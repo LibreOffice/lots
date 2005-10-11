@@ -13,6 +13,7 @@
 *                  | InputStream -> URL, Unterstützung von includes
 *                  | alles ab # ist jetzt Kommentar
 *                  | Testprogramm hinzugefügt
+* 11.10.2005 | BNK | Einbetten von Zeilenumbrüchen mittels %n
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -273,8 +274,9 @@ public class ConfigThingy
       super(url, line, position);
       Matcher m = p.matcher(tokenData);
       if (!m.find()) throw new IllegalArgumentException("String token expected!");
-      //extract string inside "..." and replace "" with "
-      content = m.group(1).replaceAll("\"\"","\"");
+      //extract string inside "..." and replace "" with ", %n with "\n" and 
+      //%% with %
+      content = m.group(1).replaceAll("\"\"","\"").replaceAll("%n","\n").replaceAll("%%","%");
     }
     public int type() {return Token.STRING;}
     public static int atStartOf(String str)
