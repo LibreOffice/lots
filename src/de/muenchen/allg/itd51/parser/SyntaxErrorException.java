@@ -9,6 +9,7 @@
 * Datum      | Wer | Änderungsgrund
 * -------------------------------------------------------------------
 * 06.10.2005 | BNK | Erstellung
+* 11.10.2005 | BNK | Doku
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -18,7 +19,7 @@
 package de.muenchen.allg.itd51.parser;
 
 /**
- * TODO Doku
+ * Signalisiert einen Fehler in einer zu parsenden Zeichenfolge
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class SyntaxErrorException extends RuntimeException
