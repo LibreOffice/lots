@@ -14,6 +14,7 @@
 *                  | alles ab # ist jetzt Kommentar
 *                  | Testprogramm hinzugefügt
 * 11.10.2005 | BNK | Einbetten von Zeilenumbrüchen mittels %n
+*                  | Ausführlich kommentiert
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -36,20 +37,36 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * TODO Doku NICHT vergessen, zu erwähnen, dass ";" und "," Whitespace sind.
+ * Ein ConfigThingy repräsentiert einen Knoten eines Baumes, der durch das
+ * Parsen einer WollMux-Konfigurationsdatei entsteht. 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class ConfigThingy
 {
+  /** Die Kindknoten. */
   private List children;
+  /** Der Name des Knotens. Bei Blättern ist dies der (String-)Wert des Knotens. */
   private String name;
   
+  /**
+   * Parst die Datei, die durch URL bestimmt ist.
+   * @param name der Name der Wurzel des erzeugten ConfigThingy-Baumes.
+   * @throws IOException falls das Laden von Daten von url (oder einer includeten
+   * URL) fehlschlägt.
+   * @throws SyntaxErrorException falls beim Parsen der Daten von url ein
+   * syntaktischer Fehler gefunden wird.
+   */
   public ConfigThingy(String name, URL url) throws IOException
   {
     this(name);
     childrenFromUrl(url);
   }
   
+  /**
+   * Parst url und hängt die entsprechenden Knoten als Kinder an this an.
+   * @throws IOException falls das Laden von Daten von url (oder einer includeten
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   protected void childrenFromUrl(URL url) throws IOException
   {
     Stack stack = new Stack();
@@ -129,38 +146,84 @@ public class ConfigThingy
       throw new SyntaxErrorException(token1.url()+": "+(stack.size() - 1) + " schließende Klammern fehlen");
   }
   
+  /**
+   * Erzeugt ein ConfigThingy mit Name/Wert name, ohne Kinder.
+   */
   private ConfigThingy(String name)
   {
     this.name = name;
     this.children = new Vector();
   }
   
+  /**
+   * Erzeugt ein anonymes ConfigThingy mit Kindern aus children.
+   */
   private ConfigThingy(List children)
   {
     this.name="";
     this.children = children;
   }
 
-  public void addChild(ConfigThingy child)
+  /**
+   * Fügt dem ConfigThingy ein weiteres Kind hinzu.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private void addChild(ConfigThingy child)
   {
     children.add(child);
   }
   
+  /**
+   * Liefert die Anzahl der Kinder zurück.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   public int count()
   {
     return children.size();
   }
     
+  /**
+   * Liefert einen Iterator über die Kinder dieses ConfigThingys.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   public Iterator iterator()
   {
     return children.iterator();
   }
   
+  /**
+   * Liefert den Namen dieses Knotens des Config-Baumes zurück. Im Falle eines
+   * Blattes entspricht dies dem (String-)Wert.
+   * @return
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   public String getName()
   {
     return name;
   }
 
+  /**
+   * Durchsucht den Teilbaum mit Wurzel this nach Knoten mit Name name auf
+   * Suchtiefe searchlevel und
+   * fügt sie (oder falls getParents==true ihre Eltern) in die Liste found ein.
+   * @param parent Der Elternknoten von this.
+   * @param name der Name nach dem zu suchen ist.
+   * @param found in diese Liste werden die gefundenen Knoten 
+   *        (oder falls getParents==true ihre Eltern) eingefügt. Jeder Knoten
+   *        taucht maximal einmal in dieser Liste auf, d.h. falls getParents==true
+   *        und ein Knoten mehrere Kinder mit Name name hat, wird dieser Knoten
+   *        trotzdem nur einmal eingefügt.
+   * @param parentLevel die Suchtiefe bei Breitensuche von parent, d.h. this hat Suchtiefe parentLevel + 1
+   * @param searchLevel die Suchtiefe bei Breitensuche auf der die Knoten gesucht werden sollen.
+   *        Knoten auf anderen Suchtiefen werden nicht in found eingefügt. 
+   * @param getParents falls true werden die Elternknoten statt der gefundenen
+   *        Knoten eingefügt. Jeder Elternknoten wird allerdings grundsätzlich
+   *        nur einmal eingefügt, auch wenn er mehrere passende Kinder hat.
+   * @return true falls noch mindestens ein Knoten mit Suchtiefe searchlevel
+   *         erreicht wurde, d.h. falls eine Suche mit höherem searchlevel
+   *         prinzipiell Ergebnisse bringen könnte.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private boolean rollcall(ConfigThingy parent, String name, List found, int parentLevel, int searchLevel, boolean getParents)
   {
     int level = parentLevel + 1;
@@ -192,16 +255,42 @@ public class ConfigThingy
   }
   
   
+  /**
+   * Führt eine Breitensuch nach Nachfahrenknoten von this durch, die name
+   * als Name haben. 
+   * @return null, falls kein entsprechender Knoten gefunden wurde. Falls
+   * es entsprechende Knoten gibt, wird die niedrigste Suchtiefe bestimmt auf
+   * der entsprechende Knoten zu finden sind und es werden alle Knoten auf
+   * dieser Suchtiefe zurückgeliefert. Falls dies genau einer ist, wird er
+   * direkt zurückgeliefert, ansonsten wird ein unbenanntes ConfigThingy
+   * geliefert, das diese Knoten (und nur diese) als Kinder hat. 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   public ConfigThingy get(String name)
   {
     return get(name, false);
   }
   
+  /**
+   * Wie {@link #get(String)}, aber es werden die Elternknoten der gefundenen Knoten
+   * zurückgeliefert anstatt der Knoten selbst. Es ist zu beachten, dass jeder
+   * Elternknoten nur genau einmal in den Ergebnissen enthalten ist, auch wenn
+   * er mehrere passende Kinder hat,
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   public ConfigThingy getByChild(String name)
   {
     return get(name, true);
   }
   
+  /**
+   * Falls getParents == false verhält sich diese Funktion wie {@link #get(String)},
+   * falls getParents == true wie {@link #getByChild(String)}.
+   * @param name
+   * @param getParents
+   * @return
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   protected ConfigThingy get(String name, boolean getParents)
   {
     List found = new Vector();
@@ -220,6 +309,11 @@ public class ConfigThingy
     }
   }
   
+  /**
+   * Falls der Knoten this ein Blatt ist wird der Name des Knotens geliefert,
+   * ansonsten die Konkatenation aller Blätter des unter this
+   * liegenden Teilbaums. 
+   */
   public String toString()
   {
     if (children.isEmpty()) return name;
@@ -229,6 +323,11 @@ public class ConfigThingy
     return buf.toString();
   }
   
+  /**
+   * Die Methode {@link ConfigThingy#tokenize(URL)} liefert eine Liste von
+   * Objekten, die alle dieses Interface implementieren.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private interface Token
   {
     public static final int KEY = 0;
@@ -238,13 +337,49 @@ public class ConfigThingy
     public static final int END = 4;
     public static final int INCLUDE = 5;
     public static final int LINECOMMENT = 6;
+    
+    /**
+     * Liefert die URL des Dokuments, in dem dieses Token gefunden wurde.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
     public URL url();
+    
+    /**
+     * Liefert die Zeile in der dieses Token gefunden wurde.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
     public int line();
+    
+    /**
+     * Liefert die Position des ersten Zeichens dieses Tokens in seiner Zeile,
+     * gezählt ab 1.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
     public int position();
+    
+    /**
+     * Liefert die Art dieses Tokens, z.B. {@link #KEY}.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
     public int type();
+
+    /**
+     * Liefert die Textrepräsentation dieses Tokens. Diese ist NICHT zwangsweise
+     * identisch mit der Zeichenfolge aus der dieses Token geparst wurde.
+     * Zum Beispiel tauchen Trennzeichen wie die Gänsefüßchen zur Abgrenzung
+     * von Strings in dem hier zurückgelieferten String nicht auf. Ebensowenig
+     * sind in diesem String Escape-Sequenzen zu finden, die im Eingabedatenstrom
+     * verwendet werden, um bestimmte Zeichen wie z.B. Newline darzustellen.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
     public String contentString();
   }
   
+  /**
+   * Abstrakte Basis-Klasse für Tokens, die ihren {@link #contentString()} Wert
+   * in einer String-Variable speichern.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private static abstract class StringContentToken implements Token
   {
     protected String content;
@@ -265,10 +400,23 @@ public class ConfigThingy
     public String contentString() {return content;}
   }
   
+
+  /**
+   * Token für einen String gemäß Syntax für WollMux-Config-Dateien.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private static class StringToken extends StringContentToken
   {
+    /**
+     * Regex zur Identifikation von legalen Strings.
+     */
     private static Pattern p = Pattern.compile("^\"((([^\"])|(\"\"))*)\"");
     
+    /**
+     * Erzeugt ein neues StringToken 
+     * @param tokenData ein String, für den {@link #atStartOf(String)} einen
+     * Wert größer 0 zurückliefert.
+     */
     public StringToken(String tokenData, URL url, int line, int position)
     {
       super(url, line, position);
@@ -279,6 +427,12 @@ public class ConfigThingy
       content = m.group(1).replaceAll("\"\"","\"").replaceAll("%n","\n").replaceAll("%%","%");
     }
     public int type() {return Token.STRING;}
+    
+    /**
+     * Liefert die Länge des längsten Prefixes von str, das sich als Token
+     * dieser Klasse interpretieren lässt.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
     public static int atStartOf(String str)
     {
       Matcher m = p.matcher(str);
@@ -287,10 +441,22 @@ public class ConfigThingy
     }
   }
   
+  /**
+   * Ein Token für einen Schlüssel gemäß Syntax für WollMux-Config-Dateien.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private static class KeyToken extends StringContentToken
   {
+    /**
+     * Regex zur Identifikation von legalen Schlüsseln.
+     */
     private static Pattern p = Pattern.compile("^([a-zA-Z_][a-zA-Z_0-9]*)");
     
+    /**
+     * Erzeugt ein neues KeyToken 
+     * @param tokenData ein String, für den {@link #atStartOf(String)} einen
+     * Wert größer 0 zurückliefert.
+     */
     public KeyToken(String tokenData, URL url, int line, int position)
     {
       super(url, line, position);
@@ -299,6 +465,12 @@ public class ConfigThingy
       content = m.group(1);
     }
     public int type() {return Token.KEY;}
+    
+    /**
+     * Liefert die Länge des längsten Prefixes von str, das sich als Token
+     * dieser Klasse interpretieren lässt.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
     public static int atStartOf(String str)
     {
       Matcher m = p.matcher(str);
@@ -307,6 +479,10 @@ public class ConfigThingy
     }
   }
 
+  /**
+   * Token für öffnende runde Klammer.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private static class OpenParenToken extends StringContentToken
   {
     public OpenParenToken(URL url, int line, int position)
@@ -315,12 +491,21 @@ public class ConfigThingy
       content = "(";
     }
     public int type() {return Token.OPENPAREN;}
+    
+    /**
+     * Liefert 1, falls str mit '(' beginnt, ansonsten 0.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
     public static int atStartOf(String str)
     {
       return str.startsWith("(") ? 1 : 0;
     }
   }
   
+  /**
+   * Token für schließende runde Klammer.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private static class CloseParenToken extends StringContentToken
   {
     public CloseParenToken(URL url, int line, int position)
@@ -329,13 +514,21 @@ public class ConfigThingy
       content = ")";
     }
     public int type() {return Token.CLOSEPAREN;}
+    
+    /**
+     * Liefert 1, falls str mit ')' beginnt, ansonsten 0.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
     public static int atStartOf(String str)
     {
       return str.startsWith(")") ? 1 : 0;
     }
-    
   }
- 
+
+  /**
+   * Token für den String "%include".
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private static class IncludeToken extends StringContentToken
   {
     private static final String inc = "%include";
@@ -345,27 +538,53 @@ public class ConfigThingy
       content = inc;
     }
     public int type() {return Token.INCLUDE;}
+    
+    /**
+     * Liefert die Länge des längsten Prefixes von str, das sich als Token
+     * dieser Klasse interpretieren lässt.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
     public static int atStartOf(String str)
     {
       return str.startsWith(inc) ? inc.length() : 0;
     }
   }
-  
+
+  /**
+   * Token für einen Kommentar gemäß Syntax von WollMux-Config-Dateien.
+   * ACHTUNG: Tokens dieser Klasse werden derzeit von {@link ConfigThingy#tokenize(URL)}
+   * nicht zurückgeliefert, sondern verworfen.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private static class LineCommentToken extends StringContentToken
   {
   
+    /**
+     * Erzeugt einen neuen LineCommenToken.
+     * @param tokenData ein String, dessen erstes Zeichen '#' ist.
+     */
     public LineCommentToken(String tokenData, URL url, int line, int position)
     {
       super(url, line, position);
       content = tokenData.substring(1);
     }
     public int type() {return Token.LINECOMMENT;}
+  
+    /**
+     * Liefert die Länge des längsten Prefixes von str, das sich als Token
+     * dieser Klasse interpretieren lässt.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
     public static int atStartOf(String str)
     {
       return str.startsWith("#") ? str.length() : 0;
     }
   }
   
+  /**
+   * Signalisiert das Ende des Eingabedatenstroms.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private static class EndToken extends StringContentToken
   {
     public EndToken(URL url, int line, int position)
@@ -374,16 +593,23 @@ public class ConfigThingy
       content = "";
     }
     public int type() {return Token.END;}
+   
+    /**
+     * Liefert immer 0.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
     public static int atStartOf(String str) {return 0;}
   }
   
   
   /**
-   * 
-   * @param ins
-   * @return the list of Tokens, terminated by 7 end tokens.
-   * @throws IOException
-   * @throws SyntaxErrorException
+   * Zerlegt die Datei, die durch url bestimmt wird in {@link Token}s. 
+   * @return die Liste der identifizierten Tokens, abgeschlossen durch
+   * mindestens 7 {@link EndToken}s.
+   * @throws IOException falls beim Zugriff auf die Daten von url etwas
+   * schief geht.
+   * @throws SyntaxErrorException falls eine Zeichenfolge nicht als Token
+   * identifiziert werden kann.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private static List tokenize(URL url) throws IOException, SyntaxErrorException
@@ -462,6 +688,11 @@ public class ConfigThingy
     return tokens;
   }
   
+/**
+ * Liefert eine textuelle Baumdarstellung von conf. Jeder Zeile wird
+ * childPrefix vorangestellt.
+ * @author Matthias Benkmann (D-III-ITD 5.1)
+ */
   public static String treeDump(ConfigThingy conf, String childPrefix)
   {
     StringBuffer buf = new StringBuffer();
