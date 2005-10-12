@@ -15,6 +15,7 @@
 *                  | Testprogramm hinzugefügt
 * 11.10.2005 | BNK | Einbetten von Zeilenumbrüchen mittels %n
 *                  | Ausführlich kommentiert
+* 12.10.2005 | BNK | get() benennt jetzt Ergebnisknoten "<query results>"
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -158,9 +159,9 @@ public class ConfigThingy
   /**
    * Erzeugt ein anonymes ConfigThingy mit Kindern aus children.
    */
-  private ConfigThingy(List children)
+  private ConfigThingy(String name, List children)
   {
-    this.name="";
+    this.name=name;
     this.children = children;
   }
 
@@ -262,8 +263,9 @@ public class ConfigThingy
    * es entsprechende Knoten gibt, wird die niedrigste Suchtiefe bestimmt auf
    * der entsprechende Knoten zu finden sind und es werden alle Knoten auf
    * dieser Suchtiefe zurückgeliefert. Falls dies genau einer ist, wird er
-   * direkt zurückgeliefert, ansonsten wird ein unbenanntes ConfigThingy
-   * geliefert, das diese Knoten (und nur diese) als Kinder hat. 
+   * direkt zurückgeliefert, ansonsten wird ein ConfigThingy mit Namen
+   * "<query results>" geliefert, das diese Knoten (und nur diese) 
+   * als Kinder hat. 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public ConfigThingy get(String name)
@@ -305,7 +307,7 @@ public class ConfigThingy
     {
       case 0: return null;
       case 1: return (ConfigThingy)found.get(0);
-      default: return new ConfigThingy(found); 
+      default: return new ConfigThingy("<query results>",found); 
     }
   }
   
