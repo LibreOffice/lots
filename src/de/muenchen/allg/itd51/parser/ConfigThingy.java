@@ -20,6 +20,7 @@
 *                  | jetzt unabhängig von der Kontext-URL.
 *                  | '..' Strings sind jetzt auch erlaubt
 * 13.10.2005 | BNK | Von InputStream auf Reader umgestellt.                  
+* 13.10.2005 | BNK | +query(), +queryByChild()
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -277,7 +278,7 @@ public class ConfigThingy
   
   
   /**
-   * Führt eine Breitensuch nach Nachfahrenknoten von this durch, die name
+   * Führt eine Breitensuche nach Nachfahrenknoten von this durch, die name
    * als Name haben. 
    * @return null, falls kein entsprechender Knoten gefunden wurde. Falls
    * es entsprechende Knoten gibt, wird die niedrigste Suchtiefe bestimmt auf
@@ -290,7 +291,22 @@ public class ConfigThingy
    */
   public ConfigThingy get(String name)
   {
-    return get(name, false);
+    ConfigThingy res = query(name, false);
+    if (res.count() == 0) return null;
+    if (res.count() == 1)
+      res = (ConfigThingy)res.iterator().next();
+    return res;
+  }
+  
+  /**
+   * Wie {@link #get(String)}, aber es wird grundsätzlich ein ConfigThingy
+   * mit Namen "<query results>" über die Resultate gesetzt. Im Falle, dass es keine
+   * Resultate gibt, wird nicht null sondern ein ConfigThingy ohne Kinder geliefert.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public ConfigThingy query(String name)
+  {
+    return query(name, false);
   }
   
   /**
@@ -302,7 +318,23 @@ public class ConfigThingy
    */
   public ConfigThingy getByChild(String name)
   {
-    return get(name, true);
+    ConfigThingy res = query(name, true);
+    if (res.count() == 0) return null;
+    if (res.count() == 1)
+      res = (ConfigThingy)res.iterator().next();
+    return res;
+  }
+  
+  /**
+   * Wie {@link #query(String)}, aber es werden die Elternknoten der gefundenen Knoten
+   * zurückgeliefert anstatt der Knoten selbst. Es ist zu beachten, dass jeder
+   * Elternknoten nur genau einmal in den Ergebnissen enthalten ist, auch wenn
+   * er mehrere passende Kinder hat,
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public ConfigThingy queryByChild(String name)
+  {
+    return query(name, true);
   }
   
   /**
@@ -313,7 +345,7 @@ public class ConfigThingy
    * @return
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  protected ConfigThingy get(String name, boolean getParents)
+  protected ConfigThingy query(String name, boolean getParents)
   {
     List found = new Vector();
     boolean haveMore;
@@ -323,12 +355,8 @@ public class ConfigThingy
       ++searchlevel;
     }while(found.isEmpty() && haveMore );
     
-    switch (found.size())
-    {
-      case 0: return null;
-      case 1: return (ConfigThingy)found.get(0);
-      default: return new ConfigThingy("<query results>",found); 
-    }
+    if (found.size() == 0) return new ConfigThingy("<query results>");
+    return new ConfigThingy("<query results>",found); 
   }
   
   /**
