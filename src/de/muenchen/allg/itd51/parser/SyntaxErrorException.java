@@ -10,6 +10,7 @@
 * -------------------------------------------------------------------
 * 06.10.2005 | BNK | Erstellung
 * 11.10.2005 | BNK | Doku
+* 13.10.2005 | BNK | +serialVersionUID
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -24,6 +25,10 @@ package de.muenchen.allg.itd51.parser;
  */
 public class SyntaxErrorException extends RuntimeException
 {
+  /**
+   * keine Ahnung was das soll, aber es macht Eclipse glücklich.
+   */
+  private static final long serialVersionUID = 7215084024054862356L;
   public SyntaxErrorException() {};
   public SyntaxErrorException(String message) {super(message);}
   public SyntaxErrorException(String message, Throwable cause) {super(message,cause);}
