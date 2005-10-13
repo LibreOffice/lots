@@ -23,6 +23,7 @@
 * 13.10.2005 | BNK | +query(), +queryByChild()
 * 13.10.2005 | BNK | +getNodesVisibleAt()
 * 13.10.2005 | BNK | public-Version von getNodesVisibleAt() mit etwas passenderer Signatur
+* 13.10.2005 | BNK | getNodesVisibleAt() -> static
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -221,10 +222,11 @@ public class ConfigThingy
    * Knoten des ConfigThingy-Baumes mit Wurzel root sind,
    * die Name nodeNameToScanFor haben und vom Knoten
    * node aus sichtbar sind. Dabei ist ein Knoten sichtbar von node, wenn er
-   * ein Bruder- bzw. Schwesterknoten von node, ein Vorfahre von node
+   * node selbst, ein Bruder- bzw. Schwesterknoten von node, 
+   * ein Vorfahre von node
    * oder ein Bruder-/Schwesterknoten eines Vorfahren von node ist. 
    */
-  public ConfigThingy getNodesVisibleAt(ConfigThingy node, String nodeNameToScanFor, ConfigThingy root)
+  public static ConfigThingy getNodesVisibleAt(ConfigThingy node, String nodeNameToScanFor, ConfigThingy root)
   {
     Stack s = new Stack();
     Vector r = new Vector();
