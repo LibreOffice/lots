@@ -36,6 +36,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Stack;
@@ -214,7 +215,16 @@ public class ConfigThingy
     return children.iterator();
   }
   
-  public static boolean getNodesVisibleAt(ConfigThingy node, String nodeNameToScanFor, Stack /* of Vector*/ s, ConfigThiny root, Vector result)
+  /**
+   * TODO kommentieren
+   * @param node
+   * @param nodeNameToScanFor
+   * @param s
+   * @param root
+   * @param result
+   * @return
+   */
+  public static boolean getNodesVisibleAt(ConfigThingy node, String nodeNameToScanFor, Stack /* of Vector*/ s, ConfigThingy root, Vector result)
   {
     if (root == node)
     {
@@ -241,7 +251,7 @@ public class ConfigThingy
     while (iter.hasNext())
     {
       ConfigThingy child = (ConfigThingy)iter.next();
-      if (collectVarsValidAtNode(node, s, child, result)) return true;
+      if (getNodesVisibleAt(node, nodeNameToScanFor, s, child, result)) return true;
     }
     
     s.pop();
