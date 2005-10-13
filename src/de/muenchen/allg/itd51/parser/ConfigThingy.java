@@ -18,6 +18,7 @@
 * 12.10.2005 | BNK | get() benennt jetzt Ergebnisknoten "<query results>"
 * 13.10.2005 | BNK | Der InputStream von dem die Daten gelesen werden ist
 *                  | jetzt unabhängig von der Kontext-URL.
+*                  | '..' Strings sind jetzt auch erlaubt
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -430,7 +431,8 @@ public class ConfigThingy
     /**
      * Regex zur Identifikation von legalen Strings.
      */
-    private static Pattern p = Pattern.compile("^\"((([^\"])|(\"\"))*)\"");
+    private static Pattern p1 = Pattern.compile("^\"((([^\"])|(\"\"))*)\"");
+    private static Pattern p2 = Pattern.compile("^'((([^'])|(''))*)'");
     
     /**
      * Erzeugt ein neues StringToken 
@@ -440,11 +442,22 @@ public class ConfigThingy
     public StringToken(String tokenData, URL url, int line, int position)
     {
       super(url, line, position);
-      Matcher m = p.matcher(tokenData);
-      if (!m.find()) throw new IllegalArgumentException("String token expected!");
-      //extract string inside "..." and replace "" with ", %n with "\n" and 
-      //%% with %
-      content = m.group(1).replaceAll("\"\"","\"").replaceAll("%n","\n").replaceAll("%%","%");
+      Matcher m = p1.matcher(tokenData); //testet auf "..." Strings
+      if (m.find())
+      {
+        //extract string inside "..." and replace "" with ", %n with "\n" and 
+        //%% with %
+        content = m.group(1).replaceAll("\"\"","\"").replaceAll("%n","\n").replaceAll("%%","%");
+      }
+      else
+      {
+        m = p2.matcher(tokenData); //tested auf '...' Strings
+        if (!m.find()) throw new IllegalArgumentException("String token expected!");
+        
+        //extract string inside '...' and replace '' with ', %n with "\n" and 
+        //%% with %
+        content = m.group(1).replaceAll("''","'").replaceAll("%n","\n").replaceAll("%%","%");
+      }
     }
     public int type() {return Token.STRING;}
     
@@ -455,9 +468,11 @@ public class ConfigThingy
      */
     public static int atStartOf(String str)
     {
-      Matcher m = p.matcher(str);
-      if (!m.find()) return 0;
-      return m.end();
+      Matcher m = p1.matcher(str);
+      if (m.find()) return m.end();
+      m = p2.matcher(str);
+      if (m.find()) return m.end();
+      return 0;
     }
   }
   
