@@ -22,6 +22,7 @@
 * 13.10.2005 | BNK | Von InputStream auf Reader umgestellt.                  
 * 13.10.2005 | BNK | +query(), +queryByChild()
 * 13.10.2005 | BNK | +getNodesVisibleAt()
+* 13.10.2005 | BNK | public-Version von getNodesVisibleAt() mit etwas passenderer Signatur
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -216,15 +217,22 @@ public class ConfigThingy
   }
   
   /**
-   * TODO kommentieren
-   * @param node
-   * @param nodeNameToScanFor
-   * @param s
-   * @param root
-   * @param result
-   * @return
+   * Liefert ein ConfigThingy names "<visible nodes>", dessen Kinder alle 
+   * Knoten des ConfigThingy-Baumes mit Wurzel root sind,
+   * die Name nodeNameToScanFor haben und vom Knoten
+   * node aus sichtbar sind. Dabei ist ein Knoten sichtbar von node, wenn er
+   * ein Bruder- bzw. Schwesterknoten von node, ein Vorfahre von node
+   * oder ein Bruder-/Schwesterknoten eines Vorfahren von node ist. 
    */
-  public static boolean getNodesVisibleAt(ConfigThingy node, String nodeNameToScanFor, Stack /* of Vector*/ s, ConfigThingy root, Vector result)
+  public ConfigThingy getNodesVisibleAt(ConfigThingy node, String nodeNameToScanFor, ConfigThingy root)
+  {
+    Stack s = new Stack();
+    Vector r = new Vector();
+    getNodesVisibleAt(node,nodeNameToScanFor, s, root, r);
+    return new ConfigThingy("<visible nodes>", r);
+  }
+  
+  private static boolean getNodesVisibleAt(ConfigThingy node, String nodeNameToScanFor, Stack /* of Vector*/ s, ConfigThingy root, Collection result)
   {
     if (root == node)
     {
