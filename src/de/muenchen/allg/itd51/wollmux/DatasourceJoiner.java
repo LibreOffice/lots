@@ -43,15 +43,15 @@ public class DatasourceJoiner
   //           "5.1"
   
   //suchString kann vorne und/oder hinten ein % haben zur prefix/suffix/teilstring-suche
-  public Datensatz find(String spaltenName, String suchString)
+  public Dataset find(String spaltenName, String suchString)
   {
     return null;
   }
-  public Datensatz find(String spaltenName1, String suchString1,String spaltenName2, String suchString2)
+  public Dataset find(String spaltenName1, String suchString1,String spaltenName2, String suchString2)
   {
     return null;
   }
-  public Datensatz find(String spaltenName1, String suchString1,String spaltenName2, String suchString2,String spaltenName3, String suchString3)
+  public Dataset find(String spaltenName1, String suchString1,String spaltenName2, String suchString2,String spaltenName3, String suchString3)
   {
     return null;
   }

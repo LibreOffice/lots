@@ -1,5 +1,5 @@
 /*
-* Dateiname: Datensatz.java
+* Dateiname: Dataset.java
 * Projekt  : n/a
 * Funktion : TODO Funktionsbeschreibung
 * 
@@ -21,7 +21,7 @@ package de.muenchen.allg.itd51.wollmux;
  * TODO Doku
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
-public class Datensatz
+public class Dataset
 {
   public String get(String spaltenName)
   {
