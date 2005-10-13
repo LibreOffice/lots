@@ -19,6 +19,7 @@
 * 13.10.2005 | BNK | Der InputStream von dem die Daten gelesen werden ist
 *                  | jetzt unabhängig von der Kontext-URL.
 *                  | '..' Strings sind jetzt auch erlaubt
+* 13.10.2005 | BNK | Von InputStream auf Reader umgestellt.                  
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -32,6 +33,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.List;
@@ -63,34 +65,34 @@ public class ConfigThingy
   public ConfigThingy(String name, URL url) throws IOException
   {
     this(name);
-    childrenFromUrl(url, url.openStream());
+    childrenFromUrl(url, new InputStreamReader(url.openStream()));
   }
   
   /**
-   * Parst die Daten aus ins im Kontext der URL url.
+   * Parst die Daten aus read im Kontext der URL url.
    * @param name der Name der Wurzel des erzeugten ConfigThingy-Baumes.
    * @throws IOException falls das Laden von Daten von url (oder einer includeten
    * URL) fehlschlägt.
    * @throws SyntaxErrorException falls beim Parsen der Daten von url ein
    * syntaktischer Fehler gefunden wird.
    */
-  public ConfigThingy(String name, URL url, InputStream ins) throws IOException
+  public ConfigThingy(String name, URL url, Reader read) throws IOException
   {
     this(name);
-    childrenFromUrl(url,ins);
+    childrenFromUrl(url,read);
   }
   
   /**
-   * Parst die Daten aus ins im Kontext von url und hängt die entsprechenden 
+   * Parst die Daten aus read im Kontext von url und hängt die entsprechenden 
    * Knoten als Kinder an this an.
    * @throws IOException falls das Laden von Daten von url (oder einer includeten
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  protected void childrenFromUrl(URL url, InputStream ins) throws IOException
+  protected void childrenFromUrl(URL url, Reader read) throws IOException
   {
     Stack stack = new Stack();
     stack.push(this);
-    List tokens = tokenize(url, ins);
+    List tokens = tokenize(url, read);
     Iterator liter = tokens.iterator();
     Token token1, token2;
     do{
@@ -105,7 +107,7 @@ public class ConfigThingy
               case Token.STRING:
                    try{
                      URL includeURL = new URL(url,token2.contentString()); 
-                     ((ConfigThingy)stack.peek()).childrenFromUrl(includeURL, includeURL.openStream());
+                     ((ConfigThingy)stack.peek()).childrenFromUrl(includeURL, new InputStreamReader(includeURL.openStream()));
                    } catch(IOException iox)
                    {
                      throw new IOException(token2.url()+" in Zeile "+token2.line()+" bei Zeichen "+token2.position()+": %include fehlgeschlagen: "+iox.toString());
@@ -638,7 +640,7 @@ public class ConfigThingy
   
   
   /**
-   * Zerlegt die Daten aus InputStream ins in {@link Token}s.
+   * Zerlegt die Daten aus read in {@link Token}s.
    * Als Quell-URL wird in den Tokens url eingetragen. 
    * @return die Liste der identifizierten Tokens, abgeschlossen durch
    * mindestens 7 {@link EndToken}s.
@@ -648,10 +650,10 @@ public class ConfigThingy
    * identifiziert werden kann.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private static List tokenize(URL url, InputStream ins) throws IOException, SyntaxErrorException
+  private static List tokenize(URL url, Reader read) throws IOException, SyntaxErrorException
   {
     List tokens = new Vector();
-    BufferedReader in = new BufferedReader(new InputStreamReader(ins));
+    BufferedReader in = new BufferedReader(read);
     String line;
     
     int lineNo = 0;
