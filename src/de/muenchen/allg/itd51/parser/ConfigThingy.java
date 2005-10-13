@@ -21,6 +21,7 @@
 *                  | '..' Strings sind jetzt auch erlaubt
 * 13.10.2005 | BNK | Von InputStream auf Reader umgestellt.                  
 * 13.10.2005 | BNK | +query(), +queryByChild()
+* 13.10.2005 | BNK | +getNodesVisibleAt()
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -211,6 +212,40 @@ public class ConfigThingy
   public Iterator iterator()
   {
     return children.iterator();
+  }
+  
+  public static boolean getNodesVisibleAt(ConfigThingy node, String nodeNameToScanFor, Stack /* of Vector*/ s, ConfigThiny root, Vector result)
+  {
+    if (root == node)
+    {
+      Iterator iter = s.iterator();
+      while (iter.hasNext())
+      {
+        result.addAll((Collection)iter.next());
+      }
+      return true;
+    }
+    
+    Iterator iter = root.iterator();
+    Vector v = new Vector();
+    while (iter.hasNext())
+    {
+      ConfigThingy child = (ConfigThingy)iter.next();
+      if (child.getName().equals(nodeNameToScanFor))
+      v.add(child);
+    }
+    
+    s.push(v);
+    
+    iter = root.iterator();
+    while (iter.hasNext())
+    {
+      ConfigThingy child = (ConfigThingy)iter.next();
+      if (collectVarsValidAtNode(node, s, child, result)) return true;
+    }
+    
+    s.pop();
+    return false;
   }
   
   /**
