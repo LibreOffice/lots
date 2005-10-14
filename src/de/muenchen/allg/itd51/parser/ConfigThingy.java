@@ -351,7 +351,7 @@ public class ConfigThingy
   public ConfigThingy get(String name) throws NodeNotFoundException
   {
     ConfigThingy res = query(name, false);
-    if (res.count() == 0) throw new NodeNotFoundException(getName()+ " hat keinen Nachfahren '"+name+"'");
+    if (res.count() == 0) throw new NodeNotFoundException("Knoten "+getName()+ " hat keinen Nachfahren '"+name+"'");
     if (res.count() == 1)
       res = (ConfigThingy)res.iterator().next();
     return res;
@@ -381,7 +381,7 @@ public class ConfigThingy
   public ConfigThingy getByChild(String name) throws NodeNotFoundException
   {
     ConfigThingy res = query(name, true);
-    if (res.count() == 0) throw new NodeNotFoundException(getName()+ " hat keinen Nachfahren '"+name+"'");
+    if (res.count() == 0) throw new NodeNotFoundException("Knoten "+getName()+ " hat keinen Nachfahren '"+name+"'");
     if (res.count() == 1)
       res = (ConfigThingy)res.iterator().next();
     return res;
