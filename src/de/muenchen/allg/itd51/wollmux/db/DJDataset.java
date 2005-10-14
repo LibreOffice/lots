@@ -22,26 +22,13 @@ package de.muenchen.allg.itd51.wollmux.db;
  * TODO Doku
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
-public class DJDataset implements Dataset
+public interface DJDataset extends Dataset
 {
-
-  /**
-   * 
-   */
-  public DJDataset()
-  {
-    super();
-    // TODO Auto-generated constructor stub
-  }
 
   /* (non-Javadoc)
    * @see de.muenchen.allg.itd51.wollmux.db.Dataset#get(java.lang.String)
    */
-  public String get(String spaltenName)
-  {
-    // TODO Auto-generated method stub
-    return null;
-  }
+  public String get(String spaltenName);
   
   /**
    * Liefert true, falls die Spalte columnName dieses Datensatzes nicht aus
@@ -50,9 +37,6 @@ public class DJDataset implements Dataset
    * @return
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public boolean hasLocalOverride(String columnName) throws ColumnNotFoundException
-  {
-    throw new ColumnNotFoundException("Datenbankspalte "+columnName+" existiert nicht");
-  }
-
+  public boolean hasLocalOverride(String columnName) throws ColumnNotFoundException;
+  
 }
