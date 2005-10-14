@@ -25,6 +25,7 @@
 * 13.10.2005 | BNK | public-Version von getNodesVisibleAt() mit etwas passenderer Signatur
 * 13.10.2005 | BNK | getNodesVisibleAt() -> static
 * 14.10.2005 | BNK | get() und getByChild() auf Werfen von NodeNotFoundException umgestellt.
+* 14.10.2005 | BNK | besserer Exception-Text
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
