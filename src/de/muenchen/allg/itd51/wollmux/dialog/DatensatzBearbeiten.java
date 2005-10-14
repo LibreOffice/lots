@@ -1,7 +1,7 @@
 /*
-* Dateiname: AbsenderdatenBearbeiten.java
+* Dateiname: DatensatzBearbeiten.java
 * Projekt  : WollMux
-* Funktion : Dynamisches Erzeugen eines Swing-GUIs für den Absenderdaten Bearbeiten Dialog anhand von ConfigThingy
+* Funktion : Dynamisches Erzeugen eines Swing-GUIs für das Bearbeiten eines Datensatzes anhand von ConfigThingy
 * 
 * Copyright: Landeshauptstadt München
 *
@@ -43,33 +43,42 @@ import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
+import javax.swing.text.JTextComponent;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
+import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
+import de.muenchen.allg.itd51.wollmux.Logger;
+import de.muenchen.allg.itd51.wollmux.db.DJDataset;
+import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
 
 /**
  * TODO Doku
+ * TODO Bei Speichern und Standardwerte wiederherstellen erst sicherheitsabfrage
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
-public class AbsenderdatenBearbeiten
+public class DatensatzBearbeiten
 {
   private final static int TEXTFIELD_DEFAULT_WIDTH = 22;
   private final static int TF_BORDER = 4;
   private final static int SEP_BORDER = 7;
   private final static int BUTTON_BORDER = 2;
+  private DJDataset datensatz;
   private Map fenster;
   private DialogWindow currentWindow;
   private JFrame myFrame;
   private JPanel cardPanel;
   private CardLayout cardLayout;
   private String firstWindow;
-  private ActionListener actionListenerAbsenderdatenBearbeiten_abort = new ActionListener()
+  private ActionListener actionListenerDatensatzBearbeiten_abort = new ActionListener()
         { public void actionPerformed(ActionEvent e){ abort(); } };
-  private ActionListener actionListenerAbsenderdatenBearbeiten_restoreStandard = new ActionListener()
+  private ActionListener actionListenerDatensatzBearbeiten_restoreStandard = new ActionListener()
         { public void actionPerformed(ActionEvent e){ restoreStandard(); } };
     
   
@@ -77,17 +86,21 @@ public class AbsenderdatenBearbeiten
    * Allgemein gilt für diese Klasse: public-Funktionen dürfen NICHT vom 
    * Event-Dispatching Thread aus aufgerufen werden, private-Funktionen
    * dürfen NUR vom Event-Dispatching Thread aufgerufen werden.
-   * @param conf
+   * @param conf, hiervon wird Unterschlüssel "Fenster" ausgewertet
+   * @throws ConfigurationErrorException im Falle eines schwerwiegenden
+   *         Konfigurationsfehlers, der es dem Dialog unmöglich macht,
+   *         zu funktionieren (z.B. dass der "Fenster" Schlüssel fehlt.
    */
-  public AbsenderdatenBearbeiten(ConfigThingy conf)
+  public DatensatzBearbeiten(ConfigThingy conf, DJDataset datensatz) throws ConfigurationErrorException
   {
-    ConfigThingy c = conf.get("AbsenderdatenBearbeiten");
-    if (c != null) conf = c;
+    this.datensatz = datensatz;
     
     fenster = new HashMap();
     
-    final ConfigThingy fensterDesc = conf.get("Fenster");
-    if (fensterDesc == null) throw new ConfigurationErrorException("Fenster für Dialog AbsenderdatenBearbeiten fehlen in Config-Datei");
+    final ConfigThingy fensterDesc = conf.query("Fenster");
+    if (fensterDesc.count() == 0)
+      throw new ConfigurationErrorException("Schlüssel 'Fenster' fehlt in "+conf.getName());
+    
     
     //  GUI im Event-Dispatching Thread erzeugen wg. Thread-Safety.
     try{
@@ -196,6 +209,32 @@ public class AbsenderdatenBearbeiten
     cardLayout.show(cardPanel,currentWindow.getName());
   }
 
+  private abstract class DataControl
+  {
+    protected String startText;
+    protected String columnName;
+    protected boolean myDatasetIsLocal;
+    
+    public DataControl(String colName, boolean dsLocal)
+    {
+      columnName = colName;
+      myDatasetIsLocal = dsLocal;
+    }
+    public abstract String getTextFromControl();
+    public String getColumnName() {return columnName;}
+    public abstract void setTextInControl(String text);
+    public boolean hasBeenModified() {return !startText.equals(getTextFromControl());}
+    public boolean datasetIsLocal() {return myDatasetIsLocal;}
+  }
+  
+  /*private class TextComponentDataControl extends DataControl
+  {
+    public TextComponentDataControl(String colName, JTextComponent compo)
+    {
+      super(colName, datensatz);
+    }
+  }*/
+  
   
   private class DialogWindow
   {
@@ -228,7 +267,7 @@ public class AbsenderdatenBearbeiten
     public void createGUI(ConfigThingy conf)
     {
       title = "TITLE fehlt in Fensterbeschreibung";
-      try{title = ""+conf.get("TITLE");}catch(NullPointerException x){}
+      try{title = ""+conf.get("TITLE");}catch(NodeNotFoundException x){}
       
       myPanel = new JPanel(new BorderLayout());
       myInputPanel = new JPanel();
@@ -245,32 +284,51 @@ public class AbsenderdatenBearbeiten
       GridBagConstraints gbcBottomglue= new GridBagConstraints(0, 0, 2, 1, 1.0, 1.0, GridBagConstraints.PAGE_END,   GridBagConstraints.BOTH,       new Insets(0,0,0,0),0,0);
       GridBagConstraints gbcLabel     = new GridBagConstraints(0, 0, 2, 1, 0.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.NONE,       new Insets(0,0,0,0),0,0);
       GridBagConstraints gbcSeparator = new GridBagConstraints(0, 0, 2, 1, 1.0, 0.0, GridBagConstraints.CENTER,     GridBagConstraints.HORIZONTAL, new Insets(0,0,0,0),0,0);
-      GridBagConstraints gbcLabelLeft = new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.LINE_START,   GridBagConstraints.NONE,       new Insets(0,0,0,10),0,0);
+      GridBagConstraints gbcLabelLeft = new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(0,0,0,10),0,0);
       GridBagConstraints gbcTextfield = new GridBagConstraints(1, 0, 1, 1, 1.0, 0.0, GridBagConstraints.LINE_END,   GridBagConstraints.HORIZONTAL, new Insets(0,0,0,0),0,0);
+      GridBagConstraints gbcTextarea =  new GridBagConstraints(1, 0, 1, 1, 1.0, 0.0, GridBagConstraints.LINE_END,   GridBagConstraints.HORIZONTAL, new Insets(0,0,0,0),0,0);
       GridBagConstraints gbcCombobox  = new GridBagConstraints(1, 0, 1, 1, 1.0, 0.0, GridBagConstraints.LINE_END,   GridBagConstraints.HORIZONTAL, new Insets(0,0,0,0),0,0);
       
-      ConfigThingy felder = conf.get("Eingabefelder");
+      ConfigThingy felder = conf.query("Eingabefelder");
       int y = -1;
-      if (felder != null)
+      
+      Iterator iter = felder.iterator();
+      while (iter.hasNext())
       {
-        Iterator iter = felder.iterator();
-        while (iter.hasNext())
-        {
-          ++y;
-          ConfigThingy uiElementDesc = (ConfigThingy)iter.next();
-          try{
+        ++y;
+        ConfigThingy uiElementDesc = (ConfigThingy)iter.next();
+        try{
+          
+          
+          /*
+           * ACHTUNG! DER FOLGENDE CODE SOLLTE SO GESCHRIEBEN WERDEN,
+           * DASS DER ZUSTAND AUCH IM FALLE EINES GESCHEITERTEN GET()
+           * UND EINER EVTL. DARAUS RESULTIERENDEN NULLPOINTEREXCEPTION
+           * NOCH KONSISTENT IST!
+           */
+          
+          
+          String type = uiElementDesc.get("TYPE").toString();
+          if (type.equals("textfield"))
+          {
+            JLabel label = new JLabel();
+            label.setBorder(BorderFactory.createEmptyBorder(TF_BORDER,0,TF_BORDER,0));
+            gbcLabelLeft.gridy = y;
+            myInputPanel.add(label, gbcLabelLeft);
+            try{ label.setText(uiElementDesc.get("LABEL").toString()); } catch(Exception x){}
             
-            
-            /*
-             * ACHTUNG! DER FOLGENDE CODE SOLLTE SO GESCHRIEBEN WERDEN,
-             * DASS DER ZUSTAND AUCH IM FALLE EINES GESCHEITERTEN GET()
-             * UND EINER EVTL. DARAUS RESULTIERENDEN NULLPOINTEREXCEPTION
-             * NOCH KONSISTENT IST!
-             */
-            
-            
-            String type = uiElementDesc.get("TYPE").toString();
-            if (type.equals("textfield"))
+            JPanel uiElement = new JPanel(new GridLayout(1,1));
+            JTextField tf = new JTextField(TEXTFIELD_DEFAULT_WIDTH);
+            //Font fnt = tf.getFont();
+            //tf.setFont(fnt.deriveFont((float)14.0));
+            //tf.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
+            uiElement.add(tf);
+            uiElement.setBorder(BorderFactory.createEmptyBorder(TF_BORDER,0,TF_BORDER,0));
+            gbcTextfield.gridy = y;
+            myInputPanel.add(uiElement, gbcTextfield);
+          }
+          else       
+            if (type.equals("textarea"))
             {
               JLabel label = new JLabel();
               label.setBorder(BorderFactory.createEmptyBorder(TF_BORDER,0,TF_BORDER,0));
@@ -278,15 +336,18 @@ public class AbsenderdatenBearbeiten
               myInputPanel.add(label, gbcLabelLeft);
               try{ label.setText(uiElementDesc.get("LABEL").toString()); } catch(Exception x){}
               
+              int lines = 3;
+              try{ lines = Integer.parseInt(uiElementDesc.get("LINES").toString()); } catch(Exception x){}
+              JTextArea textarea = new JTextArea(lines,TEXTFIELD_DEFAULT_WIDTH);
               JPanel uiElement = new JPanel(new GridLayout(1,1));
-              JTextField tf = new JTextField(TEXTFIELD_DEFAULT_WIDTH);
-              //Font fnt = tf.getFont();
-              //tf.setFont(fnt.deriveFont((float)14.0));
-              //tf.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
-              uiElement.add(tf);
+              JScrollPane scrollPane = new JScrollPane(textarea);//, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER, JScrollPane.VERTICAL_SCROLLBAR_NEVER);
+              scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+              scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
+              uiElement.add(scrollPane);
+              
               uiElement.setBorder(BorderFactory.createEmptyBorder(TF_BORDER,0,TF_BORDER,0));
-              gbcTextfield.gridy = y;
-              myInputPanel.add(uiElement, gbcTextfield);
+              gbcTextarea.gridy = y;
+              myInputPanel.add(uiElement, gbcTextarea);
             }
             else
               if (type.equals("separator"))
@@ -297,116 +358,115 @@ public class AbsenderdatenBearbeiten
                 gbcSeparator.gridy = y;
                 myInputPanel.add(uiElement, gbcSeparator);
               }
-            if (type.equals("label"))
+          if (type.equals("label"))
+          {
+            JLabel uiElement = new JLabel();
+            uiElement.setBorder(BorderFactory.createEmptyBorder(TF_BORDER,0,TF_BORDER,0));
+            gbcLabel.gridy = y;
+            myInputPanel.add(uiElement, gbcLabel);
+            uiElement.setText(uiElementDesc.get("LABEL").toString());
+          }
+          else
+            if (type.equals("combobox"))
             {
-              JLabel uiElement = new JLabel();
+              JLabel label = new JLabel();
+              label.setBorder(BorderFactory.createEmptyBorder(TF_BORDER,0,TF_BORDER,0));
+              gbcLabelLeft.gridy = y;
+              myInputPanel.add(label, gbcLabelLeft);
+              try{ label.setText(uiElementDesc.get("LABEL").toString()); } catch(Exception x){}
+              
+              JPanel uiElement = new JPanel(new GridLayout(1,1));
+              JComboBox combo = new JComboBox();
+              uiElement.add(combo);
               uiElement.setBorder(BorderFactory.createEmptyBorder(TF_BORDER,0,TF_BORDER,0));
-              gbcLabel.gridy = y;
-              myInputPanel.add(uiElement, gbcLabel);
-              uiElement.setText(uiElementDesc.get("LABEL").toString());
-            }
-            else
-              if (type.equals("combobox"))
+              gbcCombobox.gridy = y;
+              myInputPanel.add(uiElement, gbcCombobox);
+              Iterator values = uiElementDesc.query("VALUES").iterator();
+              while (values.hasNext())
               {
-                JLabel label = new JLabel();
-                label.setBorder(BorderFactory.createEmptyBorder(TF_BORDER,0,TF_BORDER,0));
-                gbcLabelLeft.gridy = y;
-                myInputPanel.add(label, gbcLabelLeft);
-                try{ label.setText(uiElementDesc.get("LABEL").toString()); } catch(Exception x){}
-                
-                JPanel uiElement = new JPanel(new GridLayout(1,1));
-                JComboBox combo = new JComboBox();
-                uiElement.add(combo);
-                uiElement.setBorder(BorderFactory.createEmptyBorder(TF_BORDER,0,TF_BORDER,0));
-                gbcCombobox.gridy = y;
-                myInputPanel.add(uiElement, gbcCombobox);
-                Iterator values = uiElementDesc.get("VALUES").iterator();
-                while (values.hasNext())
-                {
-                  combo.addItem(values.next());
-                }
+                combo.addItem(values.next());
               }
-          } catch(NullPointerException x) {/*ignoriere das Problem */}
-        }
+            }
+        } catch(NodeNotFoundException x) {Logger.error(x);}
       }
       
       ++y;
       gbcBottomglue.gridy = y;
       myInputPanel.add(Box.createGlue(), gbcBottomglue);
       
-      ConfigThingy buttons = conf.get("Buttons");
-      if (buttons != null)
+      ConfigThingy buttons = conf.query("Buttons");
+      iter = buttons.iterator();
+      boolean firstButton = true;
+      while (iter.hasNext())
       {
-        
-        Iterator iter = buttons.iterator();
-        boolean firstButton = true;
-        while (iter.hasNext())
-        {
-          ConfigThingy uiElementDesc = (ConfigThingy)iter.next();
-          try{
+        ConfigThingy uiElementDesc = (ConfigThingy)iter.next();
+        try{
+          
+          /*
+           * ACHTUNG! DER FOLGENDE CODE SOLLTE SO GESCHRIEBEN WERDEN,
+           * DASS DER ZUSTAND AUCH IM FALLE EINES GESCHEITERTEN GET()
+           * UND EINER EVTL. DARAUS RESULTIERENDEN NULLPOINTEREXCEPTION
+           * NOCH KONSISTENT IST!
+           */
+          
+          String type = uiElementDesc.get("TYPE").toString();
+          if (type.equals("button"))
+          {
+            String action = uiElementDesc.get("ACTION").toString();
+            String label  = uiElementDesc.get("LABEL").toString();
+            char hotkey = 0;
+            try{
+              hotkey = uiElementDesc.get("HOTKEY").toString().charAt(0);
+            }catch(Exception x){}
             
-            /*
-             * ACHTUNG! DER FOLGENDE CODE SOLLTE SO GESCHRIEBEN WERDEN,
-             * DASS DER ZUSTAND AUCH IM FALLE EINES GESCHEITERTEN GET()
-             * UND EINER EVTL. DARAUS RESULTIERENDEN NULLPOINTEREXCEPTION
-             * NOCH KONSISTENT IST!
-             */
+            JButton button = new JButton(label);
+            button.setMnemonic(hotkey);
+            JPanel uiElement = new JPanel(new GridLayout(1,1));
+            int left = BUTTON_BORDER;
+            if (firstButton) {left = 0; firstButton = false;}
+            int right = BUTTON_BORDER;
+            if (!iter.hasNext()) right = 0;
+            uiElement.setBorder(BorderFactory.createEmptyBorder(0,left,0,right));
+            uiElement.add(button);
+            myButtonPanel.add(uiElement);
             
-            String type = uiElementDesc.get("TYPE").toString();
-            if (type.equals("button"))
+            if (action.equals("DatensatzBearbeiten_abort"))
             {
-              String action = uiElementDesc.get("ACTION").toString();
-              String label  = uiElementDesc.get("LABEL").toString();
-              char hotkey = 0;
-              try{
-                hotkey = uiElementDesc.get("HOTKEY").toString().charAt(0);
-              }catch(Exception x){}
-              
-              JButton button = new JButton(label);
-              button.setMnemonic(hotkey);
-              JPanel uiElement = new JPanel(new GridLayout(1,1));
-              int left = BUTTON_BORDER;
-              if (firstButton) {left = 0; firstButton = false;}
-              int right = BUTTON_BORDER;
-              if (!iter.hasNext()) right = 0;
-              uiElement.setBorder(BorderFactory.createEmptyBorder(0,left,0,right));
-              uiElement.add(button);
-              myButtonPanel.add(uiElement);
-              
-              if (action.equals("AbsenderdatenBearbeiten_abort"))
-              {
-                button.addActionListener(actionListenerAbsenderdatenBearbeiten_abort);
-              }
-              if (action.equals("AbsenderdatenBearbeiten_restoreStandard"))
-              {
-                button.addActionListener(actionListenerAbsenderdatenBearbeiten_restoreStandard);
-              }
-              if (action.equals("AbsenderdatenBearbeiten_switchWindow"))
-              {
-                final String window = uiElementDesc.get("WINDOW").toString();
-                button.addActionListener( new ActionListener()
-                    { public void actionPerformed(ActionEvent e){ showWindow(window); }
-                    });
-              }
+              button.addActionListener(actionListenerDatensatzBearbeiten_abort);
             }
-            else if (type.equals("glue"))
+            if (action.equals("DatensatzBearbeiten_restoreStandard"))
             {
-              try{
-                int minsize = Integer.parseInt(uiElementDesc.get("MINSIZE").toString());
-                myButtonPanel.add(Box.createHorizontalStrut(minsize));
-              }catch(Exception x){}
-              myButtonPanel.add(Box.createHorizontalGlue());
+              button.addActionListener(actionListenerDatensatzBearbeiten_restoreStandard);
             }
-          } catch(NullPointerException x) {/*ignoriere das Problem */}
-        }
+            if (action.equals("DatensatzBearbeiten_switchWindow"))
+            {
+              final String window = uiElementDesc.get("WINDOW").toString();
+              button.addActionListener( new ActionListener()
+                  { public void actionPerformed(ActionEvent e){ showWindow(window); }
+                  });
+            }
+          }
+          else if (type.equals("glue"))
+          {
+            try{
+              int minsize = Integer.parseInt(uiElementDesc.get("MINSIZE").toString());
+              myButtonPanel.add(Box.createHorizontalStrut(minsize));
+            }catch(Exception x){}
+            myButtonPanel.add(Box.createHorizontalGlue());
+          }
+        } catch(NodeNotFoundException x) {Logger.error(x);}
       }
+      
     }
   }
   
   public static void main(String[] args) throws Exception
   {
     String confFile = "testdata/AbsenderdatenBearbeiten.conf";
-    AbsenderdatenBearbeiten ab = new AbsenderdatenBearbeiten(new ConfigThingy("",new URL(new File(System.getProperty("user.dir")).toURL(),confFile)));
+    DatasourceJoiner dj = new DatasourceJoiner();
+    DJDataset datensatz = dj.getSelectedDataset();
+    ConfigThingy conf = new ConfigThingy("",new URL(new File(System.getProperty("user.dir")).toURL(),confFile)); 
+    DatensatzBearbeiten ab = new DatensatzBearbeiten(conf.get("AbsenderdatenBearbeiten"), datensatz);
     ab.show();
     Thread.sleep(60000);
     ab.dispose();
