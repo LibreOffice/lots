@@ -24,6 +24,7 @@
 * 13.10.2005 | BNK | +getNodesVisibleAt()
 * 13.10.2005 | BNK | public-Version von getNodesVisibleAt() mit etwas passenderer Signatur
 * 13.10.2005 | BNK | getNodesVisibleAt() -> static
+* 14.10.2005 | BNK | get() und getByChild() auf Werfen von NodeNotFoundException umgestellt.
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -335,19 +336,22 @@ public class ConfigThingy
   /**
    * Führt eine Breitensuche nach Nachfahrenknoten von this durch, die name
    * als Name haben. 
-   * @return null, falls kein entsprechender Knoten gefunden wurde. Falls
+   * @return Falls
    * es entsprechende Knoten gibt, wird die niedrigste Suchtiefe bestimmt auf
    * der entsprechende Knoten zu finden sind und es werden alle Knoten auf
    * dieser Suchtiefe zurückgeliefert. Falls dies genau einer ist, wird er
    * direkt zurückgeliefert, ansonsten wird ein ConfigThingy mit Namen
    * "<query results>" geliefert, das diese Knoten (und nur diese) 
-   * als Kinder hat. 
+   * als Kinder hat.
+   * @throws NodeNotFoundException falls keine entsprechenden Knoten gefunden 
+   *         wurden. Falls das nicht gewünscht ist, kann {@link #query(String)}
+   *         benutzt werden. 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public ConfigThingy get(String name)
+  public ConfigThingy get(String name) throws NodeNotFoundException
   {
     ConfigThingy res = query(name, false);
-    if (res.count() == 0) return null;
+    if (res.count() == 0) throw new NodeNotFoundException(getName()+ " hat keinen Nachfahren '"+name+"'");
     if (res.count() == 1)
       res = (ConfigThingy)res.iterator().next();
     return res;
@@ -369,12 +373,15 @@ public class ConfigThingy
    * zurückgeliefert anstatt der Knoten selbst. Es ist zu beachten, dass jeder
    * Elternknoten nur genau einmal in den Ergebnissen enthalten ist, auch wenn
    * er mehrere passende Kinder hat,
+   * @throws NodeNotFoundException falls keine entsprechenden Knoten gefunden 
+   *         wurden. Falls das nicht gewünscht ist, kann {@link #query(String)}
+   *         benutzt werden.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public ConfigThingy getByChild(String name)
+  public ConfigThingy getByChild(String name) throws NodeNotFoundException
   {
     ConfigThingy res = query(name, true);
-    if (res.count() == 0) return null;
+    if (res.count() == 0) throw new NodeNotFoundException(getName()+ " hat keinen Nachfahren '"+name+"'");
     if (res.count() == 1)
       res = (ConfigThingy)res.iterator().next();
     return res;
@@ -865,11 +872,11 @@ public class ConfigThingy
       {
         if (i + 1 == args.length) 
         {
-          byChild = conf.getByChild(args[i]);
+          try{ byChild = conf.getByChild(args[i]); }catch(NodeNotFoundException x){}
           getbychildstr = getstr + ".getByChild(\""+args[i]+"\")"; 
         }
         getstr = getstr + ".get(\""+args[i]+"\")";
-        conf = conf.get(args[i]);
+        try{ conf = conf.get(args[i]);  }catch(NodeNotFoundException x){ conf = null; }
         if (conf == null) break;
       }
       
