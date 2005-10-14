@@ -1,6 +1,6 @@
 /*
 * Dateiname: SyntaxErrorException.java
-* Projekt  : n/a
+* Projekt  : WollMux
 * Funktion : Signalisiert einen Fehler in einer zu parsenden Zeichenfolge 
 * 
 * Copyright: Landeshauptstadt München
@@ -11,6 +11,7 @@
 * 06.10.2005 | BNK | Erstellung
 * 11.10.2005 | BNK | Doku
 * 13.10.2005 | BNK | +serialVersionUID
+* 14.10.2005 | BNK | +Projekt: WollMux
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
