@@ -65,10 +65,11 @@ public class ConfigThingy
    * @param name der Name der Wurzel des erzeugten ConfigThingy-Baumes.
    * @throws IOException falls das Laden von Daten von url (oder einer includeten
    * URL) fehlschlägt.
+   * @throws SyntaxErrorException 
    * @throws SyntaxErrorException falls beim Parsen der Daten von url ein
    * syntaktischer Fehler gefunden wird.
    */
-  public ConfigThingy(String name, URL url) throws IOException
+  public ConfigThingy(String name, URL url) throws IOException, SyntaxErrorException
   {
     this(name);
     childrenFromUrl(url, new InputStreamReader(url.openStream()));
@@ -79,10 +80,11 @@ public class ConfigThingy
    * @param name der Name der Wurzel des erzeugten ConfigThingy-Baumes.
    * @throws IOException falls das Laden von Daten von url (oder einer includeten
    * URL) fehlschlägt.
+   * @throws SyntaxErrorException 
    * @throws SyntaxErrorException falls beim Parsen der Daten von url ein
    * syntaktischer Fehler gefunden wird.
    */
-  public ConfigThingy(String name, URL url, Reader read) throws IOException
+  public ConfigThingy(String name, URL url, Reader read) throws IOException, SyntaxErrorException
   {
     this(name);
     childrenFromUrl(url,read);
@@ -93,8 +95,9 @@ public class ConfigThingy
    * Knoten als Kinder an this an.
    * @throws IOException falls das Laden von Daten von url (oder einer includeten
    * @author Matthias Benkmann (D-III-ITD 5.1)
+   * @throws SyntaxErrorException 
    */
-  protected void childrenFromUrl(URL url, Reader read) throws IOException
+  protected void childrenFromUrl(URL url, Reader read) throws IOException, SyntaxErrorException
   {
     Stack stack = new Stack();
     stack.push(this);
@@ -845,8 +848,9 @@ public class ConfigThingy
    *              (configthingy.get(get1).get(get2)...) dessen Ergebnis 
    *              ausgegeben wird.
    * @author Matthias Benkmann (D-III-ITD 5.1)
+   * @throws SyntaxErrorException 
    */
-  public static void main(String[] args) throws IOException
+  public static void main(String[] args) throws IOException, SyntaxErrorException
   {
     if (args.length < 1)
     {

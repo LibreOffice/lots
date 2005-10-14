@@ -12,6 +12,7 @@
 * 11.10.2005 | BNK | Doku
 * 13.10.2005 | BNK | +serialVersionUID
 * 14.10.2005 | BNK | +Projekt: WollMux
+* 14.10.2005 | BNK | SyntaxErrorException ist keine RuntimeException mehr.
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -24,7 +25,7 @@ package de.muenchen.allg.itd51.parser;
  * Signalisiert einen Fehler in einer zu parsenden Zeichenfolge
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
-public class SyntaxErrorException extends RuntimeException
+public class SyntaxErrorException extends Exception
 {
   /**
    * keine Ahnung was das soll, aber es macht Eclipse glücklich.
