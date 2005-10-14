@@ -9,6 +9,7 @@
 * Datum      | Wer | Änderungsgrund
 * -------------------------------------------------------------------
 * 11.10.2005 | BNK | Erstellung
+* 14.10.2005 | BNK | Interaktion mit DJDataset
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -55,6 +56,7 @@ import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.Logger;
+import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.DJDataset;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
 
@@ -215,11 +217,7 @@ public class DatensatzBearbeiten
     protected String columnName;
     protected boolean myDatasetIsLocal;
     
-    public DataControl(String colName, boolean dsLocal)
-    {
-      columnName = colName;
-      myDatasetIsLocal = dsLocal;
-    }
+    
     public abstract String getTextFromControl();
     public String getColumnName() {return columnName;}
     public abstract void setTextInControl(String text);
@@ -227,13 +225,65 @@ public class DatensatzBearbeiten
     public boolean datasetIsLocal() {return myDatasetIsLocal;}
   }
   
-  /*private class TextComponentDataControl extends DataControl
+  private class TextComponentDataControl extends DataControl
   {
+    JTextComponent myComponent;
+    
     public TextComponentDataControl(String colName, JTextComponent compo)
+    throws ColumnNotFoundException
     {
-      super(colName, datensatz);
+      columnName = colName;
+      myDatasetIsLocal = datensatz.hasLocalOverride(colName);
+      myComponent = compo;
+      startText = datensatz.get(colName);
+      setTextInControl(startText);
     }
-  }*/
+
+    public String getTextFromControl()
+    {
+      return myComponent.getText();
+    }
+
+    public void setTextInControl(String text)
+    {
+      myComponent.setText(text);
+    }
+  }
+  
+  private class ComboBoxDataControl extends DataControl
+  {
+    JComboBox myComponent;
+    
+    public ComboBoxDataControl(String colName, JComboBox compo)
+    throws ColumnNotFoundException
+    {
+      columnName = colName;
+      myDatasetIsLocal = datensatz.hasLocalOverride(colName);
+      myComponent = compo;
+      startText = datensatz.get(colName);
+      addItem(startText);
+      setTextInControl(startText);
+    }
+
+    public void addItem(String text)
+    {
+      for (int i = myComponent.getItemCount() - 1; i >=0 ; --i)
+      {
+        if (myComponent.getItemAt(i).equals(text)) return;
+      }
+      myComponent.addItem(text);
+    }
+    
+    public String getTextFromControl()
+    {
+      return myComponent.getSelectedItem().toString();
+    }
+
+    public void setTextInControl(String text)
+    {
+      myComponent.setSelectedItem(text);
+    }
+  }
   
   
   private class DialogWindow
@@ -319,6 +369,12 @@ public class DatensatzBearbeiten
             
             JPanel uiElement = new JPanel(new GridLayout(1,1));
             JTextField tf = new JTextField(TEXTFIELD_DEFAULT_WIDTH);
+            
+            try
+            {
+              new TextComponentDataControl(uiElementDesc.get("DB_SPALTE").toString(), tf);
+            } catch (Exception x) { Logger.error(x); }
+            
             //Font fnt = tf.getFont();
             //tf.setFont(fnt.deriveFont((float)14.0));
             //tf.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
@@ -339,6 +395,11 @@ public class DatensatzBearbeiten
               int lines = 3;
               try{ lines = Integer.parseInt(uiElementDesc.get("LINES").toString()); } catch(Exception x){}
               JTextArea textarea = new JTextArea(lines,TEXTFIELD_DEFAULT_WIDTH);
+              try
+              {
+                new TextComponentDataControl(uiElementDesc.get("DB_SPALTE").toString(), textarea);
+              } catch (Exception x) { Logger.error(x); }
+
               JPanel uiElement = new JPanel(new GridLayout(1,1));
               JScrollPane scrollPane = new JScrollPane(textarea);//, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER, JScrollPane.VERTICAL_SCROLLBAR_NEVER);
               scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -377,15 +438,20 @@ public class DatensatzBearbeiten
               
               JPanel uiElement = new JPanel(new GridLayout(1,1));
               JComboBox combo = new JComboBox();
+              try
+              {
+                ComboBoxDataControl comboCtrl = new ComboBoxDataControl(uiElementDesc.get("DB_SPALTE").toString(), combo);
+                Iterator values = uiElementDesc.query("VALUES").iterator();
+                while (values.hasNext())
+                {
+                  comboCtrl.addItem(values.next().toString());
+                }
+              } catch (Exception x) { Logger.error(x); }
+
               uiElement.add(combo);
               uiElement.setBorder(BorderFactory.createEmptyBorder(TF_BORDER,0,TF_BORDER,0));
               gbcCombobox.gridy = y;
               myInputPanel.add(uiElement, gbcCombobox);
-              Iterator values = uiElementDesc.query("VALUES").iterator();
-              while (values.hasNext())
-              {
-                combo.addItem(values.next());
-              }
             }
         } catch(NodeNotFoundException x) {Logger.error(x);}
       }

@@ -1,7 +1,7 @@
 /*
 * Dateiname: Dataset.java
-* Projekt  : n/a
-* Funktion : TODO Funktionsbeschreibung
+* Projekt  : WollMux
+* Funktion : Interface für Datensätze einer Tabelle.
 * 
 * Copyright: Landeshauptstadt München
 *

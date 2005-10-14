@@ -1,7 +1,8 @@
 /*
 * Dateiname: DatasourceJoiner.java
-* Projekt  : n/a
-* Funktion : TODO Funktionsbeschreibung
+* Projekt  : WollMux
+* Funktion : stellt eine virtuelle Datenbank zur Verfügung, die ihre Daten
+*            aus verschiedenen Hintergrunddatenbanken zieht.
 * 
 * Copyright: Landeshauptstadt München
 *
@@ -44,17 +45,31 @@ public class DatasourceJoiner
   //           "5.1"
   
   //suchString kann vorne und/oder hinten ein % haben zur prefix/suffix/teilstring-suche
-  public Dataset find(String spaltenName, String suchString)
+  public QueryResults find(String spaltenName, String suchString)
   {
     return null;
   }
-  public Dataset find(String spaltenName1, String suchString1,String spaltenName2, String suchString2)
+  
+  public QueryResults find(String spaltenName1, String suchString1,String spaltenName2, String suchString2)
   {
     return null;
   }
-  public Dataset find(String spaltenName1, String suchString1,String spaltenName2, String suchString2,String spaltenName3, String suchString3)
+  
+  public QueryResults find(String spaltenName1, String suchString1,String spaltenName2, String suchString2,String spaltenName3, String suchString3)
   {
     return null;
   }
+  
+  /**
+   * Liefert den momentan in der Datensatzliste ausgewählten Datensatz.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public DJDataset getSelectedDataset() throws DatasetNotFoundException
+  {
+    throw new DatasetNotFoundException();
+  }
+  
+//TODO LOS = Local Override Storage  
+  
   
 }
