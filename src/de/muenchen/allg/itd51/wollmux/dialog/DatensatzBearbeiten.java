@@ -10,6 +10,7 @@
 * -------------------------------------------------------------------
 * 11.10.2005 | BNK | Erstellung
 * 14.10.2005 | BNK | Interaktion mit DJDataset
+* 14.10.2005 | BNK | Kommentiert
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -72,39 +73,98 @@ import de.muenchen.allg.itd51.wollmux.db.DJDataset;
 import de.muenchen.allg.itd51.wollmux.db.TestDJDataset;
 
 /**
- * TODO Doku
- * TODO Bei Speichern und Standardwerte wiederherstellen erst sicherheitsabfrage
+ * Diese Klasse baut anhand einer als ConfigThingy übergebenen 
+ * Dialogbeschreibung einen (mehrseitigen) Dialog zur Bearbeitung eines
+ * {@link de.muenchen.allg.itd51.wollmux.db.DJDataset}s.
+ * <b>ACHTUNG:</b> Die public-Funktionen dieser Klasse dürfen NICHT aus dem
+ * Event-Dispatching Thread heraus aufgerufen werden. Die private-Funktionen
+ * dagegen dürfen NUR aus dem Event-Dispatching Thread heraus aufgerufen werden. 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class DatensatzBearbeiten
 {
+  /**
+   * Standardbreite für Textfelder
+   */
   private final static int TEXTFIELD_DEFAULT_WIDTH = 22;
+  /**
+   * Rand um Textfelder (wird auch für ein paar andere Ränder verwendet)
+   * in Pixeln.
+   */
   private final static int TF_BORDER = 4;
+  /**
+   * Rand über und unter einem horizontalen Separator (in Pixeln).
+   */
   private final static int SEP_BORDER = 7;
+  /**
+   * Rand um Buttons (in Pixeln).
+   */
   private final static int BUTTON_BORDER = 2;
+  /**
+   * der Datensatz, der durch den Dialog bearbeitet wird.
+   */
   private DJDataset datensatz;
+  /**
+   * Bildet Fensternamen (umschliessender Schlüssel in der Beschreibungssprache)
+   * auf {@link DialogWindow}s ab. Wird unter anderem zum Auflösen der Bezeichner
+   * der switchTo-ACTION verwendet.
+   */
   private Map fenster;
+  /**
+   * das momentan angezeigte Dialogfenster.
+   */
   private DialogWindow currentWindow;
+  /**
+   * Der Rahmen des gesamten Dialogs.
+   */
   private JFrame myFrame;
+  /**
+   * Ein mit CardLayout versehenes Panel, das die verschiedenen Dialogseiten
+   * managt.
+   */
   private JPanel cardPanel;
+  /**
+   * Das CardLayout von cardPanel.
+   */
   private CardLayout cardLayout;
+  /**
+   * Der Name (siehe {@link #fenster}) des ersten Fensters des Dialogs,
+   * das ist das erste Fenster, das in der Dialog-Beschreibung aufgeführt ist.
+   */
   private String firstWindow;
+  /**
+   * Die mit MODIFY_MARKER_COLOR gesetzte Farbe.
+   */
   private Color modColor;
+  
+  /**
+   * ActionListener für Buttons mit der ACTION "abort". 
+   */
   private ActionListener actionListenerDatensatzBearbeiten_abort = new ActionListener()
         { public void actionPerformed(ActionEvent e){ abort(); } };
+        
+        /**
+         * ActionListener für Buttons mit der ACTION "restoreStandard". 
+         */        
   private ActionListener actionListenerDatensatzBearbeiten_restoreStandard = new ActionListener()
         { public void actionPerformed(ActionEvent e){ restoreStandard(); } };
+        /**
+         * ActionListener für Buttons mit der ACTION "save". 
+         */
   private ActionListener actionListenerDatensatzBearbeiten_save = new ActionListener()
         { public void actionPerformed(ActionEvent e){ save(); } };
+        /**
+         * ActionListener für Buttons mit der ACTION "saveAndExit". 
+         */
   private ActionListener actionListenerDatensatzBearbeiten_saveAndExit = new ActionListener()
         { public void actionPerformed(ActionEvent e){ saveAndExit(); } };
     
   
   /**
-   * Allgemein gilt für diese Klasse: public-Funktionen dürfen NICHT vom 
-   * Event-Dispatching Thread aus aufgerufen werden, private-Funktionen
-   * dürfen NUR vom Event-Dispatching Thread aufgerufen werden.
-   * @param conf, hiervon wird Unterschlüssel "Fenster" ausgewertet
+   * Erzeugt einen neuen Dialog, der allerdings zu Beginn nicht sichtbar ist.
+   * @param conf das ConfigThingy, das den Dialog beschreibt (der Vater des
+   *        "Fenster"-Knotens.
+   * @param datensatz der Datensatz, der mit dem Dialog bearbeitet werden soll.
    * @throws ConfigurationErrorException im Falle eines schwerwiegenden
    *         Konfigurationsfehlers, der es dem Dialog unmöglich macht,
    *         zu funktionieren (z.B. dass der "Fenster" Schlüssel fehlt.
@@ -176,7 +236,18 @@ public class DatensatzBearbeiten
     myFrame.setResizable(false);
   }
   
+  /**
+   * Implementiert die gleichnamige ACTION.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private void abort(){myFrame.dispose();}
+  
+  /**
+   * Implementiert die gleichnamige ACTION.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private void restoreStandard()
   {
     if (!currentWindow.hasChanges()) return;
@@ -184,7 +255,12 @@ public class DatensatzBearbeiten
     if (res != JOptionPane.YES_OPTION) return;
     currentWindow.restoreStandard();
   };
-  
+
+  /**
+   * Implementiert die gleichnamige ACTION.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private boolean save() 
   {
     boolean hasChanges = false;
@@ -200,12 +276,22 @@ public class DatensatzBearbeiten
     while (iter.hasNext()) ((DialogWindow)iter.next()).save();
     return true; 
   };
-  
+
+  /**
+   * Implementiert die gleichnamige ACTION.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private void saveAndExit()
   {
     if (save()) abort();
   }
   
+  /**
+   * Ein WindowListener, der auf den JFrame registriert wird, damit als
+   * Reaktion auf den Schliessen-Knopf auch die ACTION "abort" ausgeführt wird.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private class MyWindowListener implements WindowListener
   {
     public MyWindowListener(){}
@@ -218,6 +304,12 @@ public class DatensatzBearbeiten
     public void windowOpened(WindowEvent e) {}
   }
 
+  /**
+   * Zerstört den Dialog. Nach Aufruf dieser Funktion dürfen keine weiteren
+   * Aufrufe von Methoden des Dialogs erfolgen.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   public void dispose()
   {
     //  GUI im Event-Dispatching Thread zerstören wg. Thread-Safety.
@@ -231,7 +323,11 @@ public class DatensatzBearbeiten
     catch(Exception x) {/*Hope for the best*/}
   }
 
-  
+  /**
+   * Macht den Dialog sichtbar.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   public void show()
   {
     javax.swing.SwingUtilities.invokeLater(new Runnable() {
@@ -241,6 +337,11 @@ public class DatensatzBearbeiten
     });
   }
   
+  /**
+   * private Version von show(), die im Event-Dispatching Thread laufen muss.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private void showEDT()
   {
     if (fenster.size() == 0) return;
@@ -248,6 +349,11 @@ public class DatensatzBearbeiten
   }
 
   
+  /**
+   * aktiviert das Dialog-Fenster namens name.
+   * @param name
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private void showWindow(String name)
   {
     if (!fenster.containsKey(name)) return;
@@ -259,19 +365,60 @@ public class DatensatzBearbeiten
     cardLayout.show(cardPanel,currentWindow.getName());
   }
 
+  /**
+   * Dieses Interface dient dazu, dass {@link DataControl}s jemandem
+   * (nämlich {@link DialogWindow}s) mitteilen können, wenn sie ihre Farbe
+   * geändert haben (weil sich ihr "geändert" Zustand geändert hat).
+   * Dies erlaubt es den DialogWindows, Buttons zu aktualisieren, deren
+   * Ausgegrautseinszustand davon abhängt, ob angezeigte Felder geändert wurden
+   * oder nicht.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private interface ColorChangeListener
   {
     public void colorChanged();
   }
   
+  /**
+   * Ein DataControl kümmert sich um die Verwaltung von Eingabe-Controls eines
+   * DialogWindows. Es stellt insbesondere die Schnittstelle zwischen dem
+   * Control und dem Datensatz her.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private abstract class DataControl
   {
+    /**
+     * der Text des Datenbankfeldes dieses Controls. Wenn startText nicht mit
+     * dem aktuell im Control angezeigten Text übereinstimmt, dann hat der
+     * Benutzer den Wert seit den letzten Save geändert.
+     */
     protected String startText;
+    /**
+     * Der Name der Datenbankspalte, die mit dem Control editiert wird.
+     */
     protected String columnName;
+    
+    /**
+     * Cacht den Wert von DJDataset.hasLocalOverride(columnName).
+     */
     protected boolean myDatasetIsLocal;
+    /**
+     * die Farbe, die der Hintergrund des Controls annehmen soll, wenn
+     * {@link #myDatasetIsLocal} true ist.
+     */
     protected Color localColor;
+    /**
+     * die Farbe, die der Hintegrund des Controls annehmen soll,  wenn
+     * {@link #myDatasetIsLocal} false ist.
+     */ 
     protected Color normalColor;
+    /**
+     * Das Control.
+     */
     protected JComponent myComponent;
+    /**
+     * true, falls der Hintegrund des Controls aktuell in normalColor eingefärbt ist.
+     */
     boolean isCurrentlyNormalColor;
     List listeners = new Vector();
     
@@ -329,6 +476,13 @@ public class DatensatzBearbeiten
         }
       }
     }
+    
+    /**
+     * Falls hasBeenModified() wird der aktuell im Control stehende Wert
+     * in die Datenbank zurückgespeichert.
+     * 
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
     public void save()
     {
       if (hasBeenModified())
@@ -343,6 +497,12 @@ public class DatensatzBearbeiten
       }
     }
     
+    /**
+     * Der Wert des Controls wird aus der Datenbank aktualisiert und
+     * daran gekoppelt. D.h. lokale Änderungen werden verworfen. 
+     * 
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
     public void restoreStandard()
     {
       try{ 
@@ -354,10 +514,12 @@ public class DatensatzBearbeiten
       
   }
   
+  /**
+   * Ein {@link DataControl} für JTextComponents.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private class TextComponentDataControl extends DataControl implements DocumentListener
   {
-    
-    
     public TextComponentDataControl(String colName, JTextComponent compo, Color localColor)
     throws ColumnNotFoundException
     {
@@ -382,6 +544,10 @@ public class DatensatzBearbeiten
     
   }
   
+/**
+ * Ein {@link DataControl} für JComboBoxes.
+ * @author Matthias Benkmann (D-III-ITD 5.1)
+ */
   private class ComboBoxDataControl extends DataControl implements ActionListener, ItemListener 
   {
     public ComboBoxDataControl(String colName, JComboBox compo, Color localColor)
@@ -418,26 +584,73 @@ public class DatensatzBearbeiten
     public void itemStateChanged(ItemEvent e) { updateBackground(); }
   }
   
-  
+  /**
+   * Verwaltet eine Seite des Dialogs.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private class DialogWindow implements ColorChangeListener
   {
+    /**
+     * Das Panel, das die ganze Dialogseite enthält.
+     */
     private JPanel myPanel;
+    /**
+     * Unter-Panel, das die ganzen Eingabe-Elemente enthält. 
+     */
     private JPanel myInputPanel;
+    /**
+     * Unter-Panel, das die Buttons enthält.
+     */
     private JPanel myButtonPanel;
+    /**
+     * Titel, den der Frame bekommen soll, wenn diese Dialogseite angezeigt wird.
+     */
     private String title;
+    /**
+     * Der Name dieses Fensters (vergleiche {@link DatensatzBearbeiten#fenster}).
+     */
     private String name;
+    /**
+     * Alle {@link DataControl}s zu dieser Dialogseite. Falls die Konfigurationsdaten
+     * des Dialogs fehlerhaft sind kann es sein, dass nicht zu jedem Control ein
+     * DataControl existiert.
+     */
     private List dataControls = new Vector();
+    /**
+     * Liste aller JButtons, die ausgegraut werden müssen, wenn keines der
+     * DataControls einen hasBeenModified() Zustand hat.
+     */
     private List buttonsToGreyOutIfNoChanges = new Vector();
     
+    /**
+     * Liefert das JPanel für diese Dialogseite zurück.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
     public JPanel JPanel() {return myPanel;}
+    /**
+     * Liefert den Titel zurück, den der Frame haben soll, wenn diese
+     * Dialogseite angezeigt wird.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
     public String getTitle() {return title;}
     
+    /**
+     * Erzeugt ein neues DialogWindow, dessen Name name ist 
+     * (vergleiche {@link DatensatzBearbeiten#fenster}) und das seinen
+     * Aufbau aus conf bezieht. conf sollte ein Kind des Knotens "Fenster"
+     * aus der gesamten Dialogbeschreibung sein.
+     */
     public DialogWindow(String name, final ConfigThingy conf)
     {
       this.name = name;
       createGUI(conf);
     }
     
+    /**
+     * liefert den Namen zurück, der dem Konstruktor übergeben wurde
+     * (vergleiche {@link DatensatzBearbeiten#fenster}.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
     public String getName() {return name;}
     
     public void save()
@@ -466,6 +679,11 @@ public class DatensatzBearbeiten
       while (iter.hasNext()) ((DataControl)iter.next()).restoreStandard();
     }
     
+/**
+ * Ersetzt "%{SPALTENNAME}" in str durch den Wert der entsprechenden Spalte
+ * im Datensatz, der durch den Dialog bearbeitet wird. 
+ * @author Matthias Benkmann (D-III-ITD 5.1)
+ */
     public String substituteVars(String str)
     {
       Pattern p = Pattern.compile("%\\{([a-zA-Z0-9]+)\\}");
@@ -484,11 +702,6 @@ public class DatensatzBearbeiten
       return str;
     }
     
-    /**
-     * Create the GUI and show it.  For thread safety,
-     * this method should be invoked from the
-     * event-dispatching thread.
-     */
     public void createGUI(ConfigThingy conf)
     {
       title = "TITLE fehlt in Fensterbeschreibung";
