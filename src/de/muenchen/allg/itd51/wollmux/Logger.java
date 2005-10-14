@@ -11,6 +11,8 @@
  * 13.10.2005 | LUT | Erstellung
  * 14.10.2005 | BNK | Kommentar korrigiert: Standard ist LOG nicht NONE
  *                  | System.err als Standardausgabestrom
+ * 14.10.2005 | LUT | critical(*) --> error(*)
+ *                    + Anzeige des Datums bei allen Meldungen.                  
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)

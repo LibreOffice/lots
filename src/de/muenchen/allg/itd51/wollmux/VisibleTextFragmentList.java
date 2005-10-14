@@ -20,7 +20,6 @@ package de.muenchen.allg.itd51.wollmux;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -164,20 +163,20 @@ public class VisibleTextFragmentList {
 	 * @author Christoph Lutz (D-III-ITD 5.1)
 	 */
 	public static void main(String[] args) throws IOException {
-		if (args.length < 1) {
-			System.out.println("USAGE: <url>");
-			System.exit(0);
-		}
-		Logger.init(System.out, Logger.DEBUG);
-
-		File cwd = new File(".");
-
-		args[0] = args[0].replaceAll("\\\\", "/");
-		ConfigThingy conf = new ConfigThingy(args[0], new URL(cwd.toURL(),
-				args[0]));
-
-		VisibleTextFragmentList tfrags;
 		try {
+			if (args.length < 1) {
+				System.out.println("USAGE: <url>");
+				System.exit(0);
+			}
+			Logger.init(Logger.DEBUG);
+
+			File cwd = new File(".");
+
+			args[0] = args[0].replaceAll("\\\\", "/");
+			ConfigThingy conf = new ConfigThingy(args[0], new URL(cwd.toURL(),
+					args[0]));
+
+			VisibleTextFragmentList tfrags;
 			tfrags = new VisibleTextFragmentList(conf);
 
 			String[] ids = tfrags.getIDs();
@@ -186,7 +185,7 @@ public class VisibleTextFragmentList {
 						+ tfrags.getURLByID(ids[i]));
 			}
 
-		} catch (NodeNotFoundException e) {
+		} catch (Exception e) {
 			Logger.error(e);
 		}
 		System.exit(0);
