@@ -25,18 +25,31 @@ package de.muenchen.allg.itd51.wollmux.db;
 public interface DJDataset extends Dataset
 {
 
-  /* (non-Javadoc)
-   * @see de.muenchen.allg.itd51.wollmux.db.Dataset#get(java.lang.String)
+  
+  
+  /**
+   * Schreibt newValue als neuen Wert des Datensatzes in Spalte columnName in den LOS des DJ.
+   * @throws ColumnNotFoundException falls keine Spalte namens columnName existiert. 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public String get(String spaltenName);
+  public void set(String columnName, String newValue) throws ColumnNotFoundException;
   
   /**
    * Liefert true, falls die Spalte columnName dieses Datensatzes nicht aus
    * den Hintergrunddatenbank kommt, sondern aus dem lokalen Override-Speicher
    * des DJ.
-   * @return
+   * @throws ColumnNotFoundException falls keine Spalte namens columnName existiert.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public boolean hasLocalOverride(String columnName) throws ColumnNotFoundException;
+  
+  /**
+   * Verwirft den Wert im LOS für Spalte columnName dieses Datensatzes und 
+   * verknüpft die Spalte wieder mit der Hintergrunddatenbank.
+   * @throws ColumnNotFoundException falls keine Spalte namens columnName existiert.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public void discardLocalOverride(String columnName) throws ColumnNotFoundException;
+  
   
 }

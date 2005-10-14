@@ -20,6 +20,7 @@ package de.muenchen.allg.itd51.wollmux.dialog;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -28,21 +29,29 @@ import java.awt.Insets;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
@@ -50,6 +59,8 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.text.JTextComponent;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
@@ -58,7 +69,7 @@ import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.DJDataset;
-import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
+import de.muenchen.allg.itd51.wollmux.db.TestDJDataset;
 
 /**
  * TODO Doku
@@ -78,10 +89,15 @@ public class DatensatzBearbeiten
   private JPanel cardPanel;
   private CardLayout cardLayout;
   private String firstWindow;
+  private Color modColor;
   private ActionListener actionListenerDatensatzBearbeiten_abort = new ActionListener()
         { public void actionPerformed(ActionEvent e){ abort(); } };
   private ActionListener actionListenerDatensatzBearbeiten_restoreStandard = new ActionListener()
         { public void actionPerformed(ActionEvent e){ restoreStandard(); } };
+  private ActionListener actionListenerDatensatzBearbeiten_save = new ActionListener()
+        { public void actionPerformed(ActionEvent e){ save(); } };
+  private ActionListener actionListenerDatensatzBearbeiten_saveAndExit = new ActionListener()
+        { public void actionPerformed(ActionEvent e){ saveAndExit(); } };
     
   
   /**
@@ -99,6 +115,11 @@ public class DatensatzBearbeiten
     
     fenster = new HashMap();
     
+    modColor = Color.PINK;
+    try{
+      modColor = Color.decode(conf.get("MODIFY_MARKER_COLOR").getLastChild().toString());
+    }catch(Exception x){Logger.error(x);}
+    
     final ConfigThingy fensterDesc = conf.query("Fenster");
     if (fensterDesc.count() == 0)
       throw new ConfigurationErrorException("Schlüssel 'Fenster' fehlt in "+conf.getName());
@@ -108,7 +129,7 @@ public class DatensatzBearbeiten
     try{
       javax.swing.SwingUtilities.invokeAndWait(new Runnable() {
         public void run() {
-            createGUI(fensterDesc);
+            try{createGUI(fensterDesc.getLastChild());}catch(Exception x){};
         }
       });
     }
@@ -156,7 +177,34 @@ public class DatensatzBearbeiten
   }
   
   private void abort(){myFrame.dispose();}
-  private void restoreStandard(){}
+  private void restoreStandard()
+  {
+    if (!currentWindow.hasChanges()) return;
+    int res = JOptionPane.showConfirmDialog(myFrame, "Wollen Sie Ihre persönlichen Änderungen wirklich verwerfen\nund die Felder dieser Dialogseite wieder mit der zentralen Datenbank synchronisieren?","Lokale Änderungen wirklich verwerfen?",JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+    if (res != JOptionPane.YES_OPTION) return;
+    currentWindow.restoreStandard();
+  };
+  
+  private boolean save() 
+  {
+    boolean hasChanges = false;
+    Iterator iter = fenster.values().iterator();
+    while (iter.hasNext())
+      hasChanges = hasChanges || ((DialogWindow)iter.next()).hasChanges();
+    
+    if (!hasChanges) return true;
+    int res = JOptionPane.showConfirmDialog(myFrame, "Wollen Sie Ihre Änderungen wirklich speichern\nund auf die Aktualisierung der entsprechenden Felder\naus der zentralen Datenbank verzichten?","Änderungen speichern?",JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+    if (res != JOptionPane.YES_OPTION) return false;
+    
+    iter = fenster.values().iterator();
+    while (iter.hasNext()) ((DialogWindow)iter.next()).save();
+    return true; 
+  };
+  
+  private void saveAndExit()
+  {
+    if (save()) abort();
+  }
   
   private class MyWindowListener implements WindowListener
   {
@@ -211,88 +259,175 @@ public class DatensatzBearbeiten
     cardLayout.show(cardPanel,currentWindow.getName());
   }
 
+  private interface ColorChangeListener
+  {
+    public void colorChanged();
+  }
+  
   private abstract class DataControl
   {
     protected String startText;
     protected String columnName;
     protected boolean myDatasetIsLocal;
+    protected Color localColor;
+    protected Color normalColor;
+    protected JComponent myComponent;
+    boolean isCurrentlyNormalColor;
+    List listeners = new Vector();
     
+    public void initCompo(String colName, JComponent compo, Color localColor)
+    {
+      this.localColor = localColor;
+      columnName = colName;
+      myComponent = compo;
+      normalColor = myComponent.getBackground();
+      isCurrentlyNormalColor = true;
+    }
+    
+    public void initText() throws ColumnNotFoundException
+    {
+      myDatasetIsLocal = datensatz.hasLocalOverride(columnName);
+      startText = datensatz.get(columnName);
+      setTextInControl(startText);
+      updateBackground();
+    }
+    
+    public void addColorChangeListener(ColorChangeListener l)
+    {
+      if (!listeners.contains(l)) listeners.add(l);
+    }
+    
+    public void notifyColorChangeListeners()
+    {
+      Iterator iter = listeners.iterator();
+      while (iter.hasNext()) ((ColorChangeListener)iter.next()).colorChanged();
+    }
     
     public abstract String getTextFromControl();
     public String getColumnName() {return columnName;}
     public abstract void setTextInControl(String text);
     public boolean hasBeenModified() {return !startText.equals(getTextFromControl());}
     public boolean datasetIsLocal() {return myDatasetIsLocal;}
+    public void updateBackground()
+    {
+      if (datasetIsLocal() || hasBeenModified())
+      {
+        myComponent.setBackground(localColor);
+        if (isCurrentlyNormalColor)
+        {
+          isCurrentlyNormalColor = false;
+          notifyColorChangeListeners();
+        }
+      }
+      else
+      {
+        myComponent.setBackground(normalColor);
+        if (!isCurrentlyNormalColor)
+        {
+          isCurrentlyNormalColor = true;
+          notifyColorChangeListeners();
+        }
+      }
+    }
+    public void save()
+    {
+      if (hasBeenModified())
+      {
+        try{ 
+          String text = getTextFromControl();
+          datensatz.set(columnName, text);
+          startText = text;
+          myDatasetIsLocal = datensatz.hasLocalOverride(columnName);
+        }catch(ColumnNotFoundException x){}
+        updateBackground();
+      }
+    }
+    
+    public void restoreStandard()
+    {
+      try{ 
+        datensatz.discardLocalOverride(columnName);
+        initText();
+      }catch(ColumnNotFoundException x){}
+      updateBackground();
+    }
+      
   }
   
-  private class TextComponentDataControl extends DataControl
+  private class TextComponentDataControl extends DataControl implements DocumentListener
   {
-    JTextComponent myComponent;
     
-    public TextComponentDataControl(String colName, JTextComponent compo)
+    
+    public TextComponentDataControl(String colName, JTextComponent compo, Color localColor)
     throws ColumnNotFoundException
     {
-      columnName = colName;
-      myDatasetIsLocal = datensatz.hasLocalOverride(colName);
-      myComponent = compo;
-      startText = datensatz.get(colName);
-      setTextInControl(startText);
+      initCompo(colName, compo, localColor);
+      initText();
+      compo.getDocument().addDocumentListener(this);
     }
 
     public String getTextFromControl()
     {
-      return myComponent.getText();
+      return ((JTextComponent)myComponent).getText();
     }
 
     public void setTextInControl(String text)
     {
-      myComponent.setText(text);
+      ((JTextComponent)myComponent).setText(text);
     }
+
+    public void changedUpdate(DocumentEvent e) { updateBackground(); }
+    public void insertUpdate(DocumentEvent e) { updateBackground(); }
+    public void removeUpdate(DocumentEvent e) { updateBackground(); }
+    
   }
   
-  private class ComboBoxDataControl extends DataControl
+  private class ComboBoxDataControl extends DataControl implements ActionListener, ItemListener 
   {
-    JComboBox myComponent;
-    
-    public ComboBoxDataControl(String colName, JComboBox compo)
+    public ComboBoxDataControl(String colName, JComboBox compo, Color localColor)
     throws ColumnNotFoundException
     {
-      columnName = colName;
-      myDatasetIsLocal = datensatz.hasLocalOverride(colName);
-      myComponent = compo;
-      startText = datensatz.get(colName);
-      addItem(startText);
-      setTextInControl(startText);
+      initCompo(colName, compo, localColor);
+      addItem(datensatz.get(columnName));
+      initText();
+      
+      compo.getEditor().addActionListener(this);
+      compo.addItemListener(this);
     }
 
     public void addItem(String text)
     {
-      for (int i = myComponent.getItemCount() - 1; i >=0 ; --i)
+      for (int i = ((JComboBox)myComponent).getItemCount() - 1; i >=0 ; --i)
       {
-        if (myComponent.getItemAt(i).equals(text)) return;
+        if (((JComboBox)myComponent).getItemAt(i).equals(text)) return;
       }
-      myComponent.addItem(text);
+      ((JComboBox)myComponent).addItem(text);
     }
     
     public String getTextFromControl()
     {
-      return myComponent.getSelectedItem().toString();
+      return ((JComboBox)myComponent).getSelectedItem().toString();
     }
 
     public void setTextInControl(String text)
     {
-      myComponent.setSelectedItem(text);
+      ((JComboBox)myComponent).setSelectedItem(text);
     }
+    
+    public void actionPerformed(ActionEvent e) { updateBackground(); }
+    public void itemStateChanged(ItemEvent e) { updateBackground(); }
   }
   
   
-  private class DialogWindow
+  private class DialogWindow implements ColorChangeListener
   {
     private JPanel myPanel;
     private JPanel myInputPanel;
     private JPanel myButtonPanel;
     private String title;
     private String name;
+    private List dataControls = new Vector();
+    private List buttonsToGreyOutIfNoChanges = new Vector();
     
     public JPanel JPanel() {return myPanel;}
     public String getTitle() {return title;}
@@ -305,9 +440,49 @@ public class DatensatzBearbeiten
     
     public String getName() {return name;}
     
-    public void show(){}
-    public void hide(){}
+    public void save()
+    {
+      Iterator iter = dataControls.iterator();
+      while (iter.hasNext()) ((DataControl)iter.next()).save();
+    }
     
+    public boolean hasChanges()
+    {
+      Iterator iter = dataControls.iterator();
+      while (iter.hasNext()) if (((DataControl)iter.next()).hasBeenModified()) return true;
+      return false;
+    }
+    
+    public void colorChanged()
+    {
+      boolean enabled = hasChanges();
+      Iterator iter = buttonsToGreyOutIfNoChanges.iterator();
+      while (iter.hasNext()) ((JButton)iter.next()).setEnabled(enabled);
+    }
+    
+    public void restoreStandard()
+    {
+      Iterator iter = dataControls.iterator();
+      while (iter.hasNext()) ((DataControl)iter.next()).restoreStandard();
+    }
+    
+    public String substituteVars(String str)
+    {
+      Pattern p = Pattern.compile("%\\{([a-zA-Z0-9]+)\\}");
+      Matcher m = p.matcher(str);
+      if (m.find())
+      do{
+        String spalte = m.group(1);
+        String wert = spalte;
+        try{
+          wert = datensatz.get(spalte);
+          wert = wert.replaceAll("%","");
+        } catch (ColumnNotFoundException e) { Logger.error(e); }
+        str = str.substring(0,m.start())+wert+str.substring(m.end());
+        m = p.matcher(str);
+      }while(m.find());
+      return str;
+    }
     
     /**
      * Create the GUI and show it.  For thread safety,
@@ -317,7 +492,7 @@ public class DatensatzBearbeiten
     public void createGUI(ConfigThingy conf)
     {
       title = "TITLE fehlt in Fensterbeschreibung";
-      try{title = ""+conf.get("TITLE");}catch(NodeNotFoundException x){}
+      try{title = substituteVars(""+conf.get("TITLE"));}catch(NodeNotFoundException x){}
       
       myPanel = new JPanel(new BorderLayout());
       myInputPanel = new JPanel();
@@ -339,52 +514,30 @@ public class DatensatzBearbeiten
       GridBagConstraints gbcTextarea =  new GridBagConstraints(1, 0, 1, 1, 1.0, 0.0, GridBagConstraints.LINE_END,   GridBagConstraints.HORIZONTAL, new Insets(0,0,0,0),0,0);
       GridBagConstraints gbcCombobox  = new GridBagConstraints(1, 0, 1, 1, 1.0, 0.0, GridBagConstraints.LINE_END,   GridBagConstraints.HORIZONTAL, new Insets(0,0,0,0),0,0);
       
-      ConfigThingy felder = conf.query("Eingabefelder");
+      ConfigThingy felderParent = conf.query("Eingabefelder");
       int y = -1;
       
-      Iterator iter = felder.iterator();
-      while (iter.hasNext())
+      Iterator piter = felderParent.iterator();
+      while (piter.hasNext())
       {
-        ++y;
-        ConfigThingy uiElementDesc = (ConfigThingy)iter.next();
-        try{
-          
-          
-          /*
-           * ACHTUNG! DER FOLGENDE CODE SOLLTE SO GESCHRIEBEN WERDEN,
-           * DASS DER ZUSTAND AUCH IM FALLE EINES GESCHEITERTEN GET()
-           * UND EINER EVTL. DARAUS RESULTIERENDEN NULLPOINTEREXCEPTION
-           * NOCH KONSISTENT IST!
-           */
-          
-          
-          String type = uiElementDesc.get("TYPE").toString();
-          if (type.equals("textfield"))
-          {
-            JLabel label = new JLabel();
-            label.setBorder(BorderFactory.createEmptyBorder(TF_BORDER,0,TF_BORDER,0));
-            gbcLabelLeft.gridy = y;
-            myInputPanel.add(label, gbcLabelLeft);
-            try{ label.setText(uiElementDesc.get("LABEL").toString()); } catch(Exception x){}
+        Iterator iter = ((ConfigThingy)piter.next()).iterator();
+        while (iter.hasNext())
+        {
+          ++y;
+          ConfigThingy uiElementDesc = (ConfigThingy)iter.next();
+          try{
             
-            JPanel uiElement = new JPanel(new GridLayout(1,1));
-            JTextField tf = new JTextField(TEXTFIELD_DEFAULT_WIDTH);
             
-            try
-            {
-              new TextComponentDataControl(uiElementDesc.get("DB_SPALTE").toString(), tf);
-            } catch (Exception x) { Logger.error(x); }
+            /*
+             * ACHTUNG! DER FOLGENDE CODE SOLLTE SO GESCHRIEBEN WERDEN,
+             * DASS DER ZUSTAND AUCH IM FALLE EINES GESCHEITERTEN GET()
+             * UND EINER EVTL. DARAUS RESULTIERENDEN NULLPOINTEREXCEPTION
+             * NOCH KONSISTENT IST!
+             */
             
-            //Font fnt = tf.getFont();
-            //tf.setFont(fnt.deriveFont((float)14.0));
-            //tf.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
-            uiElement.add(tf);
-            uiElement.setBorder(BorderFactory.createEmptyBorder(TF_BORDER,0,TF_BORDER,0));
-            gbcTextfield.gridy = y;
-            myInputPanel.add(uiElement, gbcTextfield);
-          }
-          else       
-            if (type.equals("textarea"))
+            
+            String type = uiElementDesc.get("TYPE").toString();
+            if (type.equals("textfield"))
             {
               JLabel label = new JLabel();
               label.setBorder(BorderFactory.createEmptyBorder(TF_BORDER,0,TF_BORDER,0));
@@ -392,145 +545,189 @@ public class DatensatzBearbeiten
               myInputPanel.add(label, gbcLabelLeft);
               try{ label.setText(uiElementDesc.get("LABEL").toString()); } catch(Exception x){}
               
-              int lines = 3;
-              try{ lines = Integer.parseInt(uiElementDesc.get("LINES").toString()); } catch(Exception x){}
-              JTextArea textarea = new JTextArea(lines,TEXTFIELD_DEFAULT_WIDTH);
+              JPanel uiElement = new JPanel(new GridLayout(1,1));
+              JTextField tf = new JTextField(TEXTFIELD_DEFAULT_WIDTH);
+              
               try
               {
-                new TextComponentDataControl(uiElementDesc.get("DB_SPALTE").toString(), textarea);
+                dataControls.add(new TextComponentDataControl(uiElementDesc.get("DB_SPALTE").toString(), tf, modColor));
               } catch (Exception x) { Logger.error(x); }
-
-              JPanel uiElement = new JPanel(new GridLayout(1,1));
-              JScrollPane scrollPane = new JScrollPane(textarea);//, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER, JScrollPane.VERTICAL_SCROLLBAR_NEVER);
-              scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-              scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
-              uiElement.add(scrollPane);
               
+              //Font fnt = tf.getFont();
+              //tf.setFont(fnt.deriveFont((float)14.0));
+              //tf.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
+              uiElement.add(tf);
               uiElement.setBorder(BorderFactory.createEmptyBorder(TF_BORDER,0,TF_BORDER,0));
-              gbcTextarea.gridy = y;
-              myInputPanel.add(uiElement, gbcTextarea);
+              gbcTextfield.gridy = y;
+              myInputPanel.add(uiElement, gbcTextfield);
+            }
+            else       
+              if (type.equals("textarea"))
+              {
+                JLabel label = new JLabel();
+                label.setBorder(BorderFactory.createEmptyBorder(TF_BORDER,0,TF_BORDER,0));
+                gbcLabelLeft.gridy = y;
+                myInputPanel.add(label, gbcLabelLeft);
+                try{ label.setText(uiElementDesc.get("LABEL").toString()); } catch(Exception x){}
+                
+                int lines = 3;
+                try{ lines = Integer.parseInt(uiElementDesc.get("LINES").toString()); } catch(Exception x){}
+                JTextArea textarea = new JTextArea(lines,TEXTFIELD_DEFAULT_WIDTH);
+                try
+                {
+                  dataControls.add(new TextComponentDataControl(uiElementDesc.get("DB_SPALTE").toString(), textarea, modColor));
+                } catch (Exception x) { Logger.error(x); }
+                
+                JPanel uiElement = new JPanel(new GridLayout(1,1));
+                JScrollPane scrollPane = new JScrollPane(textarea);//, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER, JScrollPane.VERTICAL_SCROLLBAR_NEVER);
+                scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+                scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
+                uiElement.add(scrollPane);
+                
+                uiElement.setBorder(BorderFactory.createEmptyBorder(TF_BORDER,0,TF_BORDER,0));
+                gbcTextarea.gridy = y;
+                myInputPanel.add(uiElement, gbcTextarea);
+              }
+              else
+                if (type.equals("separator"))
+                {
+                  JPanel uiElement = new JPanel(new GridLayout(1,1));
+                  uiElement.add(new JSeparator(SwingConstants.HORIZONTAL));
+                  uiElement.setBorder(BorderFactory.createEmptyBorder(SEP_BORDER,0,SEP_BORDER,0));
+                  gbcSeparator.gridy = y;
+                  myInputPanel.add(uiElement, gbcSeparator);
+                }
+            if (type.equals("label"))
+            {
+              JLabel uiElement = new JLabel();
+              uiElement.setBorder(BorderFactory.createEmptyBorder(TF_BORDER,0,TF_BORDER,0));
+              gbcLabel.gridy = y;
+              myInputPanel.add(uiElement, gbcLabel);
+              uiElement.setText(uiElementDesc.get("LABEL").toString());
             }
             else
-              if (type.equals("separator"))
+              if (type.equals("combobox"))
               {
+                JLabel label = new JLabel();
+                label.setBorder(BorderFactory.createEmptyBorder(TF_BORDER,0,TF_BORDER,0));
+                gbcLabelLeft.gridy = y;
+                myInputPanel.add(label, gbcLabelLeft);
+                try{ label.setText(uiElementDesc.get("LABEL").toString()); } catch(Exception x){}
+                
                 JPanel uiElement = new JPanel(new GridLayout(1,1));
-                uiElement.add(new JSeparator(SwingConstants.HORIZONTAL));
-                uiElement.setBorder(BorderFactory.createEmptyBorder(SEP_BORDER,0,SEP_BORDER,0));
-                gbcSeparator.gridy = y;
-                myInputPanel.add(uiElement, gbcSeparator);
-              }
-          if (type.equals("label"))
-          {
-            JLabel uiElement = new JLabel();
-            uiElement.setBorder(BorderFactory.createEmptyBorder(TF_BORDER,0,TF_BORDER,0));
-            gbcLabel.gridy = y;
-            myInputPanel.add(uiElement, gbcLabel);
-            uiElement.setText(uiElementDesc.get("LABEL").toString());
-          }
-          else
-            if (type.equals("combobox"))
-            {
-              JLabel label = new JLabel();
-              label.setBorder(BorderFactory.createEmptyBorder(TF_BORDER,0,TF_BORDER,0));
-              gbcLabelLeft.gridy = y;
-              myInputPanel.add(label, gbcLabelLeft);
-              try{ label.setText(uiElementDesc.get("LABEL").toString()); } catch(Exception x){}
-              
-              JPanel uiElement = new JPanel(new GridLayout(1,1));
-              JComboBox combo = new JComboBox();
-              try
-              {
-                ComboBoxDataControl comboCtrl = new ComboBoxDataControl(uiElementDesc.get("DB_SPALTE").toString(), combo);
-                Iterator values = uiElementDesc.query("VALUES").iterator();
-                while (values.hasNext())
+                JComboBox combo = new JComboBox();
+                try
                 {
-                  comboCtrl.addItem(values.next().toString());
-                }
-              } catch (Exception x) { Logger.error(x); }
-
-              uiElement.add(combo);
-              uiElement.setBorder(BorderFactory.createEmptyBorder(TF_BORDER,0,TF_BORDER,0));
-              gbcCombobox.gridy = y;
-              myInputPanel.add(uiElement, gbcCombobox);
-            }
-        } catch(NodeNotFoundException x) {Logger.error(x);}
+                  ComboBoxDataControl comboCtrl = new ComboBoxDataControl(uiElementDesc.get("DB_SPALTE").toString(), combo, modColor);
+                  Iterator values = uiElementDesc.get("VALUES").iterator();
+                  while (values.hasNext())
+                  {
+                    comboCtrl.addItem(values.next().toString());
+                  }
+                  dataControls.add(comboCtrl);
+                } catch (Exception x) { Logger.error(x); }
+                
+                uiElement.add(combo);
+                uiElement.setBorder(BorderFactory.createEmptyBorder(TF_BORDER,0,TF_BORDER,0));
+                gbcCombobox.gridy = y;
+                myInputPanel.add(uiElement, gbcCombobox);
+              }
+          } catch(NodeNotFoundException x) {Logger.error(x);}
+        }
       }
       
       ++y;
       gbcBottomglue.gridy = y;
       myInputPanel.add(Box.createGlue(), gbcBottomglue);
       
-      ConfigThingy buttons = conf.query("Buttons");
-      iter = buttons.iterator();
+      ConfigThingy buttonParents = conf.query("Buttons");
+      piter = buttonParents.iterator();
       boolean firstButton = true;
-      while (iter.hasNext())
+      while (piter.hasNext())
       {
-        ConfigThingy uiElementDesc = (ConfigThingy)iter.next();
-        try{
-          
-          /*
-           * ACHTUNG! DER FOLGENDE CODE SOLLTE SO GESCHRIEBEN WERDEN,
-           * DASS DER ZUSTAND AUCH IM FALLE EINES GESCHEITERTEN GET()
-           * UND EINER EVTL. DARAUS RESULTIERENDEN NULLPOINTEREXCEPTION
-           * NOCH KONSISTENT IST!
-           */
-          
-          String type = uiElementDesc.get("TYPE").toString();
-          if (type.equals("button"))
-          {
-            String action = uiElementDesc.get("ACTION").toString();
-            String label  = uiElementDesc.get("LABEL").toString();
-            char hotkey = 0;
-            try{
-              hotkey = uiElementDesc.get("HOTKEY").toString().charAt(0);
-            }catch(Exception x){}
+        Iterator iter = ((ConfigThingy)piter.next()).iterator();
+        while (iter.hasNext())
+        {
+          ConfigThingy uiElementDesc = (ConfigThingy)iter.next();
+          try{
             
-            JButton button = new JButton(label);
-            button.setMnemonic(hotkey);
-            JPanel uiElement = new JPanel(new GridLayout(1,1));
-            int left = BUTTON_BORDER;
-            if (firstButton) {left = 0; firstButton = false;}
-            int right = BUTTON_BORDER;
-            if (!iter.hasNext()) right = 0;
-            uiElement.setBorder(BorderFactory.createEmptyBorder(0,left,0,right));
-            uiElement.add(button);
-            myButtonPanel.add(uiElement);
+            /*
+             * ACHTUNG! DER FOLGENDE CODE SOLLTE SO GESCHRIEBEN WERDEN,
+             * DASS DER ZUSTAND AUCH IM FALLE EINES GESCHEITERTEN GET()
+             * UND EINER EVTL. DARAUS RESULTIERENDEN NULLPOINTEREXCEPTION
+             * NOCH KONSISTENT IST!
+             */
             
-            if (action.equals("DatensatzBearbeiten_abort"))
+            String type = uiElementDesc.get("TYPE").toString();
+            if (type.equals("button"))
             {
-              button.addActionListener(actionListenerDatensatzBearbeiten_abort);
+              String action = uiElementDesc.get("ACTION").toString();
+              String label  = uiElementDesc.get("LABEL").toString();
+              char hotkey = 0;
+              try{
+                hotkey = uiElementDesc.get("HOTKEY").toString().charAt(0);
+              }catch(Exception x){}
+              
+              JButton button = new JButton(label);
+              button.setMnemonic(hotkey);
+              JPanel uiElement = new JPanel(new GridLayout(1,1));
+              int left = BUTTON_BORDER;
+              if (firstButton) {left = 0; firstButton = false;}
+              int right = BUTTON_BORDER;
+              if (!iter.hasNext()) right = 0;
+              uiElement.setBorder(BorderFactory.createEmptyBorder(0,left,0,right));
+              uiElement.add(button);
+              myButtonPanel.add(uiElement);
+              
+              if (action.equals("abort"))
+              {
+                button.addActionListener(actionListenerDatensatzBearbeiten_abort);
+              }
+              if (action.equals("restoreStandard"))
+              {
+                buttonsToGreyOutIfNoChanges.add(button);
+                button.addActionListener(actionListenerDatensatzBearbeiten_restoreStandard);
+              }
+              if (action.equals("save"))
+              {
+                button.addActionListener(actionListenerDatensatzBearbeiten_save);
+              }
+              if (action.equals("saveAndExit"))
+              {
+                button.addActionListener(actionListenerDatensatzBearbeiten_saveAndExit);
+              }
+              if (action.equals("switchWindow"))
+              {
+                final String window = uiElementDesc.get("WINDOW").toString();
+                button.addActionListener( new ActionListener()
+                    { public void actionPerformed(ActionEvent e){ showWindow(window); }
+                    });
+              }
             }
-            if (action.equals("DatensatzBearbeiten_restoreStandard"))
+            else if (type.equals("glue"))
             {
-              button.addActionListener(actionListenerDatensatzBearbeiten_restoreStandard);
+              try{
+                int minsize = Integer.parseInt(uiElementDesc.get("MINSIZE").toString());
+                myButtonPanel.add(Box.createHorizontalStrut(minsize));
+              }catch(Exception x){}
+              myButtonPanel.add(Box.createHorizontalGlue());
             }
-            if (action.equals("DatensatzBearbeiten_switchWindow"))
-            {
-              final String window = uiElementDesc.get("WINDOW").toString();
-              button.addActionListener( new ActionListener()
-                  { public void actionPerformed(ActionEvent e){ showWindow(window); }
-                  });
-            }
-          }
-          else if (type.equals("glue"))
-          {
-            try{
-              int minsize = Integer.parseInt(uiElementDesc.get("MINSIZE").toString());
-              myButtonPanel.add(Box.createHorizontalStrut(minsize));
-            }catch(Exception x){}
-            myButtonPanel.add(Box.createHorizontalGlue());
-          }
-        } catch(NodeNotFoundException x) {Logger.error(x);}
+          } catch(NodeNotFoundException x) {Logger.error(x);}
+        }
       }
       
+      Iterator iter = dataControls.iterator();
+      while (iter.hasNext()) ((DataControl)iter.next()).addColorChangeListener(this);
+      colorChanged();
+
     }
   }
+  
   
   public static void main(String[] args) throws Exception
   {
     String confFile = "testdata/AbsenderdatenBearbeiten.conf";
-    DatasourceJoiner dj = new DatasourceJoiner();
-    DJDataset datensatz = dj.getSelectedDataset();
+    DJDataset datensatz = new TestDJDataset();
     ConfigThingy conf = new ConfigThingy("",new URL(new File(System.getProperty("user.dir")).toURL(),confFile)); 
     DatensatzBearbeiten ab = new DatensatzBearbeiten(conf.get("AbsenderdatenBearbeiten"), datensatz);
     ab.show();
