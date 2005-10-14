@@ -26,6 +26,7 @@
 * 13.10.2005 | BNK | getNodesVisibleAt() -> static
 * 14.10.2005 | BNK | get() und getByChild() auf Werfen von NodeNotFoundException umgestellt.
 * 14.10.2005 | BNK | besserer Exception-Text
+* 14.10.2005 | BNK | +getFirstChild() und getLastChild() 
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -282,6 +283,28 @@ public class ConfigThingy
   public String getName()
   {
     return name;
+  }
+  
+  /**
+   * Liefert den ersten Kind-Knoten.
+   * @throws NodeNotFoundException falls this keine Kinder hat.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public ConfigThingy getFirstChild() throws NodeNotFoundException
+  {
+    if (children.isEmpty()) throw new NodeNotFoundException("Knoten "+getName()+" hat keine Kinder");
+    return (ConfigThingy)children.get(0);
+  }
+  
+  /**
+   * Liefert den letzten Kind-Knoten.
+   * @throws NodeNotFoundException falls this keine Kinder hat.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public ConfigThingy getLastChild() throws NodeNotFoundException
+  {
+    if (children.isEmpty()) throw new NodeNotFoundException("Knoten "+getName()+" hat keine Kinder");
+    return (ConfigThingy)children.get(children.size()-1);
   }
 
   /**
