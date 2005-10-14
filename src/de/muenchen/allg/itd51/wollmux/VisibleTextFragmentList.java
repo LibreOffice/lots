@@ -73,6 +73,8 @@ public class VisibleTextFragmentList {
 			ConfigThingy frag = (ConfigThingy) s.next();
 			fragmentMap.put(frag.get("ID").toString(), frag);
 		}
+		Logger.debug2("VisibleTextFragmentList: " + fragmentMap.size()
+				+ " entries.");
 	}
 
 	private String expandVariable(ConfigThingy node, ConfigThingy root) {
@@ -103,6 +105,10 @@ public class VisibleTextFragmentList {
 		// Die Variable ersetzen:
 		String string = node.toString();
 		Matcher m = Pattern.compile("\\$\\{([^\\}]*)\\}").matcher(string);
+		// TODO: Endlosloop bei der Ersetzung sich selbst enthaltender Variablen
+		// verhindern. Ein Zähler bis 100 als Abbruchbedingung oder so...
+		// Vorsicht auch bei $ im String: replaceFirst wertet $ als
+		// Sonderzeichen für Gruppen regulärer Ausdrücke aus.
 		while (m.find()) {
 			String key = m.group(1);
 			if (variables.containsKey(key)) {
@@ -168,7 +174,7 @@ public class VisibleTextFragmentList {
 				System.out.println("USAGE: <url>");
 				System.exit(0);
 			}
-			Logger.init(Logger.DEBUG);
+			Logger.init(System.out, Logger.DEBUG);
 
 			File cwd = new File(".");
 

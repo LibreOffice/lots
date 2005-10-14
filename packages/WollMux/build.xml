@@ -1,0 +1,47 @@
+<project default="main">
+	<property name="COMPONENT" value="WollMux" />
+	<property name="REG_NAME" value="de.muenchen.allg.itd51.wollmux.comp.WollMux" />
+	<property name="COMPJAR" value="${COMPONENT}.uno.jar" />
+	<property name="PKG_NAME" value="${COMPONENT}.uno.pkg" />
+
+	<target name="main" depends="package" />
+
+	<!-- Das Target install installiert/reinstalliert das erzeugte uno-package -->
+	<target name="install" depends="package">
+		<echo level="info">unopkg remove ${PKG_NAME}:</echo>
+		<exec executable="unopkg" failifexecutionfails="false">
+			<arg line="remove ${PKG_NAME}" />
+		</exec>
+		<echo level="info">unopkg add ${PKG_NAME}:</echo>
+		<exec executable="unopkg" failifexecutionfails="false">
+			<arg line="add ../${PKG_NAME}" />
+		</exec>
+	</target>
+
+	<!-- Das Target package registriert die Komponente und erzeugt ein uno.pkg-file -->
+	<target name="package" depends="jarfile">
+		<zip destfile="../${PKG_NAME}">
+			<fileset dir=".">
+				<include name="${COMPJAR}" />
+				<include name="Jobs.xcu" />
+				<include name="META-INF/manifest.xml" />
+			</fileset>
+		</zip>
+	</target>
+
+	<!-- Das Target jarfile erzeugt die Java-Komponente -->
+	<target name="jarfile">
+		<jar destfile="${COMPJAR}">
+			<fileset dir="../../bin" includes="**/*.class" />
+			<fileset dir="../../../UNOHelper/bin" includes="**/*.class" />
+			<!--fileset dir="${MY_IDL}" includes="**/*.class" /-->
+			<manifest>
+				<attribute name="Bundle-Name" value="${COMPONENT}" />
+				<attribute name="Bundle-Activator" value="${REG_NAME}" />
+				<attribute name="Bundle-SymbolicName" value="${COMPONENT}" />
+				<attribute name="Bundle-Version" value="1.0" />
+				<attribute name="RegistrationClassName" value="${REG_NAME}" />
+			</manifest>
+		</jar>
+	</target>
+</project>
