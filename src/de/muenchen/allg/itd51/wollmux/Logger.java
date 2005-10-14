@@ -9,6 +9,8 @@
  * Datum      | Wer | Änderungsgrund
  * -------------------------------------------------------------------
  * 13.10.2005 | LUT | Erstellung
+ * 14.10.2005 | BNK | Kommentar korrigiert: Standard ist LOG nicht NONE
+ *                  | System.err als Standardausgabestrom
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -24,7 +26,8 @@ import java.io.PrintStream;
  * Der Logger ist ein simpler Logging Mechanismus, der im Programmablauf
  * auftretende Nachrichten verschiedener Prioritäten entgegennimmt und die
  * Nachrichten entsprechend der Einstellung des Logging-Modus auf einem
- * PrintStream ausgibt. Die Logging-Nachrichten werden über unterschiedliche
+ * PrintStream ausgibt (Standardeinstellung: System.err). 
+ * Die Logging-Nachrichten werden über unterschiedliche
  * Methodenaufrufe entsprechend der Logging-Priorität abgesetzt. Folgende
  * Methoden stehen dafür zur Verfügung: critical(), log(), debug(), debug2()
  * </p>
@@ -33,7 +36,7 @@ import java.io.PrintStream;
  * beschreibt, welche Nachrichten aus den Prioritätsstufen angezeigt werden und
  * welche nicht. Jeder Logging Modus zeigt die Nachrichten seiner Priorität und
  * die Nachrichten der höheren Prioritätsstufen an. Standardmässig ist der Modus
- * Logging.NONE voreingestellt.
+ * Logging.LOG voreingestellt.
  * </p>
  */
 public class Logger {
@@ -41,7 +44,7 @@ public class Logger {
 	/**
 	 * Der PrintStream, auf den die Nachrichten geschrieben werden.
 	 */
-	private static PrintStream out;
+	private static PrintStream out = System.err;
 
 	/**
 	 * Im Logging-Modus <code>NONE</code> werden keine Nachrichten ausgegeben.
@@ -85,8 +88,8 @@ public class Logger {
 
 	/**
 	 * Über die Methode init wird der Logger mit einem PrintStream und einem
-	 * Logging-Modus initialisiert. Ohne diese Methode verhält sich der Logger
-	 * stumm und erzeugt keinerlei Meldungen.
+	 * Logging-Modus initialisiert. Ohne diese Methode schreibt der Logger
+     * auf System.err im Modus LOG.
 	 * 
 	 * @param loggingMode
 	 *            Der neue Logging-Modus kann über die statischen Felder
