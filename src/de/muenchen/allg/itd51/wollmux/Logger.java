@@ -20,23 +20,24 @@
 package de.muenchen.allg.itd51.wollmux;
 
 import java.io.PrintStream;
+import java.util.Date;
 
 /**
  * <p>
  * Der Logger ist ein simpler Logging Mechanismus, der im Programmablauf
  * auftretende Nachrichten verschiedener Prioritäten entgegennimmt und die
  * Nachrichten entsprechend der Einstellung des Logging-Modus auf einem
- * PrintStream ausgibt (Standardeinstellung: System.err). 
- * Die Logging-Nachrichten werden über unterschiedliche
- * Methodenaufrufe entsprechend der Logging-Priorität abgesetzt. Folgende
- * Methoden stehen dafür zur Verfügung: critical(), log(), debug(), debug2()
+ * PrintStream ausgibt (Standardeinstellung: System.err). Die
+ * Logging-Nachrichten werden über unterschiedliche Methodenaufrufe entsprechend
+ * der Logging-Priorität abgesetzt. Folgende Methoden stehen dafür zur
+ * Verfügung: critical(), log(), debug(), debug2()
  * </p>
  * <p>
  * Der Logging-Modus kann über die init()-Methode initialisiert werden. Er
  * beschreibt, welche Nachrichten aus den Prioritätsstufen angezeigt werden und
  * welche nicht. Jeder Logging Modus zeigt die Nachrichten seiner Priorität und
  * die Nachrichten der höheren Prioritätsstufen an. Standardmässig ist der Modus
- * Logging.LOG voreingestellt.
+ * Logging.ERROR voreingestellt.
  * </p>
  */
 public class Logger {
@@ -53,11 +54,11 @@ public class Logger {
 	public static final int NONE = 0;
 
 	/**
-	 * Der Logging-Modus <code>CRITICAL</code> zeigt nur Nachrichten der
-	 * höchsten Prioritätsstufe an. CRITICAL enthält nur Nachrichten, die für
-	 * den Programmablauf kritisch sind - z.B. Fehlermeldungen und Exceptions.
+	 * Der Logging-Modus <code>ERROR</code> zeigt Nachrichten der höchsten
+	 * Prioritätsstufe "ERROR" an. ERROR enthält Nachrichten, die den
+	 * Programmablauf beeinflussen - z.B. Fehlermeldungen und Exceptions.
 	 */
-	public static final int CRITICAL = 1;
+	public static final int ERROR = 1;
 
 	/**
 	 * Der Logging-Modus <code>LOG</code> ist der Standard Modus. Er zeigt
@@ -84,12 +85,12 @@ public class Logger {
 	/**
 	 * Das Feld <code>mode</code> enthält den aktuellen Logging-Mode
 	 */
-	private static int mode = LOG;
+	private static int mode = ERROR;
 
 	/**
 	 * Über die Methode init wird der Logger mit einem PrintStream und einem
-	 * Logging-Modus initialisiert. Ohne diese Methode schreibt der Logger
-     * auf System.err im Modus LOG.
+	 * Logging-Modus initialisiert. Ohne diese Methode schreibt der Logger auf
+	 * System.err im Modus LOG.
 	 * 
 	 * @param loggingMode
 	 *            Der neue Logging-Modus kann über die statischen Felder
@@ -102,16 +103,30 @@ public class Logger {
 	}
 
 	/**
+	 * Über die Methode init wird der Logger in dem Logging-Modus loggingMode
+	 * initialisiert. Ohne diese Methode schreibt der Logger auf System.err im
+	 * Modus LOG.
+	 * 
+	 * @param loggingMode
+	 *            Der neue Logging-Modus kann über die statischen Felder
+	 *            Logger.MODUS (z. B. Logger.DEBUG) angegeben werden.
+	 */
+	public static void init(int loggingMode) {
+		mode = loggingMode;
+		Logger.debug2("Logger::init(): LoggingMode = " + mode);
+	}
+
+	/**
 	 * Nachricht der höchsten Priorität "critical" absetzen. Als "critical" sind
 	 * nur Ereignisse einzustufen, die den Programmablauf unvorhergesehen
-	 * verändern.
+	 * verändern oder die weitere Ausführung unmöglich machen.
 	 * 
 	 * @param msg
 	 *            Die Logging-Nachricht
 	 */
-	public static void critical(String msg) {
-		if (mode >= CRITICAL)
-			println("CRITICAL: " + msg);
+	public static void error(String msg) {
+		if (mode >= ERROR)
+			println("ERROR: " + msg);
 	}
 
 	/**
@@ -120,9 +135,9 @@ public class Logger {
 	 * 
 	 * @param e
 	 */
-	public static void critical(Exception e) {
-		if (mode >= CRITICAL)
-			printException("CRITICAL: ", e);
+	public static void error(Exception e) {
+		if (mode >= ERROR)
+			printException("ERROR: ", e);
 	}
 
 	/**
@@ -207,7 +222,7 @@ public class Logger {
 	 */
 	private static void println(String s) {
 		if (out != null) {
-			out.println(s);
+			out.println(new Date() + " " + s);
 		}
 	}
 
@@ -217,11 +232,12 @@ public class Logger {
 	 * @param s
 	 */
 	private static void printException(String prefix, Exception e) {
+		prefix = new Date() + " " + prefix;
 		if (out != null) {
 			out.println(prefix + e.toString());
 			StackTraceElement[] se = e.getStackTrace();
 			for (int i = 0; i < se.length; i++) {
-				out.println(prefix + se.toString());
+				out.println(prefix + se[i].toString());
 			}
 		}
 	}

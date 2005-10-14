@@ -30,10 +30,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
+import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 
 /**
  * Die VisibleTextFragmentList repräsentiert die ausgewertete Liste aller in den
- * Konfigurationsdateien beschriebener "Textfragments" Abschnitte. Sie kümmert
+ * Konfigurationsdateien beschriebener "Textfragmente" Abschnitte. Sie kümmert
  * sich insbesondere um das Auswerten der Variablen in den URL-Attributen und um
  * die Beachtung der Vorrangregelung: Immer das zuletzt definierte Textfragment
  * oder die zuletzt definierte Variable gewinnt.
@@ -60,11 +61,14 @@ public class VisibleTextFragmentList {
 	 * 
 	 * @param root
 	 *            Wurzel des Konfigurationsbaumes der Konfigurationsdatei.
+	 * @throws NodeNotFoundException
 	 */
-	public VisibleTextFragmentList(ConfigThingy root) {
+	public VisibleTextFragmentList(ConfigThingy root)
+			throws NodeNotFoundException {
 		this.root = root;
 		this.fragmentMap = new HashMap();
-		ConfigThingy tfrags = root.query("Textfragments").getByChild("ID");
+		ConfigThingy tfrags;
+		tfrags = root.get("Textfragment").getByChild("ID");
 		Iterator s = tfrags.iterator();
 		while (s.hasNext()) {
 			ConfigThingy frag = (ConfigThingy) s.next();
@@ -79,8 +83,12 @@ public class VisibleTextFragmentList {
 				.iterator();
 		while (i.hasNext()) {
 			ConfigThingy var = (ConfigThingy) i.next();
-			variables.put(var.get("NAME").toString(), var.get("VALUE")
-					.toString());
+			try {
+				variables.put(var.get("NAME").toString(), var.get("VALUE")
+						.toString());
+			} catch (NodeNotFoundException e) {
+				Logger.log(e);
+			}
 		}
 
 		// Debug-Ausgabe:
@@ -117,7 +125,7 @@ public class VisibleTextFragmentList {
 	}
 
 	/**
-	 * Gibt die URL des mit id definierten Textfragments zurück. Falls das
+	 * Gibt die URL des mit id definierten Textfragmente zurück. Falls das
 	 * Textfragment nicht existiert, wird null zurückgeliefert.
 	 * 
 	 * @param id
@@ -125,20 +133,12 @@ public class VisibleTextFragmentList {
 	 * @return die URL des mit id definierten Textfragments. Falls das
 	 *         Textfragment nicht existiert oder die URL ungültig ist, wird null
 	 *         zurückgeliefert.
-	 * @throws MalformedURLException
-	 *             Falls die URL fehlerhaft ist.
+	 * @throws NodeNotFoundException
 	 */
-	public URL getURLByID(String id) {
+	public String getURLByID(String id) throws NodeNotFoundException {
 		if (id != null && fragmentMap.containsKey(id)) {
 			ConfigThingy frag = (ConfigThingy) fragmentMap.get(id);
-			try {
-				// TODO: Die URL kann noch keine relativen Pfade ohne
-				// Protokoll...
-				return new URL(expandVariable(frag.get("URL"), root));
-			} catch (MalformedURLException e) {
-				Logger.log(e);
-				return null;
-			}
+			return expandVariable(frag.get("URL"), root);
 		}
 		return null;
 	}
@@ -177,14 +177,19 @@ public class VisibleTextFragmentList {
 		ConfigThingy conf = new ConfigThingy(args[0], new URL(cwd.toURL(),
 				args[0]));
 
-		VisibleTextFragmentList tfrags = new VisibleTextFragmentList(conf);
+		VisibleTextFragmentList tfrags;
+		try {
+			tfrags = new VisibleTextFragmentList(conf);
 
-		String[] ids = tfrags.getIDs();
-		for (int i = 0; i < ids.length; i++) {
-			Logger.debug("Textfragment: " + ids[i] + " --> "
-					+ tfrags.getURLByID(ids[i]));
+			String[] ids = tfrags.getIDs();
+			for (int i = 0; i < ids.length; i++) {
+				Logger.debug("Textfragment: " + ids[i] + " --> "
+						+ tfrags.getURLByID(ids[i]));
+			}
+
+		} catch (NodeNotFoundException e) {
+			Logger.error(e);
 		}
-
 		System.exit(0);
 	}
 }
