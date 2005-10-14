@@ -15,7 +15,8 @@
 * @version 1.0
 * 
 */
-package de.muenchen.allg.itd51.wollmux;
+package de.muenchen.allg.itd51.wollmux.db;
+
 
 /**
  * TODO Doku
