@@ -68,7 +68,7 @@ public class VisibleTextFragmentList {
 		this.root = root;
 		this.fragmentMap = new HashMap();
 		ConfigThingy tfrags;
-		tfrags = root.get("Textfragment").getByChild("ID");
+		tfrags = root.get("Textfragmente").getByChild("ID");
 		Iterator s = tfrags.iterator();
 		while (s.hasNext()) {
 			ConfigThingy frag = (ConfigThingy) s.next();
@@ -87,7 +87,7 @@ public class VisibleTextFragmentList {
 				variables.put(var.get("NAME").toString(), var.get("VALUE")
 						.toString());
 			} catch (NodeNotFoundException e) {
-				Logger.log(e);
+				Logger.error(e);
 			}
 		}
 
@@ -116,9 +116,8 @@ public class VisibleTextFragmentList {
 				// Eine Exception muss deswegen nicht geworfen werden, es ist
 				// aber
 				// sinnvoll, die Fehlermeldung in einem Logger rauszuschreiben.
-				Logger.log("Warnung: Die Variable \"" + key
-						+ "\" in der URL \"" + string
-						+ "\" ist nicht definiert.");
+				Logger.error("Die Variable \"" + key + "\" in der URL \""
+						+ string + "\" ist nicht definiert.");
 			}
 		}
 		return string;
