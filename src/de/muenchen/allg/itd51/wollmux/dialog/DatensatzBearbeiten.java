@@ -12,6 +12,7 @@
 * 14.10.2005 | BNK | Interaktion mit DJDataset
 * 14.10.2005 | BNK | Kommentiert
 * 17.10.2005 | BNK | Unterstützung für immer ausgegraute Buttons.
+* 17.10.2005 | BNK | Unterstützung für READONLY
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -749,7 +750,8 @@ public class DatensatzBearbeiten
              * NOCH KONSISTENT IST!
              */
             
-            
+            boolean readonly = false;
+            try{ if (uiElementDesc.get("READONLY").toString().equals("true")) readonly = true; }catch(NodeNotFoundException x){}
             String type = uiElementDesc.get("TYPE").toString();
             if (type.equals("textfield"))
             {
@@ -761,6 +763,7 @@ public class DatensatzBearbeiten
               
               JPanel uiElement = new JPanel(new GridLayout(1,1));
               JTextField tf = new JTextField(TEXTFIELD_DEFAULT_WIDTH);
+              tf.setEditable(!readonly);
               
               try
               {
@@ -787,6 +790,8 @@ public class DatensatzBearbeiten
                 int lines = 3;
                 try{ lines = Integer.parseInt(uiElementDesc.get("LINES").toString()); } catch(Exception x){}
                 JTextArea textarea = new JTextArea(lines,TEXTFIELD_DEFAULT_WIDTH);
+                textarea.setEditable(!readonly);
+                
                 try
                 {
                   dataControls.add(new TextComponentDataControl(uiElementDesc.get("DB_SPALTE").toString(), textarea, modColor));
@@ -830,6 +835,7 @@ public class DatensatzBearbeiten
                 
                 JPanel uiElement = new JPanel(new GridLayout(1,1));
                 JComboBox combo = new JComboBox();
+                combo.setEnabled(!readonly);
                 try
                 {
                   ComboBoxDataControl comboCtrl = new ComboBoxDataControl(uiElementDesc.get("DB_SPALTE").toString(), combo, modColor);
