@@ -11,6 +11,7 @@
 * 11.10.2005 | BNK | Erstellung
 * 14.10.2005 | BNK | Interaktion mit DJDataset
 * 14.10.2005 | BNK | Kommentiert
+* 17.10.2005 | BNK | Unterstützung für immer ausgegraute Buttons.
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -874,8 +875,13 @@ public class DatensatzBearbeiten
             String type = uiElementDesc.get("TYPE").toString();
             if (type.equals("button"))
             {
-              String action = uiElementDesc.get("ACTION").toString();
+              String action = "";
+              try{
+                action = uiElementDesc.get("ACTION").toString();
+              }catch(NodeNotFoundException x){}
+              
               String label  = uiElementDesc.get("LABEL").toString();
+              
               char hotkey = 0;
               try{
                 hotkey = uiElementDesc.get("HOTKEY").toString().charAt(0);
@@ -895,27 +901,35 @@ public class DatensatzBearbeiten
               if (action.equals("abort"))
               {
                 button.addActionListener(actionListenerDatensatzBearbeiten_abort);
-              }
+              } else
               if (action.equals("restoreStandard"))
               {
                 buttonsToGreyOutIfNoChanges.add(button);
                 button.addActionListener(actionListenerDatensatzBearbeiten_restoreStandard);
-              }
+              } else
               if (action.equals("save"))
               {
                 button.addActionListener(actionListenerDatensatzBearbeiten_save);
-              }
+              } else
               if (action.equals("saveAndExit"))
               {
                 button.addActionListener(actionListenerDatensatzBearbeiten_saveAndExit);
-              }
+              } else
               if (action.equals("switchWindow"))
               {
                 final String window = uiElementDesc.get("WINDOW").toString();
                 button.addActionListener( new ActionListener()
                     { public void actionPerformed(ActionEvent e){ showWindow(window); }
                     });
+              } else
+              if (action.equals(""))
+              {
+                button.setEnabled(false);
               }
+              else
+                Logger.error("Unbekannte ACTION: "+action);
+              
+              
             }
             else if (type.equals("glue"))
             {
