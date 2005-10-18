@@ -29,7 +29,8 @@ import com.sun.star.beans.PropertyValue;
 import com.sun.star.container.NoSuchElementException;
 import com.sun.star.container.XNameAccess;
 import com.sun.star.lang.WrappedTargetException;
-import com.sun.star.text.XText;
+import com.sun.star.text.ControlCharacter;
+import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextRange;
 import com.sun.star.uno.Exception;
@@ -40,6 +41,12 @@ import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.comp.WollMux;
 import de.muenchen.allg.itd51.wollmux.db.Dataset;
 
+/**
+ * Diese Klasse repräsentiert den Kommando-Interpreter zur Auswertung von
+ * WollMux-Kommandos in einem gegebenen Textdokument.
+ * 
+ * @author Christoph Lutz (D-III-ITD 5.1)
+ */
 public class WMCommandInterpreter
 {
 
@@ -52,6 +59,12 @@ public class WMCommandInterpreter
    * URLs werden relativ zum documentCtx aufgelöst.
    */
   private URL documentCtx;
+
+  /**
+   * Abbruchwert für die Anzahl der Interationsschritte beim Auswerten neu
+   * hinzugekommener Bookmarks.
+   */
+  private static final int MAXCOUNT = 100;
 
   /**
    * Der Konstruktor erzeugt einen neuen Kommandointerpreter, der alle Kommandos
@@ -104,13 +117,15 @@ public class WMCommandInterpreter
         .compile("\\A\\p{Space}*(WM\\p{Space}*\\(.*\\))\\p{Space}*\\d*\\z");
 
     // Solange durch die ständig neu erzeugte Liste aller Bookmarks gehen, bis
-    // alle Bookmarks ausgewertet wurden.
+    // alle Bookmarks ausgewertet wurden oder die Abbruchbedingung zur
+    // Vermeindung von Endlosschleifen erfüllt ist.
     boolean changed = true;
-    while (changed)
+    for (int count = 0; changed && count < MAXCOUNT; ++count)
     {
       changed = false;
       XNameAccess bookmarkAccess = document.xBookmarksSupplier().getBookmarks();
       String[] bookmarks = bookmarkAccess.getElementNames();
+
       // Alle Bookmarks durchlaufen und ggf. die execute-Routine aufrufen.
       for (int i = 0; i < bookmarks.length; i++)
       {
@@ -230,15 +245,19 @@ public class WMCommandInterpreter
     XNameAccess bookmarkAccess = document.xBookmarksSupplier().getBookmarks();
     try
     {
-      // TODO: Verschachtelte Textfragmente gehen nicht, wenn das entsprechende
-      // WM-Kommando am Anfang des Fragments steht.
 
       // TextCursor zum Einfügen erzeugen.
       UnoService bookmark = new UnoService(bookmarkAccess
           .getByName(bookmarkName));
-      XText xText = document.xTextDocument().getText();
-      UnoService cursor = new UnoService(xText.createTextCursorByRange(bookmark
-          .xTextContent().getAnchor()));
+      UnoService text = new UnoService(document.xTextDocument().getText());
+      UnoService cursor = new UnoService(text.xText().createTextCursorByRange(
+          bookmark.xTextContent().getAnchor()));
+
+      // Sonderzeichen zu Beginn einfügen
+      text.xText().insertControlCharacter(
+          cursor.xTextRange().getStart(),
+          ControlCharacter.SOFT_HYPHEN,
+          false);
 
       // URL aus Fragmentliste erzeugen.
       String urlStr = WollMux.getTextFragmentList().getURLByID(frag_id);
@@ -259,8 +278,20 @@ public class WMCommandInterpreter
           urlStr,
           new PropertyValue[] {});
 
+      // Sonderzeichen am Ende einfügen:
+      text.xText().insertControlCharacter(
+          cursor.xTextRange().getEnd(),
+          ControlCharacter.SOFT_HYPHEN,
+          false);
+
+      // Neuen Cursor entsprechend erweitern.
+      XTextCursor newCursor = text.xText().createTextCursor();
+      newCursor.gotoRange(cursor.xTextRange().getStart(), false);
+      newCursor.goLeft((short) 1, false);
+      newCursor.gotoRange(cursor.xTextRange().getEnd(), true);
+
       // Bookmark an neuen Range anpassen
-      reRangeBookmark(bookmarkName, cursor.xTextRange());
+      reRangeBookmark(bookmarkName, newCursor);
 
     }
     catch (java.lang.Exception e)
