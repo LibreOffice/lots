@@ -13,6 +13,7 @@
 * 14.10.2005 | BNK | Kommentiert
 * 17.10.2005 | BNK | Unterstützung für immer ausgegraute Buttons.
 * 17.10.2005 | BNK | Unterstützung für READONLY
+* 18.10.2005 | BNK | Zusätzliche Exceptions loggen
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -195,7 +196,7 @@ public class DatensatzBearbeiten
         }
       });
     }
-    catch(Exception x) {/*Hope for the best*/}
+    catch(Exception x) {Logger.error(x);}
     
     
   }
