@@ -35,6 +35,7 @@ import com.sun.star.uno.XComponentContext;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.VisibleTextFragmentList;
+import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
 
 /**
  * Diese Klasse stellt den zentralen UNO-Service WollMux dar. Der Service dient
@@ -43,273 +44,309 @@ import de.muenchen.allg.itd51.wollmux.VisibleTextFragmentList;
  * Zugriff auf alle Programmmodule über entsprechende get-Methoden gewährleistet
  * wird.
  */
-public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob {
+public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob
+{
 
-	/**
-	 * Die Instanz des Singleton.
-	 */
-	private static WollMux myInstance;
+  /**
+   * Die Instanz des Singleton.
+   */
+  private static WollMux myInstance;
 
-	/**
-	 * Enthält einen PrintStream in den die Log-Nachrichten geschrieben werden.
-	 */
-	private static PrintStream wollmuxLog;
+  /**
+   * Enthält einen PrintStream in den die Log-Nachrichten geschrieben werden.
+   */
+  private static PrintStream wollmuxLog;
 
-	/**
-	 * Enthält das File der Konfigurationsdatei wollmux.conf
-	 */
-	private static File wollmuxConfFile;
+  /**
+   * Enthält das File der Konfigurationsdatei wollmux.conf
+   */
+  private static File wollmuxConfFile;
 
-	/**
-	 * Enthält den geparsten Konfigruationsbaum der wollmux.conf
-	 */
-	private static ConfigThingy wollmuxConf;
+  /**
+   * Enthält den geparsten Konfigruationsbaum der wollmux.conf
+   */
+  private static ConfigThingy wollmuxConf;
 
-	/**
-	 * Enthält die geparste Textfragmentliste, die in der wollmux.conf definiert
-	 * wurde.
-	 */
-	private static VisibleTextFragmentList textFragmentList;
+  /**
+   * Enthält die geparste Textfragmentliste, die in der wollmux.conf definiert
+   * wurde.
+   */
+  private static VisibleTextFragmentList textFragmentList;
 
-	/**
-	 * Der XComponentContext in dem der WollMux läuft.
-	 */
-	private static XComponentContext xComponentContext;
+  /**
+   * Enthält den zentralen DataSourceJoiner.
+   */
+  private static DatasourceJoiner datasourceJoiner;
 
-	/**
-	 * Dieses Feld entält eine Liste aller Services, die dieser UNO-Service
-	 * implementiert.
-	 */
-	public static final java.lang.String[] SERVICENAMES = { "com.sun.star.task.AsyncJob" };
+  /**
+   * Der XComponentContext in dem der WollMux läuft.
+   */
+  private static XComponentContext xComponentContext;
 
-	/**
-	 * Dieses Feld enthält den vollständigen Namen der Serviceimplementierung.
-	 * Dieser ist üblicherweise WollMux.class.getName(), in den Beispieldateien
-	 * aus dem DevGuide wird der Name jedoch immer ausgeschrieben. Ich vermute
-	 * dass das schon seinen Grund hat...
-	 */
-	public static final java.lang.String IMPLEMENTATIONNAME = "de.muenchen.allg.itd51.wollmux.comp.WollMux";
+  /**
+   * Dieses Feld entält eine Liste aller Services, die dieser UNO-Service
+   * implementiert.
+   */
+  public static final java.lang.String[] SERVICENAMES = { "com.sun.star.task.AsyncJob" };
 
-	/**
-	 * Diesen Konstruktor bitte nur zur Erzeugung der ersten Singleton-Instanz
-	 * benutzen. Er kann leider nicht private gemacht werden, da er für die
-	 * Erzeugung des Jobs notwendig ist. Die Singleton-Instanz wird mit der
-	 * Methode getInstance zurückgeliefert. Der Konstruktor erzeugt ein neues
-	 * WollMux-Objekt im XComponentContext context.
-	 * 
-	 * @param context
-	 */
-	public WollMux(XComponentContext context) {
-		xComponentContext = context;
+  /**
+   * Dieses Feld enthält den vollständigen Namen der Serviceimplementierung.
+   * Dieser ist üblicherweise WollMux.class.getName(), in den Beispieldateien
+   * aus dem DevGuide wird der Name jedoch immer ausgeschrieben. Ich vermute
+   * dass das schon seinen Grund hat...
+   */
+  public static final java.lang.String IMPLEMENTATIONNAME = "de.muenchen.allg.itd51.wollmux.comp.WollMux";
 
-		// Das hier sollte die einzige Stelle sein, an der Pfade hart
-		// verdrahtet sind...
-		String userHome = System.getProperty("user.home");
-		File wollmuxDir = new File(userHome, ".wollmux");
-		if (!wollmuxDir.exists())
-			wollmuxDir.mkdirs();
-		File wollmuxLogFile = new File(wollmuxDir, "wollmux.log");
-		wollmuxConfFile = new File(wollmuxDir, "wollmux.conf");
-		try {
-			wollmuxLog = new PrintStream(new FileOutputStream(wollmuxLogFile));
-		} catch (FileNotFoundException e) {
-			// Da kann ich nicht viel machen, wenn noch nicht mal das
-			// Logfile funktioniert...
-		}
-		myInstance = this;
-	}
+  /**
+   * Diesen Konstruktor bitte nur zur Erzeugung der ersten Singleton-Instanz
+   * benutzen. Er kann leider nicht private gemacht werden, da er für die
+   * Erzeugung des Jobs notwendig ist. Die Singleton-Instanz wird mit der
+   * Methode getInstance zurückgeliefert. Der Konstruktor erzeugt ein neues
+   * WollMux-Objekt im XComponentContext context.
+   * 
+   * @param context
+   */
+  public WollMux(XComponentContext context)
+  {
+    xComponentContext = context;
 
-	/**
-	 * Über dies Methode können die wichtigsten Startwerte des WollMux manuell
-	 * gesetzt werden. Dies ist vor allem zum Testen der Anwendung im
-	 * Remote-Betrieb notwendig.
-	 * 
-	 * @param logStream
-	 *            Den Ausgabestream, in den die Logging Nachrichten geschrieben
-	 *            werden sollen.
-	 * @param wollmuxConf
-	 *            die Wollmux-Konfigruationsdatei.
-	 */
-	public static void initialize(PrintStream logStream, File wollmuxConf) {
-		WollMux.wollmuxLog = logStream;
-		WollMux.wollmuxConfFile = wollmuxConf;
-	}
+    // Das hier sollte die einzige Stelle sein, an der Pfade hart
+    // verdrahtet sind...
+    String userHome = System.getProperty("user.home");
+    File wollmuxDir = new File(userHome, ".wollmux");
+    if (!wollmuxDir.exists()) wollmuxDir.mkdirs();
+    File wollmuxLogFile = new File(wollmuxDir, "wollmux.log");
+    wollmuxConfFile = new File(wollmuxDir, "wollmux.conf");
+    try
+    {
+      wollmuxLog = new PrintStream(new FileOutputStream(wollmuxLogFile));
+    }
+    catch (FileNotFoundException e)
+    {
+      // Da kann ich nicht viel machen, wenn noch nicht mal das
+      // Logfile funktioniert...
+    }
+    myInstance = this;
+  }
 
-	/**
-	 * Diese Methode übernimmt den eigentlichen Bootstrap des WollMux.
-	 */
-	public void startupWollMux() {
-		try {
+  /**
+   * Über dies Methode können die wichtigsten Startwerte des WollMux manuell
+   * gesetzt werden. Dies ist vor allem zum Testen der Anwendung im
+   * Remote-Betrieb notwendig.
+   * 
+   * @param logStream
+   *          Den Ausgabestream, in den die Logging Nachrichten geschrieben
+   *          werden sollen.
+   * @param wollmuxConf
+   *          die Wollmux-Konfigruationsdatei.
+   */
+  public static void initialize(PrintStream logStream, File wollmuxConf)
+  {
+    WollMux.wollmuxLog = logStream;
+    WollMux.wollmuxConfFile = wollmuxConf;
+  }
 
-			// Logger initialisieren und erste Meldung ausgeben:
-			if (wollmuxLog != null)
-				Logger.init(wollmuxLog, Logger.ALL);
-			Logger.log("StartupWollMux");
-			Logger.debug("wollmuxConfFile = " + wollmuxConfFile.toString());
+  /**
+   * Diese Methode übernimmt den eigentlichen Bootstrap des WollMux.
+   */
+  public void startupWollMux()
+  {
+    try
+    {
 
-			// Parsen der Konfigurationsdatei
-			ConfigThingy conf = new ConfigThingy("wollmux.conf",
-					wollmuxConfFile.toURL());
+      // Logger initialisieren und erste Meldung ausgeben:
+      if (wollmuxLog != null) Logger.init(wollmuxLog, Logger.ALL);
+      Logger.log("StartupWollMux");
+      Logger.debug("wollmuxConfFile = " + wollmuxConfFile.toString());
 
-			// VisibleTextFragmentList erzeugen
-			textFragmentList = new VisibleTextFragmentList(conf);
-		} catch (Exception e) {
-			Logger.error(e);
-		}
+      // Parsen der Konfigurationsdatei
+      ConfigThingy conf = new ConfigThingy("wollmux.conf", wollmuxConfFile
+          .toURL());
 
-	}
+      // VisibleTextFragmentList erzeugen
+      textFragmentList = new VisibleTextFragmentList(conf);
 
-	/**
-	 * @return Returns the textFragmentList.
-	 */
-	public static VisibleTextFragmentList getTextFragmentList() {
-		return textFragmentList;
-	}
+      // DatasourceJoiner erzeugen
+      datasourceJoiner = new DatasourceJoiner();
 
-	/**
-	 * @return Returns the wollmuxConf.
-	 */
-	public static ConfigThingy getWollmuxConf() {
-		return wollmuxConf;
-	}
+    }
+    catch (Exception e)
+    {
+      Logger.error(e);
+    }
 
-	/**
-	 * @return Returns the xComponentContext.
-	 */
-	public static XComponentContext getXComponentContext() {
-		return xComponentContext;
-	}
+  }
 
-	/*
-	 * TODO: Diese Methode müsste vielleicht gar nicht unbedingt was tun. Man
-	 * kann das startupWollMux ja auch in die Konstruktoren auslagern...
-	 * vielleicht mache ich das noch einmal.
-	 * 
-	 * (non-Javadoc)
-	 * 
-	 * @see com.sun.star.task.XAsyncJob#executeAsync(com.sun.star.beans.NamedValue[],
-	 *      com.sun.star.task.XJobListener)
-	 */
-	public synchronized void executeAsync(
-			com.sun.star.beans.NamedValue[] lArgs,
-			com.sun.star.task.XJobListener xListener)
-			throws com.sun.star.lang.IllegalArgumentException {
-		if (xListener == null)
-			throw new com.sun.star.lang.IllegalArgumentException(
-					"invalid listener");
+  /**
+   * @return Returns the textFragmentList.
+   */
+  public static VisibleTextFragmentList getTextFragmentList()
+  {
+    return textFragmentList;
+  }
 
-		com.sun.star.beans.NamedValue[] lEnvironment = null;
+  /**
+   * @return Returns the wollmuxConf.
+   */
+  public static ConfigThingy getWollmuxConf()
+  {
+    return wollmuxConf;
+  }
 
-		// Hole das Environment-Argument
-		for (int i = 0; i < lArgs.length; ++i) {
-			if (lArgs[i].Name.equals("Environment")) {
-				lEnvironment = (com.sun.star.beans.NamedValue[]) com.sun.star.uno.AnyConverter
-						.toArray(lArgs[i].Value);
-			}
-		}
-		if (lEnvironment == null)
-			throw new com.sun.star.lang.IllegalArgumentException(
-					"no environment");
+  /**
+   * @return Returns the xComponentContext.
+   */
+  public static XComponentContext getXComponentContext()
+  {
+    return xComponentContext;
+  }
 
-		// Hole Event-Informationen
-		String sEnvType = null;
-		String sEventName = null;
-		for (int i = 0; i < lEnvironment.length; ++i) {
-			if (lEnvironment[i].Name.equals("EnvType"))
-				sEnvType = com.sun.star.uno.AnyConverter
-						.toString(lEnvironment[i].Value);
-			else if (lEnvironment[i].Name.equals("EventName"))
-				sEventName = com.sun.star.uno.AnyConverter
-						.toString(lEnvironment[i].Value);
-		}
+  /*
+   * TODO: Diese Methode müsste vielleicht gar nicht unbedingt was tun. Man kann
+   * das startupWollMux ja auch in die Konstruktoren auslagern... vielleicht
+   * mache ich das noch einmal.
+   * 
+   * (non-Javadoc)
+   * 
+   * @see com.sun.star.task.XAsyncJob#executeAsync(com.sun.star.beans.NamedValue[],
+   *      com.sun.star.task.XJobListener)
+   */
+  public synchronized void executeAsync(com.sun.star.beans.NamedValue[] lArgs,
+      com.sun.star.task.XJobListener xListener)
+      throws com.sun.star.lang.IllegalArgumentException
+  {
+    if (xListener == null)
+      throw new com.sun.star.lang.IllegalArgumentException("invalid listener");
 
-		// Prüfe die property "EnvType":
-		if ((sEnvType == null)
-				|| ((!sEnvType.equals("EXECUTOR")) && (!sEnvType
-						.equals("DISPATCH")))) {
-			java.lang.String sMessage = "\"" + sEnvType
-					+ "\" isn't a valid value for EnvType";
-			throw new com.sun.star.lang.IllegalArgumentException(sMessage);
-		}
+    com.sun.star.beans.NamedValue[] lEnvironment = null;
 
-		/***********************************************************************
-		 * Starte den WollMux!
-		 */
-		if (sEventName.equals("onFirstVisibleTask"))
-			startupWollMux();
-		/** *************************************************** */
+    // Hole das Environment-Argument
+    for (int i = 0; i < lArgs.length; ++i)
+    {
+      if (lArgs[i].Name.equals("Environment"))
+      {
+        lEnvironment = (com.sun.star.beans.NamedValue[]) com.sun.star.uno.AnyConverter
+            .toArray(lArgs[i].Value);
+      }
+    }
+    if (lEnvironment == null)
+      throw new com.sun.star.lang.IllegalArgumentException("no environment");
 
-		xListener.jobFinished(this, new NamedValue[] {});
-	}
+    // Hole Event-Informationen
+    String sEnvType = null;
+    String sEventName = null;
+    for (int i = 0; i < lEnvironment.length; ++i)
+    {
+      if (lEnvironment[i].Name.equals("EnvType"))
+        sEnvType = com.sun.star.uno.AnyConverter
+            .toString(lEnvironment[i].Value);
+      else if (lEnvironment[i].Name.equals("EventName"))
+        sEventName = com.sun.star.uno.AnyConverter
+            .toString(lEnvironment[i].Value);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.sun.star.lang.XServiceInfo#getSupportedServiceNames()
-	 */
-	public String[] getSupportedServiceNames() {
-		return SERVICENAMES;
-	}
+    // Prüfe die property "EnvType":
+    if ((sEnvType == null)
+        || ((!sEnvType.equals("EXECUTOR")) && (!sEnvType.equals("DISPATCH"))))
+    {
+      java.lang.String sMessage = "\""
+                                  + sEnvType
+                                  + "\" isn't a valid value for EnvType";
+      throw new com.sun.star.lang.IllegalArgumentException(sMessage);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.sun.star.lang.XServiceInfo#supportsService(java.lang.String)
-	 */
-	public boolean supportsService(String sService) {
-		int len = SERVICENAMES.length;
-		for (int i = 0; i < len; i++) {
-			if (sService.equals(SERVICENAMES[i]))
-				return true;
-		}
-		return false;
-	}
+    /***************************************************************************
+     * Starte den WollMux!
+     */
+    if (sEventName.equals("onFirstVisibleTask")) startupWollMux();
+    /** *************************************************** */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.sun.star.lang.XServiceInfo#getImplementationName()
-	 */
-	public String getImplementationName() {
-		return (WollMux.class.getName());
-	}
+    xListener.jobFinished(this, new NamedValue[] {});
+  }
 
-	/**
-	 * Diese Methode liefert eine Factory zurück, die in der Lage ist den
-	 * UNO-Service zu erzeugen. Die Methode wird von UNO intern benötigt. Die
-	 * Methoden __getComponentFactory und __writeRegistryServiceInfo stellen das
-	 * Herzstück des UNO-Service dar.
-	 * 
-	 * @param sImplName
-	 * @return
-	 */
-	public synchronized static XSingleComponentFactory __getComponentFactory(
-			java.lang.String sImplName) {
-		com.sun.star.lang.XSingleComponentFactory xFactory = null;
-		if (sImplName.equals(WollMux.IMPLEMENTATIONNAME))
-			xFactory = Factory.createComponentFactory(WollMux.class,
-					SERVICENAMES);
-		return xFactory;
-	}
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.sun.star.lang.XServiceInfo#getSupportedServiceNames()
+   */
+  public String[] getSupportedServiceNames()
+  {
+    return SERVICENAMES;
+  }
 
-	/**
-	 * Diese Methode registriert den UNO-Service. Sie wird z.B. beim unopkg-add
-	 * im Hintergrund aufgerufen. Die Methoden __getComponentFactory und
-	 * __writeRegistryServiceInfo stellen das Herzstück des UNO-Service dar.
-	 * 
-	 * @param xRegKey
-	 * @return
-	 */
-	public synchronized static boolean __writeRegistryServiceInfo(
-			XRegistryKey xRegKey) {
-		return Factory.writeRegistryServiceInfo(WollMux.IMPLEMENTATIONNAME,
-				WollMux.SERVICENAMES, xRegKey);
-	}
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.sun.star.lang.XServiceInfo#supportsService(java.lang.String)
+   */
+  public boolean supportsService(String sService)
+  {
+    int len = SERVICENAMES.length;
+    for (int i = 0; i < len; i++)
+    {
+      if (sService.equals(SERVICENAMES[i])) return true;
+    }
+    return false;
+  }
 
-	/**
-	 * @return Returns the myInstance.
-	 */
-	public static WollMux getInstance() {
-		return myInstance;
-	}
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.sun.star.lang.XServiceInfo#getImplementationName()
+   */
+  public String getImplementationName()
+  {
+    return (WollMux.class.getName());
+  }
+
+  /**
+   * Diese Methode liefert eine Factory zurück, die in der Lage ist den
+   * UNO-Service zu erzeugen. Die Methode wird von UNO intern benötigt. Die
+   * Methoden __getComponentFactory und __writeRegistryServiceInfo stellen das
+   * Herzstück des UNO-Service dar.
+   * 
+   * @param sImplName
+   * @return
+   */
+  public synchronized static XSingleComponentFactory __getComponentFactory(
+      java.lang.String sImplName)
+  {
+    com.sun.star.lang.XSingleComponentFactory xFactory = null;
+    if (sImplName.equals(WollMux.IMPLEMENTATIONNAME))
+      xFactory = Factory.createComponentFactory(WollMux.class, SERVICENAMES);
+    return xFactory;
+  }
+
+  /**
+   * Diese Methode registriert den UNO-Service. Sie wird z.B. beim unopkg-add im
+   * Hintergrund aufgerufen. Die Methoden __getComponentFactory und
+   * __writeRegistryServiceInfo stellen das Herzstück des UNO-Service dar.
+   * 
+   * @param xRegKey
+   * @return
+   */
+  public synchronized static boolean __writeRegistryServiceInfo(
+      XRegistryKey xRegKey)
+  {
+    return Factory.writeRegistryServiceInfo(
+        WollMux.IMPLEMENTATIONNAME,
+        WollMux.SERVICENAMES,
+        xRegKey);
+  }
+
+  /**
+   * @return Returns the myInstance.
+   */
+  public static WollMux getInstance()
+  {
+    return myInstance;
+  }
+
+  /**
+   * @return Returns the datasourceJoiner.
+   */
+  public static DatasourceJoiner getDatasourceJoiner()
+  {
+    return datasourceJoiner;
+  }
 }

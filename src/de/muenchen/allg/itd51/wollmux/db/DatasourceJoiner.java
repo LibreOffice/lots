@@ -66,7 +66,7 @@ public class DatasourceJoiner
    */
   public DJDataset getSelectedDataset() throws DatasetNotFoundException
   {
-    throw new DatasetNotFoundException();
+    return new TestDJDataset();
   }
   
 //TODO LOS = Local Override Storage  

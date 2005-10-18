@@ -41,159 +41,206 @@ import de.muenchen.allg.itd51.parser.NodeNotFoundException;
  * @author Christoph Lutz (D-III-ITD 5.1)
  * 
  */
-public class VisibleTextFragmentList {
+public class VisibleTextFragmentList
+{
 
-	/**
-	 * Speichert die Wurzel des Konfigurationsbaumes, um später Variablen
-	 * auflösen zu können.
-	 */
-	private ConfigThingy root;
+  /**
+   * Speichert die Wurzel des Konfigurationsbaumes, um später Variablen auflösen
+   * zu können.
+   */
+  private ConfigThingy root;
 
-	/**
-	 * Die fragmentMap (of ConfigThingy) enthält alle sichtbaren Textfragmente.
-	 */
-	private Map fragmentMap;
+  /**
+   * Die fragmentMap (of ConfigThingy) enthält alle sichtbaren Textfragmente.
+   */
+  private Map fragmentMap;
 
-	/**
-	 * Der Konstruktor erzeugt eine neue VisibleTextFragmentList aus einer
-	 * gegebenen Konfiguration.
-	 * 
-	 * @param root
-	 *            Wurzel des Konfigurationsbaumes der Konfigurationsdatei.
-	 * @throws NodeNotFoundException
-	 */
-	public VisibleTextFragmentList(ConfigThingy root)
-			throws NodeNotFoundException {
-		this.root = root;
-		this.fragmentMap = new HashMap();
-		ConfigThingy tfrags;
-		tfrags = root.get("Textfragmente").getByChild("ID");
-		Iterator s = tfrags.iterator();
-		while (s.hasNext()) {
-			ConfigThingy frag = (ConfigThingy) s.next();
-			fragmentMap.put(frag.get("ID").toString(), frag);
-		}
-		Logger.debug2("VisibleTextFragmentList: " + fragmentMap.size()
-				+ " entries.");
-	}
+  /**
+   * Abbruchwert zur Vermeidung von Endlosloops bei Variablenersetzungen.
+   */
+  private static final int MAXCOUNT = 100;
 
-	private String expandVariable(ConfigThingy node, ConfigThingy root) {
-		// Map der sichtbaren Variablen erzeugen:
-		Map variables = new HashMap();
-		Iterator i = ConfigThingy.getNodesVisibleAt(node, "VAR", root)
-				.iterator();
-		while (i.hasNext()) {
-			ConfigThingy var = (ConfigThingy) i.next();
-			try {
-				variables.put(var.get("NAME").toString(), var.get("VALUE")
-						.toString());
-			} catch (NodeNotFoundException e) {
-				Logger.error(e);
-			}
-		}
+  /**
+   * Der Konstruktor erzeugt eine neue VisibleTextFragmentList aus einer
+   * gegebenen Konfiguration.
+   * 
+   * @param root
+   *          Wurzel des Konfigurationsbaumes der Konfigurationsdatei.
+   * @throws NodeNotFoundException
+   */
+  public VisibleTextFragmentList(ConfigThingy root)
+      throws NodeNotFoundException
+  {
+    this.root = root;
+    this.fragmentMap = new HashMap();
+    ConfigThingy tfrags;
+    tfrags = root.get("Textfragmente").getByChild("FRAG_ID");
+    Iterator s = tfrags.iterator();
+    while (s.hasNext())
+    {
+      ConfigThingy frag = (ConfigThingy) s.next();
+      fragmentMap.put(frag.get("FRAG_ID").toString(), frag);
+    }
+    Logger.debug2("VisibleTextFragmentList: "
+                  + fragmentMap.size()
+                  + " entries.");
+  }
 
-		// Debug-Ausgabe:
-		Logger.debug2("Variablenset an Knoten " + node.getName() + " \""
-				+ node.toString() + "\":");
-		Iterator keys = variables.keySet().iterator();
-		while (keys.hasNext()) {
-			String key = (String) keys.next();
-			String value = (String) variables.get(key);
-			Logger.debug2("  " + key + "=\"" + value + "\"");
-		}
+  private String expandVariable(ConfigThingy node, ConfigThingy root)
+  {
+    // Map der sichtbaren Variablen erzeugen:
+    Map variables = new HashMap();
+    Iterator i = ConfigThingy.getNodesVisibleAt(node, "VAR", root).iterator();
+    while (i.hasNext())
+    {
+      ConfigThingy var = (ConfigThingy) i.next();
+      try
+      {
+        variables.put(var.get("NAME").toString(), var.get("VALUE").toString());
+      }
+      catch (NodeNotFoundException e)
+      {
+        Logger.error(e);
+      }
+    }
 
-		// Die Variable ersetzen:
-		String string = node.toString();
-		Matcher m = Pattern.compile("\\$\\{([^\\}]*)\\}").matcher(string);
-		// TODO: Endlosloop bei der Ersetzung sich selbst enthaltender Variablen
-		// verhindern. Ein Zähler bis 100 als Abbruchbedingung oder so...
-		// Vorsicht auch bei $ im String: replaceFirst wertet $ als
-		// Sonderzeichen für Gruppen regulärer Ausdrücke aus.
-		while (m.find()) {
-			String key = m.group(1);
-			if (variables.containsKey(key)) {
-				string = m.replaceFirst((String) variables.get(key));
-				Logger.debug2("  Ersetzen der Variable " + m.group(0) + " --> "
-						+ string);
-			} else {
-				// Die Variable kann nicht ersetzt werden und wird auch nicht
-				// ersetzt.
-				// Eine Exception muss deswegen nicht geworfen werden, es ist
-				// aber
-				// sinnvoll, die Fehlermeldung in einem Logger rauszuschreiben.
-				Logger.error("Die Variable \"" + key + "\" in der URL \""
-						+ string + "\" ist nicht definiert.");
-			}
-		}
-		return string;
-	}
+    // Debug-Ausgabe:
+    Logger.debug2("Variablenset an Knoten "
+                  + node.getName()
+                  + " \""
+                  + node.toString()
+                  + "\":");
+    Iterator keys = variables.keySet().iterator();
+    while (keys.hasNext())
+    {
+      String key = (String) keys.next();
+      String value = (String) variables.get(key);
+      Logger.debug2("  " + key + "=\"" + value + "\"");
+    }
 
-	/**
-	 * Gibt die URL des mit id definierten Textfragmente zurück. Falls das
-	 * Textfragment nicht existiert, wird null zurückgeliefert.
-	 * 
-	 * @param id
-	 *            Die ID des gesuchten Textfragments.
-	 * @return die URL des mit id definierten Textfragments. Falls das
-	 *         Textfragment nicht existiert oder die URL ungültig ist, wird null
-	 *         zurückgeliefert.
-	 * @throws NodeNotFoundException
-	 */
-	public String getURLByID(String id) throws NodeNotFoundException {
-		if (id != null && fragmentMap.containsKey(id)) {
-			ConfigThingy frag = (ConfigThingy) fragmentMap.get(id);
-			return expandVariable(frag.get("URL"), root);
-		}
-		return null;
-	}
+    // Matcher zum Finden der Variablen ersetzen:
+    String string = node.toString();
+    Pattern var = Pattern.compile("\\$\\{([^\\}]*)\\}");
+    Matcher m = var.matcher(string);
 
-	/**
-	 * Diese Methode erzeugt ein String-Array der IDs aller erkannten
-	 * Textfragmente.
-	 * 
-	 * @return Ein String-Array der IDs aller erkannten Textfragmente.
-	 */
-	public String[] getIDs() {
-		Set keys = fragmentMap.keySet();
-		return (String[]) keys.toArray(new String[keys.size()]);
-	}
+    // Variablen so lange ersetzen, bis keine Variable mehr gefunden wird.
+    // Vermeidung von möglichen Endlosloops durch Abbruch nach MAXCOUNT
+    // Ersetzungen.
+    for (int count = 0; m.find() && count < MAXCOUNT; ++count)
+    {
+      String key = m.group(1);
+      if (variables.containsKey(key))
+      {
+        string = string.substring(0, m.start())
+                 + (String) variables.get(key)
+                 + string.substring(m.end());
+        // string = m.replaceFirst((String) variables.get(key));
+        Logger.debug2("  Ersetzen der Variable "
+                      + m.group(0)
+                      + " --> "
+                      + string);
+        // Nach jeder Ersetzung wieder von vorne anfangen.
+        m = var.matcher(string);
+      }
+      else
+      {
+        // Die Variable kann nicht ersetzt werden und wird auch nicht
+        // ersetzt.
+        // Eine Exception muss deswegen nicht geworfen werden, es ist
+        // aber
+        // sinnvoll, die Fehlermeldung in einem Logger rauszuschreiben.
+        Logger.error("Die Variable \""
+                     + key
+                     + "\" in der URL \""
+                     + string
+                     + "\" ist nicht definiert.");
+      }
+    }
+    return string;
+  }
 
-	/**
-	 * Testet die Funktionsweise der VisibleTextFragmentList. Eine in url
-	 * angegebene Konfigdatei wird eingelesen und die dazugehörige
-	 * VisibleTextFragmentList erstellt. Anschliessend wird die ausgegeben.
-	 * 
-	 * @param args
-	 *            url, dabei ist url die URL einer zu lesenden Config-Datei. Das
-	 *            Programm gibt die Liste der Textfragmente aus.
-	 * @author Christoph Lutz (D-III-ITD 5.1)
-	 */
-	public static void main(String[] args) throws IOException {
-		try {
-			if (args.length < 1) {
-				System.out.println("USAGE: <url>");
-				System.exit(0);
-			}
-			Logger.init(System.out, Logger.DEBUG);
+  /**
+   * Gibt die URL des mit id definierten Textfragmente zurück. Falls das
+   * Textfragment nicht existiert, wird null zurückgeliefert.
+   * 
+   * @param id
+   *          Die ID des gesuchten Textfragments.
+   * @return die URL des mit id definierten Textfragments. Falls das
+   *         Textfragment nicht existiert oder die URL ungültig ist, wird null
+   *         zurückgeliefert.
+   * @throws NodeNotFoundException
+   *           Das Attribut URL des Textfragments ist nicht definiert.
+   * @throws TextFragmentNotDefinedException
+   *           Das gesuchte Textfragment ist nicht definiert.
+   */
+  public String getURLByID(String id) throws NodeNotFoundException,
+      TextFragmentNotDefinedException
+  {
+    if (id != null && fragmentMap.containsKey(id))
+    {
+      ConfigThingy frag = (ConfigThingy) fragmentMap.get(id);
+      return expandVariable(frag.get("URL"), root);
+    }
+    else
+      throw new TextFragmentNotDefinedException(id);
+  }
 
-			File cwd = new File(".");
+  /**
+   * Diese Methode erzeugt ein String-Array der IDs aller erkannten
+   * Textfragmente.
+   * 
+   * @return Ein String-Array der IDs aller erkannten Textfragmente.
+   */
+  public String[] getIDs()
+  {
+    Set keys = fragmentMap.keySet();
+    return (String[]) keys.toArray(new String[keys.size()]);
+  }
 
-			args[0] = args[0].replaceAll("\\\\", "/");
-			ConfigThingy conf = new ConfigThingy(args[0], new URL(cwd.toURL(),
-					args[0]));
+  /**
+   * Testet die Funktionsweise der VisibleTextFragmentList. Eine in url
+   * angegebene Konfigdatei wird eingelesen und die dazugehörige
+   * VisibleTextFragmentList erstellt. Anschliessend wird die ausgegeben.
+   * 
+   * @param args
+   *          url, dabei ist url die URL einer zu lesenden Config-Datei. Das
+   *          Programm gibt die Liste der Textfragmente aus.
+   * @author Christoph Lutz (D-III-ITD 5.1)
+   */
+  public static void main(String[] args) throws IOException
+  {
+    try
+    {
+      if (args.length < 1)
+      {
+        System.out.println("USAGE: <url>");
+        System.exit(0);
+      }
+      Logger.init(Logger.DEBUG);
 
-			VisibleTextFragmentList tfrags;
-			tfrags = new VisibleTextFragmentList(conf);
+      File cwd = new File(".");
 
-			String[] ids = tfrags.getIDs();
-			for (int i = 0; i < ids.length; i++) {
-				Logger.debug("Textfragment: " + ids[i] + " --> "
-						+ tfrags.getURLByID(ids[i]));
-			}
+      args[0] = args[0].replaceAll("\\\\", "/");
+      ConfigThingy conf = new ConfigThingy(args[0], new URL(cwd.toURL(),
+          args[0]));
 
-		} catch (Exception e) {
-			Logger.error(e);
-		}
-		System.exit(0);
-	}
+      VisibleTextFragmentList tfrags;
+      tfrags = new VisibleTextFragmentList(conf);
+
+      String[] ids = tfrags.getIDs();
+      for (int i = 0; i < ids.length; i++)
+      {
+        Logger.debug("Textfragment: "
+                     + ids[i]
+                     + " --> "
+                     + tfrags.getURLByID(ids[i]));
+      }
+
+    }
+    catch (Exception e)
+    {
+      Logger.error(e);
+    }
+    System.exit(0);
+  }
 }
