@@ -29,8 +29,6 @@ import com.sun.star.beans.PropertyValue;
 import com.sun.star.container.NoSuchElementException;
 import com.sun.star.container.XNameAccess;
 import com.sun.star.lang.WrappedTargetException;
-import com.sun.star.text.ControlCharacter;
-import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextRange;
 import com.sun.star.uno.Exception;
@@ -65,6 +63,12 @@ public class WMCommandInterpreter
    * hinzugekommener Bookmarks.
    */
   private static final int MAXCOUNT = 100;
+
+  /**
+   * Verstecktes Trennzeichen, das zum Beginn und zum Ende eines Textfragments
+   * eingefügt wird um verschachtelte WollMux-Kommandos zu ermöglichen.
+   */
+  private static final String FRAGMENT_MARK = " X ";
 
   /**
    * Der Konstruktor erzeugt einen neuen Kommandointerpreter, der alle Kommandos
@@ -246,18 +250,25 @@ public class WMCommandInterpreter
     try
     {
 
-      // TextCursor zum Einfügen erzeugen.
+      // TextCursor erzeugen, der den gesamten Ersetzungsbereich des Bookmarks
+      // umschließt und mit dem Inhalt der beiden FRAGMENT_MARKs vorbelegen.
       UnoService bookmark = new UnoService(bookmarkAccess
           .getByName(bookmarkName));
       UnoService text = new UnoService(document.xTextDocument().getText());
-      UnoService cursor = new UnoService(text.xText().createTextCursorByRange(
-          bookmark.xTextContent().getAnchor()));
+      UnoService bookmarkCursor = new UnoService(text.xText()
+          .createTextCursorByRange(bookmark.xTextContent().getAnchor()));
+      bookmarkCursor.xTextCursor().setString(FRAGMENT_MARK + FRAGMENT_MARK);
 
-      // Sonderzeichen zu Beginn einfügen
-      text.xText().insertControlCharacter(
-          cursor.xTextRange().getStart(),
-          ControlCharacter.SOFT_HYPHEN,
-          false);
+      // InsertCurser erzeugen, in den das Textfragment eingefügt wird.
+      UnoService insCursor = new UnoService(text.xText()
+          .createTextCursorByRange(bookmarkCursor.xTextCursor()));
+      // TODO: prüfen, in welcher Reihenfolge der Bookmark definiert ist...
+      insCursor.xTextCursor().goRight((short) FRAGMENT_MARK.length(), false);
+      insCursor.xTextCursor().collapseToStart();
+
+      Logger.debug2("Textcursor ursprünglich: #"
+                    + bookmarkCursor.xTextRange().getString()
+                    + "#");
 
       // URL aus Fragmentliste erzeugen.
       String urlStr = WollMux.getTextFragmentList().getURLByID(frag_id);
@@ -274,24 +285,38 @@ public class WMCommandInterpreter
                    + "\" ein.");
 
       // Textfragment einfügen
-      cursor.xDocumentInsertable().insertDocumentFromURL(
+      insCursor.xDocumentInsertable().insertDocumentFromURL(
           urlStr,
           new PropertyValue[] {});
+      // wird benötigt, damit das erste Element nicht unsichtbar ist...
+      insCursor.xTextCursor().collapseToEnd();
+      Logger.debug2("nach Einfügen: #"
+          + bookmarkCursor.xTextRange().getString()
+          + "#");
 
-      // Sonderzeichen am Ende einfügen:
-      text.xText().insertControlCharacter(
-          cursor.xTextRange().getEnd(),
-          ControlCharacter.SOFT_HYPHEN,
+      // FRAGMENT_MARKen verstecken:
+      UnoService hiddenCursor = new UnoService(text.xText().createTextCursor());
+      // start-Marke
+      hiddenCursor.xTextCursor().gotoRange(
+          bookmarkCursor.xTextRange().getStart(),
           false);
-
-      // Neuen Cursor entsprechend erweitern.
-      XTextCursor newCursor = text.xText().createTextCursor();
-      newCursor.gotoRange(cursor.xTextRange().getStart(), false);
-      newCursor.goLeft((short) 1, false);
-      newCursor.gotoRange(cursor.xTextRange().getEnd(), true);
+      hiddenCursor.xTextCursor().goRight((short) FRAGMENT_MARK.length(), true);
+      hiddenCursor.setPropertyValue("CharHidden", Boolean.TRUE);
+      Logger.debug2("HiddenCursor start: #"
+                    + hiddenCursor.xTextRange().getString()
+                    + "#");
+      // end-Marke
+      hiddenCursor.xTextCursor().gotoRange(
+          bookmarkCursor.xTextRange().getEnd(),
+          false);
+      hiddenCursor.xTextCursor().goLeft((short) FRAGMENT_MARK.length(), true);
+      hiddenCursor.setPropertyValue("CharHidden", Boolean.TRUE);
+      Logger.debug2("HiddenCursor end: #"
+          + hiddenCursor.xTextRange().getString()
+          + "#");
 
       // Bookmark an neuen Range anpassen
-      reRangeBookmark(bookmarkName, newCursor);
+      reRangeBookmark(bookmarkName, bookmarkCursor.xTextRange());
 
     }
     catch (java.lang.Exception e)
