@@ -33,6 +33,7 @@ import com.sun.star.task.XAsyncJob;
 import com.sun.star.uno.XComponentContext;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.EventDispatcher;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.VisibleTextFragmentList;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
@@ -155,7 +156,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob
     {
 
       // Logger initialisieren und erste Meldung ausgeben:
-      if (wollmuxLog != null) Logger.init(wollmuxLog, Logger.ALL);
+      if (wollmuxLog != null) Logger.init(wollmuxLog, Logger.ERROR);
       Logger.log("StartupWollMux");
       Logger.debug("wollmuxConfFile = " + wollmuxConfFile.toString());
 
@@ -169,6 +170,9 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob
       // DatasourceJoiner erzeugen
       datasourceJoiner = new DatasourceJoiner();
 
+      // register global EventListener
+      EventDispatcher.registerGlobalEventListener();
+      
     }
     catch (Exception e)
     {

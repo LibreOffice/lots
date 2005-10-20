@@ -113,6 +113,10 @@ public class WMCommandInterpreter
    */
   public void interpret()
   {
+    // Die Sichtbare Darstellung in OOo abschalten:
+    document.xModel().lockControllers();
+    
+    // Bereits abgearbeitete Bookmarks merken.
     HashMap evaluatedBookmarks = new HashMap();
 
     // Folgendes Pattern prüft ob es sich bei dem Bookmark um ein gültiges
@@ -153,6 +157,9 @@ public class WMCommandInterpreter
         }
       }
     }
+    
+    // Lock-Controllers wieder aufheben:
+    document.xModel().unlockControllers();
   }
 
   /**
@@ -268,10 +275,6 @@ public class WMCommandInterpreter
       bookmarkCursor.xTextCursor().setString(FRAGMENT_MARK + FRAGMENT_MARK);
       bookmarkCursor.setPropertyValue("CharHidden", Boolean.FALSE);
 
-      Logger.debug2("Textcursor ursprünglich: #"
-                    + bookmarkCursor.xTextRange().getString()
-                    + "#");
-
       // InsertCurser erzeugen, in den das Textfragment eingefügt wird.
       UnoService insCursor = new UnoService(text.xText()
           .createTextCursorByRange(bookmarkCursor.xTextCursor()));
@@ -299,10 +302,6 @@ public class WMCommandInterpreter
           new PropertyValue[] {});
       // wird benötigt, damit das erste Element nicht unsichtbar ist...
       insCursor.xTextCursor().collapseToEnd();
-
-      Logger.debug2("nach Einfügen: #"
-                    + bookmarkCursor.xTextRange().getString()
-                    + "#");
 
       // FRAGMENT_MARKen verstecken:
       UnoService hiddenCursor = new UnoService(text.xText().createTextCursor());
@@ -479,6 +478,6 @@ public class WMCommandInterpreter
     {
       Logger.error(e);
     }
-    System.exit(0);
+    //System.exit(0);
   }
 }
