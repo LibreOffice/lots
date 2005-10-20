@@ -10,6 +10,7 @@
 * -------------------------------------------------------------------
 * 14.10.2005 | BNK | Erstellung
 * 20.10.2005 | BNK | Stark erweitert 
+* 20.10.2005 | BNK | Unterstützung für Fallback
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -28,6 +29,7 @@ public class TestDJDataset implements DJDataset
   private Map myBS = new HashMap();
   private Set schema = null;
   private boolean isFromLOS = true;
+  private Map fallback = null;
   
   /** Erzeugt einen TestDJDataset, der jedes Schema unterstützt und bei
    * als aus dem LOS kommend betrachtet wird.
@@ -44,20 +46,31 @@ public class TestDJDataset implements DJDataset
    *        Spalten mit Namen, die nicht in schema sind Exceptions.
    * @param isFromLOS legt fest, ob der Datensatz als aus dem LOS kommend
    *        betrachtet werden soll (also insbesondere ob er {@link #set(String, String)}
-   *        unterstützen soll). 
+   *        unterstützen soll).
+   * @param fallback falls fallback nicht null ist, so wird 
+   *        falls der Wert für eine Spalte nicht gesetzt ist (nicht
+   *        zu verwechseln mit gesetzt auf den leeren String!), so wird versucht,
+   *        anhand dieser Map der Spaltenname auf einen anderen Spaltennamen
+   *        umzusetzen, dessen Wert dann geliefert wird. 
    */
-  public TestDJDataset(Map backingStore, Set schema, boolean isFromLOS)
+  public TestDJDataset(Map backingStore, Set schema, boolean isFromLOS, Map fallback)
   {
     myBS = backingStore;
     this.schema = schema;
     this.isFromLOS = isFromLOS;
+    this.fallback = fallback;
   }
   
   public String get(String spaltenName) throws ColumnNotFoundException
   {
-    if (myLOS.containsKey(spaltenName)) return (String)myLOS.get(spaltenName);
-    if (myBS.containsKey(spaltenName)) return (String)myBS.get(spaltenName);
-    if (schema != null && !schema.contains(spaltenName)) throw new ColumnNotFoundException("Spalte "+spaltenName+" existiert nicht!"); 
+    if (schema != null && !schema.contains(spaltenName)) throw new ColumnNotFoundException("Spalte "+spaltenName+" existiert nicht!");
+    String res;
+    res = (String)myLOS.get(spaltenName);
+    if (res != null) return res; 
+    res = (String)myBS.get(spaltenName);
+    if (res != null) return res;
+    if (fallback != null && fallback.containsKey(spaltenName)) 
+      return get((String)fallback.get(spaltenName)); 
     return spaltenName;
   }
 

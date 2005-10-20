@@ -10,6 +10,7 @@
 * -------------------------------------------------------------------
 * 19.10.2005 | BNK | Erstellung
 * 20.10.2005 | BNK | Fertig
+* 20.10.2005 | BNK | Fallback Rolle -> OrgaKurz
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -35,15 +36,17 @@ public class TestDatasourceJoiner extends DatasourceJoiner
 {
   private final static String[][] myBSData = new String[][]
 {{"Vorname",   "Nachname",      "OrgaKurz",       "Rolle", "Mail"},
- {"Matthias",  "Benkmux",       "D-WOLL-MUX-5.1", "",      "matthias.benkmux@muenchen.de"},
- {"Christoph", "Mux",           "D-WOLL-MUX-5.1", "",      "christoph.mux@muenchen.de"},
- {"Matthias",  "Benkmann",      "D-III-ITD-5.1",  "",      "matthias.benkmann@muenchen.de"},
- {"Christoph", "Lutz",          "D-III-ITD-5.1",  "",      "christoph.lutz@muenchen.de"},
- {"Gertraud",  "Loesewitz",     "D-L",            "",      "gertraud.loesewitz@muenchen.de"},
- {"Kristina",  "Lorenz",        "D-L",            "",      "kristina.lorenz@muenchen.de"},
- {"Peter",     "Hofmann",       "D-III-LIMUX",    "",      "peter.hofmann@muenchen.de"},
- {"Manfred",   "Lubig-Konzett", "D-III-LIMUX",    "",      "manfred.lubig-konzett@muenchen.de"},
- {"Wilhelm",   "Hoegner",       "D-HAIII",        "",      "wilhelm.hoegner@muenchen.de"}
+ {"Matthias",  "Benkmux",       "D-WOLL-MUX-5.1", null,      "matthias.benkmux@muenchen.de"},
+ {"Christoph", "Mux",           "D-WOLL-MUX-5.1", null,      "christoph.mux@muenchen.de"},
+ {"Matthias",  "Benkmann",      "D-III-ITD-5.1",  null,      "matthias.benkmann@muenchen.de"},
+ {"Christoph", "Lutz",          "D-III-ITD-5.1",  null,      "christoph.lutz@muenchen.de"},
+ {"Gertraud",  "Loesewitz",     "D-L",            null,      "gertraud.loesewitz@muenchen.de"},
+ {"Kristina",  "Lorenz",        "D-L",            null,      "kristina.lorenz@muenchen.de"},
+ {"Peter",     "Hofmann",       "D-III-LIMUX",    null,      "peter.hofmann@muenchen.de"},
+ {"Manfred",   "Lubig-Konzett", "D-III-LIMUX",    null,      "manfred.lubig-konzett@muenchen.de"},
+ {"Wilhelm",   "Hoegner",       "D-HAIII",        null,      "wilhelm.hoegner@muenchen.de"},
+ {"Gerhard",   "Werner",        "D-WOLL-MUX-5.2", null,      "gerhard.werner@woanders.de"},
+ {"Werner",    "Gerhard",       "D-WOLL-MUX-5.2", null,      "werner.gerhard@woanders.de"}
  }; 
   
   private List myBS = new Vector();
@@ -58,6 +61,9 @@ public class TestDatasourceJoiner extends DatasourceJoiner
   
   public TestDatasourceJoiner(Set schema)
   {
+    Map fallback = new HashMap();
+    fallback.put("Rolle","OrgaKurz");
+    
     String[] spalten = myBSData[0];
     
     if (schema != null)
@@ -77,7 +83,7 @@ public class TestDatasourceJoiner extends DatasourceJoiner
       {
         dsBS.put(spalten[j], ds[j]);
       }
-      myBS.add(new TestDJDataset(dsBS, mySchema, false));
+      myBS.add(new TestDJDataset(dsBS, mySchema, false, fallback));
     }
   }
   
@@ -193,13 +199,13 @@ public class TestDatasourceJoiner extends DatasourceJoiner
     public ColumnIdentityChecker(String columnName, String compareValue)
     {
       this.columnName = columnName;
-      this.compare = compareValue;
+      this.compare = compareValue.toLowerCase();
     }
     
     public boolean matches(Dataset ds)
     {
       try{
-        return ds.get(columnName).equals(compare);
+        return ds.get(columnName).equalsIgnoreCase(compare);
       } catch (ColumnNotFoundException e) { return false; }
     }
   }
@@ -212,13 +218,13 @@ public class TestDatasourceJoiner extends DatasourceJoiner
     public ColumnPrefixChecker(String columnName, String compareValue)
     {
       this.columnName = columnName;
-      this.compare = compareValue;
+      this.compare = compareValue.toLowerCase();
     }
     
     public boolean matches(Dataset ds)
     {
       try{
-        return ds.get(columnName).startsWith(compare);
+        return ds.get(columnName).toLowerCase().startsWith(compare);
       }catch (ColumnNotFoundException e){ return false; }
     }
   }
@@ -231,13 +237,13 @@ public class TestDatasourceJoiner extends DatasourceJoiner
     public ColumnSuffixChecker(String columnName, String compareValue)
     {
       this.columnName = columnName;
-      this.compare = compareValue;
+      this.compare = compareValue.toLowerCase();
     }
     
     public boolean matches(Dataset ds)
     {
       try{
-        return ds.get(columnName).endsWith(compare);
+        return ds.get(columnName).toLowerCase().endsWith(compare);
       }catch (ColumnNotFoundException e){ return false; }
     }
   }
@@ -250,13 +256,13 @@ public class TestDatasourceJoiner extends DatasourceJoiner
     public ColumnContainsChecker(String columnName, String compareValue)
     {
       this.columnName = columnName;
-      this.compare = compareValue;
+      this.compare = compareValue.toLowerCase();
     }
     
     public boolean matches(Dataset ds)
     {
       try{
-        return ds.get(columnName).indexOf(compare) >= 0;
+        return ds.get(columnName).toLowerCase().indexOf(compare) >= 0;
       }catch (ColumnNotFoundException e){ return false; }
     }
   }

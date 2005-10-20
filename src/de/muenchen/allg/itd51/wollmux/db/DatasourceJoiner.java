@@ -37,7 +37,7 @@ public class DatasourceJoiner
   //O           "ITD5.1"  nicht unterstützt weil Minus vor 5.1 fehlt
   //X           "ITD-5.1"
   //O           "D"   liefert Personen mit Nachname-Anfangsbuchstabe D
-  //X           "D-"
+  //X           "D-*"
   //O           "ITD5"    nicht unterstützt weil Minus vor 5 fehlt
   //X           "D-HAIII"
   //X           "5.1"
