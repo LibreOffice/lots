@@ -36,4 +36,10 @@ public interface QueryResults
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public Iterator iterator();
+  
+  /**
+   * Liefert true, falls es keine Ergebnisse gibt.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public boolean isEmpty();
 }

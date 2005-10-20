@@ -18,6 +18,8 @@
 */
 package de.muenchen.allg.itd51.wollmux.db;
 
+import java.util.Iterator;
+
 
 /**
  * TODO Doku
@@ -25,26 +27,51 @@ package de.muenchen.allg.itd51.wollmux.db;
  */
 public class DatasourceJoiner
 {
-  //Suche nach "Vorname Name"
-  //           "Vorn Nam"
-  //           "Nam"
-  //           "Nam Vorn"
-  //           "Nam, Vorn"
-  //           "vorname.nachname"
-  //           "vorname.nachname@muenchen.de"
-  //           "ITD5.1"
-  //           "ITD 5.1"
-  //           "ITD-5.1"
-  //           "D-III-ITD-5.1"
-  //           "D-HAIII-ITD-5.1"
-  //           "D-HAIII-ITD5.1"
-  //           "D-HAIII-ITD 5.1"
-  //           "D"
-  //           "ITD5"
-  //           "D-HAIII"
-  //           "5.1"
   
-  //suchString kann vorne und/oder hinten ein % haben zur prefix/suffix/teilstring-suche
+  private LocalOverrideStorage myLOS;
+  
+  //Suche nach 
+  //X           "vorname.nachname"
+  //X           "vorname.nachname@muenchen.de"
+  //X           "Nam"
+  //O           "ITD5.1"  nicht unterstützt weil Minus vor 5.1 fehlt
+  //X           "ITD-5.1"
+  //O           "D"   liefert Personen mit Nachname-Anfangsbuchstabe D
+  //X           "D-"
+  //O           "ITD5"    nicht unterstützt weil Minus vor 5 fehlt
+  //X           "D-HAIII"
+  //X           "5.1"
+  //X           "D-III-ITD-5.1"
+  //O           "D-HAIII-ITD-5.1"   nicht unterstützt, da HA nicht im lhmOUShortname
+  //O           "D-HAIII-ITD5.1"    nicht unterstützt (siehe oben)
+
+  //X           "Nam Vorn"
+  //X           "Nam, Vorn"
+  //X           "Vorname Name"
+  //X           "Vorn Nam"
+  //X           "ITD 5.1"
+  //O           "D-HAIII-ITD 5.1"   steht nicht mit HA im LDAP
+  //X           "V. Nachname"
+  //X           "Vorname N."
+
+  
+  /*
+   * Als allgemeines Konstrukt um die Rolle<->OrgaKurz Beziehung zu
+   * beschreiben die Möglichkeit einbauen, in der Join-Datei für das Schema
+   * der virtuellen Datenbank Fallbacks einzuführen. 
+   * Beispiel: Rolle -> OrgaKurz
+   * Falls von einem Datensatz die Spalte "Rolle" angefragt wird, diese
+   * jedoch null ist, so wird der Wert der Spalte "OrgaKurz" zurückgeliefert.
+   * Dies wird in Dataset oder QueryResults implementiert, indem diese bei
+   * Instanziierung die Fallback-Listen bekommen.
+   */
+  
+  
+  //suchString kann vorne und/oder hinten ein oder mehrere * haben zur 
+  // prefix/suffix/teilstring-suche (mehrere aufeinanderfolgende * sind
+  //äquivalent zu einem *), * in der Mitte des suchStrings sind nicht erlaubt.
+  //die Suche erfolgt grundsätzlich case-insensitive
+  //gesucht wird nur in der virtuellen Datenbank, nicht im LOS.
   public QueryResults find(String spaltenName, String suchString)
   {
     return null;
@@ -55,13 +82,9 @@ public class DatasourceJoiner
     return null;
   }
   
-  public QueryResults find(String spaltenName1, String suchString1,String spaltenName2, String suchString2,String spaltenName3, String suchString3)
-  {
-    return null;
-  }
-  
   /**
-   * Liefert den momentan in der Datensatzliste ausgewählten Datensatz.
+   * Liefert den momentan im Lokalen Override Speicher ausgewählten Datensatz.
+   * @throws DatasetNotFoundException falls der LOS leer ist.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public DJDataset getSelectedDataset() throws DatasetNotFoundException
@@ -69,7 +92,33 @@ public class DatasourceJoiner
     return new TestDJDataset();
   }
   
-//TODO LOS = Local Override Storage  
+  /**
+   * Liefert alle Datensätze (als {@link de.muenchen.allg.itd51.wollmux.db.DJDataset}) des Lokalen Override Speichers.
+   */
+  public QueryResults getLOS()
+  {
+    return myLOS;
+  }
   
+  private static class LocalOverrideStorage implements QueryResults
+  {
+
+    public int size()
+    {
+      // TODO Auto-generated method stub
+      return 0;
+    }
+
+    public Iterator iterator()
+    {
+      // TODO Auto-generated method stub
+      return null;
+    }
+
+    public boolean isEmpty()
+    {
+      return size() == 0;
+    }
+  }
   
 }
