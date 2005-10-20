@@ -33,7 +33,7 @@ import com.sun.star.task.XAsyncJob;
 import com.sun.star.uno.XComponentContext;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.EventDispatcher;
+import de.muenchen.allg.itd51.wollmux.EventListener;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.VisibleTextFragmentList;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
@@ -171,7 +171,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob
       datasourceJoiner = new DatasourceJoiner();
 
       // register global EventListener
-      EventDispatcher.registerGlobalEventListener();
+      EventListener.registerGlobalEventListener();
       
     }
     catch (Exception e)
