@@ -249,6 +249,14 @@ public class WMCommandInterpreter
     XNameAccess bookmarkAccess = document.xBookmarksSupplier().getBookmarks();
     try
     {
+      // Ablauf:
+      // "x" ist die explizit sichtbare FRAGMENT_MARK, die später auf
+      // Hidden ("h") gesetzt wird.
+      // 1) bookmarkCursor = "xx"
+      // 2) insertCursor exakt in die Mitte der xx setzen.
+      // 3) Inhalt aus Fragmentdatei einfügen in insCursor
+      // 4) "x" auf "h" setzen
+      // Ergebnis: bookmarCursor = "h<inhalt>h"
 
       // TextCursor erzeugen, der den gesamten Ersetzungsbereich des Bookmarks
       // umschließt und mit dem Inhalt der beiden FRAGMENT_MARKs vorbelegen.
@@ -258,17 +266,17 @@ public class WMCommandInterpreter
       UnoService bookmarkCursor = new UnoService(text.xText()
           .createTextCursorByRange(bookmark.xTextContent().getAnchor()));
       bookmarkCursor.xTextCursor().setString(FRAGMENT_MARK + FRAGMENT_MARK);
-
-      // InsertCurser erzeugen, in den das Textfragment eingefügt wird.
-      UnoService insCursor = new UnoService(text.xText()
-          .createTextCursorByRange(bookmarkCursor.xTextCursor()));
-      // TODO: prüfen, in welcher Reihenfolge der Bookmark definiert ist...
-      insCursor.xTextCursor().goRight((short) FRAGMENT_MARK.length(), false);
-      insCursor.xTextCursor().collapseToStart();
+      bookmarkCursor.setPropertyValue("CharHidden", Boolean.FALSE);
 
       Logger.debug2("Textcursor ursprünglich: #"
                     + bookmarkCursor.xTextRange().getString()
                     + "#");
+
+      // InsertCurser erzeugen, in den das Textfragment eingefügt wird.
+      UnoService insCursor = new UnoService(text.xText()
+          .createTextCursorByRange(bookmarkCursor.xTextCursor()));
+      insCursor.xTextCursor().goRight((short) FRAGMENT_MARK.length(), false);
+      insCursor.xTextCursor().collapseToStart();
 
       // URL aus Fragmentliste erzeugen.
       String urlStr = WollMux.getTextFragmentList().getURLByID(frag_id);
@@ -278,6 +286,7 @@ public class WMCommandInterpreter
         urlStr = new URL(documentCtx, urlStr).toExternalForm();
       }
       urlStr = unoURL(urlStr);
+
       Logger.debug("Füge Textfragment \""
                    + frag_id
                    + "\" von URL \""
@@ -290,9 +299,10 @@ public class WMCommandInterpreter
           new PropertyValue[] {});
       // wird benötigt, damit das erste Element nicht unsichtbar ist...
       insCursor.xTextCursor().collapseToEnd();
+
       Logger.debug2("nach Einfügen: #"
-          + bookmarkCursor.xTextRange().getString()
-          + "#");
+                    + bookmarkCursor.xTextRange().getString()
+                    + "#");
 
       // FRAGMENT_MARKen verstecken:
       UnoService hiddenCursor = new UnoService(text.xText().createTextCursor());
@@ -302,18 +312,12 @@ public class WMCommandInterpreter
           false);
       hiddenCursor.xTextCursor().goRight((short) FRAGMENT_MARK.length(), true);
       hiddenCursor.setPropertyValue("CharHidden", Boolean.TRUE);
-      Logger.debug2("HiddenCursor start: #"
-                    + hiddenCursor.xTextRange().getString()
-                    + "#");
       // end-Marke
       hiddenCursor.xTextCursor().gotoRange(
           bookmarkCursor.xTextRange().getEnd(),
           false);
       hiddenCursor.xTextCursor().goLeft((short) FRAGMENT_MARK.length(), true);
       hiddenCursor.setPropertyValue("CharHidden", Boolean.TRUE);
-      Logger.debug2("HiddenCursor end: #"
-          + hiddenCursor.xTextRange().getString()
-          + "#");
 
       // Bookmark an neuen Range anpassen
       reRangeBookmark(bookmarkName, bookmarkCursor.xTextRange());
