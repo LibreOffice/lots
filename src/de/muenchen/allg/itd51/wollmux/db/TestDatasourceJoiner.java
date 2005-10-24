@@ -30,7 +30,6 @@ import java.util.Vector;
 
 
 /**
- * TODO Doku
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class TestDatasourceJoiner extends DatasourceJoiner
