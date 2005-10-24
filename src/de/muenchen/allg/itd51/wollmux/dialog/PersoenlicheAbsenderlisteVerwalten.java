@@ -12,10 +12,12 @@
 * 18.10.2005 | BNK | PAL Verwalten GUI großteils implementiert (aber funktionslos)
 * 19.10.2005 | BNK | Suche implementiert
 * 20.10.2005 | BNK | Suche getestet
+* 24.10.2005 | BNK | Restliche ACTIONS implementiert
+*                  | Doppelklickbehandlung
+*                  | Sortierung
+*                  | Gegenseitiger Ausschluss der Selektierung
 * -------------------------------------------------------------------
 *
-* TODO Buttons ausgrauen, wenn kein Listenelement markiert
-* 
 * @author Matthias Benkmann (D-III-ITD 5.1)
 * @version 1.0
 * 
@@ -27,13 +29,19 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
@@ -325,12 +333,8 @@ public class PersoenlicheAbsenderlisteVerwalten
             String action = "";
             try{ action = uiElementDesc.get("ACTION").toString(); }catch(NodeNotFoundException e){}
             
-            if (action.equals("search"))
-            {
-              tf.addActionListener(actionListener_search);
-            }
-            else
-              Logger.error("Ununterstützte ACTION: "+action);
+            ActionListener actionL = getAction(action);
+            if (actionL != null) tf.addActionListener(actionL);
           }
           else
           if (type.equals("label"))
@@ -375,6 +379,12 @@ public class PersoenlicheAbsenderlisteVerwalten
             
             list.addListSelectionListener(myListSelectionListener);
             
+            String action = "";
+            try{ action = uiElementDesc.get("ACTION").toString(); }catch(NodeNotFoundException e){}
+            
+            ActionListener actionL = getAction(action);
+            if (actionL != null) list.addMouseListener(new MyActionMouseListener(list, actionL));
+            
             JScrollPane scrollPane = new JScrollPane(list);
             scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
             scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
@@ -404,43 +414,18 @@ public class PersoenlicheAbsenderlisteVerwalten
             gbcButton.gridx = x;
             gbcButton.gridy = y;
             compo.add(button, gbcButton);
-              
-            if (action.equals("abort"))
+            
+            ActionListener actionL = getAction(action);
+            if (actionL != null) button.addActionListener(actionL);
+            
+            if (action.equals("editEntry"))
             {
-              button.addActionListener(actionListener_abort);
-            }
-            else if (action.equals("search"))
-            {
-              button.addActionListener(actionListener_search);
-            }
-            else if (action.equals("addToPAL"))
-            {
-              button.addActionListener(actionListener_addToPAL);
-            }
-            else if (action.equals("removeFromPAL"))
-            {
-              button.addActionListener(actionListener_removeFromPAL);
-            }
-            else if (action.equals("editEntry"))
-            {
-              button.addActionListener(actionListener_editEntry);
               buttonsToGreyOutIfNothingSelected.add(button);
             }
             else if (action.equals("copyEntry"))
             {
-              button.addActionListener(actionListener_copyEntry);
               buttonsToGreyOutIfNothingSelected.add(button);
             }
-            else if (action.equals("newPALEntry"))
-            {
-              button.addActionListener(actionListener_newPALEntry);
-            }
-            else if (action.equals(""))
-            {
-              button.setEnabled(false);
-            }
-            else
-              Logger.error("Ununterstützte ACTION: "+action);
           }
           else
           {
@@ -450,17 +435,91 @@ public class PersoenlicheAbsenderlisteVerwalten
       }
     }
   }
+
+  private class MyActionMouseListener extends MouseAdapter
+  {
+    private JList list;
+    private ActionListener action;
+    
+    public MyActionMouseListener(JList list, ActionListener action)
+    {
+      this.list = list;
+      this.action = action;
+    }
+    
+    public void mouseClicked(MouseEvent e) 
+    {
+      if (e.getClickCount() == 2) 
+      {
+        Point location = e.getPoint();
+        int index = list.locationToIndex(location);
+        if (index < 0) return;
+        Rectangle bounds = list.getCellBounds(index, index);
+        if (!bounds.contains(location)) return;
+        action.actionPerformed(null);
+      }
+    }
+  }
+
+  
+  private ActionListener getAction(String action)
+  {
+    if (action.equals("abort"))
+    {
+      return actionListener_abort;
+    }
+    else if (action.equals("search"))
+    {
+      return actionListener_search;
+    }
+    else if (action.equals("addToPAL"))
+    {
+      return actionListener_addToPAL;
+    }
+    else if (action.equals("removeFromPAL"))
+    {
+      return actionListener_removeFromPAL;
+    }
+    else if (action.equals("editEntry"))
+    {
+      return actionListener_editEntry;
+    }
+    else if (action.equals("copyEntry"))
+    {
+      return actionListener_copyEntry;
+    }
+    else if (action.equals("newPALEntry"))
+    {
+      return actionListener_newPALEntry;
+    }
+    else if (action.equals(""))
+    {
+      return null;
+    }
+    else
+      Logger.error("Ununterstützte ACTION: "+action);
+    
+    return null;
+  }
   
   private void setListElements(JList list, QueryResults data)
   {
+    Object[] elements = new Object[data.size()];
+    Iterator iter = data.iterator();
+    int i = 0;
+    while (iter.hasNext()) elements[i++] = new ListElement((DJDataset)iter.next());
+    Arrays.sort(elements, new Comparator()
+    {
+      public int compare(Object o1, Object o2)
+      {
+        return o1.toString().compareTo(o2.toString());
+      }
+    });
+   
     DefaultListModel listModel = (DefaultListModel)list.getModel();
     listModel.clear();
-    Iterator iter = data.iterator();
-    while (iter.hasNext())
-    {
-      DJDataset ds = (DJDataset)iter.next();
-      listModel.addElement(new ListElement(ds));
-    }
+    for (i = 0; i < elements.length; ++i)
+      listModel.addElement(elements[i]);
   }
   
   
