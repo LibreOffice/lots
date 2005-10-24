@@ -14,6 +14,7 @@
 * 17.10.2005 | BNK | Unterstützung für immer ausgegraute Buttons.
 * 17.10.2005 | BNK | Unterstützung für READONLY
 * 18.10.2005 | BNK | Zusätzliche Exceptions loggen
+* 24.10.2005 | BNK | dialogEndListener wird am Ende aufgerufen
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -161,6 +162,8 @@ public class DatensatzBearbeiten
          */
   private ActionListener actionListenerDatensatzBearbeiten_saveAndExit = new ActionListener()
         { public void actionPerformed(ActionEvent e){ saveAndExit(); } };
+  
+  private ActionListener dialogEndListener = null;
     
   
   /**
@@ -168,13 +171,18 @@ public class DatensatzBearbeiten
    * @param conf das ConfigThingy, das den Dialog beschreibt (der Vater des
    *        "Fenster"-Knotens.
    * @param datensatz der Datensatz, der mit dem Dialog bearbeitet werden soll.
+   * @param dialogEndListener falls nicht null, wird 
+   *        die {@link ActionListener#actionPerformed(java.awt.event.ActionEvent)}
+   *        Methode wird aufgerufen (im Event Dispatching Thread), 
+   *        nachdem der Dialog geschlossen wurde.
    * @throws ConfigurationErrorException im Falle eines schwerwiegenden
    *         Konfigurationsfehlers, der es dem Dialog unmöglich macht,
    *         zu funktionieren (z.B. dass der "Fenster" Schlüssel fehlt.
    */
-  public DatensatzBearbeiten(ConfigThingy conf, DJDataset datensatz) throws ConfigurationErrorException
+  public DatensatzBearbeiten(ConfigThingy conf, DJDataset datensatz, ActionListener dialogEndListener) throws ConfigurationErrorException
   {
     this.datensatz = datensatz;
+    this.dialogEndListener = dialogEndListener;
     
     fenster = new HashMap();
     
@@ -197,8 +205,18 @@ public class DatensatzBearbeiten
       });
     }
     catch(Exception x) {Logger.error(x);}
-    
-    
+  }
+  
+  /**
+   * Wie {@link #DatensatzBearbeiten(ConfigThingy, DJDataset, ActionListener)}
+   * mit null als dialogEndListener.
+   * @param conf
+   * @param datensatz
+   * @throws ConfigurationErrorException
+   */
+  public DatensatzBearbeiten(ConfigThingy conf, DJDataset datensatz) throws ConfigurationErrorException
+  {
+    this(conf, datensatz, null);
   }
   
   private void createGUI(ConfigThingy fensterDesc)
@@ -244,7 +262,12 @@ public class DatensatzBearbeiten
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private void abort(){myFrame.dispose();}
+  private void abort()
+  {
+    myFrame.dispose();
+    if (dialogEndListener != null)
+      dialogEndListener.actionPerformed(null);
+  }
   
   /**
    * Implementiert die gleichnamige ACTION.
