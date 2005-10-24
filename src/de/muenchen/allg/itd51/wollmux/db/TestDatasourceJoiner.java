@@ -11,6 +11,7 @@
 * 19.10.2005 | BNK | Erstellung
 * 20.10.2005 | BNK | Fertig
 * 20.10.2005 | BNK | Fallback Rolle -> OrgaKurz
+* 24.10.2005 | BNK | Erweitert um die Features, die PAL Verwalten braucht
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -53,6 +54,7 @@ public class TestDatasourceJoiner extends DatasourceJoiner
   private List myLOS = new Vector();
   private int indexOfSelectedDataset = -1;
   private Set mySchema;
+  private Map fallback;
   
   public TestDatasourceJoiner()
   {
@@ -61,7 +63,7 @@ public class TestDatasourceJoiner extends DatasourceJoiner
   
   public TestDatasourceJoiner(Set schema)
   {
-    Map fallback = new HashMap();
+    fallback = new HashMap();
     fallback.put("Rolle","OrgaKurz");
     
     String[] spalten = myBSData[0];
@@ -83,7 +85,7 @@ public class TestDatasourceJoiner extends DatasourceJoiner
       {
         dsBS.put(spalten[j], ds[j]);
       }
-      myBS.add(new TestDJDataset(dsBS, mySchema, false, fallback));
+      myBS.add(new MyTestDJDataset(dsBS, mySchema, false, fallback));
     }
   }
   
@@ -130,6 +132,13 @@ public class TestDatasourceJoiner extends DatasourceJoiner
   public QueryResults getLOS()
   {
     return new MyQueryResults(new Vector(myLOS));
+  }
+  
+  public DJDataset newDataset()
+  {
+    DJDataset ds = new MyTestDJDataset(null, mySchema, true, fallback);
+    myLOS.add(ds);
+    return ds;
   }
   
   private DatasetChecker makeChecker(String columnName, String query)
@@ -312,6 +321,27 @@ public class TestDatasourceJoiner extends DatasourceJoiner
       System.out.println();
     }
     System.out.println();
+  }
+  
+  private class MyTestDJDataset extends TestDJDataset
+  {
+    public MyTestDJDataset(Map backingStore, Set schema, boolean isFromLOS, Map fallback)
+    {
+      super(backingStore, schema, isFromLOS, fallback);
+    }
+    
+    public DJDataset copy()
+    {
+      MyTestDJDataset newds = new MyTestDJDataset(new HashMap(this.getBS()), mySchema, true, fallback); 
+      myLOS.add(newds);
+      return newds;
+    }
+    
+    public void remove()
+    {
+      if (!isFromLOS()) throw new UnsupportedOperationException("Versuch, einen Datensatz, der nicht aus dem LOS kommt zu entfernen");
+      myLOS.remove(this);
+    }
   }
   
   public static void main(String[] args)

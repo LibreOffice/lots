@@ -10,6 +10,8 @@
 * Datum      | Wer | Änderungsgrund
 * -------------------------------------------------------------------
 * 14.10.2005 | BNK | Erstellung
+* 24.10.2005 | BNK | +copy()
+*                  | +remove()
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -72,5 +74,24 @@ public interface DJDataset extends Dataset
    */
   public void discardLocalOverride(String columnName) throws ColumnNotFoundException;
   
+  /**
+   * Legt eine Kopie dieses Datensatzes im LOS an. Achtung! Dies verändert
+   * nicht den Rückgabewert von {@link #isFromLOS()}, da dieser Datensatz
+   * selbst dadurch nicht verändert wird.
+   * 
+   * @return die neue Kopie.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public DJDataset copy();
   
+  /**
+   * Entfernt diesen Datensatz aus dem LOS. Achtung! Nach dieser Operation ist
+   * der Datensatz ungültig. Insbesondere ist der Wert von {@link #isFromLOS()}
+   * nicht definiert.
+   * @throws UnsupportedOperationException falls dieser Datensatz nicht aus
+   * dem LOS kommt.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public void remove() throws UnsupportedOperationException;
 }

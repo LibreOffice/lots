@@ -10,6 +10,7 @@
 * Datum      | Wer | Änderungsgrund
 * -------------------------------------------------------------------
 * 06.10.2005 | BNK | Erstellung
+* 24.10.2005 | BNK | +newDataset()
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -72,6 +73,7 @@ public class DatasourceJoiner
   //äquivalent zu einem *), * in der Mitte des suchStrings sind nicht erlaubt.
   //die Suche erfolgt grundsätzlich case-insensitive
   //gesucht wird nur in der virtuellen Datenbank, nicht im LOS.
+  //die Ergebnisse sind alle DJDatasets
   public QueryResults find(String spaltenName, String suchString)
   {
     return null;
@@ -99,6 +101,16 @@ public class DatasourceJoiner
   {
     return myLOS;
   }
+  
+  /**
+   * Legt einen neuen Datensatz im LOS an, der nicht mit einer Hintergrunddatenbank
+   * verknüpft ist und liefert ihn zurück.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public DJDataset newDataset()
+  {
+    return null;
+  };
   
   private static class LocalOverrideStorage implements QueryResults
   {

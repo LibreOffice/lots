@@ -61,6 +61,16 @@ public class TestDJDataset implements DJDataset
     this.fallback = fallback;
   }
   
+  /** 
+   * Liefert die Map, die dem Konstruktor als backingStore Argument übergeben
+   * wurde.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public Map getBS()
+  {
+    return myBS;
+  }
+  
   public String get(String spaltenName) throws ColumnNotFoundException
   {
     if (schema != null && !schema.contains(spaltenName)) throw new ColumnNotFoundException("Spalte "+spaltenName+" existiert nicht!");
@@ -94,4 +104,8 @@ public class TestDJDataset implements DJDataset
   {
     return isFromLOS;
   }
+
+  public DJDataset copy() { return new TestDJDataset(new HashMap(myBS), schema, true, fallback);}
+  
+  public void remove(){};
 }

@@ -52,14 +52,18 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 import javax.swing.UIManager;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
+import de.muenchen.allg.itd51.wollmux.db.DJDataset;
 import de.muenchen.allg.itd51.wollmux.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
 import de.muenchen.allg.itd51.wollmux.db.QueryResults;
@@ -157,18 +161,30 @@ public class PersoenlicheAbsenderlisteVerwalten
   private JList palJList;
   private JTextField query;
   
+  private ActionListener dialogEndListener;
+  private ConfigThingy abConf;
+  
+  private MyListSelectionListener myListSelectionListener = new MyListSelectionListener(); 
+  
   /**
-   * Erzeugt einen neuen Dialog, der allerdings zu Beginn nicht sichtbar ist.
+   * Erzeugt einen neuen Dialog.
    * @param conf das ConfigThingy, das den Dialog beschreibt (der Vater des
    *        "Fenster"-Knotens.
-   * @param datensatz der Datensatz, der mit dem Dialog bearbeitet werden soll.
+   * @param abConf das ConfigThingy, das den Absenderdaten Bearbeiten Dialog beschreibt.
+   * @param dj der DatasourceJoiner, der die zu bearbeitende Liste verwaltet.
+   * @param dialogEndListener falls nicht null, wird 
+   *        die {@link ActionListener#actionPerformed(java.awt.event.ActionEvent)}
+   *        Methode wird aufgerufen (im Event Dispatching Thread), 
+   *        nachdem der Dialog geschlossen wurde. 
    * @throws ConfigurationErrorException im Falle eines schwerwiegenden
    *         Konfigurationsfehlers, der es dem Dialog unmöglich macht,
    *         zu funktionieren (z.B. dass der "Fenster" Schlüssel fehlt.
    */
-  public PersoenlicheAbsenderlisteVerwalten(ConfigThingy conf, DatasourceJoiner dj) throws ConfigurationErrorException
+  public PersoenlicheAbsenderlisteVerwalten(ConfigThingy conf, ConfigThingy abConf, DatasourceJoiner dj, ActionListener dialogEndListener) throws ConfigurationErrorException
   {
     this.dj = dj;
+    this.abConf = abConf;
+    this.dialogEndListener = dialogEndListener;
     
     final ConfigThingy fensterDesc = conf.query("Fenster");
     if (fensterDesc.count() == 0)
@@ -177,7 +193,7 @@ public class PersoenlicheAbsenderlisteVerwalten
     
     //  GUI im Event-Dispatching Thread erzeugen wg. Thread-Safety.
     try{
-      javax.swing.SwingUtilities.invokeAndWait(new Runnable() {
+      javax.swing.SwingUtilities.invokeLater(new Runnable() {
         public void run() {
             try{createGUI(fensterDesc.getLastChild());}catch(Exception x){};
         }
@@ -253,6 +269,7 @@ public class PersoenlicheAbsenderlisteVerwalten
     int y = screenSize.height/2 - frameHeight/2;
     myFrame.setLocation(x,y);
     myFrame.setResizable(false);
+    showEDT();
   }
   
   private void addUIElements(ConfigThingy conf, String key, JComponent compo, int stepx, int stepy)
@@ -356,6 +373,8 @@ public class PersoenlicheAbsenderlisteVerwalten
             list.setLayoutOrientation(JList.VERTICAL);
             list.setPrototypeCellValue("Matthias S. Benkmann ist euer Gott (W-OLL-MUX-5.1)");
             
+            list.addListSelectionListener(myListSelectionListener);
+            
             JScrollPane scrollPane = new JScrollPane(list);
             scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
             scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
@@ -415,7 +434,6 @@ public class PersoenlicheAbsenderlisteVerwalten
             else if (action.equals("newPALEntry"))
             {
               button.addActionListener(actionListener_newPALEntry);
-              buttonsToGreyOutIfNothingSelected.add(button);
             }
             else if (action.equals(""))
             {
@@ -440,11 +458,35 @@ public class PersoenlicheAbsenderlisteVerwalten
     Iterator iter = data.iterator();
     while (iter.hasNext())
     {
-      Dataset ds = (Dataset)iter.next();
-      listModel.addElement(substituteVars(displayTemplate, ds));
+      DJDataset ds = (DJDataset)iter.next();
+      listModel.addElement(new ListElement(ds));
     }
   }
   
+  
+  private String getDisplayString(DJDataset ds)
+  {
+    return substituteVars(displayTemplate, ds);
+  }
+  
+  private class ListElement
+  {
+    private String displayString;
+    private DJDataset ds;
+    
+    public ListElement(DJDataset ds)
+    {
+      displayString = getDisplayString(ds);
+      this.ds = ds;
+    }
+
+    public String toString()
+    {
+      return displayString;
+    }
+    
+    public DJDataset getDataset() {return ds;}
+  }
   /**
    * Ersetzt "%{SPALTENNAME}" in str durch den Wert der entsprechenden Spalte im
    * datensatz.
@@ -489,13 +531,155 @@ public class PersoenlicheAbsenderlisteVerwalten
     Iterator iter = buttonsToGreyOutIfNothingSelected.iterator();
     while (iter.hasNext()) ((JButton)iter.next()).setEnabled(enabled);
   }
+
+  private class MyListSelectionListener implements ListSelectionListener
+  {
+
+    public void valueChanged(ListSelectionEvent e)
+    {
+      JList list = (JList)e.getSource();
+      if (list != palJList && list != resultsJList) return;
+      
+      /*
+       * Dafür sorgen, dass nie in beiden Listen ein Element selektiert ist.
+       */
+      JList otherlist = (list == palJList) ? resultsJList: palJList;
+      if (list.getSelectedIndex() >= 0) otherlist.clearSelection();
+      
+      /*
+       * Buttons ausgrauen, falls nichts selektiert, einschwarzen sonst.
+       */
+      updateButtonStates();
+    }
+  }
   
   /**
    * Implementiert die gleichnamige ACTION.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private void abort(){myFrame.dispose();}
+  private void abort()
+  {
+    myFrame.dispose();
+    if (dialogEndListener != null)
+      dialogEndListener.actionPerformed(null);
+  }
+    
+  private void addToPAL()
+  {
+    Object[] sel = resultsJList.getSelectedValues();
+    addEntries: for (int i = 0; i < sel.length; ++i)
+    {
+      ListElement e = (ListElement)sel[i];
+      DJDataset ds = e.getDataset();
+      String eStr = getDisplayString(ds);
+      ListModel model = palJList.getModel();
+      for (int j = model.getSize() - 1; j >= 0; --j)
+      {
+        ListElement e2 = (ListElement)model.getElementAt(j);
+        if (e2.toString().equals(eStr)) continue addEntries;
+      }
+      ds.copy();
+    }
+
+    listsHaveChanged();
+  }
+
+  /**
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private void listsHaveChanged()
+  {
+    setListElements(palJList, dj.getLOS());
+    palJList.clearSelection();
+    resultsJList.clearSelection();
+    updateButtonStates();
+  }
+  
+  private void removeFromPAL()
+  {
+    Object[] sel = palJList.getSelectedValues();
+    for (int i = 0; i < sel.length; ++i)
+    {
+      ListElement e = (ListElement)sel[i];
+      e.getDataset().remove();
+    }
+
+    listsHaveChanged(); 
+  }
+  
+  private void editEntry()
+  {
+    ListElement e = (ListElement)palJList.getSelectedValue();
+    DJDataset ds;
+    if (e == null)
+    {
+      e = (ListElement)resultsJList.getSelectedValue();
+      if (e == null) return;
+      ds = e.getDataset().copy();
+    }
+    else ds = e.getDataset();
+    
+    ActionListener del = dialogEndListener;
+    dialogEndListener = null;
+    abort();
+    try
+    {
+      new DatensatzBearbeiten(abConf, ds, del);
+    }
+    catch (ConfigurationErrorException x)
+    {
+     Logger.error(x);
+    }
+  }
+  
+  private void copyDJDataset(DJDataset orig)
+  {
+    DJDataset newDS = orig.copy();
+    try
+    {
+      newDS.set("Rolle", "Kopie");
+    }
+    catch (Exception e)
+    {
+      Logger.error(e);
+    }
+  }
+  
+  private void copyEntry()
+  {
+    Object[] sel = resultsJList.getSelectedValues();
+    for (int i = 0; i < sel.length; ++i)
+    {
+      ListElement e = (ListElement)sel[i];
+      copyDJDataset(e.getDataset());
+    }
+    
+    sel = palJList.getSelectedValues();
+    for (int i = 0; i < sel.length; ++i)
+    {
+      ListElement e = (ListElement)sel[i];
+      copyDJDataset(e.getDataset());
+    }
+
+    listsHaveChanged();
+  }
+  
+  private void newPALEntry()
+  {
+    DJDataset ds = dj.newDataset();
+    try{
+      ds.set("Vorname","Tinchen");
+      ds.set("Nachname","Wollmux");
+      ds.set("Rolle", "D-WOLL-MUX-ITD-5.1");
+    }catch(Exception x)
+    {
+      Logger.error(x);
+    }
+    listsHaveChanged();
+  }
+  
   
   private void search()
   {
@@ -816,15 +1000,6 @@ public class PersoenlicheAbsenderlisteVerwalten
     updateButtonStates();
   }
   
-  private void addToPAL(){myFrame.dispose();}
-  
-  private void removeFromPAL(){myFrame.dispose();}
-  
-  private void editEntry(){myFrame.dispose();}
-  
-  private void copyEntry(){myFrame.dispose();}
-  
-  private void newPALEntry(){myFrame.dispose();}
   
   
   /**
@@ -844,9 +1019,12 @@ public class PersoenlicheAbsenderlisteVerwalten
     public void windowOpened(WindowEvent e) {}
   }
 
+  
   /**
    * Zerstört den Dialog. Nach Aufruf dieser Funktion dürfen keine weiteren
-   * Aufrufe von Methoden des Dialogs erfolgen.
+   * Aufrufe von Methoden des Dialogs erfolgen. Die Verarbeitung erfolgt
+   * asynchron. Wurde dem Konstruktor ein entsprechender ActionListener
+   * übergeben, so wird seine actionPerformed() Funktion aufgerufen.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -854,27 +1032,13 @@ public class PersoenlicheAbsenderlisteVerwalten
   {
     //  GUI im Event-Dispatching Thread zerstören wg. Thread-Safety.
     try{
-      javax.swing.SwingUtilities.invokeAndWait(new Runnable() {
+      javax.swing.SwingUtilities.invokeLater(new Runnable() {
         public void run() {
           abort();
         }
       });
     }
     catch(Exception x) {/*Hope for the best*/}
-  }
-
-  /**
-   * Macht den Dialog sichtbar.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  public void show()
-  {
-    javax.swing.SwingUtilities.invokeLater(new Runnable() {
-      public void run() {
-        showEDT();
-      }
-    });
   }
   
   /**
@@ -887,15 +1051,42 @@ public class PersoenlicheAbsenderlisteVerwalten
     myFrame.setVisible(true);
   }
   
+  private static class RunTest implements ActionListener
+  {
+    private DatasourceJoiner dj;
+    private ConfigThingy conf;
+    private ConfigThingy abConf;
+    
+    public RunTest(ConfigThingy conf, ConfigThingy abConf, DatasourceJoiner dj)
+    {
+      this.dj = dj;
+      this.conf = conf;
+      this.abConf = abConf;
+    }
+    
+    public void actionPerformed(ActionEvent e)
+    {
+      try{
+        new PersoenlicheAbsenderlisteVerwalten(conf, abConf, dj, this);
+      } catch(ConfigurationErrorException x)
+      {
+        Logger.error(x);
+      }
+    }
+  }
+  
   public static void main(String[] args) throws Exception
   {
     String confFile = "testdata/PAL.conf";
+    String abConfFile = "testdata/AbsenderdatenBearbeiten.conf";
     ConfigThingy conf = new ConfigThingy("",new URL(new File(System.getProperty("user.dir")).toURL(),confFile));
+    ConfigThingy abConf = new ConfigThingy("",new URL(new File(System.getProperty("user.dir")).toURL(),abConfFile));
     TestDatasourceJoiner dj = new TestDatasourceJoiner();
-    PersoenlicheAbsenderlisteVerwalten dialog = new PersoenlicheAbsenderlisteVerwalten(conf.get("PersoenlicheAbsenderliste"), dj);
-    dialog.show();
+    RunTest test = new RunTest(conf.get("PersoenlicheAbsenderliste"), abConf.get("AbsenderdatenBearbeiten"), dj);
+    test.actionPerformed(null);
     Thread.sleep(600000);
-    dialog.dispose();
+    System.exit(0);
   }
+
 }
 

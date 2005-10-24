@@ -16,6 +16,8 @@
 * 18.10.2005 | BNK | Zusätzliche Exceptions loggen
 * 24.10.2005 | BNK | dialogEndListener wird am Ende aufgerufen
 *                  | show() entfernt zur Vermeidung von Thread-Problemen
+* 24.10.2005 | BNK | restoreStandard() Buttons nicht mehr ausgegraut, wenn 
+*                  | Werte nicht geändert wurden, aber bereits aus dem LOS sind.
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -277,7 +279,7 @@ public class DatensatzBearbeiten
    */
   private void restoreStandard()
   {
-    if (!currentWindow.hasChanges()) return;
+    if (!currentWindow.hasLocalValues()) return;
     int res = JOptionPane.showConfirmDialog(myFrame, "Wollen Sie Ihre persönlichen Änderungen wirklich verwerfen\nund die Felder dieser Dialogseite wieder mit der zentralen Datenbank synchronisieren?","Lokale Änderungen wirklich verwerfen?",JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
     if (res != JOptionPane.YES_OPTION) return;
     currentWindow.restoreStandard();
@@ -682,9 +684,20 @@ public class DatensatzBearbeiten
       return false;
     }
     
+    public boolean hasLocalValues()
+    {
+      Iterator iter = dataControls.iterator();
+      while (iter.hasNext()) 
+      {
+        DataControl ctrl = (DataControl)iter.next();
+        if (ctrl.datasetIsLocal() || ctrl.hasBeenModified()) return true;
+      }
+      return false;
+    }
+    
     public void colorChanged()
     {
-      boolean enabled = hasChanges();
+      boolean enabled = hasLocalValues();
       Iterator iter = buttonsToGreyOutIfNoChanges.iterator();
       while (iter.hasNext()) ((JButton)iter.next()).setEnabled(enabled);
     }
