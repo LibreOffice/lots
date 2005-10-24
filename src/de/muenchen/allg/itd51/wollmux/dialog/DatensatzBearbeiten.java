@@ -77,6 +77,7 @@ import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.DJDataset;
+import de.muenchen.allg.itd51.wollmux.db.NoBackingStoreException;
 import de.muenchen.allg.itd51.wollmux.db.TestDJDataset;
 
 /**
@@ -279,7 +280,7 @@ public class DatensatzBearbeiten
    */
   private void restoreStandard()
   {
-    if (!currentWindow.hasLocalValues()) return;
+    if (!datensatz.hasBackingStore() || !currentWindow.hasLocalValues()) return;
     int res = JOptionPane.showConfirmDialog(myFrame, "Wollen Sie Ihre persönlichen Änderungen wirklich verwerfen\nund die Felder dieser Dialogseite wieder mit der zentralen Datenbank synchronisieren?","Lokale Änderungen wirklich verwerfen?",JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
     if (res != JOptionPane.YES_OPTION) return;
     currentWindow.restoreStandard();
@@ -527,6 +528,10 @@ public class DatensatzBearbeiten
         datensatz.discardLocalOverride(columnName);
         initText();
       }catch(ColumnNotFoundException x){}
+       catch(NoBackingStoreException x)
+       {
+         Logger.error("Es hätte nie passieren dürfen, aber restoreStandard() wurde für einen Datensatz ohne Backing Store aufgerufen!");
+       }
       updateBackground();
     }
       
@@ -697,7 +702,7 @@ public class DatensatzBearbeiten
     
     public void colorChanged()
     {
-      boolean enabled = hasLocalValues();
+      boolean enabled = hasLocalValues() && datensatz.hasBackingStore();
       Iterator iter = buttonsToGreyOutIfNoChanges.iterator();
       while (iter.hasNext()) ((JButton)iter.next()).setEnabled(enabled);
     }
