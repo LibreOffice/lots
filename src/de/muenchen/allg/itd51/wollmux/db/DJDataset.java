@@ -50,6 +50,14 @@ public interface DJDataset extends Dataset
   public boolean hasLocalOverride(String columnName) throws ColumnNotFoundException;
   
   /**
+   * Liefert true, falls zu diesem Datensatz eine Hintergrunddatenbank
+   * existiert, mit der einige seiner Spalten verknüpft sind, oder über
+   * {@link #discardLocalOverride(String)} verknüpft werden können.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public boolean hasBackingStore();
+  
+  /**
    * Liefert true, falls dieser Datensatz aus dem Lokalen Override Speicher
    * kommt. ACHTUNG! Dies bedeutet nicht, dass es eine Spalte gibt, für die
    * hasLocalOverride(Spalte) true liefert, da der LOS auch Datensätze erlaubt,
@@ -66,13 +74,15 @@ public interface DJDataset extends Dataset
    * ACHTUNG! Ein Datensatz bei dem der lokale Override für alle Spalten
    * discardet wurde wird NICHT automatisch aus dem LOS entfernt. Insbesondere
    * liefert isFromLOS() weiterhin true.
-   * Diese Funktion kann auch ohne Fehler oder Exception aufgerufen werden, 
-   * falls der Datensatz keinen lokal Override für die Spalte hat oder sogar
-   * gar nicht aus dem LOS kommt. Die Spalte muss auf jeden Fall existieren.
+   * Die Spalte muss auf jeden Fall existieren.
    * @throws ColumnNotFoundException falls keine Spalte namens columnName existiert.
+   * @throws NoBackingStoreException falls der Datensatz nie mit einer Hintergrunddatenbank verknüpft war.
+   * Keine Exception wird geworfen, falls der die entsprechende Spalte
+   * bereits mit einer Hintergrunddatenbank verknüpft ist (z.B. weil der Datensatz
+   * gar nicht aus dem LOS kommt).
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public void discardLocalOverride(String columnName) throws ColumnNotFoundException;
+  public void discardLocalOverride(String columnName) throws ColumnNotFoundException, NoBackingStoreException;
   
   /**
    * Legt eine Kopie dieses Datensatzes im LOS an. Achtung! Dies verändert

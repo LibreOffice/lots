@@ -329,9 +329,15 @@ public class TestDatasourceJoiner extends DatasourceJoiner
       super(backingStore, schema, isFromLOS, fallback);
     }
     
+    private Map copyBS()
+    {
+      Map bs = this.getBS();
+      return bs == null ? null : new HashMap(this.getBS());
+    }
+    
     public DJDataset copy()
     {
-      MyTestDJDataset newds = new MyTestDJDataset(new HashMap(this.getBS()), mySchema, true, fallback); 
+      MyTestDJDataset newds = new MyTestDJDataset(copyBS(), mySchema, true, fallback); 
       myLOS.add(newds);
       return newds;
     }

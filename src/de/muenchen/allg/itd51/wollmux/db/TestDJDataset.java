@@ -76,9 +76,12 @@ public class TestDJDataset implements DJDataset
     if (schema != null && !schema.contains(spaltenName)) throw new ColumnNotFoundException("Spalte "+spaltenName+" existiert nicht!");
     String res;
     res = (String)myLOS.get(spaltenName);
-    if (res != null) return res; 
-    res = (String)myBS.get(spaltenName);
     if (res != null) return res;
+    if (myBS != null)
+    {
+      res = (String)myBS.get(spaltenName);
+      if (res != null) return res;
+    }
     if (fallback != null && fallback.containsKey(spaltenName)) 
       return get((String)fallback.get(spaltenName)); 
     return spaltenName;
@@ -95,8 +98,9 @@ public class TestDJDataset implements DJDataset
     myLOS.put(columnName, newValue);
   }
 
-  public void discardLocalOverride(String columnName) throws ColumnNotFoundException
+  public void discardLocalOverride(String columnName) throws ColumnNotFoundException, NoBackingStoreException
   {
+    if (myBS == null) throw new NoBackingStoreException("Datensatz nicht mit Hintergrundspeicher verknüpft");
     myLOS.remove(columnName);
   }
 
@@ -104,8 +108,10 @@ public class TestDJDataset implements DJDataset
   {
     return isFromLOS;
   }
+  
+  public boolean hasBackingStore() {return myBS != null;}
 
-  public DJDataset copy() { return new TestDJDataset(new HashMap(myBS), schema, true, fallback);}
+  public DJDataset copy() { return new TestDJDataset(myBS == null? null: new HashMap(myBS), schema, true, fallback);}
   
   public void remove(){};
 }

@@ -55,6 +55,23 @@ public class DatasourceJoiner
   //X           "V. Nachname"
   //X           "Vorname N."
 
+  /* Mögliche Probleme:
+   * 
+   * - copy() muss auch bei einem Datensatz ohne Backing Store funktionieren
+   * - der Datensatz könnte zwischenzeitlich im Backing Store gelöscht werden 
+   * 
+   * teilweise Lösung: Für jeden Eintrag des LOS ist der Hintergrundspeicher im Cache.
+   * Der Cache wird während der Ausführung des WollMux nicht geändert. 
+   * Über den Cache grundsätzlich einen Backing Store zur Verfügung
+   * Auch mit newDataset() erzeugte Datensätze bekommen Einträge im Cache
+   * als hätten sie einen Backing Store. Bei diesen Einträgen (und natürlich
+   * auch im LOS) werden alle Spalten mit einem String vorbelegt, der dem
+   * Namen der Spalte entspricht.
+   * 
+   * Ein Problem an dieser Lösung könnte sein, dass Datensätze evtl. Identifier
+   * brauchen, die den Join aus dem sie entstanden sind beschreiben. Mal schaun.
+   * 
+   * */
   
   /*
    * Als allgemeines Konstrukt um die Rolle<->OrgaKurz Beziehung zu
