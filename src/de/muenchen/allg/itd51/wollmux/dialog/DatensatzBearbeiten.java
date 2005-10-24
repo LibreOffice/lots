@@ -15,6 +15,7 @@
 * 17.10.2005 | BNK | Unterstützung für READONLY
 * 18.10.2005 | BNK | Zusätzliche Exceptions loggen
 * 24.10.2005 | BNK | dialogEndListener wird am Ende aufgerufen
+*                  | show() entfernt zur Vermeidung von Thread-Problemen
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -80,9 +81,8 @@ import de.muenchen.allg.itd51.wollmux.db.TestDJDataset;
  * Diese Klasse baut anhand einer als ConfigThingy übergebenen 
  * Dialogbeschreibung einen (mehrseitigen) Dialog zur Bearbeitung eines
  * {@link de.muenchen.allg.itd51.wollmux.db.DJDataset}s.
- * <b>ACHTUNG:</b> Die public-Funktionen dieser Klasse dürfen NICHT aus dem
- * Event-Dispatching Thread heraus aufgerufen werden. Die private-Funktionen
- * dagegen dürfen NUR aus dem Event-Dispatching Thread heraus aufgerufen werden. 
+ * <b>ACHTUNG:</b> Die private-Funktionen
+ * dürfen NUR aus dem Event-Dispatching Thread heraus aufgerufen werden. 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class DatensatzBearbeiten
@@ -167,7 +167,7 @@ public class DatensatzBearbeiten
     
   
   /**
-   * Erzeugt einen neuen Dialog, der allerdings zu Beginn nicht sichtbar ist.
+   * Erzeugt einen neuen Dialog und zeigt ihn an.
    * @param conf das ConfigThingy, das den Dialog beschreibt (der Vater des
    *        "Fenster"-Knotens.
    * @param datensatz der Datensatz, der mit dem Dialog bearbeitet werden soll.
@@ -198,7 +198,7 @@ public class DatensatzBearbeiten
     
     //  GUI im Event-Dispatching Thread erzeugen wg. Thread-Safety.
     try{
-      javax.swing.SwingUtilities.invokeAndWait(new Runnable() {
+      javax.swing.SwingUtilities.invokeLater(new Runnable() {
         public void run() {
             try{createGUI(fensterDesc.getLastChild());}catch(Exception x){};
         }
@@ -255,6 +255,7 @@ public class DatensatzBearbeiten
     int y = screenSize.height/2 - frameHeight/2;
     myFrame.setLocation(x,y);
     myFrame.setResizable(false);
+    showEDT();
   }
   
   /**
@@ -332,7 +333,9 @@ public class DatensatzBearbeiten
 
   /**
    * Zerstört den Dialog. Nach Aufruf dieser Funktion dürfen keine weiteren
-   * Aufrufe von Methoden des Dialogs erfolgen.
+   * Aufrufe von Methoden des Dialogs erfolgen. Die Verarbeitung erfolgt
+   * asynchron. Wurde dem Konstruktor ein entsprechender ActionListener
+   * übergeben, so wird seine actionPerformed() Funktion aufgerufen.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -340,7 +343,7 @@ public class DatensatzBearbeiten
   {
     //  GUI im Event-Dispatching Thread zerstören wg. Thread-Safety.
     try{
-      javax.swing.SwingUtilities.invokeAndWait(new Runnable() {
+      javax.swing.SwingUtilities.invokeLater(new Runnable() {
         public void run() {
           abort();
         }
@@ -349,22 +352,9 @@ public class DatensatzBearbeiten
     catch(Exception x) {/*Hope for the best*/}
   }
 
-  /**
-   * Macht den Dialog sichtbar.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  public void show()
-  {
-    javax.swing.SwingUtilities.invokeLater(new Runnable() {
-      public void run() {
-        showEDT();
-      }
-    });
-  }
   
   /**
-   * private Version von show(), die im Event-Dispatching Thread laufen muss.
+   * Zeigt den Dialog an.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -987,7 +977,6 @@ public class DatensatzBearbeiten
     DJDataset datensatz = new TestDJDataset();
     ConfigThingy conf = new ConfigThingy("",new URL(new File(System.getProperty("user.dir")).toURL(),confFile)); 
     DatensatzBearbeiten ab = new DatensatzBearbeiten(conf.get("AbsenderdatenBearbeiten"), datensatz);
-    ab.show();
     Thread.sleep(60000);
     ab.dispose();
   }
