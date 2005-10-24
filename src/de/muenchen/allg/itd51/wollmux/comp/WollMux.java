@@ -32,11 +32,15 @@ import com.sun.star.registry.XRegistryKey;
 import com.sun.star.task.XAsyncJob;
 import com.sun.star.uno.XComponentContext;
 
+import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.EventListener;
+import de.muenchen.allg.itd51.wollmux.Event;
+import de.muenchen.allg.itd51.wollmux.EventProcessor;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.VisibleTextFragmentList;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
+import de.muenchen.allg.itd51.wollmux.db.TestDatasourceJoiner;
 
 /**
  * Diese Klasse stellt den zentralen UNO-Service WollMux dar. Der Service dient
@@ -89,14 +93,6 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob
    * implementiert.
    */
   public static final java.lang.String[] SERVICENAMES = { "com.sun.star.task.AsyncJob" };
-
-  /**
-   * Dieses Feld enthält den vollständigen Namen der Serviceimplementierung.
-   * Dieser ist üblicherweise WollMux.class.getName(), in den Beispieldateien
-   * aus dem DevGuide wird der Name jedoch immer ausgeschrieben. Ich vermute
-   * dass das schon seinen Grund hat...
-   */
-  public static final java.lang.String IMPLEMENTATIONNAME = "de.muenchen.allg.itd51.wollmux.comp.WollMux";
 
   /**
    * Diesen Konstruktor bitte nur zur Erzeugung der ersten Singleton-Instanz
@@ -161,18 +157,23 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob
       Logger.debug("wollmuxConfFile = " + wollmuxConfFile.toString());
 
       // Parsen der Konfigurationsdatei
-      ConfigThingy conf = new ConfigThingy("wollmux.conf", wollmuxConfFile
-          .toURL());
+      wollmuxConf = new ConfigThingy("wollmuxConf", wollmuxConfFile.toURL());
 
       // VisibleTextFragmentList erzeugen
-      textFragmentList = new VisibleTextFragmentList(conf);
+      textFragmentList = new VisibleTextFragmentList(wollmuxConf);
 
       // DatasourceJoiner erzeugen
-      datasourceJoiner = new DatasourceJoiner();
+      datasourceJoiner = new TestDatasourceJoiner();
 
       // register global EventListener
-      EventListener.registerGlobalEventListener();
-      
+      UnoService eventBroadcaster = UnoService.createWithContext(
+          "com.sun.star.frame.GlobalEventBroadcaster",
+          WollMux.getXComponentContext());
+      eventBroadcaster.xEventBroadcaster().addEventListener(
+          EventProcessor.create());
+
+      EventProcessor.create().addEvent(
+          new Event(Event.ON_ABSENDERDATEN_BEARBEITEN, true));
     }
     catch (Exception e)
     {
@@ -205,12 +206,9 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob
     return xComponentContext;
   }
 
-  /*
-   * TODO: Diese Methode müsste vielleicht gar nicht unbedingt was tun. Man kann
-   * das startupWollMux ja auch in die Konstruktoren auslagern... vielleicht
-   * mache ich das noch einmal.
-   * 
-   * (non-Javadoc)
+  /**
+   * Der AsyncJob wird mit dem Event OnFirstVisibleTask gestartet und besitzt
+   * nur die Aufgabe, den WollMux über die Methode startupWollMux() zu starten.
    * 
    * @see com.sun.star.task.XAsyncJob#executeAsync(com.sun.star.beans.NamedValue[],
    *      com.sun.star.task.XJobListener)
@@ -316,7 +314,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob
       java.lang.String sImplName)
   {
     com.sun.star.lang.XSingleComponentFactory xFactory = null;
-    if (sImplName.equals(WollMux.IMPLEMENTATIONNAME))
+    if (sImplName.equals(WollMux.class.getName()))
       xFactory = Factory.createComponentFactory(WollMux.class, SERVICENAMES);
     return xFactory;
   }
@@ -333,7 +331,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob
       XRegistryKey xRegKey)
   {
     return Factory.writeRegistryServiceInfo(
-        WollMux.IMPLEMENTATIONNAME,
+        WollMux.class.getName(),
         WollMux.SERVICENAMES,
         xRegKey);
   }
@@ -352,5 +350,35 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob
   public static DatasourceJoiner getDatasourceJoiner()
   {
     return datasourceJoiner;
+  }
+
+  /**
+   * main-Methode zum Testen des WollMux über einen Remote-Context.
+   */
+  public static void main(String[] args)
+  {
+    try
+    {
+      if (args.length < 1)
+      {
+        System.out.println("USAGE: <config_url>");
+        System.exit(0);
+      }
+      File cwd = new File(".");
+
+      args[0] = args[0].replaceAll("\\\\", "/");
+
+      // Remote-Context herstellen
+      UNO.init();
+
+      // WollMux starten
+      new WollMux(UNO.defaultContext);
+      WollMux.initialize(System.err, new File(cwd, args[0]));
+      WollMux.getInstance().startupWollMux();
+    }
+    catch (Exception e)
+    {
+      Logger.error(e);
+    }
   }
 }

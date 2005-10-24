@@ -10,6 +10,9 @@
  * Datum      | Wer | Änderungsgrund
  * -------------------------------------------------------------------
  * 14.10.2005 | LUT | Erstellung
+ * 24.10.2005 | LUT | + Sauberes umschliessen von Bookmarks in 
+ *                      executeInsertFrag.
+ *                    + Abschalten der lock-Controllers  
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -114,8 +117,10 @@ public class WMCommandInterpreter
   public void interpret()
   {
     // Die Sichtbare Darstellung in OOo abschalten:
-    document.xModel().lockControllers();
-    
+    // document.xModel().lockControllers();
+    // Wurde auskommentiert, da der Aufbau zu langsam ist und die arbeitsweise
+    // transparenter ist, wenn der Benutzer sieht dass sich was tut...
+
     // Bereits abgearbeitete Bookmarks merken.
     HashMap evaluatedBookmarks = new HashMap();
 
@@ -157,9 +162,9 @@ public class WMCommandInterpreter
         }
       }
     }
-    
+
     // Lock-Controllers wieder aufheben:
-    document.xModel().unlockControllers();
+    // document.xModel().unlockControllers();
   }
 
   /**
@@ -478,6 +483,6 @@ public class WMCommandInterpreter
     {
       Logger.error(e);
     }
-    //System.exit(0);
+    // System.exit(0);
   }
 }
