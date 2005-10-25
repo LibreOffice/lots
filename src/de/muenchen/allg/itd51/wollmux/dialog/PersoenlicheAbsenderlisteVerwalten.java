@@ -474,7 +474,7 @@ public class PersoenlicheAbsenderlisteVerwalten
           }
           else
           {
-            Logger.error("Unbekannter TYPE für User Interface Element: "+type);
+            Logger.error("Ununterstützter TYPE für User Interface Element: "+type);
           }
         } catch(NodeNotFoundException e) {Logger.error(e);}
       }

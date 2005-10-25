@@ -965,7 +965,7 @@ public class DatensatzBearbeiten
                 button.setEnabled(false);
               }
               else
-                Logger.error("Unbekannte ACTION: "+action);
+                Logger.error("Ununterstützte ACTION: "+action);
               
               
             }
