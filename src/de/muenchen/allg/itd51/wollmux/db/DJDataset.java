@@ -69,6 +69,19 @@ public interface DJDataset extends Dataset
   public boolean isFromLOS();
   
   /**
+   * Liefert true, falls this der momentan im LOS ausgewählte Datensatz ist.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public boolean isSelectedDataset();
+  
+  /**
+   * Macht this zum im LOS ausgewählten Datensatz. 
+   * @throws UnsupportedOperationException falls this nicht aus dem LOS kommt.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public void select() throws UnsupportedOperationException;
+  
+  /**
    * Verwirft den Wert im LOS für Spalte columnName dieses Datensatzes und 
    * verknüpft die Spalte wieder mit der Hintergrunddatenbank.
    * ACHTUNG! Ein Datensatz bei dem der lokale Override für alle Spalten

@@ -51,9 +51,9 @@ public class TestDatasourceJoiner extends DatasourceJoiner
   
   private List myBS = new Vector();
   private List myLOS = new Vector();
-  private int indexOfSelectedDataset = -1;
   private Set mySchema;
   private Map fallback;
+  private DJDataset selectedDataset = null;
   
   public TestDatasourceJoiner()
   {
@@ -122,7 +122,7 @@ public class TestDatasourceJoiner extends DatasourceJoiner
   public DJDataset getSelectedDataset() throws DatasetNotFoundException
   {
     if (myLOS.isEmpty()) throw new DatasetNotFoundException("Der Lokale Override Speicher ist leer");
-    return (DJDataset)myLOS.get(indexOfSelectedDataset);
+    return selectedDataset;
   }
   
   /**
@@ -137,6 +137,7 @@ public class TestDatasourceJoiner extends DatasourceJoiner
   {
     DJDataset ds = new MyTestDJDataset(null, mySchema, true, fallback);
     myLOS.add(ds);
+    if (selectedDataset == null) selectedDataset = ds;
     return ds;
   }
   
@@ -339,6 +340,7 @@ public class TestDatasourceJoiner extends DatasourceJoiner
     {
       MyTestDJDataset newds = new MyTestDJDataset(copyBS(), mySchema, true, fallback); 
       myLOS.add(newds);
+      if (selectedDataset == null) selectedDataset = newds;
       return newds;
     }
     
@@ -346,7 +348,20 @@ public class TestDatasourceJoiner extends DatasourceJoiner
     {
       if (!isFromLOS()) throw new UnsupportedOperationException("Versuch, einen Datensatz, der nicht aus dem LOS kommt zu entfernen");
       myLOS.remove(this);
+      if (selectedDataset == this)
+        selectedDataset = (myLOS.isEmpty()? null: (DJDataset)myLOS.get(0));
     }
+    
+    public boolean isSelectedDataset()
+    {
+      return this == selectedDataset;
+    }
+
+    public void select() throws UnsupportedOperationException
+    {
+      if (!isFromLOS()) throw new UnsupportedOperationException();
+      selectedDataset = this;
+    };
   }
   
   public static void main(String[] args)

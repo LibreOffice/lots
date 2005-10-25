@@ -113,5 +113,15 @@ public class TestDJDataset implements DJDataset
 
   public DJDataset copy() { return new TestDJDataset(myBS == null? null: new HashMap(myBS), schema, true, fallback);}
   
-  public void remove(){};
+  public void remove(){}
+
+  public boolean isSelectedDataset()
+  {
+    return false;
+  }
+
+  public void select() throws UnsupportedOperationException
+  {
+    if (!isFromLOS()) throw new UnsupportedOperationException();
+  };
 }

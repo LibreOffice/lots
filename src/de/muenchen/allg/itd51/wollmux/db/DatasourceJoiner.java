@@ -103,7 +103,8 @@ public class DatasourceJoiner
   
   /**
    * Liefert den momentan im Lokalen Override Speicher ausgewählten Datensatz.
-   * @throws DatasetNotFoundException falls der LOS leer ist.
+   * @throws DatasetNotFoundException falls der LOS leer ist (ansonsten ist
+   * immer ein Datensatz selektiert).
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public DJDataset getSelectedDataset() throws DatasetNotFoundException
