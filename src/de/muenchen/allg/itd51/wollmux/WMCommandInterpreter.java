@@ -469,7 +469,7 @@ public class WMCommandInterpreter
       // WollMux starten
       new WollMux(UNO.defaultContext);
       WollMux.initialize(System.err, new File(cwd, args[0]));
-      WollMux.getInstance().startupWollMux();
+      WollMux.startupWollMux();
 
       Logger.init(Logger.ALL);
 

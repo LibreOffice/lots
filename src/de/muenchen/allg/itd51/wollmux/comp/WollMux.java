@@ -24,13 +24,20 @@ import java.io.FileOutputStream;
 import java.io.PrintStream;
 
 import com.sun.star.beans.NamedValue;
+import com.sun.star.frame.DispatchDescriptor;
+import com.sun.star.frame.XDispatch;
+import com.sun.star.frame.XDispatchProvider;
+import com.sun.star.frame.XStatusListener;
 import com.sun.star.lang.XServiceInfo;
 import com.sun.star.lang.XSingleComponentFactory;
 import com.sun.star.lib.uno.helper.Factory;
 import com.sun.star.lib.uno.helper.WeakBase;
 import com.sun.star.registry.XRegistryKey;
 import com.sun.star.task.XAsyncJob;
+import com.sun.star.uno.RuntimeException;
+import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
+import com.sun.star.util.URL;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoService;
@@ -45,18 +52,12 @@ import de.muenchen.allg.itd51.wollmux.db.TestDatasourceJoiner;
 /**
  * Diese Klasse stellt den zentralen UNO-Service WollMux dar. Der Service dient
  * als Einstiegspunkt des WollMux und initialisiert alle benötigten
- * Programmmodule. Der Service ist als Singleton implementiert über den der
- * Zugriff auf alle Programmmodule über entsprechende get-Methoden gewährleistet
- * wird.
+ * Programmmodule. Sämtliche Felder und öffentliche Methoden des Services sind
+ * static und ermöglichen den Zugriff aus anderen Programmmodulen.
  */
-public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob
+public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
+    XDispatch, XDispatchProvider
 {
-
-  /**
-   * Die Instanz des Singleton.
-   */
-  private static WollMux myInstance;
-
   /**
    * Enthält einen PrintStream in den die Log-Nachrichten geschrieben werden.
    */
@@ -95,18 +96,28 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob
   public static final java.lang.String[] SERVICENAMES = { "com.sun.star.task.AsyncJob" };
 
   /**
-   * Diesen Konstruktor bitte nur zur Erzeugung der ersten Singleton-Instanz
-   * benutzen. Er kann leider nicht private gemacht werden, da er für die
-   * Erzeugung des Jobs notwendig ist. Die Singleton-Instanz wird mit der
-   * Methode getInstance zurückgeliefert. Der Konstruktor erzeugt ein neues
-   * WollMux-Objekt im XComponentContext context.
+   * Der Konstruktor erzeugt einen neues WollMux-Service im XComponentContext
+   * context. Wurde der WollMux bereits in einem anderen Kontext erzeugt, so
+   * wird eine RuntimeException geworfen.
    * 
    * @param context
    */
   public WollMux(XComponentContext context)
   {
-    xComponentContext = context;
+    // Context sichern, Ausführung in anderem Kontext verhindern.
+    if (xComponentContext == null)
+      xComponentContext = context;
+    else if (!UnoRuntime.areSame(context, xComponentContext))
+      throw new RuntimeException(
+          "WollMux kann nur in einem Kontext erzeugt werden.");
+  }
 
+  /**
+   * Diese Methode initialisiert den WollMux mit den festen Standardwerten:
+   * wollMuxDir=$HOME/.wollmux, wollMuxLog=wollmux.log, wollMuxConf=wollmux.conf
+   */
+  public static void initialize()
+  {
     // Das hier sollte die einzige Stelle sein, an der Pfade hart
     // verdrahtet sind...
     String userHome = System.getProperty("user.home");
@@ -123,7 +134,6 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob
       // Da kann ich nicht viel machen, wenn noch nicht mal das
       // Logfile funktioniert...
     }
-    myInstance = this;
   }
 
   /**
@@ -146,13 +156,12 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob
   /**
    * Diese Methode übernimmt den eigentlichen Bootstrap des WollMux.
    */
-  public void startupWollMux()
+  public static void startupWollMux()
   {
     try
     {
-
       // Logger initialisieren und erste Meldung ausgeben:
-      if (wollmuxLog != null) Logger.init(wollmuxLog, Logger.ERROR);
+      if (wollmuxLog != null) Logger.init(wollmuxLog, Logger.ALL);
       Logger.log("StartupWollMux");
       Logger.debug("wollmuxConfFile = " + wollmuxConfFile.toString());
 
@@ -172,14 +181,11 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob
       eventBroadcaster.xEventBroadcaster().addEventListener(
           EventProcessor.create());
 
-      EventProcessor.create().addEvent(
-          new Event(Event.ON_ABSENDERDATEN_BEARBEITEN, true));
     }
     catch (Exception e)
     {
       Logger.error(e);
     }
-
   }
 
   /**
@@ -260,7 +266,11 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob
     /***************************************************************************
      * Starte den WollMux!
      */
-    if (sEventName.equals("onFirstVisibleTask")) startupWollMux();
+    if (sEventName.equals("onFirstVisibleTask"))
+    {
+      initialize();
+      startupWollMux();
+    }
     /** *************************************************** */
 
     xListener.jobFinished(this, new NamedValue[] {});
@@ -337,19 +347,96 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob
   }
 
   /**
-   * @return Returns the myInstance.
-   */
-  public static WollMux getInstance()
-  {
-    return myInstance;
-  }
-
-  /**
    * @return Returns the datasourceJoiner.
    */
   public static DatasourceJoiner getDatasourceJoiner()
   {
     return datasourceJoiner;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.sun.star.frame.XDispatchProvider#queryDispatch(com.sun.star.util.URL,
+   *      java.lang.String, int)
+   */
+  public XDispatch queryDispatch( /* IN */com.sun.star.util.URL aURL,
+  /* IN */String sTargetFrameName,
+  /* IN */int iSearchFlags)
+  {
+    XDispatch xRet = null;
+    if (aURL.Protocol.compareTo(".WollMux:") == 0)
+    {
+      if (aURL.Path.compareTo("AbsenderdatenBearbeitenDialog") == 0)
+        xRet = this;
+      if (aURL.Path.compareTo("OpenFrag") == 0) xRet = this;
+    }
+    return xRet;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.sun.star.frame.XDispatchProvider#queryDispatches(com.sun.star.frame.DispatchDescriptor[])
+   */
+  public XDispatch[] queryDispatches( /* IN */DispatchDescriptor[] seqDescripts)
+  {
+    int nCount = seqDescripts.length;
+    XDispatch[] lDispatcher = new XDispatch[nCount];
+
+    for (int i = 0; i < nCount; ++i)
+      lDispatcher[i] = queryDispatch(
+          seqDescripts[i].FeatureURL,
+          seqDescripts[i].FrameName,
+          seqDescripts[i].SearchFlags);
+
+    return lDispatcher;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.sun.star.frame.XDispatch#addStatusListener(com.sun.star.frame.XStatusListener,
+   *      com.sun.star.util.URL)
+   */
+  public void addStatusListener(XStatusListener arg0, URL arg1)
+  {
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.sun.star.frame.XDispatch#dispatch(com.sun.star.util.URL,
+   *      com.sun.star.beans.PropertyValue[])
+   */
+  public void dispatch( /* IN */com.sun.star.util.URL aURL,
+  /* IN */com.sun.star.beans.PropertyValue[] aArguments)
+  {
+    Logger.init(Logger.ALL); // TODO: remove me
+    if (aURL.Protocol.compareTo(".WollMux:") == 0)
+    {
+      if (aURL.Path.compareTo("AbsenderdatenBearbeitenDialog") == 0)
+      {
+        Logger
+        .debug2("Dispatch: Aufruf von .WollMux:AbsenderdatenBearbeitenDialog");
+        EventProcessor.create().addEvent(
+            new Event(Event.ON_ABSENDERDATEN_BEARBEITEN, true));
+      }
+      if (aURL.Path.compareTo("OpenFrag") == 0)
+      {
+        Logger.debug2("Dispatch: Aufruf von .WollMux:OpenFrag");
+      }
+    }
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.sun.star.frame.XDispatch#removeStatusListener(com.sun.star.frame.XStatusListener,
+   *      com.sun.star.util.URL)
+   */
+  public void removeStatusListener(XStatusListener arg0, URL arg1)
+  {
   }
 
   /**
@@ -374,11 +461,12 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob
       // WollMux starten
       new WollMux(UNO.defaultContext);
       WollMux.initialize(System.err, new File(cwd, args[0]));
-      WollMux.getInstance().startupWollMux();
+      WollMux.startupWollMux();
     }
     catch (Exception e)
     {
       Logger.error(e);
     }
   }
+
 }

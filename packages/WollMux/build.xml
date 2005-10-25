@@ -23,7 +23,7 @@
 		<zip destfile="../${PKG_NAME}">
 			<fileset dir=".">
 				<include name="${COMPJAR}" />
-				<include name="Jobs.xcu" />
+				<include name="*.xcu" />
 				<include name="META-INF/manifest.xml" />
 			</fileset>
 		</zip>
