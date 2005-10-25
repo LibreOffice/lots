@@ -16,6 +16,7 @@
 *                  | Doppelklickbehandlung
 *                  | Sortierung
 *                  | Gegenseitiger Ausschluss der Selektierung
+* 25.10.2005 | BNK | besser kommentiert
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -79,16 +80,17 @@ import de.muenchen.allg.itd51.wollmux.db.TestDatasourceJoiner;
 
 /**
  * Diese Klasse baut anhand einer als ConfigThingy übergebenen 
- * Dialogbeschreibung einen (mehrseitigen) Dialog zur Bearbeitung eines
- * {@link de.muenchen.allg.itd51.wollmux.db.DJDataset}s.
- * <b>ACHTUNG:</b> Die public-Funktionen dieser Klasse dürfen NICHT aus dem
- * Event-Dispatching Thread heraus aufgerufen werden. Die private-Funktionen
- * dagegen dürfen NUR aus dem Event-Dispatching Thread heraus aufgerufen werden. 
+ * Dialogbeschreibung einen Dialog zum Hinzufügen/Entfernen von Einträgen
+ * der Persönlichen Absenderliste auf. Die private-Funktionen
+ * dagegen NUR aus dem Event-Dispatching Thread heraus aufgerufen werden. 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class PersoenlicheAbsenderlisteVerwalten
 {
-  
+  /**
+   * Gibt an, wie die Personen in den Listen angezeigt werden sollen.
+   * %{Spalte} Syntax um entsprechenden Wert des Datensatzes einzufügen.
+   */
   private final static String displayTemplate = "%{Nachname}, %{Vorname} (%{Rolle})";
   
   /**
@@ -163,15 +165,44 @@ public class PersoenlicheAbsenderlisteVerwalten
    */
   private DatasourceJoiner dj;
   
+  /**
+   * Speichert Referenzen auf die JButtons, die zu deaktivieren sind,
+   * wenn kein Eintrag in einer Liste selektiert ist.
+   */
   private List buttonsToGreyOutIfNothingSelected = new Vector();
   
+  /**
+   * Die Listbox mit den Suchresultaten.
+   */
   private JList resultsJList;
+  
+  /**
+   * Die Listbox mit der persönlichen Absenderliste.
+   */
   private JList palJList;
+  
+  /**
+   * Das Textfeld in dem der Benutzer seine Suchanfrage eintippt.
+   */
   private JTextField query;
   
+  /**
+   * Der dem {@link #PersoenlicheAbsenderlisteVerwalten(ConfigThingy, ConfigThingy, DatasourceJoiner, ActionListener) Konstruktor} 
+   * übergebene dialogEndListener.
+   */
   private ActionListener dialogEndListener;
+
+  /**
+   * Das ConfigThingy, das den Dialog Datensatz Bearbeiten für das Bearbeiten
+   * eines Datensatzes der PAL spezifiziert.
+   */
   private ConfigThingy abConf;
   
+  /**
+   * Sorgt dafür, dass jeweils nur in einer der beiden Listboxen ein Eintrag
+   * selektiert sein kann und dass die entsprechenden Buttons ausgegraut werden
+   * wenn kein Eintrag selektiert ist.
+   */
   private MyListSelectionListener myListSelectionListener = new MyListSelectionListener(); 
   
   /**
@@ -182,7 +213,7 @@ public class PersoenlicheAbsenderlisteVerwalten
    * @param dj der DatasourceJoiner, der die zu bearbeitende Liste verwaltet.
    * @param dialogEndListener falls nicht null, wird 
    *        die {@link ActionListener#actionPerformed(java.awt.event.ActionEvent)}
-   *        Methode wird aufgerufen (im Event Dispatching Thread), 
+   *        Methode aufgerufen (im Event Dispatching Thread), 
    *        nachdem der Dialog geschlossen wurde. 
    * @throws ConfigurationErrorException im Falle eines schwerwiegenden
    *         Konfigurationsfehlers, der es dem Dialog unmöglich macht,
@@ -194,9 +225,13 @@ public class PersoenlicheAbsenderlisteVerwalten
     this.abConf = abConf;
     this.dialogEndListener = dialogEndListener;
     
-    final ConfigThingy fensterDesc = conf.query("Fenster");
-    if (fensterDesc.count() == 0)
+    ConfigThingy fensterDesc1 = conf.query("Fenster");
+    if (fensterDesc1.count() == 0)
       throw new ConfigurationErrorException("Schlüssel 'Fenster' fehlt in "+conf.getName());
+    
+    final ConfigThingy fensterDesc = fensterDesc1.query("Verwalten");
+    if (fensterDesc.count() == 0)
+      throw new ConfigurationErrorException("Schlüssel 'Verwalten' fehlt in "+conf.getName());
     
     
     //  GUI im Event-Dispatching Thread erzeugen wg. Thread-Safety.
@@ -210,7 +245,12 @@ public class PersoenlicheAbsenderlisteVerwalten
     catch(Exception x) {Logger.error(x);}
   }
   
-  private void createGUI(ConfigThingy fensterDesc) throws NodeNotFoundException
+  /**
+   * Erzeugt das GUI.
+   * @param fensterDesc die Spezifikation dieses Dialogs.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private void createGUI(ConfigThingy fensterDesc)
   {
     //use system LAF for window decorations
     try{UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());}catch(Exception x){};
@@ -220,7 +260,7 @@ public class PersoenlicheAbsenderlisteVerwalten
     palJList = new JList(new DefaultListModel());
     query = new JTextField(TEXTFIELD_DEFAULT_WIDTH);
     
-    fensterDesc = fensterDesc.get("Verwalten");
+    
     String title = "TITLE fehlt für Fenster PersoenlicheAbsenderListeVerwalten/Verwalten";
     try{
       title = fensterDesc.get("TITLE").toString();
@@ -277,9 +317,14 @@ public class PersoenlicheAbsenderlisteVerwalten
     int y = screenSize.height/2 - frameHeight/2;
     myFrame.setLocation(x,y);
     myFrame.setResizable(false);
-    showEDT();
+    myFrame.setVisible(true);
   }
   
+  /** Fügt compo UI Elemente gemäss den Kindern von conf.query(key) hinzu.
+   *  compo muss ein GridBagLayout haben. stepx und stepy geben an um
+   *  wieviel mit jedem UI Element die x und die y Koordinate der Zelle
+   *  erhöht werden soll. Wirklich sinnvoll sind hier nur (0,1) und (1,0).
+   */
   private void addUIElements(ConfigThingy conf, String key, JComponent compo, int stepx, int stepy)
   {
     //int gridx, int gridy, int gridwidth, int gridheight, double weightx, double weighty, int anchor,          int fill,                  Insets insets, int ipadx, int ipady) 
@@ -436,6 +481,11 @@ public class PersoenlicheAbsenderlisteVerwalten
     }
   }
 
+  /**
+   * Wartet auf Doppelklick und führt dann die actionPerformed() Methode
+   * eines ActionListeners aus.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private class MyActionMouseListener extends MouseAdapter
   {
     private JList list;
@@ -462,6 +512,11 @@ public class PersoenlicheAbsenderlisteVerwalten
   }
 
   
+  /**
+   * Übersetzt den Namen einer ACTION in eine Referenz auf das
+   * passende actionListener_... Objekt.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private ActionListener getAction(String action)
   {
     if (action.equals("abort"))
@@ -502,6 +557,12 @@ public class PersoenlicheAbsenderlisteVerwalten
     return null;
   }
   
+  /**
+   * Nimmt eine JList list, die ein DefaultListModel haben muss und ändert ihre
+   * Wertliste so, dass sie data entspricht. Die Datasets aus data werden nicht
+   * direkt als Werte verwendet, sondern in {@link ListElement} Objekte gewrappt.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private void setListElements(JList list, QueryResults data)
   {
     Object[] elements = new Object[data.size()];
@@ -523,11 +584,19 @@ public class PersoenlicheAbsenderlisteVerwalten
   }
   
   
+  /**
+   * Liefert zu einem Datensatz den in einer Listbox anzuzeigenden String.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private String getDisplayString(DJDataset ds)
   {
     return substituteVars(displayTemplate, ds);
   }
   
+  /**
+   * Wrapper um ein DJDataset zum Einfügen in eine JList. Die
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private class ListElement
   {
     private String displayString;
@@ -546,6 +615,7 @@ public class PersoenlicheAbsenderlisteVerwalten
     
     public DJDataset getDataset() {return ds;}
   }
+
   /**
    * Ersetzt "%{SPALTENNAME}" in str durch den Wert der entsprechenden Spalte im
    * datensatz.
@@ -575,7 +645,12 @@ public class PersoenlicheAbsenderlisteVerwalten
     return str;
   }
 
-  
+  /**
+   * Aktiviert oder Deaktiviert die {@link #buttonsToGreyOutIfNothingSelected} gemäss der
+   * Selektion oder nicht Selektion von Werten in den Listboxen.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private void updateButtonStates()
   {
     boolean enabled = false;
@@ -591,9 +666,13 @@ public class PersoenlicheAbsenderlisteVerwalten
     while (iter.hasNext()) ((JButton)iter.next()).setEnabled(enabled);
   }
 
+  /**
+   * Sorgt dafür, dass jeweils nur in einer der beiden Listboxen ein Eintrag
+   * selektiert sein kann und dass die entsprechenden Buttons ausgegraut werden
+   * wenn kein Eintrag selektiert ist.
+   */
   private class MyListSelectionListener implements ListSelectionListener
   {
-
     public void valueChanged(ListSelectionEvent e)
     {
       JList list = (JList)e.getSource();
@@ -624,6 +703,11 @@ public class PersoenlicheAbsenderlisteVerwalten
       dialogEndListener.actionPerformed(null);
   }
     
+  /**
+   * Implementiert die gleichnamige ACTION.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private void addToPAL()
   {
     Object[] sel = resultsJList.getSelectedValues();
@@ -645,7 +729,9 @@ public class PersoenlicheAbsenderlisteVerwalten
   }
 
   /**
-   * 
+   * Aktualisiert die Werte in der PAL Listbox, löscht die Selektionen
+   * in beiden Listboxen und passt den Ausgegraut-Status der Buttons
+   * entsprechend an. 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void listsHaveChanged()
@@ -656,6 +742,11 @@ public class PersoenlicheAbsenderlisteVerwalten
     updateButtonStates();
   }
   
+  /**
+   * Implementiert die gleichnamige ACTION.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private void removeFromPAL()
   {
     Object[] sel = palJList.getSelectedValues();
@@ -668,6 +759,11 @@ public class PersoenlicheAbsenderlisteVerwalten
     listsHaveChanged(); 
   }
   
+  /**
+   * Implementiert die gleichnamige ACTION.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private void editEntry()
   {
     ListElement e = (ListElement)palJList.getSelectedValue();
@@ -693,6 +789,11 @@ public class PersoenlicheAbsenderlisteVerwalten
     }
   }
   
+  /**
+   * Erzeugt eine Kopue von orig und ändert ihre Rolle auf
+   * "Kopie".
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private void copyDJDataset(DJDataset orig)
   {
     DJDataset newDS = orig.copy();
@@ -706,6 +807,11 @@ public class PersoenlicheAbsenderlisteVerwalten
     }
   }
   
+  /**
+   * Implementiert die gleichnamige ACTION.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private void copyEntry()
   {
     Object[] sel = resultsJList.getSelectedValues();
@@ -725,6 +831,11 @@ public class PersoenlicheAbsenderlisteVerwalten
     listsHaveChanged();
   }
   
+  /**
+   * Implementiert die gleichnamige ACTION.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private void newPALEntry()
   {
     DJDataset ds = dj.newDataset();
@@ -739,7 +850,12 @@ public class PersoenlicheAbsenderlisteVerwalten
     listsHaveChanged();
   }
   
-  
+  /**
+   * Implementiert die gleichnamige ACTION. Hier stecken die ganzen
+   * komplexen Heuristiken drinnen zur Auswertung der Suchanfrage.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private void search()
   {
     /* die möglichen Separatorzeichen zwischen Abteilung und Unterabteilung. */
@@ -1101,15 +1217,9 @@ public class PersoenlicheAbsenderlisteVerwalten
   }
   
   /**
-   * private Version von show(), die im Event-Dispatching Thread laufen muss.
-   * 
+   * Sorgt für das dauernde Neustarten des Dialogs.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private void showEDT()
-  {
-    myFrame.setVisible(true);
-  }
-  
   private static class RunTest implements ActionListener
   {
     private DatasourceJoiner dj;
