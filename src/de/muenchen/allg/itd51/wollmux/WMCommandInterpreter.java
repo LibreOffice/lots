@@ -36,6 +36,7 @@ import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextRange;
 import com.sun.star.uno.Exception;
 
+import de.muenchen.allg.afid.OOoURL;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
@@ -293,7 +294,6 @@ public class WMCommandInterpreter
         // Verwende URL im gegebenen Kontext.
         urlStr = new URL(documentCtx, urlStr).toExternalForm();
       }
-      urlStr = unoURL(urlStr);
 
       Logger.debug("Füge Textfragment \""
                    + frag_id
@@ -302,8 +302,11 @@ public class WMCommandInterpreter
                    + "\" ein.");
 
       // Textfragment einfügen
+      // TODO: Proxysettings aus UNO übernehmen!
+      new URL(urlStr).openConnection().getContentLength(); // Teste ob Ziel erreichbar.
+      
       insCursor.xDocumentInsertable().insertDocumentFromURL(
-          urlStr,
+          new OOoURL(urlStr, WollMux.getXComponentContext()).toString(),
           new PropertyValue[] {});
       // wird benötigt, damit das erste Element nicht unsichtbar ist...
       insCursor.xTextCursor().collapseToEnd();
@@ -424,27 +427,6 @@ public class WMCommandInterpreter
   }
 
   /**
-   * Diese Methode erzeugt mit Hilfe des URLTranformers eine URL, die für die
-   * Kommandos loadComponentFromURL und insertDocumentFromURL geeignet ist.
-   * 
-   * @param urlStr
-   * @return
-   * @throws Exception
-   *           Problem bei der Erzeugung der unoURL.
-   */
-  private static String unoURL(String urlStr) throws Exception
-  {
-    UnoService trans;
-    trans = UnoService.createWithContext(
-        "com.sun.star.util.URLTransformer",
-        WollMux.getXComponentContext());
-    com.sun.star.util.URL[] unoURL = new com.sun.star.util.URL[] { new com.sun.star.util.URL() };
-    unoURL[0].Complete = urlStr;
-    trans.xURLTransformer().parseStrict(unoURL);
-    return unoURL[0].Complete;
-  }
-
-  /**
    * Methode zum Testen des WMCommandoInterpreters.
    * 
    * @param args
@@ -475,7 +457,8 @@ public class WMCommandInterpreter
 
       // Dokument zum Parsen Öffnen
       URL url = new URL(cwd.toURL(), args[1]);
-      UNO.loadComponentFromURL(unoURL(url.toExternalForm()), true, false);
+      UNO.loadComponentFromURL(new OOoURL(url.toExternalForm(),
+          UNO.defaultContext).toString(), true, false);
 
       new WMCommandInterpreter(UNO.XTextDocument(UNO.compo), url).interpret();
     }

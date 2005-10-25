@@ -33,6 +33,8 @@ public class Event
 
   public static final int ON_ABSENDERDATEN_BEARBEITEN = 10;
 
+  public static final int ON_OPENFRAG = 11;
+
   public static final int UNKNOWN = 100;
 
   private int event = UNKNOWN;
@@ -41,9 +43,18 @@ public class Event
 
   private Object source = null;
 
+  private String argument = "";
+  
   public Event(int event, boolean isGUIEvent)
   {
     this.event = event;
+    this.isGUIEvent = isGUIEvent;
+  }
+
+  public Event(int event, String argument, boolean isGUIEvent)
+  {
+    this.event = event;
+    this.argument = argument;
     this.isGUIEvent = isGUIEvent;
   }
 
@@ -54,7 +65,7 @@ public class Event
         XInterface.class,
         docEvent.Source);
 
-    // Bekannte Event-Typen:
+    // Bekannte Event-Typen rausziehen:
     if (docEvent.EventName.equals("OnLoad")) this.event = ON_LOAD;
   }
 
@@ -79,6 +90,10 @@ public class Event
   public boolean isGUIEvent()
   {
     return isGUIEvent;
+  }
+  
+  public String getArgument() {
+    return argument;
   }
 
   public String toString()

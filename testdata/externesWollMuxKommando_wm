@@ -1,1 +1,1 @@
-CMD 'insertValue' DB_SPALTE 'Anrede'
+CMD 'insertValue' DB_SPALTE 'Vorname'

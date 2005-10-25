@@ -22,6 +22,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import com.sun.star.beans.NamedValue;
 import com.sun.star.frame.DispatchDescriptor;
@@ -94,6 +96,20 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
    * implementiert.
    */
   public static final java.lang.String[] SERVICENAMES = { "com.sun.star.task.AsyncJob" };
+
+  /**
+   * Dieses Feld enthält den Namen des Protokolls der WollMux-Kommando-URLs
+   */
+  public static final String wollmuxProtocol = "WollMux";
+
+  /*
+   * Hier kommt die Definition der Befehlsnamen, die über WollMux-Kommando-URLs
+   * abgesetzt werden können.
+   */
+
+  public static final String cmdAbsenderdatenBearbeiten = "AbsenderdatenBearbeitenDialog";
+
+  public static final String cmdOpenFrag = "OpenFrag";
 
   /**
    * Der Konstruktor erzeugt einen neues WollMux-Service im XComponentContext
@@ -365,11 +381,27 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
   /* IN */int iSearchFlags)
   {
     XDispatch xRet = null;
-    if (aURL.Protocol.compareTo(".WollMux:") == 0)
+    try
     {
-      if (aURL.Path.compareTo("AbsenderdatenBearbeitenDialog") == 0)
-        xRet = this;
-      if (aURL.Path.compareTo("OpenFrag") == 0) xRet = this;
+      URI uri = new URI(aURL.Complete);
+      Logger.debug2("queryDispatch: "
+                    + uri.toString()
+                    + "#"
+                    + uri.getSchemeSpecificPart()
+                    + "#"
+                    + uri.getFragment()
+                    + "#"); // TODO deleteme
+      if (uri.getScheme().equals(wollmuxProtocol))
+      {
+        if (uri.getSchemeSpecificPart().equals(cmdAbsenderdatenBearbeiten))
+          xRet = this;
+
+        if (uri.getSchemeSpecificPart().equals(cmdOpenFrag)) xRet = this;
+      }
+    }
+    catch (URISyntaxException e)
+    {
+      Logger.error(e);
     }
     return xRet;
   }
@@ -413,19 +445,32 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
   /* IN */com.sun.star.beans.PropertyValue[] aArguments)
   {
     Logger.init(Logger.ALL); // TODO: remove me
-    if (aURL.Protocol.compareTo(".WollMux:") == 0)
+    try
     {
-      if (aURL.Path.compareTo("AbsenderdatenBearbeitenDialog") == 0)
+      URI uri = new URI(aURL.Complete);
+
+      if (uri.getScheme().equals(wollmuxProtocol))
       {
-        Logger
-        .debug2("Dispatch: Aufruf von .WollMux:AbsenderdatenBearbeitenDialog");
-        EventProcessor.create().addEvent(
-            new Event(Event.ON_ABSENDERDATEN_BEARBEITEN, true));
+        if (uri.getSchemeSpecificPart().equals(cmdAbsenderdatenBearbeiten))
+        {
+          Logger
+              .debug2("Dispatch: Aufruf von .WollMux:AbsenderdatenBearbeitenDialog");
+          EventProcessor.create().addEvent(
+              new Event(Event.ON_ABSENDERDATEN_BEARBEITEN, true));
+        }
+
+        if (uri.getSchemeSpecificPart().equals(cmdOpenFrag))
+        {
+          Logger.debug2("Dispatch: Aufruf von WollMux:OpenFrag mit Frag:"
+                        + uri.getFragment());
+          EventProcessor.create().addEvent(
+              new Event(Event.ON_OPENFRAG, uri.getFragment(), false));
+        }
       }
-      if (aURL.Path.compareTo("OpenFrag") == 0)
-      {
-        Logger.debug2("Dispatch: Aufruf von .WollMux:OpenFrag");
-      }
+    }
+    catch (URISyntaxException e)
+    {
+      Logger.error(e);
     }
   }
 

@@ -19,15 +19,20 @@ package de.muenchen.allg.itd51.wollmux;
 
 import java.net.URL;
 
+import com.sun.star.beans.PropertyValue;
+
+import de.muenchen.allg.afid.OOoURL;
 import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.comp.WollMux;
+import de.muenchen.allg.itd51.wollmux.dialog.AbsenderAuswaehlen;
 import de.muenchen.allg.itd51.wollmux.dialog.PersoenlicheAbsenderlisteVerwalten;
 
 /**
  * TODO: Dokumentieren von EventHandler
+ * 
  * @author lut
- *
+ * 
  */
 public class EventHandler
 {
@@ -55,6 +60,31 @@ public class EventHandler
           new WMCommandInterpreter(source.xTextDocument(), url).interpret();
         }
       }
+
+      // ON_OPENFRAG:
+      if (event.getEvent() == Event.ON_OPENFRAG)
+      {
+        UnoService desktop = UnoService.createWithContext(
+            "com.sun.star.frame.Desktop",
+            WollMux.getXComponentContext());
+        String frag_id = event.getArgument();
+        String urlStr = WollMux.getTextFragmentList().getURLByID(frag_id);
+
+        // open document as Template:
+        PropertyValue[] props = new PropertyValue[] { new PropertyValue() };
+        props[0].Name = "AsTemplate";
+        props[0].Value = Boolean.TRUE;
+
+        UnoService doc = new UnoService(desktop.xComponentLoader()
+            .loadComponentFromURL(
+                new OOoURL(urlStr, WollMux.getXComponentContext()).toString(),
+                "_blank",
+                0,
+                props));
+
+        new WMCommandInterpreter(doc.xTextDocument(), new URL(urlStr))
+            .interpret();
+      }
     }
     catch (java.lang.Exception e)
     {
@@ -78,11 +108,13 @@ public class EventHandler
       // ON_ABSENDERDATEN_BEARBEITEN:
       if (event.getEvent() == Event.ON_ABSENDERDATEN_BEARBEITEN)
       {
+        ConfigThingy whoAmIconf = WollMux.getWollmuxConf().get(
+            "AbsenderAuswaehlen");
         ConfigThingy PALconf = WollMux.getWollmuxConf().get(
             "PersoenlicheAbsenderliste");
         ConfigThingy ADBconf = WollMux.getWollmuxConf().get(
             "AbsenderdatenBearbeiten");
-        new PersoenlicheAbsenderlisteVerwalten(PALconf, ADBconf, WollMux
+        new AbsenderAuswaehlen(whoAmIconf, PALconf, ADBconf, WollMux
             .getDatasourceJoiner(), EventProcessor.create());
       }
     }

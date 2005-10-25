@@ -26,7 +26,7 @@
 									<value>externer Briefkopf</value>
 								</prop>
 								<prop oor:name="URL" oor:type="xs:string">
-									<value>vnd.sun.star.script:briefkopf.Briefkopf.createExternerBriefkopf?language=Basic&amp;location=application</value>
+									<value>WollMux:OpenFrag#test_c</value>
 								</prop>
 								<prop oor:name="Target" oor:type="xs:string">
 									<value>_self</value>
@@ -40,78 +40,10 @@
 									<value/>
 								</prop>
 								<prop oor:name="Title" oor:type="xs:string">
-									<value>interner Briefkopf</value>
+									<value>WMKommandoTest</value>
 								</prop>
 								<prop oor:name="URL" oor:type="xs:string">
-									<value>vnd.sun.star.script:briefkopf.Briefkopf.createInternerBriefkopf?language=Basic&amp;location=application</value>
-								</prop>
-								<prop oor:name="Target" oor:type="xs:string">
-									<value>_self</value>
-								</prop>
-								<prop oor:name="ImageIdentifier" oor:type="xs:string">
-									<value/>
-								</prop>
-							</node>
-							<node oor:name="menu03" oor:op="replace">
-								<prop oor:name="Context" oor:type="xs:string">
-									<value/>
-								</prop>
-								<prop oor:name="Title" oor:type="xs:string">
-									<value>externe Kurzmitteilung</value>
-								</prop>
-								<prop oor:name="URL" oor:type="xs:string">
-									<value>vnd.sun.star.script:briefkopf.Briefkopf.createExternerBriefkopf?language=Basic&amp;location=application</value>
-								</prop>
-								<prop oor:name="Target" oor:type="xs:string">
-									<value>_self</value>
-								</prop>
-								<prop oor:name="ImageIdentifier" oor:type="xs:string">
-									<value/>
-								</prop>
-							</node>
-							<node oor:name="menu04" oor:op="replace">
-								<prop oor:name="Context" oor:type="xs:string">
-									<value/>
-								</prop>
-								<prop oor:name="Title" oor:type="xs:string">
-									<value>interne Kurzmitteilung</value>
-								</prop>
-								<prop oor:name="URL" oor:type="xs:string">
-									<value>vnd.sun.star.script:briefkopf.Briefkopf.createExternerBriefkopf?language=Basic&amp;location=application</value>
-								</prop>
-								<prop oor:name="Target" oor:type="xs:string">
-									<value>_self</value>
-								</prop>
-								<prop oor:name="ImageIdentifier" oor:type="xs:string">
-									<value/>
-								</prop>
-							</node>
-							<node oor:name="menu05" oor:op="replace">
-								<prop oor:name="Context" oor:type="xs:string">
-									<value/>
-								</prop>
-								<prop oor:name="Title" oor:type="xs:string">
-									<value>FAX-Vorlage</value>
-								</prop>
-								<prop oor:name="URL" oor:type="xs:string">
-									<value>vnd.sun.star.script:briefkopf.Briefkopf.createExternerBriefkopf?language=Basic&amp;location=application</value>
-								</prop>
-								<prop oor:name="Target" oor:type="xs:string">
-									<value>_self</value>
-								</prop>
-								<prop oor:name="ImageIdentifier" oor:type="xs:string">
-									<value/>
-								</prop>
-							</node>
-							<node oor:name="menu06" oor:op="replace">
-								<prop oor:name="Context" oor:type="xs:string">
-									<value/>
-								</prop>
-								<prop oor:name="Title" oor:type="xs:string">
-									<value>&lt;...Referatvorlagen...&gt;</value>
-								</prop>
-								<prop oor:name="URL" oor:type="xs:string">
-									<value>vnd.sun.star.script:briefkopf.Briefkopf.createExternerBriefkopf?language=Basic&amp;location=application</value>
+									<value>WollMux:OpenFrag#WMKommandoTest</value>
 								</prop>
 								<prop oor:name="Target" oor:type="xs:string">
 									<value>_self</value>
@@ -135,7 +67,7 @@
 							<value>Absenderdaten</value>
 						</prop>
 						<prop oor:name="URL" oor:type="xs:string">
-							<value>.WollMux:AbsenderdatenBearbeitenDialog</value>
+							<value>WollMux:AbsenderdatenBearbeitenDialog</value>
 						</prop>
 						<prop oor:name="Target" oor:type="xs:string">
 							<value>_self</value>
