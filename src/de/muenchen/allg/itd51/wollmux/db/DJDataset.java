@@ -86,7 +86,7 @@ public interface DJDataset extends Dataset
   
   /**
    * Legt eine Kopie dieses Datensatzes im LOS an. Achtung! Dies verändert
-   * nicht den Rückgabewert von {@link #isFromLOS()}, da dieser Datensatz
+   * nicht den Rückgabewert von this.{@link #isFromLOS()}, da this
    * selbst dadurch nicht verändert wird.
    * 
    * @return die neue Kopie.
