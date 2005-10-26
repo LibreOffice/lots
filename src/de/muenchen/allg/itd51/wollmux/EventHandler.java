@@ -21,7 +21,6 @@ import java.net.URL;
 
 import com.sun.star.beans.PropertyValue;
 
-import de.muenchen.allg.afid.OOoURL;
 import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.comp.WollMux;
@@ -67,7 +66,16 @@ public class EventHandler
             "com.sun.star.frame.Desktop",
             WollMux.getXComponentContext());
         String frag_id = event.getArgument();
+
+        // Fragment-URL holen und aufbereiten:
         String urlStr = WollMux.getTextFragmentList().getURLByID(frag_id);
+        UnoService trans = UnoService.createWithContext(
+            "com.sun.star.util.URLTransformer",
+            WollMux.getXComponentContext());
+        com.sun.star.util.URL[] unoURL = new com.sun.star.util.URL[] { new com.sun.star.util.URL() };
+        unoURL[0].Complete = urlStr;
+        trans.xURLTransformer().parseStrict(unoURL);
+        urlStr = unoURL[0].Complete;
 
         // open document as Template:
         PropertyValue[] props = new PropertyValue[] { new PropertyValue() };
@@ -75,11 +83,7 @@ public class EventHandler
         props[0].Value = Boolean.TRUE;
 
         UnoService doc = new UnoService(desktop.xComponentLoader()
-            .loadComponentFromURL(
-                new OOoURL(urlStr, WollMux.getXComponentContext()).toString(),
-                "_blank",
-                0,
-                props));
+            .loadComponentFromURL(urlStr, "_blank", 0, props));
 
         new WMCommandInterpreter(doc.xTextDocument(), new URL(urlStr))
             .interpret();
@@ -102,6 +106,7 @@ public class EventHandler
   public static void processGUIEvent(Event event)
   {
     Logger.debug("Bearbeiten des GUI-Events: " + event);
+
     try
     {
       // ON_ABSENDERDATEN_BEARBEITEN:

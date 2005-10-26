@@ -36,7 +36,6 @@ import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextRange;
 import com.sun.star.uno.Exception;
 
-import de.muenchen.allg.afid.OOoURL;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
@@ -184,6 +183,7 @@ public class WMCommandInterpreter
       ConfigThingy wm = new ConfigThingy("WMCmd", documentCtx,
           new StringReader(cmdString)).get("WM");
       ConfigThingy cmd = wm.get("CMD");
+      // TODO: nichts machen wenn FROZEN "true"
 
       // insertFrag
       if (cmd.toString().equals("insertFrag"))
@@ -287,13 +287,20 @@ public class WMCommandInterpreter
       insCursor.xTextCursor().goRight((short) FRAGMENT_MARK.length(), false);
       insCursor.xTextCursor().collapseToStart();
 
-      // URL aus Fragmentliste erzeugen.
+      // Fragment-URL holen und aufbereiten.
       String urlStr = WollMux.getTextFragmentList().getURLByID(frag_id);
       if (documentCtx != null)
       {
         // Verwende URL im gegebenen Kontext.
         urlStr = new URL(documentCtx, urlStr).toExternalForm();
       }
+      UnoService trans = UnoService.createWithContext(
+          "com.sun.star.util.URLTransformer",
+          WollMux.getXComponentContext());
+      com.sun.star.util.URL[] unoURL = new com.sun.star.util.URL[] { new com.sun.star.util.URL() };
+      unoURL[0].Complete = urlStr;
+      trans.xURLTransformer().parseStrict(unoURL);
+      urlStr = unoURL[0].Complete;
 
       Logger.debug("Füge Textfragment \""
                    + frag_id
@@ -303,13 +310,15 @@ public class WMCommandInterpreter
 
       // Textfragment einfügen
       // TODO: Proxysettings aus UNO übernehmen!
-      new URL(urlStr).openConnection().getContentLength(); // Teste ob Ziel erreichbar.
-      
+      new URL(urlStr).openConnection().getContentLength(); // Teste ob Ziel
+      // erreichbar.
+
       insCursor.xDocumentInsertable().insertDocumentFromURL(
-          new OOoURL(urlStr, WollMux.getXComponentContext()).toString(),
+          urlStr,
           new PropertyValue[] {});
-      // wird benötigt, damit das erste Element nicht unsichtbar ist...
-      insCursor.xTextCursor().collapseToEnd();
+      // TODO:evtl raus! wird benötigt, damit das erste Element nicht unsichtbar
+      // ist...
+      // insCursor.xTextCursor().collapseToEnd();
 
       // FRAGMENT_MARKen verstecken:
       UnoService hiddenCursor = new UnoService(text.xText().createTextCursor());
@@ -327,6 +336,7 @@ public class WMCommandInterpreter
       hiddenCursor.setPropertyValue("CharHidden", Boolean.TRUE);
 
       // Bookmark an neuen Range anpassen
+      // TODO: FROZEN "true" setzen.
       reRangeBookmark(bookmarkName, bookmarkCursor.xTextRange());
 
     }
@@ -455,12 +465,20 @@ public class WMCommandInterpreter
 
       Logger.init(Logger.ALL);
 
-      // Dokument zum Parsen Öffnen
-      URL url = new URL(cwd.toURL(), args[1]);
-      UNO.loadComponentFromURL(new OOoURL(url.toExternalForm(),
-          UNO.defaultContext).toString(), true, false);
+      // Dokument URL aufbereiten und Dokument zum Parsen öffnen
+      String urlStr = new URL(cwd.toURL(), args[1]).toExternalForm();
+      UnoService trans = UnoService.createWithContext(
+          "com.sun.star.util.URLTransformer",
+          WollMux.getXComponentContext());
+      com.sun.star.util.URL[] unoURL = new com.sun.star.util.URL[] { new com.sun.star.util.URL() };
+      unoURL[0].Complete = urlStr;
+      trans.xURLTransformer().parseStrict(unoURL);
+      urlStr = unoURL[0].Complete;
 
-      new WMCommandInterpreter(UNO.XTextDocument(UNO.compo), url).interpret();
+      UNO.loadComponentFromURL(urlStr, true, false);
+
+      new WMCommandInterpreter(UNO.XTextDocument(UNO.compo), new URL(urlStr))
+          .interpret();
     }
     catch (java.lang.Exception e)
     {
