@@ -107,12 +107,12 @@ public class EventHandler
       // ON_ABSENDERDATEN_BEARBEITEN:
       if (event.getEvent() == Event.ON_ABSENDERDATEN_BEARBEITEN)
       {
-        ConfigThingy whoAmIconf = WollMux.getWollmuxConf().get(
-            "AbsenderAuswaehlen");
-        ConfigThingy PALconf = WollMux.getWollmuxConf().get(
-            "PersoenlicheAbsenderliste");
-        ConfigThingy ADBconf = WollMux.getWollmuxConf().get(
-            "AbsenderdatenBearbeiten");
+        ConfigThingy whoAmIconf = WollMux.getWollmuxConf().query(
+            "AbsenderAuswaehlen").getLastChild();
+        ConfigThingy PALconf = WollMux.getWollmuxConf().query(
+            "PersoenlicheAbsenderliste").getLastChild();
+        ConfigThingy ADBconf = WollMux.getWollmuxConf().query(
+            "AbsenderdatenBearbeiten").getLastChild();
         new AbsenderAuswaehlen(whoAmIconf, PALconf, ADBconf, WollMux
             .getDatasourceJoiner(), EventProcessor.create());
       }
