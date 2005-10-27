@@ -12,7 +12,8 @@
  * 14.10.2005 | BNK | Kommentar korrigiert: Standard ist LOG nicht NONE
  *                  | System.err als Standardausgabestrom
  * 14.10.2005 | LUT | critical(*) --> error(*)
- *                    + Anzeige des Datums bei allen Meldungen.                  
+ *                    + Anzeige des Datums bei allen Meldungen.
+ * 27.10.2005 | BNK | Leerzeile nach jeder Logmeldung                  
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -128,7 +129,7 @@ public class Logger {
 	 */
 	public static void error(String msg) {
 		if (mode >= ERROR)
-			println("ERROR: " + msg);
+			println("ERROR: " + msg +"\n");
 	}
 
 	/**
@@ -152,7 +153,7 @@ public class Logger {
 	 */
 	public static void log(String msg) {
 		if (mode >= LOG)
-			println("LOG: " + msg);
+			println("LOG: " + msg + "\n");
 	}
 
 	/**
@@ -176,7 +177,7 @@ public class Logger {
 	 */
 	public static void debug(String msg) {
 		if (mode >= DEBUG)
-			println("DEBUG: " + msg);
+			println("DEBUG: " + msg + "\n");
 	}
 
 	/**
@@ -203,7 +204,7 @@ public class Logger {
 	 */
 	public static void debug2(String msg) {
 		if (mode >= ALL)
-			println("DEBUG2: " + msg);
+			println("DEBUG2: " + msg + "\n");
 	}
 
 	/**
@@ -242,5 +243,6 @@ public class Logger {
 				out.println(prefix + se[i].toString());
 			}
 		}
+        out.println();
 	}
 }
