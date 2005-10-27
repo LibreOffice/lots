@@ -9,6 +9,7 @@
 * Datum      | Wer | Änderungsgrund
 * -------------------------------------------------------------------
 * 25.10.2005 | BNK | Erstellung
+* 27.10.2005 | BNK | back + CLOSEACTION
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -102,11 +103,21 @@ public class AbsenderAuswaehlen
     { public void actionPerformed(ActionEvent e) { abort(); } };
     
     /**
+     * ActionListener für Buttons mit der ACTION "back".
+     */
+    private ActionListener actionListener_back = new ActionListener()
+      { public void actionPerformed(ActionEvent e) { back(); } };
+      
+    /**
      * ActionListener für Buttons mit der ACTION "editList".
      */
     private ActionListener actionListener_editList = new ActionListener()
     { public void actionPerformed(ActionEvent e) { editList(); } };
     
+  /**
+   * wird getriggert bei windowClosing() Event.
+   */
+  private ActionListener closeAction = actionListener_abort;
       
   /**
    * Der Rahmen des gesamten Dialogs.
@@ -136,6 +147,11 @@ public class AbsenderAuswaehlen
   private ActionListener dialogEndListener;
 
   /**
+   * Das ConfigThingy, das diesen Dialog spezifiziert.
+   */
+  private ConfigThingy myConf;
+  
+  /**
    * Das ConfigThingy, das den Dialog zum Bearbeiten der Absenderliste
    * spezifiziert.
    */
@@ -163,7 +179,9 @@ public class AbsenderAuswaehlen
    * @param dialogEndListener falls nicht null, wird 
    *        die {@link ActionListener#actionPerformed(java.awt.event.ActionEvent)}
    *        Methode aufgerufen (im Event Dispatching Thread), 
-   *        nachdem der Dialog geschlossen wurde. 
+   *        nachdem der Dialog geschlossen wurde.
+   *        Das actionCommand des ActionEvents gibt die Aktion an, die
+   *        das Speichern des Dialogs veranlasst hat. 
    * @throws ConfigurationErrorException im Falle eines schwerwiegenden
    *         Konfigurationsfehlers, der es dem Dialog unmöglich macht,
    *         zu funktionieren (z.B. dass der "Fenster" Schlüssel fehlt.
@@ -171,6 +189,7 @@ public class AbsenderAuswaehlen
   public AbsenderAuswaehlen(ConfigThingy conf, ConfigThingy verConf, ConfigThingy abConf, DatasourceJoiner dj, ActionListener dialogEndListener) throws ConfigurationErrorException
   {
     this.dj = dj;
+    this.myConf = conf;
     this.abConf = abConf;
     this.verConf = verConf;
     this.dialogEndListener = dialogEndListener;
@@ -212,6 +231,10 @@ public class AbsenderAuswaehlen
     try{
       title = fensterDesc.get("TITLE").toString();
     } catch(Exception x){};
+    
+    try{
+      closeAction = getAction(fensterDesc.get("CLOSEACTION").toString());
+    } catch(Exception x){}
     
     //Create and set up the window.
     myFrame = new JFrame(title);
@@ -418,6 +441,10 @@ public class AbsenderAuswaehlen
     if (action.equals("abort"))
     {
       return actionListener_abort;
+    } 
+    else if (action.equals("back"))
+    {
+      return actionListener_back;
     }
     else if (action.equals("editList"))
     {
@@ -557,11 +584,31 @@ public class AbsenderAuswaehlen
    */
   private void abort()
   {
+    dialogEnd("abort");
+  }
+  
+  /**
+   * Implementiert die gleichnamige ACTION.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private void back()
+  {
+    dialogEnd("back");
+  }
+
+  
+  /**
+   * Beendet den Dialog und liefer actionCommand an den
+   * dialogEndHandler zurück (falls er nicht null ist).
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private void dialogEnd(String actionCommand)
+  {
     myFrame.dispose();
     if (dialogEndListener != null)
-      dialogEndListener.actionPerformed(null);
+      dialogEndListener.actionPerformed(new ActionEvent(actionCommand,0,actionCommand));
   }
-    
   
   /**
    * Implementiert die gleichnamige ACTION.
@@ -570,7 +617,7 @@ public class AbsenderAuswaehlen
    */
   private void editList()
   {
-    ActionListener del = dialogEndListener;
+    ActionListener del = new MyDialogEndListener(myConf, verConf, abConf, dj, dialogEndListener, null);
     dialogEndListener = null;
     abort();
     try
@@ -584,6 +631,49 @@ public class AbsenderAuswaehlen
   }
   
     
+  private static class MyDialogEndListener implements ActionListener
+  {
+    private ConfigThingy conf;
+    private ConfigThingy abConf;
+    private ConfigThingy verConf;
+    private DatasourceJoiner dj;
+    private ActionListener dialogEndListener;
+    private String actionCommand;
+    
+    /**
+     * Falls actionPerformed() mit getActionCommand().equals("back")
+     * aufgerufen wird, wird ein neuer  AbsenderAuswaehlen Dialog mit
+     * den übergebenen Parametern erzeugt. Ansonsten wird
+     * der dialogEndListener mit actionCommand aufgerufen. Falls actionCommand
+     * null ist wird das action command des ActionEvents weitergereicht,
+     * der actionPerformed() übergeben wird.
+     */
+    public MyDialogEndListener(ConfigThingy conf, ConfigThingy verConf,
+        ConfigThingy abConf, DatasourceJoiner dj,
+        ActionListener dialogEndListener, String actionCommand)
+    {
+      this.conf = conf;
+      this.verConf = verConf;
+      this.abConf = abConf;
+      this.dj = dj;
+      this.dialogEndListener = dialogEndListener;
+      this.actionCommand = actionCommand;
+    }
+    
+    public void actionPerformed(ActionEvent e)
+    {
+      if (e.getActionCommand().equals("back"))
+        try{
+          new AbsenderAuswaehlen(conf, verConf, abConf, dj, dialogEndListener);
+        }catch(Exception x) {Logger.error(x);}
+      else
+      {
+        if (actionCommand == null) actionCommand = e.getActionCommand();
+        if (dialogEndListener != null)
+          dialogEndListener.actionPerformed(new ActionEvent(actionCommand,0,actionCommand));
+      }
+    }
+  }
   
   /**
    * Ein WindowListener, der auf den JFrame registriert wird, damit als
@@ -595,7 +685,7 @@ public class AbsenderAuswaehlen
     public MyWindowListener(){}
     public void windowActivated(WindowEvent e) { }
     public void windowClosed(WindowEvent e) {}
-    public void windowClosing(WindowEvent e) { abort(); }
+    public void windowClosing(WindowEvent e) { closeAction.actionPerformed(null); }
     public void windowDeactivated(WindowEvent e) { }
     public void windowDeiconified(WindowEvent e) {}
     public void windowIconified(WindowEvent e) { }
@@ -646,6 +736,9 @@ public class AbsenderAuswaehlen
     public void actionPerformed(ActionEvent e)
     {
       try{
+        try{
+          if (e.getActionCommand().equals("abort")) System.exit(0);
+        }catch(Exception x){}
         new AbsenderAuswaehlen(conf, verConf, abConf, dj, this);
       } catch(ConfigurationErrorException x)
       {

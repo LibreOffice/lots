@@ -18,6 +18,7 @@
 *                  | show() entfernt zur Vermeidung von Thread-Problemen
 * 24.10.2005 | BNK | restoreStandard() Buttons nicht mehr ausgegraut, wenn 
 *                  | Werte nicht geändert wurden, aber bereits aus dem LOS sind.
+* 27.10.2005 | BNK | back + CLOSEACTION
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -147,28 +148,41 @@ public class DatensatzBearbeiten
   /**
    * ActionListener für Buttons mit der ACTION "abort". 
    */
-  private ActionListener actionListenerDatensatzBearbeiten_abort = new ActionListener()
+  private ActionListener actionListener_abort = new ActionListener()
         { public void actionPerformed(ActionEvent e){ abort(); } };
-        
+ 
+        /**
+         * ActionListener für Buttons mit der ACTION "back".
+         */
+        private ActionListener actionListener_back = new ActionListener()
+          { public void actionPerformed(ActionEvent e) { back(); } };
+          
         /**
          * ActionListener für Buttons mit der ACTION "restoreStandard". 
          */        
-  private ActionListener actionListenerDatensatzBearbeiten_restoreStandard = new ActionListener()
+  private ActionListener actionListener_restoreStandard = new ActionListener()
         { public void actionPerformed(ActionEvent e){ restoreStandard(); } };
         /**
          * ActionListener für Buttons mit der ACTION "save". 
          */
-  private ActionListener actionListenerDatensatzBearbeiten_save = new ActionListener()
+  private ActionListener actionListener_save = new ActionListener()
         { public void actionPerformed(ActionEvent e){ save(); } };
         /**
          * ActionListener für Buttons mit der ACTION "saveAndExit". 
          */
-  private ActionListener actionListenerDatensatzBearbeiten_saveAndExit = new ActionListener()
+  private ActionListener actionListener_saveAndExit = new ActionListener()
         { public void actionPerformed(ActionEvent e){ saveAndExit(); } };
   
+  /**
+  * wir bei Ende des Dialogs aufgerufen wenn nicht null (siehe Konstruktor).
+  */
   private ActionListener dialogEndListener = null;
-    
   
+  /**
+   * wird getriggert bei windowClosing() Event.
+   */
+  private ActionListener closeAction = actionListener_abort;
+    
   /**
    * Erzeugt einen neuen Dialog und zeigt ihn an.
    * @param conf das ConfigThingy, das den Dialog beschreibt (der Vater des
@@ -178,6 +192,8 @@ public class DatensatzBearbeiten
    *        die {@link ActionListener#actionPerformed(java.awt.event.ActionEvent)}
    *        Methode wird aufgerufen (im Event Dispatching Thread), 
    *        nachdem der Dialog geschlossen wurde.
+   *        Das actionCommand des ActionEvents gibt die Aktion an, die
+   *        das Speichern des Dialogs veranlasst hat.
    * @throws ConfigurationErrorException im Falle eines schwerwiegenden
    *         Konfigurationsfehlers, der es dem Dialog unmöglich macht,
    *         zu funktionieren (z.B. dass der "Fenster" Schlüssel fehlt.
@@ -268,9 +284,29 @@ public class DatensatzBearbeiten
    */
   private void abort()
   {
+    dialogEnd("abort");
+  }
+  
+  /**
+   * Implementiert die gleichnamige ACTION.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private void back()
+  {
+    dialogEnd("back");
+  }
+  
+  /**
+   * Beendet den Dialog und ruft falls nötig den dialogEndListener auf
+   * wobei das gegebene actionCommand übergeben wird.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private void dialogEnd(String actionCommand)
+  {
     myFrame.dispose();
     if (dialogEndListener != null)
-      dialogEndListener.actionPerformed(null);
+      dialogEndListener.actionPerformed(new ActionEvent(actionCommand,0,actionCommand));
   }
   
   /**
@@ -314,7 +350,7 @@ public class DatensatzBearbeiten
    */
   private void saveAndExit()
   {
-    if (save()) abort();
+    if (save()) dialogEnd("saveAndExit");
   }
   
   /**
@@ -327,7 +363,7 @@ public class DatensatzBearbeiten
     public MyWindowListener(){}
     public void windowActivated(WindowEvent e) { }
     public void windowClosed(WindowEvent e) {}
-    public void windowClosing(WindowEvent e) { abort(); }
+    public void windowClosing(WindowEvent e) { closeAction.actionPerformed(null); }
     public void windowDeactivated(WindowEvent e) { }
     public void windowDeiconified(WindowEvent e) {}
     public void windowIconified(WindowEvent e) { }
@@ -382,6 +418,7 @@ public class DatensatzBearbeiten
     myFrame.setTitle(currentWindow.getTitle());
     myFrame.setVisible(true);
     cardLayout.show(cardPanel,currentWindow.getName());
+    closeAction = currentWindow.getCloseAction();
   }
 
   /**
@@ -645,6 +682,8 @@ public class DatensatzBearbeiten
      */
     private List buttonsToGreyOutIfNoChanges = new Vector();
     
+    private ActionListener closeAction = actionListener_abort;
+    
     /**
      * Liefert das JPanel für diese Dialogseite zurück.
      * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -675,6 +714,8 @@ public class DatensatzBearbeiten
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     public String getName() {return name;}
+    
+    public ActionListener getCloseAction() {return this.closeAction;}
     
     public void save()
     {
@@ -740,6 +781,10 @@ public class DatensatzBearbeiten
     {
       title = "TITLE fehlt in Fensterbeschreibung";
       try{title = substituteVars(""+conf.get("TITLE"));}catch(NodeNotFoundException x){}
+      
+      try{
+        closeAction = getAction(conf.get("CLOSEACTION").toString());
+      } catch(Exception x){}
       
       myPanel = new JPanel(new BorderLayout());
       myInputPanel = new JPanel();
@@ -936,22 +981,15 @@ public class DatensatzBearbeiten
               uiElement.add(button);
               myButtonPanel.add(uiElement);
               
-              if (action.equals("abort"))
-              {
-                button.addActionListener(actionListenerDatensatzBearbeiten_abort);
-              } else
+              ActionListener actionL = getAction(action);
+              if (actionL != null) 
+                button.addActionListener(actionL);
+              else
+                button.setEnabled(false);
+              
               if (action.equals("restoreStandard"))
               {
                 buttonsToGreyOutIfNoChanges.add(button);
-                button.addActionListener(actionListenerDatensatzBearbeiten_restoreStandard);
-              } else
-              if (action.equals("save"))
-              {
-                button.addActionListener(actionListenerDatensatzBearbeiten_save);
-              } else
-              if (action.equals("saveAndExit"))
-              {
-                button.addActionListener(actionListenerDatensatzBearbeiten_saveAndExit);
               } else
               if (action.equals("switchWindow"))
               {
@@ -959,14 +997,9 @@ public class DatensatzBearbeiten
                 button.addActionListener( new ActionListener()
                     { public void actionPerformed(ActionEvent e){ showWindow(window); }
                     });
-              } else
-              if (action.equals(""))
-              {
-                button.setEnabled(false);
-              }
-              else
-                Logger.error("Ununterstützte ACTION: "+action);
               
+                button.setEnabled(true);
+              }
               
             }
             else if (type.equals("glue"))
@@ -988,6 +1021,46 @@ public class DatensatzBearbeiten
     }
   }
   
+  /**
+   * Übersetzt den Namen einer ACTION in eine Referenz auf das
+   * passende actionListener_... Objekt.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private ActionListener getAction(String action)
+  {
+    if (action.equals("abort"))
+    {
+      return actionListener_abort;
+    }
+    else if (action.equals("back"))
+    {
+      return actionListener_back;
+    }
+    else if (action.equals("restoreStandard"))
+    {
+      return actionListener_restoreStandard;
+    }
+    else if (action.equals("save"))
+    {
+      return actionListener_save;
+    }
+    else if (action.equals("saveAndExit"))
+    {
+      return actionListener_saveAndExit;
+    }
+    else if (action.equals("switchWindow"))
+    {
+      return null;
+    }
+    else if (action.equals(""))
+    {
+      return null;
+    }
+    else
+      Logger.error("Ununterstützte ACTION: "+action);
+    
+    return null;
+  }
   
   public static void main(String[] args) throws Exception
   {

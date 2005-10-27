@@ -17,6 +17,7 @@
 *                  | Sortierung
 *                  | Gegenseitiger Ausschluss der Selektierung
 * 25.10.2005 | BNK | besser kommentiert
+* 27.10.2005 | BNK | back + CLOSEACTION
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -113,6 +114,12 @@ public class PersoenlicheAbsenderlisteVerwalten
    */
   private ActionListener actionListener_abort = new ActionListener()
     { public void actionPerformed(ActionEvent e) { abort(); } };
+  
+    /**
+     * ActionListener für Buttons mit der ACTION "back".
+     */
+    private ActionListener actionListener_back = new ActionListener()
+      { public void actionPerformed(ActionEvent e) { back(); } };
     
     /**
      * ActionListener für Buttons mit der ACTION "search".
@@ -149,6 +156,11 @@ public class PersoenlicheAbsenderlisteVerwalten
      */
     private ActionListener actionListener_newPALEntry = new ActionListener()
     { public void actionPerformed(ActionEvent e) { newPALEntry(); } };
+    
+  /**
+   * wird getriggert bei windowClosing() Event.
+   */
+  private ActionListener closeAction = actionListener_abort;
     
   /**
    * Der Rahmen des gesamten Dialogs.
@@ -193,6 +205,12 @@ public class PersoenlicheAbsenderlisteVerwalten
   private ActionListener dialogEndListener;
 
   /**
+   * Das ConfigThingy, das diesen Dialog spezifiziert.
+   */
+  private ConfigThingy myConf;
+
+  
+  /**
    * Das ConfigThingy, das den Dialog Datensatz Bearbeiten für das Bearbeiten
    * eines Datensatzes der PAL spezifiziert.
    */
@@ -215,6 +233,8 @@ public class PersoenlicheAbsenderlisteVerwalten
    *        die {@link ActionListener#actionPerformed(java.awt.event.ActionEvent)}
    *        Methode aufgerufen (im Event Dispatching Thread), 
    *        nachdem der Dialog geschlossen wurde. 
+   *        Das actionCommand des ActionEvents gibt die Aktion an, die
+   *        das Speichern des Dialogs veranlasst hat.
    * @throws ConfigurationErrorException im Falle eines schwerwiegenden
    *         Konfigurationsfehlers, der es dem Dialog unmöglich macht,
    *         zu funktionieren (z.B. dass der "Fenster" Schlüssel fehlt.
@@ -222,6 +242,7 @@ public class PersoenlicheAbsenderlisteVerwalten
   public PersoenlicheAbsenderlisteVerwalten(ConfigThingy conf, ConfigThingy abConf, DatasourceJoiner dj, ActionListener dialogEndListener) throws ConfigurationErrorException
   {
     this.dj = dj;
+    this.myConf = conf;
     this.abConf = abConf;
     this.dialogEndListener = dialogEndListener;
     
@@ -265,6 +286,10 @@ public class PersoenlicheAbsenderlisteVerwalten
     try{
       title = fensterDesc.get("TITLE").toString();
     } catch(Exception x){};
+    
+    try{
+      closeAction = getAction(fensterDesc.get("CLOSEACTION").toString());
+    } catch(Exception x){}
     
     //Create and set up the window.
     myFrame = new JFrame(title);
@@ -461,7 +486,10 @@ public class PersoenlicheAbsenderlisteVerwalten
             compo.add(button, gbcButton);
             
             ActionListener actionL = getAction(action);
-            if (actionL != null) button.addActionListener(actionL);
+            if (actionL != null) 
+              button.addActionListener(actionL);
+            else
+              button.setEnabled(false);
             
             if (action.equals("editEntry"))
             {
@@ -510,52 +538,7 @@ public class PersoenlicheAbsenderlisteVerwalten
       }
     }
   }
-
   
-  /**
-   * Übersetzt den Namen einer ACTION in eine Referenz auf das
-   * passende actionListener_... Objekt.
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private ActionListener getAction(String action)
-  {
-    if (action.equals("abort"))
-    {
-      return actionListener_abort;
-    }
-    else if (action.equals("search"))
-    {
-      return actionListener_search;
-    }
-    else if (action.equals("addToPAL"))
-    {
-      return actionListener_addToPAL;
-    }
-    else if (action.equals("removeFromPAL"))
-    {
-      return actionListener_removeFromPAL;
-    }
-    else if (action.equals("editEntry"))
-    {
-      return actionListener_editEntry;
-    }
-    else if (action.equals("copyEntry"))
-    {
-      return actionListener_copyEntry;
-    }
-    else if (action.equals("newPALEntry"))
-    {
-      return actionListener_newPALEntry;
-    }
-    else if (action.equals(""))
-    {
-      return null;
-    }
-    else
-      Logger.error("Ununterstützte ACTION: "+action);
-    
-    return null;
-  }
   
   /**
    * Nimmt eine JList list, die ein DefaultListModel haben muss und ändert ihre
@@ -698,9 +681,29 @@ public class PersoenlicheAbsenderlisteVerwalten
    */
   private void abort()
   {
+    dialogEnd("abort");
+  }
+  
+  /**
+   * Implementiert die gleichnamige ACTION.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private void back()
+  {
+    dialogEnd("back");
+  }
+  
+  /**
+   * Beendet den Dialog und ruft falls nötig den dialogEndListener auf
+   * wobei das gegebene actionCommand übergeben wird.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private void dialogEnd(String actionCommand)
+  {
     myFrame.dispose();
     if (dialogEndListener != null)
-      dialogEndListener.actionPerformed(null);
+      dialogEndListener.actionPerformed(new ActionEvent(actionCommand,0,actionCommand));
   }
     
   /**
@@ -776,7 +779,7 @@ public class PersoenlicheAbsenderlisteVerwalten
     }
     else ds = e.getDataset();
     
-    ActionListener del = dialogEndListener;
+    ActionListener del = new MyDialogEndListener(myConf, abConf, dj, dialogEndListener, null);
     dialogEndListener = null;
     abort();
     try
@@ -1175,6 +1178,94 @@ public class PersoenlicheAbsenderlisteVerwalten
     updateButtonStates();
   }
   
+  /**
+   * Übersetzt den Namen einer ACTION in eine Referenz auf das
+   * passende actionListener_... Objekt.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private ActionListener getAction(String action)
+  {
+    if (action.equals("abort"))
+    {
+      return actionListener_abort;
+    }
+    else if (action.equals("back"))
+    {
+      return actionListener_back;
+    }
+    else if (action.equals("search"))
+    {
+      return actionListener_search;
+    }
+    else if (action.equals("addToPAL"))
+    {
+      return actionListener_addToPAL;
+    }
+    else if (action.equals("removeFromPAL"))
+    {
+      return actionListener_removeFromPAL;
+    }
+    else if (action.equals("editEntry"))
+    {
+      return actionListener_editEntry;
+    }
+    else if (action.equals("copyEntry"))
+    {
+      return actionListener_copyEntry;
+    }
+    else if (action.equals("newPALEntry"))
+    {
+      return actionListener_newPALEntry;
+    }
+    else if (action.equals(""))
+    {
+      return null;
+    }
+    else
+      Logger.error("Ununterstützte ACTION: "+action);
+    
+    return null;
+  }
+  
+  private static class MyDialogEndListener implements ActionListener
+  {
+    private ConfigThingy conf;
+    private ConfigThingy abConf;
+    private DatasourceJoiner dj;
+    private ActionListener dialogEndListener;
+    private String actionCommand;
+    
+    /**
+     * Falls actionPerformed() mit getActionCommand().equals("back")
+     * aufgerufen wird, wird ein neuer  AbsenderAuswaehlen Dialog mit
+     * den übergebenen Parametern erzeugt. Ansonsten wird
+     * der dialogEndListener mit actionCommand aufgerufen. Falls actionCommand
+     * null ist wird das action command des ActionEvents weitergereicht,
+     * der actionPerformed() übergeben wird.
+     */
+    public MyDialogEndListener(ConfigThingy conf, ConfigThingy abConf, DatasourceJoiner dj, ActionListener dialogEndListener, String actionCommand)
+    {
+      this.conf = conf;
+      this.abConf = abConf;
+      this.dj = dj;
+      this.dialogEndListener = dialogEndListener;
+      this.actionCommand = actionCommand;
+    }
+    
+    public void actionPerformed(ActionEvent e)
+    {
+      if (e.getActionCommand().equals("back"))
+        try{
+          new PersoenlicheAbsenderlisteVerwalten(conf, abConf, dj, dialogEndListener);
+        }catch(Exception x) {Logger.error(x);}
+      else
+      {
+        if (actionCommand == null) actionCommand = e.getActionCommand();
+        if (dialogEndListener != null)
+          dialogEndListener.actionPerformed(new ActionEvent(actionCommand,0,actionCommand));
+      }
+    }
+  }
   
   
   /**
@@ -1187,7 +1278,7 @@ public class PersoenlicheAbsenderlisteVerwalten
     public MyWindowListener(){}
     public void windowActivated(WindowEvent e) { }
     public void windowClosed(WindowEvent e) {}
-    public void windowClosing(WindowEvent e) { abort(); }
+    public void windowClosing(WindowEvent e) { closeAction.actionPerformed(null); }
     public void windowDeactivated(WindowEvent e) { }
     public void windowDeiconified(WindowEvent e) {}
     public void windowIconified(WindowEvent e) { }
@@ -1235,6 +1326,9 @@ public class PersoenlicheAbsenderlisteVerwalten
     
     public void actionPerformed(ActionEvent e)
     {
+      try{
+        if (e.getActionCommand().equals("abort")) System.exit(0);
+      }catch(Exception x){}
       try{
         new PersoenlicheAbsenderlisteVerwalten(conf, abConf, dj, this);
       } catch(ConfigurationErrorException x)
