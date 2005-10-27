@@ -607,7 +607,7 @@ public class AbsenderAuswaehlen
   {
     myFrame.dispose();
     if (dialogEndListener != null)
-      dialogEndListener.actionPerformed(new ActionEvent(actionCommand,0,actionCommand));
+      dialogEndListener.actionPerformed(new ActionEvent("AbsenderAuswaehlen",0,actionCommand));
   }
   
   /**
@@ -647,6 +647,8 @@ public class AbsenderAuswaehlen
      * der dialogEndListener mit actionCommand aufgerufen. Falls actionCommand
      * null ist wird das action command des ActionEvents weitergereicht,
      * der actionPerformed() übergeben wird.
+     * Als source muss actionPerformed der Name des Dialogs als String übergeben werden.
+     * Dieser wird weitergereicht, falls actionPerformed == null.
      */
     public MyDialogEndListener(ConfigThingy conf, ConfigThingy verConf,
         ConfigThingy abConf, DatasourceJoiner dj,
@@ -668,9 +670,14 @@ public class AbsenderAuswaehlen
         }catch(Exception x) {Logger.error(x);}
       else
       {
-        if (actionCommand == null) actionCommand = e.getActionCommand();
+        String source = "AbsenderAuswaehlen";
+        if (actionCommand == null) 
+        {
+          actionCommand = e.getActionCommand();
+          source = (String)e.getSource();
+        }
         if (dialogEndListener != null)
-          dialogEndListener.actionPerformed(new ActionEvent(actionCommand,0,actionCommand));
+          dialogEndListener.actionPerformed(new ActionEvent(source,0,actionCommand));
       }
     }
   }

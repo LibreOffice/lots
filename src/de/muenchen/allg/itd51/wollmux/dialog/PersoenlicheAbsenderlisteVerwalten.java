@@ -703,7 +703,7 @@ public class PersoenlicheAbsenderlisteVerwalten
   {
     myFrame.dispose();
     if (dialogEndListener != null)
-      dialogEndListener.actionPerformed(new ActionEvent(actionCommand,0,actionCommand));
+      dialogEndListener.actionPerformed(new ActionEvent("PersoenlicheAbsenderliste",0,actionCommand));
   }
     
   /**
@@ -1242,6 +1242,8 @@ public class PersoenlicheAbsenderlisteVerwalten
      * der dialogEndListener mit actionCommand aufgerufen. Falls actionCommand
      * null ist wird das action command des ActionEvents weitergereicht,
      * der actionPerformed() übergeben wird.
+     * Als source muss actionPerformed der Name des Dialogs als String übergeben werden.
+     * Dieser wird weitergereicht, falls actionPerformed == null.
      */
     public MyDialogEndListener(ConfigThingy conf, ConfigThingy abConf, DatasourceJoiner dj, ActionListener dialogEndListener, String actionCommand)
     {
@@ -1260,9 +1262,14 @@ public class PersoenlicheAbsenderlisteVerwalten
         }catch(Exception x) {Logger.error(x);}
       else
       {
-        if (actionCommand == null) actionCommand = e.getActionCommand();
+        String source = "PersoenlicheAbsenderliste";
+        if (actionCommand == null) 
+        {
+          actionCommand = e.getActionCommand();
+          source = (String)e.getSource();
+        }
         if (dialogEndListener != null)
-          dialogEndListener.actionPerformed(new ActionEvent(actionCommand,0,actionCommand));
+          dialogEndListener.actionPerformed(new ActionEvent(source,0,actionCommand));
       }
     }
   }
