@@ -216,6 +216,7 @@ public class WMCommandInterpreter
     {
       Dataset ds = WollMux.getDatasourceJoiner().getSelectedDataset();
       fillBookmark(bookmarkName, ds.get(spaltenname));
+      //TODO Was soll passieren, wenn Wert der Spalte unbelegt? Dann gibt's eine NullPointerException, weil ds.get() null liefert. Fehlermeldung einfügen oder doch lieber leeren String? -- Matthias
     }
     catch (java.lang.Exception e)
     {

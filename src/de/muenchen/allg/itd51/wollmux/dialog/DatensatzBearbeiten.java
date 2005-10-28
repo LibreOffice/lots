@@ -491,6 +491,7 @@ public class DatensatzBearbeiten
     {
       myDatasetIsLocal = datensatz.hasLocalOverride(columnName);
       startText = datensatz.get(columnName);
+      if (startText == null) startText = "";
       setTextInControl(startText);
       updateBackground();
     }
@@ -623,6 +624,7 @@ public class DatensatzBearbeiten
 
     public void addItem(String text)
     {
+      if (text == null) text = "";
       for (int i = ((JComboBox)myComponent).getItemCount() - 1; i >=0 ; --i)
       {
         if (((JComboBox)myComponent).getItemAt(i).equals(text)) return;
@@ -768,8 +770,9 @@ public class DatensatzBearbeiten
         String spalte = m.group(1);
         String wert = spalte;
         try{
-          wert = datensatz.get(spalte);
-          wert = wert.replaceAll("%","");
+          String wert2 = datensatz.get(spalte);
+          if (wert2 != null)
+            wert = wert2.replaceAll("%","");
         } catch (ColumnNotFoundException e) { Logger.error(e); }
         str = str.substring(0,m.start())+wert+str.substring(m.end());
         m = p.matcher(str);

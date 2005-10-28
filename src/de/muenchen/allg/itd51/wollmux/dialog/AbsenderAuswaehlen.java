@@ -543,8 +543,9 @@ public class AbsenderAuswaehlen
       String wert = spalte;
       try
       {
-        wert = datensatz.get(spalte);
-        wert = wert.replaceAll("%", "");
+        String wert2 = datensatz.get(spalte);
+        if (wert2 != null)
+          wert = wert2.replaceAll("%", "");
       }
       catch (ColumnNotFoundException e)
       {
