@@ -23,18 +23,17 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class TestDJDataset implements DJDataset
+public class TestDJDataset extends DJDatasetBase
 {
-  private Map myLOS = new HashMap();
-  private Map myBS = new HashMap();
-  private Set schema = null;
-  private boolean isFromLOS = true;
   private Map fallback = null;
   
   /** Erzeugt einen TestDJDataset, der jedes Schema unterstützt und bei
    * als aus dem LOS kommend betrachtet wird.
    */
-  public TestDJDataset() {}
+  public TestDJDataset() 
+  {
+    super(new HashMap(), new HashMap(), null);
+  }
   
   /**
    * 
@@ -55,9 +54,7 @@ public class TestDJDataset implements DJDataset
    */
   public TestDJDataset(Map backingStore, Set schema, boolean isFromLOS, Map fallback)
   {
-    myBS = backingStore;
-    this.schema = schema;
-    this.isFromLOS = isFromLOS;
+    super(backingStore, isFromLOS?new HashMap():null,schema);
     this.fallback = fallback;
   }
   
@@ -73,45 +70,16 @@ public class TestDJDataset implements DJDataset
   
   public String get(String spaltenName) throws ColumnNotFoundException
   {
-    if (schema != null && !schema.contains(spaltenName)) throw new ColumnNotFoundException("Spalte "+spaltenName+" existiert nicht!");
-    String res;
-    res = (String)myLOS.get(spaltenName);
-    if (res != null) return res;
-    if (myBS != null)
-    {
-      res = (String)myBS.get(spaltenName);
-      if (res != null) return res;
-    }
+    String str = super.get(spaltenName);
+    if (str != null) return str;
+    
     if (fallback != null && fallback.containsKey(spaltenName)) 
       return get((String)fallback.get(spaltenName)); 
+
     return spaltenName;
   }
 
-  public boolean hasLocalOverride(String columnName) throws ColumnNotFoundException
-  {
-    return myLOS.containsKey(columnName);
-  }
-
-  public void set(String columnName, String newValue) throws ColumnNotFoundException, UnsupportedOperationException  
-  {
-    if (!isFromLOS) throw new UnsupportedOperationException("Nur Datensätze aus dem LOS können manipuliert werden!");
-    myLOS.put(columnName, newValue);
-  }
-
-  public void discardLocalOverride(String columnName) throws ColumnNotFoundException, NoBackingStoreException
-  {
-    if (myBS == null) throw new NoBackingStoreException("Datensatz nicht mit Hintergrundspeicher verknüpft");
-    myLOS.remove(columnName);
-  }
-
-  public boolean isFromLOS()
-  {
-    return isFromLOS;
-  }
-  
-  public boolean hasBackingStore() {return myBS != null;}
-
-  public DJDataset copy() { return new TestDJDataset(myBS == null? null: new HashMap(myBS), schema, true, fallback);}
+  public DJDataset copy() { return new TestDJDataset(hasBackingStore()? new HashMap(myBS):null, schema, true, fallback);}
   
   public void remove(){}
 
@@ -123,5 +91,10 @@ public class TestDJDataset implements DJDataset
   public void select() throws UnsupportedOperationException
   {
     if (!isFromLOS()) throw new UnsupportedOperationException();
+  }
+
+  public String getKey()
+  {
+    return ""+this.hashCode();
   };
 }
