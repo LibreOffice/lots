@@ -24,7 +24,8 @@
 package de.muenchen.allg.itd51.wollmux.db;
 
 /**
- * TODO Doku
+ * Ein vom DJ gelieferter Datensatz, der zu den Methoden von
+*  Dataset noch DJ-spezifische Methoden anbietet.
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public interface DJDataset extends Dataset
