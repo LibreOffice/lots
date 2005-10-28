@@ -12,6 +12,9 @@
 * 14.10.2005 | BNK | Erstellung
 * 24.10.2005 | BNK | +copy()
 *                  | +remove()
+* 28.10.2005 | BNK | bessere Doku
+*                  | set() wirft jetzt IllegalArgumentException, wenn
+*                  | versucht wird, die Spalte mit null zu overriden
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -32,18 +35,23 @@ public interface DJDataset extends Dataset
   /**
    * Schreibt newValue als neuen Wert des Datensatzes in Spalte columnName 
    * in den LOS des DJ, jedoch nur falls der Datensatz bereits aus dem LOS
-   * kommt (also {@link #isFromLOS()} true liefert).
+   * kommt (also {@link #isFromLOS()} true liefert). Es ist nicht möglich,
+   * mit dieser Funktion einen Spaltenwert als unbelegt (newValue == null) zu
+   * überschreiben.
    * @throws ColumnNotFoundException falls keine Spalte namens columnName existiert. 
    * @throws UnsupportedOperationException, falls dieser Datensatz nicht aus
    *         dem LOS kommt.
+   * @throws IllegalArgumentException, falls als newValue null übergeben wird.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public void set(String columnName, String newValue) throws ColumnNotFoundException, UnsupportedOperationException;
+  public void set(String columnName, String newValue) throws ColumnNotFoundException, UnsupportedOperationException, IllegalArgumentException;
   
   /**
    * Liefert true, falls die Spalte columnName dieses Datensatzes nicht aus
    * den Hintergrunddatenbank kommt, sondern aus dem lokalen Override-Speicher
-   * des DJ.
+   * des DJ. Falls der Datensatz gar nicht mit einer Hintergrunddatenbank
+   * verknüpft ist (hasBackingStore() == false), so wird hier immer true
+   * geliefert, auch wenn der Wert in der Spalte unbelegt ist.
    * @throws ColumnNotFoundException falls keine Spalte namens columnName existiert.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
