@@ -10,6 +10,7 @@
 * -------------------------------------------------------------------
 * 27.10.2005 | BNK | Erstellung
 * 28.10.2005 | BNK | Erweiterung
+* 28.10.2005 | BNK | +getName()
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -68,4 +69,9 @@ public interface Datasource
   public QueryResults getDatasetsByKey(Collection keys, long timeout) 
     throws TimeoutException;
   
+  /**
+   * Liefert den Namen dieser Datenquelle.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public String getName();
 }
