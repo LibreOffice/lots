@@ -62,7 +62,7 @@ public class EventProcessor implements XEventListener, XModifyListener,
     {
       public void run()
       {
-        Logger.log("Starte EventProcessor-Thread");
+        Logger.debug("Starte EventProcessor-Thread");
         try
         {
           while (true)
@@ -101,7 +101,7 @@ public class EventProcessor implements XEventListener, XModifyListener,
           Logger.error("EventProcessor-Thread wurde unterbrochen:");
           Logger.error(e);
         }
-        Logger.log("Beende EventProcessor-Thread");
+        Logger.debug("Beende EventProcessor-Thread");
       }
     });
     eventProcessorThread.start();
@@ -136,6 +136,8 @@ public class EventProcessor implements XEventListener, XModifyListener,
    */
   public void actionPerformed(ActionEvent actionEvent)
   {
+    //TODO: actionEvent.getActionCommand(); "back" auswerten
+    // (String)actionEvent.getSource() ist der Name des Dialogs
     {
       synchronized (processGUIEvent)
       {

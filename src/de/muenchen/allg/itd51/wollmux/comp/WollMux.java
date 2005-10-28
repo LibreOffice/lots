@@ -22,8 +22,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 
 import com.sun.star.beans.NamedValue;
 import com.sun.star.frame.DispatchDescriptor;
@@ -39,7 +41,6 @@ import com.sun.star.task.XAsyncJob;
 import com.sun.star.uno.RuntimeException;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
-import com.sun.star.util.URL;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoService;
@@ -92,6 +93,13 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
   private static XComponentContext xComponentContext;
 
   /**
+   * Die URL des Wertes DEFAULT_CONTEXT aus der Konfigurationsdatei.
+   * defaultContext überschreibt den in der Konfigurationsdatei definierten
+   * DEFAULT_CONTEXT.
+   */
+  private static URL defaultContext;
+
+  /**
    * Dieses Feld entält eine Liste aller Services, die dieser UNO-Service
    * implementiert.
    */
@@ -100,7 +108,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
   /**
    * Dieses Feld enthält den Namen des Protokolls der WollMux-Kommando-URLs
    */
-  public static final String wollmuxProtocol = "WollMux";
+  public static final String wollmuxProtocol = "wollmux";
 
   /*
    * Hier kommt die Definition der Befehlsnamen, die über WollMux-Kommando-URLs
@@ -162,11 +170,17 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
    *          werden sollen.
    * @param wollmuxConf
    *          die Wollmux-Konfigruationsdatei.
+   * @param defaultContext
+   *          die URL des Wertes DEFAULT_CONTEXT aus der Konfigurationsdatei.
+   *          defaultContext überschreibt den in der Konfigurationsdatei
+   *          definierten DEFAULT_CONTEXT.
    */
-  public static void initialize(PrintStream logStream, File wollmuxConf)
+  public static void initialize(PrintStream logStream, File wollmuxConf,
+      URL defaultContext)
   {
     WollMux.wollmuxLog = logStream;
     WollMux.wollmuxConfFile = wollmuxConf;
+    WollMux.defaultContext = defaultContext;
   }
 
   /**
@@ -178,7 +192,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
     {
       // Logger initialisieren und erste Meldung ausgeben:
       if (wollmuxLog != null) Logger.init(wollmuxLog, Logger.ALL);
-      Logger.log("StartupWollMux");
+      Logger.debug("StartupWollMux");
       Logger.debug("wollmuxConfFile = " + wollmuxConfFile.toString());
 
       // Parsen der Konfigurationsdatei
@@ -226,6 +240,45 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
   public static XComponentContext getXComponentContext()
   {
     return xComponentContext;
+  }
+
+  /**
+   * Diese Methode liefert den letzten in der Konfigurationsdatei definierten
+   * DEFAULT_CONTEXT zurück. Ist in der Konfigurationsdatei keine URL definiert,
+   * so wird die URL "file:/" zurückgeliefert und eine Fehlermeldung in die
+   * Loggdatei geschrieben.
+   * 
+   * @return der letzte in der Konfigurationsdatei definierte DEFAULT_CONTEXT.
+   */
+  public static URL getDEFAULT_CONTEXT()
+  {
+    if (defaultContext == null)
+    {
+      try
+      {
+        ConfigThingy dc = wollmuxConf.query("DEFAULT_CONTEXT").getLastChild();
+        String urlStr = dc.toString();
+        // url mit einem "/" aufhören lassen (falls noch nicht angegeben).
+        if (urlStr.endsWith("/"))
+          defaultContext = new URL(dc.toString());
+        else
+          defaultContext = new URL(dc.toString() + "/");
+      }
+      catch (Exception e)
+      {
+        Logger.error(e);
+        try
+        {
+          defaultContext = new URL("file:/");
+        }
+        catch (MalformedURLException x)
+        {
+          // kommt nicht vor, da obige file url korrekt!
+          Logger.error(x);
+        }
+      }
+    }
+    return defaultContext;
   }
 
   /**
@@ -391,12 +444,13 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
                     + "#"
                     + uri.getFragment()
                     + "#"); // TODO deleteme
-      if (uri.getScheme().equals(wollmuxProtocol))
+      if (uri.getScheme().compareToIgnoreCase(wollmuxProtocol) == 0)
       {
-        if (uri.getSchemeSpecificPart().equals(cmdAbsenderdatenBearbeiten))
-          xRet = this;
+        if (uri.getSchemeSpecificPart().compareToIgnoreCase(
+            cmdAbsenderdatenBearbeiten) == 0) xRet = this;
 
-        if (uri.getSchemeSpecificPart().equals(cmdOpenFrag)) xRet = this;
+        if (uri.getSchemeSpecificPart().compareToIgnoreCase(cmdOpenFrag) == 0)
+          xRet = this;
       }
     }
     catch (URISyntaxException e)
@@ -431,7 +485,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
    * @see com.sun.star.frame.XDispatch#addStatusListener(com.sun.star.frame.XStatusListener,
    *      com.sun.star.util.URL)
    */
-  public void addStatusListener(XStatusListener arg0, URL arg1)
+  public void addStatusListener(XStatusListener arg0, com.sun.star.util.URL arg1)
   {
   }
 
@@ -449,17 +503,18 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
     {
       URI uri = new URI(aURL.Complete);
 
-      if (uri.getScheme().equals(wollmuxProtocol))
+      if (uri.getScheme().compareToIgnoreCase(wollmuxProtocol) == 0)
       {
-        if (uri.getSchemeSpecificPart().equals(cmdAbsenderdatenBearbeiten))
+        if (uri.getSchemeSpecificPart().compareToIgnoreCase(
+            cmdAbsenderdatenBearbeiten) == 0)
         {
           Logger
-              .debug2("Dispatch: Aufruf von .WollMux:AbsenderdatenBearbeitenDialog");
+              .debug2("Dispatch: Aufruf von WollMux:AbsenderdatenBearbeitenDialog");
           EventProcessor.create().addEvent(
               new Event(Event.ON_ABSENDERDATEN_BEARBEITEN, true));
         }
 
-        if (uri.getSchemeSpecificPart().equals(cmdOpenFrag))
+        if (uri.getSchemeSpecificPart().compareToIgnoreCase(cmdOpenFrag) == 0)
         {
           Logger.debug2("Dispatch: Aufruf von WollMux:OpenFrag mit Frag:"
                         + uri.getFragment());
@@ -480,7 +535,8 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
    * @see com.sun.star.frame.XDispatch#removeStatusListener(com.sun.star.frame.XStatusListener,
    *      com.sun.star.util.URL)
    */
-  public void removeStatusListener(XStatusListener arg0, URL arg1)
+  public void removeStatusListener(XStatusListener arg0,
+      com.sun.star.util.URL arg1)
   {
   }
 
@@ -496,7 +552,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
         System.out.println("USAGE: <config_url>");
         System.exit(0);
       }
-      File cwd = new File(".");
+      File cwd = new File("testdata");
 
       args[0] = args[0].replaceAll("\\\\", "/");
 
@@ -505,7 +561,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
 
       // WollMux starten
       new WollMux(UNO.defaultContext);
-      WollMux.initialize(System.err, new File(cwd, args[0]));
+      WollMux.initialize(System.err, new File(cwd, args[0]), cwd.toURL());
       WollMux.startupWollMux();
     }
     catch (Exception e)

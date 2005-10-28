@@ -31,6 +31,7 @@ import java.util.regex.Pattern;
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.container.NoSuchElementException;
 import com.sun.star.container.XNameAccess;
+import com.sun.star.io.IOException;
 import com.sun.star.lang.WrappedTargetException;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextRange;
@@ -57,11 +58,6 @@ public class WMCommandInterpreter
   private UnoService document;
 
   /**
-   * URLs werden relativ zum documentCtx aufgelöst.
-   */
-  private URL documentCtx;
-
-  /**
    * Abbruchwert für die Anzahl der Interationsschritte beim Auswerten neu
    * hinzugekommener Bookmarks.
    */
@@ -71,37 +67,19 @@ public class WMCommandInterpreter
    * Verstecktes Trennzeichen, das zum Beginn und zum Ende eines Textfragments
    * eingefügt wird um verschachtelte WollMux-Kommandos zu ermöglichen.
    */
-  private static final String FRAGMENT_MARK = " X ";
+  private static final String FRAGMENT_MARK_OPEN = "<..";
+
+  private static final String FRAGMENT_MARK_CLOSE = "..>";
 
   /**
    * Der Konstruktor erzeugt einen neuen Kommandointerpreter, der alle Kommandos
-   * im übergebenen xDoc scannt und entsprechend auflöst. Wird der Interpreter
-   * über diesen Konstruktor erzeugt, können keine relativen URLs aufgelöst
-   * werden.
+   * im übergebenen xDoc scannen und entsprechend auflösen kann.
    * 
    * @param xDoc
    */
   public WMCommandInterpreter(XTextDocument xDoc)
   {
     this.document = new UnoService(xDoc);
-    this.documentCtx = null;
-  }
-
-  /**
-   * Der Konstruktor erzeugt einen neuen Kommandointerpreter, der alle Kommandos
-   * im übergebenen xDoc scannt und entsprechend auflöst. Der documentCtx
-   * beschreibt die Original-Vorlage, aus der das zu bearbeitende Dokument
-   * abgeleitet wurde. Alle relativen Pfadangaben (derzeit in
-   * include-Anweisungen oder bei Textfragment-URLs) können aufgelöst werden und
-   * beziehen sich auf die URL der original-Vorlage.
-   * 
-   * @param xDoc
-   * @param documentCtx
-   */
-  public WMCommandInterpreter(XTextDocument xDoc, URL documentCtx)
-  {
-    this.document = new UnoService(xDoc);
-    this.documentCtx = documentCtx;
   }
 
   /**
@@ -180,7 +158,7 @@ public class WMCommandInterpreter
   {
     try
     {
-      ConfigThingy wm = new ConfigThingy("WMCmd", documentCtx,
+      ConfigThingy wm = new ConfigThingy("WMCmd", WollMux.getDEFAULT_CONTEXT(),
           new StringReader(cmdString)).get("WM");
       ConfigThingy cmd = wm.get("CMD");
       // TODO: nichts machen wenn FROZEN "true"
@@ -259,46 +237,17 @@ public class WMCommandInterpreter
    */
   private void executeInsertFrag(String frag_id, String bookmarkName)
   {
-    XNameAccess bookmarkAccess = document.xBookmarksSupplier().getBookmarks();
     try
     {
-      // Ablauf:
-      // "x" ist die explizit sichtbare FRAGMENT_MARK, die später auf
-      // Hidden ("h") gesetzt wird.
-      // 1) bookmarkCursor = "xx"
-      // 2) insertCursor exakt in die Mitte der xx setzen.
-      // 3) Inhalt aus Fragmentdatei einfügen in insCursor
-      // 4) "x" auf "h" setzen
-      // Ergebnis: bookmarCursor = "h<inhalt>h"
-
-      // TextCursor erzeugen, der den gesamten Ersetzungsbereich des Bookmarks
-      // umschließt und mit dem Inhalt der beiden FRAGMENT_MARKs vorbelegen.
-      UnoService bookmark = new UnoService(bookmarkAccess
-          .getByName(bookmarkName));
-      UnoService text = new UnoService(document.xTextDocument().getText());
-      UnoService bookmarkCursor = new UnoService(text.xText()
-          .createTextCursorByRange(bookmark.xTextContent().getAnchor()));
-      bookmarkCursor.xTextCursor().setString(FRAGMENT_MARK + FRAGMENT_MARK);
-      bookmarkCursor.setPropertyValue("CharHidden", Boolean.FALSE);
-
-      // InsertCurser erzeugen, in den das Textfragment eingefügt wird.
-      UnoService insCursor = new UnoService(text.xText()
-          .createTextCursorByRange(bookmarkCursor.xTextCursor()));
-      insCursor.xTextCursor().goRight((short) FRAGMENT_MARK.length(), false);
-      insCursor.xTextCursor().collapseToStart();
-
       // Fragment-URL holen und aufbereiten.
       String urlStr = WollMux.getTextFragmentList().getURLByID(frag_id);
-      if (documentCtx != null)
-      {
-        // Verwende URL im gegebenen Kontext.
-        urlStr = new URL(documentCtx, urlStr).toExternalForm();
-      }
+      // Verwende URL im gegebenen Kontext.
+      URL url = new URL(WollMux.getDEFAULT_CONTEXT(), urlStr);
       UnoService trans = UnoService.createWithContext(
           "com.sun.star.util.URLTransformer",
           WollMux.getXComponentContext());
       com.sun.star.util.URL[] unoURL = new com.sun.star.util.URL[] { new com.sun.star.util.URL() };
-      unoURL[0].Complete = urlStr;
+      unoURL[0].Complete = url.toExternalForm();
       trans.xURLTransformer().parseStrict(unoURL);
       urlStr = unoURL[0].Complete;
 
@@ -308,36 +257,23 @@ public class WMCommandInterpreter
                    + urlStr
                    + "\" ein.");
 
-      // Textfragment einfügen
-      // TODO: Proxysettings aus UNO übernehmen!
-      new URL(urlStr).openConnection().getContentLength(); // Teste ob Ziel
-      // erreichbar.
+      // Workaround für den insertDocumentFromURL-Fehler (Einfrieren von OOo
+      // wenn Ressource nicht auflösbar).
+      if (url.openConnection().getContentLength() <= 0)
+      {
+        throw new IOException("Fragment "
+                              + frag_id
+                              + " ("
+                              + url.toExternalForm()
+                              + ") ist leer oder nicht verfügbar");
+      }
 
-      insCursor.xDocumentInsertable().insertDocumentFromURL(
-          urlStr,
-          new PropertyValue[] {});
-      // TODO:evtl raus! wird benötigt, damit das erste Element nicht unsichtbar
-      // ist...
-      // insCursor.xTextCursor().collapseToEnd();
-
-      // FRAGMENT_MARKen verstecken:
-      UnoService hiddenCursor = new UnoService(text.xText().createTextCursor());
-      // start-Marke
-      hiddenCursor.xTextCursor().gotoRange(
-          bookmarkCursor.xTextRange().getStart(),
-          false);
-      hiddenCursor.xTextCursor().goRight((short) FRAGMENT_MARK.length(), true);
-      hiddenCursor.setPropertyValue("CharHidden", Boolean.TRUE);
-      // end-Marke
-      hiddenCursor.xTextCursor().gotoRange(
-          bookmarkCursor.xTextRange().getEnd(),
-          false);
-      hiddenCursor.xTextCursor().goLeft((short) FRAGMENT_MARK.length(), true);
-      hiddenCursor.setPropertyValue("CharHidden", Boolean.TRUE);
+      // Dokument einfügen
+      XTextRange bookmarkCursor = insertDocumentWithMarks(bookmarkName, urlStr);
 
       // Bookmark an neuen Range anpassen
       // TODO: FROZEN "true" setzen.
-      reRangeBookmark(bookmarkName, bookmarkCursor.xTextRange());
+      reRangeBookmark(bookmarkName, bookmarkCursor);
 
     }
     catch (java.lang.Exception e)
@@ -346,6 +282,87 @@ public class WMCommandInterpreter
       Logger.error(e);
       fillBookmark(bookmarkName, bookmarkName + ": " + e.toString());
     }
+  }
+
+  /**
+   * Diese private Methode fügt ein Document an die Stelle von bookmarkName ein.
+   * Der eingefügte Inhalt wird von unsichtbaren FRAGMENT_MARKen umgeben um ein
+   * verschachteltes Einfügen von Inhalten zu ermöglichen. Das Bookmark wird
+   * nicht automatisch vergößert.
+   * 
+   * @param bookmarkName
+   *          der Name des Bookmarks an dessen Stelle das Dokument eingefügt
+   *          werden soll.
+   * @param unoURL
+   *          die bereits für uno aufbereitete unoURL
+   * @return
+   * @throws NoSuchElementException
+   * @throws WrappedTargetException
+   * @throws Exception
+   */
+  private XTextRange insertDocumentWithMarks(String bookmarkName, String unoURL)
+      throws NoSuchElementException, WrappedTargetException, Exception
+  {
+    // so gehts:
+    // "x" ist die explizit sichtbare FRAGMENT_MARK, die später auf
+    // Hidden ("h") gesetzt wird.
+    // 1) bookmarkCursor = "xx"
+    // 2) insertCursor exakt in die Mitte der xx setzen.
+    // 3) Inhalt aus Fragmentdatei einfügen in insCursor
+    // 4) alle "x" auf "h" setzen
+    // Ergebnis: bookmarCursor = "h<inhalt>h"
+
+    // TextCursor erzeugen, der den gesamten Ersetzungsbereich des Bookmarks
+    // umschließt und mit dem Inhalt der beiden FRAGMENT_MARKs vorbelegen.
+    XNameAccess bookmarkAccess = document.xBookmarksSupplier().getBookmarks();
+    UnoService bookmark = new UnoService(bookmarkAccess.getByName(bookmarkName));
+    UnoService text = new UnoService(document.xTextDocument().getText());
+    UnoService bookmarkCursor = new UnoService(text.xText()
+        .createTextCursorByRange(bookmark.xTextContent().getAnchor()));
+    bookmarkCursor.xTextCursor().setString(
+        FRAGMENT_MARK_OPEN + FRAGMENT_MARK_CLOSE);
+    bookmarkCursor.setPropertyValue("CharHidden", Boolean.FALSE);
+
+    // InsertCurser erzeugen, in den das Textfragment eingefügt wird.
+    UnoService insCursor = new UnoService(text.xText().createTextCursorByRange(
+        bookmarkCursor.xTextCursor()));
+    insCursor.xTextCursor().goRight((short) FRAGMENT_MARK_OPEN.length(), false);
+    insCursor.xTextCursor().collapseToStart();
+
+    try
+    {
+      // Textfragment einfügen:
+      PropertyValue[] props = new PropertyValue[] { new PropertyValue() };
+      insCursor.xDocumentInsertable().insertDocumentFromURL(unoURL, props);
+    }
+    catch (java.lang.Exception e)
+    {
+      Logger.error("Bookmark \"" + bookmarkName + "\":");
+      Logger.error(e);
+      insCursor.xTextCursor().setString(bookmarkName + ": " + e.toString());
+    }
+
+    // FRAGMENT_MARKen verstecken:
+    UnoService hiddenCursor = new UnoService(text.xText().createTextCursor());
+    // start-Marke
+    hiddenCursor.xTextCursor().gotoRange(
+        bookmarkCursor.xTextRange().getStart(),
+        false);
+    hiddenCursor.xTextCursor().goRight(
+        (short) FRAGMENT_MARK_OPEN.length(),
+        true);
+    hiddenCursor.setPropertyValue("CharHidden", Boolean.TRUE);
+    // end-Marke
+    hiddenCursor.xTextCursor().gotoRange(
+        bookmarkCursor.xTextRange().getEnd(),
+        false);
+    hiddenCursor.xTextCursor().goLeft(
+        (short) FRAGMENT_MARK_CLOSE.length(),
+        true);
+    hiddenCursor.setPropertyValue("CharHidden", Boolean.TRUE);
+
+    // das war's
+    return bookmarkCursor.xTextRange();
   }
 
   /**
@@ -450,7 +467,7 @@ public class WMCommandInterpreter
         System.out.println("USAGE: <config_url> <document_url>");
         System.exit(0);
       }
-      File cwd = new File(".");
+      File cwd = new File("testdata");
 
       args[0] = args[0].replaceAll("\\\\", "/");
       args[1] = args[1].replaceAll("\\\\", "/");
@@ -460,7 +477,7 @@ public class WMCommandInterpreter
 
       // WollMux starten
       new WollMux(UNO.defaultContext);
-      WollMux.initialize(System.err, new File(cwd, args[0]));
+      WollMux.initialize(System.err, new File(cwd, args[0]), cwd.toURL());
       WollMux.startupWollMux();
 
       Logger.init(Logger.ALL);
@@ -477,8 +494,7 @@ public class WMCommandInterpreter
 
       UNO.loadComponentFromURL(urlStr, true, false);
 
-      new WMCommandInterpreter(UNO.XTextDocument(UNO.compo), new URL(urlStr))
-          .interpret();
+      new WMCommandInterpreter(UNO.XTextDocument(UNO.compo)).interpret();
     }
     catch (java.lang.Exception e)
     {

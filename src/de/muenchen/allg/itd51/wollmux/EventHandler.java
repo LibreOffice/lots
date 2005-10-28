@@ -52,10 +52,7 @@ public class EventHandler
         UnoService source = new UnoService(event.getSource());
         if (source.xTextDocument() != null)
         {
-          URL url = new URL(source.xModel().getURL());
-          Logger.debug("Verarbeite Dokument mit der URL "
-                       + url.toExternalForm());
-          new WMCommandInterpreter(source.xTextDocument(), url).interpret();
+          new WMCommandInterpreter(source.xTextDocument()).interpret();
         }
       }
 
@@ -68,25 +65,25 @@ public class EventHandler
         String frag_id = event.getArgument();
 
         // Fragment-URL holen und aufbereiten:
-        String urlStr = WollMux.getTextFragmentList().getURLByID(frag_id);
+        URL url = new URL(WollMux.getDEFAULT_CONTEXT(), WollMux
+            .getTextFragmentList().getURLByID(frag_id));
         UnoService trans = UnoService.createWithContext(
             "com.sun.star.util.URLTransformer",
             WollMux.getXComponentContext());
         com.sun.star.util.URL[] unoURL = new com.sun.star.util.URL[] { new com.sun.star.util.URL() };
-        unoURL[0].Complete = urlStr;
+        unoURL[0].Complete = url.toExternalForm();
         trans.xURLTransformer().parseStrict(unoURL);
-        urlStr = unoURL[0].Complete;
+        String urlStr = unoURL[0].Complete;
 
         // open document as Template:
         PropertyValue[] props = new PropertyValue[] { new PropertyValue() };
         props[0].Name = "AsTemplate";
         props[0].Value = Boolean.TRUE;
-
-        UnoService doc = new UnoService(desktop.xComponentLoader()
-            .loadComponentFromURL(urlStr, "_blank", 0, props));
-
-        new WMCommandInterpreter(doc.xTextDocument(), new URL(urlStr))
-            .interpret();
+        desktop.xComponentLoader().loadComponentFromURL(
+            urlStr,
+            "_blank",
+            0,
+            props);
       }
     }
     catch (java.lang.Exception e)
