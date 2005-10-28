@@ -103,7 +103,7 @@ public class WMCommandInterpreter
     HashMap evaluatedBookmarks = new HashMap();
 
     // Folgendes Pattern prüft ob es sich bei dem Bookmark um ein gültiges
-    // WM-Kommando handelt und entfernt evtl. vorhandene Zahlen-Prefixe.
+    // WM-Kommando handelt und entfernt evtl. vorhandene Zahlen-Postfixe.
     Pattern wmCmd = Pattern
         .compile("\\A\\p{Space}*(WM\\p{Space}*\\(.*\\))\\p{Space}*\\d*\\z");
 
@@ -161,7 +161,7 @@ public class WMCommandInterpreter
       ConfigThingy wm = new ConfigThingy("WMCmd", WollMux.getDEFAULT_CONTEXT(),
           new StringReader(cmdString)).get("WM");
       ConfigThingy cmd = wm.get("CMD");
-      // TODO: nichts machen wenn FROZEN "true"
+      // TODO: nichts machen wenn DONE "true"
 
       // insertFrag
       if (cmd.toString().equals("insertFrag"))
@@ -215,8 +215,10 @@ public class WMCommandInterpreter
     try
     {
       Dataset ds = WollMux.getDatasourceJoiner().getSelectedDataset();
-      fillBookmark(bookmarkName, ds.get(spaltenname));
-      //TODO Was soll passieren, wenn Wert der Spalte unbelegt? Dann gibt's eine NullPointerException, weil ds.get() null liefert. Fehlermeldung einfügen oder doch lieber leeren String? -- Matthias
+      if (ds.get(spaltenname) == null)
+        fillBookmark(bookmarkName, "");
+      else
+        fillBookmark(bookmarkName, ds.get(spaltenname));
     }
     catch (java.lang.Exception e)
     {

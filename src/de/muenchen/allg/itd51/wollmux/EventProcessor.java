@@ -114,7 +114,7 @@ public class EventProcessor implements XEventListener, XModifyListener,
    */
   public void notifyEvent(com.sun.star.document.EventObject docEvent)
   {
-    Logger.debug2("Incoming: " + new Event(docEvent));
+    Logger.debug2("Incoming: " + new Event(docEvent) + " " + docEvent.EventName);
     addEvent(new Event(docEvent));
   }
 

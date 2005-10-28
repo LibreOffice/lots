@@ -22,20 +22,23 @@ import com.sun.star.uno.XInterface;
 
 /**
  * TODO: dokumentieren von Event.java
+ * 
  * @author lut
- *
+ * 
  */
 public class Event
 {
+  public static final int UNKNOWN = -1;
+
   public static final int ON_LOAD = 1;
 
-  public static final int ON_MODIFIED = 5;
+  public static final int ON_NEW = 2;
 
-  public static final int ON_ABSENDERDATEN_BEARBEITEN = 10;
+  public static final int ON_MODIFIED = 10;
 
-  public static final int ON_OPENFRAG = 11;
+  public static final int ON_ABSENDERDATEN_BEARBEITEN = 20;
 
-  public static final int UNKNOWN = 100;
+  public static final int ON_OPENFRAG = 21;
 
   private int event = UNKNOWN;
 
@@ -44,7 +47,7 @@ public class Event
   private Object source = null;
 
   private String argument = "";
-  
+
   public Event(int event, boolean isGUIEvent)
   {
     this.event = event;
@@ -67,6 +70,7 @@ public class Event
 
     // Bekannte Event-Typen rausziehen:
     if (docEvent.EventName.equals("OnLoad")) this.event = ON_LOAD;
+    if (docEvent.EventName.equals("OnNew")) this.event = ON_NEW;
   }
 
   public Event(com.sun.star.lang.EventObject modifyEvent)
@@ -91,8 +95,9 @@ public class Event
   {
     return isGUIEvent;
   }
-  
-  public String getArgument() {
+
+  public String getArgument()
+  {
     return argument;
   }
 
@@ -102,7 +107,9 @@ public class Event
     if (event == ON_ABSENDERDATEN_BEARBEITEN)
       name = "ON_ABSENDERDATEN_BEARBEITEN";
     if (event == ON_LOAD) name = "ON_LOAD";
+    if (event == ON_NEW) name = "ON_NEW";
     if (event == ON_MODIFIED) name = "ON_MODIFIED";
+    if (event == ON_OPENFRAG) name = "ON_OPENFRAG";
     return "Event(" + name + ")";
   }
 }

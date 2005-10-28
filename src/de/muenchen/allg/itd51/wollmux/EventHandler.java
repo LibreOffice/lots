@@ -56,6 +56,16 @@ public class EventHandler
         }
       }
 
+      // ON_NEW:
+      if (event.getEvent() == Event.ON_NEW)
+      {
+        UnoService source = new UnoService(event.getSource());
+        if (source.xTextDocument() != null)
+        {
+          new WMCommandInterpreter(source.xTextDocument()).interpret();
+        }
+      }
+
       // ON_OPENFRAG:
       if (event.getEvent() == Event.ON_OPENFRAG)
       {
