@@ -119,6 +119,8 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
 
   public static final String cmdOpenFrag = "OpenFrag";
 
+  public static final String cmdSenderBox = "SenderBox";
+
   /**
    * Der Konstruktor erzeugt einen neues WollMux-Service im XComponentContext
    * context. Wurde der WollMux bereits in einem anderen Kontext erzeugt, so
@@ -450,6 +452,9 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
             cmdAbsenderdatenBearbeiten) == 0) xRet = this;
 
         if (uri.getSchemeSpecificPart().compareToIgnoreCase(cmdOpenFrag) == 0)
+          xRet = this;
+
+        if (uri.getSchemeSpecificPart().compareToIgnoreCase(cmdSenderBox) == 0)
           xRet = this;
       }
     }

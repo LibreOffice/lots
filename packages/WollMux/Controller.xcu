@@ -1,0 +1,24 @@
+<?xml version='1.0' encoding='UTF-8'?>
+
+<oor:component-data oor:name="Controller" oor:package="org.openoffice.Office.UI"
+	xmlns:install="http://openoffice.org/2004/installation"
+	xmlns:oor="http://openoffice.org/2001/registry"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<node oor:name="Registered">
+		<node oor:name="ToolBar">
+			<node oor:name="senderBox" oor:op="replace">
+				<prop oor:name="Command">
+					<value>wollmux:senderBox</value>
+				</prop>
+				<prop oor:name="Module">
+					<value/>
+				</prop>
+				<prop oor:name="Controller">
+					<value>de.muenchen.allg.itd51.wollmux.SenderBox</value>
+				</prop>
+			</node>
+		</node>
+	</node>
+</oor:component-data>
+

@@ -1,8 +1,22 @@
 <project default="main">
 	<property name="COMPONENT" value="WollMux" />
-	<property name="REG_NAME" value="de.muenchen.allg.itd51.wollmux.comp.WollMux" />
-	<property name="COMPJAR" value="${COMPONENT}.uno.jar" />
 	<property name="PKG_NAME" value="${COMPONENT}.uno.pkg" />
+
+	<property name="WollMux_REG_NAME" value="de.muenchen.allg.itd51.wollmux.comp.WollMux" />
+	<property name="WollMux_COMPJAR" value="${COMPONENT}.uno.jar" />
+
+	<property name="SenderBox_REG_NAME" value="de.muenchen.allg.itd51.wollmux.comp.SenderBox" />
+	<property name="SenderBox_COMPJAR" value="SenderBox.uno.jar" />
+
+	<property name="RDBFILE" value="${COMPONENT}.rdb" />
+	<property name="RDBFILE_ABS" value="${basedir}/${RDBFILE}" />
+
+	<property name="MY_IDL" value="${basedir}/../../idl" />
+	<property name="MY_CLASSES" value="${basedir}/../../bin" />
+	
+	<property name="UNOHELPER_CLASSES" value="${basedir}/../../../UNOHelper/bin" />
+	<property name="SDK_RDB" value="${basedir}/../../../OOo-SDK/types" />
+	<property name="SDK_IDL" value="${basedir}/../../../OOo-SDK/idl" />
 
 	<target name="main" depends="package" />
 
@@ -19,29 +33,73 @@
 	</target>
 
 	<!-- Das Target package registriert die Komponente und erzeugt ein uno.pkg-file -->
-	<target name="package" depends="jarfile">
+	<target name="package" depends="jarfile, jarfile2">
 		<zip destfile="../${PKG_NAME}">
 			<fileset dir=".">
-				<include name="${COMPJAR}" />
+				<include name="${WollMux_COMPJAR}" />
+				<include name="${SenderBox_COMPJAR}" />
 				<include name="*.xcu" />
+				<include name="*.rdb" />
 				<include name="META-INF/manifest.xml" />
 			</fileset>
 		</zip>
 	</target>
 
-	<!-- Das Target jarfile erzeugt die Java-Komponente -->
-	<target name="jarfile">
-		<jar destfile="${COMPJAR}">
-			<fileset dir="../../bin" includes="**/*.class" />
-			<fileset dir="../../../UNOHelper/bin" includes="**/*.class" />
-			<!--fileset dir="${MY_IDL}" includes="**/*.class" /-->
+	<!-- Das Target jarfile erzeugt die Java-Komponente WollMux -->
+	<target name="jarfile" depends="javamake">
+		<jar destfile="${WollMux_COMPJAR}">
+			<fileset dir="${MY_CLASSES}" includes="**/*.class" />
+			<fileset dir="${MY_IDL}" includes="**/*.class" />
+			<fileset dir="${UNOHELPER_CLASSES}" includes="**/*.class" />
 			<manifest>
 				<attribute name="Bundle-Name" value="${COMPONENT}" />
-				<attribute name="Bundle-Activator" value="${REG_NAME}" />
+				<attribute name="Bundle-Activator" value="${WollMux_REG_NAME}" />
 				<attribute name="Bundle-SymbolicName" value="${COMPONENT}" />
 				<attribute name="Bundle-Version" value="1.0" />
-				<attribute name="RegistrationClassName" value="${REG_NAME}" />
+				<attribute name="RegistrationClassName" value="${WollMux_REG_NAME}" />
 			</manifest>
 		</jar>
+	</target>
+
+	<!-- Das Target jarfile erzeugt die Java-Komponente SenderBox -->
+	<target name="jarfile2" depends="javamake">
+		<jar destfile="${SenderBox_COMPJAR}">
+			<fileset dir="${MY_CLASSES}" includes="**/*.class" />
+			<fileset dir="${MY_IDL}" includes="**/*.class" />
+			<fileset dir="${UNOHELPER_CLASSES}" includes="**/*.class" />
+			<manifest>
+				<attribute name="Bundle-Name" value="${COMPONENT}" />
+				<attribute name="Bundle-Activator" value="${SenderBox_REG_NAME}" />
+				<attribute name="Bundle-SymbolicName" value="${COMPONENT}" />
+				<attribute name="Bundle-Version" value="1.0" />
+				<attribute name="RegistrationClassName" value="${SenderBox_REG_NAME}" />
+			</manifest>
+		</jar>
+	</target>
+
+	<!-- Das Target javamake erzeugt das rdb-file und die java-Interfaces -->
+	<target name="javamake">
+		<echo level="info">idlc:</echo>
+		<apply executable="idlc">
+			<arg line="-C -I${SDK_IDL}" />
+			<fileset dir="${MY_IDL}" includes="**/*.idl" />
+		</apply>
+
+		<echo level="info">regmerge:</echo>
+		<apply executable="regmerge">
+			<arg line="'${RDBFILE}' /UCR" />
+			<fileset dir="${MY_IDL}" includes="**/*.urd" />
+		</apply>
+
+		<echo level="info">javamaker:</echo>
+		<apply executable="javamaker" dir="${MY_IDL}" relative="true" addsourcefile="false" dest="${MY_IDL}">
+			<arg line="-BUCR" />
+			<targetfile />
+			<arg line="-nD ${SDK_RDB}/types.rdb ${RDBFILE_ABS}" />
+			<fileset dir="${MY_IDL}" includes="**/*.urd" />
+			<mapper>
+				<mapper type="package" from="*.urd" to="-T*" />
+			</mapper>
+		</apply>
 	</target>
 </project>

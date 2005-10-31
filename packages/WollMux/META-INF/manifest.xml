@@ -4,5 +4,8 @@
  <manifest:file-entry manifest:media-type="application/vnd.sun.star.configuration-data" manifest:full-path="Jobs.xcu"/>
  <manifest:file-entry manifest:media-type="application/vnd.sun.star.configuration-data" manifest:full-path="ProtocolHandler.xcu"/>
  <manifest:file-entry manifest:media-type="application/vnd.sun.star.configuration-data" manifest:full-path="Addon.xcu"/>
+ <manifest:file-entry manifest:media-type="application/vnd.sun.star.configuration-data" manifest:full-path="Controller.xcu"/>
  <manifest:file-entry manifest:media-type="application/vnd.sun.star.uno-component;type=Java" manifest:full-path="WollMux.uno.jar"/>
+ <manifest:file-entry manifest:media-type="application/vnd.sun.star.uno-typelibrary;type=RDB" manifest:full-path="WollMux.rdb"/>
+ <manifest:file-entry manifest:media-type="application/vnd.sun.star.uno-component;type=Java" manifest:full-path="SenderBox.uno.jar"/>
 </manifest:manifest>
