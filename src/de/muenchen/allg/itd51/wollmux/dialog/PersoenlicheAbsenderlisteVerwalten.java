@@ -18,6 +18,7 @@
 *                  | Gegenseitiger Ausschluss der Selektierung
 * 25.10.2005 | BNK | besser kommentiert
 * 27.10.2005 | BNK | back + CLOSEACTION
+* 31.10.2005 | BNK | Behandlung von TimeoutException bei find()
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -72,6 +73,7 @@ import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.Logger;
+import de.muenchen.allg.itd51.wollmux.TimeoutException;
 import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.DJDataset;
 import de.muenchen.allg.itd51.wollmux.db.Dataset;
@@ -544,25 +546,32 @@ public class PersoenlicheAbsenderlisteVerwalten
    * Nimmt eine JList list, die ein DefaultListModel haben muss und ändert ihre
    * Wertliste so, dass sie data entspricht. Die Datasets aus data werden nicht
    * direkt als Werte verwendet, sondern in {@link ListElement} Objekte gewrappt.
+   * data == null wird interpretiert als leere Liste.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void setListElements(JList list, QueryResults data)
   {
-    Object[] elements = new Object[data.size()];
-    Iterator iter = data.iterator();
-    int i = 0;
-    while (iter.hasNext()) elements[i++] = new ListElement((DJDataset)iter.next());
-    Arrays.sort(elements, new Comparator()
+    Object[] elements;
+    if (data == null)
+      elements = new Object[]{};
+    else
     {
-      public int compare(Object o1, Object o2)
-      {
-        return o1.toString().compareTo(o2.toString());
-      }
-    });
-   
+      elements = new Object[data.size()];
+      Iterator iter = data.iterator();
+      int i = 0;
+      while (iter.hasNext()) elements[i++] = new ListElement((DJDataset)iter.next());
+      Arrays.sort(elements, new Comparator()
+          {
+        public int compare(Object o1, Object o2)
+        {
+          return o1.toString().compareTo(o2.toString());
+        }
+          });
+    }
+    
     DefaultListModel listModel = (DefaultListModel)list.getModel();
     listModel.clear();
-    for (i = 0; i < elements.length; ++i)
+    for (int i = 0; i < elements.length; ++i)
       listModel.addElement(elements[i]);
   }
   
@@ -923,259 +932,261 @@ public class PersoenlicheAbsenderlisteVerwalten
 
     
     QueryResults results = null;
-    
-    if (count == 1)
-    {
-      String wort1 = queryArray[0];
-      
-      if (wort1.endsWith("*"))
+    try{
+      if (count == 1)
       {
-        /* 1 Wort
-         * Sternchen am Ende
-         *   Abteilung*
-         *   *bteilung*
-         *   Nachn*
-         *   Vorn*
-         *   Email*
-        */
-        do{
-          results = dj.find("OrgaKurz", wort1);
-          if (!results.isEmpty()) break;
-          
-          results = dj.find("OrgaKurz", "*"+wort1);
-          if (!results.isEmpty()) break;
-          
-          results = dj.find("Nachname", wort1);
-          if (!results.isEmpty()) break;
-          
-          results = dj.find("Vorname", wort1);
-          if (!results.isEmpty()) break;
-          
-          results = dj.find("Mail", wort1);
-          if (!results.isEmpty()) break;
-        }while(false);
-
-      }
-      else
-      {
-        /* 1 Wort
-         * kein Sternchen enthalten 
-         *   Nachname
-         *   Email
-         *   Email@muenchen.de
-         *   Nachn*
-         *   Abteilung
-         *     *eilung
-         *   Vorname
-         *   Vorn*
-         */
-        do{
-          results = dj.find("Nachname", wort1);
-          if (!results.isEmpty()) break;
-          
-          results = dj.find("Mail", wort1);
-          if (!results.isEmpty()) break;
-          
-          results = dj.find("Mail", wort1 + "@muenchen.de");
-          if (!results.isEmpty()) break;
-          
-          results = dj.find("Nachname", wort1+"*");
-          if (!results.isEmpty()) break;
-          
-          results = dj.find("OrgaKurz", wort1);
-          if (!results.isEmpty()) break;
-          
-          results = dj.find("OrgaKurz", "*"+wort1);
-          if (!results.isEmpty()) break;
-          
-          results = dj.find("Vorname", wort1);
-          if (!results.isEmpty()) break;
-          
-          results = dj.find("Vorname", wort1+"*");
-          if (!results.isEmpty()) break;
-        }while(false);
-      }
-    }
-    else if (count == 2)
-    {
-      String wort1 = queryArray[0];
-      String wort2 = queryArray[1];
-      
-      if (hasComma)
-      {
-        if (wort1.endsWith("*") || wort2.endsWith("*"))
-        {
-          /* 2 Worte mit Komma
-           * Bei Sternchen in einem oder beiden Wörtern werden die Wörter direkt
-           * als Suchanfrage verwendet in der Reihenfolge 
-           *   Nachn[*] Vorn[*]
-           *   Vorn[*] Nachn[*]
-           */
-          do{
-            results = dj.find("Nachname", wort1, "Vorname", wort2);
-            if (!results.isEmpty()) break;
-            
-            results = dj.find("Vorname", wort1, "Nachname", wort2);
-            if (!results.isEmpty()) break;
-          } while(false);
-        }
-        else
-        {
-          /* 2 Worte mit Komma
-           * kein Sternchen
-           *   Nachname Vorname 
-           *   Nachname Vorn*
-           *   Nachn* Vorname 
-           *   Nachn* Vorn*
-           */
-          do
-          {
-            results = dj.find("Nachname", wort1, "Vorname", wort2);
-            if (!results.isEmpty()) break;
-            
-            results = dj.find("Nachname", wort1, "Vorname", wort2+"*");
-            if (!results.isEmpty()) break;
-            
-            results = dj.find("Nachname", wort1+"*", "Vorname", wort2);
-            if (!results.isEmpty()) break;
-            
-            results = dj.find("Nachname", wort1+"*", "Vorname", wort2+"*");
-            if (!results.isEmpty()) break;
-          } while (false);
-         
-        }
-      }
-      else //if (!hasComma)
-      {
+        String wort1 = queryArray[0];
+        
         if (wort1.endsWith("*"))
         {
-          /* 2 Worte, kein Komma
-           * Bei Sternchen im ersten oder in beiden Wörtern werden die Wörter 
-           * direkt als Suchanfrage verwendet in der Reihenfolge 
-           *   Vorn[*] Nachn[*]
-           *   Nachn[*] Vorn[*]
-           */ 
-          do{
-            results = dj.find("Vorname", wort1, "Nachname", wort2);
-            if (!results.isEmpty()) break;
-            
-            results = dj.find("Nachname", wort1, "Vorname", wort2);
-            if (!results.isEmpty()) break;
-          }while(false);
-        }
-        else if (wort2.endsWith("*"))
-        {
-          /* 2 Worte, kein Komma
-           * Sternchen nur am Ende des 2.Wortes
-           *   Abt-eil*
-           *   Abt/eil*
-           *   Abt<space>eil*
-           *   Abt_eil*
-           *   *bt-eil*
-           *   *bt/eil*
-           *   *bt<space>eil*
-           *   *bt_eil*
-           *   Vorname Nachn*
-           *   Nachname Vorn*
+          /* 1 Wort
+           * Sternchen am Ende
+           *   Abteilung*
+           *   *bteilung*
+           *   Nachn*
+           *   Vorn*
+           *   Email*
            */
-          out: do{
-            for (int i = 0; i < SEP_CHARS.length(); ++i)
-            {
-              results = dj.find("OrgaKurz", wort1+SEP_CHARS.charAt(i)+wort2);
-              if (!results.isEmpty()) break out;
-            }
+          do{
+            results = dj.find("OrgaKurz", wort1);
+            if (!results.isEmpty()) break;
             
-            for (int i = 0; i < SEP_CHARS.length(); ++i)
-            {
-              results = dj.find("OrgaKurz", "*"+wort1+SEP_CHARS.charAt(i)+wort2);
-              if (!results.isEmpty()) break out;
-            }
+            results = dj.find("OrgaKurz", "*"+wort1);
+            if (!results.isEmpty()) break;
             
-            results = dj.find("Vorname", wort1, "Nachname", wort2);
-            if (!results.isEmpty()) break out;
+            results = dj.find("Nachname", wort1);
+            if (!results.isEmpty()) break;
             
-            results = dj.find("Nachname", wort1, "Vorname", wort2);
-            if (!results.isEmpty()) break out;
+            results = dj.find("Vorname", wort1);
+            if (!results.isEmpty()) break;
+            
+            results = dj.find("Mail", wort1);
+            if (!results.isEmpty()) break;
           }while(false);
+          
         }
         else
         {
-          /* 2 Worte, kein Komma
-           * kein Sternchen
-           *   Vorname Nachname
-           *   Nachname Vorname
-           *   Vorname Nachn*
-           *   Nachname Vorn*
-           *   Abt-eilung
-           *   Abt/eilung
-           *   Abt<space>eilung
-           *   Abt_eilung
-           *    *t-eilung
-           *    *t/eilung
-           *    *t<space>eilung
-           *    *t_eilung
-           *   Vorn* Nachn*
-           *   Nachn* Vorn*
+          /* 1 Wort
+           * kein Sternchen enthalten 
+           *   Nachname
+           *   Email
+           *   Email@muenchen.de
+           *   Nachn*
+           *   Abteilung
+           *     *eilung
+           *   Vorname
+           *   Vorn*
            */
-          out: do{
+          do{
+            results = dj.find("Nachname", wort1);
+            if (!results.isEmpty()) break;
             
-            results = dj.find("Vorname", wort1, "Nachname", wort2);
-            if (!results.isEmpty()) break out;
+            results = dj.find("Mail", wort1);
+            if (!results.isEmpty()) break;
             
-            results = dj.find("Nachname", wort1, "Vorname", wort2);
-            if (!results.isEmpty()) break out;
-
-            results = dj.find("Vorname", wort1, "Nachname", wort2+"*");
-            if (!results.isEmpty()) break out;
+            results = dj.find("Mail", wort1 + "@muenchen.de");
+            if (!results.isEmpty()) break;
             
-            results = dj.find("Nachname", wort1, "Vorname", wort2+"*");
-            if (!results.isEmpty()) break out;
+            results = dj.find("Nachname", wort1+"*");
+            if (!results.isEmpty()) break;
             
-            for (int i = 0; i < SEP_CHARS.length(); ++i)
-            {
-              results = dj.find("OrgaKurz", wort1+SEP_CHARS.charAt(i)+wort2);
-              if (!results.isEmpty()) break out;
-            }
+            results = dj.find("OrgaKurz", wort1);
+            if (!results.isEmpty()) break;
             
-            for (int i = 0; i < SEP_CHARS.length(); ++i)
-            {
-              results = dj.find("OrgaKurz", "*"+wort1+SEP_CHARS.charAt(i)+wort2);
-              if (!results.isEmpty()) break out;
-            }
+            results = dj.find("OrgaKurz", "*"+wort1);
+            if (!results.isEmpty()) break;
             
-            results = dj.find("Vorname", wort1+"*", "Nachname", wort2+"*");
-            if (!results.isEmpty()) break out;
+            results = dj.find("Vorname", wort1);
+            if (!results.isEmpty()) break;
             
-            results = dj.find("Nachname", wort1+"*", "Vorname", wort2+"*");
-            if (!results.isEmpty()) break out;
-            
-          } while(false);
+            results = dj.find("Vorname", wort1+"*");
+            if (!results.isEmpty()) break;
+          }while(false);
         }
       }
-    }
-    else if (count > 2)
-    {
-      /* Mehr als 2 Worte, aber höchstens das letzte Wort endet auf "*",
-       * da der Fall, dass ein anderes auf "*" endet schon ganz am
-       * Anfang abgefangen und auf den Fall count == 2 reduziert wurde.
-       * 
-       * Ganzer String wird wieder zusammengebaut und als Abteilung
-       * interpretiert
-       * kein Sternchen
-       *   Abteilung       (z.B. KVR-II/213 Team 1)
-       *   *bteilung
-       *   
-       * letztes Wort endet auf Sternchen
-       *   *bteilung*
-       */
-      StringBuffer buf = new StringBuffer();
-      for (int i = 0; i < count; ++i)
-        buf.append((i > 0?" ":"") + queryArray[i]);
-      
-      results = dj.find("OrgaKurz",buf.toString());
-    }
+      else if (count == 2)
+      {
+        String wort1 = queryArray[0];
+        String wort2 = queryArray[1];
+        
+        if (hasComma)
+        {
+          if (wort1.endsWith("*") || wort2.endsWith("*"))
+          {
+            /* 2 Worte mit Komma
+             * Bei Sternchen in einem oder beiden Wörtern werden die Wörter direkt
+             * als Suchanfrage verwendet in der Reihenfolge 
+             *   Nachn[*] Vorn[*]
+             *   Vorn[*] Nachn[*]
+             */
+            do{
+              results = dj.find("Nachname", wort1, "Vorname", wort2);
+              if (!results.isEmpty()) break;
+              
+              results = dj.find("Vorname", wort1, "Nachname", wort2);
+              if (!results.isEmpty()) break;
+            } while(false);
+          }
+          else
+          {
+            /* 2 Worte mit Komma
+             * kein Sternchen
+             *   Nachname Vorname 
+             *   Nachname Vorn*
+             *   Nachn* Vorname 
+             *   Nachn* Vorn*
+             */
+            do
+            {
+              results = dj.find("Nachname", wort1, "Vorname", wort2);
+              if (!results.isEmpty()) break;
+              
+              results = dj.find("Nachname", wort1, "Vorname", wort2+"*");
+              if (!results.isEmpty()) break;
+              
+              results = dj.find("Nachname", wort1+"*", "Vorname", wort2);
+              if (!results.isEmpty()) break;
+              
+              results = dj.find("Nachname", wort1+"*", "Vorname", wort2+"*");
+              if (!results.isEmpty()) break;
+            } while (false);
+            
+          }
+        }
+        else //if (!hasComma)
+        {
+          if (wort1.endsWith("*"))
+          {
+            /* 2 Worte, kein Komma
+             * Bei Sternchen im ersten oder in beiden Wörtern werden die Wörter 
+             * direkt als Suchanfrage verwendet in der Reihenfolge 
+             *   Vorn[*] Nachn[*]
+             *   Nachn[*] Vorn[*]
+             */ 
+            do{
+              results = dj.find("Vorname", wort1, "Nachname", wort2);
+              if (!results.isEmpty()) break;
+              
+              results = dj.find("Nachname", wort1, "Vorname", wort2);
+              if (!results.isEmpty()) break;
+            }while(false);
+          }
+          else if (wort2.endsWith("*"))
+          {
+            /* 2 Worte, kein Komma
+             * Sternchen nur am Ende des 2.Wortes
+             *   Abt-eil*
+             *   Abt/eil*
+             *   Abt<space>eil*
+             *   Abt_eil*
+             *   *bt-eil*
+             *   *bt/eil*
+             *   *bt<space>eil*
+             *   *bt_eil*
+             *   Vorname Nachn*
+             *   Nachname Vorn*
+             */
+            out: do{
+              for (int i = 0; i < SEP_CHARS.length(); ++i)
+              {
+                results = dj.find("OrgaKurz", wort1+SEP_CHARS.charAt(i)+wort2);
+                if (!results.isEmpty()) break out;
+              }
+              
+              for (int i = 0; i < SEP_CHARS.length(); ++i)
+              {
+                results = dj.find("OrgaKurz", "*"+wort1+SEP_CHARS.charAt(i)+wort2);
+                if (!results.isEmpty()) break out;
+              }
+              
+              results = dj.find("Vorname", wort1, "Nachname", wort2);
+              if (!results.isEmpty()) break out;
+              
+              results = dj.find("Nachname", wort1, "Vorname", wort2);
+              if (!results.isEmpty()) break out;
+            }while(false);
+          }
+          else
+          {
+            /* 2 Worte, kein Komma
+             * kein Sternchen
+             *   Vorname Nachname
+             *   Nachname Vorname
+             *   Vorname Nachn*
+             *   Nachname Vorn*
+             *   Abt-eilung
+             *   Abt/eilung
+             *   Abt<space>eilung
+             *   Abt_eilung
+             *    *t-eilung
+             *    *t/eilung
+             *    *t<space>eilung
+             *    *t_eilung
+             *   Vorn* Nachn*
+             *   Nachn* Vorn*
+             */
+            out: do{
+              
+              results = dj.find("Vorname", wort1, "Nachname", wort2);
+              if (!results.isEmpty()) break out;
+              
+              results = dj.find("Nachname", wort1, "Vorname", wort2);
+              if (!results.isEmpty()) break out;
+              
+              results = dj.find("Vorname", wort1, "Nachname", wort2+"*");
+              if (!results.isEmpty()) break out;
+              
+              results = dj.find("Nachname", wort1, "Vorname", wort2+"*");
+              if (!results.isEmpty()) break out;
+              
+              for (int i = 0; i < SEP_CHARS.length(); ++i)
+              {
+                results = dj.find("OrgaKurz", wort1+SEP_CHARS.charAt(i)+wort2);
+                if (!results.isEmpty()) break out;
+              }
+              
+              for (int i = 0; i < SEP_CHARS.length(); ++i)
+              {
+                results = dj.find("OrgaKurz", "*"+wort1+SEP_CHARS.charAt(i)+wort2);
+                if (!results.isEmpty()) break out;
+              }
+              
+              results = dj.find("Vorname", wort1+"*", "Nachname", wort2+"*");
+              if (!results.isEmpty()) break out;
+              
+              results = dj.find("Nachname", wort1+"*", "Vorname", wort2+"*");
+              if (!results.isEmpty()) break out;
+              
+            } while(false);
+          }
+        }
+      }
+      else if (count > 2)
+      {
+        /* Mehr als 2 Worte, aber höchstens das letzte Wort endet auf "*",
+         * da der Fall, dass ein anderes auf "*" endet schon ganz am
+         * Anfang abgefangen und auf den Fall count == 2 reduziert wurde.
+         * 
+         * Ganzer String wird wieder zusammengebaut und als Abteilung
+         * interpretiert
+         * kein Sternchen
+         *   Abteilung       (z.B. KVR-II/213 Team 1)
+         *   *bteilung
+         *   
+         * letztes Wort endet auf Sternchen
+         *   *bteilung*
+         */
+        StringBuffer buf = new StringBuffer();
+        for (int i = 0; i < count; ++i)
+          buf.append((i > 0?" ":"") + queryArray[i]);
+        
+        results = dj.find("OrgaKurz",buf.toString());
+      }
+    }catch(TimeoutException x) {}
 
-    setListElements(resultsJList, results);
+      // kann mit results == null umgehen
+    setListElements(resultsJList, results); 
     updateButtonStates();
   }
   
