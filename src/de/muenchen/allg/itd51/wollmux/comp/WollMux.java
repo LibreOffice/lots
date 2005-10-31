@@ -511,7 +511,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
           Logger
               .debug2("Dispatch: Aufruf von WollMux:AbsenderdatenBearbeitenDialog");
           EventProcessor.create().addEvent(
-              new Event(Event.ON_ABSENDERDATEN_BEARBEITEN, true));
+              new Event(Event.ON_ABSENDERDATEN_BEARBEITEN));
         }
 
         if (uri.getSchemeSpecificPart().compareToIgnoreCase(cmdOpenFrag) == 0)
@@ -519,7 +519,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
           Logger.debug2("Dispatch: Aufruf von WollMux:OpenFrag mit Frag:"
                         + uri.getFragment());
           EventProcessor.create().addEvent(
-              new Event(Event.ON_OPENFRAG, uri.getFragment(), false));
+              new Event(Event.ON_OPENFRAG, uri.getFragment()));
         }
       }
     }

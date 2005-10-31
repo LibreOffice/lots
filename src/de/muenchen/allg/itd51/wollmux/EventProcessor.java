@@ -47,7 +47,14 @@ public class EventProcessor implements XEventListener, XModifyListener,
 
   private static Thread eventProcessorThread;
 
-  private static boolean processGUIEvent[] = new boolean[1];
+  /**
+   * Synchroniserter Booleanwert mit dem aktuellen processNextEvent-Status.
+   */
+  private static boolean processNextEvent[] = new boolean[1];
+
+  public static final boolean processTheNextEvent = true;
+
+  public static final boolean waitForGUIReturn = false;
 
   public static EventProcessor create()
   {
@@ -76,22 +83,11 @@ public class EventProcessor implements XEventListener, XModifyListener,
             }
             if (event.getEvent() != Event.UNKNOWN)
             {
-              if (event.isGUIEvent())
+              synchronized (processNextEvent)
               {
-                // GUI-Event verarbeiten und anschliessend warten, bis
-                // actionPerformed() aufgerufen wird.
-                synchronized (processGUIEvent)
-                {
-                  processGUIEvent[0] = false;
-                  EventHandler.processGUIEvent(event);
-                  while (processGUIEvent[0] == false)
-                    processGUIEvent.wait();
-                }
-              }
-              else
-              {
-                // Event normal ausführen.
-                EventHandler.processEvent(event);
+                processNextEvent[0] = EventHandler.processEvent(event);
+                while (processNextEvent[0] == waitForGUIReturn)
+                  processNextEvent.wait();
               }
             }
           }
@@ -114,7 +110,8 @@ public class EventProcessor implements XEventListener, XModifyListener,
    */
   public void notifyEvent(com.sun.star.document.EventObject docEvent)
   {
-    Logger.debug2("Incoming: " + new Event(docEvent) + " " + docEvent.EventName);
+    Logger
+        .debug2("Incoming: " + new Event(docEvent) + " " + docEvent.EventName);
     addEvent(new Event(docEvent));
   }
 
@@ -136,14 +133,20 @@ public class EventProcessor implements XEventListener, XModifyListener,
    */
   public void actionPerformed(ActionEvent actionEvent)
   {
-    //TODO: actionEvent.getActionCommand(); "back" auswerten
-    // (String)actionEvent.getSource() ist der Name des Dialogs
+    // add back- und abort events
+    if (actionEvent.getActionCommand().equals("back"))
     {
-      synchronized (processGUIEvent)
-      {
-        processGUIEvent[0] = true;
-        processGUIEvent.notifyAll();
-      }
+      addEvent(new Event(Event.ON_DIALOG_BACK, (String) actionEvent.getSource()));
+    }
+    if (actionEvent.getActionCommand().equals("abort"))
+    {
+      addEvent(new Event(Event.ON_DIALOG_ABORT, (String) actionEvent
+          .getSource()));
+    }
+    synchronized (processNextEvent)
+    {
+      processNextEvent[0] = processTheNextEvent;
+      processNextEvent.notifyAll();
     }
   }
 

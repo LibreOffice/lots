@@ -35,13 +35,17 @@ import de.muenchen.allg.itd51.wollmux.dialog.AbsenderAuswaehlen;
 public class EventHandler
 {
   /**
-   * Diese Method ist für die Ausführung eines einzelnen (normalen) Events
-   * zuständig. Nach der Bearbeitung startet der EventProcessor unmittelbar die
-   * Bearbeitung des nächsten Events.
+   * Diese Method ist für die Ausführung eines einzelnen Events zuständig. Nach
+   * der Bearbeitung entscheidet der Rückgabewert ob unmittelbar die Bearbeitung
+   * des nächsten Events gestartet werden soll oder ob das GUI blockiert werden
+   * soll bis das nächste actionPerformed-Event beim EventProcessor eintrifft.
    * 
    * @param event
+   *          Das auszuführende Ereignis
+   * @return einer der Werte <code>EventProcessor.processNextEvent</code> oder
+   *         <code>EventProcessor.waitForGUIReturn</code>.
    */
-  public static void processEvent(Event event)
+  public static boolean processEvent(Event event)
   {
     Logger.debug("Bearbeiten des Events: " + event);
     try
@@ -54,6 +58,7 @@ public class EventHandler
         {
           new WMCommandInterpreter(source.xTextDocument()).interpret();
         }
+        return EventProcessor.processTheNextEvent;
       }
 
       // ON_NEW:
@@ -64,6 +69,7 @@ public class EventHandler
         {
           new WMCommandInterpreter(source.xTextDocument()).interpret();
         }
+        return EventProcessor.processTheNextEvent;
       }
 
       // ON_OPENFRAG:
@@ -94,28 +100,9 @@ public class EventHandler
             "_blank",
             0,
             props);
+        return EventProcessor.processTheNextEvent;
       }
-    }
-    catch (java.lang.Exception e)
-    {
-      Logger.error(e);
-    }
-  }
 
-  /**
-   * GUIEvents sind grundsätzlich WollMux-modal. D.h. die Event-Verarbeitung
-   * durch den EventProcessor-Thread wird nach der Ausführung von
-   * processGUIEvent() solange gestoppt, bis das actionPerformed-Event beim
-   * EventProcessor eintrifft.
-   * 
-   * @param event
-   */
-  public static void processGUIEvent(Event event)
-  {
-    Logger.debug("Bearbeiten des GUI-Events: " + event);
-
-    try
-    {
       // ON_ABSENDERDATEN_BEARBEITEN:
       if (event.getEvent() == Event.ON_ABSENDERDATEN_BEARBEITEN)
       {
@@ -127,12 +114,30 @@ public class EventHandler
             "AbsenderdatenBearbeiten").getLastChild();
         new AbsenderAuswaehlen(whoAmIconf, PALconf, ADBconf, WollMux
             .getDatasourceJoiner(), EventProcessor.create());
+        return EventProcessor.waitForGUIReturn;
       }
+
+      // ON_DIALOG_BACK:
+      if (event.getEvent() == Event.ON_DIALOG_BACK)
+      {
+        // hier kann auf das Back-Event reagiert werden. In Event.getArgument()
+        // steht der Name des aufrufenden Dialogs.
+        return EventProcessor.processTheNextEvent;
+      }
+
+      // ON_DIALOG_ABORT:
+      if (event.getEvent() == Event.ON_DIALOG_ABORT)
+      {
+        // hier kann auf das Abort-Event reagiert werden. In Event.getArgument()
+        // steht der Name des aufrufenden Dialogs.
+        return EventProcessor.processTheNextEvent;
+      }
+
     }
-    catch (Exception e)
+    catch (java.lang.Exception e)
     {
       Logger.error(e);
     }
-
+    return EventProcessor.processTheNextEvent;
   }
 }

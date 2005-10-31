@@ -40,25 +40,63 @@ public class Event
 
   public static final int ON_OPENFRAG = 21;
 
-  private int event = UNKNOWN;
+  public static final int ON_DIALOG_BACK = 30;
 
-  private boolean isGUIEvent = false;
+  public static final int ON_DIALOG_ABORT = 31;
+
+  private int event = UNKNOWN;
 
   private Object source = null;
 
   private String argument = "";
 
-  public Event(int event, boolean isGUIEvent)
+  private String getEventName()
   {
-    this.event = event;
-    this.isGUIEvent = isGUIEvent;
+    if (event == UNKNOWN)
+    {
+      return "UNKNOWN";
+    }
+    if (event == ON_ABSENDERDATEN_BEARBEITEN)
+    {
+      return "ON_ABSENDERDATEN_BEARBEITEN";
+    }
+    if (event == ON_LOAD)
+    {
+      return "ON_LOAD";
+    }
+    if (event == ON_NEW)
+    {
+      return "ON_NEW";
+    }
+    if (event == ON_MODIFIED)
+    {
+      return "ON_MODIFIED";
+    }
+    if (event == ON_OPENFRAG)
+    {
+      return "ON_OPENFRAG";
+    }
+    if (event == ON_DIALOG_BACK)
+    {
+      return "ON_DIALOG_BACK";
+    }
+    if (event == ON_DIALOG_ABORT)
+    {
+      return "ON_DIALOG_ABORT";
+    }
+    else
+      return "namenlos";
   }
 
-  public Event(int event, String argument, boolean isGUIEvent)
+  public Event(int event)
+  {
+    this.event = event;
+  }
+
+  public Event(int event, String argument)
   {
     this.event = event;
     this.argument = argument;
-    this.isGUIEvent = isGUIEvent;
   }
 
   public Event(com.sun.star.document.EventObject docEvent)
@@ -91,11 +129,6 @@ public class Event
     return source;
   }
 
-  public boolean isGUIEvent()
-  {
-    return isGUIEvent;
-  }
-
   public String getArgument()
   {
     return argument;
@@ -103,13 +136,6 @@ public class Event
 
   public String toString()
   {
-    String name = "UNKNOWN";
-    if (event == ON_ABSENDERDATEN_BEARBEITEN)
-      name = "ON_ABSENDERDATEN_BEARBEITEN";
-    if (event == ON_LOAD) name = "ON_LOAD";
-    if (event == ON_NEW) name = "ON_NEW";
-    if (event == ON_MODIFIED) name = "ON_MODIFIED";
-    if (event == ON_OPENFRAG) name = "ON_OPENFRAG";
-    return "Event(" + name + ")";
+    return "Event(" + getEventName() + ")";
   }
 }
