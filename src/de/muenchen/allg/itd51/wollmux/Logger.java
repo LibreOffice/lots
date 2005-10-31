@@ -155,7 +155,7 @@ public class Logger {
 	{
 	  if (mode >= ERROR)
 	  {
-	    println("ERROR: " + msg + "\n");
+	    println("ERROR: " + msg);
 	    printException("ERROR: ", e);
 	  }
 	}
