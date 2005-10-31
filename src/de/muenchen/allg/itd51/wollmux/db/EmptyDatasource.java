@@ -10,6 +10,7 @@
 * -------------------------------------------------------------------
 * 28.10.2005 | BNK | Erstellung
 * 28.10.2005 | BNK | +getName()
+* 31.10.2005 | BNK | +find()
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -19,8 +20,11 @@
 package de.muenchen.allg.itd51.wollmux.db;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.Vector;
+
+import de.muenchen.allg.itd51.wollmux.TimeoutException;
 
 /**
  * Eine Datenquelle, die keine Datensätze enthält.
@@ -57,5 +61,10 @@ public class EmptyDatasource implements Datasource
   public String getName()
   {
     return name;
+  }
+
+  public QueryResults find(List query, long timeout) throws TimeoutException
+  {
+    return emptyResults;
   }
 }
