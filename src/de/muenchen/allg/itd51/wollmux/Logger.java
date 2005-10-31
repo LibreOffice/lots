@@ -14,6 +14,8 @@
  * 14.10.2005 | LUT | critical(*) --> error(*)
  *                    + Anzeige des Datums bei allen Meldungen.
  * 27.10.2005 | BNK | Leerzeile nach jeder Logmeldung                  
+ * 31.10.2005 | BNK | +error(msg, e)
+ *                  | "critical" -> "error"
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -33,7 +35,7 @@ import java.util.Date;
  * PrintStream ausgibt (Standardeinstellung: System.err). Die
  * Logging-Nachrichten werden über unterschiedliche Methodenaufrufe entsprechend
  * der Logging-Priorität abgesetzt. Folgende Methoden stehen dafür zur
- * Verfügung: critical(), log(), debug(), debug2()
+ * Verfügung: error(), log(), debug(), debug2()
  * </p>
  * <p>
  * Der Logging-Modus kann über die init()-Methode initialisiert werden. Er
@@ -120,7 +122,7 @@ public class Logger {
 	}
 
 	/**
-	 * Nachricht der höchsten Priorität "critical" absetzen. Als "critical" sind
+	 * Nachricht der höchsten Priorität "error" absetzen. Als "error" sind
 	 * nur Ereignisse einzustufen, die den Programmablauf unvorhergesehen
 	 * verändern oder die weitere Ausführung unmöglich machen.
 	 * 
@@ -133,7 +135,7 @@ public class Logger {
 	}
 
 	/**
-	 * Wie {@link #critical(String)}, nur dass statt dem String eine Exception
+	 * Wie {@link #error(String)}, nur dass statt dem String eine Exception
 	 * ausgegeben wird.
 	 * 
 	 * @param e
@@ -142,15 +144,30 @@ public class Logger {
 		if (mode >= ERROR)
 			printException("ERROR: ", e);
 	}
+    
+	/**
+	 * Wie {@link #error(String)}, nur dass statt dem String eine Exception
+	 * ausgegeben wird.
+	 * 
+	 * @param e
+	 */
+	public static void error(String msg, Exception e)
+	{
+	  if (mode >= ERROR)
+	  {
+	    println("ERROR: " + msg + "\n");
+	    printException("ERROR: ", e);
+	  }
+	}
 
 	/**
-	 * Nachricht der Priorität "log" absetzen. "log" enthält alle Nachrichten,
-	 * die für den täglichen Programmablauf beim Endanwender oder zur Auffindung
-	 * der gängigsten Bedienfehler interessant sind.
-	 * 
-	 * @param msg
-	 *            Die Logging-Nachricht
-	 */
+   * Nachricht der Priorität "log" absetzen. "log" enthält alle Nachrichten, die
+   * für den täglichen Programmablauf beim Endanwender oder zur Auffindung der
+   * gängigsten Bedienfehler interessant sind.
+   * 
+   * @param msg
+   *          Die Logging-Nachricht
+   */
 	public static void log(String msg) {
 		if (mode >= LOG)
 			println("LOG: " + msg + "\n");
