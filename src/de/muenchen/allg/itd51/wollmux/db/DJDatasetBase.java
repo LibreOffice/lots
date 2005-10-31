@@ -57,6 +57,16 @@ public abstract class DJDatasetBase implements DJDataset
     return myBS;
   }
   
+  /** 
+   * Liefert die Map, die dem Konstruktor als overrideStore Argument übergeben
+   * wurde.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public Map getLOS()
+  {
+    return myBS;
+  }
+  
   public String get(String spaltenName) throws ColumnNotFoundException
   {
     if (schema != null && !schema.contains(spaltenName)) throw new ColumnNotFoundException("Spalte "+spaltenName+" existiert nicht!");
