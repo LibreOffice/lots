@@ -1,3 +1,5 @@
+//TODO Testen, ob unter Linux geschriebene Dateien mit Umlauten unter Windows lesbar sind und umgekehrt. Problem könnte sein, dass wir zur Zeit unseren Readern/Writern keinen Zeichnsatz vorschreiben und evtl. der Systemzeichensatz gewaehlt wird, der unter Windows und Linux verschieden ist.
+
 /*
 * Dateiname: ConfigThingy.java
 * Projekt  : WollMux
@@ -28,6 +30,9 @@
 * 14.10.2005 | BNK | besserer Exception-Text
 * 14.10.2005 | BNK | +getFirstChild() und getLastChild() 
 * 02.11.2005 | BNK | Streams nach Lesen schliessen.
+* 02.11.2005 | BNK | UTF8 beim Lesen annehmen
+*                  | +stringRepresentation()
+*                  | +add(childName)
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -57,6 +62,17 @@ import java.util.regex.Pattern;
  */
 public class ConfigThingy
 {
+  /**
+   * Der Name des Zeichensatzes, in dem ConfigThingy-Dateien gespeichert
+   * werden.
+   */
+  public static final String CHARSET = "UTF-8";
+  
+  /**
+   * Einrückung für stringRepresentation().
+   */
+  private static final String INDENT = "  ";
+  
   /** Die Kindknoten. */
   private List children;
   /** Der Name des Knotens. Bei Blättern ist dies der (String-)Wert des Knotens. */
@@ -74,7 +90,7 @@ public class ConfigThingy
   public ConfigThingy(String name, URL url) throws IOException, SyntaxErrorException
   {
     this(name);
-    childrenFromUrl(url, new InputStreamReader(url.openStream()));
+    childrenFromUrl(url, new InputStreamReader(url.openStream(),CHARSET));
   }
   
   /**
@@ -120,7 +136,7 @@ public class ConfigThingy
               case Token.STRING:
                 try{
                   URL includeURL = new URL(url,token2.contentString());
-                  ((ConfigThingy)stack.peek()).childrenFromUrl(includeURL, new InputStreamReader(includeURL.openStream()) );
+                  ((ConfigThingy)stack.peek()).childrenFromUrl(includeURL, new InputStreamReader(includeURL.openStream(),CHARSET) );
                 } catch(IOException iox)
                 {
                   throw new IOException(token2.url()+" in Zeile "+token2.line()+" bei Zeichen "+token2.position()+": %include fehlgeschlagen: "+iox.toString());
@@ -213,6 +229,18 @@ public class ConfigThingy
   }
   
   /**
+   * Fügt ein neues Kind namens childName als letztes Kind an und
+   * liefert eine Referenz auf das neue Kind.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public ConfigThingy add(String childName)
+  {
+    ConfigThingy newChild = new ConfigThingy(childName); 
+    addChild(newChild);
+    return newChild;
+  }
+  
+  /**
    * Liefert die Anzahl der Kinder zurück.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -300,6 +328,15 @@ public class ConfigThingy
   public ConfigThingy getFirstChild() throws NodeNotFoundException
   {
     if (children.isEmpty()) throw new NodeNotFoundException("Knoten "+getName()+" hat keine Kinder");
+    return (ConfigThingy)children.get(0);
+  }
+  
+  /** Wie getFirstChild(), aber falls kein Kind vorhanden wird
+   * IndexOutOfBoundsException geworfen anstatt NodeNotFoundException.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private ConfigThingy getFirstChildNoThrow()
+  {
     return (ConfigThingy)children.get(0);
   }
   
@@ -469,6 +506,117 @@ public class ConfigThingy
     return buf.toString();
   }
   
+  /**
+   * Gibt eine String-Darstellung des kompletten ConfigThingy-Baumes
+   * zurück, die geeignet ist, in eine Datei gespeichert und von dort wieder
+   * als ConfigThingy geparst zu werden.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TODO Testen
+   */
+  public String stringRepresentation()
+  {
+    StringBuffer buf = new StringBuffer();
+    stringRepresentation(buf,"");
+    return buf.toString();
+  }
+  
+  /**
+   * Ersetzt " durch "", \n durch %n, % durch %%
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private String escapeString(String str)
+  {
+    return str.replaceAll("%","%%").replaceAll("\n","%n").replaceAll("\"","\"\"");
+  }
+  
+  /**
+   * Hängt eine textuelle Darstellung diese ConfigThingys an buf an.
+   * Jeder Zeile wird childPrefix vorangestellt.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private void stringRepresentation(StringBuffer buf, String childPrefix)
+  {
+    
+    if (count() == 0) //Blatt
+    {
+      buf.append("\""+escapeString(getName())+"\"");
+    }
+    else if (count() == 1 && getFirstChildNoThrow().count() == 0) //Schlüssel-Wert-Paar
+    {
+      buf.append(getName());
+      buf.append(' ');
+      getFirstChildNoThrow().stringRepresentation(buf, childPrefix);
+    }
+    else
+    {
+      int type = structureType();
+      if (type == ST_VALUE_LIST || type == ST_PAIR_LIST) //nur Kinder, keine Enkelkinder
+      {
+        buf.append(childPrefix);
+        buf.append(getName());
+        buf.append('(');
+        Iterator iter = iterator();
+        while (iter.hasNext())
+        {
+          ConfigThingy child = (ConfigThingy)iter.next();
+          child.stringRepresentation(buf, childPrefix);
+          if (iter.hasNext()) 
+          {
+            if (type == ST_VALUE_LIST) buf.append(',');
+            buf.append(' ');
+          }
+        }
+        buf.append(')');
+        buf.append("\n");
+      }
+      else
+      {
+        buf.append('\n');
+        buf.append(childPrefix);
+        buf.append(getName());
+        buf.append("(\n");
+        Iterator iter = iterator();
+        while (iter.hasNext())
+        {
+          ConfigThingy child = (ConfigThingy)iter.next();
+          if (child.count() == 0 || 
+             (child.count() == 1 && child.getFirstChildNoThrow().count() == 0))
+            buf.append(childPrefix+INDENT);
+          
+          child.stringRepresentation(buf, childPrefix+INDENT);
+          
+          if (child.count() == 0 || 
+             (child.count() == 1 && child.getFirstChildNoThrow().count() == 0))
+             buf.append('\n');
+        }
+        buf.append(childPrefix);
+        buf.append(")\n");
+      }
+    }
+  }
+  
+
+  private static final int ST_VALUE_LIST = 0;
+  private static final int ST_PAIR_LIST = 1;
+  private static final int ST_OTHER = 2;
+  
+  private int structureType()
+  {
+    Iterator iter = iterator();
+    int count = -1;
+    while (iter.hasNext())
+    {
+      ConfigThingy child = (ConfigThingy)iter.next();
+      if (count == -1) count = child.count();
+      if (count != child.count())  return ST_OTHER;
+      if (count > 1) return ST_OTHER;
+      if (count == 1 && child.getFirstChildNoThrow().count() > 0) return ST_OTHER;
+    }
+    
+    return  count == 0 ? ST_VALUE_LIST : ST_PAIR_LIST;
+  }
+
+
   /**
    * Die Methode {@link ConfigThingy#tokenize(URL)} liefert eine Liste von
    * Objekten, die alle dieses Interface implementieren.
@@ -892,6 +1040,8 @@ public class ConfigThingy
 
     args[0] = args[0].replaceAll("\\\\","/");
     ConfigThingy conf = new ConfigThingy(args[0], new URL(cwd.toURL(),args[0]));
+    
+    System.out.println("Dies ist die stringRepresentation(): \n\n"+conf.stringRepresentation());
     
     System.out.println("Dies ist der Ergebnisbaum: \n\n"+treeDump(conf, ""));
     
