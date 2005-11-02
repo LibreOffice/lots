@@ -50,7 +50,6 @@ import de.muenchen.allg.itd51.wollmux.EventProcessor;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.VisibleTextFragmentList;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
-import de.muenchen.allg.itd51.wollmux.db.TestDatasourceJoiner;
 
 /**
  * Diese Klasse stellt den zentralen UNO-Service WollMux dar. Der Service dient
@@ -70,6 +69,11 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
    * Enthält das File der Konfigurationsdatei wollmux.conf
    */
   private static File wollmuxConfFile;
+
+  /**
+   * Enthält das File in des local-overwrite-storage-caches.
+   */
+  private static File losCacheFile;
 
   /**
    * Enthält den geparsten Konfigruationsbaum der wollmux.conf
@@ -149,8 +153,9 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
     String userHome = System.getProperty("user.home");
     File wollmuxDir = new File(userHome, ".wollmux");
     if (!wollmuxDir.exists()) wollmuxDir.mkdirs();
-    File wollmuxLogFile = new File(wollmuxDir, "wollmux.log");
     wollmuxConfFile = new File(wollmuxDir, "wollmux.conf");
+    losCacheFile = new File(wollmuxDir, "cache.conf");
+    File wollmuxLogFile = new File(wollmuxDir, "wollmux.log");
     try
     {
       wollmuxLog = new PrintStream(new FileOutputStream(wollmuxLogFile));
@@ -178,10 +183,11 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
    *          definierten DEFAULT_CONTEXT.
    */
   public static void initialize(PrintStream logStream, File wollmuxConf,
-      URL defaultContext)
+      File losCache, URL defaultContext)
   {
     WollMux.wollmuxLog = logStream;
     WollMux.wollmuxConfFile = wollmuxConf;
+    WollMux.losCacheFile = losCache;
     WollMux.defaultContext = defaultContext;
   }
 
@@ -204,7 +210,8 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
       textFragmentList = new VisibleTextFragmentList(wollmuxConf);
 
       // DatasourceJoiner erzeugen
-      datasourceJoiner = new TestDatasourceJoiner();
+      datasourceJoiner = new DatasourceJoiner(wollmuxConf, "Personal",
+          losCacheFile, getDEFAULT_CONTEXT());
 
       // register global EventListener
       UnoService eventBroadcaster = UnoService.createWithContext(
@@ -552,9 +559,9 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
   {
     try
     {
-      if (args.length < 1)
+      if (args.length < 2)
       {
-        System.out.println("USAGE: <config_url>");
+        System.out.println("USAGE: <config_url> <losCache>");
         System.exit(0);
       }
       File cwd = new File("testdata");
@@ -566,7 +573,8 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
 
       // WollMux starten
       new WollMux(UNO.defaultContext);
-      WollMux.initialize(System.err, new File(cwd, args[0]), cwd.toURL());
+      WollMux.initialize(System.err, new File(cwd, args[0]), new File(cwd,
+          args[1]), cwd.toURL());
       WollMux.startupWollMux();
     }
     catch (Exception e)

@@ -122,6 +122,10 @@ public class EventHandler
       {
         // hier kann auf das Back-Event reagiert werden. In Event.getArgument()
         // steht der Name des aufrufenden Dialogs.
+
+        // Der Cache und der LOS kann sich potentiell ändern. Daher wird er hier
+        // gesichert.
+        WollMux.getDatasourceJoiner().saveCacheAndLOS();
         return EventProcessor.processTheNextEvent;
       }
 
@@ -130,6 +134,10 @@ public class EventHandler
       {
         // hier kann auf das Abort-Event reagiert werden. In Event.getArgument()
         // steht der Name des aufrufenden Dialogs.
+
+        // Der Cache und der LOS kann sich potentiell ändern. Daher wird er hier
+        // gesichert.
+        WollMux.getDatasourceJoiner().saveCacheAndLOS();
         return EventProcessor.processTheNextEvent;
       }
 

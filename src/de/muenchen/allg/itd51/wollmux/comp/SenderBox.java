@@ -1,5 +1,5 @@
 /*
- * Dateiname: ToolbarComboBox.java
+ * Dateiname: SenderBox.java
  * Projekt  : WollMux
  * Funktion : Controller für eine in der Toolbar eingebettete 
  *            ComboBox zur Auswahl des aktuellen Absenders.
@@ -11,23 +11,28 @@
  * -------------------------------------------------------------------
  * 31.10.2005 | LUT | Erstellung
  * -------------------------------------------------------------------
-
  *
- * @author D-HAIII 5.1 Christoph Lutz
+ * @author Christoph Lutz (D-III-ITD 5.1)
  * @version 1.0
  * 
  */
 package de.muenchen.allg.itd51.wollmux.comp;
 
+import com.sun.star.awt.ActionEvent;
+import com.sun.star.awt.ItemEvent;
+import com.sun.star.awt.Key;
+import com.sun.star.awt.KeyEvent;
 import com.sun.star.awt.Rectangle;
+import com.sun.star.awt.TextEvent;
 import com.sun.star.awt.VclWindowPeerAttribute;
 import com.sun.star.awt.WindowAttribute;
 import com.sun.star.awt.WindowClass;
 import com.sun.star.awt.WindowDescriptor;
-import com.sun.star.awt.XComboBox;
-import com.sun.star.awt.XToolkit;
+import com.sun.star.awt.XActionListener;
+import com.sun.star.awt.XItemListener;
+import com.sun.star.awt.XKeyListener;
+import com.sun.star.awt.XTextListener;
 import com.sun.star.awt.XWindow;
-import com.sun.star.awt.XWindowPeer;
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.comp.loader.FactoryHelper;
 import com.sun.star.frame.FeatureStateEvent;
@@ -35,6 +40,7 @@ import com.sun.star.frame.XFrame;
 import com.sun.star.frame.XStatusListener;
 import com.sun.star.frame.XToolbarController;
 import com.sun.star.lang.EventObject;
+import com.sun.star.lang.XComponent;
 import com.sun.star.lang.XInitialization;
 import com.sun.star.lang.XMultiServiceFactory;
 import com.sun.star.lang.XServiceInfo;
@@ -51,16 +57,22 @@ import com.sun.star.util.XUpdatable;
 import de.muenchen.allg.afid.MsgBox;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoService;
+import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.XSenderBox;
 
 /**
+ * Diese Klasse implementiert einen com.sun.star.frame.ToolbarController, mit
+ * dem eine ComboBox in eine Toolbar eingebettet werden kann, die für die
+ * Auswahl des aktuellen Absenders zuständig ist.
+ * 
+ * @author Christoph Lutz (D-III-ITD 5.1)
+ */
+/**
  * @author lut
  * 
- * Diese Klasse implementiert einen com.sun.star.frame.ToolbarController, mit
- * dem eine ComboBox in eine Toolbar eingebettet werden kann.
  */
 public class SenderBox extends ComponentBase implements XServiceInfo,
-    XSenderBox
+    XSenderBox, XItemListener, XActionListener, XTextListener, XKeyListener
 {
 
   protected static final String __serviceName = "de.muenchen.allg.itd51.wollmux.SenderBox";
@@ -75,7 +87,7 @@ public class SenderBox extends ComponentBase implements XServiceInfo,
    * Das Feld cBox enthält den ComboBox-Service für den weiteren Zugriff auf die
    * Box.
    */
-  private static UnoService cBox;
+  private UnoService cBox;
 
   /*
    * (non-Javadoc)
@@ -152,57 +164,6 @@ public class SenderBox extends ComponentBase implements XServiceInfo,
    * 
    * @see com.sun.star.frame.XToolbarController#createItemWindow(com.sun.star.awt.XWindow)
    */
-  public XWindow createItemWindow2(XWindow xWindow)
-  {
-    XMultiServiceFactory xMSF = serviceManager.xMultiServiceFactory();
-    try
-    {
-      // get XWindowPeer
-      XWindowPeer xWinPeer = (XWindowPeer) UnoRuntime.queryInterface(
-          XWindowPeer.class,
-          xWindow);
-
-      // create Toolkit-Service
-      Object o = xMSF.createInstance("com.sun.star.awt.Toolkit");
-      XToolkit xToolkit = (XToolkit) UnoRuntime.queryInterface(
-          XToolkit.class,
-          o);
-
-      // create WindowDescriptor
-      WindowDescriptor wd = new WindowDescriptor();
-      wd.Type = WindowClass.SIMPLE;
-      wd.Parent = xWinPeer;
-      wd.Bounds = new Rectangle(0, 0, 100, 100);
-      wd.ParentIndex = -1;
-      wd.WindowAttributes = WindowAttribute.SHOW;
-      wd.WindowServiceName = "combobox";
-
-      // create ComboBox
-      XWindowPeer cBox_xWinPeer = xToolkit.createWindow(wd);
-      XComboBox cBox_xComboBox = (XComboBox) UnoRuntime.queryInterface(
-          XComboBox.class,
-          cBox_xWinPeer);
-      XWindow cBox_xWindow = (XWindow) UnoRuntime.queryInterface(
-          XWindow.class,
-          cBox_xWinPeer);
-
-      // add some elements
-      cBox_xComboBox.addItems(new String[] {
-                                            "test",
-                                            "foo",
-                                            "bar",
-                                            "test2",
-                                            "foo2",
-                                            "bar2" }, (short) 0);
-
-      return cBox_xWindow;
-    }
-    catch (com.sun.star.uno.Exception e)
-    {
-      return null;
-    }
-  }
-
   public XWindow createItemWindow(XWindow xwin)
   {
     if (cBox == null)
@@ -220,6 +181,22 @@ public class SenderBox extends ComponentBase implements XServiceInfo,
                               | VclWindowPeerAttribute.DROPDOWN;
         wd.WindowServiceName = "ComboBox";
         cBox = new UnoService(toolkit.xToolkit().createWindow(wd));
+        addItems(new String[] {
+                               "test1",
+                               "foo1",
+                               "bar1",
+                               "test2",
+                               "foo2",
+                               "bar2",
+                               "test3",
+                               "foo3",
+                               "bar3" }, (short) 0);
+        cBox.xComboBox().addActionListener(this);
+        cBox.xComboBox().addItemListener(this);
+        cBox.xComponent().addEventListener(this);
+        cBox.xTextComponent().addTextListener(this);
+        cBox.xWindow().addKeyListener(this);
+        cBox.msgboxFeatures();
       }
       catch (Exception e)
       {
@@ -275,8 +252,7 @@ public class SenderBox extends ComponentBase implements XServiceInfo,
    */
   public void update()
   {
-    // TODO Auto-generated method stub
-
+    Logger.debug2("SenderBox::update");
   }
 
   /*
@@ -286,8 +262,7 @@ public class SenderBox extends ComponentBase implements XServiceInfo,
    */
   public void click()
   {
-    // TODO Auto-generated method stub
-
+    Logger.debug2("SenderBox::click");
   }
 
   /*
@@ -297,7 +272,7 @@ public class SenderBox extends ComponentBase implements XServiceInfo,
    */
   public XWindow createPopupWindow()
   {
-    // TODO Auto-generated method stub
+    Logger.debug2("SenderBox::createPopupWindow");
     return null;
   }
 
@@ -308,8 +283,7 @@ public class SenderBox extends ComponentBase implements XServiceInfo,
    */
   public void doubleClick()
   {
-    // TODO Auto-generated method stub
-
+    Logger.debug2("SenderBox::doubleClick");
   }
 
   /*
@@ -319,8 +293,7 @@ public class SenderBox extends ComponentBase implements XServiceInfo,
    */
   public void execute(short arg0)
   {
-    // TODO Auto-generated method stub
-
+    Logger.debug2("SenderBox::execute");
   }
 
   /*
@@ -375,8 +348,7 @@ public class SenderBox extends ComponentBase implements XServiceInfo,
    */
   public void statusChanged(FeatureStateEvent arg0)
   {
-    // TODO Auto-generated method stub
-
+    Logger.debug2("SenderBox::statusChanged");
   }
 
   /*
@@ -384,10 +356,12 @@ public class SenderBox extends ComponentBase implements XServiceInfo,
    * 
    * @see com.sun.star.lang.XEventListener#disposing(com.sun.star.lang.EventObject)
    */
-  public void disposing(EventObject arg0)
+  public void disposing(EventObject source)
   {
-    // TODO Auto-generated method stub
-
+    Logger.debug2("SenderBox::disposing");
+    // EventListener deregistrieren.
+    XComponent xCompo = UNO.XComponent(source.Source);
+    if (xCompo != null) xCompo.removeEventListener(this);
   }
 
   public static void main(String[] args) throws java.lang.Exception
@@ -399,7 +373,6 @@ public class SenderBox extends ComponentBase implements XServiceInfo,
         ctx);
 
     String sToolBar = "private:resource/toolbar/UITest";
-    String sMyCommand = "macro://./Standard.UITest.DestroyToolbar()";
 
     UnoService doc = new UnoService(desktop.xDesktop().getCurrentComponent());
     UnoService frame = new UnoService(doc.xModel().getCurrentController()
@@ -442,26 +415,6 @@ public class SenderBox extends ComponentBase implements XServiceInfo,
     // set the settings
     toolbar.xUIElementSettings().setSettings(oToolBarSettings.xIndexAccess());
 
-    // default-setting for the combobox:
-    UnoService tcb = UnoService.createWithContext(
-        "de.muenchen.frame.ToolbarComboBox",
-        ctx);
-    XSenderBox xTcb = (XSenderBox) UnoRuntime.queryInterface(
-        XSenderBox.class,
-        tcb.getObject());
-    xTcb.addItems(new String[] {
-                                "test1",
-                                "foo1",
-                                "bar1",
-                                "test2",
-                                "foo2",
-                                "bar2",
-                                "test3",
-                                "foo3",
-                                "bar3" }, (short) 0);
-    xTcb.setText("Hallo");
-    xTcb.setDropDownLineCount((short) 5);
-
     System.exit(0);
   }
 
@@ -475,5 +428,51 @@ public class SenderBox extends ComponentBase implements XServiceInfo,
     aToolbarItem[1].Name = "Label";
     aToolbarItem[1].Value = label;
     return aToolbarItem;
+  }
+
+  /*
+   * Empfängt eine Nachricht, wenn mit der Maus auf ein anderes als das aktive
+   * Element geklickt wurde.
+   * 
+   * (non-Javadoc)
+   * 
+   * @see com.sun.star.awt.XItemListener#itemStateChanged(com.sun.star.awt.ItemEvent)
+   */
+  public void itemStateChanged(ItemEvent arg0)
+  {
+    Logger.debug2("SenderBox::itemStateChanged " + arg0.Selected);
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.sun.star.awt.XActionListener#actionPerformed(com.sun.star.awt.ActionEvent)
+   */
+  public void actionPerformed(ActionEvent arg0)
+  {
+    Logger.debug2("SenderBox::actionPerformed " + arg0.ActionCommand);
+  }
+
+  /*
+   * Empfängt eine Nachricht wenn der Text in der ComboBox geändert wurde.
+   * 
+   * (non-Javadoc)
+   * 
+   * @see com.sun.star.awt.XTextListener#textChanged(com.sun.star.awt.TextEvent)
+   */
+  public void textChanged(TextEvent arg0)
+  {
+    Logger.debug2("SenderBox::textChanged " + arg0.dummy1);
+  }
+
+  public void keyPressed(KeyEvent arg0)
+  {
+    Logger.debug2("SenderBox::keyPressed" + arg0.KeyCode);
+    if (arg0.KeyCode == Key.RETURN) Logger.debug2("Return pressed!");
+  }
+
+  public void keyReleased(KeyEvent arg0)
+  {
+    // do nothing
   }
 }

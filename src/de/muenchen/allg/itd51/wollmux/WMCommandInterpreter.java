@@ -465,9 +465,9 @@ public class WMCommandInterpreter
   {
     try
     {
-      if (args.length < 2)
+      if (args.length < 3)
       {
-        System.out.println("USAGE: <config_url> <document_url>");
+        System.out.println("USAGE: <config_url> <los_cache> <document_url>");
         System.exit(0);
       }
       File cwd = new File("testdata");
@@ -480,13 +480,14 @@ public class WMCommandInterpreter
 
       // WollMux starten
       new WollMux(UNO.defaultContext);
-      WollMux.initialize(System.err, new File(cwd, args[0]), cwd.toURL());
+      WollMux.initialize(System.err, new File(cwd, args[0]), new File(cwd,
+          args[1]), cwd.toURL());
       WollMux.startupWollMux();
 
       Logger.init(Logger.ALL);
 
       // Dokument URL aufbereiten und Dokument zum Parsen öffnen
-      String urlStr = new URL(cwd.toURL(), args[1]).toExternalForm();
+      String urlStr = new URL(cwd.toURL(), args[2]).toExternalForm();
       UnoService trans = UnoService.createWithContext(
           "com.sun.star.util.URLTransformer",
           WollMux.getXComponentContext());
