@@ -204,7 +204,7 @@ public class ConfigThingy
   /**
    * Erzeugt ein ConfigThingy mit Name/Wert name, ohne Kinder.
    */
-  private ConfigThingy(String name)
+  public ConfigThingy(String name)
   {
     this.name = name;
     this.children = new Vector();
@@ -521,12 +521,12 @@ public class ConfigThingy
   }
   
   /**
-   * Ersetzt " durch "", \n durch %n, % durch %%
+   * Ersetzt ' durch '', \n durch %n, % durch %%
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private String escapeString(String str)
   {
-    return str.replaceAll("%","%%").replaceAll("\n","%n").replaceAll("\"","\"\"");
+    return str.replaceAll("%","%%").replaceAll("\n","%n").replaceAll("'","''");
   }
   
   /**
@@ -539,7 +539,7 @@ public class ConfigThingy
     
     if (count() == 0) //Blatt
     {
-      buf.append("\""+escapeString(getName())+"\"");
+      buf.append("'"+escapeString(getName())+"'");
     }
     else if (count() == 1 && getFirstChildNoThrow().count() == 0) //Schlüssel-Wert-Paar
     {
