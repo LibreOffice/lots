@@ -16,6 +16,7 @@
  * 27.10.2005 | BNK | Leerzeile nach jeder Logmeldung                  
  * 31.10.2005 | BNK | +error(msg, e)
  *                  | "critical" -> "error"
+ * 02.11.2005 | BNK | LOG aus Default-Modus
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -42,7 +43,7 @@ import java.util.Date;
  * beschreibt, welche Nachrichten aus den Prioritätsstufen angezeigt werden und
  * welche nicht. Jeder Logging Modus zeigt die Nachrichten seiner Priorität und
  * die Nachrichten der höheren Prioritätsstufen an. Standardmässig ist der Modus
- * Logging.ERROR voreingestellt.
+ * Logging.LOG voreingestellt.
  * </p>
  */
 public class Logger {
@@ -54,7 +55,6 @@ public class Logger {
 
 	/**
 	 * Im Logging-Modus <code>NONE</code> werden keine Nachrichten ausgegeben.
-	 * Dieser Modus ist die Defaulteinstellung.
 	 */
 	public static final int NONE = 0;
 
@@ -69,6 +69,7 @@ public class Logger {
 	 * Der Logging-Modus <code>LOG</code> ist der Standard Modus. Er zeigt
 	 * Nachrichten und wichtige Programminformationen an, die im täglichen
 	 * Einsatz interessant sind.
+     * Dieser Modus ist die Defaulteinstellung.
 	 */
 	public static final int LOG = 3;
 
@@ -90,7 +91,7 @@ public class Logger {
 	/**
 	 * Das Feld <code>mode</code> enthält den aktuellen Logging-Mode
 	 */
-	private static int mode = ERROR;
+	private static int mode = LOG;
 
 	/**
 	 * Über die Methode init wird der Logger mit einem PrintStream und einem
