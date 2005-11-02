@@ -27,6 +27,7 @@
 * 14.10.2005 | BNK | get() und getByChild() auf Werfen von NodeNotFoundException umgestellt.
 * 14.10.2005 | BNK | besserer Exception-Text
 * 14.10.2005 | BNK | +getFirstChild() und getLastChild() 
+* 02.11.2005 | BNK | Streams nach Lesen schliessen.
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -77,7 +78,8 @@ public class ConfigThingy
   }
   
   /**
-   * Parst die Daten aus read im Kontext der URL url.
+   * Parst die Daten aus read im Kontext der URL url. read wird sowohl im
+   * Fehlerfalle als auch nach dem erfolgreichen Einlesen geschlossen.
    * @param name der Name der Wurzel des erzeugten ConfigThingy-Baumes.
    * @throws IOException falls das Laden von Daten von url (oder einer includeten
    * URL) fehlschlägt.
@@ -100,82 +102,87 @@ public class ConfigThingy
    */
   protected void childrenFromUrl(URL url, Reader read) throws IOException, SyntaxErrorException
   {
-    Stack stack = new Stack();
-    stack.push(this);
-    List tokens = tokenize(url, read);
-    Iterator liter = tokens.iterator();
-    Token token1, token2;
-    do{
-      token1 = (Token)liter.next();
-      ConfigThingy child;
-      switch (token1.type())
-      {
-        case Token.INCLUDE:
+    try{
+      Stack stack = new Stack();
+      stack.push(this);
+      List tokens = tokenize(url, read);
+      Iterator liter = tokens.iterator();
+      Token token1, token2;
+      do{
+        token1 = (Token)liter.next();
+        ConfigThingy child;
+        switch (token1.type())
+        {
+          case Token.INCLUDE:
             token2 = (Token)liter.next();
             switch (token2.type())
             {
               case Token.STRING:
-                   try{
-                     URL includeURL = new URL(url,token2.contentString()); 
-                     ((ConfigThingy)stack.peek()).childrenFromUrl(includeURL, new InputStreamReader(includeURL.openStream()));
-                   } catch(IOException iox)
-                   {
-                     throw new IOException(token2.url()+" in Zeile "+token2.line()+" bei Zeichen "+token2.position()+": %include fehlgeschlagen: "+iox.toString());
-                   }
-                  break;
+                try{
+                  URL includeURL = new URL(url,token2.contentString());
+                  ((ConfigThingy)stack.peek()).childrenFromUrl(includeURL, new InputStreamReader(includeURL.openStream()) );
+                } catch(IOException iox)
+                {
+                  throw new IOException(token2.url()+" in Zeile "+token2.line()+" bei Zeichen "+token2.position()+": %include fehlgeschlagen: "+iox.toString());
+                }
+                break;
               default:
-                  throw new SyntaxErrorException(token2.url()+": URL-String (umschlossen von Gänsefüßchen) erwartet in Zeile "+token2.line()+" bei Zeichen "+token2.position());
+                throw new SyntaxErrorException(token2.url()+": URL-String (umschlossen von Gänsefüßchen) erwartet in Zeile "+token2.line()+" bei Zeichen "+token2.position());
             }
             break;
             
-        case Token.KEY:
+          case Token.KEY:
             token2 = (Token)liter.next();
             switch (token2.type())
             {
               case Token.OPENPAREN:
-                  child = new ConfigThingy(token1.contentString());
-                  ((ConfigThingy)stack.peek()).addChild(child);
-                  stack.push(child);
-                  break;
+                child = new ConfigThingy(token1.contentString());
+                ((ConfigThingy)stack.peek()).addChild(child);
+                stack.push(child);
+                break;
               case Token.STRING:
-                  child = new ConfigThingy(token1.contentString());
-                  ConfigThingy grandchild = new ConfigThingy(token2.contentString());
-                  child.addChild(grandchild);
-                  ((ConfigThingy)stack.peek()).addChild(child);
-                  break;
+                child = new ConfigThingy(token1.contentString());
+                ConfigThingy grandchild = new ConfigThingy(token2.contentString());
+                child.addChild(grandchild);
+                ((ConfigThingy)stack.peek()).addChild(child);
+                break;
               default:
-                  throw new SyntaxErrorException(token2.url()+": Syntaxfehler in Zeile "+token2.line()+" bei Zeichen "+token2.position());
+                throw new SyntaxErrorException(token2.url()+": Syntaxfehler in Zeile "+token2.line()+" bei Zeichen "+token2.position());
             }
             break;
-        
-        case Token.STRING:
+            
+          case Token.STRING:
             child = new ConfigThingy(token1.contentString());
             ((ConfigThingy)stack.peek()).addChild(child);
             break;
-        
-        case Token.CLOSEPAREN:
+            
+          case Token.CLOSEPAREN:
             //Achtung: Wurzel darf nicht gepoppt werden.
-          if (stack.size() <= 1) throw new SyntaxErrorException(token1.url()+": Klammer ')' ohne passende Klammer '(' in Zeile "+token1.line()+" bei Zeichen "+token1.position()); 
-          stack.pop();  
-          break;
-          
-        case Token.OPENPAREN:
-          child = new ConfigThingy("");
-          ((ConfigThingy)stack.peek()).addChild(child);
-          stack.push(child);
-          break;
-
-        case Token.END:
-          break;
-
-        default:
-          throw new SyntaxErrorException(token1.url()+": Syntaxfehler in Zeile "+token1.line()+" bei Zeichen "+token1.position());
-      }
+            if (stack.size() <= 1) throw new SyntaxErrorException(token1.url()+": Klammer ')' ohne passende Klammer '(' in Zeile "+token1.line()+" bei Zeichen "+token1.position()); 
+            stack.pop();  
+            break;
+            
+          case Token.OPENPAREN:
+            child = new ConfigThingy("");
+            ((ConfigThingy)stack.peek()).addChild(child);
+            stack.push(child);
+            break;
+            
+          case Token.END:
+            break;
+            
+          default:
+            throw new SyntaxErrorException(token1.url()+": Syntaxfehler in Zeile "+token1.line()+" bei Zeichen "+token1.position());
+        }
+        
+      } while(token1.type() != Token.END);
       
-    } while(token1.type() != Token.END);
-    
-    if (stack.size() > 1)
-      throw new SyntaxErrorException(token1.url()+": "+(stack.size() - 1) + " schließende Klammern fehlen");
+      if (stack.size() > 1)
+        throw new SyntaxErrorException(token1.url()+": "+(stack.size() - 1) + " schließende Klammern fehlen");
+    }
+    finally{
+      try{read.close();}catch(Exception x){};
+    }
   }
   
   /**
