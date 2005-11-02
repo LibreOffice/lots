@@ -23,9 +23,10 @@
 package de.muenchen.allg.itd51.wollmux.db;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Date;
 import java.util.HashMap;
@@ -341,7 +342,7 @@ public class DatasourceJoiner
       {
         try
         {
-          ConfigThingy cacheData = new ConfigThingy(losCache.getPath(),context, new FileReader(cacheFile));
+          ConfigThingy cacheData = new ConfigThingy(losCache.getPath(),context, new InputStreamReader(new FileInputStream(losCache),ConfigThingy.CHARSET));
           /*
            * Falls der Cache korrupt ist sollen keine korrupten Daten in unseren
            * globalen Felder stehen, deswegen erzeugen wir erstmal alles in
