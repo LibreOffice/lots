@@ -140,7 +140,7 @@ public class ThingyDatasource extends RAMDatasource
   }
 
   private Dataset createDataset(ConfigThingy dsDesc, Set schema, String[] schemaOrdered, String[] keyCols) throws ConfigurationErrorException
-  {
+  { //TESTED
     if (dsDesc.count() == 0) return new MyDataset(schema, keyCols);
     try
     {
@@ -154,7 +154,7 @@ public class ThingyDatasource extends RAMDatasource
   }
 
   private Dataset createDatasetUnordered(ConfigThingy dsDesc, Set schema, String[] keyCols) throws ConfigurationErrorException
-  {
+  { //TESTED
     Map data = new HashMap();
     Iterator iter = dsDesc.iterator();
     while (iter.hasNext())
@@ -170,7 +170,7 @@ public class ThingyDatasource extends RAMDatasource
   }
 
   private Dataset createDatasetOrdered(ConfigThingy dsDesc, Set schema, String[] schemaOrdered, String[] keyCols) throws ConfigurationErrorException
-  {
+  { //TESTED
     if (dsDesc.count() > schemaOrdered.length)
       throw new ConfigurationErrorException("Datensatz hat mehr Felder als das Schema");
 
@@ -202,20 +202,20 @@ public class ThingyDatasource extends RAMDatasource
     }
     
     public MyDataset(Set schema, Map data, String[] keyCols) 
-    {
+    { //TESTED
       this.schema = schema;
       this.data = data;
       initKey(keyCols);
     }
     
     private void initKey(String[] keyCols)
-    {
+    { //TESTED
       StringBuffer buffy = new StringBuffer();
       for (int i = 0; i < keyCols.length; ++i)
       {
         String str = (String)data.get(keyCols[i]);
         if (str != null) buffy.append(str);
-        buffy.append(KEY_SEPARATOR);
+        if (i + 1 < keyCols.length) buffy.append(KEY_SEPARATOR);
       }
       key = buffy.toString();
     }
@@ -227,7 +227,7 @@ public class ThingyDatasource extends RAMDatasource
     }
     
     public String getKey()
-    {
+    { //TESTED
       return key;
     }
   }

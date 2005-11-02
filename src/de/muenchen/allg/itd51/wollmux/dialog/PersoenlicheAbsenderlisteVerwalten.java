@@ -19,6 +19,7 @@
 * 25.10.2005 | BNK | besser kommentiert
 * 27.10.2005 | BNK | back + CLOSEACTION
 * 31.10.2005 | BNK | Behandlung von TimeoutException bei find()
+* 02.11.2005 | BNK | +editNewPALEntry()
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -158,6 +159,12 @@ public class PersoenlicheAbsenderlisteVerwalten
      */
     private ActionListener actionListener_newPALEntry = new ActionListener()
     { public void actionPerformed(ActionEvent e) { newPALEntry(); } };
+    
+    /**
+     * ActionListener für Buttons mit der ACTION "newPALEntry".
+     */
+    private ActionListener actionListener_editNewPALEntry = new ActionListener()
+    { public void actionPerformed(ActionEvent e) { editNewPALEntry(); } };
     
   /**
    * wird getriggert bei windowClosing() Event.
@@ -497,6 +504,14 @@ public class PersoenlicheAbsenderlisteVerwalten
             {
               buttonsToGreyOutIfNothingSelected.add(button);
             }
+            if (action.equals("removeFromPAL"))
+            {
+              buttonsToGreyOutIfNothingSelected.add(button);
+            }
+            if (action.equals("addToPAL"))
+            {
+              buttonsToGreyOutIfNothingSelected.add(button);
+            }
             else if (action.equals("copyEntry"))
             {
               buttonsToGreyOutIfNothingSelected.add(button);
@@ -622,16 +637,11 @@ public class PersoenlicheAbsenderlisteVerwalten
     {
       String spalte = m.group(1);
       String wert = spalte;
-      try
-      {
+      try{
         String wert2 = datensatz.get(spalte);
         if (wert2 != null)
-          wert = wert.replaceAll("%", "");
-      }
-      catch (ColumnNotFoundException e)
-      {
-        Logger.error(e);
-      }
+          wert = wert2.replaceAll("%", "");
+      } catch (ColumnNotFoundException e) { Logger.error(e);}
       str = str.substring(0, m.start()) + wert + str.substring(m.end());
       m = p.matcher(str);
     } while (m.find());
@@ -789,6 +799,11 @@ public class PersoenlicheAbsenderlisteVerwalten
     }
     else ds = e.getDataset();
     
+    editDataset(ds);
+  }
+  
+  private void editDataset(DJDataset ds)
+  {
     ActionListener del = new MyDialogEndListener(myConf, abConf, dj, dialogEndListener, null);
     dialogEndListener = null;
     abort();
@@ -798,7 +813,7 @@ public class PersoenlicheAbsenderlisteVerwalten
     }
     catch (ConfigurationErrorException x)
     {
-     Logger.error(x);
+      Logger.error(x);
     }
   }
   
@@ -845,11 +860,12 @@ public class PersoenlicheAbsenderlisteVerwalten
   }
   
   /**
-   * Implementiert die gleichnamige ACTION.
+   * Implementiert die gleichnamige ACTION. Liefert den neuen Datensatz
+   * zurück.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private void newPALEntry()
+  private DJDataset newPALEntry()
   {
     DJDataset ds = dj.newDataset();
     try{
@@ -861,6 +877,17 @@ public class PersoenlicheAbsenderlisteVerwalten
       Logger.error(x);
     }
     listsHaveChanged();
+    return ds;
+  }
+  
+  /**
+   * Implementiert die gleichnamige ACTION.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private void editNewPALEntry()
+  {
+    editDataset(newPALEntry());
   }
   
   /**
@@ -1228,6 +1255,10 @@ public class PersoenlicheAbsenderlisteVerwalten
     else if (action.equals("newPALEntry"))
     {
       return actionListener_newPALEntry;
+    }
+    else if (action.equals("editNewPALEntry"))
+    {
+      return actionListener_editNewPALEntry;
     }
     else if (action.equals(""))
     {

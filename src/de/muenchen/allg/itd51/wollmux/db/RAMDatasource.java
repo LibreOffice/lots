@@ -60,13 +60,13 @@ public class RAMDatasource implements Datasource
   protected RAMDatasource(){};
 
   public Set getSchema()
-  {
+  { //TESTED
     return new HashSet(schema);
   }
 
   public QueryResults getDatasetsByKey(Collection keys, long timeout)
       throws TimeoutException
-  {
+  { //TESTED
     Vector res = new Vector();
     Iterator iter = data.iterator();
     while (iter.hasNext())
@@ -82,7 +82,7 @@ public class RAMDatasource implements Datasource
    * @see de.muenchen.allg.itd51.wollmux.db.Datasource#find(java.util.List, long)
    */
   public QueryResults find(List query, long timeout) throws TimeoutException
-  {
+  { //TESTED
     DatasetChecker checker = new MatchAllDatasetChecker();
     Iterator iter = query.iterator();
     while (iter.hasNext())

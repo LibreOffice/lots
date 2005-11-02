@@ -10,6 +10,9 @@
 * -------------------------------------------------------------------
 * 25.10.2005 | BNK | Erstellung
 * 27.10.2005 | BNK | back + CLOSEACTION
+* 02.11.2005 | BNK | Absenderliste nicht mehr mit Vorname = M* befüllen,
+*                    weil jetzt der TestDJ schon eine Absenderliste
+*                    mit Einträgen hat.
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -764,12 +767,6 @@ public class AbsenderAuswaehlen
     ConfigThingy verConf = new ConfigThingy("",new URL(new File(System.getProperty("user.dir")).toURL(),verConfFile));
     ConfigThingy abConf = new ConfigThingy("",new URL(new File(System.getProperty("user.dir")).toURL(),abConfFile));
     TestDatasourceJoiner dj = new TestDatasourceJoiner();
-    QueryResults entries = dj.find("Vorname", "M*");
-    Iterator iter = entries.iterator();
-    while (iter.hasNext())
-    {
-      ((DJDataset)iter.next()).copy();
-    }
     RunTest test = new RunTest(conf.get("AbsenderAuswaehlen"), verConf.get("PersoenlicheAbsenderliste"), abConf.get("AbsenderdatenBearbeiten"), dj);
     test.actionPerformed(null);
     Thread.sleep(600000);

@@ -19,6 +19,7 @@
 * 24.10.2005 | BNK | restoreStandard() Buttons nicht mehr ausgegraut, wenn 
 *                  | Werte nicht geändert wurden, aber bereits aus dem LOS sind.
 * 27.10.2005 | BNK | back + CLOSEACTION
+* 02.11.2005 | BNK | +saveAndBack()
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -172,6 +173,13 @@ public class DatensatzBearbeiten
          */
   private ActionListener actionListener_saveAndExit = new ActionListener()
         { public void actionPerformed(ActionEvent e){ saveAndExit(); } };
+ 
+   /**
+    * ActionListener für Buttons mit der ACTION "saveAndExit". 
+    */
+   private ActionListener actionListener_saveAndBack = new ActionListener()
+     { public void actionPerformed(ActionEvent e){ saveAndBack(); } };
+
   
   /**
   * wir bei Ende des Dialogs aufgerufen wenn nicht null (siehe Konstruktor).
@@ -351,6 +359,16 @@ public class DatensatzBearbeiten
   private void saveAndExit()
   {
     if (save()) dialogEnd("saveAndExit");
+  }
+  
+  /**
+   * Implementiert die gleichnamige ACTION.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private void saveAndBack()
+  {
+    if (save()) dialogEnd("back");
   }
   
   /**
@@ -1050,6 +1068,10 @@ public class DatensatzBearbeiten
     else if (action.equals("saveAndExit"))
     {
       return actionListener_saveAndExit;
+    }
+    else if (action.equals("saveAndBack"))
+    {
+      return actionListener_saveAndBack;
     }
     else if (action.equals("switchWindow"))
     {

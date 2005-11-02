@@ -11,6 +11,7 @@
 * 27.10.2005 | BNK | Erstellung
 * 28.10.2005 | BNK | Erweiterung
 * 28.10.2005 | BNK | +getName()
+* 31.10.2005 | BNK | +find()
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -20,6 +21,7 @@
 package de.muenchen.allg.itd51.wollmux.db;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 import de.muenchen.allg.itd51.wollmux.TimeoutException;
@@ -67,6 +69,19 @@ public interface Datasource
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public QueryResults getDatasetsByKey(Collection keys, long timeout) 
+    throws TimeoutException;
+  
+  /**
+   * Liefert alle Datensätze, die alle Bedingungen von query (Liste
+   * von {@link QueryPart}s) erfüllen. Ist query leer, werden keine
+   * Datensätze zurückgeliefert.
+   * @param timeout die maximale Zeit in Millisekunden, die vergehen darf, bis die
+   * Funktion zurückkehrt.
+   * @throws TimeoutException, falls die Anfrage nicht rechtzeitig beendet
+   * werden konnte.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public QueryResults find(List query, long timeout) 
     throws TimeoutException;
   
   /**

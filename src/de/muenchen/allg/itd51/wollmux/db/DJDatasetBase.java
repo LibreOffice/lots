@@ -41,7 +41,7 @@ public abstract class DJDatasetBase implements DJDataset
    *        Spalten mit Namen, die nicht in schema sind Exceptions.
    */
   public DJDatasetBase(Map backingStore, Map overrideStore, Set schema)
-  {
+  { //TESTED
     myBS = backingStore;
     myLOS = overrideStore;
     this.schema = schema;
@@ -63,8 +63,8 @@ public abstract class DJDatasetBase implements DJDataset
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public Map getLOS()
-  {
-    return myBS;
+  { //TESTED
+    return myLOS;
   }
   
   public String get(String spaltenName) throws ColumnNotFoundException
