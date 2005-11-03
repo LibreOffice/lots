@@ -26,6 +26,7 @@ import com.sun.star.awt.ItemEvent;
 import com.sun.star.awt.Key;
 import com.sun.star.awt.KeyEvent;
 import com.sun.star.awt.Rectangle;
+import com.sun.star.awt.Selection;
 import com.sun.star.awt.TextEvent;
 import com.sun.star.awt.VclWindowPeerAttribute;
 import com.sun.star.awt.WindowAttribute;
@@ -419,6 +420,12 @@ public class SenderBox extends ComponentBase implements XServiceInfo,
   {
     Logger.debug2("SenderBox::itemStateChanged " + event.Selected);
     selectSender(event.Selected);
+    if (selected != null)
+    {
+      cBox.xTextComponent().setText(selected.toString());
+      cBox.xTextComponent().setSelection(
+          new Selection(selected.toString().length(), 0));
+    }
   }
 
   /*
@@ -456,18 +463,20 @@ public class SenderBox extends ComponentBase implements XServiceInfo,
     {
       String[] items = cBox.xComboBox().getItems();
       String text = cBox.xTextComponent().getText();
-      boolean found = false;
       for (int i = 0; i < items.length; i++)
       {
         if (text.equals(items[i]))
         {
-          found = true;
           selectSender(i);
           break;
         }
       }
-      if (found == false && selected != null)
+      if (selected != null)
+      {
         cBox.xTextComponent().setText(selected.toString());
+        cBox.xTextComponent().setSelection(
+            new Selection(selected.toString().length(), 0));
+      }
       Logger.debug2("Return pressed!");
     }
   }
