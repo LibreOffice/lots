@@ -37,6 +37,7 @@
 *                  | Default stringChar ist jetzt wieder "
 *                  | +Warnung, dass mittels add(String) ConfigThingys produziert
 *                  | werden können, die den Syntaxregeln widersprechen.
+* 03.11.2005 | BNK | BOM (\uFEFF) auf Whitespace-Liste gesetzt 
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -963,7 +964,7 @@ public class ConfigThingy
     String line;
     
     int lineNo = 0;
-    Pattern whitespace = Pattern.compile("^(\\p{Space}|,|;)+");
+    Pattern whitespace = Pattern.compile("^(\\p{Space}|,|;|\\uFEFF)+");
     while(null != (line = in.readLine()))
     {
       ++lineNo;
