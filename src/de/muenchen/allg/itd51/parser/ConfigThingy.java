@@ -33,6 +33,8 @@
 * 02.11.2005 | BNK | UTF8 beim Lesen annehmen
 *                  | +stringRepresentation()
 *                  | +add(childName)
+* 03.11.2005 | BNK | +stringRepresentation(chilrenOnly, stringChar)
+*                  | Default stringChar ist jetzt wieder "
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -510,23 +512,50 @@ public class ConfigThingy
    * Gibt eine String-Darstellung des kompletten ConfigThingy-Baumes
    * zurück, die geeignet ist, in eine Datei gespeichert und von dort wieder
    * als ConfigThingy geparst zu werden.
+   * @param childrenOnly wenn true wird keine äusserste Verschachtelung
+   *        mit dem Namen von this erzeugt.
+   * @param stringChar das Zeichen, das zum Einschliessen von Strings
+   *        verwendet werden soll.
+   * @throws IllegalArgumentException falls stringChar nicht ' oder " ist.
    * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TODO Testen
+   */
+  public String stringRepresentation(boolean childrenOnly, char stringChar)
+  throws java.lang.IllegalArgumentException
+  {
+    if (stringChar != '"' && stringChar != '\'')
+      throw new java.lang.IllegalArgumentException("Als Stringbegrenzer sind nur \" und ' erlaubt.");
+    
+    StringBuffer buf = new StringBuffer();
+    if (!childrenOnly)
+      stringRepresentation(buf,"",stringChar);
+    else
+    {
+      Iterator iter = iterator();
+      while (iter.hasNext())
+      {
+        ((ConfigThingy)iter.next()).stringRepresentation(buf,"",stringChar);
+        buf.append('\n');
+      }
+    }
+    return buf.toString();
+  }
+
+  /**
+   * Wie {@link #stringRepresentation(boolean, char) stringRepresentation(false, '"')}.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public String stringRepresentation()
   {
-    StringBuffer buf = new StringBuffer();
-    stringRepresentation(buf,"");
-    return buf.toString();
+    return stringRepresentation(false, '"');
   }
   
   /**
    * Ersetzt ' durch '', \n durch %n, % durch %%
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private String escapeString(String str)
+  private String escapeString(String str,char stringChar)
   {
-    return str.replaceAll("%","%%").replaceAll("\n","%n").replaceAll("'","''");
+    return str.replaceAll("%","%%").replaceAll("\n","%n").replaceAll(""+stringChar,""+stringChar+stringChar);
   }
   
   /**
@@ -534,18 +563,18 @@ public class ConfigThingy
    * Jeder Zeile wird childPrefix vorangestellt.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private void stringRepresentation(StringBuffer buf, String childPrefix)
+  private void stringRepresentation(StringBuffer buf, String childPrefix, char stringChar)
   {
     
     if (count() == 0) //Blatt
     {
-      buf.append("'"+escapeString(getName())+"'");
+      buf.append(stringChar+escapeString(getName(),stringChar)+stringChar);
     }
     else if (count() == 1 && getFirstChildNoThrow().count() == 0) //Schlüssel-Wert-Paar
     {
       buf.append(getName());
       buf.append(' ');
-      getFirstChildNoThrow().stringRepresentation(buf, childPrefix);
+      getFirstChildNoThrow().stringRepresentation(buf, childPrefix, stringChar);
     }
     else
     {
@@ -559,7 +588,7 @@ public class ConfigThingy
         while (iter.hasNext())
         {
           ConfigThingy child = (ConfigThingy)iter.next();
-          child.stringRepresentation(buf, childPrefix);
+          child.stringRepresentation(buf, childPrefix, stringChar);
           if (iter.hasNext()) 
           {
             if (type == ST_VALUE_LIST) buf.append(',');
@@ -583,7 +612,7 @@ public class ConfigThingy
              (child.count() == 1 && child.getFirstChildNoThrow().count() == 0))
             buf.append(childPrefix+INDENT);
           
-          child.stringRepresentation(buf, childPrefix+INDENT);
+          child.stringRepresentation(buf, childPrefix+INDENT, stringChar);
           
           if (child.count() == 0 || 
              (child.count() == 1 && child.getFirstChildNoThrow().count() == 0))
