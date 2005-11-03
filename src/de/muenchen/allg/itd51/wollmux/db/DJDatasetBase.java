@@ -9,6 +9,7 @@
 * Datum      | Wer | Änderungsgrund
 * -------------------------------------------------------------------
 * 28.10.2005 | BNK | Erstellung
+* 03.11.2005 | BNK | besser kommentiert.
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -20,14 +21,35 @@ package de.muenchen.allg.itd51.wollmux.db;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Basisklasse für DJDataset-Implementierungen. 
+ * @author Matthias Benkmann (D-III-ITD 5.1)
+ */
 public abstract class DJDatasetBase implements DJDataset
 {
+  /**
+   * Bildet Spaltennamen auf (String-)Werte ab. Die Daten in myLOS repräsentieren
+   * den lokalen Override, die in myBS die (gecachten) Daten aus der Hintergrunddatenbank.
+   * myLOS kann null sein, dann wird der Datensatz als nicht aus dem LOS kommend
+   * betrachtet. 
+   */
   protected Map myLOS;
+  /**
+   * Bildet Spaltennamen auf (String-)Werte ab. Die Daten in myLOS repräsentieren
+   * den lokalen Override, die in myBS die (gecachten) Daten aus der Hintergrunddatenbank.
+   * myBS kann null sein, dann wird der Datensatz als nur aus dem LOS kommend
+   * und nicht mit einer Hintergrunddatenbank verknüpft betrachtet. 
+   */
   protected Map myBS;
+  /**
+   * Die Menge aller Spaltennamen, die dieser Datensatz kennt. Falls dieses
+   * Set nicht null ist, werfen Versuche, auf unbekannte Spalten zuzugreifen
+   * eine Exception.
+   */
   protected Set schema;
   
   /**
-   * 
+   * Erzeugt einen neuen Datensatz.
    * @param backingStore mappt Spaltennamen auf den Spaltenwert des Datensatzes
    *        in der Hintergrunddatenbank. Spalten, die nicht enthalten sind
    *        werden als im Datensatz unbelegt betrachtet.
@@ -67,6 +89,15 @@ public abstract class DJDatasetBase implements DJDataset
     return myLOS;
   }
   
+  /**
+   * Liefert den Wert, den dieser Datensatz in der Spalte spaltenName stehen hat
+   * (override hat vorrang vor backing store).
+   * Falls schema nicht null ist, wird eine ColumnNotFoundException geworfen,
+   * wenn versucht wird auf eine Spalte zuzugreifen, die nicht im schema ist.
+   * Falls weder backing store noch override Speicher einen Wert für diese
+   * Spalte haben, so wird null geliefert (nicht verwechseln mit Zugriff auf
+   * eine nicht existierende Spalte!).
+   */
   public String get(String spaltenName) throws ColumnNotFoundException
   {
     if (schema != null && !schema.contains(spaltenName)) throw new ColumnNotFoundException("Spalte "+spaltenName+" existiert nicht!");

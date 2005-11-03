@@ -10,6 +10,7 @@
 * Datum      | Wer | Änderungsgrund
 * -------------------------------------------------------------------
 * 28.10.2005 | BNK | Erstellung
+* 03.11.2005 | BNK | besser kommentiert
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -22,8 +23,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
+/**
+ * Eine einfache Klasse um eine Liste als QueryResults zur
+ *  Verfügung zu stellen.
+ * @author Matthias Benkmann (D-III-ITD 5.1)
+ */
 class QueryResultsList implements QueryResults
 {
+  /**
+   * Die Liste der Datasets.
+   */
   private List data;
   
   /**

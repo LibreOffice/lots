@@ -16,6 +16,7 @@
 *                  | Aus Cache wird jetzt auch der ausgewählte gelesen
 * 03.11.2005 | BNK | saveCacheAndLOS kriegt jetzt File-Argument
 *                  | saveCacheAndLos implementiert
+* 03.11.2005 | BNK | besser kommentiert
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -51,77 +52,36 @@ import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.TimeoutException;
 
-
 /**
- * TODO Doku
- * TODO Festverdrahtete Datasource, die bestimmte find-Anfragen wie "Credits"
- * beantworten kann und immer gefragt wird, wenn die Anfrage bei
- * der Hauptdatenbank keine Ergebnisse gebracht hat.
+ * Stellt eine virtuelle Datenbank zur Verfügung, die ihre Daten aus
+ * verschiedenen Hintergrunddatenbanken zieht.
  * @author Matthias Benkmann (D-III-ITD 5.1)
- * 
  */
-
-//TODO Folgende Doku auswerten und was noch brauchbar ist irgendwo unterbringen
-//Suche nach 
-//X           "vorname.nachname"
-//X           "vorname.nachname@muenchen.de"
-//X           "Nam"
-//O           "ITD5.1"  nicht unterstützt weil Minus vor 5.1 fehlt
-//X           "ITD-5.1"
-//O           "D"   liefert Personen mit Nachname-Anfangsbuchstabe D
-//X           "D-*"
-//O           "ITD5"    nicht unterstützt weil Minus vor 5 fehlt
-//X           "D-HAIII"
-//X           "5.1"
-//X           "D-III-ITD-5.1"
-//O           "D-HAIII-ITD-5.1"   nicht unterstützt, da HA nicht im lhmOUShortname
-//O           "D-HAIII-ITD5.1"    nicht unterstützt (siehe oben)
-
-//X           "Nam Vorn"
-//X           "Nam, Vorn"
-//X           "Vorname Name"
-//X           "Vorn Nam"
-//X           "ITD 5.1"
-//O           "D-HAIII-ITD 5.1"   steht nicht mit HA im LDAP
-//X           "V. Nachname"
-//X           "Vorname N."
-
-/* Mögliche Probleme:
- * 
- * - copy() muss auch bei einem Datensatz ohne Backing Store funktionieren
- * - der Datensatz könnte zwischenzeitlich im Backing Store gelöscht werden 
- * 
- * teilweise Lösung: Für jeden Eintrag des LOS ist der Hintergrundspeicher im Cache.
- * Der Cache wird während der Ausführung des WollMux nicht geändert. 
- * Über den Cache grundsätzlich einen Backing Store zur Verfügung
- * Auch mit newDataset() erzeugte Datensätze bekommen Einträge im Cache
- * als hätten sie einen Backing Store. Bei diesen Einträgen (und natürlich
- * auch im LOS) werden alle Spalten mit einem String vorbelegt, der dem
- * Namen der Spalte entspricht.
- * 
- * Ein Problem an dieser Lösung könnte sein, dass Datensätze evtl. Identifier
- * brauchen, die den Join aus dem sie entstanden sind beschreiben. Mal schaun.
- * 
- * */
-
-/*
- * Als allgemeines Konstrukt um die Rolle<->OrgaKurz Beziehung zu
- * beschreiben die Möglichkeit einbauen, in der Join-Datei für das Schema
- * der virtuellen Datenbank Fallbacks einzuführen. 
- * Beispiel: Rolle -> OrgaKurz
- * Falls von einem Datensatz die Spalte "Rolle" angefragt wird, diese
- * jedoch null ist, so wird der Wert der Spalte "OrgaKurz" zurückgeliefert.
- * Dies wird in Dataset oder QueryResults implementiert, indem diese bei
- * Instanziierung die Fallback-Listen bekommen.
- */
-
-
 public class DatasourceJoiner
 {
+  /**
+   * Wird an Datasource.find() übergeben, um die maximale Zeit der
+   * Bearbeitung einer Suchanfrage zu begrenzen, damit nicht im Falle
+   * eines Netzproblems alles einfriert.
+   */
   private static final long QUERY_TIMEOUT = 3000;
+  
+  /**
+   * Muster für erlaubte Suchstrings für den Aufruf von find().
+   */
   private static final Pattern SUCHSTRING_PATTERN = Pattern.compile("^\\*?[^*]+\\*?$");
+  
+  /**
+   * Bildet Datenquellenname auf Datasource-Objekt ab. Nur die jeweils zuletzt
+   * unter einem Namen in der Config-Datei aufgeführte Datebank ist hier
+   * verzeichnet.
+   */
   private Map nameToDatasource = new HashMap();
   private LocalOverrideStorage myLOS;
+  
+  /**
+   * Die Datenquelle auf die sich find(), getLOS(), etc beziehen.
+   */
   protected Datasource mainDatasource;
   
   /**
@@ -130,7 +90,7 @@ public class DatasourceJoiner
    * @param mainSourceName der Name der Datenquelle, auf die sich die
    * Funktionen des DJ (find(),...) beziehen sollen.
    * @param losCache die Datei, in der der DJ die Datensätze des LOS
-   *        abspeichern soll. Falls diese Datei bereits existiert, wird sie vom
+   *        abspeichern soll. Falls diese Datei existiert, wird sie vom
    *        Konstruktor eingelesen und verwendet.
    * @param context, der Kontext relativ zu dem Datenquellen URLs in ihrer Beschreibung
    *        auswerten sollen.
@@ -145,9 +105,19 @@ public class DatasourceJoiner
     init(joinConf, mainSourceName, losCache, context);
   }
   
-  
+  /**
+   * Nur für die Verwendung durch abgeleitete Klassen, die den parametrisierten
+   * Konstruktor nicht verwenden können, und stattdessen init() benutzen.
+   */
   protected DatasourceJoiner(){};
   
+  /**
+   * Erledigt die Initialisierungsaufgaben des Konstruktors mit den gleichen
+   * Parametern. Für die Verwendung durch abgeleitete Klassen, die den
+   * parametrisierten Konstruktor nicht verwenden können.
+   * @throws ConfigurationErrorException
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   protected void init(ConfigThingy joinConf, String mainSourceName, File losCache, URL context)
   throws ConfigurationErrorException
   { //TESTED
@@ -248,6 +218,35 @@ public class DatasourceJoiner
    * suchString, der nur Sternchen enthält oder einer der leer ist.
    * Alle Ergebnisse sind {@link DJDataset}s.
    * Die Suche erfolgt grundsätzlich case-insensitive.
+   * <p>
+   * Im folgenden eine Liste möglicher Suchanfragen mit Angabe, ob sie
+   * unterstützt wird (X) oder nicht (O).
+   * </p>
+   * <pre>
+Suche nach 
+X           "vorname.nachname"
+X           "vorname.nachname@muenchen.de"
+X           "Nam"
+O           "ITD5.1"  nicht unterstützt weil Minus vor 5.1 fehlt
+X           "ITD-5.1"
+O           "D"   liefert Personen mit Nachname-Anfangsbuchstabe D
+X           "D-*"
+O           "ITD5"    nicht unterstützt weil Minus vor 5 fehlt
+X           "D-HAIII"
+X           "5.1"
+X           "D-III-ITD-5.1"
+O           "D-HAIII-ITD-5.1"   nicht unterstützt, da HA nicht im lhmOUShortname
+O           "D-HAIII-ITD5.1"    nicht unterstützt (siehe oben)
+
+X           "Nam Vorn"
+X           "Nam, Vorn"
+X           "Vorname Name"
+X           "Vorn Nam"
+X           "ITD 5.1"
+O           "D-HAIII-ITD 5.1"   steht nicht mit HA im LDAP
+X           "V. Nachname"
+X           "Vorname N."
+</pre>
    * @throws TimeoutException falls die Anfrage nicht innerhalb einer 
    * intern vorgegebenen Zeitspanne beendet werden konnte.
    */
@@ -261,6 +260,12 @@ public class DatasourceJoiner
     return find(query);
   }
   
+  /**
+   * Wie find(spaltenName, suchString), aber mit einer zweiten Spaltenbedingung,
+   * die und-verknüpft wird.
+   * @throws TimeoutException
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   public QueryResults find(String spaltenName1, String suchString1,String spaltenName2, String suchString2) throws TimeoutException
   {
     if (suchString1 == null || !SUCHSTRING_PATTERN.matcher(suchString1).matches())
@@ -274,6 +279,11 @@ public class DatasourceJoiner
     return find(query);
   }
   
+  /**
+   * Findet Datensätze, die query (Liste von QueryParts) entsprechen.
+   * @throws TimeoutException
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private QueryResults find(List query) throws TimeoutException
   { //TESTED
     QueryResults res = mainDatasource.find(query, QUERY_TIMEOUT);
@@ -336,7 +346,7 @@ public class DatasourceJoiner
   }
   
   /**
-   * Liefert alle Datensätze (als {@link de.muenchen.allg.itd51.wollmux.db.DJDataset}) des Lokalen Override Speichers.
+   * Liefert alle Datensätze des Lokalen Override Speichers (als {@link de.muenchen.allg.itd51.wollmux.db.DJDataset}).
    */
   public QueryResults getLOS()
   {
@@ -354,14 +364,43 @@ public class DatasourceJoiner
     return myLOS.newDataset();
   };
   
+  /**
+   * Verwaltet den LOS des DJ.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private static class LocalOverrideStorage
   {
+    /**
+     * Präfix, das vor generierte Schlüssel von LOS-only Datensätzen gesetzt
+     * wird, um diese eindeutig von anderen Schlüsseln unterscheiden
+     * zu können.
+     */
     private static final String LOS_ONLY_MAGIC = "GEHORCHE DEM WOLLMUX!";
+    /**
+     * Liste aller LOSDJDatasets.
+     */
     private List data = new LinkedList();
+    
+    /**
+     * Das Schema des LOS. Dies ist null solange es nicht initialisiert wurde.
+     * Falls beim Laden des Cache ein Fehler auftritt kann dies auch nach
+     * dem Konstruktor noch null sein.
+     */
     private Set losSchema = null;
+    /**
+     * Der ausgewählte Datensatz. Nur dann null, wenn data leer ist.
+     */
     private DJDataset selectedDataset = null;
+    
+    /**
+     * Basis für die Erzeugung eines Schlüssels für einen LOS-only Datensatz.
+     */
     private long nextGeneratedKey = new Date().getTime();
     
+    /**
+     * Versucht, den Cache und den LOS aus der Datei losCache (ConfigThingy)
+     * zu lesen. %includes in losCache werden relativ zu context aufgelöst.  
+     */
     public LocalOverrideStorage(File losCache, URL context)
     { //TESTED
       String selectKey = "";
@@ -437,6 +476,13 @@ public class DatasourceJoiner
       selectDataset(selectKey);
     }
     
+    /**
+     * Falls es im LOS momentan einen Datensatz mit Schlüssel selectKey gibt,
+     * so wird er zum ausgewählten Datensatz, ansonsten wird, falls der LOS
+     * mindestens einen Datensatz enthält, ein beliebiger Datensatz
+     * ausgewählt.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
     public void selectDataset(String selectKey)
     { //TESTED
       if (!data.isEmpty()) selectedDataset = (DJDataset)data.get(0);
@@ -453,11 +499,21 @@ public class DatasourceJoiner
       
     }
 
+    /**
+     * Generiert einen neuen (eindeutigen) Schlüssel für die Erzeugung
+     * eines LOS-only Datensatzes.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
     private String generateKey()
     {
       return LOS_ONLY_MAGIC + (nextGeneratedKey++);
     }
     
+    /**
+     * Erzeugt einen neuen Datensatz, der nicht mit Hintergrundspeicher
+     * verknüpft ist.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
     public DJDataset newDataset()
     {
       Map dsoverride = new HashMap();
@@ -473,6 +529,11 @@ public class DatasourceJoiner
       return ds;
     }
     
+    /**
+     * Erzeugt eine Kopie im LOS vom Datensatz ds, der nicht aus dem
+     * LOS kommen darf.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
     public DJDataset copyNonLOSDataset(Dataset ds)
     {
       if (ds instanceof LOSDJDataset)
@@ -500,12 +561,25 @@ public class DatasourceJoiner
       return newDs;
     }
 
+    /**
+     * Liefert den momentan im LOS selektierten Datensatz zurück.
+     * @throws DatasetNotFoundException falls der LOS leer ist (sonst ist
+     * immer ein Datensatz selektiert).
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
     public DJDataset getSelectedDataset() throws DatasetNotFoundException
     {
       if (data.isEmpty()) throw new DatasetNotFoundException("Der Lokale Override Speicher ist leer");
       return selectedDataset;
     }
 
+    /**
+     * Läd für die Datensätze des LOS aktuelle Daten aus der Datenbank database.
+     * @param timeout die maximale Zeit, die database Zeit hat, anfragen
+     * zu beantworten.
+     * @throws TimeoutException
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
     public void refreshFromDatabase(Datasource database, long timeout) throws TimeoutException
     { //TESTED
       Map keyToLOSDJDataset = new HashMap();
@@ -690,42 +764,85 @@ public class DatasourceJoiner
       }
     }
     
+     /**
+      * Liefert die Anzahl der Datensätze im LOS.
+      * @author Matthias Benkmann (D-III-ITD 5.1)
+      */
     public int size()
     {
       return data.size();
     }
 
+    /**
+     * Iterator über alle Datensätze im LOS.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
     public Iterator iterator()
     {
       return data.iterator();
     }
 
+    /**
+     * true, falls der LOS leer ist.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
     public boolean isEmpty()
     {
       return data.isEmpty();
     }
     
+    /**
+     * Ein Datensatz im LOS bzw Cache.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
     private class LOSDJDataset extends DJDatasetBase
     {
+      /**
+       * Der Schlüsselwert dieses Datensatzes.
+       */
       private String key;
       
+      /**
+       * Erzeugt einen neuen LOSDJDataset.
+       * @param dscache die Map, deren Werte den gecachten Werten aus der
+       * Hintergrunddatenbank entsprechen.
+       * @param dsoverride die Map, deren Werte den lokalen Overrides
+       * entsprechen.
+       * @param schema das Schema des LOS zu dem dieser Datensatz gehört.
+       * @param key der Schlüsselwert dieses Datensatzes.
+       */
       public LOSDJDataset(Map dscache, Map dsoverride, Set schema, String key)
       { //TESTED
         super(dscache, dsoverride, schema);
         this.key = key;
       }
 
+      /**
+       * Entfernt die Spalte namens columnName aus lokalem Override und Cache
+       * dieses Datensatzes.
+       * @param columnName
+       * @author Matthias Benkmann (D-III-ITD 5.1)
+       */
       public void drop(String columnName)
       { //TESTED
         if (isFromLOS()) myLOS.remove(columnName);
         if (hasBackingStore()) myBS.remove(columnName);
       }
 
+      /**
+       * Ändert die Referenz auf das Schema dieses Datensatzes. Eine Anpassung
+       * der im Datensatz gespeicherten Werte geschieht nicht. Dafür muss
+       * drop() verwendet werden.
+       * @author Matthias Benkmann (D-III-ITD 5.1)
+       */
       public void setSchema(Set losSchema)
       { //TESTED
         this.schema = losSchema;        
       }
 
+      /**
+       * Erzeugt eine Kopie dieses Datensatzes im LOS.
+       */
       public DJDataset copy()
       {
         DJDataset newDS = new LOSDJDataset(this.myBS, isFromLOS()? new HashMap(this.myLOS): new HashMap(), this.schema, this.key);
@@ -734,9 +851,16 @@ public class DatasourceJoiner
         return newDS;
       }
 
+      /**
+       * Entfernt diesen Datensatz aus dem LOS.
+       */
       public void remove() throws UnsupportedOperationException
       {
+        //dieser Test ist nur der vollständigkeit halber hier, für den
+        //Falls dass diese Funktion mal in anderen Kontext gecopynpastet
+        //wird. Ein LOSDJDataset ist immer aus dem LOS.
         if (!isFromLOS()) throw new UnsupportedOperationException("Versuch, einen Datensatz, der nicht aus dem LOS kommt zu entfernen");
+        
         LocalOverrideStorage.this.data.remove(this);
         if (selectedDataset == this)
         {
@@ -764,7 +888,14 @@ public class DatasourceJoiner
       }
     }
   }
-  
+
+  /**
+   * Ein Wrapper um einfache Datasets, wie sie von Datasources als Ergebnisse
+   * von Anfragen zurückgeliefert werden. Der Wrapper ist notwendig, um
+   * die auch für Fremddatensätze sinnvollen DJDataset Funktionen anbieten
+   * zu können, allen voran copy(). 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private class DJDatasetWrapper implements DJDataset
   {
     private Dataset myDS;

@@ -9,6 +9,7 @@
 * Datum      | Wer | Änderungsgrund
 * -------------------------------------------------------------------
 * 31.10.2005 | BNK | Erstellung
+* 03.11.2005 | BNK | besser kommentiert
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -37,6 +38,15 @@ public class QueryPart
     searchString = suchString;
   }
   
+  /**
+   * Liefert den Name der zu testenden Spalten.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   public String getColumnName() {return columnName;}
+  
+  /**
+   * Liefert den Suchstring auf den getestet werden soll. 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   public String getSearchString() {return searchString;} 
 }

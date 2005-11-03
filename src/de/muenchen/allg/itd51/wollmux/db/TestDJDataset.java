@@ -1,7 +1,7 @@
 /*
 * Dateiname: TestDJDataset.java
 * Projekt  : WollMux
-* Funktion : Minimal-Implementierung von DJDataset zu Testzwecken.
+* Funktion : Implementierung von DJDataset zu Testzwecken.
 * 
 * Copyright: Landeshauptstadt München
 *
@@ -11,6 +11,7 @@
 * 14.10.2005 | BNK | Erstellung
 * 20.10.2005 | BNK | Stark erweitert 
 * 20.10.2005 | BNK | Unterstützung für Fallback
+* 03.11.2005 | BNK | besser kommentiert
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -23,11 +24,21 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Implementierung von DJDataset zu Testzwecken. Eine zentrale Eigenschaft von
+ * TestDJDataset ist, dass es für Spalten, für die kein Wert gesetzt ist den
+ * Spaltennamen als Antwort auf get()-Anfragen liefern kann, so dass alle Spalten
+ * von aussen betrachtet belegt sind.
+ * @author Matthias Benkmann (D-III-ITD 5.1)
+ */
 public class TestDJDataset extends DJDatasetBase
 {
+  /**
+   * siehe Konstruktor.
+   */
   private Map fallback = null;
   
-  /** Erzeugt einen TestDJDataset, der jedes Schema unterstützt und bei
+  /** Erzeugt einen TestDJDataset, der jedes Schema unterstützt und 
    * als aus dem LOS kommend betrachtet wird.
    */
   public TestDJDataset() 
@@ -36,11 +47,11 @@ public class TestDJDataset extends DJDatasetBase
   }
   
   /**
-   * 
+   * Erzeugt ein neues TestDJDataset. 
    * @param backingStore mappt Spaltennamen auf den Spaltenwert des Datensatzes
    *        in der Hintergrunddatenbank. Es müssen nicht alle Spalten enthalten
    *        sein. Der Mechanismus zum automatischen Generieren von Spaltenwerten
-   *        identisch zum Spaltennamen existiert weiter.
+   *        aus dem Spaltennamen existiert weiter.
    * @param schema falls nicht null übergeben wird, erzeugen Zugriffe auf
    *        Spalten mit Namen, die nicht in schema sind Exceptions.
    * @param isFromLOS legt fest, ob der Datensatz als aus dem LOS kommend
@@ -48,8 +59,8 @@ public class TestDJDataset extends DJDatasetBase
    *        unterstützen soll).
    * @param fallback falls fallback nicht null ist, so wird 
    *        falls der Wert für eine Spalte nicht gesetzt ist (nicht
-   *        zu verwechseln mit gesetzt auf den leeren String!), so wird versucht,
-   *        anhand dieser Map der Spaltenname auf einen anderen Spaltennamen
+   *        zu verwechseln mit gesetzt auf den leeren String!) versucht,
+   *        anhand dieser Map den Spaltennamen auf einen anderen Spaltennamen
    *        umzusetzen, dessen Wert dann geliefert wird. 
    */
   public TestDJDataset(Map backingStore, Set schema, boolean isFromLOS, Map fallback)

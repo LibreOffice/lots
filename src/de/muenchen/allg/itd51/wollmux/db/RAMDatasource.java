@@ -10,6 +10,7 @@
 * Datum      | Wer | Änderungsgrund
 * -------------------------------------------------------------------
 * 31.10.2005 | BNK | Erstellung
+* 03.11.2005 | BNK | besser kommentiert
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -34,13 +35,24 @@ import de.muenchen.allg.itd51.wollmux.TimeoutException;
  */
 public class RAMDatasource implements Datasource
 {
+  /**
+   * Das Schema dieser Datenquelle.
+   */
   private Set schema;
+  
+  /**
+   * Liste aller Datasets, die in dieser Datasource gespeichert sind.
+   */
   private List data;
+  
+  /**
+   * Der Name dieser Datenquelle.
+   */
   private String name;
   
   /**
-   * Achtung: data und schema werden direkt als Referenz eingebunden, 
-   * nicht kopiert.
+   * Erzeugt eine neue RAMDatasource mit Namen name.
+   * data und schema werden direkt als Referenz eingebunden, nicht kopiert.
    * @param name der Name der Datenquelle
    * @param schema das Schema der Datenquelle
    * @param data die Datensätze der Datenquelle
@@ -50,6 +62,12 @@ public class RAMDatasource implements Datasource
     init(name, schema, data);
   }
   
+  /**
+   * Führt die Initialisierungsaktionen des Konstruktors mit den gleichen
+   * Parametern aus. Diese Methode sollte von abgeleiteten Klassen verwendet
+   * werden, wenn sie den Konstruktor ohne Argumente verwenden.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   protected void init(String name, Set schema, List data)
   {
     this.schema = schema; 
@@ -57,6 +75,11 @@ public class RAMDatasource implements Datasource
     this.name = name;
   }
   
+  /**
+  * Erzeugt eine uninitialisierte RAMDatasource. Eine abgeleitete Klasse, die diesen
+  * Konstruktor verwendet sollte init() aufrufen, um die nötigen Initialisierungen
+  * zu erledigen. 
+  */
   protected RAMDatasource(){};
 
   public Set getSchema()
@@ -111,6 +134,16 @@ public class RAMDatasource implements Datasource
   }
 
   
+  /**
+   * Erzeugt einen DatasetChecker, der die Abfrage query auf der Spalte
+   * columnName implementiert. 
+   * @param columnName der Name der zu checkenden Spalte
+   * @param query ein Suchstring, der am Anfang und/oder Ende genau 1 Sternchen
+   *        haben kann für Präfix/Suffix/Teilstringsuche
+   * @return ein DatasetChecker, der Datensätze überprüft darauf, ob sie
+   * in Spalte columnName den Suchstring query stehen haben.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private DatasetChecker makeChecker(String columnName, String query)
   {
     int i = query.startsWith("*") ? 1 : 0;
@@ -125,23 +158,55 @@ public class RAMDatasource implements Datasource
     }
   }
   
+  /**
+   * Ein DatasetChecker überprüft, ob für ein Dataset eine bestimmte Bedingung
+   * erfüllt ist.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private static abstract class DatasetChecker
   {
+    /**
+     * Liefert true, wenn die Bedingung dieses Checkers auf ds zutrifft.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
     public abstract boolean matches(Dataset ds);
 
+    /**
+     * Liefert einen DatasetChecker zurück, der die Bedingung von this und
+     * zusätzlich die Bedingung von check2 prüft. Die matches() Funktion des
+     * zurückgelieferten Checkers liefert nur true, wenn die matches() Methoden
+     * von beiden Checkern true liefern.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
     public DatasetChecker and(DatasetChecker check2)
     { return new AndDatasetChecker(this, check2);}
     
+    /**
+     * Liefert einen DatasetChecker zurück, der die Bedingung von this und
+     * zusätzlich die Bedingung von check2 prüft. Die matches() Funktion des
+     * zurückgelieferten Checkers liefert true, wenn die matches() Methode
+     * von mindestens einem der beiden Checker true liefert.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
     public DatasetChecker or(DatasetChecker check2)
     { return new OrDatasetChecker(this, check2);}
   }
   
+  /**
+   * Ein DatasetChecker, der alle Datensätze durchwinkt.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private static class MatchAllDatasetChecker extends DatasetChecker
   {
     public boolean matches(Dataset ds) {return true;}
   }
 
   
+  /**
+   * Ein DatasetChecker, der 2 andere Checker auswertet und die und-Verknüpfung
+   * ihrer matches() Ergebnisse liefert.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private static class AndDatasetChecker extends DatasetChecker
   {
     private DatasetChecker check1;
@@ -158,7 +223,12 @@ public class RAMDatasource implements Datasource
       return check1.matches(ds) && check2.matches(ds);
     }
   }
-  
+
+  /**
+   * Ein DatasetChecker, der 2 andere Checker auswertet und die oder-Verknüpfung
+   * ihrer matches() Ergebnisse liefert.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private static class OrDatasetChecker extends DatasetChecker
   {
     private DatasetChecker check1;
@@ -176,6 +246,11 @@ public class RAMDatasource implements Datasource
     }
   }
   
+  /**
+   * Ein DatasetChecker, der Datensätze darauf überprüft, ob sie einen exakten
+   * String (allerdings CASE-INSENSITIVE) in einer Spalte haben.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private static class ColumnIdentityChecker extends DatasetChecker
   {
     private String columnName;
@@ -195,6 +270,11 @@ public class RAMDatasource implements Datasource
     }
   }
 
+  /**
+   * Ein DatasetChecker, der überprüft ob der Wert einer gegebenen Spalte
+   * mit einem bestimmten Präfix (CASE-INSENSITIVE) beginnt. 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private static class ColumnPrefixChecker extends DatasetChecker
   {
     private String columnName;
@@ -214,6 +294,11 @@ public class RAMDatasource implements Datasource
     }
   }
 
+  /**
+   * Ein DatasetChecker, der überprüft ob der Wert einer gegebenen Spalte
+   * mit einem bestimmten Suffix (CASE-INSENSITIVE) endet. 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private static class ColumnSuffixChecker extends DatasetChecker
   {
     private String columnName;
@@ -233,6 +318,11 @@ public class RAMDatasource implements Datasource
     }
   }
 
+  /**
+   * Ein DatasetChecker, der überprüft ob der Wert einer gegebenen Spalte
+   * einen bestimmten Teilstring (CASE-INSENSITIVE) enthält. 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private static class ColumnContainsChecker extends DatasetChecker
   {
     private String columnName;

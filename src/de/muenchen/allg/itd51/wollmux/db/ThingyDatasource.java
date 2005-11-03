@@ -9,6 +9,7 @@
 * Datum      | Wer | Änderungsgrund
 * -------------------------------------------------------------------
 * 27.10.2005 | BNK | Erstellung
+* 03.11.2005 | BNK | besser kommentiert
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -139,6 +140,21 @@ public class ThingyDatasource extends RAMDatasource
     }
   }
 
+  /**
+   * Erzeugt ein neues MyDataset aus der Beschreibung dsDesc.
+   * Die Methode erkennt automatisch, ob die Beschreibung in der Form
+   *    ("Spaltenwert1", "Spaltenwert2",...)
+   * oder der Form
+   *    (Spalte1 "Wert1" Spalte2 "Wert2" ...)
+   * ist.
+   * @param schema das Datenbankschema
+   * @param schemaOrdered das Datenbankschema mit erhaltener Spaltenreihenfolge
+   *        entsprechend Schema-Sektion.
+   * @param keyCols die Schlüsselspalten
+   * @throws ConfigurationErrorException im Falle von Verstössen gegen diverse
+   * Regeln.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private Dataset createDataset(ConfigThingy dsDesc, Set schema, String[] schemaOrdered, String[] keyCols) throws ConfigurationErrorException
   { //TESTED
     if (dsDesc.count() == 0) return new MyDataset(schema, keyCols);
@@ -153,6 +169,12 @@ public class ThingyDatasource extends RAMDatasource
     return null;
   }
 
+  /**
+   * Erzeugt ein neues MyDataset aus der Beschreibung dsDesc. dsDesc muss in der
+   * Form (Spalte1 "Spaltenwert1" Spalte2 "Spaltenwert2 ...) sein.
+   * @throws ConfigurationErrorException bei verstössen gegen diverse Regeln
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private Dataset createDatasetUnordered(ConfigThingy dsDesc, Set schema, String[] keyCols) throws ConfigurationErrorException
   { //TESTED
     Map data = new HashMap();
@@ -169,6 +191,12 @@ public class ThingyDatasource extends RAMDatasource
     return new MyDataset(schema, data, keyCols);
   }
 
+  /**
+   * Erzeugt ein neues MyDataset aus der Beschreibung dsDesc. dsDesc muss in der
+   * Form ("Spaltenwert1" "Spaltenwert2 ...) sein.
+   * @throws ConfigurationErrorException bei verstössen gegen diverse Regeln
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private Dataset createDatasetOrdered(ConfigThingy dsDesc, Set schema, String[] schemaOrdered, String[] keyCols) throws ConfigurationErrorException
   { //TESTED
     if (dsDesc.count() > schemaOrdered.length)
@@ -208,6 +236,12 @@ public class ThingyDatasource extends RAMDatasource
       initKey(keyCols);
     }
     
+    /**
+     * Setzt aus den Werten der Schlüsselspalten separiert durch KEY_SEPARATOR
+     * den Schlüssel zusammen.
+     * @param keyCols die Namen der Schlüsselspalten
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
     private void initKey(String[] keyCols)
     { //TESTED
       StringBuffer buffy = new StringBuffer();

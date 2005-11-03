@@ -12,6 +12,7 @@
 * 28.10.2005 | BNK | Erweiterung
 * 28.10.2005 | BNK | +getName()
 * 31.10.2005 | BNK | +find()
+* 03.11.2005 | BNK | besser kommentiert
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -27,6 +28,7 @@ import java.util.Set;
 import de.muenchen.allg.itd51.wollmux.TimeoutException;
 
 /**
+ * Interface für Datenquellen, die der DJ verwalten kann.
  * ACHTUNG! Die Konstruktoren dieser Klasse dürfen keine potentiell
  * lange blockierenden Aktionen (zum Beispiel Netzverbindung herstellen) 
  * ausführen. Sie dürfen auch nicht versagen, falls irgendeine Rahmenbedingung
@@ -39,12 +41,16 @@ import de.muenchen.allg.itd51.wollmux.TimeoutException;
  * Für die Methoden, die auf Datensätze zugreifen gilt, dass ihr Versagen
  * aufgrund von Rahmenbedingungen (z.B. kein Netz) nicht dazu führen darf,
  * dass das Datenquellen-Objekt in einen unbrauchbaren Zustand gerät.
- * Woimmer sinnvoll sollte es möglich sein, eine Operation zu einem
+ * Wo immer sinnvoll sollte es möglich sein, eine Operation zu einem
  * späteren Zeitpunkt zu wiederholen, wenn die Rahmenbedingungen sich
  * geändert haben, und dann sollte die Operation gelingen. Dies bedeutet
  * insbesondere, dass Verbindungsaufbau zu Servern wo nötig jeweils neu
- * versucht wird und nicht nur einmalig im Konstruktor.
- * 
+ * versucht wird und nicht nur einmalig im Konstruktor. In diesem
+ * Zusammenhang seit darauf hingewiesen, dass Verbindungen explizit mit close()
+ * beendet werden sollten (typischerweise in einem finally() Block, damit der
+ * Befehl auch im Ausnahmefall ausgeführt wird), weil die Garbage Collection von
+ * Java dies evtl. sehr spät tut.
+ * <br><br>
  * Argumente gegen Datasource-Typ "override":
  * - (korrekte) Suche nur schwierig und ineffizient zu implementieren
  * - würde vermutlich dazu führen, dass Daten im LDAP schlechter gepflegt
@@ -61,7 +67,9 @@ public interface Datasource
   
   /**
    * Liefert alle Datensätze, deren Schlüssel in der Collection keys
-   * enthalten sind.
+   * enthalten sind. Man beachte, dass die Eindeutigkeit von Schlüsseln nur
+   * eine Empfehlung darstellt. Die Anzahl der zurückgelieferten Datensätze kann
+   * also die Anzahl der übergebenen Schlüssel übersteigen.
    * @param timeout die maximale Zeit in Millisekunden, die vergehen darf, bis die
    * Funktion zurückkehrt.
    * @throws TimeoutException, falls die Anfrage nicht rechtzeitig beendet
