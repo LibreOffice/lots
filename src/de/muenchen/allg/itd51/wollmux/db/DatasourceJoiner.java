@@ -146,8 +146,10 @@ public class DatasourceJoiner
       try{
         if (type.equals("conf"))
           ds = new ThingyDatasource(nameToDatasource, sourceDesc, context);
+        else if (type.equals("ldap"))
+          ds = new LDAPDatasource(nameToDatasource, sourceDesc, context);
         else
-          Logger.error("Ununterstützter Datenquellentyp: "+type);
+          Logger.error("Ununterstützter Datenquellentyp: " + type);
       }
       catch(Exception x)
       {
