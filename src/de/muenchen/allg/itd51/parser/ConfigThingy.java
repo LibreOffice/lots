@@ -35,6 +35,8 @@
 *                  | +add(childName)
 * 03.11.2005 | BNK | +stringRepresentation(chilrenOnly, stringChar)
 *                  | Default stringChar ist jetzt wieder "
+*                  | +Warnung, dass mittels add(String) ConfigThingys produziert
+*                  | werden können, die den Syntaxregeln widersprechen.
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -232,7 +234,11 @@ public class ConfigThingy
   
   /**
    * Fügt ein neues Kind namens childName als letztes Kind an und
-   * liefert eine Referenz auf das neue Kind.
+   * liefert eine Referenz auf das neue Kind. Achtung! Mit dieser Methode
+   * ist es möglich, ConfigThingys zu erzeugen, die sich nicht an die 
+   * Syntaxbeschränkungen des Parsers für Schlüssel halten. Wird so ein
+   * ConfigThingy mittels stringRepresentation() in Text konvertiert, entsteht
+   * etwas, das der Parser nicht wieder einlesen kann.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public ConfigThingy add(String childName)
