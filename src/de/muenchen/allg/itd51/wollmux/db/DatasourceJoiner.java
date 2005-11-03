@@ -13,7 +13,9 @@
 * 24.10.2005 | BNK | +newDataset()
 * 28.10.2005 | BNK | Arbeit an der Baustelle
 * 02.11.2005 | BNK | Testen und Debuggen
-*                  | Aus Cache wird jetzt auch der ausgewählte gelesen 
+*                  | Aus Cache wird jetzt auch der ausgewählte gelesen
+* 03.11.2005 | BNK | saveCacheAndLOS kriegt jetzt File-Argument
+*                  | saveCacheAndLos implementiert
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -25,8 +27,11 @@ package de.muenchen.allg.itd51.wollmux.db;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.net.URL;
 import java.util.Date;
 import java.util.HashMap;
@@ -284,15 +289,39 @@ public class DatasourceJoiner
   
   
   /**
-   * Speichert den aktuellen LOS samt zugehörigem Cache in die Datei,
-   * die dem Konstruktor als losCache übergeben wurde.
+   * Speichert den aktuellen LOS samt zugehörigem Cache in die Datei
+   * cacheFile.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public void saveCacheAndLOS() throws IOException
+  public void saveCacheAndLOS(File cacheFile) throws IOException
   {
-    //TODO saveCacheAndLOS()
-    throw new IOException("noch nicht implementiert");
+    Set schema = myLOS.getSchema();
+    if (schema == null)
+    {
+      Logger.error("Kann Cache nicht speichern, weil nicht initialisiert.");
+      return;
+    }
+    
+    ConfigThingy conf = new ConfigThingy(cacheFile.getPath());
+    ConfigThingy schemaConf = conf.add("Schema");
+    Iterator iter = schema.iterator();
+    while (iter.hasNext())
+    {
+      schemaConf.add((String)iter.next());
+    }
+    
+    ConfigThingy datenConf = conf.add("Daten");
+    myLOS.dumpData(datenConf);
+    
+    try{
+      Dataset ds = getSelectedDataset();
+      conf.add("Ausgewaehlt").add(ds.getKey());
+    }catch(DatasetNotFoundException x) {}
+    
+    Writer out = new OutputStreamWriter(new FileOutputStream(cacheFile),ConfigThingy.CHARSET);
+    out.write(conf.stringRepresentation(true, '"'));
+    out.close();
   }
   
   /**
@@ -328,7 +357,6 @@ public class DatasourceJoiner
   private static class LocalOverrideStorage
   {
     private static final String LOS_ONLY_MAGIC = "GEHORCHE DEM WOLLMUX!";
-    private File cacheFile;
     private List data = new LinkedList();
     private Set losSchema = null;
     private DJDataset selectedDataset = null;
@@ -336,9 +364,8 @@ public class DatasourceJoiner
     
     public LocalOverrideStorage(File losCache, URL context)
     { //TESTED
-      cacheFile = losCache;
       String selectKey = "";
-      if (cacheFile.canRead())
+      if (losCache.canRead())
       {
         try
         {
@@ -368,7 +395,7 @@ public class DatasourceJoiner
               String spalte = dsNode.getName();
               if (!newSchema.contains(spalte))
               {
-                Logger.error(cacheFile.getPath()+" enthält korrupten Datensatz (Spalte "+spalte+" nicht im Schema) => Cache wird ignoriert!");
+                Logger.error(losCache.getPath()+" enthält korrupten Datensatz (Spalte "+spalte+" nicht im Schema) => Cache wird ignoriert!");
                 return;
               }
               
@@ -383,7 +410,7 @@ public class DatasourceJoiner
               String spalte = dsNode.getName();
               if (!newSchema.contains(spalte))
               {
-                Logger.error(cacheFile.getPath()+" enthält korrupten Datensatz (Spalte "+spalte+" nicht im Schema) => Cache wird ignoriert!");
+                Logger.error(losCache.getPath()+" enthält korrupten Datensatz (Spalte "+spalte+" nicht im Schema) => Cache wird ignoriert!");
                 return;
               }
               
@@ -586,6 +613,41 @@ public class DatasourceJoiner
     public Set getSchema() {return losSchema;} //TESTED
     
     /**
+     * Fügt conf die Beschreibung der Datensätze im LOS als Kinder hinzu.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
+    public void dumpData(ConfigThingy conf)
+    {
+      Iterator iter = data.iterator();
+      while (iter.hasNext())
+      {
+        LOSDJDataset ds = (LOSDJDataset)iter.next();
+        ConfigThingy dsConf = conf.add("");
+        dsConf.add("Key").add(ds.getKey());
+        
+        ConfigThingy cacheConf = dsConf.add("Cache");
+        Iterator entries = ds.getBS().entrySet().iterator();
+        while (entries.hasNext())
+        {
+          Map.Entry ent = (Map.Entry)entries.next();
+          String spalte = (String)ent.getKey();
+          String wert = (String)ent.getValue();
+          if (wert != null) cacheConf.add(spalte).add(wert);
+        }
+        
+        ConfigThingy overrideConf = dsConf.add("Override");
+        entries = ds.getLOS().entrySet().iterator();
+        while (entries.hasNext())
+        {
+          Map.Entry ent = (Map.Entry)entries.next();
+          String spalte = (String)ent.getKey();
+          String wert = (String)ent.getValue();
+          if (wert != null) overrideConf.add(spalte).add(wert);
+        }
+      }
+    }
+    
+    /**
      * Ändert das Datenbankschema. Spalten des alten Schemas, die im neuen
      * nicht mehr vorhanden sind werden aus den Datensätzen gelöscht. 
      * Im neuen Schema hinzugekommene Spalten werden in den Datensätzen
@@ -613,7 +675,7 @@ public class DatasourceJoiner
       if (spaltenDieWeggefallenSind.isEmpty() 
        && spaltenDieDazuGekommenSind.isEmpty()) return;
       
-      Logger.log("Das Datenbank-Schema wurde geändert. Der Cache "+cacheFile.getPath()+" wird angepasst.");
+      Logger.log("Das Datenbank-Schema wurde geändert. Der Cache wird angepasst.");
       
       Iterator iter = data.iterator();
       while (iter.hasNext())

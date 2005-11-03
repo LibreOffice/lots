@@ -23,6 +23,7 @@
 package de.muenchen.allg.itd51.wollmux.db;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.Set;
@@ -37,9 +38,14 @@ import de.muenchen.allg.itd51.wollmux.TimeoutException;
 public class TestDatasourceJoiner extends DatasourceJoiner
 {
   
-  public void saveCacheAndLOS()
+  public void saveCacheAndLOS(File cacheFile)
   {
-    //TestDJ soll nichts überschreiben
+    //TestDJ soll nichts (ungewollt) überschreiben
+  }
+  
+  public void reallySaveCacheAndLOS(File cacheFile) throws IOException
+  {
+    super.saveCacheAndLOS(cacheFile);
   }
   
   public TestDatasourceJoiner()
@@ -90,7 +96,7 @@ public class TestDatasourceJoiner extends DatasourceJoiner
   }
   
   
-  public static void main(String[] args) throws TimeoutException
+  public static void main(String[] args) throws TimeoutException, IOException
   {
     TestDatasourceJoiner dj = new TestDatasourceJoiner();
     printResults("Nachname = Benkmux", dj.getMainDatasourceSchema(), dj.find("Nachname","Benkmux"));
@@ -101,6 +107,12 @@ public class TestDatasourceJoiner extends DatasourceJoiner
     printResults("Nachname = Lutz", dj.getMainDatasourceSchema(), dj.find("Nachname","Lutz"));
     printResults("Nachname = *uX, Vorname = m*", dj.getMainDatasourceSchema(), dj.find("Nachname","*uX","Vorname","m*"));
     printResults("Local Override Storage", dj.getMainDatasourceSchema(), dj.getLOS());
+    
+    if (args.length == 1)
+    {
+      File outFile = new File(args[0]);
+      dj.reallySaveCacheAndLOS(outFile);
+    }
   }
   
 }
