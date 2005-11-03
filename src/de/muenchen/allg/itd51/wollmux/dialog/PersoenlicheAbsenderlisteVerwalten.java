@@ -82,6 +82,8 @@ import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
 import de.muenchen.allg.itd51.wollmux.db.QueryResults;
 import de.muenchen.allg.itd51.wollmux.db.TestDatasourceJoiner;
 
+//TODO Anfrage "Credits" unterstützen.
+
 /**
  * Diese Klasse baut anhand einer als ConfigThingy übergebenen 
  * Dialogbeschreibung einen Dialog zum Hinzufügen/Entfernen von Einträgen
