@@ -4,10 +4,10 @@
  * Funktion : Implementierung eines com.sun.star.frame.ToolbarController
               als ComboBox zur Auswahl des aktuellen Absenders
  * 
- * Copyright: Landeshauptstadt München
+ * Copyright: Landeshauptstadt M?nchen
  *
- * Änderungshistorie:
- * Nr. |  Datum     |   Autor   | Änderungsgrund
+ * ?nderungshistorie:
+ * Nr. |  Datum     |   Autor   | ?nderungsgrund
  * -------------------------------------------------------------------
  * 001 | 13.09.2005 |    LUT    | Erstellung
  * -------------------------------------------------------------------
@@ -39,12 +39,8 @@ interface XSenderBox
     interface com::sun::star::lang::XInitialization;
     interface com::sun::star::util::XUpdatable;
     interface com::sun::star::frame::XToolbarController;
-    
-    void setText([in] string text);
 
-	void setDropDownLineCount([in] short i);
-
-	void addItems([in] sequence< string > items, [in] short pos);
+	void updateContent();
 }; 
  
 //============================================================================= 

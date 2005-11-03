@@ -26,6 +26,8 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Iterator;
+import java.util.Vector;
 
 import com.sun.star.beans.NamedValue;
 import com.sun.star.frame.DispatchDescriptor;
@@ -49,6 +51,7 @@ import de.muenchen.allg.itd51.wollmux.Event;
 import de.muenchen.allg.itd51.wollmux.EventProcessor;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.VisibleTextFragmentList;
+import de.muenchen.allg.itd51.wollmux.XSenderBox;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
 
 /**
@@ -104,6 +107,11 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
   private static URL defaultContext;
 
   /**
+   * Enthält alle registrierten SenderBox-Objekte.
+   */
+  private static Vector registeredSenderBoxes;
+
+  /**
    * Dieses Feld entält eine Liste aller Services, die dieser UNO-Service
    * implementiert.
    */
@@ -135,8 +143,10 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
   public WollMux(XComponentContext context)
   {
     // Context sichern, Ausführung in anderem Kontext verhindern.
-    if (xComponentContext == null)
+    if (xComponentContext == null) {
       xComponentContext = context;
+      registeredSenderBoxes = new Vector();
+    }
     else if (!UnoRuntime.areSame(context, xComponentContext))
       throw new RuntimeException(
           "WollMux kann nur in einem Kontext erzeugt werden.");
@@ -581,6 +591,57 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
     {
       Logger.error(e);
     }
+  }
+
+  /**
+   * Diese Methode registriert eine XSenderBox, die updates empfängt wenn sich
+   * die PAL ändert. Die selbe XSenderBox kann mehrmals registriert werden.
+   * 
+   * @see de.muenchen.allg.itd51.wollmux.XWollMux#addSenderBox(de.muenchen.allg.itd51.wollmux.XSenderBox)
+   */
+  public static void registerSenderBox(XSenderBox senderBox)
+  {
+    registeredSenderBoxes.add(senderBox);
+    Logger.debug2("WollMux::added senderBox.");
+  }
+
+  /**
+   * Diese methode deregistriert eine XSenderBox. Ist die XSenderBox mehrfach
+   * registriert, so wird nur das erste registrierte Element entfernt.
+   * 
+   * @param senderBox
+   */
+  public static void deregisterSenderBox(XSenderBox senderBox)
+  {
+//    Iterator i = registeredSenderBoxes.iterator();
+//    while (i.hasNext())
+//    {
+//      if (((XSenderBox) i.next()) == senderBox)
+//      {
+//        i.remove();
+//        break;
+//      }
+//    }
+  }
+
+  /**
+   * Liefert das File-Objekt des LocalOverrideStorage Caches zurück.
+   * 
+   * @return das File-Objekt des LocalOverrideStorage Caches.
+   */
+  public static File getLosCacheFile()
+  {
+    return losCacheFile;
+  }
+
+  /**
+   * Liefert einen Iterator auf alle registrierten SenderBox-Objekte.
+   * 
+   * @return Iterator auf alle registrierten SenderBox-Objekte.
+   */
+  public static Iterator senderBoxesIterator()
+  {
+    return registeredSenderBoxes.iterator();
   }
 
 }

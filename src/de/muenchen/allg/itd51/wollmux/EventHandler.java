@@ -17,7 +17,9 @@
  */
 package de.muenchen.allg.itd51.wollmux;
 
+import java.io.IOException;
 import java.net.URL;
+import java.util.Iterator;
 
 import com.sun.star.beans.PropertyValue;
 
@@ -123,9 +125,7 @@ public class EventHandler
         // hier kann auf das Back-Event reagiert werden. In Event.getArgument()
         // steht der Name des aufrufenden Dialogs.
 
-        // Der Cache und der LOS kann sich potentiell ändern. Daher wird er hier
-        // gesichert.
-        WollMux.getDatasourceJoiner().saveCacheAndLOS();
+        potentialChangeOfSelectionAndPAL();
         return EventProcessor.processTheNextEvent;
       }
 
@@ -135,9 +135,7 @@ public class EventHandler
         // hier kann auf das Abort-Event reagiert werden. In Event.getArgument()
         // steht der Name des aufrufenden Dialogs.
 
-        // Der Cache und der LOS kann sich potentiell ändern. Daher wird er hier
-        // gesichert.
-        WollMux.getDatasourceJoiner().saveCacheAndLOS();
+        potentialChangeOfSelectionAndPAL();
         return EventProcessor.processTheNextEvent;
       }
 
@@ -147,5 +145,21 @@ public class EventHandler
       Logger.error(e);
     }
     return EventProcessor.processTheNextEvent;
+  }
+
+  public static void potentialChangeOfSelectionAndPAL() throws IOException
+  {
+    Logger.debug2("potential...");
+    // Alle registrierten SenderBoxen updaten:
+    Iterator i = WollMux.senderBoxesIterator();
+    while (i.hasNext())
+    {
+      Logger.debug2("update SenderBox");
+      ((XSenderBox) i.next()).updateContent();
+    }
+
+    // Der Cache und der LOS auf Platte speichern.
+    WollMux.getDatasourceJoiner().saveCacheAndLOS(WollMux.getLosCacheFile());
+
   }
 }

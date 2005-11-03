@@ -18,6 +18,9 @@
  */
 package de.muenchen.allg.itd51.wollmux.comp;
 
+import java.util.Arrays;
+import java.util.Iterator;
+
 import com.sun.star.awt.ActionEvent;
 import com.sun.star.awt.ItemEvent;
 import com.sun.star.awt.Key;
@@ -54,11 +57,14 @@ import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
 import com.sun.star.util.XUpdatable;
 
-import de.muenchen.allg.afid.MsgBox;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.XSenderBox;
+import de.muenchen.allg.itd51.wollmux.db.DJDataset;
+import de.muenchen.allg.itd51.wollmux.db.DJDatasetListElement;
+import de.muenchen.allg.itd51.wollmux.db.DatasetNotFoundException;
+import de.muenchen.allg.itd51.wollmux.db.QueryResults;
 
 /**
  * Diese Klasse implementiert einen com.sun.star.frame.ToolbarController, mit
@@ -77,11 +83,17 @@ public class SenderBox extends ComponentBase implements XServiceInfo,
 
   protected static final String __serviceName = "de.muenchen.allg.itd51.wollmux.SenderBox";
 
+  private static final short DEFAULT_LINE_COUNT = 10;
+
   private XFrame frame;
 
   private String commandURL;
 
   private UnoService serviceManager;
+
+  private DJDatasetListElement[] elements;
+
+  private DJDatasetListElement selected;
 
   /**
    * Das Feld cBox enthält den ComboBox-Service für den weiteren Zugriff auf die
@@ -181,26 +193,17 @@ public class SenderBox extends ComponentBase implements XServiceInfo,
                               | VclWindowPeerAttribute.DROPDOWN;
         wd.WindowServiceName = "ComboBox";
         cBox = new UnoService(toolkit.xToolkit().createWindow(wd));
-        addItems(new String[] {
-                               "test1",
-                               "foo1",
-                               "bar1",
-                               "test2",
-                               "foo2",
-                               "bar2",
-                               "test3",
-                               "foo3",
-                               "bar3" }, (short) 0);
+        cBox.xComboBox().setDropDownLineCount(DEFAULT_LINE_COUNT);
         cBox.xComboBox().addActionListener(this);
         cBox.xComboBox().addItemListener(this);
         cBox.xComponent().addEventListener(this);
         cBox.xTextComponent().addTextListener(this);
         cBox.xWindow().addKeyListener(this);
-        cBox.msgboxFeatures();
+        updateComboBox();
       }
       catch (Exception e)
       {
-        MsgBox.simple("Exception", "in ToolbarComboBox.createItemWindow()");
+        Logger.error(e);
       }
     }
     return cBox.xWindow();
@@ -335,10 +338,49 @@ public class SenderBox extends ComponentBase implements XServiceInfo,
       {
         str += "     " + args[i].toString() + ",\n";
       }
-      MsgBox.simple("ToolbarComboBox: Error", "InvalidArguments: initialize(\n"
-                                              + str
-                                              + ")\n");
+      Logger.error("SenderBox::initialize(): InvalidArguments [\n"
+                   + str
+                   + "]\n");
     }
+
+    // SenderBox im WollMux registrieren:
+    WollMux.registerSenderBox(this);
+
+    // den Inhalt initial befüllen.
+    updateContent();
+  }
+
+  /**
+   * Holt sich die aktuelle Absenderliste und den gerade selektierten Eintrag
+   * aus dem zentralen DatasouerceJoiner des WollMux. Wenn sich der Inhalt der
+   * PAL potentiell ändert ruft der EventHandler diese Methode bei jedem im
+   * WollMux registrierten SenderBox-Objekt auf.
+   */
+  public void updateContent()
+  {
+    // Liste der entries aufbauen.
+    QueryResults data = WollMux.getDatasourceJoiner().getLOS();
+
+    elements = new DJDatasetListElement[data.size()];
+    Iterator iter = data.iterator();
+    int i = 0;
+    while (iter.hasNext())
+      elements[i++] = new DJDatasetListElement((DJDataset) iter.next());
+    Arrays.sort(elements);
+
+    // selektierten Eintrag holen:
+    try
+    {
+      selected = new DJDatasetListElement(WollMux.getDatasourceJoiner()
+          .getSelectedDataset());
+    }
+    catch (DatasetNotFoundException e)
+    {
+      selected = null;
+    }
+
+    // ComboBox updaten
+    updateComboBox();
   }
 
   /*
@@ -359,9 +401,122 @@ public class SenderBox extends ComponentBase implements XServiceInfo,
   public void disposing(EventObject source)
   {
     Logger.debug2("SenderBox::disposing");
+
     // EventListener deregistrieren.
     XComponent xCompo = UNO.XComponent(source.Source);
     if (xCompo != null) xCompo.removeEventListener(this);
+
+    // SenderBox im WollMux deregistrieren.
+    WollMux.deregisterSenderBox(this);
+  }
+
+  /**
+   * Wird aufgerufen, wenn ein Element mit der Maus selektiert wurde.
+   * 
+   * @see com.sun.star.awt.XItemListener#itemStateChanged(com.sun.star.awt.ItemEvent)
+   */
+  public void itemStateChanged(ItemEvent event)
+  {
+    Logger.debug2("SenderBox::itemStateChanged " + event.Selected);
+    selectSender(event.Selected);
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.sun.star.awt.XActionListener#actionPerformed(com.sun.star.awt.ActionEvent)
+   */
+  public void actionPerformed(ActionEvent arg0)
+  {
+    Logger.debug2("SenderBox::actionPerformed " + arg0.ActionCommand);
+  }
+
+  /*
+   * Empfängt eine Nachricht wenn der Text in der ComboBox geändert wurde.
+   * 
+   * (non-Javadoc)
+   * 
+   * @see com.sun.star.awt.XTextListener#textChanged(com.sun.star.awt.TextEvent)
+   */
+  public void textChanged(TextEvent arg0)
+  {
+    Logger.debug2("SenderBox::textChanged " + arg0.dummy1);
+  }
+
+  /**
+   * Wenn die Return-Taste gedrückt wurde soll das aktuell ausgewählte Element
+   * verwendet werden.
+   * 
+   * @see com.sun.star.awt.XKeyListener#keyPressed(com.sun.star.awt.KeyEvent)
+   */
+  public void keyPressed(KeyEvent arg0)
+  {
+    Logger.debug2("SenderBox::keyPressed" + arg0.KeyCode);
+    if (arg0.KeyCode == Key.RETURN)
+    {
+      String[] items = cBox.xComboBox().getItems();
+      String text = cBox.xTextComponent().getText();
+      boolean found = false;
+      for (int i = 0; i < items.length; i++)
+      {
+        if (text.equals(items[i]))
+        {
+          found = true;
+          selectSender(i);
+          break;
+        }
+      }
+      if (found == false && selected != null)
+        cBox.xTextComponent().setText(selected.toString());
+      Logger.debug2("Return pressed!");
+    }
+  }
+
+  public void keyReleased(KeyEvent arg0)
+  {
+    // do nothing
+  }
+
+  /**
+   * Selektiert den Sender an der i-ten Stelle in der dargestellten Liste.
+   * 
+   * @param i
+   */
+  private void selectSender(int i)
+  {
+    if (i >= 0 && i < elements.length)
+    {
+      selected = elements[i];
+      selected.getDataset().select();
+    }
+  }
+
+  /**
+   * Diese Methode baut den Inhalt der ComboBox neu mit aktuellen Werten auf.
+   */
+  private void updateComboBox()
+  {
+    if (cBox != null && cBox.xComboBox() != null)
+    {
+      cBox.xComboBox().removeItems(
+          (short) 0,
+          (short) (cBox.xComboBox().getItemCount() - 1));
+      for (short i = 0; i < elements.length; i++)
+      {
+        cBox.xComboBox().addItem(elements[i].toString(), i);
+      }
+      try
+      {
+        cBox.xTextComponent().setText(
+            new DJDatasetListElement(WollMux.getDatasourceJoiner()
+                .getSelectedDataset()).toString());
+      }
+      catch (DatasetNotFoundException e)
+      {
+        cBox.xTextComponent().setText("");
+        Logger.error(e);
+      }
+    }
   }
 
   public static void main(String[] args) throws java.lang.Exception
@@ -428,51 +583,5 @@ public class SenderBox extends ComponentBase implements XServiceInfo,
     aToolbarItem[1].Name = "Label";
     aToolbarItem[1].Value = label;
     return aToolbarItem;
-  }
-
-  /*
-   * Empfängt eine Nachricht, wenn mit der Maus auf ein anderes als das aktive
-   * Element geklickt wurde.
-   * 
-   * (non-Javadoc)
-   * 
-   * @see com.sun.star.awt.XItemListener#itemStateChanged(com.sun.star.awt.ItemEvent)
-   */
-  public void itemStateChanged(ItemEvent arg0)
-  {
-    Logger.debug2("SenderBox::itemStateChanged " + arg0.Selected);
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.sun.star.awt.XActionListener#actionPerformed(com.sun.star.awt.ActionEvent)
-   */
-  public void actionPerformed(ActionEvent arg0)
-  {
-    Logger.debug2("SenderBox::actionPerformed " + arg0.ActionCommand);
-  }
-
-  /*
-   * Empfängt eine Nachricht wenn der Text in der ComboBox geändert wurde.
-   * 
-   * (non-Javadoc)
-   * 
-   * @see com.sun.star.awt.XTextListener#textChanged(com.sun.star.awt.TextEvent)
-   */
-  public void textChanged(TextEvent arg0)
-  {
-    Logger.debug2("SenderBox::textChanged " + arg0.dummy1);
-  }
-
-  public void keyPressed(KeyEvent arg0)
-  {
-    Logger.debug2("SenderBox::keyPressed" + arg0.KeyCode);
-    if (arg0.KeyCode == Key.RETURN) Logger.debug2("Return pressed!");
-  }
-
-  public void keyReleased(KeyEvent arg0)
-  {
-    // do nothing
   }
 }
