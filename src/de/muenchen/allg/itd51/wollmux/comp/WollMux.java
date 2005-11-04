@@ -613,15 +613,15 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
    */
   public static void deregisterSenderBox(XSenderBox senderBox)
   {
-//    Iterator i = registeredSenderBoxes.iterator();
-//    while (i.hasNext())
-//    {
-//      if (((XSenderBox) i.next()) == senderBox)
-//      {
-//        i.remove();
-//        break;
-//      }
-//    }
+    Iterator i = registeredSenderBoxes.iterator();
+    while (i.hasNext())
+    {
+      if (((XSenderBox) i.next()) == senderBox)
+      {
+        i.remove();
+        break;
+      }
+    }
   }
 
   /**

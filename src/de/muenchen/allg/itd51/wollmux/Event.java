@@ -38,11 +38,15 @@ public class Event
 
   public static final int ON_ABSENDERDATEN_BEARBEITEN = 20;
 
-  public static final int ON_OPENFRAG = 21;
+  public static final int ON_PERSOENLICHE_ABSENDERLISTE = 21;
 
   public static final int ON_DIALOG_BACK = 30;
 
   public static final int ON_DIALOG_ABORT = 31;
+
+  public static final int ON_OPENFRAG = 40;
+
+  public static final int ON_SELECTION_CHANGED = 50;
 
   private int event = UNKNOWN;
 
@@ -59,6 +63,10 @@ public class Event
     if (event == ON_ABSENDERDATEN_BEARBEITEN)
     {
       return "ON_ABSENDERDATEN_BEARBEITEN";
+    }
+    if (event == ON_PERSOENLICHE_ABSENDERLISTE)
+    {
+      return "ON_PERSOENLICHE_ABSENDERLISTE";
     }
     if (event == ON_LOAD)
     {
@@ -83,6 +91,10 @@ public class Event
     if (event == ON_DIALOG_ABORT)
     {
       return "ON_DIALOG_ABORT";
+    }
+    if (event == ON_SELECTION_CHANGED)
+    {
+      return "ON_SELECTION_CHANGED";
     }
     else
       return "namenlos";

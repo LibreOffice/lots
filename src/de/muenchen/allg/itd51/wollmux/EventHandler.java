@@ -27,6 +27,7 @@ import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.comp.WollMux;
 import de.muenchen.allg.itd51.wollmux.dialog.AbsenderAuswaehlen;
+import de.muenchen.allg.itd51.wollmux.dialog.PersoenlicheAbsenderlisteVerwalten;
 
 /**
  * TODO: Dokumentieren von EventHandler
@@ -119,6 +120,18 @@ public class EventHandler
         return EventProcessor.waitForGUIReturn;
       }
 
+      // ON_PERSOENLICHE_ABSENDERLISTE:
+      if (event.getEvent() == Event.ON_PERSOENLICHE_ABSENDERLISTE)
+      {
+        ConfigThingy PALconf = WollMux.getWollmuxConf().query(
+            "PersoenlicheAbsenderliste").getLastChild();
+        ConfigThingy ADBconf = WollMux.getWollmuxConf().query(
+            "AbsenderdatenBearbeiten").getLastChild();
+        new PersoenlicheAbsenderlisteVerwalten(PALconf, ADBconf, WollMux
+            .getDatasourceJoiner(), EventProcessor.create());
+        return EventProcessor.waitForGUIReturn;
+      }
+
       // ON_DIALOG_BACK:
       if (event.getEvent() == Event.ON_DIALOG_BACK)
       {
@@ -135,6 +148,13 @@ public class EventHandler
         // hier kann auf das Abort-Event reagiert werden. In Event.getArgument()
         // steht der Name des aufrufenden Dialogs.
 
+        potentialChangeOfSelectionAndPAL();
+        return EventProcessor.processTheNextEvent;
+      }
+
+      // ON_SELECTION_CHANGED:
+      if (event.getEvent() == Event.ON_SELECTION_CHANGED)
+      {
         potentialChangeOfSelectionAndPAL();
         return EventProcessor.processTheNextEvent;
       }
