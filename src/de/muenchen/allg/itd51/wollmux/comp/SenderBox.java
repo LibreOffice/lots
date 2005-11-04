@@ -538,16 +538,6 @@ public class SenderBox extends ComponentBase implements XServiceInfo,
   {
     if (cBox != null)
     {
-      // Für die Bestimmung des breitesten Textelements:
-      FontDescriptor fd = (FontDescriptor) cBox.xVclWindowPeer().getProperty(
-          "FontDescriptor");
-      XFont font = null;
-      if (fd != null && cBox.xDevice() != null)
-      {
-        font = cBox.xDevice().getFont(fd);
-      }
-      int maxWidth = 0;
-
       if (cBox.xComboBox() != null)
       {
         // Alte Einträge löschen:
@@ -559,18 +549,6 @@ public class SenderBox extends ComponentBase implements XServiceInfo,
         for (short i = 0; i < elements.length; i++)
         {
           cBox.xComboBox().addItem(elements[i].toString(), i);
-          // Breite des längsten Textes bestimmen:
-          if (font != null)
-          {
-            int width = font.getStringWidth(elements[i].toString());
-            if (width > maxWidth) maxWidth = width;
-          }
-        }
-
-        // Neue maximalbreite setzen:
-        if (font != null && cBox.xWindow() != null)
-        {
-          // cBox.xWindow().setPosSize(0, 0, maxWidth, 0, PosSize.WIDTH);
         }
 
         // Text des ausgewählten Elements anzeigen:
