@@ -22,9 +22,11 @@ import java.util.Arrays;
 import java.util.Iterator;
 
 import com.sun.star.awt.ActionEvent;
+import com.sun.star.awt.FontDescriptor;
 import com.sun.star.awt.ItemEvent;
 import com.sun.star.awt.Key;
 import com.sun.star.awt.KeyEvent;
+import com.sun.star.awt.PosSize;
 import com.sun.star.awt.Rectangle;
 import com.sun.star.awt.Selection;
 import com.sun.star.awt.TextEvent;
@@ -33,6 +35,7 @@ import com.sun.star.awt.WindowAttribute;
 import com.sun.star.awt.WindowClass;
 import com.sun.star.awt.WindowDescriptor;
 import com.sun.star.awt.XActionListener;
+import com.sun.star.awt.XFont;
 import com.sun.star.awt.XItemListener;
 import com.sun.star.awt.XKeyListener;
 import com.sun.star.awt.XTextListener;
@@ -84,8 +87,6 @@ public class SenderBox extends ComponentBase implements XServiceInfo,
 
   protected static final String __serviceName = "de.muenchen.allg.itd51.wollmux.SenderBox";
 
-  private static final short DEFAULT_LINE_COUNT = 10;
-
   private XFrame frame;
 
   private String commandURL;
@@ -95,6 +96,16 @@ public class SenderBox extends ComponentBase implements XServiceInfo,
   private DJDatasetListElement[] elements;
 
   private DJDatasetListElement selected;
+
+  // Grundeinstellungen für die Anzeige der ComboBox
+
+  private static final String TEXT_PROTOTYPE = "Matthias S. Benkmann ist euer Gott (W-OLL-MUX-5.1)";
+
+  private static final short DEFAULT_LINE_COUNT = 10;
+
+  private static final int DEFAULT_FALLBACK_WIDTH = 200;
+
+  private static final int DEFAULT_FALLBACK_HEIGHT = 13;
 
   /**
    * Das Feld cBox enthält den ComboBox-Service für den weiteren Zugriff auf die
@@ -185,21 +196,41 @@ public class SenderBox extends ComponentBase implements XServiceInfo,
       {
         UnoService toolkit = serviceManager.create("com.sun.star.awt.Toolkit");
 
+        // Window erzeugen:
         WindowDescriptor wd = new WindowDescriptor();
         wd.Type = WindowClass.SIMPLE;
         wd.Parent = UNO.XWindowPeer(xwin);
-        wd.Bounds = new Rectangle(0, 0, 200, 30);
+        wd.Bounds = new Rectangle(0, 0, DEFAULT_FALLBACK_WIDTH,
+            DEFAULT_FALLBACK_HEIGHT);
         wd.ParentIndex = -1;
         wd.WindowAttributes = WindowAttribute.SHOW
                               | VclWindowPeerAttribute.DROPDOWN;
         wd.WindowServiceName = "ComboBox";
         cBox = new UnoService(toolkit.xToolkit().createWindow(wd));
+
+        // Höhe und Breite der ComboBox nach dem TEXT_PROTOTYPE anpassen:
+        FontDescriptor fd = (FontDescriptor) cBox.xVclWindowPeer().getProperty(
+            "FontDescriptor");
+        if (fd != null && cBox.xDevice() != null && cBox.xWindow() != null)
+        {
+          // Anmerkung: fd.Height liefert fälschlicherweise immer 0. Der Umweg
+          // über xDevice.getFont().getFontDescriptor() ist daher notwendig.
+          XFont font = cBox.xDevice().getFont(fd);
+          int height = (int) (font.getFontDescriptor().Height * 1.6);
+          int width = font.getStringWidth(TEXT_PROTOTYPE);
+          cBox.xWindow().setPosSize(0, 0, width, height, PosSize.SIZE);
+        }
+
+        // DropDownLineCount setzen
         cBox.xComboBox().setDropDownLineCount(DEFAULT_LINE_COUNT);
+
+        // register listeners
         cBox.xComboBox().addActionListener(this);
         cBox.xComboBox().addItemListener(this);
         cBox.xComponent().addEventListener(this);
         cBox.xTextComponent().addTextListener(this);
         cBox.xWindow().addKeyListener(this);
+
         updateComboBox();
       }
       catch (Exception e)
@@ -505,25 +536,55 @@ public class SenderBox extends ComponentBase implements XServiceInfo,
    */
   private void updateComboBox()
   {
-    if (cBox != null && cBox.xComboBox() != null)
+    if (cBox != null)
     {
-      cBox.xComboBox().removeItems(
-          (short) 0,
-          (short) (cBox.xComboBox().getItemCount() - 1));
-      for (short i = 0; i < elements.length; i++)
+      // Für die Bestimmung des breitesten Textelements:
+      FontDescriptor fd = (FontDescriptor) cBox.xVclWindowPeer().getProperty(
+          "FontDescriptor");
+      XFont font = null;
+      if (fd != null && cBox.xDevice() != null)
       {
-        cBox.xComboBox().addItem(elements[i].toString(), i);
+        font = cBox.xDevice().getFont(fd);
       }
-      try
+      int maxWidth = 0;
+
+      if (cBox.xComboBox() != null)
       {
-        cBox.xTextComponent().setText(
-            new DJDatasetListElement(WollMux.getDatasourceJoiner()
-                .getSelectedDataset()).toString());
-      }
-      catch (DatasetNotFoundException e)
-      {
-        cBox.xTextComponent().setText("");
-        Logger.error(e);
+        // Alte Einträge löschen:
+        cBox.xComboBox().removeItems(
+            (short) 0,
+            (short) (cBox.xComboBox().getItemCount() - 1));
+
+        // Neue Texteinträge setzen:
+        for (short i = 0; i < elements.length; i++)
+        {
+          cBox.xComboBox().addItem(elements[i].toString(), i);
+          // Breite des längsten Textes bestimmen:
+          if (font != null)
+          {
+            int width = font.getStringWidth(elements[i].toString());
+            if (width > maxWidth) maxWidth = width;
+          }
+        }
+
+        // Neue maximalbreite setzen:
+        if (font != null && cBox.xWindow() != null)
+        {
+          // cBox.xWindow().setPosSize(0, 0, maxWidth, 0, PosSize.WIDTH);
+        }
+
+        // Text des ausgewählten Elements anzeigen:
+        try
+        {
+          cBox.xTextComponent().setText(
+              new DJDatasetListElement(WollMux.getDatasourceJoiner()
+                  .getSelectedDataset()).toString());
+        }
+        catch (DatasetNotFoundException e)
+        {
+          cBox.xTextComponent().setText("");
+          Logger.error(e);
+        }
       }
     }
   }
