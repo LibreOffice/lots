@@ -647,7 +647,7 @@ X           "Vorname N."
       }
       
       
-      /* TODO Folgender Kommentar sollte vermutlich auch ins Handbuch.
+      /* 
        * Es ist möglich, dass noch Datensätze aus dem alten LOS übrig sind
        * für die keine aktuellen Daten gefunden wurden. Dies sind entweder
        * Datensätze, die von vorneherein nicht mit einer Hintergrunddatenbank
