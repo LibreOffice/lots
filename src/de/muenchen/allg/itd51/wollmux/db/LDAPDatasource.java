@@ -75,15 +75,22 @@ public class LDAPDatasource implements Datasource
     Iterator iter = spalten.iterator();
     while (iter.hasNext())
     {
-      ConfigThingy spalteDesc = (ConfigThingy)iter.next();
-      String spalte;
-      try{
-        spalte = spalteDesc.get("DB_SPALTE").toString();
-      } catch(NodeNotFoundException x) {
-        throw new ConfigurationErrorException("Fehler in Definition von Datenquelle "+name+": DB_SPALTE Angabe fehlt");
+      ConfigThingy spaltenDesc = (ConfigThingy)iter.next();
+      Iterator iter2 = spaltenDesc.iterator();
+      while (iter2.hasNext())
+      {
+        ConfigThingy spalteDesc = (ConfigThingy)iter2.next();
+        String spalte;
+        try{
+          spalte = spalteDesc.get("DB_SPALTE").toString();
+          spalteToPath.put(spalte, path);
+        } catch(NodeNotFoundException x) {
+          throw new ConfigurationErrorException("Fehler in Definition von Datenquelle "+name+": DB_SPALTE Angabe fehlt");
+        }
+        schema.add(spalte);
       }
       
-      schema.add(spalte);
+      
       
     }
   }
