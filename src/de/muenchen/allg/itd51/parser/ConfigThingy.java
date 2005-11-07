@@ -38,6 +38,7 @@
 *                  | +Warnung, dass mittels add(String) ConfigThingys produziert
 *                  | werden können, die den Syntaxregeln widersprechen.
 * 03.11.2005 | BNK | BOM (\uFEFF) auf Whitespace-Liste gesetzt 
+* 07.11.2005 | BNK | +setName()
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -327,6 +328,20 @@ public class ConfigThingy
   public String getName()
   {
     return name;
+  }
+  
+  /**
+   * Ändert den Namen dieses Knotens auf newName. 
+   * Achtung! Mit dieser Methode
+   * ist es möglich, ConfigThingys zu erzeugen, die sich nicht an die 
+   * Syntaxbeschränkungen des Parsers für Schlüssel halten. Wird so ein
+   * ConfigThingy mittels stringRepresentation() in Text konvertiert, 
+   * entsteht etwas, das der Parser nicht wieder einlesen kann.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public void setName(String newName)
+  {
+    name = newName;
   }
   
   /**
