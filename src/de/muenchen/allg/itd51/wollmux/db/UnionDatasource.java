@@ -80,6 +80,14 @@ public class UnionDatasource implements Datasource
     if (source2 == null)
       throw new ConfigurationErrorException("Fehler bei Initialisierung von Datenquelle \""+name+"\": Referenzierte Datenquelle \""+source2+"\" nicht (oder fehlerhaft) definiert");
 
+    /*
+     * Anmerkung: Die folgende Bedingung ist "unnötig" streng, aber um
+     * sie aufzuweichen (z.B. Gesamtschema ist Vereinigung der Schemata)
+     * wäre es erforderlich, einen Dataset-Wrapper zu implementieren,
+     * der dafür sorgt, dass alle Datasets, die in QueryResults zurück-
+     * geliefert werden das selbe Schema haben. Solange dafür keine
+     * Notwendigkeit ersichtlich ist, spare ich mir diesen Aufwand.
+     */
     Set schema1 = source1.getSchema();
     Set schema2 = source2.getSchema();
     if (!schema1.containsAll(schema2) || !schema2.containsAll(schema1))
