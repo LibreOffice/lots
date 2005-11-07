@@ -89,7 +89,12 @@ public class PreferDatasource implements Datasource
     if (source2 == null)
       throw new ConfigurationErrorException("Fehler bei Initialisierung von Datenquelle \""+name+"\": Referenzierte Datenquelle \""+source2+"\" nicht (oder fehlerhaft) definiert");
 
-    schema = new HashSet(source1.getSchema());
+    Set schema1 = source1.getSchema();
+    Set schema2 = source2.getSchema();
+    if (!schema1.containsAll(schema2) || !schema2.containsAll(schema1))
+      throw new ConfigurationErrorException("Schemata der Datenquellen \""+source1Name+"\" und \""+source2Name+"\" stimmen nicht überein");
+    
+    schema = new HashSet(schema1);
   }
 
   public Set getSchema()
