@@ -30,6 +30,10 @@ import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.TimeoutException;
 
+/**
+ * Datasource, die die Vereinigung 2er Datasources darstellt
+ * @author Matthias Benkmann (D-III-ITD 5.1)
+ */
 public class UnionDatasource implements Datasource
 {
   private Datasource source1;
