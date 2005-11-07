@@ -58,6 +58,13 @@ public class WMCommandInterpreter
   private UnoService document;
 
   /**
+   * Dieses Flag gibt an, ob der WMCommandInterpreter Änderungen am Dokument
+   * vornehmen darf. Kommandos, die das Dokument nicht verändern, können
+   * trotzdem ausgeführt werden.
+   */
+  private boolean allowDocumentModification;
+
+  /**
    * Abbruchwert für die Anzahl der Interationsschritte beim Auswerten neu
    * hinzugekommener Bookmarks.
    */
@@ -80,6 +87,11 @@ public class WMCommandInterpreter
   public WMCommandInterpreter(XTextDocument xDoc)
   {
     this.document = new UnoService(xDoc);
+
+    // Wenn das Dokument als Dokument (und nicht als Template) geöffnet wurde,
+    // soll das Dokument nicht vom WollMux verändert werden:
+    allowDocumentModification = (xDoc.getURL() == null || xDoc.getURL().equals(
+        ""));
   }
 
   /**
@@ -105,7 +117,7 @@ public class WMCommandInterpreter
     // Folgendes Pattern prüft ob es sich bei dem Bookmark um ein gültiges
     // WM-Kommando handelt und entfernt evtl. vorhandene Zahlen-Postfixe.
     Pattern wmCmd = Pattern
-        .compile("\\A\\p{Space}*(WM\\p{Space}*\\(.*\\))\\p{Space}*\\d*\\z");
+        .compile("\\A\\p{Space}*(WM\\p{Space}*\\(.*\\))\\p{Space}*(\\d*)\\z");
 
     // Solange durch die ständig neu erzeugte Liste aller Bookmarks gehen, bis
     // alle Bookmarks ausgewertet wurden oder die Abbruchbedingung zur
@@ -122,16 +134,27 @@ public class WMCommandInterpreter
       {
         if (!evaluatedBookmarks.containsKey(bookmarks[i]))
         {
-          Logger.debug2("Evaluate Bookmark \"" + bookmarks[i] + "\".");
+          String bookmarkName = bookmarks[i];
+
+          Logger.debug2("Evaluate Bookmark \"" + bookmarkName + "\".");
           changed = true;
-          evaluatedBookmarks.put(bookmarks[i], Boolean.TRUE);
+          evaluatedBookmarks.put(bookmarkName, Boolean.TRUE);
 
           // Bookmark evaluieren.
-          Matcher m = wmCmd.matcher(bookmarks[i]);
+          Matcher m = wmCmd.matcher(bookmarkName);
           if (m.find())
           {
             Logger.debug2("Found WM-Command: " + m.group(1));
-            execute(m.group(1), bookmarks[i]);
+            String newBookmarkName = execute(m.group(1), bookmarkName, m
+                .group(2));
+
+            // Wenn sich der Bookmark geändert hat, muss evaluatedBookmarks
+            // angepasst werden:
+            if (!bookmarkName.equals(newBookmarkName))
+            {
+              evaluatedBookmarks.put(newBookmarkName, evaluatedBookmarks
+                  .remove(bookmarkName));
+            }
           }
           else
           {
@@ -154,44 +177,64 @@ public class WMCommandInterpreter
    *          Der Name des zugehörigen Bookmarks für die weitere Verarbeitung.
    *          Im Fehlerfall wird auf den Bookmarknamen verwiesen.
    */
-  private void execute(String cmdString, String bookmarkName)
+  private String execute(String cmdString, String bookmarkName, String suffix)
   {
     try
     {
-      ConfigThingy wm = new ConfigThingy("WMCmd", WollMux.getDEFAULT_CONTEXT(),
-          new StringReader(cmdString)).get("WM");
+      ConfigThingy wm = new ConfigThingy("", WollMux.getDEFAULT_CONTEXT(),
+          new StringReader(cmdString));
       ConfigThingy cmd = wm.get("CMD");
-      // TODO: nichts machen wenn DONE "true"
+      WMCommandState state = new WMCommandState(wm);
 
-      // insertFrag
-      if (cmd.toString().equals("insertFrag"))
+      if (state.isDone() == false || state.getErrors() > 0)
       {
-        Logger.debug2("Cmd: insertFrag mit FRAG_ID \""
-                      + wm.get("FRAG_ID").toString()
-                      + "\"");
-        executeInsertFrag(wm.get("FRAG_ID").toString(), bookmarkName);
+
+        // insertFrag
+        if (cmd.toString().equals("insertFrag"))
+        {
+          Logger.debug2("Cmd: insertFrag mit FRAG_ID \""
+                        + wm.get("FRAG_ID").toString()
+                        + "\"");
+
+          state = executeInsertFrag(
+              wm.get("FRAG_ID").toString(),
+              bookmarkName,
+              state);
+        }
+
+        // insertValue
+        else if (cmd.toString().equals("insertValue"))
+        {
+          Logger.debug2("Cmd: insertValue mit DB_SPALTE \""
+                        + wm.get("DB_SPALTE").toString()
+                        + "\"");
+          state = executeInsertValue(
+              wm.get("DB_SPALTE").toString(),
+              bookmarkName,
+              state);
+        }
+
+        // unbekanntes Kommando
+        else
+        {
+          String msg = bookmarkName
+                       + ": "
+                       + "Unbekanntes WollMux-Kommando \""
+                       + cmd.toString()
+                       + "\"";
+          Logger.error(msg);
+          state.setErrors(1);
+          fillBookmark(bookmarkName, msg);
+        }
       }
 
-      // insertValue
-      else if (cmd.toString().equals("insertValue"))
-      {
-        Logger.debug2("Cmd: insertValue mit DB_SPALTE \""
-                      + wm.get("DB_SPALTE").toString()
-                      + "\"");
-        executeInsertValue(wm.get("DB_SPALTE").toString(), bookmarkName);
-      }
+      // Neuen Status rausschreiben:
+      ConfigThingy wmCmd = state.toConfigThingy();
+      String wmCmdString = wmCmd.stringRepresentation(true, '\'') + suffix;
+      wmCmdString = wmCmdString.replaceAll("[\r\n]+", " ");
+      Logger.debug2("EXECUTE STATE: " + wmCmdString);
 
-      // unbekanntes Kommando
-      else
-      {
-        String msg = bookmarkName
-                     + ": "
-                     + "Unbekanntes WollMux-Kommando \""
-                     + cmd.toString()
-                     + "\"";
-        Logger.error(msg);
-        fillBookmark(bookmarkName, msg);
-      }
+      return renameBookmark(bookmarkName, wmCmdString);
     }
     catch (java.lang.Exception e)
     {
@@ -199,6 +242,7 @@ public class WMCommandInterpreter
       Logger.error(e);
       fillBookmark(bookmarkName, bookmarkName + ": " + e.toString());
     }
+    return bookmarkName;
   }
 
   /**
@@ -210,8 +254,10 @@ public class WMCommandInterpreter
    * @param bookmarkName
    *          Name des Bookmarks in das der Wert eingefügt werden soll.
    */
-  private void executeInsertValue(String spaltenname, String bookmarkName)
+  private WMCommandState executeInsertValue(String spaltenname,
+      String bookmarkName, WMCommandState state)
   {
+    state.setErrors(0);
     try
     {
       Dataset ds = WollMux.getDatasourceJoiner().getSelectedDataset();
@@ -219,13 +265,17 @@ public class WMCommandInterpreter
         fillBookmark(bookmarkName, "");
       else
         fillBookmark(bookmarkName, ds.get(spaltenname));
+      state.setDone(true);
     }
     catch (java.lang.Exception e)
     {
       Logger.error("Bookmark \"" + bookmarkName + "\":");
       Logger.error(e);
       fillBookmark(bookmarkName, bookmarkName + ": " + e.toString());
+      state.setErrors(state.getErrors() + 1);
     }
+    state.setDone(true);
+    return state;
   }
 
   /**
@@ -238,13 +288,14 @@ public class WMCommandInterpreter
    * @param bookmarkName
    *          Name des bookmarks, in das das Fragment eingefügt werden soll.
    */
-  private void executeInsertFrag(String frag_id, String bookmarkName)
+  private WMCommandState executeInsertFrag(String frag_id, String bookmarkName,
+      WMCommandState state)
   {
+    state.setErrors(0);
     try
     {
-      // Fragment-URL holen und aufbereiten.
+      // Fragment-URL holen und aufbereiten. Kontext ist der DEFAULT_CONTEXT.
       String urlStr = WollMux.getTextFragmentList().getURLByID(frag_id);
-      // Verwende URL im gegebenen Kontext.
       URL url = new URL(WollMux.getDEFAULT_CONTEXT(), urlStr);
       UnoService trans = UnoService.createWithContext(
           "com.sun.star.util.URLTransformer",
@@ -275,8 +326,7 @@ public class WMCommandInterpreter
       XTextRange bookmarkCursor = insertDocumentWithMarks(bookmarkName, urlStr);
 
       // Bookmark an neuen Range anpassen
-      // TODO: FROZEN "true" setzen.
-      reRangeBookmark(bookmarkName, bookmarkCursor);
+      rerangeBookmark(bookmarkName, bookmarkCursor);
 
     }
     catch (java.lang.Exception e)
@@ -284,7 +334,10 @@ public class WMCommandInterpreter
       Logger.error("Bookmark \"" + bookmarkName + "\":");
       Logger.error(e);
       fillBookmark(bookmarkName, bookmarkName + ": " + e.toString());
+      state.setErrors(state.getErrors() + 1);
     }
+    state.setDone(true);
+    return state;
   }
 
   /**
@@ -306,66 +359,73 @@ public class WMCommandInterpreter
   private XTextRange insertDocumentWithMarks(String bookmarkName, String unoURL)
       throws NoSuchElementException, WrappedTargetException, Exception
   {
-    // so gehts:
-    // "x" ist die explizit sichtbare FRAGMENT_MARK, die später auf
-    // Hidden ("h") gesetzt wird.
-    // 1) bookmarkCursor = "xx"
-    // 2) insertCursor exakt in die Mitte der xx setzen.
-    // 3) Inhalt aus Fragmentdatei einfügen in insCursor
-    // 4) alle "x" auf "h" setzen
-    // Ergebnis: bookmarCursor = "h<inhalt>h"
-
-    // TextCursor erzeugen, der den gesamten Ersetzungsbereich des Bookmarks
-    // umschließt und mit dem Inhalt der beiden FRAGMENT_MARKs vorbelegen.
-    XNameAccess bookmarkAccess = document.xBookmarksSupplier().getBookmarks();
-    UnoService bookmark = new UnoService(bookmarkAccess.getByName(bookmarkName));
-    UnoService text = new UnoService(document.xTextDocument().getText());
-    UnoService bookmarkCursor = new UnoService(text.xText()
-        .createTextCursorByRange(bookmark.xTextContent().getAnchor()));
-    bookmarkCursor.xTextCursor().setString(
-        FRAGMENT_MARK_OPEN + FRAGMENT_MARK_CLOSE);
-    bookmarkCursor.setPropertyValue("CharHidden", Boolean.FALSE);
-
-    // InsertCurser erzeugen, in den das Textfragment eingefügt wird.
-    UnoService insCursor = new UnoService(text.xText().createTextCursorByRange(
-        bookmarkCursor.xTextCursor()));
-    insCursor.xTextCursor().goRight((short) FRAGMENT_MARK_OPEN.length(), false);
-    insCursor.xTextCursor().collapseToStart();
-
-    try
+    if (allowDocumentModification)
     {
-      // Textfragment einfügen:
-      PropertyValue[] props = new PropertyValue[] { new PropertyValue() };
-      insCursor.xDocumentInsertable().insertDocumentFromURL(unoURL, props);
-    }
-    catch (java.lang.Exception e)
-    {
-      Logger.error("Bookmark \"" + bookmarkName + "\":");
-      Logger.error(e);
-      insCursor.xTextCursor().setString(bookmarkName + ": " + e.toString());
-    }
+      // so gehts:
+      // "x" ist die explizit sichtbare FRAGMENT_MARK, die später auf
+      // Hidden ("h") gesetzt wird.
+      // 1) bookmarkCursor = "xx"
+      // 2) insertCursor exakt in die Mitte der xx setzen.
+      // 3) Inhalt aus Fragmentdatei einfügen in insCursor
+      // 4) alle "x" auf "h" setzen
+      // Ergebnis: bookmarCursor = "h<inhalt>h"
 
-    // FRAGMENT_MARKen verstecken:
-    UnoService hiddenCursor = new UnoService(text.xText().createTextCursor());
-    // start-Marke
-    hiddenCursor.xTextCursor().gotoRange(
-        bookmarkCursor.xTextRange().getStart(),
-        false);
-    hiddenCursor.xTextCursor().goRight(
-        (short) FRAGMENT_MARK_OPEN.length(),
-        true);
-    hiddenCursor.setPropertyValue("CharHidden", Boolean.TRUE);
-    // end-Marke
-    hiddenCursor.xTextCursor().gotoRange(
-        bookmarkCursor.xTextRange().getEnd(),
-        false);
-    hiddenCursor.xTextCursor().goLeft(
-        (short) FRAGMENT_MARK_CLOSE.length(),
-        true);
-    hiddenCursor.setPropertyValue("CharHidden", Boolean.TRUE);
+      // TextCursor erzeugen, der den gesamten Ersetzungsbereich des Bookmarks
+      // umschließt und mit dem Inhalt der beiden FRAGMENT_MARKs vorbelegen.
+      XNameAccess bookmarkAccess = document.xBookmarksSupplier().getBookmarks();
+      UnoService bookmark = new UnoService(bookmarkAccess
+          .getByName(bookmarkName));
+      UnoService text = new UnoService(document.xTextDocument().getText());
+      UnoService bookmarkCursor = new UnoService(text.xText()
+          .createTextCursorByRange(bookmark.xTextContent().getAnchor()));
+      bookmarkCursor.xTextCursor().setString(
+          FRAGMENT_MARK_OPEN + FRAGMENT_MARK_CLOSE);
+      bookmarkCursor.setPropertyValue("CharHidden", Boolean.FALSE);
 
-    // das war's
-    return bookmarkCursor.xTextRange();
+      // InsertCurser erzeugen, in den das Textfragment eingefügt wird.
+      UnoService insCursor = new UnoService(text.xText()
+          .createTextCursorByRange(bookmarkCursor.xTextCursor()));
+      insCursor.xTextCursor().goRight(
+          (short) FRAGMENT_MARK_OPEN.length(),
+          false);
+      insCursor.xTextCursor().collapseToStart();
+
+      try
+      {
+        // Textfragment einfügen:
+        PropertyValue[] props = new PropertyValue[] { new PropertyValue() };
+        insCursor.xDocumentInsertable().insertDocumentFromURL(unoURL, props);
+      }
+      catch (java.lang.Exception e)
+      {
+        Logger.error("Bookmark \"" + bookmarkName + "\":");
+        Logger.error(e);
+        insCursor.xTextCursor().setString(bookmarkName + ": " + e.toString());
+      }
+
+      // FRAGMENT_MARKen verstecken:
+      UnoService hiddenCursor = new UnoService(text.xText().createTextCursor());
+      // start-Marke
+      hiddenCursor.xTextCursor().gotoRange(
+          bookmarkCursor.xTextRange().getStart(),
+          false);
+      hiddenCursor.xTextCursor().goRight(
+          (short) FRAGMENT_MARK_OPEN.length(),
+          true);
+      hiddenCursor.setPropertyValue("CharHidden", Boolean.TRUE);
+      // end-Marke
+      hiddenCursor.xTextCursor().gotoRange(
+          bookmarkCursor.xTextRange().getEnd(),
+          false);
+      hiddenCursor.xTextCursor().goLeft(
+          (short) FRAGMENT_MARK_CLOSE.length(),
+          true);
+      hiddenCursor.setPropertyValue("CharHidden", Boolean.TRUE);
+
+      // das war's
+      return bookmarkCursor.xTextRange();
+    }
+    return null;
   }
 
   /**
@@ -378,44 +438,94 @@ public class WMCommandInterpreter
    * @throws WrappedTargetException
    * @throws NoSuchElementException
    */
-  private void reRangeBookmark(String bookmarkName, XTextRange xTextRange)
+  private void rerangeBookmark(String bookmarkName, XTextRange xTextRange)
       throws NoSuchElementException, WrappedTargetException
   {
-    // Ein Bookmark ohne Ausdehnung kann nicht einfach nachträglich
-    // erweitert werden. Dies geht nur beim Erzeugen und Einfügen mit
-    // insertTextContent(...). Um ein solches Bookmark mit einer
-    // Ausdehnung versehen zu können, muss es zu erst gelöscht, und
-    // anschließend wieder neu erzeugt und mit der Ausdehnung xTextRange
-    // eingefügt werden.
-
-    // alten Bookmark löschen.
-    UnoService oldBookmark = new UnoService(document.xBookmarksSupplier()
-        .getBookmarks().getByName(bookmarkName));
-
-    document.xTextDocument().getText().removeTextContent(
-        oldBookmark.xTextContent());
-
-    // neuen Bookmark unter dem alten Namen mit Ausdehnung hinzufügen.
-    UnoService newBookmark;
-    try
+    if (allowDocumentModification)
     {
-      newBookmark = document.create("com.sun.star.text.Bookmark");
-      newBookmark.xNamed().setName(bookmarkName);
-      document.xTextDocument().getText().insertTextContent(
-          xTextRange,
-          newBookmark.xTextContent(),
-          true);
+      // Ein Bookmark ohne Ausdehnung kann nicht einfach nachträglich
+      // erweitert werden. Dies geht nur beim Erzeugen und Einfügen mit
+      // insertTextContent(...). Um ein solches Bookmark mit einer
+      // Ausdehnung versehen zu können, muss es zu erst gelöscht, und
+      // anschließend wieder neu erzeugt und mit der Ausdehnung xTextRange
+      // eingefügt werden.
+
+      // altes Bookmark löschen.
+      UnoService oldBookmark = new UnoService(document.xBookmarksSupplier()
+          .getBookmarks().getByName(bookmarkName));
+
+      document.xTextDocument().getText().removeTextContent(
+          oldBookmark.xTextContent());
+
+      // neuen Bookmark unter dem alten Namen mit Ausdehnung hinzufügen.
+      UnoService newBookmark;
+      try
+      {
+        newBookmark = document.create("com.sun.star.text.Bookmark");
+        newBookmark.xNamed().setName(bookmarkName);
+        document.xTextDocument().getText().insertTextContent(
+            xTextRange,
+            newBookmark.xTextContent(),
+            true);
+      }
+      catch (Exception e)
+      {
+        // Fehler beim Erzeugen des Service Bookmark. Sollt normal nicht
+        // passieren.
+        Logger.error(e);
+        Logger.error("ReRange: Bookmark \""
+                     + bookmarkName
+                     + "\" konnte nicht neu erzeugt werden und ging "
+                     + "verloren.");
+      }
     }
-    catch (Exception e)
+  }
+
+  /**
+   * Diese Methode benennt das Bookmark oldName zu dem Namen newName um. Ist der
+   * Name bereits definiert, so hängt OpenOffice an den Namen automatisch eine
+   * Nummer an. Die Methode gibt den tatsächlich erzeugten Bookmarknamen zurück.
+   * 
+   * @param oldName
+   * @param newName
+   * @return den tatsächlich erzeugten Namen des Bookmarks.
+   */
+  private String renameBookmark(String oldName, String newName)
+  {
+    if (allowDocumentModification)
     {
-      // Fehler beim Erzeugen des Service Bookmark. Sollt normal nicht
-      // passieren.
-      Logger.error(e);
-      Logger.error("ReRange: Bookmark \""
-                   + bookmarkName
-                   + "\" konnte nicht neu erzeugt werden und ging "
-                   + "verloren.");
+      try
+      {
+        // altes Bookmark holen.
+        UnoService oldBookmark = new UnoService(document.xBookmarksSupplier()
+            .getBookmarks().getByName(oldName));
+
+        // Bereich merken:
+        UnoService text = new UnoService(document.xTextDocument().getText());
+        UnoService bookmarkCursor = new UnoService(text.xText()
+            .createTextCursorByRange(oldBookmark.xTextContent().getAnchor()));
+
+        // altes Bookmark löschen.
+        document.xTextDocument().getText().removeTextContent(
+            oldBookmark.xTextContent());
+
+        // neues Bookmark hinzufügen.
+        UnoService newBookmark;
+        newBookmark = document.create("com.sun.star.text.Bookmark");
+        newBookmark.xNamed().setName(newName);
+        document.xTextDocument().getText().insertTextContent(
+            bookmarkCursor.xTextRange(),
+            newBookmark.xTextContent(),
+            true);
+
+        return newBookmark.xNamed().getName();
+      }
+      catch (Exception e)
+      {
+        Logger.error(e);
+      }
     }
+    return oldName;
   }
 
   /**
@@ -427,32 +537,35 @@ public class WMCommandInterpreter
    */
   private void fillBookmark(String bookmarkName, String text)
   {
-    XNameAccess bookmarkAccess = document.xBookmarksSupplier().getBookmarks();
-    try
+    if (allowDocumentModification)
     {
+      XNameAccess bookmarkAccess = document.xBookmarksSupplier().getBookmarks();
+      try
+      {
 
-      // Textcursor erzeugen und mit dem neuen Text ausdehnen.
-      UnoService bookmark = new UnoService(bookmarkAccess
-          .getByName(bookmarkName));
-      UnoService cursor = new UnoService(document.xTextDocument().getText()
-          .createTextCursorByRange(bookmark.xTextContent().getAnchor()));
-      cursor.xTextCursor().setString(text);
+        // Textcursor erzeugen und mit dem neuen Text ausdehnen.
+        UnoService bookmark = new UnoService(bookmarkAccess
+            .getByName(bookmarkName));
+        UnoService cursor = new UnoService(document.xTextDocument().getText()
+            .createTextCursorByRange(bookmark.xTextContent().getAnchor()));
+        cursor.xTextCursor().setString(text);
 
-      // Bookmark an neuen Range anpassen
-      reRangeBookmark(bookmarkName, cursor.xTextRange());
+        // Bookmark an neuen Range anpassen
+        rerangeBookmark(bookmarkName, cursor.xTextRange());
 
-    }
-    catch (NoSuchElementException e)
-    {
-      // Dieser Fall kann normalerweise nicht auftreten, da nur Bookmarks
-      // verarbeitet werden, die auch wirklich existieren.
-      Logger.error(e);
-    }
-    catch (WrappedTargetException e)
-    {
-      // interner UNO-Fehler beim Holen des Bookmarks. Sollte
-      // normalerweise nicht auftreten.
-      Logger.error(e);
+      }
+      catch (NoSuchElementException e)
+      {
+        // Dieser Fall kann normalerweise nicht auftreten, da nur Bookmarks
+        // verarbeitet werden, die auch wirklich existieren.
+        Logger.error(e);
+      }
+      catch (WrappedTargetException e)
+      {
+        // interner UNO-Fehler beim Holen des Bookmarks. Sollte
+        // normalerweise nicht auftreten.
+        Logger.error(e);
+      }
     }
   }
 
@@ -498,7 +611,7 @@ public class WMCommandInterpreter
 
       UNO.loadComponentFromURL(urlStr, true, false);
 
-      new WMCommandInterpreter(UNO.XTextDocument(UNO.compo)).interpret();
+      // new WMCommandInterpreter(UNO.XTextDocument(UNO.compo)).interpret();
     }
     catch (java.lang.Exception e)
     {
