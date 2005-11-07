@@ -17,6 +17,7 @@
 * 03.11.2005 | BNK | saveCacheAndLOS kriegt jetzt File-Argument
 *                  | saveCacheAndLos implementiert
 * 03.11.2005 | BNK | besser kommentiert
+* 07.11.2005 | BNK | +type "union"
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -146,6 +147,8 @@ public class DatasourceJoiner
       try{
         if (type.equals("conf"))
           ds = new ThingyDatasource(nameToDatasource, sourceDesc, context);
+        else if (type.equals("union"))
+          ds = new UnionDatasource(nameToDatasource, sourceDesc, context);
         //else if (type.equals("ldap"))
         //  ds = new LDAPDatasource(nameToDatasource, sourceDesc, context);
         else
