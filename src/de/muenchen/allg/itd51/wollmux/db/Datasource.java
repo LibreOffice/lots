@@ -82,7 +82,8 @@ public interface Datasource
   /**
    * Liefert alle Datensätze, die alle Bedingungen von query (Liste
    * von {@link QueryPart}s) erfüllen. Ist query leer, werden keine
-   * Datensätze zurückgeliefert.
+   * Datensätze zurückgeliefert. Enthält query Bedingungen über Spalten,
+   * die die Datenbank nicht hat, werden keine Datensätze zurückgeliefert.
    * @param timeout die maximale Zeit in Millisekunden, die vergehen darf, bis die
    * Funktion zurückkehrt.
    * @throws TimeoutException, falls die Anfrage nicht rechtzeitig beendet
