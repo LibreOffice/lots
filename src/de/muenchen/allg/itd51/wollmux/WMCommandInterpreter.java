@@ -103,8 +103,10 @@ public class WMCommandInterpreter
    * 
    * Alle Bookmarks, die nicht dieser Syntax entsprechen, werden als normale
    * Bookmarks behandelt und nicht vom Interpreter bearbeitet.
+   * 
+   * @throws EndlessLoopException
    */
-  public void interpret()
+  public void interpret() throws EndlessLoopException
   {
     // Die Sichtbare Darstellung in OOo abschalten:
     // document.xModel().lockControllers();
@@ -123,7 +125,8 @@ public class WMCommandInterpreter
     // alle Bookmarks ausgewertet wurden oder die Abbruchbedingung zur
     // Vermeindung von Endlosschleifen erfüllt ist.
     boolean changed = true;
-    for (int count = 0; changed && count < MAXCOUNT; ++count)
+    int count = 0;
+    while (changed && MAXCOUNT > ++count)
     {
       changed = false;
       XNameAccess bookmarkAccess = document.xBookmarksSupplier().getBookmarks();
@@ -162,6 +165,26 @@ public class WMCommandInterpreter
           }
         }
       }
+    }
+    if (count == MAXCOUNT)
+    {
+      // EndlessLoopException mit dem Namen des Dokuments schmeissen.
+      UnoService frame = new UnoService(document.xModel()
+          .getCurrentController().getFrame());
+      String name;
+      try
+      {
+        name = frame.getPropertyValue("Title").toString();
+      }
+      catch (Exception e)
+      {
+        name = "";
+      }
+
+      throw new EndlessLoopException(
+          "Endlosschleife bei der Textfragment-Ersetzung in Dokument \""
+              + name
+              + "\"");
     }
 
     // Lock-Controllers wieder aufheben:

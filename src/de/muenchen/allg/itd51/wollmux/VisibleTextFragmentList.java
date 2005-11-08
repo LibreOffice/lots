@@ -87,6 +87,7 @@ public class VisibleTextFragmentList
   }
 
   private String expandVariable(ConfigThingy node, ConfigThingy root)
+      throws EndlessLoopException
   {
     // Map der sichtbaren Variablen erzeugen:
     Map variables = new HashMap();
@@ -126,7 +127,8 @@ public class VisibleTextFragmentList
     // Variablen so lange ersetzen, bis keine Variable mehr gefunden wird.
     // Vermeidung von möglichen Endlosloops durch Abbruch nach MAXCOUNT
     // Ersetzungen.
-    for (int count = 0; m.find() && count < MAXCOUNT; ++count)
+    int count = 0;
+    while (m.find() && MAXCOUNT > ++count)
     {
       String key = m.group(1);
       if (variables.containsKey(key))
@@ -145,10 +147,8 @@ public class VisibleTextFragmentList
       else
       {
         // Die Variable kann nicht ersetzt werden und wird auch nicht
-        // ersetzt.
-        // Eine Exception muss deswegen nicht geworfen werden, es ist
-        // aber
-        // sinnvoll, die Fehlermeldung in einem Logger rauszuschreiben.
+        // ersetzt. Eine Exception muss deswegen nicht geworfen werden, es ist
+        // aber sinnvoll, die Fehlermeldung in einem Logger rauszuschreiben.
         Logger.error("Die Variable \""
                      + key
                      + "\" in der URL \""
@@ -156,33 +156,42 @@ public class VisibleTextFragmentList
                      + "\" ist nicht definiert.");
       }
     }
+    if (count == MAXCOUNT)
+      throw new EndlessLoopException(
+          "Endlosschleife ber der Ersetzung der Variablen in URL \""
+              + node.toString()
+              + "\".");
     return string;
   }
 
   /**
-   * Gibt die URL des mit id definierten Textfragmente zurück. Falls das
-   * Textfragment nicht existiert, wird null zurückgeliefert.
+   * Gibt die URL des unter der frag_id definierten Textfragmente zurück. Falls
+   * das Textfragment nicht existiert, wird eine TextfragmentNotDefinedException
+   * geworfen.
    * 
-   * @param id
+   * @param frag_id
    *          Die ID des gesuchten Textfragments.
-   * @return die URL des mit id definierten Textfragments. Falls das
+   * @return die URL des unter der frag_id definierten Textfragments. Falls das
    *         Textfragment nicht existiert oder die URL ungültig ist, wird null
    *         zurückgeliefert.
    * @throws NodeNotFoundException
    *           Das Attribut URL des Textfragments ist nicht definiert.
    * @throws TextFragmentNotDefinedException
    *           Das gesuchte Textfragment ist nicht definiert.
+   * @throws EndlessLoopException
+   *           Bei der Ersetzung der Variablen in der URL trat eine
+   *           Endlosschleife auf.
    */
-  public String getURLByID(String id) throws NodeNotFoundException,
-      TextFragmentNotDefinedException
+  public String getURLByID(String frag_id) throws NodeNotFoundException,
+      TextFragmentNotDefinedException, EndlessLoopException
   {
-    if (id != null && fragmentMap.containsKey(id))
+    if (frag_id != null && fragmentMap.containsKey(frag_id))
     {
-      ConfigThingy frag = (ConfigThingy) fragmentMap.get(id);
+      ConfigThingy frag = (ConfigThingy) fragmentMap.get(frag_id);
       return expandVariable(frag.get("URL"), root);
     }
     else
-      throw new TextFragmentNotDefinedException(id);
+      throw new TextFragmentNotDefinedException(frag_id);
   }
 
   /**
@@ -230,10 +239,17 @@ public class VisibleTextFragmentList
       String[] ids = tfrags.getIDs();
       for (int i = 0; i < ids.length; i++)
       {
-        Logger.debug("Textfragment: "
-                     + ids[i]
-                     + " --> "
-                     + tfrags.getURLByID(ids[i]));
+        try
+        {
+          Logger.debug("Textfragment: "
+                       + ids[i]
+                       + " --> "
+                       + tfrags.getURLByID(ids[i]));
+        }
+        catch (EndlessLoopException e)
+        {
+          Logger.error(e);
+        }
       }
 
     }

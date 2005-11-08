@@ -1,7 +1,8 @@
 /*
- * Dateiname: TextfragmentNotDefinedException.java
+ * Dateiname: EndlessLoopException.java
  * Projekt  : WollMux
- * Funktion : Ein angefragtes Textfragment ist nicht definiert.
+ * Funktion : Bei einer Textersetzung (z.B. aus einer Variable oder beim insertFrag) 
+ *            kam es zu einer Endlosschleife.
  * 
  * Copyright: Landeshauptstadt München
  *
@@ -18,18 +19,17 @@
 package de.muenchen.allg.itd51.wollmux;
 
 /**
- * Ein angefragtes Textfragment ist nicht definiert.
+ * Bei einer Textersetzung (z.B. aus einer Variable oder beim insertFrag) kam es
+ * zu einer Endlosschleife.
  * 
  * @author Christoph Lutz (D-III-ITD 5.1)
  */
-public class TextFragmentNotDefinedException extends Exception
+public class EndlessLoopException extends Exception
 {
-  private static final long serialVersionUID = -7265020323269743988L;
+  private static final long serialVersionUID = -3679814069994462633L;
 
-  public TextFragmentNotDefinedException(String id)
+  public EndlessLoopException(String msg)
   {
-    super("Das abgefragte Textfragment mit der id \""
-          + id
-          + "\" ist nicht definiert.");
+    super(msg);
   }
 }
