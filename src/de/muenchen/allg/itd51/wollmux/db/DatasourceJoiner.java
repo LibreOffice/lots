@@ -149,6 +149,8 @@ public class DatasourceJoiner
           ds = new ThingyDatasource(nameToDatasource, sourceDesc, context);
         else if (type.equals("union"))
           ds = new UnionDatasource(nameToDatasource, sourceDesc, context);
+        else if (type.equals("attach"))
+          ds = new AttachDatasource(nameToDatasource, sourceDesc, context);
         //else if (type.equals("ldap"))
         //  ds = new LDAPDatasource(nameToDatasource, sourceDesc, context);
         else
