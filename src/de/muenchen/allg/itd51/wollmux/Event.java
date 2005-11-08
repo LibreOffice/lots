@@ -21,13 +21,19 @@ import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XInterface;
 
 /**
- * TODO: dokumentieren von Event.java
+ * Diese Klasse repräsentiert ein WollMux-Ereignis. Alle WollMux-Ereignisse
+ * werden in einem eigenen EventProcessorThread vom WollMux sequentiell
+ * ausgeführt. Jedes Event hat einen Namen (bzw. Typ) (z.B. Event.ON_LOAD), ein
+ * optionales String-Argument und eine optionale Quelle (die das Ereignis
+ * verursacht hat).
  * 
- * @author lut
+ * @author Christoph Lutz (D-III-ITD 5.1)
  * 
  */
 public class Event
 {
+  // Konstanten für alle bekannten events:
+
   public static final int UNKNOWN = -1;
 
   public static final int ON_LOAD = 1;
@@ -48,12 +54,19 @@ public class Event
 
   public static final int ON_SELECTION_CHANGED = 50;
 
+  // private Felder:
+
   private int event = UNKNOWN;
 
   private Object source = null;
 
   private String argument = "";
 
+  /**
+   * Diese Methode liefert eine String-Repräsentation des Eventnames zurück.
+   * 
+   * @return eine String-Repräsentation des Eventnames
+   */
   private String getEventName()
   {
     if (event == UNKNOWN)
@@ -100,17 +113,44 @@ public class Event
       return "namenlos";
   }
 
+  /**
+   * Der Konstruktor erzeugt ein neues Event mit dem Eventnamen event und ohne
+   * Argument und Quelle.
+   * 
+   * @param event
+   *          der Typ des Events. Siehe die Konstantendefinition in Event (z.B.
+   *          Event.ON_LOAD)
+   */
   public Event(int event)
   {
     this.event = event;
   }
 
+  /**
+   * Der Konstruktor erzeugt ein neues Event mit dem Namen event und dem
+   * String-argument argument.
+   * 
+   * @param event
+   *          der Name des Events. Siehe die Konstantendefinition in Event (z.B.
+   *          Event.ON_LOAD)
+   * @param argument
+   *          Ein beliebiger String als Argument, der von dem dem Event
+   *          zugehörigen Eventhandler interpretiert werden muss.
+   */
   public Event(int event, String argument)
   {
     this.event = event;
     this.argument = argument;
   }
 
+  /**
+   * Der Konstruktor erzeugt ein Event-Objekt aus einem gegebenen
+   * OOo-Document-Event docEvent. Dabei werden nur docEvents ausgewertet, die
+   * auch WollMux-Events sind. Ist das docEvent für den WollMux nicht relevant,
+   * so wird ein Event mit dem Namen Event.UNKNOWN erzeugt.
+   * 
+   * @param docEvent
+   */
   public Event(com.sun.star.document.EventObject docEvent)
   {
     this.event = UNKNOWN;
@@ -123,6 +163,12 @@ public class Event
     if (docEvent.EventName.equals("OnNew")) this.event = ON_NEW;
   }
 
+  /**
+   * Der Konstruktor erzeugt ein Event-Objekt aus einem gegebenen
+   * OOo-Modify-Event modifyEvent. Dabei werden nur modifyEvents ausgewertet,
+   * die auch WollMux-Events sind. Ist das modifyEvent für den WollMux nicht
+   * relevant, so wird ein Event mit dem Namen Event.UNKNOWN erzeugt.
+   */
   public Event(com.sun.star.lang.EventObject modifyEvent)
   {
     this.event = ON_MODIFIED;
@@ -131,21 +177,45 @@ public class Event
         modifyEvent.Source);
   }
 
+  /**
+   * Diese Methode liefert den Namen des Events in Form eines integer-Wertes
+   * zurück. Die gültigen Namen sind in den Konstanten Event.ON_* abgelegt.
+   * 
+   * @return Name des Events (siehe Event-Konstanten z.B. Event.ON_LOAD)
+   */
   public int getEvent()
   {
     return event;
   }
 
+  /**
+   * Diese Methode liefert die Quelle des Events zurück, die das Event initiiert
+   * hat. Bei Events, die aus OOo kamen ist die Quelle üblicherweise vom Typ
+   * XComponent.
+   * 
+   * @return die Quelle aus der das Event kam.
+   */
   public Object getSource()
   {
     return source;
   }
 
+  /**
+   * Diese Methode liefert das String-Argument des Events zurück.
+   * 
+   * @return das String-Argument des Events
+   */
   public String getArgument()
   {
     return argument;
   }
 
+  /**
+   * Diese Methode erzeugt eine String-Repräsentation des Event-Objekts mit der
+   * Syntax "Event(<Eventname>)".
+   * 
+   * @see java.lang.Object#toString()
+   */
   public String toString()
   {
     return "Event(" + getEventName() + ")";

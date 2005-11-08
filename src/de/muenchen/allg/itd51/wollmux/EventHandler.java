@@ -30,10 +30,12 @@ import de.muenchen.allg.itd51.wollmux.dialog.AbsenderAuswaehlen;
 import de.muenchen.allg.itd51.wollmux.dialog.PersoenlicheAbsenderlisteVerwalten;
 
 /**
- * TODO: Dokumentieren von EventHandler
+ * Der EventHandler stellt die statische Methode processEvent() zur Verfügung,
+ * die die Abbarbeitung eines einzelnen Events aus dem EvenProcessor übernehmen
+ * soll. Der EventHandler ist der zentrale Einstiegspunkt, für die
+ * Implementierung aller WollMux-Funktionen.
  * 
- * @author lut
- * 
+ * @author Christoph Lutz (D-III-ITD 5.1)
  */
 public class EventHandler
 {
@@ -167,14 +169,21 @@ public class EventHandler
     return EventProcessor.processTheNextEvent;
   }
 
-  public static void potentialChangeOfSelectionAndPAL() throws IOException
+  /**
+   * Diese Methode kann aufgerufen werden, wenn sich die
+   * PersönlicheAbsenderliste möglicherweise geändert hat. Sie übernimmt das
+   * Informieren aller registrierten SenderBoxen und das Abspeichern des
+   * LOS-Caches.
+   * 
+   * @throws IOException
+   */
+  private static void potentialChangeOfSelectionAndPAL() throws IOException
   {
-    Logger.debug2("potential...");
     // Alle registrierten SenderBoxen updaten:
     Iterator i = WollMux.senderBoxesIterator();
     while (i.hasNext())
     {
-      Logger.debug2("update SenderBox");
+      Logger.debug2("Update SenderBox");
       ((XSenderBox) i.next()).updateContent();
     }
 
