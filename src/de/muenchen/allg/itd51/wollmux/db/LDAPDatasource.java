@@ -21,16 +21,18 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Collection;
-import java.util.Enumeration;
 import java.util.HashMap;
+
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.Vector;
-import java.util.Hashtable;
+import java.util.regex.Pattern;
+import javax.naming.ldap.InitialLdapContext;
 import javax.naming.directory.*;
 import javax.naming.*;
 
@@ -38,36 +40,41 @@ import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.parser.SyntaxErrorException;
 import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
+import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.TimeoutException;
 
 /**
- * TODO Doku
+ * Datasource
+ * Zugriff auf ein LDAP-Verzeichnis
+ * 
  * @author Max Meier (D-III-ITD 5.1)
  */
 public class LDAPDatasource implements Datasource
 {
-  private static QueryResults emptyResults = new QueryResultsList(new Vector(0));
   private Set schema;
   private String name;
   
   private String url;
   private String baseDN;  
   private String objectClass;
-  
-  
+ 
   // properties für die Verbindung zum LDAP-Server
   private Properties properties = new Properties();
   
   // Separator zur Schluesselerzeugung aus mehreren Schluesselwerten
   private final static String SEPARATOR = "!$§%&";
   
-  private final static int COUNT_LIMIT = 500;
-  
   // Map von query-Strings auf LDAP-Attributnamen
-  private Hashtable nameMap = new Hashtable();
+  private Map nameMap = new HashMap();
+  
+  // Nameparser
+  private NameParser nameParser;
   
   // Key-Attribute (LDAP)
-  private Vector keyAttributes = new Vector();
+  private List keyAttributes = new Vector();
+  
+  // regex für erlaubte Bezeichner
+  private static final Pattern SPALTENNAME = Pattern.compile("^[a-zA-Z_][a-zA-Z_0-9]*$");
   
   /**
    * Erzeugt eine neue LDAPDatasource.
@@ -91,20 +98,21 @@ public class LDAPDatasource implements Datasource
     try {
       url = sourceDesc.get("URL").toString();
     } catch (NodeNotFoundException e) {
-      throw new ConfigurationErrorException(errorMessage() + "URL des LDAP-Servers fehlt.");
+      throw new ConfigurationErrorException( errorMessage() + "URL des LDAP-Servers fehlt.");
     }
     
     try {
       baseDN = sourceDesc.get("BASE_DN").toString();
     } catch (NodeNotFoundException e) {
-      throw new ConfigurationErrorException(errorMessage() + "BASE_DN des LDAP-Servers fehlt.");
+      throw new ConfigurationErrorException( errorMessage() + "BASE_DN des LDAP-Servers fehlt.");
     }
     
     try {
       objectClass = sourceDesc.get("OBJECT_CLASS").toString();
     } catch (NodeNotFoundException e) {
-      throw new ConfigurationErrorException(errorMessage() + "Keine OBJECT_CLASS definiert.");
+      throw new ConfigurationErrorException( errorMessage() + "Keine OBJECT_CLASS definiert.");
     }
+    
     
     // set properties
     properties.put(Context.INITIAL_CONTEXT_FACTORY,"com.sun.jndi.ldap.LdapCtxFactory");
@@ -113,7 +121,7 @@ public class LDAPDatasource implements Datasource
     ConfigThingy spalten = sourceDesc.query("Spalten");
     
     if (spalten.count() == 0)
-      throw new ConfigurationErrorException(errorMessage() + "Abschnitt 'Spalten' fehlt.");
+      throw new ConfigurationErrorException( errorMessage() + "Abschnitt 'Spalten' fehlt.");
     
     schema = new HashSet();
     
@@ -137,23 +145,27 @@ public class LDAPDatasource implements Datasource
         try {
           
           spalte = spalteDesc.get("DB_SPALTE").toString();
+          
+          if (!SPALTENNAME.matcher(spalte).matches())
+            throw new ConfigurationErrorException( errorMessage() +  "Spalte \""+spalte+"\" entspricht nicht der Syntax eines Bezeichners"); 
+          
           String path = spalteDesc.get("PATH").toString();
           
           // get relativePath and attributeName
           String[] splitted = path.split(":");
           
-          if (splitted.length!=2) throw new ConfigurationErrorException(errorMessage() + "Syntaxerror bei Pfadangabe von " + spalte);
+          if (splitted.length!=2) throw new ConfigurationErrorException( errorMessage() + "Syntaxerror bei Pfadangabe von " + spalte);
           
           try {
             relativePath = Integer.parseInt(splitted[0]);
           } catch (NumberFormatException e) {
-            throw new ConfigurationErrorException(errorMessage() + "Syntaxerror bei Angabe des relativen Pfads von " + spalte);
+            throw new ConfigurationErrorException( errorMessage() + "Syntaxerror bei Angabe des relativen Pfads von " + spalte);
           } 
           
           attributeName = splitted[1];
           
         } catch(NodeNotFoundException x) {
-          throw new ConfigurationErrorException(errorMessage() + "DB_SPALTE Angabe fehlt");
+          throw new ConfigurationErrorException( errorMessage() + "DB_SPALTE Angabe fehlt");
         }
         
         LDAPAttribute currentPath = new LDAPAttribute(relativePath, attributeName);
@@ -166,25 +178,31 @@ public class LDAPDatasource implements Datasource
     ConfigThingy keys = sourceDesc.query("Schluessel");
     
     if (keys.count()==0)
-      throw new ConfigurationErrorException(errorMessage() + "Schluesselfeld fehlt.");
+      throw new ConfigurationErrorException( errorMessage() + "Schluesselfeld fehlt.");
     
     ConfigThingy keySpalten;
     
     try {
+      // der letzte definierte Schluessel wird verwendet
       keySpalten = keys.getLastChild();
     } catch (NodeNotFoundException e) {
-      throw new ConfigurationErrorException(errorMessage() + "Syntaxerror bei Schluesseldefinition.");
+      throw new ConfigurationErrorException( errorMessage() + "Syntaxerror bei Schluesseldefinition.");
     }
     
     Iterator keyIterator = keySpalten.iterator();
-      
-    while(keyIterator.hasNext()) {   
+    
+    // speichere die Schluesselattribute
+    while(keyIterator.hasNext()) { 
       String currentName = keyIterator.next().toString();
+      
+      // ist Schluesselattribut vorhanden?
+      if (nameMap.get(currentName)==null) throw new ConfigurationErrorException( errorMessage() + "Schluesselelement nicht definiert.");
+        
       keyAttributes.add(currentName);
     }
     
     if (keyAttributes.size()==0)
-      throw new ConfigurationErrorException(errorMessage() + "Kein Schluesselement angegeben.");
+      throw new ConfigurationErrorException(errorMessage() + "Kein Schluesseleleement angegeben.");
     
   }
   
@@ -203,7 +221,7 @@ public class LDAPDatasource implements Datasource
     String attributeName;
     
     
-    public LDAPAttribute(int relativePath, String attributeName) {
+    LDAPAttribute(int relativePath, String attributeName) {
       this.relativePath = relativePath;
       this.attributeName = attributeName;
     }
@@ -213,9 +231,10 @@ public class LDAPDatasource implements Datasource
   private class LDAPDataset implements Dataset {
     
     private String key;
-    private Hashtable relation = new Hashtable();
+    private Map relation;
     
-    public LDAPDataset(String key, Hashtable relation) {
+    
+    LDAPDataset(String key, Map relation) {
       this.key = key;
       this.relation = relation;
     }
@@ -233,29 +252,6 @@ public class LDAPDatasource implements Datasource
     
   }
   
-  private class LDAPQueryResults implements QueryResults {
-    
-    private Vector results;
-    
-    
-    public LDAPQueryResults(Vector results) {
-      this.results = results;
-    }
-
-    public int size() {
-      return results.size();
-    }
-
-    public Iterator iterator() {
-      return results.iterator();
-    }
-
-    public boolean isEmpty() {
-      return results.isEmpty();
-    }
-    
-  }
-  
   
   /* (non-Javadoc)
    * @see de.muenchen.allg.itd51.wollmux.db.Datasource#getSchema()
@@ -264,14 +260,14 @@ public class LDAPDatasource implements Datasource
   {
     return schema;
   }
-  
+
 
   /* (non-Javadoc)
    * @see de.muenchen.allg.itd51.wollmux.db.Datasource#getDatasetsByKey(java.util.Collection, long)
    */
-  public QueryResults getDatasetsByKey(Collection keys, long timeout) throws TimeoutException { 
+  public QueryResults getDatasetsByKey(Collection keys, long timeout) throws TimeoutException {
     
-    // TODO: timeout!
+    long endTime = System.currentTimeMillis() + timeout;
     
     Vector results = new Vector();
       
@@ -282,20 +278,78 @@ public class LDAPDatasource implements Datasource
       String currentKey = (String) iter.next();
       String searchFilter = keyToQuery(currentKey);
       
-      NamingEnumeration currentResults = searchLDAP(searchFilter);
+      NamingEnumeration currentResults = searchLDAPPerson("",searchFilter,timeout);
       
-      try {
-        while(currentResults.hasMore()) {
-          SearchResult currentResult = (SearchResult) currentResults.next();
-          results.add(getDataset(currentResult));
+        try
+        {
+          while(currentResults.hasMore()) {
+            if (System.currentTimeMillis()>endTime) throw new TimeoutException();
+            SearchResult currentResult = (SearchResult) currentResults.next();
+            results.add(getDataset(currentResult,endTime));
+          }
         }
-      } catch (Exception e) {
-        throw new TimeoutException();
-      }
+        catch (TimeLimitExceededException e)
+        {
+          throw new TimeoutException(e);
+        }
+        catch (NamingException e)
+        {
+          Logger.error(e);
+          throw new TimeoutException("Fehler bei Enumeration der LDAP-Anfrageergebnisse",e);
+        }
+     
+ 
 
     }
     
-    return new LDAPQueryResults(results);
+    results.trimToSize();
+    
+    return new QueryResultsList(results);
+  }
+  
+  class RelativePaths {
+    
+    private int relative;
+    private List paths;
+    
+    RelativePaths(int relative, List paths) {
+      this.relative = relative;
+      this.paths = paths;
+    }
+    
+  }
+  
+  public RelativePaths getPaths(String filter, int pathLength) throws TimeoutException {
+    
+    Vector paths;
+    
+    try
+    {
+      DirContext ctx = new InitialLdapContext(properties,null);
+      NameParser np = ctx.getNameParser("");
+      int rootSize = np.parse(baseDN).size();
+      SearchControls sc = new SearchControls();
+      sc.setSearchScope(SearchControls.SUBTREE_SCOPE);
+      
+      NamingEnumeration enumer = ctx.search(baseDN,filter,sc);
+      
+      paths = new Vector();
+      
+      while(enumer.hasMoreElements()) {
+        SearchResult result = (SearchResult) enumer.nextElement();
+        String path = checkQuotes(result.getName());
+        Name pathName = np.parse(path);
+        if (pathName.size()+rootSize==pathLength | pathLength<0) paths.add(pathName);
+      }
+      
+    }
+    catch (NamingException e)
+    {
+      throw new TimeoutException("Internal error in LDAP.",e);
+    }
+    
+    return new RelativePaths(pathLength,paths);
+    
   }
   
 
@@ -304,44 +358,133 @@ public class LDAPDatasource implements Datasource
    */
   public QueryResults find(List query, long timeout) throws TimeoutException {
     
-    // TODO timeout!
+    long endTime = System.currentTimeMillis() + timeout;
     
     Iterator iter = query.iterator();
     
     String searchFilter = "";
+    List subtreePathLists = new Vector();
     
     boolean first = true;
     while (iter.hasNext()) {
+      
+      if (System.currentTimeMillis()>endTime) throw new TimeoutException();
+      
       QueryPart currentQuery = (QueryPart) iter.next();
       
       LDAPAttribute ldapAttribute = (LDAPAttribute) nameMap.get(currentQuery.getColumnName());
       
+      if (ldapAttribute==null) continue;
+      
       String attributeName = ldapAttribute.attributeName;
+      int relativePath = ldapAttribute.relativePath;
       String attributeValue = currentQuery.getSearchString();
       
-      if (first) {
-        searchFilter = "(" + attributeName + "=" + attributeValue + ")";
-        first = false;
-      } else {
-        searchFilter = "(&(" + attributeName + "=" + attributeValue + ")" + searchFilter + ")";
+      if (relativePath==0) { // edit filter
+        if (first) {
+          searchFilter = "(" + attributeName + "=" + attributeValue + ")";
+          first = false;
+        } else {
+          searchFilter = "(&(" + attributeName + "=" + attributeValue + ")" + searchFilter + ")";
+        }
+      } else { // search for subtrees
+        
+        String pathFilter = "(" + attributeName + "=" + attributeValue + ")";
+        
+        RelativePaths paths = getPaths(pathFilter,relativePath);
+        
+        subtreePathLists.add(paths);
+        
       }
+      
+    }
+    
+    // create subtree paths to search
+    
+    List subtrees = new Vector();
+    
+    if (subtreePathLists.size()==0) subtrees.add("");
+    else {
+      
+      for (int n=0; n<subtreePathLists.size(); n++) {
+        
+        RelativePaths currentRelativePaths = (RelativePaths) subtreePathLists.get(n);
+        
+        // TODO definiere Ordnung auf den Pfaden
+        
+        /* betrachte die kleinsten Pfade
+         * betrachte nächstgrößere Pfade -> kleinerer Pfad substring des aktuellen?
+         * ...
+         * die übriggebliebenen längsten Pfade werden in 'subtrees' gespeichert
+         */
+        
+        
+        
+        for (int m=0; m<currentRelativePaths.paths.size(); m++) {
+          String currentName = (String) currentRelativePaths.paths.get(m).toString();
+          subtrees.add(currentName);
+          
+        }
+        
+        
+      }
+      
+      
       
     }
     
     Vector results = new Vector();
     
-    NamingEnumeration currentResults = searchLDAP(searchFilter);
+    if (searchFilter.equals("")&subtrees.size()==0) return new QueryResultsList(new Vector(0));
     
-    try {
-      while(currentResults.hasMore()) {
-        SearchResult currentResult = (SearchResult) currentResults.next();
-        results.add(getDataset(currentResult));
+    
+    Iterator subtreeIterator = subtrees.iterator();
+    //List resultEnums = new Vector();
+    
+    List currentResultList = new Vector();
+    
+    while(subtreeIterator.hasNext()) {
+      String subTree = (String)subtreeIterator.next();
+      String comma = ",";
+      if (subTree.equals("")) comma = "";
+      NamingEnumeration currentResults = searchLDAPPerson(subTree + comma,searchFilter,timeout);
+      
+      while(currentResults.hasMoreElements()) {
+        SearchResult sr = (SearchResult) currentResults.nextElement();
+        sr.setName(checkQuotes(sr.getName()) + comma + subTree);
+        currentResultList.add(sr);
       }
-    } catch (Exception e) {
+      
+      //resultEnums.add(currentResults);
+    }
+    
+    Iterator currentResultsIterator = currentResultList.iterator();
+    
+    
+    try
+    {
+      
+        while(currentResultsIterator.hasNext()) {
+          if (System.currentTimeMillis()>endTime) throw new TimeoutException();
+          SearchResult currentResult = (SearchResult) currentResultsIterator.next();
+                
+          Dataset ds = getDataset(currentResult,endTime);
+          results.add(ds);
+        }
+    }
+    catch (TimeoutException e) {
       throw new TimeoutException(e);
     }
+    /*catch (NamingException e)
+    {
+      Logger.error(e);
+      throw new TimeoutException("Fehler bei Enumeration der LDAP-Anfrageergebnisse",e);
+    }*/
+   
+    
+    results.trimToSize();
        
-    return new LDAPQueryResults(results);
+    return new QueryResultsList(results);
   }
   
 
@@ -355,17 +498,19 @@ public class LDAPDatasource implements Datasource
   
   
   // generiert einen Schluessel aus einem geordneten(!) Vector der Schluesselwerte
-  private String generateKey(Vector values) {
-    
-    /*if (values.size()!=keyAttributes.size())
-      throw new Exception();
-      */
+  private String generateKey(List values) {
     
     String key = "";
     
     for (int n=0; n<values.size(); n++) {
       if (n==0) {
-        key = (String) values.get(n);
+        Object value = values.get(n);
+        if (value==null) {
+          key = "";
+        }
+        else {
+          key = (String) values.get(n);
+        }
       } else {
         key = key + SEPARATOR + (String) values.get(n);
       }
@@ -380,10 +525,6 @@ public class LDAPDatasource implements Datasource
     
     String[] keyValues = key.split(SEPARATOR);
     
-    /*if (keyValues.length!=keyAttributes.size())
-      throw new Exception();
-      */
-    
     String query = "";   
     for (int n=0; n<keyValues.length; n++) {
       if (n==0) {
@@ -397,16 +538,44 @@ public class LDAPDatasource implements Datasource
   }
   
   
-  private Dataset getDataset(SearchResult searchResult) throws TimeoutException {
+  // vervollständigt SearchResults um Daten aus dem Verteichnis und gibt ein Dataset zurück
+  private Dataset getDataset(SearchResult searchResult, long endTime) throws TimeoutException {
     
     Attributes attributes = searchResult.getAttributes();
-    Enumeration keys = nameMap.keys();
+    
     
     Hashtable relation = new Hashtable();
     
-    while(keys.hasMoreElements()) {
+    DirContext ctx = null;
+    Name pathName;
+    Name rootName;
+    
+    try {
       
-      String currentKey = (String) keys.nextElement();
+      String tempPath = searchResult.getName();
+      
+      tempPath = checkQuotes(tempPath);
+         
+      ctx = new InitialLdapContext(properties,null);
+      
+      NameParser nameParser = ctx.getNameParser("");
+      pathName = nameParser.parse(tempPath);
+      rootName = nameParser.parse(baseDN);
+      
+    } catch (NamingException e) {
+      try {
+        ctx.close();
+      } catch (NamingException e2) {}
+      throw new TimeoutException("Fehler beim Zugriff auf das LDAP-Verzeichnis.",e);
+    }
+    
+    Iterator keys = nameMap.keySet().iterator();
+    
+    while(keys.hasNext()) {
+      
+      if (System.currentTimeMillis()>endTime) throw new TimeoutException();
+      
+      String currentKey = (String) keys.next();
       LDAPAttribute currentAttribute = (LDAPAttribute) nameMap.get(currentKey);
       
       int relativePath = currentAttribute.relativePath;
@@ -414,59 +583,56 @@ public class LDAPDatasource implements Datasource
       
       String value = null;
       
-      if (relativePath==0) {
+      if (relativePath==0) { // value can be found in the attributes
+        
+          try
+          {
+            value = (String) attributes.get(attributeName).get();
+          }
+          catch (NamingException e)
+          {
+             // do nothing (Attributwert nicht vorhanden und bleibt somit 'null')
+          }
+          catch (NullPointerException e)
+          {
+            // do nothing (Attributwert nicht vorhanden und bleibt somit 'null')
+          }
+
+        
+      } else { // value is stored somewhere else in the directory
+        
+        
+        Name attributePath = (Name) rootName.clone();
         
         try {
-          value = (String) attributes.get(attributeName).get();
-        } catch (Exception e) {}
         
-      } else {
-        
-        String pathName = searchResult.getName();
-
-        //value = getAttributeValue(name,attributeName,relativePath);
-
-        boolean flag = false;
-        if (pathName.charAt(0)=='\"' & pathName.charAt(pathName.length()-1)=='\"') flag = true;
-        
-        if (flag) {
-          pathName = pathName.substring(1);
-          pathName = pathName.substring(0,pathName.length()-1);
-        }
-        
-        if (!flag & pathName.charAt(0)=='\"') {
-          flag = true;
-          pathName = pathName.substring(pathName.length()-1);
-        }
-        
-        String[] split = pathName.split("(?<!\\\\),");
-        
-        //System.out.println("FULLPATH::: " + searchResult.getName());
-        
-        if (relativePath < 0) {
-          relativePath = split.length + relativePath;
-        }
-        
-        if (relativePath<split.length) {
-          
-          String path = "";
-          
-          for (int n=0; n<relativePath; n++) {
+          if (relativePath < 0) { // Pfad relativ zum aktuellen Element
             
-            if (n==0) {
-              path = split[split.length-1];
-            } else {
-              path = split[split.length-1-n] + "," + path;
-            }
+            attributePath.addAll(pathName.getPrefix(pathName.size()+relativePath-rootName.size()));
             
-          }
+          } else { // relativePath > 0, Pfad relativ zur Wurzel
+            
+            attributePath.addAll(pathName.getPrefix(relativePath-rootName.size()));
+            
+          }       
           
-          //System.out.println("!!!PATH:  " + path);
           
-          value = getAttributeValue(path,attributeName,flag);
               
+          String[] searchAttributes = { attributeName }; 
+          Attributes foundAttributes = ctx.getAttributes(attributePath,searchAttributes);
+          Attribute foundAttribute = foundAttributes.get(attributeName); 
+          
+          if (foundAttribute!=null) {
+            value = (String) foundAttribute.get();
+          }  
+          
+        } catch (NamingException e) {
+           // do nothing (Attributwert nicht vorhanden und bleibt somit 'null')
         }
-        
+        catch (NullPointerException e)
+        {
+          // do nothing (Attributwert nicht vorhanden und bleibt somit 'null')
+        }
 
       }
       
@@ -484,15 +650,22 @@ public class LDAPDatasource implements Datasource
     
     String key = generateKey(keyValues);
     
+    try {
+      ctx.close();
+    } catch (NamingException e) {}
+    
     return new LDAPDataset(key, relation);
   }
   
   
-  private NamingEnumeration searchLDAP(String filter) throws TimeoutException {
+  // Suche im Directory
+  private NamingEnumeration searchLDAPPerson(String path, String filter, long timeout) throws TimeoutException {
     
     SearchControls searchControls = new SearchControls();
     searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
-    searchControls.setCountLimit(COUNT_LIMIT);
+    
+    if (timeout>Integer.MAX_VALUE) timeout = Integer.MAX_VALUE;
+    searchControls.setTimeLimit((int) timeout);
     
     filter = "(&(objectClass=" + objectClass + ")" + filter + ")";
     
@@ -502,10 +675,12 @@ public class LDAPDatasource implements Datasource
     
     try {
       
-      ctx = new InitialDirContext(properties);
-        
-      result = ctx.search(baseDN,filter,searchControls);
+      ctx = new InitialLdapContext(properties,null);
       
+      result = ctx.search(path + baseDN,filter,searchControls);
+    
+    } catch (TimeLimitExceededException e) {
+      throw new TimeoutException(e);
     } catch (NamingException e) {
       throw new TimeoutException(e);
     } finally {
@@ -518,105 +693,26 @@ public class LDAPDatasource implements Datasource
     return result;
   }
   
-  private String getAttributeValue(String path, String name,boolean flag) throws TimeoutException {
-    
-    DirContext ctx = null;
-    
-    String result;
-    
-    try {
-      
-      ctx = new InitialDirContext(properties);
-      
-      String fullPath = path + "," + baseDN;
-      
-      if (flag) fullPath = "\"" + fullPath + "\"";
-      
-      String[] searchAttributes = {name};
-      
-      Attributes attributes = ctx.getAttributes(fullPath,searchAttributes);
-      
-      Attribute attribute = attributes.get(name);
-      
-      if (attribute==null) result = null;
-      else {
-        result = (String) attribute.get();
+  private String checkQuotes(String tempPath) {
+    /*
+     * delete surrounding quotation marks
+     * 
+     * Der Character '/' ist in LDAP erlaubt, jedoch nicht im JNDI.
+     * Deswegen werden Pfade, die '/' enthalten von .getName() in Anführungszeichen
+     * gesetzt und können deshalb nicht mehr geparsed werden. 
+     */
+    int  tempEnd = tempPath.length() - 1; 
+    if (tempEnd>0) {
+      if (tempPath.charAt(0) == '"' && tempPath.charAt(tempEnd) == '"') {
+            tempPath = tempPath.substring(1,tempEnd);
       }
-
-    } catch (NamingException e) {
-      throw new TimeoutException(e);
-    } finally {
-      if (ctx!=null)
-      try {
-        ctx.close();
-      } catch (Exception e) {}
     }
- 
-    return result;
     
+    return tempPath;
+       
   }
   
-/*private String getAttributeValue(String path, String attrName, int relativePath) throws TimeoutException {
-    
-    DirContext ctx = null;
-    
-    String result;
-    
-    Name name;
-    
-    try {
-      
-      ctx = new InitialDirContext(properties);
-      
-      NameParser parser;
-      
-        
-      NameParser nameParser = ctx.getNameParser("");
-      
-      name = nameParser.parse(path);
-      
-      
-      if (relativePath>0) {
-        name = name.getSuffix(name.size()-relativePath);
-      } else {
-        name = name.getSuffix(-relativePath);
-        
-      }
-      
-      Name base = nameParser.parse(baseDN);
-      
-      Name fullPath = name.addAll(base);
-      
-      System.out.println("full path:" + fullPath);
-      
-      String[] searchAttributes = {attrName};
-      
-      Attributes attributes = ctx.getAttributes(fullPath,searchAttributes);
-      
-      Attribute attribute = attributes.get(attrName);
-      
-      if (attribute==null) result = null;
-      else {
-        result = (String) attribute.get();
-      }
- 
-      return result;
-          
-      } catch (Exception e) {
-        System.out.println(e);
-      } finally {
-        if (ctx!=null)
-        try {
-          ctx.close();
-        } catch (Exception e) {}
-      }
 
-      return null;
-      
-    
-  }
-  */
-  
   private String errorMessage() {
     return "Fehler in Definition von Datenquelle " + name + ": ";
   }
@@ -667,7 +763,8 @@ public class LDAPDatasource implements Datasource
   {
     List query = new Vector();
     query.add(new QueryPart(spaltenName, suchString));
-    return find(query,3000);
+    QueryResults find = find(query,3000000);
+    return find;
   }
   
   private QueryResults simpleFind(String spaltenName1, String suchString1,String spaltenName2, String suchString2) throws TimeoutException
@@ -675,11 +772,10 @@ public class LDAPDatasource implements Datasource
     List query = new Vector();
     query.add(new QueryPart(spaltenName1, suchString1));
     query.add(new QueryPart(spaltenName2, suchString2));
-    return find(query,3000);
+    QueryResults find = find(query,3000000);
+    return find;
   }
-  
-  
-  
+
   public static void main(String[] args) throws IOException, SyntaxErrorException, NodeNotFoundException, TimeoutException, ConfigurationErrorException
   {
     File curDir = new File(System.getProperty("user.dir"));
@@ -689,14 +785,18 @@ public class LDAPDatasource implements Datasource
     Map nameToDatasource = new HashMap();
     ConfigThingy sourceDesc = ldapConf.query("Datenquelle").getFirstChild();
     LDAPDatasource dj = new LDAPDatasource(nameToDatasource, sourceDesc, context);
-    printResults("Nachname = lOEsewiTZ", dj.getSchema(), dj.simpleFind("Nachname","lOEsewiTZ"));
-    printResults("Nachname = benkm*", dj.getSchema(), dj.simpleFind("Nachname","benkm*"));
-    printResults("Nachname = *utz", dj.getSchema(), dj.simpleFind("Nachname","*utz"));
+    
+    
+    //printResults("Nachname = *", dj.getSchema(), dj.simpleFind("Nachname","*")); 
+    printResults("Nachname = Bruce-Boye", dj.getSchema(), dj.simpleFind("Nachname","augustin","Referat","Sozialreferat"));
+    //printResults("Referat = Sozialreferat, Nachname = Bruce-Boye", dj.getSchema(), dj.simpleFind("Referat","Sozialreferat","Nachname","Bruce-Boye")); 
+    //printResults("Referat = Sozialreferat", dj.getSchema(), dj.simpleFind("Referat","Sozialreferat"));
+    //printResults("Nachname = lOEsewiTZ", dj.getSchema(), dj.simpleFind("Nachname","lOEsewiTZ")); 
+    /*printResults("Nachname = *utz", dj.getSchema(), dj.simpleFind("Nachname","*utz"));
     printResults("Nachname = *oe*", dj.getSchema(), dj.simpleFind("Nachname","*oe*"));
     printResults("Nachname = Lutz", dj.getSchema(), dj.simpleFind("Nachname","Lutz"));
     printResults("Nachname = *utz, Vorname = Chris*", dj.getSchema(), dj.simpleFind("Nachname","*utz","Vorname","Chris*"));
-    
-    
+    */
   }
 
 }
