@@ -151,6 +151,10 @@ public class DatasourceJoiner
           ds = new UnionDatasource(nameToDatasource, sourceDesc, context);
         else if (type.equals("attach"))
           ds = new AttachDatasource(nameToDatasource, sourceDesc, context);
+        else if (type.equals("prefer"))
+          ds = new PreferDatasource(nameToDatasource, sourceDesc, context);
+        else if (type.equals("rename"))
+          ds = new RenameDatasource(nameToDatasource, sourceDesc, context);
         //else if (type.equals("ldap"))
         //  ds = new LDAPDatasource(nameToDatasource, sourceDesc, context);
         else

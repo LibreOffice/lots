@@ -84,10 +84,10 @@ public class PreferDatasource implements Datasource
     source2 = (Datasource)nameToDatasource.get(source2Name);
     
     if (source1 == null)
-      throw new ConfigurationErrorException("Fehler bei Initialisierung von Datenquelle \""+name+"\": Referenzierte Datenquelle \""+source1+"\" nicht (oder fehlerhaft) definiert");
+      throw new ConfigurationErrorException("Fehler bei Initialisierung von Datenquelle \""+name+"\": Referenzierte Datenquelle \""+source1Name+"\" nicht (oder fehlerhaft) definiert");
     
     if (source2 == null)
-      throw new ConfigurationErrorException("Fehler bei Initialisierung von Datenquelle \""+name+"\": Referenzierte Datenquelle \""+source2+"\" nicht (oder fehlerhaft) definiert");
+      throw new ConfigurationErrorException("Fehler bei Initialisierung von Datenquelle \""+name+"\": Referenzierte Datenquelle \""+source2Name+"\" nicht (oder fehlerhaft) definiert");
 
     /*
      * Anmerkung: Die folgende Bedingung ist "unnötig" streng, aber um
