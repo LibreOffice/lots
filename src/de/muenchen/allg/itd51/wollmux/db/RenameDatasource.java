@@ -115,7 +115,7 @@ public class RenameDatasource implements Datasource
 
   public QueryResults getDatasetsByKey(Collection keys, long timeout) throws TimeoutException
   {
-    return source.getDatasetsByKey(keys, timeout);
+    return wrapDatasets(source.getDatasetsByKey(keys, timeout));
   }
 
   public QueryResults find(List query, long timeout) throws TimeoutException
@@ -126,18 +126,53 @@ public class RenameDatasource implements Datasource
     {
       QueryPart p = (QueryPart)iter.next();
       String spalte = p.getColumnName();
-      String neueSpalte = (String)mapNewToOld.get(spalte);
-      if (neueSpalte != null) 
-        translatedQuery.add(new QueryPart(neueSpalte,p.getSearchString()));
+      String alteSpalte = (String)mapNewToOld.get(spalte);
+      if (alteSpalte != null) 
+        translatedQuery.add(new QueryPart(alteSpalte,p.getSearchString()));
       else
         translatedQuery.add(p);
     }
-    return source.find(translatedQuery, timeout);
+    return wrapDatasets(source.find(translatedQuery, timeout));
   }
 
   public String getName()
   {
     return name;
+  }
+  
+  private QueryResults wrapDatasets(QueryResults res)
+  {
+    List wrappedRes = new Vector(res.size());
+    Iterator iter = res.iterator();
+    while (iter.hasNext())
+      wrappedRes.add(new RenameDataset((Dataset)iter.next()));
+    
+    return new QueryResultsList(wrappedRes);
+  }
+  
+  private class RenameDataset implements Dataset
+  {
+    private Dataset ds;
+    
+    public RenameDataset(Dataset ds)
+    {
+      this.ds = ds;
+    }
+    
+    
+    public String get(String columnName) throws ColumnNotFoundException
+    {
+      String alteSpalte = (String)mapNewToOld.get(columnName);
+      if (alteSpalte != null) 
+        return ds.get(alteSpalte);
+      else
+        return ds.get(columnName);
+    }
+
+    public String getKey()
+    {
+      return ds.getKey();
+    }
   }
 
 }
