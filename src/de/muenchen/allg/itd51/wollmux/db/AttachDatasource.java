@@ -1,4 +1,4 @@
-/* TODO AttachDatasource testen
+/* TODO AttachDatasource testen, insbes. Anfrage nur auf Spalten der ATTACH-Datenquelle
 * Dateiname: AttachDatasource.java
 * Projekt  : WollMux
 * Funktion : Eine Datenquelle, die eine andere Datenquelle um Spalten ergänzt.
@@ -9,6 +9,7 @@
 * Datum      | Wer | Änderungsgrund
 * -------------------------------------------------------------------
 * 08.11.2005 | BNK | Erstellung
+* 09.11.2005 | BNK | find() auf Spalten der ATTACH-Datenquelle unterstützt
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -191,11 +192,40 @@ public class AttachDatasource implements Datasource
   public QueryResults find(List query, long timeout) throws TimeoutException
   {
     long time = new Date().getTime();
-    QueryResults results = source1.find(query, timeout);
-    time = (new Date().getTime()) - time;
-    timeout -= time;
-    if (timeout <= 0) throw new TimeoutException("Datenquelle "+source1Name+" konnte Anfrage find() nicht schnell genug beantworten");
-    return attachColumns(results, timeout);
+    List query1 = new Vector(query.size()/2);
+    List query2 = new Vector(query.size()/2);
+    Iterator iter = query.iterator();
+    while (iter.hasNext())
+    {
+      QueryPart p = (QueryPart)iter.next();
+      if (p.getColumnName().startsWith(source2Prefix))
+        query2.add(new QueryPart(p.getColumnName().substring(source2Prefix.length()),p.getSearchString()));
+      else
+        query1.add(p);
+    }
+    
+    /*
+     * Die ATTACH-Datenquelle ist normalerweise nur untergeordnet und
+     * Spaltenbedingungen dafür schränken die Suchergebnisse wenig ein.
+     * Deshalb werten wir falls wir mindestens eine Bedingung an die
+     * Hauptdatenquelle haben, die Anfrage auf dieser Datenquelle aus. 
+     */
+    if (query1.size() > 0)
+    {
+      QueryResults results = source1.find(query1, timeout);
+      time = (new Date().getTime()) - time;
+      timeout -= time;
+      if (timeout <= 0) throw new TimeoutException("Datenquelle "+source1Name+" konnte Anfrage find() nicht schnell genug beantworten");
+      return attachColumns(results, timeout);
+    }
+    else
+    {
+      QueryResults results = source2.find(query, timeout);
+      time = (new Date().getTime()) - time;
+      timeout -= time;
+      if (timeout <= 0) throw new TimeoutException("Datenquelle "+source2Name+" konnte Anfrage find() nicht schnell genug beantworten");
+      return attachColumnsReversed(results, timeout);
+    }
   }
   
   /* (non-Javadoc)
@@ -236,6 +266,40 @@ public class AttachDatasource implements Datasource
     
     return new QueryResultsList(resultsWithAttachments);
   }
+  
+  private QueryResults attachColumnsReversed(QueryResults results, long timeout) throws TimeoutException
+  {
+    long endTime = new Date().getTime() + timeout;
+    
+    List resultsWithAttachments = new Vector(results.size());
+    
+    Iterator iter = results.iterator();
+    while (iter.hasNext())
+    {
+      Dataset ds = (Dataset)iter.next();
+      List query = new Vector(match1.length);
+      for (int i = 0; i < match1.length; ++i)
+      {
+        try{
+          query.add(new QueryPart(match1[i], ds.get(match2[i])));
+        }catch(ColumnNotFoundException x) { Logger.error(x); }
+      }
+      
+      timeout = endTime - (new Date().getTime());
+      if (timeout <= 0) throw new TimeoutException();
+      QueryResults prependix = source1.find(query, timeout);
+      
+      if (prependix.size() > 0)
+      {
+        Iterator iter2 = prependix.iterator();
+        while (iter2.hasNext())
+           resultsWithAttachments.add(new ConcatDataset((Dataset)iter2.next(),ds));
+      }
+    }
+    
+    return new QueryResultsList(resultsWithAttachments);
+  }
+
 
   private class ConcatDataset implements Dataset
   {
