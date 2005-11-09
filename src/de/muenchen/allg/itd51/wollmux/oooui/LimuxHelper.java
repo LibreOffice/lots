@@ -70,27 +70,39 @@ public class LimuxHelper
      return result;
    }
 
+   
+// * <b>null</b> is returned if no value for the specified name was set. It is important to have the <b>null</b> 
+// * as an indication that the property is not set. Other objects (like a dummy "new Object()") may cause unexpected 
+// * behaviour when used together with UNO. For example, "ItemDescriptorContainer" set to a dummy Object() value may 
+// * cause the  StackOverflowException.
+
    /**
-    * TODO: helper, what should be the return type instead of null?
+    * Read and returns the value of the property <b>propName</b> set in the <b>values</b> PropertyValue[]. 
     * 
-    * @param set
+    * @param values
     * @param propName
     * @return value of the PropertyValue.Value or <b>new Object()<\b>, if the value is not defined
     */
-   public static Object getProperty(PropertyValue[] set, String propName){
-     for (int i = 0; i < set.length; i++)
+   public static Object getProperty(PropertyValue[] values, String propName, Object def){
+     for (int i = 0; i < values.length; i++)
      {
-       if (set[i].Name.equals(propName)){
-         return set[i].Value;
+       if (values[i].Name.equals(propName)){
+         return values[i].Value;
        }
      }
-     return new Object();
+     return def;
    }
 
-   
-   public static String getProperty(ConfigThingy ct, String label)
+   /**
+    * query property from a ConfigThingy. An empty string is retured, if the property is not set. 
+    * 
+    * @param ct
+    * @param label
+    * @return
+    */
+   public static String getProperty(ConfigThingy ct, String label, String def)
    {
-     String result = "";
+     String result = def;
      ConfigThingy x = null;
      try
      {
@@ -100,6 +112,7 @@ public class LimuxHelper
      catch (NodeNotFoundException e)
      {
        // Logger.error(e);
+       return result;
      }
      return result;
    }
