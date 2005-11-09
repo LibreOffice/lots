@@ -81,9 +81,11 @@ public class MenuList
 
   private static String S_MENUBAR = "private:resource/menubar/menubar";
 
-  private static String S_TOOLBAR = "private:resource/toolbar/UITest";
+//  private static String S_TOOLBAR = "private:resource/toolbar/UITest";
+  private static String S_TOOLBAR = "private:resource/toolbar/standardbar";
+  
 
-  private static String PREFIX = "WollMux:";
+  private static String PREFIX = "wollmux:";
   
   private static String UNDEFINED = "<undefined>";
   private static String SEPARATOR = "-----------------";
@@ -126,7 +128,8 @@ public class MenuList
     // 0. read in the names of all top-level menues.
     // DIFF 1
 //    Iterator mlIter = root.query("Menueleiste").getFirstChild().iterator();
-    Iterator mlIter = root.query("Symbolleisten").getFirstChild().iterator();
+    //>> getMenuIterator(); getToolbarIterator();
+    Iterator mlIter = root.query("Symbolleisten").query("Briefkopfleiste").getFirstChild().iterator();
     // also added to replace similar call in the initConnection()
     uiConfigManager = xCmSupplier.getUIConfigurationManager("com.sun.star.script.BasicIDE");
    
@@ -180,6 +183,7 @@ public class MenuList
         XIndexContainer.class,
         xoMenuBarSettings.getSettings(true));
 //    DIFF 3 (the fileMenus is not required?)
+    //>> getDummyMenuItem(); getDummyToolbarItem();
 //    fileMenus = (PropertyValue[]) UnoRuntime.queryInterface(
 //        PropertyValue[].class,
 //        oMenuBarSettings.getByIndex(7));
@@ -187,28 +191,44 @@ public class MenuList
 //        fileMenus,
 //        "ItemDescriptorContainer",
 //        null);
+  fileMenus = (PropertyValue[]) UnoRuntime.queryInterface(PropertyValue[].class,oMenuBarSettings.getByIndex(5));
 
+    
+    
     removeMenues(PREFIX);
+    //DIFF
+    int mCounter = 0;
+    
     for (Iterator iter = topLevelMenues.iterator(); iter.hasNext();)
     {
       ConfigThingy element = (ConfigThingy) iter.next();
 
+      //DIFF 4
       PropertyValue[] topMenu = createMenuTree(element);
-      // TODO: check if insertion at POSITION is possible
-      // UNDO 2
-      Iterator iter2 = element.iterator();
-      while (iter2.hasNext())
-      {
-        ConfigThingy element2 = (ConfigThingy) iter2.next();
-        oMenuBarSettings.insertByIndex(Integer.parseInt(LimuxHelper.getProperty(element2,"POSITION", "0")), topMenu);        
-      }
+//      topMenu = LimuxHelper.setProperty(fileMenus, "Label", LimuxHelper.getProperty(topMenu, "Label", UNDEFINED));
+//      fileMenus = LimuxHelper.setProperty(fileMenus, "CommandURL",".uno:NewDoc");
+      oMenuBarSettings.insertByIndex(mCounter, topMenu);
+      mCounter++;
       
-
+//      // TODO: check if insertion at POSITION is possible
+//      // UNDO 2
+//      Iterator iter2 = element.iterator();
+//      int mCounter = 0;
+//      while (iter2.hasNext())
+//      {
+//        ConfigThingy element2 = (ConfigThingy) iter2.next();
+//        PropertyValue[] topMenu = createToolbarItem(element2);
+//        fileMenus = LimuxHelper.setProperty(topMenu, "Label", LimuxHelper
+//            .getProperty(topMenu, "Label", UNDEFINED));
+//        oMenuBarSettings.insertByIndex(mCounter, fileMenus);
+////        break;
+//      }
       
       
       xoMenuBarSettings.setSettings(oMenuBarSettings);
     }
 
+    // UNDO
     XUIConfigurationPersistence xUIConfigurationPersistence = (XUIConfigurationPersistence) UnoRuntime
         .queryInterface(XUIConfigurationPersistence.class, uiConfigManager);
     xUIConfigurationPersistence.store();
@@ -331,7 +351,7 @@ public class MenuList
       WrappedTargetException, NodeNotFoundException
   {
 
-    if (LimuxHelper.getProperty(ct, "TYPE", "menu").equals("menu"))
+    if (LimuxHelper.getProperty(ct, "TYPE", UNDEFINED).equals("menu"))
     {
       // lastCommandUrl = PREFIX+getProperty(ct,"ACTION")+"menuAction";
       PropertyValue[] menu = createMenu(ct);
@@ -370,7 +390,7 @@ public class MenuList
               LimuxHelper.getProperty(menuItem, "CommandURL", UNDEFINED));
           Object subM = LimuxHelper.getProperty(
               menuItem,
-              "ItemDescriptorContainer", UNDEFINED);
+              "ItemDescriptorContainer", null);
           fileMenus = LimuxHelper.setProperty(fileMenus,"ItemDescriptorContainer",null);
           if (subM != null)
           {
@@ -393,18 +413,18 @@ public class MenuList
       }
       return menu;
     }
-    else if (LimuxHelper.getProperty(ct, "TYPE", "").equals("button"))
+    else if (LimuxHelper.getProperty(ct, "TYPE", UNDEFINED).equals("button"))
     {
       // lastCommandUrl = PREFIX+getProperty(ct,"ACTION");
       PropertyValue[] menuItem = createMenuItem(ct);
       return menuItem;
     }
-    else if (LimuxHelper.getProperty(ct, "TYPE", "").equals("separator"))
+    else if (LimuxHelper.getProperty(ct, "TYPE", UNDEFINED).equals("separator"))
     {
       PropertyValue[] menuItem = createMenuItem(ct);
       return menuItem;
     }
-    else if (LimuxHelper.getProperty(ct, "TYPE", "").equals("senderbox"))
+    else if (LimuxHelper.getProperty(ct, "TYPE", UNDEFINED).equals("senderbox"))
     {
       PropertyValue[] menuItem = createMenuItem(ct);
       return menuItem;
@@ -412,7 +432,7 @@ public class MenuList
       // should not occure
       Logger
           .error("The ConfigThingy of the specified file can't be processed: "
-                 + LimuxHelper.getProperty(ct, "TYPE", ""));
+                 + LimuxHelper.getProperty(ct, "TYPE", UNDEFINED));
       return new PropertyValue[] {};
     }
 
@@ -446,7 +466,7 @@ public class MenuList
   {
     try
     {
-      MenuList tfrags = new MenuList(configThingy, xContext, xFrame, S_MENUBAR);
+      new MenuList(configThingy, xContext, xFrame, S_MENUBAR);
 
     }
     catch (Exception e)
@@ -467,7 +487,7 @@ public class MenuList
   {
     try
     {
-      MenuList tfrags = new MenuList(configThingy, xContext, xFrame, S_TOOLBAR);
+      new MenuList(configThingy, xContext, xFrame, S_TOOLBAR);
 
     }
     catch (Exception e)
@@ -490,17 +510,13 @@ public class MenuList
     PropertyValue[] loadProps = LimuxHelper.setProperty(
         null,
         "CommandURL",
-        LimuxHelper.getProperty(ct, "ACTION", UNDEFINED));
+        PREFIX + LimuxHelper.getProperty(ct, "MENU", UNDEFINED));
     loadProps = LimuxHelper.setProperty(loadProps, "Label", setHotkey(
         LimuxHelper.getProperty(ct, "LABEL", UNDEFINED),
         LimuxHelper.getProperty(ct, "HOTKEY", UNDEFINED)));
     // TODO: (note) the following commandURL will not be unique among different
     // submenues. The reason:
     // the same submenue can be bound to different parent menues.
-    loadProps = LimuxHelper.setProperty(
-        loadProps,
-        "CommandURL",
-        PREFIX + LimuxHelper.getProperty(ct, "MENU", UNDEFINED));
     loadProps = LimuxHelper.setProperty(loadProps, "HelpURL", "");
 
     return loadProps;
@@ -562,10 +578,10 @@ public class MenuList
     else
     {
       // a commandURL like ".WollMux:myAction#myArgument"
-      String action = LimuxHelper.getProperty(ct, "ACTION", UNDEFINED);
+      String action = PREFIX+LimuxHelper.getProperty(ct, "ACTION", UNDEFINED);
       String arg = LimuxHelper.getProperty(ct, "FRAG_ID", UNDEFINED);
       value = action;
-      if (!arg.equals("")){
+      if (!arg.equals(UNDEFINED)){
         value = ((String)action).concat("#").concat(arg); 
       }
     }
@@ -652,7 +668,7 @@ public class MenuList
     else
     {
       // a commandURL like ".WollMux:myAction#myArgument"
-      String action = LimuxHelper.getProperty(ct, "ACTION", UNDEFINED);
+      String action = PREFIX+LimuxHelper.getProperty(ct, "ACTION", UNDEFINED);
       String arg = LimuxHelper.getProperty(ct, "FRAG_ID", UNDEFINED);
       value = action;
       if (!arg.equals("")){
@@ -663,7 +679,7 @@ public class MenuList
         null,
         "CommandURL",
         value);
-
+    
     // set Label with appropriate hotkey
     value = (type == 1) ? SEPARATOR : LimuxHelper.getProperty(ct, "LABEL", UNDEFINED);
     loadProps = LimuxHelper.setProperty(loadProps, "Label", setHotkey(
@@ -689,13 +705,13 @@ public class MenuList
     loadProps = LimuxHelper.setProperty(
         loadProps,
         "GraphicURL",
-        "file:///home/glg/dot.bmp");
+        "file:///C:/test.bmp");
     
-    // ImageURL
-    loadProps = LimuxHelper.setProperty(
-        loadProps,
-        "ImageURL",
-        "file:///home/glg/dot.bmp");
+//    // ImageURL
+//    loadProps = LimuxHelper.setProperty(
+//        loadProps,
+//        "ImageURL",
+//        "file:///C:/test.bmp");
     
     // usual menuItem or separator?
     value = (type == 1)
@@ -768,7 +784,9 @@ public class MenuList
       xFrame = xController.getFrame();
 
       MenuList.generateMenues(conf, testmxRemoteContext, xFrame);
-//       MenuList.generateToolbarEntries(conf, testmxRemoteContext, xFrame);
+      
+      MenuList.generateToolbarEntries(conf, testmxRemoteContext, xFrame);
+      
 
     }
     catch (Exception e)
