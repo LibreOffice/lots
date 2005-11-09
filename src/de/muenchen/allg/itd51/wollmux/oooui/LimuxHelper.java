@@ -112,8 +112,13 @@ public class LimuxHelper
      catch (NodeNotFoundException e)
      {
        // Logger.error(e);
-       return result;
+       return def;
      }
+     
+     // the attribute (like "POSITION") was not set 
+     if (result.equals("<query results>"))
+       return def;
+     
      return result;
    }
 
