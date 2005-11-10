@@ -18,6 +18,8 @@
 *                  | saveCacheAndLos implementiert
 * 03.11.2005 | BNK | besser kommentiert
 * 07.11.2005 | BNK | +type "union"
+* 10.11.2005 | BNK | das Suchen der Datensätze für den Refresh hinter die
+*                    Schemaanpassung verschoben.
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -600,7 +602,6 @@ X           "Vorname N."
         LOSDJDataset ds = (LOSDJDataset)iter.next();
         keyToLOSDJDataset.put(ds.getKey(), ds);
       }
-      QueryResults res = database.getDatasetsByKey(keyToLOSDJDataset.keySet(), timeout);
       
       /*
        * Schema anpassen und DANACH data leeren. Dadurch werden die
@@ -617,14 +618,15 @@ X           "Vorname N."
       
       /*
        * Neue Datensätze auf Basis der Query erzeugen. Dabei werden die
-       * LOS-Speicher von den korrespndierenden alten (gefunden via
+       * LOS-Speicher von den korrespondierenden alten (gefunden via
        * keyToLOSDJDataset) direkt übernommen.
        * ACHTUNG: Hierbei werden auch temporär im Hintergrundspeicher
        * "verlorene" Datensätze wieder mit dem Hintergrundspeicher
        * verknüpft. Sie langer Kommentar weiter unten.
        * Bei evtl. Änderungen bitte beachten!!!
        */
-      
+
+      QueryResults res = database.getDatasetsByKey(keyToLOSDJDataset.keySet(), timeout);
       iter = res.iterator();
       while (iter.hasNext())
       {
