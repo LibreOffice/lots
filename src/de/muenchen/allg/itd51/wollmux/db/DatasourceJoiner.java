@@ -22,6 +22,7 @@
 *                  |  Schemaanpassung verschoben.
 *                  | Und nochmal die Reihenfolge umgewürfelt, hoffentlich stimmt's
 *                  | jetzt.
+* 10.11.2005 | BNK | Unicode-Marker an den Anfang der Cache-Datei schreiben
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -345,6 +346,7 @@ X           "Vorname N."
     }catch(DatasetNotFoundException x) {}
     
     Writer out = new OutputStreamWriter(new FileOutputStream(cacheFile),ConfigThingy.CHARSET);
+    out.write("\uFEFF");
     out.write(conf.stringRepresentation(true, '"'));
     out.close();
   }
