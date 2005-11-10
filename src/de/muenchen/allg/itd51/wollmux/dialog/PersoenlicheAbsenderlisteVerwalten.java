@@ -30,6 +30,7 @@
 package de.muenchen.allg.itd51.wollmux.dialog;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -67,7 +68,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
-import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -317,6 +317,7 @@ public class PersoenlicheAbsenderlisteVerwalten
     myFrame.addWindowListener(new MyWindowListener());
     
     mainPanel = new JPanel(new BorderLayout());
+    mainPanel.setBackground(Color.RED);
     mainPanel.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
     myFrame.getContentPane().add(mainPanel);
   
@@ -362,16 +363,6 @@ public class PersoenlicheAbsenderlisteVerwalten
     myFrame.setLocation(x,y);
     myFrame.setResizable(false);
     myFrame.setVisible(true);
-    SwingUtilities.invokeLater(new Runnable(){
-
-      public void run()
-      {
-        myFrame.repaint();
-        
-      }
-      
-    }
-        );
   }
   
   /** Fügt compo UI Elemente gemäss den Kindern von conf.query(key) hinzu.
