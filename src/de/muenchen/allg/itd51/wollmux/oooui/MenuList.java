@@ -1,3 +1,21 @@
+/*
+ * Dateiname: Event.java
+ * Projekt  : WollMux
+ * Funktion : The MenuList is responsible for the generation of the menus
+ *            and toolbars
+ * 
+ * Copyright: Landeshauptstadt München
+ *
+ * Änderungshistorie:
+ * Datum      | Wer     | Änderungsgrund
+ * -------------------------------------------------------------------
+ * 24.10.2005 | GOLOVKO | Erstellung
+ * -------------------------------------------------------------------
+ *
+ * @author Andrej Golovko
+ * @version 1.0
+ * 
+ */
 package de.muenchen.allg.itd51.wollmux.oooui;
 
 import java.io.File;
@@ -130,6 +148,7 @@ public class MenuList
 //    Iterator mlIter = root.query("Menueleiste").getFirstChild().iterator();
     //>> getMenuIterator(); getToolbarIterator();
     Iterator mlIter = root.query("Symbolleisten").query("Briefkopfleiste").getFirstChild().iterator();
+    // TODO: Briefkopfleiste sollte nicht hardcoded sein 
     // also added to replace similar call in the initConnection()
     uiConfigManager = xCmSupplier.getUIConfigurationManager("com.sun.star.script.BasicIDE");
    
@@ -579,10 +598,16 @@ public class MenuList
     {
       // a commandURL like ".WollMux:myAction#myArgument"
       String action = PREFIX+LimuxHelper.getProperty(ct, "ACTION", UNDEFINED);
-      String arg = LimuxHelper.getProperty(ct, "FRAG_ID", UNDEFINED);
+      // TODO: schreibe Warnungen in Logger, wenn die Property nicht gefunden wurde.
+      String arg = LimuxHelper.getProperty(ct, "FRAG_ID", UNDEFINED); 
+      // TODO: FRAG_ID hängt vom Typ ab! Nur bei Type Action "openTemplate" soll FRAG_ID als argument verwendet werden.
       value = action;
-      if (!arg.equals(UNDEFINED)){
-        value = ((String)action).concat("#").concat(arg); 
+      // TODO: funktioniert nicht richtig...
+      //if(action.compareToIgnoreCase("openTemplate") == 0) {
+        if (!arg.equals(UNDEFINED)){
+          value = ((String)action).concat("#").concat(arg); 
+//        } else
+//          Logger.error("Keine FRAG_ID definiert in menu..."); //TODO: ausführliche Meldung.
       }
     }
     PropertyValue[] loadProps = LimuxHelper.setProperty(
