@@ -67,6 +67,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -361,6 +362,16 @@ public class PersoenlicheAbsenderlisteVerwalten
     myFrame.setLocation(x,y);
     myFrame.setResizable(false);
     myFrame.setVisible(true);
+    SwingUtilities.invokeLater(new Runnable(){
+
+      public void run()
+      {
+        myFrame.repaint();
+        
+      }
+      
+    }
+        );
   }
   
   /** Fügt compo UI Elemente gemäss den Kindern von conf.query(key) hinzu.
