@@ -20,6 +20,7 @@
 * 27.10.2005 | BNK | back + CLOSEACTION
 * 31.10.2005 | BNK | Behandlung von TimeoutException bei find()
 * 02.11.2005 | BNK | +editNewPALEntry()
+* 10.11.2005 | BNK | +DEFAULT_* Konstanten
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -93,6 +94,12 @@ import de.muenchen.allg.itd51.wollmux.db.TestDatasourceJoiner;
  */
 public class PersoenlicheAbsenderlisteVerwalten
 {
+  public static final String DEFAULT_ROLLE = "D-WOLL-MUX-5.1";
+
+  public static final String DEFAULT_NACHNAME = "Wollmux";
+
+  public static final String DEFAULT_VORNAME = "Tinchen";
+
   /**
    * Gibt an, wie die Personen in den Listen angezeigt werden sollen.
    * %{Spalte} Syntax um entsprechenden Wert des Datensatzes einzufügen.
@@ -871,9 +878,9 @@ public class PersoenlicheAbsenderlisteVerwalten
   {
     DJDataset ds = dj.newDataset();
     try{
-      ds.set("Vorname","Tinchen");
-      ds.set("Nachname","Wollmux");
-      ds.set("Rolle", "D-WOLL-MUX-ITD-5.1");
+      ds.set("Vorname",DEFAULT_VORNAME);
+      ds.set("Nachname",DEFAULT_NACHNAME);
+      ds.set("Rolle", DEFAULT_ROLLE);
     }catch(Exception x)
     {
       Logger.error(x);
