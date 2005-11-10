@@ -105,7 +105,7 @@ public class MenuList
 
   private static String PREFIX = "wollmux:";
   
-  private static String UNDEFINED = "<undefined>";
+  private static String UNDEFINED = "undefined";
   private static String SEPARATOR = "-----------------";
 
   private XIndexContainer oMenuBarSettings;
@@ -445,7 +445,7 @@ public class MenuList
     }
     else if (LimuxHelper.getProperty(ct, "TYPE", UNDEFINED).equals("senderbox"))
     {
-      PropertyValue[] menuItem = createMenuItem(ct);
+      PropertyValue[] menuItem = createSenderBox(ct);
       return menuItem;
     } else {
       // should not occure
@@ -457,6 +457,16 @@ public class MenuList
 
   }
 
+  private PropertyValue[] createSenderBox(ConfigThingy ct){
+    PropertyValue[] result = null;
+    result = createMenu(ct);
+    
+    result = LimuxHelper.setProperty(result,"CommandURL",PREFIX+"senderBox");
+    
+    
+    return result;
+  }
+  
   private List getMenueItems(ConfigThingy lhmVorlage)
       throws NodeNotFoundException
   {
