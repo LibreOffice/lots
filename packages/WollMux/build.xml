@@ -34,6 +34,7 @@
 
 	<!-- Das Target package registriert die Komponente und erzeugt ein uno.pkg-file -->
 	<target name="package" depends="jarfile, jarfile2">
+		<delete file="../${PKG_NAME}" />
 		<zip destfile="../${PKG_NAME}">
 			<fileset dir=".">
 				<include name="${WollMux_COMPJAR}" />
@@ -47,6 +48,7 @@
 
 	<!-- Das Target jarfile erzeugt die Java-Komponente WollMux -->
 	<target name="jarfile" depends="javamake">
+		<delete file="${WollMux_COMPJAR}" />
 		<jar destfile="${WollMux_COMPJAR}">
 			<fileset dir="${MY_CLASSES}" includes="**/*.class" excludes="**/SenderBox.class" />
 			<fileset dir="${MY_IDL}" includes="**/*.class" />
@@ -63,6 +65,7 @@
 
 	<!-- Das Target jarfile erzeugt die Java-Komponente SenderBox -->
 	<target name="jarfile2" depends="javamake">
+		<delete file="${SenderBox_COMPJAR}" />
 		<jar destfile="${SenderBox_COMPJAR}">
 			<fileset dir="${MY_CLASSES}" includes="**/SenderBox.class" />
 			<!--fileset dir="${MY_IDL}" includes="**/*.class" />
