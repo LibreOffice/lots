@@ -19,7 +19,9 @@
 * 03.11.2005 | BNK | besser kommentiert
 * 07.11.2005 | BNK | +type "union"
 * 10.11.2005 | BNK | das Suchen der Datensätze für den Refresh hinter die
-*                    Schemaanpassung verschoben.
+*                  |  Schemaanpassung verschoben.
+*                  | Und nochmal die Reihenfolge umgewürfelt, hoffentlich stimmt's
+*                  | jetzt.
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -595,6 +597,16 @@ X           "Vorname N."
      */
     public void refreshFromDatabase(Datasource database, long timeout) throws TimeoutException
     { //TESTED
+      /*
+       * Zuallererst das Schema anpassen. Insbesondere muss dies VOR dem
+       * Leeren von data erfolgen. Dadurch werden die
+       * LOS-Speicher der LOSDJDatasets an das neue Schema angepasst,
+       * bevor der Speicher geleert wird. Dies ist notwendig, da die
+       * LOS-Speicher später direkt an die aus res neu erzeugten 
+       * LOSDJDatasets weitergereicht werden.
+       */
+      this.setSchema(database.getSchema());
+      
       Map keyToLOSDJDataset = new HashMap();
       Iterator iter = data.iterator();
       while (iter.hasNext())
@@ -604,13 +616,11 @@ X           "Vorname N."
       }
       
       /*
-       * Schema anpassen und DANACH data leeren. Dadurch werden die
-       * LOS-Speicher der LOSDJDatasets an das neue Schema angepasst,
-       * bevor der Speicher geleert wird. Dies ist notwendig, da die
-       * LOS-Speicher später direkt an die aus res neu erzeugten 
-       * LOSDJDatasets weitergereicht werden.
+       * Aktualisierte Daten abfragen bevor data geleert wird, damit im
+       * Falle eines Timeouts nicht der Cache verloren geht.
        */
-      this.setSchema(database.getSchema()); 
+      QueryResults res = database.getDatasetsByKey(keyToLOSDJDataset.keySet(), timeout);
+      
       data.clear();
       String selectKey = "";
       if (selectedDataset != null) selectKey = selectedDataset.getKey();
@@ -626,7 +636,6 @@ X           "Vorname N."
        * Bei evtl. Änderungen bitte beachten!!!
        */
 
-      QueryResults res = database.getDatasetsByKey(keyToLOSDJDataset.keySet(), timeout);
       iter = res.iterator();
       while (iter.hasNext())
       {
