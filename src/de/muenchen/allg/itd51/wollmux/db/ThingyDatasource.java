@@ -10,6 +10,7 @@
 * -------------------------------------------------------------------
 * 27.10.2005 | BNK | Erstellung
 * 03.11.2005 | BNK | besser kommentiert
+* 10.11.2005 | BNK | Fehlermeldung, wenn in Daten() ein benannter Datensatz auftaucht
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -157,6 +158,7 @@ public class ThingyDatasource extends RAMDatasource
    */
   private Dataset createDataset(ConfigThingy dsDesc, Set schema, String[] schemaOrdered, String[] keyCols) throws ConfigurationErrorException
   { //TESTED
+    if (!dsDesc.getName().equals("")) throw new ConfigurationErrorException("Öffnende Klammer erwartet vor \""+dsDesc.getName()+"\"");
     if (dsDesc.count() == 0) return new MyDataset(schema, keyCols);
     try
     {
