@@ -1,4 +1,4 @@
-/* TODO Testen von UnionDatasource
+/* 
 * Dateiname: UnionDatasource.java
 * Projekt  : WollMux
 * Funktion : Datasource, die die Vereinigung 2er Datasources darstellt
@@ -9,6 +9,7 @@
 * Datum      | Wer | Änderungsgrund
 * -------------------------------------------------------------------
 * 07.11.2005 | BNK | Erstellung
+* 10.11.2005 | BNK | getestet und debuggt
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -21,6 +22,7 @@ import java.net.URL;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -91,7 +93,27 @@ public class UnionDatasource implements Datasource
     Set schema1 = source1.getSchema();
     Set schema2 = source2.getSchema();
     if (!schema1.containsAll(schema2) || !schema2.containsAll(schema1))
-      throw new ConfigurationErrorException("Schemata der Datenquellen \""+source1Name+"\" und \""+source2Name+"\" stimmen nicht überein");
+    {
+      Set difference1 = new HashSet(schema1);
+      difference1.removeAll(schema2);
+      Set difference2 = new HashSet(schema2);
+      difference2.removeAll(schema1);
+      StringBuffer buf1 = new StringBuffer();
+      Iterator iter = difference1.iterator();
+      while (iter.hasNext())
+      {
+        buf1.append((String)iter.next());
+        if (iter.hasNext()) buf1.append(", ");
+      }
+      StringBuffer buf2 = new StringBuffer();
+      iter = difference2.iterator();
+      while (iter.hasNext())
+      {
+        buf2.append((String)iter.next());
+        if (iter.hasNext()) buf2.append(", ");
+      }
+      throw new ConfigurationErrorException("Datenquelle \""+source1Name+"\" fehlen die Spalten: "+buf2+" und Datenquelle \""+source2Name+"\" fehlen die Spalten: "+buf1);
+    }
     
     schema = new HashSet(schema1);
   }
