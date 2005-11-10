@@ -158,8 +158,8 @@ public class DatasourceJoiner
           ds = new AttachDatasource(nameToDatasource, sourceDesc, context);
         else if (type.equals("prefer"))
           ds = new PreferDatasource(nameToDatasource, sourceDesc, context);
-        else if (type.equals("rename"))
-          ds = new RenameDatasource(nameToDatasource, sourceDesc, context);
+        else if (type.equals("schema"))
+          ds = new SchemaDatasource(nameToDatasource, sourceDesc, context);
         //else if (type.equals("ldap"))
         //  ds = new LDAPDatasource(nameToDatasource, sourceDesc, context);
         else
@@ -724,17 +724,20 @@ X           "Vorname N."
         dsConf.add("Key").add(ds.getKey());
         
         ConfigThingy cacheConf = dsConf.add("Cache");
-        Iterator entries = ds.getBS().entrySet().iterator();
-        while (entries.hasNext())
+        if (ds.hasBackingStore())
         {
-          Map.Entry ent = (Map.Entry)entries.next();
-          String spalte = (String)ent.getKey();
-          String wert = (String)ent.getValue();
-          if (wert != null) cacheConf.add(spalte).add(wert);
+          Iterator entries = ds.getBS().entrySet().iterator();
+          while (entries.hasNext())
+          {
+            Map.Entry ent = (Map.Entry)entries.next();
+            String spalte = (String)ent.getKey();
+            String wert = (String)ent.getValue();
+            if (wert != null) cacheConf.add(spalte).add(wert);
+          }
         }
         
         ConfigThingy overrideConf = dsConf.add("Override");
-        entries = ds.getLOS().entrySet().iterator();
+        Iterator entries = ds.getLOS().entrySet().iterator();
         while (entries.hasNext())
         {
           Map.Entry ent = (Map.Entry)entries.next();

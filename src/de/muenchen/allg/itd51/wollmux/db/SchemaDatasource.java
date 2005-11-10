@@ -1,8 +1,8 @@
-/* TODO RenameDatasource testen
-* Dateiname: RenameDatasource.java
+/* TODO SchemaDatasource testen
+* Dateiname: SchemaDatasource.java
 * Projekt  : WollMux
 * Funktion : Datenquelle, die die Daten einer existierenden Datenquelle 
-*            mit geänderten Spaltennamen zur Verfügung stellt. 
+*            mit geänderten Spalten zur Verfügung stellt. 
 * 
 * Copyright: Landeshauptstadt München
 *
@@ -35,10 +35,10 @@ import de.muenchen.allg.itd51.wollmux.TimeoutException;
 
 /**
  * Datenquelle, die die Daten einer existierenden Datenquelle 
- *            mit geänderten Spaltennamen zur Verfügung stellt. 
+ *            mit geänderten Spalten zur Verfügung stellt. 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
-public class RenameDatasource implements Datasource
+public class SchemaDatasource implements Datasource
 {
   private static final Pattern SPALTENNAME = Pattern.compile("^[a-zA-Z_][a-zA-Z_0-9]*$");
   private Datasource source;
@@ -48,16 +48,16 @@ public class RenameDatasource implements Datasource
   private Map mapNewToOld;
   
   /**
-   * Erzeugt eine neue RenameDatasource.
+   * Erzeugt eine neue SchemaDatasource.
    * @param nameToDatasource enthält alle bis zum Zeitpunkt der Definition
-   *        dieser RenameDatasource bereits vollständig instanziierten
+   *        dieser SchemaDatasource bereits vollständig instanziierten
    *        Datenquellen.
    * @param sourceDesc der "Datenquelle"-Knoten, der die Beschreibung
-   *        dieser RenameDatasource enthält.
+   *        dieser SchemaDatasource enthält.
    * @param context der Kontext relativ zu dem URLs aufgelöst werden sollen
    *        (zur Zeit nicht verwendet).
    */
-  public RenameDatasource(Map nameToDatasource, ConfigThingy sourceDesc, URL context)
+  public SchemaDatasource(Map nameToDatasource, ConfigThingy sourceDesc, URL context)
   throws ConfigurationErrorException
   {
     try{ name = sourceDesc.get("NAME").toString();} 
