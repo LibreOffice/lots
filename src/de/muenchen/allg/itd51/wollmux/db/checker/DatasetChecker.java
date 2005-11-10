@@ -1,6 +1,10 @@
 package de.muenchen.allg.itd51.wollmux.db.checker;
 
+import java.util.Iterator;
+import java.util.List;
+
 import de.muenchen.allg.itd51.wollmux.db.Dataset;
+import de.muenchen.allg.itd51.wollmux.db.QueryPart;
 
 /**
  * Ein DatasetChecker überprüft, ob für ein Dataset eine bestimmte Bedingung
@@ -31,6 +35,24 @@ public abstract class DatasetChecker
       case 4: 
       default:  return new ColumnContainsChecker(columnName, query.substring(1,query.length()-1));
     }
+  }
+  
+  /**
+   * Erzeugt einen DatasetChecker, der die Bedingungen einer Liste von
+   * QueryParts (und-verknüpft) überprüft.
+   * @param query Liste von QueryParts.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public static DatasetChecker makeChecker(List query)
+  {
+    DatasetChecker checker = new MatchAllDatasetChecker();
+    Iterator iter = query.iterator();
+    while (iter.hasNext())
+    {
+      QueryPart part = (QueryPart)iter.next();
+      checker = checker.and(DatasetChecker.makeChecker(part.getColumnName(), part.getSearchString()));
+    }
+    return checker;
   }
 
   

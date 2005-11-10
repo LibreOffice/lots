@@ -10,6 +10,7 @@
 * -------------------------------------------------------------------
 * 08.11.2005 | BNK | Erstellung
 * 09.11.2005 | BNK | find() auf Spalten der ATTACH-Datenquelle unterstützt
+* 10.11.2005 | BNK | korrekte Filterung nach Spalten der ATTACH-Datenquelle
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -33,6 +34,8 @@ import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.TimeoutException;
+import de.muenchen.allg.itd51.wollmux.db.checker.DatasetChecker;
+import de.muenchen.allg.itd51.wollmux.db.checker.MatchAllDatasetChecker;
 
 /**
  * Eine Datenquelle, die eine andere Datenquelle um Spalten ergänzt.
@@ -183,7 +186,7 @@ public class AttachDatasource implements Datasource
     time = (new Date().getTime()) - time;
     timeout -= time;
     if (timeout <= 0) throw new TimeoutException("Datenquelle "+source1Name+" konnte Anfrage getDatasetsByKey() nicht schnell genug beantworten");
-    return attachColumns(results, timeout);
+    return attachColumns(results, timeout, new MatchAllDatasetChecker());
   }
 
   /* (non-Javadoc)
@@ -216,11 +219,14 @@ public class AttachDatasource implements Datasource
       time = (new Date().getTime()) - time;
       timeout -= time;
       if (timeout <= 0) throw new TimeoutException("Datenquelle "+source1Name+" konnte Anfrage find() nicht schnell genug beantworten");
-      return attachColumns(results, timeout);
+      
+      DatasetChecker filter = DatasetChecker.makeChecker(query2);
+      
+      return attachColumns(results, timeout, filter);
     }
     else
     {
-      QueryResults results = source2.find(query, timeout);
+      QueryResults results = source2.find(query2, timeout);
       time = (new Date().getTime()) - time;
       timeout -= time;
       if (timeout <= 0) throw new TimeoutException("Datenquelle "+source2Name+" konnte Anfrage find() nicht schnell genug beantworten");
@@ -236,7 +242,7 @@ public class AttachDatasource implements Datasource
     return name;
   }
   
-  private QueryResults attachColumns(QueryResults results, long timeout) throws TimeoutException
+  private QueryResults attachColumns(QueryResults results, long timeout, DatasetChecker filter) throws TimeoutException
   {
     long endTime = new Date().getTime() + timeout;
     
@@ -246,6 +252,7 @@ public class AttachDatasource implements Datasource
     while (iter.hasNext())
     {
       Dataset ds = (Dataset)iter.next();
+     
       List query = new Vector(match1.length);
       for (int i = 0; i < match1.length; ++i)
       {
@@ -258,10 +265,26 @@ public class AttachDatasource implements Datasource
       if (timeout <= 0) throw new TimeoutException();
       QueryResults appendix = source2.find(query, timeout);
       
+      Dataset newDataset;
+      
       if (appendix.size() == 0)
-        resultsWithAttachments.add(new ConcatDataset(ds,null));
+      {
+        newDataset = new ConcatDataset(ds,null);
+        if (filter.matches(newDataset)) resultsWithAttachments.add(newDataset);
+      }
       else
-        resultsWithAttachments.add(new ConcatDataset(ds,(Dataset)appendix.iterator().next()));
+      {
+        Iterator appendixIter = appendix.iterator();
+        while (appendixIter.hasNext())
+        {
+          newDataset = new ConcatDataset(ds,(Dataset)appendixIter.next());
+          if (filter.matches(newDataset)) 
+          {
+            resultsWithAttachments.add(newDataset);
+            break;
+          }
+        }
+      }
     }
     
     return new QueryResultsList(resultsWithAttachments);

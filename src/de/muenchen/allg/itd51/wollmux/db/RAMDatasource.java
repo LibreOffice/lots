@@ -29,7 +29,6 @@ import java.util.Vector;
 
 import de.muenchen.allg.itd51.wollmux.TimeoutException;
 import de.muenchen.allg.itd51.wollmux.db.checker.DatasetChecker;
-import de.muenchen.allg.itd51.wollmux.db.checker.MatchAllDatasetChecker;
 
 /**
  * Oberklasse für Datasources, die ihre Daten vollständig
@@ -109,17 +108,11 @@ public class RAMDatasource implements Datasource
    */
   public QueryResults find(List query, long timeout) throws TimeoutException
   { //TESTED
-    DatasetChecker checker = new MatchAllDatasetChecker();
-    Iterator iter = query.iterator();
-    while (iter.hasNext())
-    {
-      QueryPart part = (QueryPart)iter.next();
-      checker = checker.and(DatasetChecker.makeChecker(part.getColumnName(), part.getSearchString()));
-    }
+    DatasetChecker checker = DatasetChecker.makeChecker(query);
     
     List results = new Vector();
     
-    iter = data.iterator();
+    Iterator iter = data.iterator();
     while (iter.hasNext())
     {
       Dataset ds = (Dataset)iter.next();
