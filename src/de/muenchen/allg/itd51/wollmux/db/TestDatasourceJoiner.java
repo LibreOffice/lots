@@ -133,6 +133,8 @@ public class TestDatasourceJoiner extends DatasourceJoiner
     printResults("Nachname = Schlonz", dj.getMainDatasourceSchema(), dj.find("Nachname","Schlonz"));
     printResults("Nachname = Lutz", dj.getMainDatasourceSchema(), dj.find("Nachname","Lutz"));
     printResults("Nachname = *uX, Vorname = m*", dj.getMainDatasourceSchema(), dj.find("Nachname","*uX","Vorname","m*"));
+    printResults("Homepage = *limux", dj.getMainDatasourceSchema(), dj.find("OrgaSpezifischeErgaenzungen__Homepage","*limux"));
+    printResults("Homepage = *limux, Nachname = B*", dj.getMainDatasourceSchema(), dj.find("OrgaSpezifischeErgaenzungen__Homepage","*limux","Nachname","B*"));
     printResults("Local Override Storage", dj.getMainDatasourceSchema(), dj.getLOS());
     
     if (args.length == 1)

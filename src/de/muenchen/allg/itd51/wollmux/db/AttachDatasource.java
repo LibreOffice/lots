@@ -1,4 +1,4 @@
-/* TODO AttachDatasource testen, insbes. Anfrage nur auf Spalten der ATTACH-Datenquelle
+/* 
 * Dateiname: AttachDatasource.java
 * Projekt  : WollMux
 * Funktion : Eine Datenquelle, die eine andere Datenquelle um Spalten ergänzt.
@@ -197,12 +197,16 @@ public class AttachDatasource implements Datasource
     long time = new Date().getTime();
     List query1 = new Vector(query.size()/2);
     List query2 = new Vector(query.size()/2);
+    List query2WithPrefix = new Vector(query.size()/2);
     Iterator iter = query.iterator();
     while (iter.hasNext())
     {
       QueryPart p = (QueryPart)iter.next();
       if (p.getColumnName().startsWith(source2Prefix))
+      {
         query2.add(new QueryPart(p.getColumnName().substring(source2Prefix.length()),p.getSearchString()));
+        query2WithPrefix.add(p);
+      }
       else
         query1.add(p);
     }
@@ -220,7 +224,7 @@ public class AttachDatasource implements Datasource
       timeout -= time;
       if (timeout <= 0) throw new TimeoutException("Datenquelle "+source1Name+" konnte Anfrage find() nicht schnell genug beantworten");
       
-      DatasetChecker filter = DatasetChecker.makeChecker(query2);
+      DatasetChecker filter = DatasetChecker.makeChecker(query2WithPrefix);
       
       return attachColumns(results, timeout, filter);
     }
