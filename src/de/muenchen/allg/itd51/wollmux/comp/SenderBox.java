@@ -309,7 +309,7 @@ public class SenderBox extends ComponentBase implements XServiceInfo,
 
     // In diesem Fallback-Fall den AbsenderdatenBearbeiten dialog öffnen.
     EventProcessor.create().addEvent(
-        new Event(Event.ON_ABSENDERDATEN_BEARBEITEN));
+        new Event(Event.ON_ABSENDER_AUSWAEHLEN));
   }
 
   /**

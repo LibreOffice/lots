@@ -42,17 +42,21 @@ public class Event
 
   public static final int ON_MODIFIED = 10;
 
-  public static final int ON_ABSENDERDATEN_BEARBEITEN = 20;
+  public static final int ON_ABSENDER_AUSWAEHLEN = 20;
 
   public static final int ON_PERSOENLICHE_ABSENDERLISTE = 21;
+
+  public static final int ON_DATENSATZ_BEARBEITEN = 22;
 
   public static final int ON_DIALOG_BACK = 30;
 
   public static final int ON_DIALOG_ABORT = 31;
 
-  public static final int ON_OPENFRAG = 40;
+  public static final int ON_OPENTEMPLATE = 40;
 
   public static final int ON_SELECTION_CHANGED = 50;
+
+  public static final int ON_INITIALIZE = 60;
 
   // private Felder:
 
@@ -73,13 +77,17 @@ public class Event
     {
       return "UNKNOWN";
     }
-    if (event == ON_ABSENDERDATEN_BEARBEITEN)
+    if (event == ON_ABSENDER_AUSWAEHLEN)
     {
-      return "ON_ABSENDERDATEN_BEARBEITEN";
+      return "ON_ABSENDER_AUSWAEHLEN";
     }
     if (event == ON_PERSOENLICHE_ABSENDERLISTE)
     {
       return "ON_PERSOENLICHE_ABSENDERLISTE";
+    }
+    if (event == ON_DATENSATZ_BEARBEITEN)
+    {
+      return "ON_DATENSATZ_BEARBEITEN";
     }
     if (event == ON_LOAD)
     {
@@ -93,9 +101,9 @@ public class Event
     {
       return "ON_MODIFIED";
     }
-    if (event == ON_OPENFRAG)
+    if (event == ON_OPENTEMPLATE)
     {
-      return "ON_OPENFRAG";
+      return "ON_OPENTEMPLATE";
     }
     if (event == ON_DIALOG_BACK)
     {
@@ -108,6 +116,10 @@ public class Event
     if (event == ON_SELECTION_CHANGED)
     {
       return "ON_SELECTION_CHANGED";
+    }
+    if (event == ON_INITIALIZE)
+    {
+      return "ON_INITIALIZE";
     }
     else
       return "namenlos";
@@ -159,8 +171,10 @@ public class Event
         docEvent.Source);
 
     // Bekannte Event-Typen rausziehen:
-    if (docEvent.EventName.equals("OnLoad")) this.event = ON_LOAD;
-    if (docEvent.EventName.equals("OnNew")) this.event = ON_NEW;
+    if (docEvent.EventName.compareToIgnoreCase("OnLoad") == 0)
+      this.event = ON_LOAD;
+    if (docEvent.EventName.compareToIgnoreCase("OnNew") == 0)
+      this.event = ON_NEW;
   }
 
   /**

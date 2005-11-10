@@ -9,6 +9,9 @@
  * Datum      | Wer | Änderungsgrund
  * -------------------------------------------------------------------
  * 14.10.2005 | LUT | Erstellung
+ * 09.11.2005 | LUT | + Logfile wird jetzt erweitert (append-modus)
+ *                    + verwenden des Konfigurationsparameters SENDER_SOURCE
+ *                    + Erster Start des wollmux über wm_configured feststellen.
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -127,11 +130,21 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
    * abgesetzt werden können.
    */
 
-  public static final String cmdAbsenderdatenBearbeiten = "AbsenderdatenBearbeitenDialog";
+  public static final String cmdAbsenderAuswaehlen = "AbsenderAuswaehlen";
 
-  public static final String cmdOpenFrag = "OpenFrag";
+  public static final String cmdOpenTemplate = "OpenTemplate";
 
   public static final String cmdSenderBox = "SenderBox";
+
+  private static final String cmdMenu = "Menu";
+
+  /**
+   * Inhalt der wollmux.conf-Datei, die angelegt wird, wenn noch keine
+   * wollmux.conf-Datei vorhanden ist. Ist defaultWollmuxConf==null, so wird gar
+   * keine wollmux.conf-Datei angelegt.
+   */
+  private static final String defaultWollmuxConf = "%include \"http://limux.tvc.muenchen.de/wollmux/wollmux.conf\"\r\n"
+                                                   + "DEFAULT_CONTEXT \"http://limux.tvc.muenchen.de/wollmux\"";
 
   /**
    * Der Konstruktor erzeugt einen neues WollMux-Service im XComponentContext
@@ -143,7 +156,8 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
   public WollMux(XComponentContext context)
   {
     // Context sichern, Ausführung in anderem Kontext verhindern.
-    if (xComponentContext == null) {
+    if (xComponentContext == null)
+    {
       xComponentContext = context;
       registeredSenderBoxes = new Vector();
     }
@@ -162,13 +176,32 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
     // verdrahtet sind...
     String userHome = System.getProperty("user.home");
     File wollmuxDir = new File(userHome, ".wollmux");
-    if (!wollmuxDir.exists()) wollmuxDir.mkdirs();
     wollmuxConfFile = new File(wollmuxDir, "wollmux.conf");
     losCacheFile = new File(wollmuxDir, "cache.conf");
     File wollmuxLogFile = new File(wollmuxDir, "wollmux.log");
+
+    // .wollmux-Verzeichnis erzeugen falls es nicht existiert
+    if (!wollmuxDir.exists()) wollmuxDir.mkdirs();
+
+    // Default wollmux.conf erzeugen falls noch keine wollmux.conf existiert.
+    if (!wollmuxConfFile.exists() && defaultWollmuxConf != null)
+    {
+      try
+      {
+        PrintStream wmconf = new PrintStream(new FileOutputStream(
+            wollmuxConfFile));
+        wmconf.println(defaultWollmuxConf);
+        wmconf.close();
+      }
+      catch (FileNotFoundException e)
+      {
+      }
+    }
+
+    // wollmux.log-File erzeugen:
     try
     {
-      wollmuxLog = new PrintStream(new FileOutputStream(wollmuxLogFile));
+      wollmuxLog = new PrintStream(new FileOutputStream(wollmuxLogFile, true));
     }
     catch (FileNotFoundException e)
     {
@@ -220,7 +253,8 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
       textFragmentList = new VisibleTextFragmentList(wollmuxConf);
 
       // DatasourceJoiner erzeugen
-      datasourceJoiner = new DatasourceJoiner(wollmuxConf, "Personal",
+      ConfigThingy ssource = wollmuxConf.query("SENDER_SOURCE").getLastChild();
+      datasourceJoiner = new DatasourceJoiner(wollmuxConf, ssource.toString(),
           losCacheFile, getDEFAULT_CONTEXT());
 
       // register global EventListener
@@ -230,6 +264,8 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
       eventBroadcaster.xEventBroadcaster().addEventListener(
           EventProcessor.create());
 
+      // Event ON_FIRST_INITIALIZE erzeugen:
+      EventProcessor.create().addEvent(new Event(Event.ON_INITIALIZE));
     }
     catch (Exception e)
     {
@@ -466,12 +502,15 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
       if (uri.getScheme().compareToIgnoreCase(wollmuxProtocol) == 0)
       {
         if (uri.getSchemeSpecificPart().compareToIgnoreCase(
-            cmdAbsenderdatenBearbeiten) == 0) xRet = this;
+            cmdAbsenderAuswaehlen) == 0) xRet = this;
 
-        if (uri.getSchemeSpecificPart().compareToIgnoreCase(cmdOpenFrag) == 0)
+        if (uri.getSchemeSpecificPart().compareToIgnoreCase(cmdOpenTemplate) == 0)
           xRet = this;
 
         if (uri.getSchemeSpecificPart().compareToIgnoreCase(cmdSenderBox) == 0)
+          xRet = this;
+
+        if (uri.getSchemeSpecificPart().compareToIgnoreCase(cmdMenu) == 0)
           xRet = this;
       }
     }
@@ -528,20 +567,26 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
       if (uri.getScheme().compareToIgnoreCase(wollmuxProtocol) == 0)
       {
         if (uri.getSchemeSpecificPart().compareToIgnoreCase(
-            cmdAbsenderdatenBearbeiten) == 0)
+            cmdAbsenderAuswaehlen) == 0)
         {
           Logger
               .debug2("Dispatch: Aufruf von WollMux:AbsenderdatenBearbeitenDialog");
           EventProcessor.create().addEvent(
-              new Event(Event.ON_ABSENDERDATEN_BEARBEITEN));
+              new Event(Event.ON_ABSENDER_AUSWAEHLEN));
         }
 
-        if (uri.getSchemeSpecificPart().compareToIgnoreCase(cmdOpenFrag) == 0)
+        if (uri.getSchemeSpecificPart().compareToIgnoreCase(cmdOpenTemplate) == 0)
         {
           Logger.debug2("Dispatch: Aufruf von WollMux:OpenFrag mit Frag:"
                         + uri.getFragment());
           EventProcessor.create().addEvent(
-              new Event(Event.ON_OPENFRAG, uri.getFragment()));
+              new Event(Event.ON_OPENTEMPLATE, uri.getFragment()));
+        }
+
+        if (uri.getSchemeSpecificPart().compareToIgnoreCase(cmdMenu) == 0)
+        {
+          Logger.debug2("Dispatch: Aufruf von WollMux:menu mit menu:"
+                        + uri.getFragment());
         }
       }
     }

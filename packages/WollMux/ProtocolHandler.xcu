@@ -3,7 +3,7 @@
 	<node oor:name="HandlerSet">
 		<node oor:name="de.muenchen.allg.itd51.wollmux.comp.WollMux" oor:op="replace">
 			<prop oor:name="Protocols" oor:type="oor:string-list">
-				<value>WollMux:*</value>
+				<value>WollMux:* wollmux:*</value>
 			</prop>
 		</node>
 	</node>
