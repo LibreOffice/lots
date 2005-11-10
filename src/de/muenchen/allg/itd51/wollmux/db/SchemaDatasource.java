@@ -10,6 +10,7 @@
 * Datum      | Wer | Änderungsgrund
 * -------------------------------------------------------------------
 * 09.11.2005 | BNK | Erstellung
+* 10.11.2005 | BNK | Zu SchemaDatasource aufgebohrt
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -41,6 +42,7 @@ import de.muenchen.allg.itd51.wollmux.TimeoutException;
 public class SchemaDatasource implements Datasource
 {
   private static final Pattern SPALTENNAME = Pattern.compile("^[a-zA-Z_][a-zA-Z_0-9]*$");
+  private static final String EMPTY_COLUMN = "";
   private Datasource source;
   private String sourceName;
   private String name;
@@ -75,14 +77,46 @@ public class SchemaDatasource implements Datasource
     if (source == null)
       throw new ConfigurationErrorException("Fehler bei Initialisierung von Datenquelle \""+name+"\": Referenzierte Datenquelle \""+sourceName+"\" nicht (oder fehlerhaft) definiert");
   
-    ConfigThingy renamesDesc = sourceDesc.query("RENAME");
-    int numRenames = renamesDesc.count();
-  
     schema = source.getSchema();
     mapNewToOld = new HashMap();
     
-    Iterator iter = renamesDesc.iterator();
-    for (int i = 0; i < numRenames; ++i)
+    List columnsToDrop = new Vector();
+    
+    ConfigThingy drops = sourceDesc.query("DROP");
+    Iterator iter = drops.iterator();
+    while (iter.hasNext())
+    {
+      Iterator iter2 = ((ConfigThingy)iter.next()).iterator();
+      while (iter2.hasNext())
+      {
+        String spalte = iter2.next().toString();
+        if (!schema.contains(spalte))
+          throw new ConfigurationErrorException("Spalte \""+spalte+"\" ist nicht im Schema");
+        columnsToDrop.add(spalte);
+      }
+    }
+    
+    List columnsToAdd = new Vector();
+    
+    ConfigThingy adds = sourceDesc.query("ADD");
+    iter = adds.iterator();
+    while (iter.hasNext())
+    {
+      Iterator iter2 = ((ConfigThingy)iter.next()).iterator();
+      while (iter2.hasNext())
+      {
+        String spalte = iter2.next().toString();
+        if (!SPALTENNAME.matcher(spalte).matches())
+          throw new ConfigurationErrorException("\""+spalte+"\" ist kein erlaubter Spaltenname");
+        columnsToAdd.add(spalte);
+        columnsToDrop.remove(spalte);
+      }
+    }
+    
+    ConfigThingy renamesDesc = sourceDesc.query("RENAME");
+    
+    iter = renamesDesc.iterator();
+    while (iter.hasNext())
     {
       ConfigThingy renameDesc = (ConfigThingy)iter.next();
       if (renameDesc.count() != 2)
@@ -102,10 +136,28 @@ public class SchemaDatasource implements Datasource
         throw new ConfigurationErrorException("\""+spalte2+"\" ist kein erlaubter Spaltenname");
       
       mapNewToOld.put(spalte2, spalte1);
+      columnsToDrop.remove(spalte2);
+      columnsToAdd.add(spalte2);
+      columnsToDrop.add(spalte1);
     }
     
-    schema.removeAll(mapNewToOld.values());
-    schema.addAll(mapNewToOld.keySet());
+    /**
+     * Für alle hinzugefügten Spalten, die weder in der Originaldatenbank
+     * existieren noch durch einen RENAME auf eine Spalte der Originaldatenbank
+     * abgebildet werden, füge ein Pseudomapping auf EMPTY_COLUMN hinzu,
+     * damit RenameDataset.get() weiss, dass es für die Spalte null liefern soll.
+     */
+    iter = columnsToAdd.iterator();
+    while (iter.hasNext())
+    {
+      String spalte = (String)iter.next();
+      if (!schema.contains(spalte) && !mapNewToOld.containsKey(spalte))
+        mapNewToOld.put(spalte, EMPTY_COLUMN);
+    }
+    
+    schema.removeAll(columnsToDrop);
+    schema.addAll(columnsToAdd);
+    
   }
 
   public Set getSchema()
@@ -162,7 +214,13 @@ public class SchemaDatasource implements Datasource
     
     public String get(String columnName) throws ColumnNotFoundException
     {
+      if (!schema.contains(columnName)) throw new ColumnNotFoundException("Spalte "+columnName+" existiert nicht!");
+      
       String alteSpalte = (String)mapNewToOld.get(columnName);
+      
+      if (alteSpalte == /*nicht equals()!!!!*/ EMPTY_COLUMN) 
+        return null;
+      
       if (alteSpalte != null) 
         return ds.get(alteSpalte);
       else
