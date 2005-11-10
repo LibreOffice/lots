@@ -11,6 +11,7 @@
 * -------------------------------------------------------------------
 * 31.10.2005 | BNK | Erstellung
 * 03.11.2005 | BNK | besser kommentiert
+* 10.11.2005 | BNK | Refactoring: DatasetChecker & Co. in eigene Klassen
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -27,10 +28,6 @@ import java.util.Set;
 import java.util.Vector;
 
 import de.muenchen.allg.itd51.wollmux.TimeoutException;
-import de.muenchen.allg.itd51.wollmux.db.checker.ColumnContainsChecker;
-import de.muenchen.allg.itd51.wollmux.db.checker.ColumnIdentityChecker;
-import de.muenchen.allg.itd51.wollmux.db.checker.ColumnPrefixChecker;
-import de.muenchen.allg.itd51.wollmux.db.checker.ColumnSuffixChecker;
 import de.muenchen.allg.itd51.wollmux.db.checker.DatasetChecker;
 import de.muenchen.allg.itd51.wollmux.db.checker.MatchAllDatasetChecker;
 
