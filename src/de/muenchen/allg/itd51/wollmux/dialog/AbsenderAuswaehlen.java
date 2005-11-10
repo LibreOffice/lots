@@ -270,6 +270,7 @@ public class AbsenderAuswaehlen
     myFrame.setLocation(x,y);
     myFrame.setResizable(false);
     myFrame.setVisible(true);
+    myFrame.requestFocus();
   }
   
   /** Fügt compo UI Elemente gemäss den Kindern von conf.query(key) hinzu.

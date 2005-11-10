@@ -437,6 +437,7 @@ public class DatensatzBearbeiten
     myFrame.setVisible(true);
     cardLayout.show(cardPanel,currentWindow.getName());
     closeAction = currentWindow.getCloseAction();
+    myFrame.requestFocus();
   }
 
   /**
