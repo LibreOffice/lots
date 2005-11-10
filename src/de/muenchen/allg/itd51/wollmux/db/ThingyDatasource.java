@@ -85,7 +85,9 @@ public class ThingyDatasource extends RAMDatasource
       {
         String spalte = iter.next().toString();
         if (!SPALTENNAME.matcher(spalte).matches())
-          throw new ConfigurationErrorException("Fehler in Definition von Datenquelle "+name+": Spalte \""+spalte+"\" entspricht nicht der Syntax eines Bezeichners"); 
+          throw new ConfigurationErrorException("Fehler in Definition von Datenquelle "+name+": Spalte \""+spalte+"\" entspricht nicht der Syntax eines Bezeichners");
+        if (schema.contains(spalte))
+          throw new ConfigurationErrorException("Fehler in Definition von Datenquelle "+name+": Spalte \""+spalte+"\" doppelt aufgeführt im Schema");
         schema.add(spalte);
         schemaOrdered[i++] = spalte;
       }

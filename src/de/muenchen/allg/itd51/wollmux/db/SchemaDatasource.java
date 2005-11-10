@@ -1,4 +1,4 @@
-/* TODO SchemaDatasource testen
+/* 
 * Dateiname: SchemaDatasource.java
 * Projekt  : WollMux
 * Funktion : Datenquelle, die die Daten einer existierenden Datenquelle 
@@ -22,6 +22,7 @@ package de.muenchen.allg.itd51.wollmux.db;
 import java.net.URL;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -77,7 +78,7 @@ public class SchemaDatasource implements Datasource
     if (source == null)
       throw new ConfigurationErrorException("Fehler bei Initialisierung von Datenquelle \""+name+"\": Referenzierte Datenquelle \""+sourceName+"\" nicht (oder fehlerhaft) definiert");
   
-    schema = source.getSchema();
+    schema = new HashSet(source.getSchema());
     mapNewToOld = new HashMap();
     
     List columnsToDrop = new Vector();
@@ -136,9 +137,9 @@ public class SchemaDatasource implements Datasource
         throw new ConfigurationErrorException("\""+spalte2+"\" ist kein erlaubter Spaltenname");
       
       mapNewToOld.put(spalte2, spalte1);
+      columnsToDrop.add(spalte1);
       columnsToDrop.remove(spalte2);
       columnsToAdd.add(spalte2);
-      columnsToDrop.add(spalte1);
     }
     
     /**
@@ -178,7 +179,15 @@ public class SchemaDatasource implements Datasource
     {
       QueryPart p = (QueryPart)iter.next();
       String spalte = p.getColumnName();
+      
+      if (!schema.contains(spalte)) //dieser Test ist nicht redundant wegen DROPs
+        return new QueryResultsList(new Vector(0));
+      
       String alteSpalte = (String)mapNewToOld.get(spalte);
+      
+      if (alteSpalte == /*nicht equals()!!!!*/ EMPTY_COLUMN) 
+        return new QueryResultsList(new Vector(0));
+      
       if (alteSpalte != null) 
         translatedQuery.add(new QueryPart(alteSpalte,p.getSearchString()));
       else
@@ -214,6 +223,7 @@ public class SchemaDatasource implements Datasource
     
     public String get(String columnName) throws ColumnNotFoundException
     {
+        //dieser Test ist nicht redundant wegen DROPs
       if (!schema.contains(columnName)) throw new ColumnNotFoundException("Spalte "+columnName+" existiert nicht!");
       
       String alteSpalte = (String)mapNewToOld.get(columnName);

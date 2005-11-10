@@ -167,7 +167,7 @@ public class DatasourceJoiner
       }
       catch(Exception x)
       {
-        Logger.error("Fehler beim Initialisieren von Datenquelle \""+name+"\":", x);
+        Logger.error("Fehler beim Initialisieren von Datenquelle \""+name+"\" (Typ \""+type+"\"):", x);
       }
   
       if (ds == null)

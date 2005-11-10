@@ -92,11 +92,13 @@ public class UnionDatasource implements Datasource
     Set schema2 = source2.getSchema();
     if (!schema1.containsAll(schema2) || !schema2.containsAll(schema1))
       throw new ConfigurationErrorException("Schemata der Datenquellen \""+source1Name+"\" und \""+source2Name+"\" stimmen nicht überein");
+    
+    schema = new HashSet(schema1);
   }
 
   public Set getSchema()
   {
-    return new HashSet(schema);
+    return schema;
   }
 
   public QueryResults getDatasetsByKey(Collection keys, long timeout) throws TimeoutException
