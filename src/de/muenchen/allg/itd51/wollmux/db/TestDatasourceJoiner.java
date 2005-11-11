@@ -99,6 +99,10 @@ public class TestDatasourceJoiner extends DatasourceJoiner
     {
       Dataset result = (Dataset)resIter.next();
       
+      try{
+      System.out.print(result.get("Nachname")+": ");
+      }catch(Exception x){}
+      
       Iterator spiter = schema.iterator();
       while (spiter.hasNext())
       {
@@ -131,7 +135,8 @@ public class TestDatasourceJoiner extends DatasourceJoiner
     printResults("Nachname = *ux", dj.getMainDatasourceSchema(), dj.find("Nachname","*ux"));
     printResults("Nachname = *oe*", dj.getMainDatasourceSchema(), dj.find("Nachname","*oe*"));
     printResults("Nachname = Schlonz", dj.getMainDatasourceSchema(), dj.find("Nachname","Schlonz"));
-    printResults("Nachname = Lutz", dj.getMainDatasourceSchema(), dj.find("Nachname","Lutz"));
+    printResults("Nachname = Lutz*", dj.getMainDatasourceSchema(), dj.find("Nachname","Lutz*"));
+    printResults("Vorname = Christoph", dj.getMainDatasourceSchema(), dj.find("Vorname","Christoph"));
     printResults("Nachname = *uX, Vorname = m*", dj.getMainDatasourceSchema(), dj.find("Nachname","*uX","Vorname","m*"));
     printResults("Homepage = *limux", dj.getMainDatasourceSchema(), dj.find("Homepage","*limux"));
     printResults("Homepage = *limux, Nachname = B*", dj.getMainDatasourceSchema(), dj.find("Homepage","*limux","Nachname","B*"));

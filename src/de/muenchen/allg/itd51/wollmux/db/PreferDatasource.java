@@ -1,4 +1,4 @@
-/* TODO Testen von PreferDatasource
+/* 
 * Dateiname: PreferDatasource.java
 * Projekt  : WollMux
 * Funktion : Datasource, die Daten einer Datenquelle von Datein einer andere
@@ -10,6 +10,7 @@
 * Datum      | Wer | Änderungsgrund
 * -------------------------------------------------------------------
 * 07.11.2005 | BNK | Erstellung
+* 11.11.2005 | BNK | getestet und debuggt
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -20,7 +21,6 @@ package de.muenchen.allg.itd51.wollmux.db;
 
 import java.net.URL;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -101,34 +101,67 @@ public class PreferDatasource implements Datasource
     Set schema1 = source1.getSchema();
     Set schema2 = source2.getSchema();
     if (!schema1.containsAll(schema2) || !schema2.containsAll(schema1))
-      throw new ConfigurationErrorException("Schemata der Datenquellen \""+source1Name+"\" und \""+source2Name+"\" stimmen nicht überein");
+    {
+      Set difference1 = new HashSet(schema1);
+      difference1.removeAll(schema2);
+      Set difference2 = new HashSet(schema2);
+      difference2.removeAll(schema1);
+      StringBuffer buf1 = new StringBuffer();
+      Iterator iter = difference1.iterator();
+      while (iter.hasNext())
+      {
+        buf1.append((String)iter.next());
+        if (iter.hasNext()) buf1.append(", ");
+      }
+      StringBuffer buf2 = new StringBuffer();
+      iter = difference2.iterator();
+      while (iter.hasNext())
+      {
+        buf2.append((String)iter.next());
+        if (iter.hasNext()) buf2.append(", ");
+      }
+      throw new ConfigurationErrorException("Datenquelle \""+source1Name+"\" fehlen die Spalten: "+buf2+" und Datenquelle \""+source2Name+"\" fehlen die Spalten: "+buf1);
+    }
+
     
     schema = new HashSet(schema1);
   }
 
   public Set getSchema()
   {
-    return new HashSet(schema);
+    return schema;
   }
 
   public QueryResults getDatasetsByKey(Collection keys, long timeout) throws TimeoutException
   {
-    long time = new Date().getTime();
+    long endTime = System.currentTimeMillis() + timeout;
     QueryResults results = source2.getDatasetsByKey(keys, timeout);
-    time = (new Date().getTime()) - time;
-    timeout -= time;
+    
+    timeout = endTime - System.currentTimeMillis();
     if (timeout <= 0) throw new TimeoutException("Datenquelle "+source2Name+" konnte Anfrage getDatasetsByKey() nicht schnell genug beantworten");
-    return new QueryResultsOverride(results, source1, timeout);
+     
+    QueryResults overrideResults = source1.getDatasetsByKey(keys, timeout);
+    
+    timeout = endTime - System.currentTimeMillis();
+    if (timeout <= 0) throw new TimeoutException("Datenquelle "+source1Name+" konnte Anfrage getDatasetsByKey() nicht schnell genug beantworten");
+    
+    return new QueryResultsOverride(results, overrideResults, source1, timeout);
   }
 
   public QueryResults find(List query, long timeout) throws TimeoutException
   {
-    long time = new Date().getTime();
+    long endTime = System.currentTimeMillis() + timeout;
     QueryResults results = source2.find(query, timeout);
-    time = (new Date().getTime()) - time;
-    timeout -= time;
+    
+    timeout = endTime - System.currentTimeMillis();
     if (timeout <= 0) throw new TimeoutException("Datenquelle "+source2Name+" konnte Anfrage find() nicht schnell genug beantworten");
-    return new QueryResultsOverride(results, source1, timeout);
+     
+    QueryResults overrideResults = source1.find(query, timeout);
+    
+    timeout = endTime - System.currentTimeMillis();
+    if (timeout <= 0) throw new TimeoutException("Datenquelle "+source1Name+" konnte Anfrage find() nicht schnell genug beantworten");
+    
+    return new QueryResultsOverride(results, overrideResults, source1, timeout);
   }
 
   public String getName()
@@ -143,9 +176,12 @@ public class PreferDatasource implements Datasource
     private QueryResults overrideResults;
     private QueryResults results;
     
-    public QueryResultsOverride(QueryResults results, Datasource override, long timeout)
+    public QueryResultsOverride(QueryResults results, QueryResults overrideResults, Datasource override, long timeout)
     throws TimeoutException
     {
+      this.overrideResults = overrideResults;
+      
+      long endTime = System.currentTimeMillis() + timeout;
       this.results = results;
       size = results.size();
         
@@ -153,30 +189,49 @@ public class PreferDatasource implements Datasource
       
       Iterator iter = results.iterator();
       while (iter.hasNext())
-      {
+      { 
         Dataset ds = (Dataset)iter.next();
         String key = ds.getKey();
         if (!keyToCount.containsKey(key))
           keyToCount.put(key, new int[]{0});
         int[] count = (int[])keyToCount.get(key);
         ++count[0];
+        if (System.currentTimeMillis() > endTime)
+          throw new TimeoutException();
       }
- 
-      overrideResults = override.getDatasetsByKey(keyToCount.keySet(),timeout);
+      
+      /**
+       * Datensätze für die ein Korrekturdatensatz vorliegt, dieaber nicht in
+       * overrideResults auftauchen (weil die Korrektur dafür gesorgt hat, dass
+       * die Suchbedingung nicht mehr passt) müssen auch mit ihrem Schlüssel
+       * auf die Blacklist. Deswegen müssen wir diese Datensätze suchen.
+       */
+      timeout = endTime - System.currentTimeMillis();
+      if (timeout <= 0) throw new TimeoutException();
+      QueryResults blacklistResults = override.getDatasetsByKey(keyToCount.keySet(),timeout); 
       
       size += overrideResults.size();
       
-      iter = overrideResults.iterator();
-      while (iter.hasNext())
+      QueryResults[] oResults = new QueryResults[]{overrideResults, blacklistResults};
+      
+      for (int i = 0; i < oResults.length; ++i)
       {
-        Dataset ds = (Dataset)iter.next();
-        String key = ds.getKey();
-        
-        int[] count = (int[])keyToCount.get(key);
-        size -= count[0];
-        count[0] = 0;
-        
-        keyBlacklist.add(key);
+        iter = oResults[i].iterator();
+        while (iter.hasNext())
+        {
+          Dataset ds = (Dataset)iter.next();
+          String key = ds.getKey();
+          
+          int[] count = (int[])keyToCount.get(key);
+          if (count != null)
+          {
+            size -= count[0];
+            count[0] = 0;
+            keyBlacklist.add(key);
+          }
+          if (System.currentTimeMillis() > endTime)
+            throw new TimeoutException();
+        }
       }
     }
     
