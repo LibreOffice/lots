@@ -483,7 +483,6 @@ public class MenuList
    * @throws NodeNotFoundException
    */
   private List getMenuItems(ConfigThingy lhmVorlage)
-      throws NodeNotFoundException
   {
     ArrayList results = new ArrayList();
     // an element is smth like "LHMVorlagen(...)"
@@ -507,7 +506,7 @@ public class MenuList
    * @throws NodeNotFoundException 
    */
   public static void generateMenues(ConfigThingy configThingy,
-      XComponentContext xContext, XFrame xFrame) throws NodeNotFoundException
+      XComponentContext xContext, XFrame xFrame)
   {
     try
     {
@@ -516,6 +515,10 @@ public class MenuList
     catch (Exception e)
     {
       Logger.error("Generation of the menu failed", e);
+    }
+    catch (NodeNotFoundException e)
+    {
+      Logger.error(e);
     }
   }
 
