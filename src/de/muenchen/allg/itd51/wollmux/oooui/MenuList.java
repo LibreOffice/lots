@@ -98,28 +98,23 @@ public class MenuList
 
   private static String S_MENUBAR = "private:resource/menubar/menubar";
 
-  // private static String S_TOOLBAR = "private:resource/toolbar/UITest";
   private static String S_TOOLBAR_PREFIX = "private:resource/toolbar/user_";
 
-  // info about the type of the currently generated elment (e.g. toolbar, menu)
+  // currently generated element type {MENU,TOOLBAR}
   private int elementType = 0;
 
   private static String PREFIX = "wollmux:";
 
   private static String UNDEFINED = "undefined";
 
-  private static String SEPARATOR = "-----------------";
+  private static String MENU_SEPARATOR = "-----------------";
+  private static String TOOLBAR_SEPARATOR = "|";
 
-  private XIndexContainer oMenuBarSettings;
+  private XIndexContainer oElementSettings;
 
-  // TODO: delete fileMenus as soon as the problem with empty entries in the
-  // submenus is solved
+  // TODO: a "File" UI item
   private PropertyValue[] fileMenus;
 
-  // TODO: the string is intended to be used for the creation of the separators.
-  // TODO: Contains the last inserted MenuItem. Doesn't work for unknown
-  // reasons.
-  // private String lastCommandUrl = "wollmux:myaction";
 
   /**
    * Der Konstruktor erzeugt eine neue MenuList aus einer gegebenen
@@ -132,25 +127,24 @@ public class MenuList
   protected MenuList(ConfigThingy root, XComponentContext xContext,
       XFrame xFrame, String targetUIStr) throws Exception
   {
+    this.xFrame = xFrame;
+    this.mxRemoteContext = xContext;
 
     if (targetUIStr.equals(S_MENUBAR))
     {
       elementType = MENU;
-      _generateMenues(root, xContext, xFrame, targetUIStr);
+      _generateMenues(root, targetUIStr);
     }
     else if (targetUIStr.equals(S_TOOLBAR_PREFIX))
     {
       elementType = TOOLBAR;
-      _generateToolbar(root, xContext, xFrame, targetUIStr);
+      _generateToolbar(root, targetUIStr);
     }
 
   }
 
-  private void _generateToolbar(ConfigThingy root, XComponentContext xContext,
-      XFrame xFrame, String targetUIStr) throws Exception
+  private void _generateToolbar(ConfigThingy root, String targetUIStr) throws Exception
   {
-    this.xFrame = xFrame;
-    this.mxRemoteContext = xContext;
     initConnection();
 
     htIdToMenu = readMenues(root);
@@ -180,16 +174,15 @@ public class MenuList
       {
         ConfigThingy element = (ConfigThingy) iter.next();
         PropertyValue[] topMenu = createUIItemeTree(element);
-        oMenuBarSettings.insertByIndex(mCounter, topMenu);
+        oElementSettings.insertByIndex(mCounter, topMenu);
         mCounter++;
       }
-      xoMenuBarSettings.setSettings(oMenuBarSettings);
-      XUIConfigurationPersistence xUIConfigurationPersistence = (XUIConfigurationPersistence) UnoRuntime
-          .queryInterface(XUIConfigurationPersistence.class, uiConfigManager);
-      xUIConfigurationPersistence.store();
-      xUIConfigurationPersistence.isReadOnly();
+      xoMenuBarSettings.setSettings(oElementSettings);
     }
-
+    
+    XUIConfigurationPersistence xUIConfigurationPersistence = (XUIConfigurationPersistence) UnoRuntime
+    .queryInterface(XUIConfigurationPersistence.class, uiConfigManager);
+    xUIConfigurationPersistence.store();
   }
 
   /**
@@ -209,25 +202,25 @@ public class MenuList
       IllegalArgumentException, WrappedTargetException
 
   {
-    XUIElement oMenuBar = xLayoutManager.getElement(tbResource);
-    if (oMenuBar == null)
+    XUIElement uiElement = xLayoutManager.getElement(tbResource);
+    if (uiElement == null)
     {
       xLayoutManager.destroyElement(tbResource);
       xLayoutManager.createElement(tbResource);
-      oMenuBar = xLayoutManager.getElement(tbResource);
+      uiElement = xLayoutManager.getElement(tbResource);
     }
     xLayoutManager.showElement(tbResource);
 
     XPropertySet props = (XPropertySet) UnoRuntime.queryInterface(
         XPropertySet.class,
-        oMenuBar);
+        uiElement);
     props.setPropertyValue("Persistent", new Boolean(false));
-    XUIElementSettings xoMenuBarSettings = (XUIElementSettings) UnoRuntime
-        .queryInterface(XUIElementSettings.class, oMenuBar);
-    oMenuBarSettings = (XIndexContainer) UnoRuntime.queryInterface(
+    XUIElementSettings xoElementSettings = (XUIElementSettings) UnoRuntime
+        .queryInterface(XUIElementSettings.class, uiElement);
+    oElementSettings = (XIndexContainer) UnoRuntime.queryInterface(
         XIndexContainer.class,
-        xoMenuBarSettings.getSettings(true));
-    return xoMenuBarSettings;
+        xoElementSettings.getSettings(true));
+    return xoElementSettings;
   }
 
   private Hashtable readMenues(ConfigThingy root) throws NodeNotFoundException
@@ -257,14 +250,9 @@ public class MenuList
     return hash;
   }
 
-  private void _generateMenues(ConfigThingy root, XComponentContext xContext,
-      XFrame xFrame, String targetUIStr) throws Exception,
-      NodeNotFoundException, UnknownPropertyException, PropertyVetoException,
-      IllegalArgumentException, WrappedTargetException,
-      IndexOutOfBoundsException, com.sun.star.uno.Exception
+  private void _generateMenues(ConfigThingy root, String targetUIStr) throws Exception 
   {
-    this.xFrame = xFrame;
-    this.mxRemoteContext = xContext;
+
     initConnection();
     // 0. read in the names of all top-level menues.
     Iterator mlIter = root.query("Menueleiste").getFirstChild().iterator();
@@ -277,19 +265,10 @@ public class MenuList
     htIdToMenu = readMenues(root);
 
     // 2. init objects required for the creation of the menu elements
-    XUIElement oMenuBar = xLayoutManager.getElement(targetUIStr);
-    XPropertySet props = (XPropertySet) UnoRuntime.queryInterface(
-        XPropertySet.class,
-        oMenuBar);
-    props.setPropertyValue("Persistent", new Boolean(false));
-    XUIElementSettings xoMenuBarSettings = (XUIElementSettings) UnoRuntime
-        .queryInterface(XUIElementSettings.class, oMenuBar);
-    oMenuBarSettings = (XIndexContainer) UnoRuntime.queryInterface(
-        XIndexContainer.class,
-        xoMenuBarSettings.getSettings(true));
+    XUIElementSettings xoMenuBarSettings = getUIElementSettings(targetUIStr);
     fileMenus = (PropertyValue[]) UnoRuntime.queryInterface(
         PropertyValue[].class,
-        oMenuBarSettings.getByIndex(7));
+        oElementSettings.getByIndex(7));
     fileMenus = LimuxHelper.setProperty(
         fileMenus,
         "ItemDescriptorContainer",
@@ -301,14 +280,13 @@ public class MenuList
       ConfigThingy element = (ConfigThingy) iter.next();
 
       PropertyValue[] topMenu = createUIItemeTree(element);
-      // TODO: check if insertion at POSITION is possible
-      // UNDO 2
-      oMenuBarSettings.insertByIndex(Integer.parseInt(LimuxHelper.getProperty(
+      // TODO: check if insert at POSITION is possible
+      oElementSettings.insertByIndex(Integer.parseInt(LimuxHelper.getProperty(
           element,
           "POSITION",
           "0")), topMenu);
 
-      xoMenuBarSettings.setSettings(oMenuBarSettings);
+      xoMenuBarSettings.setSettings(oElementSettings);
     }
 
     XUIConfigurationPersistence xUIConfigurationPersistence = (XUIConfigurationPersistence) UnoRuntime
@@ -348,14 +326,12 @@ public class MenuList
    * top-level menu. The methods is called recursively.
    * 
    * @param ct
-   * @throws WrappedTargetException
-   * @throws IndexOutOfBoundsException
-   * @throws IllegalArgumentException
+   * @throws WrappedTargetException 
+   * @throws IndexOutOfBoundsException 
+   * @throws IllegalArgumentException 
    * 
    */
-  protected PropertyValue[] createUIItemeTree(ConfigThingy ct)
-      throws IllegalArgumentException, IndexOutOfBoundsException,
-      WrappedTargetException
+  protected PropertyValue[] createUIItemeTree(ConfigThingy ct) throws IllegalArgumentException, IndexOutOfBoundsException, WrappedTargetException
   {
 
     if (LimuxHelper.getProperty(ct, "TYPE", UNDEFINED).equals("menu"))
@@ -387,13 +363,8 @@ public class MenuList
       {
         ConfigThingy subCt = (ConfigThingy) iter.next();
         menuItem = createUIItemeTree(subCt);
-        // TODO: re-implement as soon as the following problem is solved:
-        // the submenues are not shown, if first entry in the menuu doesn't
-        // confirm
-        // to some _unknown_ criterias. A workarround is to use the "File" (or
-        // any other
-        // standard menu entry) for creation of the first entry in the custom
-        // menu.
+        // TODO: TRICK: a "File" menubar uiItem is used as a template  
+        //       when inserting it as a subitem into a custom top-level item; 
         if (counter == 0)
         {
           fileMenus = LimuxHelper.setProperty(fileMenus, "Label", LimuxHelper
@@ -612,11 +583,11 @@ public class MenuList
   {
     PropertyValue[] menu;
     ArrayList arr = new ArrayList();
-    for (int i = oMenuBarSettings.getCount() - 1; i >= 0; i--)
+    for (int i = oElementSettings.getCount() - 1; i >= 0; i--)
     {
       menu = (PropertyValue[]) UnoRuntime.queryInterface(
           PropertyValue[].class,
-          oMenuBarSettings.getByIndex(i));
+          oElementSettings.getByIndex(i));
       String url = (String) LimuxHelper.getProperty(
           menu,
           "CommandURL",
@@ -630,7 +601,7 @@ public class MenuList
     for (Iterator iter = arr.iterator(); iter.hasNext();)
     {
       Integer i = (Integer) iter.next();
-      oMenuBarSettings.removeByIndex(i.intValue());
+      oElementSettings.removeByIndex(i.intValue());
 
     }
   }
@@ -638,14 +609,13 @@ public class MenuList
   private PropertyValue[] createSeparator(ConfigThingy ct)
   {
     PropertyValue[] loadProps = null;
-
     switch (elementType)
     {
       case TOOLBAR:
-        loadProps = LimuxHelper.setProperty(loadProps, "Label", SEPARATOR);
+        loadProps = LimuxHelper.setProperty(loadProps, "Label", TOOLBAR_SEPARATOR);
         break;
       case MENU:
-        loadProps = LimuxHelper.setProperty(loadProps, "Label", SEPARATOR);
+        loadProps = LimuxHelper.setProperty(loadProps, "Label", MENU_SEPARATOR);
         break;
       default:
         break;
@@ -709,6 +679,7 @@ public class MenuList
             loadProps,
             "Type",
             FormButtonType.PUSH);
+        // User commented code to add extra properties for the TOOLBAR item
         // Style
         // (other possible types would be "ItemStyle.AUTO_SIZE" or
         // "ItemStyle.DRAW_FLAT")
@@ -783,7 +754,7 @@ public class MenuList
       xController = xModel.getCurrentController();
       xFrame = xController.getFrame();
 
-      // MenuList.generateMenues(conf, testmxRemoteContext, xFrame);
+       MenuList.generateMenues(conf, testmxRemoteContext, xFrame);
 
       MenuList.generateToolbarEntries(conf, testmxRemoteContext, xFrame);
 
