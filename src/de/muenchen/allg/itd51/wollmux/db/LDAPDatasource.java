@@ -62,7 +62,7 @@ public class LDAPDatasource implements Datasource
   private Properties properties = new Properties();
   
   // Separator zur Schluesselerzeugung aus mehreren Schluesselwerten
-  private final static String SEPARATOR = ":::::";
+  private final static String SEPARATOR = "&:=&:%";
   
   // Map von query-Strings auf LDAP-Attributnamen
   private Map nameMap = new HashMap();
@@ -72,7 +72,6 @@ public class LDAPDatasource implements Datasource
   
   // Key-Attribute (LDAP)
   private List keyAttributes = new Vector();
-  private List absoluteAttributes = new Vector();
   private int keyStatus; // 0:= nur absolute Attribute, 1:= absolute und relative Attribute, 2:= nur relative Attribute
   
   // regex für erlaubte Bezeichner
@@ -207,11 +206,9 @@ public class LDAPDatasource implements Datasource
       
       if (currentKeyLDAPAttribute.relativePath != 0) {
         onlyAbsolute = false;
-        absoluteAttributes.add(new Boolean(false));
       }
       if (currentKeyLDAPAttribute.relativePath == 0) {
         onlyRelative = false;
-        absoluteAttributes.add(new Boolean(true));
       }
       
       keyAttributes.add(currentName);
@@ -328,14 +325,11 @@ public class LDAPDatasource implements Datasource
 
       }
       
-      System.out.println(searchFilter);
       
       // search LDAP
       NamingEnumeration currentResults = searchLDAPPerson("", searchFilter, true, true,timeout);
       
       Vector results = new Vector();
-      
-      System.out.println(results.size());
       
       while(currentResults.hasMoreElements()) {
         if (System.currentTimeMillis()>endTime) throw new TimeoutException();
@@ -797,18 +791,21 @@ public class LDAPDatasource implements Datasource
 
     String[] keyValues = key.split(SEPARATOR);
     
-    
     String query = "";   
     boolean first = true;
     for (int n=0; n<keyValues.length; n++) {
-      Boolean isAbsolute = (Boolean)absoluteAttributes.get(n);
-      if (isAbsolute.booleanValue()) {
-        if (first) {
-          query = "(" + keyAttributes.get(n) + "=" + keyValues[n] + ")";
+
+      LDAPAttribute currentAttribute = (LDAPAttribute) nameMap.get(keyAttributes.get(n));
+      
+      if (currentAttribute.relativePath==0) {
+        
+        if (first) {  
+          query = "(" + currentAttribute.attributeName + "=" + keyValues[n] + ")";
           first = false;
         } else {
-          query = "(&(" + keyAttributes.get(n) + "=" + keyValues[n] + ")" + query + ")";
+          query = "(&(" + currentAttribute.attributeName + "=" + keyValues[n] + ")" + query + ")";
         }
+        
       }
     }
     return query;
@@ -1089,7 +1086,6 @@ public class LDAPDatasource implements Datasource
   
   private void test() {
     
-    String filer = "(|(&(Nachname=Friderich)(OID=3891))(|(&(Nachname=Grüner-Köbele)(OID=3894))(&(Nachname=Laur)(OID=3893))))";
  
   
     try {
@@ -1100,14 +1096,7 @@ public class LDAPDatasource implements Datasource
       
       so.setSearchScope(so.SUBTREE_SCOPE);
       
-      NamingEnumeration ne = ctx.search(baseDN,filer,so);
-      
-      System.out.println("xxx");
-      
-      while(ne.hasMoreElements()) {
-        System.out.println("!");
-        ne.nextElement();
-      }
+
       
       
     } catch(Exception e ){
@@ -1181,9 +1170,7 @@ public class LDAPDatasource implements Datasource
     ConfigThingy sourceDesc = ldapConf.query("Datenquelle").getFirstChild();
     LDAPDatasource dj = new LDAPDatasource(nameToDatasource, sourceDesc, context);
     
-    //dj.test();
     
-    /*
    QueryResults qr = dj.simpleFind("OrgaEmail","  r.kom@muenchen.de","Orga1","Referatsleitung");
     Iterator iter = qr.iterator();
     
@@ -1192,17 +1179,18 @@ public class LDAPDatasource implements Datasource
     while(iter.hasNext()) {
       Dataset ds = (Dataset) iter.next();
       String key = ds.getKey();
-      System.out.println(ds.getKey());
+      System.out.println("Key: " + ds.getKey());
       
       keys.add(key);
       
     }
     
+    
     QueryResults qr2 = dj.getDatasetsByKey(keys,30000);
     
-    dj.printResults("xxx",dj.schema,qr2);
-    */
-
+    dj.printResults("Get and find keys: ",dj.schema,qr2);
+    
+    
     printResults("OrgaEmail = r.kom@muenchen.de , Orga1 = Referatsleitung", dj.getSchema(), dj.simpleFind("OrgaEmail","  r.kom@muenchen.de","Orga1","Referatsleitung"));
     printResults("OrgaEmail = r.kom@muenchen.de , Orga3 = Referatsleitung", dj.getSchema(), dj.simpleFind("OrgaEmail","  r.kom@muenchen.de","Orga3","Referatsleitung"));
     printResults("Orga2 = Stadtarchiv , Referat = Direktorium", dj.getSchema(), dj.simpleFind("Orga2","Stadtarchiv","Referat","Direktorium")); 
