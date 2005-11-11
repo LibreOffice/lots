@@ -17,8 +17,6 @@
  */
 package de.muenchen.allg.itd51.wollmux;
 
-import com.sun.star.uno.UnoRuntime;
-import com.sun.star.uno.XInterface;
 
 /**
  * Diese Klasse repräsentiert ein WollMux-Ereignis. Alle WollMux-Ereignisse
@@ -156,39 +154,18 @@ public class Event
   }
 
   /**
-   * Der Konstruktor erzeugt ein Event-Objekt aus einem gegebenen
-   * OOo-Document-Event docEvent. Dabei werden nur docEvents ausgewertet, die
-   * auch WollMux-Events sind. Ist das docEvent für den WollMux nicht relevant,
-   * so wird ein Event mit dem Namen Event.UNKNOWN erzeugt.
+   * Der Konstruktor erzeugt ein neues Event mit dem Namen event, dem
+   * String-argument argument und der Quelle source.
    * 
-   * @param docEvent
+   * @param event
+   * @param argument
+   * @param source
    */
-  public Event(com.sun.star.document.EventObject docEvent)
+  public Event(int event, String argument, Object source)
   {
-    this.event = UNKNOWN;
-    this.source = (XInterface) UnoRuntime.queryInterface(
-        XInterface.class,
-        docEvent.Source);
-
-    // Bekannte Event-Typen rausziehen:
-    if (docEvent.EventName.compareToIgnoreCase("OnLoad") == 0)
-      this.event = ON_LOAD;
-    if (docEvent.EventName.compareToIgnoreCase("OnNew") == 0)
-      this.event = ON_NEW;
-  }
-
-  /**
-   * Der Konstruktor erzeugt ein Event-Objekt aus einem gegebenen
-   * OOo-Modify-Event modifyEvent. Dabei werden nur modifyEvents ausgewertet,
-   * die auch WollMux-Events sind. Ist das modifyEvent für den WollMux nicht
-   * relevant, so wird ein Event mit dem Namen Event.UNKNOWN erzeugt.
-   */
-  public Event(com.sun.star.lang.EventObject modifyEvent)
-  {
-    this.event = ON_MODIFIED;
-    this.source = (XInterface) UnoRuntime.queryInterface(
-        XInterface.class,
-        modifyEvent.Source);
+    this.event = event;
+    this.argument = argument;
+    this.source = source;
   }
 
   /**

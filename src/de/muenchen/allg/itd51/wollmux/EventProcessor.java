@@ -24,11 +24,15 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.sun.star.document.XEventListener;
+import com.sun.star.frame.XFrame;
 import com.sun.star.lang.XComponent;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.util.XModifyListener;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.afid.UnoService;
+import de.muenchen.allg.itd51.wollmux.comp.WollMux;
+import de.muenchen.allg.itd51.wollmux.oooui.MenuList;
 
 /**
  * Der EventProcessor sorgt für eine synchronisierte Verarbeitung aller
@@ -110,9 +114,28 @@ public class EventProcessor implements XEventListener, XModifyListener,
    */
   public void notifyEvent(com.sun.star.document.EventObject docEvent)
   {
-    Logger
-        .debug2("Incoming: " + new Event(docEvent) + " " + docEvent.EventName);
-    addEvent(new Event(docEvent));
+    Logger.debug2("Incoming documentEvent: " + docEvent.EventName);
+    UnoService source = new UnoService(docEvent.Source);
+
+    // Bekannte Event-Typen rausziehen:
+    if (docEvent.EventName.compareToIgnoreCase("OnLoad") == 0)
+      addEvent(new Event(Event.ON_LOAD, "", docEvent.Source));
+
+    if (docEvent.EventName.compareToIgnoreCase("OnNew") == 0)
+      addEvent(new Event(Event.ON_NEW, "", docEvent.Source));
+
+    if (docEvent.EventName.compareToIgnoreCase("OnPrepareUnload") == 0)
+    {
+      // auf das Event OnPrepareUnload muss synchron reagiert werden:
+      if (source.xTextDocument() != null)
+      {
+        Logger.debug2("Making Toolbar persistent.");
+        XFrame frame = source.xModel().getCurrentController().getFrame();
+        MenuList.generateToolbarEntries(WollMux.getWollmuxConf(), WollMux
+            .getXComponentContext(), frame);
+        MenuList.store(WollMux.getXComponentContext(), frame);
+      }
+    }
   }
 
   /**
@@ -122,8 +145,7 @@ public class EventProcessor implements XEventListener, XModifyListener,
    */
   public void modified(com.sun.star.lang.EventObject modifyEvent)
   {
-    Logger.debug2("Incoming: " + new Event(modifyEvent));
-    addEvent(new Event(modifyEvent));
+    addEvent(new Event(Event.ON_MODIFIED, "", modifyEvent.Source));
   }
 
   /**
