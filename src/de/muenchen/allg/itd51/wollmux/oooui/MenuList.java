@@ -94,7 +94,7 @@ public class MenuList
 
   private XLayoutManager xLayoutManager;
 
-  private XUIConfigurationManager uiConfigManager;
+  private static XUIConfigurationManager uiConfigManager;
 
   private XModuleUIConfigurationManagerSupplier xCmSupplier;
 
@@ -148,6 +148,20 @@ public class MenuList
 
   }
 
+  
+  protected MenuList(XComponentContext xContext,
+      XFrame xFrame) throws Exception, NodeNotFoundException
+  {
+    this.xFrame = xFrame;
+    this.mxRemoteContext = xContext;
+    
+    initConnection();
+    
+    XUIConfigurationPersistence xUIConfigurationPersistence = (XUIConfigurationPersistence) UnoRuntime
+    .queryInterface(XUIConfigurationPersistence.class, uiConfigManager);
+    xUIConfigurationPersistence.store();
+  }
+  
   private void _generateToolbar(ConfigThingy root, String targetUIStr) throws Exception, NodeNotFoundException
   {
     initConnection();
@@ -184,8 +198,7 @@ public class MenuList
       }
       xoMenuBarSettings.setSettings(oElementSettings);
     }
-    
-    store();
+
   }
 
   /**
@@ -297,8 +310,6 @@ public class MenuList
 
       xoMenuBarSettings.setSettings(oElementSettings);
     }
-
-    store();
   }
 
   /**
@@ -537,11 +548,11 @@ public class MenuList
    * make change to the menu/toolbar element persistant
    * 
    * @throws Exception
+   * @throws NodeNotFoundException 
    */
-  public void store() throws Exception{
-    XUIConfigurationPersistence xUIConfigurationPersistence = (XUIConfigurationPersistence) UnoRuntime
-    .queryInterface(XUIConfigurationPersistence.class, uiConfigManager);
-    xUIConfigurationPersistence.store();    
+  public static void store(XComponentContext xContext,
+      XFrame xFrame) throws Exception, NodeNotFoundException{
+    new MenuList(xContext, xFrame);
   }
   
   /**
@@ -778,9 +789,11 @@ public class MenuList
       xController = xModel.getCurrentController();
       xFrame = xController.getFrame();
 
-       MenuList.generateMenues(conf, testmxRemoteContext, xFrame);
+//       MenuList.generateMenues(conf, testmxRemoteContext, xFrame);
+//
+//      MenuList.generateToolbarEntries(conf, testmxRemoteContext, xFrame);
 
-      MenuList.generateToolbarEntries(conf, testmxRemoteContext, xFrame);
+      store(testmxRemoteContext,xFrame);
 
     }
     catch (Exception e)
