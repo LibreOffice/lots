@@ -20,6 +20,7 @@ package de.muenchen.allg.itd51.wollmux.oooui;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -30,6 +31,7 @@ import com.sun.star.beans.PropertyValue;
 import com.sun.star.beans.PropertyVetoException;
 import com.sun.star.beans.UnknownPropertyException;
 import com.sun.star.beans.XPropertySet;
+import com.sun.star.comp.helper.BootstrapException;
 import com.sun.star.container.XIndexContainer;
 import com.sun.star.form.FormButtonType;
 import com.sun.star.frame.XController;
@@ -47,11 +49,13 @@ import com.sun.star.ui.XUIConfigurationManager;
 import com.sun.star.ui.XUIConfigurationPersistence;
 import com.sun.star.ui.XUIElement;
 import com.sun.star.ui.XUIElementSettings;
+import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
+import de.muenchen.allg.itd51.parser.SyntaxErrorException;
 import de.muenchen.allg.itd51.wollmux.Logger;
 
 /**
@@ -123,9 +127,10 @@ public class MenuList
    * @param root
    *          Wurzel des Konfigurationsbaumes der Konfigurationsdatei.
    * @throws Exception
+   * @throws NodeNotFoundException 
    */
   protected MenuList(ConfigThingy root, XComponentContext xContext,
-      XFrame xFrame, String targetUIStr) throws Exception
+      XFrame xFrame, String targetUIStr) throws Exception, NodeNotFoundException
   {
     this.xFrame = xFrame;
     this.mxRemoteContext = xContext;
@@ -143,7 +148,7 @@ public class MenuList
 
   }
 
-  private void _generateToolbar(ConfigThingy root, String targetUIStr) throws Exception
+  private void _generateToolbar(ConfigThingy root, String targetUIStr) throws Exception, NodeNotFoundException
   {
     initConnection();
 
@@ -155,7 +160,7 @@ public class MenuList
     while (iterOverElements.hasNext())
     {
       ConfigThingy uiElement = (ConfigThingy) iterOverElements.next();
-      String tbResource = targetUIStr + uiElement.getName();
+      String tbResource = S_TOOLBAR_PREFIX + uiElement.getName();
       Iterator iterOverItems = uiElement.queryByChild("TYPE").iterator();
       topLevelMenues = new ArrayList();
       while (iterOverItems.hasNext())
@@ -180,9 +185,7 @@ public class MenuList
       xoMenuBarSettings.setSettings(oElementSettings);
     }
     
-    XUIConfigurationPersistence xUIConfigurationPersistence = (XUIConfigurationPersistence) UnoRuntime
-    .queryInterface(XUIConfigurationPersistence.class, uiConfigManager);
-    xUIConfigurationPersistence.store();
+    store();
   }
 
   /**
@@ -208,13 +211,19 @@ public class MenuList
       xLayoutManager.destroyElement(tbResource);
       xLayoutManager.createElement(tbResource);
       uiElement = xLayoutManager.getElement(tbResource);
+      
+      XPropertySet props = (XPropertySet) UnoRuntime.queryInterface(
+          XPropertySet.class,
+          uiElement);
+      props.setPropertyValue("Persistent", new Boolean(false));
+    } else {
+      XPropertySet props = (XPropertySet) UnoRuntime.queryInterface(
+          XPropertySet.class,
+          uiElement);
+      props.setPropertyValue("Persistent", new Boolean(true));    
     }
+    
     xLayoutManager.showElement(tbResource);
-
-    XPropertySet props = (XPropertySet) UnoRuntime.queryInterface(
-        XPropertySet.class,
-        uiElement);
-    props.setPropertyValue("Persistent", new Boolean(false));
     XUIElementSettings xoElementSettings = (XUIElementSettings) UnoRuntime
         .queryInterface(XUIElementSettings.class, uiElement);
     oElementSettings = (XIndexContainer) UnoRuntime.queryInterface(
@@ -250,7 +259,7 @@ public class MenuList
     return hash;
   }
 
-  private void _generateMenues(ConfigThingy root, String targetUIStr) throws Exception 
+  private void _generateMenues(ConfigThingy root, String targetUIStr) throws Exception, NodeNotFoundException 
   {
 
     initConnection();
@@ -289,9 +298,7 @@ public class MenuList
       xoMenuBarSettings.setSettings(oElementSettings);
     }
 
-    XUIConfigurationPersistence xUIConfigurationPersistence = (XUIConfigurationPersistence) UnoRuntime
-        .queryInterface(XUIConfigurationPersistence.class, uiConfigManager);
-    xUIConfigurationPersistence.store();
+    store();
   }
 
   /**
@@ -469,7 +476,7 @@ public class MenuList
   {
     ArrayList results = new ArrayList();
     // an element is smth like "LHMVorlagen(...)"
-    Iterator iter1 = lhmVorlage.getByChild("TYPE").iterator();
+    Iterator iter1 = lhmVorlage.queryByChild("TYPE").iterator();
     while (iter1.hasNext())
     {
       // every element is something like "Element(...)" entry
@@ -486,9 +493,10 @@ public class MenuList
    * 
    * @param configThingy
    * @param xFrame
+   * @throws NodeNotFoundException 
    */
   public static void generateMenues(ConfigThingy configThingy,
-      XComponentContext xContext, XFrame xFrame)
+      XComponentContext xContext, XFrame xFrame) throws NodeNotFoundException
   {
     try
     {
@@ -518,8 +526,24 @@ public class MenuList
     {
       Logger.error("Generation of the toolbar entries failed", e);
     }
+    catch (NodeNotFoundException e)
+    {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
   }
 
+  /**
+   * make change to the menu/toolbar element persistant
+   * 
+   * @throws Exception
+   */
+  public void store() throws Exception{
+    XUIConfigurationPersistence xUIConfigurationPersistence = (XUIConfigurationPersistence) UnoRuntime
+    .queryInterface(XUIConfigurationPersistence.class, uiConfigManager);
+    xUIConfigurationPersistence.store();    
+  }
+  
   /**
    * generate a menu entry which corresponds to the type "menu" in the
    * "LHMVorlagenMenue.conf" and as a result contains the submenues.
@@ -760,6 +784,26 @@ public class MenuList
 
     }
     catch (Exception e)
+    {
+      Logger.error("Error in main()", e);
+    }
+    catch (MalformedURLException e)
+    {
+      Logger.error("Error in main()", e);
+    }
+    catch (IOException e)
+    {
+      Logger.error("Error in main()", e);
+    }
+    catch (SyntaxErrorException e)
+    {
+      Logger.error("Error in main()", e);
+    }
+    catch (NodeNotFoundException e)
+    {
+      Logger.error("Error in main()", e);
+    }
+    catch (BootstrapException e)
     {
       Logger.error("Error in main()", e);
     }
