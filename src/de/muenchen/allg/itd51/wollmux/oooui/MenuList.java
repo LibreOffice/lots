@@ -826,10 +826,6 @@ public class MenuList
     {
       Logger.error("Error in main()", e);
     }
-    catch (NodeNotFoundException e)
-    {
-      Logger.error("Error in main()", e);
-    }
     catch (BootstrapException e)
     {
       Logger.error("Error in main()", e);
