@@ -224,6 +224,8 @@ public class EventHandler
       XFrame frame = source.xModel().getCurrentController().getFrame();
       MenuList.generateMenues(WollMux.getWollmuxConf(), WollMux
           .getXComponentContext(), frame);
+      MenuList.generateToolbarEntries(WollMux.getWollmuxConf(), WollMux
+          .getXComponentContext(), frame);
 
       // Interpretation von WM-Kommandos
       new WMCommandInterpreter(source.xTextDocument()).interpret();
