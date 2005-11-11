@@ -62,7 +62,7 @@ public class LDAPDatasource implements Datasource
   private Properties properties = new Properties();
   
   // Separator zur Schluesselerzeugung aus mehreren Schluesselwerten
-  private final static String SEPARATOR = "!$§%&";
+  private final static String SEPARATOR = ":::::";
   
   // Map von query-Strings auf LDAP-Attributnamen
   private Map nameMap = new HashMap();
@@ -72,6 +72,8 @@ public class LDAPDatasource implements Datasource
   
   // Key-Attribute (LDAP)
   private List keyAttributes = new Vector();
+  private List absoluteAttributes = new Vector();
+  private int keyStatus; // 0:= nur absolute Attribute, 1:= absolute und relative Attribute, 2:= nur relative Attribute
   
   // regex für erlaubte Bezeichner
   private static final Pattern SPALTENNAME = Pattern.compile("^[a-zA-Z_][a-zA-Z_0-9]*$");
@@ -191,15 +193,34 @@ public class LDAPDatasource implements Datasource
     
     Iterator keyIterator = keySpalten.iterator();
     
+    boolean onlyRelative = true;
+    boolean onlyAbsolute = true;
+    
     // speichere die Schluesselattribute
     while(keyIterator.hasNext()) { 
       String currentName = keyIterator.next().toString();
       
+      LDAPAttribute currentKeyLDAPAttribute = (LDAPAttribute) nameMap.get(currentName);
+      
       // ist Schluesselattribut vorhanden?
-      if (nameMap.get(currentName)==null) throw new ConfigurationErrorException( errorMessage() + "Schluesselelement nicht definiert.");
-        
+      if (currentKeyLDAPAttribute==null) throw new ConfigurationErrorException( errorMessage() + "Schluesselelement nicht definiert.");
+      
+      if (currentKeyLDAPAttribute.relativePath != 0) {
+        onlyAbsolute = false;
+        absoluteAttributes.add(new Boolean(false));
+      }
+      if (currentKeyLDAPAttribute.relativePath == 0) {
+        onlyRelative = false;
+        absoluteAttributes.add(new Boolean(true));
+      }
+      
       keyAttributes.add(currentName);
     }
+   
+    
+    if (onlyAbsolute) keyStatus = 0;
+    else if (onlyRelative) keyStatus = 2;
+    else keyStatus = 1;
     
     if (keyAttributes.size()==0)
       throw new ConfigurationErrorException(errorMessage() + "Kein Schluesseleleement angegeben.");
@@ -228,6 +249,7 @@ public class LDAPDatasource implements Datasource
     
   }
   
+  // LDAPDataset
   private class LDAPDataset implements Dataset {
     
     private String key;
@@ -261,6 +283,19 @@ public class LDAPDatasource implements Datasource
     return schema;
   }
 
+  
+  private List keyToFindQuery(String key)
+  {
+    String[] keyValues = key.split(SEPARATOR);
+    
+    List query = new Vector(keyValues.length);
+    
+    for (int n=0; n<keyValues.length; n++)
+      query.add(new QueryPart((String)keyAttributes.get(n),keyValues[n]));
+      
+    return query;
+  }
+ 
 
   /* (non-Javadoc)
    * @see de.muenchen.allg.itd51.wollmux.db.Datasource#getDatasetsByKey(java.util.Collection, long)
@@ -269,42 +304,84 @@ public class LDAPDatasource implements Datasource
     
     long endTime = System.currentTimeMillis() + timeout;
     
-    Vector results = new Vector();
+    if (keyStatus == 0 | keyStatus == 1) { // absolute Attribute vorhanden
       
-    Iterator iter = keys.iterator();
-    
-    while(iter.hasNext()) {
+      Iterator iter = keys.iterator();
       
-      String currentKey = (String) iter.next();
-      String searchFilter = keyToQuery(currentKey);
+      // build searchFilter
+      String searchFilter = "";
       
-      NamingEnumeration currentResults = searchLDAPPerson("",searchFilter,timeout);
+      boolean first = true;
+      while(iter.hasNext()) {
+        
+        String currentKey = (String) iter.next();
+
+        String currentSearchFilter = keyToQuery(currentKey);
+        
+        
+        if (first) {
+          searchFilter = currentSearchFilter;
+          first = false;
+        } else {
+          searchFilter = "(|" + currentSearchFilter + searchFilter + ")";
+        }
+
+      }
       
+      System.out.println(searchFilter);
+      
+      // search LDAP
+      NamingEnumeration currentResults = searchLDAPPerson("", searchFilter, true, true,timeout);
+      
+      Vector results = new Vector();
+      
+      System.out.println(results.size());
+      
+      while(currentResults.hasMoreElements()) {
+        if (System.currentTimeMillis()>endTime) throw new TimeoutException();
         try
         {
-          while(currentResults.hasMore()) {
-            if (System.currentTimeMillis()>endTime) throw new TimeoutException();
-            SearchResult currentResult = (SearchResult) currentResults.next();
-            results.add(getDataset(currentResult,endTime));
+          SearchResult currentResult = (SearchResult) currentResults.next();
+          Dataset dataset = getDataset(currentResult,endTime);
+          if (keyStatus==0) {
+            results.add(dataset);
+          } else if (keys.contains(dataset.getKey())) {
+            results.add(dataset);
           }
-        }
-        catch (TimeLimitExceededException e)
-        {
-          throw new TimeoutException(e);
         }
         catch (NamingException e)
         {
-          Logger.error(e);
-          throw new TimeoutException("Fehler bei Enumeration der LDAP-Anfrageergebnisse",e);
+          Logger.error("Error in LDAP-Directory.",e);
         }
-     
- 
+        
+          
+      }
 
+      //results.trimToSize();
+      
+      return new QueryResultsList(results);
+      
+      
+      
     }
     
-    results.trimToSize();
-    
-    return new QueryResultsList(results);
+    if (keyStatus == 2) { // nur relative Attribute
+      List results = new Vector(keys.size());
+      
+       Iterator iter = keys.iterator();
+       while (iter.hasNext())
+       {
+         if (System.currentTimeMillis()>endTime) throw new TimeoutException();
+         List query = keyToFindQuery((String)iter.next());
+         QueryResults res = find(query,timeout);
+         Iterator iter2 = res.iterator();
+         while (iter2.hasNext()) results.add(iter2.next());
+  
+       }
+      return new QueryResultsList(results);
+    }
+     
+    return null;
   }
   
   class RelativePaths {
@@ -319,7 +396,19 @@ public class LDAPDatasource implements Datasource
     
   }
   
-  public RelativePaths getPaths(String filter, int pathLength) throws TimeoutException {
+  class RelativePath {
+    
+    private int relative;
+    private Name name;
+    
+    RelativePath(int relative, Name name) {
+      this.relative = relative;
+      this.name = name;
+    }
+  
+  }
+  
+  private RelativePaths getPaths(String filter, int pathLength, long endTime) throws TimeoutException {
     
     Vector paths;
     
@@ -336,6 +425,7 @@ public class LDAPDatasource implements Datasource
       paths = new Vector();
       
       while(enumer.hasMoreElements()) {
+        if (System.currentTimeMillis()>endTime) throw new TimeoutException();
         SearchResult result = (SearchResult) enumer.nextElement();
         String path = checkQuotes(result.getName());
         Name pathName = np.parse(path);
@@ -352,6 +442,7 @@ public class LDAPDatasource implements Datasource
     
   }
   
+  
 
   /* (non-Javadoc)
    * @see de.muenchen.allg.itd51.wollmux.db.Datasource#find(java.util.List, long)
@@ -363,7 +454,11 @@ public class LDAPDatasource implements Datasource
     Iterator iter = query.iterator();
     
     String searchFilter = "";
-    List subtreePathLists = new Vector();
+    List positiveSubtreePathLists = new Vector();
+    //List negativeSubtreePaths = new Vector();
+    List negativeSubtreePathLists = new Vector();
+    
+    Map attributeMap = new HashMap();
     
     boolean first = true;
     while (iter.hasNext()) {
@@ -387,87 +482,269 @@ public class LDAPDatasource implements Datasource
         } else {
           searchFilter = "(&(" + attributeName + "=" + attributeValue + ")" + searchFilter + ")";
         }
-      } else { // search for subtrees
+      } else { // edit searchFilters for subtree searches:
         
-        String pathFilter = "(" + attributeName + "=" + attributeValue + ")";
+        Integer key = new Integer(relativePath);
         
-        RelativePaths paths = getPaths(pathFilter,relativePath);
+        String formerSearchPath = (String) attributeMap.get(key);
         
-        subtreePathLists.add(paths);
-        
-      }
-      
-    }
-    
-    // create subtree paths to search
-    
-    List subtrees = new Vector();
-    
-    if (subtreePathLists.size()==0) subtrees.add("");
-    else {
-      
-      for (int n=0; n<subtreePathLists.size(); n++) {
-        
-        RelativePaths currentRelativePaths = (RelativePaths) subtreePathLists.get(n);
-        
-        // TODO definiere Ordnung auf den Pfaden
-        
-        /* betrachte die kleinsten Pfade
-         * betrachte nächstgrößere Pfade -> kleinerer Pfad substring des aktuellen?
-         * ...
-         * die übriggebliebenen längsten Pfade werden in 'subtrees' gespeichert
-         */
-        
-        
-        
-        for (int m=0; m<currentRelativePaths.paths.size(); m++) {
-          String currentName = (String) currentRelativePaths.paths.get(m).toString();
-          subtrees.add(currentName);
-          
+        if (formerSearchPath==null) {
+          formerSearchPath = "(" + attributeName + "=" + attributeValue + ")";
+        } else {
+          formerSearchPath = "(&(" + attributeName + "=" + attributeValue + ")" + formerSearchPath + ")";
         }
         
+        attributeMap.put(key,formerSearchPath);
         
       }
       
+    }
+    
+    Iterator attributeKeys = attributeMap.keySet().iterator();
+    
+    while (attributeKeys.hasNext()) {
+      Integer currentKey = (Integer) attributeKeys.next();
       
+      int relativePath = currentKey.intValue();
+      
+      String pathFilter = (String) attributeMap.get(currentKey);
+      
+      RelativePaths paths = getPaths(pathFilter,relativePath,endTime);
+      
+      if (relativePath>0) {
+        positiveSubtreePathLists.add(paths);
+      } else {
+        List negativeSubtreePaths = new Vector();
+        for (int n=0; n<paths.paths.size(); n++) {
+          Name currentName = (Name)paths.paths.get(n);
+          RelativePath newNegativePath = new RelativePath(paths.relative,currentName);
+          negativeSubtreePaths.add(newNegativePath);
+        }
+        negativeSubtreePathLists.add(negativeSubtreePaths);
+        
+      }
       
     }
     
-    Vector results = new Vector();
+    /* bilde die Schnittmenge aller angegebenen positiv relativen Pfade
+     * 
+     * Dieser Algorithmus vergleicht zwei Listen, die jeweils
+     * alle relevanten Pfade eines Suchattributs repräsentieren.
+     * Zuerst werden die Listen nach der Länge der enthaltenen Pfade
+     * sortiert, danach wird betrachte, ob für jedes Element der Liste
+     * der längeren Pfade ein Element aus der Liste der kürzeren Pfade existiert,
+     * dass ein Prefix des ersten Elements ist.
+     * Wenn ja, wird das Element in die Liste mergedPositiveSubtreePathLists aufgenommen
+     * und somit weiter betrachtet, wenn nein, ist die Schnittmengeneigenschaft
+     * nicht gegeben und der Pfad wird verworfen.
+    */
+    List mergedPositiveSubtreePathLists = null;
+
+    int mergedCurrentSize = 0;
     
-    if (searchFilter.equals("")&subtrees.size()==0) return new QueryResultsList(new Vector(0));
+    if (positiveSubtreePathLists.size()>0) {
+      RelativePaths currentSubtreePaths = (RelativePaths) positiveSubtreePathLists.get(0);
+      mergedPositiveSubtreePathLists = currentSubtreePaths.paths;
+      mergedCurrentSize = currentSubtreePaths.relative;
+    }
+    
+    for (int n=1; n<positiveSubtreePathLists.size(); n++) {
+      
+      RelativePaths currentSubtreePaths = (RelativePaths) positiveSubtreePathLists.get(n);
+      
+      List shorter, longer;
+          
+      if (currentSubtreePaths.relative<mergedCurrentSize) {
+        shorter = currentSubtreePaths.paths;
+        longer = mergedPositiveSubtreePathLists;
+      } else {
+        shorter = mergedPositiveSubtreePathLists;
+        longer = currentSubtreePaths.paths;
+        mergedCurrentSize = currentSubtreePaths.relative;
+      }
+      
+      mergedPositiveSubtreePathLists = new Vector();
+      
+      for (int m=0; m<longer.size(); m++) {
+        Name longerName = (Name) longer.get(m);
+        
+        for (int p=0; p<shorter.size(); p++) {
+          Name shorterName = (Name) shorter.get(p);
+          if (longerName.startsWith(shorterName)) {
+            mergedPositiveSubtreePathLists.add(longerName);
+            break;
+          }
+        }
+        
+      }
+        
+    }
+    
+    /*
+     * bilde die Schnittmenge aller angegebenen negativen relativen Pfade
+     * 
+     * Vergleiche jeweils zwei Listen, die je ein Suchattribut repräsentieren.
+     * 
+     */
+    List mergedNegativeList = null;
+    if (negativeSubtreePathLists.size()>0) {
+      mergedNegativeList = (List) negativeSubtreePathLists.get(0);
+    }
+
+    for (int n=1; n<negativeSubtreePathLists.size(); n++) {
+      
+      List newMergedNegativeList = new Vector();
+      
+
+      List currentList = (List) negativeSubtreePathLists.get(n);
+
+      for (int m=0; m<mergedNegativeList.size(); m++) {
+        RelativePath currentPath = (RelativePath) mergedNegativeList.get(m);
+        
+        for (int p=0; p<currentList.size(); p++) {
+          RelativePath otherPath = (RelativePath) currentList.get(p);
+          
+          RelativePath shorter, longer;
+          
+          if (currentPath.name.size()<otherPath.name.size()) {
+            shorter = currentPath;
+            longer = otherPath;
+          } else {
+            shorter = otherPath;
+            longer = currentPath;
+          }
+          
+          if (currentPath.name.size()-currentPath.relative == otherPath.name.size()-otherPath.relative && longer.name.startsWith(shorter.name)) {
+            newMergedNegativeList.add(longer);
+          }
+          
+        }
+      }
+      
+      mergedNegativeList = newMergedNegativeList;
+      
+       
+    }
+    
+    /*
+     * bilde die Schnittmenge aus den positiv und negativ relativen Listen
+     */
+    List mergedNegativeSubtreePaths;
+    if (mergedPositiveSubtreePathLists!=null && mergedNegativeList!=null) {
+      
+      mergedNegativeSubtreePaths = new Vector();
+      
+      for (int n=0; n<mergedNegativeList.size();n++) {
+        RelativePath currentPath = (RelativePath) mergedNegativeList.get(n);
+        
+        for (int m=0; m<mergedPositiveSubtreePathLists.size(); m++) {
+          Name currentName = (Name) mergedPositiveSubtreePathLists.get(m);
+          
+          if (currentPath.name.size()<currentName.size()) {
+            
+            if (currentName.startsWith(currentPath.name) && currentPath.name.size()-currentPath.relative>=currentName.size()) {
+              mergedNegativeSubtreePaths.add(currentPath);
+            }
+            
+          } else {
+            
+            if(currentPath.name.startsWith(currentName)) {
+              mergedNegativeSubtreePaths.add(currentPath);
+            }
+            
+          }
+          
+          
+        }
+      }
+    } else {
+      mergedNegativeSubtreePaths = mergedNegativeList;
+    }
+     
+    
+    if (searchFilter.equals("")&mergedPositiveSubtreePathLists==null&mergedNegativeSubtreePaths==null) return new QueryResultsList(new Vector(0));
+    
+    List positiveSubtreeStrings = new Vector();
+    
+    // create Strings from Names
+    if (positiveSubtreePathLists.size()==0) {
+      positiveSubtreeStrings.add("");
+    } else {
+      
+      for (int n=0; n<mergedPositiveSubtreePathLists.size(); n++) {
+        Name currentName = (Name) mergedPositiveSubtreePathLists.get(n);
+        positiveSubtreeStrings.add(currentName.toString());
+      }
+      
+    }
     
     
-    Iterator subtreeIterator = subtrees.iterator();
-    //List resultEnums = new Vector();
+    Iterator subtreeIterator = positiveSubtreeStrings.iterator();
     
     List currentResultList = new Vector();
     
-    while(subtreeIterator.hasNext()) {
-      String subTree = (String)subtreeIterator.next();
-      String comma = ",";
-      if (subTree.equals("")) comma = "";
-      NamingEnumeration currentResults = searchLDAPPerson(subTree + comma,searchFilter,timeout);
+    
+    if (negativeSubtreePathLists.size()==0) {
+      // allgemeine Suche
       
-      while(currentResults.hasMoreElements()) {
-        SearchResult sr = (SearchResult) currentResults.nextElement();
-        sr.setName(checkQuotes(sr.getName()) + comma + subTree);
-        currentResultList.add(sr);
+      while(subtreeIterator.hasNext()) {
+        
+        if (System.currentTimeMillis()>endTime) throw new TimeoutException();
+        
+        String subTree = (String)subtreeIterator.next();
+        String comma = ",";
+        if (subTree.equals("")) comma = "";
+        NamingEnumeration currentResults = searchLDAPPerson(subTree + comma,searchFilter,true, true,timeout);
+        
+        while(currentResults.hasMoreElements()) {
+          SearchResult sr = (SearchResult) currentResults.nextElement();
+          sr.setName(checkQuotes(sr.getName()) + comma + subTree);
+          currentResultList.add(sr);
+        }
+        
+      } 
+    } else {
+      // Breitensuche muss verwendet werden
+      
+      for (int n=0; n<mergedNegativeSubtreePaths.size(); n++) {
+        
+        if (System.currentTimeMillis()>endTime) throw new TimeoutException();
+        
+        RelativePath currentRelativePath = (RelativePath) mergedNegativeSubtreePaths.get(n);
+        int depth = -currentRelativePath.relative;
+
+        Name currentName = currentRelativePath.name;
+        String currentPath = currentName.toString();
+        List currentSearch = bfsSearchLDAPPerson(currentPath,searchFilter,depth,endTime);
+        String comma = ",";
+        if (currentPath.equals("")) comma = "";
+        
+        for (int m=0; m<currentSearch.size(); m++) {
+          SearchResult sr = (SearchResult) currentSearch.get(m);
+          String actualPath = checkQuotes(sr.getName()) + comma + currentPath;
+          sr.setName(actualPath);
+          currentResultList.add(sr);
+        }
+          
       }
       
-      //resultEnums.add(currentResults);
+      
     }
     
     Iterator currentResultsIterator = currentResultList.iterator();
     
     
+    Vector results = new Vector();
+    
+    // generate Datasets from SearchResults
     try
     {
       
         while(currentResultsIterator.hasNext()) {
+          
           if (System.currentTimeMillis()>endTime) throw new TimeoutException();
-          SearchResult currentResult = (SearchResult) currentResultsIterator.next();
-                
+          
+          SearchResult currentResult = (SearchResult) currentResultsIterator.next();     
           Dataset ds = getDataset(currentResult,endTime);
           results.add(ds);
         }
@@ -475,11 +752,6 @@ public class LDAPDatasource implements Datasource
     catch (TimeoutException e) {
       throw new TimeoutException(e);
     }
-    /*catch (NamingException e)
-    {
-      Logger.error(e);
-      throw new TimeoutException("Fehler bei Enumeration der LDAP-Anfrageergebnisse",e);
-    }*/
    
     
     results.trimToSize();
@@ -522,23 +794,28 @@ public class LDAPDatasource implements Datasource
   
   // generiert einen Suchausdruck aus einem Schluessel
   private String keyToQuery(String key) {
-    
+
     String[] keyValues = key.split(SEPARATOR);
     
+    
     String query = "";   
+    boolean first = true;
     for (int n=0; n<keyValues.length; n++) {
-      if (n==0) {
-        query = "(" + nameMap.get(keyAttributes.get(n)) + "=" + keyValues[n] + ")";
-      } else {
-        query = "(&(" + nameMap.get(keyAttributes.get(n)) + "=" + keyValues[n] + ")" + query + ")";
+      Boolean isAbsolute = (Boolean)absoluteAttributes.get(n);
+      if (isAbsolute.booleanValue()) {
+        if (first) {
+          query = "(" + keyAttributes.get(n) + "=" + keyValues[n] + ")";
+          first = false;
+        } else {
+          query = "(&(" + keyAttributes.get(n) + "=" + keyValues[n] + ")" + query + ")";
+        }
       }
     }
-    
     return query;
   }
   
   
-  // vervollständigt SearchResults um Daten aus dem Verteichnis und gibt ein Dataset zurück
+  // vervollständigt SearchResults um Daten aus dem Verzeichnis und gibt ein Dataset zurück
   private Dataset getDataset(SearchResult searchResult, long endTime) throws TimeoutException {
     
     Attributes attributes = searchResult.getAttributes();
@@ -608,8 +885,8 @@ public class LDAPDatasource implements Datasource
         
           if (relativePath < 0) { // Pfad relativ zum aktuellen Element
             
-            attributePath.addAll(pathName.getPrefix(pathName.size()+relativePath-rootName.size()));
-            
+            attributePath.addAll(pathName.getPrefix(pathName.size()+relativePath));
+
           } else { // relativePath > 0, Pfad relativ zur Wurzel
             
             attributePath.addAll(pathName.getPrefix(relativePath-rootName.size()));
@@ -633,6 +910,9 @@ public class LDAPDatasource implements Datasource
         {
           // do nothing (Attributwert nicht vorhanden und bleibt somit 'null')
         }
+        catch (ArrayIndexOutOfBoundsException e) {
+          // auch hier: do nothing (Attributwert befindet sich unterhalb der aktuellen lhmPerson)
+        }
 
       }
       
@@ -655,19 +935,31 @@ public class LDAPDatasource implements Datasource
     } catch (NamingException e) {}
     
     return new LDAPDataset(key, relation);
-  }
+  }  
+
   
-  
-  // Suche im Directory
-  private NamingEnumeration searchLDAPPerson(String path, String filter, long timeout) throws TimeoutException {
+  /* allgemeine Suche im Directory
+   * 
+   */
+  private NamingEnumeration searchLDAPPerson(String path, String filter, boolean subTreeScope, boolean onlyObjectClass, long timeout) throws TimeoutException {
+    
     
     SearchControls searchControls = new SearchControls();
-    searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
+    
+    if (subTreeScope) {
+      searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
+    } else {
+      searchControls.setSearchScope(SearchControls.ONELEVEL_SCOPE);
+    }
     
     if (timeout>Integer.MAX_VALUE) timeout = Integer.MAX_VALUE;
     searchControls.setTimeLimit((int) timeout);
     
-    filter = "(&(objectClass=" + objectClass + ")" + filter + ")";
+    if (onlyObjectClass) {
+      filter = "(&(objectClass=" + objectClass + ")" + filter + ")";
+    } else {
+      filter = "(&(objectClass=" + "*" + ")" + filter + ")";
+    }
     
     DirContext ctx = null;
     
@@ -677,7 +969,11 @@ public class LDAPDatasource implements Datasource
       
       ctx = new InitialLdapContext(properties,null);
       
-      result = ctx.search(path + baseDN,filter,searchControls);
+      NameParser nameParser = ctx.getNameParser("");
+      Name name = nameParser.parse(path + baseDN);
+      
+      result = ctx.search(name,filter,searchControls);
+
     
     } catch (TimeLimitExceededException e) {
       throw new TimeoutException(e);
@@ -692,6 +988,75 @@ public class LDAPDatasource implements Datasource
  
     return result;
   }
+  
+  /* Breitensuche im Directory
+   * Sucht alle LDAPPersons, die auf dem angegebenen Level über dem angegebenen Pfadnamen liegen.
+  */
+  private List bfsSearchLDAPPerson(String path, String filter, int level, long endTime) throws TimeoutException {
+    
+    List seeds = new Vector();
+    seeds.add(path);
+    
+    String comma = ",";
+    
+    
+    for (int n=0; n<(level-1); n++) {
+      
+      if (System.currentTimeMillis()>endTime) throw new TimeoutException();
+      
+      List nextSeeds = new Vector();
+      
+      for (int m=0; m<seeds.size(); m++) {
+        
+        if (System.currentTimeMillis()>endTime) throw new TimeoutException();
+        
+        String searchPath = (String)seeds.get(m);
+        
+        comma = ",";
+        if (searchPath.equals("")) comma = "";
+      
+        NamingEnumeration enumer = searchLDAPPerson(searchPath + comma,"",false,false,endTime);
+        
+        while (enumer.hasMoreElements()) {
+          
+          if (System.currentTimeMillis()>endTime) throw new TimeoutException();
+          
+          SearchResult currentResult = (SearchResult)enumer.nextElement();
+          String subPath = checkQuotes(currentResult.getName());
+          comma = ",";
+          if (subPath.equals("")) comma = "";
+          String currentPath = subPath + comma + searchPath;
+          nextSeeds.add(currentPath);
+        }
+      }
+      
+      seeds = nextSeeds;
+        
+    }
+    
+    List result = new Vector();
+    
+    for (int n=0; n<seeds.size(); n++) {
+      
+      if (System.currentTimeMillis()>endTime) throw new TimeoutException();
+      
+      String currentPath = (String)seeds.get(n);
+      
+      comma = ",";
+      if (currentPath.equals("")) comma = "";
+      
+      NamingEnumeration enumer = searchLDAPPerson(currentPath + comma,filter,false,true,endTime);
+      
+      while (enumer.hasMoreElements()) {
+        if (System.currentTimeMillis()>endTime) throw new TimeoutException();
+        result.add(enumer.nextElement());
+      }
+      
+    }
+    
+    return result;
+  }
+  
   
   private String checkQuotes(String tempPath) {
     /*
@@ -719,6 +1084,36 @@ public class LDAPDatasource implements Datasource
   
   
   
+  
+
+  
+  private void test() {
+    
+    String filer = "(|(&(Nachname=Friderich)(OID=3891))(|(&(Nachname=Grüner-Köbele)(OID=3894))(&(Nachname=Laur)(OID=3893))))";
+ 
+  
+    try {
+      
+      DirContext ctx = new InitialDirContext(properties);
+      
+      SearchControls so = new SearchControls();
+      
+      so.setSearchScope(so.SUBTREE_SCOPE);
+      
+      NamingEnumeration ne = ctx.search(baseDN,filer,so);
+      
+      System.out.println("xxx");
+      
+      while(ne.hasMoreElements()) {
+        System.out.println("!");
+        ne.nextElement();
+      }
+      
+      
+    } catch(Exception e ){
+    System.out.println(e);
+    }
+  }
   
   
   // TESTFUNKTIONEN
@@ -786,17 +1181,38 @@ public class LDAPDatasource implements Datasource
     ConfigThingy sourceDesc = ldapConf.query("Datenquelle").getFirstChild();
     LDAPDatasource dj = new LDAPDatasource(nameToDatasource, sourceDesc, context);
     
+    //dj.test();
     
-    //printResults("Nachname = *", dj.getSchema(), dj.simpleFind("Nachname","*")); 
-    printResults("Nachname = Bruce-Boye", dj.getSchema(), dj.simpleFind("Nachname","augustin","Referat","Sozialreferat"));
-    //printResults("Referat = Sozialreferat, Nachname = Bruce-Boye", dj.getSchema(), dj.simpleFind("Referat","Sozialreferat","Nachname","Bruce-Boye")); 
-    //printResults("Referat = Sozialreferat", dj.getSchema(), dj.simpleFind("Referat","Sozialreferat"));
-    //printResults("Nachname = lOEsewiTZ", dj.getSchema(), dj.simpleFind("Nachname","lOEsewiTZ")); 
-    /*printResults("Nachname = *utz", dj.getSchema(), dj.simpleFind("Nachname","*utz"));
-    printResults("Nachname = *oe*", dj.getSchema(), dj.simpleFind("Nachname","*oe*"));
+    /*
+   QueryResults qr = dj.simpleFind("OrgaEmail","  r.kom@muenchen.de","Orga1","Referatsleitung");
+    Iterator iter = qr.iterator();
+    
+    Collection keys = new Vector();
+    
+    while(iter.hasNext()) {
+      Dataset ds = (Dataset) iter.next();
+      String key = ds.getKey();
+      System.out.println(ds.getKey());
+      
+      keys.add(key);
+      
+    }
+    
+    QueryResults qr2 = dj.getDatasetsByKey(keys,30000);
+    
+    dj.printResults("xxx",dj.schema,qr2);
+    */
+
+    printResults("OrgaEmail = r.kom@muenchen.de , Orga1 = Referatsleitung", dj.getSchema(), dj.simpleFind("OrgaEmail","  r.kom@muenchen.de","Orga1","Referatsleitung"));
+    printResults("OrgaEmail = r.kom@muenchen.de , Orga3 = Referatsleitung", dj.getSchema(), dj.simpleFind("OrgaEmail","  r.kom@muenchen.de","Orga3","Referatsleitung"));
+    printResults("Orga2 = Stadtarchiv , Referat = Direktorium", dj.getSchema(), dj.simpleFind("Orga2","Stadtarchiv","Referat","Direktorium")); 
+    printResults("Referat = Sozialreferat , Nachname = Meier", dj.getSchema(), dj.simpleFind("Referat","Sozialreferat","Nachname","Meier")); 
+    printResults("Nachname = lOEsewiTZ", dj.getSchema(), dj.simpleFind("Nachname","lOEsewiTZ")); 
+    //printResults("Nachname = *utz", dj.getSchema(), dj.simpleFind("Nachname","*utz"));
+    //printResults("Nachname = *oe*", dj.getSchema(), dj.simpleFind("Nachname","*oe*"));
     printResults("Nachname = Lutz", dj.getSchema(), dj.simpleFind("Nachname","Lutz"));
     printResults("Nachname = *utz, Vorname = Chris*", dj.getSchema(), dj.simpleFind("Nachname","*utz","Vorname","Chris*"));
-    */
+  
   }
 
 }
