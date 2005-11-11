@@ -551,8 +551,19 @@ public class MenuList
    * @throws NodeNotFoundException 
    */
   public static void store(XComponentContext xContext,
-      XFrame xFrame) throws Exception, NodeNotFoundException{
-    new MenuList(xContext, xFrame);
+      XFrame xFrame) {
+    try
+    {
+      new MenuList(xContext, xFrame);
+    }
+    catch (Exception e)
+    {
+      Logger.error(e);
+    }
+    catch (NodeNotFoundException e)
+    {
+      Logger.error(e);
+    }
   }
   
   /**
@@ -789,9 +800,9 @@ public class MenuList
       xController = xModel.getCurrentController();
       xFrame = xController.getFrame();
 
-//       MenuList.generateMenues(conf, testmxRemoteContext, xFrame);
-//
-//      MenuList.generateToolbarEntries(conf, testmxRemoteContext, xFrame);
+       MenuList.generateMenues(conf, testmxRemoteContext, xFrame);
+
+      MenuList.generateToolbarEntries(conf, testmxRemoteContext, xFrame);
 
       store(testmxRemoteContext,xFrame);
 
