@@ -4,6 +4,7 @@ import com.sun.star.beans.PropertyValue;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
+import de.muenchen.allg.itd51.wollmux.Logger;
 /**
  * 
  * Contains misc helper methods.
@@ -111,7 +112,7 @@ public class LimuxHelper
      }
      catch (NodeNotFoundException e)
      {
-       // Logger.error(e);
+//       Logger.error("Property ["+label+"] not set; returning value ["+def+"] instead.",e);
        return def;
      }
      
