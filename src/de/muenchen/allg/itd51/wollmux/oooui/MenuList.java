@@ -120,6 +120,7 @@ public class MenuList
   private PropertyValue[] fileMenus;
 
 
+
   /**
    * Der Konstruktor erzeugt eine neue MenuList aus einer gegebenen
    * Konfiguration.
@@ -277,7 +278,7 @@ public class MenuList
 
     initConnection();
     // 0. read in the names of all top-level menues.
-    Iterator mlIter = root.query("Menueleiste").getFirstChild().iterator();
+    Iterator mlIter = root.query("Menueleiste").getLastChild().iterator();
     while (mlIter.hasNext())
     {
       ConfigThingy topMenu = (ConfigThingy) mlIter.next();
@@ -307,8 +308,9 @@ public class MenuList
           element,
           "POSITION",
           "0")), topMenu);
-
+      
       xoMenuBarSettings.setSettings(oElementSettings);
+      
     }
   }
 
@@ -802,11 +804,9 @@ public class MenuList
           .getCurrentComponent());
       xController = xModel.getCurrentController();
       xFrame = xController.getFrame();
-
-       MenuList.generateMenues(conf, testmxRemoteContext, xFrame);
-
+//
+      MenuList.generateMenues(conf, testmxRemoteContext, xFrame);
       MenuList.generateToolbarEntries(conf, testmxRemoteContext, xFrame);
-
       store(testmxRemoteContext,xFrame);
 
     }
