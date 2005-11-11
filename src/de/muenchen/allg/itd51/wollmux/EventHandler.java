@@ -243,15 +243,6 @@ public class EventHandler
     // nichts machen, wenn es ist bereits Datensätze im LOS gibt.
     if (dsj.getLOS().size() != 0) return EventProcessor.processTheNextEvent;
 
-    // Wollmux-conf-Option CHECK_SENDER_ON_INIT auswerten:
-    boolean ask = false;
-    ConfigThingy askCT = WollMux.getWollmuxConf().query("CHECK_SENDER_ON_INIT");
-    if (askCT.count() > 0)
-    {
-      String askStr = askCT.getLastChild().toString();
-      if (askStr.compareToIgnoreCase("true") == 0) ask = true;
-    }
-
     // Die initialen Daten aus den OOo UserProfileData holen:
     String vorname = getUserProfileData("givenname");
     String nachname = getUserProfileData("sn");
@@ -267,63 +258,19 @@ public class EventHandler
       r = dsj.find("Vorname", vorname, "Nachname", nachname);
 
     // Auswertung der Suchergebnisse:
-    if (r == null || r.size() == 0)
+    if (r != null)
     {
-      // wenn kein Eintrag gefunden wurde, wird ein neuer Eintrag erzeugt.
-      DJDataset ds = dsj.newDataset();
-      ds.set("Vorname", PersoenlicheAbsenderlisteVerwalten.DEFAULT_VORNAME);
-      ds.set("Nachname", PersoenlicheAbsenderlisteVerwalten.DEFAULT_NACHNAME);
-      ds.set("Rolle", PersoenlicheAbsenderlisteVerwalten.DEFAULT_ROLLE);
-
-      if (ask)
-        EventProcessor.create().addEvent(
-            new Event(Event.ON_DATENSATZ_BEARBEITEN));
-      return EventProcessor.processTheNextEvent;
-    }
-    else if (r.size() == 1)
-    {
-      // wenn genau ein Match kam, wird dieser verwendet.
-      DJDataset ds = (DJDataset) r.iterator().next();
-      // TODO: obiger Cast sollt Dataset sein (oder die Doku ist falsch)
-      ds.copy();
-
-      if (ask)
-        EventProcessor.create().addEvent(
-            new Event(Event.ON_DATENSATZ_BEARBEITEN));
-      return EventProcessor.processTheNextEvent;
-    }
-    else if (r.size() > 1)
-    {
-      // wenn mehrere Einträge da sind, werden alle in die PAL kopiert und
-      // der AbsenderAuswaehlen Dialog gestartet:
+      // alle matches werden in die PAL kopiert:
       Iterator i = r.iterator();
       while (i.hasNext())
       {
         ((DJDataset) i.next()).copy();
         // TODO: obiger Cast sollt Dataset sein (oder die Doku ist falsch)
       }
-
-      if (ask)
-      {
-        // Dialogkonfiguration holen:
-        ConfigThingy whoAmIconf = WollMux.getWollmuxConf().query(
-            "InitialenAbsenderAuswaehlen").getLastChild();
-        ConfigThingy PALconf = WollMux.getWollmuxConf().query(
-            "PersoenlicheAbsenderliste").getLastChild();
-        ConfigThingy ADBconf = WollMux.getWollmuxConf().query(
-            "AbsenderdatenBearbeiten").getLastChild();
-
-        new AbsenderAuswaehlen(whoAmIconf, PALconf, ADBconf, WollMux
-            .getDatasourceJoiner(), EventProcessor.create());
-
-        // danach soll der Datensatz-Bearbeiten Dialog starten.
-        EventProcessor.create().addEvent(
-            new Event(Event.ON_DATENSATZ_BEARBEITEN));
-        return EventProcessor.waitForGUIReturn;
-      }
-      else
-        return EventProcessor.processTheNextEvent;
     }
+
+    // Absender Auswählen Dialog starten:
+    EventProcessor.create().addEvent(new Event(Event.ON_ABSENDER_AUSWAEHLEN));
     return EventProcessor.processTheNextEvent;
   }
 
