@@ -603,7 +603,10 @@ public class WMCommandInterpreter
         // Textcursor erzeugen und mit dem neuen Text ausdehnen.
         UnoService bookmark = new UnoService(bookmarkAccess
             .getByName(bookmarkName));
-        UnoService cursor = new UnoService(document.xTextDocument().getText()
+        UnoService textRange = new UnoService(bookmark.xTextContent()
+            .getAnchor());
+        UnoService xText = new UnoService(textRange.xTextRange().getText());
+        UnoService cursor = new UnoService(xText.xText()
             .createTextCursorByRange(bookmark.xTextContent().getAnchor()));
         cursor.xTextCursor().setString(text);
 
