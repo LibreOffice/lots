@@ -1,3 +1,4 @@
+//TODO Confirm-Dialoge (zum Beispiel beim Speichern) müssen "Ja" und "Nein", nicht "Yes" und "No" Buttons anbieten
 /*
 * Dateiname: DatensatzBearbeiten.java
 * Projekt  : WollMux
