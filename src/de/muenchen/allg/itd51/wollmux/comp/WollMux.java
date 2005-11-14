@@ -143,8 +143,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
    * wollmux.conf-Datei vorhanden ist. Ist defaultWollmuxConf==null, so wird gar
    * keine wollmux.conf-Datei angelegt.
    */
-  private static final String defaultWollmuxConf = "%include \"http://limux.tvc.muenchen.de/wollmux/wollmux.conf\"\r\n"
-                                                   + "DEFAULT_CONTEXT \"http://limux.tvc.muenchen.de/wollmux\"";
+  private static final String defaultWollmuxConf = "%include \"http://limux.tvc.muenchen.de/ablage/sonstiges/wollmux/wollmux.conf\"\r\n";
 
   /**
    * Der Konstruktor erzeugt einen neues WollMux-Service im XComponentContext
