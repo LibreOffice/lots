@@ -30,6 +30,7 @@ import java.util.regex.Pattern;
 
 import com.sun.star.awt.FontWeight;
 import com.sun.star.beans.PropertyValue;
+import com.sun.star.beans.PropertyVetoException;
 import com.sun.star.container.NoSuchElementException;
 import com.sun.star.container.XNameAccess;
 import com.sun.star.io.IOException;
@@ -171,6 +172,17 @@ public class WMCommandInterpreter
           }
         }
       }
+    }
+
+    // Document-Modified auf false setzen, da nur wirkliche
+    // Benutzerinteraktionen den Modified-Status beeinflussen sollen.
+    try
+    {
+      document.xModifiable().setModified(false);
+    }
+    catch (PropertyVetoException x)
+    {
+      // wenn jemand was dagegen hat, dann setze ich halt nichts.
     }
 
     // ggf. EndlessLoopException mit dem Namen des Dokuments schmeissen.
