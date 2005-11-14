@@ -50,6 +50,7 @@ import com.sun.star.uno.XComponentContext;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
+import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.Event;
 import de.muenchen.allg.itd51.wollmux.EventProcessor;
 import de.muenchen.allg.itd51.wollmux.Logger;
@@ -241,13 +242,16 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
     try
     {
       // Logger initialisieren und erste Meldung ausgeben:
-      if (wollmuxLog != null) Logger.init(wollmuxLog, Logger.ALL);
+      if (wollmuxLog != null) Logger.init(wollmuxLog, Logger.LOG);
       Logger.debug("StartupWollMux");
       Logger.debug("wollmuxConfFile = " + wollmuxConfFile.toString());
 
       // Parsen der Konfigurationsdatei
       wollmuxConf = new ConfigThingy("wollmuxConf", wollmuxConfFile.toURL());
 
+      // Auswertung von LOGGING_MODE: 
+      setLoggingMode(wollmuxConf);
+      
       // VisibleTextFragmentList erzeugen
       textFragmentList = new VisibleTextFragmentList(wollmuxConf);
 
@@ -269,6 +273,29 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
     catch (Exception e)
     {
       Logger.error(e);
+    }
+  }
+
+  /**
+   * Wertet die undokumentierte wollmux.conf-Direktive LOGGING_MODE aus und
+   * setzt den Logging-Modus entsprechend.
+   * 
+   * @param ct
+   */
+  private static void setLoggingMode(ConfigThingy ct)
+  {
+    ConfigThingy log = ct.query("LOGGING_MODE");
+    if (log.count() > 0)
+    {
+      try
+      {
+        String mode = log.getLastChild().toString();
+        Logger.init(mode);
+      }
+      catch (NodeNotFoundException x)
+      {
+        Logger.error(x);
+      }
     }
   }
 
