@@ -413,7 +413,9 @@ public class LDAPDatasource implements Datasource
       int rootSize = np.parse(baseDN).size();
       SearchControls sc = new SearchControls();
       sc.setSearchScope(SearchControls.SUBTREE_SCOPE);
-      
+      /*TODO hier muss das timelimit für sc gesetzt werden
+        bitte überprüf ob du das noch an anderen stellen vergessen hast
+        - Matthias */
       NamingEnumeration enumer = ctx.search(baseDN,filter,sc);
       
       paths = new Vector();
