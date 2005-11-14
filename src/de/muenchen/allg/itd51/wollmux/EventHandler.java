@@ -124,7 +124,9 @@ public class EventHandler
     catch (java.lang.Exception e)
     {
       Logger.error(e);
-      showInfoModal("WollMux-Fehler:", e.toString());
+      String msg = e.getClass().getName() + ":\n\n";
+      if(e.getMessage() != null) msg+= e.getMessage();
+      showInfoModal("WollMux-Fehler:", msg);
     }
     return EventProcessor.processTheNextEvent;
   }
@@ -215,7 +217,8 @@ public class EventHandler
     return EventProcessor.processTheNextEvent;
   }
 
-  private static boolean on_load(Event event) throws EndlessLoopException
+  private static boolean on_load(Event event) throws EndlessLoopException,
+      WMCommandsFailedException
   {
     UnoService source = new UnoService(event.getSource());
     if (source.xTextDocument() != null)

@@ -59,6 +59,11 @@ public class WMCommandInterpreter
   private UnoService document;
 
   /**
+   * Zählt die Anzahl der während des interpret()-Vorgangs auftretenden Fehler.
+   */
+  private int errorFieldCount;
+
+  /**
    * Dieses Flag gibt an, ob der WMCommandInterpreter Änderungen am Dokument
    * vornehmen darf. Kommandos, die das Dokument nicht verändern, können
    * trotzdem ausgeführt werden.
@@ -106,14 +111,11 @@ public class WMCommandInterpreter
    * Bookmarks behandelt und nicht vom Interpreter bearbeitet.
    * 
    * @throws EndlessLoopException
+   * @throws WMCommandsFailedException
    */
-  public void interpret() throws EndlessLoopException
+  public void interpret() throws EndlessLoopException,
+      WMCommandsFailedException
   {
-    // Die Sichtbare Darstellung in OOo abschalten:
-    // document.xModel().lockControllers();
-    // Wurde auskommentiert, da der Aufbau zu langsam ist und die arbeitsweise
-    // transparenter ist, wenn der Benutzer sieht dass sich was tut...
-
     // Bereits abgearbeitete Bookmarks merken.
     HashMap evaluatedBookmarks = new HashMap();
 
@@ -127,6 +129,7 @@ public class WMCommandInterpreter
     // Vermeindung von Endlosschleifen erfüllt ist.
     boolean changed = true;
     int count = 0;
+    errorFieldCount = 0;
     while (changed && MAXCOUNT > ++count)
     {
       changed = false;
@@ -167,9 +170,10 @@ public class WMCommandInterpreter
         }
       }
     }
+
+    // ggf. EndlessLoopException mit dem Namen des Dokuments schmeissen.
     if (count == MAXCOUNT)
     {
-      // EndlessLoopException mit dem Namen des Dokuments schmeissen.
       UnoService frame = new UnoService(document.xModel()
           .getCurrentController().getFrame());
       String name;
@@ -188,8 +192,16 @@ public class WMCommandInterpreter
               + "\"");
     }
 
-    // Lock-Controllers wieder aufheben:
-    // document.xModel().unlockControllers();
+    // ggf. eine WMCommandsFailedException werfen:
+    if (errorFieldCount != 0)
+    {
+      throw new WMCommandsFailedException(
+          "Bei der Dokumenterzeugung mit dem Briefkopfsystem trat(en) "
+              + errorFieldCount
+              + " Fehler auf.\n\n"
+              + "Bitte überprüfen Sie das Dokument und kontaktieren ggf. die "
+              + "für Sie zuständige Systemadministration.");
+    }
   }
 
   /**
@@ -379,7 +391,7 @@ public class WMCommandInterpreter
    * @throws Exception
    */
   private XTextRange insertDocumentWithMarks(String bookmarkName, String unoURL)
-      throws NoSuchElementException, WrappedTargetException, Exception
+      throws NoSuchElementException, WrappedTargetException/* , Exception */
   {
     if (allowDocumentModification)
     {
@@ -402,7 +414,14 @@ public class WMCommandInterpreter
           .createTextCursorByRange(bookmark.xTextContent().getAnchor()));
       bookmarkCursor.xTextCursor().setString(
           FRAGMENT_MARK_OPEN + FRAGMENT_MARK_CLOSE);
-      bookmarkCursor.setPropertyValue("CharHidden", Boolean.FALSE);
+      try
+      {
+        bookmarkCursor.setPropertyValue("CharHidden", Boolean.FALSE);
+      }
+      catch (Exception x)
+      {
+        Logger.error(x);
+      }
 
       // InsertCurser erzeugen, in den das Textfragment eingefügt wird.
       UnoService insCursor = new UnoService(text.xText()
@@ -422,28 +441,43 @@ public class WMCommandInterpreter
       {
         Logger.error("Bookmark \"" + bookmarkName + "\":");
         Logger.error(e);
-        insCursor.xTextCursor().setString(bookmarkName + ": " + e.toString());
-        // TODO: überarbeiten
+        insertErrorField(insCursor.xTextCursor(), "Bookmark \""
+                                                  + bookmarkName
+                                                  + "\":\n\n", e);
       }
 
       // FRAGMENT_MARKen verstecken:
       UnoService hiddenCursor = new UnoService(text.xText().createTextCursor());
-      // start-Marke
+      // 1) start-Marke
       hiddenCursor.xTextCursor().gotoRange(
           bookmarkCursor.xTextRange().getStart(),
           false);
       hiddenCursor.xTextCursor().goRight(
           (short) FRAGMENT_MARK_OPEN.length(),
           true);
-      hiddenCursor.setPropertyValue("CharHidden", Boolean.TRUE);
-      // end-Marke
+      try
+      {
+        hiddenCursor.setPropertyValue("CharHidden", Boolean.TRUE);
+      }
+      catch (Exception x)
+      {
+        Logger.error(x);
+      }
+      // 2) end-Marke
       hiddenCursor.xTextCursor().gotoRange(
           bookmarkCursor.xTextRange().getEnd(),
           false);
       hiddenCursor.xTextCursor().goLeft(
           (short) FRAGMENT_MARK_CLOSE.length(),
           true);
-      hiddenCursor.setPropertyValue("CharHidden", Boolean.TRUE);
+      try
+      {
+        hiddenCursor.setPropertyValue("CharHidden", Boolean.TRUE);
+      }
+      catch (Exception x)
+      {
+        Logger.error(x);
+      }
 
       // das war's
       return bookmarkCursor.xTextRange();
@@ -612,56 +646,13 @@ public class WMCommandInterpreter
         // Textcursor erzeugen und mit dem neuen Text ausdehnen.
         UnoService bookmark = new UnoService(bookmarkAccess
             .getByName(bookmarkName));
-        UnoService cursor = new UnoService(document.xTextDocument().getText()
-            .createTextCursorByRange(bookmark.xTextContent().getAnchor()));
-        cursor.xTextCursor().setString("<FEHLER:  >");
-
-        // Text fett und rot machen:
-        try
-        {
-          cursor.setPropertyValue("CharColor", new Integer(0xff0000));
-          cursor.setPropertyValue("CharWeight", new Float(FontWeight.BOLD));
-        }
-        catch (java.lang.Exception x)
-        {
-          Logger.error(x);
-        }
-
-        // msg += Stacktrace von e
-        if (e != null)
-        {
-          if (e.getMessage() != null)
-            msg += e.getMessage() + "\n\n" + e.toString() + "\n";
-          else
-            msg += e.toString() + "\n\n";
-          StackTraceElement[] element = e.getStackTrace();
-          for (int i = 0; i < element.length; i++)
-          {
-            msg += element[i].toString() + "\n";
-          }
-        }
-
-        // Ein Annotation-Textfield erzeugen und einfügen:
-        try
-        {
-          UnoService c = new UnoService(document.xTextDocument().getText()
-              .createTextCursorByRange(cursor.xTextCursor().getEnd()));
-          c.xTextCursor().goLeft((short) 2, false);
-          UnoService note = document
-              .create("com.sun.star.text.TextField.Annotation");
-          note.setPropertyValue("Content", msg);
-          document.xTextDocument().getText().insertTextContent(
-              c.xTextCursor(),
-              note.xTextContent(),
-              false);
-        }
-        catch (java.lang.Exception x)
-        {
-          Logger.error(x);
-        }
+        XTextRange range = insertErrorField(
+            bookmark.xTextContent().getAnchor(),
+            msg,
+            e);
 
         // Bookmark an neuen Range anpassen
-        rerangeBookmark(bookmarkName, cursor.xTextRange());
+        if (range != null) rerangeBookmark(bookmarkName, range);
       }
       catch (NoSuchElementException x)
       {
@@ -676,6 +667,61 @@ public class WMCommandInterpreter
         Logger.error(x);
       }
     }
+  }
+
+  private XTextRange insertErrorField(XTextRange range, String text,
+      java.lang.Exception e)
+  {
+    errorFieldCount++;
+
+    UnoService cursor = new UnoService(document.xTextDocument().getText()
+        .createTextCursorByRange(range));
+    cursor.xTextCursor().setString("<FEHLER:  >");
+
+    // Text fett und rot machen:
+    try
+    {
+      cursor.setPropertyValue("CharColor", new Integer(0xff0000));
+      cursor.setPropertyValue("CharWeight", new Float(FontWeight.BOLD));
+    }
+    catch (java.lang.Exception x)
+    {
+      Logger.error(x);
+    }
+
+    // msg += Stacktrace von e
+    if (e != null)
+    {
+      if (e.getMessage() != null)
+        text += e.getMessage() + "\n\n" + e.getClass().getName() + ":\n";
+      else
+        text += e.toString() + "\n\n";
+      StackTraceElement[] element = e.getStackTrace();
+      for (int i = 0; i < element.length; i++)
+      {
+        text += element[i].toString() + "\n";
+      }
+    }
+
+    // Ein Annotation-Textfield erzeugen und einfügen:
+    try
+    {
+      UnoService c = new UnoService(document.xTextDocument().getText()
+          .createTextCursorByRange(cursor.xTextCursor().getEnd()));
+      c.xTextCursor().goLeft((short) 2, false);
+      UnoService note = document
+          .create("com.sun.star.text.TextField.Annotation");
+      note.setPropertyValue("Content", text);
+      document.xTextDocument().getText().insertTextContent(
+          c.xTextCursor(),
+          note.xTextContent(),
+          false);
+    }
+    catch (java.lang.Exception x)
+    {
+      Logger.error(x);
+    }
+    return cursor.xTextRange();
   }
 
   /**

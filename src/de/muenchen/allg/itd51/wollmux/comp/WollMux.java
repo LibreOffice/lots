@@ -558,7 +558,6 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
   public void dispatch( /* IN */com.sun.star.util.URL aURL,
   /* IN */com.sun.star.beans.PropertyValue[] aArguments)
   {
-    Logger.init(Logger.ALL); // TODO: remove me
     try
     {
       URI uri = new URI(aURL.Complete);
