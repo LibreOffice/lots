@@ -21,6 +21,7 @@
 * 31.10.2005 | BNK | Behandlung von TimeoutException bei find()
 * 02.11.2005 | BNK | +editNewPALEntry()
 * 10.11.2005 | BNK | +DEFAULT_* Konstanten
+* 14.11.2005 | BNK | Exakter Match "Nachname" entfernt aus 1-Wort-Fall
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -1006,7 +1007,6 @@ public class PersoenlicheAbsenderlisteVerwalten
         {
           /* 1 Wort
            * kein Sternchen enthalten 
-           *   Nachname
            *   Email
            *   Email@muenchen.de
            *   Nachn*
@@ -1016,9 +1016,6 @@ public class PersoenlicheAbsenderlisteVerwalten
            *   Vorn*
            */
           do{
-            results = dj.find("Nachname", wort1);
-            if (!results.isEmpty()) break;
-            
             results = dj.find("Mail", wort1);
             if (!results.isEmpty()) break;
             
