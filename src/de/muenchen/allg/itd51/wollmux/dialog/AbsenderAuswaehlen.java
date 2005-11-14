@@ -1,3 +1,5 @@
+//TODO 1. Schriftgrösse der Dialoge folgt nicht den Windows-Einstellungen (Grosse schriftarten)
+//TODO 2. textareas haben andere Schrift als textfields
 /*
 * Dateiname: AbsenderAuswaehlen.java
 * Projekt  : WollMux

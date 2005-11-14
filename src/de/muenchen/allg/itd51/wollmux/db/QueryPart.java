@@ -10,6 +10,7 @@
 * -------------------------------------------------------------------
 * 31.10.2005 | BNK | Erstellung
 * 03.11.2005 | BNK | besser kommentiert
+* 14.11.2005 | BNK | null Suchstring als leerer String interpretiert
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -34,6 +35,9 @@ public class QueryPart
   
   public QueryPart(String spaltenName, String suchString)
   {
+    if (spaltenName == null) throw new NullPointerException();
+    if (suchString == null) 
+      suchString = "";
     columnName = spaltenName;
     searchString = suchString;
   }

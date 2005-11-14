@@ -160,8 +160,8 @@ public class DatasourceJoiner
           ds = new PreferDatasource(nameToDatasource, sourceDesc, context);
         else if (type.equals("schema"))
           ds = new SchemaDatasource(nameToDatasource, sourceDesc, context);
-        //else if (type.equals("ldap"))
-        //  ds = new LDAPDatasource(nameToDatasource, sourceDesc, context);
+        else if (type.equals("ldap"))
+          ds = new LDAPDatasource(nameToDatasource, sourceDesc, context);
         else
           Logger.error("Ununterstützter Datenquellentyp: " + type);
       }
@@ -203,7 +203,7 @@ public class DatasourceJoiner
       mainDatasource = (Datasource)nameToDatasource.get(mainSourceName);
 
       try{
-        myLOS.refreshFromDatabase(mainDatasource, QUERY_TIMEOUT);
+        myLOS.refreshFromDatabase(mainDatasource, queryTimeout());
       } catch(TimeoutException x)
       {
         Logger.error("Timeout beim Zugriff auf Datenquelle "+mainDatasource.getName()+" => Benutze Daten aus Cache");
@@ -300,9 +300,9 @@ X           "Vorname N."
    * @throws TimeoutException
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private QueryResults find(List query) throws TimeoutException
+  protected QueryResults find(List query) throws TimeoutException
   { //TESTED
-    QueryResults res = mainDatasource.find(query, QUERY_TIMEOUT);
+    QueryResults res = mainDatasource.find(query, queryTimeout());
     List djDatasetsList = new Vector(res.size());
     Iterator iter = res.iterator();
     while (iter.hasNext())
@@ -313,6 +313,7 @@ X           "Vorname N."
     return new QueryResultsList(djDatasetsList);
   }
   
+  protected long queryTimeout() {return QUERY_TIMEOUT;}
   
   /**
    * Speichert den aktuellen LOS samt zugehörigem Cache in die Datei

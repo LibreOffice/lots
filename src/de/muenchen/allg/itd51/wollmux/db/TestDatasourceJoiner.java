@@ -27,6 +27,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
@@ -39,6 +40,8 @@ import de.muenchen.allg.itd51.wollmux.TimeoutException;
  */
 public class TestDatasourceJoiner extends DatasourceJoiner
 {
+  private static final long TEST_QUERY_TIMEOUT = 3000;
+  
   /** TestDJ soll nichts (ungewollt) überschreiben, deshalb hier no-op (aber
    * es gibt reallySaveCacheAndLOS()).
    */ 
@@ -80,7 +83,8 @@ public class TestDatasourceJoiner extends DatasourceJoiner
       System.exit(1);
     }
   }
-  
+
+  protected long queryTimeout() {return TEST_QUERY_TIMEOUT;}
   
   /**
    * Gibt results aus. 
