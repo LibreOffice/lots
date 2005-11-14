@@ -411,8 +411,6 @@ public class WMCommandInterpreter
       XNameAccess bookmarkAccess = document.xBookmarksSupplier().getBookmarks();
       UnoService bookmark = new UnoService(bookmarkAccess
           .getByName(bookmarkName));
-      UnoService text = new UnoService(bookmark.xTextContent().getAnchor()
-          .getText());
       UnoService bookmarkCursor = createTextCursorByBookmark(bookmark);
       bookmarkCursor.xTextCursor().setString(
           FRAGMENT_MARK_OPEN + FRAGMENT_MARK_CLOSE);
@@ -449,7 +447,8 @@ public class WMCommandInterpreter
       }
 
       // FRAGMENT_MARKen verstecken:
-      UnoService hiddenCursor = new UnoService(text.xText().createTextCursor());
+      UnoService hiddenCursor = new UnoService(bookmark.xTextContent()
+          .getAnchor().getText().createTextCursor());
       // 1) start-Marke
       hiddenCursor.xTextCursor().gotoRange(
           bookmarkCursor.xTextRange().getStart(),
@@ -485,20 +484,6 @@ public class WMCommandInterpreter
       return bookmarkCursor.xTextRange();
     }
     return null;
-  }
-
-  /**
-   * Erzeugt einen textCursor an der Stelle des Bookmarks bookmarkName.
-   * 
-   * @param bookmarkName
-   * @return
-   * @throws NoSuchElementException
-   * @throws WrappedTargetException
-   */
-  private UnoService createTextCursorByBookmark(UnoService bookmark)
-      throws NoSuchElementException, WrappedTargetException
-  {
-    return createTextCursorByRange(bookmark.xTextContent().getAnchor());
   }
 
   /**
@@ -741,6 +726,20 @@ public class WMCommandInterpreter
   {
     return new UnoService(xTextRange.getText().createTextCursorByRange(
         xTextRange));
+  }
+
+  /**
+   * Erzeugt einen textCursor an der Stelle des Bookmarks bookmarkName.
+   * 
+   * @param bookmarkName
+   * @return
+   * @throws NoSuchElementException
+   * @throws WrappedTargetException
+   */
+  private UnoService createTextCursorByBookmark(UnoService bookmark)
+      throws NoSuchElementException, WrappedTargetException
+  {
+    return createTextCursorByRange(bookmark.xTextContent().getAnchor());
   }
 
   /**
