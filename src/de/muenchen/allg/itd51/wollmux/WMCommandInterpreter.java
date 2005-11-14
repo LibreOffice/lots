@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.sun.star.awt.FontWeight;
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.container.NoSuchElementException;
 import com.sun.star.container.XNameAccess;
@@ -240,14 +241,12 @@ public class WMCommandInterpreter
         // unbekanntes Kommando
         else
         {
-          String msg = bookmarkName
-                       + ": "
-                       + "Unbekanntes WollMux-Kommando \""
+          String msg = "Unbekanntes WollMux-Kommando \""
                        + cmd.toString()
                        + "\"";
           Logger.error(msg);
           state.setErrors(1);
-          fillBookmark(bookmarkName, msg);
+          insertErrorField(bookmarkName, msg, null);
         }
       }
 
@@ -263,7 +262,7 @@ public class WMCommandInterpreter
     {
       Logger.error("Bookmark \"" + bookmarkName + "\":");
       Logger.error(e);
-      fillBookmark(bookmarkName, bookmarkName + ": " + e.toString());
+      insertErrorField(bookmarkName, "", e);
     }
     return bookmarkName;
   }
@@ -294,7 +293,7 @@ public class WMCommandInterpreter
     {
       Logger.error("Bookmark \"" + bookmarkName + "\":");
       Logger.error(e);
-      fillBookmark(bookmarkName, bookmarkName + ": " + e.toString());
+      insertErrorField(bookmarkName, "", e);
       state.setErrors(state.getErrors() + 1);
     }
     state.setDone(true);
@@ -356,7 +355,7 @@ public class WMCommandInterpreter
     {
       Logger.error("Bookmark \"" + bookmarkName + "\":");
       Logger.error(e);
-      fillBookmark(bookmarkName, bookmarkName + ": " + e.toString());
+      insertErrorField(bookmarkName, "", e);
       state.setErrors(state.getErrors() + 1);
     }
     state.setDone(true);
@@ -424,6 +423,7 @@ public class WMCommandInterpreter
         Logger.error("Bookmark \"" + bookmarkName + "\":");
         Logger.error(e);
         insCursor.xTextCursor().setString(bookmarkName + ": " + e.toString());
+        // TODO: überarbeiten
       }
 
       // FRAGMENT_MARKen verstecken:
@@ -588,6 +588,92 @@ public class WMCommandInterpreter
         // interner UNO-Fehler beim Holen des Bookmarks. Sollte
         // normalerweise nicht auftreten.
         Logger.error(e);
+      }
+    }
+  }
+
+  /**
+   * Diese Methode fügt ein Fehler-Feld an die Stelle des Bookmarks.
+   * 
+   * @param bookmarkName
+   * @param text
+   */
+  private void insertErrorField(String bookmarkName, String text,
+      java.lang.Exception e)
+  {
+    if (allowDocumentModification)
+    {
+      String msg = "Fehler in Bookmark \"" + bookmarkName + "\":\n\n" + text;
+      try
+      {
+        XNameAccess bookmarkAccess = document.xBookmarksSupplier()
+            .getBookmarks();
+
+        // Textcursor erzeugen und mit dem neuen Text ausdehnen.
+        UnoService bookmark = new UnoService(bookmarkAccess
+            .getByName(bookmarkName));
+        UnoService cursor = new UnoService(document.xTextDocument().getText()
+            .createTextCursorByRange(bookmark.xTextContent().getAnchor()));
+        cursor.xTextCursor().setString("<FEHLER:  >");
+
+        // Text fett und rot machen:
+        try
+        {
+          cursor.setPropertyValue("CharColor", new Integer(0xff0000));
+          cursor.setPropertyValue("CharWeight", new Float(FontWeight.BOLD));
+        }
+        catch (java.lang.Exception x)
+        {
+          Logger.error(x);
+        }
+
+        // msg += Stacktrace von e
+        if (e != null)
+        {
+          if (e.getMessage() != null)
+            msg += e.getMessage() + "\n\n" + e.toString() + "\n";
+          else
+            msg += e.toString() + "\n\n";
+          StackTraceElement[] element = e.getStackTrace();
+          for (int i = 0; i < element.length; i++)
+          {
+            msg += element[i].toString() + "\n";
+          }
+        }
+
+        // Ein Annotation-Textfield erzeugen und einfügen:
+        try
+        {
+          UnoService c = new UnoService(document.xTextDocument().getText()
+              .createTextCursorByRange(cursor.xTextCursor().getEnd()));
+          c.xTextCursor().goLeft((short) 2, false);
+          UnoService note = document
+              .create("com.sun.star.text.TextField.Annotation");
+          note.setPropertyValue("Content", msg);
+          document.xTextDocument().getText().insertTextContent(
+              c.xTextCursor(),
+              note.xTextContent(),
+              false);
+        }
+        catch (java.lang.Exception x)
+        {
+          Logger.error(x);
+        }
+
+        // Bookmark an neuen Range anpassen
+        rerangeBookmark(bookmarkName, cursor.xTextRange());
+      }
+      catch (NoSuchElementException x)
+      {
+        // Dieser Fall kann normalerweise nicht auftreten, da nur Bookmarks
+        // verarbeitet werden, die auch wirklich existieren.
+        Logger.error(x);
+      }
+      catch (WrappedTargetException x)
+      {
+        // interner UNO-Fehler beim Holen des Bookmarks. Sollte
+        // normalerweise nicht auftreten.
+        Logger.error(x);
       }
     }
   }
