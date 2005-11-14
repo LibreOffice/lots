@@ -33,7 +33,9 @@ import com.sun.star.beans.PropertyValue;
 import com.sun.star.container.NoSuchElementException;
 import com.sun.star.container.XNameAccess;
 import com.sun.star.io.IOException;
+import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.lang.WrappedTargetException;
+import com.sun.star.text.XTextContent;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextRange;
 import com.sun.star.uno.Exception;
@@ -409,9 +411,9 @@ public class WMCommandInterpreter
       XNameAccess bookmarkAccess = document.xBookmarksSupplier().getBookmarks();
       UnoService bookmark = new UnoService(bookmarkAccess
           .getByName(bookmarkName));
-      UnoService text = new UnoService(document.xTextDocument().getText());
-      UnoService bookmarkCursor = new UnoService(text.xText()
-          .createTextCursorByRange(bookmark.xTextContent().getAnchor()));
+      UnoService text = new UnoService(bookmark.xTextContent().getAnchor()
+          .getText());
+      UnoService bookmarkCursor = createTextCursorByBookmark(bookmark);
       bookmarkCursor.xTextCursor().setString(
           FRAGMENT_MARK_OPEN + FRAGMENT_MARK_CLOSE);
       try
@@ -424,8 +426,8 @@ public class WMCommandInterpreter
       }
 
       // InsertCurser erzeugen, in den das Textfragment eingefügt wird.
-      UnoService insCursor = new UnoService(text.xText()
-          .createTextCursorByRange(bookmarkCursor.xTextCursor()));
+      UnoService insCursor = createTextCursorByRange(bookmarkCursor
+          .xTextCursor());
       insCursor.xTextCursor().goRight(
           (short) FRAGMENT_MARK_OPEN.length(),
           false);
@@ -486,6 +488,20 @@ public class WMCommandInterpreter
   }
 
   /**
+   * Erzeugt einen textCursor an der Stelle des Bookmarks bookmarkName.
+   * 
+   * @param bookmarkName
+   * @return
+   * @throws NoSuchElementException
+   * @throws WrappedTargetException
+   */
+  private UnoService createTextCursorByBookmark(UnoService bookmark)
+      throws NoSuchElementException, WrappedTargetException
+  {
+    return createTextCursorByRange(bookmark.xTextContent().getAnchor());
+  }
+
+  /**
    * Diese Methode ordnet dem Bookmark bookmarkName eine neue Range xTextRang
    * zu. Damit kann z.B. ein Bookmark ohne Ausdehnung eine Ausdehnung xTextRange
    * erhalten.
@@ -510,9 +526,7 @@ public class WMCommandInterpreter
       // altes Bookmark löschen.
       UnoService oldBookmark = new UnoService(document.xBookmarksSupplier()
           .getBookmarks().getByName(bookmarkName));
-
-      document.xTextDocument().getText().removeTextContent(
-          oldBookmark.xTextContent());
+      removeTextContent(oldBookmark.xTextContent());
 
       // neuen Bookmark unter dem alten Namen mit Ausdehnung hinzufügen.
       UnoService newBookmark;
@@ -520,10 +534,7 @@ public class WMCommandInterpreter
       {
         newBookmark = document.create("com.sun.star.text.Bookmark");
         newBookmark.xNamed().setName(bookmarkName);
-        document.xTextDocument().getText().insertTextContent(
-            xTextRange,
-            newBookmark.xTextContent(),
-            true);
+        insertTextContent(xTextRange, newBookmark.xTextContent(), true);
       }
       catch (Exception e)
       {
@@ -558,22 +569,18 @@ public class WMCommandInterpreter
             .getBookmarks().getByName(oldName));
 
         // Bereich merken:
-        UnoService text = new UnoService(document.xTextDocument().getText());
-        UnoService bookmarkCursor = new UnoService(text.xText()
-            .createTextCursorByRange(oldBookmark.xTextContent().getAnchor()));
+        UnoService bookmarkCursor = createTextCursorByRange(oldBookmark
+            .xTextContent().getAnchor());
 
         // altes Bookmark löschen.
-        document.xTextDocument().getText().removeTextContent(
-            oldBookmark.xTextContent());
+        removeTextContent(oldBookmark.xTextContent());
 
         // neues Bookmark hinzufügen.
         UnoService newBookmark;
         newBookmark = document.create("com.sun.star.text.Bookmark");
         newBookmark.xNamed().setName(newName);
-        document.xTextDocument().getText().insertTextContent(
-            bookmarkCursor.xTextRange(),
-            newBookmark.xTextContent(),
-            true);
+        insertTextContent(bookmarkCursor.xTextRange(), newBookmark
+            .xTextContent(), true);
 
         return newBookmark.xNamed().getName();
       }
@@ -603,11 +610,7 @@ public class WMCommandInterpreter
         // Textcursor erzeugen und mit dem neuen Text ausdehnen.
         UnoService bookmark = new UnoService(bookmarkAccess
             .getByName(bookmarkName));
-        UnoService textRange = new UnoService(bookmark.xTextContent()
-            .getAnchor());
-        UnoService xText = new UnoService(textRange.xTextRange().getText());
-        UnoService cursor = new UnoService(xText.xText()
-            .createTextCursorByRange(bookmark.xTextContent().getAnchor()));
+        UnoService cursor = createTextCursorByBookmark(bookmark);
         cursor.xTextCursor().setString(text);
 
         // Bookmark an neuen Range anpassen
@@ -677,8 +680,7 @@ public class WMCommandInterpreter
   {
     errorFieldCount++;
 
-    UnoService cursor = new UnoService(document.xTextDocument().getText()
-        .createTextCursorByRange(range));
+    UnoService cursor = createTextCursorByRange(range);
     cursor.xTextCursor().setString("<FEHLER:  >");
 
     // Text fett und rot machen:
@@ -709,22 +711,36 @@ public class WMCommandInterpreter
     // Ein Annotation-Textfield erzeugen und einfügen:
     try
     {
-      UnoService c = new UnoService(document.xTextDocument().getText()
-          .createTextCursorByRange(cursor.xTextCursor().getEnd()));
+      UnoService c = createTextCursorByRange(cursor.xTextCursor().getEnd());
       c.xTextCursor().goLeft((short) 2, false);
       UnoService note = document
           .create("com.sun.star.text.TextField.Annotation");
       note.setPropertyValue("Content", text);
-      document.xTextDocument().getText().insertTextContent(
-          c.xTextCursor(),
-          note.xTextContent(),
-          false);
+      insertTextContent(c.xTextRange(), note.xTextContent(), false);
     }
     catch (java.lang.Exception x)
     {
       Logger.error(x);
     }
     return cursor.xTextRange();
+  }
+
+  private void insertTextContent(XTextRange xTextRange, XTextContent content,
+      boolean absorb) throws IllegalArgumentException
+  {
+    xTextRange.getText().insertTextContent(xTextRange, content, absorb);
+  }
+
+  private void removeTextContent(XTextContent content)
+      throws NoSuchElementException
+  {
+    content.getAnchor().getText().removeTextContent(content);
+  }
+
+  private UnoService createTextCursorByRange(XTextRange xTextRange)
+  {
+    return new UnoService(xTextRange.getText().createTextCursorByRange(
+        xTextRange));
   }
 
   /**
