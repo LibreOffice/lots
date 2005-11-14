@@ -113,7 +113,7 @@ public class SenderBox extends ComponentBase implements XServiceInfo,
 
   // Grundeinstellungen für die Anzeige der ComboBox
 
-  private static final String TEXT_PROTOTYPE = "Matthias S. Benkmann ist euer Gott (W-OLL-MUX-5.1)";
+  private static final String TEXT_PROTOTYPE = "Lutz, Christoph Alexander  (D-III-ITD-5.1)";
 
   private static final short DEFAULT_LINE_COUNT = 10;
 
