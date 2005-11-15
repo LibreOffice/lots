@@ -892,6 +892,7 @@ public class DatensatzBearbeiten
                 try{ lines = Integer.parseInt(uiElementDesc.get("LINES").toString()); } catch(Exception x){}
                 JTextArea textarea = new JTextArea(lines,TEXTFIELD_DEFAULT_WIDTH);
                 textarea.setEditable(!readonly);
+                textarea.setFont(new JTextField().getFont());
                 
                 try
                 {

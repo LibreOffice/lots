@@ -1,4 +1,3 @@
-//TODO 2. textareas haben andere Schrift als textfields
 /*
 * Dateiname: AbsenderAuswaehlen.java
 * Projekt  : WollMux
