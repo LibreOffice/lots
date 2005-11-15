@@ -80,14 +80,6 @@ public class WMCommandInterpreter
   private static final int MAXCOUNT = 100;
 
   /**
-   * Verstecktes Trennzeichen, das zum Beginn und zum Ende eines Textfragments
-   * eingefügt wird um verschachtelte WollMux-Kommandos zu ermöglichen.
-   */
-  private static final String FRAGMENT_MARK_OPEN = "<..";
-
-  private static final String FRAGMENT_MARK_CLOSE = "..>";
-
-  /**
    * Der Konstruktor erzeugt einen neuen Kommandointerpreter, der alle Kommandos
    * im übergebenen xDoc scannen und entsprechend auflösen kann.
    * 
@@ -409,39 +401,14 @@ public class WMCommandInterpreter
   {
     if (allowDocumentModification)
     {
-      // so gehts:
-      // "x" ist die explizit sichtbare FRAGMENT_MARK, die später auf
-      // Hidden ("h") gesetzt wird.
-      // 1) bookmarkCursor = "xx"
-      // 2) insertCursor exakt in die Mitte der xx setzen.
-      // 3) Inhalt aus Fragmentdatei einfügen in insCursor
-      // 4) alle "x" auf "h" setzen
-      // Ergebnis: bookmarCursor = "h<inhalt>h"
 
-      // TextCursor erzeugen, der den gesamten Ersetzungsbereich des Bookmarks
-      // umschließt und mit dem Inhalt der beiden FRAGMENT_MARKs vorbelegen.
+      // WMInsertField und insCursor erzeugen:
       XNameAccess bookmarkAccess = document.xBookmarksSupplier().getBookmarks();
       UnoService bookmark = new UnoService(bookmarkAccess
           .getByName(bookmarkName));
-      UnoService bookmarkCursor = createTextCursorByBookmark(bookmark);
-      bookmarkCursor.xTextCursor().setString(
-          FRAGMENT_MARK_OPEN + FRAGMENT_MARK_CLOSE);
-      try
-      {
-        bookmarkCursor.setPropertyValue("CharHidden", Boolean.FALSE);
-      }
-      catch (Exception x)
-      {
-        Logger.error(x);
-      }
-
-      // InsertCurser erzeugen, in den das Textfragment eingefügt wird.
-      UnoService insCursor = createTextCursorByRange(bookmarkCursor
-          .xTextCursor());
-      insCursor.xTextCursor().goRight(
-          (short) FRAGMENT_MARK_OPEN.length(),
-          false);
-      insCursor.xTextCursor().collapseToStart();
+      WMInsertField insertField = new WMInsertField(createTextCursorByBookmark(
+          bookmark).xTextCursor());
+      UnoService insCursor = insertField.createInsertCursor();
 
       try
       {
@@ -458,42 +425,10 @@ public class WMCommandInterpreter
                                                   + "\":\n\n", e);
       }
 
-      // FRAGMENT_MARKen verstecken:
-      UnoService hiddenCursor = new UnoService(bookmark.xTextContent()
-          .getAnchor().getText().createTextCursor());
-      // 1) start-Marke
-      hiddenCursor.xTextCursor().gotoRange(
-          bookmarkCursor.xTextRange().getStart(),
-          false);
-      hiddenCursor.xTextCursor().goRight(
-          (short) FRAGMENT_MARK_OPEN.length(),
-          true);
-      try
-      {
-        hiddenCursor.setPropertyValue("CharHidden", Boolean.TRUE);
-      }
-      catch (Exception x)
-      {
-        Logger.error(x);
-      }
-      // 2) end-Marke
-      hiddenCursor.xTextCursor().gotoRange(
-          bookmarkCursor.xTextRange().getEnd(),
-          false);
-      hiddenCursor.xTextCursor().goLeft(
-          (short) FRAGMENT_MARK_CLOSE.length(),
-          true);
-      try
-      {
-        hiddenCursor.setPropertyValue("CharHidden", Boolean.TRUE);
-      }
-      catch (Exception x)
-      {
-        Logger.error(x);
-      }
+      // Textmarken verstecken:
+      insertField.hideMarks();
 
-      // das war's
-      return bookmarkCursor.xTextRange();
+      return insertField.getTextRange();
     }
     return null;
   }
@@ -607,11 +542,15 @@ public class WMCommandInterpreter
         // Textcursor erzeugen und mit dem neuen Text ausdehnen.
         UnoService bookmark = new UnoService(bookmarkAccess
             .getByName(bookmarkName));
-        UnoService cursor = createTextCursorByBookmark(bookmark);
-        cursor.xTextCursor().setString(text);
+        WMInsertField insertField = new WMInsertField(
+            createTextCursorByBookmark(bookmark).xTextRange());
+        insertField.createInsertCursor().xTextCursor().setString(text);
 
+        // Markers verstecken:
+        insertField.hideMarks();
+        
         // Bookmark an neuen Range anpassen
-        rerangeBookmark(bookmarkName, cursor.xTextRange());
+        rerangeBookmark(bookmarkName, insertField.getTextRange());
 
       }
       catch (NoSuchElementException e)
