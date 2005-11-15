@@ -290,7 +290,6 @@ public class EventHandler
       while (i.hasNext())
       {
         ((DJDataset) i.next()).copy();
-        // TODO: obiger Cast sollt Dataset sein (oder die Doku ist falsch)
       }
     }
 

@@ -190,10 +190,10 @@ public class EventProcessor implements XEventListener, XModifyListener,
         if (UnoRuntime.areSame(source.Source, event.getSource())) i.remove();
       }
     }
+
     // EventListener deregistrieren.
     XComponent xCompo = UNO.XComponent(source.Source);
     if (xCompo != null) xCompo.removeEventListener(this);
-    // TODO: Wann hören wir auf?
   }
 
   /**

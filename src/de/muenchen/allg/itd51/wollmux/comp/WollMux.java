@@ -514,12 +514,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
     {
       URI uri = new URI(aURL.Complete);
       Logger.debug2("queryDispatch: "
-                    + uri.toString()
-                    + "#"
-                    + uri.getSchemeSpecificPart()
-                    + "#"
-                    + uri.getFragment()
-                    + "#"); // TODO deleteme
+                    + uri.toString());
       if (uri.getScheme().compareToIgnoreCase(wollmuxProtocol) == 0)
       {
         if (uri.getSchemeSpecificPart().compareToIgnoreCase(
