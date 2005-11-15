@@ -143,6 +143,7 @@ public class LDAPDatasource implements Datasource
         int relativePath;
         String attributeName;
         String objectClass = null;
+        String lineSeparator = null;
         
         try {
           
@@ -172,6 +173,12 @@ public class LDAPDatasource implements Datasource
             // do nothing... (Angabe von OBJECT_CLASS optional)
           }
           
+          try {
+            lineSeparator = spalteDesc.get("LINE_SEPARATOR").toString();
+          } catch (NodeNotFoundException x) {
+            // do nothing... (Angabe von LINE_SEPARATOR optional)
+          }
+          
         } catch(NodeNotFoundException x) {
           throw new ConfigurationErrorException( errorMessage() + "DB_SPALTE Angabe fehlt");
         }
@@ -179,6 +186,9 @@ public class LDAPDatasource implements Datasource
         LDAPAttribute currentPath = new LDAPAttribute(relativePath, attributeName);
         if(objectClass!=null) {
           currentPath.objectClass = objectClass;
+        }
+        if(lineSeparator!=null) {
+          currentPath.lineSeparator = lineSeparator;
         }
         nameMap.put(spalte,currentPath);
         schema.add(spalte);
@@ -250,6 +260,9 @@ public class LDAPDatasource implements Datasource
     
     // exklusive objectClass
     String objectClass;
+    
+    // line separator
+    String lineSeparator;
     
     
     LDAPAttribute(int relativePath, String attributeName) {
@@ -366,9 +379,7 @@ public class LDAPDatasource implements Datasource
 
       //results.trimToSize();
       
-      return new QueryResultsList(results);
-      
-      
+      return new QueryResultsList(results);  
       
     }
     
@@ -493,9 +504,6 @@ public class LDAPDatasource implements Datasource
       if (objectClass!=null) {
         currentSearchFilter = "(&" + currentSearchFilter + "(objectClass=" + objectClass + "))";
       }
-      
-      System.out.println("current search filter: " + currentSearchFilter);
-      
 
       if (relativePath==0) { // edit filter   
         if (first) {
@@ -949,9 +957,14 @@ public class LDAPDatasource implements Datasource
         }
 
       }
-      
-      if (value!=null)
+
+      if (value!=null) {
+        String lineSeparator = currentAttribute.lineSeparator;
+        if (lineSeparator!=null) {
+          value = value.replaceAll(lineSeparator,"/n");
+        }
         relation.put(currentKey, value);
+      }
     }
     
     // generate Key
@@ -1188,9 +1201,10 @@ public class LDAPDatasource implements Datasource
     ConfigThingy sourceDesc = ldapConf.query("Datenquelle").getFirstChild();
     LDAPDatasource dj = new LDAPDatasource(nameToDatasource, sourceDesc, context);
     
+    
    
     // Test keys
-   QueryResults qr = dj.simpleFind("OrgaEmail","  r.kom@muenchen.de","Orga1","Referatsleitung");
+   /*QueryResults qr = dj.simpleFind("OrgaEmail","  r.kom@muenchen.de","Orga1","Referatsleitung");
     Iterator iter = qr.iterator();
     
     Collection keys = new Vector();
@@ -1208,18 +1222,18 @@ public class LDAPDatasource implements Datasource
     QueryResults qr2 = dj.getDatasetsByKey(keys,30000);
     
     dj.printResults("Get and find keys: ",dj.schema,qr2);
-    
+    */
     
     printResults("OrgaEmail = r.kom@muenchen.de , Orga1 = Referatsleitung", dj.getSchema(), dj.simpleFind("OrgaEmail"," r.kom@muenchen.de","Orga1","Referatsleitung"));
-    /*printResults("OrgaEmail = r.kom@muenchen.de , Orga3 = Referatsleitung", dj.getSchema(), dj.simpleFind("OrgaEmail","  r.kom@muenchen.de","Orga3","Referatsleitung"));
+    printResults("OrgaEmail = r.kom@muenchen.de , Orga3 = Referatsleitung", dj.getSchema(), dj.simpleFind("OrgaEmail","  r.kom@muenchen.de","Orga3","Referatsleitung"));
     printResults("Orga2 = Stadtarchiv , Referat = Direktorium", dj.getSchema(), dj.simpleFind("Orga2","Stadtarchiv","Referat","Direktorium")); 
     printResults("Referat = Sozialreferat , Nachname = Meier", dj.getSchema(), dj.simpleFind("Referat","Sozialreferat","Nachname","Meier")); 
-    printResults("Nachname = lOEsewiTZ", dj.getSchema(), dj.simpleFind("Nachname","lOEsewiTZ"));*/ 
+    //printResults("Nachname =r*", dj.getSchema(), dj.simpleFind("Nachname","r*"));
     //printResults("Nachname = *utz", dj.getSchema(), dj.simpleFind("Nachname","*utz"));
     //printResults("Nachname = *oe*", dj.getSchema(), dj.simpleFind("Nachname","*oe*"));
     //printResults("Nachname = Lutz", dj.getSchema(), dj.simpleFind("Nachname","Lutz"));
-    //printResults("Nachname = *utz, Vorname = Chris*", dj.getSchema(), dj.simpleFind("Nachname","Lutz","Vorname","Chris*"));
-    //printResults("Nachname = *utz, Vorname = Chris*", dj.getSchema(), dj.simpleFind("Nachname","Benkmann","Vorname","Matthias"));
+    printResults("Nachname = *utz, Vorname = Chris*", dj.getSchema(), dj.simpleFind("Nachname","Lutz","Vorname","Chris*"));
+    printResults("Nachname = *utz, Vorname = Chris*", dj.getSchema(), dj.simpleFind("Nachname","Benkmann","Vorname","Matthias"));
   
   }
 
