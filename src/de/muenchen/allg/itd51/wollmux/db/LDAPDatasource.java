@@ -933,9 +933,7 @@ public class LDAPDatasource implements Datasource
             
             attributePath.addAll(pathName.getPrefix(relativePath-rootName.size()));
             
-          }       
-          
-          
+          }        
               
           String[] searchAttributes = { attributeName }; 
           Attributes foundAttributes = ctx.getAttributes(attributePath,searchAttributes);
@@ -961,7 +959,7 @@ public class LDAPDatasource implements Datasource
       if (value!=null) {
         String lineSeparator = currentAttribute.lineSeparator;
         if (lineSeparator!=null) {
-          value = value.replaceAll(lineSeparator,"/n");
+          value = value.replaceAll(lineSeparator,"\n");
         }
         relation.put(currentKey, value);
       }
