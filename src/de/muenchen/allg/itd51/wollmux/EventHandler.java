@@ -17,6 +17,7 @@
  */
 package de.muenchen.allg.itd51.wollmux;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -25,7 +26,6 @@ import java.util.Iterator;
 import com.sun.star.awt.XWindow;
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.frame.XFrame;
-import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
@@ -125,7 +125,7 @@ public class EventHandler
     {
       Logger.error(e);
       String msg = e.getClass().getName() + ":\n\n";
-      if(e.getMessage() != null) msg+= e.getMessage();
+      if (e.getMessage() != null) msg += e.getMessage();
       showInfoModal("WollMux-Fehler:", msg);
     }
     return EventProcessor.processTheNextEvent;
@@ -189,9 +189,8 @@ public class EventHandler
   }
 
   private static boolean on_opentemplate(Event event) throws Exception,
-      MalformedURLException, NodeNotFoundException,
-      TextFragmentNotDefinedException, EndlessLoopException,
-      com.sun.star.io.IOException, IllegalArgumentException
+      NodeNotFoundException, TextFragmentNotDefinedException,
+      EndlessLoopException, FileNotFoundException
   {
     UnoService desktop = UnoService.createWithContext(
         "com.sun.star.frame.Desktop",
@@ -199,21 +198,44 @@ public class EventHandler
     String frag_id = event.getArgument();
 
     // Fragment-URL holen und aufbereiten:
-    URL url = new URL(WollMux.getDEFAULT_CONTEXT(), WollMux
-        .getTextFragmentList().getURLByID(frag_id));
+    String urlStr = WollMux.getTextFragmentList().getURLByID(frag_id);
+    URL url;
+    try
+    {
+      url = new URL(WollMux.getDEFAULT_CONTEXT(), urlStr);
+    }
+    catch (MalformedURLException e)
+    {
+      throw new FileNotFoundException("Die Vorlage mit der URL \""
+                                      + urlStr
+                                      + "\" konnte nicht geöffnet werden.");
+    }
     UnoService trans = UnoService.createWithContext(
         "com.sun.star.util.URLTransformer",
         WollMux.getXComponentContext());
     com.sun.star.util.URL[] unoURL = new com.sun.star.util.URL[] { new com.sun.star.util.URL() };
     unoURL[0].Complete = url.toExternalForm();
     trans.xURLTransformer().parseStrict(unoURL);
-    String urlStr = unoURL[0].Complete;
+    urlStr = unoURL[0].Complete;
 
     // open document as Template:
     PropertyValue[] props = new PropertyValue[] { new PropertyValue() };
     props[0].Name = "AsTemplate";
     props[0].Value = Boolean.TRUE;
-    desktop.xComponentLoader().loadComponentFromURL(urlStr, "_blank", 0, props);
+    try
+    {
+      desktop.xComponentLoader().loadComponentFromURL(
+          urlStr,
+          "_blank",
+          0,
+          props);
+    }
+    catch (java.lang.Exception x)
+    {
+      throw new FileNotFoundException("Die Vorlage mit der URL \""
+                                      + urlStr
+                                      + "\" konnte nicht geöffnet werden.");
+    }
     return EventProcessor.processTheNextEvent;
   }
 
