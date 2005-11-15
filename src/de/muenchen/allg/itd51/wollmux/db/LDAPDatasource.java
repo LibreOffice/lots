@@ -22,9 +22,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Collection;
 import java.util.HashMap;
-
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -67,15 +65,15 @@ public class LDAPDatasource implements Datasource
   // Map von query-Strings auf LDAP-Attributnamen
   private Map nameMap = new HashMap();
   
-  // Nameparser
-  private NameParser nameParser;
-  
   // Key-Attribute (LDAP)
   private List keyAttributes = new Vector();
   private int keyStatus; // 0:= nur absolute Attribute, 1:= absolute und relative Attribute, 2:= nur relative Attribute
   
   // regex für erlaubte Bezeichner
   private static final Pattern SPALTENNAME = Pattern.compile("^[a-zA-Z_][a-zA-Z_0-9]*$");
+  
+  // temporärer cache für relative Attribute (wird bei jeder neuen Suche neu angelegt)
+  private Map attributeCache = new HashMap();
   
   /**
    * Erzeugt eine neue LDAPDatasource.
@@ -113,8 +111,7 @@ public class LDAPDatasource implements Datasource
     } catch (NodeNotFoundException e) {
       throw new ConfigurationErrorException( errorMessage() + "Keine OBJECT_CLASS definiert.");
     }
-    
-    
+       
     // set properties
     properties.put(Context.INITIAL_CONTEXT_FACTORY,"com.sun.jndi.ldap.LdapCtxFactory");
     properties.put(Context.PROVIDER_URL,url); // + "/" + baseDN);
@@ -327,6 +324,8 @@ public class LDAPDatasource implements Datasource
     
     long endTime = System.currentTimeMillis() + timeout;
     
+    attributeCache.clear();
+    
     if (keyStatus == 0 | keyStatus == 1) { // absolute Attribute vorhanden
       
       Iterator iter = keys.iterator();
@@ -379,6 +378,8 @@ public class LDAPDatasource implements Datasource
 
       //results.trimToSize();
       
+      attributeCache.clear();
+      
       return new QueryResultsList(results);  
       
     }
@@ -399,9 +400,13 @@ public class LDAPDatasource implements Datasource
          }
   
        }
+       
+       attributeCache.clear();
+       
       return new QueryResultsList(results);
     }
      
+    attributeCache.clear();
     return null;
   }
   
@@ -474,7 +479,7 @@ public class LDAPDatasource implements Datasource
   public QueryResults find(List query, long timeout) throws TimeoutException {
     
     long endTime = System.currentTimeMillis() + timeout;
-    
+     
     Iterator iter = query.iterator();
     
     String searchFilter = "";
@@ -692,7 +697,9 @@ public class LDAPDatasource implements Datasource
     }
      
     
-    if (searchFilter.equals("")&mergedPositiveSubtreePathLists==null&mergedNegativeSubtreePaths==null) return new QueryResultsList(new Vector(0));
+    if (searchFilter.equals("")&mergedPositiveSubtreePathLists==null&mergedNegativeSubtreePaths==null) {
+      return new QueryResultsList(new Vector(0));
+    }
     
     List positiveSubtreeStrings = new Vector();
     
@@ -767,6 +774,9 @@ public class LDAPDatasource implements Datasource
     Vector results = new Vector();
     
     // generate Datasets from SearchResults
+    
+    attributeCache.clear();
+    
     try
     {
       
@@ -780,11 +790,13 @@ public class LDAPDatasource implements Datasource
         }
     }
     catch (TimeoutException e) {
+      attributeCache.clear();
       throw new TimeoutException(e);
     }
    
-    
     results.trimToSize();
+    
+    attributeCache.clear();
        
     return new QueryResultsList(results);
   }
@@ -863,7 +875,7 @@ public class LDAPDatasource implements Datasource
     Attributes attributes = searchResult.getAttributes();
     
     
-    Hashtable relation = new Hashtable();
+    Map relation = new HashMap();
     
     DirContext ctx = null;
     Name pathName;
@@ -933,10 +945,42 @@ public class LDAPDatasource implements Datasource
             
             attributePath.addAll(pathName.getPrefix(relativePath-rootName.size()));
             
-          }        
+          }
+          
+          class CacheKey {
               
-          String[] searchAttributes = { attributeName }; 
-          Attributes foundAttributes = ctx.getAttributes(attributePath,searchAttributes);
+            private String hash;
+            
+            public CacheKey(Name attributePath, String[] searchAttributes) {
+              hash = attributePath.toString();
+              for (int n=0; n<searchAttributes.length; n++) {
+                hash += searchAttributes[n];
+              }
+            }
+            
+            public int hashCode() {
+              return hash.hashCode();
+            }
+            
+            public boolean equals(Object other) {
+              CacheKey otherKey = (CacheKey) other;
+              return hash.equals(otherKey.hash);
+            }
+ 
+          }
+              
+          String[] searchAttributes = { attributeName };
+          
+          Attributes foundAttributes; 
+          
+          CacheKey key = new CacheKey(attributePath,searchAttributes);
+          foundAttributes = (Attributes) attributeCache.get(key);
+          
+          if (foundAttributes==null) {
+            foundAttributes = ctx.getAttributes(attributePath,searchAttributes);
+            attributeCache.put(key,foundAttributes);
+          }
+          
           Attribute foundAttribute = foundAttributes.get(attributeName); 
           
           if (foundAttribute!=null) {
@@ -1200,9 +1244,9 @@ public class LDAPDatasource implements Datasource
     LDAPDatasource dj = new LDAPDatasource(nameToDatasource, sourceDesc, context);
     
     
-   
+
     // Test keys
-   /*QueryResults qr = dj.simpleFind("OrgaEmail","  r.kom@muenchen.de","Orga1","Referatsleitung");
+    QueryResults qr = dj.simpleFind("OrgaEmail","  r.kom@muenchen.de","Orga1","Referatsleitung");
     Iterator iter = qr.iterator();
     
     Collection keys = new Vector();
@@ -1220,19 +1264,21 @@ public class LDAPDatasource implements Datasource
     QueryResults qr2 = dj.getDatasetsByKey(keys,30000);
     
     dj.printResults("Get and find keys: ",dj.schema,qr2);
-    */
+    
     
     printResults("OrgaEmail = r.kom@muenchen.de , Orga1 = Referatsleitung", dj.getSchema(), dj.simpleFind("OrgaEmail"," r.kom@muenchen.de","Orga1","Referatsleitung"));
     printResults("OrgaEmail = r.kom@muenchen.de , Orga3 = Referatsleitung", dj.getSchema(), dj.simpleFind("OrgaEmail","  r.kom@muenchen.de","Orga3","Referatsleitung"));
     printResults("Orga2 = Stadtarchiv , Referat = Direktorium", dj.getSchema(), dj.simpleFind("Orga2","Stadtarchiv","Referat","Direktorium")); 
     printResults("Referat = Sozialreferat , Nachname = Meier", dj.getSchema(), dj.simpleFind("Referat","Sozialreferat","Nachname","Meier")); 
+    
     //printResults("Nachname =r*", dj.getSchema(), dj.simpleFind("Nachname","r*"));
-    //printResults("Nachname = *utz", dj.getSchema(), dj.simpleFind("Nachname","*utz"));
-    //printResults("Nachname = *oe*", dj.getSchema(), dj.simpleFind("Nachname","*oe*"));
-    //printResults("Nachname = Lutz", dj.getSchema(), dj.simpleFind("Nachname","Lutz"));
+
+    printResults("Nachname = *utz", dj.getSchema(), dj.simpleFind("Nachname","*utz"));
+    printResults("Nachname = *oe*", dj.getSchema(), dj.simpleFind("Nachname","*oe*"));
+    printResults("Nachname = Lutz", dj.getSchema(), dj.simpleFind("Nachname","Lutz"));
     printResults("Nachname = *utz, Vorname = Chris*", dj.getSchema(), dj.simpleFind("Nachname","Lutz","Vorname","Chris*"));
     printResults("Nachname = *utz, Vorname = Chris*", dj.getSchema(), dj.simpleFind("Nachname","Benkmann","Vorname","Matthias"));
-  
+
   }
 
 }
