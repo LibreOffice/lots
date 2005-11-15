@@ -367,9 +367,12 @@ public class LDAPDatasource implements Datasource
        {
          if (System.currentTimeMillis()>endTime) throw new TimeoutException();
          List query = keyToFindQuery((String)iter.next());
-         QueryResults res = find(query,timeout);
+         QueryResults res = find(query,endTime);
          Iterator iter2 = res.iterator();
-         while (iter2.hasNext()) results.add(iter2.next());
+         while (iter2.hasNext()) {
+           if (System.currentTimeMillis()>endTime) throw new TimeoutException();
+           results.add(iter2.next());
+         }
   
        }
       return new QueryResultsList(results);
@@ -378,7 +381,7 @@ public class LDAPDatasource implements Datasource
     return null;
   }
   
-  class RelativePaths {
+  private class RelativePaths {
     
     private int relative;
     private List paths;
@@ -390,7 +393,7 @@ public class LDAPDatasource implements Datasource
     
   }
   
-  class RelativePath {
+  private class RelativePath {
     
     private int relative;
     private Name name;
@@ -402,7 +405,7 @@ public class LDAPDatasource implements Datasource
   
   }
   
-  private RelativePaths getPaths(String filter, int pathLength, long endTime) throws TimeoutException {
+  private RelativePaths getPaths(String filter, int pathLength, long timeout, long endTime) throws TimeoutException {
     
     Vector paths;
     
@@ -413,9 +416,10 @@ public class LDAPDatasource implements Datasource
       int rootSize = np.parse(baseDN).size();
       SearchControls sc = new SearchControls();
       sc.setSearchScope(SearchControls.SUBTREE_SCOPE);
-      /*TODO hier muss das timelimit für sc gesetzt werden
-        bitte überprüf ob du das noch an anderen stellen vergessen hast
-        - Matthias */
+      
+      if (timeout>Integer.MAX_VALUE) timeout = Integer.MAX_VALUE;
+      sc.setTimeLimit((int)timeout);
+
       NamingEnumeration enumer = ctx.search(baseDN,filter,sc);
       
       paths = new Vector();
@@ -451,7 +455,7 @@ public class LDAPDatasource implements Datasource
     
     String searchFilter = "";
     List positiveSubtreePathLists = new Vector();
-    //List negativeSubtreePaths = new Vector();
+
     List negativeSubtreePathLists = new Vector();
     
     Map attributeMap = new HashMap();
@@ -505,7 +509,7 @@ public class LDAPDatasource implements Datasource
       
       String pathFilter = (String) attributeMap.get(currentKey);
       
-      RelativePaths paths = getPaths(pathFilter,relativePath,endTime);
+      RelativePaths paths = getPaths(pathFilter,relativePath,timeout,endTime);
       
       if (relativePath>0) {
         positiveSubtreePathLists.add(paths);
@@ -1086,25 +1090,6 @@ public class LDAPDatasource implements Datasource
   
 
   
-  private void test() {
-    
- 
-  
-    try {
-      
-      DirContext ctx = new InitialDirContext(properties);
-      
-      SearchControls so = new SearchControls();
-      
-      so.setSearchScope(so.SUBTREE_SCOPE);
-      
-
-      
-      
-    } catch(Exception e ){
-    System.out.println(e);
-    }
-  }
   
   
   // TESTFUNKTIONEN
