@@ -70,7 +70,7 @@ public class DatasourceJoiner
    * Bearbeitung einer Suchanfrage zu begrenzen, damit nicht im Falle
    * eines Netzproblems alles einfriert.
    */
-  private static final long QUERY_TIMEOUT = 10000;
+  private static final long QUERY_TIMEOUT = 5000;
   
   /**
    * Muster für erlaubte Suchstrings für den Aufruf von find().

@@ -1217,7 +1217,7 @@ public class PersoenlicheAbsenderlisteVerwalten
         
         results = dj.find("OrgaKurz",buf.toString());
       }
-    }catch(TimeoutException x) {}
+    }catch(TimeoutException x) { Logger.error(x);}
 
       // kann mit results == null umgehen
     setListElements(resultsJList, results); 

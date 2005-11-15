@@ -39,7 +39,7 @@ import de.muenchen.allg.itd51.wollmux.TimeoutException;
  */
 public class TestDatasourceJoiner extends DatasourceJoiner
 {
-  private static final long TEST_QUERY_TIMEOUT = 3000;
+  private static final long TEST_QUERY_TIMEOUT = 5000;
   
   /** TestDJ soll nichts (ungewollt) überschreiben, deshalb hier no-op (aber
    * es gibt reallySaveCacheAndLOS()).
