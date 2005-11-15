@@ -21,6 +21,7 @@
 *                  | Werte nicht geändert wurden, aber bereits aus dem LOS sind.
 * 27.10.2005 | BNK | back + CLOSEACTION
 * 02.11.2005 | BNK | +saveAndBack()
+* 15.11.2005 | BNK | Endlosschleife beseitigt durch vertauschen der || Operanden
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -341,7 +342,7 @@ public class DatensatzBearbeiten
     boolean hasChanges = false;
     Iterator iter = fenster.values().iterator();
     while (iter.hasNext())
-      hasChanges = hasChanges || ((DialogWindow)iter.next()).hasChanges();
+      hasChanges = ((DialogWindow)iter.next()).hasChanges() || hasChanges;
     
     if (!hasChanges) return true;
     int res = JOptionPane.showConfirmDialog(myFrame, "Wollen Sie Ihre Änderungen wirklich speichern\nund auf die Aktualisierung der entsprechenden Felder\naus der zentralen Datenbank verzichten?","Änderungen speichern?",JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
