@@ -142,6 +142,7 @@ public class LDAPDatasource implements Datasource
         String spalte;
         int relativePath;
         String attributeName;
+        String objectClass = null;
         
         try {
           
@@ -165,11 +166,20 @@ public class LDAPDatasource implements Datasource
           
           attributeName = splitted[1];
           
+          try {
+            objectClass = spalteDesc.get("OBJECT_CLASS").toString();
+          } catch (NodeNotFoundException x) {
+            // do nothing... (Angabe von OBJECT_CLASS optional)
+          }
+          
         } catch(NodeNotFoundException x) {
           throw new ConfigurationErrorException( errorMessage() + "DB_SPALTE Angabe fehlt");
         }
         
         LDAPAttribute currentPath = new LDAPAttribute(relativePath, attributeName);
+        if(objectClass!=null) {
+          currentPath.objectClass = objectClass;
+        }
         nameMap.put(spalte,currentPath);
         schema.add(spalte);
       }  
@@ -237,6 +247,9 @@ public class LDAPDatasource implements Datasource
     
     // Attributname im LDAP
     String attributeName;
+    
+    // exklusive objectClass
+    String objectClass;
     
     
     LDAPAttribute(int relativePath, String attributeName) {
@@ -475,12 +488,21 @@ public class LDAPDatasource implements Datasource
       int relativePath = ldapAttribute.relativePath;
       String attributeValue = currentQuery.getSearchString();
       
-      if (relativePath==0) { // edit filter
+      String objectClass = ldapAttribute.objectClass;
+      String currentSearchFilter = "(" + attributeName + "=" + attributeValue + ")";
+      if (objectClass!=null) {
+        currentSearchFilter = "(&" + currentSearchFilter + "(objectClass=" + objectClass + "))";
+      }
+      
+      System.out.println("current search filter: " + currentSearchFilter);
+      
+
+      if (relativePath==0) { // edit filter   
         if (first) {
-          searchFilter = "(" + attributeName + "=" + attributeValue + ")";
+          searchFilter = currentSearchFilter;
           first = false;
         } else {
-          searchFilter = "(&(" + attributeName + "=" + attributeValue + ")" + searchFilter + ")";
+          searchFilter = "(&" + currentSearchFilter + searchFilter + ")";
         }
       } else { // edit searchFilters for subtree searches:
         
@@ -489,9 +511,9 @@ public class LDAPDatasource implements Datasource
         String formerSearchPath = (String) attributeMap.get(key);
         
         if (formerSearchPath==null) {
-          formerSearchPath = "(" + attributeName + "=" + attributeValue + ")";
+          formerSearchPath = currentSearchFilter;
         } else {
-          formerSearchPath = "(&(" + attributeName + "=" + attributeValue + ")" + formerSearchPath + ")";
+          formerSearchPath = "(&" + currentSearchFilter + formerSearchPath + ")";
         }
         
         attributeMap.put(key,formerSearchPath);
@@ -805,11 +827,20 @@ public class LDAPDatasource implements Datasource
       
       if (currentAttribute.relativePath==0) {
         
+        String attributeName = currentAttribute.attributeName;
+        String objectClass = currentAttribute.objectClass;
+        
+        String currentSearchFilter = "(" + attributeName + "=" + keyValues[n] + ")";
+        
+        if (objectClass!=null) {
+          currentSearchFilter = "(&" + currentSearchFilter + "(objectClass=" + objectClass +"))"; 
+        }
+        
         if (first) {  
-          query = "(" + currentAttribute.attributeName + "=" + keyValues[n] + ")";
+          query = currentSearchFilter;
           first = false;
         } else {
-          query = "(&(" + currentAttribute.attributeName + "=" + keyValues[n] + ")" + query + ")";
+          query = "(&" + currentSearchFilter + query + ")";
         }
         
       }
@@ -1157,7 +1188,8 @@ public class LDAPDatasource implements Datasource
     ConfigThingy sourceDesc = ldapConf.query("Datenquelle").getFirstChild();
     LDAPDatasource dj = new LDAPDatasource(nameToDatasource, sourceDesc, context);
     
-    
+   
+    // Test keys
    QueryResults qr = dj.simpleFind("OrgaEmail","  r.kom@muenchen.de","Orga1","Referatsleitung");
     Iterator iter = qr.iterator();
     
@@ -1178,15 +1210,16 @@ public class LDAPDatasource implements Datasource
     dj.printResults("Get and find keys: ",dj.schema,qr2);
     
     
-    printResults("OrgaEmail = r.kom@muenchen.de , Orga1 = Referatsleitung", dj.getSchema(), dj.simpleFind("OrgaEmail","  r.kom@muenchen.de","Orga1","Referatsleitung"));
-    printResults("OrgaEmail = r.kom@muenchen.de , Orga3 = Referatsleitung", dj.getSchema(), dj.simpleFind("OrgaEmail","  r.kom@muenchen.de","Orga3","Referatsleitung"));
+    printResults("OrgaEmail = r.kom@muenchen.de , Orga1 = Referatsleitung", dj.getSchema(), dj.simpleFind("OrgaEmail"," r.kom@muenchen.de","Orga1","Referatsleitung"));
+    /*printResults("OrgaEmail = r.kom@muenchen.de , Orga3 = Referatsleitung", dj.getSchema(), dj.simpleFind("OrgaEmail","  r.kom@muenchen.de","Orga3","Referatsleitung"));
     printResults("Orga2 = Stadtarchiv , Referat = Direktorium", dj.getSchema(), dj.simpleFind("Orga2","Stadtarchiv","Referat","Direktorium")); 
     printResults("Referat = Sozialreferat , Nachname = Meier", dj.getSchema(), dj.simpleFind("Referat","Sozialreferat","Nachname","Meier")); 
-    printResults("Nachname = lOEsewiTZ", dj.getSchema(), dj.simpleFind("Nachname","lOEsewiTZ")); 
+    printResults("Nachname = lOEsewiTZ", dj.getSchema(), dj.simpleFind("Nachname","lOEsewiTZ"));*/ 
     //printResults("Nachname = *utz", dj.getSchema(), dj.simpleFind("Nachname","*utz"));
     //printResults("Nachname = *oe*", dj.getSchema(), dj.simpleFind("Nachname","*oe*"));
-    printResults("Nachname = Lutz", dj.getSchema(), dj.simpleFind("Nachname","Lutz"));
-    printResults("Nachname = *utz, Vorname = Chris*", dj.getSchema(), dj.simpleFind("Nachname","*utz","Vorname","Chris*"));
+    //printResults("Nachname = Lutz", dj.getSchema(), dj.simpleFind("Nachname","Lutz"));
+    //printResults("Nachname = *utz, Vorname = Chris*", dj.getSchema(), dj.simpleFind("Nachname","Lutz","Vorname","Chris*"));
+    //printResults("Nachname = *utz, Vorname = Chris*", dj.getSchema(), dj.simpleFind("Nachname","Benkmann","Vorname","Matthias"));
   
   }
 
