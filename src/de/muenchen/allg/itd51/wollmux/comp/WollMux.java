@@ -70,7 +70,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
   /**
    * Enthält einen PrintStream in den die Log-Nachrichten geschrieben werden.
    */
-  private static PrintStream wollmuxLog;
+  private static File wollmuxLogFile;
 
   /**
    * Enthält das File der Konfigurationsdatei wollmux.conf
@@ -178,7 +178,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
     File wollmuxDir = new File(userHome, ".wollmux");
     wollmuxConfFile = new File(wollmuxDir, "wollmux.conf");
     losCacheFile = new File(wollmuxDir, "cache.conf");
-    File wollmuxLogFile = new File(wollmuxDir, "wollmux.log");
+    wollmuxLogFile = new File(wollmuxDir, "wollmux.log");
 
     // .wollmux-Verzeichnis erzeugen falls es nicht existiert
     if (!wollmuxDir.exists()) wollmuxDir.mkdirs();
@@ -197,17 +197,6 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
       {
       }
     }
-
-    // wollmux.log-File erzeugen:
-    try
-    {
-      wollmuxLog = new PrintStream(new FileOutputStream(wollmuxLogFile, true));
-    }
-    catch (FileNotFoundException e)
-    {
-      // Da kann ich nicht viel machen, wenn noch nicht mal das
-      // Logfile funktioniert...
-    }
   }
 
   /**
@@ -225,10 +214,9 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
    *          defaultContext überschreibt den in der Konfigurationsdatei
    *          definierten DEFAULT_CONTEXT.
    */
-  public static void initialize(PrintStream logStream, File wollmuxConf,
-      File losCache, URL defaultContext)
+  public static void initialize(File wollmuxConf, File losCache,
+      URL defaultContext)
   {
-    WollMux.wollmuxLog = logStream;
     WollMux.wollmuxConfFile = wollmuxConf;
     WollMux.losCacheFile = losCache;
     WollMux.defaultContext = defaultContext;
@@ -241,17 +229,24 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
   {
     try
     {
-      // Logger initialisieren und erste Meldung ausgeben:
-      if (wollmuxLog != null) Logger.init(wollmuxLog, Logger.LOG);
-      Logger.debug("StartupWollMux");
-      Logger.debug("wollmuxConfFile = " + wollmuxConfFile.toString());
+      // Logger initialisieren:
+      if (wollmuxLogFile != null) try
+      {
+        Logger.init(wollmuxLogFile, Logger.LOG);
+      }
+      catch (FileNotFoundException x)
+      {
+        // dann gibts halt kein logging - pech gehabt.
+      }
 
       // Parsen der Konfigurationsdatei
       wollmuxConf = new ConfigThingy("wollmuxConf", wollmuxConfFile.toURL());
 
-      // Auswertung von LOGGING_MODE: 
+      // Auswertung von LOGGING_MODE und erste debug-Meldungen loggen:
       setLoggingMode(wollmuxConf);
-      
+      Logger.debug("StartupWollMux");
+      Logger.debug("wollmuxConfFile = " + wollmuxConfFile.toString());
+
       // VisibleTextFragmentList erzeugen
       textFragmentList = new VisibleTextFragmentList(wollmuxConf);
 
@@ -653,8 +648,8 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
 
       // WollMux starten
       new WollMux(UNO.defaultContext);
-      WollMux.initialize(System.err, new File(cwd, args[0]), new File(cwd,
-          args[1]), cwd.toURL());
+      WollMux.initialize(new File(cwd, args[0]), new File(cwd, args[1]), cwd
+          .toURL());
       WollMux.startupWollMux();
     }
     catch (Exception e)

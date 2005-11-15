@@ -778,8 +778,8 @@ public class WMCommandInterpreter
 
       // WollMux starten
       new WollMux(UNO.defaultContext);
-      WollMux.initialize(System.err, new File(cwd, args[0]), new File(cwd,
-          args[1]), cwd.toURL());
+      WollMux.initialize(new File(cwd, args[0]), new File(cwd, args[1]), cwd
+          .toURL());
       WollMux.startupWollMux();
 
       Logger.init(Logger.ALL);

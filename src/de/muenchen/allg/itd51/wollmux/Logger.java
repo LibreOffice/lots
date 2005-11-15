@@ -25,6 +25,10 @@
 
 package de.muenchen.allg.itd51.wollmux;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Date;
 
@@ -52,7 +56,12 @@ public class Logger
   /**
    * Der PrintStream, auf den die Nachrichten geschrieben werden.
    */
-  private static PrintStream out = System.err;
+  private static PrintStream defaultOutputStream = System.err;
+
+  /**
+   * optional: Datei, aus der der PrintStream erzeugt wird.
+   */
+  private static File file = null;
 
   /**
    * Im Logging-Modus <code>NONE</code> werden keine Nachrichten ausgegeben.
@@ -104,9 +113,31 @@ public class Logger
    */
   public static void init(PrintStream outputPrintStream, int loggingMode)
   {
-    out = outputPrintStream;
+    defaultOutputStream = outputPrintStream;
     mode = loggingMode;
     Logger.debug2("Logger::init(): LoggingMode = " + mode);
+  }
+
+  /**
+   * Über die Methode init wird der Logger mit einer Ausgabedatei und einem
+   * Logging-Modus initialisiert. Ohne diese Methode schreibt der Logger auf
+   * System.err im Modus LOG.
+   * 
+   * @param outputFile
+   *          Datei, in die die Ausgaben geschrieben werden.
+   * @param loggingMode
+   *          Der neue Logging-Modus kann über die statischen Felder
+   *          Logger.MODUS (z. B. Logger.DEBUG) angegeben werden.
+   * @throws FileNotFoundException
+   */
+  public static void init(File outputFile, int loggingMode)
+      throws FileNotFoundException
+  {
+    file = outputFile;
+    mode = loggingMode;
+    Logger.debug2("Logger::init(): LoggingMode = " + mode);
+    // prüfen, ob File geschrieben werden kann:
+    new FileOutputStream(outputFile);
   }
 
   /**
@@ -264,9 +295,42 @@ public class Logger
    */
   private static void println(String s)
   {
-    if (out != null)
+    // Ausgabestream oeffnen bzw. festlegen:
+    PrintStream out;
+    FileOutputStream fileOut = null;
+    if (file != null)
+      try
+      {
+        fileOut = new FileOutputStream(file, true);
+        out = new PrintStream(fileOut);
+      }
+      catch (FileNotFoundException x)
+      {
+        out = Logger.defaultOutputStream;
+      }
+    else
     {
-      out.println(new Date() + " " + s);
+      out = Logger.defaultOutputStream;
+    }
+
+    // Ausgabe schreiben:
+    out.println(new Date() + " " + s);
+    out.flush();
+
+    // Ein File wird nach dem Schreiben geschlossen.
+    if (fileOut != null)
+    {
+      try
+      {
+        out.close();
+        fileOut.close();
+        out = null;
+        fileOut = null;
+        System.gc();
+      }
+      catch (IOException e)
+      {
+      }
     }
   }
 
@@ -278,15 +342,49 @@ public class Logger
   private static void printException(String prefix, Exception e)
   {
     prefix = new Date() + " " + prefix;
-    if (out != null)
-    {
-      out.println(prefix + e.toString());
-      StackTraceElement[] se = e.getStackTrace();
-      for (int i = 0; i < se.length; i++)
+
+    // Ausgabestream oeffnen bzw. festlegen:
+    PrintStream out;
+    FileOutputStream fileOut = null;
+    if (file != null)
+      try
       {
-        out.println(prefix + se[i].toString());
+        fileOut = new FileOutputStream(file, true);
+        out = new PrintStream(fileOut);
       }
+      catch (FileNotFoundException x)
+      {
+        out = Logger.defaultOutputStream;
+      }
+    else
+    {
+      out = Logger.defaultOutputStream;
+    }
+
+    // Ausgabe schreiben:
+    out.println(prefix + e.toString());
+    StackTraceElement[] se = e.getStackTrace();
+    for (int i = 0; i < se.length; i++)
+    {
+      out.println(prefix + se[i].toString());
     }
     out.println();
+    out.flush();
+
+    // Ein File wird nach der Ausgabe geschlossen:
+    if (fileOut != null)
+    {
+      try
+      {
+        out.close();
+        fileOut.close();
+        out = null;
+        fileOut = null;
+        System.gc();
+      }
+      catch (IOException e1)
+      {
+      }
+    }
   }
 }
