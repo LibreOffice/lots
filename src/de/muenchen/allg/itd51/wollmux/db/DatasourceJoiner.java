@@ -206,7 +206,7 @@ public class DatasourceJoiner
         myLOS.refreshFromDatabase(mainDatasource, queryTimeout());
       } catch(TimeoutException x)
       {
-        Logger.error("Timeout beim Zugriff auf Datenquelle "+mainDatasource.getName()+" => Benutze Daten aus Cache");
+        Logger.error("Timeout beim Zugriff auf Datenquelle "+mainDatasource.getName()+" => Benutze Daten aus Cache", x);
       }
 
     }
