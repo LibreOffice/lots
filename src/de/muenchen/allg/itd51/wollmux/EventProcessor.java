@@ -124,6 +124,9 @@ public class EventProcessor implements XEventListener, XModifyListener,
     if (docEvent.EventName.compareToIgnoreCase("OnNew") == 0)
       addEvent(new Event(Event.ON_NEW, "", docEvent.Source));
 
+    if (docEvent.EventName.compareToIgnoreCase("OnFocus") == 0)
+      addEvent(new Event(Event.ON_FOCUS, "", docEvent.Source));
+
     if (docEvent.EventName.compareToIgnoreCase("OnPrepareUnload") == 0)
     {
       // auf das Event OnPrepareUnload muss synchron reagiert werden:

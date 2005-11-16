@@ -40,6 +40,8 @@ public class Event
 
   public static final int ON_MODIFIED = 10;
 
+  public static final int ON_FOCUS = 12;
+
   public static final int ON_ABSENDER_AUSWAEHLEN = 20;
 
   public static final int ON_PERSOENLICHE_ABSENDERLISTE = 21;
@@ -118,6 +120,10 @@ public class Event
     if (event == ON_INITIALIZE)
     {
       return "ON_INITIALIZE";
+    }
+    if (event == ON_FOCUS)
+    {
+      return "ON_FOCUS";
     }
     else
       return "namenlos";

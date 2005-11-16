@@ -54,6 +54,8 @@ import de.muenchen.allg.itd51.wollmux.oooui.MenuList;
  */
 public class EventHandler
 {
+  public static boolean menubarInitialized = false;
+
   /**
    * Diese Method ist für die Ausführung eines einzelnen Events zuständig. Nach
    * der Bearbeitung entscheidet der Rückgabewert ob unmittelbar die Bearbeitung
@@ -78,6 +80,11 @@ public class EventHandler
       if (event.getEvent() == Event.ON_NEW)
       {
         return on_load(event);
+      }
+
+      if (event.getEvent() == Event.ON_FOCUS)
+      {
+        return on_focus(event);
       }
 
       if (event.getEvent() == Event.ON_OPENTEMPLATE)
@@ -135,14 +142,42 @@ public class EventHandler
    * Einzelne Eventhandler
    ****************************************************************************/
 
-  private static boolean on_selection_changed() throws IOException
+  private static boolean on_focus(Event event)
   {
     // Alle registrierten SenderBoxen updaten:
-    Iterator i = WollMux.senderBoxesIterator();
-    while (i.hasNext())
+    UnoService source = new UnoService(event.getSource());
+    if (source.supportsService("com.sun.star.text.TextDocument"))
     {
-      Logger.debug2("Update SenderBox");
-      ((XSenderBox) i.next()).updateContent();
+      Iterator i = WollMux.senderBoxesIterator();
+      while (i.hasNext())
+      {
+        Logger.debug2("Update SenderBox");
+        ((XSenderBox) i.next()).updateContentForFrame(source.xModel()
+            .getCurrentController().getFrame());
+      }
+    }
+
+    return EventProcessor.processTheNextEvent;
+  }
+
+  private static boolean on_selection_changed() throws IOException
+  {
+    // Die SenderBox des aktuellen Frame updaten:
+    try
+    {
+      UnoService desktop = UnoService.createWithContext(
+          "com.sun.star.frame.Desktop",
+          WollMux.getXComponentContext());
+      XFrame frame = desktop.xDesktop().getCurrentFrame();
+      Iterator i = WollMux.senderBoxesIterator();
+      while (i.hasNext())
+      {
+        Logger.debug2("Update SenderBox");
+        ((XSenderBox) i.next()).updateContentForFrame(frame);
+      }
+    }
+    catch (Exception x)
+    {
     }
 
     // Der Cache und der LOS auf Platte speichern.
@@ -247,10 +282,14 @@ public class EventHandler
     {
       // WollMux-Menues aktualisieren
       XFrame frame = source.xModel().getCurrentController().getFrame();
-      MenuList.generateMenues(WollMux.getWollmuxConf(), WollMux
-          .getXComponentContext(), frame);
       MenuList.generateToolbarEntries(WollMux.getWollmuxConf(), WollMux
           .getXComponentContext(), frame);
+      if (menubarInitialized == false)
+      {
+        MenuList.generateMenues(WollMux.getWollmuxConf(), WollMux
+            .getXComponentContext(), frame);
+        menubarInitialized = true;
+      }
 
       // Interpretation von WM-Kommandos
       new WMCommandInterpreter(source.xTextDocument()).interpret();

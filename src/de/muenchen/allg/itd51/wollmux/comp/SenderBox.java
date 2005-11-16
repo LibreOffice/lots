@@ -308,8 +308,7 @@ public class SenderBox extends ComponentBase implements XServiceInfo,
     Logger.debug2("SenderBox::execute");
 
     // In diesem Fallback-Fall den AbsenderdatenBearbeiten dialog öffnen.
-    EventProcessor.create().addEvent(
-        new Event(Event.ON_ABSENDER_AUSWAEHLEN));
+    EventProcessor.create().addEvent(new Event(Event.ON_ABSENDER_AUSWAEHLEN));
   }
 
   /**
@@ -457,6 +456,19 @@ public class SenderBox extends ComponentBase implements XServiceInfo,
 
     // ComboBox updaten
     updateComboBox();
+  }
+
+  /**
+   * Wie {@see updateContent()}, der Update wird jedoch nur dann ausgeführt,
+   * wenn der übergebene Frame f mit dem eigenen Frame der Senderbox
+   * übereinstimmt. Dies ist z.B. notwendig, um die Senderbox ausschließlich bei
+   * ON_FOCUS-Events updaten zu können.
+   * 
+   * @param f
+   */
+  public void updateContentForFrame(XFrame f)
+  {
+    if (UnoRuntime.areSame(frame, f)) updateContent();
   }
 
   /**

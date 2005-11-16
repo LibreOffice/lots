@@ -23,6 +23,7 @@
 #include <com/sun/star/lang/XInitialization.idl> 
 #include <com/sun/star/util/XUpdatable.idl> 
 #include <com/sun/star/frame/XToolbarController.idl> 
+#include <com/sun/star/frame/XFrame.idl> 
  
 //============================================================================= 
  
@@ -41,6 +42,7 @@ interface XSenderBox
     interface com::sun::star::frame::XToolbarController;
 
 	void updateContent();
+	void updateContentForFrame([in] com::sun::star::frame::XFrame xFrame);
 }; 
  
 //============================================================================= 
