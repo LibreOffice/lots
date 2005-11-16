@@ -88,6 +88,7 @@
 			<fileset dir="${MY_IDL}" includes="**/*.idl" />
 		</apply>
 
+		<delete file="${RDBFILE}" />
 		<echo level="info">regmerge:</echo>
 		<apply executable="regmerge">
 			<arg line="'${RDBFILE}' /UCR" />
