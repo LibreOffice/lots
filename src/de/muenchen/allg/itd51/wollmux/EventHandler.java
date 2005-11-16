@@ -243,7 +243,7 @@ public class EventHandler
       WMCommandsFailedException
   {
     UnoService source = new UnoService(event.getSource());
-    if (source.xTextDocument() != null)
+    if (source.supportsService("com.sun.star.text.TextDocument"))
     {
       // WollMux-Menues aktualisieren
       XFrame frame = source.xModel().getCurrentController().getFrame();
