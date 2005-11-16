@@ -37,6 +37,7 @@ import com.sun.star.awt.XItemListener;
 import com.sun.star.awt.XKeyListener;
 import com.sun.star.awt.XWindow;
 import com.sun.star.beans.PropertyValue;
+import com.sun.star.beans.UnknownPropertyException;
 import com.sun.star.comp.loader.FactoryHelper;
 import com.sun.star.frame.FeatureStateEvent;
 import com.sun.star.frame.XFrame;
@@ -57,6 +58,7 @@ import com.sun.star.uno.XComponentContext;
 import com.sun.star.util.XUpdatable;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.wollmux.Event;
 import de.muenchen.allg.itd51.wollmux.EventProcessor;
@@ -137,30 +139,21 @@ public class SenderBox extends ComponentBase implements XServiceInfo,
    */
   public void initialize(Object[] args) throws Exception
   {
-    frame = null;
-    commandURL = null;
-    serviceManager = null;
-    for (int i = 0; i < args.length; i++)
-    {
-      if (args[i] instanceof PropertyValue)
-      {
-        String arg = ((PropertyValue) args[i]).Name;
-        Object val = ((PropertyValue) args[i]).Value;
+    UnoProps props = new UnoProps(args);
 
-        if (arg.equals("Frame"))
-        {
-          frame = (XFrame) UnoRuntime.queryInterface(XFrame.class, val);
-        }
-        if (arg.equals("CommandURL"))
-        {
-          commandURL = (String) val;
-        }
-        if (arg.equals("ServiceManager"))
-        {
-          serviceManager = new UnoService(val);
-        }
-      }
+    try
+    {
+      frame = props.getUnoServiceByPropertyValue("Frame").xFrame();
+      commandURL = props.getStringByPropertyValue("CommandURL");
+      serviceManager = props.getUnoServiceByPropertyValue("ServiceManager");
     }
+    catch (UnknownPropertyException x)
+    {
+      frame = null;
+      commandURL = null;
+      serviceManager = null;
+    }
+
     // check if arguments where correct and complete
     if (frame == null || commandURL == null || serviceManager == null)
     {
@@ -639,13 +632,7 @@ public class SenderBox extends ComponentBase implements XServiceInfo,
 
   private static PropertyValue[] createToolbarItem(String command, String label)
   {
-    PropertyValue[] aToolbarItem = new PropertyValue[2];
-    aToolbarItem[0] = new PropertyValue();
-    aToolbarItem[0].Name = "CommandURL";
-    aToolbarItem[0].Value = command;
-    aToolbarItem[1] = new PropertyValue();
-    aToolbarItem[1].Name = "Label";
-    aToolbarItem[1].Value = label;
-    return aToolbarItem;
+    return (new UnoProps()).setPropertyValue("CommandURL", command)
+        .setPropertyValue("Label", label).getProps();
   }
 }

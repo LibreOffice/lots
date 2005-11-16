@@ -24,12 +24,12 @@ import java.net.URL;
 import java.util.Iterator;
 
 import com.sun.star.awt.XWindow;
-import com.sun.star.beans.PropertyValue;
 import com.sun.star.frame.XFrame;
 import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
 
+import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
@@ -254,16 +254,13 @@ public class EventHandler
     urlStr = unoURL[0].Complete;
 
     // open document as Template:
-    PropertyValue[] props = new PropertyValue[] { new PropertyValue() };
-    props[0].Name = "AsTemplate";
-    props[0].Value = Boolean.TRUE;
     try
     {
       desktop.xComponentLoader().loadComponentFromURL(
           urlStr,
           "_blank",
           0,
-          props);
+          new UnoProps("AsTemplate", Boolean.TRUE).getProps());
     }
     catch (java.lang.Exception x)
     {
@@ -398,15 +395,14 @@ public class EventHandler
   {
     try
     {
-      PropertyValue[] args = new com.sun.star.beans.PropertyValue[] { new PropertyValue() };
-      args[0].Name = "nodepath";
-      args[0].Value = "/org.openoffice.UserProfile/Data";
       UnoService confProvider = UnoService.createWithContext(
           "com.sun.star.configuration.ConfigurationProvider",
           WollMux.getXComponentContext());
+
       UnoService confView = confProvider.create(
           "com.sun.star.configuration.ConfigurationAccess",
-          args);
+          new UnoProps("nodepath", "/org.openoffice.UserProfile/Data")
+              .getProps());
       return confView.xNameAccess().getByName(key).toString();
     }
     catch (Exception e)

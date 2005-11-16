@@ -413,8 +413,9 @@ public class WMCommandInterpreter
       try
       {
         // Textfragment einfügen:
-        PropertyValue[] props = new PropertyValue[] { new PropertyValue() };
-        insCursor.xDocumentInsertable().insertDocumentFromURL(unoURL, props);
+        insCursor.xDocumentInsertable().insertDocumentFromURL(
+            unoURL,
+            new PropertyValue[] {});
       }
       catch (java.lang.Exception e)
       {
@@ -548,7 +549,7 @@ public class WMCommandInterpreter
 
         // Markers verstecken:
         insertField.hideMarks();
-        
+
         // Bookmark an neuen Range anpassen
         rerangeBookmark(bookmarkName, insertField.getTextRange());
 
