@@ -170,8 +170,8 @@ public class SenderBox extends ComponentBase implements XServiceInfo,
     // SenderBox im WollMux registrieren:
     WollMux.registerSenderBox(this);
 
-    // den Inhalt initial befüllen.
-    updateContent();
+    // WollMux informieren, damit ein Update erfolgen kann:
+    EventProcessor.create().addEvent(new Event(Event.ON_SELECTION_CHANGED));
   }
 
   /**
