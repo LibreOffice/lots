@@ -205,13 +205,30 @@ public class SenderBox extends ComponentBase implements XServiceInfo,
             "FontDescriptor");
         if (fd != null && cBox.xDevice() != null && cBox.xWindow() != null)
         {
-          // Anmerkung: fd.Height liefert fälschlicherweise immer 0. Der Umweg
-          // über xDevice.getFont().getFontDescriptor() ist daher notwendig.
+          // Weite der Combobox bestimmen:
+          // Anmerkung: fd.Height liefert immer 0, da die Anzahl der Pixel vom
+          // Device abhängt. Der Umweg über
+          // xDevice.getFont().getFontDescriptor()
+          // ist daher notwendig.
           XFont font = cBox.xDevice().getFont(fd);
-          int height = (int) (font.getFontDescriptor().Height * 1.8);
-          // TODO: Saubere Bestimmung der vollständigen Fonthöhe, ohne Konstante
-          // (1.8).
           int width = font.getStringWidth(TEXT_PROTOTYPE);
+
+          // Höhe der Combobox bestimmen:
+          //
+          // border ------- 2 Pixel
+          //
+          // spaces ------- 3 Pixel
+          // *
+          // ch. *
+          // height *
+          // *
+          // ****
+          // spaces ------- 3 Pixel
+          //
+          // border ------- 2 Pixel
+          int height = (int) (font.getFontDescriptor().Height + 2 * 2 + 2 * 3);
+
+          // Werte für weite und höhe setzen:
           cBox.xWindow().setPosSize(0, 0, width, height, PosSize.SIZE);
         }
 
