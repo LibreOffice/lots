@@ -17,7 +17,6 @@
  */
 package de.muenchen.allg.itd51.wollmux;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -225,12 +224,17 @@ public class EventHandler
 
   private static boolean on_opentemplate(Event event) throws Exception,
       NodeNotFoundException, TextFragmentNotDefinedException,
-      EndlessLoopException, Throwable
+      EndlessLoopException, IOException, MalformedURLException
   {
     UnoService desktop = UnoService.createWithContext(
         "com.sun.star.frame.Desktop",
         WollMux.getXComponentContext());
     String frag_id = event.getArgument();
+
+    // einheitlicher Fehlerzusatz:
+    String errorExt = "\n\nDer Fehler trat beim Auflösen des Textfragments mit der ID \""
+                      + frag_id
+                      + "\" auf.";
 
     // Fragment-URL holen und aufbereiten:
     String urlStr = WollMux.getTextFragmentList().getURLByID(frag_id);
@@ -241,9 +245,11 @@ public class EventHandler
     }
     catch (MalformedURLException e)
     {
-      throw new FileNotFoundException("Die Vorlage mit der URL \""
+      throw new MalformedURLException("Die URL \""
                                       + urlStr
-                                      + "\" konnte nicht geöffnet werden.");
+                                      + "\" dieser Vorlage ist ungültig: "
+                                      + e.getMessage()
+                                      + errorExt);
     }
     UnoService trans = UnoService.createWithContext(
         "com.sun.star.util.URLTransformer",
@@ -264,9 +270,12 @@ public class EventHandler
     }
     catch (java.lang.Exception x)
     {
-      throw new Throwable("Die Vorlage mit der URL \""
-                          + urlStr
-                          + "\" konnte nicht geöffnet werden.", x);
+      throw new com.sun.star.io.IOException(
+          "Die Vorlage mit der URL \""
+              + urlStr
+              + "\" konnte nicht geöffnet werden.\n\n"
+              + "Bitte stellen Sie sicher, dass die Vorlage existiert und unbeschädigt ist."
+              + errorExt, x);
     }
     return EventProcessor.processTheNextEvent;
   }
