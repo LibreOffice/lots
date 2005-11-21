@@ -128,7 +128,7 @@ public class EventHandler
       }
 
     }
-    catch (java.lang.Exception e)
+    catch (Throwable e)
     {
       Logger.error(e);
       String msg = e.getClass().getName() + ":\n\n";
@@ -225,7 +225,7 @@ public class EventHandler
 
   private static boolean on_opentemplate(Event event) throws Exception,
       NodeNotFoundException, TextFragmentNotDefinedException,
-      EndlessLoopException, FileNotFoundException
+      EndlessLoopException, Throwable
   {
     UnoService desktop = UnoService.createWithContext(
         "com.sun.star.frame.Desktop",
@@ -264,9 +264,9 @@ public class EventHandler
     }
     catch (java.lang.Exception x)
     {
-      throw new FileNotFoundException("Die Vorlage mit der URL \""
-                                      + urlStr
-                                      + "\" konnte nicht geöffnet werden.");
+      throw new Throwable("Die Vorlage mit der URL \""
+                          + urlStr
+                          + "\" konnte nicht geöffnet werden.", x);
     }
     return EventProcessor.processTheNextEvent;
   }

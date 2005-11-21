@@ -193,7 +193,7 @@ public class Logger
    * 
    * @param e
    */
-  public static void error(Exception e)
+  public static void error(Throwable e)
   {
     if (mode >= ERROR) printException("ERROR: ", e);
   }
@@ -232,7 +232,7 @@ public class Logger
    * 
    * @param e
    */
-  public static void log(Exception e)
+  public static void log(Throwable e)
   {
     if (mode >= LOG) printException("LOG: ", e);
   }
@@ -256,7 +256,7 @@ public class Logger
    * 
    * @param e
    */
-  public static void debug(Exception e)
+  public static void debug(Throwable e)
   {
     if (mode >= DEBUG) printException("DEBUG: ", e);
   }
@@ -283,7 +283,7 @@ public class Logger
    * 
    * @param e
    */
-  public static void debug2(Exception e)
+  public static void debug2(Throwable e)
   {
     if (mode >= ALL) printException("DEBUG2: ", e);
   }
@@ -339,7 +339,7 @@ public class Logger
    * 
    * @param s
    */
-  private static void printException(String prefix, Exception e)
+  private static void printException(String prefix, Throwable e)
   {
     prefix = new Date() + " " + prefix;
 
