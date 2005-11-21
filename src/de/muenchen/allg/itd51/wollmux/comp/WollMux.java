@@ -21,9 +21,11 @@
 
 package de.muenchen.allg.itd51.wollmux.comp;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -245,6 +247,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
       // Auswertung von LOGGING_MODE und erste debug-Meldungen loggen:
       setLoggingMode(wollmuxConf);
       Logger.debug("StartupWollMux");
+      Logger.debug("Build-Info:\n\n" + getBuildInfo("          "));
       Logger.debug("wollmuxConfFile = " + wollmuxConfFile.toString());
 
       // VisibleTextFragmentList erzeugen
@@ -269,6 +272,47 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
     {
       Logger.error(e);
     }
+  }
+
+  /**
+   * Diese Methode liefert Informationen über die Version und den BuildStatus
+   * der aktuellen WollMux-Installation zurück. Der Build-Status wird derzeit
+   * während dem Build-Prozess mit dem Kommando "svn info" auf das
+   * Projektverzeichnis des WollMux erstellt und die Ausgabe in der Datei
+   * buildinfo im WollMux.uno.pkg-Paket sowie in der WollMux.uno.jar-Datei
+   * abgelegt.
+   * 
+   * Kann dieses File nicht gelesen werden, so wird eine entsprechende
+   * Ersatzmeldung erzeugt (siehe Sourcecode).
+   * 
+   * @param insertChars
+   *          Einen String, der zur möglichen Einrückung der einzelnen Zeilen
+   *          der buildinfo-Datei vor jede Zeile gehängt wird. Soll nicht
+   *          eingerückt werden ist der String der Leerstring "".
+   * @return Der Build-Status der aktuellen WollMux-Installation.
+   * @return
+   */
+  public static String getBuildInfo(String insertChars)
+  {
+    try
+    {
+      String buildInfo = "";
+      URL url = WollMux.class.getClassLoader().getResource("buildinfo");
+      if (url != null)
+      {
+        BufferedReader in = new BufferedReader(new InputStreamReader(url
+            .openStream()));
+        for (String l = null; (l = in.readLine()) != null;)
+        {
+          buildInfo += insertChars + l + "\n";
+        }
+        return buildInfo;
+      }
+    }
+    catch (java.lang.Exception x)
+    {
+    }
+    return "Build-Info: Die Build-Info konnte nicht gelesen werden.";
   }
 
   /**
@@ -513,8 +557,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
     try
     {
       URI uri = new URI(aURL.Complete);
-      Logger.debug2("queryDispatch: "
-                    + uri.toString());
+      Logger.debug2("queryDispatch: " + uri.toString());
       if (uri.getScheme().compareToIgnoreCase(wollmuxProtocol) == 0)
       {
         if (uri.getSchemeSpecificPart().compareToIgnoreCase(

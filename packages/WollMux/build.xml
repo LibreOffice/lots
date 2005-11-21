@@ -1,6 +1,37 @@
 <project default="main">
+	<!--
+	*****************************************************************
+	Build-Datei für den WollMux.
+	
+	Die Build-Datei stellt Haupt Main-Targets zur Verfügung, die für
+	die Erzeugung des WollMux interessant sind:
+	* package: erzeugt ein WollMux.uno.pkg-Paket
+	* install: erzeugt und installiert das WollMux.uno.pkg-Paket mit
+	           unopkg add im Benutzerbereich.
+	           
+	Vorraussetzungen für die erfolgreiche Paketerzeugung:
+	* <OOoPath>/program ist in der PATH-Variable
+	* Nur unter Linux: Die Umgebungsvariable LD_LIBRARY_PATH muss
+	  ebenfalls <OOoPath>/program enthalten.
+	* Die Executables javamaker, idlc und regmerge des OOo2-SDKs werden
+	  über die Pfad-Variable gefunden. Entweder Sie kopieren diese drei
+	  Dateien nach <OOoPath>/program oder sie nehmen das Verzeichnis
+	  <OOoSDK2>/(linux|windows)/bin in die Pfad-Variable auf.
+	* Die Eclipse-Projekte OOo-SDK und UNOHelper sind aus dem 
+	  svn-Repository ausgecheckt worden und befinden sich in den
+	  entsprechenden Nachbarverzeichnissen zum WollMux-Projektverzeichnis.
+    * Die Kommandozeilenversion von svn sollte installiert sein und im PATH
+      stehen, damit die buildinfo-Datei erzeugt werden kann.
+	
+	Datum:  21.11.2005
+	Author: Christoph Lutz (D-III-ITD-5.1)
+	*****************************************************************
+	-->
+
 	<property name="COMPONENT" value="WollMux" />
 	<property name="PKG_NAME" value="${COMPONENT}.uno.pkg" />
+	<property name="BUILD_INFO_FILE" value="buildinfo" />
+	<property name="LOGO" value="wollmux.jpg" />
 
 	<property name="WollMux_REG_NAME" value="de.muenchen.allg.itd51.wollmux.comp.WollMux" />
 	<property name="WollMux_COMPJAR" value="${COMPONENT}.uno.jar" />
@@ -42,17 +73,23 @@
 				<include name="*.xcu" />
 				<include name="*.rdb" />
 				<include name="META-INF/manifest.xml" />
+				<include name="${BUILD_INFO_FILE}" />
 			</fileset>
 		</zip>
 	</target>
 
 	<!-- Das Target jarfile erzeugt die Java-Komponente WollMux -->
 	<target name="jarfile" depends="javamake">
+		<exec executable="svn" output="${BUILD_INFO_FILE}" failifexecutionfails="false">
+			<arg line="info ../.." />
+		</exec>
 		<delete file="${WollMux_COMPJAR}" />
 		<jar destfile="${WollMux_COMPJAR}">
 			<fileset dir="${MY_CLASSES}" includes="**/*.class" excludes="**/SenderBox.class" />
 			<fileset dir="${MY_IDL}" includes="**/*.class" />
 			<fileset dir="${UNOHELPER_CLASSES}" includes="**/*.class" />
+			<fileset file="${BUILD_INFO_FILE}" />
+			<fileset file="${LOGO}" />
 			<manifest>
 				<attribute name="Bundle-Name" value="${COMPONENT}" />
 				<attribute name="Bundle-Activator" value="${WollMux_REG_NAME}" />

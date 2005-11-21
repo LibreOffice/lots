@@ -36,6 +36,7 @@ import com.sun.star.container.XNameAccess;
 import com.sun.star.io.IOException;
 import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.lang.WrappedTargetException;
+import com.sun.star.text.TextContentAnchorType;
 import com.sun.star.text.XTextContent;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextRange;
@@ -232,7 +233,7 @@ public class WMCommandInterpreter
       {
 
         // insertFrag
-        if (cmd.toString().equals("insertFrag"))
+        if (cmd.toString().compareToIgnoreCase("insertFrag") == 0)
         {
           Logger.debug2("Cmd: insertFrag mit FRAG_ID \""
                         + wm.get("FRAG_ID").toString()
@@ -245,7 +246,7 @@ public class WMCommandInterpreter
         }
 
         // insertValue
-        else if (cmd.toString().equals("insertValue"))
+        else if (cmd.toString().compareToIgnoreCase("insertValue") == 0)
         {
           Logger.debug2("Cmd: insertValue mit DB_SPALTE \""
                         + wm.get("DB_SPALTE").toString()
@@ -254,6 +255,20 @@ public class WMCommandInterpreter
               wm.get("DB_SPALTE").toString(),
               bookmarkName,
               state);
+        }
+
+        // rufe den wollmux
+        else if (cmd.toString().compareToIgnoreCase("RufeDenWollMux") == 0)
+        {
+          Logger.debug2("Cmd: RufeDenWollMux");
+          state = executeRufeDenWollMux(bookmarkName, state);
+        }
+
+        // rufe den wollmux
+        else if (cmd.toString().compareToIgnoreCase("Version") == 0)
+        {
+          Logger.debug2("Cmd: Version");
+          state = executeVersion(bookmarkName, state);
         }
 
         // unbekanntes Kommando
@@ -432,6 +447,118 @@ public class WMCommandInterpreter
       return insertField.getTextRange();
     }
     return null;
+  }
+
+  /**
+   * Gibt Informationen über die aktuelle Install-Version des WollMux aus.
+   * 
+   * @param bookmarkName
+   *          Name des Bookmarks in das der Wert eingefügt werden soll.
+   */
+  private WMCommandState executeVersion(String bookmarkName,
+      WMCommandState state)
+  {
+    if (allowDocumentModification)
+    {
+      state.setErrors(0);
+      XNameAccess bookmarkAccess = document.xBookmarksSupplier().getBookmarks();
+      try
+      {
+        UnoService bookmark = new UnoService(bookmarkAccess
+            .getByName(bookmarkName));
+        WMInsertField insertField = new WMInsertField(
+            createTextCursorByBookmark(bookmark).xTextRange());
+        UnoService insCurs = insertField.createInsertCursor();
+        insCurs.xTextCursor().setString(
+            "Build-Info:\n" + WollMux.getBuildInfo(""));
+
+        insertField.hideMarks();
+      }
+      catch (Exception x)
+      {
+        state.setErrors(1);
+        Logger.error(x);
+      }
+    }
+    state.setDone(true);
+    return state;
+  }
+
+  /**
+   * Easteregg, ausgelöst durch den Befehl WM(CMD'rufeDenWollMux').
+   * 
+   * @param bookmarkName
+   *          Name des Bookmarks in das der Wert eingefügt werden soll.
+   */
+  private WMCommandState executeRufeDenWollMux(String bookmarkName,
+      WMCommandState state)
+  {
+    if (allowDocumentModification)
+    {
+      state.setErrors(0);
+      XNameAccess bookmarkAccess = document.xBookmarksSupplier().getBookmarks();
+      try
+      {
+        UnoService bookmark = new UnoService(bookmarkAccess
+            .getByName(bookmarkName));
+        WMInsertField insertField = new WMInsertField(
+            createTextCursorByBookmark(bookmark).xTextRange());
+        UnoService insCurs = insertField.createInsertCursor();
+        insCurs.xTextCursor().getText().insertString(
+            insCurs.xTextRange().getEnd(),
+            "... und er kommt!\n\n",
+            false);
+
+        // WollMux-Bild einfügen:
+        UnoService bild = null;
+        for (short i = 7; i < 42; i += 1)
+        {
+          bild = document.create("com.sun.star.text.GraphicObject");
+          bild.setPropertyValue(
+              "GraphicURL",
+              "http://limux.tvc.muenchen.de/wiki/images/4/4a/Wollmux.jpg");
+          bild.setPropertyValue(
+              "AnchorType",
+              TextContentAnchorType.AS_CHARACTER);
+          bild.setPropertyValue("RelativeHeight", new Short(i));
+          bild.setPropertyValue("RelativeWidth", new Short(i));
+          bild.setPropertyValue("LeftMargin", new Integer(i * i * i / 4));
+          insertTextContent(
+              insCurs.xTextRange().getEnd(),
+              bild.xTextContent(),
+              false);
+          Integer waiter = new Integer(70 - i);
+          synchronized (waiter)
+          {
+            try
+            {
+              waiter.wait(waiter.intValue());
+            }
+            catch (InterruptedException e)
+            {
+            }
+          }
+          insCurs.xTextCursor().getText()
+              .removeTextContent(bild.xTextContent());
+        }
+        insCurs
+            .xTextCursor()
+            .getText()
+            .insertString(
+                insCurs.xTextRange(),
+                "\nAber er gehorcht nur BNK, LUT und anderen eingeweihten Personen...",
+                false);
+
+        insertField.hideMarks();
+      }
+      catch (Exception x)
+      {
+        state.setErrors(1);
+        Logger.error(x);
+      }
+    }
+    state.setDone(true);
+    return state;
   }
 
   /**
