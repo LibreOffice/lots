@@ -29,7 +29,8 @@
 	-->
 
 	<property name="COMPONENT" value="WollMux" />
-	<property name="PKG_NAME" value="${COMPONENT}.uno.pkg" />
+	<property name="VERSION" value="0.9" />
+	<property name="PKG_NAME" value="${COMPONENT}-${VERSION}.uno.pkg" />
 	<property name="BUILD_INFO_FILE" value="buildinfo" />
 	<property name="LOGO" value="wollmux.jpg" />
 
@@ -64,7 +65,7 @@
 	</target>
 
 	<!-- Das Target package registriert die Komponente und erzeugt ein uno.pkg-file -->
-	<target name="package" depends="jarfile, jarfile2">
+	<target name="package" depends="jarfile, jarfile2, buildinfo">
 		<delete file="../${PKG_NAME}" />
 		<zip destfile="../${PKG_NAME}">
 			<fileset dir=".">
@@ -79,10 +80,7 @@
 	</target>
 
 	<!-- Das Target jarfile erzeugt die Java-Komponente WollMux -->
-	<target name="jarfile" depends="javamake">
-		<exec executable="svn" output="${BUILD_INFO_FILE}" failifexecutionfails="false">
-			<arg line="info ../.." />
-		</exec>
+	<target name="jarfile" depends="javamake, buildinfo">
 		<delete file="${WollMux_COMPJAR}" />
 		<jar destfile="${WollMux_COMPJAR}">
 			<fileset dir="${MY_CLASSES}" includes="**/*.class" excludes="**/SenderBox.class" />
@@ -98,6 +96,23 @@
 				<attribute name="RegistrationClassName" value="${WollMux_REG_NAME}" />
 			</manifest>
 		</jar>
+	</target>
+
+	<!-- Das Target erzeugt das buildinfo-File -->
+	<target name="buildinfo">
+		<exec executable="svn" output="${BUILD_INFO_FILE}" failifexecutionfails="false" failonerror="false">
+			<arg line="info ../.." />
+		</exec>
+		<loadfile property="svn_info" srcfile="${BUILD_INFO_FILE}" encoding="ISO-8859-1" failonerror="false">
+			<filterchain>
+				<headfilter skip="1" />
+			</filterchain>
+		</loadfile>
+		<echo message="" file="${BUILD_INFO_FILE}" />
+		<echo file="${BUILD_INFO_FILE}">Paketversion: ${PKG_NAME}
+
+Subversion-Build-Info:
+${svn_info}</echo>
 	</target>
 
 	<!-- Das Target jarfile erzeugt die Java-Komponente SenderBox -->
