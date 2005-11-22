@@ -23,6 +23,8 @@
 * 10.11.2005 | BNK | +DEFAULT_* Konstanten
 * 14.11.2005 | BNK | Exakter Match "Nachname" entfernt aus 1-Wort-Fall
 * 22.11.2005 | BNK | Common.setLookAndFeel() verwenden
+* 22.11.2005 | BNK | Bei Initialisierung ist der selectedDataset auch in der Liste 
+*                  | selektiert.
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -80,6 +82,7 @@ import de.muenchen.allg.itd51.wollmux.TimeoutException;
 import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.DJDataset;
 import de.muenchen.allg.itd51.wollmux.db.Dataset;
+import de.muenchen.allg.itd51.wollmux.db.DatasetNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
 import de.muenchen.allg.itd51.wollmux.db.QueryResults;
 import de.muenchen.allg.itd51.wollmux.db.TestDatasourceJoiner;
@@ -347,7 +350,11 @@ public class PersoenlicheAbsenderlisteVerwalten
     addUIElements(fensterDesc, "Absenderliste", absenderliste, 0, 1);
     addUIElements(fensterDesc, "Fussbereich", fussbereich, 1, 0);
     
-    setListElements(palJList, dj.getLOS());
+    Dataset dsToSelect = null;
+    try{
+      dsToSelect = dj.getSelectedDataset();
+    }catch(DatasetNotFoundException x){}
+    setListElements(palJList, dj.getLOS(), dsToSelect);
   
     updateButtonStates();
     
@@ -570,17 +577,20 @@ public class PersoenlicheAbsenderlisteVerwalten
    * Nimmt eine JList list, die ein DefaultListModel haben muss und ändert ihre
    * Wertliste so, dass sie data entspricht. Die Datasets aus data werden nicht
    * direkt als Werte verwendet, sondern in {@link ListElement} Objekte gewrappt.
-   * data == null wird interpretiert als leere Liste.
+   * data == null wird interpretiert als leere Liste. Wenn datasetToSelect != null ist,
+   * so wird der entsprechende Datensatz in der Liste selektiert, wenn er darin vorhanden 
+   * ist.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private void setListElements(JList list, QueryResults data)
+  private void setListElements(JList list, QueryResults data, Dataset datasetToSelect)
   {
-    Object[] elements;
+    int selectedIndex = -1;
+    ListElement[] elements;
     if (data == null)
-      elements = new Object[]{};
+      elements = new ListElement[]{};
     else
     {
-      elements = new Object[data.size()];
+      elements = new ListElement[data.size()];
       Iterator iter = data.iterator();
       int i = 0;
       while (iter.hasNext()) elements[i++] = new ListElement((DJDataset)iter.next());
@@ -596,7 +606,24 @@ public class PersoenlicheAbsenderlisteVerwalten
     DefaultListModel listModel = (DefaultListModel)list.getModel();
     listModel.clear();
     for (int i = 0; i < elements.length; ++i)
+    {
       listModel.addElement(elements[i]);
+      if (datasetToSelect != null && 
+          elements[i].getDataset().getKey().equals(datasetToSelect.getKey()))
+        selectedIndex = i;
+    }
+    
+    if (selectedIndex >= 0) list.setSelectedIndex(selectedIndex);
+  }
+  
+  /**
+   * wie {@link #setListElements(JList, QueryResults, Dataset)}, aber es wird kein Datensatz
+   * selektiert.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private void setListElements(JList list, QueryResults data)
+  {
+    setListElements(list, data, null);
   }
   
   
