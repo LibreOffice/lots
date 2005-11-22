@@ -424,6 +424,9 @@ public class LDAPDatasource implements Datasource
       throws TimeoutException
   {
 
+    if (keys.isEmpty())
+      return new QueryResultsList(new Vector(0));
+    
     long endTime = System.currentTimeMillis() + timeout;
 
     attributeCache.clear();
