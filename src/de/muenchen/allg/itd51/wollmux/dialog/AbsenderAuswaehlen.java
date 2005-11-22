@@ -13,6 +13,7 @@
 * 02.11.2005 | BNK | Absenderliste nicht mehr mit Vorname = M* befüllen,
 *                    weil jetzt der TestDJ schon eine Absenderliste
 *                    mit Einträgen hat.
+* 22.11.2005 | BNK | Common.setLookAndFeel() verwenden
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -55,6 +56,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.UIManager;
+import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -224,9 +226,7 @@ public class AbsenderAuswaehlen
    */
   private void createGUI(ConfigThingy fensterDesc)
   {
-    //use system LAF for window decorations
-    try{UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());}catch(Exception x){};
-    JFrame.setDefaultLookAndFeelDecorated(true);
+    Common.setLookAndFeel();
     
     palJList = new JList(new DefaultListModel());
    
@@ -761,6 +761,10 @@ public class AbsenderAuswaehlen
   
   public static void main(String[] args) throws Exception
   {
+    LookAndFeelInfo[] lf = UIManager.getInstalledLookAndFeels();
+    for (int i = 0; i < lf.length; ++i)
+      System.out.println(lf[i].getClassName());
+    System.out.println("Default L&F: "+UIManager.getSystemLookAndFeelClassName());
     String confFile = "testdata/WhoAmI.conf";
     String verConfFile = "testdata/PAL.conf";
     String abConfFile = "testdata/AbsenderdatenBearbeiten.conf";

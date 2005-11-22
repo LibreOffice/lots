@@ -21,6 +21,7 @@
 * 27.10.2005 | BNK | back + CLOSEACTION
 * 02.11.2005 | BNK | +saveAndBack()
 * 15.11.2005 | BNK | Endlosschleife beseitigt durch vertauschen der || Operanden
+* 22.11.2005 | BNK | Common.setLookAndFeel() verwenden
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -69,7 +70,6 @@ import javax.swing.JSeparator;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
-import javax.swing.UIManager;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.JTextComponent;
@@ -249,9 +249,7 @@ public class DatensatzBearbeiten
   
   private void createGUI(ConfigThingy fensterDesc)
   {
-    //use system LAF for window decorations
-    try{UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());}catch(Exception x){};
-    JFrame.setDefaultLookAndFeelDecorated(true);
+    Common.setLookAndFeel();
     
     //Create and set up the window.
     myFrame = new JFrame("Absenderdaten bearbeiten");
