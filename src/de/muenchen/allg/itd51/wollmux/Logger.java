@@ -17,6 +17,7 @@
  * 31.10.2005 | BNK | +error(msg, e)
  *                  | "critical" -> "error"
  * 02.11.2005 | BNK | LOG aus Default-Modus
+ * 24.11.2005 | BNK | In init() das Logfile nicht löschen.
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -137,7 +138,7 @@ public class Logger
     mode = loggingMode;
     Logger.debug2("Logger::init(): LoggingMode = " + mode);
     // prüfen, ob File geschrieben werden kann:
-    new FileOutputStream(outputFile);
+    new FileOutputStream(outputFile,true);
   }
 
   /**
