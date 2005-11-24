@@ -11,6 +11,7 @@
  * 03.11.2005 | BNK | Erstellung
  * 16.11.2005 | BNK | Ctrl-Shift-F
  *                  | besser kommentiert
+ * 24.11.2005 | BNK | escapen von Werten in LDAP-Suchanfragen
  * -------------------------------------------------------------------
  *
  * @author Max Meier (D-III-ITD 5.1)
@@ -177,6 +178,9 @@ public class LDAPDatasource implements Datasource
     try
     {
       objectClass = sourceDesc.get("OBJECT_CLASS").toString();
+      if (!ATTRIBUTE_RE.matcher(objectClass).matches())
+        throw new ConfigurationErrorException("OBJECT_CLASS enthält unerlaubte Zeichen: \""+objectClass+"\"");
+
     }
     catch (NodeNotFoundException e)
     {
@@ -662,17 +666,17 @@ public class LDAPDatasource implements Datasource
       String attributeValue = currentQuery.getSearchString();
 
       String objectClass = colDef.objectClass;
-      String currentSearchFilter = "(" //FIXME was ist wenn attributeValue Zeichen enthält, die für LDAP-Query bedeutung haben?, Escaping siehe RFC 2254, TODO testen ob escaping funktioniert
-                                   + attributeName //TODO escapen (Ja, auch den Attr.-Namen, sicher ist sicher!)
+      String currentSearchFilter = "(" 
+                                   + ldapEscape(attributeName)
                                    + "="
-                                   + attributeValue //TODO escapen
+                                   + ldapEscape(attributeValue)
                                    + ")";
       if (objectClass != null)
       {
         currentSearchFilter = "(&"
                               + currentSearchFilter
                               + "(objectClass="
-                              + objectClass //FIXME escapen falls illegale zeichen
+                              + ldapEscape(objectClass)
                               + "))";
       }
 
@@ -1035,6 +1039,17 @@ public class LDAPDatasource implements Datasource
     attributeCache.clear();
 
     return new QueryResultsList(results);
+  }
+
+  /**
+   * Escaping nach RFC 2254 Abschnitt 4. 
+   * Sternderl werden nicht escapet, weil sie ihre normale Sternerl-Bedeutung
+   * beibehalten sollen.
+   */  
+  private String ldapEscape(String value)
+  {
+    return value.replaceAll("\\\\", "\\\\5c").replaceAll("\\(", "\\\\28")
+        .replaceAll("\\)", "\\\\29").replaceAll("\\00","\\\\00");
   }
 
   /*
@@ -1726,9 +1741,9 @@ public class LDAPDatasource implements Datasource
         dj.getSchema(),
         dj.simpleFind("Orga2", "Stadtarchiv", "Referat", "Direktorium"));
     printResults(
-        "Referat = Sozialreferat , Nachname = Meier",
+        "Referat = Sozialreferat , Nachname = Me\\)er",
         dj.getSchema(),
-        dj.simpleFind("Referat", "Sozialreferat", "Nachname", "Meier"));
+        dj.simpleFind("Referat", "Sozialreferat", "Nachname", "Me\\)er"));
 
     // printResults("Nachname =r*", dj.getSchema(),
     // dj.simpleFind("Nachname","r*"));
