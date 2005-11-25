@@ -102,13 +102,13 @@ public class LDAPDatasource implements Datasource
       .compile("^[a-zA-Z_][a-zA-Z_0-9]*$");
   
   /** Regex zum Checken der Syntax von BASE_DN. 
-   * FIXME: Sicher zu restriktiv!
+   * TOD0: Sicher zu restriktiv!
    */
   private static final Pattern BASEDN_RE = Pattern
       .compile("^[a-zA-Z]+=[a-zA-ZäÄöÖüÜß \\\\()-]+(,[a-zA-Z]+=[a-zA-ZäÄöÖüÜß \\\\()-]+)*$");
   
   /** Regex zum Checken der Syntax von LDAP-Attributsbezeichnern. 
-   * FIXME: Sicher zu restriktiv!
+   * TOD0: Sicher zu restriktiv!
    */
   private static final Pattern ATTRIBUTE_RE = Pattern
       .compile("^[a-zA-Z]+$");
@@ -467,7 +467,7 @@ public class LDAPDatasource implements Datasource
       NamingEnumeration currentResults = searchLDAPPerson(
           "",
           searchFilter,
-          true,
+          SearchControls.SUBTREE_SCOPE,
           true,
           timeout);
 
@@ -554,7 +554,9 @@ public class LDAPDatasource implements Datasource
   }
 
   /**
-   * Ein (Ldap)Name, der zu einer Suche mit Pfad-Level ungleich 0 gehört. 
+   * Ein (Ldap)Name und der Pfad-Level für die Suche. Typischerweise ist der Pfad-Level != 0,
+   * aber ein Level von 0 ist auch möglich (kann bei Bildung der Schnittmenge von positiven
+   * und negativen Kandidaten entstehen). 
    * @author Max Meier (D-III-ITD 5.1)
    */
   private class RelativePath
@@ -697,28 +699,28 @@ public class LDAPDatasource implements Datasource
 
         Integer key = new Integer(relativePath);
 
-        String formerSearchPath = (String) mapNon0PathLevelToSearchFilter.get(key); //TODO formerSearchPath besseren Namen geben
+        String non0LevelSearchFilter = (String) mapNon0PathLevelToSearchFilter.get(key);
 
-        if (formerSearchPath == null)
+        if (non0LevelSearchFilter == null)
         {
-          formerSearchPath = currentSearchFilter;
+          non0LevelSearchFilter = currentSearchFilter;
         }
         else
         {
-          formerSearchPath = "(&"
+          non0LevelSearchFilter = "(&"
                              + currentSearchFilter
-                             + formerSearchPath
+                             + non0LevelSearchFilter
                              + ")";
         }
 
-        mapNon0PathLevelToSearchFilter.put(key, formerSearchPath);
+        mapNon0PathLevelToSearchFilter.put(key, non0LevelSearchFilter);
 
       }
 
     }
 
     Iterator attributeKeys = mapNon0PathLevelToSearchFilter.keySet().iterator();
-//TODO evtl. Optimierung: attributeKeys nicht in zufälliger Reihenfolge durchgehen
+//TOD0 evtl. Optimierung: attributeKeys nicht in zufälliger Reihenfolge durchgehen
     while (attributeKeys.hasNext())
     {
       Integer currentKey = (Integer) attributeKeys.next();
@@ -734,9 +736,14 @@ public class LDAPDatasource implements Datasource
         positiveSubtreePathLists.add(paths);
       }
       else
-      { //TODO: Wo ist der Sinn darin, aus einem RelativePaths Objekt eine Liste von RelativePath Objekten zu machen?
+      { 
+        /*
+         * RelativePaths in Liste von RelativePath Objekten umwandeln, da nachher
+         * im Merge-Schritt eine Liste entstehen soll, in der Pfade verschiedener
+         * Stufe gemischt enthalten sein können.
+         */
         List negativeSubtreePaths = new Vector();
-        for (int n = 0; n < paths.paths.size(); n++) //TODO Iterator verwenden
+        for (int n = 0; n < paths.paths.size(); n++) //TOD0 Iterator verwenden
         {
           Name currentName = (Name) paths.paths.get(n);
           RelativePath newNegativePath = new RelativePath(paths.relative,
@@ -763,46 +770,46 @@ public class LDAPDatasource implements Datasource
      */
     List mergedPositiveSubtreePathLists = null;
 
-    int mergedCurrentSize = 0; //TODO: Der Name ist Bullshit. Die Variable gibt den Level an. okay, size bezieht sicht auf die laenge der (Ldap)Names
+    int mergedCurrentSize = 0; //TOD0: Der Name ist Bullshit. Die Variable gibt den Level an. okay, size bezieht sicht auf die laenge der (Ldap)Names
 
-    if (positiveSubtreePathLists.size() > 0) //TODO if nach aussen ziehen (evtl. gleich auf Iterator übergehen, siehe todo weiter unten), damit mergedPositiveSubtreePathLists nicht mit null initialisiert werden muss und damit beweisbar ist, dass es initialisiert ist
+    if (positiveSubtreePathLists.size() > 0) //TOD0 if nach aussen ziehen (evtl. gleich auf Iterator übergehen, siehe todo weiter unten), damit mergedPositiveSubtreePathLists nicht mit null initialisiert werden muss und damit beweisbar ist, dass es initialisiert ist
     {
       RelativePaths currentSubtreePaths = (RelativePaths) positiveSubtreePathLists
-          .get(0); //FIXME: Hier wird eine Liste von zufälligem Level rausgepickt (entsprechend sortierung von attributeMap.keySet(), Wo ist die oben angesprochene Sortierung?
+          .get(0); //TOD0: Hier wird eine Liste von zufälligem Level rausgepickt (entsprechend sortierung von attributeMap.keySet(), Wo ist die oben angesprochene Sortierung?
       mergedPositiveSubtreePathLists = currentSubtreePaths.paths;
       mergedCurrentSize = currentSubtreePaths.relative;
     }
 
-    for (int n = 1; n < positiveSubtreePathLists.size(); n++) //TODO Iterator verwenden
+    for (int n = 1; n < positiveSubtreePathLists.size(); n++) //TOD0 Iterator verwenden
     {
 //TODO diesen Code-Pfad testen
       RelativePaths currentSubtreePaths = (RelativePaths) positiveSubtreePathLists
           .get(n);
 
-      List shorter, longer; //of (Ldap)Names //TODO: Bullshit-Namen, hier geht's um greaterLevel und smallerLevel, okay bezieht sich auf die laenge der (Ldap)Names
+      List shorterLdapNames, longerLdapNames; //of (Ldap)Names
 
       if (currentSubtreePaths.relative < mergedCurrentSize)
       {
-        shorter = currentSubtreePaths.paths;
-        longer = mergedPositiveSubtreePathLists;
+        shorterLdapNames = currentSubtreePaths.paths;
+        longerLdapNames = mergedPositiveSubtreePathLists;
       }
       else
       {
-        shorter = mergedPositiveSubtreePathLists;
-        longer = currentSubtreePaths.paths;
+        shorterLdapNames = mergedPositiveSubtreePathLists;
+        longerLdapNames = currentSubtreePaths.paths;
         mergedCurrentSize = currentSubtreePaths.relative;
       }
 
       mergedPositiveSubtreePathLists = new Vector();
 
-      for (int m = 0; m < longer.size(); m++)
+      for (int m = 0; m < longerLdapNames.size(); m++)
       {
-        Name longerName = (Name) longer.get(m);
+        Name longerName = (Name) longerLdapNames.get(m);
 
-        for (int p = 0; p < shorter.size(); p++)
+        for (int p = 0; p < shorterLdapNames.size(); p++)
         {
-          Name shorterName = (Name) shorter.get(p);
-          if (longerName.startsWith(shorterName)) //TODO betrachtet dies korrekt die einzelnen Pfadkomponenten als ganzes oder würde   (ou=Foo,ou=Bar) als Präfix von (ou=Foo,ou=Bartender,ou=bla) durchgehen?
+          Name shorterName = (Name) shorterLdapNames.get(p);
+          if (longerName.startsWith(shorterName)) 
           {
             mergedPositiveSubtreePathLists.add(longerName);
             break;
@@ -820,7 +827,7 @@ public class LDAPDatasource implements Datasource
      * 
      */
     List mergedNegativeList = null;
-    if (negativeSubtreePathLists.size() > 0) //TODO if nach oben ziehen, um mergedNegativeList nicht mit null initialisieren zu müssen
+    if (negativeSubtreePathLists.size() > 0) //TOD0 if nach oben ziehen, um mergedNegativeList nicht mit null initialisieren zu müssen
     {
       mergedNegativeList = (List) negativeSubtreePathLists.get(0);
     }
@@ -830,12 +837,32 @@ public class LDAPDatasource implements Datasource
 //TODO diesen Code-Pfad testen
       List newMergedNegativeList = new Vector();
 
+      /* 
+       * alle Objekte von currentList haben die selbe Stufe.
+       */ 
       List currentList = (List) negativeSubtreePathLists.get(n);
 
       for (int m = 0; m < mergedNegativeList.size(); m++)
       {
         RelativePath currentPath = (RelativePath) mergedNegativeList.get(m);
 
+        /* 
+         * Suche zu currentPath in der currentList einen Pfad, der eine Aussage über eine
+         * Teilmenge oder eine Obermenge der Nachkommen von currentPath macht, die potentielle
+         * Ergebnisse sind. Beispiel*/
+//      A1:-2     Hier ist A1 ein Knoten der auf eine Suchbedingung mit Level -2 passt, d.h.
+//     / |        von dem Enkelkinder potentielle Ergebnisse sind.      
+//    D  B:-1     Bei B sind Kinder potentielle Ergebnisse. Die Enkelkinder von A1 sind eine
+//    |  | \      Obermenge der Kinder von B. 
+//    |  |  \   
+//    E  C1  C2
+
+         /* 
+         * Gibt es so einen Match nicht,
+         * dann fliegt currentPath raus (indem es nicht nach newMergedNegativeList 
+         * übertragen wird). Gibt es so einen Match, so wird der längere Pfad von beiden in
+         * die newMergedNegativeList übernommen (im Beispiel B).
+         */
         for (int p = 0; p < currentList.size(); p++)
         {
           RelativePath otherPath = (RelativePath) currentList.get(p);
@@ -856,9 +883,19 @@ public class LDAPDatasource implements Datasource
           if (currentPath.name.size() - currentPath.relative == otherPath.name
               .size()
                                                                 - otherPath.relative
-              && longer.name.startsWith(shorter.name)) //TODO wie vorher: funktioniert startsWith hier?
+              && longer.name.startsWith(shorter.name)) 
           {
-            newMergedNegativeList.add(longer); //TODO: break
+            newMergedNegativeList.add(longer);
+//            * 
+//            * Achtung: Kein break hier! Beispiel
+//            * 
+//            *            A          A ist currentPath mit Level -2
+//            *           / \         B1 und B2 sind in der currentList mit Level -1
+//            *          /   \        Sowohl B1 als auch B2 müssen in die
+//            *         B1   B2       newMergedNegativeList kommen!
+//            *         |     |
+//            *         C1    C2      
+//            *
           }
 
         }
@@ -889,10 +926,18 @@ public class LDAPDatasource implements Datasource
           {
 
             if (currentName.startsWith(currentPath.name)
-                && currentPath.name.size() - currentPath.relative >= currentName
-                    .size())
-            { //FIXME: neuen RelativePath erzeugen mit .relative = currentPath.name.size() - currentPath-relative - currentName.size(), nicht currentPath recyclen, weil es mit verschiedenen positiven jeweils einen neuen Schnitt geben kann
-              mergedNegativeSubtreePaths.add(currentPath); 
+                && currentPath.name.size() - currentPath.relative >= currentName.size())
+            { 
+              /*
+               * Wir bilden einen neuen RelativePath mit dem Namen des positiven (currentName),
+               * der tiefer im Baum liegt und einem (negativen) Level, der die selbe Nachfahrenebene
+               * selektiert wie der Level des negativen (currentPath).
+               * Achtung: Es ist möglich, dass der neu-gebildete Level 0 ist.
+               * TODO checken, ob das irgendwo probleme macht
+               */
+              RelativePath newPath = new RelativePath(currentName.size() - currentPath.name.size() + currentPath.relative, currentName);
+              mergedNegativeSubtreePaths.add(newPath);
+              //kein break weil mit dem selben negativen currentPath mehrere Schnitte möglich sind.
             }
 
           }
@@ -915,7 +960,7 @@ public class LDAPDatasource implements Datasource
     }
 
     if (searchFilter.equals("") //TODO: die Listen sollten nie null sein (siehe vorherige TODOs) entsprechend muss hier auf isEmpty() getestet werden
-        && mergedPositiveSubtreePathLists == null //FIXME: sollte wohl && sein. Durchsuche ganze Datei nach | und &. Max scheint das generell falsch zu machen.
+        && mergedPositiveSubtreePathLists == null 
         && mergedNegativeSubtreePaths == null)
     {
       return new QueryResultsList(new Vector(0));
@@ -958,7 +1003,7 @@ public class LDAPDatasource implements Datasource
         NamingEnumeration currentResults = searchLDAPPerson(
             subTree + comma,
             searchFilter,
-            true,
+            SearchControls.SUBTREE_SCOPE,
             true,
             timeout); //FIXME: timeout muss vorher neu berechnet werden aus endTime, besser nur endTime an die Funktion übergeben, TODO alle vorkommen von timeout überprüfen, ob nicht der selbe Fehler gemacht wurde
 
@@ -972,9 +1017,7 @@ public class LDAPDatasource implements Datasource
       }
     }
     else
-    {
-      // Breitensuche muss verwendet werden
-
+    { // Breitensuche ausgehend von den Knoten der mergedNegativeSubtreePaths
       for (int n = 0; n < mergedNegativeSubtreePaths.size(); n++) //TODO: Iterator verwenden
       {
 
@@ -983,6 +1026,8 @@ public class LDAPDatasource implements Datasource
         RelativePath currentRelativePath = (RelativePath) mergedNegativeSubtreePaths
             .get(n);
         int depth = -currentRelativePath.relative;
+        //ACHTUNG: depth kann 0 sein. Siehe Kommentar bei Bildung des Schnitts aus negativen
+        //und positiven Pfaden.
 
         Name currentName = currentRelativePath.name;
         String currentPath = currentName.toString();
@@ -997,7 +1042,8 @@ public class LDAPDatasource implements Datasource
         for (int m = 0; m < currentSearch.size(); m++) //TODO Iterator verwenden
         {
           SearchResult sr = (SearchResult) currentSearch.get(m);
-          String actualPath = checkQuotes(sr.getName()) + comma + currentPath;
+          String name = checkQuotes(sr.getName());
+          String actualPath = name + (name.length()>0?comma:"") + currentPath;
           sr.setName(actualPath);
           currentResultList.add(sr);
         }
@@ -1028,15 +1074,12 @@ public class LDAPDatasource implements Datasource
         results.add(ds);
       }
     }
-    catch (TimeoutException e) //FIXME: Bullshit, falls es wirklich wichtig ist, hier den attributeCache zu löschen (was vermutlich nicht so ist), soll das in einen finally Block
+    finally 
     {
       attributeCache.clear();
-      throw new TimeoutException(e);
     }
 
     results.trimToSize();
-
-    attributeCache.clear();
 
     return new QueryResultsList(results);
   }
@@ -1315,7 +1358,7 @@ public class LDAPDatasource implements Datasource
         {
           // do nothing (Attributwert nicht vorhanden und bleibt somit 'null')
         }
-        catch (ArrayIndexOutOfBoundsException e)
+        catch (IndexOutOfBoundsException e)
         {
           // auch hier: do nothing (Attributwert befindet sich unterhalb der
           // aktuellen lhmPerson)
@@ -1361,7 +1404,7 @@ public class LDAPDatasource implements Datasource
    * 
    * @param path
    * @param filter
-   * @param subTreeScope
+   * @param searchScope
    * @param onlyObjectClass
    * @param timeout
    * @return
@@ -1370,21 +1413,14 @@ public class LDAPDatasource implements Datasource
    * TODO Testen
    */
   private NamingEnumeration searchLDAPPerson(String path, String filter,
-      boolean subTreeScope, boolean onlyObjectClass, long timeout)
+      int searchScope, boolean onlyObjectClass, long timeout)
       throws TimeoutException
   {
 
     SearchControls searchControls = new SearchControls();
 
-    if (subTreeScope)
-    {
-      searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
-    }
-    else
-    {
-      searchControls.setSearchScope(SearchControls.ONELEVEL_SCOPE);
-    }
-
+    searchControls.setSearchScope(searchScope);
+    
     if (timeout > Integer.MAX_VALUE) timeout = Integer.MAX_VALUE;
     searchControls.setTimeLimit((int) timeout);
 
@@ -1462,7 +1498,7 @@ public class LDAPDatasource implements Datasource
 
       List nextSeeds = new Vector();
 
-      for (int m = 0; m < seeds.size(); m++) //TODO Iterator verwenden
+      for (int m = 0; m < seeds.size(); m++) //TOD0 Iterator verwenden
       {
 
         if (System.currentTimeMillis() > endTime) throw new TimeoutException();
@@ -1475,7 +1511,7 @@ public class LDAPDatasource implements Datasource
         NamingEnumeration enumer = searchLDAPPerson(
             searchPath + comma,
             "",
-            false,
+            SearchControls.ONELEVEL_SCOPE,
             false,
             endTime);
 
@@ -1500,7 +1536,7 @@ public class LDAPDatasource implements Datasource
 
     List result = new Vector();
 
-    for (int n = 0; n < seeds.size(); n++) //TODO Iterator verwenden
+    for (int n = 0; n < seeds.size(); n++) //TOD0 Iterator verwenden
     {
 
       if (System.currentTimeMillis() > endTime) throw new TimeoutException();
@@ -1513,7 +1549,7 @@ public class LDAPDatasource implements Datasource
       NamingEnumeration enumer = searchLDAPPerson(
           currentPath + comma,
           filter,
-          false,
+          level == 0? SearchControls.OBJECT_SCOPE:SearchControls.ONELEVEL_SCOPE,
           true,
           endTime);
 
@@ -1529,31 +1565,32 @@ public class LDAPDatasource implements Datasource
   }
 
   /**
-   * TODO kommentar vom code block unten hierher kopieren
-   * @param tempPath
-   * @return
+   * Entferne umschliessende Doublequotes aus path falls vorhanden.
+   * Dies muss gemacht werden, da das Zeichen '/' in LDAP Pfadkomponenten 
+   * erlaubt ist, im JNDI jedoch als Komponententrenner verwendet wird. 
+   * Deswegen
+   * werden Pfade, die '/' enthalten von .getName() in Anführungszeichen
+   * gesetzt und können deshalb nicht mehr geparsed werden.
+   *
+   * TOD0 Ich bin mir nicht sicher, ob hier nicht noch mehr zu tun ist.
+   * Was ist z.B. mit enthaltenen Doublequotes? Kann das passieren?
+   * Wie werden die escapet?
    * @author Max Meier (D-III-ITD 5.1)
    * 
    */
-  private String checkQuotes(String tempPath)
+  private String checkQuotes(String path)
   {
-    /* TODO Was ist mit im Pfad enthaltenen "? Ist das erlaubt? Werden die escapet? Muss hier unescaping betrieben werden?
-     * delete surrounding quotation marks
-     * 
-     * Der Character '/' ist in LDAP erlaubt, jedoch nicht im JNDI. Deswegen
-     * werden Pfade, die '/' enthalten von .getName() in Anführungszeichen
-     * gesetzt und können deshalb nicht mehr geparsed werden.
-     */
-    int tempEnd = tempPath.length() - 1;
+    
+    int tempEnd = path.length() - 1;
     if (tempEnd > 0)
     {
-      if (tempPath.charAt(0) == '"' && tempPath.charAt(tempEnd) == '"')
+      if (path.charAt(0) == '"' && path.charAt(tempEnd) == '"')
       {
-        tempPath = tempPath.substring(1, tempEnd);
+        path = path.substring(1, tempEnd);
       }
     }
 
-    return tempPath;
+    return path;
 
   }
 
@@ -1724,22 +1761,25 @@ public class LDAPDatasource implements Datasource
 
     printResults("Get and find keys: ", dj.schema, qr2);
 
-    printResults("OrgaEmail = r.kom@muenchen.de , Orga1 = Referatsleitung", dj
+    printResults("OrgaEmail =  direktorium@muenchen.de , Gertraud = Gertraud", dj
         .getSchema(), dj.simpleFind(
         "OrgaEmail",
-        " r.kom@muenchen.de",
-        "Orga1",
-        "Referatsleitung"));
+        "direktorium@muenchen.de",
+        "Gertraud",
+        "Gertraud"));
+    
     printResults("OrgaEmail = r.kom@muenchen.de , Orga3 = Referatsleitung", dj
         .getSchema(), dj.simpleFind(
         "OrgaEmail",
         "  r.kom@muenchen.de",
         "Orga3",
         "Referatsleitung"));
+    
     printResults(
         "Orga2 = Stadtarchiv , Referat = Direktorium",
         dj.getSchema(),
         dj.simpleFind("Orga2", "Stadtarchiv", "Referat", "Direktorium"));
+    
     printResults(
         "Referat = Sozialreferat , Nachname = Me\\)er",
         dj.getSchema(),
@@ -1759,7 +1799,7 @@ public class LDAPDatasource implements Datasource
         "Lutz"));
     printResults("Nachname = *utz, Vorname = Chris*", dj.getSchema(), dj
         .simpleFind("Nachname", "Lutz", "Vorname", "Chris*"));
-    printResults("Nachname = *utz, Vorname = Chris*", dj.getSchema(), dj
+    printResults("Nachname = Benkmann, Vorname = Matthias", dj.getSchema(), dj
         .simpleFind("Nachname", "Benkmann", "Vorname", "Matthias"));
 
   }
