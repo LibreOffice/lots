@@ -12,6 +12,7 @@
  * 16.11.2005 | BNK | Ctrl-Shift-F
  *                  | besser kommentiert
  * 24.11.2005 | BNK | escapen von Werten in LDAP-Suchanfragen
+ * 28.11.2005 | BNK | mehr testing und fixing und optimizing
  * -------------------------------------------------------------------
  *
  * @author Max Meier (D-III-ITD 5.1)
@@ -469,7 +470,7 @@ public class LDAPDatasource implements Datasource
           searchFilter,
           SearchControls.SUBTREE_SCOPE,
           true,
-          timeout);
+          endTime);
 
       Vector results = new Vector();
 
@@ -933,7 +934,6 @@ public class LDAPDatasource implements Datasource
                * der tiefer im Baum liegt und einem (negativen) Level, der die selbe Nachfahrenebene
                * selektiert wie der Level des negativen (currentPath).
                * Achtung: Es ist möglich, dass der neu-gebildete Level 0 ist.
-               * TODO checken, ob das irgendwo probleme macht
                */
               RelativePath newPath = new RelativePath(currentName.size() - currentPath.name.size() + currentPath.relative, currentName);
               mergedNegativeSubtreePaths.add(newPath);
@@ -959,44 +959,52 @@ public class LDAPDatasource implements Datasource
       mergedNegativeSubtreePaths = mergedNegativeList;
     }
 
-    if (searchFilter.equals("") //TODO: die Listen sollten nie null sein (siehe vorherige TODOs) entsprechend muss hier auf isEmpty() getestet werden
+    if (searchFilter.equals("") //TOD0: die Listen sollten nie null sein (siehe vorherige TODOs) entsprechend muss hier auf isEmpty() getestet werden
         && mergedPositiveSubtreePathLists == null 
         && mergedNegativeSubtreePaths == null)
     {
       return new QueryResultsList(new Vector(0));
     }
-
-    List positiveSubtreeStrings = new Vector();
-//TODO: Wenn mergedNegativeSubtreePaths nicht leer ist, dann interessieren mich die positiven hier doch gar nicht mehr, also folgenden Code-Block in den Fall dass mergedNSP leer ist hineinverschieben
-    // create Strings from Names
-    if (positiveSubtreePathLists.size() == 0)
-    {
-      positiveSubtreeStrings.add("");
-    }
-    else
-    {
-
-      for (int n = 0; n < mergedPositiveSubtreePathLists.size(); n++)
-      {
-        Name currentName = (Name) mergedPositiveSubtreePathLists.get(n);
-        positiveSubtreeStrings.add(currentName.toString());
-      }
-
-    }
-
-    Iterator subtreeIterator = positiveSubtreeStrings.iterator();
-
+    
     List currentResultList = new Vector();
 
-    if (negativeSubtreePathLists.size() == 0) //TODO: besser insgesamt auf havePositiveConstraints und haveNegativeConstrainst Booleans umstellen, anstatt die size zu überprüfen. Könnte zum Irrtum verleiten, dass hier  mergedNegativeSubtreePaths getestet werden sollte, was aber nicht stimmt, da wenn die mergedListe leer ist, eine leere Ergebnisliste geliefert werden muss, wenn es positive einschränkungen gibt
+    /* 
+     * TOD0: besser insgesamt auf havePositiveConstraints und haveNegativeConstrainst 
+     * Booleans umstellen, anstatt die size zu überprüfen. Könnte zum Irrtum verleiten, 
+     * dass hier  mergedNegativeSubtreePaths getestet werden sollte, was aber nicht stimmt,
+     * da wenn die mergedListe leer ist, eine leere Ergebnisliste geliefert werden muss, 
+     * wenn es positive einschränkungen gibt. 
+     */
+    if (negativeSubtreePathLists.size() == 0) 
     {
+      
+      List positiveSubtreeStrings = new Vector();
+      
+      // create Strings from Names
+      if (positiveSubtreePathLists.size() == 0)
+      {
+        positiveSubtreeStrings.add("");
+      }
+      else
+      {
+        
+        for (int n = 0; n < mergedPositiveSubtreePathLists.size(); n++)
+        {
+          Name currentName = (Name) mergedPositiveSubtreePathLists.get(n);
+          positiveSubtreeStrings.add(currentName.toString());
+        }
+        
+      }
+      
+      Iterator subtreeIterator = positiveSubtreeStrings.iterator();
+      
       // allgemeine Suche
-
+      
       while (subtreeIterator.hasNext())
       {
-
+        
         if (System.currentTimeMillis() > endTime) throw new TimeoutException();
-
+        
         String subTree = (String) subtreeIterator.next();
         String comma = ",";
         if (subTree.equals("")) comma = "";
@@ -1005,7 +1013,7 @@ public class LDAPDatasource implements Datasource
             searchFilter,
             SearchControls.SUBTREE_SCOPE,
             true,
-            timeout); //FIXME: timeout muss vorher neu berechnet werden aus endTime, besser nur endTime an die Funktion übergeben, TODO alle vorkommen von timeout überprüfen, ob nicht der selbe Fehler gemacht wurde
+            endTime); 
 
         while (currentResults.hasMoreElements())
         {
@@ -1018,7 +1026,7 @@ public class LDAPDatasource implements Datasource
     }
     else
     { // Breitensuche ausgehend von den Knoten der mergedNegativeSubtreePaths
-      for (int n = 0; n < mergedNegativeSubtreePaths.size(); n++) //TODO: Iterator verwenden
+      for (int n = 0; n < mergedNegativeSubtreePaths.size(); n++) //TOD0 Iterator verwenden
       {
 
         if (System.currentTimeMillis() > endTime) throw new TimeoutException();
@@ -1039,7 +1047,7 @@ public class LDAPDatasource implements Datasource
         String comma = ",";
         if (currentPath.equals("")) comma = "";
 
-        for (int m = 0; m < currentSearch.size(); m++) //TODO Iterator verwenden
+        for (int m = 0; m < currentSearch.size(); m++) //TOD0 Iterator verwenden
         {
           SearchResult sr = (SearchResult) currentSearch.get(m);
           String name = checkQuotes(sr.getName());
@@ -1115,30 +1123,17 @@ public class LDAPDatasource implements Datasource
    */
   private String generateKey(List values)
   {
-
-    String key = "";
-
-    for (int n = 0; n < values.size(); n++) //TODO Iterator verwenden
+    StringBuffer key = new StringBuffer();
+    Iterator iter = values.iterator();
+    while (iter.hasNext())
     {
-      if (n == 0)
-      {
-        Object value = values.get(n);
-        if (value == null)
-        {
-          key = "";
-        }
-        else
-        {
-          key = (String) values.get(n); //TODO: Ouch, wie wär's einfach mit "value"
-        }
-      }
-      else
-      {
-        key = key + SEPARATOR + (String) values.get(n);
-      }
+      String value = (String)iter.next();
+      if (value != null)
+        key.append(value);
+      if (iter.hasNext()) key.append(SEPARATOR);
     }
-
-    return key;
+    
+    return key.toString();
   }
 
   /**
@@ -1197,6 +1192,43 @@ public class LDAPDatasource implements Datasource
     return query;
   }
 
+  
+  private static class CacheKey
+  {
+    private static final String SEPARATOR = "/{%§";
+    private String hash;
+    
+    public CacheKey(Name attributePath, String[] searchAttributes)
+    {
+      StringBuffer buf = new StringBuffer();
+      buf.append(searchAttributes.length);
+      buf.append(SEPARATOR);
+      buf.append(attributePath.toString());
+      for (int n = 0; n < searchAttributes.length; ++n)
+      {
+        buf.append(searchAttributes[n]);
+      }
+      hash = buf.toString();
+    }
+    
+    public int hashCode()
+    {
+      return hash.hashCode();
+    }
+    
+    public boolean equals(Object other)
+    {
+      try{
+        CacheKey otherKey = (CacheKey) other;
+        return hash.equals(otherKey.hash);
+      }catch(Exception e)
+      {
+        return false;
+      }
+    }
+    
+  }
+  
   /**
    * vervollständigt SearchResults um Daten aus dem Verzeichnis und gibt ein
    * Dataset zurück
@@ -1216,187 +1248,151 @@ public class LDAPDatasource implements Datasource
     Map relation = new HashMap();
 
     DirContext ctx = null;
-    Name pathName;
-    Name rootName;
-
-    try
-    {
-
-      String tempPath = searchResult.getName();
-
-      tempPath = checkQuotes(tempPath);
-
-      ctx = new InitialLdapContext(properties, null);
-
-      NameParser nameParser = ctx.getNameParser("");
-      pathName = nameParser.parse(tempPath);
-      rootName = nameParser.parse(baseDN); //TODO: Das ist eine Konstante, nur einmal berechnen (ausser, dass dies nur mit funktionierender Netzanbindung moeglich ist). Testen mit rausgezogenem Netzkabel
-
-    }
-    catch (NamingException e)
-    {
+    try{
+      Name pathName;
+      Name rootName;
+      
       try
       {
-        ctx.close(); //TODO: lieber in einen finally block für die Gesamtmethode.Evtl auch in anderen Methoden
+        
+        String tempPath = searchResult.getName();
+        
+        tempPath = checkQuotes(tempPath);
+        
+        ctx = new InitialLdapContext(properties, null);
+        
+        NameParser nameParser = ctx.getNameParser("");
+        pathName = nameParser.parse(tempPath);
+        rootName = nameParser.parse(baseDN); //TOD0: Das ist eine Konstante, nur einmal berechnen (ausser, dass dies nur mit funktionierender Netzanbindung moeglich ist). Testen mit rausgezogenem Netzkabel
+        
       }
-      catch (NamingException e2)
+      catch (NamingException e)
       {
+        throw new TimeoutException(
+            "Fehler beim Zugriff auf das LDAP-Verzeichnis.", e);
       }
-      throw new TimeoutException(
-          "Fehler beim Zugriff auf das LDAP-Verzeichnis.", e);
-    }
-
-    Iterator keys = columnDefinitions.keySet().iterator(); //TODO: Eigentlich soll hier doch über die Map.Entrys iteriert werden
-
-    while (keys.hasNext())
-    {
-
-      if (System.currentTimeMillis() > endTime) throw new TimeoutException();
-
-      String currentKey = (String) keys.next();
-      ColumnDefinition currentAttribute = (ColumnDefinition) columnDefinitions.get(currentKey);
-
-      int relativePath = currentAttribute.relativePath;
-      String attributeName = currentAttribute.attributeName;
-
-      String value = null;
-
-      if (relativePath == 0)
-      { // value can be found in the attributes
-
-        try
-        {
-          value = (String) attributes.get(attributeName).get();
-        }
-        catch (NamingException e)
-        {
-          // do nothing (Attributwert nicht vorhanden und bleibt somit 'null')
-        }
-        catch (NullPointerException e)
-        {
-          // do nothing (Attributwert nicht vorhanden und bleibt somit 'null')
-        }
-
-      }
-      else
-      { // value is stored somewhere else in the directory
-
-        Name attributePath = (Name) rootName.clone();
-
-        try
-        {
-
-          if (relativePath < 0)
-          { // Pfad relativ zum aktuellen Element
-
-            attributePath.addAll(pathName.getPrefix(pathName.size()
-                                                    + relativePath));
-
-          }
-          else
-          { // relativePath > 0, Pfad relativ zur Wurzel
-
-            attributePath.addAll(pathName.getPrefix(relativePath
-                                                    - rootName.size()));
-
-          }
-
-          class CacheKey //TODO raus aus dieser Methode schieben
-          {
-
-            private String hash;
-
-            public CacheKey(Name attributePath, String[] searchAttributes)
-            {
-              hash = attributePath.toString(); //TODO: Separatoren zwischen die Teilstrings, searchAttributes.length auch zu hash hinzufügen
-              for (int n = 0; n < searchAttributes.length; n++)
-              {
-                hash += searchAttributes[n]; //TODO: StringBuffer verwenden wg. Performance
-              }
-            }
-
-            public int hashCode()
-            {
-              return hash.hashCode();
-            }
-
-            public boolean equals(Object other)
-            {
-              CacheKey otherKey = (CacheKey) other; //TODO: Exceptions abfangen
-              return hash.equals(otherKey.hash);
-            }
-
-          }
-
-          String[] searchAttributes = { attributeName };
-
-          Attributes foundAttributes;
-
-          CacheKey key = new CacheKey(attributePath, searchAttributes);
-          foundAttributes = (Attributes) attributeCache.get(key);
-
-          if (foundAttributes == null)
-          {
-            foundAttributes = ctx //TODO: Ist das sinnvoll, nur einzelne Attribute rauszuholen und zu cachen? Wäre es nicht besser, den ganzen Knoten samt aller Attribute zu holen und zu cachen? Das ganze sollte in eine Cache-Klasse ausgelagert werden, an die die Anfrage weitergeleitet wird, so dass dieses Verhalten (wie auch das handeln einer maximalgroesse des Cache) an einem Ort gemanaget wird
-                .getAttributes(attributePath, searchAttributes); //TODO: Ein "searchAttributes" zusammenstellen am Anfang auf Basis des Schemas und überall verwenden, um Suchen einzuschränken
-            attributeCache.put(key, foundAttributes);
-          }
-
-          Attribute foundAttribute = foundAttributes.get(attributeName);
-
-          if (foundAttribute != null)
-          {
-            value = (String) foundAttribute.get();
-          }
-
-        }
-        catch (NamingException e)
-        {
-          // do nothing (Attributwert nicht vorhanden und bleibt somit 'null')
-        }
-        catch (NullPointerException e)
-        {
-          // do nothing (Attributwert nicht vorhanden und bleibt somit 'null')
-        }
-        catch (IndexOutOfBoundsException e)
-        {
-          // auch hier: do nothing (Attributwert befindet sich unterhalb der
-          // aktuellen lhmPerson)
-        }
-
-      }
-
-      if (value != null)
+      
+      Iterator columnDefIter = columnDefinitions.entrySet().iterator();
+      
+      while (columnDefIter.hasNext())
       {
-        String lineSeparator = currentAttribute.lineSeparator;
-        if (lineSeparator != null)
-        {
-          value = value.replaceAll(lineSeparator, "\n");
+        
+        if (System.currentTimeMillis() > endTime) throw new TimeoutException();
+        
+        Map.Entry columnDefEntry = (Map.Entry)columnDefIter.next();
+        ColumnDefinition currentAttribute = (ColumnDefinition)columnDefEntry.getValue();
+        
+        int relativePath = currentAttribute.relativePath;
+        String attributeName = currentAttribute.attributeName;
+        
+        String value = null;
+        
+        if (relativePath == 0)
+        { // value can be found in the attributes
+          
+          try
+          {
+            value = (String) attributes.get(attributeName).get();
+          }
+          catch (NamingException e)
+          {
+            // do nothing (Attributwert nicht vorhanden und bleibt somit 'null')
+          }
+          catch (NullPointerException e)
+          {
+            // do nothing (Attributwert nicht vorhanden und bleibt somit 'null')
+          }
+          
         }
-        relation.put(currentKey, value);
+        else
+        { // value is stored somewhere else in the directory
+          
+          Name attributePath = (Name) rootName.clone();
+          
+          try
+          {
+            
+            if (relativePath < 0)
+            { // Pfad relativ zum aktuellen Element
+              
+              attributePath.addAll(pathName.getPrefix(pathName.size()
+                  + relativePath));
+              
+            }
+            else
+            { // relativePath > 0, Pfad relativ zur Wurzel
+              
+              attributePath.addAll(pathName.getPrefix(relativePath
+                  - rootName.size()));
+            }
+            
+            String[] searchAttributes = { attributeName };
+            
+            Attributes foundAttributes;
+            
+            CacheKey key = new CacheKey(attributePath, searchAttributes);
+            foundAttributes = (Attributes) attributeCache.get(key);
+            
+            if (foundAttributes == null)
+            {
+              foundAttributes = ctx //TODO: Ist das sinnvoll, nur einzelne Attribute rauszuholen und zu cachen? Wäre es nicht besser, den ganzen Knoten samt aller Attribute zu holen und zu cachen? Das ganze sollte in eine Cache-Klasse ausgelagert werden, an die die Anfrage weitergeleitet wird, so dass dieses Verhalten (wie auch das handeln einer maximalgroesse des Cache) an einem Ort gemanaget wird
+              //TODO geschwindikeitsvergleich mit/ohne Cache
+              .getAttributes(attributePath, searchAttributes); //TODO: Ein "searchAttributes" zusammenstellen am Anfang auf Basis des Schemas und überall verwenden, um Suchen einzuschränken
+              attributeCache.put(key, foundAttributes);
+            }
+            
+            Attribute foundAttribute = foundAttributes.get(attributeName);
+            
+            if (foundAttribute != null)
+            {
+              value = (String) foundAttribute.get();
+            }
+            
+          }
+          catch (NamingException e)
+          {
+            // do nothing (Attributwert nicht vorhanden und bleibt somit 'null')
+          }
+          catch (NullPointerException e)
+          {
+            // do nothing (Attributwert nicht vorhanden und bleibt somit 'null')
+          }
+          catch (IndexOutOfBoundsException e)
+          {
+            // auch hier: do nothing (Attributwert befindet sich unterhalb der
+            // aktuellen lhmPerson)
+          }
+          
+        }
+        
+        if (value != null)
+        {
+          String lineSeparator = currentAttribute.lineSeparator;
+          if (lineSeparator != null)
+          {
+            value = value.replaceAll(lineSeparator, "\n");
+          }
+          relation.put(columnDefEntry.getKey(), value);
+        }
       }
-    }
-
-    // generate Key
-    Vector keyValues = new Vector();
-//TODO Extrem ineffizient, generateKey sollte besser gleich relation übergeben kriegen (oder das ganze generatekey sollte im LDAPDataset Konstruktor erfolgen), das vorher zusammenbauen eines vectors ist schrott
-    for (int n = 0; n < keyAttributes.size(); n++)
+      
+      // generate Key
+      Vector keyValues = new Vector();
+//    TODO Extrem ineffizient, generateKey sollte besser gleich relation übergeben kriegen (oder das ganze generatekey sollte im LDAPDataset Konstruktor erfolgen), das vorher zusammenbauen eines vectors ist schrott
+      for (int n = 0; n < keyAttributes.size(); n++)
+      {
+        String currentValue = (String) relation.get(keyAttributes.get(n));
+        keyValues.add(currentValue);
+      }
+      
+      String key = generateKey(keyValues);
+      
+      return new LDAPDataset(key, relation);
+      
+    }finally
     {
-      String currentValue = (String) relation.get(keyAttributes.get(n));
-      keyValues.add(currentValue);
+      try{ctx.close();} catch(Exception e){}
     }
-
-    String key = generateKey(keyValues);
-
-    try
-    {
-      ctx.close();
-    }
-    catch (NamingException e)
-    {
-    }
-
-    return new LDAPDataset(key, relation);
   }
 
   /**
@@ -1413,7 +1409,7 @@ public class LDAPDatasource implements Datasource
    * TODO Testen
    */
   private NamingEnumeration searchLDAPPerson(String path, String filter,
-      int searchScope, boolean onlyObjectClass, long timeout)
+      int searchScope, boolean onlyObjectClass, long endTime)
       throws TimeoutException
   {
 
@@ -1421,6 +1417,8 @@ public class LDAPDatasource implements Datasource
 
     searchControls.setSearchScope(searchScope);
     
+    long timeout = endTime - System.currentTimeMillis();
+    if (timeout <= 0) throw new TimeoutException();
     if (timeout > Integer.MAX_VALUE) timeout = Integer.MAX_VALUE;
     searchControls.setTimeLimit((int) timeout);
 
@@ -1458,13 +1456,7 @@ public class LDAPDatasource implements Datasource
     }
     finally
     {
-      if (ctx != null) try
-      {
-        ctx.close();
-      }
-      catch (Exception e)
-      {
-      }
+      try{ctx.close();}catch (Exception e){}
     }
 
     return result;
@@ -1740,9 +1732,7 @@ public class LDAPDatasource implements Datasource
     // Test keys
     QueryResults qr = dj.simpleFind(
         "OrgaEmail",
-        "  r.kom@muenchen.de",
-        "Orga1",
-        "Referatsleitung");
+        "direktorium@muenchen.de");
     Iterator iter = qr.iterator();
 
     Collection keys = new Vector();
