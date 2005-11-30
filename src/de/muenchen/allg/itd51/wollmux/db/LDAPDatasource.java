@@ -13,6 +13,7 @@
  *                  | besser kommentiert
  * 24.11.2005 | BNK | escapen von Werten in LDAP-Suchanfragen
  * 28.11.2005 | BNK | mehr testing und fixing und optimizing
+ * 30.11.2005 | BNK | mehr testing und bugfixing
  * -------------------------------------------------------------------
  *
  * @author Max Meier (D-III-ITD 5.1)
@@ -419,7 +420,7 @@ public class LDAPDatasource implements Datasource
     return query;
   }
 
-  /* TODO testen
+  /*
    * (non-Javadoc)
    * 
    * @see de.muenchen.allg.itd51.wollmux.db.Datasource#getDatasetsByKey(java.util.Collection,
@@ -428,110 +429,102 @@ public class LDAPDatasource implements Datasource
   public QueryResults getDatasetsByKey(Collection keys, long timeout)
       throws TimeoutException
   {
+    try
+    {
+      if (keys.isEmpty()) return new QueryResultsList(new Vector(0));
 
-    if (keys.isEmpty())
-      return new QueryResultsList(new Vector(0));
-    
-    long endTime = System.currentTimeMillis() + timeout;
-
-    attributeCache.clear();
-
-    if (keyStatus == ABSOLUTE_ONLY || keyStatus == ABSOLUTE_AND_RELATIVE)
-    { // absolute Attribute vorhanden
-
-      Iterator iter = keys.iterator();
-
-      // build searchFilter
-      String searchFilter = "";
-
-      boolean first = true;
-      while (iter.hasNext())
-      {
-
-        String currentKey = (String) iter.next();
-
-        String currentSearchFilter = keyToQuery(currentKey);
-
-        if (first)
-        {
-          searchFilter = currentSearchFilter;
-          first = false;
-        }
-        else
-        {
-          searchFilter = "(|" + currentSearchFilter + searchFilter + ")";
-        }
-
-      }
-
-      // search LDAP
-      NamingEnumeration currentResults = searchLDAPPerson(
-          "",
-          searchFilter,
-          SearchControls.SUBTREE_SCOPE,
-          true,
-          endTime);
-
-      Vector results = new Vector();
-
-      while (currentResults.hasMoreElements())
-      {
-        if (System.currentTimeMillis() > endTime) throw new TimeoutException();
-        try
-        {
-          SearchResult currentResult = (SearchResult) currentResults.next();
-          Dataset dataset = getDataset(currentResult, endTime);
-          if (keyStatus == ABSOLUTE_ONLY)
-          {
-            results.add(dataset);
-          }
-          else if (keys.contains(dataset.getKey()))
-          {
-            results.add(dataset);
-          }
-        }
-        catch (NamingException e)
-        {
-          Logger.error("Error in LDAP-Directory.", e);
-        }
-
-      }
-
-      // results.trimToSize();
+      long endTime = System.currentTimeMillis() + timeout;
 
       attributeCache.clear();
 
-      return new QueryResultsList(results);
+      if (keyStatus == ABSOLUTE_ONLY || keyStatus == ABSOLUTE_AND_RELATIVE)
+      { // absolute Attribute vorhanden
 
-    }
+        Iterator iter = keys.iterator();
 
-    if (keyStatus == RELATIVE_ONLY)
-    { // nur relative Attribute
-      List results = new Vector(keys.size());
+        // build searchFilter
+        String searchFilter = "";
 
-      Iterator iter = keys.iterator();
-      while (iter.hasNext())
-      {
-        if (System.currentTimeMillis() > endTime) throw new TimeoutException();
-        List query = keyToFindQuery((String) iter.next());
-        QueryResults res = find(query, endTime);
-        Iterator iter2 = res.iterator();
-        while (iter2.hasNext())
+        while (iter.hasNext())
+        {
+
+          String currentKey = (String) iter.next();
+          String currentSearchFilter = keyToQuery(currentKey);
+          searchFilter = searchFilter + currentSearchFilter;
+        }
+        searchFilter = "(|" + searchFilter + ")";
+
+        // search LDAP
+        NamingEnumeration currentResults = searchLDAP(
+            "",
+            searchFilter,
+            SearchControls.SUBTREE_SCOPE,
+            true,
+            endTime);
+
+        Vector results = new Vector();
+
+        while (currentResults.hasMoreElements())
         {
           if (System.currentTimeMillis() > endTime)
             throw new TimeoutException();
-          results.add(iter2.next());
+          try
+          {
+            SearchResult currentResult = (SearchResult) currentResults.next();
+            Dataset dataset = getDataset(currentResult, endTime);
+            if (keyStatus == ABSOLUTE_ONLY)
+            {
+              results.add(dataset);
+            }
+            else if (keys.contains(dataset.getKey()))
+            {
+              results.add(dataset);
+            }
+          }
+          catch (NamingException e)
+          {
+            Logger.error("Error in LDAP-Directory.", e);
+          }
         }
+
+        // results.trimToSize();
+
+        return new QueryResultsList(results);
 
       }
 
-      attributeCache.clear();
+      if (keyStatus == RELATIVE_ONLY)
+      { // nur relative Attribute
+        List results = new Vector(keys.size());
 
-      return new QueryResultsList(results);
+        Iterator iter = keys.iterator();
+        while (iter.hasNext())
+        {
+          if (System.currentTimeMillis() > endTime)
+            throw new TimeoutException();
+          List query = keyToFindQuery((String) iter.next());
+          QueryResults res = find(query, endTime);
+          Iterator iter2 = res.iterator();
+          while (iter2.hasNext())
+          {
+            if (System.currentTimeMillis() > endTime)
+              throw new TimeoutException();
+            results.add(iter2.next());
+          }
+
+        }
+
+     
+        return new QueryResultsList(results);
+      }
+
+      return null;
+
     }
-
-    attributeCache.clear();
-    return null;
+    finally
+    {
+      attributeCache.clear();
+    }
   }
 
   /**
@@ -783,7 +776,7 @@ public class LDAPDatasource implements Datasource
 
     for (int n = 1; n < positiveSubtreePathLists.size(); n++) //TOD0 Iterator verwenden
     {
-//TODO diesen Code-Pfad testen
+
       RelativePaths currentSubtreePaths = (RelativePaths) positiveSubtreePathLists
           .get(n);
 
@@ -835,7 +828,6 @@ public class LDAPDatasource implements Datasource
 
     for (int n = 1; n < negativeSubtreePathLists.size(); n++)
     {
-//TODO diesen Code-Pfad testen
       List newMergedNegativeList = new Vector();
 
       /* 
@@ -882,8 +874,7 @@ public class LDAPDatasource implements Datasource
           }
 
           if (currentPath.name.size() - currentPath.relative == otherPath.name
-              .size()
-                                                                - otherPath.relative
+              .size() - otherPath.relative              
               && longer.name.startsWith(shorter.name)) 
           {
             newMergedNegativeList.add(longer);
@@ -1008,7 +999,7 @@ public class LDAPDatasource implements Datasource
         String subTree = (String) subtreeIterator.next();
         String comma = ",";
         if (subTree.equals("")) comma = "";
-        NamingEnumeration currentResults = searchLDAPPerson(
+        NamingEnumeration currentResults = searchLDAP(
             subTree + comma,
             searchFilter,
             SearchControls.SUBTREE_SCOPE,
@@ -1018,7 +1009,8 @@ public class LDAPDatasource implements Datasource
         while (currentResults.hasMoreElements())
         {
           SearchResult sr = (SearchResult) currentResults.nextElement();
-          sr.setName(checkQuotes(sr.getName()) + comma + subTree);
+          String name = checkQuotes(sr.getName());
+          sr.setName(name + (name.length()>0?comma:"") + subTree);
           currentResultList.add(sr);
         }
 
@@ -1039,23 +1031,13 @@ public class LDAPDatasource implements Datasource
 
         Name currentName = currentRelativePath.name;
         String currentPath = currentName.toString();
-        List currentSearch = bfsSearchLDAPPerson(
+        List currentSearch = searchLDAPLevel(
             currentPath,
             searchFilter,
             depth,
             endTime);
-        String comma = ",";
-        if (currentPath.equals("")) comma = "";
 
-        for (int m = 0; m < currentSearch.size(); m++) //TOD0 Iterator verwenden
-        {
-          SearchResult sr = (SearchResult) currentSearch.get(m);
-          String name = checkQuotes(sr.getName());
-          String actualPath = name + (name.length()>0?comma:"") + currentPath;
-          sr.setName(actualPath);
-          currentResultList.add(sr);
-        }
-
+        currentResultList.addAll(currentSearch);
       }
 
     }
@@ -1119,7 +1101,7 @@ public class LDAPDatasource implements Datasource
    * @param values
    * @return
    * @author Max Meier (D-III-ITD 5.1)
-   * TODO Testen
+   * TODO Als Schlüssel gleich den LDAP-Suchstring wie keyToQuery verwenden, wobei nur Level 0 Spalten dort eingebracht werden (ldapEscape beachten). Daran anhängen durch * getrennt Abwechselnd spaltennamen und wert. Daraus kann in getDatasetByKey leicht eine find-query gebaut werden.
    */
   private String generateKey(List values)
   {
@@ -1141,13 +1123,13 @@ public class LDAPDatasource implements Datasource
    * @param key
    * @return
    * @author Max Meier (D-III-ITD 5.1)
-   * TODO Testen
+   * 
    */
   private String keyToQuery(String key)
   {
 
     String[] keyValues = key.split(SEPARATOR);
-
+//TODO if keyValues.length > keyAttributes.size()
     String query = "";
     boolean first = true;
     for (int n = 0; n < keyValues.length; n++)
@@ -1165,7 +1147,7 @@ public class LDAPDatasource implements Datasource
         String currentSearchFilter = "("
                                      + attributeName
                                      + "="
-                                     + keyValues[n]
+                                     + ldapEscape(keyValues[n])
                                      + ")";
 
         if (objectClass != null)
@@ -1173,7 +1155,7 @@ public class LDAPDatasource implements Datasource
           currentSearchFilter = "(&"
                                 + currentSearchFilter
                                 + "(objectClass="
-                                + objectClass
+                                + ldapEscape(objectClass)
                                 + "))";
         }
 
@@ -1237,7 +1219,7 @@ public class LDAPDatasource implements Datasource
    * @return
    * @throws TimeoutException
    * @author Max Meier (D-III-ITD 5.1)
-   * TODO Testen
+   * 
    */
   private Dataset getDataset(SearchResult searchResult, long endTime)
       throws TimeoutException
@@ -1314,7 +1296,7 @@ public class LDAPDatasource implements Datasource
             
             if (relativePath < 0)
             { // Pfad relativ zum aktuellen Element
-              
+          
               attributePath.addAll(pathName.getPrefix(pathName.size()
                   + relativePath));
               
@@ -1335,9 +1317,9 @@ public class LDAPDatasource implements Datasource
             
             if (foundAttributes == null)
             {
-              foundAttributes = ctx //TODO: Ist das sinnvoll, nur einzelne Attribute rauszuholen und zu cachen? Wäre es nicht besser, den ganzen Knoten samt aller Attribute zu holen und zu cachen? Das ganze sollte in eine Cache-Klasse ausgelagert werden, an die die Anfrage weitergeleitet wird, so dass dieses Verhalten (wie auch das handeln einer maximalgroesse des Cache) an einem Ort gemanaget wird
+              foundAttributes = ctx //TOD0: Ist das sinnvoll, nur einzelne Attribute rauszuholen und zu cachen? Wäre es nicht besser, den ganzen Knoten samt aller Attribute zu holen und zu cachen? Das ganze sollte in eine Cache-Klasse ausgelagert werden, an die die Anfrage weitergeleitet wird, so dass dieses Verhalten (wie auch das handeln einer maximalgroesse des Cache) an einem Ort gemanaget wird
               //TODO geschwindikeitsvergleich mit/ohne Cache
-              .getAttributes(attributePath, searchAttributes); //TODO: Ein "searchAttributes" zusammenstellen am Anfang auf Basis des Schemas und überall verwenden, um Suchen einzuschränken
+              .getAttributes(attributePath, searchAttributes); //TOD0: Ein "searchAttributes" zusammenstellen am Anfang auf Basis des Schemas und überall verwenden, um Suchen einzuschränken
               attributeCache.put(key, foundAttributes);
             }
             
@@ -1378,7 +1360,7 @@ public class LDAPDatasource implements Datasource
       
       // generate Key
       Vector keyValues = new Vector();
-//    TODO Extrem ineffizient, generateKey sollte besser gleich relation übergeben kriegen (oder das ganze generatekey sollte im LDAPDataset Konstruktor erfolgen), das vorher zusammenbauen eines vectors ist schrott
+//    TOD0 Extrem ineffizient, generateKey sollte besser gleich relation übergeben kriegen (oder das ganze generatekey sollte im LDAPDataset Konstruktor erfolgen), das vorher zusammenbauen eines vectors ist schrott
       for (int n = 0; n < keyAttributes.size(); n++)
       {
         String currentValue = (String) relation.get(keyAttributes.get(n));
@@ -1396,19 +1378,24 @@ public class LDAPDatasource implements Datasource
   }
 
   /**
-   * allgemeine Suche im Directory TODO bessere Doku, alle Aufrufe checken
+   * Sucht im Teilbaum path + BASE_DN nach Knoten, auf die Suchkriterium filter
+   * passt.
    * 
-   * @param path
-   * @param filter
-   * @param searchScope
-   * @param onlyObjectClass
-   * @param timeout
-   * @return
-   * @throws TimeoutException
+   * @param path der Pfad des Startknotens. Wird mit BASE_DN konkateniert.
+   * @param filter der Suchfilter.
+   * @param searchScope SearchControls.SUBTREE_SCOPE, SearchControls.OBJECT_SCOPE oder
+   *                    SearchControls.ONELEVEL_SCOPE, um anzugeben wo gesucht werden soll.
+   * @param onlyObjectClass falls true, werden nur Knoten zurückgeliefert, deren objectClass
+   *        {@link #objectClass} entspricht.
+   * @param endTime wird die Suche nicht vor dieser Zeit beendet, wird eine TimeoutException 
+   *        geworfen
+   * @return die Suchergebnisse
+   * @throws TimeoutException falls die Suche nicht schnell genug abgeschlossen werden
+   *         konnte.
    * @author Max Meier (D-III-ITD 5.1)
-   * TODO Testen
+   *
    */
-  private NamingEnumeration searchLDAPPerson(String path, String filter,
+  private NamingEnumeration searchLDAP(String path, String filter,
       int searchScope, boolean onlyObjectClass, long endTime)
       throws TimeoutException
   {
@@ -1428,7 +1415,7 @@ public class LDAPDatasource implements Datasource
     }
     else
     {
-      filter = "(&(objectClass=" + "*" + ")" + filter + ")";
+      filter = "(&(objectClass=" + "*" + ")" + filter + ")"; //TOD0 das objectClass=* ist doch überflüssig
     }
 
     DirContext ctx = null;
@@ -1463,18 +1450,15 @@ public class LDAPDatasource implements Datasource
   }
 
   /**
-   * Breitensuche im Directory Sucht alle LDAPPersons TODO dies sind Objekte des Typs OBJECT_CLASS, nicht Persons, die auf dem angegebenen
-   * Level über dem angegebenen Pfadnamen liegen.
-   * @param path
-   * @param filter
-   * @param level
-   * @param endTime
-   * @return
-   * @throws TimeoutException
+   * Durchsucht die Nachfahren des durch path + BASE_DN bezeichneten Knotens mit Abstand
+   * level zu diesem Knoten nach Knoten, die auf die Suchanfrage filter passen.
+   * Es werden nur Objekte mit objectClass = {@link #objectClass} geliefert.
+   * @return eine List von {@link SearchResult}s.
+   * @throws TimeoutException falls die Anfrage nicht vor endTime beantwortet werden konnte.
    * @author Max Meier (D-III-ITD 5.1)
-   * TODO Testen
+   * 
    */
-  private List bfsSearchLDAPPerson(String path, String filter, int level,
+  private List searchLDAPLevel(String path, String filter, int level,
       long endTime) throws TimeoutException
   {
 
@@ -1485,7 +1469,6 @@ public class LDAPDatasource implements Datasource
 
     for (int n = 0; n < (level - 1); n++)
     {
-
       if (System.currentTimeMillis() > endTime) throw new TimeoutException();
 
       List nextSeeds = new Vector();
@@ -1500,7 +1483,7 @@ public class LDAPDatasource implements Datasource
         comma = ",";
         if (searchPath.equals("")) comma = "";
 
-        NamingEnumeration enumer = searchLDAPPerson(
+        NamingEnumeration enumer = searchLDAP(
             searchPath + comma,
             "",
             SearchControls.ONELEVEL_SCOPE,
@@ -1538,7 +1521,7 @@ public class LDAPDatasource implements Datasource
       comma = ",";
       if (currentPath.equals("")) comma = "";
 
-      NamingEnumeration enumer = searchLDAPPerson(
+      NamingEnumeration enumer = searchLDAP(
           currentPath + comma,
           filter,
           level == 0? SearchControls.OBJECT_SCOPE:SearchControls.ONELEVEL_SCOPE,
@@ -1548,7 +1531,11 @@ public class LDAPDatasource implements Datasource
       while (enumer.hasMoreElements())
       {
         if (System.currentTimeMillis() > endTime) throw new TimeoutException();
-        result.add(enumer.nextElement());
+        SearchResult sr = (SearchResult)enumer.nextElement();
+        String name = checkQuotes(sr.getName());
+        String actualPath = name + (name.length()>0?comma:"") + currentPath;
+        sr.setName(actualPath);
+        result.add(sr);
       }
 
     }
@@ -1714,7 +1701,6 @@ public class LDAPDatasource implements Datasource
    * @throws TimeoutException
    * @throws ConfigurationErrorException
    * @author Max Meier (D-III-ITD 5.1)
-   * TODO Testen
    */
   public static void main(String[] args) throws IOException,
       SyntaxErrorException, NodeNotFoundException, TimeoutException,
@@ -1747,7 +1733,7 @@ public class LDAPDatasource implements Datasource
 
     }
 
-    QueryResults qr2 = dj.getDatasetsByKey(keys, 30000);
+    QueryResults qr2 = dj.getDatasetsByKey(keys, 300000);
 
     printResults("Get and find keys: ", dj.schema, qr2);
 
@@ -1758,12 +1744,31 @@ public class LDAPDatasource implements Datasource
         "Gertraud",
         "Gertraud"));
     
-    printResults("OrgaEmail = r.kom@muenchen.de , Orga3 = Referatsleitung", dj
+    printResults("OrgaEmail = linux-client.it.dir@muenchen.de, Referat = Direktorium", dj
         .getSchema(), dj.simpleFind(
         "OrgaEmail",
-        "  r.kom@muenchen.de",
-        "Orga3",
-        "Referatsleitung"));
+        "linux-client.it.dir@muenchen.de",
+        "Referat",
+        "Direktorium"));
+    
+    printResults("Gertraud = Gertraud, Referat = Direktorium", dj
+        .getSchema(), dj.simpleFind(
+        "Gertraud",
+        "Gertraud",
+        "Referat",
+        "Direktorium"));
+    
+    printResults("OrgaKurz = D-L, UberOrga = d", dj
+        .getSchema(), dj.simpleFind(
+        "OrgaKurz",
+        "D-L",
+        "UberOrga",
+        "d"));
+    
+    printResults("UberOrga = d", dj
+        .getSchema(), dj.simpleFind(
+        "UberOrga",
+        "d"));
     
     printResults(
         "Orga2 = Stadtarchiv , Referat = Direktorium",
