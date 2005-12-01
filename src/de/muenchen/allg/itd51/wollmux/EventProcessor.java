@@ -9,6 +9,9 @@
  * Datum      | Wer | Änderungsgrund
  * -------------------------------------------------------------------
  * 24.10.2005 | LUT | Erstellung
+ * 01.12.2005 | BNK | Ausgabe des hashCode()s in den Debug-Meldungen, um Events 
+ *                  | Objekten zuordnen zu können beim Lesen des Logfiles
+ *                  | +ON_UNLOAD
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -114,12 +117,19 @@ public class EventProcessor implements XEventListener, XModifyListener,
    */
   public void notifyEvent(com.sun.star.document.EventObject docEvent)
   {
-    Logger.debug2("Incoming documentEvent: " + docEvent.EventName);
+    int code = 0;
+    try{
+      code = docEvent.Source.hashCode();
+    }catch(Exception x){}
+    Logger.debug2("Incoming documentEvent for #"+code+": " + docEvent.EventName);
     UnoService source = new UnoService(docEvent.Source);
 
     // Bekannte Event-Typen rausziehen:
     if (docEvent.EventName.compareToIgnoreCase("OnLoad") == 0)
       addEvent(new Event(Event.ON_LOAD, "", docEvent.Source));
+    
+    if (docEvent.EventName.compareToIgnoreCase("OnUnload") == 0)
+      addEvent(new Event(Event.ON_UNLOAD, "", docEvent.Source));
 
     if (docEvent.EventName.compareToIgnoreCase("OnNew") == 0)
       addEvent(new Event(Event.ON_NEW, "", docEvent.Source));
@@ -182,6 +192,15 @@ public class EventProcessor implements XEventListener, XModifyListener,
    */
   public void disposing(com.sun.star.lang.EventObject source)
   {
+   // FIXME Christoph, ist Dir nicht aufgefallen, dass diese Routine nie
+    // aufgerufen wird? Es ist nicht genug, deinen EventHandler auf den
+    // GlobalEventBroadcaster zu registrieren. Du musst ihn auch auf jedes
+    // Dokument registrieren, da z.B. disposing() nur von auf Dokumenten
+    // registrierten Handlern aufgerufen wird. Wozu hab ich dir denn meinen
+    // EventHandlerTest.java gegeben? Da hättest Du das sehen können.
+    Logger.debug2("disposing(): Removing events for #"
+                  + source.hashCode()
+                  + " from queue");
     // eventQueue durchscannen und Events mit nicht mehr erfüllten
     // Sourcen-Referenzen löschen.
     synchronized (eventQueue)
@@ -190,7 +209,11 @@ public class EventProcessor implements XEventListener, XModifyListener,
       while (i.hasNext())
       {
         Event event = (Event) i.next();
-        if (UnoRuntime.areSame(source.Source, event.getSource())) i.remove();
+        if (UnoRuntime.areSame(source.Source, event.getSource()))
+        {
+          Logger.debug2("Removing " + event);
+          i.remove();
+        }
       }
     }
 

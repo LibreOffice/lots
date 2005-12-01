@@ -9,6 +9,10 @@
  * Datum      | Wer | Änderungsgrund
  * -------------------------------------------------------------------
  * 24.10.2005 | LUT | Erstellung
+ * 01.12.2005 | BNK | +on_unload() das die Toolbar neu erzeugt (böser Hack zum 
+ *                  | Beheben des Seitenansicht-Toolbar-Verschwindibus-Problems)
+ *                  | Ausgabe des hashCode()s in den Debug-Meldungen, um Events 
+ *                  | Objekten zuordnen zu können beim Lesen des Logfiles
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -23,8 +27,9 @@ import java.net.URL;
 import java.util.Iterator;
 
 import com.sun.star.awt.XWindow;
+import com.sun.star.frame.XController;
 import com.sun.star.frame.XFrame;
-import com.sun.star.uno.Exception;
+import com.sun.star.lang.DisposedException;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
 
@@ -68,12 +73,21 @@ public class EventHandler
    */
   public static boolean processEvent(Event event)
   {
-    Logger.debug("Bearbeiten des Events: " + event);
+    int code = 0;
+    try{
+      code = event.getSource().hashCode();
+    }catch(java.lang.Exception x){}
+    Logger.debug("Bearbeiten des Events: " + event+ " for #"+code);
     try
     {
       if (event.getEvent() == Event.ON_LOAD)
       {
         return on_load(event);
+      }
+      
+      if (event.getEvent() == Event.ON_UNLOAD)
+      {
+        return on_unload(event);
       }
 
       if (event.getEvent() == Event.ON_NEW)
@@ -303,6 +317,59 @@ public class EventHandler
     return EventProcessor.processTheNextEvent;
   }
 
+  private static boolean on_unload(Event event) throws EndlessLoopException,
+  WMCommandsFailedException
+  {
+    // FIXME Christoph, die Toolbar verschwindet wenn umgeschaltet wird auf
+    // Seitenansicht. Ich habe, um dies zu beheben diesen on_unload() Handler
+    // eingeführt weil es der einzige Event ist, der zur Zeit bei diesem Wechsel
+    // erfasst wird. Dies ist allerdings unsauber. 
+    // Es ist ohnehin eine
+    // gute Frage, wieso ein on_unload() Event produziert wird bei Umschalten
+    // auf die Seitenansicht. Vielleicht ist das ein Bug in OOo?
+    // Die saubere Lösung wäre, den jeweiligen
+    // XController des Dokuments zu überwachen und auf sein disposing() zu
+    // reagieren. Überhaupt sollte vermutlich für die Toolbar-bezogenen Sachen
+    // mehr auf den Controller geschaut werden. Immerhin sind die Toolbars nicht
+    // am Model, sondern am Frame (der eigentlich mit dem Model nichts zu tun
+    // hat, sondern nur mit dem Controller). Christoph, überdenk das ganze
+    // nochmal. Ich denke du wirst auch auf die jeweiligen Controller EventHandler
+    // registrieren und auf disposing() reagieren müssen, um das Erzeugen der
+    // Toolbar in den gewünschten Fällen korrekt anstossen zu können.
+    UnoService source = new UnoService(event.getSource());
+    if (source.supportsService("com.sun.star.text.TextDocument"))
+    {
+      XController controller = null;
+      try{
+        controller = source.xModel().getCurrentController();
+      }
+      catch (DisposedException x)
+      {
+        // FIXME Ganz übler Hack. DisposedException abfangen ist keine Lösung
+        // sondern versteckt nur das Problem. Die DisposedException würde gar
+        // nicht auftreten, wenn (siehe oben) nicht der ON_UNLOAD Event
+        // misbraucht würde um das Seitenansicht-Problem zu lösen.
+        // Evtl. liesse sich auch noch über den OnPrepareUnload Event oder
+        // den OnPrepareViewClosing Event (beide kommen im Seitenansichtswechsel 
+        // nicht) dafür sorgen, dass der on_unload Handler im Falle eines wirklichen
+        // Schliessen des Dokuments nicht zum Zuge kommt.
+        // Vielleicht wäre es nicht schlecht, eine HashMap zu führen, die Dokumente
+        // auf einen Status mappt. In diesem Status könnte dann transportiert werden,
+        // ob das Objekt noch lebt oder evtl. am Absterben ist. 
+      }
+        
+      
+      if (controller != null)
+      {
+        XFrame frame = controller.getFrame();
+        MenuList.generateToolbarEntries(WollMux.getWollmuxConf(), WollMux
+            .getXComponentContext(), frame);
+      }
+    }
+    return EventProcessor.processTheNextEvent;
+  }
+  
+  
   private static boolean on_initialize() throws NodeNotFoundException,
       TimeoutException, ConfigurationErrorException,
       UnsupportedOperationException, java.lang.IllegalArgumentException,

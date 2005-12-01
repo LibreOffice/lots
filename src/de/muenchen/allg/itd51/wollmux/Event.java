@@ -9,6 +9,7 @@
  * Datum      | Wer | Änderungsgrund
  * -------------------------------------------------------------------
  * 24.10.2005 | LUT | Erstellung
+ * 01.12.2005 | BNK | +ON_UNLOAD (mit Nummer 70, folgen die Nummern irgendeinem System?)
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -57,6 +58,8 @@ public class Event
   public static final int ON_SELECTION_CHANGED = 50;
 
   public static final int ON_INITIALIZE = 60;
+  
+  public static final int ON_UNLOAD = 70;
 
   // private Felder:
 
@@ -92,6 +95,10 @@ public class Event
     if (event == ON_LOAD)
     {
       return "ON_LOAD";
+    }
+    if (event == ON_UNLOAD)
+    {
+      return "ON_UNLOAD";
     }
     if (event == ON_NEW)
     {
