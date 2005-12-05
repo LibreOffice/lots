@@ -18,6 +18,7 @@
  * 09.11.2005 | LUT | + Logfile wird jetzt erweitert (append-modus)
  *                    + verwenden des Konfigurationsparameters SENDER_SOURCE
  *                    + Erster Start des wollmux über wm_configured feststellen.
+ * 05.12.2005 | BNK | line.separator statt \n                 |  
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -253,7 +254,10 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
       // Auswertung von LOGGING_MODE und erste debug-Meldungen loggen:
       setLoggingMode(wollmuxConf);
       Logger.debug("StartupWollMux");
-      Logger.debug("Build-Info:\n\n" + getBuildInfo("          "));
+      Logger.debug("Build-Info:"
+                   + System.getProperty("line.separator")
+                   + System.getProperty("line.separator")
+                   + getBuildInfo("          "));
       Logger.debug("wollmuxConfFile = " + wollmuxConfFile.toString());
 
       // VisibleTextFragmentList erzeugen
@@ -310,7 +314,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
             .openStream()));
         for (String l = null; (l = in.readLine()) != null;)
         {
-          buildInfo += insertChars + l + "\n";
+          buildInfo += insertChars + l + System.getProperty("line.separator");
         }
         return buildInfo;
       }

@@ -18,6 +18,7 @@
  *                  | "critical" -> "error"
  * 02.11.2005 | BNK | LOG aus Default-Modus
  * 24.11.2005 | BNK | In init() das Logfile nicht löschen.
+ * 05.12.2005 | BNK | line.separator statt \n
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -185,7 +186,7 @@ public class Logger
    */
   public static void error(String msg)
   {
-    if (mode >= ERROR) println("ERROR: " + msg + "\n");
+    if (mode >= ERROR) println("ERROR: " + msg + System.getProperty("line.separator"));
   }
 
   /**
@@ -224,7 +225,7 @@ public class Logger
    */
   public static void log(String msg)
   {
-    if (mode >= LOG) println("LOG: " + msg + "\n");
+    if (mode >= LOG) println("LOG: " + msg + System.getProperty("line.separator"));
   }
 
   /**
@@ -248,7 +249,7 @@ public class Logger
    */
   public static void debug(String msg)
   {
-    if (mode >= DEBUG) println("DEBUG: " + msg + "\n");
+    if (mode >= DEBUG) println("DEBUG: " + msg + System.getProperty("line.separator"));
   }
 
   /**
@@ -275,7 +276,7 @@ public class Logger
    */
   public static void debug2(String msg)
   {
-    if (mode >= ALL) println("DEBUG2: " + msg + "\n");
+    if (mode >= ALL) println("DEBUG2: " + msg + System.getProperty("line.separator"));
   }
 
   /**
