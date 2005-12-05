@@ -4,7 +4,6 @@ import com.sun.star.beans.PropertyValue;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
-import de.muenchen.allg.itd51.wollmux.Logger;
 /**
  * 
  * Contains misc helper methods.
@@ -104,11 +103,9 @@ public class LimuxHelper
    public static String getProperty(ConfigThingy ct, String label, String def)
    {
      String result = def;
-     ConfigThingy x = null;
      try
      {
-       result = ct.query(label).toString();
-       x = ct.getByChild(label);
+       result = ct.get(label).toString();
      }
      catch (NodeNotFoundException e)
      {

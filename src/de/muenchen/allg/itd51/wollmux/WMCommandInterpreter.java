@@ -469,8 +469,8 @@ public class WMCommandInterpreter
         WMInsertField insertField = new WMInsertField(
             createTextCursorByBookmark(bookmark).xTextRange());
         UnoService insCurs = insertField.createInsertCursor();
-        insCurs.xTextCursor().setString(
-            "Build-Info:\n" + WollMux.getBuildInfo(""));
+        insCurs.xTextCursor()
+            .setString("Build-Info: " + WollMux.getBuildInfo());
 
         insertField.hideMarks();
       }

@@ -30,7 +30,7 @@
 
 	<property name="COMPONENT" value="WollMux" />
 	<property name="VERSION" value="0.9" />
-	<property name="PKG_NAME" value="${COMPONENT}-${VERSION}.uno.pkg" />
+	<property name="PKG_NAME" value="${COMPONENT}.uno.pkg" />
 	<property name="BUILD_INFO_FILE" value="buildinfo" />
 	<property name="LOGO" value="wollmux.jpg" />
 
@@ -102,17 +102,19 @@
 	<target name="buildinfo">
 		<exec executable="svn" output="${BUILD_INFO_FILE}" failifexecutionfails="false" failonerror="false">
 			<arg line="info ../.." />
+			<env key="LC_MESSAGES" value="en_US" />
 		</exec>
-		<loadfile property="svn_info" srcfile="${BUILD_INFO_FILE}" encoding="ISO-8859-1" failonerror="false">
+		<loadfile property="revision" srcfile="${BUILD_INFO_FILE}" failonerror="false">
 			<filterchain>
-				<headfilter skip="1" />
+				<linecontains>
+					<contains value="Revision: " />
+				</linecontains>
+				<deletecharacters chars="\r" />
+				<deletecharacters chars="\n" />
 			</filterchain>
 		</loadfile>
 		<echo message="" file="${BUILD_INFO_FILE}" />
-		<echo file="${BUILD_INFO_FILE}">Paketversion: ${PKG_NAME}
-
-Subversion-Build-Info:
-${svn_info}</echo>
+		<echo file="${BUILD_INFO_FILE}">Paketversion: ${VERSION}, ${revision}</echo>
 	</target>
 
 	<!-- Das Target jarfile erzeugt die Java-Komponente SenderBox -->
