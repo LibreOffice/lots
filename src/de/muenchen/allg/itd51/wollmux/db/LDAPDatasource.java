@@ -16,6 +16,7 @@
  * 30.11.2005 | BNK | mehr testing und bugfixing
  * 02.12.2005 | BNK | Schlüssel umgestellt und dadurch robuster und 
  *                  | effizienter gemacht 
+ * 05.12.2005 | BNK | Schlüssel mit RE überprüfen und ignorieren falls kein Match
  * -------------------------------------------------------------------
  *
  * @author Max Meier (D-III-ITD 5.1)
@@ -124,6 +125,11 @@ public class LDAPDatasource implements Datasource
    */
   private static final Pattern ATTRIBUTE_RE = Pattern
       .compile("^[a-zA-Z]+$");
+  
+  /** Regex zum Checken, ob ein Schlüssel für die LDAP-Datasource legal ist.
+   */
+  private static final Pattern KEY_RE = Pattern
+      .compile("^(\\(&(\\([^()=]+[^()]*\\))+\\))?"+KEY_SEPARATOR_0_NON_0_RE+"([a-zA-Z_][a-zA-Z0-9_]*=.*"+SEPARATOR+")?$");
 
 
   /** temporärer cache für relative Attribute (wird bei jeder neuen Suche neu
@@ -470,11 +476,12 @@ public class LDAPDatasource implements Datasource
 
         while (iter.hasNext())
         {
-
           String currentKey = (String) iter.next();
+          if (!KEY_RE.matcher(currentKey).matches()) continue;
           String[] ks = currentKey.split(KEY_SEPARATOR_0_NON_0_RE,2);
           searchFilter = searchFilter + ks[0];
         }
+        if (searchFilter.length() == 0) return new QueryResultsList(new Vector(0));
         searchFilter = "(|" + searchFilter + ")";
 
         // search LDAP
