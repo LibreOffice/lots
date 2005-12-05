@@ -104,6 +104,23 @@ public class DatasourceJoiner
    *         auftritt, der die Arbeit des DJ unmöglich macht, wie z.B.
    *         wenn die Datenquelle mainSourceName in der
    *         joinConf fehlt und gleichzeitig kein Cache verfügbar ist.
+   * TODO Ein Argument hinzufügen vom Typ DatasourceJoiner.Status, das 
+   * Informationen darüber enthält ob Daten nicht mit dem LDAP abgeglichen
+   * werden konnten, weil ihr Schlüssel nicht gefunden wurde. Damit kann
+   * dann eine entsprechende Message Box gebracht werden.
+   * Es sollte irgendeine Markierung dieser Datensätze geben, damit der
+   * Benutzer weiss, welche nicht mehr mit dem LDAP abgeglichen werden.
+   * Dürfte aber schwierig sein, dies in die bestehenden Dialoge zu
+   * integrieren. Eventuell kann auch die Message Box alle derartigen
+   * Datensätze auflisten, z.B. "Die folgenden Datensätze konnten nicht
+   * aus der Datenbank aktualisiert werden. Wenn dieses Problem nicht temporärer
+   * Natur ist, sollten sie diese Datensätze aus ihrer Absenderliste löschen
+   * und neu hinzufügen: ...." 
+   * Eventuell ist es sinnvoll, Datensätze, deren Schlüssel
+   * nicht mehr im LDAP gefunden wurden ganz umzuwandeln in LOS-only Datensätze.
+   * Dies darf natürlich nur dann erfolgen, wenn der Grund dafür, dass sie
+   * nicht aktualisiert werden konnten nicht in einer fehlenden Datenbank oder
+   * einem Timeout liegt.
    */
   public DatasourceJoiner(ConfigThingy joinConf, String mainSourceName, File losCache, URL context)
   throws ConfigurationErrorException

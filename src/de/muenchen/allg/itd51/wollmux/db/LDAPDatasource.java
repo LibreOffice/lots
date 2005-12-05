@@ -14,6 +14,8 @@
  * 24.11.2005 | BNK | escapen von Werten in LDAP-Suchanfragen
  * 28.11.2005 | BNK | mehr testing und fixing und optimizing
  * 30.11.2005 | BNK | mehr testing und bugfixing
+ * 02.12.2005 | BNK | Schlüssel umgestellt und dadurch robuster und 
+ *                  | effizienter gemacht 
  * -------------------------------------------------------------------
  *
  * @author Max Meier (D-III-ITD 5.1)
@@ -28,6 +30,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -80,6 +84,12 @@ public class LDAPDatasource implements Datasource
 
   /** Separator zur Schluesselerzeugung aus mehreren Schluesselwerten*/
   private final static String SEPARATOR = "&:=&:%";
+  
+  /**
+   * Trennt den ersten Teil des Schlüssels, der den Pfaden mit Level 0
+   * entspricht vom Rest des Schlüssels
+   */
+  private static final String KEY_SEPARATOR_0_NON_0_RE = "==%§%==";
 
   /** Map von query-Strings auf LDAP-Attributnamen */
   private Map columnDefinitions = new HashMap();
@@ -114,6 +124,7 @@ public class LDAPDatasource implements Datasource
    */
   private static final Pattern ATTRIBUTE_RE = Pattern
       .compile("^[a-zA-Z]+$");
+
 
   /** temporärer cache für relative Attribute (wird bei jeder neuen Suche neu
   * angelegt) */
@@ -288,7 +299,7 @@ public class LDAPDatasource implements Datasource
         }
 
         
-        ColumnDefinition columnAttr = new ColumnDefinition(relativePath,
+        ColumnDefinition columnAttr = new ColumnDefinition(spalte, relativePath,
             attributeName);
         columnAttr.objectClass = objectClass;
         columnAttr.lineSeparator = lineSeparator;
@@ -372,6 +383,11 @@ public class LDAPDatasource implements Datasource
      */
     int relativePath;
 
+    /**
+     * Name der Spalte.
+     */
+    String columnName;
+    
     /** Attributname im LDAP*/
     String attributeName = null;
 
@@ -381,8 +397,9 @@ public class LDAPDatasource implements Datasource
     /** line separator */
     String lineSeparator;
 
-    ColumnDefinition(int relativePath, String attributeName)
+    ColumnDefinition(String columnName, int relativePath, String attributeName)
     {
+      this.columnName = columnName;
       this.relativePath = relativePath;
       this.attributeName = attributeName;
     }
@@ -410,12 +427,16 @@ public class LDAPDatasource implements Datasource
    */
   private List keyToFindQuery(String key)
   {
-    String[] keyValues = key.split(SEPARATOR);
+    String[] ks = key.split(KEY_SEPARATOR_0_NON_0_RE, 2);
+    ks = ks[1].split(SEPARATOR);
+    
+    List query = new Vector(ks.length);
 
-    List query = new Vector(keyValues.length);
-
-    for (int n = 0; n < keyValues.length; n++)
-      query.add(new QueryPart((String) keyAttributes.get(n), keyValues[n]));
+    for (int i = 0; i < ks.length; ++i)
+    {
+      String[] q = ks[i].split("=",2);
+      query.add(new QueryPart(q[0], q[1]));
+    }
 
     return query;
   }
@@ -429,10 +450,12 @@ public class LDAPDatasource implements Datasource
   public QueryResults getDatasetsByKey(Collection keys, long timeout)
       throws TimeoutException
   {
+    if (keys.isEmpty()) return new QueryResultsList(new Vector(0));
+    
+    Vector results = new Vector(keys.size());
+    
     try
     {
-      if (keys.isEmpty()) return new QueryResultsList(new Vector(0));
-
       long endTime = System.currentTimeMillis() + timeout;
 
       attributeCache.clear();
@@ -449,8 +472,8 @@ public class LDAPDatasource implements Datasource
         {
 
           String currentKey = (String) iter.next();
-          String currentSearchFilter = keyToQuery(currentKey);
-          searchFilter = searchFilter + currentSearchFilter;
+          String[] ks = currentKey.split(KEY_SEPARATOR_0_NON_0_RE,2);
+          searchFilter = searchFilter + ks[0];
         }
         searchFilter = "(|" + searchFilter + ")";
 
@@ -461,8 +484,6 @@ public class LDAPDatasource implements Datasource
             SearchControls.SUBTREE_SCOPE,
             true,
             endTime);
-
-        Vector results = new Vector();
 
         while (currentResults.hasMoreElements())
         {
@@ -486,40 +507,25 @@ public class LDAPDatasource implements Datasource
             Logger.error("Error in LDAP-Directory.", e);
           }
         }
-
-        // results.trimToSize();
-
-        return new QueryResultsList(results);
-
       }
-
-      if (keyStatus == RELATIVE_ONLY)
+      else //if (keyStatus == RELATIVE_ONLY)
       { // nur relative Attribute
-        List results = new Vector(keys.size());
-
         Iterator iter = keys.iterator();
         while (iter.hasNext())
         {
-          if (System.currentTimeMillis() > endTime)
-            throw new TimeoutException();
           List query = keyToFindQuery((String) iter.next());
-          QueryResults res = find(query, endTime);
+          timeout = endTime - System.currentTimeMillis();
+          if (timeout <= 0)
+            throw new TimeoutException();
+          QueryResults res = find(query, timeout);
           Iterator iter2 = res.iterator();
-          while (iter2.hasNext())
-          {
-            if (System.currentTimeMillis() > endTime)
-              throw new TimeoutException();
-            results.add(iter2.next());
-          }
-
+          while (iter2.hasNext()) results.add(iter2.next());
         }
-
-     
-        return new QueryResultsList(results);
       }
-
-      return null;
-
+      
+      results.trimToSize();
+      return new QueryResultsList(results);
+      
     }
     finally
     {
@@ -1100,80 +1106,77 @@ public class LDAPDatasource implements Datasource
    * Schluesselwerte
    * @param values
    * @return
-   * @author Max Meier (D-III-ITD 5.1)
+   * @author Matthias Benkmann (D-III-ITD 5.1)
    * TODO Als Schlüssel gleich den LDAP-Suchstring wie keyToQuery verwenden, wobei nur Level 0 Spalten dort eingebracht werden (ldapEscape beachten). Daran anhängen durch * getrennt Abwechselnd spaltennamen und wert. Daraus kann in getDatasetByKey leicht eine find-query gebaut werden.
    */
-  private String generateKey(List values)
+  private String generateKey(Map data)
   {
-    StringBuffer key = new StringBuffer();
-    Iterator iter = values.iterator();
+    List keyColumns = new Vector(); 
+    Iterator iter = keyAttributes.iterator();
     while (iter.hasNext())
     {
-      String value = (String)iter.next();
-      if (value != null)
-        key.append(value);
-      if (iter.hasNext()) key.append(SEPARATOR);
+      String keyAttr = (String)iter.next();
+      ColumnDefinition colDef = (ColumnDefinition)columnDefinitions.get(keyAttr);
+      keyColumns.add(colDef);
+    }
+    
+    //Spalten alphabetisch und nach Pfad-Level sortieren, um einen
+    //wohldefinierten Schlüssel zu erhalten, der unabhängig von der Ordnung 
+    //der Map ist.
+    Collections.sort(keyColumns, new Comparator()
+    {
+        public int compare(Object o1, Object o2)
+        {
+          ColumnDefinition colDef1 = (ColumnDefinition)o1;
+          ColumnDefinition colDef2 = (ColumnDefinition)o2;
+          int comp1 = colDef1.attributeName.compareTo(colDef2.attributeName);
+          int comp2 = colDef1.relativePath - colDef2.relativePath;
+          int comp = comp1;
+          if (comp == 0) comp = comp2;
+          return comp;
+        }
+    });
+    
+    
+    StringBuffer key = new StringBuffer();
+    iter = keyColumns.iterator();
+    while (iter.hasNext())
+    {
+      ColumnDefinition colDef = (ColumnDefinition)iter.next();
+      if (colDef.relativePath == 0) 
+      {
+        key.append('(');
+        key.append(ldapEscape(colDef.attributeName));
+        key.append('=');
+        String value = (String)data.get(colDef.columnName);
+        if (value == null) value = "*";
+        key.append(ldapEscape(value));
+        key.append(')');
+      }
+      
+    }
+    
+    if (key.length() > 0) { key.insert(0,"(&"); key.append(')');}
+    
+    key.append(KEY_SEPARATOR_0_NON_0_RE);
+    
+    iter = keyColumns.iterator();
+    while (iter.hasNext())
+    {
+      ColumnDefinition colDef = (ColumnDefinition)iter.next();
+      if (colDef.relativePath != 0) 
+      {
+        key.append(colDef.columnName);
+        key.append('=');
+        String value = (String)data.get(colDef.columnName);
+        if (value == null) value = "";
+        key.append(value.replaceAll("\\*","").replaceAll(SEPARATOR,""));
+        key.append(SEPARATOR);
+      }
     }
     
     return key.toString();
   }
-
-  /**
-   * generiert einen Suchausdruck aus einem Schluessel
-   * @param key
-   * @return
-   * @author Max Meier (D-III-ITD 5.1)
-   * 
-   */
-  private String keyToQuery(String key)
-  {
-
-    String[] keyValues = key.split(SEPARATOR);
-//TODO if keyValues.length > keyAttributes.size()
-    String query = "";
-    boolean first = true;
-    for (int n = 0; n < keyValues.length; n++)
-    {
-
-      ColumnDefinition currentAttribute = (ColumnDefinition) columnDefinitions
-          .get(keyAttributes.get(n));
-
-      if (currentAttribute.relativePath == 0)
-      {
-
-        String attributeName = currentAttribute.attributeName;
-        String objectClass = currentAttribute.objectClass;
-
-        String currentSearchFilter = "("
-                                     + attributeName
-                                     + "="
-                                     + ldapEscape(keyValues[n])
-                                     + ")";
-
-        if (objectClass != null)
-        {
-          currentSearchFilter = "(&"
-                                + currentSearchFilter
-                                + "(objectClass="
-                                + ldapEscape(objectClass)
-                                + "))";
-        }
-
-        if (first)
-        {
-          query = currentSearchFilter;
-          first = false;
-        }
-        else
-        {
-          query = "(&" + currentSearchFilter + query + ")";
-        }
-
-      }
-    }
-    return query;
-  }
-
   
   private static class CacheKey
   {
@@ -1358,16 +1361,7 @@ public class LDAPDatasource implements Datasource
         }
       }
       
-      // generate Key
-      Vector keyValues = new Vector();
-//    TOD0 Extrem ineffizient, generateKey sollte besser gleich relation übergeben kriegen (oder das ganze generatekey sollte im LDAPDataset Konstruktor erfolgen), das vorher zusammenbauen eines vectors ist schrott
-      for (int n = 0; n < keyAttributes.size(); n++)
-      {
-        String currentValue = (String) relation.get(keyAttributes.get(n));
-        keyValues.add(currentValue);
-      }
-      
-      String key = generateKey(keyValues);
+      String key = generateKey(relation);
       
       return new LDAPDataset(key, relation);
       
@@ -1712,11 +1706,12 @@ public class LDAPDatasource implements Datasource
     ConfigThingy ldapConf = new ConfigThingy("", confURL);
     Map nameToDatasource = new HashMap();
     ConfigThingy sourceDesc = ldapConf.query("Datenquelle").getFirstChild();
-    LDAPDatasource dj = new LDAPDatasource(nameToDatasource, sourceDesc,
+    LDAPDatasource source = new LDAPDatasource(nameToDatasource, sourceDesc,
         context);
 
     // Test keys
-    QueryResults qr = dj.simpleFind(
+    System.out.println("Schlüssel für Anfrage OrgaEmail=direktorium@muenchen.de:");
+    QueryResults qr = source.simpleFind(
         "OrgaEmail",
         "direktorium@muenchen.de");
     Iterator iter = qr.iterator();
@@ -1733,68 +1728,68 @@ public class LDAPDatasource implements Datasource
 
     }
 
-    QueryResults qr2 = dj.getDatasetsByKey(keys, 300000);
+    QueryResults qr2 = source.getDatasetsByKey(keys, 3000000);
 
-    printResults("Get and find keys: ", dj.schema, qr2);
+    printResults("Datensätze zu vorigen Schlüsseln: ", source.schema, qr2);
 
-    printResults("OrgaEmail =  direktorium@muenchen.de , Gertraud = Gertraud", dj
-        .getSchema(), dj.simpleFind(
+    printResults("OrgaEmail =  direktorium@muenchen.de , Gertraud = Gertraud", source
+        .getSchema(), source.simpleFind(
         "OrgaEmail",
         "direktorium@muenchen.de",
         "Gertraud",
         "Gertraud"));
     
-    printResults("OrgaEmail = linux-client.it.dir@muenchen.de, Referat = Direktorium", dj
-        .getSchema(), dj.simpleFind(
+    printResults("OrgaEmail = linux-client.it.dir@muenchen.de, Referat = Direktorium", source
+        .getSchema(), source.simpleFind(
         "OrgaEmail",
         "linux-client.it.dir@muenchen.de",
         "Referat",
         "Direktorium"));
     
-    printResults("Gertraud = Gertraud, Referat = Direktorium", dj
-        .getSchema(), dj.simpleFind(
+    printResults("Gertraud = Gertraud, Referat = Direktorium", source
+        .getSchema(), source.simpleFind(
         "Gertraud",
         "Gertraud",
         "Referat",
         "Direktorium"));
     
-    printResults("OrgaKurz = D-L, UberOrga = d", dj
-        .getSchema(), dj.simpleFind(
+    printResults("OrgaKurz = D-L, UberOrga = d", source
+        .getSchema(), source.simpleFind(
         "OrgaKurz",
         "D-L",
         "UberOrga",
         "d"));
     
-    printResults("UberOrga = d", dj
-        .getSchema(), dj.simpleFind(
+    printResults("UberOrga = d", source
+        .getSchema(), source.simpleFind(
         "UberOrga",
         "d"));
     
     printResults(
         "Orga2 = Stadtarchiv , Referat = Direktorium",
-        dj.getSchema(),
-        dj.simpleFind("Orga2", "Stadtarchiv", "Referat", "Direktorium"));
+        source.getSchema(),
+        source.simpleFind("Orga2", "Stadtarchiv", "Referat", "Direktorium"));
     
     printResults(
         "Referat = Sozialreferat , Nachname = Me\\)er",
-        dj.getSchema(),
-        dj.simpleFind("Referat", "Sozialreferat", "Nachname", "Me\\)er"));
+        source.getSchema(),
+        source.simpleFind("Referat", "Sozialreferat", "Nachname", "Me\\)er"));
 
     // printResults("Nachname =r*", dj.getSchema(),
     // dj.simpleFind("Nachname","r*"));
 
-    printResults("Nachname = *utz", dj.getSchema(), dj.simpleFind(
+    printResults("Nachname = *utz", source.getSchema(), source.simpleFind(
         "Nachname",
         "*utz"));
-    printResults("Nachname = *oe*", dj.getSchema(), dj.simpleFind(
+    printResults("Nachname = *oe*", source.getSchema(), source.simpleFind(
         "Nachname",
         "*oe*"));
-    printResults("Nachname = Lutz", dj.getSchema(), dj.simpleFind(
+    printResults("Nachname = Lutz", source.getSchema(), source.simpleFind(
         "Nachname",
         "Lutz"));
-    printResults("Nachname = *utz, Vorname = Chris*", dj.getSchema(), dj
+    printResults("Nachname = *utz, Vorname = Chris*", source.getSchema(), source
         .simpleFind("Nachname", "Lutz", "Vorname", "Chris*"));
-    printResults("Nachname = Benkmann, Vorname = Matthias", dj.getSchema(), dj
+    printResults("Nachname = Benkmann, Vorname = Matthias", source.getSchema(), source
         .simpleFind("Nachname", "Benkmann", "Vorname", "Matthias"));
 
   }
