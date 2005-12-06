@@ -23,6 +23,12 @@
 *                  | Und nochmal die Reihenfolge umgewürfelt, hoffentlich stimmt's
 *                  | jetzt.
 * 10.11.2005 | BNK | Unicode-Marker an den Anfang der Cache-Datei schreiben
+* 06.12.2005 | BNK | +getStatus() (enthält momentan Info über Datensätze, die nicht
+*                  |   in der Datenbank wiedergefunden werden konnten und deshalb
+*                  |   vermutlich neu eingefügt werden sollten, weil sonst auf
+*                  |   Ewigkeit nur der Cache verwendet wird.
+*                  | LOS-only Datensätze werden nun korrekt in dumpData()
+*                  |   wiedergegeben und im Konstruktor restauriert.
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -91,6 +97,24 @@ public class DatasourceJoiner
   protected Datasource mainDatasource;
   
   /**
+   * Repräsentiert den Status eines DatasourceJoiners.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public static class Status
+  {
+    /**
+     * Eine Liste, die die {@link Dataset}s enthält, die mit einer 
+     * Hintergrunddatenbank verknüpft sind, deren Schlüssel jedoch darin nicht
+     * mehr gefunden wurde und deshalb nicht aktualisiert werden konnte. 
+     */
+    public List lostDatasets = new Vector(0);
+  }
+  
+  private Status status;
+  
+  public Status getStatus() {return status;}
+  
+  /**
    * Erzeugt einen neuen DatasourceJoiner.
    * @param joinConf ein ConfigThingy mit "Datenquellen" Kindern.
    * @param mainSourceName der Name der Datenquelle, auf die sich die
@@ -104,23 +128,6 @@ public class DatasourceJoiner
    *         auftritt, der die Arbeit des DJ unmöglich macht, wie z.B.
    *         wenn die Datenquelle mainSourceName in der
    *         joinConf fehlt und gleichzeitig kein Cache verfügbar ist.
-   * TODO Ein Argument hinzufügen vom Typ DatasourceJoiner.Status, das 
-   * Informationen darüber enthält ob Daten nicht mit dem LDAP abgeglichen
-   * werden konnten, weil ihr Schlüssel nicht gefunden wurde. Damit kann
-   * dann eine entsprechende Message Box gebracht werden.
-   * Es sollte irgendeine Markierung dieser Datensätze geben, damit der
-   * Benutzer weiss, welche nicht mehr mit dem LDAP abgeglichen werden.
-   * Dürfte aber schwierig sein, dies in die bestehenden Dialoge zu
-   * integrieren. Eventuell kann auch die Message Box alle derartigen
-   * Datensätze auflisten, z.B. "Die folgenden Datensätze konnten nicht
-   * aus der Datenbank aktualisiert werden. Wenn dieses Problem nicht temporärer
-   * Natur ist, sollten sie diese Datensätze aus ihrer Absenderliste löschen
-   * und neu hinzufügen: ...." 
-   * Eventuell ist es sinnvoll, Datensätze, deren Schlüssel
-   * nicht mehr im LDAP gefunden wurden ganz umzuwandeln in LOS-only Datensätze.
-   * Dies darf natürlich nur dann erfolgen, wenn der Grund dafür, dass sie
-   * nicht aktualisiert werden konnten nicht in einer fehlenden Datenbank oder
-   * einem Timeout liegt.
    */
   public DatasourceJoiner(ConfigThingy joinConf, String mainSourceName, File losCache, URL context)
   throws ConfigurationErrorException
@@ -144,6 +151,8 @@ public class DatasourceJoiner
   protected void init(ConfigThingy joinConf, String mainSourceName, File losCache, URL context)
   throws ConfigurationErrorException
   { //TESTED
+    status = new Status();
+    
     ConfigThingy datenquellen = joinConf.query("Datenquellen").query("Datenquelle");
     Iterator iter = datenquellen.iterator();
     while (iter.hasNext())
@@ -220,7 +229,7 @@ public class DatasourceJoiner
       mainDatasource = (Datasource)nameToDatasource.get(mainSourceName);
 
       try{
-        myLOS.refreshFromDatabase(mainDatasource, queryTimeout());
+        myLOS.refreshFromDatabase(mainDatasource, queryTimeout(), status);
       } catch(TimeoutException x)
       {
         Logger.error("Timeout beim Zugriff auf Datenquelle \""+mainDatasource.getName()+"\" => Benutze Daten aus Cache", x);
@@ -461,23 +470,29 @@ X           "Vorname N."
           {
             ConfigThingy dsconf = (ConfigThingy)iter.next();
             
-            Map dscache = new HashMap();
-            Iterator iter2 = dsconf.get("Cache").iterator();
-            while (iter2.hasNext())
+            Map dscache = null;
+            ConfigThingy cacheColumns = dsconf.query("Cache");
+            if (cacheColumns.count() > 0)
             {
-              ConfigThingy dsNode = (ConfigThingy)iter2.next();
-              String spalte = dsNode.getName();
-              if (!newSchema.contains(spalte))
+              dscache = new HashMap();
+              Iterator iter2 = cacheColumns.getFirstChild().iterator();
+              while (iter2.hasNext())
               {
-                Logger.error(losCache.getPath()+" enthält korrupten Datensatz (Spalte "+spalte+" nicht im Schema) => Cache wird ignoriert!");
-                return;
+                ConfigThingy dsNode = (ConfigThingy)iter2.next();
+                String spalte = dsNode.getName();
+                if (!newSchema.contains(spalte))
+                {
+                  Logger.error(losCache.getPath()+" enthält korrupten Datensatz (Spalte "+spalte+" nicht im Schema) => Cache wird ignoriert!");
+                  return;
+                }
+                
+                dscache.put(spalte, dsNode.toString());
               }
-              
-              dscache.put(spalte, dsNode.toString());
             }
+            //else LOS-only Datensatz, dscache bleibt null
             
             Map dsoverride = new HashMap();
-            iter2 = dsconf.get("Override").iterator();
+            Iterator iter2 = dsconf.get("Override").iterator();
             while (iter2.hasNext())
             {
               ConfigThingy dsNode = (ConfigThingy)iter2.next();
@@ -612,10 +627,11 @@ X           "Vorname N."
      * Läd für die Datensätze des LOS aktuelle Daten aus der Datenbank database.
      * @param timeout die maximale Zeit, die database Zeit hat, anfragen
      * zu beantworten.
+     * @param status hiervon wird das Feld lostDatasets geupdatet.
      * @throws TimeoutException
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
-    public void refreshFromDatabase(Datasource database, long timeout) throws TimeoutException
+    public void refreshFromDatabase(Datasource database, long timeout, Status status) throws TimeoutException
     { //TESTED
       /*
        * Zuallererst das Schema anpassen. Insbesondere muss dies VOR dem
@@ -714,9 +730,33 @@ X           "Vorname N."
        *     wird der Eintrag in der Absenderliste mit dem neuen Eintrag
        *     verknüpft, obwohl dieser nichts mit dem alten zu tun hat.
        */
+      Vector lostDatasets = new Vector();
       iter = keyToLOSDJDataset.values().iterator();
       while (iter.hasNext())
-        data.add(iter.next());
+      {
+        DJDataset ds = (DJDataset)iter.next();
+        try{
+          if (ds.hasBackingStore()) lostDatasets.add(new SimpleDataset(losSchema, ds));
+        }catch(ColumnNotFoundException x)
+        {
+          Logger.error(x);
+        }
+        data.add(ds);
+      }
+      
+      lostDatasets.trimToSize();
+      status.lostDatasets = lostDatasets;
+      
+      StringBuffer buffyTheVampireSlayer = new StringBuffer();
+      iter = lostDatasets.iterator();
+      while (iter.hasNext())
+      {
+        Dataset ds = ((Dataset)iter.next());
+        buffyTheVampireSlayer.append(ds.getKey());
+        if (iter.hasNext()) buffyTheVampireSlayer.append(", ");
+      }
+      if (buffyTheVampireSlayer.length() > 0)
+        Logger.log("Die Datensätze mit folgenden Schlüsseln konnten nicht aus der Datenbank aktualisiert werden: "+buffyTheVampireSlayer);
       
       selectDataset(selectKey);
     }
@@ -741,9 +781,9 @@ X           "Vorname N."
         ConfigThingy dsConf = conf.add("");
         dsConf.add("Key").add(ds.getKey());
         
-        ConfigThingy cacheConf = dsConf.add("Cache");
         if (ds.hasBackingStore())
         {
+          ConfigThingy cacheConf = dsConf.add("Cache");
           Iterator entries = ds.getBS().entrySet().iterator();
           while (entries.hasNext())
           {
