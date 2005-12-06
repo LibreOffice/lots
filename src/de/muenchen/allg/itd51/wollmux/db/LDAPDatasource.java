@@ -429,7 +429,6 @@ public class LDAPDatasource implements Datasource
    * @param key
    * @return
    * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TODO Testen
    */
   private List keyToFindQuery(String key)
   {
@@ -1114,7 +1113,6 @@ public class LDAPDatasource implements Datasource
    * @param values
    * @return
    * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TODO Als Schlüssel gleich den LDAP-Suchstring wie keyToQuery verwenden, wobei nur Level 0 Spalten dort eingebracht werden (ldapEscape beachten). Daran anhängen durch * getrennt Abwechselnd spaltennamen und wert. Daraus kann in getDatasetByKey leicht eine find-query gebaut werden.
    */
   private String generateKey(Map data)
   {
