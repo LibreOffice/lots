@@ -60,6 +60,7 @@ import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
+import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.Event;
 import de.muenchen.allg.itd51.wollmux.EventProcessor;
 import de.muenchen.allg.itd51.wollmux.Logger;
@@ -261,8 +262,18 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
       textFragmentList = new VisibleTextFragmentList(wollmuxConf);
 
       // DatasourceJoiner erzeugen
-      ConfigThingy ssource = wollmuxConf.query("SENDER_SOURCE").getLastChild();
-      datasourceJoiner = new DatasourceJoiner(wollmuxConf, ssource.toString(),
+      ConfigThingy ssource = wollmuxConf.query("SENDER_SOURCE");
+      String ssourceStr;
+      try
+      {
+        ssourceStr = ssource.getLastChild().toString();
+      }
+      catch (NodeNotFoundException e)
+      {
+        throw new ConfigurationErrorException(
+            "Keine Hauptdatenquelle (SENDER_SOURCE) definiert.");
+      }
+      datasourceJoiner = new DatasourceJoiner(wollmuxConf, ssourceStr,
           losCacheFile, getDEFAULT_CONTEXT());
 
       // register global EventListener
@@ -277,7 +288,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
     }
     catch (Exception e)
     {
-      Logger.error(e);
+      Logger.error("WollMux konnte nicht gestartet werden:", e);
     }
   }
 

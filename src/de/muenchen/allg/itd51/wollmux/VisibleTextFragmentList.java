@@ -69,21 +69,30 @@ public class VisibleTextFragmentList
    * @throws NodeNotFoundException
    */
   public VisibleTextFragmentList(ConfigThingy root)
-      throws NodeNotFoundException
   {
     this.root = root;
     this.fragmentMap = new HashMap();
     ConfigThingy tfrags;
-    tfrags = root.get("Textfragmente").getByChild("FRAG_ID");
+    tfrags = root.query("Textfragmente").queryByChild("FRAG_ID");
     Iterator s = tfrags.iterator();
     while (s.hasNext())
     {
       ConfigThingy frag = (ConfigThingy) s.next();
-      fragmentMap.put(frag.get("FRAG_ID").toString(), frag);
+      try
+      {
+        fragmentMap.put(frag.get("FRAG_ID").toString(), frag);
+      }
+      catch (NodeNotFoundException x)
+      {
+        // obiger query verhindert dies.
+      }
     }
-    Logger.debug2("VisibleTextFragmentList: "
+    Logger.debug("VisibleTextFragmentList: "
                   + fragmentMap.size()
                   + " entries.");
+    if (fragmentMap.size() == 0)
+      Logger
+          .log("Es wurden keine Textfragmente definiert.");
   }
 
   private String expandVariable(ConfigThingy node, ConfigThingy root)
