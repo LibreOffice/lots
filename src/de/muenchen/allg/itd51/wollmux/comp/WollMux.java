@@ -376,33 +376,48 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
    * Loggdatei geschrieben.
    * 
    * @return der letzte in der Konfigurationsdatei definierte DEFAULT_CONTEXT.
+   * @throws ConfigurationErrorException
    */
-  public static URL getDEFAULT_CONTEXT()
+  public static URL getDEFAULT_CONTEXT() throws ConfigurationErrorException
   {
     if (defaultContext == null)
     {
+      ConfigThingy dc = wollmuxConf.query("DEFAULT_CONTEXT");
+      String urlStr;
       try
       {
-        ConfigThingy dc = wollmuxConf.query("DEFAULT_CONTEXT").getLastChild();
-        String urlStr = dc.toString();
-        // url mit einem "/" aufhören lassen (falls noch nicht angegeben).
-        if (urlStr.endsWith("/"))
-          defaultContext = new URL(dc.toString());
-        else
-          defaultContext = new URL(dc.toString() + "/");
+        urlStr = dc.getLastChild().toString();
       }
-      catch (Exception e)
+      catch (NodeNotFoundException e)
       {
-        Logger.error(e);
+        urlStr = "file:";
+        Logger.log("Kein DEFAULT_CONTEXT definiert. Verwende \""
+                   + urlStr
+                   + "\"");
+      }
+
+      // url mit einem "/" aufhören lassen (falls noch nicht angegeben).
+      String urlVerzStr = (urlStr.endsWith("/")) ? urlStr : urlStr + "/";
+
+      // URL aus urlVerzStr erzeugen
+      try
+      {
+        defaultContext = new URL(urlVerzStr);
+      }
+      catch (MalformedURLException e)
+      {
         try
         {
-          defaultContext = new URL("file:/");
+          defaultContext = new URL("file:");
         }
         catch (MalformedURLException x)
         {
-          // kommt nicht vor, da obige file url korrekt!
-          Logger.error(x);
         }
+        Logger.log("Fehlerhafter DEFAULT_CONTEXT \""
+                   + urlStr
+                   + "\". Verwende \""
+                   + defaultContext.toString()
+                   + "\"");
       }
     }
     return defaultContext;
