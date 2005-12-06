@@ -19,6 +19,7 @@
  * 02.11.2005 | BNK | LOG aus Default-Modus
  * 24.11.2005 | BNK | In init() das Logfile nicht löschen.
  * 05.12.2005 | BNK | line.separator statt \n
+ * 06.12.2005 | BNK | bessere Separatoren, kein Test mehr in init, ob Logfile schreibbar
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -117,7 +118,7 @@ public class Logger
   {
     defaultOutputStream = outputPrintStream;
     mode = loggingMode;
-    Logger.debug2("Logger::init(): LoggingMode = " + mode);
+    Logger.debug2("========================== Logger::init(): LoggingMode = " + mode+" ========================");
   }
 
   /**
@@ -133,13 +134,10 @@ public class Logger
    * @throws FileNotFoundException
    */
   public static void init(File outputFile, int loggingMode)
-      throws FileNotFoundException
   {
     file = outputFile;
     mode = loggingMode;
-    Logger.debug2("Logger::init(): LoggingMode = " + mode);
-    // prüfen, ob File geschrieben werden kann:
-    new FileOutputStream(outputFile,true);
+    Logger.debug2("========================== Logger::init(): LoggingMode = " + mode+" ========================");
   }
 
   /**
@@ -154,7 +152,7 @@ public class Logger
   public static void init(int loggingMode)
   {
     mode = loggingMode;
-    Logger.debug2("Logger::init(): LoggingMode = " + mode);
+    Logger.debug2("========================== Logger::init(): LoggingMode = " + mode+" ========================");
   }
 
   /**

@@ -240,14 +240,8 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
     try
     {
       // Logger initialisieren:
-      if (wollmuxLogFile != null) try
-      {
+      if (wollmuxLogFile != null)
         Logger.init(wollmuxLogFile, Logger.LOG);
-      }
-      catch (FileNotFoundException x)
-      {
-        // dann gibts halt kein logging - pech gehabt.
-      }
 
       // Parsen der Konfigurationsdatei
       wollmuxConf = new ConfigThingy("wollmuxConf", wollmuxConfFile.toURL());
