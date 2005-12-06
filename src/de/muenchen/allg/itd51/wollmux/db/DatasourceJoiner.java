@@ -211,7 +211,7 @@ public class DatasourceJoiner
     { 
       if (schema == null) throw new ConfigurationErrorException("Datenquelle \""+mainSourceName+"\" nicht definiert und Cache nicht vorhanden");
       
-      Logger.error("Datenquelle "+mainSourceName+" nicht definiert => verwende alte Daten aus Cache");
+      Logger.error("Datenquelle \""+mainSourceName+"\" nicht definiert => verwende alte Daten aus Cache");
       mainDatasource = new EmptyDatasource(schema, mainSourceName);
       nameToDatasource.put(mainSourceName, mainDatasource);
     }
@@ -223,7 +223,7 @@ public class DatasourceJoiner
         myLOS.refreshFromDatabase(mainDatasource, queryTimeout());
       } catch(TimeoutException x)
       {
-        Logger.error("Timeout beim Zugriff auf Datenquelle "+mainDatasource.getName()+" => Benutze Daten aus Cache", x);
+        Logger.error("Timeout beim Zugriff auf Datenquelle \""+mainDatasource.getName()+"\" => Benutze Daten aus Cache", x);
       }
 
     }
