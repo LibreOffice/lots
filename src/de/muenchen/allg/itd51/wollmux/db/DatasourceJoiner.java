@@ -209,7 +209,7 @@ public class DatasourceJoiner
     
     if (!nameToDatasource.containsKey(mainSourceName))
     { 
-      if (schema == null) throw new ConfigurationErrorException("Datenquelle "+mainSourceName+" nicht definiert und Cache nicht vorhanden");
+      if (schema == null) throw new ConfigurationErrorException("Datenquelle \""+mainSourceName+"\" nicht definiert und Cache nicht vorhanden");
       
       Logger.error("Datenquelle "+mainSourceName+" nicht definiert => verwende alte Daten aus Cache");
       mainDatasource = new EmptyDatasource(schema, mainSourceName);
