@@ -1,9 +1,4 @@
 //FIXME Bei Uninstall des WollMux Paketes geht das LHM-Vorlagen Menü nicht weg.
-//TODO Ich halte es nicht für klug, die Versionsnummer in den Package-Namen reinzukodieren
-//(gemeint ist das UNO-Package WollMux.uno.pkg, nicht das .deb Package. Letzteres muss
-//natürlich die Versionsnummer im Namen enthalten) .
-//Dies führt nur dazu, dass mehrere WollMux-Packages parallel installiert werden. Ich weiss
-//auch nicht ob die Software-Verteilung damit umgehen kann.
 /*
  * Dateiname: WollMux.java
  * Projekt  : WollMux
