@@ -23,36 +23,30 @@ package de.muenchen.allg.itd51.wollmux.oooui;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.List;
 
+import com.sun.star.awt.Point;
 import com.sun.star.beans.PropertyValue;
-import com.sun.star.beans.PropertyVetoException;
-import com.sun.star.beans.UnknownPropertyException;
 import com.sun.star.beans.XPropertySet;
-import com.sun.star.container.NoSuchElementException;
-import com.sun.star.container.XIndexContainer;
 import com.sun.star.frame.XController;
 import com.sun.star.frame.XDesktop;
 import com.sun.star.frame.XFrame;
 import com.sun.star.frame.XLayoutManager;
 import com.sun.star.frame.XModel;
-import com.sun.star.lang.IllegalArgumentException;
-import com.sun.star.lang.WrappedTargetException;
 import com.sun.star.lang.XMultiComponentFactory;
 import com.sun.star.lang.XSingleComponentFactory;
+import com.sun.star.ui.DockingArea;
 import com.sun.star.ui.ItemType;
 import com.sun.star.ui.XUIElement;
-import com.sun.star.ui.XUIElementSettings;
 import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
 
+import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
+import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.Logger;
 
 /**
@@ -73,15 +67,9 @@ import de.muenchen.allg.itd51.wollmux.Logger;
  * @author GOLOVKO
  * 
  */
-
 public class MenuList
 {
-  private Hashtable htIdToMenu = new Hashtable();
-
-  private List topLevelMenues = new ArrayList();
-
-  // the variables from the running OO
-  private XComponentContext ctx = null;
+  private XComponentContext ctx;
 
   private XLayoutManager xLayoutManager;
 
@@ -91,14 +79,7 @@ public class MenuList
 
   private static String PREFIX = "wollmux:";
 
-  private static String UNDEFINED = "undefined";
-
-  private XIndexContainer oElementSettings;
-
-  // Workaround: a "File" UI item
-  private PropertyValue[] fileMenus;
-
-  protected MenuList(XComponentContext ctx, XFrame xFrame)
+  private MenuList(XComponentContext ctx, XFrame xFrame)
   {
     this.ctx = ctx;
 
@@ -125,8 +106,6 @@ public class MenuList
    */
   private void generateToolbar(ConfigThingy root) throws Exception
   {
-    htIdToMenu = readMenues(root);
-
     // 0. read in the names of all top-level menues.
     ConfigThingy bars = root.query("Symbolleisten");
     if (bars.count() > 0)
@@ -138,147 +117,116 @@ public class MenuList
       }
       catch (NodeNotFoundException e)
       {
-        // oben abgefangen
+        // kann nicht auftreten, da oben abgefangen
+        Logger.error(e);
       }
+
+      // Iteration über alle definierten Symbolleisten
       while (i.hasNext())
       {
-        ConfigThingy uiElement = (ConfigThingy) i.next();
-        String tbResource = S_TOOLBAR_PREFIX + uiElement.getName();
-        Iterator iterOverItems = uiElement.queryByChild("TYPE").iterator();
-        topLevelMenues = new ArrayList();
-        while (iterOverItems.hasNext())
+        ConfigThingy toolbar = (ConfigThingy) i.next();
+        String tbResource = S_TOOLBAR_PREFIX + toolbar.getName();
+
+        XUIElement xUIElement = xLayoutManager.getElement(tbResource);
+        if (xUIElement == null)
         {
-          ConfigThingy uiItem = (ConfigThingy) iterOverItems.next();
-          topLevelMenues.add(uiItem);
+          // xLayoutManager.destroyElement(tbResource);
+          xLayoutManager.createElement(tbResource);
+          xUIElement = xLayoutManager.getElement(tbResource);
+        }
+        UnoService uiElement = new UnoService(xUIElement);
+        UnoService settings = new UnoService(uiElement.xUIElementSettings()
+            .getSettings(true));
+
+        // Iteration über alle Elemente der Symbolleiste
+        Iterator j = toolbar.queryByChild("TYPE").iterator();
+        for (int mCounter = 0; j.hasNext();)
+        {
+          ConfigThingy element = (ConfigThingy) j.next();
+          try
+          {
+            PropertyValue[] topMenu = createUIItem(
+                element,
+                root,
+                settings.xSingleComponentFactory()).getProps();
+            settings.xIndexContainer().insertByIndex(mCounter, topMenu);
+            mCounter++;
+          }
+          catch (java.lang.Exception e)
+          {
+            Logger.error(e);
+          }
         }
 
-        // 2. init objects required for the creation of the menu elements
-        XUIElementSettings xoMenuBarSettings = getUIElementSettings(tbResource);
+        // Einstellungen Setzen
+        uiElement.setPropertyValue("Persistent", Boolean.FALSE);
+        uiElement.xUIElementSettings().setSettings(settings.xIndexAccess());
 
-        int mCounter = 0;
-        for (Iterator iter = topLevelMenues.iterator(); iter.hasNext();)
-        {
-          ConfigThingy element = (ConfigThingy) iter.next();
-          PropertyValue[] topMenu = createUIItemeTree(element);
-          oElementSettings.insertByIndex(mCounter, topMenu);
-          mCounter++;
-        }
-        xoMenuBarSettings.setSettings(oElementSettings);
+        // Neue Toolbar positionieren und anzeigen.
+        int topHeight = xLayoutManager.getCurrentDockingArea().Y;
+        xLayoutManager.dockWindow(
+            tbResource,
+            DockingArea.DOCKINGAREA_TOP,
+            new Point(0, topHeight));
         xLayoutManager.showElement(tbResource);
       }
     }
   }
 
   /**
-   * 
-   * set private variables required in other methods and return element settings
-   * back.
-   * 
-   * @param tbResource
-   * @return
-   * @throws WrappedTargetException
-   * @throws IllegalArgumentException
-   * @throws PropertyVetoException
-   * @throws UnknownPropertyException
+   * @param root
+   * @throws Exception
    */
-  private XUIElementSettings getUIElementSettings(String tbResource)
-      throws UnknownPropertyException, PropertyVetoException,
-      IllegalArgumentException, WrappedTargetException
-
-  {
-    XUIElement uiElement = xLayoutManager.getElement(tbResource);
-    if (uiElement == null)
-    {
-      // xLayoutManager.destroyElement(tbResource);
-      xLayoutManager.createElement(tbResource);
-      uiElement = xLayoutManager.getElement(tbResource);
-    }
-
-    // set persistence to false
-    XPropertySet props = (XPropertySet) UnoRuntime.queryInterface(
-        XPropertySet.class,
-        uiElement);
-    props.setPropertyValue("Persistent", new Boolean(false));
-
-    XUIElementSettings xoElementSettings = (XUIElementSettings) UnoRuntime
-        .queryInterface(XUIElementSettings.class, uiElement);
-    oElementSettings = (XIndexContainer) UnoRuntime.queryInterface(
-        XIndexContainer.class,
-        xoElementSettings.getSettings(true));
-    return xoElementSettings;
-  }
-
-  private Hashtable readMenues(ConfigThingy root)
-  {
-    Hashtable hash = new Hashtable();
-    List menues = new ArrayList();
-    // 1. use .query() to get all Menues fragments
-    Iterator menuesIter = root.query("Menues").iterator();
-    // 1.1 iterate over "Menues"
-    while (menuesIter.hasNext())
-    {
-      // each element is "Menues(...)"
-      ConfigThingy menue = (ConfigThingy) menuesIter.next();
-      Iterator lhmVorlageIter = menue.iterator();
-      // htIdToMenu.put()
-      // 1.2 iterate over "vorlagen" inside of the single menu
-      while (lhmVorlageIter.hasNext())
-      {
-        // each element smthng like "LHMVorlagen(...)"
-        ConfigThingy lhmVorlage = (ConfigThingy) lhmVorlageIter.next();
-        menues = getMenuItems(lhmVorlage);
-        // 1.3 put something like "LHMVorlagen"=> <array of Menu> into hash for
-        // sake of uniquness
-        hash.put(lhmVorlage.getName(), menues);
-      }
-    }
-    return hash;
-  }
-
   private void generateMenues(ConfigThingy root) throws Exception
   {
     // 0. read in the names of all top-level menues.
     ConfigThingy bar = root.query("Menueleiste");
     if (bar.count() > 0)
     {
+
+      XUIElement xUIElement = xLayoutManager.getElement(S_MENUBAR);
+      if (xUIElement == null)
+      {
+        xLayoutManager.createElement(S_MENUBAR);
+        xUIElement = xLayoutManager.getElement(S_MENUBAR);
+      }
+
+      UnoService uiElement = new UnoService(xUIElement);
+      UnoService settings = new UnoService(uiElement.xUIElementSettings()
+          .getSettings(true));
+      uiElement.setPropertyValue("Persistent", Boolean.FALSE);
+
       Iterator i = null;
       try
       {
-        i = bar.getLastChild().iterator();
+        i = bar.getLastChild().queryByChild("TYPE").iterator();
       }
       catch (NodeNotFoundException e)
       {
-        // wird oben abgefangen
+        // kann nicht auftreten, da oben abgefangen
+        Logger.error(e);
       }
+
+      // Iteriere über alle Menueleisten-Einträge:
       while (i.hasNext())
       {
-        ConfigThingy topMenu = (ConfigThingy) i.next();
-        topLevelMenues.add(topMenu);
-      }
-
-      htIdToMenu = readMenues(root);
-
-      // 2. init objects required for the creation of the menu elements
-      XUIElementSettings xoMenuBarSettings = getUIElementSettings(S_MENUBAR);
-      fileMenus = (PropertyValue[]) UnoRuntime.queryInterface(
-          PropertyValue[].class,
-          oElementSettings.getByIndex(7));
-      fileMenus = LimuxHelper.setProperty(
-          fileMenus,
-          "ItemDescriptorContainer",
-          null);
-
-      for (Iterator iter = topLevelMenues.iterator(); iter.hasNext();)
-      {
-        ConfigThingy element = (ConfigThingy) iter.next();
-
-        PropertyValue[] topMenu = createUIItemeTree(element);
-        // TODO: check if insert at POSITION is possible
-        oElementSettings.insertByIndex(Integer.parseInt(LimuxHelper
-            .getProperty(element, "POSITION", "0")), topMenu);
-
-        xoMenuBarSettings.setSettings(oElementSettings);
-
+        ConfigThingy element = (ConfigThingy) i.next();
+        try
+        {
+          String pos = getMandatoryAttribute(element, "POSITION").toString();
+          PropertyValue[] topMenu = createUIItem(
+              element,
+              root,
+              settings.xSingleComponentFactory()).getProps();
+          settings.xIndexContainer().insertByIndex(
+              Integer.parseInt(pos),
+              topMenu);
+          uiElement.xUIElementSettings().setSettings(settings.xIndexAccess());
+        }
+        catch (java.lang.Exception e)
+        {
+          Logger.error(e);
+        }
       }
     }
   }
@@ -290,110 +238,114 @@ public class MenuList
    * 
    * @param ct
    * @throws Exception
+   * @throws ConfigurationErrorException
+   * @throws Exception
    * 
    */
-  protected PropertyValue[] createUIItemeTree(ConfigThingy ct) throws Exception
+  private UnoProps createUIItem(ConfigThingy ct, ConfigThingy root,
+      XSingleComponentFactory factory) throws ConfigurationErrorException,
+      Exception
   {
+    String type = getMandatoryAttribute(ct, "TYPE").toString();
 
-    if (LimuxHelper.getProperty(ct, "TYPE", UNDEFINED).equals("menu"))
+    if (type.equals("menu"))
     {
-      // lastCommandUrl = PREFIX+getProperty(ct,"ACTION")+"menuAction";
-      PropertyValue[] menu = createMenu(ct);
-      List subCts = (List) htIdToMenu.get(LimuxHelper.getProperty(
-          ct,
-          "MENU",
-          UNDEFINED));
-      PropertyValue[] menuItem = null;
-      XSingleComponentFactory factory = (XSingleComponentFactory) UnoRuntime
-          .queryInterface(XSingleComponentFactory.class, oElementSettings);
-      XIndexContainer container = (XIndexContainer) UnoRuntime.queryInterface(
-          XIndexContainer.class,
-          factory.createInstanceWithContext(ctx));
-      // container.insertByIndex(0,fileMenus);
-      int counter = 0;
-      // the menu was referenced, but not defined. Create subfolder and skip.
-      // Example: "MenuA"=>"A_set", but the entries for the "A_set" are not
-      // defined anywhere.
-      // TODO: should the user be informed?
-      if (subCts == null)
-      {
-        menu = LimuxHelper.setProperty(
-            menu,
-            "ItemDescriptorContainer",
-            container);
-        return menu;
-      }
-      // iterate over entries in the submenu
-      for (Iterator iter = subCts.iterator(); iter.hasNext();)
-      {
-        ConfigThingy subCt = (ConfigThingy) iter.next();
-        menuItem = createUIItemeTree(subCt);
-        // TODO: TRICK: a "File" menubar uiItem is used as a template
-        // when inserting it as a subitem into a custom top-level item;
-        if (counter == 0)
-        {
-          fileMenus = LimuxHelper.setProperty(fileMenus, "Label", LimuxHelper
-              .getProperty(menuItem, "Label", UNDEFINED));
-          fileMenus = LimuxHelper.setProperty(
-              fileMenus,
-              "CommandURL",
-              LimuxHelper.getProperty(menuItem, "CommandURL", UNDEFINED));
-          Object subM = LimuxHelper.getProperty(
-              menuItem,
-              "ItemDescriptorContainer",
-              null);
-          fileMenus = LimuxHelper.setProperty(
-              fileMenus,
-              "ItemDescriptorContainer",
-              null);
-          if (subM != null)
-          {
-            fileMenus = LimuxHelper.setProperty(
-                fileMenus,
-                "ItemDescriptorContainer",
-                LimuxHelper.getProperty(
-                    menuItem,
-                    "ItemDescriptorContainer",
-                    null));
-          }
-          container.insertByIndex(counter, fileMenus);
-        }
-        else
-        {
-          container.insertByIndex(counter, menuItem);
-        }
-        menu = LimuxHelper.setProperty(
-            menu,
-            "ItemDescriptorContainer",
-            container);
-        counter++;
-      }
-      return menu;
+      return createMenu(ct, root, factory);
     }
-    else if (LimuxHelper.getProperty(ct, "TYPE", UNDEFINED).equals("button"))
+    else if (type.equals("button"))
     {
-      // lastCommandUrl = PREFIX+getProperty(ct,"ACTION");
-      PropertyValue[] menuItem = createButton(ct);
-      return menuItem;
+      return createButton(ct);
     }
-    else if (LimuxHelper.getProperty(ct, "TYPE", UNDEFINED).equals("separator"))
+    else if (type.equals("separator"))
     {
-      PropertyValue[] menuItem = createSeparator(ct);
-      return menuItem;
+      return createSeparator(ct);
     }
-    else if (LimuxHelper.getProperty(ct, "TYPE", UNDEFINED).equals("senderbox"))
+    else if (type.equals("senderbox"))
     {
-      PropertyValue[] menuItem = createSenderBox(ct);
-      return menuItem;
+      return createSenderBox(ct);
     }
     else
     {
-      // should not occure
-      Logger.error("Unknown type of the UI item: "
-                   + LimuxHelper.getProperty(ct, "TYPE", UNDEFINED));
-      return new PropertyValue[] {};
+      throw new ConfigurationErrorException("Unbekannter TYPE in Element: "
+                                            + ct.stringRepresentation());
     }
+  }
 
+  private UnoProps createMenu(ConfigThingy ct, ConfigThingy root,
+      XSingleComponentFactory factory) throws ConfigurationErrorException,
+      Exception
+  {
+    String menuref = getMandatoryAttribute(ct, "MENU").toString();
+    String label = getHotkeyLabel(ct);
+
+    // create submenu-container:
+    UnoService container = new UnoService(factory
+        .createInstanceWithContext(ctx));
+
+    UnoProps props = new UnoProps();
+    props.setPropertyValue("CommandURL", PREFIX + "menu#" + menuref);
+    props.setPropertyValue("Label", label);
+    props.setPropertyValue("Type", new Short(ItemType.DEFAULT));
+    props.setPropertyValue("ItemDescriptorContainer", container.xIndexAccess());
+
+    // Hole in Menuebeschreibung von menuref:
+    ConfigThingy menues = root.query("Menues").query(menuref);
+    if (menues.count() > 0)
+    {
+      Iterator i = null;
+      try
+      {
+        i = menues.getLastChild().queryByChild("TYPE").iterator();
+      }
+      catch (NodeNotFoundException e)
+      {
+        // kann nicht auftreten, da oben abgefangen
+        Logger.error(e);
+      }
+
+      // iterate over entries in the submenu
+      for (int counter = 0; i.hasNext();)
+      {
+        ConfigThingy subCt = (ConfigThingy) i.next();
+        try
+        {
+          UnoProps menuItem = createUIItem(subCt, root, factory);
+          container.xIndexContainer().insertByIndex(
+              counter,
+              menuItem.getProps());
+          counter++;
+        }
+        catch (java.lang.Exception x)
+        {
+          Logger.error(x);
+        }
+      }
+    }
+    else
+    {
+      Logger.error("Menue \""
+                   + menuref
+                   + "\" nicht definiert im Eintrag \""
+                   + label
+                   + "\"");
+    }
+    return props;
+  }
+
+  private static ConfigThingy getMandatoryAttribute(ConfigThingy ct, String att)
+      throws ConfigurationErrorException
+  {
+    try
+    {
+      return ct.get(att);
+    }
+    catch (NodeNotFoundException e)
+    {
+      throw new ConfigurationErrorException("Fehlendes Attribut \""
+                                            + att
+                                            + "\" in Element: "
+                                            + ct.stringRepresentation());
+    }
   }
 
   /**
@@ -403,45 +355,18 @@ public class MenuList
    * 
    * @param ct
    * @return
+   * @throws ConfigurationErrorException
    */
-  private PropertyValue[] createSenderBox(ConfigThingy ct)
+  private UnoProps createSenderBox(ConfigThingy ct)
+      throws ConfigurationErrorException
   {
-    PropertyValue[] loadProps = null;
+    String label = getMandatoryAttribute(ct, "LABEL").toString();
 
-    // LABEL
-    String value = LimuxHelper.getProperty(ct, "LABEL", UNDEFINED);
-    loadProps = LimuxHelper.setProperty(loadProps, "Label", value);
-
-    // TYPE
-    loadProps = LimuxHelper.setProperty(loadProps, "Type", new Short(
-        ItemType.DEFAULT));
-
-    loadProps = LimuxHelper.setProperty(loadProps, "CommandURL", PREFIX
-                                                                 + "senderBox");
-
-    return loadProps;
-  }
-
-  /**
-   * return UI element items as a list of ConfigThingy
-   * 
-   * @param lhmVorlage
-   * @return
-   * @throws NodeNotFoundException
-   */
-  private List getMenuItems(ConfigThingy lhmVorlage)
-  {
-    ArrayList results = new ArrayList();
-    // an element is smth like "LHMVorlagen(...)"
-    Iterator iter1 = lhmVorlage.queryByChild("TYPE").iterator();
-    while (iter1.hasNext())
-    {
-      // every element is something like "Element(...)" entry
-      ConfigThingy child1 = (ConfigThingy) iter1.next();
-      // Logger.debug(child1.get("LABEL").toString());
-      results.add(child1);
-    }
-    return results;
+    UnoProps props = new UnoProps();
+    props.setPropertyValue("Label", label);
+    props.setPropertyValue("Type", new Short(ItemType.DEFAULT));
+    props.setPropertyValue("CommandURL", PREFIX + "senderBox");
+    return props;
   }
 
   /**
@@ -486,118 +411,48 @@ public class MenuList
   }
 
   /**
-   * make change to the menu/toolbar element persistant
+   * creates a labelstring with a hotkey if there is a HOTKEY-attribute
+   * specified. The case of the Hotkey letter is ignored. The first occurence of
+   * the letter is used as a hotkey.
    * 
-   * @throws Exception
-   * 
-   * @throws Exception
-   * @throws NodeNotFoundException
-   */
-  public static void generatePersistentModuleUIElements(ConfigThingy ct,
-      XComponentContext ctx) throws Exception
-  {
-    UnoService moduleCfgMgrSupplier;
-    moduleCfgMgrSupplier = UnoService.createWithContext(
-        "com.sun.star.ui.ModuleUIConfigurationManagerSupplier",
-        ctx);
-    UnoService uiConfigMgr = new UnoService(moduleCfgMgrSupplier
-        .xModuleUIConfigurationManagerSupplier().getUIConfigurationManager(
-            "com.sun.star.text.TextDocument"));
-
-    ConfigThingy elements = ct.query("Symbolleisten");
-    if (elements.count() > 0)
-    {
-      Iterator i = null;
-      try
-      {
-        i = elements.getLastChild().iterator();
-      }
-      catch (NodeNotFoundException x)
-      {
-        // oben abgefangen.
-      }
-      while (i.hasNext())
-      {
-        ConfigThingy element = (ConfigThingy) i.next();
-        String elementURL = S_TOOLBAR_PREFIX + element.getName();
-        try
-        {
-          uiConfigMgr.xUIConfigurationManager().getSettings(elementURL, true);
-        }
-        catch (NoSuchElementException e)
-        {
-          UnoService container = new UnoService(uiConfigMgr
-              .xUIConfigurationManager().createSettings());
-          uiConfigMgr.xUIConfigurationManager().insertSettings(
-              elementURL,
-              container.xIndexAccess());
-        }
-      }
-    }
-
-    // make the elements persistent.
-    uiConfigMgr.xUIConfigurationPersistence().store();
-  }
-
-  /**
-   * generate a menu entry which corresponds to the type "menu" in the
-   * "LHMVorlagenMenue.conf" and as a result contains the submenues.
-   * 
-   * @param ct
-   *          the element which describes the menu entry
-   * @return the PropertyValue[] equivalent of the <b>ct</b>
-   */
-  private PropertyValue[] createMenu(ConfigThingy ct)
-  {
-
-    PropertyValue[] loadProps = LimuxHelper.setProperty(
-        null,
-        "CommandURL",
-        PREFIX + "Menu#" + LimuxHelper.getProperty(ct, "MENU", UNDEFINED));
-    loadProps = LimuxHelper.setProperty(loadProps, "Label", setHotkey(
-        LimuxHelper.getProperty(ct, "LABEL", UNDEFINED),
-        LimuxHelper.getProperty(ct, "HOTKEY", UNDEFINED)));
-    loadProps = LimuxHelper.setProperty(loadProps, "HelpURL", "");
-
-    return loadProps;
-  }
-
-  /**
-   * modify the label to make hotkey underlined in the OO. The case of the
-   * Hotkey letter is ignored. The first occurence of the letter is used as a
-   * hotkey.
-   * 
-   * @param label
-   * @param hotkey
+   * @param element
+   *          Ein Element, das die Attribute LABEL und optional HOTKEY als
+   *          Kinder enthält.
    * @return
+   * @throws ConfigurationErrorException
    */
-  private String setHotkey(String label, String hotkey)
+  private static String getHotkeyLabel(ConfigThingy element)
+      throws ConfigurationErrorException
   {
-    String nLabel = label.replaceFirst(hotkey, "~" + hotkey);
-    if (nLabel.equals(label))
+    String label = getMandatoryAttribute(element, "LABEL").toString();
+
+    try
     {
-      nLabel = label.replaceFirst(hotkey.toLowerCase(), "~"
-                                                        + hotkey.toLowerCase());
+      String hotkey = element.get("HOTKEY").toString();
+      String nLabel = label.replaceFirst(hotkey, "~" + hotkey);
+      if (nLabel.equals(label))
+      {
+        nLabel = label.replaceFirst(hotkey.toLowerCase(), "~"
+                                                          + hotkey
+                                                              .toLowerCase());
+      }
       if (nLabel.equals(label))
       {
         nLabel = label.replaceFirst(hotkey.toUpperCase(), "~"
                                                           + hotkey
                                                               .toUpperCase());
       }
+      return nLabel;
     }
-
-    return nLabel;
-
+    catch (NodeNotFoundException e)
+    {
+      return label;
+    }
   }
 
-  private PropertyValue[] createSeparator(ConfigThingy ct)
+  private UnoProps createSeparator(ConfigThingy ct)
   {
-    PropertyValue[] loadProps = null;
-
-    loadProps = LimuxHelper.setProperty(loadProps, "Type", new Short(
-        ItemType.SEPARATOR_LINE));
-
-    return loadProps;
+    return new UnoProps("Type", new Short(ItemType.SEPARATOR_LINE));
   }
 
   /**
@@ -606,42 +461,27 @@ public class MenuList
    * 
    * @param ct
    * @return
+   * @throws ConfigurationErrorException
    */
-  private PropertyValue[] createButton(ConfigThingy ct)
+  private UnoProps createButton(ConfigThingy ct)
+      throws ConfigurationErrorException
   {
-    PropertyValue[] loadProps = null;
+    String action = getMandatoryAttribute(ct, "ACTION").toString();
+    String label = getHotkeyLabel(ct);
 
     // ACTION + FRAG_ID
     // (a commandURL like ".WollMux:myAction#myArgument")
-    String action = LimuxHelper.getProperty(ct, "ACTION", UNDEFINED);
     if (action.equalsIgnoreCase("openTemplate"))
     {
-      // FRAG_ID hängt vom Typ ab! Nur bei Type Action "openTemplate" soll
-      // FRAG_ID als argument verwendet werden.
-      String fragid = LimuxHelper.getProperty(ct, "FRAG_ID", UNDEFINED);
-      if (fragid.equalsIgnoreCase(UNDEFINED))
-      {
-        Logger.error("Keine FRAG_ID definiert in menu...");
-        // TODO: ausführliche Meldung.
-      }
-      else
-      {
-        action = action + "#" + fragid;
-      }
+      String fragid = getMandatoryAttribute(ct, "FRAG_ID").toString();
+      action = action + "#" + fragid;
     }
-    loadProps = LimuxHelper.setProperty(loadProps, "CommandURL", PREFIX
-                                                                 + action);
 
-    // LABEL + HOTKEY
-    String label = LimuxHelper.getProperty(ct, "LABEL", UNDEFINED);
-    label = setHotkey(label, LimuxHelper.getProperty(ct, "HOTKEY", UNDEFINED));
-    loadProps = LimuxHelper.setProperty(loadProps, "Label", label);
-
-    // TYPE
-    loadProps = LimuxHelper.setProperty(loadProps, "Type", new Short(
-        ItemType.DEFAULT));
-
-    return loadProps;
+    UnoProps props = new UnoProps();
+    props.setPropertyValue("CommandURL", PREFIX + action);
+    props.setPropertyValue("Label", label);
+    props.setPropertyValue("Type", new Short(ItemType.DEFAULT));
+    return props;
   }
 
   // ************************************************************************

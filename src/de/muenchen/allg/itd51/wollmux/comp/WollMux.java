@@ -47,7 +47,6 @@ import com.sun.star.lib.uno.helper.Factory;
 import com.sun.star.lib.uno.helper.WeakBase;
 import com.sun.star.registry.XRegistryKey;
 import com.sun.star.task.XAsyncJob;
-import com.sun.star.uno.Exception;
 import com.sun.star.uno.RuntimeException;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
@@ -63,7 +62,6 @@ import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.VisibleTextFragmentList;
 import de.muenchen.allg.itd51.wollmux.XSenderBox;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
-import de.muenchen.allg.itd51.wollmux.oooui.MenuList;
 
 /**
  * Diese Klasse stellt den zentralen UNO-Service WollMux dar. Der Service dient
@@ -265,18 +263,6 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
       }
       datasourceJoiner = new DatasourceJoiner(wollmuxConf, ssourceStr,
           losCacheFile, getDEFAULT_CONTEXT());
-
-      // leere, persistente Toolbars erzeugen:
-      try
-      {
-        MenuList.generatePersistentModuleUIElements(
-            wollmuxConf,
-            getXComponentContext());
-      }
-      catch (Exception e)
-      {
-        Logger.error("Kann keine persistente Toolbar(s) erzeugen.", e);
-      }
 
       // register global EventListener
       UnoService eventBroadcaster = UnoService.createWithContext(

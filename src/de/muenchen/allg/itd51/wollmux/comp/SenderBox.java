@@ -143,9 +143,9 @@ public class SenderBox extends ComponentBase implements XServiceInfo,
 
     try
     {
-      frame = props.getUnoServiceByPropertyValue("Frame").xFrame();
-      commandURL = props.getStringByPropertyValue("CommandURL");
-      serviceManager = props.getUnoServiceByPropertyValue("ServiceManager");
+      frame = props.getPropertyValueAsUnoService("Frame").xFrame();
+      commandURL = props.getPropertyValueAsString("CommandURL");
+      serviceManager = props.getPropertyValueAsUnoService("ServiceManager");
     }
     catch (UnknownPropertyException x)
     {
