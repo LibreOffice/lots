@@ -28,6 +28,7 @@ import java.util.Iterator;
 import com.sun.star.awt.Point;
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.beans.XPropertySet;
+import com.sun.star.container.NoSuchElementException;
 import com.sun.star.frame.XController;
 import com.sun.star.frame.XDesktop;
 import com.sun.star.frame.XFrame;
@@ -106,6 +107,14 @@ public class MenuList
    */
   private void generateToolbar(ConfigThingy root) throws Exception
   {
+    // ConfigurationManager (für persistente Einstellungen) holen.
+    UnoService moduleCfgMgrSupplier = UnoService.createWithContext(
+        "com.sun.star.ui.ModuleUIConfigurationManagerSupplier",
+        ctx);
+    UnoService uiConfigMgr = new UnoService(moduleCfgMgrSupplier
+        .xModuleUIConfigurationManagerSupplier().getUIConfigurationManager(
+            "com.sun.star.text.TextDocument"));
+
     // 0. read in the names of all top-level menues.
     ConfigThingy bars = root.query("Symbolleisten");
     if (bars.count() > 0)
@@ -127,16 +136,29 @@ public class MenuList
         ConfigThingy toolbar = (ConfigThingy) i.next();
         String tbResource = S_TOOLBAR_PREFIX + toolbar.getName();
 
-        XUIElement xUIElement = xLayoutManager.getElement(tbResource);
-        if (xUIElement == null)
+        // Hole settings vom uiCfgMgr oder erzeuge neue settings:
+        boolean toolbarIsNew = false;
+        UnoService settings;
+        try
         {
-          // xLayoutManager.destroyElement(tbResource);
-          xLayoutManager.createElement(tbResource);
-          xUIElement = xLayoutManager.getElement(tbResource);
+          settings = new UnoService(uiConfigMgr.xUIConfigurationManager()
+              .getSettings(tbResource, true));
         }
-        UnoService uiElement = new UnoService(xUIElement);
-        UnoService settings = new UnoService(uiElement.xUIElementSettings()
-            .getSettings(true));
+        catch (NoSuchElementException e)
+        {
+          settings = new UnoService(uiConfigMgr.xUIConfigurationManager()
+              .createSettings());
+          uiConfigMgr.xUIConfigurationManager().insertSettings(
+              tbResource,
+              settings.xIndexAccess());
+          toolbarIsNew = true;
+        }
+
+        // Alle bestehenden Einträge löschen:
+        while (settings.xIndexContainer().getCount() > 0)
+        {
+          settings.xIndexContainer().removeByIndex(0);
+        }
 
         // Iteration über alle Elemente der Symbolleiste
         Iterator j = toolbar.queryByChild("TYPE").iterator();
@@ -159,18 +181,26 @@ public class MenuList
         }
 
         // Einstellungen Setzen
-        uiElement.setPropertyValue("Persistent", Boolean.FALSE);
-        uiElement.xUIElementSettings().setSettings(settings.xIndexAccess());
-
-        // Neue Toolbar positionieren und anzeigen.
-        int topHeight = xLayoutManager.getCurrentDockingArea().Y;
-        xLayoutManager.dockWindow(
+        uiConfigMgr.xUIConfigurationManager().replaceSettings(
             tbResource,
-            DockingArea.DOCKINGAREA_TOP,
-            new Point(0, topHeight));
+            settings.xIndexAccess());
+
+        // Toolbar positionieren und anzeigen.
+        xLayoutManager.createElement(tbResource);
+        if (toolbarIsNew)
+        {
+          int topHeight = xLayoutManager.getCurrentDockingArea().Y;
+          xLayoutManager.dockWindow(
+              tbResource,
+              DockingArea.DOCKINGAREA_TOP,
+              new Point(0, topHeight));
+        }
         xLayoutManager.showElement(tbResource);
       }
     }
+
+    // neue Toolbars persistent machen:
+    uiConfigMgr.xUIConfigurationPersistence().store();
   }
 
   /**

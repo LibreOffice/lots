@@ -1,4 +1,3 @@
-//FIXME Bei Uninstall des WollMux Paketes geht das LHM-Vorlagen Menü nicht weg.
 /*
  * Dateiname: WollMux.java
  * Projekt  : WollMux
