@@ -27,15 +27,12 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.sun.star.document.XEventListener;
-import com.sun.star.frame.XFrame;
 import com.sun.star.lang.XComponent;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.util.XModifyListener;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoService;
-import de.muenchen.allg.itd51.wollmux.comp.WollMux;
-import de.muenchen.allg.itd51.wollmux.oooui.MenuList;
 
 /**
  * Der EventProcessor sorgt für eine synchronisierte Verarbeitung aller
@@ -118,16 +115,30 @@ public class EventProcessor implements XEventListener, XModifyListener,
   public void notifyEvent(com.sun.star.document.EventObject docEvent)
   {
     int code = 0;
-    try{
+    try
+    {
       code = docEvent.Source.hashCode();
-    }catch(Exception x){}
-    Logger.debug2("Incoming documentEvent for #"+code+": " + docEvent.EventName);
+    }
+    catch (Exception x)
+    {
+    }
+    Logger.debug2("Incoming documentEvent for #"
+                  + code
+                  + ": "
+                  + docEvent.EventName);
     UnoService source = new UnoService(docEvent.Source);
+
+    // Im Falle von OnLoad oder OnNew den EventProcessor als Eventhandler
+    // des neuen Dokuments registrieren:
+    if (docEvent.EventName.compareToIgnoreCase("OnLoad") == 0
+        || docEvent.EventName.compareToIgnoreCase("OnNew") == 0)
+      if (source.supportsService("com.sun.star.text.TextDocument"))
+        source.xComponent().addEventListener(EventProcessor.create());
 
     // Bekannte Event-Typen rausziehen:
     if (docEvent.EventName.compareToIgnoreCase("OnLoad") == 0)
       addEvent(new Event(Event.ON_LOAD, "", docEvent.Source));
-    
+
     if (docEvent.EventName.compareToIgnoreCase("OnUnload") == 0)
       addEvent(new Event(Event.ON_UNLOAD, "", docEvent.Source));
 
@@ -139,15 +150,16 @@ public class EventProcessor implements XEventListener, XModifyListener,
 
     if (docEvent.EventName.compareToIgnoreCase("OnPrepareUnload") == 0)
     {
-      // auf das Event OnPrepareUnload muss synchron reagiert werden:
-      if (source.xTextDocument() != null)
-      {
-        Logger.debug2("Making Toolbar persistent.");
-        XFrame frame = source.xModel().getCurrentController().getFrame();
-        MenuList.generateToolbarEntries(WollMux.getWollmuxConf(), WollMux
-            .getXComponentContext(), frame);
-        MenuList.store(WollMux.getXComponentContext(), frame);
-      }
+//      // auf das Event OnPrepareUnload muss synchron reagiert werden:
+//      if (source.xTextDocument() != null)
+//      {
+//        Logger.debug2("Making Toolbar persistent.");
+//        XFrame frame = source.xModel().getCurrentController().getFrame();
+//        MenuList.generateToolbarEntries(WollMux.getWollmuxConf(), WollMux
+//            .getXComponentContext(), frame);
+//        MenuList.store(WollMux.getXComponentContext(), frame);
+//      }
+      //TODO: remove OnPrepareUnload-Event.
     }
   }
 
@@ -192,7 +204,7 @@ public class EventProcessor implements XEventListener, XModifyListener,
    */
   public void disposing(com.sun.star.lang.EventObject source)
   {
-   // FIXME Christoph, ist Dir nicht aufgefallen, dass diese Routine nie
+    // FIXME Christoph, ist Dir nicht aufgefallen, dass diese Routine nie
     // aufgerufen wird? Es ist nicht genug, deinen EventHandler auf den
     // GlobalEventBroadcaster zu registrieren. Du musst ihn auch auf jedes
     // Dokument registrieren, da z.B. disposing() nur von auf Dokumenten

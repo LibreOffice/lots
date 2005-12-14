@@ -58,8 +58,6 @@ import de.muenchen.allg.itd51.wollmux.oooui.MenuList;
  */
 public class EventHandler
 {
-  public static boolean menubarInitialized = false;
-
   /**
    * Diese Method ist für die Ausführung eines einzelnen Events zuständig. Nach
    * der Bearbeitung entscheidet der Rückgabewert ob unmittelbar die Bearbeitung
@@ -74,17 +72,21 @@ public class EventHandler
   public static boolean processEvent(Event event)
   {
     int code = 0;
-    try{
+    try
+    {
       code = event.getSource().hashCode();
-    }catch(java.lang.Exception x){}
-    Logger.debug("Bearbeiten des Events: " + event+ " for #"+code);
+    }
+    catch (java.lang.Exception x)
+    {
+    }
+    Logger.debug("Bearbeiten des Events: " + event + " for #" + code);
     try
     {
       if (event.getEvent() == Event.ON_LOAD)
       {
         return on_load(event);
       }
-      
+
       if (event.getEvent() == Event.ON_UNLOAD)
       {
         return on_unload(event);
@@ -304,12 +306,8 @@ public class EventHandler
       XFrame frame = source.xModel().getCurrentController().getFrame();
       MenuList.generateToolbarEntries(WollMux.getWollmuxConf(), WollMux
           .getXComponentContext(), frame);
-      if (menubarInitialized == false)
-      {
-        MenuList.generateMenues(WollMux.getWollmuxConf(), WollMux
-            .getXComponentContext(), frame);
-        menubarInitialized = true;
-      }
+      MenuList.generateMenues(WollMux.getWollmuxConf(), WollMux
+          .getXComponentContext(), frame);
 
       // Interpretation von WM-Kommandos
       new WMCommandInterpreter(source.xTextDocument()).interpret();
@@ -318,12 +316,12 @@ public class EventHandler
   }
 
   private static boolean on_unload(Event event) throws EndlessLoopException,
-  WMCommandsFailedException
+      WMCommandsFailedException
   {
     // FIXME Christoph, die Toolbar verschwindet wenn umgeschaltet wird auf
     // Seitenansicht. Ich habe, um dies zu beheben diesen on_unload() Handler
     // eingeführt weil es der einzige Event ist, der zur Zeit bei diesem Wechsel
-    // erfasst wird. Dies ist allerdings unsauber. 
+    // erfasst wird. Dies ist allerdings unsauber.
     // Es ist ohnehin eine
     // gute Frage, wieso ein on_unload() Event produziert wird bei Umschalten
     // auf die Seitenansicht. Vielleicht ist das ein Bug in OOo?
@@ -333,14 +331,16 @@ public class EventHandler
     // mehr auf den Controller geschaut werden. Immerhin sind die Toolbars nicht
     // am Model, sondern am Frame (der eigentlich mit dem Model nichts zu tun
     // hat, sondern nur mit dem Controller). Christoph, überdenk das ganze
-    // nochmal. Ich denke du wirst auch auf die jeweiligen Controller EventHandler
+    // nochmal. Ich denke du wirst auch auf die jeweiligen Controller
+    // EventHandler
     // registrieren und auf disposing() reagieren müssen, um das Erzeugen der
     // Toolbar in den gewünschten Fällen korrekt anstossen zu können.
     UnoService source = new UnoService(event.getSource());
     if (source.supportsService("com.sun.star.text.TextDocument"))
     {
       XController controller = null;
-      try{
+      try
+      {
         controller = source.xModel().getCurrentController();
       }
       catch (DisposedException x)
@@ -350,15 +350,17 @@ public class EventHandler
         // nicht auftreten, wenn (siehe oben) nicht der ON_UNLOAD Event
         // misbraucht würde um das Seitenansicht-Problem zu lösen.
         // Evtl. liesse sich auch noch über den OnPrepareUnload Event oder
-        // den OnPrepareViewClosing Event (beide kommen im Seitenansichtswechsel 
-        // nicht) dafür sorgen, dass der on_unload Handler im Falle eines wirklichen
+        // den OnPrepareViewClosing Event (beide kommen im Seitenansichtswechsel
+        // nicht) dafür sorgen, dass der on_unload Handler im Falle eines
+        // wirklichen
         // Schliessen des Dokuments nicht zum Zuge kommt.
-        // Vielleicht wäre es nicht schlecht, eine HashMap zu führen, die Dokumente
-        // auf einen Status mappt. In diesem Status könnte dann transportiert werden,
-        // ob das Objekt noch lebt oder evtl. am Absterben ist. 
+        // Vielleicht wäre es nicht schlecht, eine HashMap zu führen, die
+        // Dokumente
+        // auf einen Status mappt. In diesem Status könnte dann transportiert
+        // werden,
+        // ob das Objekt noch lebt oder evtl. am Absterben ist.
       }
-        
-      
+
       if (controller != null)
       {
         XFrame frame = controller.getFrame();
@@ -368,8 +370,7 @@ public class EventHandler
     }
     return EventProcessor.processTheNextEvent;
   }
-  
-  
+
   private static boolean on_initialize() throws NodeNotFoundException,
       TimeoutException, ConfigurationErrorException,
       UnsupportedOperationException, java.lang.IllegalArgumentException,
