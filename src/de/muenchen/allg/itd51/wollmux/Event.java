@@ -59,7 +59,7 @@ public class Event
 
   public static final int ON_INITIALIZE = 60;
   
-  public static final int ON_UNLOAD = 70;
+  public static final int ON_FRAME_CHANGED = 70;
 
   // private Felder:
 
@@ -96,9 +96,9 @@ public class Event
     {
       return "ON_LOAD";
     }
-    if (event == ON_UNLOAD)
+    if (event == ON_FRAME_CHANGED)
     {
-      return "ON_UNLOAD";
+      return "ON_FRAME_CHANGED";
     }
     if (event == ON_NEW)
     {

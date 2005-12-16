@@ -1,7 +1,7 @@
 /*
- * Dateiname: MenuList.java
+ * Dateiname: OOoUserInterface.java
  * Projekt  : WollMux
- * Funktion : The MenuList is responsible for the generation of the menus
+ * Funktion : The OOoUserInterface is responsible for the generation of the menus
  *            and toolbars
  * 
  * Copyright: Landeshauptstadt München
@@ -18,7 +18,7 @@
  * @version 1.0
  * 
  */
-package de.muenchen.allg.itd51.wollmux.oooui;
+package de.muenchen.allg.itd51.wollmux;
 
 import java.io.File;
 import java.io.IOException;
@@ -47,15 +47,11 @@ import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
-import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
-import de.muenchen.allg.itd51.wollmux.Logger;
 
 /**
- * The MenuList is responsible for the generation of the menus in the instance
- * of the OO. The generated menues are persistent and will be there after OO
- * restarts.
- * 
- * 
+ * The OOoUserInterface is responsible for the generation of the menus in the
+ * instance of the OO. The generated menues are persistent and will be there
+ * after OO restarts.
  * 
  * The generated menu entries will be available for all documents of the same
  * type. For example, a user works with a XTextDocument. A call to the
@@ -63,12 +59,9 @@ import de.muenchen.allg.itd51.wollmux.Logger;
  * these menues. But the menues are not there, if some document of another type
  * as XTextDocument is opened.
  * 
- * 
- * 
  * @author GOLOVKO
- * 
  */
-public class MenuList
+public class OOoUserInterface
 {
   private XComponentContext ctx;
 
@@ -80,7 +73,48 @@ public class MenuList
 
   private static String PREFIX = "wollmux:";
 
-  private MenuList(XComponentContext ctx, XFrame xFrame)
+  /**
+   * generates described with the <b>configThingy</b> menues in the frame of
+   * the running OO instance.
+   * 
+   * @param configThingy
+   * @param xFrame
+   * @throws NodeNotFoundException
+   */
+  public static void generateMenues(ConfigThingy configThingy,
+      XComponentContext xContext, XFrame xFrame)
+  {
+    try
+    {
+      new OOoUserInterface(xContext, xFrame).generateMenues(configThingy);
+    }
+    catch (Exception e)
+    {
+      Logger.error("Generation of the menu failed", e);
+    }
+  }
+
+  /**
+   * generates described with the <b>configThingy</b> menues in the frame of
+   * the running OO instance.
+   * 
+   * @param configThingy
+   * @param xFrame
+   */
+  public static void generateToolbarEntries(ConfigThingy configThingy,
+      XComponentContext xContext, XFrame xFrame)
+  {
+    try
+    {
+      new OOoUserInterface(xContext, xFrame).generateToolbar(configThingy);
+    }
+    catch (Exception e)
+    {
+      Logger.error("Generation of the toolbar entries failed", e);
+    }
+  }
+
+  private OOoUserInterface(XComponentContext ctx, XFrame xFrame)
   {
     this.ctx = ctx;
 
@@ -301,6 +335,22 @@ public class MenuList
     }
   }
 
+  /**
+   * Diese Methode erzeugt ein neues, leeres PopupMenue.
+   * 
+   * @param ct
+   *          Das ConfigThingy-Element, das das Menue beschreibt.
+   * @param root
+   *          Das Wurzelelement der Configuration, das die "Menues"-Abschnitte
+   *          enthält.
+   * @param factory
+   *          Eine Factory zur Erzeugung des neuen ItemDescriptorContainers des
+   *          PopupMenues - kann üblicherweise aus dem Settings-Objekt des
+   *          Wurzel-UI-Elements mit queryInterface erzeugt werden.
+   * @return
+   * @throws ConfigurationErrorException
+   * @throws Exception
+   */
   private UnoProps createMenu(ConfigThingy ct, ConfigThingy root,
       XSingleComponentFactory factory) throws ConfigurationErrorException,
       Exception
@@ -362,22 +412,6 @@ public class MenuList
     return props;
   }
 
-  private static ConfigThingy getMandatoryAttribute(ConfigThingy ct, String att)
-      throws ConfigurationErrorException
-  {
-    try
-    {
-      return ct.get(att);
-    }
-    catch (NodeNotFoundException e)
-    {
-      throw new ConfigurationErrorException("Fehlendes Attribut \""
-                                            + att
-                                            + "\" in Element: "
-                                            + ct.stringRepresentation());
-    }
-  }
-
   /**
    * 
    * a senderBox is an item (usually belongs to a toolbar) with drop-down list
@@ -400,43 +434,70 @@ public class MenuList
   }
 
   /**
-   * generates described with the <b>configThingy</b> menues in the frame of
-   * the running OO instance.
+   * Erzeugt einen Separator.
    * 
-   * @param configThingy
-   * @param xFrame
-   * @throws NodeNotFoundException
+   * @param ct
+   * @return
    */
-  public static void generateMenues(ConfigThingy configThingy,
-      XComponentContext xContext, XFrame xFrame)
+  private UnoProps createSeparator(ConfigThingy ct)
   {
-    try
-    {
-      new MenuList(xContext, xFrame).generateMenues(configThingy);
-    }
-    catch (Exception e)
-    {
-      Logger.error("Generation of the menu failed", e);
-    }
+    return new UnoProps("Type", new Short(ItemType.SEPARATOR_LINE));
   }
 
   /**
-   * generates described with the <b>configThingy</b> menues in the frame of
-   * the running OO instance.
+   * generate a an item for either toolbar or menu element. Corrsponds to the
+   * type "button" in the "LHMVorlagenMenue.conf".
    * 
-   * @param configThingy
-   * @param xFrame
+   * @param ct
+   * @return
+   * @throws ConfigurationErrorException
    */
-  public static void generateToolbarEntries(ConfigThingy configThingy,
-      XComponentContext xContext, XFrame xFrame)
+  private UnoProps createButton(ConfigThingy ct)
+      throws ConfigurationErrorException
+  {
+    String action = getMandatoryAttribute(ct, "ACTION").toString();
+    String label = getHotkeyLabel(ct);
+
+    // ACTION + FRAG_ID
+    // (a commandURL like ".WollMux:myAction#myArgument")
+    if (action.equalsIgnoreCase("openTemplate"))
+    {
+      String fragid = getMandatoryAttribute(ct, "FRAG_ID").toString();
+      action = action + "#" + fragid;
+    }
+
+    UnoProps props = new UnoProps();
+    props.setPropertyValue("CommandURL", PREFIX + action);
+    props.setPropertyValue("Label", label);
+    props.setPropertyValue("Type", new Short(ItemType.DEFAULT));
+    return props;
+  }
+
+  /**
+   * Diese Methode stellt sicher, dass ein ConfigThingy-Attribut vorhanden ist
+   * und liefert dieses zurück. Ist das Attribut nicht vorhanden, so wird eine
+   * ConfigurationErrorException geworfen.
+   * 
+   * @param ct
+   *          Das ConfigThingy Element, das das Attribut beinhalten soll.
+   * @param att
+   *          Der Name des gesuchten Attributs.
+   * @return
+   * @throws ConfigurationErrorException
+   */
+  private static ConfigThingy getMandatoryAttribute(ConfigThingy ct, String att)
+      throws ConfigurationErrorException
   {
     try
     {
-      new MenuList(xContext, xFrame).generateToolbar(configThingy);
+      return ct.get(att);
     }
-    catch (Exception e)
+    catch (NodeNotFoundException e)
     {
-      Logger.error("Generation of the toolbar entries failed", e);
+      throw new ConfigurationErrorException("Fehlendes Attribut \""
+                                            + att
+                                            + "\" in Element: "
+                                            + ct.stringRepresentation());
     }
   }
 
@@ -478,40 +539,6 @@ public class MenuList
     {
       return label;
     }
-  }
-
-  private UnoProps createSeparator(ConfigThingy ct)
-  {
-    return new UnoProps("Type", new Short(ItemType.SEPARATOR_LINE));
-  }
-
-  /**
-   * generate a an item for either toolbar or menu element. Corrsponds to the
-   * type "button" in the "LHMVorlagenMenue.conf".
-   * 
-   * @param ct
-   * @return
-   * @throws ConfigurationErrorException
-   */
-  private UnoProps createButton(ConfigThingy ct)
-      throws ConfigurationErrorException
-  {
-    String action = getMandatoryAttribute(ct, "ACTION").toString();
-    String label = getHotkeyLabel(ct);
-
-    // ACTION + FRAG_ID
-    // (a commandURL like ".WollMux:myAction#myArgument")
-    if (action.equalsIgnoreCase("openTemplate"))
-    {
-      String fragid = getMandatoryAttribute(ct, "FRAG_ID").toString();
-      action = action + "#" + fragid;
-    }
-
-    UnoProps props = new UnoProps();
-    props.setPropertyValue("CommandURL", PREFIX + action);
-    props.setPropertyValue("Label", label);
-    props.setPropertyValue("Type", new Short(ItemType.DEFAULT));
-    return props;
   }
 
   // ************************************************************************
@@ -569,8 +596,9 @@ public class MenuList
       xController = xModel.getCurrentController();
       xFrame = xController.getFrame();
       //
-      MenuList.generateMenues(conf, testmxRemoteContext, xFrame);
-      MenuList.generateToolbarEntries(conf, testmxRemoteContext, xFrame);
+      OOoUserInterface.generateMenues(conf, testmxRemoteContext, xFrame);
+      OOoUserInterface
+          .generateToolbarEntries(conf, testmxRemoteContext, xFrame);
     }
     catch (java.lang.Exception e)
     {

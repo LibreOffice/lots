@@ -27,11 +27,12 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.sun.star.document.XEventListener;
-import com.sun.star.lang.XComponent;
+import com.sun.star.frame.FrameAction;
+import com.sun.star.frame.FrameActionEvent;
+import com.sun.star.frame.XFrameActionListener;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.util.XModifyListener;
 
-import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoService;
 
 /**
@@ -43,7 +44,7 @@ import de.muenchen.allg.afid.UnoService;
  * @author lut
  */
 public class EventProcessor implements XEventListener, XModifyListener,
-    ActionListener
+    XFrameActionListener, ActionListener
 {
   private List eventQueue = new LinkedList();
 
@@ -108,6 +109,21 @@ public class EventProcessor implements XEventListener, XModifyListener,
   }
 
   /**
+   * Diese Methode fügt ein Event an die eventQueue an und weckt den
+   * EventProcessor-Thread.
+   * 
+   * @param event
+   */
+  public void addEvent(Event event)
+  {
+    synchronized (eventQueue)
+    {
+      eventQueue.add(event);
+      eventQueue.notifyAll();
+    }
+  }
+
+  /**
    * Wird vom GlobalEventBroadcaster aufgerufen.
    * 
    * @see com.sun.star.document.XEventListener#notifyEvent(com.sun.star.document.EventObject)
@@ -129,38 +145,24 @@ public class EventProcessor implements XEventListener, XModifyListener,
     UnoService source = new UnoService(docEvent.Source);
 
     // Im Falle von OnLoad oder OnNew den EventProcessor als Eventhandler
-    // des neuen Dokuments registrieren:
+    // des neuen Dokuments registrieren und den Document-Status auf alive
+    // setzen:
     if (docEvent.EventName.compareToIgnoreCase("OnLoad") == 0
         || docEvent.EventName.compareToIgnoreCase("OnNew") == 0)
       if (source.supportsService("com.sun.star.text.TextDocument"))
+      {
         source.xComponent().addEventListener(EventProcessor.create());
+      }
 
     // Bekannte Event-Typen rausziehen:
     if (docEvent.EventName.compareToIgnoreCase("OnLoad") == 0)
       addEvent(new Event(Event.ON_LOAD, "", docEvent.Source));
-
-    if (docEvent.EventName.compareToIgnoreCase("OnUnload") == 0)
-      addEvent(new Event(Event.ON_UNLOAD, "", docEvent.Source));
 
     if (docEvent.EventName.compareToIgnoreCase("OnNew") == 0)
       addEvent(new Event(Event.ON_NEW, "", docEvent.Source));
 
     if (docEvent.EventName.compareToIgnoreCase("OnFocus") == 0)
       addEvent(new Event(Event.ON_FOCUS, "", docEvent.Source));
-
-    if (docEvent.EventName.compareToIgnoreCase("OnPrepareUnload") == 0)
-    {
-//      // auf das Event OnPrepareUnload muss synchron reagiert werden:
-//      if (source.xTextDocument() != null)
-//      {
-//        Logger.debug2("Making Toolbar persistent.");
-//        XFrame frame = source.xModel().getCurrentController().getFrame();
-//        MenuList.generateToolbarEntries(WollMux.getWollmuxConf(), WollMux
-//            .getXComponentContext(), frame);
-//        MenuList.store(WollMux.getXComponentContext(), frame);
-//      }
-      //TODO: remove OnPrepareUnload-Event.
-    }
   }
 
   /**
@@ -204,15 +206,10 @@ public class EventProcessor implements XEventListener, XModifyListener,
    */
   public void disposing(com.sun.star.lang.EventObject source)
   {
-    // FIXME Christoph, ist Dir nicht aufgefallen, dass diese Routine nie
-    // aufgerufen wird? Es ist nicht genug, deinen EventHandler auf den
-    // GlobalEventBroadcaster zu registrieren. Du musst ihn auch auf jedes
-    // Dokument registrieren, da z.B. disposing() nur von auf Dokumenten
-    // registrierten Handlern aufgerufen wird. Wozu hab ich dir denn meinen
-    // EventHandlerTest.java gegeben? Da hättest Du das sehen können.
     Logger.debug2("disposing(): Removing events for #"
                   + source.hashCode()
                   + " from queue");
+
     // eventQueue durchscannen und Events mit nicht mehr erfüllten
     // Sourcen-Referenzen löschen.
     synchronized (eventQueue)
@@ -229,23 +226,54 @@ public class EventProcessor implements XEventListener, XModifyListener,
       }
     }
 
+    UnoService usSource = new UnoService(source.Source);
+
     // EventListener deregistrieren.
-    XComponent xCompo = UNO.XComponent(source.Source);
-    if (xCompo != null) xCompo.removeEventListener(this);
+    if (usSource.xComponent() != null)
+      usSource.xComponent().removeEventListener(this);
   }
 
-  /**
-   * Diese Methode fügt ein Event an die eventQueue an und weckt den
-   * EventProcessor-Thread.
-   * 
-   * @param event
-   */
-  public void addEvent(Event event)
+  public void frameAction(FrameActionEvent event)
   {
-    synchronized (eventQueue)
+    FrameAction action = event.Action;
+    String actionStr = "unknown";
+    if (action == FrameAction.COMPONENT_ATTACHED)
     {
-      eventQueue.add(event);
-      eventQueue.notifyAll();
+      actionStr = "COMPONENT_ATTACHED";
     }
+    if (action == FrameAction.COMPONENT_DETACHING)
+    {
+      actionStr = "COMPONENT_DETACHING";
+    }
+    if (action == FrameAction.COMPONENT_REATTACHED)
+    {
+      actionStr = "COMPONENT_REATTACHED";
+    }
+    if (action == FrameAction.FRAME_ACTIVATED)
+    {
+      actionStr = "FRAME_ACTIVATED";
+    }
+    if (action == FrameAction.FRAME_DEACTIVATING)
+    {
+      actionStr = "FRAME_DEACTIVATING";
+    }
+    if (action == FrameAction.CONTEXT_CHANGED)
+    {
+      actionStr = "CONTEXT_CHANGED";
+    }
+    if (action == FrameAction.FRAME_UI_ACTIVATED)
+    {
+      actionStr = "FRAME_UI_ACTIVATED";
+    }
+    if (action == FrameAction.FRAME_UI_DEACTIVATING)
+    {
+      actionStr = "FRAME_UI_DEACTIVATING";
+    }
+    Logger.debug2("Incoming FrameActionEvent: " + actionStr);
+
+    // Bekannte Event-Typen rausziehen:
+    if (action == FrameAction.COMPONENT_REATTACHED)
+      addEvent(new Event(Event.ON_FRAME_CHANGED, "", event.Source));
   }
+
 }
