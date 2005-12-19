@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Iterator;
+import java.util.List;
 
 import com.sun.star.awt.XWindow;
 import com.sun.star.frame.XFrame;
@@ -38,6 +39,7 @@ import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.comp.WollMux;
 import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.DJDataset;
+import de.muenchen.allg.itd51.wollmux.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.db.DatasetNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
 import de.muenchen.allg.itd51.wollmux.db.QueryResults;
@@ -335,36 +337,59 @@ public class EventHandler
   {
     DatasourceJoiner dsj = WollMux.getDatasourceJoiner();
 
-    // nichts machen, wenn es ist bereits Datensätze im LOS gibt.
-    if (dsj.getLOS().size() != 0) return EventProcessor.processTheNextEvent;
-
-    // Die initialen Daten aus den OOo UserProfileData holen:
-    String vorname = getUserProfileData("givenname");
-    String nachname = getUserProfileData("sn");
-    Logger.debug2("Initialize mit Vorname=\""
-                  + vorname
-                  + "\" und Nachname=\""
-                  + nachname
-                  + "\"");
-
-    // im DatasourceJoiner nach dem Benutzer suchen:
-    QueryResults r = null;
-    if (!vorname.equals("") && !nachname.equals(""))
-      r = dsj.find("Vorname", vorname, "Nachname", nachname);
-
-    // Auswertung der Suchergebnisse:
-    if (r != null)
+    // falls es noch keine Datensätze im LOS gibt.
+    if (dsj.getLOS().size() == 0)
     {
-      // alle matches werden in die PAL kopiert:
-      Iterator i = r.iterator();
-      while (i.hasNext())
+
+      // Die initialen Daten aus den OOo UserProfileData holen:
+      String vorname = getUserProfileData("givenname");
+      String nachname = getUserProfileData("sn");
+      Logger.debug2("Initialize mit Vorname=\""
+                    + vorname
+                    + "\" und Nachname=\""
+                    + nachname
+                    + "\"");
+
+      // im DatasourceJoiner nach dem Benutzer suchen:
+      QueryResults r = null;
+      if (!vorname.equals("") && !nachname.equals(""))
+        r = dsj.find("Vorname", vorname, "Nachname", nachname);
+
+      // Auswertung der Suchergebnisse:
+      if (r != null)
       {
-        ((DJDataset) i.next()).copy();
+        // alle matches werden in die PAL kopiert:
+        Iterator i = r.iterator();
+        while (i.hasNext())
+        {
+          ((DJDataset) i.next()).copy();
+        }
+      }
+
+      // Absender Auswählen Dialog starten:
+      EventProcessor.create().addEvent(new Event(Event.ON_ABSENDER_AUSWAEHLEN));
+    }
+    else
+    {
+      String message = "Die folgenden Datensätze konnten nicht "
+                       + "aus der Datenbank aktualisiert werden. "
+                       + "Wenn dieses Problem nicht temporärer "
+                       + "Natur ist, sollten sie diese Datensätze aus "
+                       + "ihrer Absenderliste löschen und neu hinzufügen:\n\n";
+      List l = dsj.getStatus().lostDatasets;
+      if (l.size() > 0)
+      {
+        Iterator i = l.iterator();
+        while (i.hasNext())
+        {
+          Dataset ds = (Dataset) i.next();
+          message += ds.get("Nachname") + ", ";
+          message += ds.get("Vorname") + " (";
+          message += ds.get("Rolle") + ")\n";
+        }
+        showInfoModal("WollMux-Info", message);
       }
     }
-
-    // Absender Auswählen Dialog starten:
-    EventProcessor.create().addEvent(new Event(Event.ON_ABSENDER_AUSWAEHLEN));
     return EventProcessor.processTheNextEvent;
   }
 
