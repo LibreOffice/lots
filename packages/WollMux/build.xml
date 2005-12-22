@@ -92,7 +92,7 @@
 				<attribute name="Bundle-Name" value="${COMPONENT}" />
 				<attribute name="Bundle-Activator" value="${WollMux_REG_NAME}" />
 				<attribute name="Bundle-SymbolicName" value="${COMPONENT}" />
-				<attribute name="Bundle-Version" value="1.0" />
+				<attribute name="Bundle-Version" value="${VERSION}" />
 				<attribute name="RegistrationClassName" value="${WollMux_REG_NAME}" />
 			</manifest>
 		</jar>
