@@ -278,19 +278,58 @@ public class OOoUserInterface
         try
         {
           String pos = getMandatoryAttribute(element, "POSITION").toString();
-          PropertyValue[] topMenu = createUIItem(
-              element,
-              root,
-              settings.xSingleComponentFactory()).getProps();
+          UnoProps item = createUIItem(element, root, settings
+              .xSingleComponentFactory());
+          removeFromSettings(settings, item
+              .getPropertyValueAsString("CommandURL"));
           settings.xIndexContainer().insertByIndex(
               Integer.parseInt(pos),
-              topMenu);
+              item.getProps());
           uiElement.xUIElementSettings().setSettings(settings.xIndexAccess());
         }
         catch (java.lang.Exception e)
         {
           Logger.error(e);
         }
+      }
+    }
+  }
+
+  /**
+   * Diese Methode sucht in einem übergebenen settings-container nach einem
+   * Element mit der gegebenen URL und löscht dieses aus dem Container. Es wird
+   * nur der erste match gelöscht.
+   * 
+   * @param settings
+   * @param url
+   */
+  private void removeFromSettings(UnoService settings, String url)
+  {
+    int count = settings.xIndexContainer().getCount();
+    for (int i = 0; i < count; i++)
+    {
+      String itemUrl = null;
+      try
+      {
+        UnoProps item = new UnoProps((Object[]) settings.xIndexContainer()
+            .getByIndex(i));
+        itemUrl = item.getPropertyValueAsString("CommandURL");
+      }
+      catch (java.lang.Exception e)
+      {
+        Logger.error(e);
+      }
+      if (itemUrl != null && itemUrl.equals(url))
+      {
+        try
+        {
+          settings.xIndexContainer().removeByIndex(i);
+        }
+        catch (java.lang.Exception e)
+        {
+          Logger.error(e);
+        }
+        return;
       }
     }
   }
