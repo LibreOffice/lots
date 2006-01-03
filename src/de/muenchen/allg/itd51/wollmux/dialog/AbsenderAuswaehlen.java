@@ -14,6 +14,7 @@
 *                    weil jetzt der TestDJ schon eine Absenderliste
 *                    mit Einträgen hat.
 * 22.11.2005 | BNK | Common.setLookAndFeel() verwenden
+* 03.01.2005 | BNK | Bug korrigiert;  .gridy = x  sollte .gridx = x sein.
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -318,7 +319,7 @@ public class AbsenderAuswaehlen
           if (type.equals("label"))
           {
             JLabel uiElement = new JLabel();
-            gbcLabel.gridy = x;
+            gbcLabel.gridx = x;
             gbcLabel.gridy = y;
             compo.add(uiElement, gbcLabel);
             uiElement.setText(uiElementDesc.get("LABEL").toString());
@@ -332,7 +333,7 @@ public class AbsenderAuswaehlen
             }catch(Exception e){}
             uiElement.add(Box.createHorizontalGlue());
 
-            gbcGlue.gridy = x;
+            gbcGlue.gridx = x;
             gbcGlue.gridy = y;
             compo.add(uiElement, gbcGlue);
           }
