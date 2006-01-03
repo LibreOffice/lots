@@ -9,6 +9,7 @@
 * Datum      | Wer | Änderungsgrund
 * -------------------------------------------------------------------
 * 02.01.2006 | BNK | Erstellung
+* 03.01.2006 | BNK | Menüs unterstützt
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -17,7 +18,6 @@
 */
 package de.muenchen.allg.itd51.wollmux.dialog;
 
-import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
@@ -33,10 +33,13 @@ import java.awt.event.WindowFocusListener;
 import java.awt.event.WindowListener;
 import java.io.File;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
+import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.ImageIcon;
@@ -45,7 +48,12 @@ import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JSeparator;
+import javax.swing.SwingConstants;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
@@ -80,9 +88,21 @@ public class WollMuxBar
   private JPanel logoPanel;
 
   /**
-   * Standardbreite für Textfelder
+   * Mappt einen Menü-Namen auf ein entsprechendes JPopupMenu.
    */
-  //private final static int TEXTFIELD_DEFAULT_WIDTH = 22;
+  private Map mapMenuNameToJPopupMenu = new HashMap();
+  
+  /**
+   * Mappt einen Menü-Namen auf ein entsprechendes JMenu.
+   */
+  private Map mapMenuNameToJMenu = new HashMap();
+  
+  /**
+   * Rand über und unter einem horizontalen bzw links und rechts neben vertikalem
+   * Separator (in Pixeln).
+   */
+  private final static int SEP_BORDER = 4;
+  
   /**
    * Rand um Textfelder (wird auch für ein paar andere Ränder verwendet)
    * in Pixeln.
@@ -108,6 +128,13 @@ public class WollMuxBar
   { public void actionPerformed(ActionEvent e){ openTemplate(e.getActionCommand()); } };
   
   /**
+   * ActionListener für Buttons, denen ein Menü zugeordnet ist. 
+   */
+  private ActionListener actionListener_openMenu = new ActionListener()
+        { public void actionPerformed(ActionEvent e){ openMenu(e); } };
+  
+  
+  /**
    * wird getriggert bei windowClosing() Event.
    */
   private ActionListener closeAction = actionListener_abort;
@@ -118,7 +145,7 @@ public class WollMuxBar
   private List senderboxes = new Vector();
   
   /**
-   * @param conf Briefkopfleiste-Knoten 
+   * @param conf Vater-Knoten von Menues und Symbolleisten 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public WollMuxBar(final ConfigThingy conf)
@@ -129,7 +156,10 @@ public class WollMuxBar
     try{
       javax.swing.SwingUtilities.invokeLater(new Runnable() {
         public void run() {
-            try{createGUI(conf);}catch(Exception x){};
+            try{createGUI(conf);}catch(Exception x)
+            {
+              Logger.error(x);
+            };
         }
       });
     }
@@ -137,13 +167,13 @@ public class WollMuxBar
 
   }
 
-  private void createGUI(ConfigThingy barDesc)
+  private void createGUI(ConfigThingy conf)
   {
     Common.setLookAndFeel();
     
     String title ="WollMux";
     try{
-      title = barDesc.get("TITLE").toString();
+      title = conf.get("Briefkopfleiste").get("TITLE").toString();
     }catch(Exception x) {}
     
     //Create and set up the window.
@@ -156,8 +186,13 @@ public class WollMuxBar
     contentPanel.setLayout(new GridBagLayout());
     myFrame.getContentPane().add(contentPanel);
     
-    addUIElements(barDesc, "Buttons", contentPanel, 1, 0);
-    
+    try{
+      addUIElements(conf.query("Menues"),conf.get("Briefkopfleiste"), "Elemente", contentPanel, 1, 0);
+    }catch(NodeNotFoundException x)
+    {
+      Logger.error(x);
+    }
+
     WindowTransformer trafo = new WindowTransformer();
     
     logoFrame = new JFrame("WollMux");
@@ -189,19 +224,28 @@ public class WollMuxBar
     myFrame.setVisible(true);
   }
   
+  
+  
+  
   /** Fügt compo UI Elemente gemäss den Kindern von conf.query(key) hinzu.
    *  compo muss ein GridBagLayout haben. stepx und stepy geben an um
    *  wieviel mit jedem UI Element die x und die y Koordinate der Zelle
    *  erhöht werden soll. Wirklich sinnvoll sind hier nur (0,1) und (1,0).
+   *  menuConf muss als Kinder "Menues"-Knoten haben, die als ihre Kinder
+   *  Menübeschreibungen haben für die Menüs, die als UI Elemente verwendet
+   *  werden.
+   *  context kann "menu" oder "panel" sein.
    */
-  private void addUIElements(ConfigThingy conf, String key, JComponent compo, int stepx, int stepy)
+  private void addUIElements(ConfigThingy menuConf, ConfigThingy conf, String key, JComponent compo, int stepx, int stepy, String context)
   {
     //int gridx, int gridy, int gridwidth, int gridheight, double weightx, double weighty, int anchor,          int fill,                  Insets insets, int ipadx, int ipady) 
     //GridBagConstraints gbcTextfield = new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0, GridBagConstraints.LINE_START,   GridBagConstraints.HORIZONTAL, new Insets(TF_BORDER,TF_BORDER,TF_BORDER,TF_BORDER),0,0);
-    GridBagConstraints gbcLabel     = new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.NONE,       new Insets(TF_BORDER,TF_BORDER,TF_BORDER,TF_BORDER),0,0);
-    GridBagConstraints gbcGlue      = new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.LINE_START, GridBagConstraints.BOTH,       new Insets(0,0,0,0),0,0);
-    GridBagConstraints gbcButton    = new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.NONE,       new Insets(BUTTON_BORDER,BUTTON_BORDER,BUTTON_BORDER,BUTTON_BORDER),0,0);
-    GridBagConstraints gbcListBox    = new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH,       new Insets(TF_BORDER,TF_BORDER,TF_BORDER,TF_BORDER),0,0);
+    GridBagConstraints gbcLabel      = new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.NONE,       new Insets(TF_BORDER,TF_BORDER,TF_BORDER,TF_BORDER),0,0);
+    GridBagConstraints gbcGlue       = new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.LINE_START, GridBagConstraints.BOTH,       new Insets(0,0,0,0),0,0);
+    GridBagConstraints gbcButton     = new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.NONE,       new Insets(BUTTON_BORDER,BUTTON_BORDER,BUTTON_BORDER,BUTTON_BORDER),0,0);
+    GridBagConstraints gbcMenuButton = new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.NONE,       new Insets(BUTTON_BORDER,BUTTON_BORDER,BUTTON_BORDER,BUTTON_BORDER),0,0);
+    GridBagConstraints gbcListBox    = new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH,           new Insets(TF_BORDER,TF_BORDER,TF_BORDER,TF_BORDER),0,0);
+    GridBagConstraints gbcSeparator  = new GridBagConstraints(0, 0, 1, 1, (double)stepx, (double)stepy, GridBagConstraints.CENTER,  stepx == 0? GridBagConstraints.HORIZONTAL : GridBagConstraints.VERTICAL,       new Insets(stepy > 0? SEP_BORDER:0,stepx > 0? SEP_BORDER:0,stepy > 0? SEP_BORDER:0, stepx > 0? SEP_BORDER:0),0,0);
       
     ConfigThingy felderParent = conf.query(key);
     int y = -stepy;
@@ -234,10 +278,32 @@ public class WollMuxBar
           if (type.equals("label"))
           {
             JLabel uiElement = new JLabel();
-            gbcLabel.gridy = x;
+            gbcLabel.gridx = x;
             gbcLabel.gridy = y;
-            compo.add(uiElement, gbcLabel);
+            if (context.equals("menu"))
+              compo.add(uiElement);
+            else
+              compo.add(uiElement, gbcLabel);
             uiElement.setText(uiElementDesc.get("LABEL").toString());
+          }
+          else
+          if (type.equals("separator"))
+          {
+            JComponent uiElement = new JSeparator(stepx == 0? SwingConstants.HORIZONTAL : SwingConstants.VERTICAL);
+            if (context.equals("menu"))
+            {
+              JPanel p = new JPanel(new GridLayout(1,1));
+              p.add(uiElement);
+              uiElement = p;
+              uiElement.setBorder(BorderFactory.createEmptyBorder(stepy > 0? SEP_BORDER:0,stepx > 0? SEP_BORDER:0,stepy > 0? SEP_BORDER:0, stepx > 0? SEP_BORDER:0));
+            }
+
+            gbcSeparator.gridx = x;
+            gbcSeparator.gridy = y;
+            if (context.equals("menu"))
+              compo.add(uiElement);
+            else
+              compo.add(uiElement, gbcSeparator);
           }
           else if (type.equals("glue"))
           {
@@ -248,28 +314,38 @@ public class WollMuxBar
             }catch(Exception e){}
             uiElement.add(Box.createHorizontalGlue());
 
-            gbcGlue.gridy = x;
+            gbcGlue.gridx = x;
             gbcGlue.gridy = y;
-            compo.add(uiElement, gbcGlue);
+            if (context.equals("menu"))
+              compo.add(uiElement);
+            else
+              compo.add(uiElement, gbcGlue);
           }
           else
           if (type.equals("senderbox"))
           {
+            if (context.equals("menu")) 
+            {
+              Logger.error("Elemente vom Typ \"senderbox\" können nicht in Menüs eingefügt werden!");
+              continue;
+            }
+            
             int lines = 10;
             try{ lines = Integer.parseInt(uiElementDesc.get("LINES").toString()); } catch(Exception e){}
             
             JComboBox senderbox = new JComboBox();
+            senderbox.addItem("Benkmann, Matthias (D-WOL-MUX-5.1)");
             
             senderbox.setMaximumRowCount(lines);
-            senderbox.setPrototypeDisplayValue("Matthias S. Benkmann ist euer Gott (W-OLL-MUX-5.1)");
+            senderbox.setPrototypeDisplayValue("Matthias B. ist euer Gott (W-OLL-MUX-5.1)");
             senderbox.setEditable(false);
             
             //TODO senderbox.add*listener(...);
             
-            String action = "";
-            try{ action = uiElementDesc.get("ACTION").toString(); }catch(NodeNotFoundException e){}
+            //String action = "";
+            //try{ action = uiElementDesc.get("ACTION").toString(); }catch(NodeNotFoundException e){}
             
-            ActionListener actionL = getAction(action);
+            //ActionListener actionL = getAction(action);
             //TODO if (actionL != null) list.addMouseListener(new MyActionMouseListener(senderbox, actionL));
             
             senderboxes.add(senderbox);
@@ -293,13 +369,14 @@ public class WollMuxBar
               hotkey = uiElementDesc.get("HOTKEY").toString().charAt(0);
             }catch(Exception e){}
               
-            JButton button = new JButton(label);
+            AbstractButton button;
+            if (context.equals("menu"))
+              button = new JMenuItem(label);
+            else 
+              button = new JButton(label);
+            
             button.setMnemonic(hotkey);
 
-            gbcButton.gridx = x;
-            gbcButton.gridy = y;
-            compo.add(button, gbcButton);
-            
             ActionListener actionL = getAction(action);
             if (actionL != null) button.addActionListener(actionL);
             String fragment = "";
@@ -308,6 +385,52 @@ public class WollMuxBar
             }catch(NodeNotFoundException e){}
             button.setActionCommand(fragment);
             
+            gbcButton.gridx = x;
+            gbcButton.gridy = y;
+            if (context.equals("menu"))
+              compo.add(button);
+            else
+              compo.add(button, gbcButton);
+          }
+          else
+          if (type.equals("menu"))
+          {
+            String label  = uiElementDesc.get("LABEL").toString();
+              
+            char hotkey = 0;
+            try{
+              hotkey = uiElementDesc.get("HOTKEY").toString().charAt(0);
+            }catch(Exception e){}
+            
+            String menuName = "";
+            try{
+              menuName = uiElementDesc.get("MENU").toString();
+            }catch(NodeNotFoundException e){}
+            
+            AbstractButton button;
+            if (context.equals("menu"))
+            {
+              parseMenu(mapMenuNameToJMenu, menuConf, menuName, new JMenu(label));
+              button = (AbstractButton)mapMenuNameToJMenu.get(menuName);
+              if (button == null)
+                button = new JMenu(label);
+            }
+            else
+            {
+              parseMenu(mapMenuNameToJPopupMenu, menuConf, menuName, new JPopupMenu());
+              button = new JButton(label);
+              button.addActionListener(actionListener_openMenu) ;
+              button.setActionCommand(menuName);
+            }
+            
+            button.setMnemonic(hotkey);
+
+            gbcMenuButton.gridx = x;
+            gbcMenuButton.gridy = y;
+            if (context.equals("menu"))
+              compo.add(button);
+            else
+              compo.add(button, gbcMenuButton);
           }
           else
           {
@@ -316,6 +439,36 @@ public class WollMuxBar
         } catch(NodeNotFoundException e) {Logger.error(e);}
       }
     }
+  }
+  
+  private void addUIElements(ConfigThingy menuConf, ConfigThingy conf, String key, JComponent compo, int stepx, int stepy)
+  {
+    addUIElements(menuConf, conf, key, compo, stepx, stepy, "panel");
+  }
+  
+  private void parseMenu(Map mapMenuNameToMenu, ConfigThingy menuConf, String menuName, JComponent menu)
+  {
+    if (mapMenuNameToMenu.containsKey(menuName)) return;
+
+    ConfigThingy conf;
+    try
+    {
+      conf = menuConf.query(menuName).getLastChild();
+    }
+    catch (NodeNotFoundException x)
+    {
+      Logger.error("Menü \"" + menuName + "\" nicht definiert");
+      return;
+    }
+    
+    /*
+     * Zur Vermeidung von Endlosschleifen muss dieses Statement vor dem
+     * Aufruf von addUIElements stehen.
+     */
+    mapMenuNameToMenu.put(menuName, menu);
+    
+//    menu.setLayout(new GridBagLayout());
+    addUIElements(menuConf, conf, "Elemente", menu, 0, 1, "menu");
   }
   
   /**
@@ -433,6 +586,30 @@ public class WollMuxBar
     }catch(Exception x) {Logger.error(x);}
   }
 
+  /**
+   * Wird aufgerufen, wenn ein Button aktiviert wird, dem ein Menü zugeordnet
+   * ist.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TODO Testen
+   */
+  private void openMenu(ActionEvent e)
+  {
+    String menuName = e.getActionCommand();
+    JComponent compo;
+    try{
+      compo = (JComponent)e.getSource();
+    }catch(Exception x)
+    {
+      Logger.error(x);
+      return;
+    }
+    
+    JPopupMenu menu = (JPopupMenu)mapMenuNameToJPopupMenu.get(menuName);
+    if (menu == null) return;
+    
+    menu.show(compo, 0, compo.getHeight());
+  }
+  
   private String fragIdToURL(String fragid)
   {
     if (fragid.equals("externerBriefkopf")) return "http://limux.tvc.muenchen.de/ablage/sonstiges/wollmux/vorlagen/WOL_Briefkopf-extern_v1_2005-12-19.ott";
