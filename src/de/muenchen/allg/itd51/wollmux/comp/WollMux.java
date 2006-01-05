@@ -22,18 +22,8 @@
 
 package de.muenchen.allg.itd51.wollmux.comp;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.InputStreamReader;
-import java.io.PrintStream;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.Iterator;
-import java.util.Vector;
 
 import com.sun.star.beans.NamedValue;
 import com.sun.star.frame.DispatchDescriptor;
@@ -46,21 +36,11 @@ import com.sun.star.lib.uno.helper.Factory;
 import com.sun.star.lib.uno.helper.WeakBase;
 import com.sun.star.registry.XRegistryKey;
 import com.sun.star.task.XAsyncJob;
-import com.sun.star.uno.RuntimeException;
-import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
 
-import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.afid.UnoService;
-import de.muenchen.allg.itd51.parser.ConfigThingy;
-import de.muenchen.allg.itd51.parser.NodeNotFoundException;
-import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.Event;
-import de.muenchen.allg.itd51.wollmux.EventProcessor;
 import de.muenchen.allg.itd51.wollmux.Logger;
-import de.muenchen.allg.itd51.wollmux.VisibleTextFragmentList;
-import de.muenchen.allg.itd51.wollmux.XSenderBox;
-import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
+import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
 
 /**
  * Diese Klasse stellt den zentralen UNO-Service WollMux dar. Der Service dient
@@ -71,69 +51,26 @@ import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
 public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
     XDispatch, XDispatchProvider
 {
-  /**
-   * Enthält einen PrintStream in den die Log-Nachrichten geschrieben werden.
-   */
-  private static File wollmuxLogFile;
 
-  /**
-   * Enthält das File der Konfigurationsdatei wollmux.conf
-   */
-  private static File wollmuxConfFile;
-
-  /**
-   * Enthält das File in des local-overwrite-storage-caches.
-   */
-  private static File losCacheFile;
-
-  /**
-   * Enthält den geparsten Konfigruationsbaum der wollmux.conf
-   */
-  private static ConfigThingy wollmuxConf;
-
-  /**
-   * Enthält die geparste Textfragmentliste, die in der wollmux.conf definiert
-   * wurde.
-   */
-  private static VisibleTextFragmentList textFragmentList;
-
-  /**
-   * Enthält den zentralen DataSourceJoiner.
-   */
-  private static DatasourceJoiner datasourceJoiner;
-
-  /**
-   * Der XComponentContext in dem der WollMux läuft.
-   */
-  private static XComponentContext xComponentContext;
-
-  /**
-   * Die URL des Wertes DEFAULT_CONTEXT aus der Konfigurationsdatei.
-   * defaultContext überschreibt den in der Konfigurationsdatei definierten
-   * DEFAULT_CONTEXT.
-   */
-  private static URL defaultContext;
-
-  /**
-   * Enthält alle registrierten SenderBox-Objekte.
-   */
-  private static Vector registeredSenderBoxes;
+  private XComponentContext ctx;
 
   /**
    * Dieses Feld entält eine Liste aller Services, die dieser UNO-Service
    * implementiert.
    */
-  public static final java.lang.String[] SERVICENAMES = { "com.sun.star.task.AsyncJob" };
+  public static final java.lang.String[] SERVICENAMES = {
+                                                         "com.sun.star.task.AsyncJob",
+                                                         "de.muenchen.allg.itd51.wollmux.comp.WollMux" };
+
+  /*
+   * Felder des Protocol-Handlers: Hier kommt die Definition der Befehlsnamen,
+   * die über WollMux-Kommando-URLs abgesetzt werden können.
+   */
 
   /**
    * Dieses Feld enthält den Namen des Protokolls der WollMux-Kommando-URLs
    */
   public static final String wollmuxProtocol = "wollmux";
-
-  /*
-   * Hier kommt die Definition der Befehlsnamen, die über WollMux-Kommando-URLs
-   * abgesetzt werden können.
-   */
 
   public static final String cmdAbsenderAuswaehlen = "AbsenderAuswaehlen";
 
@@ -144,276 +81,15 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
   private static final String cmdMenu = "Menu";
 
   /**
-   * Inhalt der wollmux.conf-Datei, die angelegt wird, wenn noch keine
-   * wollmux.conf-Datei vorhanden ist. Ist defaultWollmuxConf==null, so wird gar
-   * keine wollmux.conf-Datei angelegt.
-   */
-  private static final String defaultWollmuxConf = "%include \"http://limux.tvc.muenchen.de/ablage/sonstiges/wollmux/wollmux.conf\"\r\n";
-
-  /**
-   * Der Konstruktor erzeugt einen neues WollMux-Service im XComponentContext
-   * context. Wurde der WollMux bereits in einem anderen Kontext erzeugt, so
-   * wird eine RuntimeException geworfen.
+   * TODO: überarbeiten. Der Konstruktor erzeugt einen neues WollMux-Service im
+   * XComponentContext context. Wurde der WollMux bereits in einem anderen
+   * Kontext erzeugt, so wird eine RuntimeException geworfen.
    * 
    * @param context
    */
-  public WollMux(XComponentContext context)
+  public WollMux(XComponentContext ctx)
   {
-    // Context sichern, Ausführung in anderem Kontext verhindern.
-    if (xComponentContext == null)
-    {
-      xComponentContext = context;
-      registeredSenderBoxes = new Vector();
-    }
-    else if (!UnoRuntime.areSame(context, xComponentContext))
-      throw new RuntimeException(
-          "WollMux kann nur in einem Kontext erzeugt werden.");
-  }
-
-  /**
-   * Diese Methode initialisiert den WollMux mit den festen Standardwerten:
-   * wollMuxDir=$HOME/.wollmux, wollMuxLog=wollmux.log, wollMuxConf=wollmux.conf
-   */
-  public static void initialize()
-  {
-    // Das hier sollte die einzige Stelle sein, an der Pfade hart
-    // verdrahtet sind...
-    String userHome = System.getProperty("user.home");
-    File wollmuxDir = new File(userHome, ".wollmux");
-    wollmuxConfFile = new File(wollmuxDir, "wollmux.conf");
-    losCacheFile = new File(wollmuxDir, "cache.conf");
-    wollmuxLogFile = new File(wollmuxDir, "wollmux.log");
-
-    // .wollmux-Verzeichnis erzeugen falls es nicht existiert
-    if (!wollmuxDir.exists()) wollmuxDir.mkdirs();
-
-    // Default wollmux.conf erzeugen falls noch keine wollmux.conf existiert.
-    if (!wollmuxConfFile.exists() && defaultWollmuxConf != null)
-    {
-      try
-      {
-        PrintStream wmconf = new PrintStream(new FileOutputStream(
-            wollmuxConfFile));
-        wmconf.println(defaultWollmuxConf);
-        wmconf.close();
-      }
-      catch (FileNotFoundException e)
-      {
-      }
-    }
-  }
-
-  /**
-   * Über dies Methode können die wichtigsten Startwerte des WollMux manuell
-   * gesetzt werden. Dies ist vor allem zum Testen der Anwendung im
-   * Remote-Betrieb notwendig.
-   * 
-   * @param logStream
-   *          Den Ausgabestream, in den die Logging Nachrichten geschrieben
-   *          werden sollen.
-   * @param wollmuxConf
-   *          die Wollmux-Konfigruationsdatei.
-   * @param defaultContext
-   *          die URL des Wertes DEFAULT_CONTEXT aus der Konfigurationsdatei.
-   *          defaultContext überschreibt den in der Konfigurationsdatei
-   *          definierten DEFAULT_CONTEXT.
-   */
-  public static void initialize(File wollmuxConf, File losCache,
-      URL defaultContext)
-  {
-    WollMux.wollmuxConfFile = wollmuxConf;
-    WollMux.losCacheFile = losCache;
-    WollMux.defaultContext = defaultContext;
-  }
-
-  /**
-   * Diese Methode übernimmt den eigentlichen Bootstrap des WollMux.
-   */
-  public static void startupWollMux()
-  {
-    try
-    {
-      // Logger initialisieren:
-      if (wollmuxLogFile != null) Logger.init(wollmuxLogFile, Logger.LOG);
-
-      // Parsen der Konfigurationsdatei
-      wollmuxConf = new ConfigThingy("wollmuxConf", wollmuxConfFile.toURL());
-
-      // Auswertung von LOGGING_MODE und erste debug-Meldungen loggen:
-      setLoggingMode(wollmuxConf);
-      Logger.debug("StartupWollMux");
-      Logger.debug("Build-Info: " + getBuildInfo());
-      Logger.debug("wollmuxConfFile = " + wollmuxConfFile.toString());
-
-      // VisibleTextFragmentList erzeugen
-      textFragmentList = new VisibleTextFragmentList(wollmuxConf);
-
-      // DatasourceJoiner erzeugen
-      ConfigThingy ssource = wollmuxConf.query("SENDER_SOURCE");
-      String ssourceStr;
-      try
-      {
-        ssourceStr = ssource.getLastChild().toString();
-      }
-      catch (NodeNotFoundException e)
-      {
-        throw new ConfigurationErrorException(
-            "Keine Hauptdatenquelle (SENDER_SOURCE) definiert.");
-      }
-      datasourceJoiner = new DatasourceJoiner(wollmuxConf, ssourceStr,
-          losCacheFile, getDEFAULT_CONTEXT());
-
-      // register global EventListener
-      UnoService eventBroadcaster = UnoService.createWithContext(
-          "com.sun.star.frame.GlobalEventBroadcaster",
-          WollMux.getXComponentContext());
-      eventBroadcaster.xEventBroadcaster().addEventListener(
-          EventProcessor.create());
-
-      // Event ON_FIRST_INITIALIZE erzeugen:
-      EventProcessor.create().addEvent(new Event(Event.ON_INITIALIZE));
-    }
-    catch (java.lang.Exception e)
-    {
-      Logger.error("WollMux konnte nicht gestartet werden:", e);
-    }
-  }
-
-  /**
-   * Diese Methode liefert die erste Zeile aus der buildinfo-Datei der aktuellen
-   * WollMux-Installation zurück. Der Build-Status wird während dem
-   * Build-Prozess mit dem Kommando "svn info" auf das Projektverzeichnis
-   * erstellt. Die Buildinfo-Datei buildinfo enthält die Paketnummer und die
-   * svn-Revision und ist im WollMux.uno.pkg-Paket sowie in der
-   * WollMux.uno.jar-Datei abgelegt.
-   * 
-   * Kann dieses File nicht gelesen werden, so wird eine entsprechende
-   * Ersatzmeldung erzeugt (siehe Sourcecode).
-   * 
-   * @param insertChars
-   *          Einen String, der zur möglichen Einrückung der einzelnen Zeilen
-   *          der buildinfo-Datei vor jede Zeile gehängt wird. Soll nicht
-   *          eingerückt werden ist der String der Leerstring "".
-   * @return Der Build-Status der aktuellen WollMux-Installation.
-   * @return
-   */
-  public static String getBuildInfo()
-  {
-    try
-    {
-      URL url = WollMux.class.getClassLoader().getResource("buildinfo");
-      if (url != null)
-      {
-        BufferedReader in = new BufferedReader(new InputStreamReader(url
-            .openStream()));
-        return in.readLine().toString();
-      }
-    }
-    catch (java.lang.Exception x)
-    {
-    }
-    return "Die Datei buildinfo konnte nicht gelesen werden.";
-  }
-
-  /**
-   * Wertet die undokumentierte wollmux.conf-Direktive LOGGING_MODE aus und
-   * setzt den Logging-Modus entsprechend.
-   * 
-   * @param ct
-   */
-  private static void setLoggingMode(ConfigThingy ct)
-  {
-    ConfigThingy log = ct.query("LOGGING_MODE");
-    if (log.count() > 0)
-    {
-      try
-      {
-        String mode = log.getLastChild().toString();
-        Logger.init(mode);
-      }
-      catch (NodeNotFoundException x)
-      {
-        Logger.error(x);
-      }
-    }
-  }
-
-  /**
-   * @return Returns the textFragmentList.
-   */
-  public static VisibleTextFragmentList getTextFragmentList()
-  {
-    return textFragmentList;
-  }
-
-  /**
-   * @return Returns the wollmuxConf.
-   */
-  public static ConfigThingy getWollmuxConf()
-  {
-    return wollmuxConf;
-  }
-
-  /**
-   * @return Returns the xComponentContext.
-   */
-  public static XComponentContext getXComponentContext()
-  {
-    return xComponentContext;
-  }
-
-  /**
-   * Diese Methode liefert den letzten in der Konfigurationsdatei definierten
-   * DEFAULT_CONTEXT zurück. Ist in der Konfigurationsdatei keine URL definiert,
-   * so wird die URL "file:/" zurückgeliefert und eine Fehlermeldung in die
-   * Loggdatei geschrieben.
-   * 
-   * @return der letzte in der Konfigurationsdatei definierte DEFAULT_CONTEXT.
-   * @throws ConfigurationErrorException
-   */
-  public static URL getDEFAULT_CONTEXT() throws ConfigurationErrorException
-  {
-    if (defaultContext == null)
-    {
-      ConfigThingy dc = wollmuxConf.query("DEFAULT_CONTEXT");
-      String urlStr;
-      try
-      {
-        urlStr = dc.getLastChild().toString();
-      }
-      catch (NodeNotFoundException e)
-      {
-        urlStr = "file:";
-        Logger.log("Kein DEFAULT_CONTEXT definiert. Verwende \""
-                   + urlStr
-                   + "\"");
-      }
-
-      // url mit einem "/" aufhören lassen (falls noch nicht angegeben).
-      String urlVerzStr = (urlStr.endsWith("/")) ? urlStr : urlStr + "/";
-
-      // URL aus urlVerzStr erzeugen
-      try
-      {
-        defaultContext = new URL(urlVerzStr);
-      }
-      catch (MalformedURLException e)
-      {
-        try
-        {
-          defaultContext = new URL("file:");
-        }
-        catch (MalformedURLException x)
-        {
-        }
-        Logger.log("Fehlerhafter DEFAULT_CONTEXT \""
-                   + urlStr
-                   + "\". Verwende \""
-                   + defaultContext.toString()
-                   + "\"");
-      }
-    }
-    return defaultContext;
+    this.ctx = ctx;
   }
 
   /**
@@ -472,8 +148,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
      */
     if (sEventName.equals("onFirstVisibleTask"))
     {
-      initialize();
-      startupWollMux();
+      WollMuxSingleton.getInstance().initialize(ctx);
     }
     /** *************************************************** */
 
@@ -548,14 +223,6 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
         WollMux.class.getName(),
         WollMux.SERVICENAMES,
         xRegKey);
-  }
-
-  /**
-   * @return Returns the datasourceJoiner.
-   */
-  public static DatasourceJoiner getDatasourceJoiner()
-  {
-    return datasourceJoiner;
   }
 
   /*
@@ -636,6 +303,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
     try
     {
       URI uri = new URI(aURL.Complete);
+      WollMuxSingleton mux = WollMuxSingleton.getInstance();
 
       if (uri.getScheme().compareToIgnoreCase(wollmuxProtocol) == 0)
       {
@@ -644,7 +312,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
         {
           Logger
               .debug2("Dispatch: Aufruf von WollMux:AbsenderdatenBearbeitenDialog");
-          EventProcessor.create().addEvent(
+          mux.getEventProcessor().addEvent(
               new Event(Event.ON_ABSENDER_AUSWAEHLEN));
         }
 
@@ -652,7 +320,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
         {
           Logger.debug2("Dispatch: Aufruf von WollMux:OpenFrag mit Frag:"
                         + uri.getFragment());
-          EventProcessor.create().addEvent(
+          mux.getEventProcessor().addEvent(
               new Event(Event.ON_OPENTEMPLATE, uri.getFragment()));
         }
 
@@ -678,88 +346,6 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
   public void removeStatusListener(XStatusListener arg0,
       com.sun.star.util.URL arg1)
   {
-  }
-
-  /**
-   * main-Methode zum Testen des WollMux über einen Remote-Context.
-   */
-  public static void main(String[] args)
-  {
-    try
-    {
-      if (args.length < 2)
-      {
-        System.out.println("USAGE: <config_url> <losCache>");
-        System.exit(0);
-      }
-      File cwd = new File("testdata");
-
-      args[0] = args[0].replaceAll("\\\\", "/");
-
-      // Remote-Context herstellen
-      UNO.init();
-
-      // WollMux starten
-      new WollMux(UNO.defaultContext);
-      WollMux.initialize(new File(cwd, args[0]), new File(cwd, args[1]), cwd
-          .toURL());
-      WollMux.startupWollMux();
-    }
-    catch (java.lang.Exception e)
-    {
-      Logger.error(e);
-    }
-  }
-
-  /**
-   * Diese Methode registriert eine XSenderBox, die updates empfängt wenn sich
-   * die PAL ändert. Die selbe XSenderBox kann mehrmals registriert werden.
-   * 
-   * @see de.muenchen.allg.itd51.wollmux.XWollMux#addSenderBox(de.muenchen.allg.itd51.wollmux.XSenderBox)
-   */
-  public static void registerSenderBox(XSenderBox senderBox)
-  {
-    registeredSenderBoxes.add(senderBox);
-    Logger.debug2("WollMux::added senderBox.");
-  }
-
-  /**
-   * Diese methode deregistriert eine XSenderBox. Ist die XSenderBox mehrfach
-   * registriert, so wird nur das erste registrierte Element entfernt.
-   * 
-   * @param senderBox
-   */
-  public static void deregisterSenderBox(XSenderBox senderBox)
-  {
-    Iterator i = registeredSenderBoxes.iterator();
-    while (i.hasNext())
-    {
-      if (((XSenderBox) i.next()) == senderBox)
-      {
-        i.remove();
-        break;
-      }
-    }
-  }
-
-  /**
-   * Liefert das File-Objekt des LocalOverrideStorage Caches zurück.
-   * 
-   * @return das File-Objekt des LocalOverrideStorage Caches.
-   */
-  public static File getLosCacheFile()
-  {
-    return losCacheFile;
-  }
-
-  /**
-   * Liefert einen Iterator auf alle registrierten SenderBox-Objekte.
-   * 
-   * @return Iterator auf alle registrierten SenderBox-Objekte.
-   */
-  public static Iterator senderBoxesIterator()
-  {
-    return registeredSenderBoxes.iterator();
   }
 
 }

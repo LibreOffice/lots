@@ -61,7 +61,7 @@ public class EventProcessor implements XEventListener, XModifyListener,
 
   public static final boolean waitForGUIReturn = false;
 
-  public static EventProcessor create()
+  public static EventProcessor getInstance()
   {
     if (singletonInstance == null) singletonInstance = new EventProcessor();
     return singletonInstance;
@@ -151,7 +151,7 @@ public class EventProcessor implements XEventListener, XModifyListener,
         || docEvent.EventName.compareToIgnoreCase("OnNew") == 0)
       if (source.supportsService("com.sun.star.text.TextDocument"))
       {
-        source.xComponent().addEventListener(EventProcessor.create());
+        source.xComponent().addEventListener(this);
       }
 
     // Bekannte Event-Typen rausziehen:

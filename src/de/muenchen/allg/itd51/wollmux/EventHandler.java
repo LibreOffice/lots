@@ -36,7 +36,6 @@ import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
-import de.muenchen.allg.itd51.wollmux.comp.WollMux;
 import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.DJDataset;
 import de.muenchen.allg.itd51.wollmux.db.Dataset;
@@ -163,7 +162,7 @@ public class EventHandler
     UnoService source = new UnoService(event.getSource());
     if (source.supportsService("com.sun.star.text.TextDocument"))
     {
-      Iterator i = WollMux.senderBoxesIterator();
+      Iterator i = WollMuxSingleton.getInstance().senderBoxesIterator();
       while (i.hasNext())
       {
         Logger.debug2("Update SenderBox");
@@ -177,14 +176,16 @@ public class EventHandler
 
   private static boolean on_selection_changed() throws IOException
   {
+    WollMuxSingleton mux = WollMuxSingleton.getInstance();
+
     // Die SenderBox des aktuellen Frame updaten:
     try
     {
       UnoService desktop = UnoService.createWithContext(
           "com.sun.star.frame.Desktop",
-          WollMux.getXComponentContext());
+          mux.getXComponentContext());
       XFrame frame = desktop.xDesktop().getCurrentFrame();
-      Iterator i = WollMux.senderBoxesIterator();
+      Iterator i = mux.senderBoxesIterator();
       while (i.hasNext())
       {
         Logger.debug2("Update SenderBox");
@@ -196,7 +197,7 @@ public class EventHandler
     }
 
     // Der Cache und der LOS auf Platte speichern.
-    WollMux.getDatasourceJoiner().saveCacheAndLOS(WollMux.getLosCacheFile());
+    mux.getDatasourceJoiner().saveCacheAndLOS(mux.getLosCacheFile());
 
     return EventProcessor.processTheNextEvent;
   }
@@ -204,12 +205,14 @@ public class EventHandler
   private static boolean on_persoenliche_absenderliste()
       throws NodeNotFoundException, ConfigurationErrorException
   {
-    ConfigThingy PALconf = WollMux.getWollmuxConf().query(
+    WollMuxSingleton mux = WollMuxSingleton.getInstance();
+
+    ConfigThingy PALconf = mux.getWollmuxConf().query(
         "PersoenlicheAbsenderliste").getLastChild();
-    ConfigThingy ADBconf = WollMux.getWollmuxConf().query(
-        "AbsenderdatenBearbeiten").getLastChild();
-    new PersoenlicheAbsenderlisteVerwalten(PALconf, ADBconf, WollMux
-        .getDatasourceJoiner(), EventProcessor.create());
+    ConfigThingy ADBconf = mux.getWollmuxConf()
+        .query("AbsenderdatenBearbeiten").getLastChild();
+    new PersoenlicheAbsenderlisteVerwalten(PALconf, ADBconf, mux
+        .getDatasourceJoiner(), mux.getEventProcessor());
     return EventProcessor.waitForGUIReturn;
   }
 
@@ -217,24 +220,28 @@ public class EventHandler
       throws NodeNotFoundException, ConfigurationErrorException,
       DatasetNotFoundException
   {
-    ConfigThingy ADBconf = WollMux.getWollmuxConf().query(
-        "AbsenderdatenBearbeiten").getLastChild();
-    new DatensatzBearbeiten(ADBconf, WollMux.getDatasourceJoiner()
-        .getSelectedDataset(), EventProcessor.create());
+    WollMuxSingleton mux = WollMuxSingleton.getInstance();
+
+    ConfigThingy ADBconf = mux.getWollmuxConf()
+        .query("AbsenderdatenBearbeiten").getLastChild();
+    new DatensatzBearbeiten(ADBconf, mux.getDatasourceJoiner()
+        .getSelectedDataset(), mux.getEventProcessor());
     return EventProcessor.waitForGUIReturn;
   }
 
   private static boolean on_absender_auswaehlen() throws NodeNotFoundException,
       ConfigurationErrorException
   {
-    ConfigThingy whoAmIconf = WollMux.getWollmuxConf().query(
-        "AbsenderAuswaehlen").getLastChild();
-    ConfigThingy PALconf = WollMux.getWollmuxConf().query(
+    WollMuxSingleton mux = WollMuxSingleton.getInstance();
+
+    ConfigThingy whoAmIconf = mux.getWollmuxConf().query("AbsenderAuswaehlen")
+        .getLastChild();
+    ConfigThingy PALconf = mux.getWollmuxConf().query(
         "PersoenlicheAbsenderliste").getLastChild();
-    ConfigThingy ADBconf = WollMux.getWollmuxConf().query(
-        "AbsenderdatenBearbeiten").getLastChild();
-    new AbsenderAuswaehlen(whoAmIconf, PALconf, ADBconf, WollMux
-        .getDatasourceJoiner(), EventProcessor.create());
+    ConfigThingy ADBconf = mux.getWollmuxConf()
+        .query("AbsenderdatenBearbeiten").getLastChild();
+    new AbsenderAuswaehlen(whoAmIconf, PALconf, ADBconf, mux
+        .getDatasourceJoiner(), mux.getEventProcessor());
     return EventProcessor.waitForGUIReturn;
   }
 
@@ -242,9 +249,11 @@ public class EventHandler
       NodeNotFoundException, TextFragmentNotDefinedException,
       EndlessLoopException, IOException, MalformedURLException
   {
+    WollMuxSingleton mux = WollMuxSingleton.getInstance();
+
     UnoService desktop = UnoService.createWithContext(
         "com.sun.star.frame.Desktop",
-        WollMux.getXComponentContext());
+        mux.getXComponentContext());
     String frag_id = event.getArgument();
 
     // einheitlicher Fehlerzusatz:
@@ -253,11 +262,11 @@ public class EventHandler
                       + "\" auf.";
 
     // Fragment-URL holen und aufbereiten:
-    String urlStr = WollMux.getTextFragmentList().getURLByID(frag_id);
+    String urlStr = mux.getTextFragmentList().getURLByID(frag_id);
     URL url;
     try
     {
-      url = new URL(WollMux.getDEFAULT_CONTEXT(), urlStr);
+      url = new URL(mux.getDEFAULT_CONTEXT(), urlStr);
     }
     catch (MalformedURLException e)
     {
@@ -269,7 +278,7 @@ public class EventHandler
     }
     UnoService trans = UnoService.createWithContext(
         "com.sun.star.util.URLTransformer",
-        WollMux.getXComponentContext());
+        mux.getXComponentContext());
     com.sun.star.util.URL[] unoURL = new com.sun.star.util.URL[] { new com.sun.star.util.URL() };
     unoURL[0].Complete = url.toExternalForm();
     trans.xURLTransformer().parseStrict(unoURL);
@@ -299,19 +308,21 @@ public class EventHandler
   private static boolean on_load(Event event) throws EndlessLoopException,
       WMCommandsFailedException
   {
+    WollMuxSingleton mux = WollMuxSingleton.getInstance();
+
     UnoService source = new UnoService(event.getSource());
     if (source.supportsService("com.sun.star.text.TextDocument"))
     {
       // auf Events des Frame hören:
       XFrame frame = source.xModel().getCurrentController().getFrame();
-      frame.addFrameActionListener(EventProcessor.create());
+      frame.addFrameActionListener(mux.getEventProcessor());
 
       // OOOUI (Menues + Toolbars) aktualisieren
-      EventProcessor.create().addEvent(
+      mux.getEventProcessor().addEvent(
           new Event(Event.ON_FRAME_CHANGED, null, frame));
 
       // Interpretation von WM-Kommandos
-      new WMCommandInterpreter(source.xTextDocument()).interpret();
+      new WMCommandInterpreter(source.xTextDocument(), mux).interpret();
     }
     return EventProcessor.processTheNextEvent;
   }
@@ -319,12 +330,14 @@ public class EventHandler
   private static boolean on_frame_changed(Event event)
       throws EndlessLoopException, WMCommandsFailedException
   {
+    WollMuxSingleton mux = WollMuxSingleton.getInstance();
+
     UnoService source = new UnoService(event.getSource());
     if (source.xFrame() != null)
     {
-      OOoUserInterface.generateToolbarEntries(WollMux.getWollmuxConf(), WollMux
+      OOoUserInterface.generateToolbarEntries(mux.getWollmuxConf(), mux
           .getXComponentContext(), source.xFrame());
-      OOoUserInterface.generateMenues(WollMux.getWollmuxConf(), WollMux
+      OOoUserInterface.generateMenues(mux.getWollmuxConf(), mux
           .getXComponentContext(), source.xFrame());
     }
     return EventProcessor.processTheNextEvent;
@@ -335,7 +348,9 @@ public class EventHandler
       UnsupportedOperationException, java.lang.IllegalArgumentException,
       ColumnNotFoundException
   {
-    DatasourceJoiner dsj = WollMux.getDatasourceJoiner();
+    WollMuxSingleton mux = WollMuxSingleton.getInstance();
+
+    DatasourceJoiner dsj = mux.getDatasourceJoiner();
 
     // falls es noch keine Datensätze im LOS gibt.
     if (dsj.getLOS().size() == 0)
@@ -367,7 +382,7 @@ public class EventHandler
       }
 
       // Absender Auswählen Dialog starten:
-      EventProcessor.create().addEvent(new Event(Event.ON_ABSENDER_AUSWAEHLEN));
+      mux.getEventProcessor().addEvent(new Event(Event.ON_ABSENDER_AUSWAEHLEN));
     }
     else
     {
@@ -405,7 +420,8 @@ public class EventHandler
   {
     try
     {
-      XComponentContext m_xCmpCtx = WollMux.getXComponentContext();
+      XComponentContext m_xCmpCtx = WollMuxSingleton.getInstance()
+          .getXComponentContext();
 
       // hole aktuelles Window:
       UnoService desktop = UnoService.createWithContext(
@@ -456,7 +472,7 @@ public class EventHandler
     {
       UnoService confProvider = UnoService.createWithContext(
           "com.sun.star.configuration.ConfigurationProvider",
-          WollMux.getXComponentContext());
+          WollMuxSingleton.getInstance().getXComponentContext());
 
       UnoService confView = confProvider.create(
           "com.sun.star.configuration.ConfigurationAccess",

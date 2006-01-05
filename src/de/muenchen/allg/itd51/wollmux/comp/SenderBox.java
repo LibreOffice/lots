@@ -61,8 +61,8 @@ import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.wollmux.Event;
-import de.muenchen.allg.itd51.wollmux.EventProcessor;
 import de.muenchen.allg.itd51.wollmux.Logger;
+import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
 import de.muenchen.allg.itd51.wollmux.XSenderBox;
 import de.muenchen.allg.itd51.wollmux.db.DJDataset;
 import de.muenchen.allg.itd51.wollmux.db.DJDatasetListElement;
@@ -140,6 +140,7 @@ public class SenderBox extends ComponentBase implements XServiceInfo,
   public void initialize(Object[] args) throws Exception
   {
     UnoProps props = new UnoProps(args);
+    WollMuxSingleton mux = WollMuxSingleton.getInstance();
 
     try
     {
@@ -168,10 +169,10 @@ public class SenderBox extends ComponentBase implements XServiceInfo,
     }
 
     // SenderBox im WollMux registrieren:
-    WollMux.registerSenderBox(this);
+    mux.registerSenderBox(this);
 
     // WollMux informieren, damit ein Update erfolgen kann:
-    EventProcessor.create().addEvent(new Event(Event.ON_SELECTION_CHANGED));
+    mux.getEventProcessor().addEvent(new Event(Event.ON_SELECTION_CHANGED));
   }
 
   /**
@@ -234,6 +235,9 @@ public class SenderBox extends ComponentBase implements XServiceInfo,
 
         // DropDownLineCount setzen
         cBox.xComboBox().setDropDownLineCount(DEFAULT_LINE_COUNT);
+
+        // Eventhandler registrieren:
+        registerComboBoxListeners();
       }
       catch (Exception e)
       {
@@ -270,18 +274,26 @@ public class SenderBox extends ComponentBase implements XServiceInfo,
   {
     Logger.debug2("SenderBox::update");
 
-    // (falls Event-Listener da sind) bestehende Listener löschen:
+    // Bestehende Listener löschen und neu registrieren:
+    deregisterComboBoxListeners();
+    registerComboBoxListeners();
+
+    // Inhalte updaten
+    updateComboBox();
+  }
+
+  private void deregisterComboBoxListeners()
+  {
     cBox.xComboBox().removeItemListener(this);
     cBox.xComponent().removeEventListener(this);
     cBox.xWindow().removeKeyListener(this);
+  }
 
-    // Event-Listener registrieren.
+  private void registerComboBoxListeners()
+  {
     cBox.xComboBox().addItemListener(this);
     cBox.xComponent().addEventListener(this);
     cBox.xWindow().addKeyListener(this);
-
-    // Inhalt updaten
-    updateComboBox();
   }
 
   /**
@@ -293,13 +305,10 @@ public class SenderBox extends ComponentBase implements XServiceInfo,
   {
     Logger.debug2("SenderBox::disposing");
 
-    // Event-Listener deregistrieren.
-    cBox.xComboBox().removeItemListener(this);
-    cBox.xComponent().removeEventListener(this);
-    cBox.xWindow().removeKeyListener(this);
+    deregisterComboBoxListeners();
 
     // SenderBox im WollMux deregistrieren.
-    WollMux.deregisterSenderBox(this);
+    WollMuxSingleton.getInstance().deregisterSenderBox(this);
   }
 
   /**
@@ -318,7 +327,8 @@ public class SenderBox extends ComponentBase implements XServiceInfo,
     Logger.debug2("SenderBox::execute");
 
     // In diesem Fallback-Fall den AbsenderdatenBearbeiten dialog öffnen.
-    EventProcessor.create().addEvent(new Event(Event.ON_ABSENDER_AUSWAEHLEN));
+    WollMuxSingleton.getInstance().getEventProcessor().addEvent(
+        new Event(Event.ON_ABSENDER_AUSWAEHLEN));
   }
 
   /**
@@ -415,6 +425,8 @@ public class SenderBox extends ComponentBase implements XServiceInfo,
    */
   private void selectSender(int i)
   {
+    WollMuxSingleton mux = WollMuxSingleton.getInstance();
+
     if (i >= 0 && i < elements.length)
     {
       selected = elements[i];
@@ -425,12 +437,12 @@ public class SenderBox extends ComponentBase implements XServiceInfo,
 
       // Informiere den WollMux über die Änderung, damit der Cache gespeichert
       // wird und andere SenderBoxen benachrichtigt werden.
-      EventProcessor.create().addEvent(new Event(Event.ON_SELECTION_CHANGED));
+      mux.getEventProcessor().addEvent(new Event(Event.ON_SELECTION_CHANGED));
     }
     if (i == elements.length)
     {
       // Event für LISTE_BEARBEITEN
-      EventProcessor.create().addEvent(
+      mux.getEventProcessor().addEvent(
           new Event(Event.ON_PERSOENLICHE_ABSENDERLISTE));
     }
   }
@@ -443,8 +455,10 @@ public class SenderBox extends ComponentBase implements XServiceInfo,
    */
   public void updateContent()
   {
+    WollMuxSingleton mux = WollMuxSingleton.getInstance();
+
     // Liste der entries aufbauen.
-    QueryResults data = WollMux.getDatasourceJoiner().getLOS();
+    QueryResults data = mux.getDatasourceJoiner().getLOS();
 
     elements = new DJDatasetListElement[data.size()];
     Iterator iter = data.iterator();
@@ -456,7 +470,7 @@ public class SenderBox extends ComponentBase implements XServiceInfo,
     // selektierten Eintrag holen:
     try
     {
-      selected = new DJDatasetListElement(WollMux.getDatasourceJoiner()
+      selected = new DJDatasetListElement(mux.getDatasourceJoiner()
           .getSelectedDataset());
     }
     catch (DatasetNotFoundException e)

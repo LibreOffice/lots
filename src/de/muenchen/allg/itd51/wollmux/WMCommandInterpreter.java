@@ -21,7 +21,6 @@
  */
 package de.muenchen.allg.itd51.wollmux;
 
-import java.io.File;
 import java.io.StringReader;
 import java.net.URL;
 import java.util.HashMap;
@@ -42,10 +41,8 @@ import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextRange;
 import com.sun.star.uno.Exception;
 
-import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.comp.WollMux;
 import de.muenchen.allg.itd51.wollmux.db.Dataset;
 
 /**
@@ -57,6 +54,8 @@ import de.muenchen.allg.itd51.wollmux.db.Dataset;
 public class WMCommandInterpreter
 {
 
+  private WollMuxSingleton mux;
+  
   /**
    * Das Dokument, das interpretiert werden soll.
    */
@@ -86,9 +85,10 @@ public class WMCommandInterpreter
    * 
    * @param xDoc
    */
-  public WMCommandInterpreter(XTextDocument xDoc)
+  public WMCommandInterpreter(XTextDocument xDoc, WollMuxSingleton mux)
   {
     this.document = new UnoService(xDoc);
+    this.mux = mux;
 
     // Wenn das Dokument als Dokument (und nicht als Template) geöffnet wurde,
     // soll das Dokument nicht vom WollMux verändert werden:
@@ -224,7 +224,7 @@ public class WMCommandInterpreter
   {
     try
     {
-      ConfigThingy wm = new ConfigThingy("", WollMux.getDEFAULT_CONTEXT(),
+      ConfigThingy wm = new ConfigThingy("", mux.getDEFAULT_CONTEXT(),
           new StringReader(cmdString));
       ConfigThingy cmd = wm.get("CMD");
       WMCommandState state = new WMCommandState(wm);
@@ -315,7 +315,7 @@ public class WMCommandInterpreter
     state.setErrors(0);
     try
     {
-      Dataset ds = WollMux.getDatasourceJoiner().getSelectedDataset();
+      Dataset ds = mux.getDatasourceJoiner().getSelectedDataset();
       if (ds.get(spaltenname) == null)
         fillBookmark(bookmarkName, "");
       else
@@ -350,11 +350,11 @@ public class WMCommandInterpreter
     try
     {
       // Fragment-URL holen und aufbereiten. Kontext ist der DEFAULT_CONTEXT.
-      String urlStr = WollMux.getTextFragmentList().getURLByID(frag_id);
-      URL url = new URL(WollMux.getDEFAULT_CONTEXT(), urlStr);
+      String urlStr = mux.getTextFragmentList().getURLByID(frag_id);
+      URL url = new URL(mux.getDEFAULT_CONTEXT(), urlStr);
       UnoService trans = UnoService.createWithContext(
           "com.sun.star.util.URLTransformer",
-          WollMux.getXComponentContext());
+          mux.getXComponentContext());
       com.sun.star.util.URL[] unoURL = new com.sun.star.util.URL[] { new com.sun.star.util.URL() };
       unoURL[0].Complete = url.toExternalForm();
       trans.xURLTransformer().parseStrict(unoURL);
@@ -470,7 +470,7 @@ public class WMCommandInterpreter
             createTextCursorByBookmark(bookmark).xTextRange());
         UnoService insCurs = insertField.createInsertCursor();
         insCurs.xTextCursor()
-            .setString("Build-Info: " + WollMux.getBuildInfo());
+            .setString("Build-Info: " + mux.getBuildInfo());
 
         insertField.hideMarks();
       }
@@ -819,56 +819,5 @@ public class WMCommandInterpreter
       throws NoSuchElementException, WrappedTargetException
   {
     return createTextCursorByRange(bookmark.xTextContent().getAnchor());
-  }
-
-  /**
-   * Methode zum Testen des WMCommandoInterpreters.
-   * 
-   * @param args
-   */
-  public static void main(String[] args)
-  {
-    try
-    {
-      if (args.length < 3)
-      {
-        System.out.println("USAGE: <config_url> <los_cache> <document_url>");
-        System.exit(0);
-      }
-      File cwd = new File("testdata");
-
-      args[0] = args[0].replaceAll("\\\\", "/");
-      args[1] = args[1].replaceAll("\\\\", "/");
-
-      // Remote-Kontext herstellen
-      UNO.init();
-
-      // WollMux starten
-      new WollMux(UNO.defaultContext);
-      WollMux.initialize(new File(cwd, args[0]), new File(cwd, args[1]), cwd
-          .toURL());
-      WollMux.startupWollMux();
-
-      Logger.init(Logger.ALL);
-
-      // Dokument URL aufbereiten und Dokument zum Parsen öffnen
-      String urlStr = new URL(cwd.toURL(), args[2]).toExternalForm();
-      UnoService trans = UnoService.createWithContext(
-          "com.sun.star.util.URLTransformer",
-          WollMux.getXComponentContext());
-      com.sun.star.util.URL[] unoURL = new com.sun.star.util.URL[] { new com.sun.star.util.URL() };
-      unoURL[0].Complete = urlStr;
-      trans.xURLTransformer().parseStrict(unoURL);
-      urlStr = unoURL[0].Complete;
-
-      UNO.loadComponentFromURL(urlStr, true, false);
-
-      // new WMCommandInterpreter(UNO.XTextDocument(UNO.compo)).interpret();
-    }
-    catch (java.lang.Exception e)
-    {
-      Logger.error(e);
-    }
-    // System.exit(0);
   }
 }
