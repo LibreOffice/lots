@@ -411,6 +411,7 @@ public class WollMuxBar
             if (context.equals("menu"))
             {
               parseMenu(mapMenuNameToJMenu, menuConf, menuName, new JMenu(label));
+              //FIXME Ich glaube nicht, dass es wirklich funktioniert, das selbe JMenu an mehreren Stellen in die GUI-Hierarchie einzufügen. Insofern ist das mit der Map für JMenus wohl Schmarrn und es sollte jedes mal ein neues JMenu erzeugt werden. Selbiges gilt natürlich genauso innerhalb von parseMenu. Im Falle der JPopupMenus ist das allerdings kein Problem, da diese ja nirgends in die Hierarchie eingehängt werden.
               button = (AbstractButton)mapMenuNameToJMenu.get(menuName);
               if (button == null)
                 button = new JMenu(label);
