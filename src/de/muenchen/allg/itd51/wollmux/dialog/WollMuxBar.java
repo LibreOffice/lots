@@ -645,8 +645,21 @@ public class WollMuxBar
     if (args.length > 0)
     {
       if (args[0].equals("--minimize")) minimize = true;
+      else
       if (args[0].equals("--topbar")) topbar = true;
+      else
       if (args[0].equals("--normalwindow")) normalwindow = true;
+      else
+      {
+        System.err.println("Unbekannter Aufrufparameter: "+args[0]);
+        System.exit(1);
+      }
+      
+      if (args.length > 1)
+      {
+        System.err.println("Zu viele Aufrufparameter!");
+        System.exit(1);
+      }
     }
     UNO.init();
     String confFile = "data/wollmuxbar.conf";
