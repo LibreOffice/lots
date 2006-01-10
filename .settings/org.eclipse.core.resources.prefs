@@ -1,9 +1,10 @@
-#Mon Nov 14 15:22:20 CET 2005
+#Tue Jan 10 14:14:46 CET 2006
 eclipse.preferences.version=1
 encoding//idl/de/muenchen/allg/itd51/wollmux/XSenderBox.idl=US-ASCII
 encoding//packages/WollMux/Controller.xcu=UTF-8
 encoding//packages/WollMux/Jobs.xcu=UTF-8
 encoding//packages/WollMux/ProtocolHandler.xcu=UTF-8
+encoding//src/data=UTF-8
 encoding/<project>=ISO-8859-1
 encoding/default=UTF-8
 encoding/testdata=UTF-8

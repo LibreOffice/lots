@@ -10,6 +10,7 @@
 * -------------------------------------------------------------------
 * 02.01.2006 | BNK | Erstellung
 * 03.01.2006 | BNK | Menüs unterstützt
+* 10.01.2006 | BNK | Icon und Config-File pfadunabhängig über Classloader
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -31,7 +32,7 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowFocusListener;
 import java.awt.event.WindowListener;
-import java.io.File;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -67,6 +68,8 @@ import de.muenchen.allg.itd51.wollmux.Logger;
  */
 public class WollMuxBar
 {
+  private final URL ICON_URL = this.getClass().getClassLoader().getResource("data/wollmux_klein.jpg");
+  
   /**
    * Der Rahmen der die Steuerelemente enthält.
    */
@@ -198,7 +201,7 @@ public class WollMuxBar
     logoFrame = new JFrame("WollMux");
     logoFrame.setUndecorated(true);
     logoFrame.setAlwaysOnTop(true);
-    JLabel logo = new JLabel(new ImageIcon("testdata/wollmux_klein.jpg"));
+    JLabel logo = new JLabel(new ImageIcon(ICON_URL));
     logo.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
     logoPanel = new JPanel(new GridLayout(1,1));
     logoPanel.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
@@ -628,9 +631,12 @@ public class WollMuxBar
   public static void main(String[] args) throws Exception
   {
     UNO.init();
-    String confFile = "testdata/wollmuxbar.conf";
-    ConfigThingy conf = new ConfigThingy("", new URL(new File(System
-        .getProperty("user.dir")).toURL(), confFile));
+    String confFile = "data/wollmuxbar.conf";
+    URL confURL = WollMuxBar.class.getClassLoader().getResource(confFile);
+    
+    //ConfigThingy conf = new ConfigThingy("", new URL(new File(System
+    //    .getProperty("user.dir")).toURL(), confFile));
+    ConfigThingy conf = new ConfigThingy("", confURL, new InputStreamReader(confURL.openStream(),ConfigThingy.CHARSET));
     new WollMuxBar(conf);    
   }
   
