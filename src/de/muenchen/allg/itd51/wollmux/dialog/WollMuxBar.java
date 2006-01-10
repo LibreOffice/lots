@@ -11,6 +11,7 @@
 * 02.01.2006 | BNK | Erstellung
 * 03.01.2006 | BNK | Menüs unterstützt
 * 10.01.2006 | BNK | Icon und Config-File pfadunabhängig über Classloader
+*                  | switches --minimize, --topbar, --normalwindow
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -19,6 +20,7 @@
 */
 package de.muenchen.allg.itd51.wollmux.dialog;
 
+import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
@@ -69,6 +71,10 @@ import de.muenchen.allg.itd51.wollmux.Logger;
 public class WollMuxBar
 {
   private final URL ICON_URL = this.getClass().getClassLoader().getResource("data/wollmux_klein.jpg");
+  private static boolean minimize = false;
+  private static boolean topbar = false;
+  private static boolean normalwindow = false;
+
   
   /**
    * Der Rahmen der die Steuerelemente enthält.
@@ -213,7 +219,7 @@ public class WollMuxBar
     logoFrame.setLocation(0,0);
     logoFrame.setResizable(false);
 
-    myFrame.setAlwaysOnTop(true);
+    if (!normalwindow) myFrame.setAlwaysOnTop(true);
     myFrame.addWindowFocusListener(trafo);
     
     myFrame.pack();
@@ -490,6 +496,10 @@ public class WollMuxBar
     {
       return actionListener_openTemplate;
     }
+    if (action.equals("absenderAuswaehlen"))
+    {
+      return null;
+    }
     else if (action.equals(""))
     {
       return null;
@@ -547,6 +557,8 @@ public class WollMuxBar
     }
     public void windowLostFocus(WindowEvent e)
     {
+      if (topbar || normalwindow) return;
+      if (minimize) {myFrame.setExtendedState(Frame.ICONIFIED); return;}
       if (isLogo) return;
       myFrame.setVisible(false);
       logoFrame.setVisible(true);
@@ -630,6 +642,12 @@ public class WollMuxBar
    */
   public static void main(String[] args) throws Exception
   {
+    if (args.length > 0)
+    {
+      if (args[0].equals("--minimize")) minimize = true;
+      if (args[0].equals("--topbar")) topbar = true;
+      if (args[0].equals("--normalwindow")) normalwindow = true;
+    }
     UNO.init();
     String confFile = "data/wollmuxbar.conf";
     URL confURL = WollMuxBar.class.getClassLoader().getResource(confFile);
