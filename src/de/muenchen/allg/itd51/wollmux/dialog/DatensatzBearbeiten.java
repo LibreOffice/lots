@@ -22,6 +22,7 @@
 * 02.11.2005 | BNK | +saveAndBack()
 * 15.11.2005 | BNK | Endlosschleife beseitigt durch vertauschen der || Operanden
 * 22.11.2005 | BNK | Common.setLookAndFeel() verwenden
+* 11.01.2006 | BNK | EDIT "true" bei comboboxen unterstützt
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -935,6 +936,9 @@ public class DatensatzBearbeiten
                 JPanel uiElement = new JPanel(new GridLayout(1,1));
                 JComboBox combo = new JComboBox();
                 combo.setEnabled(!readonly);
+                boolean editable = false;
+                try{ if (uiElementDesc.get("EDIT").toString().equals("true")) editable = true; }catch(NodeNotFoundException x){}
+                combo.setEditable(editable);
                 try
                 {
                   ComboBoxDataControl comboCtrl = new ComboBoxDataControl(uiElementDesc.get("DB_SPALTE").toString(), combo, modColor);
