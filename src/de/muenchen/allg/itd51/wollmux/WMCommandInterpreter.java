@@ -24,6 +24,7 @@ package de.muenchen.allg.itd51.wollmux;
 import java.io.StringReader;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -55,7 +56,7 @@ public class WMCommandInterpreter
 {
 
   private WollMuxSingleton mux;
-  
+
   /**
    * Das Dokument, das interpretiert werden soll.
    */
@@ -254,6 +255,7 @@ public class WMCommandInterpreter
           state = executeInsertValue(
               wm.get("DB_SPALTE").toString(),
               bookmarkName,
+              wm,
               state);
         }
 
@@ -264,7 +266,7 @@ public class WMCommandInterpreter
           state = executeRufeDenWollMux(bookmarkName, state);
         }
 
-        // rufe den wollmux
+        // version
         else if (cmd.toString().compareToIgnoreCase("Version") == 0)
         {
           Logger.debug2("Cmd: Version");
@@ -310,16 +312,22 @@ public class WMCommandInterpreter
    *          Name des Bookmarks in das der Wert eingefügt werden soll.
    */
   private WMCommandState executeInsertValue(String spaltenname,
-      String bookmarkName, WMCommandState state)
+      String bookmarkName, ConfigThingy wm, WMCommandState state)
   {
     state.setErrors(0);
     try
     {
       Dataset ds = mux.getDatasourceJoiner().getSelectedDataset();
-      if (ds.get(spaltenname) == null)
+      if (ds.get(spaltenname) == null || ds.get(spaltenname).equals(""))
         fillBookmark(bookmarkName, "");
       else
-        fillBookmark(bookmarkName, ds.get(spaltenname));
+      {
+        // Auswertung der AUTOSEP und SEPARATOR - Attribute
+        String[] seps = getSeparators(wm);
+
+        // Bookmark befüllen
+        fillBookmark(bookmarkName, seps[0] + ds.get(spaltenname) + seps[1]);
+      }
       state.setDone(true);
     }
     catch (java.lang.Exception e)
@@ -331,6 +339,60 @@ public class WMCommandInterpreter
     }
     state.setDone(true);
     return state;
+  }
+
+  /**
+   * Evaluiert die WM-Kommando-Attribute AUTOSEP und SEPARATOR und liefert ein
+   * Array mit den String-Werten des linken (Index 0) und rechten (index 1)
+   * Separators.
+   * 
+   * @param wmCmd
+   *          WollMux-Kommando das optional die Attribute AUTOSEP und SEPARATOR
+   *          enthält.
+   * @return Array mit den String-Werten des linken (Index 0) und rechten (index
+   *         1) Separators.
+   * @throws java.lang.Exception
+   *           Die Exception wird geworfen, wenn ein falscher AUTOSEP-Typ
+   *           angegeben wurde.
+   */
+  private String[] getSeparators(ConfigThingy wmCmd) throws java.lang.Exception
+  {
+    String[] resultSeps = new String[] { /* left = */"", /* right = */"" };
+    Iterator autoseps = wmCmd.query("AUTOSEP").iterator();
+    Iterator seps = wmCmd.query("SEPARATOR").iterator();
+    String currentSep = " "; // mit Default-Separator vorbelegt
+
+    while (autoseps.hasNext())
+    {
+      ConfigThingy as = (ConfigThingy) autoseps.next();
+      String sep = currentSep;
+      if (seps.hasNext()) sep = ((ConfigThingy) seps.next()).toString();
+
+      if (as.toString().compareToIgnoreCase("left") == 0)
+      {
+        resultSeps[0] = sep;
+      }
+      else if (as.toString().compareToIgnoreCase("right") == 0)
+      {
+        resultSeps[1] = sep;
+      }
+      else if (as.toString().compareToIgnoreCase("both") == 0)
+      {
+        resultSeps[0] = sep;
+        resultSeps[1] = sep;
+      }
+      else
+      {
+        throw new java.lang.Exception(
+            "Unbekannter AUTOSEP-typ \""
+                + as.toString()
+                + "\". Erwarte \"left\", \"right\" oder \"both\".");
+      }
+
+      currentSep = sep;
+    }
+
+    return resultSeps;
   }
 
   /**
@@ -469,8 +531,7 @@ public class WMCommandInterpreter
         WMInsertField insertField = new WMInsertField(
             createTextCursorByBookmark(bookmark).xTextRange());
         UnoService insCurs = insertField.createInsertCursor();
-        insCurs.xTextCursor()
-            .setString("Build-Info: " + mux.getBuildInfo());
+        insCurs.xTextCursor().setString("Build-Info: " + mux.getBuildInfo());
 
         insertField.hideMarks();
       }
