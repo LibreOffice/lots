@@ -1,4 +1,4 @@
-/*
+/* TODO Diesen Dialog und alle anderen auf alwaysOnTop setzen (im VorMux branch)
 * Dateiname: AbsenderAuswaehlen.java
 * Projekt  : WollMux
 * Funktion : Implementiert den Absenderdaten auswählen Dialog des BKS
