@@ -25,6 +25,7 @@
 * 22.11.2005 | BNK | Common.setLookAndFeel() verwenden
 * 22.11.2005 | BNK | Bei Initialisierung ist der selectedDataset auch in der Liste 
 *                  | selektiert.
+* 20.01.2006 | BNK | Default-Anrede für Tinchen WollMux ist "Frau"
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -103,6 +104,8 @@ public class PersoenlicheAbsenderlisteVerwalten
   public static final String DEFAULT_NACHNAME = "Wollmux";
 
   public static final String DEFAULT_VORNAME = "Tinchen";
+  
+  public static final String DEFAULT_ANREDE = "Frau";
 
   /**
    * Gibt an, wie die Personen in den Listen angezeigt werden sollen.
@@ -908,6 +911,7 @@ public class PersoenlicheAbsenderlisteVerwalten
       ds.set("Vorname",DEFAULT_VORNAME);
       ds.set("Nachname",DEFAULT_NACHNAME);
       ds.set("Rolle", DEFAULT_ROLLE);
+      ds.set("Anrede", DEFAULT_ANREDE);
     }catch(Exception x)
     {
       Logger.error(x);
