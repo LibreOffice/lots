@@ -23,6 +23,7 @@
 * 15.11.2005 | BNK | Endlosschleife beseitigt durch vertauschen der || Operanden
 * 22.11.2005 | BNK | Common.setLookAndFeel() verwenden
 * 11.01.2006 | BNK | EDIT "true" bei comboboxen unterstützt
+* 25.01.2006 | BNK | Auch editierbare Comboboxen ändern nun den Hintergrund korrekt.
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -526,6 +527,10 @@ public class DatensatzBearbeiten
       while (iter.hasNext()) ((ColorChangeListener)iter.next()).colorChanged();
     }
     
+    public void setBackground(Color c)
+    {
+      myComponent.setBackground(c);
+    }
     public abstract String getTextFromControl();
     public String getColumnName() {return columnName;}
     public abstract void setTextInControl(String text);
@@ -535,7 +540,7 @@ public class DatensatzBearbeiten
     {
       if (datasetIsLocal() || hasBeenModified())
       {
-        myComponent.setBackground(localColor);
+        setBackground(localColor);
         if (isCurrentlyNormalColor)
         {
           isCurrentlyNormalColor = false;
@@ -544,7 +549,7 @@ public class DatensatzBearbeiten
       }
       else
       {
-        myComponent.setBackground(normalColor);
+        setBackground(normalColor);
         if (!isCurrentlyNormalColor)
         {
           isCurrentlyNormalColor = true;
@@ -641,6 +646,12 @@ public class DatensatzBearbeiten
       compo.addItemListener(this);
     }
 
+    public void setBackground(Color c)
+    {
+      super.setBackground(c);
+      ((JComboBox)myComponent).getEditor().getEditorComponent().setBackground(c);
+    }
+    
     public void addItem(String text)
     {
       if (text == null) text = "";
