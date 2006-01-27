@@ -9,6 +9,7 @@
 * Datum      | Wer | Änderungsgrund
 * -------------------------------------------------------------------
 * 27.12.2005 | BNK | Erstellung
+* 27.01.2006 | BNK | JFrame-Verwaltung nach FormGUI ausgelagert.
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -19,31 +20,20 @@ package de.muenchen.allg.itd51.wollmux.dialog;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
-import java.io.File;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
-import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
-import de.muenchen.allg.itd51.wollmux.FormListener;
 import de.muenchen.allg.itd51.wollmux.FormModel;
 import de.muenchen.allg.itd51.wollmux.Logger;
 
@@ -78,15 +68,7 @@ public class FormController implements UIElementEventHandler
    */
   private String firstWindow;
   
-  /**
-   * Der Titel des Formularfensters.
-   */
-  private String formTitle = "Unbenanntes Formular";
-  
-  /**
-   * Der Rahmen des gesamten Dialogs.
-   */
-  private JFrame myFrame;
+  private JPanel contentPanel;
   
   private UIElementFactory uiElementFactory;
   
@@ -95,20 +77,9 @@ public class FormController implements UIElementEventHandler
   
   private Map mapIdToUIElement = new HashMap();
   private Map mapIdToListOfDependingUIElements = new HashMap();
-
-  /**
-   * ActionListener für Buttons mit der ACTION "abort". 
-   */
-  private ActionListener actionListener_abort = new ActionListener()
-        { public void actionPerformed(ActionEvent e){ abort(); } };
   
   /**
-   * wird getriggert bei windowClosing() Event.
-   */
-  private ActionListener closeAction = actionListener_abort;
-  
-  /**
-   * 
+   * ACHTUNG! Darf nur im Event Dispatching Thread aufgerufen werden.
    * @param model
    * @param uidesc
    * @param idToPresetValue
@@ -119,9 +90,6 @@ public class FormController implements UIElementEventHandler
   {
     fenster = new HashMap();
     
-    try{
-      formTitle = conf.get("Formular").get("TITLE").toString();
-    }catch(Exception x) {}
     
     final ConfigThingy fensterDesc = conf.query("Fenster");
     if (fensterDesc.count() == 0)
@@ -129,14 +97,9 @@ public class FormController implements UIElementEventHandler
     
     initFactories();  
     
-    
-    //  GUI im Event-Dispatching Thread erzeugen wg. Thread-Safety.
+
     try{
-      javax.swing.SwingUtilities.invokeLater(new Runnable() {
-        public void run() {
-            try{createGUI(fensterDesc.getLastChild());}catch(Exception x){};
-        }
-      });
+      createGUI(fensterDesc.getLastChild());
     }
     catch(Exception x) {Logger.error(x);}
 
@@ -146,16 +109,9 @@ public class FormController implements UIElementEventHandler
   {
     Common.setLookAndFeel();
     
-    //Create and set up the window.
-    myFrame = new JFrame(formTitle);
-    //leave handling of close request to WindowListener.windowClosing
-    myFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-    myFrame.addWindowListener(new MyWindowListener());
-    
-    JPanel contentPanel = new JPanel();
+    contentPanel = new JPanel();
     JTabbedPane tabbedPane = new JTabbedPane();
     contentPanel.add(tabbedPane);
-    myFrame.getContentPane().add(contentPanel);
     
     Iterator iter = fensterDesc.iterator();
     while (iter.hasNext())
@@ -173,18 +129,10 @@ public class FormController implements UIElementEventHandler
     }
     
     //TODO nachdem alle Felder erzeugt wurden, mit Default-Werten befuellen. Danach alle Plausis testen und Felder entsprechend einfärben.
-    
-    myFrame.pack();
-    int frameWidth = myFrame.getWidth();
-    int frameHeight = myFrame.getHeight();
-    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-    int x = screenSize.width/2 - frameWidth/2; 
-    int y = screenSize.height/2 - frameHeight/2;
-    myFrame.setLocation(x,y);
-    myFrame.setResizable(true);
-    myFrame.setVisible(true);
   }
   
+
+  public JPanel JPanel(){ return contentPanel;}
   
   private class DialogWindow
   {
@@ -323,39 +271,11 @@ public class FormController implements UIElementEventHandler
 
     public JPanel JPanel()
     {
-      // TODO Auto-generated method stub
       return myPanel;
     }
   }
   
-  /**
-   * Ein WindowListener, der auf den JFrame registriert wird, damit als
-   * Reaktion auf den Schliessen-Knopf auch die ACTION "abort" ausgeführt wird.
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private class MyWindowListener implements WindowListener
-  {
-    public MyWindowListener(){}
-    public void windowActivated(WindowEvent e) { }
-    public void windowClosed(WindowEvent e) {}
-    public void windowClosing(WindowEvent e) { closeAction.actionPerformed(null); }
-    public void windowDeactivated(WindowEvent e) { }
-    public void windowDeiconified(WindowEvent e) {}
-    public void windowIconified(WindowEvent e) { }
-    public void windowOpened(WindowEvent e) {}
-  }
   
-  
-  /**
-   * Implementiert die gleichnamige ACTION.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private void abort()
-  {
-    myFrame.dispose();
-    System.exit(0);
-  }
 
   private void initFactories()
   {
@@ -429,16 +349,7 @@ public class FormController implements UIElementEventHandler
         mapTypeToLabelType, mapTypeToLabelLayoutConstraints, this);
 
   }
-
-  /**
-   * 
-   * @param listen
-   * @author Matthias Benkmann (D-III-ITD 5.1) TODO Testen
-   */
-  public void addFormValueChangedListener(FormListener listen)
-  {
-  }
-
+  
   public void processUiElementEvent(UIElement source, String eventType, Object[] args)
   {
     System.out.println("UIElementEvent: "+eventType+" on UIElement "+source.getId());
@@ -461,24 +372,8 @@ public class FormController implements UIElementEventHandler
   }
   
   
-  private static class DummyFormModel implements FormModel
-  {
-  }
   
-  /**
-   * @param args
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TODO Testen
-   */
-  public static void main(String[] args) throws Exception
-  {
-    UNO.init();
-    String confFile = "testdata/formulartest.conf";
-    ConfigThingy conf = new ConfigThingy("", new URL(new File(System
-        .getProperty("user.dir")).toURL(), confFile));
-    new FormController(conf, new DummyFormModel(), new HashMap());
-  }
-
+  
   
 
 }

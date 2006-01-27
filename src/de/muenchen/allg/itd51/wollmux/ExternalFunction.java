@@ -17,6 +17,7 @@
 */
 package de.muenchen.allg.itd51.wollmux;
 
+import java.lang.reflect.Method;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +35,8 @@ import de.muenchen.allg.itd51.parser.NodeNotFoundException;
  */
 public class ExternalFunction
 {
-  private XScript script;
+  private XScript script = null;
+  private Method method = null;
   private String[] params;
   private String[] depends;
   
@@ -56,7 +58,27 @@ public class ExternalFunction
     
     try
     {
-      script = UNO.masterScriptProvider.getScript(url);
+      if (url.startsWith("java:"))
+      {
+        String classStr = url.substring(5,url.lastIndexOf('.'));
+        String methodStr = url.substring(url.lastIndexOf('.')+1);
+        Class c = this.getClass().getClassLoader().loadClass(classStr);
+        Method[] methods = c.getDeclaredMethods();
+        for (int i = 0; i < methods.length; ++i)
+          if (methods[i].getName().equals(methodStr))
+          {
+            if (method != null)
+            { 
+              Logger.error("Klasse \""+classStr+"\" enthält 2 Methoden namens \""+methodStr+"\"");
+              break;
+            }
+            method = methods[i];
+          }
+      }
+      else
+      {
+        script = UNO.masterScriptProvider.getScript(url);
+      }
     }
     catch (Exception e)
     {
@@ -78,7 +100,23 @@ public class ExternalFunction
       }
     }
     
-    params = new String[paramsConf.count()];
+    List paramList = new Vector();
+    iter = paramsConf.iterator();
+    while (iter.hasNext())
+    {
+      ConfigThingy param = (ConfigThingy)iter.next();
+      Iterator paramIter = param.iterator();
+      while (paramIter.hasNext())
+      {
+        String p = paramIter.next().toString();
+        paramList.add(p); 
+      }
+    }
+    
+    params = new String[paramList.size()];
+    for (int i = 0; i < paramList.size(); ++i)
+      params[i] = (String)paramList.get(i);
+
     depends = new String[depList.size()];
     for (int i = 0; i < depList.size(); ++i)
       depends[i] = (String)depList.get(i);
@@ -105,8 +143,9 @@ public class ExternalFunction
     short[][] aOutParamIndex = new short[][]{new short[0]};
     Object[][] aOutParam = new Object[][]{new Object[0]};
     try{
-        Object retval = script.invoke(args, aOutParamIndex, aOutParam);
-        return retval;
+        if (script != null) return script.invoke(args, aOutParamIndex, aOutParam);
+        if (method != null) return method.invoke(null, args);
+        return null;
     } catch(Exception x)
     {
       throw new Exception(x);
