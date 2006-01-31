@@ -19,13 +19,10 @@
 */
 package de.muenchen.allg.itd51.wollmux.dialog;
 
-import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.Panel;
 import java.awt.ScrollPane;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
@@ -40,7 +37,11 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import com.sun.star.beans.PropertyValue;
+import com.sun.star.beans.XPropertySet;
+import com.sun.star.comp.beans.NoConnectionException;
 import com.sun.star.comp.beans.OOoBean;
+import com.sun.star.frame.XController;
+import com.sun.star.view.XViewSettingsSupplier;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
@@ -101,42 +102,7 @@ public class FormGUI
 
   }
 
-  private void createGUI2(ConfigThingy conf)
-  {
-    //Common.setLookAndFeel();
-    
-    //Create and set up the window.
-    Frame myFrame = new java.awt.Frame(formTitle);
-    //leave handling of close request to WindowListener.windowClosing
-    //myFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-    //myFrame.addWindowListener(new MyWindowListener());
-    
-    Panel contentPanel = new Panel(new BorderLayout());
-    //myFrame.setContentPane(contentPanel);
-    contentPanel.add(myBean, BorderLayout.CENTER);
-    myFrame.add(contentPanel);
-    
-    
-    myFrame.pack();
-    int frameWidth = 400;
-    int frameHeight = 400;
-    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-    int x = screenSize.width/2 - frameWidth/2; 
-    int y = screenSize.height/2 - frameHeight/2;
-    myFrame.setLocation(x,y);
-    myFrame.setResizable(true);
-    myFrame.setVisible(true);
-    
-    try{
-      myBean.loadFromURL("private:factory/swriter", null);
-      myBean.aquireSystemWindow();
-    }catch(Exception e)
-    {
-      Logger.error(e);
-    }
 
-
-  }
   private void createGUI(ConfigThingy conf)
   {
     Common.setLookAndFeel();
@@ -184,7 +150,7 @@ public class FormGUI
       PropertyValue[] arguments = new PropertyValue[2];
       arguments[0] = new PropertyValue();
       arguments[0].Name = "Preview";
-      arguments[0].Value = new Boolean(true);
+      arguments[0].Value = new Boolean(false);
       arguments[1] = new PropertyValue();
       arguments[1].Name = "ReadOnly";
       arguments[1].Value = new Boolean(true);
@@ -217,6 +183,19 @@ public class FormGUI
     myBean.invalidate();
     myBean.validate();
     myBean.repaint();
+    
+    
+    try
+    {
+      XController ctrl = myBean.getController();
+      XViewSettingsSupplier supp = UNO.XViewSettingsSupplier(ctrl);
+      XPropertySet props = supp.getViewSettings();
+      System.out.println(""+UNO.setProperty(props, "ZoomValue", new Short((short)40)));
+    }
+    catch (NoConnectionException e)
+    {
+      Logger.error(e);
+    }
    
   }
 
