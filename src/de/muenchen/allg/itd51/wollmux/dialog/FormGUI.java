@@ -10,6 +10,7 @@
 * -------------------------------------------------------------------
 * 27.01.2006 | BNK | Erstellung
 * 30.01.2006 | BNK | Office-Bean Einbindung
+* 31.01.2006 | BNK | Bean im Preview-Modus aufrufen
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -25,6 +26,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.Panel;
+import java.awt.ScrollPane;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -37,6 +39,7 @@ import java.util.HashMap;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import com.sun.star.beans.PropertyValue;
 import com.sun.star.comp.beans.OOoBean;
 
 import de.muenchen.allg.afid.UNO;
@@ -160,8 +163,9 @@ public class FormGUI
       Logger.error(x);
     }
     
-    contentPanel.add(myBean, gbcBean);
-    
+    ScrollPane scrollPane = new ScrollPane(ScrollPane.SCROLLBARS_ALWAYS);
+    scrollPane.add(myBean);
+    contentPanel.add(scrollPane, gbcBean);
 
     myFrame.pack();
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -177,12 +181,43 @@ public class FormGUI
     myFrame.validate();
     
     try{
-      myBean.loadFromURL("private:factory/swriter", null);
+      PropertyValue[] arguments = new PropertyValue[2];
+      arguments[0] = new PropertyValue();
+      arguments[0].Name = "Preview";
+      arguments[0].Value = new Boolean(true);
+      arguments[1] = new PropertyValue();
+      arguments[1].Name = "ReadOnly";
+      arguments[1].Value = new Boolean(true);
+      myBean.loadFromURL("file:///c:/temp/foobar.odt", arguments);
     }catch(Exception e)
     {
       Logger.error(e);
     }
+    contentPanel.invalidate();
+    contentPanel.validate();
+    contentPanel.repaint();
+    scrollPane.invalidate();
+    scrollPane.validate();
+    scrollPane.repaint();
+    myBean.invalidate();
     myBean.validate();
+    myBean.repaint();
+    scrollPane.invalidate();
+    scrollPane.validate();
+    scrollPane.repaint();
+    myBean.invalidate();
+    myBean.validate();
+    myBean.repaint();
+    contentPanel.invalidate();
+    contentPanel.validate();
+    contentPanel.repaint();
+    scrollPane.invalidate();
+    scrollPane.validate();
+    scrollPane.repaint();
+    myBean.invalidate();
+    myBean.validate();
+    myBean.repaint();
+   
   }
 
   /**
