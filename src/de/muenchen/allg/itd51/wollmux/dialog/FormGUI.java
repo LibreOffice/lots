@@ -11,6 +11,7 @@
 * 27.01.2006 | BNK | Erstellung
 * 30.01.2006 | BNK | Office-Bean Einbindung
 * 31.01.2006 | BNK | Bean im Preview-Modus aufrufen
+* 01.02.2006 | BNK | etwas rumgedoktore mit LayoutManager 
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -23,7 +24,6 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.ScrollPane;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -41,6 +41,7 @@ import com.sun.star.beans.XPropertySet;
 import com.sun.star.comp.beans.NoConnectionException;
 import com.sun.star.comp.beans.OOoBean;
 import com.sun.star.frame.XController;
+import com.sun.star.frame.XLayoutManager;
 import com.sun.star.view.XViewSettingsSupplier;
 
 import de.muenchen.allg.afid.UNO;
@@ -129,9 +130,8 @@ public class FormGUI
       Logger.error(x);
     }
     
-    ScrollPane scrollPane = new ScrollPane(ScrollPane.SCROLLBARS_ALWAYS);
-    scrollPane.add(myBean);
-    contentPanel.add(scrollPane, gbcBean);
+    
+    contentPanel.add(myBean, gbcBean);
 
     myFrame.pack();
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -162,24 +162,15 @@ public class FormGUI
     contentPanel.invalidate();
     contentPanel.validate();
     contentPanel.repaint();
-    scrollPane.invalidate();
-    scrollPane.validate();
-    scrollPane.repaint();
     myBean.invalidate();
     myBean.validate();
     myBean.repaint();
-    scrollPane.invalidate();
-    scrollPane.validate();
-    scrollPane.repaint();
     myBean.invalidate();
     myBean.validate();
     myBean.repaint();
     contentPanel.invalidate();
     contentPanel.validate();
     contentPanel.repaint();
-    scrollPane.invalidate();
-    scrollPane.validate();
-    scrollPane.repaint();
     myBean.invalidate();
     myBean.validate();
     myBean.repaint();
@@ -188,6 +179,10 @@ public class FormGUI
     try
     {
       XController ctrl = myBean.getController();
+      XLayoutManager lm = UNO.XLayoutManager(UNO.getProperty(ctrl.getFrame(), "LayoutManager"));
+      lm.lock();
+      lm.setVisible(false);
+      lm.reset();
       XViewSettingsSupplier supp = UNO.XViewSettingsSupplier(ctrl);
       XPropertySet props = supp.getViewSettings();
       System.out.println(""+UNO.setProperty(props, "ZoomValue", new Short((short)40)));
