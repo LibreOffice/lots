@@ -33,6 +33,7 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.Condition;
 import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.FormModel;
 import de.muenchen.allg.itd51.wollmux.Logger;
@@ -164,7 +165,7 @@ public class FormController implements UIElementEventHandler
           
           mapIdToUIElement.put(uiElement.getId(), uiElement);
           
-          UIElement.Constraints cons = uiElement.getConstraints();
+          Condition cons = uiElement.getConstraints();
           if (cons != null)
           {
             Iterator consIter = cons.dependencies().iterator();
@@ -360,10 +361,10 @@ public class FormController implements UIElementEventHandler
       while (iter.hasNext())
       {
         UIElement dependingUIElement = (UIElement)iter.next();
-        UIElement.Constraints cons =  dependingUIElement.getConstraints();
+        Condition cons =  dependingUIElement.getConstraints();
         if (cons == null) continue;
         //TODO momentante Plausi-Zustand merken und Background nur ändern wenn Zustand geändert. Farben nicht fest verdrahten. WHITE aus dem standardbackground eines neuen Elements holen. PINK aus Config.
-        if (cons.checkValid(mapIdToUIElement))
+        if (cons.check(mapIdToUIElement))
           dependingUIElement.setBackground(Color.WHITE);
         else
           dependingUIElement.setBackground(Color.PINK);

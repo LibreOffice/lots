@@ -19,8 +19,6 @@ package de.muenchen.allg.itd51.wollmux.dialog;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.util.Collection;
-import java.util.Map;
 
 import javax.swing.AbstractButton;
 import javax.swing.JCheckBox;
@@ -31,13 +29,16 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.text.JTextComponent;
 
+import de.muenchen.allg.itd51.wollmux.Condition;
+import de.muenchen.allg.itd51.wollmux.Value;
+
 
 /**
  * Interface das von den konkreten UI Elementen (Combobox etc.) abstrahiert. 
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
-public interface UIElement
+public interface UIElement extends Value
 {
   public static final Integer LABEL_NONE = new Integer(0);
   public static final Integer LABEL_LEFT = new Integer(-1);
@@ -80,7 +81,7 @@ public interface UIElement
    * gesetzt.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public Constraints getConstraints();
+  public Condition getConstraints();
   
   /**
    * Der aktuelle Wert des UI Elements. Falls es sich um ein boolesches
@@ -101,7 +102,7 @@ public interface UIElement
    * Wert hat, wird immer false geliefert.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public boolean isSet();
+  public boolean getBoolean();
   
   /**
    * Liefert die ID dieses UIElements oder "" wenn nicht gesetzt.
@@ -113,33 +114,13 @@ public interface UIElement
   /** Setzt eine neue Hintergrundfarbe für das UIElement. */
   public void setBackground(Color bg);
   
-  public interface Constraints
-  {
-    /**
-     * Liefert true, wenn die Constraints erfüllt sind.
-     * @param mapIdToUIElement bildet die IDs der Eingabefelder auf
-     * entsprechende UIElements ab.  
-     * @author Matthias Benkmann (D-III-ITD 5.1)
-     */
-    public boolean checkValid(Map mapIdToUIElement);
-    
-    /**
-     * Liefert eine Collection der IDs der Eingabefelder von denen diese
-     * Constraints abhängen, d,h, die IDs die mindestens in der Map vorhanden sein
-     * müssen, die an checkValid() übergeben wird. ACHTUNG! Die zurückgelieferte
-     * Collection darf nicht verändert werden!
-     * @author Matthias Benkmann (D-III-ITD 5.1)
-     */
-    public Collection dependencies();
-  }
-
   public static abstract class UIElementBase implements UIElement
   {
     protected Integer labelType = LABEL_NONE;
     protected JLabel label = null;
     protected Object layoutConstraints = null;
     protected Object labelLayoutConstraints = null;
-    protected Constraints constraints = null;
+    protected Condition constraints = null;
     protected String id = "";
   
     public void setBackground(Color bg)
@@ -169,14 +150,14 @@ public interface UIElement
       return labelLayoutConstraints;
     }
 
-    public Constraints getConstraints()
+    public Condition getConstraints()
     {
       return constraints;
     }
 
     public abstract String getString();
 
-    public abstract boolean isSet();
+    public abstract boolean getBoolean();
     
     public String getId() {return id;}
   }
@@ -202,7 +183,7 @@ public interface UIElement
       return "false";
     }
 
-    public boolean isSet()
+    public boolean getBoolean()
     {
       return false;
     }
@@ -230,7 +211,7 @@ public interface UIElement
       return "false";
     }
 
-    public boolean isSet()
+    public boolean getBoolean()
     {
       return false;
     }
@@ -240,7 +221,7 @@ public interface UIElement
   {
     private JTextField textfield;
     
-    public Textfield(String id, JTextField tf, Object layoutConstraints, Integer labelType, String label, Object labelLayoutConstraints, Constraints constraints)
+    public Textfield(String id, JTextField tf, Object layoutConstraints, Integer labelType, String label, Object labelLayoutConstraints, Condition constraints)
     {
       this.textfield = tf;
       this.layoutConstraints = layoutConstraints;
@@ -261,7 +242,7 @@ public interface UIElement
       return textfield.getText();
     }
 
-    public boolean isSet()
+    public boolean getBoolean()
     {
       return !getString().equals("");
     }
@@ -271,7 +252,7 @@ public interface UIElement
   {
     private JComboBox combo;
     
-    public Combobox(String id, JComboBox combo, Object layoutConstraints, Integer labelType, String label, Object labelLayoutConstraints, Constraints constraints)
+    public Combobox(String id, JComboBox combo, Object layoutConstraints, Integer labelType, String label, Object labelLayoutConstraints, Condition constraints)
     {
       this.combo = combo;
       this.layoutConstraints = layoutConstraints;
@@ -298,7 +279,7 @@ public interface UIElement
       return ((JTextComponent)combo.getEditor().getEditorComponent()).getText();
     }
 
-    public boolean isSet()
+    public boolean getBoolean()
     {
       return !getString().equals("");
     }
@@ -310,7 +291,7 @@ public interface UIElement
     private JTextArea textarea;
     private Component textAreaComponent;
     
-    public Textarea(String id, JTextArea textarea, Component textAreaComponent, Object layoutConstraints, Integer labelType, String label, Object labelLayoutConstraints, Constraints constraints)
+    public Textarea(String id, JTextArea textarea, Component textAreaComponent, Object layoutConstraints, Integer labelType, String label, Object labelLayoutConstraints, Condition constraints)
     {
       this.textarea = textarea;
       this.textAreaComponent = textAreaComponent;
@@ -332,7 +313,7 @@ public interface UIElement
       return textarea.getText();
     }
 
-    public boolean isSet()
+    public boolean getBoolean()
     {
       return !getString().equals("");
     }
@@ -358,10 +339,10 @@ public interface UIElement
 
     public String getString()
     {
-      return isSet() ? "true" : "false";
+      return getBoolean() ? "true" : "false";
     }
 
-    public boolean isSet()
+    public boolean getBoolean()
     {
       return box.isSelected();
     }
@@ -389,7 +370,7 @@ public interface UIElement
       return "false";
     }
 
-    public boolean isSet()
+    public boolean getBoolean()
     {
       return false;
     }
@@ -416,7 +397,7 @@ public interface UIElement
       return "false";
     }
 
-    public boolean isSet()
+    public boolean getBoolean()
     {
       return false;
     }

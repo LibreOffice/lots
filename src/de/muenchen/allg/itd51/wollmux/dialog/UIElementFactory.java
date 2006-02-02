@@ -47,6 +47,8 @@ import javax.swing.text.JTextComponent;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
+import de.muenchen.allg.itd51.wollmux.Condition;
+import de.muenchen.allg.itd51.wollmux.ConditionFactory;
 import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.Logger;
 
@@ -148,7 +150,7 @@ public class UIElementFactory
       labelType = (Integer)mapTypeToLabelType.get(DEFAULT);
   
     UIElement uiElement;
-    UIElement.Constraints constraints = UIElementConstraintsFactory.getGrandchildConstraints(conf.query("PLAUSI"));
+    Condition constraints = ConditionFactory.getGrandchildCondition(conf.query("PLAUSI"));
     
     if (type.equals("button"))
     {
