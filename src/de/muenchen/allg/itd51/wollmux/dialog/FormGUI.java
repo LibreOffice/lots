@@ -12,6 +12,7 @@
 * 30.01.2006 | BNK | Office-Bean Einbindung
 * 31.01.2006 | BNK | Bean im Preview-Modus aufrufen
 * 01.02.2006 | BNK | etwas rumgedoktore mit LayoutManager 
+* 02.02.2006 | BNK | Fenster zusammengeklebt
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -21,12 +22,12 @@
 package de.muenchen.allg.itd51.wollmux.dialog;
 
 import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
@@ -34,15 +35,10 @@ import java.net.URL;
 import java.util.HashMap;
 
 import javax.swing.JFrame;
-import javax.swing.JPanel;
 
-import com.sun.star.beans.PropertyValue;
-import com.sun.star.beans.XPropertySet;
-import com.sun.star.comp.beans.NoConnectionException;
-import com.sun.star.comp.beans.OOoBean;
-import com.sun.star.frame.XController;
-import com.sun.star.frame.XLayoutManager;
-import com.sun.star.view.XViewSettingsSupplier;
+import com.sun.star.awt.PosSize;
+import com.sun.star.awt.XWindow2;
+import com.sun.star.text.XTextDocument;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
@@ -56,12 +52,15 @@ import de.muenchen.allg.itd51.wollmux.Logger;
  */
 public class FormGUI
 {
+  int winBorderWidth;
+  int winBorderHeight;
+  
   /**
    * Der Rahmen des gesamten Dialogs.
    */
   private JFrame myFrame;
   
-  private OOoBean myBean;
+  private XTextDocument myDoc;
   
   /**
    * Der Titel des Formularfensters.
@@ -83,9 +82,9 @@ public class FormGUI
   private ActionListener closeAction = actionListener_abort;
   
 
-  public FormGUI(final ConfigThingy conf, OOoBean bean)
+  public FormGUI(final ConfigThingy conf, XTextDocument doc)
   {
-    myBean = bean;
+    myDoc = doc;
     
     try{
       formTitle = conf.get("Formular").get("TITLE").toString();
@@ -112,86 +111,58 @@ public class FormGUI
     myFrame = new JFrame(formTitle);
     //leave handling of close request to WindowListener.windowClosing
     myFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-    myFrame.addWindowListener(new MyWindowListener());
-    
-    JPanel contentPanel = new JPanel(new GridBagLayout());
-    myFrame.getContentPane().add(contentPanel);
-    
-//  int gridx, int gridy, int gridwidth, int gridheight, double weightx, double weighty, int anchor,          int fill,                  Insets insets, int ipadx, int ipady) 
-    GridBagConstraints gbcFormController = new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0, GridBagConstraints.PAGE_START,   GridBagConstraints.HORIZONTAL, new Insets(0,0,0,0),0,0);
-    GridBagConstraints gbcBean           = new GridBagConstraints(0, 1, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER,   GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0);
+    MyWindowListener oehrchen = new MyWindowListener(); 
+    myFrame.addWindowListener(oehrchen);
+    myFrame.addComponentListener(oehrchen);
     
     FormController formController;
     try{
       formController = new FormController(conf, new DummyFormModel(), new HashMap());
-      contentPanel.add(formController.JPanel(), gbcFormController);
     }catch (ConfigurationErrorException x)
     {
       Logger.error(x);
+      return;
     }
-    
-    
-    contentPanel.add(myBean, gbcBean);
+
+    myFrame.getContentPane().add(formController.JPanel());
 
     myFrame.pack();
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-    int frameWidth = myFrame.getWidth();
-    myFrame.setSize(frameWidth, screenSize.height*4/5);
-
+    //int frameWidth = myFrame.getWidth();
     int frameHeight = myFrame.getHeight();
-    int x = screenSize.width/2 - frameWidth/2; 
+    //frameHeight = screenSize.height * 8 / 10;
+    //myFrame.setSize(frameWidth, frameHeight);
+    int x = 0; //screenSize.width/2 - frameWidth/2; 
     int y = screenSize.height/2 - frameHeight/2;
     myFrame.setLocation(x,y);
     myFrame.setResizable(true);
     myFrame.setVisible(true);
-    myFrame.validate();
     
-    try{
-      PropertyValue[] arguments = new PropertyValue[2];
-      arguments[0] = new PropertyValue();
-      arguments[0].Name = "Preview";
-      arguments[0].Value = new Boolean(false);
-      arguments[1] = new PropertyValue();
-      arguments[1].Name = "ReadOnly";
-      arguments[1].Value = new Boolean(true);
-      myBean.loadFromURL("file:///c:/temp/foobar.odt", arguments);
-    }catch(Exception e)
-    {
-      Logger.error(e);
-    }
-    contentPanel.invalidate();
-    contentPanel.validate();
-    contentPanel.repaint();
-    myBean.invalidate();
-    myBean.validate();
-    myBean.repaint();
-    myBean.invalidate();
-    myBean.validate();
-    myBean.repaint();
-    contentPanel.invalidate();
-    contentPanel.validate();
-    contentPanel.repaint();
-    myBean.invalidate();
-    myBean.validate();
-    myBean.repaint();
-    
-    
-    try
-    {
-      XController ctrl = myBean.getController();
-      XLayoutManager lm = UNO.XLayoutManager(UNO.getProperty(ctrl.getFrame(), "LayoutManager"));
-      lm.lock();
-      lm.setVisible(false);
-      lm.reset();
-      XViewSettingsSupplier supp = UNO.XViewSettingsSupplier(ctrl);
-      XPropertySet props = supp.getViewSettings();
-      System.out.println(""+UNO.setProperty(props, "ZoomValue", new Short((short)40)));
-    }
-    catch (NoConnectionException e)
-    {
-      Logger.error(e);
-    }
-   
+    Point panelLocation = formController.JPanel().getLocationOnScreen();
+    Point frameLocation = myFrame.getLocationOnScreen();
+    winBorderWidth  = panelLocation.x - frameLocation.x;
+    winBorderHeight = panelLocation.y - frameLocation.y;
+    cuddleWithOpenOfficeWindow();
+  }
+
+
+  /**
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TODO Testen
+   */
+  private void cuddleWithOpenOfficeWindow()
+  {
+    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+    int frameWidth = myFrame.getWidth();
+    int frameHeight = myFrame.getHeight();
+    XWindow2 win = UNO.XWindow2(myDoc.getCurrentController().getFrame().getContainerWindow());
+    int docX = myFrame.getX() + frameWidth + winBorderWidth;
+    int docY = myFrame.getY() + winBorderHeight;
+    int docWidth = screenSize.width - docX - winBorderWidth;
+    int docHeight = frameHeight - winBorderHeight - winBorderWidth;
+    win.setPosSize(docX, docY, docWidth, docHeight, PosSize.POSSIZE);
+    //UNO.XTopWindow(win).toFront();
+    //win.setFocus();
   }
 
   /**
@@ -199,16 +170,42 @@ public class FormGUI
    * Reaktion auf den Schliessen-Knopf auch die ACTION "abort" ausgeführt wird.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private class MyWindowListener implements WindowListener
+  private class MyWindowListener implements WindowListener, ComponentListener
   {
     public MyWindowListener(){}
-    public void windowActivated(WindowEvent e) { }
+    public void windowActivated(WindowEvent e) 
+    { 
+      cuddleWithOpenOfficeWindow();
+    }
     public void windowClosed(WindowEvent e) {}
     public void windowClosing(WindowEvent e) { closeAction.actionPerformed(null); }
     public void windowDeactivated(WindowEvent e) { }
-    public void windowDeiconified(WindowEvent e) {}
-    public void windowIconified(WindowEvent e) { }
+    public void windowDeiconified(WindowEvent e) 
+    {
+      XWindow2 win = UNO.XWindow2(myDoc.getCurrentController().getFrame().getContainerWindow());
+      win.setVisible(true);
+      cuddleWithOpenOfficeWindow();
+    }
+    public void windowIconified(WindowEvent e) 
+    { 
+      XWindow2 win = UNO.XWindow2(myDoc.getCurrentController().getFrame().getContainerWindow());
+      win.setVisible(false);
+    }
     public void windowOpened(WindowEvent e) {}
+    public void componentResized(ComponentEvent e)
+    {
+      cuddleWithOpenOfficeWindow();
+    }
+    public void componentMoved(ComponentEvent e)
+    {
+      cuddleWithOpenOfficeWindow();
+    }
+    public void componentShown(ComponentEvent e)
+    {
+    }
+    public void componentHidden(ComponentEvent e)
+    {
+    }
   }
   
   
@@ -219,8 +216,13 @@ public class FormGUI
    */
   private void abort()
   {
+    try{
+      UNO.XCloseable(myDoc).close(true);
+    }catch(Exception x)
+    {
+      Logger.error(x);
+    }
     myFrame.dispose();
-    myBean.stopOOoConnection();
     System.exit(0);
   }
   
@@ -240,10 +242,8 @@ public class FormGUI
     String confFile = "testdata/formulartest.conf";
     ConfigThingy conf = new ConfigThingy("", new URL(new File(System
         .getProperty("user.dir")).toURL(), confFile));
-    OOoBean bean = new OOoBean();
-    System.out.println(""+bean.getOOoConnection());
-    
-    new FormGUI(conf, bean);
+    XTextDocument doc = UNO.XTextDocument(UNO.loadComponentFromURL("private:factory/swriter", true, true));
+    new FormGUI(conf, doc);
   }
 
 
