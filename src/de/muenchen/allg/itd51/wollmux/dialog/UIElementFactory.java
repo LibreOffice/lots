@@ -234,7 +234,10 @@ public class UIElementFactory
                 boxBruceleitner.doClick();
             }
           });
-      return new UIElement.Checkbox(id, boxBruceleitner, agentinMitHerz, layoutConstraints);
+      uiElement = new UIElement.Checkbox(id, boxBruceleitner, agentinMitHerz, layoutConstraints);
+      boxBruceleitner.addActionListener(new UIElementActionListener(uiElementEventHandler, uiElement, "valueChanged", new Object[]{}));
+      
+      return uiElement;
     }
     else if (type.equals("h-separator"))
     {

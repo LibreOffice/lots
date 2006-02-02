@@ -10,6 +10,7 @@
 * -------------------------------------------------------------------
 * 27.12.2005 | BNK | Erstellung
 * 27.01.2006 | BNK | JFrame-Verwaltung nach FormGUI ausgelagert.
+* 02.02.2006 | BNK | Ein/Ausblendungen begonnen
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -23,6 +24,7 @@ import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -34,6 +36,7 @@ import javax.swing.JTabbedPane;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.Condition;
+import de.muenchen.allg.itd51.wollmux.ConditionFactory;
 import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.FormModel;
 import de.muenchen.allg.itd51.wollmux.Logger;
@@ -78,6 +81,8 @@ public class FormController implements UIElementEventHandler
   
   private Map mapIdToUIElement = new HashMap();
   private Map mapIdToListOfDependingUIElements = new HashMap();
+  private Map mapIdToListOfDependingGroups = new HashMap();
+  private Map mapGroupIdToGroup = new HashMap();
   
   /**
    * ACHTUNG! Darf nur im Event Dispatching Thread aufgerufen werden.
@@ -93,20 +98,22 @@ public class FormController implements UIElementEventHandler
     
     
     final ConfigThingy fensterDesc = conf.query("Fenster");
+    ConfigThingy visibilityDesc = conf.query("Sichtbarkeit");
     if (fensterDesc.count() == 0)
       throw new ConfigurationErrorException("Schlüssel 'Fenster' fehlt in "+conf.getName());
     
     initFactories();  
     
-
     try{
-      createGUI(fensterDesc.getLastChild());
+      if (visibilityDesc.count() > 0) visibilityDesc = visibilityDesc.getLastChild();
+      final ConfigThingy visDesc = visibilityDesc;
+      createGUI(fensterDesc.getLastChild(), visDesc);
     }
     catch(Exception x) {Logger.error(x);}
 
   }
 
-  private void createGUI(ConfigThingy fensterDesc)
+  private void createGUI(ConfigThingy fensterDesc, ConfigThingy visibilityDesc)
   {
     Common.setLookAndFeel();
     
@@ -127,6 +134,38 @@ public class FormController implements UIElementEventHandler
       if (firstWindow == null) firstWindow = fensterName;
       fenster.put(fensterName,newWindow);
       tabbedPane.add(tabTitle,newWindow.JPanel()); //TODO insertTab() verwenden, Tooltip und Mnemonic einführen
+    }
+    
+    iter = visibilityDesc.iterator();
+    while (iter.hasNext())
+    {
+      ConfigThingy visRule = (ConfigThingy)iter.next();
+      String groupId = visRule.getName();
+      Condition cond;
+      try{
+        cond = ConditionFactory.getChildCondition(visRule);
+      }catch(ConfigurationErrorException x)
+      {
+        Logger.error(x);
+        continue;
+      }
+      
+      if (!mapGroupIdToGroup.containsKey(groupId))
+        mapGroupIdToGroup.put(groupId,new Group());
+ 
+      Group group = (Group)mapGroupIdToGroup.get(groupId);
+      group.condition = cond;
+      
+      Collection deps = cond.dependencies();
+      Iterator depsIter = deps.iterator();
+      while (depsIter.hasNext())
+      {
+        String elementId = (String)depsIter.next();
+        if (!mapIdToListOfDependingGroups.containsKey(elementId))
+          mapIdToListOfDependingGroups.put(elementId,new Vector(1));
+        
+        ((List)mapIdToListOfDependingGroups.get(elementId)).add(group);
+      }
     }
     
     //TODO nachdem alle Felder erzeugt wurden, mit Default-Werten befuellen. Danach alle Plausis testen und Felder entsprechend einfärben.
@@ -164,6 +203,23 @@ public class FormController implements UIElementEventHandler
             Logger.error("ID \""+uiElement.getId()+"\" mehrfach vergeben");
           
           mapIdToUIElement.put(uiElement.getId(), uiElement);
+          
+          ConfigThingy groupsConf = uiConf.query("GROUPS");
+          Iterator groupsIter = groupsConf.iterator();
+          while (groupsIter.hasNext())
+          {
+            ConfigThingy groups = (ConfigThingy)groupsIter.next();
+            Iterator groupIter = groups.iterator();
+            while (groupIter.hasNext())
+            {
+              String group = groupIter.next().toString();
+              if (!mapGroupIdToGroup.containsKey(group))
+                mapGroupIdToGroup.put(group, new Group());
+              
+              Group g = (Group)mapGroupIdToGroup.get(group);
+              g.uiElements.add(uiElement);
+            }
+          }
           
           Condition cons = uiElement.getConstraints();
           if (cons != null)
@@ -370,11 +426,38 @@ public class FormController implements UIElementEventHandler
           dependingUIElement.setBackground(Color.PINK);
       }
     }
+    
+    List dependingGroups = (List)mapIdToListOfDependingGroups.get(source.getId());
+    if (dependingGroups != null)
+    {
+      Iterator iter = dependingGroups.iterator();
+      while (iter.hasNext())
+      {
+        Group dependingGroup = (Group)iter.next();
+        Condition cond =  dependingGroup.condition;
+        if (cond == null) continue;
+        boolean result = cond.check(mapIdToUIElement);
+        if (result == dependingGroup.visible) continue;
+        dependingGroup.visible = result;
+        
+        Iterator uiElementIter = dependingGroup.uiElements.iterator();
+        while (uiElementIter.hasNext())
+        {
+          UIElement ele = (UIElement)uiElementIter.next();
+          ele.setVisible(dependingGroup.visible);
+        }
+      }
+    }
   }
   
   
   
-  
+  private static class Group
+  {
+    public List uiElements = new Vector(1);
+    public Condition condition = null;
+    public boolean visible = true;
+  }
   
 
 }

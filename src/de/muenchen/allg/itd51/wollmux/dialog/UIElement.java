@@ -114,6 +114,12 @@ public interface UIElement extends Value
   /** Setzt eine neue Hintergrundfarbe für das UIElement. */
   public void setBackground(Color bg);
   
+  /**
+   * Setzt die Sichtbarkeit der Komponente sowie des Labels gemeinsam.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public void setVisible(boolean vis);
+  
   public static abstract class UIElementBase implements UIElement
   {
     protected Integer labelType = LABEL_NONE;
@@ -155,6 +161,12 @@ public interface UIElement extends Value
       return constraints;
     }
 
+    public void setVisible(boolean vis)
+    {
+      if (getLabel() != null) getLabel().setVisible(vis);
+      getComponent().setVisible(vis);
+    }
+    
     public abstract String getString();
 
     public abstract boolean getBoolean();

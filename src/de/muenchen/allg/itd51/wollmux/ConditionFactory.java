@@ -33,7 +33,14 @@ import de.muenchen.allg.itd51.parser.ConfigThingy;
  */
 public class ConditionFactory
 {
-
+  private static Condition myAlwaysTrueCondition = new AlwaysTrueCondition();
+  
+  
+  public static Condition alwaysTrueCondition()
+  {
+    return myAlwaysTrueCondition;
+  }
+  
   /**
    * Erzeugt ein Condition-Objekt aus einer ConfigThingy-Beschreibung.
    * Geparst werden alle ENKEL von conf und dann und-verknüpft. Sind keine
@@ -56,6 +63,31 @@ public class ConditionFactory
         
         andCondition.add(cons);
       }
+    }
+    
+    if (andCondition.isEmpty()) return null;
+    
+    andCondition.trimToSize();
+    return new AndCondition(andCondition);
+  }
+  
+  /**
+   * Erzeugt ein Condition-Objekt aus einer ConfigThingy-Beschreibung.
+   * Geparst werden alle KINDER von conf und dann und-verknüpft. Sind keine
+   * Kinder vorhanden, so wird null geliefert.
+   * @throws ConfigurationErrorException falls ein Teil von conf nicht als Constraint
+   * geparst werden konnte.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TODO Testen
+   */
+  public static Condition getChildCondition(ConfigThingy conf) throws ConfigurationErrorException
+  {
+    Vector andCondition = new Vector();
+    Iterator iter = conf.iterator();
+    while (iter.hasNext())
+    {
+      Condition cons = getCondition((ConfigThingy)iter.next());
+      andCondition.add(cons);
     }
     
     if (andCondition.isEmpty()) return null;
@@ -279,6 +311,21 @@ public class ConditionFactory
     public Collection dependencies()
     {
       return deps;
+    }
+  }
+  
+  private static class AlwaysTrueCondition implements Condition
+  {
+    private static Collection emptyCollection = new Vector(0);
+    
+    public boolean check(Map mapIdToValue)
+    {
+      return true;
+    }
+
+    public Collection dependencies()
+    {
+      return emptyCollection;
     }
   }
 
