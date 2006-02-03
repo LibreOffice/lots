@@ -64,5 +64,11 @@ package de.muenchen.allg.itd51.wollmux;
 public interface FormModel
 {
 
+  void setWindowPosSize(int docX, int docY, int docWidth, int docHeight);
+
+  void setWindowVisible(boolean vis);
+
+  void close();
+
   
 }

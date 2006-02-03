@@ -84,6 +84,8 @@ public class FormController implements UIElementEventHandler
   private Map mapIdToListOfDependingGroups = new HashMap();
   private Map mapGroupIdToGroup = new HashMap();
   
+  private FormModel formModel;
+  
   /**
    * ACHTUNG! Darf nur im Event Dispatching Thread aufgerufen werden.
    * @param model
@@ -91,11 +93,11 @@ public class FormController implements UIElementEventHandler
    * @param idToPresetValue
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public FormController(ConfigThingy conf, FormModel model, Map idToPresetValue)
+  public FormController(ConfigThingy conf, FormModel model, final Map idToPresetValue)
   throws ConfigurationErrorException
   {
     fenster = new HashMap();
-    
+    formModel = model;
     
     final ConfigThingy fensterDesc = conf.query("Fenster");
     ConfigThingy visibilityDesc = conf.query("Sichtbarkeit");
@@ -107,13 +109,13 @@ public class FormController implements UIElementEventHandler
     try{
       if (visibilityDesc.count() > 0) visibilityDesc = visibilityDesc.getLastChild();
       final ConfigThingy visDesc = visibilityDesc;
-      createGUI(fensterDesc.getLastChild(), visDesc);
+      createGUI(fensterDesc.getLastChild(), visDesc, idToPresetValue);
     }
     catch(Exception x) {Logger.error(x);}
 
   }
 
-  private void createGUI(ConfigThingy fensterDesc, ConfigThingy visibilityDesc)
+  private void createGUI(ConfigThingy fensterDesc, ConfigThingy visibilityDesc, Map mapIdToPresetValue)
   {
     Common.setLookAndFeel();
     

@@ -33,6 +33,7 @@ import java.awt.event.WindowListener;
 import java.io.File;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.JFrame;
 
@@ -60,7 +61,7 @@ public class FormGUI
    */
   private JFrame myFrame;
   
-  private XTextDocument myDoc;
+  private FormModel myDoc;
   
   /**
    * Der Titel des Formularfensters.
@@ -82,7 +83,7 @@ public class FormGUI
   private ActionListener closeAction = actionListener_abort;
   
 
-  public FormGUI(final ConfigThingy conf, XTextDocument doc)
+  public FormGUI(final ConfigThingy conf, FormModel doc, final Map mapIdToPresetValue)
   {
     myDoc = doc;
     
@@ -94,7 +95,7 @@ public class FormGUI
     try{
       javax.swing.SwingUtilities.invokeLater(new Runnable() {
         public void run() {
-            try{createGUI(conf);}catch(Exception x){Logger.error(x);};
+            try{createGUI(conf, mapIdToPresetValue);}catch(Exception x){Logger.error(x);};
         }
       });
     }
@@ -103,7 +104,7 @@ public class FormGUI
   }
 
 
-  private void createGUI(ConfigThingy conf)
+  private void createGUI(ConfigThingy conf, Map mapIdToPresetValue)
   {
     Common.setLookAndFeel();
     
@@ -117,7 +118,7 @@ public class FormGUI
     
     FormController formController;
     try{
-      formController = new FormController(conf, new DummyFormModel(), new HashMap());
+      formController = new FormController(conf, myDoc, mapIdToPresetValue);
     }catch (ConfigurationErrorException x)
     {
       Logger.error(x);
@@ -155,12 +156,11 @@ public class FormGUI
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
     int frameWidth = myFrame.getWidth();
     int frameHeight = myFrame.getHeight();
-    XWindow2 win = UNO.XWindow2(myDoc.getCurrentController().getFrame().getContainerWindow());
     int docX = myFrame.getX() + frameWidth + winBorderWidth;
     int docY = myFrame.getY() + winBorderHeight;
     int docWidth = screenSize.width - docX - winBorderWidth;
     int docHeight = frameHeight - winBorderHeight - winBorderWidth;
-    win.setPosSize(docX, docY, docWidth, docHeight, PosSize.POSSIZE);
+    myDoc.setWindowPosSize(docX, docY, docWidth, docHeight);
     //UNO.XTopWindow(win).toFront();
     //win.setFocus();
   }
@@ -182,14 +182,12 @@ public class FormGUI
     public void windowDeactivated(WindowEvent e) { }
     public void windowDeiconified(WindowEvent e) 
     {
-      XWindow2 win = UNO.XWindow2(myDoc.getCurrentController().getFrame().getContainerWindow());
-      win.setVisible(true);
+      myDoc.setWindowVisible(true);
       cuddleWithOpenOfficeWindow();
     }
     public void windowIconified(WindowEvent e) 
     { 
-      XWindow2 win = UNO.XWindow2(myDoc.getCurrentController().getFrame().getContainerWindow());
-      win.setVisible(false);
+      myDoc.setWindowVisible(false);
     }
     public void windowOpened(WindowEvent e) {}
     public void componentResized(ComponentEvent e)
@@ -216,12 +214,7 @@ public class FormGUI
    */
   private void abort()
   {
-    try{
-      UNO.XCloseable(myDoc).close(true);
-    }catch(Exception x)
-    {
-      Logger.error(x);
-    }
+    myDoc.close();
     myFrame.dispose();
     System.exit(0);
   }
@@ -229,6 +222,34 @@ public class FormGUI
   
   private static class DummyFormModel implements FormModel
   {
+    XTextDocument myDoc;
+    XWindow2 myWindow;
+    
+    public DummyFormModel(XTextDocument doc)
+    {
+      myDoc = doc;
+      myWindow = UNO.XWindow2(myDoc.getCurrentController().getFrame().getContainerWindow()); 
+    }
+    
+    public void setWindowPosSize(int x, int y, int width, int height)
+    {
+      myWindow.setPosSize(x, y, width, height, PosSize.POSSIZE);
+    }
+
+    public void setWindowVisible(boolean vis)
+    {
+      myWindow.setVisible(vis);
+    }
+
+    public void close()
+    {
+      try{
+        UNO.XCloseable(myDoc).close(true);
+      }catch(Exception x)
+      {
+        Logger.error(x);
+      }
+    }
   }
   
   /**
@@ -243,7 +264,8 @@ public class FormGUI
     ConfigThingy conf = new ConfigThingy("", new URL(new File(System
         .getProperty("user.dir")).toURL(), confFile));
     XTextDocument doc = UNO.XTextDocument(UNO.loadComponentFromURL("private:factory/swriter", true, true));
-    new FormGUI(conf, doc);
+    FormModel model = new DummyFormModel(doc);
+    new FormGUI(conf, model, new HashMap());
   }
 
 
