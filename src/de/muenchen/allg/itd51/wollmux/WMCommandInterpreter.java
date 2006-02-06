@@ -250,7 +250,7 @@ public class WMCommandInterpreter
       {
         try
         {
-          document.xCloseable().close(false);
+          document.xCloseable().close(true);
         }
         catch (CloseVetoException e)
         {
