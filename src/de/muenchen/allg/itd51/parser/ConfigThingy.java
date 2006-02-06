@@ -39,6 +39,7 @@
 *                  | werden können, die den Syntaxregeln widersprechen.
 * 03.11.2005 | BNK | BOM (\uFEFF) auf Whitespace-Liste gesetzt 
 * 07.11.2005 | BNK | +setName()
+* 06.02.2006 | BNK | addChild() public
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -227,9 +228,10 @@ public class ConfigThingy
 
   /**
    * Fügt dem ConfigThingy ein weiteres Kind hinzu.
+   * ACHTUNG! child wird nicht kopiert, sondern als Refernz eingefügt!
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private void addChild(ConfigThingy child)
+  public void addChild(ConfigThingy child)
   {
     children.add(child);
   }
