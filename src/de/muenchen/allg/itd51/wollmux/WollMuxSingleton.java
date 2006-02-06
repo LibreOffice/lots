@@ -30,6 +30,7 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Vector;
 
@@ -38,7 +39,11 @@ import com.sun.star.uno.XComponentContext;
 import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
+import de.muenchen.allg.itd51.wollmux.db.DJDataset;
+import de.muenchen.allg.itd51.wollmux.db.DJDatasetListElement;
+import de.muenchen.allg.itd51.wollmux.db.DatasetNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
+import de.muenchen.allg.itd51.wollmux.db.QueryResults;
 
 /**
  * Diese Klasse stellt den zentralen UNO-Service WollMux dar. Der Service dient
@@ -46,7 +51,8 @@ import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
  * Programmmodule. Sämtliche Felder und öffentliche Methoden des Services sind
  * static und ermöglichen den Zugriff aus anderen Programmmodulen.
  */
-public class WollMuxSingleton
+public class WollMuxSingleton implements XPALChangeEventBroadcaster,
+    XPALProvider
 {
 
   private static WollMuxSingleton singletonInstance = null;
@@ -98,7 +104,7 @@ public class WollMuxSingleton
   /**
    * Enthält alle registrierten SenderBox-Objekte.
    */
-  private Vector registeredSenderBoxes;
+  private Vector registeredPALChangeListener;
 
   /**
    * Inhalt der wollmux.conf-Datei, die angelegt wird, wenn noch keine
@@ -110,23 +116,9 @@ public class WollMuxSingleton
   /**
    * Die WollMux-Hauptklasse ist als singleton realisiert.
    */
-  private WollMuxSingleton()
+  private WollMuxSingleton(XComponentContext ctx)
   {
-    registeredSenderBoxes = new Vector();
-  }
-
-  public static WollMuxSingleton getInstance()
-  {
-    if (singletonInstance == null) singletonInstance = new WollMuxSingleton();
-    return singletonInstance;
-  }
-
-  /**
-   * Diese Methode initialisiert den WollMux mit den festen Standardwerten:
-   * wollMuxDir=$HOME/.wollmux, wollMuxLog=wollmux.log, wollMuxConf=wollmux.conf
-   */
-  public void initialize(XComponentContext ctx)
-  {
+    registeredPALChangeListener = new Vector();
     this.ctx = ctx;
 
     // Das hier sollte die einzige Stelle sein, an der Pfade hart
@@ -155,40 +147,6 @@ public class WollMuxSingleton
       }
     }
 
-    startupWollMux();
-  }
-
-  /**
-   * Über dies Methode können die wichtigsten Startwerte des WollMux manuell
-   * gesetzt werden. Dies ist vor allem zum Testen der Anwendung im
-   * Remote-Betrieb notwendig.
-   * 
-   * @param logStream
-   *          Den Ausgabestream, in den die Logging Nachrichten geschrieben
-   *          werden sollen.
-   * @param wollmuxConf
-   *          die Wollmux-Konfigruationsdatei.
-   * @param defaultContext
-   *          die URL des Wertes DEFAULT_CONTEXT aus der Konfigurationsdatei.
-   *          defaultContext überschreibt den in der Konfigurationsdatei
-   *          definierten DEFAULT_CONTEXT.
-   */
-  public void initialize(XComponentContext ctx, File wollmuxConf,
-      File losCache, URL defaultContext)
-  {
-    this.ctx = ctx;
-    this.wollmuxConfFile = wollmuxConf;
-    this.losCacheFile = losCache;
-    this.defaultContextURL = defaultContext;
-
-    startupWollMux();
-  }
-
-  /**
-   * Diese Methode übernimmt den eigentlichen Bootstrap des WollMux.
-   */
-  private void startupWollMux()
-  {
     try
     {
       // Logger initialisieren:
@@ -227,7 +185,7 @@ public class WollMuxSingleton
           ctx);
       eventBroadcaster.xEventBroadcaster()
           .addEventListener(getEventProcessor());
-      
+
       // Event ON_FIRST_INITIALIZE erzeugen:
       getEventProcessor().addEvent(new Event(Event.ON_INITIALIZE));
     }
@@ -235,7 +193,21 @@ public class WollMuxSingleton
     {
       Logger.error("WollMux konnte nicht gestartet werden:", e);
     }
-    
+  }
+
+  public static WollMuxSingleton getInstance()
+  {
+    return singletonInstance;
+  }
+
+  /**
+   * Diese Methode initialisiert den WollMux mit den festen Standardwerten:
+   * wollMuxDir=$HOME/.wollmux, wollMuxLog=wollmux.log, wollMuxConf=wollmux.conf
+   */
+  public static void initialize(XComponentContext ctx)
+  {
+    if (singletonInstance == null)
+      singletonInstance = new WollMuxSingleton(ctx);
   }
 
   /**
@@ -388,12 +360,11 @@ public class WollMuxSingleton
    * Diese Methode registriert eine XSenderBox, die updates empfängt wenn sich
    * die PAL ändert. Die selbe XSenderBox kann mehrmals registriert werden.
    * 
-   * @see de.muenchen.allg.itd51.wollmux.XWollMux#addSenderBox(de.muenchen.allg.itd51.wollmux.XSenderBox)
    */
-  public void registerSenderBox(XSenderBox senderBox)
+  public void addPALChangeEventListener(XPALChangeEventListener listener)
   {
-    registeredSenderBoxes.add(senderBox);
-    Logger.debug2("WollMux::added senderBox.");
+    Logger.debug2("WollMux::addPALChangeEventListener()");
+    registeredPALChangeListener.add(listener);
   }
 
   /**
@@ -402,12 +373,13 @@ public class WollMuxSingleton
    * 
    * @param senderBox
    */
-  public void deregisterSenderBox(XSenderBox senderBox)
+  public void removePALChangeEventListener(XPALChangeEventListener listener)
   {
-    Iterator i = registeredSenderBoxes.iterator();
+    Logger.debug2("WollMux::removePALChangeEventListener()");
+    Iterator i = registeredPALChangeListener.iterator();
     while (i.hasNext())
     {
-      if (((XSenderBox) i.next()) == senderBox)
+      if (((XPALChangeEventListener) i.next()) == listener)
       {
         i.remove();
         break;
@@ -430,13 +402,68 @@ public class WollMuxSingleton
    * 
    * @return Iterator auf alle registrierten SenderBox-Objekte.
    */
-  public Iterator senderBoxesIterator()
+  public Iterator palChangeListenerIterator()
   {
-    return registeredSenderBoxes.iterator();
+    return registeredPALChangeListener.iterator();
   }
 
   public EventProcessor getEventProcessor()
   {
     return EventProcessor.getInstance();
   }
+
+  public String[] getPALEntries()
+  {
+    DJDatasetListElement[] pal = getSortedPALEntries();
+    String[] elements = new String[pal.length];
+    for (int i = 0; i < pal.length; i++)
+    {
+      elements[i] = pal[i].toString();
+    }
+    return elements;
+  }
+
+  private DJDatasetListElement[] getSortedPALEntries()
+  {
+    // Liste der entries aufbauen.
+    QueryResults data = getDatasourceJoiner().getLOS();
+
+    DJDatasetListElement[] elements = new DJDatasetListElement[data.size()];
+    Iterator iter = data.iterator();
+    int i = 0;
+    while (iter.hasNext())
+      elements[i++] = new DJDatasetListElement((DJDataset) iter.next());
+    Arrays.sort(elements);
+
+    return elements;
+  }
+
+  public String getCurrentSender()
+  {
+    try
+    {
+      DJDataset selected = getDatasourceJoiner().getSelectedDataset();
+      return new DJDatasetListElement(selected).toString();
+    }
+    catch (DatasetNotFoundException e)
+    {
+      return null;
+    }
+  }
+
+  public void setCurrentSender(String sender, short idx)
+  {
+    DJDatasetListElement[] pal = getSortedPALEntries();
+
+    if (idx >= 0 && idx < pal.length)
+    {
+      if (pal[idx].toString().equals(sender))
+      {
+        getEventProcessor().addEvent(
+            new Event(Event.ON_SET_SENDER, null, pal[idx].getDataset()));
+      }
+    }
+    // TODO: was machen wenn's nicht klappt?
+  }
+
 }

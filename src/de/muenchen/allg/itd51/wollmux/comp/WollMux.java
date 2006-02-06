@@ -41,6 +41,8 @@ import com.sun.star.uno.XComponentContext;
 import de.muenchen.allg.itd51.wollmux.Event;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
+import de.muenchen.allg.itd51.wollmux.XPALChangeEventListener;
+import de.muenchen.allg.itd51.wollmux.XWollMux;
 
 /**
  * Diese Klasse stellt den zentralen UNO-Service WollMux dar. Der Service dient
@@ -49,10 +51,8 @@ import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
  * static und ermöglichen den Zugriff aus anderen Programmmodulen.
  */
 public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
-    XDispatch, XDispatchProvider
+    XDispatch, XDispatchProvider, XWollMux
 {
-
-  private XComponentContext ctx;
 
   /**
    * Dieses Feld entält eine Liste aller Services, die dieser UNO-Service
@@ -60,7 +60,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
    */
   public static final java.lang.String[] SERVICENAMES = {
                                                          "com.sun.star.task.AsyncJob",
-                                                         "de.muenchen.allg.itd51.wollmux.comp.WollMux" };
+                                                         "de.muenchen.allg.itd51.wollmux.WollMux" };
 
   /*
    * Felder des Protocol-Handlers: Hier kommt die Definition der Befehlsnamen,
@@ -89,12 +89,13 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
    */
   public WollMux(XComponentContext ctx)
   {
-    this.ctx = ctx;
+    WollMuxSingleton.initialize(ctx);
   }
 
   /**
-   * Der AsyncJob wird mit dem Event OnFirstVisibleTask gestartet und besitzt
-   * nur die Aufgabe, den WollMux über die Methode startupWollMux() zu starten.
+   * Der AsyncJob wird mit dem Event OnFirstVisibleTask gestartet. Die Methode
+   * selbst beendet sich sofort wieder, bevor die Methode jedoch ausgeführt
+   * wird, wird im Konstruktor das WollMuxSingleton initialisiert.
    * 
    * @see com.sun.star.task.XAsyncJob#executeAsync(com.sun.star.beans.NamedValue[],
    *      com.sun.star.task.XJobListener)
@@ -148,7 +149,6 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
      */
     if (sEventName.equals("onFirstVisibleTask"))
     {
-      WollMuxSingleton.getInstance().initialize(ctx);
     }
     /** *************************************************** */
 
@@ -348,4 +348,30 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
   {
   }
 
+  /*****************************************************************************
+   * XWollMux-Implementierung:
+   ****************************************************************************/
+
+  /*
+   * Hier wird auch gleich ein update getriggered! (non-Javadoc)
+   * 
+   * @see de.muenchen.allg.itd51.wollmux.XPALChangeEventBroadcaster#addPALChangeEventListener(de.muenchen.allg.itd51.wollmux.XPALChangeEventListener)
+   */
+  public void addPALChangeEventListener(XPALChangeEventListener l)
+  {
+    WollMuxSingleton.getInstance().addPALChangeEventListener(l);
+    WollMuxSingleton.getInstance().getEventProcessor().addEvent(
+        new Event(Event.ON_SELECTION_CHANGED));
+  }
+
+  public void removePALChangeEventListener(XPALChangeEventListener l)
+  {
+    WollMuxSingleton.getInstance().removePALChangeEventListener(l);
+  }
+
+  public void setCurrentSender(String sender, short idx)
+  {
+    // TODO: evtl. über den dispatch-Mechanismus ersetzen.
+    WollMuxSingleton.getInstance().setCurrentSender(sender, idx);
+  }
 }

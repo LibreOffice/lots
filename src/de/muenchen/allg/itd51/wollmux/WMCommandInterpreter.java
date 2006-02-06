@@ -42,7 +42,6 @@ import com.sun.star.text.XTextContent;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextRange;
 import com.sun.star.uno.Exception;
-import com.sun.star.util.CloseVetoException;
 
 import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
@@ -252,7 +251,7 @@ public class WMCommandInterpreter
         {
           document.xCloseable().close(true);
         }
-        catch (CloseVetoException e)
+        catch (java.lang.Exception e)
         {
           Logger.error(e);
         }

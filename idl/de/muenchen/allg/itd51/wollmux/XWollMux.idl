@@ -1,0 +1,19 @@
+#ifndef __de_muenchen_allg_itd51_wollmux_XWollMux_idl__ 
+#define __de_muenchen_allg_itd51_wollmux_XWollMux_idl__ 
+
+#include "XPALChangeEventBroadcaster.idl"
+ 
+module de {  module muenchen {  module allg { module itd51 { module wollmux {
+
+interface XWollMux
+{
+	interface XPALChangeEventBroadcaster;
+	
+	void setCurrentSender([in] string sender, [in] short index);
+}; 
+  
+service WollMux: XWollMux;
+
+}; }; }; }; };
+ 
+#endif

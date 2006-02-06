@@ -1,0 +1,29 @@
+#ifndef __de_muenchen_allg_itd51_wollmux_XPALProvider_idl__ 
+#define __de_muenchen_allg_itd51_wollmux_XPALProvider_idl__ 
+ 
+#include <com/sun/star/uno/XInterface.idl> 
+#include <com/sun/star/lang/XComponent.idl> 
+#include <com/sun/star/lang/XEventListener.idl> 
+#include <com/sun/star/frame/XFrame.idl> 
+  
+module de {  module muenchen {  module allg { module itd51 { module wollmux {
+ 
+/** Das Interface XPALProvider stellt alle Methoden zur Verfügung, die benötigt werden,
+    um die Persönliche Absenderliste (PAL) der Benutzer anzusprechen.
+ */
+interface XPALProvider
+{
+	sequence< string > getPALEntries();
+	
+	string getCurrentSender();
+	
+	/**
+	  setzt den Sender sender nur dann, wenn er auf dem gegebenen index
+	  in der sortierten pal zu finden ist. D.h. wenn die Liste aktuell ist.
+	*/
+	void setCurrentSender( [in] string sender, [in] short index );
+};
+
+}; }; }; }; };
+ 
+#endif

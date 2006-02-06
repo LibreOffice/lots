@@ -29,6 +29,8 @@ import java.awt.Insets;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -60,23 +62,39 @@ import javax.swing.JPopupMenu;
 import javax.swing.JSeparator;
 import javax.swing.SwingConstants;
 
+import com.sun.star.beans.PropertyValue;
+import com.sun.star.frame.XDispatch;
+import com.sun.star.lang.EventObject;
+import com.sun.star.uno.UnoRuntime;
+import com.sun.star.uno.XComponentContext;
+
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.Logger;
+import de.muenchen.allg.itd51.wollmux.XPALChangeEventListener;
+import de.muenchen.allg.itd51.wollmux.XPALProvider;
+import de.muenchen.allg.itd51.wollmux.XWollMux;
+import de.muenchen.allg.itd51.wollmux.comp.WollMux;
 
 /**
  * Stellt UI bereit, um ein Formulardokument zu bearbeiten.
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
-public class WollMuxBar
+public class WollMuxBar implements XPALChangeEventListener
 {
   private final URL ICON_URL = this.getClass().getClassLoader().getResource("data/wollmux_klein.jpg");
   private static boolean minimize = false;
   private static boolean topbar = false;
   private static boolean normalwindow = false;
 
+  
+  /**
+   * Der WollMux-Service, mit dem die WollMuxBar Informationen austauscht.
+   */
+  private XWollMux mux;
   
   /**
    * Der Rahmen der die Steuerelemente enthält.
@@ -130,13 +148,19 @@ public class WollMuxBar
    * ActionListener für Buttons mit der ACTION "abort". 
    */
   private ActionListener actionListener_abort = new ActionListener()
-        { public void actionPerformed(ActionEvent e){ abort(); } };
+       { public void actionPerformed(ActionEvent e){ abort(); } };
         
-        /**
-         * ActionListener für Buttons mit der ACTION "openTemplate". 
-         */
+  /**
+   * ActionListener für Buttons mit der ACTION "openTemplate". 
+   */
   private ActionListener actionListener_openTemplate = new ActionListener()
-  { public void actionPerformed(ActionEvent e){ openTemplate(e.getActionCommand()); } };
+       { public void actionPerformed(ActionEvent e){ dispatchWollMuxUrl(WollMux.cmdOpenTemplate, e.getActionCommand()); } };
+
+  /**
+   * ActionListener für Buttons mit der ACTION "openTemplate". 
+   */
+  private ActionListener actionListener_absenderAuswaehlen = new ActionListener()
+      { public void actionPerformed(ActionEvent e){ dispatchWollMuxUrl(WollMux.cmdAbsenderAuswaehlen, e.getActionCommand()); } };
   
   /**
    * ActionListener für Buttons, denen ein Menü zugeordnet ist. 
@@ -144,12 +168,32 @@ public class WollMuxBar
   private ActionListener actionListener_openMenu = new ActionListener()
         { public void actionPerformed(ActionEvent e){ openMenu(e); } };
   
-  
   /**
    * wird getriggert bei windowClosing() Event.
    */
   private ActionListener closeAction = actionListener_abort;
   
+  /**
+   * ItemListener bei Elementänderungen der senderboxes: 
+   */
+  private ItemListener itemListener = new ItemListener() { 
+    public void itemStateChanged(ItemEvent e) {
+      if(e.getStateChange() == ItemEvent.SELECTED && e.getSource() instanceof JComboBox) {
+        JComboBox cbox = (JComboBox) e.getSource();
+        int id = cbox.getSelectedIndex();
+        String name = cbox.getSelectedItem().toString();
+
+        // TODO: Hier könnte ich auch eine neues WollMux-dispatch-Kommando einführen und verwenden.
+        // wollmux informieren:
+        if (mux != null)
+        {
+          mux.setCurrentSender(name, (short) id);
+          System.out.println("setCurrentSender(\"" + name + "\", " + id + ")");
+        }
+      }
+    }
+  };
+
   /**
    * Alle senderboxes (JComboBoxes) der Leiste.
    */
@@ -159,7 +203,7 @@ public class WollMuxBar
    * @param conf Vater-Knoten von Menues und Symbolleisten 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public WollMuxBar(final ConfigThingy conf)
+  public WollMuxBar(final ConfigThingy conf, final XComponentContext ctx)
   throws ConfigurationErrorException
   {
 
@@ -176,6 +220,19 @@ public class WollMuxBar
     }
     catch(Exception x) {Logger.error(x);}
 
+    // PALChangeListener registrieren.
+    try
+    {
+      UnoService factory = new UnoService(ctx.getServiceManager());
+      UnoService usMux = factory.create("de.muenchen.allg.itd51.wollmux.WollMux");
+      this.mux = (XWollMux) UnoRuntime.queryInterface(XWollMux.class, usMux.getObject());
+    } catch (Exception e) { Logger.error(e); }
+
+    if (mux != null)
+    {
+      System.out.println("JSenderBox-addme");
+      mux.addPALChangeEventListener(this);
+    }
   }
 
   private void createGUI(ConfigThingy conf)
@@ -351,13 +408,12 @@ public class WollMuxBar
             try{ lines = Integer.parseInt(uiElementDesc.get("LINES").toString()); } catch(Exception e){}
             
             JComboBox senderbox = new JComboBox();
-            senderbox.addItem("Benkmann, Matthias (D-WOL-MUX-5.1)");
             
             senderbox.setMaximumRowCount(lines);
             senderbox.setPrototypeDisplayValue("Matthias B. ist euer Gott (W-OLL-MUX-5.1)");
             senderbox.setEditable(false);
             
-            //TODO senderbox.add*listener(...);
+            senderbox.addItemListener(itemListener);
             
             //String action = "";
             //try{ action = uiElementDesc.get("ACTION").toString(); }catch(NodeNotFoundException e){}
@@ -506,7 +562,7 @@ public class WollMuxBar
     }
     if (action.equals("absenderAuswaehlen"))
     {
-      return null;
+      return actionListener_absenderAuswaehlen;
     }
     else if (action.equals(""))
     {
@@ -595,19 +651,29 @@ public class WollMuxBar
   private void abort()
   {
     myFrame.dispose();
+
+    if(mux!=null)
+      mux.removePALChangeEventListener(this);
+
     System.exit(0);
   }
   
   /**
-   * Implementiert die gleichnamige ACTION.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * Diese Methode erzeugt eine wollmuxUrl und übergibt sie dem WollMux zur Bearbeitung.
+   *  
+   * @param dispatchCmd das Kommando, das der WollMux ausführen soll. (z.B. "openTemplate")
+   * @param arg ein optionales Argument (z.B. "{fragid}"). Ist das Argument null oder
+   *        der Leerstring, so wird es nicht mit übergeben.
    */
-  private void openTemplate(String fragid)
-  {
-    try{
-      UNO.loadComponentFromURL(fragIdToURL(fragid),true,true);
-    }catch(Exception x) {Logger.error(x);}
+  private void dispatchWollMuxUrl(String dispatchCmd, String arg) {
+    XDispatch disp = (XDispatch) UnoRuntime.queryInterface(XDispatch.class, mux);
+    if(disp != null) {
+      if(arg != null && !arg.equals("")) arg = "#" + arg;
+      else arg = "";
+      com.sun.star.util.URL url = new com.sun.star.util.URL();
+      url.Complete = WollMux.wollmuxProtocol + ":" + dispatchCmd + arg;
+      disp.dispatch(url, new PropertyValue[] {});
+    }
   }
 
   /**
@@ -618,6 +684,7 @@ public class WollMuxBar
    */
   private void openMenu(ActionEvent e)
   {
+    System.out.println("openMenu");
     String menuName = e.getActionCommand();
     JComponent compo;
     try{
@@ -632,15 +699,6 @@ public class WollMuxBar
     if (menu == null) return;
     
     menu.show(compo, 0, compo.getHeight());
-  }
-  
-  private String fragIdToURL(String fragid)
-  {
-    if (fragid.equals("externerBriefkopf")) return "http://limux.tvc.muenchen.de/ablage/sonstiges/wollmux/vorlagen/WOL_Briefkopf-extern_v1_2005-12-19.ott";
-    if (fragid.equals("internerBriefkopf")) return "http://limux.tvc.muenchen.de/ablage/sonstiges/wollmux/vorlagen/WOL_Briefkopf-intern_v1_2005-11-23.ott";
-    if (fragid.equals("kurzmitteilung")) return "http://limux.tvc.muenchen.de/ablage/sonstiges/wollmux/vorlagen/WOL_Briefkopf-Kurzmitteilung_v1_2005-11-25.ott";
-    if (fragid.equals("faxVorlage")) return "http://limux.tvc.muenchen.de/ablage/sonstiges/wollmux/vorlagen/WOL_Briefkopf-Fax_v1_2005-12-12.ott";
-    return "";
   }
   
   /**
@@ -676,9 +734,56 @@ public class WollMuxBar
     //ConfigThingy conf = new ConfigThingy("", new URL(new File(System
     //    .getProperty("user.dir")).toURL(), confFile));
     ConfigThingy conf = new ConfigThingy("", confURL, new InputStreamReader(confURL.openStream(),ConfigThingy.CHARSET));
-    new WollMuxBar(conf);    
+    new WollMuxBar(conf, UNO.defaultContext);    
   }
-  
+
+  public void updateContent(EventObject eventObject)
+  {
+    System.out.println("UpdateContent");
+    XPALProvider palProv = (XPALProvider) UnoRuntime.queryInterface(
+        XPALProvider.class,
+        eventObject.Source);
+    if (palProv != null)
+    {
+      Iterator iter = senderboxes.iterator();
+      while(iter.hasNext()) {
+        
+        JComboBox senderbox = (JComboBox) iter.next();
+        
+        // keine items erzeugen beim Update
+        senderbox.removeItemListener(itemListener);
+        
+        // alte Items löschen
+        senderbox.removeAllItems();
+        
+        // neue Items eintragen
+        String[] entries = palProv.getPALEntries();
+        for (int i = 0; i < entries.length; i++)
+        {
+          senderbox.addItem(entries[i]);
+        }
+        
+        // Selektiertes Item setzen:
+        if (palProv.getCurrentSender() != null)
+          senderbox.setSelectedItem(palProv.getCurrentSender());
+        
+        // ItemListener wieder setzen.
+        senderbox.addItemListener(itemListener);
+      }
+    } else {
+      System.err.println("NO palProvider!");
+    }
+    
+  }
+
+  public void disposing(EventObject arg0)
+  {
+    System.out.println("disposing");
+    mux = null;
+    // TODO: hier darf natürlich nicht disposed werden, sondern 
+    // es muss der Kontext wieder hergestellt werden.
+    myFrame.dispose();
+  }
 
 }
 

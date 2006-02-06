@@ -54,8 +54,10 @@ public class Event
   public static final int ON_DIALOG_ABORT = 31;
 
   public static final int ON_OPENTEMPLATE = 40;
+  
+  public static final int ON_SET_SENDER = 50;
 
-  public static final int ON_SELECTION_CHANGED = 50;
+  public static final int ON_SELECTION_CHANGED = 51;
 
   public static final int ON_INITIALIZE = 60;
   
@@ -123,6 +125,10 @@ public class Event
     if (event == ON_SELECTION_CHANGED)
     {
       return "ON_SELECTION_CHANGED";
+    }
+    if (event == ON_SET_SENDER)
+    {
+      return "ON_SET_SENDER";
     }
     if (event == ON_INITIALIZE)
     {

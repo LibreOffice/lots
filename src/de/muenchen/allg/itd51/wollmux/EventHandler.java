@@ -29,6 +29,7 @@ import java.util.List;
 
 import com.sun.star.awt.XWindow;
 import com.sun.star.frame.XFrame;
+import com.sun.star.lang.EventObject;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
 
@@ -136,6 +137,11 @@ public class EventHandler
         return on_selection_changed();
       }
 
+      if (event.getEvent() == Event.ON_SET_SENDER)
+      {
+        return on_set_sender(event);
+      }
+
       if (event.getEvent() == Event.ON_SELECTION_CHANGED)
       {
         return on_selection_changed();
@@ -158,19 +164,24 @@ public class EventHandler
 
   private static boolean on_focus(Event event)
   {
-    // Alle registrierten SenderBoxen updaten:
-    UnoService source = new UnoService(event.getSource());
-    if (source.supportsService("com.sun.star.text.TextDocument"))
-    {
-      Iterator i = WollMuxSingleton.getInstance().senderBoxesIterator();
-      while (i.hasNext())
-      {
-        Logger.debug2("Update SenderBox");
-        ((XSenderBox) i.next()).updateContentForFrame(source.xModel()
-            .getCurrentController().getFrame());
-      }
-    }
-
+    // // Alle registrierten SenderBoxen updaten:
+    // UnoService source = new UnoService(event.getSource());
+    // if (source.supportsService("com.sun.star.text.TextDocument"))
+    // {
+    // Iterator i = WollMuxSingleton.getInstance().palChangeListenerIterator();
+    // while (i.hasNext())
+    // {
+    // Logger.debug2("on_focus: Update SenderBox");
+    // EventObject eventObject = new EventObject();
+    // eventObject.Source = WollMuxSingleton.getInstance();
+    // ((XPALChangeEventListener) i.next()).updateContent(eventObject /*
+    // * ,
+    // * source.xModel()
+    // * .getCurrentController().getFrame()
+    // */);
+    // }
+    // }
+    //
     return EventProcessor.processTheNextEvent;
   }
 
@@ -178,25 +189,17 @@ public class EventHandler
   {
     WollMuxSingleton mux = WollMuxSingleton.getInstance();
 
-    // Die SenderBox des aktuellen Frame updaten:
-    try
+    // registrierte PALChangeListener updaten
+    Iterator i = mux.palChangeListenerIterator();
+    while (i.hasNext())
     {
-      UnoService desktop = UnoService.createWithContext(
-          "com.sun.star.frame.Desktop",
-          mux.getXComponentContext());
-      XFrame frame = desktop.xDesktop().getCurrentFrame();
-      Iterator i = mux.senderBoxesIterator();
-      while (i.hasNext())
-      {
-        Logger.debug2("Update SenderBox");
-        ((XSenderBox) i.next()).updateContentForFrame(frame);
-      }
-    }
-    catch (Exception x)
-    {
+      Logger.debug2("on_selection_changed: Update SenderBox");
+      EventObject eventObject = new EventObject();
+      eventObject.Source = WollMuxSingleton.getInstance();
+      ((XPALChangeEventListener) i.next()).updateContent(eventObject);
     }
 
-    // Der Cache und der LOS auf Platte speichern.
+    // Cache und LOS auf Platte speichern.
     mux.getDatasourceJoiner().saveCacheAndLOS(mux.getLosCacheFile());
 
     return EventProcessor.processTheNextEvent;
@@ -330,16 +333,28 @@ public class EventHandler
   private static boolean on_frame_changed(Event event)
       throws EndlessLoopException, WMCommandsFailedException
   {
-    WollMuxSingleton mux = WollMuxSingleton.getInstance();
+    // WollMuxSingleton mux = WollMuxSingleton.getInstance();
+    //
+    // UnoService source = new UnoService(event.getSource());
+    // if (source.xFrame() != null)
+    // {
+    // OOoUserInterface.generateToolbarEntries(mux.getWollmuxConf(), mux
+    // .getXComponentContext(), source.xFrame());
+    // OOoUserInterface.generateMenues(mux.getWollmuxConf(), mux
+    // .getXComponentContext(), source.xFrame());
+    // }
+    return EventProcessor.processTheNextEvent;
+  }
 
-    UnoService source = new UnoService(event.getSource());
-    if (source.xFrame() != null)
+  private static boolean on_set_sender(Event event)
+  {
+    Object source = event.getSource();
+    if (source instanceof DJDataset)
     {
-      OOoUserInterface.generateToolbarEntries(mux.getWollmuxConf(), mux
-          .getXComponentContext(), source.xFrame());
-      OOoUserInterface.generateMenues(mux.getWollmuxConf(), mux
-          .getXComponentContext(), source.xFrame());
+      ((DJDataset) source).select();
     }
+    WollMuxSingleton.getInstance().getEventProcessor().addEvent(
+        new Event(Event.ON_SELECTION_CHANGED));
     return EventProcessor.processTheNextEvent;
   }
 

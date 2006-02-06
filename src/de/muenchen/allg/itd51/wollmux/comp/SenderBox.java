@@ -140,7 +140,6 @@ public class SenderBox extends ComponentBase implements XServiceInfo,
   public void initialize(Object[] args) throws Exception
   {
     UnoProps props = new UnoProps(args);
-    WollMuxSingleton mux = WollMuxSingleton.getInstance();
 
     try
     {
@@ -154,6 +153,11 @@ public class SenderBox extends ComponentBase implements XServiceInfo,
       commandURL = null;
       serviceManager = null;
     }
+
+    // initialisiere den WollMux
+    WollMuxSingleton.initialize(serviceManager.getPropertyValue(
+        "DefaultContext").xComponentContext());
+    WollMuxSingleton mux = WollMuxSingleton.getInstance();
 
     // check if arguments where correct and complete
     if (frame == null || commandURL == null || serviceManager == null)
@@ -169,7 +173,7 @@ public class SenderBox extends ComponentBase implements XServiceInfo,
     }
 
     // SenderBox im WollMux registrieren:
-    mux.registerSenderBox(this);
+    mux.addPALChangeEventListener(this);
 
     // WollMux informieren, damit ein Update erfolgen kann:
     mux.getEventProcessor().addEvent(new Event(Event.ON_SELECTION_CHANGED));
@@ -308,7 +312,7 @@ public class SenderBox extends ComponentBase implements XServiceInfo,
     deregisterComboBoxListeners();
 
     // SenderBox im WollMux deregistrieren.
-    WollMuxSingleton.getInstance().deregisterSenderBox(this);
+    WollMuxSingleton.getInstance().removePALChangeEventListener(this);
   }
 
   /**
@@ -453,7 +457,7 @@ public class SenderBox extends ComponentBase implements XServiceInfo,
    * PAL potentiell ändert ruft der EventHandler diese Methode bei jedem im
    * WollMux registrierten SenderBox-Objekt auf.
    */
-  public void updateContent()
+  public void updateContent(EventObject eventObject)
   {
     WollMuxSingleton mux = WollMuxSingleton.getInstance();
 
@@ -492,7 +496,7 @@ public class SenderBox extends ComponentBase implements XServiceInfo,
    */
   public void updateContentForFrame(XFrame f)
   {
-    if (UnoRuntime.areSame(frame, f)) updateContent();
+    if (UnoRuntime.areSame(frame, f)) updateContent(null);
   }
 
   /**

@@ -23,14 +23,11 @@
 #include <com/sun/star/lang/XInitialization.idl> 
 #include <com/sun/star/util/XUpdatable.idl> 
 #include <com/sun/star/frame/XToolbarController.idl> 
-#include <com/sun/star/frame/XFrame.idl> 
- 
-//============================================================================= 
- 
- module de {  module muenchen {  module allg { module itd51 { module wollmux {
- 
-//============================================================================= 
- 
+
+#include "XPALChangeEventListener.idl" 
+
+module de {  module muenchen {  module allg { module itd51 { module wollmux {
+
 /** Das new-style Interface XSenderBox beschreibt die Eigenschaften des 
     com.sun.star.frame.ToolbarController-Service.
  */
@@ -41,17 +38,11 @@ interface XSenderBox
     interface com::sun::star::util::XUpdatable;
     interface com::sun::star::frame::XToolbarController;
 
-	void updateContent();
-	void updateContentForFrame([in] com::sun::star::frame::XFrame xFrame);
+	interface XPALChangeEventListener;
 }; 
- 
-//============================================================================= 
  
 service SenderBox: XSenderBox;
 
 }; }; }; }; };
  
-/*============================================================================= 
- 
-=============================================================================*/ 
 #endif

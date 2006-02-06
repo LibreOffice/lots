@@ -1,0 +1,18 @@
+#ifndef __de_muenchen_allg_itd51_wollmux_XPALChangeEventListener_idl__ 
+#define __de_muenchen_allg_itd51_wollmux_XPALChangeEventListener_idl__ 
+ 
+#include <com/sun/star/lang/XEventListener.idl> 
+#include <com/sun/star/lang/EventObject.idl> 
+#include <com/sun/star/frame/XFrame.idl> 
+  
+module de {  module muenchen {  module allg { module itd51 { module wollmux {
+ 
+interface XPALChangeEventListener 
+{
+    interface com::sun::star::lang::XEventListener;
+	void updateContent( [in] com::sun::star::lang::EventObject eventObject );
+};
+
+}; }; }; }; };
+ 
+#endif

@@ -1,0 +1,17 @@
+#ifndef __de_muenchen_allg_itd51_wollmux_XPALChangeEventBroadcaster_idl__ 
+#define __de_muenchen_allg_itd51_wollmux_XPALChangeEventBroadcaster_idl__ 
+ 
+#include "XPALChangeEventListener.idl" 
+ 
+module de {  module muenchen {  module allg { module itd51 { module wollmux {
+ 
+interface XPALChangeEventBroadcaster
+{
+	void addPALChangeEventListener( [in] XPALChangeEventListener listener);
+	
+	void removePALChangeEventListener( [in] XPALChangeEventListener listener);
+};
+
+}; }; }; }; };
+ 
+#endif
