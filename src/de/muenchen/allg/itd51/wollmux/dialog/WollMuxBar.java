@@ -12,6 +12,7 @@
 * 03.01.2006 | BNK | Menüs unterstützt
 * 10.01.2006 | BNK | Icon und Config-File pfadunabhängig über Classloader
 *                  | switches --minimize, --topbar, --normalwindow
+* 06.02.2006 | BNK | Menüleiste hinzugefügt
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -52,6 +53,7 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
+import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
@@ -201,6 +203,12 @@ public class WollMuxBar
     {
       Logger.error(x);
     }
+    
+    JMenuBar mbar = new JMenuBar();
+    addUIElements(conf.query("Menues"),conf.query("Menueleiste"), "Menueleiste", mbar, 1, 0, "menu");
+    myFrame.setJMenuBar(mbar);
+    
+    //myFrame.setUndecorated(true);
 
     WindowTransformer trafo = new WindowTransformer();
     
