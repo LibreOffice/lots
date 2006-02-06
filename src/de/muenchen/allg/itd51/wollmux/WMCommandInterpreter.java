@@ -29,6 +29,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.sun.star.awt.FontWeight;
+import com.sun.star.awt.PosSize;
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.beans.PropertyVetoException;
 import com.sun.star.container.NoSuchElementException;
@@ -41,10 +42,12 @@ import com.sun.star.text.XTextContent;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextRange;
 import com.sun.star.uno.Exception;
+import com.sun.star.util.CloseVetoException;
 
 import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.db.Dataset;
+import de.muenchen.allg.itd51.wollmux.dialog.FormGUI;
 
 /**
  * Diese Klasse repräsentiert den Kommando-Interpreter zur Auswertung von
@@ -81,6 +84,18 @@ public class WMCommandInterpreter
   private static final int MAXCOUNT = 100;
 
   /**
+   * Das ConfigThingy enthält alle Form-Desriptoren, die im Lauf des
+   * interpret-Vorgangs aufgesammelt werden.
+   */
+  private ConfigThingy formDescriptors;
+
+  /**
+   * Dieses Flag wird in executeForm auf true gesetzt, wenn das Dokument
+   * mindestens eine Formularbeschreibung enthält.
+   */
+  private boolean documentIsAFormular;
+
+  /**
    * Der Konstruktor erzeugt einen neuen Kommandointerpreter, der alle Kommandos
    * im übergebenen xDoc scannen und entsprechend auflösen kann.
    * 
@@ -90,6 +105,8 @@ public class WMCommandInterpreter
   {
     this.document = new UnoService(xDoc);
     this.mux = mux;
+    this.formDescriptors = new ConfigThingy("Forms");
+    this.documentIsAFormular = false;
 
     // Wenn das Dokument als Dokument (und nicht als Template) geöffnet wurde,
     // soll das Dokument nicht vom WollMux verändert werden:
@@ -210,6 +227,65 @@ public class WMCommandInterpreter
               + "Bitte überprüfen Sie das Dokument und kontaktieren ggf. die "
               + "für Sie zuständige Systemadministration.");
     }
+
+    // Formulardialog starten:
+    if (documentIsAFormular)
+    {
+      startFormGUI();
+    }
+  }
+
+  /**
+   * Diese Methode startet die FormularGUI. Sie enthält vorerst nur eine
+   * dummy-implementierung, bei der auch noch keine im Dokument gesetzten
+   * Feldinhalte ausgewertet werden. D.h. die GUI startet immer mit einer leeren
+   * IdToPreset-Map.
+   */
+  private void startFormGUI()
+  {
+    FormModel fm = new FormModel()
+    {
+
+      public void close()
+      {
+        try
+        {
+          document.xCloseable().close(false);
+        }
+        catch (CloseVetoException e)
+        {
+          Logger.error(e);
+        }
+      }
+
+      public void setWindowVisible(boolean vis)
+      {
+        UnoService frame = new UnoService(document.xModel()
+            .getCurrentController().getFrame());
+        if (frame.xFrame() != null)
+        {
+          frame.xFrame().getContainerWindow().setVisible(vis);
+        }
+      }
+
+      public void setWindowPosSize(int docX, int docY, int docWidth,
+          int docHeight)
+      {
+        UnoService frame = new UnoService(document.xModel()
+            .getCurrentController().getFrame());
+        if (frame.xFrame() != null)
+        {
+          frame.xFrame().getContainerWindow().setPosSize(
+              docX,
+              docY,
+              docWidth,
+              docHeight,
+              PosSize.POSSIZE);
+        }
+      }
+
+    };
+    new FormGUI(formDescriptors, fm, new HashMap());
   }
 
   /**
@@ -225,8 +301,7 @@ public class WMCommandInterpreter
   {
     try
     {
-      ConfigThingy wm = new ConfigThingy("", mux.getDEFAULT_CONTEXT(),
-          new StringReader(cmdString));
+      ConfigThingy wm = new ConfigThingy("", null, new StringReader(cmdString));
       ConfigThingy cmd = wm.get("CMD");
       WMCommandState state = new WMCommandState(wm);
 
@@ -271,6 +346,13 @@ public class WMCommandInterpreter
         {
           Logger.debug2("Cmd: Version");
           state = executeVersion(bookmarkName, state);
+        }
+
+        // form
+        else if (cmd.toString().compareToIgnoreCase("Form") == 0)
+        {
+          Logger.debug2("Cmd: Form");
+          state = executeForm(bookmarkName, state);
         }
 
         // unbekanntes Kommando
@@ -536,6 +618,57 @@ public class WMCommandInterpreter
         insertField.hideMarks();
       }
       catch (Exception x)
+      {
+        state.setErrors(1);
+        Logger.error(x);
+      }
+    }
+    state.setDone(true);
+    return state;
+  }
+
+  /**
+   * Hinter einem Form-Kommando verbirgt sich eine Notiz, die das Formular
+   * beschreibt, das in der FormularGUI angezeigt werden soll. Das Kommando
+   * executeForm sammelt alle solchen Formularbeschreibungen im formDescriptor.
+   * Enthält der formDescriptor mehr als einen Eintrag, wird nach dem
+   * interpret-Vorgang die FormGUI gestartet.
+   * 
+   * @param bookmarkName
+   * @param state
+   * @return
+   */
+  private WMCommandState executeForm(String bookmarkName, WMCommandState state)
+  {
+    if (allowDocumentModification)
+    {
+      state.setErrors(0);
+      XNameAccess bookmarkAccess = document.xBookmarksSupplier().getBookmarks();
+      try
+      {
+        UnoService bookmark = new UnoService(bookmarkAccess
+            .getByName(bookmarkName));
+        UnoService cursor = createTextCursorByBookmark(bookmark);
+        UnoService textfield = cursor.getPropertyValue("TextField");
+        Object content = textfield.getPropertyValue("Content").getObject();
+        if (content != null)
+        {
+          ConfigThingy ct = new ConfigThingy("", null, new StringReader(content
+              .toString()));
+          ConfigThingy formulars = ct.query("Formular");
+          if (formulars.count() == 0)
+            throw new ConfigurationErrorException(
+                "Formularbeschreibung enthält keinen Abschnitt \"Formular\".");
+          documentIsAFormular = true;
+          Iterator formIter = formulars.iterator();
+          while (formIter.hasNext())
+          {
+            ConfigThingy form = (ConfigThingy) formIter.next();
+            formDescriptors.addChild(form);
+          }
+        }
+      }
+      catch (java.lang.Exception x)
       {
         state.setErrors(1);
         Logger.error(x);
