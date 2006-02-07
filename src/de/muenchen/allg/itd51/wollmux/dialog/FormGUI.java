@@ -216,7 +216,6 @@ public class FormGUI
   {
     myDoc.close();
     myFrame.dispose();
-    System.exit(0);
   }
   
   
