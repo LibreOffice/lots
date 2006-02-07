@@ -127,6 +127,11 @@ public class WollMuxBar implements XPALChangeEventListener
   private Map mapMenuNameToJMenu = new HashMap();
   
   /**
+   * enthält die Anzahl der Einträge in der Senderbox (ohne den "-- Liste bearbeiten --"-Eintrag).
+   */
+  private int senderBoxEntries = 0;
+
+  /**
    * Rand über und unter einem horizontalen bzw links und rechts neben vertikalem
    * Separator (in Pixeln).
    */
@@ -157,7 +162,7 @@ public class WollMuxBar implements XPALChangeEventListener
        { public void actionPerformed(ActionEvent e){ dispatchWollMuxUrl(WollMux.cmdOpenTemplate, e.getActionCommand()); } };
 
   /**
-   * ActionListener für Buttons mit der ACTION "openTemplate". 
+   * ActionListener für Buttons mit der ACTION "absenderAuswaehlen". 
    */
   private ActionListener actionListener_absenderAuswaehlen = new ActionListener()
       { public void actionPerformed(ActionEvent e){ dispatchWollMuxUrl(WollMux.cmdAbsenderAuswaehlen, e.getActionCommand()); } };
@@ -181,6 +186,13 @@ public class WollMuxBar implements XPALChangeEventListener
       if(e.getStateChange() == ItemEvent.SELECTED && e.getSource() instanceof JComboBox) {
         JComboBox cbox = (JComboBox) e.getSource();
         int id = cbox.getSelectedIndex();
+        
+        // Sonderrolle: -- Liste bearbeiten --
+        if(id == senderBoxEntries) {
+          dispatchWollMuxUrl(WollMux.cmdPALVerwalten, null);
+          return;
+        }
+        
         String name = cbox.getSelectedItem().toString();
 
         // TODO: Hier könnte ich auch eine neues WollMux-dispatch-Kommando einführen und verwenden.
@@ -758,10 +770,12 @@ public class WollMuxBar implements XPALChangeEventListener
         
         // neue Items eintragen
         String[] entries = palProv.getPALEntries();
+        senderBoxEntries = entries.length;
         for (int i = 0; i < entries.length; i++)
         {
           senderbox.addItem(entries[i]);
         }
+        senderbox.addItem("- - - - Liste bearbeiten - - - -");
         
         // Selektiertes Item setzen:
         if (palProv.getCurrentSender() != null)

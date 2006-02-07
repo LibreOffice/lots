@@ -74,11 +74,13 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
 
   public static final String cmdAbsenderAuswaehlen = "AbsenderAuswaehlen";
 
+  public static final String cmdPALVerwalten = "PALVerwalten";
+
   public static final String cmdOpenTemplate = "OpenTemplate";
 
   public static final String cmdSenderBox = "SenderBox";
 
-  private static final String cmdMenu = "Menu";
+  public static final String cmdMenu = "Menu";
 
   /**
    * TODO: überarbeiten. Der Konstruktor erzeugt einen neues WollMux-Service im
@@ -253,6 +255,9 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
 
         if (uri.getSchemeSpecificPart().compareToIgnoreCase(cmdMenu) == 0)
           xRet = this;
+
+        if (uri.getSchemeSpecificPart().compareToIgnoreCase(cmdPALVerwalten) == 0)
+          xRet = this;
       }
     }
     catch (URISyntaxException e)
@@ -314,6 +319,15 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
               .debug2("Dispatch: Aufruf von WollMux:AbsenderdatenBearbeitenDialog");
           mux.getEventProcessor().addEvent(
               new Event(Event.ON_ABSENDER_AUSWAEHLEN));
+        }
+
+        if (uri.getSchemeSpecificPart().compareToIgnoreCase(
+            cmdPALVerwalten) == 0)
+        {
+          Logger
+              .debug2("Dispatch: Aufruf von WollMux:PALVerwalten");
+          mux.getEventProcessor().addEvent(
+              new Event(Event.ON_PERSOENLICHE_ABSENDERLISTE));
         }
 
         if (uri.getSchemeSpecificPart().compareToIgnoreCase(cmdOpenTemplate) == 0)
