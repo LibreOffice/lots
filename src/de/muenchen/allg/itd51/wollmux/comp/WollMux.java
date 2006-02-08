@@ -321,11 +321,9 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
               new Event(Event.ON_ABSENDER_AUSWAEHLEN));
         }
 
-        if (uri.getSchemeSpecificPart().compareToIgnoreCase(
-            cmdPALVerwalten) == 0)
+        if (uri.getSchemeSpecificPart().compareToIgnoreCase(cmdPALVerwalten) == 0)
         {
-          Logger
-              .debug2("Dispatch: Aufruf von WollMux:PALVerwalten");
+          Logger.debug2("Dispatch: Aufruf von WollMux:PALVerwalten");
           mux.getEventProcessor().addEvent(
               new Event(Event.ON_PERSOENLICHE_ABSENDERLISTE));
         }
@@ -385,7 +383,13 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
 
   public void setCurrentSender(String sender, short idx)
   {
-    // TODO: evtl. über den dispatch-Mechanismus ersetzen.
     WollMuxSingleton.getInstance().setCurrentSender(sender, idx);
   }
+
+  public String getWollmuxConfAsString()
+  {
+    return WollMuxSingleton.getInstance().getWollmuxConf()
+        .stringRepresentation();
+  }
+
 }

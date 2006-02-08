@@ -26,7 +26,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import com.sun.star.document.EventObject;
 import com.sun.star.document.XEventListener;
 import com.sun.star.frame.FrameAction;
 import com.sun.star.frame.FrameActionEvent;
@@ -164,15 +163,6 @@ public class EventProcessor implements XEventListener, XModifyListener,
 
     if (docEvent.EventName.compareToIgnoreCase("OnFocus") == 0)
       addEvent(new Event(Event.ON_FOCUS, "", docEvent.Source));
-
-    if (docEvent.EventName.compareToIgnoreCase("OnCloseApp") == 0) {
-      // muss synchron behandelt werden:
-      // PALChange-Listener informieren:
-      Iterator i = WollMuxSingleton.getInstance().palChangeListenerIterator();
-      while(i.hasNext()) {
-        ((XPALChangeEventListener) i.next()).disposing(new EventObject());
-      }
-    }
 }
 
   /**

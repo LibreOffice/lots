@@ -37,7 +37,8 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowFocusListener;
 import java.awt.event.WindowListener;
-import java.io.InputStreamReader;
+import java.io.IOException;
+import java.io.StringReader;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -63,15 +64,17 @@ import javax.swing.JSeparator;
 import javax.swing.SwingConstants;
 
 import com.sun.star.beans.PropertyValue;
+import com.sun.star.comp.helper.Bootstrap;
 import com.sun.star.frame.XDispatch;
+import com.sun.star.lang.DisposedException;
 import com.sun.star.lang.EventObject;
+import com.sun.star.lang.XMultiServiceFactory;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
 
-import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
+import de.muenchen.allg.itd51.parser.SyntaxErrorException;
 import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.XPALChangeEventListener;
@@ -93,8 +96,11 @@ public class WollMuxBar implements XPALChangeEventListener
   
   /**
    * Der WollMux-Service, mit dem die WollMuxBar Informationen austauscht.
+   * Der WollMux-Service sollte nicht über dieses Feld, sondern ausschließlich über
+   * die Methode getRemoteWollMux bezogen werden, da diese mit einem möglichen
+   * Schließen von OOo während die WollMuxBar läuft klarkommt.
    */
-  private XWollMux mux;
+  private Object __mux;
   
   /**
    * Der Rahmen der die Steuerelemente enthält.
@@ -182,42 +188,35 @@ public class WollMuxBar implements XPALChangeEventListener
    * ItemListener bei Elementänderungen der senderboxes: 
    */
   private ItemListener itemListener = new ItemListener() { 
-    public void itemStateChanged(ItemEvent e) {
-      if(e.getStateChange() == ItemEvent.SELECTED && e.getSource() instanceof JComboBox) {
-        JComboBox cbox = (JComboBox) e.getSource();
-        int id = cbox.getSelectedIndex();
-        
-        // Sonderrolle: -- Liste bearbeiten --
-        if(id == senderBoxEntries) {
-          dispatchWollMuxUrl(WollMux.cmdPALVerwalten, null);
-          return;
-        }
-        
-        String name = cbox.getSelectedItem().toString();
+    public void itemStateChanged(ItemEvent e) { senderBoxItemChanged(e); } };
 
-        // TODO: Hier könnte ich auch eine neues WollMux-dispatch-Kommando einführen und verwenden.
-        // wollmux informieren:
-        if (mux != null)
-        {
-          mux.setCurrentSender(name, (short) id);
-          System.out.println("setCurrentSender(\"" + name + "\", " + id + ")");
-        }
-      }
-    }
-  };
 
   /**
    * Alle senderboxes (JComboBoxes) der Leiste.
    */
   private List senderboxes = new Vector();
   
+  
+  /**
+   * Dieses Flag ist true, wenn sie WollMux Bar einen PALUpdateListener beim
+   * entfernten WollMux registriert hat.
+   */
+  private boolean palUpdateListenerIsRegistered = false;
+  
   /**
    * @param conf Vater-Knoten von Menues und Symbolleisten 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public WollMuxBar(final ConfigThingy conf, final XComponentContext ctx)
-  throws ConfigurationErrorException
+  public WollMuxBar()
+  throws ConfigurationErrorException, SyntaxErrorException, IOException
   {
+    XWollMux mux = getRemoteWollMux(true);
+    String confStr = "";
+    if(mux!=null) {
+      confStr = mux.getWollmuxConfAsString();
+    }
+      
+    final ConfigThingy conf = new ConfigThingy("", null, new StringReader(confStr));
 
     //  GUI im Event-Dispatching Thread erzeugen wg. Thread-Safety.
     try{
@@ -231,27 +230,13 @@ public class WollMuxBar implements XPALChangeEventListener
       });
     }
     catch(Exception x) {Logger.error(x);}
-
-    // PALChangeListener registrieren.
-    try
-    {
-      UnoService factory = new UnoService(ctx.getServiceManager());
-      UnoService usMux = factory.create("de.muenchen.allg.itd51.wollmux.WollMux");
-      this.mux = (XWollMux) UnoRuntime.queryInterface(XWollMux.class, usMux.getObject());
-    } catch (Exception e) { Logger.error(e); }
-
-    if (mux != null)
-    {
-      System.out.println("JSenderBox-addme");
-      mux.addPALChangeEventListener(this);
-    }
   }
 
   private void createGUI(ConfigThingy conf)
   {
     Common.setLookAndFeel();
     
-    String title ="WollMux";
+    String title ="Vorlagen und Formulare (fix)";
     try{
       title = conf.get("Briefkopfleiste").get("TITLE").toString();
     }catch(Exception x) {}
@@ -267,14 +252,14 @@ public class WollMuxBar implements XPALChangeEventListener
     myFrame.getContentPane().add(contentPanel);
     
     try{
-      addUIElements(conf.query("Menues"),conf.get("Briefkopfleiste"), "Elemente", contentPanel, 1, 0);
+      addUIElements(conf.query("Menues"),conf.get("Briefkopfleiste"), contentPanel, 1, 0, "panel");
     }catch(NodeNotFoundException x)
     {
       Logger.error(x);
     }
     
     JMenuBar mbar = new JMenuBar();
-    addUIElements(conf.query("Menues"),conf.query("Menueleiste"), "Menueleiste", mbar, 1, 0, "menu");
+    addUIElements(conf.query("Menues"),conf.query("Menueleiste"), mbar, 1, 0, "menu");
     myFrame.setJMenuBar(mbar);
     
     //myFrame.setUndecorated(true);
@@ -322,8 +307,9 @@ public class WollMuxBar implements XPALChangeEventListener
    *  werden.
    *  context kann "menu" oder "panel" sein.
    */
-  private void addUIElements(ConfigThingy menuConf, ConfigThingy conf, String key, JComponent compo, int stepx, int stepy, String context)
+  private void addUIElements(ConfigThingy menuConf, ConfigThingy elementParent, JComponent compo, int stepx, int stepy, String context)
   {
+    // TODO: Umstellen auf uiElementFactory
     //int gridx, int gridy, int gridwidth, int gridheight, double weightx, double weighty, int anchor,          int fill,                  Insets insets, int ipadx, int ipady) 
     //GridBagConstraints gbcTextfield = new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0, GridBagConstraints.LINE_START,   GridBagConstraints.HORIZONTAL, new Insets(TF_BORDER,TF_BORDER,TF_BORDER,TF_BORDER),0,0);
     GridBagConstraints gbcLabel      = new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.NONE,       new Insets(TF_BORDER,TF_BORDER,TF_BORDER,TF_BORDER),0,0);
@@ -333,46 +319,42 @@ public class WollMuxBar implements XPALChangeEventListener
     GridBagConstraints gbcListBox    = new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH,           new Insets(TF_BORDER,TF_BORDER,TF_BORDER,TF_BORDER),0,0);
     GridBagConstraints gbcSeparator  = new GridBagConstraints(0, 0, 1, 1, (double)stepx, (double)stepy, GridBagConstraints.CENTER,  stepx == 0? GridBagConstraints.HORIZONTAL : GridBagConstraints.VERTICAL,       new Insets(stepy > 0? SEP_BORDER:0,stepx > 0? SEP_BORDER:0,stepy > 0? SEP_BORDER:0, stepx > 0? SEP_BORDER:0),0,0);
       
-    ConfigThingy felderParent = conf.query(key);
     int y = -stepy;
     int x = -stepx; 
       
-    Iterator piter = felderParent.iterator();
+    Iterator piter = elementParent.iterator();
     while (piter.hasNext())
     {
-      Iterator iter = ((ConfigThingy)piter.next()).iterator();
-      while (iter.hasNext())
-      {
-        y += stepy;
-        x += stepx;
+      ConfigThingy uiElementDesc = (ConfigThingy)piter.next();
+      y += stepy;
+      x += stepx;
+      
+      try{
+        /*
+         * TODO: ACHTUNG! DER FOLGENDE CODE SOLLTE SO GESCHRIEBEN WERDEN,
+         * DASS DER ZUSTAND AUCH IM FALLE EINES GESCHEITERTEN GET()
+         * UND EINER EVTL. DARAUS RESULTIERENDEN NULLPOINTEREXCEPTION
+         * NOCH KONSISTENT IST!
+         */
         
-        ConfigThingy uiElementDesc = (ConfigThingy)iter.next();
-        try{
-          /*
-           * ACHTUNG! DER FOLGENDE CODE SOLLTE SO GESCHRIEBEN WERDEN,
-           * DASS DER ZUSTAND AUCH IM FALLE EINES GESCHEITERTEN GET()
-           * UND EINER EVTL. DARAUS RESULTIERENDEN NULLPOINTEREXCEPTION
-           * NOCH KONSISTENT IST!
-           */
-            
-          //boolean readonly = false;
-          //String id = "";
-          //try{ id = uiElementDesc.get("ID").toString(); }catch(NodeNotFoundException e){}
-          //try{ if (uiElementDesc.get("READONLY").toString().equals("true")) readonly = true; }catch(NodeNotFoundException e){}
-          String type = uiElementDesc.get("TYPE").toString();
-          
-          if (type.equals("label"))
-          {
-            JLabel uiElement = new JLabel();
-            gbcLabel.gridx = x;
-            gbcLabel.gridy = y;
-            if (context.equals("menu"))
-              compo.add(uiElement);
-            else
-              compo.add(uiElement, gbcLabel);
-            uiElement.setText(uiElementDesc.get("LABEL").toString());
-          }
+        //boolean readonly = false;
+        //String id = "";
+        //try{ id = uiElementDesc.get("ID").toString(); }catch(NodeNotFoundException e){}
+        //try{ if (uiElementDesc.get("READONLY").toString().equals("true")) readonly = true; }catch(NodeNotFoundException e){}
+        String type = uiElementDesc.get("TYPE").toString();
+        
+        if (type.equals("label"))
+        {
+          JLabel uiElement = new JLabel();
+          gbcLabel.gridx = x;
+          gbcLabel.gridy = y;
+          if (context.equals("menu"))
+            compo.add(uiElement);
           else
+            compo.add(uiElement, gbcLabel);
+          uiElement.setText(uiElementDesc.get("LABEL").toString());
+        }
+        else
           if (type.equals("separator"))
           {
             JComponent uiElement = new JSeparator(stepx == 0? SwingConstants.HORIZONTAL : SwingConstants.VERTICAL);
@@ -383,7 +365,7 @@ public class WollMuxBar implements XPALChangeEventListener
               uiElement = p;
               uiElement.setBorder(BorderFactory.createEmptyBorder(stepy > 0? SEP_BORDER:0,stepx > 0? SEP_BORDER:0,stepy > 0? SEP_BORDER:0, stepx > 0? SEP_BORDER:0));
             }
-
+            
             gbcSeparator.gridx = x;
             gbcSeparator.gridy = y;
             if (context.equals("menu"))
@@ -399,7 +381,7 @@ public class WollMuxBar implements XPALChangeEventListener
               uiElement.add(Box.createHorizontalStrut(minsize));
             }catch(Exception e){}
             uiElement.add(Box.createHorizontalGlue());
-
+            
             gbcGlue.gridx = x;
             gbcGlue.gridy = y;
             if (context.equals("menu"))
@@ -408,128 +390,125 @@ public class WollMuxBar implements XPALChangeEventListener
               compo.add(uiElement, gbcGlue);
           }
           else
-          if (type.equals("senderbox"))
-          {
-            if (context.equals("menu")) 
+            if (type.equals("senderbox"))
             {
-              Logger.error("Elemente vom Typ \"senderbox\" können nicht in Menüs eingefügt werden!");
-              continue;
-            }
-            
-            int lines = 10;
-            try{ lines = Integer.parseInt(uiElementDesc.get("LINES").toString()); } catch(Exception e){}
-            
-            JComboBox senderbox = new JComboBox();
-            
-            senderbox.setMaximumRowCount(lines);
-            senderbox.setPrototypeDisplayValue("Matthias B. ist euer Gott (W-OLL-MUX-5.1)");
-            senderbox.setEditable(false);
-            
-            senderbox.addItemListener(itemListener);
-            
-            //String action = "";
-            //try{ action = uiElementDesc.get("ACTION").toString(); }catch(NodeNotFoundException e){}
-            
-            //ActionListener actionL = getAction(action);
-            //TODO if (actionL != null) list.addMouseListener(new MyActionMouseListener(senderbox, actionL));
-            
-            senderboxes.add(senderbox);
-            
-            gbcListBox.gridx = x;
-            gbcListBox.gridy = y;
-            compo.add(senderbox, gbcListBox);
-          }
-          else
-          if (type.equals("button"))
-          {
-            String action = "";
-            try{
-              action = uiElementDesc.get("ACTION").toString();
-            }catch(NodeNotFoundException e){}
+              if (context.equals("menu")) 
+              {
+                Logger.error("Elemente vom Typ \"senderbox\" können nicht in Menüs eingefügt werden!");
+                continue;
+              }
               
-            String label  = uiElementDesc.get("LABEL").toString();
+              int lines = 10;
+              try{ lines = Integer.parseInt(uiElementDesc.get("LINES").toString()); } catch(Exception e){}
               
-            char hotkey = 0;
-            try{
-              hotkey = uiElementDesc.get("HOTKEY").toString().charAt(0);
-            }catch(Exception e){}
+              JComboBox senderbox = new JComboBox();
               
-            AbstractButton button;
-            if (context.equals("menu"))
-              button = new JMenuItem(label);
-            else 
-              button = new JButton(label);
-            
-            button.setMnemonic(hotkey);
-
-            ActionListener actionL = getAction(action);
-            if (actionL != null) button.addActionListener(actionL);
-            String fragment = "";
-            try{
-              fragment = uiElementDesc.get("FRAG_ID").toString();
-            }catch(NodeNotFoundException e){}
-            button.setActionCommand(fragment);
-            
-            gbcButton.gridx = x;
-            gbcButton.gridy = y;
-            if (context.equals("menu"))
-              compo.add(button);
-            else
-              compo.add(button, gbcButton);
-          }
-          else
-          if (type.equals("menu"))
-          {
-            String label  = uiElementDesc.get("LABEL").toString();
+              senderbox.setMaximumRowCount(lines);
+              senderbox.setPrototypeDisplayValue("Matthias B. ist euer Gott (W-OLL-MUX-5.1)");
+              senderbox.setEditable(false);
               
-            char hotkey = 0;
-            try{
-              hotkey = uiElementDesc.get("HOTKEY").toString().charAt(0);
-            }catch(Exception e){}
-            
-            String menuName = "";
-            try{
-              menuName = uiElementDesc.get("MENU").toString();
-            }catch(NodeNotFoundException e){}
-            
-            AbstractButton button;
-            if (context.equals("menu"))
-            {
-              parseMenu(mapMenuNameToJMenu, menuConf, menuName, new JMenu(label));
-              //FIXME Ich glaube nicht, dass es wirklich funktioniert, das selbe JMenu an mehreren Stellen in die GUI-Hierarchie einzufügen. Insofern ist das mit der Map für JMenus wohl Schmarrn und es sollte jedes mal ein neues JMenu erzeugt werden. Selbiges gilt natürlich genauso innerhalb von parseMenu. Im Falle der JPopupMenus ist das allerdings kein Problem, da diese ja nirgends in die Hierarchie eingehängt werden.
-              button = (AbstractButton)mapMenuNameToJMenu.get(menuName);
-              if (button == null)
-                button = new JMenu(label);
+              senderbox.addItemListener(itemListener);
+              
+              //String action = "";
+              //try{ action = uiElementDesc.get("ACTION").toString(); }catch(NodeNotFoundException e){}
+              
+              //ActionListener actionL = getAction(action);
+              //TODO if (actionL != null) list.addMouseListener(new MyActionMouseListener(senderbox, actionL));
+              
+              senderboxes.add(senderbox);
+              
+              gbcListBox.gridx = x;
+              gbcListBox.gridy = y;
+              compo.add(senderbox, gbcListBox);
+              
+              // updateListener registrieren:
+              registerPALUpdateListener(getRemoteWollMux(true));
             }
             else
-            {
-              parseMenu(mapMenuNameToJPopupMenu, menuConf, menuName, new JPopupMenu());
-              button = new JButton(label);
-              button.addActionListener(actionListener_openMenu) ;
-              button.setActionCommand(menuName);
-            }
-            
-            button.setMnemonic(hotkey);
-
-            gbcMenuButton.gridx = x;
-            gbcMenuButton.gridy = y;
-            if (context.equals("menu"))
-              compo.add(button);
-            else
-              compo.add(button, gbcMenuButton);
-          }
-          else
-          {
-            Logger.error("Ununterstützter TYPE für User Interface Element: "+type);
-          }
-        } catch(NodeNotFoundException e) {Logger.error(e);}
-      }
+              if (type.equals("button"))
+              {
+                String action = "";
+                try{
+                  action = uiElementDesc.get("ACTION").toString();
+                }catch(NodeNotFoundException e){}
+                
+                String label  = uiElementDesc.get("LABEL").toString();
+                
+                char hotkey = 0;
+                try{
+                  hotkey = uiElementDesc.get("HOTKEY").toString().charAt(0);
+                }catch(Exception e){}
+                
+                AbstractButton button;
+                if (context.equals("menu"))
+                  button = new JMenuItem(label);
+                else 
+                  button = new JButton(label);
+                
+                button.setMnemonic(hotkey);
+                
+                ActionListener actionL = getAction(action);
+                if (actionL != null) button.addActionListener(actionL);
+                String fragment = "";
+                try{
+                  fragment = uiElementDesc.get("FRAG_ID").toString();
+                }catch(NodeNotFoundException e){}
+                button.setActionCommand(fragment);
+                
+                gbcButton.gridx = x;
+                gbcButton.gridy = y;
+                if (context.equals("menu"))
+                  compo.add(button);
+                else
+                  compo.add(button, gbcButton);
+              }
+              else
+                if (type.equals("menu"))
+                {
+                  String label  = uiElementDesc.get("LABEL").toString();
+                  
+                  char hotkey = 0;
+                  try{
+                    hotkey = uiElementDesc.get("HOTKEY").toString().charAt(0);
+                  }catch(Exception e){}
+                  
+                  String menuName = "";
+                  try{
+                    menuName = uiElementDesc.get("MENU").toString();
+                  }catch(NodeNotFoundException e){}
+                  
+                  AbstractButton button;
+                  if (context.equals("menu"))
+                  {
+                    parseMenu(mapMenuNameToJMenu, menuConf, menuName, new JMenu(label));
+                    //FIXME Ich glaube nicht, dass es wirklich funktioniert, das selbe JMenu an mehreren Stellen in die GUI-Hierarchie einzufügen. Insofern ist das mit der Map für JMenus wohl Schmarrn und es sollte jedes mal ein neues JMenu erzeugt werden. Selbiges gilt natürlich genauso innerhalb von parseMenu. Im Falle der JPopupMenus ist das allerdings kein Problem, da diese ja nirgends in die Hierarchie eingehängt werden.
+                    button = (AbstractButton)mapMenuNameToJMenu.get(menuName);
+                    if (button == null)
+                      button = new JMenu(label);
+                  }
+                  else
+                  {
+                    parseMenu(mapMenuNameToJPopupMenu, menuConf, menuName, new JPopupMenu());
+                    button = new JButton(label);
+                    button.addActionListener(actionListener_openMenu) ;
+                    button.setActionCommand(menuName);
+                  }
+                  
+                  button.setMnemonic(hotkey);
+                  
+                  gbcMenuButton.gridx = x;
+                  gbcMenuButton.gridy = y;
+                  if (context.equals("menu"))
+                    compo.add(button);
+                  else
+                    compo.add(button, gbcMenuButton);
+                }
+                else
+                {
+                  Logger.error("Ununterstützter TYPE für User Interface Element: "+type);
+                }
+      } catch(NodeNotFoundException e) {Logger.error(e);}
     }
-  }
-  
-  private void addUIElements(ConfigThingy menuConf, ConfigThingy conf, String key, JComponent compo, int stepx, int stepy)
-  {
-    addUIElements(menuConf, conf, key, compo, stepx, stepy, "panel");
   }
   
   private void parseMenu(Map mapMenuNameToMenu, ConfigThingy menuConf, String menuName, JComponent menu)
@@ -539,9 +518,9 @@ public class WollMuxBar implements XPALChangeEventListener
     ConfigThingy conf;
     try
     {
-      conf = menuConf.query(menuName).getLastChild();
+      conf = menuConf.query(menuName).getLastChild().get("Elemente");
     }
-    catch (NodeNotFoundException x)
+    catch (Exception x)
     {
       Logger.error("Menü \"" + menuName + "\" nicht definiert");
       return;
@@ -554,7 +533,8 @@ public class WollMuxBar implements XPALChangeEventListener
     mapMenuNameToMenu.put(menuName, menu);
     
 //    menu.setLayout(new GridBagLayout());
-    addUIElements(menuConf, conf, "Elemente", menu, 0, 1, "menu");
+    
+    addUIElements(menuConf, conf, menu, 0, 1, "menu");
   }
   
   /**
@@ -662,10 +642,9 @@ public class WollMuxBar implements XPALChangeEventListener
    */
   private void abort()
   {
-    myFrame.dispose();
+    deregisterPALUpdateListener(getRemoteWollMux(false));
 
-    if(mux!=null)
-      mux.removePALChangeEventListener(this);
+    myFrame.dispose();
 
     System.exit(0);
   }
@@ -678,7 +657,8 @@ public class WollMuxBar implements XPALChangeEventListener
    *        der Leerstring, so wird es nicht mit übergeben.
    */
   private void dispatchWollMuxUrl(String dispatchCmd, String arg) {
-    XDispatch disp = (XDispatch) UnoRuntime.queryInterface(XDispatch.class, mux);
+    XDispatch disp = null;
+    disp = (XDispatch) UnoRuntime.queryInterface(XDispatch.class, getRemoteWollMux(true));
     if(disp != null) {
       if(arg != null && !arg.equals("")) arg = "#" + arg;
       else arg = "";
@@ -696,7 +676,7 @@ public class WollMuxBar implements XPALChangeEventListener
    */
   private void openMenu(ActionEvent e)
   {
-    System.out.println("openMenu");
+    Logger.debug2("openMenu");
     String menuName = e.getActionCommand();
     JComponent compo;
     try{
@@ -712,6 +692,38 @@ public class WollMuxBar implements XPALChangeEventListener
     
     menu.show(compo, 0, compo.getHeight());
   }
+
+  /**
+   * Diese Methode wird aufgerufen, wenn in der Senderbox ein anderes Element
+   * ausgewählt wurde. Die Methode setzt daraufhin den aktuellen Absender im
+   * entfernten WollMux neu.
+   * 
+   * @param e
+   */
+  private void senderBoxItemChanged(ItemEvent e)
+  {
+    if(e.getStateChange() == ItemEvent.SELECTED && e.getSource() instanceof JComboBox) {
+      JComboBox cbox = (JComboBox) e.getSource();
+      int id = cbox.getSelectedIndex();
+      
+      // Sonderrolle: -- Liste bearbeiten --
+      if(id == senderBoxEntries) {
+        dispatchWollMuxUrl(WollMux.cmdPALVerwalten, null);
+        return;
+      }
+      
+      String name = cbox.getSelectedItem().toString();
+      
+      // TODO: Hier könnte ich auch eine neues WollMux-dispatch-Kommando einführen und verwenden.
+      // wollmux informieren:
+      XWollMux mux = getRemoteWollMux(true);
+      if (mux != null)
+      {
+        mux.setCurrentSender(name, (short) id);
+      }
+    }
+  }
+
   
   /**
    * @param args
@@ -739,19 +751,15 @@ public class WollMuxBar implements XPALChangeEventListener
         System.exit(1);
       }
     }
-    UNO.init();
-    String confFile = "data/wollmuxbar.conf";
-    URL confURL = WollMuxBar.class.getClassLoader().getResource(confFile);
     
-    //ConfigThingy conf = new ConfigThingy("", new URL(new File(System
-    //    .getProperty("user.dir")).toURL(), confFile));
-    ConfigThingy conf = new ConfigThingy("", confURL, new InputStreamReader(confURL.openStream(),ConfigThingy.CHARSET));
-    new WollMuxBar(conf, UNO.defaultContext);    
+    new WollMuxBar();    
   }
 
+  /* (non-Javadoc)
+   * @see de.muenchen.allg.itd51.wollmux.XPALChangeEventListener#updateContent(com.sun.star.lang.EventObject)
+   */
   public void updateContent(EventObject eventObject)
   {
-    System.out.println("UpdateContent");
     XPALProvider palProv = (XPALProvider) UnoRuntime.queryInterface(
         XPALProvider.class,
         eventObject.Source);
@@ -792,11 +800,69 @@ public class WollMuxBar implements XPALChangeEventListener
 
   public void disposing(EventObject arg0)
   {
-    System.out.println("disposing");
-    mux = null;
-    // TODO: hier darf natürlich nicht disposed werden, sondern 
-    // es muss der Kontext wieder hergestellt werden.
-    myFrame.dispose();
+  }
+
+  /**
+   * Diese Methode liefert eine Instanz auf den entfernten WollMux zurück.
+   * Wurde noch gar keine UNO-Verbindung hergestellt, so wird eine Verbindung
+   * zu OOo hiermit aufgebaut und der WollMux instanziiert. 
+   * 
+   * Ist der Übergabewert reconnect true, wird die Verbindung auch dann wieder
+   * hergestellt, wenn eine vorhergehende Verbindung aufgrund einer 
+   * DisposedException unterbrochen wurde.
+   * 
+   * Konnte keine Verbindung hergestellt werden, oder eine unterbrochene
+   * Verbindung nicht wieder hergestellt werden, so liefert die Methode null zurück.
+   *
+   * @param reconnect
+   * @return Instanz eines gültigen WollMux oder null, falls keine Instanz 
+   *         erzeugt werden konnte. 
+   */
+  private XWollMux getRemoteWollMux(boolean reconnect) {
+    if(__mux != null) {
+      try {
+        return (XWollMux) UnoRuntime.queryInterface(XWollMux.class, __mux);
+      } catch (DisposedException e) {
+        __mux = null;
+        if(!reconnect) return null;
+      }
+    }
+    
+    XWollMux mux = null;
+    try
+    {
+      XComponentContext ctx = Bootstrap.bootstrap();
+      XMultiServiceFactory factory = (XMultiServiceFactory) UnoRuntime.queryInterface(XMultiServiceFactory.class, ctx.getServiceManager());
+      this.__mux = factory.createInstance("de.muenchen.allg.itd51.wollmux.WollMux");
+      mux = (XWollMux) UnoRuntime.queryInterface(XWollMux.class, __mux);
+    } catch (Exception e) { Logger.error(e); }
+
+    // re-register Listener if they were registered in the previous connection:
+    if(palUpdateListenerIsRegistered) {
+      palUpdateListenerIsRegistered = false;
+      registerPALUpdateListener(mux);
+    }
+
+    return mux;
+  }
+  
+  /**
+   * registriert den PALUpdateListener auf dem entfernten WollMux.
+   * @param mux
+   */
+  private void deregisterPALUpdateListener(XWollMux mux) {
+    if(mux != null && palUpdateListenerIsRegistered) {
+      mux.removePALChangeEventListener(this);
+      palUpdateListenerIsRegistered = false;
+    }
+  }
+  
+  private void registerPALUpdateListener(XWollMux mux)
+  {
+    if(mux != null && !palUpdateListenerIsRegistered) {
+      mux.addPALChangeEventListener(this);
+      palUpdateListenerIsRegistered = true;
+    }
   }
 
 }
