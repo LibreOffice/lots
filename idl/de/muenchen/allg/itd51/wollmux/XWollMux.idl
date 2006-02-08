@@ -9,6 +9,8 @@ interface XWollMux
 {
 	interface XPALChangeEventBroadcaster;
 	
+	string getWollmuxConfAsString();
+
 	void setCurrentSender([in] string sender, [in] short index);
 }; 
   
