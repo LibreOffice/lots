@@ -613,6 +613,7 @@ public class WollMuxBar implements XPALChangeEventListener
     }
     public void windowLostFocus(WindowEvent e)
     {
+      if (e.getOppositeWindow() != null) return;
       if (topbar || normalwindow) return;
       if (minimize) {myFrame.setExtendedState(Frame.ICONIFIED); return;}
       if (isLogo) return;
