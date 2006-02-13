@@ -163,6 +163,7 @@
 
 	
 	<property name="BIN" value="${basedir}/bin" />
+	<property name="IDLS" value="${basedir}/idl" />
 	<property name="PACKAGE_DIR" value="${basedir}/packages" />
 	<property name="WOLLMUXBAR_JAR" value="${PACKAGE_DIR}/WollMuxBar.jar" />
 	<property name="UNOHELPER_BIN" value="${basedir}/../UNOHelper/bin" />
@@ -174,6 +175,7 @@
 		<delete file="${WOLLMUXBAR_JAR}" />
 		<jar destfile="${WOLLMUXBAR_JAR}">
 			<fileset dir="${BIN}" includes="**/*.class" />
+			<fileset dir="${IDLS}" includes="**/*.class" />
 			<fileset dir="${UNOHELPER_BIN}" includes="**/*.class" />
 			<fileset dir="${TOOLING}" includes="**/*" />
 			<fileset dir="${BIN}" includes="data/**" />
