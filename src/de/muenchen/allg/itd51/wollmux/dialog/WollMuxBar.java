@@ -88,6 +88,8 @@ import de.muenchen.allg.itd51.wollmux.comp.WollMux;
  */
 public class WollMuxBar implements XPALChangeEventListener
 {
+  private static final String DEFAULT_TITLE = "Vorlagen und Formulare";
+  
   private final URL ICON_URL = this.getClass().getClassLoader().getResource("data/wollmux_klein.jpg");
   private static boolean minimize = false;
   private static boolean topbar = false;
@@ -236,7 +238,7 @@ public class WollMuxBar implements XPALChangeEventListener
   {
     Common.setLookAndFeel();
     
-    String title ="Vorlagen und Formulare (fix)";
+    String title = DEFAULT_TITLE;
     try{
       title = conf.get("Briefkopfleiste").get("TITLE").toString();
     }catch(Exception x) {}
@@ -266,7 +268,7 @@ public class WollMuxBar implements XPALChangeEventListener
 
     WindowTransformer trafo = new WindowTransformer();
     
-    logoFrame = new JFrame("WollMux");
+    logoFrame = new JFrame(DEFAULT_TITLE);
     logoFrame.setUndecorated(true);
     logoFrame.setAlwaysOnTop(true);
     JLabel logo = new JLabel(new ImageIcon(ICON_URL));
