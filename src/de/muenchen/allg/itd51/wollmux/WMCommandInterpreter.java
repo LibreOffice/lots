@@ -65,6 +65,18 @@ public class WMCommandInterpreter
   private UnoService document;
 
   /**
+   * Die Liste der Fragment-urls, die bei den Kommandos "insertContent"
+   * eingefügt werden sollen.
+   */
+  private String[] fragUrls;
+
+  /**
+   * Die Liste der Fragment-urls, die bei den Kommandos "insertContent"
+   * eingefügt werden sollen.
+   */
+  private int fragUrlsCount = 0;
+
+  /**
    * Zählt die Anzahl der während des interpret()-Vorgangs auftretenden Fehler.
    */
   private int errorFieldCount;
@@ -100,12 +112,14 @@ public class WMCommandInterpreter
    * 
    * @param xDoc
    */
-  public WMCommandInterpreter(XTextDocument xDoc, WollMuxSingleton mux)
+  public WMCommandInterpreter(XTextDocument xDoc, WollMuxSingleton mux,
+      String[] frag_urls)
   {
     this.document = new UnoService(xDoc);
     this.mux = mux;
     this.formDescriptors = new ConfigThingy("Forms");
     this.documentIsAFormular = false;
+    this.fragUrls = frag_urls;
 
     // Wenn das Dokument als Dokument (und nicht als Template) geöffnet wurde,
     // soll das Dokument nicht vom WollMux verändert werden:
@@ -318,6 +332,14 @@ public class WMCommandInterpreter
               wm.get("FRAG_ID").toString(),
               bookmarkName,
               state);
+        }
+
+        // insertContent
+        else if (cmd.toString().compareToIgnoreCase("insertContent") == 0)
+        {
+          Logger.debug2("Cmd: insertContent");
+
+          state = executeInsertContent(bookmarkName, state);
         }
 
         // insertValue
@@ -533,6 +555,49 @@ public class WMCommandInterpreter
       Logger.error(e);
       insertErrorField(bookmarkName, "", e);
       state.setErrors(state.getErrors() + 1);
+    }
+    state.setDone(true);
+    return state;
+  }
+
+  /**
+   * Diese Methode fügt das nächste Textfragment aus der dem
+   * WMCommandInterpreter übergebenen frag_urls liste ein. Im Fehlerfall wird
+   * die Fehlermeldung eingefügt.
+   * 
+   * @param frag_id
+   *          FRAG_ID, des im Abschnitt Textfragmente in der Konfigurationsdatei
+   *          definierten Textfragments.
+   * @param bookmarkName
+   *          Name des bookmarks, in das das Fragment eingefügt werden soll.
+   */
+  private WMCommandState executeInsertContent(String bookmarkName,
+      WMCommandState state)
+  {
+    state.setErrors(0);
+    if (fragUrls.length > fragUrlsCount)
+    {
+      String urlStr = fragUrls[fragUrlsCount++];
+
+      try
+      {
+        Logger.debug("Füge Textfragment von URL \"" + urlStr + "\" ein.");
+
+        // Dokument einfügen
+        XTextRange bookmarkCursor = insertDocumentWithMarks(
+            bookmarkName,
+            urlStr);
+
+        // Bookmark an neuen Range anpassen
+        rerangeBookmark(bookmarkName, bookmarkCursor);
+      }
+      catch (java.lang.Exception e)
+      {
+        Logger.error("Bookmark \"" + bookmarkName + "\":");
+        Logger.error(e);
+        insertErrorField(bookmarkName, "", e);
+        state.setErrors(state.getErrors() + 1);
+      }
     }
     state.setDone(true);
     return state;

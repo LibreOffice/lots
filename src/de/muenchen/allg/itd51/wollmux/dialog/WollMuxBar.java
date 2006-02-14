@@ -13,6 +13,7 @@
 * 10.01.2006 | BNK | Icon und Config-File pfadunabhängig über Classloader
 *                  | switches --minimize, --topbar, --normalwindow
 * 06.02.2006 | BNK | Menüleiste hinzugefügt
+* 14.02.2006 | BNK | Minimieren rückgängig machen bei Aktivierung der Leiste.
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -451,10 +452,21 @@ public class WollMuxBar implements XPALChangeEventListener
                 
                 ActionListener actionL = getAction(action);
                 if (actionL != null) button.addActionListener(actionL);
+                
+                // Erzeuge frag_id-Liste
                 String fragment = "";
-                try{
-                  fragment = uiElementDesc.get("FRAG_ID").toString();
-                }catch(NodeNotFoundException e){}
+                ConfigThingy fids = uiElementDesc.query("FRAG_ID");
+                if(fids.count() == 0) {
+                  Logger.error("Keine FRAG_ID definiert in Element " + uiElementDesc.stringRepresentation());
+                } else {
+                  Iterator i = fids.iterator();
+                  fragment = i.next().toString();
+                  while (i.hasNext())
+                  {
+                    fragment += "&" + i.next().toString();
+                  }
+                }
+
                 button.setActionCommand(fragment);
                 
                 gbcButton.gridx = x;
@@ -596,6 +608,7 @@ public class WollMuxBar implements XPALChangeEventListener
     {
       if (!isLogo) return;
       myFrame.setVisible(true);
+      myFrame.setExtendedState(JFrame.NORMAL);
       logoFrame.setVisible(false);
       isLogo = false;
     }

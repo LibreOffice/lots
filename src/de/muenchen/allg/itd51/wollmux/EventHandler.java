@@ -24,11 +24,11 @@ package de.muenchen.allg.itd51.wollmux;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
 import com.sun.star.awt.XWindow;
-import com.sun.star.frame.XFrame;
 import com.sun.star.lang.EventObject;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
@@ -57,6 +57,15 @@ import de.muenchen.allg.itd51.wollmux.dialog.PersoenlicheAbsenderlisteVerwalten;
  */
 public class EventHandler
 {
+  /**
+   * Dieses Feld stellt ein Zwischenspeicher für Fragment-Urls dar. Es wird dazu
+   * benutzt, im Fall eines openTemplate-Befehls die urls der übergebenen
+   * frag_id-Liste temporär zu speichern. Das Event on_new/on_load holt sich die
+   * temporär gespeicherten Argumente aus der hashMap und übergibt sie dem
+   * WMCommandInterpreter.
+   */
+  private static HashMap fragUrlsBuffer = new HashMap();
+
   /**
    * Diese Method ist für die Ausführung eines einzelnen Events zuständig. Nach
    * der Bearbeitung entscheidet der Rückgabewert ob unmittelbar die Bearbeitung
@@ -257,52 +266,73 @@ public class EventHandler
     UnoService desktop = UnoService.createWithContext(
         "com.sun.star.frame.Desktop",
         mux.getXComponentContext());
-    String frag_id = event.getArgument();
+    String args = event.getArgument();
 
-    // einheitlicher Fehlerzusatz:
-    String errorExt = "\n\nDer Fehler trat beim Auflösen des Textfragments mit der ID \""
-                      + frag_id
-                      + "\" auf.";
+    String[] frag_ids = args.split("&");
 
-    // Fragment-URL holen und aufbereiten:
-    String urlStr = mux.getTextFragmentList().getURLByID(frag_id);
-    URL url;
-    try
+    // das erste Argument ist das unmittelbar zu landende Textfragment und
+    // wird nach urlStr aufgelöst. Alle weiteren Argumente (falls vorhanden)
+    // werden nach argsUrlStr aufgelöst.
+    String loadUrlStr = "";
+    String[] argsUrlStr = new String[frag_ids.length - 1];
+    String errorExt = "";
+
+    for (int i = 0; i < frag_ids.length; i++)
     {
-      url = new URL(mux.getDEFAULT_CONTEXT(), urlStr);
+      String frag_id = frag_ids[i];
+
+      // einheitlicher Fehlerzusatz:
+      errorExt = "\n\nDer Fehler trat beim Auflösen des Textfragments mit der ID \""
+                 + frag_id
+                 + "\" auf.";
+
+      // Fragment-URL holen und aufbereiten:
+      String urlStr = mux.getTextFragmentList().getURLByID(frag_id);
+      URL url;
+      try
+      {
+        url = new URL(mux.getDEFAULT_CONTEXT(), urlStr);
+      }
+      catch (MalformedURLException e)
+      {
+        throw new MalformedURLException("Die URL \""
+                                        + urlStr
+                                        + "\" dieser Vorlage ist ungültig: "
+                                        + e.getMessage()
+                                        + errorExt);
+      }
+      UnoService trans = UnoService.createWithContext(
+          "com.sun.star.util.URLTransformer",
+          mux.getXComponentContext());
+      com.sun.star.util.URL[] unoURL = new com.sun.star.util.URL[] { new com.sun.star.util.URL() };
+      unoURL[0].Complete = url.toExternalForm();
+      trans.xURLTransformer().parseStrict(unoURL);
+      urlStr = unoURL[0].Complete;
+
+      if (i == 0)
+        loadUrlStr = urlStr;
+      else
+        argsUrlStr[i - 1] = urlStr;
     }
-    catch (MalformedURLException e)
-    {
-      throw new MalformedURLException("Die URL \""
-                                      + urlStr
-                                      + "\" dieser Vorlage ist ungültig: "
-                                      + e.getMessage()
-                                      + errorExt);
-    }
-    UnoService trans = UnoService.createWithContext(
-        "com.sun.star.util.URLTransformer",
-        mux.getXComponentContext());
-    com.sun.star.util.URL[] unoURL = new com.sun.star.util.URL[] { new com.sun.star.util.URL() };
-    unoURL[0].Complete = url.toExternalForm();
-    trans.xURLTransformer().parseStrict(unoURL);
-    urlStr = unoURL[0].Complete;
 
     // open document as Template:
     try
     {
-      desktop.xComponentLoader().loadComponentFromURL(
-          urlStr,
-          "_blank",
-          0,
-          new UnoProps("AsTemplate", Boolean.TRUE).getProps());
+      UnoService doc = new UnoService(desktop.xComponentLoader()
+          .loadComponentFromURL(
+              loadUrlStr,
+              "_blank",
+              0,
+              new UnoProps("AsTemplate", Boolean.TRUE).getProps()));
+      fragUrlsBuffer.put(doc.xInterface(), argsUrlStr);
     }
     catch (java.lang.Exception x)
     {
       throw new com.sun.star.io.IOException(
           "Die Vorlage mit der URL \""
-              + urlStr
-              + "\" konnte nicht geöffnet werden.\n\n"
-              + "Bitte stellen Sie sicher, dass die Vorlage existiert und unbeschädigt ist."
+              + loadUrlStr
+              + "\" kann nicht geöffnet werden.\n\n"
+              + "Bitte stellen Sie sicher, dass alle verwendeten Textfragment existiert und unbeschädigt sind."
               + errorExt, x);
     }
     return EventProcessor.processTheNextEvent;
@@ -316,16 +346,21 @@ public class EventHandler
     UnoService source = new UnoService(event.getSource());
     if (source.supportsService("com.sun.star.text.TextDocument"))
     {
+      // TODO: das wird mit der WollMuxBar nicht mehr benötigt...
       // auf Events des Frame hören:
-      XFrame frame = source.xModel().getCurrentController().getFrame();
-      frame.addFrameActionListener(mux.getEventProcessor());
-
+      // XFrame frame = source.xModel().getCurrentController().getFrame();
+      // frame.addFrameActionListener(mux.getEventProcessor());
       // OOOUI (Menues + Toolbars) aktualisieren
-      mux.getEventProcessor().addEvent(
-          new Event(Event.ON_FRAME_CHANGED, null, frame));
+      // mux.getEventProcessor().addEvent(
+      // new Event(Event.ON_FRAME_CHANGED, null, frame));
+
+      String[] frag_urls = new String[] {};
+      if (fragUrlsBuffer.containsKey(source.xInterface()))
+        frag_urls = (String[]) fragUrlsBuffer.remove(source.xInterface());
 
       // Interpretation von WM-Kommandos
-      new WMCommandInterpreter(source.xTextDocument(), mux).interpret();
+      new WMCommandInterpreter(source.xTextDocument(), mux, frag_urls)
+          .interpret();
     }
     return EventProcessor.processTheNextEvent;
   }

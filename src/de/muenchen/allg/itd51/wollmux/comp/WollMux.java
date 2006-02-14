@@ -106,54 +106,54 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
       com.sun.star.task.XJobListener xListener)
       throws com.sun.star.lang.IllegalArgumentException
   {
-    if (xListener == null)
-      throw new com.sun.star.lang.IllegalArgumentException("invalid listener");
-
-    com.sun.star.beans.NamedValue[] lEnvironment = null;
-
-    // Hole das Environment-Argument
-    for (int i = 0; i < lArgs.length; ++i)
-    {
-      if (lArgs[i].Name.equals("Environment"))
-      {
-        lEnvironment = (com.sun.star.beans.NamedValue[]) com.sun.star.uno.AnyConverter
-            .toArray(lArgs[i].Value);
-      }
-    }
-    if (lEnvironment == null)
-      throw new com.sun.star.lang.IllegalArgumentException("no environment");
-
-    // Hole Event-Informationen
-    String sEnvType = null;
-    String sEventName = null;
-    for (int i = 0; i < lEnvironment.length; ++i)
-    {
-      if (lEnvironment[i].Name.equals("EnvType"))
-        sEnvType = com.sun.star.uno.AnyConverter
-            .toString(lEnvironment[i].Value);
-      else if (lEnvironment[i].Name.equals("EventName"))
-        sEventName = com.sun.star.uno.AnyConverter
-            .toString(lEnvironment[i].Value);
-    }
-
-    // Prüfe die property "EnvType":
-    if ((sEnvType == null)
-        || ((!sEnvType.equals("EXECUTOR")) && (!sEnvType.equals("DISPATCH"))))
-    {
-      java.lang.String sMessage = "\""
-                                  + sEnvType
-                                  + "\" isn't a valid value for EnvType";
-      throw new com.sun.star.lang.IllegalArgumentException(sMessage);
-    }
-
-    /***************************************************************************
-     * Starte den WollMux!
-     */
-    if (sEventName.equals("onFirstVisibleTask"))
-    {
-    }
-    /** *************************************************** */
-
+//    if (xListener == null)
+//      throw new com.sun.star.lang.IllegalArgumentException("invalid listener");
+//
+//    com.sun.star.beans.NamedValue[] lEnvironment = null;
+//
+//    // Hole das Environment-Argument
+//    for (int i = 0; i < lArgs.length; ++i)
+//    {
+//      if (lArgs[i].Name.equals("Environment"))
+//      {
+//        lEnvironment = (com.sun.star.beans.NamedValue[]) com.sun.star.uno.AnyConverter
+//            .toArray(lArgs[i].Value);
+//      }
+//    }
+//    if (lEnvironment == null)
+//      throw new com.sun.star.lang.IllegalArgumentException("no environment");
+//
+//    // Hole Event-Informationen
+//    String sEnvType = null;
+//    String sEventName = null;
+//    for (int i = 0; i < lEnvironment.length; ++i)
+//    {
+//      if (lEnvironment[i].Name.equals("EnvType"))
+//        sEnvType = com.sun.star.uno.AnyConverter
+//            .toString(lEnvironment[i].Value);
+//      else if (lEnvironment[i].Name.equals("EventName"))
+//        sEventName = com.sun.star.uno.AnyConverter
+//            .toString(lEnvironment[i].Value);
+//    }
+//
+//    // Prüfe die property "EnvType":
+//    if ((sEnvType == null)
+//        || ((!sEnvType.equals("EXECUTOR")) && (!sEnvType.equals("DISPATCH"))))
+//    {
+//      java.lang.String sMessage = "\""
+//                                  + sEnvType
+//                                  + "\" isn't a valid value for EnvType";
+//      throw new com.sun.star.lang.IllegalArgumentException(sMessage);
+//    }
+//
+//    /***************************************************************************
+//     * Starte den WollMux!
+//     */
+//    if (sEventName.equals("onFirstVisibleTask"))
+//    {
+//    }
+//    /** *************************************************** */
+//
     xListener.jobFinished(this, new NamedValue[] {});
   }
 
