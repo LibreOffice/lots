@@ -40,6 +40,7 @@
 * 03.11.2005 | BNK | BOM (\uFEFF) auf Whitespace-Liste gesetzt 
 * 07.11.2005 | BNK | +setName()
 * 06.02.2006 | BNK | addChild() public
+* 15.02.2005 | BNK | leere %include URLs abgefangen
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -138,19 +139,19 @@ public class ConfigThingy
         {
           case Token.INCLUDE:
             token2 = (Token)liter.next();
-            switch (token2.type())
+            if(token2.type() == Token.STRING && !token2.contentString().equals(""))
             {
-              case Token.STRING:
-                try{
-                  URL includeURL = new URL(url,token2.contentString());
-                  ((ConfigThingy)stack.peek()).childrenFromUrl(includeURL, new InputStreamReader(includeURL.openStream(),CHARSET) );
-                } catch(IOException iox)
-                {
-                  throw new IOException(token2.url()+" in Zeile "+token2.line()+" bei Zeichen "+token2.position()+": %include fehlgeschlagen: "+iox.toString());
-                }
-                break;
-              default:
-                throw new SyntaxErrorException(token2.url()+": URL-String (umschlossen von Gänsefüßchen) erwartet in Zeile "+token2.line()+" bei Zeichen "+token2.position());
+              try{
+                URL includeURL = new URL(url,token2.contentString());
+                ((ConfigThingy)stack.peek()).childrenFromUrl(includeURL, new InputStreamReader(includeURL.openStream(),CHARSET) );
+              } catch(IOException iox)
+              {
+                throw new IOException(token2.url()+" in Zeile "+token2.line()+" bei Zeichen "+token2.position()+": %include fehlgeschlagen: "+iox.toString());
+              }
+            }
+            else
+            {
+              throw new SyntaxErrorException(token2.url()+": URL-String (umschlossen von Gänsefüßchen) erwartet in Zeile "+token2.line()+" bei Zeichen "+token2.position());
             }
             break;
             
