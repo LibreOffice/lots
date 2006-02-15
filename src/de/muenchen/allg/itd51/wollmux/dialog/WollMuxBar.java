@@ -255,14 +255,25 @@ public class WollMuxBar implements XPALChangeEventListener
     myFrame.getContentPane().add(contentPanel);
     
     try{
-      addUIElements(conf.query("Menues"),conf.get("Briefkopfleiste"), contentPanel, 1, 0, "panel");
+      ConfigThingy bkl = conf.query("Symbolleisten").query("Briefkopfleiste");
+      if(bkl.count() > 0) {
+        addUIElements(conf.query("Menues"),bkl.getLastChild(), contentPanel, 1, 0, "panel");
+      }
     }catch(NodeNotFoundException x)
     {
       Logger.error(x);
     }
     
     JMenuBar mbar = new JMenuBar();
-    addUIElements(conf.query("Menues"),conf.query("Menueleiste"), mbar, 1, 0, "menu");
+    try{
+      ConfigThingy menubar = conf.query("Menueleiste");
+      if(menubar.count() > 0) {
+        addUIElements(conf.query("Menues"),menubar.getLastChild(), mbar, 1, 0, "menu");
+      }
+    }catch(NodeNotFoundException x)
+    {
+      Logger.error(x);
+    }
     myFrame.setJMenuBar(mbar);
     
     //myFrame.setUndecorated(true);
