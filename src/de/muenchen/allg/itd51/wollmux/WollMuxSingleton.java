@@ -447,7 +447,7 @@ public class WollMuxSingleton implements XPALChangeEventBroadcaster,
     }
     catch (DatasetNotFoundException e)
     {
-      return null;
+      return "";
     }
   }
 

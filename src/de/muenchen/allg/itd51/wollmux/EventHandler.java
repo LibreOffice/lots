@@ -194,7 +194,7 @@ public class EventHandler
     return EventProcessor.processTheNextEvent;
   }
 
-  private static boolean on_selection_changed() throws IOException
+  private static boolean on_selection_changed()
   {
     WollMuxSingleton mux = WollMuxSingleton.getInstance();
 
@@ -209,7 +209,14 @@ public class EventHandler
     }
 
     // Cache und LOS auf Platte speichern.
-    mux.getDatasourceJoiner().saveCacheAndLOS(mux.getLosCacheFile());
+    try
+    {
+      mux.getDatasourceJoiner().saveCacheAndLOS(mux.getLosCacheFile());
+    }
+    catch (IOException e)
+    {
+      Logger.error(e);
+    }
 
     return EventProcessor.processTheNextEvent;
   }
@@ -393,10 +400,7 @@ public class EventHandler
     return EventProcessor.processTheNextEvent;
   }
 
-  private static boolean on_initialize() throws NodeNotFoundException,
-      TimeoutException, ConfigurationErrorException,
-      UnsupportedOperationException, java.lang.IllegalArgumentException,
-      ColumnNotFoundException
+  private static boolean on_initialize() 
   {
     WollMuxSingleton mux = WollMuxSingleton.getInstance();
 
@@ -417,8 +421,14 @@ public class EventHandler
 
       // im DatasourceJoiner nach dem Benutzer suchen:
       QueryResults r = null;
-      if (!vorname.equals("") && !nachname.equals(""))
+      if (!vorname.equals("") && !nachname.equals("")) try
+      {
         r = dsj.find("Vorname", vorname, "Nachname", nachname);
+      }
+      catch (TimeoutException e)
+      {
+        Logger.error(e);
+      }
 
       // Auswertung der Suchergebnisse:
       if (r != null)
@@ -448,9 +458,16 @@ public class EventHandler
         while (i.hasNext())
         {
           Dataset ds = (Dataset) i.next();
-          message += ds.get("Nachname") + ", ";
-          message += ds.get("Vorname") + " (";
-          message += ds.get("Rolle") + ")\n";
+          try
+          {
+            message += ds.get("Nachname") + ", ";
+            message += ds.get("Vorname") + " (";
+            message += ds.get("Rolle") + ")\n";
+          }
+          catch (ColumnNotFoundException x)
+          {
+            Logger.error(x);
+          }
         }
         showInfoModal("WollMux-Info", message);
       }

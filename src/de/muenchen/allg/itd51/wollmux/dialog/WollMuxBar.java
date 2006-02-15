@@ -89,7 +89,10 @@ import de.muenchen.allg.itd51.wollmux.comp.WollMux;
  */
 public class WollMuxBar implements XPALChangeEventListener
 {
+
   private static final String DEFAULT_TITLE = "Vorlagen und Formulare";
+  
+  private static final String LEERE_LISTE = "<kein Absender vorhanden>";
   
   private final URL ICON_URL = this.getClass().getClassLoader().getResource("data/wollmux_klein.jpg");
   private static boolean minimize = false;
@@ -734,19 +737,19 @@ public class WollMuxBar implements XPALChangeEventListener
       int id = cbox.getSelectedIndex();
       
       // Sonderrolle: -- Liste bearbeiten --
-      if(id == senderBoxEntries) {
+      if(id >= senderBoxEntries) {
         dispatchWollMuxUrl(WollMux.cmdPALVerwalten, null);
         return;
       }
       
       String name = cbox.getSelectedItem().toString();
-      
-      // TODO: Hier könnte ich auch eine neues WollMux-dispatch-Kommando einführen und verwenden.
-      // wollmux informieren:
-      XWollMux mux = getRemoteWollMux(true);
-      if (mux != null)
-      {
-        mux.setCurrentSender(name, (short) id);
+      if(name != null && !name.equals(LEERE_LISTE)) {
+        // wollmux informieren:
+        XWollMux mux = getRemoteWollMux(true);
+        if (mux != null)
+        {
+          mux.setCurrentSender(name, (short) id);
+        }
       }
     }
   }
@@ -806,15 +809,20 @@ public class WollMuxBar implements XPALChangeEventListener
         // neue Items eintragen
         String[] entries = palProv.getPALEntries();
         senderBoxEntries = entries.length;
-        for (int i = 0; i < entries.length; i++)
-        {
-          senderbox.addItem(entries[i]);
+        if(senderBoxEntries != 0) {
+          for (int i = 0; i < entries.length; i++)
+          {
+            senderbox.addItem(entries[i]);
+          }
+        } else {
+          senderbox.addItem(LEERE_LISTE);
         }
         senderbox.addItem("- - - - Liste bearbeiten - - - -");
         
         // Selektiertes Item setzen:
-        if (palProv.getCurrentSender() != null)
-          senderbox.setSelectedItem(palProv.getCurrentSender());
+        String current = palProv.getCurrentSender();
+        if (current != null && !current.equals(""))
+          senderbox.setSelectedItem(current);
         
         // ItemListener wieder setzen.
         senderbox.addItemListener(itemListener);
