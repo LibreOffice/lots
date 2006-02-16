@@ -17,6 +17,7 @@
  * 02.12.2005 | BNK | Schlüssel umgestellt und dadurch robuster und 
  *                  | effizienter gemacht 
  * 05.12.2005 | BNK | Schlüssel mit RE überprüfen und ignorieren falls kein Match
+ * 16.02.2006 | BNK | mehr Debug-Output
  * -------------------------------------------------------------------
  *
  * @author Max Meier (D-III-ITD 5.1)
@@ -593,7 +594,9 @@ public class LDAPDatasource implements Datasource
 
     try
     { 
+      Logger.debug2("new InitialLdapContext(properties, null)");
       DirContext ctx = new InitialLdapContext(properties, null);
+      Logger.debug2("ctx.getNameParser(\"\")");
       NameParser np = ctx.getNameParser("");
       int rootSize = np.parse(baseDN).size();  
       SearchControls sc = new SearchControls();
@@ -603,8 +606,10 @@ public class LDAPDatasource implements Datasource
       if (timeout <= 0) throw new TimeoutException();
       if (timeout > Integer.MAX_VALUE) timeout = Integer.MAX_VALUE;
       sc.setTimeLimit((int) timeout);
-
+      
+      Logger.debug2("ctx.search("+baseDN+","+filter+",sc) mit Zeitlimit "+sc.getTimeLimit());
       NamingEnumeration enumer = ctx.search(baseDN, filter, sc);
+      Logger.debug2("ctx.search() abgeschlossen");
 
       paths = new Vector();
 
@@ -1398,7 +1403,8 @@ public class LDAPDatasource implements Datasource
       int searchScope, boolean onlyObjectClass, long endTime)
       throws TimeoutException
   {
-
+    Logger.debug("searchLDAP("+path+","+filter+","+searchScope+","+onlyObjectClass+","+endTime+") zum Zeitpunkt "+System.currentTimeMillis());
+    
     SearchControls searchControls = new SearchControls();
 
     searchControls.setSearchScope(searchScope);
@@ -1429,7 +1435,9 @@ public class LDAPDatasource implements Datasource
       NameParser nameParser = ctx.getNameParser("");
       Name name = nameParser.parse(path + baseDN);
 
+      Logger.debug2("ctx.search("+name+","+filter+",searchControls) mit Zeitlimit "+searchControls.getTimeLimit());
       result = ctx.search(name, filter, searchControls);
+      Logger.debug2("ctx.search() abgeschlossen");
 
     }
     catch (TimeLimitExceededException e)
