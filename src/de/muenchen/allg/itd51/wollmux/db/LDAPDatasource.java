@@ -18,6 +18,7 @@
  *                  | effizienter gemacht 
  * 05.12.2005 | BNK | Schlüssel mit RE überprüfen und ignorieren falls kein Match
  * 16.02.2006 | BNK | mehr Debug-Output
+ * 16.02.2006 | BNK | Timeout auch bei new InitialLdapContext()
  * -------------------------------------------------------------------
  *
  * @author Max Meier (D-III-ITD 5.1)
@@ -592,19 +593,22 @@ public class LDAPDatasource implements Datasource
 
     Vector paths;
 
+    long timeout = endTime - System.currentTimeMillis();
+    if (timeout <= 0) throw new TimeoutException();
+    if (timeout > Integer.MAX_VALUE) timeout = Integer.MAX_VALUE;
+
     try
     { 
+      properties.setProperty("com.sun.jndi.ldap.connect.timeout", ""+timeout);
       Logger.debug2("new InitialLdapContext(properties, null)");
       DirContext ctx = new InitialLdapContext(properties, null);
+      
       Logger.debug2("ctx.getNameParser(\"\")");
       NameParser np = ctx.getNameParser("");
       int rootSize = np.parse(baseDN).size();  
       SearchControls sc = new SearchControls();
       sc.setSearchScope(SearchControls.SUBTREE_SCOPE);
-
-      long timeout = endTime - System.currentTimeMillis();
-      if (timeout <= 0) throw new TimeoutException();
-      if (timeout > Integer.MAX_VALUE) timeout = Integer.MAX_VALUE;
+    
       sc.setTimeLimit((int) timeout);
       
       Logger.debug2("ctx.search("+baseDN+","+filter+",sc) mit Zeitlimit "+sc.getTimeLimit());
@@ -1254,6 +1258,11 @@ public class LDAPDatasource implements Datasource
         
         tempPath = checkQuotes(tempPath);
         
+        long timeout = endTime - System.currentTimeMillis();
+        if (timeout <= 0) throw new TimeoutException();
+        if (timeout > Integer.MAX_VALUE) timeout = Integer.MAX_VALUE;
+        properties.setProperty("com.sun.jndi.ldap.connect.timeout", ""+timeout);
+        Logger.debug2("new InitialLdapContext(properties, null)");
         ctx = new InitialLdapContext(properties, null);
         
         NameParser nameParser = ctx.getNameParser("");
@@ -1429,7 +1438,7 @@ public class LDAPDatasource implements Datasource
 
     try
     {
-
+      properties.setProperty("com.sun.jndi.ldap.connect.timeout", ""+timeout);
       Logger.debug2("new InitialLdapContext(properties, null)");
       ctx = new InitialLdapContext(properties, null);
 
