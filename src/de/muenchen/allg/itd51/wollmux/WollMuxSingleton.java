@@ -111,7 +111,8 @@ public class WollMuxSingleton implements XPALChangeEventBroadcaster,
    * wollmux.conf-Datei vorhanden ist. Ist defaultWollmuxConf==null, so wird gar
    * keine wollmux.conf-Datei angelegt.
    */
-  private final String defaultWollmuxConf = "%include \"http://limux.tvc.muenchen.de/ablage/sonstiges/wollmux/wollmux.conf\"\r\n";
+  private final String defaultWollmuxConf = null; 
+  //"%include \"http://limux.tvc.muenchen.de/ablage/sonstiges/wollmux/wollmux.conf\"\r\n";
 
   /**
    * Die WollMux-Hauptklasse ist als singleton realisiert.
