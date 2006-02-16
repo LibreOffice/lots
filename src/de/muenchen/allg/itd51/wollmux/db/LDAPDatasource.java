@@ -1430,8 +1430,10 @@ public class LDAPDatasource implements Datasource
     try
     {
 
+      Logger.debug2("new InitialLdapContext(properties, null)");
       ctx = new InitialLdapContext(properties, null);
 
+      Logger.debug2("ctx.getNameParser(\"\")");
       NameParser nameParser = ctx.getNameParser("");
       Name name = nameParser.parse(path + baseDN);
 
