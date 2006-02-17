@@ -34,6 +34,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Vector;
 
+import com.sun.star.uno.Exception;
 import com.sun.star.uno.XComponentContext;
 
 import de.muenchen.allg.afid.UnoService;
@@ -111,8 +112,10 @@ public class WollMuxSingleton implements XPALChangeEventBroadcaster,
    * wollmux.conf-Datei vorhanden ist. Ist defaultWollmuxConf==null, so wird gar
    * keine wollmux.conf-Datei angelegt.
    */
-  private final String defaultWollmuxConf = null; 
-  //"%include \"http://limux.tvc.muenchen.de/ablage/sonstiges/wollmux/wollmux.conf\"\r\n";
+  private final String defaultWollmuxConf = null;
+
+  // "%include
+  // \"http://limux.tvc.muenchen.de/ablage/sonstiges/wollmux/wollmux.conf\"\r\n";
 
   /**
    * Die WollMux-Hauptklasse ist als singleton realisiert.
@@ -384,6 +387,26 @@ public class WollMuxSingleton implements XPALChangeEventBroadcaster,
       {
         i.remove();
         break;
+      }
+    }
+    if (registeredPALChangeListener.size() == 0)
+    {
+      // Versuche den desktop zu schlieﬂen wenn kein Eintrag mehr da ist
+      // und der Desktop auch sonst keine Elemente enth‰lt:
+      try
+      {
+        UnoService desktop = UnoService.createWithContext(
+            "com.sun.star.frame.Desktop",
+            ctx);
+        if (desktop.xDesktop() != null)
+        {
+          if (!desktop.xDesktop().getComponents().hasElements())
+            desktop.xDesktop().terminate();
+        }
+      }
+      catch (Exception e)
+      {
+        Logger.error(e);
       }
     }
   }
