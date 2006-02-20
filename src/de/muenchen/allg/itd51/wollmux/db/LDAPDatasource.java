@@ -19,6 +19,7 @@
  * 05.12.2005 | BNK | Schlüssel mit RE überprüfen und ignorieren falls kein Match
  * 16.02.2006 | BNK | mehr Debug-Output
  * 16.02.2006 | BNK | Timeout auch bei new InitialLdapContext()
+ * 20.02.2006 | BNK | setTimeout() Funktion
  * -------------------------------------------------------------------
  *
  * @author Max Meier (D-III-ITD 5.1)
@@ -168,6 +169,7 @@ public class LDAPDatasource implements Datasource
     try
     { 
       url = sourceDesc.get("URL").toString();
+      url = "ldap://tucker.afd.dir.muenchen.de:389";
       try
       {
         new URI(url);
@@ -377,6 +379,14 @@ public class LDAPDatasource implements Datasource
     
   }
 
+  /** Setzt die timeout-Properties. */
+  private void setTimeout(Properties props, long timeout)
+  {
+    properties.setProperty("com.sun.jndi.ldap.connect.timeout", ""+timeout);
+    properties.setProperty("com.sun.jndi.dns.timeout.initial", ""+timeout);
+    properties.setProperty("com.sun.jndi.dns.timeout.retries", "1");
+  }
+  
   /**
    * repräsentiert eine Spaltendefinition
    * @author Max  Meier (D-III-ITD 5.1)
@@ -599,7 +609,7 @@ public class LDAPDatasource implements Datasource
 
     try
     { 
-      properties.setProperty("com.sun.jndi.ldap.connect.timeout", ""+timeout);
+      setTimeout(properties, timeout);
       Logger.debug2("new InitialLdapContext(properties, null)");
       DirContext ctx = new InitialLdapContext(properties, null);
       
@@ -1261,7 +1271,7 @@ public class LDAPDatasource implements Datasource
         long timeout = endTime - System.currentTimeMillis();
         if (timeout <= 0) throw new TimeoutException();
         if (timeout > Integer.MAX_VALUE) timeout = Integer.MAX_VALUE;
-        properties.setProperty("com.sun.jndi.ldap.connect.timeout", ""+timeout);
+        setTimeout(properties, timeout);
         Logger.debug2("new InitialLdapContext(properties, null)");
         ctx = new InitialLdapContext(properties, null);
         
@@ -1438,7 +1448,7 @@ public class LDAPDatasource implements Datasource
 
     try
     {
-      properties.setProperty("com.sun.jndi.ldap.connect.timeout", ""+timeout);
+      setTimeout(properties, timeout);
       Logger.debug2("new InitialLdapContext(properties, null)");
       ctx = new InitialLdapContext(properties, null);
 
