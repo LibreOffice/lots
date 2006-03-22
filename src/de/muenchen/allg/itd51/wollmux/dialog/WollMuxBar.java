@@ -473,7 +473,7 @@ public class WollMuxBar implements XPALChangeEventListener
                 String fragment = "";
                 ConfigThingy fids = uiElementDesc.query("FRAG_ID");
                 if(fids.count() == 0) {
-                  Logger.error("Keine FRAG_ID definiert in Element " + uiElementDesc.stringRepresentation());
+                  //TODO: Wieso ist dies im WollMux-Branch ein TODO, aber hier war es das nicht?? Bitte erst nach Funktionstest der Log-Meldung wieder aktivieren. Logger.error("Keine FRAG_ID definiert in Element " + uiElementDesc.stringRepresentation());
                 } else {
                   Iterator i = fids.iterator();
                   fragment = i.next().toString();
