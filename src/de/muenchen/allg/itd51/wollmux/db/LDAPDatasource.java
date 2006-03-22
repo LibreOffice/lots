@@ -169,7 +169,6 @@ public class LDAPDatasource implements Datasource
     try
     { 
       url = sourceDesc.get("URL").toString();
-      url = "ldap://tucker.afd.dir.muenchen.de:389";
       try
       {
         new URI(url);
