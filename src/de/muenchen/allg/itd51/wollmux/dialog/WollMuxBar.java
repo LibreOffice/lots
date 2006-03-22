@@ -14,6 +14,7 @@
 *                  | switches --minimize, --topbar, --normalwindow
 * 06.02.2006 | BNK | Menüleiste hinzugefügt
 * 14.02.2006 | BNK | Minimieren rückgängig machen bei Aktivierung der Leiste.
+* 15.02.2006 | BNK | ordentliches Abort auch bei schliessen des Icon-Fensters
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -293,6 +294,7 @@ public class WollMuxBar implements XPALChangeEventListener
     logoPanel.add(logo);
     logo.addMouseListener(trafo);
     logo.addMouseMotionListener(trafo);
+    logoFrame.addWindowListener(new MyWindowListener());
     logoFrame.getContentPane().add(logoPanel);
     logoFrame.pack();
     logoFrame.setLocation(0,0);
