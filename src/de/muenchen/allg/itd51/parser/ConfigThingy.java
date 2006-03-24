@@ -42,6 +42,7 @@
 * 06.02.2006 | BNK | addChild() public
 * 15.02.2005 | BNK | leere %include URLs abgefangen
 * 22.03.2006 | BNK | urlEncodierung von nicht-ASCII-Zeichen in %include URLs. (R1360)
+* 24.03.2006 | BNK | urlEncodierung nur noch von in URLs nicht erlaubten Zeichen (R1377)
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -65,6 +66,8 @@ import java.util.Stack;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import de.muenchen.allg.itd51.wollmux.Logger;
 
 /**
  * Ein ConfigThingy repräsentiert einen Knoten eines Baumes, der durch das
@@ -222,37 +225,33 @@ public class ConfigThingy
   }
 
   /**
-   * Jagt alle Zeichen aus url außer '/' und einem führenden "<protokoll:>" Teil
-   * durch URLEncoder.encode(...,CHARSET)
+   * Jagt alle in URLs verbotenen Zeichen durch URLEncoder.encode(...,CHARSET)
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
   private String urlEncode(String url)
   {
-    if (url.length() == 0) return url;
     url = url.replaceAll("\\\\","/");
+    StringBuffer buffy = new StringBuffer();
     try{
-      String[] parts = url.split("/");
-      String[] leaderParts = parts[0].split(":",2);
-      if (leaderParts.length == 1)
-        leaderParts[0] = URLEncoder.encode(leaderParts[0], CHARSET);
-      
-      StringBuffer buffy = new StringBuffer(leaderParts[0]);
-      
-      if (leaderParts.length == 2)
+      for (int i = 0; i < url.length(); ++i)
       {
-        buffy.append(':');
-        buffy.append(URLEncoder.encode(leaderParts[1], CHARSET));
+        char ch = url.charAt(i);
+        if ((('a' <= ch) && (ch <= 'z')) || (('A' <= ch) && (ch <= 'Z')) ||
+            (('0' <= ch) && (ch <= '9')) ||
+            ch == ';' || ch == '/' || ch == '?' || ch == ':' || ch == '@' || 
+            ch == '&' || ch == '=' || ch == '+' || ch == '$' || ch == ',' ||
+            ch == '-' || ch == '_' || ch == '.' || ch == '!' || ch == '~' || 
+            ch == '*' || ch == '\'' || ch == '(' || ch == ')' || ch == '%')
+        {
+          buffy.append(ch);
+        }
+        else
+          buffy.append(URLEncoder.encode(""+ch, CHARSET));
       }
       
-      for (int i = 1; i < parts.length; ++i)
-      {
-        buffy.append('/');
-        buffy.append(URLEncoder.encode(parts[i], CHARSET));
-      }
       url = buffy.toString();
-    } catch(UnsupportedEncodingException x) {};
-    
+    }catch(UnsupportedEncodingException x){}
     return url;
   }
   
