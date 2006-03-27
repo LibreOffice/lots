@@ -10,6 +10,7 @@
  * -------------------------------------------------------------------
  * 24.10.2005 | LUT | Erstellung
  * 01.12.2005 | BNK | +ON_UNLOAD (mit Nummer 70, folgen die Nummern irgendeinem System?)
+ * 27.03.2005 | LUT | neues Kommando/Event openDocument 
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -54,6 +55,8 @@ public class Event
   public static final int ON_DIALOG_ABORT = 31;
 
   public static final int ON_OPENTEMPLATE = 40;
+
+  public static final int ON_OPENDOCUMENT = 41;
   
   public static final int ON_SET_SENDER = 50;
 
@@ -113,6 +116,10 @@ public class Event
     if (event == ON_OPENTEMPLATE)
     {
       return "ON_OPENTEMPLATE";
+    }
+    if (event == ON_OPENTEMPLATE)
+    {
+      return "ON_OPENDOCUMENT";
     }
     if (event == ON_DIALOG_BACK)
     {

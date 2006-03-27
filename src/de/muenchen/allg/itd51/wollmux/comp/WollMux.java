@@ -78,6 +78,8 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
 
   public static final String cmdOpenTemplate = "OpenTemplate";
 
+  public static final String cmdOpenDocument = "OpenDocument";
+
   public static final String cmdSenderBox = "SenderBox";
 
   public static final String cmdMenu = "Menu";
@@ -250,6 +252,9 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
         if (uri.getSchemeSpecificPart().compareToIgnoreCase(cmdOpenTemplate) == 0)
           xRet = this;
 
+        if (uri.getSchemeSpecificPart().compareToIgnoreCase(cmdOpenDocument) == 0)
+          xRet = this;
+
         if (uri.getSchemeSpecificPart().compareToIgnoreCase(cmdSenderBox) == 0)
           xRet = this;
 
@@ -330,10 +335,18 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
 
         if (uri.getSchemeSpecificPart().compareToIgnoreCase(cmdOpenTemplate) == 0)
         {
-          Logger.debug2("Dispatch: Aufruf von WollMux:OpenFrag mit Frag:"
+          Logger.debug2("Dispatch: Aufruf von WollMux:OpenTemplate mit Frag:"
                         + uri.getFragment());
           mux.getEventProcessor().addEvent(
               new Event(Event.ON_OPENTEMPLATE, uri.getFragment()));
+        }
+
+        if (uri.getSchemeSpecificPart().compareToIgnoreCase(cmdOpenDocument) == 0)
+        {
+          Logger.debug2("Dispatch: Aufruf von WollMux:OpenDocument mit Frag:"
+                        + uri.getFragment());
+          mux.getEventProcessor().addEvent(
+              new Event(Event.ON_OPENDOCUMENT, uri.getFragment()));
         }
 
         if (uri.getSchemeSpecificPart().compareToIgnoreCase(cmdMenu) == 0)

@@ -67,8 +67,6 @@ import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import de.muenchen.allg.itd51.wollmux.Logger;
-
 /**
  * Ein ConfigThingy repräsentiert einen Knoten eines Baumes, der durch das
  * Parsen einer WollMux-Konfigurationsdatei entsteht. 

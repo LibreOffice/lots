@@ -13,6 +13,7 @@
  *                  | Beheben des Seitenansicht-Toolbar-Verschwindibus-Problems)
  *                  | Ausgabe des hashCode()s in den Debug-Meldungen, um Events 
  *                  | Objekten zuordnen zu können beim Lesen des Logfiles
+ * 27.03.2005 | LUT | neues Kommando openDocument                 
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -29,6 +30,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.sun.star.awt.XWindow;
+import com.sun.star.frame.FrameSearchFlag;
+import com.sun.star.frame.XFrame;
 import com.sun.star.lang.EventObject;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
@@ -113,7 +116,12 @@ public class EventHandler
 
       if (event.getEvent() == Event.ON_OPENTEMPLATE)
       {
-        return on_opentemplate(event);
+        return on_opendocument(event, true);
+      }
+
+      if (event.getEvent() == Event.ON_OPENDOCUMENT)
+      {
+        return on_opendocument(event, false);
       }
 
       if (event.getEvent() == Event.ON_ABSENDER_AUSWAEHLEN)
@@ -264,8 +272,8 @@ public class EventHandler
     return EventProcessor.waitForGUIReturn;
   }
 
-  private static boolean on_opentemplate(Event event) throws Exception,
-      NodeNotFoundException, TextFragmentNotDefinedException,
+  private static boolean on_opendocument(Event event, boolean asTemplate)
+      throws Exception, NodeNotFoundException, TextFragmentNotDefinedException,
       EndlessLoopException, IOException, MalformedURLException
   {
     WollMuxSingleton mux = WollMuxSingleton.getInstance();
@@ -322,15 +330,15 @@ public class EventHandler
         argsUrlStr[i - 1] = urlStr;
     }
 
-    // open document as Template:
+    // open document as Template (or as document):
     try
     {
       UnoService doc = new UnoService(desktop.xComponentLoader()
           .loadComponentFromURL(
               loadUrlStr,
               "_blank",
-              0,
-              new UnoProps("AsTemplate", Boolean.TRUE).getProps()));
+              FrameSearchFlag.CREATE,
+              new UnoProps("AsTemplate", new Boolean(asTemplate)).getProps()));
       fragUrlsBuffer.put(doc.xInterface(), argsUrlStr);
     }
     catch (java.lang.Exception x)
@@ -400,7 +408,7 @@ public class EventHandler
     return EventProcessor.processTheNextEvent;
   }
 
-  private static boolean on_initialize() 
+  private static boolean on_initialize()
   {
     WollMuxSingleton mux = WollMuxSingleton.getInstance();
 
@@ -494,8 +502,13 @@ public class EventHandler
       UnoService desktop = UnoService.createWithContext(
           "com.sun.star.frame.Desktop",
           m_xCmpCtx);
-      XWindow xParent = desktop.xDesktop().getCurrentFrame()
-          .getContainerWindow();
+      // TODO: nicht den currentFrame zur gewinnung des xParent verwenden, da
+      // mit der WollMuxBar die Vorraussetzung entfällt, dass IMMER bereits ein
+      // bestehendes Dokument / ein bestehender Frame vorhanden ist. Besser ist
+      // es, ein neues parent-Window zu erzeugen. Wie geht das?
+      XFrame xFrame = desktop.xDesktop().getCurrentFrame();
+      XWindow xParent = null;
+      if (xFrame != null) xParent = xFrame.getContainerWindow();
 
       // get access to the office toolkit environment
       com.sun.star.awt.XToolkit xKit = (com.sun.star.awt.XToolkit) UnoRuntime

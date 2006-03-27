@@ -174,6 +174,13 @@ public class WollMuxBar implements XPALChangeEventListener
   private ActionListener actionListener_openTemplate = new ActionListener()
        { public void actionPerformed(ActionEvent e){ dispatchWollMuxUrl(WollMux.cmdOpenTemplate, e.getActionCommand()); } };
 
+
+  /**
+   * ActionListener für Buttons mit der ACTION "openDocument". 
+   */
+  private ActionListener actionListener_openDocument = new ActionListener()
+       { public void actionPerformed(ActionEvent e){ dispatchWollMuxUrl(WollMux.cmdOpenDocument, e.getActionCommand()); } };
+
   /**
    * ActionListener für Buttons mit der ACTION "absenderAuswaehlen". 
    */
@@ -581,6 +588,10 @@ public class WollMuxBar implements XPALChangeEventListener
     if (action.equals("openTemplate"))
     {
       return actionListener_openTemplate;
+    }
+    if (action.equals("openDocument"))
+    {
+      return actionListener_openDocument;
     }
     if (action.equals("absenderAuswaehlen"))
     {
