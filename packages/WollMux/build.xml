@@ -102,7 +102,6 @@
 	<target name="buildinfo">
 		<exec executable="svn" output="${BUILD_INFO_FILE}" failifexecutionfails="false" failonerror="false">
 			<arg line="info ../.." />
-			<env key="LC_MESSAGES" value="en_US" />
 		</exec>
 		<loadfile property="revision" srcfile="${BUILD_INFO_FILE}" failonerror="false">
 			<filterchain>
