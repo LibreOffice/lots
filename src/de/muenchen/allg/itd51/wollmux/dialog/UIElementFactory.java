@@ -366,15 +366,6 @@ public class UIElementFactory
     return null;
   }
 
-  /**
-   * @param args
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TODO Testen
-   */
-  public static void main(String[] args)
-  {
-    // TODO Auto-generated method stub
 
-  }
 
 }

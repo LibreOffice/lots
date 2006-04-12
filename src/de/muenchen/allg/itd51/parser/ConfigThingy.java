@@ -1,5 +1,3 @@
-//TODO Testen, ob unter Linux geschriebene Dateien mit Umlauten unter Windows lesbar sind und umgekehrt. Problem könnte sein, dass wir zur Zeit unseren Readern/Writern keinen Zeichnsatz vorschreiben und evtl. der Systemzeichensatz gewaehlt wird, der unter Windows und Linux verschieden ist.
-
 /*
 * Dateiname: ConfigThingy.java
 * Projekt  : WollMux

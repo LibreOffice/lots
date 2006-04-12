@@ -435,12 +435,6 @@ public class WollMuxBar implements XPALChangeEventListener
               
               senderbox.addItemListener(itemListener);
               
-              //String action = "";
-              //try{ action = uiElementDesc.get("ACTION").toString(); }catch(NodeNotFoundException e){}
-              
-              //ActionListener actionL = getAction(action);
-              //TODO if (actionL != null) list.addMouseListener(new MyActionMouseListener(senderbox, actionL));
-              
               senderboxes.add(senderbox);
               
               gbcListBox.gridx = x;
@@ -673,7 +667,6 @@ public class WollMuxBar implements XPALChangeEventListener
     }
     public void mouseMoved(MouseEvent e)
     {
-      // TODO Auto-generated method stub
       
     }
   }
