@@ -29,6 +29,9 @@
 *                  |   Ewigkeit nur der Cache verwendet wird.
 *                  | LOS-only Datensätze werden nun korrekt in dumpData()
 *                  |   wiedergegeben und im Konstruktor restauriert.
+* 12.04.2006 | BNK | [P766]mehrere Datensätze mit gleichem Schlüssel korrekt in
+*                  | cache.conf gespeichert und wieder restauriert, ohne LDAP
+*                  | Anbindung zu verlieren.                  
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -369,7 +372,9 @@ X           "Vorname N."
     
     try{
       Dataset ds = getSelectedDataset();
-      conf.add("Ausgewaehlt").add(ds.getKey());
+      ConfigThingy ausgewaehlt = conf.add("Ausgewaehlt");
+      ausgewaehlt.add(ds.getKey());
+      ausgewaehlt.add(""+getSelectedDatasetSameKeyIndex());
     }catch(DatasetNotFoundException x) {}
     
     Writer out = new OutputStreamWriter(new FileOutputStream(cacheFile),ConfigThingy.CHARSET);
@@ -387,6 +392,18 @@ X           "Vorname N."
   public DJDataset getSelectedDataset() throws DatasetNotFoundException
   {
     return myLOS.getSelectedDataset();
+  }
+  
+  /**
+   * Liefert die Anzahl der Datensätze im LOS, die den selben Schlüssel haben wie
+   * der ausgewählte, und die vor diesem in der LOS-Liste gespeichert sind.
+   * @throws DatasetNotFoundException falls der LOS leer ist (ansonsten ist
+   * immer ein Datensatz selektiert).
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public int getSelectedDatasetSameKeyIndex() throws DatasetNotFoundException
+  {
+    return myLOS.getSelectedDatasetSameKeyIndex();
   }
   
   /**
@@ -421,7 +438,9 @@ X           "Vorname N."
      */
     private static final String LOS_ONLY_MAGIC = "GEHORCHE DEM WOLLMUX!";
     /**
-     * Liste aller LOSDJDatasets.
+     * Liste aller LOSDJDatasets. Die Liste muss geordnet sein, damit Datensätze
+     * mit gleichem Schlüssel über ihre Position in der Liste identifiziert
+     * werden können.
      */
     private List data = new LinkedList();
     
@@ -448,6 +467,7 @@ X           "Vorname N."
     public LocalOverrideStorage(File losCache, URL context)
     { //TESTED
       String selectKey = "";
+      String sameKeyIndex = "";
       if (losCache.canRead())
       {
         try
@@ -510,7 +530,9 @@ X           "Vorname N."
             
           }
           
-          selectKey = cacheData.get("Ausgewaehlt").toString();
+          ConfigThingy ausgewaehlt = cacheData.get("Ausgewaehlt");
+          selectKey = ausgewaehlt.getFirstChild().toString();
+          sameKeyIndex = ausgewaehlt.getLastChild().toString();
           
           losSchema = newSchema;
           this.data = data;
@@ -523,18 +545,26 @@ X           "Vorname N."
       else
         Logger.log("Cache-Datei "+losCache.getPath()+" kann nicht gelesen werden.");
       
-      selectDataset(selectKey);
+      int sameKeyIndexInt = 0;
+      try{sameKeyIndexInt = Integer.parseInt(sameKeyIndex);}
+        catch (NumberFormatException e){}
+      selectDataset(selectKey, sameKeyIndexInt);
     }
     
     /**
-     * Falls es im LOS momentan einen Datensatz mit Schlüssel selectKey gibt,
-     * so wird er zum ausgewählten Datensatz, ansonsten wird, falls der LOS
+     * Falls es im LOS momentan mindestens einen Datensatz mit Schlüssel selectKey 
+     * gibt, so wird der durch sameKeyIndex bezeichnete zum ausgewählten Datensatz,
+     * ansonsten wird, falls der LOS
      * mindestens einen Datensatz enthält, ein beliebiger Datensatz
      * ausgewählt.
+     * @param sameKeyIndex zählt ab 0 und gibt an, der wievielte Datensatz
+     *         gewählt werden soll, wenn mehrere mit gleichem Schlüssel vorhanden 
+     *         sind. Sollte sameKeyIndex zu hoch sein, wird der letzte Datensatz
+     *         mit dem entsprechenden Schlüssel ausgewählt.
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
-    public void selectDataset(String selectKey)
-    { //TESTED
+    public void selectDataset(String selectKey, int sameKeyIndex)
+    {
       if (!data.isEmpty()) selectedDataset = (DJDataset)data.get(0);
       Iterator iter = data.iterator();
       while (iter.hasNext())
@@ -543,10 +573,9 @@ X           "Vorname N."
         if (selectKey.equals(ds.getKey()))
         {
           selectedDataset = ds;
-          return;
+          if (--sameKeyIndex < 0) return;
         }
       }
-      
     }
 
     /**
@@ -622,6 +651,30 @@ X           "Vorname N."
       if (data.isEmpty()) throw new DatasetNotFoundException("Der Lokale Override Speicher ist leer");
       return selectedDataset;
     }
+    
+    /**
+     * Liefert die Anzahl der Datensätze im LOS, die den selben Schlüssel haben wie
+     * der ausgewählte, und die vor diesem in der LOS-Liste gespeichert sind.
+     * @throws DatasetNotFoundException falls der LOS leer ist (ansonsten ist
+     * immer ein Datensatz selektiert).
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
+    public int getSelectedDatasetSameKeyIndex() throws DatasetNotFoundException
+    {
+      DJDataset ds = getSelectedDataset();
+      String key = ds.getKey();
+      int idx = 0;
+      Iterator iter = data.iterator();
+      while (iter.hasNext())
+      {
+        LOSDJDataset ds2 = (LOSDJDataset)iter.next();
+        if (ds2 == ds) return idx;
+        if (ds2.getKey().equals(key)) ++idx;
+      }
+      
+      return idx;
+    }
+    
 
     /**
      * Läd für die Datensätze des LOS aktuelle Daten aus der Datenbank database.
@@ -643,32 +696,48 @@ X           "Vorname N."
        */
       this.setSchema(database.getSchema());
       
-      Map keyToLOSDJDataset = new HashMap();
+      /*
+       * Mappt Schlüssel auf Listen mit Datensätzen, die diese Schlüssel haben.
+       * Hier werden Listen verwendet, da mehrere Datensätze denselben Schlüssel
+       * haben können, z.B. wenn der selbe LDAP-Datensatz mehrfach eingefügt wurde
+       * um mit verschiedenen Rollen verwendet zu werden.
+       */
+      Map keyToLOSDJDatasetList = new HashMap();
+      
       Iterator iter = data.iterator();
       while (iter.hasNext())
       {
         LOSDJDataset ds = (LOSDJDataset)iter.next();
-        keyToLOSDJDataset.put(ds.getKey(), ds);
+        String key = ds.getKey();
+        if (!keyToLOSDJDatasetList.containsKey(key))
+          keyToLOSDJDatasetList.put(key, new Vector(1));
+        List djdslist = (List)keyToLOSDJDatasetList.get(key);
+        djdslist.add(ds);
       }
       
       /*
        * Aktualisierte Daten abfragen bevor data geleert wird, damit im
        * Falle eines Timeouts nicht der Cache verloren geht.
        */
-      QueryResults res = database.getDatasetsByKey(keyToLOSDJDataset.keySet(), timeout);
+      QueryResults res = database.getDatasetsByKey(keyToLOSDJDatasetList.keySet(), timeout);
       
       data.clear();
       String selectKey = "";
-      if (selectedDataset != null) selectKey = selectedDataset.getKey();
+      int sameKeyIndex = 0;
+      try{
+        selectKey = getSelectedDataset().getKey();
+        sameKeyIndex = getSelectedDatasetSameKeyIndex();
+      }catch(DatasetNotFoundException x){}
+      
       selectedDataset = null;
       
       /*
        * Neue Datensätze auf Basis der Query erzeugen. Dabei werden die
        * LOS-Speicher von den korrespondierenden alten (gefunden via
-       * keyToLOSDJDataset) direkt übernommen.
+       * keyToLOSDJDatasetList) direkt übernommen.
        * ACHTUNG: Hierbei werden auch temporär im Hintergrundspeicher
        * "verlorene" Datensätze wieder mit dem Hintergrundspeicher
-       * verknüpft. Sie langer Kommentar weiter unten.
+       * verknüpft. Siehe langer Kommentar weiter unten.
        * Bei evtl. Änderungen bitte beachten!!!
        */
 
@@ -691,14 +760,18 @@ X           "Vorname N."
           
           String key = sourceDS.getKey();
           
-          LOSDJDataset override = (LOSDJDataset)keyToLOSDJDataset.remove(key);
-          Map dsoverride;
-          if (override == null)
-            dsoverride = new HashMap();
+          List overrideList = (List)keyToLOSDJDatasetList.remove(key);
+          if (overrideList == null)
+            data.add(new LOSDJDataset(dscache, new HashMap(), losSchema, key));
           else
-            dsoverride = override.getLOS();
-          
-          data.add(new LOSDJDataset(dscache, dsoverride, losSchema, key));
+          {
+            Iterator djDsIter = overrideList.iterator();
+            while(djDsIter.hasNext())
+            {
+              LOSDJDataset override = (LOSDJDataset)djDsIter.next();
+              data.add(new LOSDJDataset(dscache, override.getLOS(), losSchema, key));
+            }
+          }
         }catch(Exception x) {Logger.error(x);}
       }
       
@@ -731,17 +804,22 @@ X           "Vorname N."
        *     verknüpft, obwohl dieser nichts mit dem alten zu tun hat.
        */
       Vector lostDatasets = new Vector();
-      iter = keyToLOSDJDataset.values().iterator();
+      iter = keyToLOSDJDatasetList.values().iterator();
       while (iter.hasNext())
       {
-        DJDataset ds = (DJDataset)iter.next();
-        try{
-          if (ds.hasBackingStore()) lostDatasets.add(new SimpleDataset(losSchema, ds));
-        }catch(ColumnNotFoundException x)
+        List djDatasetList = (List)iter.next();
+        Iterator iter2 = djDatasetList.iterator();
+        while (iter2.hasNext())
         {
-          Logger.error(x);
+          DJDataset ds = (DJDataset)iter2.next();
+          try{
+            if (ds.hasBackingStore()) lostDatasets.add(new SimpleDataset(losSchema, ds));
+          }catch(ColumnNotFoundException x)
+          {
+            Logger.error(x);
+          }
+          data.add(ds);
         }
-        data.add(ds);
       }
       
       lostDatasets.trimToSize();
@@ -758,7 +836,7 @@ X           "Vorname N."
       if (buffyTheVampireSlayer.length() > 0)
         Logger.log("Die Datensätze mit folgenden Schlüsseln konnten nicht aus der Datenbank aktualisiert werden: "+buffyTheVampireSlayer);
       
-      selectDataset(selectKey);
+      selectDataset(selectKey, sameKeyIndex);
     }
 
     /**
