@@ -1,7 +1,7 @@
 /*
 * Dateiname: WollMuxBar.java
 * Projekt  : WollMux
-* Funktion : Always-on-top Menü-Leiste als zentraler Ausgangspunkt für WollMux-Funktionen
+* Funktion : Menü-Leiste als zentraler Ausgangspunkt für WollMux-Funktionen
 * 
 * Copyright: Landeshauptstadt München
 *
@@ -40,7 +40,6 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowFocusListener;
 import java.awt.event.WindowListener;
 import java.io.IOException;
-import java.io.StringReader;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -79,53 +78,81 @@ import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.parser.SyntaxErrorException;
 import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.Logger;
+import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.XPALChangeEventListener;
 import de.muenchen.allg.itd51.wollmux.XPALProvider;
 import de.muenchen.allg.itd51.wollmux.XWollMux;
 import de.muenchen.allg.itd51.wollmux.comp.WollMux;
 
 /**
- * Stellt UI bereit, um ein Formulardokument zu bearbeiten.
+ * Menü-Leiste als zentraler Ausgangspunkt für WollMux-Funktionen.
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class WollMuxBar implements XPALChangeEventListener
 {
-
+  /**
+   * Titel des WollMuxBar-Fensters (falls nicht anders konfiguriert).
+   */
   private static final String DEFAULT_TITLE = "Vorlagen und Formulare";
   
+  /**
+   * Spezialeintrag in der Absenderliste, 
+   * der genau dann vorhanden ist, wenn die Absenderliste leer ist.
+   */
   private static final String LEERE_LISTE = "<kein Absender vorhanden>";
   
+  /**
+   * Icon in das sich die WollMuxBar verwandelt (falls nicht anders konfiguriert).
+   */
   private final URL ICON_URL = this.getClass().getClassLoader().getResource("data/wollmux_klein.jpg");
-  private static boolean minimize = false;
-  private static boolean topbar = false;
-  private static boolean normalwindow = false;
-
   
+  /**
+   * Wenn die WollMuxBar den Fokus verliert, verwandelt sie sich in ein Icon.
+   */
+  private static final int BECOME_ICON_MODE = 0;
+  /**
+   * Wenn die WollMuxBar den Fokus verliert, minimiert sich das Fenster.
+   */
+  private static final int MINIMIZE_TO_TASKBAR_MODE = 1;
+  /**
+   * Die WollMuxBar verhält sich wie ein normales Fenster. 
+   */
+  private static final int NORMAL_WINDOW_MODE = 2;
+  /**
+   * Die WollMuxBar ist immer im Vordergrund.
+   */
+  private static final int ALWAYS_ON_TOP_WINDOW_MODE = 3;
+  
+  /**
+   * Der Anzeigemodus für die WollMuxBar (z.B. {@link BECOME_ICON_MODE})
+   */
+  private int windowMode; 
+    
   /**
    * Der WollMux-Service, mit dem die WollMuxBar Informationen austauscht.
    * Der WollMux-Service sollte nicht über dieses Feld, sondern ausschließlich über
    * die Methode getRemoteWollMux bezogen werden, da diese mit einem möglichen
    * Schließen von OOo während die WollMuxBar läuft klarkommt.
    */
-  private Object __mux;
+  private Object remoteWollMux;
   
   /**
-   * Der Rahmen der die Steuerelemente enthält.
+   * Das Fenster das die eigentliche WollMuxBar enthält.
    */
   private JFrame myFrame;
   
   /**
-   * Der Rahmen, der das Logo enthält.
+   * Das Fenster, das das Icon enthält, in das sich die Leiste verwandeln kann.
    */
   private JFrame logoFrame;
   
   /**
-   * Das Panel, das die Steuerelemente enthält.
+   * Das Panel für den Inhalt des Fensters der WollMuxBar (myFrame).
    */
   private JPanel contentPanel;
   
   /**
-   * Das Panel, das nur das WollMux-Logo enthält.
+   * Das Panel für das Icon-Fenster (logoFrame).
    */
   private JPanel logoPanel;
 
@@ -142,7 +169,7 @@ public class WollMuxBar implements XPALChangeEventListener
   /**
    * enthält die Anzahl der Einträge in der Senderbox (ohne den "-- Liste bearbeiten --"-Eintrag).
    */
-  private int senderBoxEntries = 0;
+  private int numSenderBoxEntries = 0;
 
   /**
    * Rand über und unter einem horizontalen bzw links und rechts neben vertikalem
@@ -174,7 +201,6 @@ public class WollMuxBar implements XPALChangeEventListener
   private ActionListener actionListener_openTemplate = new ActionListener()
        { public void actionPerformed(ActionEvent e){ dispatchWollMuxUrl(WollMux.cmdOpenTemplate, e.getActionCommand()); } };
 
-
   /**
    * ActionListener für Buttons mit der ACTION "openDocument". 
    */
@@ -201,8 +227,8 @@ public class WollMuxBar implements XPALChangeEventListener
   /**
    * ItemListener bei Elementänderungen der senderboxes: 
    */
-  private ItemListener itemListener = new ItemListener() { 
-    public void itemStateChanged(ItemEvent e) { senderBoxItemChanged(e); } };
+  private ItemListener itemListener = new ItemListener() 
+    { public void itemStateChanged(ItemEvent e) { senderBoxItemChanged(e); } };
 
 
   /**
@@ -210,27 +236,21 @@ public class WollMuxBar implements XPALChangeEventListener
    */
   private List senderboxes = new Vector();
   
-  
   /**
-   * Dieses Flag ist true, wenn sie WollMux Bar einen PALUpdateListener beim
-   * entfernten WollMux registriert hat.
+   * True, wenn die WollMuxBar einen PALUpdateListener beim entfernten WollMux 
+   * registriert hat (weil sie eine oder mehrere Senderboxes enthält).
    */
   private boolean palUpdateListenerIsRegistered = false;
   
   /**
-   * @param conf Vater-Knoten von Menues und Symbolleisten 
+   * Erzeugt eine neue WollMuxBar.
+   * @param winMode Anzeigemodus, z.B. {@link #BECOME_ICON_MODE} 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public WollMuxBar()
+  public WollMuxBar(int winMode, final ConfigThingy conf)
   throws ConfigurationErrorException, SyntaxErrorException, IOException
   {
-    XWollMux mux = getRemoteWollMux(true);
-    String confStr = "";
-    if(mux!=null) {
-      confStr = mux.getWollmuxConfAsString();
-    }
-      
-    final ConfigThingy conf = new ConfigThingy("", null, new StringReader(confStr));
+    windowMode = winMode;
 
     //  GUI im Event-Dispatching Thread erzeugen wg. Thread-Safety.
     try{
@@ -259,6 +279,8 @@ public class WollMuxBar implements XPALChangeEventListener
     myFrame = new JFrame(title);
     //leave handling of close request to WindowListener.windowClosing
     myFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+    //Ein WindowListener, der auf den JFrame registriert wird, damit als
+    //Reaktion auf den Schliessen-Knopf auch die ACTION "abort" ausgeführt wird.
     myFrame.addWindowListener(new MyWindowListener());
     
     contentPanel = new JPanel();
@@ -294,34 +316,30 @@ public class WollMuxBar implements XPALChangeEventListener
     logoFrame = new JFrame(DEFAULT_TITLE);
     logoFrame.setUndecorated(true);
     logoFrame.setAlwaysOnTop(true);
+    
     JLabel logo = new JLabel(new ImageIcon(ICON_URL));
     logo.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
     logoPanel = new JPanel(new GridLayout(1,1));
     logoPanel.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
     logoPanel.add(logo);
+    logoFrame.getContentPane().add(logoPanel);
+    
     logo.addMouseListener(trafo);
     logo.addMouseMotionListener(trafo);
     logoFrame.addWindowListener(new MyWindowListener());
-    logoFrame.getContentPane().add(logoPanel);
+    
     logoFrame.pack();
     logoFrame.setLocation(0,0);
     logoFrame.setResizable(false);
 
-    if (!normalwindow) myFrame.setAlwaysOnTop(true);
+    if (windowMode != NORMAL_WINDOW_MODE) myFrame.setAlwaysOnTop(true);
     myFrame.addWindowFocusListener(trafo);
     
     myFrame.pack();
-//    int frameWidth = myFrame.getWidth();
-//    int frameHeight = myFrame.getHeight();
-//    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-//    int x = screenSize.width/2 - frameWidth/2; 
-//    int y = screenSize.height/2 - frameHeight/2;
     myFrame.setLocation(0,0);
     myFrame.setResizable(false);
     myFrame.setVisible(true);
   }
-  
-  
   
   
   /** Fügt compo UI Elemente gemäss den Kindern von conf.query(key) hinzu.
@@ -650,8 +668,8 @@ public class WollMuxBar implements XPALChangeEventListener
     public void windowLostFocus(WindowEvent e)
     {
       if (e.getOppositeWindow() != null) return;
-      if (topbar || normalwindow) return;
-      if (minimize) {myFrame.setExtendedState(Frame.ICONIFIED); return;}
+      if (windowMode == ALWAYS_ON_TOP_WINDOW_MODE || windowMode == NORMAL_WINDOW_MODE) return;
+      if (windowMode == MINIMIZE_TO_TASKBAR_MODE) {myFrame.setExtendedState(Frame.ICONIFIED); return;}
       if (isLogo) return;
       myFrame.setVisible(false);
       logoFrame.setVisible(true);
@@ -743,7 +761,7 @@ public class WollMuxBar implements XPALChangeEventListener
       int id = cbox.getSelectedIndex();
       
       // Sonderrolle: -- Liste bearbeiten --
-      if(id >= senderBoxEntries) {
+      if(id >= numSenderBoxEntries) {
         dispatchWollMuxUrl(WollMux.cmdPALVerwalten, null);
         return;
       }
@@ -761,36 +779,6 @@ public class WollMuxBar implements XPALChangeEventListener
   }
 
   
-  /**
-   * @param args
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TODO Testen
-   */
-  public static void main(String[] args) throws Exception
-  {
-    if (args.length > 0)
-    {
-      if (args[0].equals("--minimize")) minimize = true;
-      else
-      if (args[0].equals("--topbar")) topbar = true;
-      else
-      if (args[0].equals("--normalwindow")) normalwindow = true;
-      else
-      {
-        System.err.println("Unbekannter Aufrufparameter: "+args[0]);
-        System.exit(1);
-      }
-      
-      if (args.length > 1)
-      {
-        System.err.println("Zu viele Aufrufparameter!");
-        System.exit(1);
-      }
-    }
-    
-    new WollMuxBar();    
-  }
-
   /* (non-Javadoc)
    * @see de.muenchen.allg.itd51.wollmux.XPALChangeEventListener#updateContent(com.sun.star.lang.EventObject)
    */
@@ -814,8 +802,8 @@ public class WollMuxBar implements XPALChangeEventListener
         
         // neue Items eintragen
         String[] entries = palProv.getPALEntries();
-        senderBoxEntries = entries.length;
-        if(senderBoxEntries != 0) {
+        numSenderBoxEntries = entries.length;
+        if(numSenderBoxEntries != 0) {
           for (int i = 0; i < entries.length; i++)
           {
             senderbox.addItem(entries[i]);
@@ -860,11 +848,12 @@ public class WollMuxBar implements XPALChangeEventListener
    *         erzeugt werden konnte. 
    */
   private XWollMux getRemoteWollMux(boolean reconnect) {
-    if(__mux != null) {
+    if(remoteWollMux != null) {
       try {
-        return (XWollMux) UnoRuntime.queryInterface(XWollMux.class, __mux);
-      } catch (DisposedException e) {
-        __mux = null;
+        return (XWollMux) UnoRuntime.queryInterface(XWollMux.class, remoteWollMux);
+      } catch (DisposedException e) 
+      {
+        remoteWollMux = null;
         if(!reconnect) return null;
       }
     }
@@ -874,8 +863,8 @@ public class WollMuxBar implements XPALChangeEventListener
     {
       XComponentContext ctx = Bootstrap.bootstrap();
       XMultiServiceFactory factory = (XMultiServiceFactory) UnoRuntime.queryInterface(XMultiServiceFactory.class, ctx.getServiceManager());
-      this.__mux = factory.createInstance("de.muenchen.allg.itd51.wollmux.WollMux");
-      mux = (XWollMux) UnoRuntime.queryInterface(XWollMux.class, __mux);
+      remoteWollMux = factory.createInstance("de.muenchen.allg.itd51.wollmux.WollMux");
+      mux = (XWollMux) UnoRuntime.queryInterface(XWollMux.class, remoteWollMux);
     } catch (Exception e) { Logger.error(e); }
 
     // re-register Listener if they were registered in the previous connection:
@@ -906,5 +895,58 @@ public class WollMuxBar implements XPALChangeEventListener
     }
   }
 
-}
+  
+  /**
+   * @param args
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TODO Testen
+   */
+  public static void main(String[] args) throws Exception
+  {
+    int windowMode = BECOME_ICON_MODE;
+    if (args.length > 0)
+    {
+      if (args[0].equals("--minimize")) windowMode = MINIMIZE_TO_TASKBAR_MODE;
+      else
+      if (args[0].equals("--topbar")) windowMode = ALWAYS_ON_TOP_WINDOW_MODE;
+      else
+      if (args[0].equals("--normalwindow")) windowMode = NORMAL_WINDOW_MODE;
+      else
+      {
+        System.err.println("Unbekannter Aufrufparameter: "+args[0]);
+        System.exit(1);
+      }
+      
+      if (args.length > 1)
+      {
+        System.err.println("Zu viele Aufrufparameter!");
+        System.exit(1);
+      }
+    }
+    
+    WollMuxFiles.setupWollMuxDir();
+    ConfigThingy wollmuxConf = new ConfigThingy("wollmuxConf", WollMuxFiles.getWollMuxConfFile().toURL());
+    Logger.init(WollMuxFiles.getWollMuxLogFile(), Logger.LOG);
 
+    /*
+     * Wertet die undokumentierte wollmux.conf-Direktive LOGGING_MODE aus und
+     * setzt den Logging-Modus entsprechend.
+     */
+  
+    ConfigThingy log = wollmuxConf.query("LOGGING_MODE");
+    if (log.count() > 0)
+    {
+      try{
+        String mode = log.getLastChild().toString();
+        Logger.init(mode);
+      }
+      catch (NodeNotFoundException x)
+      {
+        Logger.error(x);
+      }
+    }
+    
+    new WollMuxBar(windowMode, wollmuxConf);    
+  }
+
+}

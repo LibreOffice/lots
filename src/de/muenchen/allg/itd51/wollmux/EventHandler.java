@@ -219,7 +219,7 @@ public class EventHandler
     // Cache und LOS auf Platte speichern.
     try
     {
-      mux.getDatasourceJoiner().saveCacheAndLOS(mux.getLosCacheFile());
+      mux.getDatasourceJoiner().saveCacheAndLOS(WollMuxFiles.getLosCacheFile());
     }
     catch (IOException e)
     {

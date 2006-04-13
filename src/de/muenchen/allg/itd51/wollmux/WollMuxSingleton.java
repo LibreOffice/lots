@@ -12,7 +12,8 @@
  * 09.11.2005 | LUT | + Logfile wird jetzt erweitert (append-modus)
  *                    + verwenden des Konfigurationsparameters SENDER_SOURCE
  *                    + Erster Start des wollmux über wm_configured feststellen.
- * 05.12.2005 | BNK | line.separator statt \n                 |  
+ * 05.12.2005 | BNK | line.separator statt \n     
+ * 13.04.2006 | BNK | .wollmux/ Handling ausgegliedert in WollMuxFiles.  
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -23,11 +24,7 @@
 package de.muenchen.allg.itd51.wollmux;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.InputStreamReader;
-import java.io.PrintStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
@@ -58,21 +55,7 @@ public class WollMuxSingleton implements XPALChangeEventBroadcaster,
 
   private static WollMuxSingleton singletonInstance = null;
 
-  /**
-   * Enthält einen PrintStream in den die Log-Nachrichten geschrieben werden.
-   */
-  private File wollmuxLogFile;
-
-  /**
-   * Enthält das File der Konfigurationsdatei wollmux.conf
-   */
-  private File wollmuxConfFile;
-
-  /**
-   * Enthält das File in des local-overwrite-storage-caches.
-   */
-  private File losCacheFile;
-
+  
   /**
    * Enthält den geparsten Konfigruationsbaum der wollmux.conf
    */
@@ -108,16 +91,6 @@ public class WollMuxSingleton implements XPALChangeEventBroadcaster,
   private Vector registeredPALChangeListener;
 
   /**
-   * Inhalt der wollmux.conf-Datei, die angelegt wird, wenn noch keine
-   * wollmux.conf-Datei vorhanden ist. Ist defaultWollmuxConf==null, so wird gar
-   * keine wollmux.conf-Datei angelegt.
-   */
-  private final String defaultWollmuxConf = null;
-
-  // "%include
-  // \"http://limux.tvc.muenchen.de/ablage/sonstiges/wollmux/wollmux.conf\"\r\n";
-
-  /**
    * Die WollMux-Hauptklasse ist als singleton realisiert.
    */
   private WollMuxSingleton(XComponentContext ctx)
@@ -125,45 +98,21 @@ public class WollMuxSingleton implements XPALChangeEventBroadcaster,
     registeredPALChangeListener = new Vector();
     this.ctx = ctx;
 
-    // Das hier sollte die einzige Stelle sein, an der Pfade hart
-    // verdrahtet sind...
-    String userHome = System.getProperty("user.home");
-    File wollmuxDir = new File(userHome, ".wollmux");
-    this.wollmuxConfFile = new File(wollmuxDir, "wollmux.conf");
-    this.losCacheFile = new File(wollmuxDir, "cache.conf");
-    this.wollmuxLogFile = new File(wollmuxDir, "wollmux.log");
-
-    // .wollmux-Verzeichnis erzeugen falls es nicht existiert
-    if (!wollmuxDir.exists()) wollmuxDir.mkdirs();
-
-    // Default wollmux.conf erzeugen falls noch keine wollmux.conf existiert.
-    if (!wollmuxConfFile.exists() && defaultWollmuxConf != null)
-    {
-      try
-      {
-        PrintStream wmconf = new PrintStream(new FileOutputStream(
-            wollmuxConfFile));
-        wmconf.println(defaultWollmuxConf);
-        wmconf.close();
-      }
-      catch (FileNotFoundException e)
-      {
-      }
-    }
+    WollMuxFiles.setupWollMuxDir();
 
     try
     {
       // Logger initialisieren:
-      if (wollmuxLogFile != null) Logger.init(wollmuxLogFile, Logger.LOG);
+      if (WollMuxFiles.getWollMuxLogFile() != null) Logger.init(WollMuxFiles.getWollMuxLogFile(), Logger.LOG);
 
       // Parsen der Konfigurationsdatei
-      wollmuxConf = new ConfigThingy("wollmuxConf", wollmuxConfFile.toURL());
+      wollmuxConf = new ConfigThingy("wollmuxConf", WollMuxFiles.getWollMuxConfFile().toURL());
 
       // Auswertung von LOGGING_MODE und erste debug-Meldungen loggen:
       setLoggingMode(wollmuxConf);
       Logger.debug("StartupWollMux");
       Logger.debug("Build-Info: " + getBuildInfo());
-      Logger.debug("wollmuxConfFile = " + wollmuxConfFile.toString());
+      Logger.debug("wollmuxConfFile = " + WollMuxFiles.getWollMuxConfFile().toString());
 
       // VisibleTextFragmentList erzeugen
       textFragmentList = new VisibleTextFragmentList(wollmuxConf);
@@ -181,7 +130,7 @@ public class WollMuxSingleton implements XPALChangeEventBroadcaster,
             "Keine Hauptdatenquelle (SENDER_SOURCE) definiert.");
       }
       datasourceJoiner = new DatasourceJoiner(wollmuxConf, ssourceStr,
-          losCacheFile, getDEFAULT_CONTEXT());
+          WollMuxFiles.getLosCacheFile(), getDEFAULT_CONTEXT());
 
       // register global EventListener
       UnoService eventBroadcaster = UnoService.createWithContext(
@@ -411,15 +360,7 @@ public class WollMuxSingleton implements XPALChangeEventBroadcaster,
     }
   }
 
-  /**
-   * Liefert das File-Objekt des LocalOverrideStorage Caches zurück.
-   * 
-   * @return das File-Objekt des LocalOverrideStorage Caches.
-   */
-  public File getLosCacheFile()
-  {
-    return losCacheFile;
-  }
+  
 
   /**
    * Liefert einen Iterator auf alle registrierten SenderBox-Objekte.
