@@ -31,7 +31,8 @@
 *                  |   wiedergegeben und im Konstruktor restauriert.
 * 12.04.2006 | BNK | [P766]mehrere Datensätze mit gleichem Schlüssel korrekt in
 *                  | cache.conf gespeichert und wieder restauriert, ohne LDAP
-*                  | Anbindung zu verlieren.                  
+*                  | Anbindung zu verlieren.
+* 18.04.2006 | BNK | Bugfix zur Behebung von P766: ausgewaehlten Datensatz richtig merken              
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -721,7 +722,10 @@ X           "Vorname N."
        */
       QueryResults res = database.getDatasetsByKey(keyToLOSDJDatasetList.keySet(), timeout);
       
-      data.clear();
+      /*
+       * Schlüssel und Index des selektierten Datensatzes feststellen, bevor
+       * data geleert wird.
+       */
       String selectKey = "";
       int sameKeyIndex = 0;
       try{
@@ -729,6 +733,7 @@ X           "Vorname N."
         sameKeyIndex = getSelectedDatasetSameKeyIndex();
       }catch(DatasetNotFoundException x){}
       
+      data.clear();
       selectedDataset = null;
       
       /*
