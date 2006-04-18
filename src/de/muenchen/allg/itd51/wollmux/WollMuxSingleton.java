@@ -32,6 +32,7 @@ import java.util.Iterator;
 import java.util.Vector;
 
 import com.sun.star.uno.Exception;
+import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
 
 import de.muenchen.allg.afid.UnoService;
@@ -317,6 +318,12 @@ public class WollMuxSingleton implements XPALChangeEventBroadcaster,
   public void addPALChangeEventListener(XPALChangeEventListener listener)
   {
     Logger.debug2("WollMux::addPALChangeEventListener()");
+    Iterator i = registeredPALChangeListener.iterator();
+    while (i.hasNext())
+    {
+      Object l = i.next();
+      if (UnoRuntime.areSame(l, listener)) return; 
+    }
     registeredPALChangeListener.add(listener);
   }
 
@@ -332,11 +339,9 @@ public class WollMuxSingleton implements XPALChangeEventBroadcaster,
     Iterator i = registeredPALChangeListener.iterator();
     while (i.hasNext())
     {
-      if (((XPALChangeEventListener) i.next()) == listener)
-      {
+      Object l = i.next();
+      if (UnoRuntime.areSame(l, listener)) 
         i.remove();
-        break;
-      }
     }
     if (registeredPALChangeListener.size() == 0)
     {

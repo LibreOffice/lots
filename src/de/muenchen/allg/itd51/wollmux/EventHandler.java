@@ -213,7 +213,12 @@ public class EventHandler
       Logger.debug2("on_selection_changed: Update SenderBox");
       EventObject eventObject = new EventObject();
       eventObject.Source = WollMuxSingleton.getInstance();
-      ((XPALChangeEventListener) i.next()).updateContent(eventObject);
+      try{
+        ((XPALChangeEventListener) i.next()).updateContent(eventObject);
+      }catch(Exception x)
+      {
+        i.remove();
+      }
     }
 
     // Cache und LOS auf Platte speichern.
