@@ -123,7 +123,7 @@ public class WollMuxBar
   private WollMuxBarEventHandler eventHandler;
   
   /**
-   * Das Fenster das je nach Situation die WollMuxBar oder das Icon enthält.
+   * Der Rahmen, der die Steuerelemente enthält.
    */
   private JFrame myFrame;
   
