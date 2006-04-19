@@ -24,6 +24,7 @@
 * 22.11.2005 | BNK | Common.setLookAndFeel() verwenden
 * 11.01.2006 | BNK | EDIT "true" bei comboboxen unterstützt
 * 25.01.2006 | BNK | Auch editierbare Comboboxen ändern nun den Hintergrund korrekt.
+* 19.04.2006 | BNK | [R1337]Fehlermeldung, bei unbekanntem TYPE
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -888,46 +889,44 @@ public class DatensatzBearbeiten
               gbcTextfield.gridy = y;
               myInputPanel.add(uiElement, gbcTextfield);
             }
-            else       
-              if (type.equals("textarea"))
+            else if (type.equals("textarea"))
+            {
+              JLabel label = new JLabel();
+              label.setBorder(BorderFactory.createEmptyBorder(TF_BORDER,0,TF_BORDER,0));
+              gbcLabelLeft.gridy = y;
+              myInputPanel.add(label, gbcLabelLeft);
+              try{ label.setText(uiElementDesc.get("LABEL").toString()); } catch(Exception x){}
+              
+              int lines = 3;
+              try{ lines = Integer.parseInt(uiElementDesc.get("LINES").toString()); } catch(Exception x){}
+              JTextArea textarea = new JTextArea(lines,TEXTFIELD_DEFAULT_WIDTH);
+              textarea.setEditable(!readonly);
+              textarea.setFont(new JTextField().getFont());
+              
+              try
               {
-                JLabel label = new JLabel();
-                label.setBorder(BorderFactory.createEmptyBorder(TF_BORDER,0,TF_BORDER,0));
-                gbcLabelLeft.gridy = y;
-                myInputPanel.add(label, gbcLabelLeft);
-                try{ label.setText(uiElementDesc.get("LABEL").toString()); } catch(Exception x){}
-                
-                int lines = 3;
-                try{ lines = Integer.parseInt(uiElementDesc.get("LINES").toString()); } catch(Exception x){}
-                JTextArea textarea = new JTextArea(lines,TEXTFIELD_DEFAULT_WIDTH);
-                textarea.setEditable(!readonly);
-                textarea.setFont(new JTextField().getFont());
-                
-                try
-                {
-                  dataControls.add(new TextComponentDataControl(uiElementDesc.get("DB_SPALTE").toString(), textarea, modColor));
-                } catch (Exception x) { Logger.error(x); }
-                
-                JPanel uiElement = new JPanel(new GridLayout(1,1));
-                JScrollPane scrollPane = new JScrollPane(textarea);//, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER, JScrollPane.VERTICAL_SCROLLBAR_NEVER);
-                scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-                scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
-                uiElement.add(scrollPane);
-                
-                uiElement.setBorder(BorderFactory.createEmptyBorder(TF_BORDER,0,TF_BORDER,0));
-                gbcTextarea.gridy = y;
-                myInputPanel.add(uiElement, gbcTextarea);
-              }
-              else
-                if (type.equals("separator"))
-                {
-                  JPanel uiElement = new JPanel(new GridLayout(1,1));
-                  uiElement.add(new JSeparator(SwingConstants.HORIZONTAL));
-                  uiElement.setBorder(BorderFactory.createEmptyBorder(SEP_BORDER,0,SEP_BORDER,0));
-                  gbcSeparator.gridy = y;
-                  myInputPanel.add(uiElement, gbcSeparator);
-                }
-            if (type.equals("label"))
+                dataControls.add(new TextComponentDataControl(uiElementDesc.get("DB_SPALTE").toString(), textarea, modColor));
+              } catch (Exception x) { Logger.error(x); }
+              
+              JPanel uiElement = new JPanel(new GridLayout(1,1));
+              JScrollPane scrollPane = new JScrollPane(textarea);//, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER, JScrollPane.VERTICAL_SCROLLBAR_NEVER);
+              scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+              scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
+              uiElement.add(scrollPane);
+              
+              uiElement.setBorder(BorderFactory.createEmptyBorder(TF_BORDER,0,TF_BORDER,0));
+              gbcTextarea.gridy = y;
+              myInputPanel.add(uiElement, gbcTextarea);
+            }
+            else if (type.equals("separator"))
+            {
+              JPanel uiElement = new JPanel(new GridLayout(1,1));
+              uiElement.add(new JSeparator(SwingConstants.HORIZONTAL));
+              uiElement.setBorder(BorderFactory.createEmptyBorder(SEP_BORDER,0,SEP_BORDER,0));
+              gbcSeparator.gridy = y;
+              myInputPanel.add(uiElement, gbcSeparator);
+            }
+            else if (type.equals("label"))
             {
               JLabel uiElement = new JLabel();
               uiElement.setBorder(BorderFactory.createEmptyBorder(TF_BORDER,0,TF_BORDER,0));
@@ -935,37 +934,40 @@ public class DatensatzBearbeiten
               myInputPanel.add(uiElement, gbcLabel);
               uiElement.setText(uiElementDesc.get("LABEL").toString());
             }
-            else
-              if (type.equals("combobox"))
+            else if (type.equals("combobox"))
+            {
+              JLabel label = new JLabel();
+              label.setBorder(BorderFactory.createEmptyBorder(TF_BORDER,0,TF_BORDER,0));
+              gbcLabelLeft.gridy = y;
+              myInputPanel.add(label, gbcLabelLeft);
+              try{ label.setText(uiElementDesc.get("LABEL").toString()); } catch(Exception x){}
+              
+              JPanel uiElement = new JPanel(new GridLayout(1,1));
+              JComboBox combo = new JComboBox();
+              combo.setEnabled(!readonly);
+              boolean editable = false;
+              try{ if (uiElementDesc.get("EDIT").toString().equals("true")) editable = true; }catch(NodeNotFoundException x){}
+              combo.setEditable(editable);
+              try
               {
-                JLabel label = new JLabel();
-                label.setBorder(BorderFactory.createEmptyBorder(TF_BORDER,0,TF_BORDER,0));
-                gbcLabelLeft.gridy = y;
-                myInputPanel.add(label, gbcLabelLeft);
-                try{ label.setText(uiElementDesc.get("LABEL").toString()); } catch(Exception x){}
-                
-                JPanel uiElement = new JPanel(new GridLayout(1,1));
-                JComboBox combo = new JComboBox();
-                combo.setEnabled(!readonly);
-                boolean editable = false;
-                try{ if (uiElementDesc.get("EDIT").toString().equals("true")) editable = true; }catch(NodeNotFoundException x){}
-                combo.setEditable(editable);
-                try
+                ComboBoxDataControl comboCtrl = new ComboBoxDataControl(uiElementDesc.get("DB_SPALTE").toString(), combo, modColor);
+                Iterator values = uiElementDesc.get("VALUES").iterator();
+                while (values.hasNext())
                 {
-                  ComboBoxDataControl comboCtrl = new ComboBoxDataControl(uiElementDesc.get("DB_SPALTE").toString(), combo, modColor);
-                  Iterator values = uiElementDesc.get("VALUES").iterator();
-                  while (values.hasNext())
-                  {
-                    comboCtrl.addItem(values.next().toString());
-                  }
-                  dataControls.add(comboCtrl);
-                } catch (Exception x) { Logger.error(x); }
-                
-                uiElement.add(combo);
-                uiElement.setBorder(BorderFactory.createEmptyBorder(TF_BORDER,0,TF_BORDER,0));
-                gbcCombobox.gridy = y;
-                myInputPanel.add(uiElement, gbcCombobox);
-              }
+                  comboCtrl.addItem(values.next().toString());
+                }
+                dataControls.add(comboCtrl);
+              } catch (Exception x) { Logger.error(x); }
+              
+              uiElement.add(combo);
+              uiElement.setBorder(BorderFactory.createEmptyBorder(TF_BORDER,0,TF_BORDER,0));
+              gbcCombobox.gridy = y;
+              myInputPanel.add(uiElement, gbcCombobox);
+            }
+            else
+            {
+              Logger.error("Ununterstützter TYPE für User Interface Element: "+type);
+            }
           } catch(NodeNotFoundException x) {Logger.error(x);}
         }
       }
