@@ -15,6 +15,7 @@
 * 06.02.2006 | BNK | Menüleiste hinzugefügt
 * 14.02.2006 | BNK | Minimieren rückgängig machen bei Aktivierung der Leiste.
 * 15.02.2006 | BNK | ordentliches Abort auch bei schliessen des Icon-Fensters
+* 19.04.2006 | BNK | [R1342][R1398]große Aufräumaktion, Umstellung auf WollMuxBarEventHandler
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -64,31 +65,19 @@ import javax.swing.JPopupMenu;
 import javax.swing.JSeparator;
 import javax.swing.SwingConstants;
 
-import com.sun.star.beans.PropertyValue;
-import com.sun.star.comp.helper.Bootstrap;
-import com.sun.star.frame.XDispatch;
-import com.sun.star.lang.DisposedException;
-import com.sun.star.lang.EventObject;
-import com.sun.star.lang.XMultiServiceFactory;
-import com.sun.star.uno.UnoRuntime;
-import com.sun.star.uno.XComponentContext;
-
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.parser.SyntaxErrorException;
 import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
-import de.muenchen.allg.itd51.wollmux.XPALChangeEventListener;
-import de.muenchen.allg.itd51.wollmux.XPALProvider;
-import de.muenchen.allg.itd51.wollmux.XWollMux;
 import de.muenchen.allg.itd51.wollmux.comp.WollMux;
 
 /**
  * Menü-Leiste als zentraler Ausgangspunkt für WollMux-Funktionen.
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
-public class WollMuxBar implements XPALChangeEventListener
+public class WollMuxBar
 {
   /**
    * Titel des WollMuxBar-Fensters (falls nicht anders konfiguriert).
@@ -127,17 +116,14 @@ public class WollMuxBar implements XPALChangeEventListener
    * Der Anzeigemodus für die WollMuxBar (z.B. {@link BECOME_ICON_MODE})
    */
   private int windowMode; 
-    
+
   /**
-   * Der WollMux-Service, mit dem die WollMuxBar Informationen austauscht.
-   * Der WollMux-Service sollte nicht über dieses Feld, sondern ausschließlich über
-   * die Methode getRemoteWollMux bezogen werden, da diese mit einem möglichen
-   * Schließen von OOo während die WollMuxBar läuft klarkommt.
+   * Dient der thread-safen Kommunikation mit dem entfernten WollMux.
    */
-  private Object remoteWollMux;
+  private WollMuxBarEventHandler eventHandler;
   
   /**
-   * Das Fenster das die eigentliche WollMuxBar enthält.
+   * Das Fenster das je nach Situation die WollMuxBar oder das Icon enthält.
    */
   private JFrame myFrame;
   
@@ -167,11 +153,6 @@ public class WollMuxBar implements XPALChangeEventListener
   private Map mapMenuNameToJMenu = new HashMap();
   
   /**
-   * enthält die Anzahl der Einträge in der Senderbox (ohne den "-- Liste bearbeiten --"-Eintrag).
-   */
-  private int numSenderBoxEntries = 0;
-
-  /**
    * Rand über und unter einem horizontalen bzw links und rechts neben vertikalem
    * Separator (in Pixeln).
    */
@@ -199,19 +180,22 @@ public class WollMuxBar implements XPALChangeEventListener
    * ActionListener für Buttons mit der ACTION "openTemplate". 
    */
   private ActionListener actionListener_openTemplate = new ActionListener()
-       { public void actionPerformed(ActionEvent e){ dispatchWollMuxUrl(WollMux.cmdOpenTemplate, e.getActionCommand()); } };
+       { public void actionPerformed(ActionEvent e){ 
+         eventHandler.handleWollMuxUrl(WollMux.cmdOpenTemplate, e.getActionCommand()); } };
 
   /**
    * ActionListener für Buttons mit der ACTION "openDocument". 
    */
   private ActionListener actionListener_openDocument = new ActionListener()
-       { public void actionPerformed(ActionEvent e){ dispatchWollMuxUrl(WollMux.cmdOpenDocument, e.getActionCommand()); } };
+       { public void actionPerformed(ActionEvent e){ 
+         eventHandler.handleWollMuxUrl(WollMux.cmdOpenDocument, e.getActionCommand()); } };
 
   /**
    * ActionListener für Buttons mit der ACTION "absenderAuswaehlen". 
    */
   private ActionListener actionListener_absenderAuswaehlen = new ActionListener()
-      { public void actionPerformed(ActionEvent e){ dispatchWollMuxUrl(WollMux.cmdAbsenderAuswaehlen, e.getActionCommand()); } };
+      { public void actionPerformed(ActionEvent e){ 
+        eventHandler.handleWollMuxUrl(WollMux.cmdAbsenderAuswaehlen, e.getActionCommand()); } };
   
   /**
    * ActionListener für Buttons, denen ein Menü zugeordnet ist. 
@@ -237,12 +221,6 @@ public class WollMuxBar implements XPALChangeEventListener
   private List senderboxes = new Vector();
   
   /**
-   * True, wenn die WollMuxBar einen PALUpdateListener beim entfernten WollMux 
-   * registriert hat (weil sie eine oder mehrere Senderboxes enthält).
-   */
-  private boolean palUpdateListenerIsRegistered = false;
-  
-  /**
    * Erzeugt eine neue WollMuxBar.
    * @param winMode Anzeigemodus, z.B. {@link #BECOME_ICON_MODE} 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -252,6 +230,9 @@ public class WollMuxBar implements XPALChangeEventListener
   {
     windowMode = winMode;
 
+    eventHandler = new WollMuxBarEventHandler(this);
+    eventHandler.connectWithWollMux();
+    
     //  GUI im Event-Dispatching Thread erzeugen wg. Thread-Safety.
     try{
       javax.swing.SwingUtilities.invokeLater(new Runnable() {
@@ -310,8 +291,6 @@ public class WollMuxBar implements XPALChangeEventListener
     myFrame.setJMenuBar(mbar);
     
     //myFrame.setUndecorated(true);
-
-    WindowTransformer trafo = new WindowTransformer();
     
     logoFrame = new JFrame(DEFAULT_TITLE);
     logoFrame.setUndecorated(true);
@@ -324,17 +303,19 @@ public class WollMuxBar implements XPALChangeEventListener
     logoPanel.add(logo);
     logoFrame.getContentPane().add(logoPanel);
     
+    WindowTransformer trafo = new WindowTransformer();
+    myFrame.addWindowFocusListener(trafo);
     logo.addMouseListener(trafo);
     logo.addMouseMotionListener(trafo);
+    
     logoFrame.addWindowListener(new MyWindowListener());
     
+    logoFrame.setFocusableWindowState(false);
     logoFrame.pack();
     logoFrame.setLocation(0,0);
     logoFrame.setResizable(false);
 
     if (windowMode != NORMAL_WINDOW_MODE) myFrame.setAlwaysOnTop(true);
-    myFrame.addWindowFocusListener(trafo);
-    
     myFrame.pack();
     myFrame.setLocation(0,0);
     myFrame.setResizable(false);
@@ -451,16 +432,11 @@ public class WollMuxBar implements XPALChangeEventListener
               senderbox.setPrototypeDisplayValue("Matthias B. ist euer Gott (W-OLL-MUX-5.1)");
               senderbox.setEditable(false);
               
-              senderbox.addItemListener(itemListener);
-              
               senderboxes.add(senderbox);
               
               gbcListBox.gridx = x;
               gbcListBox.gridy = y;
               compo.add(senderbox, gbcListBox);
-              
-              // updateListener registrieren:
-              registerPALUpdateListener(getRemoteWollMux(true));
             }
             else
               if (type.equals("button"))
@@ -621,7 +597,8 @@ public class WollMuxBar implements XPALChangeEventListener
   
   
   /**
-   * Ein WindowListener, der auf den JFrame registriert wird, damit als
+   * Ein WindowListener, der auf die JFrames der Leiste und des Icons 
+   * registriert wird, damit als
    * Reaktion auf den Schliessen-Knopf auch die ACTION "abort" ausgeführt wird.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -637,37 +614,49 @@ public class WollMuxBar implements XPALChangeEventListener
     public void windowOpened(WindowEvent e) {}
   }
   
-  
+  /**
+   * Wird auf das Icon-Fenster als MouseListener und MouseMotionListener registriert,
+   * um das Anklicken und Verschieben des Icons zu managen; wird auf das 
+   * Leistenfenster als WindowFocusListener registriert, um falls erforderlich das
+   * minimieren zum Icon anzustoßen.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private class WindowTransformer implements MouseListener, MouseMotionListener, WindowFocusListener
   {
+    /**
+     * Falls das Icon mit der Maus gezogen wird ist diese der Startpunkt an dem
+     * der Mausknopf heruntergedrückt wurde.
+     */
     private Point dragStart = new Point(0,0);
+    
+    /**
+     * true, während das Icon-Fenster aktiv ist, false während das Leistenfenster
+     * aktiv ist.
+     */
     private boolean isLogo = false;
     
     public void mouseClicked(MouseEvent e)
     {
       if (!isLogo) return;
+      logoFrame.setVisible(false);
       myFrame.setVisible(true);
       myFrame.setExtendedState(JFrame.NORMAL);
-      logoFrame.setVisible(false);
       isLogo = false;
     }
+    
     public void mousePressed(MouseEvent e)
     {
       dragStart = e.getPoint();
     }
+
     public void mouseReleased(MouseEvent e){}
     public void mouseExited(MouseEvent e){}
-    public void mouseEntered(MouseEvent e)
-    {
-    }
+    public void mouseEntered(MouseEvent e){}
+    public void mouseMoved(MouseEvent e) {}
+    public void windowGainedFocus(WindowEvent e) {}
     
-    public void windowGainedFocus(WindowEvent e)
-    {
-    
-    }
     public void windowLostFocus(WindowEvent e)
     {
-      if (e.getOppositeWindow() != null) return;
       if (windowMode == ALWAYS_ON_TOP_WINDOW_MODE || windowMode == NORMAL_WINDOW_MODE) return;
       if (windowMode == MINIMIZE_TO_TASKBAR_MODE) {myFrame.setExtendedState(Frame.ICONIFIED); return;}
       if (isLogo) return;
@@ -675,6 +664,7 @@ public class WollMuxBar implements XPALChangeEventListener
       logoFrame.setVisible(true);
       isLogo = true;
     }
+    
     public void mouseDragged(MouseEvent e)
     {
       Point winLoc = logoFrame.getLocation();
@@ -682,10 +672,6 @@ public class WollMuxBar implements XPALChangeEventListener
       winLoc.x += p.x - dragStart.x;
       winLoc.y += p.y - dragStart.y;
       logoFrame.setLocation(winLoc);
-    }
-    public void mouseMoved(MouseEvent e)
-    {
-      
     }
   }
   
@@ -696,41 +682,21 @@ public class WollMuxBar implements XPALChangeEventListener
    */
   private void abort()
   {
-    deregisterPALUpdateListener(getRemoteWollMux(false));
-
+    eventHandler.handleTerminate();
     myFrame.dispose();
+    eventHandler.waitForThreadTermination();
 
     System.exit(0);
   }
   
-  /**
-   * Diese Methode erzeugt eine wollmuxUrl und übergibt sie dem WollMux zur Bearbeitung.
-   *  
-   * @param dispatchCmd das Kommando, das der WollMux ausführen soll. (z.B. "openTemplate")
-   * @param arg ein optionales Argument (z.B. "{fragid}"). Ist das Argument null oder
-   *        der Leerstring, so wird es nicht mit übergeben.
-   */
-  private void dispatchWollMuxUrl(String dispatchCmd, String arg) {
-    XDispatch disp = null;
-    disp = (XDispatch) UnoRuntime.queryInterface(XDispatch.class, getRemoteWollMux(true));
-    if(disp != null) {
-      if(arg != null && !arg.equals("")) arg = "#" + arg;
-      else arg = "";
-      com.sun.star.util.URL url = new com.sun.star.util.URL();
-      url.Complete = WollMux.wollmuxProtocol + ":" + dispatchCmd + arg;
-      disp.dispatch(url, new PropertyValue[] {});
-    }
-  }
 
   /**
    * Wird aufgerufen, wenn ein Button aktiviert wird, dem ein Menü zugeordnet
    * ist.
    * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TODO Testen
    */
   private void openMenu(ActionEvent e)
   {
-    Logger.debug2("openMenu");
     String menuName = e.getActionCommand();
     JComponent compo;
     try{
@@ -752,156 +718,79 @@ public class WollMuxBar implements XPALChangeEventListener
    * ausgewählt wurde. Die Methode setzt daraufhin den aktuellen Absender im
    * entfernten WollMux neu.
    * 
-   * @param e
+   * @author Christoph Lutz (D-III-ITD 5.1)
+   * TESTED 
    */
   private void senderBoxItemChanged(ItemEvent e)
   {
-    if(e.getStateChange() == ItemEvent.SELECTED && e.getSource() instanceof JComboBox) {
+    if(e.getStateChange() == ItemEvent.SELECTED && 
+        e.getSource() instanceof JComboBox) 
+    {
       JComboBox cbox = (JComboBox) e.getSource();
       int id = cbox.getSelectedIndex();
       
       // Sonderrolle: -- Liste bearbeiten --
-      if(id >= numSenderBoxEntries) {
-        dispatchWollMuxUrl(WollMux.cmdPALVerwalten, null);
+      if(id == cbox.getItemCount()-1) {
+        eventHandler.handleWollMuxUrl(WollMux.cmdPALVerwalten, null);
         return;
       }
       
       String name = cbox.getSelectedItem().toString();
-      if(name != null && !name.equals(LEERE_LISTE)) {
-        // wollmux informieren:
-        XWollMux mux = getRemoteWollMux(true);
-        if (mux != null)
-        {
-          mux.setCurrentSender(name, (short) id);
-        }
-      }
-    }
-  }
-
-  
-  /* (non-Javadoc)
-   * @see de.muenchen.allg.itd51.wollmux.XPALChangeEventListener#updateContent(com.sun.star.lang.EventObject)
-   */
-  public void updateContent(EventObject eventObject)
-  {
-    XPALProvider palProv = (XPALProvider) UnoRuntime.queryInterface(
-        XPALProvider.class,
-        eventObject.Source);
-    if (palProv != null)
-    {
-      Iterator iter = senderboxes.iterator();
-      while(iter.hasNext()) {
-        
-        JComboBox senderbox = (JComboBox) iter.next();
-        
-        // keine items erzeugen beim Update
-        senderbox.removeItemListener(itemListener);
-        
-        // alte Items löschen
-        senderbox.removeAllItems();
-        
-        // neue Items eintragen
-        String[] entries = palProv.getPALEntries();
-        numSenderBoxEntries = entries.length;
-        if(numSenderBoxEntries != 0) {
-          for (int i = 0; i < entries.length; i++)
-          {
-            senderbox.addItem(entries[i]);
-          }
-        } else {
-          senderbox.addItem(LEERE_LISTE);
-        }
-        senderbox.addItem("- - - - Liste bearbeiten - - - -");
-        
-        // Selektiertes Item setzen:
-        String current = palProv.getCurrentSender();
-        if (current != null && !current.equals(""))
-          senderbox.setSelectedItem(current);
-        
-        // ItemListener wieder setzen.
-        senderbox.addItemListener(itemListener);
-      }
-    } else {
-      System.err.println("NO palProvider!");
-    }
-    
-  }
-
-  public void disposing(EventObject arg0)
-  {
-  }
-
-  /**
-   * Diese Methode liefert eine Instanz auf den entfernten WollMux zurück.
-   * Wurde noch gar keine UNO-Verbindung hergestellt, so wird eine Verbindung
-   * zu OOo hiermit aufgebaut und der WollMux instanziiert. 
-   * 
-   * Ist der Übergabewert reconnect true, wird die Verbindung auch dann wieder
-   * hergestellt, wenn eine vorhergehende Verbindung aufgrund einer 
-   * DisposedException unterbrochen wurde.
-   * 
-   * Konnte keine Verbindung hergestellt werden, oder eine unterbrochene
-   * Verbindung nicht wieder hergestellt werden, so liefert die Methode null zurück.
-   *
-   * @param reconnect
-   * @return Instanz eines gültigen WollMux oder null, falls keine Instanz 
-   *         erzeugt werden konnte. 
-   */
-  private XWollMux getRemoteWollMux(boolean reconnect) {
-    if(remoteWollMux != null) {
-      try {
-        return (XWollMux) UnoRuntime.queryInterface(XWollMux.class, remoteWollMux);
-      } catch (DisposedException e) 
+      if(name != null && !name.equals(LEERE_LISTE)) 
       {
-        remoteWollMux = null;
-        if(!reconnect) return null;
+        eventHandler.handleSelectPALEntry(name, id);
       }
     }
-    
-    XWollMux mux = null;
-    try
-    {
-      XComponentContext ctx = Bootstrap.bootstrap();
-      XMultiServiceFactory factory = (XMultiServiceFactory) UnoRuntime.queryInterface(XMultiServiceFactory.class, ctx.getServiceManager());
-      remoteWollMux = factory.createInstance("de.muenchen.allg.itd51.wollmux.WollMux");
-      mux = (XWollMux) UnoRuntime.queryInterface(XWollMux.class, remoteWollMux);
-    } catch (Exception e) { Logger.error(e); }
-
-    // re-register Listener if they were registered in the previous connection:
-    if(palUpdateListenerIsRegistered) {
-      palUpdateListenerIsRegistered = false;
-      registerPALUpdateListener(mux);
-    }
-
-    return mux;
   }
   
   /**
-   * registriert den PALUpdateListener auf dem entfernten WollMux.
-   * @param mux
-   */
-  private void deregisterPALUpdateListener(XWollMux mux) {
-    if(mux != null && palUpdateListenerIsRegistered) {
-      mux.removePALChangeEventListener(this);
-      palUpdateListenerIsRegistered = false;
-    }
-  }
-  
-  private void registerPALUpdateListener(XWollMux mux)
-  {
-    if(mux != null && !palUpdateListenerIsRegistered) {
-      mux.addPALChangeEventListener(this);
-      palUpdateListenerIsRegistered = true;
-    }
-  }
-
-  
-  /**
-   * @param args
+   * Setzt die Einträge aller Senderboxes neu.
+   * @param entries die Einträge, die die Senderbox enthalten soll.
+   * @param current der ausgewählte Eintrag
    * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TODO Testen
+   * TESTED
    */
-  public static void main(String[] args) throws Exception
+  public void updateSenderboxes(String[] entries, String current)
+  {
+    Iterator iter = senderboxes.iterator();
+    while(iter.hasNext()) 
+    {
+      JComboBox senderbox = (JComboBox) iter.next();
+      
+      // keine items erzeugen beim Update
+      senderbox.removeItemListener(itemListener);
+      
+      // alte Items löschen
+      senderbox.removeAllItems();
+      
+      // neue Items eintragen
+      if(entries.length > 0) 
+      {
+        for (int i = 0; i < entries.length; i++)
+        {
+          senderbox.addItem(entries[i]);
+        }
+      } 
+      else senderbox.addItem(LEERE_LISTE);
+
+      senderbox.addItem("- - - - Liste bearbeiten - - - -");
+      
+      // Selektiertes Item setzen:
+      
+      if (current != null && !current.equals(""))
+        senderbox.setSelectedItem(current);
+      
+      // ItemListener wieder setzen.
+      senderbox.addItemListener(itemListener);
+    }
+  }
+ 
+  /**
+   * Startet die WollMuxBar.
+   * @param args --minimize, --topbar, --normalwindow um das Anzeigeverhalten festzulegen.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public static void main(String[] args)
   {
     int windowMode = BECOME_ICON_MODE;
     if (args.length > 0)
@@ -925,28 +814,28 @@ public class WollMuxBar implements XPALChangeEventListener
     }
     
     WollMuxFiles.setupWollMuxDir();
-    ConfigThingy wollmuxConf = new ConfigThingy("wollmuxConf", WollMuxFiles.getWollMuxConfFile().toURL());
     Logger.init(WollMuxFiles.getWollMuxLogFile(), Logger.LOG);
-
-    /*
-     * Wertet die undokumentierte wollmux.conf-Direktive LOGGING_MODE aus und
-     * setzt den Logging-Modus entsprechend.
-     */
-  
-    ConfigThingy log = wollmuxConf.query("LOGGING_MODE");
-    if (log.count() > 0)
-    {
-      try{
+    
+    try{
+      ConfigThingy wollmuxConf = new ConfigThingy("wollmuxConf", WollMuxFiles.getWollMuxConfFile().toURL());
+      
+      /*
+       * Wertet die undokumentierte wollmux.conf-Direktive LOGGING_MODE aus und
+       * setzt den Logging-Modus entsprechend.
+       */
+      ConfigThingy log = wollmuxConf.query("LOGGING_MODE");
+      if (log.count() > 0)
+      {
         String mode = log.getLastChild().toString();
         Logger.init(mode);
       }
-      catch (NodeNotFoundException x)
-      {
-        Logger.error(x);
-      }
+      
+      new WollMuxBar(windowMode, wollmuxConf);
+      
+    } catch(Exception x)
+    {
+      Logger.error(x);
     }
-    
-    new WollMuxBar(windowMode, wollmuxConf);    
   }
 
 }
