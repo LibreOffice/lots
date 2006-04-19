@@ -321,8 +321,15 @@ public class WollMuxBarEventHandler
           }
           
           processEvent(e);
-          if (e instanceof TerminateEvent) return;
-        }catch (InterruptedException e){}
+          if (e instanceof TerminateEvent) 
+          {
+            Logger.debug("WollMuxBarEventHandler terminating");
+            return;
+          }
+        }catch (InterruptedException e)
+        {
+          Logger.error(e);
+        }
       }
     }
     

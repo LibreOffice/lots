@@ -249,6 +249,7 @@ public class WollMuxBar
 
   private void createGUI(ConfigThingy conf)
   {
+    Logger.debug("WollMuxBar.createGUI");
     Common.setLookAndFeel();
     
     String title = DEFAULT_TITLE;
