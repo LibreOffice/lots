@@ -213,9 +213,11 @@ public class EventHandler
       Logger.debug2("on_selection_changed: Update SenderBox");
       EventObject eventObject = new EventObject();
       eventObject.Source = WollMuxSingleton.getInstance();
-      try{
+      try
+      {
         ((XPALChangeEventListener) i.next()).updateContent(eventObject);
-      }catch(Exception x)
+      }
+      catch (Exception x)
       {
         i.remove();
       }
@@ -352,7 +354,7 @@ public class EventHandler
           "Die Vorlage mit der URL \""
               + loadUrlStr
               + "\" kann nicht geöffnet werden.\n\n"
-              + "Bitte stellen Sie sicher, dass alle verwendeten Textfragment existiert und unbeschädigt sind."
+              + "Bitte stellen Sie sicher, dass alle verwendeten Textfragmente existieren und unbeschädigt sind."
               + errorExt, x);
     }
     return EventProcessor.processTheNextEvent;
