@@ -13,7 +13,8 @@
  *                    + verwenden des Konfigurationsparameters SENDER_SOURCE
  *                    + Erster Start des wollmux über wm_configured feststellen.
  * 05.12.2005 | BNK | line.separator statt \n     
- * 13.04.2006 | BNK | .wollmux/ Handling ausgegliedert in WollMuxFiles.  
+ * 13.04.2006 | BNK | .wollmux/ Handling ausgegliedert in WollMuxFiles.
+ * 20.04.2006 | BNK | DEFAULT_CONTEXT ausgegliedert nach WollMuxFiles  
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -25,7 +26,6 @@ package de.muenchen.allg.itd51.wollmux;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -58,11 +58,6 @@ public class WollMuxSingleton implements XPALChangeEventBroadcaster,
 
   
   /**
-   * Enthält den geparsten Konfigruationsbaum der wollmux.conf
-   */
-  private ConfigThingy wollmuxConf;
-
-  /**
    * Enthält die geparste Textfragmentliste, die in der wollmux.conf definiert
    * wurde.
    */
@@ -78,13 +73,6 @@ public class WollMuxSingleton implements XPALChangeEventBroadcaster,
    * läuft.
    */
   private XComponentContext ctx;
-
-  /**
-   * Die URL des Wertes DEFAULT_CONTEXT aus der Konfigurationsdatei.
-   * defaultContext überschreibt den in der Konfigurationsdatei definierten
-   * DEFAULT_CONTEXT.
-   */
-  private URL defaultContextURL;
 
   /**
    * Enthält alle registrierten SenderBox-Objekte.
@@ -103,23 +91,16 @@ public class WollMuxSingleton implements XPALChangeEventBroadcaster,
 
     try
     {
-      // Logger initialisieren:
-      if (WollMuxFiles.getWollMuxLogFile() != null) Logger.init(WollMuxFiles.getWollMuxLogFile(), Logger.LOG);
-
-      // Parsen der Konfigurationsdatei
-      wollmuxConf = new ConfigThingy("wollmuxConf", WollMuxFiles.getWollMuxConfFile().toURL());
-
-      // Auswertung von LOGGING_MODE und erste debug-Meldungen loggen:
-      setLoggingMode(wollmuxConf);
       Logger.debug("StartupWollMux");
       Logger.debug("Build-Info: " + getBuildInfo());
       Logger.debug("wollmuxConfFile = " + WollMuxFiles.getWollMuxConfFile().toString());
+      Logger.debug("DEFAULT_CONTEXT \""+WollMuxFiles.getDEFAULT_CONTEXT().toString()+"\"");
 
       // VisibleTextFragmentList erzeugen
-      textFragmentList = new VisibleTextFragmentList(wollmuxConf);
+      textFragmentList = new VisibleTextFragmentList(WollMuxFiles.getWollmuxConf());
 
       // DatasourceJoiner erzeugen
-      ConfigThingy ssource = wollmuxConf.query("SENDER_SOURCE");
+      ConfigThingy ssource = WollMuxFiles.getWollmuxConf().query("SENDER_SOURCE");
       String ssourceStr;
       try
       {
@@ -130,8 +111,8 @@ public class WollMuxSingleton implements XPALChangeEventBroadcaster,
         throw new ConfigurationErrorException(
             "Keine Hauptdatenquelle (SENDER_SOURCE) definiert.");
       }
-      datasourceJoiner = new DatasourceJoiner(wollmuxConf, ssourceStr,
-          WollMuxFiles.getLosCacheFile(), getDEFAULT_CONTEXT());
+      datasourceJoiner = new DatasourceJoiner(WollMuxFiles.getWollmuxConf(), ssourceStr,
+          WollMuxFiles.getLosCacheFile(), WollMuxFiles.getDEFAULT_CONTEXT());
 
       // register global EventListener
       UnoService eventBroadcaster = UnoService.createWithContext(
@@ -201,28 +182,6 @@ public class WollMuxSingleton implements XPALChangeEventBroadcaster,
     return "Die Datei buildinfo konnte nicht gelesen werden.";
   }
 
-  /**
-   * Wertet die undokumentierte wollmux.conf-Direktive LOGGING_MODE aus und
-   * setzt den Logging-Modus entsprechend.
-   * 
-   * @param ct
-   */
-  private void setLoggingMode(ConfigThingy ct)
-  {
-    ConfigThingy log = ct.query("LOGGING_MODE");
-    if (log.count() > 0)
-    {
-      try
-      {
-        String mode = log.getLastChild().toString();
-        Logger.init(mode);
-      }
-      catch (NodeNotFoundException x)
-      {
-        Logger.error(x);
-      }
-    }
-  }
 
   /**
    * @return Returns the textFragmentList.
@@ -233,73 +192,11 @@ public class WollMuxSingleton implements XPALChangeEventBroadcaster,
   }
 
   /**
-   * @return Returns the wollmuxConf.
-   */
-  public ConfigThingy getWollmuxConf()
-  {
-    return wollmuxConf;
-  }
-
-  /**
    * @return Returns the xComponentContext.
    */
   public XComponentContext getXComponentContext()
   {
     return ctx;
-  }
-
-  /**
-   * Diese Methode liefert den letzten in der Konfigurationsdatei definierten
-   * DEFAULT_CONTEXT zurück. Ist in der Konfigurationsdatei keine URL definiert,
-   * so wird die URL "file:/" zurückgeliefert und eine Fehlermeldung in die
-   * Loggdatei geschrieben.
-   * 
-   * @return der letzte in der Konfigurationsdatei definierte DEFAULT_CONTEXT.
-   * @throws ConfigurationErrorException
-   */
-  public URL getDEFAULT_CONTEXT() throws ConfigurationErrorException
-  {
-    if (defaultContextURL == null)
-    {
-      ConfigThingy dc = wollmuxConf.query("DEFAULT_CONTEXT");
-      String urlStr;
-      try
-      {
-        urlStr = dc.getLastChild().toString();
-      }
-      catch (NodeNotFoundException e)
-      {
-        urlStr = "file:";
-        Logger.log("Kein DEFAULT_CONTEXT definiert. Verwende \""
-                   + urlStr
-                   + "\"");
-      }
-
-      // url mit einem "/" aufhören lassen (falls noch nicht angegeben).
-      String urlVerzStr = (urlStr.endsWith("/")) ? urlStr : urlStr + "/";
-
-      // URL aus urlVerzStr erzeugen
-      try
-      {
-        defaultContextURL = new URL(urlVerzStr);
-      }
-      catch (MalformedURLException e)
-      {
-        try
-        {
-          defaultContextURL = new URL("file:");
-        }
-        catch (MalformedURLException x)
-        {
-        }
-        Logger.log("Fehlerhafter DEFAULT_CONTEXT \""
-                   + urlStr
-                   + "\". Verwende \""
-                   + defaultContextURL.toString()
-                   + "\"");
-      }
-    }
-    return defaultContextURL;
   }
 
   /**
@@ -434,6 +331,24 @@ public class WollMuxSingleton implements XPALChangeEventBroadcaster,
       }
     }
     // TODO: was machen wenn's nicht klappt?
+  }
+  
+  /**
+   * siehe {@link WollMuxFiles#getWollmuxConf()}.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public ConfigThingy getWollmuxConf()
+  {
+    return WollMuxFiles.getWollmuxConf();
+  }
+  
+  /**
+   * siehe {@link WollMuxFiles#getDEFAULT_CONTEXT()}.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public URL getDEFAULT_CONTEXT()
+  {
+    return WollMuxFiles.getDEFAULT_CONTEXT();
   }
 
 }

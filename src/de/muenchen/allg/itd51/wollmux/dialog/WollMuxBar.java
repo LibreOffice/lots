@@ -16,6 +16,7 @@
 * 14.02.2006 | BNK | Minimieren rückgängig machen bei Aktivierung der Leiste.
 * 15.02.2006 | BNK | ordentliches Abort auch bei schliessen des Icon-Fensters
 * 19.04.2006 | BNK | [R1342][R1398]große Aufräumaktion, Umstellung auf WollMuxBarEventHandler
+* 20.04.2006 | BNK | [R1207][R1205]Icon der WollMuxBar konfigurierbar, Anzeigemodus konfigurierbar
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -254,7 +255,7 @@ public class WollMuxBar
     
     String title = DEFAULT_TITLE;
     try{
-      title = conf.get("Briefkopfleiste").get("TITLE").toString();
+      title = conf.get("Fenster").get("WollMuxBar").get("TITLE").toString();
     }catch(Exception x) {}
     
     //Create and set up the window.
@@ -293,11 +294,19 @@ public class WollMuxBar
     
     //myFrame.setUndecorated(true);
     
-    logoFrame = new JFrame(DEFAULT_TITLE);
+    logoFrame = new JFrame(title);
     logoFrame.setUndecorated(true);
     logoFrame.setAlwaysOnTop(true);
     
-    JLabel logo = new JLabel(new ImageIcon(ICON_URL));
+    URL iconUrl = ICON_URL;
+    try{
+      String urlStr = conf.get("Fenster").get("WollMuxBar").get("ICON").toString();
+      URL iconUrl2 = new URL(WollMuxFiles.getDEFAULT_CONTEXT(), urlStr);
+      iconUrl2.openStream().close(); //testen ob URL erreichbar ist.
+      iconUrl = iconUrl2;
+    }catch(Exception x) {}
+    
+    JLabel logo = new JLabel(new ImageIcon(iconUrl));
     logo.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
     logoPanel = new JPanel(new GridLayout(1,1));
     logoPanel.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
@@ -818,20 +827,34 @@ public class WollMuxBar
     Logger.init(WollMuxFiles.getWollMuxLogFile(), Logger.LOG);
     
     try{
-      ConfigThingy wollmuxConf = new ConfigThingy("wollmuxConf", WollMuxFiles.getWollMuxConfFile().toURL());
-      
       /*
        * Wertet die undokumentierte wollmux.conf-Direktive LOGGING_MODE aus und
        * setzt den Logging-Modus entsprechend.
        */
-      ConfigThingy log = wollmuxConf.query("LOGGING_MODE");
+      ConfigThingy log = WollMuxFiles.getWollmuxConf().query("LOGGING_MODE");
       if (log.count() > 0)
       {
         String mode = log.getLastChild().toString();
         Logger.init(mode);
       }
       
-      new WollMuxBar(windowMode, wollmuxConf);
+      Logger.debug("WollMuxBar gestartet");
+      
+      try{
+        String windowMode2 = WollMuxFiles.getWollmuxConf().get("Fenster").get("WollMuxBar").get("MODE").toString();
+        if (windowMode2.equals("Icon"))
+          windowMode = BECOME_ICON_MODE;
+        else if (windowMode2.equals("AlwaysOnTop"))
+          windowMode = ALWAYS_ON_TOP_WINDOW_MODE;
+        else if (windowMode2.equals("Window"))
+          windowMode = NORMAL_WINDOW_MODE;
+        else if (windowMode2.equals("Minimize"))
+          windowMode = MINIMIZE_TO_TASKBAR_MODE;
+        else
+          Logger.error("Ununterstützer MODE für WollMuxBar-Fenster: '"+windowMode2+"'");
+      }catch(Exception x){}
+      
+      new WollMuxBar(windowMode, WollMuxFiles.getWollmuxConf());
       
     } catch(Exception x)
     {
