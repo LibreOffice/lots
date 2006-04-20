@@ -35,7 +35,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Calendar;
-import java.util.Date;
 
 /**
  * <p>
@@ -315,15 +314,21 @@ public class Logger
       out = Logger.defaultOutputStream;
     }
     
-    // Ausgabe schreiben:
+    // Zeit und Datum holen und aufbereiten:
     Calendar now = Calendar.getInstance();
     int day = now.get(Calendar.DAY_OF_MONTH);
     int month = now.get(Calendar.MONTH);
+    int hour = now.get(Calendar.HOUR_OF_DAY);
+    int minute = now.get(Calendar.MINUTE);
     String dayStr = ""+day;
     String monthStr = ""+month;
+    String hourStr = ""+hour;
+    String minuteStr = ""+minute;
     if (day < 10) dayStr = "0"+dayStr;
     if (month < 10) monthStr = "0"+monthStr;
-    out.println(now.get(Calendar.YEAR)+"-"+monthStr+"-"+dayStr+" "+now.get(Calendar.HOUR_OF_DAY)+":"+now.get(Calendar.MINUTE)+" "+s);
+
+    // Ausgabe schreiben:
+    out.println(now.get(Calendar.YEAR)+"-"+monthStr+"-"+dayStr+" "+hourStr+":"+minuteStr+" "+s);
     out.flush();
 
     // Ein File wird nach dem Schreiben geschlossen.
@@ -350,8 +355,6 @@ public class Logger
    */
   private static void printException(String prefix, Throwable e)
   {
-    prefix = new Date() + " " + prefix;
-
     // Ausgabestream oeffnen bzw. festlegen:
     PrintStream out;
     FileOutputStream fileOut = null;
@@ -369,6 +372,20 @@ public class Logger
     {
       out = Logger.defaultOutputStream;
     }
+
+    // Zeit und Datum holen und aufbereiten
+    Calendar now = Calendar.getInstance();
+    int day = now.get(Calendar.DAY_OF_MONTH);
+    int month = now.get(Calendar.MONTH);
+    int hour = now.get(Calendar.HOUR_OF_DAY);
+    int minute = now.get(Calendar.MINUTE);
+    String dayStr = ""+day;
+    String monthStr = ""+month;
+    String hourStr = ""+hour;
+    String minuteStr = ""+minute;
+    if (day < 10) dayStr = "0"+dayStr;
+    if (month < 10) monthStr = "0"+monthStr;
+    prefix = ""+now.get(Calendar.YEAR)+"-"+monthStr+"-"+dayStr+" "+hourStr+":"+minuteStr+" "+prefix;
 
     // Ausgabe schreiben:
     out.println(prefix + e.toString());
