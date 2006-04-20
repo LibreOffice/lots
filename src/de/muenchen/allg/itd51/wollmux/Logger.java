@@ -326,6 +326,8 @@ public class Logger
     String minuteStr = ""+minute;
     if (day < 10) dayStr = "0"+dayStr;
     if (month < 10) monthStr = "0"+monthStr;
+    if (hour < 10) hourStr = "0"+hourStr;
+    if (minute < 10) minuteStr = "0"+minuteStr;
 
     // Ausgabe schreiben:
     out.println(now.get(Calendar.YEAR)+"-"+monthStr+"-"+dayStr+" "+hourStr+":"+minuteStr+" "+s);
@@ -385,6 +387,8 @@ public class Logger
     String minuteStr = ""+minute;
     if (day < 10) dayStr = "0"+dayStr;
     if (month < 10) monthStr = "0"+monthStr;
+    if (hour < 10) hourStr = "0"+hourStr;
+    if (minute < 10) minuteStr = "0"+minuteStr;
     prefix = ""+now.get(Calendar.YEAR)+"-"+monthStr+"-"+dayStr+" "+hourStr+":"+minuteStr+" "+prefix;
 
     // Ausgabe schreiben:
