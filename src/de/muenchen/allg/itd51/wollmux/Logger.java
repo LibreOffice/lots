@@ -20,6 +20,7 @@
  * 24.11.2005 | BNK | In init() das Logfile nicht löschen.
  * 05.12.2005 | BNK | line.separator statt \n
  * 06.12.2005 | BNK | bessere Separatoren, kein Test mehr in init, ob Logfile schreibbar
+ * 20.04.2006 | BNK | bessere Datum/Zeitangabe, Angabe des Aufrufers
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -33,6 +34,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -184,7 +186,7 @@ public class Logger
    */
   public static void error(String msg)
   {
-    if (mode >= ERROR) println("ERROR: " + msg + System.getProperty("line.separator"));
+    if (mode >= ERROR) println("ERROR("+getCaller(2)+"): " + msg + System.getProperty("line.separator"));
   }
 
   /**
@@ -195,7 +197,7 @@ public class Logger
    */
   public static void error(Throwable e)
   {
-    if (mode >= ERROR) printException("ERROR: ", e);
+    if (mode >= ERROR) printException("ERROR("+getCaller(2)+"): ", e);
   }
 
   /**
@@ -208,8 +210,8 @@ public class Logger
   {
     if (mode >= ERROR)
     {
-      println("ERROR: " + msg);
-      printException("ERROR: ", e);
+      println("ERROR("+getCaller(2)+"): " + msg);
+      printException("ERROR("+getCaller(2)+"): ", e);
     }
   }
 
@@ -223,7 +225,7 @@ public class Logger
    */
   public static void log(String msg)
   {
-    if (mode >= LOG) println("LOG: " + msg + System.getProperty("line.separator"));
+    if (mode >= LOG) println("LOG("+getCaller(2)+"): " + msg + System.getProperty("line.separator"));
   }
 
   /**
@@ -234,7 +236,7 @@ public class Logger
    */
   public static void log(Throwable e)
   {
-    if (mode >= LOG) printException("LOG: ", e);
+    if (mode >= LOG) printException("LOG("+getCaller(2)+"): ", e);
   }
 
   /**
@@ -247,7 +249,7 @@ public class Logger
    */
   public static void debug(String msg)
   {
-    if (mode >= DEBUG) println("DEBUG: " + msg + System.getProperty("line.separator"));
+    if (mode >= DEBUG) println("DEBUG("+getCaller(2)+"): " + msg + System.getProperty("line.separator"));
   }
 
   /**
@@ -258,7 +260,7 @@ public class Logger
    */
   public static void debug(Throwable e)
   {
-    if (mode >= DEBUG) printException("DEBUG: ", e);
+    if (mode >= DEBUG) printException("DEBUG("+getCaller(2)+"): ", e);
   }
 
   /**
@@ -274,7 +276,7 @@ public class Logger
    */
   public static void debug2(String msg)
   {
-    if (mode >= ALL) println("DEBUG2: " + msg + System.getProperty("line.separator"));
+    if (mode >= ALL) println("DEBUG2("+getCaller(2)+"): " + msg + System.getProperty("line.separator"));
   }
 
   /**
@@ -285,7 +287,7 @@ public class Logger
    */
   public static void debug2(Throwable e)
   {
-    if (mode >= ALL) printException("DEBUG2: ", e);
+    if (mode >= ALL) printException("DEBUG2("+getCaller(2)+"): ", e);
   }
 
   /**
@@ -312,9 +314,16 @@ public class Logger
     {
       out = Logger.defaultOutputStream;
     }
-
+    
     // Ausgabe schreiben:
-    out.println(new Date() + " " + s);
+    Calendar now = Calendar.getInstance();
+    int day = now.get(Calendar.DAY_OF_MONTH);
+    int month = now.get(Calendar.MONTH);
+    String dayStr = ""+day;
+    String monthStr = ""+month;
+    if (day < 10) dayStr = "0"+dayStr;
+    if (month < 10) monthStr = "0"+monthStr;
+    out.println(now.get(Calendar.YEAR)+"-"+monthStr+"-"+dayStr+" "+now.get(Calendar.HOUR_OF_DAY)+":"+now.get(Calendar.MINUTE)+" "+s);
     out.flush();
 
     // Ein File wird nach dem Schreiben geschlossen.
@@ -386,5 +395,20 @@ public class Logger
       {
       }
     }
+  }
+  
+  /**
+   * Liefert Datei (ohne java Extension) und Zeilennummer des Elements level des Stacks.
+   * Level 1 ist dabei die Funktion, die getCaller() aufruft.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private static String getCaller(int level)
+  {
+    try{
+      Throwable grosserWurf = new Throwable();
+      grosserWurf.fillInStackTrace();
+      StackTraceElement[] dickTracy = grosserWurf.getStackTrace();
+      return dickTracy[level].getFileName().replaceAll("\\.java","")+":"+dickTracy[level].getLineNumber();
+    } catch(Exception x){return "Unknown:???";}
   }
 }
