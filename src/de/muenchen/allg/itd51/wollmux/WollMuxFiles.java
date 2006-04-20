@@ -233,7 +233,8 @@ public class WollMuxFiles
 
   /**
    * Wertet die undokumentierte wollmux.conf-Direktive LOGGING_MODE aus und
-   * setzt den Logging-Modus entsprechend.
+   * setzt den Logging-Modus entsprechend. Ist kein LOGGING_MODE gegeben, so
+   * greift der Standard (siehe Logger.java)
    * 
    * @param ct
    */

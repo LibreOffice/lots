@@ -1,7 +1,9 @@
 /*
  * Dateiname: SenderBox.java
  * Projekt  : WollMux
- * Funktion : Controller für eine in der Toolbar eingebettete 
+ * Funktion : ACHTUNG: Die Einbindung von SenderBoxen in OOo wurde deaktiviert - Die Klasse
+ *            SenderBox wird nur noch als mögliche Fallback-Lösung aufgehoben!
+ *            Controller für eine in der Toolbar eingebettete 
  *            ComboBox zur Auswahl des aktuellen Absenders.
  * 
  * Copyright: Landeshauptstadt München
@@ -70,9 +72,11 @@ import de.muenchen.allg.itd51.wollmux.db.DatasetNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.QueryResults;
 
 /**
- * Diese Klasse implementiert einen com.sun.star.frame.ToolbarController, mit
- * dem eine ComboBox in eine Toolbar eingebettet werden kann, die für die
- * Auswahl des aktuellen Absenders zuständig ist.
+ * ACHTUNG: Die Einbindung von SenderBoxen in OOo wurde deaktiviert - Die Klasse
+ * SenderBox wird nur noch als mögliche Fallback-Lösung aufgehoben! Diese Klasse
+ * implementiert einen com.sun.star.frame.ToolbarController, mit dem eine
+ * ComboBox in eine Toolbar eingebettet werden kann, die für die Auswahl des
+ * aktuellen Absenders zuständig ist.
  * 
  * @author Christoph Lutz (D-III-ITD 5.1)
  */
