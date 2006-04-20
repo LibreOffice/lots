@@ -19,6 +19,7 @@
  */
 package de.muenchen.allg.itd51.wollmux;
 
+import java.util.Vector;
 
 /**
  * Diese Klasse repräsentiert ein WollMux-Ereignis. Alle WollMux-Ereignisse
@@ -57,13 +58,13 @@ public class Event
   public static final int ON_OPENTEMPLATE = 40;
 
   public static final int ON_OPENDOCUMENT = 41;
-  
+
   public static final int ON_SET_SENDER = 50;
 
   public static final int ON_SELECTION_CHANGED = 51;
 
   public static final int ON_INITIALIZE = 60;
-  
+
   public static final int ON_FRAME_CHANGED = 70;
 
   // private Felder:
@@ -72,7 +73,7 @@ public class Event
 
   private Object source = null;
 
-  private String argument = "";
+  private Vector args = null;
 
   /**
    * Diese Methode liefert eine String-Repräsentation des Eventnames zurück.
@@ -173,10 +174,10 @@ public class Event
    *          Ein beliebiger String als Argument, der von dem dem Event
    *          zugehörigen Eventhandler interpretiert werden muss.
    */
-  public Event(int event, String argument)
+  public Event(int event, Vector args)
   {
     this.event = event;
-    this.argument = argument;
+    this.args = args;
   }
 
   /**
@@ -187,11 +188,11 @@ public class Event
    * @param argument
    * @param source
    */
-  public Event(int event, String argument, Object source)
+  public Event(int event, Vector args, Object source)
   {
     this.event = event;
-    this.argument = argument;
     this.source = source;
+    this.args = args;
   }
 
   /**
@@ -218,13 +219,13 @@ public class Event
   }
 
   /**
-   * Diese Methode liefert das String-Argument des Events zurück.
+   * Diese Methode liefert den Vektor der Argumente des Events zurück.
    * 
-   * @return das String-Argument des Events
+   * @return den Argumente-Vektor des Events
    */
-  public String getArgument()
+  public Vector getArgs()
   {
-    return argument;
+      return args;
   }
 
   /**

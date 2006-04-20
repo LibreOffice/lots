@@ -28,6 +28,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Vector;
 
 import com.sun.star.awt.XWindow;
 import com.sun.star.frame.FrameSearchFlag;
@@ -61,13 +62,14 @@ import de.muenchen.allg.itd51.wollmux.dialog.PersoenlicheAbsenderlisteVerwalten;
 public class EventHandler
 {
   /**
-   * Dieses Feld stellt ein Zwischenspeicher für Fragment-Urls dar. Es wird dazu
-   * benutzt, im Fall eines openTemplate-Befehls die urls der übergebenen
-   * frag_id-Liste temporär zu speichern. Das Event on_new/on_load holt sich die
-   * temporär gespeicherten Argumente aus der hashMap und übergibt sie dem
+   * Dieses Feld stellt ein Zwischenspeicher für Fragment-Urls dar, der
+   * Dokument-Instanzen auf Fragment-URL-Listen mapped. Es wird dazu benutzt, im
+   * Fall eines openTemplate-Befehls die urls der übergebenen frag_id-Liste
+   * temporär zu speichern. Das Event on_new/on_load holt sich die temporär
+   * gespeicherten Argumente aus der hashMap und übergibt sie dem
    * WMCommandInterpreter.
    */
-  private static HashMap fragUrlsBuffer = new HashMap();
+  private static HashMap docFragUrlsBuffer = new HashMap();
 
   /**
    * Diese Method ist für die Ausführung eines einzelnen Events zuständig. Nach
@@ -288,20 +290,20 @@ public class EventHandler
     UnoService desktop = UnoService.createWithContext(
         "com.sun.star.frame.Desktop",
         mux.getXComponentContext());
-    String args = event.getArgument();
-
-    String[] frag_ids = args.split("&");
+    Vector args = event.getArgs();
 
     // das erste Argument ist das unmittelbar zu landende Textfragment und
     // wird nach urlStr aufgelöst. Alle weiteren Argumente (falls vorhanden)
     // werden nach argsUrlStr aufgelöst.
     String loadUrlStr = "";
-    String[] argsUrlStr = new String[frag_ids.length - 1];
+    String[] argsUrlStr = new String[args.size() - 1];
     String errorExt = "";
 
-    for (int i = 0; i < frag_ids.length; i++)
+    Iterator i = args.iterator();
+    int count = 0;
+    while (i.hasNext())
     {
-      String frag_id = frag_ids[i];
+      String frag_id = (String) i.next();
 
       // einheitlicher Fehlerzusatz:
       errorExt = "\n\nDer Fehler trat beim Auflösen des Textfragments mit der ID \""
@@ -319,10 +321,13 @@ public class EventHandler
       {
         throw new MalformedURLException("Die URL \""
                                         + urlStr
-                                        + "\" dieser Vorlage ist ungültig: "
+                                        + "\" ist ungültig: "
                                         + e.getMessage()
                                         + errorExt);
       }
+
+
+      // URL durch den URL-Transformer jagen
       UnoService trans = UnoService.createWithContext(
           "com.sun.star.util.URLTransformer",
           mux.getXComponentContext());
@@ -331,10 +336,34 @@ public class EventHandler
       trans.xURLTransformer().parseStrict(unoURL);
       urlStr = unoURL[0].Complete;
 
-      if (i == 0)
+      // Workaround für Fehler in insertDocumentFromURL: Prüfen ob URL aufgelöst
+      // werden kann, da sonst der insertDocumentFromURL einfriert.
+      try
+      {
+        url = new URL(urlStr);
+      }
+      catch (MalformedURLException e)
+      {
+        // darf nicht auftreten, da url bereits oben geprüft wurde...
+        Logger.error(e);
+      }
+      if (url.openConnection().getContentLength() <= 0)
+      {
+        throw new IOException(
+            "Die URL \""
+            + url.toExternalForm()
+            + "\" kann nicht aufgelöst werden!\n\n"
+            + "Bitte stellen Sie sicher, dass das verwendete Textfragment existiert und unbeschädigt ist."
+            + errorExt);
+      }
+      
+      // URL in die in loadUrlStr (zum sofort öffnen) und in argsUrlStr (zum
+      // später öffnen) aufnehmen
+      if (count == 0)
         loadUrlStr = urlStr;
       else
-        argsUrlStr[i - 1] = urlStr;
+        argsUrlStr[count - 1] = urlStr;
+      count++;
     }
 
     // open document as Template (or as document):
@@ -346,7 +375,7 @@ public class EventHandler
               "_blank",
               FrameSearchFlag.CREATE,
               new UnoProps("AsTemplate", new Boolean(asTemplate)).getProps()));
-      fragUrlsBuffer.put(doc.xInterface(), argsUrlStr);
+      docFragUrlsBuffer.put(doc.xInterface(), argsUrlStr);
     }
     catch (java.lang.Exception x)
     {
@@ -354,7 +383,7 @@ public class EventHandler
           "Die Vorlage mit der URL \""
               + loadUrlStr
               + "\" kann nicht geöffnet werden.\n\n"
-              + "Bitte stellen Sie sicher, dass alle verwendeten Textfragmente existieren und unbeschädigt sind."
+              + "Bitte stellen Sie sicher, dass das verwendete Textfragment existiert und unbeschädigt ist."
               + errorExt, x);
     }
     return EventProcessor.processTheNextEvent;
@@ -377,8 +406,8 @@ public class EventHandler
       // new Event(Event.ON_FRAME_CHANGED, null, frame));
 
       String[] frag_urls = new String[] {};
-      if (fragUrlsBuffer.containsKey(source.xInterface()))
-        frag_urls = (String[]) fragUrlsBuffer.remove(source.xInterface());
+      if (docFragUrlsBuffer.containsKey(source.xInterface()))
+        frag_urls = (String[]) docFragUrlsBuffer.remove(source.xInterface());
 
       // Interpretation von WM-Kommandos
       new WMCommandInterpreter(source.xTextDocument(), mux, frag_urls)

@@ -156,13 +156,13 @@ public class EventProcessor implements XEventListener, XModifyListener,
 
     // Bekannte Event-Typen rausziehen:
     if (docEvent.EventName.compareToIgnoreCase("OnLoad") == 0)
-      addEvent(new Event(Event.ON_LOAD, "", docEvent.Source));
+      addEvent(new Event(Event.ON_LOAD, null, docEvent.Source));
 
     if (docEvent.EventName.compareToIgnoreCase("OnNew") == 0)
-      addEvent(new Event(Event.ON_NEW, "", docEvent.Source));
+      addEvent(new Event(Event.ON_NEW, null, docEvent.Source));
 
     if (docEvent.EventName.compareToIgnoreCase("OnFocus") == 0)
-      addEvent(new Event(Event.ON_FOCUS, "", docEvent.Source));
+      addEvent(new Event(Event.ON_FOCUS, null, docEvent.Source));
 }
 
   /**
@@ -172,7 +172,7 @@ public class EventProcessor implements XEventListener, XModifyListener,
    */
   public void modified(com.sun.star.lang.EventObject modifyEvent)
   {
-    addEvent(new Event(Event.ON_MODIFIED, "", modifyEvent.Source));
+    addEvent(new Event(Event.ON_MODIFIED, null, modifyEvent.Source));
   }
 
   /**
@@ -185,12 +185,11 @@ public class EventProcessor implements XEventListener, XModifyListener,
     // add back- und abort events
     if (actionEvent.getActionCommand().equals("back"))
     {
-      addEvent(new Event(Event.ON_DIALOG_BACK, (String) actionEvent.getSource()));
+      addEvent(new Event(Event.ON_DIALOG_BACK));
     }
     if (actionEvent.getActionCommand().equals("abort"))
     {
-      addEvent(new Event(Event.ON_DIALOG_ABORT, (String) actionEvent
-          .getSource()));
+      addEvent(new Event(Event.ON_DIALOG_ABORT));
     }
     synchronized (processNextEvent)
     {
@@ -267,7 +266,7 @@ public class EventProcessor implements XEventListener, XModifyListener,
 
     // Bekannte Event-Typen rausziehen:
     if (action == FrameAction.COMPONENT_REATTACHED)
-      addEvent(new Event(Event.ON_FRAME_CHANGED, "", event.Source));
+      addEvent(new Event(Event.ON_FRAME_CHANGED, null, event.Source));
   }
 
 }

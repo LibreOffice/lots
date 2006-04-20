@@ -28,7 +28,7 @@ public class TextFragmentNotDefinedException extends Exception
 
   public TextFragmentNotDefinedException(String id)
   {
-    super("Das abgefragte Textfragment mit der id \""
+    super("Das abgefragte Textfragment mit der FRAG_ID \""
           + id
           + "\" ist nicht definiert.");
   }

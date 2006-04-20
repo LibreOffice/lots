@@ -22,8 +22,8 @@
 
 package de.muenchen.allg.itd51.wollmux.comp;
 
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.util.Iterator;
+import java.util.Vector;
 
 import com.sun.star.beans.NamedValue;
 import com.sun.star.frame.DispatchDescriptor;
@@ -108,54 +108,6 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
       com.sun.star.task.XJobListener xListener)
       throws com.sun.star.lang.IllegalArgumentException
   {
-//    if (xListener == null)
-//      throw new com.sun.star.lang.IllegalArgumentException("invalid listener");
-//
-//    com.sun.star.beans.NamedValue[] lEnvironment = null;
-//
-//    // Hole das Environment-Argument
-//    for (int i = 0; i < lArgs.length; ++i)
-//    {
-//      if (lArgs[i].Name.equals("Environment"))
-//      {
-//        lEnvironment = (com.sun.star.beans.NamedValue[]) com.sun.star.uno.AnyConverter
-//            .toArray(lArgs[i].Value);
-//      }
-//    }
-//    if (lEnvironment == null)
-//      throw new com.sun.star.lang.IllegalArgumentException("no environment");
-//
-//    // Hole Event-Informationen
-//    String sEnvType = null;
-//    String sEventName = null;
-//    for (int i = 0; i < lEnvironment.length; ++i)
-//    {
-//      if (lEnvironment[i].Name.equals("EnvType"))
-//        sEnvType = com.sun.star.uno.AnyConverter
-//            .toString(lEnvironment[i].Value);
-//      else if (lEnvironment[i].Name.equals("EventName"))
-//        sEventName = com.sun.star.uno.AnyConverter
-//            .toString(lEnvironment[i].Value);
-//    }
-//
-//    // Prüfe die property "EnvType":
-//    if ((sEnvType == null)
-//        || ((!sEnvType.equals("EXECUTOR")) && (!sEnvType.equals("DISPATCH"))))
-//    {
-//      java.lang.String sMessage = "\""
-//                                  + sEnvType
-//                                  + "\" isn't a valid value for EnvType";
-//      throw new com.sun.star.lang.IllegalArgumentException(sMessage);
-//    }
-//
-//    /***************************************************************************
-//     * Starte den WollMux!
-//     */
-//    if (sEventName.equals("onFirstVisibleTask"))
-//    {
-//    }
-//    /** *************************************************** */
-//
     xListener.jobFinished(this, new NamedValue[] {});
   }
 
@@ -240,36 +192,65 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
   /* IN */int iSearchFlags)
   {
     XDispatch xRet = null;
-    try
+    Logger.debug2("queryDispatch: " + aURL.Complete);
+
+    Vector parsedURL = parseWollmuxURL(aURL.Complete);
+    if (parsedURL != null && parsedURL.size() >= 1)
     {
-      URI uri = new URI(aURL.Complete);
-      Logger.debug2("queryDispatch: " + uri.toString());
-      if (uri.getScheme().compareToIgnoreCase(wollmuxProtocol) == 0)
-      {
-        if (uri.getSchemeSpecificPart().compareToIgnoreCase(
-            cmdAbsenderAuswaehlen) == 0) xRet = this;
+      String cmd = (String) parsedURL.remove(0);
 
-        if (uri.getSchemeSpecificPart().compareToIgnoreCase(cmdOpenTemplate) == 0)
-          xRet = this;
+      if (cmd.compareToIgnoreCase(cmdAbsenderAuswaehlen) == 0) xRet = this;
 
-        if (uri.getSchemeSpecificPart().compareToIgnoreCase(cmdOpenDocument) == 0)
-          xRet = this;
+      if (cmd.compareToIgnoreCase(cmdOpenTemplate) == 0) xRet = this;
 
-        if (uri.getSchemeSpecificPart().compareToIgnoreCase(cmdSenderBox) == 0)
-          xRet = this;
+      if (cmd.compareToIgnoreCase(cmdOpenDocument) == 0) xRet = this;
 
-        if (uri.getSchemeSpecificPart().compareToIgnoreCase(cmdMenu) == 0)
-          xRet = this;
+      if (cmd.compareToIgnoreCase(cmdSenderBox) == 0) xRet = this;
 
-        if (uri.getSchemeSpecificPart().compareToIgnoreCase(cmdPALVerwalten) == 0)
-          xRet = this;
-      }
-    }
-    catch (URISyntaxException e)
-    {
-      Logger.error(e);
+      if (cmd.compareToIgnoreCase(cmdMenu) == 0) xRet = this;
+
+      if (cmd.compareToIgnoreCase(cmdPALVerwalten) == 0) xRet = this;
     }
     return xRet;
+  }
+
+  /**
+   * Diese Methode prüft, ob die in urlStr übergebene URL eine wollmux-URL ist
+   * (also mit "wollmux:" beginnt) und zerlegt die URL in die Teile (Kommando,
+   * Argument1, ..., ArgumentN), die sie in einem Vector zurückgibt. Ist die
+   * übergebene URL keine wollmux-URL, so liefert die Methode null zurück. Eine
+   * gültige WollMux-URL ist überlicherweise wie folgt aufgebaut:
+   * "wollmux:Kommando#Argument1&Argument2", wobei die Argumente nur Bezeichner
+   * sein dürfen.
+   * 
+   * @param urlStr
+   * @return
+   */
+  private Vector parseWollmuxURL(String urlStr)
+  {
+    String[] parts = urlStr.split(":", 2);
+    if (parts != null
+        && parts.length == 2
+        && parts[0].compareToIgnoreCase(wollmuxProtocol) == 0)
+    {
+      Vector result = new Vector();
+      String cmdAndArgs = parts[1];
+      parts = cmdAndArgs.split("#", 2);
+      String cmd = parts[0];
+      result.add(cmd);
+      if (parts.length == 2)
+      {
+        String argStr = parts[1];
+        String[] args = argStr.split("&");
+        for (int i = 0; i < args.length; i++)
+        {
+          result.add(args[i]);
+        }
+      }
+      return result;
+    }
+    else
+      return null;
   }
 
   /*
@@ -310,55 +291,57 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
   public void dispatch( /* IN */com.sun.star.util.URL aURL,
   /* IN */com.sun.star.beans.PropertyValue[] aArguments)
   {
-    try
-    {
-      URI uri = new URI(aURL.Complete);
-      WollMuxSingleton mux = WollMuxSingleton.getInstance();
+    WollMuxSingleton mux = WollMuxSingleton.getInstance();
 
-      if (uri.getScheme().compareToIgnoreCase(wollmuxProtocol) == 0)
+    Vector parsedURL = parseWollmuxURL(aURL.Complete);
+    if (parsedURL != null && parsedURL.size() >= 1)
+    {
+      String cmd = (String) parsedURL.remove(0);
+
+      // argStr zusammenbauen (wird nur für debug-Meldung benötigt)
+      String argStr = "";
+      Iterator i = parsedURL.iterator();
+      while (i.hasNext())
       {
-        if (uri.getSchemeSpecificPart().compareToIgnoreCase(
-            cmdAbsenderAuswaehlen) == 0)
-        {
-          Logger
-              .debug2("Dispatch: Aufruf von WollMux:AbsenderdatenBearbeitenDialog");
-          mux.getEventProcessor().addEvent(
-              new Event(Event.ON_ABSENDER_AUSWAEHLEN));
-        }
-
-        if (uri.getSchemeSpecificPart().compareToIgnoreCase(cmdPALVerwalten) == 0)
-        {
-          Logger.debug2("Dispatch: Aufruf von WollMux:PALVerwalten");
-          mux.getEventProcessor().addEvent(
-              new Event(Event.ON_PERSOENLICHE_ABSENDERLISTE));
-        }
-
-        if (uri.getSchemeSpecificPart().compareToIgnoreCase(cmdOpenTemplate) == 0)
-        {
-          Logger.debug2("Dispatch: Aufruf von WollMux:OpenTemplate mit Frag:"
-                        + uri.getFragment());
-          mux.getEventProcessor().addEvent(
-              new Event(Event.ON_OPENTEMPLATE, uri.getFragment()));
-        }
-
-        if (uri.getSchemeSpecificPart().compareToIgnoreCase(cmdOpenDocument) == 0)
-        {
-          Logger.debug2("Dispatch: Aufruf von WollMux:OpenDocument mit Frag:"
-                        + uri.getFragment());
-          mux.getEventProcessor().addEvent(
-              new Event(Event.ON_OPENDOCUMENT, uri.getFragment()));
-        }
-
-        if (uri.getSchemeSpecificPart().compareToIgnoreCase(cmdMenu) == 0)
-        {
-          Logger.debug2("Dispatch: Aufruf von WollMux:menu mit menu:"
-                        + uri.getFragment());
-        }
+        argStr += "" + i.next();
+        if (i.hasNext()) argStr += ", ";
       }
-    }
-    catch (URISyntaxException e)
-    {
-      Logger.error(e);
+
+      if (cmd.compareToIgnoreCase(cmdAbsenderAuswaehlen) == 0)
+      {
+        Logger
+            .debug2("Dispatch: Aufruf von WollMux:AbsenderdatenBearbeitenDialog");
+        mux.getEventProcessor().addEvent(
+            new Event(Event.ON_ABSENDER_AUSWAEHLEN));
+      }
+
+      if (cmd.compareToIgnoreCase(cmdPALVerwalten) == 0)
+      {
+        Logger.debug2("Dispatch: Aufruf von WollMux:PALVerwalten");
+        mux.getEventProcessor().addEvent(
+            new Event(Event.ON_PERSOENLICHE_ABSENDERLISTE));
+      }
+
+      if (cmd.compareToIgnoreCase(cmdOpenTemplate) == 0)
+      {
+        Logger.debug2("Dispatch: Aufruf von WollMux:OpenTemplate mit Args:"
+                      + argStr);
+        mux.getEventProcessor().addEvent(
+            new Event(Event.ON_OPENTEMPLATE, parsedURL));
+      }
+
+      if (cmd.compareToIgnoreCase(cmdOpenDocument) == 0)
+      {
+        Logger.debug2("Dispatch: Aufruf von WollMux:OpenDocument mit Args:"
+                      + argStr);
+        mux.getEventProcessor().addEvent(
+            new Event(Event.ON_OPENDOCUMENT, parsedURL));
+      }
+
+      if (cmd.compareToIgnoreCase(cmdMenu) == 0)
+      {
+        Logger.debug2("Dispatch: Aufruf von WollMux:menu mit Arg:" + parsedURL);
+      }
     }
   }
 

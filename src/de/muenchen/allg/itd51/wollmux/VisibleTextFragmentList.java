@@ -80,19 +80,31 @@ public class VisibleTextFragmentList
       ConfigThingy frag = (ConfigThingy) s.next();
       try
       {
-        fragmentMap.put(frag.get("FRAG_ID").toString(), frag);
+        String frag_id = frag.get("FRAG_ID").toString();
+        if (frag_id.matches("^([a-zA-Z_][a-zA-Z_0-9]*)$"))
+        {
+          fragmentMap.put(frag.get("FRAG_ID").toString(), frag);
+        }
+        else
+        {
+          String stringRep = frag.stringRepresentation();
+          stringRep = stringRep.substring(0, stringRep.length() - 1);
+          Logger
+              .error(new ConfigurationErrorException(
+                  "Fehler in Textfragment \""
+                      + stringRep
+                      + "\": Ungültiger Bezeichner für FRAG_ID - ignoriere Textfragment!"));
+        }
       }
       catch (NodeNotFoundException x)
       {
         // obiger query verhindert dies.
       }
     }
-    Logger.debug("VisibleTextFragmentList: "
-                  + fragmentMap.size()
-                  + " entries.");
+    Logger
+        .debug("VisibleTextFragmentList: " + fragmentMap.size() + " entries.");
     if (fragmentMap.size() == 0)
-      Logger
-          .log("Es wurden keine Textfragmente definiert.");
+      Logger.log("Es wurden keine Textfragmente definiert.");
   }
 
   private String expandVariable(ConfigThingy node, ConfigThingy root)
