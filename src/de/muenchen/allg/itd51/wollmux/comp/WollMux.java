@@ -1,7 +1,7 @@
 /*
  * Dateiname: WollMux.java
  * Projekt  : WollMux
- * Funktion : UNO-Service WollMux; Singleton und zentrale WollMux-Instanz.
+ * Funktion : zentraler UNO-Service WollMux 
  * 
  * Copyright: Landeshauptstadt München
  *
@@ -45,10 +45,12 @@ import de.muenchen.allg.itd51.wollmux.XPALChangeEventListener;
 import de.muenchen.allg.itd51.wollmux.XWollMux;
 
 /**
- * Diese Klasse stellt den zentralen UNO-Service WollMux dar. Der Service dient
- * als Einstiegspunkt des WollMux und initialisiert alle benötigten
- * Programmmodule. Sämtliche Felder und öffentliche Methoden des Services sind
- * static und ermöglichen den Zugriff aus anderen Programmmodulen.
+ * Diese Klasse stellt den zentralen UNO-Service WollMux dar. Der Service hat
+ * drei Funktionen: als XAsyncJob sorgt der Service dafür, dass das
+ * WollMuxSingleton beim Starten von OpenOffice initialisiert wird (er startet
+ * also den WollMux). Als XDispatchProvider und XDispatch behandelt er alle
+ * "wollmux:kommando..." URLs und als XWollMux stellt er die Schnittstelle für
+ * externe UNO-Komponenten dar.
  */
 public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
     XDispatch, XDispatchProvider, XWollMux
@@ -85,9 +87,10 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
   public static final String cmdMenu = "Menu";
 
   /**
-   * TODO: überarbeiten. Der Konstruktor erzeugt einen neues WollMux-Service im
-   * XComponentContext context. Wurde der WollMux bereits in einem anderen
-   * Kontext erzeugt, so wird eine RuntimeException geworfen.
+   * Der Konstruktor initialisiert das WollMuxSingleton und startet damit den
+   * eigentlichen WollMux. Der Konstuktor wird aufgerufen, bevor OpenOffice.org
+   * die Methode executeAsync() aufrufen kann, die bei einem
+   * ON_FIRST_VISIBLE_TASK-Event über den Job-Mechanismus ausgeführt wird.
    * 
    * @param context
    */
@@ -220,8 +223,8 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
    * Argument1, ..., ArgumentN), die sie in einem Vector zurückgibt. Ist die
    * übergebene URL keine wollmux-URL, so liefert die Methode null zurück. Eine
    * gültige WollMux-URL ist überlicherweise wie folgt aufgebaut:
-   * "wollmux:Kommando#Argument1&Argument2", wobei die Argumente nur Bezeichner
-   * sein dürfen.
+   * "wollmux:Kommando#Argument1&Argument2", wobei die Argumente nicht das
+   * '&'-Zeichen enthalten dürfen.
    * 
    * @param urlStr
    * @return
@@ -270,16 +273,6 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
           seqDescripts[i].SearchFlags);
 
     return lDispatcher;
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.sun.star.frame.XDispatch#addStatusListener(com.sun.star.frame.XStatusListener,
-   *      com.sun.star.util.URL)
-   */
-  public void addStatusListener(XStatusListener arg0, com.sun.star.util.URL arg1)
-  {
   }
 
   /*
@@ -354,38 +347,71 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
   public void removeStatusListener(XStatusListener arg0,
       com.sun.star.util.URL arg1)
   {
+    // Es gibt keine sinnvolle Verwendung für StatusListener im WollMux
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.sun.star.frame.XDispatch#addStatusListener(com.sun.star.frame.XStatusListener,
+   *      com.sun.star.util.URL)
+   */
+  public void addStatusListener(XStatusListener arg0, com.sun.star.util.URL arg1)
+  {
+    // Es gibt keine sinnvolle Verwendung für StatusListener im WollMux
   }
 
   /*****************************************************************************
    * XWollMux-Implementierung:
    ****************************************************************************/
 
-  /*
-   * Hier wird auch gleich ein update getriggered! (non-Javadoc)
+  /**
+   * Diese Methode registriert einen XPALChangeEventListener, der updates
+   * empfängt wenn sich die PAL ändert. Nach dem Registrieren wird sofort ein
+   * ON_SELECTION_CHANGED Ereignis ausgelöst, welches dafür sort, dass sofort
+   * ein erster update aller Listener ausgeführt wird. Die Methode ignoriert
+   * alle XPALChangeEventListenener-Instanzen, die bereits registriert wurden.
+   * Mehrfachregistrierung der selben Instanz ist also nicht möglich.
    * 
    * @see de.muenchen.allg.itd51.wollmux.XPALChangeEventBroadcaster#addPALChangeEventListener(de.muenchen.allg.itd51.wollmux.XPALChangeEventListener)
    */
   public void addPALChangeEventListener(XPALChangeEventListener l)
   {
-    WollMuxSingleton.getInstance().addPALChangeEventListener(l);
     WollMuxSingleton.getInstance().getEventProcessor().addEvent(
-        new Event(Event.ON_SELECTION_CHANGED));
+        new Event(Event.ON_ADD_PAL_CHANGE_EVENT_LISTENER, null, l));
   }
 
+  /**
+   * Diese Methode deregistriert einen XPALChangeEventListener wenn er bereits
+   * registriert war. Nach dem Deregistrieren des letzten PALChangeEventListener
+   * wird der Desktop (und damit die aktuelle OpenOffice.org-Instanz)
+   * geschlossen, wenn keine weitere OpenOffice.org-Komponente geöffnet ist. Ein
+   * evtl. vorhandener Schnellstarter wird jedoch nicht beendet.
+   * 
+   * @see de.muenchen.allg.itd51.wollmux.XPALChangeEventBroadcaster#removePALChangeEventListener(de.muenchen.allg.itd51.wollmux.XPALChangeEventListener)
+   */
   public void removePALChangeEventListener(XPALChangeEventListener l)
   {
-    WollMuxSingleton.getInstance().removePALChangeEventListener(l);
+    WollMuxSingleton.getInstance().getEventProcessor().addEvent(
+        new Event(Event.ON_REMOVE_PAL_CHANGE_EVENT_LISTENER, null, l));
   }
 
+  /**
+   * Diese Methode setzt den aktuellen Absender der Persönlichen Absenderliste
+   * (PAL) auf den Absender sender. Der Absender wird nur gesetzt, wenn die
+   * Parameter sender und idx in der alphabetisch sortierten Absenderliste des
+   * WollMux übereinstimmen - d.h. die Absenderliste der veranlassenden
+   * SenderBox zum Zeitpunkt der Auswahl konsistent zur PAL des WollMux war. Die
+   * Methode verwendet für sender das selben Format wie es vom
+   * XPALProvider:getCurrentSender() geliefert wird.
+   */
   public void setCurrentSender(String sender, short idx)
   {
-    WollMuxSingleton.getInstance().setCurrentSender(sender, idx);
+    Logger.debug2("WollMux.setCurrentSender(\"" + sender + "\", " + idx + ")");
+    Vector args = new Vector();
+    args.add(new String(sender));
+    args.add(new Integer(idx));
+    WollMuxSingleton.getInstance().getEventProcessor().addEvent(
+        new Event(Event.ON_SET_SENDER, args));
   }
-
-  public String getWollmuxConfAsString()
-  {
-    return WollMuxSingleton.getInstance().getWollmuxConf()
-        .stringRepresentation();
-  }
-
 }

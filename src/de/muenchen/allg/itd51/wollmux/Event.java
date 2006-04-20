@@ -61,11 +61,18 @@ public class Event
 
   public static final int ON_SET_SENDER = 50;
 
-  public static final int ON_SELECTION_CHANGED = 51;
+  public static final int ON_ADD_PAL_CHANGE_EVENT_LISTENER = 51;
+
+  public static final int ON_REMOVE_PAL_CHANGE_EVENT_LISTENER = 52;
+
+  public static final int ON_SELECTION_CHANGED = 53;
 
   public static final int ON_INITIALIZE = 60;
 
   public static final int ON_FRAME_CHANGED = 70;
+
+  public static final int ON_TRY_TO_CLOSE_OOO = 71;
+
 
   // private Felder:
 
@@ -145,6 +152,18 @@ public class Event
     if (event == ON_FOCUS)
     {
       return "ON_FOCUS";
+    }
+    if (event == ON_ADD_PAL_CHANGE_EVENT_LISTENER)
+    {
+      return "ON_ADD_PAL_CHANGE_EVENT_LISTENER";
+    }
+    if (event == ON_REMOVE_PAL_CHANGE_EVENT_LISTENER)
+    {
+      return "ON_REMOVE_PAL_CHANGE_EVENT_LISTENER";
+    }
+    if (event == ON_TRY_TO_CLOSE_OOO)
+    {
+      return "ON_TRY_TO_CLOSE_OOO";
     }
     else
       return "namenlos";

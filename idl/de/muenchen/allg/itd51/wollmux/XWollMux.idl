@@ -1,3 +1,15 @@
+/*
+ * Dateiname: XWollMux.idl
+ * Projekt  : WollMux
+ * Funktion : Interface-Definition für den WollMux-Service
+ * 
+ * Copyright: Landeshauptstadt München
+ *
+ * @author Christoph Lutz (D-III-ITD 5.1)
+ * @version 1.0
+ * 
+ */
+ 
 #ifndef __de_muenchen_allg_itd51_wollmux_XWollMux_idl__ 
 #define __de_muenchen_allg_itd51_wollmux_XWollMux_idl__ 
 
@@ -5,12 +17,23 @@
  
 module de {  module muenchen {  module allg { module itd51 { module wollmux {
 
+/**
+  Dieses Interface beschreibt alle Methoden, die der WollMux-Service exportiert.
+*/
 interface XWollMux
 {
+	// Methoden zum Registrieren/Deregistieren von XPALChangeEventListenern.
 	interface XPALChangeEventBroadcaster;
-	
-	string getWollmuxConfAsString();
 
+    /**
+      Diese Methode setzt den aktuellen Absender der Persönlichen Absenderliste
+      (PAL) auf den Absender sender. Der Absender wird nur gesetzt, wenn die
+      Parameter sender und idx in der alphabetisch sortierten Absenderliste des
+      WollMux übereinstimmen - d.h. die Absenderliste der veranlassenden
+      SenderBox zum Zeitpunkt der Auswahl konsistent zur PAL des WollMux war. 
+      Die Methode verwendet für sender das selben Format wie es vom
+      XPALProvider:getCurrentSender() geliefert wird.
+     */
 	void setCurrentSender([in] string sender, [in] short index);
 }; 
   

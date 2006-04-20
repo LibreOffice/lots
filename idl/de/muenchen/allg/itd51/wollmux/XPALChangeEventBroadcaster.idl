@@ -1,14 +1,46 @@
+/*
+ * Dateiname: XPALChangeEventBroadcaster.idl
+ * Projekt  : WollMux
+ * Funktion : Interface-Definition für einen Broadcaster von Änderungen an der Persönliche Absenderliste (PAL)
+ * 
+ * Copyright: Landeshauptstadt München
+ *
+ * @author Christoph Lutz (D-III-ITD 5.1)
+ * @version 1.0
+ * 
+ */
+
 #ifndef __de_muenchen_allg_itd51_wollmux_XPALChangeEventBroadcaster_idl__ 
 #define __de_muenchen_allg_itd51_wollmux_XPALChangeEventBroadcaster_idl__ 
  
 #include "XPALChangeEventListener.idl" 
  
 module de {  module muenchen {  module allg { module itd51 { module wollmux {
- 
+
+/** 
+  Das Interface XPALChangeEventBroadcasteristener definiert einen Broadcaster, der über
+  Änderungen an der Persönlichen Absenderliste (PAL) informieren kann. Er enthält
+  Methoden zum Registrieren und Deregistrieren von XPALChangeEventListenern.
+ */ 
 interface XPALChangeEventBroadcaster
 {
+    /**
+      Diese Methode registriert einen XPALChangeEventListener, der updates
+      empfängt wenn sich die PAL ändert. Nach dem Registrieren wird sofort ein
+      ON_SELECTION_CHANGED Ereignis ausgelöst, welches dafür sort, dass sofort
+      ein erster update aller Listener ausgeführt wird. Die Methode ignoriert
+      alle XPALChangeEventListenener-Instanzen, die bereits registriert wurden.
+      Mehrfachregistrierung der selben Instanz ist also nicht möglich.
+     */
 	void addPALChangeEventListener( [in] XPALChangeEventListener listener);
-	
+
+    /**
+      Diese Methode deregistriert einen XPALChangeEventListener wenn er bereits
+      registriert war. Nach dem Deregistrieren des letzten XPALChangeEventListener
+      wird der Desktop (und damit die aktuelle OpenOffice.org-Instanz)
+      geschlossen, wenn keine weitere OpenOffice.org-Komponente geöffnet ist. Ein
+      evtl. vorhandener Schnellstarter wird jedoch nicht beendet.
+     */
 	void removePALChangeEventListener( [in] XPALChangeEventListener listener);
 };
 

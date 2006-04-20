@@ -34,6 +34,7 @@ import com.sun.star.awt.XWindow;
 import com.sun.star.frame.FrameSearchFlag;
 import com.sun.star.frame.XFrame;
 import com.sun.star.lang.EventObject;
+import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
 
@@ -43,6 +44,7 @@ import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.DJDataset;
+import de.muenchen.allg.itd51.wollmux.db.DJDatasetListElement;
 import de.muenchen.allg.itd51.wollmux.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.db.DatasetNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
@@ -53,9 +55,9 @@ import de.muenchen.allg.itd51.wollmux.dialog.PersoenlicheAbsenderlisteVerwalten;
 
 /**
  * Der EventHandler stellt die statische Methode processEvent() zur Verfügung,
- * die die Abbarbeitung eines einzelnen Events aus dem EvenProcessor übernehmen
- * soll. Der EventHandler ist der zentrale Einstiegspunkt, für die
- * Implementierung aller WollMux-Funktionen.
+ * die die Abbarbeitung aller Events aus dem EvenProcessor übernimmt. Der
+ * EventHandler ist der zentrale Einstiegspunkt, für die Implementierung aller
+ * WollMux-Funktionen.
  * 
  * @author Christoph Lutz (D-III-ITD 5.1)
  */
@@ -166,6 +168,20 @@ public class EventHandler
         return on_selection_changed();
       }
 
+      if (event.getEvent() == Event.ON_TRY_TO_CLOSE_OOO)
+      {
+        return on_try_to_close_OOo();
+      }
+
+      if (event.getEvent() == Event.ON_ADD_PAL_CHANGE_EVENT_LISTENER)
+      {
+        return on_add_pal_change_event_listener(event);
+      }
+
+      if (event.getEvent() == Event.ON_REMOVE_PAL_CHANGE_EVENT_LISTENER)
+      {
+        return on_remove_pal_change_event_listener(event);
+      }
     }
     catch (Throwable e)
     {
@@ -183,24 +199,8 @@ public class EventHandler
 
   private static boolean on_focus(Event event)
   {
-    // // Alle registrierten SenderBoxen updaten:
-    // UnoService source = new UnoService(event.getSource());
-    // if (source.supportsService("com.sun.star.text.TextDocument"))
-    // {
-    // Iterator i = WollMuxSingleton.getInstance().palChangeListenerIterator();
-    // while (i.hasNext())
-    // {
-    // Logger.debug2("on_focus: Update SenderBox");
-    // EventObject eventObject = new EventObject();
-    // eventObject.Source = WollMuxSingleton.getInstance();
-    // ((XPALChangeEventListener) i.next()).updateContent(eventObject /*
-    // * ,
-    // * source.xModel()
-    // * .getCurrentController().getFrame()
-    // */);
-    // }
-    // }
-    //
+    // Hier wurden früher als Workaround alle registrierten SenderBoxen
+    // geupdated. Das ist jetzt nicht mehr notwendig.
     return EventProcessor.processTheNextEvent;
   }
 
@@ -219,7 +219,7 @@ public class EventHandler
       {
         ((XPALChangeEventListener) i.next()).updateContent(eventObject);
       }
-      catch (Exception x)
+      catch (java.lang.Exception x)
       {
         i.remove();
       }
@@ -326,7 +326,6 @@ public class EventHandler
                                         + errorExt);
       }
 
-
       // URL durch den URL-Transformer jagen
       UnoService trans = UnoService.createWithContext(
           "com.sun.star.util.URLTransformer",
@@ -351,12 +350,12 @@ public class EventHandler
       {
         throw new IOException(
             "Die URL \""
-            + url.toExternalForm()
-            + "\" kann nicht aufgelöst werden!\n\n"
-            + "Bitte stellen Sie sicher, dass das verwendete Textfragment existiert und unbeschädigt ist."
-            + errorExt);
+                + url.toExternalForm()
+                + "\" kann nicht aufgelöst werden!\n\n"
+                + "Bitte stellen Sie sicher, dass das verwendete Textfragment existiert und unbeschädigt ist."
+                + errorExt);
       }
-      
+
       // URL in die in loadUrlStr (zum sofort öffnen) und in argsUrlStr (zum
       // später öffnen) aufnehmen
       if (count == 0)
@@ -397,14 +396,7 @@ public class EventHandler
     UnoService source = new UnoService(event.getSource());
     if (source.supportsService("com.sun.star.text.TextDocument"))
     {
-      // TODO: das wird mit der WollMuxBar nicht mehr benötigt...
-      // auf Events des Frame hören:
-      // XFrame frame = source.xModel().getCurrentController().getFrame();
-      // frame.addFrameActionListener(mux.getEventProcessor());
-      // OOOUI (Menues + Toolbars) aktualisieren
-      // mux.getEventProcessor().addEvent(
-      // new Event(Event.ON_FRAME_CHANGED, null, frame));
-
+      // beim on_opendocument erzeugte frag_id-liste aus puffer holen.
       String[] frag_urls = new String[] {};
       if (docFragUrlsBuffer.containsKey(source.xInterface()))
         frag_urls = (String[]) docFragUrlsBuffer.remove(source.xInterface());
@@ -419,26 +411,43 @@ public class EventHandler
   private static boolean on_frame_changed(Event event)
       throws EndlessLoopException, WMCommandsFailedException
   {
-    // WollMuxSingleton mux = WollMuxSingleton.getInstance();
-    //
-    // UnoService source = new UnoService(event.getSource());
-    // if (source.xFrame() != null)
-    // {
-    // OOoUserInterface.generateToolbarEntries(mux.getWollmuxConf(), mux
-    // .getXComponentContext(), source.xFrame());
-    // OOoUserInterface.generateMenues(mux.getWollmuxConf(), mux
-    // .getXComponentContext(), source.xFrame());
-    // }
+    // Hier wurden früher die In OOo-eingebetteten Menüs und Symbolleiten
+    // geupdated. Das ist jetzt nicht mehr notwendig.
     return EventProcessor.processTheNextEvent;
   }
 
   private static boolean on_set_sender(Event event)
   {
-    Object source = event.getSource();
-    if (source instanceof DJDataset)
+    // prüfen der Event-Argumente
+    if (event.getArgs().size() == 2
+        && event.getArgs().get(0) instanceof String
+        && event.getArgs().get(1) instanceof Integer)
     {
-      ((DJDataset) source).select();
+      String sender = (String) event.getArgs().get(0);
+      Integer idx = (Integer) event.getArgs().get(1);
+
+      DJDatasetListElement[] pal = WollMuxSingleton.getInstance()
+          .getSortedPALEntries();
+
+      // nur den neuen Absender setzen, wenn index und sender übereinstimmen,
+      // d.h.
+      // die Absenderliste der entfernten WollMuxBar konsistent war.
+      if (idx.intValue() >= 0
+          && idx.intValue() < pal.length
+          && pal[idx.intValue()].toString().equals(sender))
+      {
+        pal[idx.intValue()].getDataset().select();
+      }
+      else
+      {
+        Logger.error("Setzen des Senders \""
+                     + sender
+                     + "\" schlug fehl, da der index \""
+                     + idx
+                     + "\" nicht mit der PAL übereinstimmt (Inkosistenzen?)");
+      }
     }
+
     WollMuxSingleton.getInstance().getEventProcessor().addEvent(
         new Event(Event.ON_SELECTION_CHANGED));
     return EventProcessor.processTheNextEvent;
@@ -516,6 +525,50 @@ public class EventHandler
         showInfoModal("WollMux-Info", message);
       }
     }
+    return EventProcessor.processTheNextEvent;
+  }
+
+  /**
+   * Schließt OpenOffice.org, wenn keine andere OOo-Komponente geöffnet ist.
+   */
+  private static boolean on_try_to_close_OOo()
+  {
+    try
+    {
+      UnoService desktop = UnoService.createWithContext(
+          "com.sun.star.frame.Desktop",
+          WollMuxSingleton.getInstance().getXComponentContext());
+      if (desktop.xDesktop() != null)
+      {
+        if (!desktop.xDesktop().getComponents().hasElements())
+          desktop.xDesktop().terminate();
+      }
+    }
+    catch (Exception e)
+    {
+      Logger.error(e);
+    }
+
+    return EventProcessor.processTheNextEvent;
+  }
+
+  private static boolean on_add_pal_change_event_listener(Event e)
+  {
+    XPALChangeEventListener l = (XPALChangeEventListener) UnoRuntime
+        .queryInterface(XPALChangeEventListener.class, e.getSource());
+    WollMuxSingleton.getInstance().addPALChangeEventListener(l);
+
+    WollMuxSingleton.getInstance().getEventProcessor().addEvent(
+        new Event(Event.ON_SELECTION_CHANGED));
+
+    return EventProcessor.processTheNextEvent;
+  }
+
+  private static boolean on_remove_pal_change_event_listener(Event e)
+  {
+    XPALChangeEventListener l = (XPALChangeEventListener) UnoRuntime
+        .queryInterface(XPALChangeEventListener.class, e.getSource());
+    WollMuxSingleton.getInstance().removePALChangeEventListener(l);
     return EventProcessor.processTheNextEvent;
   }
 

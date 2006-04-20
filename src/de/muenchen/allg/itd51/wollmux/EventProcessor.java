@@ -268,5 +268,4 @@ public class EventProcessor implements XEventListener, XModifyListener,
     if (action == FrameAction.COMPONENT_REATTACHED)
       addEvent(new Event(Event.ON_FRAME_CHANGED, null, event.Source));
   }
-
 }
