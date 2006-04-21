@@ -153,11 +153,6 @@ public class WollMuxBar
   private Map mapMenuNameToJPopupMenu = new HashMap();
   
   /**
-   * Mappt einen Menü-Namen auf ein entsprechendes JMenu.
-   */
-  private Map mapMenuNameToJMenu = new HashMap();
-  
-  /**
    * Die UIElementFactory, die verwendet wird, um das GUI aufzubauen.
    */
   private UIElementFactory uiElementFactory;
