@@ -9,6 +9,10 @@
 * Datum      | Wer | Änderungsgrund
 * -------------------------------------------------------------------
 * 05.01.2006 | BNK | Erstellung
+* 21.04.2006 | BNK | +Set supportedActions zum Angeben welche ACTIONs akzeptiert werden
+*                  | +TYPE "menuitem"
+*                  | +ACTION "openTemplate" und "openDocument"
+*                  | null-Werte in den Maps unterstützt
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -28,6 +32,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import javax.swing.AbstractButton;
 import javax.swing.Box;
@@ -35,6 +40,7 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
@@ -69,22 +75,27 @@ public class UIElementFactory
   private Map mapTypeToLayoutConstraints;
   private Map mapTypeToLabelType;
   private Map mapTypeToLabelLayoutConstraints;
+  private Set supportedActions;
   private UIElementEventHandler uiElementEventHandler;
   
   /**
-   * Wenn kein Mapping gefunden wird, wird ein Mapping für "default" gesucht. 
+   * Wenn kein Mapping gefunden wird, wird ein Mapping für "default" gesucht.
+   * TODO null Werte in den maps sind erlaubt und werden zurückgeliefert (es wird nicht DEFAULT konsultiert) 
    */
   public UIElementFactory(Map mapTypeToLayoutConstraints, Map mapTypeToLabelType,
-                          Map mapTypeToLabelLayoutConstraints, UIElementEventHandler handler)
+                          Map mapTypeToLabelLayoutConstraints, 
+                          Set supportedActions, UIElementEventHandler handler)
   {
     this.mapTypeToLayoutConstraints = mapTypeToLayoutConstraints;
     this.mapTypeToLabelType = mapTypeToLabelType;
     this.mapTypeToLabelLayoutConstraints = mapTypeToLabelLayoutConstraints;
+    this.supportedActions = supportedActions;
     uiElementEventHandler = handler;
   }
   
   /**
-   * 
+   * TODO Doku mit vollständiger Liste der unterstützten Typen (inkl. h-separator et al)
+   * TODO Was passiert, wenn in einer map fuer einen Typ z.B. kein labelType oder keine LayoutConstraints gefunden werden (DEFAULT wird herangezogen)
    * @param context bildet (falls non-null) Typnamen auf andere ab. Auf diese Weise lassen sich
    *                unterschiedliche Interpretationen des selben Typs in verschiedenen
    *                Kontexten realisieren. Z.B. könnte in dieser Map der Typ "button" auf
@@ -130,12 +141,23 @@ public class UIElementFactory
      */
     if (context != null && context.containsKey(type)) 
       type = (String)context.get(type);
+
+    /*
+     * ACHTUNG! Hier wird immer erst mit containsKey() getestet, anstatt
+     * nur get() zu machen und auf null zu testen, weil null-Werte in
+     * den Maps erlaubt sind und zurückgeliefert werden sollen.
+     */
     
-    Object layoutConstraints = mapTypeToLayoutConstraints.get(type);
-    if (layoutConstraints == null) 
+    Object layoutConstraints;
+    if (mapTypeToLayoutConstraints.containsKey(type))
+      layoutConstraints = mapTypeToLayoutConstraints.get(type);
+    else
       layoutConstraints = mapTypeToLayoutConstraints.get(DEFAULT);
-    Object labelLayoutConstraints = mapTypeToLabelLayoutConstraints.get(type);
-    if (labelLayoutConstraints ==null)
+    
+    Object labelLayoutConstraints;
+    if (mapTypeToLabelLayoutConstraints.containsKey(type))
+      labelLayoutConstraints = mapTypeToLabelLayoutConstraints.get(type);
+    else
       labelLayoutConstraints = mapTypeToLabelLayoutConstraints.get(DEFAULT);
     /**
      * Falls nötig, erzeuge unabhängigen Klon der Layout Constraints.
@@ -145,16 +167,24 @@ public class UIElementFactory
     if (labelLayoutConstraints instanceof GridBagConstraints) 
       labelLayoutConstraints = ((GridBagConstraints)labelLayoutConstraints).clone();
         
-    Integer labelType = (Integer)mapTypeToLabelType.get(type);
-    if (labelType == null)
+    Integer labelType;
+    if (mapTypeToLabelType.containsKey(type)) 
+      labelType = (Integer)mapTypeToLabelType.get(type);
+    else
       labelType = (Integer)mapTypeToLabelType.get(DEFAULT);
   
     UIElement uiElement;
     Condition constraints = ConditionFactory.getGrandchildCondition(conf.query("PLAUSI"));
     
-    if (type.equals("button"))
+    if (type.equals("button") ||
+        type.equals("menuitem"))
     {
-      AbstractButton button = new JButton(label);
+      AbstractButton button;
+      if (type.equals("button"))
+        button = new JButton(label);
+      else
+        button = new JMenuItem(label);
+      
       button.setMnemonic(hotkey);
       if (!tip.equals("")) button.setToolTipText(tip);
       uiElement = new UIElement.Button(id, button, layoutConstraints);
@@ -270,7 +300,7 @@ public class UIElementFactory
       return new UIElement.Box(id, box, layoutConstraints);
     }
     else
-      throw new ConfigurationErrorException("Ununterstützter TYPE: \""+type+"\"");
+      throw new ConfigurationErrorException("Ununterstützter TYPE für GUI Element: \""+type+"\"");
       
     //Sollte nie erreicht werden. Entweder wir liefern ein UIElement oder wir
     //werfen eine Exception mit problemspezifischer Meldung.
@@ -348,6 +378,12 @@ public class UIElementFactory
   
   private ActionListener getAction(UIElement uiElement, String action, ConfigThingy conf, UIElementEventHandler handler)
   {
+    if (!supportedActions.contains(action))
+    {
+      Logger.error("Ununterstützte ACTION \""+action+"\"");
+      return null;
+    }
+    
     if (action.equals("switchWindow"))
     {
       try{
@@ -358,9 +394,28 @@ public class UIElementFactory
         Logger.error("ACTION \"switchWindow\" erfordert WINDOW-Attribut");
       }
     }
-    else
+    else if (action.equals("openTemplate") ||
+             action.equals("openDocument"))
     {
-      Logger.error("Ununterstützte ACTION \""+action+"\"");
+      ConfigThingy fids = conf.query("FRAG_ID");
+      if(fids.count() > 0) 
+      {
+        Iterator i = fids.iterator();
+        String fragId = i.next().toString();
+        while (i.hasNext())
+        {
+          fragId += "&" + i.next().toString();
+        }
+        return new UIElementActionListener(handler, uiElement, "action", new Object[]{action, fragId});
+      }
+      else
+      {
+        Logger.error("ACTION \""+action+"\" erfordert mindestens ein Attribut FRAG_ID");
+      }
+    }
+    else 
+    {
+      return new UIElementActionListener(handler, uiElement, "action", new Object[]{action});
     }
     
     return null;
