@@ -71,9 +71,6 @@ public class Event
 
   public static final int ON_FRAME_CHANGED = 70;
 
-  public static final int ON_TRY_TO_CLOSE_OOO = 71;
-
-
   // private Felder:
 
   private int event = UNKNOWN;
@@ -160,10 +157,6 @@ public class Event
     if (event == ON_REMOVE_PAL_CHANGE_EVENT_LISTENER)
     {
       return "ON_REMOVE_PAL_CHANGE_EVENT_LISTENER";
-    }
-    if (event == ON_TRY_TO_CLOSE_OOO)
-    {
-      return "ON_TRY_TO_CLOSE_OOO";
     }
     else
       return "namenlos";

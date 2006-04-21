@@ -243,11 +243,7 @@ public class WollMuxSingleton implements XPALProvider
 
   /**
    * Diese Methode deregistriert einen XPALChangeEventListener wenn er bereits
-   * registriert war. Nach dem Deregistrieren des letzten
-   * XPALChangeEventListener wird der Desktop (und damit die aktuelle
-   * OpenOffice.org-Instanz) geschlossen, wenn keine weitere
-   * OpenOffice.org-Komponente geöffnet ist. Ein evtl. vorhandener
-   * Schnellstarter wird jedoch nicht beendet.
+   * registriert war. 
    * 
    * Achtung: Die Methode darf nicht direkt von einem UNO-Service aufgerufen
    * werden, sondern jeder Aufruf muss über den EventHandler laufen. Deswegen
@@ -262,12 +258,6 @@ public class WollMuxSingleton implements XPALProvider
     {
       Object l = i.next();
       if (UnoRuntime.areSame(l, listener)) i.remove();
-    }
-    if (registeredPALChangeListener.size() == 0)
-    {
-      // Versuche den desktop zu schließen wenn kein Eintrag mehr da ist
-      // und der Desktop auch sonst keine Elemente enthält:
-      getEventProcessor().addEvent(new Event(Event.ON_TRY_TO_CLOSE_OOO));
     }
   }
 

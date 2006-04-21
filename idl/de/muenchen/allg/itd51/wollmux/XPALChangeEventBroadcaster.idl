@@ -36,10 +36,7 @@ interface XPALChangeEventBroadcaster
 
     /**
       Diese Methode deregistriert einen XPALChangeEventListener wenn er bereits
-      registriert war. Nach dem Deregistrieren des letzten XPALChangeEventListener
-      wird der Desktop (und damit die aktuelle OpenOffice.org-Instanz)
-      geschlossen, wenn keine weitere OpenOffice.org-Komponente geöffnet ist. Ein
-      evtl. vorhandener Schnellstarter wird jedoch nicht beendet.
+      registriert war.
      */
 	void removePALChangeEventListener( [in] XPALChangeEventListener listener);
 };

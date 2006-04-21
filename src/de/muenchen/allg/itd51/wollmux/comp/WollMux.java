@@ -383,10 +383,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
 
   /**
    * Diese Methode deregistriert einen XPALChangeEventListener wenn er bereits
-   * registriert war. Nach dem Deregistrieren des letzten PALChangeEventListener
-   * wird der Desktop (und damit die aktuelle OpenOffice.org-Instanz)
-   * geschlossen, wenn keine weitere OpenOffice.org-Komponente geöffnet ist. Ein
-   * evtl. vorhandener Schnellstarter wird jedoch nicht beendet.
+   * registriert war. 
    * 
    * @see de.muenchen.allg.itd51.wollmux.XPALChangeEventBroadcaster#removePALChangeEventListener(de.muenchen.allg.itd51.wollmux.XPALChangeEventListener)
    */

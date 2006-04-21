@@ -168,11 +168,6 @@ public class EventHandler
         return on_selection_changed();
       }
 
-      if (event.getEvent() == Event.ON_TRY_TO_CLOSE_OOO)
-      {
-        return on_try_to_close_OOo();
-      }
-
       if (event.getEvent() == Event.ON_ADD_PAL_CHANGE_EVENT_LISTENER)
       {
         return on_add_pal_change_event_listener(event);
@@ -525,30 +520,6 @@ public class EventHandler
         showInfoModal("WollMux-Info", message);
       }
     }
-    return EventProcessor.processTheNextEvent;
-  }
-
-  /**
-   * Schließt OpenOffice.org, wenn keine andere OOo-Komponente geöffnet ist.
-   */
-  private static boolean on_try_to_close_OOo()
-  {
-    try
-    {
-      UnoService desktop = UnoService.createWithContext(
-          "com.sun.star.frame.Desktop",
-          WollMuxSingleton.getInstance().getXComponentContext());
-      if (desktop.xDesktop() != null)
-      {
-        if (!desktop.xDesktop().getComponents().hasElements())
-          desktop.xDesktop().terminate();
-      }
-    }
-    catch (Exception e)
-    {
-      Logger.error(e);
-    }
-
     return EventProcessor.processTheNextEvent;
   }
 
