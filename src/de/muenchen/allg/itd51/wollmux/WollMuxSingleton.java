@@ -13,13 +13,13 @@
  *                    + verwenden des Konfigurationsparameters SENDER_SOURCE
  *                    + Erster Start des wollmux über wm_configured feststellen.
  * 05.12.2005 | BNK | line.separator statt \n     
- <<<<<<< .mine
  * 13.04.2006 | BNK | .wollmux/ Handling ausgegliedert in WollMuxFiles.
  * 20.04.2006 | LUT | Überarbeitung Code-Kommentare  
- =======
- * 13.04.2006 | BNK | .wollmux/ Handling ausgegliedert in WollMuxFiles.
- * 20.04.2006 | BNK | DEFAULT_CONTEXT ausgegliedert nach WollMuxFiles  
- >>>>>>> .r773
+ * 20.04.2006 | BNK | DEFAULT_CONTEXT ausgegliedert nach WollMuxFiles
+ * 21.04.2006 | LUT | + Robusteres Verhalten bei Fehlern während dem Einlesen 
+ *                    von Konfigurationsdateien; 
+ *                    + wohldefinierte Datenstrukturen
+ *                    + Flag für EventProcessor: acceptEvents
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -36,6 +36,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Vector;
 
+import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
 
@@ -86,56 +87,73 @@ public class WollMuxSingleton implements XPALProvider
    */
   private WollMuxSingleton(XComponentContext ctx)
   {
+    boolean successfullStartup = true;
+
     registeredPALChangeListener = new Vector();
     this.ctx = ctx;
 
     WollMuxFiles.setupWollMuxDir();
 
+    Logger.debug("StartupWollMux");
+    Logger.debug("Build-Info: " + getBuildInfo());
+    Logger.debug("wollmuxConfFile = "
+                 + WollMuxFiles.getWollMuxConfFile().toString());
+    Logger.debug("DEFAULT_CONTEXT \""
+                 + WollMuxFiles.getDEFAULT_CONTEXT().toString()
+                 + "\"");
+
+    // VisibleTextFragmentList erzeugen
+    textFragmentList = new VisibleTextFragmentList(WollMuxFiles
+        .getWollmuxConf());
+
+    // DatasourceJoiner erzeugen
+    ConfigThingy senderSource = WollMuxFiles.getWollmuxConf().query(
+        "SENDER_SOURCE");
+    String senderSourceStr = "";
     try
     {
-      Logger.debug("StartupWollMux");
-      Logger.debug("Build-Info: " + getBuildInfo());
-      Logger.debug("wollmuxConfFile = "
-                   + WollMuxFiles.getWollMuxConfFile().toString());
-      Logger.debug("DEFAULT_CONTEXT \""
-                   + WollMuxFiles.getDEFAULT_CONTEXT().toString()
-                   + "\"");
-
-      // VisibleTextFragmentList erzeugen
-      textFragmentList = new VisibleTextFragmentList(WollMuxFiles
-          .getWollmuxConf());
-
-      // DatasourceJoiner erzeugen
-      ConfigThingy ssource = WollMuxFiles.getWollmuxConf().query(
-          "SENDER_SOURCE");
-      String ssourceStr;
-      try
-      {
-        ssourceStr = ssource.getLastChild().toString();
-      }
-      catch (NodeNotFoundException e)
-      {
-        throw new ConfigurationErrorException(
-            "Keine Hauptdatenquelle (SENDER_SOURCE) definiert.");
-      }
+      senderSourceStr = senderSource.getLastChild().toString();
+    }
+    catch (NodeNotFoundException e)
+    {
+      Logger
+          .error(
+              "WollMux konnte nicht gestartet werden:",
+              new ConfigurationErrorException(
+                  "Keine Hauptdatenquelle SENDER_SOURCE definiert! Setze SENDER_SOURCE=\"\"."));
+      successfullStartup = false;
+    }
+    try
+    {
       datasourceJoiner = new DatasourceJoiner(WollMuxFiles.getWollmuxConf(),
-          ssourceStr, WollMuxFiles.getLosCacheFile(), WollMuxFiles
+          senderSourceStr, WollMuxFiles.getLosCacheFile(), WollMuxFiles
               .getDEFAULT_CONTEXT());
+    }
+    catch (ConfigurationErrorException e)
+    {
+      Logger.error("WollMux konnte nicht gestartet werden:", e);
+      successfullStartup = false;
+    }
 
-      // register global EventListener
+    // Initialisiere EventProcessor
+    getEventProcessor().setAcceptEvents(successfullStartup);
+
+    // register global EventListener
+    try
+    {
       UnoService eventBroadcaster = UnoService.createWithContext(
           "com.sun.star.frame.GlobalEventBroadcaster",
           ctx);
       eventBroadcaster.xEventBroadcaster()
           .addEventListener(getEventProcessor());
-
-      // Event ON_FIRST_INITIALIZE erzeugen:
-      getEventProcessor().addEvent(new Event(Event.ON_INITIALIZE));
     }
-    catch (java.lang.Exception e)
+    catch (Exception e)
     {
-      Logger.error("WollMux konnte nicht gestartet werden:", e);
+      Logger.error(e);
     }
+
+    // Event ON_FIRST_INITIALIZE erzeugen:
+    getEventProcessor().addEvent(new Event(Event.ON_INITIALIZE));
   }
 
   /**
@@ -243,7 +261,7 @@ public class WollMuxSingleton implements XPALProvider
 
   /**
    * Diese Methode deregistriert einen XPALChangeEventListener wenn er bereits
-   * registriert war. 
+   * registriert war.
    * 
    * Achtung: Die Methode darf nicht direkt von einem UNO-Service aufgerufen
    * werden, sondern jeder Aufruf muss über den EventHandler laufen. Deswegen

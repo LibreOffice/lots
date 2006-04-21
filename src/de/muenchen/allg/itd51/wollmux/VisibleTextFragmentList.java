@@ -10,6 +10,10 @@
  * Datum      | Wer | Änderungsgrund
  * -------------------------------------------------------------------
  * 13.10.2005 | LUT | Erstellung
+ * 20.04.2006 | LUT | Testen ob FRAG_IDs Identifier sind
+ * 21.04.2006 | LUT | + Keine Warnung wenn keine Textfragmente definiert - Eine
+ *                      Konfiguration ohne Textfragmente kann durchaus gewünscht sein.
+ *                    + getURLByID: ConfigurationErrorException statt NodeNotFoundException
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -103,8 +107,6 @@ public class VisibleTextFragmentList
     }
     Logger
         .debug("VisibleTextFragmentList: " + fragmentMap.size() + " entries.");
-    if (fragmentMap.size() == 0)
-      Logger.log("Es wurden keine Textfragmente definiert.");
   }
 
   private String expandVariable(ConfigThingy node, ConfigThingy root)
@@ -203,13 +205,23 @@ public class VisibleTextFragmentList
    *           Bei der Ersetzung der Variablen in der URL trat eine
    *           Endlosschleife auf.
    */
-  public String getURLByID(String frag_id) throws NodeNotFoundException,
+  public String getURLByID(String frag_id) throws ConfigurationErrorException,
       TextFragmentNotDefinedException, EndlessLoopException
   {
     if (frag_id != null && fragmentMap.containsKey(frag_id))
     {
       ConfigThingy frag = (ConfigThingy) fragmentMap.get(frag_id);
-      return expandVariable(frag.get("URL"), root);
+      ConfigThingy url;
+      try
+      {
+        url = frag.get("URL");
+      }
+      catch (NodeNotFoundException e)
+      {
+        throw new ConfigurationErrorException(
+            "Argument URL fehlt in Textfragment \"" + frag_id + "\"!");
+      }
+      return expandVariable(url, root);
     }
     else
       throw new TextFragmentNotDefinedException(frag_id);

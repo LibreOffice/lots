@@ -13,7 +13,9 @@
  *                  | Beheben des Seitenansicht-Toolbar-Verschwindibus-Problems)
  *                  | Ausgabe des hashCode()s in den Debug-Meldungen, um Events 
  *                  | Objekten zuordnen zu können beim Lesen des Logfiles
- * 27.03.2005 | LUT | neues Kommando openDocument                 
+ * 27.03.2005 | LUT | neues Kommando openDocument
+ * 21.04.2006 | LUT | +ConfigurationErrorException statt NodeNotFoundException bei
+ *                    fehlendem URL-Attribut in Textfragmenten                
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -277,7 +279,7 @@ public class EventHandler
   }
 
   private static boolean on_opendocument(Event event, boolean asTemplate)
-      throws Exception, NodeNotFoundException, TextFragmentNotDefinedException,
+      throws Exception, ConfigurationErrorException, TextFragmentNotDefinedException,
       EndlessLoopException, IOException, MalformedURLException
   {
     WollMuxSingleton mux = WollMuxSingleton.getInstance();

@@ -12,6 +12,7 @@
  * 01.12.2005 | BNK | Ausgabe des hashCode()s in den Debug-Meldungen, um Events 
  *                  | Objekten zuordnen zu können beim Lesen des Logfiles
  *                  | +ON_UNLOAD
+ * 21.04.2006 | LUT | +acceptEvents-Flag zum deaktivieren der Event-Entgegennahme.                 
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -46,6 +47,12 @@ import de.muenchen.allg.afid.UnoService;
 public class EventProcessor implements XEventListener, XModifyListener,
     XFrameActionListener, ActionListener
 {
+  /**
+   * Gibt an, ob der EventProcessor überhaupt events entgegennimmt. Ist
+   * acceptEvents=false, werden alle Events ignoriert.
+   */
+  private boolean acceptEvents = false;
+
   private List eventQueue = new LinkedList();
 
   private static EventProcessor singletonInstance;
@@ -65,6 +72,18 @@ public class EventProcessor implements XEventListener, XModifyListener,
   {
     if (singletonInstance == null) singletonInstance = new EventProcessor();
     return singletonInstance;
+  }
+
+  /**
+   * Mit dieser Methode ist es möglich die Entgegennahme von Events zu
+   * blockieren. Alle eingehenden Events werden ignoriert, wenn accept auf false
+   * gesetzt ist und entgegengenommen, wenn accept auf true gesetzt ist.
+   * 
+   * @param accept
+   */
+  public void setAcceptEvents(boolean accept)
+  {
+    acceptEvents = accept;
   }
 
   private EventProcessor()
@@ -109,14 +128,15 @@ public class EventProcessor implements XEventListener, XModifyListener,
   }
 
   /**
-   * Diese Methode fügt ein Event an die eventQueue an und weckt den
-   * EventProcessor-Thread.
+   * Diese Methode fügt ein Event an die eventQueue an wenn der WollMux
+   * erfolgreich initialisiert wurde und damit events akzeptieren darf.
+   * Anschliessend weckt sie den EventProcessor-Thread.
    * 
    * @param event
    */
   public void addEvent(Event event)
   {
-    synchronized (eventQueue)
+    if (acceptEvents) synchronized (eventQueue)
     {
       eventQueue.add(event);
       eventQueue.notifyAll();
