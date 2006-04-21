@@ -17,6 +17,12 @@
 * 15.02.2006 | BNK | ordentliches Abort auch bei schliessen des Icon-Fensters
 * 19.04.2006 | BNK | [R1342][R1398]große Aufräumaktion, Umstellung auf WollMuxBarEventHandler
 * 20.04.2006 | BNK | [R1207][R1205]Icon der WollMuxBar konfigurierbar, Anzeigemodus konfigurierbar
+* 21.04.2006 | BNK | Umgestellt auf UIElementFactory
+*                  | Bitte Warten... in der Senderbox solange noch keine Verbindung besteht
+*                  | Wenn ein Menü mehrfach verwendet wird, so wird jetzt jedes
+*                  | Mal ein neues erzeugt, um Probleme zu vermeiden, die auftreten
+*                  | könnten, wenn das selbe JMenu an mehreren Stellen in der
+*                  | Komponentenhierarchie erscheint.
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -44,14 +50,15 @@ import java.awt.event.WindowListener;
 import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
 
 import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
-import javax.swing.Box;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -60,11 +67,8 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
-import javax.swing.JSeparator;
-import javax.swing.SwingConstants;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
@@ -154,10 +158,19 @@ public class WollMuxBar
   private Map mapMenuNameToJMenu = new HashMap();
   
   /**
-   * Rand über und unter einem horizontalen bzw links und rechts neben vertikalem
-   * Separator (in Pixeln).
+   * Die UIElementFactory, die verwendet wird, um das GUI aufzubauen.
    */
-  private final static int SEP_BORDER = 4;
+  private UIElementFactory uiElementFactory;
+  
+  /**
+   * Kontext für GUI-Elemente in JPanels (für Übergabe an die uiElementFactory).
+   */
+  private Map panelContext;
+  
+  /**
+   * Kontext für GUI-Elemente in JMenus und JPopupMenus (für Übergabe an die uiElementFactory).
+   */
+  private Map menuContext;
   
   /**
    * Rand um Textfelder (wird auch für ein paar andere Ränder verwendet)
@@ -169,35 +182,13 @@ public class WollMuxBar
    * Rand um Buttons (in Pixeln).
    */
   private final static int BUTTON_BORDER = 2;
-
   
   /**
    * ActionListener für Buttons mit der ACTION "abort". 
    */
   private ActionListener actionListener_abort = new ActionListener()
        { public void actionPerformed(ActionEvent e){ abort(); } };
-        
-  /**
-   * ActionListener für Buttons mit der ACTION "openTemplate". 
-   */
-  private ActionListener actionListener_openTemplate = new ActionListener()
-       { public void actionPerformed(ActionEvent e){ 
-         eventHandler.handleWollMuxUrl(WollMux.cmdOpenTemplate, e.getActionCommand()); } };
-
-  /**
-   * ActionListener für Buttons mit der ACTION "openDocument". 
-   */
-  private ActionListener actionListener_openDocument = new ActionListener()
-       { public void actionPerformed(ActionEvent e){ 
-         eventHandler.handleWollMuxUrl(WollMux.cmdOpenDocument, e.getActionCommand()); } };
-
-  /**
-   * ActionListener für Buttons mit der ACTION "absenderAuswaehlen". 
-   */
-  private ActionListener actionListener_absenderAuswaehlen = new ActionListener()
-      { public void actionPerformed(ActionEvent e){ 
-        eventHandler.handleWollMuxUrl(WollMux.cmdAbsenderAuswaehlen, e.getActionCommand()); } };
-  
+    
   /**
    * ActionListener für Buttons, denen ein Menü zugeordnet ist. 
    */
@@ -214,7 +205,6 @@ public class WollMuxBar
    */
   private ItemListener itemListener = new ItemListener() 
     { public void itemStateChanged(ItemEvent e) { senderBoxItemChanged(e); } };
-
 
   /**
    * Alle senderboxes (JComboBoxes) der Leiste.
@@ -252,6 +242,8 @@ public class WollMuxBar
   {
     Logger.debug("WollMuxBar.createGUI");
     Common.setLookAndFeel();
+    
+    initFactories();
     
     String title = DEFAULT_TITLE;
     try{
@@ -332,31 +324,51 @@ public class WollMuxBar
     myFrame.setVisible(true);
   }
   
-  
-  /** Fügt compo UI Elemente gemäss den Kindern von conf.query(key) hinzu.
-   *  compo muss ein GridBagLayout haben. stepx und stepy geben an um
-   *  wieviel mit jedem UI Element die x und die y Koordinate der Zelle
-   *  erhöht werden soll. Wirklich sinnvoll sind hier nur (0,1) und (1,0).
-   *  menuConf muss als Kinder "Menues"-Knoten haben, die als ihre Kinder
-   *  Menübeschreibungen haben für die Menüs, die als UI Elemente verwendet
-   *  werden.
-   *  context kann "menu" oder "panel" sein.
+  /**
+   * Fügt der Komponente compo UI Elemente hinzu, eines für jedes Kind von 
+   * elementParent.
+   * 
+   * @param menuConf die Kinder dieses ConfigThingys müssen "Menues"-Knoten sein,
+   *        deren Kinder Menübeschreibungen sind für die Menüs, 
+   *        die als UI Elemente verwendet werden.
+   * @param elementParent
+   * @param context kann die Werte "menu" oder "panel" haben und gibt an, um was
+   *        es sich bei compo handelt. Abhängig vom context werden manche 
+   *        UI Elemente anders interpretiert, z.B. werden "button" Elemente im
+   *        context "menu" zu JMenuItems.        
+   * @param compo die Komponente zu der die UI Elemente hinzugefügt werden sollen.
+   *        Falls context nicht "menu" ist, muss compo ein GridBagLayout haben.
+   * @param stepx stepx und stepy geben an, um wieviel mit jedem UI Element die x 
+   *        und die y Koordinate innerhalb des GridBagLayouts erhöht werden sollen.
+   *        Sinnvoll sind hier normalerweise nur (0,1) und (1,0).
+   * @param stepy siehe stepx
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TODO Testen
    */
-  private void addUIElements(ConfigThingy menuConf, ConfigThingy elementParent, JComponent compo, int stepx, int stepy, String context)
+  private void addUIElements(ConfigThingy menuConf, ConfigThingy elementParent, 
+      JComponent compo, int stepx, int stepy, String context)
   {
-    // TODO: Umstellen auf uiElementFactory
+    addUIElementsChecked(new HashSet(), menuConf, elementParent, compo, stepx, stepy, context);
+  }
+  
+  /**
+   * Wie addUIElements, aber reicht den Parameter alreadySeen an parseMenu weiter,
+   * um sich gegenseitig enthaltende Menüs zu erkennen.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private void addUIElementsChecked(Set alreadySeen, ConfigThingy menuConf, ConfigThingy elementParent, 
+      JComponent compo, int stepx, int stepy, String context)
+  {
     //int gridx, int gridy, int gridwidth, int gridheight, double weightx, double weighty, int anchor,          int fill,                  Insets insets, int ipadx, int ipady) 
     //GridBagConstraints gbcTextfield = new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0, GridBagConstraints.LINE_START,   GridBagConstraints.HORIZONTAL, new Insets(TF_BORDER,TF_BORDER,TF_BORDER,TF_BORDER),0,0);
-    GridBagConstraints gbcLabel      = new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.NONE,       new Insets(TF_BORDER,TF_BORDER,TF_BORDER,TF_BORDER),0,0);
-    GridBagConstraints gbcGlue       = new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.LINE_START, GridBagConstraints.BOTH,       new Insets(0,0,0,0),0,0);
-    GridBagConstraints gbcButton     = new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.NONE,       new Insets(BUTTON_BORDER,BUTTON_BORDER,BUTTON_BORDER,BUTTON_BORDER),0,0);
     GridBagConstraints gbcMenuButton = new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.NONE,       new Insets(BUTTON_BORDER,BUTTON_BORDER,BUTTON_BORDER,BUTTON_BORDER),0,0);
-    GridBagConstraints gbcListBox    = new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH,           new Insets(TF_BORDER,TF_BORDER,TF_BORDER,TF_BORDER),0,0);
-    GridBagConstraints gbcSeparator  = new GridBagConstraints(0, 0, 1, 1, (double)stepx, (double)stepy, GridBagConstraints.CENTER,  stepx == 0? GridBagConstraints.HORIZONTAL : GridBagConstraints.VERTICAL,       new Insets(stepy > 0? SEP_BORDER:0,stepx > 0? SEP_BORDER:0,stepy > 0? SEP_BORDER:0, stepx > 0? SEP_BORDER:0),0,0);
+    GridBagConstraints gbcSenderbox    = new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH,           new Insets(TF_BORDER,TF_BORDER,TF_BORDER,TF_BORDER),0,0);
       
     int y = -stepy;
     int x = -stepx; 
       
+    Map contextMap = context.equals("menu") ? menuContext : panelContext;
+    
     Iterator piter = elementParent.iterator();
     while (piter.hasNext())
     {
@@ -365,190 +377,130 @@ public class WollMuxBar
       x += stepx;
       
       try{
-        /*
-         * TODO: ACHTUNG! DER FOLGENDE CODE SOLLTE SO GESCHRIEBEN WERDEN,
-         * DASS DER ZUSTAND AUCH IM FALLE EINES GESCHEITERTEN GET()
-         * UND EINER EVTL. DARAUS RESULTIERENDEN NULLPOINTEREXCEPTION
-         * NOCH KONSISTENT IST!
-         */
-        
-        //boolean readonly = false;
-        //String id = "";
-        //try{ id = uiElementDesc.get("ID").toString(); }catch(NodeNotFoundException e){}
-        //try{ if (uiElementDesc.get("READONLY").toString().equals("true")) readonly = true; }catch(NodeNotFoundException e){}
-        String type = uiElementDesc.get("TYPE").toString();
-        
-        if (type.equals("label"))
+        String type;
+        try{
+          type = uiElementDesc.get("TYPE").toString();
+        }
+        catch(NodeNotFoundException e)
         {
-          JLabel uiElement = new JLabel();
-          gbcLabel.gridx = x;
-          gbcLabel.gridy = y;
+          Logger.error("Ein User Interface Element ohne TYPE wurde entdeckt");
+          continue;
+        }
+        
+        if (type.equals("senderbox"))
+        {
+          if (context.equals("menu")) 
+          {
+            Logger.error("Elemente vom Typ \"senderbox\" können nicht in Menüs eingefügt werden!");
+            continue;
+          }
+          
+          int lines = 10;
+          try{ lines = Integer.parseInt(uiElementDesc.get("LINES").toString()); } catch(Exception e){}
+          
+          JComboBox senderbox = new JComboBox();
+          
+          senderbox.setMaximumRowCount(lines);
+          senderbox.setPrototypeDisplayValue("Matthias B. ist euer Gott (W-OLL-MUX-5.1)");
+          senderbox.setEditable(false);
+          
+          senderbox.addItem("Bitte warten...");
+          senderboxes.add(senderbox);
+          
+          gbcSenderbox.gridx = x;
+          gbcSenderbox.gridy = y;
+          compo.add(senderbox, gbcSenderbox);
+        }
+        else if (type.equals("menu"))
+        {
+          String label = "LABEL FEHLT!";
+          try{ label = uiElementDesc.get("LABEL").toString(); } catch(Exception e){}
+          
+          char hotkey = 0;
+          try{
+            hotkey = uiElementDesc.get("HOTKEY").toString().charAt(0);
+          }catch(Exception e){}
+          
+          String menuName = "";
+          try{
+            menuName = uiElementDesc.get("MENU").toString();
+          }catch(NodeNotFoundException e){}
+          
+          AbstractButton button;
           if (context.equals("menu"))
-            compo.add(uiElement);
+          {
+            button = (AbstractButton)parseMenu(alreadySeen, null, menuConf, menuName, new JMenu(label));
+            if (button == null)
+              button = new JMenu(label);
+          }
           else
-            compo.add(uiElement, gbcLabel);
-          uiElement.setText(uiElementDesc.get("LABEL").toString());
+          {
+            parseMenu(alreadySeen, mapMenuNameToJPopupMenu, menuConf, menuName, new JPopupMenu());
+            button = new JButton(label);
+            button.addActionListener(actionListener_openMenu) ;
+            button.setActionCommand(menuName);
+          }
+          
+          button.setMnemonic(hotkey);
+          
+          gbcMenuButton.gridx = x;
+          gbcMenuButton.gridy = y;
+          if (context.equals("menu"))
+            compo.add(button);
+          else
+            compo.add(button, gbcMenuButton);
         }
         else
-          if (type.equals("separator"))
-          {
-            JComponent uiElement = new JSeparator(stepx == 0? SwingConstants.HORIZONTAL : SwingConstants.VERTICAL);
-            if (context.equals("menu"))
-            {
-              JPanel p = new JPanel(new GridLayout(1,1));
-              p.add(uiElement);
-              uiElement = p;
-              uiElement.setBorder(BorderFactory.createEmptyBorder(stepy > 0? SEP_BORDER:0,stepx > 0? SEP_BORDER:0,stepy > 0? SEP_BORDER:0, stepx > 0? SEP_BORDER:0));
-            }
-            
-            gbcSeparator.gridx = x;
-            gbcSeparator.gridy = y;
-            if (context.equals("menu"))
-              compo.add(uiElement);
-            else
-              compo.add(uiElement, gbcSeparator);
-          }
-          else if (type.equals("glue"))
-          {
-            Box uiElement = Box.createHorizontalBox();
-            try{
-              int minsize = Integer.parseInt(uiElementDesc.get("MINSIZE").toString());
-              uiElement.add(Box.createHorizontalStrut(minsize));
-            }catch(Exception e){}
-            uiElement.add(Box.createHorizontalGlue());
-            
-            gbcGlue.gridx = x;
-            gbcGlue.gridy = y;
-            if (context.equals("menu"))
-              compo.add(uiElement);
-            else
-              compo.add(uiElement, gbcGlue);
-          }
+        {
+          UIElement uiElement = uiElementFactory.createUIElement(contextMap, uiElementDesc);
+          GridBagConstraints gbc = (GridBagConstraints)uiElement.getLayoutConstraints();
+          gbc.gridx = x;
+          gbc.gridy = y;
+          if (context.equals("menu"))
+            compo.add(uiElement.getComponent());
           else
-            if (type.equals("senderbox"))
-            {
-              if (context.equals("menu")) 
-              {
-                Logger.error("Elemente vom Typ \"senderbox\" können nicht in Menüs eingefügt werden!");
-                continue;
-              }
-              
-              int lines = 10;
-              try{ lines = Integer.parseInt(uiElementDesc.get("LINES").toString()); } catch(Exception e){}
-              
-              JComboBox senderbox = new JComboBox();
-              
-              senderbox.setMaximumRowCount(lines);
-              senderbox.setPrototypeDisplayValue("Matthias B. ist euer Gott (W-OLL-MUX-5.1)");
-              senderbox.setEditable(false);
-              
-              senderboxes.add(senderbox);
-              
-              gbcListBox.gridx = x;
-              gbcListBox.gridy = y;
-              compo.add(senderbox, gbcListBox);
-            }
-            else
-              if (type.equals("button"))
-              {
-                String action = "";
-                try{
-                  action = uiElementDesc.get("ACTION").toString();
-                }catch(NodeNotFoundException e){}
-                
-                String label  = uiElementDesc.get("LABEL").toString();
-                
-                char hotkey = 0;
-                try{
-                  hotkey = uiElementDesc.get("HOTKEY").toString().charAt(0);
-                }catch(Exception e){}
-                
-                AbstractButton button;
-                if (context.equals("menu"))
-                  button = new JMenuItem(label);
-                else 
-                  button = new JButton(label);
-                
-                button.setMnemonic(hotkey);
-                
-                ActionListener actionL = getAction(action);
-                if (actionL != null) button.addActionListener(actionL);
-                
-                // Erzeuge frag_id-Liste
-                String fragment = "";
-                ConfigThingy fids = uiElementDesc.query("FRAG_ID");
-                if(fids.count() == 0) {
-                  //TODO: Wieso ist dies im WollMux-Branch ein TODO, aber hier war es das nicht?? Bitte erst nach Funktionstest der Log-Meldung wieder aktivieren. Logger.error("Keine FRAG_ID definiert in Element " + uiElementDesc.stringRepresentation());
-                } else {
-                  Iterator i = fids.iterator();
-                  fragment = i.next().toString();
-                  while (i.hasNext())
-                  {
-                    fragment += "&" + i.next().toString();
-                  }
-                }
-
-                button.setActionCommand(fragment);
-                
-                gbcButton.gridx = x;
-                gbcButton.gridy = y;
-                if (context.equals("menu"))
-                  compo.add(button);
-                else
-                  compo.add(button, gbcButton);
-              }
-              else
-                if (type.equals("menu"))
-                {
-                  String label  = uiElementDesc.get("LABEL").toString();
-                  
-                  char hotkey = 0;
-                  try{
-                    hotkey = uiElementDesc.get("HOTKEY").toString().charAt(0);
-                  }catch(Exception e){}
-                  
-                  String menuName = "";
-                  try{
-                    menuName = uiElementDesc.get("MENU").toString();
-                  }catch(NodeNotFoundException e){}
-                  
-                  AbstractButton button;
-                  if (context.equals("menu"))
-                  {
-                    parseMenu(mapMenuNameToJMenu, menuConf, menuName, new JMenu(label));
-                    //FIXME Ich glaube nicht, dass es wirklich funktioniert, das selbe JMenu an mehreren Stellen in die GUI-Hierarchie einzufügen. Insofern ist das mit der Map für JMenus wohl Schmarrn und es sollte jedes mal ein neues JMenu erzeugt werden. Selbiges gilt natürlich genauso innerhalb von parseMenu. Im Falle der JPopupMenus ist das allerdings kein Problem, da diese ja nirgends in die Hierarchie eingehängt werden.
-                    button = (AbstractButton)mapMenuNameToJMenu.get(menuName);
-                    if (button == null)
-                      button = new JMenu(label);
-                  }
-                  else
-                  {
-                    parseMenu(mapMenuNameToJPopupMenu, menuConf, menuName, new JPopupMenu());
-                    button = new JButton(label);
-                    button.addActionListener(actionListener_openMenu) ;
-                    button.setActionCommand(menuName);
-                  }
-                  
-                  button.setMnemonic(hotkey);
-                  
-                  gbcMenuButton.gridx = x;
-                  gbcMenuButton.gridy = y;
-                  if (context.equals("menu"))
-                    compo.add(button);
-                  else
-                    compo.add(button, gbcMenuButton);
-                }
-                else
-                {
-                  Logger.error("Ununterstützter TYPE für User Interface Element: "+type);
-                }
-      } catch(NodeNotFoundException e) {Logger.error(e);}
+            compo.add(uiElement.getComponent(), gbc);
+        }
+      }
+      catch(ConfigurationErrorException e) {Logger.error(e);}
     }
   }
   
-  private void parseMenu(Map mapMenuNameToMenu, ConfigThingy menuConf, String menuName, JComponent menu)
+  /**
+   * Parst eine Menübeschreibung und erzeugt ein entsprechendes Menü.
+   * @param menu das JMenu oder JPopupMenu zu dem die UI Elemente hinzugefügt 
+   *        werden sollen.
+   * @param menuConf die Kinder dieses ConfigThingys müssen "Menues"-Knoten sein,
+   *        deren Kinder Menübeschreibungen sind. 
+   * @param menuName identifiziert das Menü aus menuConf, das geparst wird. Gibt es
+   *        mehrere, so wird das letzte verwendet.
+   * @param mapMenuNameToMenu falls nicht-null, so wird falls bereits ein Eintrag
+   *                          menuName enthalten ist, dieser zurückgeliefert, 
+   *                          ansonsten wird ein Mapping von menuName auf menu
+   *                          hinzugefügt.
+   *                          Falls null, so wird immer ein neues Menü erzeugt,
+   *                          außer das menuName ist in alreadySeen, dann gibt
+   *                          es eine Fehlermeldung
+   * @param alreadySeen falls menuName hier enthalten ist und mapMenuNameToMenu==null
+   *                    dann wird eine Fehlermeldung ausgegeben und null zurückgeliefert.
+   *                          
+   * @return menu, falls das Menü erfolgreich aufgebaut werden konnte, null, wenn 
+   *         das Menü nicht in menuConf definiert ist oder wenn es in alreadySeen
+   *         ist und mapMenuNameToMenu == null.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TODO Testen
+   */
+  private JComponent parseMenu(Set alreadySeen, Map mapMenuNameToMenu, ConfigThingy menuConf, 
+      String menuName, JComponent menu)
   {
-    if (mapMenuNameToMenu.containsKey(menuName)) return;
+    if (mapMenuNameToMenu != null && mapMenuNameToMenu.containsKey(menuName)) 
+      return (JComponent)mapMenuNameToMenu.get(menuName);
+    
+    if (mapMenuNameToMenu == null && alreadySeen.contains(menuName))
+    {
+      Logger.error("Menü \""+menuName+"\" ist an einer Endlosschleife sich gegenseitig enthaltender Menüs beteiligt");
+      return null;
+    }
 
     ConfigThingy conf;
     try
@@ -557,52 +509,117 @@ public class WollMuxBar
     }
     catch (Exception x)
     {
-      Logger.error("Menü \"" + menuName + "\" nicht definiert");
-      return;
+      Logger.error("Menü \"" + menuName + "\" enthält nicht definiert oder enthält keinen Abschnitt \"Elemente()\"");
+      return null;
     }
     
     /*
-     * Zur Vermeidung von Endlosschleifen muss dieses Statement vor dem
-     * Aufruf von addUIElements stehen.
+     * Zur Vermeidung von Endlosschleifen müssen die folgenden BEIDEN Statements 
+     * vor dem Aufruf von addUIElements stehen.
      */
-    mapMenuNameToMenu.put(menuName, menu);
+    alreadySeen.add(menuName);
+    if (mapMenuNameToMenu != null) mapMenuNameToMenu.put(menuName, menu);
     
-//    menu.setLayout(new GridBagLayout());
-    
-    addUIElements(menuConf, conf, menu, 0, 1, "menu");
+    addUIElementsChecked(alreadySeen, menuConf, conf, menu, 0, 1, "menu");
+    return menu;
   }
   
   /**
-   * Übersetzt den Namen einer ACTION in eine Referenz auf das
-   * passende actionListener_... Objekt.
+   * Initialisiert uiElementFactory.
+   * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TODO Testen
    */
-  private ActionListener getAction(String action)
+  private void initFactories()
   {
-    if (action.equals("abort"))
-    {
-      return actionListener_abort;
-    } 
-    if (action.equals("openTemplate"))
-    {
-      return actionListener_openTemplate;
-    }
-    if (action.equals("openDocument"))
-    {
-      return actionListener_openDocument;
-    }
-    if (action.equals("absenderAuswaehlen"))
-    {
-      return actionListener_absenderAuswaehlen;
-    }
-    else if (action.equals(""))
-    {
-      return null;
-    }
-    else
-      Logger.error("Ununterstützte ACTION: "+action);
+    Map mapTypeToLayoutConstraints = new HashMap();
+    Map mapTypeToLabelType = new HashMap();
+    Map mapTypeToLabelLayoutConstraints = new HashMap();
+
+    //int gridx, int gridy, int gridwidth, int gridheight, double weightx, double weighty, int anchor,          int fill,                  Insets insets, int ipadx, int ipady) 
+    GridBagConstraints gbcCombobox  = new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH,           new Insets(TF_BORDER,TF_BORDER,TF_BORDER,TF_BORDER),0,0);
+    GridBagConstraints gbcLabel =     new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.NONE,       new Insets(TF_BORDER,TF_BORDER,TF_BORDER,TF_BORDER),0,0);
+    GridBagConstraints gbcButton    = new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.NONE,       new Insets(BUTTON_BORDER,BUTTON_BORDER,BUTTON_BORDER,BUTTON_BORDER),0,0);
+    GridBagConstraints gbcHsep      = new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL,       new Insets(3*TF_BORDER,0,2*TF_BORDER,0),0,0);
+    GridBagConstraints gbcVsep      = new GridBagConstraints(0, 0, 1, 1, 0.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.VERTICAL,       new Insets(0,TF_BORDER,0,TF_BORDER),0,0);
+    GridBagConstraints gbcGlue      = new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.LINE_START, GridBagConstraints.BOTH,       new Insets(0,0,0,0),0,0);
     
-    return null;
+    
+    mapTypeToLayoutConstraints.put("default", gbcButton);
+    mapTypeToLabelType.put("default", UIElement.LABEL_LEFT);
+    mapTypeToLabelLayoutConstraints.put("default", null);
+    
+    mapTypeToLayoutConstraints.put("combobox", gbcCombobox);
+    mapTypeToLabelType.put("combobox", UIElement.LABEL_LEFT);
+    //mapTypeToLabelLayoutConstraints.put("combobox", none);
+    
+    mapTypeToLayoutConstraints.put("h-glue", gbcGlue);
+    mapTypeToLabelType.put("h-glue", UIElement.LABEL_NONE);
+    //mapTypeToLabelLayoutConstraints.put("h-glue", none);
+    mapTypeToLayoutConstraints.put("v-glue", gbcGlue);
+    mapTypeToLabelType.put("v-glue", UIElement.LABEL_NONE);
+    //mapTypeToLabelLayoutConstraints.put("v-glue", none);
+    
+    mapTypeToLayoutConstraints.put("label", gbcLabel);
+    mapTypeToLabelType.put("label", UIElement.LABEL_NONE);
+    //mapTypeToLabelLayoutConstraints.put("label", none);
+    
+    mapTypeToLayoutConstraints.put("button", gbcButton);
+    mapTypeToLabelType.put("button", UIElement.LABEL_NONE);
+    //mapTypeToLabelLayoutConstraints.put("button", none);
+    
+    mapTypeToLayoutConstraints.put("h-separator", gbcHsep);
+    mapTypeToLabelType.put("h-separator", UIElement.LABEL_NONE);
+    //mapTypeToLabelLayoutConstraints.put("h-separator", none);
+    mapTypeToLayoutConstraints.put("v-separator", gbcVsep);
+    mapTypeToLabelType.put("v-separator", UIElement.LABEL_NONE);
+    //mapTypeToLabelLayoutConstraints.put("v-separator", none);
+    
+    panelContext = new HashMap();
+    panelContext.put("separator","v-separator");
+    panelContext.put("glue","h-glue");
+    
+    menuContext = new HashMap();
+    menuContext.put("separator","h-separator");
+    menuContext.put("glue","v-glue");
+    menuContext.put("button", "menuitem");
+    
+    Set supportedActions = new HashSet();
+    supportedActions.add("openTemplate");
+    supportedActions.add("absenderAuswaehlen");
+    supportedActions.add("openDocument");
+    supportedActions.add("abort");
+    
+    uiElementFactory = new UIElementFactory(mapTypeToLayoutConstraints,
+        mapTypeToLabelType, mapTypeToLabelLayoutConstraints, supportedActions, new MyUIElementEventHandler());
+
+  }
+  
+  private class MyUIElementEventHandler implements UIElementEventHandler
+  {
+
+    public void processUiElementEvent(UIElement source, String eventType, Object[] args)
+    {
+      if (!eventType.equals("action")) return;
+      
+      String action = args[0].toString();
+      if (action.equals("absenderAuswaehlen"))
+      {
+        eventHandler.handleWollMuxUrl(WollMux.cmdAbsenderAuswaehlen,"");
+      }
+      else if (action.equals("openDocument"))
+      {
+        eventHandler.handleWollMuxUrl(WollMux.cmdOpenDocument, args[1].toString());
+      }
+      else if (action.equals("openTemplate"))
+      {
+        eventHandler.handleWollMuxUrl(WollMux.cmdOpenTemplate, args[1].toString());
+      }
+      else if (action.equals("abort"))
+      {
+        abort();
+      }
+    }
   }
   
   
