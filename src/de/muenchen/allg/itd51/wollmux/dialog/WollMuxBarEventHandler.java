@@ -9,6 +9,7 @@
 * Datum      | Wer | Änderungsgrund
 * -------------------------------------------------------------------
 * 18.04.2006 | BNK | Erstellung
+* 21.04.2006 | BNK | Vernünftige Meldung wenn keine Verbindung zum OOo WOllMux hergestellt werden konnte
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -371,18 +372,21 @@ public class WollMuxBarEventHandler
       }
     }
     
-    XWollMux mux = null;
     try
     {
       XComponentContext ctx = Bootstrap.bootstrap();
       XMultiServiceFactory factory = (XMultiServiceFactory) UnoRuntime.queryInterface(XMultiServiceFactory.class, ctx.getServiceManager());
       remoteWollMux = factory.createInstance("de.muenchen.allg.itd51.wollmux.WollMux");
-      mux = (XWollMux) UnoRuntime.queryInterface(XWollMux.class, remoteWollMux);
-    } catch (Exception e) { Logger.error(e); }
+      XWollMux mux = (XWollMux) UnoRuntime.queryInterface(XWollMux.class, remoteWollMux);
+      mux.addPALChangeEventListener(myPALChangeEventListener);
+      return mux;
+    } 
+    catch (Exception e) 
+    { 
+      Logger.error("Konnte keine Verbindung zum WollMux-Modul in OpenOffice herstellen"); 
+    }
 
-    mux.addPALChangeEventListener(myPALChangeEventListener);
-
-    return mux;
+    return null;
   }
 }
 
