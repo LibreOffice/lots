@@ -26,9 +26,11 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
 
 import javax.swing.JPanel;
@@ -404,8 +406,10 @@ public class FormController implements UIElementEventHandler
     buttonContext.put("separator","v-separator");
     buttonContext.put("glue","h-glue");
     
+    Set supportedActions = new HashSet();
+    
     uiElementFactory = new UIElementFactory(mapTypeToLayoutConstraints,
-        mapTypeToLabelType, mapTypeToLabelLayoutConstraints, this);
+        mapTypeToLabelType, mapTypeToLabelLayoutConstraints, supportedActions, this);
 
   }
   
