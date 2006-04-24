@@ -9,6 +9,7 @@
 * Datum      | Wer | Änderungsgrund
 * -------------------------------------------------------------------
 * 11.01.2006 | BNK | Erstellung
+* 24.04.2006 | BNK | kommentiert.
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -39,21 +40,41 @@ import de.muenchen.allg.itd51.wollmux.Value;
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public interface UIElement extends Value
-{
+{ 
+
+  /**
+   * Gibt an, dass das UI Element kein zusätzliches Label erhalten soll.
+   */
   public static final Integer LABEL_NONE = new Integer(0);
+  
+  /**
+   * Gibt an, dass links neben dem UI Element ein zusätzliches Label stehen soll.
+   */
   public static final Integer LABEL_LEFT = new Integer(-1);
+  
+  /**
+   * Gibt an, dass rechts neben dem UI Element ein zusätzliches Label stehen soll.
+   */
   public static final Integer LABEL_RIGHT = new Integer(+1);
 
   /**
-   * LABEL_LEFT, LABEL_RIGHT, LABEL_NONE 
+   * Liefert die Information, ob das UI Element ein
+   * zusätzliches Label links oder rechts bekommen soll. Mögliche Werte sind
+   * {@link #LABEL_LEFT}, {@link #LABEL_RIGHT} und
+   * {@link #LABEL_NONE}.
    */
   public Integer getLabelType();
+
   /**
-   * Label, nur definiert falls getLabelType() ungleich 0.
+   * Ist nur definiert, wenn getLabelType() nicht LABEL_NONE ist und liefert das
+   * anzuzeigende Zusatzlabel. Achtung! Bei UI Elementen, die selbst Labels sind
+   * (TYPE "label") liefert diese Methode <b>nicht</b> das UI Element selbst.
    */
   public Component getLabel();
+  
   /**
-   * Der funktionale Teil des UIElements. 
+   * Der funktionale Teil des UIElements. Achtung! Bei UI Elementen vom TYPE
+   * "label" liefert diese Methode (nicht getLabel()) das Label. 
    */
   public Component getComponent();
   
@@ -69,16 +90,16 @@ public interface UIElement extends Value
   /**
    * Liefert das empfohlene zweite Argument für 
    * {@link java.awt.Container#add(java.awt.Component, java.lang.Object)}
-   * für das Label dieses UIElements. Nur definiert, 
-   * falls getLabelType() ungleich 0.
+   * für das Zusatz-Label dieses UIElements. Nur definiert, 
+   * falls getLabelType() nicht LABEL_NONE ist.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public Object getLabelLayoutConstraints();
   
   /**
-   * Die Beschränkungen der möglichen Werte des UI Elements. null, falls keine
-   * gesetzt.
+   * Die Beschränkungen (Plausis) der möglichen Werte des UI Elements oder null, 
+   * falls keine gesetzt sind.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public Condition getConstraints();
@@ -107,19 +128,24 @@ public interface UIElement extends Value
   /**
    * Liefert die ID dieses UIElements oder "" wenn nicht gesetzt.
    * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TODO Testen
    */
   public String getId();
   
-  /** Setzt eine neue Hintergrundfarbe für das UIElement. */
+  /** 
+   * Setzt eine neue Hintergrundfarbe für das UIElement. 
+   * */
   public void setBackground(Color bg);
   
   /**
-   * Setzt die Sichtbarkeit der Komponente sowie des Labels gemeinsam.
+   * Setzt die Sichtbarkeit der Komponente und ihres Zusatzlabels (falls vorhanden).
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void setVisible(boolean vis);
   
+  /**
+   * Abstrakte Basis-Klasse für UIElemente.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   public static abstract class UIElementBase implements UIElement
   {
     protected Integer labelType = LABEL_NONE;

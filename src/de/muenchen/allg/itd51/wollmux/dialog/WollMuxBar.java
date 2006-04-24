@@ -23,6 +23,7 @@
 *                  | Mal ein neues erzeugt, um Probleme zu vermeiden, die auftreten
 *                  | könnten, wenn das selbe JMenu an mehreren Stellen in der
 *                  | Komponentenhierarchie erscheint.
+* 24.04.2006 | BNK | kleinere Aufräumarbeiten. Code Review.
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -47,7 +48,6 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowFocusListener;
 import java.awt.event.WindowListener;
-import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -72,7 +72,6 @@ import javax.swing.JPopupMenu;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
-import de.muenchen.allg.itd51.parser.SyntaxErrorException;
 import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
@@ -118,7 +117,7 @@ public class WollMuxBar
   private static final int ALWAYS_ON_TOP_WINDOW_MODE = 3;
   
   /**
-   * Der Anzeigemodus für die WollMuxBar (z.B. {@link BECOME_ICON_MODE})
+   * Der Anzeigemodus für die WollMuxBar (z,B, {@link BECOME_ICON_MODE})
    */
   private int windowMode; 
 
@@ -208,22 +207,40 @@ public class WollMuxBar
   
   /**
    * Erzeugt eine neue WollMuxBar.
-   * @param winMode Anzeigemodus, z.B. {@link #BECOME_ICON_MODE} 
+   * @param winMode Anzeigemodus, z.B. {@link #BECOME_ICON_MODE}
+   * @param conf der Inhalt der wollmux.conf 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public WollMuxBar(int winMode, final ConfigThingy conf)
-  throws ConfigurationErrorException, SyntaxErrorException, IOException
   {
     windowMode = winMode;
 
     eventHandler = new WollMuxBarEventHandler(this);
-    eventHandler.connectWithWollMux();
     
-    //  GUI im Event-Dispatching Thread erzeugen wg. Thread-Safety.
+    /*
+     * Die GUI wird im Event-Dispatching Thread erzeugt wg. Thread-Safety.
+     * Auch eventHandler.connectWithWollMux() wird im EDT ausgeführt, um
+     * sicherzustellen, dass kein updateSenderBoxes() ausgeführt wird, bevor
+     * nicht die Senderboxen erzeugt wurden.
+     */
     try{
       javax.swing.SwingUtilities.invokeLater(new Runnable() {
         public void run() {
-            try{createGUI(conf);}catch(Exception x)
+            try{
+              /*
+               * Dieser Befehl steht VOR dem Aufruf von createGUI(), damit
+               * OOo schon gestartet wird, während wir noch mit GUI aufbauen
+               * beschäftigt sind. Es ist trotztdem sichergestellt, dass
+               * updateSenderboxes() nicht vor der Beendigung von createGUI()
+               * aufgerufen werden kann, weil updateSenderboxes() durch den
+               * WollMuxBarEventHandler ebenfalls mit invokeLater() in den EDT
+               * geschickt wird und dort erst zum Zug kommen kann, wenn diese
+               * run() Methode beendet ist. 
+               */
+              eventHandler.connectWithWollMux();
+              
+              createGUI(conf);
+            }catch(Exception x)
             {
               Logger.error(x);
             };
@@ -235,7 +252,6 @@ public class WollMuxBar
 
   private void createGUI(ConfigThingy conf)
   {
-    Logger.debug("WollMuxBar.createGUI");
     Common.setLookAndFeel();
     
     initFactories();
@@ -245,7 +261,6 @@ public class WollMuxBar
       title = conf.get("Fenster").get("WollMuxBar").get("TITLE").toString();
     }catch(Exception x) {}
     
-    //Create and set up the window.
     myFrame = new JFrame(title);
     //leave handling of close request to WindowListener.windowClosing
     myFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -279,11 +294,12 @@ public class WollMuxBar
     }
     myFrame.setJMenuBar(mbar);
     
-    //myFrame.setUndecorated(true);
-    
     logoFrame = new JFrame(title);
     logoFrame.setUndecorated(true);
     logoFrame.setAlwaysOnTop(true);
+    //wie bei myFrame soll abort ausgeführt werden, nicht die default Aktion
+    logoFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+    logoFrame.addWindowListener(new MyWindowListener());
     
     URL iconUrl = ICON_URL;
     try{
@@ -305,9 +321,9 @@ public class WollMuxBar
     logo.addMouseListener(trafo);
     logo.addMouseMotionListener(trafo);
     
-    logoFrame.addWindowListener(new MyWindowListener());
-    
+      //in der Hoffnung, dass es verhindert, dass anderen Fenstern der Fokus gestohlen wird
     logoFrame.setFocusableWindowState(false);
+    
     logoFrame.pack();
     logoFrame.setLocation(0,0);
     logoFrame.setResizable(false);
@@ -338,7 +354,6 @@ public class WollMuxBar
    *        Sinnvoll sind hier normalerweise nur (0,1) und (1,0).
    * @param stepy siehe stepx
    * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TODO Testen
    */
   private void addUIElements(ConfigThingy menuConf, ConfigThingy elementParent, 
       JComponent compo, int stepx, int stepy, String context)
@@ -350,6 +365,7 @@ public class WollMuxBar
    * Wie addUIElements, aber reicht den Parameter alreadySeen an parseMenu weiter,
    * um sich gegenseitig enthaltende Menüs zu erkennen.
    * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED
    */
   private void addUIElementsChecked(Set alreadySeen, ConfigThingy menuConf, ConfigThingy elementParent, 
       JComponent compo, int stepx, int stepy, String context)
@@ -357,7 +373,7 @@ public class WollMuxBar
     //int gridx, int gridy, int gridwidth, int gridheight, double weightx, double weighty, int anchor,          int fill,                  Insets insets, int ipadx, int ipady) 
     //GridBagConstraints gbcTextfield = new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0, GridBagConstraints.LINE_START,   GridBagConstraints.HORIZONTAL, new Insets(TF_BORDER,TF_BORDER,TF_BORDER,TF_BORDER),0,0);
     GridBagConstraints gbcMenuButton = new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.NONE,       new Insets(BUTTON_BORDER,BUTTON_BORDER,BUTTON_BORDER,BUTTON_BORDER),0,0);
-    GridBagConstraints gbcSenderbox    = new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH,           new Insets(TF_BORDER,TF_BORDER,TF_BORDER,TF_BORDER),0,0);
+    GridBagConstraints gbcSenderbox  = new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH,           new Insets(TF_BORDER,TF_BORDER,TF_BORDER,TF_BORDER),0,0);
       
     int y = -stepy;
     int x = -stepx; 
@@ -408,7 +424,7 @@ public class WollMuxBar
         }
         else if (type.equals("menu"))
         {
-          String label = "LABEL FEHLT!";
+          String label = "LABEL FEHLT ODER FEHLERHAFT!";
           try{ label = uiElementDesc.get("LABEL").toString(); } catch(Exception e){}
           
           char hotkey = 0;
@@ -429,7 +445,7 @@ public class WollMuxBar
               button = new JMenu(label);
           }
           else
-          {
+          { 
             parseMenu(alreadySeen, mapMenuNameToJPopupMenu, menuConf, menuName, new JPopupMenu());
             button = new JButton(label);
             button.addActionListener(actionListener_openMenu) ;
@@ -475,7 +491,7 @@ public class WollMuxBar
    *                          hinzugefügt.
    *                          Falls null, so wird immer ein neues Menü erzeugt,
    *                          außer das menuName ist in alreadySeen, dann gibt
-   *                          es eine Fehlermeldung
+   *                          es eine Fehlermeldung.
    * @param alreadySeen falls menuName hier enthalten ist und mapMenuNameToMenu==null
    *                    dann wird eine Fehlermeldung ausgegeben und null zurückgeliefert.
    *                          
@@ -483,7 +499,7 @@ public class WollMuxBar
    *         das Menü nicht in menuConf definiert ist oder wenn es in alreadySeen
    *         ist und mapMenuNameToMenu == null.
    * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TODO Testen
+   * TESTED
    */
   private JComponent parseMenu(Set alreadySeen, Map mapMenuNameToMenu, ConfigThingy menuConf, 
       String menuName, JComponent menu)
@@ -504,18 +520,19 @@ public class WollMuxBar
     }
     catch (Exception x)
     {
-      Logger.error("Menü \"" + menuName + "\" enthält nicht definiert oder enthält keinen Abschnitt \"Elemente()\"");
+      Logger.error("Menü \"" + menuName + "\" nicht definiert oder enthält keinen Abschnitt \"Elemente()\"");
       return null;
     }
     
     /*
      * Zur Vermeidung von Endlosschleifen müssen die folgenden BEIDEN Statements 
-     * vor dem Aufruf von addUIElements stehen.
+     * vor dem Aufruf von addUIElementsChecked stehen.
      */
     alreadySeen.add(menuName);
     if (mapMenuNameToMenu != null) mapMenuNameToMenu.put(menuName, menu);
     
     addUIElementsChecked(alreadySeen, menuConf, conf, menu, 0, 1, "menu");
+    alreadySeen.remove(menuName);
     return menu;
   }
   
@@ -523,7 +540,7 @@ public class WollMuxBar
    * Initialisiert uiElementFactory.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TODO Testen
+   * TESTED
    */
   private void initFactories()
   {
@@ -541,11 +558,11 @@ public class WollMuxBar
     
     
     mapTypeToLayoutConstraints.put("default", gbcButton);
-    mapTypeToLabelType.put("default", UIElement.LABEL_LEFT);
+    mapTypeToLabelType.put("default", UIElement.LABEL_NONE);
     mapTypeToLabelLayoutConstraints.put("default", null);
     
     mapTypeToLayoutConstraints.put("combobox", gbcCombobox);
-    mapTypeToLabelType.put("combobox", UIElement.LABEL_LEFT);
+    mapTypeToLabelType.put("combobox", UIElement.LABEL_NONE);
     //mapTypeToLabelLayoutConstraints.put("combobox", none);
     
     mapTypeToLayoutConstraints.put("h-glue", gbcGlue);
@@ -590,9 +607,13 @@ public class WollMuxBar
 
   }
   
+  /**
+   * Behandelt die Events der Eingabeelemente, die über die uiElementFactory 
+   * erzeugt wurden (also fast alle).
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private class MyUIElementEventHandler implements UIElementEventHandler
   {
-
     public void processUiElementEvent(UIElement source, String eventType, Object[] args)
     {
       if (!eventType.equals("action")) return;
@@ -617,7 +638,118 @@ public class WollMuxBar
     }
   }
   
+  /**
+   * Implementiert die gleichnamige ACTION.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private void abort()
+  {
+    eventHandler.handleTerminate();
+    myFrame.dispose();
+    logoFrame.dispose();
+    eventHandler.waitForThreadTermination();
+
+    System.exit(0);
+  }
   
+
+  /**
+   * Wird aufgerufen, wenn ein Button aktiviert wird, dem ein Menü zugeordnet
+   * ist und lässt dann das entsprechende Menü aus mapMenuNameToJPopupMenu 
+   * erscheinen.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private void openMenu(ActionEvent e)
+  {
+    String menuName = e.getActionCommand();
+    JComponent compo;
+    try{
+      compo = (JComponent)e.getSource();
+    }catch(Exception x)
+    {
+      Logger.error(x);
+      return;
+    }
+    
+    JPopupMenu menu = (JPopupMenu)mapMenuNameToJPopupMenu.get(menuName);
+    if (menu == null) return;
+    
+    menu.show(compo, 0, compo.getHeight());
+  }
+
+  /**
+   * Diese Methode wird aufgerufen, wenn in der Senderbox ein anderes Element
+   * ausgewählt wurde und setzt daraufhin den aktuellen Absender im
+   * entfernten WollMux neu.
+   * 
+   * @author Christoph Lutz (D-III-ITD 5.1)
+   * TESTED 
+   */
+  private void senderBoxItemChanged(ItemEvent e)
+  {
+    if(e.getStateChange() == ItemEvent.SELECTED && 
+        e.getSource() instanceof JComboBox) 
+    {
+      JComboBox cbox = (JComboBox) e.getSource();
+      int id = cbox.getSelectedIndex();
+      
+      // Sonderrolle: -- Liste bearbeiten --
+      if(id == cbox.getItemCount()-1) {
+        eventHandler.handleWollMuxUrl(WollMux.cmdPALVerwalten, null);
+        return;
+      }
+      
+      String name = cbox.getSelectedItem().toString();
+      if(name != null && !name.equals(LEERE_LISTE)) 
+      {
+        eventHandler.handleSelectPALEntry(name, id);
+      }
+    }
+  }
+  
+  /**
+   * Setzt die Einträge aller Senderboxes neu.
+   * @param entries die Einträge, die die Senderboxen enthalten sollen.
+   * @param current der ausgewählte Eintrag
+   * @author Matthias Benkmann, Christoph Lutz (D-III-ITD 5.1)
+   * TESTED
+   */
+  public void updateSenderboxes(String[] entries, String current)
+  {
+    Iterator iter = senderboxes.iterator();
+    while(iter.hasNext()) 
+    {
+      JComboBox senderbox = (JComboBox) iter.next();
+      
+      // keine items erzeugen beim Update
+      senderbox.removeItemListener(itemListener);
+      
+      // alte Items löschen
+      senderbox.removeAllItems();
+      
+      // neue Items eintragen
+      if(entries.length > 0) 
+      {
+        for (int i = 0; i < entries.length; i++)
+        {
+          senderbox.addItem(entries[i]);
+        }
+      } 
+      else senderbox.addItem(LEERE_LISTE);
+
+      senderbox.addItem("- - - - Liste bearbeiten - - - -");
+      
+      // Selektiertes Item setzen:
+      
+      if (current != null && !current.equals(""))
+        senderbox.setSelectedItem(current);
+      
+      // ItemListener wieder setzen.
+      senderbox.addItemListener(itemListener);
+    }
+  }
+
   /**
    * Ein WindowListener, der auf die JFrames der Leiste und des Icons 
    * registriert wird, damit als
@@ -646,7 +778,7 @@ public class WollMuxBar
   private class WindowTransformer implements MouseListener, MouseMotionListener, WindowFocusListener
   {
     /**
-     * Falls das Icon mit der Maus gezogen wird ist diese der Startpunkt an dem
+     * Falls das Icon mit der Maus gezogen wird ist dies der Startpunkt an dem
      * der Mausknopf heruntergedrückt wurde.
      */
     private Point dragStart = new Point(0,0);
@@ -698,116 +830,6 @@ public class WollMuxBar
   }
   
   /**
-   * Implementiert die gleichnamige ACTION.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private void abort()
-  {
-    eventHandler.handleTerminate();
-    myFrame.dispose();
-    eventHandler.waitForThreadTermination();
-
-    System.exit(0);
-  }
-  
-
-  /**
-   * Wird aufgerufen, wenn ein Button aktiviert wird, dem ein Menü zugeordnet
-   * ist.
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private void openMenu(ActionEvent e)
-  {
-    String menuName = e.getActionCommand();
-    JComponent compo;
-    try{
-      compo = (JComponent)e.getSource();
-    }catch(Exception x)
-    {
-      Logger.error(x);
-      return;
-    }
-    
-    JPopupMenu menu = (JPopupMenu)mapMenuNameToJPopupMenu.get(menuName);
-    if (menu == null) return;
-    
-    menu.show(compo, 0, compo.getHeight());
-  }
-
-  /**
-   * Diese Methode wird aufgerufen, wenn in der Senderbox ein anderes Element
-   * ausgewählt wurde. Die Methode setzt daraufhin den aktuellen Absender im
-   * entfernten WollMux neu.
-   * 
-   * @author Christoph Lutz (D-III-ITD 5.1)
-   * TESTED 
-   */
-  private void senderBoxItemChanged(ItemEvent e)
-  {
-    if(e.getStateChange() == ItemEvent.SELECTED && 
-        e.getSource() instanceof JComboBox) 
-    {
-      JComboBox cbox = (JComboBox) e.getSource();
-      int id = cbox.getSelectedIndex();
-      
-      // Sonderrolle: -- Liste bearbeiten --
-      if(id == cbox.getItemCount()-1) {
-        eventHandler.handleWollMuxUrl(WollMux.cmdPALVerwalten, null);
-        return;
-      }
-      
-      String name = cbox.getSelectedItem().toString();
-      if(name != null && !name.equals(LEERE_LISTE)) 
-      {
-        eventHandler.handleSelectPALEntry(name, id);
-      }
-    }
-  }
-  
-  /**
-   * Setzt die Einträge aller Senderboxes neu.
-   * @param entries die Einträge, die die Senderbox enthalten soll.
-   * @param current der ausgewählte Eintrag
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TESTED
-   */
-  public void updateSenderboxes(String[] entries, String current)
-  {
-    Iterator iter = senderboxes.iterator();
-    while(iter.hasNext()) 
-    {
-      JComboBox senderbox = (JComboBox) iter.next();
-      
-      // keine items erzeugen beim Update
-      senderbox.removeItemListener(itemListener);
-      
-      // alte Items löschen
-      senderbox.removeAllItems();
-      
-      // neue Items eintragen
-      if(entries.length > 0) 
-      {
-        for (int i = 0; i < entries.length; i++)
-        {
-          senderbox.addItem(entries[i]);
-        }
-      } 
-      else senderbox.addItem(LEERE_LISTE);
-
-      senderbox.addItem("- - - - Liste bearbeiten - - - -");
-      
-      // Selektiertes Item setzen:
-      
-      if (current != null && !current.equals(""))
-        senderbox.setSelectedItem(current);
-      
-      // ItemListener wieder setzen.
-      senderbox.addItemListener(itemListener);
-    }
-  }
- 
-  /**
    * Startet die WollMuxBar.
    * @param args --minimize, --topbar, --normalwindow um das Anzeigeverhalten festzulegen.
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -839,17 +861,6 @@ public class WollMuxBar
     Logger.init(WollMuxFiles.getWollMuxLogFile(), Logger.LOG);
     
     try{
-      /*
-       * Wertet die undokumentierte wollmux.conf-Direktive LOGGING_MODE aus und
-       * setzt den Logging-Modus entsprechend.
-       */
-      ConfigThingy log = WollMuxFiles.getWollmuxConf().query("LOGGING_MODE");
-      if (log.count() > 0)
-      {
-        String mode = log.getLastChild().toString();
-        Logger.init(mode);
-      }
-      
       Logger.debug("WollMuxBar gestartet");
       
       try{

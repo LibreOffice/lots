@@ -10,6 +10,7 @@
 * -------------------------------------------------------------------
 * 18.04.2006 | BNK | Erstellung
 * 21.04.2006 | BNK | Vernünftige Meldung wenn keine Verbindung zum OOo WOllMux hergestellt werden konnte
+* 24.04.2006 | BNK | kleinere Aufräumarbeiten. Code Review.
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -141,6 +142,9 @@ public class WollMuxBarEventHandler
   /**
    * Teilt dem WollMux mit, dass PAL Eintrag entry gewählt wurde, der der
    * index-te Eintrag der PAL (gezählt ab 0) ist.
+   * Es werden sowohl der Eintrag als auch der Index übergeben, damit der WollMux
+   * auf Konsistenz prüfen kann. Schließlich ist es möglich, dass in der
+   * Zwischenzeit konkurrierende Änderungen der Senderbox stattgefunden haben.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void handleSelectPALEntry(String entry, int index)
@@ -150,9 +154,9 @@ public class WollMuxBarEventHandler
   
   /**
    * Lässt den EventHandler sich ordnungsgemäß deinitialisieren und seine 
-   * Verbindung zum Entfernten WollMux lösen, sowie seinen Bearbeitungsthread
-   * beenden. Achtung! Es sollte die Methode waitForThreadTermination() verwendet werden, bevor
-   * mit System.exit() die JVM beendet wird.
+   * Verbindung zum entfernten WollMux lösen, sowie seinen Bearbeitungsthread
+   * beenden. Achtung! Es sollte die Methode waitForThreadTermination() verwendet 
+   * werden, bevor mit System.exit() die JVM beendet wird.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -276,10 +280,10 @@ public class WollMuxBarEventHandler
 
   private class MyPALChangeEventListener implements XPALChangeEventListener
   {
-    public void updateContent(EventObject arg0)
+    public void updateContent(EventObject eventObject)
     {
       XPALProvider palProv = (XPALProvider) UnoRuntime.queryInterface(
-          XPALProvider.class,arg0.Source);
+          XPALProvider.class,eventObject.Source);
       if (palProv != null)
       {
         try{
@@ -355,7 +359,7 @@ public class WollMuxBarEventHandler
    * DisposedException unterbrochen wurde.
    * 
    * @return Instanz eines gültigen WollMux.  Konnte keine Verbindung hergestellt werden, 
-   * oder eine unterbrochene Verbindung nicht wieder hergestellt werden, 
+   * oder eine unterbrochene Verbindung nicht wiederhergestellt werden, 
    * so liefert die Methode null zurück.
    * TESTED 
    */

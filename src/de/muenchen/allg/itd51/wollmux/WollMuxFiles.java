@@ -78,7 +78,7 @@ public class WollMuxFiles
    * erstellt eine Standard-wollmux,conf. Initialisiert auch den Logger.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TODO Testen
+   * TESTED
    */
   public static void setupWollMuxDir()
   {
@@ -198,6 +198,7 @@ public class WollMuxFiles
    * entsprechende URL. 
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED 
    */
   private static void determineDefaultContext()
   {
@@ -217,9 +218,15 @@ public class WollMuxFiles
       // url mit einem "/" aufhören lassen (falls noch nicht angegeben).
       String urlVerzStr = (urlStr.endsWith("/")) ? urlStr : urlStr + "/";
 
-      // URL aus urlVerzStr erzeugen
       try
       {
+        /*
+         * Die folgenden 3 Statements realisieren ein Fallback-Verhalten.
+         * Falls das letzte Statement eine MalformedURLException wirft, dann
+         * gilt das vorige Statement. Hat dieses schon eine MalformedURLException
+         * geworfen (sollte eigentlich nicht passieren können), so gilt immer noch
+         * das erste.
+         */
         defaultContextURL = new URL("file:///");
         defaultContextURL = getWollMuxDir().toURI().toURL();
         defaultContextURL = new URL(defaultContextURL,urlVerzStr);
