@@ -52,6 +52,7 @@ import de.muenchen.allg.itd51.wollmux.db.DatasetNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
 import de.muenchen.allg.itd51.wollmux.db.QueryResults;
 import de.muenchen.allg.itd51.wollmux.dialog.AbsenderAuswaehlen;
+import de.muenchen.allg.itd51.wollmux.dialog.Common;
 import de.muenchen.allg.itd51.wollmux.dialog.DatensatzBearbeiten;
 import de.muenchen.allg.itd51.wollmux.dialog.PersoenlicheAbsenderlisteVerwalten;
 
@@ -185,7 +186,7 @@ public class EventHandler
       Logger.error(e);
       String msg = e.getClass().getName() + ":\n\n";
       if (e.getMessage() != null) msg += e.getMessage();
-      showInfoModal("WollMux-Fehler:", msg);
+      showInfoModal("WollMux-Fehler", msg);
     }
     return EventProcessor.processTheNextEvent;
   }
@@ -279,8 +280,9 @@ public class EventHandler
   }
 
   private static boolean on_opendocument(Event event, boolean asTemplate)
-      throws Exception, ConfigurationErrorException, TextFragmentNotDefinedException,
-      EndlessLoopException, IOException, MalformedURLException
+      throws Exception, ConfigurationErrorException,
+      TextFragmentNotDefinedException, EndlessLoopException, IOException,
+      MalformedURLException
   {
     WollMuxSingleton mux = WollMuxSingleton.getInstance();
 
@@ -303,7 +305,8 @@ public class EventHandler
       String frag_id = (String) i.next();
 
       // einheitlicher Fehlerzusatz:
-      errorExt = "\n\nDer Fehler trat beim Auflösen des Textfragments mit der ID \""
+      errorExt = "\n\nDer Fehler trat beim Auflösen des Textfragments mit der \n"
+                 + "FRAG_ID \""
                  + frag_id
                  + "\" auf.";
 
@@ -564,43 +567,55 @@ public class EventHandler
       UnoService desktop = UnoService.createWithContext(
           "com.sun.star.frame.Desktop",
           m_xCmpCtx);
-      // TODO: nicht den currentFrame zur gewinnung des xParent verwenden, da
-      // mit der WollMuxBar die Vorraussetzung entfällt, dass IMMER bereits ein
-      // bestehendes Dokument / ein bestehender Frame vorhanden ist. Besser ist
-      // es, ein neues parent-Window zu erzeugen. Wie geht das?
+
+      // wenn ein Frame vorhanden ist, wird dieser als Parent für die Erzeugung
+      // einer Infobox über das Toolkit verwendet, ansonsten wird ein
+      // swing-Dialog gestartet.
       XFrame xFrame = desktop.xDesktop().getCurrentFrame();
-      XWindow xParent = null;
-      if (xFrame != null) xParent = xFrame.getContainerWindow();
+      if (xFrame != null)
+      {
+        XWindow xParent = xFrame.getContainerWindow();
 
-      // get access to the office toolkit environment
-      com.sun.star.awt.XToolkit xKit = (com.sun.star.awt.XToolkit) UnoRuntime
-          .queryInterface(com.sun.star.awt.XToolkit.class, m_xCmpCtx
-              .getServiceManager().createInstanceWithContext(
-                  "com.sun.star.awt.Toolkit",
-                  m_xCmpCtx));
+        // get access to the office toolkit environment
+        com.sun.star.awt.XToolkit xKit = (com.sun.star.awt.XToolkit) UnoRuntime
+            .queryInterface(com.sun.star.awt.XToolkit.class, m_xCmpCtx
+                .getServiceManager().createInstanceWithContext(
+                    "com.sun.star.awt.Toolkit",
+                    m_xCmpCtx));
 
-      // describe the info box ini it's parameters
-      com.sun.star.awt.WindowDescriptor aDescriptor = new com.sun.star.awt.WindowDescriptor();
-      aDescriptor.WindowServiceName = "infobox";
-      aDescriptor.Bounds = new com.sun.star.awt.Rectangle(0, 0, 300, 200);
-      aDescriptor.WindowAttributes = com.sun.star.awt.WindowAttribute.BORDER
-                                     | com.sun.star.awt.WindowAttribute.MOVEABLE
-                                     | com.sun.star.awt.WindowAttribute.CLOSEABLE;
-      aDescriptor.Type = com.sun.star.awt.WindowClass.MODALTOP;
-      aDescriptor.ParentIndex = 1;
-      aDescriptor.Parent = (com.sun.star.awt.XWindowPeer) UnoRuntime
-          .queryInterface(com.sun.star.awt.XWindowPeer.class, xParent);
+        // describe the info box ini it's parameters
+        com.sun.star.awt.WindowDescriptor aDescriptor = new com.sun.star.awt.WindowDescriptor();
+        aDescriptor.WindowServiceName = "infobox";
+        aDescriptor.Bounds = new com.sun.star.awt.Rectangle(0, 0, 300, 200);
+        aDescriptor.WindowAttributes = com.sun.star.awt.WindowAttribute.BORDER
+                                       | com.sun.star.awt.WindowAttribute.MOVEABLE
+                                       | com.sun.star.awt.WindowAttribute.CLOSEABLE;
+        aDescriptor.Type = com.sun.star.awt.WindowClass.MODALTOP;
+        aDescriptor.ParentIndex = 1;
+        aDescriptor.Parent = (com.sun.star.awt.XWindowPeer) UnoRuntime
+            .queryInterface(com.sun.star.awt.XWindowPeer.class, xParent);
 
-      // create the info box window
-      com.sun.star.awt.XWindowPeer xPeer = xKit.createWindow(aDescriptor);
-      com.sun.star.awt.XMessageBox xInfoBox = (com.sun.star.awt.XMessageBox) UnoRuntime
-          .queryInterface(com.sun.star.awt.XMessageBox.class, xPeer);
-      if (xInfoBox == null) return;
+        // create the info box window
+        com.sun.star.awt.XWindowPeer xPeer = xKit.createWindow(aDescriptor);
+        com.sun.star.awt.XMessageBox xInfoBox = (com.sun.star.awt.XMessageBox) UnoRuntime
+            .queryInterface(com.sun.star.awt.XMessageBox.class, xPeer);
+        if (xInfoBox == null) return;
 
-      // fill it with all given informations and show it
-      xInfoBox.setCaptionText("" + sTitle + "");
-      xInfoBox.setMessageText("" + sMessage + "");
-      xInfoBox.execute();
+        // fill it with all given informations and show it
+        xInfoBox.setCaptionText("" + sTitle + "");
+        xInfoBox.setMessageText("" + sMessage + "");
+        xInfoBox.execute();
+      }
+      else
+      {
+        // zeige eine swing-infoBox an, falls kein OOo Parent vorhanden ist.
+        Common.setLookAndFeel();
+        javax.swing.JOptionPane.showMessageDialog(
+            null,
+            sMessage,
+            sTitle,
+            javax.swing.JOptionPane.INFORMATION_MESSAGE);
+      }
     }
     catch (Exception e)
     {
