@@ -84,6 +84,10 @@ public class EventProcessor implements XEventListener, XModifyListener,
   public void setAcceptEvents(boolean accept)
   {
     acceptEvents = accept;
+    if(accept)
+      Logger.debug("EventProcessor: akzeptiere neue Events.");
+    else
+      Logger.debug("EventProcessor: blockiere Entgegennahme von Events!");
   }
 
   private EventProcessor()
