@@ -26,6 +26,7 @@
 * 24.04.2006 | BNK | kleinere Aufräumarbeiten. Code Review.
 * 24.04.2006 | BNK | [R1390]Popup-Fenster, wenn Verbindung zu OOo WollMux nicht hergestellt
 *                  | werden konnte.
+* 24.04.2006 | BNK | [R1460]Popup-Fenster, wenn WollMux nicht konfiguriert.
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -189,6 +190,10 @@ public class WollMuxBar
   "Eine mögliche Ursache ist ein fehlerhaft installiertes OpenOffice.\n"+
   "Eine weitere mögliche Ursache ist, dass WollMux.uno.pkg nicht oder fehlerhaft "+
   "installiert wurde.";
+
+  private static final String WOLLMUX_CONFIG_ERROR_MESSAGE = 
+  "Ihr WollMux ist nicht richtig konfiguriert.\n"+
+  "Bitte wenden Sie sich an Ihre Systembetreuerin oder Ihren Systembetreuer.";
   
   /**
    * ActionListener für Buttons mit der ACTION "abort". 
@@ -882,13 +887,14 @@ public class WollMuxBar
     }
     
     WollMuxFiles.setupWollMuxDir();
-    Logger.init(WollMuxFiles.getWollMuxLogFile(), Logger.LOG);
+    
+    ConfigThingy wollmuxConf = WollMuxFiles.getWollmuxConf();
     
     try{
       Logger.debug("WollMuxBar gestartet");
       
       try{
-        String windowMode2 = WollMuxFiles.getWollmuxConf().get("Fenster").get("WollMuxBar").get("MODE").toString();
+        String windowMode2 = wollmuxConf.get("Fenster").get("WollMuxBar").get("MODE").toString();
         if (windowMode2.equals("Icon"))
           windowMode = BECOME_ICON_MODE;
         else if (windowMode2.equals("AlwaysOnTop"))
@@ -901,7 +907,10 @@ public class WollMuxBar
           Logger.error("Ununterstützer MODE für WollMuxBar-Fenster: '"+windowMode2+"'");
       }catch(Exception x){}
       
-      new WollMuxBar(windowMode, WollMuxFiles.getWollmuxConf());
+      if (wollmuxConf.query("Symbolleisten").count()==0)
+        JOptionPane.showMessageDialog(null, WOLLMUX_CONFIG_ERROR_MESSAGE, "Fehlerhafte Konfiguration", JOptionPane.ERROR_MESSAGE);
+      else
+        new WollMuxBar(windowMode, wollmuxConf);
       
     } catch(Exception x)
     {

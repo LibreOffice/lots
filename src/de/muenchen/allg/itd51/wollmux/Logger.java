@@ -21,6 +21,7 @@
  * 05.12.2005 | BNK | line.separator statt \n
  * 06.12.2005 | BNK | bessere Separatoren, kein Test mehr in init, ob Logfile schreibbar
  * 20.04.2006 | BNK | bessere Datum/Zeitangabe, Angabe des Aufrufers
+ * 24.04.2006 | BNK | korrekte Monatsangabe.
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -317,7 +318,7 @@ public class Logger
     // Zeit und Datum holen und aufbereiten:
     Calendar now = Calendar.getInstance();
     int day = now.get(Calendar.DAY_OF_MONTH);
-    int month = now.get(Calendar.MONTH);
+    int month = now.get(Calendar.MONTH)+1;
     int hour = now.get(Calendar.HOUR_OF_DAY);
     int minute = now.get(Calendar.MINUTE);
     String dayStr = ""+day;
