@@ -24,6 +24,8 @@
 *                  | könnten, wenn das selbe JMenu an mehreren Stellen in der
 *                  | Komponentenhierarchie erscheint.
 * 24.04.2006 | BNK | kleinere Aufräumarbeiten. Code Review.
+* 24.04.2006 | BNK | [R1390]Popup-Fenster, wenn Verbindung zu OOo WollMux nicht hergestellt
+*                  | werden konnte.
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -67,6 +69,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 
@@ -176,6 +179,16 @@ public class WollMuxBar
    * Rand um Buttons (in Pixeln).
    */
   private final static int BUTTON_BORDER = 2;
+
+  /**
+   * Die Fehlermeldung die in einem Popup-Fenster gebracht wird, wenn keine
+   * Verbindung zum WollMux in OOo hergestellt werden konnte.
+   */
+  private static final String CONNECTION_FAILED_MESSAGE = 
+  "Es konnte keine Verbindung zur WollMux-Komponente von OpenOffice hergestellt werden.\n"+
+  "Eine mögliche Ursache ist ein fehlerhaft installiertes OpenOffice.\n"+
+  "Eine weitere mögliche Ursache ist, dass WollMux.uno.pkg nicht oder fehlerhaft "+
+  "installiert wurde.";
   
   /**
    * ActionListener für Buttons mit der ACTION "abort". 
@@ -748,6 +761,17 @@ public class WollMuxBar
       // ItemListener wieder setzen.
       senderbox.addItemListener(itemListener);
     }
+  }
+  
+  /**
+   * Erzeugt ein Popup-Fenster, das den Benutzer darüber informiert, dass keine
+   * Verbindung zur WollMux-Komponente in OpenOffice hergestellt werden konnte.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public void connectionFailedWarning()
+  {
+    JOptionPane.showMessageDialog(null, CONNECTION_FAILED_MESSAGE, "WollMux-Fehler", JOptionPane.ERROR_MESSAGE);
   }
 
   /**

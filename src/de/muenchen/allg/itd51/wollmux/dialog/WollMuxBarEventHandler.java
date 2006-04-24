@@ -11,6 +11,8 @@
 * 18.04.2006 | BNK | Erstellung
 * 21.04.2006 | BNK | Vernünftige Meldung wenn keine Verbindung zum OOo WOllMux hergestellt werden konnte
 * 24.04.2006 | BNK | kleinere Aufräumarbeiten. Code Review.
+* 24.04.2006 | BNK | [R1390]Popup-Fenster, wenn Verbindung zu OOo WollMux nicht hergestellt
+*                  | werden konnte.
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -350,20 +352,23 @@ public class WollMuxBarEventHandler
   }
   
   /**
-   * Diese Methode liefert eine Instanz auf den entfernten WollMux zurück.
-   * Wurde noch gar keine UNO-Verbindung hergestellt, so wird eine Verbindung
-   * zu OOo hiermit aufgebaut und der WollMux instanziiert.    
+   * Diese Methode liefert eine Instanz auf den entfernten WollMux zurück, wobei
+   * der connect-Parameter steuert, ob falls notwendig eine neue UNO-Verbindung
+   * aufgebaut wird.
    * 
-   * @param reconnect Ist der Übergabewert reconnect true, wird die Verbindung auch dann wieder
-   * hergestellt, wenn eine vorhergehende Verbindung aufgrund einer 
-   * DisposedException unterbrochen wurde.
+   * @param connect Die Methode versucht immer zuerst, eine bestehende Verbindung
+   * mit OOo zu verwenden, um das WollMux-Objekt zu bekommen. Der Parameter connect
+   * steuert das Verhalten, falls entweder bisher keine Verbindung mit OOo
+   * hergestellt wurde oder die Verbindung abgerissen ist. Falls connect == false,
+   * so wird in diesen Fällen null zurückgeliefert ohne dass versucht wird, eine
+   * neue Verbindung aufzubauen. Falls connect == true, so wird versucht, eine
+   * neue Verbindung aufzubauen.
    * 
-   * @return Instanz eines gültigen WollMux.  Konnte keine Verbindung hergestellt werden, 
-   * oder eine unterbrochene Verbindung nicht wiederhergestellt werden, 
-   * so liefert die Methode null zurück.
+   * @return Instanz eines gültigen WollMux.  Konnte oder sollte keine Verbindung 
+   * hergestellt werden, so wird null zurückgeliefert. 
    * TESTED 
    */
-  private XWollMux getRemoteWollMux(boolean reconnect) 
+  private XWollMux getRemoteWollMux(boolean connect) 
   {
     if(remoteWollMux != null) 
     {
@@ -372,24 +377,35 @@ public class WollMuxBarEventHandler
       } catch (DisposedException e) 
       {
         remoteWollMux = null;
-        if(!reconnect) return null;
       }
     }
     
-    try
+    if(connect)
     {
-      XComponentContext ctx = Bootstrap.bootstrap();
-      XMultiServiceFactory factory = (XMultiServiceFactory) UnoRuntime.queryInterface(XMultiServiceFactory.class, ctx.getServiceManager());
-      remoteWollMux = factory.createInstance("de.muenchen.allg.itd51.wollmux.WollMux");
-      XWollMux mux = (XWollMux) UnoRuntime.queryInterface(XWollMux.class, remoteWollMux);
-      mux.addPALChangeEventListener(myPALChangeEventListener);
-      return mux;
-    } 
-    catch (Exception e) 
-    { 
-      Logger.error("Konnte keine Verbindung zum WollMux-Modul in OpenOffice herstellen"); 
+      try
+      {
+        XComponentContext ctx = Bootstrap.bootstrap();
+        XMultiServiceFactory factory = (XMultiServiceFactory) UnoRuntime.queryInterface(XMultiServiceFactory.class, ctx.getServiceManager());
+        remoteWollMux = factory.createInstance("de.muenchen.allg.itd51.wollmux.WollMux");
+        XWollMux mux = (XWollMux) UnoRuntime.queryInterface(XWollMux.class, remoteWollMux);
+        mux.addPALChangeEventListener(myPALChangeEventListener);
+        return mux;
+      } 
+      catch (Exception e) 
+      { 
+        Logger.error("Konnte keine Verbindung zum WollMux-Modul in OpenOffice herstellen");
+        try{
+          final WollMuxBar wmbar = wollmuxbar;
+          javax.swing.SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+              wmbar.connectionFailedWarning();
+            }
+          });
+        }
+        catch(Exception x) {}
+      }
     }
-
+    
     return null;
   }
 }
