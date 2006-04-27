@@ -402,7 +402,7 @@ public class EventHandler
         frag_urls = (String[]) docFragUrlsBuffer.remove(source.xInterface());
 
       // Interpretation von WM-Kommandos
-      new WMCommandInterpreter(source.xTextDocument(), mux, frag_urls)
+      new DocumentCommandInterpreter(source.xTextDocument(), mux, frag_urls)
           .interpret();
     }
     return EventProcessor.processTheNextEvent;
