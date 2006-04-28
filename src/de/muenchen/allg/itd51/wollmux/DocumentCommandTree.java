@@ -5,18 +5,18 @@ import java.io.StringReader;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.sun.star.comp.helper.Bootstrap;
 import com.sun.star.comp.helper.BootstrapException;
+import com.sun.star.container.NoSuchElementException;
 import com.sun.star.container.XNameAccess;
 import com.sun.star.frame.XDesktop;
 import com.sun.star.lang.XComponent;
-import com.sun.star.lang.XMultiServiceFactory;
 import com.sun.star.text.XBookmarksSupplier;
-import com.sun.star.text.XTextContent;
 import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
@@ -63,9 +63,6 @@ public class DocumentCommandTree
     Pattern wmCmdPattern = Pattern
         .compile("\\A\\p{Space}*(WM\\p{Space}*\\(.*\\))\\p{Space}*(\\d*)\\z");
 
-    XMultiServiceFactory factory = (XMultiServiceFactory) UnoRuntime
-        .queryInterface(XMultiServiceFactory.class, doc);
-
     XBookmarksSupplier bms = (XBookmarksSupplier) UnoRuntime.queryInterface(
         XBookmarksSupplier.class,
         doc);
@@ -85,21 +82,15 @@ public class DocumentCommandTree
           scannedBookmarks.add(bookmarkName);
 
         // Bookmark-Objekt erzeugen:
-        Bookmark bookmark = null;
-        XTextContent xTextContent = null;
+        Bookmark bookmark;
         try
         {
-          xTextContent = (XTextContent) UnoRuntime.queryInterface(
-              XTextContent.class,
-              bma.getByName(bookmarkName));
+          bookmark = new Bookmark(bookmarkName, doc);
         }
-        catch (java.lang.Exception x)
+        catch (NoSuchElementException e)
         {
-          Logger.error(x);
-        }
-        if (xTextContent != null && factory != null)
-        {
-          bookmark = new Bookmark(xTextContent, factory);
+          Logger.error(e);
+          continue;
         }
 
         // Bookmark evaluieren. Ist Bookmark ein "WM"-Kommand?
@@ -186,23 +177,34 @@ public class DocumentCommandTree
     }
   }
 
-  public Iterator depthFirstIterator()
+  public Iterator depthFirstIterator(boolean reverse)
   {
     Vector list = new Vector();
-    depthFirstAddToList(root, list);
+    depthFirstAddToList(root, list, reverse);
     return list.iterator();
   }
 
-  private void depthFirstAddToList(DocumentCommand cmd, List list)
+  private void depthFirstAddToList(DocumentCommand cmd, List list,
+      boolean reverse)
   {
     // Element hinzufügen (ausser RootElement)
     if (!(cmd instanceof RootElement)) list.add(cmd);
 
     // Kinder hinzufügen
-    Iterator i = cmd.getChildIterator();
+    ListIterator i = cmd.getChildIterator();
+
     while (i.hasNext())
     {
-      depthFirstAddToList((DocumentCommand) i.next(), list);
+      DocumentCommand child = (DocumentCommand) i.next();
+      if (!reverse) depthFirstAddToList(child, list, false);
+    }
+    if (!reverse) return;
+    // Der vorherige Vorwärtsdurchgang positoniert zugleich den Iterator ans
+    // Ende. Von da an kann man jetzt rückwärts gehen.
+    while (i.hasPrevious())
+    {
+      DocumentCommand child = (DocumentCommand) i.previous();
+      if (reverse) depthFirstAddToList(child, list, true);
     }
   }
 
@@ -231,7 +233,11 @@ public class DocumentCommandTree
    */
   public void cleanInsertMarks()
   {
-    Iterator i = depthFirstIterator();
+    // Das Löschen muss mit einer Tiefensuche, aber in umgekehrter Reihenfolge
+    // ablaufen, da sonst leere Bookmarks (Ausdehnung=0) durch das Entfernen der
+    // INSERT_MARKs im unmittelbar darauffolgenden Bookmark ungewollt gelöscht
+    // werden. Bei der umgekehrten Reihenfolge tritt dieses Problem nicht auf.
+    Iterator i = depthFirstIterator(true);
     while (i.hasNext())
     {
       DocumentCommand cmd = (DocumentCommand) i.next();
@@ -246,7 +252,7 @@ public class DocumentCommandTree
    */
   public void updateBookmarks()
   {
-    Iterator i = depthFirstIterator();
+    Iterator i = depthFirstIterator(false);
     while (i.hasNext())
     {
       DocumentCommand cmd = (DocumentCommand) i.next();

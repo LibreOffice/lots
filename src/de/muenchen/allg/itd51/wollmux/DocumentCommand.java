@@ -163,9 +163,9 @@ abstract public class DocumentCommand
     return compareCount;
   }
 
-  protected Iterator getChildIterator()
+  protected ListIterator getChildIterator()
   {
-    return childs.iterator();
+    return childs.listIterator();
   }
 
   /**
@@ -273,15 +273,16 @@ abstract public class DocumentCommand
   }
 
   /**
-   * Hat das DocumentCommand oder dessen Kinder über createInsertCursor
-   * Einfügemarken erzeugt, werden sie aus dem Dokument-Kommando und allen
-   * Kinder-Kommandos gelöscht.
+   * Hat das DocumentCommand über createInsertCursor Einfügemarken erzeugt,
+   * werden diese aus dem Dokumentkommando gelöscht.
    */
   public void cleanInsertMarks()
   {
     if (hasInsertMarks)
     {
       XTextRange range = bookmark.getTextRange();
+
+      // INSERT_MARKs mit Hilfe eines Cursors von links und rechts löschen
       XTextCursor cursor;
 
       // INSERT_MARK links löschen:
@@ -293,16 +294,7 @@ abstract public class DocumentCommand
       cursor = range.getText().createTextCursorByRange(range.getEnd());
       cursor.goLeft((short) INSERT_MARK_CLOSE.length(), true);
       cursor.setString("");
-
       hasInsertMarks = false;
-    }
-
-    // Kinder durchsuchen:
-    Iterator i = childs.iterator();
-    while (i.hasNext())
-    {
-      DocumentCommand child = (DocumentCommand) i.next();
-      child.cleanInsertMarks();
     }
   }
 
@@ -422,22 +414,16 @@ abstract public class DocumentCommand
    */
   public String updateBookmark()
   {
-    // Neuen Status rausschreiben:
+    // Neues WM-String zusammenbauen, der keine Zeilenvorschübe und
+    // abschließende Leerzeichen enthält:
     String wmCmdString = toConfigThingy().stringRepresentation(true, '\'');
     wmCmdString = wmCmdString.replaceAll("[\r\n]+", " ");
+    while (wmCmdString.endsWith(" "))
+      wmCmdString = wmCmdString.substring(0, wmCmdString.length() - 1);
 
-    try
-    {
-      bookmark.rename(wmCmdString);
-    }
-    catch (Exception e)
-    {
-      Logger.error("Konnte Bookmark \""
-                   + bookmark.getName()
-                   + "nicht umbenennen in \""
-                   + wmCmdString
-                   + "\"!", e);
-    }
+    // Neuen Status rausschreiben:
+    bookmark.rename(wmCmdString);
+
     return bookmark.getName();
   }
 

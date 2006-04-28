@@ -2,8 +2,8 @@ package de.muenchen.allg.itd51.wollmux;
 
 import com.sun.star.container.NoSuchElementException;
 import com.sun.star.lang.IllegalArgumentException;
-import com.sun.star.lang.XMultiServiceFactory;
-import com.sun.star.text.XTextContent;
+import com.sun.star.lang.WrappedTargetException;
+import com.sun.star.lang.XComponent;
 import com.sun.star.text.XTextRange;
 import com.sun.star.text.XTextRangeCompare;
 import com.sun.star.uno.Exception;
@@ -19,20 +19,31 @@ public class Bookmark
 {
   private UnoService bookmark;
 
-  private XMultiServiceFactory factory;
+  private String name;
 
-  public Bookmark(XTextContent xTextContent, XMultiServiceFactory factory)
+  private UnoService document;
+
+  public Bookmark(String name, XComponent doc) throws NoSuchElementException
   {
-    this.bookmark = new UnoService(xTextContent);
-    this.factory = factory;
+    this.document = new UnoService(doc);
+    this.name = name;
+    if (document.xBookmarksSupplier() != null)
+    {
+      try
+      {
+        bookmark = new UnoService(document.xBookmarksSupplier().getBookmarks()
+            .getByName(name));
+      }
+      catch (WrappedTargetException e)
+      {
+        Logger.error(e);
+      }
+    }
   }
 
   public String getName()
   {
-    if (bookmark.xNamed() != null)
-      return bookmark.xNamed().getName();
-    else
-      return "<unbenannt>";
+    return name;
   }
 
   public String toString()
@@ -96,8 +107,10 @@ public class Bookmark
    * @return den tatsächlich erzeugten Namen des Bookmarks.
    * @throws Exception
    */
-  public String rename(String newName) throws Exception
+  public String rename(String newName)
   {
+    Logger.debug("Rename \"" + name + "\" --> \"" + newName + "\"");
+
     // altes Bookmark löschen.
     XTextRange range = getTextRange();
     if (range != null)
@@ -105,19 +118,39 @@ public class Bookmark
       try
       {
         range.getText().removeTextContent(bookmark.xTextContent());
+        bookmark = new UnoService(null);
+        name = null;
       }
       catch (NoSuchElementException e)
+      {
+        // wenn' schon weg ist, ist es mir auch recht.
+      }
+
+      // neuen Bookmark mit neuem Namen hinzufügen.
+      try
+      {
+        bookmark = document.create("com.sun.star.text.Bookmark");
+      }
+      catch (Exception e)
       {
         Logger.error(e);
       }
 
-      // neuen Bookmark mit neuem Namen hinzufügen.
-      bookmark = new UnoService(factory
-          .createInstance("com.sun.star.text.Bookmark"));
-      bookmark.xNamed().setName(newName);
-      range.getText().insertTextContent(range, bookmark.xTextContent(), true);
+      if (bookmark.xNamed() != null)
+      {
+        bookmark.xNamed().setName(newName);
+        name = bookmark.xNamed().getName();
+      }
+      try
+      {
+        range.getText().insertTextContent(range, bookmark.xTextContent(), true);
+      }
+      catch (IllegalArgumentException e)
+      {
+        Logger.error(e);
+      }
     }
-    return getName();
+    return name;
   }
 
   public void rerangeBookmark(XTextRange xTextRange) throws Exception
@@ -139,8 +172,7 @@ public class Bookmark
       }
 
       // neuen Bookmark unter dem alten Namen mit Ausdehnung hinzufügen.
-      bookmark = new UnoService(factory
-          .createInstance("com.sun.star.text.Bookmark"));
+      bookmark = document.create("com.sun.star.text.Bookmark");
       bookmark.xNamed().setName(name);
       xTextRange.getText().insertTextContent(
           xTextRange,
@@ -151,11 +183,6 @@ public class Bookmark
 
   public XTextRange getTextRange()
   {
-    if (bookmark != null && bookmark.xTextContent() != null)
-    {
-      return bookmark.xTextContent().getAnchor();
-    }
-    else
-      return null;
+    return bookmark.xTextContent().getAnchor();
   }
 }

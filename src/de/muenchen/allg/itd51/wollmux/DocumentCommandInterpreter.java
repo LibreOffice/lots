@@ -135,7 +135,7 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
 
       // Alle (neuen) DocumentCommands durchlaufen und mit execute aufrufen.
       tree.update();
-      Iterator iter = tree.depthFirstIterator();
+      Iterator iter = tree.depthFirstIterator(false);
       while (iter.hasNext())
       {
         DocumentCommand cmd = (DocumentCommand) iter.next();
@@ -156,6 +156,9 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
     // entfernen der INSERT_MARKS
     tree.cleanInsertMarks();
 
+    // jetzt kann man den sichtbaren Text darstellen
+    if (document.xModel() != null) document.xModel().unlockControllers();
+    
     // updates der Bookmarks:
     tree.updateBookmarks();
 
@@ -170,7 +173,6 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
       // wenn jemand was dagegen hat, dann setze ich halt nichts.
     }
 
-    if (document.xModel() != null) document.xModel().unlockControllers();
 
     // ggf. EndlessLoopException mit dem Namen des Dokuments schmeissen.
     if (loopCount == MAXCOUNT)
