@@ -332,7 +332,6 @@ abstract public class DocumentCommand
   public void setDoneState(boolean done)
   {
     this.done = new Boolean(done);
-    // TODO: refresh (rename) bookmark
   }
 
   /**
