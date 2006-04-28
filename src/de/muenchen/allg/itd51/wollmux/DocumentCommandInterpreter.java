@@ -120,15 +120,17 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
   public void interpret() throws EndlessLoopException,
       WMCommandsFailedException
   {
-    if (document.xModel() != null) document.xModel().lockControllers();
+    // Dokumentkommando-Baum scannen:
+    DocumentCommandTree tree = new DocumentCommandTree(document.xComponent());
 
-    // Solange durch die ständig neu erzeugte Liste aller Bookmarks gehen, bis
-    // alle Bookmarks ausgewertet wurden oder die Abbruchbedingung zur
-    // Vermeindung von Endlosschleifen erfüllt ist.
+    // Zähler für aufgetretene Fehler bei der Bearbeitung der Kommandos.
+    int errorCount = 0;
+
+    // Zuerst alle insertFrags und insertContents abarbeiten bis sich der Baum
+    // nicht mehr ändert. Der loopCount dient zur Vermeidung von
+    // Endlosschleifen.
     boolean changed = true;
     int loopCount = 0;
-    int errorCount = 0;
-    DocumentCommandTree tree = new DocumentCommandTree(document.xComponent());
     while (changed && MAXCOUNT > ++loopCount)
     {
       changed = false;
@@ -139,26 +141,43 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
       while (iter.hasNext())
       {
         DocumentCommand cmd = (DocumentCommand) iter.next();
-        if (cmd.isDone() == false)
+        if ((cmd instanceof DocumentCommand.InsertFrag || cmd instanceof DocumentCommand.InsertContent)
+            && cmd.isDone() == false)
         {
           changed = true;
 
-          // Dokumentkommando ausführen und Fehler zählen:
-          if (cmd instanceof ExecutableCommand)
-          {
-            Object result = ((ExecutableCommand) cmd).execute(this);
-            errorCount += ((Integer) result).intValue();
-          }
+          // Kommandos ausführen
+          Object result = ((ExecutableCommand) cmd).execute(this);
+          errorCount += ((Integer) result).intValue();
         }
+      }
+    }
+
+    // Bei der Bearbeitung der insertValues muss man nicht jede Änderung sofort
+    // sehen:
+    if (document.xModel() != null) document.xModel().lockControllers();
+
+    // Und jetzt nochmal alle (übrigen) DocumentCommands in einem einzigen
+    // Durchlauf mit execute aufrufen.
+    tree.update();
+    Iterator iter = tree.depthFirstIterator(false);
+    while (iter.hasNext())
+    {
+      DocumentCommand cmd = (DocumentCommand) iter.next();
+      if (cmd instanceof ExecutableCommand && cmd.isDone() == false)
+      {
+        // Kommandos ausführen
+        Object result = ((ExecutableCommand) cmd).execute(this);
+        errorCount += ((Integer) result).intValue();
       }
     }
 
     // entfernen der INSERT_MARKS
     tree.cleanInsertMarks();
 
-    // jetzt kann man den sichtbaren Text darstellen
+    // jetzt soll man wieder was sehen:
     if (document.xModel() != null) document.xModel().unlockControllers();
-    
+
     // updates der Bookmarks:
     tree.updateBookmarks();
 
@@ -172,7 +191,6 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
     {
       // wenn jemand was dagegen hat, dann setze ich halt nichts.
     }
-
 
     // ggf. EndlessLoopException mit dem Namen des Dokuments schmeissen.
     if (loopCount == MAXCOUNT)

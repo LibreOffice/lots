@@ -100,7 +100,6 @@ public class DocumentCommandTree
         if (m.find())
         {
           String cmdString = m.group(1);
-          Logger.debug2("Parse Dokumentkommando: " + cmdString);
           try
           {
             wmCmd = new ConfigThingy("", null, new StringReader(cmdString));
@@ -127,8 +126,7 @@ public class DocumentCommandTree
         }
       }
     }
-    Logger.debug2("createCommandTreeFromDocument(): fertig! compareCount="
-                  + compareCount);
+    Logger.debug2("Update fertig - compareCount=" + compareCount);
 
     return root;
   }
