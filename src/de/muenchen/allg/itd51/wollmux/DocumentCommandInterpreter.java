@@ -349,6 +349,26 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
       insCursor.xDocumentInsertable().insertDocumentFromURL(
           urlStr,
           new PropertyValue[] {});
+
+      // Falls die erste Zeile des eingefügten Textfragments leer ist, wird die
+      // erste Zeile gelöscht.
+//      UnoService cursor = new UnoService(insCursor.xTextRange().getText()
+//          .createTextCursorByRange(insCursor.xTextRange().getStart()));
+//      if (cursor.xParagraphCursor().isEndOfParagraph())
+//      {
+//        cursor.xTextCursor().goRight((short) 1, true);
+//        cursor.xTextCursor().setString("");
+//      }
+//
+//      // Falls die letzte Zeile des eingefügten Textfragments leer ist, wird die
+//      // letzte Zeile gelöscht.
+//      cursor = new UnoService(insCursor.xTextRange().getText()
+//          .createTextCursorByRange(insCursor.xTextRange().getEnd()));
+//      if (cursor.xParagraphCursor().isStartOfParagraph())
+//      {
+//        cursor.xTextCursor().goLeft((short) 1, true);
+//        cursor.xTextCursor().setString("");
+//      }
     }
     catch (java.lang.Exception e)
     {
