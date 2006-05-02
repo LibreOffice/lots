@@ -9,10 +9,12 @@
  * Änderungshistorie:
  * Datum      | Wer | Änderungsgrund
  * -------------------------------------------------------------------
- * 14.10.2005 | LUT | Erstellung
+ * 14.10.2005 | LUT | Erstellung als WMCommandInterpreter
  * 24.10.2005 | LUT | + Sauberes umschliessen von Bookmarks in 
  *                      executeInsertFrag.
  *                    + Abschalten der lock-Controllers  
+ * 02.05.2006 | LUT | Komplett-Überarbeitung und Umbenennung in
+ *                    DocumentCommandInterpreter.
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -29,6 +31,8 @@ import java.util.Iterator;
 import com.sun.star.awt.FontWeight;
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.beans.PropertyVetoException;
+import com.sun.star.container.XEnumeration;
+import com.sun.star.container.XEnumerationAccess;
 import com.sun.star.io.IOException;
 import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
@@ -155,7 +159,7 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
 
     // Bei der Bearbeitung der insertValues muss man nicht jede Änderung sofort
     // sehen:
-    if (document.xModel() != null) document.xModel().lockControllers();
+    // if (document.xModel() != null) document.xModel().lockControllers();
 
     // Und jetzt nochmal alle (übrigen) DocumentCommands in einem einzigen
     // Durchlauf mit execute aufrufen.
@@ -181,16 +185,14 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
     while (iter.hasNext())
     {
       DocumentCommand cmd = (DocumentCommand) iter.next();
-      if ((cmd instanceof DocumentCommand.InsertFrag || cmd instanceof DocumentCommand.InsertContent)
-          && cmd.isDone() == false)
+      if ((cmd instanceof DocumentCommand.InsertFrag || cmd instanceof DocumentCommand.InsertContent))
       {
         cleanEmptyParagraphs(cmd);
       }
     }
-    
-    
+
     // jetzt soll man wieder was sehen:
-    if (document.xModel() != null) document.xModel().unlockControllers();
+    // if (document.xModel() != null) document.xModel().unlockControllers();
 
     // updates der Bookmarks:
     tree.updateBookmarks();
@@ -247,25 +249,55 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
 
   private void cleanEmptyParagraphs(DocumentCommand cmd)
   {
-    XTextRange range = cmd.getTextRange();
-    // Falls die erste Zeile des eingefügten Textfragments leer ist, wird die
-    // erste Zeile gelöscht.
-    UnoService cursor = new UnoService(range.getText()
-        .createTextCursorByRange(range.getStart()));
-    if (cursor.xParagraphCursor().isEndOfParagraph())
-    {
-      cursor.xTextCursor().goRight((short) 1, true);
-      cursor.xTextCursor().setString("");
-    }
+    Logger.debug2("cleanEmptyParagraphs(" + cmd + ")");
 
-    // Falls die letzte Zeile des eingefügten Textfragments leer ist, wird die
-    // letzte Zeile gelöscht.
-    cursor = new UnoService(range.getText()
-        .createTextCursorByRange(range.getEnd()));
-    if (cursor.xParagraphCursor().isStartOfParagraph())
+    try
     {
-      cursor.xTextCursor().goLeft((short) 1, true);
-      cursor.xTextCursor().setString("");
+      XTextRange range = cmd.getTextRange();
+      
+      // Falls die erste Zeile des eingefügten Textfragments leer ist, wird die
+      // erste Zeile gelöscht.
+      UnoService cursor = new UnoService(range.getText()
+          .createTextCursorByRange(range.getStart()));
+      if (cursor.xParagraphCursor().isEndOfParagraph())
+      {
+        cursor.xTextCursor().goRight((short) 1, false);
+
+        // Beginnt der nächste Absatz mit einer TextPortion?
+        boolean nextParStartsWithTextPortion = false;
+        XEnumerationAccess ea = cursor.xEnumerationAccess();
+        XEnumeration enumeration = null;
+        if (ea != null) enumeration = ea.createEnumeration();
+        Object o = null;
+        if (enumeration != null && enumeration.hasMoreElements())
+          o = enumeration.nextElement();
+        if (new UnoService(o).supportsService("com.sun.star.text.TextPortion"))
+        {
+          nextParStartsWithTextPortion = true;
+        }
+
+        // Absatz nur löschen, wenn der nächste Absatz mit einer TextPortion
+        // beginnt:
+        if (nextParStartsWithTextPortion)
+        {
+          cursor.xTextCursor().goLeft((short) 1, true);
+          cursor.xTextCursor().setString("");
+        }
+      }
+
+      // Falls die letzte Zeile des eingefügten Textfragments leer ist, wird die
+      // letzte Zeile gelöscht.
+//      cursor = new UnoService(range.getText().createTextCursorByRange(
+//          range.getEnd()));
+//      if (cursor.xParagraphCursor().isStartOfParagraph())
+//      {
+//        cursor.xTextCursor().goLeft((short) 1, true);
+//        cursor.xTextCursor().setString("");
+//      }
+    }
+    catch (Throwable t)
+    {
+      Logger.error(t);
     }
   }
 
