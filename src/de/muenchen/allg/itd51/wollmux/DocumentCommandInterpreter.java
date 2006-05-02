@@ -1,8 +1,8 @@
 /*
- * Dateiname: WMCommandInterpreter.java
+ * Dateiname: DocumentCommandInterpreter.java
  * Projekt  : WollMux
- * Funktion : Scannt alle Bookmarks eines Dokuments und interpretiert ggf. die 
- *            WM-Kommandos.
+ * Funktion : Scannt alle Bookmarks eines Dokuments und interpretiert die enthaltenen
+ *            Dokumentkommandos.
  * 
  * Copyright: Landeshauptstadt München
  *
@@ -175,6 +175,20 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
     // entfernen der INSERT_MARKS
     tree.cleanInsertMarks();
 
+    // jetzt nochmal den Baum durchgehen und alle leeren Absätze zum Beginn und
+    // Ende der insertFrags und insertContents entfernen.
+    iter = tree.depthFirstIterator(false);
+    while (iter.hasNext())
+    {
+      DocumentCommand cmd = (DocumentCommand) iter.next();
+      if ((cmd instanceof DocumentCommand.InsertFrag || cmd instanceof DocumentCommand.InsertContent)
+          && cmd.isDone() == false)
+      {
+        cleanEmptyParagraphs(cmd);
+      }
+    }
+    
+    
     // jetzt soll man wieder was sehen:
     if (document.xModel() != null) document.xModel().unlockControllers();
 
@@ -228,6 +242,30 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
     if (documentIsAFormular)
     {
       startFormGUI();
+    }
+  }
+
+  private void cleanEmptyParagraphs(DocumentCommand cmd)
+  {
+    XTextRange range = cmd.getTextRange();
+    // Falls die erste Zeile des eingefügten Textfragments leer ist, wird die
+    // erste Zeile gelöscht.
+    UnoService cursor = new UnoService(range.getText()
+        .createTextCursorByRange(range.getStart()));
+    if (cursor.xParagraphCursor().isEndOfParagraph())
+    {
+      cursor.xTextCursor().goRight((short) 1, true);
+      cursor.xTextCursor().setString("");
+    }
+
+    // Falls die letzte Zeile des eingefügten Textfragments leer ist, wird die
+    // letzte Zeile gelöscht.
+    cursor = new UnoService(range.getText()
+        .createTextCursorByRange(range.getEnd()));
+    if (cursor.xParagraphCursor().isStartOfParagraph())
+    {
+      cursor.xTextCursor().goLeft((short) 1, true);
+      cursor.xTextCursor().setString("");
     }
   }
 
@@ -349,26 +387,6 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
       insCursor.xDocumentInsertable().insertDocumentFromURL(
           urlStr,
           new PropertyValue[] {});
-
-      // Falls die erste Zeile des eingefügten Textfragments leer ist, wird die
-      // erste Zeile gelöscht.
-//      UnoService cursor = new UnoService(insCursor.xTextRange().getText()
-//          .createTextCursorByRange(insCursor.xTextRange().getStart()));
-//      if (cursor.xParagraphCursor().isEndOfParagraph())
-//      {
-//        cursor.xTextCursor().goRight((short) 1, true);
-//        cursor.xTextCursor().setString("");
-//      }
-//
-//      // Falls die letzte Zeile des eingefügten Textfragments leer ist, wird die
-//      // letzte Zeile gelöscht.
-//      cursor = new UnoService(insCursor.xTextRange().getText()
-//          .createTextCursorByRange(insCursor.xTextRange().getEnd()));
-//      if (cursor.xParagraphCursor().isStartOfParagraph())
-//      {
-//        cursor.xTextCursor().goLeft((short) 1, true);
-//        cursor.xTextCursor().setString("");
-//      }
     }
     catch (java.lang.Exception e)
     {
