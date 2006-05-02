@@ -27,6 +27,7 @@
 * 24.04.2006 | BNK | [R1390]Popup-Fenster, wenn Verbindung zu OOo WollMux nicht hergestellt
 *                  | werden konnte.
 * 24.04.2006 | BNK | [R1460]Popup-Fenster, wenn WollMux nicht konfiguriert.
+* 02.05.2006 | BNK | [R1202 Teil 1] Fensterposition und Größe von WollMuxBar konfigurierbar
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -35,12 +36,14 @@
 */
 package de.muenchen.allg.itd51.wollmux.dialog;
 
+import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.Point;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -273,11 +276,29 @@ public class WollMuxBar
     Common.setLookAndFeel();
     
     initFactories();
+   
+    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
     
     String title = DEFAULT_TITLE;
-    try{
-      title = conf.get("Fenster").get("WollMuxBar").get("TITLE").toString();
-    }catch(Exception x) {}
+    try{title = conf.get("Fenster").get("WollMuxBar").get("TITLE").toString();}catch(Exception x) {}
+    
+    int myFrame_x = Integer.MIN_VALUE;
+    try{myFrame_x = Integer.parseInt(conf.get("Fenster").get("WollMuxBar").get("X").toString());}catch(Exception x) {}
+    
+    int myFrame_y = Integer.MIN_VALUE;
+    try{myFrame_y = Integer.parseInt(conf.get("Fenster").get("WollMuxBar").get("Y").toString());}catch(Exception x) {}
+    
+    int myFrame_width = 0;
+    try{myFrame_width = Integer.parseInt(conf.get("Fenster").get("WollMuxBar").get("WIDTH").toString());}catch(Exception x) {}
+    
+    int myFrame_height = 0;
+    try{myFrame_height = Integer.parseInt(conf.get("Fenster").get("WollMuxBar").get("HEIGHT").toString());}catch(Exception x) {}
+    
+    int icon_x = screenSize.width - 96;
+    try{icon_x = Integer.parseInt(conf.get("Fenster").get("WollMuxBar").get("ICONX").toString());}catch(Exception x) {}
+    
+    int icon_y = screenSize.height - 128;
+    try{icon_y = Integer.parseInt(conf.get("Fenster").get("WollMuxBar").get("ICONY").toString());}catch(Exception x) {}
     
     myFrame = new JFrame(title);
     //leave handling of close request to WindowListener.windowClosing
@@ -343,13 +364,20 @@ public class WollMuxBar
     logoFrame.setFocusableWindowState(false);
     
     logoFrame.pack();
-    logoFrame.setLocation(0,0);
+    logoFrame.setLocation(icon_x,icon_y);
     logoFrame.setResizable(false);
 
     if (windowMode != NORMAL_WINDOW_MODE) myFrame.setAlwaysOnTop(true);
+    
     myFrame.pack();
-    myFrame.setLocation(0,0);
-    myFrame.setResizable(false);
+    Dimension frameSize = myFrame.getSize();
+    if (myFrame_width > 0) frameSize.width = myFrame_width;
+    if (myFrame_height > 0) frameSize.height = myFrame_height;
+    myFrame.setSize(frameSize);
+    if (myFrame_x == Integer.MIN_VALUE) myFrame_x = screenSize.width/2 - frameSize.width/2; 
+    if (myFrame_y == Integer.MIN_VALUE) myFrame_y = (int)(0.8*(screenSize.height/2 - frameSize.height/2));
+    myFrame.setLocation(myFrame_x,myFrame_y);
+    myFrame.setResizable(true);
     myFrame.setVisible(true);
   }
   
