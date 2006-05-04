@@ -187,7 +187,7 @@ public class AbsenderAuswaehlen
    *        Methode aufgerufen (im Event Dispatching Thread), 
    *        nachdem der Dialog geschlossen wurde.
    *        Das actionCommand des ActionEvents gibt die Aktion an, die
-   *        das Speichern des Dialogs veranlasst hat. 
+   *        das Beenden des Dialogs veranlasst hat. 
    * @throws ConfigurationErrorException im Falle eines schwerwiegenden
    *         Konfigurationsfehlers, der es dem Dialog unmöglich macht,
    *         zu funktionieren (z.B. dass der "Fenster" Schlüssel fehlt.
