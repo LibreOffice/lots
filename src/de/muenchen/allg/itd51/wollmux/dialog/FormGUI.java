@@ -1,7 +1,7 @@
 /*
 * Dateiname: FormGUI.java
 * Projekt  : WollMux
-* Funktion : managed die Fenster (OfficeBean-Vorschau und FormController) der FormularGUI. 
+* Funktion : managed die Fenster (Writer und FormController) der FormularGUI. 
 * 
 * Copyright: Landeshauptstadt München
 *
@@ -13,6 +13,7 @@
 * 31.01.2006 | BNK | Bean im Preview-Modus aufrufen
 * 01.02.2006 | BNK | etwas rumgedoktore mit LayoutManager 
 * 02.02.2006 | BNK | Fenster zusammengeklebt
+* 05.05.2006 | BNK | Condition -> Function, besser kommentiert 
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -46,25 +47,42 @@ import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.FormModel;
 import de.muenchen.allg.itd51.wollmux.Logger;
+import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 
 /**
- * Managed die Fenster (OfficeBean-Vorschau und FormController) der FormularGUI.
+ * Managed die Fenster (Writer und FormController) der FormularGUI.
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class FormGUI
 {
+  /**
+   * Die Breite des linken Randes eines Fensters. Diese wird benötigt, um die exakte
+   * Platzierung von Writer und Formular-Fenster so zu steuern, dass die Fenster
+   * ohne Lücke nebeneinander angeordnet sind.
+   */
   int winBorderWidth;
+  
+  /**
+   * Die Breite des oberen Randes eines Fensters. Diese wird benötigt, um die exakte
+   * Platzierung von Writer und Formular-Fenster so zu steuern, dass die Fenster
+   * auf und mit gleicher Höhe angeordnet sind.
+   */
   int winBorderHeight;
   
   /**
-   * Der Rahmen des gesamten Dialogs.
+   * Das Fenster der Formular-GUI. Hier wird der FormController eingebettet. Auch
+   * das Office-Bean wäre hier eingebettet worden, wenn nicht die Entscheidung
+   * gegen seine Verwendung gefallen wäre.
    */
   private JFrame myFrame;
   
+  /**
+   * Das zum Formular gehörende Writer-Dokument (als FormModel gekapselt).
+   */
   private FormModel myDoc;
   
   /**
-   * Der Titel des Formularfensters.
+   * Der Titel des Formularfensters (falls nicht anderweitig spezifiziert).
    */
   private String formTitle = "Unbenanntes Formular";
   
@@ -76,26 +94,38 @@ public class FormGUI
         { public void actionPerformed(ActionEvent e){ abort(); } };
   
 
-
   /**
    * wird getriggert bei windowClosing() Event.
    */
   private ActionListener closeAction = actionListener_abort;
   
 
-  public FormGUI(final ConfigThingy conf, FormModel doc, final Map mapIdToPresetValue)
+  /**
+   * Zeigt eine neue Formular-GUI an.
+   * @param conf der Formular-Knoten, der die Formularbeschreibung enthält.
+   * @param doc das zum Formular gehörende Writer-Dokument (gekapselt als FormModel)
+   * @param mapIdToPresetValue bildet IDs von Formularfeldern auf Vorgabewerte ab.
+   *        Falls hier ein Wert für ein Formularfeld vorhanden ist, so wird dieser
+   *        allen anderen automatischen Befüllungen vorgezogen.
+   * @param funcLib die Funktionsbibliothek, die zur Auswertung von Plausis etc.
+   *        herangezogen werden soll.
+   * @param dialogLib die Dialogbibliothek, die die Dialoge bereitstellt, die
+   *        für automatisch zu befüllende Formularfelder benötigt werden.
+   */
+  public FormGUI(final ConfigThingy conf, FormModel doc, final Map mapIdToPresetValue,
+      final FunctionLibrary funcLib, final DialogLibrary dialogLib)
   {
     myDoc = doc;
     
     try{
-      formTitle = conf.get("Formular").get("TITLE").toString();
+      formTitle = conf.get("TITLE").toString();
     }catch(Exception x) {}
   
     //  GUI im Event-Dispatching Thread erzeugen wg. Thread-Safety.
     try{
       javax.swing.SwingUtilities.invokeLater(new Runnable() {
         public void run() {
-            try{createGUI(conf, mapIdToPresetValue);}catch(Exception x){Logger.error(x);};
+            try{createGUI(conf, mapIdToPresetValue, funcLib, dialogLib);}catch(Exception x){Logger.error(x);};
         }
       });
     }
@@ -104,7 +134,8 @@ public class FormGUI
   }
 
 
-  private void createGUI(ConfigThingy conf, Map mapIdToPresetValue)
+  private void createGUI(ConfigThingy conf, Map mapIdToPresetValue,
+      FunctionLibrary funcLib, DialogLibrary dialogLib)
   {
     Common.setLookAndFeel();
     
@@ -112,13 +143,16 @@ public class FormGUI
     myFrame = new JFrame(formTitle);
     //leave handling of close request to WindowListener.windowClosing
     myFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-    MyWindowListener oehrchen = new MyWindowListener(); 
+    MyWindowListener oehrchen = new MyWindowListener();
+    //der WindowListener sorgt dafür, dass auf windowClosing mit abort reagiert wird
     myFrame.addWindowListener(oehrchen);
+    //der ComponentListener sorgt dafür dass bei Verschieben/Größenänderung das
+    //Writer-Fenster ebenfalls angepasst wird.
     myFrame.addComponentListener(oehrchen);
     
     FormController formController;
     try{
-      formController = new FormController(conf, myDoc, mapIdToPresetValue);
+      formController = new FormController(conf, myDoc, mapIdToPresetValue, funcLib, dialogLib);
     }catch (ConfigurationErrorException x)
     {
       Logger.error(x);
@@ -139,15 +173,25 @@ public class FormGUI
     myFrame.setResizable(true);
     myFrame.setVisible(true);
     
+    /*
+     * Berechnen der Breite des Fensterrahmens.
+     */
     Point panelLocation = formController.JPanel().getLocationOnScreen();
     Point frameLocation = myFrame.getLocationOnScreen();
     winBorderWidth  = panelLocation.x - frameLocation.x;
     winBorderHeight = panelLocation.y - frameLocation.y;
+    
+    /*
+     * Muss nach dem Berechnen von winBorderWidth und winBorderHeight aufgerufen
+     * werden, da diese in der Methode verwendet werden.
+     */
     cuddleWithOpenOfficeWindow();
   }
 
 
   /**
+   * Arrangiert das Writer Fenster so, dass es neben dem Formular-Fenster
+   * sitzt.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TODO Testen
    */
@@ -161,13 +205,13 @@ public class FormGUI
     int docWidth = screenSize.width - docX - winBorderWidth;
     int docHeight = frameHeight - winBorderHeight - winBorderWidth;
     myDoc.setWindowPosSize(docX, docY, docWidth, docHeight);
-    //UNO.XTopWindow(win).toFront();
-    //win.setFocus();
   }
 
   /**
    * Ein WindowListener, der auf den JFrame registriert wird, damit als
-   * Reaktion auf den Schliessen-Knopf auch die ACTION "abort" ausgeführt wird.
+   * Reaktion auf den Schliessen-Knopf auch die ACTION "abort" ausgeführt wird, sowie
+   * ein ComponentListener, der beim Verschieben und Verändern der Größe dafür
+   * sorgt, dass das Writer-Fenster entsprechend mitverändert.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private class MyWindowListener implements WindowListener, ComponentListener
@@ -205,7 +249,6 @@ public class FormGUI
     {
     }
   }
-  
   
   /**
    * Implementiert die gleichnamige ACTION.
@@ -264,7 +307,7 @@ public class FormGUI
         .getProperty("user.dir")).toURL(), confFile));
     XTextDocument doc = UNO.XTextDocument(UNO.loadComponentFromURL("private:factory/swriter", true, true));
     FormModel model = new DummyFormModel(doc);
-    new FormGUI(conf, model, new HashMap());
+    new FormGUI(conf.get("Formular"), model, new HashMap(), new FunctionLibrary(), new DialogLibrary());
   }
 
 

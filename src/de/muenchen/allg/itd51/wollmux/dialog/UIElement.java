@@ -10,6 +10,7 @@
 * -------------------------------------------------------------------
 * 11.01.2006 | BNK | Erstellung
 * 24.04.2006 | BNK | kommentiert.
+* 05.05.2006 | BNK | Condition -> Function
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -30,8 +31,8 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.text.JTextComponent;
 
-import de.muenchen.allg.itd51.wollmux.Condition;
-import de.muenchen.allg.itd51.wollmux.Value;
+import de.muenchen.allg.itd51.wollmux.func.Function;
+import de.muenchen.allg.itd51.wollmux.func.Value;
 
 
 /**
@@ -98,11 +99,18 @@ public interface UIElement extends Value
   public Object getLabelLayoutConstraints();
   
   /**
-   * Die Beschränkungen (Plausis) der möglichen Werte des UI Elements oder null, 
-   * falls keine gesetzt sind.
+   * Liefert eine Funktion, die die Beschränkungen (Plausis) der möglichen Werte 
+   * des UI Elements abbildet oder null, falls keine gesetzt sind.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public Condition getConstraints();
+  public Function getConstraints();
+  
+  /**
+   * Setzt die Funktion, die von {@link #getConstraints()} zurückgeliefert werden
+   * soll.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public void setConstraints(Function func);
   
   /**
    * Der aktuelle Wert des UI Elements. Falls es sich um ein boolesches
@@ -152,7 +160,7 @@ public interface UIElement extends Value
     protected JLabel label = null;
     protected Object layoutConstraints = null;
     protected Object labelLayoutConstraints = null;
-    protected Condition constraints = null;
+    protected Function constraints = null;
     protected String id = "";
   
     public void setBackground(Color bg)
@@ -182,9 +190,14 @@ public interface UIElement extends Value
       return labelLayoutConstraints;
     }
 
-    public Condition getConstraints()
+    public Function getConstraints()
     {
       return constraints;
+    }
+    
+    public void setConstraints(Function func)
+    {
+      constraints = func;
     }
 
     public void setVisible(boolean vis)
@@ -259,12 +272,11 @@ public interface UIElement extends Value
   {
     private JTextField textfield;
     
-    public Textfield(String id, JTextField tf, Object layoutConstraints, Integer labelType, String label, Object labelLayoutConstraints, Condition constraints)
+    public Textfield(String id, JTextField tf, Object layoutConstraints, Integer labelType, String label, Object labelLayoutConstraints)
     {
       this.textfield = tf;
       this.layoutConstraints = layoutConstraints;
       this.labelLayoutConstraints = labelLayoutConstraints;
-      this.constraints = constraints;
       this.label = new JLabel(label);
       this.labelType = labelType;
       this.id = id;
@@ -290,12 +302,11 @@ public interface UIElement extends Value
   {
     private JComboBox combo;
     
-    public Combobox(String id, JComboBox combo, Object layoutConstraints, Integer labelType, String label, Object labelLayoutConstraints, Condition constraints)
+    public Combobox(String id, JComboBox combo, Object layoutConstraints, Integer labelType, String label, Object labelLayoutConstraints)
     {
       this.combo = combo;
       this.layoutConstraints = layoutConstraints;
       this.labelLayoutConstraints = labelLayoutConstraints;
-      this.constraints = constraints;
       this.label = new JLabel(label);
       this.labelType = labelType;
       this.id = id;
@@ -329,13 +340,12 @@ public interface UIElement extends Value
     private JTextArea textarea;
     private Component textAreaComponent;
     
-    public Textarea(String id, JTextArea textarea, Component textAreaComponent, Object layoutConstraints, Integer labelType, String label, Object labelLayoutConstraints, Condition constraints)
+    public Textarea(String id, JTextArea textarea, Component textAreaComponent, Object layoutConstraints, Integer labelType, String label, Object labelLayoutConstraints)
     {
       this.textarea = textarea;
       this.textAreaComponent = textAreaComponent;
       this.layoutConstraints = layoutConstraints;
       this.labelLayoutConstraints = labelLayoutConstraints;
-      this.constraints = constraints;
       this.label = new JLabel(label);
       this.labelType = labelType;
       this.id = id;

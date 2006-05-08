@@ -15,6 +15,7 @@
  *                    + Abschalten der lock-Controllers  
  * 02.05.2006 | LUT | Komplett-Überarbeitung und Umbenennung in
  *                    DocumentCommandInterpreter.
+ * 05.05.2006 | BNK | Dummy-Argument zum Aufruf des FormGUI Konstruktors hinzugefügt.
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -44,7 +45,9 @@ import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.ExecutableCommand;
 import de.muenchen.allg.itd51.wollmux.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.db.DatasetNotFoundException;
+import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
 import de.muenchen.allg.itd51.wollmux.dialog.FormGUI;
+import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 
 /**
  * Diese Klasse repräsentiert den Kommando-Interpreter zur Auswertung von
@@ -310,7 +313,7 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
   private void startFormGUI()
   {
     FormModel fm = new FormModelImpl(document.xComponent());
-    new FormGUI(formDescriptors, fm, new HashMap());
+    new FormGUI(formDescriptors, fm, new HashMap(), new FunctionLibrary(), new DialogLibrary());
   }
 
   public Object executeCommand(DocumentCommand.InvalidCommand cmd)

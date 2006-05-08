@@ -11,6 +11,7 @@
 * 27.12.2005 | BNK | Erstellung
 * 27.01.2006 | BNK | JFrame-Verwaltung nach FormGUI ausgelagert.
 * 02.02.2006 | BNK | Ein/Ausblendungen begonnen
+* 05.05.2006 | BNK | Condition -> Function, kommentiert
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -37,11 +38,13 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.Condition;
-import de.muenchen.allg.itd51.wollmux.ConditionFactory;
 import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.FormModel;
 import de.muenchen.allg.itd51.wollmux.Logger;
+import de.muenchen.allg.itd51.wollmux.func.Function;
+import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
+import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
+import de.muenchen.allg.itd51.wollmux.func.Values;
 
 /**
  * Stellt UI bereit, um ein Formulardokument zu bearbeiten.
@@ -62,44 +65,95 @@ public class FormController implements UIElementEventHandler
   private final static int BUTTON_BORDER = 2;
   
   /**
-   * Bildet Fensternamen (umschliessender Schlüssel in der Beschreibungssprache)
-   * auf {@link DialogWindow}s ab. Wird unter anderem zum Auflösen der Bezeichner
-   * der switchTo-ACTION verwendet.
+   * Das JPanel, das die GUI des FormControllers enthält.
    */
-  private Map fenster;
-
-  /**
-   * Der Name (siehe {@link #fenster}) des ersten Fensters des Dialogs,
-   * das ist das erste Fenster, das in der Dialog-Beschreibung aufgeführt ist.
-   */
-  private String firstWindow;
-  
   private JPanel contentPanel;
   
+  /**
+   * Die für die Erzeugung der UI Elemente verwendete Factory.
+   */
   private UIElementFactory uiElementFactory;
   
+  /**
+   * Die Funktionsbibliothek, die für das Interpretieren von Plausis etc, 
+   * herangezogen wird.
+   */
+  private FunctionLibrary funcLib;
+  
+  /**
+   * Die Dialogbibliothek, die die Dialoge liefert, die für die automatische
+   * Befüllung von Formularfeldern benötigt werden.
+   */
+  private DialogLibrary dialogLib;
+  
+  /**
+   * Ein Kontext für {@link UIElementFactory#createUIElement(Map, ConfigThingy)},
+   * der verwendet wird für das Erzeugen der vertikal angeordneten UI Elemente, die
+   * die Formularfelder darstellen.
+   */
   private Map panelContext;
+  
+  /**
+   * Ein Kontext für {@link UIElementFactory#createUIElement(Map, ConfigThingy)},
+   * der verwendet wird für das Erzeugen der horizontal angeordneten Buttons
+   * unter den Formularfeldern.
+   */
   private Map buttonContext;
   
+  /**
+   * Bildet IDs auf die dazugehörigen UIElements ab.
+   */
   private Map mapIdToUIElement = new HashMap();
+  
+  /**
+   * Bildet IDs auf Lists von UIElements ab, die vom UIElement ID abhängen
+   * (zum Beispiel weil ihre Plausi davon abhängt).
+   */
   private Map mapIdToListOfDependingUIElements = new HashMap();
+  
+  /**
+   * Bildet die ID eines UIElements ab auf eine List der Groups, die von
+   * Änderungen des UIElements betroffen sind (zum Beispiel weil die 
+   * Sichtbarkeitsfunktion der Gruppe von dem UIElement abhängt).
+   */
   private Map mapIdToListOfDependingGroups = new HashMap();
+  
+  /**
+   * Bildet GROUPS Bezeichner auf die entsprechenden Group-Instanzen ab.
+   */
   private Map mapGroupIdToGroup = new HashMap();
   
+  /**
+   * Die Inhalte der UIElemente aus {@link #mapIdToUIElement} als Values zur
+   * Verfügung gestellt.
+   */
+  private Values myUIElementValues = new UIElementMapValues(mapIdToUIElement);
+  
+  /**
+   * Das Writer-Dokument, das zum Formular gehört (gekapselt als FormModel).
+   */
   private FormModel formModel;
   
   /**
    * ACHTUNG! Darf nur im Event Dispatching Thread aufgerufen werden.
-   * @param model
-   * @param uidesc
-   * @param idToPresetValue
+   * @param conf der Formular-Knoten, der die Formularbeschreibung enthält.
+   * @param model das zum Formular gehörende Writer-Dokument (gekapselt als FormModel)
+   * @param idToPresetValue bildet IDs von Formularfeldern auf Vorgabewerte ab.
+   *        Falls hier ein Wert für ein Formularfeld vorhanden ist, so wird dieser
+   *        allen anderen automatischen Befüllungen vorgezogen.
+   * @param funcLib die Funktionsbibliothek, die zur Auswertung von Plausis etc.
+   *        herangezogen werden soll.
+   * @param dialogLib die Dialogbibliothek, die die Dialoge bereitstellt, die
+   *        für automatisch zu befüllende Formularfelder benötigt werden.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public FormController(ConfigThingy conf, FormModel model, final Map idToPresetValue)
+  public FormController(ConfigThingy conf, FormModel model, final Map idToPresetValue, 
+      FunctionLibrary funcLib, DialogLibrary dialogLib)
   throws ConfigurationErrorException
   {
-    fenster = new HashMap();
-    formModel = model;
+    this.formModel = model;
+    this.funcLib = funcLib;
+    this.dialogLib = dialogLib;
     
     final ConfigThingy fensterDesc = conf.query("Fenster");
     ConfigThingy visibilityDesc = conf.query("Sichtbarkeit");
@@ -117,6 +171,24 @@ public class FormController implements UIElementEventHandler
 
   }
 
+  /**
+   * Liefert ein JPanel, das das gesamte GUI des FormControllers enthält.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public JPanel JPanel(){ return contentPanel;}
+
+  
+  /**
+   * Baut die GUI auf (darf nur im EDT aufgerufen werden).
+   * @param fensterDesc der Fenster()-Knoten der Formularbeschreibung.
+   * @param visibilityDesc der Sichtbarkeit-Knoten der Formularbeschreibung oder
+   *               ein leeres ConfigThingy falls der Knoten nicht existiert.
+   * @param mapIdToPresetValue bildet IDs von Formularfeldern auf Vorgabewerte ab.
+   *        Falls hier ein Wert für ein Formularfeld vorhanden ist, so wird dieser
+   *        allen anderen automatischen Befüllungen vorgezogen.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TODO Testen
+   */
   private void createGUI(ConfigThingy fensterDesc, ConfigThingy visibilityDesc, Map mapIdToPresetValue)
   {
     Common.setLookAndFeel();
@@ -125,29 +197,32 @@ public class FormController implements UIElementEventHandler
     JTabbedPane tabbedPane = new JTabbedPane();
     contentPanel.add(tabbedPane);
     
+    /********************************************************
+     * Tabs erzeugen.
+     ******************************************************/
     Iterator iter = fensterDesc.iterator();
     while (iter.hasNext())
     {
       ConfigThingy neuesFenster = (ConfigThingy)iter.next();
-      String fensterName = neuesFenster.getName();
       String tabTitle = "Eingabe";
       try{
         tabTitle = neuesFenster.get("TITLE").toString();
       } catch(Exception x){}
-      DialogWindow newWindow = new DialogWindow(fensterName, neuesFenster);
-      if (firstWindow == null) firstWindow = fensterName;
-      fenster.put(fensterName,newWindow);
+      DialogWindow newWindow = new DialogWindow(neuesFenster);
       tabbedPane.add(tabTitle,newWindow.JPanel()); //TODO insertTab() verwenden, Tooltip und Mnemonic einführen
     }
     
+    /************************************************************
+     * Sichtbarkeit auswerten. 
+     ***********************************************************/
     iter = visibilityDesc.iterator();
     while (iter.hasNext())
     {
       ConfigThingy visRule = (ConfigThingy)iter.next();
       String groupId = visRule.getName();
-      Condition cond;
+      Function cond;
       try{
-        cond = ConditionFactory.getChildCondition(visRule);
+        cond = FunctionFactory.parseChildren(visRule, funcLib, dialogLib);
       }catch(ConfigurationErrorException x)
       {
         Logger.error(x);
@@ -160,11 +235,10 @@ public class FormController implements UIElementEventHandler
       Group group = (Group)mapGroupIdToGroup.get(groupId);
       group.condition = cond;
       
-      Collection deps = cond.dependencies();
-      Iterator depsIter = deps.iterator();
-      while (depsIter.hasNext())
+      String[] deps = cond.parameters();
+      for (int i = 0; i < deps.length; ++i)
       {
-        String elementId = (String)depsIter.next();
+        String elementId = deps[i];
         if (!mapIdToListOfDependingGroups.containsKey(elementId))
           mapIdToListOfDependingGroups.put(elementId,new Vector(1));
         
@@ -176,13 +250,24 @@ public class FormController implements UIElementEventHandler
   }
   
 
-  public JPanel JPanel(){ return contentPanel;}
-  
+  /**
+   * Ein Tab der Formular-GUI.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private class DialogWindow
   {
+    /**
+     * Das Panel das die GUI-Elemente enthält.
+     */
     private JPanel myPanel;
     
-    public DialogWindow(String name, ConfigThingy conf)
+    /**
+     * Erzeugt ein neues Tab.
+     * @param conf der Kind-Knoten des Fenster-Knotens der das Formular beschreibt.
+     *        conf ist direkter Elternknoten des Knotens "Eingabefelder".
+     * @author Matthias Benkmann (D-III-ITD 5.1)     
+     */
+    public DialogWindow(ConfigThingy conf)
     {
       myPanel = new JPanel(new GridBagLayout());
       int y = 0;
@@ -197,6 +282,7 @@ public class FormController implements UIElementEventHandler
           UIElement uiElement;
           try{
             uiElement = uiElementFactory.createUIElement(panelContext, uiConf);
+            uiElement.setConstraints(FunctionFactory.parseGrandchildren(uiConf.query("PLAUSI"), funcLib, dialogLib));
           } catch(ConfigurationErrorException x)
           {
             Logger.error(x);
@@ -225,13 +311,20 @@ public class FormController implements UIElementEventHandler
             }
           }
           
-          Condition cons = uiElement.getConstraints();
+          /**
+           * Falls das Element eine Plausi hat.
+           */
+          Function cons = uiElement.getConstraints();
           if (cons != null)
           {
-            Iterator consIter = cons.dependencies().iterator();
-            while (consIter.hasNext())
+            /**
+             * Für alle Felder von denen die Plausi abhängt das uiElement in
+             * die Liste der abhängigen UI Elemente einfügen. 
+             */
+            String[] consParams = cons.parameters();
+            for (int i = 0; i < consParams.length; ++i)
             {
-              String dependency = (String)consIter.next();
+              String dependency = consParams[i];
               if (!mapIdToListOfDependingUIElements.containsKey(dependency))
                 mapIdToListOfDependingUIElements.put(dependency, new Vector(1));
               
@@ -239,13 +332,23 @@ public class FormController implements UIElementEventHandler
               deps.add(uiElement);
             }
             
+            /**
+             * Dafür sorgen, dass uiElement immer in seiner eigenen Abhängigenliste
+             * steht, damit bei jeder Änderung an uiElement auf jeden Fall die
+             * Plausi neu ausgewertet wird, auch wenn sie nicht von diesem Element
+             * abhängt. Man denke sich zum Beispiel einen Zufallsgenerator als Plausi.
+             * Er hängt zwar nicht vom Wert des Felds ab, sollte aber bei jeder
+             * Änderung des Feldes erneut befragt werden.
+             */
             if (!mapIdToListOfDependingUIElements.containsKey(uiElement.getId()))
               mapIdToListOfDependingUIElements.put(uiElement.getId(), new Vector(1));
-            
             List deps = (List)mapIdToListOfDependingUIElements.get(uiElement.getId());
             if (!deps.contains(uiElement)) deps.add(uiElement);
           }
           
+          /********************************************************************
+           * UI Element und evtl. vorhandenes Zusatzlabel zum GUI hinzufügen.
+           *********************************************************************/
           int compoX = 0;
           if (!uiElement.getLabelType().equals(UIElement.LABEL_NONE))
           {
@@ -273,6 +376,10 @@ public class FormController implements UIElementEventHandler
         }
       }
       
+      
+      /*****************************************************************************
+       * Für die Buttons ein eigenes Panel anlegen und mit UIElementen befüllen. 
+       *****************************************************************************/
       JPanel buttonPanel = new JPanel(new GridBagLayout());
       GridBagConstraints gbcPanel = new GridBagConstraints(0, 0, 2, 1, 1.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL,       new Insets(TF_BORDER,TF_BORDER,TF_BORDER,TF_BORDER),0,0);
       gbcPanel.gridx = 0;
@@ -330,6 +437,10 @@ public class FormController implements UIElementEventHandler
       
     }
 
+    /**
+     * Liefert das Panel zurück, dass den ganzen Inhalt dieses Tabs enthält.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
     public JPanel JPanel()
     {
       return myPanel;
@@ -337,7 +448,13 @@ public class FormController implements UIElementEventHandler
   }
   
   
-
+  /**
+   * Initialisiert die UIElementFactory, die zur Erzeugung der UIElements
+   * verwendet wird.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TODO Testen
+   */
   private void initFactories()
   {
     Map mapTypeToLayoutConstraints = new HashMap();
@@ -413,6 +530,14 @@ public class FormController implements UIElementEventHandler
 
   }
   
+  /**
+  * Die zentrale Anlaufstelle für alle von UIElementen ausgelösten Events. 
+  * @param source
+  * @param eventType
+  * @param args
+  * @author Matthias Benkmann (D-III-ITD 5.1)
+  * TODO Testen
+  */
   public void processUiElementEvent(UIElement source, String eventType, Object[] args)
   {
     System.out.println("UIElementEvent: "+eventType+" on UIElement "+source.getId());
@@ -423,10 +548,10 @@ public class FormController implements UIElementEventHandler
       while (iter.hasNext())
       {
         UIElement dependingUIElement = (UIElement)iter.next();
-        Condition cons =  dependingUIElement.getConstraints();
+        Function cons =  dependingUIElement.getConstraints();
         if (cons == null) continue;
         //TODO momentante Plausi-Zustand merken und Background nur ändern wenn Zustand geändert. Farben nicht fest verdrahten. WHITE aus dem standardbackground eines neuen Elements holen. PINK aus Config.
-        if (cons.check(mapIdToUIElement))
+        if (cons.getBoolean(myUIElementValues))
           dependingUIElement.setBackground(Color.WHITE);
         else
           dependingUIElement.setBackground(Color.PINK);
@@ -440,9 +565,9 @@ public class FormController implements UIElementEventHandler
       while (iter.hasNext())
       {
         Group dependingGroup = (Group)iter.next();
-        Condition cond =  dependingGroup.condition;
+        Function cond =  dependingGroup.condition;
         if (cond == null) continue;
-        boolean result = cond.check(mapIdToUIElement);
+        boolean result = cond.getBoolean(myUIElementValues);
         if (result == dependingGroup.visible) continue;
         dependingGroup.visible = result;
         
@@ -457,13 +582,63 @@ public class FormController implements UIElementEventHandler
   }
   
   
-  
+  /**
+   * Eine Sichtbarkeitsgruppe von UIElementen.
+   *
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private static class Group
   {
+    /**
+     * Die Mitglieder der Gruppe.
+     */
     public List uiElements = new Vector(1);
-    public Condition condition = null;
+    
+    /**
+     * Die Bedingung für die Sichtbarkeit (true = sichtbar) oder null, wenn
+     * keine Sichtbarkeitsbedingung definiert.
+     */
+    public Function condition = null;
+    
+    /**
+     * true, wenn die Gruppe im Augenblick sichtbar ist.
+     */
     public boolean visible = true;
   }
   
+  /**
+   * Stellt den Inhalt einer Map von IDs auf UIElemente als Values zur
+   * Verfügung.
+   *
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private static class UIElementMapValues implements Values
+  {
+    private Map mapIdToUIElement;
+    
+    public UIElementMapValues(Map mapIdToUIElement)
+    {
+      this.mapIdToUIElement = mapIdToUIElement;
+    }
+
+    public boolean hasValue(String id)
+    {
+      return mapIdToUIElement.containsKey(id);
+    }
+
+    public String getString(String id)
+    {
+      UIElement uiElement = (UIElement)mapIdToUIElement.get(id);
+      if (uiElement == null) return "";
+      return uiElement.getString();
+    }
+
+    public boolean getBoolean(String id)
+    {
+      UIElement uiElement = (UIElement)mapIdToUIElement.get(id);
+      if (uiElement == null) return false;
+      return uiElement.getBoolean();
+    }
+  }
 
 }

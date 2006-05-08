@@ -54,8 +54,6 @@ import javax.swing.text.JTextComponent;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
-import de.muenchen.allg.itd51.wollmux.Condition;
-import de.muenchen.allg.itd51.wollmux.ConditionFactory;
 import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.Logger;
 
@@ -301,7 +299,6 @@ public class UIElementFactory
       labelType = (Integer)mapTypeToLabelType.get(DEFAULT);
   
     UIElement uiElement;
-    Condition constraints = ConditionFactory.getGrandchildCondition(conf.query("PLAUSI"));
     
     if (type.equals("button") ||
         type.equals("menuitem"))
@@ -330,7 +327,7 @@ public class UIElementFactory
       JTextField tf = new JTextField(textfieldWidth);
       tf.setEditable(!readonly);
       if (!tip.equals("")) tf.setToolTipText(tip);
-      uiElement = new UIElement.Textfield(id, tf, layoutConstraints, labelType, label, labelLayoutConstraints, constraints);
+      uiElement = new UIElement.Textfield(id, tf, layoutConstraints, labelType, label, labelLayoutConstraints);
       tf.getDocument().addDocumentListener(new UIElementDocumentListener(uiElementEventHandler, uiElement, "valueChanged", new Object[]{}));
       return uiElement;
     }
@@ -348,7 +345,7 @@ public class UIElementFactory
       scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
       scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
       panel.add(scrollPane);
-      uiElement = new UIElement.Textarea(id, textarea, panel, layoutConstraints, labelType, label, labelLayoutConstraints, constraints);
+      uiElement = new UIElement.Textarea(id, textarea, panel, layoutConstraints, labelType, label, labelLayoutConstraints);
       textarea.getDocument().addDocumentListener(new UIElementDocumentListener(uiElementEventHandler, uiElement, "valueChanged", new Object[]{}));
       return uiElement;
     }
@@ -367,7 +364,7 @@ public class UIElementFactory
         }
       } catch (Exception x) { Logger.error(x); }
       
-      uiElement = new UIElement.Combobox(id, combo, layoutConstraints, labelType, label, labelLayoutConstraints, constraints);
+      uiElement = new UIElement.Combobox(id, combo, layoutConstraints, labelType, label, labelLayoutConstraints);
       if (editable) 
         ((JTextComponent)combo.getEditor().getEditorComponent()).getDocument().addDocumentListener(new UIElementDocumentListener(uiElementEventHandler, uiElement, "valueChanged", new Object[]{}));
       else

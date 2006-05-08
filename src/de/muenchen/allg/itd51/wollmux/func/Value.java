@@ -15,7 +15,7 @@
 * @version 1.0
 * 
 */
-package de.muenchen.allg.itd51.wollmux;
+package de.muenchen.allg.itd51.wollmux.func;
 
 /**
  * Ein Wert, der als verschiedene Datentypen abrufbar ist
@@ -32,8 +32,7 @@ public interface Value
   
   /**
    * Der aktuelle Wert als boolean. Falls der Wert seiner Natur nach ein
-   * String ist, so wird true geliefert, falls der aktuelle
-   * Wert nicht der leere String ist.
+   * String ist, so ist das Ergebnis abhängig von der konkreten Implementierung.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public boolean getBoolean();
