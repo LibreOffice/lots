@@ -40,6 +40,7 @@ import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
 
+import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
@@ -87,10 +88,24 @@ public class WollMuxSingleton implements XPALProvider
    */
   private WollMuxSingleton(XComponentContext ctx)
   {
+    // Der XComponentContext wir hier gesichert und vom WollMuxSingleton mit
+    // getXComponentContext zurückgeliefert.
+    this.ctx = ctx;
+
+    // Initialisiere die UNO-Klasse, so dass auch mit dieser Hilfsklasse
+    // gearbeitet werden kann.
+    try
+    {
+      UNO.init(ctx.getServiceManager());
+    }
+    catch (java.lang.Exception e)
+    {
+      Logger.error(e);
+    }
+
     boolean successfullStartup = true;
 
     registeredPALChangeListener = new Vector();
-    this.ctx = ctx;
 
     WollMuxFiles.setupWollMuxDir();
 
