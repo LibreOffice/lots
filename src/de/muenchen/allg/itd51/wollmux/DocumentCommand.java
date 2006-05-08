@@ -24,7 +24,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.ListIterator;
 
-import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextRange;
 import com.sun.star.uno.Exception;
@@ -175,15 +174,7 @@ abstract public class DocumentCommand
    */
   protected int getRelation(DocumentCommand b)
   {
-    int cmp;
-    try
-    {
-      cmp = bookmark.compare(b.bookmark);
-    }
-    catch (IllegalArgumentException e)
-    {
-      return REL_B_IS_SIBLING_AFTER_A;
-    }
+    int cmp = bookmark.compare(b.bookmark);
 
     if (cmp == Bookmark.POS_AABB) return REL_B_IS_SIBLING_AFTER_A;
     if (cmp == Bookmark.POS_BBAA) return REL_B_IS_SIBLING_BEFORE_A;
@@ -228,7 +219,8 @@ abstract public class DocumentCommand
    * Bookmarks, welches das DocumentCommand definiert - die Methode darf aber
    * nur verwendet werden, um die Inhalte an dieser Positon auszulesen und nicht
    * um neue Textinhalte an dieser Stelle einzufügen (dafür gibt es
-   * createInsertCursor()).
+   * createInsertCursor()); ist das Bookmark nicht (mehr) vorhanden, wird null
+   * zurück geliefert.
    * 
    * @return
    */
@@ -240,36 +232,34 @@ abstract public class DocumentCommand
   /**
    * Erzeugt einen in INSERT_MARKs eingeschlossenen Cursor, in dem Feldinhalte
    * sicher eingefügt werden können, ohne die Ordnung der DocumentCommands zu
-   * stören. Jeder Aufruf von createInsertCursor überschreibt die bestehenden
+   * stören; ist das Bookmark nicht (mehr) vorhanden, wird null zurück
+   * geliefert. Jeder Aufruf von createInsertCursor überschreibt die bestehenden
    * Inhalte des bisherigen DocumentCommands. Der InsertCursor sieht in etwa wie
    * folgt aus: "<" CURSOR ">". Der InsertCursor hat direkt nach der Erzeugung
    * keine Ausdehnung. Die INSERT_MARKS "<" und ">" können nach Beendigung der
    * Dokumentgenerierung über die Methode cleanInsertMarks() wieder entfernt
    * werden.
    * 
-   * @return
+   * @return XTextCursor zum Einfügen oder null
    */
   public XTextCursor createInsertCursor()
   {
     XTextRange range = bookmark.getTextRange();
 
-    XTextCursor cursor = range.getText().createTextCursorByRange(range);
-    cursor.setString(INSERT_MARK_OPEN + INSERT_MARK_CLOSE);
-    hasInsertMarks = true;
-
-    try
+    if (range != null)
     {
+      XTextCursor cursor = range.getText().createTextCursorByRange(range);
+      cursor.setString(INSERT_MARK_OPEN + INSERT_MARK_CLOSE);
+      hasInsertMarks = true;
+
       bookmark.rerangeBookmark(cursor);
-    }
-    catch (Exception e)
-    {
-      Logger.error(e);
-    }
 
-    cursor.goRight((short) INSERT_MARK_OPEN.length(), false);
-    cursor.collapseToStart();
+      cursor.goRight((short) INSERT_MARK_OPEN.length(), false);
+      cursor.collapseToStart();
 
-    return cursor;
+      return cursor;
+    }
+    return null;
   }
 
   /**
@@ -281,20 +271,23 @@ abstract public class DocumentCommand
     if (hasInsertMarks)
     {
       XTextRange range = bookmark.getTextRange();
+      if (range != null)
+      {
 
-      // INSERT_MARKs mit Hilfe eines Cursors von links und rechts löschen
-      XTextCursor cursor;
+        // INSERT_MARKs mit Hilfe eines Cursors von links und rechts löschen
+        XTextCursor cursor;
 
-      // INSERT_MARK links löschen:
-      cursor = range.getText().createTextCursorByRange(range.getStart());
-      cursor.goRight((short) INSERT_MARK_OPEN.length(), true);
-      cursor.setString("");
+        // INSERT_MARK links löschen:
+        cursor = range.getText().createTextCursorByRange(range.getStart());
+        cursor.goRight((short) INSERT_MARK_OPEN.length(), true);
+        cursor.setString("");
 
-      // INSERT_MARK rechts löschen:
-      cursor = range.getText().createTextCursorByRange(range.getEnd());
-      cursor.goLeft((short) INSERT_MARK_CLOSE.length(), true);
-      cursor.setString("");
-      hasInsertMarks = false;
+        // INSERT_MARK rechts löschen:
+        cursor = range.getText().createTextCursorByRange(range.getEnd());
+        cursor.goLeft((short) INSERT_MARK_CLOSE.length(), true);
+        cursor.setString("");
+        hasInsertMarks = false;
+      }
     }
   }
 

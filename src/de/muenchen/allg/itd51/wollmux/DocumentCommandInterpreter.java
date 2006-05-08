@@ -32,6 +32,7 @@ import java.util.Iterator;
 import com.sun.star.awt.FontWeight;
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.beans.PropertyVetoException;
+import com.sun.star.container.NoSuchElementException;
 import com.sun.star.container.XEnumeration;
 import com.sun.star.container.XEnumerationAccess;
 import com.sun.star.io.IOException;
@@ -254,53 +255,136 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
   {
     Logger.debug2("cleanEmptyParagraphs(" + cmd + ")");
 
-    try
+    // Ersten Absatz löschen, falls er leer ist:
+
+    // benötigte TextCursor holen:
+    XTextRange range = cmd.getTextRange();
+    UnoService fragStart = new UnoService(null);
+    UnoService marker = new UnoService(null);
+    if (range != null)
     {
-      XTextRange range = cmd.getTextRange();
-      
-      // Falls die erste Zeile des eingefügten Textfragments leer ist, wird die
-      // erste Zeile gelöscht.
-      UnoService cursor = new UnoService(range.getText()
-          .createTextCursorByRange(range.getStart()));
-      if (cursor.xParagraphCursor().isEndOfParagraph())
+      fragStart = new UnoService(range.getText().createTextCursorByRange(
+          range.getStart()));
+      marker = new UnoService(range.getText().createTextCursor());
+    }
+
+    if (fragStart.xParagraphCursor() != null
+        && fragStart.xParagraphCursor().isStartOfParagraph())
+    {
+      // Der Cursor ist am Ende des Absatzes. Das sagt uns, dass der erste
+      // eingefügte Absatz ein leerer Absatz war. Damit soll dieser Absatz
+      // gelöscht werden:
+
+      // Jetzt wird der marker verwendet, um die zu löschenden Absatzvorschübe
+      // zu markieren. Hier muss man zuerst eins nach rechts gehen und den
+      // Bereich von rechts nach links aufziehen, denn sonst würden nach dem
+      // kommenden Löschvorgang (setString("")) die Absatzmerkmale des
+      // vorherigen Absatzes benutzt und nicht die des nächsten Absatzes wie
+      // gewünscht.
+      marker.xTextCursor().gotoRange(fragStart.xTextRange(), false);
+      marker.xParagraphCursor().goRight((short) 1, false);
+      marker.xParagraphCursor().goLeft((short) 1, true);
+
+      // In manchen Fällen verhält sich der Textcursor nach den obigen zwei
+      // Zeilen anders als erwartet. Z.B. wenn der nächsten Absatz eine
+      // TextTable ist. In diesem Fall ist nach obigen zwei Zeilen die ganze
+      // Tabelle markiert und nicht nur das Absatztrennzeichen. Der Cursor
+      // markiert also mehr Inhalt als nur den erwarteten Absatzvorschub. In
+      // einem solchen Fall, darf der markierte Inhalt nicht gelöscht werden.
+      // Man findet diesen Fall heraus, in dem man die Anzahl der Elemente
+      // der Enumeration auf diesen Cursor zählt. Ist die Anzahl > 1, so wurde
+      // ungewollter Inhalt mit markiert.
+      int count = countEnumerationContent(marker.xEnumerationAccess());
+      if (count == 1)
       {
-        cursor.xTextCursor().goRight((short) 1, false);
+        // Normalfall: hier darf gelöscht werden
+        marker.xTextCursor().setString("");
+      }
+      if (count > 1)
+      {
+        // Nur wenn auch der Einfügepunkt des insertFrags/insertContent ein
+        // leerer Absatz war, kann dieser leere Absatz als ganzes gelöscht
+        // werden. Man erkennt den Fall daran, dass fragStart auch der Anfang
+        // des Absatzes ist.
+        if (fragStart.xParagraphCursor().isStartOfParagraph())
+          deleteParagraph(fragStart.xTextCursor());
+        // Hier wird leider auch das Bookmark selbst gelöscht!
+      }
+    }
 
-        // Beginnt der nächste Absatz mit einer TextPortion?
-        boolean nextParStartsWithTextPortion = false;
-        XEnumerationAccess ea = cursor.xEnumerationAccess();
-        XEnumeration enumeration = null;
-        if (ea != null) enumeration = ea.createEnumeration();
-        Object o = null;
-        if (enumeration != null && enumeration.hasMoreElements())
-          o = enumeration.nextElement();
-        if (new UnoService(o).supportsService("com.sun.star.text.TextPortion"))
+    // Letzten Absatz löschen, falls er leer ist:
+
+    // der Range muss hier nochmal geholt werden, für den Fall, dass obige
+    // Zeilen das Bookmark mit löschen (der delete Paragraph tut dies z.B. beim
+    // insertFrag "Fusszeile" im Zusammenspiel mit TextTables).
+    range = cmd.getTextRange();
+    UnoService fragEnd = new UnoService(null);
+    if (range != null)
+    {
+      fragEnd = new UnoService(range.getText().createTextCursorByRange(
+          range.getEnd()));
+      marker = new UnoService(range.getText().createTextCursor());
+    }
+
+    if (fragEnd.xParagraphCursor() != null
+        && fragEnd.xParagraphCursor().isStartOfParagraph())
+    {
+      marker.xTextCursor().gotoRange(fragEnd.xTextRange(), false);
+      marker.xTextCursor().goLeft((short) 1, true);
+      marker.xTextCursor().setString("");
+    }
+  }
+
+  private int countEnumerationContent(XEnumerationAccess enumAccess)
+  {
+    int count = 0;
+    if (enumAccess != null)
+    {
+      XEnumeration xenum = enumAccess.createEnumeration();
+      while (xenum.hasMoreElements())
+      {
+        try
         {
-          nextParStartsWithTextPortion = true;
+          xenum.nextElement();
+          ++count;
         }
-
-        // Absatz nur löschen, wenn der nächste Absatz mit einer TextPortion
-        // beginnt:
-        if (nextParStartsWithTextPortion)
+        catch (Exception e)
         {
-          cursor.xTextCursor().goLeft((short) 1, true);
-          cursor.xTextCursor().setString("");
+          Logger.error(e);
         }
       }
-
-      // Falls die letzte Zeile des eingefügten Textfragments leer ist, wird die
-      // letzte Zeile gelöscht.
-//      cursor = new UnoService(range.getText().createTextCursorByRange(
-//          range.getEnd()));
-//      if (cursor.xParagraphCursor().isStartOfParagraph())
-//      {
-//        cursor.xTextCursor().goLeft((short) 1, true);
-//        cursor.xTextCursor().setString("");
-//      }
     }
-    catch (Throwable t)
+    return count;
+  }
+
+  /**
+   * Löscht den ganzen Paragraphen in dem der Cursor steht.
+   * 
+   * @param textCursor
+   */
+  private void deleteParagraph(XTextCursor textCursor)
+  {
+    UnoService cursor = new UnoService(textCursor);
+    UnoService element = new UnoService(null);
+    if (cursor.xEnumerationAccess().createEnumeration() != null)
     {
-      Logger.error(t);
+      XEnumeration xenum = cursor.xEnumerationAccess().createEnumeration();
+      if (xenum.hasMoreElements()) try
+      {
+        element = new UnoService(xenum.nextElement());
+      }
+      catch (Exception e)
+      {
+        Logger.error(e);
+      }
+    }
+    if (element.xTextContent() != null) try
+    {
+      cursor.xTextCursor().getText().removeTextContent(element.xTextContent());
+    }
+    catch (NoSuchElementException e)
+    {
+      Logger.error(e);
     }
   }
 
@@ -313,7 +397,8 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
   private void startFormGUI()
   {
     FormModel fm = new FormModelImpl(document.xComponent());
-    new FormGUI(formDescriptors, fm, new HashMap(), new FunctionLibrary(), new DialogLibrary());
+    new FormGUI(formDescriptors, fm, new HashMap(), new FunctionLibrary(),
+        new DialogLibrary());
   }
 
   public Object executeCommand(DocumentCommand.InvalidCommand cmd)
@@ -346,15 +431,18 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
             "Kein Absender ausgewählt! Bitte wählen Sie einen Absender aus!");
       }
       XTextCursor insCursor = cmd.createInsertCursor();
-      if (ds.get(spaltenname) == null || ds.get(spaltenname).equals(""))
+      if (insCursor != null)
       {
-        insCursor.setString("");
-      }
-      else
-      {
-        insCursor.setString(cmd.getLeftSeparator()
-                            + ds.get(spaltenname)
-                            + cmd.getRightSeparator());
+        if (ds.get(spaltenname) == null || ds.get(spaltenname).equals(""))
+        {
+          insCursor.setString("");
+        }
+        else
+        {
+          insCursor.setString(cmd.getLeftSeparator()
+                              + ds.get(spaltenname)
+                              + cmd.getRightSeparator());
+        }
       }
     }
     catch (java.lang.Exception e)
@@ -419,9 +507,12 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
 
       // Textfragment einfügen:
       UnoService insCursor = new UnoService(cmd.createInsertCursor());
-      insCursor.xDocumentInsertable().insertDocumentFromURL(
-          urlStr,
-          new PropertyValue[] {});
+      if (insCursor.xDocumentInsertable() != null)
+      {
+        insCursor.xDocumentInsertable().insertDocumentFromURL(
+            urlStr,
+            new PropertyValue[] {});
+      }
     }
     catch (java.lang.Exception e)
     {
@@ -457,9 +548,10 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
 
         // Textfragment einfügen:
         UnoService insCursor = new UnoService(cmd.createInsertCursor());
-        insCursor.xDocumentInsertable().insertDocumentFromURL(
-            urlStr,
-            new PropertyValue[] {});
+        if (insCursor.xDocumentInsertable() != null)
+          insCursor.xDocumentInsertable().insertDocumentFromURL(
+              urlStr,
+              new PropertyValue[] {});
       }
       catch (java.lang.Exception e)
       {
@@ -489,10 +581,14 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
     try
     {
       XTextRange range = cmd.getTextRange();
-      UnoService cursor = new UnoService(range.getText()
-          .createTextCursorByRange(range));
-      UnoService textfield = cursor.getPropertyValue("TextField");
-      Object content = textfield.getPropertyValue("Content").getObject();
+      Object content = null;
+      if (range != null)
+      {
+        UnoService cursor = new UnoService(range.getText()
+            .createTextCursorByRange(range));
+        UnoService textfield = cursor.getPropertyValue("TextField");
+        content = textfield.getPropertyValue("Content").getObject();
+      }
       if (content != null)
       {
         ConfigThingy ct = new ConfigThingy("", null, new StringReader(content
