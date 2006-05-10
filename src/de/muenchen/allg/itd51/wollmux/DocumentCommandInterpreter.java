@@ -43,7 +43,6 @@ import com.sun.star.uno.Exception;
 
 import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.DocumentCommand.ExecutableCommand;
 import de.muenchen.allg.itd51.wollmux.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.db.DatasetNotFoundException;
 import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
@@ -136,8 +135,9 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
     // Zähler für aufgetretene Fehler bei der Bearbeitung der Kommandos.
     int errorCount = 0;
 
-    // Zuerst alle insertFrags und insertContents abarbeiten bis sich der Baum
-    // nicht mehr ändert. Der loopCount dient zur Vermeidung von
+    // Zuerst alle Kommandos bearbeiten, die irgendwie Kinder bekommen können,
+    // d.h. alle insertFrags und insertContents. Das geschieht so lange, bis
+    // sich der Baum nicht mehr ändert. Der loopCount dient zur Vermeidung von
     // Endlosschleifen.
     boolean changed = true;
     int loopCount = 0;
@@ -151,14 +151,12 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
       while (iter.hasNext())
       {
         DocumentCommand cmd = (DocumentCommand) iter.next();
-        if ((cmd instanceof DocumentCommand.InsertFrag || cmd instanceof DocumentCommand.InsertContent)
-            && cmd.isDone() == false)
-        {
-          changed = true;
 
-          // Kommandos ausführen
-          Object result = ((ExecutableCommand) cmd).execute(this);
-          errorCount += ((Integer) result).intValue();
+        if (cmd.canHaveChilds() && cmd.isDone() == false)
+        {
+          // Kommando ausführen und Fehler zählen
+          errorCount += cmd.execute(this);
+          changed = true;
         }
       }
     }
@@ -167,18 +165,17 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
     // sehen:
     if (document.xModel() != null) document.xModel().lockControllers();
 
-    // Und jetzt nochmal alle (übrigen) DocumentCommands in einem einzigen
-    // Durchlauf mit execute aufrufen.
+    // Und jetzt nochmal alle (übrigen) DocumentCommands (z.B. insertValues) in
+    // einem einzigen Durchlauf mit execute aufrufen.
     tree.update();
     Iterator iter = tree.depthFirstIterator(false);
     while (iter.hasNext())
     {
       DocumentCommand cmd = (DocumentCommand) iter.next();
-      if (cmd instanceof ExecutableCommand && cmd.isDone() == false)
+      if (cmd.isDone() == false)
       {
-        // Kommandos ausführen
-        Object result = ((ExecutableCommand) cmd).execute(this);
-        errorCount += ((Integer) result).intValue();
+        // Kommandos ausführen und Fehler zählen
+        errorCount += cmd.execute(this);
       }
     }
 
@@ -191,7 +188,8 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
     while (iter.hasNext())
     {
       DocumentCommand cmd = (DocumentCommand) iter.next();
-      if ((cmd instanceof DocumentCommand.InsertFrag || cmd instanceof DocumentCommand.InsertContent))
+      if (cmd.isDone() == true
+          && cmd instanceof DocumentCommand.ExternalContentInserter)
       {
         cleanEmptyParagraphs(cmd);
       }
@@ -343,7 +341,9 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
 
   /**
    * Die Methode prüft, ob der zweite Paragraph des markierte Bereichs ein
-   * TextParagraph ist.
+   * TextParagraph ist und gibt true zurück, wenn der zweite Paragraph nicht
+   * vorhanden ist oder er den Service com.sun.star.text.Paragraph
+   * implementiert.
    * 
    * @param enumAccess
    * @return
@@ -433,20 +433,20 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
         new DialogLibrary());
   }
 
-  public Object executeCommand(DocumentCommand.InvalidCommand cmd)
+  public int executeCommand(DocumentCommand.InvalidCommand cmd)
   {
     insertErrorField(
         cmd,
         "Dokumentkommando ist ungültig: " + cmd.getMessage(),
         null);
-    return new Integer(1);
+    return 1;
   }
 
   /**
    * Diese Methode fügt einen Spaltenwert aus dem aktuellen Datensatz ein. Im
    * Fehlerfall wird die Fehlermeldung eingefügt.
    */
-  public Object executeCommand(DocumentCommand.InsertValue cmd)
+  public int executeCommand(DocumentCommand.InsertValue cmd)
   {
     cmd.setErrorState(false);
     try
@@ -481,10 +481,10 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
     {
       insertErrorField(cmd, "", e);
       cmd.setErrorState(true);
-      return new Integer(1);
+      return 1;
     }
     cmd.setDoneState(true);
-    return new Integer(0);
+    return 0;
   }
 
   /**
@@ -497,7 +497,7 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
    * @param bookmarkName
    *          Name des bookmarks, in das das Fragment eingefügt werden soll.
    */
-  public Object executeCommand(DocumentCommand.InsertFrag cmd)
+  public int executeCommand(DocumentCommand.InsertFrag cmd)
   {
     cmd.setErrorState(false);
     try
@@ -550,10 +550,10 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
     {
       insertErrorField(cmd, "", e);
       cmd.setErrorState(true);
-      return new Integer(1);
+      return 1;
     }
     cmd.setDoneState(true);
-    return new Integer(0);
+    return 0;
   }
 
   /**
@@ -567,7 +567,7 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
    * @param bookmarkName
    *          Name des bookmarks, in das das Fragment eingefügt werden soll.
    */
-  public Object executeCommand(DocumentCommand.InsertContent cmd)
+  public int executeCommand(DocumentCommand.InsertContent cmd)
   {
     cmd.setErrorState(false);
     if (fragUrls.length > fragUrlsCount)
@@ -589,11 +589,11 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
       {
         insertErrorField(cmd, "", e);
         cmd.setErrorState(true);
-        return new Integer(1);
+        return 1;
       }
     }
     cmd.setDoneState(true);
-    return new Integer(0);
+    return 0;
   }
 
   /**
@@ -607,7 +607,7 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
    * @param state
    * @return
    */
-  public Object executeCommand(DocumentCommand.Form cmd)
+  public int executeCommand(DocumentCommand.Form cmd)
   {
     cmd.setErrorState(false);
     try
@@ -642,10 +642,10 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
     {
       insertErrorField(cmd, "", e);
       cmd.setErrorState(true);
-      return new Integer(1);
+      return 1;
     }
     cmd.setDoneState(true);
-    return new Integer(0);
+    return 0;
   }
 
   /**

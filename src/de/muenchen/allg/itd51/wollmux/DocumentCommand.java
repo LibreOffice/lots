@@ -222,6 +222,17 @@ abstract public class DocumentCommand
   protected abstract boolean canHaveChilds();
 
   /**
+   * Callbackfunktion für die Ausführung des Dokumentkommandos in einem
+   * DocumentCommand.Executor wie z.B. dem DocumentCommandInterpreter. Die
+   * Methode liefert die Anzahl der bei der Ausführung entstandenen Fehler
+   * zurück.
+   * 
+   * @param executor
+   * @return Anzahl der aufgetretenen Fehler
+   */
+  public abstract int execute(DocumentCommand.Executor executor);
+
+  /**
    * Diese Methode ermöglicht den Zugriff auf den vollständigen TextRange des
    * Bookmarks, welches das DocumentCommand definiert - die Methode darf aber
    * nur verwendet werden, um die Inhalte an dieser Positon auszulesen und nicht
@@ -535,23 +546,27 @@ abstract public class DocumentCommand
    * 
    * @author christoph.lutz
    */
-  static interface ExecutableCommand
-  {
-    public Object execute(DocumentCommand.Executor visitable);
-  }
-
   static interface Executor
   {
-    public Object executeCommand(DocumentCommand.InsertFrag cmd);
+    public int executeCommand(DocumentCommand.InsertFrag cmd);
 
-    public Object executeCommand(DocumentCommand.InsertValue cmd);
+    public int executeCommand(DocumentCommand.InsertValue cmd);
 
-    public Object executeCommand(DocumentCommand.InsertContent cmd);
+    public int executeCommand(DocumentCommand.InsertContent cmd);
 
-    public Object executeCommand(DocumentCommand.Form cmd);
+    public int executeCommand(DocumentCommand.Form cmd);
 
-    public Object executeCommand(DocumentCommand.InvalidCommand cmd);
+    public int executeCommand(DocumentCommand.InvalidCommand cmd);
   }
+
+  // ********************************************************************************
+  /**
+   * Beschreibt ein Dokumentkommando, das Dokumentinhalte über
+   * insertDocumentFromURL einfügt.
+   */
+  static interface ExternalContentInserter
+  {
+  };
 
   // ********************************************************************************
   static public class InvalidCommandException extends Exception
@@ -565,8 +580,7 @@ abstract public class DocumentCommand
   }
 
   // ********************************************************************************
-  static public class InvalidCommand extends DocumentCommand implements
-      ExecutableCommand
+  static public class InvalidCommand extends DocumentCommand
   {
     private java.lang.Exception exception;
 
@@ -597,7 +611,7 @@ abstract public class DocumentCommand
       return true;
     }
 
-    public Object execute(DocumentCommand.Executor visitable)
+    public int execute(DocumentCommand.Executor visitable)
     {
       return visitable.executeCommand(this);
     }
@@ -610,7 +624,7 @@ abstract public class DocumentCommand
   }
 
   // ********************************************************************************
-  static public class Form extends DocumentCommand implements ExecutableCommand
+  static public class Form extends DocumentCommand
   {
     public Form(ConfigThingy wmCmd, Bookmark bookmark, boolean debug)
     {
@@ -622,7 +636,7 @@ abstract public class DocumentCommand
       return false;
     }
 
-    public Object execute(DocumentCommand.Executor visitable)
+    public int execute(DocumentCommand.Executor visitable)
     {
       return visitable.executeCommand(this);
     }
@@ -650,11 +664,16 @@ abstract public class DocumentCommand
     {
       return true;
     }
+
+    public int execute(DocumentCommand.Executor e)
+    {
+      return 0;
+    }
   }
 
   // ********************************************************************************
   static public class InsertFrag extends DocumentCommand implements
-      ExecutableCommand
+      ExternalContentInserter
   {
     private String fragID;
 
@@ -682,7 +701,7 @@ abstract public class DocumentCommand
       return true;
     }
 
-    public Object execute(DocumentCommand.Executor visitable)
+    public int execute(DocumentCommand.Executor visitable)
     {
       return visitable.executeCommand(this);
     }
@@ -690,7 +709,7 @@ abstract public class DocumentCommand
 
   // ********************************************************************************
   static public class InsertContent extends DocumentCommand implements
-      ExecutableCommand
+      ExternalContentInserter
   {
     private String fragID;
 
@@ -710,15 +729,14 @@ abstract public class DocumentCommand
       return true;
     }
 
-    public Object execute(DocumentCommand.Executor visitable)
+    public int execute(DocumentCommand.Executor visitable)
     {
       return visitable.executeCommand(this);
     }
   }
 
   // ********************************************************************************
-  static public class InsertValue extends DocumentCommand implements
-      ExecutableCommand
+  static public class InsertValue extends DocumentCommand
   {
     private String dbSpalte;
 
@@ -794,7 +812,7 @@ abstract public class DocumentCommand
       return rightSeparator;
     }
 
-    public Object execute(DocumentCommand.Executor visitable)
+    public int execute(DocumentCommand.Executor visitable)
     {
       return visitable.executeCommand(this);
     }
