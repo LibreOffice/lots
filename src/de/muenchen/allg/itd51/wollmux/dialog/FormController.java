@@ -25,7 +25,6 @@ import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -192,7 +191,7 @@ public class FormController implements UIElementEventHandler
   private void createGUI(ConfigThingy fensterDesc, ConfigThingy visibilityDesc, Map mapIdToPresetValue)
   {
     Common.setLookAndFeel();
-    
+     //TODO Fenster-Positions und Größenangaben in wollmux.conf auswerten 
     contentPanel = new JPanel();
     JTabbedPane tabbedPane = new JTabbedPane();
     contentPanel.add(tabbedPane);
@@ -222,7 +221,7 @@ public class FormController implements UIElementEventHandler
       String groupId = visRule.getName();
       Function cond;
       try{
-        cond = FunctionFactory.parseChildren(visRule, funcLib, dialogLib);
+        cond = FunctionFactory.parseChildren(visRule, funcLib, dialogLib, this);
       }catch(ConfigurationErrorException x)
       {
         Logger.error(x);
@@ -282,7 +281,7 @@ public class FormController implements UIElementEventHandler
           UIElement uiElement;
           try{
             uiElement = uiElementFactory.createUIElement(panelContext, uiConf);
-            uiElement.setConstraints(FunctionFactory.parseGrandchildren(uiConf.query("PLAUSI"), funcLib, dialogLib));
+            uiElement.setConstraints(FunctionFactory.parseGrandchildren(uiConf.query("PLAUSI"), funcLib, dialogLib, this));
           } catch(ConfigurationErrorException x)
           {
             Logger.error(x);

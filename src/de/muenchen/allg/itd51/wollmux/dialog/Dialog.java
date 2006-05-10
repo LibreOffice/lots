@@ -25,20 +25,28 @@ import java.awt.event.ActionListener;
 public interface Dialog
 {
   /**
-   * Liefert den durch id identifizierten Wert den der Dialog im Kontext context
-   * hat. 
+   * Liefert eine neue Instanz dieses Dialogs für den gegebenen context.
    * @param context Für jeden Kontext hält der Dialog eine unabhängige Kopie von
    *        seinem Zustand vor. Auf diese Weise lässt sich der Dialog an verschiedenen
    *        Stellen unabhängig voneinander einsetzen.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public Object getData(Object context, String id);
+  public Dialog instantiate(Object context);
+  
+  /**
+   * Liefert den durch id identifizierten Wert des Dialogs (null, falls die
+   * id dem Dialog nicht bekannt ist). Diese Funktion darf nur für mit instantiate()
+   * erzeugte Instanzen aufgerufen werden. Ansonsten liefert sie immer null.
+   * Diese Funktion ist Thread-safe. Insbesondere muss sie nicht im EDT aufgerufen werden.
+   * Sie kann sowohl vor, während als auch nach dem Aufruf von show() aufgerufen werden,
+   * auch nachdem der Dialog schon geschlossen wurde.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public Object getData(String id);
  
   /**
-   * Zeigt den Dialog an.
-   * @param context Für jeden Kontext hält der Dialog eine unabhängige Kopie von
-   *        seinem Zustand vor. Auf diese Weise lässt sich der Dialog an verschiedenen
-   *        Stellen unabhängig voneinander einsetzen.
+   * Zeigt den Dialog an. Diese Funktion darf nur für mit instantiate() erzeugte
+   * Instanzen aufgerufen werden. Ansonsten tut sie nichts.
    * @param dialogEndListener falls nicht null, wird 
    *        die {@link ActionListener#actionPerformed(java.awt.event.ActionEvent)}
    *        Methode aufgerufen (im Event Dispatching Thread), 
@@ -47,5 +55,5 @@ public interface Dialog
    *        das Beenden des Dialogs veranlasst hat.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public void show(Object context, ActionListener dialogEndListener);
+  public void show(ActionListener dialogEndListener);
 }

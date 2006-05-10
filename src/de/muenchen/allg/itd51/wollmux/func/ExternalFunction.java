@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Vector;
 
 import com.sun.star.script.provider.XScript;
+import com.sun.star.uno.AnyConverter;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
@@ -58,7 +59,7 @@ public class ExternalFunction
    * Erzeugt aus einem ConfigThingy (übergeben wird der EXTERN-Knoten) eine
    * ExternalFunction.
    * @throws ConfigurationErrorException falls die Spezifikation in conf fehlerhaft ist.
-   */
+   * TESTED */
   public ExternalFunction(ConfigThingy conf) throws ConfigurationErrorException
   {
     String url;
@@ -131,10 +132,11 @@ public class ExternalFunction
    * Ruft die Funktion auf mit den String-Parametern aus parameters.
    * @param parameters sollte zu jedem der von {@link #parameters()} gelieferten
    *        Namen einen String-Wert enthalten. 
-   * @return den Wert des Funktionsaufrufs
+   * @return den Wert des Funktionsaufrufs oder null falls es ein Problem gab, das
+   *         nicht zu einer Exception geführt hat.
    * @throws Exception falls ein Problem auftritt
    * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TODO Testen
+   * TESTED
    */
   public Object invoke(Values parameters) throws Exception
   {
@@ -143,8 +145,17 @@ public class ExternalFunction
       args[i] = parameters.getString(params[i]);
     short[][] aOutParamIndex = new short[][]{new short[0]};
     Object[][] aOutParam = new Object[][]{new Object[0]};
-    if (script != null) return script.invoke(args, aOutParamIndex, aOutParam);
-    if (method != null) return method.invoke(null, args);
-    return null; //weil Java nicht wissen kann, dass die obigen ifs alle Fälle abfangen
+    if (script != null) 
+    {
+      Object result = script.invoke(args, aOutParamIndex, aOutParam);
+      if (AnyConverter.isVoid(result)) result = null;
+      return result;
+    }
+    else if (method != null) 
+    {
+      Object result = method.invoke(null, args);
+      return result;
+    }
+    return null;
   }
 }

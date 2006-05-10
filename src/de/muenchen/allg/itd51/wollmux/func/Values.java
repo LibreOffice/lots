@@ -17,6 +17,8 @@
 */
 package de.muenchen.allg.itd51.wollmux.func;
 
+import java.util.HashMap;
+
 /**
  * Eine Menge benannter {@link de.muenchen.allg.itd51.wollmux.func.Value}s.
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -24,7 +26,9 @@ package de.muenchen.allg.itd51.wollmux.func;
 public interface Values
 {
   /**
-   * Liefert true genau dann wenn ein Wert mit der ID id vorhanden ist.
+   * Liefert true genau dann wenn ein Wert mit der ID id vorhanden ist (ACHTUNG,
+   * bei mit BIND zusammengesetzten Funktionen bekommt die gebundene Funktion
+   * unter Umständen hier keine akkurate Antwort).
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public boolean hasValue(String id);
@@ -58,5 +62,51 @@ public interface Values
     public boolean hasValue(String id) { return false; }
     public String getString(String id) { return ""; }
     public boolean getBoolean(String id) { return false; }
+  }
+  
+  /**
+   * Simple Implementierung des Values-Interfaces in der Art einer Map.
+   *
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public static class SimpleMap implements Values
+  {
+    private HashMap values = new HashMap();
+    
+    /**
+     * Fügt den Wert value hinzu, identifiziert mit id. Ein bereits vorhandener
+     * Wert wird ersetzt.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
+    public void put(String id, String value)
+    {
+      values.put(id, value);
+    }
+    
+    /**
+     * Entfernt den Wert, der durch id identifiziert wird (falls vorhanden).
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
+    public void remove(String id)
+    {
+      values.remove(id);
+    }
+    
+    public boolean hasValue(String id)
+    {
+      return values.containsKey(id); 
+    }
+
+    public String getString(String id)
+    {
+      String str = (String)values.get(id);
+      if (str == null) return "";
+      return str;
+    }
+
+    public boolean getBoolean(String id)
+    {
+      return getString(id).equalsIgnoreCase("true");
+    }
   }
 }

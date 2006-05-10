@@ -10,6 +10,7 @@
 * -------------------------------------------------------------------
 * 26.01.2006 | BNK | Erstellung
 * 08.05.2006 | BNK | nach Standard umbenannt, da in Zukunft auch für Trafos etc.
+*                  | +anredeSuffix()
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -50,6 +51,19 @@ public class Standard
       return new Boolean(false);
     }
     return new Boolean(true);
+  }
+  
+  /**
+   * Liefert den String herrText zurück, falls lowcase(anrede) == "herr", ansonsten
+   * wird frauText geliefert.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public static String herrFrauText(String anrede, String frauText, String herrText)
+  {
+    if (anrede.equalsIgnoreCase("herr")) 
+      return herrText;
+    else
+      return frauText;
   }
 
 }

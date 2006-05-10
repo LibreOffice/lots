@@ -17,21 +17,24 @@
 */
 package de.muenchen.allg.itd51.wollmux.dialog;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Eine Bibliothek von benannten Dialogs.
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class DialogLibrary
 {
-
+  private Map mapIdToDialog = new HashMap();
+  private DialogLibrary baselib;
+  
+  
   /**
    * Erzeugt eine leere Dialogsbibliothek. 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public DialogLibrary()
-  {
-  
-  }
+  public DialogLibrary(){}
   
   /**
    * Erzeugt eine Dialogsbibliothek, die baselib referenziert (nicht kopiert!).
@@ -41,16 +44,17 @@ public class DialogLibrary
    */
   public DialogLibrary(DialogLibrary baselib)
   {
-  
+    this.baselib = baselib;
   }
 
   /**
    * Fügt dialog dieser Dialogsbibliothek unter dem Namen dlgName hinzu.
    * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TODO Testen
    */
   public void add(String dlgName, Dialog dialog)
   {
+    if (dialog == null || dlgName == null) throw new NullPointerException("Weder Dialogname noch Dialog darf null sein");
+    mapIdToDialog.put(dlgName, dialog);
   }
 
   /**
@@ -60,11 +64,12 @@ public class DialogLibrary
    * befragt, falls die Dialogsbibliothek selbst keinen Dialog des entsprechenden
    * Namens kennt.
    * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TODO Testen
    */
   public Dialog get(String dlgName)
   {
-    return null;
+    Dialog dialog = (Dialog)mapIdToDialog.get(dlgName);
+    if (dialog == null && baselib != null) dialog = baselib.get(dlgName);
+    return dialog;
   }
   
 }
