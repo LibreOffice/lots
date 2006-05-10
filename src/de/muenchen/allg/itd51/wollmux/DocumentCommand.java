@@ -237,15 +237,19 @@ abstract public class DocumentCommand
   }
 
   /**
-   * Erzeugt einen in INSERT_MARKs eingeschlossenen Cursor, in dem Feldinhalte
-   * sicher eingefügt werden können, ohne die Ordnung der DocumentCommands zu
-   * stören; ist das Bookmark nicht (mehr) vorhanden, wird null zurück
-   * geliefert. Jeder Aufruf von createInsertCursor überschreibt die bestehenden
-   * Inhalte des bisherigen DocumentCommands. Der InsertCursor sieht in etwa wie
-   * folgt aus: "<" CURSOR ">". Der InsertCursor hat direkt nach der Erzeugung
-   * keine Ausdehnung. Die INSERT_MARKS "<" und ">" können nach Beendigung der
-   * Dokumentgenerierung über die Methode cleanInsertMarks() wieder entfernt
-   * werden.
+   * Erzeugt einen Cursor, der ein sicheres Einfügen von Inhalten an der
+   * Cursorposition gewährleistet, ohne dabei die Hierarchie oder Ordnung der
+   * Dokumentkommandos zu zerstören. Kann das Dokumentkommando Kinder besitzen,
+   * so wird der Cursor in INSERT_MARKs eingeschlossen. Kann das
+   * Dokumentkommando keine Kinder besitzen, so wird ein einfacher TextCursor
+   * aus dem vollen TextRange des Bookmarks erzeugt. Ist das Bookmark nicht
+   * (mehr) vorhanden, wird null zurück geliefert. Jeder Aufruf von
+   * createInsertCursor überschreibt die bestehenden Inhalte des bisherigen
+   * DocumentCommands. Der InsertCursor von Dokumentkommandos mit Kindern sieht
+   * in etwa wie folgt aus: "<" CURSOR ">". Der InsertCursor hat direkt nach
+   * der Erzeugung keine Ausdehnung. Die INSERT_MARKS "<" und ">" können nach
+   * Beendigung der Dokumentgenerierung über die Methode cleanInsertMarks()
+   * wieder entfernt werden.
    * 
    * @return XTextCursor zum Einfügen oder null
    */
@@ -255,16 +259,22 @@ abstract public class DocumentCommand
 
     if (range != null)
     {
-      XTextCursor cursor = range.getText().createTextCursorByRange(range);
-      cursor.setString(INSERT_MARK_OPEN + INSERT_MARK_CLOSE);
-      hasInsertMarks = true;
+      if (canHaveChilds())
+      {
+        // wenn
+        XTextCursor cursor = range.getText().createTextCursorByRange(range);
+        cursor.setString(INSERT_MARK_OPEN + INSERT_MARK_CLOSE);
+        hasInsertMarks = true;
 
-      bookmark.rerangeBookmark(cursor);
+        bookmark.rerangeBookmark(cursor);
 
-      cursor.goRight((short) INSERT_MARK_OPEN.length(), false);
-      cursor.collapseToStart();
+        cursor.goRight((short) INSERT_MARK_OPEN.length(), false);
+        cursor.collapseToStart();
 
-      return cursor;
+        return cursor;
+      }
+      else
+        return range.getText().createTextCursorByRange(range);
     }
     return null;
   }

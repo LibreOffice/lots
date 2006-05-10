@@ -165,7 +165,7 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
 
     // Bei der Bearbeitung der insertValues muss man nicht jede Änderung sofort
     // sehen:
-    // if (document.xModel() != null) document.xModel().lockControllers();
+    if (document.xModel() != null) document.xModel().lockControllers();
 
     // Und jetzt nochmal alle (übrigen) DocumentCommands in einem einzigen
     // Durchlauf mit execute aufrufen.
@@ -198,7 +198,7 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
     }
 
     // jetzt soll man wieder was sehen:
-    // if (document.xModel() != null) document.xModel().unlockControllers();
+    if (document.xModel() != null) document.xModel().unlockControllers();
 
     // updates der Bookmarks:
     tree.updateBookmarks();
