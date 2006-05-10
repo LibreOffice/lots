@@ -56,7 +56,17 @@ import de.muenchen.allg.itd51.wollmux.dialog.FormGUI;
 public class DocumentCommandInterpreter implements DocumentCommand.Executor
 {
 
+  /**
+   * Enthält die Instanz auf das zentrale WollMuxSingleton.
+   */
   private WollMuxSingleton mux;
+
+  /**
+   * Gibt an, ob das Dokument als Vorlage behandelt wird und damit die
+   * enthaltenen Dokumentkommandos ausgewertet werden sollen (bei true) oder
+   * nicht (bei false).
+   */
+  private boolean isOpenAsTemplate;
 
   /**
    * Das Dokument, das interpretiert werden soll.
@@ -107,11 +117,14 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
     this.formDescriptors = new ConfigThingy("Forms");
     this.documentIsAFormular = false;
     this.fragUrls = frag_urls;
+    // Bei Templates besitzt das xDoc kein URL-Attribut, bei normalen
+    // Dokumenten schon.
+    this.isOpenAsTemplate = (xDoc.getURL() == null || xDoc.getURL().equals(""));
   }
 
   /**
    * Über diese Methode wird die eigentliche Ausführung der Interpretation der
-   * WM-Kommandos gestartet. Ein WM-Kommando besitzt sie Syntax "WM (
+   * Dokumentkommandos gestartet. Ein WM-Kommando besitzt sie Syntax "WM (
    * Unterkommando ){Zahl}", wobei Spaces an jeder Stelle auftauchen oder
    * weggelassen werden dürfen. Der Wert {Zahl} am Ende des Kommandos dient zur
    * Unterscheidung verschiedener Bookmarks in OOo und ist optional.
@@ -125,13 +138,41 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
   public void interpret() throws EndlessLoopException,
       WMCommandsFailedException
   {
-    // Dokumentkommando-Baum scannen:
 
+    // Dokumentkommando-Baum scannen:
     DocumentCommandTree tree = new DocumentCommandTree(document.xComponent(),
         mux.isDebugMode());
 
     // Zähler für aufgetretene Fehler bei der Bearbeitung der Kommandos.
     int errorCount = 0;
+
+    if (isOpenAsTemplate)
+    {
+      errorCount = executeDocumentCommands(tree);
+    }
+
+    // ggf. eine WMCommandsFailedException werfen:
+    if (errorCount != 0)
+    {
+      throw new WMCommandsFailedException(
+          "Bei der Dokumenterzeugung mit dem Briefkopfsystem trat(en) "
+              + errorCount
+              + " Fehler auf.\n\n"
+              + "Bitte überprüfen Sie das Dokument und kontaktieren ggf. die "
+              + "für Sie zuständige Systemadministration.");
+    }
+
+    // Formulardialog starten:
+    if (documentIsAFormular)
+    {
+      startFormGUI();
+    }
+  }
+
+  private int executeDocumentCommands(DocumentCommandTree tree)
+      throws EndlessLoopException
+  {
+    int errors = 0;
 
     // Zuerst alle Kommandos bearbeiten, die irgendwie Kinder bekommen können,
     // d.h. alle insertFrags und insertContents. Das geschieht so lange, bis
@@ -153,61 +194,10 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
         if (cmd.canHaveChilds() && cmd.isDone() == false)
         {
           // Kommando ausführen und Fehler zählen
-          errorCount += cmd.execute(this);
+          errors += cmd.execute(this);
           changed = true;
         }
       }
-    }
-
-    // Bei der Bearbeitung der insertValues muss man nicht jede Änderung sofort
-    // sehen:
-    if (document.xModel() != null) document.xModel().lockControllers();
-
-    // Und jetzt nochmal alle (übrigen) DocumentCommands (z.B. insertValues) in
-    // einem einzigen Durchlauf mit execute aufrufen.
-    tree.update();
-    Iterator iter = tree.depthFirstIterator(false);
-    while (iter.hasNext())
-    {
-      DocumentCommand cmd = (DocumentCommand) iter.next();
-      if (cmd.isDone() == false)
-      {
-        // Kommandos ausführen und Fehler zählen
-        errorCount += cmd.execute(this);
-      }
-    }
-
-    // entfernen der INSERT_MARKS
-    tree.cleanInsertMarks();
-
-    // jetzt nochmal den Baum durchgehen und alle leeren Absätze zum Beginn und
-    // Ende der insertFrags und insertContents entfernen.
-    iter = tree.depthFirstIterator(false);
-    while (iter.hasNext())
-    {
-      DocumentCommand cmd = (DocumentCommand) iter.next();
-      if (cmd.isDone() == true
-          && cmd instanceof DocumentCommand.ExternalContentInserter)
-      {
-        cleanEmptyParagraphs(cmd);
-      }
-    }
-
-    // jetzt soll man wieder was sehen:
-    if (document.xModel() != null) document.xModel().unlockControllers();
-
-    // updates der Bookmarks:
-    tree.updateBookmarks();
-
-    // Document-Modified auf false setzen, da nur wirkliche
-    // Benutzerinteraktionen den Modified-Status beeinflussen sollen.
-    try
-    {
-      document.xModifiable().setModified(false);
-    }
-    catch (PropertyVetoException x)
-    {
-      // wenn jemand was dagegen hat, dann setze ich halt nichts.
     }
 
     // ggf. EndlessLoopException mit dem Namen des Dokuments schmeissen.
@@ -231,22 +221,58 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
               + "\"");
     }
 
-    // ggf. eine WMCommandsFailedException werfen:
-    if (errorCount != 0)
+    // Bei der Bearbeitung der einfachen Kommandos (z.B. insertValues) muss man
+    // nicht jede Änderung sofort sehen:
+    if (document.xModel() != null) document.xModel().lockControllers();
+
+    // Und jetzt nochmal alle (übrigen) DocumentCommands (z.B. insertValues)
+    // in einem einzigen Durchlauf mit execute aufrufen.
+    tree.update();
+    Iterator iter = tree.depthFirstIterator(false);
+    while (iter.hasNext())
     {
-      throw new WMCommandsFailedException(
-          "Bei der Dokumenterzeugung mit dem Briefkopfsystem trat(en) "
-              + errorCount
-              + " Fehler auf.\n\n"
-              + "Bitte überprüfen Sie das Dokument und kontaktieren ggf. die "
-              + "für Sie zuständige Systemadministration.");
+      DocumentCommand cmd = (DocumentCommand) iter.next();
+      if (cmd.isDone() == false)
+      {
+        // Kommandos ausführen und Fehler zählen
+        errors += cmd.execute(this);
+      }
     }
 
-    // Formulardialog starten:
-    if (documentIsAFormular)
+    // entfernen der INSERT_MARKS
+    tree.cleanInsertMarks();
+
+    // jetzt nochmal den Baum durchgehen und alle leeren Absätze zum Beginn
+    // und Ende der insertFrags und insertContents entfernen.
+    iter = tree.depthFirstIterator(false);
+    while (iter.hasNext())
     {
-      startFormGUI();
+      DocumentCommand cmd = (DocumentCommand) iter.next();
+      if (cmd.isDone() == true
+          && cmd instanceof DocumentCommand.ExternalContentInserter)
+      {
+        cleanEmptyParagraphs(cmd);
+      }
     }
+
+    // jetzt soll man wieder was sehen:
+    if (document.xModel() != null) document.xModel().unlockControllers();
+
+    // updaten/entfernen der Bookmarks:
+    tree.updateBookmarks();
+
+    // Document-Modified auf false setzen, da nur wirkliche
+    // Benutzerinteraktionen den Modified-Status beeinflussen sollen.
+    try
+    {
+      document.xModifiable().setModified(false);
+    }
+    catch (PropertyVetoException x)
+    {
+      // wenn jemand was dagegen hat, dann setze ich halt nichts.
+    }
+
+    return errors;
   }
 
   private void cleanEmptyParagraphs(DocumentCommand cmd)
