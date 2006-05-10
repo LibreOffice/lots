@@ -46,6 +46,12 @@ abstract public class DocumentCommand
 
   private LinkedList childs; // Kinder vom Typ DocumentCommand
 
+  /**
+   * Im debug-modus werden bei updateBookmarks keine Bookmarks entfernt - damit
+   * wird das debuggen im Fehlerfall erleichtet.
+   */
+  private boolean debug;
+
   // private DocumentCommand parent;
 
   private Bookmark bookmark;
@@ -83,13 +89,14 @@ abstract public class DocumentCommand
 
   /* ************************************************************ */
 
-  private DocumentCommand(ConfigThingy wmCmd, Bookmark bookmark)
+  private DocumentCommand(ConfigThingy wmCmd, Bookmark bookmark, boolean debug)
   {
     this.wmCmd = wmCmd;
     this.bookmark = bookmark;
     // this.parent = null; TODO: wieder rein!
     this.childs = new LinkedList();
     this.hasInsertMarks = false;
+    this.debug = debug;
   }
 
   public String getBookmarkName()
@@ -399,24 +406,36 @@ abstract public class DocumentCommand
   }
 
   /**
-   * Schreibt die Status-Änderung des Dokumentkommandos zurück auf das Bookmark
-   * im Dokument und liefert den neuen Namen des Bookmarks zurück.
+   * Schribt den neuen Status des Dokumentkommandos in das Dokument zurück oder
+   * löscht ein Bookmark, wenn der Status DONE=true gesetzt ist - Die Methode
+   * liefert entweder den Namen des neuen Bookmarks, welches die neuen
+   * Statusinformationen enthält zurück, oder null, wenn das zugehörige Bookmark
+   * gelöscht wurde. Ist der debug-modus gesetzt, so werden in gar keinem Fall
+   * Bookmarks gelöscht, womit die Fehlersuche erleichtert werden soll.
    * 
-   * @return der Name des neuen Bookmarks.
+   * @return der Name des neuen Bookmarks oder null.
    */
   public String updateBookmark()
   {
-    // Neues WM-String zusammenbauen, der keine Zeilenvorschübe und
-    // abschließende Leerzeichen enthält:
-    String wmCmdString = toConfigThingy().stringRepresentation(true, '\'');
-    wmCmdString = wmCmdString.replaceAll("[\r\n]+", " ");
-    while (wmCmdString.endsWith(" "))
-      wmCmdString = wmCmdString.substring(0, wmCmdString.length() - 1);
+    if (!isDone() || debug)
+    {
+      // Neues WM-String zusammenbauen, der keine Zeilenvorschübe und
+      // abschließende Leerzeichen enthält:
+      String wmCmdString = toConfigThingy().stringRepresentation(true, '\'');
+      wmCmdString = wmCmdString.replaceAll("[\r\n]+", " ");
+      while (wmCmdString.endsWith(" "))
+        wmCmdString = wmCmdString.substring(0, wmCmdString.length() - 1);
 
-    // Neuen Status rausschreiben:
-    bookmark.rename(wmCmdString);
+      // Neuen Status rausschreiben:
+      bookmark.rename(wmCmdString);
 
-    return bookmark.getName();
+      return bookmark.getName();
+    }
+    else
+    {
+      bookmark.remove();
+      return null;
+    }
   }
 
   /**
@@ -542,15 +561,16 @@ abstract public class DocumentCommand
     private java.lang.Exception exception;
 
     public InvalidCommand(ConfigThingy wmCmd, Bookmark bookmark,
-        InvalidCommandException exception)
+        InvalidCommandException exception, boolean debug)
     {
-      super(wmCmd, bookmark);
+      super(wmCmd, bookmark, debug);
       this.exception = exception;
     }
 
-    public InvalidCommand(Bookmark bookmark, SyntaxErrorException exception)
+    public InvalidCommand(Bookmark bookmark, SyntaxErrorException exception,
+        boolean debug)
     {
-      super(new ConfigThingy("WM"), bookmark);
+      super(new ConfigThingy("WM"), bookmark, debug);
       this.exception = exception;
     }
 
@@ -582,9 +602,9 @@ abstract public class DocumentCommand
   // ********************************************************************************
   static public class Form extends DocumentCommand implements ExecutableCommand
   {
-    public Form(ConfigThingy wmCmd, Bookmark bookmark)
+    public Form(ConfigThingy wmCmd, Bookmark bookmark, boolean debug)
     {
-      super(wmCmd, bookmark);
+      super(wmCmd, bookmark, debug);
     }
 
     protected boolean canHaveChilds()
@@ -603,7 +623,7 @@ abstract public class DocumentCommand
   {
     public RootElement()
     {
-      super(new ConfigThingy("WM"), null);
+      super(new ConfigThingy("WM"), null, false);
     }
 
     public String getBookmarkName()
@@ -628,10 +648,10 @@ abstract public class DocumentCommand
   {
     private String fragID;
 
-    public InsertFrag(ConfigThingy wmCmd, Bookmark bookmark)
+    public InsertFrag(ConfigThingy wmCmd, Bookmark bookmark, boolean debug)
         throws InvalidCommandException
     {
-      super(wmCmd, bookmark);
+      super(wmCmd, bookmark, debug);
       try
       {
         fragID = wmCmd.get("WM").get("FRAG_ID").toString();
@@ -664,10 +684,10 @@ abstract public class DocumentCommand
   {
     private String fragID;
 
-    public InsertContent(ConfigThingy wmCmd, Bookmark bookmark)
+    public InsertContent(ConfigThingy wmCmd, Bookmark bookmark, boolean debug)
         throws InvalidCommandException
     {
-      super(wmCmd, bookmark);
+      super(wmCmd, bookmark, debug);
     }
 
     public String getFragID()
@@ -696,10 +716,10 @@ abstract public class DocumentCommand
 
     private String rightSeparator = "";
 
-    public InsertValue(ConfigThingy wmCmd, Bookmark bookmark)
+    public InsertValue(ConfigThingy wmCmd, Bookmark bookmark, boolean debug)
         throws InvalidCommandException
     {
-      super(wmCmd, bookmark);
+      super(wmCmd, bookmark, debug);
       try
       {
         dbSpalte = wmCmd.get("WM").get("DB_SPALTE").toString();

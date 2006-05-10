@@ -129,7 +129,9 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
       WMCommandsFailedException
   {
     // Dokumentkommando-Baum scannen:
-    DocumentCommandTree tree = new DocumentCommandTree(document.xComponent());
+
+    DocumentCommandTree tree = new DocumentCommandTree(document.xComponent(),
+        mux.isDebugMode());
 
     // Zähler für aufgetretene Fehler bei der Bearbeitung der Kommandos.
     int errorCount = 0;
@@ -291,24 +293,28 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
       // Tabelle markiert und nicht nur das Absatztrennzeichen. Der Cursor
       // markiert also mehr Inhalt als nur den erwarteten Absatzvorschub. In
       // einem solchen Fall, darf der markierte Inhalt nicht gelöscht werden.
-      // Man findet diesen Fall heraus, in dem man die Anzahl der Elemente
-      // der Enumeration auf diesen Cursor zählt. Ist die Anzahl > 1, so wurde
-      // ungewollter Inhalt mit markiert.
-      int count = countEnumerationContent(marker.xEnumerationAccess());
-      if (count == 1)
+      // Anders ausgedrückt, darf der Absatz nur gelöscht werden, wenn beim
+      // Markieren ausschließlich Text markiert wurde.
+      if (isFollowedByTextParagraph(marker.xEnumerationAccess()))
       {
         // Normalfall: hier darf gelöscht werden
+        Logger.debug2("Loesche Absatzvorschubzeichen");
         marker.xTextCursor().setString("");
       }
-      if (count > 1)
+      else
       {
-        // Nur wenn auch der Einfügepunkt des insertFrags/insertContent ein
-        // leerer Absatz war, kann dieser leere Absatz als ganzes gelöscht
+        // In diesem Fall darf normalerweise nichts gelöscht werden, ausser der
+        // Einfügepunkt des insertFrags/insertContent selbst ist ein
+        // leerer Absatz. Dieser leere Absatz kann als ganzes gelöscht
         // werden. Man erkennt den Fall daran, dass fragStart auch der Anfang
         // des Absatzes ist.
         if (fragStart.xParagraphCursor().isStartOfParagraph())
+        {
+          Logger.debug2("Loesche den ganzen leeren Absatz");
           deleteParagraph(fragStart.xTextCursor());
-        // Hier wird leider auch das Bookmark selbst gelöscht!
+          // Hierbei wird das zugehörige Bookmark ungültig, da es z.B. eine
+          // enthaltene TextTable nicht mehr umschließt.
+        }
       }
     }
 
@@ -335,52 +341,78 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
     }
   }
 
-  private int countEnumerationContent(XEnumerationAccess enumAccess)
+  /**
+   * Die Methode prüft, ob der zweite Paragraph des markierte Bereichs ein
+   * TextParagraph ist.
+   * 
+   * @param enumAccess
+   * @return
+   */
+  private boolean isFollowedByTextParagraph(XEnumerationAccess enumAccess)
   {
-    int count = 0;
     if (enumAccess != null)
     {
       XEnumeration xenum = enumAccess.createEnumeration();
-      while (xenum.hasMoreElements())
+      Object element2 = null;
+
+      if (xenum.hasMoreElements()) try
+      {
+        xenum.nextElement();
+      }
+      catch (Exception e)
+      {
+      }
+
+      if (xenum.hasMoreElements())
       {
         try
         {
-          xenum.nextElement();
-          ++count;
+          element2 = xenum.nextElement();
         }
         catch (Exception e)
         {
-          Logger.error(e);
         }
       }
+      else
+        return true;
+
+      return new UnoService(element2)
+          .supportsService("com.sun.star.text.Paragraph");
     }
-    return count;
+    return false;
   }
 
   /**
-   * Löscht den ganzen Paragraphen in dem der Cursor steht.
+   * Löscht den ganzen ersten Absatz an der Cursorposition.
    * 
    * @param textCursor
    */
   private void deleteParagraph(XTextCursor textCursor)
   {
+    // Beim Löschen des Absatzes erzeugt OOo ein ungewolltes "Zombie"-Bookmark.
+    // Issue Siehe http://qa.openoffice.org/issues/show_bug.cgi?id=65247
+
     UnoService cursor = new UnoService(textCursor);
-    UnoService element = new UnoService(null);
+
+    // Ersten Absatz des Bookmarks holen:
+    UnoService par = new UnoService(null);
     if (cursor.xEnumerationAccess().createEnumeration() != null)
     {
       XEnumeration xenum = cursor.xEnumerationAccess().createEnumeration();
       if (xenum.hasMoreElements()) try
       {
-        element = new UnoService(xenum.nextElement());
+        par = new UnoService(xenum.nextElement());
       }
       catch (Exception e)
       {
         Logger.error(e);
       }
     }
-    if (element.xTextContent() != null) try
+
+    // Lösche den Paragraph
+    if (cursor.xTextCursor() != null && par.xTextContent() != null) try
     {
-      cursor.xTextCursor().getText().removeTextContent(element.xTextContent());
+      cursor.xTextCursor().getText().removeTextContent(par.xTextContent());
     }
     catch (NoSuchElementException e)
     {

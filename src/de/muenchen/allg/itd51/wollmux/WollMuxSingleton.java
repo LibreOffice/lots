@@ -20,6 +20,7 @@
  *                    von Konfigurationsdateien; 
  *                    + wohldefinierte Datenstrukturen
  *                    + Flag für EventProcessor: acceptEvents
+ * 08.05.2006 | LUT | + isDebugMode()
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -399,5 +400,14 @@ public class WollMuxSingleton implements XPALProvider
   public URL getDEFAULT_CONTEXT()
   {
     return WollMuxFiles.getDEFAULT_CONTEXT();
+  }
+  
+  /**
+   * siehe {@link WollMuxFiles#isDebugMode()}.
+   * 
+   * @author Christoph Lutz (D-III-ITD 5.1)
+   */
+  public boolean isDebugMode() {
+    return WollMuxFiles.isDebugMode();
   }
 }

@@ -17,8 +17,6 @@ import de.muenchen.allg.afid.UnoService;
  */
 public class Bookmark
 {
-  private UnoService bookmark;
-
   private String name;
 
   private UnoService document;
@@ -27,7 +25,7 @@ public class Bookmark
   {
     this.document = new UnoService(doc);
     this.name = name;
-    this.bookmark = getBookmarkService(name, document);
+    UnoService bookmark = getBookmarkService(name, document);
     if (bookmark.xTextContent() == null)
       throw new NoSuchElementException("Bookmark \""
                                        + name
@@ -90,6 +88,7 @@ public class Bookmark
    */
   public int compare(Bookmark b)
   {
+    Logger.debug2("compare: " + this + " <--> " + b);
     return compareTextRanges(this.getTextRange(), b.getTextRange());
   }
 
@@ -140,7 +139,8 @@ public class Bookmark
       }
       catch (IllegalArgumentException e)
       {
-        Logger.error(e);
+        // nicht loggen! Tritt regulär auf, wenn Bookmarks aus unterschiedlichen
+        // Frames verglichen werden.
       }
     }
     // Im Fehlerfall wird so getan als käme B nach A
@@ -160,22 +160,14 @@ public class Bookmark
   {
     Logger.debug("Rename \"" + name + "\" --> \"" + newName + "\"");
 
-    // altes Bookmark löschen.
-    XTextRange range = getTextRange(); // holt auch den BookmarkService neu!
-    if (range != null && bookmark.xTextContent() != null)
+    XTextRange oldRange = getTextRange();
+    if (oldRange != null)
     {
-      try
-      {
-        range.getText().removeTextContent(bookmark.xTextContent());
-        bookmark = new UnoService(null);
-        name = null;
-      }
-      catch (NoSuchElementException e)
-      {
-        // wenn' schon weg ist, ist es mir auch recht.
-      }
+      // altes Bookmark löschen:
+      remove();
 
-      // neuen Bookmark mit neuem Namen hinzufügen.
+      // neues Bookmark mit neuem Namen hinzufügen.
+      UnoService bookmark = new UnoService(null);
       try
       {
         bookmark = document.create("com.sun.star.text.Bookmark");
@@ -192,7 +184,10 @@ public class Bookmark
       }
       try
       {
-        range.getText().insertTextContent(range, bookmark.xTextContent(), true);
+        oldRange.getText().insertTextContent(
+            oldRange,
+            bookmark.xTextContent(),
+            true);
       }
       catch (IllegalArgumentException e)
       {
@@ -204,36 +199,22 @@ public class Bookmark
 
   public void rerangeBookmark(XTextRange xTextRange)
   {
-    XTextRange range = getTextRange();
-    if (range != null && bookmark.xTextContent() != null)
+    // altes Bookmark löschen.
+    remove();
+
+    // neues Bookmark unter dem alten Namen mit neuer Ausdehnung hinzufügen.
+    try
     {
-      // Name merken:
-      String name = getName();
-
-      // altes Bookmark löschen.
-      try
-      {
-        range.getText().removeTextContent(bookmark.xTextContent());
-      }
-      catch (NoSuchElementException e)
-      {
-        Logger.error(e);
-      }
-
-      // neuen Bookmark unter dem alten Namen mit Ausdehnung hinzufügen.
-      try
-      {
-        bookmark = document.create("com.sun.star.text.Bookmark");
-        bookmark.xNamed().setName(name);
-        xTextRange.getText().insertTextContent(
-            xTextRange,
-            bookmark.xTextContent(),
-            true);
-      }
-      catch (Exception e)
-      {
-        Logger.error(e);
-      }
+      UnoService bookmark = document.create("com.sun.star.text.Bookmark");
+      bookmark.xNamed().setName(name);
+      xTextRange.getText().insertTextContent(
+          xTextRange,
+          bookmark.xTextContent(),
+          true);
+    }
+    catch (Exception e)
+    {
+      Logger.error(e);
     }
   }
 
@@ -245,12 +226,28 @@ public class Bookmark
    */
   public XTextRange getTextRange()
   {
-    // Das Bookmark könnte inzwischen vom Benutzer gelöscht worden sein. Aus
-    // diesem Grund wird es hier neu geholt.
-    bookmark = getBookmarkService(name, document);
+    UnoService bookmark = getBookmarkService(name, document);
 
     if (bookmark.xTextContent() != null)
       return bookmark.xTextContent().getAnchor();
     return null;
+  }
+
+  public void remove()
+  {
+    UnoService bookmark = getBookmarkService(name, document);
+    if (bookmark.xTextContent() != null)
+    {
+      try
+      {
+        XTextRange range = bookmark.xTextContent().getAnchor();
+        range.getText().removeTextContent(bookmark.xTextContent());
+        bookmark = new UnoService(null);
+      }
+      catch (NoSuchElementException e)
+      {
+        Logger.error(e);
+      }
+    }
   }
 }

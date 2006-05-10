@@ -32,15 +32,24 @@ public class DocumentCommandTree
 {
   private XComponent doc;
 
+  /**
+   * Das Debugfeld bezieht sich auf die updateBookmarks-Methode und gibt an, ob
+   * Dokumentkommandos mit dem Status DONE=true mit dem update gelöscht werden
+   * sollen (was das Standardverhalten ist) oder nicht (damit man leichter
+   * debuggen kann).
+   */
+  private boolean debug;
+
   private HashSet scannedBookmarks;
 
   private RootElement root;
 
-  public DocumentCommandTree(XComponent doc)
+  public DocumentCommandTree(XComponent doc, boolean debug)
   {
     this.doc = doc;
     this.scannedBookmarks = new HashSet();
     this.root = new DocumentCommand.RootElement();
+    this.debug = debug;
   }
 
   /**
@@ -110,7 +119,7 @@ public class DocumentCommandTree
           }
           catch (SyntaxErrorException e)
           {
-            command = new InvalidCommand(bookmark, e);
+            command = new InvalidCommand(bookmark, e, debug);
           }
         }
 
@@ -149,29 +158,29 @@ public class DocumentCommandTree
       // spezielle Kommando-Instanzen erzeugen
       if (cmd.compareToIgnoreCase("insertFrag") == 0)
       {
-        return new DocumentCommand.InsertFrag(wmCmd, bookmark);
+        return new DocumentCommand.InsertFrag(wmCmd, bookmark, debug);
       }
 
       if (cmd.compareToIgnoreCase("insertValue") == 0)
       {
-        return new DocumentCommand.InsertValue(wmCmd, bookmark);
+        return new DocumentCommand.InsertValue(wmCmd, bookmark, debug);
       }
 
       if (cmd.compareToIgnoreCase("insertContent") == 0)
       {
-        return new DocumentCommand.InsertContent(wmCmd, bookmark);
+        return new DocumentCommand.InsertContent(wmCmd, bookmark, debug);
       }
 
       if (cmd.compareToIgnoreCase("form") == 0)
       {
-        return new DocumentCommand.Form(wmCmd, bookmark);
+        return new DocumentCommand.Form(wmCmd, bookmark, debug);
       }
 
       throw new InvalidCommandException("Unbekanntes Kommando \"" + cmd + "\"");
     }
     catch (InvalidCommandException e)
     {
-      return new DocumentCommand.InvalidCommand(wmCmd, bookmark, e);
+      return new DocumentCommand.InvalidCommand(wmCmd, bookmark, e, debug);
     }
   }
 
@@ -258,7 +267,11 @@ public class DocumentCommandTree
       String newBookmarkName = cmd.updateBookmark();
 
       // Anpassen des scannedBookmarks-Set
-      if (!oldBookmarkName.equals(newBookmarkName))
+      if (newBookmarkName == null)
+      {
+        scannedBookmarks.remove(oldBookmarkName);
+      }
+      else if (!oldBookmarkName.equals(newBookmarkName))
       {
         scannedBookmarks.remove(oldBookmarkName);
         scannedBookmarks.add(newBookmarkName);
@@ -279,7 +292,7 @@ public class DocumentCommandTree
             ctx));
 
     DocumentCommandTree tree = new DocumentCommandTree(xDesktop
-        .getCurrentComponent());
+        .getCurrentComponent(), false);
     tree.update();
 
     System.out.println(tree.dumpTree());

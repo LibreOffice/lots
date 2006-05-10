@@ -261,6 +261,29 @@ public class WollMuxFiles
       }
     }
   }
+  
+  /**
+   * Gibt Auskunft darüber, sich der WollMux im debug-modus befindet; 
+   * Der debug-modus wird automatisch aktiviert, wenn der LOGGING_MODE
+   * auf "debug" oder "all" gesetzt wurde. Im debug-mode werden z.B.
+   * die Bookmarks abgearbeiteter Dokumentkommandos nach der Ausführung
+   * nicht entfernt, damit sich Fehler leichter finden lassen.
+   *  
+   * @return
+   */
+  public static boolean isDebugMode() {
+    ConfigThingy log = getWollmuxConf().query("LOGGING_MODE");
+    if(log.count() > 0) {
+      try
+      {
+        String mode = log.getLastChild().toString();
+        if(mode.compareToIgnoreCase("debug") == 0 
+            || mode.compareToIgnoreCase("all") == 0)
+          return true;
+      } catch (Exception e) {}
+    }
+    return false;
+  }
 
   
 }
