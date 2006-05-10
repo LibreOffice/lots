@@ -45,9 +45,7 @@ import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.db.DatasetNotFoundException;
-import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
 import de.muenchen.allg.itd51.wollmux.dialog.FormGUI;
-import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 
 /**
  * Diese Klasse repräsentiert den Kommando-Interpreter zur Auswertung von
@@ -429,8 +427,8 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
   private void startFormGUI()
   {
     FormModel fm = new FormModelImpl(document.xComponent());
-    new FormGUI(formDescriptors, fm, new HashMap(), new FunctionLibrary(),
-        new DialogLibrary());
+    new FormGUI(formDescriptors, fm, new HashMap(), mux.getGlobalFunctions(),
+        mux.getFunctionDialogs());
   }
 
   public int executeCommand(DocumentCommand.InvalidCommand cmd)
