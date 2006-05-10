@@ -20,6 +20,7 @@
  * 16.02.2006 | BNK | mehr Debug-Output
  * 16.02.2006 | BNK | Timeout auch bei new InitialLdapContext()
  * 20.02.2006 | BNK | setTimeout() Funktion
+ * 10.05.2006 | BNK | bessere Debug-Meldungen
  * -------------------------------------------------------------------
  *
  * @author Max Meier (D-III-ITD 5.1)
@@ -501,7 +502,7 @@ public class LDAPDatasource implements Datasource
             SearchControls.SUBTREE_SCOPE,
             true,
             endTime);
-
+        
         while (currentResults.hasMoreElements())
         {
           if (System.currentTimeMillis() > endTime)
@@ -1270,8 +1271,8 @@ public class LDAPDatasource implements Datasource
         long timeout = endTime - System.currentTimeMillis();
         if (timeout <= 0) throw new TimeoutException();
         if (timeout > Integer.MAX_VALUE) timeout = Integer.MAX_VALUE;
+        Logger.debug2("getDataset(): verbleibende Zeit: "+timeout);
         setTimeout(properties, timeout);
-        Logger.debug2("new InitialLdapContext(properties, null)");
         ctx = new InitialLdapContext(properties, null);
         
         NameParser nameParser = ctx.getNameParser("");
@@ -1473,6 +1474,7 @@ public class LDAPDatasource implements Datasource
       try{ctx.close();}catch (Exception e){}
     }
 
+    Logger.debug((result.hasMoreElements()? "Ergebnisse gefunden" : "keine Ergebnisse gefunden")+" (verbleibende Zeit: "+(endTime - System.currentTimeMillis())+")");
     return result;
   }
 
@@ -1822,8 +1824,12 @@ public class LDAPDatasource implements Datasource
         "Lutz"));
     printResults("Nachname = *utz, Vorname = Chris*", source.getSchema(), source
         .simpleFind("Nachname", "Lutz", "Vorname", "Chris*"));
+    
     printResults("Nachname = Benkmann, Vorname = Matthias", source.getSchema(), source
         .simpleFind("Nachname", "Benkmann", "Vorname", "Matthias"));
+    
+    printResults("OrgaKurz = *itd-5.1", source.getSchema(), source
+        .simpleFind("OrgaKurz", "*itd-5.1"));
 
   }
 
