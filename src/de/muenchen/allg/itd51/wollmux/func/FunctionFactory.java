@@ -185,7 +185,7 @@ public class FunctionFactory
       andFunction.trimToSize();
       return new AndFunction(andFunction);
     }
-    if (name.equals("NOT"))
+    else if (name.equals("NOT"))
     {
       Vector notFunction = new Vector();
       Iterator iter = conf.iterator();
