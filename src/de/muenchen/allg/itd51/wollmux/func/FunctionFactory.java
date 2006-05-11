@@ -12,6 +12,7 @@
 * 08.05.2006 | BNK | Testing und Debugging, mehr Grund-Funktionen
 * 09.05.2006 | BNK | weitere Grundfunktionen
 * 11.05.2006 | BNK | NOT implementiert
+*                  | MATCH.getString() kann jetzt Function.ERROR liefern
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -626,12 +627,12 @@ public class FunctionFactory
       this.input = input;
     }
     
-    public boolean getBoolean(Values parameters)
+    public String getString(Values parameters)
     {
       String str = input.getString(parameters);
-      if (str == Function.ERROR) return false;
-      if (pattern.matcher(str).matches()) return true;
-      return false;
+      if (str == Function.ERROR) return Function.ERROR;
+      if (pattern.matcher(str).matches()) return "true";
+      return "false";
     }
 
     public String[] parameters()
@@ -639,11 +640,10 @@ public class FunctionFactory
       return input.parameters();
     }
 
-    public String getString(Values parameters)
+    public boolean getBoolean(Values parameters)
     {
-      return ""+getBoolean(parameters);
+      return getString(parameters).equalsIgnoreCase("true");
     }
-
   }
 
   private static abstract class MultiFunction implements Function
