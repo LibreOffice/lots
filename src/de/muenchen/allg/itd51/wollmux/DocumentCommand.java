@@ -817,4 +817,44 @@ abstract public class DocumentCommand
       return visitable.executeCommand(this);
     }
   }
+
+  // ********************************************************************************
+  static public class BeATemplate extends DocumentCommand
+  {
+    public BeATemplate(ConfigThingy wmCmd, Bookmark bookmark, boolean debug)
+        throws InvalidCommandException
+    {
+      super(wmCmd, bookmark, debug);
+    }
+
+    protected boolean canHaveChilds()
+    {
+      return false;
+    }
+
+    public int execute(DocumentCommand.Executor visitable)
+    {
+      return 0;
+    }
+  }
+
+  // ********************************************************************************
+  static public class BeADocument extends DocumentCommand
+  {
+    public BeADocument(ConfigThingy wmCmd, Bookmark bookmark, boolean debug)
+        throws InvalidCommandException
+    {
+      super(wmCmd, bookmark, debug);
+    }
+
+    protected boolean canHaveChilds()
+    {
+      return false;
+    }
+
+    public int execute(DocumentCommand.Executor visitable)
+    {
+      return 0;
+    }
+  }
 }

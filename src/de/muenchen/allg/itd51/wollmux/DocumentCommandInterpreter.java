@@ -62,13 +62,6 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
   private WollMuxSingleton mux;
 
   /**
-   * Gibt an, ob das Dokument als Vorlage behandelt wird und damit die
-   * enthaltenen Dokumentkommandos ausgewertet werden sollen (bei true) oder
-   * nicht (bei false).
-   */
-  private boolean isOpenAsTemplate;
-
-  /**
    * Das Dokument, das interpretiert werden soll.
    */
   private UnoService document;
@@ -117,9 +110,6 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
     this.formDescriptors = new ConfigThingy("Forms");
     this.documentIsAFormular = false;
     this.fragUrls = frag_urls;
-    // Bei Templates besitzt das xDoc kein URL-Attribut, bei normalen
-    // Dokumenten schon.
-    this.isOpenAsTemplate = (xDoc.getURL() == null || xDoc.getURL().equals(""));
   }
 
   /**
@@ -142,11 +132,12 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
     // Dokumentkommando-Baum scannen:
     DocumentCommandTree tree = new DocumentCommandTree(document.xComponent(),
         mux.isDebugMode());
+    tree.update();
 
     // Zähler für aufgetretene Fehler bei der Bearbeitung der Kommandos.
     int errors = 0;
 
-    if (isOpenAsTemplate)
+    if (isOpenAsTemplate(tree))
     {
       // 1) Zuerst alle Kommandos bearbeiten, die irgendwie Kinder bekommen
       // können, damit der DocumentCommandTree vollständig aufgebaut werden
@@ -176,15 +167,23 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
       // 6) Jetzt darf man wieder was sehen:
       if (document.xModel() != null && !mux.isDebugMode())
         document.xModel().unlockControllers();
-
-      // 7) Die Statusänderungen der Dokumentkommandos auf die Bookmarks
-      // übertragen bzw. die Bookmarks abgearbeiteter Kommandos löschen.
-      tree.updateBookmarks();
-
-      // 8) Document-Modified auf false setzen, da nur wirkliche
-      // Benutzerinteraktionen den Modified-Status beeinflussen sollen.
-      setDocumentModified(false);
     }
+
+    // Folgende Schritte sollen auch ausgeführt werden, wenn das Dokument "als
+    // Dokument" geöffnet wurde:
+
+    // 7) Die Statusänderungen der Dokumentkommandos auf die Bookmarks
+    // übertragen bzw. die Bookmarks abgearbeiteter Kommandos löschen. Der
+    // Schritt soll aus folgenden Gründen auch dann ausgeführt werden, wenn das
+    // Dokument "als Dokument" geöffnet wurde:
+    // a) Damit ein evtl. vorhandenes Dokumentkommando BeADocument gelöscht
+    // wird.
+    // b) Zur Normierung der enthaltenen Bookmarks.
+    tree.updateBookmarks();
+
+    // 8) Document-Modified auf false setzen, da nur wirkliche
+    // Benutzerinteraktionen den Modified-Status beeinflussen sollen.
+    setDocumentModified(false);
 
     // ggf. eine WMCommandsFailedException werfen:
     if (errors != 0)
@@ -202,6 +201,44 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
     {
       startFormGUI();
     }
+  }
+
+  /**
+   * Die Methode ermittelt, ob das Dokument als Vorlage behandelt wird und damit
+   * die enthaltenen Dokumentkommandos ausgewertet werden sollen (bei true) oder
+   * nicht (bei false).
+   */
+  private boolean isOpenAsTemplate(DocumentCommandTree tree)
+  {
+    // Vorbelegung: im Zweifelsfall immer als Template öffnen.
+    boolean isTemplate = true;
+
+    // Bei Templates besitzt das xDoc kein URL-Attribut, bei normalen
+    // Dokumenten schon.
+    if (document.xTextDocument() != null)
+      isTemplate = (document.xTextDocument().getURL() == null || document
+          .xTextDocument().getURL().equals(""));
+
+    // jetzt noch die Kommandos BeATemplate und BeADocument auswerten:
+    Iterator iter = tree.depthFirstIterator(false);
+    while (iter.hasNext())
+    {
+      DocumentCommand cmd = (DocumentCommand) iter.next();
+
+      // gleich abbrechen, wenn eines der beiden Kommandos gefunden wurde.
+      if (cmd instanceof DocumentCommand.BeATemplate)
+      {
+        cmd.setDoneState(true);
+        return true;
+      }
+      if (cmd instanceof DocumentCommand.BeADocument)
+      {
+        cmd.setDoneState(true);
+        return false;
+      }
+    }
+
+    return isTemplate;
   }
 
   private void setDocumentModified(boolean state)
@@ -287,7 +324,6 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
   private int processAllDocumentCommands(DocumentCommandTree tree)
   {
     int errors = 0;
-    tree.update();
     Iterator iter = tree.depthFirstIterator(false);
     while (iter.hasNext())
     {
