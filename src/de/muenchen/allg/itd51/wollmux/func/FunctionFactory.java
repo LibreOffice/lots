@@ -11,6 +11,7 @@
 * 03.05.2006 | BNK | Erstellung
 * 08.05.2006 | BNK | Testing und Debugging, mehr Grund-Funktionen
 * 09.05.2006 | BNK | weitere Grundfunktionen
+* 11.05.2006 | BNK | NOT implementiert
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -183,6 +184,19 @@ public class FunctionFactory
       
       andFunction.trimToSize();
       return new AndFunction(andFunction);
+    }
+    if (name.equals("NOT"))
+    {
+      Vector notFunction = new Vector();
+      Iterator iter = conf.iterator();
+      while (iter.hasNext())
+      {
+        Function cons = parse((ConfigThingy)iter.next(), funcLib, dialogLib, context);
+        notFunction.add(cons);
+      }
+      
+      notFunction.trimToSize();
+      return new NotFunction(notFunction);
     }
     else if (name.equals("OR"))
     {
@@ -715,6 +729,29 @@ public class FunctionFactory
     }
   }
   
+  private static class NotFunction extends MultiFunction
+  {
+  
+    public NotFunction(Collection subFunction)
+    { 
+      super(subFunction);
+    }
+    
+    public String getString(Values parameters)
+    { 
+      Iterator iter = subFunction.iterator();
+      while (iter.hasNext())
+      {
+        Function func = (Function)iter.next();
+        String str = func.getString(parameters);
+        if (str == Function.ERROR) return Function.ERROR;
+        if (!str.equalsIgnoreCase("true")) return "true";
+      }
+      return "false";
+    }
+  }
+  
+  
   private static class OrFunction extends MultiFunction
   {
     public OrFunction(Collection subFunction)
@@ -897,6 +934,11 @@ public class FunctionFactory
         new StringReader(funcStr));
     printFunction(funcStr, parseChildren(funcThingy, funcLib, dialogLib, context), values);
     
+    funcStr = "NOT(VALUE('GibtMilch'))"; 
+    funcThingy = new ConfigThingy("BAR", new URL("file:///"), 
+        new StringReader(funcStr));
+    printFunction(funcStr, parseChildren(funcThingy, funcLib, dialogLib, context), values);
+    
     funcStr = "MATCH(VALUE('Name'),'llMux')"; 
     funcThingy = new ConfigThingy("BAR", new URL("file:///"), 
         new StringReader(funcStr));
@@ -987,6 +1029,11 @@ public class FunctionFactory
     printFunction(funcStr, parseChildren(funcThingy, funcLib, dialogLib, context), values);
     
     funcStr = "DIALOG('Empfaenger', 'Fehler')"; 
+    funcThingy = new ConfigThingy("BAR", new URL("file:///"), 
+        new StringReader(funcStr));
+    printFunction(funcStr, parseChildren(funcThingy, funcLib, dialogLib, context), values);
+    
+    funcStr = "AND()"; 
     funcThingy = new ConfigThingy("BAR", new URL("file:///"), 
         new StringReader(funcStr));
     printFunction(funcStr, parseChildren(funcThingy, funcLib, dialogLib, context), values);
