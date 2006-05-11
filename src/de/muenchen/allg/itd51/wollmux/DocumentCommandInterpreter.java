@@ -144,19 +144,54 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
         mux.isDebugMode());
 
     // Zähler für aufgetretene Fehler bei der Bearbeitung der Kommandos.
-    int errorCount = 0;
+    int errors = 0;
 
     if (isOpenAsTemplate)
     {
-      errorCount = executeDocumentCommands(tree);
+      // 1) Zuerst alle Kommandos bearbeiten, die irgendwie Kinder bekommen
+      // können, damit der DocumentCommandTree vollständig aufgebaut werden
+      // kann.
+      errors += processInsertFrags(tree);
+
+      // 2) Während der Bearbeitung der einfachen Kommandos (z.B. insertValues)
+      // muss man nicht jede Änderung sofort sehen (Geschwindigkeitsvorteil, da
+      // OOo nicht neu rendern muss). Ist im Debug-Modus abgeschalten:
+      if (document.xModel() != null && !mux.isDebugMode())
+        document.xModel().lockControllers();
+
+      // 3) Und jetzt nochmal alle (übrigen) DocumentCommands (z.B.
+      // insertValues) in einem einzigen Durchlauf mit execute aufrufen.
+      errors += processAllDocumentCommands(tree);
+
+      // 4) Da keine neuen Elemente mehr eingefügt werden müssen, können
+      // jetzt die INSERT_MARKS "<" und ">" der insertFrags und
+      // InsertContent-Kommandos gelöscht werden.
+      tree.cleanInsertMarks();
+
+      // 5) Erst nachdem die INSERT_MARKS entfernt wurden, lassen sich leere
+      // Absätze zum Beginn und Ende der insertFrag bzw. insertContent-Kommandos
+      // sauber erkennen und entfernen.
+      cleanEmptyParagraphs(tree);
+
+      // 6) Jetzt darf man wieder was sehen:
+      if (document.xModel() != null && !mux.isDebugMode())
+        document.xModel().unlockControllers();
+
+      // 7) Die Statusänderungen der Dokumentkommandos auf die Bookmarks
+      // übertragen bzw. die Bookmarks abgearbeiteter Kommandos löschen.
+      tree.updateBookmarks();
+
+      // 8) Document-Modified auf false setzen, da nur wirkliche
+      // Benutzerinteraktionen den Modified-Status beeinflussen sollen.
+      setDocumentModified(false);
     }
 
     // ggf. eine WMCommandsFailedException werfen:
-    if (errorCount != 0)
+    if (errors != 0)
     {
       throw new WMCommandsFailedException(
           "Bei der Dokumenterzeugung mit dem Briefkopfsystem trat(en) "
-              + errorCount
+              + errors
               + " Fehler auf.\n\n"
               + "Bitte überprüfen Sie das Dokument und kontaktieren ggf. die "
               + "für Sie zuständige Systemadministration.");
@@ -169,64 +204,89 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
     }
   }
 
-  private int executeDocumentCommands(DocumentCommandTree tree)
+  private void setDocumentModified(boolean state)
+  {
+    try
+    {
+      document.xModifiable().setModified(state);
+    }
+    catch (PropertyVetoException x)
+    {
+      // wenn jemand was dagegen hat, dann setze ich halt nichts.
+    }
+  }
+
+  private void cleanEmptyParagraphs(DocumentCommandTree tree)
+  {
+    Iterator iter = tree.depthFirstIterator(false);
+    while (iter.hasNext())
+    {
+      DocumentCommand cmd = (DocumentCommand) iter.next();
+      if (cmd.isDone() == true
+          && cmd instanceof DocumentCommand.FragmentInserter)
+      {
+        cleanEmptyParagraphsForCommand(cmd);
+      }
+    }
+  }
+
+  private int processInsertFrags(DocumentCommandTree tree)
       throws EndlessLoopException
   {
     int errors = 0;
 
-    // Zuerst alle Kommandos bearbeiten, die irgendwie Kinder bekommen können,
-    // d.h. alle insertFrags und insertContents. Das geschieht so lange, bis
-    // sich der Baum nicht mehr ändert. Der loopCount dient zur Vermeidung von
-    // Endlosschleifen.
-    boolean changed = true;
-    int loopCount = 0;
-    while (changed && MAXCOUNT > ++loopCount)
+    // Ausführung so lange wiederholen, bis sich der Baum nicht mehr ändert. Der
+    // loopCount dient zur Vermeidung von Endlosschleifen.
     {
-      changed = false;
-
-      // Alle (neuen) DocumentCommands durchlaufen und mit execute aufrufen.
-      tree.update();
-      Iterator iter = tree.depthFirstIterator(false);
-      while (iter.hasNext())
+      boolean changed = true;
+      int loopCount = 0;
+      while (changed && MAXCOUNT > ++loopCount)
       {
-        DocumentCommand cmd = (DocumentCommand) iter.next();
+        changed = false;
 
-        if (cmd.canHaveChilds() && cmd.isDone() == false)
+        // Alle (neuen) DocumentCommands durchlaufen und mit execute aufrufen.
+        tree.update();
+        Iterator iter = tree.depthFirstIterator(false);
+        while (iter.hasNext())
         {
-          // Kommando ausführen und Fehler zählen
-          errors += cmd.execute(this);
-          changed = true;
+          DocumentCommand cmd = (DocumentCommand) iter.next();
+
+          if (cmd.isDone() == false
+              && cmd instanceof DocumentCommand.FragmentInserter)
+          {
+            // Kommando ausführen und Fehler zählen
+            errors += cmd.execute(this);
+            changed = true;
+          }
         }
       }
-    }
 
-    // ggf. EndlessLoopException mit dem Namen des Dokuments schmeissen.
-    if (loopCount == MAXCOUNT)
-    {
-      UnoService frame = new UnoService(document.xModel()
-          .getCurrentController().getFrame());
-      String name;
-      try
+      // ggf. EndlessLoopException mit dem Namen des Dokuments schmeissen.
+      if (loopCount == MAXCOUNT)
       {
-        name = frame.getPropertyValue("Title").toString();
-      }
-      catch (Exception e)
-      {
-        name = "";
-      }
+        UnoService frame = new UnoService(document.xModel()
+            .getCurrentController().getFrame());
+        String name = "";
+        try
+        {
+          name = frame.getPropertyValue("Title").toString();
+        }
+        catch (Exception e)
+        {
+        }
 
-      throw new EndlessLoopException(
-          "Endlosschleife bei der Textfragment-Ersetzung in Dokument \""
-              + name
-              + "\"");
+        throw new EndlessLoopException(
+            "Endlosschleife bei der Textfragment-Ersetzung in Dokument \""
+                + name
+                + "\"");
+      }
     }
+    return errors;
+  }
 
-    // Bei der Bearbeitung der einfachen Kommandos (z.B. insertValues) muss man
-    // nicht jede Änderung sofort sehen:
-    if (document.xModel() != null) document.xModel().lockControllers();
-
-    // Und jetzt nochmal alle (übrigen) DocumentCommands (z.B. insertValues)
-    // in einem einzigen Durchlauf mit execute aufrufen.
+  private int processAllDocumentCommands(DocumentCommandTree tree)
+  {
+    int errors = 0;
     tree.update();
     Iterator iter = tree.depthFirstIterator(false);
     while (iter.hasNext())
@@ -238,46 +298,12 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
         errors += cmd.execute(this);
       }
     }
-
-    // entfernen der INSERT_MARKS
-    tree.cleanInsertMarks();
-
-    // jetzt nochmal den Baum durchgehen und alle leeren Absätze zum Beginn
-    // und Ende der insertFrags und insertContents entfernen.
-    iter = tree.depthFirstIterator(false);
-    while (iter.hasNext())
-    {
-      DocumentCommand cmd = (DocumentCommand) iter.next();
-      if (cmd.isDone() == true
-          && cmd instanceof DocumentCommand.ExternalContentInserter)
-      {
-        cleanEmptyParagraphs(cmd);
-      }
-    }
-
-    // jetzt soll man wieder was sehen:
-    if (document.xModel() != null) document.xModel().unlockControllers();
-
-    // updaten/entfernen der Bookmarks:
-    tree.updateBookmarks();
-
-    // Document-Modified auf false setzen, da nur wirkliche
-    // Benutzerinteraktionen den Modified-Status beeinflussen sollen.
-    try
-    {
-      document.xModifiable().setModified(false);
-    }
-    catch (PropertyVetoException x)
-    {
-      // wenn jemand was dagegen hat, dann setze ich halt nichts.
-    }
-
     return errors;
   }
 
-  private void cleanEmptyParagraphs(DocumentCommand cmd)
+  private void cleanEmptyParagraphsForCommand(DocumentCommand cmd)
   {
-    Logger.debug2("cleanEmptyParagraphs(" + cmd + ")");
+    Logger.debug2("cleanEmptyParagraphsForCommand(" + cmd + ")");
 
     // Ersten Absatz löschen, falls er leer ist:
 
@@ -293,7 +319,7 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
     }
 
     if (fragStart.xParagraphCursor() != null
-        && fragStart.xParagraphCursor().isStartOfParagraph())
+        && fragStart.xParagraphCursor().isEndOfParagraph())
     {
       // Der Cursor ist am Ende des Absatzes. Das sagt uns, dass der erste
       // eingefügte Absatz ein leerer Absatz war. Damit soll dieser Absatz
@@ -355,7 +381,7 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
     }
 
     if (fragEnd.xParagraphCursor() != null
-        && fragEnd.xParagraphCursor().isStartOfParagraph())
+        && fragEnd.xParagraphCursor().isEndOfParagraph())
     {
       marker.xTextCursor().gotoRange(fragEnd.xTextRange(), false);
       marker.xTextCursor().goLeft((short) 1, true);

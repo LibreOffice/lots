@@ -564,7 +564,7 @@ abstract public class DocumentCommand
    * Beschreibt ein Dokumentkommando, das Dokumentinhalte über
    * insertDocumentFromURL einfügt.
    */
-  static interface ExternalContentInserter
+  static interface FragmentInserter
   {
   };
 
@@ -673,7 +673,7 @@ abstract public class DocumentCommand
 
   // ********************************************************************************
   static public class InsertFrag extends DocumentCommand implements
-      ExternalContentInserter
+      FragmentInserter
   {
     private String fragID;
 
@@ -709,7 +709,7 @@ abstract public class DocumentCommand
 
   // ********************************************************************************
   static public class InsertContent extends DocumentCommand implements
-      ExternalContentInserter
+      FragmentInserter
   {
     private String fragID;
 
