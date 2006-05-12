@@ -75,17 +75,19 @@ public class WollMuxSingleton implements XPALProvider
    * wurde.
    */
   private VisibleTextFragmentList textFragmentList;
-  
+
   /**
-   * Enthält die im Funktionen-Abschnitt der wollmux,conf definierten Funktionen.
+   * Enthält die im Funktionen-Abschnitt der wollmux,conf definierten
+   * Funktionen.
    */
   private FunctionLibrary globalFunctions;
-  
+
   /**
-   * Enthält die im Funktionsdialoge-Abschnitt der wollmux,conf definierten Dialoge.
+   * Enthält die im Funktionsdialoge-Abschnitt der wollmux,conf definierten
+   * Dialoge.
    */
   private DialogLibrary funcDialogs;
-  
+
   /**
    * Enthält den zentralen DataSourceJoiner.
    */
@@ -170,17 +172,17 @@ public class WollMuxSingleton implements XPALProvider
     }
 
     /*
-     * Funktionsdialoge parsen.
-     * ACHTUNG! Muss vor parseGlobalFunctions() erfolgen.
+     * Funktionsdialoge parsen. ACHTUNG! Muss vor parseGlobalFunctions()
+     * erfolgen.
      */
     parseFunctionDialogs(WollMuxFiles.getWollmuxConf());
-    
+
     /*
-     * Globale Funktionen parsen.
-     * ACHTUNG! Verwendet die Funktionsdialoge. Diese müssen also vorher geparst sein.
+     * Globale Funktionen parsen. ACHTUNG! Verwendet die Funktionsdialoge. Diese
+     * müssen also vorher geparst sein.
      */
     parseGlobalFunctions(WollMuxFiles.getWollmuxConf(), getFunctionDialogs());
-    
+
     // Initialisiere EventProcessor
     getEventProcessor().setAcceptEvents(successfullStartup);
 
@@ -197,9 +199,6 @@ public class WollMuxSingleton implements XPALProvider
     {
       Logger.error(e);
     }
-
-    // Event ON_FIRST_INITIALIZE erzeugen:
-    getEventProcessor().addEvent(new Event(Event.ON_INITIALIZE));
   }
 
   /**
@@ -220,7 +219,13 @@ public class WollMuxSingleton implements XPALProvider
   public static void initialize(XComponentContext ctx)
   {
     if (singletonInstance == null)
+    {
       singletonInstance = new WollMuxSingleton(ctx);
+
+      // Event ON_FIRST_INITIALIZE erzeugen:
+      singletonInstance.getEventProcessor().addEvent(
+          new Event(Event.ON_INITIALIZE));
+    }
   }
 
   /**
@@ -431,89 +436,104 @@ public class WollMuxSingleton implements XPALProvider
   {
     return WollMuxFiles.getDEFAULT_CONTEXT();
   }
-  
+
   /**
-   * Liefert die Funktionsbibliothek, die die global definierten Funktionen enthält.
+   * Liefert die Funktionsbibliothek, die die global definierten Funktionen
+   * enthält.
+   * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public FunctionLibrary getGlobalFunctions()
   {
     return globalFunctions;
   }
-  
+
   /**
-   * Liefert die Dialogbibliothek, die die Dialoge enthält, die in Funktionen 
+   * Liefert die Dialogbibliothek, die die Dialoge enthält, die in Funktionen
    * (Grundfunktion "DIALOG") verwendung finden.
+   * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public DialogLibrary getFunctionDialogs()
   {
     return funcDialogs;
   }
-  
+
   /**
-   * Bekommt in conf die wollmux,conf übergeben und parst den "Funktionsdialoge" Abschnitt daraus.
+   * Bekommt in conf die wollmux,conf übergeben und parst den "Funktionsdialoge"
+   * Abschnitt daraus.
+   * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void parseFunctionDialogs(ConfigThingy conf)
   {
     funcDialogs = new DialogLibrary();
-    
+
     Set dialogsInBlock = new HashSet();
-    
+
     conf = conf.query("Funktionsdialoge");
     Iterator parentIter = conf.iterator();
     while (parentIter.hasNext())
     {
       dialogsInBlock.clear();
-      Iterator iter = ((ConfigThingy)parentIter.next()).iterator();
+      Iterator iter = ((ConfigThingy) parentIter.next()).iterator();
       while (iter.hasNext())
       {
-        ConfigThingy dialogConf = (ConfigThingy)iter.next();
+        ConfigThingy dialogConf = (ConfigThingy) iter.next();
         String name = dialogConf.getName();
         if (dialogsInBlock.contains(name))
-          Logger.error("Funktionsdialog \""+name+"\" im selben Funktionsdialoge-Abschnitt mehrmals definiert");
+          Logger
+              .error("Funktionsdialog \""
+                     + name
+                     + "\" im selben Funktionsdialoge-Abschnitt mehrmals definiert");
         dialogsInBlock.add(name);
       }
     }
   }
-  
+
   /**
-   * Bekommt in conf die wollmux,conf übergeben und parst den "Funktionen" Abschnitt daraus.
+   * Bekommt in conf die wollmux,conf übergeben und parst den "Funktionen"
+   * Abschnitt daraus.
+   * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void parseGlobalFunctions(ConfigThingy conf, DialogLibrary dialogLib)
   {
     globalFunctions = new FunctionLibrary();
-    
+
     conf = conf.query("Funktionen");
     Iterator parentIter = conf.iterator();
     while (parentIter.hasNext())
     {
-      Iterator iter = ((ConfigThingy)parentIter.next()).iterator();
+      Iterator iter = ((ConfigThingy) parentIter.next()).iterator();
       while (iter.hasNext())
       {
-        ConfigThingy funcConf = (ConfigThingy)iter.next();
+        ConfigThingy funcConf = (ConfigThingy) iter.next();
         String name = funcConf.getName();
         try
         {
-          Function func = FunctionFactory.parseChildren(funcConf, globalFunctions, dialogLib, null);
+          Function func = FunctionFactory.parseChildren(
+              funcConf,
+              globalFunctions,
+              dialogLib,
+              null);
           globalFunctions.add(name, func);
         }
         catch (ConfigurationErrorException e)
         {
-          Logger.error("Fehler beim Parsen der Funktion \""+name+"\"",e);
+          Logger.error("Fehler beim Parsen der Funktion \"" + name + "\"", e);
         }
       }
     }
   }
-  
+
   /**
    * siehe {@link WollMuxFiles#isDebugMode()}.
    * 
    * @author Christoph Lutz (D-III-ITD 5.1)
    */
-  public boolean isDebugMode() {
+  public boolean isDebugMode()
+  {
     return WollMuxFiles.isDebugMode();
   }
 }
