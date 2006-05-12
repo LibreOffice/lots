@@ -557,6 +557,8 @@ abstract public class DocumentCommand
     public int executeCommand(DocumentCommand.Form cmd);
 
     public int executeCommand(DocumentCommand.InvalidCommand cmd);
+
+    public int executeCommand(DocumentCommand.Version cmd);
   }
 
   // ********************************************************************************
@@ -827,6 +829,26 @@ abstract public class DocumentCommand
     public String getRightSeparator()
     {
       return rightSeparator;
+    }
+
+    public int execute(DocumentCommand.Executor visitable)
+    {
+      return visitable.executeCommand(this);
+    }
+  }
+
+  // ********************************************************************************
+  static public class Version extends DocumentCommand
+  {
+    public Version(ConfigThingy wmCmd, Bookmark bookmark, boolean debug)
+        throws InvalidCommandException
+    {
+      super(wmCmd, bookmark, debug);
+    }
+
+    protected boolean canHaveChilds()
+    {
+      return false;
     }
 
     public int execute(DocumentCommand.Executor visitable)

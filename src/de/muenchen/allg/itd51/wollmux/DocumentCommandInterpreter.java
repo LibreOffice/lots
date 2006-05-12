@@ -699,6 +699,19 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
   }
 
   /**
+   * Gibt Informationen über die aktuelle Install-Version des WollMux aus.
+   */
+  public int executeCommand(DocumentCommand.Version cmd)
+  {
+    XTextCursor insCurs = cmd.createInsertCursor();
+    if (insCurs != null)
+      insCurs.setString("Build-Info: " + mux.getBuildInfo());
+
+    cmd.setDoneState(true);
+    return 0;
+  }
+
+  /**
    * Diese Methode fügt ein Fehler-Feld an die Stelle des Dokumentkommandos ein.
    */
   private void insertErrorField(DocumentCommand cmd, java.lang.Exception e)

@@ -186,6 +186,11 @@ public class DocumentCommandTree
         return new DocumentCommand.OFF(wmCmd, bookmark, debug);
       }
 
+      if (cmd.compareToIgnoreCase("version") == 0)
+      {
+        return new DocumentCommand.Version(wmCmd, bookmark, debug);
+      }
+
       throw new InvalidCommandException("Unbekanntes Kommando \"" + cmd + "\"");
     }
     catch (InvalidCommandException e)
