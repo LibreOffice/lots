@@ -79,12 +79,6 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
   private int fragUrlsCount = 0;
 
   /**
-   * Abbruchwert für die Anzahl der Interationsschritte beim Auswerten neu
-   * hinzugekommener Bookmarks.
-   */
-  private static final int MAXCOUNT = 100;
-
-  /**
    * Das ConfigThingy enthält alle Form-Desriptoren, die im Lauf des
    * interpret-Vorgangs aufgesammelt werden.
    */
@@ -125,8 +119,7 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
    * @throws EndlessLoopException
    * @throws WMCommandsFailedException
    */
-  public void interpret() throws EndlessLoopException,
-      WMCommandsFailedException
+  public void interpret() throws WMCommandsFailedException
   {
 
     // Dokumentkommando-Baum scannen:
@@ -226,12 +219,12 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
       DocumentCommand cmd = (DocumentCommand) iter.next();
 
       // gleich abbrechen, wenn eines der beiden Kommandos gefunden wurde.
-      if (cmd instanceof DocumentCommand.BeATemplate)
+      if (cmd instanceof DocumentCommand.ON)
       {
         cmd.setDoneState(true);
         return true;
       }
-      if (cmd instanceof DocumentCommand.BeADocument)
+      if (cmd instanceof DocumentCommand.OFF)
       {
         cmd.setDoneState(true);
         return false;
@@ -268,54 +261,27 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
   }
 
   private int processInsertFrags(DocumentCommandTree tree)
-      throws EndlessLoopException
   {
     int errors = 0;
-
-    // Ausführung so lange wiederholen, bis sich der Baum nicht mehr ändert. Der
-    // loopCount dient zur Vermeidung von Endlosschleifen.
+    for (boolean changed = true; changed;)
     {
-      boolean changed = true;
-      int loopCount = 0;
-      while (changed && MAXCOUNT > ++loopCount)
+      changed = false;
+
+      // Alle (neuen) DocumentCommands durchlaufen und mit execute aufrufen.
+      tree.update();
+      Iterator iter = tree.depthFirstIterator(false);
+      while (iter.hasNext())
       {
-        changed = false;
+        DocumentCommand cmd = (DocumentCommand) iter.next();
 
-        // Alle (neuen) DocumentCommands durchlaufen und mit execute aufrufen.
-        tree.update();
-        Iterator iter = tree.depthFirstIterator(false);
-        while (iter.hasNext())
+        if (cmd.isDone() == false
+            && cmd.hasError() == false
+            && cmd instanceof DocumentCommand.FragmentInserter)
         {
-          DocumentCommand cmd = (DocumentCommand) iter.next();
-
-          if (cmd.isDone() == false
-              && cmd instanceof DocumentCommand.FragmentInserter)
-          {
-            // Kommando ausführen und Fehler zählen
-            errors += cmd.execute(this);
-            changed = true;
-          }
+          // Kommando ausführen und Fehler zählen
+          errors += cmd.execute(this);
+          changed = true;
         }
-      }
-
-      // ggf. EndlessLoopException mit dem Namen des Dokuments schmeissen.
-      if (loopCount == MAXCOUNT)
-      {
-        UnoService frame = new UnoService(document.xModel()
-            .getCurrentController().getFrame());
-        String name = "";
-        try
-        {
-          name = frame.getPropertyValue("Title").toString();
-        }
-        catch (Exception e)
-        {
-        }
-
-        throw new EndlessLoopException(
-            "Endlosschleife bei der Textfragment-Ersetzung in Dokument \""
-                + name
-                + "\"");
       }
     }
     return errors;
@@ -328,7 +294,7 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
     while (iter.hasNext())
     {
       DocumentCommand cmd = (DocumentCommand) iter.next();
-      if (cmd.isDone() == false)
+      if (cmd.isDone() == false && cmd.hasError() == false)
       {
         // Kommandos ausführen und Fehler zählen
         errors += cmd.execute(this);
@@ -521,10 +487,8 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
 
   public int executeCommand(DocumentCommand.InvalidCommand cmd)
   {
-    insertErrorField(
-        cmd,
-        "Dokumentkommando ist ungültig: " + cmd.getMessage(),
-        null);
+    insertErrorField(cmd, cmd.getException());
+    cmd.setErrorState(true);
     return 1;
   }
 
@@ -565,7 +529,7 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
     }
     catch (java.lang.Exception e)
     {
-      insertErrorField(cmd, "", e);
+      insertErrorField(cmd, e);
       cmd.setErrorState(true);
       return 1;
     }
@@ -634,7 +598,7 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
     }
     catch (java.lang.Exception e)
     {
-      insertErrorField(cmd, "", e);
+      insertErrorField(cmd, e);
       cmd.setErrorState(true);
       return 1;
     }
@@ -673,7 +637,7 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
       }
       catch (java.lang.Exception e)
       {
-        insertErrorField(cmd, "", e);
+        insertErrorField(cmd, e);
         cmd.setErrorState(true);
         return 1;
       }
@@ -726,7 +690,7 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
     }
     catch (java.lang.Exception e)
     {
-      insertErrorField(cmd, "", e);
+      insertErrorField(cmd, e);
       cmd.setErrorState(true);
       return 1;
     }
@@ -737,21 +701,15 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
   /**
    * Diese Methode fügt ein Fehler-Feld an die Stelle des Dokumentkommandos ein.
    */
-  private void insertErrorField(DocumentCommand cmd, String text,
-      java.lang.Exception e)
+  private void insertErrorField(DocumentCommand cmd, java.lang.Exception e)
   {
-    String msg = "Fehler in Dokumentkommando \""
-                 + cmd.getBookmarkName()
-                 + "\": ";
+    String msg = "Fehler in Dokumentkommando \"" + cmd.getBookmarkName() + "\"";
 
     // Meldung auch auf dem Logger ausgeben
     if (e != null)
-      Logger.error(msg + text, e);
+      Logger.error(msg, e);
     else
-      Logger.error(msg + text);
-
-    // Meldung für die mehrzeilige Ausgabe aufbereiten
-    text = msg + "\n\n" + text;
+      Logger.error(msg);
 
     UnoService cursor = new UnoService(cmd.createInsertCursor());
     cursor.xTextCursor().setString("<FEHLER:  >");
@@ -767,20 +725,6 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
       Logger.error(x);
     }
 
-    // msg += Stacktrace von e
-    if (e != null)
-    {
-      if (e.getMessage() != null)
-        text += e.getMessage() + "\n\n" + e.getClass().getName() + ":\n";
-      else
-        text += e.toString() + "\n\n";
-      StackTraceElement[] element = e.getStackTrace();
-      for (int i = 0; i < element.length; i++)
-      {
-        text += element[i].toString() + "\n";
-      }
-    }
-
     // Ein Annotation-Textfield erzeugen und einfügen:
     try
     {
@@ -790,7 +734,7 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
       c.xTextCursor().goLeft((short) 2, false);
       UnoService note = document
           .create("com.sun.star.text.TextField.Annotation");
-      note.setPropertyValue("Content", text);
+      note.setPropertyValue("Content", msg + ":\n\n" + e.getMessage());
       c.xTextRange().getText().insertTextContent(
           c.xTextRange(),
           note.xTextContent(),

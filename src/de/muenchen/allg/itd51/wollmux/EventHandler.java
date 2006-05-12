@@ -280,9 +280,8 @@ public class EventHandler
   }
 
   private static boolean on_opendocument(Event event, boolean asTemplate)
-      throws Exception, ConfigurationErrorException,
-      TextFragmentNotDefinedException, EndlessLoopException, IOException,
-      MalformedURLException
+      throws Exception, ConfigurationErrorException, EndlessLoopException,
+      TextFragmentNotDefinedException, IOException, MalformedURLException
   {
     WollMuxSingleton mux = WollMuxSingleton.getInstance();
 
@@ -388,8 +387,7 @@ public class EventHandler
     return EventProcessor.processTheNextEvent;
   }
 
-  private static boolean on_load(Event event) throws EndlessLoopException,
-      WMCommandsFailedException
+  private static boolean on_load(Event event) throws WMCommandsFailedException
   {
     WollMuxSingleton mux = WollMuxSingleton.getInstance();
 
@@ -409,7 +407,6 @@ public class EventHandler
   }
 
   private static boolean on_frame_changed(Event event)
-      throws EndlessLoopException, WMCommandsFailedException
   {
     // Hier wurden früher die In OOo-eingebetteten Menüs und Symbolleiten
     // geupdated. Das ist jetzt nicht mehr notwendig.

@@ -363,7 +363,7 @@ abstract public class DocumentCommand
    * @return true, wenn bei der Kommandobearbeitung Fehler auftraten;
    *         andernfalls false
    */
-  public boolean getError()
+  public boolean hasError()
   {
     if (error != null)
       return error.booleanValue();
@@ -418,9 +418,9 @@ abstract public class DocumentCommand
     {
       setOrCreate("ERROR", error.toString());
     }
-    else if (getError() != STATE_DEFAULT_ERROR.booleanValue())
+    else if (hasError() != STATE_DEFAULT_ERROR.booleanValue())
     {
-      setOrCreate("ERRORS", "" + getError() + "");
+      setOrCreate("ERRORS", "" + hasError() + "");
     }
 
     return wmCmd;
@@ -598,12 +598,9 @@ abstract public class DocumentCommand
       this.exception = exception;
     }
 
-    public String getMessage()
+    public java.lang.Exception getException()
     {
-      return exception.toString()
-             + "\nIn Bookmark \""
-             + getBookmarkName()
-             + "\".";
+      return exception;
     }
 
     protected boolean canHaveChilds()
@@ -704,6 +701,26 @@ abstract public class DocumentCommand
     public int execute(DocumentCommand.Executor visitable)
     {
       return visitable.executeCommand(this);
+    }
+
+    protected int add(DocumentCommand b)
+    {
+      if (b instanceof InsertFrag)
+      {
+        InsertFrag bif = (InsertFrag) b;
+        // Falls sich ein Fragment selbst aufruft, wandle das Kommando um in ein
+        // InvalidCommand - zur Vermeidung von Endlosschleifen.
+        if (this.getFragID().equals(bif.getFragID()))
+        {
+          InvalidCommandException ivc = new InvalidCommandException(
+              "Das Fragment mit der FRAG_ID \""
+                  + fragID
+                  + "\" ruft sich direkt oder indirekt selbst auf "
+                  + "und würde damit eine Endlosschleife verursachen.");
+          b = new InvalidCommand(b.wmCmd, b.bookmark, ivc, b.debug);
+        }
+      }
+      return super.add(b);
     }
   }
 
@@ -819,9 +836,9 @@ abstract public class DocumentCommand
   }
 
   // ********************************************************************************
-  static public class BeATemplate extends DocumentCommand
+  static public class ON extends DocumentCommand
   {
-    public BeATemplate(ConfigThingy wmCmd, Bookmark bookmark, boolean debug)
+    public ON(ConfigThingy wmCmd, Bookmark bookmark, boolean debug)
         throws InvalidCommandException
     {
       super(wmCmd, bookmark, debug);
@@ -839,9 +856,9 @@ abstract public class DocumentCommand
   }
 
   // ********************************************************************************
-  static public class BeADocument extends DocumentCommand
+  static public class OFF extends DocumentCommand
   {
-    public BeADocument(ConfigThingy wmCmd, Bookmark bookmark, boolean debug)
+    public OFF(ConfigThingy wmCmd, Bookmark bookmark, boolean debug)
         throws InvalidCommandException
     {
       super(wmCmd, bookmark, debug);

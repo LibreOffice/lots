@@ -176,14 +176,14 @@ public class DocumentCommandTree
         return new DocumentCommand.Form(wmCmd, bookmark, debug);
       }
 
-      if (cmd.compareToIgnoreCase("BeATemplate") == 0)
+      if (cmd.compareToIgnoreCase("on") == 0)
       {
-        return new DocumentCommand.BeATemplate(wmCmd, bookmark, debug);
+        return new DocumentCommand.ON(wmCmd, bookmark, debug);
       }
 
-      if (cmd.compareToIgnoreCase("BeADocument") == 0)
+      if (cmd.compareToIgnoreCase("off") == 0)
       {
-        return new DocumentCommand.BeADocument(wmCmd, bookmark, debug);
+        return new DocumentCommand.OFF(wmCmd, bookmark, debug);
       }
 
       throw new InvalidCommandException("Unbekanntes Kommando \"" + cmd + "\"");
