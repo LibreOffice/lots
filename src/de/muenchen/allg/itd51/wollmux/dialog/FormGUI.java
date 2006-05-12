@@ -106,7 +106,10 @@ public class FormGUI
    * @param doc das zum Formular gehörende Writer-Dokument (gekapselt als FormModel)
    * @param mapIdToPresetValue bildet IDs von Formularfeldern auf Vorgabewerte ab.
    *        Falls hier ein Wert für ein Formularfeld vorhanden ist, so wird dieser
-   *        allen anderen automatischen Befüllungen vorgezogen.
+   *        allen anderen automatischen Befüllungen vorgezogen. Wird das Objekt
+   *        {@link FormController#FISHY} als Wert für ein Feld übergeben, 
+   *        so wird dieses Feld
+   *        speziell markiert als ungültig bis der Benutzer es manuell ändert.
    * @param funcLib die Funktionsbibliothek, die zur Auswertung von Plausis etc.
    *        herangezogen werden soll.
    * @param dialogLib die Dialogbibliothek, die die Dialoge bereitstellt, die

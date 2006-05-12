@@ -51,7 +51,14 @@ import de.muenchen.allg.itd51.wollmux.func.Values;
  */
 public class FormController implements UIElementEventHandler
 {
-
+  /**
+   * Wird and FormGUI und FormController in mapIdToPresetValue übergeben, wenn
+   * der Wert des entsprechenden Feldes nicht korrekt widerhergestellt werden kann.
+   * ACHTUNG! Diese Konstante muss als Objekt übergeben werden, da sie == verglichen
+   * wird.
+   */
+  public final static String FISHY = "!!!PRÜFEN!!!";
+  
   /**
    * Rand um Textfelder (wird auch für ein paar andere Ränder verwendet)
    * in Pixeln.
@@ -137,16 +144,18 @@ public class FormController implements UIElementEventHandler
    * ACHTUNG! Darf nur im Event Dispatching Thread aufgerufen werden.
    * @param conf der Formular-Knoten, der die Formularbeschreibung enthält.
    * @param model das zum Formular gehörende Writer-Dokument (gekapselt als FormModel)
-   * @param idToPresetValue bildet IDs von Formularfeldern auf Vorgabewerte ab.
+   * @param mapIdToPresetValue bildet IDs von Formularfeldern auf Vorgabewerte ab.
    *        Falls hier ein Wert für ein Formularfeld vorhanden ist, so wird dieser
-   *        allen anderen automatischen Befüllungen vorgezogen.
+   *        allen anderen automatischen Befüllungen vorgezogen. Wird das Objekt
+   *        {@link #FISHY} als Wert für ein Feld übergeben, so wird dieses Feld
+   *        speziell markiert als ungültig bis der Benutzer es manuell ändert.
    * @param funcLib die Funktionsbibliothek, die zur Auswertung von Plausis etc.
    *        herangezogen werden soll.
    * @param dialogLib die Dialogbibliothek, die die Dialoge bereitstellt, die
    *        für automatisch zu befüllende Formularfelder benötigt werden.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public FormController(ConfigThingy conf, FormModel model, final Map idToPresetValue, 
+  public FormController(ConfigThingy conf, FormModel model, final Map mapIdToPresetValue, 
       FunctionLibrary funcLib, DialogLibrary dialogLib)
   throws ConfigurationErrorException
   {
@@ -164,7 +173,7 @@ public class FormController implements UIElementEventHandler
     try{
       if (visibilityDesc.count() > 0) visibilityDesc = visibilityDesc.getLastChild();
       final ConfigThingy visDesc = visibilityDesc;
-      createGUI(fensterDesc.getLastChild(), visDesc, idToPresetValue);
+      createGUI(fensterDesc.getLastChild(), visDesc, mapIdToPresetValue);
     }
     catch(Exception x) {Logger.error(x);}
 
