@@ -25,6 +25,8 @@
 * 11.01.2006 | BNK | EDIT "true" bei comboboxen unterstützt
 * 25.01.2006 | BNK | Auch editierbare Comboboxen ändern nun den Hintergrund korrekt.
 * 19.04.2006 | BNK | [R1337]Fehlermeldung, bei unbekanntem TYPE
+* 15.05.2006 | BNK | nicht-editierbare Comboboxen funktionieren jetzt hoffentlich 
+*                  | richtig mit Vorgabewerten, die nicht in der Liste sind.
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -670,7 +672,11 @@ public class DatensatzBearbeiten
 
     public void setTextInControl(String text)
     {
-      ((JComboBox)myComponent).setSelectedItem(text);
+      JComboBox myBox = (JComboBox)myComponent;
+      boolean edit = myBox.isEditable();
+      myBox.setEditable(true);
+      myBox.setSelectedItem(text);
+      myBox.setEditable(edit);
     }
     
     public void actionPerformed(ActionEvent e) { updateBackground(); }
