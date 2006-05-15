@@ -349,6 +349,25 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
       {
         // Normalfall: hier darf gelöscht werden
         Logger.debug2("Loesche Absatzvorschubzeichen");
+
+        // Anmerkung: Normalerweise reicht der setString("") zum Löschen des
+        // Zeichens. Jedoch im Spezialfall, dass der zweite Absatz auch leer
+        // ist, würde der zweite Absatz ohne den folgenden Workaround seine
+        // Formatierung verlieren. Das Problem ist gemeldet unter:
+        // http://qa.openoffice.org/issues/show_bug.cgi?id=65384
+
+        // Workaround: bevor der Absatz gelöscht wird, füge ich in den zweiten
+        // Absatz einen Inhalt ein.
+        marker.xTextCursor().goRight((short) 1, false); // cursor korrigieren
+        marker.xTextCursor().setString("c");
+        marker.xTextCursor().collapseToStart();
+        marker.xTextCursor().goLeft((short) 1, true); // cursor wie vorher
+
+        // hier das eigentliche Löschen des Absatzvorschubs
+        marker.xTextCursor().setString("");
+
+        // Workaround: Nun wird der vorher eingefügte Inhalt wieder gelöscht.
+        marker.xTextCursor().goRight((short) 1, true);
         marker.xTextCursor().setString("");
       }
       else
@@ -363,7 +382,8 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
           Logger.debug2("Loesche den ganzen leeren Absatz");
           deleteParagraph(fragStart.xTextCursor());
           // Hierbei wird das zugehörige Bookmark ungültig, da es z.B. eine
-          // enthaltene TextTable nicht mehr umschließt.
+          // enthaltene TextTable nicht mehr umschließt. Aus diesem Grund werden
+          // Bookmarks nach erfolgreicher Ausführung gelöscht...
         }
       }
     }
