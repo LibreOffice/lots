@@ -22,6 +22,7 @@
  * 06.12.2005 | BNK | bessere Separatoren, kein Test mehr in init, ob Logfile schreibbar
  * 20.04.2006 | BNK | bessere Datum/Zeitangabe, Angabe des Aufrufers
  * 24.04.2006 | BNK | korrekte Monatsangabe.
+ * 15.05.2006 | BNK | Cause ausgeben in printException()
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -393,12 +394,17 @@ public class Logger
     prefix = ""+now.get(Calendar.YEAR)+"-"+monthStr+"-"+dayStr+" "+hourStr+":"+minuteStr+" "+prefix;
 
     // Ausgabe schreiben:
-    out.println(prefix + e.toString());
-    StackTraceElement[] se = e.getStackTrace();
-    for (int i = 0; i < se.length; i++)
-    {
-      out.println(prefix + se[i].toString());
-    }
+    do{
+      out.println(prefix + e.toString());
+      StackTraceElement[] se = e.getStackTrace();
+      for (int i = 0; i < se.length; i++)
+      {
+        out.println(prefix + se[i].toString());
+      }
+      
+      e = e.getCause();
+      if (e != null) out.println(prefix + "-------- CAUSED BY ------");
+    }while(e != null);
     out.println();
     out.flush();
 
