@@ -404,7 +404,7 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
     }
 
     if (fragEnd.xParagraphCursor() != null
-        && fragEnd.xParagraphCursor().isEndOfParagraph())
+        && fragEnd.xParagraphCursor().isStartOfParagraph())
     {
       marker.xTextCursor().gotoRange(fragEnd.xTextRange(), false);
       marker.xTextCursor().goLeft((short) 1, true);
