@@ -36,6 +36,7 @@ import com.sun.star.container.NoSuchElementException;
 import com.sun.star.container.XEnumeration;
 import com.sun.star.container.XEnumerationAccess;
 import com.sun.star.io.IOException;
+import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextRange;
@@ -350,7 +351,7 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
         // Normalfall: hier darf gelöscht werden
         Logger.debug2("Loesche Absatzvorschubzeichen");
 
-        // Anmerkung: Normalerweise reicht der setString("") zum Löschen des
+        // Workaround: Normalerweise reicht der setString("") zum Löschen des
         // Zeichens. Jedoch im Spezialfall, dass der zweite Absatz auch leer
         // ist, würde der zweite Absatz ohne den folgenden Workaround seine
         // Formatierung verlieren. Das Problem ist gemeldet unter:
@@ -574,47 +575,17 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
     {
       // Fragment-URL holen und aufbereiten. Kontext ist der DEFAULT_CONTEXT.
       String urlStr = mux.getTextFragmentList().getURLByID(cmd.getFragID());
+
       URL url = new URL(mux.getDEFAULT_CONTEXT(), urlStr);
-      try
-      {
-        UnoService trans = UnoService.createWithContext(
-            "com.sun.star.util.URLTransformer",
-            mux.getXComponentContext());
-        com.sun.star.util.URL[] unoURL = new com.sun.star.util.URL[] { new com.sun.star.util.URL() };
-        unoURL[0].Complete = url.toExternalForm();
-        trans.xURLTransformer().parseStrict(unoURL);
-        urlStr = unoURL[0].Complete;
-      }
-      catch (Exception e)
-      {
-        Logger.error(e);
-      }
 
       Logger.debug("Füge Textfragment \""
                    + cmd.getFragID()
                    + "\" von URL \""
-                   + urlStr
+                   + url.toExternalForm()
                    + "\" ein.");
 
-      // Workaround für den insertDocumentFromURL-Fehler (Einfrieren von OOo
-      // wenn Ressource nicht auflösbar).
-      if (url.openConnection().getContentLength() <= 0)
-      {
-        throw new IOException("Fragment "
-                              + cmd.getFragID()
-                              + " ("
-                              + url.toExternalForm()
-                              + ") ist leer oder nicht verfügbar");
-      }
-
-      // Textfragment einfügen:
-      UnoService insCursor = new UnoService(cmd.createInsertCursor());
-      if (insCursor.xDocumentInsertable() != null)
-      {
-        insCursor.xDocumentInsertable().insertDocumentFromURL(
-            urlStr,
-            new PropertyValue[] {});
-      }
+      // fragment einfügen:
+      insertDocumentFromURL(cmd, url);
     }
     catch (java.lang.Exception e)
     {
@@ -624,6 +595,95 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
     }
     cmd.setDoneState(true);
     return 0;
+  }
+
+  /**
+   * Die Methode fügt das externe Dokument von der URL url an die Stelle von cmd
+   * ein. Die Methode enthält desweiteren notwendige Workarounds für die Bugs
+   * des insertDocumentFromURL der UNO-API.
+   * 
+   * @param cmd
+   * @param url
+   * @throws java.io.IOException
+   * @throws IOException
+   * @throws IllegalArgumentException
+   */
+  private void insertDocumentFromURL(DocumentCommand cmd, URL url)
+      throws java.io.IOException, IOException, IllegalArgumentException
+  {
+
+    // Workaround: OOo friert ein, wenn ressource bei insertDocumentFromURL
+    // nicht auflösbar. http://qa.openoffice.org/issues/show_bug.cgi?id=57049
+    // Hier wird versucht, die URL über den java-Klasse url aufzulösen und bei
+    // Fehlern abgebrochen.
+    if (url.openConnection().getContentLength() <= 0)
+    {
+      throw new IOException("Das Textfragment mit der URL \""
+                            + url.toExternalForm()
+                            + "\" ist leer oder nicht verfügbar");
+    }
+
+    // URL durch den URLTransformer von OOo jagen, damit die URL auch von OOo
+    // verarbeitet werden kann.
+    String urlStr = null;
+    try
+    {
+      UnoService trans = UnoService.createWithContext(
+          "com.sun.star.util.URLTransformer",
+          mux.getXComponentContext());
+      com.sun.star.util.URL[] unoURL = new com.sun.star.util.URL[] { new com.sun.star.util.URL() };
+      unoURL[0].Complete = url.toExternalForm();
+      trans.xURLTransformer().parseStrict(unoURL);
+      urlStr = unoURL[0].Complete;
+    }
+    catch (Exception e)
+    {
+      Logger.error(e);
+    }
+
+    // Workaround: Alten Paragraphenstyle merken. Problembeschreibung siehe
+    // http://qa.openoffice.org/issues/show_bug.cgi?id=60475
+    String paraStyleName = null;
+    UnoService endCursor = new UnoService(null);
+    XTextRange range = cmd.getTextRange();
+    if (range != null)
+    {
+      endCursor = new UnoService(range.getText().createTextCursorByRange(
+          range.getEnd()));
+    }
+    try
+    {
+      if (endCursor.xPropertySet() != null)
+        paraStyleName = endCursor.getPropertyValue("ParaStyleName").getObject()
+            .toString();
+    }
+    catch (java.lang.Exception e)
+    {
+      Logger.error(e);
+    }
+
+    // Textfragment einfügen:
+    UnoService insCursor = new UnoService(cmd.createInsertCursor());
+    if (insCursor.xDocumentInsertable() != null && urlStr != null)
+    {
+      insCursor.xDocumentInsertable().insertDocumentFromURL(
+          urlStr,
+          new PropertyValue[] {});
+    }
+
+    // Workaround: ParagraphStyleName für den letzten eingefügten Paragraphen
+    // wieder setzen (siehe oben).
+    if (endCursor.xPropertySet() != null && paraStyleName != null)
+    {
+      try
+      {
+        endCursor.setPropertyValue("ParaStyleName", paraStyleName);
+      }
+      catch (java.lang.Exception e)
+      {
+        Logger.error(e);
+      }
+    }
   }
 
   /**
@@ -648,12 +708,7 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
       {
         Logger.debug("Füge Textfragment von URL \"" + urlStr + "\" ein.");
 
-        // Textfragment einfügen:
-        UnoService insCursor = new UnoService(cmd.createInsertCursor());
-        if (insCursor.xDocumentInsertable() != null)
-          insCursor.xDocumentInsertable().insertDocumentFromURL(
-              urlStr,
-              new PropertyValue[] {});
+        insertDocumentFromURL(cmd, new URL(urlStr));
       }
       catch (java.lang.Exception e)
       {
