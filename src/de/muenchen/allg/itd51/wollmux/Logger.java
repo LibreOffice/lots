@@ -23,6 +23,7 @@
  * 20.04.2006 | BNK | bessere Datum/Zeitangabe, Angabe des Aufrufers
  * 24.04.2006 | BNK | korrekte Monatsangabe.
  * 15.05.2006 | BNK | Cause ausgeben in printException()
+ * 16.05.2006 | BNK | println() und printException() vereinheitlicht
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -187,7 +188,7 @@ public class Logger
    */
   public static void error(String msg)
   {
-    if (mode >= ERROR) println("ERROR("+getCaller(2)+"): " + msg + System.getProperty("line.separator"));
+    if (mode >= ERROR) printInfo("ERROR("+getCaller(2)+"): ", msg, null);
   }
 
   /**
@@ -198,7 +199,7 @@ public class Logger
    */
   public static void error(Throwable e)
   {
-    if (mode >= ERROR) printException("ERROR("+getCaller(2)+"): ", e);
+    if (mode >= ERROR) printInfo("ERROR("+getCaller(2)+"): ", null, e);
   }
 
   /**
@@ -209,11 +210,7 @@ public class Logger
    */
   public static void error(String msg, Exception e)
   {
-    if (mode >= ERROR)
-    {
-      println("ERROR("+getCaller(2)+"): " + msg);
-      printException("ERROR("+getCaller(2)+"): ", e);
-    }
+    if (mode >= ERROR) printInfo("ERROR(" + getCaller(2) + "): ", msg, e);
   }
 
   /**
@@ -226,7 +223,7 @@ public class Logger
    */
   public static void log(String msg)
   {
-    if (mode >= LOG) println("LOG("+getCaller(2)+"): " + msg + System.getProperty("line.separator"));
+    if (mode >= LOG) printInfo("LOG("+getCaller(2)+"): ", msg, null);
   }
 
   /**
@@ -237,7 +234,7 @@ public class Logger
    */
   public static void log(Throwable e)
   {
-    if (mode >= LOG) printException("LOG("+getCaller(2)+"): ", e);
+    if (mode >= LOG) printInfo("LOG("+getCaller(2)+"): ", null, e);
   }
 
   /**
@@ -250,7 +247,7 @@ public class Logger
    */
   public static void debug(String msg)
   {
-    if (mode >= DEBUG) println("DEBUG("+getCaller(2)+"): " + msg + System.getProperty("line.separator"));
+    if (mode >= DEBUG) printInfo("DEBUG("+getCaller(2)+"): ", msg, null);
   }
 
   /**
@@ -261,7 +258,7 @@ public class Logger
    */
   public static void debug(Throwable e)
   {
-    if (mode >= DEBUG) printException("DEBUG("+getCaller(2)+"): ", e);
+    if (mode >= DEBUG) printInfo("DEBUG("+getCaller(2)+"): ", null, e);
   }
 
   /**
@@ -277,7 +274,7 @@ public class Logger
    */
   public static void debug2(String msg)
   {
-    if (mode >= ALL) println("DEBUG2("+getCaller(2)+"): " + msg + System.getProperty("line.separator"));
+    if (mode >= ALL) printInfo("DEBUG2("+getCaller(2)+"): ", msg, null);
   }
 
   /**
@@ -288,76 +285,13 @@ public class Logger
    */
   public static void debug2(Throwable e)
   {
-    if (mode >= ALL) printException("DEBUG2("+getCaller(2)+"): ", e);
+    if (mode >= ALL) printInfo("DEBUG2("+getCaller(2)+"): ", null, e);
   }
 
   /**
-   * Gebe den String s auf dem PrintStream aus.
-   * 
-   * @param s
+   * Gibt msg gefolgt vom Stacktrace von e aus, wobei jeder Zeile prefix vorangestellt wird.
    */
-  private static void println(String s)
-  {
-    // Ausgabestream oeffnen bzw. festlegen:
-    PrintStream out;
-    FileOutputStream fileOut = null;
-    if (file != null)
-      try
-      {
-        fileOut = new FileOutputStream(file, true);
-        out = new PrintStream(fileOut);
-      }
-      catch (FileNotFoundException x)
-      {
-        out = Logger.defaultOutputStream;
-      }
-    else
-    {
-      out = Logger.defaultOutputStream;
-    }
-    
-    // Zeit und Datum holen und aufbereiten:
-    Calendar now = Calendar.getInstance();
-    int day = now.get(Calendar.DAY_OF_MONTH);
-    int month = now.get(Calendar.MONTH)+1;
-    int hour = now.get(Calendar.HOUR_OF_DAY);
-    int minute = now.get(Calendar.MINUTE);
-    String dayStr = ""+day;
-    String monthStr = ""+month;
-    String hourStr = ""+hour;
-    String minuteStr = ""+minute;
-    if (day < 10) dayStr = "0"+dayStr;
-    if (month < 10) monthStr = "0"+monthStr;
-    if (hour < 10) hourStr = "0"+hourStr;
-    if (minute < 10) minuteStr = "0"+minuteStr;
-
-    // Ausgabe schreiben:
-    out.println(now.get(Calendar.YEAR)+"-"+monthStr+"-"+dayStr+" "+hourStr+":"+minuteStr+" "+s);
-    out.flush();
-
-    // Ein File wird nach dem Schreiben geschlossen.
-    if (fileOut != null)
-    {
-      try
-      {
-        out.close();
-        fileOut.close();
-        out = null;
-        fileOut = null;
-        System.gc();
-      }
-      catch (IOException e)
-      {
-      }
-    }
-  }
-
-  /**
-   * Gebe die Exception e samt StackTrace auf dem PrintStream aus.
-   * 
-   * @param s
-   */
-  private static void printException(String prefix, Throwable e)
+  private static void printInfo(String prefix, String msg, Throwable e)
   {
     // Ausgabestream oeffnen bzw. festlegen:
     PrintStream out;
@@ -380,7 +314,7 @@ public class Logger
     // Zeit und Datum holen und aufbereiten
     Calendar now = Calendar.getInstance();
     int day = now.get(Calendar.DAY_OF_MONTH);
-    int month = now.get(Calendar.MONTH);
+    int month = now.get(Calendar.MONTH) + 1;
     int hour = now.get(Calendar.HOUR_OF_DAY);
     int minute = now.get(Calendar.MINUTE);
     String dayStr = ""+day;
@@ -394,16 +328,29 @@ public class Logger
     prefix = ""+now.get(Calendar.YEAR)+"-"+monthStr+"-"+dayStr+" "+hourStr+":"+minuteStr+" "+prefix;
 
     // Ausgabe schreiben:
-    do{
-      out.println(prefix + e.toString());
+    if (msg != null)
+    {
+      out.print(prefix);
+      out.println(msg);
+    }
+    
+    while (e != null)
+    {
+      out.print(prefix);
+      out.println(e.toString());
       StackTraceElement[] se = e.getStackTrace();
       for (int i = 0; i < se.length; i++)
       {
-        out.println(prefix + se[i].toString());
+        out.print(prefix);
+        out.println(se[i].toString());
       }
       
       e = e.getCause();
-      if (e != null) out.println(prefix + "-------- CAUSED BY ------");
+      if (e != null) 
+      {
+        out.print(prefix);
+        out.println("-------- CAUSED BY ------");
+      }
     }while(e != null);
     out.println();
     out.flush();
@@ -415,9 +362,6 @@ public class Logger
       {
         out.close();
         fileOut.close();
-        out = null;
-        fileOut = null;
-        System.gc();
       }
       catch (IOException e1)
       {
