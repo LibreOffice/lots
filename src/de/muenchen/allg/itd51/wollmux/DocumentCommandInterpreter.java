@@ -15,7 +15,7 @@
  * 02.05.2006 | LUT | Komplett-Überarbeitung und Umbenennung in
  *                    DocumentCommandInterpreter.
  * 05.05.2006 | BNK | Dummy-Argument zum Aufruf des FormGUI Konstruktors hinzugefügt.
- * 17.05.2006 | BNK | Doku überarbeitet.
+ * 17.05.2006 | LUT | Doku überarbeitet.
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)

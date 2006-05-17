@@ -10,8 +10,9 @@
  * Datum      | Wer | Änderungsgrund
  * -------------------------------------------------------------------
  * 07.11.2005 | LUT | Erstellung als WMCommandState
- * 23.01.2005 | LUT | Erweiterung zum hierarchischen WM-Kommando
- * 26.04.2005 | LUT | Komplette Überarbeitung und Umbenennung in DocumentCommand
+ * 23.01.2006 | LUT | Erweiterung zum hierarchischen WM-Kommando
+ * 26.04.2006 | LUT | Komplette Überarbeitung und Umbenennung in DocumentCommand
+ * 17.05.2006 | LUT | Doku überarbeitet
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)

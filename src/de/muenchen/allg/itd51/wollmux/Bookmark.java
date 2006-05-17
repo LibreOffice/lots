@@ -9,7 +9,7 @@
  * Änderungshistorie:
  * Datum      | Wer | Änderungsgrund
  * -------------------------------------------------------------------
- * 17.05.2005 | LUT | Dokumentation ergänzt
+ * 17.05.2006 | LUT | Dokumentation ergänzt
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
