@@ -33,8 +33,8 @@ import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.parser.SyntaxErrorException;
 
 /**
- * Beschreibt ein Dokumentkommando, das als Teilknoten eines hierarchischen
- * Kommandobaumes weitere Kinder-Kommandos enthalten kann und weitere
+ * Beschreibt ein Dokumentkommando, das als Element eines hierarchischen
+ * Kommandobaumes weitere Kinder-Elemente enthalten kann und weitere
  * Eigenschaften wie z.B. den Gruppenzugehörigkeit, Sichtbarkeit und
  * Ausführstatus besitzt.
  * 
@@ -42,28 +42,45 @@ import de.muenchen.allg.itd51.parser.SyntaxErrorException;
  */
 abstract public class DocumentCommand
 {
+  /**
+   * Das geparste ConfigThingy des zugehörenden Bookmarks.
+   */
   private ConfigThingy wmCmd;
 
-  private LinkedList childs; // Kinder vom Typ DocumentCommand
-
   /**
-   * Im debug-modus werden bei updateBookmarks keine Bookmarks entfernt - damit
-   * wird das debuggen im Fehlerfall erleichtet.
+   * Die Liste aller Kinder-Elemente.
    */
-  private boolean debug;
+  private LinkedList childs; // Kinder vom Typ DocumentCommand
 
   // private DocumentCommand parent;
 
+  /**
+   * Das zu diesem DokumentCommand gehörende Bookmark.
+   */
   private Bookmark bookmark;
 
   // Status-Attribute:
 
+  /**
+   * Vorbelegung für den Status DONE.
+   */
   private static final Boolean STATE_DEFAULT_DONE = new Boolean(false);
 
+  /**
+   * Vorbelegung für den Status ERROR
+   */
   private static final Boolean STATE_DEFAULT_ERROR = new Boolean(false);
 
+  /**
+   * Enthält den aktuellen DONE-Status oder null, falls der Wert nicht verändert
+   * wurde.
+   */
   private Boolean done;
 
+  /**
+   * Enthält den aktuellen EROOR-Status oder null, falls der Wert nicht
+   * verändert wurde.
+   */
   private Boolean error;
 
   // Einfügemarken und Status für InsertCursor zum sicheren Einfügen von
@@ -89,26 +106,56 @@ abstract public class DocumentCommand
 
   /* ************************************************************ */
 
-  private DocumentCommand(ConfigThingy wmCmd, Bookmark bookmark, boolean debug)
+  /**
+   * Der Konstruktor liefert eine Instanz eines DocumentCommand an der Stelle
+   * des Bookmarks bookmark mit dem geparsten Kommando wmCmd.
+   * 
+   * @param wmCmd
+   *          das geparste WM-Kommando
+   * @param bookmark
+   *          das zugehörige Bookmark
+   */
+  private DocumentCommand(ConfigThingy wmCmd, Bookmark bookmark)
   {
     this.wmCmd = wmCmd;
     this.bookmark = bookmark;
     // this.parent = null; TODO: wieder rein!
     this.childs = new LinkedList();
     this.hasInsertMarks = false;
-    this.debug = debug;
   }
 
+  /**
+   * Liefert den Namen des zugehörigen Bookmarks zurück.
+   * 
+   * @return Liefert den Namen des zugehörigen Bookmarks zurück.
+   */
   public String getBookmarkName()
   {
     return bookmark.getName();
   }
 
+  /**
+   * Diese Methode liefert eine String-Repräsentation des DokumentCommands
+   * zurück. Die String-Repräsentation hat den Aufbau DocumentCommand[<bookmarkName>].
+   */
   public String toString()
   {
     return "" + this.getClass().getSimpleName() + "[" + getBookmarkName() + "]";
   }
 
+  /**
+   * Fügt dem aktuellen Dokumentkommando ein neues Kind-Element b hinzu. Dabei
+   * werden die TextRanges der beiden Kommandos verglichen und deren Relation
+   * bestimmt. Je nach Relation wird das neue Kommando als Kind vor oder nach
+   * einem bereits bestehenden Kind eingehängt oder die Anfrage an ein
+   * Kind-Element weitergereicht.
+   * 
+   * @param b
+   *          Das Kindelement b
+   * @return Die Anzahl der aufkummulierten TextRange Vergleiche, die zum
+   *         Hinzufügen benötigt wurden. Kann für Performance-Statistiken
+   *         verwendet werden.
+   */
   protected int add(DocumentCommand b)
   {
     int compareCount = 0;
@@ -169,15 +216,26 @@ abstract public class DocumentCommand
     return compareCount;
   }
 
+  /**
+   * Liefert einen ListIterator über alle Kinder-Elemente des Dokumentkommandos.
+   * 
+   * @return Liefert einen ListIterator über alle Kinder-Elemente des
+   *         Dokumentkommandos.
+   */
   protected ListIterator getChildIterator()
   {
     return childs.listIterator();
   }
 
   /**
+   * Diese Methode liefert die Beziehung des aktuellen DocumentCommand und des
+   * DocumentCommand b in Form einer Konstante DocumentCommand.REL_xxx zurück.
+   * 
    * @param b
-   * @return
-   * @throws
+   *          Das DocumentCommand b, mit dem das aktuelle DocumentCommand
+   *          verglichen wird.
+   * @return Die Relation der zwei DocumentCommands in Form einer Konstante
+   *         DocumentCommand.REL_xxx.
    */
   protected int getRelation(DocumentCommand b)
   {
@@ -208,10 +266,10 @@ abstract public class DocumentCommand
   }
 
   /**
-   * Gibt Auskunft darüber, ob ein DocumentCommand Unterkommandos besitzen darf.
-   * Ein Kommando darf Kinder besitzen, wenn es theoretisch mehr als einen
-   * atomaren Textinhalt umschließen kann. Ein Atom (kleinste, nicht teilbare
-   * Einheit) selbst darf jedoch keine Kinder besitzen. Beispiel: Ein
+   * Diese Methode gibt Auskunft darüber, ob ein DocumentCommand Unterkommandos
+   * besitzen darf. Ein Kommando darf Kinder besitzen, wenn es theoretisch mehr
+   * als einen atomaren Textinhalt umschließen kann. Ein Atom (kleinste, nicht
+   * teilbare Einheit) selbst darf jedoch keine Kinder besitzen. Beispiel: Ein
    * WM(CMD'insertFrag'...) kann nach der Auflösung mehrere Unterelemente
    * besitzen und würde daher "true" zurückliefern. Ein Kommando
    * WM(CMD'insertValue'...) hingegen repräsentiert exakt einen atomaren Wert
@@ -344,7 +402,7 @@ abstract public class DocumentCommand
   }
 
   /**
-   * Setzt den Status für das Attribut Done.
+   * Setzt den Status für das Attribut DONE.
    * 
    * @param done
    *          true, signalisiert, dass das Kommando bereits bearbeitet wurde,
@@ -436,7 +494,7 @@ abstract public class DocumentCommand
    * 
    * @return der Name des neuen Bookmarks oder null.
    */
-  public String updateBookmark()
+  public String updateBookmark(boolean debug)
   {
     if (!isDone() || debug)
     {
@@ -460,7 +518,7 @@ abstract public class DocumentCommand
   }
 
   /**
-   * Gibt Auskunft, ob ein Key unter halb des STATE-Knotens definiert ist. z.B.
+   * Gibt Auskunft, ob ein Key unterhalb des STATE-Knotens definiert ist. z.B.
    * "WM(...) STATE (KEY '...')"
    * 
    * @param key
@@ -564,13 +622,18 @@ abstract public class DocumentCommand
   // ********************************************************************************
   /**
    * Beschreibt ein Dokumentkommando, das Dokumentinhalte über
-   * insertDocumentFromURL einfügt.
+   * insertDocumentFromURL einfügt (Derzeit implementieren insertFrag und
+   * insertContent dieses Interface).
    */
   static interface FragmentInserter
   {
   };
 
   // ********************************************************************************
+  /**
+   * Eine Exception die geworfen wird, wenn ein Dokumentkommando als ungültig
+   * erkannt wurde, z,b, aufgrund eines fehlenden Parameters.
+   */
   static public class InvalidCommandException extends Exception
   {
     private static final long serialVersionUID = -3960668930339529734L;
@@ -582,21 +645,28 @@ abstract public class DocumentCommand
   }
 
   // ********************************************************************************
+  /**
+   * Beschreibt ein Dokumentkommando, das aufgrund eines Syntax-Fehlers oder
+   * eines fehlenden Parameters ungültig ist, jedoch trotzdem im Dokument als
+   * Fehlerfeld dargestellt werden soll.
+   * 
+   * @author lut
+   * 
+   */
   static public class InvalidCommand extends DocumentCommand
   {
     private java.lang.Exception exception;
 
     public InvalidCommand(ConfigThingy wmCmd, Bookmark bookmark,
-        InvalidCommandException exception, boolean debug)
+        InvalidCommandException exception)
     {
-      super(wmCmd, bookmark, debug);
+      super(wmCmd, bookmark);
       this.exception = exception;
     }
 
-    public InvalidCommand(Bookmark bookmark, SyntaxErrorException exception,
-        boolean debug)
+    public InvalidCommand(Bookmark bookmark, SyntaxErrorException exception)
     {
-      super(new ConfigThingy("WM"), bookmark, debug);
+      super(new ConfigThingy("WM"), bookmark);
       this.exception = exception;
     }
 
@@ -623,11 +693,19 @@ abstract public class DocumentCommand
   }
 
   // ********************************************************************************
+  /**
+   * Beschreibt das Dokumentkommando Form, welches Zugriff auf die
+   * Formularbeschreibung des Dokuments ermöglicht, die in Form einer Notiz
+   * innerhalb des zum Form-Kommando zugehörigen Bookmarks abgelegt ist.
+   * 
+   * @author lut
+   * 
+   */
   static public class Form extends DocumentCommand
   {
-    public Form(ConfigThingy wmCmd, Bookmark bookmark, boolean debug)
+    public Form(ConfigThingy wmCmd, Bookmark bookmark)
     {
-      super(wmCmd, bookmark, debug);
+      super(wmCmd, bookmark);
     }
 
     protected boolean canHaveChilds()
@@ -642,11 +720,14 @@ abstract public class DocumentCommand
   }
 
   // ********************************************************************************
+  /**
+   * Dieses besondere Element dient als Wurzel für den DocumentCommandTree.
+   */
   static public class RootElement extends DocumentCommand
   {
     public RootElement()
     {
-      super(new ConfigThingy("WM"), null, false);
+      super(new ConfigThingy("WM"), null);
     }
 
     public String getBookmarkName()
@@ -671,15 +752,18 @@ abstract public class DocumentCommand
   }
 
   // ********************************************************************************
+  /**
+   * Das Kommando InsertFrag fügt ein externes Textfragment in das Dokument ein.
+   */
   static public class InsertFrag extends DocumentCommand implements
       FragmentInserter
   {
     private String fragID;
 
-    public InsertFrag(ConfigThingy wmCmd, Bookmark bookmark, boolean debug)
+    public InsertFrag(ConfigThingy wmCmd, Bookmark bookmark)
         throws InvalidCommandException
     {
-      super(wmCmd, bookmark, debug);
+      super(wmCmd, bookmark);
       try
       {
         fragID = wmCmd.get("WM").get("FRAG_ID").toString();
@@ -719,7 +803,7 @@ abstract public class DocumentCommand
                   + fragID
                   + "\" ruft sich direkt oder indirekt selbst auf "
                   + "und würde damit eine Endlosschleife verursachen.");
-          b = new InvalidCommand(b.wmCmd, b.bookmark, ivc, b.debug);
+          b = new InvalidCommand(b.wmCmd, b.bookmark, ivc);
         }
       }
       return super.add(b);
@@ -727,15 +811,19 @@ abstract public class DocumentCommand
   }
 
   // ********************************************************************************
+  /**
+   * Das Kommando InsertContent dient zum Mischen von Dokumenten und ist im
+   * Handbuch des WollMux ausführlicher beschrieben.
+   */
   static public class InsertContent extends DocumentCommand implements
       FragmentInserter
   {
     private String fragID;
 
-    public InsertContent(ConfigThingy wmCmd, Bookmark bookmark, boolean debug)
+    public InsertContent(ConfigThingy wmCmd, Bookmark bookmark)
         throws InvalidCommandException
     {
-      super(wmCmd, bookmark, debug);
+      super(wmCmd, bookmark);
     }
 
     public String getFragID()
@@ -755,6 +843,9 @@ abstract public class DocumentCommand
   }
 
   // ********************************************************************************
+  /**
+   * Dieses Kommando fügt den Wert eines Absenderfeldes in den Briefkopf ein.
+   */
   static public class InsertValue extends DocumentCommand
   {
     private String dbSpalte;
@@ -763,10 +854,10 @@ abstract public class DocumentCommand
 
     private String rightSeparator = "";
 
-    public InsertValue(ConfigThingy wmCmd, Bookmark bookmark, boolean debug)
+    public InsertValue(ConfigThingy wmCmd, Bookmark bookmark)
         throws InvalidCommandException
     {
-      super(wmCmd, bookmark, debug);
+      super(wmCmd, bookmark);
       try
       {
         dbSpalte = wmCmd.get("WM").get("DB_SPALTE").toString();
@@ -838,12 +929,16 @@ abstract public class DocumentCommand
   }
 
   // ********************************************************************************
+  /**
+   * Dieses Kommando fügt die Versionsnummer der aktuellen WollMux-Installation
+   * in das Dokument ein.
+   */
   static public class Version extends DocumentCommand
   {
-    public Version(ConfigThingy wmCmd, Bookmark bookmark, boolean debug)
+    public Version(ConfigThingy wmCmd, Bookmark bookmark)
         throws InvalidCommandException
     {
-      super(wmCmd, bookmark, debug);
+      super(wmCmd, bookmark);
     }
 
     protected boolean canHaveChilds()
@@ -860,10 +955,10 @@ abstract public class DocumentCommand
   // ********************************************************************************
   static public class ON extends DocumentCommand
   {
-    public ON(ConfigThingy wmCmd, Bookmark bookmark, boolean debug)
+    public ON(ConfigThingy wmCmd, Bookmark bookmark)
         throws InvalidCommandException
     {
-      super(wmCmd, bookmark, debug);
+      super(wmCmd, bookmark);
     }
 
     protected boolean canHaveChilds()
@@ -880,10 +975,10 @@ abstract public class DocumentCommand
   // ********************************************************************************
   static public class OFF extends DocumentCommand
   {
-    public OFF(ConfigThingy wmCmd, Bookmark bookmark, boolean debug)
+    public OFF(ConfigThingy wmCmd, Bookmark bookmark)
         throws InvalidCommandException
     {
-      super(wmCmd, bookmark, debug);
+      super(wmCmd, bookmark);
     }
 
     protected boolean canHaveChilds()

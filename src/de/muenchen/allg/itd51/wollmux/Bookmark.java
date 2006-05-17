@@ -1,3 +1,21 @@
+/*
+ * Dateiname: Bookmark.java
+ * Projekt  : WollMux
+ * Funktion : Diese Klasse repräsentiert ein Bookmark in OOo und bietet Methoden
+ *            für den vereinfachten Zugriff und die Manipulation von Bookmarks an.
+ * 
+ * Copyright: Landeshauptstadt München
+ *
+ * Änderungshistorie:
+ * Datum      | Wer | Änderungsgrund
+ * -------------------------------------------------------------------
+ * 17.05.2005 | LUT | Dokumentation ergänzt
+ * -------------------------------------------------------------------
+ *
+ * @author Christoph Lutz (D-III-ITD 5.1)
+ * @version 1.0
+ * 
+ */
 package de.muenchen.allg.itd51.wollmux;
 
 import com.sun.star.container.NoSuchElementException;
@@ -12,15 +30,36 @@ import com.sun.star.uno.UnoRuntime;
 import de.muenchen.allg.afid.UnoService;
 
 /**
- * @author lut
+ * Diese Klasse repräsentiert ein Bookmark in OOo und bietet Methoden für den
+ * vereinfachten Zugriff und die Manipulation von Bookmarks an.
  * 
+ * @author Christoph Lutz (D-III-ITD-5.1)
  */
 public class Bookmark
 {
+  /**
+   * Enthält den Namen des Bookmarks
+   */
   private String name;
 
+  /**
+   * Enthält den UnoService des Dokuments dem das Bookmark zugeordnet ist.
+   */
   private UnoService document;
 
+  /**
+   * Der Konstruktor liefert eine Instanz eines bereits im Dokument doc
+   * bestehenden Bookmarks mit dem Namen name zurück; ist das Bookmark im
+   * angebegenen Dokument nicht enthalten, so wird eine NoSuchElementException
+   * zurückgegeben.
+   * 
+   * @param name
+   *          Der Name des bereits im Dokument vorhandenen Bookmarks.
+   * @param doc
+   *          Das Dokument, welches Das Bookmark name enthält.
+   * @throws NoSuchElementException
+   *           Das Bookmark name ist im angegebenen Dokument nicht enthalten.
+   */
   public Bookmark(String name, XComponent doc) throws NoSuchElementException
   {
     this.document = new UnoService(doc);
@@ -35,11 +74,15 @@ public class Bookmark
   /**
    * Vor jedem Zugriff auf den BookmarkService bookmark sollte der Service neu
    * geholt werden, damit auch der Fall behandelt wird, dass das Bookmark
-   * inzwischen gelöscht wurde.
+   * inzwischen vom Anwender gelöscht wurde. Ist das Bookmark nicht (mehr) im
+   * Dokument vorhanden, so wird ein new UnoService(null) zurückgeliefert,
+   * welches leichter verarbeitet werden kann.
    * 
    * @param name
+   *          Der Name des bereits im Dokument vorhandenen Bookmarks.
    * @param document
-   * @return
+   *          Das Dokument, welches Das Bookmark name enthält.
+   * @return Den UnoService des Bookmarks name im Dokument document.
    */
   private static UnoService getBookmarkService(String name, UnoService document)
   {
@@ -61,21 +104,31 @@ public class Bookmark
     return new UnoService(null);
   }
 
+  /**
+   * Diese Methode liefert den (aktuellen) Namen des Bookmarks als String
+   * zurück.
+   * 
+   * @return liefert den (aktuellen) Namen des Bookmarks als String zurück.
+   */
   public String getName()
   {
     return name;
   }
 
+  /**
+   * Diese Methode liefert eine String-Repräsentation mit dem Aufbau "Bookmark[<name>]"
+   * zurück.
+   */
   public String toString()
   {
     return "Bookmark[" + getName() + "]";
   }
 
   /**
-   * Vergleicht zwei Bookmarks und liefert ihre Relation zurück. Folgende
-   * Rückgabewerte sind möglich: POS_BBAA = B kommt vor A; POS_BB88 = B startet
-   * vor A, aber endet gemeinsam mit A; POS_B88B = B enthält A, beginnt und
-   * endet aber nicht mit A; POS_88AA = B startet mit A und endet vor A;
+   * Diese Methode vergleicht zwei Bookmarks und liefert ihre Relation zurück.
+   * Folgende Rückgabewerte sind möglich: POS_BBAA = B kommt vor A; POS_BB88 = B
+   * startet vor A, aber endet gemeinsam mit A; POS_B88B = B enthält A, beginnt
+   * und endet aber nicht mit A; POS_88AA = B startet mit A und endet vor A;
    * POS_8888 = A und B starten und enden gleich; POS_88BB = A und B starten
    * gleichzeitig, aber A endet vor B; POS_A88A = A enthält B, beginnt und endet
    * jedoch nicht mit B; POS_AA88 = A startet vor B, aber endet mit B; POS_AABB =
@@ -84,7 +137,9 @@ public class Bookmark
    * also so getan, als käme B nach A.
    * 
    * @param b
-   * @return
+   *          Das Bookmark B, das mit this (Bookmark A) verglichen werden soll.
+   * @return Die Relation der beiden Bookmark in Form einer Konstante
+   *         Bookmark.POS_XXX (siehe Beschreibung)
    */
   public int compare(Bookmark b)
   {
@@ -95,25 +150,64 @@ public class Bookmark
   // Positionsangaben als Rückgabewerte von compareTextRanges
   // Fälle: A:=a alleine, 8:=Überlagerung von a und b, B:=b alleine
 
+  /**
+   * Das Bookmark B tritt im Dokument vor dem Bookmark A auf.
+   */
   public static final int POS_BBAA = -4;
 
+  /**
+   * Das Bookmark B startet vor dem Bookmark A, aber hört gleichzeitig mit A
+   * auf.
+   */
   public static final int POS_BB88 = -3;
 
+  /**
+   * Das Bookmark B enthält das Bookmark A vollständig.
+   */
   public static final int POS_B88B = -2;
 
+  /**
+   * Das Bookmark B startet mit dem Bookmark A, hört jedoch vor dem Bookmark A
+   * auf.
+   */
   public static final int POS_88AA = -1;
 
+  /**
+   * A und B liegen an der selben Position.
+   */
   public static final int POS_8888 = -0;
 
+  /**
+   * Das Bookmark A startet mit dem Bookmark B, hört jedoch vor dem Bookmark B
+   * auf.
+   */
   public static final int POS_88BB = 1;
 
+  /**
+   * Das Bookmark A enthält das Bookmark B vollständig.
+   */
   public static final int POS_A88A = 2;
 
+  /**
+   * Das Bookmark A startet vor dem Bookmark B, hört jedoch gemeinsam mit dem
+   * Bookmark B auf.
+   */
   public static final int POS_AA88 = 3;
 
+  /**
+   * Das Bookmark A liegt im Dokument vor dem Bookmark B.
+   */
   public static final int POS_AABB = 4;
 
-  public static int compareTextRanges(XTextRange a, XTextRange b)
+  /**
+   * Diese Methode vergleicht die beiden TextRanges a und b und liefert ihre
+   * Relation in Form der Konstanten Bookmark.POS_xxx zurück.
+   * 
+   * @param a
+   * @param b
+   * @return Die Relation von a und b in Form einer Konstanten Bookmark.POS_xxx.
+   */
+  private static int compareTextRanges(XTextRange a, XTextRange b)
   {
     // Fälle: A:=a alleine, 8:=Überlagerung von a und b, B:=b alleine
     // -4 = BBBBAAAA bzw. BB88AA
@@ -149,8 +243,8 @@ public class Bookmark
 
   /**
    * Diese Methode benennt das Bookmark oldName zu dem Namen newName um. Ist der
-   * Name bereits definiert, so hängt OpenOffice an den Namen automatisch eine
-   * Nummer an. Die Methode gibt den tatsächlich erzeugten Bookmarknamen zurück.
+   * Name bereits definiert, so hängt OOo an den Namen automatisch eine Nummer
+   * an. Die Methode gibt den tatsächlich erzeugten Bookmarknamen zurück.
    * 
    * @param newName
    * @return den tatsächlich erzeugten Namen des Bookmarks.
@@ -197,6 +291,12 @@ public class Bookmark
     return name;
   }
 
+  /**
+   * Diese Methode weist dem Bookmark einen neuen TextRange (als Anchor) zu.
+   * 
+   * @param xTextRange
+   *          Der neue TextRange des Bookmarks.
+   */
   public void rerangeBookmark(XTextRange xTextRange)
   {
     // altes Bookmark löschen.
@@ -233,6 +333,9 @@ public class Bookmark
     return null;
   }
 
+  /**
+   * Diese Methode löscht das Bookmark aus dem Dokument.
+   */
   public void remove()
   {
     UnoService bookmark = getBookmarkService(name, document);

@@ -1,3 +1,22 @@
+/*
+ * Dateiname: DocumentCommandTree.java
+ * Projekt  : WollMux
+ * Funktion : Diese Klasse repräsentiert einen Baum von Dokumentkommandos
+ *            eines Dokuments.
+ * 
+ * Copyright: Landeshauptstadt München
+ *
+ * Änderungshistorie:
+ * Datum      | Wer | Änderungsgrund
+ * -------------------------------------------------------------------
+ * 17.05.2005 | LUT | Dokumentation ergänzt
+ * -------------------------------------------------------------------
+ *
+ * @author Christoph Lutz (D-III-ITD 5.1)
+ * @version 1.0
+ * 
+ */
+
 package de.muenchen.allg.itd51.wollmux;
 
 import java.io.IOException;
@@ -28,42 +47,50 @@ import de.muenchen.allg.itd51.wollmux.DocumentCommand.InvalidCommand;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InvalidCommandException;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.RootElement;
 
+/**
+ * Diese Klasse repräsentiert einen Baum von Dokumentkommandos eines Dokuments.
+ * Der Baum kann sich selbst updaten, d.h. er scannt das Dokument nach neuen
+ * Bookmarks und erzeugt ggf. neue Dokumentkommandos, die er zusätzlich in den
+ * Baum einhängen kann.
+ */
 public class DocumentCommandTree
 {
+  /**
+   * Das Dokument, welches die DokumentCommands enthält.
+   */
   private XComponent doc;
 
   /**
-   * Das Debugfeld bezieht sich auf die updateBookmarks-Methode und gibt an, ob
-   * Dokumentkommandos mit dem Status DONE=true mit dem update gelöscht werden
-   * sollen (was das Standardverhalten ist) oder nicht (damit man leichter
-   * debuggen kann).
+   * Ein HashSet aller bereits bekannter Bookmarks, die beim update nicht mehr
+   * erneut eingelesen werden müssen.
    */
-  private boolean debug;
-
   private HashSet scannedBookmarks;
 
+  /**
+   * Das Wurzelelement des Kommando-Baumes.
+   */
   private RootElement root;
 
-  public DocumentCommandTree(XComponent doc, boolean debug)
+  /**
+   * Erzeugt einen neuen (vorerst leeren) DocumentCommandTree. Der Baum kann
+   * anschließend durch die Methode update() gefüllt werden.
+   * 
+   * @param doc
+   *          Das Dokument, welches die Dokumentkommandos enthält.
+   */
+  public DocumentCommandTree(XComponent doc)
   {
     this.doc = doc;
     this.scannedBookmarks = new HashSet();
     this.root = new DocumentCommand.RootElement();
-    this.debug = debug;
   }
 
   /**
-   * Diese Methode durchsucht alle Bookmarks des übergebenen Dokuments und
-   * erstellt daraus eine hierarchische DocumentCommand-Struktur, dessen
-   * Wurzelknoten anschließend zurückgeliefert wird.
+   * Diese Methode durchsucht das Dokument nach neuen, bisher nicht gescannten
+   * Dokumentkommandos und fügt diese dem Baum hinzu. Das Kommando liefert das
+   * Wurzelelement des Kommandobaumes zurück.
    * 
-   * @param doc
-   * @return
-   * @throws CommandsOverlappException
-   *           Das Dokument enthält zwei Bookmarks mit atomaren
-   *           DocumentCommands, die sich überlappen.
-   * @throws SyntaxErrorException
-   * @throws IOException
+   * @return Das Wurzelelement des Kommandobaumes.
    */
   public DocumentCommand update()
   {
@@ -119,7 +146,7 @@ public class DocumentCommandTree
           }
           catch (SyntaxErrorException e)
           {
-            command = new InvalidCommand(bookmark, e, debug);
+            command = new InvalidCommand(bookmark, e);
           }
         }
 
@@ -140,7 +167,17 @@ public class DocumentCommandTree
     return root;
   }
 
-  public DocumentCommand createCommand(ConfigThingy wmCmd, Bookmark bookmark)
+  /**
+   * Fabrikmethode für die Erzeugung neuer Dokumentkommandos an dem Bookmark
+   * bookmark mit dem als ConfigThingy vorgeparsten Dokumentkommando wmCmd.
+   * 
+   * @param wmCmd
+   *          Das vorgeparste Dokumentkommando
+   * @param bookmark
+   *          Das Bookmark zu dem Dokumentkommando
+   * @return Ein passende konkretes DocumentCommand-Instanz.
+   */
+  private DocumentCommand createCommand(ConfigThingy wmCmd, Bookmark bookmark)
   {
     String cmd = "";
     try
@@ -158,47 +195,60 @@ public class DocumentCommandTree
       // spezielle Kommando-Instanzen erzeugen
       if (cmd.compareToIgnoreCase("insertFrag") == 0)
       {
-        return new DocumentCommand.InsertFrag(wmCmd, bookmark, debug);
+        return new DocumentCommand.InsertFrag(wmCmd, bookmark);
       }
 
       if (cmd.compareToIgnoreCase("insertValue") == 0)
       {
-        return new DocumentCommand.InsertValue(wmCmd, bookmark, debug);
+        return new DocumentCommand.InsertValue(wmCmd, bookmark);
       }
 
       if (cmd.compareToIgnoreCase("insertContent") == 0)
       {
-        return new DocumentCommand.InsertContent(wmCmd, bookmark, debug);
+        return new DocumentCommand.InsertContent(wmCmd, bookmark);
       }
 
       if (cmd.compareToIgnoreCase("form") == 0)
       {
-        return new DocumentCommand.Form(wmCmd, bookmark, debug);
+        return new DocumentCommand.Form(wmCmd, bookmark);
       }
 
       if (cmd.compareToIgnoreCase("on") == 0)
       {
-        return new DocumentCommand.ON(wmCmd, bookmark, debug);
+        return new DocumentCommand.ON(wmCmd, bookmark);
       }
 
       if (cmd.compareToIgnoreCase("off") == 0)
       {
-        return new DocumentCommand.OFF(wmCmd, bookmark, debug);
+        return new DocumentCommand.OFF(wmCmd, bookmark);
       }
 
       if (cmd.compareToIgnoreCase("version") == 0)
       {
-        return new DocumentCommand.Version(wmCmd, bookmark, debug);
+        return new DocumentCommand.Version(wmCmd, bookmark);
       }
 
       throw new InvalidCommandException("Unbekanntes Kommando \"" + cmd + "\"");
     }
     catch (InvalidCommandException e)
     {
-      return new DocumentCommand.InvalidCommand(wmCmd, bookmark, e, debug);
+      return new DocumentCommand.InvalidCommand(wmCmd, bookmark, e);
     }
   }
 
+  /**
+   * Diese Methode liefert einen Iterator über alle Elemente des Kommandobaumes
+   * ohne dem Wurzelelement, wobei die Elemente bei reverse==false in der
+   * Reihenfolge einer Tiefensuche zurückgeliefert werden - bei reverse==true
+   * wird ebenfalls eine Tiefensuche durchgeführt, nur dass mit dem jeweils
+   * letzten Element der Kinderliste begonnen wird.
+   * 
+   * @param reverse
+   *          gibt an, ob bei der Tiefensuche mit dem jeweils letzten Element
+   *          der Kinderliste begonnen wird.
+   * @return Iterator über alle Elemente des Kommandobaumes ohne dem
+   *         Wurzelelement.
+   */
   public Iterator depthFirstIterator(boolean reverse)
   {
     Vector list = new Vector();
@@ -206,6 +256,16 @@ public class DocumentCommandTree
     return list.iterator();
   }
 
+  /**
+   * Hilfsfunktion für die Erstellung des depthFirstIterators - fügt das
+   * Kommando cmd und dessen Kinder (rekursiv) zur Liste list hinzu. Ist
+   * Reverse=true, so wird beim Hinzufügen der Kinder in umgekehrter Reihenfolge
+   * verfahren.
+   * 
+   * @param cmd
+   * @param list
+   * @param reverse
+   */
   private void depthFirstAddToList(DocumentCommand cmd, List list,
       boolean reverse)
   {
@@ -230,11 +290,22 @@ public class DocumentCommandTree
     }
   }
 
+  /**
+   * Die Methode gibt eine String Repräsentation des gesamten Kommandobaumes
+   * zurück und ist für test- und debugging-Zwecke gedacht.
+   */
   public String dumpTree()
   {
     return dumpTree(root, "");
   }
 
+  /**
+   * Hilfmethode für dumpTree()
+   * 
+   * @param cmd
+   * @param spaces
+   * @return
+   */
   private String dumpTree(DocumentCommand cmd, String spaces)
   {
     String str = spaces + this.toString() + "\n";
@@ -272,14 +343,14 @@ public class DocumentCommandTree
    * Bookmarks im Dokument auf ihren neuen Status anzupassen um damit den Status
    * im Dokument zu manifestieren.
    */
-  public void updateBookmarks()
+  public void updateBookmarks(boolean debug)
   {
     Iterator i = depthFirstIterator(false);
     while (i.hasNext())
     {
       DocumentCommand cmd = (DocumentCommand) i.next();
       String oldBookmarkName = cmd.getBookmarkName();
-      String newBookmarkName = cmd.updateBookmark();
+      String newBookmarkName = cmd.updateBookmark(debug);
 
       // Anpassen des scannedBookmarks-Set
       if (newBookmarkName == null)
@@ -294,6 +365,14 @@ public class DocumentCommandTree
     }
   }
 
+  /**
+   * Main-Methode für Testzwecke. Erzeugt einen Kommandobaum aus dem aktuell in
+   * OOo geöffneten Dokument und gibt diesen auf System.out aus.
+   * 
+   * @param args
+   * @throws BootstrapException
+   * @throws Exception
+   */
   public static void main(String[] args) throws BootstrapException, Exception
   {
     Logger.init("all");
@@ -307,7 +386,7 @@ public class DocumentCommandTree
             ctx));
 
     DocumentCommandTree tree = new DocumentCommandTree(xDesktop
-        .getCurrentComponent(), false);
+        .getCurrentComponent());
     tree.update();
 
     System.out.println(tree.dumpTree());

@@ -1,8 +1,7 @@
 /*
  * Dateiname: DocumentCommandInterpreter.java
  * Projekt  : WollMux
- * Funktion : Scannt alle Bookmarks eines Dokuments und interpretiert die enthaltenen
- *            Dokumentkommandos.
+ * Funktion : Interpretiert die in einem Dokument enthaltenen Dokumentkommandos.
  * 
  * Copyright: Landeshauptstadt München
  *
@@ -16,6 +15,7 @@
  * 02.05.2006 | LUT | Komplett-Überarbeitung und Umbenennung in
  *                    DocumentCommandInterpreter.
  * 05.05.2006 | BNK | Dummy-Argument zum Aufruf des FormGUI Konstruktors hinzugefügt.
+ * 17.05.2006 | BNK | Doku überarbeitet.
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -92,10 +92,17 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
   private boolean documentIsAFormular;
 
   /**
-   * Der Konstruktor erzeugt einen neuen Kommandointerpreter, der alle Kommandos
-   * im übergebenen xDoc scannen und entsprechend auflösen kann.
+   * Der Konstruktor erzeugt einen neuen Kommandointerpreter, der alle
+   * Dokumentkommandos im übergebenen Dokument xDoc scannen und interpretieren
+   * kann.
    * 
    * @param xDoc
+   *          Das Dokument, dessen Kommandos ausgeführt werden sollen.
+   * @param mux
+   *          Die Instanz des zentralen WollMux-Singletons
+   * @param frag_urls
+   *          Eine Liste mit fragment-urls, die für das Kommando insertContent
+   *          benötigt wird.
    */
   public DocumentCommandInterpreter(XTextDocument xDoc, WollMuxSingleton mux,
       String[] frag_urls)
@@ -117,15 +124,13 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
    * Alle Bookmarks, die nicht dieser Syntax entsprechen, werden als normale
    * Bookmarks behandelt und nicht vom Interpreter bearbeitet.
    * 
-   * @throws EndlessLoopException
    * @throws WMCommandsFailedException
    */
   public void interpret() throws WMCommandsFailedException
   {
 
     // Dokumentkommando-Baum scannen:
-    DocumentCommandTree tree = new DocumentCommandTree(document.xComponent(),
-        mux.isDebugMode());
+    DocumentCommandTree tree = new DocumentCommandTree(document.xComponent());
     tree.update();
 
     // Zähler für aufgetretene Fehler bei der Bearbeitung der Kommandos.
@@ -136,7 +141,7 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
       // 1) Zuerst alle Kommandos bearbeiten, die irgendwie Kinder bekommen
       // können, damit der DocumentCommandTree vollständig aufgebaut werden
       // kann.
-      errors += processInsertFrags(tree);
+      errors += processFragmentInserter(tree);
 
       // 2) Während der Bearbeitung der einfachen Kommandos (z.B. insertValues)
       // muss man nicht jede Änderung sofort sehen (Geschwindigkeitsvorteil, da
@@ -173,7 +178,7 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
     // a) Damit ein evtl. vorhandenes Dokumentkommando BeADocument gelöscht
     // wird.
     // b) Zur Normierung der enthaltenen Bookmarks.
-    tree.updateBookmarks();
+    tree.updateBookmarks(mux.isDebugMode());
 
     // 8) Document-Modified auf false setzen, da nur wirkliche
     // Benutzerinteraktionen den Modified-Status beeinflussen sollen.
@@ -235,6 +240,11 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
     return isTemplate;
   }
 
+  /**
+   * Diese Methode setzt den DocumentModified-Status auf state.
+   * 
+   * @param state
+   */
   private void setDocumentModified(boolean state)
   {
     try
@@ -247,6 +257,14 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
     }
   }
 
+  /**
+   * Diese Methode löscht leere Absätze, die sich um die im Kommandobaum tree
+   * enthaltenen Dokumentkommandos vom Typ FragmentInserter befinden.
+   * 
+   * @param tree
+   *          Der Kommandobaum in dem nach FragmentInserter-Kommandos gesucht
+   *          wird.
+   */
   private void cleanEmptyParagraphs(DocumentCommandTree tree)
   {
     Iterator iter = tree.depthFirstIterator(false);
@@ -261,7 +279,16 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
     }
   }
 
-  private int processInsertFrags(DocumentCommandTree tree)
+  /**
+   * Diese Methode expandiert alle Dokumentkommandos aus dem Kommandobaum tree,
+   * die Textfragmente in das Dokument einfügen.
+   * 
+   * @param tree
+   *          Der Kommandobaum, in dem nach FragmentInserter-Kommandos gesucht
+   *          wird.
+   * @return die Anzahl der bei der Ersetzung aufgetretenen Fehler.
+   */
+  private int processFragmentInserter(DocumentCommandTree tree)
   {
     int errors = 0;
     for (boolean changed = true; changed;)
@@ -288,6 +315,14 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
     return errors;
   }
 
+  /**
+   * Diese Methode führt alle Dokumentkommandos aus, wenn Sie nicht den Status
+   * DONE=true oder ERROR=true besitzen.
+   * 
+   * @param tree
+   *          Der Kommandobaum der die auszuführenden Kommandos enthält.
+   * @return die Anzahl der bei der Ersetzung aufgetretenen Fehler.
+   */
   private int processAllDocumentCommands(DocumentCommandTree tree)
   {
     int errors = 0;
@@ -304,6 +339,14 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
     return errors;
   }
 
+  /**
+   * Diese Methode löscht die leeren Absätze zum Beginn und zum Ende des
+   * übergebenen Dokumentkommandos cmd, falls leere Absätze vorhanden sind.
+   * 
+   * @param cmd
+   *          Das Dokumentkommando, um das die leeren Absätze entfernt werden
+   *          sollen.
+   */
   private void cleanEmptyParagraphsForCommand(DocumentCommand cmd)
   {
     Logger.debug2("cleanEmptyParagraphsForCommand(" + cmd + ")");
@@ -419,7 +462,9 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
    * implementiert.
    * 
    * @param enumAccess
-   * @return
+   *          die XEnumerationAccess Instanz des markierten Bereichts (ein
+   *          TextCursors).
+   * @return true oder false
    */
   private boolean isFollowedByTextParagraph(XEnumerationAccess enumAccess)
   {
@@ -456,7 +501,7 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
   }
 
   /**
-   * Löscht den ganzen ersten Absatz an der Cursorposition.
+   * Löscht den ganzen ersten Absatz an der Cursorposition textCursor.
    * 
    * @param textCursor
    */
@@ -506,6 +551,10 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
         mux.getFunctionDialogs());
   }
 
+  /**
+   * Diese Methode bearbeitet ein InvalidCommand und fügt ein Fehlerfeld an der
+   * Stelle des Dokumentkommandos ein.
+   */
   public int executeCommand(DocumentCommand.InvalidCommand cmd)
   {
     insertErrorField(cmd, cmd.getException());
@@ -514,8 +563,8 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
   }
 
   /**
-   * Diese Methode fügt einen Spaltenwert aus dem aktuellen Datensatz ein. Im
-   * Fehlerfall wird die Fehlermeldung eingefügt.
+   * Diese Methode fügt einen Spaltenwert aus dem aktuellen Datensatz der
+   * Absenderdaten ein. Im Fehlerfall wird die Fehlermeldung eingefügt.
    */
   public int executeCommand(DocumentCommand.InsertValue cmd)
   {
@@ -561,12 +610,6 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
   /**
    * Diese Methode fügt das Textfragment frag_id in den gegebenen Bookmark
    * bookmarkName ein. Im Fehlerfall wird die Fehlermeldung eingefügt.
-   * 
-   * @param frag_id
-   *          FRAG_ID, des im Abschnitt Textfragmente in der Konfigurationsdatei
-   *          definierten Textfragments.
-   * @param bookmarkName
-   *          Name des bookmarks, in das das Fragment eingefügt werden soll.
    */
   public int executeCommand(DocumentCommand.InsertFrag cmd)
   {
@@ -603,7 +646,9 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
    * des insertDocumentFromURL der UNO-API.
    * 
    * @param cmd
+   *          Einfügeposition
    * @param url
+   *          die URL des einzufügenden Textfragments
    * @throws java.io.IOException
    * @throws IOException
    * @throws IllegalArgumentException
@@ -690,12 +735,6 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
    * Diese Methode fügt das nächste Textfragment aus der dem
    * WMCommandInterpreter übergebenen frag_urls liste ein. Im Fehlerfall wird
    * die Fehlermeldung eingefügt.
-   * 
-   * @param frag_id
-   *          FRAG_ID, des im Abschnitt Textfragmente in der Konfigurationsdatei
-   *          definierten Textfragments.
-   * @param bookmarkName
-   *          Name des bookmarks, in das das Fragment eingefügt werden soll.
    */
   public int executeCommand(DocumentCommand.InsertContent cmd)
   {
@@ -727,10 +766,6 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
    * executeForm sammelt alle solchen Formularbeschreibungen im formDescriptor.
    * Enthält der formDescriptor mehr als einen Eintrag, wird nach dem
    * interpret-Vorgang die FormGUI gestartet.
-   * 
-   * @param bookmarkName
-   * @param state
-   * @return
    */
   public int executeCommand(DocumentCommand.Form cmd)
   {
