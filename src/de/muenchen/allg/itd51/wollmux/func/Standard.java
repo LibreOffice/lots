@@ -19,6 +19,8 @@
 */
 package de.muenchen.allg.itd51.wollmux.func;
 
+import java.util.Calendar;
+
 /**
  * Standardfunktionen für Plausibilitätschecks, Trafos,... in Formularen.
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -64,6 +66,33 @@ public class Standard
       return herrText;
     else
       return frauText;
+  }
+  
+  /**
+   * Versucht, zu erkennen, ob datum ein korrektes Datum der Form Monat.Tag.Jahr
+   * ist (wobei Jahr immer 4-stellig sein muss).
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TODO Testen
+   */
+  public static boolean korrektesDatum(String datum)
+  {
+    try{
+      String[] s = datum.split("\\.");
+      if (s.length != 3) return false;
+      int tag = Integer.parseInt(s[0]);
+      int monat = Integer.parseInt(s[1]);
+      int jahr = Integer.parseInt(s[2]);
+      if (jahr < 1000 || jahr > 9999) return false;
+      Calendar cal = Calendar.getInstance();
+      cal.setLenient(false);
+      cal.set(Calendar.DAY_OF_MONTH, tag);
+      cal.set(Calendar.MONTH, monat - 1);
+      cal.set(Calendar.YEAR, jahr);
+      return (cal.get(Calendar.DAY_OF_MONTH) == tag &&
+              cal.get(Calendar.MONTH) ==  monat - 1 &&
+              cal.get(Calendar.YEAR) == jahr);
+    }catch(Exception x) {}
+    return false;
   }
 
 }

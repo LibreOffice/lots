@@ -18,15 +18,24 @@
 */
 package de.muenchen.allg.itd51.wollmux;
 
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
+import de.muenchen.allg.itd51.wollmux.dialog.Dialog;
+import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
+import de.muenchen.allg.itd51.wollmux.func.Function;
+import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
+import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 
 /**
  * 
@@ -285,5 +294,90 @@ public class WollMuxFiles
     return false;
   }
 
-  
+  /**
+   * Parst die "Funktionsdialoge" Abschnitte aus conf und liefert als Ergebnis
+   * eine DialogLibrary zurück.
+   * 
+   * @param baselib falls nicht-null wird diese als Fallback verlinkt, um Dialoge
+   *        zu liefern, die anderweitig nicht gefunden werden.
+
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public static DialogLibrary parseFunctionDialogs(ConfigThingy conf, DialogLibrary baselib)
+  {
+    DialogLibrary funcDialogs = new DialogLibrary(baselib);
+
+    Set dialogsInBlock = new HashSet();
+
+    conf = conf.query("Funktionsdialoge");
+    Iterator parentIter = conf.iterator();
+    while (parentIter.hasNext())
+    {
+      dialogsInBlock.clear();
+      Iterator iter = ((ConfigThingy) parentIter.next()).iterator();
+      while (iter.hasNext())
+      {
+        ConfigThingy dialogConf = (ConfigThingy) iter.next();
+        String name = dialogConf.getName();
+        if (dialogsInBlock.contains(name))
+          Logger
+              .error("Funktionsdialog \""
+                     + name
+                     + "\" im selben Funktionsdialoge-Abschnitt mehrmals definiert");
+        dialogsInBlock.add(name);
+        funcDialogs.add(name, new Dialog(){
+          public Dialog instantiate(Object context) {return this;}
+          public Object getData(String id){ return null; }
+          public void show(ActionListener dialogEndListener) {}});
+      }
+    }
+    
+    return funcDialogs;
+  }
+
+  /**
+   * Parst die "Funktionen" Abschnitte aus conf und liefert eine entsprechende
+   * FunctionLibrary.
+   * 
+   * @param context der Kontext in dem die Funktionsdefinitionen ausgewertet werden
+   *        sollen (insbesondere DIALOG-Funktionen)
+   *        
+   * @param baselib falls nicht-null wird diese als Fallback verlinkt, um Funktionen
+   *        zu liefern, die anderweitig nicht gefunden werden.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public static FunctionLibrary parseFunctions(ConfigThingy conf, DialogLibrary dialogLib, Object context, FunctionLibrary baselib)
+  {
+    FunctionLibrary funcs = new FunctionLibrary(baselib);
+
+    conf = conf.query("Funktionen");
+    Iterator parentIter = conf.iterator();
+    while (parentIter.hasNext())
+    {
+      Iterator iter = ((ConfigThingy) parentIter.next()).iterator();
+      while (iter.hasNext())
+      {
+        ConfigThingy funcConf = (ConfigThingy) iter.next();
+        String name = funcConf.getName();
+        try
+        {
+          Function func = FunctionFactory.parseChildren(
+              funcConf,
+              funcs,
+              dialogLib,
+              context);
+          funcs.add(name, func);
+        }
+        catch (ConfigurationErrorException e)
+        {
+          Logger.error("Fehler beim Parsen der Funktion \"" + name + "\"", e);
+        }
+      }
+    }
+    
+    return funcs;
+  }
+
 }

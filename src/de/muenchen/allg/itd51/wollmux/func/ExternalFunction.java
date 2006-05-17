@@ -88,6 +88,8 @@ public class ExternalFunction
             }
             method = methods[i];
           }
+        
+        if (method == null) throw new ConfigurationErrorException("Klasse \""+classStr+"\" enthält keine Methode namens \""+methodStr+"\"");
       }
       else
       {

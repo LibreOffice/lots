@@ -155,7 +155,7 @@ public class FormGUI
     
     FormController formController;
     try{
-      formController = new FormController(conf, myDoc, mapIdToPresetValue, funcLib, dialogLib);
+      formController = new FormController(conf, myDoc, mapIdToPresetValue, funcLib, dialogLib, new MyAbortRequestListener());
     }catch (ConfigurationErrorException x)
     {
       Logger.error(x);
@@ -295,6 +295,24 @@ public class FormGUI
         Logger.error(x);
       }
     }
+
+    public void setVisibleState(String groupId, boolean visible) 
+    {
+      Logger.log("Gruppe \""+groupId+"\" ist jetzt "+(visible?"sichtbar":"unsichtbar"));
+    }
+
+    public void valueChanged(String fieldId, String newValue)
+    {
+      Logger.log("Feld \""+fieldId+"\" hat jetzt den Wert \""+newValue+"\"");
+    }
+  }
+  
+  private class MyAbortRequestListener implements ActionListener
+  {
+    public void actionPerformed(ActionEvent e)
+    {
+      abort();
+    }
   }
   
   /**
@@ -305,12 +323,23 @@ public class FormGUI
   public static void main(String[] args) throws Exception
   {
     UNO.init();
+    Logger.init(Logger.DEBUG);
     String confFile = "testdata/formulartest.conf";
     ConfigThingy conf = new ConfigThingy("", new URL(new File(System
         .getProperty("user.dir")).toURL(), confFile));
     XTextDocument doc = UNO.XTextDocument(UNO.loadComponentFromURL("private:factory/swriter", true, true));
     FormModel model = new DummyFormModel(doc);
-    new FormGUI(conf.get("Formular"), model, new HashMap(), new FunctionLibrary(), new DialogLibrary());
+    Map mapIdToPresetValue = new HashMap();
+    mapIdToPresetValue.put("NEFishy", FormController.FISHY);
+    mapIdToPresetValue.put("NEPresetInList", "Dings");
+    mapIdToPresetValue.put("NEPresetNotInList", "Schwupps");
+    mapIdToPresetValue.put("EFishy", FormController.FISHY);
+    mapIdToPresetValue.put("EPresetInList", "Dings");
+    mapIdToPresetValue.put("EPresetNotInList", "Schwupps");
+    mapIdToPresetValue.put("AbtLohn", "TRUE");
+    mapIdToPresetValue.put("AbtAnteile", "false");
+    mapIdToPresetValue.put("AbtKaution", "true");
+    new FormGUI(conf.get("Formular"), model, mapIdToPresetValue, new FunctionLibrary(), new DialogLibrary());
   }
 
 

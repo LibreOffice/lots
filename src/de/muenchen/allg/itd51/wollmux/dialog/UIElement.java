@@ -11,6 +11,7 @@
 * 11.01.2006 | BNK | Erstellung
 * 24.04.2006 | BNK | kommentiert.
 * 05.05.2006 | BNK | Condition -> Function
+* 15.05.2006 | BNK | +setString()
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -29,7 +30,6 @@ import javax.swing.JLabel;
 import javax.swing.JSeparator;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import javax.swing.text.JTextComponent;
 
 import de.muenchen.allg.itd51.wollmux.func.Function;
 import de.muenchen.allg.itd51.wollmux.func.Value;
@@ -99,18 +99,17 @@ public interface UIElement extends Value
   public Object getLabelLayoutConstraints();
   
   /**
-   * Liefert eine Funktion, die die Beschränkungen (Plausis) der möglichen Werte 
-   * des UI Elements abbildet oder null, falls keine gesetzt sind.
+   * Liefert das mit setAdditionalData() gesetzte Objekt.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public Function getConstraints();
+  public Object getAdditionalData();
   
   /**
-   * Setzt die Funktion, die von {@link #getConstraints()} zurückgeliefert werden
-   * soll.
+   * Setzt das Objekt, das von getAdditionalData() zurückgeliefert werden soll.
+   * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public void setConstraints(Function func);
+  public void setAdditionalData(Object o);
   
   /**
    * Der aktuelle Wert des UI Elements. Falls es sich um ein boolesches
@@ -132,6 +131,16 @@ public interface UIElement extends Value
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public boolean getBoolean();
+  
+  /**
+   * Setzt den aktuellen Wert dieses UI Elements (falls möglich) auf str. Falls es
+   * sich um ein boolesches Element (Checkbox etc) handelt, so wird der String "true"
+   * (ohne Berücksichtigung von Gross-/Kleinschreibung)
+   * als true und jeder andere String als false betrachtet.
+   *
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public void setString(String str);
   
   /**
    * Liefert die ID dieses UIElements oder "" wenn nicht gesetzt.
@@ -162,6 +171,7 @@ public interface UIElement extends Value
     protected Object labelLayoutConstraints = null;
     protected Function constraints = null;
     protected String id = "";
+    protected Object addData = null;
   
     public void setBackground(Color bg)
     {
@@ -189,16 +199,17 @@ public interface UIElement extends Value
     {
       return labelLayoutConstraints;
     }
-
-    public Function getConstraints()
+    
+    public Object getAdditionalData()
     {
-      return constraints;
+      return addData;
     }
     
-    public void setConstraints(Function func)
+    public void setAdditionalData(Object o)
     {
-      constraints = func;
+      addData = o;
     }
+    
 
     public void setVisible(boolean vis)
     {
@@ -211,6 +222,8 @@ public interface UIElement extends Value
     public abstract boolean getBoolean();
     
     public String getId() {return id;}
+    
+    public void setString(String str){};
   }
   
   public static class Label extends UIElementBase
@@ -296,6 +309,11 @@ public interface UIElement extends Value
     {
       return !getString().equals("");
     }
+    
+    public void setString(String str)
+    {
+      textfield.setText(str);
+    }
   }
   
   public static class Combobox extends UIElementBase
@@ -325,12 +343,20 @@ public interface UIElement extends Value
 
     public String getString()
     {
-      return ((JTextComponent)combo.getEditor().getEditorComponent()).getText();
+      return combo.getSelectedItem().toString();
     }
 
     public boolean getBoolean()
     {
       return !getString().equals("");
+    }
+    
+    public void setString(String str)
+    {
+      boolean edit = combo.isEditable();
+      combo.setEditable(true);
+      combo.setSelectedItem(str);
+      combo.setEditable(edit);
     }
   }
 
@@ -365,6 +391,11 @@ public interface UIElement extends Value
     {
       return !getString().equals("");
     }
+    
+    public void setString(String str)
+    {
+      textarea.setText(str);
+    }
   }
   
   public static class Checkbox extends UIElementBase
@@ -395,6 +426,10 @@ public interface UIElement extends Value
       return box.isSelected();
     }
     
+    public void setString(String str)
+    {
+      box.setSelected(str.equalsIgnoreCase("true"));
+    }
   }
   
   public static class Separator extends UIElementBase

@@ -374,6 +374,7 @@ public class UIElementFactory
     else if (type.equals("checkbox"))
     {
       final JCheckBox boxBruceleitner = new JCheckBox();
+      boxBruceleitner.setEnabled(!readonly);
       JPanel agentinMitHerz = new JPanel(new FlowLayout(FlowLayout.LEADING, 5,0));
       agentinMitHerz.add(boxBruceleitner);
       JLabel herzileinMusstNichtTraurigSein = new JLabel(label);

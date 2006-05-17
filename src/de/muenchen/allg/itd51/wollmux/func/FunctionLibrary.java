@@ -36,14 +36,13 @@ public class FunctionLibrary
    */
   public FunctionLibrary()
   {
-    mapIdToFunction = new HashMap();
-    baselib = null;
+    this(null);
   }
   
   /**
    * Erzeugt eine Funktionsbibliothek, die baselib referenziert (nicht kopiert!).
    * baselib wird immer dann befragt, wenn die Funktionsbibliothek selbst keine
-   * Funktion des entsprechenden Namens enthält.  
+   * Funktion des entsprechenden Namens enthält. baselib darf null sein. 
    * @param baselib
    */
   public FunctionLibrary(FunctionLibrary baselib)

@@ -12,6 +12,7 @@
 * 27.01.2006 | BNK | JFrame-Verwaltung nach FormGUI ausgelagert.
 * 02.02.2006 | BNK | Ein/Ausblendungen begonnen
 * 05.05.2006 | BNK | Condition -> Function, kommentiert
+* 17.05.2006 | BNK | AUTOFILL, PLAUSI, Übergabe an FormModel
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -25,6 +26,8 @@ import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -40,6 +43,7 @@ import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.FormModel;
 import de.muenchen.allg.itd51.wollmux.Logger;
+import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.func.Function;
 import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
@@ -74,6 +78,11 @@ public class FormController implements UIElementEventHandler
    * Das JPanel, das die GUI des FormControllers enthält.
    */
   private JPanel contentPanel;
+  
+  /**
+   * Die JTabbedPane, die die ganzen Tabs der GUI enthält.
+   */
+  private JTabbedPane myTabbedPane;
   
   /**
    * Die für die Erzeugung der UI Elemente verwendete Factory.
@@ -112,10 +121,14 @@ public class FormController implements UIElementEventHandler
   private Map mapIdToUIElement = new HashMap();
   
   /**
-   * Bildet IDs auf Lists von UIElements ab, die vom UIElement ID abhängen
-   * (zum Beispiel weil ihre Plausi davon abhängt).
+   * Bildet IDs auf Lists von UIElements ab, deren Plausi vom UIElement ID abhängt.
    */
-  private Map mapIdToListOfDependingUIElements = new HashMap();
+  private Map mapIdToListOfUIElementsWithDependingPlausi = new HashMap();
+  
+  /**
+   * Bildet IDs auf Lists von UIElements ab, deren AUTOFILL vom UIElement ID abhängt.
+   */
+  private Map mapIdToListOfUIElementsWithDependingAutofill = new HashMap();
   
   /**
    * Bildet die ID eines UIElements ab auf eine List der Groups, die von
@@ -130,15 +143,32 @@ public class FormController implements UIElementEventHandler
   private Map mapGroupIdToGroup = new HashMap();
   
   /**
+   * Diese Liste enthält alle UIElements.
+   */
+  private Vector uiElements = new Vector();
+  
+  /**
    * Die Inhalte der UIElemente aus {@link #mapIdToUIElement} als Values zur
    * Verfügung gestellt.
    */
   private Values myUIElementValues = new UIElementMapValues(mapIdToUIElement);
   
   /**
+   * Solange dieses Flag false ist, werden Events von UI Elementen ignoriert.
+   */
+  private boolean processUIElementEvents = false;
+  
+  /**
    * Das Writer-Dokument, das zum Formular gehört (gekapselt als FormModel).
    */
   private FormModel formModel;
+  
+  /**
+   * Wird aufgerufen, wenn eine Aktion einen Abbruch des Dialogs erwirken soll.
+   */
+  private ActionListener abortRequestListener;
+
+  
   
   /**
    * ACHTUNG! Darf nur im Event Dispatching Thread aufgerufen werden.
@@ -153,24 +183,33 @@ public class FormController implements UIElementEventHandler
    *        herangezogen werden soll.
    * @param dialogLib die Dialogbibliothek, die die Dialoge bereitstellt, die
    *        für automatisch zu befüllende Formularfelder benötigt werden.
+   * @param abortRequestListener falls nicht null, wird 
+   *        die {@link ActionListener#actionPerformed(java.awt.event.ActionEvent)}
+   *        Methode aufgerufen (im Event Dispatching Thread), wenn der Benutzer
+   *        eine Aktion aktiviert hat, die das Beenden des Dialogs verursachen soll. 
+   *        Das actionCommand des ActionEvents gibt die Aktion an, die
+   *        verantwortlich ist.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public FormController(ConfigThingy conf, FormModel model, final Map mapIdToPresetValue, 
-      FunctionLibrary funcLib, DialogLibrary dialogLib)
+      FunctionLibrary funcLib, DialogLibrary dialogLib, ActionListener abortRequestListener)
   throws ConfigurationErrorException
   {
+    dialogLib = WollMuxFiles.parseFunctionDialogs(conf, dialogLib);
+    funcLib = WollMuxFiles.parseFunctions(conf, dialogLib, this, funcLib);
     this.formModel = model;
     this.funcLib = funcLib;
     this.dialogLib = dialogLib;
+    this.abortRequestListener = abortRequestListener;
     
     final ConfigThingy fensterDesc = conf.query("Fenster");
-    ConfigThingy visibilityDesc = conf.query("Sichtbarkeit");
     if (fensterDesc.count() == 0)
       throw new ConfigurationErrorException("Schlüssel 'Fenster' fehlt in "+conf.getName());
     
     initFactories();  
     
     try{
+      ConfigThingy visibilityDesc = conf.query("Sichtbarkeit");
       if (visibilityDesc.count() > 0) visibilityDesc = visibilityDesc.getLastChild();
       final ConfigThingy visDesc = visibilityDesc;
       createGUI(fensterDesc.getLastChild(), visDesc, mapIdToPresetValue);
@@ -193,17 +232,19 @@ public class FormController implements UIElementEventHandler
    *               ein leeres ConfigThingy falls der Knoten nicht existiert.
    * @param mapIdToPresetValue bildet IDs von Formularfeldern auf Vorgabewerte ab.
    *        Falls hier ein Wert für ein Formularfeld vorhanden ist, so wird dieser
-   *        allen anderen automatischen Befüllungen vorgezogen.
+   *        allen anderen automatischen Befüllungen vorgezogen. Wird das Objekt
+   *        {@link #FISHY} als Wert für ein Feld übergeben, so wird dieses Feld
+   *        speziell markiert als ungültig bis der Benutzer es manuell ändert.
    * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TODO Testen
+   * TESTED
    */
   private void createGUI(ConfigThingy fensterDesc, ConfigThingy visibilityDesc, Map mapIdToPresetValue)
   {
     Common.setLookAndFeel();
      //TODO Fenster-Positions und Größenangaben in wollmux.conf auswerten 
     contentPanel = new JPanel();
-    JTabbedPane tabbedPane = new JTabbedPane();
-    contentPanel.add(tabbedPane);
+    myTabbedPane = new JTabbedPane();
+    contentPanel.add(myTabbedPane);
     
     /********************************************************
      * Tabs erzeugen.
@@ -216,16 +257,57 @@ public class FormController implements UIElementEventHandler
       try{
         tabTitle = neuesFenster.get("TITLE").toString();
       } catch(Exception x){}
-      DialogWindow newWindow = new DialogWindow(neuesFenster);
-      tabbedPane.add(tabTitle,newWindow.JPanel()); //TODO insertTab() verwenden, Tooltip und Mnemonic einführen
+      DialogWindow newWindow = new DialogWindow(neuesFenster, mapIdToPresetValue);
+      myTabbedPane.add(tabTitle,newWindow.JPanel()); //TODO insertTab() verwenden, Tooltip und Mnemonic einführen
     }
+    
+    uiElements.trimToSize(); //verschwendeten Platz freigeben.
+    
+    /*
+     * AUTOFILL Funktionen berechnen und Felder entsprechend befüllen.
+     * Änderungen an FormModel kommunizieren.
+     */
+    autofill(mapIdToPresetValue);
     
     /************************************************************
      * Sichtbarkeit auswerten. 
      ***********************************************************/
+    setVisibility(visibilityDesc);
+
+
+    /*****************************************************************
+     * Plausis und fishy-Zustand checken und Hintergrundfarben entsprechend
+     * setzen. 
+     ******************************************************************/
+    iter = uiElements.iterator();
+    while (iter.hasNext())
+    {
+      UIElement uiElement = ((UIElement)iter.next());
+      checkPlausi(uiElement);
+    }
+    
+    /*
+     * Event-Verarbeitung starten.
+     */
+    processUIElementEvents = true;
+  }
+
+  /**
+   * Parst die Sichtbarkeitsinformationen und setzt die Sichtbarkeit der
+   * UIElemente entsprechend und benachrichtigt das FormModel.
+   * @param visibilityDesc der Sichtbarkeit-Knoten der Formularbeschreibung oder
+   *               ein leeres ConfigThingy falls der Knoten nicht existiert.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED*/
+  private void setVisibility(ConfigThingy visibilityDesc)
+  {
+    Iterator iter;
     iter = visibilityDesc.iterator();
     while (iter.hasNext())
     {
+      /*
+       * Sichtbarkeitsfunktion parsen.
+       */
       ConfigThingy visRule = (ConfigThingy)iter.next();
       String groupId = visRule.getName();
       Function cond;
@@ -237,12 +319,27 @@ public class FormController implements UIElementEventHandler
         continue;
       }
       
+      /*
+       * Falls keine Gruppe mit entsprechender Id existiert, dann legen wir einfach
+       * eine leere Gruppe an.
+       */
       if (!mapGroupIdToGroup.containsKey(groupId))
-        mapGroupIdToGroup.put(groupId,new Group());
+        mapGroupIdToGroup.put(groupId,new Group(groupId));
  
+      /*
+       * Group mit der entsprechenden Bezeichnung heraussuchen und ihr 
+       * condition-Feld setzten. Fehler ausgeben wenn condition bereits gesetzt.
+       */
       Group group = (Group)mapGroupIdToGroup.get(groupId);
+      if (group.condition != null)
+        Logger.error("Mehrere Sichtbarkeitsregeln für Gruppe \""+groupId+"\" angegeben.");
       group.condition = cond;
       
+      /*
+       * Für jeden Parameter der condition-Funktion ein Mapping in
+       * mapIdToListOfDependingGroups erzeugen (falls noch nicht geschehen) und
+       * die neue Group in diese Liste eintragen.
+       */
       String[] deps = cond.parameters();
       for (int i = 0; i < deps.length; ++i)
       {
@@ -252,12 +349,48 @@ public class FormController implements UIElementEventHandler
         
         ((List)mapIdToListOfDependingGroups.get(elementId)).add(group);
       }
+      
+      /*
+       * Sichtbarkeitsstatus berechnen und auf die Mitglieder der Gruppe anwenden.
+       */
+      group.visible = cond.getBoolean(myUIElementValues);
+      Iterator uiEiter = group.uiElements.iterator();
+      while (uiEiter.hasNext())
+      {
+        UIElement uiElement = (UIElement)uiEiter.next();
+        uiElement.setVisible(group.visible);
+      }
+
+      /*
+       * FormModel benachrichtigen.
+       */
+      formModel.setVisibleState(groupId, group.visible);
     }
-    
-    //TODO nachdem alle Felder erzeugt wurden, mit Default-Werten befuellen. Danach alle Plausis testen und Felder entsprechend einfärben.
   }
   
-
+  /**
+   * Berechnet für jedes UIElement, dessen ID nicht als Schlüssel in
+   * mapIdToPresetValue ist den AUTOFILL-Wert, setzt das Feld entsprechend und
+   * teilt dies als Änderung an das FormModel mit.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED*/
+  private void autofill(Map mapIdToPresetValue)
+  {
+    Iterator iter = uiElements.iterator();
+    while (iter.hasNext())
+    {
+      UIElement uiElement = (UIElement)iter.next();
+      String id = uiElement.getId();
+      if (mapIdToPresetValue.containsKey(id)) continue;
+      UIElementState state = (UIElementState)uiElement.getAdditionalData();
+      if (state.autofill == null) continue;
+      String str = state.autofill.getString(myUIElementValues);
+      uiElement.setString(str);
+      formModel.valueChanged(id, str);
+    }
+  }
+  
   /**
    * Ein Tab der Formular-GUI.
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -273,9 +406,14 @@ public class FormController implements UIElementEventHandler
      * Erzeugt ein neues Tab.
      * @param conf der Kind-Knoten des Fenster-Knotens der das Formular beschreibt.
      *        conf ist direkter Elternknoten des Knotens "Eingabefelder".
+     * @param mapIdToPresetValue bildet IDs von Formularfeldern auf Vorgabewerte ab.
+     *        Falls hier ein Wert für ein Formularfeld vorhanden ist, so wird dieser
+     *        allen anderen automatischen Befüllungen vorgezogen. Wird das Objekt
+     *        {@link #FISHY} als Wert für ein Feld übergeben, so wird dieses Feld
+     *        speziell markiert als ungültig bis der Benutzer es manuell ändert.
      * @author Matthias Benkmann (D-III-ITD 5.1)     
      */
-    public DialogWindow(ConfigThingy conf)
+    public DialogWindow(ConfigThingy conf, Map mapIdToPresetValue)
     {
       myPanel = new JPanel(new GridBagLayout());
       int y = 0;
@@ -290,69 +428,73 @@ public class FormController implements UIElementEventHandler
           UIElement uiElement;
           try{
             uiElement = uiElementFactory.createUIElement(panelContext, uiConf);
-            uiElement.setConstraints(FunctionFactory.parseGrandchildren(uiConf.query("PLAUSI"), funcLib, dialogLib, this));
+            UIElementState state = new UIElementState();
+            state.plausi = FunctionFactory.parseGrandchildren(uiConf.query("PLAUSI"), funcLib, dialogLib, this);
+            state.autofill = FunctionFactory.parseGrandchildren(uiConf.query("AUTOFILL"), funcLib, dialogLib, this);
+            uiElement.setAdditionalData(state);
           } catch(ConfigurationErrorException x)
           {
             Logger.error(x);
             continue;
           }
           
-          if (mapIdToUIElement.containsKey(uiElement.getId()))
-            Logger.error("ID \""+uiElement.getId()+"\" mehrfach vergeben");
+          uiElements.add(uiElement);
           
-          mapIdToUIElement.put(uiElement.getId(), uiElement);
-          
-          ConfigThingy groupsConf = uiConf.query("GROUPS");
-          Iterator groupsIter = groupsConf.iterator();
-          while (groupsIter.hasNext())
-          {
-            ConfigThingy groups = (ConfigThingy)groupsIter.next();
-            Iterator groupIter = groups.iterator();
-            while (groupIter.hasNext())
-            {
-              String group = groupIter.next().toString();
-              if (!mapGroupIdToGroup.containsKey(group))
-                mapGroupIdToGroup.put(group, new Group());
-              
-              Group g = (Group)mapGroupIdToGroup.get(group);
-              g.uiElements.add(uiElement);
-            }
-          }
-          
-          /**
-           * Falls das Element eine Plausi hat.
+          /*
+           * Überprüfen, dass die ID des neuen Elements nicht schon verwendet wurde
+           * und Fehler ausgeben, falls doppelte Verwendung. Es wird auf jeden Fall
+           * weitergemacht und das neue Mapping in mapIdToUIElement gespeichert
+           * (aber nur falls die ID nicht leer ist).
            */
-          Function cons = uiElement.getConstraints();
-          if (cons != null)
+          if (mapIdToUIElement.containsKey(uiElement.getId()))
           {
-            /**
-             * Für alle Felder von denen die Plausi abhängt das uiElement in
-             * die Liste der abhängigen UI Elemente einfügen. 
-             */
-            String[] consParams = cons.parameters();
-            for (int i = 0; i < consParams.length; ++i)
+            String label = "nicht vorhanden";
+            try{ label = uiConf.get("LABEL").toString(); } catch(Exception x){}; 
+            Logger.error("ID \""+uiElement.getId()+"\" mehrfach vergeben bei Element mit Label \""+label+"\"");
+          }
+          if (uiElement.getId().length() > 0)
+            mapIdToUIElement.put(uiElement.getId(), uiElement);
+          
+          /*
+           * Preset-Wert auswerten und Element entsprechend initialisieren.
+           */
+          Object preset = mapIdToPresetValue.get(uiElement.getId());
+          if (preset != null)
+          {
+            if (preset == FISHY)
             {
-              String dependency = consParams[i];
-              if (!mapIdToListOfDependingUIElements.containsKey(dependency))
-                mapIdToListOfDependingUIElements.put(dependency, new Vector(1));
-              
-              List deps = (List)mapIdToListOfDependingUIElements.get(dependency);
-              deps.add(uiElement);
+              ((UIElementState)uiElement.getAdditionalData()).fishy = true;
             }
             
-            /**
-             * Dafür sorgen, dass uiElement immer in seiner eigenen Abhängigenliste
-             * steht, damit bei jeder Änderung an uiElement auf jeden Fall die
-             * Plausi neu ausgewertet wird, auch wenn sie nicht von diesem Element
-             * abhängt. Man denke sich zum Beispiel einen Zufallsgenerator als Plausi.
-             * Er hängt zwar nicht vom Wert des Felds ab, sollte aber bei jeder
-             * Änderung des Feldes erneut befragt werden.
-             */
-            if (!mapIdToListOfDependingUIElements.containsKey(uiElement.getId()))
-              mapIdToListOfDependingUIElements.put(uiElement.getId(), new Vector(1));
-            List deps = (List)mapIdToListOfDependingUIElements.get(uiElement.getId());
-            if (!deps.contains(uiElement)) deps.add(uiElement);
+            uiElement.setString(preset.toString());
           }
+          
+          /*
+           * GROUPS auswerten und entsprechende Mappings speichern.
+           */
+          parseGROUPS(uiConf, uiElement);
+          
+          /*
+           * Plausi-Parameter auswerten und entsprechende Abhängigkeitsmappings
+           * speichern. 
+           */
+          storeDeps(uiElement);
+          
+          /**
+           * Dafür sorgen, dass uiElement immer in seiner eigenen Abhängigenliste
+           * steht, damit bei jeder Änderung an uiElement auf jeden Fall die
+           * Plausi neu ausgewertet wird, auch wenn sie nicht von diesem Element
+           * abhängt. Man denke sich zum Beispiel einen Zufallsgenerator als Plausi.
+           * Er hängt zwar nicht vom Wert des Felds ab, sollte aber bei jeder
+           * Änderung des Feldes erneut befragt werden.
+           * 
+           * Neben der Bedeutung für Plausis ist dies ebenfalls wichtig, damit der
+           * FISHY-Zustand neu gesetzt wird, wenn sich das Feld ändert.
+           */
+          if (!mapIdToListOfUIElementsWithDependingPlausi.containsKey(uiElement.getId()))
+            mapIdToListOfUIElementsWithDependingPlausi.put(uiElement.getId(), new Vector(1));
+          List deps = (List)mapIdToListOfUIElementsWithDependingPlausi.get(uiElement.getId());
+          if (!deps.contains(uiElement)) deps.add(uiElement);
           
           /********************************************************************
            * UI Element und evtl. vorhandenes Zusatzlabel zum GUI hinzufügen.
@@ -388,6 +530,17 @@ public class FormController implements UIElementEventHandler
       /*****************************************************************************
        * Für die Buttons ein eigenes Panel anlegen und mit UIElementen befüllen. 
        *****************************************************************************/
+      createButtonPanel(conf, y);
+    }
+
+    /**
+     * Fügt myPanel an Koordinate y ein Panel hinzu, das mit Buttons gemäß der
+     * Beschreibung in conf,query("Buttons") befüllt wird.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
+    private void createButtonPanel(ConfigThingy conf, int y)
+    {
+      Iterator parentiter;
       JPanel buttonPanel = new JPanel(new GridBagLayout());
       GridBagConstraints gbcPanel = new GridBagConstraints(0, 0, 2, 1, 1.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL,       new Insets(TF_BORDER,TF_BORDER,TF_BORDER,TF_BORDER),0,0);
       gbcPanel.gridx = 0;
@@ -441,8 +594,66 @@ public class FormController implements UIElementEventHandler
           
         }
       }
+    }
 
+    /**
+     * Falls uiElement eine Plausi und oder ein Autofill hat, 
+     * werden entsprechende Abhängigkeiten in den Maps erfasst.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     * TESTED
+     */
+    private void storeDeps(UIElement uiElement)
+    {
+      UIElementState state = ((UIElementState)uiElement.getAdditionalData()); 
+      Function func = state.plausi;
+      Map mapIdToListOfDependingUIElements = mapIdToListOfUIElementsWithDependingPlausi;
       
+      /**
+       * Für alle Felder von denen die Function abhängt das uiElement in
+       * die Liste der abhängigen UI Elemente einfügen.
+       */
+      for (int f = 0; f < 2; ++f, func = state.autofill, 
+          mapIdToListOfDependingUIElements = mapIdToListOfUIElementsWithDependingAutofill)
+      {
+        if (func != null)
+        {
+          String[] params = func.parameters();
+          for (int i = 0; i < params.length; ++i)
+          {
+            String dependency = params[i];
+            if (!mapIdToListOfDependingUIElements.containsKey(dependency))
+              mapIdToListOfDependingUIElements.put(dependency, new Vector(1));
+            
+            List deps = (List)mapIdToListOfDependingUIElements.get(dependency);
+            deps.add(uiElement);
+          }
+        }
+      }
+    }
+
+    /**
+     * Verarbeitet die GROUPS-Attribute von uiConf (was zu uiElement gehören muss).
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
+    private void parseGROUPS(ConfigThingy uiConf, UIElement uiElement)
+    {
+      ConfigThingy groupsConf = uiConf.query("GROUPS");
+      Iterator groupsIter = groupsConf.iterator();
+      while (groupsIter.hasNext())
+      {
+        ConfigThingy groups = (ConfigThingy)groupsIter.next();
+        Iterator groupIter = groups.iterator();
+        while (groupIter.hasNext())
+        {
+          String groupId = groupIter.next().toString();
+          if (!mapGroupIdToGroup.containsKey(groupId))
+            mapGroupIdToGroup.put(groupId, new Group(groupId));
+          
+          Group g = (Group)mapGroupIdToGroup.get(groupId);
+          g.uiElements.add(uiElement);
+          
+        }
+      }
     }
 
     /**
@@ -461,7 +672,7 @@ public class FormController implements UIElementEventHandler
    * verwendet wird.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TODO Testen
+   * TESTED
    */
   private void initFactories()
   {
@@ -532,6 +743,9 @@ public class FormController implements UIElementEventHandler
     buttonContext.put("glue","h-glue");
     
     Set supportedActions = new HashSet();
+    supportedActions.add("abort");
+    supportedActions.add("nextTab");
+    supportedActions.add("prevTab");
     
     uiElementFactory = new UIElementFactory(mapTypeToLayoutConstraints,
         mapTypeToLabelType, mapTypeToLabelLayoutConstraints, supportedActions, this);
@@ -539,56 +753,199 @@ public class FormController implements UIElementEventHandler
   }
   
   /**
-  * Die zentrale Anlaufstelle für alle von UIElementen ausgelösten Events. 
-  * @param source
-  * @param eventType
-  * @param args
+  * Die zentrale Anlaufstelle für alle von UIElementen ausgelösten Events
+  * (siehe {@link UIElementEventHandler#processUiElementEvent(UIElement, String, Object[])}).
+  *  
   * @author Matthias Benkmann (D-III-ITD 5.1)
-  * TODO Testen
   */
   public void processUiElementEvent(UIElement source, String eventType, Object[] args)
   {
-    System.out.println("UIElementEvent: "+eventType+" on UIElement "+source.getId());
-    List dependingUIElements = (List)mapIdToListOfDependingUIElements.get(source.getId());
-    if (dependingUIElements != null)
-    {
-      Iterator iter = dependingUIElements.iterator();
-      while (iter.hasNext())
+    if (!processUIElementEvents) return;
+    try{
+      processUIElementEvents = false; // Reentranz bei setString() unterbinden
+      StringBuffer buffy = new StringBuffer("UIElementEvent: "+eventType+"(");
+      for (int i = 0; i < args.length; ++i)
+        buffy.append(""+args[i]);
+      buffy.append(") on UIElement "+source.getId());
+      Logger.debug(buffy.toString());
+      
+      if (eventType.equals("valueChanged"))
       {
-        UIElement dependingUIElement = (UIElement)iter.next();
-        Function cons =  dependingUIElement.getConstraints();
-        if (cons == null) continue;
-        //TODO momentante Plausi-Zustand merken und Background nur ändern wenn Zustand geändert. Farben nicht fest verdrahten. WHITE aus dem standardbackground eines neuen Elements holen. PINK aus Config.
-        if (cons.getBoolean(myUIElementValues))
-          dependingUIElement.setBackground(Color.WHITE);
-        else
-          dependingUIElement.setBackground(Color.PINK);
+        // FISHY-Zustand löschen, weil Wert geändert 
+        ((UIElementState)source.getAdditionalData()).fishy = false;
+        
+        // FormModel benachrichtigen über Änderung von source
+        // da recomputeAutofills() das FormModel über genau diese Änderung nicht
+        // informiert.
+        formModel.valueChanged(source.getId(), source.getString());
+        
+        Set idsOfChangedElements = computeChangesCausedByChangeOf(source.getId());
+        recomputeAutofills(idsOfChangedElements, source.getId());
+        checkDependingPlausis(idsOfChangedElements);
+        checkDependingVisibilityGroups(idsOfChangedElements);
+      }
+      else if (eventType.equals("action"))
+      {
+        String action = (String)args[0];
+        if (action.equals("abort"))
+          abortRequestListener.actionPerformed(new ActionEvent(this, 0, "abort"));
       }
     }
-    
-    List dependingGroups = (List)mapIdToListOfDependingGroups.get(source.getId());
-    if (dependingGroups != null)
+    finally
     {
-      Iterator iter = dependingGroups.iterator();
-      while (iter.hasNext())
+      processUIElementEvents = true;
+    }
+  }
+
+  /**
+   * Liefert die Menge aller IDs (inklusive id) von UIElementen, deren Wert sich
+   * ändert, wenn sich der Wert von UIElement id ändert (z,B, wegen AUTOFILLs).
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED
+   */
+  public Set computeChangesCausedByChangeOf(String id)
+  {
+    Set ids = new HashSet();
+    Set todo = new HashSet();
+    todo.add(id);
+    while (!todo.isEmpty())
+    {
+      Iterator iter = todo.iterator();
+      id = (String)iter.next();
+      iter.remove();
+      if (!ids.contains(id))
       {
-        Group dependingGroup = (Group)iter.next();
-        Function cond =  dependingGroup.condition;
-        if (cond == null) continue;
-        boolean result = cond.getBoolean(myUIElementValues);
-        if (result == dependingGroup.visible) continue;
-        dependingGroup.visible = result;
-        
-        Iterator uiElementIter = dependingGroup.uiElements.iterator();
-        while (uiElementIter.hasNext())
+        ids.add(id);
+        List deps = (List)mapIdToListOfUIElementsWithDependingAutofill.get(id);
+        if (deps == null) continue;
+        Iterator iter2 = deps.iterator();
+        while (iter2.hasNext())
         {
-          UIElement ele = (UIElement)uiElementIter.next();
-          ele.setVisible(dependingGroup.visible);
+          id = ((UIElement)iter2.next()).getId();
+          if (!ids.contains(id)) todo.add(id);
         }
+      }
+    }
+    return ids;
+  }
+  
+  /**
+   * Berechnet die Werte mit den AUTOFILL-Funktionen neu für alle UIElemente
+   * aus ids mit Ausnahme von exception. Das FormModel wird ebenfalls 
+   * benachrichtigt.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED
+   */
+  public void recomputeAutofills(Set ids, String exception)
+  {
+      // Alle UIElemente in der Reihenfolge ihrer Definition durchgehen,
+      // damit die AUTOFILLs in der richtigen Reihenfolge ausgewertet werden
+      // (Annahme ist hier, dass jedes AUTOFILL maximal von vorher definierten
+      // Feldern abhängt)
+    Iterator iter = uiElements.iterator();
+    while (iter.hasNext())
+    {
+      UIElement uiElement = (UIElement)iter.next();
+      if (uiElement.getId().equals(exception)) continue;
+      if (!ids.contains(uiElement.getId())) continue;
+      UIElementState state = (UIElementState)uiElement.getAdditionalData();
+      if (state.autofill != null)
+      {
+        state.fishy = false;
+        uiElement.setString(state.autofill.getString(myUIElementValues));
+        formModel.valueChanged(uiElement.getId(), uiElement.getString());
       }
     }
   }
   
+  /**
+   * Bestimmt und setzt die Sichtbarkeit neu für alle Groups, die von mindestens
+   * einem UIElement mit id aus ids abhängen.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED
+   */
+  private void checkDependingVisibilityGroups(Set ids)
+  {
+    Iterator idsIter = ids.iterator();
+    while (idsIter.hasNext())
+    {
+      String id = (String)idsIter.next();
+      List dependingGroups = (List)mapIdToListOfDependingGroups.get(id);
+      if (dependingGroups != null)
+      {
+        Iterator iter = dependingGroups.iterator();
+        while (iter.hasNext())
+        {
+          Group dependingGroup = (Group)iter.next();
+          Function cond =  dependingGroup.condition;
+          if (cond == null) continue;
+          boolean result = cond.getBoolean(myUIElementValues);
+          if (result == dependingGroup.visible) continue;
+          dependingGroup.visible = result;
+          formModel.setVisibleState(dependingGroup.id, dependingGroup.visible);
+          
+          Iterator uiElementIter = dependingGroup.uiElements.iterator();
+          while (uiElementIter.hasNext())
+          {
+            UIElement ele = (UIElement)uiElementIter.next();
+            ele.setVisible(dependingGroup.visible);
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * Berechnet alle Plausi-Zustände neu für Elemente, die von mindestens einem
+   * Element mit ID aus ids abhängen. 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED */
+  private void checkDependingPlausis(Set ids)
+  {
+    Iterator idsIter = ids.iterator();
+    while (idsIter.hasNext())
+    {
+      String id = (String)idsIter.next();
+      
+      List dependingUIElements = (List)mapIdToListOfUIElementsWithDependingPlausi.get(id);
+      if (dependingUIElements != null)
+      {
+        Iterator iter = dependingUIElements.iterator();
+        while (iter.hasNext())
+        {
+          UIElement dependingUIElement = (UIElement)iter.next();
+          checkPlausi(dependingUIElement);
+        }
+      }
+    }
+  }
+
+  /**
+   * Überprüft die Plausi und den fishy-Zustand von uiElement und setzt den 
+   * Hintergrund entsprechend. 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED
+   */
+  private void checkPlausi(UIElement uiElement)
+  {
+    //TODO Plausi-Counter einführen, der zählt, wieviele AKTUELL SICHTBARE!!!!! Eingabeelemente aktuell eine nicht erfuellte Plausi haben. Bei Änderung zwischen 0 und einem anderen Wert muss FormModel.setPlausiOkay() aufgerufen werden.
+    UIElementState state = ((UIElementState)uiElement.getAdditionalData());
+    Function plausi =  state.plausi;
+    
+    boolean newOkay = !state.fishy;
+    
+    if (plausi != null)
+      newOkay = newOkay && plausi.getBoolean(myUIElementValues);
+    
+    //TODO Farben nicht fest verdrahten. WHITE aus dem standardbackground eines neuen Elements holen. PINK aus Config.
+    if (state.okay == newOkay) return;
+    state.okay = newOkay;
+    
+    if (newOkay)
+      uiElement.setBackground(Color.WHITE);
+    else
+      uiElement.setBackground(Color.PINK);
+  }
   
   /**
    * Eine Sichtbarkeitsgruppe von UIElementen.
@@ -612,6 +969,45 @@ public class FormController implements UIElementEventHandler
      * true, wenn die Gruppe im Augenblick sichtbar ist.
      */
     public boolean visible = true;
+    
+    /**
+     * Die GROUP id dieser Gruppe.
+     */
+    public String id;
+    
+    public Group(String groupId)
+    {
+      id = groupId;
+    }
+  }
+  
+  /**
+   * Speichert diverse Daten über den Zustand eines UIElements.
+   *
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private static class UIElementState
+  {
+    /**
+     * Die Plausi, die dieses Element überprüft (falls vorhanden).
+     */
+    public Function plausi = null;
+    
+    /**
+     * Die AUTOFILL-Funktion (falls vorhanden).
+     */
+    public Function autofill = null;
+    
+    /**
+     * true, wenn das Element als zu prüfen markiert werden soll, solange bis
+     * der Benutzer es editiert.
+     */
+    public boolean fishy = false;
+    
+    /**
+     * Cachet das Ergebnis der letzten Prüfung von plausi und fishy.
+     */
+    public boolean okay = true;
   }
   
   /**

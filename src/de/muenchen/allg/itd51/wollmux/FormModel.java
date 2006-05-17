@@ -64,11 +64,18 @@ package de.muenchen.allg.itd51.wollmux;
 public interface FormModel
 {
 
-  void setWindowPosSize(int docX, int docY, int docWidth, int docHeight);
+  public void setWindowPosSize(int docX, int docY, int docWidth, int docHeight);
 
-  void setWindowVisible(boolean vis);
+  public void setWindowVisible(boolean vis);
 
-  void close();
+  public void close();
 
+  public void setVisibleState(String groupId, boolean visible);
   
+  /**
+   * Es ist nicht garantiert, dass sich der Wert tatsächlich geändert hat.
+   * Die fieldId kann leer sein (aber nie null).
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public void valueChanged(String fieldId, String newValue);
 }

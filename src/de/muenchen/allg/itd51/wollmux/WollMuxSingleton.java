@@ -36,9 +36,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Set;
 import java.util.Vector;
 
 import com.sun.star.uno.Exception;
@@ -55,8 +53,6 @@ import de.muenchen.allg.itd51.wollmux.db.DatasetNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
 import de.muenchen.allg.itd51.wollmux.db.QueryResults;
 import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
-import de.muenchen.allg.itd51.wollmux.func.Function;
-import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 
 /**
@@ -175,13 +171,14 @@ public class WollMuxSingleton implements XPALProvider
      * Funktionsdialoge parsen. ACHTUNG! Muss vor parseGlobalFunctions()
      * erfolgen.
      */
-    parseFunctionDialogs(WollMuxFiles.getWollmuxConf());
+    funcDialogs = WollMuxFiles.parseFunctionDialogs(WollMuxFiles.getWollmuxConf(), null);
 
     /*
      * Globale Funktionen parsen. ACHTUNG! Verwendet die Funktionsdialoge. Diese
-     * müssen also vorher geparst sein.
+     * müssen also vorher geparst sein. Als context wird null übergeben, weil
+     * globale Funktionen keinen Kontext haben.
      */
-    parseGlobalFunctions(WollMuxFiles.getWollmuxConf(), getFunctionDialogs());
+    globalFunctions = WollMuxFiles.parseFunctions(WollMuxFiles.getWollmuxConf(), getFunctionDialogs(), null, null);
 
     // Initialisiere EventProcessor
     getEventProcessor().setAcceptEvents(successfullStartup);
@@ -457,74 +454,6 @@ public class WollMuxSingleton implements XPALProvider
   public DialogLibrary getFunctionDialogs()
   {
     return funcDialogs;
-  }
-
-  /**
-   * Bekommt in conf die wollmux,conf übergeben und parst den "Funktionsdialoge"
-   * Abschnitt daraus.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private void parseFunctionDialogs(ConfigThingy conf)
-  {
-    funcDialogs = new DialogLibrary();
-
-    Set dialogsInBlock = new HashSet();
-
-    conf = conf.query("Funktionsdialoge");
-    Iterator parentIter = conf.iterator();
-    while (parentIter.hasNext())
-    {
-      dialogsInBlock.clear();
-      Iterator iter = ((ConfigThingy) parentIter.next()).iterator();
-      while (iter.hasNext())
-      {
-        ConfigThingy dialogConf = (ConfigThingy) iter.next();
-        String name = dialogConf.getName();
-        if (dialogsInBlock.contains(name))
-          Logger
-              .error("Funktionsdialog \""
-                     + name
-                     + "\" im selben Funktionsdialoge-Abschnitt mehrmals definiert");
-        dialogsInBlock.add(name);
-      }
-    }
-  }
-
-  /**
-   * Bekommt in conf die wollmux,conf übergeben und parst den "Funktionen"
-   * Abschnitt daraus.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private void parseGlobalFunctions(ConfigThingy conf, DialogLibrary dialogLib)
-  {
-    globalFunctions = new FunctionLibrary();
-
-    conf = conf.query("Funktionen");
-    Iterator parentIter = conf.iterator();
-    while (parentIter.hasNext())
-    {
-      Iterator iter = ((ConfigThingy) parentIter.next()).iterator();
-      while (iter.hasNext())
-      {
-        ConfigThingy funcConf = (ConfigThingy) iter.next();
-        String name = funcConf.getName();
-        try
-        {
-          Function func = FunctionFactory.parseChildren(
-              funcConf,
-              globalFunctions,
-              dialogLib,
-              null);
-          globalFunctions.add(name, func);
-        }
-        catch (ConfigurationErrorException e)
-        {
-          Logger.error("Fehler beim Parsen der Funktion \"" + name + "\"", e);
-        }
-      }
-    }
   }
 
   /**
