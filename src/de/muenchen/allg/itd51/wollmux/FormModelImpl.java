@@ -52,4 +52,16 @@ public class FormModelImpl implements FormModel
           PosSize.POSSIZE);
     }
   }
+
+  public void setVisibleState(String groupId, boolean visible)
+  {
+    // TODO setVisibleState implementieren
+    
+  }
+
+  public void valueChanged(String fieldId, String newValue)
+  {
+    // TODO valueChanged implementieren
+    
+  }
 }
