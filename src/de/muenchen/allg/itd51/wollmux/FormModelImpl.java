@@ -64,4 +64,16 @@ public class FormModelImpl implements FormModel
     // TODO valueChanged implementieren
     
   }
+
+  public void focusGained(String fieldId)
+  {
+    // TODO focusGained(String fieldId) implementieren
+    
+  }
+
+  public void focusLost(String fieldId)
+  {
+    // TODO focusLost(String fieldId) implementieren
+    
+  }
 }
