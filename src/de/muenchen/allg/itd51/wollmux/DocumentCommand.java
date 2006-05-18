@@ -607,6 +607,8 @@ abstract public class DocumentCommand
    */
   static interface Executor
   {
+    public int executeCommand(DocumentCommand.RootElement cmd);
+
     public int executeCommand(DocumentCommand.InsertFrag cmd);
 
     public int executeCommand(DocumentCommand.InsertValue cmd);
@@ -618,6 +620,8 @@ abstract public class DocumentCommand
     public int executeCommand(DocumentCommand.InvalidCommand cmd);
 
     public int executeCommand(DocumentCommand.Version cmd);
+
+    public int executeCommand(DocumentCommand.UpdateFields cmd);
   }
 
   // ********************************************************************************
@@ -748,7 +752,7 @@ abstract public class DocumentCommand
 
     public int execute(DocumentCommand.Executor e)
     {
-      return 0;
+      return e.executeCommand(this);
     }
   }
 
@@ -954,9 +958,9 @@ abstract public class DocumentCommand
   }
 
   // ********************************************************************************
-  static public class ON extends DocumentCommand
+  static public class UpdateFields extends DocumentCommand
   {
-    public ON(ConfigThingy wmCmd, Bookmark bookmark)
+    public UpdateFields(ConfigThingy wmCmd, Bookmark bookmark)
         throws InvalidCommandException
     {
       super(wmCmd, bookmark);
@@ -964,32 +968,12 @@ abstract public class DocumentCommand
 
     protected boolean canHaveChilds()
     {
-      return false;
+      return true;
     }
 
     public int execute(DocumentCommand.Executor visitable)
     {
-      return 0;
-    }
-  }
-
-  // ********************************************************************************
-  static public class OFF extends DocumentCommand
-  {
-    public OFF(ConfigThingy wmCmd, Bookmark bookmark)
-        throws InvalidCommandException
-    {
-      super(wmCmd, bookmark);
-    }
-
-    protected boolean canHaveChilds()
-    {
-      return false;
-    }
-
-    public int execute(DocumentCommand.Executor visitable)
-    {
-      return 0;
+      return visitable.executeCommand(this);
     }
   }
 }

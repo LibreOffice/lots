@@ -213,14 +213,9 @@ public class DocumentCommandTree
         return new DocumentCommand.Form(wmCmd, bookmark);
       }
 
-      if (cmd.compareToIgnoreCase("on") == 0)
+      if (cmd.compareToIgnoreCase("updateFields") == 0)
       {
-        return new DocumentCommand.ON(wmCmd, bookmark);
-      }
-
-      if (cmd.compareToIgnoreCase("off") == 0)
-      {
-        return new DocumentCommand.OFF(wmCmd, bookmark);
+        return new DocumentCommand.UpdateFields(wmCmd, bookmark);
       }
 
       if (cmd.compareToIgnoreCase("version") == 0)
@@ -318,24 +313,6 @@ public class DocumentCommandTree
     }
 
     return str;
-  }
-
-  /**
-   * Veranlasst alle Elemente in der Reihenfolge einer Tiefensuche ihre
-   * InsertMarks zu löschen.
-   */
-  public void cleanInsertMarks()
-  {
-    // Das Löschen muss mit einer Tiefensuche, aber in umgekehrter Reihenfolge
-    // ablaufen, da sonst leere Bookmarks (Ausdehnung=0) durch das Entfernen der
-    // INSERT_MARKs im unmittelbar darauffolgenden Bookmark ungewollt gelöscht
-    // werden. Bei der umgekehrten Reihenfolge tritt dieses Problem nicht auf.
-    Iterator i = depthFirstIterator(true);
-    while (i.hasNext())
-    {
-      DocumentCommand cmd = (DocumentCommand) i.next();
-      cmd.cleanInsertMarks();
-    }
   }
 
   /**
