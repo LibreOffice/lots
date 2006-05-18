@@ -12,6 +12,7 @@
 * 24.04.2006 | BNK | kommentiert.
 * 05.05.2006 | BNK | Condition -> Function
 * 15.05.2006 | BNK | +setString()
+* 18.05.2006 | BNK | +isStatic()
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -160,6 +161,13 @@ public interface UIElement extends Value
   public void setVisible(boolean vis);
   
   /**
+   * Liefert true, wenn das Element keine Änderungen erlaubt (z,B, ein Separator
+   * oder ein Label).
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public boolean isStatic();
+  
+  /**
    * Abstrakte Basis-Klasse für UIElemente.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -251,6 +259,8 @@ public interface UIElement extends Value
     {
       return false;
     }
+    
+    public boolean isStatic() {return true;}
   }
   
   
@@ -279,6 +289,8 @@ public interface UIElement extends Value
     {
       return false;
     }
+    
+    public boolean isStatic() {return true;}
   }
   
   public static class Textfield extends UIElementBase
@@ -314,6 +326,8 @@ public interface UIElement extends Value
     {
       textfield.setText(str);
     }
+    
+    public boolean isStatic() {return false;}
   }
   
   public static class Combobox extends UIElementBase
@@ -358,6 +372,8 @@ public interface UIElement extends Value
       combo.setSelectedItem(str);
       combo.setEditable(edit);
     }
+    
+    public boolean isStatic() {return false;}
   }
 
   
@@ -396,6 +412,8 @@ public interface UIElement extends Value
     {
       textarea.setText(str);
     }
+    
+    public boolean isStatic() {return false;}
   }
   
   public static class Checkbox extends UIElementBase
@@ -430,6 +448,8 @@ public interface UIElement extends Value
     {
       box.setSelected(str.equalsIgnoreCase("true"));
     }
+    
+    public boolean isStatic() {return false;}
   }
   
   public static class Separator extends UIElementBase
@@ -457,6 +477,8 @@ public interface UIElement extends Value
     {
       return false;
     }
+    
+    public boolean isStatic() {return true;}
   }
   
   public static class Box extends UIElementBase
@@ -484,6 +506,8 @@ public interface UIElement extends Value
     {
       return false;
     }
+    
+    public boolean isStatic() {return true;}
   }
   
 

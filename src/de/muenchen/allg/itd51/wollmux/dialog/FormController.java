@@ -14,6 +14,9 @@
 * 05.05.2006 | BNK | Condition -> Function, kommentiert
 * 17.05.2006 | BNK | AUTOFILL, PLAUSI, Übergabe an FormModel
 * 18.05.2006 | BNK | Fokus-Änderungen an formModel kommunizieren
+*                  | TIP und HOTKEY bei Tabs unterstützen
+*                  | leere Tabs ausgrauen
+*                  | nextTab und prevTab implementiert
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -84,6 +87,14 @@ public class FormController implements UIElementEventHandler
    * Die JTabbedPane, die die ganzen Tabs der GUI enthält.
    */
   private JTabbedPane myTabbedPane;
+  
+  /**
+   * tabVisibleCount[i] gibt an, wieviele sichtbare Eingabeelemente (Buttonleiste
+   * wird nicht gezählt) das Tab mit Index i hat.
+   * ACHTUNG! Muss mit leerem Array starten, weil es ansonsten in
+   * increaseTabVisibleCount() eine ArrayIndexOutOfBoundsException gibt!
+   */
+  private int[] tabVisibleCount = new int[]{};
   
   /**
    * Die für die Erzeugung der UI Elemente verwendete Factory.
@@ -251,15 +262,40 @@ public class FormController implements UIElementEventHandler
      * Tabs erzeugen.
      ******************************************************/
     Iterator iter = fensterDesc.iterator();
+    int tabIndex = 0;
     while (iter.hasNext())
     {
       ConfigThingy neuesFenster = (ConfigThingy)iter.next();
+      
+      
+      /*
+       * Die folgende Schleife ist nicht nur eleganter als mehrere try-catch-Blöcke
+       * um get()-Befehle, sie verhindert auch, dass TIP oder HOTKEY aus Versehen
+       * von einem enthaltenen Button aufgeschnappt werden.
+       */
       String tabTitle = "Eingabe";
-      try{
-        tabTitle = neuesFenster.get("TITLE").toString();
-      } catch(Exception x){}
-      DialogWindow newWindow = new DialogWindow(neuesFenster, mapIdToPresetValue);
-      myTabbedPane.add(tabTitle,newWindow.JPanel()); //TODO insertTab() verwenden, Tooltip und Mnemonic einführen
+      char hotkey = 0;
+      String tip = "";
+      Iterator childIter = neuesFenster.iterator();
+      while (childIter.hasNext())
+      {
+        ConfigThingy childConf = (ConfigThingy)childIter.next();
+        String name = childConf.getName();
+        if (name.equals("TIP")) tip = childConf.toString(); else
+        if (name.equals("TITLE")) tabTitle = childConf.toString(); else
+        if (name.equals("HOTKEY"))
+        {
+          String str = childConf.toString();
+          if (str.length() > 0) hotkey = str.toUpperCase().charAt(0);
+        }
+      }
+      
+      DialogWindow newWindow = new DialogWindow(tabIndex, neuesFenster, mapIdToPresetValue);
+      
+      myTabbedPane.addTab(tabTitle, null, newWindow.JPanel(), tip);
+      if (hotkey != 0) myTabbedPane.setMnemonicAt(tabIndex, hotkey);
+
+      ++tabIndex;
     }
     
     uiElements.trimToSize(); //verschwendeten Platz freigeben.
@@ -353,19 +389,9 @@ public class FormController implements UIElementEventHandler
       
       /*
        * Sichtbarkeitsstatus berechnen und auf die Mitglieder der Gruppe anwenden.
+       * Benachrichtigt auch formModel.
        */
-      group.visible = cond.getBoolean(myUIElementValues);
-      Iterator uiEiter = group.uiElements.iterator();
-      while (uiEiter.hasNext())
-      {
-        UIElement uiElement = (UIElement)uiEiter.next();
-        uiElement.setVisible(group.visible);
-      }
-
-      /*
-       * FormModel benachrichtigen.
-       */
-      formModel.setVisibleState(groupId, group.visible);
+      setGroupVisibility(group, cond.getBoolean(myUIElementValues));
     }
   }
   
@@ -405,6 +431,8 @@ public class FormController implements UIElementEventHandler
     
     /**
      * Erzeugt ein neues Tab.
+     * @param tabIndex Die Nummer (von 0 gezählt) des Tabs, das dieses DialogWindow
+     *        darstellt.
      * @param conf der Kind-Knoten des Fenster-Knotens der das Formular beschreibt.
      *        conf ist direkter Elternknoten des Knotens "Eingabefelder".
      * @param mapIdToPresetValue bildet IDs von Formularfeldern auf Vorgabewerte ab.
@@ -414,7 +442,7 @@ public class FormController implements UIElementEventHandler
      *        speziell markiert als ungültig bis der Benutzer es manuell ändert.
      * @author Matthias Benkmann (D-III-ITD 5.1)     
      */
-    public DialogWindow(ConfigThingy conf, Map mapIdToPresetValue)
+    public DialogWindow(int tabIndex, ConfigThingy conf, Map mapIdToPresetValue)
     {
       myPanel = new JPanel(new GridBagLayout());
       int y = 0;
@@ -432,6 +460,7 @@ public class FormController implements UIElementEventHandler
             UIElementState state = new UIElementState();
             state.plausi = FunctionFactory.parseGrandchildren(uiConf.query("PLAUSI"), funcLib, dialogLib, this);
             state.autofill = FunctionFactory.parseGrandchildren(uiConf.query("AUTOFILL"), funcLib, dialogLib, this);
+            state.tabIndex = tabIndex;
             uiElement.setAdditionalData(state);
           } catch(ConfigurationErrorException x)
           {
@@ -523,7 +552,7 @@ public class FormController implements UIElementEventHandler
           gbc.gridy = y;
           ++y;
           myPanel.add(uiElement.getComponent(), gbc);
-          
+          if (!uiElement.isStatic()) increaseTabVisibleCount(tabIndex);
         }
       }
       
@@ -789,7 +818,31 @@ public class FormController implements UIElementEventHandler
       {
         String action = (String)args[0];
         if (action.equals("abort"))
+        {
           abortRequestListener.actionPerformed(new ActionEvent(this, 0, "abort"));
+        } else if (action.equals("nextTab"))
+        {
+          int startIdx = myTabbedPane.getSelectedIndex(); 
+          int idx = startIdx;
+          do{
+            ++idx;
+            if (idx >= myTabbedPane.getTabCount()) idx = 0;
+            if (myTabbedPane.isEnabledAt(idx)) break;
+          } while (idx != startIdx);
+          
+          myTabbedPane.setSelectedIndex(idx);
+        } else if (action.equals("prevTab"))
+        {
+          int startIdx = myTabbedPane.getSelectedIndex(); 
+          int idx = startIdx;
+          do{
+            if (idx == 0) idx = myTabbedPane.getTabCount();
+            --idx;
+            if (myTabbedPane.isEnabledAt(idx)) break;
+          } while (idx != startIdx);
+          
+          myTabbedPane.setSelectedIndex(idx);
+        }
       }
       else if (eventType.equals("focus"))
       {
@@ -798,6 +851,10 @@ public class FormController implements UIElementEventHandler
         else
           formModel.focusGained(source.getId());
       }
+    }
+    catch (Exception x)
+    {
+      Logger.error(x);
     }
     finally
     {
@@ -889,18 +946,95 @@ public class FormController implements UIElementEventHandler
           if (cond == null) continue;
           boolean result = cond.getBoolean(myUIElementValues);
           if (result == dependingGroup.visible) continue;
-          dependingGroup.visible = result;
-          formModel.setVisibleState(dependingGroup.id, dependingGroup.visible);
           
-          Iterator uiElementIter = dependingGroup.uiElements.iterator();
-          while (uiElementIter.hasNext())
-          {
-            UIElement ele = (UIElement)uiElementIter.next();
-            ele.setVisible(dependingGroup.visible);
-          }
+          setGroupVisibility(dependingGroup, result);
         }
       }
     }
+  }
+
+  /**
+   * Setzt die Sichtbarkeit aller Mitglieder von group auf visible und benachrichtigt
+   * das FormModel entsprechend.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private void setGroupVisibility(Group group, boolean visible)
+  {
+    group.visible = visible;
+    Iterator uiElementIter = group.uiElements.iterator();
+    while (uiElementIter.hasNext())
+    {
+      UIElement ele = (UIElement)uiElementIter.next();
+      UIElementState state = (UIElementState)ele.getAdditionalData();
+
+      /*
+       * Der folgende Test ist erforderlich, weil Elemente mehreren Gruppen
+       * angehören können, so dass eine Änderung des Status der Gruppe nicht
+       * bedeutet, dass sich alle Elemente ändern. Falls sich der
+       * Zustand eines Elements nicht geändert hat, dann darf weder
+       * increaseTabVisibleCount() noch decreaseTabVisibleCount()
+       * aufgerufen werden.
+       */
+      if (state.visible != group.visible)
+      {
+        ele.setVisible(group.visible);
+        state.visible = group.visible;
+        if (!ele.isStatic())
+        {
+          if (state.visible)
+            increaseTabVisibleCount(state.tabIndex);
+          else
+            decreaseTabVisibleCount(state.tabIndex);
+        }
+      }
+      
+    }
+    
+    formModel.setVisibleState(group.id, group.visible);
+  }
+  
+  /**
+   * Erhöht den Zähler von tabVisibleCount[tabIndex] um 1. Sollte das Array nicht
+   * lang genug sein, wird es verlängert. Falls dadurch auf einem Tab eine
+   * nicht-leere Menge von nicht-statischen Elementen sichtbar ist, so wird das
+   * Tab sichtbar geschaltet.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED
+   */
+  private void increaseTabVisibleCount(int tabIndex)
+  {
+    /*
+     * Achtung! Der Aufbau des folgenden Codes ist wichtig! Der Befehl
+     * myTabbedPane.setEnabledAt(tabIndex, true); darf beim ersten erhöhen von
+     * 0 auf 1 noch nicht ausgeführt werden, weil dies geschieht bevor das
+     * Tab dem JTabbedPane hinzugefügt wurde. Deshalb beginnt tabVisibleCount mit
+     * dem leeren Array, damit wir diesen Fall erkennen können.
+     */
+    if (tabIndex >= tabVisibleCount.length)
+    {
+      int[] newTVC = new int[tabIndex+1];
+      System.arraycopy(tabVisibleCount, 0, newTVC, 0, tabVisibleCount.length);
+      newTVC[tabIndex] = 1;
+      tabVisibleCount = newTVC;
+    }
+    else
+    {
+      if (++tabVisibleCount[tabIndex] == 1)
+        myTabbedPane.setEnabledAt(tabIndex, true);
+    }
+  }
+  
+  /**
+   * Erniedrigt den Zähler von tabVisibleCount[tabIndex] um 1. 
+   * Falls dadurch auf einem Tab keine nicht-statischen Elemente
+   * mehr sichtbar ist, so wird das Tab unsichtbar geschaltet.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED
+   */
+  private void decreaseTabVisibleCount(int tabIndex)
+  {
+    if (--tabVisibleCount[tabIndex] == 0)
+      myTabbedPane.setEnabledAt(tabIndex, false);
   }
 
   /**
@@ -1016,6 +1150,16 @@ public class FormController implements UIElementEventHandler
      * Cachet das Ergebnis der letzten Prüfung von plausi und fishy.
      */
     public boolean okay = true;
+    
+    /**
+     * Auf welchem Tab befindet sich das UI Element.
+     */
+    public int tabIndex = -1;
+    
+    /**
+     * true, wenn das Element sichtbar ist.
+     */
+    public boolean visible = true;
   }
   
   /**
