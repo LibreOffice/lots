@@ -305,6 +305,16 @@ public class FormGUI
     {
       Logger.log("Feld \""+fieldId+"\" hat jetzt den Wert \""+newValue+"\"");
     }
+
+    public void focusGained(String fieldId)
+    {
+      Logger.log("Feld \""+fieldId+"\" hat den Fokus bekommen");
+    }
+
+    public void focusLost(String fieldId)
+    {
+      Logger.log("Feld \""+fieldId+"\" hat den Fokus verloren"); 
+    }
   }
   
   private class MyAbortRequestListener implements ActionListener

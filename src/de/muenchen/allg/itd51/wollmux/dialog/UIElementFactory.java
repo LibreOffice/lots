@@ -27,6 +27,8 @@ import java.awt.GridBagConstraints;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
@@ -315,6 +317,7 @@ public class UIElementFactory
       
       ActionListener actionL = getAction(uiElement, action, conf, uiElementEventHandler);
       if (actionL != null) button.addActionListener(actionL);
+      button.addFocusListener(new UIElementFocusListener(uiElementEventHandler, uiElement));
       return uiElement;
     }
     else if (type.equals("label"))
@@ -329,6 +332,7 @@ public class UIElementFactory
       if (!tip.equals("")) tf.setToolTipText(tip);
       uiElement = new UIElement.Textfield(id, tf, layoutConstraints, labelType, label, labelLayoutConstraints);
       tf.getDocument().addDocumentListener(new UIElementDocumentListener(uiElementEventHandler, uiElement, "valueChanged", new Object[]{}));
+      tf.addFocusListener(new UIElementFocusListener(uiElementEventHandler, uiElement));
       return uiElement;
     }
     else if (type.equals("textarea"))
@@ -347,6 +351,7 @@ public class UIElementFactory
       panel.add(scrollPane);
       uiElement = new UIElement.Textarea(id, textarea, panel, layoutConstraints, labelType, label, labelLayoutConstraints);
       textarea.getDocument().addDocumentListener(new UIElementDocumentListener(uiElementEventHandler, uiElement, "valueChanged", new Object[]{}));
+      textarea.addFocusListener(new UIElementFocusListener(uiElementEventHandler, uiElement));
       return uiElement;
     }
     else if (type.equals("combobox"))
@@ -365,10 +370,18 @@ public class UIElementFactory
       } catch (Exception x) { Logger.error(x); }
       
       uiElement = new UIElement.Combobox(id, combo, layoutConstraints, labelType, label, labelLayoutConstraints);
+      
       if (editable) 
-        ((JTextComponent)combo.getEditor().getEditorComponent()).getDocument().addDocumentListener(new UIElementDocumentListener(uiElementEventHandler, uiElement, "valueChanged", new Object[]{}));
+      {
+        JTextComponent tc = ((JTextComponent)combo.getEditor().getEditorComponent());
+        tc.addFocusListener(new UIElementFocusListener(uiElementEventHandler, uiElement));
+        tc.getDocument().addDocumentListener(new UIElementDocumentListener(uiElementEventHandler, uiElement, "valueChanged", new Object[]{}));
+      }
       else
+      {
         combo.addItemListener(new UIElementItemListener(uiElementEventHandler, uiElement, "valueChanged", new Object[]{}));
+        combo.addFocusListener(new UIElementFocusListener(uiElementEventHandler, uiElement));
+      }
       return uiElement;
     }
     else if (type.equals("checkbox"))
@@ -391,7 +404,7 @@ public class UIElementFactory
           });
       uiElement = new UIElement.Checkbox(id, boxBruceleitner, agentinMitHerz, layoutConstraints);
       boxBruceleitner.addActionListener(new UIElementActionListener(uiElementEventHandler, uiElement, "valueChanged", new Object[]{}));
-      
+      boxBruceleitner.addFocusListener(new UIElementFocusListener(uiElementEventHandler, uiElement));
       return uiElement;
     }
     else if (type.equals("h-separator"))
@@ -428,6 +441,33 @@ public class UIElementFactory
       throw new ConfigurationErrorException("Ununterstützter TYPE für GUI Element: \""+type+"\"");
   }
 
+  /**
+   * Wird als FocusListener auf UI Elemente registriert, um die auftretenden
+   * Events an einen {@link UIElementEventHandler} weiterzureichen.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private static class UIElementFocusListener implements FocusListener
+  {
+    private UIElementEventHandler handler;
+    private UIElement uiElement;
+    private static final String[] lost = new String[]{"lost"};
+    private static final String[] gained = new String[]{"gained"};
+    
+    public UIElementFocusListener(UIElementEventHandler handler, UIElement uiElement)
+    {
+      this.handler = handler;
+      this.uiElement = uiElement;
+    }
+    public void focusGained(FocusEvent e)
+    {
+      handler.processUiElementEvent(uiElement, "focus", gained);     
+    }
+    public void focusLost(FocusEvent e)
+    {
+      handler.processUiElementEvent(uiElement, "focus", lost);
+    }
+  }
+  
   /**
    * Wird als ActionListener auf UI Elemente registriert, um die auftretenden
    * Events an einen {@link UIElementEventHandler} weiterzureichen.

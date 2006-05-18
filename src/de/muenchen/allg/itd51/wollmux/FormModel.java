@@ -78,4 +78,8 @@ public interface FormModel
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void valueChanged(String fieldId, String newValue);
+  
+  public void focusGained(String fieldId);
+  
+  public void focusLost(String fieldId);
 }

@@ -13,6 +13,7 @@
 * 02.02.2006 | BNK | Ein/Ausblendungen begonnen
 * 05.05.2006 | BNK | Condition -> Function, kommentiert
 * 17.05.2006 | BNK | AUTOFILL, PLAUSI, Übergabe an FormModel
+* 18.05.2006 | BNK | Fokus-Änderungen an formModel kommunizieren
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -789,6 +790,13 @@ public class FormController implements UIElementEventHandler
         String action = (String)args[0];
         if (action.equals("abort"))
           abortRequestListener.actionPerformed(new ActionEvent(this, 0, "abort"));
+      }
+      else if (eventType.equals("focus"))
+      {
+        if (args[0].equals("lost"))
+          formModel.focusLost(source.getId());
+        else
+          formModel.focusGained(source.getId());
       }
     }
     finally
