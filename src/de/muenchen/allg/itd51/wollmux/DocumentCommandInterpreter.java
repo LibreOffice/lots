@@ -27,6 +27,7 @@ package de.muenchen.allg.itd51.wollmux;
 import java.io.StringReader;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 
 import com.sun.star.awt.FontWeight;
@@ -707,6 +708,19 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
       Logger.error(e);
     }
 
+    // Liste aller TextFrames vor dem Einfügen zusammenstellen (benötigt für das
+    // Updaten der enthaltenen TextFields später).
+    HashSet textFrames = new HashSet();
+    if (document.xTextFramesSupplier() != null)
+    {
+      String[] names = document.xTextFramesSupplier().getTextFrames()
+          .getElementNames();
+      for (int i = 0; i < names.length; i++)
+      {
+        textFrames.add(names[i]);
+      }
+    }
+
     // Textfragment einfügen:
     UnoService insCursor = new UnoService(cmd.createInsertCursor());
     if (insCursor.xDocumentInsertable() != null && urlStr != null)
@@ -727,6 +741,99 @@ public class DocumentCommandInterpreter implements DocumentCommand.Executor
       catch (java.lang.Exception e)
       {
         Logger.error(e);
+      }
+    }
+
+    // Aktualisieren der neu hinzugekommenen Textfelder (z.B. der Datumfelder):
+    // zuerst den Inhalt des Range durchsuchen:
+    if (range != null)
+    {
+      UnoService rangeCursor = new UnoService(range.getText()
+          .createTextCursorByRange(range));
+      updateTextFieldsRecursive(rangeCursor);
+    }
+    // jetzt noch die neu hinzugekommenen TextFrames durchsuchen:
+    updateTextFieldsInNewFrames(textFrames);
+    Logger.debug("2");
+  }
+
+  /**
+   * Diese Methode updated alle Updatable-Felder in den Frames, deren Namen
+   * nicht im HashSet textFrames enthalten sind.
+   * 
+   * @param textFrames
+   *          HashSet mit den Namen der nicht upzudatenden TextFrames.
+   */
+  private void updateTextFieldsInNewFrames(HashSet textFrames)
+  {
+    if (document.xTextFramesSupplier() != null)
+    {
+      String[] names = document.xTextFramesSupplier().getTextFrames()
+          .getElementNames();
+      for (int i = 0; i < names.length; i++)
+      {
+        if (!textFrames.contains(names[i]))
+        {
+          Logger.debug("Update TextFelder des Frames " + names[i]);
+          UnoService frame = new UnoService(null);
+          try
+          {
+            frame = new UnoService(document.xTextFramesSupplier()
+                .getTextFrames().getByName(names[i]));
+            updateTextFieldsRecursive(frame);
+          }
+          catch (java.lang.Exception e)
+          {
+            Logger.error(e);
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * Diese Methode durchsucht das Element element rekursiv nach TextFeldern und
+   * ruft die Methode update() auf.
+   * 
+   * @param element
+   *          Das Element das geupdated werden soll.
+   */
+  private void updateTextFieldsRecursive(UnoService element)
+  {
+    // zuerst die Kinder durchsuchen (falls vorhanden):
+    if (element.xEnumerationAccess() != null)
+    {
+      element.msgboxFeatures();
+      XEnumeration xEnum = element.xEnumerationAccess().createEnumeration();
+      
+      while (xEnum.hasMoreElements())
+      {
+        try
+        {
+          UnoService child = new UnoService(xEnum.nextElement());
+          updateTextFieldsRecursive(child);
+        }
+        catch (java.lang.Exception e)
+        {
+          Logger.error(e);
+        }
+      }
+    }
+
+    // jetzt noch update selbst aufrufen (wenn verfügbar):
+    if (element.xTextField() != null)
+    {
+      try
+      {
+        UnoService textField = element.getPropertyValue("TextField");
+        if (textField.xUpdatable() != null)
+        {
+          textField.msgboxFeatures();
+          textField.xUpdatable().update();
+        }
+      }
+      catch (Exception e)
+      {
       }
     }
   }
