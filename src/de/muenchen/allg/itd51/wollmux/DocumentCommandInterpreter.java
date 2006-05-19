@@ -153,13 +153,19 @@ public class DocumentCommandInterpreter
       // kann.
       errors += new DocumentExpander().execute(tree);
 
-      // 2) Und jetzt nochmal alle (übrigen) DocumentCommands (z.B.
-      // insertValues) in einem einzigen Durchlauf mit execute aufrufen.
-      errors += new MainProcessor().execute(tree);
-
-      // 3) Jetzt können die TextFelder innerhalb der updateFields Kommandos
-      // geupdatet werden.
+      // 2) Jetzt können die TextFelder innerhalb der updateFields Kommandos
+      // geupdatet werden. Durch die Auslagerung in einen extra Schritt wird die
+      // Reihenfolge der Abarbeitung klar definiert (zuerst die updateFields
+      // Kommandos, dann die anderen Kommandos). Dies ist wichtig, da
+      // insbesondere das updateFields Kommando exakt mit einem anderen Kommando
+      // übereinander liegen kann. Ausserdem liegt updateFields thematisch näher
+      // am expandieren der Textfragmente, da updateFields im Prinzip nur dessen
+      // Schwäche beseitigt.
       errors += new TextFieldUpdater().execute(tree);
+
+      // 3) Hauptverarbeitung: Jetzt alle noch übrigen DocumentCommands (z.B.
+      // insertValues) in einem einzigen Durchlauf mit execute bearbeiten.
+      errors += new MainProcessor().execute(tree);
 
       // 4) Da keine neuen Elemente mehr eingefügt werden müssen, können
       // jetzt die INSERT_MARKS "<" und ">" der insertFrags und
@@ -172,13 +178,7 @@ public class DocumentCommandInterpreter
       errors += new EmptyParagraphCleaner().execute(tree);
 
       // 6) Die Statusänderungen der Dokumentkommandos auf die Bookmarks
-      // übertragen bzw. die Bookmarks abgearbeiteter Kommandos löschen. Der
-      // Schritt soll aus folgenden Gründen auch dann ausgeführt werden, wenn
-      // das
-      // Dokument "als Dokument" geöffnet wurde:
-      // a) Damit ein evtl. vorhandenes Dokumentkommando BeADocument gelöscht
-      // wird.
-      // b) Zur Normierung der enthaltenen Bookmarks.
+      // übertragen bzw. die Bookmarks abgearbeiteter Kommandos löschen.
       tree.updateBookmarks(mux.isDebugMode());
 
       // 7) Document-Modified auf false setzen, da nur wirkliche

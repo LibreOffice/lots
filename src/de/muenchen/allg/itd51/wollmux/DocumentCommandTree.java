@@ -223,6 +223,21 @@ public class DocumentCommandTree
         return new DocumentCommand.Version(wmCmd, bookmark);
       }
 
+      if (cmd.compareToIgnoreCase("setType") == 0)
+      {
+        return new DocumentCommand.NotYetImplemented(wmCmd, bookmark);
+      }
+
+      if (cmd.compareToIgnoreCase("insertFormValue") == 0)
+      {
+        return new DocumentCommand.NotYetImplemented(wmCmd, bookmark);
+      }
+
+      if (cmd.compareToIgnoreCase("insertFunction") == 0)
+      {
+        return new DocumentCommand.NotYetImplemented(wmCmd, bookmark);
+      }
+
       throw new InvalidCommandException("Unbekanntes Kommando \"" + cmd + "\"");
     }
     catch (InvalidCommandException e)
