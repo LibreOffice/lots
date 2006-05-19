@@ -710,6 +710,7 @@ abstract public class DocumentCommand
     public NotYetImplemented(ConfigThingy wmCmd, Bookmark bookmark)
     {
       super(wmCmd, bookmark);
+      setDoneState(true);
     }
 
     protected boolean canHaveChilds()
