@@ -32,7 +32,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
+import com.sun.star.awt.DeviceInfo;
+import com.sun.star.awt.PosSize;
 import com.sun.star.awt.XWindow;
+import com.sun.star.beans.XPropertySet;
 import com.sun.star.frame.FrameSearchFlag;
 import com.sun.star.frame.XFrame;
 import com.sun.star.lang.EventObject;
@@ -394,6 +397,19 @@ public class EventHandler
     UnoService source = new UnoService(event.getSource());
     if (source.supportsService("com.sun.star.text.TextDocument"))
     {
+      // Konfigurationsabschnitt Textdokument verarbeiten:
+      ConfigThingy tds = new ConfigThingy("Textdokument");
+      try
+      {
+        tds = mux.getWollmuxConf().query("Fenster").getLastChild().query(
+            "Textdokument").getLastChild();
+        // Einstellungen setzen:
+        setWindowViewSettings(source, tds);
+      }
+      catch (NodeNotFoundException e)
+      {
+      }
+
       // beim on_opendocument erzeugte frag_id-liste aus puffer holen.
       String[] frag_urls = new String[] {};
       if (docFragUrlsBuffer.containsKey(source.xInterface()))
@@ -637,6 +653,94 @@ public class EventHandler
     catch (Exception e)
     {
       return "";
+    }
+  }
+
+  /**
+   * Diese Methode liest die (optionalen) Attribute X, Y, WIDTH, HEIGHT und ZOOM
+   * aus dem übergebenen Konfigurations-Abschnitt settings und setzt die
+   * Fenstereinstellungen der Komponente compo entsprechend um. Bei den Pärchen
+   * X/Y bzw. SIZE/WIDTH müssen jeweils beide Komponenten im
+   * Konfigurationsabschnitt angegeben sein.
+   * 
+   * @param compo
+   *          Die Komponente, deren Fenstereinstellungen gesetzt werden sollen
+   * @param settings
+   *          der Konfigurationsabschnitt, der X, Y, WIDHT, HEIGHT und ZOOM als
+   *          direkte Kinder enthält.
+   */
+  private static void setWindowViewSettings(UnoService compo,
+      ConfigThingy settings)
+  {
+    // Fenster holen (zum setzen der Fensterposition und des Zooms)
+    UnoService window = new UnoService(null);
+    XFrame frame = null;
+    if (compo.xModel() != null)
+      frame = compo.xModel().getCurrentController().getFrame();
+    UnoService controller = new UnoService(compo.xModel()
+        .getCurrentController());
+    if (frame != null)
+    {
+      window = new UnoService(frame.getContainerWindow());
+    }
+
+    // Insets bestimmen (Rahmenmaße des Windows)
+    int insetLeft = 0, insetTop = 0, insetRight = 0, insetButtom = 0;
+    if (window.xDevice() != null)
+    {
+      DeviceInfo di = window.xDevice().getInfo();
+      insetButtom = di.BottomInset;
+      insetTop = di.TopInset;
+      insetRight = di.RightInset;
+      insetLeft = di.LeftInset;
+    }
+
+    // Position setzen:
+    try
+    {
+      int xPos = new Integer(settings.get("X").toString()).intValue();
+      int yPos = new Integer(settings.get("Y").toString()).intValue();
+      if (window.xWindow() != null)
+      {
+        window.xWindow().setPosSize(
+            xPos + insetLeft,
+            yPos + insetTop,
+            0,
+            0,
+            PosSize.POS);
+      }
+    }
+    catch (java.lang.Exception e)
+    {
+    }
+    // Dimensions setzen:
+    try
+    {
+      int width = new Integer(settings.get("WIDTH").toString()).intValue();
+      int height = new Integer(settings.get("HEIGHT").toString()).intValue();
+      if (window.xWindow() != null)
+        window.xWindow().setPosSize(
+            0,
+            0,
+            width + insetRight,
+            height + insetButtom,
+            PosSize.SIZE);
+    }
+    catch (java.lang.Exception e)
+    {
+    }
+    // Zoom setzen:
+    try
+    {
+      Short zoom = new Short(settings.get("ZOOM").toString());
+      XPropertySet viewSettings = null;
+      if (controller.xViewSettingsSupplier() != null)
+        viewSettings = controller.xViewSettingsSupplier().getViewSettings();
+      if (viewSettings != null)
+        viewSettings.setPropertyValue("ZoomValue", zoom);
+    }
+    catch (java.lang.Exception e)
+    {
     }
   }
 }
