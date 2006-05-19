@@ -692,8 +692,34 @@ abstract public class DocumentCommand
 
     public String updateBookmark()
     {
-      // der updateBookmark darf in diesem Fall natürlich nichts rausschreiben.
+      // der updateBookmark darf in diesem Fall natürlich nichts rausschreiben,
+      // da das Kommando ja nicht mal in einer syntaktisch vollständigen Version
+      // vorliegt.
       return getBookmarkName();
+    }
+  }
+
+  // ********************************************************************************
+  /**
+   * Beschreibt ein noch nicht implementiertes Dokumentkommando, das jedoch für
+   * die Zukunft geplant ist und dess Ausführung daher keine Fehler beim
+   * Erzeugen des Briefkopfs liefern darf.
+   */
+  static public class NotYetImplemented extends DocumentCommand
+  {
+    public NotYetImplemented(ConfigThingy wmCmd, Bookmark bookmark)
+    {
+      super(wmCmd, bookmark);
+    }
+
+    protected boolean canHaveChilds()
+    {
+      return true;
+    }
+
+    public int execute(DocumentCommand.Executor visitable)
+    {
+      return 0;
     }
   }
 
