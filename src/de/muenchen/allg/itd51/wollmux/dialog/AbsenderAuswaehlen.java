@@ -15,6 +15,7 @@
 *                    mit Einträgen hat.
 * 22.11.2005 | BNK | Common.setLookAndFeel() verwenden
 * 03.01.2005 | BNK | Bug korrigiert;  .gridy = x  sollte .gridx = x sein.
+* 19.05.2006 | BNK | [R1898]Wenn die Liste leer ist, dann gleich den PAL Verwalten Dialog aufrufen
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -259,19 +260,27 @@ public class AbsenderAuswaehlen
     addUIElements(fensterDesc, "Absenderliste", absenderliste, 0, 1);
     addUIElements(fensterDesc, "Buttons", buttons, 1, 0);
     
-    setListElements(palJList, dj.getLOS());
-    selectSelectedDataset(palJList);
-    
-    myFrame.pack();
-    int frameWidth = myFrame.getWidth();
-    int frameHeight = myFrame.getHeight();
-    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-    int x = screenSize.width/2 - frameWidth/2; 
-    int y = screenSize.height/2 - frameHeight/2;
-    myFrame.setLocation(x,y);
-    myFrame.setResizable(false);
-    myFrame.setVisible(true);
-    myFrame.requestFocus();
+    QueryResults palEntries = dj.getLOS();
+    if (palEntries.isEmpty())
+    {
+      editList();
+    }
+    else
+    {
+      setListElements(palJList, dj.getLOS());
+      selectSelectedDataset(palJList);
+      
+      myFrame.pack();
+      int frameWidth = myFrame.getWidth();
+      int frameHeight = myFrame.getHeight();
+      Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+      int x = screenSize.width/2 - frameWidth/2; 
+      int y = screenSize.height/2 - frameHeight/2;
+      myFrame.setLocation(x,y);
+      myFrame.setResizable(false);
+      myFrame.setVisible(true);
+      myFrame.requestFocus();
+    }
   }
   
   /** Fügt compo UI Elemente gemäss den Kindern von conf.query(key) hinzu.
