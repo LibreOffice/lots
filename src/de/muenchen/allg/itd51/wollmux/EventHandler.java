@@ -722,8 +722,8 @@ public class EventHandler
         window.xWindow().setPosSize(
             0,
             0,
-            width + insetRight,
-            height + insetButtom,
+            width - insetLeft - insetRight,
+            height - insetTop - insetButtom,
             PosSize.SIZE);
     }
     catch (java.lang.Exception e)
