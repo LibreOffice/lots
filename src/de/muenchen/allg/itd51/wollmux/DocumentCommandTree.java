@@ -233,7 +233,7 @@ public class DocumentCommandTree
         return new DocumentCommand.NotYetImplemented(wmCmd, bookmark);
       }
 
-      if (cmd.compareToIgnoreCase("insertFunction") == 0)
+      if (cmd.compareToIgnoreCase("insertFunctionValue") == 0)
       {
         return new DocumentCommand.NotYetImplemented(wmCmd, bookmark);
       }
