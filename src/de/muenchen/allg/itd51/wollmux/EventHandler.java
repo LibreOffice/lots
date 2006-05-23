@@ -35,7 +35,10 @@ import java.util.Vector;
 import com.sun.star.awt.DeviceInfo;
 import com.sun.star.awt.PosSize;
 import com.sun.star.awt.XWindow;
+import com.sun.star.beans.PropertyVetoException;
 import com.sun.star.beans.XPropertySet;
+import com.sun.star.container.NoSuchElementException;
+import com.sun.star.container.XNameAccess;
 import com.sun.star.frame.FrameSearchFlag;
 import com.sun.star.frame.XFrame;
 import com.sun.star.lang.EventObject;
@@ -410,14 +413,79 @@ public class EventHandler
       {
       }
 
-      // beim on_opendocument erzeugte frag_id-liste aus puffer holen.
-      String[] frag_urls = new String[] {};
+      // Beim on_opendocument erzeugte frag_id-liste aus puffer holen.
+      String[] fragUrls = new String[] {};
       if (docFragUrlsBuffer.containsKey(source.xInterface()))
-        frag_urls = (String[]) docFragUrlsBuffer.remove(source.xInterface());
+        fragUrls = (String[]) docFragUrlsBuffer.remove(source.xInterface());
 
-      // Interpretation von WM-Kommandos
-      new DocumentCommandInterpreter(source.xTextDocument(), mux, frag_urls)
-          .interpret();
+      // Mögliche Aktionen für das neu geöffnete Dokument:
+      boolean processNormalCommands = false;
+      boolean processFormCommands = false;
+
+      // Bestimmung des Dokumenttyps (openAsTemplate?):
+      if (source.xTextDocument() != null)
+        processNormalCommands = (source.xTextDocument().getURL() == null || source
+            .xTextDocument().getURL().equals(""));
+
+      // Auswerten der Special-Bookmarks "setType"
+      if (source.xBookmarksSupplier() != null)
+      {
+        XNameAccess bookmarks = source.xBookmarksSupplier().getBookmarks();
+        if (bookmarks.hasByName(DocumentCommand.SETTYPE_normalTemplate))
+        {
+          processNormalCommands = true;
+          processFormCommands = false;
+        }
+        else if (bookmarks.hasByName(DocumentCommand.SETTYPE_formTemplate))
+        {
+          processNormalCommands = true;
+          processFormCommands = true;
+        }
+        else if (bookmarks.hasByName(DocumentCommand.SETTYPE_formDocument))
+        {
+          processNormalCommands = false;
+          processFormCommands = true;
+        }
+        else if (bookmarks.hasByName(DocumentCommand.SETTYPE_templateTemplate))
+        {
+          processNormalCommands = false;
+          processFormCommands = false;
+
+          // Bookmark gleich löschen, da ja hier der eigentliche Interpreter gar
+          // nicht aktiv wird.
+          try
+          {
+            Bookmark b = new Bookmark(DocumentCommand.SETTYPE_templateTemplate,
+                source.xBookmarksSupplier());
+            b.remove();
+          }
+          catch (NoSuchElementException e)
+          {
+            Logger.error(e);
+          }
+
+          // So tun als ob das Dokument nicht verändert worden wäre:
+          if (source.xModifiable() != null) try
+          {
+            source.xModifiable().setModified(false);
+          }
+          catch (PropertyVetoException e)
+          {
+            Logger.error(e);
+          }
+        }
+      }
+
+      // Ausführung der Dokumentkommandos
+      if (processNormalCommands || processFormCommands)
+      {
+        DocumentCommandInterpreter dci = new DocumentCommandInterpreter(source
+            .xTextDocument(), mux);
+
+        if (processNormalCommands) dci.executeTemplateCommands(fragUrls);
+
+        if (processFormCommands) dci.executeFormCommands();
+      }
     }
     return EventProcessor.processTheNextEvent;
   }
@@ -512,10 +580,10 @@ public class EventHandler
     }
     else
     {
-      String message = "Die folgenden Datensätze konnten nicht "
-                       + "aus der Datenbank aktualisiert werden. "
-                       + "Wenn dieses Problem nicht temporärer "
-                       + "Natur ist, sollten sie diese Datensätze aus "
+      String message = "Die folgenden Datensätze konnten nicht\n"
+                       + "aus der Datenbank aktualisiert werden.\n"
+                       + "Wenn dieses Problem nicht temporärer\n"
+                       + "Natur ist, sollten sie diese Datensätze aus\n"
                        + "ihrer Absenderliste löschen und neu hinzufügen:\n\n";
       List l = dsj.getStatus().lostDatasets;
       if (l.size() > 0)

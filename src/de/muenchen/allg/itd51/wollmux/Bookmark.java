@@ -21,7 +21,8 @@ package de.muenchen.allg.itd51.wollmux;
 import com.sun.star.container.NoSuchElementException;
 import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.lang.WrappedTargetException;
-import com.sun.star.lang.XComponent;
+import com.sun.star.text.XBookmarksSupplier;
+import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextRange;
 import com.sun.star.text.XTextRangeCompare;
 import com.sun.star.uno.Exception;
@@ -60,7 +61,8 @@ public class Bookmark
    * @throws NoSuchElementException
    *           Das Bookmark name ist im angegebenen Dokument nicht enthalten.
    */
-  public Bookmark(String name, XComponent doc) throws NoSuchElementException
+  public Bookmark(String name, XBookmarksSupplier doc)
+      throws NoSuchElementException
   {
     this.document = new UnoService(doc);
     this.name = name;
@@ -69,6 +71,58 @@ public class Bookmark
       throw new NoSuchElementException("Bookmark \""
                                        + name
                                        + "\" existiert nicht.");
+  }
+
+  /**
+   * Der Konstruktor erzeugt ein neues Bookmark name im Dokument doc an der
+   * Position, die durch range beschrieben ist.
+   * 
+   * @param name
+   *          Der Name des neu zu erstellenden Bookmarks.
+   * @param doc
+   *          Das Dokument, welches das Bookmark name enthalten soll.
+   * @param range
+   *          Die Position, an der das Dokument liegen soll.
+   */
+  public Bookmark(String name, XTextDocument doc, XTextRange range)
+  {
+    this.document = new UnoService(doc);
+    this.name = name;
+
+    // Bookmark-Service erzeugen
+    UnoService bookmark = new UnoService(null);
+    try
+    {
+      bookmark = document.create("com.sun.star.text.Bookmark");
+    }
+    catch (Exception e)
+    {
+      Logger.error(e);
+    }
+
+    // Namen setzen
+    if (bookmark.xNamed() != null)
+    {
+      bookmark.xNamed().setName(name);
+    }
+
+    // Bookmark ins Dokument einfügen
+    if (document.xTextDocument() != null
+        && bookmark.xTextContent() != null
+        && range != null)
+    {
+      try
+      {
+        document.xTextDocument().getText().insertTextContent(
+            range,
+            bookmark.xTextContent(),
+            false);
+      }
+      catch (IllegalArgumentException e)
+      {
+        Logger.error(e);
+      }
+    }
   }
 
   /**

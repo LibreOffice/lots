@@ -43,6 +43,35 @@ import de.muenchen.allg.itd51.parser.SyntaxErrorException;
  */
 abstract public class DocumentCommand
 {
+
+  /**
+   * Spezialkommando zum Setzen des Dokumenttyps auf "normalTemplate". Dieses
+   * Spezialkommando muss exakt in der vorgegebenen Schreibweise geschrieben
+   * sein.
+   */
+  public final static String SETTYPE_normalTemplate = "WM(CMD 'setType' TYPE 'normalTemplate')";
+
+  /**
+   * Spezialkommando zum Setzen des Dokumenttyps auf "templateTemplate". Dieses
+   * Spezialkommando muss exakt in der vorgegebenen Schreibweise geschrieben
+   * sein.
+   */
+  public final static String SETTYPE_templateTemplate = "WM(CMD 'setType' TYPE 'templateTemplate')";
+
+  /**
+   * Spezialkommando zum Setzen des Dokumenttyps auf "formTemplate". Dieses
+   * Spezialkommando muss exakt in der vorgegebenen Schreibweise geschrieben
+   * sein.
+   */
+  public final static String SETTYPE_formTemplate = "WM(CMD 'setType' TYPE 'formTemplate')";
+
+  /**
+   * Spezialkommando zum Setzen des Dokumenttyps auf "formDocument". Dieses
+   * Spezialkommando muss exakt in der vorgegebenen Schreibweise geschrieben
+   * sein.
+   */
+  public final static String SETTYPE_formDocument = "WM(CMD 'setType' TYPE 'formDocument')";
+
   /**
    * Das geparste ConfigThingy des zugehörenden Bookmarks.
    */
@@ -622,6 +651,8 @@ abstract public class DocumentCommand
     public int executeCommand(DocumentCommand.Version cmd);
 
     public int executeCommand(DocumentCommand.UpdateFields cmd);
+
+    public int executeCommand(DocumentCommand.SetType cmd);
   }
 
   // ********************************************************************************
@@ -996,6 +1027,56 @@ abstract public class DocumentCommand
     protected boolean canHaveChilds()
     {
       return true;
+    }
+
+    public int execute(DocumentCommand.Executor visitable)
+    {
+      return visitable.executeCommand(this);
+    }
+  }
+
+  // ********************************************************************************
+  /**
+   * Beschreibt ein Dokumentkommando, das aufgrund eines Syntax-Fehlers oder
+   * eines fehlenden Parameters ungültig ist, jedoch trotzdem im Dokument als
+   * Fehlerfeld dargestellt werden soll.
+   * 
+   * @author lut
+   * 
+   */
+  static public class SetType extends DocumentCommand
+  {
+    private String type;
+
+    public SetType(ConfigThingy wmCmd, Bookmark bookmark)
+        throws InvalidCommandException
+    {
+      super(wmCmd, bookmark);
+      type = "";
+      try
+      {
+        type = wmCmd.get("WM").get("TYPE").toString();
+      }
+      catch (NodeNotFoundException e)
+      {
+        throw new InvalidCommandException("Fehlendes Attribut TYPE");
+      }
+      if (type.compareToIgnoreCase("templateTemplate") != 0
+          && type.compareToIgnoreCase("formTemplate") != 0
+          && type.compareToIgnoreCase("normalTemplate") != 0
+          && type.compareToIgnoreCase("formDocument") != 0)
+        throw new InvalidCommandException(
+            "Angegebener TYPE ist ungültig oder falsch geschrieben. Erwarte \"templateTemplate\", \"formTemplate\", \"normalTemplate\" oder \"formDocument\"!");
+    }
+
+    String getType()
+    {
+      return type;
+    }
+
+    protected boolean canHaveChilds()
+    {
+      return false;
     }
 
     public int execute(DocumentCommand.Executor visitable)

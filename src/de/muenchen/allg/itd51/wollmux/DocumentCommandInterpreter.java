@@ -45,15 +45,11 @@ import com.sun.star.uno.Exception;
 
 import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.DocumentCommand.Executor;
-import de.muenchen.allg.itd51.wollmux.DocumentCommand.Form;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertContent;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertFrag;
-import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertValue;
-import de.muenchen.allg.itd51.wollmux.DocumentCommand.InvalidCommand;
-import de.muenchen.allg.itd51.wollmux.DocumentCommand.RootElement;
+import de.muenchen.allg.itd51.wollmux.DocumentCommand.SetType;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.UpdateFields;
-import de.muenchen.allg.itd51.wollmux.DocumentCommand.Version;
+import de.muenchen.allg.itd51.wollmux.DocumentCommandTree.TreeExecutor;
 import de.muenchen.allg.itd51.wollmux.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.db.DatasetNotFoundException;
 import de.muenchen.allg.itd51.wollmux.dialog.FormGUI;
@@ -78,28 +74,9 @@ public class DocumentCommandInterpreter
   private UnoService document;
 
   /**
-   * Die Liste der Fragment-urls, die bei den Kommandos "insertContent"
-   * eingefügt werden sollen.
+   * Der geparste Dokumentkommando-Baum
    */
-  private String[] fragUrls;
-
-  /**
-   * Die Liste der Fragment-urls, die bei den Kommandos "insertContent"
-   * eingefügt werden sollen.
-   */
-  private int fragUrlsCount = 0;
-
-  /**
-   * Das ConfigThingy enthält alle Form-Desriptoren, die im Lauf des
-   * interpret-Vorgangs aufgesammelt werden.
-   */
-  private ConfigThingy formDescriptors;
-
-  /**
-   * Dieses Flag wird in executeForm auf true gesetzt, wenn das Dokument
-   * mindestens eine Formularbeschreibung enthält.
-   */
-  private boolean documentIsAFormular;
+  private DocumentCommandTree tree;
 
   /**
    * Der Konstruktor erzeugt einen neuen Kommandointerpreter, der alle
@@ -114,77 +91,63 @@ public class DocumentCommandInterpreter
    *          Eine Liste mit fragment-urls, die für das Kommando insertContent
    *          benötigt wird.
    */
-  public DocumentCommandInterpreter(XTextDocument xDoc, WollMuxSingleton mux,
-      String[] frag_urls)
+  public DocumentCommandInterpreter(XTextDocument xDoc, WollMuxSingleton mux)
   {
     this.document = new UnoService(xDoc);
     this.mux = mux;
-    this.formDescriptors = new ConfigThingy("Forms");
-    this.documentIsAFormular = false;
-    this.fragUrls = frag_urls;
+    this.tree = new DocumentCommandTree(document.xBookmarksSupplier());
   }
 
   /**
-   * Über diese Methode wird die eigentliche Ausführung der Interpretation der
-   * Dokumentkommandos gestartet. Ein WM-Kommando besitzt sie Syntax "WM (
-   * Unterkommando ){Zahl}", wobei Spaces an jeder Stelle auftauchen oder
-   * weggelassen werden dürfen. Der Wert {Zahl} am Ende des Kommandos dient zur
-   * Unterscheidung verschiedener Bookmarks in OOo und ist optional.
-   * 
-   * Alle Bookmarks, die nicht dieser Syntax entsprechen, werden als normale
-   * Bookmarks behandelt und nicht vom Interpreter bearbeitet.
+   * Über diese Methode wird die Ausführung der Kommandos gestartet, die für das
+   * Expandieren und Befüllen von Dokumenten notwendig sind.
    * 
    * @throws WMCommandsFailedException
    */
-  public void interpret() throws WMCommandsFailedException
+  public void executeTemplateCommands(String[] fragUrls)
+      throws WMCommandsFailedException
   {
-
-    // Dokumentkommando-Baum scannen:
-    DocumentCommandTree tree = new DocumentCommandTree(document.xComponent());
-    tree.update();
+    Logger.debug("executeTemplateCommands");
 
     // Zähler für aufgetretene Fehler bei der Bearbeitung der Kommandos.
     int errors = 0;
 
-    if (isOpenAsTemplate(tree))
-    {
-      // 1) Zuerst alle Kommandos bearbeiten, die irgendwie Kinder bekommen
-      // können, damit der DocumentCommandTree vollständig aufgebaut werden
-      // kann.
-      errors += new DocumentExpander().execute(tree);
+    // 1) Zuerst alle Kommandos bearbeiten, die irgendwie Kinder bekommen
+    // können, damit der DocumentCommandTree vollständig aufgebaut werden
+    // kann.
+    errors += new DocumentExpander(fragUrls).execute(tree);
 
-      // 2) Jetzt können die TextFelder innerhalb der updateFields Kommandos
-      // geupdatet werden. Durch die Auslagerung in einen extra Schritt wird die
-      // Reihenfolge der Abarbeitung klar definiert (zuerst die updateFields
-      // Kommandos, dann die anderen Kommandos). Dies ist wichtig, da
-      // insbesondere das updateFields Kommando exakt mit einem anderen Kommando
-      // übereinander liegen kann. Ausserdem liegt updateFields thematisch näher
-      // am expandieren der Textfragmente, da updateFields im Prinzip nur dessen
-      // Schwäche beseitigt.
-      errors += new TextFieldUpdater().execute(tree);
+    // 2) Jetzt können die TextFelder innerhalb der updateFields Kommandos
+    // geupdatet werden. Durch die Auslagerung in einen extra Schritt wird die
+    // Reihenfolge der Abarbeitung klar definiert (zuerst die updateFields
+    // Kommandos, dann die anderen Kommandos). Dies ist wichtig, da
+    // insbesondere das updateFields Kommando exakt mit einem anderen Kommando
+    // übereinander liegen kann. Ausserdem liegt updateFields thematisch näher
+    // am expandieren der Textfragmente, da updateFields im Prinzip nur dessen
+    // Schwäche beseitigt.
+    errors += new TextFieldUpdater().execute(tree);
 
-      // 3) Hauptverarbeitung: Jetzt alle noch übrigen DocumentCommands (z.B.
-      // insertValues) in einem einzigen Durchlauf mit execute bearbeiten.
-      errors += new MainProcessor().execute(tree);
+    // 3) Hauptverarbeitung: Jetzt alle noch übrigen DocumentCommands (z.B.
+    // insertValues) in einem einzigen Durchlauf mit execute bearbeiten.
+    errors += new MainProcessor().execute(tree);
 
-      // 4) Da keine neuen Elemente mehr eingefügt werden müssen, können
-      // jetzt die INSERT_MARKS "<" und ">" der insertFrags und
-      // InsertContent-Kommandos gelöscht werden.
-      errors += cleanInsertMarks(tree);
+    // 4) Da keine neuen Elemente mehr eingefügt werden müssen, können
+    // jetzt die INSERT_MARKS "<" und ">" der insertFrags und
+    // InsertContent-Kommandos gelöscht werden.
+    errors += cleanInsertMarks(tree);
 
-      // 5) Erst nachdem die INSERT_MARKS entfernt wurden, lassen sich leere
-      // Absätze zum Beginn und Ende der insertFrag bzw. insertContent-Kommandos
-      // sauber erkennen und entfernen.
-      errors += new EmptyParagraphCleaner().execute(tree);
+    // 5) Erst nachdem die INSERT_MARKS entfernt wurden, lassen sich leere
+    // Absätze zum Beginn und Ende der insertFrag bzw. insertContent-Kommandos
+    // sauber erkennen und entfernen.
+    errors += new EmptyParagraphCleaner().execute(tree);
 
-      // 6) Die Statusänderungen der Dokumentkommandos auf die Bookmarks
-      // übertragen bzw. die Bookmarks abgearbeiteter Kommandos löschen.
-      tree.updateBookmarks(mux.isDebugMode());
+    // 6) Die Statusänderungen der Dokumentkommandos auf die Bookmarks
+    // übertragen bzw. die Bookmarks abgearbeiteter Kommandos löschen.
+    tree.updateBookmarks(mux.isDebugMode());
 
-      // 7) Document-Modified auf false setzen, da nur wirkliche
-      // Benutzerinteraktionen den Modified-Status beeinflussen sollen.
-      setDocumentModified(false);
-    }
+    // 7) Document-Modified auf false setzen, da nur wirkliche
+    // Benutzerinteraktionen den Modified-Status beeinflussen sollen.
+    setDocumentModified(false);
 
     // ggf. eine WMCommandsFailedException werfen:
     if (errors != 0)
@@ -196,36 +159,47 @@ public class DocumentCommandInterpreter
               + "Bitte überprüfen Sie das Dokument und kontaktieren ggf. die "
               + "für Sie zuständige Systemadministration.");
     }
-
-    // Formulardialog starten:
-    if (documentIsAFormular)
-    {
-      startFormGUI();
-    }
   }
 
   /**
-   * Die Methode ermittelt, ob das Dokument als Vorlage behandelt wird und damit
-   * die enthaltenen Dokumentkommandos ausgewertet werden sollen (bei true) oder
-   * nicht (bei false).
+   * Diese Methode führt alle Kommandos aus, im Zusammenhang mit der
+   * Formularbearbeitung ausgeführt werden müssen.
    */
-  private boolean isOpenAsTemplate(DocumentCommandTree tree)
+  public void executeFormCommands()
   {
-    // Vorbelegung: im Zweifelsfall immer als Template öffnen.
-    boolean isTemplate = true;
+    Logger.debug("executeFormCommands");
 
-    // Bei Templates besitzt das xDoc kein URL-Attribut, bei normalen
-    // Dokumenten schon.
-    if (document.xTextDocument() != null)
-      isTemplate = (document.xTextDocument().getURL() == null || document
-          .xTextDocument().getURL().equals(""));
+    // 1) Scannen aller für das Formular relevanten Informationen:
+    FormScanner fs = new FormScanner();
+    fs.execute(tree);
+    ConfigThingy descs = fs.getFormDescriptors();
+    if (descs.query("Formular").count() == 0)
+    {
+      Logger.error("Das Formular enthält keine Formularbeschreibung!");
+      descs = new ConfigThingy("WM").add("Formular").add("Fenster");
+      // FIXME: Standardfehlerverhalten geht noch nicht richtig!
+    }
 
-    return isTemplate;
+    // 2) Bookmarks updaten
+    tree.updateBookmarks(mux.isDebugMode());
+
+    // 3) Document-Modified auf false setzen, da nur wirkliche
+    // Benutzerinteraktionen den Modified-Status beeinflussen sollen.
+    setDocumentModified(false);
+
+    // 4) Formulardialog starten:
+    FormModel fm = new FormModelImpl(document.xComponent());
+
+    new FormGUI(descs, fm, new HashMap(), mux.getGlobalFunctions(), mux
+        .getFunctionDialogs());
   }
 
-  private class EmptyParagraphCleaner implements Executor
+  /**
+   * Der EmptyParagraphCleaner löscht leere Absätze aus allen zuvor eingefügten
+   * Textfragmenten heraus.
+   */
+  private class EmptyParagraphCleaner extends TreeExecutor
   {
-
     /**
      * Diese Methode löscht leere Absätze, die sich um die im Kommandobaum tree
      * enthaltenen Dokumentkommandos vom Typ FragmentInserter befinden.
@@ -238,24 +212,17 @@ public class DocumentCommandInterpreter
     {
       setLockControllers(true);
 
+      int errors = 0;
       Iterator iter = tree.depthFirstIterator(false);
       while (iter.hasNext())
       {
         DocumentCommand cmd = (DocumentCommand) iter.next();
-        if (cmd.isDone() == true
-            && cmd instanceof DocumentCommand.FragmentInserter)
-        {
-          cmd.execute(this);
-        }
+        errors += cmd.execute(this);
       }
 
       setLockControllers(false);
-      return 0;
-    }
 
-    public int executeCommand(RootElement cmd)
-    {
-      return 0;
+      return errors;
     }
 
     public int executeCommand(InsertFrag cmd)
@@ -264,34 +231,9 @@ public class DocumentCommandInterpreter
       return 0;
     }
 
-    public int executeCommand(InsertValue cmd)
-    {
-      return 0;
-    }
-
     public int executeCommand(InsertContent cmd)
     {
       cleanEmptyParagraphsForCommand(cmd);
-      return 0;
-    }
-
-    public int executeCommand(Form cmd)
-    {
-      return 0;
-    }
-
-    public int executeCommand(InvalidCommand cmd)
-    {
-      return 0;
-    }
-
-    public int executeCommand(Version cmd)
-    {
-      return 0;
-    }
-
-    public int executeCommand(UpdateFields cmd)
-    {
       return 0;
     }
 
@@ -525,19 +467,6 @@ public class DocumentCommandInterpreter
   }
 
   /**
-   * Diese Methode startet die FormularGUI. Sie enthält vorerst nur eine
-   * dummy-implementierung, bei der auch noch keine im Dokument gesetzten
-   * Feldinhalte ausgewertet werden. D.h. die GUI startet immer mit einer leeren
-   * IdToPreset-Map.
-   */
-  private void startFormGUI()
-  {
-    FormModel fm = new FormModelImpl(document.xComponent());
-    new FormGUI(formDescriptors, fm, new HashMap(), mux.getGlobalFunctions(),
-        mux.getFunctionDialogs());
-  }
-
-  /**
    * Der DocumentExpander sorgt dafür, dass das Dokument nach Ausführung der
    * enthaltenen Kommandos komplett aufgebaut ist und alle Textfragmente
    * eingefügt wurden.
@@ -545,42 +474,38 @@ public class DocumentCommandInterpreter
    * @author christoph.lutz
    * 
    */
-  private class DocumentExpander implements DocumentCommand.Executor
+  private class DocumentExpander extends TreeExecutor
   {
-    private boolean changed;
+    private String[] fragUrls;
 
-    private int execute(DocumentCommandTree tree)
+    private int fragUrlsCount = 0;
+
+    /**
+     * Erzeugt einen neuen DocumentExpander, mit der Liste fragUrls, die die
+     * URLs beschreibt, von denen die Textfragmente für den insertContent Befehl
+     * bezogen werden sollen.
+     * 
+     * @param fragUrls
+     */
+    public DocumentExpander(String[] fragUrls)
     {
-      int errors = 0;
-      do
-      {
-        changed = false;
-
-        // Alle (neuen) DocumentCommands durchlaufen und mit execute aufrufen.
-        tree.update();
-        Iterator iter = tree.depthFirstIterator(false);
-        while (iter.hasNext())
-        {
-          DocumentCommand cmd = (DocumentCommand) iter.next();
-
-          if (cmd.isDone() == false && cmd.hasError() == false)
-          {
-            // Kommando ausführen und Fehler zählen
-            errors += cmd.execute(this);
-          }
-        }
-      } while (changed);
-      return errors;
+      this.fragUrls = fragUrls;
+      this.fragUrlsCount = 0;
     }
 
-    public int executeCommand(RootElement cmd)
+    public int execute(DocumentCommandTree tree)
     {
-      return 0;
+      return executeDepthFirst(tree, false);
     }
 
+    /**
+     * Diese Methode fügt das Textfragment frag_id in den gegebenen Bookmark
+     * bookmarkName ein. Im Fehlerfall wird eine entsprechende Fehlermeldung
+     * eingefügt.
+     */
     public int executeCommand(InsertFrag cmd)
     {
-      changed = true;
+      repeatScan = true;
       cmd.setErrorState(false);
       try
       {
@@ -608,14 +533,14 @@ public class DocumentCommandInterpreter
       return 0;
     }
 
-    public int executeCommand(InsertValue cmd)
-    {
-      return 0;
-    }
-
+    /**
+     * Diese Methode fügt das nächste Textfragment aus der dem
+     * WMCommandInterpreter übergebenen frag_urls liste ein. Im Fehlerfall wird
+     * eine entsprechende Fehlermeldung eingefügt.
+     */
     public int executeCommand(InsertContent cmd)
     {
-      changed = true;
+      repeatScan = true;
       cmd.setErrorState(false);
       if (fragUrls.length > fragUrlsCount)
       {
@@ -635,26 +560,6 @@ public class DocumentCommandInterpreter
         }
       }
       cmd.setDoneState(true);
-      return 0;
-    }
-
-    public int executeCommand(Form cmd)
-    {
-      return 0;
-    }
-
-    public int executeCommand(InvalidCommand cmd)
-    {
-      return 0;
-    }
-
-    public int executeCommand(Version cmd)
-    {
-      return 0;
-    }
-
-    public int executeCommand(UpdateFields cmd)
-    {
       return 0;
     }
 
@@ -773,38 +678,17 @@ public class DocumentCommandInterpreter
    * @author christoph.lutz
    * 
    */
-  private class MainProcessor implements DocumentCommand.Executor
+  private class MainProcessor extends TreeExecutor
   {
-
     /**
-     * Diese Methode führt alle Dokumentkommandos aus, wenn Sie nicht den Status
-     * DONE=true oder ERROR=true besitzen.
-     * 
-     * @param tree
-     *          Der Kommandobaum der die auszuführenden Kommandos enthält.
-     * @return die Anzahl der bei der Ersetzung aufgetretenen Fehler.
+     * Hauptverarbeitungsschritt starten.
      */
     private int execute(DocumentCommandTree tree)
     {
-      // Während der Bearbeitung der einfachen Kommandos (z.B. insertValues)
-      // muss man nicht jede Änderung sofort sehen (Geschwindigkeitsvorteil, da
-      // OOo nicht neu rendern muss). Ist im Debug-Modus abgeschalten:
       setLockControllers(true);
 
-      // Ausführung der Kommandos
-      int errors = 0;
-      Iterator iter = tree.depthFirstIterator(false);
-      while (iter.hasNext())
-      {
-        DocumentCommand cmd = (DocumentCommand) iter.next();
-        if (cmd.isDone() == false && cmd.hasError() == false)
-        {
-          // Kommandos ausführen und Fehler zählen
-          errors += cmd.execute(this);
-        }
-      }
+      int errors = executeDepthFirst(tree, false);
 
-      // Jetzt darf man wieder was sehen:
       setLockControllers(false);
 
       return errors;
@@ -867,73 +751,6 @@ public class DocumentCommandInterpreter
     }
 
     /**
-     * Diese Methode fügt das Textfragment frag_id in den gegebenen Bookmark
-     * bookmarkName ein. Im Fehlerfall wird die Fehlermeldung eingefügt.
-     */
-    public int executeCommand(DocumentCommand.InsertFrag cmd)
-    {
-      return 0;
-    }
-
-    /**
-     * Diese Methode fügt das nächste Textfragment aus der dem
-     * WMCommandInterpreter übergebenen frag_urls liste ein. Im Fehlerfall wird
-     * die Fehlermeldung eingefügt.
-     */
-    public int executeCommand(DocumentCommand.InsertContent cmd)
-    {
-      return 0;
-    }
-
-    /**
-     * Hinter einem Form-Kommando verbirgt sich eine Notiz, die das Formular
-     * beschreibt, das in der FormularGUI angezeigt werden soll. Das Kommando
-     * executeForm sammelt alle solchen Formularbeschreibungen im
-     * formDescriptor. Enthält der formDescriptor mehr als einen Eintrag, wird
-     * nach dem interpret-Vorgang die FormGUI gestartet.
-     */
-    public int executeCommand(DocumentCommand.Form cmd)
-    {
-      cmd.setErrorState(false);
-      try
-      {
-        XTextRange range = cmd.getTextRange();
-        Object content = null;
-        if (range != null)
-        {
-          UnoService cursor = new UnoService(range.getText()
-              .createTextCursorByRange(range));
-          UnoService textfield = cursor.getPropertyValue("TextField");
-          content = textfield.getPropertyValue("Content").getObject();
-        }
-        if (content != null)
-        {
-          ConfigThingy ct = new ConfigThingy("", null, new StringReader(content
-              .toString()));
-          ConfigThingy formulars = ct.query("Formular");
-          if (formulars.count() == 0)
-            throw new ConfigurationErrorException(
-                "Formularbeschreibung enthält keinen Abschnitt \"Formular\".");
-          documentIsAFormular = true;
-          Iterator formIter = formulars.iterator();
-          while (formIter.hasNext())
-          {
-            ConfigThingy form = (ConfigThingy) formIter.next();
-            formDescriptors.addChild(form);
-          }
-        }
-      }
-      catch (java.lang.Exception e)
-      {
-        insertErrorField(cmd, e);
-        cmd.setErrorState(true);
-        return 1;
-      }
-      cmd.setDoneState(true);
-      return 0;
-    }
-
-    /**
      * Gibt Informationen über die aktuelle Install-Version des WollMux aus.
      */
     public int executeCommand(DocumentCommand.Version cmd)
@@ -946,80 +763,45 @@ public class DocumentCommandInterpreter
       return 0;
     }
 
-    public int executeCommand(RootElement cmd)
+    /**
+     * Ist der Dokumenttyp "normalTemplate" gesetzt, wird es hier auf DONE=true
+     * gesetzt (die Dokumenttypen "formTemplate" und "formDocument" werden im
+     * FormScanner behandelt).
+     */
+    public int executeCommand(SetType cmd)
     {
-      return 0;
-    }
-
-    public int executeCommand(UpdateFields cmd)
-    {
+      if (cmd.getType().compareToIgnoreCase("normalTemplate") == 0)
+      {
+        cmd.setDoneState(true);
+      }
       return 0;
     }
   }
 
-  private class TextFieldUpdater implements DocumentCommand.Executor
+  /**
+   * Dieser Executor hat die Aufgabe alle updateFields-Befehle zu verarbeiten.
+   */
+  private class TextFieldUpdater extends TreeExecutor
   {
+    /**
+     * Ausführung starten
+     */
     private int execute(DocumentCommandTree tree)
     {
       setLockControllers(true);
 
-      // Ausführung der Kommandos
-      int errors = 0;
-      Iterator iter = tree.depthFirstIterator(false);
-      while (iter.hasNext())
-      {
-        DocumentCommand cmd = (DocumentCommand) iter.next();
-        if (cmd.isDone() == false && cmd.hasError() == false)
-        {
-          // Kommandos ausführen und Fehler zählen
-          errors += cmd.execute(this);
-        }
-      }
+      int errors = executeDepthFirst(tree, false);
 
-      // Jetzt darf man wieder was sehen:
       setLockControllers(false);
 
       return errors;
     }
 
-    public int executeCommand(RootElement cmd)
-    {
-      return 0;
-    }
-
-    public int executeCommand(InsertFrag cmd)
-    {
-      return 0;
-    }
-
-    public int executeCommand(InsertValue cmd)
-    {
-      return 0;
-    }
-
-    public int executeCommand(InsertContent cmd)
-    {
-      return 0;
-    }
-
-    public int executeCommand(Form cmd)
-    {
-      return 0;
-    }
-
-    public int executeCommand(InvalidCommand cmd)
-    {
-      return 0;
-    }
-
-    public int executeCommand(Version cmd)
-    {
-      return 0;
-    }
-
+    /**
+     * Diese Methode updated alle TextFields, die das Kommando cmd umschließt.
+     */
     public int executeCommand(UpdateFields cmd)
     {
-      Logger.debug("Ausführen des Kommandos \"" + cmd + "\"");
       XTextRange range = cmd.getTextRange();
       if (range != null)
       {
@@ -1077,6 +859,97 @@ public class DocumentCommandInterpreter
     }
   }
 
+  /**
+   * Der FormScanner erstellt alle Datenstrukturen, die für die Ausführung der
+   * FormGUI notwendig sind.
+   */
+  private class FormScanner extends TreeExecutor
+  {
+    /**
+     * Das ConfigThingy enthält alle Form-Desriptoren, die im Lauf des
+     * interpret-Vorgangs aufgesammelt werden.
+     */
+    private ConfigThingy formDescriptors = new ConfigThingy("Form");
+
+    private ConfigThingy getFormDescriptors()
+    {
+      return formDescriptors;
+    }
+
+    /**
+     * Ausführung starten
+     */
+    private int execute(DocumentCommandTree tree)
+    {
+      return executeDepthFirst(tree, false);
+    }
+
+    /**
+     * Hinter einem Form-Kommando verbirgt sich eine Notiz, die das Formular
+     * beschreibt, das in der FormularGUI angezeigt werden soll. Das Kommando
+     * executeForm sammelt alle solchen Formularbeschreibungen im
+     * formDescriptor. Enthält der formDescriptor mehr als einen Eintrag, wird
+     * nach dem interpret-Vorgang die FormGUI gestartet.
+     */
+    public int executeCommand(DocumentCommand.Form cmd)
+    {
+      cmd.setErrorState(false);
+      try
+      {
+        XTextRange range = cmd.getTextRange();
+        Object content = null;
+        if (range != null)
+        {
+          UnoService cursor = new UnoService(range.getText()
+              .createTextCursorByRange(range));
+          UnoService textfield = cursor.getPropertyValue("TextField");
+          content = textfield.getPropertyValue("Content").getObject();
+        }
+        if (content != null)
+        {
+          ConfigThingy ct = new ConfigThingy("", null, new StringReader(content
+              .toString()));
+          ConfigThingy formulars = ct.query("Formular");
+          if (formulars.count() == 0)
+            throw new ConfigurationErrorException(
+                "Formularbeschreibung enthält keinen Abschnitt \"Formular\".");
+          Iterator formIter = formulars.iterator();
+          while (formIter.hasNext())
+          {
+            ConfigThingy form = (ConfigThingy) formIter.next();
+            formDescriptors.addChild(form);
+          }
+        }
+      }
+      catch (java.lang.Exception e)
+      {
+        insertErrorField(cmd, e);
+        cmd.setErrorState(true);
+        return 1;
+      }
+      cmd.setDoneState(true);
+      return 0;
+    }
+
+    /**
+     * Behandlung der Dokumenttypen "formTemplate" und "formDocument":
+     */
+    public int executeCommand(SetType cmd)
+    {
+      // FormDocument bleibt unverändert bestehen. Daher hier kein Code dazu!
+
+      if (cmd.getType().compareToIgnoreCase("formTemplate") == 0)
+      {
+        cmd.setDoneState(true);
+        // erzeuge ein neues Bookmark für den Typen formDocument
+        new Bookmark(DocumentCommand.SETTYPE_formDocument, document
+            .xTextDocument(), cmd.getTextRange());
+      }
+
+      return 0;
+    }
+  }
+
   // Helper-Methoden:
 
   /**
@@ -1088,7 +961,8 @@ public class DocumentCommandInterpreter
   {
     try
     {
-      document.xModifiable().setModified(state);
+      if (document.xModifiable() != null)
+        document.xModifiable().setModified(state);
     }
     catch (PropertyVetoException x)
     {
