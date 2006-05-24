@@ -29,6 +29,7 @@ import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextRange;
 import com.sun.star.uno.Exception;
 
+import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.parser.SyntaxErrorException;
@@ -43,7 +44,6 @@ import de.muenchen.allg.itd51.parser.SyntaxErrorException;
  */
 abstract public class DocumentCommand
 {
-
   /**
    * Spezialkommando zum Setzen des Dokumenttyps auf "normalTemplate". Dieses
    * Spezialkommando muss exakt in der vorgegebenen Schreibweise geschrieben
@@ -57,13 +57,6 @@ abstract public class DocumentCommand
    * sein.
    */
   public final static String SETTYPE_templateTemplate = "WM(CMD 'setType' TYPE 'templateTemplate')";
-
-  /**
-   * Spezialkommando zum Setzen des Dokumenttyps auf "formTemplate". Dieses
-   * Spezialkommando muss exakt in der vorgegebenen Schreibweise geschrieben
-   * sein.
-   */
-  public final static String SETTYPE_formTemplate = "WM(CMD 'setType' TYPE 'formTemplate')";
 
   /**
    * Spezialkommando zum Setzen des Dokumenttyps auf "formDocument". Dieses
@@ -653,6 +646,8 @@ abstract public class DocumentCommand
     public int executeCommand(DocumentCommand.UpdateFields cmd);
 
     public int executeCommand(DocumentCommand.SetType cmd);
+
+    public int executeCommand(DocumentCommand.InsertFormValue cmd);
   }
 
   // ********************************************************************************
@@ -993,6 +988,68 @@ abstract public class DocumentCommand
 
   // ********************************************************************************
   /**
+   * Dieses Kommando fügt den Wert eines Absenderfeldes in den Briefkopf ein.
+   */
+  static public class InsertFormValue extends DocumentCommand
+  {
+    private String id = null;
+
+    private String trafo = null;
+
+    private UnoService textField;
+
+    public InsertFormValue(ConfigThingy wmCmd, Bookmark bookmark)
+        throws InvalidCommandException
+    {
+      super(wmCmd, bookmark);
+
+      try
+      {
+        id = wmCmd.get("WM").get("ID").toString();
+      }
+      catch (NodeNotFoundException e)
+      {
+        throw new InvalidCommandException("Fehlendes Attribut ID");
+      }
+
+      try
+      {
+        trafo = wmCmd.get("WM").get("TRAFO").toString();
+      }
+      catch (NodeNotFoundException e)
+      {
+        // TRAFO ist optional
+      }
+    }
+
+    public String getID()
+    {
+      return id;
+    }
+
+    public String getTrafoName()
+    {
+      return trafo;
+    }
+
+    public UnoService getInputField()
+    {
+      return textField;
+    }
+
+    protected boolean canHaveChilds()
+    {
+      return false;
+    }
+
+    public int execute(DocumentCommand.Executor visitable)
+    {
+      return visitable.executeCommand(this);
+    }
+  }
+  
+  // ********************************************************************************
+  /**
    * Dieses Kommando fügt die Versionsnummer der aktuellen WollMux-Installation
    * in das Dokument ein.
    */
@@ -1062,11 +1119,10 @@ abstract public class DocumentCommand
         throw new InvalidCommandException("Fehlendes Attribut TYPE");
       }
       if (type.compareToIgnoreCase("templateTemplate") != 0
-          && type.compareToIgnoreCase("formTemplate") != 0
           && type.compareToIgnoreCase("normalTemplate") != 0
           && type.compareToIgnoreCase("formDocument") != 0)
         throw new InvalidCommandException(
-            "Angegebener TYPE ist ungültig oder falsch geschrieben. Erwarte \"templateTemplate\", \"formTemplate\", \"normalTemplate\" oder \"formDocument\"!");
+            "Angegebener TYPE ist ungültig oder falsch geschrieben. Erwarte \"templateTemplate\", \"normalTemplate\" oder \"formDocument\"!");
     }
 
     String getType()

@@ -427,7 +427,7 @@ public class EventHandler
         processNormalCommands = (source.xTextDocument().getURL() == null || source
             .xTextDocument().getURL().equals(""));
 
-      // Auswerten der Special-Bookmarks "setType"
+      // Auswerten der Special-Bookmarks "WM(CMD 'setType' TYPE '...')"
       if (source.xBookmarksSupplier() != null)
       {
         XNameAccess bookmarks = source.xBookmarksSupplier().getBookmarks();
@@ -435,44 +435,25 @@ public class EventHandler
         {
           processNormalCommands = true;
           processFormCommands = false;
-        }
-        else if (bookmarks.hasByName(DocumentCommand.SETTYPE_formTemplate))
-        {
-          processNormalCommands = true;
-          processFormCommands = true;
-        }
-        else if (bookmarks.hasByName(DocumentCommand.SETTYPE_formDocument))
-        {
-          processNormalCommands = false;
-          processFormCommands = true;
+
+          // Bookmark löschen
+          removeBookmark(source, DocumentCommand.SETTYPE_normalTemplate);
         }
         else if (bookmarks.hasByName(DocumentCommand.SETTYPE_templateTemplate))
         {
           processNormalCommands = false;
           processFormCommands = false;
 
-          // Bookmark gleich löschen, da ja hier der eigentliche Interpreter gar
-          // nicht aktiv wird.
-          try
-          {
-            Bookmark b = new Bookmark(DocumentCommand.SETTYPE_templateTemplate,
-                source.xBookmarksSupplier());
-            b.remove();
-          }
-          catch (NoSuchElementException e)
-          {
-            Logger.error(e);
-          }
+          // Bookmark löschen
+          removeBookmark(source, DocumentCommand.SETTYPE_templateTemplate);
+        }
+        else if (bookmarks.hasByName(DocumentCommand.SETTYPE_formDocument))
+        {
+          processNormalCommands = false;
+          processFormCommands = true;
 
-          // So tun als ob das Dokument nicht verändert worden wäre:
-          if (source.xModifiable() != null) try
-          {
-            source.xModifiable().setModified(false);
-          }
-          catch (PropertyVetoException e)
-          {
-            Logger.error(e);
-          }
+          // Das Bookmark wird NICHT aus dem Dokument gelöscht, da ein
+          // formDocument immer ein formDocument bleiben soll.
         }
       }
 
@@ -484,10 +465,45 @@ public class EventHandler
 
         if (processNormalCommands) dci.executeTemplateCommands(fragUrls);
 
-        if (processFormCommands) dci.executeFormCommands();
+        if (processFormCommands || dci.isFormular()) dci.executeFormCommands();
       }
     }
     return EventProcessor.processTheNextEvent;
+  }
+
+  /**
+   * Die Methode löscht das Bookmark name aus dem Dokument doc und setzt den
+   * document-modified-Status anschließend auf false, weil nur wirkliche
+   * Benutzerinteraktion zur Speichern-Abfrage beim Schließen führen sollte.
+   * 
+   * @param doc
+   * @param name
+   */
+  private static void removeBookmark(UnoService doc, String name)
+  {
+    try
+    {
+      if (doc.xBookmarksSupplier() != null)
+      {
+        Bookmark b = new Bookmark(name, doc.xBookmarksSupplier());
+        b.remove();
+      }
+    }
+    catch (NoSuchElementException e)
+    {
+      Logger.error(e);
+    }
+
+    // So tun als ob das Dokument (durch das Löschen des Bookmarks) nicht
+    // verändert worden wäre:
+    if (doc.xModifiable() != null) try
+    {
+      doc.xModifiable().setModified(false);
+    }
+    catch (PropertyVetoException e)
+    {
+      Logger.error(e);
+    }
   }
 
   private static boolean on_frame_changed(Event event)

@@ -179,6 +179,14 @@ public class Bookmark
   }
 
   /**
+   * Diese Methode liefert das Dokument zu dem das Bookmark gehört.
+   */
+  public XTextDocument getDocument()
+  {
+    return document.xTextDocument();
+  }
+
+  /**
    * Diese Methode vergleicht zwei Bookmarks und liefert ihre Relation zurück.
    * Folgende Rückgabewerte sind möglich: POS_BBAA = B kommt vor A; POS_BB88 = B
    * startet vor A, aber endet gemeinsam mit A; POS_B88B = B enthält A, beginnt

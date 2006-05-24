@@ -45,6 +45,7 @@ import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.parser.SyntaxErrorException;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.Form;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertContent;
+import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertFormValue;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertFrag;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertValue;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InvalidCommand;
@@ -234,7 +235,7 @@ public class DocumentCommandTree
 
       if (cmd.compareToIgnoreCase("insertFormValue") == 0)
       {
-        return new DocumentCommand.NotYetImplemented(wmCmd, bookmark);
+        return new DocumentCommand.InsertFormValue(wmCmd, bookmark);
       }
 
       if (cmd.compareToIgnoreCase("insertFunctionValue") == 0)
@@ -476,6 +477,11 @@ public class DocumentCommandTree
     }
 
     public int executeCommand(SetType cmd)
+    {
+      return 0;
+    }
+
+    public int executeCommand(InsertFormValue cmd)
     {
       return 0;
     }

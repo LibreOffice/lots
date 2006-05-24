@@ -29,6 +29,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Vector;
 
 import com.sun.star.awt.FontWeight;
 import com.sun.star.beans.PropertyValue;
@@ -40,12 +41,15 @@ import com.sun.star.io.IOException;
 import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
+import com.sun.star.text.XTextField;
 import com.sun.star.text.XTextRange;
 import com.sun.star.uno.Exception;
 
 import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.DocumentCommand.Form;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertContent;
+import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertFormValue;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertFrag;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.SetType;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.UpdateFields;
@@ -79,6 +83,13 @@ public class DocumentCommandInterpreter
   private DocumentCommandTree tree;
 
   /**
+   * Das Feld beschreibt, ob es sich bei dem Dokument um ein Formular handelt.
+   * Das Feld kann erst verwendet werden, nachdem die Methode
+   * executeTemplateCommands durchlaufen wurde.
+   */
+  private boolean isAFormular;
+
+  /**
    * Der Konstruktor erzeugt einen neuen Kommandointerpreter, der alle
    * Dokumentkommandos im übergebenen Dokument xDoc scannen und interpretieren
    * kann.
@@ -96,6 +107,7 @@ public class DocumentCommandInterpreter
     this.document = new UnoService(xDoc);
     this.mux = mux;
     this.tree = new DocumentCommandTree(document.xBookmarksSupplier());
+    this.isAFormular = false;
   }
 
   /**
@@ -153,41 +165,79 @@ public class DocumentCommandInterpreter
     if (errors != 0)
     {
       throw new WMCommandsFailedException(
-          "Bei der Dokumenterzeugung mit dem Briefkopfsystem trat(en) "
-              + errors
-              + " Fehler auf.\n\n"
-              + "Bitte überprüfen Sie das Dokument und kontaktieren ggf. die "
-              + "für Sie zuständige Systemadministration.");
+          "Die verwendete Vorlage enthält "
+              + ((errors == 1) ? "einen" : "" + errors)
+              + " Fehler.\n\n"
+              + "Bitte kontaktieren Sie Ihre Systemadministration.");
     }
+  }
+
+  /**
+   * Die Methode gibt Auskunft darüber, ob das Dokument ein Formular ist (also
+   * mindestens ein WM(CMD'Form') Kommando enthält) und darf erst verwendet
+   * werden, nachdem die Methode executeTemplateCommands durchlaufen wurde.
+   * 
+   * @return true, wenn sich während des executeTemplateCommands herausgestellt
+   *         hat, dass das Dokument mindestens ein WM(CMD 'Form')-Kommando
+   *         enthält. Ansonsten false
+   */
+  public boolean isFormular()
+  {
+    return this.isAFormular;
   }
 
   /**
    * Diese Methode führt alle Kommandos aus, im Zusammenhang mit der
    * Formularbearbeitung ausgeführt werden müssen.
+   * 
+   * @throws WMCommandsFailedException
    */
-  public void executeFormCommands()
+  public void executeFormCommands() throws WMCommandsFailedException
   {
     Logger.debug("executeFormCommands");
+    int errors = 0;
 
     // 1) Scannen aller für das Formular relevanten Informationen:
     FormScanner fs = new FormScanner();
-    fs.execute(tree);
+    errors += fs.execute(tree);
+
     ConfigThingy descs = fs.getFormDescriptors();
-    if (descs.query("Formular").count() == 0)
-    {
-      Logger.error("Das Formular enthält keine Formularbeschreibung!");
-      descs = new ConfigThingy("WM").add("Formular").add("Fenster");
-      // FIXME: Standardfehlerverhalten geht noch nicht richtig!
-    }
+    HashMap idToFormFields = fs.getIDToFormFields();
+    if (idToFormFields.containsKey("fixme"))
+    // TODO: behandlung von idToFormFields
+      ;
 
     // 2) Bookmarks updaten
     tree.updateBookmarks(mux.isDebugMode());
 
-    // 3) Document-Modified auf false setzen, da nur wirkliche
+    // 3) Jetzt wird ein WM(CMD 'setType' TYPE 'formDocument)-Kommando an den
+    // Anfang des Dokuments gesetzt um das Dokument als Formulardokument
+    // auszuzeichnen.
+    if (document.xTextDocument() != null)
+      new Bookmark(DocumentCommand.SETTYPE_formDocument, document
+          .xTextDocument(), document.xTextDocument().getText().getStart());
+
+    // 4) Document-Modified auf false setzen, da nur wirkliche
     // Benutzerinteraktionen den Modified-Status beeinflussen sollen.
     setDocumentModified(false);
 
-    // 4) Formulardialog starten:
+    // ggf. entsprechende WMCommandsFailedException werfen:
+    if (descs.query("Formular").count() == 0)
+    {
+      throw new WMCommandsFailedException(
+          "Die Vorlage bzw. das Formular enthält keine Formularbeschreibung\n\n"
+              + "Bitte kontaktieren Sie Ihre Systemadministration.");
+    }
+    if (errors != 0)
+    {
+      throw new WMCommandsFailedException(
+          "Die verwendete Vorlage enthält "
+              + ((errors == 1) ? "einen" : "" + errors)
+              + " Fehler.\n\n"
+              + "Bitte kontaktieren Sie Ihre Systemadministration.");
+    }
+
+    // 5) Formulardialog starten:
     FormModel fm = new FormModelImpl(document.xComponent());
 
     new FormGUI(descs, fm, new HashMap(), mux.getGlobalFunctions(), mux
@@ -764,17 +814,13 @@ public class DocumentCommandInterpreter
     }
 
     /**
-     * Ist der Dokumenttyp "normalTemplate" gesetzt, wird es hier auf DONE=true
-     * gesetzt (die Dokumenttypen "formTemplate" und "formDocument" werden im
-     * FormScanner behandelt).
+     * Diese Methode setzt nur isFormular auf true. Die Eigentliche Bearbeitung
+     * des Formulars erfolgt dann in executeFormCommands().
      */
-    public int executeCommand(SetType cmd)
+    public int executeCommand(Form cmd)
     {
-      if (cmd.getType().compareToIgnoreCase("normalTemplate") == 0)
-      {
-        cmd.setDoneState(true);
-      }
-      return 0;
+      isAFormular = true;
+      return super.executeCommand(cmd);
     }
   }
 
@@ -814,8 +860,9 @@ public class DocumentCommandInterpreter
     }
 
     /**
-     * Diese Methode durchsucht das Element element rekursiv nach TextFeldern
-     * und ruft deren Methode update() auf.
+     * Diese Methode durchsucht das Element element bzw. dessen
+     * XEnumerationAccess Interface rekursiv nach TextFeldern und ruft deren
+     * Methode update() auf.
      * 
      * @param element
      *          Das Element das geupdated werden soll.
@@ -871,9 +918,16 @@ public class DocumentCommandInterpreter
      */
     private ConfigThingy formDescriptors = new ConfigThingy("Form");
 
+    private HashMap idToFormFields = new HashMap();
+
     private ConfigThingy getFormDescriptors()
     {
       return formDescriptors;
+    }
+
+    private HashMap getIDToFormFields()
+    {
+      return idToFormFields;
     }
 
     /**
@@ -894,16 +948,27 @@ public class DocumentCommandInterpreter
     public int executeCommand(DocumentCommand.Form cmd)
     {
       cmd.setErrorState(false);
+      XTextRange range = cmd.getTextRange();
+      Object content = null;
       try
       {
-        XTextRange range = cmd.getTextRange();
-        Object content = null;
         if (range != null)
         {
           UnoService cursor = new UnoService(range.getText()
               .createTextCursorByRange(range));
-          UnoService textfield = cursor.getPropertyValue("TextField");
-          content = textfield.getPropertyValue("Content").getObject();
+
+          UnoService textfield = new UnoService(findTextFieldRecursive(
+              cursor,
+              "com.sun.star.text.TextField.Annotation"));
+          try
+          {
+            content = textfield.getPropertyValue("Content").getObject();
+          }
+          catch (Exception e)
+          {
+            throw new ConfigurationErrorException(
+                "Das Notiz-Feld mit der Formularbeschreibung fehlt.");
+          }
         }
         if (content != null)
         {
@@ -927,30 +992,196 @@ public class DocumentCommandInterpreter
         cmd.setErrorState(true);
         return 1;
       }
-      cmd.setDoneState(true);
+      return 0;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.DocumentCommand.Executor#executeCommand(de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertFormValue)
+     */
+    public int executeCommand(InsertFormValue cmd)
+    {
+      final String tfServiceName = "com.sun.star.text.TextField.Input";
+
+      // Textfeld suchen:
+      UnoService inputField = new UnoService(null);
+      XTextRange range = cmd.getTextRange();
+      if (range != null)
+      {
+        UnoService cursor = new UnoService(range.getText()
+            .createTextCursorByRange(range));
+        inputField = new UnoService(findTextFieldRecursive(
+            cursor,
+            tfServiceName));
+      }
+
+      // wenn kein Textfeld vorhanden ist, wird eins neu erstellt
+      if (inputField.xTextField() == null)
+      {
+        Logger.debug(cmd + ": Erzeuge neues Input-Field.");
+        try
+        {
+          inputField = document.create(tfServiceName);
+          XTextCursor cursor = cmd.createInsertCursor();
+          if (cursor != null)
+          {
+            cursor.getText().insertTextContent(
+                cursor,
+                inputField.xTextContent(),
+                true);
+          }
+        }
+        catch (Exception e)
+        {
+          Logger.error(e);
+        }
+      }
+
+      // idToFormFields aufbauen
+      String id = cmd.getID();
+      Vector fields;
+      if (idToFormFields.containsKey(id))
+      {
+        fields = (Vector) idToFormFields.get(id);
+      }
+      else
+      {
+        fields = new Vector();
+        idToFormFields.put(id, fields);
+      }
+      fields.add(new FormField(cmd, inputField.xTextField()));
+
       return 0;
     }
 
     /**
-     * Behandlung der Dokumenttypen "formTemplate" und "formDocument":
+     * Da der DocumentTree zu diesem Zeitpunkt eigentlich gar kein
+     * SetType-Kommando mehr beinhalten darf, wird jedes evtl. noch vorhandene
+     * setType-Kommando auf DONE=true gesetzt, damit es beim updateBookmarks
+     * entfernt wird.
      */
     public int executeCommand(SetType cmd)
     {
-      // FormDocument bleibt unverändert bestehen. Daher hier kein Code dazu!
+      cmd.setDoneState(true);
+      return 0;
+    }
 
-      if (cmd.getType().compareToIgnoreCase("formTemplate") == 0)
+    // Helper-Methoden:
+
+    /**
+     * Diese Methode durchsucht das Element element bzw. dessen
+     * XEnumerationAccess Interface rekursiv nach InputFields und liefert das
+     * erste gefundene InputField zurück.
+     * 
+     * @param element
+     *          Das erste gefundene InputField.
+     */
+    private XTextField findTextFieldRecursive(UnoService element,
+        String serviceName)
+    {
+      // zuerst die Kinder durchsuchen (falls vorhanden):
+      if (element.xEnumerationAccess() != null)
       {
-        cmd.setDoneState(true);
-        // erzeuge ein neues Bookmark für den Typen formDocument
-        new Bookmark(DocumentCommand.SETTYPE_formDocument, document
-            .xTextDocument(), cmd.getTextRange());
+        XEnumeration xEnum = element.xEnumerationAccess().createEnumeration();
+
+        while (xEnum.hasMoreElements())
+        {
+          try
+          {
+            UnoService child = new UnoService(xEnum.nextElement());
+            XTextField found = findTextFieldRecursive(child, serviceName);
+            // das erste gefundene Element zurückliefern.
+            if (found != null) return found;
+          }
+          catch (java.lang.Exception e)
+          {
+            Logger.error(e);
+          }
+        }
       }
 
-      return 0;
+      // jetzt noch schauen, ob es sich bei dem Element um ein InputField
+      // handelt:
+      if (element.xTextField() != null)
+      {
+        try
+        {
+          UnoService textField = element.getPropertyValue("TextField");
+          if (textField.supportsService(serviceName))
+          {
+            return textField.xTextField();
+          }
+        }
+        catch (Exception e)
+        {
+        }
+      }
+
+      return null;
     }
   }
 
-  // Helper-Methoden:
+  /**
+   * Diese Klasse repräsentiert ein Formularfeld im Dokument an der Stelle eines
+   * insertFormValue-Kommandos.
+   * 
+   * @author lut
+   * 
+   */
+  public static class FormField
+  {
+    InsertFormValue cmd;
+
+    UnoService inputField;
+
+    public FormField(InsertFormValue cmd, XTextField xTextField)
+    {
+      inputField = new UnoService(xTextField);
+    }
+
+    /**
+     * Gibt an, ob der Inhalt des InputFields mit der zuletzt gesetzten MD5-Sum
+     * des Feldes übereinstimmt oder ob der Wert seitdem geändert wurde (z.B.
+     * durch manuelles Setzen des Feldinhalts durch den Benutzer).
+     * 
+     * @return true, wenn sich der der Inhalt des InputFields nicht mehr mit der
+     *         zuletzt gesetzten MD5-Sum übereinstimmt, ansonsten false
+     */
+    public boolean hasChangedPreviously()
+    {
+      // TODO: implementieren von FormField.changedPreviously
+      return false;
+    }
+
+    /**
+     * Diese Methode belegt den Wert des Formularfeldes im Dokument mit dem
+     * neuen Inhalt value; ist das Formularfeld mit einer TRAFO belegt, so wird
+     * vor dem setzen des neuen Inhaltes die TRAFO-Funktion ausgeführt und der
+     * neu berechnete Wert stattdessen eingefügt.
+     * 
+     * @param value
+     */
+    public void setValue(String value)
+    {
+      if (cmd.getTrafoName() != null)
+      {
+        // value = trafo(value)
+      }
+      // - md5=calcMD5(value)
+      // - cmd.setMD5(md5)
+      if (inputField.xTextField() != null) try
+      {
+        inputField.setPropertyValue("Content", value);
+      }
+      catch (Exception e)
+      {
+        Logger.error(e);
+      }
+    }
+  }
+
+  // Übergreifende Helper-Methoden:
 
   /**
    * Diese Methode setzt den DocumentModified-Status auf state.
