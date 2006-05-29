@@ -23,11 +23,18 @@ package de.muenchen.allg.itd51.wollmux.dialog;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.Vector;
 
 import javax.swing.AbstractButton;
+import javax.swing.DefaultListModel;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
@@ -371,6 +378,74 @@ public interface UIElement extends Value
       combo.setEditable(true);
       combo.setSelectedItem(str);
       combo.setEditable(edit);
+    }
+    
+    public boolean isStatic() {return false;}
+  }
+  
+  public static class Listbox extends UIElementBase
+  {
+    private JScrollPane scrollPane;
+    private JList list;
+    
+    public Listbox(String id, JScrollPane scrollPane, JList list, Object layoutConstraints, Integer labelType, String label, Object labelLayoutConstraints)
+    {
+      this.scrollPane = scrollPane;
+      this.list = list;
+      this.layoutConstraints = layoutConstraints;
+      this.labelLayoutConstraints = labelLayoutConstraints;
+      this.label = new JLabel(label);
+      this.labelType = labelType;
+      this.id = id;
+    }
+    
+    public Component getComponent()
+    {
+      return scrollPane;
+    }
+
+    public String getString()
+    {
+      Object[] vals = list.getSelectedValues();
+      StringBuffer buffy = new StringBuffer();
+      for (int i = 0; i < vals.length; ++i)
+      {
+        if (i > 0) buffy.append('\n');
+        buffy.append(vals[i].toString());
+      }
+      return buffy.toString();
+    }
+
+    public boolean getBoolean()
+    {
+      return !getString().equals("");
+    }
+    
+    public void setString(String str)
+    {
+      Set vals = new HashSet();
+      String[] split = str.split("\n");
+      for (int i = 0; i < split.length; ++i)
+        vals.add(split[i]);
+      
+      Vector indices = new Vector(split.length);
+      DefaultListModel model = (DefaultListModel)list.getModel();
+      Enumeration enu = model.elements();
+      int index = 0;
+      while (enu.hasMoreElements())
+      {
+        if (vals.contains(enu.nextElement())) indices.add(new Integer(index));
+        ++index;
+      }
+      
+      if (!indices.isEmpty())
+      {
+        int[] selIndices = new int[indices.size()];
+        for (int i = 0; i < selIndices.length; ++i)
+          selIndices[i] = ((Integer)indices.get(i)).intValue();
+    
+        list.setSelectedIndices(selIndices);
+      }
     }
     
     public boolean isStatic() {return false;}

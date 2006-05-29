@@ -25,6 +25,8 @@ package de.muenchen.allg.itd51.wollmux.dialog;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridLayout;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
@@ -39,19 +41,24 @@ import java.util.Set;
 
 import javax.swing.AbstractButton;
 import javax.swing.Box;
+import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.text.JTextComponent;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
@@ -198,6 +205,9 @@ public class UIElementFactory
    *   
    *   <dt>checkbox</dt>
    *   <dd>Eine Checkbox.</dd>
+   *   
+   *   <dt>listbox</dt>
+   *   <dd>Eine Liste von Einträgen.</dd>
    *   
    *   <dt>v-separator</dt>
    *   <dd>Ein separator mit <b>vertikaler</b> Ausdehnung (z.B. ein senkrechter Strich).
@@ -407,6 +417,30 @@ public class UIElementFactory
       boxBruceleitner.addFocusListener(new UIElementFocusListener(uiElementEventHandler, uiElement));
       return uiElement;
     }
+    else if (type.equals("listbox"))
+    {
+      int lines = 10;
+      try{ lines = Integer.parseInt(conf.get("LINES").toString()); } catch(Exception e){}
+      
+      JList list = new JList(new DefaultListModel());
+      
+      list.setVisibleRowCount(lines);
+      list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+      list.setLayoutOrientation(JList.VERTICAL);
+      list.setPrototypeCellValue("Matthias S. Benkmann ist euer Gott (W-OLL-MUX-5.1)");
+      
+      JScrollPane scrollPane = new JScrollPane(list);
+      scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+      scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+      
+      uiElement = new UIElement.Listbox(id, scrollPane, list, layoutConstraints, labelType, label, labelLayoutConstraints); 
+      
+      list.addListSelectionListener(new UIElementListSelectionListener(uiElementEventHandler, uiElement, "listSelectionChanged", new Object[]{list}));
+      
+      ActionListener actionL = getAction(uiElement, action, conf, uiElementEventHandler);
+      if (actionL != null) list.addMouseListener(new MyActionMouseListener(list, actionL));
+      return uiElement;
+    }
     else if (type.equals("h-separator"))
     {
       JSeparator wurzelSepp = new JSeparator(SwingConstants.HORIZONTAL);
@@ -549,6 +583,61 @@ public class UIElementFactory
     {
       if (e.getStateChange() == ItemEvent.SELECTED)
         handler.processUiElementEvent(uiElement, eventType, args);
+    }
+  }
+  
+  /**
+   * Wird als ListSelectionListener auf UI Elemente registriert, um die auftretenden
+   * Events an einen {@link UIElementEventHandler} weiterzureichen.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private static class UIElementListSelectionListener implements ListSelectionListener
+  {
+    private UIElementEventHandler handler;
+    private UIElement uiElement;
+    private String eventType;
+    private Object[] args;
+    
+    public UIElementListSelectionListener(UIElementEventHandler handler, UIElement uiElement, String eventType, Object[] args)
+    {
+      this.handler = handler;
+      this.uiElement = uiElement;
+      this.eventType = eventType;
+      this.args = args;
+    }
+    public void valueChanged(ListSelectionEvent e)
+    {
+      handler.processUiElementEvent(uiElement, eventType, args);
+    }
+  }
+  
+  /**
+   * Wartet auf Doppelklick in eine JList und führt dann die 
+   * actionPerformed() Methode eines ActionListeners aus.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private class MyActionMouseListener extends MouseAdapter
+  {
+    private JList list;
+    private ActionListener action;
+    
+    public MyActionMouseListener(JList list, ActionListener action)
+    {
+      this.list = list;
+      this.action = action;
+    }
+    
+    public void mouseClicked(MouseEvent e) 
+    {
+      if (e.getClickCount() == 2) 
+      {
+        Point location = e.getPoint();
+        int index = list.locationToIndex(location);
+        if (index < 0) return;
+        Rectangle bounds = list.getCellBounds(index, index);
+        if (!bounds.contains(location)) return;
+        action.actionPerformed(null);
+      }
     }
   }
   
