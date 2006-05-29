@@ -41,6 +41,7 @@
 * 15.02.2005 | BNK | leere %include URLs abgefangen
 * 22.03.2006 | BNK | urlEncodierung von nicht-ASCII-Zeichen in %include URLs. (R1360)
 * 24.03.2006 | BNK | urlEncodierung nur noch von in URLs nicht erlaubten Zeichen (R1377)
+* 22.05.2006 | BNK | get und Konsorten erlauben jetzt ein maxlevel Argument
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -481,7 +482,17 @@ public class ConfigThingy
    */
   public ConfigThingy get(String name) throws NodeNotFoundException
   {
-    ConfigThingy res = query(name, false);
+    return get(name, Integer.MAX_VALUE);
+  }
+  
+  /**
+   * Wie {@link #get(String)}, es werden aber maximal Ergebnisse von Suchtiefe
+   * maxlevel (0 ist this) zurückgeliefert.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public ConfigThingy get(String name, int maxlevel) throws NodeNotFoundException
+  {
+    ConfigThingy res = query(name, false, maxlevel);
     if (res.count() == 0) throw new NodeNotFoundException("Knoten "+getName()+ " hat keinen Nachfahren '"+name+"'");
     if (res.count() == 1)
       res = (ConfigThingy)res.iterator().next();
@@ -496,7 +507,18 @@ public class ConfigThingy
    */
   public ConfigThingy query(String name)
   {
-    return query(name, false);
+    return query(name, false, Integer.MAX_VALUE);
+  }
+  
+  /**
+   * Wie {@link #get(String, int)}, aber es wird grundsätzlich ein ConfigThingy
+   * mit Namen "<query results>" über die Resultate gesetzt. Im Falle, dass es keine
+   * Resultate gibt, wird nicht null sondern ein ConfigThingy ohne Kinder geliefert.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public ConfigThingy query(String name, int maxlevel)
+  {
+    return query(name, false, maxlevel);
   }
   
   /**
@@ -511,7 +533,22 @@ public class ConfigThingy
    */
   public ConfigThingy getByChild(String name) throws NodeNotFoundException
   {
-    ConfigThingy res = query(name, true);
+    return getByChild(name, Integer.MAX_VALUE);
+  }
+  
+  /**
+   * Wie {@link #get(String, int)}, aber es werden die Elternknoten der gefundenen Knoten
+   * zurückgeliefert anstatt der Knoten selbst. Es ist zu beachten, dass jeder
+   * Elternknoten nur genau einmal in den Ergebnissen enthalten ist, auch wenn
+   * er mehrere passende Kinder hat,
+   * @throws NodeNotFoundException falls keine entsprechenden Knoten gefunden 
+   *         wurden. Falls das nicht gewünscht ist, kann {@link #query(String)}
+   *         benutzt werden.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public ConfigThingy getByChild(String name, int maxlevel) throws NodeNotFoundException
+  {
+    ConfigThingy res = query(name, true, maxlevel);
     if (res.count() == 0) throw new NodeNotFoundException("Knoten "+getName()+ " hat keinen Nachfahren '"+name+"'");
     if (res.count() == 1)
       res = (ConfigThingy)res.iterator().next();
@@ -527,23 +564,33 @@ public class ConfigThingy
    */
   public ConfigThingy queryByChild(String name)
   {
-    return query(name, true);
+    return query(name, true, Integer.MAX_VALUE);
   }
   
   /**
-   * Falls getParents == false verhält sich diese Funktion wie {@link #get(String)},
-   * falls getParents == true wie {@link #getByChild(String)}.
-   * @param name
-   * @param getParents
-   * @return
+   * Wie {@link #query(String, int)}, aber es werden die Elternknoten der gefundenen Knoten
+   * zurückgeliefert anstatt der Knoten selbst. Es ist zu beachten, dass jeder
+   * Elternknoten nur genau einmal in den Ergebnissen enthalten ist, auch wenn
+   * er mehrere passende Kinder hat,
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  protected ConfigThingy query(String name, boolean getParents)
+  public ConfigThingy queryByChild(String name, int maxlevel)
+  {
+    return query(name, true, maxlevel);
+  }
+  
+  /**
+   * Falls getParents == false verhält sich diese Funktion wie {@link #get(String, int)},
+   * falls getParents == true wie {@link #getByChild(String, int)}.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  protected ConfigThingy query(String name, boolean getParents, int maxlevel)
   {
     List found = new Vector();
     boolean haveMore;
     int searchlevel = 1;
     do{
+      if (searchlevel > maxlevel) break;
       haveMore = rollcall(this, name, found, -1, searchlevel, getParents);
       ++searchlevel;
     }while(found.isEmpty() && haveMore );
