@@ -15,6 +15,7 @@
 * 31.10.2005 | BNK | TestDJ ist jetzt nur noch normaler DJ mit Default-
 *                    initialisierung und ohne speichern
 * 03.11.2005 | BNK | besser kommentiert
+* 26.05.2006 | BNK | Testfaelle für dj.find(Query)
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -26,8 +27,11 @@ package de.muenchen.allg.itd51.wollmux.db;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
+import java.util.Vector;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.TimeoutException;
@@ -39,7 +43,7 @@ import de.muenchen.allg.itd51.wollmux.TimeoutException;
  */
 public class TestDatasourceJoiner extends DatasourceJoiner
 {
-  private static final long TEST_QUERY_TIMEOUT = 5000;
+  private static final long TEST_QUERY_TIMEOUT = 500000;
   
   /** TestDJ soll nichts (ungewollt) überschreiben, deshalb hier no-op (aber
    * es gibt reallySaveCacheAndLOS()).
@@ -133,6 +137,33 @@ public class TestDatasourceJoiner extends DatasourceJoiner
   public static void main(String[] args) throws TimeoutException, IOException
   {
     TestDatasourceJoiner dj = new TestDatasourceJoiner();
+    
+    System.out.println("find(Query) mit unbekanntem Datenquellennamen:");
+    try{
+      dj.find(new Query("GibtsNicht", new Vector()));
+    }catch(Exception x)
+    {
+      System.out.println(x.getClass().getCanonicalName()+": "+x.getMessage());
+    }
+    System.out.println();
+    System.out.println("find(Query) mit illegalem Suchstring:");
+    try{
+      List l = new Vector();
+      l.add(new QueryPart("A****","f***en"));
+      dj.find(new Query("Personal", l));
+    }catch(Exception x)
+    {
+      System.out.println(x.getClass().getCanonicalName()+": "+x.getMessage());
+    }
+    
+    Set testSchema = new HashSet();
+    testSchema.add("OrgaKurz");
+    testSchema.add("Homepage");
+    List listOfQueryParts = new Vector();
+    listOfQueryParts.add(new QueryPart("Homepage", "*limux"));
+    Query query = new Query("OrgaSpezifischeErgaenzungen", listOfQueryParts);
+    printResults("OrgaSpezifischeErgaenzungen: Homepage = *limux", testSchema, dj.find(query));
+    
     printResults("Nachname = Benkmux", dj.getMainDatasourceSchema(), dj.find("Nachname","Benkmux"));
     printResults("Nachname = Benkm*", dj.getMainDatasourceSchema(), dj.find("Nachname","Benkm*"));
     printResults("Nachname = *ux", dj.getMainDatasourceSchema(), dj.find("Nachname","*ux"));

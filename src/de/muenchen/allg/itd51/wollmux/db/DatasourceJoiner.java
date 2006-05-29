@@ -32,7 +32,8 @@
 * 12.04.2006 | BNK | [P766]mehrere Datensätze mit gleichem Schlüssel korrekt in
 *                  | cache.conf gespeichert und wieder restauriert, ohne LDAP
 *                  | Anbindung zu verlieren.
-* 18.04.2006 | BNK | Bugfix zur Behebung von P766: ausgewaehlten Datensatz richtig merken              
+* 18.04.2006 | BNK | Bugfix zur Behebung von P766: ausgewaehlten Datensatz richtig merken
+* 26.05.2006 | BNK | +find(Query)              
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -324,6 +325,33 @@ X           "Vorname N."
     query.add(new QueryPart(spaltenName2, suchString2));
     return find(query);
   }
+  
+  /**
+   * Durchsucht eine beliebige Datenquelle unter Angabe einer beliebigen Anzahl von 
+   * Spaltenbedingungen. ACHTUNG! Die Ergebnisse sind keine DJDatasets!
+   * @throws TimeoutException
+   * @throws IllegalArgumentException falls eine Suchanfrage fehlerhaft ist, weil
+   *         z.B. die entsprechende Datenquelle nicht existiert.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TODO Testen
+   */
+  public QueryResults find(Query query) throws TimeoutException
+  {
+    Datasource source = (Datasource)nameToDatasource.get(query.getDatasourceName());
+    if (source == null)
+      throw new IllegalArgumentException("Datenquelle \""+query.getDatasourceName()+"\" soll durchsucht werden, ist aber nicht definiert");
+    
+    Iterator iter = query.iterator();
+    while (iter.hasNext())
+    {
+      String suchString = ((QueryPart)iter.next()).getSearchString();
+      if (suchString == null || !SUCHSTRING_PATTERN.matcher(suchString).matches())
+        throw new IllegalArgumentException("Illegaler Suchstring: "+suchString);
+    }
+    
+    return source.find(query.getQueryParts(), queryTimeout());
+  }
+  
   
   /**
    * Findet Datensätze, die query (Liste von QueryParts) entsprechen.
