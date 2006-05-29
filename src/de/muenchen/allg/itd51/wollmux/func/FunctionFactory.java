@@ -84,15 +84,16 @@ public class FunctionFactory
    * @param dialogLib die Dialogbibliothek anhand derer Referenzen auf Dialoge 
    *        aufgelöst werden sollen.
    * @param context Manche Grundfunktionen (insbes. DIALOG) halten kontextabhängige
-   *        Werte. Zur Unterscheidung der verschiedenen Instanzen dient das context
-   *        Objekt. Wird hier null übergeben, dann wird eine ConfigurationErrorException
+   *        Werte. Zur Unterscheidung der verschiedenen Instanzen dient die context
+   *        Map, in der die verschiedenen Instanzen abgelegt werden. 
+   *        Wird hier null übergeben, dann wird eine ConfigurationErrorException
    *        geworfen, wenn conf eine Funktion enthält, die einen Kontext benötigt. 
    * @throws ConfigurationErrorException falls conf keine korrekte Funktionsbeschreibung 
    *        ist oder die Funktion einen context benötigt aber null übergeben wurde.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
-  public static Function parseGrandchildren(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Object context) throws ConfigurationErrorException
+  public static Function parseGrandchildren(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
   {
     Vector andFunction = new Vector();
     Iterator iter1 = conf.iterator();
@@ -125,15 +126,16 @@ public class FunctionFactory
    * @param dialogLib die Dialogbibliothek anhand derer Referenzen auf Dialoge 
    *        aufgelöst werden sollen.
    * @param context Manche Grundfunktionen (insbes. DIALOG) halten kontextabhängige
-   *        Werte. Zur Unterscheidung der verschiedenen Instanzen dient das context
-   *        Objekt. Wird hier null übergeben, dann wird eine ConfigurationErrorException
+   *        Werte. Zur Unterscheidung der verschiedenen Instanzen dient die context
+   *        Map, in der die verschiedenen Instanzen abgelegt werden. 
+   *        Wird hier null übergeben, dann wird eine ConfigurationErrorException
    *        geworfen, wenn conf eine Funktion enthält, die einen Kontext benötigt. 
    * @throws ConfigurationErrorException falls conf keine korrekte Funktionsbeschreibung 
    *        ist oder die Funktion einen context benötigt aber null übergeben wurde.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
-  public static Function parseChildren(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Object context) throws ConfigurationErrorException
+  public static Function parseChildren(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
   {
     Vector andFunction = new Vector();
     Iterator iter = conf.iterator();
@@ -158,15 +160,16 @@ public class FunctionFactory
    * @param dialogLib die Dialogbibliothek anhand derer Referenzen auf Dialoge 
    *        aufgelöst werden sollen.
    * @param context Manche Grundfunktionen (insbes. DIALOG) halten kontextabhängige
-   *        Werte. Zur Unterscheidung der verschiedenen Instanzen dient das context
-   *        Objekt. Wird hier null übergeben, dann wird eine ConfigurationErrorException
+   *        Werte. Zur Unterscheidung der verschiedenen Instanzen dient die context
+   *        Map, in der die verschiedenen Instanzen abgelegt werden. 
+   *        Wird hier null übergeben, dann wird eine ConfigurationErrorException
    *        geworfen, wenn conf eine Funktion enthält, die einen Kontext benötigt. 
    * @throws ConfigurationErrorException falls conf keine korrekte Funktionsbeschreibung 
    *        ist oder die Funktion einen context benötigt aber null übergeben wurde.
    * 
    * TESTED
    */
-  public static Function parse(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Object context) throws ConfigurationErrorException
+  public static Function parse(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
   {
     String name = conf.getName();
     
@@ -371,9 +374,10 @@ public class FunctionFactory
     private Dialog dialog;
     private String dataName;
     
-    public DialogFunction(Dialog dialog, String dataName, Object context)
+    public DialogFunction(Dialog dialog, String dataName, Map context)
+    throws ConfigurationErrorException
     {
-      this.dialog = dialog.instantiate(context);
+      this.dialog = dialog.instanceFor(context);
       this.dataName = dataName;
     }
     
@@ -398,7 +402,7 @@ public class FunctionFactory
     private Function func;
     private String[] params;
     
-    public BindFunction(Function func, ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Object context) throws ConfigurationErrorException
+    public BindFunction(Function func, ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
     {
       this.func = func;
       
@@ -881,12 +885,12 @@ public class FunctionFactory
   {
     UNO.init();
     
-    Object context = new String();
+    Map context = new HashMap();
     FunctionLibrary funcLib = new FunctionLibrary();
     DialogLibrary dialogLib = new DialogLibrary();
     
     dialogLib.add("Empfaenger", new Dialog(){
-      public Dialog instantiate(Object context) { return this;}
+      public Dialog instanceFor(Map context) { return this;}
       public Object getData(String id)
       { if (id.equals("Strasse")) return "Herzog-Wilhelm-Str. 22";
         return null; }

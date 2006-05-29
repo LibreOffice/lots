@@ -128,6 +128,11 @@ public class FormController implements UIElementEventHandler
   private Map buttonContext;
   
   /**
+   * Der Kontext, in dem Funktionen geparst werden.
+   */
+  private Map functionContext;
+  
+  /**
    * Bildet IDs auf die dazugehörigen UIElements ab.
    */
   private Map mapIdToUIElement = new HashMap();
@@ -207,8 +212,9 @@ public class FormController implements UIElementEventHandler
       FunctionLibrary funcLib, DialogLibrary dialogLib, ActionListener abortRequestListener)
   throws ConfigurationErrorException
   {
-    dialogLib = WollMuxFiles.parseFunctionDialogs(conf, dialogLib);
-    funcLib = WollMuxFiles.parseFunctions(conf, dialogLib, this, funcLib);
+    functionContext = new HashMap();
+    dialogLib = WollMuxFiles.parseFunctionDialogs(conf, dialogLib, functionContext);
+    funcLib = WollMuxFiles.parseFunctions(conf, dialogLib, functionContext, funcLib);
     this.formModel = model;
     this.funcLib = funcLib;
     this.dialogLib = dialogLib;
@@ -349,7 +355,7 @@ public class FormController implements UIElementEventHandler
       String groupId = visRule.getName();
       Function cond;
       try{
-        cond = FunctionFactory.parseChildren(visRule, funcLib, dialogLib, this);
+        cond = FunctionFactory.parseChildren(visRule, funcLib, dialogLib, functionContext);
       }catch(ConfigurationErrorException x)
       {
         Logger.error(x);
@@ -458,8 +464,8 @@ public class FormController implements UIElementEventHandler
           try{
             uiElement = uiElementFactory.createUIElement(panelContext, uiConf);
             UIElementState state = new UIElementState();
-            state.plausi = FunctionFactory.parseGrandchildren(uiConf.query("PLAUSI"), funcLib, dialogLib, this);
-            state.autofill = FunctionFactory.parseGrandchildren(uiConf.query("AUTOFILL"), funcLib, dialogLib, this);
+            state.plausi = FunctionFactory.parseGrandchildren(uiConf.query("PLAUSI"), funcLib, dialogLib, functionContext);
+            state.autofill = FunctionFactory.parseGrandchildren(uiConf.query("AUTOFILL"), funcLib, dialogLib, functionContext);
             state.tabIndex = tabIndex;
             uiElement.setAdditionalData(state);
           } catch(ConfigurationErrorException x)
@@ -793,11 +799,14 @@ public class FormController implements UIElementEventHandler
     if (!processUIElementEvents) return;
     try{
       processUIElementEvents = false; // Reentranz bei setString() unterbinden
-      StringBuffer buffy = new StringBuffer("UIElementEvent: "+eventType+"(");
-      for (int i = 0; i < args.length; ++i)
-        buffy.append(""+args[i]);
-      buffy.append(") on UIElement "+source.getId());
-      Logger.debug(buffy.toString());
+      if (WollMuxFiles.isDebugMode())
+      {
+        StringBuffer buffy = new StringBuffer("UIElementEvent: "+eventType+"(");
+        for (int i = 0; i < args.length; ++i)
+          buffy.append(""+args[i]);
+        buffy.append(") on UIElement "+source.getId());
+        Logger.debug(buffy.toString());
+      }
       
       if (eventType.equals("valueChanged"))
       {
