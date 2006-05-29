@@ -14,6 +14,7 @@
 *                  | +ACTION "openTemplate" und "openDocument"
 *                  | null-Werte in den Maps unterstützt
 * 24.04.2006 | BNK | Qualitätssicherung
+* 29.05.2006 | BNK | ordentliche Context-Klasse
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -85,42 +86,7 @@ public class UIElementFactory
    */
   private static final String DEFAULT = "default";
   
-  /**
-   * Bildet einen TYPE auf die dazugehörigen layout constraints (d,i, der optionale
-   * zweite Parameter von 
-   * {@link java.awt.Container#add(java.awt.Component, java.lang.Object) java.awt.Container.add()}) 
-   * ab.
-   */
-  private Map mapTypeToLayoutConstraints;
   
-  /**
-   * Bildet einen TYPE auf einen Integer ab, der angibt, ob das UI Element ein
-   * zusätzliches Label links oder rechts bekommen soll. Mögliche Werte sind
-   * {@link UIElement#LABEL_LEFT}, {@link UIElement#LABEL_RIGHT} und
-   * {@link UIElement#LABEL_NONE}.
-   */
-  private Map mapTypeToLabelType;
-  
-  /**
-   * Für UI Elemente, die ein zusätzliches Label links oder rechts bekommen sollen
-   * (siehe {@link #mapTypeToLabelType}) liefert diese Map die layout constraints
-   * für das Label. Achtung! UI Elemente mit TYPE "label" beziehen ihre
-   * layout constraints nicht aus dieser Map, sondern wie alle anderen UI Elemente
-   * auch aus {@link #mapTypeToLayoutConstraints}.  
-   */
-  private Map mapTypeToLabelLayoutConstraints;
-  
-  /**
-   * Die Menge (von Strings) der ACTIONs, die akzeptiert werden sollen. Alle 
-   * anderen produzieren eine Fehlermeldung.
-   */
-  private Set supportedActions;
-  
-  /**
-   * Der {@link UIElementEventHandler}, an den die erzeugten UI Elemente ihre
-   * Ereignisse melden.
-   */
-  private UIElementEventHandler uiElementEventHandler;
   
   /**
    * Die Breite (in Zeichen) für Textfields und Textareas. Kann mit
@@ -132,10 +98,7 @@ public class UIElementFactory
    * Erzeugt eine Factory, die aus {@link ConfigThingy}s Objekte des
    * Typs {@link UIElement} erzeugt. Die zu übergebenen Maps dürfen alle
    * null-Werte enthalten, die den entsprechenden Eigenschaften der erzeugten
-   * UIElemente zugewiesen werden. Ist für einen TYPE in einer Map kein Mapping
-   * angegeben (auch kein null-Wert), so wird erst geschaut, ob ein Mapping
-   * für "default" vorhanden ist. Falls ja, so wird dieses der entsprechenden
-   * Eigenschaft des erzeugten UIElements zugewiesen, ansonsten null.
+   * UIElemente zugewiesen werden. 
    * 
    * @param mapTypeToLayoutConstraints bildet einen TYPE auf die dazugehörigen 
    *        layout constraints (d,i, der optionale zweite Parameter von 
@@ -164,16 +127,7 @@ public class UIElementFactory
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) 
    */
-  public UIElementFactory(Map mapTypeToLayoutConstraints, Map mapTypeToLabelType,
-                          Map mapTypeToLabelLayoutConstraints, 
-                          Set supportedActions, UIElementEventHandler handler)
-  {
-    this.mapTypeToLayoutConstraints = mapTypeToLayoutConstraints;
-    this.mapTypeToLabelType = mapTypeToLabelType;
-    this.mapTypeToLabelLayoutConstraints = mapTypeToLabelLayoutConstraints;
-    this.supportedActions = supportedActions;
-    uiElementEventHandler = handler;
-  }
+  public UIElementFactory() {}
   
   /**
    * Setzt die Breite für erzeugte Textfields und Textareas auf anzahlZeichen.
@@ -204,7 +158,7 @@ public class UIElementFactory
    *   <dd>Eine Combobox.</dd>
    *   
    *   <dt>checkbox</dt>
-   *   <dd>Eine Checkbox.</dd>
+   *   <dd>Eine Checkbox mit integriertem Label das immer rechts ist.</dd>
    *   
    *   <dt>listbox</dt>
    *   <dd>Eine Liste von Einträgen.</dd>
@@ -232,19 +186,18 @@ public class UIElementFactory
    *   den Konstruktor übergebenen Maps ein TYPE nicht gefunden wird.</dd>
    * </dl>
    * 
-   * @param context bildet (falls non-null) Typnamen auf andere ab. 
-   *                Auf diese Weise lassen sich
-   *                unterschiedliche Interpretationen des selben Typs in 
-   *                verschiedenen
-   *                Kontexten realisieren. Z.B. könnte in dieser Map der Typ 
-   *                "button" auf "menuitem" abgebildet werden, wenn UI Elemente
-   *                für ein Menü zu produzieren sind.
+   * @param context Liefert Informationen für die Erstellung der UI Elemente.
+   *  Ist für einen TYPE in einer Map kein Mapping
+   * angegeben (auch kein null-Wert), so wird erst geschaut, ob ein Mapping
+   * für "default" vorhanden ist. Falls ja, so wird dieses der entsprechenden
+   * Eigenschaft des erzeugten UIElements zugewiesen, ansonsten null.
+   * 
    * @return niemals null.
    * @throws ConfigurationErrorException falls irgendein Fehler in der Beschreibung
    *                des UI Elements gefunden wird.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public UIElement createUIElement(Map context, ConfigThingy conf) throws ConfigurationErrorException
+  public UIElement createUIElement(Context context, ConfigThingy conf) throws ConfigurationErrorException
   {
     String label = "";
     String tip = "";
@@ -276,8 +229,8 @@ public class UIElementFactory
     /*
      * Den richtigen type aus dem context bestimmen.
      */
-    if (context != null && context.containsKey(type)) 
-      type = (String)context.get(type);
+    if (context.mapTypeToType != null && context.mapTypeToType.containsKey(type)) 
+      type = (String)context.mapTypeToType.get(type);
 
     /*
      * ACHTUNG! Hier wird immer erst mit containsKey() getestet, anstatt
@@ -286,16 +239,16 @@ public class UIElementFactory
      */
     
     Object layoutConstraints;
-    if (mapTypeToLayoutConstraints.containsKey(type))
-      layoutConstraints = mapTypeToLayoutConstraints.get(type);
+    if (context.mapTypeToLayoutConstraints.containsKey(type))
+      layoutConstraints = context.mapTypeToLayoutConstraints.get(type);
     else
-      layoutConstraints = mapTypeToLayoutConstraints.get(DEFAULT);
+      layoutConstraints = context.mapTypeToLayoutConstraints.get(DEFAULT);
     
     Object labelLayoutConstraints;
-    if (mapTypeToLabelLayoutConstraints.containsKey(type))
-      labelLayoutConstraints = mapTypeToLabelLayoutConstraints.get(type);
+    if (context.mapTypeToLabelLayoutConstraints.containsKey(type))
+      labelLayoutConstraints = context.mapTypeToLabelLayoutConstraints.get(type);
     else
-      labelLayoutConstraints = mapTypeToLabelLayoutConstraints.get(DEFAULT);
+      labelLayoutConstraints = context.mapTypeToLabelLayoutConstraints.get(DEFAULT);
     /**
      * Falls nötig, erzeuge unabhängigen Klon der Layout Constraints.
      */
@@ -305,10 +258,10 @@ public class UIElementFactory
       labelLayoutConstraints = ((GridBagConstraints)labelLayoutConstraints).clone();
         
     Integer labelType;
-    if (mapTypeToLabelType.containsKey(type)) 
-      labelType = (Integer)mapTypeToLabelType.get(type);
+    if (context.mapTypeToLabelType.containsKey(type)) 
+      labelType = (Integer)context.mapTypeToLabelType.get(type);
     else
-      labelType = (Integer)mapTypeToLabelType.get(DEFAULT);
+      labelType = (Integer)context.mapTypeToLabelType.get(DEFAULT);
   
     UIElement uiElement;
     
@@ -325,9 +278,9 @@ public class UIElementFactory
       if (!tip.equals("")) button.setToolTipText(tip);
       uiElement = new UIElement.Button(id, button, layoutConstraints);
       
-      ActionListener actionL = getAction(uiElement, action, conf, uiElementEventHandler);
+      ActionListener actionL = getAction(uiElement, action, conf, context.uiElementEventHandler, context.supportedActions);
       if (actionL != null) button.addActionListener(actionL);
-      button.addFocusListener(new UIElementFocusListener(uiElementEventHandler, uiElement));
+      button.addFocusListener(new UIElementFocusListener(context.uiElementEventHandler, uiElement));
       return uiElement;
     }
     else if (type.equals("label"))
@@ -341,8 +294,8 @@ public class UIElementFactory
       tf.setEditable(!readonly);
       if (!tip.equals("")) tf.setToolTipText(tip);
       uiElement = new UIElement.Textfield(id, tf, layoutConstraints, labelType, label, labelLayoutConstraints);
-      tf.getDocument().addDocumentListener(new UIElementDocumentListener(uiElementEventHandler, uiElement, "valueChanged", new Object[]{}));
-      tf.addFocusListener(new UIElementFocusListener(uiElementEventHandler, uiElement));
+      tf.getDocument().addDocumentListener(new UIElementDocumentListener(context.uiElementEventHandler, uiElement, "valueChanged", new Object[]{}));
+      tf.addFocusListener(new UIElementFocusListener(context.uiElementEventHandler, uiElement));
       return uiElement;
     }
     else if (type.equals("textarea"))
@@ -360,8 +313,8 @@ public class UIElementFactory
       scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
       panel.add(scrollPane);
       uiElement = new UIElement.Textarea(id, textarea, panel, layoutConstraints, labelType, label, labelLayoutConstraints);
-      textarea.getDocument().addDocumentListener(new UIElementDocumentListener(uiElementEventHandler, uiElement, "valueChanged", new Object[]{}));
-      textarea.addFocusListener(new UIElementFocusListener(uiElementEventHandler, uiElement));
+      textarea.getDocument().addDocumentListener(new UIElementDocumentListener(context.uiElementEventHandler, uiElement, "valueChanged", new Object[]{}));
+      textarea.addFocusListener(new UIElementFocusListener(context.uiElementEventHandler, uiElement));
       return uiElement;
     }
     else if (type.equals("combobox"))
@@ -384,18 +337,23 @@ public class UIElementFactory
       if (editable) 
       {
         JTextComponent tc = ((JTextComponent)combo.getEditor().getEditorComponent());
-        tc.addFocusListener(new UIElementFocusListener(uiElementEventHandler, uiElement));
-        tc.getDocument().addDocumentListener(new UIElementDocumentListener(uiElementEventHandler, uiElement, "valueChanged", new Object[]{}));
+        tc.addFocusListener(new UIElementFocusListener(context.uiElementEventHandler, uiElement));
+        tc.getDocument().addDocumentListener(new UIElementDocumentListener(context.uiElementEventHandler, uiElement, "valueChanged", new Object[]{}));
       }
       else
       {
-        combo.addItemListener(new UIElementItemListener(uiElementEventHandler, uiElement, "valueChanged", new Object[]{}));
-        combo.addFocusListener(new UIElementFocusListener(uiElementEventHandler, uiElement));
+        combo.addItemListener(new UIElementItemListener(context.uiElementEventHandler, uiElement, "valueChanged", new Object[]{}));
+        combo.addFocusListener(new UIElementFocusListener(context.uiElementEventHandler, uiElement));
       }
       return uiElement;
     }
     else if (type.equals("checkbox"))
     {
+      /*
+       * ACHTUNG! Diese checkbox hat ihr Label fest integriert auf der
+       * letzten Seite und liefert als Zusatzlabel immer LABEL_NONE.
+       */
+      
       final JCheckBox boxBruceleitner = new JCheckBox();
       boxBruceleitner.setEnabled(!readonly);
       JPanel agentinMitHerz = new JPanel(new FlowLayout(FlowLayout.LEADING, 5,0));
@@ -413,8 +371,8 @@ public class UIElementFactory
             }
           });
       uiElement = new UIElement.Checkbox(id, boxBruceleitner, agentinMitHerz, layoutConstraints);
-      boxBruceleitner.addActionListener(new UIElementActionListener(uiElementEventHandler, uiElement, "valueChanged", new Object[]{}));
-      boxBruceleitner.addFocusListener(new UIElementFocusListener(uiElementEventHandler, uiElement));
+      boxBruceleitner.addActionListener(new UIElementActionListener(context.uiElementEventHandler, uiElement, "valueChanged", new Object[]{}));
+      boxBruceleitner.addFocusListener(new UIElementFocusListener(context.uiElementEventHandler, uiElement));
       return uiElement;
     }
     else if (type.equals("listbox"))
@@ -435,9 +393,9 @@ public class UIElementFactory
       
       uiElement = new UIElement.Listbox(id, scrollPane, list, layoutConstraints, labelType, label, labelLayoutConstraints); 
       
-      list.addListSelectionListener(new UIElementListSelectionListener(uiElementEventHandler, uiElement, "listSelectionChanged", new Object[]{list}));
+      list.addListSelectionListener(new UIElementListSelectionListener(context.uiElementEventHandler, uiElement, "listSelectionChanged", new Object[]{list}));
       
-      ActionListener actionL = getAction(uiElement, action, conf, uiElementEventHandler);
+      ActionListener actionL = getAction(uiElement, action, conf, context.uiElementEventHandler, context.supportedActions);
       if (actionL != null) list.addMouseListener(new MyActionMouseListener(list, actionL));
       return uiElement;
     }
@@ -662,7 +620,7 @@ public class UIElementFactory
    * geliefert.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private ActionListener getAction(UIElement uiElement, String action, ConfigThingy conf, UIElementEventHandler handler)
+  private ActionListener getAction(UIElement uiElement, String action, ConfigThingy conf, UIElementEventHandler handler, Set supportedActions)
   {
     if (!supportedActions.contains(action))
     {
@@ -707,6 +665,61 @@ public class UIElementFactory
     return null;
   }
 
+  public static class Context
+  {
+    /**
+     * Bildet einen TYPE auf die dazugehörigen layout constraints (d,i, der optionale
+     * zweite Parameter von 
+     * {@link java.awt.Container#add(java.awt.Component, java.lang.Object) java.awt.Container.add()}) 
+     * ab. Darf null-Werte enthalten.  Ist für einen TYPE kein Mapping
+   * angegeben (auch kein null-Wert), so wird erst geschaut, ob ein Mapping
+   * für "default" vorhanden ist. Falls ja, so wird dieses der entsprechenden
+   * Eigenschaft des erzeugten UIElements zugewiesen, ansonsten null.
+     */
+    public Map mapTypeToLayoutConstraints;
+    
+    /**
+     * Bildet einen TYPE auf einen Integer ab, der angibt, ob das UI Element ein
+     * zusätzliches Label links oder rechts bekommen soll. Mögliche Werte sind
+     * {@link UIElement#LABEL_LEFT}, {@link UIElement#LABEL_RIGHT} und
+     * {@link UIElement#LABEL_NONE}. Darf null-Werte enthalten. Ist für einen TYPE kein Mapping
+   * angegeben (auch kein null-Wert), so wird erst geschaut, ob ein Mapping
+   * für "default" vorhanden ist. Falls ja, so wird dieses der entsprechenden
+   * Eigenschaft des erzeugten UIElements zugewiesen, ansonsten null.
+     */
+    public Map mapTypeToLabelType;
+    
+    /**
+     * Für UI Elemente, die ein zusätzliches Label links oder rechts bekommen sollen
+     * (siehe {@link #mapTypeToLabelType}) liefert diese Map die layout constraints
+     * für das Label. Achtung! UI Elemente mit TYPE "label" beziehen ihre
+     * layout constraints nicht aus dieser Map, sondern wie alle anderen UI Elemente
+     * auch aus {@link #mapTypeToLayoutConstraints}. Darf null-Werte enthalten.
+     * Ist für einen TYPE kein Mapping
+   * angegeben (auch kein null-Wert), so wird erst geschaut, ob ein Mapping
+   * für "default" vorhanden ist. Falls ja, so wird dieses der entsprechenden
+   * Eigenschaft des erzeugten UIElements zugewiesen, ansonsten null.  
+     */
+    public Map mapTypeToLabelLayoutConstraints;
+    
+    /**
+     * Die Menge (von Strings) der ACTIONs, die akzeptiert werden sollen. Alle 
+     * anderen produzieren eine Fehlermeldung.
+     */
+    public Set supportedActions;
+    
+    /**
+     * Der {@link UIElementEventHandler}, an den die erzeugten UI Elemente ihre
+     * Ereignisse melden.
+     */
+    public UIElementEventHandler uiElementEventHandler;
 
+    /**
+     * Enthält diese Map für einen TYPE ein Mapping auf einen anderen TYPE, so
+     * wird der andere TYPE verwendet. Dies ist nützlich, um abhängig vom Kontext
+     * den TYPE "separator" entweder auf "h-separator" oder "v-separator" abzubilden.
+     */
+    public Map mapTypeToType;
+  }
 
 }

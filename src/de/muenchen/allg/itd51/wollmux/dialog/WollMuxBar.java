@@ -28,6 +28,8 @@
 *                  | werden konnte.
 * 24.04.2006 | BNK | [R1460]Popup-Fenster, wenn WollMux nicht konfiguriert.
 * 02.05.2006 | BNK | [R1202 Teil 1] Fensterposition und Größe von WollMuxBar konfigurierbar
+* 29.05.2006 | BNK | in initFactories() Label Typen explizit genullt.
+*                  | Umstellung auf UIElementFactory.Context
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -166,12 +168,12 @@ public class WollMuxBar
   /**
    * Kontext für GUI-Elemente in JPanels (für Übergabe an die uiElementFactory).
    */
-  private Map panelContext;
+  private UIElementFactory.Context panelContext;
   
   /**
    * Kontext für GUI-Elemente in JMenus und JPopupMenus (für Übergabe an die uiElementFactory).
    */
-  private Map menuContext;
+  private UIElementFactory.Context menuContext;
   
   /**
    * Rand um Textfelder (wird auch für ein paar andere Ränder verwendet)
@@ -424,7 +426,7 @@ public class WollMuxBar
     int y = -stepy;
     int x = -stepx; 
       
-    Map contextMap = context.equals("menu") ? menuContext : panelContext;
+    UIElementFactory.Context contextMap = context.equals("menu") ? menuContext : panelContext;
     
     Iterator piter = elementParent.iterator();
     while (piter.hasNext())
@@ -609,38 +611,50 @@ public class WollMuxBar
     
     mapTypeToLayoutConstraints.put("combobox", gbcCombobox);
     mapTypeToLabelType.put("combobox", UIElement.LABEL_NONE);
-    //mapTypeToLabelLayoutConstraints.put("combobox", none);
+    mapTypeToLabelLayoutConstraints.put("combobox", null);
     
     mapTypeToLayoutConstraints.put("h-glue", gbcGlue);
     mapTypeToLabelType.put("h-glue", UIElement.LABEL_NONE);
-    //mapTypeToLabelLayoutConstraints.put("h-glue", none);
+    mapTypeToLabelLayoutConstraints.put("h-glue", null);
     mapTypeToLayoutConstraints.put("v-glue", gbcGlue);
     mapTypeToLabelType.put("v-glue", UIElement.LABEL_NONE);
-    //mapTypeToLabelLayoutConstraints.put("v-glue", none);
+    mapTypeToLabelLayoutConstraints.put("v-glue", null);
     
     mapTypeToLayoutConstraints.put("label", gbcLabel);
     mapTypeToLabelType.put("label", UIElement.LABEL_NONE);
-    //mapTypeToLabelLayoutConstraints.put("label", none);
+    mapTypeToLabelLayoutConstraints.put("label", null);
     
     mapTypeToLayoutConstraints.put("button", gbcButton);
     mapTypeToLabelType.put("button", UIElement.LABEL_NONE);
-    //mapTypeToLabelLayoutConstraints.put("button", none);
+    mapTypeToLabelLayoutConstraints.put("button", null);
     
     mapTypeToLayoutConstraints.put("h-separator", gbcHsep);
     mapTypeToLabelType.put("h-separator", UIElement.LABEL_NONE);
-    //mapTypeToLabelLayoutConstraints.put("h-separator", none);
+    mapTypeToLabelLayoutConstraints.put("h-separator", null);
     mapTypeToLayoutConstraints.put("v-separator", gbcVsep);
     mapTypeToLabelType.put("v-separator", UIElement.LABEL_NONE);
-    //mapTypeToLabelLayoutConstraints.put("v-separator", none);
+    mapTypeToLabelLayoutConstraints.put("v-separator", null);
+
+    UIElementEventHandler myUIElementEventHandler = new MyUIElementEventHandler();
     
-    panelContext = new HashMap();
-    panelContext.put("separator","v-separator");
-    panelContext.put("glue","h-glue");
+    panelContext = new UIElementFactory.Context();
+    panelContext.mapTypeToLabelLayoutConstraints = mapTypeToLabelLayoutConstraints;
+    panelContext.mapTypeToLabelType = mapTypeToLabelType;
+    panelContext.mapTypeToLayoutConstraints = mapTypeToLayoutConstraints;
+    panelContext.uiElementEventHandler = myUIElementEventHandler;
+    panelContext.mapTypeToType = new HashMap();
+    panelContext.mapTypeToType.put("separator","v-separator");
+    panelContext.mapTypeToType.put("glue","h-glue");
     
-    menuContext = new HashMap();
-    menuContext.put("separator","h-separator");
-    menuContext.put("glue","v-glue");
-    menuContext.put("button", "menuitem");
+    menuContext = new UIElementFactory.Context();
+    menuContext.mapTypeToLabelLayoutConstraints = mapTypeToLabelLayoutConstraints;
+    menuContext.mapTypeToLabelType = mapTypeToLabelType;
+    menuContext.mapTypeToLayoutConstraints = mapTypeToLayoutConstraints;
+    menuContext.uiElementEventHandler = myUIElementEventHandler;
+    menuContext.mapTypeToType = new HashMap();
+    menuContext.mapTypeToType.put("separator","h-separator");
+    menuContext.mapTypeToType.put("glue","v-glue");
+    menuContext.mapTypeToType.put("button", "menuitem");
     
     Set supportedActions = new HashSet();
     supportedActions.add("openTemplate");
@@ -648,9 +662,10 @@ public class WollMuxBar
     supportedActions.add("openDocument");
     supportedActions.add("abort");
     
-    uiElementFactory = new UIElementFactory(mapTypeToLayoutConstraints,
-        mapTypeToLabelType, mapTypeToLabelLayoutConstraints, supportedActions, new MyUIElementEventHandler());
-
+    panelContext.supportedActions = supportedActions;
+    menuContext.supportedActions = supportedActions;
+    
+    uiElementFactory = new UIElementFactory();
   }
   
   /**

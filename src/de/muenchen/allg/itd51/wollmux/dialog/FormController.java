@@ -17,6 +17,7 @@
 *                  | TIP und HOTKEY bei Tabs unterstützen
 *                  | leere Tabs ausgrauen
 *                  | nextTab und prevTab implementiert
+* 29.05.2006 | BNK | Umstellung auf UIElementFactory.Context
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -114,18 +115,18 @@ public class FormController implements UIElementEventHandler
   private DialogLibrary dialogLib;
   
   /**
-   * Ein Kontext für {@link UIElementFactory#createUIElement(Map, ConfigThingy)},
+   * Ein Kontext für {@link UIElementFactory#createUIElement(Context, ConfigThingy)},
    * der verwendet wird für das Erzeugen der vertikal angeordneten UI Elemente, die
    * die Formularfelder darstellen.
    */
-  private Map panelContext;
+  private UIElementFactory.Context panelContext;
   
   /**
-   * Ein Kontext für {@link UIElementFactory#createUIElement(Map, ConfigThingy)},
+   * Ein Kontext für {@link UIElementFactory#createUIElement(Context, ConfigThingy)},
    * der verwendet wird für das Erzeugen der horizontal angeordneten Buttons
    * unter den Formularfeldern.
    */
-  private Map buttonContext;
+  private UIElementFactory.Context buttonContext;
   
   /**
    * Der Kontext, in dem Funktionen geparst werden.
@@ -721,7 +722,7 @@ public class FormController implements UIElementEventHandler
     GridBagConstraints gbcCombobox  = new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0, GridBagConstraints.LINE_START,   GridBagConstraints.HORIZONTAL, new Insets(TF_BORDER,TF_BORDER,TF_BORDER,TF_BORDER),0,0);
     GridBagConstraints gbcTextarea  = new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0, GridBagConstraints.LINE_START,   GridBagConstraints.HORIZONTAL, new Insets(TF_BORDER,TF_BORDER,TF_BORDER,TF_BORDER),0,0);
     GridBagConstraints gbcLabelLeft = new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.NONE,       new Insets(TF_BORDER,TF_BORDER,TF_BORDER,TF_BORDER),0,0);
-    GridBagConstraints gbcCheckbox  = new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.NONE,       new Insets(TF_BORDER,TF_BORDER,TF_BORDER,TF_BORDER),0,0);
+    GridBagConstraints gbcCheckbox  = new GridBagConstraints(0, 0, 2/*JA*/, 1, 1.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL,       new Insets(TF_BORDER,TF_BORDER,TF_BORDER,TF_BORDER),0,0);
     GridBagConstraints gbcLabel =     new GridBagConstraints(0, 0, 2, 1, 1.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL,       new Insets(TF_BORDER,TF_BORDER,TF_BORDER,TF_BORDER),0,0);
     GridBagConstraints gbcButton    = new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.NONE,       new Insets(BUTTON_BORDER,BUTTON_BORDER,BUTTON_BORDER,BUTTON_BORDER),0,0);
     GridBagConstraints gbcHsep      = new GridBagConstraints(0, 0, 2, 1, 1.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL,       new Insets(3*TF_BORDER,0,2*TF_BORDER,0),0,0);
@@ -742,10 +743,10 @@ public class FormController implements UIElementEventHandler
     
     mapTypeToLayoutConstraints.put("h-glue", gbcGlue);
     mapTypeToLabelType.put("h-glue", UIElement.LABEL_NONE);
-    //mapTypeToLabelLayoutConstraints.put("h-glue", none);
+    mapTypeToLabelLayoutConstraints.put("h-glue", null);
     mapTypeToLayoutConstraints.put("v-glue", gbcGlue);
     mapTypeToLabelType.put("v-glue", UIElement.LABEL_NONE);
-    //mapTypeToLabelLayoutConstraints.put("v-glue", none);
+    mapTypeToLabelLayoutConstraints.put("v-glue", null);
     
     mapTypeToLayoutConstraints.put("textarea", gbcTextarea);
     mapTypeToLabelType.put("textarea", UIElement.LABEL_LEFT);
@@ -753,38 +754,49 @@ public class FormController implements UIElementEventHandler
     
     mapTypeToLayoutConstraints.put("label", gbcLabel);
     mapTypeToLabelType.put("label", UIElement.LABEL_NONE);
-    //mapTypeToLabelLayoutConstraints.put("label", none);
+    mapTypeToLabelLayoutConstraints.put("label", null);
     
     mapTypeToLayoutConstraints.put("checkbox", gbcCheckbox);
     mapTypeToLabelType.put("checkbox", UIElement.LABEL_NONE);
-    //mapTypeToLabelLayoutConstraints.put("checkbox", none);
+    mapTypeToLabelLayoutConstraints.put("checkbox", null); //hat label integriert
     
     mapTypeToLayoutConstraints.put("button", gbcButton);
     mapTypeToLabelType.put("button", UIElement.LABEL_NONE);
-    //mapTypeToLabelLayoutConstraints.put("button", none);
+    mapTypeToLabelLayoutConstraints.put("button", null);
     
     mapTypeToLayoutConstraints.put("h-separator", gbcHsep);
     mapTypeToLabelType.put("h-separator", UIElement.LABEL_NONE);
-    //mapTypeToLabelLayoutConstraints.put("h-separator", none);
+    mapTypeToLabelLayoutConstraints.put("h-separator", null);
     mapTypeToLayoutConstraints.put("v-separator", gbcVsep);
     mapTypeToLabelType.put("v-separator", UIElement.LABEL_NONE);
-    //mapTypeToLabelLayoutConstraints.put("v-separator", none);
+    mapTypeToLabelLayoutConstraints.put("v-separator", null);
     
-    panelContext = new HashMap();
-    panelContext.put("separator","h-separator");
-    panelContext.put("glue","v-glue");
+    panelContext = new UIElementFactory.Context();
+    panelContext.mapTypeToLabelLayoutConstraints = mapTypeToLabelLayoutConstraints;
+    panelContext.mapTypeToLabelType = mapTypeToLabelType;
+    panelContext.mapTypeToLayoutConstraints = mapTypeToLayoutConstraints;
+    panelContext.uiElementEventHandler = this;
+    panelContext.mapTypeToType = new HashMap();
+    panelContext.mapTypeToType.put("separator","h-separator");
+    panelContext.mapTypeToType.put("glue","v-glue");
     
-    buttonContext = new HashMap();
-    buttonContext.put("separator","v-separator");
-    buttonContext.put("glue","h-glue");
+    buttonContext = new UIElementFactory.Context();
+    buttonContext.mapTypeToLabelLayoutConstraints = mapTypeToLabelLayoutConstraints;
+    buttonContext.mapTypeToLabelType = mapTypeToLabelType;
+    buttonContext.mapTypeToLayoutConstraints = mapTypeToLayoutConstraints;
+    buttonContext.uiElementEventHandler = this;
+    buttonContext.mapTypeToType = new HashMap();
+    buttonContext.mapTypeToType.put("separator","v-separator");
+    buttonContext.mapTypeToType.put("glue","h-glue");
     
     Set supportedActions = new HashSet();
     supportedActions.add("abort");
     supportedActions.add("nextTab");
     supportedActions.add("prevTab");
+    panelContext.supportedActions = supportedActions;
+    buttonContext.supportedActions = supportedActions;
     
-    uiElementFactory = new UIElementFactory(mapTypeToLayoutConstraints,
-        mapTypeToLabelType, mapTypeToLabelLayoutConstraints, supportedActions, this);
+    uiElementFactory = new UIElementFactory();
 
   }
   
