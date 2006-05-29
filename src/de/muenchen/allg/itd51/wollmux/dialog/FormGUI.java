@@ -47,6 +47,7 @@ import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.FormModel;
 import de.muenchen.allg.itd51.wollmux.Logger;
+import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 
 /**
@@ -333,6 +334,7 @@ public class FormGUI
   public static void main(String[] args) throws Exception
   {
     UNO.init();
+    WollMuxFiles.setupWollMuxDir();
     Logger.init(Logger.DEBUG);
     String confFile = "testdata/formulartest.conf";
     ConfigThingy conf = new ConfigThingy("", new URL(new File(System
