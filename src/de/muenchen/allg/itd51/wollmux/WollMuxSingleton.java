@@ -23,6 +23,7 @@
  * 08.05.2006 | LUT | + isDebugMode()
  * 10.05.2006 | BNK | +parseGlobalFunctions()
  *                  | +parseFunctionDialogs()
+ * 26.05.2006 | BNK | DJ initialisierung ausgelagert nacht WollMuxFiles
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -46,7 +47,6 @@ import com.sun.star.uno.XComponentContext;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
-import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.DJDataset;
 import de.muenchen.allg.itd51.wollmux.db.DJDatasetListElement;
 import de.muenchen.allg.itd51.wollmux.db.DatasetNotFoundException;
@@ -85,11 +85,6 @@ public class WollMuxSingleton implements XPALProvider
   private DialogLibrary funcDialogs;
 
   /**
-   * Enthält den zentralen DataSourceJoiner.
-   */
-  private DatasourceJoiner datasourceJoiner;
-
-  /**
    * Enthält den default XComponentContext in dem der WollMux (bzw. das OOo)
    * läuft.
    */
@@ -120,7 +115,7 @@ public class WollMuxSingleton implements XPALProvider
       Logger.error(e);
     }
 
-    boolean successfullStartup = true;
+    boolean successfulStartup = true;
 
     registeredPALChangeListener = new Vector();
 
@@ -138,40 +133,15 @@ public class WollMuxSingleton implements XPALProvider
     textFragmentList = new VisibleTextFragmentList(WollMuxFiles
         .getWollmuxConf());
 
-    // DatasourceJoiner erzeugen
-    ConfigThingy senderSource = WollMuxFiles.getWollmuxConf().query(
-        "SENDER_SOURCE");
-    String senderSourceStr = "";
-    try
-    {
-      senderSourceStr = senderSource.getLastChild().toString();
-    }
-    catch (NodeNotFoundException e)
-    {
-      Logger
-          .error(
-              "WollMux konnte nicht gestartet werden:",
-              new ConfigurationErrorException(
-                  "Keine Hauptdatenquelle SENDER_SOURCE definiert! Setze SENDER_SOURCE=\"\"."));
-      successfullStartup = false;
-    }
-    try
-    {
-      datasourceJoiner = new DatasourceJoiner(WollMuxFiles.getWollmuxConf(),
-          senderSourceStr, WollMuxFiles.getLosCacheFile(), WollMuxFiles
-              .getDEFAULT_CONTEXT());
-    }
-    catch (ConfigurationErrorException e)
-    {
-      Logger.error("WollMux konnte nicht gestartet werden:", e);
-      successfullStartup = false;
-    }
+    // Versuchen, den DJ zu initialisieren und Flag setzen, falls nicht erfolgreich.
+    if (getDatasourceJoiner() == null)
+      successfulStartup = false;
 
     /*
      * Funktionsdialoge parsen. ACHTUNG! Muss vor parseGlobalFunctions()
      * erfolgen.
      */
-    funcDialogs = WollMuxFiles.parseFunctionDialogs(WollMuxFiles.getWollmuxConf(), null);
+    funcDialogs = WollMuxFiles.parseFunctionDialogs(WollMuxFiles.getWollmuxConf(), null, null);
 
     /*
      * Globale Funktionen parsen. ACHTUNG! Verwendet die Funktionsdialoge. Diese
@@ -181,7 +151,7 @@ public class WollMuxSingleton implements XPALProvider
     globalFunctions = WollMuxFiles.parseFunctions(WollMuxFiles.getWollmuxConf(), getFunctionDialogs(), null, null);
 
     // Initialisiere EventProcessor
-    getEventProcessor().setAcceptEvents(successfullStartup);
+    getEventProcessor().setAcceptEvents(successfulStartup);
 
     // register global EventListener
     try
@@ -281,7 +251,7 @@ public class WollMuxSingleton implements XPALProvider
    */
   public DatasourceJoiner getDatasourceJoiner()
   {
-    return datasourceJoiner;
+    return WollMuxFiles.getDatasourceJoiner();
   }
 
   /**

@@ -10,6 +10,7 @@
 * -------------------------------------------------------------------
 * 13.04.2006 | BNK | Erstellung
 * 20.04.2006 | BNK | [R1200] .wollmux-Verzeichnis als Vorbelegung für DEFAULT_CONTEXT
+* 26.05.2006 | BNK | +DJ Initialisierung
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -18,7 +19,6 @@
 */
 package de.muenchen.allg.itd51.wollmux;
 
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -27,11 +27,13 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
-import de.muenchen.allg.itd51.wollmux.dialog.Dialog;
+import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
+import de.muenchen.allg.itd51.wollmux.dialog.DatasourceSearchDialog;
 import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
 import de.muenchen.allg.itd51.wollmux.func.Function;
 import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
@@ -48,6 +50,17 @@ public class WollMuxFiles
    * Die in der wollmux.conf mit DEFAULT_CONTEXT festgelegte URL.
    */
   private static URL defaultContextURL;
+  
+  /**
+   * Enthält den zentralen DataSourceJoiner.
+   */
+  private static DatasourceJoiner datasourceJoiner;
+  
+  /**
+   * Falls true, wurde bereits versucht, den DJ zu initialisieren (über den
+   * Erfolg des Versuchs sagt die Variable nichts.)
+   */
+  private static boolean djInitialized = false;
 
   /**
    * Enthält den geparsten Konfigruationsbaum der wollmux.conf
@@ -201,6 +214,42 @@ public class WollMuxFiles
   {
     return defaultContextURL;
   }
+  
+  /**
+   * Initialisiert den DJ wenn nötig und liefert ihn dann zurück (oder null,
+   * falls ein Fehler während der Initialisierung aufgetreten ist).
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public static DatasourceJoiner getDatasourceJoiner()
+  {
+    if (!djInitialized)
+    {
+      djInitialized = true;
+      ConfigThingy senderSource = WollMuxFiles.getWollmuxConf().query(
+      "SENDER_SOURCE");
+      String senderSourceStr = "";
+      try
+      {
+        senderSourceStr = senderSource.getLastChild().toString();
+      }
+      catch (NodeNotFoundException e)
+      {
+        Logger.error("Keine Hauptdatenquelle SENDER_SOURCE definiert! Setze SENDER_SOURCE=\"\".");
+      }
+      try
+      {
+        datasourceJoiner = new DatasourceJoiner(getWollmuxConf(),
+            senderSourceStr, getLosCacheFile(), getDEFAULT_CONTEXT());
+      }
+      catch (ConfigurationErrorException e)
+      {
+        Logger.error(e);
+      }
+    }
+    
+    return datasourceJoiner;
+  }
  
   /**
    * Werten den DEFAULT_CONTEXT aus wollmux,conf aus und erstellt eine
@@ -300,11 +349,14 @@ public class WollMuxFiles
    * 
    * @param baselib falls nicht-null wird diese als Fallback verlinkt, um Dialoge
    *        zu liefern, die anderweitig nicht gefunden werden.
-
+   * @param context der Kontext in dem in Dialogen enthaltene Funktionsdefinitionen 
+   *        ausgewertet werden sollen (insbesondere DIALOG-Funktionen). 
+   *        ACHTUNG! Hier werden Werte
+   *        gespeichert, es ist nicht nur ein Schlüssel.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public static DialogLibrary parseFunctionDialogs(ConfigThingy conf, DialogLibrary baselib)
+  public static DialogLibrary parseFunctionDialogs(ConfigThingy conf, DialogLibrary baselib, Map context)
   {
     DialogLibrary funcDialogs = new DialogLibrary(baselib);
 
@@ -326,10 +378,7 @@ public class WollMuxFiles
                      + name
                      + "\" im selben Funktionsdialoge-Abschnitt mehrmals definiert");
         dialogsInBlock.add(name);
-        funcDialogs.add(name, new Dialog(){
-          public Dialog instantiate(Object context) {return this;}
-          public Object getData(String id){ return null; }
-          public void show(ActionListener dialogEndListener) {}});
+        funcDialogs.add(name, DatasourceSearchDialog.create(dialogConf, getDatasourceJoiner()));
       }
     }
     
@@ -341,14 +390,15 @@ public class WollMuxFiles
    * FunctionLibrary.
    * 
    * @param context der Kontext in dem die Funktionsdefinitionen ausgewertet werden
-   *        sollen (insbesondere DIALOG-Funktionen)
+   *        sollen (insbesondere DIALOG-Funktionen). ACHTUNG! Hier werden Werte
+   *        gespeichert, es ist nicht nur ein Schlüssel.
    *        
    * @param baselib falls nicht-null wird diese als Fallback verlinkt, um Funktionen
    *        zu liefern, die anderweitig nicht gefunden werden.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public static FunctionLibrary parseFunctions(ConfigThingy conf, DialogLibrary dialogLib, Object context, FunctionLibrary baselib)
+  public static FunctionLibrary parseFunctions(ConfigThingy conf, DialogLibrary dialogLib, Map context, FunctionLibrary baselib)
   {
     FunctionLibrary funcs = new FunctionLibrary(baselib);
 
