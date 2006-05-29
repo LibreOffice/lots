@@ -498,6 +498,10 @@ public interface UIElement extends Value
     
     public Checkbox(String id, JCheckBox boxBruceleitner, Component kompost, Object layoutConstraints)
     {
+      /*
+       * labelType wird geerbt als LABEL_NONE, da diese Checkbox ihr Label im
+       * UI Element fest integriert hat.
+       */
       this.kompost = kompost;
       this.box = boxBruceleitner;
       this.layoutConstraints = layoutConstraints;
