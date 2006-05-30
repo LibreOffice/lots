@@ -296,8 +296,11 @@ public class UIElementFactory
       uiElement = new UIElement.Textfield(id, tf, layoutConstraints, labelType, label, labelLayoutConstraints);
       tf.getDocument().addDocumentListener(new UIElementDocumentListener(context.uiElementEventHandler, uiElement, "valueChanged", new Object[]{}));
       tf.addFocusListener(new UIElementFocusListener(context.uiElementEventHandler, uiElement));
-      ActionListener actionL = getAction(uiElement, action, conf, context.uiElementEventHandler, context.supportedActions);
-      if (actionL != null) tf.addActionListener(actionL);
+      if (action.length() > 0)
+      {
+        ActionListener actionL = getAction(uiElement, action, conf, context.uiElementEventHandler, context.supportedActions);
+        if (actionL != null) tf.addActionListener(actionL);
+      }
       return uiElement;
     }
     else if (type.equals("textarea"))

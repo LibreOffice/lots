@@ -639,8 +639,8 @@ public class DatasourceSearchDialog implements Dialog
       }catch(TimeoutException x) { Logger.error(x);}
       catch(IllegalArgumentException x) { Logger.error(x);} //wird bei illegalen Suchanfragen geworfen
       
-      // kann mit results == null und resultsList == null umgehen
-      setListElements(resultsList, new TranslatedQueryResults(results, columnTranslations)); 
+      if (results != null && resultsList != null)
+        setListElements(resultsList, new TranslatedQueryResults(results, columnTranslations)); 
     }
 
     /**
@@ -1270,7 +1270,7 @@ public class DatasourceSearchDialog implements Dialog
     
     /**
      * Die QueryResults res werden mit den columnTranslations (Liste von
-     * ColumnTranslation Objekten) übersetzt.
+     * ColumnTranslation Objekten) übersetzt. 
      */
     public TranslatedQueryResults(QueryResults res, List columnTranslations)
     {
