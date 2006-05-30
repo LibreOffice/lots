@@ -13,6 +13,7 @@
 * 05.05.2006 | BNK | Condition -> Function
 * 15.05.2006 | BNK | +setString()
 * 18.05.2006 | BNK | +isStatic()
+* 30.05.2006 | BNK | UIElement.Listbox unterstützt jetzt Zusatzfunktionen
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -23,8 +24,10 @@ package de.muenchen.allg.itd51.wollmux.dialog;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.Vector;
 
@@ -446,6 +449,61 @@ public interface UIElement extends Value
     
         list.setSelectedIndices(selIndices);
       }
+    }
+    
+    /**
+     * Löscht alle alten Einträge dieser ListBox und ersetzt sie durch
+     * die Einträge von newEntries (beliebige Objects).
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     * TODO Testen
+     */
+    public void setList(Collection newEntries)
+    {
+      DefaultListModel listModel = (DefaultListModel)list.getModel();
+      listModel.clear();
+      Iterator iter = newEntries.iterator();
+      while (iter.hasNext())
+      {
+        listModel.addElement(iter.next());
+      }
+    }
+    
+    /**
+     * Liefert alle selektierten Objekte der Liste.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     * TODO Testen
+     */
+    public Object[] getSelected()
+    {
+      return list.getSelectedValues();
+    }
+    
+    /**
+     * Falls Mehrfachauswahl möglich ist werden alle gültigen Indizes (Numbers,
+     * gezählt ab 0) aus indices selektiert, falls nur Einfachauswahl möglich wird
+     * nur der erste gültige Index selektiert.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     * TODO Testen
+     */
+    public void select(Collection indices)
+    {
+      int[] selected = new int[indices.size()];
+      Iterator iter = indices.iterator();
+      int i = 0;
+      while (iter.hasNext())
+      {
+        int index = ((Number)iter.next()).intValue();
+        selected[i++] = index;
+      }
+      
+      if (i < selected.length)
+      {
+        int[] newSelected = new int[i];
+        System.arraycopy(selected, 0, newSelected, 0, i);
+        selected = newSelected;
+      }
+      
+      list.setSelectedIndices(selected);
     }
     
     public boolean isStatic() {return false;}
