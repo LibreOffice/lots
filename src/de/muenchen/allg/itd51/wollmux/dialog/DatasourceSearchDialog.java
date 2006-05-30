@@ -12,6 +12,7 @@
 * 23.05.2006 | BNK | Rohbau
 * 24.05.2006 | BNK | angefangen mit Suchstrategie auswerten etc.
 * 26.05.2006 | BNK | Suchstrategie,... fertig implementiert
+* 29.05.2006 | BNK | Umstellung auf UIElementFactory.Context
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -46,10 +47,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.swing.BoxLayout;
-import javax.swing.DefaultListModel;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
-import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
@@ -64,6 +63,7 @@ import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
 import de.muenchen.allg.itd51.wollmux.db.Query;
 import de.muenchen.allg.itd51.wollmux.db.QueryPart;
 import de.muenchen.allg.itd51.wollmux.db.QueryResults;
+import de.muenchen.allg.itd51.wollmux.dialog.UIElementFactory.Context;
 
 /**
  * Dialog zur Suche nach Daten in einer Datenquelle, die über DIALOG-Funktion 
@@ -126,16 +126,24 @@ public class DatasourceSearchDialog implements Dialog
   private DatasourceJoiner dj;
   
   /**
-   * Ein Kontext für {@link UIElementFactory#createUIElement(Map, ConfigThingy)},
-   * der verwendet wird für das Erzeugen von vertikal angeordneten UI Elementen.
+   * Ein Kontext für {@link UIElementFactory#createUIElement(Context, ConfigThingy)},
+   * der verwendet wird für das Erzeugen von vertikal angeordneten UI Elementen 
+   * (mit Ausnahme der Vorschau).
    */
-  private Map vertiContext;
+  private UIElementFactory.Context vertiContext;
   
   /**
-   * Ein Kontext für {@link UIElementFactory#createUIElement(Map, ConfigThingy)},
+   * Ein Kontext für {@link UIElementFactory#createUIElement(Context, ConfigThingy)},
+   * der verwendet wird für das Erzeugen der vertikal angeordneten UI Elemente 
+   * der Vorschau.
+   */
+  private UIElementFactory.Context previewContext;
+  
+  /**
+   * Ein Kontext für {@link UIElementFactory#createUIElement(Context, ConfigThingy)},
    * der verwendet wird für das Erzeugen von horizontal angeordneten Elementen.
    */
-  private Map horiContext;
+  private UIElementFactory.Context horiContext;
   
   /**
    * Solange dieses Flag false ist, werden Events von UI Elementen ignoriert.
@@ -182,7 +190,7 @@ public class DatasourceSearchDialog implements Dialog
     if (str == null) return "";
     return str;
   }
-  
+  //TESTED
   public void show(ActionListener dialogEndListener) throws ConfigurationErrorException
   {
     synchronized (shown)
@@ -209,7 +217,11 @@ public class DatasourceSearchDialog implements Dialog
       final String title2 = title;
       javax.swing.SwingUtilities.invokeLater(new Runnable() {
         public void run() {
-            try{createGUI(title2, fensterDesc.getLastChild());}catch(Exception x){};
+            try{
+              createGUI(title2, fensterDesc.getLastChild());}catch(Exception x)
+            {
+              Logger.error(x);
+            };
         }
       });
     }
@@ -221,7 +233,7 @@ public class DatasourceSearchDialog implements Dialog
    * @param title der Titel des Fensters.
    * @param fensterDesc der "Fenster" Abschnitt, der die Tabs der GUI beschreibt.
    * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TODO Testen
+   * TESTED
    */
   private void createGUI(String title, ConfigThingy fensterDesc)
   {
@@ -233,7 +245,7 @@ public class DatasourceSearchDialog implements Dialog
     myFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
     MyWindowListener oehrchen = new MyWindowListener();
     //der WindowListener sorgt dafür, dass auf windowClosing mit abort reagiert wird
-    myFrame.addWindowListener(oehrchen);
+    myFrame.addWindowListener(oehrchen); //TODO CLOSEACTION statt einfach nur abort()
     
     JPanel contentPanel = new JPanel();
     myFrame.getContentPane().add(contentPanel);
@@ -259,7 +271,7 @@ public class DatasourceSearchDialog implements Dialog
       String tip = "";
       Iterator childIter = neuesFenster.iterator();
       while (childIter.hasNext())
-      {
+      { //TODO CLOSEACTION unterstuetzen
         ConfigThingy childConf = (ConfigThingy)childIter.next();
         String name = childConf.getName();
         if (name.equals("TIP")) tip = childConf.toString(); else
@@ -323,7 +335,7 @@ public class DatasourceSearchDialog implements Dialog
     /**
      * Die Listbox mit den Suchresultaten.
      */
-    private UIElement resultsList = null;
+    private UIElement.Listbox resultsList = null;
     
     /**
      * Das Textfeld in dem der Benutzer seine Suchanfrage eintippt.
@@ -349,7 +361,7 @@ public class DatasourceSearchDialog implements Dialog
      * @param conf der Kind-Knoten des Fenster-Knotens der das Tab beschreibt.
      *        conf ist direkter Elternknoten der Knoten "Intro" et al.
      * @author Matthias Benkmann (D-III-ITD 5.1)     
-     */
+     * TESTED */
     public DialogWindow(int tabIndex, ConfigThingy conf)
     {
       searchStrategy = SearchStrategy.parse(conf);
@@ -377,11 +389,11 @@ public class DatasourceSearchDialog implements Dialog
       suchergebnisUndVorschau.add(suchergebnis);
       suchergebnisUndVorschau.add(vorschau);
       
-      addUIElements(conf, "Intro", intro, 0, 1);
-      addUIElements(conf, "Suche", suche, 1, 0);
-      addUIElements(conf, "Suchergebnis", suchergebnis, 0, 1);
-      addUIElements(conf, "Vorschau", vorschau, 0, 1);
-      addUIElements(conf, "Fussbereich", fussbereich, 1, 0);
+      addUIElements(conf, "Intro", intro, 0, 1, vertiContext);
+      addUIElements(conf, "Suche", suche, 1, 0, horiContext);
+      addUIElements(conf, "Suchergebnis", suchergebnis, 0, 1, vertiContext);
+      addUIElements(conf, "Vorschau", vorschau, 0, 1, previewContext);
+      addUIElements(conf, "Fussbereich", fussbereich, 1, 0, horiContext);
     }
 
     
@@ -389,8 +401,8 @@ public class DatasourceSearchDialog implements Dialog
      *  compo muss ein GridBagLayout haben. stepx und stepy geben an um
      *  wieviel mit jedem UI Element die x und die y Koordinate der Zelle
      *  erhöht werden soll. Wirklich sinnvoll sind hier nur (0,1) und (1,0).
-     */
-    private void addUIElements(ConfigThingy conf, String key, JComponent compo, int stepx, int stepy)
+     * TESTED */
+    private void addUIElements(ConfigThingy conf, String key, JComponent compo, int stepx, int stepy, UIElementFactory.Context context)
     {
       int y = 0;
       int x = 0; 
@@ -404,7 +416,6 @@ public class DatasourceSearchDialog implements Dialog
           ConfigThingy uiConf = (ConfigThingy)iter.next();
           UIElement uiElement;
           try{
-            Map context = stepx > 0 ? horiContext : vertiContext;
             uiElement = uiElementFactory.createUIElement(context, uiConf);
           } catch(ConfigurationErrorException e)
           {
@@ -421,8 +432,13 @@ public class DatasourceSearchDialog implements Dialog
             
           if (id.equals("suchergebnis"))
           {
-            resultsList = uiElement;
-            try{ displayTemplate = uiConf.get("DISPLAY").toString(); }catch(Exception e) {};
+            try {
+              resultsList = (UIElement.Listbox)uiElement;
+              try{ displayTemplate = uiConf.get("DISPLAY").toString(); }catch(Exception e) {};
+            }catch(ClassCastException e)
+            {
+              Logger.error("UI Element mit ID \"suchergebnis\" muss vom TYPE \"listbox\" sein!");
+            }
           }
             
           
@@ -446,7 +462,7 @@ public class DatasourceSearchDialog implements Dialog
               GridBagConstraints gbc = (GridBagConstraints)uiElement.getLabelLayoutConstraints();
               gbc.gridx = x + labelX;
               gbc.gridy = y;
-              myPanel.add(label, gbc);
+              compo.add(label, gbc);
             }
           }
           GridBagConstraints gbc = (GridBagConstraints)uiElement.getLayoutConstraints();
@@ -454,24 +470,21 @@ public class DatasourceSearchDialog implements Dialog
           gbc.gridy = y;
           x += stepx * labelmod;
           y += stepy;
-          myPanel.add(uiElement.getComponent(), gbc);
+          compo.add(uiElement.getComponent(), gbc);
           
         }  
       }    
     }
     
     /**
-     * Nimmt eine JList list, die ein DefaultListModel haben muss und ändert ihre
-     * Wertliste so, dass sie data entspricht. Die Datasets aus data werden nicht
+     * Ändert die Werteliste von list so, 
+     * dass sie data entspricht. Die Datasets aus data werden nicht
      * direkt als Werte verwendet, sondern in {@link ListElement} Objekte gewrappt.
-     * data == null wird interpretiert als leere Liste. Wenn datasetToSelect != null ist,
-     * so wird der entsprechende Datensatz in der Liste selektiert, wenn er darin vorhanden 
-     * ist.
+     * data == null wird interpretiert als leere Liste. 
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
-    private void setListElements(JList list, QueryResults data, Dataset datasetToSelect)
+    private void setListElements(UIElement.Listbox list, QueryResults data)
     {
-      int selectedIndex = -1;
       ListElement[] elements;
       if (data == null)
         elements = new ListElement[]{};
@@ -482,37 +495,17 @@ public class DatasourceSearchDialog implements Dialog
         int i = 0;
         while (iter.hasNext()) elements[i++] = new ListElement((Dataset)iter.next());
         Arrays.sort(elements, new Comparator()
-            {
+        {
           public int compare(Object o1, Object o2)
           {
             return o1.toString().compareTo(o2.toString());
           }
-            });
+        });
       }
       
-      DefaultListModel listModel = (DefaultListModel)list.getModel();
-      listModel.clear();
-      for (int i = 0; i < elements.length; ++i)
-      {
-        listModel.addElement(elements[i]);
-        if (datasetToSelect != null && 
-            elements[i].getDataset().getKey().equals(datasetToSelect.getKey()))
-          selectedIndex = i;
-      }
-      
-      if (selectedIndex >= 0) list.setSelectedIndex(selectedIndex);
+      list.setList(Arrays.asList(elements));
     }
       
-    /**
-     * wie {@link #setListElements(JList, QueryResults, Dataset)}, aber es wird kein Datensatz
-     * selektiert.
-     * @author Matthias Benkmann (D-III-ITD 5.1)
-     */
-    private void setListElements(JList list, QueryResults data)
-    {
-      setListElements(list, data, null);
-    }
-    
       
     /**
      * Liefert zu einem Datensatz den in einer Listbox anzuzeigenden String.
@@ -553,9 +546,9 @@ public class DatasourceSearchDialog implements Dialog
      * @author Matthias Benkmann (D-III-ITD 5.1)
      * TODO Testen
      */
-    public void search(SearchStrategy searchStrategy, String queryString, JList resultsList)
+    public void search()
     {
-      List queries = parseQuery(searchStrategy, queryString);
+      List queries = parseQuery(searchStrategy, query.getString());
       
       QueryResults results = null;
       try{
@@ -593,6 +586,17 @@ public class DatasourceSearchDialog implements Dialog
           Logger.debug(buffy.toString());
         }
         
+        if (eventType.equals("action"))
+        {
+          String action = (String)args[0];
+          if (action.equals("abort"))
+            abort();
+          else if (action.equals("back"))
+            back();
+          else if (action.equals("search"))
+            search();
+        }
+        
       }catch (Exception x)
       {
         Logger.error(x);
@@ -618,70 +622,114 @@ public class DatasourceSearchDialog implements Dialog
       
       //int gridx, int gridy, int gridwidth, int gridheight, double weightx, double weighty, int anchor,          int fill,                  Insets insets, int ipadx, int ipady) 
       GridBagConstraints gbcTextfield = new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0, GridBagConstraints.LINE_START,   GridBagConstraints.HORIZONTAL, new Insets(TF_BORDER,TF_BORDER,TF_BORDER,TF_BORDER),0,0);
+      GridBagConstraints gbcListbox   = new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER,   GridBagConstraints.BOTH, new Insets(TF_BORDER,TF_BORDER,TF_BORDER,TF_BORDER),0,0);
       GridBagConstraints gbcCombobox  = new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0, GridBagConstraints.LINE_START,   GridBagConstraints.HORIZONTAL, new Insets(TF_BORDER,TF_BORDER,TF_BORDER,TF_BORDER),0,0);
       GridBagConstraints gbcTextarea  = new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0, GridBagConstraints.LINE_START,   GridBagConstraints.HORIZONTAL, new Insets(TF_BORDER,TF_BORDER,TF_BORDER,TF_BORDER),0,0);
       GridBagConstraints gbcLabelLeft = new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.NONE,       new Insets(TF_BORDER,TF_BORDER,TF_BORDER,TF_BORDER),0,0);
-      GridBagConstraints gbcCheckbox  = new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.NONE,       new Insets(TF_BORDER,TF_BORDER,TF_BORDER,TF_BORDER),0,0);
-      GridBagConstraints gbcLabel =     new GridBagConstraints(0, 0, 2, 1, 1.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL,       new Insets(TF_BORDER,TF_BORDER,TF_BORDER,TF_BORDER),0,0);
+      GridBagConstraints gbcCheckbox  = new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL,       new Insets(TF_BORDER,TF_BORDER,TF_BORDER,TF_BORDER),0,0);
+      GridBagConstraints gbcLabel =     new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL,       new Insets(TF_BORDER,TF_BORDER,TF_BORDER,TF_BORDER),0,0);
+      GridBagConstraints gbcPreviewLabel =new GridBagConstraints(0, 0, 2, 1, 1.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL,       new Insets(TF_BORDER,TF_BORDER,TF_BORDER,TF_BORDER),0,0);
       GridBagConstraints gbcButton    = new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.NONE,       new Insets(BUTTON_BORDER,BUTTON_BORDER,BUTTON_BORDER,BUTTON_BORDER),0,0);
-      GridBagConstraints gbcHsep      = new GridBagConstraints(0, 0, 2, 1, 1.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL,       new Insets(3*TF_BORDER,0,2*TF_BORDER,0),0,0);
+      GridBagConstraints gbcHsep      = new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL,       new Insets(3*TF_BORDER,0,2*TF_BORDER,0),0,0);
+      GridBagConstraints gbcPreviewHsep=new GridBagConstraints(0, 0, 2, 1, 1.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL,       new Insets(3*TF_BORDER,0,2*TF_BORDER,0),0,0);
       GridBagConstraints gbcVsep      = new GridBagConstraints(0, 0, 1, 1, 0.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.VERTICAL,       new Insets(0,TF_BORDER,0,TF_BORDER),0,0);
       GridBagConstraints gbcGlue      = new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.LINE_START, GridBagConstraints.BOTH,       new Insets(0,0,0,0),0,0);
+      GridBagConstraints gbcPreviewGlue= new GridBagConstraints(0, 0, 2, 1, 1.0, 1.0, GridBagConstraints.LINE_START, GridBagConstraints.BOTH,       new Insets(0,0,0,0),0,0);
       
       mapTypeToLayoutConstraints.put("default", gbcTextfield);
-      mapTypeToLabelType.put("default", UIElement.LABEL_LEFT);
-      mapTypeToLabelLayoutConstraints.put("default", gbcLabelLeft);
+      mapTypeToLabelType.put("default", UIElement.LABEL_NONE);
+      mapTypeToLabelLayoutConstraints.put("default", null);
       
       mapTypeToLayoutConstraints.put("textfield", gbcTextfield);
-      mapTypeToLabelType.put("textfield", UIElement.LABEL_LEFT);
-      mapTypeToLabelLayoutConstraints.put("textfield", gbcLabelLeft);
+      mapTypeToLabelType.put("textfield", UIElement.LABEL_NONE);
+      mapTypeToLabelLayoutConstraints.put("textfield", null);
       
       mapTypeToLayoutConstraints.put("combobox", gbcCombobox);
-      mapTypeToLabelType.put("combobox", UIElement.LABEL_LEFT);
-      mapTypeToLabelLayoutConstraints.put("combobox", gbcLabelLeft);
+      mapTypeToLabelType.put("combobox", UIElement.LABEL_NONE);
+      mapTypeToLabelLayoutConstraints.put("combobox", null);
       
       mapTypeToLayoutConstraints.put("h-glue", gbcGlue);
       mapTypeToLabelType.put("h-glue", UIElement.LABEL_NONE);
-      //mapTypeToLabelLayoutConstraints.put("h-glue", none);
+      mapTypeToLabelLayoutConstraints.put("h-glue", null);
       mapTypeToLayoutConstraints.put("v-glue", gbcGlue);
       mapTypeToLabelType.put("v-glue", UIElement.LABEL_NONE);
-      //mapTypeToLabelLayoutConstraints.put("v-glue", none);
+      mapTypeToLabelLayoutConstraints.put("v-glue", null);
       
       mapTypeToLayoutConstraints.put("textarea", gbcTextarea);
-      mapTypeToLabelType.put("textarea", UIElement.LABEL_LEFT);
-      mapTypeToLabelLayoutConstraints.put("textarea", gbcLabelLeft);
+      mapTypeToLabelType.put("textarea", UIElement.LABEL_NONE);
+      mapTypeToLabelLayoutConstraints.put("textarea", null);
+      
+      mapTypeToLayoutConstraints.put("listbox", gbcListbox);
+      mapTypeToLabelType.put("listbox", UIElement.LABEL_NONE);
+      mapTypeToLabelLayoutConstraints.put("listbox", null);
       
       mapTypeToLayoutConstraints.put("label", gbcLabel);
       mapTypeToLabelType.put("label", UIElement.LABEL_NONE);
-      //mapTypeToLabelLayoutConstraints.put("label", none);
+      mapTypeToLabelLayoutConstraints.put("label", null);
       
       mapTypeToLayoutConstraints.put("checkbox", gbcCheckbox);
       mapTypeToLabelType.put("checkbox", UIElement.LABEL_NONE);
-      //mapTypeToLabelLayoutConstraints.put("checkbox", none);
+      mapTypeToLabelLayoutConstraints.put("checkbox", null); //hat label integriert
       
       mapTypeToLayoutConstraints.put("button", gbcButton);
       mapTypeToLabelType.put("button", UIElement.LABEL_NONE);
-      //mapTypeToLabelLayoutConstraints.put("button", none);
+      mapTypeToLabelLayoutConstraints.put("button", null);
       
       mapTypeToLayoutConstraints.put("h-separator", gbcHsep);
       mapTypeToLabelType.put("h-separator", UIElement.LABEL_NONE);
-      //mapTypeToLabelLayoutConstraints.put("h-separator", none);
+      mapTypeToLabelLayoutConstraints.put("h-separator", null);
       mapTypeToLayoutConstraints.put("v-separator", gbcVsep);
       mapTypeToLabelType.put("v-separator", UIElement.LABEL_NONE);
-      //mapTypeToLabelLayoutConstraints.put("v-separator", none);
-      
-      vertiContext = new HashMap();
-      vertiContext.put("separator","h-separator");
-      vertiContext.put("glue","v-glue");
-      
-      horiContext = new HashMap();
-      horiContext.put("separator","v-separator");
-      horiContext.put("glue","h-glue");
-      
+      mapTypeToLabelLayoutConstraints.put("v-separator", null);
+
       Set supportedActions = new HashSet();
+      supportedActions.add("abort");
+      supportedActions.add("back");
       
-      uiElementFactory = new UIElementFactory(mapTypeToLayoutConstraints,
-          mapTypeToLabelType, mapTypeToLabelLayoutConstraints, supportedActions, this);
+      vertiContext = new UIElementFactory.Context();
+      vertiContext.mapTypeToLabelLayoutConstraints = mapTypeToLabelLayoutConstraints;
+      vertiContext.mapTypeToLabelType = mapTypeToLabelType;
+      vertiContext.mapTypeToLayoutConstraints = mapTypeToLayoutConstraints;
+      vertiContext.uiElementEventHandler = this;
+      vertiContext.mapTypeToType = new HashMap();
+      vertiContext.mapTypeToType.put("separator","h-separator");
+      vertiContext.mapTypeToType.put("glue","v-glue");
+      vertiContext.supportedActions = supportedActions;
+      vertiContext.uiElementEventHandler = this;
+      
+      horiContext = new UIElementFactory.Context();
+      horiContext.mapTypeToLabelLayoutConstraints = mapTypeToLabelLayoutConstraints;
+      horiContext.mapTypeToLabelType = mapTypeToLabelType;
+      horiContext.mapTypeToLayoutConstraints = mapTypeToLayoutConstraints;
+      horiContext.uiElementEventHandler = this;
+      horiContext.mapTypeToType = new HashMap();
+      horiContext.mapTypeToType.put("separator","v-separator");
+      horiContext.mapTypeToType.put("glue","h-glue");
+      horiContext.supportedActions = supportedActions;
+      horiContext.uiElementEventHandler = this;
+
+      Map previewLabelLayoutConstraints = new HashMap(mapTypeToLabelLayoutConstraints);
+      previewLabelLayoutConstraints.put("textfield",gbcLabelLeft);
+      Map previewLabelType = new HashMap(mapTypeToLabelType);
+      previewLabelType.put("textfield", UIElement.LABEL_LEFT);
+      Map previewLayoutConstraints = new HashMap(mapTypeToLayoutConstraints);
+      previewLayoutConstraints.put("h-glue", gbcPreviewGlue);
+      previewLayoutConstraints.put("v-glue", gbcPreviewGlue);
+      previewLayoutConstraints.put("label", gbcPreviewLabel);
+      previewLayoutConstraints.put("h-separator", gbcPreviewHsep);
+      previewContext = new UIElementFactory.Context();
+      previewContext.mapTypeToLabelLayoutConstraints = previewLabelLayoutConstraints;
+      previewContext.mapTypeToLabelType = previewLabelType;
+      previewContext.mapTypeToLayoutConstraints = previewLayoutConstraints;
+      previewContext.uiElementEventHandler = this;
+      previewContext.mapTypeToType = new HashMap();
+      previewContext.mapTypeToType.put("separator","h-separator");
+      previewContext.mapTypeToType.put("glue","v-glue");
+      previewContext.supportedActions = supportedActions;
+      previewContext.uiElementEventHandler = this;
+
+      
+      uiElementFactory = new UIElementFactory();
       
     }
   }/*******************************************************************
@@ -714,7 +762,7 @@ public class DatasourceSearchDialog implements Dialog
      * SearchStrategy.
      * @param conf
      * @author Matthias Benkmann (D-III-ITD 5.1)
-     * TODO Testen
+     * TESTED
      */
     public static SearchStrategy parse(ConfigThingy conf)
     {
@@ -945,8 +993,12 @@ public class DatasourceSearchDialog implements Dialog
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void dialogEnd(String actionCommand)
-  {
+  { 
     myFrame.dispose();
+    synchronized(shown)
+    {
+      shown[0] = false;
+    }
     if (dialogEndListener != null)
       dialogEndListener.actionPerformed(new ActionEvent("PersoenlicheAbsenderliste",0,actionCommand));
   }
@@ -1006,11 +1058,13 @@ public class DatasourceSearchDialog implements Dialog
   public static void main(String[] args) throws Exception
   {
     WollMuxFiles.setupWollMuxDir();
+    Logger.init(System.err, Logger.DEBUG);
     String confFile = "testdata/formulartest.conf";
     ConfigThingy conf = new ConfigThingy("", new URL(new File(System
         .getProperty("user.dir")).toURL(), confFile));
     Dialog dialog = DatasourceSearchDialog.create(conf.get("Funktionsdialoge").get("Empfaengerauswahl"), WollMuxFiles.getDatasourceJoiner());
-    dialog.show(null);
+    Map myContext = new HashMap();
+    dialog.instanceFor(myContext).show(null);
   }
 
   
