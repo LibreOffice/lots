@@ -24,6 +24,8 @@
  * 24.04.2006 | BNK | korrekte Monatsangabe.
  * 15.05.2006 | BNK | Cause ausgeben in printException()
  * 16.05.2006 | BNK | println() und printException() vereinheitlicht
+ * 30.05.2006 | BNK | bei init(PrintStream,...) den file zurücksetzen, damit
+ *                  | die Zuweisung auch wirksam wird.
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -63,7 +65,7 @@ public class Logger
   /**
    * Der PrintStream, auf den die Nachrichten geschrieben werden.
    */
-  private static PrintStream defaultOutputStream = System.err;
+  private static PrintStream outputStream = System.err;
 
   /**
    * optional: Datei, aus der der PrintStream erzeugt wird.
@@ -120,7 +122,8 @@ public class Logger
    */
   public static void init(PrintStream outputPrintStream, int loggingMode)
   {
-    defaultOutputStream = outputPrintStream;
+    outputStream = outputPrintStream;
+    file = null; //evtl. vorher erfolgte Zuweisung aufheben, damit outputStream auch wirklich verwendet wird
     mode = loggingMode;
     Logger.debug2("========================== Logger::init(): LoggingMode = " + mode+" ========================");
   }
@@ -304,11 +307,11 @@ public class Logger
       }
       catch (FileNotFoundException x)
       {
-        out = Logger.defaultOutputStream;
+        out = Logger.outputStream;
       }
     else
     {
-      out = Logger.defaultOutputStream;
+      out = Logger.outputStream;
     }
 
     // Zeit und Datum holen und aufbereiten
