@@ -25,7 +25,10 @@
 package de.muenchen.allg.itd51.wollmux;
 
 import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -56,6 +59,7 @@ import de.muenchen.allg.itd51.wollmux.DocumentCommand.UpdateFields;
 import de.muenchen.allg.itd51.wollmux.DocumentCommandTree.TreeExecutor;
 import de.muenchen.allg.itd51.wollmux.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.db.DatasetNotFoundException;
+import de.muenchen.allg.itd51.wollmux.dialog.FormController;
 import de.muenchen.allg.itd51.wollmux.dialog.FormGUI;
 
 /**
@@ -192,6 +196,9 @@ public class DocumentCommandInterpreter
    * 
    * @throws WMCommandsFailedException
    */
+  /**
+   * @throws WMCommandsFailedException
+   */
   public void executeFormCommands() throws WMCommandsFailedException
   {
     Logger.debug("executeFormCommands");
@@ -203,9 +210,7 @@ public class DocumentCommandInterpreter
 
     ConfigThingy descs = fs.getFormDescriptors();
     HashMap idToFormFields = fs.getIDToFormFields();
-    if (idToFormFields.containsKey("fixme"))
-    // TODO: behandlung von idToFormFields
-      ;
+    HashMap idToPresetValue = mapIDToPresetValue(idToFormFields);
 
     // 2) Bookmarks updaten
     tree.updateBookmarks(mux.isDebugMode());
@@ -240,8 +245,91 @@ public class DocumentCommandInterpreter
     // 5) Formulardialog starten:
     FormModel fm = new FormModelImpl(document.xComponent());
 
-    new FormGUI(descs, fm, new HashMap(), mux.getGlobalFunctions(), mux
+    new FormGUI(descs, fm, idToPresetValue, mux.getGlobalFunctions(), mux
         .getFunctionDialogs());
+  }
+
+  /**
+   * Diese Methode bestimmt die Vorbelegung der Formularfelder des Formulars und
+   * liefert eine HashMap zurück, die die id eines Formularfeldes auf den
+   * bestimmten Wert abbildet. Der Wert ist nur dann klar definiert, wenn alle
+   * FormFields zu einer ID unverändert geblieben sind, oder wenn nur
+   * untransformierte Felder vorhanden sind, die alle den selben Wert enthalten.
+   * 
+   * @param idToFormFields
+   *          Eine Map, die die vorhandenen IDs auf Vectoren von FormFields
+   *          abbildet.
+   * @return
+   */
+  private HashMap mapIDToPresetValue(HashMap idToFormFields)
+  {
+    HashMap idToPresetValue = new HashMap();
+    Iterator i = idToFormFields.keySet().iterator();
+    while (i.hasNext())
+    {
+      String id = (String) i.next();
+      Vector fields = (Vector) idToFormFields.get(id);
+
+      if (fields.size() > 0)
+      {
+        boolean allAreUnchanged = true;
+        boolean allAreUntransformed = true;
+        boolean allHaveChecksums = true;
+        boolean allUntransformedHaveSameValues = true;
+        Iterator j = fields.iterator();
+        String refValue = null;
+        while (j.hasNext())
+        {
+          FormField field = (FormField) j.next();
+          String thisValue = field.getValue();
+
+          if (field.hasChangedPreviously()) allAreUnchanged = false;
+
+          if (!field.hasChecksum()) allHaveChecksums = false;
+
+          if (field.hasTrafo())
+          {
+            allAreUntransformed = false;
+          }
+          else
+          {
+            // Referenzwert bestimmen
+            if (refValue == null) refValue = thisValue;
+
+            if (thisValue == null || !thisValue.equals(refValue))
+              allUntransformedHaveSameValues = false;
+          }
+        }
+
+        // Der Wert ist nur dann klar definiert, wenn sich gar kein Feld zuletzt
+        // geändert hat oder wenn nur untransformierte Felder vorhanden sind,
+        // die alle den selben Wert enthalten.
+        if (allHaveChecksums)
+        {
+          String value = FormController.FISHY;
+          if (allAreUnchanged)
+          {
+            if (refValue != null) value = refValue;
+          }
+          else
+          {
+            if (allAreUntransformed
+                && allUntransformedHaveSameValues
+                && refValue != null) value = refValue;
+          }
+
+          idToPresetValue.put(id, value);
+          Logger.debug2("Add IDToPresetValue: ID=\""
+                        + id
+                        + "\" --> Wert=\""
+                        + value
+                        + "\"");
+        }
+
+      }
+
+    }
+    return idToPresetValue;
   }
 
   /**
@@ -1137,21 +1225,39 @@ public class DocumentCommandInterpreter
 
     public FormField(InsertFormValue cmd, XTextField xTextField)
     {
-      inputField = new UnoService(xTextField);
+      this.cmd = cmd;
+      this.inputField = new UnoService(xTextField);
     }
 
     /**
      * Gibt an, ob der Inhalt des InputFields mit der zuletzt gesetzten MD5-Sum
      * des Feldes übereinstimmt oder ob der Wert seitdem geändert wurde (z.B.
-     * durch manuelles Setzen des Feldinhalts durch den Benutzer).
+     * durch manuelles Setzen des Feldinhalts durch den Benutzer). Ist noch kein
+     * MD5-Vergleichswert vorhanden, so wird false zurückgeliefert.
      * 
-     * @return true, wenn sich der der Inhalt des InputFields nicht mehr mit der
-     *         zuletzt gesetzten MD5-Sum übereinstimmt, ansonsten false
+     * @return true, wenn der Inhalt des InputFields nicht mehr mit der zuletzt
+     *         gesetzten MD5-Sum übereinstimmt, ansonsten false
      */
     public boolean hasChangedPreviously()
     {
-      // TODO: implementieren von FormField.changedPreviously
+      String value = getValue();
+      String lastSetMD5 = cmd.getMD5();
+      if (value != null && lastSetMD5 != null)
+      {
+        String md5 = getMD5HexRepresentation(value);
+        return !(md5.equals(lastSetMD5));
+      }
       return false;
+    }
+
+    /**
+     * Die Methode liefert true, wenn das insertFormValue-Kommando eine
+     * TRAFO-Funktion verwendet, um den gesetzten Wert zu transformieren,
+     * ansonsten wird false zurückgegeben.
+     */
+    public boolean hasTrafo()
+    {
+      return (cmd.getTrafoName() != null);
     }
 
     /**
@@ -1168,8 +1274,12 @@ public class DocumentCommandInterpreter
       {
         // value = trafo(value)
       }
-      // - md5=calcMD5(value)
-      // - cmd.setMD5(md5)
+
+      // md5-Wert bestimmen und setzen:
+      String md5 = getMD5HexRepresentation(value);
+      cmd.setMD5(md5);
+
+      // Inhalt des Textfeldes setzen:
       if (inputField.xTextField() != null) try
       {
         inputField.setPropertyValue("Content", value);
@@ -1178,6 +1288,65 @@ public class DocumentCommandInterpreter
       {
         Logger.error(e);
       }
+    }
+
+    /**
+     * Diese Methode liefert den aktuellen Wert des Formularfeldes als String
+     * zurück oder null, falls der Wert nicht bestimmt werden kann.
+     * 
+     * @return der aktuelle Wert des Formularfeldes als String
+     */
+    public String getValue()
+    {
+      try
+      {
+        return inputField.getPropertyValue("Content").getObject().toString();
+      }
+      catch (Exception e)
+      {
+        return null;
+      }
+    }
+
+    /**
+     * 
+     * @return
+     */
+    public boolean hasChecksum()
+    {
+      return (cmd.getMD5() != null);
+    }
+
+    public void setMD5(String md5Str)
+    {
+      cmd.setMD5(md5Str);
+    }
+
+    // Helper-Methoden:
+
+    public static String getMD5HexRepresentation(String string)
+    {
+      String md5 = "";
+      try
+      {
+        MessageDigest md = MessageDigest.getInstance("MD5");
+        byte[] md5bytes = md.digest(string.getBytes("UTF-8"));
+        for (int k = 0; k < md5bytes.length; k++)
+        {
+          byte b = md5bytes[k];
+          String str = Integer.toHexString(b + 512);
+          md5 += str.substring(1);
+        }
+      }
+      catch (NoSuchAlgorithmException e)
+      {
+        Logger.error(e);
+      }
+      catch (UnsupportedEncodingException e)
+      {
+        Logger.error(e);
+      }
+      return md5;
     }
   }
 

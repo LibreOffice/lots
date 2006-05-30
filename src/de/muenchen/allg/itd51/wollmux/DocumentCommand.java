@@ -29,7 +29,6 @@ import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextRange;
 import com.sun.star.uno.Exception;
 
-import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.parser.SyntaxErrorException;
@@ -476,7 +475,7 @@ abstract public class DocumentCommand
    * @return Ein ConfigThingy, das das "WM"-Kommando mit allen
    *         Statusinformationen enthält.
    */
-  private ConfigThingy toConfigThingy()
+  protected ConfigThingy toConfigThingy()
   {
     // DONE:
     // Falls der Knoten existiert und sich der Status geändert hat wird der neue
@@ -547,7 +546,7 @@ abstract public class DocumentCommand
    * @param key
    * @return true, falls der Key definiert ist, andernfalls false.
    */
-  private boolean isDefinedState(String key)
+  protected boolean isDefinedState(String key)
   {
     return (getState(key) != null);
   }
@@ -559,7 +558,7 @@ abstract public class DocumentCommand
    * @param key
    * @return
    */
-  private ConfigThingy getState(String key)
+  protected ConfigThingy getState(String key)
   {
     ConfigThingy state;
     try
@@ -583,7 +582,7 @@ abstract public class DocumentCommand
    * @param key
    * @param value
    */
-  private void setOrCreate(String key, String value)
+  protected void setOrCreate(String key, String value)
   {
     // gewünschte Struktur aufbauen:
 
@@ -996,7 +995,7 @@ abstract public class DocumentCommand
 
     private String trafo = null;
 
-    private UnoService textField;
+    private String md5 = null;
 
     public InsertFormValue(ConfigThingy wmCmd, Bookmark bookmark)
         throws InvalidCommandException
@@ -1032,9 +1031,17 @@ abstract public class DocumentCommand
       return trafo;
     }
 
-    public UnoService getInputField()
+    public String getMD5()
     {
-      return textField;
+      if (md5 != null)
+        return md5;
+      else if (isDefinedState("MD5")) return getState("MD5").toString();
+      return null;
+    }
+
+    public void setMD5(String md5Str)
+    {
+      md5 = md5Str;
     }
 
     protected boolean canHaveChilds()
@@ -1046,8 +1053,17 @@ abstract public class DocumentCommand
     {
       return visitable.executeCommand(this);
     }
+
+    protected ConfigThingy toConfigThingy()
+    {
+      // MD5 im wmCmd setzen:
+      if (md5 != null) setOrCreate("MD5", md5);
+
+      return super.toConfigThingy();
+    }
+
   }
-  
+
   // ********************************************************************************
   /**
    * Dieses Kommando fügt die Versionsnummer der aktuellen WollMux-Installation
