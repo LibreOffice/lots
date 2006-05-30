@@ -9,6 +9,7 @@
 * Datum      | Wer | Änderungsgrund
 * -------------------------------------------------------------------
 * 06.12.2005 | BNK | Erstellung
+* 30.05.2006 | BNK | +SimpleDataset(String key, Map data)
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -53,6 +54,20 @@ public class SimpleDataset implements Dataset
     }
   }
   
+  /**
+   * Erzeugt ein SimpleDataset, das den Schlüssel key hat und dessen Daten
+   * von der Map data geliefert werden. Das Schema wird implizit durch die
+   * Schlüssel bestimmt, die data kennt (d.h. wenn data.containsKey(column), dann
+   * ist column im Schema). 
+   * ACHTUNG! Sowohl schema als auch data werden
+   * per Referenz eingebunden.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public SimpleDataset(String key, Map data)
+  {
+    this.key = key;
+    this.data = data;
+  }
    
   /* (non-Javadoc)
    * @see de.muenchen.allg.itd51.wollmux.db.Dataset#get(java.lang.String)
