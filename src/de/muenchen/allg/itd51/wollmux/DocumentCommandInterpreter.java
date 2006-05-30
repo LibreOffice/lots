@@ -1309,15 +1309,17 @@ public class DocumentCommandInterpreter
     }
 
     /**
-     * 
-     * @return
+     * Liefert true, wenn das Dokumentkommando eine Checksumme (MD5) im Status
+     * enthält, über die festgestellt werden kann, ob der Wert des Eingabefeldes
+     * noch mit der zuletzt gesetzten Checksumme übereinstimmt (siehe
+     * hasChangedPreviously())
      */
     public boolean hasChecksum()
     {
       return (cmd.getMD5() != null);
     }
 
-    public void setMD5(String md5Str)
+    private void setMD5(String md5Str)
     {
       cmd.setMD5(md5Str);
     }
