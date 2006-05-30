@@ -42,7 +42,8 @@ public class Query
   /**
    * Erzeugt eine neue Query.
    * @param dbName der Name die Datenquelle auf der die Suche erfolgen soll.
-   * @param listOfQueryParts Liste von QueryParts, die die eigentliche Query beschreiben.
+   * @param listOfQueryParts Liste von QueryParts, die die eigentliche Query 
+   *        beschreiben. ACHTUNG! Wird als Referenz eingebunden.
    */
   public Query(String dbName, List listOfQueryParts)
   {
