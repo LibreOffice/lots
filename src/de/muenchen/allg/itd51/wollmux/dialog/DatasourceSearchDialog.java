@@ -13,6 +13,7 @@
 * 24.05.2006 | BNK | angefangen mit Suchstrategie auswerten etc.
 * 26.05.2006 | BNK | Suchstrategie,... fertig implementiert
 * 29.05.2006 | BNK | Umstellung auf UIElementFactory.Context
+* 30.05.2006 | BNK | Suche implementiert
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -63,7 +64,12 @@ import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
 import de.muenchen.allg.itd51.wollmux.db.Query;
 import de.muenchen.allg.itd51.wollmux.db.QueryPart;
 import de.muenchen.allg.itd51.wollmux.db.QueryResults;
+import de.muenchen.allg.itd51.wollmux.db.SimpleDataset;
 import de.muenchen.allg.itd51.wollmux.dialog.UIElementFactory.Context;
+import de.muenchen.allg.itd51.wollmux.func.Function;
+import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
+import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
+import de.muenchen.allg.itd51.wollmux.func.Values;
 
 /**
  * Dialog zur Suche nach Daten in einer Datenquelle, die über DIALOG-Funktion 
@@ -151,6 +157,25 @@ public class DatasourceSearchDialog implements Dialog
   private boolean processUIElementEvents = false;
   
   /**
+   * Wird zur Auflösung von Funktionsreferenzen in Spaltenumsetzung-Abschnitten
+   * verwendet.
+   */
+  private FunctionLibrary funcLib;
+  
+  /**
+   * Zur Zeit noch nicht unterstützt, aber im Prinzip könnte man in einem
+   * Datenquellensuchdialog ebenfalls wieder Funktionsdialoge verwenden. Diese
+   * würden dann aus dieser Bibliothek bezogen.
+   */
+  private DialogLibrary dialogLib;
+  
+  /**
+   * Werden durch diesen Funktionsdialog weitere Funktionsdialoge erzeugt, so
+   * wird dieser Kontext übergeben. 
+   */
+  private Map context = new HashMap();
+  
+  /**
    * Der show übergebene dialogEndListener.
    */
   private ActionListener dialogEndListener;
@@ -191,7 +216,7 @@ public class DatasourceSearchDialog implements Dialog
     return str;
   }
   //TESTED
-  public void show(ActionListener dialogEndListener) throws ConfigurationErrorException
+  public void show(ActionListener dialogEndListener, FunctionLibrary funcLib, DialogLibrary dialogLib) throws ConfigurationErrorException
   {
     synchronized (shown)
     {
@@ -199,6 +224,8 @@ public class DatasourceSearchDialog implements Dialog
       shown[0] = true;
     }
     this.dialogEndListener = dialogEndListener;
+    this.funcLib = funcLib;
+    this.dialogLib = dialogLib;
     
     String title = "Datensatz Auswählen";
     try{ title = myConf.get("TITLE",1).toString();} catch(Exception x){}
@@ -325,6 +352,14 @@ public class DatasourceSearchDialog implements Dialog
      * Die Suchstrategie für Suchanfragen. 
      */
     private SearchStrategy searchStrategy;
+    
+    /**
+     * Eine Liste von ColumnTranslations, die die Umsetzung der Spalten der
+     * gefundenen Datasets auf die vom Dialog zu exportierenden Werte
+     * realisieren. Jede ColumnTranslation entspricht einem Eintrag des
+     * Spaltenumsetzung-Abschnitts. 
+     */
+    private List columnTranslations;
 
     /**
      * Legt fest, wie die Datensätze in der Ergebnisliste dargestellt werden
@@ -352,6 +387,12 @@ public class DatasourceSearchDialog implements Dialog
      * Die für die Erzeugung der UI Elemente verwendete Factory.
      */
     private UIElementFactory uiElementFactory;
+
+    /**
+     * Bildet DB_SPALTE Werte des Vorschau-Abschnitts auf die entsprechenden
+     * UIElemente ab (jeweils 1 UIElement pro DB_SPALTE, keine Liste).
+     */
+    private Map mapDB_SPALTEtoUIElement;
     
     
     /**
@@ -365,6 +406,7 @@ public class DatasourceSearchDialog implements Dialog
     public DialogWindow(int tabIndex, ConfigThingy conf)
     {
       searchStrategy = SearchStrategy.parse(conf);
+      columnTranslations = parseColumnTranslations(conf);
       initFactories();
       
       myPanel = new JPanel(new BorderLayout());
@@ -389,11 +431,12 @@ public class DatasourceSearchDialog implements Dialog
       suchergebnisUndVorschau.add(suchergebnis);
       suchergebnisUndVorschau.add(vorschau);
       
-      addUIElements(conf, "Intro", intro, 0, 1, vertiContext);
-      addUIElements(conf, "Suche", suche, 1, 0, horiContext);
-      addUIElements(conf, "Suchergebnis", suchergebnis, 0, 1, vertiContext);
-      addUIElements(conf, "Vorschau", vorschau, 0, 1, previewContext);
-      addUIElements(conf, "Fussbereich", fussbereich, 1, 0, horiContext);
+      addUIElements(conf, "Intro", intro, 0, 1, vertiContext, null);
+      addUIElements(conf, "Suche", suche, 1, 0, horiContext, null);
+      addUIElements(conf, "Suchergebnis", suchergebnis, 0, 1, vertiContext, null);
+      mapDB_SPALTEtoUIElement = new HashMap();
+      addUIElements(conf, "Vorschau", vorschau, 0, 1, previewContext, mapDB_SPALTEtoUIElement);
+      addUIElements(conf, "Fussbereich", fussbereich, 1, 0, horiContext, null);
     }
 
     
@@ -402,7 +445,7 @@ public class DatasourceSearchDialog implements Dialog
      *  wieviel mit jedem UI Element die x und die y Koordinate der Zelle
      *  erhöht werden soll. Wirklich sinnvoll sind hier nur (0,1) und (1,0).
      * TESTED */
-    private void addUIElements(ConfigThingy conf, String key, JComponent compo, int stepx, int stepy, UIElementFactory.Context context)
+    private void addUIElements(ConfigThingy conf, String key, JComponent compo, int stepx, int stepy, UIElementFactory.Context context, Map mapDB_SPALTEtoUIElement)
     {
       int y = 0;
       int x = 0; 
@@ -417,6 +460,10 @@ public class DatasourceSearchDialog implements Dialog
           UIElement uiElement;
           try{
             uiElement = uiElementFactory.createUIElement(context, uiConf);
+            try {
+              String dbSpalte = uiConf.get("DB_SPALTE").toString();
+              mapDB_SPALTEtoUIElement.put(dbSpalte, uiElement);
+            }catch(Exception e) {}
           } catch(ConfigurationErrorException e)
           {
             Logger.error(e);
@@ -477,14 +524,43 @@ public class DatasourceSearchDialog implements Dialog
     }
     
     /**
+     * Geht alle Elemente von mapDB_SPALTEtoUIElement durch und updated die
+     * Felder mit den entsprechenden Werten aus dem Datensatz, der an ele
+     * dranhängt.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     * TODO Testen
+     */
+    private void updatePreview(ListElement ele)
+    {
+      Dataset ds = ele.getDataset();
+      Iterator iter = mapDB_SPALTEtoUIElement.entrySet().iterator();
+      while (iter.hasNext())
+      {
+        Map.Entry entry = (Map.Entry)iter.next();
+        String dbSpalte = (String)entry.getKey();
+        UIElement uiElement = (UIElement)entry.getValue();
+        try
+        {
+          uiElement.setString(ds.get(dbSpalte));
+        }
+        catch (ColumnNotFoundException e)
+        {
+          Logger.error("Fehler im Abschnitt \"Spaltenumsetzung\" oder \"Vorschau\". Spalte \""+dbSpalte+"\" soll in Vorschau angezeigt werden ist aber nicht in der Spaltenumsetzung definiert.");
+        }
+      }
+    }
+    
+    /**
      * Ändert die Werteliste von list so, 
      * dass sie data entspricht. Die Datasets aus data werden nicht
      * direkt als Werte verwendet, sondern in {@link ListElement} Objekte gewrappt.
-     * data == null wird interpretiert als leere Liste. 
+     * data == null wird interpretiert als leere Liste.
+     * list kann null sein (dann tut diese Funktion nichts). 
      * @author Matthias Benkmann (D-III-ITD 5.1)
-     */
+     * TESTED */
     private void setListElements(UIElement.Listbox list, QueryResults data)
     {
+      if (list == null) return;
       ListElement[] elements;
       if (data == null)
         elements = new ListElement[]{};
@@ -541,13 +617,15 @@ public class DatasourceSearchDialog implements Dialog
     
 
     /**
-     * Führt Suchanfrage queryString aus gemäß searchStrategy und ändert
+     * Führt die Suchanfrage im Feld query aus (falls dieses nicht null ist)
+     * gemäß searchStrategy und ändert
      * resultsList so dass sie die Suchergebnisse enthält.  
      * @author Matthias Benkmann (D-III-ITD 5.1)
-     * TODO Testen
+     * TESTED
      */
     public void search()
     {
+      if (query == null) return;
       List queries = parseQuery(searchStrategy, query.getString());
       
       QueryResults results = null;
@@ -561,8 +639,8 @@ public class DatasourceSearchDialog implements Dialog
       }catch(TimeoutException x) { Logger.error(x);}
       catch(IllegalArgumentException x) { Logger.error(x);} //wird bei illegalen Suchanfragen geworfen
       
-      // kann mit results == null umgehen
-      setListElements(resultsList, results); 
+      // kann mit results == null und resultsList == null umgehen
+      setListElements(resultsList, new TranslatedQueryResults(results, columnTranslations)); 
     }
 
     /**
@@ -596,6 +674,13 @@ public class DatasourceSearchDialog implements Dialog
           else if (action.equals("search"))
             search();
         }
+        else if (eventType.equals("listSelectionChanged"))
+        {
+          Object[] selected = ((UIElement.Listbox)source).getSelected();
+          if (selected.length > 0)
+            updatePreview((ListElement)selected[0]);
+        }
+          
         
       }catch (Exception x)
       {
@@ -685,6 +770,7 @@ public class DatasourceSearchDialog implements Dialog
       Set supportedActions = new HashSet();
       supportedActions.add("abort");
       supportedActions.add("back");
+      supportedActions.add("search");
       
       vertiContext = new UIElementFactory.Context();
       vertiContext.mapTypeToLabelLayoutConstraints = mapTypeToLabelLayoutConstraints;
@@ -822,7 +908,7 @@ public class DatasourceSearchDialog implements Dialog
      * stehen durchgeführt werden solange bis eine davon ein Ergebnis liefert.
      * @return null falls keine Strategie für den gegebenen wordcount vorhanden.
      * @author Matthias Benkmann (D-III-ITD 5.1)
-     * TODO Testen
+     * TESTED
      */
     public List getTemplate(int wordcount)
     {
@@ -835,7 +921,7 @@ public class DatasourceSearchDialog implements Dialog
    * "${wortX}" enthalten kann) und instanziiert es mit Wörtern aus words, wobei
    * nur die ersten wordcount Einträge von words beachtet werden. 
    * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TODO Testen
+   * TESTED
    */
   private Query resolveTemplate(Query template, String[] words, int wordcount)
   {
@@ -867,11 +953,11 @@ public class DatasourceSearchDialog implements Dialog
    * für die Anzahl Wörter gefunden wurde.
    * @return die leere Liste falls keine Liste bestimmt werden konnte.
    * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TODO Testen
+   * TESTED
    */
   private List parseQuery(SearchStrategy searchStrategy, String queryString)
   {
-    List query = new Vector();
+    List queryList = new Vector();
     
     /*
      * Kommata durch Space ersetzen (d.h. "Benkmann,Matthias" -> "Benkmann Matthias")
@@ -917,7 +1003,7 @@ public class DatasourceSearchDialog implements Dialog
      * Passende Suchstrategie finden; falls nötig dazu Wörter am Ende weglassen.
      */
     while( count > 0 && 
-           searchStrategy.getTemplate(count - 1) == null
+           searchStrategy.getTemplate(count) == null
          )
       --count;
     
@@ -925,17 +1011,17 @@ public class DatasourceSearchDialog implements Dialog
      * leerer Suchstring (bzw. nur einzelne Sternchen)
      * oder keine Suchstrategie gefunden
      */
-    if (count == 0) return query; 
+    if (count == 0) return queryList; 
     
-    List templateList = searchStrategy.getTemplate(count -1);
+    List templateList = searchStrategy.getTemplate(count);
     Iterator iter = templateList.iterator();
     while (iter.hasNext())
     {
       Query template = (Query)iter.next();
-      query.add(resolveTemplate(template, queryArray, count));
+      queryList.add(resolveTemplate(template, queryArray, count));
     }
     
-    return query;
+    return queryList;
   }
   
   /**
@@ -956,7 +1042,7 @@ public class DatasourceSearchDialog implements Dialog
         String wert2 = datensatz.get(spalte);
         if (wert2 != null)
           wert = wert2.replaceAll("\\$", "");
-      } catch (ColumnNotFoundException e) { Logger.error(e);}
+      } catch (ColumnNotFoundException e) { Logger.error("Fehler beim Auflösen des Platzhalters \"${"+spalte+"}\": Spalte für den Datensatz nicht definiert");}
       str = str.substring(0, m.start()) + wert + str.substring(m.end());
       m = p.matcher(str);
     } while (m.find());
@@ -1032,7 +1118,7 @@ public class DatasourceSearchDialog implements Dialog
     }
     
     public Object getData(String id)  { return null;}
-    public void show(ActionListener dialogEndListener) {}
+    public void show(ActionListener dialogEndListener, FunctionLibrary funcLib, DialogLibrary dialogLib) {}
   }
   
   /**
@@ -1051,7 +1137,164 @@ public class DatasourceSearchDialog implements Dialog
     public void windowIconified(WindowEvent e) { }
     public void windowOpened(WindowEvent e) {}
   }
+  
+  /**
+   * Definition einer neuen Spalte als Funktion alter Spaltenwerte.
+   *
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private static class ColumnTranslation
+  {
+    /**
+     * der Name der neuen Spalte.
+     */
+    private String newColumnName;
     
+    /**
+     * Die Funktion, die die neue Spalte definiert.
+     */
+    private Function func;
+    
+    /**
+     * Erzeugt eine neue ColumnTranslation, die eine neue Spalte mit Namen
+     * newColumnName definiert als Wert der Funktion func.
+     */
+    public ColumnTranslation(String newColumnName, Function func)
+    {
+      this.newColumnName = newColumnName;
+      this.func = func;
+    }
+    
+    /**
+     * Liefert den Namen der neuen Spalte.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
+    public String getNewColumnName()
+    {
+      return newColumnName;
+    }
+    
+    /**
+     * Liefert den Wert der neuen Spalte für Datensatz ds.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
+    public String getNewColumnValue(Dataset ds)
+    {
+      return func.getString(new DatasetValues(ds));
+    }
+  }
+  
+  /**
+   * Parst conf,query("Spaltenumsetzung") und liefert eine Liste, die
+   * für jeden Eintrag ein entsprechendes ColumnTranslation Objekt enthält.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED
+   */
+  private List parseColumnTranslations(ConfigThingy conf)
+  {
+    Vector columnTrans = new Vector();
+    Iterator parentIter = conf.query("Spaltenumsetzung").iterator();
+    while (parentIter.hasNext())
+    {
+      Iterator iter = ((ConfigThingy)parentIter.next()).iterator();
+      while (iter.hasNext())
+      {
+        ConfigThingy transConf = (ConfigThingy)iter.next();
+        String name = transConf.getName();
+        try
+        {
+          Function func = FunctionFactory.parseChildren(transConf, funcLib, dialogLib, context);
+          columnTrans.add(new ColumnTranslation(name, func));
+        }
+        catch (ConfigurationErrorException e)
+        {
+          Logger.error("Fehler beim Parsen der Spaltenumsetzungsfunktion für Ergebnisspalte \"" + name + "\"", e);        
+        }
+      }
+    }
+    
+    columnTrans.trimToSize();
+    return columnTrans;
+  }
+    
+  /**
+   * Stellt die Spalten eines Datasets als Values zur Verfügung.
+   *
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private static class DatasetValues implements Values
+  {
+    private Dataset ds;
+    
+    public DatasetValues(Dataset ds)
+    {
+      this.ds = ds;
+    }
+
+    public boolean hasValue(String id)
+    {
+      try{
+        ds.get(id);
+      }catch(ColumnNotFoundException x)
+      {
+        return false;
+      }
+      return true;
+    }
+
+    public String getString(String id)
+    {
+      String str = null;
+      try{
+        str = ds.get(id);
+      }catch(ColumnNotFoundException x) {}
+      
+      return str == null ? "": str;
+    }
+
+    public boolean getBoolean(String id)
+    {
+      return getString(id).equalsIgnoreCase("true");
+    }
+  }
+  
+  /**
+   * Wendet Spaltenumsetzungen auf QueryResults an und stellt das Ergebnis
+   * wieder als QueryResults zur Verfügung.
+   *
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private class TranslatedQueryResults implements QueryResults
+  {
+    private List qres;
+    
+    /**
+     * Die QueryResults res werden mit den columnTranslations (Liste von
+     * ColumnTranslation Objekten) übersetzt.
+     */
+    public TranslatedQueryResults(QueryResults res, List columnTranslations)
+    {
+      qres = new Vector(res.size());
+      Iterator iter = res.iterator();
+      while (iter.hasNext())
+      {
+        Dataset ds = (Dataset)iter.next();
+        Map data = new HashMap();
+        Iterator transIter = columnTranslations.iterator();
+        while (transIter.hasNext())
+        {
+          ColumnTranslation trans = (ColumnTranslation)transIter.next();
+          data.put(trans.getNewColumnName(), trans.getNewColumnValue(ds));
+        }
+        qres.add(new SimpleDataset(ds.getKey(), data));
+      }
+    }
+    
+    public int size() {  return qres.size();}
+    public Iterator iterator() { return qres.iterator(); }
+    public boolean isEmpty() { return qres.isEmpty(); }
+  }
+  
   /**
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -1064,7 +1307,7 @@ public class DatasourceSearchDialog implements Dialog
         .getProperty("user.dir")).toURL(), confFile));
     Dialog dialog = DatasourceSearchDialog.create(conf.get("Funktionsdialoge").get("Empfaengerauswahl"), WollMuxFiles.getDatasourceJoiner());
     Map myContext = new HashMap();
-    dialog.instanceFor(myContext).show(null);
+    dialog.instanceFor(myContext).show(null, new FunctionLibrary(), new DialogLibrary());
   }
 
   

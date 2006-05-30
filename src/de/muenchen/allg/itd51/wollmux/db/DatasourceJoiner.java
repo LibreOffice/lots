@@ -333,7 +333,7 @@ X           "Vorname N."
    * @throws IllegalArgumentException falls eine Suchanfrage fehlerhaft ist, weil
    *         z.B. die entsprechende Datenquelle nicht existiert.
    * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TODO Testen
+   * TESTED
    */
   public QueryResults find(Query query) throws TimeoutException
   {
@@ -341,6 +341,9 @@ X           "Vorname N."
     if (source == null)
       throw new IllegalArgumentException("Datenquelle \""+query.getDatasourceName()+"\" soll durchsucht werden, ist aber nicht definiert");
     
+    /*
+     * Suchstrings auf Legalität prüfen.
+     */
     Iterator iter = query.iterator();
     while (iter.hasNext())
     {
@@ -349,6 +352,7 @@ X           "Vorname N."
         throw new IllegalArgumentException("Illegaler Suchstring: "+suchString);
     }
     
+    // Suche ausführen.
     return source.find(query.getQueryParts(), queryTimeout());
   }
   

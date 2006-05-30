@@ -296,6 +296,8 @@ public class UIElementFactory
       uiElement = new UIElement.Textfield(id, tf, layoutConstraints, labelType, label, labelLayoutConstraints);
       tf.getDocument().addDocumentListener(new UIElementDocumentListener(context.uiElementEventHandler, uiElement, "valueChanged", new Object[]{}));
       tf.addFocusListener(new UIElementFocusListener(context.uiElementEventHandler, uiElement));
+      ActionListener actionL = getAction(uiElement, action, conf, context.uiElementEventHandler, context.supportedActions);
+      if (actionL != null) tf.addActionListener(actionL);
       return uiElement;
     }
     else if (type.equals("textarea"))
@@ -393,7 +395,7 @@ public class UIElementFactory
       
       uiElement = new UIElement.Listbox(id, scrollPane, list, layoutConstraints, labelType, label, labelLayoutConstraints); 
       
-      list.addListSelectionListener(new UIElementListSelectionListener(context.uiElementEventHandler, uiElement, "listSelectionChanged", new Object[]{list}));
+      list.addListSelectionListener(new UIElementListSelectionListener(context.uiElementEventHandler, uiElement, "listSelectionChanged", new Object[]{}));
       
       ActionListener actionL = getAction(uiElement, action, conf, context.uiElementEventHandler, context.supportedActions);
       if (actionL != null) list.addMouseListener(new MyActionMouseListener(list, actionL));

@@ -21,6 +21,7 @@ import java.awt.event.ActionListener;
 import java.util.Map;
 
 import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
+import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 
 /**
  * Ein Dialog, der dem Benutzer erlaubt verschiedenen Werte zu setzen.
@@ -66,10 +67,16 @@ public interface Dialog
    *        nachdem der Dialog geschlossen wurde.
    *        Das actionCommand des ActionEvents gibt die Aktion an, die
    *        das Beenden des Dialogs veranlasst hat.
+   * @param funcLib falls der Dialog Funktionen auswertet, so werden Referenzen
+   *        auf Funktionen mit dieser Bibliothek aufgelöst.
+   * @param dialogLib falls der Dialog wiederum Funktionsdialoge unterstützt,
+   *        so werden Referenzen auf Funktionsdialoge über diese Bibliothek
+   *        aufgelöst.
    * @throws ConfigurationErrorException wenn der Dialog mit fehlerhaften Daten
    *         initialisiert wurde (und der Fehler erst bei der Anzeige
    *         diagnostiziert werden konnte).
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public void show(ActionListener dialogEndListener) throws ConfigurationErrorException;
+  public void show(ActionListener dialogEndListener, FunctionLibrary funcLib,
+      DialogLibrary dialogLib) throws ConfigurationErrorException;
 }

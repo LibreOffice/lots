@@ -894,7 +894,7 @@ public class FunctionFactory
       public Object getData(String id)
       { if (id.equals("Strasse")) return "Herzog-Wilhelm-Str. 22";
         return null; }
-      public void show(ActionListener dialogEndListener){}
+      public void show(ActionListener dialogEndListener, FunctionLibrary funcLib, DialogLibrary dialogLib){}
       });
     
     printFunction("alwaysTrueFunction()",alwaysTrueFunction(), noValues);

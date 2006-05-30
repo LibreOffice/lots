@@ -455,7 +455,7 @@ public interface UIElement extends Value
      * Löscht alle alten Einträge dieser ListBox und ersetzt sie durch
      * die Einträge von newEntries (beliebige Objects).
      * @author Matthias Benkmann (D-III-ITD 5.1)
-     * TODO Testen
+     * TESTED
      */
     public void setList(Collection newEntries)
     {
@@ -471,7 +471,7 @@ public interface UIElement extends Value
     /**
      * Liefert alle selektierten Objekte der Liste.
      * @author Matthias Benkmann (D-III-ITD 5.1)
-     * TODO Testen
+     * TESTED
      */
     public Object[] getSelected()
     {
@@ -483,7 +483,7 @@ public interface UIElement extends Value
      * gezählt ab 0) aus indices selektiert, falls nur Einfachauswahl möglich wird
      * nur der erste gültige Index selektiert.
      * @author Matthias Benkmann (D-III-ITD 5.1)
-     * TODO Testen
+     * 
      */
     public void select(Collection indices)
     {
