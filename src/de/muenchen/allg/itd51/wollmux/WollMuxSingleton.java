@@ -138,8 +138,10 @@ public class WollMuxSingleton implements XPALProvider
       successfulStartup = false;
 
     /*
-     * Funktionsdialoge parsen. ACHTUNG! Muss vor parseGlobalFunctions()
-     * erfolgen.
+     * Globale Funktionsdialoge parsen. ACHTUNG! Muss vor parseGlobalFunctions()
+     * erfolgen. Als context wird null übergeben, weil
+     * globale Funktionen keinen Kontext haben.
+     * TODO Überlegen, ob ein globaler Kontext doch Sinn machen könnte. Dadurch könnten globale Funktionen globale Funktionsdialoge darstellen, die global einheitliche Werte haben.
      */
     funcDialogs = WollMuxFiles.parseFunctionDialogs(WollMuxFiles.getWollmuxConf(), null, null);
 

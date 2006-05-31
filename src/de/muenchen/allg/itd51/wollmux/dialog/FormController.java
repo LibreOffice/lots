@@ -204,6 +204,7 @@ public class FormController implements UIElementEventHandler
    *        allen anderen automatischen Befüllungen vorgezogen. Wird das Objekt
    *        {@link #FISHY} als Wert für ein Feld übergeben, so wird dieses Feld
    *        speziell markiert als ungültig bis der Benutzer es manuell ändert.
+   * @param functionContext der Kontext für Funktionen, die einen benötigen.
    * @param funcLib die Funktionsbibliothek, die zur Auswertung von Plausis etc.
    *        herangezogen werden soll.
    * @param dialogLib die Dialogbibliothek, die die Dialoge bereitstellt, die
@@ -217,12 +218,10 @@ public class FormController implements UIElementEventHandler
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public FormController(ConfigThingy conf, FormModel model, final Map mapIdToPresetValue, 
-      FunctionLibrary funcLib, DialogLibrary dialogLib, ActionListener abortRequestListener)
+      Map functionContext, FunctionLibrary funcLib, DialogLibrary dialogLib, ActionListener abortRequestListener)
   throws ConfigurationErrorException
   {
-    functionContext = new HashMap();
-    dialogLib = WollMuxFiles.parseFunctionDialogs(conf, dialogLib, functionContext);
-    funcLib = WollMuxFiles.parseFunctions(conf, dialogLib, functionContext, funcLib);
+    this.functionContext = functionContext;
     this.formModel = model;
     this.funcLib = funcLib;
     this.dialogLib = dialogLib;

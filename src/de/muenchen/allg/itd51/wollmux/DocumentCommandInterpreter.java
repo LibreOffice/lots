@@ -245,7 +245,7 @@ public class DocumentCommandInterpreter
     // 5) Formulardialog starten:
     FormModel fm = new FormModelImpl(document.xComponent());
 
-    new FormGUI(descs, fm, idToPresetValue, mux.getGlobalFunctions(), mux
+    new FormGUI(descs, fm, idToPresetValue, fm.getFunctionContext(), mux.getGlobalFunctions(), mux
         .getFunctionDialogs());
   }
 

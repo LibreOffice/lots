@@ -111,12 +111,14 @@ public class FormGUI
    *        {@link FormController#FISHY} als Wert für ein Feld übergeben, 
    *        so wird dieses Feld
    *        speziell markiert als ungültig bis der Benutzer es manuell ändert.
+   * @param functionContext der Kontext für Funktionen, die einen benötigen.
    * @param funcLib die Funktionsbibliothek, die zur Auswertung von Plausis etc.
    *        herangezogen werden soll.
    * @param dialogLib die Dialogbibliothek, die die Dialoge bereitstellt, die
    *        für automatisch zu befüllende Formularfelder benötigt werden.
    */
   public FormGUI(final ConfigThingy conf, FormModel doc, final Map mapIdToPresetValue,
+      final Map functionContext,
       final FunctionLibrary funcLib, final DialogLibrary dialogLib)
   {
     myDoc = doc;
@@ -129,7 +131,7 @@ public class FormGUI
     try{
       javax.swing.SwingUtilities.invokeLater(new Runnable() {
         public void run() {
-            try{createGUI(conf, mapIdToPresetValue, funcLib, dialogLib);}catch(Exception x){Logger.error(x);};
+            try{createGUI(conf, mapIdToPresetValue, functionContext, funcLib, dialogLib);}catch(Exception x){Logger.error(x);};
         }
       });
     }
@@ -139,6 +141,7 @@ public class FormGUI
 
 
   private void createGUI(ConfigThingy conf, Map mapIdToPresetValue,
+      Map functionContext,
       FunctionLibrary funcLib, DialogLibrary dialogLib)
   {
     Common.setLookAndFeel();
@@ -156,7 +159,7 @@ public class FormGUI
     
     FormController formController;
     try{
-      formController = new FormController(conf, myDoc, mapIdToPresetValue, funcLib, dialogLib, new MyAbortRequestListener());
+      formController = new FormController(conf, myDoc, mapIdToPresetValue, functionContext, funcLib, dialogLib, new MyAbortRequestListener());
     }catch (ConfigurationErrorException x)
     {
       Logger.error(x);
@@ -349,7 +352,12 @@ public class FormGUI
     mapIdToPresetValue.put("AbtLohn", "TRUE");
     mapIdToPresetValue.put("AbtAnteile", "false");
     mapIdToPresetValue.put("AbtKaution", "true");
-    new FormGUI(conf.get("Formular"), model, mapIdToPresetValue, new FunctionLibrary(), new DialogLibrary());
+    
+    Map functionContext = new HashMap();
+    DialogLibrary dialogLib = WollMuxFiles.parseFunctionDialogs(conf.get("Formular"), null, functionContext);
+    FunctionLibrary funcLib = WollMuxFiles.parseFunctions(conf.get("Formular"), dialogLib, functionContext, null);
+
+    new FormGUI(conf.get("Formular"), model, mapIdToPresetValue, functionContext, funcLib, dialogLib);
   }
 
 
