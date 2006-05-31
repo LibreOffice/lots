@@ -15,6 +15,7 @@
 *                  | null-Werte in den Maps unterstützt
 * 24.04.2006 | BNK | Qualitätssicherung
 * 29.05.2006 | BNK | ordentliche Context-Klasse
+* 31.05.2006 | BNK | +funcDialog
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -660,6 +661,16 @@ public class UIElementFactory
       else
       {
         Logger.error("ACTION \""+action+"\" erfordert mindestens ein Attribut FRAG_ID");
+      }
+    }
+    else if (action.equals("funcDialog"))
+    {
+      try{
+        String dialogName = conf.get("DIALOG").toString();
+        return new UIElementActionListener(handler, uiElement, "action", new Object[]{action, dialogName});
+      }catch(NodeNotFoundException x)
+      {
+        Logger.error("ACTION \"funcDialog\" erfordert DIALOG-Attribut");
       }
     }
     else 

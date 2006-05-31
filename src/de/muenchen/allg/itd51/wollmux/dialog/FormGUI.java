@@ -327,15 +327,13 @@ public class FormGUI
   }
   
   /**
-   * @param args
    * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TODO Testen
    */
   public static void main(String[] args) throws Exception
   {
     UNO.init();
     WollMuxFiles.setupWollMuxDir();
-    Logger.init(Logger.DEBUG);
+    Logger.init(System.err, Logger.DEBUG);
     String confFile = "testdata/formulartest.conf";
     ConfigThingy conf = new ConfigThingy("", new URL(new File(System
         .getProperty("user.dir")).toURL(), confFile));

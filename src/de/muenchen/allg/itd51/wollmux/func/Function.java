@@ -9,6 +9,7 @@
 * Datum      | Wer | Änderungsgrund
 * -------------------------------------------------------------------
 * 03.05.2006 | BNK | Erstellung
+* 31.05.2006 | BNK | +getFunctionDialogReferences()
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -16,6 +17,8 @@
 * 
 */
 package de.muenchen.allg.itd51.wollmux.func;
+
+import java.util.Collection;
 
 /**
  * Eine Funktion, die einen Wert in Abhängigkeit von Parametern berechnet.
@@ -30,6 +33,13 @@ public interface Function
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public String[] parameters();
+  
+  /**
+   * Zu set werden die Namen aller Funktionsdialoge hinzugefügt, die diese
+   * Funktion referenziert.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public void getFunctionDialogReferences(Collection set);
   
   /**
    * Ruft die Funktion mit Argumenten aus parameters auf und liefert das

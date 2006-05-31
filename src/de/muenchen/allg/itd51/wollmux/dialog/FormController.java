@@ -18,6 +18,7 @@
 *                  | leere Tabs ausgrauen
 *                  | nextTab und prevTab implementiert
 * 29.05.2006 | BNK | Umstellung auf UIElementFactory.Context
+* 31.05.2006 | BNK | ACTION "funcDialog"
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -147,6 +148,12 @@ public class FormController implements UIElementEventHandler
    * Bildet IDs auf Lists von UIElements ab, deren AUTOFILL vom UIElement ID abhängt.
    */
   private Map mapIdToListOfUIElementsWithDependingAutofill = new HashMap();
+  
+  /**
+   * Bildet Namen von Funktionsdialogen auf Lists von UIElements ab, deren AUTOFILL
+   * von diesem Funktionsdialog abhängen.
+   */
+  private Map mapDialogNameToListOfUIElementsWithDependingAutofill = new HashMap();
   
   /**
    * Bildet die ID eines UIElements ab auf eine List der Groups, die von
@@ -426,6 +433,31 @@ public class FormController implements UIElementEventHandler
   }
   
   /**
+   * Falls func nicht null ist, wird uiElement für alle Funktionsdialoge, die func
+   * referenziert in die entsprechende Liste in {@link #mapDialogNameToListOfUIElementsWithDependingAutofill}
+   * eingetragen.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED
+   */
+  private void storeAutofillFunctionDialogDeps(UIElement uiElement, Function func)
+  {
+    if (func == null) return;
+    
+    Set funcDialogNames = new HashSet();
+    func.getFunctionDialogReferences(funcDialogNames);
+    Iterator iter = funcDialogNames.iterator();
+    while (iter.hasNext())
+    {
+      String dialogName = (String)iter.next();
+      if (!mapDialogNameToListOfUIElementsWithDependingAutofill.containsKey(dialogName))
+        mapDialogNameToListOfUIElementsWithDependingAutofill.put(dialogName, new Vector(1));
+   
+      List l = (List)mapDialogNameToListOfUIElementsWithDependingAutofill.get(dialogName);
+      l.add(uiElement);
+    }
+  }
+  
+  /**
    * Ein Tab der Formular-GUI.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -467,6 +499,7 @@ public class FormController implements UIElementEventHandler
             UIElementState state = new UIElementState();
             state.plausi = FunctionFactory.parseGrandchildren(uiConf.query("PLAUSI"), funcLib, dialogLib, functionContext);
             state.autofill = FunctionFactory.parseGrandchildren(uiConf.query("AUTOFILL"), funcLib, dialogLib, functionContext);
+            storeAutofillFunctionDialogDeps(uiElement, state.autofill);
             state.tabIndex = tabIndex;
             uiElement.setAdditionalData(state);
           } catch(ConfigurationErrorException x)
@@ -793,11 +826,26 @@ public class FormController implements UIElementEventHandler
     supportedActions.add("abort");
     supportedActions.add("nextTab");
     supportedActions.add("prevTab");
+    supportedActions.add("funcDialog");
     panelContext.supportedActions = supportedActions;
     buttonContext.supportedActions = supportedActions;
     
     uiElementFactory = new UIElementFactory();
 
+  }
+  
+  private class FunctionDialogEndListener implements ActionListener
+  {
+    private String funcDialogName;
+    public FunctionDialogEndListener(String dialogName)
+    {
+      funcDialogName = dialogName;
+    }
+    public void actionPerformed(ActionEvent e)
+    {
+      if (e.getActionCommand().equals("select"))
+        processUiElementEvent(null, "funcDialogSelect", new Object[]{funcDialogName});  
+    }
   }
   
   /**
@@ -815,8 +863,8 @@ public class FormController implements UIElementEventHandler
       {
         StringBuffer buffy = new StringBuffer("UIElementEvent: "+eventType+"(");
         for (int i = 0; i < args.length; ++i)
-          buffy.append(""+args[i]);
-        buffy.append(") on UIElement "+source.getId());
+          buffy.append((i == 0?"":",")+args[i]);
+        if (source != null) buffy.append(") on UIElement "+source.getId());
         Logger.debug(buffy.toString());
       }
       
@@ -830,10 +878,16 @@ public class FormController implements UIElementEventHandler
         // informiert.
         formModel.valueChanged(source.getId(), source.getString());
         
-        Set idsOfChangedElements = computeChangesCausedByChangeOf(source.getId());
-        recomputeAutofills(idsOfChangedElements, source.getId());
-        checkDependingPlausis(idsOfChangedElements);
-        checkDependingVisibilityGroups(idsOfChangedElements);
+        Set todo = new HashSet();
+        todo.add(source);
+        /*
+         * Der folgende Code wird ebenfalls für den eventType funcDialogSelect
+         * verwendet. Die beiden sollten vermutlich immer synchron gehalten werden. 
+         */
+        Set changedElements = computeChangesCausedByChangeOf(todo);
+        recomputeAutofills(changedElements, source);
+        checkDependingPlausis(changedElements);
+        checkDependingVisibilityGroups(changedElements);
       }
       else if (eventType.equals("action"))
       {
@@ -841,7 +895,8 @@ public class FormController implements UIElementEventHandler
         if (action.equals("abort"))
         {
           abortRequestListener.actionPerformed(new ActionEvent(this, 0, "abort"));
-        } else if (action.equals("nextTab"))
+        } 
+        else if (action.equals("nextTab"))
         {
           int startIdx = myTabbedPane.getSelectedIndex(); 
           int idx = startIdx;
@@ -852,7 +907,8 @@ public class FormController implements UIElementEventHandler
           } while (idx != startIdx);
           
           myTabbedPane.setSelectedIndex(idx);
-        } else if (action.equals("prevTab"))
+        } 
+        else if (action.equals("prevTab"))
         {
           int startIdx = myTabbedPane.getSelectedIndex(); 
           int idx = startIdx;
@@ -864,6 +920,17 @@ public class FormController implements UIElementEventHandler
           
           myTabbedPane.setSelectedIndex(idx);
         }
+        else if (action.equals("funcDialog"))
+        {
+          String dialogName = (String)args[1];
+          Dialog dlg = dialogLib.get(dialogName);
+          if (dlg == null)
+            Logger.error("Funktionsdialog \""+dialogName+"\" ist nicht definiert");
+          else
+          {
+            dlg.instanceFor(functionContext).show(new FunctionDialogEndListener(dialogName), funcLib, dialogLib);
+          }
+        }
       }
       else if (eventType.equals("focus"))
       {
@@ -871,6 +938,29 @@ public class FormController implements UIElementEventHandler
           formModel.focusLost(source.getId());
         else
           formModel.focusGained(source.getId());
+      }
+      else if (eventType.equals("funcDialogSelect"))
+      {
+        String dialogName = (String)args[0];
+        Set todo = new HashSet();
+        List depending = (List)mapDialogNameToListOfUIElementsWithDependingAutofill.get(dialogName);
+        if (depending != null)
+        {
+          Iterator iter = depending.iterator();
+          while (iter.hasNext())
+          {
+            UIElement uiElement = (UIElement)iter.next();
+            todo.add(uiElement);
+          }
+        }
+        /*
+         * Der folgende Code wird ebenfalls für den eventType valueChanged
+         * verwendet. Die beiden sollten vermutlich immer synchron gehalten werden. 
+         */
+        Set changedElements = computeChangesCausedByChangeOf(todo);
+        recomputeAutofills(changedElements, source);
+        checkDependingPlausis(changedElements);
+        checkDependingVisibilityGroups(changedElements);
       }
     }
     catch (Exception x)
@@ -884,45 +974,45 @@ public class FormController implements UIElementEventHandler
   }
 
   /**
-   * Liefert die Menge aller IDs (inklusive id) von UIElementen, deren Wert sich
-   * ändert, wenn sich der Wert von UIElement id ändert (z,B, wegen AUTOFILLs).
+   * Liefert die Menge aller UIElemente (inklusive der aus todo), deren 
+   * Wert sich ändert, wenn sich der Wert eines UIElements aus todo
+   * ändert (z,B, wegen AUTOFILLs). ACHTUNG! todo wird durch diese Methode
+   * verändert.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
-  public Set computeChangesCausedByChangeOf(String id)
+  public Set computeChangesCausedByChangeOf(Set todo)
   {
-    Set ids = new HashSet();
-    Set todo = new HashSet();
-    todo.add(id);
+    Set elements = new HashSet();
     while (!todo.isEmpty())
     {
       Iterator iter = todo.iterator();
-      id = (String)iter.next();
+      UIElement uiElement = (UIElement)iter.next();
       iter.remove();
-      if (!ids.contains(id))
+      if (!elements.contains(uiElement))
       {
-        ids.add(id);
-        List deps = (List)mapIdToListOfUIElementsWithDependingAutofill.get(id);
+        elements.add(uiElement);
+        List deps = (List)mapIdToListOfUIElementsWithDependingAutofill.get(uiElement.getId());
         if (deps == null) continue;
         Iterator iter2 = deps.iterator();
         while (iter2.hasNext())
         {
-          id = ((UIElement)iter2.next()).getId();
-          if (!ids.contains(id)) todo.add(id);
+          uiElement = (UIElement)iter2.next();
+          if (!elements.contains(uiElement)) todo.add(uiElement);
         }
       }
     }
-    return ids;
+    return elements;
   }
   
   /**
    * Berechnet die Werte mit den AUTOFILL-Funktionen neu für alle UIElemente
-   * aus ids mit Ausnahme von exception. Das FormModel wird ebenfalls 
+   * aus elements mit Ausnahme von exception (falls nicht null). Das FormModel wird ebenfalls 
    * benachrichtigt.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
-  public void recomputeAutofills(Set ids, String exception)
+  public void recomputeAutofills(Set elements, UIElement exception)
   {
       // Alle UIElemente in der Reihenfolge ihrer Definition durchgehen,
       // damit die AUTOFILLs in der richtigen Reihenfolge ausgewertet werden
@@ -932,8 +1022,8 @@ public class FormController implements UIElementEventHandler
     while (iter.hasNext())
     {
       UIElement uiElement = (UIElement)iter.next();
-      if (uiElement.getId().equals(exception)) continue;
-      if (!ids.contains(uiElement.getId())) continue;
+      if (uiElement == exception) continue;
+      if (!elements.contains(uiElement)) continue;
       UIElementState state = (UIElementState)uiElement.getAdditionalData();
       if (state.autofill != null)
       {
@@ -950,13 +1040,13 @@ public class FormController implements UIElementEventHandler
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
-  private void checkDependingVisibilityGroups(Set ids)
+  private void checkDependingVisibilityGroups(Set elements)
   {
-    Iterator idsIter = ids.iterator();
-    while (idsIter.hasNext())
+    Iterator eleIter = elements.iterator();
+    while (eleIter.hasNext())
     {
-      String id = (String)idsIter.next();
-      List dependingGroups = (List)mapIdToListOfDependingGroups.get(id);
+      UIElement uiElement = (UIElement)eleIter.next();
+      List dependingGroups = (List)mapIdToListOfDependingGroups.get(uiElement.getId());
       if (dependingGroups != null)
       {
         Iterator iter = dependingGroups.iterator();
@@ -1063,14 +1153,14 @@ public class FormController implements UIElementEventHandler
    * Element mit ID aus ids abhängen. 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED */
-  private void checkDependingPlausis(Set ids)
+  private void checkDependingPlausis(Set elements)
   {
-    Iterator idsIter = ids.iterator();
-    while (idsIter.hasNext())
+    Iterator eleIter = elements.iterator();
+    while (eleIter.hasNext())
     {
-      String id = (String)idsIter.next();
+      UIElement uiElement = (UIElement)eleIter.next();
       
-      List dependingUIElements = (List)mapIdToListOfUIElementsWithDependingPlausi.get(id);
+      List dependingUIElements = (List)mapIdToListOfUIElementsWithDependingPlausi.get(uiElement.getId());
       if (dependingUIElements != null)
       {
         Iterator iter = dependingUIElements.iterator();

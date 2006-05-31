@@ -13,6 +13,7 @@
 * 09.05.2006 | BNK | weitere Grundfunktionen
 * 11.05.2006 | BNK | NOT implementiert
 *                  | MATCH.getString() kann jetzt Function.ERROR liefern
+* 31.05.2006 | BNK | +getFunctionDialogReferences()
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -323,7 +324,7 @@ public class FunctionFactory
       if (context == null)
         throw new ConfigurationErrorException("DIALOG-Funktion ist kontextabhängig und kann deshalb hier nicht verwendet werden.");
       
-      return new DialogFunction(dialog, dataName, context);
+      return new DialogFunction(dialogName, dialog, dataName, context);
     }
     else if (name.equals("BIND"))
     {
@@ -373,15 +374,21 @@ public class FunctionFactory
   {
     private Dialog dialog;
     private String dataName;
+    private String dialogName;
     
-    public DialogFunction(Dialog dialog, String dataName, Map context)
+    public DialogFunction(String dialogName, Dialog dialog, String dataName, Map context)
     throws ConfigurationErrorException
     {
       this.dialog = dialog.instanceFor(context);
       this.dataName = dataName;
+      this.dialogName = dialogName;
     }
     
     public String[] parameters() { return noParams; }
+    public void getFunctionDialogReferences(Collection set)
+    {
+      set.add(dialogName);
+    }
 
     public String getString(Values parameters)
     {
@@ -401,6 +408,7 @@ public class FunctionFactory
     private Map mapParamNameToSetFunction = new HashMap();
     private Function func;
     private String[] params;
+    private Set functionDialogReferences = new HashSet();
     
     public BindFunction(Function func, ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
     {
@@ -432,6 +440,8 @@ public class FunctionFactory
         
         mapParamNameToSetFunction.put(name, setFunc);
         setFuncParams.addAll(Arrays.asList(setFunc.parameters()));
+        setFunc.getFunctionDialogReferences(functionDialogReferences);
+        
         /*
          * name wurde gebunden, wird also nicht mehr als Parameter benötigt,
          * außer wenn eine der setFuncs den Parameter benötigt. In diesem Fall ist
@@ -452,6 +462,11 @@ public class FunctionFactory
     public String[] parameters()
     {
       return params;
+    }
+    
+    public void getFunctionDialogReferences(Collection set)
+    {
+      set.addAll(functionDialogReferences);
     }
 
     public String getString(Values parameters)
@@ -548,6 +563,8 @@ public class FunctionFactory
     {
       return params;
     }
+    
+    public void getFunctionDialogReferences(Collection set) {}
 
     public String getString(Values parameters)
     {
@@ -567,6 +584,7 @@ public class FunctionFactory
     private boolean bool;
     
     public String[] parameters() { return noParams; }
+    public void getFunctionDialogReferences(Collection set) {}
 
     public StringLiteralFunction(String str)
     {
@@ -598,6 +616,8 @@ public class FunctionFactory
     {
       return func.parameters();
     }
+    
+    public void getFunctionDialogReferences(Collection set) {}
     
     public String getString(Values parameters)
     {
@@ -643,6 +663,11 @@ public class FunctionFactory
     {
       return input.parameters();
     }
+    
+    public void getFunctionDialogReferences(Collection set) 
+    {
+      input.getFunctionDialogReferences(set);
+    }
 
     public boolean getBoolean(Values parameters)
     {
@@ -687,6 +712,14 @@ public class FunctionFactory
     }
 
     public String[] parameters() {  return params; }
+    public void getFunctionDialogReferences(Collection set) 
+    {
+      Iterator iter = subFunction.iterator();
+      while (iter.hasNext())
+      {
+        ((Function)iter.next()).getFunctionDialogReferences(set);
+      }
+    }
   }
 
   private static class CatFunction extends MultiFunction
@@ -822,6 +855,13 @@ public class FunctionFactory
     {
       return params;
     }
+    
+    public void getFunctionDialogReferences(Collection set)
+    {
+      ifFunction.getFunctionDialogReferences(set);
+      thenFunction.getFunctionDialogReferences(set);
+      elseFunction.getFunctionDialogReferences(set);
+    }
 
     public String getString(Values parameters)
     {
@@ -852,6 +892,7 @@ public class FunctionFactory
       return noParams;
     }
     
+    public void getFunctionDialogReferences(Collection set) {} 
 
     public String getString(Values parameters)
     {

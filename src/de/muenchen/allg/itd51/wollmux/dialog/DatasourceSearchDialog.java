@@ -36,6 +36,7 @@ import java.awt.event.WindowListener;
 import java.io.File;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -325,6 +326,7 @@ public class DatasourceSearchDialog implements Dialog
     processUIElementEvents = true;
     
     myFrame.pack();
+    myFrame.setAlwaysOnTop(true);
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
     int frameWidth = myFrame.getWidth();
     int frameHeight = myFrame.getHeight();
@@ -360,6 +362,12 @@ public class DatasourceSearchDialog implements Dialog
      * Spaltenumsetzung-Abschnitts. 
      */
     private List columnTranslations;
+    
+    /**
+     * Enthält die Namen aller Ergebnisspalten, d,h, die Menge der newColumnNames
+     * aller ColumnTranslation-Objekte in columnTranslations.
+     */
+    private Collection schema;
 
     /**
      * Legt fest, wie die Datensätze in der Ergebnisliste dargestellt werden
@@ -406,7 +414,8 @@ public class DatasourceSearchDialog implements Dialog
     public DialogWindow(int tabIndex, ConfigThingy conf)
     {
       searchStrategy = SearchStrategy.parse(conf);
-      columnTranslations = parseColumnTranslations(conf);
+      schema = new HashSet();
+      columnTranslations = parseColumnTranslations(conf, schema);
       initFactories();
       
       myPanel = new JPanel(new BorderLayout());
@@ -659,7 +668,7 @@ public class DatasourceSearchDialog implements Dialog
         {
           StringBuffer buffy = new StringBuffer("UIElementEvent: "+eventType+"(");
           for (int i = 0; i < args.length; ++i)
-            buffy.append(""+args[i]);
+            buffy.append((i == 0?"":",")+args[i]);
           buffy.append(") on UIElement "+source.getId());
           Logger.debug(buffy.toString());
         }
@@ -673,6 +682,17 @@ public class DatasourceSearchDialog implements Dialog
             back();
           else if (action.equals("search"))
             search();
+          else if (action.equals("select"))
+          {
+            Dataset ds = null;
+            if (resultsList != null)
+            {
+              Object[] selected = resultsList.getSelected();
+              if (selected.length > 0)
+                ds = ((ListElement)selected[0]).getDataset();
+            }
+            select(schema, ds);
+          }
         }
         else if (eventType.equals("listSelectionChanged"))
         {
@@ -771,6 +791,7 @@ public class DatasourceSearchDialog implements Dialog
       supportedActions.add("abort");
       supportedActions.add("back");
       supportedActions.add("search");
+      supportedActions.add("select");
       
       vertiContext = new UIElementFactory.Context();
       vertiContext.mapTypeToLabelLayoutConstraints = mapTypeToLabelLayoutConstraints;
@@ -1074,6 +1095,33 @@ public class DatasourceSearchDialog implements Dialog
   }
   
   /**
+   * Implementiert die gleichnamige ACTION.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private void select(Collection schema, Dataset ds)
+  {
+    if (ds != null)
+    {
+      Map newData = new HashMap();
+      Iterator iter = schema.iterator();
+      while (iter.hasNext())
+      {
+        String columnName = (String)iter.next();
+        try{
+          newData.put(columnName, ds.get(columnName));
+        }catch(Exception x) {Logger.error("Huh? Dies sollte nicht passieren können", x);}
+      }
+      
+      synchronized(data)
+      {
+        data[0] = newData;
+      } 
+    }
+    dialogEnd("select");
+  }
+  
+  /**
    * Beendet den Dialog und ruft falls nötig den dialogEndListener auf
    * wobei das gegebene actionCommand übergeben wird.
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -1187,10 +1235,12 @@ public class DatasourceSearchDialog implements Dialog
   /**
    * Parst conf,query("Spaltenumsetzung") und liefert eine Liste, die
    * für jeden Eintrag ein entsprechendes ColumnTranslation Objekt enthält.
+   * @param schema Dieser Collection werden die Namen aller Ergebnisspalten
+   *        hinzugefügt.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
-  private List parseColumnTranslations(ConfigThingy conf)
+  private List parseColumnTranslations(ConfigThingy conf, Collection schema)
   {
     Vector columnTrans = new Vector();
     Iterator parentIter = conf.query("Spaltenumsetzung").iterator();
@@ -1205,6 +1255,7 @@ public class DatasourceSearchDialog implements Dialog
         {
           Function func = FunctionFactory.parseChildren(transConf, funcLib, dialogLib, context);
           columnTrans.add(new ColumnTranslation(name, func));
+          schema.add(name);
         }
         catch (ConfigurationErrorException e)
         {
