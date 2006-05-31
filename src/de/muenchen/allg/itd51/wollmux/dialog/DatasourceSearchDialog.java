@@ -410,7 +410,8 @@ public class DatasourceSearchDialog implements Dialog
      * @param conf der Kind-Knoten des Fenster-Knotens der das Tab beschreibt.
      *        conf ist direkter Elternknoten der Knoten "Intro" et al.
      * @author Matthias Benkmann (D-III-ITD 5.1)     
-     * TESTED */
+     * TESTED 
+     */
     public DialogWindow(int tabIndex, ConfigThingy conf)
     {
       searchStrategy = SearchStrategy.parse(conf);
@@ -449,11 +450,17 @@ public class DatasourceSearchDialog implements Dialog
     }
 
     
-    /** Fügt compo UI Elemente gemäss den Kindern von conf.query(key) hinzu.
-     *  compo muss ein GridBagLayout haben. stepx und stepy geben an um
-     *  wieviel mit jedem UI Element die x und die y Koordinate der Zelle
-     *  erhöht werden soll. Wirklich sinnvoll sind hier nur (0,1) und (1,0).
-     * TESTED */
+    /** 
+     * Fügt compo UI Elemente gemäss den Kindern von conf.query(key) hinzu.
+     * compo muss ein GridBagLayout haben. stepx und stepy geben an um
+     * wieviel mit jedem UI Element die x und die y Koordinate der Zelle
+     * erhöht werden soll. Wirklich sinnvoll sind hier nur (0,1) und (1,0).
+     * @param context ist der Kontext, der {@link UIElementFactory#createUIElement(Context, ConfigThingy)}
+     *        übergeben werden soll für die Erzeugung der UIElemente.
+     * @param in dieser Map werden all erzeugten UIElemente registriert, die ein
+     *        DB_SPALTE Attribut haben. null ist nicht erlaubt.   
+     * TESTED 
+     */
     private void addUIElements(ConfigThingy conf, String key, JComponent compo, int stepx, int stepy, UIElementFactory.Context context, Map mapDB_SPALTEtoUIElement)
     {
       int y = 0;
@@ -533,11 +540,11 @@ public class DatasourceSearchDialog implements Dialog
     }
     
     /**
-     * Geht alle Elemente von mapDB_SPALTEtoUIElement durch und updated die
+     * Geht alle Elemente von {@link #mapDB_SPALTEtoUIElement} durch und updated die
      * Felder mit den entsprechenden Werten aus dem Datensatz, der an ele
      * dranhängt.
      * @author Matthias Benkmann (D-III-ITD 5.1)
-     * TODO Testen
+     * TESTED
      */
     private void updatePreview(ListElement ele)
     {
@@ -566,7 +573,8 @@ public class DatasourceSearchDialog implements Dialog
      * data == null wird interpretiert als leere Liste.
      * list kann null sein (dann tut diese Funktion nichts). 
      * @author Matthias Benkmann (D-III-ITD 5.1)
-     * TESTED */
+     * TESTED 
+     */
     private void setListElements(UIElement.Listbox list, QueryResults data)
     {
       if (list == null) return;
@@ -626,9 +634,10 @@ public class DatasourceSearchDialog implements Dialog
     
 
     /**
-     * Führt die Suchanfrage im Feld query aus (falls dieses nicht null ist)
-     * gemäß searchStrategy und ändert
-     * resultsList so dass sie die Suchergebnisse enthält.  
+     * Führt die Suchanfrage im Feld {@link #query} aus (falls dieses nicht null ist)
+     * gemäß {@link #searchStrategy} und ändert
+     * {@link #resultsList} (falls nicht null) 
+     * so dass sie die Suchergebnisse enthält.  
      * @author Matthias Benkmann (D-III-ITD 5.1)
      * TESTED
      */
@@ -852,7 +861,7 @@ public class DatasourceSearchDialog implements Dialog
   
   
   /**
-   * Eine Suchstrategie liefert für eine gegebene Anzahl Wörter eine Liste von
+   * Eine Suchstrategie liefert für eine gegebene Wortzahl eine Liste von
    * Templates für Suchanfragen, die der Reihe nach mit den Wörtern probiert werden
    * sollen bis ein Ergebnis gefunden ist.
    */

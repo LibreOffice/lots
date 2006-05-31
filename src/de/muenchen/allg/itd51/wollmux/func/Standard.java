@@ -72,7 +72,7 @@ public class Standard
    * Versucht, zu erkennen, ob datum ein korrektes Datum der Form Monat.Tag.Jahr
    * ist (wobei Jahr immer 4-stellig sein muss).
    * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TODO Testen
+   * TESTED
    */
   public static boolean korrektesDatum(String datum)
   {

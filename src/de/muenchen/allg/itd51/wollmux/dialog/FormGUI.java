@@ -200,7 +200,7 @@ public class FormGUI
    * Arrangiert das Writer Fenster so, dass es neben dem Formular-Fenster
    * sitzt.
    * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TODO Testen
+   * TESTED
    */
   private void cuddleWithOpenOfficeWindow()
   {
