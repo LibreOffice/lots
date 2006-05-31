@@ -32,6 +32,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Vector;
 
 import com.sun.star.awt.FontWeight;
@@ -50,6 +51,7 @@ import com.sun.star.uno.Exception;
 
 import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
+import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.Form;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertContent;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertFormValue;
@@ -59,8 +61,10 @@ import de.muenchen.allg.itd51.wollmux.DocumentCommand.UpdateFields;
 import de.muenchen.allg.itd51.wollmux.DocumentCommandTree.TreeExecutor;
 import de.muenchen.allg.itd51.wollmux.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.db.DatasetNotFoundException;
+import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
 import de.muenchen.allg.itd51.wollmux.dialog.FormController;
 import de.muenchen.allg.itd51.wollmux.dialog.FormGUI;
+import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 
 /**
  * Diese Klasse repräsentiert den Kommando-Interpreter zur Auswertung von
@@ -226,6 +230,25 @@ public class DocumentCommandInterpreter
     // Benutzerinteraktionen den Modified-Status beeinflussen sollen.
     setDocumentModified(false);
 
+    // FunctionContext erzeugen und im Formular definierte
+    // Funktionen/DialogFunktionen parsen:
+    Map functionContext = new HashMap();
+    DialogLibrary dialogLib = new DialogLibrary();
+    FunctionLibrary funcLib = new FunctionLibrary();
+    try
+    {
+      dialogLib = WollMuxFiles.parseFunctionDialogs(descs.get("Formular"), mux
+          .getFunctionDialogs(), functionContext);
+      funcLib = WollMuxFiles.parseFunctions(
+          descs.get("Formular"),
+          dialogLib,
+          functionContext,
+          mux.getGlobalFunctions());
+    }
+    catch (NodeNotFoundException e)
+    {
+    }
+
     // ggf. entsprechende WMCommandsFailedException werfen:
     if (descs.query("Formular").count() == 0)
     {
@@ -245,8 +268,7 @@ public class DocumentCommandInterpreter
     // 5) Formulardialog starten:
     FormModel fm = new FormModelImpl(document.xComponent());
 
-    new FormGUI(descs, fm, idToPresetValue, fm.getFunctionContext(), mux.getGlobalFunctions(), mux
-        .getFunctionDialogs());
+    new FormGUI(descs, fm, idToPresetValue, functionContext, funcLib, dialogLib);
   }
 
   /**
