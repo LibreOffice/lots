@@ -900,7 +900,7 @@ public class DatasourceSearchDialog implements Dialog
             ConfigThingy qconf = (ConfigThingy)columnIter.next();
             String columnName = qconf.getName();
             String searchString = qconf.toString();
-            Matcher m = Pattern.compile("\\$\\{wort[1-9]\\}").matcher(searchString); //TODO Dokumentieren, dass wort1 bis wort9 unterstützt werden
+            Matcher m = Pattern.compile("\\$\\{wort[1-9]\\}").matcher(searchString); 
             while (m.find())
             {
               int wordnum = searchString.charAt(m.end() - 2) - '0';
