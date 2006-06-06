@@ -105,7 +105,15 @@ public class WollMuxEventHandler
     {
       super(msg, e);
     }
+  }
 
+  private static class CantStartDialogException extends WollMuxFehlerException
+  {
+    public CantStartDialogException(java.lang.Exception e)
+    {
+      super("Der Dialog konnte nicht gestartet werden!\n\n"
+            + "Bitte kontaktieren Sie Ihre Systemadministration.", e);
+    }
   }
 
   /**
@@ -214,8 +222,7 @@ public class WollMuxEventHandler
       }
       catch (ConfigurationErrorException e)
       {
-        throw new WollMuxFehlerException(
-            "Der Dialog konnte nicht gestartet werden!", e);
+        throw new CantStartDialogException(e);
       }
 
       // Dialog starten:
@@ -226,8 +233,7 @@ public class WollMuxEventHandler
       }
       catch (java.lang.Exception e)
       {
-        throw new WollMuxFehlerException(
-            "Der Dialog konnte nicht gestartet werden!", e);
+        throw new CantStartDialogException(e);
       }
       return EventProcessor.waitForGUIReturn;
     }
@@ -256,8 +262,7 @@ public class WollMuxEventHandler
       }
       catch (ConfigurationErrorException e)
       {
-        throw new WollMuxFehlerException(
-            "Der Dialog konnte nicht gestartet werden!", e);
+        throw new CantStartDialogException(e);
       }
 
       // Dialog starten:
@@ -268,8 +273,7 @@ public class WollMuxEventHandler
       }
       catch (java.lang.Exception e)
       {
-        throw new WollMuxFehlerException(
-            "Der Dialog konnte nicht gestartet werden!", e);
+        throw new CantStartDialogException(e);
       }
 
       return EventProcessor.waitForGUIReturn;
