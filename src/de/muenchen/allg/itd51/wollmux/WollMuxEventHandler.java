@@ -109,6 +109,8 @@ public class WollMuxEventHandler
 
   private static class CantStartDialogException extends WollMuxFehlerException
   {
+    private static final long serialVersionUID = -1130975078605219254L;
+
     public CantStartDialogException(java.lang.Exception e)
     {
       super("Der Dialog konnte nicht gestartet werden!\n\n"
