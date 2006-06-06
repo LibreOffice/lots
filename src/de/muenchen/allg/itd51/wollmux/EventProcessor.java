@@ -13,6 +13,7 @@
  *                  | Objekten zuordnen zu können beim Lesen des Logfiles
  *                  | +ON_UNLOAD
  * 21.04.2006 | LUT | +acceptEvents-Flag zum deaktivieren der Event-Entgegennahme.                 
+ * 06.06.2006 | LUT | + Ablösung der Event-Klasse durch saubere Objektstruktur
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -28,13 +29,9 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.sun.star.document.XEventListener;
-import com.sun.star.frame.FrameAction;
-import com.sun.star.frame.FrameActionEvent;
-import com.sun.star.frame.XFrameActionListener;
-import com.sun.star.uno.UnoRuntime;
-import com.sun.star.util.XModifyListener;
 
 import de.muenchen.allg.afid.UnoService;
+import de.muenchen.allg.itd51.wollmux.WollMuxEventHandler.WollMuxEvent;
 
 /**
  * Der EventProcessor sorgt für eine synchronisierte Verarbeitung aller
@@ -44,8 +41,7 @@ import de.muenchen.allg.afid.UnoService;
  * 
  * @author lut
  */
-public class EventProcessor implements XEventListener, XModifyListener,
-    XFrameActionListener, ActionListener
+public class EventProcessor implements XEventListener, ActionListener
 {
   /**
    * Gibt an, ob der EventProcessor überhaupt events entgegennimmt. Ist
@@ -84,7 +80,7 @@ public class EventProcessor implements XEventListener, XModifyListener,
   public void setAcceptEvents(boolean accept)
   {
     acceptEvents = accept;
-    if(accept)
+    if (accept)
       Logger.debug("EventProcessor: akzeptiere neue Events.");
     else
       Logger.debug("EventProcessor: blockiere Entgegennahme von Events!");
@@ -102,21 +98,18 @@ public class EventProcessor implements XEventListener, XModifyListener,
         {
           while (true)
           {
-            Event event;
+            WollMuxEvent event;
             synchronized (eventQueue)
             {
               while (eventQueue.isEmpty())
                 eventQueue.wait();
-              event = (Event) eventQueue.remove(0);
+              event = (WollMuxEvent) eventQueue.remove(0);
             }
-            if (event.getEvent() != Event.UNKNOWN)
+            synchronized (processNextEvent)
             {
-              synchronized (processNextEvent)
-              {
-                processNextEvent[0] = EventHandler.processEvent(event);
-                while (processNextEvent[0] == waitForGUIReturn)
-                  processNextEvent.wait();
-              }
+              processNextEvent[0] = event.process();
+              while (processNextEvent[0] == waitForGUIReturn)
+                processNextEvent.wait();
             }
           }
         }
@@ -138,7 +131,7 @@ public class EventProcessor implements XEventListener, XModifyListener,
    * 
    * @param event
    */
-  public void addEvent(Event event)
+  public void addEvent(WollMuxEventHandler.WollMuxEvent event)
   {
     if (acceptEvents) synchronized (eventQueue)
     {
@@ -168,35 +161,18 @@ public class EventProcessor implements XEventListener, XModifyListener,
                   + docEvent.EventName);
     UnoService source = new UnoService(docEvent.Source);
 
-    // Im Falle von OnLoad oder OnNew den EventProcessor als Eventhandler
-    // des neuen Dokuments registrieren und den Document-Status auf alive
-    // setzen:
-    if (docEvent.EventName.compareToIgnoreCase("OnLoad") == 0
-        || docEvent.EventName.compareToIgnoreCase("OnNew") == 0)
-      if (source.supportsService("com.sun.star.text.TextDocument"))
-      {
-        source.xComponent().addEventListener(this);
-      }
-
     // Bekannte Event-Typen rausziehen:
-    if (docEvent.EventName.compareToIgnoreCase("OnLoad") == 0)
-      addEvent(new Event(Event.ON_LOAD, null, docEvent.Source));
-
-    if (docEvent.EventName.compareToIgnoreCase("OnNew") == 0)
-      addEvent(new Event(Event.ON_NEW, null, docEvent.Source));
-
-    if (docEvent.EventName.compareToIgnoreCase("OnFocus") == 0)
-      addEvent(new Event(Event.ON_FOCUS, null, docEvent.Source));
-}
-
-  /**
-   * Wird von einzelnen Uno-Komponenten bei Änderungen aufgerufen.
-   * 
-   * @see com.sun.star.util.XModifyListener#modified(com.sun.star.lang.EventObject)
-   */
-  public void modified(com.sun.star.lang.EventObject modifyEvent)
-  {
-    addEvent(new Event(Event.ON_MODIFIED, null, modifyEvent.Source));
+    if (source.xTextDocument() != null)
+    {
+      if (docEvent.EventName.compareToIgnoreCase("OnLoad") == 0)
+      {
+        WollMuxEventHandler.handleProcessTextDocument(source.xTextDocument());
+      }
+      if (docEvent.EventName.compareToIgnoreCase("OnNew") == 0)
+      {
+        WollMuxEventHandler.handleProcessTextDocument(source.xTextDocument());
+      }
+    }
   }
 
   /**
@@ -207,18 +183,20 @@ public class EventProcessor implements XEventListener, XModifyListener,
   public void actionPerformed(ActionEvent actionEvent)
   {
     // add back- und abort events
-    if (actionEvent.getActionCommand().equals("back"))
+    String cmd = actionEvent.getActionCommand();
+    if (cmd.equals("back") || cmd.equals("abort"))
     {
-      addEvent(new Event(Event.ON_DIALOG_BACK));
-    }
-    if (actionEvent.getActionCommand().equals("abort"))
-    {
-      addEvent(new Event(Event.ON_DIALOG_ABORT));
-    }
-    synchronized (processNextEvent)
-    {
-      processNextEvent[0] = processTheNextEvent;
-      processNextEvent.notifyAll();
+      // Alle bisherigen Dialoge nehmen potentiell Änderungen an der
+      // Persönlichen Absenderliste vor. Daher wird hier ein PALChangedNotify
+      // rausgegeben. TODO: Event OnDialogReturned stattdessen einführen und nur
+      // bei PAL-Dialogen den PALChangeNotify durchführen.
+      WollMuxEventHandler.handlePALChangedNotify();
+
+      synchronized (processNextEvent)
+      {
+        processNextEvent[0] = processTheNextEvent;
+        processNextEvent.notifyAll();
+      }
     }
   }
 
@@ -240,56 +218,13 @@ public class EventProcessor implements XEventListener, XModifyListener,
       Iterator i = eventQueue.iterator();
       while (i.hasNext())
       {
-        Event event = (Event) i.next();
-        if (UnoRuntime.areSame(source.Source, event.getSource()))
+        WollMuxEvent event = (WollMuxEvent) i.next();
+        if (event.requires(source.Source))
         {
           Logger.debug2("Removing " + event);
           i.remove();
         }
       }
     }
-  }
-
-  public void frameAction(FrameActionEvent event)
-  {
-    FrameAction action = event.Action;
-    String actionStr = "unknown";
-    if (action == FrameAction.COMPONENT_ATTACHED)
-    {
-      actionStr = "COMPONENT_ATTACHED";
-    }
-    if (action == FrameAction.COMPONENT_DETACHING)
-    {
-      actionStr = "COMPONENT_DETACHING";
-    }
-    if (action == FrameAction.COMPONENT_REATTACHED)
-    {
-      actionStr = "COMPONENT_REATTACHED";
-    }
-    if (action == FrameAction.FRAME_ACTIVATED)
-    {
-      actionStr = "FRAME_ACTIVATED";
-    }
-    if (action == FrameAction.FRAME_DEACTIVATING)
-    {
-      actionStr = "FRAME_DEACTIVATING";
-    }
-    if (action == FrameAction.CONTEXT_CHANGED)
-    {
-      actionStr = "CONTEXT_CHANGED";
-    }
-    if (action == FrameAction.FRAME_UI_ACTIVATED)
-    {
-      actionStr = "FRAME_UI_ACTIVATED";
-    }
-    if (action == FrameAction.FRAME_UI_DEACTIVATING)
-    {
-      actionStr = "FRAME_UI_DEACTIVATING";
-    }
-    Logger.debug2("Incoming FrameActionEvent: " + actionStr);
-
-    // Bekannte Event-Typen rausziehen:
-    if (action == FrameAction.COMPONENT_REATTACHED)
-      addEvent(new Event(Event.ON_FRAME_CHANGED, null, event.Source));
   }
 }

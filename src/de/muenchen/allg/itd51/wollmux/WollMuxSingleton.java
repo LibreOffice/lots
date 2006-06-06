@@ -24,6 +24,7 @@
  * 10.05.2006 | BNK | +parseGlobalFunctions()
  *                  | +parseFunctionDialogs()
  * 26.05.2006 | BNK | DJ initialisierung ausgelagert nacht WollMuxFiles
+ * 06.06.2006 | LUT | + Ablösung der Event-Klasse durch saubere Objektstruktur
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -133,24 +134,30 @@ public class WollMuxSingleton implements XPALProvider
     textFragmentList = new VisibleTextFragmentList(WollMuxFiles
         .getWollmuxConf());
 
-    // Versuchen, den DJ zu initialisieren und Flag setzen, falls nicht erfolgreich.
-    if (getDatasourceJoiner() == null)
-      successfulStartup = false;
+    // Versuchen, den DJ zu initialisieren und Flag setzen, falls nicht
+    // erfolgreich.
+    if (getDatasourceJoiner() == null) successfulStartup = false;
 
     /*
      * Globale Funktionsdialoge parsen. ACHTUNG! Muss vor parseGlobalFunctions()
-     * erfolgen. Als context wird null übergeben, weil
-     * globale Funktionen keinen Kontext haben.
-     * TODO Überlegen, ob ein globaler Kontext doch Sinn machen könnte. Dadurch könnten globale Funktionen globale Funktionsdialoge darstellen, die global einheitliche Werte haben.
+     * erfolgen. Als context wird null übergeben, weil globale Funktionen keinen
+     * Kontext haben. TODO Überlegen, ob ein globaler Kontext doch Sinn machen
+     * könnte. Dadurch könnten globale Funktionen globale Funktionsdialoge
+     * darstellen, die global einheitliche Werte haben.
      */
-    funcDialogs = WollMuxFiles.parseFunctionDialogs(WollMuxFiles.getWollmuxConf(), null, null);
+    funcDialogs = WollMuxFiles.parseFunctionDialogs(WollMuxFiles
+        .getWollmuxConf(), null, null);
 
     /*
      * Globale Funktionen parsen. ACHTUNG! Verwendet die Funktionsdialoge. Diese
      * müssen also vorher geparst sein. Als context wird null übergeben, weil
      * globale Funktionen keinen Kontext haben.
      */
-    globalFunctions = WollMuxFiles.parseFunctions(WollMuxFiles.getWollmuxConf(), getFunctionDialogs(), null, null);
+    globalFunctions = WollMuxFiles.parseFunctions(
+        WollMuxFiles.getWollmuxConf(),
+        getFunctionDialogs(),
+        null,
+        null);
 
     // Initialisiere EventProcessor
     getEventProcessor().setAcceptEvents(successfulStartup);
@@ -192,8 +199,7 @@ public class WollMuxSingleton implements XPALProvider
       singletonInstance = new WollMuxSingleton(ctx);
 
       // Event ON_FIRST_INITIALIZE erzeugen:
-      singletonInstance.getEventProcessor().addEvent(
-          new Event(Event.ON_INITIALIZE));
+      WollMuxEventHandler.handleInitialize();
     }
   }
 
@@ -270,6 +276,9 @@ public class WollMuxSingleton implements XPALProvider
   public void addPALChangeEventListener(XPALChangeEventListener listener)
   {
     Logger.debug2("WollMuxSingleton::addPALChangeEventListener()");
+
+    if (listener == null) return;
+
     Iterator i = registeredPALChangeListener.iterator();
     while (i.hasNext())
     {

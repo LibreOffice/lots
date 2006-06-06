@@ -13,6 +13,7 @@
  *                    + verwenden des Konfigurationsparameters SENDER_SOURCE
  *                    + Erster Start des wollmux über wm_configured feststellen.
  * 05.12.2005 | BNK | line.separator statt \n                 |  
+ * 06.06.2006 | LUT | + Ablösung der Event-Klasse durch saubere Objektstruktur
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -38,8 +39,8 @@ import com.sun.star.registry.XRegistryKey;
 import com.sun.star.task.XAsyncJob;
 import com.sun.star.uno.XComponentContext;
 
-import de.muenchen.allg.itd51.wollmux.Event;
 import de.muenchen.allg.itd51.wollmux.Logger;
+import de.muenchen.allg.itd51.wollmux.WollMuxEventHandler;
 import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
 import de.muenchen.allg.itd51.wollmux.XPALChangeEventListener;
 import de.muenchen.allg.itd51.wollmux.XWollMux;
@@ -284,8 +285,6 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
   public void dispatch( /* IN */com.sun.star.util.URL aURL,
   /* IN */com.sun.star.beans.PropertyValue[] aArguments)
   {
-    WollMuxSingleton mux = WollMuxSingleton.getInstance();
-
     Vector parsedURL = parseWollmuxURL(aURL.Complete);
     if (parsedURL != null && parsedURL.size() >= 1)
     {
@@ -302,33 +301,28 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
 
       if (cmd.compareToIgnoreCase(cmdAbsenderAuswaehlen) == 0)
       {
-        Logger
-            .debug2("Dispatch: Aufruf von WollMux:AbsenderdatenBearbeitenDialog");
-        mux.getEventProcessor().addEvent(
-            new Event(Event.ON_ABSENDER_AUSWAEHLEN));
+        Logger.debug2("Dispatch: Aufruf von WollMux:AbsenderAuswaehlenDialog");
+        WollMuxEventHandler.handleShowDialogAbsenderAuswaehlen();
       }
 
       if (cmd.compareToIgnoreCase(cmdPALVerwalten) == 0)
       {
         Logger.debug2("Dispatch: Aufruf von WollMux:PALVerwalten");
-        mux.getEventProcessor().addEvent(
-            new Event(Event.ON_PERSOENLICHE_ABSENDERLISTE));
+        WollMuxEventHandler.handleShowDialogPersoenlicheAbsenderliste();
       }
 
       if (cmd.compareToIgnoreCase(cmdOpenTemplate) == 0)
       {
         Logger.debug2("Dispatch: Aufruf von WollMux:OpenTemplate mit Args:"
                       + argStr);
-        mux.getEventProcessor().addEvent(
-            new Event(Event.ON_OPENTEMPLATE, parsedURL));
+        WollMuxEventHandler.handleOpenDocument(parsedURL, true);
       }
 
       if (cmd.compareToIgnoreCase(cmdOpenDocument) == 0)
       {
         Logger.debug2("Dispatch: Aufruf von WollMux:OpenDocument mit Args:"
                       + argStr);
-        mux.getEventProcessor().addEvent(
-            new Event(Event.ON_OPENDOCUMENT, parsedURL));
+        WollMuxEventHandler.handleOpenDocument(parsedURL, false);
       }
 
       if (cmd.compareToIgnoreCase(cmdMenu) == 0)
@@ -377,20 +371,18 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
    */
   public void addPALChangeEventListener(XPALChangeEventListener l)
   {
-    WollMuxSingleton.getInstance().getEventProcessor().addEvent(
-        new Event(Event.ON_ADD_PAL_CHANGE_EVENT_LISTENER, null, l));
+    WollMuxEventHandler.handleAddPALChangeEventListener(l);
   }
 
   /**
    * Diese Methode deregistriert einen XPALChangeEventListener wenn er bereits
-   * registriert war. 
+   * registriert war.
    * 
    * @see de.muenchen.allg.itd51.wollmux.XPALChangeEventBroadcaster#removePALChangeEventListener(de.muenchen.allg.itd51.wollmux.XPALChangeEventListener)
    */
   public void removePALChangeEventListener(XPALChangeEventListener l)
   {
-    WollMuxSingleton.getInstance().getEventProcessor().addEvent(
-        new Event(Event.ON_REMOVE_PAL_CHANGE_EVENT_LISTENER, null, l));
+    WollMuxEventHandler.handleRemovePALChangeEventListener(l);
   }
 
   /**
@@ -405,10 +397,6 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
   public void setCurrentSender(String sender, short idx)
   {
     Logger.debug2("WollMux.setCurrentSender(\"" + sender + "\", " + idx + ")");
-    Vector args = new Vector();
-    args.add(new String(sender));
-    args.add(new Integer(idx));
-    WollMuxSingleton.getInstance().getEventProcessor().addEvent(
-        new Event(Event.ON_SET_SENDER, args));
+    WollMuxEventHandler.handleSetSender(sender, idx);
   }
 }
