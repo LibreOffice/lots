@@ -94,6 +94,12 @@ public class WollMuxEventHandler
     public boolean requires(Object o);
   }
 
+  /**
+   * Repräsentiert einen Fehler, der benutzersichtbar in einem Fehlerdialog
+   * angezeigt wird.
+   * 
+   * @author christoph.lutz
+   */
   private static class WollMuxFehlerException extends java.lang.Exception
   {
     private static final long serialVersionUID = 3618646713098791791L;
@@ -147,9 +153,7 @@ public class WollMuxEventHandler
       {
         errorMessage(e);
       }
-      // doit() darf zwar ausser der WollMuxFehler Exception keine weiteren
-      // Exceptions werfen, hier aber der Notnagel für alle nicht in doit
-      // abgefangenen Runtime-Exceptions.
+      // Notnagel für alle Runtime-Exceptions.
       catch (Throwable t)
       {
         Logger.error(t);
@@ -189,6 +193,11 @@ public class WollMuxEventHandler
       return EventProcessor.processTheNextEvent;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.WollMuxEventHandler.WollMuxEvent#requires(java.lang.Object)
+     */
     public boolean requires(Object o)
     {
       return false;
@@ -220,16 +229,33 @@ public class WollMuxEventHandler
     }
   }
 
+  /**
+   * Stellt das WollMuxEvent event in die EventQueue des EventProcessors.
+   * 
+   * @param event
+   */
   private static void handle(WollMuxEvent event)
   {
     WollMuxSingleton.getInstance().getEventProcessor().addEvent(event);
   }
 
+  // *******************************************************************************************
+
+  /**
+   * Erzeugt ein neues WollMuxEvent, das den Dialog AbsenderAuswaehlen startet.
+   */
   public static void handleShowDialogAbsenderAuswaehlen()
   {
     handle(new OnShowDialogAbsenderAuswaehlen());
   }
 
+  /**
+   * Dieses Event wird vom WollMux-Service (...comp.WollMux) und aus dem
+   * WollMuxEventHandler ausgelöst und sorgt dafür, dass der Dialog
+   * AbsenderAuswählen gestartet wird.
+   * 
+   * @author christoph.lutz
+   */
   private static class OnShowDialogAbsenderAuswaehlen extends BasicEvent
   {
     protected boolean doit() throws WollMuxFehlerException
@@ -267,11 +293,24 @@ public class WollMuxEventHandler
     }
   }
 
+  // *******************************************************************************************
+
+  /**
+   * Erzeugt ein neues WollMuxEvent, das den Dialog
+   * PersoenlichtAbsenderListe-Verwalten startet.
+   */
   public static void handleShowDialogPersoenlicheAbsenderliste()
   {
     handle(new OnShowDialogPersoenlicheAbsenderlisteVerwalten());
   }
 
+  /**
+   * Dieses Event wird vom WollMux-Service (...comp.WollMux) und aus dem
+   * WollMuxEventHandler ausgelöst und sorgt dafür, dass der Dialog
+   * PersönlicheAbsendeliste-Verwalten gestartet wird.
+   * 
+   * @author christoph.lutz
+   */
   private static class OnShowDialogPersoenlicheAbsenderlisteVerwalten extends
       BasicEvent
   {
@@ -308,12 +347,27 @@ public class WollMuxEventHandler
     }
   }
 
+  // *******************************************************************************************
+
+  /**
+   * Erzeugt ein neues WollMuxEvent, das die eigentliche Dokumentbearbeitung
+   * eines TextDokuments startet.
+   * 
+   * @param xTextDoc
+   *          Das XTextDocument, das durch den WollMux verarbeitet werden soll.
+   */
   public static void handleProcessTextDocument(XTextDocument xTextDoc)
   {
     handle(new OnProcessTextDocument(xTextDoc));
   }
 
-  // früher ON_LOAD und ON_NEW
+  /**
+   * Dieses Event wird immer dann ausgelöst, wenn der GlobalEventBroadcaster von
+   * OOo ein ON_NEW oder ein ON_LOAD-Event wirft. Das Event sorgt dafür, dass
+   * die eigentliche Dokumentbearbeitung durch den WollMux angestossen wird.
+   * 
+   * @author christoph.lutz
+   */
   private static class OnProcessTextDocument extends BasicEvent
   {
     XTextDocument xTextDoc;
@@ -550,12 +604,34 @@ public class WollMuxEventHandler
     }
   }
 
+  // *******************************************************************************************
+
+  /**
+   * Erzeugt ein neues WollMuxEvent, welches dafür sorgt, dass ein Dokument
+   * geöffnet wird.
+   * 
+   * @param fragIDs
+   *          Ein Vector mit fragIDs, wobei das erste Element die FRAG_ID des zu
+   *          öffnenden Dokuments beinhalten muss. Weitere Elemente werden in
+   *          eine Liste zusammengefasst und als Parameter für das
+   *          Dokumentkommando insertContent verwendet.
+   * @param asTemplate
+   *          true, wenn das Dokument als "Unbenannt X" geöffnet werden soll
+   *          (also im "Template-Modus") und false, wenn das Dokument zum
+   *          Bearbeiten geöffnet werden soll.
+   */
   public static void handleOpenDocument(Vector fragIDs, boolean asTemplate)
   {
     handle(new OnOpenDocument(fragIDs, asTemplate));
   }
 
-  // früher ON_OPENDOCUMENT und ON_OPENTEMPLATE
+  /**
+   * Dieses Event wird gestartet, wenn der WollMux-Service (...comp.WollMux) das
+   * Dispatch-Kommando wollmux:openTemplate bzw. wollmux:openDocument empfängt
+   * und sort dafür, dass das entsprechende Dokument geöffnet wird.
+   * 
+   * @author christoph.lutz
+   */
   private static class OnOpenDocument extends BasicEvent
   {
     private boolean asTemplate;
@@ -710,12 +786,25 @@ public class WollMuxEventHandler
     }
   }
 
+  // *******************************************************************************************
+
+  /**
+   * Erzeugt ein neues WollMuxEvent, das dafür sorgt, dass alle registrierten
+   * XPALChangeEventListener geupdated werden.
+   */
   public static void handlePALChangedNotify()
   {
     handle(new OnPALChangedNotify());
   }
 
-  // return "ON_SELECTION_CHANGED";
+  /**
+   * Dieses Event wird immer dann erzeugt, wenn ein Dialog zur Bearbeitung der
+   * PAL geschlossen wurde und immer dann wenn die PAL z.B. durch einen
+   * wollmux:setSender-Befehl geändert hat. Das Event sorgt dafür, dass alle im
+   * WollMuxSingleton registrierten XPALChangeListener geupdatet werden.
+   * 
+   * @author christoph.lutz
+   */
   private static class OnPALChangedNotify extends BasicEvent
   {
     protected boolean doit() throws WollMuxFehlerException
@@ -754,12 +843,31 @@ public class WollMuxEventHandler
     }
   }
 
+  // *******************************************************************************************
+
+  /**
+   * Erzeugt ein neues WollMuxEvent zum setzen des aktuellen Absenders.
+   * 
+   * @param senderName
+   *          Name des Senders in der Form "Nachname, Vorname (Rolle)" wie sie
+   *          auch der PALProvider bereithält.
+   * @param idx
+   *          der zum Sender senderName passende index in der sortierten
+   *          Senderliste - dient zur Konsistenz-Prüfung, damit kein Sender
+   *          gesetzt wird, wenn die PAL der setzenden Komponente nicht mit der
+   *          PAL des WollMux übereinstimmt.
+   */
   public static void handleSetSender(String senderName, int idx)
   {
     handle(new OnSetSender(senderName, idx));
   }
 
-  // return "ON_SET_SENDER";
+  /**
+   * Dieses Event wird ausgelöst, wenn im WollMux-Service die methode setSender
+   * aufgerufen wird. Es sort dafür, dass ein neuer Absender gesetzt wird.
+   * 
+   * @author christoph.lutz
+   */
   private static class OnSetSender extends BasicEvent
   {
     private String senderName;
@@ -799,6 +907,27 @@ public class WollMuxEventHandler
     }
   }
 
+  // *******************************************************************************************
+
+  /**
+   * Erzeugt ein neues WollMuxEvent, welches dafür sorgt, dass alle
+   * Formularfelder Dokument auf den neuen Wert gesetzt werden. Bei
+   * Formularfeldern mit TRAFO-Funktion wird die Transformation entsprechend
+   * durchgeführt.
+   * 
+   * @param doc
+   *          Das Dokument, welches die Formularfelder enthält.
+   * @param idToFormValues
+   *          Eine HashMap die unter dem Schlüssel fieldID den Vektor aller
+   *          FormFields mit der ID fieldID liefert.
+   * @param fieldId
+   *          Die ID der Formularfelder, deren Werte angepasst werden sollen.
+   * @param newValue
+   *          Der neue untransformierte Wert des Formularfeldes.
+   * @param funcLib
+   *          Die Funktionsbibliothek, die zur Gewinnung der Trafo-Funktion
+   *          verwendet werden soll.
+   */
   public static void handleFormValueChanged(XTextDocument doc,
       HashMap idToFormValues, String fieldId, String newValue,
       FunctionLibrary funcLib)
@@ -807,6 +936,14 @@ public class WollMuxEventHandler
         funcLib));
   }
 
+  /**
+   * Dieses Event wird (derzeit) vom FormModelImpl ausgelöst, wenn in der
+   * Formular-GUI der Wert des Formularfeldes fieldID geändert wurde und sorgt
+   * dafür, dass die Wertänderung auf alle betroffenen Formularfelder im
+   * Dokument doc übertragen werden.
+   * 
+   * @author christoph.lutz
+   */
   private static class OnFormValueChanged extends BasicEvent
   {
     private XTextDocument doc;
@@ -857,12 +994,37 @@ public class WollMuxEventHandler
     }
   }
 
+  // *******************************************************************************************
+
+  /**
+   * Erzeugt ein Event, das den ViewCursor des Dokuments auf das aktuell in der
+   * Formular-GUI bearbeitete Formularfeld setzt.
+   * 
+   * @param idToFormValues
+   *          Eine HashMap die unter dem Schlüssel fieldID den Vektor aller
+   *          FormFields mit der ID fieldID liefert.
+   * @param fieldId
+   *          die ID des Formularfeldes das den Fokus bekommen soll. Besitzen
+   *          mehrere Formularfelder diese ID, so wird bevorzugt das erste
+   *          Formularfeld aus dem Vektor genommen, das keine Trafo enthält.
+   *          Ansonsten wird das erste Formularfeld im Vektor verwendet.
+   * @param doc
+   *          Das Dokument, welches das Formularfeld enthält
+   */
   public static void handleFocusFormField(HashMap idToFormValues,
       String fieldId, XTextDocument doc)
   {
     handle(new OnFocusFormField(idToFormValues, fieldId, doc));
   }
 
+  /**
+   * Dieses Event wird (derzeit) vom FormModelImpl ausgelöst, wenn in der
+   * Formular-GUI ein Formularfeld den Fokus bekommen hat und es sorgt dafür,
+   * dass der View-Cursor des Dokuments das entsprechende FormField im Dokument
+   * anspringt.
+   * 
+   * @author christoph.lutz
+   */
   private static class OnFocusFormField extends BasicEvent
   {
     private HashMap idToFormValues;
@@ -903,12 +1065,38 @@ public class WollMuxEventHandler
     }
   }
 
+  // *******************************************************************************************
+
+  /**
+   * Erzeugt ein Event, das den View-Cursor des Dokuments doc wieder an die
+   * Stelle zurücksetzt, an der er sich vor dem Fokusieren des Formularfeldes
+   * fieldID befunden hat.
+   * 
+   * @param idToFormValues
+   *          Eine HashMap die unter dem Schlüssel fieldID den Vektor aller
+   *          FormFields mit der ID fieldID liefert.
+   * @param fieldId
+   *          die ID des Formularfeldes das den Fokus bekommen soll. Besitzen
+   *          mehrere Formularfelder diese ID, so wird bevorzugt das erste
+   *          Formularfeld aus dem Vektor genommen, das keine Trafo enthält.
+   *          Ansonsten wird das erste Formularfeld im Vektor verwendet.
+   * @param doc
+   *          Das Dokument, welches das Formularfeld enthält
+   */
   public static void handleUnFocusFormField(HashMap idToFormValues,
       String fieldId, XTextDocument doc)
   {
     handle(new OnUnFocusFormField(idToFormValues, fieldId, doc));
   }
 
+  /**
+   * Dieses Event wird vom FormModelImpl ausgelöst, wenn in der Formular-GUI ein
+   * Formularfeld den Fokus verloren hat und sorgt dafür, dass der View-Cursor
+   * im Dokument wieder an die Stelle zurück springt, an der er vor dem
+   * Fokusieren stand.
+   * 
+   * @author christoph.lutz
+   */
   private static class OnUnFocusFormField extends BasicEvent
   {
     private HashMap idToFormValues;
@@ -949,12 +1137,27 @@ public class WollMuxEventHandler
     }
   }
 
+  // *******************************************************************************************
+
+  /**
+   * Erzeugt ein neues WollMuxEvent, das ggf. notwendige interaktive
+   * Initialisierungen vornimmt. Derzeit wird vor allem die Konsitenz der
+   * persönlichen Absenderliste geprüft und der AbsenderAuswählen Dialog
+   * gestartet, falls die Liste leer ist.
+   */
   public static void handleInitialize()
   {
     handle(new OnInitialize());
   }
 
-  // return "ON_INITIALIZE";
+  /**
+   * Dieses Event wird als erstes WollMuxEvent bei der Initialisierung des
+   * WollMux im WollMuxSingleton erzeugt und übernimmt alle benutzersichtbaren
+   * (interaktiven) Initialisierungen wie z.B. das Darstellen des
+   * AbsenderAuswählen-Dialogs, falls die PAL leer ist.
+   * 
+   * @author christoph.lutz
+   */
   private static class OnInitialize extends BasicEvent
   {
     protected boolean doit() throws WollMuxFehlerException
@@ -1056,13 +1259,28 @@ public class WollMuxEventHandler
     }
   }
 
+  // *******************************************************************************************
+
+  /**
+   * Erzeugt ein neues WollMuxEvent zum Registrieren des übergebenen
+   * XPALChangeEventListeners.
+   * 
+   * @param listener
+   */
   public static void handleAddPALChangeEventListener(
       XPALChangeEventListener listener)
   {
     handle(new OnAddPALChangeEventListener(listener));
   }
 
-  // return "ON_ADD_PAL_CHANGE_EVENT_LISTENER";
+  /**
+   * Dieses Event wird ausgelöst, wenn sich ein externer PALChangeEventListener
+   * beim WollMux-Service registriert. Es sorgt dafür, dass der
+   * PALChangeEventListener in die Liste der registrierten
+   * PALChangeEventListener im WollMuxSingleton aufgenommen wird.
+   * 
+   * @author christoph.lutz
+   */
   private static class OnAddPALChangeEventListener extends BasicEvent
   {
     private XPALChangeEventListener listener;
@@ -1087,13 +1305,29 @@ public class WollMuxEventHandler
     }
   }
 
+  // *******************************************************************************************
+
+  /**
+   * Erzeugt ein neues WollMuxEvent, das den übergebenen XPALChangeEventListener
+   * deregistriert.
+   * 
+   * @param listener
+   *          der zu deregistrierende XPALChangeEventListener
+   */
   public static void handleRemovePALChangeEventListener(
       XPALChangeEventListener listener)
   {
     handle(new OnRemovePALChangeEventListener(listener));
   }
 
-  // return "ON_REMOVE_PAL_CHANGE_EVENT_LISTENER";
+  /**
+   * Dieses Event wird vom WollMux-Service (...comp.WollMux) ausgelöst wenn sich
+   * ein externe XPALChangeEventListener beim WollMux deregistriert. Der zu
+   * entfernende XPALChangeEventListerner wird anschließend im WollMuxSingleton
+   * aus der Liste der registrierten XPALChangeEventListener genommen.
+   * 
+   * @author christoph.lutz
+   */
   private static class OnRemovePALChangeEventListener extends BasicEvent
   {
     private XPALChangeEventListener listener;
@@ -1110,6 +1344,8 @@ public class WollMuxEventHandler
     }
   }
 
+  // *******************************************************************************************
+  // Globale Helper-Methoden
   /**
    * Diese Methode erzeugt einen modalen UNO-Dialog zur Anzeige von
    * Fehlermeldungen bei der Bearbeitung eines Events.
