@@ -1379,7 +1379,7 @@ public class DocumentCommandInterpreter
             .getCurrentController());
         XTextCursor cursor = controller.xTextViewCursorSupplier()
             .getViewCursor();
-        oldFocusRange = cursor;
+        oldFocusRange = cursor.getText().createTextCursorByRange(cursor);
         XTextRange anchor = inputField.xTextField().getAnchor();
         cursor.gotoRange(anchor, false);
       }
