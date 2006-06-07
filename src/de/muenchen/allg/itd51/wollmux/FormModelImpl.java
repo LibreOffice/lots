@@ -2,18 +2,28 @@
 
 package de.muenchen.allg.itd51.wollmux;
 
+import java.util.HashMap;
+
 import com.sun.star.awt.PosSize;
 import com.sun.star.lang.XComponent;
 
 import de.muenchen.allg.afid.UnoService;
+import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 
 public class FormModelImpl implements FormModel
 {
-  private UnoService document;
+  private final UnoService document;
 
-  public FormModelImpl(XComponent doc)
+  private final FunctionLibrary funcLib;
+
+  private final HashMap idToFormValues;
+
+  public FormModelImpl(XComponent doc, FunctionLibrary funcLib,
+      HashMap idToFormValues)
   {
     this.document = new UnoService(doc);
+    this.funcLib = funcLib;
+    this.idToFormValues = idToFormValues;
   }
 
   public void close()
@@ -56,24 +66,30 @@ public class FormModelImpl implements FormModel
   public void setVisibleState(String groupId, boolean visible)
   {
     // TODO setVisibleState implementieren
-    
+
   }
 
   public void valueChanged(String fieldId, String newValue)
   {
-    // TODO valueChanged implementieren
-    
+    WollMuxEventHandler.handleFormValueChanged(
+        document.xTextDocument(),
+        idToFormValues,
+        fieldId,
+        newValue,
+        funcLib);
   }
 
   public void focusGained(String fieldId)
   {
-    // TODO focusGained(String fieldId) implementieren
-    
+    WollMuxEventHandler.handleFocusFormField(idToFormValues, fieldId, document
+        .xTextDocument());
   }
 
   public void focusLost(String fieldId)
   {
-    // TODO focusLost(String fieldId) implementieren
-    
+    WollMuxEventHandler.handleUnFocusFormField(
+        idToFormValues,
+        fieldId,
+        document.xTextDocument());
   }
 }

@@ -64,7 +64,9 @@ import de.muenchen.allg.itd51.wollmux.db.DatasetNotFoundException;
 import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
 import de.muenchen.allg.itd51.wollmux.dialog.FormController;
 import de.muenchen.allg.itd51.wollmux.dialog.FormGUI;
+import de.muenchen.allg.itd51.wollmux.func.Function;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
+import de.muenchen.allg.itd51.wollmux.func.Values.SimpleMap;
 
 /**
  * Diese Klasse repräsentiert den Kommando-Interpreter zur Auswertung von
@@ -266,7 +268,8 @@ public class DocumentCommandInterpreter
     }
 
     // 5) Formulardialog starten:
-    FormModel fm = new FormModelImpl(document.xComponent());
+    FormModel fm = new FormModelImpl(document.xComponent(), funcLib,
+        idToFormFields);
 
     new FormGUI(descs, fm, idToPresetValue, functionContext, funcLib, dialogLib);
   }
@@ -1245,6 +1248,12 @@ public class DocumentCommandInterpreter
 
     UnoService inputField;
 
+    /**
+     * Enthält die TextRange des viewCursors, bevor die focus()-Methode
+     * aufgerufen wurde.
+     */
+    XTextRange oldFocusRange = null;
+
     public FormField(InsertFormValue cmd, XTextField xTextField)
     {
       this.cmd = cmd;
@@ -1290,26 +1299,46 @@ public class DocumentCommandInterpreter
      * 
      * @param value
      */
-    public void setValue(String value)
+    public void setValue(String value, FunctionLibrary funcLib)
     {
       if (cmd.getTrafoName() != null)
       {
-        // value = trafo(value)
+        Function func = funcLib.get(cmd.getTrafoName());
+        if (func != null)
+        {
+          SimpleMap args = new SimpleMap();
+          args.put("VALUE", value);
+          value = func.getString(args);
+        }
+        else
+        {
+          value = "<FEHLER: TRAFO '"
+                  + cmd.getTrafoName()
+                  + "' nicht definiert>";
+          Logger.error("Die in Kommando '"
+                       + cmd
+                       + " verwendete TRAFO '"
+                       + cmd.getTrafoName()
+                       + "' ist nicht definiert.");
+        }
       }
 
       // md5-Wert bestimmen und setzen:
       String md5 = getMD5HexRepresentation(value);
       cmd.setMD5(md5);
+      cmd.updateBookmark(false);
 
       // Inhalt des Textfeldes setzen:
-      if (inputField.xTextField() != null) try
-      {
-        inputField.setPropertyValue("Content", value);
-      }
-      catch (Exception e)
-      {
-        Logger.error(e);
-      }
+      if (inputField.xTextField() != null && inputField.xUpdatable() != null)
+        try
+        {
+          inputField.setPropertyValue("Content", value);
+          inputField.xUpdatable().update();
+        }
+        catch (Exception e)
+        {
+          Logger.error(e);
+        }
     }
 
     /**
@@ -1341,9 +1370,40 @@ public class DocumentCommandInterpreter
       return (cmd.getMD5() != null);
     }
 
-    private void setMD5(String md5Str)
+    public void focus(XTextDocument doc)
     {
-      cmd.setMD5(md5Str);
+      try
+      {
+        UnoService document = new UnoService(doc);
+        UnoService controller = new UnoService(document.xModel()
+            .getCurrentController());
+        XTextCursor cursor = controller.xTextViewCursorSupplier()
+            .getViewCursor();
+        oldFocusRange = cursor;
+        XTextRange anchor = inputField.xTextField().getAnchor();
+        cursor.gotoRange(anchor, false);
+      }
+      catch (java.lang.Exception e)
+      {
+      }
+    }
+
+    public void unfocus(XTextDocument doc)
+    {
+      if (oldFocusRange != null)
+        try
+        {
+          UnoService document = new UnoService(doc);
+          UnoService controller = new UnoService(document.xModel()
+              .getCurrentController());
+          XTextCursor cursor = controller.xTextViewCursorSupplier()
+              .getViewCursor();
+          cursor.gotoRange(oldFocusRange, false);
+          oldFocusRange = null;
+        }
+        catch (java.lang.Exception e)
+        {
+        }
     }
 
     // Helper-Methoden:

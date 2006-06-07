@@ -56,6 +56,7 @@ import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
+import de.muenchen.allg.itd51.wollmux.DocumentCommandInterpreter.FormField;
 import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.DJDataset;
 import de.muenchen.allg.itd51.wollmux.db.DJDatasetListElement;
@@ -65,6 +66,7 @@ import de.muenchen.allg.itd51.wollmux.db.QueryResults;
 import de.muenchen.allg.itd51.wollmux.dialog.AbsenderAuswaehlen;
 import de.muenchen.allg.itd51.wollmux.dialog.Common;
 import de.muenchen.allg.itd51.wollmux.dialog.PersoenlicheAbsenderlisteVerwalten;
+import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 
 /**
  * Ermöglicht die Einstellung neuer WollMuxEvents in die EventQueue.
@@ -192,6 +194,30 @@ public class WollMuxEventHandler
       return false;
     }
 
+    /**
+     * Wenn in dem übergebenen Vector mit FormField-Elementen ein
+     * nicht-transformiertes Feld vorhanden ist, so wird das erste
+     * nicht-transformierte Feld zurückgegeben, ansonsten wird das erste
+     * transformierte Feld zurückgegeben, oder null, falls der Vector keine
+     * Elemente enthält.
+     * 
+     * @param formFields
+     *          Vektor mit FormField-Elementen
+     * @return Ein FormField Element, wobei untransformierte Felder bevorzugt
+     *         werden.
+     */
+    protected FormField preferUntransformedFormField(Vector formFields)
+    {
+      Iterator iter = formFields.iterator();
+      FormField field = null;
+      while (iter.hasNext())
+      {
+        FormField f = (FormField) iter.next();
+        if (field == null) field = f;
+        if (!f.hasTrafo()) return f;
+      }
+      return field;
+    }
   }
 
   private static void handle(WollMuxEvent event)
@@ -773,6 +799,156 @@ public class WollMuxEventHandler
     }
   }
 
+  public static void handleFormValueChanged(XTextDocument doc,
+      HashMap idToFormValues, String fieldId, String newValue,
+      FunctionLibrary funcLib)
+  {
+    handle(new OnFormValueChanged(doc, idToFormValues, fieldId, newValue,
+        funcLib));
+  }
+
+  private static class OnFormValueChanged extends BasicEvent
+  {
+    private XTextDocument doc;
+
+    private HashMap idToFormValues;
+
+    private String fieldId;
+
+    private String newValue;
+
+    private FunctionLibrary funcLib;
+
+    public OnFormValueChanged(XTextDocument doc, HashMap idToFormValues,
+        String fieldId, String newValue, FunctionLibrary funcLib)
+    {
+      this.doc = doc;
+      this.idToFormValues = idToFormValues;
+      this.fieldId = fieldId;
+      this.newValue = newValue;
+      this.funcLib = funcLib;
+    }
+
+    protected boolean doit() throws WollMuxFehlerException
+    {
+      if (idToFormValues.containsKey(fieldId))
+      {
+        Vector formFields = (Vector) idToFormValues.get(fieldId);
+        Iterator i = formFields.iterator();
+        while (i.hasNext())
+        {
+          FormField field = (FormField) i.next();
+          field.setValue(newValue, funcLib);
+        }
+      }
+      else
+      {
+        Logger.debug(this
+                     + ": Es existiert kein Formularfeld mit der ID '"
+                     + fieldId
+                     + "' in diesem Dokument");
+      }
+      return EventProcessor.processTheNextEvent;
+    }
+
+    public boolean requires(Object o)
+    {
+      return UnoRuntime.areSame(doc, o);
+    }
+  }
+
+  public static void handleFocusFormField(HashMap idToFormValues,
+      String fieldId, XTextDocument doc)
+  {
+    handle(new OnFocusFormField(idToFormValues, fieldId, doc));
+  }
+
+  private static class OnFocusFormField extends BasicEvent
+  {
+    private HashMap idToFormValues;
+
+    private String fieldId;
+
+    private XTextDocument doc;
+
+    public OnFocusFormField(HashMap idToFormValues, String fieldId,
+        XTextDocument doc)
+    {
+      this.idToFormValues = idToFormValues;
+      this.fieldId = fieldId;
+      this.doc = doc;
+    }
+
+    protected boolean doit() throws WollMuxFehlerException
+    {
+      if (idToFormValues.containsKey(fieldId))
+      {
+        Vector formFields = (Vector) idToFormValues.get(fieldId);
+        FormField field = preferUntransformedFormField(formFields);
+        if (field != null) field.focus(doc);
+      }
+      else
+      {
+        Logger.debug(this
+                     + ": Es existiert kein Formularfeld mit der ID '"
+                     + fieldId
+                     + "' in diesem Dokument");
+      }
+      return EventProcessor.processTheNextEvent;
+    }
+
+    public boolean requires(Object o)
+    {
+      return UnoRuntime.areSame(doc, o);
+    }
+  }
+
+  public static void handleUnFocusFormField(HashMap idToFormValues,
+      String fieldId, XTextDocument doc)
+  {
+    handle(new OnUnFocusFormField(idToFormValues, fieldId, doc));
+  }
+
+  private static class OnUnFocusFormField extends BasicEvent
+  {
+    private HashMap idToFormValues;
+
+    private String fieldId;
+
+    private XTextDocument doc;
+
+    public OnUnFocusFormField(HashMap idToFormValues, String fieldId,
+        XTextDocument doc)
+    {
+      this.idToFormValues = idToFormValues;
+      this.fieldId = fieldId;
+      this.doc = doc;
+    }
+
+    protected boolean doit() throws WollMuxFehlerException
+    {
+      if (idToFormValues.containsKey(fieldId))
+      {
+        Vector formFields = (Vector) idToFormValues.get(fieldId);
+        FormField field = preferUntransformedFormField(formFields);
+        if (field != null) field.unfocus(doc);
+      }
+      else
+      {
+        Logger.debug(this
+                     + ": Es existiert kein Formularfeld mit der ID '"
+                     + fieldId
+                     + "' in diesem Dokument");
+      }
+      return EventProcessor.processTheNextEvent;
+    }
+
+    public boolean requires(Object o)
+    {
+      return UnoRuntime.areSame(doc, o);
+    }
+  }
+
   public static void handleInitialize()
   {
     handle(new OnInitialize());
@@ -1048,4 +1224,5 @@ public class WollMuxEventHandler
               + "' fehlt in der Konfigurationsdatei.", e);
     }
   }
+
 }

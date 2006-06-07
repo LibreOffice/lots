@@ -507,7 +507,7 @@ abstract public class DocumentCommand
   }
 
   /**
-   * Schribt den neuen Status des Dokumentkommandos in das Dokument zurück oder
+   * Schreibt den neuen Status des Dokumentkommandos in das Dokument zurück oder
    * löscht ein Bookmark, wenn der Status DONE=true gesetzt ist - Die Methode
    * liefert entweder den Namen des neuen Bookmarks, welches die neuen
    * Statusinformationen enthält zurück, oder null, wenn das zugehörige Bookmark
