@@ -46,17 +46,19 @@ import com.sun.star.container.NoSuchElementException;
 import com.sun.star.container.XNameAccess;
 import com.sun.star.frame.FrameSearchFlag;
 import com.sun.star.frame.XFrame;
+import com.sun.star.frame.XModel;
+import com.sun.star.lang.DisposedException;
 import com.sun.star.lang.EventObject;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
 
+import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
-import de.muenchen.allg.itd51.wollmux.DocumentCommandInterpreter.FormField;
 import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.DJDataset;
 import de.muenchen.allg.itd51.wollmux.db.DJDatasetListElement;
@@ -975,7 +977,13 @@ public class WollMuxEventHandler
         while (i.hasNext())
         {
           FormField field = (FormField) i.next();
-          field.setValue(newValue, funcLib);
+          try
+          {
+            field.setValue(newValue, funcLib);
+          }
+          catch (DisposedException e)
+          {
+          }
         }
       }
       else
@@ -985,6 +993,70 @@ public class WollMuxEventHandler
                      + fieldId
                      + "' in diesem Dokument");
       }
+      return EventProcessor.processTheNextEvent;
+    }
+
+    public boolean requires(Object o)
+    {
+      return UnoRuntime.areSame(doc, o);
+    }
+  }
+
+  // *******************************************************************************************
+
+  /**
+   * Erzeugt ein neues WollMuxEvent, welches dafür sorgt, dass alle Textbereiche
+   * im übergebenen Dokument, die einer bestimmten Gruppe zugehören ein- oder
+   * ausgeblendet werden.
+   * 
+   * @param doc
+   *          Das Dokument, welches die Textbereiche, die über Dokumentkommandos
+   *          spezifiziert sind enthält.
+   * @param groupId
+   *          Die GROUP (ID) der ein/auszublendenden Gruppe.
+   * @param visible
+   *          Der neue Sichtbarkeitsstatus (true=sichtbar, false=ausgeblendet)
+   * @param cmdTree
+   *          Die DocumentCommandTree-Struktur, die den Zustand der
+   *          Sichtbarkeiten enthält.
+   */
+  public static void handleSetVisibleState(XTextDocument doc, String groupID,
+      boolean visible, DocumentCommandTree cmdTree)
+  {
+    handle(new OnSetVisibleState(doc, groupID, visible, cmdTree));
+  }
+
+  /**
+   * Dieses Event wird (derzeit) vom FormModelImpl ausgelöst, wenn in der
+   * Formular-GUI bestimmte Text-Teile des übergebenen Dokuments ein- oder
+   * ausgeblendet werden sollen.
+   * 
+   * @author christoph.lutz
+   */
+  private static class OnSetVisibleState extends BasicEvent
+  {
+    private XTextDocument doc;
+
+    private String groupId;
+
+    private boolean visible;
+
+    private DocumentCommandTree cmdTree;
+
+    public OnSetVisibleState(XTextDocument doc, String groupId,
+        boolean visible, DocumentCommandTree cmdTree)
+    {
+      this.doc = doc;
+      this.groupId = groupId;
+      this.visible = visible;
+      this.cmdTree = cmdTree;
+    }
+
+    protected boolean doit() throws WollMuxFehlerException
+    {
+      // TODO: implement doit of setVisibleState
+      if (groupId != null && visible != false && cmdTree != null)
+      ; // vorerst keine Warnungen ausgeben!
       return EventProcessor.processTheNextEvent;
     }
 
@@ -1047,7 +1119,13 @@ public class WollMuxEventHandler
       {
         Vector formFields = (Vector) idToFormValues.get(fieldId);
         FormField field = preferUntransformedFormField(formFields);
-        if (field != null) field.focus(doc);
+        try
+        {
+          if (field != null) field.focus(doc);
+        }
+        catch (DisposedException e)
+        {
+        }
       }
       else
       {
@@ -1119,7 +1197,13 @@ public class WollMuxEventHandler
       {
         Vector formFields = (Vector) idToFormValues.get(fieldId);
         FormField field = preferUntransformedFormField(formFields);
-        if (field != null) field.unfocus(doc);
+        try
+        {
+          if (field != null) field.unfocus(doc);
+        }
+        catch (DisposedException e)
+        {
+        }
       }
       else
       {
@@ -1127,6 +1211,186 @@ public class WollMuxEventHandler
                      + ": Es existiert kein Formularfeld mit der ID '"
                      + fieldId
                      + "' in diesem Dokument");
+      }
+      return EventProcessor.processTheNextEvent;
+    }
+
+    public boolean requires(Object o)
+    {
+      return UnoRuntime.areSame(doc, o);
+    }
+  }
+
+  // *******************************************************************************************
+
+  /**
+   * Erzeugt ein Event, das die Fenster-Position und Größe des übergebenen
+   * Dokuments auf die vorgegebenen Werte setzt. Dabei wird direkt die
+   * entsprechende Funktion der UNO-API verwendet, die leider ein paar
+   * unangenehme Eigenheiten (siehe docY) hat.
+   * 
+   * @param model
+   *          Das XModel-Interface des Dokuments dessen Position/Größe gesetzt
+   *          werden soll.
+   * @param docX
+   *          Die X-Koordinate der Position in Pixel, gezählt von links oben.
+   * @param docY
+   *          Die Y-Koordinate der Position in Pixel, gezählt von links oben.
+   *          Achtung: Die Maßangaben beziehen sich auf den Inhalt des Rahmens
+   *          OHNE den Frame. D.h. die Titelzeile des Frames wird nicht
+   *          mitberechnet und muss vorher selbst eingerechnet werden.
+   * @param docWidth
+   *          Die Größe des Dokuments auf der X-Achse in Pixel
+   * @param docHeight
+   *          Die Größe des Dokuments auf der Y-Achse in Pixel. Auch hier wird
+   *          die Titelzeile des Rahmens nicht beachtet und muss vorher
+   *          entsprechend eingerechnet werden.
+   */
+  public static void handleSetWindowPosSize(XModel model, int docX, int docY,
+      int docWidth, int docHeight)
+  {
+    handle(new OnSetWindowPosSize(model, docX, docY, docWidth, docHeight));
+  }
+
+  /**
+   * Dieses Event wird vom FormModelImpl ausgelöst, wenn die Formular-GUI die
+   * Position und die Ausmasse des Dokuments verändert. Ruft direkt
+   * setWindowsPosSize der UNO-API auf.
+   * 
+   * @author christoph.lutz
+   */
+  private static class OnSetWindowPosSize extends BasicEvent
+  {
+    private XModel model;
+
+    private int docX, docY, docWidth, docHeight;
+
+    public OnSetWindowPosSize(XModel model, int docX, int docY, int docWidth,
+        int docHeight)
+    {
+      this.model = model;
+      this.docX = docX;
+      this.docY = docY;
+      this.docWidth = docWidth;
+      this.docHeight = docHeight;
+    }
+
+    protected boolean doit() throws WollMuxFehlerException
+    {
+      try
+      {
+        XFrame frame = model.getCurrentController().getFrame();
+        frame.getContainerWindow().setPosSize(
+            docX,
+            docY,
+            docWidth,
+            docHeight,
+            PosSize.POSSIZE);
+      }
+      catch (java.lang.Exception e)
+      {
+      }
+      return EventProcessor.processTheNextEvent;
+    }
+
+    public boolean requires(Object o)
+    {
+      return UnoRuntime.areSame(model, o);
+    }
+  }
+
+  // *******************************************************************************************
+
+  /**
+   * Erzeugt ein Event, das die Anzeige des übergebenen Dokuments auf sichtbar
+   * oder unsichtbar schaltet. Dabei wird direkt die entsprechende Funktion der
+   * UNO-API verwendet.
+   * 
+   * @param model
+   *          Das XModel interface des dokuments, welches sichtbar oder
+   *          unsichtbar geschaltet werden soll.
+   * @param visible
+   *          true, wenn das Dokument sichtbar geschaltet werden soll und false,
+   *          wenn das Dokument unsichtbar geschaltet werden soll.
+   */
+  public static void handleSetWindowVisible(XModel model, boolean visible)
+  {
+    handle(new OnSetWindowVisible(model, visible));
+  }
+
+  /**
+   * Dieses Event wird vom FormModelImpl ausgelöst, wenn die Formular-GUI das
+   * bearbeitete Dokument sichtbar/unsichtbar schalten möchte. Ruft direkt
+   * setVisible der UNO-API auf.
+   * 
+   * @author christoph.lutz
+   */
+  private static class OnSetWindowVisible extends BasicEvent
+  {
+    private XModel model;
+
+    boolean visible;
+
+    public OnSetWindowVisible(XModel model, boolean visible)
+    {
+      this.model = model;
+      this.visible = visible;
+    }
+
+    protected boolean doit() throws WollMuxFehlerException
+    {
+      XFrame frame = model.getCurrentController().getFrame();
+      if (frame != null)
+      {
+        frame.getContainerWindow().setVisible(visible);
+      }
+      return EventProcessor.processTheNextEvent;
+    }
+
+    public boolean requires(Object o)
+    {
+      return UnoRuntime.areSame(model, o);
+    }
+  }
+
+  // *******************************************************************************************
+
+  /**
+   * Erzeugt ein Event, das das übergebene Dokument schließt.
+   * 
+   * @param doc
+   *          Das zu schließende XTextDocument.
+   */
+  public static void handleCloseTextDocument(XTextDocument doc)
+  {
+    handle(new OnCloseTextDocument(doc));
+  }
+
+  /**
+   * Dieses Event wird vom FormModelImpl ausgelöst, wenn der Benutzer die
+   * Formular-GUI schließt und damit auch das zugehörige TextDokument
+   * geschlossen werden soll.
+   * 
+   * @author christoph.lutz
+   */
+  private static class OnCloseTextDocument extends BasicEvent
+  {
+    private XTextDocument doc;
+
+    public OnCloseTextDocument(XTextDocument doc)
+    {
+      this.doc = doc;
+    }
+
+    protected boolean doit() throws WollMuxFehlerException
+    {
+      try
+      {
+        UNO.XCloseable(doc).close(true);
+      }
+      catch (java.lang.Exception e)
+      {
+        Logger.error(e);
       }
       return EventProcessor.processTheNextEvent;
     }
