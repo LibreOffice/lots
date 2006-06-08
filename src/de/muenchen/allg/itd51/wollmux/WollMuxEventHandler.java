@@ -917,8 +917,6 @@ public class WollMuxEventHandler
    * Formularfeldern mit TRAFO-Funktion wird die Transformation entsprechend
    * durchgeführt.
    * 
-   * @param doc
-   *          Das Dokument, welches die Formularfelder enthält.
    * @param idToFormValues
    *          Eine HashMap die unter dem Schlüssel fieldID den Vektor aller
    *          FormFields mit der ID fieldID liefert.
@@ -930,12 +928,10 @@ public class WollMuxEventHandler
    *          Die Funktionsbibliothek, die zur Gewinnung der Trafo-Funktion
    *          verwendet werden soll.
    */
-  public static void handleFormValueChanged(XTextDocument doc,
-      HashMap idToFormValues, String fieldId, String newValue,
-      FunctionLibrary funcLib)
+  public static void handleFormValueChanged(HashMap idToFormValues,
+      String fieldId, String newValue, FunctionLibrary funcLib)
   {
-    handle(new OnFormValueChanged(doc, idToFormValues, fieldId, newValue,
-        funcLib));
+    handle(new OnFormValueChanged(idToFormValues, fieldId, newValue, funcLib));
   }
 
   /**
@@ -948,8 +944,6 @@ public class WollMuxEventHandler
    */
   private static class OnFormValueChanged extends BasicEvent
   {
-    private XTextDocument doc;
-
     private HashMap idToFormValues;
 
     private String fieldId;
@@ -958,10 +952,9 @@ public class WollMuxEventHandler
 
     private FunctionLibrary funcLib;
 
-    public OnFormValueChanged(XTextDocument doc, HashMap idToFormValues,
-        String fieldId, String newValue, FunctionLibrary funcLib)
+    public OnFormValueChanged(HashMap idToFormValues, String fieldId,
+        String newValue, FunctionLibrary funcLib)
     {
-      this.doc = doc;
       this.idToFormValues = idToFormValues;
       this.fieldId = fieldId;
       this.newValue = newValue;
@@ -995,11 +988,6 @@ public class WollMuxEventHandler
       }
       return EventProcessor.processTheNextEvent;
     }
-
-    public boolean requires(Object o)
-    {
-      return UnoRuntime.areSame(doc, o);
-    }
   }
 
   // *******************************************************************************************
@@ -1020,10 +1008,10 @@ public class WollMuxEventHandler
    *          Die DocumentCommandTree-Struktur, die den Zustand der
    *          Sichtbarkeiten enthält.
    */
-  public static void handleSetVisibleState(XTextDocument doc, String groupID,
-      boolean visible, DocumentCommandTree cmdTree)
+  public static void handleSetVisibleState(DocumentCommandTree cmdTree,
+      String groupId, boolean visible)
   {
-    handle(new OnSetVisibleState(doc, groupID, visible, cmdTree));
+    handle(new OnSetVisibleState(cmdTree, groupId, visible));
   }
 
   /**
@@ -1035,21 +1023,18 @@ public class WollMuxEventHandler
    */
   private static class OnSetVisibleState extends BasicEvent
   {
-    private XTextDocument doc;
-
     private String groupId;
 
     private boolean visible;
 
     private DocumentCommandTree cmdTree;
 
-    public OnSetVisibleState(XTextDocument doc, String groupId,
-        boolean visible, DocumentCommandTree cmdTree)
+    public OnSetVisibleState(DocumentCommandTree cmdTree, String groupId,
+        boolean visible)
     {
-      this.doc = doc;
+      this.cmdTree = cmdTree;
       this.groupId = groupId;
       this.visible = visible;
-      this.cmdTree = cmdTree;
     }
 
     protected boolean doit() throws WollMuxFehlerException
@@ -1058,11 +1043,6 @@ public class WollMuxEventHandler
       if (groupId != null && visible != false && cmdTree != null)
       ; // vorerst keine Warnungen ausgeben!
       return EventProcessor.processTheNextEvent;
-    }
-
-    public boolean requires(Object o)
-    {
-      return UnoRuntime.areSame(doc, o);
     }
   }
 
@@ -1080,13 +1060,10 @@ public class WollMuxEventHandler
    *          mehrere Formularfelder diese ID, so wird bevorzugt das erste
    *          Formularfeld aus dem Vektor genommen, das keine Trafo enthält.
    *          Ansonsten wird das erste Formularfeld im Vektor verwendet.
-   * @param doc
-   *          Das Dokument, welches das Formularfeld enthält
    */
-  public static void handleFocusFormField(HashMap idToFormValues,
-      String fieldId, XTextDocument doc)
+  public static void handleFocusFormField(HashMap idToFormValues, String fieldId)
   {
-    handle(new OnFocusFormField(idToFormValues, fieldId, doc));
+    handle(new OnFocusFormField(idToFormValues, fieldId));
   }
 
   /**
@@ -1103,14 +1080,10 @@ public class WollMuxEventHandler
 
     private String fieldId;
 
-    private XTextDocument doc;
-
-    public OnFocusFormField(HashMap idToFormValues, String fieldId,
-        XTextDocument doc)
+    public OnFocusFormField(HashMap idToFormValues, String fieldId)
     {
       this.idToFormValues = idToFormValues;
       this.fieldId = fieldId;
-      this.doc = doc;
     }
 
     protected boolean doit() throws WollMuxFehlerException
@@ -1121,7 +1094,7 @@ public class WollMuxEventHandler
         FormField field = preferUntransformedFormField(formFields);
         try
         {
-          if (field != null) field.focus(doc);
+          if (field != null) field.focus();
         }
         catch (DisposedException e)
         {
@@ -1135,11 +1108,6 @@ public class WollMuxEventHandler
                      + "' in diesem Dokument");
       }
       return EventProcessor.processTheNextEvent;
-    }
-
-    public boolean requires(Object o)
-    {
-      return UnoRuntime.areSame(doc, o);
     }
   }
 
@@ -1158,13 +1126,11 @@ public class WollMuxEventHandler
    *          mehrere Formularfelder diese ID, so wird bevorzugt das erste
    *          Formularfeld aus dem Vektor genommen, das keine Trafo enthält.
    *          Ansonsten wird das erste Formularfeld im Vektor verwendet.
-   * @param doc
-   *          Das Dokument, welches das Formularfeld enthält
    */
   public static void handleUnFocusFormField(HashMap idToFormValues,
-      String fieldId, XTextDocument doc)
+      String fieldId)
   {
-    handle(new OnUnFocusFormField(idToFormValues, fieldId, doc));
+    handle(new OnUnFocusFormField(idToFormValues, fieldId));
   }
 
   /**
@@ -1181,14 +1147,10 @@ public class WollMuxEventHandler
 
     private String fieldId;
 
-    private XTextDocument doc;
-
-    public OnUnFocusFormField(HashMap idToFormValues, String fieldId,
-        XTextDocument doc)
+    public OnUnFocusFormField(HashMap idToFormValues, String fieldId)
     {
       this.idToFormValues = idToFormValues;
       this.fieldId = fieldId;
-      this.doc = doc;
     }
 
     protected boolean doit() throws WollMuxFehlerException
@@ -1199,7 +1161,7 @@ public class WollMuxEventHandler
         FormField field = preferUntransformedFormField(formFields);
         try
         {
-          if (field != null) field.unfocus(doc);
+          if (field != null) field.unfocus();
         }
         catch (DisposedException e)
         {
@@ -1213,11 +1175,6 @@ public class WollMuxEventHandler
                      + "' in diesem Dokument");
       }
       return EventProcessor.processTheNextEvent;
-    }
-
-    public boolean requires(Object o)
-    {
-      return UnoRuntime.areSame(doc, o);
     }
   }
 

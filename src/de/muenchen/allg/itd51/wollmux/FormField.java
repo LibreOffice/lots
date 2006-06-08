@@ -22,6 +22,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import com.sun.star.container.XEnumeration;
 import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextField;
@@ -42,6 +43,8 @@ import de.muenchen.allg.itd51.wollmux.func.Values.SimpleMap;
  */
 public class FormField
 {
+  XTextDocument doc;
+
   InsertFormValue cmd;
 
   UnoService inputField;
@@ -52,10 +55,58 @@ public class FormField
    */
   XTextRange oldFocusRange = null;
 
-  public FormField(InsertFormValue cmd, XTextField xTextField)
+  /**
+   * Erzeugt ein Formualfeld im Dokument doc an der Stelle des
+   * InsertFormValue-Kommandos cmd. Ist unter dem bookmark bereits ein TextFeld
+   * vom Typ InputField vorhanden, so wird dieses Feld als inputField für die
+   * Darstellung des Wertes des Formularfeldes genutzt. Ist innerhalb des
+   * Bookmarks noch kein InputField vorhanden, so wird ein neues InputField in
+   * den Bookmark eingefügt.
+   * 
+   * @param doc
+   *          das Dokument, zu dem das Formularfeld gehört.
+   * @param cmd
+   *          das zugehörige insertFormValue-Kommando.
+   */
+  public FormField(XTextDocument doc, InsertFormValue cmd)
   {
+    this.doc = doc;
     this.cmd = cmd;
-    this.inputField = new UnoService(xTextField);
+    this.inputField = new UnoService(null);
+
+    // Textfeld suchen:
+    XTextRange range = cmd.getTextRange();
+    if (range != null)
+    {
+      UnoService cursor = new UnoService(range.getText()
+          .createTextCursorByRange(range));
+      inputField = new UnoService(findTextFieldRecursive(
+          cursor,
+          "com.sun.star.text.TextField.Input"));
+    }
+
+    // wenn kein Textfeld vorhanden ist, wird eines neu erstellt
+    if (inputField.xTextField() == null)
+    {
+      Logger.debug2(cmd + ": Erzeuge neues Input-Field.");
+      try
+      {
+        inputField = new UnoService(doc)
+            .create("com.sun.star.text.TextField.Input");
+        XTextCursor cursor = cmd.createInsertCursor();
+        if (cursor != null)
+        {
+          cursor.getText().insertTextContent(
+              cursor,
+              inputField.xTextContent(),
+              true);
+        }
+      }
+      catch (Exception e)
+      {
+        Logger.error(e);
+      }
+    }
   }
 
   /**
@@ -171,7 +222,7 @@ public class FormField
    * 
    * @param doc
    */
-  public void focus(XTextDocument doc)
+  public void focus()
   {
     try
     {
@@ -194,7 +245,7 @@ public class FormField
    * 
    * @param doc
    */
-  public void unfocus(XTextDocument doc)
+  public void unfocus()
   {
     if (oldFocusRange != null)
       try
@@ -244,5 +295,57 @@ public class FormField
       Logger.error(e);
     }
     return md5;
+  }
+
+  /**
+   * Diese Methode durchsucht das Element element bzw. dessen XEnumerationAccess
+   * Interface rekursiv nach InputFields und liefert das erste gefundene
+   * InputField zurück.
+   * 
+   * @param element
+   *          Das erste gefundene InputField.
+   */
+  private XTextField findTextFieldRecursive(UnoService element,
+      String serviceName)
+  {
+    // zuerst die Kinder durchsuchen (falls vorhanden):
+    if (element.xEnumerationAccess() != null)
+    {
+      XEnumeration xEnum = element.xEnumerationAccess().createEnumeration();
+
+      while (xEnum.hasMoreElements())
+      {
+        try
+        {
+          UnoService child = new UnoService(xEnum.nextElement());
+          XTextField found = findTextFieldRecursive(child, serviceName);
+          // das erste gefundene Element zurückliefern.
+          if (found != null) return found;
+        }
+        catch (java.lang.Exception e)
+        {
+          Logger.error(e);
+        }
+      }
+    }
+
+    // jetzt noch schauen, ob es sich bei dem Element um ein InputField
+    // handelt:
+    if (element.xTextField() != null)
+    {
+      try
+      {
+        UnoService textField = element.getPropertyValue("TextField");
+        if (textField.supportsService(serviceName))
+        {
+          return textField.xTextField();
+        }
+      }
+      catch (Exception e)
+      {
+      }
+    }
+
+    return null;
   }
 }

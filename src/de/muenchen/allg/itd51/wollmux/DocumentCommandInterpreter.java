@@ -399,13 +399,12 @@ public class DocumentCommandInterpreter
 
     public void setVisibleState(String groupId, boolean visible)
     {
-      WollMuxEventHandler.handleSetVisibleState(doc, groupId, visible, cmdTree);
+      WollMuxEventHandler.handleSetVisibleState(cmdTree, groupId, visible);
     }
 
     public void valueChanged(String fieldId, String newValue)
     {
       WollMuxEventHandler.handleFormValueChanged(
-          doc,
           idToFormValues,
           fieldId,
           newValue,
@@ -414,12 +413,12 @@ public class DocumentCommandInterpreter
 
     public void focusGained(String fieldId)
     {
-      WollMuxEventHandler.handleFocusFormField(idToFormValues, fieldId, doc);
+      WollMuxEventHandler.handleFocusFormField(idToFormValues, fieldId);
     }
 
     public void focusLost(String fieldId)
     {
-      WollMuxEventHandler.handleUnFocusFormField(idToFormValues, fieldId, doc);
+      WollMuxEventHandler.handleUnFocusFormField(idToFormValues, fieldId);
     }
   }
 
@@ -1181,42 +1180,6 @@ public class DocumentCommandInterpreter
      */
     public int executeCommand(InsertFormValue cmd)
     {
-      final String tfServiceName = "com.sun.star.text.TextField.Input";
-
-      // Textfeld suchen:
-      UnoService inputField = new UnoService(null);
-      XTextRange range = cmd.getTextRange();
-      if (range != null)
-      {
-        UnoService cursor = new UnoService(range.getText()
-            .createTextCursorByRange(range));
-        inputField = new UnoService(findTextFieldRecursive(
-            cursor,
-            tfServiceName));
-      }
-
-      // wenn kein Textfeld vorhanden ist, wird eins neu erstellt
-      if (inputField.xTextField() == null)
-      {
-        Logger.debug(cmd + ": Erzeuge neues Input-Field.");
-        try
-        {
-          inputField = document.create(tfServiceName);
-          XTextCursor cursor = cmd.createInsertCursor();
-          if (cursor != null)
-          {
-            cursor.getText().insertTextContent(
-                cursor,
-                inputField.xTextContent(),
-                true);
-          }
-        }
-        catch (Exception e)
-        {
-          Logger.error(e);
-        }
-      }
-
       // idToFormFields aufbauen
       String id = cmd.getID();
       Vector fields;
@@ -1229,7 +1192,7 @@ public class DocumentCommandInterpreter
         fields = new Vector();
         idToFormFields.put(id, fields);
       }
-      fields.add(new FormField(cmd, inputField.xTextField()));
+      fields.add(new FormField(document.xTextDocument(), cmd));
 
       return 0;
     }
