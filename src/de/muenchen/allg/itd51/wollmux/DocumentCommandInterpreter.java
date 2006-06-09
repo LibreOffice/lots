@@ -368,6 +368,8 @@ public class DocumentCommandInterpreter
 
     private final DocumentCommandTree cmdTree;
 
+    private final HashSet invisibleGroups;
+
     public FormModelImpl(XTextDocument doc, FunctionLibrary funcLib,
         HashMap idToFormValues, DocumentCommandTree cmdTree)
     {
@@ -375,6 +377,7 @@ public class DocumentCommandInterpreter
       this.funcLib = funcLib;
       this.idToFormValues = idToFormValues;
       this.cmdTree = cmdTree;
+      this.invisibleGroups = new HashSet();
     }
 
     public void close()
@@ -399,7 +402,11 @@ public class DocumentCommandInterpreter
 
     public void setVisibleState(String groupId, boolean visible)
     {
-      WollMuxEventHandler.handleSetVisibleState(cmdTree, groupId, visible);
+      WollMuxEventHandler.handleSetVisibleState(
+          cmdTree,
+          invisibleGroups,
+          groupId,
+          visible);
     }
 
     public void valueChanged(String fieldId, String newValue)

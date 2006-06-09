@@ -51,6 +51,7 @@ import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertValue;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InvalidCommand;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InvalidCommandException;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.RootElement;
+import de.muenchen.allg.itd51.wollmux.DocumentCommand.SetGroups;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.SetType;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.UpdateFields;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.Version;
@@ -243,6 +244,11 @@ public class DocumentCommandTree
         return new DocumentCommand.NotYetImplemented(wmCmd, bookmark);
       }
 
+      if (cmd.compareToIgnoreCase("setGroups") == 0)
+      {
+        return new DocumentCommand.SetGroups(wmCmd, bookmark);
+      }
+
       throw new InvalidCommandException("Unbekanntes Kommando \"" + cmd + "\"");
     }
     catch (InvalidCommandException e)
@@ -323,7 +329,7 @@ public class DocumentCommandTree
    */
   private String dumpTree(DocumentCommand cmd, String spaces)
   {
-    String str = spaces + this.toString() + "\n";
+    String str = spaces + cmd.toString() + " GROUPS: " + cmd.getGroups() + "\n";
 
     // und jetzt die Kinder
     Iterator i = cmd.getChildIterator();
@@ -482,6 +488,11 @@ public class DocumentCommandTree
     }
 
     public int executeCommand(InsertFormValue cmd)
+    {
+      return 0;
+    }
+
+    public int executeCommand(SetGroups cmd)
     {
       return 0;
     }

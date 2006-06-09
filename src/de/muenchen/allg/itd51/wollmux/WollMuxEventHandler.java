@@ -33,8 +33,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.Vector;
 
 import com.sun.star.awt.DeviceInfo;
@@ -47,10 +49,10 @@ import com.sun.star.container.XNameAccess;
 import com.sun.star.frame.FrameSearchFlag;
 import com.sun.star.frame.XFrame;
 import com.sun.star.frame.XModel;
-import com.sun.star.lang.DisposedException;
 import com.sun.star.lang.EventObject;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.uno.Exception;
+import com.sun.star.uno.RuntimeException;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
 
@@ -146,7 +148,7 @@ public class WollMuxEventHandler
      */
     public boolean process()
     {
-      Logger.debug("Process WollMuxEvent " + this.getClass().getSimpleName());
+      Logger.debug("Process WollMuxEvent " + this.toString());
       try
       {
         return doit();
@@ -228,6 +230,11 @@ public class WollMuxEventHandler
         if (!f.hasTrafo()) return f;
       }
       return field;
+    }
+
+    public String toString()
+    {
+      return this.getClass().getSimpleName();
     }
   }
 
@@ -480,6 +487,11 @@ public class WollMuxEventHandler
     public boolean requires(Object o)
     {
       return UnoRuntime.areSame(xTextDoc, o);
+    }
+
+    public String toString()
+    {
+      return this.getClass().getSimpleName() + "(" + xTextDoc.hashCode() + ")";
     }
 
     /**
@@ -786,6 +798,16 @@ public class WollMuxEventHandler
 
       return EventProcessor.processTheNextEvent;
     }
+
+    public String toString()
+    {
+      return this.getClass().getSimpleName()
+             + "("
+             + ((asTemplate) ? "asTemplate" : "asDocument")
+             + ", "
+             + fragIDs
+             + ")";
+    }
   }
 
   // *******************************************************************************************
@@ -907,6 +929,16 @@ public class WollMuxEventHandler
       WollMuxEventHandler.handlePALChangedNotify();
       return EventProcessor.processTheNextEvent;
     }
+
+    public String toString()
+    {
+      return this.getClass().getSimpleName()
+             + "("
+             + senderName
+             + ", "
+             + idx
+             + ")";
+    }
   }
 
   // *******************************************************************************************
@@ -974,8 +1006,9 @@ public class WollMuxEventHandler
           {
             field.setValue(newValue, funcLib);
           }
-          catch (DisposedException e)
+          catch (RuntimeException e)
           {
+            // Absicherung gegen das manuelle Löschen von Dokumentinhalten.
           }
         }
       }
@@ -987,6 +1020,16 @@ public class WollMuxEventHandler
                      + "' in diesem Dokument");
       }
       return EventProcessor.processTheNextEvent;
+    }
+
+    public String toString()
+    {
+      return this.getClass().getSimpleName()
+             + "('"
+             + fieldId
+             + "', '"
+             + newValue
+             + "')";
     }
   }
 
@@ -1000,6 +1043,9 @@ public class WollMuxEventHandler
    * @param doc
    *          Das Dokument, welches die Textbereiche, die über Dokumentkommandos
    *          spezifiziert sind enthält.
+   * @param invisibleGroups
+   *          Enthält ein HashSet, das die groupId's aller als unsichtbar
+   *          markierten Gruppen enthält.
    * @param groupId
    *          Die GROUP (ID) der ein/auszublendenden Gruppe.
    * @param visible
@@ -1009,9 +1055,9 @@ public class WollMuxEventHandler
    *          Sichtbarkeiten enthält.
    */
   public static void handleSetVisibleState(DocumentCommandTree cmdTree,
-      String groupId, boolean visible)
+      HashSet invisibleGroups, String groupId, boolean visible)
   {
-    handle(new OnSetVisibleState(cmdTree, groupId, visible));
+    handle(new OnSetVisibleState(cmdTree, invisibleGroups, groupId, visible));
   }
 
   /**
@@ -1029,20 +1075,59 @@ public class WollMuxEventHandler
 
     private DocumentCommandTree cmdTree;
 
-    public OnSetVisibleState(DocumentCommandTree cmdTree, String groupId,
-        boolean visible)
+    private HashSet invisibleGroups;
+
+    public OnSetVisibleState(DocumentCommandTree cmdTree,
+        HashSet invisibleGroups, String groupId, boolean visible)
     {
       this.cmdTree = cmdTree;
+      this.invisibleGroups = invisibleGroups;
       this.groupId = groupId;
       this.visible = visible;
     }
 
     protected boolean doit() throws WollMuxFehlerException
     {
-      // TODO: implement doit of setVisibleState
-      if (groupId != null && visible != false && cmdTree != null)
-      ; // vorerst keine Warnungen ausgeben!
+      // invisibleGroups anpassen:
+      if (visible)
+        invisibleGroups.remove(groupId);
+      else
+        invisibleGroups.add(groupId);
+
+      // Kommandobaum durchlaufen und alle betroffenen Elemente updaten:
+      Iterator iter = cmdTree.depthFirstIterator(false);
+      while (iter.hasNext())
+      {
+        DocumentCommand cmd = (DocumentCommand) iter.next();
+        Set groups = cmd.getGroups();
+        if (!groups.contains(groupId)) continue;
+        boolean setVisible = true;
+        Iterator i = groups.iterator();
+        while (i.hasNext())
+        {
+          String groupId = (String) i.next();
+          if (invisibleGroups.contains(groupId)) setVisible = false;
+        }
+        try
+        {
+          cmd.setVisible(setVisible);
+        }
+        catch (RuntimeException e)
+        {
+          // Absicherung gegen das manuelle Löschen von Dokumentinhalten
+        }
+      }
       return EventProcessor.processTheNextEvent;
+    }
+
+    public String toString()
+    {
+      return this.getClass().getSimpleName()
+             + "('"
+             + groupId
+             + "', "
+             + visible
+             + ")";
     }
   }
 
@@ -1096,8 +1181,9 @@ public class WollMuxEventHandler
         {
           if (field != null) field.focus();
         }
-        catch (DisposedException e)
+        catch (RuntimeException e)
         {
+          // Absicherung gegen das manuelle Löschen von Dokumentinhalten. 
         }
       }
       else
@@ -1108,6 +1194,11 @@ public class WollMuxEventHandler
                      + "' in diesem Dokument");
       }
       return EventProcessor.processTheNextEvent;
+    }
+
+    public String toString()
+    {
+      return this.getClass().getSimpleName() + "('" + fieldId + "')";
     }
   }
 
@@ -1163,8 +1254,9 @@ public class WollMuxEventHandler
         {
           if (field != null) field.unfocus();
         }
-        catch (DisposedException e)
+        catch (RuntimeException e)
         {
+          // Absicherung gegen das manuelle Löschen von Dokumentinhalten. 
         }
       }
       else
@@ -1175,6 +1267,11 @@ public class WollMuxEventHandler
                      + "' in diesem Dokument");
       }
       return EventProcessor.processTheNextEvent;
+    }
+
+    public String toString()
+    {
+      return this.getClass().getSimpleName() + "('" + fieldId + "')";
     }
   }
 
@@ -1254,6 +1351,20 @@ public class WollMuxEventHandler
     {
       return UnoRuntime.areSame(model, o);
     }
+
+    public String toString()
+    {
+      return this.getClass().getSimpleName()
+             + "("
+             + docX
+             + ", "
+             + docY
+             + ", "
+             + docWidth
+             + ", "
+             + docHeight
+             + ")";
+    }
   }
 
   // *******************************************************************************************
@@ -1308,6 +1419,11 @@ public class WollMuxEventHandler
     {
       return UnoRuntime.areSame(model, o);
     }
+
+    public String toString()
+    {
+      return this.getClass().getSimpleName() + "(" + visible + ")";
+    }
   }
 
   // *******************************************************************************************
@@ -1355,6 +1471,11 @@ public class WollMuxEventHandler
     public boolean requires(Object o)
     {
       return UnoRuntime.areSame(doc, o);
+    }
+
+    public String toString()
+    {
+      return this.getClass().getSimpleName() + "(" + doc.hashCode() + ")";
     }
   }
 
@@ -1524,6 +1645,11 @@ public class WollMuxEventHandler
     {
       return UnoRuntime.areSame(listener, o);
     }
+
+    public String toString()
+    {
+      return this.getClass().getSimpleName() + "(" + listener.hashCode() + ")";
+    }
   }
 
   // *******************************************************************************************
@@ -1562,6 +1688,11 @@ public class WollMuxEventHandler
     {
       WollMuxSingleton.getInstance().removePALChangeEventListener(listener);
       return EventProcessor.processTheNextEvent;
+    }
+
+    public String toString()
+    {
+      return this.getClass().getSimpleName() + "(" + listener.hashCode() + ")";
     }
   }
 

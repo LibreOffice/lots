@@ -21,14 +21,17 @@
  */
 package de.muenchen.allg.itd51.wollmux;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.ListIterator;
+import java.util.Set;
 
 import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextRange;
 import com.sun.star.uno.Exception;
 
+import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.parser.SyntaxErrorException;
@@ -74,7 +77,10 @@ abstract public class DocumentCommand
    */
   private LinkedList childs; // Kinder vom Typ DocumentCommand
 
-  // private DocumentCommand parent;
+  /**
+   * Der Vaterknoten des Dokumentkommandos im Kommando-Baum.
+   */
+  private DocumentCommand parent;
 
   /**
    * Das zu diesem DokumentCommand gehörende Bookmark.
@@ -104,6 +110,12 @@ abstract public class DocumentCommand
    * verändert wurde.
    */
   private Boolean error;
+
+  /**
+   * Das Attribut visible gibt an, ob der Textinhalt des Kommandos sichtbar oder
+   * ausgeblendet ist. Es wird nicht persistent im bookmark gespeichert.
+   */
+  private boolean visible = true;
 
   // Einfügemarken und Status für InsertCursor zum sicheren Einfügen von
   // Inhalten
@@ -141,7 +153,7 @@ abstract public class DocumentCommand
   {
     this.wmCmd = wmCmd;
     this.bookmark = bookmark;
-    // this.parent = null; TODO: wieder rein!
+    this.parent = null;
     this.childs = new LinkedList();
     this.hasInsertMarks = false;
   }
@@ -198,7 +210,7 @@ abstract public class DocumentCommand
       // b liegt nach a: danach einfügen
       if (rel == REL_B_IS_SIBLING_AFTER_A)
       {
-        // b.parent = this; TODO: wieder rein!
+        b.parent = this;
         childsIterator.next();
         childsIterator.add(b);
         return compareCount;
@@ -207,7 +219,7 @@ abstract public class DocumentCommand
       // b ist Vater von a: a aushängen und zum Kind von b machen.
       if (rel == REL_B_IS_PARENT_OF_A)
       {
-        // a.parent = b; TODO: wieder rein!
+        a.parent = b;
         b.add(a);
         childsIterator.remove();
       }
@@ -233,7 +245,7 @@ abstract public class DocumentCommand
     }
 
     // falls bisher noch nicht hinzugefügt: am Anfang einfügen.
-    // b.parent = this; TODO: wieder rein!
+    b.parent = this;
     childsIterator.add(b);
     return compareCount;
   }
@@ -619,6 +631,67 @@ abstract public class DocumentCommand
     }
   }
 
+  /**
+   * gibt den Sichtbarkeitsstatus des Textinhaltes unter dem Dokumentkommando
+   * zurück, der über das CharHidden-Attribut realisiert ist.
+   * 
+   * @return true=sichtbar, false=ausgeblendet
+   */
+  public boolean isVisible()
+  {
+    return visible;
+  }
+
+  /**
+   * Setzt den Sichtbarkeitsstatus des Textinhaltes unter dem Dokumentkommando
+   * in dem das CharHidden-Attribut des entsprechenden TextCursors gesetzt wird.
+   * Der Status visible wird nicht persistent im Bookmark hinterlegt.
+   * 
+   * @param visible
+   *          true=sichtbar, false=ausgeblendet
+   */
+  public void setVisible(boolean visible)
+  {
+    this.visible = visible;
+    XTextRange range = getTextRange();
+    if (range != null)
+    {
+      XTextCursor cursor = range.getText().createTextCursorByRange(range);
+      UNO.setProperty(cursor, "CharHidden", new Boolean(!visible));
+    }
+  }
+
+  /**
+   * Liefert alle Gruppen, die dem Dokumentkommando zugeordnet sind, wobei jede
+   * Gruppe auch die Gruppenzugehörigkeit des Vaterelements im
+   * DocumentCommand-Baum erbt.
+   * 
+   * @return Ein Set, das alle zugeordneten groupId's, einschließlich der vom
+   *         Vater geerbten, als Strings enthält.
+   */
+  public Set getGroups()
+  {
+    // GROUPS-Attribut auslesen falls vorhanden.
+    ConfigThingy groups = new ConfigThingy("");
+    try
+    {
+      groups = wmCmd.get("GROUPS");
+    }
+    catch (NodeNotFoundException e)
+    {
+    }
+
+    Set groupsSet = (parent != null) ? parent.getGroups() : new HashSet();
+    Iterator i = groups.iterator();
+    while (i.hasNext())
+    {
+      String groupId = i.next().toString();
+      groupsSet.add(groupId);
+    }
+
+    return groupsSet;
+  }
+
   // ********************************************************************************
   /**
    * Kommandos werden extern definiert - um das zu ermöglichen greift hier das
@@ -647,6 +720,8 @@ abstract public class DocumentCommand
     public int executeCommand(DocumentCommand.SetType cmd);
 
     public int executeCommand(DocumentCommand.InsertFormValue cmd);
+
+    public int executeCommand(DocumentCommand.SetGroups cmd);
   }
 
   // ********************************************************************************
@@ -805,6 +880,11 @@ abstract public class DocumentCommand
     public int execute(DocumentCommand.Executor e)
     {
       return e.executeCommand(this);
+    }
+
+    public Set getGroups()
+    {
+      return new HashSet();
     }
   }
 
@@ -1089,6 +1169,10 @@ abstract public class DocumentCommand
   }
 
   // ********************************************************************************
+  /**
+   * dieses Kommando sorgt dafür, dass alle unter dem Bookmark liegenden
+   * TextFields geupdatet werden.
+   */
   static public class UpdateFields extends DocumentCommand
   {
     public UpdateFields(ConfigThingy wmCmd, Bookmark bookmark)
@@ -1110,12 +1194,11 @@ abstract public class DocumentCommand
 
   // ********************************************************************************
   /**
-   * Beschreibt ein Dokumentkommando, das aufgrund eines Syntax-Fehlers oder
-   * eines fehlenden Parameters ungültig ist, jedoch trotzdem im Dokument als
-   * Fehlerfeld dargestellt werden soll.
-   * 
-   * @author lut
-   * 
+   * Über dieses Dokumentkommando kann der Typ des Dokuments festgelegt werden.
+   * Es gibt die Typen SETTYPE_normalTemplate, SETTYPE_templateTemplate und
+   * SETTYPE_formDocument. Die SetType-Kommandos werden bereits im
+   * OnProcessTextDocument-Event verarbeitet und spielen daher keine Rolle mehr
+   * für den DocumentCommandInterpreter.
    */
   static public class SetType extends DocumentCommand
   {
@@ -1149,6 +1232,32 @@ abstract public class DocumentCommand
     protected boolean canHaveChilds()
     {
       return false;
+    }
+
+    public int execute(DocumentCommand.Executor visitable)
+    {
+      return visitable.executeCommand(this);
+    }
+  }
+
+  // ********************************************************************************
+  /**
+   * Das Kommando SetGrups dient dazu, dem vom Bookmark umschlossenen Textinhalt
+   * eine oder mehrere Gruppen zuweisen zu können. Im gegensatz zu anderen
+   * Dokumentkommandos, die auch das GROUPS Attribut unterstützen, besitzt
+   * dieses Kommando ausser der Zuordnung von Gruppen keine weitere Funktion.
+   */
+  static public class SetGroups extends DocumentCommand
+  {
+    public SetGroups(ConfigThingy wmCmd, Bookmark bookmark)
+        throws InvalidCommandException
+    {
+      super(wmCmd, bookmark);
+    }
+
+    protected boolean canHaveChilds()
+    {
+      return true;
     }
 
     public int execute(DocumentCommand.Executor visitable)
