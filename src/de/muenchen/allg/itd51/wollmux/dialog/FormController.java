@@ -266,7 +266,8 @@ public class FormController implements UIElementEventHandler
   private void createGUI(ConfigThingy fensterDesc, ConfigThingy visibilityDesc, Map mapIdToPresetValue)
   {
     Common.setLookAndFeel();
-     //TODO Fenster-Positions und Größenangaben in wollmux.conf auswerten 
+     //TODO Fenster-Positions und Größenangaben in wollmux.conf auswerten
+    //TODO Scrollen, bei zuvielen Eingabeelementen (vertikale Grösse wird ja ohnehin vorgegeben ueber den Fenster() Abschnitt)
     contentPanel = new JPanel();
     myTabbedPane = new JTabbedPane();
     contentPanel.add(myTabbedPane);
