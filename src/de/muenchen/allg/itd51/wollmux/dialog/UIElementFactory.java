@@ -16,6 +16,7 @@
 * 24.04.2006 | BNK | Qualitätssicherung
 * 29.05.2006 | BNK | ordentliche Context-Klasse
 * 31.05.2006 | BNK | +funcDialog
+* 16.06.2006 | BNK | Beim Ändern eines Checkbox-Werts holt sich die Checkbox jetzt den Fokus
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -377,7 +378,7 @@ public class UIElementFactory
             }
           });
       uiElement = new UIElement.Checkbox(id, boxBruceleitner, agentinMitHerz, layoutConstraints);
-      boxBruceleitner.addActionListener(new UIElementActionListener(context.uiElementEventHandler, uiElement, "valueChanged", new Object[]{}));
+      boxBruceleitner.addActionListener(new UIElementActionListener(context.uiElementEventHandler, uiElement, true, "valueChanged", new Object[]{}));
       boxBruceleitner.addFocusListener(new UIElementFocusListener(context.uiElementEventHandler, uiElement));
       return uiElement;
     }
@@ -477,16 +478,19 @@ public class UIElementFactory
     private UIElement uiElement;
     private String eventType;
     private Object[] args;
+    private boolean takeFocus;
     
-    public UIElementActionListener(UIElementEventHandler handler, UIElement uiElement, String eventType, Object[] args)
+    public UIElementActionListener(UIElementEventHandler handler, UIElement uiElement, boolean takeFocus, String eventType, Object[] args)
     {
       this.handler = handler;
       this.uiElement = uiElement;
+      this.takeFocus = takeFocus;
       this.eventType = eventType;
       this.args = args;
     }
     public void actionPerformed(ActionEvent e)
     {
+      if (takeFocus && !uiElement.hasFocus()) uiElement.takeFocus();
       handler.processUiElementEvent(uiElement, eventType, args);
     }
   }
@@ -638,7 +642,7 @@ public class UIElementFactory
     {
       try{
         String window = conf.get("WINDOW").toString();
-        return new UIElementActionListener(handler, uiElement, "action", new Object[]{action, window});
+        return new UIElementActionListener(handler, uiElement, false, "action", new Object[]{action, window});
       }catch(NodeNotFoundException x)
       {
         Logger.error("ACTION \"switchWindow\" erfordert WINDOW-Attribut");
@@ -656,7 +660,7 @@ public class UIElementFactory
         {
           fragId += "&" + i.next().toString();
         }
-        return new UIElementActionListener(handler, uiElement, "action", new Object[]{action, fragId});
+        return new UIElementActionListener(handler, uiElement, false, "action", new Object[]{action, fragId});
       }
       else
       {
@@ -667,7 +671,7 @@ public class UIElementFactory
     {
       try{
         String dialogName = conf.get("DIALOG").toString();
-        return new UIElementActionListener(handler, uiElement, "action", new Object[]{action, dialogName});
+        return new UIElementActionListener(handler, uiElement, false, "action", new Object[]{action, dialogName});
       }catch(NodeNotFoundException x)
       {
         Logger.error("ACTION \"funcDialog\" erfordert DIALOG-Attribut");
@@ -675,7 +679,7 @@ public class UIElementFactory
     }
     else 
     {
-      return new UIElementActionListener(handler, uiElement, "action", new Object[]{action});
+      return new UIElementActionListener(handler, uiElement, false, "action", new Object[]{action});
     }
     
     return null;

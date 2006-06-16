@@ -14,6 +14,7 @@
 * 15.05.2006 | BNK | +setString()
 * 18.05.2006 | BNK | +isStatic()
 * 30.05.2006 | BNK | UIElement.Listbox unterstützt jetzt Zusatzfunktionen
+* 16.06.2006 | BNK | +hasFocus(), +takeFocus()
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -178,6 +179,18 @@ public interface UIElement extends Value
   public boolean isStatic();
   
   /**
+   * Liefert true, wenn dieses UIElement im Moment den Eingabefokus hat.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public boolean hasFocus();
+  
+  /**
+   * Sagt dem UIElement, es soll versuchen, den Eingabefokus zu übernehmen.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public void takeFocus();
+  
+  /**
    * Abstrakte Basis-Klasse für UIElemente.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -242,6 +255,16 @@ public interface UIElement extends Value
     public String getId() {return id;}
     
     public void setString(String str){};
+    
+    public boolean hasFocus()
+    {
+      return getComponent().isFocusOwner();
+    }
+    
+    public void takeFocus()
+    {
+      getComponent().requestFocusInWindow();
+    }
   }
   
   public static class Label extends UIElementBase
@@ -587,6 +610,16 @@ public interface UIElement extends Value
     }
     
     public boolean isStatic() {return false;}
+    
+    public boolean hasFocus()
+    {
+      return box.isFocusOwner();
+    }
+    
+    public void takeFocus()
+    {
+      box.requestFocusInWindow();
+    }
   }
   
   public static class Separator extends UIElementBase
