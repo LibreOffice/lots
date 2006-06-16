@@ -30,6 +30,8 @@
 * 02.05.2006 | BNK | [R1202 Teil 1] Fensterposition und Größe von WollMuxBar konfigurierbar
 * 29.05.2006 | BNK | in initFactories() Label Typen explizit genullt.
 *                  | Umstellung auf UIElementFactory.Context
+* 16.06.2006 | BNK | Fokusverlust wird simuliert jedes Mal wenn der Benutzer was
+*                  | drückt, damit sich die WollMuxBar dann minimiert. 
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -128,7 +130,12 @@ public class WollMuxBar
   /**
    * Der Anzeigemodus für die WollMuxBar (z,B, {@link BECOME_ICON_MODE})
    */
-  private int windowMode; 
+  private int windowMode;
+  
+  /**
+   * Regelt den Wechsel zwischen den verschiedenen Anzeigemodi bei Fokusverlust etc.
+   */
+  private WindowTransformer myWindowTransformer;
 
   /**
    * Dient der thread-safen Kommunikation mit dem entfernten WollMux.
@@ -357,10 +364,10 @@ public class WollMuxBar
     logoPanel.add(logo);
     logoFrame.getContentPane().add(logoPanel);
     
-    WindowTransformer trafo = new WindowTransformer();
-    myFrame.addWindowFocusListener(trafo);
-    logo.addMouseListener(trafo);
-    logo.addMouseMotionListener(trafo);
+    myWindowTransformer = new WindowTransformer();
+    myFrame.addWindowFocusListener(myWindowTransformer);
+    logo.addMouseListener(myWindowTransformer);
+    logo.addMouseMotionListener(myWindowTransformer);
     
       //in der Hoffnung, dass es verhindert, dass anderen Fenstern der Fokus gestohlen wird
     logoFrame.setFocusableWindowState(false);
@@ -682,14 +689,17 @@ public class WollMuxBar
       String action = args[0].toString();
       if (action.equals("absenderAuswaehlen"))
       {
+        myWindowTransformer.windowLostFocus(null);
         eventHandler.handleWollMuxUrl(WollMux.cmdAbsenderAuswaehlen,"");
       }
       else if (action.equals("openDocument"))
       {
+        myWindowTransformer.windowLostFocus(null);
         eventHandler.handleWollMuxUrl(WollMux.cmdOpenDocument, args[1].toString());
       }
       else if (action.equals("openTemplate"))
       {
+        myWindowTransformer.windowLostFocus(null);
         eventHandler.handleWollMuxUrl(WollMux.cmdOpenTemplate, args[1].toString());
       }
       else if (action.equals("abort"))
@@ -883,6 +893,13 @@ public class WollMuxBar
     
     public void windowLostFocus(WindowEvent e)
     {
+      /*
+       * ACHTUNG! Diese Methode wird auch direkt aufgerufen 
+       * aus processUiElementEvent(). Dadurch kann es zu Doppelaufruf kommen.
+       * Sollte die Unterscheidung irgendwann mal nötig sein, dann kann das
+       * daran erfolgen, dass der Event e im synthetischen Fall null ist.
+       */
+      
       if (windowMode == ALWAYS_ON_TOP_WINDOW_MODE || windowMode == NORMAL_WINDOW_MODE) return;
       if (windowMode == MINIMIZE_TO_TASKBAR_MODE) {myFrame.setExtendedState(Frame.ICONIFIED); return;}
       if (isLogo) return;
