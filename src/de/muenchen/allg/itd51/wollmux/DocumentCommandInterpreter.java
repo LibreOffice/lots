@@ -58,6 +58,7 @@ import de.muenchen.allg.itd51.wollmux.DocumentCommand.SetType;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.UpdateFields;
 import de.muenchen.allg.itd51.wollmux.DocumentCommandTree.TreeExecutor;
 import de.muenchen.allg.itd51.wollmux.FormFieldFactory.FormField;
+import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.db.DatasetNotFoundException;
 import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
@@ -948,39 +949,38 @@ public class DocumentCommandInterpreter
     public int executeCommand(DocumentCommand.InsertValue cmd)
     {
       cmd.setErrorState(false);
+      
+      String spaltenname = cmd.getDBSpalte();
+      String value = null;
       try
       {
-        String spaltenname = cmd.getDBSpalte();
-        Dataset ds;
-        try
-        {
-          ds = mux.getDatasourceJoiner().getSelectedDataset();
-        }
-        catch (DatasetNotFoundException e)
-        {
-          throw new Exception(
-              "Kein Absender ausgewählt! Bitte wählen Sie einen Absender aus!");
-        }
-        XTextCursor insCursor = cmd.createInsertCursor();
-        if (insCursor != null)
-        {
-          if (ds.get(spaltenname) == null || ds.get(spaltenname).equals(""))
-          {
-            insCursor.setString("");
-          }
-          else
-          {
-            insCursor.setString(cmd.getLeftSeparator()
-                                + ds.get(spaltenname)
-                                + cmd.getRightSeparator());
-          }
-        }
+        Dataset ds = mux.getDatasourceJoiner().getSelectedDataset();
+        value = ds.get(spaltenname);
       }
-      catch (java.lang.Exception e)
+      catch (DatasetNotFoundException e)
+      {
+        value = "<FEHLER: Kein Absender ausgewählt!>";
+      }
+      catch (ColumnNotFoundException e)
       {
         insertErrorField(cmd, e);
         cmd.setErrorState(true);
         return 1;
+      }
+      
+      XTextCursor insCursor = cmd.createInsertCursor();
+      if (insCursor != null)
+      {
+        if (value == null || value.equals(""))
+        {
+          insCursor.setString("");
+        }
+        else
+        {
+          insCursor.setString(cmd.getLeftSeparator()
+                              + value
+                              + cmd.getRightSeparator());
+        }
       }
       cmd.setDoneState(true);
       return 0;
