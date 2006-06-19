@@ -29,7 +29,7 @@
 	-->
 
 	<property name="COMPONENT" value="WollMux" />
-	<property name="VERSION" value="1.2.1" />
+	<property name="VERSION" value="1.2.0" />
 	<property name="PKG_NAME" value="${COMPONENT}.uno.pkg" />
 	<property name="BUILD_INFO_FILE" value="buildinfo" />
 	<property name="LOGO" value="wollmux.jpg" />
