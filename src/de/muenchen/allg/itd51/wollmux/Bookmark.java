@@ -282,9 +282,11 @@ public class Bookmark
     // +3 = AA88
     // +4 = AAAABBBB bzw. AA88BB
 
-    XTextRangeCompare compare = (XTextRangeCompare) UnoRuntime.queryInterface(
-        XTextRangeCompare.class,
-        a.getText());
+    XTextRangeCompare compare = null;
+    if (a != null)
+      compare = (XTextRangeCompare) UnoRuntime.queryInterface(
+          XTextRangeCompare.class,
+          a.getText());
     if (compare != null && a != null && b != null)
     {
       try

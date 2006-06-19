@@ -61,6 +61,7 @@ import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
+import de.muenchen.allg.itd51.wollmux.FormFieldFactory.FormField;
 import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.DJDataset;
 import de.muenchen.allg.itd51.wollmux.db.DJDatasetListElement;
@@ -1183,7 +1184,7 @@ public class WollMuxEventHandler
         }
         catch (RuntimeException e)
         {
-          // Absicherung gegen das manuelle Löschen von Dokumentinhalten. 
+          // Absicherung gegen das manuelle Löschen von Dokumentinhalten.
         }
       }
       else
@@ -1256,7 +1257,7 @@ public class WollMuxEventHandler
         }
         catch (RuntimeException e)
         {
-          // Absicherung gegen das manuelle Löschen von Dokumentinhalten. 
+          // Absicherung gegen das manuelle Löschen von Dokumentinhalten.
         }
       }
       else

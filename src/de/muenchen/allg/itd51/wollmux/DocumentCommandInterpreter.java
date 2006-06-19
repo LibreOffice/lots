@@ -57,6 +57,7 @@ import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertFrag;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.SetType;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.UpdateFields;
 import de.muenchen.allg.itd51.wollmux.DocumentCommandTree.TreeExecutor;
+import de.muenchen.allg.itd51.wollmux.FormFieldFactory.FormField;
 import de.muenchen.allg.itd51.wollmux.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.db.DatasetNotFoundException;
 import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
@@ -1199,7 +1200,9 @@ public class DocumentCommandInterpreter
         fields = new Vector();
         idToFormFields.put(id, fields);
       }
-      fields.add(new FormField(document.xTextDocument(), cmd));
+      FormField field = FormFieldFactory.createFormField(document
+          .xTextDocument(), cmd);
+      if (field != null) fields.add(field);
 
       return 0;
     }
