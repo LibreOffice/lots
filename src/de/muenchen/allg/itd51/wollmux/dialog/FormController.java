@@ -19,6 +19,7 @@
 *                  | nextTab und prevTab implementiert
 * 29.05.2006 | BNK | Umstellung auf UIElementFactory.Context
 * 31.05.2006 | BNK | ACTION "funcDialog"
+* 19.06.2006 | BNK | Auch Werte für Felder, die nicht geautofilled sind an FormModel kommunizieren bei Startup
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -316,9 +317,9 @@ public class FormController implements UIElementEventHandler
     
     /*
      * AUTOFILL Funktionen berechnen und Felder entsprechend befüllen.
-     * Änderungen an FormModel kommunizieren.
+     * Werte (egal ob AUTOFILL oder nicht) an FormModel kommunizieren.
      */
-    autofill(mapIdToPresetValue);
+    initialStateForUIElementsNotInMapIdToPresetValue(mapIdToPresetValue);
     
     /************************************************************
      * Sichtbarkeit auswerten. 
@@ -412,11 +413,11 @@ public class FormController implements UIElementEventHandler
   /**
    * Berechnet für jedes UIElement, dessen ID nicht als Schlüssel in
    * mapIdToPresetValue ist den AUTOFILL-Wert, setzt das Feld entsprechend und
-   * teilt dies als Änderung an das FormModel mit.
+   * teilt den Wert des Feldes (egal ob AUTOFILL oder nicht) dem FormModel mit.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED*/
-  private void autofill(Map mapIdToPresetValue)
+  private void initialStateForUIElementsNotInMapIdToPresetValue(Map mapIdToPresetValue)
   {
     Iterator iter = uiElements.iterator();
     while (iter.hasNext())
@@ -425,10 +426,12 @@ public class FormController implements UIElementEventHandler
       String id = uiElement.getId();
       if (mapIdToPresetValue.containsKey(id)) continue;
       UIElementState state = (UIElementState)uiElement.getAdditionalData();
-      if (state.autofill == null) continue;
-      String str = state.autofill.getString(myUIElementValues);
-      uiElement.setString(str);
-      formModel.valueChanged(id, str);
+      if (state.autofill != null)
+      {
+        String str = state.autofill.getString(myUIElementValues);
+        uiElement.setString(str);
+      }
+      formModel.valueChanged(id, uiElement.getString());
     }
   }
   
