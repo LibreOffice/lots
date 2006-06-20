@@ -26,6 +26,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 import com.sun.star.container.XEnumeration;
+import com.sun.star.drawing.XControlShape;
 import com.sun.star.frame.XController;
 import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
@@ -68,36 +69,32 @@ public final class FormFieldFactory
     // FormControl vom Typ Checkbox suchen:
     if (range != null)
     {
-      Object checkbox = findFormControl(
+      XControlShape shape = findControlShape(
           range,
           "com.sun.star.form.component.CheckBox");
-      if (checkbox != null) return new CheckboxFormField(doc, cmd, checkbox);
+      if (shape != null && UNO.XTextContent(shape) != null)
+        return new CheckboxFormField(doc, cmd, shape.getControl(), UNO
+            .XTextContent(shape).getAnchor());
     }
 
-    // Textfeld vom Typ TextField.Input suchen:
-    Object inputField = null;
+    // Textfeld vom Typ com.sun.star.text.TextField.Input suchen:
+    XTextField field = null;
     if (range != null)
-    {
-      XTextCursor cursor = range.getText().createTextCursorByRange(range);
-      inputField = findRecursive(cursor, "com.sun.star.text.TextField.Input");
-    }
+      field = findTextField(range, "com.sun.star.text.TextField.Input");
 
     // wenn kein Formularfeld gefunden wurde, wird ein TextField.Input neu
     // erstellt.
-    if (UNO.XTextField(inputField) == null)
+    if (field == null)
     {
       Logger.debug2(cmd + ": Erzeuge neues Input-Field.");
       try
       {
-        inputField = UNO.XMultiServiceFactory(doc).createInstance(
-            "com.sun.star.text.TextField.Input");
+        field = UNO.XTextField(UNO.XMultiServiceFactory(doc).createInstance(
+            "com.sun.star.text.TextField.Input"));
         XTextCursor cursor = cmd.createInsertCursor();
-        if (cursor != null)
+        if (cursor != null && field != null)
         {
-          cursor.getText().insertTextContent(
-              cursor,
-              UNO.XTextContent(inputField),
-              true);
+          cursor.getText().insertTextContent(cursor, field, true);
         }
       }
       catch (Exception e)
@@ -106,25 +103,27 @@ public final class FormFieldFactory
       }
     }
 
-    if (UNO.XTextField(inputField) != null)
-      return new InputFormField(doc, cmd, UNO.XTextField(inputField));
+    if (field != null) return new InputFormField(doc, cmd, field);
 
     return null;
   }
 
   /**
-   * Diese Methode sucht in der übergebenen Range range nach einem
-   * FormControl-Element das den Service serviceName implementiert und liefert
-   * das erste gefundene Element zurück oder null, falls kein entsprechendes
-   * FormControl-Element vorhanden ist.
+   * Diese Methode sucht in der übergebenen Range range nach einer Instanz von
+   * XControlShape, dessen getControl-Methode ein Objekt vom Service-Typ
+   * serviceName implementiert, und liefert das erste gefundene, Element zurück
+   * oder null, falls kein entsprechendes XControlShape-Element vorhanden ist.
    * 
    * @param range
    *          Die range in der nach FormControl-Elementen gesucht werden soll.
    * @param serviceName
-   * @return Das erste gefundene FormControl-Element oder null, falls kein
-   *         FormControl-Element vorhanden ist.
+   *          Der Service name des gesuchten FormControl-Elements
+   * @return Die XControlShape-Instanz, die das gesuchte FormControl-Element zur
+   *         Verfügung stellt, oder null, falls kein entsprechendes Element
+   *         vorhanden ist.
    */
-  private static Object findFormControl(XTextRange range, String serviceName)
+  private static XControlShape findControlShape(XTextRange range,
+      String serviceName)
   {
     if (UNO.XContentEnumerationAccess(range) != null)
     {
@@ -144,7 +143,8 @@ public final class FormFieldFactory
         if (UNO.XControlShape(element) != null)
         {
           Object control = UNO.XControlShape(element).getControl();
-          if (UNO.supportsService(control, serviceName)) return control;
+          if (UNO.supportsService(control, serviceName))
+            return UNO.XControlShape(element);
         }
       }
     }
@@ -222,15 +222,17 @@ public final class FormFieldFactory
 
   private static abstract class BasicFormField implements FormField
   {
-    XTextDocument doc;
+    private XTextDocument doc;
 
-    InsertFormValue cmd;
+    private InsertFormValue cmd;
+
+    private final XTextRange focusRange;
 
     /**
      * Enthält die TextRange des viewCursors, bevor die focus()-Methode
      * aufgerufen wurde.
      */
-    XTextRange oldFocusRange = null;
+    private XTextRange oldFocusRange = null;
 
     /**
      * Erzeugt ein Formualfeld im Dokument doc an der Stelle des
@@ -244,11 +246,18 @@ public final class FormFieldFactory
      *          das Dokument, zu dem das Formularfeld gehört.
      * @param cmd
      *          das zugehörige insertFormValue-Kommando.
+     * @param focusRange
+     *          Beschreibt die range, auf die der ViewCursor beim Aufruf der
+     *          focus()-methode gesetzt werden soll. Der Parameter ist
+     *          erforderlich, da das Setzen des viewCursors auf die TextRanges
+     *          des Kommandos cmd unter Linux nicht sauber funktioniert.
      */
-    public BasicFormField(XTextDocument doc, InsertFormValue cmd)
+    public BasicFormField(XTextDocument doc, InsertFormValue cmd,
+        XTextRange focusRange)
     {
       this.doc = doc;
       this.cmd = cmd;
+      this.focusRange = focusRange;
     }
 
     /*
@@ -369,8 +378,7 @@ public final class FormFieldFactory
         XTextCursor cursor = UNO.XTextViewCursorSupplier(controller)
             .getViewCursor();
         oldFocusRange = cursor.getText().createTextCursorByRange(cursor);
-        XTextRange anchor = cmd.getTextRange();
-        if (anchor != null) cursor.gotoRange(anchor, false);
+        if (focusRange != null) cursor.gotoRange(focusRange, false);
       }
       catch (java.lang.Exception e)
       {
@@ -446,25 +454,27 @@ public final class FormFieldFactory
     public InputFormField(XTextDocument doc, InsertFormValue cmd,
         XTextField inputField)
     {
-      super(doc, cmd);
+      super(doc, cmd, UNO.XTextContent(inputField).getAnchor());
       this.inputField = inputField;
     }
 
     public void setFormElementValue(String value)
     {
-      if (UNO.XTextField(inputField) != null
-          && UNO.XUpdatable(inputField) != null)
+      if (inputField != null && UNO.XUpdatable(inputField) != null)
+      {
         UNO.setProperty(inputField, "Content", value);
-      UNO.XUpdatable(inputField).update();
+        UNO.XUpdatable(inputField).update();
+      }
     }
 
     public String getFormElementValue()
     {
-      Object content = UNO.getProperty(inputField, "Content");
-      if (content != null)
-        return content.toString();
-      else
-        return "";
+      if (inputField != null)
+      {
+        Object content = UNO.getProperty(inputField, "Content");
+        if (content != null) return content.toString();
+      }
+      return "";
     }
   }
 
@@ -493,11 +503,14 @@ public final class FormFieldFactory
      *          Ein UNO-Service vom Typ von com.sun.star.form.component.CheckBox
      *          das den Zugriff auf das entsprechende FormControl-Element
      *          ermöglicht.
+     * @param focusRange
+     *          Beschreibt die range, auf die der ViewCursor beim Aufruf der
+     *          focus()-methode gesetzt werden soll.
      */
     public CheckboxFormField(XTextDocument doc, InsertFormValue cmd,
-        Object checkbox)
+        Object checkbox, XTextRange focusRange)
     {
-      super(doc, cmd);
+      super(doc, cmd, focusRange);
 
       this.checkbox = checkbox;
     }
@@ -543,10 +556,12 @@ public final class FormFieldFactory
    *          Der Service-Name des gesuchten Elements.
    * @return Das erste gefundene Element, das serviceName implementiert.
    */
-  private static Object findRecursive(Object element, String serviceName)
+  private static XTextField findTextField(Object element, String serviceName)
   {
     // Ende, wenn es das Element selbst schon ist.
-    if (UNO.supportsService(element, serviceName)) return element;
+    if (UNO.XTextField(element) != null
+        && UNO.supportsService(element, serviceName))
+      return UNO.XTextField(element);
 
     // Kinder-Elemente des Containers XEnumerationAccess durchsuchen
     if (UNO.XEnumerationAccess(element) != null)
@@ -557,7 +572,7 @@ public final class FormFieldFactory
       {
         try
         {
-          Object found = findRecursive(xEnum.nextElement(), serviceName);
+          XTextField found = findTextField(xEnum.nextElement(), serviceName);
           // das erste gefundene Element zurückliefern.
           if (found != null) return found;
         }
@@ -572,11 +587,10 @@ public final class FormFieldFactory
     if (UNO.XTextField(element) != null)
     {
       Object textField = UNO.getProperty(element, "TextField");
-      Object found = findRecursive(textField, serviceName);
+      XTextField found = findTextField(textField, serviceName);
       if (found != null) return found;
     }
 
     return null;
   }
-
 }
