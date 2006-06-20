@@ -11,6 +11,8 @@
 * 13.04.2006 | BNK | Erstellung
 * 20.04.2006 | BNK | [R1200] .wollmux-Verzeichnis als Vorbelegung für DEFAULT_CONTEXT
 * 26.05.2006 | BNK | +DJ Initialisierung
+* 20.06.2006 | BNK | keine wollmux.conf mehr anlegen wenn nicht vorhanden
+*                  | /etc/wollmux/wollmux.conf auswerten
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -46,6 +48,8 @@ import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
  */
 public class WollMuxFiles
 {
+  private static final String ETC_WOLLMUX_WOLLMUX_CONF = "/etc/wollmux/wollmux.conf";
+  
   /**
    * Die in der wollmux.conf mit DEFAULT_CONTEXT festgelegte URL.
    */
@@ -93,7 +97,7 @@ public class WollMuxFiles
    * wollmux.conf-Datei vorhanden ist. Ist defaultWollmuxConf==null, so wird gar
    * keine wollmux.conf-Datei angelegt.
    */
-  private static final String defaultWollmuxConf = "%include \"<Hier tragen Sie bitte die URL Ihrer zentralen wollmux-Konfigurationsdatei ein>\"\r\n";
+  private static final String defaultWollmuxConf = null; //"# %include \"<Entfernen Sie das # am Anfang der Zeile und tragen Sie hier die URL Ihrer zentralen wollmux-Konfigurationsdatei ein>\"\r\n";
   
   /**
    * Erzeugt das ,wollmux-Verzeichnis, falls es noch nicht existiert und
@@ -138,17 +142,49 @@ public class WollMuxFiles
     if (WollMuxFiles.getWollMuxLogFile() != null) Logger.init(WollMuxFiles.getWollMuxLogFile(), Logger.LOG);
     
     /*
-     * Jetzt versuchen, die wollmux.conf zu parsen.
+     * Jetzt versuchen, die wollmux.conf zu parsen (falls die Datei existiert).
      */
     try
     {
-      wollmuxConf = new ConfigThingy("wollmuxConf", getWollMuxConfFile().toURI().toURL());
+      if (getWollMuxConfFile().exists())
+        wollmuxConf = new ConfigThingy("wollmuxConf", getWollMuxConfFile().toURI().toURL());
+    }
+    catch (Exception e)
+    {
+      Logger.error(e);
+    }
+    
+    /*
+     * Logging-Mode zum ersten Mal setzen. Wird nachher nochmal gesetzt, nachdem
+     * wir /etc/wollmux/wollmux.conf geparst haben.
+     */
+    setLoggingMode(WollMuxFiles.getWollmuxConf());
+    
+    /*
+     * Falls die obige wollmux.conf keinen DEFAULT_CONTEXT definiert,
+     * so wird falls /etc/wollmux/wollmux.conf existiert diese der oben
+     * geparsten wollmux.conf aus dem HOME-Verzeichnis vorangestellt.
+     */
+    if (wollmuxConf.query("DEFAULT_CONTEXT", 1).count()==0)
+    try {
+      File etc_wollmux_conf = new File(ETC_WOLLMUX_WOLLMUX_CONF);
+      if (etc_wollmux_conf.exists())
+      {
+        ConfigThingy etcWollmuxConf = new ConfigThingy("etcWollmuxConf", etc_wollmux_conf.toURI().toURL());
+        Logger.debug(ETC_WOLLMUX_WOLLMUX_CONF+" gelesen");
+        Iterator iter = wollmuxConf.iterator();
+        while (iter.hasNext()) etcWollmuxConf.addChild((ConfigThingy)iter.next());
+        wollmuxConf = etcWollmuxConf;
+      }
     }
     catch (Exception e)
     {
       Logger.error(e);
     }
 
+    /*
+     * Logging-Mode endgültig setzen.
+     */
     setLoggingMode(WollMuxFiles.getWollmuxConf());
     
     determineDefaultContext();
