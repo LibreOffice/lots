@@ -1573,7 +1573,7 @@ public class WollMuxEventHandler
                            + "aus der Datenbank aktualisiert werden:\n\n"
                            + names
                            + "\nWenn dieses Problem nicht temporärer "
-                           + "Natur ist, sollten sie diese Datensätze aus "
+                           + "Natur ist, sollten Sie diese Datensätze aus "
                            + "ihrer Absenderliste löschen und neu hinzufügen!";
           showInfoModal("WollMux-Info", message);
         }
