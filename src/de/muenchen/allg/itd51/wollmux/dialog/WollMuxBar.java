@@ -31,7 +31,9 @@
 * 29.05.2006 | BNK | in initFactories() Label Typen explizit genullt.
 *                  | Umstellung auf UIElementFactory.Context
 * 16.06.2006 | BNK | Fokusverlust wird simuliert jedes Mal wenn der Benutzer was
-*                  | drückt, damit sich die WollMuxBar dann minimiert. 
+*                  | drückt, damit sich die WollMuxBar dann minimiert.
+* 21.06.2006 | BNK | Gross/Kleinschreibung ignorieren beim Auswertden des MODE
+*                  | Es wird jetzt der letzte Fenster/WollMuxBar-Abschnitt verwendet. 
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -289,25 +291,29 @@ public class WollMuxBar
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
     
     String title = DEFAULT_TITLE;
-    try{title = conf.get("Fenster").get("WollMuxBar").get("TITLE").toString();}catch(Exception x) {}
+    ConfigThingy wmBarConf = new ConfigThingy("");
+    try{
+      wmBarConf = conf.query("Fenster").query("WollMuxBar").getLastChild(); 
+    }catch(Exception x) {}
+    try{title = wmBarConf.get("TITLE").toString();}catch(Exception x) {}
     
     int myFrame_x = Integer.MIN_VALUE;
-    try{myFrame_x = Integer.parseInt(conf.get("Fenster").get("WollMuxBar").get("X").toString());}catch(Exception x) {}
+    try{myFrame_x = Integer.parseInt(wmBarConf.get("X").toString());}catch(Exception x) {}
     
     int myFrame_y = Integer.MIN_VALUE;
-    try{myFrame_y = Integer.parseInt(conf.get("Fenster").get("WollMuxBar").get("Y").toString());}catch(Exception x) {}
+    try{myFrame_y = Integer.parseInt(wmBarConf.get("Y").toString());}catch(Exception x) {}
     
     int myFrame_width = 0;
-    try{myFrame_width = Integer.parseInt(conf.get("Fenster").get("WollMuxBar").get("WIDTH").toString());}catch(Exception x) {}
+    try{myFrame_width = Integer.parseInt(wmBarConf.get("WIDTH").toString());}catch(Exception x) {}
     
     int myFrame_height = 0;
-    try{myFrame_height = Integer.parseInt(conf.get("Fenster").get("WollMuxBar").get("HEIGHT").toString());}catch(Exception x) {}
+    try{myFrame_height = Integer.parseInt(wmBarConf.get("HEIGHT").toString());}catch(Exception x) {}
     
     int icon_x = screenSize.width - 96;
-    try{icon_x = Integer.parseInt(conf.get("Fenster").get("WollMuxBar").get("ICONX").toString());}catch(Exception x) {}
+    try{icon_x = Integer.parseInt(wmBarConf.get("ICONX").toString());}catch(Exception x) {}
     
     int icon_y = screenSize.height - 128;
-    try{icon_y = Integer.parseInt(conf.get("Fenster").get("WollMuxBar").get("ICONY").toString());}catch(Exception x) {}
+    try{icon_y = Integer.parseInt(wmBarConf.get("ICONY").toString());}catch(Exception x) {}
     
     myFrame = new JFrame(title);
     //leave handling of close request to WindowListener.windowClosing
@@ -351,7 +357,7 @@ public class WollMuxBar
     
     URL iconUrl = ICON_URL;
     try{
-      String urlStr = conf.get("Fenster").get("WollMuxBar").get("ICON").toString();
+      String urlStr = wmBarConf.get("ICON").toString();
       URL iconUrl2 = new URL(WollMuxFiles.getDEFAULT_CONTEXT(), urlStr);
       iconUrl2.openStream().close(); //testen ob URL erreichbar ist.
       iconUrl = iconUrl2;
@@ -686,6 +692,7 @@ public class WollMuxBar
     {
       if (!eventType.equals("action")) return;
       
+      //TODO Wenn der UpAndAwayModus implementiert wurde, dann sollte in dem Fall nicht windowListFocus() sondern die entsprechende Mauscursor hat Fenster verlassen Methode aufgerufen werden, damit sich die Leiste auch dann minimiert. Oder besser das ganze aus dem WindowTransformer auslagern, denn es ist unschön so einen Event Handler direkt aufzurufen.
       String action = args[0].toString();
       if (action.equals("absenderAuswaehlen"))
       {
@@ -954,14 +961,14 @@ public class WollMuxBar
       Logger.debug("WollMuxBar gestartet");
       
       try{
-        String windowMode2 = wollmuxConf.get("Fenster").get("WollMuxBar").get("MODE").toString();
-        if (windowMode2.equals("Icon"))
+        String windowMode2 = wollmuxConf.query("Fenster").query("WollMuxBar").getLastChild().get("MODE").toString();
+        if (windowMode2.equalsIgnoreCase("Icon"))
           windowMode = BECOME_ICON_MODE;
-        else if (windowMode2.equals("AlwaysOnTop"))
+        else if (windowMode2.equalsIgnoreCase("AlwaysOnTop"))
           windowMode = ALWAYS_ON_TOP_WINDOW_MODE;
-        else if (windowMode2.equals("Window"))
+        else if (windowMode2.equalsIgnoreCase("Window"))
           windowMode = NORMAL_WINDOW_MODE;
-        else if (windowMode2.equals("Minimize"))
+        else if (windowMode2.equalsIgnoreCase("Minimize"))
           windowMode = MINIMIZE_TO_TASKBAR_MODE;
         else
           Logger.error("Ununterstützer MODE für WollMuxBar-Fenster: '"+windowMode2+"'");
