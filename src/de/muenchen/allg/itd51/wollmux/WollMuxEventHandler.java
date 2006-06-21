@@ -408,7 +408,7 @@ public class WollMuxEventHandler
         ConfigThingy tds = new ConfigThingy("Textdokument");
         try
         {
-          tds = mux.getWollmuxConf().query("Fenster").getLastChild().query(
+          tds = mux.getWollmuxConf().query("Fenster").query(
               "Textdokument").getLastChild();
           // Einstellungen setzen:
           setWindowViewSettings(doc, tds);
