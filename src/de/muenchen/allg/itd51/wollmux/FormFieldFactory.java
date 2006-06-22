@@ -301,7 +301,10 @@ public final class FormFieldFactory
         if (func != null)
         {
           SimpleMap args = new SimpleMap();
-          args.put("VALUE", value);
+          String[] pars = func.parameters();
+          if(pars.length >= 1) {
+            args.put(pars[0], value);
+          }
           value = func.getString(args);
         }
         else
