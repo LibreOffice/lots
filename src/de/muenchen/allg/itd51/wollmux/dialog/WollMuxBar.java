@@ -33,7 +33,8 @@
 * 16.06.2006 | BNK | Fokusverlust wird simuliert jedes Mal wenn der Benutzer was
 *                  | drückt, damit sich die WollMuxBar dann minimiert.
 * 21.06.2006 | BNK | Gross/Kleinschreibung ignorieren beim Auswertden des MODE
-*                  | Es wird jetzt der letzte Fenster/WollMuxBar-Abschnitt verwendet. 
+*                  | Es wird jetzt der letzte Fenster/WollMuxBar-Abschnitt verwendet.
+* 23.06.2006 | BNK | Senderbox von JComboBox auf JPopupMenu umgestellt.                  
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -42,6 +43,7 @@
 */
 package de.muenchen.allg.itd51.wollmux.dialog;
 
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
@@ -52,8 +54,6 @@ import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -73,15 +73,16 @@ import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.JSeparator;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
@@ -128,17 +129,16 @@ public class WollMuxBar
    * Die WollMuxBar ist immer im Vordergrund.
    */
   private static final int ALWAYS_ON_TOP_WINDOW_MODE = 3;
+  /**
+   * Die WollMuxBar verschwindet am oberen Rand, wenn der Mauscursor sie verlässt.
+   */
+  private static final int UP_AND_AWAY_WINDOW_MODE = 4;
   
   /**
    * Der Anzeigemodus für die WollMuxBar (z,B, {@link BECOME_ICON_MODE})
    */
   private int windowMode;
   
-  /**
-   * Regelt den Wechsel zwischen den verschiedenen Anzeigemodi bei Fokusverlust etc.
-   */
-  private WindowTransformer myWindowTransformer;
-
   /**
    * Dient der thread-safen Kommunikation mit dem entfernten WollMux.
    */
@@ -227,15 +227,32 @@ public class WollMuxBar
   private ActionListener closeAction = actionListener_abort;
   
   /**
-   * ItemListener bei Elementänderungen der senderboxes: 
+   * Aufgerufen wenn der Spezialeintrag "Liste Bearbeiten" in der Senderbox
+   * gewählt wird.
    */
-  private ItemListener itemListener = new ItemListener() 
-    { public void itemStateChanged(ItemEvent e) { senderBoxItemChanged(e); } };
+  private ActionListener actionListener_editSenderList = new ActionListener() 
+  { public void actionPerformed(ActionEvent e) { 
+    eventHandler.handleWollMuxUrl(WollMux.cmdPALVerwalten, null); 
+    minimize(); } }; 
+  
+  /**
+   * ActionListener wenn anderer Absender in Senderbox ausgewählt. 
+   */
+  private ActionListener senderboxActionListener = new ActionListener() 
+    { public void actionPerformed(ActionEvent e) { senderBoxItemChanged(e); } };
 
   /**
-   * Alle senderboxes (JComboBoxes) der Leiste.
+   * Überwacht, ob sich die Maus in irgendwo innerhalb einer Komponente der
+   * WollMuxBar befindet.
+   */
+  private IsInsideMonitor myIsInsideMonitor = new IsInsideMonitor();
+    
+  /**
+   * Alle {@link Senderbox}es der Leiste.
    */
   private List senderboxes = new Vector();
+  
+  
   
   /**
    * Erzeugt eine neue WollMuxBar.
@@ -322,8 +339,13 @@ public class WollMuxBar
     //Reaktion auf den Schliessen-Knopf auch die ACTION "abort" ausgeführt wird.
     myFrame.addWindowListener(new MyWindowListener());
     
+    WindowTransformer myWindowTransformer = new WindowTransformer();
+    myFrame.addWindowFocusListener(myWindowTransformer);
+    myFrame.addMouseListener(myWindowTransformer);
+    
     contentPanel = new JPanel();
     contentPanel.setLayout(new GridBagLayout());
+    contentPanel.addMouseListener(myIsInsideMonitor);
     myFrame.getContentPane().add(contentPanel);
     
     try{
@@ -337,6 +359,7 @@ public class WollMuxBar
     }
     
     JMenuBar mbar = new JMenuBar();
+    mbar.addMouseListener(myIsInsideMonitor);
     try{
       ConfigThingy menubar = conf.query("Menueleiste");
       if(menubar.count() > 0) {
@@ -348,6 +371,32 @@ public class WollMuxBar
     }
     myFrame.setJMenuBar(mbar);
     
+    setupLogoFrame(title, wmBarConf, icon_x, icon_y);
+
+    if (windowMode != NORMAL_WINDOW_MODE) myFrame.setAlwaysOnTop(true);
+    
+    myFrame.pack();
+    Dimension frameSize = myFrame.getSize();
+    if (myFrame_width > 0) frameSize.width = myFrame_width;
+    if (myFrame_height > 0) frameSize.height = myFrame_height;
+    myFrame.setSize(frameSize);
+    if (myFrame_x == Integer.MIN_VALUE) myFrame_x = screenSize.width/2 - frameSize.width/2; 
+    if (myFrame_y == Integer.MIN_VALUE) myFrame_y = (int)(0.8*(screenSize.height/2 - frameSize.height/2));
+    myFrame.setLocation(myFrame_x,myFrame_y);
+    myFrame.setResizable(true);
+    myFrame.setVisible(true);
+  }
+
+  /**
+   * Erzeugt den JFrame mit dem WollMux-Logo.
+   * @param title der Titel für das Fenster (nur für Anzeige in Taskleiste)
+   * @param wmBarConf ConfigThingy des Fenster/WollMuxBar-Abschnitts.
+   * @param icon_x Start-Koordinate des Icons.
+   * @param icon_y Start-Koordinate des Icons.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private void setupLogoFrame(String title, ConfigThingy wmBarConf, int icon_x, int icon_y)
+  {
     logoFrame = new JFrame(title);
     logoFrame.setUndecorated(true);
     logoFrame.setAlwaysOnTop(true);
@@ -370,8 +419,7 @@ public class WollMuxBar
     logoPanel.add(logo);
     logoFrame.getContentPane().add(logoPanel);
     
-    myWindowTransformer = new WindowTransformer();
-    myFrame.addWindowFocusListener(myWindowTransformer);
+    LogoWindowTransformer myWindowTransformer = new LogoWindowTransformer();
     logo.addMouseListener(myWindowTransformer);
     logo.addMouseMotionListener(myWindowTransformer);
     
@@ -381,19 +429,6 @@ public class WollMuxBar
     logoFrame.pack();
     logoFrame.setLocation(icon_x,icon_y);
     logoFrame.setResizable(false);
-
-    if (windowMode != NORMAL_WINDOW_MODE) myFrame.setAlwaysOnTop(true);
-    
-    myFrame.pack();
-    Dimension frameSize = myFrame.getSize();
-    if (myFrame_width > 0) frameSize.width = myFrame_width;
-    if (myFrame_height > 0) frameSize.height = myFrame_height;
-    myFrame.setSize(frameSize);
-    if (myFrame_x == Integer.MIN_VALUE) myFrame_x = screenSize.width/2 - frameSize.width/2; 
-    if (myFrame_y == Integer.MIN_VALUE) myFrame_y = (int)(0.8*(screenSize.height/2 - frameSize.height/2));
-    myFrame.setLocation(myFrame_x,myFrame_y);
-    myFrame.setResizable(true);
-    myFrame.setVisible(true);
   }
   
   /**
@@ -434,7 +469,7 @@ public class WollMuxBar
     //int gridx, int gridy, int gridwidth, int gridheight, double weightx, double weighty, int anchor,          int fill,                  Insets insets, int ipadx, int ipady) 
     //GridBagConstraints gbcTextfield = new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0, GridBagConstraints.LINE_START,   GridBagConstraints.HORIZONTAL, new Insets(TF_BORDER,TF_BORDER,TF_BORDER,TF_BORDER),0,0);
     GridBagConstraints gbcMenuButton = new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.NONE,       new Insets(BUTTON_BORDER,BUTTON_BORDER,BUTTON_BORDER,BUTTON_BORDER),0,0);
-    GridBagConstraints gbcSenderbox  = new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH,           new Insets(TF_BORDER,TF_BORDER,TF_BORDER,TF_BORDER),0,0);
+    GridBagConstraints gbcSenderbox  = new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.NONE,       new Insets(BUTTON_BORDER,BUTTON_BORDER,BUTTON_BORDER,BUTTON_BORDER),0,0);
       
     int y = -stepy;
     int x = -stepx; 
@@ -461,27 +496,44 @@ public class WollMuxBar
         
         if (type.equals("senderbox"))
         {
-          if (context.equals("menu")) 
+          char hotkey = 0;
+          try{
+            hotkey = uiElementDesc.get("HOTKEY").toString().charAt(0);
+          }catch(Exception e){}
+          
+          
+          String label = "Bitte warten...";
+          Senderbox senderbox;
+          JComponent menu;
+          AbstractButton button;
+          if (context.equals("menu"))
           {
-            Logger.error("Elemente vom Typ \"senderbox\" können nicht in Menüs eingefügt werden!");
-            continue;
+            menu = new JMenu(label);
+            button = (AbstractButton)menu;
+            senderbox = Senderbox.create((JMenu)menu);
+          }
+          else
+          { 
+            menu = new JPopupMenu();
+            String menuName = "SenD3rB0x_"+Math.random();
+            mapMenuNameToJPopupMenu.put(menuName, menu);
+            button = new JButton(label);
+            button.addActionListener(actionListener_openMenu) ;
+            button.setActionCommand(menuName);
+            senderbox = Senderbox.create((JPopupMenu)menu, button);
           }
           
-          int lines = 10;
-          try{ lines = Integer.parseInt(uiElementDesc.get("LINES").toString()); } catch(Exception e){}
+          button.setMnemonic(hotkey);
           
-          JComboBox senderbox = new JComboBox();
-          
-          senderbox.setMaximumRowCount(lines);
-          senderbox.setPrototypeDisplayValue("Matthias B. ist euer Gott (W-OLL-MUX-5.1)");
-          senderbox.setEditable(false);
-          
-          senderbox.addItem("Bitte warten...");
           senderboxes.add(senderbox);
           
-          gbcSenderbox.gridx = x;
-          gbcSenderbox.gridy = y;
-          compo.add(senderbox, gbcSenderbox);
+          gbcMenuButton.gridx = x;
+          gbcMenuButton.gridy = y;
+          button.addMouseListener(myIsInsideMonitor);
+          if (context.equals("menu"))
+            compo.add(button);
+          else
+            compo.add(button, gbcSenderbox);
         }
         else if (type.equals("menu"))
         {
@@ -517,6 +569,7 @@ public class WollMuxBar
           
           gbcMenuButton.gridx = x;
           gbcMenuButton.gridy = y;
+          button.addMouseListener(myIsInsideMonitor);
           if (context.equals("menu"))
             compo.add(button);
           else
@@ -528,10 +581,12 @@ public class WollMuxBar
           GridBagConstraints gbc = (GridBagConstraints)uiElement.getLayoutConstraints();
           gbc.gridx = x;
           gbc.gridy = y;
+          Component uiComponent = uiElement.getComponent();
+          uiComponent.addMouseListener(myIsInsideMonitor);
           if (context.equals("menu"))
-            compo.add(uiElement.getComponent());
+            compo.add(uiComponent);
           else
-            compo.add(uiElement.getComponent(), gbc);
+            compo.add(uiComponent, gbc);
         }
       }
       catch(ConfigurationErrorException e) {Logger.error(e);}
@@ -696,17 +751,17 @@ public class WollMuxBar
       String action = args[0].toString();
       if (action.equals("absenderAuswaehlen"))
       {
-        myWindowTransformer.windowLostFocus(null);
+        minimize();
         eventHandler.handleWollMuxUrl(WollMux.cmdAbsenderAuswaehlen,"");
       }
       else if (action.equals("openDocument"))
       {
-        myWindowTransformer.windowLostFocus(null);
+        minimize();
         eventHandler.handleWollMuxUrl(WollMux.cmdOpenDocument, args[1].toString());
       }
       else if (action.equals("openTemplate"))
       {
-        myWindowTransformer.windowLostFocus(null);
+        minimize();
         eventHandler.handleWollMuxUrl(WollMux.cmdOpenTemplate, args[1].toString());
       }
       else if (action.equals("abort"))
@@ -764,26 +819,12 @@ public class WollMuxBar
    * @author Christoph Lutz (D-III-ITD 5.1)
    * TESTED 
    */
-  private void senderBoxItemChanged(ItemEvent e)
+  private void senderBoxItemChanged(ActionEvent e)
   {
-    if(e.getStateChange() == ItemEvent.SELECTED && 
-        e.getSource() instanceof JComboBox) 
-    {
-      JComboBox cbox = (JComboBox) e.getSource();
-      int id = cbox.getSelectedIndex();
-      
-      // Sonderrolle: -- Liste bearbeiten --
-      if(id == cbox.getItemCount()-1) {
-        eventHandler.handleWollMuxUrl(WollMux.cmdPALVerwalten, null);
-        return;
-      }
-      
-      String name = cbox.getSelectedItem().toString();
-      if(name != null && !name.equals(LEERE_LISTE)) 
-      {
-        eventHandler.handleSelectPALEntry(name, id);
-      }
-    }
+    String[] str = e.getActionCommand().split(":",2);
+    int index = Integer.parseInt(str[0]);
+    String item = str[1];
+    eventHandler.handleSelectPALEntry(item, index);
   }
   
   /**
@@ -798,10 +839,7 @@ public class WollMuxBar
     Iterator iter = senderboxes.iterator();
     while(iter.hasNext()) 
     {
-      JComboBox senderbox = (JComboBox) iter.next();
-      
-      // keine items erzeugen beim Update
-      senderbox.removeItemListener(itemListener);
+      Senderbox senderbox = (Senderbox) iter.next();
       
       // alte Items löschen
       senderbox.removeAllItems();
@@ -811,20 +849,78 @@ public class WollMuxBar
       {
         for (int i = 0; i < entries.length; i++)
         {
-          senderbox.addItem(entries[i]);
+          senderbox.addItem(entries[i], senderboxActionListener, ""+i+":"+entries[i], myIsInsideMonitor);
         }
       } 
-      else senderbox.addItem(LEERE_LISTE);
+      else senderbox.addItem(LEERE_LISTE, null, null, myIsInsideMonitor);
 
-      senderbox.addItem("- - - - Liste bearbeiten - - - -");
-      
-      // Selektiertes Item setzen:
+      senderbox.addSeparator();
+      senderbox.addItem("Liste Bearbeiten", actionListener_editSenderList, null, myIsInsideMonitor);
       
       if (current != null && !current.equals(""))
         senderbox.setSelectedItem(current);
-      
-      // ItemListener wieder setzen.
-      senderbox.addItemListener(itemListener);
+    }
+  }
+  
+  private static abstract class Senderbox
+  {
+    protected JComponent menu;
+    
+    public void removeAllItems()
+    {
+      menu.removeAll();
+    }
+    
+    public void addItem(String item, ActionListener listen, String actionCommand, MouseListener mouseListen)
+    {
+      JMenuItem menuItem = new JMenuItem(item);
+      menuItem.addActionListener(listen);
+      menuItem.setActionCommand(actionCommand);
+      menuItem.addMouseListener(mouseListen);
+      menu.add(menuItem);
+    }
+    public void addSeparator()
+    {
+      menu.add(new JSeparator());
+    }
+    public abstract void setSelectedItem(String item);
+    public static Senderbox create(JMenu menu)
+    {
+      return new JMenuSenderbox(menu);
+    }
+    public static Senderbox create(JPopupMenu menu, AbstractButton button)
+    {
+      return new JPopupMenuSenderbox(menu, button);
+    }
+    
+    private static class JMenuSenderbox extends Senderbox
+    {
+
+      public JMenuSenderbox(JMenu menu)
+      {
+        this.menu = menu;
+      }
+
+      public void setSelectedItem(String item)
+      {
+        ((JMenu)menu).setText(item);
+      }
+    }
+    
+    private static class JPopupMenuSenderbox extends Senderbox
+    {
+      private AbstractButton button;
+
+      public JPopupMenuSenderbox(JPopupMenu menu, AbstractButton button)
+      {
+        this.menu = menu;
+        this.button = button;
+      }
+
+      public void setSelectedItem(String item)
+      {
+        button.setText(item);
+      }
     }
   }
   
@@ -839,6 +935,7 @@ public class WollMuxBar
     JOptionPane.showMessageDialog(null, CONNECTION_FAILED_MESSAGE, "WollMux-Fehler", JOptionPane.ERROR_MESSAGE);
   }
 
+  
   /**
    * Ein WindowListener, der auf die JFrames der Leiste und des Icons 
    * registriert wird, damit als
@@ -858,13 +955,44 @@ public class WollMuxBar
   }
   
   /**
-   * Wird auf das Icon-Fenster als MouseListener und MouseMotionListener registriert,
-   * um das Anklicken und Verschieben des Icons zu managen; wird auf das 
+   * Wird auf das 
    * Leistenfenster als WindowFocusListener registriert, um falls erforderlich das
    * minimieren zum Icon anzustoßen.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private class WindowTransformer implements MouseListener, MouseMotionListener, WindowFocusListener
+  private class WindowTransformer implements WindowFocusListener, MouseListener
+  {
+    public void windowGainedFocus(WindowEvent e) {}
+    
+    public void windowLostFocus(WindowEvent e)
+    {
+      minimize();
+    }
+
+    public void mouseClicked(MouseEvent e)
+    {
+  
+    }
+    public void mousePressed(MouseEvent e) {}
+    public void mouseReleased(MouseEvent e) {}
+
+    public void mouseEntered(MouseEvent e)
+    {
+      System.out.println("mouseEntered");
+    }
+
+    public void mouseExited(MouseEvent e)
+    {
+      System.out.println("mouseExited");
+    }
+  }
+  
+  /**
+   * Wird auf das Icon-Fenster als MouseListener und MouseMotionListener registriert,
+   * um das Anklicken und Verschieben des Icons zu managen.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private class LogoWindowTransformer implements MouseListener, MouseMotionListener
   {
     /**
      * Falls das Icon mit der Maus gezogen wird ist dies der Startpunkt an dem
@@ -872,19 +1000,11 @@ public class WollMuxBar
      */
     private Point dragStart = new Point(0,0);
     
-    /**
-     * true, während das Icon-Fenster aktiv ist, false während das Leistenfenster
-     * aktiv ist.
-     */
-    private boolean isLogo = false;
-    
     public void mouseClicked(MouseEvent e)
     {
-      if (!isLogo) return;
       logoFrame.setVisible(false);
       myFrame.setVisible(true);
       myFrame.setExtendedState(JFrame.NORMAL);
-      isLogo = false;
     }
     
     public void mousePressed(MouseEvent e)
@@ -896,24 +1016,6 @@ public class WollMuxBar
     public void mouseExited(MouseEvent e){}
     public void mouseEntered(MouseEvent e){}
     public void mouseMoved(MouseEvent e) {}
-    public void windowGainedFocus(WindowEvent e) {}
-    
-    public void windowLostFocus(WindowEvent e)
-    {
-      /*
-       * ACHTUNG! Diese Methode wird auch direkt aufgerufen 
-       * aus processUiElementEvent(). Dadurch kann es zu Doppelaufruf kommen.
-       * Sollte die Unterscheidung irgendwann mal nötig sein, dann kann das
-       * daran erfolgen, dass der Event e im synthetischen Fall null ist.
-       */
-      
-      if (windowMode == ALWAYS_ON_TOP_WINDOW_MODE || windowMode == NORMAL_WINDOW_MODE) return;
-      if (windowMode == MINIMIZE_TO_TASKBAR_MODE) {myFrame.setExtendedState(Frame.ICONIFIED); return;}
-      if (isLogo) return;
-      myFrame.setVisible(false);
-      logoFrame.setVisible(true);
-      isLogo = true;
-    }
     
     public void mouseDragged(MouseEvent e)
     {
@@ -926,13 +1028,55 @@ public class WollMuxBar
   }
   
   /**
+   * Wird auf alle Komponenten der WollMuxBar registriert, um zu überwachen,
+   * ob die Maus in einer dieser Komponenten ist.
+   *
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private class IsInsideMonitor implements MouseListener
+  {
+    private boolean isInside = true;
+    
+    public boolean inside() { return isInside;}
+
+    public void mouseClicked(MouseEvent e) {}
+    public void mousePressed(MouseEvent e) {}
+    public void mouseReleased(MouseEvent e) {}
+    public void mouseEntered(MouseEvent e)
+    {
+      isInside = true;
+      System.out.println("entered");
+    }
+
+    public void mouseExited(MouseEvent e)
+    {
+      isInside = false;
+      System.out.println("exited");
+    }
+  }
+
+  /**
+   * Je nach windowMode wird die WollMuxBar auf andere Art und Weise in den
+   * Wartezustand versetzt. 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private void minimize()
+  {
+    if (windowMode == ALWAYS_ON_TOP_WINDOW_MODE || windowMode == NORMAL_WINDOW_MODE) return;
+    if (windowMode == MINIMIZE_TO_TASKBAR_MODE) {myFrame.setExtendedState(Frame.ICONIFIED); return;}
+    myFrame.setVisible(false);
+    logoFrame.setVisible(true);
+  }
+
+  
+  /**
    * Startet die WollMuxBar.
    * @param args --minimize, --topbar, --normalwindow um das Anzeigeverhalten festzulegen.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static void main(String[] args)
   {
-    int windowMode = BECOME_ICON_MODE;
+    int windowMode = UP_AND_AWAY_WINDOW_MODE;
     if (args.length > 0)
     {
       if (args[0].equals("--minimize")) windowMode = MINIMIZE_TO_TASKBAR_MODE;
@@ -970,6 +1114,8 @@ public class WollMuxBar
           windowMode = NORMAL_WINDOW_MODE;
         else if (windowMode2.equalsIgnoreCase("Minimize"))
           windowMode = MINIMIZE_TO_TASKBAR_MODE;
+        else if (windowMode2.equalsIgnoreCase("UpAndAway"))
+          windowMode = UP_AND_AWAY_WINDOW_MODE;
         else
           Logger.error("Ununterstützer MODE für WollMuxBar-Fenster: '"+windowMode2+"'");
       }catch(Exception x){}
