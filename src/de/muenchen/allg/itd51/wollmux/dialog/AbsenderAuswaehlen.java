@@ -228,7 +228,7 @@ public class AbsenderAuswaehlen
    */
   private void createGUI(ConfigThingy fensterDesc)
   {
-    Common.setLookAndFeel();
+    Common.setLookAndFeelOnce();
     
     palJList = new JList(new DefaultListModel());
    

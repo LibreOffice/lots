@@ -265,7 +265,7 @@ public class DatasourceSearchDialog implements Dialog
    */
   private void createGUI(String title, ConfigThingy fensterDesc)
   {
-    Common.setLookAndFeel();
+    Common.setLookAndFeelOnce();
     
     //Create and set up the window.
     myFrame = new JFrame(title);

@@ -1784,7 +1784,7 @@ public class WollMuxEventHandler
         }
 
         // infobox ausgeben:
-        Common.setLookAndFeel();
+        Common.setLookAndFeelOnce();
         javax.swing.JOptionPane.showMessageDialog(
             null,
             formattedMessage,

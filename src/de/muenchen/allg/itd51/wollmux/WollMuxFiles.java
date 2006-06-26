@@ -13,6 +13,7 @@
 * 26.05.2006 | BNK | +DJ Initialisierung
 * 20.06.2006 | BNK | keine wollmux.conf mehr anlegen wenn nicht vorhanden
 *                  | /etc/wollmux/wollmux.conf auswerten
+* 26.06.2006 | BNK | Dialoge/FONT_ZOOM auswerten. LookAndFeel setzen. 
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -35,6 +36,7 @@ import java.util.Set;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
+import de.muenchen.allg.itd51.wollmux.dialog.Common;
 import de.muenchen.allg.itd51.wollmux.dialog.DatasourceSearchDialog;
 import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
 import de.muenchen.allg.itd51.wollmux.func.Function;
@@ -188,6 +190,8 @@ public class WollMuxFiles
     setLoggingMode(WollMuxFiles.getWollmuxConf());
     
     determineDefaultContext();
+    
+    setLookAndFeel();
   }
 
   /**
@@ -332,6 +336,36 @@ public class WollMuxFiles
     }
   }
 
+  /**
+   * Wertet die FONT_ZOOM-Direktive des Dialoge-Abschnitts aus und zoomt die
+   * Fonts falls erforderlich.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public static void setLookAndFeel()
+  {
+    Common.setLookAndFeelOnce();
+    ConfigThingy zoom = getWollmuxConf().query("Dialoge").query("FONT_ZOOM", 2);
+    if (zoom.count() > 0)
+    {
+      try {
+        double zoomFactor = Double.parseDouble(zoom.getLastChild().toString());
+        if (zoomFactor < 0.5 || zoomFactor > 10)
+        {
+          Logger.error("Unsinniger FONT_ZOOM Wert angegeben: "+zoomFactor);
+        }
+        else
+        {
+          if (zoomFactor < 0.99 || zoomFactor >1.01) 
+            Common.zoomFonts(zoomFactor);
+        }
+      } catch(Exception x)
+      {
+        Logger.error(x);
+      }
+    }
+  }
+  
   /**
    * Wertet die undokumentierte wollmux.conf-Direktive LOGGING_MODE aus und
    * setzt den Logging-Modus entsprechend. Ist kein LOGGING_MODE gegeben, so

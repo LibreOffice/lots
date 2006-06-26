@@ -298,7 +298,7 @@ public class PersoenlicheAbsenderlisteVerwalten
    */
   private void createGUI(ConfigThingy fensterDesc)
   {
-    Common.setLookAndFeel();
+    Common.setLookAndFeelOnce();
     
     resultsJList = new JList(new DefaultListModel());
     palJList = new JList(new DefaultListModel());

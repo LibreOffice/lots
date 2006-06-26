@@ -254,7 +254,7 @@ public class DatensatzBearbeiten
   
   private void createGUI(ConfigThingy fensterDesc)
   {
-    Common.setLookAndFeel();
+    Common.setLookAndFeelOnce();
     
     //Create and set up the window.
     myFrame = new JFrame("Absenderdaten bearbeiten");

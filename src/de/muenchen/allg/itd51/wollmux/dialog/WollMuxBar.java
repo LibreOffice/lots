@@ -301,8 +301,6 @@ public class WollMuxBar
 
   private void createGUI(ConfigThingy conf)
   {
-    Common.setLookAndFeel();
-    
     initFactories();
    
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();

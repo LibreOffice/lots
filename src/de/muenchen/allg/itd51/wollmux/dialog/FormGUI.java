@@ -144,7 +144,7 @@ public class FormGUI
       Map functionContext,
       FunctionLibrary funcLib, DialogLibrary dialogLib)
   {
-    Common.setLookAndFeel();
+    Common.setLookAndFeelOnce();
     
     //Create and set up the window.
     myFrame = new JFrame(formTitle);
