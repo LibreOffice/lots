@@ -269,7 +269,11 @@ public class DocumentCommandInterpreter
     FormModel fm = new FormModelImpl(document.xTextDocument(), funcLib,
         idToFormFields, tree);
 
-    new FormGUI(descs, fm, idToPresetValue, functionContext, funcLib, dialogLib);
+    ConfigThingy formFensterConf = new ConfigThingy("");
+    try {
+      formFensterConf = WollMuxFiles.getWollmuxConf().query("Fenster").query("Formular").getLastChild();
+    }catch(NodeNotFoundException x) {}
+    new FormGUI(formFensterConf, descs, fm, idToPresetValue, functionContext, funcLib, dialogLib);
   }
 
   /**

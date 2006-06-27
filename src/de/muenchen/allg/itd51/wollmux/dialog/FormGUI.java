@@ -103,6 +103,8 @@ public class FormGUI
 
   /**
    * Zeigt eine neue Formular-GUI an.
+   * @param formFensterConf Der Formular-Unterabschnitt des Fenster-Abschnitts von
+   *        wollmux.conf.
    * @param conf der Formular-Knoten, der die Formularbeschreibung enthält.
    * @param doc das zum Formular gehörende Writer-Dokument (gekapselt als FormModel)
    * @param mapIdToPresetValue bildet IDs von Formularfeldern auf Vorgabewerte ab.
@@ -117,7 +119,7 @@ public class FormGUI
    * @param dialogLib die Dialogbibliothek, die die Dialoge bereitstellt, die
    *        für automatisch zu befüllende Formularfelder benötigt werden.
    */
-  public FormGUI(final ConfigThingy conf, FormModel doc, final Map mapIdToPresetValue,
+  public FormGUI(final ConfigThingy formFensterConf, final ConfigThingy conf, FormModel doc, final Map mapIdToPresetValue,
       final Map functionContext,
       final FunctionLibrary funcLib, final DialogLibrary dialogLib)
   {
@@ -131,7 +133,7 @@ public class FormGUI
     try{
       javax.swing.SwingUtilities.invokeLater(new Runnable() {
         public void run() {
-            try{createGUI(conf, mapIdToPresetValue, functionContext, funcLib, dialogLib);}catch(Exception x){Logger.error(x);};
+            try{createGUI(formFensterConf, conf, mapIdToPresetValue, functionContext, funcLib, dialogLib);}catch(Exception x){Logger.error(x);};
         }
       });
     }
@@ -140,7 +142,7 @@ public class FormGUI
   }
 
 
-  private void createGUI(ConfigThingy conf, Map mapIdToPresetValue,
+  private void createGUI(ConfigThingy formFensterConf, ConfigThingy conf, Map mapIdToPresetValue,
       Map functionContext,
       FunctionLibrary funcLib, DialogLibrary dialogLib)
   {
@@ -195,6 +197,17 @@ public class FormGUI
     cuddleWithOpenOfficeWindow();
   }
 
+  /**
+   * Wertet die Größenangaben von formFensterConf aus (der Formular-Unterabschnitt
+   * des Abschnitts Fenster der wollmux,conf) und passt die Fenstergrößen entsprechend
+   * an.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TODO Testen
+   */
+  private void setWindowSize(ConfigThingy formFensterConf)
+  {
+    
+  }
 
   /**
    * Arrangiert das Writer Fenster so, dass es neben dem Formular-Fenster
@@ -357,7 +370,7 @@ public class FormGUI
     DialogLibrary dialogLib = WollMuxFiles.parseFunctionDialogs(conf.get("Formular"), null, functionContext);
     FunctionLibrary funcLib = WollMuxFiles.parseFunctions(conf.get("Formular"), dialogLib, functionContext, null);
 
-    new FormGUI(conf.get("Formular"), model, mapIdToPresetValue, functionContext, funcLib, dialogLib);
+    new FormGUI(WollMuxFiles.getWollmuxConf().query("Fenster").query("Formular").getLastChild(), conf.get("Formular"), model, mapIdToPresetValue, functionContext, funcLib, dialogLib);
   }
 
 
