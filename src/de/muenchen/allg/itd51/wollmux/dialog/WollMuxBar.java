@@ -34,7 +34,8 @@
 *                  | drückt, damit sich die WollMuxBar dann minimiert.
 * 21.06.2006 | BNK | Gross/Kleinschreibung ignorieren beim Auswertden des MODE
 *                  | Es wird jetzt der letzte Fenster/WollMuxBar-Abschnitt verwendet.
-* 23.06.2006 | BNK | Senderbox von JComboBox auf JPopupMenu umgestellt.                  
+* 23.06.2006 | BNK | Senderbox von JComboBox auf JPopupMenu umgestellt.    
+* 27.06.2006 | BNK | WIDTH, HEIGHT max korrekt unterstützt              
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -43,15 +44,17 @@
 */
 package de.muenchen.allg.itd51.wollmux.dialog;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Frame;
+import java.awt.GraphicsEnvironment;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.Point;
-import java.awt.Toolkit;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -83,6 +86,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JSeparator;
+import javax.swing.Timer;
+import javax.swing.border.BevelBorder;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
@@ -150,9 +155,19 @@ public class WollMuxBar
   private JFrame myFrame;
   
   /**
+   * Falls > 0, so ist dies eine von wollmux,conf fest vorgegebene Breite.
+   */
+  private int myFrame_width;
+  
+  /**
+   * Falls > 0, so ist dies eine von wollmux,conf fest vorgegebene Höhe.
+   */
+  private int myFrame_height;
+  
+  /**
    * Das Fenster, das das Icon enthält, in das sich die Leiste verwandeln kann.
    */
-  private JFrame logoFrame;
+  private JFrame minimizedFrame;
   
   /**
    * Das Panel für den Inhalt des Fensters der WollMuxBar (myFrame).
@@ -160,7 +175,7 @@ public class WollMuxBar
   private JPanel contentPanel;
   
   /**
-   * Das Panel für das Icon-Fenster (logoFrame).
+   * Das Panel für das Icon-Fenster (minimizedFrame).
    */
   private JPanel logoPanel;
 
@@ -302,8 +317,13 @@ public class WollMuxBar
   private void createGUI(ConfigThingy conf)
   {
     initFactories();
+    
+    //TODO Mit file:///C:/Programme/j2sdk1.4.2_08/docs/api/java/awt/doc-files/FocusSpec.html  das Blink-Problem in Griff kriegen und vielleicht auch die WollMuxBar nicht mehr fokussierbar machen (vor allem die minimierte Version). Eventuell nuetzlich dazu sind JWindow-Klasse und evtl. muss ein blinder JFrame oder ein blindes JWindow als Parent in die Hierarchie eingefuegt werden (als Parent der eigentlichen WollMuxBar-Fenster)
    
-    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+    //Toolkit tk = Toolkit.getDefaultToolkit();
+    GraphicsEnvironment genv = GraphicsEnvironment.getLocalGraphicsEnvironment();
+    //Dimension screenSize = tk.getScreenSize();
+    Rectangle bounds = genv.getMaximumWindowBounds();
     
     String title = DEFAULT_TITLE;
     ConfigThingy wmBarConf = new ConfigThingy("");
@@ -318,30 +338,52 @@ public class WollMuxBar
     int myFrame_y = Integer.MIN_VALUE;
     try{myFrame_y = Integer.parseInt(wmBarConf.get("Y").toString());}catch(Exception x) {}
     
-    int myFrame_width = 0;
-    try{myFrame_width = Integer.parseInt(wmBarConf.get("WIDTH").toString());}catch(Exception x) {}
+    myFrame_width = 0;
+    try{
+      String widthStr = wmBarConf.get("WIDTH").toString();
+      if (widthStr.equalsIgnoreCase("max"))
+        myFrame_width = bounds.width;
+      else
+        myFrame_width = Integer.parseInt(widthStr);
+    }catch(Exception x) {}
     
-    int myFrame_height = 0;
-    try{myFrame_height = Integer.parseInt(wmBarConf.get("HEIGHT").toString());}catch(Exception x) {}
+    myFrame_height = 0;
+    try{
+      String heightStr = wmBarConf.get("HEIGHT").toString();
+      if (heightStr.equalsIgnoreCase("max"))
+        myFrame_height = bounds.height;
+      else
+        myFrame_height = Integer.parseInt(heightStr);
+    }catch(Exception x) {}
     
-    int icon_x = screenSize.width - 96;
+    int icon_x = bounds.width - 96;
     try{icon_x = Integer.parseInt(wmBarConf.get("ICONX").toString());}catch(Exception x) {}
     
-    int icon_y = screenSize.height - 128;
+    int icon_y = bounds.height - 128;
     try{icon_y = Integer.parseInt(wmBarConf.get("ICONY").toString());}catch(Exception x) {}
     
     myFrame = new JFrame(title);
     //leave handling of close request to WindowListener.windowClosing
     myFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+    
+    if (windowMode == UP_AND_AWAY_WINDOW_MODE)
+    {
+      myFrame.setUndecorated(true);
+      //myFrame.setFocusable(false);
+      //myFrame.setFocusableWindowState(false);
+      myFrame_x = 0;
+      myFrame_y = 0;
+    }
+    
     //Ein WindowListener, der auf den JFrame registriert wird, damit als
     //Reaktion auf den Schliessen-Knopf auch die ACTION "abort" ausgeführt wird.
     myFrame.addWindowListener(new MyWindowListener());
     
     WindowTransformer myWindowTransformer = new WindowTransformer();
     myFrame.addWindowFocusListener(myWindowTransformer);
-    myFrame.addMouseListener(myWindowTransformer);
     
     contentPanel = new JPanel();
+    contentPanel.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
     contentPanel.setLayout(new GridBagLayout());
     contentPanel.addMouseListener(myIsInsideMonitor);
     myFrame.getContentPane().add(contentPanel);
@@ -369,64 +411,100 @@ public class WollMuxBar
     }
     myFrame.setJMenuBar(mbar);
     
-    setupLogoFrame(title, wmBarConf, icon_x, icon_y);
+    setupMinimizedFrame(title, wmBarConf, icon_x, icon_y);
 
     if (windowMode != NORMAL_WINDOW_MODE) myFrame.setAlwaysOnTop(true);
     
-    myFrame.pack();
+    setSize();
     Dimension frameSize = myFrame.getSize();
-    if (myFrame_width > 0) frameSize.width = myFrame_width;
-    if (myFrame_height > 0) frameSize.height = myFrame_height;
-    myFrame.setSize(frameSize);
-    if (myFrame_x == Integer.MIN_VALUE) myFrame_x = screenSize.width/2 - frameSize.width/2; 
-    if (myFrame_y == Integer.MIN_VALUE) myFrame_y = (int)(0.8*(screenSize.height/2 - frameSize.height/2));
-    myFrame.setLocation(myFrame_x,myFrame_y);
+    if (myFrame_x == Integer.MIN_VALUE) myFrame_x = bounds.width/2 - frameSize.width/2; 
+    if (myFrame_y == Integer.MIN_VALUE) myFrame_y = (int)(0.8*(bounds.height/2 - frameSize.height/2));
+    myFrame.setLocation(bounds.x+myFrame_x,bounds.y+myFrame_y);
     myFrame.setResizable(true);
     myFrame.setVisible(true);
   }
+  
+  private void setSize()
+  {
+    myFrame.pack();
+    Dimension frameSize = myFrame.getSize();
+
+    if (myFrame_width > 0 || myFrame_height > 0)
+    {
+      if (myFrame_width > 0) frameSize.width = myFrame_width;
+      if (myFrame_height > 0) frameSize.height = myFrame_height;
+      myFrame.setSize(frameSize);
+      myFrame.validate();
+      //myFrame.repaint();
+    }
+    
+    int minimizedWidth = frameSize.width; 
+    if (minimizedWidth > 128) minimizedWidth -= 64;
+    minimizedFrame.setSize(minimizedWidth, 5);
+  }
 
   /**
-   * Erzeugt den JFrame mit dem WollMux-Logo.
+   * Erzeugt den JFrame für die minimierte Darstellung (WollMux-Logo oder
+   * schmaler Streifen).
    * @param title der Titel für das Fenster (nur für Anzeige in Taskleiste)
    * @param wmBarConf ConfigThingy des Fenster/WollMuxBar-Abschnitts.
-   * @param icon_x Start-Koordinate des Icons.
-   * @param icon_y Start-Koordinate des Icons.
+   * @param icon_x Start-Koordinate des Icons für Modus "Icon".
+   * @param icon_y Start-Koordinate des Icons für Modus "Icon".
+   * @param upAndAwayWidth breite des Streifens für Modus "UpAndAway"
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private void setupLogoFrame(String title, ConfigThingy wmBarConf, int icon_x, int icon_y)
+  private void setupMinimizedFrame(String title, ConfigThingy wmBarConf, int icon_x, int icon_y)
   {
-    logoFrame = new JFrame(title);
-    logoFrame.setUndecorated(true);
-    logoFrame.setAlwaysOnTop(true);
+    minimizedFrame = new JFrame(title);
+    minimizedFrame.setUndecorated(true);
+    minimizedFrame.setAlwaysOnTop(true);
     //wie bei myFrame soll abort ausgeführt werden, nicht die default Aktion
-    logoFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-    logoFrame.addWindowListener(new MyWindowListener());
+    minimizedFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+    minimizedFrame.addWindowListener(new MyWindowListener());
     
-    URL iconUrl = ICON_URL;
-    try{
-      String urlStr = wmBarConf.get("ICON").toString();
-      URL iconUrl2 = new URL(WollMuxFiles.getDEFAULT_CONTEXT(), urlStr);
-      iconUrl2.openStream().close(); //testen ob URL erreichbar ist.
-      iconUrl = iconUrl2;
-    }catch(Exception x) {}
+    if (windowMode == BECOME_ICON_MODE)
+    {
+      URL iconUrl = ICON_URL;
+      try{
+        String urlStr = wmBarConf.get("ICON").toString();
+        URL iconUrl2 = new URL(WollMuxFiles.getDEFAULT_CONTEXT(), urlStr);
+        iconUrl2.openStream().close(); //testen ob URL erreichbar ist.
+        iconUrl = iconUrl2;
+      }catch(Exception x) {}
+      
+      JLabel logo = new JLabel(new ImageIcon(iconUrl));
+      logo.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
+      logoPanel = new JPanel(new GridLayout(1,1));
+      logoPanel.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
+      logoPanel.add(logo);
+      minimizedFrame.getContentPane().add(logoPanel);
+      
+      LogoWindowTransformer myWindowTransformer = new LogoWindowTransformer();
+      logo.addMouseListener(myWindowTransformer);
+      logo.addMouseMotionListener(myWindowTransformer);
+    }
     
-    JLabel logo = new JLabel(new ImageIcon(iconUrl));
-    logo.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
-    logoPanel = new JPanel(new GridLayout(1,1));
-    logoPanel.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
-    logoPanel.add(logo);
-    logoFrame.getContentPane().add(logoPanel);
     
-    LogoWindowTransformer myWindowTransformer = new LogoWindowTransformer();
-    logo.addMouseListener(myWindowTransformer);
-    logo.addMouseMotionListener(myWindowTransformer);
     
       //in der Hoffnung, dass es verhindert, dass anderen Fenstern der Fokus gestohlen wird
-    logoFrame.setFocusableWindowState(false);
+    minimizedFrame.setFocusableWindowState(false);
+    minimizedFrame.setFocusable(false);
     
-    logoFrame.pack();
-    logoFrame.setLocation(icon_x,icon_y);
-    logoFrame.setResizable(false);
+    minimizedFrame.pack();
+    
+    if (windowMode == UP_AND_AWAY_WINDOW_MODE)
+    {
+      icon_x = 0;
+      icon_y = 0;
+      minimizedFrame.addMouseListener(new UpAndAwayWindowTransformer());
+      JPanel emptyPanel = new JPanel();
+      emptyPanel.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
+      emptyPanel.setFocusable(false);
+      minimizedFrame.add(emptyPanel);
+    }
+    
+    minimizedFrame.setLocation(icon_x,icon_y);
+    minimizedFrame.setResizable(false);
   }
   
   /**
@@ -518,6 +596,8 @@ public class WollMuxBar
             button = new JButton(label);
             button.addActionListener(actionListener_openMenu) ;
             button.setActionCommand(menuName);
+            button.setBackground(Color.WHITE);
+            button.setFocusable(false);
             senderbox = Senderbox.create((JPopupMenu)menu, button);
           }
           
@@ -778,7 +858,7 @@ public class WollMuxBar
   {
     eventHandler.handleTerminate();
     myFrame.dispose();
-    logoFrame.dispose();
+    minimizedFrame.dispose();
     eventHandler.waitForThreadTermination();
 
     System.exit(0);
@@ -858,6 +938,8 @@ public class WollMuxBar
       if (current != null && !current.equals(""))
         senderbox.setSelectedItem(current);
     }
+    
+    setSize();
   }
   
   private static abstract class Senderbox
@@ -958,7 +1040,7 @@ public class WollMuxBar
    * minimieren zum Icon anzustoßen.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private class WindowTransformer implements WindowFocusListener, MouseListener
+  private class WindowTransformer implements WindowFocusListener
   {
     public void windowGainedFocus(WindowEvent e) {}
     
@@ -967,22 +1049,6 @@ public class WollMuxBar
       minimize();
     }
 
-    public void mouseClicked(MouseEvent e)
-    {
-  
-    }
-    public void mousePressed(MouseEvent e) {}
-    public void mouseReleased(MouseEvent e) {}
-
-    public void mouseEntered(MouseEvent e)
-    {
-      System.out.println("mouseEntered");
-    }
-
-    public void mouseExited(MouseEvent e)
-    {
-      System.out.println("mouseExited");
-    }
   }
   
   /**
@@ -1000,9 +1066,7 @@ public class WollMuxBar
     
     public void mouseClicked(MouseEvent e)
     {
-      logoFrame.setVisible(false);
-      myFrame.setVisible(true);
-      myFrame.setExtendedState(JFrame.NORMAL);
+      maximize();
     }
     
     public void mousePressed(MouseEvent e)
@@ -1017,12 +1081,47 @@ public class WollMuxBar
     
     public void mouseDragged(MouseEvent e)
     {
-      Point winLoc = logoFrame.getLocation();
+      Point winLoc = minimizedFrame.getLocation();
       Point p = e.getPoint();
       winLoc.x += p.x - dragStart.x;
       winLoc.y += p.y - dragStart.y;
-      logoFrame.setLocation(winLoc);
+      minimizedFrame.setLocation(winLoc);
     }
+  }
+  
+  /**
+   * Wird auf den Strich am oberen Bildschirmrand registriert im UpAndAway Modus,
+   * um darauf reagieren zu können, wenn die Maus dort eindringt.
+   *
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private class UpAndAwayWindowTransformer implements MouseListener, ActionListener
+  {
+    private Timer timer;
+    
+    public UpAndAwayWindowTransformer() 
+    {
+      timer = new Timer(500, this);
+      timer.setRepeats(false);
+    }
+    
+    public void mouseClicked(MouseEvent e) {}
+    public void mousePressed(MouseEvent e) {}
+    public void mouseReleased(MouseEvent e) {}
+    public void mouseEntered(MouseEvent e)
+    {
+      timer.restart();
+    }
+
+    public void mouseExited(MouseEvent e) 
+    {
+      timer.stop();
+    }
+
+    public void actionPerformed(ActionEvent e)
+    {
+      maximize();
+    }  
   }
   
   /**
@@ -1031,25 +1130,34 @@ public class WollMuxBar
    *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private class IsInsideMonitor implements MouseListener
+  private class IsInsideMonitor implements MouseListener, ActionListener
   {
-    private boolean isInside = true;
-    
-    public boolean inside() { return isInside;}
+    private Timer timer;
 
+    public IsInsideMonitor()
+    {
+      timer = new Timer(1000, this);
+      timer.setRepeats(false);
+    }
+    
     public void mouseClicked(MouseEvent e) {}
     public void mousePressed(MouseEvent e) {}
     public void mouseReleased(MouseEvent e) {}
     public void mouseEntered(MouseEvent e)
     {
-      isInside = true;
-      System.out.println("entered");
+      if (windowMode != UP_AND_AWAY_WINDOW_MODE) return;
+      timer.stop();
     }
 
     public void mouseExited(MouseEvent e)
     {
-      isInside = false;
-      System.out.println("exited");
+      if (windowMode != UP_AND_AWAY_WINDOW_MODE) return;
+      timer.restart();
+    }
+
+    public void actionPerformed(ActionEvent e)
+    {
+      minimize();
     }
   }
 
@@ -1062,11 +1170,24 @@ public class WollMuxBar
   {
     if (windowMode == ALWAYS_ON_TOP_WINDOW_MODE || windowMode == NORMAL_WINDOW_MODE) return;
     if (windowMode == MINIMIZE_TO_TASKBAR_MODE) {myFrame.setExtendedState(Frame.ICONIFIED); return;}
+    minimizedFrame.setVisible(true);
     myFrame.setVisible(false);
-    logoFrame.setVisible(true);
   }
 
   
+  /**
+   * Je nach windowMode wird die WollMuxBar aus dem Wartezustand wieder in den
+   * aktiven Zustand versetzt.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private void maximize()
+  {
+    myFrame.setVisible(true);
+    myFrame.setExtendedState(JFrame.NORMAL);
+    if (windowMode == BECOME_ICON_MODE || windowMode == UP_AND_AWAY_WINDOW_MODE)
+      minimizedFrame.setVisible(false);
+  }
+
   /**
    * Startet die WollMuxBar.
    * @param args --minimize, --topbar, --normalwindow um das Anzeigeverhalten festzulegen.
@@ -1103,7 +1224,7 @@ public class WollMuxBar
       Logger.debug("WollMuxBar gestartet");
       
       try{
-        String windowMode2 = wollmuxConf.query("Fenster").query("WollMuxBar").getLastChild().get("MODE").toString();
+        String windowMode2 = wollmuxConf.query("Fenster").query("WollMuxBar").getLastChild().query("MODE").getLastChild().toString();
         if (windowMode2.equalsIgnoreCase("Icon"))
           windowMode = BECOME_ICON_MODE;
         else if (windowMode2.equalsIgnoreCase("AlwaysOnTop"))
