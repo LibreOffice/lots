@@ -408,8 +408,8 @@ public class WollMuxEventHandler
         ConfigThingy tds = new ConfigThingy("Textdokument");
         try
         {
-          tds = mux.getWollmuxConf().query("Fenster").query(
-              "Textdokument").getLastChild();
+          tds = mux.getWollmuxConf().query("Fenster").query("Textdokument")
+              .getLastChild();
           // Einstellungen setzen:
           setWindowViewSettings(doc, tds);
         }
@@ -945,6 +945,73 @@ public class WollMuxEventHandler
   // *******************************************************************************************
 
   /**
+   * Erzeugt ein neues WollMuxEvent zum Justieren aller OOo-Fenster, so dass
+   * kein Fenster in den übergebenen Bereich hineinragt.
+   * 
+   * @param edge
+   * @param startx
+   * @param starty
+   * @param width
+   * @param height
+   */
+  public static void handleAdjustWindows(int edge, int startx, int starty,
+      int width, int height)
+  {
+    handle(new OnAdjustWindows(edge, startx, starty, width, height));
+  }
+
+  /**
+   * Dieses Event wird ausgelöst, wenn im WollMux-Service die methode setSender
+   * aufgerufen wird. Es sort dafür, dass ein neuer Absender gesetzt wird.
+   * 
+   * @author christoph.lutz
+   */
+  private static class OnAdjustWindows extends BasicEvent
+  {
+    private int edge;
+
+    private int startx;
+
+    private int starty;
+
+    private int width;
+
+    private int height;
+
+    public OnAdjustWindows(int edge, int startx, int starty, int width,
+        int height)
+    {
+      this.startx = startx;
+      this.starty = starty;
+      this.width = width;
+      this.height = height;
+    }
+
+    protected boolean doit() throws WollMuxFehlerException
+    {
+      return EventProcessor.processTheNextEvent;
+    }
+
+    public String toString()
+    {
+      return this.getClass().getSimpleName()
+             + "("
+             + edge
+             + ", "
+             + startx
+             + ", "
+             + starty
+             + ", "
+             + width
+             + ", "
+             + height
+             + ")";
+    }
+  }
+
+  // *******************************************************************************************
+
+  /**
    * Erzeugt ein neues WollMuxEvent, welches dafür sorgt, dass alle
    * Formularfelder Dokument auf den neuen Wert gesetzt werden. Bei
    * Formularfeldern mit TRAFO-Funktion wird die Transformation entsprechend
@@ -1181,79 +1248,6 @@ public class WollMuxEventHandler
         try
         {
           if (field != null) field.focus();
-        }
-        catch (RuntimeException e)
-        {
-          // Absicherung gegen das manuelle Löschen von Dokumentinhalten.
-        }
-      }
-      else
-      {
-        Logger.debug(this
-                     + ": Es existiert kein Formularfeld mit der ID '"
-                     + fieldId
-                     + "' in diesem Dokument");
-      }
-      return EventProcessor.processTheNextEvent;
-    }
-
-    public String toString()
-    {
-      return this.getClass().getSimpleName() + "('" + fieldId + "')";
-    }
-  }
-
-  // *******************************************************************************************
-
-  /**
-   * Erzeugt ein Event, das den View-Cursor des Dokuments doc wieder an die
-   * Stelle zurücksetzt, an der er sich vor dem Fokusieren des Formularfeldes
-   * fieldID befunden hat.
-   * 
-   * @param idToFormValues
-   *          Eine HashMap die unter dem Schlüssel fieldID den Vektor aller
-   *          FormFields mit der ID fieldID liefert.
-   * @param fieldId
-   *          die ID des Formularfeldes das den Fokus bekommen soll. Besitzen
-   *          mehrere Formularfelder diese ID, so wird bevorzugt das erste
-   *          Formularfeld aus dem Vektor genommen, das keine Trafo enthält.
-   *          Ansonsten wird das erste Formularfeld im Vektor verwendet.
-   */
-  public static void handleUnFocusFormField(HashMap idToFormValues,
-      String fieldId)
-  {
-    handle(new OnUnFocusFormField(idToFormValues, fieldId));
-  }
-
-  /**
-   * Dieses Event wird vom FormModelImpl ausgelöst, wenn in der Formular-GUI ein
-   * Formularfeld den Fokus verloren hat und sorgt dafür, dass der View-Cursor
-   * im Dokument wieder an die Stelle zurück springt, an der er vor dem
-   * Fokusieren stand.
-   * 
-   * @author christoph.lutz
-   */
-  private static class OnUnFocusFormField extends BasicEvent
-  {
-    private HashMap idToFormValues;
-
-    private String fieldId;
-
-    public OnUnFocusFormField(HashMap idToFormValues, String fieldId)
-    {
-      this.idToFormValues = idToFormValues;
-      this.fieldId = fieldId;
-    }
-
-    protected boolean doit() throws WollMuxFehlerException
-    {
-      if (idToFormValues.containsKey(fieldId))
-      {
-        Vector formFields = (Vector) idToFormValues.get(fieldId);
-        FormField field = preferUntransformedFormField(formFields);
-        try
-        {
-          if (field != null) field.unfocus();
         }
         catch (RuntimeException e)
         {

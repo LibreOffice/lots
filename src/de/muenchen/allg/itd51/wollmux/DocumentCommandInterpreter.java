@@ -427,7 +427,6 @@ public class DocumentCommandInterpreter
 
     public void focusLost(String fieldId)
     {
-      WollMuxEventHandler.handleUnFocusFormField(idToFormValues, fieldId);
     }
   }
 
@@ -949,7 +948,7 @@ public class DocumentCommandInterpreter
     public int executeCommand(DocumentCommand.InsertValue cmd)
     {
       cmd.setErrorState(false);
-      
+
       String spaltenname = cmd.getDBSpalte();
       String value = null;
       try
@@ -967,7 +966,7 @@ public class DocumentCommandInterpreter
         cmd.setErrorState(true);
         return 1;
       }
-      
+
       XTextCursor insCursor = cmd.createInsertCursor();
       if (insCursor != null)
       {
