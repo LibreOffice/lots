@@ -31,7 +31,6 @@ package de.muenchen.allg.itd51.wollmux;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -742,27 +741,19 @@ public class WollMuxEventHandler
           // darf nicht auftreten, da url bereits oben geprüft wurde...
           Logger.error(e);
         }
-        URLConnection con = null;
         try
         {
-          con = url.openConnection();
+          url.openStream();
         }
         catch (IOException e)
         {
-          // Ich hab noch nicht rausgefunden, wann diese Exception geworfen
-          // wird! auf jeden Fall NICHT, wenn die URL nicht aufgelöst werden
-          // kann!!
           Logger.error(e);
-        }
-        if (con != null && con.getContentLength() <= 0)
-        {
           throw new WollMuxFehlerException(
-              "Die URL '"
-                  + url.toExternalForm()
-                  + "' des Textfragments mit der FRAG_ID '"
+              "Fehler beim Laden des Fragments mit der FRAG_ID '"
                   + frag_id
-                  + "' kann nicht aufgelöst werden!\n\n"
-                  + "Bitte stellen Sie sicher, dass das verwendete Textfragment existiert und unbeschädigt ist!");
+                  + "' von der URL '"
+                  + url.toExternalForm()
+                  + "'\n", e);
         }
 
         // URL in die in loadUrlStr (zum sofort öffnen) und in argsUrlStr (zum

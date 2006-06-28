@@ -817,21 +817,18 @@ public class DocumentCommandInterpreter
      * @throws java.io.IOException
      * @throws IOException
      * @throws IllegalArgumentException
+     * @throws java.io.IOException 
+     * @throws IOException 
      */
     private void insertDocumentFromURL(DocumentCommand cmd, URL url)
-        throws java.io.IOException, IOException, IllegalArgumentException
+        throws IllegalArgumentException, java.io.IOException, IOException
     {
 
       // Workaround: OOo friert ein, wenn ressource bei insertDocumentFromURL
       // nicht auflösbar. http://qa.openoffice.org/issues/show_bug.cgi?id=57049
       // Hier wird versucht, die URL über den java-Klasse url aufzulösen und bei
       // Fehlern abgebrochen.
-      if (url.openConnection().getContentLength() <= 0)
-      {
-        throw new IOException("Das Textfragment mit der URL \""
-                              + url.toExternalForm()
-                              + "\" ist leer oder nicht verfügbar");
-      }
+      url.openStream();
 
       // URL durch den URLTransformer von OOo jagen, damit die URL auch von OOo
       // verarbeitet werden kann.
