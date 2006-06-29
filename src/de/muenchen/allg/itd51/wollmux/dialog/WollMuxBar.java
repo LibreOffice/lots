@@ -35,7 +35,8 @@
 * 21.06.2006 | BNK | Gross/Kleinschreibung ignorieren beim Auswertden des MODE
 *                  | Es wird jetzt der letzte Fenster/WollMuxBar-Abschnitt verwendet.
 * 23.06.2006 | BNK | Senderbox von JComboBox auf JPopupMenu umgestellt.    
-* 27.06.2006 | BNK | WIDTH, HEIGHT max korrekt unterstützt              
+* 27.06.2006 | BNK | WIDTH, HEIGHT max korrekt unterstützt 
+* 29.06.2006 | BNK | min, max, center unterstützt             
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -140,6 +141,11 @@ public class WollMuxBar
   private static final int UP_AND_AWAY_WINDOW_MODE = 4;
   
   /**
+   * TODO Die WollMuxBar ist vertikal und verschwindet am linken Rand, wenn der Mauscursor sie verlässt.
+   */
+  private static final int LEFT_AND_AWAY_WINDOW_MODE = 5;
+  
+  /**
    * Der Anzeigemodus für die WollMuxBar (z,B, {@link BECOME_ICON_MODE})
    */
   private int windowMode;
@@ -156,13 +162,39 @@ public class WollMuxBar
   
   /**
    * Falls > 0, so ist dies eine von wollmux,conf fest vorgegebene Breite.
+   * Falls 0, so wird die natürliche Breite verwendet.
+   * Falls -1, so wird die maximale Breite verwendet.
    */
   private int myFrame_width;
   
   /**
    * Falls > 0, so ist dies eine von wollmux,conf fest vorgegebene Höhe.
+   * Falls 0, so wird die natürliche Höhe verwendet.
+   * Falls -1, so wird die maximale Höhe verwendet.
    */
   private int myFrame_height;
+  
+  /**
+   * Falls >= 0, so ist dies eine von wollmux,conf fest vorgegebene x-Koordinate.
+   * Diese wird nur einmal gesetzt. Danach kann der Benutzer das Fenster verschieben,
+   * wenn er möchte.
+   * Falls -1, so wird das Fenster zentriert.
+   * Falls -2, so wird die größte sinnvolle Koordinate verwendet.
+   * Falls -3, so wird die kleinste sinnvolle Koordinate verwendet.
+   * Falls Integer.MIN_VALUE, so ist keine Koordinate fest vorgegeben.
+   */
+  private int myFrame_x;
+  
+  /**
+   * Falls >= 0, so ist dies eine von wollmux,conf fest vorgegebene y-Koordinate.
+   * Diese wird nur einmal gesetzt. Danach kann der Benutzer das Fenster verschieben,
+   * wenn er möchte.
+   * Falls -1, so wird das Fenster zentriert.
+   * Falls -2, so wird die größte sinnvolle Koordinate verwendet.
+   * Falls -3, so wird die kleinste sinnvolle Koordinate verwendet.
+   * Falls Integer.MIN_VALUE, so ist keine Koordinate fest vorgegeben.
+   */
+  private int myFrame_y;
   
   /**
    * Das Fenster, das das Icon enthält, in das sich die Leiste verwandeln kann.
@@ -332,28 +364,66 @@ public class WollMuxBar
     }catch(Exception x) {}
     try{title = wmBarConf.get("TITLE").toString();}catch(Exception x) {}
     
-    int myFrame_x = Integer.MIN_VALUE;
-    try{myFrame_x = Integer.parseInt(wmBarConf.get("X").toString());}catch(Exception x) {}
+    myFrame_x = Integer.MIN_VALUE;
+    try{
+      String xStr = wmBarConf.get("X").toString();
+      if (xStr.equalsIgnoreCase("center"))
+        myFrame_x = -1;
+      else if (xStr.equalsIgnoreCase("max"))
+        myFrame_x = -2;
+      else if (xStr.equalsIgnoreCase("min"))
+        myFrame_x = -3;
+      else
+      {
+        myFrame_x = Integer.parseInt(xStr);
+          // Ja, das folgende ist eine Einschränkung, aber 
+          // negative Koordinaten gehen in KDE eh nicht und kollidieren mit
+          // obigen Festlegungen
+        if (myFrame_x < 0) myFrame_x = 0;
+      }
+    }catch(Exception x) {}
     
-    int myFrame_y = Integer.MIN_VALUE;
-    try{myFrame_y = Integer.parseInt(wmBarConf.get("Y").toString());}catch(Exception x) {}
+    myFrame_y = Integer.MIN_VALUE;
+    try{
+      String yStr = wmBarConf.get("Y").toString();
+      if (yStr.equalsIgnoreCase("center"))
+        myFrame_y = -1;
+      else if (yStr.equalsIgnoreCase("max"))
+        myFrame_y = -2;
+      else if (yStr.equalsIgnoreCase("min"))
+        myFrame_y = -3;
+      else
+      {
+        myFrame_y = Integer.parseInt(yStr);
+          // Ja, das folgende ist eine Einschränkung, aber 
+          // negative Koordinaten gehen in KDE eh nicht und kollidieren mit
+          // obigen Festlegungen
+        if (myFrame_y < 0) myFrame_y = 0;
+      }
+    }catch(Exception x) {}
     
     myFrame_width = 0;
     try{
       String widthStr = wmBarConf.get("WIDTH").toString();
       if (widthStr.equalsIgnoreCase("max"))
-        myFrame_width = bounds.width;
+        myFrame_width = -1;
       else
+      {
         myFrame_width = Integer.parseInt(widthStr);
+        if (myFrame_width < 0) myFrame_width = 0;
+      }
     }catch(Exception x) {}
     
     myFrame_height = 0;
     try{
       String heightStr = wmBarConf.get("HEIGHT").toString();
       if (heightStr.equalsIgnoreCase("max"))
-        myFrame_height = bounds.height;
+        myFrame_height = -1;
       else
+      {
         myFrame_height = Integer.parseInt(heightStr);
+        if (myFrame_height < 0) myFrame_height = 0;
+      }
     }catch(Exception x) {}
     
     int icon_x = bounds.width - 96;
@@ -371,7 +441,6 @@ public class WollMuxBar
       myFrame.setUndecorated(true);
       //myFrame.setFocusable(false);
       //myFrame.setFocusableWindowState(false);
-      myFrame_x = 0;
       myFrame_y = 0;
     }
     
@@ -415,32 +484,93 @@ public class WollMuxBar
 
     if (windowMode != NORMAL_WINDOW_MODE) myFrame.setAlwaysOnTop(true);
     
-    setSize();
-    Dimension frameSize = myFrame.getSize();
-    if (myFrame_x == Integer.MIN_VALUE) myFrame_x = bounds.width/2 - frameSize.width/2; 
-    if (myFrame_y == Integer.MIN_VALUE) myFrame_y = (int)(0.8*(bounds.height/2 - frameSize.height/2));
-    myFrame.setLocation(bounds.x+myFrame_x,bounds.y+myFrame_y);
+    setSizeAndLocation();
     myFrame.setResizable(true);
     myFrame.setVisible(true);
   }
   
-  private void setSize()
+  private void setSizeAndLocation()
   {
+    // Toolkit tk = Toolkit.getDefaultToolkit();
+    GraphicsEnvironment genv = GraphicsEnvironment.getLocalGraphicsEnvironment();
+    //Dimension screenSize = tk.getScreenSize();
+    Rectangle bounds = genv.getMaximumWindowBounds();
+    
     myFrame.pack();
-    Dimension frameSize = myFrame.getSize();
-
-    if (myFrame_width > 0 || myFrame_height > 0)
+    Dimension naturalFrameSize = myFrame.getSize();
+    Dimension frameSize = new Dimension(naturalFrameSize);
+    Point frameLocation = myFrame.getLocation(); 
+    
+    switch (myFrame_width)
     {
-      if (myFrame_width > 0) frameSize.width = myFrame_width;
-      if (myFrame_height > 0) frameSize.height = myFrame_height;
-      myFrame.setSize(frameSize);
-      myFrame.validate();
-      //myFrame.repaint();
+      case 0: // natural width
+        break;
+      case -1: // max
+        frameSize.width = bounds.width;
+        break;
+      default: // specified width
+        frameSize.width = myFrame_width;
+        break;
     }
     
+    switch (myFrame_height)
+    {
+      case 0: // natural height
+        break;
+      case -1: // max
+        frameSize.height = bounds.height;
+        break;
+      default: // specified height
+        frameSize.height = myFrame_height;
+        break;
+    }
+    
+    switch (myFrame_x)
+    {
+      case -1: // center
+        frameLocation.x = bounds.x + (bounds.width-frameSize.width)/2;
+        break;
+      case -2: // max
+        frameLocation.x = bounds.x + bounds.width - frameSize.width;
+        break;
+      case -3: // min
+        frameLocation.x = bounds.x;
+        break;
+      case Integer.MIN_VALUE: // kein Wert angegeben
+        break;
+      default: // Wert angegeben, wird nur einmal berücksichtigt.
+        frameLocation.x = myFrame_x;
+        myFrame_x = Integer.MIN_VALUE;
+        break;
+    }
+    
+    switch (myFrame_y)
+    {
+      case -1: // center
+        frameLocation.y = bounds.y + (bounds.height-frameSize.height)/2;
+        break;
+      case -2: // max
+        frameLocation.y = bounds.y + bounds.height - frameSize.height;
+        break;
+      case -3: // min
+        frameLocation.y = bounds.y;
+        break;
+      case Integer.MIN_VALUE: // kein Wert angegeben
+        break;
+      default: // Wert angegeben, wird nur einmal berücksichtigt.
+        frameLocation.y = myFrame_y;
+        myFrame_y = Integer.MIN_VALUE;
+        break;
+    }
+    
+    myFrame.setSize(frameSize);
+    myFrame.setLocation(frameLocation);
+    myFrame.validate();
+        
     int minimizedWidth = frameSize.width; 
     if (minimizedWidth > 128) minimizedWidth -= 64;
     minimizedFrame.setSize(minimizedWidth, 5);
+    minimizedFrame.setLocation(frameLocation);
   }
 
   /**
@@ -939,7 +1069,7 @@ public class WollMuxBar
         senderbox.setSelectedItem(current);
     }
     
-    setSize();
+    setSizeAndLocation();
   }
   
   private static abstract class Senderbox
