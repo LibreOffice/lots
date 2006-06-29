@@ -14,6 +14,7 @@
 * 26.05.2006 | BNK | Suchstrategie,... fertig implementiert
 * 29.05.2006 | BNK | Umstellung auf UIElementFactory.Context
 * 30.05.2006 | BNK | Suche implementiert
+* 29.06.2006 | BNK | setResizable(true)
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -335,7 +336,7 @@ public class DatasourceSearchDialog implements Dialog
     int x = screenSize.width/2 - frameWidth/2; 
     int y = screenSize.height/2 - frameHeight/2;
     myFrame.setLocation(x,y);
-    myFrame.setResizable(false);
+    myFrame.setResizable(true);
     myFrame.setVisible(true);
   }
 
