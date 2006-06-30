@@ -20,6 +20,7 @@
 package de.muenchen.allg.itd51.wollmux.dialog;
 
 import java.awt.Font;
+import java.awt.Rectangle;
 import java.util.Enumeration;
 
 import javax.swing.JFrame;
@@ -27,6 +28,7 @@ import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import javax.swing.plaf.FontUIResource;
 
+import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.Logger;
 
 /**
@@ -35,6 +37,32 @@ import de.muenchen.allg.itd51.wollmux.Logger;
  */
 public class Common
 {
+  /**
+   * Spezialwert wenn eine Breite oder Höhe die maximal sinnvolle sein soll.
+   */
+  public static final int DIMENSION_MAX = -1;
+  /**
+   * Spezialwert, wenn eine Breite oder Höhe nicht angegeben wurde.
+   */
+  public static final int DIMENSION_UNSPECIFIED = -2;
+  /**
+   * Spezialwert, wenn eine X oder Y Koordinate so gesetzt werden soll, dass das
+   * Fenster in der Mitte positioniert ist.
+   */
+  public static final int COORDINATE_CENTER = -1;
+  /**
+   * Spezialwert wenn eine X oder Y Koordinate die maximal sinnvolle sein soll.
+   */
+  public static final int COORDINATE_MAX = -2;
+  /**
+   * Spezialwert wenn eine X oder Y Koordinate die minimal sinnvolle sein soll.
+   */
+  public static final int COORDINATE_MIN = -3;
+  /**
+   * Spezialwert, wenn eine X oder Y Koordinate nicht angegeben wurde.
+   */
+  public static final int COORDINATE_UNSPECIFIED = -4;
+  
   private static boolean lafSet = false;
   
   /**
@@ -91,5 +119,79 @@ public class Common
       }
     }
     Logger.debug(changedFonts+" Fontgrößen verändert!");
+  }
+  
+  /**
+   * Parst WIDTH, HEIGHT, X und Y aus fensterConf und liefert ein entsprechendes
+   * Rectangle. Spezialwerte wie {@link #COORDINATE_CENTER} und 
+   * {@link #DIMENSION_MAX} werden verwendet.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public static Rectangle parseDimensions(ConfigThingy fensterConf)
+  {
+    Rectangle r = new Rectangle();
+    r.x = COORDINATE_UNSPECIFIED;
+    try{
+      String xStr = fensterConf.get("X").toString();
+      if (xStr.equalsIgnoreCase("center"))
+        r.x = COORDINATE_CENTER;
+      else if (xStr.equalsIgnoreCase("max"))
+        r.x = COORDINATE_MAX;
+      else if (xStr.equalsIgnoreCase("min"))
+        r.x = COORDINATE_MIN;
+      else
+      {
+        r.x = Integer.parseInt(xStr);
+          // Ja, das folgende ist eine Einschränkung, aber 
+          // negative Koordinaten gehen in KDE eh nicht und kollidieren mit
+          // obigen Festlegungen
+        if (r.x < 0) r.x = 0;
+      }
+    }catch(Exception x) {}
+    
+    r.y = COORDINATE_UNSPECIFIED;
+    try{
+      String yStr = fensterConf.get("Y").toString();
+      if (yStr.equalsIgnoreCase("center"))
+        r.y = COORDINATE_CENTER;
+      else if (yStr.equalsIgnoreCase("max"))
+        r.y = COORDINATE_MAX;
+      else if (yStr.equalsIgnoreCase("min"))
+        r.y = COORDINATE_MIN;
+      else
+      {
+        r.y = Integer.parseInt(yStr);
+          // Ja, das folgende ist eine Einschränkung, aber 
+          // negative Koordinaten gehen in KDE eh nicht und kollidieren mit
+          // obigen Festlegungen
+        if (r.y < 0) r.y = 0;
+      }
+    }catch(Exception x) {}
+    
+    r.width = DIMENSION_UNSPECIFIED;
+    try{
+      String widthStr = fensterConf.get("WIDTH").toString();
+      if (widthStr.equalsIgnoreCase("max"))
+        r.width = DIMENSION_MAX;
+      else
+      {
+        r.width = Integer.parseInt(widthStr);
+        if (r.width < 0) r.width = DIMENSION_UNSPECIFIED;
+      }
+    }catch(Exception x) {}
+    
+    r.height = DIMENSION_UNSPECIFIED;
+    try{
+      String heightStr = fensterConf.get("HEIGHT").toString();
+      if (heightStr.equalsIgnoreCase("max"))
+        r.height = DIMENSION_MAX;
+      else
+      {
+        r.height = Integer.parseInt(heightStr);
+        if (r.height < 0) r.height = DIMENSION_UNSPECIFIED;
+      }
+    }catch(Exception x) {}
+    
+    return r;
   }
 }

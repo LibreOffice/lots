@@ -489,6 +489,11 @@ public class WollMuxBar
     myFrame.setVisible(true);
   }
   
+  /**
+   * Passt die Größe und Position der Fenster an.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private void setSizeAndLocation()
   {
     // Toolkit tk = Toolkit.getDefaultToolkit();
@@ -565,7 +570,7 @@ public class WollMuxBar
     
     myFrame.setSize(frameSize);
     myFrame.setLocation(frameLocation);
-    myFrame.validate();
+    myFrame.validate(); //ohne diese wurde in Tests manchmal nicht neu gezeichnet
         
     int minimizedWidth = frameSize.width; 
     if (minimizedWidth > 128) minimizedWidth -= 64;

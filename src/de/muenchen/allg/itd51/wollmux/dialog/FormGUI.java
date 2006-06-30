@@ -22,9 +22,9 @@
 */
 package de.muenchen.allg.itd51.wollmux.dialog;
 
-import java.awt.Dimension;
-import java.awt.Point;
-import java.awt.Toolkit;
+import java.awt.GraphicsEnvironment;
+import java.awt.Insets;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
@@ -57,18 +57,11 @@ import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 public class FormGUI
 {
   /**
-   * Die Breite des linken Randes eines Fensters. Diese wird benötigt, um die exakte
-   * Platzierung von Writer und Formular-Fenster so zu steuern, dass die Fenster
-   * ohne Lücke nebeneinander angeordnet sind.
+   * Die (vom Betriebssystem gelieferten) Ränder des Formular-GUI-Fensters.
+   * Wird benötigt, um die exakte Platzierung der FormGUI und des Writer-Fensters
+   * zu bewerkstelligen.
    */
-  int winBorderWidth;
-  
-  /**
-   * Die Breite des oberen Randes eines Fensters. Diese wird benötigt, um die exakte
-   * Platzierung von Writer und Formular-Fenster so zu steuern, dass die Fenster
-   * auf und mit gleicher Höhe angeordnet sind.
-   */
-  int winBorderHeight;
+  private Insets windowInsets;
   
   /**
    * Das Fenster der Formular-GUI. Hier wird der FormController eingebettet. Auch
@@ -86,6 +79,12 @@ public class FormGUI
    * Der Titel des Formularfensters (falls nicht anderweitig spezifiziert).
    */
   private String formTitle = "Unbenanntes Formular";
+  
+  /**
+   * Gibt die Lage und Größe des Fensters der FormGUI an, so wie sie von
+   * {@link Common#parseDimensions(ConfigThingy)} geliefert wird.
+   */
+  private Rectangle formGUIBounds;
   
 
   /**
@@ -168,62 +167,135 @@ public class FormGUI
       return;
     }
 
-    myFrame.getContentPane().add(formController.JPanel());
+    myFrame.getContentPane().add(formController.JComponent());
 
     myFrame.pack();
-    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-    //int frameWidth = myFrame.getWidth();
-    int frameHeight = myFrame.getHeight();
-    //frameHeight = screenSize.height * 8 / 10;
-    //myFrame.setSize(frameWidth, frameHeight);
-    int x = 0; //screenSize.width/2 - frameWidth/2; 
-    int y = screenSize.height/2 - frameHeight/2;
-    myFrame.setLocation(x,y);
     myFrame.setResizable(true);
     myFrame.setVisible(true);
     
     /*
-     * Berechnen der Breite des Fensterrahmens.
+     * Bestimmen der Breite des Fensterrahmens.
      */
-    Point panelLocation = formController.JPanel().getLocationOnScreen();
-    Point frameLocation = myFrame.getLocationOnScreen();
-    winBorderWidth  = panelLocation.x - frameLocation.x;
-    winBorderHeight = panelLocation.y - frameLocation.y;
+    windowInsets = myFrame.getInsets();
     
-    /*
-     * Muss nach dem Berechnen von winBorderWidth und winBorderHeight aufgerufen
-     * werden, da diese in der Methode verwendet werden.
-     */
-    cuddleWithOpenOfficeWindow();
+    formGUIBounds = Common.parseDimensions(formFensterConf);
+    setFormGUISizeAndLocation();
+    arrangeWindows();
   }
 
   /**
-   * Wertet die Größenangaben von formFensterConf aus (der Formular-Unterabschnitt
-   * des Abschnitts Fenster der wollmux,conf) und passt die Fenstergrößen entsprechend
-   * an.
+   * Setzt Größe und Ort der FormGUI.
+   * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TODO Testen
    */
-  private void setWindowSize(ConfigThingy formFensterConf)
+  private void setFormGUISizeAndLocation()
   {
+    // Toolkit tk = Toolkit.getDefaultToolkit();
+    GraphicsEnvironment genv = GraphicsEnvironment.getLocalGraphicsEnvironment();
+    //Dimension screenSize = tk.getScreenSize();
+    Rectangle bounds = genv.getMaximumWindowBounds();
     
+    Rectangle frameBounds = new Rectangle(myFrame.getBounds());
+    
+    switch (formGUIBounds.width)
+    {
+      case Common.DIMENSION_UNSPECIFIED: // natural width
+        break;
+      case Common.DIMENSION_MAX: // max
+        frameBounds.width = bounds.width;
+        break;
+      default: // specified width
+        frameBounds.width = formGUIBounds.width;
+        break;
+    }
+    
+    switch (formGUIBounds.height)
+    {
+      case Common.DIMENSION_UNSPECIFIED: // natural height
+        break;
+      case Common.DIMENSION_MAX: // max
+        frameBounds.height = bounds.height;
+        break;
+      default: // specified height
+        frameBounds.height = formGUIBounds.height;
+        break;
+    }
+    
+    switch (formGUIBounds.x)
+    {
+      case Common.COORDINATE_CENTER: // center
+        frameBounds.x = bounds.x + (bounds.width-frameBounds.width)/2;
+        break;
+      case Common.COORDINATE_MAX: // max
+        frameBounds.x = bounds.x + bounds.width - frameBounds.width;
+        break;
+      case Common.COORDINATE_MIN: // min
+        frameBounds.x = bounds.x;
+        break;
+      case Common.COORDINATE_UNSPECIFIED: // kein Wert angegeben
+        break;
+      default: // Wert angegeben, wird nur einmal berücksichtigt.
+        frameBounds.x = formGUIBounds.x;
+        formGUIBounds.x = Common.COORDINATE_UNSPECIFIED;
+        break;
+    }
+    
+    switch (formGUIBounds.y)
+    {
+      case Common.COORDINATE_CENTER: // center
+        frameBounds.y = bounds.y + (bounds.height-frameBounds.height)/2;
+        break;
+      case Common.COORDINATE_MAX: // max
+        frameBounds.y = bounds.y + bounds.height - frameBounds.height;
+        break;
+      case Common.COORDINATE_MIN: // min
+        frameBounds.y = bounds.y;
+        break;
+      case Common.COORDINATE_UNSPECIFIED: // kein Wert angegeben
+        break;
+      default: // Wert angegeben, wird nur einmal berücksichtigt.
+        frameBounds.y = formGUIBounds.y;
+        formGUIBounds.y = Common.COORDINATE_UNSPECIFIED;
+        break;
+    }
+    
+    /*
+     * Workaround für Bug in Java: Standardmaessig werden die MaximumWindowBounds
+     * nicht berücksichtigt beim ersten Layout (jedoch schon, wenn sich die
+     * Taskleiste verändert).
+     */
+    if (frameBounds.y + frameBounds.height > bounds.y + bounds.height)
+      frameBounds.height = bounds.y + bounds.height - frameBounds.y;
+    
+    myFrame.setBounds(frameBounds);
+    myFrame.validate(); //ohne diese wurde in Tests manchmal nicht neu gezeichnet
   }
-
+  
   /**
    * Arrangiert das Writer Fenster so, dass es neben dem Formular-Fenster
    * sitzt.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
-  private void cuddleWithOpenOfficeWindow()
+  private void arrangeWindows()
   {
-    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-    int frameWidth = myFrame.getWidth();
-    int frameHeight = myFrame.getHeight();
-    int docX = myFrame.getX() + frameWidth + winBorderWidth;
-    int docY = myFrame.getY() + winBorderHeight;
-    int docWidth = screenSize.width - docX - winBorderWidth;
-    int docHeight = frameHeight - winBorderHeight - winBorderWidth;
+//  Toolkit tk = Toolkit.getDefaultToolkit();
+    GraphicsEnvironment genv = GraphicsEnvironment.getLocalGraphicsEnvironment();
+    //Dimension screenSize = tk.getScreenSize();
+    Rectangle bounds = genv.getMaximumWindowBounds();
+    
+    Rectangle frameBounds = new Rectangle(myFrame.getBounds());
+    
+    int docX = frameBounds.x + frameBounds.width + windowInsets.left + windowInsets.right;
+    int docWidth = bounds.x + bounds.width - docX;
+    if (docWidth < 0) 
+    {
+      docX = bounds.x;
+      docWidth = bounds.width;
+    }
+    int docY = bounds.y;
+    int docHeight = bounds.height;
     myDoc.setWindowPosSize(docX, docY, docWidth, docHeight);
   }
 
@@ -237,30 +309,27 @@ public class FormGUI
   private class MyWindowListener implements WindowListener, ComponentListener
   {
     public MyWindowListener(){}
-    public void windowActivated(WindowEvent e) 
-    { 
-      cuddleWithOpenOfficeWindow();
-    }
+    public void windowActivated(WindowEvent e) {}
     public void windowClosed(WindowEvent e) {}
     public void windowClosing(WindowEvent e) { closeAction.actionPerformed(null); }
     public void windowDeactivated(WindowEvent e) { }
     public void windowDeiconified(WindowEvent e) 
     {
-      myDoc.setWindowVisible(true);
-      cuddleWithOpenOfficeWindow();
+      //myDoc.setWindowVisible(true);
+      arrangeWindows();
     }
     public void windowIconified(WindowEvent e) 
     { 
-      myDoc.setWindowVisible(false);
+      //myDoc.setWindowVisible(false);
     }
     public void windowOpened(WindowEvent e) {}
     public void componentResized(ComponentEvent e)
     {
-      cuddleWithOpenOfficeWindow();
+      arrangeWindows();
     }
     public void componentMoved(ComponentEvent e)
     {
-      cuddleWithOpenOfficeWindow();
+      arrangeWindows();
     }
     public void componentShown(ComponentEvent e)
     {
@@ -370,7 +439,12 @@ public class FormGUI
     DialogLibrary dialogLib = WollMuxFiles.parseFunctionDialogs(conf.get("Formular"), null, functionContext);
     FunctionLibrary funcLib = WollMuxFiles.parseFunctions(conf.get("Formular"), dialogLib, functionContext, null);
 
-    new FormGUI(WollMuxFiles.getWollmuxConf().query("Fenster").query("Formular").getLastChild(), conf.get("Formular"), model, mapIdToPresetValue, functionContext, funcLib, dialogLib);
+    ConfigThingy formFensterConf = new ConfigThingy("");
+    try{
+      formFensterConf = WollMuxFiles.getWollmuxConf().query("Fenster").query("Formular").getLastChild();
+    }
+    catch(Exception x) {}
+    new FormGUI(formFensterConf, conf.get("Formular"), model, mapIdToPresetValue, functionContext, funcLib, dialogLib);
   }
 
 

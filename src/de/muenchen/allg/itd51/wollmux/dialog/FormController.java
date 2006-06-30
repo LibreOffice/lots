@@ -43,7 +43,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
+import javax.swing.BorderFactory;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
@@ -80,11 +83,6 @@ public class FormController implements UIElementEventHandler
    * Rand um Buttons (in Pixeln).
    */
   private final static int BUTTON_BORDER = 2;
-  
-  /**
-   * Das JPanel, das die GUI des FormControllers enthält.
-   */
-  private JPanel contentPanel;
   
   /**
    * Die JTabbedPane, die die ganzen Tabs der GUI enthält.
@@ -248,7 +246,7 @@ public class FormController implements UIElementEventHandler
    * Liefert ein JPanel, das das gesamte GUI des FormControllers enthält.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public JPanel JPanel(){ return contentPanel;}
+  public JComponent JComponent(){ return myTabbedPane;}
 
   
   /**
@@ -269,9 +267,18 @@ public class FormController implements UIElementEventHandler
     Common.setLookAndFeelOnce();
      //TODO Fenster-Positions und Größenangaben in wollmux.conf auswerten
     //TODO Scrollen, bei zuvielen Eingabeelementen (vertikale Grösse wird ja ohnehin vorgegeben ueber den Fenster() Abschnitt)
-    contentPanel = new JPanel();
+    
+    /*
+     * ACHTUNG! Wenn die JTabbedPane noch in ein Panel eingebettet werden soll
+     * (dazu gibt es im Augenblick allerdings keinen Grund), so muss bei diesem
+     * Panel ein BorderLayout o.ä. verwendet werden, damit die Weitergabe des
+     * Fenster-Resize ordentlich klappt und die ScrollPane ihre ScrollBalken 
+     * einblendet.
+     * 
+     */
+    //contentPanel = new JPanel();
     myTabbedPane = new JTabbedPane();
-    contentPanel.add(myTabbedPane);
+    //contentPanel.add(myTabbedPane);
     
     /********************************************************
      * Tabs erzeugen.
@@ -487,6 +494,13 @@ public class FormController implements UIElementEventHandler
     public DialogWindow(int tabIndex, ConfigThingy conf, Map mapIdToPresetValue)
     {
       myPanel = new JPanel(new GridBagLayout());
+      JPanel mainPanel = new JPanel(new GridBagLayout());
+       //    int gridx, int gridy, int gridwidth, int gridheight, double weightx, double weighty, int anchor,          int fill,                  Insets insets, int ipadx, int ipady)
+      GridBagConstraints gbcMainPanel = new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH,       new Insets(0,0,0,0),0,0);
+      JScrollPane scrollPane = new JScrollPane(mainPanel);
+      scrollPane.setBorder(BorderFactory.createLineBorder(Color.WHITE, 1));
+      myPanel.add(scrollPane, gbcMainPanel);
+      
       int y = 0;
       
       Iterator parentiter = conf.query("Eingabefelder").iterator();
@@ -587,14 +601,14 @@ public class FormController implements UIElementEventHandler
               GridBagConstraints gbc = (GridBagConstraints)uiElement.getLabelLayoutConstraints();
               gbc.gridx = labelX;
               gbc.gridy = y;
-              myPanel.add(label, gbc);
+              mainPanel.add(label, gbc);
             }
           }
           GridBagConstraints gbc = (GridBagConstraints)uiElement.getLayoutConstraints();
           gbc.gridx = compoX;
           gbc.gridy = y;
           ++y;
-          myPanel.add(uiElement.getComponent(), gbc);
+          mainPanel.add(uiElement.getComponent(), gbc);
           if (!uiElement.isStatic()) increaseTabVisibleCount(tabIndex);
         }
       }
@@ -603,7 +617,7 @@ public class FormController implements UIElementEventHandler
       /*****************************************************************************
        * Für die Buttons ein eigenes Panel anlegen und mit UIElementen befüllen. 
        *****************************************************************************/
-      createButtonPanel(conf, y);
+      createButtonPanel(conf, 1);
     }
 
     /**
@@ -615,11 +629,12 @@ public class FormController implements UIElementEventHandler
     {
       Iterator parentiter;
       JPanel buttonPanel = new JPanel(new GridBagLayout());
-      GridBagConstraints gbcPanel = new GridBagConstraints(0, 0, 2, 1, 1.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL,       new Insets(TF_BORDER,TF_BORDER,TF_BORDER,TF_BORDER),0,0);
-      gbcPanel.gridx = 0;
-      gbcPanel.gridy = y;
+      //int gridx, int gridy, int gridwidth, int gridheight, double weightx, double weighty, int anchor,          int fill,                  Insets insets, int ipadx, int ipady)
+      GridBagConstraints gbcButtonPanel = new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL,       new Insets(TF_BORDER,TF_BORDER,TF_BORDER,TF_BORDER),0,0);
+      gbcButtonPanel.gridx = 0;
+      gbcButtonPanel.gridy = y;
       ++y;
-      myPanel.add(buttonPanel,gbcPanel);
+      myPanel.add(buttonPanel,gbcButtonPanel);
       
       int x = 0;
       
