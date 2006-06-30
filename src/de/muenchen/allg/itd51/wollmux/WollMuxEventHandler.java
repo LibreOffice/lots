@@ -743,7 +743,7 @@ public class WollMuxEventHandler
         }
         try
         {
-          url.openStream();
+          WollMuxSingleton.checkURL(url);
         }
         catch (IOException e)
         {

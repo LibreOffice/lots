@@ -828,7 +828,7 @@ public class DocumentCommandInterpreter
       // nicht auflösbar. http://qa.openoffice.org/issues/show_bug.cgi?id=57049
       // Hier wird versucht, die URL über den java-Klasse url aufzulösen und bei
       // Fehlern abgebrochen.
-      url.openStream();
+      WollMuxSingleton.checkURL(url);
 
       // URL durch den URLTransformer von OOo jagen, damit die URL auch von OOo
       // verarbeitet werden kann.

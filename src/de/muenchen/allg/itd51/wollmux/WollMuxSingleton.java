@@ -35,6 +35,7 @@
 package de.muenchen.allg.itd51.wollmux;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Arrays;
@@ -445,5 +446,16 @@ public class WollMuxSingleton implements XPALProvider
   public boolean isDebugMode()
   {
     return WollMuxFiles.isDebugMode();
+  }
+  
+  /**
+   * Überprüft, ob von url gelesen werden kann und wirft eine IOException, falls
+   * nicht.
+   * @throws IOException falls von url nicht gelesen werden kann.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public static void checkURL(URL url) throws IOException
+  {
+    url.openStream().close();
   }
 }
