@@ -549,7 +549,8 @@ public class DatasourceSearchDialog implements Dialog
      */
     private void updatePreview(ListElement ele)
     {
-      Dataset ds = ele.getDataset();
+      Dataset ds = null;
+      if (ele != null) ds = ele.getDataset();
       Iterator iter = mapDB_SPALTEtoUIElement.entrySet().iterator();
       while (iter.hasNext())
       {
@@ -558,7 +559,10 @@ public class DatasourceSearchDialog implements Dialog
         UIElement uiElement = (UIElement)entry.getValue();
         try
         {
-          uiElement.setString(ds.get(dbSpalte));
+          if (ds == null)
+            uiElement.setString("");
+          else
+            uiElement.setString(ds.get(dbSpalte));
         }
         catch (ColumnNotFoundException e)
         {
@@ -598,6 +602,7 @@ public class DatasourceSearchDialog implements Dialog
       }
       
       list.setList(Arrays.asList(elements));
+      updatePreview(null);
     }
       
       
