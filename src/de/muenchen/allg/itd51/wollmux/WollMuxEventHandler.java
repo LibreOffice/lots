@@ -438,6 +438,12 @@ public class WollMuxEventHandler
       UnoService doc = new UnoService(xTextDoc);
       if (doc.supportsService("com.sun.star.text.TextDocument"))
       {
+        // closeListener registrieren
+        if (doc.xCloseable() != null)
+        {
+          doc.xCloseable().addCloseListener(mux.getEventProcessor());
+        }
+
         // Konfigurationsabschnitt Textdokument verarbeiten:
         ConfigThingy tds = new ConfigThingy("Textdokument");
         try
@@ -650,6 +656,62 @@ public class WollMuxEventHandler
       catch (java.lang.Exception e)
       {
       }
+    }
+  }
+
+  // *******************************************************************************************
+
+  /**
+   * Erzeugt ein neues WollMuxEvent, das die original Fensterposition- und Größe
+   * der übergebenen UNO-Komponente auf die Werte zurück setzt, die das Fenster
+   * vor dem Aufruf der Methode WollMuxSingleton.storeOriginalWindowPosSize()
+   * besaß. Wurde die Methode storeOriginalWindowPosSize(...) für die übergebene
+   * Komponente nicht aufgerufen, so geschieht nichts.
+   * 
+   * @param compo
+   *          Die Komponente, deren Fenster wieder auf die original Größe und
+   *          Position zurück gesetzt werden soll.
+   */
+  public static void handleRestoreOriginalWindowPosSize(XComponent compo)
+  {
+    handle(new OnRestoreOriginalWindowPosSize(compo));
+  }
+
+  /**
+   * Dieses Event wird ausgelöst, bevor ein Dokument geschlossen wird und sorgt
+   * dafür, dass die original Fensterposition- und Größe der übergebenen
+   * UNO-Komponente auf die Werte zurück gesetzt wird, die das Fenster vor dem
+   * Aufruf der Methode WollMuxSingleton.storeOriginalWindowPosSize() besaß.
+   * 
+   * @author christoph.lutz
+   */
+  private static class OnRestoreOriginalWindowPosSize extends BasicEvent
+  {
+    XComponent compo;
+
+    public OnRestoreOriginalWindowPosSize(XComponent compo)
+    {
+      this.compo = compo;
+    }
+
+    protected boolean doit() throws WollMuxFehlerException
+    {
+      WollMuxSingleton mux = WollMuxSingleton.getInstance();
+
+      // original-Fenstergröße und Position wieder herstellen.
+      mux.restoreOriginalWindowPosSize(compo);
+
+      return EventProcessor.processTheNextEvent;
+    }
+
+    public boolean requires(Object o)
+    {
+      return UnoRuntime.areSame(compo, o);
+    }
+
+    public String toString()
+    {
+      return this.getClass().getSimpleName() + "(" + compo.hashCode() + ")";
     }
   }
 

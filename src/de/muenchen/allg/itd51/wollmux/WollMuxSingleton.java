@@ -39,9 +39,13 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Vector;
 
+import com.sun.star.awt.PosSize;
+import com.sun.star.awt.Rectangle;
+import com.sun.star.lang.XComponent;
 import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
@@ -98,6 +102,15 @@ public class WollMuxSingleton implements XPALProvider
   private Vector registeredPALChangeListener;
 
   /**
+   * Die HashMap enthält als Schlüssel in HashableComponent eingepackte, aktuell
+   * geöffnete OOo-Dokumenten und deren originale Fensterpositionen, die beim
+   * Schließen der Dokumente wieder zurückgesetzt werden sollen. Der Mechanismus
+   * wird derzeit verwendet, um die original Fensterposition eines Formulars
+   * nach/beim Schließen wieder herzustellen.
+   */
+  private HashMap originalWindowPosSizes;
+
+  /**
    * Die WollMux-Hauptklasse ist als singleton realisiert.
    */
   private WollMuxSingleton(XComponentContext ctx)
@@ -120,6 +133,8 @@ public class WollMuxSingleton implements XPALProvider
     boolean successfulStartup = true;
 
     registeredPALChangeListener = new Vector();
+
+    originalWindowPosSizes = new HashMap();
 
     WollMuxFiles.setupWollMuxDir();
 
@@ -447,15 +462,115 @@ public class WollMuxSingleton implements XPALProvider
   {
     return WollMuxFiles.isDebugMode();
   }
-  
+
   /**
    * Überprüft, ob von url gelesen werden kann und wirft eine IOException, falls
    * nicht.
-   * @throws IOException falls von url nicht gelesen werden kann.
+   * 
+   * @throws IOException
+   *           falls von url nicht gelesen werden kann.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static void checkURL(URL url) throws IOException
   {
     url.openStream().close();
+  }
+
+  /**
+   * Hilfsklasse, die es ermöglicht, UNO-Componenten in HashMaps abzulegen; der
+   * Vergleich zweier HashableComponents mit equals(...) verwendet dazu den
+   * sicheren UNO-Vergleich UnoRuntime.areSame(...) und die Methode hashCode
+   * wird direkt an das UNO-Objekt weitergeleitet.
+   * 
+   * @author lut
+   */
+  private static class HashableComponent
+  {
+    private Object compo;
+
+    public HashableComponent(XComponent compo)
+    {
+      this.compo = compo;
+    }
+
+    public int hashCode()
+    {
+      if (compo != null) return compo.hashCode();
+      return 0;
+    }
+
+    public boolean equals(Object b)
+    {
+      if (b != null && b instanceof HashableComponent)
+      {
+        HashableComponent other = (HashableComponent) b;
+        return UnoRuntime.areSame(this.compo, other.compo);
+      }
+      return false;
+    }
+  }
+
+  /**
+   * Die Methode sorgt dafür, dass sich das WollMuxSingleton die
+   * Originalposition- und Dimensionen der übergebenen UNO-Komponente (bzw.
+   * deren ContainerWindow) merkt und zu einem späteren Zeitpunkt mit der
+   * methode restoreOriginalWindowPosSize(...) wieder auf den Originalwert
+   * zurückgesetzt werden kann. ACHTUNG: WollMux-Singleton hält so lange eine
+   * Referenz auf die Komponente, bis sie mit restoreOriginalWindowPosSize()
+   * wieder freigegeben wird. Der Mechanismus wird derzeit verwendet, um die
+   * Fensterposition des Office-Fensters vor dem Verschieben durch die FormGUI
+   * wieder rücksetzen zu können.
+   * 
+   * @param compo
+   *          Die Komponente, deren ContainerWindow die original Position und
+   *          Größe liefert.
+   */
+  public void storeOriginalWindowPosSize(XComponent compo)
+  {
+    Rectangle origPosSize = null;
+    try
+    {
+      origPosSize = UNO.XModel(compo).getCurrentController().getFrame()
+          .getContainerWindow().getPosSize();
+    }
+    catch (java.lang.Exception e)
+    {
+    }
+    if (compo != null && origPosSize != null)
+    {
+      originalWindowPosSizes.put(new HashableComponent(compo), origPosSize);
+    }
+  }
+
+  /**
+   * Die Methode setzt die Position und Größe der übergebenen UNO-Komponente
+   * (bzw. deren ContainerWindow) wieder auf den Stand zum Zeitpunkt des Aufrufs
+   * der Methode storeOriginalWindowPosSize zurück und löscht alle Referenzen
+   * auf die Komponente aus dem WollMuxSingleton. Falls die Komponente nicht
+   * bekannt ist (da mit Ihr kein storeOriginalWindowPosSize-Aufruf erfolgte),
+   * geschieht nichts.
+   * 
+   * @param compo
+   *          Die Komponente, deren ContainerWindow wieder auf die alte Position
+   *          und Größe gesetzt werden soll.
+   */
+  public void restoreOriginalWindowPosSize(XComponent compo)
+  {
+    Rectangle ps = (Rectangle) originalWindowPosSizes
+        .remove(new HashableComponent(compo));
+    if (ps != null)
+      try
+      {
+        UNO.XModel(compo).getCurrentController().getFrame()
+            .getContainerWindow().setPosSize(
+                ps.X,
+                ps.Y,
+                ps.Width,
+                ps.Height,
+                PosSize.POSSIZE);
+      }
+      catch (java.lang.Exception e)
+      {
+      }
   }
 }

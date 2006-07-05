@@ -29,7 +29,11 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.sun.star.document.XEventListener;
+import com.sun.star.lang.EventObject;
+import com.sun.star.util.CloseVetoException;
+import com.sun.star.util.XCloseListener;
 
+import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.wollmux.WollMuxEventHandler.WollMuxEvent;
 
@@ -41,7 +45,8 @@ import de.muenchen.allg.itd51.wollmux.WollMuxEventHandler.WollMuxEvent;
  * 
  * @author lut
  */
-public class EventProcessor implements XEventListener, ActionListener
+public class EventProcessor implements XEventListener, ActionListener,
+    XCloseListener
 {
   /**
    * Gibt an, ob der EventProcessor überhaupt events entgegennimmt. Ist
@@ -225,6 +230,50 @@ public class EventProcessor implements XEventListener, ActionListener
           i.remove();
         }
       }
+    }
+  }
+
+  /* (non-Javadoc)
+   * @see com.sun.star.util.XCloseListener#queryClosing(com.sun.star.lang.EventObject, boolean)
+   */
+  public void queryClosing(EventObject event, boolean getsOwnership)
+      throws CloseVetoException
+  {
+    if (getsOwnership && UNO.XTextDocument(event.Source) != null)
+    {
+      // sich selbst deregistrieren:
+      if (UNO.XCloseable(event.Source) != null) try
+      {
+        UNO.XCloseable(event.Source).removeCloseListener(this);
+      }
+      catch (java.lang.Exception e)
+      {
+      }
+
+      WollMuxEventHandler.handleRestoreOriginalWindowPosSize(UNO
+          .XTextDocument(event.Source));
+
+      // wer eine closeVetoException wirft muss im Falle von getsOwnership==true
+      // auch dafür sorgen, dass das Dokument geschlossen wird.
+      WollMuxEventHandler.handleCloseTextDocument(UNO
+          .XTextDocument(event.Source));
+
+      throw new CloseVetoException();
+    }
+  }
+
+  /* (non-Javadoc)
+   * @see com.sun.star.util.XCloseListener#notifyClosing(com.sun.star.lang.EventObject)
+   */
+  public void notifyClosing(EventObject event)
+  {
+    // sich selbst deregistrieren:
+    if (UNO.XCloseable(event.Source) != null) try
+    {
+      UNO.XCloseable(event.Source).removeCloseListener(this);
+    }
+    catch (java.lang.Exception e)
+    {
     }
   }
 }

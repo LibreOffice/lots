@@ -253,7 +253,7 @@ public class DocumentCommandInterpreter
     if (descs.query("Formular").count() == 0)
     {
       throw new WMCommandsFailedException(
-          "Die Vorlage bzw. das Formular enthält keine Formularbeschreibung\n\n"
+          "Die Vorlage bzw. das Formular enthält keine gültige Formularbeschreibung\n\n"
               + "Bitte kontaktieren Sie Ihre Systemadministration.");
     }
     if (errors != 0)
@@ -265,15 +265,24 @@ public class DocumentCommandInterpreter
               + "Bitte kontaktieren Sie Ihre Systemadministration.");
     }
 
-    // 5) Formulardialog starten:
+    // 5) Ursprüngliche Fensterposition und Größe merken:
+    mux.storeOriginalWindowPosSize(document.xTextDocument());
+
+    // 6) Formulardialog starten:
     FormModel fm = new FormModelImpl(document.xTextDocument(), funcLib,
         idToFormFields, tree);
 
     ConfigThingy formFensterConf = new ConfigThingy("");
-    try {
-      formFensterConf = WollMuxFiles.getWollmuxConf().query("Fenster").query("Formular").getLastChild();
-    }catch(NodeNotFoundException x) {}
-    new FormGUI(formFensterConf, descs, fm, idToPresetValue, functionContext, funcLib, dialogLib);
+    try
+    {
+      formFensterConf = WollMuxFiles.getWollmuxConf().query("Fenster").query(
+          "Formular").getLastChild();
+    }
+    catch (NodeNotFoundException x)
+    {
+    }
+    new FormGUI(formFensterConf, descs, fm, idToPresetValue, functionContext,
+        funcLib, dialogLib);
   }
 
   /**
@@ -817,8 +826,8 @@ public class DocumentCommandInterpreter
      * @throws java.io.IOException
      * @throws IOException
      * @throws IllegalArgumentException
-     * @throws java.io.IOException 
-     * @throws IOException 
+     * @throws java.io.IOException
+     * @throws IOException
      */
     private void insertDocumentFromURL(DocumentCommand cmd, URL url)
         throws IllegalArgumentException, java.io.IOException, IOException
