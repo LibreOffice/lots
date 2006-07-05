@@ -621,9 +621,8 @@ public class WollMuxBar
     
     
     
-      //in der Hoffnung, dass es verhindert, dass anderen Fenstern der Fokus gestohlen wird
-    minimizedFrame.setFocusableWindowState(false);
-    minimizedFrame.setFocusable(false);
+    //minimizedFrame.setFocusableWindowState(false);
+    //minimizedFrame.setFocusable(false);
     
     minimizedFrame.pack();
     

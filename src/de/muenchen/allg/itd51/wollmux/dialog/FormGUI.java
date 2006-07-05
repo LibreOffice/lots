@@ -14,6 +14,7 @@
 * 01.02.2006 | BNK | etwas rumgedoktore mit LayoutManager 
 * 02.02.2006 | BNK | Fenster zusammengeklebt
 * 05.05.2006 | BNK | Condition -> Function, besser kommentiert 
+* 05.07.2006 | BNK | optische Verbesserungen, insbes. bzgl. arrangeWindows()
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -62,6 +63,12 @@ public class FormGUI
    * zu bewerkstelligen.
    */
   private Insets windowInsets;
+  
+  /**
+   * Der maximal durch ein Fenster nutzbare Bereich, d,h, Bildschirmgroesse minus
+   * Taskbar undsoweiter. 
+   */
+  private Rectangle maxWindowBounds;
   
   /**
    * Das Fenster der Formular-GUI. Hier wird der FormController eingebettet. Auch
@@ -177,6 +184,19 @@ public class FormGUI
      * Bestimmen der Breite des Fensterrahmens.
      */
     windowInsets = myFrame.getInsets();
+
+    /*
+     * Leider kann wegen 
+     * http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4737732
+     * nicht auf einfache Weise die nutzbare Bildschirmflaeche bestimmt werden,
+     * deshalb der folgende Hack.
+     */
+    //  Toolkit tk = Toolkit.getDefaultToolkit();
+    //  GraphicsEnvironment genv = GraphicsEnvironment.getLocalGraphicsEnvironment();
+    // Dimension screenSize = tk.getScreenSize();
+    myFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+    maxWindowBounds = myFrame.getBounds();
+    myFrame.setExtendedState(JFrame.NORMAL);
     
     formGUIBounds = Common.parseDimensions(formFensterConf);
     setFormGUISizeAndLocation();
@@ -280,22 +300,28 @@ public class FormGUI
    */
   private void arrangeWindows()
   {
-//  Toolkit tk = Toolkit.getDefaultToolkit();
-    GraphicsEnvironment genv = GraphicsEnvironment.getLocalGraphicsEnvironment();
-    //Dimension screenSize = tk.getScreenSize();
-    Rectangle bounds = genv.getMaximumWindowBounds();
-    
     Rectangle frameBounds = new Rectangle(myFrame.getBounds());
+    Logger.debug("Maximum window bounds "+maxWindowBounds+"| window insets "+windowInsets+"| frame bounds "+frameBounds);
     
+    /*
+     * Das Addieren von windowInsets.left und windowInsets.right ist eine
+     * Heuristik. Da sich setWindowPosSize() unter Windows und Linux anders
+     * verhält, gibt es keine korrekte Methode (die mir bekannt ist), um die
+     * richtige Ausrichtung zu berechnen.
+     */
     int docX = frameBounds.x + frameBounds.width + windowInsets.left + windowInsets.right;
-    int docWidth = bounds.x + bounds.width - docX;
+    int docWidth = maxWindowBounds.x + maxWindowBounds.width - docX;
     if (docWidth < 0) 
     {
-      docX = bounds.x;
-      docWidth = bounds.width;
+      docX = maxWindowBounds.x;
+      docWidth = maxWindowBounds.width;
     }
-    int docY = bounds.y + windowInsets.top;
-    int docHeight = bounds.height - windowInsets.top - windowInsets.bottom;
+    int docY = maxWindowBounds.y + windowInsets.top;
+    /*
+     * Das Subtrahieren von 2*windowInsets.bottom ist ebenfalls eine Heuristik.
+     * (siehe weiter oben)
+     */
+    int docHeight = maxWindowBounds.y + maxWindowBounds.height - docY - 2*windowInsets.bottom;
     myDoc.setWindowPosSize(docX, docY, docWidth, docHeight);
   }
 

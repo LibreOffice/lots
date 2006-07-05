@@ -23,7 +23,6 @@ import java.awt.Font;
 import java.awt.Rectangle;
 import java.util.Enumeration;
 
-import javax.swing.JFrame;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import javax.swing.plaf.FontUIResource;
@@ -85,10 +84,11 @@ public class Common
   private static void setLookAndFeel()
   {
     String lafName = UIManager.getSystemLookAndFeelClassName();
-    if (lafName.equals("javax.swing.plaf.metal.MetalLookAndFeel"))
-      lafName = "com.sun.java.swing.plaf.gtk.GTKLookAndFeel";
+    //if (lafName.equals("javax.swing.plaf.metal.MetalLookAndFeel"))
+    //  lafName = "com.sun.java.swing.plaf.gtk.GTKLookAndFeel";
+    lafName = "javax.swing.plaf.metal.MetalLookAndFeel";
     try{UIManager.setLookAndFeel(lafName);}catch(Exception x){};
-    JFrame.setDefaultLookAndFeelDecorated(true);
+    //JFrame.setDefaultLookAndFeelDecorated(true); seems to cause problems with undecorated windows in Metal LAF
     lafSet = true;
   }
   
