@@ -294,8 +294,8 @@ public class FormGUI
       docX = bounds.x;
       docWidth = bounds.width;
     }
-    int docY = bounds.y;
-    int docHeight = bounds.height;
+    int docY = bounds.y + windowInsets.top;
+    int docHeight = bounds.height - windowInsets.top - windowInsets.bottom;
     myDoc.setWindowPosSize(docX, docY, docWidth, docHeight);
   }
 
