@@ -49,6 +49,7 @@ import com.sun.star.frame.FrameSearchFlag;
 import com.sun.star.frame.XFrame;
 import com.sun.star.frame.XModel;
 import com.sun.star.lang.EventObject;
+import com.sun.star.lang.XComponent;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.uno.Exception;
 import com.sun.star.uno.RuntimeException;
@@ -127,6 +128,40 @@ public class WollMuxEventHandler
     {
       super("Der Dialog konnte nicht gestartet werden!\n\n"
             + "Bitte kontaktieren Sie Ihre Systemadministration.", e);
+    }
+  }
+
+  /**
+   * Hilfsklasse, die es ermöglicht, UNO-Componenten in HashMaps abzulegen; der
+   * Vergleich zweier HashableComponents mit equals(...) verwendet dazu den
+   * sicheren UNO-Vergleich UnoRuntime.areSame(...) und die Methode hashCode
+   * wird direkt an das UNO-Objekt weitergeleitet.
+   * 
+   * @author lut
+   */
+  private static class HashableComponent
+  {
+    private Object compo;
+
+    public HashableComponent(XComponent compo)
+    {
+      this.compo = compo;
+    }
+
+    public int hashCode()
+    {
+      if (compo != null) return compo.hashCode();
+      return 0;
+    }
+
+    public boolean equals(Object b)
+    {
+      if (b != null && b instanceof HashableComponent)
+      {
+        HashableComponent other = (HashableComponent) b;
+        return UnoRuntime.areSame(this.compo, other.compo);
+      }
+      return false;
     }
   }
 
@@ -383,11 +418,11 @@ public class WollMuxEventHandler
 
     /**
      * Dieses Feld stellt ein Zwischenspeicher für Fragment-Urls dar, der
-     * Dokument-Instanzen auf Fragment-URL-Listen mapped. Es wird dazu benutzt,
-     * im Fall eines openTemplate-Befehls die urls der übergebenen frag_id-Liste
-     * temporär zu speichern. Das Event on_new/on_load holt sich die temporär
-     * gespeicherten Argumente aus der hashMap und übergibt sie dem
-     * WMCommandInterpreter.
+     * HashableComponent-Objekte (mit Dokument-Instanzen) auf
+     * Fragment-URL-Listen mapped. Es wird dazu benutzt, im Fall eines
+     * openTemplate-Befehls die urls der übergebenen frag_id-Liste temporär zu
+     * speichern. Das Event on_new/on_load holt sich die temporär gespeicherten
+     * Argumente aus der hashMap und übergibt sie dem WMCommandInterpreter.
      */
     private static HashMap docFragUrlsBuffer = new HashMap();
 
@@ -417,9 +452,9 @@ public class WollMuxEventHandler
         }
 
         // Beim on_opendocument erzeugte frag_id-liste aus puffer holen.
-        String[] fragUrls = new String[] {};
-        if (docFragUrlsBuffer.containsKey(doc.xInterface()))
-          fragUrls = (String[]) docFragUrlsBuffer.remove(doc.xInterface());
+        String[] fragUrls = (String[]) docFragUrlsBuffer
+            .remove(new HashableComponent(doc.xComponent()));
+        if (fragUrls == null) fragUrls = new String[] {};
 
         // Mögliche Aktionen für das neu geöffnete Dokument:
         boolean processNormalCommands = false;
@@ -776,9 +811,8 @@ public class WollMuxEventHandler
                   FrameSearchFlag.CREATE,
                   new UnoProps("AsTemplate", new Boolean(asTemplate))
                       .getProps()));
-          OnProcessTextDocument.docFragUrlsBuffer.put(
-              doc.xInterface(),
-              fragUrls);
+          OnProcessTextDocument.docFragUrlsBuffer.put(new HashableComponent(doc
+              .xComponent()), fragUrls);
         }
         catch (java.lang.Exception x)
         {
@@ -1197,21 +1231,22 @@ public class WollMuxEventHandler
   // *******************************************************************************************
 
   /**
-   * Erzeugt ein Event, das die Fenster-Position und Größe des übergebenen
-   * Dokuments auf die vorgegebenen Werte setzt. Dabei wird direkt die
-   * entsprechende Funktion der UNO-API verwendet, die leider ein paar
-   * unangenehme Eigenheiten (siehe docY) hat.
+   * Erzeugt ein Event, das die Position und Größe des übergebenen
+   * Dokument-Fensters auf die vorgegebenen Werte setzt. ACHTUNG: Die Maßangaben
+   * beziehen sich auf die linke obere Ecke des Fensterinhalts OHNE die
+   * Titelzeile und die Fensterdekoration des Rahmens. Um die linke obere Ecke
+   * des gesamten Fensters richtig zu setzen, müssen die Größenangaben des
+   * Randes der Fensterdekoration und die Höhe der Titelzeile VOR dem Aufruf der
+   * Methode entsprechend eingerechnet werden.
    * 
    * @param model
    *          Das XModel-Interface des Dokuments dessen Position/Größe gesetzt
    *          werden soll.
    * @param docX
-   *          Die X-Koordinate der Position in Pixel, gezählt von links oben.
+   *          Die linke obere Ecke des Fensterinhalts X-Koordinate der Position
+   *          in Pixel, gezählt von links oben.
    * @param docY
    *          Die Y-Koordinate der Position in Pixel, gezählt von links oben.
-   *          Achtung: Die Maßangaben beziehen sich auf den Inhalt des Rahmens
-   *          OHNE den Frame. D.h. die Titelzeile des Frames wird nicht
-   *          mitberechnet und muss vorher selbst eingerechnet werden.
    * @param docWidth
    *          Die Größe des Dokuments auf der X-Achse in Pixel
    * @param docHeight
