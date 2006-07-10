@@ -255,8 +255,8 @@ public class EventProcessor implements XEventListener, ActionListener,
 
       // wer eine closeVetoException wirft muss im Falle von getsOwnership==true
       // auch dafür sorgen, dass das Dokument geschlossen wird.
-      WollMuxEventHandler.handleCloseTextDocument(UNO
-          .XTextDocument(event.Source));
+//      WollMuxEventHandler.handleCloseTextDocument(UNO
+          //.XTextDocument(event.Source));
 
       throw new CloseVetoException();
     }
