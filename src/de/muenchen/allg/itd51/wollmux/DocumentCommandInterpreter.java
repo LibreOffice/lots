@@ -33,18 +33,24 @@ import java.util.Map;
 import java.util.Vector;
 
 import com.sun.star.awt.FontWeight;
+import com.sun.star.awt.PosSize;
+import com.sun.star.awt.Rectangle;
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.beans.PropertyVetoException;
 import com.sun.star.container.NoSuchElementException;
 import com.sun.star.container.XEnumeration;
 import com.sun.star.container.XEnumerationAccess;
 import com.sun.star.io.IOException;
+import com.sun.star.lang.EventObject;
 import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextField;
 import com.sun.star.text.XTextRange;
 import com.sun.star.uno.Exception;
+import com.sun.star.uno.UnoRuntime;
+import com.sun.star.util.CloseVetoException;
+import com.sun.star.util.XCloseListener;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoService;
@@ -266,11 +272,20 @@ public class DocumentCommandInterpreter
     }
 
     // 5) Ursprüngliche Fensterposition und Größe merken:
-    mux.storeOriginalWindowPosSize(document.xTextDocument());
+    Rectangle origPosSize = null;
+    try
+    {
+      origPosSize = document.xModel().getCurrentController().getFrame()
+          .getContainerWindow().getPosSize();
+    }
+    catch (java.lang.Exception e)
+    {
+    }
+    origPosSize = mux.commitOriginalWindowPosSize(origPosSize);
 
     // 6) Formulardialog starten:
     FormModel fm = new FormModelImpl(document.xTextDocument(), funcLib,
-        idToFormFields, tree);
+        idToFormFields, tree, origPosSize);
 
     ConfigThingy formFensterConf = new ConfigThingy("");
     try
@@ -373,7 +388,7 @@ public class DocumentCommandInterpreter
    * Wesentlichen nur dafür, dass alle Methodenaufrufe des FormModels in die
    * ensprechenden WollMuxEvents verpackt werden.
    */
-  private static class FormModelImpl implements FormModel
+  private static class FormModelImpl implements FormModel, XCloseListener
   {
     private final XTextDocument doc;
 
@@ -385,14 +400,26 @@ public class DocumentCommandInterpreter
 
     private final HashSet invisibleGroups;
 
+    private final Rectangle origWindowPosSize;
+
     public FormModelImpl(XTextDocument doc, FunctionLibrary funcLib,
-        HashMap idToFormValues, DocumentCommandTree cmdTree)
+        HashMap idToFormValues, DocumentCommandTree cmdTree, Rectangle origPos)
     {
       this.doc = doc;
       this.funcLib = funcLib;
       this.idToFormValues = idToFormValues;
       this.cmdTree = cmdTree;
       this.invisibleGroups = new HashSet();
+      this.origWindowPosSize = origPos;
+
+      // FormModel im WollMuxSingleton registrieren:
+      WollMuxEventHandler.registerFormModel(this);
+
+      // closeListener registrieren
+      if (UNO.XCloseable(doc) != null)
+      {
+        UNO.XCloseable(doc).addCloseListener(this);
+      }
     }
 
     public void close()
@@ -440,6 +467,36 @@ public class DocumentCommandInterpreter
 
     public void focusLost(String fieldId)
     {
+    }
+
+    public void queryClosing(EventObject event, boolean getsOwnership)
+        throws CloseVetoException
+    {
+      // diese Aktion muss synchron durchgeführt werden, was aber kein Problem
+      // ist, da auf das final Feld origWindowPosSize nur lesend zugegriffen
+      // wird.
+
+      // Original-Position wieder herstellen
+      if (UnoRuntime.areSame(doc, event.Source)
+          && origWindowPosSize != null
+          && UNO.XModel(doc) != null)
+        UNO.XModel(doc).getCurrentController().getFrame().getContainerWindow()
+            .setPosSize(
+                origWindowPosSize.X,
+                origWindowPosSize.Y,
+                origWindowPosSize.Width,
+                origWindowPosSize.Height,
+                PosSize.POSSIZE);
+    }
+
+    public void notifyClosing(EventObject arg0)
+    {
+      WollMuxEventHandler.deregisterFormModel(this);
+    }
+
+    public void disposing(EventObject arg0)
+    {
+      WollMuxEventHandler.deregisterFormModel(this);
     }
   }
 

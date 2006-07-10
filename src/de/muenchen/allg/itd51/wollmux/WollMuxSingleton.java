@@ -39,13 +39,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Vector;
 
-import com.sun.star.awt.PosSize;
 import com.sun.star.awt.Rectangle;
-import com.sun.star.lang.XComponent;
 import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
@@ -102,13 +100,19 @@ public class WollMuxSingleton implements XPALProvider
   private Vector registeredPALChangeListener;
 
   /**
-   * Die HashMap enthält als Schlüssel in HashableComponent eingepackte, aktuell
-   * geöffnete OOo-Dokumenten und deren originale Fensterpositionen, die beim
-   * Schließen der Dokumente wieder zurückgesetzt werden sollen. Der Mechanismus
-   * wird derzeit verwendet, um die original Fensterposition eines Formulars
-   * nach/beim Schließen wieder herzustellen.
+   * Das HashSet enthält in HashableComponent eingepackte, aktuell geöffnete
+   * OOo-Dokumenten mit Formulfunktion, deren Fensterposition und Größe beim
+   * Schließen wieder auf originalWindowPosSize zurückgesetzt werden sollen.
    */
-  private HashMap originalWindowPosSizes;
+  private HashSet currentFormModels;
+
+  /**
+   * Dieses Feld enthält die Fensterposition- und Größe des ersten
+   * Formulardialogs, bevor die FormularGUI gestartet wurde und dient dazu,
+   * Formulardokumente vor dem Schließen wieder auf die originalmaße
+   * zurücksetzen zu können.
+   */
+  private Rectangle originalWindowPosSize;
 
   /**
    * Die WollMux-Hauptklasse ist als singleton realisiert.
@@ -134,7 +138,8 @@ public class WollMuxSingleton implements XPALProvider
 
     registeredPALChangeListener = new Vector();
 
-    originalWindowPosSizes = new HashMap();
+    originalWindowPosSize = null;
+    currentFormModels = new HashSet();
 
     WollMuxFiles.setupWollMuxDir();
 
@@ -477,100 +482,64 @@ public class WollMuxSingleton implements XPALProvider
   }
 
   /**
-   * Hilfsklasse, die es ermöglicht, UNO-Componenten in HashMaps abzulegen; der
-   * Vergleich zweier HashableComponents mit equals(...) verwendet dazu den
-   * sicheren UNO-Vergleich UnoRuntime.areSame(...) und die Methode hashCode
-   * wird direkt an das UNO-Objekt weitergeleitet.
+   * Zweck dieser Methode ist es, sich die Fensterposition- und Größe des
+   * Fensters des *ersten aktuell geöffneten Formulardokuments* zu merken, und
+   * zurück zu liefern, damit das FormModel vor dem Schließen des
+   * Formulardokuments die Original Position und Größe, die das Formulardokument
+   * vor dem Starten der FormGUI besaß, wieder herstellen kann. Die in posSize
+   * übergebenen Größenangaben merkt sich die Methode genau dann, wenn die Liste
+   * der aktuell registrierten FormModels leer ist. Die Methode liefert immer
+   * die so gemerkte Position- und Größe zurück, auch dann, wenn wenn bereits
+   * ein oder mehrere FormModels registriert wurden.
    * 
-   * @author lut
+   * @param posSize
+   *          die Position und Größe des aktuellen Formulardokuments vor dem
+   *          Erzeugen des zugehörigen FormModels. Ist die Liste der
+   *          registrierten FormModels leer, so wird dieser Wert gespeichert und
+   *          bei allen folgenden Aufrufen (mit einer nicht leeren Liste
+   *          registrierter FormModels) zurück geliefert.
+   * @return Die Fensterposition und Größe des ersten aktuell geöffneten
+   *         Formulardokuments bevor es von der FormGUI verschoben wurde.
+   * 
+   * @author Christoph Lutz (D-III-ITD 5.1)
    */
-  private static class HashableComponent
+  public Rectangle commitOriginalWindowPosSize(Rectangle posSize)
   {
-    private Object compo;
-
-    public HashableComponent(XComponent compo)
-    {
-      this.compo = compo;
-    }
-
-    public int hashCode()
-    {
-      if (compo != null) return compo.hashCode();
-      return 0;
-    }
-
-    public boolean equals(Object b)
-    {
-      if (b != null && b instanceof HashableComponent)
-      {
-        HashableComponent other = (HashableComponent) b;
-        return UnoRuntime.areSame(this.compo, other.compo);
-      }
-      return false;
-    }
+    if (originalWindowPosSize == null || currentFormModels.size() == 0)
+      originalWindowPosSize = posSize;
+    return originalWindowPosSize;
   }
 
   /**
-   * Die Methode sorgt dafür, dass sich das WollMuxSingleton die
-   * Originalposition- und Dimensionen der übergebenen UNO-Komponente (bzw.
-   * deren ContainerWindow) merkt und zu einem späteren Zeitpunkt mit der
-   * methode restoreOriginalWindowPosSize(...) wieder auf den Originalwert
-   * zurückgesetzt werden kann. ACHTUNG: WollMux-Singleton hält so lange eine
-   * Referenz auf die Komponente, bis sie mit restoreOriginalWindowPosSize()
-   * wieder freigegeben wird. Der Mechanismus wird derzeit verwendet, um die
-   * Fensterposition des Office-Fensters vor dem Verschieben durch die FormGUI
-   * wieder rücksetzen zu können.
+   * Über diese Methode kann wird das WollMuxSingleton über aktuell geöffnete
+   * Formulardokumente (in Form des zugehörigen FormModels) informiert. Die
+   * FormModel bleiben so lange in einer HashMap im WollMuxSingleton
+   * gespeichert, bis sie wieder mit deregisterFormModel() aus der Map entfernt
+   * werden. Die Registrierung ist derzeit vor allem notwendig, damit das
+   * Speichern der original-Position und Größe der Formulardokumente vor dem
+   * Verschieben durch die FormGUI richtig funktioniert (siehe dazu
+   * commitOriginalWindowPosSize()).
    * 
-   * @param compo
-   *          Die Komponente, deren ContainerWindow die original Position und
-   *          Größe liefert.
+   * @param model
+   *          Das zu registrierende FormModel
+   * 
+   * @author Christoph Lutz (D-III-ITD 5.1)
    */
-  public void storeOriginalWindowPosSize(XComponent compo)
+  public void registerFormModel(FormModel model)
   {
-    Rectangle origPosSize = null;
-    try
-    {
-      origPosSize = UNO.XModel(compo).getCurrentController().getFrame()
-          .getContainerWindow().getPosSize();
-    }
-    catch (java.lang.Exception e)
-    {
-    }
-    if (compo != null && origPosSize != null)
-    {
-      originalWindowPosSizes.put(new HashableComponent(compo), origPosSize);
-    }
+    if (model != null) currentFormModels.add(model);
   }
 
   /**
-   * Die Methode setzt die Position und Größe der übergebenen UNO-Komponente
-   * (bzw. deren ContainerWindow) wieder auf den Stand zum Zeitpunkt des Aufrufs
-   * der Methode storeOriginalWindowPosSize zurück und löscht alle Referenzen
-   * auf die Komponente aus dem WollMuxSingleton. Falls die Komponente nicht
-   * bekannt ist (da mit Ihr kein storeOriginalWindowPosSize-Aufruf erfolgte),
-   * geschieht nichts.
+   * Deregistriert ein mit registerFormModel() registriertes FormModel model.
    * 
-   * @param compo
-   *          Die Komponente, deren ContainerWindow wieder auf die alte Position
-   *          und Größe gesetzt werden soll.
+   * @param model
+   *          das zu deregistrierende FormModel
+   * 
+   * @author Christoph Lutz (D-III-ITD 5.1)
    */
-  public void restoreOriginalWindowPosSize(XComponent compo)
+  public void deregisterFormModel(FormModel model)
   {
-    Rectangle ps = (Rectangle) originalWindowPosSizes
-        .remove(new HashableComponent(compo));
-    if (ps != null)
-      try
-      {
-        UNO.XModel(compo).getCurrentController().getFrame()
-            .getContainerWindow().setPosSize(
-                ps.X,
-                ps.Y,
-                ps.Width,
-                ps.Height,
-                PosSize.POSSIZE);
-      }
-      catch (java.lang.Exception e)
-      {
-      }
+    if (model != null) currentFormModels.remove(model);
   }
 }

@@ -440,12 +440,6 @@ public class WollMuxEventHandler
       UnoService doc = new UnoService(xTextDoc);
       if (doc.supportsService("com.sun.star.text.TextDocument"))
       {
-        // closeListener registrieren
-        if (doc.xCloseable() != null)
-        {
-          doc.xCloseable().addCloseListener(mux.getEventProcessor());
-        }
-
         // Konfigurationsabschnitt Textdokument verarbeiten:
         ConfigThingy tds = new ConfigThingy("Textdokument");
         try
@@ -664,56 +658,90 @@ public class WollMuxEventHandler
   // *******************************************************************************************
 
   /**
-   * Erzeugt ein neues WollMuxEvent, das die original Fensterposition- und Größe
-   * der übergebenen UNO-Komponente auf die Werte zurück setzt, die das Fenster
-   * vor dem Aufruf der Methode WollMuxSingleton.storeOriginalWindowPosSize()
-   * besaß. Wurde die Methode storeOriginalWindowPosSize(...) für die übergebene
-   * Komponente nicht aufgerufen, so geschieht nichts.
+   * Über dieses Event kann das WollMuxSingleton über aktuell geöffnete
+   * Formulardokumente (in Form des zugehörigen FormModels) informiert werden.
+   * Die FormModel-Objekte bleiben so lange in einer HashMap im WollMuxSingleton
+   * gespeichert, bis sie wieder mit deregisterFormModel() aus der Map entfernt
+   * werden. Die Registrierung ist derzeit vor allem notwendig, damit das
+   * Speichern der original-Position und Größe der Formulardokumente vor dem
+   * Verschieben durch die FormGUI richtig funktioniert.
    * 
-   * @param compo
-   *          Die Komponente, deren Fenster wieder auf die original Größe und
-   *          Position zurück gesetzt werden soll.
+   * @param model
    */
-  public static void handleRestoreOriginalWindowPosSize(XComponent compo)
+  public static void registerFormModel(FormModel model)
   {
-    handle(new OnRestoreOriginalWindowPosSize(compo));
+    handle(new OnRegisterFormModel(model));
   }
 
-  /**
-   * Dieses Event wird ausgelöst, bevor ein Dokument geschlossen wird und sorgt
-   * dafür, dass die original Fensterposition- und Größe der übergebenen
-   * UNO-Komponente auf die Werte zurück gesetzt wird, die das Fenster vor dem
-   * Aufruf der Methode WollMuxSingleton.storeOriginalWindowPosSize() besaß.
-   * 
-   * @author christoph.lutz
-   */
-  private static class OnRestoreOriginalWindowPosSize extends BasicEvent
+  private static class OnRegisterFormModel extends BasicEvent
   {
-    XComponent compo;
+    FormModel model;
 
-    public OnRestoreOriginalWindowPosSize(XComponent compo)
+    public OnRegisterFormModel(FormModel model)
     {
-      this.compo = compo;
+      this.model = model;
     }
 
     protected boolean doit() throws WollMuxFehlerException
     {
       WollMuxSingleton mux = WollMuxSingleton.getInstance();
 
-      // original-Fenstergröße und Position wieder herstellen.
-      mux.restoreOriginalWindowPosSize(compo);
+      mux.registerFormModel(model);
 
       return EventProcessor.processTheNextEvent;
     }
 
     public boolean requires(Object o)
     {
-      return UnoRuntime.areSame(compo, o);
+      return model.equals(o);
     }
 
     public String toString()
     {
-      return this.getClass().getSimpleName() + "(" + compo.hashCode() + ")";
+      return this.getClass().getSimpleName() + "(" + model + ")";
+    }
+  }
+
+  // *******************************************************************************************
+
+  /**
+   * Über dieses Event kann ein mit registerFormModel registriertes FormModel
+   * wieder deregistriert werden.
+   * 
+   * @param model
+   *          das zu deregistrierende FormModel
+   */
+  public static void deregisterFormModel(FormModel model)
+  {
+    handle(new OnDeregisterFormModel(model));
+  }
+
+  private static class OnDeregisterFormModel extends BasicEvent
+  {
+    FormModel model;
+
+    public OnDeregisterFormModel(FormModel model)
+    {
+      this.model = model;
+    }
+
+    protected boolean doit() throws WollMuxFehlerException
+    {
+      WollMuxSingleton mux = WollMuxSingleton.getInstance();
+
+      mux.deregisterFormModel(model);
+
+      return EventProcessor.processTheNextEvent;
+    }
+
+    public boolean requires(Object o)
+    {
+      return model.equals(o);
+    }
+
+    public String toString()
+    {
+      return this.getClass().getSimpleName() + "(" + model + ")";
     }
   }
 
