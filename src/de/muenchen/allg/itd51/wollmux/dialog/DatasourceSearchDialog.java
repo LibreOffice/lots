@@ -15,6 +15,7 @@
 * 29.05.2006 | BNK | Umstellung auf UIElementFactory.Context
 * 30.05.2006 | BNK | Suche implementiert
 * 29.06.2006 | BNK | setResizable(true)
+* 10.07.2006 | BNK | suchanfrageX statt wortX als Platzhalter.
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -906,7 +907,7 @@ public class DatasourceSearchDialog implements Dialog
             ConfigThingy qconf = (ConfigThingy)columnIter.next();
             String columnName = qconf.getName();
             String searchString = qconf.toString();
-            Matcher m = Pattern.compile("\\$\\{wort[1-9]\\}").matcher(searchString); 
+            Matcher m = Pattern.compile("\\$\\{suchanfrage[1-9]\\}").matcher(searchString); 
             while (m.find())
             {
               int wordnum = searchString.charAt(m.end() - 2) - '0';
@@ -954,7 +955,7 @@ public class DatasourceSearchDialog implements Dialog
   
   /**
    * Nimmt ein Template für eine Suchanfrage entgegen (das Variablen der Form
-   * "${wortX}" enthalten kann) und instanziiert es mit Wörtern aus words, wobei
+   * "${suchanfrageX}" enthalten kann) und instanziiert es mit Wörtern aus words, wobei
    * nur die ersten wordcount Einträge von words beachtet werden. 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
@@ -971,7 +972,7 @@ public class DatasourceSearchDialog implements Dialog
 
       for (int i = 0; i < wordcount; ++i)
       {
-        str = str.replaceAll("\\$\\{wort"+(i+1)+"\\}", words[i].replaceAll("\\$","\\\\\\$"));
+        str = str.replaceAll("\\$\\{suchanfrage"+(i+1)+"\\}", words[i].replaceAll("\\$","\\\\\\$"));
       }
 
       QueryPart part = new QueryPart(templatePart.getColumnName(), str); 
