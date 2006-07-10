@@ -46,6 +46,7 @@ import com.sun.star.beans.XPropertySet;
 import com.sun.star.container.NoSuchElementException;
 import com.sun.star.container.XNameAccess;
 import com.sun.star.frame.FrameSearchFlag;
+import com.sun.star.frame.XController;
 import com.sun.star.frame.XFrame;
 import com.sun.star.frame.XModel;
 import com.sun.star.lang.EventObject;
@@ -55,6 +56,7 @@ import com.sun.star.uno.Exception;
 import com.sun.star.uno.RuntimeException;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
+import com.sun.star.util.CloseVetoException;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoProps;
@@ -1473,14 +1475,32 @@ public class WollMuxEventHandler
 
     protected boolean doit() throws WollMuxFehlerException
     {
+      // Damit OOo vor dem Schließen eines veränderten Dokuments den
+      // save/dismiss-Dialog anzeigt, muss die suspend()-Methode aller
+      // XController gestartet werden, die das Model der Komponente enthalten.
+      // Man bekommt alle XController über die Frames, die der Desktop liefert.
+      Object desktop = UNO.createUNOService("com.sun.star.frame.Desktop");
+      if (UNO.XFramesSupplier(desktop) != null)
+      {
+        XFrame[] frames = UNO.XFramesSupplier(desktop).getFrames().queryFrames(
+            FrameSearchFlag.ALL);
+        for (int i = 0; i < frames.length; i++)
+        {
+          XController c = frames[i].getController();
+          if (c != null && UnoRuntime.areSame(c.getModel(), doc))
+            c.suspend(true);
+        }
+      }
+
+      // Hier das eigentliche Schließen:
       try
       {
-        UNO.XCloseable(doc).close(true);
+        if (UNO.XCloseable(doc) != null) UNO.XCloseable(doc).close(true);
       }
-      catch (java.lang.Exception e)
+      catch (CloseVetoException e)
       {
-        Logger.error(e);
       }
+
       return EventProcessor.processTheNextEvent;
     }
 
