@@ -376,6 +376,22 @@ public class FormGUI
     myFrame.dispose();
   }
   
+  /**
+   * Schliesst die FormGUI und alle zugehörigen Fenster.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public void dispose()
+  {
+    try{
+      javax.swing.SwingUtilities.invokeLater(new Runnable() {
+        public void run() {
+            try{myFrame.dispose();}catch(Exception x){};
+        }
+      });
+    }
+    catch(Exception x) {}
+  }
   
   private static class DummyFormModel implements FormModel
   {
