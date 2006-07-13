@@ -443,6 +443,11 @@ public class FormGUI
     {
       Logger.log("Feld \""+fieldId+"\" hat den Fokus verloren"); 
     }
+
+    public void dispose()
+    {
+      Logger.log("Dispose()"); 
+    }
   }
   
   private class MyAbortRequestListener implements ActionListener
