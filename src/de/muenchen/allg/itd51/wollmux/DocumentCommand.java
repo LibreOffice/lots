@@ -726,13 +726,14 @@ abstract public class DocumentCommand
 
   // ********************************************************************************
   /**
-   * Beschreibt ein Dokumentkommando, das Dokumentinhalte über
-   * insertDocumentFromURL einfügt (Derzeit implementieren insertFrag und
-   * insertContent dieses Interface).
+   * Beschreibt ein Dokumentkommando, das einen Wert in das Dokument einfügt,
+   * der über eine optionale Transformation umgewandelt werden kann (Derzeit
+   * implementieren insertValue und insertFormValue dieses Interface).
    */
-  static interface FragmentInserter
+  public static interface OptionalTrafoProvider
   {
-  };
+    public String getTrafoName();
+  }
 
   // ********************************************************************************
   /**
@@ -892,8 +893,7 @@ abstract public class DocumentCommand
   /**
    * Das Kommando InsertFrag fügt ein externes Textfragment in das Dokument ein.
    */
-  static public class InsertFrag extends DocumentCommand implements
-      FragmentInserter
+  static public class InsertFrag extends DocumentCommand
   {
     private String fragID;
 
@@ -952,8 +952,7 @@ abstract public class DocumentCommand
    * Das Kommando InsertContent dient zum Mischen von Dokumenten und ist im
    * Handbuch des WollMux ausführlicher beschrieben.
    */
-  static public class InsertContent extends DocumentCommand implements
-      FragmentInserter
+  static public class InsertContent extends DocumentCommand
   {
     private String fragID;
 
@@ -983,13 +982,16 @@ abstract public class DocumentCommand
   /**
    * Dieses Kommando fügt den Wert eines Absenderfeldes in den Briefkopf ein.
    */
-  static public class InsertValue extends DocumentCommand
+  static public class InsertValue extends DocumentCommand implements
+      OptionalTrafoProvider
   {
     private String dbSpalte;
 
     private String leftSeparator = "";
 
     private String rightSeparator = "";
+
+    private String trafo = null;
 
     public InsertValue(ConfigThingy wmCmd, Bookmark bookmark)
         throws InvalidCommandException
@@ -1037,6 +1039,16 @@ abstract public class DocumentCommand
         }
         currentSep = sep;
       }
+
+      // Auswertung des optionalen Arguments TRAFO
+      try
+      {
+        trafo = wmCmd.get("WM").get("TRAFO").toString();
+      }
+      catch (NodeNotFoundException e)
+      {
+        // TRAFO ist optional
+      }
     }
 
     public String getDBSpalte()
@@ -1059,6 +1071,11 @@ abstract public class DocumentCommand
       return rightSeparator;
     }
 
+    public String getTrafoName()
+    {
+      return trafo;
+    }
+
     public int execute(DocumentCommand.Executor visitable)
     {
       return visitable.executeCommand(this);
@@ -1069,7 +1086,8 @@ abstract public class DocumentCommand
   /**
    * Dieses Kommando fügt den Wert eines Absenderfeldes in den Briefkopf ein.
    */
-  static public class InsertFormValue extends DocumentCommand
+  static public class InsertFormValue extends DocumentCommand implements
+      OptionalTrafoProvider
   {
     private String id = null;
 

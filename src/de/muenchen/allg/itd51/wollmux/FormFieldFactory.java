@@ -36,9 +36,7 @@ import com.sun.star.uno.Exception;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertFormValue;
-import de.muenchen.allg.itd51.wollmux.func.Function;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
-import de.muenchen.allg.itd51.wollmux.func.Values.SimpleMap;
 
 /**
  * Repräsentiert eine Fabrik, die an der Stelle von
@@ -295,30 +293,11 @@ public final class FormFieldFactory
      */
     public void setValue(String value, FunctionLibrary funcLib)
     {
-      if (cmd.getTrafoName() != null)
-      {
-        Function func = funcLib.get(cmd.getTrafoName());
-        if (func != null)
-        {
-          SimpleMap args = new SimpleMap();
-          String[] pars = func.parameters();
-          if(pars.length >= 1) {
-            args.put(pars[0], value);
-          }
-          value = func.getString(args);
-        }
-        else
-        {
-          value = "<FEHLER: TRAFO '"
-                  + cmd.getTrafoName()
-                  + "' nicht definiert>";
-          Logger.error("Die in Kommando '"
-                       + cmd
-                       + " verwendete TRAFO '"
-                       + cmd.getTrafoName()
-                       + "' ist nicht definiert.");
-        }
-      }
+      // ggf. TRAFO durchführen
+      value = DocumentCommandInterpreter.getOptionalTrafoValue(
+          value,
+          cmd,
+          funcLib);
 
       // md5-Wert bestimmen und setzen:
       String md5 = getMD5HexRepresentation(value);
