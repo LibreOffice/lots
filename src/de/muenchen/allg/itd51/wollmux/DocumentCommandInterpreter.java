@@ -35,6 +35,7 @@ import java.util.Vector;
 import com.sun.star.awt.FontWeight;
 import com.sun.star.awt.PosSize;
 import com.sun.star.awt.Rectangle;
+import com.sun.star.awt.XWindow;
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.beans.PropertyVetoException;
 import com.sun.star.container.NoSuchElementException;
@@ -284,7 +285,7 @@ public class DocumentCommandInterpreter
     origPosSize = mux.commitOriginalWindowPosSize(origPosSize);
 
     // 6) Formulardialog starten:
-    FormModel fm = new FormModelImpl(document.xTextDocument(), funcLib,
+    FormModelImpl fm = new FormModelImpl(document.xTextDocument(), funcLib,
         idToFormFields, tree, origPosSize);
 
     ConfigThingy formFensterConf = new ConfigThingy("");
@@ -296,8 +297,9 @@ public class DocumentCommandInterpreter
     catch (NodeNotFoundException x)
     {
     }
-    new FormGUI(formFensterConf, descs, fm, idToPresetValue, functionContext,
-        funcLib, dialogLib);
+    FormGUI gui = new FormGUI(formFensterConf, descs, fm, idToPresetValue,
+        functionContext, funcLib, dialogLib);
+    fm.setFormGUI(gui);
   }
 
   /**
@@ -392,6 +394,8 @@ public class DocumentCommandInterpreter
   {
     private final XTextDocument doc;
 
+    private XWindow containerWindow = null;
+
     private final FunctionLibrary funcLib;
 
     private final HashMap idToFormValues;
@@ -402,6 +406,8 @@ public class DocumentCommandInterpreter
 
     private final Rectangle origWindowPosSize;
 
+    private FormGUI formGUI;
+
     public FormModelImpl(XTextDocument doc, FunctionLibrary funcLib,
         HashMap idToFormValues, DocumentCommandTree cmdTree, Rectangle origPos)
     {
@@ -411,9 +417,20 @@ public class DocumentCommandInterpreter
       this.cmdTree = cmdTree;
       this.invisibleGroups = new HashSet();
       this.origWindowPosSize = origPos;
+      this.formGUI = null;
+
+      // ContainerWindow holen:
+      try
+      {
+        this.containerWindow = UNO.XModel(doc).getCurrentController()
+            .getFrame().getContainerWindow();
+      }
+      catch (java.lang.Exception e)
+      {
+      }
 
       // FormModel im WollMuxSingleton registrieren:
-      WollMuxEventHandler.registerFormModel(this);
+      WollMuxEventHandler.handleRegisterFormModel(this);
 
       // closeListener registrieren
       if (UNO.XCloseable(doc) != null)
@@ -422,16 +439,32 @@ public class DocumentCommandInterpreter
       }
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.FormModel#close()
+     */
     public void close()
     {
       WollMuxEventHandler.handleCloseTextDocument(doc);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.FormModel#setWindowVisible(boolean)
+     */
     public void setWindowVisible(boolean vis)
     {
       WollMuxEventHandler.handleSetWindowVisible(UNO.XModel(doc), vis);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.FormModel#setWindowPosSize(int, int,
+     *      int, int)
+     */
     public void setWindowPosSize(int docX, int docY, int docWidth, int docHeight)
     {
       WollMuxEventHandler.handleSetWindowPosSize(
@@ -442,6 +475,12 @@ public class DocumentCommandInterpreter
           docHeight);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.FormModel#setVisibleState(java.lang.String,
+     *      boolean)
+     */
     public void setVisibleState(String groupId, boolean visible)
     {
       WollMuxEventHandler.handleSetVisibleState(
@@ -451,6 +490,12 @@ public class DocumentCommandInterpreter
           visible);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.FormModel#valueChanged(java.lang.String,
+     *      java.lang.String)
+     */
     public void valueChanged(String fieldId, String newValue)
     {
       WollMuxEventHandler.handleFormValueChanged(
@@ -460,15 +505,31 @@ public class DocumentCommandInterpreter
           funcLib);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.FormModel#focusGained(java.lang.String)
+     */
     public void focusGained(String fieldId)
     {
       WollMuxEventHandler.handleFocusFormField(idToFormValues, fieldId);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.FormModel#focusLost(java.lang.String)
+     */
     public void focusLost(String fieldId)
     {
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.sun.star.util.XCloseListener#queryClosing(com.sun.star.lang.EventObject,
+     *      boolean)
+     */
     public void queryClosing(EventObject event, boolean getsOwnership)
         throws CloseVetoException
     {
@@ -476,27 +537,66 @@ public class DocumentCommandInterpreter
       // ist, da auf das final Feld origWindowPosSize nur lesend zugegriffen
       // wird.
 
-      // Original-Position wieder herstellen
+      // Original-Position wieder herstellen.
+      // Anmerkung: das ContainerWindow sollte im Constructor geholt werden, da
+      // das XModel von doc in manchen F‰llen beim Schlieﬂen bereits keinen
+      // currentController mehr besitzt. Zum Zeitpunkt der Erstellung ist jedoch
+      // im Normalfall ein geeigneter currentController und damit auch ein frame
+      // und ein containerWindow vorhanden.
       if (UnoRuntime.areSame(doc, event.Source)
           && origWindowPosSize != null
-          && UNO.XModel(doc) != null)
-        UNO.XModel(doc).getCurrentController().getFrame().getContainerWindow()
-            .setPosSize(
-                origWindowPosSize.X,
-                origWindowPosSize.Y,
-                origWindowPosSize.Width,
-                origWindowPosSize.Height,
-                PosSize.POSSIZE);
+          && containerWindow != null)
+        try
+        {
+          containerWindow.setPosSize(
+              origWindowPosSize.X,
+              origWindowPosSize.Y,
+              origWindowPosSize.Width,
+              origWindowPosSize.Height,
+              PosSize.POSSIZE);
+        }
+        catch (java.lang.Exception e)
+        {
+        }
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.sun.star.util.XCloseListener#notifyClosing(com.sun.star.lang.EventObject)
+     */
     public void notifyClosing(EventObject arg0)
     {
-      WollMuxEventHandler.deregisterFormModel(this);
+      WollMuxEventHandler.handleDisposeFormModel(this);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.sun.star.lang.XEventListener#disposing(com.sun.star.lang.EventObject)
+     */
     public void disposing(EventObject arg0)
     {
-      WollMuxEventHandler.deregisterFormModel(this);
+      WollMuxEventHandler.handleDisposeFormModel(this);
+    }
+
+    /**
+     * Diese Methode schlieﬂt das FormModel selbst und teilt der FormGUI mit,
+     * dass das FormModel geschlossen wurde und in Zukunft nicht mehr
+     * angesprochen werden darf.
+     */
+    public void dispose()
+    {
+      if (formGUI != null)
+      {
+        formGUI.dispose();
+        formGUI = null;
+      }
+    }
+
+    public void setFormGUI(FormGUI formGUI)
+    {
+      this.formGUI = formGUI;
     }
   }
 

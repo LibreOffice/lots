@@ -668,7 +668,7 @@ public class WollMuxEventHandler
    * 
    * @param model
    */
-  public static void registerFormModel(FormModel model)
+  public static void handleRegisterFormModel(FormModel model)
   {
     handle(new OnRegisterFormModel(model));
   }
@@ -705,22 +705,23 @@ public class WollMuxEventHandler
   // *******************************************************************************************
 
   /**
-   * Über dieses Event kann ein mit registerFormModel registriertes FormModel
-   * wieder deregistriert werden.
+   * Über dieses Event kann ein FormModel für ungültig erklärt (disposed)
+   * werden, das FormModel wird dabei auch aus der List mit registerFormModel()
+   * registrierten FormModel-Elementen entfernt.
    * 
    * @param model
    *          das zu deregistrierende FormModel
    */
-  public static void deregisterFormModel(FormModel model)
+  public static void handleDisposeFormModel(FormModel model)
   {
-    handle(new OnDeregisterFormModel(model));
+    handle(new OnDisposeFormModel(model));
   }
 
-  private static class OnDeregisterFormModel extends BasicEvent
+  private static class OnDisposeFormModel extends BasicEvent
   {
     FormModel model;
 
-    public OnDeregisterFormModel(FormModel model)
+    public OnDisposeFormModel(FormModel model)
     {
       this.model = model;
     }
@@ -730,6 +731,8 @@ public class WollMuxEventHandler
       WollMuxSingleton mux = WollMuxSingleton.getInstance();
 
       mux.deregisterFormModel(model);
+
+      model.dispose();
 
       return EventProcessor.processTheNextEvent;
     }
