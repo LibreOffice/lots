@@ -658,59 +658,12 @@ public class WollMuxEventHandler
   // *******************************************************************************************
 
   /**
-   * Über dieses Event kann das WollMuxSingleton über aktuell geöffnete
-   * Formulardokumente (in Form des zugehörigen FormModels) informiert werden.
-   * Die FormModel-Objekte bleiben so lange in einer HashMap im WollMuxSingleton
-   * gespeichert, bis sie wieder mit deregisterFormModel() aus der Map entfernt
-   * werden. Die Registrierung ist derzeit vor allem notwendig, damit das
-   * Speichern der original-Position und Größe der Formulardokumente vor dem
-   * Verschieben durch die FormGUI richtig funktioniert.
+   * Dieses Event sorgt dafür, dass die dispose() des übergebenen FormModels
+   * model im EventProcessor-Thread ausgeführt wird. Die dispose()-Methode darf
+   * nicht ausserhalb des EventProcessor-Threads ausgeführt werden.
    * 
    * @param model
-   */
-  public static void handleRegisterFormModel(FormModel model)
-  {
-    handle(new OnRegisterFormModel(model));
-  }
-
-  private static class OnRegisterFormModel extends BasicEvent
-  {
-    FormModel model;
-
-    public OnRegisterFormModel(FormModel model)
-    {
-      this.model = model;
-    }
-
-    protected boolean doit() throws WollMuxFehlerException
-    {
-      WollMuxSingleton mux = WollMuxSingleton.getInstance();
-
-      mux.registerFormModel(model);
-
-      return EventProcessor.processTheNextEvent;
-    }
-
-    public boolean requires(Object o)
-    {
-      return model.equals(o);
-    }
-
-    public String toString()
-    {
-      return this.getClass().getSimpleName() + "(" + model + ")";
-    }
-  }
-
-  // *******************************************************************************************
-
-  /**
-   * Über dieses Event kann ein FormModel für ungültig erklärt (disposed)
-   * werden, das FormModel wird dabei auch aus der List mit registerFormModel()
-   * registrierten FormModel-Elementen entfernt.
-   * 
-   * @param model
-   *          das zu deregistrierende FormModel
+   *          das zu disposende FormModel
    */
   public static void handleDisposeFormModel(FormModel model)
   {
@@ -719,32 +672,28 @@ public class WollMuxEventHandler
 
   private static class OnDisposeFormModel extends BasicEvent
   {
-    FormModel model;
+    FormModel formModel;
 
     public OnDisposeFormModel(FormModel model)
     {
-      this.model = model;
+      this.formModel = model;
     }
 
     protected boolean doit() throws WollMuxFehlerException
     {
-      WollMuxSingleton mux = WollMuxSingleton.getInstance();
-
-      mux.deregisterFormModel(model);
-
-      model.dispose();
+      if (formModel != null) formModel.dispose();
 
       return EventProcessor.processTheNextEvent;
     }
 
     public boolean requires(Object o)
     {
-      return model.equals(o);
+      return formModel.equals(o);
     }
 
     public String toString()
     {
-      return this.getClass().getSimpleName() + "(" + model + ")";
+      return this.getClass().getSimpleName() + "(" + formModel + ")";
     }
   }
 

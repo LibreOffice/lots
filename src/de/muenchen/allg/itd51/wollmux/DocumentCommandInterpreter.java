@@ -33,9 +33,6 @@ import java.util.Map;
 import java.util.Vector;
 
 import com.sun.star.awt.FontWeight;
-import com.sun.star.awt.PosSize;
-import com.sun.star.awt.Rectangle;
-import com.sun.star.awt.XWindow;
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.beans.PropertyVetoException;
 import com.sun.star.container.NoSuchElementException;
@@ -49,7 +46,6 @@ import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextField;
 import com.sun.star.text.XTextRange;
 import com.sun.star.uno.Exception;
-import com.sun.star.uno.UnoRuntime;
 import com.sun.star.util.CloseVetoException;
 import com.sun.star.util.XCloseListener;
 
@@ -274,21 +270,9 @@ public class DocumentCommandInterpreter
               + "Bitte kontaktieren Sie Ihre Systemadministration.");
     }
 
-    // 5) Ursprüngliche Fensterposition und Größe merken:
-    Rectangle origPosSize = null;
-    try
-    {
-      origPosSize = document.xModel().getCurrentController().getFrame()
-          .getContainerWindow().getPosSize();
-    }
-    catch (java.lang.Exception e)
-    {
-    }
-    origPosSize = mux.commitOriginalWindowPosSize(origPosSize);
-
-    // 6) Formulardialog starten:
+    // 5) Formulardialog starten:
     FormModelImpl fm = new FormModelImpl(document.xTextDocument(), funcLib,
-        idToFormFields, tree, origPosSize);
+        idToFormFields, tree);
 
     ConfigThingy formFensterConf = new ConfigThingy("");
     try
@@ -396,8 +380,6 @@ public class DocumentCommandInterpreter
   {
     private final XTextDocument doc;
 
-    private XWindow containerWindow = null;
-
     private final FunctionLibrary funcLib;
 
     private final HashMap idToFormValues;
@@ -406,33 +388,22 @@ public class DocumentCommandInterpreter
 
     private final HashSet invisibleGroups;
 
-    private final Rectangle origWindowPosSize;
-
     private FormGUI formGUI;
 
+    private String defaultWindowAttributes;
+
     public FormModelImpl(XTextDocument doc, FunctionLibrary funcLib,
-        HashMap idToFormValues, DocumentCommandTree cmdTree, Rectangle origPos)
+        HashMap idToFormValues, DocumentCommandTree cmdTree)
     {
       this.doc = doc;
       this.funcLib = funcLib;
       this.idToFormValues = idToFormValues;
       this.cmdTree = cmdTree;
       this.invisibleGroups = new HashSet();
-      this.origWindowPosSize = origPos;
       this.formGUI = null;
 
-      // ContainerWindow holen:
-      try
-      {
-        this.containerWindow = UNO.XModel(doc).getCurrentController()
-            .getFrame().getContainerWindow();
-      }
-      catch (java.lang.Exception e)
-      {
-      }
-
-      // FormModel im WollMuxSingleton registrieren:
-      WollMuxEventHandler.handleRegisterFormModel(this);
+      // Standard-Fensterattribute vor dem Start der Form-GUI sichern.
+      this.defaultWindowAttributes = getDefaultWindowAttributes();
 
       // closeListener registrieren
       if (UNO.XCloseable(doc) != null)
@@ -535,31 +506,19 @@ public class DocumentCommandInterpreter
     public void queryClosing(EventObject event, boolean getsOwnership)
         throws CloseVetoException
     {
-      // diese Aktion muss synchron durchgeführt werden, was aber kein Problem
-      // ist, da auf das final Feld origWindowPosSize nur lesend zugegriffen
-      // wird.
-
-      // Original-Position wieder herstellen.
-      // Anmerkung: das ContainerWindow sollte im Constructor geholt werden, da
-      // das XModel von doc in manchen Fällen beim Schließen bereits keinen
-      // currentController mehr besitzt. Zum Zeitpunkt der Erstellung ist jedoch
-      // im Normalfall ein geeigneter currentController und damit auch ein frame
-      // und ein containerWindow vorhanden.
-      if (UnoRuntime.areSame(doc, event.Source)
-          && origWindowPosSize != null
-          && containerWindow != null)
-        try
-        {
-          containerWindow.setPosSize(
-              origWindowPosSize.X,
-              origWindowPosSize.Y,
-              origWindowPosSize.Width,
-              origWindowPosSize.Height,
-              PosSize.POSSIZE);
-        }
-        catch (java.lang.Exception e)
-        {
-        }
+      // Holen der defaultWindowAttributes direkt vor dem Schließen des
+      // Formulardokuments, um nach dem Schließen die Standard-Werte wieder
+      // herstellen zu können. Da queryClosing u.U. nicht immer zuverlässig
+      // aufgerufen wird, ist im Konstruktor auch noch ein
+      // getDefaultWindowAttributes()-Aufruf um sicher zu gehen, dass
+      // defaultWindowAttributes eine sinnvolle Vorbelegung enthält. Hier findet
+      // "nur" nochmal eine Aktualisierung statt, die auch neue Attribute
+      // beachtet, wenn sich zwischen dem Öffnen des Formulars und dem Schließen
+      // des Formulars die Standardattribute verändert haben. Die
+      // Standard-Attribute ändern sich (OOo-seitig) immer dann, wenn ein
+      // Dokument (mitsamt Fenster) geschlossen wird. Dann merkt sich OOo die
+      // Position und Größe des zuletzt geschlossenen Fensters.
+      defaultWindowAttributes = getDefaultWindowAttributes();
     }
 
     /*
@@ -594,11 +553,88 @@ public class DocumentCommandInterpreter
         formGUI.dispose();
         formGUI = null;
       }
+
+      // Rücksetzen des defaultWindowAttributes auf den Wert vor dem Schließen
+      // des Formulardokuments.
+      if (defaultWindowAttributes != null)
+        setDefaultWindowAttributes(defaultWindowAttributes);
     }
 
     public void setFormGUI(FormGUI formGUI)
     {
       this.formGUI = formGUI;
+    }
+
+    /**
+     * Diese Hilfsmethode liest das Attribut ooSetupFactoryWindowAttributes aus
+     * dem Konfigurationsknoten
+     * "/org.openoffice.Setup/Office/Factories/com.sun.star.text.TextDocument"
+     * der OOo-Konfiguration, welches die Standard-FensterAttribute enthält, mit
+     * denen neue Fenster für TextDokumente erzeugt werden.
+     * 
+     * @return
+     */
+    private static String getDefaultWindowAttributes()
+    {
+      try
+      {
+        Object cp = UNO
+            .createUNOService("com.sun.star.configuration.ConfigurationProvider");
+
+        // creation arguments: nodepath
+        com.sun.star.beans.PropertyValue aPathArgument = new com.sun.star.beans.PropertyValue();
+        aPathArgument.Name = "nodepath";
+        aPathArgument.Value = "/org.openoffice.Setup/Office/Factories/com.sun.star.text.TextDocument";
+        Object[] aArguments = new Object[1];
+        aArguments[0] = aPathArgument;
+
+        Object ca = UNO.XMultiServiceFactory(cp).createInstanceWithArguments(
+            "com.sun.star.configuration.ConfigurationAccess",
+            aArguments);
+
+        return UNO.getProperty(ca, "ooSetupFactoryWindowAttributes").toString();
+      }
+      catch (java.lang.Exception e)
+      {
+      }
+      return null;
+    }
+
+    /**
+     * Diese Hilfsmethode setzt das Attribut ooSetupFactoryWindowAttributes aus
+     * dem Konfigurationsknoten
+     * "/org.openoffice.Setup/Office/Factories/com.sun.star.text.TextDocument"
+     * der OOo-Konfiguration auf den neuen Wert value, der (am besten) über
+     * einen vorhergehenden Aufruf von getDefaultWindowAttributes() gewonnen
+     * wird.
+     * 
+     * @param value
+     */
+    private static void setDefaultWindowAttributes(String value)
+    {
+      try
+      {
+        Object cp = UNO
+            .createUNOService("com.sun.star.configuration.ConfigurationProvider");
+
+        // creation arguments: nodepath
+        com.sun.star.beans.PropertyValue aPathArgument = new com.sun.star.beans.PropertyValue();
+        aPathArgument.Name = "nodepath";
+        aPathArgument.Value = "/org.openoffice.Setup/Office/Factories/com.sun.star.text.TextDocument";
+        Object[] aArguments = new Object[1];
+        aArguments[0] = aPathArgument;
+
+        Object ca = UNO.XMultiServiceFactory(cp).createInstanceWithArguments(
+            "com.sun.star.configuration.ConfigurationUpdateAccess",
+            aArguments);
+
+        UNO.setProperty(ca, "ooSetupFactoryWindowAttributes", value);
+
+        UNO.XChangesBatch(ca).commitChanges();
+      }
+      catch (java.lang.Exception e)
+      {
+      }
     }
   }
 

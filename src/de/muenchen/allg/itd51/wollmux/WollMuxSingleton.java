@@ -39,11 +39,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Vector;
 
-import com.sun.star.awt.Rectangle;
 import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
@@ -100,21 +98,6 @@ public class WollMuxSingleton implements XPALProvider
   private Vector registeredPALChangeListener;
 
   /**
-   * Das HashSet enthält in HashableComponent eingepackte, aktuell geöffnete
-   * OOo-Dokumenten mit Formulfunktion, deren Fensterposition und Größe beim
-   * Schließen wieder auf originalWindowPosSize zurückgesetzt werden sollen.
-   */
-  private HashSet currentFormModels;
-
-  /**
-   * Dieses Feld enthält die Fensterposition- und Größe des ersten
-   * Formulardialogs, bevor die FormularGUI gestartet wurde und dient dazu,
-   * Formulardokumente vor dem Schließen wieder auf die originalmaße
-   * zurücksetzen zu können.
-   */
-  private Rectangle originalWindowPosSize;
-
-  /**
    * Die WollMux-Hauptklasse ist als singleton realisiert.
    */
   private WollMuxSingleton(XComponentContext ctx)
@@ -137,9 +120,6 @@ public class WollMuxSingleton implements XPALProvider
     boolean successfulStartup = true;
 
     registeredPALChangeListener = new Vector();
-
-    originalWindowPosSize = null;
-    currentFormModels = new HashSet();
 
     WollMuxFiles.setupWollMuxDir();
 
@@ -479,67 +459,5 @@ public class WollMuxSingleton implements XPALProvider
   public static void checkURL(URL url) throws IOException
   {
     url.openStream().close();
-  }
-
-  /**
-   * Zweck dieser Methode ist es, sich die Fensterposition- und Größe des
-   * Fensters des *ersten aktuell geöffneten Formulardokuments* zu merken, und
-   * zurück zu liefern, damit das FormModel vor dem Schließen des
-   * Formulardokuments die Original Position und Größe, die das Formulardokument
-   * vor dem Starten der FormGUI besaß, wieder herstellen kann. Die in posSize
-   * übergebenen Größenangaben merkt sich die Methode genau dann, wenn die Liste
-   * der aktuell registrierten FormModels leer ist. Die Methode liefert immer
-   * die so gemerkte Position- und Größe zurück, auch dann, wenn wenn bereits
-   * ein oder mehrere FormModels registriert wurden.
-   * 
-   * @param posSize
-   *          die Position und Größe des aktuellen Formulardokuments vor dem
-   *          Erzeugen des zugehörigen FormModels. Ist die Liste der
-   *          registrierten FormModels leer, so wird dieser Wert gespeichert und
-   *          bei allen folgenden Aufrufen (mit einer nicht leeren Liste
-   *          registrierter FormModels) zurück geliefert.
-   * @return Die Fensterposition und Größe des ersten aktuell geöffneten
-   *         Formulardokuments bevor es von der FormGUI verschoben wurde.
-   * 
-   * @author Christoph Lutz (D-III-ITD 5.1)
-   */
-  public Rectangle commitOriginalWindowPosSize(Rectangle posSize)
-  {
-    if (originalWindowPosSize == null || currentFormModels.size() == 0)
-      originalWindowPosSize = posSize;
-    return originalWindowPosSize;
-  }
-
-  /**
-   * Über diese Methode kann wird das WollMuxSingleton über aktuell geöffnete
-   * Formulardokumente (in Form des zugehörigen FormModels) informiert. Die
-   * FormModel bleiben so lange in einer HashMap im WollMuxSingleton
-   * gespeichert, bis sie wieder mit deregisterFormModel() aus der Map entfernt
-   * werden. Die Registrierung ist derzeit vor allem notwendig, damit das
-   * Speichern der original-Position und Größe der Formulardokumente vor dem
-   * Verschieben durch die FormGUI richtig funktioniert (siehe dazu
-   * commitOriginalWindowPosSize()).
-   * 
-   * @param model
-   *          Das zu registrierende FormModel
-   * 
-   * @author Christoph Lutz (D-III-ITD 5.1)
-   */
-  public void registerFormModel(FormModel model)
-  {
-    if (model != null) currentFormModels.add(model);
-  }
-
-  /**
-   * Deregistriert ein mit registerFormModel() registriertes FormModel model.
-   * 
-   * @param model
-   *          das zu deregistrierende FormModel
-   * 
-   * @author Christoph Lutz (D-III-ITD 5.1)
-   */
-  public void deregisterFormModel(FormModel model)
-  {
-    if (model != null) currentFormModels.remove(model);
   }
 }
