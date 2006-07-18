@@ -388,9 +388,9 @@ public class DocumentCommandInterpreter
 
     private final HashSet invisibleGroups;
 
-    private FormGUI formGUI;
+    private final String defaultWindowAttributes;
 
-    private String defaultWindowAttributes;
+    private FormGUI formGUI;
 
     public FormModelImpl(XTextDocument doc, FunctionLibrary funcLib,
         HashMap idToFormValues, DocumentCommandTree cmdTree)
@@ -402,7 +402,12 @@ public class DocumentCommandInterpreter
       this.invisibleGroups = new HashSet();
       this.formGUI = null;
 
-      // Standard-Fensterattribute vor dem Start der Form-GUI sichern.
+      // Standard-Fensterattribute vor dem Start der Form-GUI sichern um nach
+      // dem Schließen des Formulardokuments die Standard-Werte wieder
+      // herstellen zu können. Die Standard-Attribute ändern sich (OOo-seitig)
+      // immer dann, wenn ein Dokument (mitsamt Fenster) geschlossen wird. Dann
+      // merkt sich OOo die Position und Größe des zuletzt geschlossenen
+      // Fensters.
       this.defaultWindowAttributes = getDefaultWindowAttributes();
 
       // closeListener registrieren
@@ -506,19 +511,6 @@ public class DocumentCommandInterpreter
     public void queryClosing(EventObject event, boolean getsOwnership)
         throws CloseVetoException
     {
-      // Holen der defaultWindowAttributes direkt vor dem Schließen des
-      // Formulardokuments, um nach dem Schließen die Standard-Werte wieder
-      // herstellen zu können. Da queryClosing u.U. nicht immer zuverlässig
-      // aufgerufen wird, ist im Konstruktor auch noch ein
-      // getDefaultWindowAttributes()-Aufruf um sicher zu gehen, dass
-      // defaultWindowAttributes eine sinnvolle Vorbelegung enthält. Hier findet
-      // "nur" nochmal eine Aktualisierung statt, die auch neue Attribute
-      // beachtet, wenn sich zwischen dem Öffnen des Formulars und dem Schließen
-      // des Formulars die Standardattribute verändert haben. Die
-      // Standard-Attribute ändern sich (OOo-seitig) immer dann, wenn ein
-      // Dokument (mitsamt Fenster) geschlossen wird. Dann merkt sich OOo die
-      // Position und Größe des zuletzt geschlossenen Fensters.
-      defaultWindowAttributes = getDefaultWindowAttributes();
     }
 
     /*
@@ -542,9 +534,9 @@ public class DocumentCommandInterpreter
     }
 
     /**
-     * Diese Methode schließt das FormModel selbst und teilt der FormGUI mit,
-     * dass das FormModel geschlossen wurde und in Zukunft nicht mehr
-     * angesprochen werden darf.
+     * Diese Methode setzt die Fensterattribute wieder auf den Stand vor dem
+     * Starten der FormGUI und teilt der FormGUI mit, dass es (das FormModel)
+     * geschlossen wurde und in Zukunft nicht mehr angesprochen werden darf.
      */
     public void dispose()
     {
