@@ -15,6 +15,7 @@
 * 02.02.2006 | BNK | Fenster zusammengeklebt
 * 05.05.2006 | BNK | Condition -> Function, besser kommentiert 
 * 05.07.2006 | BNK | optische Verbesserungen, insbes. bzgl. arrangeWindows()
+* 19.07.2006 | BNK | mehrere übelste Hacks, damit die Formular-GUI nie unsinnige Größe annimmt beim Starten
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -32,6 +33,7 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.awt.event.WindowStateListener;
 import java.io.File;
 import java.net.URL;
 import java.util.HashMap;
@@ -176,6 +178,34 @@ public class FormGUI
 
     myFrame.getContentPane().add(formController.JComponent());
 
+    formGUIBounds = Common.parseDimensions(formFensterConf);
+    
+    
+    /*
+     * Leider kann wegen 
+     * http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4737732
+     * nicht auf einfache Weise die nutzbare Bildschirmflaeche bestimmt werden,
+     * deshalb der folgende Hack:
+     *   - maxWindowBounds initialisieren (so wie es eigentlich reichen sollte aber
+     *     unter KDE leider nicht tut) minus Sicherheitsabzug fuer KDE.
+     *     Die Initialisierung ist erforderlich, weil
+     *     vor den folgenden Events schon Events kommen können, die ein
+     *     arrangeWindows() erforderlich machen. 
+     *   - Wir registrieren einen WindowStateListener
+     *   - Wir maximieren das Fenster
+     *   - Sobald der Event-Handler das erfolgte Maximieren anzeigt, lesen
+     *     wir die Größe aus und setzen wieder auf normal.
+     *   - Sobald das Normalsetzen beendet ist deregistriert sich der 
+     *     WindowStateListener und die Fenster werden arrangiert.
+     *     
+     * Bemerkung: Den Teil mit Normalsetzen kann man vermutlich entfernen, da
+     * das Setzen der Fenstergröße ohnehin den maximierten Zustand verlässt.
+     */
+
+    GraphicsEnvironment genv = GraphicsEnvironment.getLocalGraphicsEnvironment();
+    maxWindowBounds = genv.getMaximumWindowBounds();
+    maxWindowBounds.height-=32; //Sicherheitsabzug für KDE Taskleiste
+
     myFrame.pack();
     myFrame.setResizable(true);
     myFrame.setVisible(true);
@@ -184,21 +214,36 @@ public class FormGUI
      * Bestimmen der Breite des Fensterrahmens.
      */
     windowInsets = myFrame.getInsets();
-
-    /*
-     * Leider kann wegen 
-     * http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4737732
-     * nicht auf einfache Weise die nutzbare Bildschirmflaeche bestimmt werden,
-     * deshalb der folgende Hack.
-     */
-    //  Toolkit tk = Toolkit.getDefaultToolkit();
-    //  GraphicsEnvironment genv = GraphicsEnvironment.getLocalGraphicsEnvironment();
-    // Dimension screenSize = tk.getScreenSize();
-    myFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-    maxWindowBounds = myFrame.getBounds();
-    myFrame.setExtendedState(JFrame.NORMAL);
     
-    formGUIBounds = Common.parseDimensions(formFensterConf);
+    myFrame.addWindowStateListener(new WindowStateListener() {
+      private int counter = 0;
+      public void windowStateChanged(WindowEvent e)
+      {
+        if (counter++ == 0) createGUI2((e.getNewState() & JFrame.MAXIMIZED_BOTH) == JFrame.MAXIMIZED_BOTH);
+        else if (counter++ == 1) createGUI3();
+        else if (counter++ == 2) myFrame.removeWindowStateListener(this);
+      }}
+    );
+    
+    myFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+  }
+  
+  private void createGUI2(boolean changeMaxWinBounds)
+  {
+    if (changeMaxWinBounds) 
+    {
+      Rectangle newBounds = myFrame.getBounds();
+      //sanity check: Falls die neuen Grenzen weniger als 75% der Fläche haben als
+      //die alten (die bis auf die Taskleiste korrekt seien sollten), dann
+      //werden sie nicht genommen.
+      if (newBounds.width * newBounds.height >= 0.75*maxWindowBounds.width*maxWindowBounds.height)
+        maxWindowBounds = newBounds; 
+    }
+    myFrame.setExtendedState(JFrame.NORMAL);
+  }
+  
+  private void createGUI3()
+  {
     setFormGUISizeAndLocation();
     arrangeWindows();
   }
@@ -211,11 +256,6 @@ public class FormGUI
    */
   private void setFormGUISizeAndLocation()
   {
-    // Toolkit tk = Toolkit.getDefaultToolkit();
-    GraphicsEnvironment genv = GraphicsEnvironment.getLocalGraphicsEnvironment();
-    //Dimension screenSize = tk.getScreenSize();
-    Rectangle bounds = genv.getMaximumWindowBounds();
-    
     Rectangle frameBounds = new Rectangle(myFrame.getBounds());
     
     switch (formGUIBounds.width)
@@ -223,7 +263,7 @@ public class FormGUI
       case Common.DIMENSION_UNSPECIFIED: // natural width
         break;
       case Common.DIMENSION_MAX: // max
-        frameBounds.width = bounds.width;
+        frameBounds.width = maxWindowBounds.width;
         break;
       default: // specified width
         frameBounds.width = formGUIBounds.width;
@@ -235,7 +275,7 @@ public class FormGUI
       case Common.DIMENSION_UNSPECIFIED: // natural height
         break;
       case Common.DIMENSION_MAX: // max
-        frameBounds.height = bounds.height;
+        frameBounds.height = maxWindowBounds.height;
         break;
       default: // specified height
         frameBounds.height = formGUIBounds.height;
@@ -245,13 +285,13 @@ public class FormGUI
     switch (formGUIBounds.x)
     {
       case Common.COORDINATE_CENTER: // center
-        frameBounds.x = bounds.x + (bounds.width-frameBounds.width)/2;
+        frameBounds.x = maxWindowBounds.x + (maxWindowBounds.width-frameBounds.width)/2;
         break;
       case Common.COORDINATE_MAX: // max
-        frameBounds.x = bounds.x + bounds.width - frameBounds.width;
+        frameBounds.x = maxWindowBounds.x + maxWindowBounds.width - frameBounds.width;
         break;
       case Common.COORDINATE_MIN: // min
-        frameBounds.x = bounds.x;
+        frameBounds.x = maxWindowBounds.x;
         break;
       case Common.COORDINATE_UNSPECIFIED: // kein Wert angegeben
         break;
@@ -264,13 +304,13 @@ public class FormGUI
     switch (formGUIBounds.y)
     {
       case Common.COORDINATE_CENTER: // center
-        frameBounds.y = bounds.y + (bounds.height-frameBounds.height)/2;
+        frameBounds.y = maxWindowBounds.y + (maxWindowBounds.height-frameBounds.height)/2;
         break;
       case Common.COORDINATE_MAX: // max
-        frameBounds.y = bounds.y + bounds.height - frameBounds.height;
+        frameBounds.y = maxWindowBounds.y + maxWindowBounds.height - frameBounds.height;
         break;
       case Common.COORDINATE_MIN: // min
-        frameBounds.y = bounds.y;
+        frameBounds.y = maxWindowBounds.y;
         break;
       case Common.COORDINATE_UNSPECIFIED: // kein Wert angegeben
         break;
@@ -285,8 +325,8 @@ public class FormGUI
      * nicht berücksichtigt beim ersten Layout (jedoch schon, wenn sich die
      * Taskleiste verändert).
      */
-    if (frameBounds.y + frameBounds.height > bounds.y + bounds.height)
-      frameBounds.height = bounds.y + bounds.height - frameBounds.y;
+    if (frameBounds.y + frameBounds.height > maxWindowBounds.y + maxWindowBounds.height)
+      frameBounds.height = maxWindowBounds.y + maxWindowBounds.height - frameBounds.y;
     
     myFrame.setBounds(frameBounds);
     myFrame.validate(); //ohne diese wurde in Tests manchmal nicht neu gezeichnet
