@@ -36,7 +36,8 @@
 *                  | Es wird jetzt der letzte Fenster/WollMuxBar-Abschnitt verwendet.
 * 23.06.2006 | BNK | Senderbox von JComboBox auf JPopupMenu umgestellt.    
 * 27.06.2006 | BNK | WIDTH, HEIGHT max korrekt unterstützt 
-* 29.06.2006 | BNK | min, max, center unterstützt             
+* 29.06.2006 | BNK | min, max, center unterstützt    
+* 19.07.2006 | BNK | MODE "Icon" repariert         
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -574,8 +575,11 @@ public class WollMuxBar
         
     int minimizedWidth = frameSize.width; 
     if (minimizedWidth > 128) minimizedWidth -= 64;
-    minimizedFrame.setSize(minimizedWidth, 5);
-    minimizedFrame.setLocation(frameLocation);
+    if (windowMode == UP_AND_AWAY_WINDOW_MODE)
+    {
+      minimizedFrame.setSize(minimizedWidth, 5);
+      minimizedFrame.setLocation(frameLocation);
+    }
   }
 
   /**
