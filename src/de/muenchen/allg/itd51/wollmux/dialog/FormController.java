@@ -265,8 +265,6 @@ public class FormController implements UIElementEventHandler
   private void createGUI(ConfigThingy fensterDesc, ConfigThingy visibilityDesc, Map mapIdToPresetValue)
   {
     Common.setLookAndFeelOnce();
-     //TODO Fenster-Positions und Größenangaben in wollmux.conf auswerten
-    //TODO Scrollen, bei zuvielen Eingabeelementen (vertikale Grösse wird ja ohnehin vorgegeben ueber den Fenster() Abschnitt)
     
     /*
      * ACHTUNG! Wenn die JTabbedPane noch in ein Panel eingebettet werden soll
