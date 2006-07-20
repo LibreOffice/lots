@@ -338,7 +338,6 @@ public class Bookmark
       if (bookmark.xNamed() != null)
       {
         bookmark.xNamed().setName(newName);
-        name = bookmark.xNamed().getName();
       }
       try
       {
@@ -350,6 +349,12 @@ public class Bookmark
       catch (IllegalArgumentException e)
       {
         Logger.error(e);
+      }
+      // Nach dem Einfügen den neuen Namen holen, da OOo einen Suffix an den
+      // Namen anhängt, wenn der selbe Name bereits vergeben ist.
+      if (bookmark.xNamed() != null)
+      {
+        name = bookmark.xNamed().getName();
       }
     }
     return name;
