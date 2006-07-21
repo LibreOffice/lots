@@ -84,7 +84,7 @@ public class DocumentCommandTree
    * Erzeugt einen neuen (vorerst leeren) DocumentCommandTree. Der Baum kann
    * anschließend durch die Methode update() gefüllt werden.
    * 
-   * @param doc
+   * @param xBookmarkSupplier
    *          Das Dokument, welches die Dokumentkommandos enthält.
    */
   public DocumentCommandTree(XBookmarksSupplier xBookmarksSupplier)
@@ -366,6 +366,19 @@ public class DocumentCommandTree
         scannedBookmarks.add(newBookmarkName);
       }
     }
+  }
+
+  /**
+   * Liefert den BookmarksSupplier des Kommandobaums zurück, der im Normalfall
+   * auch zugleich die Komponente des Textdokuments selbst ist.
+   * 
+   * @return Liefert den BookmarksSupplier des Kommandobaums zurück, der im
+   *         Normalfall auch zugleich die Komponente des Textdokuments selbst
+   *         ist.
+   */
+  public XBookmarksSupplier getBookmarksSupplier()
+  {
+    return xBookmarksSupplier;
   }
 
   /**

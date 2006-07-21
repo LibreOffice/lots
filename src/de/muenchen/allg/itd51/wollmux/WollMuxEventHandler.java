@@ -51,7 +51,9 @@ import com.sun.star.frame.XFrame;
 import com.sun.star.frame.XModel;
 import com.sun.star.lang.EventObject;
 import com.sun.star.lang.XComponent;
+import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
+import com.sun.star.text.XTextRange;
 import com.sun.star.uno.Exception;
 import com.sun.star.uno.RuntimeException;
 import com.sun.star.uno.UnoRuntime;
@@ -1164,6 +1166,8 @@ public class WollMuxEventHandler
       else
         invisibleGroups.add(groupId);
 
+      DocumentCommand firstChangedCmd = null;
+
       // Kommandobaum durchlaufen und alle betroffenen Elemente updaten:
       Iterator iter = cmdTree.depthFirstIterator(false);
       while (iter.hasNext())
@@ -1171,6 +1175,8 @@ public class WollMuxEventHandler
         DocumentCommand cmd = (DocumentCommand) iter.next();
         Set groups = cmd.getGroups();
         if (!groups.contains(groupId)) continue;
+
+        // Visibility-Status neu bestimmen:
         boolean setVisible = true;
         Iterator i = groups.iterator();
         while (i.hasNext())
@@ -1178,6 +1184,20 @@ public class WollMuxEventHandler
           String groupId = (String) i.next();
           if (invisibleGroups.contains(groupId)) setVisible = false;
         }
+
+        // Kommando merken, dessen Sichtbarkeitsstatus sich zuerst ändert und
+        // den focus (ViewCursor) auf den Start des Bereichs setzen. Da das
+        // Setzen eines ViewCursors in einen unsichtbaren Bereich nicht
+        // funktioniert, wird die Methode focusRangeStart zwei mal aufgerufen,
+        // je nach dem, ob der Bereich vor oder nach dem Setzen des neuen
+        // Sichtbarkeitsstatus sichtbar ist.
+        if (setVisible != cmd.isVisible() && firstChangedCmd == null)
+        {
+          firstChangedCmd = cmd;
+          if (firstChangedCmd.isVisible()) focusRangeStart(cmd);
+        }
+
+        // neuen Sichtbarkeitsstatus setzen:
         try
         {
           cmd.setVisible(setVisible);
@@ -1187,7 +1207,40 @@ public class WollMuxEventHandler
           // Absicherung gegen das manuelle Löschen von Dokumentinhalten
         }
       }
+
+      // Den Cursor (nochmal) auf den Anfang des Bookmarks setzen, dessen
+      // Sichtbarkeitsstatus sich zuerst geändert hat (siehe Begründung oben).
+      if (firstChangedCmd != null && firstChangedCmd.isVisible())
+        focusRangeStart(firstChangedCmd);
+
       return EventProcessor.processTheNextEvent;
+    }
+
+    /**
+     * Diese Methode setzt den ViewCursor auf den Anfang des Bookmarks des
+     * Dokumentkommandos cmd.
+     * 
+     * @param cmd
+     *          Das Dokumentkommando, auf dessen Start der ViewCursor gesetzt
+     *          werden soll.
+     */
+    private void focusRangeStart(DocumentCommand cmd)
+    {
+      XTextRange range = cmd.getTextRange();
+      if (range != null)
+        try
+        {
+          XController controller = UNO.XModel(cmdTree.getBookmarksSupplier())
+              .getCurrentController();
+          XTextCursor cursor = UNO.XTextViewCursorSupplier(controller)
+              .getViewCursor();
+          cursor.gotoRange(range.getStart(), false);
+          // Stellt sicher,
+          // cursor.goLeft((short) 1, false);
+        }
+        catch (java.lang.Exception e)
+        {
+        }
     }
 
     public String toString()
