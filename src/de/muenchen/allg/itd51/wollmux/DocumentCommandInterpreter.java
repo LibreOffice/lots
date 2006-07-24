@@ -24,7 +24,6 @@
  */
 package de.muenchen.allg.itd51.wollmux;
 
-import java.io.StringReader;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -43,7 +42,6 @@ import com.sun.star.lang.EventObject;
 import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
-import com.sun.star.text.XTextField;
 import com.sun.star.text.XTextRange;
 import com.sun.star.uno.Exception;
 import com.sun.star.util.CloseVetoException;
@@ -217,7 +215,7 @@ public class DocumentCommandInterpreter
     FormScanner fs = new FormScanner();
     errors += fs.execute(tree);
 
-    ConfigThingy descs = fs.getFormDescriptors();
+    ConfigThingy descs = fs.getFormDescriptor().toConfigThingy();
     HashMap idToFormFields = fs.getIDToFormFields();
     HashMap idToPresetValue = mapIDToPresetValue(idToFormFields);
 
@@ -1297,17 +1295,13 @@ public class DocumentCommandInterpreter
    */
   private class FormScanner extends TreeExecutor
   {
-    /**
-     * Das ConfigThingy enthält alle Form-Desriptoren, die im Lauf des
-     * interpret-Vorgangs aufgesammelt werden.
-     */
-    private ConfigThingy formDescriptors = new ConfigThingy("Form");
-
     private HashMap idToFormFields = new HashMap();
 
-    private ConfigThingy getFormDescriptors()
+    private FormDescriptor formDescriptor = new FormDescriptor();
+
+    private FormDescriptor getFormDescriptor()
     {
-      return formDescriptors;
+      return formDescriptor;
     }
 
     private HashMap getIDToFormFields()
@@ -1333,45 +1327,11 @@ public class DocumentCommandInterpreter
     public int executeCommand(DocumentCommand.Form cmd)
     {
       cmd.setErrorState(false);
-      XTextRange range = cmd.getTextRange();
-      Object content = null;
       try
       {
-        if (range != null)
-        {
-          UnoService cursor = new UnoService(range.getText()
-              .createTextCursorByRange(range));
-
-          UnoService textfield = new UnoService(findTextFieldRecursive(
-              cursor,
-              "com.sun.star.text.TextField.Annotation"));
-          try
-          {
-            content = textfield.getPropertyValue("Content").getObject();
-          }
-          catch (Exception e)
-          {
-            throw new ConfigurationErrorException(
-                "Das Notiz-Feld mit der Formularbeschreibung fehlt.");
-          }
-        }
-        if (content != null)
-        {
-          ConfigThingy ct = new ConfigThingy("", null, new StringReader(content
-              .toString()));
-          ConfigThingy formulars = ct.query("Formular");
-          if (formulars.count() == 0)
-            throw new ConfigurationErrorException(
-                "Formularbeschreibung enthält keinen Abschnitt \"Formular\".");
-          Iterator formIter = formulars.iterator();
-          while (formIter.hasNext())
-          {
-            ConfigThingy form = (ConfigThingy) formIter.next();
-            formDescriptors.addChild(form);
-          }
-        }
+        formDescriptor.add(cmd);
       }
-      catch (java.lang.Exception e)
+      catch (ConfigurationErrorException e)
       {
         insertErrorField(cmd, e);
         cmd.setErrorState(true);
@@ -1416,60 +1376,6 @@ public class DocumentCommandInterpreter
     {
       cmd.setDoneState(true);
       return 0;
-    }
-
-    // Helper-Methoden:
-
-    /**
-     * Diese Methode durchsucht das Element element bzw. dessen
-     * XEnumerationAccess Interface rekursiv nach InputFields und liefert das
-     * erste gefundene InputField zurück.
-     * 
-     * @param element
-     *          Das erste gefundene InputField.
-     */
-    private XTextField findTextFieldRecursive(UnoService element,
-        String serviceName)
-    {
-      // zuerst die Kinder durchsuchen (falls vorhanden):
-      if (element.xEnumerationAccess() != null)
-      {
-        XEnumeration xEnum = element.xEnumerationAccess().createEnumeration();
-
-        while (xEnum.hasMoreElements())
-        {
-          try
-          {
-            UnoService child = new UnoService(xEnum.nextElement());
-            XTextField found = findTextFieldRecursive(child, serviceName);
-            // das erste gefundene Element zurückliefern.
-            if (found != null) return found;
-          }
-          catch (java.lang.Exception e)
-          {
-            Logger.error(e);
-          }
-        }
-      }
-
-      // jetzt noch schauen, ob es sich bei dem Element um ein InputField
-      // handelt:
-      if (element.xTextField() != null)
-      {
-        try
-        {
-          UnoService textField = element.getPropertyValue("TextField");
-          if (textField.supportsService(serviceName))
-          {
-            return textField.xTextField();
-          }
-        }
-        catch (Exception e)
-        {
-        }
-      }
-
-      return null;
     }
   }
 
