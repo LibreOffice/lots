@@ -1,0 +1,71 @@
+#!/bin/sh
+
+if [ -z "$VERSION" ]; then
+  echo 1>&2 "VERSION nicht gesetzt"
+  exit 1
+fi
+
+if [ $# -eq 0 ]; then
+  set -- all
+fi
+
+action()
+{
+  while [ $# -gt 0 ]; do
+
+  case "_$1" in
+    *=*) 
+        eval "$1"
+        ;;
+      
+    _all) 
+        action removeold setversion package clean list
+        ;;
+
+    _removeold)
+        rm -f ../wollmux_*lhm1.{changes,deb,dsc,tar.gz}
+        ;;
+    
+    _setversion)
+        if ! grep -q "(${VERSION}lhm1)" debian/changelog ; then
+          sed "s/<<VERSION>>/${VERSION}lhm1/" debian/bump >debian/changelog.bump
+          cat debian/changelog >>debian/changelog.bump
+          mv debian/changelog.bump debian/changelog
+        fi
+        ;;
+
+    _install)
+	    mkdir -p "${DESTDIR}"/usr/lib/wollmux
+	    #cp content/* "${DESTDIR}"/usr/lib/wollmux
+	    #chmod 755 "${DESTDIR}"/usr/lib/wollmux/wollmuxbar.sh
+	    ;;
+
+    _package)
+	    dpkg-buildpackage -rfakeroot -uc -us
+	    ;;
+
+	_list)
+	    echo
+	    echo "Built the following packages"
+	    for i in ../*.deb ; do
+	      echo "$i:"
+	      dpkg -c "$i"
+	    done  
+	    ;;
+
+    _clean)
+	fakeroot debian/rules clean
+	if grep -q "Version Bumper" debian/changelog ; then
+	  sed -i 1,6d debian/changelog
+	fi
+	;;
+  
+  esac
+  shift 1
+  done
+}
+
+action "$@"
+
+
+	

@@ -1,0 +1,107 @@
+wollmux (1.2.0lhm1) siga; urgency=low
+
+  * Upgrade auf Version 1.2.0 des wollmux. 
+  * R1278 Einführung der setType-Kommandos
+  * R1588 WollMux darf nur Events erzeugen und keine internen Daten direkt manipulieren.
+  * R1589 Überarbeitung der Klasse Event.java - konkrete Events sollen eigene embedded Klassen werden.
+  * R1620 Benutzerfreundlicheres Verhalten, wenn kein Absender ausgewaehlt aber Briefkopf geoeffnet wird.
+  * R1957 Die Meldung dass Datensätze nicht aus der DB aktualisiert werden konnten muss umgebrochen werden.
+  * R2194 Bereits bestehende Checkboxen im Dokument sollen als Formularelemente unterstützt werden.
+
+ -- Jens Nitschke <jens.nitschke@muenchen.de>  Mon, 26 Jun 2006 13:13:16 +0200
+
+wollmux (0.96lhm1) siga; urgency=low
+
+  * upgrade wollmux to 0.96 according to RfC R1749.
+  * Release Notes hinzugefuegt
+  * P655 Keine versteckten Leerzeichen einfügen
+  * P728 Datumsfelder auch bei Einfügung (insbes. Mischen mit insertFrag) korrekt initialisieren
+  * P757 NullPointerException bei ans Ticket angehängter Konfiguration
+  * P762 InvocationTargetException von der WollmuxBar bei include einer nicht existierenden URL
+  * P766 Durcheinander bei zwei Datensätzen mit selbem Schlüssel in cache.conf
+  * R1200 .wollmux-Verzeichnis als Vorbelegung für DEFAULT CONTEXT
+  * R1202 Position von WollMuxBar, Icon, Writer-Fenster in wollmux.conf konfigurierbar machen.
+  * R1205 WollMuxBar-Anzeigemodus (normales Fenster, AlwaysOnTop,...) konfigurierbar machen
+  * R1207 Icon der WollMuxBar konfigurierbar machen
+  * R1337 Log-Meldung ausgeben bei unbekanntem TYPE in der Dialogspezifikation
+  * R1342 (Fehler-)Meldungen der WollMuxBar nach wollmux.log
+  * R1346 ULTRA-Dringender Folgefehler von P655
+  * R1360 Umlaute in URLs ermöglichen
+  * R1376 try/catch um alle UNO-Aufrufe in WollMuxBar
+  * R1390 Aussagekräftige Fehlermeldung beim Starten der WollMuxBar wenn WollMux.uno.pkg nicht installiert
+  * R1398 Startverhalten der WollMuxBar zur Verbesserung der Performance überarbeiten
+  * R1460 Aussagekräftige Fehlermeldung beim Starten der WollMuxBar wenn keine Konfiguration vorhanden
+  * R1590 WollMux-Fehlerdialog auch dann anzeigen, wenn noch kein Office-Fenster vorhanden ist
+  * R1898 Es soll nie ein leerer Absender Auswaehlen Dialog angezeigt werden
+
+ -- Jens Nitschke <jens.nitschke@muenchen.de>  Mon, 22 May 2006 10:14:15 +0200
+
+wollmux (0.95lhm1) siga; urgency=low
+
+  * upgrade wollmux to 0.95
+
+ -- Jens Nitschke <jens.nitschke@muenchen.de>  Mon,  6 Mar 2006 11:46:15 +0100
+
+wollmux (0.94lhm3) siga; urgency=low
+
+  * fixed versions of wollmux.uno.pkg and wollmuxbar.jar 
+
+ -- Jens Nitschke <jens.nitschke@muenchen.de>  Thu, 16 Feb 2006 15:29:41 +0100
+
+wollmux (0.94lhm2) siga; urgency=low
+
+  * changed Link /usr/bin/wollmuxbar.sh to /usr/bin/wollmuxbar
+
+ -- Jens Nitschke <jens.nitschke@muenchen.de>  Wed, 15 Feb 2006 10:30:03 +0100
+
+wollmux (0.94lhm1) siga; urgency=low
+
+  * add wollmuxbar
+  * changed dependency from Openoffice.org-base to Openoffice.org-writer
+  * changed wollmux from 0.9 to 0.94 
+
+ -- Jens Nitschke <jens.nitschke@muenchen.de>  Wed, 15 Feb 2006 08:36:26 +0100
+
+wollmux (0.9lhm7) unstable; urgency=low
+
+  * add dependency on sun-j2re1.5 
+
+ -- Jens Nitschke <jens.nitschke@muenchen.de>  Wed,  4 Jan 2006 11:06:55 +0100
+
+wollmux (0.9lhm6) unstable; urgency=low
+
+  * changed to Debian-policy 3.6.1
+  * changed postinst and prerm scripts
+
+ -- Jens Nitschke <jens.nitschke@muenchen.de>  Mon,  2 Jan 2006 11:03:12 +0100
+
+wollmux (0.9lhm5) unstable; urgency=low
+
+  * Fixed install path 
+
+ -- Cajus Pollmeier <pollmeier@gonicus.de>  Thu, 29 Dec 2005 16:42:30 +0100
+
+wollmux (0.9lhm4) unstable; urgency=low
+
+  * Fixed dependencies 
+
+ -- Cajus Pollmeier <pollmeier@goncius.de>  Thu, 29 Dec 2005 16:36:38 +0100
+
+wollmux (0.9lhm3) unstable; urgency=low
+
+  * postinst adn prerm scripts changed 
+
+ -- Jens Nitschke <jens.nitschke@muenchen.de>  Wed, 14 Dec 2005 13:00:28 +0100
+
+wollmux (0.9lhm2) unstable; urgency=low
+
+  * changed for OpenOffice 2.0
+
+ -- Jens Nitschke <jens.nitschke@muenchen.de>  Wed, 14 Dec 2005 11:55:24 +0100
+
+wollmux (0.9lhm1) unstable; urgency=low
+
+  * Initial release.
+
+ -- Jens Nitschke <jens.nitschke@muenchen.de>  Tue, 13 Dec 2005 11:05:44 +0100
+

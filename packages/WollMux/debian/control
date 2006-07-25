@@ -1,0 +1,11 @@
+Source: wollmux
+Section: lhm/main
+Priority: optional
+Maintainer: Jens Nitschke <jens.nitschke@muenchen.de>
+Standards-Version: 3.6.1
+
+Package: wollmux
+Architecture: any
+Depends: openoffice.org-writer, sun-j2re1.5
+Description: Das Briefkopfsystem der Landeshauptstadt München
+ Das Briefkopfsystem der Landeshauptstadt München

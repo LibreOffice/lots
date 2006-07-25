@@ -24,28 +24,41 @@
       stehen, damit die buildinfo-Datei erzeugt werden kann.
 	
 	Datum:  21.11.2005
-	Author: Christoph Lutz (D-III-ITD-5.1)
+	Author: Christoph Lutz (D-III-ITD-5.1), Matthias Benkmann (D-III-ITD-5.1)
 	*****************************************************************
 	-->
 
 	<property name="COMPONENT" value="WollMux" />
-	<property name="VERSION" value="1.2.1" />
+	<property name="VERSION" value="1.2.2" />
 	<property name="PKG_NAME" value="${COMPONENT}.uno.pkg" />
-	<property name="BUILD_INFO_FILE" value="buildinfo" />
+	<property name="PKG_FILE" value="${basedir}/packages/${PKG_NAME}" />
+	<property name="RDB_DIR" value="${basedir}/packages/WollMux" />
+	<property name="PACKAGE_DIR" value="${basedir}/packages" />
+	<property name="BUILD_INFO_FILE" value="${RDB_DIR}/buildinfo" />
 	<property name="LOGO" value="wollmux.jpg" />
 
 	<property name="WollMux_REG_NAME" value="de.muenchen.allg.itd51.wollmux.comp.WollMux" />
-	<property name="WollMux_COMPJAR" value="${COMPONENT}.uno.jar" />
+	<property name="WollMux_COMPJAR" value="${RDB_DIR}/${COMPONENT}.uno.jar" />
+	
+	<property name="RDBFILE" value="${RDB_DIR}/${COMPONENT}.rdb" />
 
-	<property name="RDBFILE" value="${COMPONENT}.rdb" />
-	<property name="RDBFILE_ABS" value="${basedir}/${RDBFILE}" />
+	<property name="MY_IDL" value="${basedir}/idl" />
+	<property name="MY_CLASSES" value="${basedir}/bin" />
 
-	<property name="MY_IDL" value="${basedir}/../../idl" />
-	<property name="MY_CLASSES" value="${basedir}/../../bin" />
+	<property name="UNOHELPER_CLASSES" value="${basedir}/../UNOHelper/bin" />
+	<property name="SDK_RDB" value="${basedir}/../OOo-SDK/types" />
+	<property name="SDK_IDL" value="${basedir}/../OOo-SDK/idl" />
+	
+	<property name="BIN" value="${basedir}/bin" />
+	<property name="IDLS" value="${basedir}/idl" />
+	
+	<property name="WOLLMUXBAR_JAR" value="${PACKAGE_DIR}/WollMuxBar.jar" />
+	<property name="UNOHELPER_BIN" value="${basedir}/../UNOHelper/bin" />
+	<property name="TOOLING" value="${basedir}/../OOo-SDK/classes" />
+	<property name="TOOLING_MAIN_CLASS" value="com.sun.star.lib.loader.Loader" />
+	<property name="WOLLMUXBAR_MAIN_CLASS" value="de.muenchen.allg.itd51.wollmux.dialog.WollMuxBar" />
+	<property name="MAKE_DIR" value="${basedir}/packages/WollMux" />
 
-	<property name="UNOHELPER_CLASSES" value="${basedir}/../../../UNOHelper/bin" />
-	<property name="SDK_RDB" value="${basedir}/../../../OOo-SDK/types" />
-	<property name="SDK_IDL" value="${basedir}/../../../OOo-SDK/idl" />
 
 	<target name="main" depends="package" />
 
@@ -57,15 +70,15 @@
 		</exec>
 		<echo level="info">unopkg add ${PKG_NAME}:</echo>
 		<exec executable="unopkg" failifexecutionfails="false">
-			<arg line="add ../${PKG_NAME}" />
+			<arg line="add ${PKG_FILE}" />
 		</exec>
 	</target>
 
 	<!-- Das Target package registriert die Komponente und erzeugt ein uno.pkg-file -->
 	<target name="package" depends="jarfile, buildinfo">
-		<delete file="../${PKG_NAME}" />
-		<zip destfile="../${PKG_NAME}">
-			<fileset dir=".">
+		<delete file="${PKG_FILE}" />
+		<zip destfile="${PKG_FILE}">
+			<fileset dir="${RDB_DIR}">
 				<include name="${WollMux_COMPJAR}" />
 				<include name="*.xcu" />
 				<include name="*.rdb" />
@@ -97,7 +110,7 @@
 	<!-- Das Target erzeugt das buildinfo-File -->
 	<target name="buildinfo">
 		<exec executable="svn" output="${BUILD_INFO_FILE}" failifexecutionfails="false" failonerror="false">
-			<arg line="info ../.." />
+			<arg line="info ." />
 		</exec>
 		<loadfile property="revision" srcfile="${BUILD_INFO_FILE}" failonerror="false">
 			<filterchain>
@@ -131,7 +144,7 @@
 		<apply executable="javamaker" dir="${MY_IDL}" relative="true" addsourcefile="false" dest="${MY_IDL}">
 			<arg line="-BUCR" />
 			<targetfile />
-			<arg line="-nD ${SDK_RDB}/types.rdb ${RDBFILE_ABS}" />
+			<arg line="-nD ${SDK_RDB}/types.rdb ${RDBFILE}" />
 			<fileset dir="${MY_IDL}" includes="**/*.urd" />
 			<mapper>
 				<mapper type="package" from="*.urd" to="-T*" />
@@ -140,14 +153,7 @@
 	</target>
 
 	
-	<property name="BIN" value="${basedir}/bin" />
-	<property name="IDLS" value="${basedir}/idl" />
-	<property name="PACKAGE_DIR" value="${basedir}/packages" />
-	<property name="WOLLMUXBAR_JAR" value="${PACKAGE_DIR}/WollMuxBar.jar" />
-	<property name="UNOHELPER_BIN" value="${basedir}/../UNOHelper/bin" />
-	<property name="TOOLING" value="${basedir}/../OOo-SDK/classes" />
-	<property name="TOOLING_MAIN_CLASS" value="com.sun.star.lib.loader.Loader" />
-	<property name="WOLLMUXBAR_MAIN_CLASS" value="de.muenchen.allg.itd51.wollmux.dialog.WollMuxBar" />
+
 	
 	<target name="WollMuxBar.jar">
 		<delete file="${WOLLMUXBAR_JAR}" />
@@ -165,5 +171,14 @@
 			</manifest>
 		</jar>
 	</target>
+	
+	
+	<!-- Das Target erzeugt das Debian-Paket -->
+	<target name="deb" depends="package, WollMuxBar.jar">
+		<exec executable="${MAKE_DIR}/make" dir="${MAKE_DIR}" failifexecutionfails="true" failonerror="true">
+          <env key="VERSION" value="${VERSION}" />
+		</exec>
+	</target>
+
 
 </project>
