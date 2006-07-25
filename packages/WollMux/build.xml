@@ -34,11 +34,12 @@
 	<property name="PKG_FILE" value="${basedir}/packages/${PKG_NAME}" />
 	<property name="RDB_DIR" value="${basedir}/packages/WollMux" />
 	<property name="PACKAGE_DIR" value="${basedir}/packages" />
-	<property name="BUILD_INFO_FILE" value="${RDB_DIR}/buildinfo" />
+	<property name="BUILD_INFO_FILE_NAME" value="buildinfo" />
+	<property name="BUILD_INFO_FILE" value="${RDB_DIR}/${BUILD_INFO_FILE_NAME}" />
 	<property name="LOGO" value="wollmux.jpg" />
 
 	<property name="WollMux_REG_NAME" value="de.muenchen.allg.itd51.wollmux.comp.WollMux" />
-	<property name="WollMux_COMPJAR" value="${RDB_DIR}/${COMPONENT}.uno.jar" />
+	<property name="WollMux_COMPJAR" value="${COMPONENT}.uno.jar" />
 	
 	<property name="RDBFILE" value="${RDB_DIR}/${COMPONENT}.rdb" />
 
@@ -83,15 +84,15 @@
 				<include name="*.xcu" />
 				<include name="*.rdb" />
 				<include name="META-INF/manifest.xml" />
-				<include name="${BUILD_INFO_FILE}" />
+				<include name="${BUILD_INFO_FILE_NAME}" />
 			</fileset>
 		</zip>
 	</target>
 
 	<!-- Das Target jarfile erzeugt die Java-Komponente WollMux -->
 	<target name="jarfile" depends="javamake, buildinfo">
-		<delete file="${WollMux_COMPJAR}" />
-		<jar destfile="${WollMux_COMPJAR}">
+		<delete file="${RDB_DIR}/${WollMux_COMPJAR}" />
+		<jar destfile="${RDB_DIR}/${WollMux_COMPJAR}">
 			<fileset dir="${MY_CLASSES}" includes="**/*.class" />
 			<fileset dir="${MY_IDL}" includes="**/*.class" />
 			<fileset dir="${UNOHELPER_CLASSES}" includes="**/*.class" />

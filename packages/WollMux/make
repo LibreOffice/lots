@@ -36,8 +36,9 @@ action()
 
     _install)
 	    mkdir -p "${DESTDIR}"/usr/lib/wollmux
-	    #cp content/* "${DESTDIR}"/usr/lib/wollmux
-	    #chmod 755 "${DESTDIR}"/usr/lib/wollmux/wollmuxbar.sh
+	    cp ../{WollMuxBar.jar,WollMux.uno.pkg,wollmuxbar.sh} "${DESTDIR}"/usr/lib/wollmux
+	    find "${DESTDIR}"/usr/lib/wollmux -type f -exec chmod a-x {} \;
+	    chmod 755 "${DESTDIR}"/usr/lib/wollmux/wollmuxbar.sh
 	    ;;
 
     _package)

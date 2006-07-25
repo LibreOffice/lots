@@ -19,10 +19,14 @@ set -e
 
 case "$1" in
     configure)
-    OOoTemp=$(dpkg -L openoffice.org-core02 | grep "unopkg$") > /dev/null
-    export PATH=$(dirname $OOoTemp):$PATH
+    OOoTemp="$(dpkg -L openoffice.org-core02 | grep "unopkg$")" > /dev/null
+    export PATH="$(dirname $OOoTemp):$PATH"
+    TEMPDIR="$(mktemp -d -p /tmp wollmux-postinst.XXXXXX)"
+	export HOME="$TEMPDIR" # um das lockfile-Problem zu umgehen
     cd /usr/lib/wollmux
+    unopkg remove WollMux.uno.pkg --shared &>/dev/null || true
     unopkg add WollMux.uno.pkg --shared > /dev/null
+    test -d "$TEMPDIR" && rm -rf "$TEMPDIR"
     if [ ! -e /usr/bin/wollmuxbar ]; then
        ln -s /usr/lib/wollmux/wollmuxbar.sh /usr/bin/wollmuxbar
     fi   
