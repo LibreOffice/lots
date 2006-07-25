@@ -110,7 +110,6 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
    */
   public synchronized void executeAsync(com.sun.star.beans.NamedValue[] lArgs,
       com.sun.star.task.XJobListener xListener)
-      throws com.sun.star.lang.IllegalArgumentException
   {
     xListener.jobFinished(this, new NamedValue[] {});
   }

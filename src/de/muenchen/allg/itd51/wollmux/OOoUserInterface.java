@@ -21,7 +21,6 @@
 package de.muenchen.allg.itd51.wollmux;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URL;
 import java.util.Iterator;
 
@@ -594,7 +593,7 @@ public class OOoUserInterface
    *          Programm generiert menues in der laufende Instanz der OO.
    * @author GOLOVKO
    */
-  public static void main(String[] args) throws IOException
+  public static void main(String[] args)
   {
     XMultiComponentFactory testmxRemoteServiceManager = null;
     XDesktop xDesktop;

@@ -22,6 +22,7 @@ package de.muenchen.allg.itd51.wollmux;
 import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.Vector;
 
 import com.sun.star.container.XEnumeration;
@@ -30,6 +31,7 @@ import com.sun.star.text.XTextRange;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
+import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 
 /**
  * Diese Klasse repräsentiert eine Formularbeschreibung eines Formulardokuments
@@ -68,6 +70,11 @@ public class FormDescriptor
   private HashMap configs;
 
   /**
+   * Enthält die aktuellen Werte der Formularfelder als Zuordnung id -> Wert.
+   */
+  private HashMap formFieldValues;
+
+  /**
    * Erzeugt einen neuen leeren FormDescriptor, dem über add()
    * WM(CMD'Form')-Kommandos mit Formularbeschreibungsnotizen hinzugefügt werden
    * können.
@@ -77,6 +84,7 @@ public class FormDescriptor
     formCmds = new Vector();
     annotationFields = new HashMap();
     configs = new HashMap();
+    formFieldValues = new HashMap();
   }
 
   /**
@@ -90,6 +98,8 @@ public class FormDescriptor
    *           Die Notiz der Formularbeschreibung ist nicht vorhanden, die
    *           Formularbeschreibung ist nicht vollständig oder kann nicht
    *           geparst werden.
+   *           
+   * TODO: testen
    */
   public void add(DocumentCommand.Form formCmd)
       throws ConfigurationErrorException
@@ -125,6 +135,35 @@ public class FormDescriptor
           throw new ConfigurationErrorException(
               "Die Formularbeschreibung innerhalb der Notiz enthält keinen Abschnitt \"Formular\".");
 
+        // Den "Werte"-Abschnitt der ersten Formularbeschreibung auswerten.
+        if (formCmds.size() == 0)
+        {
+          ConfigThingy werte = new ConfigThingy("Werte");
+          try
+          {
+            werte = conf.get("Werte");
+          }
+          catch (NodeNotFoundException e)
+          {
+          }
+
+          Iterator iter = werte.iterator();
+          while (iter.hasNext())
+          {
+            ConfigThingy element = (ConfigThingy) iter.next();
+            try
+            {
+              String id = element.get("ID").toString();
+              String value = element.get("VALUE").toString();
+              formFieldValues.put(id, value);
+            }
+            catch (NodeNotFoundException e)
+            {
+              Logger.error(e);
+            }
+          }
+        }
+
         formCmds.add(formCmd);
         annotationFields.put(formCmd, annotationField);
         configs.put(formCmd, conf);
@@ -153,6 +192,80 @@ public class FormDescriptor
     return formDescriptors;
   }
 
+  public void setFormFieldValue(String id, String value)
+  {
+    formFieldValues.put(id, value);
+    updateDocument();
+  }
+
+  public String getFormFieldValue(String id)
+  {
+    return (String) formFieldValues.get(id);
+  }
+
+  public Set getFormFieldIDs()
+  {
+    return formFieldValues.keySet();
+  }
+
+  /**
+   * TODO: testen
+   */
+  public void updateDocument()
+  {
+    Logger.debug2(this.getClass().getSimpleName() + ".updateDocument()");
+
+    // Neues ConfigThingy für "Werte"-Abschnitt erzeugen:
+    ConfigThingy werte = new ConfigThingy("Werte");
+    Iterator iter = formFieldValues.keySet().iterator();
+    while (iter.hasNext())
+    {
+      String key = (String) iter.next();
+      String value = (String) formFieldValues.get(key);
+      if (key != null && value != null)
+      {
+        ConfigThingy entry = new ConfigThingy("");
+        ConfigThingy cfID = new ConfigThingy("ID");
+        cfID.add(key);
+        ConfigThingy cfVALUE = new ConfigThingy("VALUE");
+        cfVALUE.add(value);
+        entry.addChild(cfID);
+        entry.addChild(cfVALUE);
+        werte.addChild(entry);
+      }
+    }
+
+    // alten "Werte"-Abschnitte des ersten WM(CMD'Form')-Kommandos durch neuen
+    // ersetzen:
+    if (formCmds.size() > 0)
+    {
+      // Formular-Abschnitt holen:
+      ConfigThingy conf = (ConfigThingy) configs.get(formCmds.get(0));
+      ConfigThingy form = new ConfigThingy("Formular");
+      try
+      {
+        form = conf.get("WM").get("Formular");
+      }
+      catch (NodeNotFoundException e)
+      {
+        Logger.error(e);
+      }
+
+      // alten "Werte"-Abschnitt löschen
+      iter = form.iterator();
+      while (iter.hasNext())
+      {
+        ConfigThingy element = (ConfigThingy) iter.next();
+        if (element.getName().equals("Werte")) iter.remove();
+      }
+
+      // neuen "Werte"-Abshcnitt setzen
+      form.addChild(werte);
+
+      Logger.debug2("SringRep: " + form.stringRepresentation());
+    }
+  }
+
   // Helper-Methoden:
 
   /**
@@ -164,7 +277,7 @@ public class FormDescriptor
    * @param element
    *          Das erste gefundene InputField.
    */
-  private XTextField findAnnotationFieldRecursive(Object element)
+  private static XTextField findAnnotationFieldRecursive(Object element)
   {
     // zuerst die Kinder durchsuchen (falls vorhanden):
     if (UNO.XEnumerationAccess(element) != null)

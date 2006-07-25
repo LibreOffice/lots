@@ -681,7 +681,7 @@ public class WollMuxEventHandler
       this.formModel = model;
     }
 
-    protected boolean doit() throws WollMuxFehlerException
+    protected boolean doit()
     {
       if (formModel != null) formModel.dispose();
 
@@ -903,7 +903,7 @@ public class WollMuxEventHandler
    */
   private static class OnPALChangedNotify extends BasicEvent
   {
-    protected boolean doit() throws WollMuxFehlerException
+    protected boolean doit()
     {
       WollMuxSingleton mux = WollMuxSingleton.getInstance();
 
@@ -976,7 +976,7 @@ public class WollMuxEventHandler
       this.idx = idx;
     }
 
-    protected boolean doit() throws WollMuxFehlerException
+    protected boolean doit()
     {
       DJDatasetListElement[] pal = WollMuxSingleton.getInstance()
           .getSortedPALEntries();
@@ -1065,7 +1065,7 @@ public class WollMuxEventHandler
       this.funcLib = funcLib;
     }
 
-    protected boolean doit() throws WollMuxFehlerException
+    protected boolean doit()
     {
       if (idToFormValues.containsKey(fieldId))
       {
@@ -1158,7 +1158,7 @@ public class WollMuxEventHandler
       this.visible = visible;
     }
 
-    protected boolean doit() throws WollMuxFehlerException
+    protected boolean doit()
     {
       // invisibleGroups anpassen:
       if (visible)
@@ -1294,7 +1294,7 @@ public class WollMuxEventHandler
       this.fieldId = fieldId;
     }
 
-    protected boolean doit() throws WollMuxFehlerException
+    protected boolean doit()
     {
       if (idToFormValues.containsKey(fieldId))
       {
@@ -1380,7 +1380,7 @@ public class WollMuxEventHandler
       this.docHeight = docHeight;
     }
 
-    protected boolean doit() throws WollMuxFehlerException
+    protected boolean doit()
     {
       try
       {
@@ -1456,7 +1456,7 @@ public class WollMuxEventHandler
       this.visible = visible;
     }
 
-    protected boolean doit() throws WollMuxFehlerException
+    protected boolean doit()
     {
       XFrame frame = model.getCurrentController().getFrame();
       if (frame != null)
@@ -1506,7 +1506,7 @@ public class WollMuxEventHandler
       this.doc = doc;
     }
 
-    protected boolean doit() throws WollMuxFehlerException
+    protected boolean doit()
     {
       // Damit OOo vor dem Schlieﬂen eines ver‰nderten Dokuments den
       // save/dismiss-Dialog anzeigt, muss die suspend()-Methode aller
@@ -1571,7 +1571,7 @@ public class WollMuxEventHandler
    */
   private static class OnInitialize extends BasicEvent
   {
-    protected boolean doit() throws WollMuxFehlerException
+    protected boolean doit()
     {
       WollMuxSingleton mux = WollMuxSingleton.getInstance();
 
@@ -1701,7 +1701,7 @@ public class WollMuxEventHandler
       this.listener = listener;
     }
 
-    protected boolean doit() throws WollMuxFehlerException
+    protected boolean doit()
     {
       WollMuxSingleton.getInstance().addPALChangeEventListener(listener);
 
@@ -1753,7 +1753,7 @@ public class WollMuxEventHandler
       this.listener = listener;
     }
 
-    protected boolean doit() throws WollMuxFehlerException
+    protected boolean doit()
     {
       WollMuxSingleton.getInstance().removePALChangeEventListener(listener);
       return EventProcessor.processTheNextEvent;

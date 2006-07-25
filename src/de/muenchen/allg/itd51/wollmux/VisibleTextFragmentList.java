@@ -23,7 +23,6 @@
 package de.muenchen.allg.itd51.wollmux;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -249,7 +248,7 @@ public class VisibleTextFragmentList
    *          Programm gibt die Liste der Textfragmente aus.
    * @author Christoph Lutz (D-III-ITD 5.1)
    */
-  public static void main(String[] args) throws IOException
+  public static void main(String[] args)
   {
     try
     {

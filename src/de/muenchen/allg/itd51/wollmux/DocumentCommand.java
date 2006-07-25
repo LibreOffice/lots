@@ -957,7 +957,6 @@ abstract public class DocumentCommand
     private String fragID;
 
     public InsertContent(ConfigThingy wmCmd, Bookmark bookmark)
-        throws InvalidCommandException
     {
       super(wmCmd, bookmark);
     }
@@ -1170,7 +1169,6 @@ abstract public class DocumentCommand
   static public class Version extends DocumentCommand
   {
     public Version(ConfigThingy wmCmd, Bookmark bookmark)
-        throws InvalidCommandException
     {
       super(wmCmd, bookmark);
     }
@@ -1194,7 +1192,6 @@ abstract public class DocumentCommand
   static public class UpdateFields extends DocumentCommand
   {
     public UpdateFields(ConfigThingy wmCmd, Bookmark bookmark)
-        throws InvalidCommandException
     {
       super(wmCmd, bookmark);
     }
@@ -1268,7 +1265,6 @@ abstract public class DocumentCommand
   static public class SetGroups extends DocumentCommand
   {
     public SetGroups(ConfigThingy wmCmd, Bookmark bookmark)
-        throws InvalidCommandException
     {
       super(wmCmd, bookmark);
     }
