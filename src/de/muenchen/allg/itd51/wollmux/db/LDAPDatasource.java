@@ -380,7 +380,7 @@ public class LDAPDatasource implements Datasource
   }
 
   /** Setzt die timeout-Properties. */
-  private void setTimeout(long timeout)
+  private void setTimeout(Properties props, long timeout)
   {
     properties.setProperty("com.sun.jndi.ldap.connect.timeout", ""+timeout);
     properties.setProperty("com.sun.jndi.dns.timeout.initial", ""+timeout);
@@ -409,7 +409,7 @@ public class LDAPDatasource implements Datasource
     /** Attributname im LDAP*/
     String attributeName = null;
 
-    /** exklusive columnObjectClass */
+    /** exklusive objectClass */
     String columnObjectClass = null;
 
     /** line separator */
@@ -609,7 +609,7 @@ public class LDAPDatasource implements Datasource
 
     try
     { 
-      setTimeout(timeout);
+      setTimeout(properties, timeout);
       Logger.debug2("new InitialLdapContext(properties, null)");
       DirContext ctx = new InitialLdapContext(properties, null);
       
@@ -702,7 +702,7 @@ public class LDAPDatasource implements Datasource
       {
         currentSearchFilter = "(&"
                               + currentSearchFilter
-                              + "(columnObjectClass="
+                              + "(objectClass="
                               + ldapEscape(objectClass)
                               + "))";
       }
@@ -1272,7 +1272,7 @@ public class LDAPDatasource implements Datasource
         if (timeout <= 0) throw new TimeoutException();
         if (timeout > Integer.MAX_VALUE) timeout = Integer.MAX_VALUE;
         Logger.debug2("getDataset(): verbleibende Zeit: "+timeout);
-        setTimeout(timeout);
+        setTimeout(properties, timeout);
         ctx = new InitialLdapContext(properties, null);
         
         NameParser nameParser = ctx.getNameParser("");
@@ -1408,8 +1408,8 @@ public class LDAPDatasource implements Datasource
    * @param filter der Suchfilter.
    * @param searchScope SearchControls.SUBTREE_SCOPE, SearchControls.OBJECT_SCOPE oder
    *                    SearchControls.ONELEVEL_SCOPE, um anzugeben wo gesucht werden soll.
-   * @param onlyObjectClass falls true, werden nur Knoten zurückgeliefert, deren columnObjectClass
-   *        {@link #columnObjectClass} entspricht.
+   * @param onlyObjectClass falls true, werden nur Knoten zurückgeliefert, deren objectClass
+   *        {@link #objectClass} entspricht.
    * @param endTime wird die Suche nicht vor dieser Zeit beendet, wird eine TimeoutException 
    *        geworfen
    * @return die Suchergebnisse
@@ -1435,11 +1435,11 @@ public class LDAPDatasource implements Datasource
 
     if (onlyObjectClass)
     {
-      filter = "(&(columnObjectClass=" + objectClass + ")" + filter + ")";
+      filter = "(&(objectClass=" + objectClass + ")" + filter + ")";
     }
     else
     {
-      filter = "(&(columnObjectClass=" + "*" + ")" + filter + ")"; //TOD0 das columnObjectClass=* ist doch überflüssig
+      filter = "(&(objectClass=" + "*" + ")" + filter + ")"; //TOD0 das objectClass=* ist doch überflüssig
     }
 
     DirContext ctx = null;
@@ -1448,7 +1448,7 @@ public class LDAPDatasource implements Datasource
 
     try
     {
-      setTimeout(timeout);
+      setTimeout(properties, timeout);
       Logger.debug2("new InitialLdapContext(properties, null)");
       ctx = new InitialLdapContext(properties, null);
 
@@ -1481,7 +1481,7 @@ public class LDAPDatasource implements Datasource
   /**
    * Durchsucht die Nachfahren des durch path + BASE_DN bezeichneten Knotens mit Abstand
    * level zu diesem Knoten nach Knoten, die auf die Suchanfrage filter passen.
-   * Es werden nur Objekte mit columnObjectClass = {@link #columnObjectClass} geliefert.
+   * Es werden nur Objekte mit objectClass = {@link #objectClass} geliefert.
    * @return eine List von {@link SearchResult}s.
    * @throws TimeoutException falls die Anfrage nicht vor endTime beantwortet werden konnte.
    * @author Max Meier (D-III-ITD 5.1)
