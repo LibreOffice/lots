@@ -89,6 +89,7 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JSeparator;
 import javax.swing.Timer;
+import javax.swing.WindowConstants;
 import javax.swing.border.BevelBorder;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
@@ -144,7 +145,7 @@ public class WollMuxBar
   /**
    * TODO Die WollMuxBar ist vertikal und verschwindet am linken Rand, wenn der Mauscursor sie verlässt.
    */
-  private static final int LEFT_AND_AWAY_WINDOW_MODE = 5;
+  //private static final int LEFT_AND_AWAY_WINDOW_MODE = 5;
   
   /**
    * Der Anzeigemodus für die WollMuxBar (z,B, {@link BECOME_ICON_MODE})
@@ -435,7 +436,7 @@ public class WollMuxBar
     
     myFrame = new JFrame(title);
     //leave handling of close request to WindowListener.windowClosing
-    myFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+    myFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
     
     if (windowMode == UP_AND_AWAY_WINDOW_MODE)
     {
@@ -598,7 +599,7 @@ public class WollMuxBar
     minimizedFrame.setUndecorated(true);
     minimizedFrame.setAlwaysOnTop(true);
     //wie bei myFrame soll abort ausgeführt werden, nicht die default Aktion
-    minimizedFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+    minimizedFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
     minimizedFrame.addWindowListener(new MyWindowListener());
     
     if (windowMode == BECOME_ICON_MODE)
@@ -1321,7 +1322,7 @@ public class WollMuxBar
   private void maximize()
   {
     myFrame.setVisible(true);
-    myFrame.setExtendedState(JFrame.NORMAL);
+    myFrame.setExtendedState(Frame.NORMAL);
     if (windowMode == BECOME_ICON_MODE || windowMode == UP_AND_AWAY_WINDOW_MODE)
       minimizedFrame.setVisible(false);
   }

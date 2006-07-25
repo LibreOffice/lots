@@ -74,7 +74,9 @@ import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
+import javax.swing.WindowConstants;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.JTextComponent;
@@ -259,7 +261,7 @@ public class DatensatzBearbeiten
     //Create and set up the window.
     myFrame = new JFrame("Absenderdaten bearbeiten");
     //leave handling of close request to WindowListener.windowClosing
-    myFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+    myFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
     myFrame.addWindowListener(new MyWindowListener());
     
     cardLayout = new CardLayout();
@@ -721,7 +723,7 @@ public class DatensatzBearbeiten
      */
     private List buttonsToGreyOutIfNoChanges = new Vector();
     
-    private ActionListener closeAction = actionListener_abort;
+    private ActionListener dialogWindowCloseAction = actionListener_abort;
     
     /**
      * Liefert das JPanel für diese Dialogseite zurück.
@@ -754,7 +756,7 @@ public class DatensatzBearbeiten
      */
     public String getName() {return name;}
     
-    public ActionListener getCloseAction() {return this.closeAction;}
+    public ActionListener getCloseAction() {return this.dialogWindowCloseAction;}
     
     public void save()
     {
@@ -823,7 +825,7 @@ public class DatensatzBearbeiten
       try{title = substituteVars(""+conf.get("TITLE"));}catch(NodeNotFoundException x){}
       
       try{
-        closeAction = getAction(conf.get("CLOSEACTION").toString());
+        dialogWindowCloseAction = getAction(conf.get("CLOSEACTION").toString());
       } catch(Exception x){}
       
       myPanel = new JPanel(new BorderLayout());
@@ -916,8 +918,8 @@ public class DatensatzBearbeiten
               
               JPanel uiElement = new JPanel(new GridLayout(1,1));
               JScrollPane scrollPane = new JScrollPane(textarea);//, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER, JScrollPane.VERTICAL_SCROLLBAR_NEVER);
-              scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-              scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
+              scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+              scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
               uiElement.add(scrollPane);
               
               uiElement.setBorder(BorderFactory.createEmptyBorder(TF_BORDER,0,TF_BORDER,0));

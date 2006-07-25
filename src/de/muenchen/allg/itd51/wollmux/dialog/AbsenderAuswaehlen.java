@@ -57,7 +57,9 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.UIManager;
+import javax.swing.WindowConstants;
 import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -244,7 +246,7 @@ public class AbsenderAuswaehlen
     //Create and set up the window.
     myFrame = new JFrame(title);
     //leave handling of close request to WindowListener.windowClosing
-    myFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+    myFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
     myFrame.addWindowListener(new MyWindowListener());
     
     mainPanel = new JPanel(new BorderLayout());
@@ -372,8 +374,8 @@ public class AbsenderAuswaehlen
             if (actionL != null) list.addMouseListener(new MyActionMouseListener(list, actionL));
             
             JScrollPane scrollPane = new JScrollPane(list);
-            scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-            scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+            scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+            scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
             
             gbcListBox.gridx = x;
             gbcListBox.gridy = y;

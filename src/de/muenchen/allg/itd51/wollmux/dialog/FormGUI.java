@@ -24,6 +24,7 @@
 */
 package de.muenchen.allg.itd51.wollmux.dialog;
 
+import java.awt.Frame;
 import java.awt.GraphicsEnvironment;
 import java.awt.Insets;
 import java.awt.Rectangle;
@@ -40,6 +41,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.JFrame;
+import javax.swing.WindowConstants;
 
 import com.sun.star.awt.PosSize;
 import com.sun.star.awt.XWindow2;
@@ -159,7 +161,7 @@ public class FormGUI
     //Create and set up the window.
     myFrame = new JFrame(formTitle);
     //leave handling of close request to WindowListener.windowClosing
-    myFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+    myFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
     MyWindowListener oehrchen = new MyWindowListener();
     //der WindowListener sorgt dafür, dass auf windowClosing mit abort reagiert wird
     myFrame.addWindowListener(oehrchen);
@@ -219,13 +221,13 @@ public class FormGUI
       private int counter = 0;
       public void windowStateChanged(WindowEvent e)
       {
-        if (counter++ == 0) createGUI2((e.getNewState() & JFrame.MAXIMIZED_BOTH) == JFrame.MAXIMIZED_BOTH);
+        if (counter++ == 0) createGUI2((e.getNewState() & Frame.MAXIMIZED_BOTH) == Frame.MAXIMIZED_BOTH);
         else if (counter++ == 1) createGUI3();
         else if (counter++ == 2) myFrame.removeWindowStateListener(this);
       }}
     );
     
-    myFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+    myFrame.setExtendedState(Frame.MAXIMIZED_BOTH);
   }
   
   private void createGUI2(boolean changeMaxWinBounds)
@@ -239,7 +241,7 @@ public class FormGUI
       if (newBounds.width * newBounds.height >= 0.75*maxWindowBounds.width*maxWindowBounds.height)
         maxWindowBounds = newBounds; 
     }
-    myFrame.setExtendedState(JFrame.NORMAL);
+    myFrame.setExtendedState(Frame.NORMAL);
   }
   
   private void createGUI3()

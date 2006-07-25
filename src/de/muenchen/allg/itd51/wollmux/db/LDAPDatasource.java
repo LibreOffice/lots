@@ -76,7 +76,7 @@ public class LDAPDatasource implements Datasource
 {
   private Set schema;
 
-  private String name;
+  private String datasourceName;
 
   private String url;
 
@@ -162,7 +162,7 @@ public class LDAPDatasource implements Datasource
 
     try
     {
-      name = sourceDesc.get("NAME").toString();
+      datasourceName = sourceDesc.get("NAME").toString();
     }
     catch (NodeNotFoundException x)
     { throw new ConfigurationErrorException("NAME der Datenquelle fehlt"); }
@@ -311,7 +311,7 @@ public class LDAPDatasource implements Datasource
         
         ColumnDefinition columnAttr = new ColumnDefinition(spalte, relativePath,
             attributeName);
-        columnAttr.objectClass = objectClass;
+        columnAttr.columnObjectClass = objectClass;
         columnAttr.lineSeparator = lineSeparator;
         columnDefinitions.put(spalte, columnAttr);
         schema.add(spalte);
@@ -380,7 +380,7 @@ public class LDAPDatasource implements Datasource
   }
 
   /** Setzt die timeout-Properties. */
-  private void setTimeout(Properties props, long timeout)
+  private void setTimeout(long timeout)
   {
     properties.setProperty("com.sun.jndi.ldap.connect.timeout", ""+timeout);
     properties.setProperty("com.sun.jndi.dns.timeout.initial", ""+timeout);
@@ -409,8 +409,8 @@ public class LDAPDatasource implements Datasource
     /** Attributname im LDAP*/
     String attributeName = null;
 
-    /** exklusive objectClass */
-    String objectClass = null;
+    /** exklusive columnObjectClass */
+    String columnObjectClass = null;
 
     /** line separator */
     String lineSeparator;
@@ -609,7 +609,7 @@ public class LDAPDatasource implements Datasource
 
     try
     { 
-      setTimeout(properties, timeout);
+      setTimeout(timeout);
       Logger.debug2("new InitialLdapContext(properties, null)");
       DirContext ctx = new InitialLdapContext(properties, null);
       
@@ -692,7 +692,7 @@ public class LDAPDatasource implements Datasource
       int relativePath = colDef.relativePath;
       String attributeValue = currentQuery.getSearchString();
 
-      String objectClass = colDef.objectClass;
+      String objectClass = colDef.columnObjectClass;
       String currentSearchFilter = "(" 
                                    + ldapEscape(attributeName)
                                    + "="
@@ -702,7 +702,7 @@ public class LDAPDatasource implements Datasource
       {
         currentSearchFilter = "(&"
                               + currentSearchFilter
-                              + "(objectClass="
+                              + "(columnObjectClass="
                               + ldapEscape(objectClass)
                               + "))";
       }
@@ -1123,7 +1123,7 @@ public class LDAPDatasource implements Datasource
    */
   public String getName()
   {
-    return name;
+    return datasourceName;
   }
 
   /**
@@ -1204,14 +1204,14 @@ public class LDAPDatasource implements Datasource
   
   private static class CacheKey
   {
-    private static final String SEPARATOR = "/{%§";
+    private static final String CACHE_KEY_SEPARATOR = "/{%§";
     private String hash;
     
     public CacheKey(Name attributePath, String[] searchAttributes)
     {
       StringBuffer buf = new StringBuffer();
       buf.append(searchAttributes.length);
-      buf.append(SEPARATOR);
+      buf.append(CACHE_KEY_SEPARATOR);
       buf.append(attributePath.toString());
       for (int n = 0; n < searchAttributes.length; ++n)
       {
@@ -1272,7 +1272,7 @@ public class LDAPDatasource implements Datasource
         if (timeout <= 0) throw new TimeoutException();
         if (timeout > Integer.MAX_VALUE) timeout = Integer.MAX_VALUE;
         Logger.debug2("getDataset(): verbleibende Zeit: "+timeout);
-        setTimeout(properties, timeout);
+        setTimeout(timeout);
         ctx = new InitialLdapContext(properties, null);
         
         NameParser nameParser = ctx.getNameParser("");
@@ -1408,8 +1408,8 @@ public class LDAPDatasource implements Datasource
    * @param filter der Suchfilter.
    * @param searchScope SearchControls.SUBTREE_SCOPE, SearchControls.OBJECT_SCOPE oder
    *                    SearchControls.ONELEVEL_SCOPE, um anzugeben wo gesucht werden soll.
-   * @param onlyObjectClass falls true, werden nur Knoten zurückgeliefert, deren objectClass
-   *        {@link #objectClass} entspricht.
+   * @param onlyObjectClass falls true, werden nur Knoten zurückgeliefert, deren columnObjectClass
+   *        {@link #columnObjectClass} entspricht.
    * @param endTime wird die Suche nicht vor dieser Zeit beendet, wird eine TimeoutException 
    *        geworfen
    * @return die Suchergebnisse
@@ -1435,11 +1435,11 @@ public class LDAPDatasource implements Datasource
 
     if (onlyObjectClass)
     {
-      filter = "(&(objectClass=" + objectClass + ")" + filter + ")";
+      filter = "(&(columnObjectClass=" + objectClass + ")" + filter + ")";
     }
     else
     {
-      filter = "(&(objectClass=" + "*" + ")" + filter + ")"; //TOD0 das objectClass=* ist doch überflüssig
+      filter = "(&(columnObjectClass=" + "*" + ")" + filter + ")"; //TOD0 das columnObjectClass=* ist doch überflüssig
     }
 
     DirContext ctx = null;
@@ -1448,7 +1448,7 @@ public class LDAPDatasource implements Datasource
 
     try
     {
-      setTimeout(properties, timeout);
+      setTimeout(timeout);
       Logger.debug2("new InitialLdapContext(properties, null)");
       ctx = new InitialLdapContext(properties, null);
 
@@ -1481,7 +1481,7 @@ public class LDAPDatasource implements Datasource
   /**
    * Durchsucht die Nachfahren des durch path + BASE_DN bezeichneten Knotens mit Abstand
    * level zu diesem Knoten nach Knoten, die auf die Suchanfrage filter passen.
-   * Es werden nur Objekte mit objectClass = {@link #objectClass} geliefert.
+   * Es werden nur Objekte mit columnObjectClass = {@link #columnObjectClass} geliefert.
    * @return eine List von {@link SearchResult}s.
    * @throws TimeoutException falls die Anfrage nicht vor endTime beantwortet werden konnte.
    * @author Max Meier (D-III-ITD 5.1)
@@ -1604,7 +1604,7 @@ public class LDAPDatasource implements Datasource
 
   private String errorMessage()
   {
-    return "Fehler in Definition von Datenquelle " + name + ": ";
+    return "Fehler in Definition von Datenquelle " + datasourceName + ": ";
   }
 
   // LDAPDataset
