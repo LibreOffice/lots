@@ -14,6 +14,7 @@
 * 11.05.2006 | BNK | NOT implementiert
 *                  | MATCH.getString() kann jetzt Function.ERROR liefern
 * 31.05.2006 | BNK | +getFunctionDialogReferences()
+* 26.07.2006 | BNK | +REPLACE-Grundfunktion
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -260,6 +261,30 @@ public class FunctionFactory
         throw new ConfigurationErrorException("Fehler in regex \""+regex+"\"", x);
       }
       return new MatchFunction(strFun, p);
+    }
+    else if (name.equals("REPLACE"))
+    {
+      if (conf.count() != 3)
+        throw new ConfigurationErrorException("Funktion vom Typ \"REPLACE\" erfordert genau 3 Parameter, nicht "+conf.count());
+      
+      Function strFun;
+      Function reFun;
+      Function repFun;
+      
+      Iterator iter = conf.iterator();
+      strFun = parse((ConfigThingy)iter.next(), funcLib, dialogLib, context);
+      reFun  = parse((ConfigThingy)iter.next(), funcLib, dialogLib, context);
+      repFun = parse((ConfigThingy)iter.next(), funcLib, dialogLib, context);
+      
+      String regex = reFun.getString(noValues);
+      Pattern p;
+      try{
+        p = Pattern.compile(regex);
+      }catch(PatternSyntaxException x)
+      {
+        throw new ConfigurationErrorException("Fehler in regex \""+regex+"\"", x);
+      }
+      return new ReplaceFunction(strFun, p, repFun);
     }
     else if (name.equals("IF"))
     {
@@ -675,6 +700,50 @@ public class FunctionFactory
     }
   }
 
+  private static class ReplaceFunction implements Function
+  {
+    private Pattern pattern;
+    private Function input;
+    private Function replace;
+    private String[] params;
+    
+    public ReplaceFunction(Function input, Pattern p, Function replace)
+    {
+      pattern = p;
+      this.input = input;
+      this.replace = replace;
+      Set paramset = new HashSet();
+      paramset.add(Arrays.asList(input.parameters()));
+      paramset.add(Arrays.asList(replace.parameters()));
+      this.params = (String[])paramset.toArray(new String[]{});
+    }
+    
+    public String getString(Values parameters)
+    {
+      String str = input.getString(parameters);
+      String repStr = replace.getString(parameters);
+      if (str == Function.ERROR || repStr == Function.ERROR) return Function.ERROR;
+      return pattern.matcher(str).replaceAll(repStr);
+    }
+
+    public String[] parameters()
+    {
+      return params;
+    }
+    
+    public void getFunctionDialogReferences(Collection set) 
+    {
+      input.getFunctionDialogReferences(set);
+      replace.getFunctionDialogReferences(set);
+    }
+
+    public boolean getBoolean(Values parameters)
+    {
+      return getString(parameters).equalsIgnoreCase("true");
+    }
+  }
+
+  
   private static abstract class MultiFunction implements Function
   {
     protected Collection subFunction;

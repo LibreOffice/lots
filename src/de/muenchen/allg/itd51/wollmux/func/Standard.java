@@ -11,6 +11,7 @@
  * 26.01.2006 | BNK | Erstellung
  * 08.05.2006 | BNK | nach Standard umbenannt, da in Zukunft auch für Trafos etc.
  *                  | +anredeSuffix()
+ * 26.07.2006 | BNK | formatInternalTelefonNumber5 -> formatiereTelefonnummerDIN5008
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -20,8 +21,6 @@
 package de.muenchen.allg.itd51.wollmux.func;
 
 import java.util.Calendar;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Standardfunktionen für Plausibilitätschecks, Trafos,... in Formularen.
@@ -108,30 +107,20 @@ public class Standard
   }
 
   /**
-   * Entfernt alle Zeichen die keine Ziffern sind aus dem übergebenen String tel
-   * und transformiert die verbleibende Nummer in die Form einer internen
-   * Telefonnummer mit einer 5-stelligen Durchwahl ("<Vorwahl> - <Durchwahl>").
-   * Ist die nummer nicht gültig, wird eine Fehlermeldung zurückgeliefert. Eine
-   * Nummer ist dann gültig, wenn sie mindestens 2 Ziffern für die Vorwahl und
-   * exakt 5 Ziffern für die Durchwahl besitzt.
-   * 
-   * @param tel
-   * @return die formatierte telefonnummer.
-   * @author Christoph Lutz (D-III-ITD 5.1)
+   * Formatiert tel gemäss DIN 5008.
+   * @author NN (D-III-ITD 5.1)
    */
-  public static String formatInternalTelefonNumber5(String tel)
+  public static String formatiereTelefonnummerDIN5008(String tel)
   {
-    String telNorm = tel.replaceAll("[^\\d]+", "");
-    Pattern p = Pattern.compile("(\\d{2,})(\\d{5})");
-    Matcher m = p.matcher(telNorm);
-
-    if (m.matches())
+    tel = tel.replaceAll("\\p{Space}", "");
+    if (tel.length() == 0) return tel;
+    if (tel.indexOf("233-") < 0) tel.replaceFirst("^233", "233-");
+    if (tel.indexOf('/') < 0) 
     {
-      String vorwahl = m.group(1);
-      String durchwahl = m.group(2);
-      return vorwahl + " - " + durchwahl;
+      tel = tel.replaceFirst("^0","");
+      tel = "089 "+tel;
     }
-    else
-      return "<Ungültige Telefonnummer (" + tel + ")>";
+    tel = tel.replaceAll("/"," ");
+    return tel;
   }
 }
