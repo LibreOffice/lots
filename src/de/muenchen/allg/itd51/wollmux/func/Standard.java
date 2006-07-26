@@ -22,6 +22,8 @@ package de.muenchen.allg.itd51.wollmux.func;
 
 import java.util.Calendar;
 
+import de.muenchen.allg.itd51.wollmux.Logger;
+
 /**
  * Standardfunktionen für Plausibilitätschecks, Trafos,... in Formularen.
  * 
@@ -112,15 +114,16 @@ public class Standard
    */
   public static String formatiereTelefonnummerDIN5008(String tel)
   {
-    tel = tel.replaceAll("\\p{Space}", "");
+    tel = tel.replaceAll("\\p{Space}", ""); //alles Whitespace entfernen
     if (tel.length() == 0) return tel;
-    if (tel.indexOf("233-") < 0) tel.replaceFirst("^233", "233-");
+    if (tel.indexOf("233-") < 0) tel = tel.replaceFirst("^233", "233-"); //falls kein Minus nach 233 und 233 steht am Anfang, dann ergänze das Minus
     if (tel.indexOf('/') < 0) 
-    {
+    { //wenn keine Vorwahl vorhanden ist
       tel = tel.replaceFirst("^0","");
       tel = "089 "+tel;
     }
-    tel = tel.replaceAll("/"," ");
+    tel = tel.replaceAll("-989", "-989 "); //989 hat eine eigene Funktion. Nach DIN 5008 also Space vor Rest der Nummer
+    tel = tel.replaceAll("/"," "); //Vorwahlabtrennung ist veraltet
     return tel;
   }
 }
