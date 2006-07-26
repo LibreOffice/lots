@@ -22,8 +22,6 @@ package de.muenchen.allg.itd51.wollmux.func;
 
 import java.util.Calendar;
 
-import de.muenchen.allg.itd51.wollmux.Logger;
-
 /**
  * Standardfunktionen für Plausibilitätschecks, Trafos,... in Formularen.
  * 
