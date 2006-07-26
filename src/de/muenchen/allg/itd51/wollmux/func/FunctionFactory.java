@@ -713,8 +713,8 @@ public class FunctionFactory
       this.input = input;
       this.replace = replace;
       Set paramset = new HashSet();
-      paramset.add(Arrays.asList(input.parameters()));
-      paramset.add(Arrays.asList(replace.parameters()));
+      paramset.addAll(Arrays.asList(input.parameters()));
+      paramset.addAll(Arrays.asList(replace.parameters()));
       this.params = (String[])paramset.toArray(new String[]{});
     }
     
@@ -1054,6 +1054,11 @@ public class FunctionFactory
     printFunction(funcStr, parseChildren(funcThingy, funcLib, dialogLib, context), values);
     
     funcStr = "MATCH(VALUE('Name'),'llMux')"; 
+    funcThingy = new ConfigThingy("BAR", new URL("file:///"), 
+        new StringReader(funcStr));
+    printFunction(funcStr, parseChildren(funcThingy, funcLib, dialogLib, context), values);
+    
+    funcStr = "REPLACE(CAT(VALUE('Name') '%n' 'Mux'),'Mux\\p{Space}Mux', 'Max')"; 
     funcThingy = new ConfigThingy("BAR", new URL("file:///"), 
         new StringReader(funcStr));
     printFunction(funcStr, parseChildren(funcThingy, funcLib, dialogLib, context), values);
