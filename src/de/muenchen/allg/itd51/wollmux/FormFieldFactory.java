@@ -71,8 +71,7 @@ public final class FormFieldFactory
           range,
           "com.sun.star.form.component.CheckBox");
       if (shape != null && UNO.XTextContent(shape) != null)
-        return new CheckboxFormField(doc, cmd, shape.getControl(), UNO
-            .XTextContent(shape).getAnchor());
+        return new CheckboxFormField(doc, cmd, shape.getControl());
     }
 
     // Textfeld vom Typ com.sun.star.text.TextField.Input suchen:
@@ -202,20 +201,11 @@ public final class FormFieldFactory
     public abstract boolean hasChecksum();
 
     /**
-     * Setzt den ViewCursor auf die Position des InputFields und merkt sich
-     * dabei die letze ViewCursor-Position.
+     * Setzt den ViewCursor auf die Position des InputFields.
      * 
      * @param doc
      */
     public abstract void focus();
-
-    /**
-     * Setzt nach den ViewCursur auf die Position im Dokument zurück, an der er
-     * vor dem letzten Aufruf der focus()-Methode war.
-     * 
-     * @param doc
-     */
-    public abstract void unfocus();
   }
 
   private static abstract class BasicFormField implements FormField
@@ -223,14 +213,6 @@ public final class FormFieldFactory
     private XTextDocument doc;
 
     private InsertFormValue cmd;
-
-    private final XTextRange focusRange;
-
-    /**
-     * Enthält die TextRange des viewCursors, bevor die focus()-Methode
-     * aufgerufen wurde.
-     */
-    private XTextRange oldFocusRange = null;
 
     /**
      * Erzeugt ein Formualfeld im Dokument doc an der Stelle des
@@ -250,12 +232,10 @@ public final class FormFieldFactory
      *          erforderlich, da das Setzen des viewCursors auf die TextRanges
      *          des Kommandos cmd unter Linux nicht sauber funktioniert.
      */
-    public BasicFormField(XTextDocument doc, InsertFormValue cmd,
-        XTextRange focusRange)
+    public BasicFormField(XTextDocument doc, InsertFormValue cmd)
     {
       this.doc = doc;
       this.cmd = cmd;
-      this.focusRange = focusRange;
     }
 
     /*
@@ -359,33 +339,12 @@ public final class FormFieldFactory
         XController controller = UNO.XModel(doc).getCurrentController();
         XTextCursor cursor = UNO.XTextViewCursorSupplier(controller)
             .getViewCursor();
-        oldFocusRange = cursor.getText().createTextCursorByRange(cursor);
+        XTextRange focusRange = cmd.getTextRange();
         if (focusRange != null) cursor.gotoRange(focusRange, false);
       }
       catch (java.lang.Exception e)
       {
       }
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see de.muenchen.allg.itd51.wollmux.FormField#unfocus()
-     */
-    public void unfocus()
-    {
-      if (oldFocusRange != null)
-        try
-        {
-          XController controller = UNO.XModel(doc).getCurrentController();
-          XTextCursor cursor = UNO.XTextViewCursorSupplier(controller)
-              .getViewCursor();
-          cursor.gotoRange(oldFocusRange, false);
-          oldFocusRange = null;
-        }
-        catch (java.lang.Exception e)
-        {
-        }
     }
 
     // Helper-Methoden:
@@ -436,7 +395,7 @@ public final class FormFieldFactory
     public InputFormField(XTextDocument doc, InsertFormValue cmd,
         XTextField inputField)
     {
-      super(doc, cmd, UNO.XTextContent(inputField).getAnchor());
+      super(doc, cmd);
       this.inputField = inputField;
     }
 
@@ -490,9 +449,9 @@ public final class FormFieldFactory
      *          focus()-methode gesetzt werden soll.
      */
     public CheckboxFormField(XTextDocument doc, InsertFormValue cmd,
-        Object checkbox, XTextRange focusRange)
+        Object checkbox)
     {
-      super(doc, cmd, focusRange);
+      super(doc, cmd);
 
       this.checkbox = checkbox;
     }
