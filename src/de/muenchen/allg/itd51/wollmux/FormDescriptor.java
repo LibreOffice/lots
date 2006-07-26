@@ -26,6 +26,7 @@ import java.util.Set;
 import java.util.Vector;
 
 import com.sun.star.container.XEnumeration;
+import com.sun.star.lang.DisposedException;
 import com.sun.star.text.XTextField;
 import com.sun.star.text.XTextRange;
 
@@ -54,6 +55,11 @@ import de.muenchen.allg.itd51.parser.NodeNotFoundException;
  */
 public class FormDescriptor
 {
+  /**
+   * Name des ConfigThingy-Abschnitts, der die Formularwerte enthält.
+   */
+  private static final String FORMULARWERTE = "Formularwerte";
+
   /**
    * Enthält alle WM(CMD'Form')-Kommandos dieser Formularbeschreibung.
    */
@@ -98,7 +104,7 @@ public class FormDescriptor
    *           Die Notiz der Formularbeschreibung ist nicht vorhanden, die
    *           Formularbeschreibung ist nicht vollständig oder kann nicht
    *           geparst werden.
-   *           
+   * 
    * TODO: testen
    */
   public void add(DocumentCommand.Form formCmd)
@@ -135,13 +141,14 @@ public class FormDescriptor
           throw new ConfigurationErrorException(
               "Die Formularbeschreibung innerhalb der Notiz enthält keinen Abschnitt \"Formular\".");
 
-        // Den "Werte"-Abschnitt der ersten Formularbeschreibung auswerten.
+        // Den "Formularwerte"-Abschnitt der ersten Formularbeschreibung
+        // auswerten.
         if (formCmds.size() == 0)
         {
-          ConfigThingy werte = new ConfigThingy("Werte");
+          ConfigThingy werte = new ConfigThingy(FORMULARWERTE);
           try
           {
-            werte = conf.get("Werte");
+            werte = conf.get(FORMULARWERTE);
           }
           catch (NodeNotFoundException e)
           {
@@ -192,31 +199,59 @@ public class FormDescriptor
     return formDescriptors;
   }
 
+  /**
+   * Informiert den FormDescriptor über den neuen Wert value der Formularfelder
+   * mit der ID id; die Änderung wird erst nach einem Aufruf von
+   * updateDocument() im "Formularwerte"-Abschnitt persistent gespeichert.
+   * 
+   * @param id
+   *          die id der Formularfelder, deren Wert neu gesetzt wurde.
+   * @param value
+   *          der neu zu setzende Wert.
+   */
   public void setFormFieldValue(String id, String value)
   {
     formFieldValues.put(id, value);
-    updateDocument();
   }
 
+  /**
+   * Liefert den zuletzt gesetzten Wert des Formularfeldes mit der ID id zurück.
+   * 
+   * @param id
+   *          Die id des Formularfeldes, dessen Wert zurück geliefert werden
+   *          soll.
+   * @return der zuletzt gesetzte Wert des Formularfeldes mit der ID id.
+   */
   public String getFormFieldValue(String id)
   {
     return (String) formFieldValues.get(id);
   }
 
+  /**
+   * Liefert ein Set zurück, das alle dem FormDescriptor bekannten IDs für
+   * Formularfelder enthält.
+   * 
+   * @return ein Set das alle dem FormDescriptor bekannten IDs für
+   *         Formularfelder enthält.
+   */
   public Set getFormFieldIDs()
   {
     return formFieldValues.keySet();
   }
 
   /**
+   * Diese Methode legt den aktuellen Werte aller Fomularfelder in einem
+   * Abschnitt "Formularwerte" unterhalb der Abschnitte "WM/Formular" in der
+   * Notiz des ersten mit add() hinzugefügten WM(CMD'Form')-Kommandos ab.
+   * 
    * TODO: testen
    */
   public void updateDocument()
   {
     Logger.debug2(this.getClass().getSimpleName() + ".updateDocument()");
 
-    // Neues ConfigThingy für "Werte"-Abschnitt erzeugen:
-    ConfigThingy werte = new ConfigThingy("Werte");
+    // Neues ConfigThingy für "Formularwerte"-Abschnitt erzeugen:
+    ConfigThingy werte = new ConfigThingy(FORMULARWERTE);
     Iterator iter = formFieldValues.keySet().iterator();
     while (iter.hasNext())
     {
@@ -235,8 +270,8 @@ public class FormDescriptor
       }
     }
 
-    // alten "Werte"-Abschnitte des ersten WM(CMD'Form')-Kommandos durch neuen
-    // ersetzen:
+    // alten "Formularwerte"-Abschnitte des ersten WM(CMD'Form')-Kommandos durch
+    // neuen ersetzen:
     if (formCmds.size() > 0)
     {
       // Formular-Abschnitt holen:
@@ -251,18 +286,26 @@ public class FormDescriptor
         Logger.error(e);
       }
 
-      // alten "Werte"-Abschnitt löschen
+      // alten "Formularwerte"-Abschnitt löschen
       iter = form.iterator();
       while (iter.hasNext())
       {
         ConfigThingy element = (ConfigThingy) iter.next();
-        if (element.getName().equals("Werte")) iter.remove();
+        if (element.getName().equals(FORMULARWERTE)) iter.remove();
       }
 
-      // neuen "Werte"-Abshcnitt setzen
+      // neuen "Formularwerte"-Abschnitt setzen
       form.addChild(werte);
 
-      Logger.debug2("SringRep: " + form.stringRepresentation());
+      // Notiz neu setzen:
+      Object anno = annotationFields.get(formCmds.get(0));
+      try
+      {
+        UNO.setProperty(anno, "Content", conf.stringRepresentation());
+      }
+      catch (DisposedException e)
+      {
+      }
     }
   }
 

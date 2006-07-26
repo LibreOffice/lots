@@ -258,7 +258,7 @@ public class WollMuxEventHandler
      * @return Ein FormField Element, wobei untransformierte Felder bevorzugt
      *         werden.
      */
-    protected FormField preferUntransformedFormField(Vector formFields)
+    protected static FormField preferUntransformedFormField(Vector formFields)
     {
       Iterator iter = formFields.iterator();
       FormField field = null;
@@ -1032,10 +1032,12 @@ public class WollMuxEventHandler
    *          Die Funktionsbibliothek, die zur Gewinnung der Trafo-Funktion
    *          verwendet werden soll.
    */
-  public static void handleFormValueChanged(HashMap idToFormValues,
-      String fieldId, String newValue, FunctionLibrary funcLib)
+  public static void handleFormValueChanged(FormDescriptor fd,
+      HashMap idToFormValues, String fieldId, String newValue,
+      FunctionLibrary funcLib)
   {
-    handle(new OnFormValueChanged(idToFormValues, fieldId, newValue, funcLib));
+    handle(new OnFormValueChanged(fd, idToFormValues, fieldId, newValue,
+        funcLib));
   }
 
   /**
@@ -1056,20 +1058,25 @@ public class WollMuxEventHandler
 
     private FunctionLibrary funcLib;
 
-    public OnFormValueChanged(HashMap idToFormValues, String fieldId,
-        String newValue, FunctionLibrary funcLib)
+    private FormDescriptor fd;
+
+    public OnFormValueChanged(FormDescriptor fd, HashMap idToFormValues,
+        String fieldId, String newValue, FunctionLibrary funcLib)
     {
       this.idToFormValues = idToFormValues;
       this.fieldId = fieldId;
       this.newValue = newValue;
       this.funcLib = funcLib;
+      this.fd = fd;
     }
 
     protected boolean doit()
     {
-      if (idToFormValues.containsKey(fieldId))
+      // Wenn es FormFields zu dieser id gibt, so werden alle FormFields auf den
+      // neuen Stand gebracht.
+      Vector formFields = (Vector) idToFormValues.get(fieldId);
+      if (formFields != null)
       {
-        Vector formFields = (Vector) idToFormValues.get(fieldId);
         Iterator i = formFields.iterator();
         while (i.hasNext())
         {
@@ -1084,20 +1091,22 @@ public class WollMuxEventHandler
           }
         }
       }
-      else
-      {
-        Logger.debug(this
-                     + ": Es existiert kein Formularfeld mit der ID '"
-                     + fieldId
-                     + "' in diesem Dokument");
-      }
+
+      // FormularDescriptor über die Änderung informieren. Dies ist vor allen
+      // auch dazu notwendig, um Originalwerte zu sichern, zu denen es kein
+      // FormField gibt.
+      fd.setFormFieldValue(fieldId, newValue);
+      fd.updateDocument(); // TODO: über einen Timer zeitversetzt etwas
+      // später ausführen lassen.
       return EventProcessor.processTheNextEvent;
     }
 
     public String toString()
     {
       return this.getClass().getSimpleName()
-             + "('"
+             + "("
+             + fd
+             + ", '"
              + fieldId
              + "', '"
              + newValue

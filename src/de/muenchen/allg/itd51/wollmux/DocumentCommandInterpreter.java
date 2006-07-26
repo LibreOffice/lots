@@ -215,9 +215,9 @@ public class DocumentCommandInterpreter
     FormScanner fs = new FormScanner();
     errors += fs.execute(tree);
 
-    ConfigThingy descs = fs.getFormDescriptor().toConfigThingy();
+    FormDescriptor fd = fs.getFormDescriptor();
     HashMap idToFormFields = fs.getIDToFormFields();
-    HashMap idToPresetValue = mapIDToPresetValue(idToFormFields);
+    HashMap idToPresetValue = mapIDToPresetValue(fd, idToFormFields);
 
     // 2) Bookmarks updaten
     tree.updateBookmarks(mux.isDebugMode());
@@ -235,6 +235,7 @@ public class DocumentCommandInterpreter
 
     // FunctionContext erzeugen und im Formular definierte
     // Funktionen/DialogFunktionen parsen:
+    ConfigThingy descs = fd.toConfigThingy();
     Map functionContext = new HashMap();
     DialogLibrary dialogLib = new DialogLibrary();
     FunctionLibrary funcLib = new FunctionLibrary();
@@ -269,7 +270,7 @@ public class DocumentCommandInterpreter
     }
 
     // 5) Formulardialog starten:
-    FormModelImpl fm = new FormModelImpl(document.xTextDocument(), funcLib,
+    FormModelImpl fm = new FormModelImpl(document.xTextDocument(), funcLib, fd,
         idToFormFields, tree);
 
     ConfigThingy formFensterConf = new ConfigThingy("");
@@ -292,29 +293,41 @@ public class DocumentCommandInterpreter
    * bestimmten Wert abbildet. Der Wert ist nur dann klar definiert, wenn alle
    * FormFields zu einer ID unver‰ndert geblieben sind, oder wenn nur
    * untransformierte Felder vorhanden sind, die alle den selben Wert enthalten.
+   * Gibt es zu einer ID kein FormField-Objekt, so wird der zuletzt
+   * abgespeicherte Wert zu dieser ID aus dem FormDescriptor verwendet.
    * 
+   * @param fd
+   *          Das FormDescriptor-Objekt, aus dem die zuletzt gesetzten Werte der
+   *          Formularfelder ausgelesen werden kˆnnen.
    * @param idToFormFields
    *          Eine Map, die die vorhandenen IDs auf Vectoren von FormFields
    *          abbildet.
-   * @return
+   * @return eine vollst‰ndige Zuordnung von Feld IDs zu den aktuellen
+   *         Vorbelegungen im Dokument.
    */
-  private HashMap mapIDToPresetValue(HashMap idToFormFields)
+  private HashMap mapIDToPresetValue(FormDescriptor fd, HashMap idToFormFields)
   {
     HashMap idToPresetValue = new HashMap();
-    Iterator i = idToFormFields.keySet().iterator();
-    while (i.hasNext())
-    {
-      String id = (String) i.next();
-      Vector fields = (Vector) idToFormFields.get(id);
 
-      if (fields.size() > 0)
+    // durch alle Werte, die im FormDescriptor abgelegt sind gehen, und
+    // vergleichen, ob sie mit den Inhalten der Formularfelder im Dokument
+    // ¸bereinstimmen.
+    Iterator idIter = fd.getFormFieldIDs().iterator();
+    while (idIter.hasNext())
+    {
+      String id = (String) idIter.next();
+      String value;
+
+      Vector fields = (Vector) idToFormFields.get(id);
+      if (fields != null && fields.size() > 0)
       {
         boolean allAreUnchanged = true;
         boolean allAreUntransformed = true;
-        boolean allHaveChecksums = true;
         boolean allUntransformedHaveSameValues = true;
-        Iterator j = fields.iterator();
+
         String refValue = null;
+
+        Iterator j = fields.iterator();
         while (j.hasNext())
         {
           FormField field = (FormField) j.next();
@@ -322,12 +335,8 @@ public class DocumentCommandInterpreter
 
           if (field.hasChangedPreviously()) allAreUnchanged = false;
 
-          if (!field.hasChecksum()) allHaveChecksums = false;
-
           if (field.hasTrafo())
-          {
             allAreUntransformed = false;
-          }
           else
           {
             // Referenzwert bestimmen
@@ -338,32 +347,39 @@ public class DocumentCommandInterpreter
           }
         }
 
-        // Der Wert ist nur dann klar definiert, wenn sich gar kein Feld zuletzt
-        // ge‰ndert hat oder wenn nur untransformierte Felder vorhanden sind,
-        // die alle den selben Wert enthalten.
-        if (allHaveChecksums)
+        // neuen Formularwert bestimmen. Regeln:
+        // 1) Wenn sich kein Formularfeld ge‰ndert hat, wird der zuletzt
+        // gesetzte Formularwert verwendet.
+        // 2) Wenn sich mindestens ein Formularfeld geandert hat, jedoch alle
+        // untransformiert sind und den selben Wert enhtalten, so wird dieser
+        // gleiche Wert als neuer Formularwert ¸bernommen.
+        // 3) in allen anderen F‰llen wird FISHY ¸bergeben.
+        if (allAreUnchanged)
+          value = fd.getFormFieldValue(id);
+        else
         {
-          String value = FormController.FISHY;
-          if (allAreUnchanged)
-          {
-            if (refValue != null) value = refValue;
-          }
+          if (allAreUntransformed
+              && allUntransformedHaveSameValues
+              && refValue != null)
+            value = refValue;
           else
-          {
-            if (allAreUntransformed
-                && allUntransformedHaveSameValues
-                && refValue != null) value = refValue;
-          }
-
-          idToPresetValue.put(id, value);
-          Logger.debug2("Add IDToPresetValue: ID=\""
-                        + id
-                        + "\" --> Wert=\""
-                        + value
-                        + "\"");
+            value = FormController.FISHY;
         }
-
       }
+      else
+      {
+        // wenn kein Formularfeld vorhanden ist wird der zuletzt gesetzte
+        // Formularwert ¸bernommen.
+        value = fd.getFormFieldValue(id);
+      }
+
+      // neuen Wert ¸bernehmen:
+      idToPresetValue.put(id, value);
+      Logger.debug2("Add IDToPresetValue: ID=\""
+                    + id
+                    + "\" --> Wert=\""
+                    + value
+                    + "\"");
 
     }
     return idToPresetValue;
@@ -388,10 +404,13 @@ public class DocumentCommandInterpreter
 
     private final String defaultWindowAttributes;
 
+    private final FormDescriptor formDescriptor;
+
     private FormGUI formGUI;
 
     public FormModelImpl(XTextDocument doc, FunctionLibrary funcLib,
-        HashMap idToFormValues, DocumentCommandTree cmdTree)
+        FormDescriptor formDescriptor, HashMap idToFormValues,
+        DocumentCommandTree cmdTree)
     {
       this.doc = doc;
       this.funcLib = funcLib;
@@ -399,6 +418,7 @@ public class DocumentCommandInterpreter
       this.cmdTree = cmdTree;
       this.invisibleGroups = new HashSet();
       this.formGUI = null;
+      this.formDescriptor = formDescriptor;
 
       // Standard-Fensterattribute vor dem Start der Form-GUI sichern um nach
       // dem Schlieﬂen des Formulardokuments die Standard-Werte wieder
@@ -475,6 +495,7 @@ public class DocumentCommandInterpreter
     public void valueChanged(String fieldId, String newValue)
     {
       WollMuxEventHandler.handleFormValueChanged(
+          formDescriptor,
           idToFormValues,
           fieldId,
           newValue,
