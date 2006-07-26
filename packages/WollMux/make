@@ -42,7 +42,7 @@ action()
 	    ;;
 
     _package)
-	    dpkg-buildpackage -rfakeroot -uc -us
+	    dpkg-buildpackage -rfakeroot -uc -us -b
 	    ;;
 
 	_list)
