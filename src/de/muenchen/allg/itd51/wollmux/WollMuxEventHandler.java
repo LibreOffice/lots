@@ -511,7 +511,26 @@ public class WollMuxEventHandler
             if (processNormalCommands) dci.executeTemplateCommands(fragUrls);
 
             if (processFormCommands || dci.isFormular())
+            {
+              // Zoom-Faktor des Abschnitts Fenster/Formular verarbeiten.
+              try
+              {
+                String zoom = mux.getWollmuxConf().query("Fenster").query("Formular")
+                .getLastChild().get("ZOOM").toString();
+                setDocumentZoom(xTextDoc, zoom);
+              }
+              catch (NodeNotFoundException e)
+              {
+                // ZOOM ist optional
+              }
+              catch (ConfigurationErrorException e)
+              {
+                Logger.error(e);
+              }
+
+              // Formularbearbeitung ausführen:
               dci.executeFormCommands();
+            }
           }
           catch (java.lang.Exception e)
           {
@@ -1424,70 +1443,6 @@ public class WollMuxEventHandler
              + ", "
              + docHeight
              + ")";
-    }
-  }
-
-  // *******************************************************************************************
-
-  /**
-   * Erzeugt ein Event, das ZoomTyp bzw. den ZoomValue der Dokumentenansicht des
-   * Dokuments doc auf den neuen Wert zoom stellt, der entwender ein
-   * ganzzahliger Prozentwert (ohne "%"-Zeichen") oder einer der Werte
-   * "Optimal", "PageWidth", "PageWidthExact" oder "EntirePage" ist.
-   * 
-   * @param model
-   *          Das XModel-Interface des Dokuments dessen Zommdarstellung gesetzt
-   *          werden soll.
-   * @param zoomValue
-   *          String-Darstellung des zu setzenden Zoomwertes.
-   */
-  public static void handleSetDocumentZoom(XModel model, String zoom)
-  {
-    handle(new OnSetDocumentZoom(model, zoom));
-  }
-
-  /**
-   * Dieses Event wird vom FormModelImpl ausgelöst, wenn die Formular-GUI die
-   * Zoomdarstellung des Formulardokuments verändert.
-   * 
-   * @author christoph.lutz
-   */
-  private static class OnSetDocumentZoom extends BasicEvent
-  {
-    private XModel model;
-
-    private String zoom;
-
-    public OnSetDocumentZoom(XModel model, String zoom)
-    {
-      this.model = model;
-      this.zoom = zoom;
-    }
-
-    protected boolean doit()
-    {
-      try
-      {
-        setDocumentZoom(model, zoom);
-      }
-      catch (ConfigurationErrorException e)
-      {
-        Logger.error(e);
-      }
-      catch (java.lang.Exception e)
-      {
-      }
-      return EventProcessor.processTheNextEvent;
-    }
-
-    public boolean requires(Object o)
-    {
-      return UnoRuntime.areSame(model, o);
-    }
-
-    public String toString()
-    {
-      return this.getClass().getSimpleName() + "('" + zoom + "')";
     }
   }
 

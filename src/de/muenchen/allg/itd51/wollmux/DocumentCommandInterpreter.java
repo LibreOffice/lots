@@ -474,16 +474,6 @@ public class DocumentCommandInterpreter
     /*
      * (non-Javadoc)
      * 
-     * @see de.muenchen.allg.itd51.wollmux.FormModel#setDocumentZoom(java.lang.String)
-     */
-    public void setDocumentZoom(String zoomValue)
-    {
-      WollMuxEventHandler.handleSetDocumentZoom(UNO.XModel(doc), zoomValue);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
      * @see de.muenchen.allg.itd51.wollmux.FormModel#setVisibleState(java.lang.String,
      *      boolean)
      */
