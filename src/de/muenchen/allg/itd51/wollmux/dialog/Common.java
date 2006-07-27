@@ -11,6 +11,7 @@
 * 22.11.2005 | BNK | Erstellung
 * 26.06.2006 | BNK | +zoomFonts
 *                  | refak. von setLookAndFeel() zu setLookAndFeelOnce()
+* 27.07.2006 | BNK | "auto" Wert explizit parsen.
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -139,6 +140,8 @@ public class Common
         r.x = COORDINATE_MAX;
       else if (xStr.equalsIgnoreCase("min"))
         r.x = COORDINATE_MIN;
+      else if (xStr.equalsIgnoreCase("auto"))
+      {/* nothing*/}
       else
       {
         r.x = Integer.parseInt(xStr);
@@ -158,6 +161,8 @@ public class Common
         r.y = COORDINATE_MAX;
       else if (yStr.equalsIgnoreCase("min"))
         r.y = COORDINATE_MIN;
+      else if (yStr.equalsIgnoreCase("auto"))
+      {/* nothing*/}
       else
       {
         r.y = Integer.parseInt(yStr);
@@ -173,6 +178,8 @@ public class Common
       String widthStr = fensterConf.get("WIDTH").toString();
       if (widthStr.equalsIgnoreCase("max"))
         r.width = DIMENSION_MAX;
+      else if (widthStr.equalsIgnoreCase("auto"))
+      {/* nothing*/}
       else
       {
         r.width = Integer.parseInt(widthStr);
@@ -185,6 +192,8 @@ public class Common
       String heightStr = fensterConf.get("HEIGHT").toString();
       if (heightStr.equalsIgnoreCase("max"))
         r.height = DIMENSION_MAX;
+      else if (heightStr.equalsIgnoreCase("auto"))
+      {/* nothing*/}
       else
       {
         r.height = Integer.parseInt(heightStr);
