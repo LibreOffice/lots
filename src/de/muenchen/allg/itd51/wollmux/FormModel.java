@@ -42,6 +42,17 @@ public interface FormModel
    */
   public void setWindowPosSize(int docX, int docY, int docWidth, int docHeight);
 
+  /**
+   * Diese Methode setzt den ZoomTyp bzw. den ZoomValue der Dokumentenansicht
+   * des Formulardokuments auf den neuen Wert zoom, der entwender ein
+   * ganzzahliger Prozentwert (ohne "%"-Zeichen") oder einer der Werte
+   * "Optimal", "PageWidth", "PageWidthExact" oder "EntirePage" ist.
+   * 
+   * @param zoomValue
+   *          String-Darstellung des zu setzenden Zoomwertes.
+   */
+  public void setDocumentZoom(String zoomValue);
+
   public void setWindowVisible(boolean vis);
 
   public void close();

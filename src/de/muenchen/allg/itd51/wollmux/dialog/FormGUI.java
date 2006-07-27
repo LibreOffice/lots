@@ -456,6 +456,11 @@ public class FormGUI
       myWindow.setVisible(vis);
     }
 
+    public void setDocumentZoom(String value)
+    {
+      // Not Yet Implemented
+    }
+
     public void close()
     {
       try{

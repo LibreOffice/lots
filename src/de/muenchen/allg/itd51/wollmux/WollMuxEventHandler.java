@@ -42,7 +42,6 @@ import com.sun.star.awt.DeviceInfo;
 import com.sun.star.awt.PosSize;
 import com.sun.star.awt.XWindow;
 import com.sun.star.beans.PropertyVetoException;
-import com.sun.star.beans.XPropertySet;
 import com.sun.star.container.NoSuchElementException;
 import com.sun.star.container.XNameAccess;
 import com.sun.star.frame.FrameSearchFlag;
@@ -59,6 +58,7 @@ import com.sun.star.uno.RuntimeException;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
 import com.sun.star.util.CloseVetoException;
+import com.sun.star.view.DocumentZoomType;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoProps;
@@ -449,7 +449,7 @@ public class WollMuxEventHandler
           tds = mux.getWollmuxConf().query("Fenster").query("Textdokument")
               .getLastChild();
           // Einstellungen setzen:
-          setWindowViewSettings(doc, tds);
+          setWindowViewSettings(xTextDoc, tds);
         }
         catch (NodeNotFoundException e)
         {
@@ -581,26 +581,25 @@ public class WollMuxEventHandler
      *          der Konfigurationsabschnitt, der X, Y, WIDHT, HEIGHT und ZOOM
      *          als direkte Kinder enthält.
      */
-    private static void setWindowViewSettings(UnoService compo,
+    private static void setWindowViewSettings(XComponent compo,
         ConfigThingy settings)
     {
       // Fenster holen (zum setzen der Fensterposition und des Zooms)
-      UnoService window = new UnoService(null);
-      XFrame frame = null;
-      if (compo.xModel() != null)
-        frame = compo.xModel().getCurrentController().getFrame();
-      UnoService controller = new UnoService(compo.xModel()
-          .getCurrentController());
-      if (frame != null)
+      XWindow window = null;
+      try
       {
-        window = new UnoService(frame.getContainerWindow());
+        window = UNO.XModel(compo).getCurrentController().getFrame()
+            .getContainerWindow();
+      }
+      catch (java.lang.Exception e)
+      {
       }
 
       // Insets bestimmen (Rahmenmaße des Windows)
       int insetLeft = 0, insetTop = 0, insetRight = 0, insetButtom = 0;
-      if (window.xDevice() != null)
+      if (UNO.XDevice(window) != null)
       {
-        DeviceInfo di = window.xDevice().getInfo();
+        DeviceInfo di = UNO.XDevice(window).getInfo();
         insetButtom = di.BottomInset;
         insetTop = di.TopInset;
         insetRight = di.RightInset;
@@ -612,9 +611,9 @@ public class WollMuxEventHandler
       {
         int xPos = new Integer(settings.get("X").toString()).intValue();
         int yPos = new Integer(settings.get("Y").toString()).intValue();
-        if (window.xWindow() != null)
+        if (window != null)
         {
-          window.xWindow().setPosSize(
+          window.setPosSize(
               xPos + insetLeft,
               yPos + insetTop,
               0,
@@ -630,8 +629,8 @@ public class WollMuxEventHandler
       {
         int width = new Integer(settings.get("WIDTH").toString()).intValue();
         int height = new Integer(settings.get("HEIGHT").toString()).intValue();
-        if (window.xWindow() != null)
-          window.xWindow().setPosSize(
+        if (window != null)
+          window.setPosSize(
               0,
               0,
               width - insetLeft - insetRight,
@@ -641,18 +640,19 @@ public class WollMuxEventHandler
       catch (java.lang.Exception e)
       {
       }
+
       // Zoom setzen:
       try
       {
-        Short zoom = new Short(settings.get("ZOOM").toString());
-        XPropertySet viewSettings = null;
-        if (controller.xViewSettingsSupplier() != null)
-          viewSettings = controller.xViewSettingsSupplier().getViewSettings();
-        if (viewSettings != null)
-          viewSettings.setPropertyValue("ZoomValue", zoom);
+        setDocumentZoom(UNO.XModel(compo), settings.get("ZOOM").toString());
       }
-      catch (java.lang.Exception e)
+      catch (NodeNotFoundException e)
       {
+        // ZOOM ist optional
+      }
+      catch (ConfigurationErrorException e)
+      {
+        Logger.error(e);
       }
     }
   }
@@ -1430,6 +1430,70 @@ public class WollMuxEventHandler
   // *******************************************************************************************
 
   /**
+   * Erzeugt ein Event, das ZoomTyp bzw. den ZoomValue der Dokumentenansicht des
+   * Dokuments doc auf den neuen Wert zoom stellt, der entwender ein
+   * ganzzahliger Prozentwert (ohne "%"-Zeichen") oder einer der Werte
+   * "Optimal", "PageWidth", "PageWidthExact" oder "EntirePage" ist.
+   * 
+   * @param model
+   *          Das XModel-Interface des Dokuments dessen Zommdarstellung gesetzt
+   *          werden soll.
+   * @param zoomValue
+   *          String-Darstellung des zu setzenden Zoomwertes.
+   */
+  public static void handleSetDocumentZoom(XModel model, String zoom)
+  {
+    handle(new OnSetDocumentZoom(model, zoom));
+  }
+
+  /**
+   * Dieses Event wird vom FormModelImpl ausgelöst, wenn die Formular-GUI die
+   * Zoomdarstellung des Formulardokuments verändert.
+   * 
+   * @author christoph.lutz
+   */
+  private static class OnSetDocumentZoom extends BasicEvent
+  {
+    private XModel model;
+
+    private String zoom;
+
+    public OnSetDocumentZoom(XModel model, String zoom)
+    {
+      this.model = model;
+      this.zoom = zoom;
+    }
+
+    protected boolean doit()
+    {
+      try
+      {
+        setDocumentZoom(model, zoom);
+      }
+      catch (ConfigurationErrorException e)
+      {
+        Logger.error(e);
+      }
+      catch (java.lang.Exception e)
+      {
+      }
+      return EventProcessor.processTheNextEvent;
+    }
+
+    public boolean requires(Object o)
+    {
+      return UnoRuntime.areSame(model, o);
+    }
+
+    public String toString()
+    {
+      return this.getClass().getSimpleName() + "('" + zoom + "')";
+    }
+  }
+
+  // *******************************************************************************************
+
+  /**
    * Erzeugt ein Event, das die Anzeige des übergebenen Dokuments auf sichtbar
    * oder unsichtbar schaltet. Dabei wird direkt die entsprechende Funktion der
    * UNO-API verwendet.
@@ -1891,4 +1955,66 @@ public class WollMuxEventHandler
     }
   }
 
+  /**
+   * Diese Methode setzt den ZoomTyp bzw. den ZoomValue der Dokumentenansicht
+   * des Dokuments doc auf den neuen Wert zoom, der entwender eine ganzzahliger
+   * Prozentwert (ohne "%"-Zeichen") oder einer der Werte "Optimal",
+   * "PageWidth", "PageWidthExact" oder "EntirePage" ist.
+   * 
+   * @param controller
+   * @param zoom
+   * @throws ConfigurationErrorException
+   */
+  private static void setDocumentZoom(XModel doc, String zoom)
+      throws ConfigurationErrorException
+  {
+    Short zoomType = null;
+    Short zoomValue = null;
+
+    if (zoom != null)
+    {
+      // ZOOM-Argument auswerten:
+      if (zoom.equalsIgnoreCase("Optimal"))
+        zoomType = new Short(DocumentZoomType.OPTIMAL);
+
+      if (zoom.equalsIgnoreCase("PageWidth"))
+        zoomType = new Short(DocumentZoomType.PAGE_WIDTH);
+
+      if (zoom.equalsIgnoreCase("PageWidthExact"))
+        zoomType = new Short(DocumentZoomType.PAGE_WIDTH_EXACT);
+
+      if (zoom.equalsIgnoreCase("EntirePage"))
+        zoomType = new Short(DocumentZoomType.ENTIRE_PAGE);
+
+      if (zoomType == null)
+      {
+        try
+        {
+          zoomValue = new Short(zoom);
+        }
+        catch (NumberFormatException e)
+        {
+        }
+      }
+    }
+
+    // ZoomType bzw ZoomValue setzen:
+    Object viewSettings = null;
+    try
+    {
+      viewSettings = UNO.XViewSettingsSupplier(doc.getCurrentController())
+          .getViewSettings();
+    }
+    catch (java.lang.Exception e)
+    {
+    }
+    if (zoomType != null)
+      UNO.setProperty(viewSettings, "ZoomType", zoomType);
+    else if (zoomValue != null)
+      UNO.setProperty(viewSettings, "ZoomValue", zoomValue);
+    else
+      throw new ConfigurationErrorException("Ungültiger ZOOM-Wert '"
+                                            + zoom
+                                            + "'");
+  }
 }
