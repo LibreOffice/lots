@@ -46,17 +46,14 @@ import de.muenchen.allg.itd51.parser.NodeNotFoundException;
  * zusammengefügt und über die Methode toConfigThingy() bereitgestellt.
  * 
  * Die Klasse bietet darüber hinaus Methoden zum Abspeichern und Auslesen der
- * original-Feldwerte im Notizfeld des ersten DocumentCommand.Form-Objekts an.
+ * original-Feldwerte im Notizfeld des ersten DocumentCommand.Form-Objekts an,
+ * das einen Formularwerte-Abschnitt enthält.
  * 
- * Im Zusammenhang mit der EntwicklerGUI können auch alle Operationen der
+ * Im Zusammenhang mit der EntwicklerGUI könnten auch alle Operationen der
  * EntwicklerGUI an der Formularbeschreibung (Hinzufügen/Löschen/Verschieben von
  * Eingabeelementen) über diese Klasse abstrahiert werden.
  * 
  * @author Christoph Lutz (D-III-ITD 5.1)
- */
-/**
- * @author lut
- * 
  */
 public class FormDescriptor
 {
@@ -114,8 +111,6 @@ public class FormDescriptor
    *           Die Notiz der Formularbeschreibung ist nicht vorhanden, die
    *           Formularbeschreibung ist nicht vollständig oder kann nicht
    *           geparst werden.
-   * 
-   * TODO: testen
    */
   public void add(DocumentCommand.Form formCmd)
       throws ConfigurationErrorException
@@ -249,8 +244,9 @@ public class FormDescriptor
 
   /**
    * Diese Methode legt den aktuellen Werte aller Fomularfelder in einem
-   * Abschnitt "Formularwerte" unterhalb der Abschnitte "WM/Formular" in der
-   * Notiz des ersten mit add() hinzugefügten WM(CMD'Form')-Kommandos ab.
+   * Abschnitt "Formularwerte" in der Notiz des ersten mit add() hinzugefügten
+   * WM(CMD'Form')-Kommandos ab, das einen Formularwerte-Abschnitt besitzt. Ist
+   * kein entsprechendes Kommando vorhanden, so wird es erzeugt.
    */
   public void updateDocument()
   {
