@@ -113,10 +113,8 @@ public class Bookmark
     {
       try
       {
-        document.xTextDocument().getText().insertTextContent(
-            range,
-            bookmark.xTextContent(),
-            false);
+        range.getText()
+            .insertTextContent(range, bookmark.xTextContent(), false);
       }
       catch (IllegalArgumentException e)
       {
