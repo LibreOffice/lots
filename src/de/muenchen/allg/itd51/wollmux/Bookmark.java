@@ -22,6 +22,7 @@ import com.sun.star.container.NoSuchElementException;
 import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.lang.WrappedTargetException;
 import com.sun.star.text.XBookmarksSupplier;
+import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextRange;
 import com.sun.star.text.XTextRangeCompare;
@@ -113,8 +114,12 @@ public class Bookmark
     {
       try
       {
+        // der TextCursor ist erforderlich, damit auch Bookmarks mit Ausdehnung
+        // erfolgreich gesetzt werden können. Das geht mit normalen TextRanges
+        // nicht.
+        XTextCursor cursor = range.getText().createTextCursorByRange(range);
         range.getText()
-            .insertTextContent(range, bookmark.xTextContent(), false);
+            .insertTextContent(cursor, bookmark.xTextContent(), true);
       }
       catch (IllegalArgumentException e)
       {
@@ -396,7 +401,17 @@ public class Bookmark
     UnoService bookmark = getBookmarkService(name, document);
 
     if (bookmark.xTextContent() != null)
-      return bookmark.xTextContent().getAnchor();
+    {
+      XTextRange range = bookmark.xTextContent().getAnchor();
+
+      // Workaround für OOo-Bug: fehlerhafter Anchor bei Bookmarks in Tabellen.
+      // http://www.openoffice.org/issues/show_bug.cgi?id=67869 . Ein
+      // TextCursor-Objekt verhält sich dahingehend robuster.
+      if (range != null)
+        range = range.getText().createTextCursorByRange(range);
+
+      return range;
+    }
     return null;
   }
 
