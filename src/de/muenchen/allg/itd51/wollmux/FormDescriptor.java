@@ -23,10 +23,11 @@ import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.Vector;
 
 import com.sun.star.container.XEnumeration;
 import com.sun.star.lang.DisposedException;
+import com.sun.star.text.XTextContent;
+import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextField;
 import com.sun.star.text.XTextRange;
 
@@ -53,27 +54,35 @@ import de.muenchen.allg.itd51.parser.NodeNotFoundException;
  * 
  * @author Christoph Lutz (D-III-ITD 5.1)
  */
+/**
+ * @author lut
+ * 
+ */
 public class FormDescriptor
 {
   /**
-   * Name des ConfigThingy-Abschnitts, der die Formularwerte enthält.
+   * Das Dokument, das als Fabrik für neue Annotations benötigt wird.
    */
-  private static final String FORMULARWERTE = "Formularwerte";
+  private XTextDocument doc;
 
   /**
-   * Enthält alle WM(CMD'Form')-Kommandos dieser Formularbeschreibung.
+   * Enthält alle Formular-Abschnitte, die in den mit add hinzugefügten
+   * Form-Kommandos gefunden wurden.
    */
-  private Vector formCmds;
+  private ConfigThingy formularConf;
 
   /**
-   * Enthält ein Mapping formCmd --> Notizfeld (annotation)
+   * Enthält das erste hinzugefügte WM(CMD'Form')-Kommando, hinter dem eine
+   * Notiz für die Aufbewahrung der Formularwerte erzeugt wird, wenn nicht
+   * bereits eine andere im Dokument vorhanden ist.
    */
-  private HashMap annotationFields;
+  private DocumentCommand.Form firstFormCmd;
 
   /**
-   * Enthält ein Mapping formCmd --> geparste ConfigThingy-Objekte
+   * Enthält das Notizfeld das sich unter dem zuletzt mit add hinzugefügten
+   * Form-Kommandos befindet, das einen "Formularwerte"-Abschnitt besitzt.
    */
-  private HashMap configs;
+  private XTextContent werteField;
 
   /**
    * Enthält die aktuellen Werte der Formularfelder als Zuordnung id -> Wert.
@@ -85,12 +94,13 @@ public class FormDescriptor
    * WM(CMD'Form')-Kommandos mit Formularbeschreibungsnotizen hinzugefügt werden
    * können.
    */
-  public FormDescriptor()
+  public FormDescriptor(XTextDocument doc)
   {
-    formCmds = new Vector();
-    annotationFields = new HashMap();
-    configs = new HashMap();
-    formFieldValues = new HashMap();
+    this.doc = doc;
+    this.formularConf = new ConfigThingy("WM");
+    this.firstFormCmd = null;
+    this.werteField = null;
+    this.formFieldValues = new HashMap();
   }
 
   /**
@@ -111,71 +121,77 @@ public class FormDescriptor
       throws ConfigurationErrorException
   {
     XTextRange range = formCmd.getTextRange();
-    if (range != null)
+
+    Object annotationField = findAnnotationFieldRecursive(range);
+    if (annotationField == null)
+      throw new ConfigurationErrorException(
+          "Die Notiz mit der Formularbeschreibung fehlt.");
+
+    Object content = UNO.getProperty(annotationField, "Content");
+    if (content == null)
+      throw new ConfigurationErrorException(
+          "Die Notiz mit der Formularbeschreibung kann nicht gelesen werden.");
+
+    ConfigThingy conf;
+    try
     {
-      Object cursor = range.getText().createTextCursorByRange(range);
+      conf = new ConfigThingy("", null, new StringReader(content.toString()));
+    }
+    catch (java.lang.Exception e)
+    {
+      throw new ConfigurationErrorException(
+          "Die Formularbeschreibung innerhalb der Notiz ist fehlerhaft:\n"
+              + e.getMessage());
+    }
 
-      Object annotationField = findAnnotationFieldRecursive(cursor);
-      if (annotationField == null)
-        throw new ConfigurationErrorException(
-            "Die Notiz mit der Formularbeschreibung fehlt.");
+    // Formular-Abschnitt auswerten:
+    ConfigThingy formular = null;
+    try
+    {
+      formular = conf.get("WM").get("Formular");
+      formularConf.addChild(formular);
+      if (firstFormCmd == null) firstFormCmd = formCmd;
+    }
+    catch (NodeNotFoundException e)
+    {
+    }
 
-      Object content = UNO.getProperty(annotationField, "Content");
-      if (content != null)
+    // Formularwerte-Abschnitt lesen:
+    ConfigThingy werte = null;
+    try
+    {
+      werte = conf.get("WM").get("Formularwerte");
+    }
+    catch (NodeNotFoundException e)
+    {
+    }
+
+    // "Formularwerte"-Abschnitt auswerten.
+    if (werte != null)
+    {
+      werteField = UNO.XTextContent(annotationField);
+
+      formFieldValues = new HashMap();
+      Iterator iter = werte.iterator();
+      while (iter.hasNext())
       {
-        ConfigThingy conf;
+        ConfigThingy element = (ConfigThingy) iter.next();
         try
         {
-          conf = new ConfigThingy("", null,
-              new StringReader(content.toString()));
+          String id = element.get("ID").toString();
+          String value = element.get("VALUE").toString();
+          formFieldValues.put(id, value);
         }
-        catch (java.lang.Exception e)
+        catch (NodeNotFoundException e)
         {
-          throw new ConfigurationErrorException(
-              "Die Formularbeschreibung innerhalb der Notiz ist fehlerhaft:\n"
-                  + e.getMessage());
+          Logger.error(e);
         }
-
-        ConfigThingy formulars = conf.query("Formular");
-        if (formulars.count() == 0)
-          throw new ConfigurationErrorException(
-              "Die Formularbeschreibung innerhalb der Notiz enthält keinen Abschnitt \"Formular\".");
-
-        // Den "Formularwerte"-Abschnitt der ersten Formularbeschreibung
-        // auswerten.
-        if (formCmds.size() == 0)
-        {
-          ConfigThingy werte = new ConfigThingy(FORMULARWERTE);
-          try
-          {
-            werte = conf.get(FORMULARWERTE);
-          }
-          catch (NodeNotFoundException e)
-          {
-          }
-
-          Iterator iter = werte.iterator();
-          while (iter.hasNext())
-          {
-            ConfigThingy element = (ConfigThingy) iter.next();
-            try
-            {
-              String id = element.get("ID").toString();
-              String value = element.get("VALUE").toString();
-              formFieldValues.put(id, value);
-            }
-            catch (NodeNotFoundException e)
-            {
-              Logger.error(e);
-            }
-          }
-        }
-
-        formCmds.add(formCmd);
-        annotationFields.put(formCmd, annotationField);
-        configs.put(formCmd, conf);
       }
     }
+
+    if (formular == null && werte == null)
+      throw new ConfigurationErrorException(
+          "Die Formularbeschreibung innerhalb der Notiz enthält keine Abschnitte 'Formular' oder 'Formularwerte'.");
   }
 
   /**
@@ -188,15 +204,7 @@ public class FormDescriptor
    */
   public ConfigThingy toConfigThingy()
   {
-    ConfigThingy formDescriptors = new ConfigThingy("WM");
-
-    Iterator cmds = formCmds.iterator();
-    while (cmds.hasNext())
-    {
-      ConfigThingy conf = (ConfigThingy) configs.get(cmds.next());
-      if (conf != null) formDescriptors.addChild(conf);
-    }
-    return formDescriptors;
+    return formularConf;
   }
 
   /**
@@ -243,15 +251,15 @@ public class FormDescriptor
    * Diese Methode legt den aktuellen Werte aller Fomularfelder in einem
    * Abschnitt "Formularwerte" unterhalb der Abschnitte "WM/Formular" in der
    * Notiz des ersten mit add() hinzugefügten WM(CMD'Form')-Kommandos ab.
-   * 
-   * TODO: testen
    */
   public void updateDocument()
   {
     Logger.debug2(this.getClass().getSimpleName() + ".updateDocument()");
 
     // Neues ConfigThingy für "Formularwerte"-Abschnitt erzeugen:
-    ConfigThingy werte = new ConfigThingy(FORMULARWERTE);
+    ConfigThingy werte = new ConfigThingy("WM");
+    ConfigThingy formwerte = new ConfigThingy("Formularwerte");
+    werte.addChild(formwerte);
     Iterator iter = formFieldValues.keySet().iterator();
     while (iter.hasNext())
     {
@@ -266,46 +274,43 @@ public class FormDescriptor
         cfVALUE.add(value);
         entry.addChild(cfID);
         entry.addChild(cfVALUE);
-        werte.addChild(entry);
+        formwerte.addChild(entry);
       }
     }
 
-    // alten "Formularwerte"-Abschnitte des ersten WM(CMD'Form')-Kommandos durch
-    // neuen ersetzen:
-    if (formCmds.size() > 0)
+    // neues WM(CMD'Form') Kommando zur Ablage der Formularwerte erzeugen, wenn
+    // nicht bereits eines vorhanden ist.
+    if (werteField == null && firstFormCmd != null)
     {
-      // Formular-Abschnitt holen:
-      ConfigThingy conf = (ConfigThingy) configs.get(formCmds.get(0));
-      ConfigThingy form = new ConfigThingy("Formular");
       try
       {
-        form = conf.get("WM").get("Formular");
+        werteField = UNO.XTextContent(UNO.XMultiServiceFactory(doc)
+            .createInstance("com.sun.star.text.TextField.Annotation"));
       }
-      catch (NodeNotFoundException e)
+      catch (java.lang.Exception e)
       {
-        Logger.error(e);
       }
 
-      // alten "Formularwerte"-Abschnitt löschen
-      iter = form.iterator();
-      while (iter.hasNext())
-      {
-        ConfigThingy element = (ConfigThingy) iter.next();
-        if (element.getName().equals(FORMULARWERTE)) iter.remove();
-      }
-
-      // neuen "Formularwerte"-Abschnitt setzen
-      form.addChild(werte);
-
-      // Notiz neu setzen:
-      Object anno = annotationFields.get(formCmds.get(0));
+      XTextRange range = firstFormCmd.getTextRange();
       try
       {
-        UNO.setProperty(anno, "Content", conf.stringRepresentation());
+        range.getText().insertTextContent(range.getEnd(), werteField, false);
       }
-      catch (DisposedException e)
+      catch (java.lang.Exception e)
       {
       }
+
+      if (doc != null && werteField != null)
+        new Bookmark("WM(CMD 'Form')", doc, werteField.getAnchor());
+    }
+
+    // neuen "Formularwerte"-Abschnitt setzen
+    try
+    {
+      UNO.setProperty(werteField, "Content", werte.stringRepresentation());
+    }
+    catch (DisposedException e)
+    {
     }
   }
 

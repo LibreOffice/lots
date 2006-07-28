@@ -1318,7 +1318,8 @@ public class DocumentCommandInterpreter
   {
     private HashMap idToFormFields = new HashMap();
 
-    private FormDescriptor formDescriptor = new FormDescriptor();
+    private FormDescriptor formDescriptor = new FormDescriptor(document
+        .xTextDocument());
 
     private FormDescriptor getFormDescriptor()
     {
