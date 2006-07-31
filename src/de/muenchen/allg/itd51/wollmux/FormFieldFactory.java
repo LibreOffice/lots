@@ -35,6 +35,7 @@ import com.sun.star.text.XTextRange;
 import com.sun.star.uno.Exception;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.itd51.wollmux.DelayedUpdater.DelayedUpdateable;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertFormValue;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 
@@ -178,11 +179,22 @@ public final class FormFieldFactory
      * Diese Methode belegt den Wert des Formularfeldes im Dokument mit dem
      * neuen Inhalt value; ist das Formularfeld mit einer TRAFO belegt, so wird
      * vor dem setzen des neuen Inhaltes die TRAFO-Funktion ausgeführt und der
-     * neu berechnete Wert stattdessen eingefügt.
+     * neu berechnete Wert stattdessen eingefügt. Achtung: Die Methode setzt nur
+     * den Wert des Formularfeldes, passt jedoch noch nicht den MD5-Wert im
+     * zugehörigen Bookmark an. Dieser zeitaufwendige Teil wurde in die Methode
+     * updateLater() ausgelagert, die zeitnah nach dem Setzen aufgerufen
+     * werden muss.
      * 
      * @param value
      */
     public abstract void setValue(String value, FunctionLibrary funcLib);
+
+    /**
+     * Die Methode berechnet den MD5-Wert des aktuell gesetzten Formularfeldes
+     * und legt den berechneten Hash-Wert im Bookmark des zugehörigen
+     * Dokumentkommandos ab.
+     */
+    public abstract void updateLater();
 
     /**
      * Diese Methode liefert den aktuellen Wert des Formularfeldes als String
@@ -208,7 +220,8 @@ public final class FormFieldFactory
     public abstract void focus();
   }
 
-  private static abstract class BasicFormField implements FormField
+  private static abstract class BasicFormField implements FormField,
+      DelayedUpdateable
   {
     private XTextDocument doc;
 
@@ -279,14 +292,23 @@ public final class FormFieldFactory
           cmd,
           funcLib);
 
-      // md5-Wert bestimmen und setzen:
-      String md5 = getMD5HexRepresentation(value);
-      cmd.setMD5(md5);
-      cmd.updateBookmark(false);
-
       // Inhalt des Textfeldes setzen:
       setFormElementValue(value);
 
+      DelayedUpdater.updateLater(this);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.FormFieldFactory.FormField#updateLater()
+     */
+    public void updateLater()
+    {
+      String value = getValue();
+      String md5 = getMD5HexRepresentation(value);
+      cmd.setMD5(md5);
+      cmd.updateBookmark(false);
     }
 
     /**

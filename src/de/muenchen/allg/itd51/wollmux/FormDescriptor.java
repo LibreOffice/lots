@@ -34,6 +34,7 @@ import com.sun.star.text.XTextRange;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
+import de.muenchen.allg.itd51.wollmux.DelayedUpdater.DelayedUpdateable;
 
 /**
  * Diese Klasse repräsentiert eine Formularbeschreibung eines Formulardokuments
@@ -55,7 +56,7 @@ import de.muenchen.allg.itd51.parser.NodeNotFoundException;
  * 
  * @author Christoph Lutz (D-III-ITD 5.1)
  */
-public class FormDescriptor
+public class FormDescriptor implements DelayedUpdateable
 {
   /**
    * Das Dokument, das als Fabrik für neue Annotations benötigt wird.
@@ -247,10 +248,12 @@ public class FormDescriptor
    * Abschnitt "Formularwerte" in der Notiz des ersten mit add() hinzugefügten
    * WM(CMD'Form')-Kommandos ab, das einen Formularwerte-Abschnitt besitzt. Ist
    * kein entsprechendes Kommando vorhanden, so wird es erzeugt.
+   * 
+   * @see de.muenchen.allg.itd51.wollmux.DelayedUpdater.DelayedUpdateable#updateLater()
    */
-  public void updateDocument()
+  public void updateLater()
   {
-    Logger.debug2(this.getClass().getSimpleName() + ".updateDocument()");
+    Logger.debug2(this.getClass().getSimpleName() + ".updateLater()");
 
     // Neues ConfigThingy für "Formularwerte"-Abschnitt erzeugen:
     ConfigThingy werte = new ConfigThingy("WM");
