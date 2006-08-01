@@ -1095,8 +1095,7 @@ public class WollMuxEventHandler
       // auch dazu notwendig, um Originalwerte zu sichern, zu denen es kein
       // FormField gibt.
       fd.setFormFieldValue(fieldId, newValue);
-      fd.updateDocument(); // TODO: über einen Timer zeitversetzt etwas
-      // später ausführen lassen.
+      fd.updateDocument(); 
       return EventProcessor.processTheNextEvent;
     }
 
