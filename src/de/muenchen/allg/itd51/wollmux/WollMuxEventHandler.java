@@ -58,6 +58,7 @@ import com.sun.star.uno.RuntimeException;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
 import com.sun.star.util.CloseVetoException;
+import com.sun.star.util.XURLTransformer;
 import com.sun.star.view.DocumentZoomType;
 
 import de.muenchen.allg.afid.UNO;
@@ -762,18 +763,6 @@ public class WollMuxEventHandler
     {
       WollMuxSingleton mux = WollMuxSingleton.getInstance();
 
-      UnoService desktop = new UnoService(null);
-      try
-      {
-        desktop = UnoService.createWithContext(
-            "com.sun.star.frame.Desktop",
-            mux.getXComponentContext());
-      }
-      catch (Exception e)
-      {
-        Logger.error(e);
-      }
-
       // das erste Argument ist das unmittelbar zu landende Textfragment und
       // wird nach urlStr aufgelöst. Alle weiteren Argumente (falls vorhanden)
       // werden nach argsUrlStr aufgelöst.
@@ -817,15 +806,14 @@ public class WollMuxEventHandler
         // URL durch den URL-Transformer jagen
         try
         {
-          UnoService trans = UnoService.createWithContext(
-              "com.sun.star.util.URLTransformer",
-              mux.getXComponentContext());
+          XURLTransformer trans = UNO.XURLTransformer(UNO
+              .createUNOService("com.sun.star.util.URLTransformer"));
           com.sun.star.util.URL[] unoURL = new com.sun.star.util.URL[] { new com.sun.star.util.URL() };
           unoURL[0].Complete = urlStr;
-          trans.xURLTransformer().parseStrict(unoURL);
+          if (trans != null) trans.parseStrict(unoURL);
           urlStr = unoURL[0].Complete;
         }
-        catch (Exception e)
+        catch (java.lang.Exception e)
         {
           Logger.error(e);
         }
@@ -865,26 +853,18 @@ public class WollMuxEventHandler
       }
 
       // open document as Template (or as document):
-      if (desktop.xComponentLoader() != null)
+      try
       {
-        try
-        {
-          UnoService doc = new UnoService(desktop.xComponentLoader()
-              .loadComponentFromURL(
-                  loadUrlStr,
-                  "_blank",
-                  FrameSearchFlag.CREATE,
-                  new UnoProps("AsTemplate", new Boolean(asTemplate))
-                      .getProps()));
-          OnProcessTextDocument.docFragUrlsBuffer.put(new HashableComponent(doc
-              .xComponent()), fragUrls);
-        }
-        catch (java.lang.Exception x)
-        {
-          throw new WollMuxFehlerException("Die Vorlage mit der URL '"
-                                           + loadUrlStr
-                                           + "' kann nicht geöffnet werden.", x);
-        }
+        XComponent doc = UNO.loadComponentFromURL(loadUrlStr, asTemplate, true);
+        OnProcessTextDocument.docFragUrlsBuffer.put(
+            new HashableComponent(doc),
+            fragUrls);
+      }
+      catch (java.lang.Exception x)
+      {
+        throw new WollMuxFehlerException("Die Vorlage mit der URL '"
+                                         + loadUrlStr
+                                         + "' kann nicht geöffnet werden.", x);
       }
 
       return EventProcessor.processTheNextEvent;
