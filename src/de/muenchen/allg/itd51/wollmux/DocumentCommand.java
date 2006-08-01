@@ -26,6 +26,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.Set;
+import java.util.Vector;
 
 import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextRange;
@@ -721,6 +722,8 @@ abstract public class DocumentCommand
 
     public int executeCommand(DocumentCommand.InsertFormValue cmd);
 
+    public int executeCommand(DocumentCommand.InsertFunctionValue cmd);
+
     public int executeCommand(DocumentCommand.SetGroups cmd);
   }
 
@@ -1159,6 +1162,68 @@ abstract public class DocumentCommand
       return super.toConfigThingy();
     }
 
+  }
+
+  // ********************************************************************************
+  /**
+   * Dieses Kommando fügt den Rückgabewert einer Funktion in den Briefkopf ein.
+   */
+  static public class InsertFunctionValue extends DocumentCommand
+  {
+    private Vector args = null;
+
+    private String function = null;
+
+    public InsertFunctionValue(ConfigThingy wmCmd, Bookmark bookmark)
+        throws InvalidCommandException
+    {
+      super(wmCmd, bookmark);
+
+      try
+      {
+        function = wmCmd.get("WM").get("FUNCTION").toString();
+      }
+      catch (NodeNotFoundException e)
+      {
+        throw new InvalidCommandException("Fehlendes Attribut FUNCTION");
+      }
+
+      args = new Vector();
+      try
+      {
+        ConfigThingy argsConf = wmCmd.get("WM").get("ARGS");
+        Iterator iter = argsConf.iterator();
+        while (iter.hasNext())
+        {
+          ConfigThingy arg = (ConfigThingy) iter.next();
+          args.add(arg.getName());
+        }
+      }
+      catch (NodeNotFoundException e)
+      {
+        // ARGS sind optional
+      }
+    }
+
+    public String getFunctionName()
+    {
+      return function;
+    }
+
+    public Vector getArgs()
+    {
+      return args;
+    }
+
+    protected boolean canHaveChilds()
+    {
+      return false;
+    }
+
+    public int execute(DocumentCommand.Executor visitable)
+    {
+      return visitable.executeCommand(this);
+    }
   }
 
   // ********************************************************************************

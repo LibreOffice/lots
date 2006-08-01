@@ -47,6 +47,7 @@ import de.muenchen.allg.itd51.wollmux.DocumentCommand.Form;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertContent;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertFormValue;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertFrag;
+import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertFunctionValue;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertValue;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InvalidCommand;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InvalidCommandException;
@@ -241,7 +242,7 @@ public class DocumentCommandTree
 
       if (cmd.compareToIgnoreCase("insertFunctionValue") == 0)
       {
-        return new DocumentCommand.NotYetImplemented(wmCmd, bookmark);
+        return new DocumentCommand.InsertFunctionValue(wmCmd, bookmark);
       }
 
       if (cmd.compareToIgnoreCase("setGroups") == 0)
@@ -506,6 +507,11 @@ public class DocumentCommandTree
     }
 
     public int executeCommand(SetGroups cmd)
+    {
+      return 0;
+    }
+
+    public int executeCommand(InsertFunctionValue cmd)
     {
       return 0;
     }

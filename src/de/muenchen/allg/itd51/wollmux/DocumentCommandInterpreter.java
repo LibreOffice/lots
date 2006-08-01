@@ -1205,6 +1205,46 @@ public class DocumentCommandInterpreter
     }
 
     /**
+     * Diese Methode fügt den Rückgabewert einer Funktion ein.
+     */
+    public int executeCommand(DocumentCommand.InsertFunctionValue cmd)
+    {
+      cmd.setErrorState(false);
+
+      String value;
+      FunctionLibrary funcLib = mux.getGlobalFunctions();
+      Function func = funcLib.get(cmd.getFunctionName());
+      if (func != null)
+      {
+        SimpleMap args = new SimpleMap();
+        String[] pars = func.parameters();
+        Iterator iter = cmd.getArgs().iterator();
+        for (int i = 0; i < pars.length && iter.hasNext(); ++i)
+        {
+          String arg = iter.next().toString();
+          args.put(pars[i], arg);
+        }
+        value = func.getString(args);
+      }
+      else
+      {
+        value = "<FEHLER: FUNCTION '"
+                + cmd.getFunctionName()
+                + "' nicht definiert>";
+        Logger.error("Die in Kommando '"
+                     + cmd
+                     + " verwendete FUNCTION '"
+                     + cmd.getFunctionName()
+                     + "' ist nicht definiert.");
+      }
+
+      XTextCursor insCursor = cmd.createInsertCursor();
+      if (insCursor != null) insCursor.setString(value);
+      cmd.setDoneState(true);
+      return 0;
+    }
+
+    /**
      * Gibt Informationen über die aktuelle Install-Version des WollMux aus.
      */
     public int executeCommand(DocumentCommand.Version cmd)
