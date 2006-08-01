@@ -65,7 +65,6 @@ import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
-import de.muenchen.allg.itd51.wollmux.DelayedUpdater.DelayedUpdateable;
 import de.muenchen.allg.itd51.wollmux.FormFieldFactory.FormField;
 import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.DJDataset;
@@ -516,8 +515,8 @@ public class WollMuxEventHandler
               // Zoom-Faktor des Abschnitts Fenster/Formular verarbeiten.
               try
               {
-                String zoom = mux.getWollmuxConf().query("Fenster").query(
-                    "Formular").getLastChild().get("ZOOM").toString();
+                String zoom = mux.getWollmuxConf().query("Fenster").query("Formular")
+                .getLastChild().get("ZOOM").toString();
                 setDocumentZoom(xTextDoc, zoom);
               }
               catch (NodeNotFoundException e)
@@ -1116,10 +1115,8 @@ public class WollMuxEventHandler
       // auch dazu notwendig, um Originalwerte zu sichern, zu denen es kein
       // FormField gibt.
       fd.setFormFieldValue(fieldId, newValue);
-
-      // Den zeitaufwändigen Update zeitversetzt ein wenig später ausführen:
-      DelayedUpdater.updateLater(fd);
-
+      fd.updateDocument(); // TODO: über einen Timer zeitversetzt etwas
+      // später ausführen lassen.
       return EventProcessor.processTheNextEvent;
     }
 
@@ -1133,65 +1130,6 @@ public class WollMuxEventHandler
              + "', '"
              + newValue
              + "')";
-    }
-  }
-
-  // *******************************************************************************************
-
-  /**
-   * TODO: anpassen! Erzeugt ein neues WollMuxEvent, welches dafür sorgt, dass
-   * alle Formularfelder Dokument auf den neuen Wert gesetzt werden. Bei
-   * Formularfeldern mit TRAFO-Funktion wird die Transformation entsprechend
-   * durchgeführt.
-   * 
-   * @param idToFormValues
-   *          Eine HashMap die unter dem Schlüssel fieldID den Vektor aller
-   *          FormFields mit der ID fieldID liefert.
-   * @param fieldId
-   *          Die ID der Formularfelder, deren Werte angepasst werden sollen.
-   * @param newValue
-   *          Der neue untransformierte Wert des Formularfeldes.
-   * @param funcLib
-   *          Die Funktionsbibliothek, die zur Gewinnung der Trafo-Funktion
-   *          verwendet werden soll.
-   */
-  public static void handleUpdateLater(DelayedUpdateable updateable)
-  {
-    handle(new OnUpdateLater(updateable));
-  }
-
-  /**
-   * TODO: anpassen! Dieses Event wird (derzeit) vom FormModelImpl ausgelöst,
-   * wenn in der Formular-GUI der Wert des Formularfeldes fieldID geändert wurde
-   * und sorgt dafür, dass die Wertänderung auf alle betroffenen Formularfelder
-   * im Dokument doc übertragen werden.
-   * 
-   * @author christoph.lutz
-   */
-  private static class OnUpdateLater extends BasicEvent
-  {
-    private DelayedUpdateable updateable;
-
-    public OnUpdateLater(DelayedUpdateable updateable)
-    {
-      this.updateable = updateable;
-    }
-
-    protected boolean doit()
-    {
-      if (updateable != null)
-      {
-        updateable.updateLater();
-      }
-
-      DelayedUpdater.updateDone(updateable);
-
-      return EventProcessor.processTheNextEvent;
-    }
-
-    public String toString()
-    {
-      return this.getClass().getSimpleName() + "(" + updateable + ")";
     }
   }
 
