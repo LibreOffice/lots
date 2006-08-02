@@ -37,7 +37,8 @@
 * 23.06.2006 | BNK | Senderbox von JComboBox auf JPopupMenu umgestellt.    
 * 27.06.2006 | BNK | WIDTH, HEIGHT max korrekt unterstützt 
 * 29.06.2006 | BNK | min, max, center unterstützt    
-* 19.07.2006 | BNK | MODE "Icon" repariert         
+* 19.07.2006 | BNK | MODE "Icon" repariert 
+* 02.08.2006 | BNK | bessere Fehlermeldung wenn Konfiguration nicht gefunden.        
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -255,8 +256,11 @@ public class WollMuxBar
   "installiert wurde.";
 
   private static final String WOLLMUX_CONFIG_ERROR_MESSAGE = 
-  "Ihr WollMux ist nicht richtig konfiguriert.\n"+
-  "Bitte wenden Sie sich an Ihre Systembetreuerin oder Ihren Systembetreuer.";
+  "Aus Ihrer WollMux-Konfiguration konnte kein Abschnitt \"Symbolleisten\" gelesen werden.\n"+
+  "Die WollMux-Leiste kann daher nicht gestartet werden. Bitte überprüfen Sie, ob in Ihrer wollmux.conf\n"+
+  "der %include für die Konfiguration der WollMuxBar (z.B. wollmuxbar_standard.conf) vorhanden ist und\n"+
+  "überprüfen Sie anhand der wollmux.log ob evtl. beim Verarbeiten eines %includes ein Fehler\n"+
+  "aufgetreten ist.";
   
   /**
    * ActionListener für Buttons mit der ACTION "abort". 
@@ -1379,7 +1383,10 @@ public class WollMuxBar
       }catch(Exception x){}
       
       if (wollmuxConf.query("Symbolleisten").count()==0)
+      {
+        Logger.error(WOLLMUX_CONFIG_ERROR_MESSAGE);
         JOptionPane.showMessageDialog(null, WOLLMUX_CONFIG_ERROR_MESSAGE, "Fehlerhafte Konfiguration", JOptionPane.ERROR_MESSAGE);
+      }
       else
         new WollMuxBar(windowMode, wollmuxConf);
       
