@@ -320,7 +320,7 @@ public class DatensatzBearbeiten
   {
     myFrame.dispose();
     if (dialogEndListener != null)
-      dialogEndListener.actionPerformed(new ActionEvent("DatensatzBearbeiten",0,actionCommand));
+      dialogEndListener.actionPerformed(new ActionEvent(DatensatzBearbeiten.class.getName(),0,actionCommand));
   }
   
   /**

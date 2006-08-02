@@ -764,7 +764,7 @@ public class PersoenlicheAbsenderlisteVerwalten
   {
     myFrame.dispose();
     if (dialogEndListener != null)
-      dialogEndListener.actionPerformed(new ActionEvent("PersoenlicheAbsenderliste",0,actionCommand));
+      dialogEndListener.actionPerformed(new ActionEvent(PersoenlicheAbsenderlisteVerwalten.class.getName(),0,actionCommand));
   }
     
   /**
@@ -1343,7 +1343,7 @@ public class PersoenlicheAbsenderlisteVerwalten
         }catch(Exception x) {Logger.error(x);}
       else
       {
-        String source = "PersoenlicheAbsenderliste";
+        String source = PersoenlicheAbsenderlisteVerwalten.class.getName();
         if (actionCommand == null) 
         {
           actionCommand = e.getActionCommand();

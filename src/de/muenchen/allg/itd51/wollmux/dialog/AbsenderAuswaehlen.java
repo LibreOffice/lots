@@ -624,7 +624,7 @@ public class AbsenderAuswaehlen
   {
     myFrame.dispose();
     if (dialogEndListener != null)
-      dialogEndListener.actionPerformed(new ActionEvent("AbsenderAuswaehlen",0,actionCommand));
+      dialogEndListener.actionPerformed(new ActionEvent(AbsenderAuswaehlen.class.getName(),0,actionCommand));
   }
   
   /**
@@ -687,7 +687,7 @@ public class AbsenderAuswaehlen
         }catch(Exception x) {Logger.error(x);}
       else
       {
-        String source = "AbsenderAuswaehlen";
+        String source = AbsenderAuswaehlen.class.getName();
         if (actionCommand == null) 
         {
           actionCommand = e.getActionCommand();

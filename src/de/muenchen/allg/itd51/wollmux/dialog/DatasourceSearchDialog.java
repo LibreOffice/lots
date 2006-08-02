@@ -1151,7 +1151,8 @@ public class DatasourceSearchDialog implements Dialog
       shown[0] = false;
     }
     if (dialogEndListener != null)
-      dialogEndListener.actionPerformed(new ActionEvent("PersoenlicheAbsenderliste",0,actionCommand));
+      dialogEndListener.actionPerformed(new ActionEvent(
+          DatasourceSearchDialog.class.getName(), 0, actionCommand));
   }
   
   
