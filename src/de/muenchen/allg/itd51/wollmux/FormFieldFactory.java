@@ -74,8 +74,15 @@ public final class FormFieldFactory
         return new CheckboxFormField(doc, cmd, shape.getControl());
     }
 
-    // Textfeld vom Typ com.sun.star.text.TextField.Input suchen:
+    // Textfeld vom Typ com.sun.star.text.TextField.DropDown suchen:
     XTextField field = null;
+    if (range != null)
+    {
+      field = findTextField(range, "com.sun.star.text.TextField.DropDown");
+      if (field != null) return new DropDownFormField(doc, cmd, field);
+    }
+
+    // Textfeld vom Typ com.sun.star.text.TextField.Input suchen:
     if (range != null)
       field = findTextField(range, "com.sun.star.text.TextField.Input");
 
@@ -413,6 +420,76 @@ public final class FormFieldFactory
       if (inputField != null)
       {
         Object content = UNO.getProperty(inputField, "Content");
+        if (content != null) return content.toString();
+      }
+      return "";
+    }
+  }
+
+  /**
+   * Repräsentiert ein FormField, das den Formularwert in einem DropDown-Field
+   * darstellt.
+   * 
+   * @author Christoph Lutz (D-III-ITD 5.1)
+   */
+  private static class DropDownFormField extends BasicFormField
+  {
+    private XTextField dropdownField;
+
+    public DropDownFormField(XTextDocument doc, InsertFormValue cmd,
+        XTextField dropdownField)
+    {
+      super(doc, cmd);
+      this.dropdownField = dropdownField;
+    }
+
+    public void setFormElementValue(String value)
+    {
+      if (dropdownField != null && UNO.XUpdatable(dropdownField) != null)
+      {
+        extendItemsList(value);
+        UNO.setProperty(dropdownField, "SelectedItem", value);
+        UNO.XUpdatable(dropdownField).update();
+      }
+    }
+
+    /**
+     * Die Methode prüft, ob der String value bereits in der Liste der erlaubten
+     * Einträge der ComboBox vorhanden ist und erweitert die Liste um value,
+     * falls nicht.
+     * 
+     * @param value
+     *          der Wert, der ggf. an in die Liste der erlaubten Einträge
+     *          aufgenommen wird.
+     */
+    private void extendItemsList(String value)
+    {
+      String[] items = (String[]) UNO.getProperty(dropdownField, "Items");
+      boolean found = false;
+      for (int i = 0; i < items.length; i++)
+      {
+        if (value.equals(items[i]))
+        {
+          found = true;
+          break;
+        }
+      }
+
+      if (!found)
+      {
+        String[] extendedItems = new String[items.length + 1];
+        for (int i = 0; i < items.length; i++)
+          extendedItems[i] = items[i];
+        extendedItems[items.length] = value;
+        UNO.setProperty(dropdownField, "Items", extendedItems);
+      }
+    }
+
+    public String getFormElementValue()
+    {
+      if (dropdownField != null)
+      {
+        Object content = UNO.getProperty(dropdownField, "SelectedItem");
         if (content != null) return content.toString();
       }
       return "";
