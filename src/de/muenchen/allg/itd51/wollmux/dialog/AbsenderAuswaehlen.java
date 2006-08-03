@@ -634,7 +634,7 @@ public class AbsenderAuswaehlen
    */
   private void editList()
   {
-    ActionListener del = new MyDialogEndListener(myConf, verConf, abConf, dj, dialogEndListener, null);
+    ActionListener del = new MyDialogEndListener(this, myConf, verConf, abConf, dj, dialogEndListener, null);
     dialogEndListener = null;
     abort();
     try
@@ -648,7 +648,7 @@ public class AbsenderAuswaehlen
   }
   
     
-  private class MyDialogEndListener implements ActionListener
+  private static class MyDialogEndListener implements ActionListener
   {
     private ConfigThingy conf;
     private ConfigThingy abConf;
@@ -656,6 +656,7 @@ public class AbsenderAuswaehlen
     private DatasourceJoiner dj;
     private ActionListener dialogEndListener;
     private String actionCommand;
+    private AbsenderAuswaehlen mySource;
     
     /**
      * Falls actionPerformed() mit getActionCommand().equals("back")
@@ -664,9 +665,10 @@ public class AbsenderAuswaehlen
      * der dialogEndListener mit actionCommand aufgerufen. Falls actionCommand
      * null ist wird das action command des ActionEvents weitergereicht,
      * der actionPerformed() übergeben wird.
-     * Falls actionPerformed == null wird auch die source weitergereicht.
+     * Falls actionPerformed == null wird auch die source weitergereicht, ansonsten
+     * wird die übergebene source verwendet.
      */
-    public MyDialogEndListener(ConfigThingy conf, ConfigThingy verConf,
+    public MyDialogEndListener(AbsenderAuswaehlen source, ConfigThingy conf, ConfigThingy verConf,
         ConfigThingy abConf, DatasourceJoiner dj,
         ActionListener dialogEndListener, String actionCommand)
     {
@@ -676,6 +678,7 @@ public class AbsenderAuswaehlen
       this.dj = dj;
       this.dialogEndListener = dialogEndListener;
       this.actionCommand = actionCommand;
+      this.mySource = source;
     }
     
     public void actionPerformed(ActionEvent e)
@@ -686,7 +689,7 @@ public class AbsenderAuswaehlen
         }catch(Exception x) {Logger.error(x);}
       else
       {
-        Object source = AbsenderAuswaehlen.this;
+        Object source = mySource;
         if (actionCommand == null) 
         {
           actionCommand = e.getActionCommand();
