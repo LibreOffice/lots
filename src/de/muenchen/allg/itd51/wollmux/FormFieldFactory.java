@@ -436,11 +436,17 @@ public final class FormFieldFactory
   {
     private XTextField dropdownField;
 
+    private String[] origItemList = null;
+
     public DropDownFormField(XTextDocument doc, InsertFormValue cmd,
         XTextField dropdownField)
     {
       super(doc, cmd);
       this.dropdownField = dropdownField;
+
+      if (dropdownField != null)
+        origItemList = (String[]) UNO.getProperty(dropdownField, "Items");
+
     }
 
     public void setFormElementValue(String value)
@@ -454,9 +460,9 @@ public final class FormFieldFactory
     }
 
     /**
-     * Die Methode prüft, ob der String value bereits in der Liste der erlaubten
-     * Einträge der ComboBox vorhanden ist und erweitert die Liste um value,
-     * falls nicht.
+     * Die Methode prüft, ob der String value bereits in der zum Zeitpunkt des
+     * Konstruktoraufrufs eingelesenen Liste oritItemList der erlaubten Einträge
+     * der ComboBox vorhanden ist und erweitert die Liste um value, falls nicht.
      * 
      * @param value
      *          der Wert, der ggf. an in die Liste der erlaubten Einträge
@@ -464,24 +470,26 @@ public final class FormFieldFactory
      */
     private void extendItemsList(String value)
     {
-      String[] items = (String[]) UNO.getProperty(dropdownField, "Items");
-      boolean found = false;
-      for (int i = 0; i < items.length; i++)
+      if (origItemList != null)
       {
-        if (value.equals(items[i]))
+        boolean found = false;
+        for (int i = 0; i < origItemList.length; i++)
         {
-          found = true;
-          break;
+          if (value.equals(origItemList[i]))
+          {
+            found = true;
+            break;
+          }
         }
-      }
 
-      if (!found)
-      {
-        String[] extendedItems = new String[items.length + 1];
-        for (int i = 0; i < items.length; i++)
-          extendedItems[i] = items[i];
-        extendedItems[items.length] = value;
-        UNO.setProperty(dropdownField, "Items", extendedItems);
+        if (!found)
+        {
+          String[] extendedItems = new String[origItemList.length + 1];
+          for (int i = 0; i < origItemList.length; i++)
+            extendedItems[i] = origItemList[i];
+          extendedItems[origItemList.length] = value;
+          UNO.setProperty(dropdownField, "Items", extendedItems);
+        }
       }
     }
 
