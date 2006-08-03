@@ -16,6 +16,7 @@
 * 30.05.2006 | BNK | Suche implementiert
 * 29.06.2006 | BNK | setResizable(true)
 * 10.07.2006 | BNK | suchanfrageX statt wortX als Platzhalter.
+* 03.08.2006 | BNK | +getSchema()
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -87,8 +88,10 @@ public class DatasourceSearchDialog implements Dialog
    * Erzeugt einen neuen Dialog, dessen Instanzen Datenquellensuchdialoge gemäß
    * der Beschreibung in conf darstellen. Die Suchergebnisse liefert dj.
    * @author Matthias Benkmann (D-III-ITD 5.1)
+   * @throws ConfigurationErrorException falls ein Fehler in der Dialogbeschreibung
+   *         vorliegt.
    */
-  public static Dialog create(ConfigThingy conf, DatasourceJoiner dj) 
+  public static Dialog create(ConfigThingy conf, DatasourceJoiner dj) throws ConfigurationErrorException 
   {
     return new Instantiator(conf, dj);
   };
@@ -117,8 +120,14 @@ public class DatasourceSearchDialog implements Dialog
   
   /**
    * data[0] speichert die aktuell ausgewählten Formulardaten.
+   * ACHTUNG! Nur in synchronized(data)-Blöcken verwenden!
    */
   private Map[] data = new Map[]{new HashMap()};
+  
+  /**
+   * Alle ids, die durch Spaltenumsetzungsabschnitte definiert werden.
+   */
+  private Set schema = new HashSet();
   
   /**
    * Der Rahmen des gesamten Dialogs.
@@ -196,12 +205,13 @@ public class DatasourceSearchDialog implements Dialog
    *        soll.
    * @param conf die Beschreibung des Dialogs.
    */
-  private DatasourceSearchDialog(Instantiator ilse, ConfigThingy conf, DatasourceJoiner dj)
+  private DatasourceSearchDialog(Instantiator ilse, Set schema, ConfigThingy conf, DatasourceJoiner dj)
   throws ConfigurationErrorException
   {
     this.myConf = conf;
     this.ilse = ilse;
     this.dj = dj;
+    this.schema = schema;
   }
 
   public Dialog instanceFor(Map context) throws ConfigurationErrorException
@@ -209,11 +219,18 @@ public class DatasourceSearchDialog implements Dialog
     return ilse.instanceFor(context);
   }
 
+  public Collection getSchema()
+  {
+    return new HashSet(schema);
+  }
+
+  
   public Object getData(String id) 
   { 
     String str;
     synchronized(data)
     {
+      if (!schema.contains(id)) return null;
       str = (String)data[0].get(id);
     }
     if (str == null) return "";
@@ -366,12 +383,6 @@ public class DatasourceSearchDialog implements Dialog
      */
     private List columnTranslations;
     
-    /**
-     * Enthält die Namen aller Ergebnisspalten, d,h, die Menge der newColumnNames
-     * aller ColumnTranslation-Objekte in columnTranslations.
-     */
-    private Collection schema;
-
     /**
      * Legt fest, wie die Datensätze in der Ergebnisliste dargestellt werden
      * sollen. Kann Variablen der Form "${name}" enthalten.
@@ -1169,22 +1180,56 @@ public class DatasourceSearchDialog implements Dialog
   {
     private ConfigThingy conf;
     private DatasourceJoiner dj;
+    private Set schema;
     
-    public Instantiator(ConfigThingy conf, DatasourceJoiner dj)
+    public Instantiator(ConfigThingy conf, DatasourceJoiner dj) throws ConfigurationErrorException
     {
       this.conf = conf;
       this.dj = dj;
+      schema = parseSchema(conf);
+      if (schema.size() == 0) throw new ConfigurationErrorException("Fehler in Funktionsdialog: Abschnitt 'Spaltenumsetzung' konnte nicht geparst werden!");
     }
     
     public Dialog instanceFor(Map context) throws ConfigurationErrorException
     {
       if (!context.containsKey(this))
-        context.put(this, new DatasourceSearchDialog(this, conf, dj));
+        context.put(this, new DatasourceSearchDialog(this, schema, conf, dj));
       return (Dialog)context.get(this);
     }
     
     public Object getData(String id)  { return null;}
     public void show(ActionListener dialogEndListener, FunctionLibrary funcLib, DialogLibrary dialogLib) {}
+
+    public Collection getSchema()
+    {
+      return new HashSet(schema);
+    }
+    
+    private HashSet parseSchema(ConfigThingy conf)
+    {
+      HashSet schema = new HashSet();
+      Iterator fensterIter = conf.query("Fenster").iterator();
+      while (fensterIter.hasNext())
+      {
+        ConfigThingy fenster = (ConfigThingy)fensterIter.next();
+        Iterator tabIter = fenster.iterator();
+        while (tabIter.hasNext())
+        {
+          ConfigThingy tab = (ConfigThingy)tabIter.next();
+          Iterator suIter = tab.query("Spaltenumsetzung", 1).iterator();
+          while (suIter.hasNext())
+          {
+            Iterator spaltenIterator = ((ConfigThingy)suIter.next()).iterator();
+            while (spaltenIterator.hasNext())
+            {
+              schema.add(((ConfigThingy)spaltenIterator.next()).getName());
+            }
+          }
+        }
+      }
+      
+      return schema;
+    }
   }
   
   /**
@@ -1379,5 +1424,6 @@ public class DatasourceSearchDialog implements Dialog
     dialog.instanceFor(myContext).show(null, new FunctionLibrary(), new DialogLibrary());
   }
 
+  
   
 }

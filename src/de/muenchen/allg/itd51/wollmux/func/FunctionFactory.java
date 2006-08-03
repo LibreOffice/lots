@@ -1005,6 +1005,10 @@ public class FunctionFactory
       { if (id.equals("Strasse")) return "Herzog-Wilhelm-Str. 22";
         return null; }
       public void show(ActionListener dialogEndListener, FunctionLibrary funcLib, DialogLibrary dialogLib){}
+      public Collection getSchema()
+      {
+        return new Vector(0);
+      }
       });
     
     printFunction("alwaysTrueFunction()",alwaysTrueFunction(), noValues);

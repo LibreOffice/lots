@@ -18,6 +18,7 @@
 package de.muenchen.allg.itd51.wollmux.dialog;
 
 import java.awt.event.ActionListener;
+import java.util.Collection;
 import java.util.Map;
 
 import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
@@ -47,7 +48,9 @@ public interface Dialog
    * nicht aufgerufen wurde wird ein Standardwert geliefert (typischerweise der
    * leere String). Der Rückgabewert null ist ebenfalls möglich und signalisiert,
    * dass der Dialog das entsprechende Feld nicht hat und auch nie haben wird.
-   * Die Rückgabe von null ist in diesem Fall allerdings nicht verpflichtend.
+   * Die Rückgabe von null ist in diesem Fall allerdings nicht verpflichtend, sondern
+   * es ist ebenfalls der leere String möglich. Die Rückgabe von null sollte
+   * jedoch erfolgen, falls es dem Dialog irgendwie möglich ist.
    *  
    * Diese Funktion darf nur für mit instantiate()
    * erzeugte Instanzen aufgerufen werden. Ansonsten liefert sie immer null.
@@ -57,6 +60,20 @@ public interface Dialog
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public Object getData(String id);
+  
+  /**
+   * Liefert eine Menge von ids, für die {@link #getData(String)} niemals null liefert.
+   * Dies ist nicht zwangsweise eine vollständige Liste aller ids, für die der Dialog
+   * Werte zurückliefern kann. Es ist ebenfalls nicht garantiert, dass der Dialog
+   * jemeils für eine dieser ids etwas anderes als den leeren String zurückliefert.
+   * Diese Funktion kann schon vor instantiate() aufgerufen werden, es ist jedoch
+   * möglich, dass bei  Aufruf für eine mit instantiate() erzeugte Instanz mehr
+   * Information (d.h. eine größere Menge) zurückgeliefert wird.
+   * Das zurückgelieferte Objekt darf verändert werden. Dies hat keine Auswirkungen
+   * auf den Dialog.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public Collection getSchema();
  
   /**
    * Zeigt den Dialog an. Diese Funktion darf nur für mit instantiate() erzeugte

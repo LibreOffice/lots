@@ -448,7 +448,14 @@ public class WollMuxFiles
                      + name
                      + "\" im selben Funktionsdialoge-Abschnitt mehrmals definiert");
         dialogsInBlock.add(name);
-        funcDialogs.add(name, DatasourceSearchDialog.create(dialogConf, getDatasourceJoiner()));
+        try
+        {
+          funcDialogs.add(name, DatasourceSearchDialog.create(dialogConf, getDatasourceJoiner()));
+        }
+        catch (ConfigurationErrorException e)
+        {
+          Logger.error("Fehler in Funktionsdialog" + name, e);
+        }
       }
     }
     
