@@ -39,6 +39,7 @@ import com.sun.star.registry.XRegistryKey;
 import com.sun.star.task.XAsyncJob;
 import com.sun.star.uno.XComponentContext;
 
+import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.WollMuxEventHandler;
 import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
@@ -84,6 +85,8 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
   public static final String cmdOpenDocument = "OpenDocument";
 
   public static final String cmdSenderBox = "SenderBox";
+
+  public static final String cmdFunctionDialog = "FunctionDialog";
 
   public static final String cmdMenu = "Menu";
 
@@ -202,17 +205,19 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
     {
       String cmd = (String) parsedURL.remove(0);
 
-      if (cmd.compareToIgnoreCase(cmdAbsenderAuswaehlen) == 0) xRet = this;
+      if (cmd.equalsIgnoreCase(cmdAbsenderAuswaehlen)) xRet = this;
 
-      if (cmd.compareToIgnoreCase(cmdOpenTemplate) == 0) xRet = this;
+      if (cmd.equalsIgnoreCase(cmdOpenTemplate)) xRet = this;
 
-      if (cmd.compareToIgnoreCase(cmdOpenDocument) == 0) xRet = this;
+      if (cmd.equalsIgnoreCase(cmdOpenDocument)) xRet = this;
 
-      if (cmd.compareToIgnoreCase(cmdSenderBox) == 0) xRet = this;
+      if (cmd.equalsIgnoreCase(cmdSenderBox)) xRet = this;
 
-      if (cmd.compareToIgnoreCase(cmdMenu) == 0) xRet = this;
+      if (cmd.equalsIgnoreCase(cmdMenu)) xRet = this;
 
-      if (cmd.compareToIgnoreCase(cmdPALVerwalten) == 0) xRet = this;
+      if (cmd.equalsIgnoreCase(cmdPALVerwalten)) xRet = this;
+
+      if (cmd.equalsIgnoreCase(cmdFunctionDialog)) xRet = this;
     }
     return xRet;
   }
@@ -327,6 +332,17 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
       if (cmd.compareToIgnoreCase(cmdMenu) == 0)
       {
         Logger.debug2("Dispatch: Aufruf von WollMux:menu mit Arg:" + parsedURL);
+      }
+
+      if (cmd.compareToIgnoreCase(cmdFunctionDialog) == 0)
+      {
+        Logger
+            .debug2("Dispatch: Aufruf von WollMux:FunctionDialog mit Arg:"
+                    + parsedURL);
+        String dialogName = "";
+        if (parsedURL.size() > 0) dialogName = parsedURL.get(0).toString();
+        WollMuxEventHandler.handleFunctionDialogShow(UNO.desktop
+            .getCurrentComponent(), dialogName);
       }
     }
   }

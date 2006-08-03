@@ -39,9 +39,14 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.Vector;
 
+import com.sun.star.container.XEnumeration;
+import com.sun.star.lang.XComponent;
 import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
@@ -98,6 +103,13 @@ public class WollMuxSingleton implements XPALProvider
   private Vector registeredPALChangeListener;
 
   /**
+   * Enthält eine Zuordnugn aller geöffneter und durch den
+   * DocumentCommandInterpreter ausgewerteter Dokumente auf die zugehörige
+   * mapIDtoFormFields.
+   */
+  private HashMap mapDocToIDToFormFields;
+
+  /**
    * Die WollMux-Hauptklasse ist als singleton realisiert.
    */
   private WollMuxSingleton(XComponentContext ctx)
@@ -105,6 +117,8 @@ public class WollMuxSingleton implements XPALProvider
     // Der XComponentContext wir hier gesichert und vom WollMuxSingleton mit
     // getXComponentContext zurückgeliefert.
     this.ctx = ctx;
+
+    this.mapDocToIDToFormFields = new HashMap();
 
     // Initialisiere die UNO-Klasse, so dass auch mit dieser Hilfsklasse
     // gearbeitet werden kann.
@@ -446,6 +460,82 @@ public class WollMuxSingleton implements XPALProvider
   public boolean isDebugMode()
   {
     return WollMuxFiles.isDebugMode();
+  }
+
+  /**
+   * Diese Methode speichert zum übergebenen Dokument doc die zugehörige HashMap
+   * idToFormFields ab, die den Zugriff auf die Formularfelder dieses Dokuments
+   * ermöglicht.
+   * 
+   * Die Methode wird derzeit vom DocumentCommandInterpreter aufgerufen, da der
+   * WollMuxEventHandler.OnFunctionDialogSelectDone die Formularfelder eines
+   * Dokuments benötigt um die Werte des Funktionsdialog in die Formularfelder
+   * übertragen zu können.
+   * 
+   * @param doc
+   *          Das Dokument, zu dem die Formularfelder gehören.
+   * @param idToFormFields
+   *          Die Formularfelder, die in einer HashMap über die Zurdnung id ->
+   *          FormField zu erreichen sind.
+   */
+  public void addIDToFormFieldsForDocument(XComponent doc,
+      HashMap idToFormFields)
+  {
+    // Vor jedem Eintrag eines neuen Elements wird die HashMap bereinigt und
+    // unbenutzte doc-Referenzen gelöscht.
+    removeAllUnusedMapDocToIDToFormFieldsEntries();
+
+    // dann wird der neue Wert aufgenommen.
+    mapDocToIDToFormFields.put(
+        new WollMuxEventHandler.HashableComponent(doc),
+        idToFormFields);
+  }
+
+  private void removeAllUnusedMapDocToIDToFormFieldsEntries()
+  {
+    // Set aller aktuellen Komponenten aufbauen:
+    Set currentComponents = new HashSet();
+    XEnumeration xenum = UNO.desktop.getComponents().createEnumeration();
+    while (xenum.hasMoreElements())
+    {
+      try
+      {
+        XComponent compo = UNO.XComponent(xenum.nextElement());
+        currentComponents.add(new WollMuxEventHandler.HashableComponent(compo));
+      }
+      catch (java.lang.Exception e)
+      {
+        Logger.error(e);
+      }
+    }
+
+    // alle Einträge aus mapDocToIDToFormFields entfernen, zu denen es keine
+    // aktuelle Komponenten gibt.
+    Iterator iter = mapDocToIDToFormFields.keySet().iterator();
+    while (iter.hasNext())
+    {
+      WollMuxEventHandler.HashableComponent hcompo = (WollMuxEventHandler.HashableComponent) iter
+          .next();
+      if (!currentComponents.contains(hcompo)) iter.remove();
+    }
+  }
+
+  /**
+   * Diese Methode liefert zum Dokument doc die zugehörige HashMap
+   * idToFormFields zurück, die den Zugriff auf die Formularfelder dieses
+   * Dokuments ermöglicht.
+   * 
+   * Die Methode wird derzeit vom WollMuxEventHandler.OnFunctionDialogSelectDone
+   * verwendet um die die Formularfelder eines Dokuments zu bekommen, damit er
+   * Werte des Funktionsdialog in die Formularfelder übertragen zu kann.
+   * 
+   * @param doc
+   *          Das Dokument, zu dem die Formularfelder gehören.
+   */
+  public HashMap getIDToFormFieldsForDocument(XComponent doc)
+  {
+    return (HashMap) mapDocToIDToFormFields
+        .get(new WollMuxEventHandler.HashableComponent(doc));
   }
 
   /**

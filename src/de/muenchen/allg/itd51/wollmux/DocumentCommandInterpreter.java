@@ -51,7 +51,6 @@ import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
-import de.muenchen.allg.itd51.wollmux.DocumentCommand.Form;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertContent;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertFormValue;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertFrag;
@@ -94,11 +93,11 @@ public class DocumentCommandInterpreter
   private DocumentCommandTree tree;
 
   /**
-   * Das Feld beschreibt, ob es sich bei dem Dokument um ein Formular handelt.
-   * Das Feld kann erst verwendet werden, nachdem die Methode
-   * executeTemplateCommands durchlaufen wurde.
+   * Der FormScanner wird sowohl bei Vorlagen als auch bei Formulardokumenten
+   * gestartet. Damit der FormScanner bei Formularvorlagen nicht zweimal
+   * aufgerufen wird, wird ein einmal bearbeiteter FormScanner hier abgelgt.
    */
-  private boolean isAFormular;
+  private FormScanner formScanner;
 
   /**
    * Der Konstruktor erzeugt einen neuen Kommandointerpreter, der alle
@@ -118,7 +117,7 @@ public class DocumentCommandInterpreter
     this.document = new UnoService(xDoc);
     this.mux = mux;
     this.tree = new DocumentCommandTree(document.xBookmarksSupplier());
-    this.isAFormular = false;
+    this.formScanner = null;
   }
 
   /**
@@ -164,11 +163,18 @@ public class DocumentCommandInterpreter
     // sauber erkennen und entfernen.
     errors += new EmptyParagraphCleaner().execute(tree);
 
-    // 6) Die Statusänderungen der Dokumentkommandos auf die Bookmarks
+    // 6) Scannen aller für das Formular relevanten Informationen:
+    if (formScanner == null) formScanner = new FormScanner();
+    errors += formScanner.execute(tree);
+    mux.addIDToFormFieldsForDocument(
+        document.xComponent(),
+        formScanner.idToFormFields);
+
+    // 7) Die Statusänderungen der Dokumentkommandos auf die Bookmarks
     // übertragen bzw. die Bookmarks abgearbeiteter Kommandos löschen.
     tree.updateBookmarks(mux.isDebugMode());
 
-    // 7) Document-Modified auf false setzen, da nur wirkliche
+    // 8) Document-Modified auf false setzen, da nur wirkliche
     // Benutzerinteraktionen den Modified-Status beeinflussen sollen.
     setDocumentModified(false);
 
@@ -194,7 +200,7 @@ public class DocumentCommandInterpreter
    */
   public boolean isFormular()
   {
-    return this.isAFormular;
+    return (formScanner != null && !formScanner.formDescriptor.isEmpty());
   }
 
   /**
@@ -212,12 +218,14 @@ public class DocumentCommandInterpreter
     int errors = 0;
 
     // 1) Scannen aller für das Formular relevanten Informationen:
-    FormScanner fs = new FormScanner();
-    errors += fs.execute(tree);
-
-    FormDescriptor fd = fs.getFormDescriptor();
-    HashMap idToFormFields = fs.getIDToFormFields();
-    HashMap idToPresetValue = mapIDToPresetValue(fd, idToFormFields);
+    if (formScanner == null)
+    {
+      formScanner = new FormScanner();
+      errors += formScanner.execute(tree);
+    }
+    HashMap idToPresetValue = mapIDToPresetValue(
+        formScanner.formDescriptor,
+        formScanner.idToFormFields);
 
     // 2) Bookmarks updaten
     tree.updateBookmarks(mux.isDebugMode());
@@ -235,7 +243,7 @@ public class DocumentCommandInterpreter
 
     // FunctionContext erzeugen und im Formular definierte
     // Funktionen/DialogFunktionen parsen:
-    ConfigThingy descs = fd.toConfigThingy();
+    ConfigThingy descs = formScanner.formDescriptor.toConfigThingy();
     Map functionContext = new HashMap();
     DialogLibrary dialogLib = new DialogLibrary();
     FunctionLibrary funcLib = new FunctionLibrary();
@@ -270,8 +278,8 @@ public class DocumentCommandInterpreter
     }
 
     // 5) Formulardialog starten:
-    FormModelImpl fm = new FormModelImpl(document.xTextDocument(), funcLib, fd,
-        idToFormFields, tree);
+    FormModelImpl fm = new FormModelImpl(document.xTextDocument(), funcLib,
+        formScanner.formDescriptor, formScanner.idToFormFields, tree);
 
     ConfigThingy formFensterConf = new ConfigThingy("");
     try
@@ -1258,13 +1266,15 @@ public class DocumentCommandInterpreter
     }
 
     /**
-     * Diese Methode setzt nur isFormular auf true. Die Eigentliche Bearbeitung
-     * des Formulars erfolgt dann in executeFormCommands().
+     * Da der DocumentTree zu diesem Zeitpunkt eigentlich gar kein
+     * SetType-Kommando mehr beinhalten darf, wird jedes evtl. noch vorhandene
+     * setType-Kommando auf DONE=true gesetzt, damit es beim updateBookmarks
+     * entfernt wird.
      */
-    public int executeCommand(Form cmd)
+    public int executeCommand(SetType cmd)
     {
-      isAFormular = true;
-      return super.executeCommand(cmd);
+      cmd.setDoneState(true);
+      return 0;
     }
   }
 
@@ -1361,16 +1371,6 @@ public class DocumentCommandInterpreter
     private FormDescriptor formDescriptor = new FormDescriptor(document
         .xTextDocument());
 
-    private FormDescriptor getFormDescriptor()
-    {
-      return formDescriptor;
-    }
-
-    private HashMap getIDToFormFields()
-    {
-      return idToFormFields;
-    }
-
     /**
      * Ausführung starten
      */
@@ -1425,18 +1425,6 @@ public class DocumentCommandInterpreter
           .xTextDocument(), cmd);
       if (field != null) fields.add(field);
 
-      return 0;
-    }
-
-    /**
-     * Da der DocumentTree zu diesem Zeitpunkt eigentlich gar kein
-     * SetType-Kommando mehr beinhalten darf, wird jedes evtl. noch vorhandene
-     * setType-Kommando auf DONE=true gesetzt, damit es beim updateBookmarks
-     * entfernt wird.
-     */
-    public int executeCommand(SetType cmd)
-    {
-      cmd.setDoneState(true);
       return 0;
     }
   }

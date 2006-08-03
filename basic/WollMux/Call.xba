@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE script:module PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "module.dtd">
+<script:module xmlns:script="http://openoffice.org/2000/script" script:name="Call" script:language="StarBasic">REM  *****  BASIC  *****
+
+Sub functionDialogEmpfaengerauswahl
+  dispatchURL(&quot;wollmux:FunctionDialog#Empfaengerauswahl&quot;)
+End Sub
+
+Sub dispatchURL(urlStr as String)
+  dim url as new com.sun.star.util.URL
+  url.Complete = urlStr
+
+  frame = ThisComponent.currentController.Frame
+  dispatch = frame.queryDispatch(url, &quot;_self&quot;, com.sun.star.frame.FrameSearchFlag.SELF)
+
+  dim args() as new com.sun.star.beans.PropertyValue
+  dispatch.dispatch(url, args)
+End Sub
+
+</script:module>

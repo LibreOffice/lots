@@ -87,6 +87,13 @@ public class FormDescriptor
   private HashMap formFieldValues;
 
   /**
+   * Zeigt an, ob der FormDescriptor leer ist, oder ob mindestens ein gültiges
+   * WM(CMD'Form')-Kommando mit add() hinzugefügt wurde, das einen
+   * Formular-Abschnitt enthält.
+   */
+  private boolean isEmpty;
+
+  /**
    * Erzeugt einen neuen leeren FormDescriptor, dem über add()
    * WM(CMD'Form')-Kommandos mit Formularbeschreibungsnotizen hinzugefügt werden
    * können.
@@ -98,6 +105,17 @@ public class FormDescriptor
     this.firstFormCmd = null;
     this.werteField = null;
     this.formFieldValues = new HashMap();
+    this.isEmpty = true;
+  }
+
+  /**
+   * Zeigt an, ob der FormDescriptor leer ist, oder ob mindestens ein gültiges
+   * WM(CMD'Form')-Kommando mit add() hinzugefügt wurde, das einen
+   * Formular-Abschnitt enthält.
+   */
+  public boolean isEmpty()
+  {
+    return isEmpty;
   }
 
   /**
@@ -146,6 +164,7 @@ public class FormDescriptor
       formular = conf.get("WM").get("Formular");
       formularConf.addChild(formular);
       if (firstFormCmd == null) firstFormCmd = formCmd;
+      isEmpty = false;
     }
     catch (NodeNotFoundException e)
     {

@@ -31,6 +31,7 @@ package de.muenchen.allg.itd51.wollmux;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -75,6 +76,7 @@ import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
 import de.muenchen.allg.itd51.wollmux.db.QueryResults;
 import de.muenchen.allg.itd51.wollmux.dialog.AbsenderAuswaehlen;
 import de.muenchen.allg.itd51.wollmux.dialog.Common;
+import de.muenchen.allg.itd51.wollmux.dialog.Dialog;
 import de.muenchen.allg.itd51.wollmux.dialog.PersoenlicheAbsenderlisteVerwalten;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 
@@ -144,7 +146,7 @@ public class WollMuxEventHandler
    * 
    * @author lut
    */
-  private static class HashableComponent
+  public static class HashableComponent
   {
     private Object compo;
 
@@ -399,6 +401,178 @@ public class WollMuxEventHandler
   // *******************************************************************************************
 
   /**
+   * Erzeugt ein neues WollMuxEvent, das den Funktionsdialog dialogName aufruft
+   * und die zurückgelieferten Werte in die entsprechenden FormField-Objekte des
+   * Dokuments doc einträgt.
+   * 
+   * Dieses Event wird vom WollMux-Service (...comp.WollMux) und aus dem
+   * WollMuxEventHandler ausgelöst.
+   */
+  public static void handleFunctionDialogShow(XComponent doc, String dialogName)
+  {
+    handle(new OnFunctionDialogShow(doc, dialogName));
+  }
+
+  private static class OnFunctionDialogShow extends BasicEvent
+  {
+    private XComponent doc;
+
+    private String dialogName;
+
+    private OnFunctionDialogShow(XComponent doc, String dialogName)
+    {
+      this.doc = doc;
+      this.dialogName = dialogName;
+    }
+
+    protected boolean doit() throws WollMuxFehlerException
+    {
+      WollMuxSingleton mux = WollMuxSingleton.getInstance();
+
+      Dialog dialog = mux.getFunctionDialogs().get(dialogName);
+
+      if (dialog != null)
+      {
+        try
+        {
+          // Dialoginstanz erzeugen und anzeigen
+          Dialog dialogInst = dialog.instanceFor(new HashMap());
+          dialogInst.show(
+              mux.getEventProcessor(),
+              mux.getGlobalFunctions(),
+              mux.getFunctionDialogs());
+
+          // DialogContext für die Weiterverarbeitung in
+          // OnFunctionDialogSelectDone sichern.
+          OnFunctionDialogSelectDone.dialogContexts.add(new DialogContext(doc,
+              dialogInst));
+
+          return EventProcessor.waitForGUIReturn;
+        }
+        catch (ConfigurationErrorException e)
+        {
+          Logger.error(e);
+        }
+      }
+      else
+      {
+        Logger.error("Funktionsdialog '"
+                     + dialogName
+                     + "' ist nicht definiert.");
+      }
+
+      return EventProcessor.processTheNextEvent;
+    }
+
+    public boolean requires(Object o)
+    {
+      return UnoRuntime.areSame(doc, o);
+    }
+
+    public String toString()
+    {
+      return this.getClass().getSimpleName()
+             + "("
+             + doc.hashCode()
+             + ", '"
+             + dialogName
+             + "')";
+    }
+  }
+
+  // *******************************************************************************************
+
+  /**
+   * Erzeugt ein neues WollMuxEvent, das den Funktionsdialog dialogName aufruft
+   * und die zurückgelieferten Werte in die entsprechenden FormField-Objekte des
+   * Dokuments doc einträgt.
+   * 
+   * Dieses Event wird vom WollMux-Service (...comp.WollMux) und aus dem
+   * WollMuxEventHandler ausgelöst.
+   */
+  public static void handleFunctionDialogSelectDone()
+  {
+    handle(new OnFunctionDialogSelectDone());
+  }
+
+  private static class OnFunctionDialogSelectDone extends BasicEvent
+  {
+    private static Vector dialogContexts = new Vector();
+
+    protected boolean doit() throws WollMuxFehlerException
+    {
+      WollMuxSingleton mux = WollMuxSingleton.getInstance();
+
+      if (dialogContexts.size() > 0)
+      {
+        // Den DialogContext vom Stack nehmen:
+        DialogContext dctx = (DialogContext) dialogContexts.remove(0);
+
+        // Dem Dokument den Fokus geben, damit die Änderungen vom Benutzer
+        // transparent mit verfolgt werden können.
+        try
+        {
+          UNO.XModel(dctx.doc).getCurrentController().getFrame()
+              .getContainerWindow().setFocus();
+        }
+        catch (java.lang.Exception e)
+        {
+          // keine Gefährdung des Ablaufs falls das nicht klappt.
+        }
+
+        // Alle Werte die der Funktionsdialog sicher zurück liefert werden in
+        // das Dokument übernommen.
+        HashMap idToFormFields = mux.getIDToFormFieldsForDocument(dctx.doc);
+        if (idToFormFields != null)
+        {
+          Collection schema = dctx.dialogInstance.getSchema();
+          Iterator iter = schema.iterator();
+          while (iter.hasNext())
+          {
+            String id = (String) iter.next();
+            if (idToFormFields.containsKey(id))
+            {
+              Vector formFields = (Vector) idToFormFields.get(id);
+              String value = dctx.dialogInstance.getData(id).toString();
+
+              // Formularwerte der entsprechenden Formularfelder auf value
+              // setzen.
+              Iterator ffiter = formFields.iterator();
+              while (ffiter.hasNext())
+              {
+                FormField formField = (FormField) ffiter.next();
+                if (formField != null)
+                  formField.setValue(value, mux.getGlobalFunctions());
+              }
+            }
+          }
+        }
+      }
+      return EventProcessor.processTheNextEvent;
+    }
+
+    public String toString()
+    {
+      return this.getClass().getSimpleName() + "()";
+    }
+  }
+
+  private static class DialogContext
+  {
+    private XComponent doc;
+
+    private Dialog dialogInstance;
+
+    private DialogContext(XComponent doc, Dialog dialogInstance)
+    {
+      this.doc = doc;
+      this.dialogInstance = dialogInstance;
+    }
+  }
+
+  // *******************************************************************************************
+
+  /**
    * Erzeugt ein neues WollMuxEvent, das die eigentliche Dokumentbearbeitung
    * eines TextDokuments startet.
    * 
@@ -443,6 +617,9 @@ public class WollMuxEventHandler
       UnoService doc = new UnoService(xTextDoc);
       if (doc.supportsService("com.sun.star.text.TextDocument"))
       {
+        // Close-Events aller Textdokumente abfangen.
+        doc.xCloseable().addCloseListener(mux.getEventProcessor());
+        
         // Konfigurationsabschnitt Textdokument verarbeiten:
         ConfigThingy tds = new ConfigThingy("Textdokument");
         try
@@ -516,8 +693,8 @@ public class WollMuxEventHandler
               // Zoom-Faktor des Abschnitts Fenster/Formular verarbeiten.
               try
               {
-                String zoom = mux.getWollmuxConf().query("Fenster").query("Formular")
-                .getLastChild().get("ZOOM").toString();
+                String zoom = mux.getWollmuxConf().query("Fenster").query(
+                    "Formular").getLastChild().get("ZOOM").toString();
                 setDocumentZoom(xTextDoc, zoom);
               }
               catch (NodeNotFoundException e)
@@ -1095,7 +1272,7 @@ public class WollMuxEventHandler
       // auch dazu notwendig, um Originalwerte zu sichern, zu denen es kein
       // FormField gibt.
       fd.setFormFieldValue(fieldId, newValue);
-      fd.updateDocument(); 
+      fd.updateDocument();
       return EventProcessor.processTheNextEvent;
     }
 

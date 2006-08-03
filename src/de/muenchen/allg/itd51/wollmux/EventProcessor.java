@@ -29,9 +29,16 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.sun.star.document.XEventListener;
+import com.sun.star.lang.EventObject;
+import com.sun.star.util.CloseVetoException;
+import com.sun.star.util.XCloseListener;
 
 import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.wollmux.WollMuxEventHandler.WollMuxEvent;
+import de.muenchen.allg.itd51.wollmux.dialog.AbsenderAuswaehlen;
+import de.muenchen.allg.itd51.wollmux.dialog.DatasourceSearchDialog;
+import de.muenchen.allg.itd51.wollmux.dialog.DatensatzBearbeiten;
+import de.muenchen.allg.itd51.wollmux.dialog.PersoenlicheAbsenderlisteVerwalten;
 
 /**
  * Der EventProcessor sorgt für eine synchronisierte Verarbeitung aller
@@ -41,7 +48,7 @@ import de.muenchen.allg.itd51.wollmux.WollMuxEventHandler.WollMuxEvent;
  * 
  * @author lut
  */
-public class EventProcessor implements XEventListener, ActionListener
+public class EventProcessor implements XEventListener, ActionListener, XCloseListener
 {
   /**
    * Gibt an, ob der EventProcessor überhaupt events entgegennimmt. Ist
@@ -176,27 +183,45 @@ public class EventProcessor implements XEventListener, ActionListener
   }
 
   /**
-   * Wird beim Beenden AWT/SWING-GUIs aufgerufen.
+   * Wird beim Beenden von AWT/SWING-GUIs aufgerufen.
    * 
    * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
    */
   public void actionPerformed(ActionEvent actionEvent)
   {
-    // add back- und abort events
+    Object source = actionEvent.getSource();
     String cmd = actionEvent.getActionCommand();
-    if (cmd.equals("back") || cmd.equals("abort"))
-    {
-      // Alle bisherigen Dialoge nehmen potentiell Änderungen an der
-      // Persönlichen Absenderliste vor. Daher wird hier ein PALChangedNotify
-      // rausgegeben. TODO: Event OnDialogReturned stattdessen einführen und nur
-      // bei PAL-Dialogen den PALChangeNotify durchführen.
-      WollMuxEventHandler.handlePALChangedNotify();
 
-      synchronized (processNextEvent)
-      {
-        processNextEvent[0] = processTheNextEvent;
-        processNextEvent.notifyAll();
-      }
+    if (source instanceof AbsenderAuswaehlen)
+    {
+      // potentielle Änderung der Absenderliste - PALChangeNotify durchführen
+      WollMuxEventHandler.handlePALChangedNotify();
+    }
+
+    else if (source instanceof PersoenlicheAbsenderlisteVerwalten)
+    {
+      // potentielle Änderung der Absenderliste - PALChangeNotify durchführen
+      WollMuxEventHandler.handlePALChangedNotify();
+    }
+
+    else if (source instanceof DatensatzBearbeiten)
+    {
+      // potentielle Änderung der Absenderliste - PALChangeNotify durchführen
+      WollMuxEventHandler.handlePALChangedNotify();
+    }
+
+    else if (source instanceof DatasourceSearchDialog)
+    {
+      if (cmd.equals("select"))
+        WollMuxEventHandler.handleFunctionDialogSelectDone();
+    }
+
+    // Dialog bedingte Sperrung der Eventqueue aufheben und Eventbearbeitung
+    // normal fortsetzen lassen:
+    synchronized (processNextEvent)
+    {
+      processNextEvent[0] = processTheNextEvent;
+      processNextEvent.notifyAll();
     }
   }
 
@@ -227,4 +252,21 @@ public class EventProcessor implements XEventListener, ActionListener
       }
     }
   }
+
+  /* (non-Javadoc)
+   * @see com.sun.star.util.XCloseListener#queryClosing(com.sun.star.lang.EventObject, boolean)
+   */
+  public void queryClosing(EventObject arg0, boolean arg1) throws CloseVetoException
+  {
+    // nichts zu tun
+  }
+
+  /* (non-Javadoc)
+   * @see com.sun.star.util.XCloseListener#notifyClosing(com.sun.star.lang.EventObject)
+   */
+  public void notifyClosing(EventObject arg0)
+  {
+    disposing(arg0);    
+  }
+  
 }
