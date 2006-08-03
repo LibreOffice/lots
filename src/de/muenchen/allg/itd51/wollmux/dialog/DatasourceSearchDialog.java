@@ -373,7 +373,7 @@ public class DatasourceSearchDialog implements Dialog
     /**
      * Die durch den Spaltenumsetzung-Abschnitt definierten Spaltennamen.
      */
-    private Set schema;
+    private Set dialogWindowSchema;
     
     /**
      * Die Suchstrategie für Suchanfragen. 
@@ -434,8 +434,8 @@ public class DatasourceSearchDialog implements Dialog
     public DialogWindow(int tabIndex, ConfigThingy conf)
     {
       searchStrategy = SearchStrategy.parse(conf);
-      schema = new HashSet();
-      columnTranslations = parseColumnTranslations(conf, schema);
+      dialogWindowSchema = new HashSet();
+      columnTranslations = parseColumnTranslations(conf, dialogWindowSchema);
       initFactories();
       
       myPanel = new JPanel(new BorderLayout());
@@ -724,7 +724,7 @@ public class DatasourceSearchDialog implements Dialog
               if (selected.length > 0)
                 ds = ((ListElement)selected[0]).getDataset();
             }
-            select(schema, ds);
+            select(dialogWindowSchema, ds);
           }
         }
         else if (eventType.equals("listSelectionChanged"))
