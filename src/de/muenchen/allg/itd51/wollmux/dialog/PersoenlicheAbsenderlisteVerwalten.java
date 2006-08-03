@@ -845,7 +845,7 @@ public class PersoenlicheAbsenderlisteVerwalten
   
   private void editDataset(DJDataset ds)
   {
-    ActionListener del = new MyDialogEndListener(myConf, abConf, dj, dialogEndListener, null);
+    ActionListener del = new MyDialogEndListener(this, myConf, abConf, dj, dialogEndListener, null);
     dialogEndListener = null;
     abort();
     try
@@ -1308,13 +1308,14 @@ public class PersoenlicheAbsenderlisteVerwalten
     return null;
   }
   
-  private class MyDialogEndListener implements ActionListener
+  private static class MyDialogEndListener implements ActionListener
   {
     private ConfigThingy conf;
     private ConfigThingy abConf;
     private DatasourceJoiner dj;
     private ActionListener dialogEndListener;
     private String actionCommand;
+    private PersoenlicheAbsenderlisteVerwalten mySource;
     
     /**
      * Falls actionPerformed() mit getActionCommand().equals("back")
@@ -1322,15 +1323,17 @@ public class PersoenlicheAbsenderlisteVerwalten
      * den übergebenen Parametern erzeugt. Ansonsten wird
      * der dialogEndListener mit actionCommand aufgerufen. Falls actionCommand
      * null ist wird das actioncommand und die source des ActionEvents weitergereicht,
-     * der actionPerformed() übergeben wird.
+     * der actionPerformed() übergeben wird, ansonsten werden die übergebenen Werte
+     * für actionCommand und source verwendet.
      */
-    public MyDialogEndListener(ConfigThingy conf, ConfigThingy abConf, DatasourceJoiner dj, ActionListener dialogEndListener, String actionCommand)
+    public MyDialogEndListener(PersoenlicheAbsenderlisteVerwalten source, ConfigThingy conf, ConfigThingy abConf, DatasourceJoiner dj, ActionListener dialogEndListener, String actionCommand)
     {
       this.conf = conf;
       this.abConf = abConf;
       this.dj = dj;
       this.dialogEndListener = dialogEndListener;
       this.actionCommand = actionCommand;
+      this.mySource = source;
     }
     
     public void actionPerformed(ActionEvent e)
@@ -1341,7 +1344,7 @@ public class PersoenlicheAbsenderlisteVerwalten
         }catch(Exception x) {Logger.error(x);}
       else
       {
-        Object source = PersoenlicheAbsenderlisteVerwalten.this;
+        Object source = mySource;
         if (actionCommand == null) 
         {
           actionCommand = e.getActionCommand();
