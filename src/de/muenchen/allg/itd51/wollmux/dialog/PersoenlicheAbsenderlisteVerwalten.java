@@ -764,7 +764,7 @@ public class PersoenlicheAbsenderlisteVerwalten
   {
     myFrame.dispose();
     if (dialogEndListener != null)
-      dialogEndListener.actionPerformed(new ActionEvent(PersoenlicheAbsenderlisteVerwalten.class.getName(),0,actionCommand));
+      dialogEndListener.actionPerformed(new ActionEvent(this,0,actionCommand));
   }
     
   /**
@@ -1308,7 +1308,7 @@ public class PersoenlicheAbsenderlisteVerwalten
     return null;
   }
   
-  private static class MyDialogEndListener implements ActionListener
+  private class MyDialogEndListener implements ActionListener
   {
     private ConfigThingy conf;
     private ConfigThingy abConf;
@@ -1321,10 +1321,8 @@ public class PersoenlicheAbsenderlisteVerwalten
      * aufgerufen wird, wird ein neuer  AbsenderAuswaehlen Dialog mit
      * den übergebenen Parametern erzeugt. Ansonsten wird
      * der dialogEndListener mit actionCommand aufgerufen. Falls actionCommand
-     * null ist wird das action command des ActionEvents weitergereicht,
+     * null ist wird das actioncommand und die source des ActionEvents weitergereicht,
      * der actionPerformed() übergeben wird.
-     * Als source muss actionPerformed der Name des Dialogs als String übergeben werden.
-     * Dieser wird weitergereicht, falls actionPerformed == null.
      */
     public MyDialogEndListener(ConfigThingy conf, ConfigThingy abConf, DatasourceJoiner dj, ActionListener dialogEndListener, String actionCommand)
     {
@@ -1343,11 +1341,11 @@ public class PersoenlicheAbsenderlisteVerwalten
         }catch(Exception x) {Logger.error(x);}
       else
       {
-        String source = PersoenlicheAbsenderlisteVerwalten.class.getName();
+        Object source = PersoenlicheAbsenderlisteVerwalten.this;
         if (actionCommand == null) 
         {
           actionCommand = e.getActionCommand();
-          source = (String)e.getSource();
+          source = e.getSource();
         }
         if (dialogEndListener != null)
           dialogEndListener.actionPerformed(new ActionEvent(source,0,actionCommand));

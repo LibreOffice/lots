@@ -648,7 +648,7 @@ public class AbsenderAuswaehlen
   }
   
     
-  private static class MyDialogEndListener implements ActionListener
+  private class MyDialogEndListener implements ActionListener
   {
     private ConfigThingy conf;
     private ConfigThingy abConf;
@@ -664,8 +664,7 @@ public class AbsenderAuswaehlen
      * der dialogEndListener mit actionCommand aufgerufen. Falls actionCommand
      * null ist wird das action command des ActionEvents weitergereicht,
      * der actionPerformed() übergeben wird.
-     * Als source muss actionPerformed der Name des Dialogs als String übergeben werden.
-     * Dieser wird weitergereicht, falls actionPerformed == null.
+     * Falls actionPerformed == null wird auch die source weitergereicht.
      */
     public MyDialogEndListener(ConfigThingy conf, ConfigThingy verConf,
         ConfigThingy abConf, DatasourceJoiner dj,
@@ -687,11 +686,11 @@ public class AbsenderAuswaehlen
         }catch(Exception x) {Logger.error(x);}
       else
       {
-        String source = AbsenderAuswaehlen.class.getName();
+        Object source = AbsenderAuswaehlen.this;
         if (actionCommand == null) 
         {
           actionCommand = e.getActionCommand();
-          source = (String)e.getSource();
+          source = e.getSource();
         }
         if (dialogEndListener != null)
           dialogEndListener.actionPerformed(new ActionEvent(source,0,actionCommand));

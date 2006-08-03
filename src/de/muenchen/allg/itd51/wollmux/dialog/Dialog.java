@@ -52,7 +52,7 @@ public interface Dialog
    * es ist ebenfalls der leere String möglich. Die Rückgabe von null sollte
    * jedoch erfolgen, falls es dem Dialog irgendwie möglich ist.
    *  
-   * Diese Funktion darf nur für mit instantiate()
+   * Diese Funktion darf nur für mit instanceFor()
    * erzeugte Instanzen aufgerufen werden. Ansonsten liefert sie immer null.
    * Diese Funktion ist Thread-safe. Insbesondere muss sie nicht im EDT aufgerufen werden.
    * Sie kann sowohl vor, während als auch nach dem Aufruf von show() aufgerufen werden,
@@ -66,8 +66,8 @@ public interface Dialog
    * Dies ist nicht zwangsweise eine vollständige Liste aller ids, für die der Dialog
    * Werte zurückliefern kann. Es ist ebenfalls nicht garantiert, dass der Dialog
    * jemeils für eine dieser ids etwas anderes als den leeren String zurückliefert.
-   * Diese Funktion kann schon vor instantiate() aufgerufen werden, es ist jedoch
-   * möglich, dass bei  Aufruf für eine mit instantiate() erzeugte Instanz mehr
+   * Diese Funktion kann schon vor instanceFor() aufgerufen werden, es ist jedoch
+   * möglich, dass bei  Aufruf für eine mit instanceFor() erzeugte Instanz mehr
    * Information (d.h. eine größere Menge) zurückgeliefert wird.
    * Das zurückgelieferte Objekt darf verändert werden. Dies hat keine Auswirkungen
    * auf den Dialog.
@@ -76,7 +76,7 @@ public interface Dialog
   public Collection getSchema();
  
   /**
-   * Zeigt den Dialog an. Diese Funktion darf nur für mit instantiate() erzeugte
+   * Zeigt den Dialog an. Diese Funktion darf nur für mit instanceFor() erzeugte
    * Instanzen aufgerufen werden. Ansonsten tut sie nichts.
    * @param dialogEndListener falls nicht null, wird 
    *        die {@link ActionListener#actionPerformed(java.awt.event.ActionEvent)}

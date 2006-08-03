@@ -1163,7 +1163,7 @@ public class DatasourceSearchDialog implements Dialog
     }
     if (dialogEndListener != null)
       dialogEndListener.actionPerformed(new ActionEvent(
-          DatasourceSearchDialog.class.getName(), 0, actionCommand));
+          this, 0, actionCommand));
   }
   
   
