@@ -371,6 +371,11 @@ public class DatasourceSearchDialog implements Dialog
     private JPanel myPanel;
     
     /**
+     * Die durch den Spaltenumsetzung-Abschnitt definierten Spaltennamen.
+     */
+    private Set schema;
+    
+    /**
      * Die Suchstrategie für Suchanfragen. 
      */
     private SearchStrategy searchStrategy;
@@ -1222,7 +1227,8 @@ public class DatasourceSearchDialog implements Dialog
             Iterator spaltenIterator = ((ConfigThingy)suIter.next()).iterator();
             while (spaltenIterator.hasNext())
             {
-              schema.add(((ConfigThingy)spaltenIterator.next()).getName());
+              ConfigThingy spalte = (ConfigThingy) spaltenIterator.next();
+              schema.add(spalte.getName());
             }
           }
         }
