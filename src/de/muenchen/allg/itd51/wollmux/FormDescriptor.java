@@ -36,22 +36,20 @@ import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 
 /**
- * Diese Klasse repräsentiert eine Formularbeschreibung eines Formulardokuments
- * in Form eines oder mehrerer WM(CMD'Form')-Kommandos mit den zugehörigen
- * Notizfeldern, die die Beschreibungstexte in ConfigThingy-Syntax enthalten.
- * Die Klasse startet zunächst als ein leerer Container für
- * DocumentCommand.Form-Objekte, in den über die add()-Methode einzelne
- * DocumentCommand.Form-Objekte hinzugefügt werden können. Logisch betrachtet
- * werden alle Beschreibungstexte zu einer großen ConfigThingy-Struktur
- * zusammengefügt und über die Methode toConfigThingy() bereitgestellt.
+ * Diese Klasse repräsentiert eine Formularbeschreibung eines Formulardokuments,
+ * die sich zusammensetzt aus dem Feld "WollMuxFormularbeschreibung" aus der
+ * DocumentInfo des Dokuments und/oder aus einem oder mehrereren
+ * WM(CMD'Form')-Kommandos mit den zugehörigen Notizfeldern, die die
+ * Beschreibungstexte in ConfigThingy-Syntax enthalten. Beim Aufruf des
+ * Konstruktors wird zunächst die DocumentInfo des Dokuments ausgelesen und
+ * evtl. dort enthaltene WollMuxFormularbeschreibungen übernommen. Anschließend
+ * können über die add()-Methode einzelne DocumentCommand.Form-Objekte
+ * hinzugefügt werden können. Logisch betrachtet werden alle Beschreibungstexte
+ * zu einer großen ConfigThingy-Struktur zusammengefügt und über die Methode
+ * toConfigThingy() bereitgestellt.
  * 
  * Die Klasse bietet darüber hinaus Methoden zum Abspeichern und Auslesen der
- * original-Feldwerte im Notizfeld des ersten DocumentCommand.Form-Objekts an,
- * das einen Formularwerte-Abschnitt enthält.
- * 
- * Im Zusammenhang mit der EntwicklerGUI könnten auch alle Operationen der
- * EntwicklerGUI an der Formularbeschreibung (Hinzufügen/Löschen/Verschieben von
- * Eingabeelementen) über diese Klasse abstrahiert werden.
+ * original-Feldwerte im DocumentInfo Feld "WollMuxFormularwerte" an.
  * 
  * @author Christoph Lutz (D-III-ITD 5.1)
  */
@@ -63,8 +61,8 @@ public class FormDescriptor
   private XTextDocument doc;
 
   /**
-   * Enthält alle Formular-Abschnitte, die in den mit add hinzugefügten
-   * Form-Kommandos gefunden wurden.
+   * Enthält alle Formular-Abschnitte, die in der DocumentInfo bzw. den mit add
+   * hinzugefügten Form-Kommandos gefunden wurden.
    */
   private ConfigThingy formularConf;
 
@@ -74,9 +72,9 @@ public class FormDescriptor
   private HashMap formFieldValues;
 
   /**
-   * Zeigt an, ob der FormDescriptor leer ist, oder ob mindestens ein gültiges
-   * WM(CMD'Form')-Kommando mit add() hinzugefügt wurde, das einen
-   * Formular-Abschnitt enthält.
+   * Zeigt an, ob der FormDescriptor leer ist, oder ob mindestens ein gültiger
+   * Formulare-Abschnitt add() hinzugefügt wurde, das einen Formular-Abschnitt
+   * enthält.
    */
   private boolean isEmpty;
 
@@ -423,7 +421,8 @@ public class FormDescriptor
    * entsprechendes Element gefunden wurde.
    * 
    * @param element
-   *          Das erste gefundene InputField.
+   *          Das erste gefundene AnnotationField oder null, wenn keines
+   *          gefunden wurde.
    */
   private static XTextField findAnnotationFieldRecursive(Object element)
   {
