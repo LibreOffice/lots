@@ -25,8 +25,8 @@ import java.util.Iterator;
 import java.util.Set;
 
 import com.sun.star.container.XEnumeration;
-import com.sun.star.lang.DisposedException;
-import com.sun.star.text.XTextContent;
+import com.sun.star.document.XDocumentInfo;
+import com.sun.star.lang.ArrayIndexOutOfBoundsException;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextField;
 import com.sun.star.text.XTextRange;
@@ -69,19 +69,6 @@ public class FormDescriptor
   private ConfigThingy formularConf;
 
   /**
-   * Enthält das erste hinzugefügte WM(CMD'Form')-Kommando, hinter dem eine
-   * Notiz für die Aufbewahrung der Formularwerte erzeugt wird, wenn nicht
-   * bereits eine andere im Dokument vorhanden ist.
-   */
-  private DocumentCommand.Form firstFormCmd;
-
-  /**
-   * Enthält das Notizfeld das sich unter dem zuletzt mit add hinzugefügten
-   * Form-Kommandos befindet, das einen "Formularwerte"-Abschnitt besitzt.
-   */
-  private XTextContent werteField;
-
-  /**
    * Enthält die aktuellen Werte der Formularfelder als Zuordnung id -> Wert.
    */
   private HashMap formFieldValues;
@@ -94,18 +81,124 @@ public class FormDescriptor
   private boolean isEmpty;
 
   /**
-   * Erzeugt einen neuen leeren FormDescriptor, dem über add()
-   * WM(CMD'Form')-Kommandos mit Formularbeschreibungsnotizen hinzugefügt werden
-   * können.
+   * Erzeugt einen neuen FormDescriptor und wertet die
+   * Formularbeschreibung/-Werte aus der DocumentInfo aus, falls sie vorhanden
+   * sind. Danach können über add() weitere WM(CMD'Form')-Kommandos mit
+   * Formularbeschreibungsnotizen hinzugefügt werden.
    */
   public FormDescriptor(XTextDocument doc)
   {
     this.doc = doc;
     this.formularConf = new ConfigThingy("WM");
-    this.firstFormCmd = null;
-    this.werteField = null;
     this.formFieldValues = new HashMap();
     this.isEmpty = true;
+
+    readDocInfoFormularbeschreibung();
+    readDocInfoFormularwerte();
+  }
+
+  /**
+   * Liest den Inhalt des WollMuxFormularbeschreibung-Feldes aus der
+   * DocumentInfo des Dokuments und fügt die Formularbeschreibung (falls eine
+   * gefunden wurde) der Gesamtbeschreibung hinzu.
+   */
+  private void readDocInfoFormularbeschreibung()
+  {
+    String value = getDocInfoValue("WollMuxFormularbeschreibung");
+    if (value == null) return;
+
+    try
+    {
+      ConfigThingy conf = new ConfigThingy("", null, new StringReader(value));
+      addFormularSection(conf);
+    }
+    catch (java.lang.Exception e)
+    {
+      Logger
+          .error(new ConfigurationErrorException(
+              "Der Inhalt des Beschreibungsfeldes 'WollMuxFormularbeschreibung' in Datei->Eigenschaften->Benutzer ist fehlerhaft:\n"
+                  + e.getMessage()));
+      return;
+    }
+  }
+
+  /**
+   * Liest den Inhalt des WollMuxFormularwerte-Feldes aus der DocumentInfo des
+   * Dokuments und überträgt die gefundenen Werte (falls welche gefunden werden)
+   * in die HashMap formFieldValues
+   */
+  private void readDocInfoFormularwerte()
+  {
+    String werteStr = getDocInfoValue("WollMuxFormularwerte");
+    if (werteStr == null) return;
+
+    // Werte-Abschnitt holen:
+    ConfigThingy werte;
+    try
+    {
+      ConfigThingy conf = new ConfigThingy("", null, new StringReader(werteStr));
+      werte = conf.get("WM").get("Formularwerte");
+    }
+    catch (java.lang.Exception e)
+    {
+      Logger
+          .error(new ConfigurationErrorException(
+              "Der Inhalt des Beschreibungsfeldes 'WollMuxFormularwerte' in Datei->Eigenschaften->Benutzer ist fehlerhaft:\n"
+                  + e.getMessage()));
+      return;
+    }
+
+    // "Formularwerte"-Abschnitt auswerten.
+    formFieldValues = new HashMap();
+    Iterator iter = werte.iterator();
+    while (iter.hasNext())
+    {
+      ConfigThingy element = (ConfigThingy) iter.next();
+      try
+      {
+        String id = element.get("ID").toString();
+        String value = element.get("VALUE").toString();
+        formFieldValues.put(id, value);
+      }
+      catch (NodeNotFoundException e)
+      {
+        Logger.error(e);
+      }
+    }
+  }
+
+  /**
+   * Die Methode liest den Wert des Feldes fieldName aus der
+   * DocumentInfo-Information des Dokuments oder gibt null zurück, wenn das Feld
+   * nicht vorhanden ist.
+   * 
+   * @param fieldName
+   *          Name des Feldes dessen Inhalt zurückgegeben werden soll.
+   * @return Den Wert des Feldes fieldName oder null, wenn das Feld nicht
+   *         vorhanden ist.
+   */
+  private String getDocInfoValue(String fieldName)
+  {
+    if (UNO.XDocumentInfoSupplier(doc) != null)
+    {
+      XDocumentInfo info = UNO.XDocumentInfoSupplier(doc).getDocumentInfo();
+      for (short i = 0; i < info.getUserFieldCount(); ++i)
+      {
+        try
+        {
+          String name = info.getUserFieldName(i);
+          if (name.equals(fieldName))
+          {
+            return info.getUserFieldValue(i);
+          }
+        }
+        catch (ArrayIndexOutOfBoundsException e)
+        {
+        }
+
+      }
+    }
+    return null;
   }
 
   /**
@@ -157,55 +250,33 @@ public class FormDescriptor
               + e.getMessage());
     }
 
+    addFormularSection(conf);
+  }
+
+  /**
+   * Fügt den Formular-Abschnitt des übergebenen configThingies zur
+   * Gesamtbeschreibung formularConf hinzu
+   * 
+   * @param conf
+   * @throws ConfigurationErrorException
+   *           wenn kein Formular-Abschnitt vorhanden ist.
+   */
+  private void addFormularSection(ConfigThingy conf)
+      throws ConfigurationErrorException
+  {
     // Formular-Abschnitt auswerten:
-    ConfigThingy formular = null;
     try
     {
-      formular = conf.get("WM").get("Formular");
+      ConfigThingy formular = conf.get("WM").get("Formular");
       formularConf.addChild(formular);
-      if (firstFormCmd == null) firstFormCmd = formCmd;
       isEmpty = false;
     }
     catch (NodeNotFoundException e)
     {
-    }
-
-    // Formularwerte-Abschnitt lesen:
-    ConfigThingy werte = null;
-    try
-    {
-      werte = conf.get("WM").get("Formularwerte");
-    }
-    catch (NodeNotFoundException e)
-    {
-    }
-
-    // "Formularwerte"-Abschnitt auswerten.
-    if (werte != null)
-    {
-      werteField = UNO.XTextContent(annotationField);
-
-      formFieldValues = new HashMap();
-      Iterator iter = werte.iterator();
-      while (iter.hasNext())
-      {
-        ConfigThingy element = (ConfigThingy) iter.next();
-        try
-        {
-          String id = element.get("ID").toString();
-          String value = element.get("VALUE").toString();
-          formFieldValues.put(id, value);
-        }
-        catch (NodeNotFoundException e)
-        {
-          Logger.error(e);
-        }
-      }
-    }
-
-    if (formular == null && werte == null)
       throw new ConfigurationErrorException(
-          "Die Formularbeschreibung innerhalb der Notiz enthält keine Abschnitte 'Formular' oder 'Formularwerte'.");
+          "Die Formularbeschreibung enthält keinen Abschnitt 'Formular':\n"
+              + e.getMessage());
+    }
   }
 
   /**
@@ -262,10 +333,9 @@ public class FormDescriptor
   }
 
   /**
-   * Diese Methode legt den aktuellen Werte aller Fomularfelder in einem
-   * Abschnitt "Formularwerte" in der Notiz des ersten mit add() hinzugefügten
-   * WM(CMD'Form')-Kommandos ab, das einen Formularwerte-Abschnitt besitzt. Ist
-   * kein entsprechendes Kommando vorhanden, so wird es erzeugt.
+   * Diese Methode legt den aktuellen Werte aller Fomularfelder in einem Feld
+   * WollMuxFormularwerte in der DocumentInfo des Dokuments ab. Ist kein
+   * entsprechendes Feld in der DocumentInfo vorhanden, so wird es neu erzeugt.
    */
   public void updateDocument()
   {
@@ -293,43 +363,58 @@ public class FormDescriptor
       }
     }
 
-    // neues WM(CMD'Form') Kommando zur Ablage der Formularwerte erzeugen, wenn
-    // nicht bereits eines vorhanden ist.
-    if (werteField == null && firstFormCmd != null)
+    // Formularwerte in die Dokumentinfo schreiben:
+    if (UNO.XDocumentInfoSupplier(doc) != null)
     {
-      try
+      short lastEmptyValue = -1;
+      boolean written = false;
+
+      // Das WollMuxFormularwerte-Feld in der bestehenden docinfo suchen und
+      // verwenden.
+      XDocumentInfo info = UNO.XDocumentInfoSupplier(doc).getDocumentInfo();
+      for (short i = 0; i < info.getUserFieldCount(); ++i)
       {
-        werteField = UNO.XTextContent(UNO.XMultiServiceFactory(doc)
-            .createInstance("com.sun.star.text.TextField.Annotation"));
-      }
-      catch (java.lang.Exception e)
-      {
+        String name = "";
+        String value = "";
+        try
+        {
+          name = info.getUserFieldName(i);
+          value = info.getUserFieldValue(i);
+        }
+        catch (ArrayIndexOutOfBoundsException e)
+        {
+        }
+
+        if (name.equals("WollMuxFormularwerte"))
+        {
+          try
+          {
+            info.setUserFieldValue(i, werte.stringRepresentation());
+            written = true;
+            break;
+          }
+          catch (ArrayIndexOutOfBoundsException e)
+          {
+          }
+        }
+        else if (value.equals("")) lastEmptyValue = i;
       }
 
-      XTextRange range = firstFormCmd.getTextRange();
-      try
+      // Falls kein entsprechendes Feld gefunden wurde, wird an der letzten
+      // freien Stelle eines neu angelegt:
+      if (!written && lastEmptyValue >= 0)
       {
-        range.getText().insertTextContent(range.getEnd(), werteField, false);
+        try
+        {
+          info.setUserFieldName(lastEmptyValue, "WollMuxFormularwerte");
+          info.setUserFieldValue(lastEmptyValue, werte.stringRepresentation());
+        }
+        catch (ArrayIndexOutOfBoundsException e)
+        {
+        }
       }
-      catch (java.lang.Exception e)
-      {
-      }
-
-      if (doc != null && werteField != null)
-        new Bookmark("WM(CMD 'Form')", doc, werteField.getAnchor());
-    }
-
-    // neuen "Formularwerte"-Abschnitt setzen
-    try
-    {
-      UNO.setProperty(werteField, "Content", werte.stringRepresentation());
-    }
-    catch (DisposedException e)
-    {
     }
   }
-
-  // Helper-Methoden:
 
   /**
    * Diese Methode durchsucht das Element element bzw. dessen XEnumerationAccess
