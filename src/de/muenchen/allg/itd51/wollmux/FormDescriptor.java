@@ -400,17 +400,24 @@ public class FormDescriptor
 
       // Falls kein entsprechendes Feld gefunden wurde, wird an der letzten
       // freien Stelle eines neu angelegt:
-      if (!written && lastEmptyValue >= 0)
-      {
-        try
+      if (!written)
+        if (lastEmptyValue >= 0)
         {
-          info.setUserFieldName(lastEmptyValue, "WollMuxFormularwerte");
-          info.setUserFieldValue(lastEmptyValue, werte.stringRepresentation());
+          try
+          {
+            info.setUserFieldName(lastEmptyValue, "WollMuxFormularwerte");
+            info
+                .setUserFieldValue(lastEmptyValue, werte.stringRepresentation());
+          }
+          catch (ArrayIndexOutOfBoundsException e)
+          {
+          }
         }
-        catch (ArrayIndexOutOfBoundsException e)
+        else
         {
+          Logger
+              .error("Kein freies Infofeld unter 'Datei->Eigenschaften->Benutzer' zum Abspeichern der WollMuxFormularwerte vorhanden. Die eingegebenen Formularwerte können nicht persistent gesichert werden.");
         }
-      }
     }
   }
 
