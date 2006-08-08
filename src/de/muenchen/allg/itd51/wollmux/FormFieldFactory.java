@@ -49,7 +49,7 @@ public final class FormFieldFactory
   /**
    * Erzeugt ein Formualfeld im Dokument doc an der Stelle des
    * InsertFormValue-Kommandos cmd. Ist unter dem bookmark bereits ein
-   * Formularelement (derzeit TextFeld vom Typ InputField oder eine Checkbox)
+   * Formularelement (derzeit TextFeld vom Typ Input, DropDown oder eine Checkbox)
    * vorhanden, so wird dieses Feld als Formularelement für die Darstellung des
    * Wertes des Formularfeldes genutzt. Ist innerhalb des Bookmarks noch kein
    * Formularelement vorhanden, so wird ein neues InputField in den Bookmark
@@ -598,13 +598,14 @@ public final class FormFieldFactory
       {
         try
         {
-          XTextField found = findTextField(xEnum.nextElement(), serviceName);
+          Object ele = xEnum.nextElement();
+          XTextField found = findTextField(ele, serviceName);
           // das erste gefundene Element zurückliefern.
           if (found != null) return found;
         }
         catch (java.lang.Exception e)
         {
-          Logger.error(e);
+          //TODO Logger.error(e); totgemacht wegen Bug #68261
         }
       }
     }
