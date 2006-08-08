@@ -119,6 +119,35 @@ public class ConfigThingy
     this(name);
     childrenFromUrl(url,read);
   }
+
+  /**
+   * Copy Constructor.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED
+   */
+  public ConfigThingy(ConfigThingy conf)
+  {
+    this(conf.getName());
+    this.addChildCopiesFrom(conf);
+  }
+  
+  /**
+   * Fügt diesem ConfigThingy unabhängige Kopien aller Kinder von conf hinzu. Die Kinder werden
+   * samt aller Nachfahren kopiert.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED
+   */
+  public void addChildCopiesFrom(ConfigThingy conf)
+  {
+    Iterator iter = conf.iterator();
+    while (iter.hasNext())
+    {
+      ConfigThingy childToCopy = (ConfigThingy)iter.next();
+      ConfigThingy childCopy = new ConfigThingy(childToCopy.getName());
+      childCopy.addChildCopiesFrom(childToCopy);
+      this.addChild(childCopy);
+    }
+  }
   
   /**
    * Parst die Daten aus read im Kontext von url und hängt die entsprechenden 
