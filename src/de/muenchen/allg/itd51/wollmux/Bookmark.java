@@ -10,6 +10,7 @@
  * Datum      | Wer | Änderungsgrund
  * -------------------------------------------------------------------
  * 17.05.2006 | LUT | Dokumentation ergänzt
+ * 07.08.2006 | BNK | +Bookmark(XNamed bookmark, XTextDocument doc)
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -19,6 +20,7 @@
 package de.muenchen.allg.itd51.wollmux;
 
 import com.sun.star.container.NoSuchElementException;
+import com.sun.star.container.XNamed;
 import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.lang.WrappedTargetException;
 import com.sun.star.text.XBookmarksSupplier;
@@ -72,6 +74,16 @@ public class Bookmark
       throw new NoSuchElementException("Bookmark \""
                                        + name
                                        + "\" existiert nicht.");
+  }
+  
+  /**
+   * Der Konstruktor liefert eine Instanz eines bereits im Dokument doc
+   * bestehenden Bookmarks bookmark zurück.
+   */
+  public Bookmark(XNamed bookmark, XTextDocument doc)
+  {
+    this.document = new UnoService(doc);
+    this.name = bookmark.getName();
   }
 
   /**
