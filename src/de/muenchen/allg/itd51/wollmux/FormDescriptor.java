@@ -10,6 +10,8 @@
  * Datum      | Wer | Änderungsgrund
  * -------------------------------------------------------------------
  * 24.07.2006 | LUT | Erstellung als FormDescriptor
+ * 08.08.2006 | BNK | +fromConfigThingy(ConfigThingy conf)
+ *                  | writeDocInfoFormularbeschreibung()
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -55,6 +57,18 @@ import de.muenchen.allg.itd51.parser.NodeNotFoundException;
  */
 public class FormDescriptor
 {
+  /**
+   * Der Name der DocumentInfo-Benutzervariable, in der die WollMux-Formularbeschreibung
+   * gespeichert wird.
+   */
+  private static final String WOLLMUX_FORMULARBESCHREIBUNG = "WollMuxFormularbeschreibung";
+
+  /**
+   * Der Name der DocumentInfo-Benutzervariable, in der die WollMux-Formularwerte
+   * gespeichert werden.
+   */
+  private static final String WOLLMUX_FORMULARWERTE = "WollMuxFormularwerte";
+
   /**
    * Das Dokument, das als Fabrik für neue Annotations benötigt wird.
    */
@@ -102,7 +116,7 @@ public class FormDescriptor
    */
   private void readDocInfoFormularbeschreibung()
   {
-    String value = getDocInfoValue("WollMuxFormularbeschreibung");
+    String value = getDocInfoValue(WOLLMUX_FORMULARBESCHREIBUNG);
     if (value == null) return;
 
     try
@@ -119,6 +133,18 @@ public class FormDescriptor
       return;
     }
   }
+  
+  /**
+   * Schreibt die Formularbeschreibung dieses FormDescriptors in das Infofeld
+   * "WollMuxFormularbeschreibung" der DocumentInfo des Dokuments.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public void writeDocInfoFormularbeschreibung()
+  {
+    writeDocInfo(WOLLMUX_FORMULARBESCHREIBUNG, toConfigThingy().stringRepresentation());
+  }
+  
 
   /**
    * Liest den Inhalt des WollMuxFormularwerte-Feldes aus der DocumentInfo des
@@ -127,7 +153,7 @@ public class FormDescriptor
    */
   private void readDocInfoFormularwerte()
   {
-    String werteStr = getDocInfoValue("WollMuxFormularwerte");
+    String werteStr = getDocInfoValue(WOLLMUX_FORMULARWERTE);
     if (werteStr == null) return;
 
     // Werte-Abschnitt holen:
@@ -281,6 +307,7 @@ public class FormDescriptor
    * Liefert eine ConfigThingy-Repräsentation, die unterhalb des Wurzelknotens
    * "WM" der Reihe nach die Vereinigung der "Formular"-Abschnitte aller
    * Formularbeschreibungen der enthaltenen WM(CMD'Form')-Kommandos enthält.
+   * ACHTUNG! Es wird eine Referenz auf ein internes Objekt geliefert! Nicht verändern!
    * 
    * @return ConfigThingy-Repräsentation mit dem Wurzelknoten "WM", die alle
    *         "Formular"-Abschnitte der Formularbeschreibungen enthält.
@@ -288,6 +315,17 @@ public class FormDescriptor
   public ConfigThingy toConfigThingy()
   {
     return formularConf;
+  }
+  
+  /**
+   * Ersetzt die Formularbeschreibung dieses FormDescriptors durch die aus conf.
+   * ACHTUNG! conf wird nicht kopiert sondern als Referenz eingebunden.
+   * @param conf ein WM-Knoten, der "Formular"-Kinder hat.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public void fromConfigThingy(ConfigThingy conf)
+  {
+    formularConf = conf;
   }
 
   /**
@@ -361,13 +399,28 @@ public class FormDescriptor
       }
     }
 
+    String infoFieldName = WOLLMUX_FORMULARWERTE;
+    String infoFieldValue = werte.stringRepresentation();
+    
+    writeDocInfo(infoFieldName, infoFieldValue);
+  }
+
+  /**
+   * Schreibt infoFielValue in ein DocumentInfo-Benutzerfeld names infoFieldName. Ist ein
+   * Feld dieses Namens bereits vorhanden, wird es überschrieben. Ist kein Feld dieses Namens
+   * wird das letzte freie Feld verwendet. Ist kein freies Feld vorhanden, gibt es eine
+   * Log-Meldung und nichts wird geschrieben.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private void writeDocInfo(String infoFieldName, String infoFieldValue)
+  {
     // Formularwerte in die Dokumentinfo schreiben:
     if (UNO.XDocumentInfoSupplier(doc) != null)
     {
       short lastEmptyValue = -1;
       boolean written = false;
 
-      // Das WollMuxFormularwerte-Feld in der bestehenden docinfo suchen und
+      // Das InfoFeld in der bestehenden docinfo suchen und
       // verwenden.
       XDocumentInfo info = UNO.XDocumentInfoSupplier(doc).getDocumentInfo();
       for (short i = 0; i < info.getUserFieldCount(); ++i)
@@ -383,11 +436,11 @@ public class FormDescriptor
         {
         }
 
-        if (name.equals("WollMuxFormularwerte"))
+        if (name.equals(infoFieldName))
         {
           try
           {
-            info.setUserFieldValue(i, werte.stringRepresentation());
+            info.setUserFieldValue(i, infoFieldValue);
             written = true;
             break;
           }
@@ -405,9 +458,9 @@ public class FormDescriptor
         {
           try
           {
-            info.setUserFieldName(lastEmptyValue, "WollMuxFormularwerte");
+            info.setUserFieldName(lastEmptyValue, infoFieldName);
             info
-                .setUserFieldValue(lastEmptyValue, werte.stringRepresentation());
+                .setUserFieldValue(lastEmptyValue, infoFieldValue);
           }
           catch (ArrayIndexOutOfBoundsException e)
           {
@@ -416,7 +469,7 @@ public class FormDescriptor
         else
         {
           Logger
-              .error("Kein freies Infofeld unter 'Datei->Eigenschaften->Benutzer' zum Abspeichern der WollMuxFormularwerte vorhanden. Die eingegebenen Formularwerte können nicht persistent gesichert werden.");
+              .error("Kein freies Infofeld unter 'Datei->Eigenschaften->Benutzer' zum Abspeichern der Formulardaten vorhanden. Die eingegebenen Formulardaten können nicht persistent gesichert werden.");
         }
     }
   }
