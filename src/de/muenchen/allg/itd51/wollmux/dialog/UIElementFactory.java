@@ -338,7 +338,7 @@ public class UIElementFactory
         {
           combo.addItem(values.next().toString());
         }
-      } catch (Exception x) { Logger.error(x); }
+      } catch (Exception x) { Logger.error("Fehlerhaftes Element des Typs \"combobox\"",x); }
       
       uiElement = new UIElement.Combobox(id, combo, layoutConstraints, labelType, label, labelLayoutConstraints);
       

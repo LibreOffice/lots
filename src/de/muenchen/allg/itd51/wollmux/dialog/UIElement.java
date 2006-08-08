@@ -390,7 +390,8 @@ public interface UIElement extends Value
 
     public String getString()
     {
-      return combo.getSelectedItem().toString();
+      Object selected = combo.getSelectedItem();
+      return selected == null ? "" : selected.toString();
     }
 
     public boolean getBoolean()
