@@ -18,6 +18,7 @@
 */
 package de.muenchen.allg.itd51.wollmux.former;
 
+import java.awt.Frame;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -66,9 +67,31 @@ public class FormularMax4000
   private static final int GENERATED_LABEL_MAXLENGTH = 30;
   
   /**
+   * Wird als Label gesetzt, falls kein sinnvolles Label automatisch generiert werden
+   * konnte.
+   */
+  private static final String NO_LABEL = "";
+  
+  /**
+   * Wird temporär als Label gesetzt, wenn kein Label benötigt wird, weil es sich nur um
+   * eine Einfügestelle handelt, die nicht als Formularsteuerelement erfasst werden soll.
+   */
+  private static final String INSERTION_ONLY = "<<InsertionOnly>>";
+  
+  /**
    * URL des Quelltexts für den Standard-Empfängerauswahl-Tab.
    */
   private final URL EMPFAENGER_TAB_URL = this.getClass().getClassLoader().getResource("data/empfaengerauswahl_controls.conf");
+  
+  /**
+   * URL des Quelltexts für die Standardbuttons für einen mittleren Tab.
+   */
+  private final URL STANDARD_BUTTONS_MIDDLE_URL = this.getClass().getClassLoader().getResource("data/standardbuttons_mitte.conf");
+  
+  /**
+   * URL des Quelltexts für die Standardbuttons für den letzten Tab.
+   */
+  private final URL STANDARD_BUTTONS_LAST_URL = this.getClass().getClassLoader().getResource("data/standardbuttons_letztes.conf");
   
   //TODO MAGIC_DESCRIPTOR_PATTERN in FormularMax 4000 Doku dokumentieren
   private static final Pattern MAGIC_DESCRIPTOR_PATTERN = Pattern.compile("\\A(.*)<<(.*)>>\\z");
@@ -153,6 +176,24 @@ public class FormularMax4000
       public void actionPerformed(ActionEvent e)
       {
         insertStandardEmpfaengerauswahl();
+      }
+      });
+    menu.add(menuItem);
+    
+    menuItem = new JMenuItem("Standardbuttons (mittlere Tabs) einfügen");
+    menuItem.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent e)
+      {
+        insertStandardButtonsMiddle();
+      }
+      });
+    menu.add(menuItem);
+    
+    menuItem = new JMenuItem("Standardbuttons (letzter Tab) einfügen");
+    menuItem.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent e)
+      {
+        insertStandardButtonsLast();
       }
       });
     menu.add(menuItem);
@@ -253,9 +294,37 @@ public class FormularMax4000
     try{ 
       ConfigThingy conf = new ConfigThingy("Empfaengerauswahl", EMPFAENGER_TAB_URL);
       int rand = (int)(Math.random()*100); 
-      FormControlModel separatorTab = FormControlModel.createTab("Reiter "+rand, "Reiter"+rand);
+      FormControlModel separatorTab = FormControlModel.createTab("Eingabe", "Reiter"+rand);
       formControlModelList.add(separatorTab,0);
       parseTab(conf, 0);
+      //TODO writeFormDescriptor();
+    }catch(Exception x) {}
+  }
+  
+  /**
+   * Hängt die Standardbuttons für einen mittleren Tab an das Ende der Liste.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private void insertStandardButtonsMiddle()
+  {
+    try{ 
+      ConfigThingy conf = new ConfigThingy("Buttons", STANDARD_BUTTONS_MIDDLE_URL);
+      parseGrandchildren(conf, -1);
+      //TODO writeFormDescriptor();
+    }catch(Exception x) {}
+  }
+  
+  /**
+   * Hängt die Standardbuttons für den letzten Tab an das Ende der Liste.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private void insertStandardButtonsLast()
+  {
+    try{ 
+      ConfigThingy conf = new ConfigThingy("Buttons", STANDARD_BUTTONS_LAST_URL);
+      parseGrandchildren(conf, -1);
       //TODO writeFormDescriptor();
     }catch(Exception x) {}
   }
@@ -349,10 +418,14 @@ public class FormularMax4000
       Visitor visitor = new DocumentTree.Visitor(){
         private Map insertions = new HashMap();
         private StringBuilder text = new StringBuilder();
+        private FormControlModel fixupCheckbox = null;
         
         public boolean container(int count)
         {
+          if (fixupCheckbox != null && fixupCheckbox.getLabel() == NO_LABEL)
+            fixupCheckbox.setLabel(makeLabelFromStartOf(text, 2*GENERATED_LABEL_MAXLENGTH));
           text.setLength(0);
+          fixupCheckbox = null;
           return true;
         }
         
@@ -375,7 +448,11 @@ public class FormularMax4000
         public boolean formControl(FormControl control)
         {
           if (insertions.isEmpty())
-            registerFormControl(control, text);
+          {
+            FormControlModel model = registerFormControl(control, text);
+            if (model != null && model.getType() == FormControlModel.CHECKBOX_TYPE)
+              fixupCheckbox = model;
+          }
           
           return true;
         }
@@ -386,7 +463,7 @@ public class FormularMax4000
   }
   
   //text: Text der im selben Absatz wie das Control vor dem Control steht.
-  private void registerFormControl(FormControl control, StringBuilder text)
+  private FormControlModel registerFormControl(FormControl control, StringBuilder text)
   {
     String label;
     String id;
@@ -395,14 +472,12 @@ public class FormularMax4000
     if (m.matches())
     {
       label = m.group(1);
+      if (label.length() == 0) label = INSERTION_ONLY; //TODO Magic Dokumentieren
       id = m.group(2);
     }
     else
     {
-      int len = text.length();
-      if (len > GENERATED_LABEL_MAXLENGTH) len = GENERATED_LABEL_MAXLENGTH;
-      label = text.substring(text.length() - len);
-      if (label.length() < 2) label = "Eingabe";
+      label = makeLabelFromEndOf(text, GENERATED_LABEL_MAXLENGTH);
       id = descriptor;
     }
     
@@ -410,44 +485,116 @@ public class FormularMax4000
     
     switch (control.getType())
     {
-      case DocumentTree.CHECKBOX_CONTROL: registerCheckbox(control, label, id); break;
-      case DocumentTree.DROPDOWN_CONTROL: registerDropdown((DropdownFormControl)control, label, id); break;
-      case DocumentTree.INPUT_CONTROL:    registerInput(control, label, id); break;
-      default: Logger.error("Unbekannter Typ Formular-Steuerelement");
+      case DocumentTree.CHECKBOX_CONTROL: return registerCheckbox(control, label, id);
+      case DocumentTree.DROPDOWN_CONTROL: return registerDropdown((DropdownFormControl)control, label, id);
+      case DocumentTree.INPUT_CONTROL:    return registerInput(control, label, id);
+      default: Logger.error("Unbekannter Typ Formular-Steuerelement"); return null;
     }
   }
-  
-  private void registerCheckbox(FormControl control, String label, String id)
+
+  /**
+   * Bastelt aus dem Ende des Textes text ein Label.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * @param maxlen TODO
+   */
+  private String makeLabelFromEndOf(StringBuilder text, int maxlen)
   {
-    if (label.length() > 0) //falls label == "" handelt es sich um eine reine Einfügestelle
+    String label;
+    String str = text.toString().trim();
+    int len = str.length();
+    if (len > maxlen) len = maxlen;
+    label = str.substring(str.length() - len);
+    if (label.length() < 2) label = NO_LABEL;
+    return label;
+  }
+  
+  /**
+   * Bastelt aus dem Start des Textes text ein Label.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private String makeLabelFromStartOf(StringBuilder text, int maxlen)
+  {
+    String label;
+    String str = text.toString().trim();
+    int len = str.length();
+    if (len > maxlen) len = maxlen;
+    label = str.substring(0, len);
+    if (label.length() < 2) label = NO_LABEL;
+    return label;
+  }
+  
+  private FormControlModel registerCheckbox(FormControl control, String label, String id)
+  {
+    FormControlModel model = null;
+    if (label != INSERTION_ONLY)
     {
-      FormControlModel model = FormControlModel.createCheckbox(label, id);
+      model = FormControlModel.createCheckbox(label, id);
+      if (control.getString().equalsIgnoreCase("true"))
+      {
+        ConfigThingy autofill = new ConfigThingy("AUTOFILL");
+        autofill.add("true");
+        model.setAutofill(autofill);
+      }
       formControlModelList.add(model);
     }
     
     control.surroundWithBookmark(insertFormValue(id));
+    return model;
   }
   
-  private void registerDropdown(DropdownFormControl control, String label, String id)
+  private FormControlModel registerDropdown(DropdownFormControl control, String label, String id)
   {
-    if (label.length() > 0) //falls label == "" handelt es sich um eine reine Einfügestelle
+    FormControlModel model = null;
+    if (label != INSERTION_ONLY)
     {
-      FormControlModel model = FormControlModel.createComboBox(label, id, control.getItems());
+      String[] items = control.getItems();
+      boolean editable = false;
+      for (int i = 0; i < items.length; ++i)
+      {
+        if (items[i].equalsIgnoreCase("<<Freitext>>")) //TODO Diese Magic dokumentieren 
+        {
+          String[] newItems = new String[items.length - 1];
+          System.arraycopy(items, 0, newItems, 0, i);
+          System.arraycopy(items, i + 1, newItems, i, items.length - i - 1);
+          items = newItems;
+          editable = true;
+          break;
+        }
+      }
+      model = FormControlModel.createComboBox(label, id, items);
+      model.setEditable(editable);
+      String preset = control.getString().trim();
+      if (preset.length() > 0)
+      {
+        ConfigThingy autofill = new ConfigThingy("AUTOFILL");
+        autofill.add(preset);
+        model.setAutofill(autofill);
+      }
       formControlModelList.add(model);
     }
     
     control.surroundWithBookmark(insertFormValue(id));
+    return model;
   }
   
-  private void registerInput(FormControl control, String label, String id)
+  private FormControlModel registerInput(FormControl control, String label, String id)
   {
-    if (label.length() > 0) //falls label == "" handelt es sich um eine reine Einfügestelle
+    FormControlModel model = null;
+    if (label != INSERTION_ONLY)
     {
-      FormControlModel model = FormControlModel.createTextfield(label, id);
+      model = FormControlModel.createTextfield(label, id);
+      String preset = control.getString().trim();
+      if (preset.length() > 0)
+      {
+        ConfigThingy autofill = new ConfigThingy("AUTOFILL");
+        autofill.add(preset);
+        model.setAutofill(autofill);
+      }
       formControlModelList.add(model);
     }
     
     control.surroundWithBookmark(insertFormValue(id));
+    return model;
   }
   
   /**
@@ -500,6 +647,7 @@ public class FormularMax4000
     
     editorFrame.pack();
     editorFrame.setVisible(true);
+    editorFrame.setExtendedState(Frame.MAXIMIZED_BOTH);
   }
   
   /**

@@ -85,7 +85,7 @@ public class FormControlModel
       else if (name.equals("DIALOG")) dialog = str;
       else if (name.equals("TIP")) tooltip = str;
       else if (name.equals("HOTKEY")) hotkey = str.length() > 0 ? str.charAt(0) : 0;
-      else if (name.equals("EDITABLE")) editable = str.equalsIgnoreCase("true");
+      else if (name.equals("EDIT")) editable = str.equalsIgnoreCase("true");
       else if (name.equals("READONLY")) readonly = str.equalsIgnoreCase("true");
       else if (name.equals("LINES")) try{lines = Integer.parseInt(str); }catch(Exception x){}
       else if (name.equals("MINSIZE")) try{minsize = Integer.parseInt(str); }catch(Exception x){}
@@ -226,9 +226,25 @@ public class FormControlModel
     return groups; 
   }
   
+  /**
+   * Ersetzt den aktuellen AUTOFILL durch conf. ACHTUNG! Es wird keine Kopie von conf
+   * gemacht, sondern direkt eine Referenz auf conf integriert.
+   * @param conf der "AUTOFILL"-Knoten.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public void setAutofill(ConfigThingy conf)
+  {
+    autofill = conf;
+  }
+  
   public void setAction(String action)
   {
     this.action = action;
+  }
+  
+  public void setLabel(String label)
+  {
+    this.label = label;
   }
   
   public void setTooltip(String tooltip)
@@ -282,7 +298,7 @@ public class FormControlModel
     conf.add("ID").add(getId());
     conf.add("TIP").add(getTooltip());
     conf.add("READONLY").add(""+getReadonly());
-    conf.add("EDITABLE").add(""+getEditable());
+    conf.add("EDIT").add(""+getEditable());
     conf.add("LINES").add(""+getLines());
     conf.add("MINSIZE").add(""+getMinsize());
     conf.add("ACTION").add(""+getAction());

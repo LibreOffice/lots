@@ -255,6 +255,12 @@ public class DocumentTree
     public int getType();
     public String getDescriptor();
     public void surroundWithBookmark(String bmName);
+    /**
+     * Liefert den aktuell im Steuerelement eingestellten Wert zurück.
+     * Boolesche Steuerelemente (Checkbox) liefern "true" oder "false".
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
+    public String getString();
   }
   
   public static interface DropdownFormControl extends FormControl
@@ -401,6 +407,11 @@ public class DocumentTree
     {
       return CHECKBOX_CONTROL;
     }
+    
+    public String getString()
+    {
+      return ""+isChecked();
+    }
 
     public String getDescriptor()
     {
@@ -470,7 +481,17 @@ public class DocumentTree
     
     public String getSelectedItem()
     {
-      return (String)UNO.getProperty(textfield, "SelectedItem");
+      try{
+        return (String)UNO.getProperty(textfield, "SelectedItem");
+      }catch(Exception x)
+      {
+        return "";
+      }
+    }
+    
+    public String getString()
+    {
+      return getSelectedItem();
     }
 
     public boolean visit(Visitor visit)
@@ -513,8 +534,7 @@ public class DocumentTree
     {
       StringBuilder buffy = new StringBuilder();
       try{buffy.append((String)UNO.getProperty(textfield,"Name"));}catch(Exception x){};
-      if (buffy.toString().trim().length() < 2)
-        try{buffy.append(getSelectedItem());}catch(Exception x){};
+      if (buffy.toString().trim().length() < 2) buffy.append(getSelectedItem());
       return buffy.toString();
     }
 
@@ -535,6 +555,11 @@ public class DocumentTree
     public String getContent()
     {
       return (String)UNO.getProperty(textfield, "Content");
+    }
+    
+    public String getString()
+    {
+      return getContent();      
     }
     
     public String toString()
