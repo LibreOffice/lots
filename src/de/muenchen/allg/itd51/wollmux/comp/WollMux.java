@@ -87,6 +87,8 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
   public static final String cmdSenderBox = "SenderBox";
 
   public static final String cmdFunctionDialog = "FunctionDialog";
+  
+  public static final String cmdFormularMax4000 = "FormularMax4000";
 
   public static final String cmdMenu = "Menu";
 
@@ -218,6 +220,8 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
       if (cmd.equalsIgnoreCase(cmdPALVerwalten)) xRet = this;
 
       if (cmd.equalsIgnoreCase(cmdFunctionDialog)) xRet = this;
+      
+      if (cmd.equalsIgnoreCase(cmdFormularMax4000)) xRet = this;
     }
     return xRet;
   }
@@ -308,7 +312,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
         Logger.debug2("Dispatch: Aufruf von WollMux:AbsenderAuswaehlenDialog");
         WollMuxEventHandler.handleShowDialogAbsenderAuswaehlen();
       }
-
+//TODO Sollte hier der effizienz halber nicht überall "else" stehen?
       if (cmd.compareToIgnoreCase(cmdPALVerwalten) == 0)
       {
         Logger.debug2("Dispatch: Aufruf von WollMux:PALVerwalten");
@@ -343,6 +347,15 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
         if (parsedURL.size() > 0) dialogName = parsedURL.get(0).toString();
         WollMuxEventHandler.handleFunctionDialogShow(UNO.desktop
             .getCurrentComponent(), dialogName);
+      }
+      
+      if (cmd.compareToIgnoreCase(cmdFormularMax4000) == 0)
+      {
+        Logger
+            .debug2("Dispatch: Aufruf von WollMux:FormularMax4000 mit Arg:"
+                    + parsedURL);
+        WollMuxEventHandler.handleFormularMax4000Show(UNO.desktop
+            .getCurrentComponent());
       }
     }
   }

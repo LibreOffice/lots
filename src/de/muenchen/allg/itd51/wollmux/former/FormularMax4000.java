@@ -44,6 +44,7 @@ import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.WindowConstants;
 
+import com.sun.star.document.XDocumentInfo;
 import com.sun.star.text.XTextDocument;
 
 import de.muenchen.allg.afid.UNO;
@@ -64,6 +65,8 @@ import de.muenchen.allg.itd51.wollmux.former.DocumentTree.Visitor;
  */
 public class FormularMax4000
 {
+  private static final String GENERATED_FORM_TITLE = "Generiert durch FormularMax 4000";
+
   private static final int GENERATED_LABEL_MAXLENGTH = 30;
   
   /**
@@ -112,7 +115,7 @@ public class FormularMax4000
    */
   private JFrame myFrame;
   
-  private String formTitle = "Generiert durch FormularMax 4000";
+  private String formTitle = GENERATED_FORM_TITLE;
   
   private FormControlModelList formControlModelList = new FormControlModelList();
   
@@ -298,7 +301,7 @@ public class FormularMax4000
       formControlModelList.add(separatorTab,0);
       parseTab(conf, 0);
       //TODO writeFormDescriptor();
-    }catch(Exception x) {}
+    }catch(Exception x) { Logger.error(x);}
   }
   
   /**
@@ -312,7 +315,7 @@ public class FormularMax4000
       ConfigThingy conf = new ConfigThingy("Buttons", STANDARD_BUTTONS_MIDDLE_URL);
       parseGrandchildren(conf, -1);
       //TODO writeFormDescriptor();
-    }catch(Exception x) {}
+    }catch(Exception x) { Logger.error(x);}
   }
   
   /**
@@ -326,7 +329,7 @@ public class FormularMax4000
       ConfigThingy conf = new ConfigThingy("Buttons", STANDARD_BUTTONS_LAST_URL);
       parseGrandchildren(conf, -1);
       //TODO writeFormDescriptor();
-    }catch(Exception x) {}
+    }catch(Exception x) { Logger.error(x);}
   }
   
   /**
@@ -414,6 +417,12 @@ public class FormularMax4000
   private void scan(XTextDocument doc)
   {
     try{
+      XDocumentInfo info = UNO.XDocumentInfoSupplier(doc).getDocumentInfo();
+      try{
+        String tit = ((String)UNO.getProperty(info,"Title")).trim();
+        if (formTitle == GENERATED_FORM_TITLE && tit.length() > 0)
+          formTitle = tit;
+      }catch(Exception x){}
       DocumentTree tree = new DocumentTree(doc);
       Visitor visitor = new DocumentTree.Visitor(){
         private Map insertions = new HashMap();
@@ -609,7 +618,7 @@ public class FormularMax4000
     str = str.replaceAll("[^a-zA-Z_0-9]","");
     if (str.length() == 0) str = "Steuerelement";
     if (!str.matches("^[a-zA-Z_].*")) str = "_" + str;
-    if (label.length() > 0)
+    if (label != INSERTION_ONLY)
       return formControlModelList.makeUniqueId(str);
     else
       return str;

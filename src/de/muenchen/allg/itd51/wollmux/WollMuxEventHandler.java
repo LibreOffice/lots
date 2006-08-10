@@ -78,6 +78,7 @@ import de.muenchen.allg.itd51.wollmux.dialog.AbsenderAuswaehlen;
 import de.muenchen.allg.itd51.wollmux.dialog.Common;
 import de.muenchen.allg.itd51.wollmux.dialog.Dialog;
 import de.muenchen.allg.itd51.wollmux.dialog.PersoenlicheAbsenderlisteVerwalten;
+import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 
 /**
@@ -412,7 +413,8 @@ public class WollMuxEventHandler
   {
     handle(new OnFunctionDialogShow(doc, dialogName));
   }
-
+  
+  
   private static class OnFunctionDialogShow extends BasicEvent
   {
     private XComponent doc;
@@ -482,6 +484,55 @@ public class WollMuxEventHandler
 
   // *******************************************************************************************
 
+  /**
+   * Erzeugt ein neues WollMuxEvent, das den FormularMax4000 aufruft für das
+   * Dokument doc.
+   * 
+   * Dieses Event wird vom WollMux-Service (...comp.WollMux) und aus dem
+   * WollMuxEventHandler ausgelöst.
+   */
+  public static void handleFormularMax4000Show(XComponent doc)
+  {
+    handle(new OnFormularMax4000Show(doc));
+  }
+
+  private static class OnFormularMax4000Show extends BasicEvent
+  {
+    private XComponent doc;
+
+    private OnFormularMax4000Show(XComponent doc)
+    {
+      this.doc = doc;
+    }
+
+    protected boolean doit() throws WollMuxFehlerException
+    {
+      XTextDocument text = UNO.XTextDocument(doc);
+      if (text != null)
+      {
+        new FormularMax4000(text);
+      }
+     
+      return EventProcessor.processTheNextEvent;
+    }
+
+    public boolean requires(Object o)
+    {
+      return UnoRuntime.areSame(doc, o); //TODO Ist das korrekt so?
+    }
+
+    public String toString()
+    {
+      return this.getClass().getSimpleName()
+             + "("
+             + doc.hashCode()
+             + "')";
+    }
+  }
+
+  // *******************************************************************************************
+
+  
   /**
    * Erzeugt ein neues WollMuxEvent, das den Funktionsdialog dialogName aufruft
    * und die zurückgelieferten Werte in die entsprechenden FormField-Objekte des

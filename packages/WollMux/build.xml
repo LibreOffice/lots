@@ -76,7 +76,7 @@
 	</target>
 
 	<!-- Das Target package registriert die Komponente und erzeugt ein uno.pkg-file -->
-	<target name="package" depends="jarfile, buildinfo, basicdir">
+	<target name="package" depends="jarfile, buildinfo">
 		<delete file="${PKG_FILE}" />
 		<zip destfile="${PKG_FILE}">
 			<fileset dir="${RDB_DIR}">
@@ -85,6 +85,8 @@
 				<include name="*.rdb" />
 				<include name="META-INF/manifest.xml" />
 				<include name="${BUILD_INFO_FILE_NAME}" />
+			</fileset>
+			<fileset dir="${basedir}">
 				<include name="basic/**/*" />
 			</fileset>
 		</zip>
@@ -97,6 +99,7 @@
 			<fileset dir="${MY_CLASSES}" includes="**/*.class" />
 			<fileset dir="${MY_IDL}" includes="**/*.class" />
 			<fileset dir="${UNOHELPER_CLASSES}" includes="**/*.class" />
+			<fileset dir="${BIN}" includes="data/**" />
 			<fileset file="${BUILD_INFO_FILE}" />
 			<fileset file="${LOGO}" />
 			<manifest>
@@ -125,13 +128,6 @@
 		</loadfile>
 		<echo message="" file="${BUILD_INFO_FILE}" />
 		<echo file="${BUILD_INFO_FILE}">Paketversion: ${VERSION}, ${revision}</echo>
-	</target>
-
-	<!-- Kopiert das basic-Das Target jarfile erzeugt die Java-Komponente WollMux -->
-	<target name="basicdir" depends="">
-		<copy todir="${RDB_DIR}/basic">
-			<fileset dir="${basedir}/basic"/>
-		</copy>
 	</target>
 
 	<!-- Das Target javamake erzeugt das rdb-file und die java-Interfaces -->
