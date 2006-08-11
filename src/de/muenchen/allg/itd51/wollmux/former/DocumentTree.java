@@ -56,6 +56,8 @@ public class DocumentTree
   public static final int CHECKBOX_CONTROL = 0;
   public static final int DROPDOWN_CONTROL = 1;
   public static final int INPUT_CONTROL = 2;
+  public static final int CONTAINER_TYPE = 0;
+  public static final int PARAGRAPH_TYPE = 1;
   
   private Node root;  
   
@@ -241,7 +243,7 @@ public class DocumentTree
         continue;
     }
     
-    nodes.add(new ContainerNode(textPortions));
+    nodes.add(new ParagraphNode(textPortions));
   }
   
   public static interface InsertionBookmark
@@ -282,7 +284,7 @@ public class DocumentTree
     
     public boolean insertionBookmark(InsertionBookmark bookmark) {return true;}
     public boolean formControl(FormControl control) {return true;}
-    public boolean container(int count) {return true;}
+    public boolean container(Container container, int count) {return true;}
     public boolean textRange(TextRange textRange) {return true;}
   }
     
@@ -293,7 +295,12 @@ public class DocumentTree
     public boolean visit(Visitor visit) {return true;}
   }
   
-  public static class ContainerNode extends Node
+  public static interface Container
+  {
+    public int getType();
+  }
+  
+  public static class ContainerNode extends Node implements Container
   {
     private Collection children;
     
@@ -305,19 +312,32 @@ public class DocumentTree
     
     public Iterator iterator() { return children.iterator();}
     public String toString() { return "CONTAINER";}
+   
+    public int getType() {return CONTAINER_TYPE;}
     
     public boolean visit(Visitor visit)
     {
-      if (!visit.container(0)) return false;
+      if (!visit.container(this, 0)) return false;
       
       Iterator iter = iterator();
       while (iter.hasNext())
       {
         if (!((Node)iter.next()).visit(visit)) return false;
       }
-      if (!visit.container(1)) return false;
+      if (!visit.container(this, 1)) return false;
       return true;
     }
+  }
+  
+  public static class ParagraphNode extends ContainerNode
+  {
+    public ParagraphNode(Collection children)
+    {
+      super(children);
+    }
+
+    public String toString() { return "PARAGRAPH";}
+    public int getType() {return PARAGRAPH_TYPE;}
   }
   
   public static class BookmarkNode extends Node

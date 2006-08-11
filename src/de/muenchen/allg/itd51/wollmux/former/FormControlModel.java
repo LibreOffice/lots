@@ -301,8 +301,8 @@ public class FormControlModel
     conf.add("EDIT").add(""+getEditable());
     conf.add("LINES").add(""+getLines());
     conf.add("MINSIZE").add(""+getMinsize());
-    conf.add("ACTION").add(""+getAction());
-    conf.add("DIALOG").add(""+getDialog());
+    if (getAction().length() > 0) conf.add("ACTION").add(""+getAction());
+    if (getDialog().length() > 0) conf.add("DIALOG").add(""+getDialog());
     if (getHotkey() > 0)
       conf.add("HOTKEY").add(""+getHotkey());
     
@@ -328,8 +328,10 @@ public class FormControlModel
       }
     }
     
-    conf.addChild(new ConfigThingy(plausi));
-    conf.addChild(new ConfigThingy(autofill));
+    if (plausi.count() > 0)
+      conf.addChild(new ConfigThingy(plausi));
+    if (autofill.count() > 0)
+      conf.addChild(new ConfigThingy(autofill));
     
     return conf; 
   }

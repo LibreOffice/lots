@@ -52,6 +52,7 @@ import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.FormDescriptor;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.dialog.Common;
+import de.muenchen.allg.itd51.wollmux.former.DocumentTree.Container;
 import de.muenchen.allg.itd51.wollmux.former.DocumentTree.DropdownFormControl;
 import de.muenchen.allg.itd51.wollmux.former.DocumentTree.FormControl;
 import de.muenchen.allg.itd51.wollmux.former.DocumentTree.InsertionBookmark;
@@ -123,7 +124,7 @@ public class FormularMax4000
   
   public FormularMax4000(final XTextDocument doc)
   {
-    formDescriptor = new FormDescriptor(doc);
+    initFormDescriptor(doc);
     init();
     
      //  GUI im Event-Dispatching Thread erzeugen wg. Thread-Safety.
@@ -167,7 +168,7 @@ public class FormularMax4000
     menuItem.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e)
       {
-        writeFormDescriptor();
+        writeFormDescriptor(doc);
       }});
     menu.add(menuItem);
     
@@ -249,12 +250,22 @@ public class FormularMax4000
   }
   
   /**
+   * Initialisiert den formDescriptor mit den Formularbeschreibungsdaten des
+   * Dokuments doc.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private void initFormDescriptor(XTextDocument doc)
+  {
+    formDescriptor = new FormDescriptor(doc);
+  }
+  
+  /**
    * Speichert die Formularbeschreibung in einem Benutzerfeld der DocumentInfo.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
-  private void writeFormDescriptor()
+  private void writeFormDescriptor(XTextDocument doc)
   {
     ConfigThingy conf = exportFormDescriptor();
     formDescriptor.fromConfigThingy(conf);
@@ -427,20 +438,33 @@ public class FormularMax4000
       Visitor visitor = new DocumentTree.Visitor(){
         private Map insertions = new HashMap();
         private StringBuilder text = new StringBuilder();
+        private StringBuilder fixupText = new StringBuilder();
         private FormControlModel fixupCheckbox = null;
         
-        public boolean container(int count)
+        private void fixup()
         {
           if (fixupCheckbox != null && fixupCheckbox.getLabel() == NO_LABEL)
-            fixupCheckbox.setLabel(makeLabelFromStartOf(text, 2*GENERATED_LABEL_MAXLENGTH));
-          text.setLength(0);
-          fixupCheckbox = null;
+          {
+            fixupCheckbox.setLabel(makeLabelFromStartOf(fixupText, 2*GENERATED_LABEL_MAXLENGTH));
+            fixupCheckbox = null;
+          }
+          fixupText.setLength(0);
+        }
+        
+        public boolean container(Container container, int count)
+        {
+          fixup();
+          
+          if (container.getType() != DocumentTree.PARAGRAPH_TYPE) text.setLength(0);
+          
           return true;
         }
         
         public boolean textRange(TextRange textRange)
         {
-          text.append(textRange.getString());
+          String str = textRange.getString(); 
+          text.append(str);
+          fixupText.append(str);
           return true;
         }
         
@@ -456,6 +480,8 @@ public class FormularMax4000
         
         public boolean formControl(FormControl control)
         {
+          fixup();
+          
           if (insertions.isEmpty())
           {
             FormControlModel model = registerFormControl(control, text);
@@ -537,6 +563,7 @@ public class FormularMax4000
     FormControlModel model = null;
     if (label != INSERTION_ONLY)
     {
+      label = NO_LABEL; //immer fixUp-Text von hinter der Checkbox benutzen, weil meist bessere Ergebnisse
       model = FormControlModel.createCheckbox(label, id);
       if (control.getString().equalsIgnoreCase("true"))
       {

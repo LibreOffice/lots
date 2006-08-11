@@ -102,7 +102,7 @@ public class FormControlModelList
     ConfigThingy tabConf = export;
     
     int phase = 0; //0: tab start, 1: Eingabefelder, 2: Buttons
-    FormControlModel currentTab = FormControlModel.createTab("Reiter 1", "Reiter1");
+    FormControlModel currentTab = FormControlModel.createTab("Eingabe", "Reiter1");
     Iterator iter = models.iterator();
     while (iter.hasNext())
     {
