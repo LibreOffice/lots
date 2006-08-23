@@ -16,6 +16,8 @@
  *                    DocumentCommandInterpreter.
  * 05.05.2006 | BNK | Dummy-Argument zum Aufruf des FormGUI Konstruktors hinzugefügt.
  * 17.05.2006 | LUT | Doku überarbeitet.
+ * 22.08.2006 | BNK | cleanInsertMarks() und EmptyParagraphCleaner verschmolzen zu
+ *                  | SurroundingGarbageCollector und dabei komplettes Rewrite.
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -28,6 +30,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
@@ -40,6 +43,8 @@ import com.sun.star.container.XEnumerationAccess;
 import com.sun.star.io.IOException;
 import com.sun.star.lang.EventObject;
 import com.sun.star.lang.IllegalArgumentException;
+import com.sun.star.text.XParagraphCursor;
+import com.sun.star.text.XTextContent;
 import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextRange;
@@ -153,15 +158,19 @@ public class DocumentCommandInterpreter
     // insertValues) in einem einzigen Durchlauf mit execute bearbeiten.
     errors += new MainProcessor().execute(tree);
 
+    //SurroundingGarbageCollector collect = new SurroundingGarbageCollector();
+    //errors += collect.execute(tree);
+    //collect.removeGarbage();
+    
     // 4) Da keine neuen Elemente mehr eingefügt werden müssen, können
     // jetzt die INSERT_MARKS "<" und ">" der insertFrags und
     // InsertContent-Kommandos gelöscht werden.
-    errors += cleanInsertMarks(tree);
+    //errors += cleanInsertMarks(tree);
 
     // 5) Erst nachdem die INSERT_MARKS entfernt wurden, lassen sich leere
     // Absätze zum Beginn und Ende der insertFrag bzw. insertContent-Kommandos
     // sauber erkennen und entfernen.
-    errors += new EmptyParagraphCleaner().execute(tree);
+    //errors += new EmptyParagraphCleaner().execute(tree);
 
     // 6) Scannen aller für das Formular relevanten Informationen:
     if (formScanner == null) formScanner = new FormScanner();
@@ -657,6 +666,226 @@ public class DocumentCommandInterpreter
     }
   }
 
+  /**
+   * Der SurroundingGarbageCollector erfasst leere Absätze und Einfügemarker um 
+   * Dokumentkommandos herum.
+   */
+  private class SurroundingGarbageCollector extends TreeExecutor
+  {
+    private XTextDocument doc;
+    
+    /**
+     * Speichert XParagraphCursor mit Ausdehnung, die zu löschenden Müll enthalten.
+     */
+    private List garbageCursors = new Vector();
+    
+    /**
+     * Diese Methode erfasst leere Absätze und Einfügemarker, die sich um die im 
+     * Kommandobaum tree enthaltenen Dokumentkommandos befinden.
+     */ 
+    private int execute(DocumentCommandTree tree)
+    {
+      doc = UNO.XTextDocument(tree.getBookmarksSupplier());
+      int errors = 0;
+      Iterator iter = tree.depthFirstIterator(false);
+      while (iter.hasNext())
+      {
+        DocumentCommand cmd = (DocumentCommand) iter.next();
+        errors += cmd.execute(this);
+      }
+
+      return errors;
+    }
+    
+    /**
+     * Löscht die vorher als Müll identifizierten Inhalte.
+     * type filter text
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     * TESTED
+     */
+    private void removeGarbage()
+    {
+      setLockControllers(true);
+      Iterator iter = garbageCursors.iterator();
+      while (iter.hasNext())
+      {
+        XParagraphCursor cursor = (XParagraphCursor)iter.next();
+        Bookmark.removeTextFromInside(doc, cursor);
+        //FIXME: Das Flag DocumentCommand.hasInsertMarks ist hiernach falsch. Evtl. bereits in collectGarbage... zurücksetzen?
+      }
+      setLockControllers(false);
+    }
+
+    public int executeCommand(InsertFrag cmd)
+    {
+      collectSurroundingGarbageForCommand(cmd);
+      return 0;
+    }
+
+    public int executeCommand(InsertContent cmd)
+    {
+      collectSurroundingGarbageForCommand(cmd);
+      return 0;
+    }
+
+    // Helper-Methoden:
+
+    /**
+     * Diese Methode erfasst Einfügemarken und leere Absätze zum Beginn und zum Ende des
+     * übergebenen Dokumentkommandos cmd.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     * TESTED
+     */
+    private void collectSurroundingGarbageForCommand(DocumentCommand cmd)
+    {
+      /*
+       * Im folgenden steht eine 0 in der ersten Stelle dafür, dass vor dem
+       * Einfügemarker kein Text mehr steht (der Marker also am Anfang des
+       * Absatzes ist). Eine 0 an der zweiten Stelle steht dafür, dass hinter
+       * dem Einfügemarker kein Text mehr folgt (der Einfügemarker also am Ende
+       * des Absatzes steht).
+       * 
+       * Startmarke: Grundsätzlich gibt es die folgenden Fälle zu unterscheiden.
+       * Ein "T" an dritter Stelle gibt an, dass hinter dem Absatz des
+       * Einfügemarkers eine Tabelle folgt.
+       * 
+       * 00: Einfügemarker und Zeilenumbruch DAHINTER löschen
+       * 
+       * 01: nur Einfügemarker löschen 
+       * 
+       * 10: nur Einfügemarker löschen
+       * 
+       * 11: nur Einfügemarker löschen
+       * 
+       * 00T: Einfügemarker und Zeilenumbruch DAVOR löschen
+       * 
+       * Die Fälle 01T, 10T und 11T werden nicht unterstützt.
+       * 
+       * Endmarke: Es gibt die folgenden Fälle:
+       * 
+       * 00: Einfügemarker und Zeilenumbruch DAHINTER löschen
+       * 
+       * 01, 10, 11: Einfügemarker löschen
+       * 
+       *
+       */
+      XParagraphCursor[] cursor = cmd.getStartMark();
+      if (cursor == null) return;
+      
+      if (cursor[0].isStartOfParagraph() && cursor[1].isEndOfParagraph())
+      {
+        XTextCursor tableChecker = cursor[1].getText().createTextCursorByRange(cursor[1]);
+        tableChecker.goRight((short)1, true);
+        if (isFollowedByTextParagraph(tableChecker))
+        {
+          cursor[1].goRight((short)1, false);
+        }
+        cursor[1].goLeft((short)(1 + cmd.getStartMarkLength()), true);
+      }
+      else //if start mark is not the only text in the paragraph
+      {
+        cursor[1].goLeft((short) 1, true);
+      }
+
+      garbageCursors.add(cursor[1]);
+      
+      cursor = cmd.getEndMark();
+      if (cursor[0].isStartOfParagraph() && cursor[1].isEndOfParagraph())
+      {
+        cursor[0].goRight((short)(1 + cmd.getEndMarkLength()), true);
+      }
+      else
+        cursor[0].goRight(cmd.getEndMarkLength(), true);
+      
+      garbageCursors.add(cursor[0]);
+    }
+    
+    /**
+     * Die Methode prüft, ob der zweite Paragraph des markierte Bereichs ein
+     * TextParagraph ist und gibt true zurück, wenn der zweite Paragraph nicht
+     * vorhanden ist oder er den Service com.sun.star.text.Paragraph
+     * implementiert.
+     * 
+     * @param enumAccess
+     *          die XEnumerationAccess Instanz des markierten Bereichts (ein
+     *          TextCursors).
+     * @return true oder false
+     */
+    private boolean isFollowedByTextParagraph(Object xEnumAccess)
+    {
+      XEnumerationAccess enumAccess = UNO.XEnumerationAccess(xEnumAccess);
+      if (enumAccess != null)
+      {
+        XEnumeration xenum = enumAccess.createEnumeration();
+        Object element2 = null;
+
+        if (xenum.hasMoreElements()) try
+        {
+          xenum.nextElement();
+        }
+        catch (Exception e)
+        {
+        }
+
+        if (xenum.hasMoreElements())
+        {
+          try
+          {
+            element2 = xenum.nextElement();
+          }
+          catch (Exception e)
+          {
+          }
+        }
+        else
+          return true;
+
+        return UNO.supportsService(element2, "com.sun.star.text.Paragraph");
+      }
+      return false;
+    }
+
+    /**
+     * Löscht den ganzen ersten Absatz an der Cursorposition textCursor.
+     * 
+     * @param range
+     */
+    private void deleteParagraph(XTextRange range)
+    {
+      // Beim Löschen des Absatzes erzeugt OOo ein ungewolltes
+      // "Zombie"-Bookmark.
+      // Issue Siehe http://qa.openoffice.org/issues/show_bug.cgi?id=65247
+
+      XTextContent paragraph = null;
+
+      // Ersten Absatz des Bookmarks holen:
+      XEnumerationAccess access = UNO.XEnumerationAccess(range);
+      if (access != null)
+      {
+        XEnumeration xenum = access.createEnumeration();
+        if (xenum.hasMoreElements()) try
+        {
+          paragraph = UNO.XTextContent(xenum.nextElement());
+        }
+        catch (Exception e)
+        {
+          Logger.error(e);
+        }
+      }
+
+      // Lösche den Paragraph
+      if (paragraph != null) 
+      try
+      {
+        range.getText().removeTextContent(paragraph);
+      }
+      catch (NoSuchElementException e)
+      {
+        Logger.error(e);
+      }
+    }
+  }
+  
   /**
    * Der EmptyParagraphCleaner löscht leere Absätze aus allen zuvor eingefügten
    * Textfragmenten heraus.

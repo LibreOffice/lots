@@ -28,6 +28,8 @@ import java.util.ListIterator;
 import java.util.Set;
 import java.util.Vector;
 
+import com.sun.star.text.XParagraphCursor;
+import com.sun.star.text.XText;
 import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextRange;
 import com.sun.star.uno.Exception;
@@ -372,7 +374,7 @@ abstract public class DocumentCommand
 
         bookmark.rerangeBookmark(cursor);
 
-        cursor.goRight((short) INSERT_MARK_OPEN.length(), false);
+        cursor.goRight(getStartMarkLength(), false);
         cursor.collapseToStart();
 
         return cursor;
@@ -383,6 +385,62 @@ abstract public class DocumentCommand
     return null;
   }
 
+  /**
+   * Liefert die Länge des End-Einfügemarkers.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public short getEndMarkLength()
+  {
+    return (short) INSERT_MARK_CLOSE.length();
+  }
+
+  
+  /**
+   * Liefert die Länge des Start-Einfügemarkers.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public short getStartMarkLength()
+  {
+    return (short) INSERT_MARK_OPEN.length();
+  }
+
+  
+  /**
+   * Liefert entweder null falls kein Start-Einfügemarke vorhanden oder liefert 2 Cursor,
+   * von denen der erste links neben der zweite rechts neben der Start-Einfügemarke steht.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED
+   */
+  public XParagraphCursor[] getStartMark()
+  {
+    XTextRange range = bookmark.getTextRange();
+    if (range == null || !hasInsertMarks) return null;
+    XParagraphCursor[] cursor = new XParagraphCursor[2];
+    XText text = range.getText(); 
+    cursor[0] = UNO.XParagraphCursor(text.createTextCursorByRange(range.getStart()));
+    cursor[1] = UNO.XParagraphCursor(text.createTextCursorByRange(cursor[0]));
+    cursor[1].goRight(getStartMarkLength(), false);
+    return cursor;
+  }
+  
+  /**
+   * Liefert entweder null falls keine End-Einfügemarke vorhanden oder liefert 2 Cursor,
+   * von denen der erste links neben der zweite rechts neben der End-Einfügemarke steht.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED
+   */
+  public XParagraphCursor[] getEndMark()
+  {
+    XTextRange range = bookmark.getTextRange();
+    if (range == null || !hasInsertMarks) return null;
+    XParagraphCursor[] cursor = new XParagraphCursor[2];
+    XText text = range.getText(); 
+    cursor[0] = UNO.XParagraphCursor(text.createTextCursorByRange(range.getEnd()));
+    cursor[1] = UNO.XParagraphCursor(text.createTextCursorByRange(cursor[0]));
+    cursor[0].goLeft(getStartMarkLength(), false);
+    return cursor;
+  }
+  
   /**
    * Hat das DocumentCommand über createInsertCursor Einfügemarken erzeugt,
    * werden diese aus dem Dokumentkommando gelöscht.
@@ -400,18 +458,21 @@ abstract public class DocumentCommand
 
         // INSERT_MARK links löschen:
         cursor = range.getText().createTextCursorByRange(range.getStart());
-        cursor.goRight((short) INSERT_MARK_OPEN.length(), true);
-        cursor.setString("");
+        cursor.goRight(getStartMarkLength(), true);
+        Bookmark.removeTextFromInside(bookmark.getDocument(), cursor);
+        //cursor.setString("");
 
         // INSERT_MARK rechts löschen:
         cursor = range.getText().createTextCursorByRange(range.getEnd());
-        cursor.goLeft((short) INSERT_MARK_CLOSE.length(), true);
-        cursor.setString("");
+        cursor.goLeft(getEndMarkLength(), true);
+        Bookmark.removeTextFromInside(bookmark.getDocument(), cursor);
+        //cursor.setString("");
         hasInsertMarks = false;
       }
     }
   }
 
+  
   /**
    * Beschreibt ob das Kommando bereits abgearbeitet wurde. Ist DONE bisher noch
    * nicht definiert oder gesetzt worden, so wird der Defaultwert false

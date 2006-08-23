@@ -19,11 +19,18 @@
  */
 package de.muenchen.allg.itd51.wollmux;
 
+import java.util.Iterator;
+import java.util.Vector;
+
 import com.sun.star.container.NoSuchElementException;
+import com.sun.star.container.XEnumeration;
+import com.sun.star.container.XEnumerationAccess;
+import com.sun.star.container.XNameAccess;
 import com.sun.star.container.XNamed;
 import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.lang.WrappedTargetException;
 import com.sun.star.text.XBookmarksSupplier;
+import com.sun.star.text.XText;
 import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextRange;
@@ -31,6 +38,7 @@ import com.sun.star.text.XTextRangeCompare;
 import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
 
+import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoService;
 
 /**
@@ -445,6 +453,92 @@ public class Bookmark
       {
         Logger.error(e);
       }
+    }
+  }
+
+  /**
+   * Entfernt allen Text (aber keine Bookmarks) aus range.
+   * @param doc das Dokument, das range enthält.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public static void removeTextFromInside(XTextDocument doc, XTextRange range)
+  {
+    try{
+      //ein Bookmark erzeugen, was genau die Range, die wir löschen wollen vom
+      //Rest des Textes abtrennt, d.h. welches dafür sorgt, dass unser Text eine
+      //eigene Textportion ist.
+      Object bookmark = UNO.XMultiServiceFactory(doc).createInstance("com.sun.star.text.Bookmark");
+      UNO.XNamed(bookmark).setName("killer");
+      range.getText().insertTextContent(range, UNO.XTextContent(bookmark), true);
+      String name = UNO.XNamed(bookmark).getName();
+      
+      //Aufsammeln der zu entfernenden TextPortions (sollte genau eine sein) und
+      //der Bookmarks, die evtl. als Kollateralschaden entfernt werden.
+      Vector collateral = new Vector();
+      Vector victims = new Vector();
+      XEnumeration xEnum = UNO.XEnumerationAccess(range).createEnumeration();
+      while (xEnum.hasMoreElements())
+      {
+        boolean kill = false;
+        XEnumerationAccess access = UNO.XEnumerationAccess(xEnum.nextElement());
+        if (access != null)
+        {
+          XEnumeration xEnum2 = access.createEnumeration();
+          while (xEnum2.hasMoreElements())
+          {
+            Object textPortion = xEnum2.nextElement();
+            if ("Bookmark".equals(UNO.getProperty(textPortion, "TextPortionType")))
+            {
+              String portionName = UNO.XNamed(UNO.getProperty(textPortion, "Bookmark")).getName();
+              if (name.equals(portionName))
+              {
+                kill = ((Boolean)UNO.getProperty(textPortion,"IsStart")).booleanValue();
+              }
+              else
+                collateral.add(portionName);
+            }
+            
+            if (kill && "Text".equals(UNO.getProperty(textPortion, "TextPortionType")))
+            {
+              victims.add(textPortion);
+            }
+          }
+        }
+      }
+      
+      /*
+       * Zu entfernenden Content löschen.
+       */
+      /*Iterator iter = victims.iterator();
+      XText text = range.getText();
+      while (iter.hasNext())
+      {
+        text.removeTextContent(UNO.XTextContent(iter.next()));
+      }*/
+      range.setString("");
+      
+      UNO.XTextContent(bookmark).getAnchor().getText().removeTextContent(UNO.XTextContent(bookmark));
+      
+      /*
+       * Verlorene Bookmarks regenerieren.
+       */
+      XNameAccess bookmarks = UNO.XBookmarksSupplier(doc).getBookmarks();
+      Iterator iter = collateral.iterator();
+      while (iter.hasNext())
+      {
+        String portionName = (String)iter.next();
+        if (!bookmarks.hasByName(portionName))
+        {
+          Logger.debug("Regeneriere Bookmark \""+portionName+"\"");
+          bookmark = UNO.XMultiServiceFactory(doc).createInstance("com.sun.star.text.Bookmark");
+          UNO.XNamed(bookmark).setName(portionName);
+          range.getText().insertTextContent(range, UNO.XTextContent(bookmark), true);
+        }
+          
+      }
+    }catch(Exception x)
+    {
+      Logger.error(x);
     }
   }
 }
