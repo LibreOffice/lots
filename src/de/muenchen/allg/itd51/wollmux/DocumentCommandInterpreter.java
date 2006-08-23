@@ -18,6 +18,8 @@
  * 17.05.2006 | LUT | Doku überarbeitet.
  * 22.08.2006 | BNK | cleanInsertMarks() und EmptyParagraphCleaner verschmolzen zu
  *                  | SurroundingGarbageCollector und dabei komplettes Rewrite.
+ * 23.08.2006 | BNK | nochmal Rewrite. Ich glaube dieser Code hält den Rekord im WollMux
+ *                  | was rewrites angeht.
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -158,9 +160,9 @@ public class DocumentCommandInterpreter
     // insertValues) in einem einzigen Durchlauf mit execute bearbeiten.
     errors += new MainProcessor().execute(tree);
 
-    //SurroundingGarbageCollector collect = new SurroundingGarbageCollector();
-    //errors += collect.execute(tree);
-    //collect.removeGarbage();
+    SurroundingGarbageCollector collect = new SurroundingGarbageCollector();
+    errors += collect.execute(tree);
+    collect.removeGarbage();
     
     // 4) Da keine neuen Elemente mehr eingefügt werden müssen, können
     // jetzt die INSERT_MARKS "<" und ">" der insertFrags und
@@ -675,9 +677,38 @@ public class DocumentCommandInterpreter
     private XTextDocument doc;
     
     /**
-     * Speichert XParagraphCursor mit Ausdehnung, die zu löschenden Müll enthalten.
+     * Speichert Muellmann-Objekte, die zu löschenden Müll entfernen.
      */
-    private List garbageCursors = new Vector();
+    private List muellmaenner = new Vector();
+    
+    private abstract class Muellmann
+    {
+      protected XTextRange range;
+      public Muellmann(XTextRange range)
+      {
+        this.range = range;
+      }
+      public abstract void tueDeinePflicht();
+    }
+    
+    private class RangeMuellmann extends Muellmann
+    {
+      public RangeMuellmann(XTextRange range) {super(range);}
+      
+      public void tueDeinePflicht()
+      {
+        Bookmark.removeTextFromInside(doc, range);
+      }
+    }
+    
+    private class ParagraphMuellmann extends Muellmann
+    {
+      public ParagraphMuellmann(XTextRange range) {super(range);}
+      public void tueDeinePflicht()
+      {
+        deleteParagraph(range);
+      }
+    }
     
     /**
      * Diese Methode erfasst leere Absätze und Einfügemarker, die sich um die im 
@@ -706,12 +737,11 @@ public class DocumentCommandInterpreter
     private void removeGarbage()
     {
       setLockControllers(true);
-      Iterator iter = garbageCursors.iterator();
+      Iterator iter = muellmaenner.iterator();
       while (iter.hasNext())
       {
-        XParagraphCursor cursor = (XParagraphCursor)iter.next();
-        Bookmark.removeTextFromInside(doc, cursor);
-        //FIXME: Das Flag DocumentCommand.hasInsertMarks ist hiernach falsch. Evtl. bereits in collectGarbage... zurücksetzen?
+        Muellmann muellmann = (Muellmann)iter.next();
+        muellmann.tueDeinePflicht();
       }
       setLockControllers(false);
     }
@@ -774,30 +804,24 @@ public class DocumentCommandInterpreter
       
       if (cursor[0].isStartOfParagraph() && cursor[1].isEndOfParagraph())
       {
-        XTextCursor tableChecker = cursor[1].getText().createTextCursorByRange(cursor[1]);
-        tableChecker.goRight((short)1, true);
-        if (isFollowedByTextParagraph(tableChecker))
-        {
-          cursor[1].goRight((short)1, false);
-        }
-        cursor[1].goLeft((short)(1 + cmd.getStartMarkLength()), true);
+        muellmaenner.add(new ParagraphMuellmann(cursor[1]));
       }
       else //if start mark is not the only text in the paragraph
       {
         cursor[1].goLeft((short) 1, true);
+        muellmaenner.add(new RangeMuellmann(cursor[1]));
       }
-
-      garbageCursors.add(cursor[1]);
       
       cursor = cmd.getEndMark();
       if (cursor[0].isStartOfParagraph() && cursor[1].isEndOfParagraph())
       {
-        cursor[0].goRight((short)(1 + cmd.getEndMarkLength()), true);
+        muellmaenner.add(new ParagraphMuellmann(cursor[1]));
       }
       else
+      {
         cursor[0].goRight(cmd.getEndMarkLength(), true);
-      
-      garbageCursors.add(cursor[0]);
+        muellmaenner.add(new RangeMuellmann(cursor[0]));
+      }
     }
     
     /**
@@ -886,255 +910,6 @@ public class DocumentCommandInterpreter
     }
   }
   
-  /**
-   * Der EmptyParagraphCleaner löscht leere Absätze aus allen zuvor eingefügten
-   * Textfragmenten heraus.
-   */
-  private class EmptyParagraphCleaner extends TreeExecutor
-  {
-    /**
-     * Diese Methode löscht leere Absätze, die sich um die im Kommandobaum tree
-     * enthaltenen Dokumentkommandos vom Typ FragmentInserter befinden.
-     * 
-     * @param tree
-     *          Der Kommandobaum in dem nach FragmentInserter-Kommandos gesucht
-     *          wird.
-     */
-    private int execute(DocumentCommandTree tree)
-    {
-      setLockControllers(true);
-
-      int errors = 0;
-      Iterator iter = tree.depthFirstIterator(false);
-      while (iter.hasNext())
-      {
-        DocumentCommand cmd = (DocumentCommand) iter.next();
-        errors += cmd.execute(this);
-      }
-
-      setLockControllers(false);
-
-      return errors;
-    }
-
-    public int executeCommand(InsertFrag cmd)
-    {
-      cleanEmptyParagraphsForCommand(cmd);
-      return 0;
-    }
-
-    public int executeCommand(InsertContent cmd)
-    {
-      cleanEmptyParagraphsForCommand(cmd);
-      return 0;
-    }
-
-    // Helper-Methoden:
-
-    /**
-     * Diese Methode löscht die leeren Absätze zum Beginn und zum Ende des
-     * übergebenen Dokumentkommandos cmd, falls leere Absätze vorhanden sind.
-     * 
-     * @param cmd
-     *          Das Dokumentkommando, um das die leeren Absätze entfernt werden
-     *          sollen.
-     */
-    private void cleanEmptyParagraphsForCommand(DocumentCommand cmd)
-    {
-      Logger.debug2("cleanEmptyParagraphsForCommand(" + cmd + ")");
-
-      // Ersten Absatz löschen, falls er leer ist:
-
-      // benötigte TextCursor holen:
-      XTextRange range = cmd.getTextRange();
-      UnoService fragStart = new UnoService(null);
-      UnoService marker = new UnoService(null);
-      if (range != null)
-      {
-        fragStart = new UnoService(range.getText().createTextCursorByRange(
-            range.getStart()));
-        marker = new UnoService(range.getText().createTextCursor());
-      }
-
-      if (fragStart.xParagraphCursor() != null
-          && fragStart.xParagraphCursor().isEndOfParagraph())
-      {
-        // Der Cursor ist am Ende des Absatzes. Das sagt uns, dass der erste
-        // eingefügte Absatz ein leerer Absatz war. Damit soll dieser Absatz
-        // gelöscht werden:
-
-        // Jetzt wird der marker verwendet, um die zu löschenden Absatzvorschübe
-        // zu markieren. Hier muss man zuerst eins nach rechts gehen und den
-        // Bereich von rechts nach links aufziehen, denn sonst würden nach dem
-        // kommenden Löschvorgang (setString("")) die Absatzmerkmale des
-        // vorherigen Absatzes benutzt und nicht die des nächsten Absatzes wie
-        // gewünscht.
-        marker.xTextCursor().gotoRange(fragStart.xTextRange(), false);
-        marker.xParagraphCursor().goRight((short) 1, false);
-        marker.xParagraphCursor().goLeft((short) 1, true);
-
-        // In manchen Fällen verhält sich der Textcursor nach den obigen zwei
-        // Zeilen anders als erwartet. Z.B. wenn der nächsten Absatz eine
-        // TextTable ist. In diesem Fall ist nach obigen zwei Zeilen die ganze
-        // Tabelle markiert und nicht nur das Absatztrennzeichen. Der Cursor
-        // markiert also mehr Inhalt als nur den erwarteten Absatzvorschub. In
-        // einem solchen Fall, darf der markierte Inhalt nicht gelöscht werden.
-        // Anders ausgedrückt, darf der Absatz nur gelöscht werden, wenn beim
-        // Markieren ausschließlich Text markiert wurde.
-        if (isFollowedByTextParagraph(marker.xEnumerationAccess()))
-        {
-          // Normalfall: hier darf gelöscht werden
-          Logger.debug2("Loesche Absatzvorschubzeichen");
-
-          // Workaround: Normalerweise reicht der setString("") zum Löschen des
-          // Zeichens. Jedoch im Spezialfall, dass der zweite Absatz auch leer
-          // ist, würde der zweite Absatz ohne den folgenden Workaround seine
-          // Formatierung verlieren. Das Problem ist gemeldet unter:
-          // http://qa.openoffice.org/issues/show_bug.cgi?id=65384
-
-          // Workaround: bevor der Absatz gelöscht wird, füge ich in den zweiten
-          // Absatz einen Inhalt ein.
-          marker.xTextCursor().goRight((short) 1, false); // cursor korrigieren
-          marker.xTextCursor().setString("c");
-          marker.xTextCursor().collapseToStart();
-          marker.xTextCursor().goLeft((short) 1, true); // cursor wie vorher
-
-          // hier das eigentliche Löschen des Absatzvorschubs
-          marker.xTextCursor().setString("");
-
-          // Workaround: Nun wird der vorher eingefügte Inhalt wieder gelöscht.
-          marker.xTextCursor().goRight((short) 1, true);
-          marker.xTextCursor().setString("");
-        }
-        else
-        {
-          // In diesem Fall darf normalerweise nichts gelöscht werden, ausser
-          // der
-          // Einfügepunkt des insertFrags/insertContent selbst ist ein
-          // leerer Absatz. Dieser leere Absatz kann als ganzes gelöscht
-          // werden. Man erkennt den Fall daran, dass fragStart auch der Anfang
-          // des Absatzes ist.
-          if (fragStart.xParagraphCursor().isStartOfParagraph())
-          {
-            Logger.debug2("Loesche den ganzen leeren Absatz");
-            deleteParagraph(fragStart.xTextCursor());
-            // Hierbei wird das zugehörige Bookmark ungültig, da es z.B. eine
-            // enthaltene TextTable nicht mehr umschließt. Aus diesem Grund
-            // werden
-            // Bookmarks nach erfolgreicher Ausführung gelöscht...
-          }
-        }
-      }
-
-      // Letzten Absatz löschen, falls er leer ist:
-
-      // der Range muss hier nochmal geholt werden, für den Fall, dass obige
-      // Zeilen das Bookmark mit löschen (der delete Paragraph tut dies z.B.
-      // beim
-      // insertFrag "Fusszeile" im Zusammenspiel mit TextTables).
-      range = cmd.getTextRange();
-      UnoService fragEnd = new UnoService(null);
-      if (range != null)
-      {
-        fragEnd = new UnoService(range.getText().createTextCursorByRange(
-            range.getEnd()));
-        marker = new UnoService(range.getText().createTextCursor());
-      }
-
-      if (fragEnd.xParagraphCursor() != null
-          && fragEnd.xParagraphCursor().isStartOfParagraph())
-      {
-        marker.xTextCursor().gotoRange(fragEnd.xTextRange(), false);
-        marker.xTextCursor().goLeft((short) 1, true);
-        marker.xTextCursor().setString("");
-      }
-    }
-
-    /**
-     * Die Methode prüft, ob der zweite Paragraph des markierte Bereichs ein
-     * TextParagraph ist und gibt true zurück, wenn der zweite Paragraph nicht
-     * vorhanden ist oder er den Service com.sun.star.text.Paragraph
-     * implementiert.
-     * 
-     * @param enumAccess
-     *          die XEnumerationAccess Instanz des markierten Bereichts (ein
-     *          TextCursors).
-     * @return true oder false
-     */
-    private boolean isFollowedByTextParagraph(XEnumerationAccess enumAccess)
-    {
-      if (enumAccess != null)
-      {
-        XEnumeration xenum = enumAccess.createEnumeration();
-        Object element2 = null;
-
-        if (xenum.hasMoreElements()) try
-        {
-          xenum.nextElement();
-        }
-        catch (Exception e)
-        {
-        }
-
-        if (xenum.hasMoreElements())
-        {
-          try
-          {
-            element2 = xenum.nextElement();
-          }
-          catch (Exception e)
-          {
-          }
-        }
-        else
-          return true;
-
-        return new UnoService(element2)
-            .supportsService("com.sun.star.text.Paragraph");
-      }
-      return false;
-    }
-
-    /**
-     * Löscht den ganzen ersten Absatz an der Cursorposition textCursor.
-     * 
-     * @param textCursor
-     */
-    private void deleteParagraph(XTextCursor textCursor)
-    {
-      // Beim Löschen des Absatzes erzeugt OOo ein ungewolltes
-      // "Zombie"-Bookmark.
-      // Issue Siehe http://qa.openoffice.org/issues/show_bug.cgi?id=65247
-
-      UnoService cursor = new UnoService(textCursor);
-
-      // Ersten Absatz des Bookmarks holen:
-      UnoService par = new UnoService(null);
-      if (cursor.xEnumerationAccess().createEnumeration() != null)
-      {
-        XEnumeration xenum = cursor.xEnumerationAccess().createEnumeration();
-        if (xenum.hasMoreElements()) try
-        {
-          par = new UnoService(xenum.nextElement());
-        }
-        catch (Exception e)
-        {
-          Logger.error(e);
-        }
-      }
-
-      // Lösche den Paragraph
-      if (cursor.xTextCursor() != null && par.xTextContent() != null) try
-      {
-        cursor.xTextCursor().getText().removeTextContent(par.xTextContent());
-      }
-      catch (NoSuchElementException e)
-      {
-        Logger.error(e);
-      }
-    }
-  }
-
   /**
    * Veranlasst alle Dokumentkommandos in der Reihenfolge einer Tiefensuche ihre
    * InsertMarks zu löschen.
