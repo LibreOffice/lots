@@ -9,6 +9,7 @@
 * Datum      | Wer | Änderungsgrund
 * -------------------------------------------------------------------
 * 04.08.2006 | BNK | Erstellung
+* 28.08.2006 | BNK | kommentiert
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -51,16 +52,51 @@ import de.muenchen.allg.itd51.wollmux.Logger;
  */
 public class DocumentTree
 {
+  /**
+   * Pattern zum Erkennen von insterValue und insertFormValue-Bookmarks.
+   */
   private static final Pattern INSERTION_BOOKMARK = Pattern.compile("\\A\\s*(WM\\s*\\(.*CMD\\s*'((insertValue)|(insertFormValue))'.*\\))\\s*\\d*\\z");
+  
+  /**
+   * Pattern zum Erkennen von setGroups-Bookmarks.
+   */
   private static final Pattern GROUP_BOOKMARK = Pattern.compile("\\A\\s*(WM\\s*\\(.*CMD\\s*'setGroups'.*\\))\\s*\\d*\\z");
+  
+  /**
+   * Rückgabewert für {@link FormControl#getType()} im Falle einer Checkbox.
+   */
   public static final int CHECKBOX_CONTROL = 0;
+  
+  /**
+   * Rückgabewert für {@link FormControl#getType()} im Falle einer Eingabeliste.
+   */
   public static final int DROPDOWN_CONTROL = 1;
+  
+  /**
+   * Rückgabewert für {@link FormControl#getType()} im Falle eines Eingabefeldes.
+   */
   public static final int INPUT_CONTROL = 2;
+  
+  /**
+   * Rückgabewert für {@link Container#getType()} falls die Art des Containers nicht
+   * näher bestimmt ist.
+   */
   public static final int CONTAINER_TYPE = 0;
+  
+  /**
+   * Rückgabewert für {@link Container#getType()} falls der Container ein Absatz ist.
+   */
   public static final int PARAGRAPH_TYPE = 1;
   
+  /**
+   * Die Wurzel des Dokumentbaums.
+   */
   private Node root;  
   
+  /**
+   * Erzeugt einen neuen Dokumentbaum für das Dokument doc.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   public DocumentTree(XTextDocument doc)
   {
     Vector topLevelNodes = new Vector();
@@ -102,6 +138,12 @@ public class DocumentTree
     root = new ContainerNode(topLevelNodes);
   }
 
+  /**
+   * Nimmt eine XEnumeration enu von Absätzen und TextTables und fügt für jedes Element von
+   * enu zu nodes einen entsprechenden {@link ContainerNode} hinzu.
+   * @param doc das Dokument in dem die Absätze liegen.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private void handleParagraphEnumeration(XEnumeration enu, Vector nodes, XTextDocument doc)
   {
     XEnumerationAccess enuAccess;
@@ -122,6 +164,11 @@ public class DocumentTree
     }
   }
 
+  /**
+   * Fügt nodes einen neuen {@link ContainerNode} hinzu, der die Zellen von table enthält. 
+   * @param doc das Dokument das die Tabelle enthält.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private void handleTextTable(XTextTable table, Collection nodes, XTextDocument doc)
   {
     Vector cells = new Vector();
@@ -137,6 +184,12 @@ public class DocumentTree
     nodes.add(new ContainerNode(cells));
   }
 
+  /**
+   * Fügt nodes einen neuen {@link ParagraphNode} hinzu, der die Inhalte des Absatzes
+   * paragraph. 
+   * @param doc das Dokument das den Absatz enthält.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private void handleParagraph(XEnumerationAccess paragraph, Collection nodes, XTextDocument doc)
   {
     Vector textPortions = new Vector();
@@ -246,17 +299,45 @@ public class DocumentTree
     nodes.add(new ParagraphNode(textPortions));
   }
   
+  /**
+   * Wird von Nodes unterstützt, die ein Bookmark repräsentieren, das eine Einfügung
+   * (insertFormValue oder insertValue) darstellt.
+   *
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   public static interface InsertionBookmark
   {
     public String getName();
     public boolean isStart();
   }
   
+  /**
+   * Wird von Nodes implementiert, die Formularsteuerelemente darstellen.
+   *
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   public static interface FormControl
   {
+    /**
+     * Liefert die Art des Steuerelements, z,B, {@link DocumentTree#CHECKBOX_CONTROL}.
+     * @return
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
     public int getType();
+    
+    /**
+     * Liefert einen String, der das Steuerelement beschreibt. Bei Eingabefeldern ist dies
+     * z.B. der "Hinweis"-Text.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
     public String getDescriptor();
+    
+    /**
+     * Legt ein Bookmark mit Namen bmName um das Steuerelement. 
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
     public void surroundWithBookmark(String bmName);
+    
     /**
      * Liefert den aktuell im Steuerelement eingestellten Wert zurück.
      * Boolesche Steuerelemente (Checkbox) liefern "true" oder "false".
@@ -275,6 +356,17 @@ public class DocumentTree
     public String getString();
   }
   
+  /**
+   * Abstrakte Basis-Klasse für das Besuchen aller Knoten eines DocumentTrees.
+   * Dazu wird ein Objekt erzeugt, das von Visitor abgeleitet ist und dann auf diesem
+   * Objekt obj die Methode obj.visit(tree) aufgerufen, wobei tree ein DocumentTree ist.
+   * Für jeden Node des Baums wird dann die entsprechende Methode von Visitor aufgerufen
+   * (teilweise mehrfach).
+   * Die Methoden können alle false zurückliefern um zu signalisieren, dass das Durchlaufen
+   * des Baumes abgebrochen werden soll. Die von Standard-Methoden liefern alle true.
+   *
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   public static abstract class Visitor
   {
     public void visit(DocumentTree tree)
@@ -282,24 +374,84 @@ public class DocumentTree
       tree.root.visit(this);
     }
     
+    /**
+     * Wird für Knoten aufgerufen, die eine Einfügestelle (insertValue, insertFormValue)
+     * repräsentieren.
+     * @return false, wenn keine weiteren Knoten besucht werden sollen.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
     public boolean insertionBookmark(InsertionBookmark bookmark) {return true;}
+    
+    /**
+     * Wird für Knoten aufgerufen, die Formularsteuerelement repräsentieren. 
+     * @return false, wenn keine weiteren Knoten besucht werden sollen.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
     public boolean formControl(FormControl control) {return true;}
+    
+    /**
+     * Wird für Knoten aufgerufen, die im inneren des Baumes liegen, d,h, Kindknoten 
+     * haben können. Dies sind zum Beispiel Absätze.
+     * @param count Der Knoten wird einmal mit count == 0 besucht bevor der erste
+     * Nachfahre besucht wird und 
+     * einmal nach dem Besuchen aller Nachfahren mit count == 1. 
+     * @return false, wenn keine weiteren Knoten besucht werden sollen.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
     public boolean container(Container container, int count) {return true;}
+    
+    /**
+     * Wird für Knoten aufgerufen, die Textabschnitte repräsentieren. 
+     * @return false, wenn keine weiteren Knoten besucht werden sollen.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
     public boolean textRange(TextRange textRange) {return true;}
   }
-    
+ 
+  /**
+   * Oberklasse für die Knoten des Dokumentbaums.
+   *
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   public static abstract class Node
   {
+    /**
+     * Liefert einen Iterator über alle Kindknoten.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
     public Iterator iterator() { return (new Vector(0)).iterator();};
     protected Node() {}
+    
+    /**
+     * Besucht den Knoten und falls es ein Container ist den ganzen Teilbaum mit diesem
+     * Knoten als Wurzel. Es werden die entsprechenden Methoden des {@link Visitor}s visit
+     * aufgerufen.
+     * @return false falls die entsprechende Methode von visit zurückliefert, dass keine
+     * weiteren Knoten mehr besucht werden sollen.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
     public boolean visit(Visitor visit) {return true;}
   }
   
+  /**
+   * Implementiert von Knoten, die Nachfahren haben können, z,B, Absätzen.
+   *
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   public static interface Container
   {
+    /**
+     * Liefert die Art des Knotens, z,B, {@link DocumentTree#PARAGRAPH_TYPE}.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
     public int getType();
   }
   
+  /**
+   * Oberklasse für Knoten, die Nachfahren haben können (z,B, Absätze).
+   *
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   public static class ContainerNode extends Node implements Container
   {
     private Collection children;
@@ -634,12 +786,6 @@ public class DocumentTree
   }
   
   
-  /**
-   * @param args
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TODO Testen
-   * @throws Exception 
-   */
   public static void main(String[] args) throws Exception
   {
     UNO.init();

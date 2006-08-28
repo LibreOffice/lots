@@ -10,6 +10,7 @@
 * -------------------------------------------------------------------
 * 03.08.2006 | BNK | Erstellung
 * 08.08.2006 | BNK | Viel Arbeit reingesteckt.
+* 28.08.2006 | BNK | kommentiert
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -66,8 +67,14 @@ import de.muenchen.allg.itd51.wollmux.former.DocumentTree.Visitor;
  */
 public class FormularMax4000
 {
+  /**
+   * Der Standard-Formulartitel, solange kein anderer gesetzt wird.
+   */
   private static final String GENERATED_FORM_TITLE = "Generiert durch FormularMax 4000";
 
+  /**
+   * Maximale Anzahl Zeichen für ein automatisch generiertes Label.
+   */
   private static final int GENERATED_LABEL_MAXLENGTH = 30;
   
   /**
@@ -97,7 +104,34 @@ public class FormularMax4000
    */
   private final URL STANDARD_BUTTONS_LAST_URL = this.getClass().getClassLoader().getResource("data/standardbuttons_letztes.conf");
   
-  //TODO MAGIC_DESCRIPTOR_PATTERN in FormularMax 4000 Doku dokumentieren
+  /**
+   * Beim Import neuer Formularfelder oder Checkboxen schaut der FormularMax4000 nach
+   * speziellen Hinweisen/Namen/Einträgen, die diesem Muster entsprechen. 
+   * Diese Zusatzinformationen werden herangezogen um Labels, IDs und andere Informationen zu
+   * bestimmen.
+   * 
+   * Eingabefeld: Als "Hinweis" kann    "Label<<ID>>" angegeben werden und wird beim Import
+   *              entsprechend berücksichtigt. Wird nur "<<ID>>" angegeben, so markiert das
+   *              Eingabefeld eine reine Einfügestelle (insertValue oder insertContent) und
+   *              beim Import wird dafür kein Formularsteuerelement erzeugt.
+   * 
+   * Eingabeliste/Dropdown: Als "Name" kann "Label<<ID>>" angegeben werden und wird beim
+   *                        Import berücksichtigt.
+   *                        Als Spezialeintrag in der Liste kann "<<Freitext>>" eingetragen werden
+   *                        und signalisiert dem FM4000, dass die ComboBox im Formular
+   *                        auch die Freitexteingabe erlauben soll.
+   *                        Wie bei Eingabefeldern auch ist die Angabe "<<ID>>" ohne Label
+   *                        möglich und signalisiert, dass es sich um eine reine Einfügestelle
+   *                        handelt, die kein Formularelement erzeugen soll.
+   * 
+   * Checkbox: Bei Checkboxen kann als "Hilfetext" "Label<<ID>>" angegeben werden und wird
+   *           beim Import entsprechend berücksichtigt.
+   * 
+   * Technischer Hinweis: Auf dieses Pattern getestet wird grundsätzlich der String, der von
+   * {@link DocumentTree.FormControl#getDescriptor()} geliefert wird.
+   * 
+   * TODO MAGIC_DESCRIPTOR_PATTERN in FormularMax 4000 Doku dokumentieren
+   */
   private static final Pattern MAGIC_DESCRIPTOR_PATTERN = Pattern.compile("\\A(.*)<<(.*)>>\\z");
 
   /**
@@ -116,12 +150,25 @@ public class FormularMax4000
    */
   private JFrame myFrame;
   
+  /**
+   * Der Titel des Formulars.
+   */
   private String formTitle = GENERATED_FORM_TITLE;
   
+  /**
+   * Verwaltet die FormControlModels dieses Formulars.
+   */
   private FormControlModelList formControlModelList = new FormControlModelList();
   
+  /**
+   * Wird verwendet für das Auslesen und Zurückspeichern der Formularbeschreibung.
+   */
   private FormDescriptor formDescriptor;
   
+  /**
+   * Startet eine Instanz des FormularMax 4000 für das Dokument doc.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   public FormularMax4000(final XTextDocument doc)
   {
     initFormDescriptor(doc);
@@ -260,7 +307,7 @@ public class FormularMax4000
   }
   
   /**
-   * Speichert die Formularbeschreibung in einem Benutzerfeld der DocumentInfo.
+   * Speichert die Formularbeschreibung im Dokument.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
@@ -389,9 +436,6 @@ public class FormularMax4000
       parseGrandchildren(conf.query("Eingabefelder"), -1);
       parseGrandchildren(conf.query("Buttons"), -1);
     }
-    
-    
-    
   }
   
   /**
@@ -423,8 +467,11 @@ public class FormularMax4000
     return count;
   }
   
-  
-  
+  /**
+   * Scannt das Dokument doc durch und erzeugt {@link FormControlModel}s für alle
+   * Formularfelder, die noch kein umschließendes WollMux-Bookmark haben.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private void scan(XTextDocument doc)
   {
     try{
@@ -497,7 +544,14 @@ public class FormularMax4000
     catch(Exception x) {Logger.error("Fehler während des Scan-Vorgangs",x);}
   }
   
-  //text: Text der im selben Absatz wie das Control vor dem Control steht.
+  /**
+   * Fügt der {@link #formControlModelList} ein neues {@link FormControlModel} hinzu für
+   * das {@link de.muenchen.allg.itd51.wollmux.former.DocumentTree.FormControl} control, wobei
+   * text der Text sein sollte, der im Dokument vor control steht. Dieser Text wird zur
+   * Generierung des Labels herangezogen.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private FormControlModel registerFormControl(FormControl control, StringBuilder text)
   {
     String label;
@@ -528,9 +582,8 @@ public class FormularMax4000
   }
 
   /**
-   * Bastelt aus dem Ende des Textes text ein Label.
+   * Bastelt aus dem Ende des Textes text ein Label das maximal maxlen Zeichen lang ist.
    * @author Matthias Benkmann (D-III-ITD 5.1)
-   * @param maxlen TODO
    */
   private String makeLabelFromEndOf(StringBuilder text, int maxlen)
   {
@@ -544,7 +597,7 @@ public class FormularMax4000
   }
   
   /**
-   * Bastelt aus dem Start des Textes text ein Label.
+   * Bastelt aus dem Start des Textes text ein Label, das maximal maxlen Zeichen lang ist.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private String makeLabelFromStartOf(StringBuilder text, int maxlen)
@@ -558,6 +611,14 @@ public class FormularMax4000
     return label;
   }
   
+  /**
+   * Fügt {@link #formControlModelList} ein neues {@link FormControlModel} für eine Checkbox
+   * hinzu und liefert es zurück.
+   * @param control das entsprechende {@link de.muenchen.allg.itd51.wollmux.former.DocumentTree.FormControl}
+   * @param label das Label
+   * @param id die ID
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private FormControlModel registerCheckbox(FormControl control, String label, String id)
   {
     FormControlModel model = null;
@@ -578,6 +639,14 @@ public class FormularMax4000
     return model;
   }
   
+  /**
+   * Fügt {@link #formControlModelList} ein neues {@link FormControlModel} für eine Auswahlliste
+   * hinzu und liefert es zurück.
+   * @param control das entsprechende {@link de.muenchen.allg.itd51.wollmux.former.DocumentTree.FormControl}
+   * @param label das Label
+   * @param id die ID
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private FormControlModel registerDropdown(DropdownFormControl control, String label, String id)
   {
     FormControlModel model = null;
@@ -613,6 +682,14 @@ public class FormularMax4000
     return model;
   }
   
+  /**
+   * Fügt {@link #formControlModelList} ein neues {@link FormControlModel} für ein Eingabefeld
+   * hinzu und liefert es zurück.
+   * @param control das entsprechende {@link de.muenchen.allg.itd51.wollmux.former.DocumentTree.FormControl}
+   * @param label das Label
+   * @param id die ID
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private FormControlModel registerInput(FormControl control, String label, String id)
   {
     FormControlModel model = null;
@@ -634,11 +711,11 @@ public class FormularMax4000
   }
   
   /**
-   * Macht aus str einen passenden Bezeichner für ein Steuerelement. Falls label == "", so
+   * Macht aus str einen passenden Bezeichner für ein Steuerelement. Falls 
+   * label == {@link #INSERTION_ONLY}, so
    * muss der Bezeichner nicht eindeutig sein (dies ist der Marker für eine reine
    * Einfügestelle, für die kein Steuerelement erzeugt werden muss).
    * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TODO Testen
    */
   private String makeControlId(String label, String str)
   {
@@ -651,6 +728,12 @@ public class FormularMax4000
       return str;
   }
 
+  /**
+   * Öffnet ein Fenster zum Editieren der Formularbeschreibung. Beim Schliessend des Fensters
+   * wird die geänderte Formularbeschreibung neu geparst, falls sie syntaktisch korrekt ist.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private void editFormDescriptor()
   {
     final JFrame editorFrame = new JFrame("Formularbeschreibung bearbeiten");
