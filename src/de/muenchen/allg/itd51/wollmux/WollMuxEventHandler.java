@@ -413,8 +413,7 @@ public class WollMuxEventHandler
   {
     handle(new OnFunctionDialogShow(doc, dialogName));
   }
-  
-  
+
   private static class OnFunctionDialogShow extends BasicEvent
   {
     private XComponent doc;
@@ -512,27 +511,23 @@ public class WollMuxEventHandler
       {
         new FormularMax4000(text);
       }
-     
+
       return EventProcessor.processTheNextEvent;
     }
 
     public boolean requires(Object o)
     {
-      return UnoRuntime.areSame(doc, o); //TODO Ist das korrekt so?
+      return UnoRuntime.areSame(doc, o); // TODO Ist das korrekt so?
     }
 
     public String toString()
     {
-      return this.getClass().getSimpleName()
-             + "("
-             + doc.hashCode()
-             + "')";
+      return this.getClass().getSimpleName() + "(" + doc.hashCode() + "')";
     }
   }
 
   // *******************************************************************************************
 
-  
   /**
    * Erzeugt ein neues WollMuxEvent, das den Funktionsdialog dialogName aufruft
    * und die zurückgelieferten Werte in die entsprechenden FormField-Objekte des
@@ -670,7 +665,7 @@ public class WollMuxEventHandler
       {
         // Close-Events aller Textdokumente abfangen.
         doc.xCloseable().addCloseListener(mux.getEventProcessor());
-        
+
         // Konfigurationsabschnitt Textdokument verarbeiten:
         ConfigThingy tds = new ConfigThingy("Textdokument");
         try
@@ -724,8 +719,10 @@ public class WollMuxEventHandler
             processNormalCommands = false;
             processFormCommands = true;
 
-            // Das Bookmark wird NICHT aus dem Dokument gelöscht, da ein
-            // formDocument immer ein formDocument bleiben soll.
+            // Bookmark löschen (wird später
+            // DocumentCommandInterpreter.executeFormCommands() aber wieder
+            // erzeugt, da Formulardokumente immer Formulardokumente bleiben)
+            removeBookmark(doc, DocumentCommand.SETTYPE_formDocument);
           }
         }
 
