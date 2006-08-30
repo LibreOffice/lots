@@ -26,12 +26,18 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 import com.sun.star.container.XEnumeration;
+import com.sun.star.container.XEnumerationAccess;
+import com.sun.star.container.XNamed;
 import com.sun.star.drawing.XControlShape;
 import com.sun.star.frame.XController;
+import com.sun.star.lang.IllegalArgumentException;
+import com.sun.star.text.XText;
+import com.sun.star.text.XTextContent;
 import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextField;
 import com.sun.star.text.XTextRange;
+import com.sun.star.uno.AnyConverter;
 import com.sun.star.uno.Exception;
 
 import de.muenchen.allg.afid.UNO;
@@ -49,11 +55,11 @@ public final class FormFieldFactory
   /**
    * Erzeugt ein Formualfeld im Dokument doc an der Stelle des
    * InsertFormValue-Kommandos cmd. Ist unter dem bookmark bereits ein
-   * Formularelement (derzeit TextFeld vom Typ Input, DropDown oder eine Checkbox)
-   * vorhanden, so wird dieses Feld als Formularelement für die Darstellung des
-   * Wertes des Formularfeldes genutzt. Ist innerhalb des Bookmarks noch kein
-   * Formularelement vorhanden, so wird ein neues InputField in den Bookmark
-   * eingefügt.
+   * Formularelement (derzeit TextFeld vom Typ Input, DropDown oder eine
+   * Checkbox) vorhanden, so wird dieses Feld als Formularelement für die
+   * Darstellung des Wertes des Formularfeldes genutzt. Ist innerhalb des
+   * Bookmarks noch kein Formularelement vorhanden, so wird ein neues InputField
+   * in den Bookmark eingefügt.
    * 
    * @param doc
    *          das Dokument, zu dem das Formularfeld gehört.
@@ -78,13 +84,19 @@ public final class FormFieldFactory
     XTextField field = null;
     if (range != null)
     {
-      field = findTextField(range, "com.sun.star.text.TextField.DropDown");
+      field = findTextField(
+          range,
+          cmd.getBookmarkName(),
+          "com.sun.star.text.TextField.DropDown");
       if (field != null) return new DropDownFormField(doc, cmd, field);
     }
 
     // Textfeld vom Typ com.sun.star.text.TextField.Input suchen:
     if (range != null)
-      field = findTextField(range, "com.sun.star.text.TextField.Input");
+      field = findTextField(
+          range,
+          cmd.getBookmarkName(),
+          "com.sun.star.text.TextField.Input");
 
     // wenn kein Formularfeld gefunden wurde, wird ein TextField.Input neu
     // erstellt.
@@ -570,6 +582,126 @@ public final class FormFieldFactory
   }
 
   /**
+   * Diese Methode erweitert die ursprüngliche Methode findTextField(Object
+   * element, String serviceName) um das Argument bookmarkName, welches für den
+   * hier implementierten Workaround
+   * http://qa.openoffice.org/issues/show_bug.cgi?id=68261 benötigt wird -
+   * ansonsten verhält sich die Methode wie findTextField(Object element, String
+   * serviceName).
+   * 
+   * @param element
+   *          das Element, das ein finales Element oder ein Container
+   *          (implementiert XEnumerationAccess) sein kann.
+   * @param bookmarkName
+   *          der Name des Bookmarks, in dem das gesuchte Element enthalten sein
+   *          soll (wird für den Workaround benötigt).
+   * @param serviceName
+   *          Der Service-Name des gesuchten Elements.
+   * @return Das erste gefundene Element, das serviceName implementiert.
+   */
+  private static XTextField findTextField(Object element, String bookmarkName,
+      String serviceName)
+  {
+    if (UNO.XTextRange(element) != null)
+    {
+      XText xText = UNO.XTextRange(element).getText();
+      if (UNO.supportsService(xText, "com.sun.star.text.CellProperties")
+          && UNO.XEnumerationAccess(xText) != null)
+        return findTextFieldInTextTableCell(
+            UNO.XEnumerationAccess(xText),
+            bookmarkName,
+            serviceName);
+    }
+    return findTextField(element, serviceName);
+  }
+
+  /**
+   * Diese Methode ist ein Workaround für
+   * http://qa.openoffice.org/issues/show_bug.cgi?id=68261 und sucht in der
+   * Zelle cell, welche vom Typ com.sun.star.text.CellProperties sein sollte,
+   * nach einem Bookmark mit dem Namen bookmarkName, welches das TextFeld vom
+   * Typ serviceName umschliesst und liefert das zuerst gefundene entsprechende
+   * TextFeld zurück, oder null, falls kein entsprechendes TextFeld gefunden
+   * wurde.
+   * 
+   * @param cell
+   *          Die XEnumerationAccess-Instanz der Tabellenzelle, in der nach dem
+   *          TextField gesucht werden soll, das von dem Bookmark bookmarkName
+   *          umschlossen ist.
+   * @param bookmarkName
+   *          Der Name des Bookmarks, das das gesucht TextField umschliesst.
+   * @param serviceName
+   *          Der Name des Services des gesuchten TextFeldes.
+   * @return Das erste gefundene TextFeld oder null, falls kein TextFeld
+   *         gefunden wurde.
+   */
+  private static XTextField findTextFieldInTextTableCell(
+      XEnumerationAccess cell, String bookmarkName, String serviceName)
+  {
+    boolean inRefferedBookmark = false;
+
+    XEnumeration xEnum = cell.createEnumeration();
+    while (xEnum.hasMoreElements())
+    {
+      XEnumerationAccess element = null;
+      try
+      {
+        element = UNO.XEnumerationAccess(xEnum.nextElement());
+      }
+      catch (java.lang.Exception e)
+      {
+        Logger.error(e);
+      }
+
+      if (element != null)
+      {
+        XEnumeration parEnum = element.createEnumeration();
+        while (parEnum.hasMoreElements())
+        {
+          XTextContent xTextContent = null;
+          try
+          {
+            xTextContent = UNO.XTextContent(parEnum.nextElement());
+          }
+          catch (java.lang.Exception e)
+          {
+            Logger.error(e);
+          }
+
+          if (xTextContent != null)
+          {
+            Object isStart = UNO.getProperty(xTextContent, "IsStart");
+            XNamed bookmark = UNO.XNamed(UNO.getProperty(
+                xTextContent,
+                "Bookmark"));
+            XTextField textField = UNO.XTextField(UNO.getProperty(
+                xTextContent,
+                "TextField"));
+
+            if (bookmark != null && isStart != null)
+            {
+              String name = bookmark.getName();
+              if (name != null && name.equals(bookmarkName)) try
+              {
+                inRefferedBookmark = AnyConverter.toBoolean(isStart);
+              }
+              catch (IllegalArgumentException e)
+              {
+                Logger.error(e);
+              }
+            }
+
+            if (inRefferedBookmark
+                && UNO.supportsService(textField, serviceName))
+              return textField;
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  /**
    * Diese Methode durchsucht das Element element dessen Kinder-Elemente, falls
    * es sich bei element um einen Container handelt, nach einem Element das den
    * Service serviceName implementiert und liefert das erste gefundene Element
@@ -605,7 +737,7 @@ public final class FormFieldFactory
         }
         catch (java.lang.Exception e)
         {
-          //TODO Logger.error(e); totgemacht wegen Bug #68261
+          Logger.error(e);
         }
       }
     }
