@@ -825,51 +825,6 @@ public class DocumentCommandInterpreter
     }
     
     /**
-     * Die Methode prüft, ob der zweite Paragraph des markierte Bereichs ein
-     * TextParagraph ist und gibt true zurück, wenn der zweite Paragraph nicht
-     * vorhanden ist oder er den Service com.sun.star.text.Paragraph
-     * implementiert.
-     * 
-     * @param enumAccess
-     *          die XEnumerationAccess Instanz des markierten Bereichts (ein
-     *          TextCursors).
-     * @return true oder false
-     */
-    private boolean isFollowedByTextParagraph(Object xEnumAccess)
-    {
-      XEnumerationAccess enumAccess = UNO.XEnumerationAccess(xEnumAccess);
-      if (enumAccess != null)
-      {
-        XEnumeration xenum = enumAccess.createEnumeration();
-        Object element2 = null;
-
-        if (xenum.hasMoreElements()) try
-        {
-          xenum.nextElement();
-        }
-        catch (Exception e)
-        {
-        }
-
-        if (xenum.hasMoreElements())
-        {
-          try
-          {
-            element2 = xenum.nextElement();
-          }
-          catch (Exception e)
-          {
-          }
-        }
-        else
-          return true;
-
-        return UNO.supportsService(element2, "com.sun.star.text.Paragraph");
-      }
-      return false;
-    }
-
-    /**
      * Löscht den ganzen ersten Absatz an der Cursorposition textCursor.
      * 
      * @param range
