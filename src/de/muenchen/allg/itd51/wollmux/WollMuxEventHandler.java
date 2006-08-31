@@ -36,6 +36,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
@@ -59,6 +60,7 @@ import com.sun.star.uno.RuntimeException;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
 import com.sun.star.util.CloseVetoException;
+import com.sun.star.util.XCloseListener;
 import com.sun.star.util.XURLTransformer;
 import com.sun.star.view.DocumentZoomType;
 
@@ -473,7 +475,7 @@ public class WollMuxEventHandler
     public String toString()
     {
       return this.getClass().getSimpleName()
-             + "("
+             + "(#"
              + doc.hashCode()
              + ", '"
              + dialogName
@@ -490,26 +492,67 @@ public class WollMuxEventHandler
    * Dieses Event wird vom WollMux-Service (...comp.WollMux) und aus dem
    * WollMuxEventHandler ausgelöst.
    */
-  public static void handleFormularMax4000Show(XComponent doc)
+  public static void handleFormularMax4000Show(XTextDocument doc)
   {
     handle(new OnFormularMax4000Show(doc));
   }
 
   private static class OnFormularMax4000Show extends BasicEvent
   {
-    private XComponent doc;
+    public static HashMap mapDocToMax4000 = new HashMap();
 
-    private OnFormularMax4000Show(XComponent doc)
+    private final XTextDocument doc;
+
+    private OnFormularMax4000Show(XTextDocument doc)
     {
       this.doc = doc;
     }
 
     protected boolean doit() throws WollMuxFehlerException
     {
-      XTextDocument text = UNO.XTextDocument(doc);
-      if (text != null)
+      if (doc == null) return EventProcessor.processTheNextEvent;
+
+      HashableComponent hDoc = new HashableComponent(doc);
+
+      // CloseListener für das Dokument (genau einmal) registrieren.
+      if (!mapDocToMax4000.containsKey(hDoc))
       {
-        new FormularMax4000(text);
+        mapDocToMax4000.put(hDoc, null);
+        if (UNO.XCloseable(doc) != null)
+        {
+          UNO.XCloseable(doc).addCloseListener(new XCloseListener()
+          {
+
+            public void disposing(EventObject arg0)
+            {
+              WollMuxEventHandler.handleFormularMax4000Close(doc);
+            }
+
+            public void notifyClosing(EventObject arg0)
+            {
+              WollMuxEventHandler.handleFormularMax4000Close(doc);
+            }
+
+            public void queryClosing(EventObject arg0, boolean arg1)
+                throws CloseVetoException
+            {
+            }
+          });
+        }
+      }
+
+      // Bestehenden Max in den Vordergrund holen oder neuen Max erzeugen.
+      FormularMax4000 max = (FormularMax4000) mapDocToMax4000.get(hDoc);
+      if (max != null)
+      {
+        max.toFront();
+      }
+      else
+      {
+        max = new FormularMax4000(doc, WollMuxSingleton.getInstance()
+            .getEventProcessor());
+
+        mapDocToMax4000.put(hDoc, max);
       }
 
       return EventProcessor.processTheNextEvent;
@@ -517,12 +560,100 @@ public class WollMuxEventHandler
 
     public boolean requires(Object o)
     {
-      return UnoRuntime.areSame(doc, o); // TODO Ist das korrekt so?
+      return UnoRuntime.areSame(doc, o);
     }
 
     public String toString()
     {
-      return this.getClass().getSimpleName() + "(" + doc.hashCode() + "')";
+      return this.getClass().getSimpleName() + "(#" + doc.hashCode() + ")";
+    }
+  }
+
+  // *******************************************************************************************
+
+  /**
+   * Erzeugt ein neues WollMuxEvent, das aufgerufen wird, wenn ein
+   * FormularMax4000 beendet wird und die entsprechenden internen Referenzen
+   * gelöscht werden können.
+   * 
+   * Dieses Event wird vom EventProcessor geworfen, wenn der FormularMax
+   * zurückkehrt.
+   */
+  public static void handleFormularMax4000Returned(FormularMax4000 max)
+  {
+    handle(new OnFormularMax4000Returned(max));
+  }
+
+  private static class OnFormularMax4000Returned extends BasicEvent
+  {
+    private FormularMax4000 max;
+
+    private OnFormularMax4000Returned(FormularMax4000 max)
+    {
+      this.max = max;
+    }
+
+    protected boolean doit() throws WollMuxFehlerException
+    {
+      // Lösche alle entsprechenden FormularMax-Instanzen aus der
+      // mapDocToMax4000
+      Iterator iter = OnFormularMax4000Show.mapDocToMax4000.entrySet()
+          .iterator();
+      while (iter.hasNext())
+      {
+        Map.Entry entry = (Map.Entry) iter.next();
+        if (entry.getValue() == max) entry.setValue(null);
+      }
+      return EventProcessor.processTheNextEvent;
+    }
+
+    public String toString()
+    {
+      return this.getClass().getSimpleName() + "(" + max + ")";
+    }
+  }
+
+  // *******************************************************************************************
+
+  /**
+   * Erzeugt ein neues WollMuxEvent, das Auskunft darüber gibt, dass das zu
+   * einem FormularMax zugehörige Textdokument geschlossen wurde und das dafür
+   * sorgt, dass der entsprechende FormularMax geschlossen und die internen
+   * Referenz gelöscht wird.
+   * 
+   * Dieses Event wird ausgelöst, wenn ein Dokument geschlossen wird, das einen
+   * Formularmax verwendet.
+   */
+  public static void handleFormularMax4000Close(XTextDocument doc)
+  {
+    handle(new OnFormularMax4000Close(doc));
+  }
+
+  private static class OnFormularMax4000Close extends BasicEvent
+  {
+    private XTextDocument doc;
+
+    private OnFormularMax4000Close(XTextDocument doc)
+    {
+      this.doc = doc;
+    }
+
+    protected boolean doit() throws WollMuxFehlerException
+    {
+      HashableComponent hDoc = new HashableComponent(doc);
+      FormularMax4000 max = (FormularMax4000) OnFormularMax4000Show.mapDocToMax4000
+          .get(hDoc);
+
+      if (max != null) max.dispose();
+
+      OnFormularMax4000Show.mapDocToMax4000.remove(hDoc);
+
+      return EventProcessor.processTheNextEvent;
+    }
+
+    public String toString()
+    {
+      return this.getClass().getSimpleName() + "(#" + doc.hashCode() + ")";
     }
   }
 
@@ -775,7 +906,7 @@ public class WollMuxEventHandler
 
     public String toString()
     {
-      return this.getClass().getSimpleName() + "(" + xTextDoc.hashCode() + ")";
+      return this.getClass().getSimpleName() + "(#" + xTextDoc.hashCode() + ")";
     }
 
     /**
@@ -1776,7 +1907,7 @@ public class WollMuxEventHandler
 
     public String toString()
     {
-      return this.getClass().getSimpleName() + "(" + doc.hashCode() + ")";
+      return this.getClass().getSimpleName() + "(#" + doc.hashCode() + ")";
     }
   }
 
@@ -1949,7 +2080,7 @@ public class WollMuxEventHandler
 
     public String toString()
     {
-      return this.getClass().getSimpleName() + "(" + listener.hashCode() + ")";
+      return this.getClass().getSimpleName() + "(#" + listener.hashCode() + ")";
     }
   }
 
@@ -1993,7 +2124,7 @@ public class WollMuxEventHandler
 
     public String toString()
     {
-      return this.getClass().getSimpleName() + "(" + listener.hashCode() + ")";
+      return this.getClass().getSimpleName() + "(#" + listener.hashCode() + ")";
     }
   }
 

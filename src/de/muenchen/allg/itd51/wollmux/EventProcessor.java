@@ -39,6 +39,7 @@ import de.muenchen.allg.itd51.wollmux.dialog.AbsenderAuswaehlen;
 import de.muenchen.allg.itd51.wollmux.dialog.DatasourceSearchDialog;
 import de.muenchen.allg.itd51.wollmux.dialog.DatensatzBearbeiten;
 import de.muenchen.allg.itd51.wollmux.dialog.PersoenlicheAbsenderlisteVerwalten;
+import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
 
 /**
  * Der EventProcessor sorgt für eine synchronisierte Verarbeitung aller
@@ -48,7 +49,8 @@ import de.muenchen.allg.itd51.wollmux.dialog.PersoenlicheAbsenderlisteVerwalten;
  * 
  * @author lut
  */
-public class EventProcessor implements XEventListener, ActionListener, XCloseListener
+public class EventProcessor implements XEventListener, ActionListener,
+    XCloseListener
 {
   /**
    * Gibt an, ob der EventProcessor überhaupt events entgegennimmt. Ist
@@ -216,6 +218,12 @@ public class EventProcessor implements XEventListener, ActionListener, XCloseLis
         WollMuxEventHandler.handleFunctionDialogSelectDone();
     }
 
+    else if (source instanceof FormularMax4000)
+    {
+      WollMuxEventHandler
+          .handleFormularMax4000Returned((FormularMax4000) source);
+    }
+
     // Dialog bedingte Sperrung der Eventqueue aufheben und Eventbearbeitung
     // normal fortsetzen lassen:
     synchronized (processNextEvent)
@@ -253,20 +261,26 @@ public class EventProcessor implements XEventListener, ActionListener, XCloseLis
     }
   }
 
-  /* (non-Javadoc)
-   * @see com.sun.star.util.XCloseListener#queryClosing(com.sun.star.lang.EventObject, boolean)
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.sun.star.util.XCloseListener#queryClosing(com.sun.star.lang.EventObject,
+   *      boolean)
    */
-  public void queryClosing(EventObject arg0, boolean arg1) throws CloseVetoException
+  public void queryClosing(EventObject arg0, boolean arg1)
+      throws CloseVetoException
   {
     // nichts zu tun
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see com.sun.star.util.XCloseListener#notifyClosing(com.sun.star.lang.EventObject)
    */
   public void notifyClosing(EventObject arg0)
   {
-    disposing(arg0);    
+    disposing(arg0);
   }
-  
+
 }
