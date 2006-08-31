@@ -9,6 +9,7 @@
 * Datum      | Wer | Änderungsgrund
 * -------------------------------------------------------------------
 * 07.08.2006 | BNK | Erstellung
+* 29.08.2006 | BNK | kommentiert.
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -18,6 +19,7 @@
 package de.muenchen.allg.itd51.wollmux.former;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.Vector;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
@@ -29,7 +31,16 @@ import de.muenchen.allg.itd51.parser.ConfigThingy;
  */
 public class FormControlModelList
 {
+  /**
+   * Die Liste der {@link FormControlModel}s.
+   */
   private Vector models = new Vector();
+  
+  /**
+   * Liste aller {@link ItemListener}, die über Änderungen des Listeninhalts informiert
+   * werden wollen.
+   */
+  private List listeners = new Vector(1);
   
   /**
    * Löscht alle bestehenden FormControlModels aus der Liste.
@@ -38,14 +49,17 @@ public class FormControlModelList
    */
   public void clear()
   {
-    models.clear();
+    while (!models.isEmpty())
+    {
+      FormControlModel model = (FormControlModel)models.remove(models.size() - 1);
+      model.hasBeenRemoved();
+    }
   }
   
   /**
    * Macht aus str einen Identifier, der noch von keinem FormControlModel dieser Liste
    * verwendet wird und liefert diesen Identifier zurück.
    * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TODO Testen
    */
   public String makeUniqueId(String str)
   {
@@ -84,6 +98,8 @@ public class FormControlModelList
       models.add(model);
     else
       models.add(idx, model);
+    
+    notifyListeners(model);
   }
   
   /**
@@ -93,8 +109,14 @@ public class FormControlModelList
   public void add(FormControlModel model)
   {
     models.add(model);
+    notifyListeners(model);
   }
   
+  /**
+   * Liefert ein ConfigThingy, dessen Wurzel ein "Fenster"-Knoten ist und alle FormControlModels
+   * dieser Liste enthält.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   public ConfigThingy export()
   {
     ConfigThingy export = new ConfigThingy("Fenster");
@@ -148,6 +170,12 @@ public class FormControlModelList
     return export;
   }
   
+  /**
+   * Erzeugt ein ConfigThingy für den Reiter tab, hängt es an conf an und liefert es zurück.
+   * Das erzeugte ConfigThingy hat folgenden Aufbau: <br>
+   * ReiterId(TITLE "title" CLOSEACTION "action" TIP "tip" HOTKEY "hotkey")
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   private ConfigThingy outputTab(FormControlModel tab, ConfigThingy conf)
   {
     conf = conf.add(tab.getId());
@@ -160,9 +188,44 @@ public class FormControlModelList
     
     return conf;
   }
+
+  /**
+   * listener wird über Änderungen der Liste informiert.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public void addListener(ItemListener listener)
+  {
+    if (!listeners.contains(listener)) listeners.add(listener);
+  }
+
+  /**
+   * Benachrichtigt alle ItemListener über das Hinzufügen von model zur Liste.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private void notifyListeners(FormControlModel model)
+  {
+    Iterator iter = listeners.iterator();
+    while (iter.hasNext())
+    {
+      ItemListener listener = (ItemListener)iter.next();
+      listener.itemAdded(model);
+    }
+  }
   
-  
-  
+  /**
+   * Interface für Klassen, die interessiert sind, zu erfahren, wenn sich die Liste
+   * ändert.
+   *
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public static interface ItemListener
+  {
+    /**
+     * Wird aufgerufen nachdem model zur Liste hinzugefügt wurde.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
+    public void itemAdded(FormControlModel model);
+  }
   
 
 }

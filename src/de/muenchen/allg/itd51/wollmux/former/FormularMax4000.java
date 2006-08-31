@@ -130,7 +130,6 @@ public class FormularMax4000
    * Technischer Hinweis: Auf dieses Pattern getestet wird grundsätzlich der String, der von
    * {@link DocumentTree.FormControl#getDescriptor()} geliefert wird.
    * 
-   * TODO MAGIC_DESCRIPTOR_PATTERN in FormularMax 4000 Doku dokumentieren
    */
   private static final Pattern MAGIC_DESCRIPTOR_PATTERN = Pattern.compile("\\A(.*)<<(.*)>>\\z");
 
@@ -146,9 +145,21 @@ public class FormularMax4000
   private ActionListener closeAction = actionListener_abort;
 
   /**
+   * Falls nicht null wird dieser Listener aufgerufen nachdem der FM4000
+   * geschlossen wurde.
+   */
+  private ActionListener abortListener = null;
+  
+  /**
    * Das Haupt-Fenster des FormularMax4000.
    */
   private JFrame myFrame;
+  
+  /**
+   * Das Fenster, das für das Bearbeiten des Quelltextes geöffnet wird.
+   * FIXME: vielleicht besser im selben Frame öffnen, damit niemand aus versehen parallel viel Arbeit im normalen Fenster macht und diese dann verliert beim Schliessen des Code-Fensters.
+   */
+  JFrame editorFrame = null;
   
   /**
    * Der Titel des Formulars.
@@ -158,7 +169,13 @@ public class FormularMax4000
   /**
    * Verwaltet die FormControlModels dieses Formulars.
    */
-  private FormControlModelList formControlModelList = new FormControlModelList();
+  private FormControlModelList formControlModelList;
+  
+  /**
+   * Hält in einem Panel FormControlModelLineViews für alle 
+   * {@link FormControlModel}s aus {@link #formControlModelList}. 
+   */
+  private AllFormControlModelLineViewsPanel allFormControlModelLineViewsPanel;
   
   /**
    * Wird verwendet für das Auslesen und Zurückspeichern der Formularbeschreibung.
@@ -167,14 +184,15 @@ public class FormularMax4000
   
   /**
    * Startet eine Instanz des FormularMax 4000 für das Dokument doc.
+   * @param abortListener (falls nicht null) wird aufgerufen, nachdem der FormularMax 4000 geschlossen wurde.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public FormularMax4000(final XTextDocument doc)
+  public FormularMax4000(final XTextDocument doc, ActionListener abortListener)
   {
+    this.abortListener = abortListener;
     initFormDescriptor(doc);
-    init();
     
-     //  GUI im Event-Dispatching Thread erzeugen wg. Thread-Safety.
+    //  GUI im Event-Dispatching Thread erzeugen wg. Thread-Safety.
     try{
       javax.swing.SwingUtilities.invokeLater(new Runnable() {
         public void run() {
@@ -189,6 +207,8 @@ public class FormularMax4000
   {
     Common.setLookAndFeelOnce();
     
+    formControlModelList = new FormControlModelList();
+    
     //  Create and set up the window.
     myFrame = new JFrame("FormularMax 4000");
     //leave handling of close request to WindowListener.windowClosing
@@ -197,8 +217,9 @@ public class FormularMax4000
     //der WindowListener sorgt dafür, dass auf windowClosing mit abort reagiert wird
     myFrame.addWindowListener(oehrchen);
     
-    JPanel myPanel = new JPanel(new GridLayout(1, 2));
-    myFrame.getContentPane().add(myPanel);
+    allFormControlModelLineViewsPanel = new AllFormControlModelLineViewsPanel(formControlModelList);
+    myFrame.getContentPane().add(allFormControlModelLineViewsPanel.JComponent());
+    
     JMenuBar mbar = new JMenuBar();
     
     //========================= Datei ============================
@@ -260,9 +281,11 @@ public class FormularMax4000
     
     mbar.add(menu);
     
-    
-    
     myFrame.setJMenuBar(mbar);
+    
+
+    initModelsAndViews();
+    
     
     myFrame.pack();
     myFrame.setResizable(true);
@@ -271,11 +294,11 @@ public class FormularMax4000
   
   /**
    * Wertet {@link #formDescriptor} aus aus und initialisiert alle internen
-   * Strukturen entsprechend.
+   * Strukturen entsprechend. Dies aktualisiert auch die entsprechenden Views.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
-  private void init()
+  private void initModelsAndViews()
   {
     formControlModelList.clear();
     ConfigThingy conf = formDescriptor.toConfigThingy();
@@ -561,7 +584,7 @@ public class FormularMax4000
     if (m.matches())
     {
       label = m.group(1);
-      if (label.length() == 0) label = INSERTION_ONLY; //TODO Magic Dokumentieren
+      if (label.length() == 0) label = INSERTION_ONLY; 
       id = m.group(2);
     }
     else
@@ -656,7 +679,7 @@ public class FormularMax4000
       boolean editable = false;
       for (int i = 0; i < items.length; ++i)
       {
-        if (items[i].equalsIgnoreCase("<<Freitext>>")) //TODO Diese Magic dokumentieren 
+        if (items[i].equalsIgnoreCase("<<Freitext>>")) 
         {
           String[] newItems = new String[items.length - 1];
           System.arraycopy(items, 0, newItems, 0, i);
@@ -736,7 +759,7 @@ public class FormularMax4000
    */
   private void editFormDescriptor()
   {
-    final JFrame editorFrame = new JFrame("Formularbeschreibung bearbeiten");
+    editorFrame = new JFrame("Formularbeschreibung bearbeiten");
     editorFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
     final JEditorPane editor = new JEditorPane("text/plain", exportFormDescriptor().stringRepresentation());
     JScrollPane scrollPane = new JScrollPane(editor, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
@@ -758,8 +781,9 @@ public class FormularMax4000
           }
           public void windowClosed(WindowEvent e)
           {
+            editorFrame = null;
             formDescriptor.fromConfigThingy(conf);
-            init();
+            initModelsAndViews();
           }
         });
     
@@ -786,6 +810,26 @@ public class FormularMax4000
   private void abort()
   {
     myFrame.dispose();
+    if (editorFrame != null) editorFrame.dispose();
+    if (abortListener != null)
+      abortListener.actionPerformed(new ActionEvent(this, 0, ""));
+  }
+  
+  /**
+   * Schliesst den FM4000 und alle zugehörigen Fenster.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public void dispose()
+  {
+    try{
+      javax.swing.SwingUtilities.invokeLater(new Runnable() {
+        public void run() {
+            try{abort();}catch(Exception x){};
+        }
+      });
+    }
+    catch(Exception x) {}
   }
   
   private class MyWindowListener implements WindowListener
@@ -810,7 +854,7 @@ public class FormularMax4000
   {
     UNO.init();
     XTextDocument doc = UNO.XTextDocument(UNO.desktop.getCurrentComponent());
-    new FormularMax4000(doc);
+    new FormularMax4000(doc,null);
   }
 
 }
