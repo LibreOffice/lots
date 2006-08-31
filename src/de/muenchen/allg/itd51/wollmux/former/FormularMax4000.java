@@ -11,6 +11,8 @@
 * 03.08.2006 | BNK | Erstellung
 * 08.08.2006 | BNK | Viel Arbeit reingesteckt.
 * 28.08.2006 | BNK | kommentiert
+* 31.08.2006 | BNK | Code-Editor-Fenster wird jetzt in korrekter Größe dargestellt
+*                  | Das Hauptfenster passt sein Größe an, wenn Steuerelemente dazukommen oder verschwinden
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -19,8 +21,8 @@
 */
 package de.muenchen.allg.itd51.wollmux.former;
 
-import java.awt.Frame;
-import java.awt.GridLayout;
+import java.awt.BorderLayout;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -44,6 +46,11 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.WindowConstants;
+import javax.swing.text.DefaultEditorKit;
+import javax.swing.text.Element;
+import javax.swing.text.PlainView;
+import javax.swing.text.View;
+import javax.swing.text.ViewFactory;
 
 import com.sun.star.document.XDocumentInfo;
 import com.sun.star.text.XTextDocument;
@@ -218,7 +225,9 @@ public class FormularMax4000
     myFrame.addWindowListener(oehrchen);
     
     allFormControlModelLineViewsPanel = new AllFormControlModelLineViewsPanel(formControlModelList);
-    myFrame.getContentPane().add(allFormControlModelLineViewsPanel.JComponent());
+    JPanel contentPanel = new JPanel(new BorderLayout());
+    contentPanel.add(allFormControlModelLineViewsPanel.JComponent(), BorderLayout.CENTER);
+    myFrame.getContentPane().add(contentPanel);
     
     JMenuBar mbar = new JMenuBar();
     
@@ -229,6 +238,7 @@ public class FormularMax4000
       public void actionPerformed(ActionEvent e)
       {
         scan(doc);
+        myFrame.pack();
       }});
     menu.add(menuItem);
     
@@ -248,6 +258,7 @@ public class FormularMax4000
       public void actionPerformed(ActionEvent e)
       {
         insertStandardEmpfaengerauswahl();
+        myFrame.pack();
       }
       });
     menu.add(menuItem);
@@ -257,6 +268,7 @@ public class FormularMax4000
       public void actionPerformed(ActionEvent e)
       {
         insertStandardButtonsMiddle();
+        myFrame.pack();
       }
       });
     menu.add(menuItem);
@@ -266,6 +278,7 @@ public class FormularMax4000
       public void actionPerformed(ActionEvent e)
       {
         insertStandardButtonsLast();
+        myFrame.pack();
       }
       });
     menu.add(menuItem);
@@ -317,6 +330,7 @@ public class FormularMax4000
       }
     }
 //  TODO writeFormDescriptor();
+    myFrame.pack();
   }
   
   /**
@@ -751,6 +765,28 @@ public class FormularMax4000
       return str;
   }
 
+  private static class NoWrapEditorKit extends DefaultEditorKit
+  {
+    private static final long serialVersionUID = -2741454443147376514L;
+    private ViewFactory vf = null;
+
+    public ViewFactory getViewFactory()
+    {
+      if (vf == null) vf=new NoWrapFactory();
+      return vf;
+    };
+
+    private class NoWrapFactory implements ViewFactory
+    {
+      public View create(Element e)
+      {
+        return new PlainView(e);
+      }
+   
+    };
+  };
+
+  
   /**
    * Öffnet ein Fenster zum Editieren der Formularbeschreibung. Beim Schliessend des Fensters
    * wird die geänderte Formularbeschreibung neu geparst, falls sie syntaktisch korrekt ist.
@@ -761,9 +797,16 @@ public class FormularMax4000
   {
     editorFrame = new JFrame("Formularbeschreibung bearbeiten");
     editorFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-    final JEditorPane editor = new JEditorPane("text/plain", exportFormDescriptor().stringRepresentation());
+    
+    final JEditorPane editor=new JEditorPane("text/plain","");
+    editor.setEditorKit(new NoWrapEditorKit());
+    editor.setText(exportFormDescriptor().stringRepresentation());
+    editor.setFont(new Font("Monospaced",Font.PLAIN,editor.getFont().getSize()+2));
     JScrollPane scrollPane = new JScrollPane(editor, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
-    editorFrame.setContentPane(scrollPane);
+    JPanel contentPanel = new JPanel(new BorderLayout());
+    contentPanel.add(scrollPane, BorderLayout.CENTER);
+    editor.setCaretPosition(0);
+    editorFrame.getContentPane().add(contentPanel);
     editorFrame.addWindowListener(new WindowAdapter()
         {
           ConfigThingy conf;
@@ -790,7 +833,6 @@ public class FormularMax4000
     
     editorFrame.pack();
     editorFrame.setVisible(true);
-    editorFrame.setExtendedState(Frame.MAXIMIZED_BOTH);
   }
   
   /**

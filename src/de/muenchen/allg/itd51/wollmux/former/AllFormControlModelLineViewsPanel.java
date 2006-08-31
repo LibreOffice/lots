@@ -23,7 +23,6 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 
 import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
@@ -81,14 +80,18 @@ public class AllFormControlModelLineViewsPanel implements View, ItemListener, On
   {
     this.formControlModelList = formControlModelList;
     formControlModelList.addListener(this);
+
     myPanel = new JPanel(new GridBagLayout());
     lineViewPanel = new JPanel(new GridBagLayout());
+    
+    scrollPane = new JScrollPane(lineViewPanel);
+    scrollPane.setBorder(BorderFactory.createLineBorder(Color.WHITE, 1));
+    
      //    int gridx, int gridy, int gridwidth, int gridheight, double weightx, double weighty, int anchor,          int fill,                  Insets insets, int ipadx, int ipady)
     GridBagConstraints gbcMainPanel = new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH,       new Insets(0,0,0,0),0,0);
     gbcMainPanel.gridx = 0;
     gbcMainPanel.gridy = 0;
-    scrollPane = new JScrollPane(lineViewPanel);
-    scrollPane.setBorder(BorderFactory.createLineBorder(Color.WHITE, 1));
+    
     myPanel.add(scrollPane, gbcMainPanel);
     
     JPanel buttonPanel = new JPanel(new GridBagLayout());
@@ -116,6 +119,7 @@ public class AllFormControlModelLineViewsPanel implements View, ItemListener, On
     gbcTextfield.gridy = lineViewPanel.getComponentCount();
     lineViewPanel.add(ofclView.JComponent(), gbcTextfield);
     lineViewPanel.validate();
+    scrollPane.validate();
   }
 
   public void viewShouldBeRemoved(OneFormControlLineView view)

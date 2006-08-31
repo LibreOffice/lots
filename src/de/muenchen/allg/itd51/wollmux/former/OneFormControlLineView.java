@@ -25,6 +25,8 @@ import javax.swing.BoxLayout;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 /**
  * Eine einzeilige Sicht auf ein einzelnes Formularsteuerelement.
@@ -93,13 +95,18 @@ public class OneFormControlLineView implements View, FormControlModel.ModelChang
   private JComponent makeLabelView()
   {
     labelTextfield = new JTextField(model.getLabel(), LABEL_COLUMNS);
-    labelTextfield.addActionListener(new ActionListener(){
-      public void actionPerformed(ActionEvent e)
+    labelTextfield.getDocument().addDocumentListener(new DocumentListener(){
+      public void update()
       {
         ignoreAttributeChanged = true;
         model.setLabel(labelTextfield.getText());
         ignoreAttributeChanged = false;
-      }});
+      }
+
+      public void insertUpdate(DocumentEvent e) {update();}
+      public void removeUpdate(DocumentEvent e) {update();}
+      public void changedUpdate(DocumentEvent e) {update();}
+      });
     return labelTextfield;
   }
   
