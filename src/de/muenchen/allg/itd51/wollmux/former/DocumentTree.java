@@ -247,22 +247,24 @@ public class DocumentTree
       } else if (textPortionType.equals("TextField"))
       {
         XDependentTextField textField = null;
-        boolean isDropdown;
+        int textfieldType = 0; //0:input, 1:dropdown, 2: reference
         try{
           textField = UNO.XDependentTextField(UNO.getProperty(textPortion,"TextField"));
           XServiceInfo info = UNO.XServiceInfo(textField); 
           if (info.supportsService("com.sun.star.text.TextField.DropDown"))
-            isDropdown = true;
+            textfieldType = 1;
           else if (info.supportsService("com.sun.star.text.TextField.Input"))
-            isDropdown = false;
-          else 
+            textfieldType = 0;
+          else
             continue; //sonstiges TextField 
         } catch(Exception x){ continue;}
         
-        if (isDropdown)
-          textPortions.add(new DropdownNode(textField, doc));
-        else
-          textPortions.add(new InputNode(textField, doc));
+        switch(textfieldType)
+        {
+          case 0: textPortions.add(new InputNode(textField, doc)); break;
+          case 1: textPortions.add(new DropdownNode(textField, doc)); break;
+        }
+          
         
       } else if (textPortionType.equals("Frame"))
       {
