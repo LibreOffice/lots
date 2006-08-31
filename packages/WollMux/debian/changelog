@@ -1,3 +1,45 @@
+wollmux (1.3.0lhm1) siga; urgency=low
+
+  * Upgrade auf Version 1.3.0 des wollmux.
+  * Viele Verbesserungen des Formularsystems
+  * Neue Grundfunktion REPLACE, die Ersetzungen von Zeichenketten in Strings erlaubt.
+  * Funktion zum Formatieren von Telefonnummern nach DIN 5008.
+  * insertValue-Daten können jetzt mit Formatierungsfunktionen belegt werden. Die
+    Standardkonfiguration wird dies in Zukunft nutzen, um Telefonnummern nach DIN 5008
+    zu formatieren.
+  * Das neue Dokumentkommando insertFunctionValue kann verwendet werden, um die
+    Rückgabewerte referatspezifischer Funktionen in den Briefkopf einfügen zu können.
+  * Neuer MODE "UpAndAway" für die WollMuxBar steht zur Verfügung. Dieser Modus wird
+    als der bislang benutzerfreundlichste betrachtet und ist deshalb die neue
+    Voreinstellung.
+  * Statt "wort1" bis "wort9" müssen die Platzhalter in Funktionsdialogen jetzt 
+    "suchanfrage1" bis "suchanfrage9" heissen.
+  * Das Attribut ZOOM der Konfigurationsabschnitte "Fenster/Textdokument" bzw.
+    "Fenster/Formular" unterstützt jetzt auch die Werte "PageWidth", "PageWidthExact",
+    "Optimal" und "EntirePage".
+  * Eine erste Version der FormularMax 4000 GUI zur Vorlagenerstellung steht zur
+    Verfügung.
+  * Der Empfängerauswahl-Dialog kann jetzt auch für einen leeren externen Briefkopf
+    aufgerufen werden. Einbinden über Extras/Anpassen.../Symbolleisten/Hinzufügen/Bereich
+    OpenOffice.org Makros/Meine Makros/WollMux/Call/functionDialogEmpfaengerauswahl.
+  * R1333 Formatierungen der insertValue-Daten ermoeglichen
+  * R1871 WM(CMD "insertFunctionValue" FUNCTION "...")
+  * R2026 Releaserelevante TODOs in FormController implementieren
+  * R2185 Zu-Strich-am-Bildschirmrand-Verwandel-Modus in WollMuxBar implementieren
+  * R2195 Fenstergroesse des Writer-Fensters bei Formularbearbeitung stets maximal
+  * R2196 Formular-GUI schliessen wenn zugehöriges Writer-Fenster geschlossen wird
+  * R2197 Beim Wechsel von Writer-Fenster zu Formular-GUI vertikale Fenstergroesse nicht
+          aendern
+  * R2221 bessere Konfigurationsmöglichkeit für Fenstergrößen
+  * R2228 LOGGING_MODE im Wiki dokumentieren
+  * R2263 Speichern-Abfrage beim Schließen der Formular-GUI hinzufügen
+  * R2609 Fenstergrößen vor dem Starten der FormGUI merken und beim Schließen des Dokuments 
+          wieder herstellen.
+  * R2686 Die Ausfuehrung von Makros in aus der WollMux-Leiste gestarteten Dokumenten und
+          Vorlagen soll moeglich sein
+
+ -- Jens Nitschke <jens.nitschke@muenchen.de>  Thu, 31 Aug 2006 17:13:16 +0200
+
 wollmux (1.2.0lhm1) siga; urgency=low
 
   * Upgrade auf Version 1.2.0 des wollmux. 
