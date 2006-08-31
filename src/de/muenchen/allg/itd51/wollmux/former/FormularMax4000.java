@@ -832,6 +832,16 @@ public class FormularMax4000
     catch(Exception x) {}
   }
   
+  /**
+   * Bringt den FormularMax 4000 in den Vordergrund.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public void toFront()
+  {
+    myFrame.toFront();
+  }
+  
   private class MyWindowListener implements WindowListener
   {
     public void windowOpened(WindowEvent e) {}
