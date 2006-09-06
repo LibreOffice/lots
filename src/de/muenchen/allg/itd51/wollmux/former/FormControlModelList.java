@@ -20,6 +20,7 @@ package de.muenchen.allg.itd51.wollmux.former;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Vector;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
@@ -51,9 +52,24 @@ public class FormControlModelList
   {
     while (!models.isEmpty())
     {
-      FormControlModel model = (FormControlModel)models.remove(models.size() - 1);
+      int index = models.size() - 1;
+      FormControlModel model = (FormControlModel)models.remove(index);
       model.hasBeenRemoved();
     }
+  }
+  
+  /**
+   * Bittet die FormControlModelList darum, das Element model aus sich zu entfernen
+   * (falls es in der Liste ist).
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TODO Testen
+   */
+  public void remove(FormControlModel model)
+  {
+    int index = models.indexOf(model);
+    if (index < 0) return;
+    models.remove(model);
+    model.hasBeenRemoved();
   }
   
   /**
@@ -94,12 +110,10 @@ public class FormControlModelList
    */
   public void add(FormControlModel model, int idx)
   {
-    if (idx < 0)
-      models.add(model);
-    else
-      models.add(idx, model);
+    if (idx < 0) idx = models.size();
+    models.add(idx, model);
     
-    notifyListeners(model);
+    notifyListeners(model, idx);
   }
   
   /**
@@ -109,7 +123,58 @@ public class FormControlModelList
   public void add(FormControlModel model)
   {
     models.add(model);
-    notifyListeners(model);
+    notifyListeners(model, models.size() - 1);
+  }
+  
+  /**
+   * Schiebt die ausgewählten FormControlModels in der Liste nach oben, d,h, reduziert ihre
+   * Indizes um 1.
+   * @param indices eine Menge von Integer-Objekten, die die Indizes der zu verschiebenden
+   * FormControlModels spezifizieren. Die Liste muss aufsteigend sortiert sein, sonst ist
+   * das Ergebnis unbestimmt. Ist das erste Element von indices die 0, so wird nichts 
+   * getan. Ansonsten werden die Indizes i aus indices der Reihe nach abgearbeitet und Element
+   * i wird mit Element i-1 vertauscht.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED
+   */
+  public void moveElementsUp(List indices)
+  {
+    Iterator iter = indices.iterator();
+    while (iter.hasNext())
+    {
+      int idx = ((Integer)iter.next()).intValue();
+      if (idx <= 0) return;
+      Object temp = models.get(idx-1);
+      models.setElementAt(models.get(idx), idx-1);
+      models.setElementAt(temp, idx);
+      notifyListeners(idx - 1 , idx);
+    }
+  }
+  
+  /**
+   * Schiebt die ausgewählten FormControlModels in der Liste nach unten, d,h, erhöht ihre
+   * Indizes um 1.
+   * @param indices eine Menge von Integer-Objekten, die die Indizes der zu verschiebenden
+   * FormControlModels spezifizieren. Die Liste muss aufsteigend sortiert sein, sonst ist
+   * das Ergebnis unbestimmt. Ist das letzte Element von indices der höchste mögliche Index, 
+   * so wird nichts 
+   * getan. Ansonsten werden die Indizes i aus indices von hinten beginnend abgearbeitet und 
+   * Element i wird mit Element i+1 vertauscht.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED
+   */
+  public void moveElementsDown(List indices)
+  {
+    ListIterator iter = indices.listIterator(indices.size());
+    while (iter.hasPrevious())
+    {
+      int idx = ((Integer)iter.previous()).intValue();
+      if (idx >= models.size() - 1) return;
+      Object temp = models.get(idx+1);
+      models.setElementAt(models.get(idx), idx + 1);
+      models.setElementAt(temp, idx);
+      notifyListeners(idx, idx + 1);
+    }
   }
   
   /**
@@ -199,16 +264,31 @@ public class FormControlModelList
   }
 
   /**
-   * Benachrichtigt alle ItemListener über das Hinzufügen von model zur Liste.
+   * Benachrichtigt alle ItemListener über das Hinzufügen von model zur Liste an Index index.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private void notifyListeners(FormControlModel model)
+  private void notifyListeners(FormControlModel model, int index)
   {
     Iterator iter = listeners.iterator();
     while (iter.hasNext())
     {
       ItemListener listener = (ItemListener)iter.next();
-      listener.itemAdded(model);
+      listener.itemAdded(model, index);
+    }
+  }
+  
+  /**
+   * Benachrichtigt alle ItemListener über das Vertauschen der Models mit Indizes index1 
+   * und index2.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private void notifyListeners(int index1, int index2)
+  {
+    Iterator iter = listeners.iterator();
+    while (iter.hasNext())
+    {
+      ItemListener listener = (ItemListener)iter.next();
+      listener.itemSwapped(index1, index2);
     }
   }
   
@@ -221,10 +301,17 @@ public class FormControlModelList
   public static interface ItemListener
   {
     /**
-     * Wird aufgerufen nachdem model zur Liste hinzugefügt wurde.
+     * Wird aufgerufen nachdem model zur Liste hinzugefügt wurde (an Index index).
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
-    public void itemAdded(FormControlModel model);
+    public void itemAdded(FormControlModel model, int index);
+    
+    /**
+     * Wird aufgerufen, nachdem Model mit Index index1 und Model mit index2 vertauscht
+     * wurden.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
+    public void itemSwapped(int index1, int index2);
   }
   
 

@@ -17,16 +17,20 @@
 */
 package de.muenchen.allg.itd51.wollmux.former;
 
-import java.awt.FlowLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.Color;
+import java.awt.event.InputEvent;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
+import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+
+
 
 /**
  * Eine einzeilige Sicht auf ein einzelnes Formularsteuerelement.
@@ -35,6 +39,16 @@ import javax.swing.event.DocumentListener;
  */
 public class OneFormControlLineView implements View, FormControlModel.ModelChangeListener
 {
+  /**
+   * Farbe für den Hintergrund, wenn die View markiert ist.
+   */
+  private static final Color MARKED_BACKGROUND_COLOR = Color.BLUE;
+  
+  /**
+   * Breite des Randes um die View.
+   */
+  private static final int BORDER = 4;
+  
   /**
    * Standardbreite des Textfelds, das das Label anzeigt.
    */
@@ -51,6 +65,10 @@ public class OneFormControlLineView implements View, FormControlModel.ModelChang
    */
   private JPanel myPanel;
   
+  /**
+   * Der FormularMax4000, zu dem diese View gehört.
+   */
+  private FormularMax4000 formularMax4000;
   
   /**
    * Wird vor dem Ändern eines Attributs des Models gesetzt, damit der rekursive Aufruf
@@ -70,19 +88,34 @@ public class OneFormControlLineView implements View, FormControlModel.ModelChang
   private JTextField labelTextfield;
   
   /**
+   * Wird auf alle Teilkomponenten dieser View registriert.
+   */
+  private MyMouseListener myMouseListener = new MyMouseListener();
+
+  /**
+   * Die Hintergrundfarbe im unmarkierten Zustand.
+   */
+  private Color unmarkedBackgroundColor;
+    
+  /**
    * Erzeugt eine View für model.
    * @param bigDaddy typischerweise ein Container, der die View enthält und daher über Änderungen
    *        auf dem Laufenden gehalten werden muss.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
-  public OneFormControlLineView(FormControlModel model, ViewChangeListener bigDaddy)
+  public OneFormControlLineView(FormControlModel model, ViewChangeListener bigDaddy, FormularMax4000 formularMax4000)
   {
     this.model = model;
     this.bigDaddy = bigDaddy;
+    this.formularMax4000 = formularMax4000;
     myPanel = new JPanel();
+    myPanel.setOpaque(true);
     myPanel.setLayout(new BoxLayout(myPanel, BoxLayout.X_AXIS));
+    myPanel.setBorder(BorderFactory.createEmptyBorder(BORDER, BORDER, BORDER, BORDER));
+    myPanel.addMouseListener(myMouseListener);
     myPanel.add(makeLabelView());
+    unmarkedBackgroundColor = myPanel.getBackground();
     model.addListener(this);
   }
   
@@ -107,6 +140,8 @@ public class OneFormControlLineView implements View, FormControlModel.ModelChang
       public void removeUpdate(DocumentEvent e) {update();}
       public void changedUpdate(DocumentEvent e) {update();}
       });
+    
+    labelTextfield.addMouseListener(myMouseListener);
     return labelTextfield;
   }
   
@@ -141,6 +176,35 @@ public class OneFormControlLineView implements View, FormControlModel.ModelChang
   }
 
   /**
+   * Liefert das {@link FormControlModel} das zu dieser View gehört.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public FormControlModel getModel()
+  {
+    return model;
+  }
+
+  /**
+   * Markiert diese View optisch als ausgewählt.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public void mark()
+  {
+    myPanel.setBackground(MARKED_BACKGROUND_COLOR);
+  }
+  
+  /**
+   * Entfernt die optische Markierung als ausgewählt von dieser View.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public void unmark()
+  {
+    myPanel.setBackground(unmarkedBackgroundColor);
+  }
+  
+  /**
    * Interface für Klassen, die an Änderungen dieser View interessiert sind.
    *
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -156,4 +220,26 @@ public class OneFormControlLineView implements View, FormControlModel.ModelChang
     public void viewShouldBeRemoved(OneFormControlLineView view);
   }
 
+  
+  /**
+   * Wird auf alle Teilkomponenten der View registriert. Setzt MousePressed-Events um in
+   * Broadcasts, die signalisieren, dass das entsprechende Model selektiert wurde. Je nachdem
+   * ob CTRL gedrückt ist oder nicht wird die Selektion erweitert oder ersetzt. 
+   *
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private class MyMouseListener implements MouseListener
+  {
+    public void mouseClicked(MouseEvent e){}
+    public void mousePressed(MouseEvent e)
+    {
+      int state = 1;
+      if ((e.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) == InputEvent.CTRL_DOWN_MASK)
+        state = 0;
+      formularMax4000.broadcast(new BroadcastFormControlModelSelection(getModel(), state, state!=0));
+    }
+    public void mouseReleased(MouseEvent e) {}
+    public void mouseEntered(MouseEvent e) {}
+    public void mouseExited(MouseEvent e) {}
+  }
 }

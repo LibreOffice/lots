@@ -515,6 +515,7 @@ public class FormControlModel
    * Benachrichtigt alle auf diesem Model registrierten Listener, dass das Model aus
    * seinem Container entfernt wurde. ACHTUNG! Darf nur von einem entsprechenden Container
    * aufgerufen werden, der das Model enthält.
+   * @param index der Index an dem sich das Model in seinem Container befand.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -556,7 +557,7 @@ public class FormControlModel
     
     /**
      * Wird aufgerufen, wenn model aus seinem Container entfernt wird (und damit
-     * in keiner View mehr angezeigt werden soll). 
+     * in keiner View mehr angezeigt werden soll).
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */

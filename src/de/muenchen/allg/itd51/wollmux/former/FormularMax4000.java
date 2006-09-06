@@ -13,6 +13,7 @@
 * 28.08.2006 | BNK | kommentiert
 * 31.08.2006 | BNK | Code-Editor-Fenster wird jetzt in korrekter Größe dargestellt
 *                  | Das Hauptfenster passt sein Größe an, wenn Steuerelemente dazukommen oder verschwinden
+* 06.09.2006 | BNK | Hoch und Runterschieben funktionieren jetzt.
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -32,7 +33,9 @@ import java.io.StringReader;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -190,6 +193,43 @@ public class FormularMax4000
   private FormDescriptor formDescriptor;
   
   /**
+   * Der globale Broadcast-Kanal wird für Nachrichten verwendet, die verschiedene permanente
+   * Objekte erreichen müssen, die aber von (transienten) Objekten ausgehen, die mit diesen 
+   * globalen Objekten
+   * wegen des Ausuferns der Verbindungen nicht in einer Beziehung stehen sollen. Diese Liste
+   * enthält alle {@link BroadcastListener}, die auf dem globalen Broadcast-Kanal horchen. 
+   * Dies dürfen nur
+   * permanente Objekte sein, d.h. Objekte deren Lebensdauer nicht vor Beenden des
+   * FM4000 endet. 
+   */
+  private List broadcastListeners = new Vector();
+  
+  /**
+   * Sendet die Nachricht b an alle Listener, die auf dem globalen Broadcast-Kanal registriert
+   * sind.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED*/
+  public void broadcast(Broadcast b)
+  {
+    Iterator iter = broadcastListeners.iterator();
+    while (iter.hasNext())
+    {
+      b.sendTo((BroadcastListener)iter.next());
+    }
+  }
+  
+  /**
+   * listener wird über globale {@link Broadcast}s informiert.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED*/
+  public void addBroadcastListener(BroadcastListener listener)
+  {
+    if (!broadcastListeners.contains(listener))
+      broadcastListeners.add(listener);
+  }
+  
+  /**
    * Startet eine Instanz des FormularMax 4000 für das Dokument doc.
    * @param abortListener (falls nicht null) wird aufgerufen, nachdem der FormularMax 4000 geschlossen wurde.
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -224,7 +264,7 @@ public class FormularMax4000
     //der WindowListener sorgt dafür, dass auf windowClosing mit abort reagiert wird
     myFrame.addWindowListener(oehrchen);
     
-    allFormControlModelLineViewsPanel = new AllFormControlModelLineViewsPanel(formControlModelList);
+    allFormControlModelLineViewsPanel = new AllFormControlModelLineViewsPanel(formControlModelList, this);
     JPanel contentPanel = new JPanel(new BorderLayout());
     contentPanel.add(allFormControlModelLineViewsPanel.JComponent(), BorderLayout.CENTER);
     myFrame.getContentPane().add(contentPanel);
