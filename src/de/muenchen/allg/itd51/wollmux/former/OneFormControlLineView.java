@@ -18,6 +18,7 @@
 package de.muenchen.allg.itd51.wollmux.former;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -37,7 +38,7 @@ import javax.swing.event.DocumentListener;
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
-public class OneFormControlLineView implements View, FormControlModel.ModelChangeListener
+public class OneFormControlLineView implements View
 {
   /**
    * Farbe für den Hintergrund, wenn die View markiert ist.
@@ -116,7 +117,7 @@ public class OneFormControlLineView implements View, FormControlModel.ModelChang
     myPanel.addMouseListener(myMouseListener);
     myPanel.add(makeLabelView());
     unmarkedBackgroundColor = myPanel.getBackground();
-    model.addListener(this);
+    model.addListener(new MyModelChangeListener());
   }
   
   /**
@@ -142,7 +143,28 @@ public class OneFormControlLineView implements View, FormControlModel.ModelChang
       });
     
     labelTextfield.addMouseListener(myMouseListener);
+    setTypeSpecificTraits(labelTextfield, model.getType());
     return labelTextfield;
+  }
+  
+  /**
+   * Setzt optische Aspekte wie Rand von compo abhängig von type.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private void setTypeSpecificTraits(JComponent compo, String type)
+  {
+    if (type == FormControlModel.TAB_TYPE)
+    {
+      Font f = compo.getFont();
+      f = f.deriveFont(Font.BOLD);
+      compo.setFont(f);
+      compo.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3));
+    }
+    else if (type == FormControlModel.BUTTON_TYPE)
+    {
+      compo.setBackground(Color.LIGHT_GRAY);
+      compo.setBorder(BorderFactory.createRaisedBevelBorder());
+    }
   }
   
   /**
@@ -156,26 +178,23 @@ public class OneFormControlLineView implements View, FormControlModel.ModelChang
     labelTextfield.setText(newLabel);
   }
   
+  /**
+   * Wird aufgerufen, wenn das TYPE des durch diese View dargestellten {@link FormControlModel}s
+   * durch eine andere Ursache als diese View geändert wurde.
+   * @param newType das neue Label.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private void typeChanged(String newType)
+  {
+    setTypeSpecificTraits(labelTextfield, newType);
+  }
+  
   public JComponent JComponent()
   {
     return myPanel;
   }
 
-  public void attributeChanged(FormControlModel model, int attributeId, Object newValue)
-  {
-    if (ignoreAttributeChanged) return;
-    switch(attributeId)
-    {
-      case FormControlModel.LABEL_ATTR: labelChanged((String)newValue); break;
-    }
-  }
-
-  public void modelRemoved(FormControlModel model)
-  {
-    bigDaddy.viewShouldBeRemoved(this);
-  }
-
-  /**
+   /**
    * Liefert das {@link FormControlModel} das zu dieser View gehört.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -220,6 +239,23 @@ public class OneFormControlLineView implements View, FormControlModel.ModelChang
     public void viewShouldBeRemoved(OneFormControlLineView view);
   }
 
+  private class MyModelChangeListener implements FormControlModel.ModelChangeListener
+  {
+    public void attributeChanged(FormControlModel model, int attributeId, Object newValue)
+    {
+      if (ignoreAttributeChanged) return;
+      switch(attributeId)
+      {
+        case FormControlModel.LABEL_ATTR: labelChanged((String)newValue); break;
+        case FormControlModel.TYPE_ATTR: typeChanged((String)newValue); break;
+      }
+    }
+
+    public void modelRemoved(FormControlModel model)
+    {
+      bigDaddy.viewShouldBeRemoved(OneFormControlLineView.this);
+    }
+  }
   
   /**
    * Wird auf alle Teilkomponenten der View registriert. Setzt MousePressed-Events um in

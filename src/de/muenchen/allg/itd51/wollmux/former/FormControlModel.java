@@ -57,10 +57,10 @@ public class FormControlModel
    */
   public static final String NO_ACTION = "";
   
-  /**
-   * Attribut ID für das Attribut "LABEL".
-   */
+  /** Attribut ID für das Attribut "LABEL". */
   public static final int LABEL_ATTR = 0;
+  /** Attribut ID für das Attribut "TYPE". */
+  public static final int TYPE_ATTR = 1;
   
   /** LABEL. */
   private String label;
@@ -444,6 +444,7 @@ public class FormControlModel
     else if (type.equals(CHECKBOX_TYPE)) this.type = CHECKBOX_TYPE;
     else if (type.equals(BUTTON_TYPE)) this.type = BUTTON_TYPE;
     else this.type = UNKNOWN_TYPE;
+    notifyListeners(TYPE_ATTR, this.type);
   }
   
   /**
@@ -518,7 +519,7 @@ public class FormControlModel
    * @param index der Index an dem sich das Model in seinem Container befand.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
+   * TESTED */
   public void hasBeenRemoved()
   {
     Iterator iter = listeners.iterator();

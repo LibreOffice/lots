@@ -290,10 +290,19 @@ public class FormularMax4000
       }});
     menu.add(menuItem);
     
+    menuItem = new JMenuItem("Formularbeschreibung editieren");
+    menuItem.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent e)
+      {
+        editFormDescriptor();
+      }});
+    menu.add(menuItem);
+
+    
     mbar.add(menu);
-//  ========================= Formular ============================
-    menu = new JMenu("Formular");
-    menuItem = new JMenuItem("Empfängerauswahl-Tab einfügen");
+//  ========================= Einfügen ============================
+    menu = new JMenu("Einfügen");
+    menuItem = new JMenuItem("Empfängerauswahl-Tab");
     menuItem.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e)
       {
@@ -303,7 +312,7 @@ public class FormularMax4000
       });
     menu.add(menuItem);
     
-    menuItem = new JMenuItem("Standardbuttons (mittlere Tabs) einfügen");
+    menuItem = new JMenuItem("Abbrechen, <-Zurück, Weiter->");
     menuItem.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e)
       {
@@ -313,7 +322,7 @@ public class FormularMax4000
       });
     menu.add(menuItem);
     
-    menuItem = new JMenuItem("Standardbuttons (letzter Tab) einfügen");
+    menuItem = new JMenuItem("Abbrechen, <-Zurück, PDF, Drucken");
     menuItem.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e)
       {
@@ -323,14 +332,6 @@ public class FormularMax4000
       });
     menu.add(menuItem);
     
-    menuItem = new JMenuItem("Formularbeschreibung editieren");
-    menuItem.addActionListener(new ActionListener(){
-      public void actionPerformed(ActionEvent e)
-      {
-        editFormDescriptor();
-      }});
-    menu.add(menuItem);
-
     
     mbar.add(menu);
     
@@ -448,7 +449,8 @@ public class FormularMax4000
   {
     try{ 
       ConfigThingy conf = new ConfigThingy("Buttons", STANDARD_BUTTONS_MIDDLE_URL);
-      parseGrandchildren(conf, -1);
+      int index = allFormControlModelLineViewsPanel.getInsertionIndex();
+      parseGrandchildren(conf, index);
       //TODO writeFormDescriptor();
     }catch(Exception x) { Logger.error(x);}
   }
@@ -462,7 +464,8 @@ public class FormularMax4000
   {
     try{ 
       ConfigThingy conf = new ConfigThingy("Buttons", STANDARD_BUTTONS_LAST_URL);
-      parseGrandchildren(conf, -1);
+      int index = allFormControlModelLineViewsPanel.getInsertionIndex();
+      parseGrandchildren(conf, index);
       //TODO writeFormDescriptor();
     }catch(Exception x) { Logger.error(x);}
   }

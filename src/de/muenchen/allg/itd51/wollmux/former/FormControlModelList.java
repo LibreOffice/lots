@@ -62,7 +62,7 @@ public class FormControlModelList
    * Bittet die FormControlModelList darum, das Element model aus sich zu entfernen
    * (falls es in der Liste ist).
    * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TODO Testen
+   * TESTED
    */
   public void remove(FormControlModel model)
   {

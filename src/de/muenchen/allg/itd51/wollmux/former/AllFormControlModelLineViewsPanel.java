@@ -18,6 +18,7 @@
 package de.muenchen.allg.itd51.wollmux.former;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -29,6 +30,7 @@ import java.util.ListIterator;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
@@ -63,6 +65,12 @@ public class AllFormControlModelLineViewsPanel implements View, ItemListener, On
   private GridBagConstraints gbcLineView = new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0, GridBagConstraints.LINE_START,   GridBagConstraints.HORIZONTAL, new Insets(0,0,0,0),0,0);
   
   /**
+   * Wird (mit wechselndem gridy Wert) verwendet als Constraints für das Hinzufügen von
+   * {@link #bottomGlue} zum lineViewPanel.
+   */
+  private GridBagConstraints gbcBottomGlue = new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER,   GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0);
+  
+  /**
    * Die {@link FormControlModelList}, deren Inhalt in dieser View angezeigt wird.
    */
   private FormControlModelList formControlModelList;
@@ -76,6 +84,12 @@ public class AllFormControlModelLineViewsPanel implements View, ItemListener, On
    * Das Panel, das die ganzen {@link OneFormControlLineView}s enthält.
    */
   private JPanel lineViewPanel;
+  
+  /**
+   * Wird immer als letztes Element in das lineViewPanel getan, damit die Elemente
+   * nicht zentriert erscheinen.
+   */
+  private Component bottomGlue = Box.createGlue();
   
   /**
    * Enthält die {@link OneFormControlLineView}s in der richtigen Reihenfolge.
@@ -127,7 +141,7 @@ public class AllFormControlModelLineViewsPanel implements View, ItemListener, On
     //int gridx, int gridy, int gridwidth, int gridheight, double weightx, double weighty, int anchor,          int fill,                  Insets insets, int ipadx, int ipady)
     GridBagConstraints gbcButtonPanel = new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL,       new Insets(TF_BORDER,TF_BORDER,TF_BORDER,TF_BORDER),0,0);
     gbcButtonPanel.gridx = 0;
-    gbcButtonPanel.gridy = 1;
+    gbcButtonPanel.gridy = 2;
     myPanel.add(buttonPanel,gbcButtonPanel);
     
     GridBagConstraints gbcButton = new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.NONE,       new Insets(BUTTON_BORDER,BUTTON_BORDER,BUTTON_BORDER,BUTTON_BORDER),0,0);
@@ -156,12 +170,22 @@ public class AllFormControlModelLineViewsPanel implements View, ItemListener, On
         deleteSelectedElements();
       }});
     buttonPanel.add(killButton, gbcButton);
+    
+    ++gbcButton.gridx;
+    JButton newButton = new JButton("Neu");
+    newButton.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent e)
+      {
+        insertNewElement();
+      }});
+    buttonPanel.add(newButton, gbcButton);
   }
 
   public JComponent JComponent()
   {
     return myPanel;
   }
+
   //TESTED
   public void itemAdded(FormControlModel model, int index)
   {
@@ -176,6 +200,8 @@ public class AllFormControlModelLineViewsPanel implements View, ItemListener, On
     
     gbcLineView.gridy = index;
     lineViewPanel.add(ofclView.JComponent(), gbcLineView);
+    gbcBottomGlue.gridy = views.size();
+    lineViewPanel.add(bottomGlue, gbcBottomGlue);
     lineViewPanel.validate();
     scrollPane.validate();
     
@@ -183,13 +209,13 @@ public class AllFormControlModelLineViewsPanel implements View, ItemListener, On
   }
 
   public void viewShouldBeRemoved(OneFormControlLineView view)
-  {
+  { //TESTED
     int index = views.indexOf(view);
     if (index < 0) return;
     
     views.remove(index);
     lineViewPanel.remove(view.JComponent());
-    for (int i = views.size() - 1; i >= index; --i)
+    for (int i = views.size() - 1; i >= index; --i)//ACHTUNG! views.size() hat sich durch remove() um 1 reduziert, deswegen stimmt diese Zeile
     {
       gbcLineView.gridy = i;
       lineViewPanel.add(((OneFormControlLineView)views.get(i)).JComponent(), gbcLineView);
@@ -237,17 +263,52 @@ public class AllFormControlModelLineViewsPanel implements View, ItemListener, On
    * Löscht alle ausgewählten Elemente.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TODO Testen
+   * TESTED
    */
   private void deleteSelectedElements()
   {
-    Iterator iter = selection.iterator();
-    while (iter.hasNext())
+    /**
+     * Die folgende Schleife muss auf diese Weise geschrieben werden und nicht mit einem
+     * Iterator, weil es ansonsten eine ConcurrentModificationException gibt, da
+     * über {@link OneFormControlLineView.ViewChangeListener#viewShouldBeRemoved(OneFormControlLineView)}
+     * die Selektion während des remove() gleich verändert wird, was den Iterator
+     * invalidieren würde.
+     */
+    while (!selection.isEmpty())
     {
-      Integer I = (Integer)iter.next();
+      Integer I = (Integer)selection.lastElement();
       OneFormControlLineView view = (OneFormControlLineView)views.get(I.intValue());
       formControlModelList.remove(view.getModel());
     }
+  }
+  
+  /**
+   * Liefert den Index des ersten vom Benutzer ausgewählten Elements oder -1, falls
+   * nichts ausgewählt.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public int getInsertionIndex()
+  {
+    int index = -1;
+    if (!selection.isEmpty())
+      index = ((Integer)selection.firstElement()).intValue();
+    return index;
+  }
+  
+  /**
+   * Fügt vor dem ersten ausgewählten Element (oder ganz am Ende, wenn nichts ausgewählt ist)
+   * ein neues Steuerelement zur Liste hinzu.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED
+   */
+  private void insertNewElement()
+  {
+    String id = formControlModelList.makeUniqueId("Reiter");
+    String label = id;
+    FormControlModel model = FormControlModel.createTab(label, id);
+    int index = getInsertionIndex();
+    formControlModelList.add(model, index);
   }
 
   public void itemSwapped(int index1, int index2)
@@ -330,7 +391,7 @@ public class AllFormControlModelLineViewsPanel implements View, ItemListener, On
   /**
    * Entfernt den Index i aus der {@link #selection} Liste falls er dort enthalten ist.
    * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
+   * TESTED*/
   private void removeSelectionIndex(int i)
   {
     int idx = selection.indexOf(new Integer(i));
