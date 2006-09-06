@@ -123,7 +123,9 @@ public class FormularMax4000
    * Eingabefeld: Als "Hinweis" kann    "Label<<ID>>" angegeben werden und wird beim Import
    *              entsprechend berücksichtigt. Wird nur "<<ID>>" angegeben, so markiert das
    *              Eingabefeld eine reine Einfügestelle (insertValue oder insertContent) und
-   *              beim Import wird dafür kein Formularsteuerelement erzeugt.
+   *              beim Import wird dafür kein Formularsteuerelement erzeugt. Wird ID
+   *              ein "glob:" vorangestellt, so wird gleich ein insertValue-Bookmark
+   *              erstellt.
    * 
    * Eingabeliste/Dropdown: Als "Name" kann "Label<<ID>>" angegeben werden und wird beim
    *                        Import berücksichtigt.
@@ -136,12 +138,18 @@ public class FormularMax4000
    * 
    * Checkbox: Bei Checkboxen kann als "Hilfetext" "Label<<ID>>" angegeben werden und wird
    *           beim Import entsprechend berücksichtigt.
-   * 
+   *           
    * Technischer Hinweis: Auf dieses Pattern getestet wird grundsätzlich der String, der von
    * {@link DocumentTree.FormControl#getDescriptor()} geliefert wird.
    * 
    */
   private static final Pattern MAGIC_DESCRIPTOR_PATTERN = Pattern.compile("\\A(.*)<<(.*)>>\\z");
+  
+  /**
+   * Präfix zur Markierung von IDs der magischen Deskriptor-Syntax um anzuzeigen, dass
+   * ein insertValue anstatt eines insertFormValue erzeugt werden soll.
+   */
+  private static final String GLOBAL_PREFIX = "glob:";
 
   /**
    * ActionListener für Buttons mit der ACTION "abort". 
@@ -180,6 +188,11 @@ public class FormularMax4000
    * Verwaltet die FormControlModels dieses Formulars.
    */
   private FormControlModelList formControlModelList;
+  
+  /**
+   * Verwaltet die {@link InsertionModel}s dieses Formulars.
+   */
+  private InsertionModelList insertionModelList;
   
   /**
    * Hält in einem Panel FormControlModelLineViews für alle 
@@ -626,9 +639,17 @@ public class FormularMax4000
   
   /**
    * Fügt der {@link #formControlModelList} ein neues {@link FormControlModel} hinzu für
-   * das {@link de.muenchen.allg.itd51.wollmux.former.DocumentTree.FormControl} control, wobei
+   * das {@link de.muenchen.allg.itd51.wollmux.former.DocumentTree.FormControl} control, 
+   * wobei
    * text der Text sein sollte, der im Dokument vor control steht. Dieser Text wird zur
-   * Generierung des Labels herangezogen.
+   * Generierung des Labels herangezogen. Es wird ebenfalls der 
+   * {@link #insertionModelList} ein entsprechendes {@link InsertionModel} hinzugefügt.
+   * Zusätzlich wird immer ein entsprechendes Bookmark um das Control herumgelegt, das
+   * die Einfügestelle markiert. 
+   * 
+   * @return null, falls es sich bei dem Control nur um eine reine Einfügestelle
+   *         handelt. In diesem Fall wird nur der {@link #insertionModelList}
+   *         ein Element hinzugefügt.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -640,9 +661,9 @@ public class FormularMax4000
     Matcher m = MAGIC_DESCRIPTOR_PATTERN.matcher(descriptor);
     if (m.matches())
     {
-      label = m.group(1);
+      label = m.group(1).trim();
       if (label.length() == 0) label = INSERTION_ONLY; 
-      id = m.group(2);
+      id = m.group(2).trim();
     }
     else
     {
@@ -652,12 +673,27 @@ public class FormularMax4000
     
     id = makeControlId(label, id);
     
-    switch (control.getType())
+    if (label == INSERTION_ONLY)
     {
-      case DocumentTree.CHECKBOX_CONTROL: return registerCheckbox(control, label, id);
-      case DocumentTree.DROPDOWN_CONTROL: return registerDropdown((DropdownFormControl)control, label, id);
-      case DocumentTree.INPUT_CONTROL:    return registerInput(control, label, id);
-      default: Logger.error("Unbekannter Typ Formular-Steuerelement"); return null;
+      if (id.startsWith(GLOBAL_PREFIX))
+      {
+        id = id.substring(GLOBAL_PREFIX.length());
+        control.surroundWithBookmark(insertValue(id));
+      }
+      else
+        control.surroundWithBookmark(insertFormValue(id));
+      
+      return null;
+    }
+    else
+    {
+      switch (control.getType())
+      {
+        case DocumentTree.CHECKBOX_CONTROL: return registerCheckbox(control, label, id);
+        case DocumentTree.DROPDOWN_CONTROL: return registerDropdown((DropdownFormControl)control, label, id);
+        case DocumentTree.INPUT_CONTROL:    return registerInput(control, label, id);
+        default: Logger.error("Unbekannter Typ Formular-Steuerelement"); return null;
+      }
     }
   }
 
@@ -702,18 +738,15 @@ public class FormularMax4000
   private FormControlModel registerCheckbox(FormControl control, String label, String id)
   {
     FormControlModel model = null;
-    if (label != INSERTION_ONLY)
+    label = NO_LABEL; //immer fixUp-Text von hinter der Checkbox benutzen, weil meist bessere Ergebnisse
+    model = FormControlModel.createCheckbox(label, id);
+    if (control.getString().equalsIgnoreCase("true"))
     {
-      label = NO_LABEL; //immer fixUp-Text von hinter der Checkbox benutzen, weil meist bessere Ergebnisse
-      model = FormControlModel.createCheckbox(label, id);
-      if (control.getString().equalsIgnoreCase("true"))
-      {
-        ConfigThingy autofill = new ConfigThingy("AUTOFILL");
-        autofill.add("true");
-        model.setAutofill(autofill);
-      }
-      formControlModelList.add(model);
+      ConfigThingy autofill = new ConfigThingy("AUTOFILL");
+      autofill.add("true");
+      model.setAutofill(autofill);
     }
+    formControlModelList.add(model);
     
     control.surroundWithBookmark(insertFormValue(id));
     return model;
@@ -730,33 +763,31 @@ public class FormularMax4000
   private FormControlModel registerDropdown(DropdownFormControl control, String label, String id)
   {
     FormControlModel model = null;
-    if (label != INSERTION_ONLY)
+    String[] items = control.getItems();
+    boolean editable = false;
+    for (int i = 0; i < items.length; ++i)
     {
-      String[] items = control.getItems();
-      boolean editable = false;
-      for (int i = 0; i < items.length; ++i)
+      if (items[i].equalsIgnoreCase("<<Freitext>>")) 
       {
-        if (items[i].equalsIgnoreCase("<<Freitext>>")) 
-        {
-          String[] newItems = new String[items.length - 1];
-          System.arraycopy(items, 0, newItems, 0, i);
-          System.arraycopy(items, i + 1, newItems, i, items.length - i - 1);
-          items = newItems;
-          editable = true;
-          break;
-        }
+        String[] newItems = new String[items.length - 1];
+        System.arraycopy(items, 0, newItems, 0, i);
+        System.arraycopy(items, i + 1, newItems, i, items.length - i - 1);
+        items = newItems;
+        editable = true;
+        break;
       }
-      model = FormControlModel.createComboBox(label, id, items);
-      model.setEditable(editable);
-      String preset = control.getString().trim();
-      if (preset.length() > 0)
-      {
-        ConfigThingy autofill = new ConfigThingy("AUTOFILL");
-        autofill.add(preset);
-        model.setAutofill(autofill);
-      }
-      formControlModelList.add(model);
     }
+    model = FormControlModel.createComboBox(label, id, items);
+    model.setEditable(editable);
+    String preset = control.getString().trim();
+    if (preset.length() > 0)
+    {
+      ConfigThingy autofill = new ConfigThingy("AUTOFILL");
+      autofill.add(preset);
+      model.setAutofill(autofill);
+    }
+    formControlModelList.add(model);
+    
     
     control.surroundWithBookmark(insertFormValue(id));
     return model;
@@ -773,18 +804,15 @@ public class FormularMax4000
   private FormControlModel registerInput(FormControl control, String label, String id)
   {
     FormControlModel model = null;
-    if (label != INSERTION_ONLY)
+    model = FormControlModel.createTextfield(label, id);
+    String preset = control.getString().trim();
+    if (preset.length() > 0)
     {
-      model = FormControlModel.createTextfield(label, id);
-      String preset = control.getString().trim();
-      if (preset.length() > 0)
-      {
-        ConfigThingy autofill = new ConfigThingy("AUTOFILL");
-        autofill.add(preset);
-        model.setAutofill(autofill);
-      }
-      formControlModelList.add(model);
+      ConfigThingy autofill = new ConfigThingy("AUTOFILL");
+      autofill.add(preset);
+      model.setAutofill(autofill);
     }
+    formControlModelList.add(model);
     
     control.surroundWithBookmark(insertFormValue(id));
     return model;
@@ -799,13 +827,23 @@ public class FormularMax4000
    */
   private String makeControlId(String label, String str)
   {
-    str = str.replaceAll("[^a-zA-Z_0-9]","");
-    if (str.length() == 0) str = "Steuerelement";
-    if (!str.matches("^[a-zA-Z_].*")) str = "_" + str;
-    if (label != INSERTION_ONLY)
-      return formControlModelList.makeUniqueId(str);
-    else
+    if (label == INSERTION_ONLY)
+    {
+      boolean glob = str.startsWith(GLOBAL_PREFIX);
+      if (glob) str = str.substring(GLOBAL_PREFIX.length());
+      str = str.replaceAll("[^a-zA-Z_0-9]","");
+      if (str.length() == 0) str = "Einfuegung";
+      if (!str.matches("^[a-zA-Z_]")) str = "_" + str;
+      if (glob) str = GLOBAL_PREFIX + str;
       return str;
+    }
+    else
+    {
+      str = str.replaceAll("[^a-zA-Z_0-9]","");
+      if (str.length() == 0) str = "Steuerelement";
+      if (!str.matches("^[a-zA-Z_]")) str = "_" + str;
+      return formControlModelList.makeUniqueId(str);
+    }
   }
 
   private static class NoWrapEditorKit extends DefaultEditorKit
@@ -876,6 +914,15 @@ public class FormularMax4000
     
     editorFrame.pack();
     editorFrame.setVisible(true);
+  }
+  
+  /**
+   * Liefert "WM(CMD'insertValue' DB_SPALTE '&lt;id>').
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private String insertValue(String id)
+  {
+    return "WM(CMD'insertValue' DB_SPALTE '"+id+"')";
   }
   
   /**
