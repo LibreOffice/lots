@@ -78,6 +78,13 @@ import de.muenchen.allg.itd51.wollmux.former.DocumentTree.Visitor;
 public class FormularMax4000
 {
   /**
+   * Regex für Test ob String mit Buchstabe oder Underscore beginnt.
+   * ACHTUNG! Das .* am Ende ist notwendig, da String.matches() immer den
+   * ganzen String testet.
+   */
+  private static final String STARTS_WITH_LETTER_RE = "^[a-zA-Z_].*";
+
+  /**
    * Der Standard-Formulartitel, solange kein anderer gesetzt wird.
    */
   private static final String GENERATED_FORM_TITLE = "Generiert durch FormularMax 4000";
@@ -833,7 +840,7 @@ public class FormularMax4000
       if (glob) str = str.substring(GLOBAL_PREFIX.length());
       str = str.replaceAll("[^a-zA-Z_0-9]","");
       if (str.length() == 0) str = "Einfuegung";
-      if (!str.matches("^[a-zA-Z_]")) str = "_" + str;
+      if (!str.matches(STARTS_WITH_LETTER_RE)) str = "_" + str;
       if (glob) str = GLOBAL_PREFIX + str;
       return str;
     }
@@ -841,7 +848,7 @@ public class FormularMax4000
     {
       str = str.replaceAll("[^a-zA-Z_0-9]","");
       if (str.length() == 0) str = "Steuerelement";
-      if (!str.matches("^[a-zA-Z_]")) str = "_" + str;
+      if (!str.matches(STARTS_WITH_LETTER_RE)) str = "_" + str;
       return formControlModelList.makeUniqueId(str);
     }
   }
