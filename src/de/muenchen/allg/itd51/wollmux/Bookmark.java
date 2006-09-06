@@ -139,6 +139,7 @@ public class Bookmark
         XTextCursor cursor = range.getText().createTextCursorByRange(range);
         range.getText()
             .insertTextContent(cursor, bookmark.xTextContent(), true);
+        this.name = bookmark.xNamed().getName();
       }
       catch (IllegalArgumentException e)
       {

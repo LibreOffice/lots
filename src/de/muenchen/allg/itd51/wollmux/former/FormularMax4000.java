@@ -60,6 +60,7 @@ import com.sun.star.text.XTextDocument;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
+import de.muenchen.allg.itd51.parser.SyntaxErrorException;
 import de.muenchen.allg.itd51.wollmux.FormDescriptor;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.dialog.Common;
@@ -192,6 +193,11 @@ public class FormularMax4000
   private String formTitle = GENERATED_FORM_TITLE;
   
   /**
+   * Das Dokument, an dem dieser FormularMax 4000 hängt.
+   */
+  private XTextDocument doc;
+  
+  /**
    * Verwaltet die FormControlModels dieses Formulars.
    */
   private FormControlModelList formControlModelList;
@@ -254,8 +260,9 @@ public class FormularMax4000
    * @param abortListener (falls nicht null) wird aufgerufen, nachdem der FormularMax 4000 geschlossen wurde.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public FormularMax4000(final XTextDocument doc, ActionListener abortListener)
+  public FormularMax4000(XTextDocument doc, ActionListener abortListener)
   {
+    this.doc = doc;
     this.abortListener = abortListener;
     initFormDescriptor(doc);
     
@@ -263,18 +270,19 @@ public class FormularMax4000
     try{
       javax.swing.SwingUtilities.invokeLater(new Runnable() {
         public void run() {
-            try{createGUI(doc);}catch(Exception x){Logger.error(x);};
+            try{createGUI();}catch(Exception x){Logger.error(x);};
         }
       });
     }
     catch(Exception x) {Logger.error(x);}
   }
   
-  private void createGUI(final XTextDocument doc)
+  private void createGUI()
   {
     Common.setLookAndFeelOnce();
     
     formControlModelList = new FormControlModelList();
+    insertionModelList = new InsertionModelList();
     
     //  Create and set up the window.
     myFrame = new JFrame("FormularMax 4000");
@@ -367,13 +375,16 @@ public class FormularMax4000
   }
   
   /**
-   * Wertet {@link #formDescriptor} aus aus und initialisiert alle internen
+   * Wertet {@link #formDescriptor}, sowie die Bookmarks von {@link #doc} aus und initialisiert 
+   * alle internen
    * Strukturen entsprechend. Dies aktualisiert auch die entsprechenden Views.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
   private void initModelsAndViews()
   {
+    //TODO Wenn TRAFOs unterstützt werden von InsertionModel, dann müssen die entsprechenden Aspekte der InsertionModels ebenfalls neu gesetzt werden
+    
     formControlModelList.clear();
     ConfigThingy conf = formDescriptor.toConfigThingy();
     parseGlobalFormInfo(conf);
@@ -390,6 +401,21 @@ public class FormularMax4000
         parseTab(tab, -1);
       }
     }
+    
+    insertionModelList.clear();
+    String[] bookmarks = UNO.XBookmarksSupplier(doc).getBookmarks().getElementNames();
+    for (int i = 0; i < bookmarks.length; ++i)
+    {
+      try{
+        String bookmark = bookmarks[i];
+        if (InsertionModel.INSERTION_BOOKMARK.matcher(bookmark).matches())
+          insertionModelList.add(new InsertionModel(bookmark));
+      }catch(SyntaxErrorException x)
+      {
+        Logger.error(x);
+      }
+    }
+    
 //  TODO writeFormDescriptor();
     myFrame.pack();
   }
@@ -680,28 +706,40 @@ public class FormularMax4000
     
     id = makeControlId(label, id);
     
+    FormControlModel model = null;
+    
+    if (label != INSERTION_ONLY)
+    {
+      switch (control.getType())
+      {
+        case DocumentTree.CHECKBOX_CONTROL: model = registerCheckbox(control, label, id); break;
+        case DocumentTree.DROPDOWN_CONTROL: model = registerDropdown((DropdownFormControl)control, label, id); break;
+        case DocumentTree.INPUT_CONTROL:    model = registerInput(control, label, id); break;
+        default: Logger.error("Unbekannter Typ Formular-Steuerelement"); return null;
+      }
+    }
+    
+    String bookmarkName = insertFormValue(id);
     if (label == INSERTION_ONLY)
     {
       if (id.startsWith(GLOBAL_PREFIX))
       {
         id = id.substring(GLOBAL_PREFIX.length());
-        control.surroundWithBookmark(insertValue(id));
+        bookmarkName = insertValue(id);
       }
-      else
-        control.surroundWithBookmark(insertFormValue(id));
-      
-      return null;
     }
-    else
+    
+    bookmarkName = control.surroundWithBookmark(bookmarkName);
+
+    try{
+      InsertionModel imodel = new InsertionModel(bookmarkName);
+      insertionModelList.add(imodel);
+    }catch(Exception x)
     {
-      switch (control.getType())
-      {
-        case DocumentTree.CHECKBOX_CONTROL: return registerCheckbox(control, label, id);
-        case DocumentTree.DROPDOWN_CONTROL: return registerDropdown((DropdownFormControl)control, label, id);
-        case DocumentTree.INPUT_CONTROL:    return registerInput(control, label, id);
-        default: Logger.error("Unbekannter Typ Formular-Steuerelement"); return null;
-      }
+      Logger.error("Es wurde ein fehlerhaftes Bookmark generiert: \""+bookmarkName+"\"");
     }
+    
+    return model;
   }
 
   /**
@@ -754,8 +792,6 @@ public class FormularMax4000
       model.setAutofill(autofill);
     }
     formControlModelList.add(model);
-    
-    control.surroundWithBookmark(insertFormValue(id));
     return model;
   }
   
@@ -794,9 +830,6 @@ public class FormularMax4000
       model.setAutofill(autofill);
     }
     formControlModelList.add(model);
-    
-    
-    control.surroundWithBookmark(insertFormValue(id));
     return model;
   }
   
@@ -820,8 +853,6 @@ public class FormularMax4000
       model.setAutofill(autofill);
     }
     formControlModelList.add(model);
-    
-    control.surroundWithBookmark(insertFormValue(id));
     return model;
   }
   

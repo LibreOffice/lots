@@ -53,11 +53,6 @@ import de.muenchen.allg.itd51.wollmux.Logger;
 public class DocumentTree
 {
   /**
-   * Pattern zum Erkennen von insterValue und insertFormValue-Bookmarks.
-   */
-  private static final Pattern INSERTION_BOOKMARK = Pattern.compile("\\A\\s*(WM\\s*\\(.*CMD\\s*'((insertValue)|(insertFormValue))'.*\\))\\s*\\d*\\z");
-  
-  /**
    * Pattern zum Erkennen von setGroups-Bookmarks.
    */
   private static final Pattern GROUP_BOOKMARK = Pattern.compile("\\A\\s*(WM\\s*\\(.*CMD\\s*'setGroups'.*\\))\\s*\\d*\\z");
@@ -215,7 +210,7 @@ public class DocumentTree
         if (bookmark == null) continue;
         
         String name = bookmark.getName();
-        Matcher m = INSERTION_BOOKMARK.matcher(name);
+        Matcher m = InsertionModel.INSERTION_BOOKMARK.matcher(name);
         if (m.matches())
         {
           ConfigThingy conf;
@@ -335,10 +330,11 @@ public class DocumentTree
     public String getDescriptor();
     
     /**
-     * Legt ein Bookmark mit Namen bmName um das Steuerelement. 
+     * Legt ein Bookmark mit gewünschtem Namen bmName um das Steuerelement und liefert den
+     * Namen mit dem das Bookmark tatsächlich erzeugt wurde zurück. 
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
-    public void surroundWithBookmark(String bmName);
+    public String surroundWithBookmark(String bmName);
     
     /**
      * Liefert den aktuell im Steuerelement eingestellten Wert zurück.
@@ -596,12 +592,13 @@ public class DocumentTree
       return buffy.toString();
     }
 
-    public void surroundWithBookmark(String bmName)
+    public String surroundWithBookmark(String bmName)
     {
       XTextRange range = UNO.XTextContent(shape).getAnchor();
       XTextCursor cursor = range.getText().createTextCursorByRange(range);
       cursor.goRight((short)1, true);
-      new Bookmark(bmName, doc, cursor);
+      Bookmark bm = new Bookmark(bmName, doc, cursor);
+      return bm.getName();
     }
   }
   
@@ -712,10 +709,11 @@ public class DocumentTree
       return buffy.toString();
     }
 
-    public void surroundWithBookmark(String bmName)
+    public String surroundWithBookmark(String bmName)
     {
       XTextRange range = UNO.XTextContent(textfield).getAnchor();
-      new Bookmark(bmName, doc, range);
+      Bookmark bm = new Bookmark(bmName, doc, range);
+      return bm.getName();
     }
   }
   
@@ -760,10 +758,11 @@ public class DocumentTree
       return buffy.toString();
     }
     
-    public void surroundWithBookmark(String bmName)
+    public String surroundWithBookmark(String bmName)
     {
       XTextRange range = UNO.XTextContent(textfield).getAnchor();
-      new Bookmark(bmName, doc, range);
+      Bookmark bm = new Bookmark(bmName, doc, range);
+      return bm.getName();
     }
   }
 

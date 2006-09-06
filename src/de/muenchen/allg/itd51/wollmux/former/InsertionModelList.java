@@ -1,7 +1,7 @@
 /*
 * Dateiname: InsertionModelList.java
-* Projekt  : n/a
-* Funktion : TODO Funktionsbeschreibung
+* Projekt  : WollMux
+* Funktion : Verwaltet eine Liste von InsertionModels.
 * 
 * Copyright: Landeshauptstadt München
 *
@@ -17,17 +17,44 @@
 */
 package de.muenchen.allg.itd51.wollmux.former;
 
+import java.util.LinkedList;
+import java.util.List;
+
+/**
+ * Verwaltet eine Liste von InsertionModels
+ *
+ * @author Matthias Benkmann (D-III-ITD 5.1)
+ */
 public class InsertionModelList
 {
-
   /**
-   * @param args
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TODO Testen
+   * Die Liste der {@link InsertionModel}s. 
    */
-  public static void main(String[] args)
+  private List models = new LinkedList();
+  
+  /**
+   * Fügt model dieser Liste hinzu.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public void add(InsertionModel model)
   {
-
+    models.add(model);
   }
-
+  
+  /**
+   * Löscht alle bestehenden InsertionModels aus der Liste.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public void clear()
+  {
+    while (!models.isEmpty())
+    {
+      int index = models.size() - 1;
+      InsertionModel model = (InsertionModel)models.remove(index);
+      model.hasBeenRemoved();
+    }
+  }
+  
 }
+
