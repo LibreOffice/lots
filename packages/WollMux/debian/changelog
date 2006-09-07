@@ -1,3 +1,10 @@
+wollmux (1.3.1lhm1) siga; urgency=low
+
+  * Upgrade auf Version 1.3.1 des wollmux.
+  * Verbesserungen des FormularMax 4000
+
+ -- Matthias Benkmann <matthias.benkmann@muenchen.de>  Thu, 07 Sep 2006 17:13:16 +0200
+
 wollmux (1.3.0lhm1) siga; urgency=low
 
   * Upgrade auf Version 1.3.0 des wollmux.
