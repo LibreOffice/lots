@@ -425,7 +425,8 @@ public class WollMuxFiles
         }
       } catch (Exception e) {}
     }
-    debugMode = false;
+    else
+      debugMode = false;
   }
 
   /**
