@@ -318,6 +318,14 @@ public class FormularMax4000
       }});
     menu.add(menuItem);
     
+    menuItem = new JMenuItem("WollMux-Formularmerkmale aus Dokument entfernen");
+    menuItem.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent e)
+      {
+        //TODO deForm(doc); insertFrags und insertValues in Ruhe lassen, aber insertFormValue, setGroups, setType und Forumlarbeschreibungsnotiz entfernen
+      }});
+    menu.add(menuItem);
+    
     menuItem = new JMenuItem("Formularbeschreibung editieren");
     menuItem.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e)
