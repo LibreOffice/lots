@@ -14,6 +14,7 @@
 * 20.06.2006 | BNK | keine wollmux.conf mehr anlegen wenn nicht vorhanden
 *                  | /etc/wollmux/wollmux.conf auswerten
 * 26.06.2006 | BNK | Dialoge/FONT_ZOOM auswerten. LookAndFeel setzen. 
+* 07.09.2006 | BNK | isDebugMode effizienter gemacht.
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -93,6 +94,10 @@ public class WollMuxFiles
    */
   private static File losCacheFile;
 
+  /**
+   * Gibt an, ob der debug-Modus aktiviert ist.
+   */
+  private static boolean debugMode;
   
   /**
    * Inhalt der wollmux.conf-Datei, die angelegt wird, wenn noch keine
@@ -190,6 +195,8 @@ public class WollMuxFiles
     setLoggingMode(WollMuxFiles.getWollmuxConf());
     
     determineDefaultContext();
+    
+    initDebugMode();
     
     setLookAndFeel();
   }
@@ -399,7 +406,13 @@ public class WollMuxFiles
    *  
    * @return
    */
-  public static boolean isDebugMode() {
+  public static boolean isDebugMode() 
+  {
+    return debugMode;
+  }
+  
+  private static void initDebugMode()
+  {
     ConfigThingy log = getWollmuxConf().query("LOGGING_MODE");
     if(log.count() > 0) {
       try
@@ -407,10 +420,12 @@ public class WollMuxFiles
         String mode = log.getLastChild().toString();
         if(mode.compareToIgnoreCase("debug") == 0 
             || mode.compareToIgnoreCase("all") == 0)
-          return true;
+        {
+          debugMode = true;
+        }
       } catch (Exception e) {}
     }
-    return false;
+    debugMode = false;
   }
 
   /**
