@@ -1326,6 +1326,7 @@ public class DocumentCommandInterpreter
   private class FormScanner extends TreeExecutor
   {
     private HashMap idToFormFields = new HashMap();
+    private Map bookmarkNameToFormField = new HashMap();
 
     private FormDescriptor formDescriptor = new FormDescriptor(document
         .xTextDocument());
@@ -1381,8 +1382,13 @@ public class DocumentCommandInterpreter
         idToFormFields.put(id, fields);
       }
       FormField field = FormFieldFactory.createFormField(document
-          .xTextDocument(), cmd);
-      if (field != null) fields.add(field);
+          .xTextDocument(), cmd, bookmarkNameToFormField);
+      
+      if (field != null) 
+      {
+        field.setCommand(cmd);
+        fields.add(field);
+      }
 
       return 0;
     }

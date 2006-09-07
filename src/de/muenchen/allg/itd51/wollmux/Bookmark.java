@@ -434,6 +434,19 @@ public class Bookmark
     }
     return null;
   }
+  
+  /**
+   * Liefert die TextRange an der dieses Bookmark verankert ist oder null
+   * falls das Bookmark nicht mehr existiert.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public XTextRange getAnchor()
+  {
+    XBookmarksSupplier supp = UNO.XBookmarksSupplier(document.getObject());
+    try{
+      return UNO.XTextContent(supp.getBookmarks().getByName(name)).getAnchor();
+    }catch(Exception x){return null;}
+  }
 
   /**
    * Diese Methode löscht das Bookmark aus dem Dokument.

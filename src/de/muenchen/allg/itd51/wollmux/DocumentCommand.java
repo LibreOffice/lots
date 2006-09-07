@@ -341,6 +341,16 @@ abstract public class DocumentCommand
   {
     return bookmark.getTextRange();
   }
+  
+  /**
+   * Liefert die TextRange an der das Bookmark dieses Kommandos verankert ist oder
+   * null, falls das Bookmark nicht mehr existiert.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public XTextRange getAnchor()
+  {
+    return bookmark.getAnchor();
+  }
 
   /**
    * Erzeugt einen Cursor, der ein sicheres Einfügen von Inhalten an der

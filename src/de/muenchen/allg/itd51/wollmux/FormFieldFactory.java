@@ -13,6 +13,7 @@
  * 08.06.2006 | LUT | Erstellung als FormField
  * 14.06.2006 | LUT | Umbenennung in FormFieldFactory und Unterstützung
  *                    von Checkboxen.
+ * 07.09.2006 | BNK | Rewrite
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -24,21 +25,24 @@ package de.muenchen.allg.itd51.wollmux;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import com.sun.star.awt.XControlModel;
 import com.sun.star.container.XEnumeration;
 import com.sun.star.container.XEnumerationAccess;
 import com.sun.star.container.XNamed;
 import com.sun.star.drawing.XControlShape;
 import com.sun.star.frame.XController;
-import com.sun.star.lang.IllegalArgumentException;
+import com.sun.star.lang.XServiceInfo;
+import com.sun.star.table.XCell;
+import com.sun.star.text.XDependentTextField;
 import com.sun.star.text.XText;
-import com.sun.star.text.XTextContent;
 import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextField;
 import com.sun.star.text.XTextRange;
-import com.sun.star.uno.AnyConverter;
-import com.sun.star.uno.Exception;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertFormValue;
@@ -52,6 +56,8 @@ import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
  */
 public final class FormFieldFactory
 {
+  public static final Pattern INSERTFORMVALUE = Pattern.compile("\\A\\s*(WM\\s*\\(.*CMD\\s*'((insertFormValue))'.*\\))\\s*\\d*\\z");
+  
   /**
    * Erzeugt ein Formualfeld im Dokument doc an der Stelle des
    * InsertFormValue-Kommandos cmd. Ist unter dem bookmark bereits ein
@@ -66,107 +72,239 @@ public final class FormFieldFactory
    * @param cmd
    *          das zugehörige insertFormValue-Kommando.
    */
-  public static FormField createFormField(XTextDocument doc, InsertFormValue cmd)
+  public static FormField createFormField(XTextDocument doc, InsertFormValue cmd, Map bookmarkNameToFormField)
   {
-    XTextRange range = cmd.getTextRange();
-
-    // FormControl vom Typ Checkbox suchen:
+    String bookmarkName = cmd.getBookmarkName();
+    FormField formField = (FormField)bookmarkNameToFormField.get(bookmarkName);
+    if (formField != null) return formField;
+    
+    /*
+     * Falls die range in einer Tabellenzelle liegt, wird sie auf die ganze Zelle
+     * ausgeweitet, damit die ganze Zelle gescannt wird (Workaround für Bug
+     * http://qa.openoffice.org/issues/show_bug.cgi?id=68261)
+     */
+    XTextRange range = cmd.getAnchor();
     if (range != null)
     {
-      XControlShape shape = findControlShape(
-          range,
-          "com.sun.star.form.component.CheckBox");
-      if (shape != null && UNO.XTextContent(shape) != null)
-        return new CheckboxFormField(doc, cmd, shape.getControl());
-    }
-
-    // Textfeld vom Typ com.sun.star.text.TextField.DropDown suchen:
-    XTextField field = null;
-    if (range != null)
-    {
-      field = findTextField(
-          range,
-          cmd.getBookmarkName(),
-          "com.sun.star.text.TextField.DropDown");
-      if (field != null) return new DropDownFormField(doc, cmd, field);
-    }
-
-    // Textfeld vom Typ com.sun.star.text.TextField.Input suchen:
-    if (range != null)
-      field = findTextField(
-          range,
-          cmd.getBookmarkName(),
-          "com.sun.star.text.TextField.Input");
-
-    // wenn kein Formularfeld gefunden wurde, wird ein TextField.Input neu
-    // erstellt.
-    if (field == null)
-    {
-      Logger.debug2(cmd + ": Erzeuge neues Input-Field.");
-      try
-      {
-        field = UNO.XTextField(UNO.XMultiServiceFactory(doc).createInstance(
-            "com.sun.star.text.TextField.Input"));
-        XTextCursor cursor = cmd.createInsertCursor();
-        if (cursor != null && field != null)
+      range = range.getText();
+      XCell cell = UNO.XCell(range);
+      if (cell == null) 
+        range = null;
+      else
+        if (WollMuxFiles.isDebugMode())
         {
-          cursor.getText().insertTextContent(cursor, field, true);
+          String cellName = (String)UNO.getProperty(cell, "CellName");
+          Logger.debug("Scanne Zelle "+cellName);
         }
-      }
-      catch (Exception e)
-      {
-        Logger.error(e);
-      }
     }
+    
+    if (range == null)
+      range = cmd.getTextRange();
+    
+    XEnumeration xenum = UNO.XEnumerationAccess(range).createEnumeration();
+    handleParagraphEnumeration(xenum, doc, bookmarkNameToFormField);
 
-    if (field != null) return new InputFormField(doc, cmd, field);
-
-    return null;
+    return (FormField)bookmarkNameToFormField.get(bookmarkName);
   }
-
+  
   /**
-   * Diese Methode sucht in der übergebenen Range range nach einer Instanz von
-   * XControlShape, dessen getControl-Methode ein Objekt vom Service-Typ
-   * serviceName implementiert, und liefert das erste gefundene, Element zurück
-   * oder null, falls kein entsprechendes XControlShape-Element vorhanden ist.
-   * 
-   * @param range
-   *          Die range in der nach FormControl-Elementen gesucht werden soll.
-   * @param serviceName
-   *          Der Service name des gesuchten FormControl-Elements
-   * @return Die XControlShape-Instanz, die das gesuchte FormControl-Element zur
-   *         Verfügung stellt, oder null, falls kein entsprechendes Element
-   *         vorhanden ist.
+   * Geht die XEnumeration enu von Absätzen und TextTables durch und erzeugt für alle
+   * in Absätzen (nicht TextTables) enthaltenen insertFormValue-Bookmarks entsprechende Einträge in
+   * mapBookmarkNameToFormField. Falls nötig wird das entsprechende FormField erzeugt. 
+   * @param doc das Dokument in dem sich die enumierten Objekte befinden.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private static XControlShape findControlShape(XTextRange range,
-      String serviceName)
+  private static void handleParagraphEnumeration(XEnumeration enu, XTextDocument doc, Map mapBookmarkNameToFormField)
   {
-    if (UNO.XContentEnumerationAccess(range) != null)
+    XEnumerationAccess enuAccess;
+    while (enu.hasMoreElements())
     {
-      XEnumeration cursEnum = UNO.XContentEnumerationAccess(range)
-          .createContentEnumeration("com.sun.star.text.TextContent");
-      while (cursEnum.hasMoreElements())
+      Object ele;
+      try{ ele = enu.nextElement(); } catch(java.lang.Exception x){continue;}
+      enuAccess = UNO.XEnumerationAccess(ele);
+      if (enuAccess != null) //ist wohl ein SwXParagraph
       {
-        Object element = null;
-        try
-        {
-          element = cursEnum.nextElement();
-        }
-        catch (java.lang.Exception e)
-        {
-          Logger.error(e);
-        }
-        if (UNO.XControlShape(element) != null)
-        {
-          Object control = UNO.XControlShape(element).getControl();
-          if (UNO.supportsService(control, serviceName))
-            return UNO.XControlShape(element);
-        }
+        handleParagraph(enuAccess, doc, mapBookmarkNameToFormField);
       }
     }
-    return null;
   }
+  
+  /**
+  * Geht die XEnumeration enuAccess von TextPortions durch und erzeugt für alle
+  * enthaltenen insertFormValue-Bookmarks entsprechende Einträge in
+  * mapBookmarkNameToFormField. Falls nötig wird das entsprechende FormField erzeugt. 
+  * @param doc das Dokument in dem sich die enumierten Objekte befinden.
+  * @author Matthias Benkmann (D-III-ITD 5.1)
+  */
+  private static void handleParagraph(XEnumerationAccess paragraph, XTextDocument doc, Map mapBookmarkNameToFormField)
+  {
+    /*
+     * Der Name des zuletzt gestarteten insertFormValue-Bookmarks.
+     */
+    String lastInsertFormValueStart = null;
+    
+    /*
+     * enumeriere alle TextPortions des Paragraphs
+     */
+    XEnumeration textPortionEnu = paragraph.createEnumeration();
+    while (textPortionEnu.hasMoreElements())
+    {
+      /*
+       * Diese etwas seltsame Konstruktion beugt Exceptions durch Bugs wie 68261 vor.
+       */
+      Object textPortion;
+      try{ textPortion = textPortionEnu.nextElement(); } catch(java.lang.Exception x){continue;};
+      
+      String textPortionType = (String)UNO.getProperty(textPortion, "TextPortionType");
+      if (textPortionType.equals("Bookmark"))
+      {
+        boolean isStart = false;
+        XNamed bookmark = null; 
+        try{
+          isStart = ((Boolean)UNO.getProperty(textPortion, "IsStart")).booleanValue();
+          bookmark = UNO.XNamed(UNO.getProperty(textPortion, "Bookmark"));
+        } catch(java.lang.Exception x){ continue;}
+        if (bookmark == null) continue;
+        
+        String name = bookmark.getName();
+        Matcher m = INSERTFORMVALUE.matcher(name);
+        if (m.matches())
+        {
+          if (isStart)
+          {
+            lastInsertFormValueStart = name;
+          }
+          else
+          {
+            if (name.equals(lastInsertFormValueStart))
+            {
+              handleNewInputField(lastInsertFormValueStart, bookmark, mapBookmarkNameToFormField, doc);
+              lastInsertFormValueStart = null;
+            }
+          }
+        }
+      } else if (textPortionType.equals("TextField"))
+      {
+        XDependentTextField textField = null;
+        int textfieldType = 0; //0:input, 1:dropdown, 2: reference
+        try{
+          textField = UNO.XDependentTextField(UNO.getProperty(textPortion,"TextField"));
+          XServiceInfo info = UNO.XServiceInfo(textField); 
+          if (info.supportsService("com.sun.star.text.TextField.DropDown"))
+            textfieldType = 1;
+          else if (info.supportsService("com.sun.star.text.TextField.Input"))
+            textfieldType = 0;
+          else
+            continue; //sonstiges TextField 
+        } catch(java.lang.Exception x){ continue;}
+        
+        switch(textfieldType)
+        {
+          case 0: handleInputField(textField, lastInsertFormValueStart, mapBookmarkNameToFormField, doc); break;
+          case 1: handleDropdown(textField, lastInsertFormValueStart, mapBookmarkNameToFormField, doc); break;
+        }
+        lastInsertFormValueStart = null;
+      } else if (textPortionType.equals("Frame"))
+      {
+        XControlModel model = null;
+        try{
+          XEnumeration contentEnum = UNO.XContentEnumerationAccess(textPortion).createContentEnumeration("com.sun.star.text.TextPortion");
+          while (contentEnum.hasMoreElements())
+          {
+            XControlShape tempShape = null;
+            try{tempShape = UNO.XControlShape(contentEnum.nextElement());}catch(java.lang.Exception x){}
+            XControlModel tempModel = tempShape.getControl();
+            XServiceInfo info = UNO.XServiceInfo(tempModel); 
+            if (info.supportsService("com.sun.star.form.component.CheckBox"))
+            {
+              model = tempModel;
+            }
+          }
+        } catch(java.lang.Exception x){ continue;}
 
+        handleCheckbox(model, lastInsertFormValueStart, mapBookmarkNameToFormField, doc);
+        lastInsertFormValueStart = null;
+      }
+      else //sonstige TextPortion
+        continue;
+    }
+
+  }
+  
+  /**
+   * Fügt ein neues Eingabefeld innerhalb des Bookmarks bookmark ein, erzeugt ein
+   * dazugehöriges FormField und setzt ein passendes Mapping von
+   * bookmarkName auf dieses FormField in mapBookmarkNameToFormField
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED
+   */
+  private static void handleNewInputField(String bookmarkName, XNamed bookmark, Map mapBookmarkNameToFormField, XTextDocument doc)
+  {
+    XTextField field = null;
+    
+    Logger.debug2("Erzeuge neues Input-Field für Bookmark \""+bookmarkName+"\"");
+    try
+    {
+      XTextRange range = UNO.XTextContent(bookmark).getAnchor();
+      XText text = range.getText();
+      field = UNO.XTextField(UNO.XMultiServiceFactory(doc).createInstance(
+      "com.sun.star.text.TextField.Input"));
+      XTextCursor cursor = text.createTextCursorByRange(range);
+      
+      if (cursor != null && field != null)
+      {
+        text.insertTextContent(cursor, field, true);
+// Dieser Code scheint nicht nötig zu sein. Ich hatte zuerst gedacht, ich müsste
+// das Bookmark regenerieren, damit es das neue Feld korrekt umschliesst, aber es funzt
+// offenbar auch ohne.
+//        text.removeTextContent(UNO.XTextContent(bookmark));
+//        cursor = text.createTextCursorByRange(field.getAnchor());
+//        bookmark = UNO.XNamed(UNO.XMultiServiceFactory(doc).createInstance(
+//        "com.sun.star.text.Bookmark"));
+//        bookmark.setName(bookmarkName);
+//        text.insertTextContent(cursor, UNO.XTextContent(bookmark), true);
+      }
+    }
+    catch (java.lang.Exception e)
+    {
+      Logger.error(e);
+    }
+  
+    if (field != null) 
+    {
+      FormField formField = new InputFormField(doc, null, field);
+      mapBookmarkNameToFormField.put(bookmarkName, formField);
+    }
+  }
+  
+  private static void handleInputField(XDependentTextField textfield, String bookmarkName, Map mapBookmarkNameToFormField, XTextDocument doc)
+  {
+    if (textfield != null) 
+    {
+      FormField formField = new InputFormField(doc, null, textfield);
+      mapBookmarkNameToFormField.put(bookmarkName, formField);
+    }
+  }
+  
+  private static void handleDropdown(XDependentTextField textfield, String bookmarkName, Map mapBookmarkNameToFormField, XTextDocument doc)
+  {
+    if (textfield != null) 
+    {
+      FormField formField = new DropDownFormField(doc, null, textfield);
+      mapBookmarkNameToFormField.put(bookmarkName, formField);
+    }
+  }
+  
+  private static void handleCheckbox(XControlModel checkbox, String bookmarkName, Map mapBookmarkNameToFormField, XTextDocument doc)
+  {
+    if (checkbox != null) 
+    {
+      FormField formField = new CheckboxFormField(doc, null, checkbox);
+      mapBookmarkNameToFormField.put(bookmarkName, formField);
+    }
+  }
+  
   /**
    * Dieses Interface beschreibt die Eigenschaften eines Formularfeldes unter
    * einem WM(CMD'insertFormValue'...)-Kommando.
@@ -175,6 +313,14 @@ public final class FormFieldFactory
    */
   interface FormField
   {
+    /**
+     * FIXME Unschöne Fixup-Funktion, die in FormScanner.executeCommand() aufgerufen
+     * wird, da der Scan von Tabellenzellen nur die Bookmarks, aber nicht die
+     * zugehörigen Commands kennt. 
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
+    public abstract void setCommand(InsertFormValue cmd);
+    
     /**
      * Gibt an, ob der Inhalt des Formularelements mit der zuletzt gesetzten
      * MD5-Sum des Feldes übereinstimmt oder ob der Wert seitdem geändert wurde
@@ -232,6 +378,8 @@ public final class FormFieldFactory
     private XTextDocument doc;
 
     private InsertFormValue cmd;
+    
+    public void setCommand(InsertFormValue cmd) {this.cmd = cmd;};
 
     /**
      * Erzeugt ein Formualfeld im Dokument doc an der Stelle des
@@ -579,177 +727,5 @@ public final class FormFieldFactory
       else
         return "false";
     }
-  }
-
-  /**
-   * Diese Methode erweitert die ursprüngliche Methode findTextField(Object
-   * element, String serviceName) um das Argument bookmarkName, welches für den
-   * hier implementierten Workaround
-   * http://qa.openoffice.org/issues/show_bug.cgi?id=68261 benötigt wird -
-   * ansonsten verhält sich die Methode wie findTextField(Object element, String
-   * serviceName).
-   * 
-   * @param element
-   *          das Element, das ein finales Element oder ein Container
-   *          (implementiert XEnumerationAccess) sein kann.
-   * @param bookmarkName
-   *          der Name des Bookmarks, in dem das gesuchte Element enthalten sein
-   *          soll (wird für den Workaround benötigt).
-   * @param serviceName
-   *          Der Service-Name des gesuchten Elements.
-   * @return Das erste gefundene Element, das serviceName implementiert.
-   */
-  private static XTextField findTextField(Object element, String bookmarkName,
-      String serviceName)
-  {
-    if (UNO.XTextRange(element) != null)
-    {
-      XText xText = UNO.XTextRange(element).getText();
-      if (UNO.supportsService(xText, "com.sun.star.text.CellProperties")
-          && UNO.XEnumerationAccess(xText) != null)
-        return findTextFieldInTextTableCell(
-            UNO.XEnumerationAccess(xText),
-            bookmarkName,
-            serviceName);
-    }
-    return findTextField(element, serviceName);
-  }
-
-  /**
-   * Diese Methode ist ein Workaround für
-   * http://qa.openoffice.org/issues/show_bug.cgi?id=68261 und sucht in der
-   * Zelle cell, welche vom Typ com.sun.star.text.CellProperties sein sollte,
-   * nach einem Bookmark mit dem Namen bookmarkName, welches das TextFeld vom
-   * Typ serviceName umschliesst und liefert das zuerst gefundene entsprechende
-   * TextFeld zurück, oder null, falls kein entsprechendes TextFeld gefunden
-   * wurde.
-   * 
-   * @param cell
-   *          Die XEnumerationAccess-Instanz der Tabellenzelle, in der nach dem
-   *          TextField gesucht werden soll, das von dem Bookmark bookmarkName
-   *          umschlossen ist.
-   * @param bookmarkName
-   *          Der Name des Bookmarks, das das gesucht TextField umschliesst.
-   * @param serviceName
-   *          Der Name des Services des gesuchten TextFeldes.
-   * @return Das erste gefundene TextFeld oder null, falls kein TextFeld
-   *         gefunden wurde.
-   */
-  private static XTextField findTextFieldInTextTableCell(
-      XEnumerationAccess cell, String bookmarkName, String serviceName)
-  {
-    boolean inRefferedBookmark = false;
-
-    XEnumeration xEnum = cell.createEnumeration();
-    while (xEnum.hasMoreElements())
-    {
-      XEnumerationAccess element = null;
-      try
-      {
-        element = UNO.XEnumerationAccess(xEnum.nextElement());
-      }
-      catch (java.lang.Exception e)
-      {
-        Logger.error(e);
-      }
-
-      if (element != null)
-      {
-        XEnumeration parEnum = element.createEnumeration();
-        while (parEnum.hasMoreElements())
-        {
-          XTextContent xTextContent = null;
-          try
-          {
-            xTextContent = UNO.XTextContent(parEnum.nextElement());
-          }
-          catch (java.lang.Exception e)
-          {
-            Logger.error(e);
-          }
-
-          if (xTextContent != null)
-          {
-            Object isStart = UNO.getProperty(xTextContent, "IsStart");
-            XNamed bookmark = UNO.XNamed(UNO.getProperty(
-                xTextContent,
-                "Bookmark"));
-            XTextField textField = UNO.XTextField(UNO.getProperty(
-                xTextContent,
-                "TextField"));
-
-            if (bookmark != null && isStart != null)
-            {
-              String name = bookmark.getName();
-              if (name != null && name.equals(bookmarkName)) try
-              {
-                inRefferedBookmark = AnyConverter.toBoolean(isStart);
-              }
-              catch (IllegalArgumentException e)
-              {
-                Logger.error(e);
-              }
-            }
-
-            if (inRefferedBookmark
-                && UNO.supportsService(textField, serviceName))
-              return textField;
-          }
-        }
-      }
-    }
-    return null;
-  }
-
-  /**
-   * Diese Methode durchsucht das Element element dessen Kinder-Elemente, falls
-   * es sich bei element um einen Container handelt, nach einem Element das den
-   * Service serviceName implementiert und liefert das erste gefundene Element
-   * zurück oder null, falls kein entsprechendes Element gefunden wurde.
-   * 
-   * @param element
-   *          das Element, das ein finales Element oder ein Container
-   *          (implementiert XEnumerationAccess) sein kann.
-   * @param serviceName
-   *          Der Service-Name des gesuchten Elements.
-   * @return Das erste gefundene Element, das serviceName implementiert.
-   */
-  private static XTextField findTextField(Object element, String serviceName)
-  {
-    // Ende, wenn es das Element selbst schon ist.
-    if (UNO.XTextField(element) != null
-        && UNO.supportsService(element, serviceName))
-      return UNO.XTextField(element);
-
-    // Kinder-Elemente des Containers XEnumerationAccess durchsuchen
-    if (UNO.XEnumerationAccess(element) != null)
-    {
-      XEnumeration xEnum = UNO.XEnumerationAccess(element).createEnumeration();
-
-      while (xEnum.hasMoreElements())
-      {
-        try
-        {
-          Object ele = xEnum.nextElement();
-          XTextField found = findTextField(ele, serviceName);
-          // das erste gefundene Element zurückliefern.
-          if (found != null) return found;
-        }
-        catch (java.lang.Exception e)
-        {
-          Logger.error(e);
-        }
-      }
-    }
-
-    // Kind-Element des Property "TextField" durchsuchen:
-    if (UNO.XTextField(element) != null)
-    {
-      Object textField = UNO.getProperty(element, "TextField");
-      XTextField found = findTextField(textField, serviceName);
-      if (found != null) return found;
-    }
-
-    return null;
   }
 }
