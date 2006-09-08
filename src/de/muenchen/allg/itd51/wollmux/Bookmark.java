@@ -82,7 +82,7 @@ public class Bookmark
                                        + name
                                        + "\" existiert nicht.");
   }
-  
+
   /**
    * Der Konstruktor liefert eine Instanz eines bereits im Dokument doc
    * bestehenden Bookmarks bookmark zurück.
@@ -412,40 +412,40 @@ public class Bookmark
 
   /**
    * Die Methode gibt die XTextRange des Bookmarks zurück, oder null, falls das
-   * Bookmark nicht vorhanden ist (z,B, weil es inzwischen gelöscht wurde).
+   * Bookmark nicht vorhanden ist (z,B, weil es inzwischen gelöscht wurde). Als
+   * Workaround für Bug #67869 erzeugt diese Methode jedoch noch einen
+   * TextCursor, mit dessen Hilfe sich der Inhalt des Bookmarks sicherer
+   * enumerieren lassen kann.
    * 
    * @return
    */
   public XTextRange getTextRange()
   {
-    UnoService bookmark = getBookmarkService(name, document);
-
-    if (bookmark.xTextContent() != null)
-    {
-      XTextRange range = bookmark.xTextContent().getAnchor();
-
-      // Workaround für OOo-Bug: fehlerhafter Anchor bei Bookmarks in Tabellen.
-      // http://www.openoffice.org/issues/show_bug.cgi?id=67869 . Ein
-      // TextCursor-Objekt verhält sich dahingehend robuster.
-      if (range != null)
-        range = range.getText().createTextCursorByRange(range);
-
-      return range;
-    }
+    // Workaround für OOo-Bug: fehlerhafter Anchor bei Bookmarks in Tabellen.
+    // http://www.openoffice.org/issues/show_bug.cgi?id=67869 . Ein
+    // TextCursor-Objekt verhält sich dahingehend robuster.
+    XTextRange range = getAnchor();
+    if (range != null) return range.getText().createTextCursorByRange(range);
     return null;
   }
-  
+
   /**
-   * Liefert die TextRange an der dieses Bookmark verankert ist oder null
-   * falls das Bookmark nicht mehr existiert.
+   * Liefert die TextRange an der dieses Bookmark verankert ist oder null falls
+   * das Bookmark nicht mehr existiert.
+   * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public XTextRange getAnchor()
   {
     XBookmarksSupplier supp = UNO.XBookmarksSupplier(document.getObject());
-    try{
+    try
+    {
       return UNO.XTextContent(supp.getBookmarks().getByName(name)).getAnchor();
-    }catch(Exception x){return null;}
+    }
+    catch (Exception x)
+    {
+      return null;
+    }
   }
 
   /**
@@ -471,22 +471,29 @@ public class Bookmark
 
   /**
    * Entfernt allen Text (aber keine Bookmarks) aus range.
-   * @param doc das Dokument, das range enthält.
+   * 
+   * @param doc
+   *          das Dokument, das range enthält.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static void removeTextFromInside(XTextDocument doc, XTextRange range)
   {
-    try{
-      //ein Bookmark erzeugen, was genau die Range, die wir löschen wollen vom
-      //Rest des Textes abtrennt, d.h. welches dafür sorgt, dass unser Text eine
-      //eigene Textportion ist.
-      Object bookmark = UNO.XMultiServiceFactory(doc).createInstance("com.sun.star.text.Bookmark");
+    try
+    {
+      // ein Bookmark erzeugen, was genau die Range, die wir löschen wollen vom
+      // Rest des Textes abtrennt, d.h. welches dafür sorgt, dass unser Text
+      // eine
+      // eigene Textportion ist.
+      Object bookmark = UNO.XMultiServiceFactory(doc).createInstance(
+          "com.sun.star.text.Bookmark");
       UNO.XNamed(bookmark).setName("killer");
-      range.getText().insertTextContent(range, UNO.XTextContent(bookmark), true);
+      range.getText()
+          .insertTextContent(range, UNO.XTextContent(bookmark), true);
       String name = UNO.XNamed(bookmark).getName();
-      
-      //Aufsammeln der zu entfernenden TextPortions (sollte genau eine sein) und
-      //der Bookmarks, die evtl. als Kollateralschaden entfernt werden.
+
+      // Aufsammeln der zu entfernenden TextPortions (sollte genau eine sein)
+      // und
+      // der Bookmarks, die evtl. als Kollateralschaden entfernt werden.
       Vector collateral = new Vector();
       Vector victims = new Vector();
       XEnumeration xEnum = UNO.XEnumerationAccess(range).createEnumeration();
@@ -500,38 +507,44 @@ public class Bookmark
           while (xEnum2.hasMoreElements())
           {
             Object textPortion = xEnum2.nextElement();
-            if ("Bookmark".equals(UNO.getProperty(textPortion, "TextPortionType")))
+            if ("Bookmark".equals(UNO.getProperty(
+                textPortion,
+                "TextPortionType")))
             {
-              String portionName = UNO.XNamed(UNO.getProperty(textPortion, "Bookmark")).getName();
+              String portionName = UNO.XNamed(
+                  UNO.getProperty(textPortion, "Bookmark")).getName();
               if (name.equals(portionName))
               {
-                kill = ((Boolean)UNO.getProperty(textPortion,"IsStart")).booleanValue();
+                kill = ((Boolean) UNO.getProperty(textPortion, "IsStart"))
+                    .booleanValue();
               }
               else
                 collateral.add(portionName);
             }
-            
-            if (kill && "Text".equals(UNO.getProperty(textPortion, "TextPortionType")))
+
+            if (kill
+                && "Text".equals(UNO
+                    .getProperty(textPortion, "TextPortionType")))
             {
               victims.add(textPortion);
             }
           }
         }
       }
-      
+
       /*
        * Zu entfernenden Content löschen.
        */
-      /*Iterator iter = victims.iterator();
-      XText text = range.getText();
-      while (iter.hasNext())
-      {
-        text.removeTextContent(UNO.XTextContent(iter.next()));
-      }*/
+      /*
+       * Iterator iter = victims.iterator(); XText text = range.getText(); while
+       * (iter.hasNext()) {
+       * text.removeTextContent(UNO.XTextContent(iter.next())); }
+       */
       range.setString("");
-      
-      UNO.XTextContent(bookmark).getAnchor().getText().removeTextContent(UNO.XTextContent(bookmark));
-      
+
+      UNO.XTextContent(bookmark).getAnchor().getText().removeTextContent(
+          UNO.XTextContent(bookmark));
+
       /*
        * Verlorene Bookmarks regenerieren.
        */
@@ -539,17 +552,22 @@ public class Bookmark
       Iterator iter = collateral.iterator();
       while (iter.hasNext())
       {
-        String portionName = (String)iter.next();
+        String portionName = (String) iter.next();
         if (!bookmarks.hasByName(portionName))
         {
-          Logger.debug("Regeneriere Bookmark \""+portionName+"\"");
-          bookmark = UNO.XMultiServiceFactory(doc).createInstance("com.sun.star.text.Bookmark");
+          Logger.debug("Regeneriere Bookmark \"" + portionName + "\"");
+          bookmark = UNO.XMultiServiceFactory(doc).createInstance(
+              "com.sun.star.text.Bookmark");
           UNO.XNamed(bookmark).setName(portionName);
-          range.getText().insertTextContent(range, UNO.XTextContent(bookmark), true);
+          range.getText().insertTextContent(
+              range,
+              UNO.XTextContent(bookmark),
+              true);
         }
-          
+
       }
-    }catch(Exception x)
+    }
+    catch (Exception x)
     {
       Logger.error(x);
     }

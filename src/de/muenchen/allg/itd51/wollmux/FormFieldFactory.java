@@ -101,8 +101,11 @@ public final class FormFieldFactory
     if (range == null)
       range = cmd.getTextRange();
     
-    XEnumeration xenum = UNO.XEnumerationAccess(range).createEnumeration();
-    handleParagraphEnumeration(xenum, doc, bookmarkNameToFormField);
+    if (range != null)
+    {
+      XEnumeration xenum = UNO.XEnumerationAccess(range).createEnumeration();
+      handleParagraphEnumeration(xenum, doc, bookmarkNameToFormField);
+    }
 
     return (FormField)bookmarkNameToFormField.get(bookmarkName);
   }
