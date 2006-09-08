@@ -25,7 +25,7 @@ case "$1" in
 	export HOME="$TEMPDIR" # um das lockfile-Problem zu umgehen
     cd /usr/lib/wollmux
     unopkg remove WollMux.uno.pkg --shared &>/dev/null || true
-    unopkg add WollMux.uno.pkg --shared > /dev/null
+    unopkg add WollMux.uno.pkg -v --shared | grep -q 'unopkg done'
     test -d "$TEMPDIR" && rm -rf "$TEMPDIR"
     if [ ! -e /usr/bin/wollmuxbar ]; then
        ln -s /usr/lib/wollmux/wollmuxbar.sh /usr/bin/wollmuxbar
