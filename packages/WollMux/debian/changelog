@@ -1,3 +1,13 @@
+wollmux (1.3.2lhm1) siga; urgency=low
+
+  * Behebung kritischer Fehler beim Öffnen von Vorlagen.
+  * Tabs der Formular-GUI werden bei Platzmangel nicht mehr hintereinander gruppiert, 
+    sondern es werden Scroll-Pfeile verwendet.
+  * Die Tab-Struktur des endgültigen Formulars wird bereits im FormularMax 4000 angezeigt.
+  * Diverse andere Verbesserungen des FormularMax 4000
+
+ -- Matthias Benkmann <matthias.benkmann@muenchen.de>  Thu, 10 Sep 2006 17:13:16 +0200
+
 wollmux (1.3.1lhm1) siga; urgency=low
 
   * Upgrade auf Version 1.3.1 des wollmux.
