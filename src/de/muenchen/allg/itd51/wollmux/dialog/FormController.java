@@ -20,6 +20,7 @@
 * 29.05.2006 | BNK | Umstellung auf UIElementFactory.Context
 * 31.05.2006 | BNK | ACTION "funcDialog"
 * 19.06.2006 | BNK | Auch Werte für Felder, die nicht geautofilled sind an FormModel kommunizieren bei Startup
+* 10.09.2006 | BNK | [P1007]Abfangen von mehr als 512 Elementen auf einem Tab.
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -83,6 +84,14 @@ public class FormController implements UIElementEventHandler
    * Rand um Buttons (in Pixeln).
    */
   private final static int BUTTON_BORDER = 2;
+  
+  /**
+   * GridBagLayout hat eine Begrenzung auf maximal 512 Grid-Elemente pro Koordinatenrichtung,
+   * deshalb wird verhindert, dass zuviele Elemente auf einem Tab eingefügt werden, indem
+   * maximal soviele wie hier angegeben angezeigt werden. Der Wert hier ist etwas weniger als
+   * 512, um Puffer zu bieten für das Hinzufügen von Elementen, die immer vorhanden sein sollen.
+   */
+  private final static int GRID_MAX = 500;
   
   /**
    * Die JTabbedPane, die die ganzen Tabs der GUI enthält.
@@ -608,9 +617,15 @@ public class FormController implements UIElementEventHandler
           ++y;
           mainPanel.add(uiElement.getComponent(), gbc);
           if (!uiElement.isStatic()) increaseTabVisibleCount(tabIndex);
+          
+          if (y > GRID_MAX) break;
         }
+        
+        if (y > GRID_MAX) break;
       }
       
+      if (y > GRID_MAX) Logger.error("Zu viele Formularelemente auf einem Tab => nicht alle werden angezeigt");
+     
       
       /*****************************************************************************
        * Für die Buttons ein eigenes Panel anlegen und mit UIElementen befüllen. 
@@ -677,9 +692,13 @@ public class FormController implements UIElementEventHandler
           gbc.gridy = 0;
           ++x;
           buttonPanel.add(uiElement.getComponent(), gbc);
-          
+         
+          if (x > GRID_MAX) break;
         }
+        if (x > GRID_MAX) break;
       }
+      
+      if (x > GRID_MAX) Logger.error("Zu viele Buttons auf einem Tab => nicht alle werden angezeigt");
     }
 
     /**
