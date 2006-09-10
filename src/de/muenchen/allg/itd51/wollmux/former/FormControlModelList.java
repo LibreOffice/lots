@@ -10,6 +10,7 @@
 * -------------------------------------------------------------------
 * 07.08.2006 | BNK | Erstellung
 * 29.08.2006 | BNK | kommentiert.
+* 10.09.2006 | BNK | [R3207]Maximale Anzahl von Steuerelementen pro Tab wird überwacht.
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -32,6 +33,12 @@ import de.muenchen.allg.itd51.parser.ConfigThingy;
  */
 public class FormControlModelList
 {
+  /**
+   * Die FormControlModelList erzwingt einen Tab nach spätestens sovielen
+   * FormControlModels. Dies sorgt Problemen mit GridBagLayout vor.
+   */
+  public static final int MAX_MODELS_PER_TAB = 500;
+  
   /**
    * Die Liste der {@link FormControlModel}s.
    */
@@ -59,6 +66,24 @@ public class FormControlModelList
   }
   
   /**
+   * Liefert die Anzahl der {@link FormControlModel}s in dieser Liste.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public int size()
+  {
+    return models.size();
+  }
+  
+  /**
+   * Liefert true gdw diese Liste keine Elemente enthält.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public boolean isEmpty()
+  {
+    return models.isEmpty();
+  }
+  
+  /**
    * Bittet die FormControlModelList darum, das Element model aus sich zu entfernen
    * (falls es in der Liste ist).
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -68,8 +93,10 @@ public class FormControlModelList
   {
     int index = models.indexOf(model);
     if (index < 0) return;
+    boolean isTab = model.getType() == FormControlModel.TAB_TYPE;
     models.remove(model);
     model.hasBeenRemoved();
+    if (isTab) enforceMaxModelsPerTab();
   }
   
   /**
@@ -114,16 +141,37 @@ public class FormControlModelList
     models.add(idx, model);
     
     notifyListeners(model, idx);
+    
+    enforceMaxModelsPerTab();
   }
-  
+
   /**
    * model wird an das Ende der Liste angehängt.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void add(FormControlModel model)
   {
-    models.add(model);
-    notifyListeners(model, models.size() - 1);
+    this.add(model, -1);
+  }
+
+  private void enforceMaxModelsPerTab()
+  {
+    if (models.size() < MAX_MODELS_PER_TAB) return;
+
+    int tabIdx = 0;
+    for (int i = 0; i < models.size(); ++i)
+    {
+      if (((FormControlModel)models.get(i)).isTab())
+        tabIdx = i;
+      
+      if (i - tabIdx >= MAX_MODELS_PER_TAB)
+      {
+        int idx = (i + tabIdx)/2;
+        String id = makeUniqueId(FormularMax4000.STANDARD_TAB_NAME);
+        this.add(FormControlModel.createTab(id, id), idx);
+        tabIdx = idx;
+      }
+    }
   }
   
   /**
@@ -140,15 +188,19 @@ public class FormControlModelList
   public void moveElementsUp(List indices)
   {
     Iterator iter = indices.iterator();
+    boolean haveMovedTab = false;
     while (iter.hasNext())
     {
       int idx = ((Integer)iter.next()).intValue();
       if (idx <= 0) return;
-      Object temp = models.get(idx-1);
-      models.setElementAt(models.get(idx), idx-1);
-      models.setElementAt(temp, idx);
+      FormControlModel model1 = (FormControlModel)models.get(idx-1);
+      FormControlModel model2 = (FormControlModel)models.get(idx);
+      haveMovedTab = haveMovedTab || model1.isTab() || model2.isTab();
+      models.setElementAt(model2, idx-1);
+      models.setElementAt(model1, idx);
       notifyListeners(idx - 1 , idx);
     }
+    if (haveMovedTab) enforceMaxModelsPerTab();
   }
   
   /**
@@ -166,17 +218,21 @@ public class FormControlModelList
   public void moveElementsDown(List indices)
   {
     ListIterator iter = indices.listIterator(indices.size());
+    boolean haveMovedTab = false;
     while (iter.hasPrevious())
     {
       int idx = ((Integer)iter.previous()).intValue();
       if (idx >= models.size() - 1) return;
-      Object temp = models.get(idx+1);
-      models.setElementAt(models.get(idx), idx + 1);
-      models.setElementAt(temp, idx);
+      FormControlModel model1 = (FormControlModel)models.get(idx+1);
+      FormControlModel model2 = (FormControlModel)models.get(idx);
+      haveMovedTab = haveMovedTab || model1.isTab() || model2.isTab();
+      models.setElementAt(model2, idx + 1);
+      models.setElementAt(model1, idx);
       notifyListeners(idx, idx + 1);
     }
+    if (haveMovedTab) enforceMaxModelsPerTab();
   }
-  
+
   /**
    * Liefert ein ConfigThingy, dessen Wurzel ein "Fenster"-Knoten ist und alle FormControlModels
    * dieser Liste enthält.
@@ -189,7 +245,8 @@ public class FormControlModelList
     ConfigThingy tabConf = export;
     
     int phase = 0; //0: tab start, 1: Eingabefelder, 2: Buttons
-    FormControlModel currentTab = FormControlModel.createTab("Eingabe", "Reiter1");
+    String id = makeUniqueId(FormularMax4000.STANDARD_TAB_NAME); 
+    FormControlModel currentTab = FormControlModel.createTab(id, id);
     Iterator iter = models.iterator();
     while (iter.hasNext())
     {
