@@ -21,6 +21,7 @@
 * 31.05.2006 | BNK | ACTION "funcDialog"
 * 19.06.2006 | BNK | Auch Werte für Felder, die nicht geautofilled sind an FormModel kommunizieren bei Startup
 * 10.09.2006 | BNK | [P1007]Abfangen von mehr als 512 Elementen auf einem Tab.
+* 10.09.2006 | BNK | Tabs scrollen, nicht hintereinander gruppieren.
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -49,6 +50,7 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
+import javax.swing.SwingConstants;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
@@ -284,7 +286,7 @@ public class FormController implements UIElementEventHandler
      * 
      */
     //contentPanel = new JPanel();
-    myTabbedPane = new JTabbedPane();
+    myTabbedPane = new JTabbedPane(SwingConstants.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
     //contentPanel.add(myTabbedPane);
     
     /********************************************************
