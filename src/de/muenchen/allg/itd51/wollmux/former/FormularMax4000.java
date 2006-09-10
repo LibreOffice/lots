@@ -78,6 +78,8 @@ import de.muenchen.allg.itd51.wollmux.former.DocumentTree.Visitor;
  */
 public class FormularMax4000
 {
+  public static final String STANDARD_TAB_NAME = "Reiter";
+
   /**
    * Regex für Test ob String mit Buchstabe oder Underscore beginnt.
    * ACHTUNG! Das .* am Ende ist notwendig, da String.matches() immer den
@@ -410,6 +412,16 @@ public class FormularMax4000
       }
     }
     
+    /*
+     * Immer mindestens 1 Tab in der Liste.
+     */
+    if (formControlModelList.isEmpty())
+    {
+      String id = formControlModelList.makeUniqueId(STANDARD_TAB_NAME);
+      FormControlModel separatorTab = FormControlModel.createTab(id, id);
+      formControlModelList.add(separatorTab,0);
+    }
+    
     insertionModelList.clear();
     String[] bookmarks = UNO.XBookmarksSupplier(doc).getBookmarks().getElementNames();
     for (int i = 0; i < bookmarks.length; ++i)
@@ -486,9 +498,6 @@ public class FormularMax4000
   {
     try{ 
       ConfigThingy conf = new ConfigThingy("Empfaengerauswahl", EMPFAENGER_TAB_URL);
-      int rand = (int)(Math.random()*100); 
-      FormControlModel separatorTab = FormControlModel.createTab("Eingabe", "Reiter"+rand);
-      formControlModelList.add(separatorTab,0);
       parseTab(conf, 0);
       //TODO writeFormDescriptor();
     }catch(Exception x) { Logger.error(x);}

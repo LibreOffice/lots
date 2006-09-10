@@ -135,6 +135,8 @@ public class OneFormControlLineView implements View
         ignoreAttributeChanged = true;
         model.setLabel(labelTextfield.getText());
         ignoreAttributeChanged = false;
+        if (getModel().getType() == FormControlModel.TAB_TYPE)
+          bigDaddy.tabTitleChanged(OneFormControlLineView.this);
       }
 
       public void insertUpdate(DocumentEvent e) {update();}
@@ -169,13 +171,15 @@ public class OneFormControlLineView implements View
   
   /**
    * Wird aufgerufen, wenn das LABEL des durch diese View dargestellten {@link FormControlModel}s
-   * durch eine andere Ursache als diese View geändert wurde.
+   * DURCH EINE ANDERE URSACHE ALS DIESE VIEW geändert wurde.
    * @param newLabel das neue Label.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private void labelChanged(String newLabel)
+  private void labelChangedDueToExternalReasons(String newLabel)
   {
     labelTextfield.setText(newLabel);
+    if (getModel().getType() == FormControlModel.TAB_TYPE)
+      bigDaddy.tabTitleChanged(this);
   }
   
   /**
@@ -237,6 +241,13 @@ public class OneFormControlLineView implements View
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     public void viewShouldBeRemoved(OneFormControlLineView view);
+    
+    /**
+     * Wird aufgerufen, wenn sich das Label des Tabs, das das Model von view ist
+     * geändert hat.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
+    public void tabTitleChanged(OneFormControlLineView view);
   }
 
   private class MyModelChangeListener implements FormControlModel.ModelChangeListener
@@ -246,7 +257,7 @@ public class OneFormControlLineView implements View
       if (ignoreAttributeChanged) return;
       switch(attributeId)
       {
-        case FormControlModel.LABEL_ATTR: labelChanged((String)newValue); break;
+        case FormControlModel.LABEL_ATTR: labelChangedDueToExternalReasons((String)newValue); break;
         case FormControlModel.TYPE_ATTR: typeChanged((String)newValue); break;
       }
     }

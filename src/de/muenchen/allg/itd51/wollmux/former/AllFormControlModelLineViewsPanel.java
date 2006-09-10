@@ -9,6 +9,7 @@
 * Datum      | Wer | Änderungsgrund
 * -------------------------------------------------------------------
 * 30.08.2006 | BNK | Erstellung
+* 10.09.2006 | BNK | [R3208]Tab-Struktur des Formulars bereits im FM4000 anzeigen
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -18,15 +19,16 @@
 package de.muenchen.allg.itd51.wollmux.former;
 
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.ListIterator;
+import java.util.Set;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
@@ -35,7 +37,10 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
+import javax.swing.SwingConstants;
 
+import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.former.FormControlModelList.ItemListener;
 
 /**
@@ -65,10 +70,9 @@ public class AllFormControlModelLineViewsPanel implements View, ItemListener, On
   private GridBagConstraints gbcLineView = new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0, GridBagConstraints.LINE_START,   GridBagConstraints.HORIZONTAL, new Insets(0,0,0,0),0,0);
   
   /**
-   * Wird (mit wechselndem gridy Wert) verwendet als Constraints für das Hinzufügen von
-   * {@link #bottomGlue} zum lineViewPanel.
+   * Wird verwendet als Constraints für das Hinzufügen von Glues zu den Tabs.
    */
-  private GridBagConstraints gbcBottomGlue = new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER,   GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0);
+  private GridBagConstraints gbcBottomGlue = new GridBagConstraints(0, FormControlModelList.MAX_MODELS_PER_TAB + 1, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER,   GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0);
   
   /**
    * Die {@link FormControlModelList}, deren Inhalt in dieser View angezeigt wird.
@@ -80,21 +84,17 @@ public class AllFormControlModelLineViewsPanel implements View, ItemListener, On
    */
   private JPanel myPanel;
   
+  private JTabbedPane tabPane;
+  
   /**
    * Das Panel, das die ganzen {@link OneFormControlLineView}s enthält.
    */
-  private JPanel lineViewPanel;
+  private JPanel firstTab;
   
   /**
-   * Wird immer als letztes Element in das lineViewPanel getan, damit die Elemente
-   * nicht zentriert erscheinen.
+   * Enthält die {@link ViewDescriptor}s in der richtigen Reihenfolge.
    */
-  private Component bottomGlue = Box.createGlue();
-  
-  /**
-   * Enthält die {@link OneFormControlLineView}s in der richtigen Reihenfolge.
-   */
-  private Vector views = new Vector();
+  private Vector viewDescriptors = new Vector();
 
   /**
    * Ein Vector von Integers, die die Indizes der selektierten Views angeben.
@@ -102,7 +102,7 @@ public class AllFormControlModelLineViewsPanel implements View, ItemListener, On
   private Vector selection = new Vector();
   
   /**
-   * Die Scrollpane in der sich das {@link #lineViewPanel} befindet.
+   * Die Scrollpane in der sich die {@link #tabPane} befindet.
    */
   private JScrollPane scrollPane;
   
@@ -125,9 +125,12 @@ public class AllFormControlModelLineViewsPanel implements View, ItemListener, On
     formularMax4000.addBroadcastListener(new MyBroadcastListener());
 
     myPanel = new JPanel(new GridBagLayout());
-    lineViewPanel = new JPanel(new GridBagLayout());
+    tabPane = new JTabbedPane(SwingConstants.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
+    firstTab = new JPanel(new GridBagLayout());
+    tabPane.addTab("Tab", firstTab);
+    firstTab.add(Box.createGlue(), gbcBottomGlue);
     
-    scrollPane = new JScrollPane(lineViewPanel);
+    scrollPane = new JScrollPane(tabPane);
     scrollPane.setBorder(BorderFactory.createLineBorder(Color.WHITE, 1));
     
      //    int gridx, int gridy, int gridwidth, int gridheight, double weightx, double weighty, int anchor,          int fill,                  Insets insets, int ipadx, int ipady)
@@ -149,7 +152,9 @@ public class AllFormControlModelLineViewsPanel implements View, ItemListener, On
     hochButton.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e)
       {
+        if (noSelectedElementsOnVisibleTab()) return;
         moveSelectedElementsUp();
+        if (noSelectedElementsOnVisibleTab()) showSelection();
       }});
     buttonPanel.add(hochButton, gbcButton);
     
@@ -158,7 +163,9 @@ public class AllFormControlModelLineViewsPanel implements View, ItemListener, On
     runterButton.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e)
       {
+        if (noSelectedElementsOnVisibleTab()) return;
         moveSelectedElementsDown();
+        if (noSelectedElementsOnVisibleTab()) showSelection();
       }});
     buttonPanel.add(runterButton, gbcButton);
     
@@ -167,9 +174,21 @@ public class AllFormControlModelLineViewsPanel implements View, ItemListener, On
     killButton.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e)
       {
+        if (noSelectedElementsOnVisibleTab()) return;
         deleteSelectedElements();
       }});
     buttonPanel.add(killButton, gbcButton);
+    
+    ++gbcButton.gridx;
+    JButton tabButton = new JButton("Tab");
+    tabButton.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent e)
+      {
+        if (noSelectedElementsOnVisibleTab()) return;
+        insertNewTab();
+        if (noSelectedElementsOnVisibleTab()) showSelection();
+      }});
+    buttonPanel.add(tabButton, gbcButton);
     
     ++gbcButton.gridx;
     JButton newButton = new JButton("Neu");
@@ -189,44 +208,145 @@ public class AllFormControlModelLineViewsPanel implements View, ItemListener, On
   //TESTED
   public void itemAdded(FormControlModel model, int index)
   {
-    OneFormControlLineView ofclView = new OneFormControlLineView(model, this, formularMax4000);
-    for (int i = views.size() - 1; i >= index; --i)
+    if (index < 0 || index > viewDescriptors.size()) 
     {
-      gbcLineView.gridy = i + 1;
-      lineViewPanel.add(((OneFormControlLineView)views.get(i)).JComponent(), gbcLineView);
+      Logger.error("Inkonsistenz zwischen Model und View!");
+      return;
+    }
+    OneFormControlLineView ofclView = new OneFormControlLineView(model, this, formularMax4000);
+    
+    boolean isTab = (model.getType() == FormControlModel.TAB_TYPE);
+    JComponent tab = firstTab;
+    int tabIndex = 0;
+    int gridY = 0;
+    if (viewDescriptors.size() > 0)
+    {
+      int i = index;
+      if (i == viewDescriptors.size()) --i;
+      ViewDescriptor desc = (ViewDescriptor)viewDescriptors.get(i);
+      tabIndex = desc.containingTabIndex;
+      tab = (JComponent)tabPane.getComponentAt(tabIndex);
+      gridY = desc.gridY;
+      if (i != index) ++gridY;
     }
     
-    views.add(index, ofclView);
+    ViewDescriptor desc = new ViewDescriptor(ofclView, gridY, tabIndex, isTab);
+    viewDescriptors.add(index, desc);
     
-    gbcLineView.gridy = index;
-    lineViewPanel.add(ofclView.JComponent(), gbcLineView);
-    gbcBottomGlue.gridy = views.size();
-    lineViewPanel.add(bottomGlue, gbcBottomGlue);
-    lineViewPanel.validate();
+    gbcLineView.gridy = gridY;
+    tab.add(ofclView.JComponent(), gbcLineView);
+    tab.validate();
+    
+    fixTabStructure(); tab = null; //tab ist eventuell entfernt worden!
+    
+    tabPane.validate();
     scrollPane.validate();
     
     fixupSelectionIndices(index, 1);
   }
+  
+  /**
+   * Geht die {@link #viewDescriptors} Liste durch und behebt Fehler, die durch strukturelle
+   * Änderungen hervorgerufen wurden. Dabei werden auch neue Tabs in {@link #tabPane} angelegt
+   * bzw. alte entfernt wenn nötig.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED
+   */
+  private void fixTabStructure()
+  {
+    Set toValidate = new HashSet();
+    int gridY = 0;
+    int tabIndex = 0;
+    JComponent tab = firstTab;
+    Iterator iter = viewDescriptors.iterator();
+    while (iter.hasNext())
+    {
+      ViewDescriptor desc = (ViewDescriptor)iter.next();
+      if (desc.isTab && gridY > 0)
+      {
+        ++tabIndex;
+        gridY = 0;
+        if (tabIndex >= tabPane.getTabCount())
+        {
+          JPanel newTab = new JPanel(new GridBagLayout());
+          newTab.add(Box.createGlue(), gbcBottomGlue);
+          tabPane.addTab("Tab", newTab);
+        }
+        
+        tab = (JComponent)tabPane.getComponentAt(tabIndex);
+      }
+      
+      if (desc.containingTabIndex != tabIndex || desc.gridY != gridY)
+      {
+        JComponent oldTab = (JComponent)tabPane.getComponent(desc.containingTabIndex);
+        oldTab.remove(desc.view.JComponent());
+        gbcLineView.gridy = gridY;
+        tab.add(desc.view.JComponent(), gbcLineView);
+        desc.containingTabIndex = tabIndex;
+        desc.gridY = gridY;
+        toValidate.add(tab);
+        toValidate.add(oldTab);
+      }
+      
+      if (desc.isTab)
+        tabPane.setTitleAt(desc.containingTabIndex, desc.view.getModel().getLabel());
+      
+      ++gridY;
+    }
+    
+    ++tabIndex;
+    while (tabIndex < tabPane.getTabCount()) tabPane.removeTabAt(tabPane.getTabCount() - 1);
+    
+    iter = toValidate.iterator();
+    while (iter.hasNext())
+    {
+      ((JComponent)iter.next()).validate();
+    }
+  }
 
+  /**
+   * Liefert den Index des ViewDescriptors, der zu view gehört in der Liste
+   * {@link #viewDescriptors} oder -1, wenn die view nicht enthalten ist.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private int getDescriptorIndexOf(OneFormControlLineView view)
+  {
+    for (int i = 0; i < viewDescriptors.size(); ++i)
+    {
+      if (((ViewDescriptor)viewDescriptors.get(i)).view == view) return i;
+    }
+    
+    return -1;
+  }
+  
   public void viewShouldBeRemoved(OneFormControlLineView view)
   { //TESTED
-    int index = views.indexOf(view);
+    int index = getDescriptorIndexOf(view);
     if (index < 0) return;
     
-    views.remove(index);
-    lineViewPanel.remove(view.JComponent());
-    for (int i = views.size() - 1; i >= index; --i)//ACHTUNG! views.size() hat sich durch remove() um 1 reduziert, deswegen stimmt diese Zeile
-    {
-      gbcLineView.gridy = i;
-      lineViewPanel.add(((OneFormControlLineView)views.get(i)).JComponent(), gbcLineView);
-    }
-    lineViewPanel.validate();
+    ViewDescriptor desc = (ViewDescriptor)viewDescriptors.remove(index);
+    JComponent tab = (JComponent)tabPane.getComponentAt(desc.containingTabIndex); 
+    tab.remove(view.JComponent());
+    tab.validate();
+    
+    fixTabStructure(); tab = null; //tab ist eventuell entfernt worden!
+    
+    tabPane.validate();
     scrollPane.validate();
     
     removeSelectionIndex(index);
     fixupSelectionIndices(index, -1);
   }
   
+  public void tabTitleChanged(OneFormControlLineView view)
+  {
+    int index = getDescriptorIndexOf(view);
+    if (index < 0) return;
+    ViewDescriptor desc = (ViewDescriptor)viewDescriptors.get(index);
+    tabPane.setTitleAt(desc.containingTabIndex, view.getModel().getLabel());
+  }
+
   /**
    * Schiebt alle ausgewählten Elemente um einen Platz nach oben, d,h, in Richtung niedrigerer
    * Indizes. Falls Element 0 ausgewählt ist wird gar nichts getan.
@@ -252,7 +372,7 @@ public class AllFormControlModelLineViewsPanel implements View, ItemListener, On
    */
   private void moveSelectedElementsDown()
   {
-    if (((Integer)selection.lastElement()).intValue() < views.size() - 1)
+    if (((Integer)selection.lastElement()).intValue() < viewDescriptors.size() - 1)
     {
       formControlModelList.moveElementsDown(selection);
      //Kein fixupSelectionIndices(0, 1) nötig, weil die itemSwapped() Events schon dafür sorgen
@@ -277,26 +397,103 @@ public class AllFormControlModelLineViewsPanel implements View, ItemListener, On
     while (!selection.isEmpty())
     {
       Integer I = (Integer)selection.lastElement();
-      OneFormControlLineView view = (OneFormControlLineView)views.get(I.intValue());
-      formControlModelList.remove(view.getModel());
+      ViewDescriptor desc = (ViewDescriptor)viewDescriptors.get(I.intValue());
+      formControlModelList.remove(desc.view.getModel());
     }
   }
   
   /**
-   * Liefert den Index des ersten vom Benutzer ausgewählten Elements oder -1, falls
-   * nichts ausgewählt.
+   * Liefert true gdw sich kein ausgewähltes Element auf dem momentan angezeigten Tab
+   * befindet.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private boolean noSelectedElementsOnVisibleTab()
+  {
+    int tabIndex = tabPane.getSelectedIndex();
+    Iterator iter = selection.iterator();
+    while (iter.hasNext())
+    {
+      int i = ((Integer)iter.next()).intValue();
+      ViewDescriptor desc = (ViewDescriptor)viewDescriptors.get(i);
+      if (desc.containingTabIndex == tabIndex) return false;
+    }
+    return true;
+  }
+  
+  /**
+   * Falls mindestens ein Element ausgewählt ist wird das sichtbare Tab so gesetzt,
+   * dass das erste ausgewählte Element angezeigt wird.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private void showSelection()
+  {
+    if (selection.isEmpty()) return;
+    
+    int i = ((Integer)selection.firstElement()).intValue();
+    ViewDescriptor desc = (ViewDescriptor)viewDescriptors.get(i);
+    tabPane.setSelectedIndex(desc.containingTabIndex);
+  }
+  
+  /**
+   * Liefert den Index des ersten momentan sichtbaren vom Benutzer ausgewählten Elements
+   * oder (falls kein ausgewähltes Element sichtbar ist) den Index des letzten sichtbaren
+   * Elements + 1 oder falls kein Tab ausgewählt ist dann -1.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public int getInsertionIndex()
   {
-    int index = -1;
-    if (!selection.isEmpty())
-      index = ((Integer)selection.firstElement()).intValue();
-    return index;
+    int tabIndex = tabPane.getSelectedIndex();
+    
+    /*
+     * Zuerst suchen wir die Selektion durch und liefern falls vorhanden das
+     * erste ausgewählte Element, das auf dem sichtbaren Tab ist.
+     */
+    Iterator iter = selection.iterator();
+    while (iter.hasNext())
+    {
+      int i = ((Integer)iter.next()).intValue();
+      ViewDescriptor desc = (ViewDescriptor)viewDescriptors.get(i);
+      if (desc.containingTabIndex == tabIndex) return i;
+    }
+    
+    /*
+     * Wenn die obige Suche fehlgeschlagen ist suchen wir alle
+     * Elemente durch nach dem ersten Element, das auf dem nächsten Tab
+     * nach dem sichtbaren ist. Dessen Index wird zurückgeliefert.
+     */
+    for (int i = 0; i < viewDescriptors.size(); ++i)
+    {
+      ViewDescriptor desc = (ViewDescriptor)viewDescriptors.get(i);
+      if (desc.containingTabIndex > tabIndex)
+        return i;
+    }
+
+    /*
+     * Falls nichts geholfen hat liefern wir -1.
+     */
+    return -1;
   }
   
   /**
    * Fügt vor dem ersten ausgewählten Element (oder ganz am Ende, wenn nichts ausgewählt ist)
+   * ein neues Tab zur Liste hinzu.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED
+   */
+  private void insertNewTab()
+  {
+    String id = formControlModelList.makeUniqueId(FormularMax4000.STANDARD_TAB_NAME);
+    String label = id;
+    FormControlModel model = FormControlModel.createTab(label, id);
+    int index = getInsertionIndex();
+    formControlModelList.add(model, index);
+  }
+
+  /**
+   * Fügt vor dem ersten ausgewählten Element (oder ganz am Ende des sichtbaren Tabs, 
+   * wenn nichts ausgewählt ist oder die Selektion auf einem unsichtbaren Tab ist)
    * ein neues Steuerelement zur Liste hinzu.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -304,24 +501,23 @@ public class AllFormControlModelLineViewsPanel implements View, ItemListener, On
    */
   private void insertNewElement()
   {
-    String id = formControlModelList.makeUniqueId("Reiter");
+    String id = formControlModelList.makeUniqueId("Eingabe");
     String label = id;
-    FormControlModel model = FormControlModel.createTab(label, id);
+    FormControlModel model = FormControlModel.createTextfield(label, id);
     int index = getInsertionIndex();
     formControlModelList.add(model, index);
   }
-
+  
   public void itemSwapped(int index1, int index2)
   {
-    OneFormControlLineView view1 = (OneFormControlLineView)views.get(index1);
-    OneFormControlLineView view2 = (OneFormControlLineView)views.get(index2);
-    views.setElementAt(view1, index2);
-    views.setElementAt(view2, index1);
-    gbcLineView.gridy = index2;
-    lineViewPanel.add(view1.JComponent(), gbcLineView);
-    gbcLineView.gridy = index1;
-    lineViewPanel.add(view2.JComponent(), gbcLineView);
-    lineViewPanel.validate();
+    ViewDescriptor desc1 = (ViewDescriptor)viewDescriptors.get(index1);
+    ViewDescriptor desc2 = (ViewDescriptor)viewDescriptors.get(index2);
+    viewDescriptors.setElementAt(desc1, index2);
+    viewDescriptors.setElementAt(desc2, index1);
+    
+    fixTabStructure();
+    
+    tabPane.validate();
     scrollPane.validate();
     
     swapSelectionIndices(index1, index2);
@@ -342,7 +538,7 @@ public class AllFormControlModelLineViewsPanel implements View, ItemListener, On
       if (i >= start)
       {
         i = i + offset;
-        if (i < 0 || i > views.size()-1)
+        if (i < 0 || i > viewDescriptors.size()-1)
           iter.remove();
         else 
           iter.set(new Integer(i));
@@ -382,7 +578,7 @@ public class AllFormControlModelLineViewsPanel implements View, ItemListener, On
     while (iter.hasNext())
     {
       Integer I = (Integer)iter.next();
-      OneFormControlLineView view = (OneFormControlLineView)views.get(I.intValue());
+      OneFormControlLineView view = ((ViewDescriptor)viewDescriptors.get(I.intValue())).view;
       view.unmark();
     }
     selection.clear();
@@ -404,11 +600,11 @@ public class AllFormControlModelLineViewsPanel implements View, ItemListener, On
     { //TESTED
       if (b.getClearSelection()) clearSelection();
       FormControlModel model = b.getModel();
-      Iterator iter = views.iterator();
+      Iterator iter = viewDescriptors.iterator();
       int index = 0;
       while (iter.hasNext())
       {
-        OneFormControlLineView view = (OneFormControlLineView)iter.next();
+        OneFormControlLineView view = ((ViewDescriptor)iter.next()).view;
         if (view.getModel() == model)
         {
           Integer I = new Integer(index);
@@ -419,13 +615,13 @@ public class AllFormControlModelLineViewsPanel implements View, ItemListener, On
           switch (state)
           {
             case -1: //abwählen
-                     ((OneFormControlLineView)views.get(index)).unmark();
+                     ((ViewDescriptor)viewDescriptors.get(index)).view.unmark();
                      selection.remove(new Integer(index));
                      break;
             case 1: //auswählen
                      if (!selection.contains(I)) 
                      {
-                       ((OneFormControlLineView)views.get(index)).mark();
+                       ((ViewDescriptor)viewDescriptors.get(index)).view.mark();
                        selection.add(I);
                      }
                      break;
@@ -436,6 +632,46 @@ public class AllFormControlModelLineViewsPanel implements View, ItemListener, On
       }
       
       Collections.sort(selection);
+    }
+  }
+  
+  /**
+   * Ein Eintrag in der Liste {@link AllFormControlModelLineViewsPanel#viewDescriptors}.
+   *
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private static class ViewDescriptor
+  {
+    /**
+     * Die View des Elements.
+     */
+    public OneFormControlLineView view;
+    
+    /**
+     * Der Index des Elements innerhalb seines Tabs.
+     */
+    public int gridY;
+    
+    /**
+     * Der Index des Tabs in {@link AllFormControlModelLineViewsPanel#tabPane}.
+     */
+    public int containingTabIndex;
+    
+    /**
+     * true gdw das Element ein Tab ist.
+     */
+    public boolean isTab;
+    
+    /**
+     * Erzeugt einen neuen ViewDescriptor.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
+    public ViewDescriptor(OneFormControlLineView view, int gridY, int containingTabIndex, boolean isTab)
+    {
+      this.view = view;
+      this.gridY = gridY;
+      this.containingTabIndex = containingTabIndex;
+      this.isTab = isTab;
     }
   }
     

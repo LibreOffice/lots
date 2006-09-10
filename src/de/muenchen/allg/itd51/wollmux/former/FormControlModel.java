@@ -243,6 +243,15 @@ public class FormControlModel
   }
   
   /**
+   * Liefert true gdw dieses FormControlModel ein Tab darstellt.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public boolean isTab()
+  {
+    return type == TAB_TYPE;
+  }
+  
+  /**
    * Liefert das LABEL dieses FormControlModels.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -430,15 +439,19 @@ public class FormControlModel
   
   /**
    * Setzt das TYPE-Attribut. Dabei wird der übergebene String in eine der
-   * {@link #COMBOBOX_TYPE *_TYPE-Konstanten} übersetzt.
+   * {@link #COMBOBOX_TYPE *_TYPE-Konstanten} übersetzt. ACHTUNG! Der TYPE von Tabs
+   * kann nicht verändert werden und andere Elemente können auch nicht in Tabs verwandelt
+   * werden.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void setType(String type)
   {
-    if (type.equals(COMBOBOX_TYPE)) this.type = COMBOBOX_TYPE;
+    if (this.type == TAB_TYPE) return; //Tabs bleiben Tabs.
+    
+    if (type.equals(TAB_TYPE)) return; //Andere Elemente können keine Tabs werden
+    else if (type.equals(COMBOBOX_TYPE)) this.type = COMBOBOX_TYPE;
     else if (type.equals(TEXTFIELD_TYPE)) this.type = TEXTFIELD_TYPE;
     else if (type.equals(TEXTAREA_TYPE)) this.type = TEXTAREA_TYPE;
-    else if (type.equals(TAB_TYPE)) this.type = TAB_TYPE;
     else if (type.equals(SEPARATOR_TYPE)) this.type = SEPARATOR_TYPE;
     else if (type.equals(GLUE_TYPE)) this.type = GLUE_TYPE;
     else if (type.equals(CHECKBOX_TYPE)) this.type = CHECKBOX_TYPE;
