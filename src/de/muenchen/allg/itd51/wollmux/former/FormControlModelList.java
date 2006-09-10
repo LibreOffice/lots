@@ -11,6 +11,8 @@
 * 07.08.2006 | BNK | Erstellung
 * 29.08.2006 | BNK | kommentiert.
 * 10.09.2006 | BNK | [R3207]Maximale Anzahl von Steuerelementen pro Tab wird überwacht.
+* 10.09.2006 | BNK | automatisch Tab einfügen, wenn nach Button ein in der Button-Zeile
+*                    unsinniges Element auftaucht.
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -275,6 +277,18 @@ public class FormControlModelList
       else if (phase == 2 && model.getType() == FormControlModel.BUTTON_TYPE)
       {
         conf.addChild(model.export());
+      }
+      else if  (phase == 2
+          && model.getType() != FormControlModel.BUTTON_TYPE
+          && model.getType() != FormControlModel.GLUE_TYPE 
+          && model.getType() != FormControlModel.SEPARATOR_TYPE)
+      {
+        id = makeUniqueId(FormularMax4000.STANDARD_TAB_NAME); 
+        currentTab = FormControlModel.createTab(id, id);
+        tabConf = outputTab(currentTab, export);
+        conf = tabConf.add("Eingabefelder");
+        conf.addChild(model.export());
+        phase = 1;
       }
       else if (phase == 0)
       {
