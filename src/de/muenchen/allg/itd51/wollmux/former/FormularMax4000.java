@@ -303,11 +303,21 @@ public class FormularMax4000
     
     //========================= Datei ============================
     JMenu menu = new JMenu("Datei");
+    
     JMenuItem menuItem = new JMenuItem("Formularfelder aus Dokument einlesen");
     menuItem.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e)
       {
         scan(doc);
+        myFrame.pack();
+      }});
+    menu.add(menuItem);
+    
+    menuItem = new JMenuItem("Formulartitel setzen");
+    menuItem.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent e)
+      {
+        setFormTitle();
         myFrame.pack();
       }});
     menu.add(menuItem);
@@ -451,6 +461,18 @@ public class FormularMax4000
   }
   
   /**
+   * Bringt einen modalen Dialog zum Bearbeiten des Formulartitels.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private void setFormTitle()
+  {
+    String newTitle = JOptionPane.showInputDialog(myFrame, "Bitte Formulartitel eingeben", formTitle);
+    if (newTitle != null)
+      formTitle = newTitle;
+  }
+  
+  /**
    * Speichert die Formularbeschreibung im Dokument.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -512,8 +534,8 @@ public class FormularMax4000
   {
     try{ 
       ConfigThingy conf = new ConfigThingy("Buttons", STANDARD_BUTTONS_MIDDLE_URL);
-      int index = allFormControlModelLineViewsPanel.getInsertionIndex();
-      parseGrandchildren(conf, index);
+      int index = allFormControlModelLineViewsPanel.getButtonInsertionIndex();
+      parseGrandchildren(conf, index, false);
       //TODO writeFormDescriptor();
     }catch(Exception x) { Logger.error(x);}
   }
@@ -527,8 +549,8 @@ public class FormularMax4000
   {
     try{ 
       ConfigThingy conf = new ConfigThingy("Buttons", STANDARD_BUTTONS_LAST_URL);
-      int index = allFormControlModelLineViewsPanel.getInsertionIndex();
-      parseGrandchildren(conf, index);
+      int index = allFormControlModelLineViewsPanel.getButtonInsertionIndex();
+      parseGrandchildren(conf, index, false);
       //TODO writeFormDescriptor();
     }catch(Exception x) { Logger.error(x);}
   }
@@ -570,14 +592,14 @@ public class FormularMax4000
     if (idx >= 0)
     {
       formControlModelList.add(tab, idx++);
-      idx += parseGrandchildren(conf.query("Eingabefelder"), idx);
-      parseGrandchildren(conf.query("Buttons"), idx);
+      idx += parseGrandchildren(conf.query("Eingabefelder"), idx, true);
+      parseGrandchildren(conf.query("Buttons"), idx, false);
     }
     else
     {
       formControlModelList.add(tab);
-      parseGrandchildren(conf.query("Eingabefelder"), -1);
-      parseGrandchildren(conf.query("Buttons"), -1);
+      parseGrandchildren(conf.query("Eingabefelder"), -1, true);
+      parseGrandchildren(conf.query("Buttons"), -1, false);
     }
   }
   
@@ -586,12 +608,18 @@ public class FormularMax4000
    * {@link #formControlModelList} entsprechende FormControlModels hinzu.
    * @param idx falls >= 0 werden die Steuerelemente am entsprechenden Index der
    *        Liste in die Formularbeschreibung eingefügt, ansonsten ans Ende angehängt.
+   * @param killLastGlue falls true wird das letzte Steuerelement entfernt, wenn es
+   *        ein glue ist.
    * @return die Anzahl der erzeugten Steuerelemente.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
-  private int parseGrandchildren(ConfigThingy grandma, int idx)
+  private int parseGrandchildren(ConfigThingy grandma, int idx, boolean killLastGlue)
   {
+    if (idx < 0) idx = formControlModelList.size();
+    
+    boolean lastIsGlue = false;
+    FormControlModel model = null;
     int count = 0;
     Iterator grandmaIter = grandma.iterator();
     while (grandmaIter.hasNext())
@@ -599,13 +627,16 @@ public class FormularMax4000
       Iterator iter = ((ConfigThingy)grandmaIter.next()).iterator();
       while (iter.hasNext())
       {
-        FormControlModel model = new FormControlModel((ConfigThingy)iter.next());
+        model = new FormControlModel((ConfigThingy)iter.next());
+        lastIsGlue = model.isGlue();
         ++count;
-        if (idx >= 0)
-          formControlModelList.add(model, idx++);
-        else
-          formControlModelList.add(model);
+        formControlModelList.add(model, idx++);
       }
+    }
+    if (killLastGlue && lastIsGlue)
+    {
+      formControlModelList.remove(model);
+      --count;
     }
     return count;
   }

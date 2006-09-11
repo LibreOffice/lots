@@ -26,8 +26,11 @@ import java.util.List;
 import java.util.Vector;
 import java.util.regex.Pattern;
 
+import com.sun.star.text.XBookmarksSupplier;
+
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.SyntaxErrorException;
+import de.muenchen.allg.itd51.wollmux.Bookmark;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.former.FormControlModel.ModelChangeListener;
 
@@ -70,7 +73,7 @@ public class InsertionModel
   /**
    * Der Name des Bookmarks, das diese Einfügestelle umschließt.
    */
-  private String bookmarkName;
+  private Bookmark bookmark; 
   
   /**
    * Die {@link ModelChangeListener}, die über Änderungen dieses Models informiert werden wollen.
@@ -88,7 +91,7 @@ public class InsertionModel
    */
   public InsertionModel(String bookmarkName) throws SyntaxErrorException
   {
-    this.bookmarkName = bookmarkName;
+    // FIXME bookmark = new Bookmark(bookmarkName, doc);
     String confStr = bookmarkName.replaceAll("\\d*\\z",""); //eventuell vorhandene Ziffern am Ende löschen
     URL url = null;
     try{

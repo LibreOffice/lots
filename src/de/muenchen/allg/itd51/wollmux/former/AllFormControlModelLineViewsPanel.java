@@ -458,10 +458,21 @@ public class AllFormControlModelLineViewsPanel implements View, ItemListener, On
     }
     
     /*
-     * Wenn die obige Suche fehlgeschlagen ist suchen wir alle
-     * Elemente durch nach dem ersten Element, das auf dem nächsten Tab
-     * nach dem sichtbaren ist. Dessen Index wird zurückgeliefert.
+     * Wenn die obige Suche fehlschlägt wird getButtonInsertionIndex() verwendet.
      */
+    return getButtonInsertionIndex();
+  }
+
+  /**
+   * Liefert den Index an dem Buttons auf dem aktuell sichtbaren Tab eingefügt
+   * werden sollten oder -1, falls kein Tab ausgewählt ist. Der zurückgelieferte
+   * Wert (falls nicht -1) entspricht dem Index des letzten sichtbaren
+   * Elements + 1.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public int getButtonInsertionIndex()
+  {
+    int tabIndex = tabPane.getSelectedIndex();
     for (int i = 0; i < viewDescriptors.size(); ++i)
     {
       ViewDescriptor desc = (ViewDescriptor)viewDescriptors.get(i);
@@ -469,9 +480,6 @@ public class AllFormControlModelLineViewsPanel implements View, ItemListener, On
         return i;
     }
 
-    /*
-     * Falls nichts geholfen hat liefern wir -1.
-     */
     return -1;
   }
   

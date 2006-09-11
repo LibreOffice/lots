@@ -106,7 +106,7 @@ public class FormControlModel
   public FormControlModel(ConfigThingy conf)
   {
     label = "Steuerelement";
-    type = "textfield";
+    type = TEXTFIELD_TYPE;
     id = "";
     
     Iterator iter = conf.iterator();
@@ -131,6 +131,9 @@ public class FormControlModel
       else if (name.equals("PLAUSI")) plausi = new ConfigThingy(attr);
       else if (name.equals("AUTOFILL")) autofill = new ConfigThingy(attr);
     }
+    
+    if (isGlue())
+      label = "glue";
   }
   
   /**
@@ -249,6 +252,15 @@ public class FormControlModel
   public boolean isTab()
   {
     return type == TAB_TYPE;
+  }
+  
+  /**
+   * Liefert true gdw dieses FormControlModel einen Glue darstellt.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public boolean isGlue()
+  {
+    return type == GLUE_TYPE;
   }
   
   /**

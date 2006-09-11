@@ -257,6 +257,7 @@ public class FormControlModelList
         currentTab = model;
       else if (phase > 0 && model.getType() == FormControlModel.TAB_TYPE)
       {
+        if (phase == 1) conf.addChild(makeGlue());
         currentTab = model;
         conf = export;
         phase = 0;
@@ -270,6 +271,7 @@ public class FormControlModelList
       }
       else if (phase == 1 && model.getType() == FormControlModel.BUTTON_TYPE)
       {
+        conf.addChild(makeGlue());
         conf = tabConf.add("Buttons");
         conf.addChild(model.export());
         phase = 2;
@@ -302,8 +304,20 @@ public class FormControlModelList
         conf.addChild(model.export());
       }
     }
+    if (phase == 1) conf.addChild(makeGlue());
   
     return export;
+  }
+  
+  /**
+   * Liefert (TYPE "glue") zurück.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private ConfigThingy makeGlue()
+  {
+    ConfigThingy conf = new ConfigThingy("");
+    conf.add("TYPE").add("glue");
+    return conf;
   }
   
   /**
