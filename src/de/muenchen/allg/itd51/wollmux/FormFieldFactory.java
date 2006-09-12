@@ -14,6 +14,7 @@
  * 14.06.2006 | LUT | Umbenennung in FormFieldFactory und Unterstützung
  *                    von Checkboxen.
  * 07.09.2006 | BNK | Rewrite
+ * 12.09.2006 | BNK | Bugfix: Bookmarks ohne Ausdehnung wurden nicht gefunden.
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -145,6 +146,7 @@ public final class FormFieldFactory
      * Der Name des zuletzt gestarteten insertFormValue-Bookmarks.
      */
     String lastInsertFormValueStart = null;
+    XNamed lastInsertFormValueBookmark = null; 
     
     /*
      * enumeriere alle TextPortions des Paragraphs
@@ -161,8 +163,8 @@ public final class FormFieldFactory
       String textPortionType = (String)UNO.getProperty(textPortion, "TextPortionType");
       if (textPortionType.equals("Bookmark"))
       {
+        XNamed bookmark = null;
         boolean isStart = false;
-        XNamed bookmark = null; 
         try{
           isStart = ((Boolean)UNO.getProperty(textPortion, "IsStart")).booleanValue();
           bookmark = UNO.XNamed(UNO.getProperty(textPortion, "Bookmark"));
@@ -176,6 +178,7 @@ public final class FormFieldFactory
           if (isStart)
           {
             lastInsertFormValueStart = name;
+            lastInsertFormValueBookmark = bookmark;
           }
           else
           {
@@ -231,6 +234,9 @@ public final class FormFieldFactory
       else //sonstige TextPortion
         continue;
     }
+    
+    if (lastInsertFormValueStart != null)
+      handleNewInputField(lastInsertFormValueStart, lastInsertFormValueBookmark, mapBookmarkNameToFormField, doc);
 
   }
   
