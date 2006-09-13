@@ -34,6 +34,7 @@ import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
 
 import de.muenchen.allg.itd51.wollmux.Logger;
+import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.XPALChangeEventListener;
 import de.muenchen.allg.itd51.wollmux.XPALProvider;
 import de.muenchen.allg.itd51.wollmux.XWollMux;
@@ -173,6 +174,8 @@ public class WollMuxBarEventHandler
    */
   private void handle(Event e)
   {
+    if (WollMuxFiles.isDebugMode())
+      Logger.debug2("Füge "+e.getClass().getSimpleName()+" zur Event-Queue hinzu");
     synchronized (eventQueue)
     {
       eventQueue.add(e);
