@@ -26,12 +26,12 @@ import java.util.List;
 import java.util.Vector;
 import java.util.regex.Pattern;
 
+import com.sun.star.container.NoSuchElementException;
 import com.sun.star.text.XBookmarksSupplier;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.SyntaxErrorException;
 import de.muenchen.allg.itd51.wollmux.Bookmark;
-import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.former.FormControlModel.ModelChangeListener;
 
 /**
@@ -45,6 +45,11 @@ public class InsertionModel
    * Pattern zum Erkennen von insertValue und insertFormValue-Bookmarks.
    */
   public static final Pattern INSERTION_BOOKMARK = Pattern.compile("\\A\\s*(WM\\s*\\(.*CMD\\s*'((insertValue)|(insertFormValue))'.*\\))\\s*\\d*\\z");
+  
+  /**
+   * Attribut-ID-Konstante für {@link ModelChangeListener#attributeChanged(InsertionModel, int, Object)}.
+   */
+  public static final int ID_ATTR = 0;
   
   /** 
    * Konstante für {@link #sourceType}, die angibt, dass die Daten für die Einfügung
@@ -71,7 +76,7 @@ public class InsertionModel
   private String dataId = "";
   
   /**
-   * Der Name des Bookmarks, das diese Einfügestelle umschließt.
+   * Das Bookmarks, das diese Einfügestelle umschließt.
    */
   private Bookmark bookmark; 
   
@@ -83,15 +88,16 @@ public class InsertionModel
   /**
    * Erzeugt ein neues InsertionModel für das Bookmark mit Namen bookmarkName, das bereits
    * im Dokument vorhanden sein muss.
-   * @param bookmarkName
+   * @param doc das Dokument in dem sich das Bookmark befindet
    * @throws SyntaxErrorException wenn bookmarkName nicht korrekte ConfigThingy-Syntax hat oder
    *         kein korrektes Einfügekommando ist.
+   * @throws NoSuchElementException wenn ein Bookmark dieses Namens in doc nicht existiert.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
-  public InsertionModel(String bookmarkName) throws SyntaxErrorException
+  public InsertionModel(String bookmarkName, XBookmarksSupplier doc) throws SyntaxErrorException, NoSuchElementException
   {
-    // FIXME bookmark = new Bookmark(bookmarkName, doc);
+    bookmark = new Bookmark(bookmarkName,doc);
     String confStr = bookmarkName.replaceAll("\\d*\\z",""); //eventuell vorhandene Ziffern am Ende löschen
     URL url = null;
     try{
@@ -124,6 +130,25 @@ public class InsertionModel
   }
   
   /**
+   * Liefert je nach Typ der Einfügung das DB_SPALTE oder ID Attribut.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public String getDataID()
+  {
+    return dataId;
+  }
+  
+  /**
+   * Ändert je nach Type der Einfügung DB_SPALTE oder ID Attribut auf den Wert newId.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public void setDataID(String newId)
+  {
+    dataId = newId;
+    notifyListeners(ID_ATTR, newId);
+  }
+  
+  /**
    * Benachrichtigt alle auf diesem Model registrierten Listener, dass das Model aus
    * seinem Container entfernt wurde. ACHTUNG! Darf nur von einem entsprechenden Container
    * aufgerufen werden, der das Model enthält.
@@ -138,6 +163,20 @@ public class InsertionModel
     {
       ModelChangeListener listener = (ModelChangeListener)iter.next();
       listener.modelRemoved(this);
+    }
+  }
+  
+  /**
+   * Ruft für jeden auf diesem Model registrierten {@link ModelChangeListener} die Methode
+   * {@link ModelChangeListener#attributeChanged(FormControlModel, int, Object)} auf. 
+   */
+  private void notifyListeners(int attributeId, Object newValue)
+  {
+    Iterator iter = listeners.iterator();
+    while (iter.hasNext())
+    {
+      ModelChangeListener listener = (ModelChangeListener)iter.next();
+      listener.attributeChanged(this, attributeId, newValue);
     }
   }
   
@@ -158,6 +197,16 @@ public class InsertionModel
    */
   public static interface ModelChangeListener
   {
+    /**
+     * Wird aufgerufen wenn ein Attribut des Models sich geändert hat. 
+     * @param model das InsertionModel, das sich geändert hat.
+     * @param attributeId eine der {@link InsertionModel#ID_ATTR Attribut-ID-Konstanten}.
+     * @param newValue der neue Wert des Attributs. Numerische Attribute werden als Integer übergeben.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
+    public void attributeChanged(InsertionModel model, int attributeId, Object newValue);
+    
+    
     /**
      * Wird aufgerufen, wenn model aus seinem Container entfernt wird (und damit
      * in keiner View mehr angezeigt werden soll).

@@ -56,6 +56,7 @@ import javax.swing.text.View;
 import javax.swing.text.ViewFactory;
 
 import com.sun.star.document.XDocumentInfo;
+import com.sun.star.text.XBookmarksSupplier;
 import com.sun.star.text.XTextDocument;
 
 import de.muenchen.allg.afid.UNO;
@@ -433,14 +434,15 @@ public class FormularMax4000
     }
     
     insertionModelList.clear();
-    String[] bookmarks = UNO.XBookmarksSupplier(doc).getBookmarks().getElementNames();
+    XBookmarksSupplier bmSupp = UNO.XBookmarksSupplier(doc); 
+    String[] bookmarks = bmSupp.getBookmarks().getElementNames();
     for (int i = 0; i < bookmarks.length; ++i)
     {
       try{
         String bookmark = bookmarks[i];
         if (InsertionModel.INSERTION_BOOKMARK.matcher(bookmark).matches())
-          insertionModelList.add(new InsertionModel(bookmark));
-      }catch(SyntaxErrorException x)
+          insertionModelList.add(new InsertionModel(bookmark, bmSupp));
+      }catch(Exception x)
       {
         Logger.error(x);
       }
@@ -780,7 +782,7 @@ public class FormularMax4000
     bookmarkName = control.surroundWithBookmark(bookmarkName);
 
     try{
-      InsertionModel imodel = new InsertionModel(bookmarkName);
+      InsertionModel imodel = new InsertionModel(bookmarkName, UNO.XBookmarksSupplier(doc));
       insertionModelList.add(imodel);
     }catch(Exception x)
     {

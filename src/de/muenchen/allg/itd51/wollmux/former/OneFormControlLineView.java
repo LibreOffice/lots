@@ -38,18 +38,8 @@ import javax.swing.event.DocumentListener;
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
-public class OneFormControlLineView implements View
+public class OneFormControlLineView extends LineView
 {
-  /**
-   * Farbe für den Hintergrund, wenn die View markiert ist.
-   */
-  private static final Color MARKED_BACKGROUND_COLOR = Color.BLUE;
-  
-  /**
-   * Breite des Randes um die View.
-   */
-  private static final int BORDER = 4;
-  
   /**
    * Standardbreite des Textfelds, das das Label anzeigt.
    */
@@ -60,16 +50,6 @@ public class OneFormControlLineView implements View
    * auf dem Laufenden gehalten werden muss.
    */
   private ViewChangeListener bigDaddy;
-  
-  /**
-   * Das Panel, das alle Komponenten dieser View enthält.
-   */
-  private JPanel myPanel;
-  
-  /**
-   * Der FormularMax4000, zu dem diese View gehört.
-   */
-  private FormularMax4000 formularMax4000;
   
   /**
    * Wird vor dem Ändern eines Attributs des Models gesetzt, damit der rekursive Aufruf
@@ -93,10 +73,6 @@ public class OneFormControlLineView implements View
    */
   private MyMouseListener myMouseListener = new MyMouseListener();
 
-  /**
-   * Die Hintergrundfarbe im unmarkierten Zustand.
-   */
-  private Color unmarkedBackgroundColor;
     
   /**
    * Erzeugt eine View für model.
@@ -192,11 +168,6 @@ public class OneFormControlLineView implements View
   {
     setTypeSpecificTraits(labelTextfield, newType);
   }
-  
-  public JComponent JComponent()
-  {
-    return myPanel;
-  }
 
    /**
    * Liefert das {@link FormControlModel} das zu dieser View gehört.
@@ -207,26 +178,6 @@ public class OneFormControlLineView implements View
     return model;
   }
 
-  /**
-   * Markiert diese View optisch als ausgewählt.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  public void mark()
-  {
-    myPanel.setBackground(MARKED_BACKGROUND_COLOR);
-  }
-  
-  /**
-   * Entfernt die optische Markierung als ausgewählt von dieser View.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  public void unmark()
-  {
-    myPanel.setBackground(unmarkedBackgroundColor);
-  }
-  
   /**
    * Interface für Klassen, die an Änderungen dieser View interessiert sind.
    *
