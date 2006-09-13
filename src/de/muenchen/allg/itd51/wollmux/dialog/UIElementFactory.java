@@ -17,6 +17,7 @@
 * 29.05.2006 | BNK | ordentliche Context-Klasse
 * 31.05.2006 | BNK | +funcDialog
 * 16.06.2006 | BNK | Beim Ändern eines Checkbox-Werts holt sich die Checkbox jetzt den Fokus
+* 13.09.2006 | BNK | Bei glues werden jetzt MINSIZE, MAXSIZE und PREFSIZE unterstützt.
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -25,6 +26,7 @@
 */
 package de.muenchen.allg.itd51.wollmux.dialog;
 
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridLayout;
@@ -419,23 +421,25 @@ public class UIElementFactory
     }
     else if (type.equals("h-glue"))
     {
-      Box box = Box.createHorizontalBox();
-      try{
-        int minsize = Integer.parseInt(conf.get("MINSIZE").toString());
-        box.add(Box.createHorizontalStrut(minsize));
-      }catch(Exception e){}
-      box.add(Box.createHorizontalGlue());
-      return new UIElement.Box(id, box, layoutConstraints);
+      int minsize = 0;
+      int prefsize = 0;
+      int maxsize = Integer.MAX_VALUE;
+      try{ minsize = Integer.parseInt(conf.get("MINSIZE").toString()); }catch(Exception x){};
+      try{ maxsize = Integer.parseInt(conf.get("MAXSIZE").toString()); }catch(Exception x){};
+      try{ prefsize = Integer.parseInt(conf.get("PREFSIZE").toString()); }catch(Exception x){};
+      
+      return new UIElement.Box(id, new Box.Filler(new Dimension(minsize, 0), new Dimension(prefsize, 0), new Dimension(maxsize, Integer.MAX_VALUE)), layoutConstraints);
     }
     else if (type.equals("v-glue"))
     {
-      Box box = Box.createVerticalBox();
-      try{
-        int minsize = Integer.parseInt(conf.get("MINSIZE").toString());
-        box.add(Box.createVerticalStrut(minsize));
-      }catch(Exception e){}
-      box.add(Box.createVerticalGlue());
-      return new UIElement.Box(id, box, layoutConstraints);
+      int minsize = 0;
+      int prefsize = 0;
+      int maxsize = Integer.MAX_VALUE;
+      try{ minsize = Integer.parseInt(conf.get("MINSIZE").toString()); }catch(Exception x){};
+      try{ maxsize = Integer.parseInt(conf.get("MAXSIZE").toString()); }catch(Exception x){};
+      try{ prefsize = Integer.parseInt(conf.get("PREFSIZE").toString()); }catch(Exception x){};
+      
+      return new UIElement.Box(id, new Box.Filler(new Dimension(0, minsize), new Dimension(0, prefsize), new Dimension(Integer.MAX_VALUE, maxsize)), layoutConstraints);
     }
     else
       throw new ConfigurationErrorException("Ununterstützter TYPE für GUI Element: \""+type+"\"");

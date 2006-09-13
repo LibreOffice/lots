@@ -654,9 +654,9 @@ public interface UIElement extends Value
   
   public static class Box extends UIElementBase
   {
-    private javax.swing.Box jackInTheBox;
+    private Component jackInTheBox;
     
-    public Box(String id, javax.swing.Box jackInTheBox, Object layoutConstraints)
+    public Box(String id, Component jackInTheBox, Object layoutConstraints)
     {
       this.jackInTheBox = jackInTheBox;
       this.layoutConstraints = layoutConstraints;
