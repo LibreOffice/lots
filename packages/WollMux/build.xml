@@ -29,7 +29,7 @@
 	-->
 
 	<property name="COMPONENT" value="WollMux" />
-	<property name="VERSION" value="1.3.4" />
+	<property name="VERSION" value="1.3.5" />
 	<property name="PKG_NAME" value="${COMPONENT}.uno.pkg" />
 	<property name="PKG_FILE" value="${basedir}/packages/${PKG_NAME}" />
 	<property name="RDB_DIR" value="${basedir}/packages/WollMux" />
