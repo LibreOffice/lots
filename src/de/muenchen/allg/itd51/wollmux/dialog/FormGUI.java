@@ -16,6 +16,7 @@
 * 05.05.2006 | BNK | Condition -> Function, besser kommentiert 
 * 05.07.2006 | BNK | optische Verbesserungen, insbes. bzgl. arrangeWindows()
 * 19.07.2006 | BNK | mehrere übelste Hacks, damit die Formular-GUI nie unsinnige Größe annimmt beim Starten
+* 14.09.2006 | BNK | üble Hacks hoffentlich robuster gemacht
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -221,9 +222,9 @@ public class FormGUI
       private int counter = 0;
       public void windowStateChanged(WindowEvent e)
       {
-        if (counter++ == 0) createGUI2((e.getNewState() & Frame.MAXIMIZED_BOTH) == Frame.MAXIMIZED_BOTH);
-        else if (counter++ == 1) createGUI3();
-        else if (counter++ == 2) myFrame.removeWindowStateListener(this);
+        if (counter == 0 && (e.getNewState() & Frame.MAXIMIZED_BOTH) == Frame.MAXIMIZED_BOTH) {createGUI2(true); ++counter;}
+        else if (counter == 1) {createGUI3(); ++counter;}
+        else if (counter == 2) {myFrame.removeWindowStateListener(this); ++counter;}
       }}
     );
     
@@ -254,15 +255,18 @@ public class FormGUI
    * Setzt Größe und Ort der FormGUI.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TODO Testen
+   * TESTED
    */
   private void setFormGUISizeAndLocation()
   {
     Rectangle frameBounds = new Rectangle(myFrame.getBounds());
+    Logger.debug("setFormGUISizeAndLocation: frameBounds="+frameBounds);
     
     switch (formGUIBounds.width)
     {
       case Common.DIMENSION_UNSPECIFIED: // natural width
+        if (frameBounds.width > (0.66*maxWindowBounds.width))
+          frameBounds.width = (int)(0.66*maxWindowBounds.width);
         break;
       case Common.DIMENSION_MAX: // max
         frameBounds.width = maxWindowBounds.width;
@@ -296,6 +300,7 @@ public class FormGUI
         frameBounds.x = maxWindowBounds.x;
         break;
       case Common.COORDINATE_UNSPECIFIED: // kein Wert angegeben
+        frameBounds.x = maxWindowBounds.x;
         break;
       default: // Wert angegeben, wird nur einmal berücksichtigt.
         frameBounds.x = formGUIBounds.x;
@@ -315,6 +320,7 @@ public class FormGUI
         frameBounds.y = maxWindowBounds.y;
         break;
       case Common.COORDINATE_UNSPECIFIED: // kein Wert angegeben
+        frameBounds.y = maxWindowBounds.y;
         break;
       default: // Wert angegeben, wird nur einmal berücksichtigt.
         frameBounds.y = formGUIBounds.y;
