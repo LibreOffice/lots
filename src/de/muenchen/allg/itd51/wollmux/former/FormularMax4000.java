@@ -24,6 +24,8 @@ package de.muenchen.allg.itd51.wollmux.former;
 
 import java.awt.BorderLayout;
 import java.awt.Font;
+import java.awt.GraphicsEnvironment;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -61,7 +63,6 @@ import com.sun.star.text.XTextDocument;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
-import de.muenchen.allg.itd51.parser.SyntaxErrorException;
 import de.muenchen.allg.itd51.wollmux.FormDescriptor;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.dialog.Common;
@@ -185,6 +186,12 @@ public class FormularMax4000
   private JFrame myFrame;
   
   /**
+   * Der maximal durch ein Fenster nutzbare Bereich, d,h, Bildschirmgroesse minus
+   * Taskbar undsoweiter. 
+   */
+  private Rectangle maxWindowBounds;
+  
+  /**
    * Das Fenster, das für das Bearbeiten des Quelltextes geöffnet wird.
    * FIXME: vielleicht besser im selben Frame öffnen, damit niemand aus versehen parallel viel Arbeit im normalen Fenster macht und diese dann verliert beim Schliessen des Code-Fensters.
    */
@@ -284,6 +291,10 @@ public class FormularMax4000
   {
     Common.setLookAndFeelOnce();
     
+    GraphicsEnvironment genv = GraphicsEnvironment.getLocalGraphicsEnvironment();
+    maxWindowBounds = genv.getMaximumWindowBounds();
+    maxWindowBounds.height-=32; //Sicherheitsabzug für KDE Taskleiste
+    
     formControlModelList = new FormControlModelList();
     insertionModelList = new InsertionModelList();
     
@@ -310,7 +321,7 @@ public class FormularMax4000
       public void actionPerformed(ActionEvent e)
       {
         scan(doc);
-        myFrame.pack();
+        setFrameSize();
       }});
     menu.add(menuItem);
     
@@ -319,7 +330,7 @@ public class FormularMax4000
       public void actionPerformed(ActionEvent e)
       {
         setFormTitle();
-        myFrame.pack();
+        setFrameSize();
       }});
     menu.add(menuItem);
     
@@ -356,7 +367,7 @@ public class FormularMax4000
       public void actionPerformed(ActionEvent e)
       {
         insertStandardEmpfaengerauswahl();
-        myFrame.pack();
+        setFrameSize();
       }
       });
     menu.add(menuItem);
@@ -366,7 +377,7 @@ public class FormularMax4000
       public void actionPerformed(ActionEvent e)
       {
         insertStandardButtonsMiddle();
-        myFrame.pack();
+        setFrameSize();
       }
       });
     menu.add(menuItem);
@@ -376,7 +387,7 @@ public class FormularMax4000
       public void actionPerformed(ActionEvent e)
       {
         insertStandardButtonsLast();
-        myFrame.pack();
+        setFrameSize();
       }
       });
     menu.add(menuItem);
@@ -390,7 +401,7 @@ public class FormularMax4000
     initModelsAndViews();
     
     
-    myFrame.pack();
+    setFrameSize();
     myFrame.setResizable(true);
     myFrame.setVisible(true);
   }
@@ -449,7 +460,7 @@ public class FormularMax4000
     }
     
 //  TODO writeFormDescriptor();
-    myFrame.pack();
+    setFrameSize();
   }
   
   /**
@@ -1069,6 +1080,34 @@ public class FormularMax4000
     catch(Exception x) {}
   }
   
+  /**
+   * Workaround für Problem unter Windows, dass das Layout bei myFrame.pack() die 
+   * Taskleiste nicht berücksichtigt (das Fenster also dahinter verschwindet), zumindest
+   * solange nicht bis man die Taskleiste mal in ihrer Größe verändert hat.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private void setFrameSize()
+  {
+    myFrame.pack();
+    Rectangle frameBounds = myFrame.getBounds();
+    if (frameBounds.x < maxWindowBounds.x)
+    {
+      frameBounds.width -= (maxWindowBounds.x - frameBounds.x);
+      frameBounds.x = maxWindowBounds.x;
+    }
+    if (frameBounds.y < maxWindowBounds.y)
+    {
+      frameBounds.height -= (maxWindowBounds.y - frameBounds.y);
+      frameBounds.y = maxWindowBounds.y;
+    }
+    if (frameBounds.width > maxWindowBounds.width)
+      frameBounds.width = maxWindowBounds.width;
+    if (frameBounds.height > maxWindowBounds.height)
+      frameBounds.height = maxWindowBounds.height;
+    myFrame.setBounds(frameBounds);
+  }
+
   private class MyWindowListener implements WindowListener
   {
     public void windowOpened(WindowEvent e) {}
