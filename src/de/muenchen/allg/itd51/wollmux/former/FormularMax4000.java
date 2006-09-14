@@ -489,6 +489,16 @@ public class FormularMax4000
     ConfigThingy conf = exportFormDescriptor();
     formDescriptor.fromConfigThingy(conf);
     formDescriptor.writeDocInfoFormularbeschreibung();
+    setModifiedState(doc);
+  }
+
+  /**
+   * Setzt den Geändert Status von doc auf wahr.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private void setModifiedState(XTextDocument doc)
+  {
+    try{UNO.XModifiable(doc).setModified(true);}catch(Exception x) {}
   }
 
   /**
@@ -722,6 +732,8 @@ public class FormularMax4000
       visitor.visit(tree);
     } 
     catch(Exception x) {Logger.error("Fehler während des Scan-Vorgangs",x);}
+    
+    setModifiedState(doc);
   }
   
   /**
