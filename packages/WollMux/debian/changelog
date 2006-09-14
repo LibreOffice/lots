@@ -1,4 +1,4 @@
-wollmux (1.3.3lhm1) siga; urgency=low
+wollmux (1.3.4lhm1) siga; urgency=low
 
   * FormularMax 4000: Mit "Neu" Button können jetzt Labels eingefügt werden
   * Verbesserungen beim Bestimmen der Fenstergroesse der Formular-GUI (Vorfall 8417)
