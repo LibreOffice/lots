@@ -50,6 +50,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 import javax.swing.text.DefaultEditorKit;
 import javax.swing.text.Element;
@@ -185,11 +186,6 @@ public class FormularMax4000
    */
   private JFrame myFrame;
   
-  /**
-   * Der maximal durch ein Fenster nutzbare Bereich, d,h, Bildschirmgroesse minus
-   * Taskbar undsoweiter. 
-   */
-  private Rectangle maxWindowBounds;
   
   /**
    * Das Fenster, das für das Bearbeiten des Quelltextes geöffnet wird.
@@ -291,9 +287,6 @@ public class FormularMax4000
   {
     Common.setLookAndFeelOnce();
     
-    GraphicsEnvironment genv = GraphicsEnvironment.getLocalGraphicsEnvironment();
-    maxWindowBounds = genv.getMaximumWindowBounds();
-    maxWindowBounds.height-=32; //Sicherheitsabzug für KDE Taskleiste
     
     formControlModelList = new FormControlModelList();
     insertionModelList = new InsertionModelList();
@@ -1013,6 +1006,7 @@ public class FormularMax4000
     
     editorFrame.pack();
     editorFrame.setVisible(true);
+    fixFrameSize(editorFrame);
   }
   
   /**
@@ -1090,7 +1084,25 @@ public class FormularMax4000
   private void setFrameSize()
   {
     myFrame.pack();
-    Rectangle frameBounds = myFrame.getBounds();
+    fixFrameSize(myFrame);
+  }
+
+  /**
+   * Sorgt dafür, dass die Ausdehnung von frame nicht die maximal erlaubten
+   * Fensterdimensionen überschreitet.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private void fixFrameSize(JFrame frame)
+  {
+    Rectangle maxWindowBounds;
+    
+    GraphicsEnvironment genv = GraphicsEnvironment.getLocalGraphicsEnvironment();
+    maxWindowBounds = genv.getMaximumWindowBounds();
+    String lafName = UIManager.getSystemLookAndFeelClassName(); 
+    if (!lafName.contains("plaf.windows."))
+      maxWindowBounds.height-=32; //Sicherheitsabzug für KDE Taskleiste
+    
+    Rectangle frameBounds = frame.getBounds();
     if (frameBounds.x < maxWindowBounds.x)
     {
       frameBounds.width -= (maxWindowBounds.x - frameBounds.x);
@@ -1105,7 +1117,7 @@ public class FormularMax4000
       frameBounds.width = maxWindowBounds.width;
     if (frameBounds.height > maxWindowBounds.height)
       frameBounds.height = maxWindowBounds.height;
-    myFrame.setBounds(frameBounds);
+    frame.setBounds(frameBounds);
   }
 
   private class MyWindowListener implements WindowListener
