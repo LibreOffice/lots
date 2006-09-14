@@ -76,6 +76,11 @@ public class FormGUI
   private Rectangle maxWindowBounds;
   
   /**
+   * Die Größe, die durch pack() für den Frame eingestellt wird.
+   */
+  private Rectangle naturalFrameBounds;
+  
+  /**
    * Das Fenster der Formular-GUI. Hier wird der FormController eingebettet. Auch
    * das Office-Bean wäre hier eingebettet worden, wenn nicht die Entscheidung
    * gegen seine Verwendung gefallen wäre.
@@ -213,6 +218,8 @@ public class FormGUI
     myFrame.setResizable(true);
     myFrame.setVisible(true);
     
+    naturalFrameBounds = myFrame.getBounds();
+    
     /*
      * Bestimmen der Breite des Fensterrahmens.
      */
@@ -259,7 +266,7 @@ public class FormGUI
    */
   private void setFormGUISizeAndLocation()
   {
-    Rectangle frameBounds = new Rectangle(myFrame.getBounds());
+    Rectangle frameBounds = new Rectangle(naturalFrameBounds);
     Logger.debug("setFormGUISizeAndLocation: frameBounds="+frameBounds);
     
     switch (formGUIBounds.width)
