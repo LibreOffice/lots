@@ -30,6 +30,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.text.Document;
 
 
 
@@ -105,7 +106,8 @@ public class OneFormControlLineView extends LineView
   private JComponent makeLabelView()
   {
     labelTextfield = new JTextField(model.getLabel(), LABEL_COLUMNS);
-    labelTextfield.getDocument().addDocumentListener(new DocumentListener(){
+    Document tfdoc = labelTextfield.getDocument();
+    tfdoc.addDocumentListener(new DocumentListener(){
       public void update()
       {
         ignoreAttributeChanged = true;
@@ -120,6 +122,7 @@ public class OneFormControlLineView extends LineView
       public void changedUpdate(DocumentEvent e) {update();}
       });
     
+    labelTextfield.setCaretPosition(0);
     labelTextfield.addMouseListener(myMouseListener);
     setTypeSpecificTraits(labelTextfield, model.getType());
     return labelTextfield;
@@ -137,11 +140,18 @@ public class OneFormControlLineView extends LineView
       f = f.deriveFont(Font.BOLD);
       compo.setFont(f);
       compo.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3));
+      compo.setBackground(new Color(230,235,250));
     }
     else if (type == FormControlModel.BUTTON_TYPE)
     {
       compo.setBackground(Color.LIGHT_GRAY);
       compo.setBorder(BorderFactory.createRaisedBevelBorder());
+    }
+    else if (type == FormControlModel.LABEL_TYPE)
+    {
+      Font f = compo.getFont();
+      f = f.deriveFont(Font.BOLD);
+      compo.setFont(f);
     }
   }
   

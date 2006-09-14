@@ -1,5 +1,14 @@
 wollmux (1.3.3lhm1) siga; urgency=low
 
+  * FormularMax 4000: Mit "Neu" Button können jetzt Labels eingefügt werden
+  * Verbesserungen beim Bestimmen der Fenstergroesse der Formular-GUI (Vorfall 8417)
+  * Diverse sonstige Verbesserungen
+  * Bei glues werden jetzt MINSIZE, MAXSIZE und PREFSIZE unterstützt
+
+ -- Matthias Benkmann <matthias.benkmann@muenchen.de>  Tue, 14 Sep 2006 17:13:16 +0200
+
+wollmux (1.3.3lhm1) siga; urgency=low
+
   * FormularMax 4000: Buttons werden immer am Ende des sichtbaren Tabs eingefügt.
   * FormularMax 4000: Datei/Formulartitel setzen
   * FormularMax 4000: Es werden automatisch glue-Elemente eingefügt, so dass die 

@@ -1059,7 +1059,14 @@ public class FormularMax4000
    */
   public void toFront()
   {
-    myFrame.toFront();
+    try{
+      javax.swing.SwingUtilities.invokeLater(new Runnable() {
+        public void run() {
+            try{myFrame.toFront();}catch(Exception x){};
+        }
+      });
+    }
+    catch(Exception x) {}
   }
   
   private class MyWindowListener implements WindowListener

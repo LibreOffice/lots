@@ -509,9 +509,8 @@ public class AllFormControlModelLineViewsPanel implements View, ItemListener, On
    */
   private void insertNewElement()
   {
-    String id = formControlModelList.makeUniqueId("Eingabe");
-    String label = id;
-    FormControlModel model = FormControlModel.createTextfield(label, id);
+    String id = formControlModelList.makeUniqueId("Label");
+    FormControlModel model = FormControlModel.createLabel("Text", id);
     int index = getInsertionIndex();
     formControlModelList.add(model, index);
   }

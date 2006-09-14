@@ -42,6 +42,7 @@ public class FormControlModel
   public static final String COMBOBOX_TYPE = "combobox";
   public static final String TEXTFIELD_TYPE = "textfield";
   public static final String TEXTAREA_TYPE = "textarea";
+  public static final String LABEL_TYPE = "label";
   public static final String TAB_TYPE = "tab";
   public static final String SEPARATOR_TYPE = "separator";
   public static final String GLUE_TYPE = "glue";
@@ -197,6 +198,16 @@ public class FormControlModel
   {
     FormControlModel model = new FormControlModel(label, TEXTFIELD_TYPE, id);
     model.editable = true;
+    return model;
+  }
+  
+  /**
+   * Liefert ein FormControlModel, das ein Label label darstellt.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public static FormControlModel createLabel(String label, String id)
+  {
+    FormControlModel model = new FormControlModel(label, LABEL_TYPE, "");
     return model;
   }
   
@@ -464,6 +475,7 @@ public class FormControlModel
     else if (type.equals(COMBOBOX_TYPE)) this.type = COMBOBOX_TYPE;
     else if (type.equals(TEXTFIELD_TYPE)) this.type = TEXTFIELD_TYPE;
     else if (type.equals(TEXTAREA_TYPE)) this.type = TEXTAREA_TYPE;
+    else if (type.equals(LABEL_TYPE)) this.type = LABEL_TYPE;
     else if (type.equals(SEPARATOR_TYPE)) this.type = SEPARATOR_TYPE;
     else if (type.equals(GLUE_TYPE)) this.type = GLUE_TYPE;
     else if (type.equals(CHECKBOX_TYPE)) this.type = CHECKBOX_TYPE;
