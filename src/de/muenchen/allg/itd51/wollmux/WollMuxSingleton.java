@@ -40,13 +40,18 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Set;
 import java.util.Vector;
 
-import com.sun.star.container.XEnumeration;
-import com.sun.star.lang.XComponent;
+import com.sun.star.beans.PropertyValue;
+import com.sun.star.frame.DispatchDescriptor;
+import com.sun.star.frame.XDispatch;
+import com.sun.star.frame.XDispatchProvider;
+import com.sun.star.frame.XDispatchProviderInterceptor;
+import com.sun.star.frame.XFrame;
+import com.sun.star.frame.XStatusListener;
+import com.sun.star.lang.EventObject;
+import com.sun.star.text.XTextDocument;
 import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
@@ -103,11 +108,12 @@ public class WollMuxSingleton implements XPALProvider
   private Vector registeredPALChangeListener;
 
   /**
-   * Enthält eine Zuordnugn aller geöffneter und durch den
-   * DocumentCommandInterpreter ausgewerteter Dokumente auf die zugehörige
-   * mapIDtoFormFields.
+   * Enthält die Menge aller aktuell geöffneter TextDocuments in Form von
+   * TextDocumentModel-Elementen. Die HashMap enthält eine Zuordnung der
+   * TextDocumentModels auf sich selbst, damit die ursprüngliche Instanz des
+   * TextDocumentModels über get() wieder hervorgeholt werden kann.
    */
-  private HashMap mapDocToIDToFormFields;
+  private HashMap currentTextDocumentModels;
 
   /**
    * Die WollMux-Hauptklasse ist als singleton realisiert.
@@ -118,7 +124,7 @@ public class WollMuxSingleton implements XPALProvider
     // getXComponentContext zurückgeliefert.
     this.ctx = ctx;
 
-    this.mapDocToIDToFormFields = new HashMap();
+    this.currentTextDocumentModels = new HashMap();
 
     // Initialisiere die UNO-Klasse, so dass auch mit dieser Hilfsklasse
     // gearbeitet werden kann.
@@ -175,7 +181,7 @@ public class WollMuxSingleton implements XPALProvider
         null);
 
     // Initialisiere EventProcessor
-    getEventProcessor().setAcceptEvents(successfulStartup);
+    EventProcessor.setAcceptEvents(successfulStartup);
 
     // register global EventListener
     try
@@ -183,8 +189,8 @@ public class WollMuxSingleton implements XPALProvider
       UnoService eventBroadcaster = UnoService.createWithContext(
           "com.sun.star.frame.GlobalEventBroadcaster",
           ctx);
-      eventBroadcaster.xEventBroadcaster()
-          .addEventListener(getEventProcessor());
+      eventBroadcaster.xEventBroadcaster().addEventListener(
+          new GlobalEventListener());
     }
     catch (Exception e)
     {
@@ -334,17 +340,6 @@ public class WollMuxSingleton implements XPALProvider
   }
 
   /**
-   * Diese Methode liefert eine Instanz auf den EventProcessor, der u.A. dazu
-   * benötigt wird, neue Events in die Eventqueue einzuhängen.
-   * 
-   * @return die Instanz des aktuellen EventProcessors
-   */
-  public EventProcessor getEventProcessor()
-  {
-    return EventProcessor.getInstance();
-  }
-
-  /**
    * Diese Methode liefert eine alphabethisch aufsteigend sortierte Liste aller
    * Einträge der Persönlichen Absenderliste (PAL) in einem String-Array, wobei
    * die einzelnen Einträge in der Form "<Nachname>, <Vorname> (<Rolle>)"
@@ -463,79 +458,42 @@ public class WollMuxSingleton implements XPALProvider
   }
 
   /**
-   * Diese Methode speichert zum übergebenen Dokument doc die zugehörige HashMap
-   * idToFormFields ab, die den Zugriff auf die Formularfelder dieses Dokuments
-   * ermöglicht.
-   * 
-   * Die Methode wird derzeit vom DocumentCommandInterpreter aufgerufen, da der
-   * WollMuxEventHandler.OnFunctionDialogSelectDone die Formularfelder eines
-   * Dokuments benötigt um die Werte des Funktionsdialog in die Formularfelder
-   * übertragen zu können.
+   * Liefert das aktuelle TextDocumentModel zum übergebenen XTextDocument doc;
+   * existiert zu doc noch kein TextDocumentModel, so wird hier eines erzeugt
+   * und das neu erzeugte zurück geliefert.
    * 
    * @param doc
-   *          Das Dokument, zu dem die Formularfelder gehören.
-   * @param idToFormFields
-   *          Die Formularfelder, die in einer HashMap über die Zurdnung id ->
-   *          FormField zu erreichen sind.
+   *          Das XTextDocument, zu dem das zugehörige TextDocumentModel
+   *          zurückgeliefert werden soll.
+   * @return Das zu doc zugehörige TextDocumentModel.
    */
-  public void addIDToFormFieldsForDocument(XComponent doc,
-      HashMap idToFormFields)
+  public TextDocumentModel getTextDocumentModel(XTextDocument doc)
   {
-    // Vor jedem Eintrag eines neuen Elements wird die HashMap bereinigt und
-    // unbenutzte doc-Referenzen gelöscht.
-    removeAllUnusedMapDocToIDToFormFieldsEntries();
-
-    // dann wird der neue Wert aufgenommen.
-    mapDocToIDToFormFields.put(
-        new WollMuxEventHandler.HashableComponent(doc),
-        idToFormFields);
-  }
-
-  private void removeAllUnusedMapDocToIDToFormFieldsEntries()
-  {
-    // Set aller aktuellen Komponenten aufbauen:
-    Set currentComponents = new HashSet();
-    XEnumeration xenum = UNO.desktop.getComponents().createEnumeration();
-    while (xenum.hasMoreElements())
+    TextDocumentModel refModel = new TextDocumentModel(doc);
+    TextDocumentModel curModel = (TextDocumentModel) currentTextDocumentModels
+        .get(refModel);
+    if (curModel == null)
     {
-      try
-      {
-        XComponent compo = UNO.XComponent(xenum.nextElement());
-        currentComponents.add(new WollMuxEventHandler.HashableComponent(compo));
-      }
-      catch (java.lang.Exception e)
-      {
-        Logger.error(e);
-      }
-    }
+      curModel = refModel;
 
-    // alle Einträge aus mapDocToIDToFormFields entfernen, zu denen es keine
-    // aktuelle Komponenten gibt.
-    Iterator iter = mapDocToIDToFormFields.keySet().iterator();
-    while (iter.hasNext())
-    {
-      WollMuxEventHandler.HashableComponent hcompo = (WollMuxEventHandler.HashableComponent) iter
-          .next();
-      if (!currentComponents.contains(hcompo)) iter.remove();
+      currentTextDocumentModels.put(curModel, curModel);
+
+      curModel.registerCloseListener();
     }
+    return curModel;
   }
 
   /**
-   * Diese Methode liefert zum Dokument doc die zugehörige HashMap
-   * idToFormFields zurück, die den Zugriff auf die Formularfelder dieses
-   * Dokuments ermöglicht.
+   * Löscht das übergebene TextDocumentModel aus der internen Liste aller
+   * aktuellen TextDocumentModels.
    * 
-   * Die Methode wird derzeit vom WollMuxEventHandler.OnFunctionDialogSelectDone
-   * verwendet um die die Formularfelder eines Dokuments zu bekommen, damit er
-   * Werte des Funktionsdialog in die Formularfelder übertragen zu kann.
-   * 
-   * @param doc
-   *          Das Dokument, zu dem die Formularfelder gehören.
+   * @param model
+   *          Das TextDocumentModel, das aus der internen Liste gelöscht werden
+   *          soll.
    */
-  public HashMap getIDToFormFieldsForDocument(XComponent doc)
+  public void disposedTextDocumentModel(TextDocumentModel model)
   {
-    return (HashMap) mapDocToIDToFormFields
-        .get(new WollMuxEventHandler.HashableComponent(doc));
+    currentTextDocumentModels.remove(model);
   }
 
   /**
@@ -550,4 +508,244 @@ public class WollMuxSingleton implements XPALProvider
   {
     url.openStream().close();
   }
+
+  public static class GlobalEventListener implements
+      com.sun.star.document.XEventListener
+  {
+    /**
+     * Wird vom GlobalEventBroadcaster aufgerufen.
+     * 
+     * @see com.sun.star.document.XEventListener#notifyEvent(com.sun.star.document.EventObject)
+     */
+    public void notifyEvent(com.sun.star.document.EventObject docEvent)
+    {
+      int code = 0;
+      try
+      {
+        code = docEvent.Source.hashCode();
+      }
+      catch (java.lang.Exception x)
+      {
+      }
+      Logger.debug2("Incoming documentEvent for #"
+                    + code
+                    + ": "
+                    + docEvent.EventName);
+      UnoService source = new UnoService(docEvent.Source);
+
+      // Bekannte Event-Typen rausziehen:
+      if (source.xTextDocument() != null)
+      {
+        // Beim OnLoadFinished wird die Bearbeitung des Dokuments gestartet.
+        // Dort ist das Dokument jedoch noch nicht mit einem Frame verknüpft.
+        if (docEvent.EventName.equalsIgnoreCase("OnLoadFinished"))
+        {
+          WollMuxEventHandler.handleProcessTextDocument(source.xTextDocument());
+        }
+
+        // Ab OnLoad oder OnNew steht nun auch der Frame zur Verfügung und der
+        // WollMuxDispatchInterceptor kann eingebunden werden.
+        else if (docEvent.EventName.equalsIgnoreCase("OnLoad")
+                 || docEvent.EventName.equalsIgnoreCase(("OnNew")))
+        {
+          XFrame frame = getFrame(source);
+          if (UNO.XDispatchProviderInterception(frame) != null)
+          {
+            Logger.debug("register WollMuxDispatchInterceptor for frame #"
+                         + frame.hashCode());
+            UNO.XDispatchProviderInterception(frame)
+                .registerDispatchProviderInterceptor(
+                    new WollMuxDispatchInterceptor());
+          }
+        }
+      }
+    }
+
+    private XFrame getFrame(UnoService source)
+    {
+      XFrame frame = null;
+      try
+      {
+        frame = source.xModel().getCurrentController().getFrame();
+      }
+      catch (java.lang.Exception e)
+      {
+      }
+      return frame;
+    }
+
+    public void disposing(EventObject arg0)
+    {
+      // nothing to do
+    }
+  }
+
+  /**
+   * Diese Klasse ermöglicht es dem WollMux, dispatch-Kommandos abzufangen und
+   * statt dessen eigene Aktionen durchzuführen. Jeder Frame
+   * 
+   * @author christoph.lutz
+   * 
+   */
+  public static class WollMuxDispatchInterceptor implements
+      XDispatchProviderInterceptor
+  {
+
+    XDispatchProvider slave = null;
+
+    XDispatchProvider master = null;
+
+    public XDispatchProvider getSlaveDispatchProvider()
+    {
+      return slave;
+    }
+
+    public void setSlaveDispatchProvider(XDispatchProvider slave)
+    {
+      this.slave = slave;
+    }
+
+    public XDispatchProvider getMasterDispatchProvider()
+    {
+      return master;
+    }
+
+    public void setMasterDispatchProvider(XDispatchProvider master)
+    {
+      this.master = master;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.sun.star.frame.XDispatchProvider#queryDispatch(com.sun.star.util.URL,
+     *      java.lang.String, int)
+     */
+    public XDispatch queryDispatch(com.sun.star.util.URL url, String frame,
+        int frameSearchFlags)
+    {
+      String urlStr = url.Complete;
+
+      // Logger.debug2("queryDispatch: '" + urlStr + "'");
+
+      final XDispatch origDisp = slave.queryDispatch(
+          url,
+          frame,
+          frameSearchFlags);
+
+      if (urlStr.equals(".uno:Print"))
+      {
+        Logger.debug("queryDispatch: '" + urlStr + "'");
+        return new XDispatch()
+        {
+          public void dispatch(com.sun.star.util.URL arg0, PropertyValue[] arg1)
+          {
+            XTextDocument doc = UNO.XTextDocument(UNO.desktop
+                .getCurrentComponent());
+            if (doc != null)
+              WollMuxEventHandler.handlePrintButtonPressed(
+                  doc,
+                  origDisp,
+                  arg0,
+                  arg1);
+          }
+
+          public void removeStatusListener(XStatusListener arg0,
+              com.sun.star.util.URL arg1)
+          {
+            if (origDisp != null) origDisp.removeStatusListener(arg0, arg1);
+          }
+
+          public void addStatusListener(XStatusListener arg0,
+              com.sun.star.util.URL arg1)
+          {
+            if (origDisp != null) origDisp.addStatusListener(arg0, arg1);
+          }
+        };
+      }
+
+      else if (urlStr.equals(".uno:UpdateInputFields"))
+      {
+        Logger.debug("queryDispatch: '" + urlStr + "'");
+        return null;
+      }
+
+      // Für Debug-Zwecke kann in der folgenden Zeile der ForwardDispatcher
+      // eingeschalten werden, der jede Dispatch-Anfrage durchreicht, dabei aber
+      // noch log-Meldungen produziert. ACHTUNG: hier darf (leider) nicht
+      // WollMuxFiles.isDebugMode() aufgerufen werden, da die Methode nicht im
+      // WollMuxEventHandler-Thread läuft.
+      if (false) return new ForwardDispatch(origDisp);
+
+      // Anfrage an das ursprüngliche DispatchObjekt weiterleiten.
+      return origDisp;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.sun.star.frame.XDispatchProvider#queryDispatches(com.sun.star.frame.DispatchDescriptor[])
+     */
+    public XDispatch[] queryDispatches(DispatchDescriptor[] seqDescripts)
+    {
+      int nCount = seqDescripts.length;
+      XDispatch[] lDispatcher = new XDispatch[nCount];
+
+      for (int i = 0; i < nCount; ++i)
+        lDispatcher[i] = queryDispatch(
+            seqDescripts[i].FeatureURL,
+            seqDescripts[i].FrameName,
+            seqDescripts[i].SearchFlags);
+
+      return lDispatcher;
+    }
+  }
+
+  /**
+   * Der ForwardDispatch ist ein Dispatch-Handler für Testzwecke, der jede
+   * Dispatch-Anfrag auf den Logger protokolliert, die Anfragen aber ansonsten
+   * unverändert an den ursprünglichen dispatch-Handler weiterreicht.
+   * 
+   * @author christoph.lutz
+   * 
+   */
+  private static class ForwardDispatch implements XDispatch
+  {
+    private XDispatch orig;
+
+    public ForwardDispatch(XDispatch orig)
+    {
+      this.orig = orig;
+    }
+
+    public void dispatch(com.sun.star.util.URL arg0, PropertyValue[] arg1)
+    {
+      Logger.debug2(ForwardDispatch.class.getName()
+                    + ".dispatch('"
+                    + arg0.Complete
+                    + "')");
+      orig.dispatch(arg0, arg1);
+    }
+
+    public void addStatusListener(XStatusListener arg0,
+        com.sun.star.util.URL arg1)
+    {
+      Logger.debug2(ForwardDispatch.class.getName()
+                    + ".addStatusListener('"
+                    + arg0.hashCode()
+                    + "')");
+      orig.addStatusListener(arg0, arg1);
+    }
+
+    public void removeStatusListener(XStatusListener arg0,
+        com.sun.star.util.URL arg1)
+    {
+      Logger.debug2(ForwardDispatch.class.getName()
+                    + ".removeStatusListener('"
+                    + arg0.hashCode()
+                    + "')");
+      orig.removeStatusListener(arg0, arg1);
+    }
+  }
+
 }

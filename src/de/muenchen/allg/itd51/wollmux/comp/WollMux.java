@@ -345,8 +345,10 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
                       + parsedURL);
         String dialogName = "";
         if (parsedURL.size() > 0) dialogName = parsedURL.get(0).toString();
-        WollMuxEventHandler.handleFunctionDialogShow(UNO.desktop
-            .getCurrentComponent(), dialogName);
+        XTextDocument doc = UNO
+            .XTextDocument(UNO.desktop.getCurrentComponent());
+        if (doc != null)
+          WollMuxEventHandler.handleFunctionDialogShow(doc, dialogName);
       }
 
       if (cmd.compareToIgnoreCase(cmdFormularMax4000) == 0)

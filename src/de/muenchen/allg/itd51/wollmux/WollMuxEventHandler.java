@@ -28,6 +28,8 @@
  */
 package de.muenchen.allg.itd51.wollmux;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -43,11 +45,12 @@ import java.util.Vector;
 import com.sun.star.awt.DeviceInfo;
 import com.sun.star.awt.PosSize;
 import com.sun.star.awt.XWindow;
+import com.sun.star.beans.PropertyValue;
 import com.sun.star.beans.PropertyVetoException;
 import com.sun.star.container.NoSuchElementException;
 import com.sun.star.container.XNameAccess;
-import com.sun.star.frame.FrameSearchFlag;
 import com.sun.star.frame.XController;
+import com.sun.star.frame.XDispatch;
 import com.sun.star.frame.XFrame;
 import com.sun.star.frame.XModel;
 import com.sun.star.lang.EventObject;
@@ -59,8 +62,6 @@ import com.sun.star.uno.Exception;
 import com.sun.star.uno.RuntimeException;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
-import com.sun.star.util.CloseVetoException;
-import com.sun.star.util.XCloseListener;
 import com.sun.star.util.XURLTransformer;
 import com.sun.star.view.DocumentZoomType;
 
@@ -138,40 +139,6 @@ public class WollMuxEventHandler
     {
       super("Der Dialog konnte nicht gestartet werden!\n\n"
             + "Bitte kontaktieren Sie Ihre Systemadministration.", e);
-    }
-  }
-
-  /**
-   * Hilfsklasse, die es ermöglicht, UNO-Componenten in HashMaps abzulegen; der
-   * Vergleich zweier HashableComponents mit equals(...) verwendet dazu den
-   * sicheren UNO-Vergleich UnoRuntime.areSame(...) und die Methode hashCode
-   * wird direkt an das UNO-Objekt weitergeleitet.
-   * 
-   * @author lut
-   */
-  public static class HashableComponent
-  {
-    private Object compo;
-
-    public HashableComponent(XComponent compo)
-    {
-      this.compo = compo;
-    }
-
-    public int hashCode()
-    {
-      if (compo != null) return compo.hashCode();
-      return 0;
-    }
-
-    public boolean equals(Object b)
-    {
-      if (b != null && b instanceof HashableComponent)
-      {
-        HashableComponent other = (HashableComponent) b;
-        return UnoRuntime.areSame(this.compo, other.compo);
-      }
-      return false;
     }
   }
 
@@ -290,7 +257,7 @@ public class WollMuxEventHandler
    */
   private static void handle(WollMuxEvent event)
   {
-    WollMuxSingleton.getInstance().getEventProcessor().addEvent(event);
+    EventProcessor.addEvent(event);
   }
 
   // *******************************************************************************************
@@ -337,13 +304,20 @@ public class WollMuxEventHandler
       try
       {
         new AbsenderAuswaehlen(whoAmIconf, PALconf, ADBconf, mux
-            .getDatasourceJoiner(), mux.getEventProcessor());
+            .getDatasourceJoiner(), new ActionListener()
+        {
+          public void actionPerformed(ActionEvent arg0)
+          {
+            WollMuxEventHandler.handlePALChangedNotify();
+            EventProcessor.processTheNextEvent();
+          }
+        });
       }
       catch (java.lang.Exception e)
       {
         throw new CantStartDialogException(e);
       }
-      return EventProcessor.waitForGUIReturn;
+      return EventProcessor.wait;
     }
   }
 
@@ -390,14 +364,21 @@ public class WollMuxEventHandler
       try
       {
         new PersoenlicheAbsenderlisteVerwalten(PALconf, ADBconf, mux
-            .getDatasourceJoiner(), mux.getEventProcessor());
+            .getDatasourceJoiner(), new ActionListener()
+        {
+          public void actionPerformed(ActionEvent arg0)
+          {
+            WollMuxEventHandler.handlePALChangedNotify();
+            EventProcessor.processTheNextEvent();
+          }
+        });
       }
       catch (java.lang.Exception e)
       {
         throw new CantStartDialogException(e);
       }
 
-      return EventProcessor.waitForGUIReturn;
+      return EventProcessor.wait;
     }
   }
 
@@ -411,18 +392,19 @@ public class WollMuxEventHandler
    * Dieses Event wird vom WollMux-Service (...comp.WollMux) und aus dem
    * WollMuxEventHandler ausgelöst.
    */
-  public static void handleFunctionDialogShow(XComponent doc, String dialogName)
+  public static void handleFunctionDialogShow(XTextDocument doc,
+      String dialogName)
   {
     handle(new OnFunctionDialogShow(doc, dialogName));
   }
 
   private static class OnFunctionDialogShow extends BasicEvent
   {
-    private XComponent doc;
+    private XTextDocument doc;
 
     private String dialogName;
 
-    private OnFunctionDialogShow(XComponent doc, String dialogName)
+    private OnFunctionDialogShow(XTextDocument doc, String dialogName)
     {
       this.doc = doc;
       this.dialogName = dialogName;
@@ -439,18 +421,24 @@ public class WollMuxEventHandler
         try
         {
           // Dialoginstanz erzeugen und anzeigen
+          ActionListener listener = new ActionListener()
+          {
+            public void actionPerformed(ActionEvent arg0)
+            {
+              WollMuxEventHandler.handleFunctionDialogSelectDone();
+              EventProcessor.processTheNextEvent();
+            }
+          };
           Dialog dialogInst = dialog.instanceFor(new HashMap());
-          dialogInst.show(
-              mux.getEventProcessor(),
-              mux.getGlobalFunctions(),
-              mux.getFunctionDialogs());
+          dialogInst.show(listener, mux.getGlobalFunctions(), mux
+              .getFunctionDialogs());
 
           // DialogContext für die Weiterverarbeitung in
           // OnFunctionDialogSelectDone sichern.
           OnFunctionDialogSelectDone.dialogContexts.add(new DialogContext(doc,
               dialogInst));
 
-          return EventProcessor.waitForGUIReturn;
+          return EventProcessor.wait;
         }
         catch (ConfigurationErrorException e)
         {
@@ -510,49 +498,31 @@ public class WollMuxEventHandler
 
     protected boolean doit() throws WollMuxFehlerException
     {
+
       if (doc == null) return EventProcessor.processTheNextEvent;
 
-      HashableComponent hDoc = new HashableComponent(doc);
-
-      // CloseListener für das Dokument (genau einmal) registrieren.
-      if (!mapDocToMax4000.containsKey(hDoc))
-      {
-        mapDocToMax4000.put(hDoc, null);
-        if (UNO.XCloseable(doc) != null)
-        {
-          UNO.XCloseable(doc).addCloseListener(new XCloseListener()
-          {
-
-            public void disposing(EventObject arg0)
-            {
-              WollMuxEventHandler.handleFormularMax4000Close(doc);
-            }
-
-            public void notifyClosing(EventObject arg0)
-            {
-              WollMuxEventHandler.handleFormularMax4000Close(doc);
-            }
-
-            public void queryClosing(EventObject arg0, boolean arg1)
-                throws CloseVetoException
-            {
-            }
-          });
-        }
-      }
+      TextDocumentModel model = WollMuxSingleton.getInstance()
+          .getTextDocumentModel(doc);
 
       // Bestehenden Max in den Vordergrund holen oder neuen Max erzeugen.
-      FormularMax4000 max = (FormularMax4000) mapDocToMax4000.get(hDoc);
+      FormularMax4000 max = model.getCurrentFormularMax4000();
       if (max != null)
       {
         max.toFront();
       }
       else
       {
-        max = new FormularMax4000(doc, WollMuxSingleton.getInstance()
-            .getEventProcessor());
-
-        mapDocToMax4000.put(hDoc, max);
+        max = new FormularMax4000(doc, new ActionListener()
+        {
+          public void actionPerformed(ActionEvent actionEvent)
+          {
+            if (actionEvent.getSource() instanceof FormularMax4000)
+              WollMuxEventHandler
+                  .handleFormularMax4000Returned((FormularMax4000) actionEvent
+                      .getSource());
+          }
+        });
+        model.setCurrentFormularMax4000(max);
       }
 
       return EventProcessor.processTheNextEvent;
@@ -616,37 +586,32 @@ public class WollMuxEventHandler
   // *******************************************************************************************
 
   /**
-   * Erzeugt ein neues WollMuxEvent, das Auskunft darüber gibt, dass das zu
-   * einem FormularMax zugehörige Textdokument geschlossen wurde und das dafür
-   * sorgt, dass der entsprechende FormularMax geschlossen und die internen
-   * Referenz gelöscht wird.
+   * Erzeugt ein neues WollMuxEvent, das Auskunft darüber gibt, dass ein
+   * TextDokument geschlossen wurde und damit auch das TextDocumentModel
+   * disposed werden soll.
    * 
-   * Dieses Event wird ausgelöst, wenn ein Dokument geschlossen wird, das einen
-   * Formularmax verwendet.
+   * Dieses Event wird ausgelöst, wenn ein TextDokument geschlossen wird.
    */
-  public static void handleFormularMax4000Close(XTextDocument doc)
+  public static void handleTextDocumentClosed(XTextDocument doc)
   {
-    handle(new OnFormularMax4000Close(doc));
+    handle(new OnTextDocumentClosed(doc));
   }
 
-  private static class OnFormularMax4000Close extends BasicEvent
+  private static class OnTextDocumentClosed extends BasicEvent
   {
     private XTextDocument doc;
 
-    private OnFormularMax4000Close(XTextDocument doc)
+    private OnTextDocumentClosed(XTextDocument doc)
     {
       this.doc = doc;
     }
 
     protected boolean doit() throws WollMuxFehlerException
     {
-      HashableComponent hDoc = new HashableComponent(doc);
-      FormularMax4000 max = (FormularMax4000) OnFormularMax4000Show.mapDocToMax4000
-          .get(hDoc);
+      TextDocumentModel model = WollMuxSingleton.getInstance()
+          .getTextDocumentModel(doc);
 
-      if (max != null) max.dispose();
-
-      OnFormularMax4000Show.mapDocToMax4000.remove(hDoc);
+      model.dispose();
 
       return EventProcessor.processTheNextEvent;
     }
@@ -699,7 +664,8 @@ public class WollMuxEventHandler
 
         // Alle Werte die der Funktionsdialog sicher zurück liefert werden in
         // das Dokument übernommen.
-        HashMap idToFormFields = mux.getIDToFormFieldsForDocument(dctx.doc);
+        HashMap idToFormFields = mux.getTextDocumentModel(dctx.doc)
+            .getIDToFormFields();
         if (idToFormFields != null)
         {
           Collection schema = dctx.dialogInstance.getSchema();
@@ -736,11 +702,11 @@ public class WollMuxEventHandler
 
   private static class DialogContext
   {
-    private XComponent doc;
+    private XTextDocument doc;
 
     private Dialog dialogInstance;
 
-    private DialogContext(XComponent doc, Dialog dialogInstance)
+    private DialogContext(XTextDocument doc, Dialog dialogInstance)
     {
       this.doc = doc;
       this.dialogInstance = dialogInstance;
@@ -772,16 +738,6 @@ public class WollMuxEventHandler
   {
     XTextDocument xTextDoc;
 
-    /**
-     * Dieses Feld stellt ein Zwischenspeicher für Fragment-Urls dar, der
-     * HashableComponent-Objekte (mit Dokument-Instanzen) auf
-     * Fragment-URL-Listen mapped. Es wird dazu benutzt, im Fall eines
-     * openTemplate-Befehls die urls der übergebenen frag_id-Liste temporär zu
-     * speichern. Das Event on_new/on_load holt sich die temporär gespeicherten
-     * Argumente aus der hashMap und übergibt sie dem WMCommandInterpreter.
-     */
-    private static HashMap docFragUrlsBuffer = new HashMap();
-
     public OnProcessTextDocument(XTextDocument xTextDoc)
     {
       this.xTextDoc = xTextDoc;
@@ -789,14 +745,14 @@ public class WollMuxEventHandler
 
     protected boolean doit() throws WollMuxFehlerException
     {
+      if (xTextDoc == null) return EventProcessor.processTheNextEvent;
+
       WollMuxSingleton mux = WollMuxSingleton.getInstance();
+      TextDocumentModel model = mux.getTextDocumentModel(xTextDoc);
 
       UnoService doc = new UnoService(xTextDoc);
       if (doc.supportsService("com.sun.star.text.TextDocument"))
       {
-        // Close-Events aller Textdokumente abfangen.
-        doc.xCloseable().addCloseListener(mux.getEventProcessor());
-
         // Konfigurationsabschnitt Textdokument verarbeiten:
         ConfigThingy tds = new ConfigThingy("Textdokument");
         try
@@ -809,11 +765,6 @@ public class WollMuxEventHandler
         catch (NodeNotFoundException e)
         {
         }
-
-        // Beim on_opendocument erzeugte frag_id-liste aus puffer holen.
-        String[] fragUrls = (String[]) docFragUrlsBuffer
-            .remove(new HashableComponent(doc.xComponent()));
-        if (fragUrls == null) fragUrls = new String[] {};
 
         // Mögliche Aktionen für das neu geöffnete Dokument:
         boolean processNormalCommands = false;
@@ -860,12 +811,12 @@ public class WollMuxEventHandler
         // Ausführung der Dokumentkommandos
         if (processNormalCommands || processFormCommands)
         {
-          DocumentCommandInterpreter dci = new DocumentCommandInterpreter(doc
-              .xTextDocument(), mux);
+          DocumentCommandInterpreter dci = new DocumentCommandInterpreter(
+              model, mux);
 
           try
           {
-            if (processNormalCommands) dci.executeTemplateCommands(fragUrls);
+            if (processNormalCommands) dci.executeTemplateCommands();
 
             if (processFormCommands || dci.isFormular())
             {
@@ -1036,48 +987,6 @@ public class WollMuxEventHandler
   // *******************************************************************************************
 
   /**
-   * Dieses Event sorgt dafür, dass die dispose() des übergebenen FormModels
-   * model im EventProcessor-Thread ausgeführt wird. Die dispose()-Methode darf
-   * nicht ausserhalb des EventProcessor-Threads ausgeführt werden.
-   * 
-   * @param model
-   *          das zu disposende FormModel
-   */
-  public static void handleDisposeFormModel(FormModel model)
-  {
-    handle(new OnDisposeFormModel(model));
-  }
-
-  private static class OnDisposeFormModel extends BasicEvent
-  {
-    FormModel formModel;
-
-    public OnDisposeFormModel(FormModel model)
-    {
-      this.formModel = model;
-    }
-
-    protected boolean doit()
-    {
-      if (formModel != null) formModel.dispose();
-
-      return EventProcessor.processTheNextEvent;
-    }
-
-    public boolean requires(Object o)
-    {
-      return formModel.equals(o);
-    }
-
-    public String toString()
-    {
-      return this.getClass().getSimpleName() + "(" + formModel + ")";
-    }
-  }
-
-  // *******************************************************************************************
-
-  /**
    * Erzeugt ein neues WollMuxEvent, welches dafür sorgt, dass ein Dokument
    * geöffnet wird.
    * 
@@ -1212,9 +1121,13 @@ public class WollMuxEventHandler
       try
       {
         XComponent doc = UNO.loadComponentFromURL(loadUrlStr, asTemplate, true);
-        OnProcessTextDocument.docFragUrlsBuffer.put(
-            new HashableComponent(doc),
-            fragUrls);
+
+        if (UNO.XTextDocument(doc) != null)
+        {
+          TextDocumentModel model = new TextDocumentModel(UNO
+              .XTextDocument(doc));
+          model.setFragUrls(fragUrls);
+        }
       }
       catch (java.lang.Exception x)
       {
@@ -1714,8 +1627,8 @@ public class WollMuxEventHandler
    *          die Titelzeile des Rahmens nicht beachtet und muss vorher
    *          entsprechend eingerechnet werden.
    */
-  public static void handleSetWindowPosSize(XModel model, int docX, int docY,
-      int docWidth, int docHeight)
+  public static void handleSetWindowPosSize(TextDocumentModel model, int docX,
+      int docY, int docWidth, int docHeight)
   {
     handle(new OnSetWindowPosSize(model, docX, docY, docWidth, docHeight));
   }
@@ -1729,12 +1642,12 @@ public class WollMuxEventHandler
    */
   private static class OnSetWindowPosSize extends BasicEvent
   {
-    private XModel model;
+    private TextDocumentModel model;
 
     private int docX, docY, docWidth, docHeight;
 
-    public OnSetWindowPosSize(XModel model, int docX, int docY, int docWidth,
-        int docHeight)
+    public OnSetWindowPosSize(TextDocumentModel model, int docX, int docY,
+        int docWidth, int docHeight)
     {
       this.model = model;
       this.docX = docX;
@@ -1745,25 +1658,13 @@ public class WollMuxEventHandler
 
     protected boolean doit()
     {
-      try
-      {
-        XFrame frame = model.getCurrentController().getFrame();
-        frame.getContainerWindow().setPosSize(
-            docX,
-            docY,
-            docWidth,
-            docHeight,
-            PosSize.POSSIZE);
-      }
-      catch (java.lang.Exception e)
-      {
-      }
+      model.setWindowPosSize(docX, docY, docWidth, docHeight);
       return EventProcessor.processTheNextEvent;
     }
 
     public boolean requires(Object o)
     {
-      return UnoRuntime.areSame(model, o);
+      return UnoRuntime.areSame(model.doc, o);
     }
 
     public String toString()
@@ -1795,7 +1696,8 @@ public class WollMuxEventHandler
    *          true, wenn das Dokument sichtbar geschaltet werden soll und false,
    *          wenn das Dokument unsichtbar geschaltet werden soll.
    */
-  public static void handleSetWindowVisible(XModel model, boolean visible)
+  public static void handleSetWindowVisible(TextDocumentModel model,
+      boolean visible)
   {
     handle(new OnSetWindowVisible(model, visible));
   }
@@ -1809,11 +1711,11 @@ public class WollMuxEventHandler
    */
   private static class OnSetWindowVisible extends BasicEvent
   {
-    private XModel model;
+    private TextDocumentModel model;
 
     boolean visible;
 
-    public OnSetWindowVisible(XModel model, boolean visible)
+    public OnSetWindowVisible(TextDocumentModel model, boolean visible)
     {
       this.model = model;
       this.visible = visible;
@@ -1821,17 +1723,13 @@ public class WollMuxEventHandler
 
     protected boolean doit()
     {
-      XFrame frame = model.getCurrentController().getFrame();
-      if (frame != null)
-      {
-        frame.getContainerWindow().setVisible(visible);
-      }
+      model.setWindowVisible(visible);
       return EventProcessor.processTheNextEvent;
     }
 
     public boolean requires(Object o)
     {
-      return UnoRuntime.areSame(model, o);
+      return UnoRuntime.areSame(model.doc, o);
     }
 
     public String toString()
@@ -1848,9 +1746,9 @@ public class WollMuxEventHandler
    * @param doc
    *          Das zu schließende XTextDocument.
    */
-  public static void handleCloseTextDocument(XTextDocument doc)
+  public static void handleCloseTextDocument(TextDocumentModel model)
   {
-    handle(new OnCloseTextDocument(doc));
+    handle(new OnCloseTextDocument(model));
   }
 
   /**
@@ -1862,52 +1760,27 @@ public class WollMuxEventHandler
    */
   private static class OnCloseTextDocument extends BasicEvent
   {
-    private XTextDocument doc;
+    private TextDocumentModel model;
 
-    public OnCloseTextDocument(XTextDocument doc)
+    public OnCloseTextDocument(TextDocumentModel model)
     {
-      this.doc = doc;
+      this.model = model;
     }
 
     protected boolean doit()
     {
-      // Damit OOo vor dem Schließen eines veränderten Dokuments den
-      // save/dismiss-Dialog anzeigt, muss die suspend()-Methode aller
-      // XController gestartet werden, die das Model der Komponente enthalten.
-      // Man bekommt alle XController über die Frames, die der Desktop liefert.
-      Object desktop = UNO.createUNOService("com.sun.star.frame.Desktop");
-      if (UNO.XFramesSupplier(desktop) != null)
-      {
-        XFrame[] frames = UNO.XFramesSupplier(desktop).getFrames().queryFrames(
-            FrameSearchFlag.ALL);
-        for (int i = 0; i < frames.length; i++)
-        {
-          XController c = frames[i].getController();
-          if (c != null && UnoRuntime.areSame(c.getModel(), doc))
-            c.suspend(true);
-        }
-      }
-
-      // Hier das eigentliche Schließen:
-      try
-      {
-        if (UNO.XCloseable(doc) != null) UNO.XCloseable(doc).close(true);
-      }
-      catch (CloseVetoException e)
-      {
-      }
-
+      model.close();
       return EventProcessor.processTheNextEvent;
     }
 
     public boolean requires(Object o)
     {
-      return UnoRuntime.areSame(doc, o);
+      return UnoRuntime.areSame(model.doc, o);
     }
 
     public String toString()
     {
-      return this.getClass().getSimpleName() + "(#" + doc.hashCode() + ")";
+      return this.getClass().getSimpleName() + "(#" + model.hashCode() + ")";
     }
   }
 
@@ -2125,6 +1998,68 @@ public class WollMuxEventHandler
     public String toString()
     {
       return this.getClass().getSimpleName() + "(#" + listener.hashCode() + ")";
+    }
+  }
+
+  // *******************************************************************************************
+
+  /**
+   * TODO: comment
+   */
+  public static void handlePrintButtonPressed(XTextDocument doc,
+      XDispatch origDisp, com.sun.star.util.URL arg0, PropertyValue[] arg1)
+  {
+    handle(new OnPrintButtonPressed(doc, origDisp, arg0, arg1));
+  }
+
+  /**
+   * Dieses Event wird vom WollMux-Service (...comp.WollMux) ausgelöst wenn sich
+   * ein externe XPALChangeEventListener beim WollMux deregistriert. Der zu
+   * entfernende XPALChangeEventListerner wird anschließend im WollMuxSingleton
+   * aus der Liste der registrierten XPALChangeEventListener genommen.
+   * 
+   * @author christoph.lutz
+   */
+  private static class OnPrintButtonPressed extends BasicEvent
+  {
+    private XTextDocument doc;
+
+    private XDispatch origDisp;
+
+    com.sun.star.util.URL arg0;
+
+    PropertyValue[] arg1;
+
+    public OnPrintButtonPressed(XTextDocument doc, XDispatch origDisp,
+        com.sun.star.util.URL arg0, PropertyValue[] arg1)
+    {
+      this.doc = doc;
+      this.origDisp = origDisp;
+      this.arg0 = arg0;
+      this.arg1 = arg1;
+    }
+
+    protected boolean doit()
+    {
+      TextDocumentModel model = WollMuxSingleton.getInstance()
+          .getTextDocumentModel(doc);
+      String printFunctionName = model.getPrintFunctionName();
+      if (printFunctionName != null && !printFunctionName.equals(""))
+      {
+        Logger.debug("NotYetImplemented: call PrintFunction '"
+                     + printFunctionName
+                     + "'");
+      }
+      else
+      {
+        if(origDisp != null) origDisp.dispatch(arg0, arg1);
+      }
+      return EventProcessor.processTheNextEvent;
+    }
+
+    public String toString()
+    {
+      return this.getClass().getSimpleName() + "(#" + doc.hashCode() + ")";
     }
   }
 

@@ -22,24 +22,10 @@
  */
 package de.muenchen.allg.itd51.wollmux;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import com.sun.star.document.XEventListener;
-import com.sun.star.lang.EventObject;
-import com.sun.star.util.CloseVetoException;
-import com.sun.star.util.XCloseListener;
-
-import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.wollmux.WollMuxEventHandler.WollMuxEvent;
-import de.muenchen.allg.itd51.wollmux.dialog.AbsenderAuswaehlen;
-import de.muenchen.allg.itd51.wollmux.dialog.DatasourceSearchDialog;
-import de.muenchen.allg.itd51.wollmux.dialog.DatensatzBearbeiten;
-import de.muenchen.allg.itd51.wollmux.dialog.PersoenlicheAbsenderlisteVerwalten;
-import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
 
 /**
  * Der EventProcessor sorgt für eine synchronisierte Verarbeitung aller
@@ -49,9 +35,39 @@ import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
  * 
  * @author lut
  */
-public class EventProcessor implements XEventListener, ActionListener,
-    XCloseListener
-{
+public class EventProcessor
+{  
+  /**
+   * Mit dieser Methode ist es möglich die Entgegennahme von Events zu
+   * blockieren. Alle eingehenden Events werden ignoriert, wenn accept auf false
+   * gesetzt ist und entgegengenommen, wenn accept auf true gesetzt ist.
+   * 
+   * @param accept
+   */
+  public static void setAcceptEvents(boolean accept)
+  {
+    getInstance()._setAcceptEvents(accept);
+  }
+  
+  /**
+   * TODO: comment
+   */
+  public static void processTheNextEvent()
+  {
+    getInstance()._processTheNextEvent();
+  }
+
+  /**
+   * Diese Methode fügt ein Event an die eventQueue an wenn der WollMux
+   * erfolgreich initialisiert wurde und damit events akzeptieren darf.
+   * Anschliessend weckt sie den EventProcessor-Thread.
+   * 
+   * @param event
+   */
+  public static void addEvent(WollMuxEventHandler.WollMuxEvent event) {
+    getInstance()._addEvent(event);
+  }
+  
   /**
    * Gibt an, ob der EventProcessor überhaupt events entgegennimmt. Ist
    * acceptEvents=false, werden alle Events ignoriert.
@@ -69,11 +85,20 @@ public class EventProcessor implements XEventListener, ActionListener,
    */
   private static boolean processNextEvent[] = new boolean[1];
 
+  /**
+   * Returnwert eines WollMuxEventHandlers, der aussagt, dass der EventProcessor
+   * mit der Ausführung der nächsten Events starten darf.
+   */
   public static final boolean processTheNextEvent = true;
 
-  public static final boolean waitForGUIReturn = false;
+  /**
+   * Returnwert eines WollMuxEventHandlers, der aussagt, dass der EventProcessor
+   * so lange keine weiteren Events ausführt, bis die asynchrone Methode
+   * processTheNextEvent() aufgerufen wird.
+   */
+  public static final boolean wait = false;
 
-  public static EventProcessor getInstance()
+  private static EventProcessor getInstance()
   {
     if (singletonInstance == null) singletonInstance = new EventProcessor();
     return singletonInstance;
@@ -86,7 +111,7 @@ public class EventProcessor implements XEventListener, ActionListener,
    * 
    * @param accept
    */
-  public void setAcceptEvents(boolean accept)
+  private void _setAcceptEvents(boolean accept)
   {
     acceptEvents = accept;
     if (accept)
@@ -117,7 +142,7 @@ public class EventProcessor implements XEventListener, ActionListener,
             synchronized (processNextEvent)
             {
               processNextEvent[0] = event.process();
-              while (processNextEvent[0] == waitForGUIReturn)
+              while (processNextEvent[0] == wait)
                 processNextEvent.wait();
             }
           }
@@ -140,7 +165,7 @@ public class EventProcessor implements XEventListener, ActionListener,
    * 
    * @param event
    */
-  public void addEvent(WollMuxEventHandler.WollMuxEvent event)
+  private void _addEvent(WollMuxEventHandler.WollMuxEvent event)
   {
     if (acceptEvents) synchronized (eventQueue)
     {
@@ -150,80 +175,13 @@ public class EventProcessor implements XEventListener, ActionListener,
   }
 
   /**
-   * Wird vom GlobalEventBroadcaster aufgerufen.
-   * 
-   * @see com.sun.star.document.XEventListener#notifyEvent(com.sun.star.document.EventObject)
-   */
-  public void notifyEvent(com.sun.star.document.EventObject docEvent)
-  {
-    int code = 0;
-    try
-    {
-      code = docEvent.Source.hashCode();
-    }
-    catch (Exception x)
-    {
-    }
-    Logger.debug2("Incoming documentEvent for #"
-                  + code
-                  + ": "
-                  + docEvent.EventName);
-    UnoService source = new UnoService(docEvent.Source);
-
-    // Bekannte Event-Typen rausziehen:
-    if (source.xTextDocument() != null)
-    {
-      if (docEvent.EventName.compareToIgnoreCase("OnLoad") == 0)
-      {
-        WollMuxEventHandler.handleProcessTextDocument(source.xTextDocument());
-      }
-      if (docEvent.EventName.compareToIgnoreCase("OnNew") == 0)
-      {
-        WollMuxEventHandler.handleProcessTextDocument(source.xTextDocument());
-      }
-    }
-  }
-
-  /**
-   * Wird beim Beenden von AWT/SWING-GUIs aufgerufen.
+   * TODO: ...Veranlasst den EventProcessor Wird beim Beenden von AWT/SWING-GUIs
+   * aufgerufen.
    * 
    * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
    */
-  public void actionPerformed(ActionEvent actionEvent)
+  private void _processTheNextEvent()
   {
-    Object source = actionEvent.getSource();
-    String cmd = actionEvent.getActionCommand();
-
-    if (source instanceof AbsenderAuswaehlen)
-    {
-      // potentielle Änderung der Absenderliste - PALChangeNotify durchführen
-      WollMuxEventHandler.handlePALChangedNotify();
-    }
-
-    else if (source instanceof PersoenlicheAbsenderlisteVerwalten)
-    {
-      // potentielle Änderung der Absenderliste - PALChangeNotify durchführen
-      WollMuxEventHandler.handlePALChangedNotify();
-    }
-
-    else if (source instanceof DatensatzBearbeiten)
-    {
-      // potentielle Änderung der Absenderliste - PALChangeNotify durchführen
-      WollMuxEventHandler.handlePALChangedNotify();
-    }
-
-    else if (source instanceof DatasourceSearchDialog)
-    {
-      if (cmd.equals("select"))
-        WollMuxEventHandler.handleFunctionDialogSelectDone();
-    }
-
-    else if (source instanceof FormularMax4000)
-    {
-      WollMuxEventHandler
-          .handleFormularMax4000Returned((FormularMax4000) source);
-    }
-
     // Dialog bedingte Sperrung der Eventqueue aufheben und Eventbearbeitung
     // normal fortsetzen lassen:
     synchronized (processNextEvent)
@@ -232,55 +190,4 @@ public class EventProcessor implements XEventListener, ActionListener,
       processNextEvent.notifyAll();
     }
   }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.sun.star.lang.XEventListener#disposing(com.sun.star.lang.EventObject)
-   */
-  public void disposing(com.sun.star.lang.EventObject source)
-  {
-    Logger.debug2("disposing(): Removing events for #"
-                  + source.hashCode()
-                  + " from queue");
-
-    // eventQueue durchscannen und Events mit nicht mehr erfüllten
-    // Sourcen-Referenzen löschen.
-    synchronized (eventQueue)
-    {
-      Iterator i = eventQueue.iterator();
-      while (i.hasNext())
-      {
-        WollMuxEvent event = (WollMuxEvent) i.next();
-        if (event.requires(source.Source))
-        {
-          Logger.debug2("Removing " + event);
-          i.remove();
-        }
-      }
-    }
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.sun.star.util.XCloseListener#queryClosing(com.sun.star.lang.EventObject,
-   *      boolean)
-   */
-  public void queryClosing(EventObject arg0, boolean arg1)
-      throws CloseVetoException
-  {
-    // nichts zu tun
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.sun.star.util.XCloseListener#notifyClosing(com.sun.star.lang.EventObject)
-   */
-  public void notifyClosing(EventObject arg0)
-  {
-    disposing(arg0);
-  }
-
 }

@@ -1,0 +1,408 @@
+/*
+ * Dateiname: TextDocumentModel.java
+ * Projekt  : WollMux
+ * Funktion : Repräsentiert ein aktuell geöffnetes TextDokument.
+ * 
+ * Copyright: Landeshauptstadt München
+ *
+ * Änderungshistorie:
+ * Datum      | Wer | Änderungsgrund
+ * -------------------------------------------------------------------
+ * 15.09.2006 | LUT | Erstellung als TextDocumentModel
+ * -------------------------------------------------------------------
+ *
+ * @author Christoph Lutz (D-III-ITD 5.1)
+ * @version 1.0
+ * 
+ */
+package de.muenchen.allg.itd51.wollmux;
+
+import java.util.HashMap;
+
+import com.sun.star.awt.PosSize;
+import com.sun.star.frame.FrameSearchFlag;
+import com.sun.star.frame.XController;
+import com.sun.star.frame.XFrame;
+import com.sun.star.frame.XModel;
+import com.sun.star.lang.EventObject;
+import com.sun.star.text.XTextDocument;
+import com.sun.star.uno.UnoRuntime;
+import com.sun.star.util.CloseVetoException;
+import com.sun.star.util.XCloseListener;
+
+import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
+
+/**
+ * Diese Klasse repräsentiert das Modell eines aktuell geöffneten TextDokuments
+ * und ermöglicht den Zugriff auf alle interessanten Aspekte des TextDokuments.
+ * 
+ * @author christoph.lutz
+ * 
+ */
+public class TextDocumentModel
+{
+  /**
+   * Enthält die Referenz auf das XTextDocument-interface des eigentlichen
+   * TextDocument-Services der zugehörigen UNO-Komponente.
+   */
+  public final XTextDocument doc;
+
+  /**
+   * Ermöglicht den Zugriff auf einen Vector aller FormField-Objekte in diesem
+   * TextDokument über den Namen der zugeordneten ID.
+   */
+  private HashMap idToFormFields;
+
+  /**
+   * Falls es sich bei dem Dokument um ein Formular handelt, wird das zugehörige
+   * FormModel hier gespeichert und beim dispose() des TextDocumentModels mit
+   * geschlossen.
+   */
+  private FormModel formModel;
+
+  /**
+   * In diesem Feld wird der CloseListener gespeichert, nachdem die Methode
+   * registerCloseListener() aufgerufen wurde.
+   */
+  private XCloseListener closeListener;
+
+  /**
+   * Enthält die Instanz des aktuell geöffneten, zu diesem Dokument gehörenden
+   * FormularMax4000.
+   */
+  private FormularMax4000 currentMax4000;
+
+  /**
+   * Dieses Feld stellt ein Zwischenspeicher für Fragment-Urls dar. Es wird dazu
+   * benutzt, im Fall eines openTemplate-Befehls die urls der übergebenen
+   * frag_id-Liste temporär zu speichern.
+   */
+  private String[] fragUrls;
+
+  /**
+   * Enthält den Namen der Druckfunktion, die der DocumentCommandInterpreter
+   * beim Ausführen der Dokumentkommandos feststellen kann.
+   */
+  private String printFunctionName;
+
+  /**
+   * Erzeugt ein neues TextDocumentModel zum XTextDocument doc und sollte nie
+   * direkt aufgerufen werden, da neue TextDocumentModels über das
+   * WollMuxSingletonie (WollMuxSingleton.getTextDocumentModel()) erzeugt und
+   * verwaltet werden.
+   * 
+   * @param doc
+   */
+  public TextDocumentModel(XTextDocument doc)
+  {
+    this.doc = doc;
+    this.idToFormFields = new HashMap();
+    this.fragUrls = new String[] {};
+    this.currentMax4000 = null;
+    this.closeListener = null;
+    this.printFunctionName = null;
+  }
+
+  /**
+   * TextDocumentModels forwarden die hashCode-Methode an das referenzierte
+   * XTextDocument weiter - so kann ein TextDocumentModel über eine HashMap
+   * verwaltet werden.
+   */
+  public int hashCode()
+  {
+    if (doc != null) return doc.hashCode();
+    return 0;
+  }
+
+  /**
+   * Zwei TextDocumentModels sind dann gleich, wenn sie das selbe XTextDocument
+   * doc referenzieren - so kann ein TextDocumentModel über eine HashMap
+   * verwaltet werden. ACHTUNG: Die Gleichheit zweier TextDocumentModes
+   * beschreibt nur die Gleichheit des verknüpften XTextDocuments, nicht jedoch
+   * die Gleichheit aller Felder des TextDocumentModels! Zwei Instanzen, die
+   * equals==true zurückliefern müssen also nicht unbedingt wirklich identisch
+   * sein.
+   */
+  public boolean equals(Object b)
+  {
+    if (b != null && b instanceof TextDocumentModel)
+    {
+      TextDocumentModel other = (TextDocumentModel) b;
+      return UnoRuntime.areSame(this.doc, other.doc);
+    }
+    return false;
+  }
+
+  /**
+   * Wird derzeit vom DocumentCommandInterpreter aufgerufen und gibt dem
+   * TextDocumentModel alle FormFields bekannt, die beim Durchlauf des
+   * FormScanners gefunden wurden.
+   * 
+   * @param idToFormFields
+   */
+  public void setIDToFormFields(HashMap idToFormFields)
+  {
+    this.idToFormFields = idToFormFields;
+  }
+
+  /**
+   * Ermöglicht den Zugriff auf einen Vector aller FormField-Objekte in diesem
+   * TextDokument über den Namen der zugeordneten ID.
+   * 
+   * @return Eine HashMap, die unter dem Schlüssel ID einen Vector mit den
+   *         entsprechenden FormFields bereithält.
+   */
+  public HashMap getIDToFormFields()
+  {
+    return idToFormFields;
+  }
+
+  /**
+   * Speichert das FormModel formModel im TextDocumentModel und wird derzeit vom
+   * DocumentCommandInterpreter aufgerufen, wenn er ein FormModel erzeugt.
+   * 
+   * @param formModel
+   */
+  public void setFormModel(FormModel formModel)
+  {
+    this.formModel = formModel;
+  }
+
+  /**
+   * Liefert das zuletzt per setFormModel() gesetzte FormModel zurück.
+   * 
+   * @return
+   */
+  public FormModel getFormModel()
+  {
+    return this.formModel;
+  }
+
+  /**
+   * Der DocumentCommandInterpreter liest sich die Liste der setFragUrls()
+   * gespeicherten Fragment-URLs hier aus, wenn die Dokumentkommandos
+   * insertContent ausgeführt werden.
+   * 
+   * @return
+   */
+  public String[] getFragUrls()
+  {
+    return fragUrls;
+  }
+
+  /**
+   * Über diese Methode kann der openDocument-Eventhandler die Liste der mit
+   * einem insertContent-Kommando zu öffnenden frag-urls speichern.
+   */
+  public void setFragUrls(String[] fragUrls)
+  {
+    this.fragUrls = fragUrls;
+  }
+
+  /**
+   * Setzt die Instanz des aktuell geöffneten, zu diesem Dokument gehörenden
+   * FormularMax4000.
+   * 
+   * @param max
+   */
+  public void setCurrentFormularMax4000(FormularMax4000 max)
+  {
+    currentMax4000 = max;
+  }
+
+  /**
+   * Liefert die Instanz des aktuell geöffneten, zu diesem Dokument gehörenden
+   * FormularMax4000 zurück, oder null, falls kein FormularMax gestartet wurde.
+   * 
+   * @return
+   */
+  public FormularMax4000 getCurrentFormularMax4000()
+  {
+    return currentMax4000;
+  }
+
+  /**
+   * TODO: comment
+   * @param printFunctionName
+   */
+  public void setPrintFunctionName(String printFunctionName)
+  {
+    this.printFunctionName = printFunctionName;
+  }
+
+  /**
+   * TODO: comment
+   * @return
+   */
+  public String getPrintFunctionName()
+  {
+    return this.printFunctionName;
+  }
+
+  /**
+   * Setzt das Fensters des TextDokuments auf Sichtbar (visible==true) oder
+   * unsichtbar (visible == false).
+   * 
+   * @param visible
+   */
+  public void setWindowVisible(boolean visible)
+  {
+    XModel xModel = UNO.XModel(doc);
+    if (xModel != null)
+    {
+      XFrame frame = xModel.getCurrentController().getFrame();
+      if (frame != null)
+      {
+        frame.getContainerWindow().setVisible(visible);
+      }
+    }
+  }
+
+  /**
+   * Diese Methode setzt den DocumentModified-Status auf state.
+   * 
+   * @param state
+   */
+  public void setDocumentModified(boolean state)
+  {
+    try
+    {
+      UNO.XModifiable(doc).setModified(state);
+    }
+    catch (java.lang.Exception x)
+    {
+    }
+  }
+
+  /**
+   * Diese Methode blockt/unblocked die Contoller, die für das Rendering der
+   * Darstellung in den Dokumenten zuständig sind, jedoch nur, wenn nicht der
+   * debug-modus gesetzt ist.
+   * 
+   * @param state
+   */
+  public void setLockControllers(boolean lock)
+  {
+    try
+    {
+      if (WollMuxSingleton.getInstance().isDebugMode() == false
+          && UNO.XModel(doc) != null)
+      {
+        if (lock)
+          UNO.XModel(doc).lockControllers();
+        else
+          UNO.XModel(doc).unlockControllers();
+      }
+    }
+    catch (java.lang.Exception e)
+    {
+    }
+  }
+
+  /**
+   * Setzt die Position des Fensters auf die übergebenen Koordinaten, wobei die
+   * Nachteile der UNO-Methode setWindowPosSize greifen, bei der die
+   * Fensterposition nicht mit dem äusseren Fensterrahmen beginnt, sondern mit
+   * der grauen Ecke links über dem File-Menü.
+   * 
+   * @param docX
+   * @param docY
+   * @param docWidth
+   * @param docHeight
+   */
+  public void setWindowPosSize(int docX, int docY, int docWidth, int docHeight)
+  {
+    try
+    {
+      UNO.XModel(doc).getCurrentController().getFrame().getContainerWindow()
+          .setPosSize(docX, docY, docWidth, docHeight, PosSize.POSSIZE);
+    }
+    catch (java.lang.Exception e)
+    {
+    }
+  }
+
+  /**
+   * Schliesst das XTextDocument, das diesem Model zugeordnet ist. Ist der
+   * closeListener registriert (was WollMuxSingleton bereits bei der Erstellung
+   * des TextDocumentModels standardmäig macht), so wird nach dem close() auch
+   * automatisch die dispose()-Methode aufgerufen.
+   */
+  public void close()
+  {
+    // Damit OOo vor dem Schließen eines veränderten Dokuments den
+    // save/dismiss-Dialog anzeigt, muss die suspend()-Methode aller
+    // XController gestartet werden, die das Model der Komponente enthalten.
+    // Man bekommt alle XController über die Frames, die der Desktop liefert.
+    Object desktop = UNO.createUNOService("com.sun.star.frame.Desktop");
+    if (UNO.XFramesSupplier(desktop) != null)
+    {
+      XFrame[] frames = UNO.XFramesSupplier(desktop).getFrames().queryFrames(
+          FrameSearchFlag.ALL);
+      for (int i = 0; i < frames.length; i++)
+      {
+        XController c = frames[i].getController();
+        if (c != null && UnoRuntime.areSame(c.getModel(), doc))
+          c.suspend(true);
+      }
+    }
+
+    // Hier das eigentliche Schließen:
+    try
+    {
+      if (UNO.XCloseable(doc) != null) UNO.XCloseable(doc).close(true);
+    }
+    catch (CloseVetoException e)
+    {
+    }
+  }
+
+  /**
+   * Ruft die Dispose-Methoden von allen aktiven, dem TextDocumentModel
+   * zugeordneten Dialogen auf und gibt den Speicher des TextDocumentModels
+   * frei.
+   */
+  public void dispose()
+  {
+    if (currentMax4000 != null) currentMax4000.dispose();
+    currentMax4000 = null;
+
+    if (formModel != null) formModel.dispose();
+    formModel = null;
+
+    // Löscht das TextDocumentModel aus dem WollMux-Singleton.
+    WollMuxSingleton.getInstance().disposedTextDocumentModel(this);
+  }
+
+  /**
+   * Registriert genau einen XCloseListener in der Komponente des
+   * XTextDocuments, so dass beim Schließen des Dokuments die entsprechenden
+   * WollMuxEvents ausgeführt werden - ist in diesem TextDocumentModel bereits
+   * ein XCloseListener registriert, so wird nichts getan.
+   */
+  public void registerCloseListener()
+  {
+    if (closeListener == null && UNO.XCloseable(doc) != null)
+    {
+      closeListener = new XCloseListener()
+      {
+        public void disposing(EventObject arg0)
+        {
+          WollMuxEventHandler.handleTextDocumentClosed(doc);
+        }
+
+        public void notifyClosing(EventObject arg0)
+        {
+          WollMuxEventHandler.handleTextDocumentClosed(doc);
+        }
+
+        public void queryClosing(EventObject arg0, boolean arg1)
+            throws CloseVetoException
+        {
+        }
+      };
+      UNO.XCloseable(doc).addCloseListener(closeListener);
+    }
+  }
+}

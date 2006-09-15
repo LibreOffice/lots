@@ -38,12 +38,10 @@ import java.util.Vector;
 
 import com.sun.star.awt.FontWeight;
 import com.sun.star.beans.PropertyValue;
-import com.sun.star.beans.PropertyVetoException;
 import com.sun.star.container.NoSuchElementException;
 import com.sun.star.container.XEnumeration;
 import com.sun.star.container.XEnumerationAccess;
 import com.sun.star.io.IOException;
-import com.sun.star.lang.EventObject;
 import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.text.XParagraphCursor;
 import com.sun.star.text.XTextContent;
@@ -51,8 +49,6 @@ import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextRange;
 import com.sun.star.uno.Exception;
-import com.sun.star.util.CloseVetoException;
-import com.sun.star.util.XCloseListener;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoService;
@@ -84,15 +80,12 @@ import de.muenchen.allg.itd51.wollmux.func.Values.SimpleMap;
 public class DocumentCommandInterpreter
 {
 
+  private TextDocumentModel model;
+
   /**
    * Enthält die Instanz auf das zentrale WollMuxSingleton.
    */
   private WollMuxSingleton mux;
-
-  /**
-   * Das Dokument, das interpretiert werden soll.
-   */
-  private UnoService document;
 
   /**
    * Der geparste Dokumentkommando-Baum
@@ -119,11 +112,12 @@ public class DocumentCommandInterpreter
    *          Eine Liste mit fragment-urls, die für das Kommando insertContent
    *          benötigt wird.
    */
-  public DocumentCommandInterpreter(XTextDocument xDoc, WollMuxSingleton mux)
+  public DocumentCommandInterpreter(TextDocumentModel model,
+      WollMuxSingleton mux)
   {
-    this.document = new UnoService(xDoc);
+    this.model = model;
     this.mux = mux;
-    this.tree = new DocumentCommandTree(document.xBookmarksSupplier());
+    this.tree = new DocumentCommandTree(UNO.XBookmarksSupplier(model.doc));
     this.formScanner = null;
   }
 
@@ -133,7 +127,7 @@ public class DocumentCommandInterpreter
    * 
    * @throws WMCommandsFailedException
    */
-  public void executeTemplateCommands(String[] fragUrls)
+  public void executeTemplateCommands()
       throws WMCommandsFailedException
   {
     Logger.debug("executeTemplateCommands");
@@ -144,7 +138,7 @@ public class DocumentCommandInterpreter
     // 1) Zuerst alle Kommandos bearbeiten, die irgendwie Kinder bekommen
     // können, damit der DocumentCommandTree vollständig aufgebaut werden
     // kann.
-    errors += new DocumentExpander(fragUrls).execute(tree);
+    errors += new DocumentExpander(model.getFragUrls()).execute(tree);
 
     // 2) Jetzt können die TextFelder innerhalb der updateFields Kommandos
     // geupdatet werden. Durch die Auslagerung in einen extra Schritt wird die
@@ -163,23 +157,21 @@ public class DocumentCommandInterpreter
     SurroundingGarbageCollector collect = new SurroundingGarbageCollector();
     errors += collect.execute(tree);
     collect.removeGarbage();
-    
+
     // 4) Da keine neuen Elemente mehr eingefügt werden müssen, können
     // jetzt die INSERT_MARKS "<" und ">" der insertFrags und
     // InsertContent-Kommandos gelöscht werden.
-    //errors += cleanInsertMarks(tree);
+    // errors += cleanInsertMarks(tree);
 
     // 5) Erst nachdem die INSERT_MARKS entfernt wurden, lassen sich leere
     // Absätze zum Beginn und Ende der insertFrag bzw. insertContent-Kommandos
     // sauber erkennen und entfernen.
-    //errors += new EmptyParagraphCleaner().execute(tree);
+    // errors += new EmptyParagraphCleaner().execute(tree);
 
     // 6) Scannen aller für das Formular relevanten Informationen:
     if (formScanner == null) formScanner = new FormScanner();
     errors += formScanner.execute(tree);
-    mux.addIDToFormFieldsForDocument(
-        document.xComponent(),
-        formScanner.idToFormFields);
+    model.setIDToFormFields(formScanner.idToFormFields);
 
     // 7) Die Statusänderungen der Dokumentkommandos auf die Bookmarks
     // übertragen bzw. die Bookmarks abgearbeiteter Kommandos löschen.
@@ -187,7 +179,7 @@ public class DocumentCommandInterpreter
 
     // 8) Document-Modified auf false setzen, da nur wirkliche
     // Benutzerinteraktionen den Modified-Status beeinflussen sollen.
-    setDocumentModified(false);
+    model.setDocumentModified(false);
 
     // ggf. eine WMCommandsFailedException werfen:
     if (errors != 0)
@@ -244,13 +236,13 @@ public class DocumentCommandInterpreter
     // 3) Jetzt wird ein WM(CMD 'setType' TYPE 'formDocument)-Kommando an den
     // Anfang des Dokuments gesetzt um das Dokument als Formulardokument
     // auszuzeichnen.
-    if (document.xTextDocument() != null)
-      new Bookmark(DocumentCommand.SETTYPE_formDocument, document
-          .xTextDocument(), document.xTextDocument().getText().getStart());
+    if (model.doc != null)
+      new Bookmark(DocumentCommand.SETTYPE_formDocument, model.doc, model.doc
+          .getText().getStart());
 
     // 4) Document-Modified auf false setzen, da nur wirkliche
     // Benutzerinteraktionen den Modified-Status beeinflussen sollen.
-    setDocumentModified(false);
+    model.setDocumentModified(false);
 
     // FunctionContext erzeugen und im Formular definierte
     // Funktionen/DialogFunktionen parsen:
@@ -289,8 +281,10 @@ public class DocumentCommandInterpreter
     }
 
     // 5) Formulardialog starten:
-    FormModelImpl fm = new FormModelImpl(document.xTextDocument(), funcLib,
+    FormModelImpl fm = new FormModelImpl(model, funcLib,
         formScanner.formDescriptor, formScanner.idToFormFields, tree);
+
+    model.setFormModel(fm);
 
     ConfigThingy formFensterConf = new ConfigThingy("");
     try
@@ -409,9 +403,9 @@ public class DocumentCommandInterpreter
    * Wesentlichen nur dafür, dass alle Methodenaufrufe des FormModels in die
    * ensprechenden WollMuxEvents verpackt werden.
    */
-  private static class FormModelImpl implements FormModel, XCloseListener
+  private static class FormModelImpl implements FormModel
   {
-    private final XTextDocument doc;
+    private final TextDocumentModel textDocumentModel;
 
     private final FunctionLibrary funcLib;
 
@@ -427,11 +421,11 @@ public class DocumentCommandInterpreter
 
     private FormGUI formGUI;
 
-    public FormModelImpl(XTextDocument doc, FunctionLibrary funcLib,
-        FormDescriptor formDescriptor, HashMap idToFormValues,
-        DocumentCommandTree cmdTree)
+    public FormModelImpl(TextDocumentModel textDocumentModel,
+        FunctionLibrary funcLib, FormDescriptor formDescriptor,
+        HashMap idToFormValues, DocumentCommandTree cmdTree)
     {
-      this.doc = doc;
+      this.textDocumentModel = textDocumentModel;
       this.funcLib = funcLib;
       this.idToFormValues = idToFormValues;
       this.cmdTree = cmdTree;
@@ -446,12 +440,6 @@ public class DocumentCommandInterpreter
       // merkt sich OOo die Position und Größe des zuletzt geschlossenen
       // Fensters.
       this.defaultWindowAttributes = getDefaultWindowAttributes();
-
-      // closeListener registrieren
-      if (UNO.XCloseable(doc) != null)
-      {
-        UNO.XCloseable(doc).addCloseListener(this);
-      }
     }
 
     /*
@@ -461,7 +449,7 @@ public class DocumentCommandInterpreter
      */
     public void close()
     {
-      WollMuxEventHandler.handleCloseTextDocument(doc);
+      WollMuxEventHandler.handleCloseTextDocument(textDocumentModel);
     }
 
     /*
@@ -471,7 +459,7 @@ public class DocumentCommandInterpreter
      */
     public void setWindowVisible(boolean vis)
     {
-      WollMuxEventHandler.handleSetWindowVisible(UNO.XModel(doc), vis);
+      WollMuxEventHandler.handleSetWindowVisible(textDocumentModel, vis);
     }
 
     /*
@@ -483,7 +471,7 @@ public class DocumentCommandInterpreter
     public void setWindowPosSize(int docX, int docY, int docWidth, int docHeight)
     {
       WollMuxEventHandler.handleSetWindowPosSize(
-          UNO.XModel(doc),
+          textDocumentModel,
           docX,
           docY,
           docWidth,
@@ -538,37 +526,6 @@ public class DocumentCommandInterpreter
      */
     public void focusLost(String fieldId)
     {
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.sun.star.util.XCloseListener#queryClosing(com.sun.star.lang.EventObject,
-     *      boolean)
-     */
-    public void queryClosing(EventObject event, boolean getsOwnership)
-        throws CloseVetoException
-    {
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.sun.star.util.XCloseListener#notifyClosing(com.sun.star.lang.EventObject)
-     */
-    public void notifyClosing(EventObject arg0)
-    {
-      WollMuxEventHandler.handleDisposeFormModel(this);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.sun.star.lang.XEventListener#disposing(com.sun.star.lang.EventObject)
-     */
-    public void disposing(EventObject arg0)
-    {
-      WollMuxEventHandler.handleDisposeFormModel(this);
     }
 
     /**
@@ -669,51 +626,60 @@ public class DocumentCommandInterpreter
   }
 
   /**
-   * Der SurroundingGarbageCollector erfasst leere Absätze und Einfügemarker um 
+   * Der SurroundingGarbageCollector erfasst leere Absätze und Einfügemarker um
    * Dokumentkommandos herum.
    */
   private class SurroundingGarbageCollector extends TreeExecutor
   {
     private XTextDocument doc;
-    
+
     /**
      * Speichert Muellmann-Objekte, die zu löschenden Müll entfernen.
      */
     private List muellmaenner = new Vector();
-    
+
     private abstract class Muellmann
     {
       protected XTextRange range;
+
       public Muellmann(XTextRange range)
       {
         this.range = range;
       }
+
       public abstract void tueDeinePflicht();
     }
-    
+
     private class RangeMuellmann extends Muellmann
     {
-      public RangeMuellmann(XTextRange range) {super(range);}
-      
+      public RangeMuellmann(XTextRange range)
+      {
+        super(range);
+      }
+
       public void tueDeinePflicht()
       {
         Bookmark.removeTextFromInside(doc, range);
       }
     }
-    
+
     private class ParagraphMuellmann extends Muellmann
     {
-      public ParagraphMuellmann(XTextRange range) {super(range);}
+      public ParagraphMuellmann(XTextRange range)
+      {
+        super(range);
+      }
+
       public void tueDeinePflicht()
       {
         deleteParagraph(range);
       }
     }
-    
+
     /**
-     * Diese Methode erfasst leere Absätze und Einfügemarker, die sich um die im 
+     * Diese Methode erfasst leere Absätze und Einfügemarker, die sich um die im
      * Kommandobaum tree enthaltenen Dokumentkommandos befinden.
-     */ 
+     */
     private int execute(DocumentCommandTree tree)
     {
       doc = UNO.XTextDocument(tree.getBookmarksSupplier());
@@ -727,23 +693,22 @@ public class DocumentCommandInterpreter
 
       return errors;
     }
-    
+
     /**
-     * Löscht die vorher als Müll identifizierten Inhalte.
-     * type filter text
-     * @author Matthias Benkmann (D-III-ITD 5.1)
-     * TESTED
+     * Löscht die vorher als Müll identifizierten Inhalte. type filter text
+     * 
+     * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
      */
     private void removeGarbage()
     {
-      setLockControllers(true);
+      model.setLockControllers(true);
       Iterator iter = muellmaenner.iterator();
       while (iter.hasNext())
       {
-        Muellmann muellmann = (Muellmann)iter.next();
+        Muellmann muellmann = (Muellmann) iter.next();
         muellmann.tueDeinePflicht();
       }
-      setLockControllers(false);
+      model.setLockControllers(false);
     }
 
     public int executeCommand(InsertFrag cmd)
@@ -761,10 +726,10 @@ public class DocumentCommandInterpreter
     // Helper-Methoden:
 
     /**
-     * Diese Methode erfasst Einfügemarken und leere Absätze zum Beginn und zum Ende des
-     * übergebenen Dokumentkommandos cmd.
-     * @author Matthias Benkmann (D-III-ITD 5.1)
-     * TESTED
+     * Diese Methode erfasst Einfügemarken und leere Absätze zum Beginn und zum
+     * Ende des übergebenen Dokumentkommandos cmd.
+     * 
+     * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
      */
     private void collectSurroundingGarbageForCommand(DocumentCommand cmd)
     {
@@ -781,7 +746,7 @@ public class DocumentCommandInterpreter
        * 
        * 00: Einfügemarker und Zeilenumbruch DAHINTER löschen
        * 
-       * 01: nur Einfügemarker löschen 
+       * 01: nur Einfügemarker löschen
        * 
        * 10: nur Einfügemarker löschen
        * 
@@ -797,21 +762,22 @@ public class DocumentCommandInterpreter
        * 
        * 01, 10, 11: Einfügemarker löschen
        * 
-       *
+       * 
        */
       XParagraphCursor[] cursor = cmd.getStartMark();
       if (cursor == null) return;
-      
+
       if (cursor[0].isStartOfParagraph() && cursor[1].isEndOfParagraph())
       {
         muellmaenner.add(new ParagraphMuellmann(cursor[1]));
       }
-      else //if start mark is not the only text in the paragraph
+      else
+      // if start mark is not the only text in the paragraph
       {
         cursor[1].goLeft((short) 1, true);
         muellmaenner.add(new RangeMuellmann(cursor[1]));
       }
-      
+
       cursor = cmd.getEndMark();
       if (cursor[0].isStartOfParagraph() && cursor[1].isEndOfParagraph())
       {
@@ -823,7 +789,7 @@ public class DocumentCommandInterpreter
         muellmaenner.add(new RangeMuellmann(cursor[0]));
       }
     }
-    
+
     /**
      * Löscht den ganzen ersten Absatz an der Cursorposition textCursor.
      * 
@@ -853,8 +819,7 @@ public class DocumentCommandInterpreter
       }
 
       // Lösche den Paragraph
-      if (paragraph != null) 
-      try
+      if (paragraph != null) try
       {
         range.getText().removeTextContent(paragraph);
       }
@@ -864,14 +829,14 @@ public class DocumentCommandInterpreter
       }
     }
   }
-  
+
   /**
    * Veranlasst alle Dokumentkommandos in der Reihenfolge einer Tiefensuche ihre
    * InsertMarks zu löschen.
    */
   public int cleanInsertMarks(DocumentCommandTree tree)
   {
-    setLockControllers(true);
+    model.setLockControllers(true);
 
     // Das Löschen muss mit einer Tiefensuche, aber in umgekehrter Reihenfolge
     // ablaufen, da sonst leere Bookmarks (Ausdehnung=0) durch das Entfernen der
@@ -884,7 +849,7 @@ public class DocumentCommandInterpreter
       cmd.cleanInsertMarks();
     }
 
-    setLockControllers(false);
+    model.setLockControllers(false);
     return 0;
   }
 
@@ -1055,9 +1020,9 @@ public class DocumentCommandInterpreter
       // das
       // Updaten der enthaltenen TextFields später).
       HashSet textFrames = new HashSet();
-      if (document.xTextFramesSupplier() != null)
+      if (UNO.XTextFramesSupplier(model.doc) != null)
       {
-        String[] names = document.xTextFramesSupplier().getTextFrames()
+        String[] names = UNO.XTextFramesSupplier(model.doc).getTextFrames()
             .getElementNames();
         for (int i = 0; i < names.length; i++)
         {
@@ -1104,11 +1069,11 @@ public class DocumentCommandInterpreter
      */
     private int execute(DocumentCommandTree tree)
     {
-      setLockControllers(true);
+      model.setLockControllers(true);
 
       int errors = executeDepthFirst(tree, false);
 
-      setLockControllers(false);
+      model.setLockControllers(false);
 
       return errors;
     }
@@ -1247,11 +1212,11 @@ public class DocumentCommandInterpreter
      */
     private int execute(DocumentCommandTree tree)
     {
-      setLockControllers(true);
+      model.setLockControllers(true);
 
       int errors = executeDepthFirst(tree, false);
 
-      setLockControllers(false);
+      model.setLockControllers(false);
 
       return errors;
     }
@@ -1326,10 +1291,10 @@ public class DocumentCommandInterpreter
   private class FormScanner extends TreeExecutor
   {
     private HashMap idToFormFields = new HashMap();
+
     private Map bookmarkNameToFormField = new HashMap();
 
-    private FormDescriptor formDescriptor = new FormDescriptor(document
-        .xTextDocument());
+    private FormDescriptor formDescriptor = new FormDescriptor(model.doc);
 
     /**
      * Ausführung starten
@@ -1381,10 +1346,12 @@ public class DocumentCommandInterpreter
         fields = new Vector();
         idToFormFields.put(id, fields);
       }
-      FormField field = FormFieldFactory.createFormField(document
-          .xTextDocument(), cmd, bookmarkNameToFormField);
-      
-      if (field != null) 
+      FormField field = FormFieldFactory.createFormField(
+          model.doc,
+          cmd,
+          bookmarkNameToFormField);
+
+      if (field != null)
       {
         field.setCommand(cmd);
         fields.add(field);
@@ -1395,39 +1362,6 @@ public class DocumentCommandInterpreter
   }
 
   // Übergreifende Helper-Methoden:
-
-  /**
-   * Diese Methode setzt den DocumentModified-Status auf state.
-   * 
-   * @param state
-   */
-  private void setDocumentModified(boolean state)
-  {
-    try
-    {
-      if (document.xModifiable() != null)
-        document.xModifiable().setModified(state);
-    }
-    catch (PropertyVetoException x)
-    {
-      // wenn jemand was dagegen hat, dann setze ich halt nichts.
-    }
-  }
-
-  /**
-   * Diese Methode blockt/unblock die Contoller, die für das Rendering der
-   * Darstellung in den Dokumenten zuständig sind, jedoch nur, wenn nicht der
-   * debug-modus gesetzt ist.
-   * 
-   * @param state
-   */
-  private void setLockControllers(boolean lock)
-  {
-    if (mux.isDebugMode() == false && document.xModel() != null) if (lock)
-      document.xModel().lockControllers();
-    else
-      document.xModel().unlockControllers();
-  }
 
   /**
    * Diese Methode fügt ein Fehler-Feld an die Stelle des Dokumentkommandos ein.
@@ -1460,16 +1394,12 @@ public class DocumentCommandInterpreter
     try
     {
       XTextRange range = cursor.xTextCursor().getEnd();
-      UnoService c = new UnoService(range.getText().createTextCursorByRange(
-          range));
-      c.xTextCursor().goLeft((short) 2, false);
-      UnoService note = document
-          .create("com.sun.star.text.TextField.Annotation");
-      note.setPropertyValue("Content", msg + ":\n\n" + e.getMessage());
-      c.xTextRange().getText().insertTextContent(
-          c.xTextRange(),
-          note.xTextContent(),
-          false);
+      XTextCursor c = range.getText().createTextCursorByRange(range);
+      c.goLeft((short) 2, false);
+      XTextContent note = UNO.XTextContent(UNO.XMultiServiceFactory(model.doc)
+          .createInstance("com.sun.star.text.TextField.Annotation"));
+      UNO.setProperty(note, "Content", msg + ":\n\n" + e.getMessage());
+      c.getText().insertTextContent(c, note, false);
     }
     catch (java.lang.Exception x)
     {
