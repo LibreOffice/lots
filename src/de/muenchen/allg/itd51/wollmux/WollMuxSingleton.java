@@ -664,12 +664,6 @@ public class WollMuxSingleton implements XPALProvider
         };
       }
 
-      else if (urlStr.equals(".uno:UpdateInputFields"))
-      {
-        Logger.debug("queryDispatch: '" + urlStr + "'");
-        return null;
-      }
-
       // Für Debug-Zwecke kann in der folgenden Zeile der ForwardDispatcher
       // eingeschalten werden, der jede Dispatch-Anfrage durchreicht, dabei aber
       // noch log-Meldungen produziert. ACHTUNG: hier darf (leider) nicht
