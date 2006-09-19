@@ -348,7 +348,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
         XTextDocument doc = UNO
             .XTextDocument(UNO.desktop.getCurrentComponent());
         if (doc != null)
-          WollMuxEventHandler.handleFunctionDialogShow(doc, dialogName);
+          WollMuxEventHandler.handleFunctionDialog(doc, dialogName);
       }
 
       if (cmd.compareToIgnoreCase(cmdFormularMax4000) == 0)

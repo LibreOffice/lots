@@ -37,6 +37,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -91,6 +92,112 @@ import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
  */
 public class WollMuxEventHandler
 {
+  /**
+   * Mit dieser Methode ist es möglich die Entgegennahme von Events zu
+   * blockieren. Alle eingehenden Events werden ignoriert, wenn accept auf false
+   * gesetzt ist und entgegengenommen, wenn accept auf true gesetzt ist.
+   * 
+   * @param accept
+   */
+  public static void setAcceptEvents(boolean accept)
+  {
+    EventProcessor.getInstance().setAcceptEvents(accept);
+  }
+
+  /**
+   * Der EventProcessor sorgt für eine synchronisierte Verarbeitung aller
+   * Wollmux-Events. Alle Events werden in eine synchronisierte eventQueue
+   * hineingepackt und von einem einzigen eventProcessingThread sequentiell
+   * abgearbeitet.
+   * 
+   * @author lut
+   */
+  public static class EventProcessor
+  {
+    /**
+     * Gibt an, ob der EventProcessor überhaupt events entgegennimmt. Ist
+     * acceptEvents=false, werden alle Events ignoriert.
+     */
+    private boolean acceptEvents = false;
+
+    private List eventQueue = new LinkedList();
+
+    private static EventProcessor singletonInstance;
+
+    private static Thread eventProcessorThread;
+
+    private static EventProcessor getInstance()
+    {
+      if (singletonInstance == null) singletonInstance = new EventProcessor();
+      return singletonInstance;
+    }
+
+    /**
+     * Mit dieser Methode ist es möglich die Entgegennahme von Events zu
+     * blockieren. Alle eingehenden Events werden ignoriert, wenn accept auf
+     * false gesetzt ist und entgegengenommen, wenn accept auf true gesetzt ist.
+     * 
+     * @param accept
+     */
+    private void setAcceptEvents(boolean accept)
+    {
+      acceptEvents = accept;
+      if (accept)
+        Logger.debug("EventProcessor: akzeptiere neue Events.");
+      else
+        Logger.debug("EventProcessor: blockiere Entgegennahme von Events!");
+    }
+
+    private EventProcessor()
+    {
+      // starte den eventProcessorThread
+      eventProcessorThread = new Thread(new Runnable()
+      {
+        public void run()
+        {
+          Logger.debug("Starte EventProcessor-Thread");
+          try
+          {
+            while (true)
+            {
+              WollMuxEvent event;
+              synchronized (eventQueue)
+              {
+                while (eventQueue.isEmpty())
+                  eventQueue.wait();
+                event = (WollMuxEvent) eventQueue.remove(0);
+              }
+
+              event.process();
+            }
+          }
+          catch (InterruptedException e)
+          {
+            Logger.error("EventProcessor-Thread wurde unterbrochen:");
+            Logger.error(e);
+          }
+          Logger.debug("Beende EventProcessor-Thread");
+        }
+      });
+      eventProcessorThread.start();
+    }
+
+    /**
+     * Diese Methode fügt ein Event an die eventQueue an wenn der WollMux
+     * erfolgreich initialisiert wurde und damit events akzeptieren darf.
+     * Anschliessend weckt sie den EventProcessor-Thread.
+     * 
+     * @param event
+     */
+    private void addEvent(WollMuxEventHandler.WollMuxEvent event)
+    {
+      if (acceptEvents) synchronized (eventQueue)
+      {
+        eventQueue.add(event);
+        eventQueue.notifyAll();
+      }
+    }
+  }
 
   /**
    * Interface für die Events, die dieser EventHandler abarbeitet.
@@ -101,7 +208,7 @@ public class WollMuxEventHandler
      * Startet die Ausführung des Events und darf nur aus dem EventProcessor
      * aufgerufen werden.
      */
-    public boolean process();
+    public void process();
 
     /**
      * Gibt an, ob das Event eine Referenz auf das Objekt o, welches auch ein
@@ -148,22 +255,21 @@ public class WollMuxEventHandler
   private static class BasicEvent implements WollMuxEvent
   {
 
+    private boolean[] lock = new boolean[] { true };
+
     /**
      * Diese Method ist für die Ausführung des Events zuständig. Nach der
      * Bearbeitung entscheidet der Rückgabewert ob unmittelbar die Bearbeitung
      * des nächsten Events gestartet werden soll oder ob das GUI blockiert
      * werden soll bis das nächste actionPerformed-Event beim EventProcessor
      * eintrifft.
-     * 
-     * @return einer der Werte <code>EventProcessor.processNextEvent</code>
-     *         oder <code>EventProcessor.waitForGUIReturn</code>.
      */
-    public boolean process()
+    public void process()
     {
       Logger.debug("Process WollMuxEvent " + this.toString());
       try
       {
-        return doit();
+        doit();
       }
       catch (WollMuxFehlerException e)
       {
@@ -174,7 +280,6 @@ public class WollMuxEventHandler
       {
         Logger.error(t);
       }
-      return EventProcessor.processTheNextEvent;
     }
 
     /**
@@ -200,14 +305,10 @@ public class WollMuxEventHandler
      * auftretenden Exceptions selbst behandeln, Fehler die jedoch
      * benutzersichtbar in einem Dialog angezeigt werden sollen, können über
      * eine WollMuxFehlerException nach oben weitergereicht werden.
-     * 
-     * @return EventProcessor.processTheNextEvent oder
-     *         EventProcessor.waitForGUIReturn
      */
-    protected boolean doit() throws WollMuxFehlerException
+    protected void doit() throws WollMuxFehlerException
     {
-      return EventProcessor.processTheNextEvent;
-    }
+    };
 
     /*
      * (non-Javadoc)
@@ -248,6 +349,76 @@ public class WollMuxEventHandler
     {
       return this.getClass().getSimpleName();
     }
+
+    /**
+     * Setzt einen lock, der in Verbindung mit setUnlock und der
+     * waitForUnlock-Methode verwendet werden kann, um quasi Modalität für nicht
+     * modale Dialoge zu realisieren. setLock() sollte stets vor dem Aufruf des
+     * nicht modalen Dialogs erfolgen, nach dem Aufruf des nicht modalen Dialogs
+     * folgt der Aufruf der waitForUnlock()-Methode. Der nicht modale Dialog
+     * erzeugt bei der Beendigung ein ActionEvent, das dafür sorgt, dass
+     * setUnlock aufgerufen wird.
+     */
+    protected void setLock()
+    {
+      lock[0] = true;
+    }
+
+    /**
+     * Macht einen mit setLock() gesetzten Lock rückgängig und bricht damit eine
+     * evtl. wartende waitForUnlock()-Methode ab.
+     */
+    protected void setUnlock()
+    {
+      synchronized (lock)
+      {
+        lock[0] = false;
+        lock.notifyAll();
+      }
+    }
+
+    /**
+     * Wartet so lange, bis der vorher mit setLock() gesetzt lock mit der
+     * Methode setUnlock() aufgehoben wird. So kann die quasi Modalität nicht
+     * modale Dialoge zu realisiert werden. setLock() sollte stets vor dem
+     * Aufruf des nicht modalen Dialogs erfolgen, nach dem Aufruf des nicht
+     * modalen Dialogs folgt der Aufruf der waitForUnlock()-Methode. Der nicht
+     * modale Dialog erzeugt bei der Beendigung ein ActionEvent, das dafür
+     * sorgt, dass setUnlock aufgerufen wird.
+     */
+    protected void waitForUnlock()
+    {
+      try
+      {
+        synchronized (lock)
+        {
+          while (lock[0] == true)
+            lock.wait();
+        }
+      }
+      catch (InterruptedException e)
+      {
+      }
+    }
+
+    /**
+     * Dieser ActionListener kann nicht modalen Dialogen übergeben werden und
+     * sorgt in Verbindung mit den Methoden setLock() und waitForUnlock() dafür,
+     * dass quasi modale Dialoge realisiert werden können.
+     */
+    protected UnlockActionListener unlockActionListener = new UnlockActionListener();
+
+    protected class UnlockActionListener implements ActionListener
+    {
+      public ActionEvent actionEvent = null;
+
+      public void actionPerformed(ActionEvent arg0)
+      {
+        setUnlock();
+        actionEvent = arg0;
+      }
+    };
+
   }
 
   /**
@@ -257,7 +428,7 @@ public class WollMuxEventHandler
    */
   private static void handle(WollMuxEvent event)
   {
-    EventProcessor.addEvent(event);
+    EventProcessor.getInstance().addEvent(event);
   }
 
   // *******************************************************************************************
@@ -279,7 +450,7 @@ public class WollMuxEventHandler
    */
   private static class OnShowDialogAbsenderAuswaehlen extends BasicEvent
   {
-    protected boolean doit() throws WollMuxFehlerException
+    protected void doit() throws WollMuxFehlerException
     {
       WollMuxSingleton mux = WollMuxSingleton.getInstance();
 
@@ -300,24 +471,20 @@ public class WollMuxEventHandler
         throw new CantStartDialogException(e);
       }
 
-      // Dialog starten:
+      // Dialog modal starten:
       try
       {
+        setLock();
         new AbsenderAuswaehlen(whoAmIconf, PALconf, ADBconf, mux
-            .getDatasourceJoiner(), new ActionListener()
-        {
-          public void actionPerformed(ActionEvent arg0)
-          {
-            WollMuxEventHandler.handlePALChangedNotify();
-            EventProcessor.processTheNextEvent();
-          }
-        });
+            .getDatasourceJoiner(), unlockActionListener);
+        waitForUnlock();
       }
       catch (java.lang.Exception e)
       {
         throw new CantStartDialogException(e);
       }
-      return EventProcessor.wait;
+
+      WollMuxEventHandler.handlePALChangedNotify();
     }
   }
 
@@ -342,7 +509,7 @@ public class WollMuxEventHandler
   private static class OnShowDialogPersoenlicheAbsenderlisteVerwalten extends
       BasicEvent
   {
-    protected boolean doit() throws WollMuxFehlerException
+    protected void doit() throws WollMuxFehlerException
     {
       WollMuxSingleton mux = WollMuxSingleton.getInstance();
       ConfigThingy conf = mux.getWollmuxConf();
@@ -360,25 +527,20 @@ public class WollMuxEventHandler
         throw new CantStartDialogException(e);
       }
 
-      // Dialog starten:
+      // Dialog modal starten:
       try
       {
+        setLock();
         new PersoenlicheAbsenderlisteVerwalten(PALconf, ADBconf, mux
-            .getDatasourceJoiner(), new ActionListener()
-        {
-          public void actionPerformed(ActionEvent arg0)
-          {
-            WollMuxEventHandler.handlePALChangedNotify();
-            EventProcessor.processTheNextEvent();
-          }
-        });
+            .getDatasourceJoiner(), unlockActionListener);
+        waitForUnlock();
       }
       catch (java.lang.Exception e)
       {
         throw new CantStartDialogException(e);
       }
 
-      return EventProcessor.wait;
+      handlePALChangedNotify();
     }
   }
 
@@ -392,67 +554,94 @@ public class WollMuxEventHandler
    * Dieses Event wird vom WollMux-Service (...comp.WollMux) und aus dem
    * WollMuxEventHandler ausgelöst.
    */
-  public static void handleFunctionDialogShow(XTextDocument doc,
-      String dialogName)
+  public static void handleFunctionDialog(XTextDocument doc, String dialogName)
   {
-    handle(new OnFunctionDialogShow(doc, dialogName));
+    handle(new OnFunctionDialog(doc, dialogName));
   }
 
-  private static class OnFunctionDialogShow extends BasicEvent
+  private static class OnFunctionDialog extends BasicEvent
   {
     private XTextDocument doc;
 
     private String dialogName;
 
-    private OnFunctionDialogShow(XTextDocument doc, String dialogName)
+    private OnFunctionDialog(XTextDocument doc, String dialogName)
     {
       this.doc = doc;
       this.dialogName = dialogName;
     }
 
-    protected boolean doit() throws WollMuxFehlerException
+    protected void doit() throws WollMuxFehlerException
     {
       WollMuxSingleton mux = WollMuxSingleton.getInstance();
 
+      // Dialog aus Funktionsdialog-Bibliothek holen:
       Dialog dialog = mux.getFunctionDialogs().get(dialogName);
+      if (dialog == null)
+        throw new WollMuxFehlerException("Funktionsdialog '"
+                                         + dialogName
+                                         + "' ist nicht definiert.");
 
-      if (dialog != null)
+      // Dialoginstanz erzeugen und modal anzeigen:
+      Dialog dialogInst = null;
+      try
       {
-        try
+        dialogInst = dialog.instanceFor(new HashMap());
+
+        setLock();
+        dialogInst.show(unlockActionListener, mux.getGlobalFunctions(), mux
+            .getFunctionDialogs());
+        waitForUnlock();
+      }
+      catch (ConfigurationErrorException e)
+      {
+        throw new CantStartDialogException(e);
+      }
+
+      // Abbruch, wenn der Dialog nicht mit OK beendet wurde.
+      String cmd = unlockActionListener.actionEvent.getActionCommand();
+      if(!cmd.equalsIgnoreCase("select")) return;
+
+      // Dem Dokument den Fokus geben, damit die Änderungen des Benutzers
+      // transparent mit verfolgt werden können.
+      try
+      {
+        UNO.XModel(doc).getCurrentController().getFrame().getContainerWindow()
+            .setFocus();
+      }
+      catch (java.lang.Exception e)
+      {
+        // keine Gefährdung des Ablaufs falls das nicht klappt.
+      }
+
+      // Alle Werte die der Funktionsdialog sicher zurück liefert werden in
+      // das Dokument übernommen.
+      HashMap idToFormFields = mux.getTextDocumentModel(doc)
+          .getIDToFormFields();
+      if (idToFormFields != null)
+      {
+        Collection schema = dialogInst.getSchema();
+        Iterator iter = schema.iterator();
+        while (iter.hasNext())
         {
-          // Dialoginstanz erzeugen und anzeigen
-          ActionListener listener = new ActionListener()
+          String id = (String) iter.next();
+          if (idToFormFields.containsKey(id))
           {
-            public void actionPerformed(ActionEvent arg0)
+            Vector formFields = (Vector) idToFormFields.get(id);
+            String value = dialogInst.getData(id).toString();
+
+            // Formularwerte der entsprechenden Formularfelder auf value
+            // setzen.
+            Iterator ffiter = formFields.iterator();
+            while (ffiter.hasNext())
             {
-              WollMuxEventHandler.handleFunctionDialogSelectDone();
-              EventProcessor.processTheNextEvent();
+              FormField formField = (FormField) ffiter.next();
+              if (formField != null)
+                formField.setValue(value, mux.getGlobalFunctions());
             }
-          };
-          Dialog dialogInst = dialog.instanceFor(new HashMap());
-          dialogInst.show(listener, mux.getGlobalFunctions(), mux
-              .getFunctionDialogs());
-
-          // DialogContext für die Weiterverarbeitung in
-          // OnFunctionDialogSelectDone sichern.
-          OnFunctionDialogSelectDone.dialogContexts.add(new DialogContext(doc,
-              dialogInst));
-
-          return EventProcessor.wait;
-        }
-        catch (ConfigurationErrorException e)
-        {
-          Logger.error(e);
+          }
         }
       }
-      else
-      {
-        Logger.error("Funktionsdialog '"
-                     + dialogName
-                     + "' ist nicht definiert.");
-      }
-
-      return EventProcessor.processTheNextEvent;
     }
 
     public boolean requires(Object o)
@@ -496,10 +685,10 @@ public class WollMuxEventHandler
       this.doc = doc;
     }
 
-    protected boolean doit() throws WollMuxFehlerException
+    protected void doit() throws WollMuxFehlerException
     {
 
-      if (doc == null) return EventProcessor.processTheNextEvent;
+      if (doc == null) return;
 
       TextDocumentModel model = WollMuxSingleton.getInstance()
           .getTextDocumentModel(doc);
@@ -524,8 +713,6 @@ public class WollMuxEventHandler
         });
         model.setCurrentFormularMax4000(max);
       }
-
-      return EventProcessor.processTheNextEvent;
     }
 
     public boolean requires(Object o)
@@ -563,7 +750,7 @@ public class WollMuxEventHandler
       this.max = max;
     }
 
-    protected boolean doit() throws WollMuxFehlerException
+    protected void doit() throws WollMuxFehlerException
     {
       // Lösche alle entsprechenden FormularMax-Instanzen aus der
       // mapDocToMax4000
@@ -574,7 +761,6 @@ public class WollMuxEventHandler
         Map.Entry entry = (Map.Entry) iter.next();
         if (entry.getValue() == max) entry.setValue(null);
       }
-      return EventProcessor.processTheNextEvent;
     }
 
     public String toString()
@@ -606,110 +792,17 @@ public class WollMuxEventHandler
       this.doc = doc;
     }
 
-    protected boolean doit() throws WollMuxFehlerException
+    protected void doit() throws WollMuxFehlerException
     {
       TextDocumentModel model = WollMuxSingleton.getInstance()
           .getTextDocumentModel(doc);
 
       model.dispose();
-
-      return EventProcessor.processTheNextEvent;
     }
 
     public String toString()
     {
       return this.getClass().getSimpleName() + "(#" + doc.hashCode() + ")";
-    }
-  }
-
-  // *******************************************************************************************
-
-  /**
-   * Erzeugt ein neues WollMuxEvent, das den Funktionsdialog dialogName aufruft
-   * und die zurückgelieferten Werte in die entsprechenden FormField-Objekte des
-   * Dokuments doc einträgt.
-   * 
-   * Dieses Event wird vom WollMux-Service (...comp.WollMux) und aus dem
-   * WollMuxEventHandler ausgelöst.
-   */
-  public static void handleFunctionDialogSelectDone()
-  {
-    handle(new OnFunctionDialogSelectDone());
-  }
-
-  private static class OnFunctionDialogSelectDone extends BasicEvent
-  {
-    private static Vector dialogContexts = new Vector();
-
-    protected boolean doit() throws WollMuxFehlerException
-    {
-      WollMuxSingleton mux = WollMuxSingleton.getInstance();
-
-      if (dialogContexts.size() > 0)
-      {
-        // Den DialogContext vom Stack nehmen:
-        DialogContext dctx = (DialogContext) dialogContexts.remove(0);
-
-        // Dem Dokument den Fokus geben, damit die Änderungen vom Benutzer
-        // transparent mit verfolgt werden können.
-        try
-        {
-          UNO.XModel(dctx.doc).getCurrentController().getFrame()
-              .getContainerWindow().setFocus();
-        }
-        catch (java.lang.Exception e)
-        {
-          // keine Gefährdung des Ablaufs falls das nicht klappt.
-        }
-
-        // Alle Werte die der Funktionsdialog sicher zurück liefert werden in
-        // das Dokument übernommen.
-        HashMap idToFormFields = mux.getTextDocumentModel(dctx.doc)
-            .getIDToFormFields();
-        if (idToFormFields != null)
-        {
-          Collection schema = dctx.dialogInstance.getSchema();
-          Iterator iter = schema.iterator();
-          while (iter.hasNext())
-          {
-            String id = (String) iter.next();
-            if (idToFormFields.containsKey(id))
-            {
-              Vector formFields = (Vector) idToFormFields.get(id);
-              String value = dctx.dialogInstance.getData(id).toString();
-
-              // Formularwerte der entsprechenden Formularfelder auf value
-              // setzen.
-              Iterator ffiter = formFields.iterator();
-              while (ffiter.hasNext())
-              {
-                FormField formField = (FormField) ffiter.next();
-                if (formField != null)
-                  formField.setValue(value, mux.getGlobalFunctions());
-              }
-            }
-          }
-        }
-      }
-      return EventProcessor.processTheNextEvent;
-    }
-
-    public String toString()
-    {
-      return this.getClass().getSimpleName() + "()";
-    }
-  }
-
-  private static class DialogContext
-  {
-    private XTextDocument doc;
-
-    private Dialog dialogInstance;
-
-    private DialogContext(XTextDocument doc, Dialog dialogInstance)
-    {
-      this.doc = doc;
-      this.dialogInstance = dialogInstance;
     }
   }
 
@@ -743,9 +836,9 @@ public class WollMuxEventHandler
       this.xTextDoc = xTextDoc;
     }
 
-    protected boolean doit() throws WollMuxFehlerException
+    protected void doit() throws WollMuxFehlerException
     {
-      if (xTextDoc == null) return EventProcessor.processTheNextEvent;
+      if (xTextDoc == null) return;
 
       WollMuxSingleton mux = WollMuxSingleton.getInstance();
       TextDocumentModel model = mux.getTextDocumentModel(xTextDoc);
@@ -847,7 +940,6 @@ public class WollMuxEventHandler
           }
         }
       }
-      return EventProcessor.processTheNextEvent;
     }
 
     public boolean requires(Object o)
@@ -1024,7 +1116,7 @@ public class WollMuxEventHandler
       this.asTemplate = asTemplate;
     }
 
-    protected boolean doit() throws WollMuxFehlerException
+    protected void doit() throws WollMuxFehlerException
     {
       WollMuxSingleton mux = WollMuxSingleton.getInstance();
 
@@ -1135,8 +1227,6 @@ public class WollMuxEventHandler
                                          + loadUrlStr
                                          + "' kann nicht geöffnet werden.", x);
       }
-
-      return EventProcessor.processTheNextEvent;
     }
 
     public String toString()
@@ -1171,7 +1261,7 @@ public class WollMuxEventHandler
    */
   private static class OnPALChangedNotify extends BasicEvent
   {
-    protected boolean doit()
+    protected void doit()
     {
       WollMuxSingleton mux = WollMuxSingleton.getInstance();
 
@@ -1202,8 +1292,6 @@ public class WollMuxEventHandler
       {
         Logger.error(e);
       }
-
-      return EventProcessor.processTheNextEvent;
     }
   }
 
@@ -1244,7 +1332,7 @@ public class WollMuxEventHandler
       this.idx = idx;
     }
 
-    protected boolean doit()
+    protected void doit()
     {
       DJDatasetListElement[] pal = WollMuxSingleton.getInstance()
           .getSortedPALEntries();
@@ -1266,8 +1354,8 @@ public class WollMuxEventHandler
                      + idx
                      + "' nicht mit der PAL übereinstimmt (Inkosistenzen?)");
       }
+
       WollMuxEventHandler.handlePALChangedNotify();
-      return EventProcessor.processTheNextEvent;
     }
 
     public String toString()
@@ -1338,7 +1426,7 @@ public class WollMuxEventHandler
       this.fd = fd;
     }
 
-    protected boolean doit()
+    protected void doit()
     {
       // Wenn es FormFields zu dieser id gibt, so werden alle FormFields auf den
       // neuen Stand gebracht.
@@ -1365,7 +1453,6 @@ public class WollMuxEventHandler
       // FormField gibt.
       fd.setFormFieldValue(fieldId, newValue);
       fd.updateDocument();
-      return EventProcessor.processTheNextEvent;
     }
 
     public String toString()
@@ -1434,7 +1521,7 @@ public class WollMuxEventHandler
       this.visible = visible;
     }
 
-    protected boolean doit()
+    protected void doit()
     {
       // invisibleGroups anpassen:
       if (visible)
@@ -1488,8 +1575,6 @@ public class WollMuxEventHandler
       // Sichtbarkeitsstatus sich zuerst geändert hat (siehe Begründung oben).
       if (firstChangedCmd != null && firstChangedCmd.isVisible())
         focusRangeStart(firstChangedCmd);
-
-      return EventProcessor.processTheNextEvent;
     }
 
     /**
@@ -1570,7 +1655,7 @@ public class WollMuxEventHandler
       this.fieldId = fieldId;
     }
 
-    protected boolean doit()
+    protected void doit()
     {
       if (idToFormValues.containsKey(fieldId))
       {
@@ -1592,7 +1677,6 @@ public class WollMuxEventHandler
                      + fieldId
                      + "' in diesem Dokument");
       }
-      return EventProcessor.processTheNextEvent;
     }
 
     public String toString()
@@ -1656,10 +1740,9 @@ public class WollMuxEventHandler
       this.docHeight = docHeight;
     }
 
-    protected boolean doit()
+    protected void doit()
     {
       model.setWindowPosSize(docX, docY, docWidth, docHeight);
-      return EventProcessor.processTheNextEvent;
     }
 
     public boolean requires(Object o)
@@ -1721,10 +1804,9 @@ public class WollMuxEventHandler
       this.visible = visible;
     }
 
-    protected boolean doit()
+    protected void doit()
     {
       model.setWindowVisible(visible);
-      return EventProcessor.processTheNextEvent;
     }
 
     public boolean requires(Object o)
@@ -1767,10 +1849,9 @@ public class WollMuxEventHandler
       this.model = model;
     }
 
-    protected boolean doit()
+    protected void doit()
     {
       model.close();
-      return EventProcessor.processTheNextEvent;
     }
 
     public boolean requires(Object o)
@@ -1807,7 +1888,7 @@ public class WollMuxEventHandler
    */
   private static class OnInitialize extends BasicEvent
   {
-    protected boolean doit()
+    protected void doit()
     {
       WollMuxSingleton mux = WollMuxSingleton.getInstance();
 
@@ -1882,7 +1963,6 @@ public class WollMuxEventHandler
           showInfoModal("WollMux-Info", message);
         }
       }
-      return EventProcessor.processTheNextEvent;
     }
 
     private static String getUserProfileData(String key)
@@ -1937,13 +2017,11 @@ public class WollMuxEventHandler
       this.listener = listener;
     }
 
-    protected boolean doit()
+    protected void doit()
     {
       WollMuxSingleton.getInstance().addPALChangeEventListener(listener);
 
       WollMuxEventHandler.handlePALChangedNotify();
-
-      return EventProcessor.processTheNextEvent;
     }
 
     public boolean requires(Object o)
@@ -1989,10 +2067,9 @@ public class WollMuxEventHandler
       this.listener = listener;
     }
 
-    protected boolean doit()
+    protected void doit()
     {
       WollMuxSingleton.getInstance().removePALChangeEventListener(listener);
-      return EventProcessor.processTheNextEvent;
     }
 
     public String toString()
@@ -2039,7 +2116,7 @@ public class WollMuxEventHandler
       this.arg1 = arg1;
     }
 
-    protected boolean doit()
+    protected void doit()
     {
       TextDocumentModel model = WollMuxSingleton.getInstance()
           .getTextDocumentModel(doc);
@@ -2052,9 +2129,8 @@ public class WollMuxEventHandler
       }
       else
       {
-        if(origDisp != null) origDisp.dispatch(arg0, arg1);
+        if (origDisp != null) origDisp.dispatch(arg0, arg1);
       }
-      return EventProcessor.processTheNextEvent;
     }
 
     public String toString()

@@ -181,7 +181,7 @@ public class WollMuxSingleton implements XPALProvider
         null);
 
     // Initialisiere EventProcessor
-    EventProcessor.setAcceptEvents(successfulStartup);
+    WollMuxEventHandler.setAcceptEvents(successfulStartup);
 
     // register global EventListener
     try
