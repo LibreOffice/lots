@@ -17,6 +17,8 @@
  */
 package de.muenchen.allg.itd51.wollmux;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.HashMap;
 
 import com.sun.star.awt.PosSize;
@@ -85,6 +87,11 @@ public class TextDocumentModel
    * beim Ausführen der Dokumentkommandos feststellen kann.
    */
   private String printFunctionName;
+
+  /**
+   * TODO: comment
+   */
+  private XPrintModel printModel = new PrintModel();
 
   /**
    * Erzeugt ein neues TextDocumentModel zum XTextDocument doc und sollte nie
@@ -224,6 +231,7 @@ public class TextDocumentModel
 
   /**
    * TODO: comment
+   * 
    * @param printFunctionName
    */
   public void setPrintFunctionName(String printFunctionName)
@@ -233,11 +241,13 @@ public class TextDocumentModel
 
   /**
    * TODO: comment
+   * 
    * @return
    */
   public String getPrintFunctionName()
   {
-    return this.printFunctionName;
+    return "SachleitendeVerfuegung";
+    // return this.printFunctionName;
   }
 
   /**
@@ -405,4 +415,105 @@ public class TextDocumentModel
       UNO.XCloseable(doc).addCloseListener(closeListener);
     }
   }
+
+  /**
+   * TODO: comment
+   * 
+   * @return
+   */
+  public XPrintModel getPrintModel()
+  {
+    return printModel;
+  }
+
+  /**
+   * TODO: comment
+   * 
+   * @author christoph.lutz
+   * 
+   */
+  public class PrintModel implements XPrintModel
+  {
+    private boolean[] lock = new boolean[] { true };
+
+    public void print(short numberOfCopies)
+    {
+      setLock();
+      WollMuxEventHandler.handleDoPrint(doc, numberOfCopies, unlockActionListener);
+      waitForUnlock();
+    }
+
+    /**
+     * TODO: doku anpassen: Setzt einen lock, der in Verbindung mit setUnlock
+     * und der waitForUnlock-Methode verwendet werden kann, um quasi Modalität
+     * für nicht modale Dialoge zu realisieren. setLock() sollte stets vor dem
+     * Aufruf des nicht modalen Dialogs erfolgen, nach dem Aufruf des nicht
+     * modalen Dialogs folgt der Aufruf der waitForUnlock()-Methode. Der nicht
+     * modale Dialog erzeugt bei der Beendigung ein ActionEvent, das dafür
+     * sorgt, dass setUnlock aufgerufen wird.
+     */
+    protected void setLock()
+    {
+      lock[0] = true;
+    }
+
+    /**
+     * TODO: doku anpassen. Macht einen mit setLock() gesetzten Lock rückgängig
+     * und bricht damit eine evtl. wartende waitForUnlock()-Methode ab.
+     */
+    protected void setUnlock()
+    {
+      synchronized (lock)
+      {
+        lock[0] = false;
+        lock.notifyAll();
+      }
+    }
+
+    /**
+     * TODO: doku anpassen. Wartet so lange, bis der vorher mit setLock()
+     * gesetzt lock mit der Methode setUnlock() aufgehoben wird. So kann die
+     * quasi Modalität nicht modale Dialoge zu realisiert werden. setLock()
+     * sollte stets vor dem Aufruf des nicht modalen Dialogs erfolgen, nach dem
+     * Aufruf des nicht modalen Dialogs folgt der Aufruf der
+     * waitForUnlock()-Methode. Der nicht modale Dialog erzeugt bei der
+     * Beendigung ein ActionEvent, das dafür sorgt, dass setUnlock aufgerufen
+     * wird.
+     */
+    protected void waitForUnlock()
+    {
+      try
+      {
+        synchronized (lock)
+        {
+          while (lock[0] == true)
+            lock.wait();
+        }
+      }
+      catch (InterruptedException e)
+      {
+      }
+    }
+
+    /**
+     * TODO: doku anpassen: Dieser ActionListener kann nicht modalen Dialogen
+     * übergeben werden und sorgt in Verbindung mit den Methoden setLock() und
+     * waitForUnlock() dafür, dass quasi modale Dialoge realisiert werden
+     * können.
+     */
+    protected UnlockActionListener unlockActionListener = new UnlockActionListener();
+
+    protected class UnlockActionListener implements ActionListener
+    {
+      public ActionEvent actionEvent = null;
+
+      public void actionPerformed(ActionEvent arg0)
+      {
+        setUnlock();
+        actionEvent = arg0;
+      }
+    };
+
+  }
+
 }

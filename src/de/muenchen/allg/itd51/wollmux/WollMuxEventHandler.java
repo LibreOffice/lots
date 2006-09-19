@@ -55,6 +55,7 @@ import com.sun.star.frame.XDispatch;
 import com.sun.star.frame.XFrame;
 import com.sun.star.frame.XModel;
 import com.sun.star.lang.EventObject;
+import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.lang.XComponent;
 import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
@@ -84,6 +85,7 @@ import de.muenchen.allg.itd51.wollmux.dialog.Dialog;
 import de.muenchen.allg.itd51.wollmux.dialog.PersoenlicheAbsenderlisteVerwalten;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
+import de.muenchen.allg.itd51.wollmux.func.PrintFunction;
 
 /**
  * Ermöglicht die Einstellung neuer WollMuxEvents in die EventQueue.
@@ -600,7 +602,7 @@ public class WollMuxEventHandler
 
       // Abbruch, wenn der Dialog nicht mit OK beendet wurde.
       String cmd = unlockActionListener.actionEvent.getActionCommand();
-      if(!cmd.equalsIgnoreCase("select")) return;
+      if (!cmd.equalsIgnoreCase("select")) return;
 
       // Dem Dokument den Fokus geben, damit die Änderungen des Benutzers
       // transparent mit verfolgt werden können.
@@ -2103,9 +2105,9 @@ public class WollMuxEventHandler
 
     private XDispatch origDisp;
 
-    com.sun.star.util.URL arg0;
+    private com.sun.star.util.URL arg0;
 
-    PropertyValue[] arg1;
+    private PropertyValue[] arg1;
 
     public OnPrintButtonPressed(XTextDocument doc, XDispatch origDisp,
         com.sun.star.util.URL arg0, PropertyValue[] arg1)
@@ -2116,20 +2118,95 @@ public class WollMuxEventHandler
       this.arg1 = arg1;
     }
 
-    protected void doit()
+    protected void doit() throws WollMuxFehlerException
     {
+      // TODO: testen
       TextDocumentModel model = WollMuxSingleton.getInstance()
           .getTextDocumentModel(doc);
       String printFunctionName = model.getPrintFunctionName();
       if (printFunctionName != null && !printFunctionName.equals(""))
       {
-        Logger.debug("NotYetImplemented: call PrintFunction '"
-                     + printFunctionName
-                     + "'");
+        PrintFunction printFunc = WollMuxSingleton.getInstance()
+            .getGlobalPrintFunctions().get(printFunctionName);
+
+        if (printFunc == null)
+          throw new WollMuxFehlerException("Druckfunktion '"
+                                           + printFunctionName
+                                           + "' nicht definiert.");
+
+        XPrintModel pmod = WollMuxSingleton.getInstance().getTextDocumentModel(
+            doc).getPrintModel();
+        
+        printFunc.invoke(pmod);
       }
       else
       {
         if (origDisp != null) origDisp.dispatch(arg0, arg1);
+      }
+    }
+
+    public String toString()
+    {
+      return this.getClass().getSimpleName() + "(#" + doc.hashCode() + ")";
+    }
+  }
+
+  // *******************************************************************************************
+
+  /**
+   * TODO: comment
+   */
+  public static void handleDoPrint(XTextDocument doc, short numberOfCopies, ActionListener listener)
+  {
+    handle(new OnDoPrint(doc, numberOfCopies, listener));
+  }
+
+  /**
+   * Dieses Event wird vom WollMux-Service (...comp.WollMux) ausgelöst wenn sich
+   * ein externe XPALChangeEventListener beim WollMux deregistriert. Der zu
+   * entfernende XPALChangeEventListerner wird anschließend im WollMuxSingleton
+   * aus der Liste der registrierten XPALChangeEventListener genommen.
+   * 
+   * @author christoph.lutz
+   */
+  private static class OnDoPrint extends BasicEvent
+  {
+    private XTextDocument doc;
+
+    private short numberOfCopies;
+
+    private ActionListener listener;
+
+    public OnDoPrint(XTextDocument doc, short numberOfCopies, ActionListener listener)
+    {
+      this.doc = doc;
+      this.numberOfCopies = numberOfCopies;
+      this.listener = listener;
+    }
+
+    protected void doit() throws WollMuxFehlerException
+    {
+      // TODO: testen
+      if (UNO.XPrintable(doc) != null)
+      {
+        PropertyValue[] args = new PropertyValue[] {
+                                                    new PropertyValue(),
+                                                    new PropertyValue() };
+        args[0].Name = "CopyCount";
+        args[0].Value = new Short(numberOfCopies);
+        args[1].Name = "Wait";
+        args[1].Value = Boolean.TRUE;
+
+        try
+        {
+          UNO.XPrintable(doc).print(args);
+        }
+        catch (java.lang.Exception e)
+        {
+          listener.actionPerformed(null);
+          throw new WollMuxFehlerException("Drucken schlug fehl!", e);
+        }
+        listener.actionPerformed(null);
       }
     }
 

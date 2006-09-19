@@ -1,0 +1,32 @@
+/*
+ * Dateiname: XPrintModel.idl
+ * Projekt  : WollMux
+ * Funktion : Repräsentiert die Schnittstelle WollMux Komfortdruckfunktionen
+ * 
+ * Copyright: Landeshauptstadt München
+ *
+ * @author Christoph Lutz (D-III-ITD 5.1)
+ * @version 1.0
+ * 
+ */
+
+#ifndef __de_muenchen_allg_itd51_wollmux_XPrintModel_idl__ 
+#define __de_muenchen_allg_itd51_wollmux_XPrintModel_idl__ 
+ 
+#include <com/sun/star/uno/XInterface.idl> 
+  
+module de {  module muenchen {  module allg { module itd51 { module wollmux {
+ 
+/** 
+  Repräsentiert die Schnittstelle WollMux Komfortdruckfunktionen.
+ */
+interface XPrintModel
+{
+    /**
+     */
+	void print( [in] short listener);
+};
+
+}; }; }; }; };
+ 
+#endif

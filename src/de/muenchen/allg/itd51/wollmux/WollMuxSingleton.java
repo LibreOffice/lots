@@ -66,6 +66,7 @@ import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
 import de.muenchen.allg.itd51.wollmux.db.QueryResults;
 import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
+import de.muenchen.allg.itd51.wollmux.func.PrintFunctionLibrary;
 
 /**
  * Diese Klasse ist ein Singleton, welcher den WollMux initialisiert und alle
@@ -95,6 +96,12 @@ public class WollMuxSingleton implements XPALProvider
    * Dialoge.
    */
   private DialogLibrary funcDialogs;
+
+  /**
+   * Enthält die im Funktionen-Abschnitt der wollmux,conf definierten
+   * Funktionen.
+   */
+  private PrintFunctionLibrary globalPrintFunctions;
 
   /**
    * Enthält den default XComponentContext in dem der WollMux (bzw. das OOo)
@@ -179,6 +186,12 @@ public class WollMuxSingleton implements XPALProvider
         getFunctionDialogs(),
         null,
         null);
+
+    /*
+     * Globale Druckfunktionen parsen.
+     */
+    globalPrintFunctions = WollMuxFiles.parsePrintFunctions(WollMuxFiles
+        .getWollmuxConf());
 
     // Initialisiere EventProcessor
     WollMuxEventHandler.setAcceptEvents(successfulStartup);
@@ -434,6 +447,17 @@ public class WollMuxSingleton implements XPALProvider
   public FunctionLibrary getGlobalFunctions()
   {
     return globalFunctions;
+  }
+
+  /**
+   * Liefert die Funktionsbibliothek, die die global definierten Druckfunktionen
+   * enthält.
+   * 
+   * @author Christoph Lutz (D-III-ITD 5.1)
+   */
+  public PrintFunctionLibrary getGlobalPrintFunctions()
+  {
+    return globalPrintFunctions;
   }
 
   /**
