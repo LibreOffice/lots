@@ -602,7 +602,7 @@ abstract public class DocumentCommand
    */
   public String updateBookmark(boolean debug)
   {
-    if (!isDone() || debug)
+    if (!isDone())
     {
       // Neues WM-String zusammenbauen, der keine Zeilenvorschübe und
       // abschließende Leerzeichen enthält:
@@ -618,7 +618,7 @@ abstract public class DocumentCommand
     }
     else
     {
-      bookmark.remove();
+      if (!debug) bookmark.remove();
       return null;
     }
   }
