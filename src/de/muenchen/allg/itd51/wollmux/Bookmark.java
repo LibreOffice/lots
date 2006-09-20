@@ -341,45 +341,37 @@ public class Bookmark
   {
     Logger.debug("Rename \"" + name + "\" --> \"" + newName + "\"");
 
-    XTextRange oldRange = getTextRange();
-    if (oldRange != null)
+    XNameAccess bookmarks = UNO.XBookmarksSupplier(document.getObject())
+        .getBookmarks();
+    if (bookmarks.hasByName(newName))
     {
-      // altes Bookmark löschen:
-      remove();
-
-      // neues Bookmark mit neuem Namen hinzufügen.
-      UnoService bookmark = new UnoService(null);
-      try
-      {
-        bookmark = document.create("com.sun.star.text.Bookmark");
-      }
-      catch (Exception e)
-      {
-        Logger.error(e);
-      }
-
-      if (bookmark.xNamed() != null)
-      {
-        bookmark.xNamed().setName(newName);
-      }
-      try
-      {
-        oldRange.getText().insertTextContent(
-            oldRange,
-            bookmark.xTextContent(),
-            true);
-      }
-      catch (IllegalArgumentException e)
-      {
-        Logger.error(e);
-      }
-      // Nach dem Einfügen den neuen Namen holen, da OOo einen Suffix an den
-      // Namen anhängt, wenn der selbe Name bereits vergeben ist.
-      if (bookmark.xNamed() != null)
-      {
-        name = bookmark.xNamed().getName();
-      }
+      int count = 1;
+      while (bookmarks.hasByName(newName + count))
+        ++count;
+      newName = newName + count;
     }
+
+    XNamed bm = null;
+    try
+    {
+      bm = UNO.XNamed(bookmarks.getByName(name));
+    }
+    catch (NoSuchElementException x)
+    {
+      Logger
+          .debug("Umbenennung kann nicht durchgeführt werden, da die Textmarke verschwunden ist :~-(");
+    }
+    catch (java.lang.Exception x)
+    {
+      Logger.error(x);
+    }
+
+    if (bm != null)
+    {
+      bm.setName(newName);
+      name = bm.getName();
+    }
+
     return name;
   }
 
