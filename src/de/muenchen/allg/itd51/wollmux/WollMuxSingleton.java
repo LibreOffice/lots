@@ -560,17 +560,12 @@ public class WollMuxSingleton implements XPALProvider
       // Bekannte Event-Typen rausziehen:
       if (source.xTextDocument() != null)
       {
-        // Beim OnLoadFinished wird die Bearbeitung des Dokuments gestartet.
-        // Dort ist das Dokument jedoch noch nicht mit einem Frame verknüpft.
-        if (docEvent.EventName.equalsIgnoreCase("OnLoadFinished"))
-        {
-          WollMuxEventHandler.handleProcessTextDocument(source.xTextDocument());
-        }
-
         // Ab OnLoad oder OnNew steht nun auch der Frame zur Verfügung und der
         // WollMuxDispatchInterceptor kann eingebunden werden.
-        else if (docEvent.EventName.equalsIgnoreCase("OnLoad")
-                 || docEvent.EventName.equalsIgnoreCase(("OnNew")))
+        // TODO: auslagern der DispatchInterceptor-Registrierung in das
+        // TextDocumentModel.
+        if (docEvent.EventName.equalsIgnoreCase("OnLoad")
+            || docEvent.EventName.equalsIgnoreCase(("OnNew")))
         {
           XFrame frame = getFrame(source);
           if (UNO.XDispatchProviderInterception(frame) != null)
@@ -581,6 +576,9 @@ public class WollMuxSingleton implements XPALProvider
                 .registerDispatchProviderInterceptor(
                     new WollMuxDispatchInterceptor());
           }
+
+          // starten der Dokumentbearbeitung:
+          WollMuxEventHandler.handleProcessTextDocument(source.xTextDocument());
         }
       }
     }
