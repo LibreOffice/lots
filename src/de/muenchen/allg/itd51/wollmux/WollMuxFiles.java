@@ -195,12 +195,12 @@ public class WollMuxFiles
         if (roots.length > 0 && roots[0].toString().contains(":"))
           defaultWollmuxConfPath = C_PROGRAMME_WOLLMUX_WOLLMUX_CONF;
         
-        File etc_wollmux_conf = new File(defaultWollmuxConfPath);
-        if (etc_wollmux_conf.exists())
+        wollmuxConfFile = new File(defaultWollmuxConfPath);
+        if (wollmuxConfFile.exists())
         {
           ConfigThingy etcWollmuxConf = new ConfigThingy("etcWollmuxConf",
-              etc_wollmux_conf.toURI().toURL());
-          Logger.debug(ETC_WOLLMUX_WOLLMUX_CONF + " gelesen");
+              wollmuxConfFile.toURI().toURL());
+
           Iterator iter = wollmuxConf.iterator();
           while (iter.hasNext())
             etcWollmuxConf.addChild((ConfigThingy) iter.next());
@@ -235,10 +235,9 @@ public class WollMuxFiles
   }
 
   /**
-   * Liefert das File-Objekt des LocalOverrideStorage Caches zurück. Darf erst
+   * Liefert das File-Objekt der wollmux,conf zurück, die gelesen wurde
+   * (kann z,B, auch die aus /etc/wollmux/ sein). Darf erst
    * nach setupWollMuxDir() aufgerufen werden.
-   * 
-   * @return das File-Objekt des LocalOverrideStorage Caches.
    */
   public static File getWollMuxConfFile()
   {
