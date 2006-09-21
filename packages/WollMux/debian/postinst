@@ -22,11 +22,13 @@ case "$1" in
     OOoTemp="$(dpkg -L openoffice.org-core02 | grep "unopkg$")" > /dev/null
     export PATH="$(dirname $OOoTemp):$PATH"
     TEMPDIR="$(mktemp -d -p /tmp wollmux-postinst.XXXXXX)"
+    echo "postinst log: $TEMPDIR/messages"
 	export HOME="$TEMPDIR" # um das lockfile-Problem zu umgehen
     cd /usr/lib/wollmux
-    unopkg remove WollMux.uno.pkg --shared &>/dev/null || true
-    unopkg add WollMux.uno.pkg -v --shared | grep -q 'unopkg done'
-    test -d "$TEMPDIR" && rm -rf "$TEMPDIR"
+    echo "***** Eine Fehlermeldung 'Package ist nicht bekannt' ist meist harmlos *****" >>"$TEMPDIR"/messages
+    unopkg remove WollMux.uno.pkg --shared >>"$TEMPDIR"/messages 2>&1 || true
+    echo "***** Ende des Abschnitts der meist harmlosen Fehlermeldungen ******" >>"$TEMPDIR"/messages
+    unopkg add WollMux.uno.pkg -v --shared 2>>"$TEMPDIR"/messages | grep -q 'unopkg done'
     if [ ! -e /usr/bin/wollmuxbar ]; then
        ln -s /usr/lib/wollmux/wollmuxbar.sh /usr/bin/wollmuxbar
     fi   
