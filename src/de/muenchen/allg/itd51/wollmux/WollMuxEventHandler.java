@@ -39,7 +39,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
@@ -55,7 +54,6 @@ import com.sun.star.frame.XDispatch;
 import com.sun.star.frame.XFrame;
 import com.sun.star.frame.XModel;
 import com.sun.star.lang.EventObject;
-import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.lang.XComponent;
 import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
@@ -678,8 +676,6 @@ public class WollMuxEventHandler
 
   private static class OnFormularMax4000Show extends BasicEvent
   {
-    public static HashMap mapDocToMax4000 = new HashMap();
-
     private final XTextDocument doc;
 
     private OnFormularMax4000Show(XTextDocument doc)
@@ -692,7 +688,7 @@ public class WollMuxEventHandler
 
       if (doc == null) return;
 
-      TextDocumentModel model = WollMuxSingleton.getInstance()
+      final TextDocumentModel model = WollMuxSingleton.getInstance()
           .getTextDocumentModel(doc);
 
       // Bestehenden Max in den Vordergrund holen oder neuen Max erzeugen.
@@ -709,8 +705,7 @@ public class WollMuxEventHandler
           {
             if (actionEvent.getSource() instanceof FormularMax4000)
               WollMuxEventHandler
-                  .handleFormularMax4000Returned((FormularMax4000) actionEvent
-                      .getSource());
+                  .handleFormularMax4000Returned(model);
           }
         });
         model.setCurrentFormularMax4000(max);
@@ -738,36 +733,28 @@ public class WollMuxEventHandler
    * Dieses Event wird vom EventProcessor geworfen, wenn der FormularMax
    * zurückkehrt.
    */
-  public static void handleFormularMax4000Returned(FormularMax4000 max)
+  public static void handleFormularMax4000Returned(TextDocumentModel model)
   {
-    handle(new OnFormularMax4000Returned(max));
+    handle(new OnFormularMax4000Returned(model));
   }
 
   private static class OnFormularMax4000Returned extends BasicEvent
   {
-    private FormularMax4000 max;
+    private TextDocumentModel model;
 
-    private OnFormularMax4000Returned(FormularMax4000 max)
+    private OnFormularMax4000Returned(TextDocumentModel model)
     {
-      this.max = max;
+      this.model = model;
     }
 
     protected void doit() throws WollMuxFehlerException
     {
-      // Lösche alle entsprechenden FormularMax-Instanzen aus der
-      // mapDocToMax4000
-      Iterator iter = OnFormularMax4000Show.mapDocToMax4000.entrySet()
-          .iterator();
-      while (iter.hasNext())
-      {
-        Map.Entry entry = (Map.Entry) iter.next();
-        if (entry.getValue() == max) entry.setValue(null);
-      }
+      model.setCurrentFormularMax4000(null);
     }
 
     public String toString()
     {
-      return this.getClass().getSimpleName() + "(" + max + ")";
+      return this.getClass().getSimpleName() + "(#" + model.hashCode() + ")";
     }
   }
 
@@ -1691,7 +1678,7 @@ public class WollMuxEventHandler
 
   /**
    * Erzeugt ein Event, das die Position und Größe des übergebenen
-   * Dokument-Fensters auf die vorgegebenen Werte setzt. ACHTUNG: Die Maßangaben
+   * Dokument-Fensters auf die vorgegebenen Werte setzt. AHTUNG: Die Maßangaben
    * beziehen sich auf die linke obere Ecke des Fensterinhalts OHNE die
    * Titelzeile und die Fensterdekoration des Rahmens. Um die linke obere Ecke
    * des gesamten Fensters richtig zu setzen, müssen die Größenangaben des
