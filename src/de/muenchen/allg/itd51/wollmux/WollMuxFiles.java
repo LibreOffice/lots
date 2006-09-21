@@ -15,6 +15,7 @@
  *                  | /etc/wollmux/wollmux.conf auswerten
  * 26.06.2006 | BNK | Dialoge/FONT_ZOOM auswerten. LookAndFeel setzen. 
  * 07.09.2006 | BNK | isDebugMode effizienter gemacht.
+ * 21.09.2006 | BNK | Unter Windows nach c:\programme\wollmux\wollmux.conf schauen
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -55,6 +56,7 @@ import de.muenchen.allg.itd51.wollmux.func.PrintFunctionLibrary;
 public class WollMuxFiles
 {
   private static final String ETC_WOLLMUX_WOLLMUX_CONF = "/etc/wollmux/wollmux.conf";
+  private static final String C_PROGRAMME_WOLLMUX_WOLLMUX_CONF = "C:\\Programme\\wollmux\\wollmux.conf";
 
   /**
    * Die in der wollmux.conf mit DEFAULT_CONTEXT festgelegte URL.
@@ -188,7 +190,12 @@ public class WollMuxFiles
     if (wollmuxConf.query("DEFAULT_CONTEXT", 1).count() == 0)
       try
       {
-        File etc_wollmux_conf = new File(ETC_WOLLMUX_WOLLMUX_CONF);
+        File[] roots = File.listRoots();
+        String defaultWollmuxConfPath = ETC_WOLLMUX_WOLLMUX_CONF; 
+        if (roots.length > 0 && roots[0].toString().contains(":"))
+          defaultWollmuxConfPath = C_PROGRAMME_WOLLMUX_WOLLMUX_CONF;
+        
+        File etc_wollmux_conf = new File(defaultWollmuxConfPath);
         if (etc_wollmux_conf.exists())
         {
           ConfigThingy etcWollmuxConf = new ConfigThingy("etcWollmuxConf",
