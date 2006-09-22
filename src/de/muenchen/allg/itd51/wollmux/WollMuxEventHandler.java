@@ -861,6 +861,7 @@ public class WollMuxEventHandler
         if (doc.xBookmarksSupplier() != null)
         {
           XNameAccess bookmarks = doc.xBookmarksSupplier().getBookmarks();
+          
           if (bookmarks.hasByName(DocumentCommand.SETTYPE_normalTemplate))
           {
             processNormalCommands = true;
@@ -869,7 +870,8 @@ public class WollMuxEventHandler
             // Bookmark löschen
             removeBookmark(doc, DocumentCommand.SETTYPE_normalTemplate);
           }
-          else if (bookmarks
+          
+          else if (processNormalCommands && bookmarks
               .hasByName(DocumentCommand.SETTYPE_templateTemplate))
           {
             processNormalCommands = false;
@@ -878,6 +880,7 @@ public class WollMuxEventHandler
             // Bookmark löschen
             removeBookmark(doc, DocumentCommand.SETTYPE_templateTemplate);
           }
+          
           else if (bookmarks.hasByName(DocumentCommand.SETTYPE_formDocument))
           {
             processNormalCommands = false;
