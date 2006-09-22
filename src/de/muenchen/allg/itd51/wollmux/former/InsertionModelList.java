@@ -17,8 +17,10 @@
 */
 package de.muenchen.allg.itd51.wollmux.former;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Vector;
 
 /**
  * Verwaltet eine Liste von InsertionModels
@@ -33,12 +35,20 @@ public class InsertionModelList
   private List models = new LinkedList();
   
   /**
+   * Liste aller {@link ItemListener}, die über Änderungen des Listeninhalts informiert
+   * werden wollen.
+   */
+  private List listeners = new Vector(1);
+  
+  /**
    * Fügt model dieser Liste hinzu.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void add(InsertionModel model)
   {
-    models.add(model);
+    int idx = models.size();
+    models.add(idx, model);
+    notifyListeners(model, idx);
   }
   
   /**
@@ -56,5 +66,43 @@ public class InsertionModelList
     }
   }
   
+  /**
+   * listener wird über Änderungen der Liste informiert.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public void addListener(ItemListener listener)
+  {
+    if (!listeners.contains(listener)) listeners.add(listener);
+  }
+  
+  /**
+   * Benachrichtigt alle ItemListener über das Hinzufügen von model zur Liste an Index index.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private void notifyListeners(InsertionModel model, int index)
+  {
+    Iterator iter = listeners.iterator();
+    while (iter.hasNext())
+    {
+      ItemListener listener = (ItemListener)iter.next();
+      listener.itemAdded(model, index);
+    }
+  }
+  
+  /**
+   * Interface für Klassen, die interessiert sind, zu erfahren, wenn sich die Liste
+   * ändert.
+   *
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public static interface ItemListener
+  {
+    /**
+     * Wird aufgerufen nachdem model zur Liste hinzugefügt wurde (an Index index).
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
+    public void itemAdded(InsertionModel model, int index);
+  }
+
 }
 

@@ -84,6 +84,9 @@ public class AllFormControlModelLineViewsPanel implements View, ItemListener, On
    */
   private JPanel myPanel;
   
+  /**
+   * Die JTabbedPane, die die Reiter dieser View enthält.
+   */
   private JTabbedPane tabPane;
   
   /**

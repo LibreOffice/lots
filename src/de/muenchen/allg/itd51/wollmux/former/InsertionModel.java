@@ -32,7 +32,6 @@ import com.sun.star.text.XBookmarksSupplier;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.SyntaxErrorException;
 import de.muenchen.allg.itd51.wollmux.Bookmark;
-import de.muenchen.allg.itd51.wollmux.former.FormControlModel.ModelChangeListener;
 
 /**
  * Stellt eine Einfügestelle im Dokument (insertValue oder insertFormValue) dar.

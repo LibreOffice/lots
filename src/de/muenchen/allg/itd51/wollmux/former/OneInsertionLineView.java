@@ -17,6 +17,7 @@
 */
 package de.muenchen.allg.itd51.wollmux.former;
 
+import java.awt.Dimension;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -80,6 +81,8 @@ public class OneInsertionLineView extends LineView
     myPanel.add(makeIDView());
     unmarkedBackgroundColor = myPanel.getBackground();
     model.addListener(new MyModelChangeListener());
+    myPanel.validate();
+    myPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, myPanel.getPreferredSize().height));
   }
   
   /**

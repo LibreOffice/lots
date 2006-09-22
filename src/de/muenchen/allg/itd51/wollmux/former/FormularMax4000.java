@@ -194,6 +194,11 @@ public class FormularMax4000
   JFrame editorFrame = null;
   
   /**
+   * Der Übercontainer für die linke Hälfte des FM4000.
+   */
+  private LeftPanel leftPanel;
+  
+  /**
    * Der Titel des Formulars.
    */
   private String formTitle = GENERATED_FORM_TITLE;
@@ -212,12 +217,6 @@ public class FormularMax4000
    * Verwaltet die {@link InsertionModel}s dieses Formulars.
    */
   private InsertionModelList insertionModelList;
-  
-  /**
-   * Hält in einem Panel FormControlModelLineViews für alle 
-   * {@link FormControlModel}s aus {@link #formControlModelList}. 
-   */
-  private AllFormControlModelLineViewsPanel allFormControlModelLineViewsPanel;
   
   /**
    * Wird verwendet für das Auslesen und Zurückspeichern der Formularbeschreibung.
@@ -299,9 +298,10 @@ public class FormularMax4000
     //der WindowListener sorgt dafür, dass auf windowClosing mit abort reagiert wird
     myFrame.addWindowListener(oehrchen);
     
-    allFormControlModelLineViewsPanel = new AllFormControlModelLineViewsPanel(formControlModelList, this);
+    leftPanel = new LeftPanel(insertionModelList, formControlModelList, this);
+    
     JPanel contentPanel = new JPanel(new BorderLayout());
-    contentPanel.add(allFormControlModelLineViewsPanel.JComponent(), BorderLayout.CENTER);
+    contentPanel.add(leftPanel.JComponent(), BorderLayout.CENTER);
     myFrame.getContentPane().add(contentPanel);
     
     JMenuBar mbar = new JMenuBar();
@@ -550,7 +550,7 @@ public class FormularMax4000
   {
     try{ 
       ConfigThingy conf = new ConfigThingy("Buttons", STANDARD_BUTTONS_MIDDLE_URL);
-      int index = allFormControlModelLineViewsPanel.getButtonInsertionIndex();
+      int index = leftPanel.getButtonInsertionIndex();
       parseGrandchildren(conf, index, false);
       //TODO writeFormDescriptor();
     }catch(Exception x) { Logger.error(x);}
@@ -565,7 +565,7 @@ public class FormularMax4000
   {
     try{ 
       ConfigThingy conf = new ConfigThingy("Buttons", STANDARD_BUTTONS_LAST_URL);
-      int index = allFormControlModelLineViewsPanel.getButtonInsertionIndex();
+      int index = leftPanel.getButtonInsertionIndex();
       parseGrandchildren(conf, index, false);
       //TODO writeFormDescriptor();
     }catch(Exception x) { Logger.error(x);}
@@ -802,7 +802,7 @@ public class FormularMax4000
       insertionModelList.add(imodel);
     }catch(Exception x)
     {
-      Logger.error("Es wurde ein fehlerhaftes Bookmark generiert: \""+bookmarkName+"\"");
+      Logger.error("Es wurde ein fehlerhaftes Bookmark generiert: \""+bookmarkName+"\"", x);
     }
     
     return model;
