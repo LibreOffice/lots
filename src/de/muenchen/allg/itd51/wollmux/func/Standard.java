@@ -106,22 +106,90 @@ public class Standard
     return false;
   }
 
-  /**
-   * Formatiert tel gemäss DIN 5008.
-   * @author NN (D-III-ITD 5.1)
+ /**
+   * Nach Aufruf über Funktion Telefonnummer. Übergabe der tel und vorwahlIntern
+   * an die Methode formatiereTelefonnummer.
+   * 
+   * @author Bettina Bauer (D-III-ITD 5.1)
    */
+
   public static String formatiereTelefonnummerDIN5008(String tel)
   {
-    tel = tel.replaceAll("\\p{Space}", ""); //alles Whitespace entfernen
-    if (tel.length() == 0) return tel;
-    if (tel.indexOf("233-") < 0) tel = tel.replaceFirst("^233", "233-"); //falls kein Minus nach 233 und 233 steht am Anfang, dann ergänze das Minus
-    if (tel.indexOf('/') < 0) 
-    { //wenn keine Vorwahl vorhanden ist
-      tel = tel.replaceFirst("^0","");
-      tel = "089 "+tel;
+    String vorwahlExtern = "089";
+    String formatierteTelExtern = formatiereTelefonnummer(tel, vorwahlExtern);
+    return formatierteTelExtern;
+  }
+
+  /**
+   * Nach Aufruf über Funktion TelefonnummerIntern. Übergabe der tel und
+   * vorwahlIntern an die Methode formatiereTelefonnummer. Die interne
+   * Telefonnummer wird so formatiert das sie von jedem internen Telefon aus
+   * gewählt werden kann.
+   * 
+   * @author Bettina Bauer (D-III-ITD 5.1)
+   */
+  public static String formatiereTelefonnummerDIN5008Intern(String tel)
+  {
+    String vorwahlIntern = "0";
+    String formatierteTelIntern = formatiereTelefonnummer(tel, vorwahlIntern);
+    return formatierteTelIntern;
+  }
+
+  /**
+   * Formatiert tel gemäss DIN 5008.
+   * 
+   * @author Bettina Bauer (D-III-ITD 5.1)
+   */
+  public static String formatiereTelefonnummer(String tel, String vorwahl)
+  {
+    if (tel == null || tel.length() == 0)
+    {
+      return tel;
     }
-    tel = tel.replaceAll("-989", "-989 "); //989 hat eine eigene Funktion. Nach DIN 5008 also Space vor Rest der Nummer
-    tel = tel.replaceAll("/"," "); //Vorwahlabtrennung ist veraltet
+    else
+    {
+      // alle Leerzeichen
+      tel = tel.replaceAll("\\p{Space}", "");
+      // alle anderen Zeichen bis auf "-" und "/"
+      tel = tel.replaceAll("[^0-9-/]", "");
+      // beginnt mit "233"
+      if (tel.startsWith("233"))
+      {
+        tel = tel.replaceAll("\\p{Punct}", "");
+        tel = tel.replaceFirst("233", vorwahl + " 233-");
+      }
+      // kein "/" enthalten und Startet mit "0"
+      else if ((!tel.contains("/")) && tel.startsWith("0"))
+      {
+        if (tel.startsWith("0-"))
+        {
+          tel = tel.replaceFirst("0-", "");
+        }
+        else
+        {
+          tel = tel.replaceFirst("0", "");
+        }
+        tel = vorwahl + " " + tel;
+        // kein "/"
+      }
+      else if (!tel.contains("/"))
+      {
+        tel = vorwahl + " " + tel;
+
+      }
+      else
+      {
+        for (int i = 0; i < tel.length(); i++)
+        {
+          if (tel.charAt(i) == '/')
+          {
+            tel = tel.replaceAll("\\p{Punct}", "");
+            tel = tel.substring(0, i) + " " + tel.substring(i, tel.length());
+          }
+        }
+
+      }
+    }
     return tel;
   }
 }
