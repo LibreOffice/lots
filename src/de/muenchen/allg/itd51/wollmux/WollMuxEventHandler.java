@@ -704,8 +704,7 @@ public class WollMuxEventHandler
           public void actionPerformed(ActionEvent actionEvent)
           {
             if (actionEvent.getSource() instanceof FormularMax4000)
-              WollMuxEventHandler
-                  .handleFormularMax4000Returned(model);
+              WollMuxEventHandler.handleFormularMax4000Returned(model);
           }
         });
         model.setCurrentFormularMax4000(max);
@@ -861,7 +860,7 @@ public class WollMuxEventHandler
         if (doc.xBookmarksSupplier() != null)
         {
           XNameAccess bookmarks = doc.xBookmarksSupplier().getBookmarks();
-          
+
           if (bookmarks.hasByName(DocumentCommand.SETTYPE_normalTemplate))
           {
             processNormalCommands = true;
@@ -870,9 +869,10 @@ public class WollMuxEventHandler
             // Bookmark löschen
             removeBookmark(doc, DocumentCommand.SETTYPE_normalTemplate);
           }
-          
-          else if (processNormalCommands && bookmarks
-              .hasByName(DocumentCommand.SETTYPE_templateTemplate))
+
+          else if (processNormalCommands
+                   && bookmarks
+                       .hasByName(DocumentCommand.SETTYPE_templateTemplate))
           {
             processNormalCommands = false;
             processFormCommands = false;
@@ -880,7 +880,7 @@ public class WollMuxEventHandler
             // Bookmark löschen
             removeBookmark(doc, DocumentCommand.SETTYPE_templateTemplate);
           }
-          
+
           else if (bookmarks.hasByName(DocumentCommand.SETTYPE_formDocument))
           {
             processNormalCommands = false;
@@ -1358,6 +1358,60 @@ public class WollMuxEventHandler
              + ", "
              + idx
              + ")";
+    }
+  }
+
+  // *******************************************************************************************
+
+  /**
+   * Erzeugt ein neues WollMuxEvent, das die Druckfunktion zum TextDokument doc
+   * auf functionName setzt.
+   * 
+   * Kann derzeit über den XWollMux-Service aufgerufen werden und steht damit
+   * als Teil der Komfortdruckfunktionen auch in externen Routinen (z.B.
+   * Basic-Makros, ...) zur Verfügung.
+   * 
+   * @param doc
+   *          Das TextDokument, zu dem die Druckfunktion gesetzt werden soll.
+   * @param functionName
+   *          der Name der Druckfunktion. Der Name muss ein gültiger
+   *          Funktionsbezeichner sein und in einem Abschnitt "Druckfunktionen"
+   *          in der wollmux.conf definiert sein.
+   */
+  public static void handleSetPrintFunction(XTextDocument doc,
+      String functionName)
+  {
+    handle(new OnSetPrintFunction(doc, functionName));
+  }
+
+  private static class OnSetPrintFunction extends BasicEvent
+  {
+    private String functionName;
+
+    private XTextDocument doc;
+
+    public OnSetPrintFunction(XTextDocument doc, String functionName)
+    {
+      this.functionName = functionName;
+      this.doc = doc;
+    }
+
+    protected void doit()
+    {
+      TextDocumentModel model = WollMuxSingleton.getInstance()
+          .getTextDocumentModel(doc);
+
+      model.setPrintFunctionName(functionName);
+    }
+
+    public String toString()
+    {
+      return this.getClass().getSimpleName()
+             + "(#"
+             + doc.hashCode()
+             + ", '"
+             + functionName
+             + "')";
     }
   }
 
@@ -2073,7 +2127,12 @@ public class WollMuxEventHandler
   // *******************************************************************************************
 
   /**
-   * TODO: comment
+   * Erzeugt ein neues WollMuxEvent das signaisiert, dass der Drucken-Knopf in
+   * OOo gedrückt wurde und eine evtl. definierte Komfortdruckfunktion
+   * ausgeführt werden soll.
+   * 
+   * Das Event wird ausgelöst, wenn der registrierte XDispatchInterceptor eines
+   * Dokuments eine entsprechende Nachricht bekommt.
    */
   public static void handlePrintButtonPressed(XTextDocument doc,
       XDispatch origDisp, com.sun.star.util.URL arg0, PropertyValue[] arg1)
@@ -2081,14 +2140,6 @@ public class WollMuxEventHandler
     handle(new OnPrintButtonPressed(doc, origDisp, arg0, arg1));
   }
 
-  /**
-   * Dieses Event wird vom WollMux-Service (...comp.WollMux) ausgelöst wenn sich
-   * ein externe XPALChangeEventListener beim WollMux deregistriert. Der zu
-   * entfernende XPALChangeEventListerner wird anschließend im WollMuxSingleton
-   * aus der Liste der registrierten XPALChangeEventListener genommen.
-   * 
-   * @author christoph.lutz
-   */
   private static class OnPrintButtonPressed extends BasicEvent
   {
     private XTextDocument doc;
@@ -2126,7 +2177,7 @@ public class WollMuxEventHandler
 
         XPrintModel pmod = WollMuxSingleton.getInstance().getTextDocumentModel(
             doc).getPrintModel();
-        
+
         printFunc.invoke(pmod);
       }
       else
@@ -2144,21 +2195,20 @@ public class WollMuxEventHandler
   // *******************************************************************************************
 
   /**
-   * TODO: comment
+   * Erzeugt ein neues WollMuxEvent, das signasisiert, dass das Dokument doc in
+   * der Anzahl numberOfCopies ausgedruckt werden soll. Nach Beendigung des
+   * Events soll der CallBack des übergebenen ActionsListeners aufgerufen
+   * werden.
+   * 
+   * Das Event dient als Hilfe für die Komfortdruckfunktionen und wird vom
+   * XPrintModel aufgerufen und mit diesem synchronisiert.
    */
-  public static void handleDoPrint(XTextDocument doc, short numberOfCopies, ActionListener listener)
+  public static void handleDoPrint(XTextDocument doc, short numberOfCopies,
+      ActionListener listener)
   {
     handle(new OnDoPrint(doc, numberOfCopies, listener));
   }
 
-  /**
-   * Dieses Event wird vom WollMux-Service (...comp.WollMux) ausgelöst wenn sich
-   * ein externe XPALChangeEventListener beim WollMux deregistriert. Der zu
-   * entfernende XPALChangeEventListerner wird anschließend im WollMuxSingleton
-   * aus der Liste der registrierten XPALChangeEventListener genommen.
-   * 
-   * @author christoph.lutz
-   */
   private static class OnDoPrint extends BasicEvent
   {
     private XTextDocument doc;
@@ -2167,7 +2217,8 @@ public class WollMuxEventHandler
 
     private ActionListener listener;
 
-    public OnDoPrint(XTextDocument doc, short numberOfCopies, ActionListener listener)
+    public OnDoPrint(XTextDocument doc, short numberOfCopies,
+        ActionListener listener)
     {
       this.doc = doc;
       this.numberOfCopies = numberOfCopies;

@@ -33,6 +33,7 @@ import com.sun.star.util.CloseVetoException;
 import com.sun.star.util.XCloseListener;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.itd51.wollmux.DocumentCommand.SetPrintFunction;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
 
 /**
@@ -83,13 +84,14 @@ public class TextDocumentModel
   private String[] fragUrls;
 
   /**
-   * Enthält den Namen der Druckfunktion, die der DocumentCommandInterpreter
-   * beim Ausführen der Dokumentkommandos feststellen kann.
+   * Enthält das SetPrintFunction-Dokumentkommando falls in diesem Dokument eine
+   * Druckfunktion definiert ist oder null, wenn keine Druckfunktion definiert
+   * ist.
    */
-  private String printFunctionName;
+  private DocumentCommand.SetPrintFunction printFunction;
 
   /**
-   * TODO: comment
+   * Enthält das zu diesem TextDocumentModel zugehörige XPrintModel.
    */
   private XPrintModel printModel = new PrintModel();
 
@@ -108,7 +110,7 @@ public class TextDocumentModel
     this.fragUrls = new String[] {};
     this.currentMax4000 = null;
     this.closeListener = null;
-    this.printFunctionName = null;
+    this.printFunction = null;
   }
 
   /**
@@ -230,24 +232,67 @@ public class TextDocumentModel
   }
 
   /**
-   * TODO: comment
+   * Diese Methode setzt die diesem TextDocumentModel zugehörige Druckfunktion
+   * auf den Wert functionName, der ein gültiger Funktionsbezeichner sein muss
+   * oder löscht eine bereits gesetzte Druckfunktion, wenn functionName der
+   * Leerstring ist.
+   * 
+   * TESTED
    * 
    * @param printFunctionName
+   *          der Name der Druckfunktion (zum setzen) oder der Leerstring (zum
+   *          löschen). Der zu setzende Name muss ein gültiger
+   *          Funktionsbezeichner sein und in einem Abschnitt "Druckfunktionen"
+   *          in der wollmux.conf definiert sein.
    */
   public void setPrintFunctionName(String printFunctionName)
   {
-    this.printFunctionName = printFunctionName;
+    if (printFunctionName == null || printFunctionName.equals(""))
+    {
+      if (printFunction != null)
+      {
+        // Bestehende Druckfunktion löschen wenn Funktionsname null oder leer.
+        printFunction.setDoneState(true);
+        printFunction.updateBookmark(false);
+        printFunction = null;
+      }
+    }
+    else if (printFunction == null)
+    {
+      // Neues Dokumentkommando anlegen wenn noch nicht definiert.
+      printFunction = new SetPrintFunction(doc, printFunctionName);
+    }
+    else
+    {
+      // ansonsten den Namen auf printFunctionName ändern.
+      printFunction.setFunctionName(printFunctionName);
+    }
   }
 
   /**
-   * TODO: comment
-   * 
-   * @return
+   * Liefert den Namen der aktuellen Druckfunktion, falls das Dokument ein
+   * entsprechendes Dokumentkomando enthält oder eine Druckfunktion mit
+   * setPrintFunctionName()-Methode gesetz wurde; ist keine Druckfunktion
+   * definiert, so wird null zurück geliefert.
    */
   public String getPrintFunctionName()
   {
-    return "SachleitendeVerfuegung";
-    // return this.printFunctionName;
+    if (printFunction != null) return printFunction.getFunctionName();
+    return null;
+  }
+
+  /**
+   * Wird vom DocumentCommandInterpreter beim parsen des Dokumentkommandobaumes
+   * aufgerufen, wenn das Dokument ein setPrintFunction-Kommando enthält - das
+   * entsprechende Kommando cmd wird im Model abgespeichert und die relevante
+   * Information kann später über getPrintFunctionName() erfragt werden.
+   * 
+   * @param cmd
+   *          Das gefundene setPrintFunction-Dokumentkommando.
+   */
+  public void setPrintFunction(SetPrintFunction cmd)
+  {
+    printFunction = cmd;
   }
 
   /**
@@ -417,9 +462,7 @@ public class TextDocumentModel
   }
 
   /**
-   * TODO: comment
-   * 
-   * @return
+   * Liefert das zu diesem TextDocumentModel zugehörige XPrintModel.
    */
   public XPrintModel getPrintModel()
   {
@@ -427,30 +470,51 @@ public class TextDocumentModel
   }
 
   /**
-   * TODO: comment
+   * Das XPrintModel ist Bestandteil der Komfortdruckfunktionen, wobei jede
+   * Druckfunktion ein XPrintModel übergeben bekommt, das das Drucken aus der
+   * Komfortdruckfunktion heraus erleichtern soll. Da die einzelnen
+   * Druckfunktionen in eigenen Threads laufen, muss jede Druckfunktion sicher
+   * stellen, dass die zu erledigenden Aktionen mit dem
+   * WollMuxEventHandler-Thread synchronisiert werden. Dies geschieht über einen
+   * lock-wait-callback-Mechanismus. Vor dem Einstellen des Action-Ereignisses
+   * in den WollMuxEventHandler wird ein lock gesetzt. Nach dem Einstellen des
+   * Ereignisses wird so lange gewartet, bis der WollMuxEventHandler die
+   * übergebene Callback-Methode aufruft.
    * 
    * @author christoph.lutz
-   * 
    */
   public class PrintModel implements XPrintModel
   {
+    /**
+     * Das lock-Flag, das vor dem Einstellen eines WollMuxEvents auf true
+     * gesetzt werden muss und signalisiert, ob das WollMuxEvent erfolgreich
+     * abgearbeitet wurde.
+     */
     private boolean[] lock = new boolean[] { true };
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#print(short)
+     */
     public void print(short numberOfCopies)
     {
       setLock();
-      WollMuxEventHandler.handleDoPrint(doc, numberOfCopies, unlockActionListener);
+      WollMuxEventHandler.handleDoPrint(
+          doc,
+          numberOfCopies,
+          unlockActionListener);
       waitForUnlock();
     }
 
     /**
-     * TODO: doku anpassen: Setzt einen lock, der in Verbindung mit setUnlock
-     * und der waitForUnlock-Methode verwendet werden kann, um quasi Modalität
-     * für nicht modale Dialoge zu realisieren. setLock() sollte stets vor dem
-     * Aufruf des nicht modalen Dialogs erfolgen, nach dem Aufruf des nicht
-     * modalen Dialogs folgt der Aufruf der waitForUnlock()-Methode. Der nicht
-     * modale Dialog erzeugt bei der Beendigung ein ActionEvent, das dafür
-     * sorgt, dass setUnlock aufgerufen wird.
+     * Setzt einen lock, der in Verbindung mit setUnlock und der
+     * waitForUnlock-Methode verwendet werden kann, um eine Synchronisierung mit
+     * dem WollMuxEventHandler-Thread zu realisieren. setLock() sollte stets vor
+     * dem Absetzen des WollMux-Events erfolgen, nach dem Absetzen des
+     * WollMux-Events folgt der Aufruf der waitForUnlock()-Methode. Das
+     * WollMuxEventHandler-Event erzeugt bei der Beendigung ein ActionEvent, das
+     * dafür sorgt, dass setUnlock aufgerufen wird.
      */
     protected void setLock()
     {
@@ -458,8 +522,8 @@ public class TextDocumentModel
     }
 
     /**
-     * TODO: doku anpassen. Macht einen mit setLock() gesetzten Lock rückgängig
-     * und bricht damit eine evtl. wartende waitForUnlock()-Methode ab.
+     * Macht einen mit setLock() gesetzten Lock rückgängig und bricht damit eine
+     * evtl. wartende waitForUnlock()-Methode ab.
      */
     protected void setUnlock()
     {
@@ -471,14 +535,13 @@ public class TextDocumentModel
     }
 
     /**
-     * TODO: doku anpassen. Wartet so lange, bis der vorher mit setLock()
-     * gesetzt lock mit der Methode setUnlock() aufgehoben wird. So kann die
-     * quasi Modalität nicht modale Dialoge zu realisiert werden. setLock()
-     * sollte stets vor dem Aufruf des nicht modalen Dialogs erfolgen, nach dem
-     * Aufruf des nicht modalen Dialogs folgt der Aufruf der
-     * waitForUnlock()-Methode. Der nicht modale Dialog erzeugt bei der
-     * Beendigung ein ActionEvent, das dafür sorgt, dass setUnlock aufgerufen
-     * wird.
+     * Wartet so lange, bis der vorher mit setLock() gesetzt lock mit der
+     * Methode setUnlock() aufgehoben wird. So kann die Synchronisierung mit
+     * Events aus dem WollMuxEventHandler-Thread realisiert werden. setLock()
+     * sollte stets vor dem Aufruf des Events erfolgen, nach dem Aufruf des
+     * Events folgt der Aufruf der waitForUnlock()-Methode. Das Event erzeugt
+     * bei der Beendigung ein ActionEvent, das dafür sorgt, dass setUnlock
+     * aufgerufen wird.
      */
     protected void waitForUnlock()
     {
@@ -496,10 +559,10 @@ public class TextDocumentModel
     }
 
     /**
-     * TODO: doku anpassen: Dieser ActionListener kann nicht modalen Dialogen
-     * übergeben werden und sorgt in Verbindung mit den Methoden setLock() und
-     * waitForUnlock() dafür, dass quasi modale Dialoge realisiert werden
-     * können.
+     * Dieser ActionListener kann WollMuxHandler-Events übergeben werden und
+     * sorgt in Verbindung mit den Methoden setLock() und waitForUnlock() dafür,
+     * dass eine Synchronisierung mit dem WollMuxEventHandler-Thread realisiert
+     * werden kann.
      */
     protected UnlockActionListener unlockActionListener = new UnlockActionListener();
 

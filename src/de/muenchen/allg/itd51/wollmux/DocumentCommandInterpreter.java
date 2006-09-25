@@ -57,6 +57,7 @@ import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertContent;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertFormValue;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertFrag;
+import de.muenchen.allg.itd51.wollmux.DocumentCommand.SetPrintFunction;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.SetType;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.UpdateFields;
 import de.muenchen.allg.itd51.wollmux.DocumentCommandTree.TreeExecutor;
@@ -127,8 +128,7 @@ public class DocumentCommandInterpreter
    * 
    * @throws WMCommandsFailedException
    */
-  public void executeTemplateCommands()
-      throws WMCommandsFailedException
+  public void executeTemplateCommands() throws WMCommandsFailedException
   {
     Logger.debug("executeTemplateCommands");
 
@@ -1199,6 +1199,26 @@ public class DocumentCommandInterpreter
     {
       cmd.setDoneState(true);
       return 0;
+    }
+
+    /**
+     * Merkt sich eine evtl. gesetzte Druckfunktion im TextDocumentModel
+     */
+    public int executeCommand(SetPrintFunction cmd)
+    {
+      if (model.getPrintFunctionName() == null)
+      {
+        model.setPrintFunction(cmd);
+        return 0;
+      }
+      else
+      {
+        insertErrorField(cmd, new Exception(
+            "Mehr als ein WM(CMD 'setPrintFunction' ...)-Kommando vorhanden!\n"
+                + "Es darf nur ein solches Kommando in der Vorlage vorkommen."));
+        cmd.setErrorState(true);
+        return 1;
+      }
     }
   }
 

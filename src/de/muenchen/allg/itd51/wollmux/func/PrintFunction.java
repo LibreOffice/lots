@@ -18,6 +18,7 @@
 package de.muenchen.allg.itd51.wollmux.func;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 
 import com.sun.star.script.provider.XScript;
 
@@ -52,8 +53,7 @@ public class PrintFunction
    * PrintFunction.
    * 
    * @throws ConfigurationErrorException
-   *           falls die Spezifikation in conf fehlerhaft ist.
-   *           TODO: testen
+   *           falls die Spezifikation in conf fehlerhaft ist. TODO: testen
    */
   public PrintFunction(ConfigThingy conf) throws ConfigurationErrorException
   {
@@ -75,21 +75,18 @@ public class PrintFunction
         String methodStr = url.substring(url.lastIndexOf('.') + 1);
         Class c = this.getClass().getClassLoader().loadClass(classStr);
         Method[] methods = c.getDeclaredMethods();
-        // TODO: signatur prüfen (erster Param muss XPrintModel sein
+
         for (int i = 0; i < methods.length; ++i)
-          if (methods[i].getName().equals(methodStr))
-          {
-            if (method != null)
-            {
-              Logger.error("Klasse \""
-                           + classStr
-                           + "\" enthält 2 Methoden namens \""
-                           + methodStr
-                           + "\"");
-              break;
-            }
-            method = methods[i];
-          }
+        {
+          Method m = methods[i];
+          if (!m.getName().equals(methodStr)) continue;
+
+          // Typ des ersten (und einzigen Parameters) prüfen:
+          Type[] types = m.getParameterTypes();
+          if (types.length != 1) continue;
+
+          if (types[0].equals(XPrintModel.class)) method = m;
+        }
 
         if (method == null)
           throw new ConfigurationErrorException(
@@ -97,7 +94,7 @@ public class PrintFunction
                   + classStr
                   + "\" enthält keine Methode namens \""
                   + methodStr
-                  + "\"");
+                  + "(XPrintModel model)\"");
       }
       else
       {
@@ -119,8 +116,7 @@ public class PrintFunction
    * @param pmod
    *          das XPrintModel des aktuellen Vordergrunddokuments, das die
    *          wichtigsten Druckkomandos bereitstellt, die die externe Funktion
-   *          verwenden kann.
-   * TODO: testen
+   *          verwenden kann. TODO: testen
    * @throws Exception
    */
   public void invoke(XPrintModel pmod)

@@ -21,6 +21,7 @@
  */
 package de.muenchen.allg.itd51.wollmux;
 
+import java.io.StringReader;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -31,6 +32,7 @@ import java.util.Vector;
 import com.sun.star.text.XParagraphCursor;
 import com.sun.star.text.XText;
 import com.sun.star.text.XTextCursor;
+import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextRange;
 import com.sun.star.uno.Exception;
 
@@ -73,7 +75,7 @@ abstract public class DocumentCommand
   /**
    * Das geparste ConfigThingy des zugehörenden Bookmarks.
    */
-  private ConfigThingy wmCmd;
+  protected ConfigThingy wmCmd;
 
   /**
    * Die Liste aller Kinder-Elemente.
@@ -88,7 +90,7 @@ abstract public class DocumentCommand
   /**
    * Das zu diesem DokumentCommand gehörende Bookmark.
    */
-  private Bookmark bookmark;
+  protected Bookmark bookmark;
 
   // Status-Attribute:
 
@@ -341,10 +343,11 @@ abstract public class DocumentCommand
   {
     return bookmark.getTextRange();
   }
-  
+
   /**
-   * Liefert die TextRange an der das Bookmark dieses Kommandos verankert ist oder
-   * null, falls das Bookmark nicht mehr existiert.
+   * Liefert die TextRange an der das Bookmark dieses Kommandos verankert ist
+   * oder null, falls das Bookmark nicht mehr existiert.
+   * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public XTextRange getAnchor()
@@ -397,6 +400,7 @@ abstract public class DocumentCommand
 
   /**
    * Liefert die Länge des End-Einfügemarkers.
+   * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public short getEndMarkLength()
@@ -404,9 +408,9 @@ abstract public class DocumentCommand
     return (short) INSERT_MARK_CLOSE.length();
   }
 
-  
   /**
    * Liefert die Länge des Start-Einfügemarkers.
+   * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public short getStartMarkLength()
@@ -414,43 +418,46 @@ abstract public class DocumentCommand
     return (short) INSERT_MARK_OPEN.length();
   }
 
-  
   /**
-   * Liefert entweder null falls kein Start-Einfügemarke vorhanden oder liefert 2 Cursor,
-   * von denen der erste links neben der zweite rechts neben der Start-Einfügemarke steht.
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TESTED
+   * Liefert entweder null falls kein Start-Einfügemarke vorhanden oder liefert
+   * 2 Cursor, von denen der erste links neben der zweite rechts neben der
+   * Start-Einfügemarke steht.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public XParagraphCursor[] getStartMark()
   {
     XTextRange range = bookmark.getTextRange();
     if (range == null || !hasInsertMarks) return null;
     XParagraphCursor[] cursor = new XParagraphCursor[2];
-    XText text = range.getText(); 
-    cursor[0] = UNO.XParagraphCursor(text.createTextCursorByRange(range.getStart()));
+    XText text = range.getText();
+    cursor[0] = UNO.XParagraphCursor(text.createTextCursorByRange(range
+        .getStart()));
     cursor[1] = UNO.XParagraphCursor(text.createTextCursorByRange(cursor[0]));
     cursor[1].goRight(getStartMarkLength(), false);
     return cursor;
   }
-  
+
   /**
-   * Liefert entweder null falls keine End-Einfügemarke vorhanden oder liefert 2 Cursor,
-   * von denen der erste links neben der zweite rechts neben der End-Einfügemarke steht.
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TESTED
+   * Liefert entweder null falls keine End-Einfügemarke vorhanden oder liefert 2
+   * Cursor, von denen der erste links neben der zweite rechts neben der
+   * End-Einfügemarke steht.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public XParagraphCursor[] getEndMark()
   {
     XTextRange range = bookmark.getTextRange();
     if (range == null || !hasInsertMarks) return null;
     XParagraphCursor[] cursor = new XParagraphCursor[2];
-    XText text = range.getText(); 
-    cursor[0] = UNO.XParagraphCursor(text.createTextCursorByRange(range.getEnd()));
+    XText text = range.getText();
+    cursor[0] = UNO.XParagraphCursor(text.createTextCursorByRange(range
+        .getEnd()));
     cursor[1] = UNO.XParagraphCursor(text.createTextCursorByRange(cursor[0]));
     cursor[0].goLeft(getStartMarkLength(), false);
     return cursor;
   }
-  
+
   /**
    * Hat das DocumentCommand über createInsertCursor Einfügemarken erzeugt,
    * werden diese aus dem Dokumentkommando gelöscht.
@@ -470,19 +477,18 @@ abstract public class DocumentCommand
         cursor = range.getText().createTextCursorByRange(range.getStart());
         cursor.goRight(getStartMarkLength(), true);
         Bookmark.removeTextFromInside(bookmark.getDocument(), cursor);
-        //cursor.setString("");
+        // cursor.setString("");
 
         // INSERT_MARK rechts löschen:
         cursor = range.getText().createTextCursorByRange(range.getEnd());
         cursor.goLeft(getEndMarkLength(), true);
         Bookmark.removeTextFromInside(bookmark.getDocument(), cursor);
-        //cursor.setString("");
+        // cursor.setString("");
         hasInsertMarks = false;
       }
     }
   }
 
-  
   /**
    * Beschreibt ob das Kommando bereits abgearbeitet wurde. Ist DONE bisher noch
    * nicht definiert oder gesetzt worden, so wird der Defaultwert false
@@ -591,6 +597,28 @@ abstract public class DocumentCommand
   }
 
   /**
+   * Liefert den Inhalt des übergebenen ConfigThingy-Objekts (üblicherweise das
+   * wmCmd) als einen String, der geeignet ist, um den ihn in Bookmarknamen
+   * verwenden zu können. D.h. alle Newline, Komma und andere für Bookmarknamen
+   * unverträgliche Zeichen werden entfernt.
+   * 
+   * @param conf
+   *          Das ConfigThingy-Objekt, zu dem die Stringrepräsentation erzeugt
+   *          werden soll.
+   * @return Einen String, der als Bookmarkname verwendet werden kann.
+   */
+  protected static String getCommandString(ConfigThingy conf)
+  {
+    // Neues WM-String zusammenbauen, der keine Zeilenvorschübe und
+    // abschließende Leerzeichen enthält:
+    String wmCmdString = conf.stringRepresentation(true, '\'');
+    wmCmdString = wmCmdString.replaceAll("[\r\n]+", " ");
+    while (wmCmdString.endsWith(" "))
+      wmCmdString = wmCmdString.substring(0, wmCmdString.length() - 1);
+    return wmCmdString;
+  }
+
+  /**
    * Schreibt den neuen Status des Dokumentkommandos in das Dokument zurück oder
    * löscht ein Bookmark, wenn der Status DONE=true gesetzt ist - Die Methode
    * liefert entweder den Namen des neuen Bookmarks, welches die neuen
@@ -604,12 +632,7 @@ abstract public class DocumentCommand
   {
     if (!isDone())
     {
-      // Neues WM-String zusammenbauen, der keine Zeilenvorschübe und
-      // abschließende Leerzeichen enthält:
-      String wmCmdString = toConfigThingy().stringRepresentation(true, '\'');
-      wmCmdString = wmCmdString.replaceAll("[\r\n]+", " ");
-      while (wmCmdString.endsWith(" "))
-        wmCmdString = wmCmdString.substring(0, wmCmdString.length() - 1);
+      String wmCmdString = getCommandString(toConfigThingy());
 
       // Neuen Status rausschreiben:
       bookmark.rename(wmCmdString);
@@ -796,6 +819,8 @@ abstract public class DocumentCommand
     public int executeCommand(DocumentCommand.InsertFunctionValue cmd);
 
     public int executeCommand(DocumentCommand.SetGroups cmd);
+
+    public int executeCommand(DocumentCommand.SetPrintFunction cmd);
   }
 
   // ********************************************************************************
@@ -1378,6 +1403,99 @@ abstract public class DocumentCommand
     String getType()
     {
       return type;
+    }
+
+    protected boolean canHaveChilds()
+    {
+      return false;
+    }
+
+    public int execute(DocumentCommand.Executor visitable)
+    {
+      return visitable.executeCommand(this);
+    }
+  }
+
+  // ********************************************************************************
+  /**
+   * Über dieses Dokumentkommando kann der Typ des Dokuments festgelegt werden.
+   * Es gibt die Typen SETTYPE_normalTemplate, SETTYPE_templateTemplate und
+   * SETTYPE_formDocument. Die SetType-Kommandos werden bereits im
+   * OnProcessTextDocument-Event verarbeitet und spielen daher keine Rolle mehr
+   * für den DocumentCommandInterpreter.
+   */
+  static public class SetPrintFunction extends DocumentCommand
+  {
+    private String funcName;
+
+    public SetPrintFunction(ConfigThingy wmCmd, Bookmark bookmark)
+        throws InvalidCommandException
+    {
+      super(wmCmd, bookmark);
+      funcName = "";
+      try
+      {
+        funcName = wmCmd.get("WM").get("FUNCTION").toString();
+      }
+      catch (NodeNotFoundException e)
+      {
+        throw new InvalidCommandException("Fehlendes Attribut FUNCTION");
+      }
+    }
+
+    /**
+     * Erzeugt ein neues SetPrintFunction-Dokumentkomando, das am Anfang
+     * doc.Text.Start liegt und auf die Druckfunktion functionName verweist.
+     * 
+     * @param doc
+     *          das Dokument an dessen doc.Text.Start das neue Bookmark erzeugt
+     *          werden soll.
+     * @param functionName
+     *          der Name der Druckfunktion
+     * @return das neue SetPrintFunction-Dokumentkommando
+     */
+    public SetPrintFunction(XTextDocument doc, String functionName)
+    {
+      super(null, new Bookmark("setPrintFunction_tmp", doc, doc.getText()
+          .getStart()));
+      setFunctionName(functionName);
+      this.funcName = functionName;
+    }
+
+    /**
+     * Setzt den neuen Funktionsnamen im Attribut FUNCTION auf den Bezeichner
+     * functionName oder logged eine Fehlermeldung, falls es sich bei der
+     * functionName um einen ungültigen Funktionsbezeichner handelt.
+     * 
+     * @param functionName
+     */
+    public void setFunctionName(String functionName)
+    {
+      if (functionName == null
+          || !functionName.matches("^([a-zA-Z_][a-zA-Z_0-9]*)$"))
+      {
+        Logger.error("SetPrintFunction: ungültiger Funktionsbezeichner '"
+                     + functionName
+                     + "'");
+        return;
+      }
+
+      try
+      {
+        wmCmd = new ConfigThingy("", null, new StringReader(
+            "WM(CMD 'setPrintFunction' FUNCTION '" + functionName + "')"));
+      }
+      catch (java.lang.Exception e)
+      {
+        Logger.error(e);
+      }
+
+      updateBookmark(false);
+    }
+
+    public String getFunctionName()
+    {
+      return funcName;
     }
 
     protected boolean canHaveChilds()

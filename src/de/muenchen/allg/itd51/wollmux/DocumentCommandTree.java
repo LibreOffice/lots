@@ -53,6 +53,7 @@ import de.muenchen.allg.itd51.wollmux.DocumentCommand.InvalidCommand;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InvalidCommandException;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.RootElement;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.SetGroups;
+import de.muenchen.allg.itd51.wollmux.DocumentCommand.SetPrintFunction;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.SetType;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.UpdateFields;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.Version;
@@ -248,6 +249,11 @@ public class DocumentCommandTree
       if (cmd.compareToIgnoreCase("setGroups") == 0)
       {
         return new DocumentCommand.SetGroups(wmCmd, bookmark);
+      }
+
+      if (cmd.compareToIgnoreCase("setPrintFunction") == 0)
+      {
+        return new DocumentCommand.SetPrintFunction(wmCmd, bookmark);
       }
 
       throw new InvalidCommandException("Unbekanntes Kommando \"" + cmd + "\"");
@@ -512,6 +518,11 @@ public class DocumentCommandTree
     }
 
     public int executeCommand(InsertFunctionValue cmd)
+    {
+      return 0;
+    }
+
+    public int executeCommand(SetPrintFunction cmd)
     {
       return 0;
     }
