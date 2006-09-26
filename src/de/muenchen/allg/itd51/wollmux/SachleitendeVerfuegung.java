@@ -35,7 +35,7 @@ public class SachleitendeVerfuegung
   private static final String FRAME_NAME_VERFUEGUNGSPUNKT1 = "WollMuxVerfuegungspunkt1";
 
   /**
-   * Enthält einen Vector mit den ersten 20 römischen Ziffern. Mehr wird in
+   * Enthält einen Vector mit den ersten 15 römischen Ziffern. Mehr wird in
    * Sachleitenden Verfügungen sicherlich nicht benötigt :-)
    */
   private static String[] romanNumbers = new String[] {
@@ -43,6 +43,7 @@ public class SachleitendeVerfuegung
                                                        "II.",
                                                        "III.",
                                                        "IV.",
+                                                       "V.",
                                                        "VI.",
                                                        "VII.",
                                                        "VIII.",
@@ -74,7 +75,9 @@ public class SachleitendeVerfuegung
     // Einen evtl. bestehenden Verfuegungspunkt zurücksetzen
     if (isVerfuegungspunkt(cursor))
     {
-      loescheVerfuegungspunkt(cursor);
+      cursor.gotoStartOfParagraph(false);
+      verfuegungspunktLoeschen(cursor);
+      ziffernAnpassen(doc);
       return;
     }
 
@@ -132,7 +135,7 @@ public class SachleitendeVerfuegung
    * @param par
    *          der Cursor, der sich in der entsprechenden Zeile befinden muss.
    */
-  private static void loescheVerfuegungspunkt(XParagraphCursor par)
+  private static void verfuegungspunktLoeschen(XParagraphCursor par)
   {
     UNO.setProperty(par, "ParaStyleName", PARA_STYLE_NAME_DEFAULT);
 
@@ -155,7 +158,8 @@ public class SachleitendeVerfuegung
 
     // Zähler für Verfuegungspunktnummer auf 1 initialisieren, wenn ein
     // Verfuegungspunkt1 vorhanden ist.
-    int count = (punkt1 == null) ? 0 : 1;
+    int count = 0;
+    if (punkt1 != null) count++;
 
     // Paragraphen des Texts enumerieren und dabei alle Verfuegungspunkte neu
     // numerieren.
@@ -202,10 +206,11 @@ public class SachleitendeVerfuegung
       XTextRange zifferOnly = getZifferOnly(punkt1);
       if (zifferOnly != null)
       {
-        if (count > 1)
-          zifferOnly.setString(romanNumbers[0]);
-        else
-          punkt1.getStart().setString(romanNumbers[0]);
+        if (count == 1) zifferOnly.setString("");
+      }
+      else
+      {
+        if (count > 1) punkt1.getStart().setString(romanNumbers[0]);
       }
     }
   }

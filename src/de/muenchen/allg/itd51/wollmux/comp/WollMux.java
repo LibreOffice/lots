@@ -37,7 +37,9 @@ import com.sun.star.lib.uno.helper.Factory;
 import com.sun.star.lib.uno.helper.WeakBase;
 import com.sun.star.registry.XRegistryKey;
 import com.sun.star.task.XAsyncJob;
+import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
+import com.sun.star.text.XTextViewCursorSupplier;
 import com.sun.star.uno.XComponentContext;
 
 import de.muenchen.allg.afid.UNO;
@@ -90,6 +92,8 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
   public static final String cmdFunctionDialog = "FunctionDialog";
 
   public static final String cmdFormularMax4000 = "FormularMax4000";
+
+  public static final String cmdZifferEinfuegen = "ZifferEinfuegen";
 
   public static final String cmdMenu = "Menu";
 
@@ -223,6 +227,8 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
       if (cmd.equalsIgnoreCase(cmdFunctionDialog)) xRet = this;
 
       if (cmd.equalsIgnoreCase(cmdFormularMax4000)) xRet = this;
+
+      if (cmd.equalsIgnoreCase(cmdZifferEinfuegen)) xRet = this;
     }
     return xRet;
   }
@@ -358,6 +364,24 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
         XTextDocument doc = UNO
             .XTextDocument(UNO.desktop.getCurrentComponent());
         if (doc != null) WollMuxEventHandler.handleFormularMax4000Show(doc);
+      }
+
+      if (cmd.compareToIgnoreCase(cmdZifferEinfuegen) == 0)
+      {
+        Logger.debug2("Dispatch: Aufruf von WollMux:ZifferEinfügen");
+        XTextDocument doc = UNO
+            .XTextDocument(UNO.desktop.getCurrentComponent());
+        if (doc != null && UNO.XModel(doc) != null)
+        {
+          // hole viewCursor
+          XTextCursor viewCursor = null;
+          XTextViewCursorSupplier suppl = UNO.XTextViewCursorSupplier(UNO
+              .XModel(doc).getCurrentController());
+          if (suppl != null) viewCursor = suppl.getViewCursor();
+
+          if (viewCursor != null)
+            WollMuxEventHandler.handleZifferEinfuegen(doc, viewCursor);
+        }
       }
     }
   }

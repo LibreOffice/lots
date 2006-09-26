@@ -2258,6 +2258,45 @@ public class WollMuxEventHandler
   }
 
   // *******************************************************************************************
+
+  /**
+   * Erzeugt ein neues WollMuxEvent, das signasisiert, dass das Dokument doc in
+   * der Anzahl numberOfCopies ausgedruckt werden soll. Nach Beendigung des
+   * Events soll der CallBack des übergebenen ActionsListeners aufgerufen
+   * werden.
+   * 
+   * Das Event dient als Hilfe für die Komfortdruckfunktionen und wird vom
+   * XPrintModel aufgerufen und mit diesem synchronisiert.
+   */
+  public static void handleZifferEinfuegen(XTextDocument doc, XTextCursor viewCursor)
+  {
+    handle(new OnZifferEinfuegen(doc, viewCursor));
+  }
+
+  private static class OnZifferEinfuegen extends BasicEvent
+  {
+    private XTextDocument doc;
+
+    private XTextCursor viewCursor;
+
+    public OnZifferEinfuegen(XTextDocument doc, XTextCursor viewCursor)
+    {
+      this.doc = doc;
+      this.viewCursor = viewCursor;
+    }
+
+    protected void doit() throws WollMuxFehlerException
+    {
+      SachleitendeVerfuegung.verfuegungspunktEinfuegen(doc, viewCursor);
+    }
+
+    public String toString()
+    {
+      return this.getClass().getSimpleName() + "(#" + doc.hashCode() + ", viewCursor)";
+    }
+  }
+
+  // *******************************************************************************************
   // Globale Helper-Methoden
   /**
    * Diese Methode erzeugt einen modalen UNO-Dialog zur Anzeige von
