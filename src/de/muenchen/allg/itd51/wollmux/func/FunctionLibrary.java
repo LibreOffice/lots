@@ -10,6 +10,7 @@
 * -------------------------------------------------------------------
 * 03.05.2006 | BNK | Erstellung
 * 08.05.2006 | BNK | Fertig implementiert.
+* 26.09.2006 | BNK | +hasFunction()
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -77,4 +78,14 @@ public class FunctionLibrary
     return func;
   }
   
+  /**
+   * Liefert true wenn diese Funktionsbibliothek eine Funktion namens funcName kennt.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public boolean hasFunction(String funcName)
+  {
+    if (mapIdToFunction.containsKey(funcName)) return true;
+    if (baselib != null) return baselib.hasFunction(funcName);
+    return false;
+  }
 }
