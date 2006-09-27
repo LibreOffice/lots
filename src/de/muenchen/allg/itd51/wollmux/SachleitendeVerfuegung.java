@@ -30,9 +30,11 @@ import de.muenchen.allg.afid.UNO;
 
 public class SachleitendeVerfuegung
 {
-  private static final String PARA_STYLE_NAME_DEFAULT = "Fließtext";
+  private static final String ParaStyleNameVerfuegungspunkt = "WollMuxVerfuegungspunkt";
 
-  private static final String FRAME_NAME_VERFUEGUNGSPUNKT1 = "WollMuxVerfuegungspunkt1";
+  private static final String ParaStyleNameDefault = "Fließtext";
+
+  private static final String FrameNameVerfuegungspunkt1 = "WollMuxVerfuegungspunkt1";
 
   /**
    * Enthält einen Vector mit den ersten 15 römischen Ziffern. Mehr wird in
@@ -56,11 +58,10 @@ public class SachleitendeVerfuegung
                                                        "XV." };
 
   /**
-   * Erzeugt einen neuen Absatz am Ende des Absatzes der range berührt und setzt
-   * das Absatzformat für den neuen Absatz auf "WollMuxVerfuegungspunkt" ODER
-   * löscht einen bestehenden Verfügungspunkt, wenn der Paragraph, in der sich
-   * range befindet, bereits das Absatzformat "WollMuxVerfügungspunkt[...]"
-   * besitzt.
+   * Setzt das Absatzformat des Absatzes, der range berührt, auf
+   * "WollMuxVerfuegungspunkt" ODER setzt alle in range enthaltenen
+   * Verfügungspunkte auf Fließtext zurück, wenn range einen oder mehrere
+   * Verfügungspunkte berührt.
    * 
    * @param range
    *          Die XTextRange, in der sich zum Zeitpunkt des Aufrufs der Cursor
@@ -72,31 +73,41 @@ public class SachleitendeVerfuegung
     XParagraphCursor cursor = UNO.XParagraphCursor(range.getText()
         .createTextCursorByRange(range));
 
-    // Einen evtl. bestehenden Verfuegungspunkt zurücksetzen
-    if (isVerfuegungspunkt(cursor))
+    // Enthält der markierte Bereich bereits Verfuegungspunkte, so werden diese
+    // gelöscht
+    boolean deletedAtLeastOne = false;
+    if (UNO.XEnumerationAccess(cursor) != null)
     {
-      cursor.gotoStartOfParagraph(false);
-      verfuegungspunktLoeschen(cursor);
-      ziffernAnpassen(doc);
-      return;
+      XEnumeration xenum = UNO.XEnumerationAccess(cursor).createEnumeration();
+
+      while (xenum.hasMoreElements())
+      {
+        XTextRange par = null;
+        try
+        {
+          par = UNO.XTextRange(xenum.nextElement());
+        }
+        catch (java.lang.Exception e)
+        {
+          Logger.error(e);
+        }
+
+        if (par != null && isVerfuegungspunkt(par))
+        {
+          // Einen evtl. bestehenden Verfuegungspunkt zurücksetzen
+          verfuegungspunktLoeschen(par);
+          deletedAtLeastOne = true;
+        }
+      }
+
     }
 
-    // Verfuegungspunkt im nächsten Paragraph erzeugen.
-    cursor.gotoEndOfParagraph(false);
-    try
+    if (!deletedAtLeastOne)
     {
-      cursor.getText().insertControlCharacter(
-          cursor,
-          com.sun.star.text.ControlCharacter.PARAGRAPH_BREAK,
-          true);
+      // Wenn kein Verfügungspunkt gelöscht wurde, sollen alle markierten
+      // Paragraphen als Verfuegungspunkte markiert werden.
+      UNO.setProperty(cursor, "ParaStyleName", ParaStyleNameVerfuegungspunkt);
     }
-    catch (IllegalArgumentException e)
-    {
-      Logger.error(e);
-    }
-
-    cursor.gotoNextParagraph(false);
-    UNO.setProperty(cursor, "ParaStyleName", "WollMuxVerfuegungspunkt");
 
     // Ziffernanpassung durchführen:
     ziffernAnpassen(doc);
@@ -124,7 +135,7 @@ public class SachleitendeVerfuegung
     catch (IllegalArgumentException e)
     {
     }
-    return paraStyleName.startsWith("WollMuxVerfuegungspunkt");
+    return paraStyleName.startsWith(ParaStyleNameVerfuegungspunkt);
   }
 
   /**
@@ -135,9 +146,9 @@ public class SachleitendeVerfuegung
    * @param par
    *          der Cursor, der sich in der entsprechenden Zeile befinden muss.
    */
-  private static void verfuegungspunktLoeschen(XParagraphCursor par)
+  private static void verfuegungspunktLoeschen(XTextRange par)
   {
-    UNO.setProperty(par, "ParaStyleName", PARA_STYLE_NAME_DEFAULT);
+    UNO.setProperty(par, "ParaStyleName", ParaStyleNameDefault);
 
     // Prüfe, ob der Absatz mit einer römischen Ziffer beginnt.
     XTextCursor zifferOnly = getZifferOnly(par);
@@ -148,10 +159,24 @@ public class SachleitendeVerfuegung
 
       // wenn nächstes Zeichen ein Whitespace-Zeichen ist, wird dieses gelöscht
       zifferOnly.goRight((short) 1, true);
-      if (zifferOnly.getString().matches("\\s")) zifferOnly.setString("");
+      if (zifferOnly.getString().matches("[ \t]")) zifferOnly.setString("");
     }
   }
 
+  /**
+   * Sucht nach allen Absätzen im Haupttextbereich des Dokuments doc (also nicht
+   * in Frames), deren Absatzformatname mit "WollMuxVerfuegungspunkt" beginnt
+   * und numeriert die bereits vorhandenen römischen Ziffern neu durch oder
+   * erzeugt eine neue Ziffer, wenn in einem entsprechenden Verfügungspunkt noch
+   * keine Ziffer gesetzt wurde. Ist ein Rahmen mit dem Namen
+   * WollMuxVerfuegungspunkt1 vorhanden, der einen als Verfügungpunkt markierten
+   * Paragraphen enthält, so wird dieser Paragraph immer (gemäß Konzept) als
+   * Verfügungspunkt "I" behandelt.
+   * 
+   * @param doc
+   *          Das Dokument, in dem alle Verfügungspunkte angepasst werden
+   *          sollen.
+   */
   public static void ziffernAnpassen(XTextDocument doc)
   {
     XTextRange punkt1 = getVerfuegungspunkt1(doc);
@@ -259,7 +284,7 @@ public class SachleitendeVerfuegung
     try
     {
       frame = UNO.XTextFrame(UNO.XTextFramesSupplier(doc).getTextFrames()
-          .getByName(FRAME_NAME_VERFUEGUNGSPUNKT1));
+          .getByName(FrameNameVerfuegungspunkt1));
     }
     catch (java.lang.Exception e)
     {
