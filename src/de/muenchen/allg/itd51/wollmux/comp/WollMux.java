@@ -95,6 +95,8 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
 
   public static final String cmdZifferEinfuegen = "ZifferEinfuegen";
 
+  public static final String cmdAbdruck = "Abdruck";
+
   public static final String cmdMenu = "Menu";
 
   /**
@@ -214,21 +216,23 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
 
       if (cmd.equalsIgnoreCase(cmdAbsenderAuswaehlen)) xRet = this;
 
-      if (cmd.equalsIgnoreCase(cmdOpenTemplate)) xRet = this;
+      else if (cmd.equalsIgnoreCase(cmdOpenTemplate)) xRet = this;
 
-      if (cmd.equalsIgnoreCase(cmdOpenDocument)) xRet = this;
+      else if (cmd.equalsIgnoreCase(cmdOpenDocument)) xRet = this;
 
-      if (cmd.equalsIgnoreCase(cmdSenderBox)) xRet = this;
+      else if (cmd.equalsIgnoreCase(cmdSenderBox)) xRet = this;
 
-      if (cmd.equalsIgnoreCase(cmdMenu)) xRet = this;
+      else if (cmd.equalsIgnoreCase(cmdMenu)) xRet = this;
 
-      if (cmd.equalsIgnoreCase(cmdPALVerwalten)) xRet = this;
+      else if (cmd.equalsIgnoreCase(cmdPALVerwalten)) xRet = this;
 
-      if (cmd.equalsIgnoreCase(cmdFunctionDialog)) xRet = this;
+      else if (cmd.equalsIgnoreCase(cmdFunctionDialog)) xRet = this;
 
-      if (cmd.equalsIgnoreCase(cmdFormularMax4000)) xRet = this;
+      else if (cmd.equalsIgnoreCase(cmdFormularMax4000)) xRet = this;
 
-      if (cmd.equalsIgnoreCase(cmdZifferEinfuegen)) xRet = this;
+      else if (cmd.equalsIgnoreCase(cmdZifferEinfuegen)) xRet = this;
+
+      else if (cmd.equalsIgnoreCase(cmdAbdruck)) xRet = this;
     }
     return xRet;
   }
@@ -319,33 +323,33 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
         Logger.debug2("Dispatch: Aufruf von WollMux:AbsenderAuswaehlenDialog");
         WollMuxEventHandler.handleShowDialogAbsenderAuswaehlen();
       }
-      // TODO Sollte hier der effizienz halber nicht überall "else" stehen?
-      if (cmd.compareToIgnoreCase(cmdPALVerwalten) == 0)
+
+      else if (cmd.compareToIgnoreCase(cmdPALVerwalten) == 0)
       {
         Logger.debug2("Dispatch: Aufruf von WollMux:PALVerwalten");
         WollMuxEventHandler.handleShowDialogPersoenlicheAbsenderliste();
       }
 
-      if (cmd.compareToIgnoreCase(cmdOpenTemplate) == 0)
+      else if (cmd.compareToIgnoreCase(cmdOpenTemplate) == 0)
       {
         Logger.debug2("Dispatch: Aufruf von WollMux:OpenTemplate mit Args:"
                       + argStr);
         WollMuxEventHandler.handleOpenDocument(parsedURL, true);
       }
 
-      if (cmd.compareToIgnoreCase(cmdOpenDocument) == 0)
+      else if (cmd.compareToIgnoreCase(cmdOpenDocument) == 0)
       {
         Logger.debug2("Dispatch: Aufruf von WollMux:OpenDocument mit Args:"
                       + argStr);
         WollMuxEventHandler.handleOpenDocument(parsedURL, false);
       }
 
-      if (cmd.compareToIgnoreCase(cmdMenu) == 0)
+      else if (cmd.compareToIgnoreCase(cmdMenu) == 0)
       {
         Logger.debug2("Dispatch: Aufruf von WollMux:menu mit Arg:" + parsedURL);
       }
 
-      if (cmd.compareToIgnoreCase(cmdFunctionDialog) == 0)
+      else if (cmd.compareToIgnoreCase(cmdFunctionDialog) == 0)
       {
         Logger.debug2("Dispatch: Aufruf von WollMux:FunctionDialog mit Arg:"
                       + parsedURL);
@@ -357,7 +361,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
           WollMuxEventHandler.handleFunctionDialog(doc, dialogName);
       }
 
-      if (cmd.compareToIgnoreCase(cmdFormularMax4000) == 0)
+      else if (cmd.compareToIgnoreCase(cmdFormularMax4000) == 0)
       {
         Logger.debug2("Dispatch: Aufruf von WollMux:FormularMax4000 mit Arg:"
                       + parsedURL);
@@ -366,7 +370,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
         if (doc != null) WollMuxEventHandler.handleFormularMax4000Show(doc);
       }
 
-      if (cmd.compareToIgnoreCase(cmdZifferEinfuegen) == 0)
+      else if (cmd.compareToIgnoreCase(cmdZifferEinfuegen) == 0)
       {
         Logger.debug2("Dispatch: Aufruf von WollMux:ZifferEinfügen");
         XTextDocument doc = UNO
@@ -381,6 +385,24 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
 
           if (viewCursor != null)
             WollMuxEventHandler.handleZifferEinfuegen(doc, viewCursor);
+        }
+      }
+
+      else if (cmd.compareToIgnoreCase(cmdAbdruck) == 0)
+      {
+        Logger.debug2("Dispatch: Aufruf von WollMux:Abdruck");
+        XTextDocument doc = UNO
+            .XTextDocument(UNO.desktop.getCurrentComponent());
+        if (doc != null && UNO.XModel(doc) != null)
+        {
+          // hole viewCursor
+          XTextCursor viewCursor = null;
+          XTextViewCursorSupplier suppl = UNO.XTextViewCursorSupplier(UNO
+              .XModel(doc).getCurrentController());
+          if (suppl != null) viewCursor = suppl.getViewCursor();
+
+          if (viewCursor != null)
+            WollMuxEventHandler.handleAbdruck(doc, viewCursor);
         }
       }
     }

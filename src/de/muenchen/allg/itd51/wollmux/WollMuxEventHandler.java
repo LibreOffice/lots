@@ -2260,15 +2260,16 @@ public class WollMuxEventHandler
   // *******************************************************************************************
 
   /**
-   * Erzeugt ein neues WollMuxEvent, das signasisiert, dass das Dokument doc in
-   * der Anzahl numberOfCopies ausgedruckt werden soll. Nach Beendigung des
-   * Events soll der CallBack des übergebenen ActionsListeners aufgerufen
-   * werden.
+   * Erzeugt ein neues WollMuxEvent, das signasisiert, dass eine weitere Ziffer
+   * der Sachleitenden Verfügungen eingefügt werden, bzw. eine bestehende Ziffer
+   * gelöscht werden soll.
    * 
-   * Das Event dient als Hilfe für die Komfortdruckfunktionen und wird vom
-   * XPrintModel aufgerufen und mit diesem synchronisiert.
+   * Das Event wird von WollMux.dispatch(...) geworfen, wenn Aufgrund eines
+   * Drucks auf den Knopf der OOo-Symbolleiste ein "wollmux:ZifferEinfuegen"
+   * dispatch erfolgte.
    */
-  public static void handleZifferEinfuegen(XTextDocument doc, XTextCursor viewCursor)
+  public static void handleZifferEinfuegen(XTextDocument doc,
+      XTextCursor viewCursor)
   {
     handle(new OnZifferEinfuegen(doc, viewCursor));
   }
@@ -2292,7 +2293,52 @@ public class WollMuxEventHandler
 
     public String toString()
     {
-      return this.getClass().getSimpleName() + "(#" + doc.hashCode() + ", viewCursor)";
+      return this.getClass().getSimpleName()
+             + "(#"
+             + doc.hashCode()
+             + ", viewCursor)";
+    }
+  }
+
+  // *******************************************************************************************
+
+  /**
+   * Erzeugt ein neues WollMuxEvent, das signasisiert, dass eine Abdruckzeile
+   * der Sachleitenden Verfügungen eingefügt werden, bzw. eine bestehende
+   * Abdruckzeile gelöscht werden soll.
+   * 
+   * Das Event wird von WollMux.dispatch(...) geworfen, wenn Aufgrund eines
+   * Drucks auf den Knopf der OOo-Symbolleiste ein "wollmux:Abdruck"
+   * dispatch erfolgte.
+   */
+  public static void handleAbdruck(XTextDocument doc, XTextCursor viewCursor)
+  {
+    handle(new OnAbdruck(doc, viewCursor));
+  }
+
+  private static class OnAbdruck extends BasicEvent
+  {
+    private XTextDocument doc;
+
+    private XTextCursor viewCursor;
+
+    public OnAbdruck(XTextDocument doc, XTextCursor viewCursor)
+    {
+      this.doc = doc;
+      this.viewCursor = viewCursor;
+    }
+
+    protected void doit() throws WollMuxFehlerException
+    {
+      SachleitendeVerfuegung.abdruck(doc, viewCursor);
+    }
+
+    public String toString()
+    {
+      return this.getClass().getSimpleName()
+             + "(#"
+             + doc.hashCode()
+             + ", viewCursor)";
     }
   }
 

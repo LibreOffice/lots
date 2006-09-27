@@ -14,6 +14,10 @@ Sub zifferEinfuegen
   dispatchURL(&quot;wollmux:zifferEinfuegen&quot;)
 End Sub
 
+Sub Abdruck
+  dispatchURL(&quot;wollmux:Abdruck&quot;)
+End Sub
+
 Sub dispatchURL(urlStr as String)
   dim url as new com.sun.star.util.URL
   url.Complete = urlStr

@@ -17,6 +17,7 @@
  */
 package de.muenchen.allg.itd51.wollmux;
 
+import com.sun.star.awt.FontWeight;
 import com.sun.star.container.XEnumeration;
 import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.text.XParagraphCursor;
@@ -32,30 +33,34 @@ public class SachleitendeVerfuegung
 {
   private static final String ParaStyleNameVerfuegungspunkt = "WollMuxVerfuegungspunkt";
 
+  private static final String ParaStyleNameAbdruck = "WollMuxVerfuegungspunktAbdruck";
+
   private static final String ParaStyleNameDefault = "Fließtext";
 
   private static final String FrameNameVerfuegungspunkt1 = "WollMuxVerfuegungspunkt1";
+
+  private static final String AbdruckDefaultStr = "Abdruck von <Vorgänger>.";
 
   /**
    * Enthält einen Vector mit den ersten 15 römischen Ziffern. Mehr wird in
    * Sachleitenden Verfügungen sicherlich nicht benötigt :-)
    */
-  private static String[] romanNumbers = new String[] {
-                                                       "I.",
-                                                       "II.",
-                                                       "III.",
-                                                       "IV.",
-                                                       "V.",
-                                                       "VI.",
-                                                       "VII.",
-                                                       "VIII.",
-                                                       "IX.",
-                                                       "X.",
-                                                       "XI.",
-                                                       "XII.",
-                                                       "XIII.",
-                                                       "XIV.",
-                                                       "XV." };
+  private static final String[] romanNumbers = new String[] {
+                                                             "I.",
+                                                             "II.",
+                                                             "III.",
+                                                             "IV.",
+                                                             "V.",
+                                                             "VI.",
+                                                             "VII.",
+                                                             "VIII.",
+                                                             "IX.",
+                                                             "X.",
+                                                             "XI.",
+                                                             "XII.",
+                                                             "XIII.",
+                                                             "XIV.",
+                                                             "XV." };
 
   /**
    * Setzt das Absatzformat des Absatzes, der range berührt, auf
@@ -75,6 +80,111 @@ public class SachleitendeVerfuegung
 
     // Enthält der markierte Bereich bereits Verfuegungspunkte, so werden diese
     // gelöscht
+    boolean deletedAtLeastOne = alleVerfuegungspunkteLoeschen(cursor);
+
+    if (!deletedAtLeastOne)
+    {
+      // Wenn kein Verfügungspunkt gelöscht wurde, sollen alle markierten
+      // Paragraphen als Verfuegungspunkte markiert werden.
+      UNO.setProperty(cursor, "ParaStyleName", ParaStyleNameVerfuegungspunkt);
+    }
+
+    // Ziffernanpassung durchführen:
+    ziffernAnpassen(doc);
+  }
+
+  /**
+   * Erzeugt am Ende des Paragraphen, der von range berührt wird, einen neuen
+   * Paragraphen, setzt diesen auf das Absatzformat
+   * WollMuxVerfuegungspunktAbdruck und belegt ihn mit dem String "Abdruck von
+   * <Vorgänger>" ODER löscht alle Verfügungspunkte die der range berührt, wenn
+   * in ihm mindestens ein bereits bestehender Verfügungspunkt enthalten ist.
+   * 
+   * @param doc
+   *          Das Dokument, in dem der Verfügungspunkt eingefügt werden soll
+   *          (wird für die Ziffernanpassung benötigt)
+   * @param cursor
+   *          Der Cursor, in dessen Bereich nach Verfügungspunkten gesucht wird.
+   */
+  public static void abdruck(XTextDocument doc, XTextRange range)
+  {
+    XParagraphCursor cursor = UNO.XParagraphCursor(range.getText()
+        .createTextCursorByRange(range));
+
+    // Enthält der markierte Bereich bereits Verfuegungspunkte, so werden diese
+    // gelöscht
+    boolean deletedAtLeastOne = alleVerfuegungspunkteLoeschen(cursor);
+
+    if (!deletedAtLeastOne)
+    {
+      // Abdruck einfügen, wenn kein Verfügungspunkt gelöscht wurde.
+      cursor.gotoStartOfParagraph(false);
+      cursor.setString(AbdruckDefaultStr + "\r");
+      cursor.gotoStartOfParagraph(false);
+      UNO.setProperty(cursor, "ParaStyleName", ParaStyleNameAbdruck);
+    }
+
+    // Ziffern anpassen:
+    ziffernAnpassen(doc);
+  }
+
+  /**
+   * Liefert true, wenn es sich bei dem übergebenen Absatz paragraph um einen
+   * als Verfuegungspunkt markierten Absatz handelt.
+   * 
+   * @param paragraph
+   *          Das Objekt mit der Property ParaStyleName, die für den Vergleich
+   *          herangezogen wird.
+   * @return true, wenn der Name des Absatzformates mit
+   *         "WollMuxVerfuegungspunkt" beginnt.
+   */
+  private static boolean isVerfuegungspunkt(XTextRange paragraph)
+  {
+    String paraStyleName = "";
+    try
+    {
+      paraStyleName = AnyConverter.toString(UNO.getProperty(
+          paragraph,
+          "ParaStyleName"));
+    }
+    catch (IllegalArgumentException e)
+    {
+    }
+    return paraStyleName.startsWith(ParaStyleNameVerfuegungspunkt);
+  }
+
+  /**
+   * Liefert true, wenn der übergebene Paragraph paragraph den für Abdrucke
+   * typischen String in der Form "Abdruck von I[, II, ...][ und n]" enthält,
+   * andernfalls false.
+   * 
+   * @param paragraph
+   *          der zu prüfende Paragraph
+   * @return
+   */
+  private static boolean isAbdruck(XTextRange paragraph)
+  {
+    String text = paragraph.getString();
+    return text.matches(".*Abdruck von (I|<Vorgänger>)\\..*");
+  }
+
+  /**
+   * Diese Methode löscht alle Verfügungspunkte, die der bereich des Cursors
+   * cursor berührt, und liefert true zurück, wenn mindestens ein
+   * Verfügungspunkt gelöscht wurde oder false, wenn sich in dem Bereich des
+   * Cursors kein Verfügungspunkt befand.
+   * 
+   * @param doc
+   *          Das Dokument, in dem der Verfügungspunkt eingefügt werden soll
+   *          (wird für die Ziffernanpassung benötigt)
+   * @param cursor
+   *          Der Cursor, in dessen Bereich nach Verfügungspunkten gesucht wird.
+   * 
+   * @return true, wenn mindestens ein Verfügungspunkt gelöscht wurde oder
+   *         false, wenn kein der cursor keinen Verfügungspunkt berührt.
+   */
+  private static boolean alleVerfuegungspunkteLoeschen(XParagraphCursor cursor)
+  {
     boolean deletedAtLeastOne = false;
     if (UNO.XEnumerationAccess(cursor) != null)
     {
@@ -99,43 +209,8 @@ public class SachleitendeVerfuegung
           deletedAtLeastOne = true;
         }
       }
-
     }
-
-    if (!deletedAtLeastOne)
-    {
-      // Wenn kein Verfügungspunkt gelöscht wurde, sollen alle markierten
-      // Paragraphen als Verfuegungspunkte markiert werden.
-      UNO.setProperty(cursor, "ParaStyleName", ParaStyleNameVerfuegungspunkt);
-    }
-
-    // Ziffernanpassung durchführen:
-    ziffernAnpassen(doc);
-  }
-
-  /**
-   * Liefert true, wenn es sich bei dem übergebenen Absatz paragraph um einen
-   * als Verfuegungspunkt markierten Absatz handelt.
-   * 
-   * @param paragraph
-   *          Das Objekt mit der Property ParaStyleName, die für den Vergleich
-   *          herangezogen wird.
-   * @return true, wenn der Name des Absatzformates mit
-   *         "WollMuxVerfuegungspunkt" beginnt.
-   */
-  private static boolean isVerfuegungspunkt(Object paragraph)
-  {
-    String paraStyleName = "";
-    try
-    {
-      paraStyleName = AnyConverter.toString(UNO.getProperty(
-          paragraph,
-          "ParaStyleName"));
-    }
-    catch (IllegalArgumentException e)
-    {
-    }
-    return paraStyleName.startsWith(ParaStyleNameVerfuegungspunkt);
+    return deletedAtLeastOne;
   }
 
   /**
@@ -161,6 +236,21 @@ public class SachleitendeVerfuegung
       zifferOnly.goRight((short) 1, true);
       if (zifferOnly.getString().matches("[ \t]")) zifferOnly.setString("");
     }
+
+    // wenn es sich bei dem Paragraphen um einen Abdruck handelt, wird dieser
+    // vollständig gelöscht.
+    if (isAbdruck(par))
+    {
+      // löscht den String "Abdruck von..."
+      par.setString("");
+      
+      // löscht das Returnzeichen ("\r") zum nächsten Absatz
+      XTextCursor parDeleter = par.getText().createTextCursorByRange(par.getEnd());
+      if(parDeleter.goRight((short)1, false)) {
+        parDeleter.goLeft((short)1, true);
+        parDeleter.setString("");
+      }
+    }
   }
 
   /**
@@ -177,7 +267,7 @@ public class SachleitendeVerfuegung
    *          Das Dokument, in dem alle Verfügungspunkte angepasst werden
    *          sollen.
    */
-  public static void ziffernAnpassen(XTextDocument doc)
+  private static void ziffernAnpassen(XTextDocument doc)
   {
     XTextRange punkt1 = getVerfuegungspunkt1(doc);
 
@@ -206,20 +296,39 @@ public class SachleitendeVerfuegung
 
         if (paragraph != null && isVerfuegungspunkt(paragraph))
         {
-          // String mit röhmischer Zahl erzeugen
-          String number = "" + (count + 1) + ".";
-          if (count < romanNumbers.length) number = romanNumbers[count];
           count++;
 
-          // Neue nummer setzen:
+          // String mit röhmischer Zahl erzeugen
+          String number = romanNumber(count);
+
+          // Enthält der Paragraph einen "Abdruck"-String, so wird dieser neu
+          // gesetzt:
+          if (isAbdruck(paragraph))
+          {
+            paragraph.setString(abdruckString(count));
+          }
+
           XTextRange zifferOnly = getZifferOnly(paragraph);
           if (zifferOnly != null)
           {
-            zifferOnly.setString(number);
+            // Nummer aktualisieren wenn sie nicht mehr stimmt.
+            if (!zifferOnly.getString().equals(number))
+              zifferOnly.setString(number);
           }
           else
           {
-            paragraph.getStart().setString(number + "\t");
+            // zuerst den Tab einfügen, damit dieses in der Standardformatierung
+            // des Absatzes erhalten bleibt.
+            paragraph.getStart().setString("\t");
+
+            // neue Nummer erzeugen mit Formatierung "fett". Die Formatierung
+            // darf sich nur auf die Nummer auswirken und nicht auch noch auf
+            // das darauffolgende "\t"-Zeichen
+            zifferOnly = paragraph.getText().createTextCursorByRange(
+                paragraph.getStart());
+            UNO.setProperty(paragraph.getStart(), "CharWeight", new Float(
+                FontWeight.BOLD));
+            zifferOnly.setString(number);
           }
         }
       }
@@ -313,5 +422,47 @@ public class SachleitendeVerfuegung
     }
 
     return null;
+  }
+
+  /**
+   * Erzeugt einen String in der Form "Abdruck von I.[, II., ...][ und <i-1>]",
+   * der passend zu einem Abdruck mit der Verfügungsnummer i angezeigt werden
+   * soll.
+   * 
+   * @param i
+   *          Die Nummer des Verfügungspunktes des Abdrucks
+   * @return String in der Form "Abdruck von I.[, II., ...][ und <i-1>]" oder
+   *         AbdruckDefaultStr, wenn der Verfügungspunkt bei i==0 und i==1
+   *         keinen Vorgänger besitzen kann.
+   */
+  private static String abdruckString(int i)
+  {
+    if (i < 2) return AbdruckDefaultStr;
+
+    String str = "Abdruck von " + romanNumber(1);
+    for (int j = 2; j < (i - 1); ++j)
+      str += ", " + romanNumber(j);
+    if (i >= 3) str += " und " + romanNumber(i - 1);
+    return str;
+  }
+
+  /**
+   * Liefert die römische Zahl zum übgebenen integer Wert i. Die römischen
+   * Zahlen werden dabei aus dem begrenzten Array romanNumbers ausgelesen. Ist i
+   * kein gültiger Index des Arrays, so sieht der Rückgabewert wie folgt aus "<dezimalzahl(i)>.".
+   * Hier kann bei Notwendigkeit natürlich auch ein Berechnungsschema für
+   * römische Zahlen implementiert werden, was für die Sachleitenden Verfügungen
+   * vermutlich aber nicht erforderlich sein wird.
+   * 
+   * @param i
+   *          Die Zahl, zu der eine römische Zahl geliefert werden soll.
+   * @return Die römische Zahl, oder "<dezimalzahl(i)>, wenn i nicht in den
+   *         Arraygrenzen von romanNumbers.
+   */
+  private static String romanNumber(int i)
+  {
+    String number = "" + i + ".";
+    if (i > 0 && i < romanNumbers.length) number = romanNumbers[i - 1];
+    return number;
   }
 }
