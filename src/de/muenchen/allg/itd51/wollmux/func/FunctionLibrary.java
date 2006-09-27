@@ -11,6 +11,7 @@
 * 03.05.2006 | BNK | Erstellung
 * 08.05.2006 | BNK | Fertig implementiert.
 * 26.09.2006 | BNK | +hasFunction()
+* 27.09.2006 | BNK | +getFunctionNames()
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -20,7 +21,9 @@
 package de.muenchen.allg.itd51.wollmux.func;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Eine Bibliothek von benannten Functions
@@ -54,7 +57,8 @@ public class FunctionLibrary
 
   /**
    * Fügt func dieser Funktionsbibliothek unter dem Namen funcName hinzu.
-   * Eine bereits existierende Funktion mit diesem Namen wird dabei ersetzt.
+   * Eine bereits existierende Funthis.paramNames = new String[paramNames.length];
+      System.arraycopy(paramNames, 0, this.paramNames, 0, paramNames.length);ktion mit diesem Namen wird dabei ersetzt.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void add(String funcName, Function func)
@@ -87,5 +91,17 @@ public class FunctionLibrary
     if (mapIdToFunction.containsKey(funcName)) return true;
     if (baselib != null) return baselib.hasFunction(funcName);
     return false;
+  }
+  
+  /**
+   * Liefert die Namen aller Funktionen, die über diese Funktionsbibliothek
+   * verfügbar sind.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public Set getFunctionNames()
+  {
+    Set names = new HashSet(mapIdToFunction.keySet());
+    if (baselib != null) names.addAll(baselib.getFunctionNames());
+    return names;
   }
 }
