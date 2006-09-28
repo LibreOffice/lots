@@ -15,7 +15,7 @@
 * @version 1.0
 * 
 */
-package de.muenchen.allg.itd51.wollmux.former;
+package de.muenchen.allg.itd51.wollmux.former.insertion;
 
 import java.awt.Dimension;
 import java.awt.event.InputEvent;
@@ -30,6 +30,10 @@ import javax.swing.JPanel;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.JTextComponent;
+
+import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
+import de.muenchen.allg.itd51.wollmux.former.view.LineView;
+import de.muenchen.allg.itd51.wollmux.former.view.ViewChangeListener;
 
 public class OneInsertionLineView extends LineView
 {

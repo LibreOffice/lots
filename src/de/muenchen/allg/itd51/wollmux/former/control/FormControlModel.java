@@ -16,7 +16,7 @@
 * @version 1.0
 * 
 */
-package de.muenchen.allg.itd51.wollmux.former;
+package de.muenchen.allg.itd51.wollmux.former.control;
 
 import java.util.Arrays;
 import java.util.HashSet;

@@ -15,7 +15,7 @@
  * @version 1.0
  * 
  */
-package de.muenchen.allg.itd51.wollmux.former;
+package de.muenchen.allg.itd51.wollmux.former.function;
 
 import java.util.Map;
 

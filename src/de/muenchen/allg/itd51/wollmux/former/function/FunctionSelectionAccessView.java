@@ -15,7 +15,7 @@
 * @version 1.0
 * 
 */
-package de.muenchen.allg.itd51.wollmux.former;
+package de.muenchen.allg.itd51.wollmux.former.function;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -30,6 +30,7 @@ import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.SwingConstants;
 
+import de.muenchen.allg.itd51.wollmux.former.view.View;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 
 /**

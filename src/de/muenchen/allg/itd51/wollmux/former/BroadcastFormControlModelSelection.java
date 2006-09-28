@@ -17,6 +17,8 @@
 */
 package de.muenchen.allg.itd51.wollmux.former;
 
+import de.muenchen.allg.itd51.wollmux.former.control.FormControlModel;
+
 /**
  * Nachricht, dass in einer View ein FormControlModel ausgewählt wurde. Diese Nachricht wird
  * von anderen Views ausgewertet, um ihre Selektionen ebenfalls anzupassen.

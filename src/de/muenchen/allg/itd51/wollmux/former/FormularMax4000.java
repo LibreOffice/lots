@@ -75,6 +75,12 @@ import de.muenchen.allg.itd51.wollmux.former.DocumentTree.FormControl;
 import de.muenchen.allg.itd51.wollmux.former.DocumentTree.InsertionBookmark;
 import de.muenchen.allg.itd51.wollmux.former.DocumentTree.TextRange;
 import de.muenchen.allg.itd51.wollmux.former.DocumentTree.Visitor;
+import de.muenchen.allg.itd51.wollmux.former.control.FormControlModel;
+import de.muenchen.allg.itd51.wollmux.former.control.FormControlModelList;
+import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelection;
+import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionProvider;
+import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModel;
+import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModelList;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 
 /**

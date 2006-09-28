@@ -21,6 +21,14 @@ import javax.swing.JComponent;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
 
+import de.muenchen.allg.itd51.wollmux.former.control.AllFormControlModelLineViewsPanel;
+import de.muenchen.allg.itd51.wollmux.former.control.FormControlModel;
+import de.muenchen.allg.itd51.wollmux.former.control.FormControlModelList;
+import de.muenchen.allg.itd51.wollmux.former.insertion.AllInsertionModelLineViewsPanel;
+import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModel;
+import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModelList;
+import de.muenchen.allg.itd51.wollmux.former.view.View;
+
 /**
  * Der Übercontainer für die linke Hälfte des FormularMax 4000.
  *

@@ -16,7 +16,7 @@
 * 
 */
 
-package de.muenchen.allg.itd51.wollmux.former;
+package de.muenchen.allg.itd51.wollmux.former.function;
 
 /**
  * Repräsentiert einen vom Benutzer konfigurierten Parameter für eine Funktion.

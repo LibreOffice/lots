@@ -15,12 +15,14 @@
 * @version 1.0
 * 
 */
-package de.muenchen.allg.itd51.wollmux.former;
+package de.muenchen.allg.itd51.wollmux.former.view;
 
 import java.awt.Color;
 
 import javax.swing.JComponent;
 import javax.swing.JPanel;
+
+import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
 
 public abstract class LineView implements View
 {

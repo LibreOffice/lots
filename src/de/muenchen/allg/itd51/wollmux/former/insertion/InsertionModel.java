@@ -15,7 +15,7 @@
 * @version 1.0
 * 
 */
-package de.muenchen.allg.itd51.wollmux.former;
+package de.muenchen.allg.itd51.wollmux.former.insertion;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -33,6 +33,9 @@ import com.sun.star.text.XBookmarksSupplier;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.SyntaxErrorException;
 import de.muenchen.allg.itd51.wollmux.Bookmark;
+import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelection;
+import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionAccess;
+import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionProvider;
 
 /**
  * Stellt eine Einfügestelle im Dokument (insertValue oder insertFormValue) dar.

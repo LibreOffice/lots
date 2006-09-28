@@ -15,7 +15,7 @@
 * @version 1.0
 * 
 */
-package de.muenchen.allg.itd51.wollmux.former;
+package de.muenchen.allg.itd51.wollmux.former.view;
 
 /**
  * Interface für Klassen, die an Änderungen einer View interessiert sind.

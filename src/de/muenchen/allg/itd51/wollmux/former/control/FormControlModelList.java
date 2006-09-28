@@ -19,7 +19,7 @@
 * @version 1.0
 * 
 */
-package de.muenchen.allg.itd51.wollmux.former;
+package de.muenchen.allg.itd51.wollmux.former.control;
 
 import java.util.Iterator;
 import java.util.List;
@@ -27,6 +27,7 @@ import java.util.ListIterator;
 import java.util.Vector;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
 
 /**
  * Verwaltet eine Liste von FormControlModels.

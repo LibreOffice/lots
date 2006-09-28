@@ -16,7 +16,7 @@
 * @version 1.0
 * 
 */
-package de.muenchen.allg.itd51.wollmux.former;
+package de.muenchen.allg.itd51.wollmux.former.control;
 
 import java.awt.Color;
 import java.awt.GridBagConstraints;
@@ -41,12 +41,16 @@ import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
 
 import de.muenchen.allg.itd51.wollmux.Logger;
-import de.muenchen.allg.itd51.wollmux.former.FormControlModelList.ItemListener;
+import de.muenchen.allg.itd51.wollmux.former.BroadcastFormControlModelSelection;
+import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
+import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
+import de.muenchen.allg.itd51.wollmux.former.control.FormControlModelList.ItemListener;
+import de.muenchen.allg.itd51.wollmux.former.view.View;
 
 /**
  * Hält in einem Panel FormControlModelLineViews für alle 
- * {@link de.muenchen.allg.itd51.wollmux.former.FormControlModel} einer 
- * {@link de.muenchen.allg.itd51.wollmux.former.FormControlModelList}.
+ * {@link de.muenchen.allg.itd51.wollmux.former.control.FormControlModel} einer 
+ * {@link de.muenchen.allg.itd51.wollmux.former.control.FormControlModelList}.
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */

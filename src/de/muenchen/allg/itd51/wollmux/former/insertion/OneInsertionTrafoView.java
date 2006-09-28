@@ -15,8 +15,10 @@
 * @version 1.0
 * 
 */
-package de.muenchen.allg.itd51.wollmux.former;
+package de.muenchen.allg.itd51.wollmux.former.insertion;
 
+import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionAccessView;
+import de.muenchen.allg.itd51.wollmux.former.view.ViewChangeListener;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 
 /**

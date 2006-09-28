@@ -15,7 +15,7 @@
 * @version 1.0
 * 
 */
-package de.muenchen.allg.itd51.wollmux.former;
+package de.muenchen.allg.itd51.wollmux.former.insertion;
 
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
@@ -33,6 +33,11 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
+
+import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
+import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
+import de.muenchen.allg.itd51.wollmux.former.view.View;
+import de.muenchen.allg.itd51.wollmux.former.view.ViewChangeListener;
 
 
 /**
@@ -63,7 +68,7 @@ public class AllInsertionModelLineViewsPanel implements View
   private JPanel myPanel;
   
   /**
-   * Das JPanel, das die {@link de.muenchen.allg.itd51.wollmux.former.OneInsertionLineView}s
+   * Das JPanel, das die {@link de.muenchen.allg.itd51.wollmux.former.insertion.OneInsertionLineView}s
    * enthält.
    */
   private JPanel mainPanel;

@@ -44,6 +44,7 @@ import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.Bookmark;
 import de.muenchen.allg.itd51.wollmux.Logger;
+import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModel;
 
 /**
  * Stellt die interessanten Teile eines Textdokuments als Baum zur Verfügung.

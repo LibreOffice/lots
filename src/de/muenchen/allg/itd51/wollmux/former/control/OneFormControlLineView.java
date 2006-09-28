@@ -15,7 +15,7 @@
 * @version 1.0
 * 
 */
-package de.muenchen.allg.itd51.wollmux.former;
+package de.muenchen.allg.itd51.wollmux.former.control;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -31,6 +31,11 @@ import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.Document;
+
+import de.muenchen.allg.itd51.wollmux.former.BroadcastFormControlModelSelection;
+import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
+import de.muenchen.allg.itd51.wollmux.former.view.LineView;
+import de.muenchen.allg.itd51.wollmux.former.view.ViewChangeListener;
 
 
 
@@ -193,7 +198,7 @@ public class OneFormControlLineView extends LineView
    *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public static interface ViewChangeListener extends de.muenchen.allg.itd51.wollmux.former.ViewChangeListener
+  public static interface ViewChangeListener extends de.muenchen.allg.itd51.wollmux.former.view.ViewChangeListener
   {
     /**
      * Wird aufgerufen, wenn sich das Label des Tabs, das das Model von view ist
