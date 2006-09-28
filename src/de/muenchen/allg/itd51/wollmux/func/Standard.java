@@ -156,7 +156,11 @@ public class Standard
       if (tel.startsWith("233"))
       {
         tel = tel.replaceAll("\\p{Punct}", "");
-        tel = tel.replaceFirst("233", vorwahl + " 233-");
+        if(tel.startsWith("233989")){
+          tel = tel.replaceFirst("233989", vorwahl + " 233-989 ");
+        }else {
+          tel = tel.replaceFirst("233", vorwahl + " 233-");
+        }
       }
       // kein "/" enthalten und Startet mit "0"
       else if ((!tel.contains("/")) && tel.startsWith("0"))
