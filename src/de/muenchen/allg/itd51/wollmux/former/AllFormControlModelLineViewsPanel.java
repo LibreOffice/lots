@@ -323,8 +323,9 @@ public class AllFormControlModelLineViewsPanel implements View, ItemListener, On
     return -1;
   }
   
-  public void viewShouldBeRemoved(OneFormControlLineView view)
+  public void viewShouldBeRemoved(View _view)
   { //TESTED
+    OneFormControlLineView view = (OneFormControlLineView)_view; 
     int index = getDescriptorIndexOf(view);
     if (index < 0) return;
     

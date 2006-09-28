@@ -66,13 +66,16 @@ import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.FormDescriptor;
 import de.muenchen.allg.itd51.wollmux.Logger;
+import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.dialog.Common;
+import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
 import de.muenchen.allg.itd51.wollmux.former.DocumentTree.Container;
 import de.muenchen.allg.itd51.wollmux.former.DocumentTree.DropdownFormControl;
 import de.muenchen.allg.itd51.wollmux.former.DocumentTree.FormControl;
 import de.muenchen.allg.itd51.wollmux.former.DocumentTree.InsertionBookmark;
 import de.muenchen.allg.itd51.wollmux.former.DocumentTree.TextRange;
 import de.muenchen.allg.itd51.wollmux.former.DocumentTree.Visitor;
+import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 
 /**
  * Stellt eine GUI bereit zum Bearbeiten einer WollMux-Formularvorlage.
@@ -224,6 +227,17 @@ public class FormularMax4000
   private FormDescriptor formDescriptor;
   
   /**
+   * Funktionsbibliothek, die globale Funktionen zur Verfügung stellt.
+   */
+  private FunctionLibrary functionLibrary;
+  
+  /**
+   * Verantwortlich für das Übersetzen von TRAFO, PLAUSI und AUTOFILL in
+   * {@link FunctionSelection}s.
+   */
+  private FunctionSelectionProvider functionSelectionProvider;
+  
+  /**
    * Der globale Broadcast-Kanal wird für Nachrichten verwendet, die verschiedene permanente
    * Objekte erreichen müssen, die aber von (transienten) Objekten ausgehen, die mit diesen 
    * globalen Objekten
@@ -263,12 +277,14 @@ public class FormularMax4000
   /**
    * Startet eine Instanz des FormularMax 4000 für das Dokument doc.
    * @param abortListener (falls nicht null) wird aufgerufen, nachdem der FormularMax 4000 geschlossen wurde.
+   * @param funcLib Funktionsbibliothek, die globale Funktionen zur Verfügung stellt.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public FormularMax4000(XTextDocument doc, ActionListener abortListener)
+  public FormularMax4000(XTextDocument doc, ActionListener abortListener, FunctionLibrary funcLib)
   {
     this.doc = doc;
     this.abortListener = abortListener;
+    this.functionLibrary = funcLib;
     initFormDescriptor(doc);
     
     //  GUI im Event-Dispatching Thread erzeugen wg. Thread-Safety.
@@ -445,7 +461,7 @@ public class FormularMax4000
       try{
         String bookmark = bookmarks[i];
         if (InsertionModel.INSERTION_BOOKMARK.matcher(bookmark).matches())
-          insertionModelList.add(new InsertionModel(bookmark, bmSupp));
+          insertionModelList.add(new InsertionModel(bookmark, bmSupp, functionSelectionProvider));
       }catch(Exception x)
       {
         Logger.error(x);
@@ -516,7 +532,8 @@ public class FormularMax4000
   }
   
   /**
-   * Extrahiert aus conf die globalen Eingenschaften des Formulars wie z,B, den Formulartitel.
+   * Extrahiert aus conf die globalen Eingenschaften des Formulars wie z,B, den Formulartitel
+   * oder die Funktionen des Funktionen-Abschnitts.
    * @param conf der WM-Knoten der über einer beliebigen Anzahl von Formular-Knoten sitzt.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
@@ -525,6 +542,16 @@ public class FormularMax4000
   {
     ConfigThingy tempConf = conf.query("Formular").query("TITLE");
     if (tempConf.count() > 0) formTitle = tempConf.toString();
+    tempConf = conf.query("Formular").query("Funktionen");
+    if (tempConf.count() >= 1)
+    {
+      try{tempConf = tempConf.getFirstChild();}catch(Exception x){}
+    }
+    else
+    {
+      tempConf = new ConfigThingy("Formular");
+    }
+    functionSelectionProvider = new FunctionSelectionProvider(functionLibrary, tempConf);
   }
   
   /**
@@ -798,7 +825,7 @@ public class FormularMax4000
     bookmarkName = control.surroundWithBookmark(bookmarkName);
 
     try{
-      InsertionModel imodel = new InsertionModel(bookmarkName, UNO.XBookmarksSupplier(doc));
+      InsertionModel imodel = new InsertionModel(bookmarkName, UNO.XBookmarksSupplier(doc), functionSelectionProvider);
       insertionModelList.add(imodel);
     }catch(Exception x)
     {
@@ -1153,8 +1180,11 @@ public class FormularMax4000
   public static void main(String[] args) throws Exception
   {
     UNO.init();
+    WollMuxFiles.setupWollMuxDir();
     XTextDocument doc = UNO.XTextDocument(UNO.desktop.getCurrentComponent());
-    new FormularMax4000(doc,null);
+    Map context = new HashMap();
+    DialogLibrary dialogLib = WollMuxFiles.parseFunctionDialogs(WollMuxFiles.getWollmuxConf(), null, context);
+    new FormularMax4000(doc,null, WollMuxFiles.parseFunctions(WollMuxFiles.getWollmuxConf(), dialogLib, context, null));
   }
 
 }

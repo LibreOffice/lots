@@ -23,6 +23,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 import java.util.regex.Pattern;
 
@@ -77,7 +78,12 @@ public class InsertionModel
   /**
    * Das Bookmarks, das diese Einfügestelle umschließt.
    */
-  private Bookmark bookmark; 
+  private Bookmark bookmark;
+  
+  /**
+   * Die TRAFO für diese Einfügung.
+   */
+  private FunctionSelection trafo;
   
   /**
    * Die {@link ModelChangeListener}, die über Änderungen dieses Models informiert werden wollen.
@@ -88,13 +94,15 @@ public class InsertionModel
    * Erzeugt ein neues InsertionModel für das Bookmark mit Namen bookmarkName, das bereits
    * im Dokument vorhanden sein muss.
    * @param doc das Dokument in dem sich das Bookmark befindet
+   * @param funcSelections ein FunctionSelectionProvider, der für das TRAFO Attribut eine passende
+   *        FunctionSelection liefern kann.
    * @throws SyntaxErrorException wenn bookmarkName nicht korrekte ConfigThingy-Syntax hat oder
    *         kein korrektes Einfügekommando ist.
    * @throws NoSuchElementException wenn ein Bookmark dieses Namens in doc nicht existiert.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
-  public InsertionModel(String bookmarkName, XBookmarksSupplier doc) throws SyntaxErrorException, NoSuchElementException
+  public InsertionModel(String bookmarkName, XBookmarksSupplier doc, FunctionSelectionProvider funcSelections) throws SyntaxErrorException, NoSuchElementException
   {
     bookmark = new Bookmark(bookmarkName,doc);
     String confStr = bookmarkName.replaceAll("\\d*\\z",""); //eventuell vorhandene Ziffern am Ende löschen
@@ -126,6 +134,15 @@ public class InsertionModel
       sourceType = FORM_TYPE;
     } else 
       throw new SyntaxErrorException();
+    
+    ConfigThingy trafoConf = conf.query("TRAFO");
+    if (trafoConf.count() == 0)
+      this.trafo = new FunctionSelection();
+    else
+    {
+      String functionName = trafoConf.toString();
+      this.trafo = funcSelections.getFunctionSelection(functionName);
+    }
   }
   
   /**
@@ -189,6 +206,16 @@ public class InsertionModel
   }
   
   /**
+   * Liefert ein Interface zum Zugriff auf die TRAFO dieses Objekts.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TODO Testen
+   */
+  public FunctionSelectionAccess getTrafoAccess()
+  {
+    return new MyTrafoAccess();
+  }
+  
+  /**
    * Interface für Listener, die über Änderungen eines Models informiert
    * werden wollen. 
    *
@@ -213,6 +240,31 @@ public class InsertionModel
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     public void modelRemoved(InsertionModel model);
+  }
+  
+  private class MyTrafoAccess implements FunctionSelectionAccess
+  {
+    public boolean isReference() { return trafo.isReference();}
+    public boolean isExpert()    { return trafo.isExpert(); }
+    public boolean isNone()      { return trafo.isNone(); }
+    public String getName()      { return trafo.getName();}
+    public ConfigThingy getExpertFunction() { return trafo.getExpertFunction(); }
+
+    public void setParameterValues(Map mapNameToParamValue)
+    {
+      trafo.setParameterValues(mapNameToParamValue);
+    }
+
+    public void setFunction(String functionName, String[] paramNames)
+    {
+      trafo.setFunction(functionName, paramNames);
+    }
+    
+    public void setExpertFunction(ConfigThingy funConf)
+    {
+      trafo.setExpertFunction(funConf);
+    }
+    
   }
   
 }

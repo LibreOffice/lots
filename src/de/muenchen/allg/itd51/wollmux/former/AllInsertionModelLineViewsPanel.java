@@ -55,7 +55,7 @@ public class AllInsertionModelLineViewsPanel implements View
   /**
    * Wird auf alle {@link OneInsertionLineView}s registriert.
    */
-  private OneInsertionLineView.ViewChangeListener myViewChangeListener;
+  private ViewChangeListener myViewChangeListener;
   
   /**
    * Das JPanel, das die ganze View enthält.
@@ -174,12 +174,12 @@ public class AllInsertionModelLineViewsPanel implements View
     
   }
   
-  private class MyViewChangeListener implements OneInsertionLineView.ViewChangeListener
+  private class MyViewChangeListener implements ViewChangeListener
   {
 
-    public void viewShouldBeRemoved(OneInsertionLineView view)
+    public void viewShouldBeRemoved(View view)
     {
-      removeItem(view);
+      removeItem((OneInsertionLineView)view);
     }
     
   }

@@ -50,7 +50,7 @@ public class OneFormControlLineView extends LineView
    * Typischerweise ein Container, der die View enthält und daher über Änderungen
    * auf dem Laufenden gehalten werden muss.
    */
-  private ViewChangeListener bigDaddy;
+  private OneFormControlLineView.ViewChangeListener bigDaddy;
   
   /**
    * Wird vor dem Ändern eines Attributs des Models gesetzt, damit der rekursive Aufruf
@@ -82,7 +82,7 @@ public class OneFormControlLineView extends LineView
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
-  public OneFormControlLineView(FormControlModel model, ViewChangeListener bigDaddy, FormularMax4000 formularMax4000)
+  public OneFormControlLineView(FormControlModel model, OneFormControlLineView.ViewChangeListener bigDaddy, FormularMax4000 formularMax4000)
   {
     this.model = model;
     this.bigDaddy = bigDaddy;
@@ -193,16 +193,8 @@ public class OneFormControlLineView extends LineView
    *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public static interface ViewChangeListener
+  public static interface ViewChangeListener extends de.muenchen.allg.itd51.wollmux.former.ViewChangeListener
   {
-    /**
-     * Wird aufgerufen, wenn alle Referenzen auf diese View entfernt werden sollten,
-     * weil die view ungültig geworden ist (typischerweise weil das zugrundeliegende Model
-     * nicht mehr da ist).
-     * @author Matthias Benkmann (D-III-ITD 5.1)
-     */
-    public void viewShouldBeRemoved(OneFormControlLineView view);
-    
     /**
      * Wird aufgerufen, wenn sich das Label des Tabs, das das Model von view ist
      * geändert hat.

@@ -156,21 +156,4 @@ public class OneInsertionLineView extends LineView
     public void mouseEntered(MouseEvent e) {}
     public void mouseExited(MouseEvent e) {}
   }
-  
-  /**
-   * Interface für Klassen, die an Änderungen dieser View interessiert sind.
-   *
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  public static interface ViewChangeListener
-  {
-    /**
-     * Wird aufgerufen, wenn alle Referenzen auf diese View entfernt werden sollten,
-     * weil die view ungültig geworden ist (typischerweise weil das zugrundeliegende Model
-     * nicht mehr da ist).
-     * @author Matthias Benkmann (D-III-ITD 5.1)
-     */
-    public void viewShouldBeRemoved(OneInsertionLineView view);
-
-  }
 }
