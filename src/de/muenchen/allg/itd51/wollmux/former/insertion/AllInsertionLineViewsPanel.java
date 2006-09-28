@@ -1,5 +1,5 @@
 /*
-* Dateiname: AllInsertionModelLineViewsPanel.java
+* Dateiname: AllInsertionLineViewsPanel.java
 * Projekt  : WollMux
 * Funktion : Enthält alle OneInsertionLineViews.
 * 
@@ -45,7 +45,7 @@ import de.muenchen.allg.itd51.wollmux.former.view.ViewChangeListener;
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
-public class AllInsertionModelLineViewsPanel implements View
+public class AllInsertionLineViewsPanel implements View
 {
   /**
    * Rand um Buttons (in Pixeln).
@@ -84,13 +84,13 @@ public class AllInsertionModelLineViewsPanel implements View
   private List views = new Vector();
   
   /**
-   * Erzeugt ein AllInsertionModelLineViewsPanel, die den Inhalt von
+   * Erzeugt ein AllInsertionLineViewsPanel, die den Inhalt von
    * insertionModelList anzeigt. ACHTUNG! insertionModelList sollte leer sein,
    * da nur neu hinzugekommene Elemente in der View angezeigt werden.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * 
    */
-  public AllInsertionModelLineViewsPanel(InsertionModelList insertionModelList, FormularMax4000 formularMax4000)
+  public AllInsertionLineViewsPanel(InsertionModelList insertionModelList, FormularMax4000 formularMax4000)
   {
     this.formularMax4000 = formularMax4000;
     insertionModelList.addListener(new MyItemListener());

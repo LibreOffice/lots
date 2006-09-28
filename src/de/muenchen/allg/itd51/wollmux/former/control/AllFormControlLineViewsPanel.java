@@ -1,5 +1,5 @@
 /*
-* Dateiname: AllFormControlModelLineViewsPanel.java
+* Dateiname: AllFormControlLineViewsPanel.java
 * Projekt  : WollMux
 * Funktion : Hält in einem Panel FormControlModelLineViews für alle FormControlModels einer FormControlModelList.
 * 
@@ -54,7 +54,7 @@ import de.muenchen.allg.itd51.wollmux.former.view.View;
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
-public class AllFormControlModelLineViewsPanel implements View, ItemListener, OneFormControlLineView.ViewChangeListener
+public class AllFormControlLineViewsPanel implements View, ItemListener, OneFormControlLineView.ViewChangeListener
 {
   /**
    * Rand um Textfelder (wird auch für ein paar andere Ränder verwendet)
@@ -119,12 +119,12 @@ public class AllFormControlModelLineViewsPanel implements View, ItemListener, On
   private FormularMax4000 formularMax4000;
   
   /**
-   * Erzeugt eine AllFormControlModelLineViewsPanel, die den Inhalt von
+   * Erzeugt eine AllFormControlLineViewsPanel, die den Inhalt von
    * formControlModelList anzeigt. ACHTUNG! formControlModelList sollte leer sein,
    * da nur neu hinzugekommene Elemente in der View angezeigt werden.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED*/
-  public AllFormControlModelLineViewsPanel(FormControlModelList formControlModelList, FormularMax4000 formularMax4000)
+  public AllFormControlLineViewsPanel(FormControlModelList formControlModelList, FormularMax4000 formularMax4000)
   {
     this.formControlModelList = formControlModelList;
     this.formularMax4000 = formularMax4000;
@@ -651,7 +651,7 @@ public class AllFormControlModelLineViewsPanel implements View, ItemListener, On
   }
   
   /**
-   * Ein Eintrag in der Liste {@link AllFormControlModelLineViewsPanel#viewDescriptors}.
+   * Ein Eintrag in der Liste {@link AllFormControlLineViewsPanel#viewDescriptors}.
    *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -668,7 +668,7 @@ public class AllFormControlModelLineViewsPanel implements View, ItemListener, On
     public int gridY;
     
     /**
-     * Der Index des Tabs in {@link AllFormControlModelLineViewsPanel#tabPane}.
+     * Der Index des Tabs in {@link AllFormControlLineViewsPanel#tabPane}.
      */
     public int containingTabIndex;
     
