@@ -341,7 +341,7 @@ public class Bookmark
    * an den Namen angehängt. Die Methode gibt den tatsächlich erzeugten Bookmarknamen zurück.
    * 
    * @return den tatsächlich erzeugten Namen des Bookmarks. Falls das Bookmark verschwunden
-   *         ist, so wird 
+   *         ist, so wird das Objekt {@link #BROKEN} zurückgeliefert (== vergleichbar). 
    * @throws Exception
    */
   public String rename(String newName)
