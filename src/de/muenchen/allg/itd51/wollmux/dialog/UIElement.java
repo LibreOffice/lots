@@ -15,6 +15,7 @@
 * 18.05.2006 | BNK | +isStatic()
 * 30.05.2006 | BNK | UIElement.Listbox unterstützt jetzt Zusatzfunktionen
 * 16.06.2006 | BNK | +hasFocus(), +takeFocus()
+* 29.09.2006 | BNK | Verbessertes Auslesen von ComboBox-Daten 
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -42,7 +43,11 @@ import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
+import javax.swing.text.JTextComponent;
 
+import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.func.Function;
 import de.muenchen.allg.itd51.wollmux.func.Value;
 
@@ -390,8 +395,21 @@ public interface UIElement extends Value
 
     public String getString()
     {
-      Object selected = combo.getSelectedItem();
-      return selected == null ? "" : selected.toString();
+      if (combo.isEditable())
+      {
+        Document comboDoc = ((JTextComponent)combo.getEditor().getEditorComponent()).getDocument(); 
+        try{
+          return comboDoc.getText(0,comboDoc.getLength());
+        }catch(BadLocationException x)
+        {
+          Logger.error(x);
+          return "";
+        }
+      } else
+      {
+        Object selected = combo.getSelectedItem();
+        return selected == null ? "" : selected.toString();
+      }
     }
 
     public boolean getBoolean()

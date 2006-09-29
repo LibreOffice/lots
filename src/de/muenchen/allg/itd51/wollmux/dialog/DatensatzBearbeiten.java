@@ -27,6 +27,7 @@
 * 19.04.2006 | BNK | [R1337]Fehlermeldung, bei unbekanntem TYPE
 * 15.05.2006 | BNK | nicht-editierbare Comboboxen funktionieren jetzt hoffentlich 
 *                  | richtig mit Vorgabewerten, die nicht in der Liste sind.
+* 29.09.2006 | BNK | Verbessertes Auslesen von ComboBox-Daten                 
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -79,6 +80,8 @@ import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
@@ -669,7 +672,22 @@ public class DatensatzBearbeiten
     
     public String getTextFromControl()
     {
-      return ((JComboBox)myComponent).getSelectedItem().toString();
+      JComboBox combo = (JComboBox)myComponent;
+      if (combo.isEditable())
+      {
+        Document comboDoc = ((JTextComponent)combo.getEditor().getEditorComponent()).getDocument(); 
+        try{
+          return comboDoc.getText(0,comboDoc.getLength());
+        }catch(BadLocationException x)
+        {
+          Logger.error(x);
+          return "";
+        }
+      } else
+      {
+        Object selected = combo.getSelectedItem();
+        return selected == null ? "" : selected.toString();
+      }
     }
 
     public void setTextInControl(String text)
