@@ -34,6 +34,8 @@ import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 
 import de.muenchen.allg.itd51.wollmux.Logger;
+import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
+import de.muenchen.allg.itd51.wollmux.former.BroadcastObjectSelection;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
 import de.muenchen.allg.itd51.wollmux.former.view.LineView;
 import de.muenchen.allg.itd51.wollmux.former.view.ViewChangeListener;
@@ -106,6 +108,10 @@ public class OneInsertionLineView extends LineView
     idBox.setSelectedItem(model.getDataID());
     JTextComponent tc = ((JTextComponent)idBox.getEditor().getEditorComponent());
     final Document comboDoc = tc.getDocument();
+    
+    idBox.addMouseListener(myMouseListener);
+    tc.addMouseListener(myMouseListener);
+    
     comboDoc.addDocumentListener(new DocumentListener(){
       public void update()
       {
@@ -121,8 +127,16 @@ public class OneInsertionLineView extends LineView
       public void changedUpdate(DocumentEvent e) {update();}
     });
     
-    idBox.addMouseListener(myMouseListener);
     return idBox;
+  }
+  
+  /**
+   * Liefert das {@link InsertionModel} das zu dieser View gehört.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public InsertionModel getModel()
+  {
+    return model;
   }
   
   private void idChangedDueToExternalReasons(String newId)
@@ -162,7 +176,12 @@ public class OneInsertionLineView extends LineView
       int state = 1;
       if ((e.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) == InputEvent.CTRL_DOWN_MASK)
         state = 0;
-      //formularMax4000.broadcast(new BroadcastFormControlModelSelection(getModel(), state, state!=0));
+      formularMax4000.broadcast(new BroadcastObjectSelection(getModel(), state, state!=0){
+
+        public void sendTo(BroadcastListener listener)
+        {
+          listener.broadcastInsertionModelSelection(this);
+        }});
     }
     public void mouseReleased(MouseEvent e) {}
     public void mouseEntered(MouseEvent e) {}

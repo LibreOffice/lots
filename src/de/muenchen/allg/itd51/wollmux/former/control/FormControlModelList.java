@@ -180,7 +180,7 @@ public class FormControlModelList
   /**
    * Schiebt die ausgewählten FormControlModels in der Liste nach oben, d,h, reduziert ihre
    * Indizes um 1.
-   * @param indices eine Menge von Integer-Objekten, die die Indizes der zu verschiebenden
+   * @param iter iteriert über eine Menge von Integer-Objekten, die die Indizes der zu verschiebenden
    * FormControlModels spezifizieren. Die Liste muss aufsteigend sortiert sein, sonst ist
    * das Ergebnis unbestimmt. Ist das erste Element von indices die 0, so wird nichts 
    * getan. Ansonsten werden die Indizes i aus indices der Reihe nach abgearbeitet und Element
@@ -188,9 +188,8 @@ public class FormControlModelList
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
-  public void moveElementsUp(List indices)
+  public void moveElementsUp(Iterator iter)
   {
-    Iterator iter = indices.iterator();
     boolean haveMovedTab = false;
     while (iter.hasNext())
     {
@@ -209,18 +208,19 @@ public class FormControlModelList
   /**
    * Schiebt die ausgewählten FormControlModels in der Liste nach unten, d,h, erhöht ihre
    * Indizes um 1.
-   * @param indices eine Menge von Integer-Objekten, die die Indizes der zu verschiebenden
-   * FormControlModels spezifizieren. Die Liste muss aufsteigend sortiert sein, sonst ist
-   * das Ergebnis unbestimmt. Ist das letzte Element von indices der höchste mögliche Index, 
+   * @param iter iteriert von hinten (d.h. startet hinter dem letzten Element) über eine Menge 
+   * von Integer-Objekten, die die Indizes der zu verschiebenden
+   * FormControlModels spezifizieren. Die Liste muss aufsteigend sortiert sein (von vorne gesehen,
+   * d.h. iter startet hinter dem größten Wert), sonst ist
+   * das Ergebnis unbestimmt. Ist das letzte Element der Liste der höchste mögliche Index, 
    * so wird nichts 
    * getan. Ansonsten werden die Indizes i aus indices von hinten beginnend abgearbeitet und 
    * Element i wird mit Element i+1 vertauscht.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
-  public void moveElementsDown(List indices)
+  public void moveElementsDown(ListIterator iter)
   {
-    ListIterator iter = indices.listIterator(indices.size());
     boolean haveMovedTab = false;
     while (iter.hasPrevious())
     {

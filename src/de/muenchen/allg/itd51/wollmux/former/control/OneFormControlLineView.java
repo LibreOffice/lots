@@ -32,7 +32,8 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.Document;
 
-import de.muenchen.allg.itd51.wollmux.former.BroadcastFormControlModelSelection;
+import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
+import de.muenchen.allg.itd51.wollmux.former.BroadcastObjectSelection;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
 import de.muenchen.allg.itd51.wollmux.former.view.LineView;
 
@@ -240,7 +241,13 @@ public class OneFormControlLineView extends LineView
       int state = 1;
       if ((e.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) == InputEvent.CTRL_DOWN_MASK)
         state = 0;
-      formularMax4000.broadcast(new BroadcastFormControlModelSelection(getModel(), state, state!=0));
+      //formularMax4000.broadcast(new BroadcastFormControlModelSelection(getModel(), state, state!=0));
+      formularMax4000.broadcast(new BroadcastObjectSelection(getModel(), state, state!=0){
+
+        public void sendTo(BroadcastListener listener)
+        {
+          listener.broadcastFormControlModelSelection(this);
+        }});
     }
     public void mouseReleased(MouseEvent e) {}
     public void mouseEntered(MouseEvent e) {}

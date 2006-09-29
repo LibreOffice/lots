@@ -31,6 +31,8 @@ import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.SwingConstants;
 
+import de.muenchen.allg.itd51.parser.ConfigThingy;
+import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.former.view.View;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 
@@ -142,13 +144,44 @@ public class FunctionSelectionAccessView implements View
   private JComboBox buildFunctionSelector()
   {
     JComboBox box = new JComboBox();
-    box.addItem(NONE_ITEM);
-    box.addItem(STRING_ITEM);
+    int selectedIndex = 0;
+    int none_index = box.getItemCount(); box.addItem(NONE_ITEM);
+    int string_index = box.getItemCount(); box.addItem(STRING_ITEM);
     Iterator iter = funcLib.getFunctionNames().iterator();
+    int i = box.getItemCount();
+ 
     while (iter.hasNext())
-      box.addItem(iter.next());
-    box.addItem(EXPERT_ITEM);
-    //FIXME Änderungen abfangen und funcSel Model entsprechend ändern
+    {
+      String funcName = (String)iter.next();
+
+      if (funcName.equals(funcSel.getFunctionName())) 
+        selectedIndex = i;
+      box.addItem(funcName);
+      ++i;
+    }
+    int expert_index = box.getItemCount(); box.addItem(EXPERT_ITEM);
+    
+    if (funcSel.isNone())
+      selectedIndex = none_index;
+    else if (funcSel.isExpert())
+    {
+      selectedIndex = expert_index;
+      try{
+        ConfigThingy expertFun = funcSel.getExpertFunction();
+        
+          //falls die Expertenfunktion leer ist oder nur ein Kind hat und keine Enkel
+          //(d.h. wenn die Funktion ein String-Literal ist), dann wird der Spezialeintrag
+          //STRING_ITEM gewählt anstatt EXPERT_ITEM.
+        if (expertFun.count() == 0 || 
+            (expertFun.count() == 1 && expertFun.getFirstChild().count() == 0)) 
+        selectedIndex = string_index;
+      }catch(NodeNotFoundException x){}
+    }
+    
+    box.setSelectedIndex(selectedIndex);
+    
+    //FIXME  Listener auf box registrieren und funcSel Model entsprechend ändern wenn dort was gemacht wird
+    
     return box;
   }
   

@@ -34,10 +34,15 @@ public class OneInsertionTrafoView extends FunctionSelectionAccessView
    */
   private ViewChangeListener bigDaddy;
   
+  /**
+   * Das Model zu dieser View.
+   */
+  private InsertionModel model;
   
   public OneInsertionTrafoView(InsertionModel model, FunctionLibrary funcLib, ViewChangeListener bigDaddy)
   {
     super(model.getTrafoAccess(), funcLib);
+    this.model = model;
     this.bigDaddy = bigDaddy;
     model.addListener(new MyModelChangeListener());
   }
@@ -52,6 +57,15 @@ public class OneInsertionTrafoView extends FunctionSelectionAccessView
     public void attributeChanged(InsertionModel model, int attributeId, Object newValue)
     {
     }
+  }
+  
+  /**
+   * Liefert das Model zu dieser View.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public InsertionModel getModel()
+  {
+    return model;
   }
 
 }

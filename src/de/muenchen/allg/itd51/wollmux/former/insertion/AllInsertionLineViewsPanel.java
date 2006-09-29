@@ -23,6 +23,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
@@ -35,7 +36,9 @@ import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 
 import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
+import de.muenchen.allg.itd51.wollmux.former.BroadcastObjectSelection;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
+import de.muenchen.allg.itd51.wollmux.former.IndexList;
 import de.muenchen.allg.itd51.wollmux.former.view.View;
 import de.muenchen.allg.itd51.wollmux.former.view.ViewChangeListener;
 
@@ -82,6 +85,11 @@ public class AllInsertionLineViewsPanel implements View
    * Die Liste der {@link OneInsertionLineView}s in dieser View.
    */
   private List views = new Vector();
+  
+  /**
+   * Liste von Indizes der selektierten Objekte in der {@link #views} Liste. 
+   */
+  private IndexList selection = new IndexList();
   
   /**
    * Erzeugt ein AllInsertionLineViewsPanel, die den Inhalt von
@@ -164,7 +172,25 @@ public class AllInsertionLineViewsPanel implements View
     views.remove(index);
     mainPanel.remove(view.JComponent());
     mainPanel.validate();
-    //TODO removeSelectionIndex(index); fixupSelectionIndices(index, -1);
+    selection.remove(index); 
+    selection.fixup(index, -1, views.size() - 1);
+  }
+  
+  /**
+   * Hebt die Selektion aller Elemente auf.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED */
+  private void clearSelection()
+  {
+    Iterator iter = selection.iterator();
+    while (iter.hasNext())
+    {
+      Integer I = (Integer)iter.next();
+      OneInsertionLineView view = (OneInsertionLineView)views.get(I.intValue());
+      view.unmark();
+    }
+    selection.clear();
   }
   
   public JComponent JComponent()
@@ -197,7 +223,35 @@ public class AllInsertionLineViewsPanel implements View
   
   private class MyBroadcastListener extends BroadcastListener
   {
-    
+    public void broadcastFormControlModelSelection(BroadcastObjectSelection b) {}
+    public void broadcastInsertionModelSelection(BroadcastObjectSelection b)
+    { 
+      if (b.getClearSelection()) clearSelection();
+      InsertionModel model = (InsertionModel)b.getObject();
+      for (int index = 0; index < views.size(); ++index)
+      {
+        OneInsertionLineView view = (OneInsertionLineView)views.get(index);
+        if (view.getModel() == model)
+        {
+          int state = b.getState();
+          if (state == 0) //toggle
+            state = selection.contains(index) ? -1 : 1;
+            
+          switch (state)
+          {
+            case -1: //abwählen
+                     view.unmark();
+                     selection.remove(index);
+                     break;
+            case 1: //auswählen
+                     view.mark();
+                     selection.add(index);
+                     break;
+          }
+        }
+      }
+
+    }
   }
     
 }

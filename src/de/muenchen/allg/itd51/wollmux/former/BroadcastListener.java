@@ -32,6 +32,16 @@ package de.muenchen.allg.itd51.wollmux.former;
  */
 public abstract class BroadcastListener
 {
-  public void broadcastFormControlModelSelection(BroadcastFormControlModelSelection b) {}
+  /**
+   * getObject() ist ein {@link de.muenchen.allg.itd51.wollmux.former.control.FormControlModel}. 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public void broadcastFormControlModelSelection(BroadcastObjectSelection b) {}
+  
+  /**
+   * getObject() ist ein {@link de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModel}. 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public void broadcastInsertionModelSelection(BroadcastObjectSelection b) {}
 }
 

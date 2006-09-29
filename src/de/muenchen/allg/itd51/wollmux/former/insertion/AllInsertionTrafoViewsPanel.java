@@ -17,14 +17,18 @@
 */
 package de.muenchen.allg.itd51.wollmux.former.insertion;
 
+import java.awt.BorderLayout;
 import java.awt.CardLayout;
+import java.awt.GridLayout;
 import java.util.List;
 import java.util.Vector;
 
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
+import de.muenchen.allg.itd51.wollmux.former.BroadcastObjectSelection;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
 import de.muenchen.allg.itd51.wollmux.former.view.View;
 import de.muenchen.allg.itd51.wollmux.former.view.ViewChangeListener;
@@ -88,7 +92,9 @@ public class AllInsertionTrafoViewsPanel implements View
     
     cards = new CardLayout();
     myPanel = new JPanel(cards);
-    myPanel.add(new JPanel(), EMPTY_PANEL);
+    JPanel emptyPanel = new JPanel();
+    emptyPanel.add(new JLabel("TRAFO-View"));
+    myPanel.add(emptyPanel, EMPTY_PANEL);
   }
   
   /**
@@ -101,7 +107,7 @@ public class AllInsertionTrafoViewsPanel implements View
     OneInsertionTrafoView view = new OneInsertionTrafoView(model, funcLib, myViewChangeListener);
     views.add(view);
     
-    myPanel.add(view.JComponent(), getCardIdFor(view));
+    myPanel.add(view.JComponent(), getCardIdFor(view.getModel()));
     myPanel.validate();
   }
   
@@ -159,7 +165,20 @@ public class AllInsertionTrafoViewsPanel implements View
   
   private class MyBroadcastListener extends BroadcastListener
   {
-    
+    public void broadcastFormControlModelSelection(BroadcastObjectSelection b) 
+    {
+      cards.show(myPanel, EMPTY_PANEL);
+    }
+    public void broadcastInsertionModelSelection(BroadcastObjectSelection b) 
+    {
+      if (b.getState() == 1)
+      {
+        InsertionModel model = (InsertionModel)b.getObject();
+        cards.show(myPanel, getCardIdFor(model));
+      }
+      else
+        cards.show(myPanel, EMPTY_PANEL);
+    }
   }
 
 }

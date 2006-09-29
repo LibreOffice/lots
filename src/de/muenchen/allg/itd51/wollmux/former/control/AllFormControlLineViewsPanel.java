@@ -24,10 +24,8 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.ListIterator;
 import java.util.Set;
 import java.util.Vector;
 
@@ -41,9 +39,10 @@ import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
 
 import de.muenchen.allg.itd51.wollmux.Logger;
-import de.muenchen.allg.itd51.wollmux.former.BroadcastFormControlModelSelection;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
+import de.muenchen.allg.itd51.wollmux.former.BroadcastObjectSelection;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
+import de.muenchen.allg.itd51.wollmux.former.IndexList;
 import de.muenchen.allg.itd51.wollmux.former.control.FormControlModelList.ItemListener;
 import de.muenchen.allg.itd51.wollmux.former.view.View;
 
@@ -102,11 +101,11 @@ public class AllFormControlLineViewsPanel implements View, ItemListener, OneForm
    * Enthält die {@link ViewDescriptor}s in der richtigen Reihenfolge.
    */
   private Vector viewDescriptors = new Vector();
-
+  
   /**
-   * Ein Vector von Integers, die die Indizes der selektierten Views angeben.
+   * Die Indizes der ausgewählten Elemente in {@link #viewDescriptors}.
    */
-  private Vector selection = new Vector();
+  private IndexList selection = new IndexList();
   
   /**
    * Die Scrollpane in der sich die {@link #tabPane} befindet.
@@ -249,7 +248,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener, OneForm
     tabPane.validate();
     scrollPane.validate();
     
-    fixupSelectionIndices(index, 1);
+    selection.fixup(index, 1, viewDescriptors.size()-1);
   }
   
   /**
@@ -343,8 +342,8 @@ public class AllFormControlLineViewsPanel implements View, ItemListener, OneForm
     tabPane.validate();
     scrollPane.validate();
     
-    removeSelectionIndex(index);
-    fixupSelectionIndices(index, -1);
+    selection.remove(index);
+    selection.fixup(index, -1, viewDescriptors.size()-1);
   }
   
   public void tabTitleChanged(OneFormControlLineView view)
@@ -364,11 +363,28 @@ public class AllFormControlLineViewsPanel implements View, ItemListener, OneForm
    */
   private void moveSelectedElementsUp()
   {
-    if (((Integer)selection.firstElement()).intValue() > 0)
+    if (selection.firstElement() > 0)
     {
-      formControlModelList.moveElementsUp(selection);
+      formControlModelList.moveElementsUp(selection.iterator());
       //Kein fixupSelectionIndices(0, -1) nötig, weil die itemSwapped() Events schon dafür sorgen
     }
+  }
+  
+  /**
+   * Hebt die Selektion aller Elemente auf.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED */
+  private void clearSelection()
+  {
+    Iterator iter = selection.iterator();
+    while (iter.hasNext())
+    {
+      Integer I = (Integer)iter.next();
+      OneFormControlLineView view = ((ViewDescriptor)viewDescriptors.get(I.intValue())).view;
+      view.unmark();
+    }
+    selection.clear();
   }
   
   /**
@@ -380,9 +396,9 @@ public class AllFormControlLineViewsPanel implements View, ItemListener, OneForm
    */
   private void moveSelectedElementsDown()
   {
-    if (((Integer)selection.lastElement()).intValue() < viewDescriptors.size() - 1)
+    if (selection.lastElement() < viewDescriptors.size() - 1)
     {
-      formControlModelList.moveElementsDown(selection);
+      formControlModelList.moveElementsDown(selection.reverseIterator());
      //Kein fixupSelectionIndices(0, 1) nötig, weil die itemSwapped() Events schon dafür sorgen
     }
   }
@@ -404,8 +420,8 @@ public class AllFormControlLineViewsPanel implements View, ItemListener, OneForm
      */
     while (!selection.isEmpty())
     {
-      Integer I = (Integer)selection.lastElement();
-      ViewDescriptor desc = (ViewDescriptor)viewDescriptors.get(I.intValue());
+      int i = selection.lastElement();
+      ViewDescriptor desc = (ViewDescriptor)viewDescriptors.get(i);
       formControlModelList.remove(desc.view.getModel());
     }
   }
@@ -438,7 +454,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener, OneForm
   {
     if (selection.isEmpty()) return;
     
-    int i = ((Integer)selection.firstElement()).intValue();
+    int i = selection.firstElement();
     ViewDescriptor desc = (ViewDescriptor)viewDescriptors.get(i);
     tabPane.setSelectedIndex(desc.containingTabIndex);
   }
@@ -535,118 +551,39 @@ public class AllFormControlLineViewsPanel implements View, ItemListener, OneForm
     tabPane.validate();
     scrollPane.validate();
     
-    swapSelectionIndices(index1, index2);
+    selection.swap(index1, index2);
   }
   
-  /**
-   * Addiert auf alle Indizes in der {@link #selection} Liste größer gleich start den offset.
-   * Indizes die dabei illegal werden werden aus der Liste gelöscht.
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TESTED*/
-  private void fixupSelectionIndices(int start, int offset)
-  {
-    ListIterator iter = selection.listIterator();
-    while (iter.hasNext())
-    {
-      Integer I = (Integer)iter.next();
-      int i = I.intValue();
-      if (i >= start)
-      {
-        i = i + offset;
-        if (i < 0 || i > viewDescriptors.size()-1)
-          iter.remove();
-        else 
-          iter.set(new Integer(i));
-      }
-    }
-  }
   
-  /**
-   * Ersetzt in {@link #selection} index1 durch index2 und index2 durch index1.
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TESTED
-   */
-  private void swapSelectionIndices(int index1, int index2)
-  {
-    ListIterator iter = selection.listIterator();
-    while (iter.hasNext())
-    {
-      Integer I = (Integer)iter.next();
-      int i = I.intValue();
-      if (i == index1)
-        iter.set(new Integer(index2));
-      else if (i == index2)
-        iter.set(new Integer(index1));
-    }
-    
-    Collections.sort(selection);
-  }
-  
-  /**
-   * Hebt die Selektion aller Elemente auf.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TESTED */
-  private void clearSelection()
-  {
-    Iterator iter = selection.iterator();
-    while (iter.hasNext())
-    {
-      Integer I = (Integer)iter.next();
-      OneFormControlLineView view = ((ViewDescriptor)viewDescriptors.get(I.intValue())).view;
-      view.unmark();
-    }
-    selection.clear();
-  }
-  
-  /**
-   * Entfernt den Index i aus der {@link #selection} Liste falls er dort enthalten ist.
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TESTED*/
-  private void removeSelectionIndex(int i)
-  {
-    int idx = selection.indexOf(new Integer(i));
-    if (idx >= 0) selection.remove(idx);
-  }
-
   private class MyBroadcastListener extends BroadcastListener
   {
-    public void broadcastFormControlModelSelection(BroadcastFormControlModelSelection b) 
+    public void broadcastFormControlModelSelection(BroadcastObjectSelection b) 
     { //TESTED
       if (b.getClearSelection()) clearSelection();
-      FormControlModel model = b.getModel();
-      Iterator iter = viewDescriptors.iterator();
-      int index = 0;
-      while (iter.hasNext())
+      FormControlModel model = (FormControlModel)b.getObject();
+      for (int index = 0; index < viewDescriptors.size(); ++index)
       {
-        OneFormControlLineView view = ((ViewDescriptor)iter.next()).view;
+        OneFormControlLineView view = ((ViewDescriptor)viewDescriptors.get(index)).view;
         if (view.getModel() == model)
         {
-          Integer I = new Integer(index);
           int state = b.getState();
           if (state == 0) //toggle
-            state = selection.contains(I) ? -1 : 1;
+            state = selection.contains(index) ? -1 : 1;
             
           switch (state)
           {
             case -1: //abwählen
-                     ((ViewDescriptor)viewDescriptors.get(index)).view.unmark();
-                     selection.remove(new Integer(index));
+                     view.unmark();
+                     selection.remove(index);
                      break;
             case 1: //auswählen
-                     if (!selection.contains(I)) 
-                     {
-                       ((ViewDescriptor)viewDescriptors.get(index)).view.mark();
-                       selection.add(I);
-                     }
+                     view.mark();
+                     selection.add(index);
                      break;
           }
         }
-        
-        ++index;
       }
-      
-      Collections.sort(selection);
+
     }
   }
   
