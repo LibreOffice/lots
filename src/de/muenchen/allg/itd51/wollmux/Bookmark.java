@@ -11,6 +11,7 @@
  * -------------------------------------------------------------------
  * 17.05.2006 | LUT | Dokumentation ergänzt
  * 07.08.2006 | BNK | +Bookmark(XNamed bookmark, XTextDocument doc)
+ * 29.09.2006 | BNK | rename() gibt nun im Fehlerfall das BROKEN-String-Objekt zurück
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -48,6 +49,12 @@ import de.muenchen.allg.afid.UnoService;
  */
 public class Bookmark
 {
+  /**
+   * Wird festgestellt, dass das Bookmark aus dem Dokument gelöscht wurde, so wird der
+   * Name auf diesen String gesetzt (== vergleichbar).
+   */
+  public static final String BROKEN = "WM(CMD'bookmarkBroken')";
+  
   /**
    * Enthält den Namen des Bookmarks
    */
@@ -329,12 +336,12 @@ public class Bookmark
   }
 
   /**
-   * Diese Methode benennt das Bookmark oldName zu dem Namen newName um. Ist der
-   * Name bereits definiert, so hängt OOo an den Namen automatisch eine Nummer
-   * an. Die Methode gibt den tatsächlich erzeugten Bookmarknamen zurück.
+   * Diese Methode benennt dieses Bookmark in newName um. Ist der
+   * Name bereits definiert, so wird automatisch eine Nummer
+   * an den Namen angehängt. Die Methode gibt den tatsächlich erzeugten Bookmarknamen zurück.
    * 
-   * @param newName
-   * @return den tatsächlich erzeugten Namen des Bookmarks.
+   * @return den tatsächlich erzeugten Namen des Bookmarks. Falls das Bookmark verschwunden
+   *         ist, so wird 
    * @throws Exception
    */
   public String rename(String newName)
@@ -371,6 +378,8 @@ public class Bookmark
       bm.setName(newName);
       name = bm.getName();
     }
+    else
+      name = BROKEN;
 
     return name;
   }
