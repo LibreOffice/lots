@@ -13,6 +13,7 @@
  * 07.08.2006 | BNK | +Bookmark(XNamed bookmark, XTextDocument doc)
  * 29.09.2006 | BNK | rename() gibt nun im Fehlerfall das BROKEN-String-Objekt zurück
  * 29.09.2006 | BNK | Unnötige renames vermeiden, um OOo nicht zu stressen
+ * 29.09.2006 | BNK | Auch im optimierten Fall wo kein rename stattfindet auf BROKEN testen
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -349,11 +350,19 @@ public class Bookmark
   {
     Logger.debug("Rename \"" + name + "\" --> \"" + newName + "\"");
 
-      // Um OOo nicht zu stressen vermeiden wir unnötige Renames
-    if (name.equals(newName)) return newName; 
-    
     XNameAccess bookmarks = UNO.XBookmarksSupplier(document.getObject())
-        .getBookmarks();
+    .getBookmarks();
+    
+      // Um OOo nicht zu stressen vermeiden wir unnötige Renames
+      // Wir testen aber trotzdem ob das Bookmark BROKEN ist
+    if (name.equals(newName)) 
+    {
+      if (!bookmarks.hasByName(name))
+        name = BROKEN;
+      return name; 
+    }
+    
+    
     if (bookmarks.hasByName(newName))
     {
       int count = 1;
