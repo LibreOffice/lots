@@ -20,6 +20,7 @@ package de.muenchen.allg.itd51.wollmux.former.insertion;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 /**
@@ -63,6 +64,53 @@ public class InsertionModelList
       int index = models.size() - 1;
       InsertionModel model = (InsertionModel)models.remove(index);
       model.hasBeenRemoved();
+    }
+  }
+  
+  /**
+   * Bittet die InsertionModelList darum, das Element model aus sich zu entfernen
+   * (falls es in der Liste ist).
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED
+   */
+  public void remove(InsertionModel model)
+  {
+    int index = models.indexOf(model);
+    if (index < 0) return;
+    models.remove(index);
+    model.hasBeenRemoved();
+  }
+  
+  /**
+   * Lässt alle in dieser Liste gespeicherten {@link InsertionModel}s ihre zugehörigen
+   * Bookmarks updaten. Falls beim Update eines Bookmarks etwas schiefgeht wird das
+   * entsprechende {@link InsertionModel} aus der Liste gelöscht. Das Ausführen dieser Funktion
+   * triggert also potentiell einige Listener.
+   * @param mapFunctionNameToConfigThingy bildet einen Funktionsnamen auf ein ConfigThingy ab, 
+   *        dessen Wurzel der Funktionsname ist und dessen Inhalt eine Funktionsdefinition.
+   *        Wenn eine Einfügung mit einer TRAFO versehen ist, wird für das Aktualisieren des
+   *        Bookmarks ein Funktionsname generiert, der noch nicht in dieser Map vorkommt
+   *        und ein Mapping für diese Funktion wird in die Map eingefügt.
+   *        Nach dem Aufruf von updateDocument() sind zu dieser Map also Einträge hinzugekommen
+   *        für alle TRAFOs, die in den Einfügungen vorkommen.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED
+   */
+  public void updateDocument(Map mapFunctionNameToConfigThingy)
+  {
+    List defunct = new Vector();
+    Iterator iter = models.iterator();
+    while (iter.hasNext())
+    {
+      InsertionModel model = (InsertionModel)iter.next();
+      if (!model.updateDocument(mapFunctionNameToConfigThingy))
+        defunct.add(model);
+    }
+    
+    iter = defunct.iterator();
+    while (iter.hasNext())
+    {
+      remove((InsertionModel)iter.next());
     }
   }
   

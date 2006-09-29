@@ -26,6 +26,8 @@ import java.util.Set;
 import java.util.Vector;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelection;
+import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionProvider;
 
 /**
  * Repräsentiert ein Formularsteuerelement.
@@ -89,10 +91,10 @@ public class FormControlModel
   private int lines = 4;
   /** MINSIZE. */
   private int minsize = 0;
-  /** PLAUSI (incl, PLAUSI-Knoten). */
-  private ConfigThingy plausi = new ConfigThingy("PLAUSI");
-  /** AUTOFILL (incl, AUTOFILL-Knoten). */
-  private ConfigThingy autofill = new ConfigThingy("AUTOFILL");
+  /** PLAUSI.  */
+  private FunctionSelection plausi = new FunctionSelection();
+  /** AUTOFILL. */
+  private FunctionSelection autofill = new FunctionSelection();
   
   /**
    * Die {@link ModelChangeListener}, die über Änderungen dieses Models informiert werden wollen.
@@ -102,9 +104,11 @@ public class FormControlModel
   /**
    * Parst conf als Steuerelement und erzeugt ein entsprechendes FormControlModel.
    * @param conf direkter Vorfahre von "TYPE", "LABEL", usw.
+   * @param funcSelProv der {@link FunctionSelectionProvider}, der zu PLAUSI und AUTOFILL
+   *        passende {@link FunctionSelection}s liefern kann.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public FormControlModel(ConfigThingy conf)
+  public FormControlModel(ConfigThingy conf, FunctionSelectionProvider funcSelProv)
   {
     label = "Steuerelement";
     type = TEXTFIELD_TYPE;
@@ -129,8 +133,8 @@ public class FormControlModel
       else if (name.equals("MINSIZE")) try{minsize = Integer.parseInt(str); }catch(Exception x){}
       else if (name.equals("VALUES")) items = parseValues(attr);
       else if (name.equals("GROUPS")) groups = parseGroups(attr);
-      else if (name.equals("PLAUSI")) plausi = new ConfigThingy(attr);
-      else if (name.equals("AUTOFILL")) autofill = new ConfigThingy(attr);
+      else if (name.equals("PLAUSI")) plausi = funcSelProv.getFunctionSelection(attr);
+      else if (name.equals("AUTOFILL")) autofill = funcSelProv.getFunctionSelection(attr);
     }
     
     if (isGlue())
@@ -380,9 +384,9 @@ public class FormControlModel
    * @param conf der "AUTOFILL"-Knoten.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public void setAutofill(ConfigThingy conf)
+  public void setAutofill(FunctionSelection funcSel)
   {
-    autofill = conf;
+    autofill = funcSel;
   }
   
   /**
@@ -527,10 +531,11 @@ public class FormControlModel
       }
     }
     
-    if (plausi.count() > 0)
-      conf.addChild(new ConfigThingy(plausi));
-    if (autofill.count() > 0)
-      conf.addChild(new ConfigThingy(autofill));
+    if (!autofill.isNone())
+      conf.addChild(autofill.export("AUTOFILL"));
+    
+    if (!plausi.isNone())
+      conf.addChild(plausi.export("PLAUSI"));
     
     return conf; 
   }

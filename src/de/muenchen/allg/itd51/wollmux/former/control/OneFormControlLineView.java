@@ -35,7 +35,6 @@ import javax.swing.text.Document;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastFormControlModelSelection;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
 import de.muenchen.allg.itd51.wollmux.former.view.LineView;
-import de.muenchen.allg.itd51.wollmux.former.view.ViewChangeListener;
 
 
 

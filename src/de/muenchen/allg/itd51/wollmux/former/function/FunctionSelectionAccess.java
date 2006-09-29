@@ -42,7 +42,7 @@ public interface FunctionSelectionAccess
 
   /**
    * Liefert true gdw diese FunctionSelection eine Referenz auf eine benannte Funktion ist,
-   * d,h, wenn {@link #getName()} einen sinnvollen Namen liefert.
+   * d,h, wenn {@link #getFunctionName()} einen sinnvollen Namen liefert.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public boolean isReference();
@@ -61,11 +61,25 @@ public interface FunctionSelectionAccess
   public boolean isNone();
 
   /**
+   * Liefert true gdw diese FunctionSelection eine Referenz auf eine benannte Funktion ist und 
+   * für mindestens einen Parameter dieser Funktion einen Wert spezifiziert.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public boolean hasSpecifiedParameters();
+  
+  /**
    * Liefert den Namen der Funktion, falls es eine Referenz auf eine externe Funktion ist, oder
    * {@link #NO_FUNCTION} bzw, {@link #EXPERT_FUNCTION}.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public String getName();
+  public String getFunctionName();
+  
+  /**
+   * Liefert die Namen der Funktionsparameter, die die momentan ausgewählte Funktion 
+   * erwartet.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public String[] getParameterNames();
 
   /**
    * Nimmt eine Abbildung von Parameternamen (Strings) auf Parameterwerte ({@link ParamValue}s)
@@ -87,8 +101,9 @@ public interface FunctionSelectionAccess
   public void setFunction(String functionName, String[] paramNames);
 
   /**
-   * Liefert eine Referenz (keine Kopie) der gespeicherten vom Benutzer manuell eingegebenen
+   * Liefert eine Kopie der gespeicherten vom Benutzer manuell eingegebenen
    * Funktion. Ist keine gesetzt, so wird ein ConfigThingy ohne Kinder zurückgeliefert.
+   * @return ein Objekt, das der Aufrufer ändern darf.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public ConfigThingy getExpertFunction();

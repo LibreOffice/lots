@@ -88,7 +88,7 @@ public class AllInsertionLineViewsPanel implements View
    * insertionModelList anzeigt. ACHTUNG! insertionModelList sollte leer sein,
    * da nur neu hinzugekommene Elemente in der View angezeigt werden.
    * @author Matthias Benkmann (D-III-ITD 5.1)
-   * 
+   * TESTED
    */
   public AllInsertionLineViewsPanel(InsertionModelList insertionModelList, FormularMax4000 formularMax4000)
   {
@@ -102,7 +102,7 @@ public class AllInsertionLineViewsPanel implements View
 
     mainPanel.add(Box.createGlue());
     
-    scrollPane = new JScrollPane(mainPanel, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
+    scrollPane = new JScrollPane(mainPanel, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
     
     JPanel buttonPanel = new JPanel(new GridBagLayout());
     
@@ -135,7 +135,7 @@ public class AllInsertionLineViewsPanel implements View
   /**
    * Fügt dieser View eine {@link OneInsertionLineView} für model hinzu.
    * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TODO Testen
+   * TESTED
    */
   private void addItem(InsertionModel model)
   {
@@ -153,13 +153,18 @@ public class AllInsertionLineViewsPanel implements View
   }
   
   /**
-   * Entfernt viWie findet man seine geschlossenen Tickets wieder.ew aus diesem Container (falls dort vorhanden).
+   * Entfernt view aus diesem Container (falls dort vorhanden).
    * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TODO Testen
+   * TESTED
    */
   private void removeItem(OneInsertionLineView view)
   {
-    
+    int index = views.indexOf(view);
+    if (index < 0) return;
+    views.remove(index);
+    mainPanel.remove(view.JComponent());
+    mainPanel.validate();
+    //TODO removeSelectionIndex(index); fixupSelectionIndices(index, -1);
   }
   
   public JComponent JComponent()

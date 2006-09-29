@@ -29,11 +29,6 @@ import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 public class OneInsertionTrafoView extends FunctionSelectionAccessView
 {
   /**
-   * Das Model zu dieser View.
-   */
-  private InsertionModel model;
-  
-  /**
    * Typischerweise ein Container, der die View enthält und daher über Änderungen
    * auf dem Laufenden gehalten werden muss.
    */
@@ -44,7 +39,6 @@ public class OneInsertionTrafoView extends FunctionSelectionAccessView
   {
     super(model.getTrafoAccess(), funcLib);
     this.bigDaddy = bigDaddy;
-    this.model = model;
     model.addListener(new MyModelChangeListener());
   }
   

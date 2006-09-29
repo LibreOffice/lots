@@ -29,8 +29,11 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 
+import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
 import de.muenchen.allg.itd51.wollmux.former.view.LineView;
 import de.muenchen.allg.itd51.wollmux.former.view.ViewChangeListener;
@@ -70,7 +73,7 @@ public class OneInsertionLineView extends LineView
   /**
    * Erzeugt eine neue View für model.
    * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TODO Testen
+   * TESTED
    */
   public OneInsertionLineView(InsertionModel model, ViewChangeListener bigDaddy, FormularMax4000 formularMax4000)
   {
@@ -86,6 +89,8 @@ public class OneInsertionLineView extends LineView
     unmarkedBackgroundColor = myPanel.getBackground();
     model.addListener(new MyModelChangeListener());
     myPanel.validate();
+      //Notwendig, um BoxLayout beim Aufziehen daran zu hindern, die Textfelder hässlich
+      //hoch zu machen.
     myPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, myPanel.getPreferredSize().height));
   }
   
@@ -93,18 +98,21 @@ public class OneInsertionLineView extends LineView
   * Liefert eine Komponente, die je nach Art der Einfügung das DB_SPALTE oder ID
   * Attribut anzeigt und Änderungen an das Model weitergibt. 
   * @author Matthias Benkmann (D-III-ITD 5.1)
-  */
+  * TESTED */
   private JComponent makeIDView()
   {
     idBox = new JComboBox();
     idBox.setEditable(true);
     idBox.setSelectedItem(model.getDataID());
     JTextComponent tc = ((JTextComponent)idBox.getEditor().getEditorComponent());
-    tc.getDocument().addDocumentListener(new DocumentListener(){
+    final Document comboDoc = tc.getDocument();
+    comboDoc.addDocumentListener(new DocumentListener(){
       public void update()
       {
         ignoreAttributeChanged = true;
-        model.setDataID(idBox.getSelectedItem().toString());
+        try{
+          model.setDataID(comboDoc.getText(0, comboDoc.getLength()));
+        }catch(BadLocationException x){Logger.error(x);}
         ignoreAttributeChanged = false;
       }
       

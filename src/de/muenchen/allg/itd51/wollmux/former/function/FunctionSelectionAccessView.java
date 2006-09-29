@@ -17,12 +17,13 @@
 */
 package de.muenchen.allg.itd51.wollmux.former.function;
 
+import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.util.Collection;
 import java.util.Iterator;
 
+import javax.swing.Box;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -51,6 +52,12 @@ public class FunctionSelectionAccessView implements View
   private static final String EXPERT_ITEM = "<Experte>";
   
   /**
+   * Eintrag für die Funktionsauswahl-ComboBox, wenn manuelle Eingabe eines Strings
+   * gewünscht ist.
+   */
+  private static final String STRING_ITEM = "<Startwert>";
+  
+  /**
    * Rand um Textfelder (wird auch für ein paar andere Ränder verwendet)
    * in Pixeln.
    */
@@ -75,7 +82,7 @@ public class FunctionSelectionAccessView implements View
    * Erzeugt eine neue View über die funcSel angezeigt und bearbeitet werden kann.
    * @param funcLib die Funktionsbibliothek, deren Funktionen auswählbar sein sollen. 
    * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TODO Testen
+   * TESTED
    */
   public FunctionSelectionAccessView(FunctionSelectionAccess funcSel, FunctionLibrary funcLib)
   {
@@ -86,6 +93,12 @@ public class FunctionSelectionAccessView implements View
     buildPanel();
   }
   
+  /**
+   * Baut {@link #myPanel} komplett neu auf für den momentanen Zustand des FunctionSelectionAccess.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED
+   */
   private void buildPanel()
   {
     myPanel.removeAll();
@@ -94,11 +107,12 @@ public class FunctionSelectionAccessView implements View
     GridBagConstraints gbcHsep      = new GridBagConstraints(0, 0, 2, 1, 1.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL,       new Insets(3*TF_BORDER,0,2*TF_BORDER,0),0,0);
     GridBagConstraints gbcTextfield = new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0, GridBagConstraints.LINE_START,   GridBagConstraints.HORIZONTAL, new Insets(TF_BORDER,TF_BORDER,TF_BORDER,TF_BORDER),0,0);
     GridBagConstraints gbcTextarea  = new GridBagConstraints(0, 0, 2, 1, 1.0, 1.0, GridBagConstraints.LINE_START,   GridBagConstraints.BOTH, new Insets(TF_BORDER,TF_BORDER,TF_BORDER,TF_BORDER),0,0);
-    
+    GridBagConstraints gbcGlue      = new GridBagConstraints(0, 0, 2, 1, 1.0, 1.0, GridBagConstraints.CENTER,   GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0);
+    //FIXME Unterscheidung nach Funktionsart und Textarea falls Expert, Werteingabe falls die Expertenfunktion nur ein String-Literal ist; dann TODO Testen
     int y = 0;
     JLabel label = new JLabel("Funktion");
     gbcLabelLeft.gridx = 0;
-    gbcLabelLeft.gridy = y++;
+    gbcLabelLeft.gridy = y;
     myPanel.add(label, gbcLabelLeft);
     
     JComboBox functionSelector = buildFunctionSelector();
@@ -111,17 +125,30 @@ public class FunctionSelectionAccessView implements View
     gbcHsep.gridy = y++;
     myPanel.add(seppl, gbcHsep);
     
+    Component glue = Box.createGlue();
+    gbcGlue.gridx = 0;
+    gbcGlue.gridy = y++;
+    myPanel.add(glue, gbcGlue);
+    
     myPanel.validate();
   }
   
+  /**
+   * Liefert eine JComboBox, die die Auswahl einer Funktion aus {@link #funcLib} erlaubt.
+   * @return
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED
+   */
   private JComboBox buildFunctionSelector()
   {
     JComboBox box = new JComboBox();
     box.addItem(NONE_ITEM);
+    box.addItem(STRING_ITEM);
     Iterator iter = funcLib.getFunctionNames().iterator();
     while (iter.hasNext())
       box.addItem(iter.next());
     box.addItem(EXPERT_ITEM);
+    //FIXME Änderungen abfangen und funcSel Model entsprechend ändern
     return box;
   }
   

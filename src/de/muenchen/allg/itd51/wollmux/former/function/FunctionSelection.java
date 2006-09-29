@@ -67,7 +67,7 @@ public class FunctionSelection implements FunctionSelectionAccess
   /**
    * Copy Constructor.
    * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
+   * TESTED */
   public FunctionSelection(FunctionSelection orig)
   {
     expertConf = new ConfigThingy(orig.expertConf);
@@ -80,7 +80,7 @@ public class FunctionSelection implements FunctionSelectionAccess
   
   /* (non-Javadoc)
    * @see de.muenchen.allg.itd51.wollmux.former.FunctionSelectionAccess#isReference()
-   * TODO Testen
+   * TESTED
    */
   public boolean isReference()
   {
@@ -99,13 +99,16 @@ public class FunctionSelection implements FunctionSelectionAccess
   
   /* (non-Javadoc)
    * @see de.muenchen.allg.itd51.wollmux.former.FunctionSelectionAccess#getName()
-   * TODO Testen
    */
-  public String getName() { return functionName;}
+  public String getFunctionName() { return functionName;}
+  
+  public String[] getParameterNames()
+  {
+    return paramNames;
+  }
   
   /* (non-Javadoc)
    * @see de.muenchen.allg.itd51.wollmux.former.FunctionSelectionAccess#setParameterValues(java.util.Map)
-   * TODO Testen
    */
   public void setParameterValues(Map mapNameToParamValue)
   {
@@ -114,7 +117,7 @@ public class FunctionSelection implements FunctionSelectionAccess
   
   /* (non-Javadoc)
    * @see de.muenchen.allg.itd51.wollmux.former.FunctionSelectionAccess#setFunction(java.lang.String, java.lang.String[])
-   * TODO Testen
+   * TESTED
    */
   public void setFunction(String functionName, String[] paramNames)
   {
@@ -136,23 +139,72 @@ public class FunctionSelection implements FunctionSelectionAccess
     }
   }
   
-  /*
-   * TODO Testen
-   */
   public ConfigThingy getExpertFunction()
   {
-    return expertConf;
+    return new ConfigThingy(expertConf);
   }
   
   /* (non-Javadoc)
    * @see de.muenchen.allg.itd51.wollmux.former.FunctionSelectionAccess#setExpertFunction(de.muenchen.allg.itd51.parser.ConfigThingy)
-   * TODO Testen
+   * TESTED
    */
   public void setExpertFunction(ConfigThingy funConf)
   {
     this.functionName = EXPERT_FUNCTION;
     this.paramNames = NO_PARAM_NAMES;
     this.expertConf = new ConfigThingy(funConf);
+  }
+  
+  /**
+   * Liefert ein ConfigThingy, das diese FunctionSelection repräsentiert (ein leeres, falls
+   * keine Funktion ausgewählt).
+   * @param root der Name des Wurzelknotens des zu liefernden ConfigThingys.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED 
+   */
+  public ConfigThingy export(String root)
+  {
+    ConfigThingy rootConf = new ConfigThingy(root); 
+    
+    if (isReference())
+    {
+      ConfigThingy conf = rootConf.add("BIND");
+      conf.add("FUNCTION").add(getFunctionName());
+      String[] params = getParameterNames();
+      for (int i = 0; i < params.length; ++i)
+      {
+        ParamValue value = (ParamValue)mapNameToParamValue.get(params[i]);
+        if (value != null && !value.isUnspecified())
+        {
+          ConfigThingy set = conf.add("SET");
+          set.add(params[i]);
+          if (value.isFieldReference())
+          {
+            set.add("VALUE").add(value.getString());
+          } else
+          {
+            set.add(value.getString());
+          }
+        }
+      }
+    }
+    else if (isExpert())
+    {
+      rootConf = getExpertFunction();
+      rootConf.setName(root);
+    }
+    
+    return rootConf;
+  }
+
+  public boolean hasSpecifiedParameters()
+  {
+    for (int i = 0; i < paramNames.length; ++i)
+    {
+      ParamValue value = (ParamValue)mapNameToParamValue.get(paramNames[i]);
+      if (value != null && !value.isUnspecified()) return true;
+    }
+    return false;
   }
 
 }

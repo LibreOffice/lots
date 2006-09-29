@@ -55,6 +55,46 @@ public class ParamValue
   }
   
   /**
+   * Liefert true gdw dieser Parameterwert unspezifiziert ist.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public boolean isUnspecified()
+  {
+    return type == UNSPECIFIED;
+  }
+  
+  /**
+   * Liefert true gdw dieser Parameterwert eine Referenz auf ein Feld mit ID
+   * {@link #getString()} ist.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public boolean isFieldReference()
+  {
+    return type == FIELD; 
+  }
+  
+  /**
+   * Liefert true gdw dieser Parameterwert der literale String {@link #getString()} ist.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public boolean isLiteral()
+  {
+    return type == LITERAL;
+  }
+  
+  /**
+   * Liefert die Feld ID, wenn {@link #isFieldReference()}, den literalen String, wenn
+   * {@link #isLiteral()} und ansonsten null.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public String getString()
+  {
+    if (isUnspecified()) return null;
+    return idStr;
+  }
+  
+  /**
    * Liefert einen unspezifizierten ParamValue.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */

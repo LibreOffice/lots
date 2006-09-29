@@ -23,11 +23,14 @@
 package de.muenchen.allg.itd51.wollmux.former;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Font;
 import java.awt.GraphicsEnvironment;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.MouseAdapter;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
@@ -49,6 +52,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
@@ -319,11 +323,12 @@ public class FormularMax4000
     MyWindowListener oehrchen = new MyWindowListener();
     //der WindowListener sorgt dafür, dass auf windowClosing mit abort reagiert wird
     myFrame.addWindowListener(oehrchen);
+    catchAllInputEventsOn(myFrame.getGlassPane()); //billiger Ersatz für Modalität von editorFrame
     
     leftPanel = new LeftPanel(insertionModelList, formControlModelList, this);
+    RightPanel rightPanel = new RightPanel(insertionModelList, functionLibrary, this);
     
-    JPanel contentPanel = new JPanel(new BorderLayout());
-    contentPanel.add(leftPanel.JComponent(), BorderLayout.CENTER);
+    JSplitPane contentPanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel.JComponent(), rightPanel.JComponent());
     myFrame.getContentPane().add(contentPanel);
     
     JMenuBar mbar = new JMenuBar();
@@ -353,7 +358,7 @@ public class FormularMax4000
     menuItem.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e)
       {
-        writeFormDescriptor(doc);
+        updateDocument(doc);
       }});
     menu.add(menuItem);
     
@@ -419,6 +424,16 @@ public class FormularMax4000
     setFrameSize();
     myFrame.setResizable(true);
     myFrame.setVisible(true);
+  }
+  
+  /**
+   * Registriert einen MouseListener und einen KeyListener auf compo, die beide nichts tun.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private void catchAllInputEventsOn(Component compo)
+  {
+    compo.addMouseListener(new MouseAdapter(){});
+    compo.addKeyListener(new KeyAdapter(){});
   }
   
   /**
@@ -501,17 +516,22 @@ public class FormularMax4000
   }
   
   /**
-   * Speichert die Formularbeschreibung im Dokument.
+   * Speichert die aktuelle Formularbeschreibung im Dokument und aktualisiert Bookmarks etc.
+   * 
+   * @return die aktualisierte Formularbeschreibung
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
-  private void writeFormDescriptor(XTextDocument doc)
+  private ConfigThingy updateDocument(XTextDocument doc)
   {
-    ConfigThingy conf = exportFormDescriptor();
-    formDescriptor.fromConfigThingy(conf);
+    Map mapFunctionNameToConfigThingy = new HashMap();
+    insertionModelList.updateDocument(mapFunctionNameToConfigThingy);
+    ConfigThingy conf = buildFormDescriptor(mapFunctionNameToConfigThingy);
+    formDescriptor.fromConfigThingy(new ConfigThingy(conf));
     formDescriptor.writeDocInfoFormularbeschreibung();
     setModifiedState(doc);
+    return conf;
   }
 
   /**
@@ -525,15 +545,28 @@ public class FormularMax4000
 
   /**
    * Liefert ein ConfigThingy zurück, das den aktuellen Zustand der Formularbeschreibung
-   * repräsentiert.
+   * repräsentiert. Zum Exportieren der Formularbeschreibung sollte {@link #updateDocument(XTextDocument)}
+   * verwendet werden.
+   * @param mapFunctionNameToConfigThingy bildet einen Funktionsnamen auf ein ConfigThingy ab, 
+   *        dessen Wurzel der Funktionsname ist und dessen Inhalt eine Funktionsdefinition ist.
+   *        Diese Funktionen ergeben den Funktionen-Abschnitt. 
    * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private ConfigThingy exportFormDescriptor()
+   * TESTED */
+  private ConfigThingy buildFormDescriptor(Map mapFunctionNameToConfigThingy)
   {
     ConfigThingy conf = new ConfigThingy("WM");
     ConfigThingy form = conf.add("Formular");
     form.add("TITLE").add(formTitle);
     form.addChild(formControlModelList.export());
+    if (!mapFunctionNameToConfigThingy.isEmpty())
+    {
+      ConfigThingy funcs = form.add("Funktionen");
+      Iterator iter = mapFunctionNameToConfigThingy.values().iterator();
+      while (iter.hasNext())
+      {
+        funcs.addChild((ConfigThingy)iter.next());
+      }
+    }
     return conf;
   }
   
@@ -676,7 +709,7 @@ public class FormularMax4000
       Iterator iter = ((ConfigThingy)grandmaIter.next()).iterator();
       while (iter.hasNext())
       {
-        model = new FormControlModel((ConfigThingy)iter.next());
+        model = new FormControlModel((ConfigThingy)iter.next(), functionSelectionProvider);
         lastIsGlue = model.isGlue();
         ++count;
         formControlModelList.add(model, idx++);
@@ -888,7 +921,7 @@ public class FormularMax4000
     {
       ConfigThingy autofill = new ConfigThingy("AUTOFILL");
       autofill.add("true");
-      model.setAutofill(autofill);
+      model.setAutofill(functionSelectionProvider.getFunctionSelection(autofill));
     }
     formControlModelList.add(model);
     return model;
@@ -926,7 +959,7 @@ public class FormularMax4000
     {
       ConfigThingy autofill = new ConfigThingy("AUTOFILL");
       autofill.add(preset);
-      model.setAutofill(autofill);
+      model.setAutofill(functionSelectionProvider.getFunctionSelection(autofill));
     }
     formControlModelList.add(model);
     return model;
@@ -949,7 +982,7 @@ public class FormularMax4000
     {
       ConfigThingy autofill = new ConfigThingy("AUTOFILL");
       autofill.add(preset);
-      model.setAutofill(autofill);
+      model.setAutofill(functionSelectionProvider.getFunctionSelection(autofill));
     }
     formControlModelList.add(model);
     return model;
@@ -1018,7 +1051,7 @@ public class FormularMax4000
     
     final JEditorPane editor=new JEditorPane("text/plain","");
     editor.setEditorKit(new NoWrapEditorKit());
-    editor.setText(exportFormDescriptor().stringRepresentation());
+    editor.setText(updateDocument(doc).stringRepresentation());
     editor.setFont(new Font("Monospaced",Font.PLAIN,editor.getFont().getSize()+2));
     JScrollPane scrollPane = new JScrollPane(editor, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
     JPanel contentPanel = new JPanel(new BorderLayout());
@@ -1043,12 +1076,17 @@ public class FormularMax4000
           public void windowClosed(WindowEvent e)
           {
             editorFrame = null;
+            if (myFrame == null) return; //falls myFrame geschlossen wurde bei offenem editorFrame
+            myFrame.getGlassPane().setVisible(false);
             formDescriptor.fromConfigThingy(conf);
             initModelsAndViews();
           }
         });
     
     
+      // Glass Pane aktiv schalten als billiger Ersatz für Modalität von editorFrame
+    myFrame.getGlassPane().setVisible(true);
+    myFrame.getGlassPane().requestFocusInWindow();
     editorFrame.pack();
     editorFrame.setVisible(true);
     fixFrameSize(editorFrame);
@@ -1060,7 +1098,7 @@ public class FormularMax4000
    */
   private String insertValue(String id)
   {
-    return "WM(CMD'insertValue' DB_SPALTE '"+id+"')";
+    return "WM(CMD 'insertValue' DB_SPALTE '"+id+"')";
   }
   
   /**
@@ -1069,7 +1107,7 @@ public class FormularMax4000
    */
   private String insertFormValue(String id)
   {
-    return "WM(CMD'insertFormValue' ID '"+id+"')";
+    return "WM(CMD 'insertFormValue' ID '"+id+"')";
   }
   
   /**
@@ -1080,6 +1118,7 @@ public class FormularMax4000
   private void abort()
   {
     myFrame.dispose();
+    myFrame = null;
     if (editorFrame != null) editorFrame.dispose();
     if (abortListener != null)
       abortListener.actionPerformed(new ActionEvent(this, 0, ""));
@@ -1187,6 +1226,7 @@ public class FormularMax4000
   {
     UNO.init();
     WollMuxFiles.setupWollMuxDir();
+    Logger.init(System.err, Logger.DEBUG);
     XTextDocument doc = UNO.XTextDocument(UNO.desktop.getCurrentComponent());
     Map context = new HashMap();
     DialogLibrary dialogLib = WollMuxFiles.parseFunctionDialogs(WollMuxFiles.getWollmuxConf(), null, context);

@@ -48,11 +48,9 @@ public class FunctionSelectionProvider
    * Funktionen aus funcLib als auch zu Funktionen, die funConf (welches ein
    * legaler "Funktionen"-Abschnitt eines Formulars sein muss) definiert liefern kann.
    * Bei gleichem Namen haben Funktionen aus funConf vorrang vor solchen aus funcLib.
-   * ACHTUNG! Die Funktionsnamen aus funConf sind NICHT zwangsweise die Funktionsnamen für die
-   * FunctionSelections. Die FunctionSelections kriegen ihre Funktionsnamen aus den
-   * FUNCTION Attributen der geparsten BIND-Funktionen. 
+   *  
    * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TODO Testen
+   * TESTED
    */
   public FunctionSelectionProvider(FunctionLibrary funcLib, ConfigThingy funConf)
   {
@@ -64,7 +62,7 @@ public class FunctionSelectionProvider
       ConfigThingy conf = (ConfigThingy)iter.next();
       FunctionSelection funcSel = getFunctionSelection(conf);
       if (funcSel.isReference())
-        mapNameToFunctionSelection.put(funcSel.getName(), funcSel);
+        mapNameToFunctionSelection.put(conf.getName(), funcSel);
     }
   }
   
@@ -76,7 +74,7 @@ public class FunctionSelectionProvider
    * Die gelieferte FunctionSelection ist auf jeden Fall neu erstellt und unabhängig von
    * anderen für den selben Namen früher gelieferten FunctionSelections.
    * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TODO Testen
+   * TESTED
    */
   public FunctionSelection getFunctionSelection(String funcName)
   {
@@ -100,7 +98,7 @@ public class FunctionSelectionProvider
    * beliebigen Wurzelknoten haben, der noch keine Grundfunktion ist 
    * (z.B. "PLAUSI" oder "AUTOFILL").
    * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TODO Testen
+   * TESTED
    */
   public FunctionSelection getFunctionSelection(ConfigThingy conf)
   {
@@ -110,8 +108,11 @@ public class FunctionSelectionProvider
     
     funcSel.setExpertFunction(conf);
     
-    if (conf.count() != 1 || !((ConfigThingy)conf.iterator().next()).getName().equals("BIND"))
-      return funcSel;
+    if (conf.count() != 1) return funcSel;
+      
+    conf = ((ConfigThingy)conf.iterator().next());
+    
+    if (!conf.getName().equals("BIND")) return funcSel;
       
     /**
      * Wir haben es mit einem einzelnen BIND zu tun. Wir versuchen, diesen zu parsen.
@@ -119,8 +120,8 @@ public class FunctionSelectionProvider
      * ansonsten setzen wir das BIND entsprechend um.
      */
     Map mapNameToParamValue = new HashMap();
-    String funcName = FunctionSelection.NO_FUNCTION;
-    Iterator iter = ((ConfigThingy)conf.iterator().next()).iterator();
+    String funcName = null;
+    Iterator iter = conf.iterator();
     while (iter.hasNext())
     {
       ConfigThingy childConf = (ConfigThingy)iter.next();
@@ -150,6 +151,8 @@ public class FunctionSelectionProvider
           
       } else return funcSel;
     }
+    
+    if (funcName == null) return funcSel;
     
     Function func = funcLib.get(funcName);
     if (func != null)
