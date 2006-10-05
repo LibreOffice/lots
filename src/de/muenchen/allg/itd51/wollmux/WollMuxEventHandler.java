@@ -58,6 +58,7 @@ import com.sun.star.lang.XComponent;
 import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextRange;
+import com.sun.star.text.XTextViewCursorSupplier;
 import com.sun.star.uno.Exception;
 import com.sun.star.uno.RuntimeException;
 import com.sun.star.uno.UnoRuntime;
@@ -2268,27 +2269,23 @@ public class WollMuxEventHandler
    * Drucks auf den Knopf der OOo-Symbolleiste ein "wollmux:ZifferEinfuegen"
    * dispatch erfolgte.
    */
-  public static void handleZifferEinfuegen(XTextDocument doc,
-      XTextCursor viewCursor)
+  public static void handleButtonZifferEinfuegenPressed(XTextDocument doc)
   {
-    handle(new OnZifferEinfuegen(doc, viewCursor));
+    handle(new OnZifferEinfuegen(doc));
   }
 
   private static class OnZifferEinfuegen extends BasicEvent
   {
     private XTextDocument doc;
 
-    private XTextCursor viewCursor;
-
-    public OnZifferEinfuegen(XTextDocument doc, XTextCursor viewCursor)
+    public OnZifferEinfuegen(XTextDocument doc)
     {
       this.doc = doc;
-      this.viewCursor = viewCursor;
     }
 
     protected void doit() throws WollMuxFehlerException
     {
-      SachleitendeVerfuegung.verfuegungspunktEinfuegen(doc, viewCursor);
+      SachleitendeVerfuegung.verfuegungspunktEinfuegen(doc, getViewCursor(doc));
     }
 
     public String toString()
@@ -2308,29 +2305,65 @@ public class WollMuxEventHandler
    * Abdruckzeile gelöscht werden soll.
    * 
    * Das Event wird von WollMux.dispatch(...) geworfen, wenn Aufgrund eines
-   * Drucks auf den Knopf der OOo-Symbolleiste ein "wollmux:Abdruck"
-   * dispatch erfolgte.
+   * Drucks auf den Knopf der OOo-Symbolleiste ein "wollmux:Abdruck" dispatch
+   * erfolgte.
    */
-  public static void handleAbdruck(XTextDocument doc, XTextCursor viewCursor)
+  public static void handleButtonAbdruckPressed(XTextDocument doc)
   {
-    handle(new OnAbdruck(doc, viewCursor));
+    handle(new OnAbdruck(doc));
   }
 
   private static class OnAbdruck extends BasicEvent
   {
     private XTextDocument doc;
 
-    private XTextCursor viewCursor;
-
-    public OnAbdruck(XTextDocument doc, XTextCursor viewCursor)
+    public OnAbdruck(XTextDocument doc)
     {
       this.doc = doc;
-      this.viewCursor = viewCursor;
     }
 
     protected void doit() throws WollMuxFehlerException
     {
-      SachleitendeVerfuegung.abdruck(doc, viewCursor);
+      SachleitendeVerfuegung.abdruck(doc, getViewCursor(doc));
+    }
+
+    public String toString()
+    {
+      return this.getClass().getSimpleName()
+             + "(#"
+             + doc.hashCode()
+             + ", viewCursor)";
+    }
+  }
+
+  // *******************************************************************************************
+
+  /**
+   * Erzeugt ein neues WollMuxEvent, das signasisiert, dass eine Zuleitungszeile
+   * der Sachleitenden Verfügungen eingefügt werden, bzw. eine bestehende
+   * Zuleitungszeile gelöscht werden soll.
+   * 
+   * Das Event wird von WollMux.dispatch(...) geworfen, wenn Aufgrund eines
+   * Drucks auf den Knopf der OOo-Symbolleiste ein "wollmux:Zuleitungszeile"
+   * dispatch erfolgte.
+   */
+  public static void handleButtonZuleitungszeilePressed(XTextDocument doc)
+  {
+    handle(new OnButtonZuleitungszeilePressed(doc));
+  }
+
+  private static class OnButtonZuleitungszeilePressed extends BasicEvent
+  {
+    private XTextDocument doc;
+
+    public OnButtonZuleitungszeilePressed(XTextDocument doc)
+    {
+      this.doc = doc;
+    }
+
+    protected void doit() throws WollMuxFehlerException
+    {
+      SachleitendeVerfuegung.zuleitungszeile(doc, getViewCursor(doc));
     }
 
     public String toString()
@@ -2344,6 +2377,24 @@ public class WollMuxEventHandler
 
   // *******************************************************************************************
   // Globale Helper-Methoden
+
+  /**
+   * Liefert den ViewCursor des aktuellen Dokuments oder null, wenn kein
+   * Controller (und damit kein ViewCursor) für doc verfügbar ist.
+   * 
+   * @param doc
+   *          Das Dokument dessen ViewCursor zurückgeliefert werden soll.
+   * @return
+   */
+  private static XTextCursor getViewCursor(XTextDocument doc)
+  {
+    XTextCursor viewCursor = null;
+    XTextViewCursorSupplier suppl = UNO.XTextViewCursorSupplier(UNO.XModel(doc)
+        .getCurrentController());
+    if (suppl != null) viewCursor = suppl.getViewCursor();
+    return viewCursor;
+  }
+
   /**
    * Diese Methode erzeugt einen modalen UNO-Dialog zur Anzeige von
    * Fehlermeldungen bei der Bearbeitung eines Events.

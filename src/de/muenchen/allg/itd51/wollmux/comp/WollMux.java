@@ -37,9 +37,7 @@ import com.sun.star.lib.uno.helper.Factory;
 import com.sun.star.lib.uno.helper.WeakBase;
 import com.sun.star.registry.XRegistryKey;
 import com.sun.star.task.XAsyncJob;
-import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
-import com.sun.star.text.XTextViewCursorSupplier;
 import com.sun.star.uno.XComponentContext;
 
 import de.muenchen.allg.afid.UNO;
@@ -96,6 +94,8 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
   public static final String cmdZifferEinfuegen = "ZifferEinfuegen";
 
   public static final String cmdAbdruck = "Abdruck";
+
+  public static final String cmdZuleitungszeile = "Zuleitungszeile";
 
   public static final String cmdMenu = "Menu";
 
@@ -214,25 +214,37 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
     {
       String cmd = (String) parsedURL.remove(0);
 
-      if (cmd.equalsIgnoreCase(cmdAbsenderAuswaehlen)) xRet = this;
+      if (cmd.equalsIgnoreCase(cmdAbsenderAuswaehlen))
+        xRet = this;
 
-      else if (cmd.equalsIgnoreCase(cmdOpenTemplate)) xRet = this;
+      else if (cmd.equalsIgnoreCase(cmdOpenTemplate))
+        xRet = this;
 
-      else if (cmd.equalsIgnoreCase(cmdOpenDocument)) xRet = this;
+      else if (cmd.equalsIgnoreCase(cmdOpenDocument))
+        xRet = this;
 
-      else if (cmd.equalsIgnoreCase(cmdSenderBox)) xRet = this;
+      else if (cmd.equalsIgnoreCase(cmdSenderBox))
+        xRet = this;
 
-      else if (cmd.equalsIgnoreCase(cmdMenu)) xRet = this;
+      else if (cmd.equalsIgnoreCase(cmdMenu))
+        xRet = this;
 
-      else if (cmd.equalsIgnoreCase(cmdPALVerwalten)) xRet = this;
+      else if (cmd.equalsIgnoreCase(cmdPALVerwalten))
+        xRet = this;
 
-      else if (cmd.equalsIgnoreCase(cmdFunctionDialog)) xRet = this;
+      else if (cmd.equalsIgnoreCase(cmdFunctionDialog))
+        xRet = this;
 
-      else if (cmd.equalsIgnoreCase(cmdFormularMax4000)) xRet = this;
+      else if (cmd.equalsIgnoreCase(cmdFormularMax4000))
+        xRet = this;
 
-      else if (cmd.equalsIgnoreCase(cmdZifferEinfuegen)) xRet = this;
+      else if (cmd.equalsIgnoreCase(cmdZifferEinfuegen))
+        xRet = this;
 
-      else if (cmd.equalsIgnoreCase(cmdAbdruck)) xRet = this;
+      else if (cmd.equalsIgnoreCase(cmdAbdruck))
+        xRet = this;
+
+      else if (cmd.equalsIgnoreCase(cmdZuleitungszeile)) xRet = this;
     }
     return xRet;
   }
@@ -376,16 +388,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
         XTextDocument doc = UNO
             .XTextDocument(UNO.desktop.getCurrentComponent());
         if (doc != null && UNO.XModel(doc) != null)
-        {
-          // hole viewCursor
-          XTextCursor viewCursor = null;
-          XTextViewCursorSupplier suppl = UNO.XTextViewCursorSupplier(UNO
-              .XModel(doc).getCurrentController());
-          if (suppl != null) viewCursor = suppl.getViewCursor();
-
-          if (viewCursor != null)
-            WollMuxEventHandler.handleZifferEinfuegen(doc, viewCursor);
-        }
+          WollMuxEventHandler.handleButtonZifferEinfuegenPressed(doc);
       }
 
       else if (cmd.compareToIgnoreCase(cmdAbdruck) == 0)
@@ -394,16 +397,16 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
         XTextDocument doc = UNO
             .XTextDocument(UNO.desktop.getCurrentComponent());
         if (doc != null && UNO.XModel(doc) != null)
-        {
-          // hole viewCursor
-          XTextCursor viewCursor = null;
-          XTextViewCursorSupplier suppl = UNO.XTextViewCursorSupplier(UNO
-              .XModel(doc).getCurrentController());
-          if (suppl != null) viewCursor = suppl.getViewCursor();
+          WollMuxEventHandler.handleButtonAbdruckPressed(doc);
+      }
 
-          if (viewCursor != null)
-            WollMuxEventHandler.handleAbdruck(doc, viewCursor);
-        }
+      else if (cmd.compareToIgnoreCase(cmdZuleitungszeile) == 0)
+      {
+        Logger.debug2("Dispatch: Aufruf von WollMux:Zuleitungszeile");
+        XTextDocument doc = UNO
+            .XTextDocument(UNO.desktop.getCurrentComponent());
+        if (doc != null && UNO.XModel(doc) != null)
+          WollMuxEventHandler.handleButtonZuleitungszeilePressed(doc);
       }
     }
   }

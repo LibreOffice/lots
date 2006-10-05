@@ -10,12 +10,16 @@ Sub FormularMax4000
   dispatchURL(&quot;wollmux:FormularMax4000&quot;)
 End Sub
 
-Sub zifferEinfuegen
+Sub ZifferEinfuegen
   dispatchURL(&quot;wollmux:zifferEinfuegen&quot;)
 End Sub
 
 Sub Abdruck
   dispatchURL(&quot;wollmux:Abdruck&quot;)
+End Sub
+
+Sub Zuleitungszeile
+  dispatchURL(&quot;wollmux:Zuleitungszeile&quot;)
 End Sub
 
 Sub dispatchURL(urlStr as String)
