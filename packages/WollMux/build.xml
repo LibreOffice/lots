@@ -73,6 +73,9 @@
 		<exec executable="unopkg" failifexecutionfails="false">
 			<arg line="add ${PKG_FILE}" />
 		</exec>
+		
+		<tstamp><format property="mytime" pattern="HH:mm:ss"/></tstamp>
+		<echo level="info" message="Install finished at ">${mytime}</echo>
 	</target>
 
 	<!-- Das Target package registriert die Komponente und erzeugt ein uno.pkg-file -->
