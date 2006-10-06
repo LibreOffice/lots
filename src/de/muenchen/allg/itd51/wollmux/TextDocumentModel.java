@@ -507,6 +507,16 @@ public class TextDocumentModel
       waitForUnlock();
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#getTextDocument()
+     */
+    public XTextDocument getTextDocument()
+    {
+      return doc;
+    }
+
     /**
      * Setzt einen lock, der in Verbindung mit setUnlock und der
      * waitForUnlock-Methode verwendet werden kann, um eine Synchronisierung mit
@@ -575,8 +585,7 @@ public class TextDocumentModel
         setUnlock();
         actionEvent = arg0;
       }
-    };
-
+    }
   }
 
 }

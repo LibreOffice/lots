@@ -17,6 +17,9 @@
  */
 package de.muenchen.allg.itd51.wollmux;
 
+import java.util.Iterator;
+import java.util.Vector;
+
 import com.sun.star.awt.FontWeight;
 import com.sun.star.container.XEnumeration;
 import com.sun.star.lang.IllegalArgumentException;
@@ -481,6 +484,15 @@ public class SachleitendeVerfuegung
         if (count > 1) punkt1.getStart().setString(romanNumbers[0]);
       }
     }
+
+    // Setzte die Druckfunktion SachleitendeVerfuegung wenn mindestens manuell
+    // eingefügter Verfügungspunkt vorhanden ist. Ansonsten setze die
+    // Druckfunktion zurück.
+    int effectiveCount = (punkt1 != null) ? count - 1 : count;
+    if (effectiveCount == 0)
+      WollMuxEventHandler.handleSetPrintFunction(doc, "");
+    else
+      WollMuxEventHandler.handleSetPrintFunction(doc, "SachleitendeVerfuegung");
   }
 
   /**
@@ -585,5 +597,268 @@ public class SachleitendeVerfuegung
     String number = "" + i + ".";
     if (i > 0 && i < romanNumbers.length) number = romanNumbers[i - 1];
     return number;
+  }
+
+  private static Vector scanVerfuegungspunkte(XTextDocument doc)
+  {
+    Vector verfuegungspunkte = new Vector();
+
+    // Verfügungspunkt1 hinzufügen wenn verfügbar.
+    XTextRange punkt1 = getVerfuegungspunkt1(doc);
+    if (punkt1 != null)
+      verfuegungspunkte.add(new VerfuegungspunktOriginal(punkt1));
+
+    Verfuegungspunkt currentVerfpunkt = null;
+
+    // Paragraphen des Texts enumerieren und Verfügungspunkte erstellen. Die
+    // Enumeration erfolgt über einen ParagraphCursor, da sich
+    // dieser stabiler verhält als das Durchgehen der XEnumerationAccess, bei
+    // der es zu OOo-Abstürzen kam. Leider konnte ich das Problem nicht exakt
+    // genug isolieren um ein entsprechende Ticket bei OOo dazu aufmachen zu
+    // können, da der Absturz nur sporadisch auftrat.
+    XParagraphCursor cursor = UNO.XParagraphCursor(doc.getText()
+        .createTextCursorByRange(doc.getText().getStart()));
+
+    if (cursor != null) do
+    {
+      // ganzen Paragraphen markieren
+      cursor.gotoEndOfParagraph(true);
+
+      if (isVerfuegungspunkt(cursor))
+      {
+        currentVerfpunkt = new Verfuegungspunkt(cursor);
+        verfuegungspunkte.add(currentVerfpunkt);
+      }
+      else if (currentVerfpunkt != null)
+      {
+        currentVerfpunkt.addParagraph(cursor);
+      }
+
+    } while (cursor.gotoNextParagraph(false));
+
+    return verfuegungspunkte;
+  }
+
+  /**
+   * Repräsentiert einen vollständigen Verfügungspunkt, der aus Überschrift
+   * (römische Ziffer + Überschrift) und Inhalt besteht. Die Klasse bietet
+   * Methden an, über die auf alle für den Druck wichtigen Eigenschaften des
+   * Verfügungspunktes zugegriffen werden kann (z.B. Überschrift, Anzahl
+   * Zuleitungszeilen, ...)
+   * 
+   * @author christoph.lutz
+   * 
+   */
+  private static class Verfuegungspunkt
+  {
+    /**
+     * Vector mit den XTextRanges aller Paragraphen des Verfügungspunktes.
+     */
+    protected Vector /* of XTextRange */paragraphs;
+
+    /**
+     * Vector of String, der alle Zuleitungszeilen enthält, die mit addParagraph
+     * hinzugefügt wurden.
+     */
+    protected Vector zuleitungszeilen;
+
+    /**
+     * Erzeugt einen neuen Verfügungspunkt, wobei firstPar der Absatz ist, der
+     * die erste Zeile mit der römischen Ziffer und der Überschrift enthält.
+     * 
+     * @param firstPar
+     *          Die erste Zeile des Verfügungspunktes mit der römischen Ziffer
+     *          und der Überschrift.
+     * @throws java.lang.NullPointerException
+     *           wenn paragraph null ist
+     */
+    public Verfuegungspunkt(XTextRange firstPar)
+    {
+      if (firstPar == null)
+        throw new NullPointerException("XTextRange firstPar ist null");
+
+      this.paragraphs = new Vector();
+      this.zuleitungszeilen = new Vector();
+
+      paragraphs.add(firstPar.getText().createTextCursorByRange(firstPar));
+    }
+
+    /**
+     * Fügt einen weiteren Paragraphen des Verfügungspunktes hinzu (wenn
+     * paragraph nicht null ist).
+     * 
+     * @param paragraph
+     *          XTextRange, das den gesamten Paragraphen enthält.
+     */
+    public void addParagraph(XTextRange paragraph)
+    {
+      if (paragraph == null) return;
+      XTextCursor par = paragraph.getText().createTextCursorByRange(paragraph);
+
+      paragraphs.add(par);
+
+      if (isZuleitungszeile(par)) zuleitungszeilen.add(par.getString());
+    }
+
+    /**
+     * Liefert true, wenn es sich bei dem übergebenen Absatz paragraph um einen
+     * als Zuleitungszeile markierten Absatz handelt.
+     * 
+     * @param paragraph
+     *          Das Objekt mit der Property ParaStyleName, die für den Vergleich
+     *          herangezogen wird.
+     * @return true, wenn der Name des Absatzformates mit
+     *         "WollMuxZuleitungszeile" beginnt.
+     */
+    private static boolean isZuleitungszeile(XTextRange paragraph)
+    {
+      String paraStyleName = "";
+      try
+      {
+        paraStyleName = AnyConverter.toString(UNO.getProperty(
+            paragraph,
+            "ParaStyleName"));
+      }
+      catch (IllegalArgumentException e)
+      {
+      }
+      return paraStyleName.startsWith(ParaStyleNameZuleitungszeile);
+    }
+
+    /**
+     * Liefert den gesamten Bereich über den sich der Verfügungspunkt erstreckt,
+     * angefangen vom Startpunkt der ersten Zeile des Verfügungspunktes bis hin
+     * zum Ende des letzten enthaltenen Paragraphen.
+     * 
+     * @return der gesamte Bereich über den sich der Verfügungspunkt erstreckt.
+     */
+    public XTextRange getCompleteRange()
+    {
+      XTextRange firstPar = UNO.XTextRange(paragraphs.get(0));
+      XTextRange lastPar = UNO
+          .XTextRange(paragraphs.get(paragraphs.size() - 1));
+
+      XTextCursor cursor = firstPar.getText().createTextCursor();
+      cursor.gotoRange(firstPar.getStart(), false);
+      cursor.gotoRange(lastPar.getEnd(), true);
+      return cursor;
+    }
+
+    /**
+     * Liefert die Anzahl der Zuleitungszeilen zurück, die dem Verfügungspunkt
+     * mit addParagraph hinzugefügt wurden.
+     * 
+     * @return Anzahl der Zuleitungszeilen dieses Verfügungspunktes.
+     */
+    public int getZuleitungszeilenCount()
+    {
+      return zuleitungszeilen.size();
+    }
+
+    /**
+     * Liefert einen Vector of Strings, der die Texte der Zuleitungszeilen
+     * beinhaltet, die dem Verfügungspunkt mit addParagraph hinzugefügt wurden.
+     * 
+     * @return Vector of Strings mit den Texten der Zuleitungszeilen.
+     */
+    public Vector getZuleitungszeilen()
+    {
+      return zuleitungszeilen;
+    }
+
+    /**
+     * Liefert den Text der Überschrift des Verfügungspunktes einschließlich der
+     * römischen Ziffer als String zurück.
+     * 
+     * @return römischer Ziffer + Überschrift
+     */
+    public String getHeading()
+    {
+      String text = "";
+      XTextRange firstPar = UNO.XTextRange(paragraphs.get(0));
+      if (firstPar != null) text = firstPar.getString();
+
+      // Tabs und Spaces durch single spaces ersetzen
+      text = text.replaceAll("\\s+", " ");
+
+      return text;
+    }
+  }
+
+  /**
+   * Enthält die Besonderheiten des ersten Verfügungspunktes eines externen
+   * Briefkopfes wie z.B. die Darstellung der Überschrift als "I. Original".
+   * 
+   * @author christoph.lutz
+   * 
+   */
+  public static class VerfuegungspunktOriginal extends Verfuegungspunkt
+  {
+    public VerfuegungspunktOriginal(XTextRange punkt1)
+    {
+      super(punkt1);
+
+      if (punkt1 == null)
+        throw new NullPointerException("XTextRange punkt1 ist null");
+
+      zuleitungszeilen.add("Empfänger siehe Empfängerfeld");
+    }
+
+    public String getHeading()
+    {
+      return "I. Original";
+    }
+
+    public void addParagraph(XTextRange paragraph)
+    {
+      // addParagraph ergibt bei Verfuegungspunkt1 keinen Sinn und wird daher
+      // disabled.
+    }
+  }
+
+  /**
+   * Zeigt den Druckdialog für Sachleitende Verfügungen an und druckt das
+   * Dokument gemäß Druckdialog in den gewünschten Ausfertigungen aus.
+   * 
+   * ACHTUNG: Diese Methode läuft nicht im WollMuxEventHandler-Thread, und daher
+   * darf nur auf die Daten zugegriffen werden, die pmod anbietet.
+   * 
+   * @param pmod
+   */
+  public static void print(XPrintModel pmod)
+  {
+    Logger.debug("SachleitendeVerfuegung.print - started");
+
+    Vector vps = scanVerfuegungspunkte(pmod.getTextDocument());
+    Iterator iter = vps.iterator();
+    while (iter.hasNext())
+    {
+      Verfuegungspunkt vp = (Verfuegungspunkt) iter.next();
+      String text = "Verfügungspunkt '" + vp.getHeading() + "'";
+      Iterator zuleits = vp.getZuleitungszeilen().iterator();
+      while (zuleits.hasNext())
+      {
+        String zuleit = (String) zuleits.next();
+        text += "\n  --> '" + zuleit + "'";
+      }
+      Logger.debug2(text);
+    }
+
+    // pmod.print((short)1);
+    Logger.debug("SachleitendeVerfuegung.print - finished");
+  }
+
+  public static void main(String[] args) throws Exception
+  {
+    UNO.init();
+
+    XTextDocument doc = UNO.XTextDocument(UNO.desktop.getCurrentComponent());
+
+    if (doc == null)
+    {
+      System.err.println("Keine Textdokument");
+      return;
+    }
+
   }
 }
