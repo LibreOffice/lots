@@ -31,6 +31,9 @@ import com.sun.star.text.XTextRange;
 import com.sun.star.uno.AnyConverter;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.itd51.parser.ConfigThingy;
+import de.muenchen.allg.itd51.parser.NodeNotFoundException;
+import de.muenchen.allg.itd51.wollmux.dialog.SachleitendeVerfuegungenDruckdialog;
 
 public class SachleitendeVerfuegung
 {
@@ -407,6 +410,11 @@ public class SachleitendeVerfuegung
    */
   private static void ziffernAnpassen(XTextDocument doc)
   {
+    // TODO: refactoring der Ziffernanpassung. Für die Ziffernanpassung kann mit
+    // leichten Modifikationen die scanVerfügungspunkte-Methode verwendet
+    // werden. Das sollte implementiert werden um unnötige Redunzanzen zu
+    // entfernen.
+
     XTextRange punkt1 = getVerfuegungspunkt1(doc);
 
     // Zähler für Verfuegungspunktnummer auf 1 initialisieren, wenn ein
@@ -649,7 +657,7 @@ public class SachleitendeVerfuegung
    * @author christoph.lutz
    * 
    */
-  private static class Verfuegungspunkt
+  public static class Verfuegungspunkt
   {
     /**
      * Vector mit den XTextRanges aller Paragraphen des Verfügungspunktes.
@@ -842,6 +850,35 @@ public class SachleitendeVerfuegung
         text += "\n  --> '" + zuleit + "'";
       }
       Logger.debug2(text);
+    }
+
+    // Beschreibung des Druckdialogs auslesen.
+    ConfigThingy conf = WollMuxSingleton.getInstance().getWollmuxConf();
+    ConfigThingy svdds = conf.query("Dialoge").query(
+        "SachleitendeVerfuegungenDruckdialog");
+    ConfigThingy printDialogConf = null;
+    try
+    {
+      printDialogConf = svdds.getLastChild();
+    }
+    catch (NodeNotFoundException e)
+    {
+      Logger
+          .error(
+              "Fehlende Dialogbeschreibung für den Dialog 'SachleitendeVerfuegungenDruckdialog'.",
+              e);
+      return;
+    }
+
+    // Druckdialog starten
+    try
+    {
+      new SachleitendeVerfuegungenDruckdialog(printDialogConf, vps, null);
+    }
+    catch (ConfigurationErrorException e)
+    {
+      Logger.error(e);
+      return;
     }
 
     // pmod.print((short)1);
