@@ -42,17 +42,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
-import com.sun.star.awt.DeviceInfo;
-import com.sun.star.awt.PosSize;
 import com.sun.star.awt.XWindow;
 import com.sun.star.beans.PropertyValue;
-import com.sun.star.beans.PropertyVetoException;
-import com.sun.star.container.NoSuchElementException;
-import com.sun.star.container.XNameAccess;
 import com.sun.star.frame.XController;
 import com.sun.star.frame.XDispatch;
 import com.sun.star.frame.XFrame;
-import com.sun.star.frame.XModel;
 import com.sun.star.lang.EventObject;
 import com.sun.star.lang.XComponent;
 import com.sun.star.text.XTextCursor;
@@ -64,7 +58,6 @@ import com.sun.star.uno.RuntimeException;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
 import com.sun.star.util.XURLTransformer;
-import com.sun.star.view.DocumentZoomType;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoProps;
@@ -832,106 +825,51 @@ public class WollMuxEventHandler
       WollMuxSingleton mux = WollMuxSingleton.getInstance();
       TextDocumentModel model = mux.getTextDocumentModel(xTextDoc);
 
-      UnoService doc = new UnoService(xTextDoc);
-      if (doc.supportsService("com.sun.star.text.TextDocument"))
+      // Konfigurationsabschnitt Textdokument verarbeiten:
+      ConfigThingy tds = new ConfigThingy("Textdokument");
+      try
       {
-        // Konfigurationsabschnitt Textdokument verarbeiten:
-        ConfigThingy tds = new ConfigThingy("Textdokument");
-        try
+        tds = mux.getWollmuxConf().query("Fenster").query("Textdokument")
+            .getLastChild();
+        model.setWindowViewSettings(tds);
+      }
+      catch (NodeNotFoundException e)
+      {
+      }
+
+      // Mögliche Aktionen für das neu geöffnete Dokument:
+      DocumentCommandInterpreter dci = new DocumentCommandInterpreter(model,
+          mux);
+
+      try
+      {
+        // Dokumentkommandos setType und setPrintFunction auswerten
+        dci.scanDocumentSettings();
+
+        // Bei Vorlagen: Ausführung der Dokumentkommandos
+        if (model.isTemplate()) dci.executeTemplateCommands();
+
+        // Bei Formularen: Konfigurationsabschnitt Fenster/Formular verarbeiten
+        if (model.isFormDocument() || model.hasFormDescriptor())
         {
-          tds = mux.getWollmuxConf().query("Fenster").query("Textdokument")
-              .getLastChild();
-          // Einstellungen setzen:
-          setWindowViewSettings(xTextDoc, tds);
-        }
-        catch (NodeNotFoundException e)
-        {
-        }
-
-        // Mögliche Aktionen für das neu geöffnete Dokument:
-        boolean processNormalCommands = false;
-        boolean processFormCommands = false;
-
-        // Bestimmung des Dokumenttyps (openAsTemplate?):
-        if (doc.xTextDocument() != null)
-          processNormalCommands = (doc.xTextDocument().getURL() == null || doc
-              .xTextDocument().getURL().equals(""));
-
-        // Auswerten der Special-Bookmarks "WM(CMD 'setType' TYPE '...')"
-        if (doc.xBookmarksSupplier() != null)
-        {
-          XNameAccess bookmarks = doc.xBookmarksSupplier().getBookmarks();
-
-          if (bookmarks.hasByName(DocumentCommand.SETTYPE_normalTemplate))
-          {
-            processNormalCommands = true;
-            processFormCommands = false;
-
-            // Bookmark löschen
-            removeBookmark(doc, DocumentCommand.SETTYPE_normalTemplate);
-          }
-
-          else if (processNormalCommands
-                   && bookmarks
-                       .hasByName(DocumentCommand.SETTYPE_templateTemplate))
-          {
-            processNormalCommands = false;
-            processFormCommands = false;
-
-            // Bookmark löschen
-            removeBookmark(doc, DocumentCommand.SETTYPE_templateTemplate);
-          }
-
-          else if (bookmarks.hasByName(DocumentCommand.SETTYPE_formDocument))
-          {
-            processNormalCommands = false;
-            processFormCommands = true;
-
-            // Bookmark löschen (wird später
-            // DocumentCommandInterpreter.executeFormCommands() aber wieder
-            // erzeugt, da Formulardokumente immer Formulardokumente bleiben)
-            removeBookmark(doc, DocumentCommand.SETTYPE_formDocument);
-          }
-        }
-
-        // Ausführung der Dokumentkommandos
-        if (processNormalCommands || processFormCommands)
-        {
-          DocumentCommandInterpreter dci = new DocumentCommandInterpreter(
-              model, mux);
-
           try
           {
-            if (processNormalCommands) dci.executeTemplateCommands();
-
-            if (processFormCommands || dci.isFormular())
-            {
-              // Zoom-Faktor des Abschnitts Fenster/Formular verarbeiten.
-              try
-              {
-                String zoom = mux.getWollmuxConf().query("Fenster").query(
-                    "Formular").getLastChild().get("ZOOM").toString();
-                setDocumentZoom(xTextDoc, zoom);
-              }
-              catch (NodeNotFoundException e)
-              {
-                // ZOOM ist optional
-              }
-              catch (ConfigurationErrorException e)
-              {
-                Logger.error(e);
-              }
-
-              // Formularbearbeitung ausführen:
-              dci.executeFormCommands();
-            }
+            model.setDocumentZoom(mux.getWollmuxConf().query("Fenster").query(
+                "Formular").getLastChild().query("ZOOM"));
           }
           catch (java.lang.Exception e)
           {
-            throw new WollMuxFehlerException(
-                "Fehler bei der Dokumentbearbeitung.", e);
           }
         }
+
+        // Bei Formularen: Ausführung der Dokumentkommandos des Formularsystems
+        if (model.isFormDocument() || model.hasFormDescriptor())
+          dci.executeFormCommands();
+      }
+      catch (java.lang.Exception e)
+      {
+        throw new WollMuxFehlerException("Fehler bei der Dokumentbearbeitung.",
+            e);
       }
     }
 
@@ -943,129 +881,6 @@ public class WollMuxEventHandler
     public String toString()
     {
       return this.getClass().getSimpleName() + "(#" + xTextDoc.hashCode() + ")";
-    }
-
-    /**
-     * Die Methode löscht das Bookmark name aus dem Dokument doc und setzt den
-     * document-modified-Status anschließend auf false, weil nur wirkliche
-     * Benutzerinteraktion zur Speichern-Abfrage beim Schließen führen sollte.
-     * 
-     * @param doc
-     * @param name
-     */
-    private static void removeBookmark(UnoService doc, String name)
-    {
-      try
-      {
-        if (doc.xBookmarksSupplier() != null)
-        {
-          Bookmark b = new Bookmark(name, doc.xBookmarksSupplier());
-          b.remove();
-        }
-      }
-      catch (NoSuchElementException e)
-      {
-        Logger.error(e);
-      }
-
-      // So tun als ob das Dokument (durch das Löschen des Bookmarks) nicht
-      // verändert worden wäre:
-      if (doc.xModifiable() != null) try
-      {
-        doc.xModifiable().setModified(false);
-      }
-      catch (PropertyVetoException e)
-      {
-        Logger.error(e);
-      }
-    }
-
-    /**
-     * Diese Methode liest die (optionalen) Attribute X, Y, WIDTH, HEIGHT und
-     * ZOOM aus dem übergebenen Konfigurations-Abschnitt settings und setzt die
-     * Fenstereinstellungen der Komponente compo entsprechend um. Bei den
-     * Pärchen X/Y bzw. SIZE/WIDTH müssen jeweils beide Komponenten im
-     * Konfigurationsabschnitt angegeben sein.
-     * 
-     * @param compo
-     *          Die Komponente, deren Fenstereinstellungen gesetzt werden sollen
-     * @param settings
-     *          der Konfigurationsabschnitt, der X, Y, WIDHT, HEIGHT und ZOOM
-     *          als direkte Kinder enthält.
-     */
-    private static void setWindowViewSettings(XComponent compo,
-        ConfigThingy settings)
-    {
-      // Fenster holen (zum setzen der Fensterposition und des Zooms)
-      XWindow window = null;
-      try
-      {
-        window = UNO.XModel(compo).getCurrentController().getFrame()
-            .getContainerWindow();
-      }
-      catch (java.lang.Exception e)
-      {
-      }
-
-      // Insets bestimmen (Rahmenmaße des Windows)
-      int insetLeft = 0, insetTop = 0, insetRight = 0, insetButtom = 0;
-      if (UNO.XDevice(window) != null)
-      {
-        DeviceInfo di = UNO.XDevice(window).getInfo();
-        insetButtom = di.BottomInset;
-        insetTop = di.TopInset;
-        insetRight = di.RightInset;
-        insetLeft = di.LeftInset;
-      }
-
-      // Position setzen:
-      try
-      {
-        int xPos = new Integer(settings.get("X").toString()).intValue();
-        int yPos = new Integer(settings.get("Y").toString()).intValue();
-        if (window != null)
-        {
-          window.setPosSize(
-              xPos + insetLeft,
-              yPos + insetTop,
-              0,
-              0,
-              PosSize.POS);
-        }
-      }
-      catch (java.lang.Exception e)
-      {
-      }
-      // Dimensions setzen:
-      try
-      {
-        int width = new Integer(settings.get("WIDTH").toString()).intValue();
-        int height = new Integer(settings.get("HEIGHT").toString()).intValue();
-        if (window != null)
-          window.setPosSize(
-              0,
-              0,
-              width - insetLeft - insetRight,
-              height - insetTop - insetButtom,
-              PosSize.SIZE);
-      }
-      catch (java.lang.Exception e)
-      {
-      }
-
-      // Zoom setzen:
-      try
-      {
-        setDocumentZoom(UNO.XModel(compo), settings.get("ZOOM").toString());
-      }
-      catch (NodeNotFoundException e)
-      {
-        // ZOOM ist optional
-      }
-      catch (ConfigurationErrorException e)
-      {
-        Logger.error(e);
-      }
     }
   }
 
@@ -1536,10 +1351,12 @@ public class WollMuxEventHandler
    *          Die DocumentCommandTree-Struktur, die den Zustand der
    *          Sichtbarkeiten enthält.
    */
-  public static void handleSetVisibleState(DocumentCommandTree cmdTree,
-      HashSet invisibleGroups, String groupId, boolean visible)
+  public static void handleSetVisibleState(XTextDocument doc,
+      DocumentCommandTree cmdTree, HashSet invisibleGroups, String groupId,
+      boolean visible)
   {
-    handle(new OnSetVisibleState(cmdTree, invisibleGroups, groupId, visible));
+    handle(new OnSetVisibleState(doc, cmdTree, invisibleGroups, groupId,
+        visible));
   }
 
   /**
@@ -1551,6 +1368,8 @@ public class WollMuxEventHandler
    */
   private static class OnSetVisibleState extends BasicEvent
   {
+    private XTextDocument doc;
+
     private String groupId;
 
     private boolean visible;
@@ -1559,9 +1378,10 @@ public class WollMuxEventHandler
 
     private HashSet invisibleGroups;
 
-    public OnSetVisibleState(DocumentCommandTree cmdTree,
+    public OnSetVisibleState(XTextDocument doc, DocumentCommandTree cmdTree,
         HashSet invisibleGroups, String groupId, boolean visible)
     {
+      this.doc = doc;
       this.cmdTree = cmdTree;
       this.invisibleGroups = invisibleGroups;
       this.groupId = groupId;
@@ -1638,13 +1458,10 @@ public class WollMuxEventHandler
       if (range != null)
         try
         {
-          XController controller = UNO.XModel(cmdTree.getBookmarksSupplier())
-              .getCurrentController();
+          XController controller = UNO.XModel(doc).getCurrentController();
           XTextCursor cursor = UNO.XTextViewCursorSupplier(controller)
               .getViewCursor();
           cursor.gotoRange(range.getStart(), false);
-          // Stellt sicher,
-          // cursor.goLeft((short) 1, false);
         }
         catch (java.lang.Exception e)
         {
@@ -2508,68 +2325,5 @@ public class WollMuxEventHandler
               + sectionName
               + "' fehlt in der Konfigurationsdatei.", e);
     }
-  }
-
-  /**
-   * Diese Methode setzt den ZoomTyp bzw. den ZoomValue der Dokumentenansicht
-   * des Dokuments doc auf den neuen Wert zoom, der entwender eine ganzzahliger
-   * Prozentwert (ohne "%"-Zeichen") oder einer der Werte "Optimal",
-   * "PageWidth", "PageWidthExact" oder "EntirePage" ist.
-   * 
-   * @param controller
-   * @param zoom
-   * @throws ConfigurationErrorException
-   */
-  private static void setDocumentZoom(XModel doc, String zoom)
-      throws ConfigurationErrorException
-  {
-    Short zoomType = null;
-    Short zoomValue = null;
-
-    if (zoom != null)
-    {
-      // ZOOM-Argument auswerten:
-      if (zoom.equalsIgnoreCase("Optimal"))
-        zoomType = new Short(DocumentZoomType.OPTIMAL);
-
-      if (zoom.equalsIgnoreCase("PageWidth"))
-        zoomType = new Short(DocumentZoomType.PAGE_WIDTH);
-
-      if (zoom.equalsIgnoreCase("PageWidthExact"))
-        zoomType = new Short(DocumentZoomType.PAGE_WIDTH_EXACT);
-
-      if (zoom.equalsIgnoreCase("EntirePage"))
-        zoomType = new Short(DocumentZoomType.ENTIRE_PAGE);
-
-      if (zoomType == null)
-      {
-        try
-        {
-          zoomValue = new Short(zoom);
-        }
-        catch (NumberFormatException e)
-        {
-        }
-      }
-    }
-
-    // ZoomType bzw ZoomValue setzen:
-    Object viewSettings = null;
-    try
-    {
-      viewSettings = UNO.XViewSettingsSupplier(doc.getCurrentController())
-          .getViewSettings();
-    }
-    catch (java.lang.Exception e)
-    {
-    }
-    if (zoomType != null)
-      UNO.setProperty(viewSettings, "ZoomType", zoomType);
-    else if (zoomValue != null)
-      UNO.setProperty(viewSettings, "ZoomValue", zoomValue);
-    else
-      throw new ConfigurationErrorException("Ungültiger ZOOM-Wert '"
-                                            + zoom
-                                            + "'");
   }
 }

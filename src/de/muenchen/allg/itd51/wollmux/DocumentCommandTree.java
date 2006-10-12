@@ -376,19 +376,6 @@ public class DocumentCommandTree
   }
 
   /**
-   * Liefert den BookmarksSupplier des Kommandobaums zurück, der im Normalfall
-   * auch zugleich die Komponente des Textdokuments selbst ist.
-   * 
-   * @return Liefert den BookmarksSupplier des Kommandobaums zurück, der im
-   *         Normalfall auch zugleich die Komponente des Textdokuments selbst
-   *         ist.
-   */
-  public XBookmarksSupplier getBookmarksSupplier()
-  {
-    return xBookmarksSupplier;
-  }
-
-  /**
    * Main-Methode für Testzwecke. Erzeugt einen Kommandobaum aus dem aktuell in
    * OOo geöffneten Dokument und gibt diesen auf System.out aus.
    * 

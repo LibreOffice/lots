@@ -21,6 +21,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -31,16 +32,11 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Vector;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
-import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
@@ -48,29 +44,19 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
-import javax.swing.ListSelectionModel;
-import javax.swing.ScrollPaneConstants;
-import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-
-import com.sun.org.apache.xerces.internal.impl.xs.opti.DefaultNode;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung.Verfuegungspunkt;
-import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
-import de.muenchen.allg.itd51.wollmux.db.DJDataset;
-import de.muenchen.allg.itd51.wollmux.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
-import de.muenchen.allg.itd51.wollmux.db.QueryResults;
 
 /**
  * Diese Klasse baut anhand einer als ConfigThingy übergebenen
@@ -83,20 +69,15 @@ import de.muenchen.allg.itd51.wollmux.db.QueryResults;
 public class SachleitendeVerfuegungenDruckdialog
 {
   /**
-   * Gibt an, wie die Personen in den Listen angezeigt werden sollen. %{Spalte}
-   * Syntax um entsprechenden Wert des Datensatzes einzufügen.
-   */
-  private final static String displayTemplate = "%{Nachname}, %{Vorname} (%{Rolle})";
-
-  /**
-   * Standardbreite für Textfelder
-   */
-  // private final static int TEXTFIELD_DEFAULT_WIDTH = 22;
-  /**
    * Rand um Textfelder (wird auch für ein paar andere Ränder verwendet) in
    * Pixeln.
    */
   private final static int TF_BORDER = 4;
+
+  /**
+   * Rand über und unter einem horizontalen Separator (in Pixeln).
+   */
+  private final static int SEP_BORDER = 7;
 
   /**
    * Rand um Buttons (in Pixeln).
@@ -201,12 +182,6 @@ public class SachleitendeVerfuegungenDruckdialog
    * enthält.
    */
   private Vector verfuegungspunkte;
-
-  /**
-   * Überwacht Änderungen in der Auswahl und wählt den entsprechenden Datensatz
-   * im DJ.
-   */
-  private MyListSelectionListener myListSelectionListener = new MyListSelectionListener();
 
   /**
    * Erzeugt einen neuen Dialog.
@@ -339,18 +314,27 @@ public class SachleitendeVerfuegungenDruckdialog
     myFrame.getContentPane().add(mainPanel);
 
     JPanel verfPunktPanel = new JPanel(new GridBagLayout());
-    JPanel allElements = new JPanel(new GridBagLayout());
     JPanel buttons = new JPanel(new GridBagLayout());
 
-    mainPanel.add(verfPunktPanel, BorderLayout.NORTH);
-    mainPanel.add(allElements, BorderLayout.CENTER);
+    mainPanel.add(verfPunktPanel, BorderLayout.CENTER);
     mainPanel.add(buttons, BorderLayout.PAGE_END);
 
     for (int i = 0; i < size; i++)
     {
       addUIElements(fensterDesc, "Verfuegungspunkt", i, verfPunktPanel, 1, 0);
     }
-    addUIElements(fensterDesc, "AllElements", size, verfPunktPanel, 1, 0);
+
+    // separator zwischen Verfügungspunkte und Summenzeile hinzufügen
+    GridBagConstraints gbcSeparator = new GridBagConstraints(0, 0,
+        GridBagConstraints.REMAINDER, 1, 1.0, 0.0, GridBagConstraints.CENTER,
+        GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0);
+    JPanel uiElement = new JPanel(new GridLayout(1,1));
+    uiElement.add(new JSeparator(SwingConstants.HORIZONTAL));
+    uiElement.setBorder(BorderFactory.createEmptyBorder(SEP_BORDER,0,SEP_BORDER,0));
+    gbcSeparator.gridy = size;
+    verfPunktPanel.add(uiElement, gbcSeparator);
+
+    addUIElements(fensterDesc, "AllElements", size+1, verfPunktPanel, 1, 0);
     addUIElements(fensterDesc, "Buttons", 0, buttons, 1, 0);
 
     myFrame.pack();
@@ -648,130 +632,6 @@ public class SachleitendeVerfuegungenDruckdialog
       Logger.error("Ununterstützte ACTION: " + action);
 
     return null;
-  }
-
-  /**
-   * Nimmt eine JList list, die ein DefaultListModel haben muss und ändert ihre
-   * Wertliste so, dass sie data entspricht. Die Datasets aus data werden nicht
-   * direkt als Werte verwendet, sondern in {@link ListElement} Objekte
-   * gewrappt.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private void setListElements(JList list, QueryResults data)
-  {
-    Object[] elements = new Object[data.size()];
-    Iterator iter = data.iterator();
-    int i = 0;
-    while (iter.hasNext())
-      elements[i++] = new ListElement((DJDataset) iter.next());
-    Arrays.sort(elements, new Comparator()
-    {
-      public int compare(Object o1, Object o2)
-      {
-        return o1.toString().compareTo(o2.toString());
-      }
-    });
-
-    DefaultListModel listModel = (DefaultListModel) list.getModel();
-    listModel.clear();
-    for (i = 0; i < elements.length; ++i)
-      listModel.addElement(elements[i]);
-  }
-
-  private void selectSelectedDataset(JList list)
-  {
-    DefaultListModel listModel = (DefaultListModel) list.getModel();
-    for (int i = 0; i < listModel.size(); ++i)
-      if (((ListElement) listModel.get(i)).getDataset().isSelectedDataset())
-        list.setSelectedValue(listModel.get(i), true);
-  }
-
-  /**
-   * Liefert zu einem Datensatz den in einer Listbox anzuzeigenden String.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private String getDisplayString(DJDataset ds)
-  {
-    return substituteVars(displayTemplate, ds);
-  }
-
-  /**
-   * Wrapper um ein DJDataset zum Einfügen in eine JList. Die
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private class ListElement
-  {
-    private String displayString;
-
-    private DJDataset ds;
-
-    public ListElement(DJDataset ds)
-    {
-      displayString = getDisplayString(ds);
-      this.ds = ds;
-    }
-
-    public String toString()
-    {
-      return displayString;
-    }
-
-    public DJDataset getDataset()
-    {
-      return ds;
-    }
-  }
-
-  /**
-   * Ersetzt "%{SPALTENNAME}" in str durch den Wert der entsprechenden Spalte im
-   * datensatz.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  public String substituteVars(String str, Dataset datensatz)
-  {
-    Pattern p = Pattern.compile("%\\{([a-zA-Z0-9]+)\\}");
-    Matcher m = p.matcher(str);
-    if (m.find()) do
-    {
-      String spalte = m.group(1);
-      String wert = spalte;
-      try
-      {
-        String wert2 = datensatz.get(spalte);
-        if (wert2 != null) wert = wert2.replaceAll("%", "");
-      }
-      catch (ColumnNotFoundException e)
-      {
-        Logger.error(e);
-      }
-      str = str.substring(0, m.start()) + wert + str.substring(m.end());
-      m = p.matcher(str);
-    } while (m.find());
-    return str;
-  }
-
-  /**
-   * Sorgt dafür, dass jeweils nur in einer der beiden Listboxen ein Eintrag
-   * selektiert sein kann und dass die entsprechenden Buttons ausgegraut werden
-   * wenn kein Eintrag selektiert ist.
-   */
-  private class MyListSelectionListener implements ListSelectionListener
-  {
-    public void valueChanged(ListSelectionEvent e)
-    {
-      JList list = (JList) e.getSource();
-      // if (list != palJList) return;
-
-      ListElement ele = (ListElement) list.getSelectedValue();
-      if (ele == null)
-        selectSelectedDataset(list);
-      else
-        ele.getDataset().select();
-    }
   }
 
   /**

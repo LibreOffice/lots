@@ -52,27 +52,6 @@ import de.muenchen.allg.itd51.parser.SyntaxErrorException;
 abstract public class DocumentCommand
 {
   /**
-   * Spezialkommando zum Setzen des Dokumenttyps auf "normalTemplate". Dieses
-   * Spezialkommando muss exakt in der vorgegebenen Schreibweise geschrieben
-   * sein.
-   */
-  public final static String SETTYPE_normalTemplate = "WM(CMD 'setType' TYPE 'normalTemplate')";
-
-  /**
-   * Spezialkommando zum Setzen des Dokumenttyps auf "templateTemplate". Dieses
-   * Spezialkommando muss exakt in der vorgegebenen Schreibweise geschrieben
-   * sein.
-   */
-  public final static String SETTYPE_templateTemplate = "WM(CMD 'setType' TYPE 'templateTemplate')";
-
-  /**
-   * Spezialkommando zum Setzen des Dokumenttyps auf "formDocument". Dieses
-   * Spezialkommando muss exakt in der vorgegebenen Schreibweise geschrieben
-   * sein.
-   */
-  public final static String SETTYPE_formDocument = "WM(CMD 'setType' TYPE 'formDocument')";
-
-  /**
    * Das geparste ConfigThingy des zugehörenden Bookmarks.
    */
   protected ConfigThingy wmCmd;

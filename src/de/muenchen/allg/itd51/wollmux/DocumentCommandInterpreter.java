@@ -46,7 +46,6 @@ import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.text.XParagraphCursor;
 import com.sun.star.text.XTextContent;
 import com.sun.star.text.XTextCursor;
-import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextRange;
 import com.sun.star.uno.Exception;
 
@@ -118,8 +117,20 @@ public class DocumentCommandInterpreter
   {
     this.model = model;
     this.mux = mux;
-    this.tree = new DocumentCommandTree(UNO.XBookmarksSupplier(model.doc));
+    this.tree = model.getDocumentCommandTree();
     this.formScanner = null;
+  }
+
+  /**
+   * Diese Methode sollte vor executeTemplateCommands und vor
+   * executeFormCommands aufgerufen werden und sorgt dafür, dass alle globalen
+   * Einstellungen des Dokuments an das TextDocumentModel weitergereicht werden.
+   */
+  public void scanDocumentSettings()
+  {
+    Logger.debug("scanDocumentSettings");
+    new DocumentSettingsScanner().execute(tree);
+    model.setDocumentModified(false);
   }
 
   /**
@@ -172,6 +183,7 @@ public class DocumentCommandInterpreter
     if (formScanner == null) formScanner = new FormScanner();
     errors += formScanner.execute(tree);
     model.setIDToFormFields(formScanner.idToFormFields);
+    model.setFormDescriptor(formScanner.formDescriptor);
 
     // 7) Die Statusänderungen der Dokumentkommandos auf die Bookmarks
     // übertragen bzw. die Bookmarks abgearbeiteter Kommandos löschen.
@@ -193,20 +205,6 @@ public class DocumentCommandInterpreter
   }
 
   /**
-   * Die Methode gibt Auskunft darüber, ob das Dokument ein Formular ist (also
-   * mindestens ein WM(CMD'Form') Kommando enthält) und darf erst verwendet
-   * werden, nachdem die Methode executeTemplateCommands durchlaufen wurde.
-   * 
-   * @return true, wenn sich während des executeTemplateCommands herausgestellt
-   *         hat, dass das Dokument mindestens ein WM(CMD 'Form')-Kommando
-   *         enthält. Ansonsten false
-   */
-  public boolean isFormular()
-  {
-    return (formScanner != null && !formScanner.formDescriptor.isEmpty());
-  }
-
-  /**
    * Diese Methode führt alle Kommandos aus, im Zusammenhang mit der
    * Formularbearbeitung ausgeführt werden müssen.
    * 
@@ -225,6 +223,8 @@ public class DocumentCommandInterpreter
     {
       formScanner = new FormScanner();
       errors += formScanner.execute(tree);
+      model.setIDToFormFields(formScanner.idToFormFields);
+      model.setFormDescriptor(formScanner.formDescriptor);
     }
     HashMap idToPresetValue = mapIDToPresetValue(
         formScanner.formDescriptor,
@@ -237,8 +237,8 @@ public class DocumentCommandInterpreter
     // Anfang des Dokuments gesetzt um das Dokument als Formulardokument
     // auszuzeichnen.
     if (model.doc != null)
-      new Bookmark(DocumentCommand.SETTYPE_formDocument, model.doc, model.doc
-          .getText().getStart());
+      new Bookmark("WM(CMD 'setType' TYPE 'formDocument')", model.doc,
+          model.doc.getText().getStart());
 
     // 4) Document-Modified auf false setzen, da nur wirkliche
     // Benutzerinteraktionen den Modified-Status beeinflussen sollen.
@@ -487,6 +487,7 @@ public class DocumentCommandInterpreter
     public void setVisibleState(String groupId, boolean visible)
     {
       WollMuxEventHandler.handleSetVisibleState(
+          textDocumentModel.doc,
           cmdTree,
           invisibleGroups,
           groupId,
@@ -626,13 +627,47 @@ public class DocumentCommandInterpreter
   }
 
   /**
+   * Hierbei handelt es sich um einen minimalen Scanner, der zu aller erst
+   * abläuft und die globalen Einstellungen des Dokuments (setType,
+   * setPrintFunction) ausliest und dem TextDocumentModel zur Verfügung stellt.
+   * 
+   * @author christoph.lutz
+   */
+  private class DocumentSettingsScanner extends TreeExecutor
+  {
+
+    public int execute(DocumentCommandTree tree)
+    {
+      return executeDepthFirst(tree, false);
+    }
+
+    public int executeCommand(SetPrintFunction cmd)
+    {
+      model.setPrintFunction(cmd);
+      return 0;
+    }
+
+    public int executeCommand(SetType cmd)
+    {
+      model.setTypeCommand(cmd);
+
+      cmd.setDoneState(true);
+
+      // über ein sofortiges Update mit Parameter false sicherstellen, dass das
+      // Kommando auch wirklich aus dem Dokument gelöscht wird, auch wenn der
+      // debug-Modus gesetzt ist.
+      cmd.updateBookmark(false);
+      return 0;
+    }
+
+  }
+
+  /**
    * Der SurroundingGarbageCollector erfasst leere Absätze und Einfügemarker um
    * Dokumentkommandos herum.
    */
   private class SurroundingGarbageCollector extends TreeExecutor
   {
-    private XTextDocument doc;
-
     /**
      * Speichert Muellmann-Objekte, die zu löschenden Müll entfernen.
      */
@@ -659,7 +694,7 @@ public class DocumentCommandInterpreter
 
       public void tueDeinePflicht()
       {
-        Bookmark.removeTextFromInside(doc, range);
+        Bookmark.removeTextFromInside(model.doc, range);
       }
     }
 
@@ -682,7 +717,6 @@ public class DocumentCommandInterpreter
      */
     private int execute(DocumentCommandTree tree)
     {
-      doc = UNO.XTextDocument(tree.getBookmarksSupplier());
       int errors = 0;
       Iterator iter = tree.depthFirstIterator(false);
       while (iter.hasNext())
@@ -955,7 +989,9 @@ public class DocumentCommandInterpreter
     /**
      * Die Methode fügt das externe Dokument von der URL url an die Stelle von
      * cmd ein. Die Methode enthält desweiteren notwendige Workarounds für die
-     * Bugs des insertDocumentFromURL der UNO-API.
+     * Bugs des insertDocumentFromURL der UNO-API. public int
+     * execute(DocumentCommandTree tree) { return executeDepthFirst(tree,
+     * false); }
      * 
      * @param cmd
      *          Einfügeposition

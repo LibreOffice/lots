@@ -21,7 +21,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
 
+import com.sun.star.awt.DeviceInfo;
 import com.sun.star.awt.PosSize;
+import com.sun.star.awt.XWindow;
 import com.sun.star.frame.FrameSearchFlag;
 import com.sun.star.frame.XController;
 import com.sun.star.frame.XFrame;
@@ -31,8 +33,11 @@ import com.sun.star.text.XTextDocument;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.util.CloseVetoException;
 import com.sun.star.util.XCloseListener;
+import com.sun.star.view.DocumentZoomType;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.itd51.parser.ConfigThingy;
+import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.SetPrintFunction;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
 
@@ -96,6 +101,24 @@ public class TextDocumentModel
   private XPrintModel printModel = new PrintModel();
 
   /**
+   * Baum aller im Dokument enthaltenen Dokumentkommandos.
+   */
+  private DocumentCommandTree docCmdTree;
+
+  /**
+   * Enthält die Formularbeschreibung falls es sich bei dem Dokument um ein
+   * Formular handelt und wird jedoch erst mit
+   * DocumentCommandInterpreter.executeNormalCommands() gesetzt.
+   */
+  private FormDescriptor formDescriptor = null;
+
+  /**
+   * Enthält das setType-Dokumentkommando dieses Dokuments falls eines vorhanden
+   * ist.
+   */
+  private DocumentCommand.SetType setTypeCommand = null;
+
+  /**
    * Erzeugt ein neues TextDocumentModel zum XTextDocument doc und sollte nie
    * direkt aufgerufen werden, da neue TextDocumentModels über das
    * WollMuxSingletonie (WollMuxSingleton.getTextDocumentModel()) erzeugt und
@@ -111,6 +134,7 @@ public class TextDocumentModel
     this.currentMax4000 = null;
     this.closeListener = null;
     this.printFunction = null;
+    this.docCmdTree = new DocumentCommandTree(UNO.XBookmarksSupplier(doc));
   }
 
   /**
@@ -229,6 +253,96 @@ public class TextDocumentModel
   public FormularMax4000 getCurrentFormularMax4000()
   {
     return currentMax4000;
+  }
+
+  /**
+   * Liefert den Baum der Dokumentkommandos zu diesem Dokuments in einem nicht
+   * zwangsweise aktualisierten Zustand. Der Zustand kann über die
+   * update()-Methode des zurückgegebenen DocumentCommandTrees aktualisiert
+   * werden.
+   * 
+   * @return Baum der Dokumentkommandos dieses Dokuments.
+   */
+  public DocumentCommandTree getDocumentCommandTree()
+  {
+    return docCmdTree;
+  }
+
+  /**
+   * Liefert true, wenn das Dokument eine Vorlage ist oder wie eine Vorlage
+   * behandelt werden soll, ansonsten false.
+   * 
+   * @return true, wenn das Dokument eine Vorlage ist oder wie eine Vorlage
+   *         behandelt werden soll, ansonsten false.
+   */
+  public boolean isTemplate()
+  {
+    if (setTypeCommand != null)
+    {
+      if (setTypeCommand.getType().equalsIgnoreCase("normalTemplate"))
+        return true;
+      else if (setTypeCommand.getType().equalsIgnoreCase("templateTemplate"))
+        return false;
+      else if (setTypeCommand.getType().equalsIgnoreCase("formDocument"))
+        return false;
+    }
+
+    // Das Dokument ist automatisch eine Vorlage, wenn es keine zugehörige URL
+    // gibt (dann steht ja in der Fensterüberschrift auch "Unbenannt1" statt
+    // einem konkreten Dokumentnamen).
+    return (doc.getURL() == null || doc.getURL().equals(""));
+  }
+
+  /**
+   * Liefert true, wenn das Dokument vom Typ formDocument ist ansonsten false.
+   * ACHTUNG: Ein Dokument könnte theoretisch mit einem WM(CMD'setType'
+   * TYPE'formDocument') Kommandos als Formulardokument markiert seine, OHNE
+   * eine gültige Formularbeschreibung zu besitzen. Dies kann mit der Methode
+   * hasFormDescriptor() geprüft werden.
+   * 
+   * @return Liefert true, wenn das Dokument vom Typ formDocument ist ansonsten
+   *         false.
+   */
+  public boolean isFormDocument()
+  {
+    return (setTypeCommand != null && setTypeCommand.getType()
+        .equalsIgnoreCase("formDocument"));
+  }
+
+  /**
+   * Liefert true, wenn das Dokument ein Formular mit einer gültigen
+   * Formularbeschreibung enthält und damit die Dokumentkommandos des
+   * Formularsystems bearbeitet werden sollen.
+   * 
+   * @return true, wenn das Dokument ein Formular mit einer gültigen
+   *         Formularbeschreibung ist, ansonsten false.
+   */
+  public boolean hasFormDescriptor()
+  {
+    if (formDescriptor != null) return !formDescriptor.isEmpty();
+
+    return false;
+  }
+
+  /**
+   * Setzt das setTypeCommand dieses Dokuments, falls ein solches existiert.
+   * 
+   * @param setTypeCommand
+   */
+  public void setTypeCommand(DocumentCommand.SetType setTypeCommand)
+  {
+    this.setTypeCommand = setTypeCommand;
+  }
+
+  /**
+   * Setzt die zu diesem Dokument zugehörige Formularbeschreibung auf
+   * formDescriptor.
+   * 
+   * @param formDescriptor
+   */
+  public void setFormDescriptor(FormDescriptor formDescriptor)
+  {
+    this.formDescriptor = formDescriptor;
   }
 
   /**
@@ -375,6 +489,162 @@ public class TextDocumentModel
     }
     catch (java.lang.Exception e)
     {
+    }
+  }
+
+  /**
+   * Diese Methode setzt den ZoomTyp bzw. den ZoomValue der Dokumentenansicht
+   * des Dokuments auf den neuen Wert zoom, der entwender eine ganzzahliger
+   * Prozentwert (ohne "%"-Zeichen") oder einer der Werte "Optimal",
+   * "PageWidth", "PageWidthExact" oder "EntirePage" ist.
+   * 
+   * @param zoom
+   * @throws ConfigurationErrorException
+   */
+  private void setDocumentZoom(String zoom) throws ConfigurationErrorException
+  {
+    Short zoomType = null;
+    Short zoomValue = null;
+
+    if (zoom != null)
+    {
+      // ZOOM-Argument auswerten:
+      if (zoom.equalsIgnoreCase("Optimal"))
+        zoomType = new Short(DocumentZoomType.OPTIMAL);
+
+      if (zoom.equalsIgnoreCase("PageWidth"))
+        zoomType = new Short(DocumentZoomType.PAGE_WIDTH);
+
+      if (zoom.equalsIgnoreCase("PageWidthExact"))
+        zoomType = new Short(DocumentZoomType.PAGE_WIDTH_EXACT);
+
+      if (zoom.equalsIgnoreCase("EntirePage"))
+        zoomType = new Short(DocumentZoomType.ENTIRE_PAGE);
+
+      if (zoomType == null)
+      {
+        try
+        {
+          zoomValue = new Short(zoom);
+        }
+        catch (NumberFormatException e)
+        {
+        }
+      }
+    }
+
+    // ZoomType bzw ZoomValue setzen:
+    Object viewSettings = null;
+    try
+    {
+      viewSettings = UNO.XViewSettingsSupplier(doc.getCurrentController())
+          .getViewSettings();
+    }
+    catch (java.lang.Exception e)
+    {
+    }
+    if (zoomType != null)
+      UNO.setProperty(viewSettings, "ZoomType", zoomType);
+    else if (zoomValue != null)
+      UNO.setProperty(viewSettings, "ZoomValue", zoomValue);
+    else
+      throw new ConfigurationErrorException("Ungültiger ZOOM-Wert '"
+                                            + zoom
+                                            + "'");
+  }
+
+  /**
+   * Diese Methode liest die (optionalen) Attribute X, Y, WIDTH, HEIGHT und ZOOM
+   * aus dem übergebenen Konfigurations-Abschnitt settings und setzt die
+   * Fenstereinstellungen des Dokuments entsprechend um. Bei den Pärchen X/Y
+   * bzw. SIZE/WIDTH müssen jeweils beide Komponenten im Konfigurationsabschnitt
+   * angegeben sein.
+   * 
+   * @param settings
+   *          der Konfigurationsabschnitt, der X, Y, WIDHT, HEIGHT und ZOOM als
+   *          direkte Kinder enthält.
+   */
+  public void setWindowViewSettings(ConfigThingy settings)
+  {
+    // Fenster holen (zum setzen der Fensterposition und des Zooms)
+    XWindow window = null;
+    try
+    {
+      window = UNO.XModel(doc).getCurrentController().getFrame()
+          .getContainerWindow();
+    }
+    catch (java.lang.Exception e)
+    {
+    }
+
+    // Insets bestimmen (Rahmenmaße des Windows)
+    int insetLeft = 0, insetTop = 0, insetRight = 0, insetButtom = 0;
+    if (UNO.XDevice(window) != null)
+    {
+      DeviceInfo di = UNO.XDevice(window).getInfo();
+      insetButtom = di.BottomInset;
+      insetTop = di.TopInset;
+      insetRight = di.RightInset;
+      insetLeft = di.LeftInset;
+    }
+
+    // Position setzen:
+    try
+    {
+      int xPos = new Integer(settings.get("X").toString()).intValue();
+      int yPos = new Integer(settings.get("Y").toString()).intValue();
+      if (window != null)
+      {
+        window.setPosSize(xPos + insetLeft, yPos + insetTop, 0, 0, PosSize.POS);
+      }
+    }
+    catch (java.lang.Exception e)
+    {
+    }
+    // Dimensions setzen:
+    try
+    {
+      int width = new Integer(settings.get("WIDTH").toString()).intValue();
+      int height = new Integer(settings.get("HEIGHT").toString()).intValue();
+      if (window != null)
+        window.setPosSize(
+            0,
+            0,
+            width - insetLeft - insetRight,
+            height - insetTop - insetButtom,
+            PosSize.SIZE);
+    }
+    catch (java.lang.Exception e)
+    {
+    }
+
+    // Zoom setzen:
+    setDocumentZoom(settings);
+  }
+
+  /**
+   * Diese Methode setzt den ZoomTyp bzw. den ZoomValue der Dokumentenansicht
+   * des Dokuments auf den neuen Wert den das ConfigThingy conf im Knoten ZOOM
+   * angibt, der entwender eine ganzzahliger Prozentwert (ohne "%"-Zeichen")
+   * oder einer der Werte "Optimal", "PageWidth", "PageWidthExact" oder
+   * "EntirePage" ist.
+   * 
+   * @param zoom
+   * @throws ConfigurationErrorException
+   */
+  public void setDocumentZoom(ConfigThingy conf)
+  {
+    try
+    {
+      setDocumentZoom(conf.get("ZOOM").toString());
+    }
+    catch (NodeNotFoundException e)
+    {
+      // ZOOM ist optional
+    }
+    catch (ConfigurationErrorException e)
+    {
+      Logger.error(e);
     }
   }
 
