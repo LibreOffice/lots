@@ -96,6 +96,13 @@ public class TextDocumentModel
   private DocumentCommand.SetPrintFunction printFunction;
 
   /**
+   * Enthält den Namen der Druckfunktion, die vor dem letzten Aufruf der Methode
+   * setPrintFunction(...) gesetzt war oder null wenn noch keine Druckfunktion
+   * gesetzt war.
+   */
+  private String formerPrintFunctionName;
+
+  /**
    * Enthält das zu diesem TextDocumentModel zugehörige XPrintModel.
    */
   private XPrintModel printModel = new PrintModel();
@@ -348,51 +355,50 @@ public class TextDocumentModel
   /**
    * Diese Methode setzt die diesem TextDocumentModel zugehörige Druckfunktion
    * auf den Wert functionName, der ein gültiger Funktionsbezeichner sein muss
-   * oder löscht eine bereits gesetzte Druckfunktion, wenn functionName der
-   * Leerstring ist.
+   * oder setzt eine Druckfunktion auf den davor zuletzt gesetzten Wert zurück,
+   * wenn functionName der Leerstring ist und früher bereits eine Druckfunktion
+   * registriert war. War früher noch keine Druckfunktion registriert, so wird
+   * das entsprechende setPrintFunction-Dokumentkommando aus dem Dokument
+   * gelöscht.
    * 
    * TESTED
    * 
    * @param printFunctionName
    *          der Name der Druckfunktion (zum setzen) oder der Leerstring (zum
-   *          löschen). Der zu setzende Name muss ein gültiger
+   *          löschen bzw. zurücksetzen). Der zu setzende Name muss ein gültiger
    *          Funktionsbezeichner sein und in einem Abschnitt "Druckfunktionen"
    *          in der wollmux.conf definiert sein.
    */
   public void setPrintFunctionName(String printFunctionName)
   {
+    // Bei null oder Leerstring: Name der vorhergehenden Druckfunktion
+    // verwenden.
     if (printFunctionName == null || printFunctionName.equals(""))
-    {
-      if (printFunction != null)
-      {
-        // Bestehende Druckfunktion löschen wenn Funktionsname null oder leer.
-        printFunction.setDoneState(true);
-        printFunction.updateBookmark(false);
-        printFunction = null;
-      }
-    }
-    else if (printFunction == null)
+      printFunctionName = formerPrintFunctionName;
+
+    // Name der bisherigen Druckfunktion in formerPrintFunctionName sichern.
+    formerPrintFunctionName = null;
+    if (printFunction != null)
+      formerPrintFunctionName = printFunction.getFunctionName();
+
+    if (printFunction == null && printFunctionName != null)
     {
       // Neues Dokumentkommando anlegen wenn noch nicht definiert.
       printFunction = new SetPrintFunction(doc, printFunctionName);
     }
-    else
+    else if (printFunction != null && printFunctionName != null)
     {
       // ansonsten den Namen auf printFunctionName ändern.
       printFunction.setFunctionName(printFunctionName);
+      printFunction.updateBookmark(false);
     }
-  }
-
-  /**
-   * Liefert den Namen der aktuellen Druckfunktion, falls das Dokument ein
-   * entsprechendes Dokumentkomando enthält oder eine Druckfunktion mit
-   * setPrintFunctionName()-Methode gesetz wurde; ist keine Druckfunktion
-   * definiert, so wird null zurück geliefert.
-   */
-  public String getPrintFunctionName()
-  {
-    if (printFunction != null) return printFunction.getFunctionName();
-    return null;
+    else if (printFunction != null && printFunctionName == null)
+    {
+      // Bestehendes Dokumentkommando löschen
+      printFunction.setDoneState(true);
+      printFunction.updateBookmark(false);
+      printFunction = null;
+    }
   }
 
   /**
@@ -406,7 +412,24 @@ public class TextDocumentModel
    */
   public void setPrintFunction(SetPrintFunction cmd)
   {
+    // Name der bisherigen Druckfunktion in formerPrintFunctionName sichern.
+    formerPrintFunctionName = null;
+    if (printFunction != null)
+      formerPrintFunctionName = printFunction.getFunctionName();
+
     printFunction = cmd;
+  }
+
+  /**
+   * Liefert den Namen der aktuellen Druckfunktion, falls das Dokument ein
+   * entsprechendes Dokumentkomando enthält oder eine Druckfunktion mit
+   * setPrintFunctionName()-Methode gesetz wurde; ist keine Druckfunktion
+   * definiert, so wird null zurück geliefert.
+   */
+  public String getPrintFunctionName()
+  {
+    if (printFunction != null) return printFunction.getFunctionName();
+    return null;
   }
 
   /**
