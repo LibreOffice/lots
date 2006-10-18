@@ -800,6 +800,10 @@ abstract public class DocumentCommand
     public int executeCommand(DocumentCommand.SetGroups cmd);
 
     public int executeCommand(DocumentCommand.SetPrintFunction cmd);
+
+    public int executeCommand(DocumentCommand.DraftOnly cmd);
+
+    public int executeCommand(DocumentCommand.NotInOriginal cmd);
   }
 
   // ********************************************************************************
@@ -1498,6 +1502,58 @@ abstract public class DocumentCommand
   static public class SetGroups extends DocumentCommand
   {
     public SetGroups(ConfigThingy wmCmd, Bookmark bookmark)
+    {
+      super(wmCmd, bookmark);
+    }
+
+    protected boolean canHaveChilds()
+    {
+      return true;
+    }
+
+    public int execute(DocumentCommand.Executor visitable)
+    {
+      return visitable.executeCommand(this);
+    }
+  }
+
+  // ********************************************************************************
+  /**
+   * TODO: überarbeiten! Beim Drucken von Sachleitenden Verfügungen wird die Ausfertigung, die ALLE
+   * definierten Verfügungpunkte enthält als "Entwurf" bezeichnet. Mit einem
+   * DraftOnly-Kommando können Blöcke im Text definiert werden, die
+   * ausschließlich im Entwurf angezeigt werden sollen.
+   */
+  static public class DraftOnly extends DocumentCommand
+  {
+    public DraftOnly(ConfigThingy wmCmd, Bookmark bookmark)
+    {
+      super(wmCmd, bookmark);
+    }
+
+    protected boolean canHaveChilds()
+    {
+      return true;
+    }
+
+    public int execute(DocumentCommand.Executor visitable)
+    {
+      return visitable.executeCommand(this);
+    }
+  }
+
+  // ********************************************************************************
+  /**
+   * TODO: überarbeiten! Beim Drucken von Sachleitenden Verfügungen wird der Verfügungspunkt I als
+   * Sonderfall behandelt, wenn es sich um einen externen Briefkopf handelt.
+   * Dann enthält "I." alle Inhalte des Originals. Mit dem NotInOriginal
+   * Kommando ist es möglich Blöcke im Text zu definieren, die NIEMALS in
+   * Originalen abgedruckt werden sollen, jedoch in allen anderen Ausdrucken,
+   * die nicht das Original sind (wie z.B. der Entwurf).
+   */
+  static public class NotInOriginal extends DocumentCommand
+  {
+    public NotInOriginal(ConfigThingy wmCmd, Bookmark bookmark)
     {
       super(wmCmd, bookmark);
     }

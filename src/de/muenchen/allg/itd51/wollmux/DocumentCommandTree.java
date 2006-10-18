@@ -43,6 +43,7 @@ import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.parser.SyntaxErrorException;
+import de.muenchen.allg.itd51.wollmux.DocumentCommand.DraftOnly;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.Form;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertContent;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertFormValue;
@@ -51,6 +52,7 @@ import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertFunctionValue;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertValue;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InvalidCommand;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InvalidCommandException;
+import de.muenchen.allg.itd51.wollmux.DocumentCommand.NotInOriginal;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.RootElement;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.SetGroups;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.SetPrintFunction;
@@ -206,54 +208,64 @@ public class DocumentCommandTree
         return new DocumentCommand.InsertFrag(wmCmd, bookmark);
       }
 
-      if (cmd.compareToIgnoreCase("insertValue") == 0)
+      else if (cmd.compareToIgnoreCase("insertValue") == 0)
       {
         return new DocumentCommand.InsertValue(wmCmd, bookmark);
       }
 
-      if (cmd.compareToIgnoreCase("insertContent") == 0)
+      else if (cmd.compareToIgnoreCase("insertContent") == 0)
       {
         return new DocumentCommand.InsertContent(wmCmd, bookmark);
       }
 
-      if (cmd.compareToIgnoreCase("form") == 0)
+      else if (cmd.compareToIgnoreCase("form") == 0)
       {
         return new DocumentCommand.Form(wmCmd, bookmark);
       }
 
-      if (cmd.compareToIgnoreCase("updateFields") == 0)
+      else if (cmd.compareToIgnoreCase("updateFields") == 0)
       {
         return new DocumentCommand.UpdateFields(wmCmd, bookmark);
       }
 
-      if (cmd.compareToIgnoreCase("version") == 0)
+      else if (cmd.compareToIgnoreCase("version") == 0)
       {
         return new DocumentCommand.Version(wmCmd, bookmark);
       }
 
-      if (cmd.compareToIgnoreCase("setType") == 0)
+      else if (cmd.compareToIgnoreCase("setType") == 0)
       {
         return new DocumentCommand.SetType(wmCmd, bookmark);
       }
 
-      if (cmd.compareToIgnoreCase("insertFormValue") == 0)
+      else if (cmd.compareToIgnoreCase("insertFormValue") == 0)
       {
         return new DocumentCommand.InsertFormValue(wmCmd, bookmark);
       }
 
-      if (cmd.compareToIgnoreCase("insertFunctionValue") == 0)
+      else if (cmd.compareToIgnoreCase("insertFunctionValue") == 0)
       {
         return new DocumentCommand.InsertFunctionValue(wmCmd, bookmark);
       }
 
-      if (cmd.compareToIgnoreCase("setGroups") == 0)
+      else if (cmd.compareToIgnoreCase("setGroups") == 0)
       {
         return new DocumentCommand.SetGroups(wmCmd, bookmark);
       }
 
-      if (cmd.compareToIgnoreCase("setPrintFunction") == 0)
+      else if (cmd.compareToIgnoreCase("setPrintFunction") == 0)
       {
         return new DocumentCommand.SetPrintFunction(wmCmd, bookmark);
+      }
+
+      else if (cmd.compareToIgnoreCase("draftOnly") == 0)
+      {
+        return new DocumentCommand.DraftOnly(wmCmd, bookmark);
+      }
+
+      else if (cmd.compareToIgnoreCase("originalOnly") == 0)
+      {
+        return new DocumentCommand.NotInOriginal(wmCmd, bookmark);
       }
 
       throw new InvalidCommandException("Unbekanntes Kommando \"" + cmd + "\"");
@@ -510,6 +522,16 @@ public class DocumentCommandTree
     }
 
     public int executeCommand(SetPrintFunction cmd)
+    {
+      return 0;
+    }
+
+    public int executeCommand(DraftOnly cmd)
+    {
+      return 0;
+    }
+    
+    public int executeCommand(NotInOriginal cmd)
     {
       return 0;
     }
