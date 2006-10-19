@@ -16,6 +16,7 @@
  * 26.06.2006 | BNK | Dialoge/FONT_ZOOM auswerten. LookAndFeel setzen. 
  * 07.09.2006 | BNK | isDebugMode effizienter gemacht.
  * 21.09.2006 | BNK | Unter Windows nach c:\programme\wollmux\wollmux.conf schauen
+ * 19.10.2006 | BNK | +dumpInfo()
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -24,12 +25,19 @@
  */
 package de.muenchen.allg.itd51.wollmux;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -245,10 +253,9 @@ public class WollMuxFiles
   }
 
   /**
-   * Liefert das File-Objekt des LocalOverrideStorage Caches zurück. Darf erst
+   * Liefert das File-Objekt der Logdatei zurück. Darf erst
    * nach setupWollMuxDir() aufgerufen werden.
    * 
-   * @return das File-Objekt des LocalOverrideStorage Caches.
    */
   public static File getWollMuxLogFile()
   {
@@ -606,6 +613,78 @@ public class WollMuxFiles
     }
 
     return funcs;
+  }
+  
+  /**
+   * Erstellt eine Dump-Datei im WollMux-Verzeichnis, die wichtige Informationen zur Fehlersuche
+   * enthält.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public static void dumpInfo()
+  {
+    Calendar cal = Calendar.getInstance();
+    String date = ""+cal.get(Calendar.YEAR)+"-"+(cal.get(Calendar.MONTH)+1)+"-"+cal.get(Calendar.DAY_OF_MONTH)+"_"+cal.getTimeInMillis();
+    File dumpFile = new File(getWollMuxDir(), "dump"+date);
+    try{
+      BufferedWriter out = new BufferedWriter(new FileWriter(dumpFile));
+      out.write("Dump time: "+date+"\n");
+      out.write(WollMuxSingleton.getInstance().getBuildInfo()+"\n");
+      out.write("DEFAULT_CONTEXT: "+getDEFAULT_CONTEXT()+"\n");
+      out.write("wollmuxDir: "+getWollMuxDir()+"\n");
+      out.write("wollmuxLogFile: "+getWollMuxLogFile()+"\n");
+      out.write("wollmuxConfFile: "+getWollMuxConfFile()+"\n");
+      out.write("losCacheFile: "+getLosCacheFile()+"\n");
+      out.write("===================== START wollmuxConfFile ==================\n");
+      try{
+        BufferedReader in = new BufferedReader(new FileReader(getWollMuxConfFile()));
+        String line = null;
+        while ((line = in.readLine()) != null)
+        {
+          out.write(line+"\n");
+        }
+      }catch(IOException ex)
+      {
+        ex.printStackTrace(new PrintWriter(out));
+      }
+      out.write("===================== END wollmuxConfFile ==================\n");
+      out.write("===================== START wollmux.conf ==================\n");
+      out.write(getWollmuxConf().stringRepresentation());
+      out.write("===================== END wollmux.conf ==================\n");
+
+      out.write("===================== START losCacheFile ==================\n");
+      try{
+        BufferedReader in = new BufferedReader(new FileReader(getLosCacheFile()));
+        String line = null;
+        while ((line = in.readLine()) != null)
+        {
+          out.write(line+"\n");
+        }
+      }catch(IOException ex)
+      {
+        ex.printStackTrace(new PrintWriter(out));
+      }
+      out.write("===================== END losCacheFile ==================\n");
+      
+      out.write("===================== START wollmux.log ==================\n");
+      try{
+        BufferedReader in = new BufferedReader(new FileReader(getWollMuxLogFile()));
+        String line = null;
+        while ((line = in.readLine()) != null)
+        {
+          out.write(line+"\n");
+        }
+      }catch(IOException ex)
+      {
+        ex.printStackTrace(new PrintWriter(out));
+      }
+      out.write("===================== END wollmux.log ==================\n");
+      out.close();
+    }
+    catch(IOException x)
+    {
+      Logger.error("Fehler beim Erstellen des Dumps",x);
+    }
   }
 
 }

@@ -38,7 +38,8 @@
 * 27.06.2006 | BNK | WIDTH, HEIGHT max korrekt unterstützt 
 * 29.06.2006 | BNK | min, max, center unterstützt    
 * 19.07.2006 | BNK | MODE "Icon" repariert 
-* 02.08.2006 | BNK | bessere Fehlermeldung wenn Konfiguration nicht gefunden.        
+* 02.08.2006 | BNK | bessere Fehlermeldung wenn Konfiguration nicht gefunden.    
+* 19.10.2006 | BNK | +ACTION "kill" +ACTION "dumpInfo"    
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -949,7 +950,9 @@ public class WollMuxBar
     supportedActions.add("openTemplate");
     supportedActions.add("absenderAuswaehlen");
     supportedActions.add("openDocument");
+    supportedActions.add("dumpInfo");
     supportedActions.add("abort");
+    supportedActions.add("kill");
     
     panelContext.supportedActions = supportedActions;
     menuContext.supportedActions = supportedActions;
@@ -985,8 +988,17 @@ public class WollMuxBar
         minimize();
         eventHandler.handleWollMuxUrl(WollMux.cmdOpenTemplate, args[1].toString());
       }
+      else if (action.equals("dumpInfo"))
+      {
+        eventHandler.handleWollMuxUrl(WollMux.cmdDumpInfo, null);
+      }
       else if (action.equals("abort"))
       {
+        abort();
+      }
+      else if (action.equals("kill"))
+      {
+        eventHandler.handleWollMuxUrl(WollMux.cmdKill, null);
         abort();
       }
     }
