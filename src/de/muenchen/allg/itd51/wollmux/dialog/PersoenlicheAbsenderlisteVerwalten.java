@@ -26,6 +26,7 @@
 * 22.11.2005 | BNK | Bei Initialisierung ist der selectedDataset auch in der Liste 
 *                  | selektiert.
 * 20.01.2006 | BNK | Default-Anrede für Tinchen WollMux ist "Frau"
+* 19.10.2006 | BNK | Credits
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -35,6 +36,7 @@
 package de.muenchen.allg.itd51.wollmux.dialog;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -61,7 +63,10 @@ import java.util.regex.Pattern;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -70,6 +75,7 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.ListCellRenderer;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 import javax.swing.ScrollPaneConstants;
@@ -82,6 +88,7 @@ import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.TimeoutException;
+import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.DJDataset;
 import de.muenchen.allg.itd51.wollmux.db.Dataset;
@@ -89,8 +96,6 @@ import de.muenchen.allg.itd51.wollmux.db.DatasetNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
 import de.muenchen.allg.itd51.wollmux.db.QueryResults;
 import de.muenchen.allg.itd51.wollmux.db.TestDatasourceJoiner;
-
-//TODO Anfrage "Credits" unterstützen.
 
 /**
  * Diese Klasse baut anhand einer als ConfigThingy übergebenen 
@@ -108,6 +113,9 @@ public class PersoenlicheAbsenderlisteVerwalten
   public static final String DEFAULT_VORNAME = "Tinchen";
   
   public static final String DEFAULT_ANREDE = "Frau";
+  
+  private final URL MB_URL = this.getClass().getClassLoader().getResource("data/mb.png");
+  private final URL CL_URL = this.getClass().getClassLoader().getResource("data/cl.png");
 
   /**
    * Gibt an, wie die Personen in den Listen angezeigt werden sollen.
@@ -286,7 +294,10 @@ public class PersoenlicheAbsenderlisteVerwalten
     try{
       javax.swing.SwingUtilities.invokeLater(new Runnable() {
         public void run() {
-            try{createGUI(fensterDesc.getLastChild());}catch(Exception x){};
+            try{createGUI(fensterDesc.getLastChild());}catch(Exception x)
+            {
+              Logger.error(x);
+            };
         }
       });
     }
@@ -303,7 +314,10 @@ public class PersoenlicheAbsenderlisteVerwalten
     Common.setLookAndFeelOnce();
     
     resultsJList = new JList(new DefaultListModel());
+    ListCellRenderer myRenderer = new MyListCellRenderer();
+    resultsJList.setCellRenderer(myRenderer);
     palJList = new JList(new DefaultListModel());
+    palJList.setCellRenderer(myRenderer);
     query = new JTextField(TEXTFIELD_DEFAULT_WIDTH);
     
     
@@ -359,11 +373,18 @@ public class PersoenlicheAbsenderlisteVerwalten
     try{
       dsToSelect = dj.getSelectedDataset();
     }catch(DatasetNotFoundException x){}
-    setListElements(palJList, dj.getLOS(), dsToSelect);
+    setListElements(palJList, dj.getLOS(), dsToSelect, false);
   
     updateButtonStates();
     
     myFrame.pack();
+    
+    /**
+     * Beschränkung der Höhe erst nach pack() aufheben, damit Fenster nicht unnötig groß wird.
+     */
+    palJList.setFixedCellHeight(-1);
+    resultsJList.setFixedCellHeight(-1);
+    
     int frameWidth = myFrame.getWidth();
     int frameHeight = myFrame.getHeight();
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -586,8 +607,10 @@ public class PersoenlicheAbsenderlisteVerwalten
    * so wird der entsprechende Datensatz in der Liste selektiert, wenn er darin vorhanden 
    * ist.
    * @author Matthias Benkmann (D-III-ITD 5.1)
+   * @param append Falls true, werden die Elemente an die Liste angehängt anstatt sie
+   * zu ersetzen.
    */
-  private void setListElements(JList list, QueryResults data, Dataset datasetToSelect)
+  private void setListElements(JList list, QueryResults data, Dataset datasetToSelect, boolean append)
   {
     int selectedIndex = -1;
     ListElement[] elements;
@@ -598,7 +621,25 @@ public class PersoenlicheAbsenderlisteVerwalten
       elements = new ListElement[data.size()];
       Iterator iter = data.iterator();
       int i = 0;
-      while (iter.hasNext()) elements[i++] = new ListElement((DJDataset)iter.next());
+      while (iter.hasNext()) 
+      {
+        DJDataset ds = (DJDataset)iter.next();
+        Icon icon = null;
+        String mail = "";
+        try{
+          mail = ds.get("Mail");
+        }catch(ColumnNotFoundException x){}
+        
+        if (WollMuxFiles.showCredits)
+        {
+          if (mail.equals("matthias.benkmann@muenchen.de"))
+            icon = new ImageIcon(MB_URL);
+          else if (mail.equals("christoph.lutz@muenchen.de"))
+            icon = new ImageIcon(CL_URL);
+        }
+        
+        elements[i++] = new ListElement(ds, icon);
+      }
       Arrays.sort(elements, new Comparator()
           {
         public int compare(Object o1, Object o2)
@@ -609,7 +650,8 @@ public class PersoenlicheAbsenderlisteVerwalten
     }
     
     DefaultListModel listModel = (DefaultListModel)list.getModel();
-    listModel.clear();
+    if (!append) listModel.clear();
+    int oldSize = listModel.size();
     for (int i = 0; i < elements.length; ++i)
     {
       listModel.addElement(elements[i]);
@@ -618,17 +660,19 @@ public class PersoenlicheAbsenderlisteVerwalten
         selectedIndex = i;
     }
     
-    if (selectedIndex >= 0) list.setSelectedIndex(selectedIndex);
+    if (selectedIndex >= 0) list.setSelectedIndex(selectedIndex + oldSize);
   }
   
   /**
-   * wie {@link #setListElements(JList, QueryResults, Dataset)}, aber es wird kein Datensatz
+   * wie {@link #setListElements(JList, QueryResults, Dataset, boolean)}, aber es wird kein Datensatz
    * selektiert.
    * @author Matthias Benkmann (D-III-ITD 5.1)
+   * @param append Falls true, werden die Elemente an die Liste angehängt anstatt sie
+   * zu ersetzen. 
    */
-  private void setListElements(JList list, QueryResults data)
+  private void setListElements(JList list, QueryResults data, boolean append)
   {
-    setListElements(list, data, null);
+    setListElements(list, data, null, append);
   }
   
   
@@ -642,23 +686,30 @@ public class PersoenlicheAbsenderlisteVerwalten
   }
   
   /**
-   * Wrapper um ein DJDataset zum Einfügen in eine JList. Die
+   * Wrapper um ein DJDataset zum Einfügen in eine JList.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private class ListElement
   {
     private String displayString;
     private DJDataset ds;
+    private Icon icon;
     
-    public ListElement(DJDataset ds)
+    public ListElement(DJDataset ds, Icon icon)
     {
       displayString = getDisplayString(ds);
       this.ds = ds;
+      this.icon = icon;
     }
 
     public String toString()
     {
       return displayString;
+    }
+    
+    public Icon getIcon()
+    {
+      return icon;
     }
     
     public DJDataset getDataset() {return ds;}
@@ -710,6 +761,29 @@ public class PersoenlicheAbsenderlisteVerwalten
     while (iter.hasNext()) ((JButton)iter.next()).setEnabled(enabled);
   }
 
+  private static class MyListCellRenderer extends DefaultListCellRenderer
+  {
+    private static final long serialVersionUID = -540148680826568290L;
+
+    public Component getListCellRendererComponent(JList list, Object value,
+        int index, boolean isSelected, boolean cellHasFocus)
+    {
+      try
+      {
+        ListElement ele = (ListElement) value;
+
+        Icon icon = ele.getIcon();
+        if (icon != null)
+          value = icon;
+        else
+          value = ele.toString();
+      }
+      catch (ClassCastException x) {}
+        
+      return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+    }
+  }
+  
   /**
    * Sorgt dafür, dass jeweils nur in einer der beiden Listboxen ein Eintrag
    * selektiert sein kann und dass die entsprechenden Buttons ausgegraut werden
@@ -800,7 +874,7 @@ public class PersoenlicheAbsenderlisteVerwalten
    */
   private void listsHaveChanged()
   {
-    setListElements(palJList, dj.getLOS());
+    setListElements(palJList, dj.getLOS(), false);
     palJList.clearSelection();
     resultsJList.clearSelection();
     updateButtonStates();
@@ -944,6 +1018,12 @@ public class PersoenlicheAbsenderlisteVerwalten
     final String SEP_CHARS = "-/ _";
     
     String queryString = query.getText();
+    
+    if (queryString.equalsIgnoreCase("credits"))
+    {
+      credits();
+      return;
+    }
     
     /*
      * Kommata durch Space ersetzen (d.h. "Benkmann,Matthias" -> "Benkmann Matthias")
@@ -1251,7 +1331,21 @@ public class PersoenlicheAbsenderlisteVerwalten
     }catch(TimeoutException x) { Logger.error(x);}
 
       // kann mit results == null umgehen
-    setListElements(resultsJList, results); 
+    setListElements(resultsJList, results, false); 
+    updateButtonStates();
+  }
+  
+  private void credits()
+  {
+    WollMuxFiles.showCredits = true;
+    QueryResults results = null;
+    try{
+      results = dj.find("Mail", "matthias.benkmann@muenchen.de");
+      setListElements(resultsJList, results, false);
+      results = dj.find("Mail", "christoph.lutz@muenchen.de");
+      setListElements(resultsJList, results, true);
+    }catch(TimeoutException x) { Logger.error(x);}
+    
     updateButtonStates();
   }
   

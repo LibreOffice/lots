@@ -111,6 +111,8 @@ public class WollMuxFiles
    * Gibt an, ob der debug-Modus aktiviert ist.
    */
   private static boolean debugMode;
+  
+  public static boolean showCredits;
 
   /**
    * Inhalt der wollmux.conf-Datei, die angelegt wird, wenn noch keine
@@ -224,6 +226,8 @@ public class WollMuxFiles
      * Logging-Mode endgültig setzen.
      */
     setLoggingMode(WollMuxFiles.getWollmuxConf());
+    
+    showCredits = WollMuxFiles.getWollmuxConf().query("SHOW_CREDITS",1).query("on").count() > 0;
 
     determineDefaultContext();
 
