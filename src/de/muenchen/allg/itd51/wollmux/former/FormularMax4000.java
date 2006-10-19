@@ -14,6 +14,7 @@
 * 31.08.2006 | BNK | Code-Editor-Fenster wird jetzt in korrekter Größe dargestellt
 *                  | Das Hauptfenster passt sein Größe an, wenn Steuerelemente dazukommen oder verschwinden
 * 06.09.2006 | BNK | Hoch und Runterschieben funktionieren jetzt.
+* 19.10.2006 | BNK | Quelltexteditor nicht mehr in einem eigenen Frame
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -31,7 +32,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.MouseAdapter;
-import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.StringReader;
@@ -199,12 +199,17 @@ public class FormularMax4000
    */
   private JFrame myFrame;
   
+  /**
+   * Oberster Container der FM4000 GUI-Elemente. Wird direkt in die ContentPane von myFrame
+   * gesteckt.
+   */
+  private JSplitPane mainContentPanel;
   
   /**
-   * Das Fenster, das für das Bearbeiten des Quelltextes geöffnet wird.
-   * FIXME: vielleicht besser im selben Frame öffnen, damit niemand aus versehen parallel viel Arbeit im normalen Fenster macht und diese dann verliert beim Schliessen des Code-Fensters.
+   * Oberster Container für den Quelltexteditor. Wird direkt in die ContentPane von myFrame
+   * gesteckt. 
    */
-  JFrame editorFrame = null;
+  private JPanel editorContentPanel;
   
   /**
    * Der Übercontainer für die linke Hälfte des FM4000.
@@ -258,6 +263,23 @@ public class FormularMax4000
    * FM4000 endet. 
    */
   private List broadcastListeners = new Vector();
+
+  private MyWindowListener oehrchen;
+
+  /**
+   * Die Haupt-Menüleiste des FM4000.
+   */
+  private JMenuBar mainMenuBar;
+  
+  /**
+   * Die Menüleiste, die angezeigt wird wenn der Quelltexteditor offen ist.
+   */
+  private JMenuBar editorMenuBar;
+
+  /**
+   * Der Quelltexteditor.
+   */
+  private JEditorPane editor;
   
   /**
    * Sendet die Nachricht b an alle Listener, die auf dem globalen Broadcast-Kanal registriert
@@ -320,7 +342,7 @@ public class FormularMax4000
     myFrame = new JFrame("FormularMax 4000");
     //leave handling of close request to WindowListener.windowClosing
     myFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-    MyWindowListener oehrchen = new MyWindowListener();
+    oehrchen = new MyWindowListener();
     //der WindowListener sorgt dafür, dass auf windowClosing mit abort reagiert wird
     myFrame.addWindowListener(oehrchen);
     catchAllInputEventsOn(myFrame.getGlassPane()); //billiger Ersatz für Modalität von editorFrame
@@ -328,11 +350,10 @@ public class FormularMax4000
     leftPanel = new LeftPanel(insertionModelList, formControlModelList, this);
     RightPanel rightPanel = new RightPanel(insertionModelList, functionLibrary, this);
     
-    JSplitPane contentPanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel.JComponent(), rightPanel.JComponent());
-    myFrame.getContentPane().add(contentPanel);
+    mainContentPanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel.JComponent(), rightPanel.JComponent());
+    myFrame.getContentPane().add(mainContentPanel);
     
-    JMenuBar mbar = new JMenuBar();
-    
+    mainMenuBar = new JMenuBar();
     //========================= Datei ============================
     JMenu menu = new JMenu("Datei");
     
@@ -379,7 +400,7 @@ public class FormularMax4000
     menu.add(menuItem);
 
     
-    mbar.add(menu);
+    mainMenuBar.add(menu);
 //  ========================= Einfügen ============================
     menu = new JMenu("Einfügen");
     menuItem = new JMenuItem("Empfängerauswahl-Tab");
@@ -413,9 +434,64 @@ public class FormularMax4000
     menu.add(menuItem);
     
     
-    mbar.add(menu);
+    mainMenuBar.add(menu);
+
+    editorMenuBar = new JMenuBar();
+    //========================= Datei ============================
+    menu = new JMenu("Datei");
     
-    myFrame.setJMenuBar(mbar);
+    menuItem = new JMenuItem("Speichern");
+    menuItem.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent e)
+      {
+        try
+        {
+          ConfigThingy conf = new ConfigThingy("", null, new StringReader(editor.getText()));
+          myFrame.setJMenuBar(mainMenuBar);
+          myFrame.getContentPane().remove(editorContentPanel);
+          myFrame.getContentPane().add(mainContentPanel);
+          formDescriptor.fromConfigThingy(conf);
+          initModelsAndViews();
+        }
+        catch (Exception e1)
+        {
+          JOptionPane.showMessageDialog(myFrame, e1.getMessage(), "Fehler beim Parsen der Formularbeschreibung", JOptionPane.WARNING_MESSAGE);
+        }
+      }});
+    menu.add(menuItem);
+    
+    menuItem = new JMenuItem("Abbrechen");
+    menuItem.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent e)
+      {
+        try
+        {
+          myFrame.setJMenuBar(mainMenuBar);
+          myFrame.getContentPane().remove(editorContentPanel);
+          myFrame.getContentPane().add(mainContentPanel);
+          setFrameSize();
+        }
+        catch (Exception e1)
+        {
+          JOptionPane.showMessageDialog(myFrame, e1.getMessage(), "Fehler beim Parsen der Formularbeschreibung", JOptionPane.WARNING_MESSAGE);
+        }
+      }});
+    menu.add(menuItem);
+    
+        
+    editorMenuBar.add(menu);
+
+    editor = new JEditorPane("text/plain","");
+    editor.setEditorKit(new NoWrapEditorKit());
+    
+    editor.setFont(new Font("Monospaced",Font.PLAIN,editor.getFont().getSize()+2));
+    JScrollPane scrollPane = new JScrollPane(editor, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
+    editorContentPanel = new JPanel(new BorderLayout());
+    editorContentPanel.add(scrollPane, BorderLayout.CENTER);
+    
+    
+    
+    myFrame.setJMenuBar(mainMenuBar);
     
 
     initModelsAndViews();
@@ -1046,50 +1122,12 @@ public class FormularMax4000
    */
   private void editFormDescriptor()
   {
-    editorFrame = new JFrame("Formularbeschreibung bearbeiten");
-    editorFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-    
-    final JEditorPane editor=new JEditorPane("text/plain","");
-    editor.setEditorKit(new NoWrapEditorKit());
-    editor.setText(updateDocument(doc).stringRepresentation());
-    editor.setFont(new Font("Monospaced",Font.PLAIN,editor.getFont().getSize()+2));
-    JScrollPane scrollPane = new JScrollPane(editor, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
-    JPanel contentPanel = new JPanel(new BorderLayout());
-    contentPanel.add(scrollPane, BorderLayout.CENTER);
     editor.setCaretPosition(0);
-    editorFrame.getContentPane().add(contentPanel);
-    editorFrame.addWindowListener(new WindowAdapter()
-        {
-          ConfigThingy conf;
-          public void windowClosing(WindowEvent e) 
-          {
-            try
-            {
-              conf = new ConfigThingy("", null, new StringReader(editor.getText()));
-              editorFrame.dispose();
-            }
-            catch (Exception e1)
-            {
-              JOptionPane.showMessageDialog(editorFrame, e1.getMessage(), "Fehler beim Parsen der Formularbeschreibung", JOptionPane.WARNING_MESSAGE);
-            }
-          }
-          public void windowClosed(WindowEvent e)
-          {
-            editorFrame = null;
-            if (myFrame == null) return; //falls myFrame geschlossen wurde bei offenem editorFrame
-            myFrame.getGlassPane().setVisible(false);
-            formDescriptor.fromConfigThingy(conf);
-            initModelsAndViews();
-          }
-        });
-    
-    
-      // Glass Pane aktiv schalten als billiger Ersatz für Modalität von editorFrame
-    myFrame.getGlassPane().setVisible(true);
-    myFrame.getGlassPane().requestFocusInWindow();
-    editorFrame.pack();
-    editorFrame.setVisible(true);
-    fixFrameSize(editorFrame);
+    editor.setText(updateDocument(doc).stringRepresentation());
+    myFrame.getContentPane().remove(mainContentPanel);
+    myFrame.getContentPane().add(editorContentPanel);
+    myFrame.setJMenuBar(editorMenuBar);
+    setFrameSize();
   }
   
   /**
@@ -1119,7 +1157,6 @@ public class FormularMax4000
   {
     myFrame.dispose();
     myFrame = null;
-    if (editorFrame != null) editorFrame.dispose();
     if (abortListener != null)
       abortListener.actionPerformed(new ActionEvent(this, 0, ""));
   }
