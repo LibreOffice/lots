@@ -971,7 +971,6 @@ public class WollMuxBar
     {
       if (!eventType.equals("action")) return;
       
-      //TODO Wenn der UpAndAwayModus implementiert wurde, dann sollte in dem Fall nicht windowListFocus() sondern die entsprechende Mauscursor hat Fenster verlassen Methode aufgerufen werden, damit sich die Leiste auch dann minimiert. Oder besser das ganze aus dem WindowTransformer auslagern, denn es ist unschön so einen Event Handler direkt aufzurufen.
       String action = args[0].toString();
       if (action.equals("absenderAuswaehlen"))
       {
