@@ -97,6 +97,10 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
 
   public static final String cmdZuleitungszeile = "Zuleitungszeile";
 
+  public static final String cmdDumpInfo = "DumpInfo";
+
+  public static final String cmdKill = "Kill";
+
   public static final String cmdMenu = "Menu";
 
   /**
@@ -244,7 +248,13 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
       else if (cmd.equalsIgnoreCase(cmdAbdruck))
         xRet = this;
 
-      else if (cmd.equalsIgnoreCase(cmdZuleitungszeile)) xRet = this;
+      else if (cmd.equalsIgnoreCase(cmdZuleitungszeile))
+        xRet = this;
+
+      else if (cmd.equalsIgnoreCase(cmdDumpInfo))
+        xRet = this;
+
+      else if (cmd.equalsIgnoreCase(cmdKill)) xRet = this;
     }
     return xRet;
   }
@@ -407,6 +417,18 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
             .XTextDocument(UNO.desktop.getCurrentComponent());
         if (doc != null && UNO.XModel(doc) != null)
           WollMuxEventHandler.handleButtonZuleitungszeilePressed(doc);
+      }
+
+      else if (cmd.compareToIgnoreCase(cmdDumpInfo) == 0)
+      {
+        Logger.debug2("Dispatch: Aufruf von WollMux:DumpInfo");
+        WollMuxEventHandler.handleDumpInfo();
+      }
+
+      else if (cmd.compareToIgnoreCase(cmdKill) == 0)
+      {
+        Logger.debug2("Dispatch: Aufruf von WollMux:Kill");
+        WollMuxEventHandler.handleKill();
       }
     }
   }
