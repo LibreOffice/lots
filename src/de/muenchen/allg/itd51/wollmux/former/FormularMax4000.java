@@ -345,7 +345,6 @@ public class FormularMax4000
     oehrchen = new MyWindowListener();
     //der WindowListener sorgt dafür, dass auf windowClosing mit abort reagiert wird
     myFrame.addWindowListener(oehrchen);
-    catchAllInputEventsOn(myFrame.getGlassPane()); //billiger Ersatz für Modalität von editorFrame
     
     leftPanel = new LeftPanel(insertionModelList, formControlModelList, this);
     RightPanel rightPanel = new RightPanel(insertionModelList, functionLibrary, this);
@@ -436,63 +435,10 @@ public class FormularMax4000
     
     mainMenuBar.add(menu);
 
-    editorMenuBar = new JMenuBar();
-    //========================= Datei ============================
-    menu = new JMenu("Datei");
-    
-    menuItem = new JMenuItem("Speichern");
-    menuItem.addActionListener(new ActionListener(){
-      public void actionPerformed(ActionEvent e)
-      {
-        try
-        {
-          ConfigThingy conf = new ConfigThingy("", null, new StringReader(editor.getText()));
-          myFrame.setJMenuBar(mainMenuBar);
-          myFrame.getContentPane().remove(editorContentPanel);
-          myFrame.getContentPane().add(mainContentPanel);
-          formDescriptor.fromConfigThingy(conf);
-          initModelsAndViews();
-        }
-        catch (Exception e1)
-        {
-          JOptionPane.showMessageDialog(myFrame, e1.getMessage(), "Fehler beim Parsen der Formularbeschreibung", JOptionPane.WARNING_MESSAGE);
-        }
-      }});
-    menu.add(menuItem);
-    
-    menuItem = new JMenuItem("Abbrechen");
-    menuItem.addActionListener(new ActionListener(){
-      public void actionPerformed(ActionEvent e)
-      {
-        try
-        {
-          myFrame.setJMenuBar(mainMenuBar);
-          myFrame.getContentPane().remove(editorContentPanel);
-          myFrame.getContentPane().add(mainContentPanel);
-          setFrameSize();
-        }
-        catch (Exception e1)
-        {
-          JOptionPane.showMessageDialog(myFrame, e1.getMessage(), "Fehler beim Parsen der Formularbeschreibung", JOptionPane.WARNING_MESSAGE);
-        }
-      }});
-    menu.add(menuItem);
-    
-        
-    editorMenuBar.add(menu);
-
-    editor = new JEditorPane("text/plain","");
-    editor.setEditorKit(new NoWrapEditorKit());
-    
-    editor.setFont(new Font("Monospaced",Font.PLAIN,editor.getFont().getSize()+2));
-    JScrollPane scrollPane = new JScrollPane(editor, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
-    editorContentPanel = new JPanel(new BorderLayout());
-    editorContentPanel.add(scrollPane, BorderLayout.CENTER);
-    
-    
-    
     myFrame.setJMenuBar(mainMenuBar);
+
     
+    initEditor();
 
     initModelsAndViews();
     
@@ -500,16 +446,6 @@ public class FormularMax4000
     setFrameSize();
     myFrame.setResizable(true);
     myFrame.setVisible(true);
-  }
-  
-  /**
-   * Registriert einen MouseListener und einen KeyListener auf compo, die beide nichts tun.
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private void catchAllInputEventsOn(Component compo)
-  {
-    compo.addMouseListener(new MouseAdapter(){});
-    compo.addKeyListener(new KeyAdapter(){});
   }
   
   /**
@@ -1112,6 +1048,69 @@ public class FormularMax4000
    
     };
   };
+
+  /**
+   * Initialisiert die GUI für den Quelltexteditor.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private void initEditor()
+  {
+    JMenu menu;
+    JMenuItem menuItem;
+    editorMenuBar = new JMenuBar();
+    //========================= Datei ============================
+    menu = new JMenu("Datei");
+    
+    menuItem = new JMenuItem("Speichern");
+    menuItem.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent e)
+      {
+        try
+        {
+          ConfigThingy conf = new ConfigThingy("", null, new StringReader(editor.getText()));
+          myFrame.setJMenuBar(mainMenuBar);
+          myFrame.getContentPane().remove(editorContentPanel);
+          myFrame.getContentPane().add(mainContentPanel);
+          formDescriptor.fromConfigThingy(conf);
+          initModelsAndViews();
+        }
+        catch (Exception e1)
+        {
+          JOptionPane.showMessageDialog(myFrame, e1.getMessage(), "Fehler beim Parsen der Formularbeschreibung", JOptionPane.WARNING_MESSAGE);
+        }
+      }});
+    menu.add(menuItem);
+    
+    menuItem = new JMenuItem("Abbrechen");
+    menuItem.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent e)
+      {
+        try
+        {
+          myFrame.setJMenuBar(mainMenuBar);
+          myFrame.getContentPane().remove(editorContentPanel);
+          myFrame.getContentPane().add(mainContentPanel);
+          setFrameSize();
+        }
+        catch (Exception e1)
+        {
+          JOptionPane.showMessageDialog(myFrame, e1.getMessage(), "Fehler beim Parsen der Formularbeschreibung", JOptionPane.WARNING_MESSAGE);
+        }
+      }});
+    menu.add(menuItem);
+    
+        
+    editorMenuBar.add(menu);
+
+    editor = new JEditorPane("text/plain","");
+    editor.setEditorKit(new NoWrapEditorKit());
+    
+    editor.setFont(new Font("Monospaced",Font.PLAIN,editor.getFont().getSize()+2));
+    JScrollPane scrollPane = new JScrollPane(editor, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
+    editorContentPanel = new JPanel(new BorderLayout());
+    editorContentPanel.add(scrollPane, BorderLayout.CENTER);
+  }
 
   
   /**
