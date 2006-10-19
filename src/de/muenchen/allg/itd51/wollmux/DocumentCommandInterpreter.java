@@ -651,12 +651,19 @@ public class DocumentCommandInterpreter
     {
       model.setTypeCommand(cmd);
 
-      cmd.setDoneState(true);
+      // Wenn eine Mischvorlage zum Bearbeiten geöffnet wurde soll das darin
+      // enthaltene setType "templateTemplate" Kommando NICHT
+      // gelöscht werden. In allen anderen Fällen schon.
+      if (!(model.hasURL() && cmd.getType()
+          .equalsIgnoreCase("templateTemplate")))
+      {
+        cmd.setDoneState(true);
 
-      // über ein sofortiges Update mit Parameter false sicherstellen, dass das
-      // Kommando auch wirklich aus dem Dokument gelöscht wird, auch wenn der
-      // debug-Modus gesetzt ist.
-      cmd.updateBookmark(false);
+        // über ein sofortiges Update mit Parameter false sicherstellen, dass
+        // das Kommando auch wirklich aus dem Dokument gelöscht wird, auch wenn
+        // der debug-Modus gesetzt ist.
+        cmd.updateBookmark(false);
+      }
       return 0;
     }
 

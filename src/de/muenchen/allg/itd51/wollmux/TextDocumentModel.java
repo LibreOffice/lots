@@ -297,7 +297,24 @@ public class TextDocumentModel
     // Das Dokument ist automatisch eine Vorlage, wenn es keine zugehörige URL
     // gibt (dann steht ja in der Fensterüberschrift auch "Unbenannt1" statt
     // einem konkreten Dokumentnamen).
-    return (doc.getURL() == null || doc.getURL().equals(""));
+    return !hasURL();
+  }
+
+  /**
+   * liefert true, wenn das Dokument eine URL besitzt, die die Quelle des
+   * Dokuments beschreibt und es sich damit um ein in OOo im "Bearbeiten"-Modus
+   * geöffnetes Dokument handelt oder false, wenn das Dokument keine URL besitzt
+   * und es sich damit um eine Vorlage handelt.
+   * 
+   * @return liefert true, wenn das Dokument eine URL besitzt, die die Quelle
+   *         des Dokuments beschreibt und es sich damit um ein in OOo im
+   *         "Bearbeiten"-Modus geöffnetes Dokument handelt oder false, wenn das
+   *         Dokument keine URL besitzt und es sich damit um eine Vorlage
+   *         handelt.
+   */
+  public boolean hasURL()
+  {
+    return doc.getURL() != null && !doc.getURL().equals("");
   }
 
   /**
