@@ -2225,8 +2225,9 @@ public class WollMuxEventHandler
   // *******************************************************************************************
 
   /**
-   * Erzeugt ein neues WollMuxEvent, das signasisiert, das gesamte Office (und
-   * damit auch der WollMux) OHNE Sicherheitsabfragen(!) beendet wird.
+   * Erzeugt ein neues WollMuxEvent, das signasisiert, dass das gesamte Office
+   * (und damit auch der WollMux) OHNE Sicherheitsabfragen(!) beendet werden
+   * soll.
    * 
    * Das Event wird von der WollMuxBar geworfen, die (speziell für Admins, nicht
    * für Endbenutzer) einen entsprechenden Button besitzt.
@@ -2240,10 +2241,18 @@ public class WollMuxEventHandler
   {
     protected void doit() throws WollMuxFehlerException
     {
-      System.exit(0);
+      if (UNO.desktop != null)
+      {
+        UNO.desktop.terminate();
+      }
+      else
+      {
+        System.exit(0);
+      }
     }
 
     public String toString()
+
     {
       return this.getClass().getSimpleName() + "()";
     }
