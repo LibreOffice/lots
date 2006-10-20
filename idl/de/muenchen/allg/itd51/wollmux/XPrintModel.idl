@@ -28,6 +28,8 @@ interface XPrintModel
 	void print( [in] short listener);
 	
 	com::sun::star::text::XTextDocument getTextDocument();
+	
+	void printVerfuegungspunkt( [in] short verfPunkt, [in] short numberOfCopies, [in] boolean showPrintSettingsOnce);
 };
 
 }; }; }; }; };

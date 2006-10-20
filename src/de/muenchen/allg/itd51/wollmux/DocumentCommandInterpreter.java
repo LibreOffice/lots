@@ -53,9 +53,11 @@ import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
+import de.muenchen.allg.itd51.wollmux.DocumentCommand.DraftOnly;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertContent;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertFormValue;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertFrag;
+import de.muenchen.allg.itd51.wollmux.DocumentCommand.NotInOriginal;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.SetPrintFunction;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.SetType;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.UpdateFields;
@@ -664,6 +666,16 @@ public class DocumentCommandInterpreter
         // der debug-Modus gesetzt ist.
         cmd.updateBookmark(false);
       }
+      return 0;
+    }
+
+    public int executeCommand(DraftOnly cmd)
+    {
+      return 0;
+    }
+
+    public int executeCommand(NotInOriginal cmd)
+    {
       return 0;
     }
 

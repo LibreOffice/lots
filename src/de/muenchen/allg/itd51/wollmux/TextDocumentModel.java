@@ -20,10 +20,13 @@ package de.muenchen.allg.itd51.wollmux;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Vector;
 
 import com.sun.star.awt.DeviceInfo;
 import com.sun.star.awt.PosSize;
 import com.sun.star.awt.XWindow;
+import com.sun.star.beans.PropertyValue;
 import com.sun.star.frame.FrameSearchFlag;
 import com.sun.star.frame.XController;
 import com.sun.star.frame.XFrame;
@@ -126,6 +129,18 @@ public class TextDocumentModel
   private DocumentCommand.SetType setTypeCommand = null;
 
   /**
+   * Enthält einen Vector aller notInOrininal-Dokumentkommandos des Dokuments,
+   * die für die Ein/Ausblendungen in Sachleitenden Verfügungen benötigt werden.
+   */
+  private Vector notInOriginalBlocks;
+
+  /**
+   * Enthält einen Vector aller draftOnly-Dokumentkommandos des Dokuments, die
+   * für die Ein/Ausblendungen in Sachleitenden Verfügungen benötigt werden.
+   */
+  private Vector draftOnlyBlocks;
+
+  /**
    * Erzeugt ein neues TextDocumentModel zum XTextDocument doc und sollte nie
    * direkt aufgerufen werden, da neue TextDocumentModels über das
    * WollMuxSingletonie (WollMuxSingleton.getTextDocumentModel()) erzeugt und
@@ -142,6 +157,8 @@ public class TextDocumentModel
     this.closeListener = null;
     this.printFunction = null;
     this.docCmdTree = new DocumentCommandTree(UNO.XBookmarksSupplier(doc));
+    this.notInOriginalBlocks = new Vector();
+    this.draftOnlyBlocks = new Vector();
   }
 
   /**
@@ -450,6 +467,56 @@ public class TextDocumentModel
   }
 
   /**
+   * Fügt der Liste der NotInOriginal-Kommandos dieses Dokuments ein weiteres
+   * Dokumentkommando cmd dieses Typs hinzu.
+   * 
+   * @param cmd
+   *          das hinzuzufügende Dokumentkommando
+   */
+  public void addNotInOriginalBlock(DocumentCommand.NotInOriginal cmd)
+  {
+    notInOriginalBlocks.add(cmd);
+  }
+
+  /**
+   * Fügt der Liste der DraftOnly-Kommandos dieses Dokuments ein weiteres
+   * Dokumentkommando cmd dieses Typs hinzu.
+   * 
+   * @param cmd
+   *          das hinzuzufügende Dokumentkommando
+   */
+  public void addDraftOnlyBlock(DocumentCommand.DraftOnly cmd)
+  {
+    draftOnlyBlocks.add(cmd);
+  }
+
+  /**
+   * Liefert einen Iterator zurück, der die Iteration aller
+   * NotInOrininal-Dokumentkommandos dieses Dokuments ermöglicht.
+   * 
+   * @return ein Iterator, der die Iteration aller
+   *         NotInOrininal-Dokumentkommandos dieses Dokuments ermöglicht. Der
+   *         Iterator kann auch keine Elemente enthalten.
+   */
+  public Iterator getNotInOrininalBlocksIterator()
+  {
+    return notInOriginalBlocks.iterator();
+  }
+
+  /**
+   * Liefert einen Iterator zurück, der die Iteration aller
+   * DraftOnly-Dokumentkommandos dieses Dokuments ermöglicht.
+   * 
+   * @return ein Iterator, der die Iteration aller DraftOnly-Dokumentkommandos
+   *         dieses Dokuments ermöglicht. Der Iterator kann auch keine Elemente
+   *         enthalten.
+   */
+  public Iterator getDraftOnlyBlocksIterator()
+  {
+    return draftOnlyBlocks.iterator();
+  }
+
+  /**
    * Setzt das Fensters des TextDokuments auf Sichtbar (visible==true) oder
    * unsichtbar (visible == false).
    * 
@@ -688,6 +755,31 @@ public class TextDocumentModel
     }
   }
 
+  public void print(short numberOfCopies)
+  {
+    // TODO: testen
+    if (UNO.XPrintable(doc) != null)
+    {
+      PropertyValue[] args = new PropertyValue[] {
+                                                  new PropertyValue(),
+                                                  new PropertyValue() };
+      args[0].Name = "CopyCount";
+      args[0].Value = new Short(numberOfCopies);
+      args[1].Name = "Wait";
+      args[1].Value = Boolean.TRUE;
+
+      try
+      {
+        UNO.XPrintable(doc).print(args);
+      }
+      catch (java.lang.Exception e)
+      {
+        // FIXME: evtl. Exception werfen?
+        Logger.error("Drucken schlug fehl!", e);
+      }
+    }
+  }
+
   /**
    * Schliesst das XTextDocument, das diesem Model zugeordnet ist. Ist der
    * closeListener registriert (was WollMuxSingleton bereits bei der Erstellung
@@ -810,9 +902,26 @@ public class TextDocumentModel
     public void print(short numberOfCopies)
     {
       setLock();
-      WollMuxEventHandler.handleDoPrint(
+      WollMuxEventHandler
+          .handlePrint(doc, numberOfCopies, unlockActionListener);
+      waitForUnlock();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#printVerfuegungspunkt(short,
+     *      boolean)
+     */
+    public void printVerfuegungspunkt(short verfPunkt, short numberOfCopies,
+        boolean showPrintSettingsOnce)
+    {
+      setLock();
+      WollMuxEventHandler.handlePrintVerfuegungspunkt(
           doc,
+          verfPunkt,
           numberOfCopies,
+          showPrintSettingsOnce,
           unlockActionListener);
       waitForUnlock();
     }

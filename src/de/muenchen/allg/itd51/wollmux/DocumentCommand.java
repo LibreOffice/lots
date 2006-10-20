@@ -1519,10 +1519,10 @@ abstract public class DocumentCommand
 
   // ********************************************************************************
   /**
-   * TODO: überarbeiten! Beim Drucken von Sachleitenden Verfügungen wird die Ausfertigung, die ALLE
+   * Beim Drucken von Sachleitenden Verfügungen wird die Ausfertigung, die ALLE
    * definierten Verfügungpunkte enthält als "Entwurf" bezeichnet. Mit einem
-   * DraftOnly-Kommando können Blöcke im Text definiert werden, die
-   * ausschließlich im Entwurf angezeigt werden sollen.
+   * DraftOnly-Kommando können Blöcke im Text definiert werden (auch an anderen
+   * Stellen), die ausschließlich im Entwurf angezeigt werden sollen.
    */
   static public class DraftOnly extends DocumentCommand
   {
@@ -1544,12 +1544,11 @@ abstract public class DocumentCommand
 
   // ********************************************************************************
   /**
-   * TODO: überarbeiten! Beim Drucken von Sachleitenden Verfügungen wird der Verfügungspunkt I als
-   * Sonderfall behandelt, wenn es sich um einen externen Briefkopf handelt.
-   * Dann enthält "I." alle Inhalte des Originals. Mit dem NotInOriginal
-   * Kommando ist es möglich Blöcke im Text zu definieren, die NIEMALS in
-   * Originalen abgedruckt werden sollen, jedoch in allen anderen Ausdrucken,
-   * die nicht das Original sind (wie z.B. der Entwurf).
+   * Beim Drucken von Sachleitenden Verfügungen wird der
+   * Verfügungspunkt I als Original bezeichnet. Mit dem
+   * NotInOriginal Kommando ist es möglich Blöcke im Text zu definieren, die
+   * NIEMALS in Originalen abgedruckt werden sollen, jedoch in allen anderen
+   * Ausdrucken, die nicht das Original sind (wie z.B. Abdrücke und Entwurf).
    */
   static public class NotInOriginal extends DocumentCommand
   {

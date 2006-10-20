@@ -833,7 +833,7 @@ public class SachleitendeVerfuegung
    * 
    * @param pmod
    */
-  public static void print(XPrintModel pmod)
+  public static void showPrintDialog(XPrintModel pmod)
   {
     Logger.debug("SachleitendeVerfuegung.print - started");
 
@@ -883,6 +883,54 @@ public class SachleitendeVerfuegung
 
     // pmod.print((short)1);
     Logger.debug("SachleitendeVerfuegung.print - finished");
+  }
+
+  /**
+   * Druckt den Verfügungpunkt verfPunkt aus dem Dokument doc in der gewünschten
+   * Anzahl numberOfCopies aus. ACHTUNG: Diese Methode darf nur aus dem
+   * WollMuxEventHandler-Thread gestartet werden, da sie auf Datenstrukturen des
+   * WollMux zugreift.
+   * 
+   * @param doc
+   * @param verfPunkt
+   * @param numberOfCopies
+   */
+  public static void printVerfuegungspunkt(TextDocumentModel model,
+      short verfPunkt, short numberOfCopies)
+  {
+    // TODO: Behandlung für WollMuxVerfuegungspunkt1 (im externen Briefkopf)
+    int count = 0;
+
+    XTextRange setInvisibleRange = null;
+
+    XParagraphCursor cursor = UNO.XParagraphCursor(model.doc.getText()
+        .createTextCursorByRange(model.doc.getText().getStart()));
+    if (cursor != null) do
+    {
+      cursor.gotoEndOfParagraph(true);
+
+      if (isVerfuegungspunkt(cursor))
+      {
+        count++;
+        if (count == (verfPunkt + 1))
+        {
+          cursor.collapseToStart();
+          cursor.gotoRange(cursor.getText().getEnd(), true);
+          setInvisibleRange = cursor;
+        }
+      }
+    } while (setInvisibleRange == null && cursor.gotoNextParagraph(false));
+
+    if (setInvisibleRange != null)
+    {
+      UNO.setProperty(setInvisibleRange, "CharHidden", Boolean.TRUE);
+
+      // TODO: Behandlung der draftOnly bzw. notInOriginal-Blöcke
+
+      model.print(numberOfCopies);
+
+      UNO.setProperty(setInvisibleRange, "CharHidden", Boolean.FALSE);
+    }
   }
 
   public static void main(String[] args) throws Exception

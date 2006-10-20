@@ -2021,13 +2021,13 @@ public class WollMuxEventHandler
    * Das Event dient als Hilfe für die Komfortdruckfunktionen und wird vom
    * XPrintModel aufgerufen und mit diesem synchronisiert.
    */
-  public static void handleDoPrint(XTextDocument doc, short numberOfCopies,
+  public static void handlePrint(XTextDocument doc, short numberOfCopies,
       ActionListener listener)
   {
-    handle(new OnDoPrint(doc, numberOfCopies, listener));
+    handle(new OnPrint(doc, numberOfCopies, listener));
   }
 
-  private static class OnDoPrint extends BasicEvent
+  private static class OnPrint extends BasicEvent
   {
     private XTextDocument doc;
 
@@ -2035,7 +2035,7 @@ public class WollMuxEventHandler
 
     private ActionListener listener;
 
-    public OnDoPrint(XTextDocument doc, short numberOfCopies,
+    public OnPrint(XTextDocument doc, short numberOfCopies,
         ActionListener listener)
     {
       this.doc = doc;
@@ -2045,28 +2045,10 @@ public class WollMuxEventHandler
 
     protected void doit() throws WollMuxFehlerException
     {
-      // TODO: testen
-      if (UNO.XPrintable(doc) != null)
-      {
-        PropertyValue[] args = new PropertyValue[] {
-                                                    new PropertyValue(),
-                                                    new PropertyValue() };
-        args[0].Name = "CopyCount";
-        args[0].Value = new Short(numberOfCopies);
-        args[1].Name = "Wait";
-        args[1].Value = Boolean.TRUE;
-
-        try
-        {
-          UNO.XPrintable(doc).print(args);
-        }
-        catch (java.lang.Exception e)
-        {
-          listener.actionPerformed(null);
-          throw new WollMuxFehlerException("Drucken schlug fehl!", e);
-        }
-        listener.actionPerformed(null);
-      }
+      TextDocumentModel model = WollMuxSingleton.getInstance()
+          .getTextDocumentModel(doc);
+      model.print(numberOfCopies);
+      listener.actionPerformed(null);
     }
 
     public String toString()
@@ -2214,6 +2196,73 @@ public class WollMuxEventHandler
     protected void doit() throws WollMuxFehlerException
     {
       WollMuxFiles.dumpInfo();
+    }
+
+    public String toString()
+    {
+      return this.getClass().getSimpleName() + "()";
+    }
+  }
+
+  // *******************************************************************************************
+
+  /**
+   * TODO: überarbeiten! Erzeugt ein neues WollMuxEvent, das dafür sorgt, dass
+   * eine Datei wollmux.dump erzeugt wird, die viele für die Fehlersuche
+   * relevanten Informationen enthält wie z.B. Versionsinfo, Inhalt der
+   * wollmux.conf, cache.conf, StringRepräsentation der Konfiguration im
+   * Speicher und eine Kopie der Log-Datei.
+   * 
+   * Das Event wird von der WollMuxBar geworfen, die (speziell für Admins, nicht
+   * für Endbenutzer) einen entsprechenden Button besitzt.
+   */
+  public static void handlePrintVerfuegungspunkt(XTextDocument doc,
+      short verfPunkt, short numberOfCopies, boolean showPrintSettingsOnce,
+      ActionListener unlockActionListener)
+  {
+    handle(new OnPrintVerfuegungspunkt(doc, verfPunkt, numberOfCopies,
+        showPrintSettingsOnce, unlockActionListener));
+  }
+
+  private static class OnPrintVerfuegungspunkt extends BasicEvent
+  {
+    private XTextDocument doc;
+
+    private short verfPunkt;
+
+    private short numberOfCopies;
+
+    private boolean showPrintSettingsOnce;
+
+    private ActionListener listener;
+
+    public OnPrintVerfuegungspunkt(XTextDocument doc, short verfPunkt,
+        short numberOfCopies, boolean showPrintSettingsOnce,
+        ActionListener listener)
+    {
+      this.doc = doc;
+      this.verfPunkt = verfPunkt;
+      this.numberOfCopies = numberOfCopies;
+      this.showPrintSettingsOnce = showPrintSettingsOnce;
+      this.listener = listener;
+    }
+
+    protected void doit() throws WollMuxFehlerException
+    {
+      TextDocumentModel model = WollMuxSingleton.getInstance()
+          .getTextDocumentModel(doc);
+
+      if (showPrintSettingsOnce)
+      {
+        // TODO: printsettingsdialog
+      }
+
+      SachleitendeVerfuegung.printVerfuegungspunkt(
+          model,
+          verfPunkt,
+          numberOfCopies);
+
+      listener.actionPerformed(null);
     }
 
     public String toString()

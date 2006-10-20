@@ -6,6 +6,6 @@ import de.muenchen.allg.itd51.wollmux.XPrintModel;
 public class StandardPrint
 {
   public static void sachleitendeVerfuegung(XPrintModel pmod) {
-    SachleitendeVerfuegung.print(pmod);
+    SachleitendeVerfuegung.showPrintDialog(pmod);
   }
 }
