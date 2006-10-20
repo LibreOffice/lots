@@ -2217,10 +2217,10 @@ public class WollMuxEventHandler
    * für Endbenutzer) einen entsprechenden Button besitzt.
    */
   public static void handlePrintVerfuegungspunkt(XTextDocument doc,
-      short verfPunkt, short numberOfCopies, boolean showPrintSettingsOnce,
-      ActionListener unlockActionListener)
+      short verfPunkt, short numberOfCopies, boolean isDraft,
+      boolean showPrintSettingsOnce, ActionListener unlockActionListener)
   {
-    handle(new OnPrintVerfuegungspunkt(doc, verfPunkt, numberOfCopies,
+    handle(new OnPrintVerfuegungspunkt(doc, verfPunkt, numberOfCopies, isDraft,
         showPrintSettingsOnce, unlockActionListener));
   }
 
@@ -2232,17 +2232,20 @@ public class WollMuxEventHandler
 
     private short numberOfCopies;
 
+    private boolean isDraft;
+
     private boolean showPrintSettingsOnce;
 
     private ActionListener listener;
 
     public OnPrintVerfuegungspunkt(XTextDocument doc, short verfPunkt,
-        short numberOfCopies, boolean showPrintSettingsOnce,
+        short numberOfCopies, boolean isDraft, boolean showPrintSettingsOnce,
         ActionListener listener)
     {
       this.doc = doc;
       this.verfPunkt = verfPunkt;
       this.numberOfCopies = numberOfCopies;
+      this.isDraft = isDraft;
       this.showPrintSettingsOnce = showPrintSettingsOnce;
       this.listener = listener;
     }
@@ -2260,7 +2263,8 @@ public class WollMuxEventHandler
       SachleitendeVerfuegung.printVerfuegungspunkt(
           model,
           verfPunkt,
-          numberOfCopies);
+          numberOfCopies,
+          isDraft);
 
       listener.actionPerformed(null);
     }

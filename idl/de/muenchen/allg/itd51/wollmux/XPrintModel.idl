@@ -29,7 +29,7 @@ interface XPrintModel
 	
 	com::sun::star::text::XTextDocument getTextDocument();
 	
-	void printVerfuegungspunkt( [in] short verfPunkt, [in] short numberOfCopies, [in] boolean showPrintSettingsOnce);
+	void printVerfuegungspunkt( [in] short verfPunkt, [in] short numberOfCopies, [in] boolean isDraft, [in] boolean showPrintSettingsOnce);
 };
 
 }; }; }; }; };

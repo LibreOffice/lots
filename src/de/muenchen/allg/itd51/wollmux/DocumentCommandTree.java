@@ -263,7 +263,7 @@ public class DocumentCommandTree
         return new DocumentCommand.DraftOnly(wmCmd, bookmark);
       }
 
-      else if (cmd.compareToIgnoreCase("originalOnly") == 0)
+      else if (cmd.compareToIgnoreCase("notInOriginal") == 0)
       {
         return new DocumentCommand.NotInOriginal(wmCmd, bookmark);
       }

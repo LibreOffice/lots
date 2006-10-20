@@ -671,11 +671,13 @@ public class DocumentCommandInterpreter
 
     public int executeCommand(DraftOnly cmd)
     {
+      model.addDraftOnlyBlock(cmd);
       return 0;
     }
 
     public int executeCommand(NotInOriginal cmd)
     {
+      model.addNotInOriginalBlock(cmd);
       return 0;
     }
 

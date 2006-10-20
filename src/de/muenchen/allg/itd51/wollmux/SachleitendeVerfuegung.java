@@ -17,6 +17,7 @@
  */
 package de.muenchen.allg.itd51.wollmux;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Vector;
 
@@ -410,11 +411,6 @@ public class SachleitendeVerfuegung
    */
   private static void ziffernAnpassen(XTextDocument doc)
   {
-    // TODO: refactoring der Ziffernanpassung. Für die Ziffernanpassung kann mit
-    // leichten Modifikationen die scanVerfügungspunkte-Methode verwendet
-    // werden. Das sollte implementiert werden um unnötige Redunzanzen zu
-    // entfernen.
-
     XTextRange punkt1 = getVerfuegungspunkt1(doc);
 
     // Zähler für Verfuegungspunktnummer auf 1 initialisieren, wenn ein
@@ -648,6 +644,11 @@ public class SachleitendeVerfuegung
   }
 
   /**
+   * TODO: Verfuegungspunkt refaktorisieren, so dass keine TextRanges mehr
+   * erforderlich sind - Verfuegungspunkt wird jetzt lediglich als Datenspeicher
+   * für den Druckdialog benötigt, der keine Zugriff auf die TextRanges
+   * benötigt.
+   * 
    * Repräsentiert einen vollständigen Verfügungspunkt, der aus Überschrift
    * (römische Ziffer + Überschrift) und Inhalt besteht. Die Klasse bietet
    * Methden an, über die auf alle für den Druck wichtigen Eigenschaften des
@@ -896,41 +897,92 @@ public class SachleitendeVerfuegung
    * @param numberOfCopies
    */
   public static void printVerfuegungspunkt(TextDocumentModel model,
-      short verfPunkt, short numberOfCopies)
+      short verfPunkt, short numberOfCopies, boolean isDraft)
   {
-    // TODO: Behandlung für WollMuxVerfuegungspunkt1 (im externen Briefkopf)
+    boolean isOriginal = (verfPunkt == 1);
+
+    // Zähler für Verfuegungspunktnummer auf 1 initialisieren, wenn ein
+    // Verfuegungspunkt1 vorhanden ist.
+    XTextRange punkt1 = getVerfuegungspunkt1(model.doc);
     int count = 0;
+    if (punkt1 != null) count++;
 
+    // Auszublendenden Bereich festlegen:
     XTextRange setInvisibleRange = null;
-
     XParagraphCursor cursor = UNO.XParagraphCursor(model.doc.getText()
         .createTextCursorByRange(model.doc.getText().getStart()));
-    if (cursor != null) do
-    {
-      cursor.gotoEndOfParagraph(true);
-
-      if (isVerfuegungspunkt(cursor))
+    if (cursor != null)
+      do
       {
-        count++;
-        if (count == (verfPunkt + 1))
-        {
-          cursor.collapseToStart();
-          cursor.gotoRange(cursor.getText().getEnd(), true);
-          setInvisibleRange = cursor;
-        }
-      }
-    } while (setInvisibleRange == null && cursor.gotoNextParagraph(false));
+        cursor.gotoEndOfParagraph(true);
 
+        if (isVerfuegungspunkt(cursor))
+        {
+          // Punkt1 merken
+          if (punkt1 == null)
+            punkt1 = cursor.getText().createTextCursorByRange(cursor);
+
+          count++;
+          if (count == (verfPunkt + 1))
+          {
+            cursor.collapseToStart();
+            cursor.gotoRange(cursor.getText().getEnd(), true);
+            setInvisibleRange = cursor;
+          }
+        }
+      } while (setInvisibleRange == null && cursor.gotoNextParagraph(false));
+
+    // ensprechende Verfügungspunkte ausblenden
     if (setInvisibleRange != null)
-    {
       UNO.setProperty(setInvisibleRange, "CharHidden", Boolean.TRUE);
 
-      // TODO: Behandlung der draftOnly bzw. notInOriginal-Blöcke
+    // Sichtbarkeitsstand der draftOnly bzw. notInOriginal-Blöcke merken.
+    HashMap /* of DocumentCommand */oldVisibilityStates = new HashMap();
 
-      model.print(numberOfCopies);
-
-      UNO.setProperty(setInvisibleRange, "CharHidden", Boolean.FALSE);
+    // Ein/Ausblenden der draftOnly bzw. notInOriginal-Blöcke:
+    Iterator iter = model.getDraftOnlyBlocksIterator();
+    while (iter.hasNext())
+    {
+      DocumentCommand cmd = (DocumentCommand) iter.next();
+      oldVisibilityStates.put(cmd, new Boolean(cmd.isVisible()));
+      cmd.setVisible(isDraft);
     }
+
+    iter = model.getNotInOrininalBlocksIterator();
+    while (iter.hasNext())
+    {
+      DocumentCommand cmd = (DocumentCommand) iter.next();
+      oldVisibilityStates.put(cmd, new Boolean(cmd.isVisible()));
+      cmd.setVisible(!isOriginal);
+    }
+
+    // Ziffer von Punkt 1 ausblenden falls isOriginal
+    XTextRange punkt1ZifferOnly = null;
+    if (isOriginal && punkt1 != null)
+    {
+      punkt1ZifferOnly = getZifferOnly(punkt1);
+      UNO.setProperty(punkt1ZifferOnly, "CharHidden", Boolean.TRUE);
+    }
+
+    // Druck des Dokuments mit den entsprechenden Ein/Ausbledungen
+    model.print(numberOfCopies);
+
+    // Ausblendung von Ziffer von Punkt 1 wieder aufheben
+    if (punkt1ZifferOnly != null)
+      UNO.setProperty(punkt1ZifferOnly, "CharHidden", Boolean.FALSE);
+
+    // Alte Sichtbarkeitszustände der draftOnly bzw. notInOriginal-Blöcke
+    // zurücksetzten.
+    iter = oldVisibilityStates.keySet().iterator();
+    while (iter.hasNext())
+    {
+      DocumentCommand cmd = (DocumentCommand) iter.next();
+      cmd.setVisible(((Boolean) oldVisibilityStates.get(cmd)).booleanValue());
+    }
+
+    // Verfügungspunkte wieder einblenden:
+    if (setInvisibleRange != null)
+      UNO.setProperty(setInvisibleRange, "CharHidden", Boolean.FALSE);
   }
 
   public static void main(String[] args) throws Exception

@@ -914,13 +914,14 @@ public class TextDocumentModel
      *      boolean)
      */
     public void printVerfuegungspunkt(short verfPunkt, short numberOfCopies,
-        boolean showPrintSettingsOnce)
+        boolean isDraft, boolean showPrintSettingsOnce)
     {
       setLock();
       WollMuxEventHandler.handlePrintVerfuegungspunkt(
           doc,
           verfPunkt,
           numberOfCopies,
+          isDraft,
           showPrintSettingsOnce,
           unlockActionListener);
       waitForUnlock();
