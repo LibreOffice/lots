@@ -23,13 +23,9 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Insets;
-import java.awt.Point;
-import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.util.Iterator;
@@ -42,7 +38,6 @@ import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.JSpinner;
@@ -564,37 +559,37 @@ public class SachleitendeVerfuegungenDruckdialog
     return count;
   }
 
-  /**
-   * Wartet auf Doppelklick und führt dann die actionPerformed() Methode eines
-   * ActionListeners aus.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private class MyActionMouseListener extends MouseAdapter
-  {
-    private JList list;
-
-    private ActionListener action;
-
-    public MyActionMouseListener(JList list, ActionListener action)
-    {
-      this.list = list;
-      this.action = action;
-    }
-
-    public void mouseClicked(MouseEvent e)
-    {
-      if (e.getClickCount() == 2)
-      {
-        Point location = e.getPoint();
-        int index = list.locationToIndex(location);
-        if (index < 0) return;
-        Rectangle bounds = list.getCellBounds(index, index);
-        if (!bounds.contains(location)) return;
-        action.actionPerformed(null);
-      }
-    }
-  }
+//  /**
+//   * Wartet auf Doppelklick und führt dann die actionPerformed() Methode eines
+//   * ActionListeners aus.
+//   * 
+//   * @author Matthias Benkmann (D-III-ITD 5.1)
+//   */
+//  private class MyActionMouseListener extends MouseAdapter
+//  {
+//    private JList list;
+//
+//    private ActionListener action;
+//
+//    public MyActionMouseListener(JList list, ActionListener action)
+//    {
+//      this.list = list;
+//      this.action = action;
+//    }
+//
+//    public void mouseClicked(MouseEvent e)
+//    {
+//      if (e.getClickCount() == 2)
+//      {
+//        Point location = e.getPoint();
+//        int index = list.locationToIndex(location);
+//        if (index < 0) return;
+//        Rectangle bounds = list.getCellBounds(index, index);
+//        if (!bounds.contains(location)) return;
+//        action.actionPerformed(null);
+//      }
+//    }
+//  }
 
   /**
    * Übersetzt den Namen einer ACTION in eine Referenz auf das passende

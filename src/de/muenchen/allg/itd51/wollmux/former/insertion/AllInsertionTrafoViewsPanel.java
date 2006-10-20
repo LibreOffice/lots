@@ -17,9 +17,7 @@
 */
 package de.muenchen.allg.itd51.wollmux.former.insertion;
 
-import java.awt.BorderLayout;
 import java.awt.CardLayout;
-import java.awt.GridLayout;
 import java.util.List;
 import java.util.Vector;
 
