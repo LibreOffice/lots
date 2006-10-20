@@ -14,6 +14,7 @@
  * 29.09.2006 | BNK | rename() gibt nun im Fehlerfall das BROKEN-String-Objekt zurück
  * 29.09.2006 | BNK | Unnötige renames vermeiden, um OOo nicht zu stressen
  * 29.09.2006 | BNK | Auch im optimierten Fall wo kein rename stattfindet auf BROKEN testen
+ * 20.10.2006 | BNK | rename() Debug-Meldung nicht mehr ausgeben, wenn No Op Optimierung triggert.
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -348,8 +349,6 @@ public class Bookmark
    */
   public String rename(String newName)
   {
-    Logger.debug("Rename \"" + name + "\" --> \"" + newName + "\"");
-
     XNameAccess bookmarks = UNO.XBookmarksSupplier(document.getObject())
     .getBookmarks();
     
@@ -362,6 +361,7 @@ public class Bookmark
       return name; 
     }
     
+    Logger.debug("Rename \"" + name + "\" --> \"" + newName + "\"");
     
     if (bookmarks.hasByName(newName))
     {
