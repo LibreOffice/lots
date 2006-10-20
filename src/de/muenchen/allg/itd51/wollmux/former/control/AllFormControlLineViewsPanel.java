@@ -518,7 +518,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener, OneForm
   {
     String id = formControlModelList.makeUniqueId(FormularMax4000.STANDARD_TAB_NAME);
     String label = id;
-    FormControlModel model = FormControlModel.createTab(label, id);
+    FormControlModel model = FormControlModel.createTab(label, id, formularMax4000);
     int index = getInsertionIndex();
     formControlModelList.add(model, index);
   }
@@ -534,7 +534,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener, OneForm
   private void insertNewElement()
   {
     String id = formControlModelList.makeUniqueId("Label");
-    FormControlModel model = FormControlModel.createLabel("Text", id);
+    FormControlModel model = FormControlModel.createLabel("Text", id, formularMax4000);
     int index = getInsertionIndex();
     formControlModelList.add(model, index);
   }

@@ -26,6 +26,7 @@ import java.util.Set;
 import java.util.Vector;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelection;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionProvider;
 
@@ -102,14 +103,21 @@ public class FormControlModel
   private List listeners = new Vector(1);
   
   /**
+   * Der FormularMax4000 zu dem dieses Model gehört. Dieser wird über Änderungen des Models
+   * informiert, um das Zurückschreiben der Daten in das Dokument anzustoßen.
+   */
+  private FormularMax4000 formularMax4000;
+  
+  /**
    * Parst conf als Steuerelement und erzeugt ein entsprechendes FormControlModel.
    * @param conf direkter Vorfahre von "TYPE", "LABEL", usw.
    * @param funcSelProv der {@link FunctionSelectionProvider}, der zu PLAUSI und AUTOFILL
    *        passende {@link FunctionSelection}s liefern kann.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public FormControlModel(ConfigThingy conf, FunctionSelectionProvider funcSelProv)
+  public FormControlModel(ConfigThingy conf, FunctionSelectionProvider funcSelProv, FormularMax4000 formularMax4000)
   {
+    this.formularMax4000 = formularMax4000;
     label = "Steuerelement";
     type = TEXTFIELD_TYPE;
     id = "";
@@ -176,11 +184,12 @@ public class FormControlModel
    * Eigenschaften erhalten Default-Werte (normalerweise der leere String).
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private FormControlModel(String label, String type, String id)
+  private FormControlModel(String label, String type, String id, FormularMax4000 formularMax4000)
   {
     this.label = label;
     this.type = type;
     this.id = id;
+    this.formularMax4000 = formularMax4000;
   }
   
   /**
@@ -188,9 +197,9 @@ public class FormControlModel
    * ID id.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public static FormControlModel createCheckbox(String label, String id)
+  public static FormControlModel createCheckbox(String label, String id, FormularMax4000 formularMax4000)
   {
-    return new FormControlModel(label, CHECKBOX_TYPE, id);
+    return new FormControlModel(label, CHECKBOX_TYPE, id, formularMax4000);
   }
   
   /**
@@ -198,9 +207,9 @@ public class FormControlModel
    * ID id.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public static FormControlModel createTextfield(String label, String id)
+  public static FormControlModel createTextfield(String label, String id, FormularMax4000 formularMax4000)
   {
-    FormControlModel model = new FormControlModel(label, TEXTFIELD_TYPE, id);
+    FormControlModel model = new FormControlModel(label, TEXTFIELD_TYPE, id, formularMax4000);
     model.editable = true;
     return model;
   }
@@ -209,9 +218,9 @@ public class FormControlModel
    * Liefert ein FormControlModel, das ein Label label darstellt.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public static FormControlModel createLabel(String label, String id)
+  public static FormControlModel createLabel(String label, String id, FormularMax4000 formularMax4000)
   {
-    FormControlModel model = new FormControlModel(label, LABEL_TYPE, "");
+    FormControlModel model = new FormControlModel(label, LABEL_TYPE, "", formularMax4000);
     return model;
   }
   
@@ -220,9 +229,9 @@ public class FormControlModel
    * ID id.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public static FormControlModel createComboBox(String label, String id, String[] items)
+  public static FormControlModel createComboBox(String label, String id, String[] items, FormularMax4000 formularMax4000)
   {
-    FormControlModel model = new FormControlModel(label, COMBOBOX_TYPE, id);
+    FormControlModel model = new FormControlModel(label, COMBOBOX_TYPE, id, formularMax4000);
     model.items = new Vector(Arrays.asList(items));
     return model;
   }
@@ -232,9 +241,9 @@ public class FormControlModel
    * LABEL label und ID id.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public static FormControlModel createTab(String label, String id)
+  public static FormControlModel createTab(String label, String id, FormularMax4000 formularMax4000)
   {
-    FormControlModel model = new FormControlModel(label, TAB_TYPE, id);
+    FormControlModel model = new FormControlModel(label, TAB_TYPE, id, formularMax4000);
     model.action = "abort";
     return model;
   }
@@ -387,6 +396,7 @@ public class FormControlModel
   public void setAutofill(FunctionSelection funcSel)
   {
     autofill = funcSel;
+    formularMax4000.documentNeedsUpdating();
   }
   
   /**
@@ -398,6 +408,7 @@ public class FormControlModel
   {
     if (action.length() == 0) action = NO_ACTION;
     this.action = action;
+    formularMax4000.documentNeedsUpdating();
   }
   
   /**
@@ -408,6 +419,7 @@ public class FormControlModel
   {
     this.label = label;
     notifyListeners(LABEL_ATTR, label);
+    formularMax4000.documentNeedsUpdating();
   }
   
   /**
@@ -417,6 +429,7 @@ public class FormControlModel
   public void setTooltip(String tooltip)
   {
     this.tooltip = tooltip;
+    formularMax4000.documentNeedsUpdating();
   }
   
   /**
@@ -426,6 +439,7 @@ public class FormControlModel
   public void setHotkey(char hotkey)
   {
     this.hotkey = hotkey; 
+    formularMax4000.documentNeedsUpdating();
   }
   
   /**
@@ -435,6 +449,7 @@ public class FormControlModel
   public void setReadonly(boolean readonly)
   {
     this.readonly = readonly;
+    formularMax4000.documentNeedsUpdating();
   }
   
   /**
@@ -443,7 +458,8 @@ public class FormControlModel
    */
   public void setEditable(boolean editable)
   {
-    this.editable = editable; 
+    this.editable = editable;
+    formularMax4000.documentNeedsUpdating();
   }
   
   /**
@@ -453,6 +469,7 @@ public class FormControlModel
   public void setLines(int lines)
   {
     this.lines = lines; 
+    formularMax4000.documentNeedsUpdating();
   }
   
   /**
@@ -462,6 +479,7 @@ public class FormControlModel
   public void setMinsize(int minsize)
   {
     this.minsize = minsize; 
+    formularMax4000.documentNeedsUpdating();
   }
   
   /**
@@ -486,6 +504,7 @@ public class FormControlModel
     else if (type.equals(BUTTON_TYPE)) this.type = BUTTON_TYPE;
     else this.type = UNKNOWN_TYPE;
     notifyListeners(TYPE_ATTR, this.type);
+    formularMax4000.documentNeedsUpdating();
   }
   
   /**

@@ -13,6 +13,7 @@
  * 08.08.2006 | BNK | +fromConfigThingy(ConfigThingy conf)
  *                  | writeDocInfoFormularbeschreibung()
  * 11.08.2006 | BNK | umgeschrieben auf das Verwenden mehrerer Notizen in einem Rahmen
+ * 19.10.2006 | BNK | WOLLMUX_FRAME_NAME public gemacht für Verwendung in FM4000.
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -96,7 +97,7 @@ public class FormDescriptor
   /**
    * Der Name des Frames in dem der WollMux seine Formulardaten speichert.
    */
-  private static final String WOLLMUX_FRAME_NAME = "WollMuxDaten";
+  public static final String WOLLMUX_FRAME_NAME = "WollMuxDaten";
   
   /**
    * Das Dokument, das als Fabrik für neue Annotations benötigt wird.

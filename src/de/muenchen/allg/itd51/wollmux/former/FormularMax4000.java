@@ -15,6 +15,7 @@
 *                  | Das Hauptfenster passt sein Größe an, wenn Steuerelemente dazukommen oder verschwinden
 * 06.09.2006 | BNK | Hoch und Runterschieben funktionieren jetzt.
 * 19.10.2006 | BNK | Quelltexteditor nicht mehr in einem eigenen Frame
+* 20.10.2006 | BNK | Rückschreiben ins Dokument erfolgt jetzt automatisch.
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -24,14 +25,11 @@
 package de.muenchen.allg.itd51.wollmux.former;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.Font;
 import java.awt.GraphicsEnvironment;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.MouseAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.StringReader;
@@ -54,6 +52,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.Timer;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 import javax.swing.text.DefaultEditorKit;
@@ -62,9 +61,12 @@ import javax.swing.text.PlainView;
 import javax.swing.text.View;
 import javax.swing.text.ViewFactory;
 
+import com.sun.star.container.XNameAccess;
 import com.sun.star.document.XDocumentInfo;
 import com.sun.star.text.XBookmarksSupplier;
+import com.sun.star.text.XTextContent;
 import com.sun.star.text.XTextDocument;
+import com.sun.star.text.XTextFramesSupplier;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
@@ -102,6 +104,14 @@ public class FormularMax4000
    * ganzen String testet.
    */
   private static final String STARTS_WITH_LETTER_RE = "^[a-zA-Z_].*";
+  
+  /**
+   * Pattern zum Erkennen der Bookmarks, die {@link #deForm(XTextDocument)} entfernen soll.
+   */
+  public static final Pattern BOOKMARK_KILL_PATTERN = Pattern.compile("(\\A\\s*(WM\\s*\\(.*CMD\\s*'((form)|(setGroups)|(insertFormValue))'.*\\))\\s*\\d*\\z)"+
+                                                                     "|(\\A\\s*(WM\\s*\\(.*CMD\\s*'(setType)'.*'formDocument'\\))\\s*\\d*\\z)"+
+                                                                     "|(\\A\\s*(WM\\s*\\(.*'formDocument'.*CMD\\s*'(setType)'.*\\))\\s*\\d*\\z)"
+                                                                     );
 
   /**
    * Der Standard-Formulartitel, solange kein anderer gesetzt wird.
@@ -264,6 +274,9 @@ public class FormularMax4000
    */
   private List broadcastListeners = new Vector();
 
+  /**
+   * Wird auf myFrame registriert, damit zum Schließen des Fensters abort() aufgerufen wird.
+   */
   private MyWindowListener oehrchen;
 
   /**
@@ -280,6 +293,12 @@ public class FormularMax4000
    * Der Quelltexteditor.
    */
   private JEditorPane editor;
+  
+  /**
+   * Wird bei jeder Änderung von Formularaspekten gestartet, um nach einer Verzögerung die
+   * Änderungen in das Dokument zu übertragen.
+   */
+  private Timer writeChangesTimer;
   
   /**
    * Sendet die Nachricht b an alle Listener, die auf dem globalen Broadcast-Kanal registriert
@@ -304,6 +323,17 @@ public class FormularMax4000
   {
     if (!broadcastListeners.contains(listener))
       broadcastListeners.add(listener);
+  }
+  
+  /**
+   * Wird bei jeder Änderung einer internen Datenstruktur aufgerufen, die ein Updaten des
+   * Dokuments erforderlich macht um persistent zu werden.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public void documentNeedsUpdating()
+  {
+    writeChangesTimer.restart();
   }
   
   /**
@@ -335,7 +365,7 @@ public class FormularMax4000
     Common.setLookAndFeelOnce();
     
     
-    formControlModelList = new FormControlModelList();
+    formControlModelList = new FormControlModelList(this);
     insertionModelList = new InsertionModelList();
     
     //  Create and set up the window.
@@ -374,19 +404,11 @@ public class FormularMax4000
       }});
     menu.add(menuItem);
     
-    menuItem = new JMenuItem("Formularbeschreibung ins Dokument übertragen");
-    menuItem.addActionListener(new ActionListener(){
-      public void actionPerformed(ActionEvent e)
-      {
-        updateDocument(doc);
-      }});
-    menu.add(menuItem);
-    
     menuItem = new JMenuItem("WollMux-Formularmerkmale aus Dokument entfernen");
     menuItem.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e)
       {
-        //TODO deForm(doc); insertFrags und insertValues in Ruhe lassen, aber insertFormValue, setGroups, setType und Forumlarbeschreibungsnotiz entfernen
+        deForm(doc); 
       }});
     menu.add(menuItem);
     
@@ -437,11 +459,19 @@ public class FormularMax4000
 
     myFrame.setJMenuBar(mainMenuBar);
 
+    writeChangesTimer = new Timer(500, new ActionListener()
+    { public void actionPerformed(ActionEvent e)
+      {
+        updateDocument(doc);
+    }});
+    writeChangesTimer.setCoalesce(true);
+    writeChangesTimer.setRepeats(false);
     
     initEditor();
 
     initModelsAndViews();
     
+    writeChangesTimer.stop();
     
     setFrameSize();
     myFrame.setResizable(true);
@@ -457,8 +487,6 @@ public class FormularMax4000
    */
   private void initModelsAndViews()
   {
-    //TODO Wenn TRAFOs unterstützt werden von InsertionModel, dann müssen die entsprechenden Aspekte der InsertionModels ebenfalls neu gesetzt werden
-    
     formControlModelList.clear();
     ConfigThingy conf = formDescriptor.toConfigThingy();
     parseGlobalFormInfo(conf);
@@ -482,7 +510,7 @@ public class FormularMax4000
     if (formControlModelList.isEmpty())
     {
       String id = formControlModelList.makeUniqueId(STANDARD_TAB_NAME);
-      FormControlModel separatorTab = FormControlModel.createTab(id, id);
+      FormControlModel separatorTab = FormControlModel.createTab(id, id, this);
       formControlModelList.add(separatorTab,0);
     }
     
@@ -494,14 +522,13 @@ public class FormularMax4000
       try{
         String bookmark = bookmarks[i];
         if (InsertionModel.INSERTION_BOOKMARK.matcher(bookmark).matches())
-          insertionModelList.add(new InsertionModel(bookmark, bmSupp, functionSelectionProvider));
+          insertionModelList.add(new InsertionModel(bookmark, bmSupp, functionSelectionProvider, this));
       }catch(Exception x)
       {
         Logger.error(x);
       }
     }
-    
-//  TODO writeFormDescriptor();
+
     setFrameSize();
   }
   
@@ -524,7 +551,10 @@ public class FormularMax4000
   {
     String newTitle = JOptionPane.showInputDialog(myFrame, "Bitte Formulartitel eingeben", formTitle);
     if (newTitle != null)
+    {
       formTitle = newTitle;
+      documentNeedsUpdating();
+    }
   }
   
   /**
@@ -537,6 +567,7 @@ public class FormularMax4000
    */
   private ConfigThingy updateDocument(XTextDocument doc)
   {
+    Logger.debug("Übertrage Formularbeschreibung ins Dokument");
     Map mapFunctionNameToConfigThingy = new HashMap();
     insertionModelList.updateDocument(mapFunctionNameToConfigThingy);
     ConfigThingy conf = buildFormDescriptor(mapFunctionNameToConfigThingy);
@@ -553,6 +584,50 @@ public class FormularMax4000
   private void setModifiedState(XTextDocument doc)
   {
     try{UNO.XModifiable(doc).setModified(true);}catch(Exception x) {}
+  }
+  
+  /**
+   * Entfernt die WollMux-Kommandos "insertFormValue", "setGroups", "setType formDocument" und
+   *  "form", sowie einen Rahmen mit Namen {@link FormDescriptor#WOLLMUX_FRAME_NAME} aus dem
+   *  Dokument doc.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED
+   */
+  private static void deForm(XTextDocument doc)
+  {
+    XBookmarksSupplier bmSupp = UNO.XBookmarksSupplier(doc);
+    XNameAccess bookmarks = bmSupp.getBookmarks();
+    String[] names = bookmarks.getElementNames();
+    for (int i = 0; i < names.length; ++i)
+    {
+      try{
+        String bookmark = names[i];
+        if (BOOKMARK_KILL_PATTERN.matcher(bookmark).matches())
+        {
+          XTextContent bm = UNO.XTextContent(bookmarks.getByName(bookmark));
+          bm.getAnchor().getText().removeTextContent(bm);
+        }
+          
+      }catch(Exception x)
+      {
+        Logger.error(x);
+      }
+    }
+    
+    XTextFramesSupplier frameSupp = UNO.XTextFramesSupplier(doc);
+    XNameAccess frames = frameSupp.getTextFrames();
+    try{
+      XTextContent frame = UNO.XTextContent(frames.getByName(FormDescriptor.WOLLMUX_FRAME_NAME));
+      /* Dies funktioniert nicht, weil für an der Seite verankerte Rahmen getAnchor() null liefert.
+       * Siehe Issue 70643
+       
+      XTextRange range = frame.getAnchor();
+      XText text = range.getText();
+      text.removeTextContent(frame);
+      */
+      doc.getText().removeTextContent(frame);
+    } catch(Exception x) {}
   }
 
   /**
@@ -615,7 +690,7 @@ public class FormularMax4000
     try{ 
       ConfigThingy conf = new ConfigThingy("Empfaengerauswahl", EMPFAENGER_TAB_URL);
       parseTab(conf, 0);
-      //TODO writeFormDescriptor();
+      documentNeedsUpdating();
     }catch(Exception x) { Logger.error(x);}
   }
   
@@ -630,7 +705,7 @@ public class FormularMax4000
       ConfigThingy conf = new ConfigThingy("Buttons", STANDARD_BUTTONS_MIDDLE_URL);
       int index = leftPanel.getButtonInsertionIndex();
       parseGrandchildren(conf, index, false);
-      //TODO writeFormDescriptor();
+      documentNeedsUpdating();
     }catch(Exception x) { Logger.error(x);}
   }
   
@@ -645,7 +720,7 @@ public class FormularMax4000
       ConfigThingy conf = new ConfigThingy("Buttons", STANDARD_BUTTONS_LAST_URL);
       int index = leftPanel.getButtonInsertionIndex();
       parseGrandchildren(conf, index, false);
-      //TODO writeFormDescriptor();
+      documentNeedsUpdating();
     }catch(Exception x) { Logger.error(x);}
   }
   
@@ -678,7 +753,7 @@ public class FormularMax4000
       else if (name.equals("HOTKEY")) hotkey = str.length() > 0 ? str.charAt(0) : 0;
     }
     
-    FormControlModel tab = FormControlModel.createTab(label, id);
+    FormControlModel tab = FormControlModel.createTab(label, id, this);
     tab.setAction(action);
     tab.setTooltip(tooltip);
     tab.setHotkey(hotkey);
@@ -695,6 +770,8 @@ public class FormularMax4000
       parseGrandchildren(conf.query("Eingabefelder"), -1, true);
       parseGrandchildren(conf.query("Buttons"), -1, false);
     }
+    
+    documentNeedsUpdating();
   }
   
   /**
@@ -721,7 +798,7 @@ public class FormularMax4000
       Iterator iter = ((ConfigThingy)grandmaIter.next()).iterator();
       while (iter.hasNext())
       {
-        model = new FormControlModel((ConfigThingy)iter.next(), functionSelectionProvider);
+        model = new FormControlModel((ConfigThingy)iter.next(), functionSelectionProvider, this);
         lastIsGlue = model.isGlue();
         ++count;
         formControlModelList.add(model, idx++);
@@ -732,6 +809,9 @@ public class FormularMax4000
       formControlModelList.remove(model);
       --count;
     }
+    
+    documentNeedsUpdating();
+    
     return count;
   }
   
@@ -811,7 +891,7 @@ public class FormularMax4000
     } 
     catch(Exception x) {Logger.error("Fehler während des Scan-Vorgangs",x);}
     
-    setModifiedState(doc);
+    documentNeedsUpdating();
   }
   
   /**
@@ -876,7 +956,7 @@ public class FormularMax4000
     bookmarkName = control.surroundWithBookmark(bookmarkName);
 
     try{
-      InsertionModel imodel = new InsertionModel(bookmarkName, UNO.XBookmarksSupplier(doc), functionSelectionProvider);
+      InsertionModel imodel = new InsertionModel(bookmarkName, UNO.XBookmarksSupplier(doc), functionSelectionProvider, this);
       insertionModelList.add(imodel);
     }catch(Exception x)
     {
@@ -928,7 +1008,7 @@ public class FormularMax4000
   {
     FormControlModel model = null;
     label = NO_LABEL; //immer fixUp-Text von hinter der Checkbox benutzen, weil meist bessere Ergebnisse
-    model = FormControlModel.createCheckbox(label, id);
+    model = FormControlModel.createCheckbox(label, id, this);
     if (control.getString().equalsIgnoreCase("true"))
     {
       ConfigThingy autofill = new ConfigThingy("AUTOFILL");
@@ -964,7 +1044,7 @@ public class FormularMax4000
         break;
       }
     }
-    model = FormControlModel.createComboBox(label, id, items);
+    model = FormControlModel.createComboBox(label, id, items, this);
     model.setEditable(editable);
     String preset = control.getString().trim();
     if (preset.length() > 0)
@@ -988,7 +1068,7 @@ public class FormularMax4000
   private FormControlModel registerInput(FormControl control, String label, String id)
   {
     FormControlModel model = null;
-    model = FormControlModel.createTextfield(label, id);
+    model = FormControlModel.createTextfield(label, id, this);
     String preset = control.getString().trim();
     if (preset.length() > 0)
     {
@@ -1073,6 +1153,7 @@ public class FormularMax4000
           myFrame.getContentPane().remove(editorContentPanel);
           myFrame.getContentPane().add(mainContentPanel);
           formDescriptor.fromConfigThingy(conf);
+          documentNeedsUpdating();
           initModelsAndViews();
         }
         catch (Exception e1)
@@ -1154,6 +1235,12 @@ public class FormularMax4000
    */
   private void abort()
   {
+    if (writeChangesTimer.isRunning())
+    {
+      Logger.debug("Schreibe wartende Änderungen ins Dokument vor abort()");
+      writeChangesTimer.stop();
+      updateDocument(doc);
+    }
     myFrame.dispose();
     myFrame = null;
     if (abortListener != null)

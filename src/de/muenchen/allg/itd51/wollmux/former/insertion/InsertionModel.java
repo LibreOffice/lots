@@ -33,6 +33,7 @@ import com.sun.star.text.XBookmarksSupplier;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.SyntaxErrorException;
 import de.muenchen.allg.itd51.wollmux.Bookmark;
+import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
 import de.muenchen.allg.itd51.wollmux.former.control.FormControlModel;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelection;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionAccess;
@@ -93,6 +94,11 @@ public class InsertionModel
    * Die {@link ModelChangeListener}, die über Änderungen dieses Models informiert werden wollen.
    */
   private List listeners = new Vector(1);
+  
+  /**
+   * Der FormularMax4000 zu dem dieses Model gehört.
+   */
+  private FormularMax4000 formularMax4000;
 
   /**
    * Erzeugt ein neues InsertionModel für das Bookmark mit Namen bookmarkName, das bereits
@@ -100,14 +106,16 @@ public class InsertionModel
    * @param doc das Dokument in dem sich das Bookmark befindet
    * @param funcSelections ein FunctionSelectionProvider, der für das TRAFO Attribut eine passende
    *        FunctionSelection liefern kann.
+   * @param formularMax4000 Der FormularMax4000 zu dem dieses InsertionModel gehört.
    * @throws SyntaxErrorException wenn bookmarkName nicht korrekte ConfigThingy-Syntax hat oder
    *         kein korrektes Einfügekommando ist.
    * @throws NoSuchElementException wenn ein Bookmark dieses Namens in doc nicht existiert.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
-  public InsertionModel(String bookmarkName, XBookmarksSupplier doc, FunctionSelectionProvider funcSelections) throws SyntaxErrorException, NoSuchElementException
+  public InsertionModel(String bookmarkName, XBookmarksSupplier doc, FunctionSelectionProvider funcSelections, FormularMax4000 formularMax4000) throws SyntaxErrorException, NoSuchElementException
   {
+    this.formularMax4000 = formularMax4000;
     bookmark = new Bookmark(bookmarkName,doc);
     String confStr = bookmarkName.replaceAll("\\d*\\z",""); //eventuell vorhandene Ziffern am Ende löschen
     URL url = null;
@@ -218,6 +226,7 @@ public class InsertionModel
   {
     dataId = newId;
     notifyListeners(ID_ATTR, newId);
+    formularMax4000.documentNeedsUpdating();
   }
   
   /**
@@ -320,16 +329,19 @@ public class InsertionModel
     public void setParameterValues(Map mapNameToParamValue)
     {
       trafo.setParameterValues(mapNameToParamValue);
+      formularMax4000.documentNeedsUpdating();
     }
 
     public void setFunction(String functionName, String[] paramNames)
     {
       trafo.setFunction(functionName, paramNames);
+      formularMax4000.documentNeedsUpdating();
     }
     
     public void setExpertFunction(ConfigThingy funConf)
     {
       trafo.setExpertFunction(funConf);
+      formularMax4000.documentNeedsUpdating();
     }
     public String[] getParameterNames()
     {

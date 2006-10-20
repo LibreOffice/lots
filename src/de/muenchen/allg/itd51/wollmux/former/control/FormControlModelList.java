@@ -54,6 +54,16 @@ public class FormControlModelList
   private List listeners = new Vector(1);
   
   /**
+   * Der FormularMax4000 zu dem diese Liste gehört.
+   */
+  private FormularMax4000 formularMax4000;
+  
+  public FormControlModelList(FormularMax4000 formularMax4000)
+  {
+    this.formularMax4000 = formularMax4000;
+  }
+  
+  /**
    * Löscht alle bestehenden FormControlModels aus der Liste.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -171,7 +181,7 @@ public class FormControlModelList
       {
         int idx = (i + tabIdx)/2;
         String id = makeUniqueId(FormularMax4000.STANDARD_TAB_NAME);
-        this.add(FormControlModel.createTab(id, id), idx);
+        this.add(FormControlModel.createTab(id, id, formularMax4000), idx);
         tabIdx = idx;
       }
     }
@@ -249,7 +259,7 @@ public class FormControlModelList
     
     int phase = 0; //0: tab start, 1: Eingabefelder, 2: Buttons
     String id = makeUniqueId(FormularMax4000.STANDARD_TAB_NAME); 
-    FormControlModel currentTab = FormControlModel.createTab(id, id);
+    FormControlModel currentTab = FormControlModel.createTab(id, id, formularMax4000);
     Iterator iter = models.iterator();
     while (iter.hasNext())
     {
@@ -287,7 +297,7 @@ public class FormControlModelList
           && model.getType() != FormControlModel.SEPARATOR_TYPE)
       {
         id = makeUniqueId(FormularMax4000.STANDARD_TAB_NAME); 
-        currentTab = FormControlModel.createTab(id, id);
+        currentTab = FormControlModel.createTab(id, id, formularMax4000);
         tabConf = outputTab(currentTab, export);
         conf = tabConf.add("Eingabefelder");
         conf.addChild(model.export());
