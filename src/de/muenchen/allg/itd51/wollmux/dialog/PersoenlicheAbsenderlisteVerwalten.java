@@ -27,6 +27,7 @@
 *                  | selektiert.
 * 20.01.2006 | BNK | Default-Anrede für Tinchen WollMux ist "Frau"
 * 19.10.2006 | BNK | Credits
+* 23.10.2006 | BNK | Bugfix: Bei credits an wurden Personen ohne Mail nicht dargestellt.
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -625,10 +626,12 @@ public class PersoenlicheAbsenderlisteVerwalten
       {
         DJDataset ds = (DJDataset)iter.next();
         Icon icon = null;
-        String mail = "";
+        String mail = null; 
         try{
-          mail = ds.get("Mail");
+          mail = ds.get("Mail"); //liefert null, wenn nicht belegt.
         }catch(ColumnNotFoundException x){}
+        
+        if (mail == null) mail = "";
         
         if (WollMuxFiles.showCredits)
         {
