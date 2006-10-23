@@ -32,7 +32,9 @@ import com.sun.star.frame.XController;
 import com.sun.star.frame.XFrame;
 import com.sun.star.frame.XModel;
 import com.sun.star.lang.EventObject;
+import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
+import com.sun.star.text.XTextViewCursorSupplier;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.util.CloseVetoException;
 import com.sun.star.util.XCloseListener;
@@ -517,6 +519,23 @@ public class TextDocumentModel
   }
 
   /**
+   * Liefert den ViewCursor des aktuellen Dokuments oder null, wenn kein
+   * Controller (oder auch kein ViewCursor) für das Dokument verfügbar ist.
+   * 
+   * @return Liefert den ViewCursor des aktuellen Dokuments oder null, wenn kein
+   *         Controller (oder auch kein ViewCursor) für das Dokument verfügbar
+   *         ist.
+   */
+  public XTextCursor getViewCursor()
+  {
+    if (UNO.XModel(doc) == null) return null;
+    XTextViewCursorSupplier suppl = UNO.XTextViewCursorSupplier(UNO.XModel(doc)
+        .getCurrentController());
+    if (suppl != null) return suppl.getViewCursor();
+    return null;
+  }
+
+  /**
    * Setzt das Fensters des TextDokuments auf Sichtbar (visible==true) oder
    * unsichtbar (visible == false).
    * 
@@ -757,7 +776,6 @@ public class TextDocumentModel
 
   public void print(short numberOfCopies)
   {
-    // TODO: testen
     if (UNO.XPrintable(doc) != null)
     {
       PropertyValue[] args = new PropertyValue[] {
@@ -894,8 +912,19 @@ public class TextDocumentModel
      */
     private boolean[] lock = new boolean[] { true };
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Liefert das XTextDocument mit dem die Druckfunktion aufgerufen wurde.
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#getTextDocument()
+     */
+    public XTextDocument getTextDocument()
+    {
+      return doc;
+    }
+
+    /**
+     * Druckt das TextDocument mit numberOfCopies Ausfertigungen auf dem aktuell
+     * eingestellten Drucker aus.
      * 
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#print(short)
      */
@@ -907,14 +936,30 @@ public class TextDocumentModel
       waitForUnlock();
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Falls das TextDocument Sachleitende Verfügungen enthält, ist es mit
+     * dieser Methode möglich, den Verfügungspunkt mit der Nummer verfPunkt
+     * auszudrucken, wobei alle darauffolgenden Verfügungspunkte ausgeblendet
+     * werden.
      * 
+     * @param verfPunkt
+     *          Die Nummer des auszuduruckenden Verfügungspunktes, wobei alle
+     *          folgenden Verfügungspunkte ausgeblendet werden.
+     * @param numberOfCopies
+     *          Die Anzahl der Ausfertigungen, in der verfPunkt ausgedruckt
+     *          werden soll.
+     * @param isDraft
+     *          wenn isDraft==true, werden alle draftOnly-Blöcke eingeblendet,
+     *          ansonsten werden sie ausgeblendet.
+     * @param isOriginal
+     *          wenn isOriginal, wird die Ziffer des Verfügungspunktes I
+     *          ausgeblendet und alle notInOriginal-Blöcke ebenso. Andernfalls
+     *          sind Ziffer und notInOriginal-Blöcke eingeblendet.
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#printVerfuegungspunkt(short,
-     *      boolean)
+     *      short, boolean, boolean)
      */
     public void printVerfuegungspunkt(short verfPunkt, short numberOfCopies,
-        boolean isDraft, boolean showPrintSettingsOnce)
+        boolean isDraft, boolean isOriginal)
     {
       setLock();
       WollMuxEventHandler.handlePrintVerfuegungspunkt(
@@ -922,19 +967,21 @@ public class TextDocumentModel
           verfPunkt,
           numberOfCopies,
           isDraft,
-          showPrintSettingsOnce,
+          isOriginal,
           unlockActionListener);
       waitForUnlock();
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Zeigt den PrintSettings-Dialog an, über den der aktuelle Drucker
+     * ausgewählt und geändert werden kann genau dann an, wenn die Methode das
+     * erste Mal aufgerufen wurde.
      * 
-     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#getTextDocument()
+     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#showPrintSettingsOnce()
      */
-    public XTextDocument getTextDocument()
+    public void showPrintSettingsOnce()
     {
-      return doc;
+      // TODO implementShowPrintSettingsOnce
     }
 
     /**
@@ -1006,6 +1053,7 @@ public class TextDocumentModel
         actionEvent = arg0;
       }
     }
+
   }
 
 }

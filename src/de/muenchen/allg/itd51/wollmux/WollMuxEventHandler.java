@@ -52,7 +52,6 @@ import com.sun.star.lang.XComponent;
 import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextRange;
-import com.sun.star.text.XTextViewCursorSupplier;
 import com.sun.star.uno.Exception;
 import com.sun.star.uno.RuntimeException;
 import com.sun.star.uno.UnoRuntime;
@@ -2084,7 +2083,9 @@ public class WollMuxEventHandler
 
     protected void doit() throws WollMuxFehlerException
     {
-      SachleitendeVerfuegung.verfuegungspunktEinfuegen(doc, getViewCursor(doc));
+      XTextCursor viewCursor = WollMuxSingleton.getInstance()
+          .getTextDocumentModel(doc).getViewCursor();
+      SachleitendeVerfuegung.verfuegungspunktEinfuegen(doc, viewCursor);
     }
 
     public String toString()
@@ -2123,7 +2124,9 @@ public class WollMuxEventHandler
 
     protected void doit() throws WollMuxFehlerException
     {
-      SachleitendeVerfuegung.abdruck(doc, getViewCursor(doc));
+      XTextCursor viewCursor = WollMuxSingleton.getInstance()
+          .getTextDocumentModel(doc).getViewCursor();
+      SachleitendeVerfuegung.abdruck(doc, viewCursor);
     }
 
     public String toString()
@@ -2162,7 +2165,9 @@ public class WollMuxEventHandler
 
     protected void doit() throws WollMuxFehlerException
     {
-      SachleitendeVerfuegung.zuleitungszeile(doc, getViewCursor(doc));
+      XTextCursor viewCursor = WollMuxSingleton.getInstance()
+          .getTextDocumentModel(doc).getViewCursor();
+      SachleitendeVerfuegung.zuleitungszeile(doc, viewCursor);
     }
 
     public String toString()
@@ -2196,77 +2201,6 @@ public class WollMuxEventHandler
     protected void doit() throws WollMuxFehlerException
     {
       WollMuxFiles.dumpInfo();
-    }
-
-    public String toString()
-    {
-      return this.getClass().getSimpleName() + "()";
-    }
-  }
-
-  // *******************************************************************************************
-
-  /**
-   * TODO: überarbeiten! Erzeugt ein neues WollMuxEvent, das dafür sorgt, dass
-   * eine Datei wollmux.dump erzeugt wird, die viele für die Fehlersuche
-   * relevanten Informationen enthält wie z.B. Versionsinfo, Inhalt der
-   * wollmux.conf, cache.conf, StringRepräsentation der Konfiguration im
-   * Speicher und eine Kopie der Log-Datei.
-   * 
-   * Das Event wird von der WollMuxBar geworfen, die (speziell für Admins, nicht
-   * für Endbenutzer) einen entsprechenden Button besitzt.
-   */
-  public static void handlePrintVerfuegungspunkt(XTextDocument doc,
-      short verfPunkt, short numberOfCopies, boolean isDraft,
-      boolean showPrintSettingsOnce, ActionListener unlockActionListener)
-  {
-    handle(new OnPrintVerfuegungspunkt(doc, verfPunkt, numberOfCopies, isDraft,
-        showPrintSettingsOnce, unlockActionListener));
-  }
-
-  private static class OnPrintVerfuegungspunkt extends BasicEvent
-  {
-    private XTextDocument doc;
-
-    private short verfPunkt;
-
-    private short numberOfCopies;
-
-    private boolean isDraft;
-
-    private boolean showPrintSettingsOnce;
-
-    private ActionListener listener;
-
-    public OnPrintVerfuegungspunkt(XTextDocument doc, short verfPunkt,
-        short numberOfCopies, boolean isDraft, boolean showPrintSettingsOnce,
-        ActionListener listener)
-    {
-      this.doc = doc;
-      this.verfPunkt = verfPunkt;
-      this.numberOfCopies = numberOfCopies;
-      this.isDraft = isDraft;
-      this.showPrintSettingsOnce = showPrintSettingsOnce;
-      this.listener = listener;
-    }
-
-    protected void doit() throws WollMuxFehlerException
-    {
-      TextDocumentModel model = WollMuxSingleton.getInstance()
-          .getTextDocumentModel(doc);
-
-      if (showPrintSettingsOnce)
-      {
-        // TODO: printsettingsdialog
-      }
-
-      SachleitendeVerfuegung.printVerfuegungspunkt(
-          model,
-          verfPunkt,
-          numberOfCopies,
-          isDraft);
-
-      listener.actionPerformed(null);
     }
 
     public String toString()
@@ -2312,24 +2246,110 @@ public class WollMuxEventHandler
   }
 
   // *******************************************************************************************
-  // Globale Helper-Methoden
 
   /**
-   * Liefert den ViewCursor des aktuellen Dokuments oder null, wenn kein
-   * Controller (und damit kein ViewCursor) für doc verfügbar ist.
+   * Erzeugt ein neues WollMuxEvent, das dafür sorgt, dass bei Sachleitenden
+   * Verfügungen der Verfügungspunkt mit der Nummer verfPunkt ausgedruck wird,
+   * wobei alle darauffolgenden Verfügungspunkte ausgeblendet sind.
+   * 
+   * Das Event wird üblicherweise von einer XPrintModel Implementierung (z.B.
+   * TextDocument.PrintModel) geworfen, wenn aus der Druckfunktion die
+   * zugehörige Methode aufgerufen wurde.
    * 
    * @param doc
-   *          Das Dokument dessen ViewCursor zurückgeliefert werden soll.
-   * @return
+   *          Das Dokument, welches die Verfügungspunkte enthält.
+   * @param verfPunkt
+   *          Die Nummer des auszuduruckenden Verfügungspunktes, wobei alle
+   *          folgenden Verfügungspunkte ausgeblendet werden.
+   * @param numberOfCopies
+   *          Die Anzahl der Ausfertigungen, in der verfPunkt ausgedruckt werden
+   *          soll.
+   * @param isDraft
+   *          wenn isDraft==true, werden alle draftOnly-Blöcke eingeblendet,
+   *          ansonsten werden sie ausgeblendet.
+   * @param isOriginal
+   *          wenn isOriginal, wird die Ziffer des Verfügungspunktes I
+   *          ausgeblendet und alle notInOriginal-Blöcke ebenso. Andernfalls
+   *          sind Ziffer und notInOriginal-Blöcke eingeblendet.
+   * @param unlockActionListener
+   *          Der unlockActionListener wird nach Beendigung des Druckens
+   *          aufgerufen, wenn er != null.
    */
-  private static XTextCursor getViewCursor(XTextDocument doc)
+  public static void handlePrintVerfuegungspunkt(XTextDocument doc,
+      short verfPunkt, short numberOfCopies, boolean isDraft,
+      boolean isOriginal, ActionListener unlockActionListener)
   {
-    XTextCursor viewCursor = null;
-    XTextViewCursorSupplier suppl = UNO.XTextViewCursorSupplier(UNO.XModel(doc)
-        .getCurrentController());
-    if (suppl != null) viewCursor = suppl.getViewCursor();
-    return viewCursor;
+    handle(new OnPrintVerfuegungspunkt(doc, verfPunkt, numberOfCopies, isDraft,
+        isOriginal, unlockActionListener));
   }
+
+  private static class OnPrintVerfuegungspunkt extends BasicEvent
+  {
+    private XTextDocument doc;
+
+    private short verfPunkt;
+
+    private short numberOfCopies;
+
+    private boolean isDraft;
+
+    private boolean isOriginal;
+
+    private ActionListener listener;
+
+    public OnPrintVerfuegungspunkt(XTextDocument doc, short verfPunkt,
+        short numberOfCopies, boolean isDraft, boolean isOriginal,
+        ActionListener listener)
+    {
+      this.doc = doc;
+      this.verfPunkt = verfPunkt;
+      this.numberOfCopies = numberOfCopies;
+      this.isDraft = isDraft;
+      this.isOriginal = isOriginal;
+      this.listener = listener;
+    }
+
+    protected void doit() throws WollMuxFehlerException
+    {
+      TextDocumentModel model = WollMuxSingleton.getInstance()
+          .getTextDocumentModel(doc);
+
+      try
+      {
+        SachleitendeVerfuegung.printVerfuegungspunkt(
+            model,
+            verfPunkt,
+            numberOfCopies,
+            isDraft,
+            isOriginal);
+      }
+      catch (java.lang.Exception e)
+      {
+        Logger.error(e);
+      }
+
+      if (listener != null) listener.actionPerformed(null);
+    }
+
+    public String toString()
+    {
+      return this.getClass().getSimpleName()
+             + "(#"
+             + doc.hashCode()
+             + ", verfPunkt="
+             + verfPunkt
+             + ", copies="
+             + numberOfCopies
+             + ", isDraft="
+             + isDraft
+             + ", isOriginal="
+             + isOriginal
+             + ")";
+    }
+  }
+
+  // *******************************************************************************************
+  // Globale Helper-Methoden
 
   /**
    * Diese Methode erzeugt einen modalen UNO-Dialog zur Anzeige von

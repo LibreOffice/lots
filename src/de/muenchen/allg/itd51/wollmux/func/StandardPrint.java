@@ -13,8 +13,8 @@ public class StandardPrint
   public static void printVerfuegungspunktTest(XPrintModel pmod)
   {
     pmod.printVerfuegungspunkt((short) 1, (short) 1, false, true);
-    pmod.printVerfuegungspunkt((short) 2, (short) 1, false, true);
-    pmod.printVerfuegungspunkt((short) 3, (short) 1, false, true);
-    pmod.printVerfuegungspunkt((short) 4, (short) 1, true, true);
+    pmod.printVerfuegungspunkt((short) 2, (short) 1, false, false);
+    pmod.printVerfuegungspunkt((short) 3, (short) 1, false, false);
+    pmod.printVerfuegungspunkt((short) 4, (short) 1, true, false);
   }
 }

@@ -630,12 +630,12 @@ public class SachleitendeVerfuegung
 
       if (isVerfuegungspunkt(cursor))
       {
-        currentVerfpunkt = new Verfuegungspunkt(cursor);
+        currentVerfpunkt = new Verfuegungspunkt(cursor.getString());
         verfuegungspunkte.add(currentVerfpunkt);
       }
-      else if (currentVerfpunkt != null)
+      else if (currentVerfpunkt != null && isZuleitungszeile(cursor))
       {
-        currentVerfpunkt.addParagraph(cursor);
+        currentVerfpunkt.addZuleitungszeile(cursor);
       }
 
     } while (cursor.gotoNextParagraph(false));
@@ -644,11 +644,6 @@ public class SachleitendeVerfuegung
   }
 
   /**
-   * TODO: Verfuegungspunkt refaktorisieren, so dass keine TextRanges mehr
-   * erforderlich sind - Verfuegungspunkt wird jetzt lediglich als Datenspeicher
-   * für den Druckdialog benötigt, der keine Zugriff auf die TextRanges
-   * benötigt.
-   * 
    * Repräsentiert einen vollständigen Verfügungspunkt, der aus Überschrift
    * (römische Ziffer + Überschrift) und Inhalt besteht. Die Klasse bietet
    * Methden an, über die auf alle für den Druck wichtigen Eigenschaften des
@@ -656,14 +651,14 @@ public class SachleitendeVerfuegung
    * Zuleitungszeilen, ...)
    * 
    * @author christoph.lutz
-   * 
    */
   public static class Verfuegungspunkt
   {
     /**
-     * Vector mit den XTextRanges aller Paragraphen des Verfügungspunktes.
+     * Enthält den vollständigen Text der erste Zeile des Verfügungspunktes
+     * einschließlich der römischen Ziffer.
      */
-    protected Vector /* of XTextRange */paragraphs;
+    protected String heading;
 
     /**
      * Vector of String, der alle Zuleitungszeilen enthält, die mit addParagraph
@@ -675,82 +670,29 @@ public class SachleitendeVerfuegung
      * Erzeugt einen neuen Verfügungspunkt, wobei firstPar der Absatz ist, der
      * die erste Zeile mit der römischen Ziffer und der Überschrift enthält.
      * 
-     * @param firstPar
-     *          Die erste Zeile des Verfügungspunktes mit der römischen Ziffer
-     *          und der Überschrift.
-     * @throws java.lang.NullPointerException
-     *           wenn paragraph null ist
+     * @param heading
+     *          Text der ersten Zeile des Verfügungspunktes mit der römischen
+     *          Ziffer und der Überschrift.
      */
-    public Verfuegungspunkt(XTextRange firstPar)
+    public Verfuegungspunkt(String heading)
     {
-      if (firstPar == null)
-        throw new NullPointerException("XTextRange firstPar ist null");
-
-      this.paragraphs = new Vector();
+      this.heading = heading;
       this.zuleitungszeilen = new Vector();
-
-      paragraphs.add(firstPar.getText().createTextCursorByRange(firstPar));
     }
 
     /**
-     * Fügt einen weiteren Paragraphen des Verfügungspunktes hinzu (wenn
+     * Fügt einen weitere Zuleitungszeile des Verfügungspunktes hinzu (wenn
      * paragraph nicht null ist).
      * 
      * @param paragraph
-     *          XTextRange, das den gesamten Paragraphen enthält.
+     *          XTextRange, das den gesamten Paragraphen der Zuleitungszeile
+     *          enthält.
      */
-    public void addParagraph(XTextRange paragraph)
+    public void addZuleitungszeile(XTextRange paragraph)
     {
       if (paragraph == null) return;
-      XTextCursor par = paragraph.getText().createTextCursorByRange(paragraph);
 
-      paragraphs.add(par);
-
-      if (isZuleitungszeile(par)) zuleitungszeilen.add(par.getString());
-    }
-
-    /**
-     * Liefert true, wenn es sich bei dem übergebenen Absatz paragraph um einen
-     * als Zuleitungszeile markierten Absatz handelt.
-     * 
-     * @param paragraph
-     *          Das Objekt mit der Property ParaStyleName, die für den Vergleich
-     *          herangezogen wird.
-     * @return true, wenn der Name des Absatzformates mit
-     *         "WollMuxZuleitungszeile" beginnt.
-     */
-    private static boolean isZuleitungszeile(XTextRange paragraph)
-    {
-      String paraStyleName = "";
-      try
-      {
-        paraStyleName = AnyConverter.toString(UNO.getProperty(
-            paragraph,
-            "ParaStyleName"));
-      }
-      catch (IllegalArgumentException e)
-      {
-      }
-      return paraStyleName.startsWith(ParaStyleNameZuleitungszeile);
-    }
-
-    /**
-     * Liefert den gesamten Bereich über den sich der Verfügungspunkt erstreckt,
-     * angefangen vom Startpunkt der ersten Zeile des Verfügungspunktes bis hin
-     * zum Ende des letzten enthaltenen Paragraphen.
-     * 
-     * @return der gesamte Bereich über den sich der Verfügungspunkt erstreckt.
-     */
-    public XTextRange getCompleteRange()
-    {
-      XTextRange firstPar = UNO.XTextRange(paragraphs.get(0));
-      XTextRange lastPar = UNO
-          .XTextRange(paragraphs.get(paragraphs.size() - 1));
-
-      XTextCursor cursor = firstPar.getText().createTextCursor();
-      cursor.gotoRange(firstPar.getStart(), false);
-      cursor.gotoRange(lastPar.getEnd(), true);
-      return cursor;
+      zuleitungszeilen.add(paragraph.getString());
     }
 
     /**
@@ -777,15 +719,14 @@ public class SachleitendeVerfuegung
 
     /**
      * Liefert den Text der Überschrift des Verfügungspunktes einschließlich der
-     * römischen Ziffer als String zurück.
+     * römischen Ziffer als String zurück, wobei mehrfache Leerzeichen (\s+)
+     * durch einfache Leerzeichen ersetzt werden.
      * 
      * @return römischer Ziffer + Überschrift
      */
     public String getHeading()
     {
-      String text = "";
-      XTextRange firstPar = UNO.XTextRange(paragraphs.get(0));
-      if (firstPar != null) text = firstPar.getString();
+      String text = heading;
 
       // Tabs und Spaces durch single spaces ersetzen
       text = text.replaceAll("\\s+", " ");
@@ -805,20 +746,12 @@ public class SachleitendeVerfuegung
   {
     public VerfuegungspunktOriginal(XTextRange punkt1)
     {
-      super(punkt1);
-
-      if (punkt1 == null)
-        throw new NullPointerException("XTextRange punkt1 ist null");
+      super("I. Original");
 
       zuleitungszeilen.add("Empfänger siehe Empfängerfeld");
     }
 
-    public String getHeading()
-    {
-      return "I. Original";
-    }
-
-    public void addParagraph(XTextRange paragraph)
+    public void addZuleitungszeile(XTextRange paragraph)
     {
       // addParagraph ergibt bei Verfuegungspunkt1 keinen Sinn und wird daher
       // disabled.
@@ -874,7 +807,7 @@ public class SachleitendeVerfuegung
     // Druckdialog starten
     try
     {
-      new SachleitendeVerfuegungenDruckdialog(printDialogConf, vps, null);
+      new SachleitendeVerfuegungenDruckdialog(printDialogConf, vps, pmod, null);
     }
     catch (ConfigurationErrorException e)
     {
@@ -892,15 +825,26 @@ public class SachleitendeVerfuegung
    * WollMuxEventHandler-Thread gestartet werden, da sie auf Datenstrukturen des
    * WollMux zugreift.
    * 
-   * @param doc
+   * @param model
+   *          Das TextDocumentModel, dessen Inhalt Sachleitende Verfügungen
+   *          enthält und ausgedruckt werden soll.
    * @param verfPunkt
+   *          Die Nummer des auszuduruckenden Verfügungspunktes, wobei alle
+   *          folgenden Verfügungspunkte ausgeblendet werden.
    * @param numberOfCopies
+   *          Die Anzahl der Ausfertigungen, in der verfPunkt ausgedruckt werden
+   *          soll.
+   * @param isDraft
+   *          wenn isDraft==true, werden alle draftOnly-Blöcke eingeblendet,
+   *          ansonsten werden sie ausgeblendet.
+   * @param isOriginal
+   *          wenn isOriginal, wird die Ziffer des Verfügungspunktes I
+   *          ausgeblendet und alle notInOriginal-Blöcke ebenso. Andernfalls
+   *          sind Ziffer und notInOriginal-Blöcke eingeblendet.
    */
   public static void printVerfuegungspunkt(TextDocumentModel model,
-      short verfPunkt, short numberOfCopies, boolean isDraft)
+      short verfPunkt, short numberOfCopies, boolean isDraft, boolean isOriginal)
   {
-    boolean isOriginal = (verfPunkt == 1);
-
     // Zähler für Verfuegungspunktnummer auf 1 initialisieren, wenn ein
     // Verfuegungspunkt1 vorhanden ist.
     XTextRange punkt1 = getVerfuegungspunkt1(model.doc);
@@ -909,6 +853,7 @@ public class SachleitendeVerfuegung
 
     // Auszublendenden Bereich festlegen:
     XTextRange setInvisibleRange = null;
+    XTextRange lastVisibleVerfPunkt = null;
     XParagraphCursor cursor = UNO.XParagraphCursor(model.doc.getText()
         .createTextCursorByRange(model.doc.getText().getStart()));
     if (cursor != null)
@@ -923,6 +868,12 @@ public class SachleitendeVerfuegung
             punkt1 = cursor.getText().createTextCursorByRange(cursor);
 
           count++;
+
+          // range des zuletzt sichtbaren Verfügungspunktes sichern
+          if (count == verfPunkt)
+            lastVisibleVerfPunkt = cursor.getText().createTextCursorByRange(
+                cursor);
+
           if (count == (verfPunkt + 1))
           {
             cursor.collapseToStart();
@@ -964,8 +915,74 @@ public class SachleitendeVerfuegung
       UNO.setProperty(punkt1ZifferOnly, "CharHidden", Boolean.TRUE);
     }
 
+    // TODO: bevor dies hier abläuft sollte unter
+    // Extras->Optionen->OOoWriter->Formatierungshilfen die Kontrollkästchen
+    // Ausgeblendeter Text (anzeigen) deaktiviert sein, da sonst der
+    // viewcursor.Page falsche Seitenangaben liefern kann. Hier sollte also ein
+    // Stück code stehen, das diese Option deaktiviert und später wieder auf den
+    // vorher gesetzten Wert zurücksetzt.
+
+    // Seitumbruch einbauen, damit der Text des letzten Verfügungspunktes
+    // niemals zwischen verschiedenen Seiten auseinander gerissen wird.
+    XTextCursor viewCursor = model.getViewCursor();
+    XTextCursor oldViewCursor = null;
+    try
+    {
+      // Dieser Aufruf fliegt auf die Schnauze, wenn der Cursor nicht im Text
+      // steht, sondern z.b. ein Rahmen markiert ist. Dann kann der viewCursor
+      // so nicht verwendet werden.
+      oldViewCursor = viewCursor.getText().createTextCursorByRange(viewCursor);
+    }
+    catch (java.lang.Exception e)
+    {
+    }
+
+    boolean pageBreakAtlastVisibleVerfPoint = false;
+
+    if (lastVisibleVerfPunkt != null
+        && viewCursor != null
+        && oldViewCursor != null)
+    {
+      // (Position) Seitennummer des Textendes holen
+      viewCursor.gotoRange(model.doc.getText().getEnd(), false);
+      int pageOfLastLine = getPageOfViewCursor(viewCursor);
+
+      // (Position) Seitennummer des letzten sichtbaren Verfügungspunktes holen
+      viewCursor.gotoRange(lastVisibleVerfPunkt, false);
+      int pageOfLastVisibleVerfPunkt = getPageOfViewCursor(viewCursor);
+
+      // viewCursor wieder auf alte Position zurücksetzen:
+      viewCursor.gotoRange(oldViewCursor, false);
+
+      // Seitenumbruch einfügen, wenn die Seitenzahlen der beiden Positionen
+      // sich unterscheiden.
+      if (pageOfLastLine != pageOfLastVisibleVerfPunkt)
+      {
+        Object pageDescName = UNO.getProperty(
+            lastVisibleVerfPunkt,
+            "PageDescName");
+        if (pageDescName != null && !pageDescName.toString().equals(""))
+        {
+          Object pageStyleName = UNO.getProperty(
+              lastVisibleVerfPunkt,
+              "PageStyleName");
+          // ist diese Property gesetzt, so wird der Seitenumbruch eingefügt:
+          UNO.setProperty(lastVisibleVerfPunkt, "PageDescName", pageStyleName);
+          UNO.setProperty(lastVisibleVerfPunkt, "PageNumberOffset", new Short(
+              (short) (pageOfLastVisibleVerfPunkt + 1)));
+          pageBreakAtlastVisibleVerfPoint = true;
+        }
+      }
+    }
+
     // Druck des Dokuments mit den entsprechenden Ein/Ausbledungen
     model.print(numberOfCopies);
+
+    // zuvor eingefügten Seitenumbruch wieder entfernen:
+    if (pageBreakAtlastVisibleVerfPoint && lastVisibleVerfPunkt != null)
+    {
+      UNO.setProperty(lastVisibleVerfPunkt, "PageDescName", "");
+    }
 
     // Ausblendung von Ziffer von Punkt 1 wieder aufheben
     if (punkt1ZifferOnly != null)
@@ -983,6 +1000,19 @@ public class SachleitendeVerfuegung
     // Verfügungspunkte wieder einblenden:
     if (setInvisibleRange != null)
       UNO.setProperty(setInvisibleRange, "CharHidden", Boolean.FALSE);
+  }
+
+  /**
+   * Liefert die Seite (>0) in der sich der ViewCursor viewCursor befindet oder
+   * 0, falls der ViewCursor diese Information nicht bereitstellen kann.
+   * 
+   * @param viewCursor
+   * @return
+   */
+  private static int getPageOfViewCursor(XTextCursor viewCursor)
+  {
+    if (UNO.XPageCursor(viewCursor) == null) return 0;
+    return UNO.XPageCursor(viewCursor).getPage();
   }
 
   public static void main(String[] args) throws Exception

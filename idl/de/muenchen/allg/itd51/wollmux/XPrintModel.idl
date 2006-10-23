@@ -23,13 +23,16 @@ module de {  module muenchen {  module allg { module itd51 { module wollmux {
  */
 interface XPrintModel
 {
+
+	com::sun::star::text::XTextDocument getTextDocument();
+
     /**
      */
 	void print( [in] short listener);
 	
-	com::sun::star::text::XTextDocument getTextDocument();
-	
-	void printVerfuegungspunkt( [in] short verfPunkt, [in] short numberOfCopies, [in] boolean isDraft, [in] boolean showPrintSettingsOnce);
+	void showPrintSettingsOnce();
+		
+	void printVerfuegungspunkt( [in] short verfPunkt, [in] short numberOfCopies, [in] boolean isDraft, [in] boolean isOriginal);
 };
 
 }; }; }; }; };

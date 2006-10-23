@@ -50,6 +50,7 @@ import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.Logger;
+import de.muenchen.allg.itd51.wollmux.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung.Verfuegungspunkt;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
 
@@ -86,7 +87,8 @@ public class SachleitendeVerfuegungenDruckdialog
   {
     public void actionPerformed(ActionEvent e)
     {
-      printElement();
+      if (e.getSource() instanceof JButton)
+        printElement((JButton) e.getSource());
     }
   };
 
@@ -179,6 +181,12 @@ public class SachleitendeVerfuegungenDruckdialog
   private Vector verfuegungspunkte;
 
   /**
+   * Enthält das XPrintModel, das der Druckfuntion übergeben wurde und für das
+   * Ausdrucken zuständig ist.
+   */
+  private XPrintModel pmodel;
+
+  /**
    * Erzeugt einen neuen Dialog.
    * 
    * @param conf
@@ -199,9 +207,10 @@ public class SachleitendeVerfuegungenDruckdialog
    *           Schlüssel fehlt.
    */
   public SachleitendeVerfuegungenDruckdialog(ConfigThingy conf,
-      Vector /* of Verfuegungspunkt */verfuegungspunkte,
+      Vector /* of Verfuegungspunkt */verfuegungspunkte, XPrintModel pmodel,
       ActionListener dialogEndListener) throws ConfigurationErrorException
   {
+    this.pmodel = pmodel;
     this.verfuegungspunkte = verfuegungspunkte;
     this.dialogEndListener = dialogEndListener;
 
@@ -323,13 +332,17 @@ public class SachleitendeVerfuegungenDruckdialog
     GridBagConstraints gbcSeparator = new GridBagConstraints(0, 0,
         GridBagConstraints.REMAINDER, 1, 1.0, 0.0, GridBagConstraints.CENTER,
         GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0);
-    JPanel uiElement = new JPanel(new GridLayout(1,1));
+    JPanel uiElement = new JPanel(new GridLayout(1, 1));
     uiElement.add(new JSeparator(SwingConstants.HORIZONTAL));
-    uiElement.setBorder(BorderFactory.createEmptyBorder(SEP_BORDER,0,SEP_BORDER,0));
+    uiElement.setBorder(BorderFactory.createEmptyBorder(
+        SEP_BORDER,
+        0,
+        SEP_BORDER,
+        0));
     gbcSeparator.gridy = size;
     verfPunktPanel.add(uiElement, gbcSeparator);
 
-    addUIElements(fensterDesc, "AllElements", size+1, verfPunktPanel, 1, 0);
+    addUIElements(fensterDesc, "AllElements", size + 1, verfPunktPanel, 1, 0);
     addUIElements(fensterDesc, "Buttons", 0, buttons, 1, 0);
 
     myFrame.pack();
@@ -518,7 +531,19 @@ public class SachleitendeVerfuegungenDruckdialog
             {
             }
 
-            JButton button = new JButton(label);
+            // Bei printElement-Actions die vordefinierten Buttons verwenden,
+            // ansonsten einen neuen erzeugen.
+            JButton button = null;
+            if (action.equalsIgnoreCase("printElement")
+                && verfPunktNr >= 0
+                && verfPunktNr < printElementButtons.length)
+            {
+              button = printElementButtons[verfPunktNr];
+              button.setText(label);
+            }
+            else
+              button = new JButton(label);
+
             button.setMnemonic(hotkey);
 
             gbcButton.gridx = x;
@@ -681,8 +706,32 @@ public class SachleitendeVerfuegungenDruckdialog
    */
   private void printAll()
   {
-    // TODO Auto-generated method stub
+    int size = verfuegungspunkte.size();
+    for (int verfPunkt = 1; verfPunkt <= size; ++verfPunkt)
+    {
+      int numberOfCopies = 0;
+      try
+      {
+        numberOfCopies = new Integer(elementCountSpinner[verfPunkt - 1]
+            .getValue().toString()).intValue();
+      }
+      catch (Exception e)
+      {
+        Logger.error("Kann Anzahl der Ausfertigungen nicht bestimmen.", e);
+      }
 
+      boolean isDraft = (verfPunkt == size);
+      boolean isOriginal = (verfPunkt == 1);
+
+      if (numberOfCopies != 0)
+        pmodel.printVerfuegungspunkt(
+            (short) verfPunkt,
+            (short) numberOfCopies,
+            isDraft,
+            isOriginal);
+    }
+    
+    abort();
   }
 
   /**
@@ -690,10 +739,45 @@ public class SachleitendeVerfuegungenDruckdialog
    * 
    * @author christoph.lutz
    */
-  private void printElement()
+  private void printElement(JButton button)
   {
-    // TODO Auto-generated method stub
+    // Button in printElementButtons suchen:
+    int verfPunkt = 0;
+    for (int i = 0; i < printElementButtons.length; i++)
+    {
+      if (printElementButtons[i] == button)
+      {
+        verfPunkt = i + 1;
+        break;
+      }
+    }
 
+    if (verfPunkt > 0)
+    {
+      int numberOfCopies = 0;
+      try
+      {
+        numberOfCopies = new Integer(elementCountSpinner[verfPunkt - 1]
+            .getValue().toString()).intValue();
+      }
+      catch (Exception e)
+      {
+        Logger.error("Kann Anzahl der Ausfertigungen nicht bestimmen.", e);
+      }
+
+      boolean isDraft = (verfPunkt == verfuegungspunkte.size());
+      boolean isOriginal = (verfPunkt == 1);
+
+      if (numberOfCopies != 0)
+        pmodel.printVerfuegungspunkt(
+            (short) verfPunkt,
+            (short) numberOfCopies,
+            isDraft,
+            isOriginal);
+    }
+
+    // Nach dem Drucken wird der Dialog geschlossen
+    abort();
   }
 
   /**
