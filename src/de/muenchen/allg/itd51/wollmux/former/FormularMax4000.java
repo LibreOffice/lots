@@ -377,7 +377,7 @@ public class FormularMax4000
     myFrame.addWindowListener(oehrchen);
     
     leftPanel = new LeftPanel(insertionModelList, formControlModelList, this);
-    RightPanel rightPanel = new RightPanel(insertionModelList, functionLibrary, this);
+    RightPanel rightPanel = new RightPanel(insertionModelList, formControlModelList, functionLibrary, this);
     
     mainContentPanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel.JComponent(), rightPanel.JComponent());
     myFrame.getContentPane().add(mainContentPanel);

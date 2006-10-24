@@ -61,8 +61,7 @@ public class FunctionSelectionProvider
     {
       ConfigThingy conf = (ConfigThingy)iter.next();
       FunctionSelection funcSel = getFunctionSelection(conf);
-      if (funcSel.isReference())
-        mapNameToFunctionSelection.put(conf.getName(), funcSel);
+      mapNameToFunctionSelection.put(conf.getName(), funcSel);
     }
   }
   

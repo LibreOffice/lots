@@ -1,21 +1,21 @@
 /*
-* Dateiname: AllInsertionTrafoViewsPanel.java
+* Dateiname: AllFormControlExtViewsPanel.java
 * Projekt  : WollMux
-* Funktion : Eine View, die alle OneInsertionTrafoViews enthält.
+* Funktion : Eine View, die alle OneFormControlExtViews enthält.
 * 
 * Copyright: Landeshauptstadt München
 *
 * Änderungshistorie:
 * Datum      | Wer | Änderungsgrund
 * -------------------------------------------------------------------
-* 28.09.2006 | BNK | Erstellung
+* 23.10.2006 | BNK | Erstellung
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
 * @version 1.0
 * 
 */
-package de.muenchen.allg.itd51.wollmux.former.insertion;
+package de.muenchen.allg.itd51.wollmux.former.control;
 
 import java.awt.CardLayout;
 import java.util.List;
@@ -34,11 +34,11 @@ import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 
 /**
  * Eine View, die alle 
- * {@link de.muenchen.allg.itd51.wollmux.former.insertion.OneInsertionTrafoView}s enthält.
+ * {@link de.muenchen.allg.itd51.wollmux.former.control.OneFormControlExtView}s enthält.
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
-public class AllInsertionTrafoViewsPanel implements View
+public class AllFormControlExtViewsPanel implements View
 {
   /**
    * Wird für das CardLayout verwendet als ID-String des leeren Panels, das angezeigt wird, 
@@ -47,7 +47,7 @@ public class AllInsertionTrafoViewsPanel implements View
   private static final String EMPTY_PANEL = "EMPTY_PANEL";
   
   /**
-   * Wird auf alle {@link OneInsertionTrafoView}s registriert.
+   * Wird auf alle {@link OneFormControlExtView}s registriert.
    */
   private ViewChangeListener myViewChangeListener;
   
@@ -68,49 +68,49 @@ public class AllInsertionTrafoViewsPanel implements View
   private CardLayout cards;
   
   /**
-   * Das Model, dessen View im Augenblick angezeigt wird.
+   * Das Model dessen View momentan angezeigt wird.
    */
-  private InsertionModel currentModel;
+  private FormControlModel currentModel;
   
   /**
-   * Die Liste der {@link OneInsertionTrafoView}s in dieser View.
+   * Die Liste der {@link OneFormControlExtView}s in dieser View.
    */
   private List views = new Vector();
   
   /**
-   * Erzeugt ein {@link AllInsertionTrafoViewsPanel}, das den Inhalt von
-   * insertionModelList anzeigt. ACHTUNG! insertionModelList sollte leer sein,
+   * Erzeugt ein {@link AllFormControlExtViewsPanel}, das den Inhalt von
+   * formControlModelList anzeigt. ACHTUNG! formControlModelList sollte leer sein,
    * da nur neu hinzugekommene Elemente in der View angezeigt werden.
    * @param funcLib die Funktionsbibliothek, die die Funktionen enthält, die die Views 
    *        zur Auswahl anbieten sollen.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
-  public AllInsertionTrafoViewsPanel(InsertionModelList insertionModelList, FunctionLibrary funcLib, FormularMax4000 formularMax4000)
+  public AllFormControlExtViewsPanel(FormControlModelList formControlModelList, FunctionLibrary funcLib, FormularMax4000 formularMax4000)
   {
     this.funcLib = funcLib;
-    insertionModelList.addListener(new MyItemListener());
+    formControlModelList.addListener(new MyItemListener());
     formularMax4000.addBroadcastListener(new MyBroadcastListener());
     myViewChangeListener = new MyViewChangeListener();
     
     cards = new CardLayout();
     myPanel = new JPanel(cards);
     JPanel emptyPanel = new JPanel();
-    emptyPanel.add(new JLabel("TRAFO-View"));
+    emptyPanel.add(new JLabel("Extra-View"));
     myPanel.add(emptyPanel, EMPTY_PANEL);
   }
   
   /**
-   * Fügt dieser View eine {@link OneInsertionTrafoView} für model hinzu.
+   * Fügt dieser View eine {@link OneFormControlExtView} für model hinzu.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
-  private void addItem(InsertionModel model)
+  private void addItem(FormControlModel model)
   {
-    OneInsertionTrafoView view = new OneInsertionTrafoView(model, funcLib, myViewChangeListener);
+    OneFormControlExtView view = new OneFormControlExtView(model, funcLib, myViewChangeListener);
     views.add(view);
     
-    myPanel.add(view.JComponent(), getCardIdFor(view.getModel()));
+    myPanel.add(view.JComponent(), getCardIdFor(model));
     myPanel.validate();
   }
   
@@ -128,7 +128,7 @@ public class AllInsertionTrafoViewsPanel implements View
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
-  private void removeItem(OneInsertionTrafoView view)
+  private void removeItem(OneFormControlExtView view)
   {
     int index = views.indexOf(view);
     if (index < 0) return;
@@ -149,14 +149,15 @@ public class AllInsertionTrafoViewsPanel implements View
   
   
   
-  private class MyItemListener implements InsertionModelList.ItemListener
+  private class MyItemListener implements FormControlModelList.ItemListener
   {
 
-    public void itemAdded(InsertionModel model, int index)
+    public void itemAdded(FormControlModel model, int index)
     {
       addItem(model);
     }
-    
+
+    public void itemSwapped(int index1, int index2) {}
   }
   
   private class MyViewChangeListener implements ViewChangeListener
@@ -164,7 +165,7 @@ public class AllInsertionTrafoViewsPanel implements View
 
     public void viewShouldBeRemoved(View view)
     {
-      removeItem((OneInsertionTrafoView)view);
+      removeItem((OneFormControlExtView)view);
     }
     
   }
@@ -174,14 +175,9 @@ public class AllInsertionTrafoViewsPanel implements View
   {
     public void broadcastFormControlModelSelection(BroadcastObjectSelection b) 
     {
-      cards.show(myPanel, EMPTY_PANEL);
-      currentModel = null;
-    }
-    public void broadcastInsertionModelSelection(BroadcastObjectSelection b) 
-    {
       if (b.getState() == 1)
       {
-        InsertionModel model = (InsertionModel)b.getObject();
+        FormControlModel model = (FormControlModel)b.getObject();
         cards.show(myPanel, getCardIdFor(model));
         currentModel = model;
       }
@@ -190,6 +186,12 @@ public class AllInsertionTrafoViewsPanel implements View
         cards.show(myPanel, EMPTY_PANEL);
         currentModel = null;
       }
+    }
+
+    public void broadcastInsertionModelSelection(BroadcastObjectSelection b) 
+    {
+      cards.show(myPanel, EMPTY_PANEL);
+      currentModel = null;
     }
   }
 

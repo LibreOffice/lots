@@ -84,7 +84,7 @@ public interface FunctionSelectionAccess
   /**
    * Nimmt eine Abbildung von Parameternamen (Strings) auf Parameterwerte ({@link ParamValue}s)
    * und übernimmt diese direkt als Referenz.
-   * @param mapNameToParamValue
+   * @param mapNameToParamValue wird direkt als Referenz übernommen.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void setParameterValues(Map mapNameToParamValue);

@@ -22,12 +22,14 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelection;
+import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionAccess;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionProvider;
 
 /**
@@ -388,6 +390,16 @@ public class FormControlModel
   }
   
   /**
+   * Liefert ein Interface zum Zugriff auf das AUTOFILL-Attribut dieses Objekts.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED
+   */
+  public FunctionSelectionAccess getAutofillAccess()
+  {
+    return new MyTrafoAccess();
+  }
+  
+  /**
    * Ersetzt den aktuellen AUTOFILL durch conf. ACHTUNG! Es wird keine Kopie von conf
    * gemacht, sondern direkt eine Referenz auf conf integriert.
    * @param conf der "AUTOFILL"-Knoten.
@@ -624,5 +636,52 @@ public class FormControlModel
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     public void modelRemoved(FormControlModel model);
+  }
+  
+  /**
+   * Diese Klasse leitet Zugriffe weiter an das Objekt {@link FormControlModel#autofill}. Bei
+   * ändernden Zugriffen wird auch noch der FormularMax4000 benachrichtigt, dass das Dokument
+   * geupdatet werden muss. Im Prinzip müsste korrekterweise ein
+   * ändernder Zugriff auf trafo auch einen Event an die ModelChangeListener schicken.
+   * Allerdings ist dies derzeit nicht implementiert,
+   * weil es derzeit genau eine View gibt für AUTOFILL, so dass konkurrierende Änderungen
+   * gar nicht möglich sind.
+   *
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private class MyTrafoAccess implements FunctionSelectionAccess
+  {
+    public boolean isReference() { return autofill.isReference();}
+    public boolean isExpert()    { return autofill.isExpert(); }
+    public boolean isNone()      { return autofill.isNone(); }
+    public String getFunctionName()      { return autofill.getFunctionName();}
+    public ConfigThingy getExpertFunction() { return autofill.getExpertFunction(); }
+
+    public void setParameterValues(Map mapNameToParamValue)
+    {
+      autofill.setParameterValues(mapNameToParamValue);
+      formularMax4000.documentNeedsUpdating();
+    }
+
+    public void setFunction(String functionName, String[] paramNames)
+    {
+      autofill.setFunction(functionName, paramNames);
+      formularMax4000.documentNeedsUpdating();
+    }
+    
+    public void setExpertFunction(ConfigThingy funConf)
+    {
+      autofill.setExpertFunction(funConf);
+      formularMax4000.documentNeedsUpdating();
+    }
+    public String[] getParameterNames()
+    {
+      return autofill.getParameterNames();
+    }
+    public boolean hasSpecifiedParameters()
+    {
+      return autofill.hasSpecifiedParameters();
+    }
+    
   }
 }

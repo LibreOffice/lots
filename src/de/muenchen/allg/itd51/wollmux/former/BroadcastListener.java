@@ -43,5 +43,17 @@ public abstract class BroadcastListener
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void broadcastInsertionModelSelection(BroadcastObjectSelection b) {}
+  
+  /**
+   * Eine View die Views aller InsertionModel enthält wurde ausgewählt.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public void broadcastAllInsertionsViewSelected() {}
+  
+  /**
+   * Eine View die Views aller FormControlModels enthält wurde ausgewählt.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public void broadcastAllFormControlsViewSelected() {}
 }
 

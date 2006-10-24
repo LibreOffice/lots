@@ -22,6 +22,8 @@ import java.awt.CardLayout;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
+import de.muenchen.allg.itd51.wollmux.former.control.AllFormControlExtViewsPanel;
+import de.muenchen.allg.itd51.wollmux.former.control.FormControlModelList;
 import de.muenchen.allg.itd51.wollmux.former.insertion.AllInsertionTrafoViewsPanel;
 import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModelList;
 import de.muenchen.allg.itd51.wollmux.former.view.View;
@@ -40,21 +42,38 @@ public class RightPanel implements View
   private static final String ALL_INSERTION_TRAFO_VIEWS_PANEL = "ALL_INSERTION_TRAFO_VIEWS_PANEL";
   
   /**
+   * Identifikationsstring für {@link CardLayout}.
+   */
+  private static final String ALL_FORMCONTROL_EXT_VIEWS_PANEL = "ALL_FORMCONTROL_EXT_VIEWS_PANEL";
+  
+  /**
    * Das JPanel, dass alle Inhalte dieser View enthält.
    */
   private JPanel myPanel;
   
   /**
+   * Das CardLayout für myPanel.
+   */
+  private CardLayout cards;
+  
+  /**
    * Erzeugt ein neues RightPanel. Zur Erläuterung der Parameter siehe
-   * {@link de.muenchen.allg.itd51.wollmux.former.insertion.AllInsertionTrafoViewsPanel#AllInsertionTrafoViewsPanel(InsertionModelList, FunctionLibrary, FormularMax4000)}.
+   * {@link de.muenchen.allg.itd51.wollmux.former.insertion.AllInsertionTrafoViewsPanel#AllInsertionTrafoViewsPanel(InsertionModelList, FunctionLibrary, FormularMax4000)}
+   * und 
+   * {@link de.muenchen.allg.itd51.wollmux.former.control.AllFormControlExtViewsPanel#AllFormControlExtViewsPanel(FormControlModelList, FunctionLibrary, FormularMax4000)}.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
-  public RightPanel(InsertionModelList insertionModelList, FunctionLibrary funcLib, FormularMax4000 formularMax4000)
+  public RightPanel(InsertionModelList insertionModelList, FormControlModelList formControlModelList, FunctionLibrary funcLib, FormularMax4000 formularMax4000)
   {
-    myPanel = new JPanel(new CardLayout());
+    cards = new CardLayout();
+    myPanel = new JPanel(cards);
+    AllFormControlExtViewsPanel allFormControlExtViewsPanel = new AllFormControlExtViewsPanel(formControlModelList, funcLib, formularMax4000);
+    myPanel.add(allFormControlExtViewsPanel.JComponent(), ALL_FORMCONTROL_EXT_VIEWS_PANEL);
     AllInsertionTrafoViewsPanel allInsertionTrafoViewsPanel = new AllInsertionTrafoViewsPanel(insertionModelList, funcLib, formularMax4000);
     myPanel.add(allInsertionTrafoViewsPanel.JComponent(), ALL_INSERTION_TRAFO_VIEWS_PANEL);
+    
+    formularMax4000.addBroadcastListener(new MyBroadcastListener());
   }
 
   public JComponent JComponent()
@@ -62,4 +81,16 @@ public class RightPanel implements View
     return myPanel;
   }
 
+  private class MyBroadcastListener extends BroadcastListener
+  {
+    public void broadcastAllInsertionsViewSelected() 
+    {
+      cards.show(myPanel, ALL_INSERTION_TRAFO_VIEWS_PANEL);
+    }
+    
+    public void broadcastAllFormControlsViewSelected() 
+    {
+      cards.show(myPanel, ALL_FORMCONTROL_EXT_VIEWS_PANEL);
+    }
+  }
 }

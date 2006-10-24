@@ -308,11 +308,11 @@ public class InsertionModel
   }
   
   /**
-   * Diese Klasse ist derzeit ziemlich witzlos. Es wäre einfacher, in getTrafoAccess() einfach
-   * direkt das Objekt {@link InsertionModel#trafo} zurückzuliefern, weil nur alle Funktionen
-   * an dieses geforwardet werden. Allerdings müsste im Prinzip korrekterweise ein
-   * ändernder Zugriff auf trafo einen Event an die ModelChangeListener schicken.
-   * Dafür wäre dann diese Klasse notwendig. Allerdings ist dies derzeit nicht implementiert,
+   * Diese Klasse leitet Zugriffe weiter an das Objekt {@link InsertionModel#trafo}. Bei
+   * ändernden Zugriffen wird auch noch der FormularMax4000 benachrichtigt, dass das Dokument
+   * geupdatet werden muss. Im Prinzip müsste korrekterweise ein
+   * ändernder Zugriff auf trafo auch einen Event an die ModelChangeListener schicken.
+   * Allerdings ist dies derzeit nicht implementiert,
    * weil es derzeit genau eine View gibt für die Trafo, so dass konkurrierende Änderungen
    * gar nicht möglich sind.
    *
