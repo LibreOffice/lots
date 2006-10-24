@@ -17,6 +17,7 @@
 */
 package de.muenchen.allg.itd51.wollmux.former.function;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -25,6 +26,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.io.StringReader;
 import java.util.Iterator;
 
 import javax.swing.Box;
@@ -62,7 +64,7 @@ public class FunctionSelectionAccessView implements View
   /**
    * Eintrag für die Funktionsauswahl-ComboBox, wenn manuelle Eingabe gewünscht ist.
    */
-  private static final String EXPERT_ITEM = "<Experte>";
+  private static final String EXPERT_ITEM = "<Code>";
   
   /**
    * Eintrag für die Funktionsauswahl-ComboBox, wenn manuelle Eingabe eines Strings
@@ -160,7 +162,7 @@ public class FunctionSelectionAccessView implements View
     GridBagConstraints gbcLabelLeft = new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.NONE,       new Insets(TF_BORDER,TF_BORDER,TF_BORDER,TF_BORDER),0,0);
     GridBagConstraints gbcHsep      = new GridBagConstraints(0, 0, 2, 1, 1.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL,       new Insets(3*TF_BORDER,0,2*TF_BORDER,0),0,0);
     GridBagConstraints gbcTextfield = new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0, GridBagConstraints.LINE_START,   GridBagConstraints.HORIZONTAL, new Insets(TF_BORDER,TF_BORDER,TF_BORDER,TF_BORDER),0,0);
-    //GridBagConstraints gbcTextarea  = new GridBagConstraints(0, 0, 2, 1, 1.0, 1.0, GridBagConstraints.LINE_START,   GridBagConstraints.BOTH, new Insets(TF_BORDER,TF_BORDER,TF_BORDER,TF_BORDER),0,0);
+    GridBagConstraints gbcTextarea  = new GridBagConstraints(0, 0, 2, 1, 1.0, 1.0, GridBagConstraints.LINE_START,   GridBagConstraints.BOTH, new Insets(TF_BORDER,TF_BORDER,TF_BORDER,TF_BORDER),0,0);
     GridBagConstraints gbcGlue      = new GridBagConstraints(0, 0, 2, 1, 1.0, 1.0, GridBagConstraints.CENTER,   GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0);
     //FIXME Unterscheidung nach Funktionsart und Textarea falls Expert, Werteingabe falls die Expertenfunktion nur ein String-Literal ist; dann TODO Testen
     int y = 0;
@@ -208,12 +210,25 @@ public class FunctionSelectionAccessView implements View
         gbcTextfield.gridy = y++;
         myPanel.add(literalValueField, gbcTextfield);
         
-        literalValueField.getDocument().addDocumentListener(new ValueFieldChangeListener());
+        literalValueField.getDocument().addDocumentListener(new ExpertFunctionChangeListener());
         
       } else //komplexere Expertenfunktion
       {
         expertFunctionIsComplex = true;
-        //TODO implementieren
+        
+        StringBuilder code = new StringBuilder();
+        Iterator iter = conf.iterator();
+        while (iter.hasNext())
+        {
+          code.append(((ConfigThingy)iter.next()).stringRepresentation());
+        }
+        
+        complexFunctionArea = new JTextArea(code.toString());
+        gbcTextarea.gridx = 0;
+        gbcTextarea.gridy = y++;
+        myPanel.add(complexFunctionArea, gbcTextarea);
+        
+        complexFunctionArea.getDocument().addDocumentListener(new ExpertFunctionChangeListener());
       }
       
     }
@@ -285,7 +300,7 @@ public class FunctionSelectionAccessView implements View
    * zurück.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TODO Testen
+   * TESTED
    */
   private void updateExpertFunction()
   {
@@ -297,7 +312,17 @@ public class FunctionSelectionAccessView implements View
     
     if (expertFunctionIsComplex)
     {
-      //TODO implementieren, Background pink setzen, wenn aufgrund von Syntaxfehler das Updaten nicht durchgefuehrt wurde
+      try
+      {
+        ConfigThingy conf = new ConfigThingy("", null, new StringReader(complexFunctionArea.getText()));
+        funcSel.setExpertFunction(conf);
+        complexFunctionArea.setBackground(Color.WHITE);
+      }
+      catch (Exception e1)
+      {
+        complexFunctionArea.setBackground(Color.PINK);
+      }
+      
     } else
     {
       ConfigThingy conf = new ConfigThingy("EXPERT");
@@ -307,12 +332,13 @@ public class FunctionSelectionAccessView implements View
   }
   
   /**
-   * Wurde die einfache String-Literal-Eingabe gewählt, so wird dieser Listener auf das
-   * Eingabefeld registriert.
+   * Dieser Listener wird sowohl für {@link FunctionSelectionAccessView#literalValueField} als
+   * auch {@link FunctionSelectionAccessView#complexFunctionArea} verwendet, um auf Benutzereingaben
+   * zu reagieren.
    *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private class ValueFieldChangeListener implements DocumentListener
+  private class ExpertFunctionChangeListener implements DocumentListener
   {
     public void insertUpdate(DocumentEvent e)
     {

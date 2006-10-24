@@ -52,6 +52,11 @@ public class OneFormControlLineView extends LineView
   private static final int LABEL_COLUMNS = 20;
   
   /**
+   * Standardbreite des Textfelds, das die ID anzeigt.
+   */
+  private static final int ID_COLUMNS = 10; 
+  
+  /**
    * Typischerweise ein Container, der die View enthält und daher über Änderungen
    * auf dem Laufenden gehalten werden muss.
    */
@@ -73,6 +78,11 @@ public class OneFormControlLineView extends LineView
    * Das JTextField, das das LABEL anzeigt und ändern lässt.
    */
   private JTextField labelTextfield;
+  
+  /**
+   * Das JTextField, das die ID anzeigt und ändern lässt.
+   */
+  private JTextField idTextfield;
   
   /**
    * Wird auf alle Teilkomponenten dieser View registriert.
@@ -97,6 +107,7 @@ public class OneFormControlLineView extends LineView
     myPanel.setLayout(new BoxLayout(myPanel, BoxLayout.X_AXIS));
     myPanel.setBorder(BorderFactory.createEmptyBorder(BORDER, BORDER, BORDER, BORDER));
     myPanel.addMouseListener(myMouseListener);
+    myPanel.add(makeIdView());
     myPanel.add(makeLabelView());
     unmarkedBackgroundColor = myPanel.getBackground();
     model.addListener(new MyModelChangeListener());
@@ -132,6 +143,36 @@ public class OneFormControlLineView extends LineView
     setTypeSpecificTraits(labelTextfield, model.getType());
     return labelTextfield;
   }
+  
+  /**
+   * Liefert eine Komponente, die die ID des FormControlModels anzeigt und Änderungen
+   * an das Model weitergibt. 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED
+   */
+  private JComponent makeIdView()
+  {
+    idTextfield = new JTextField(model.getId(), ID_COLUMNS);
+    Document tfdoc = idTextfield.getDocument();
+    tfdoc.addDocumentListener(new DocumentListener(){
+      public void update()
+      {
+        ignoreAttributeChanged = true;
+        model.setId(idTextfield.getText());
+        ignoreAttributeChanged = false;
+      }
+
+      public void insertUpdate(DocumentEvent e) {update();}
+      public void removeUpdate(DocumentEvent e) {update();}
+      public void changedUpdate(DocumentEvent e) {update();}
+      });
+    
+    idTextfield.setCaretPosition(0);
+    idTextfield.addMouseListener(myMouseListener);
+    //setTypeSpecificTraits(idTextfield, model.getType());
+    return idTextfield;
+  }
+
   
   /**
    * Setzt optische Aspekte wie Rand von compo abhängig von type.

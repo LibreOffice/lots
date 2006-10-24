@@ -67,6 +67,8 @@ public class FormControlModel
   public static final int LABEL_ATTR = 0;
   /** Attribut ID für das Attribut "TYPE". */
   public static final int TYPE_ATTR = 1;
+  /** Attribut ID für das Attribut "ID". */
+  public static final int ID_ATTR = 2;
   
   /** LABEL. */
   private String label;
@@ -430,6 +432,17 @@ public class FormControlModel
   {
     if (action.length() == 0) action = NO_ACTION;
     this.action = action;
+    formularMax4000.documentNeedsUpdating();
+  }
+  
+  /**
+   * Setzt das ID-Attribut.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public void setId(String id)
+  {
+    this.id = id;
+    notifyListeners(ID_ATTR, id);
     formularMax4000.documentNeedsUpdating();
   }
   

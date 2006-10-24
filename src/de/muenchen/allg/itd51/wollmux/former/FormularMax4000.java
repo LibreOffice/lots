@@ -1167,17 +1167,10 @@ public class FormularMax4000
     menuItem.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e)
       {
-        try
-        {
-          myFrame.setJMenuBar(mainMenuBar);
-          myFrame.getContentPane().remove(editorContentPanel);
-          myFrame.getContentPane().add(mainContentPanel);
-          setFrameSize();
-        }
-        catch (Exception e1)
-        {
-          JOptionPane.showMessageDialog(myFrame, e1.getMessage(), "Fehler beim Parsen der Formularbeschreibung", JOptionPane.WARNING_MESSAGE);
-        }
+        myFrame.setJMenuBar(mainMenuBar);
+        myFrame.getContentPane().remove(editorContentPanel);
+        myFrame.getContentPane().add(mainContentPanel);
+        setFrameSize();
       }});
     menu.add(menuItem);
     
