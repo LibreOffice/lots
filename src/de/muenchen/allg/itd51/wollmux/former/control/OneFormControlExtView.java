@@ -67,6 +67,8 @@ public class OneFormControlExtView implements View
       // direkt auf dem Model als Listener registriert.
     OneFormControlAutofillEditView autofillView = new OneFormControlAutofillEditView(model, funcLib, null);
     myTabbedPane.addTab("AUTOFILL", autofillView.JComponent());
+    OneFormControlPlausiEditView plausiView = new OneFormControlPlausiEditView(model, funcLib, null);
+    myTabbedPane.addTab("PLAUSI", plausiView.JComponent());
     
     model.addListener(new MyModelChangeListener());
   }

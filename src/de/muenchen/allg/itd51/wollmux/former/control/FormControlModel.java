@@ -396,7 +396,17 @@ public class FormControlModel
    */
   public FunctionSelectionAccess getAutofillAccess()
   {
-    return new MyTrafoAccess();
+    return new MyTrafoAccess(autofill);
+  }
+  
+  /**
+   * Liefert ein Interface zum Zugriff auf das PLAUSI-Attribut dieses Objekts.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED
+   */
+  public FunctionSelectionAccess getPlausiAccess()
+  {
+    return new MyTrafoAccess(plausi);
   }
   
   /**
@@ -639,48 +649,52 @@ public class FormControlModel
   }
   
   /**
-   * Diese Klasse leitet Zugriffe weiter an das Objekt {@link FormControlModel#autofill}. Bei
+   * Diese Klasse leitet Zugriffe weiter an ein FunctionSelection Objekt. Bei
    * ändernden Zugriffen wird auch noch der FormularMax4000 benachrichtigt, dass das Dokument
    * geupdatet werden muss. Im Prinzip müsste korrekterweise ein
-   * ändernder Zugriff auf trafo auch einen Event an die ModelChangeListener schicken.
+   * ändernder Zugriff auch einen Event an die ModelChangeListener schicken.
    * Allerdings ist dies derzeit nicht implementiert,
-   * weil es derzeit genau eine View gibt für AUTOFILL, so dass konkurrierende Änderungen
+   * weil es derzeit je genau eine View gibt für AUTOFILL und PLAUSI, so dass konkurrierende Änderungen
    * gar nicht möglich sind.
    *
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private class MyTrafoAccess implements FunctionSelectionAccess
   {
-    public boolean isReference() { return autofill.isReference();}
-    public boolean isExpert()    { return autofill.isExpert(); }
-    public boolean isNone()      { return autofill.isNone(); }
-    public String getFunctionName()      { return autofill.getFunctionName();}
-    public ConfigThingy getExpertFunction() { return autofill.getExpertFunction(); }
+    private FunctionSelection sel;
+    
+    public MyTrafoAccess(FunctionSelection sel) {this.sel = sel;}
+    
+    public boolean isReference() { return sel.isReference();}
+    public boolean isExpert()    { return sel.isExpert(); }
+    public boolean isNone()      { return sel.isNone(); }
+    public String getFunctionName()      { return sel.getFunctionName();}
+    public ConfigThingy getExpertFunction() { return sel.getExpertFunction(); }
 
     public void setParameterValues(Map mapNameToParamValue)
     {
-      autofill.setParameterValues(mapNameToParamValue);
+      sel.setParameterValues(mapNameToParamValue);
       formularMax4000.documentNeedsUpdating();
     }
 
     public void setFunction(String functionName, String[] paramNames)
     {
-      autofill.setFunction(functionName, paramNames);
+      sel.setFunction(functionName, paramNames);
       formularMax4000.documentNeedsUpdating();
     }
     
     public void setExpertFunction(ConfigThingy funConf)
     {
-      autofill.setExpertFunction(funConf);
+      sel.setExpertFunction(funConf);
       formularMax4000.documentNeedsUpdating();
     }
     public String[] getParameterNames()
     {
-      return autofill.getParameterNames();
+      return sel.getParameterNames();
     }
     public boolean hasSpecifiedParameters()
     {
-      return autofill.hasSpecifiedParameters();
+      return sel.hasSpecifiedParameters();
     }
     
   }
