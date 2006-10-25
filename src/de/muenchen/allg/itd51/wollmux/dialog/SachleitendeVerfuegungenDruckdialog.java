@@ -26,6 +26,8 @@ import java.awt.Insets;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.util.Iterator;
@@ -45,6 +47,8 @@ import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
@@ -137,6 +141,34 @@ public class SachleitendeVerfuegungenDruckdialog
   };
 
   /**
+   * ChangeListener für Änderungen an den Spinnern.
+   */
+  private ChangeListener spinnerChangeListener = new ChangeListener()
+  {
+    public void stateChanged(ChangeEvent arg0)
+    {
+      allElementCountTextField.setText("" + getAllElementCount());
+    }
+  };
+
+  /**
+   * ChangeListener für Änderungen an den ComboBoxen, der eine Änderung des
+   * ausgewählten Elements unmöglich macht.
+   */
+  private ItemListener cboxItemListener = new ItemListener()
+  {
+    public void itemStateChanged(ItemEvent arg0)
+    {
+      Object source = arg0.getSource();
+      if (source != null && source instanceof JComboBox)
+      {
+        JComboBox cbox = (JComboBox) source;
+        if (cbox.getSelectedIndex() != 0) cbox.setSelectedIndex(0);
+      }
+    }
+  };
+
+  /**
    * wird getriggert bei windowClosing() Event.
    */
   private ActionListener closeAction = actionListener_abort;
@@ -166,6 +198,11 @@ public class SachleitendeVerfuegungenDruckdialog
    * Die Array mit allen buttons auf printElement-Actions
    */
   private JButton[] printElementButtons;
+
+  /**
+   * Enthält das TextFeld, das die Summe aller Ausfertigungen anzeigt.
+   */
+  private JTextField allElementCountTextField;
 
   /**
    * Der dem
@@ -273,6 +310,8 @@ public class SachleitendeVerfuegungenDruckdialog
       // elementComboBoxes vorbelegen:
       Vector content = new Vector();
       content.add(verfPunkt.getHeading());
+      if (verfPunkt.getZuleitungszeilenCount() > 0)
+        content.add("------- Zuleitung an --------");
       Iterator iter = verfPunkt.getZuleitungszeilen().iterator();
       while (iter.hasNext())
       {
@@ -463,15 +502,7 @@ public class SachleitendeVerfuegungenDruckdialog
             else
               spinner = new JSpinner(new SpinnerNumberModel(0, 0, 0, 0));
 
-            // comboBox.addListSelectionListener(myListSelectionListener);
-
-            // String action = "";
-            // try{ action = uiElementDesc.get("ACTION").toString();
-            // }catch(NodeNotFoundException e){}
-            //            
-            // ActionListener actionL = getAction(action);
-            // if (actionL != null) comboBox.addMouseListener(new
-            // MyActionMouseListener(comboBox, actionL));
+            spinner.addChangeListener(spinnerChangeListener);
 
             gbcSpinner.gridx = x;
             gbcSpinner.gridy = y;
@@ -482,7 +513,10 @@ public class SachleitendeVerfuegungenDruckdialog
           {
             JComboBox comboBox;
             if (id.equals("element") && verfPunktNr < elementComboBoxes.length)
+            {
               comboBox = elementComboBoxes[verfPunktNr];
+              comboBox.addItemListener(cboxItemListener);
+            }
             else
               comboBox = new JComboBox();
 
@@ -500,6 +534,8 @@ public class SachleitendeVerfuegungenDruckdialog
             {
               textField = new JTextField("" + getAllElementCount());
               textField.setEditable(false);
+              textField.setHorizontalAlignment(JTextField.CENTER);
+              allElementCountTextField = textField;
             }
             else
               textField = new JTextField();
@@ -569,9 +605,7 @@ public class SachleitendeVerfuegungenDruckdialog
   }
 
   /**
-   * TODO: berechnung von allElementCount
-   * 
-   * @return
+   * Berechnet die Summe aller Ausfertigungen aller elementCountSpinner.
    */
   private int getAllElementCount()
   {
@@ -583,38 +617,6 @@ public class SachleitendeVerfuegungenDruckdialog
     }
     return count;
   }
-
-//  /**
-//   * Wartet auf Doppelklick und führt dann die actionPerformed() Methode eines
-//   * ActionListeners aus.
-//   * 
-//   * @author Matthias Benkmann (D-III-ITD 5.1)
-//   */
-//  private class MyActionMouseListener extends MouseAdapter
-//  {
-//    private JList list;
-//
-//    private ActionListener action;
-//
-//    public MyActionMouseListener(JList list, ActionListener action)
-//    {
-//      this.list = list;
-//      this.action = action;
-//    }
-//
-//    public void mouseClicked(MouseEvent e)
-//    {
-//      if (e.getClickCount() == 2)
-//      {
-//        Point location = e.getPoint();
-//        int index = list.locationToIndex(location);
-//        if (index < 0) return;
-//        Rectangle bounds = list.getCellBounds(index, index);
-//        if (!bounds.contains(location)) return;
-//        action.actionPerformed(null);
-//      }
-//    }
-//  }
 
   /**
    * Übersetzt den Namen einer ACTION in eine Referenz auf das passende
@@ -689,18 +691,19 @@ public class SachleitendeVerfuegungenDruckdialog
   }
 
   /**
-   * TODO: doc printSettings
+   * Ruft den printSettings-Dialog auf.
    * 
    * @author christoph.lutz
    */
   private void printSettings()
   {
-    // TODO Auto-generated method stub
+    // TODO printSettings
 
   }
 
   /**
-   * TODO: doc printAll
+   * Druckt alle Ausfertigungen aller Verfügungspunkte aus und beendet den
+   * Dialog.
    * 
    * @author christoph.lutz
    */
@@ -730,12 +733,13 @@ public class SachleitendeVerfuegungenDruckdialog
             isDraft,
             isOriginal);
     }
-    
+
     abort();
   }
 
   /**
-   * TODO: doc printElement()
+   * Druckt alle Ausfertigungen des Verfügungspunktes, dessen "Drucken" Button
+   * gedrückt wurde und beendet den Dialog.
    * 
    * @author christoph.lutz
    */
@@ -847,64 +851,4 @@ public class SachleitendeVerfuegungenDruckdialog
     {/* Hope for the best */
     }
   }
-
-  // /**
-  // * Sorgt für das dauernde Neustarten des Dialogs.
-  // * @author Matthias Benkmann (D-III-ITD 5.1)
-  // */
-  // private static class RunTest implements ActionListener
-  // {
-  // private DatasourceJoiner dj;
-  // private ConfigThingy conf;
-  // private ConfigThingy verConf;
-  // private ConfigThingy abConf;
-  //    
-  // public RunTest(ConfigThingy conf, ConfigThingy verConf, ConfigThingy
-  // abConf, DatasourceJoiner dj)
-  // {
-  // this.dj = dj;
-  // this.conf = conf;
-  // this.abConf = abConf;
-  // this.verConf = verConf;
-  // }
-  //    
-  // public void actionPerformed(ActionEvent e)
-  // {
-  // try{
-  // try{
-  // if (e.getActionCommand().equals("abort")) System.exit(0);
-  // }catch(Exception x){}
-  // new SachleitendeVerfuegungenDruckdialog(conf, this);
-  // } catch(ConfigurationErrorException x)
-  // {
-  // Logger.error(x);
-  // }
-  // }
-  // }
-  //  
-  // public static void main(String[] args) throws Exception
-  // {
-  // LookAndFeelInfo[] lf = UIManager.getInstalledLookAndFeels();
-  // for (int i = 0; i < lf.length; ++i)
-  // System.out.println(lf[i].getClassName());
-  // System.out.println("Default L&F:
-  // "+UIManager.getSystemLookAndFeelClassName());
-  // String confFile = "testdata/WhoAmI.conf";
-  // String verConfFile = "testdata/PAL.conf";
-  // String abConfFile = "testdata/AbsenderdatenBearbeiten.conf";
-  // ConfigThingy conf = new ConfigThingy("",new URL(new
-  // File(System.getProperty("user.dir")).toURL(),confFile));
-  // ConfigThingy verConf = new ConfigThingy("",new URL(new
-  // File(System.getProperty("user.dir")).toURL(),verConfFile));
-  // ConfigThingy abConf = new ConfigThingy("",new URL(new
-  // File(System.getProperty("user.dir")).toURL(),abConfFile));
-  // TestDatasourceJoiner dj = new TestDatasourceJoiner();
-  // RunTest test = new RunTest(conf.get("AbsenderAuswaehlen"),
-  // verConf.get("PersoenlicheAbsenderliste"),
-  // abConf.get("AbsenderdatenBearbeiten"), dj);
-  // test.actionPerformed(null);
-  // Thread.sleep(600000);
-  // System.exit(0);
-  // }
-
 }
