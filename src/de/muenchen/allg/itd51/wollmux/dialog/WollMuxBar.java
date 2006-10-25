@@ -1201,7 +1201,6 @@ public class WollMuxBar
       else if (action.equals("about"))
       {
         eventHandler.handleWollMuxUrl(WollMux.cmdAbout, getBuildInfo());
-        abort();
       }
     }
   }
