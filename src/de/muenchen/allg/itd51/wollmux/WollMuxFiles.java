@@ -635,6 +635,7 @@ public class WollMuxFiles
       out.write("Dump time: "+date+"\n");
       out.write(WollMuxSingleton.getInstance().getBuildInfo()+"\n");
       out.write("DEFAULT_CONTEXT: "+getDEFAULT_CONTEXT()+"\n");
+      out.write("CONF_VERSION: " + WollMuxSingleton.getInstance().getConfVersionInfo());
       out.write("wollmuxDir: "+getWollMuxDir()+"\n");
       out.write("wollmuxLogFile: "+getWollMuxLogFile()+"\n");
       out.write("wollmuxConfFile: "+getWollMuxConfFile()+"\n");

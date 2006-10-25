@@ -61,10 +61,10 @@
 	<property name="MAKE_DIR" value="${basedir}/packages/WollMux" />
 
 
-	<target name="main" depends="package" />
+	<target name="main" depends="package, WollMuxBar.jar" />
 
 	<!-- Das Target install installiert/reinstalliert das erzeugte uno-package -->
-	<target name="install" depends="package">
+	<target name="install" depends="package, WollMuxBar.jar">
 		<echo level="info">unopkg remove ${PKG_NAME}:</echo>
 		<exec executable="unopkg" failifexecutionfails="false">
 			<arg line="remove ${PKG_NAME}" />
@@ -130,7 +130,7 @@
 			</filterchain>
 		</loadfile>
 		<echo message="" file="${BUILD_INFO_FILE}" />
-		<echo file="${BUILD_INFO_FILE}">Paketversion: ${VERSION}, ${revision}</echo>
+		<echo file="${BUILD_INFO_FILE}">Version: ${VERSION}, ${revision}</echo>
 	</target>
 
 	<!-- Das Target javamake erzeugt das rdb-file und die java-Interfaces -->
@@ -171,6 +171,7 @@
 			<fileset dir="${UNOHELPER_BIN}" includes="**/*.class" />
 			<fileset dir="${TOOLING}" includes="**/*" />
 			<fileset dir="${BIN}" includes="data/**" />
+			<fileset file="${BUILD_INFO_FILE}" />
 			<manifest>
 				<attribute name="Main-Class" value="${TOOLING_MAIN_CLASS}" />
 				<section name="com/sun/star/lib/loader/Loader.class">

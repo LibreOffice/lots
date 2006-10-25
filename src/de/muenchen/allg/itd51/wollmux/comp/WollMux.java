@@ -103,6 +103,8 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
 
   public static final String cmdMenu = "Menu";
 
+  public static final String cmdAbout = "About";
+
   /**
    * Der Konstruktor initialisiert das WollMuxSingleton und startet damit den
    * eigentlichen WollMux. Der Konstuktor wird aufgerufen, bevor OpenOffice.org
@@ -254,7 +256,10 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
       else if (cmd.equalsIgnoreCase(cmdDumpInfo))
         xRet = this;
 
-      else if (cmd.equalsIgnoreCase(cmdKill)) xRet = this;
+      else if (cmd.equalsIgnoreCase(cmdKill))
+        xRet = this;
+
+      else if (cmd.equalsIgnoreCase(cmdAbout)) xRet = this;
     }
     return xRet;
   }
@@ -429,6 +434,15 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
       {
         Logger.debug2("Dispatch: Aufruf von WollMux:Kill");
         WollMuxEventHandler.handleKill();
+      }
+
+      else if (cmd.compareToIgnoreCase(cmdAbout) == 0)
+      {
+        Logger.debug2("Dispatch: Aufruf von WollMux:About");
+        String wollMuxBarVersion = null;
+        if (parsedURL.size() > 0)
+          wollMuxBarVersion = parsedURL.get(0).toString();
+        WollMuxEventHandler.handleAbout(wollMuxBarVersion);
       }
     }
   }

@@ -59,6 +59,7 @@ import com.sun.star.uno.XComponentContext;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
+import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.DJDataset;
 import de.muenchen.allg.itd51.wollmux.db.DJDatasetListElement;
 import de.muenchen.allg.itd51.wollmux.db.DatasetNotFoundException;
@@ -157,6 +158,7 @@ public class WollMuxSingleton implements XPALProvider
     Logger.debug("DEFAULT_CONTEXT \""
                  + WollMuxFiles.getDEFAULT_CONTEXT().toString()
                  + "\"");
+    Logger.debug("CONF_VERSION: " + getConfVersionInfo());
 
     // VisibleTextFragmentList erzeugen
     textFragmentList = new VisibleTextFragmentList(WollMuxFiles
@@ -266,7 +268,30 @@ public class WollMuxSingleton implements XPALProvider
     catch (java.lang.Exception x)
     {
     }
-    return "Die Datei buildinfo konnte nicht gelesen werden.";
+    return "Version: unbekannt";
+  }
+
+  /**
+   * Diese Methode liefert die Versionsinformation der aktuell verwendeten
+   * wollmux-Konfiguration (z.B. "wollmux-standard-config-2.2.1") als String
+   * zurück, wenn in der Konfiguration ein entsprechender CONF_VERSION-Schlüssel
+   * definiert ist, oder "unbekannt", falls der dieser Schlüssel nicht
+   * existiert.
+   * 
+   * @return Der Versionsinformation der aktuellen WollMux-Konfiguration (falls
+   *         definiert) oder "unbekannt", falls nicht.
+   */
+  public String getConfVersionInfo()
+  {
+    ConfigThingy versions = getWollmuxConf().query("CONF_VERSION");
+    try
+    {
+      return versions.getLastChild().toString();
+    }
+    catch (NodeNotFoundException e)
+    {
+      return "unbekannt";
+    }
   }
 
   /**

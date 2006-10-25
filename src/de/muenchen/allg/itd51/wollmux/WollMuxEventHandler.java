@@ -656,6 +656,54 @@ public class WollMuxEventHandler
   // *******************************************************************************************
 
   /**
+   * Erzeugt ein neues WollMuxEvent, das einen modalen Dialog anzeigt, der
+   * wichtige Versionsinformationen über den WollMux, die Konfiguration und die
+   * WollMuxBar (nur falls wollmuxBarVersion nicht der Leersting ist) enthält.
+   * Anmerkung: das WollMux-Modul hat keine Ahnung, welche WollMuxBar verwendet
+   * wird. Daher ist es möglich, über den Parameter wollMuxBarVersion eine
+   * Versionsnummer der WollMuxBar zu übergeben, die im Dialog angezeigt wird,
+   * falls wollMuxBarVersion nicht der Leerstring ist.
+   * 
+   * Dieses Event wird vom WollMux-Service (...comp.WollMux) ausgelöst, wenn die
+   * WollMux-url "wollmux:about" aufgerufen wurde.
+   */
+  public static void handleAbout(String wollMuxBarVersion)
+  {
+    handle(new OnAbout(wollMuxBarVersion));
+  }
+
+  private static class OnAbout extends BasicEvent
+  {
+    private String wollMuxBarVersion;
+
+    private OnAbout(String wollMuxBarVersion)
+    {
+      this.wollMuxBarVersion = wollMuxBarVersion;
+    }
+
+    protected void doit() throws WollMuxFehlerException
+    {
+      WollMuxSingleton mux = WollMuxSingleton.getInstance();
+
+      String str = "WollMux " + mux.getBuildInfo();
+      if (wollMuxBarVersion != null && !wollMuxBarVersion.equals(""))
+        str += "\nWollMux-Leiste " + wollMuxBarVersion;
+
+      str += "\n\nWollMux-Konfiguration: " + mux.getConfVersionInfo();
+      str += "\n" + WollMuxFiles.getDEFAULT_CONTEXT().toExternalForm();
+
+      showInfoModal("Info über Vorlagen und Formulare (WollMux)", str);
+    }
+
+    public String toString()
+    {
+      return this.getClass().getSimpleName() + "()";
+    }
+  }
+
+  // *******************************************************************************************
+
+  /**
    * Erzeugt ein neues WollMuxEvent, das den FormularMax4000 aufruft für das
    * Dokument doc.
    * 
