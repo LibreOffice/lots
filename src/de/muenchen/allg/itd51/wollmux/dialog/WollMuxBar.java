@@ -41,6 +41,7 @@
 * 02.08.2006 | BNK | bessere Fehlermeldung wenn Konfiguration nicht gefunden.    
 * 19.10.2006 | BNK | +ACTION "kill" +ACTION "dumpInfo"    
 * 25.10.2006 | BNK | [P923][R3585]Für den minimierten Zustand wird kein extra Fenster mehr verwendet.
+* 25.10.2006 | BNK | Icon-Mode entfernt.
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -57,7 +58,6 @@ import java.awt.Frame;
 import java.awt.GraphicsEnvironment;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -65,11 +65,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowFocusListener;
 import java.awt.event.WindowListener;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -80,11 +78,9 @@ import java.util.Vector;
 
 import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -121,15 +117,6 @@ public class WollMuxBar
   private static final String LEERE_LISTE = "<kein Absender vorhanden>";
   
   /**
-   * Icon in das sich die WollMuxBar verwandelt (falls nicht anders konfiguriert).
-   */
-  private final URL ICON_URL = this.getClass().getClassLoader().getResource("data/wollmux_klein.jpg");
-  
-  /**
-   * Wenn die WollMuxBar den Fokus verliert, verwandelt sie sich in ein Icon.
-   */
-  private static final int BECOME_ICON_MODE = 0;
-  /**
    * Wenn die WollMuxBar den Fokus verliert, minimiert sich das Fenster.
    */
   private static final int MINIMIZE_TO_TASKBAR_MODE = 1;
@@ -152,7 +139,7 @@ public class WollMuxBar
   //private static final int LEFT_AND_AWAY_WINDOW_MODE = 5;
   
   /**
-   * Der Anzeigemodus für die WollMuxBar (z,B, {@link BECOME_ICON_MODE})
+   * Der Anzeigemodus für die WollMuxBar (z,B, {@link #UP_AND_AWAY_WINDOW_MODE}).
    */
   private int windowMode;
   
@@ -207,11 +194,6 @@ public class WollMuxBar
    */
   private JPanel contentPanel;
   
-  /**
-   * Das Panel für das Icon-Fenster (minimizedFrame).
-   */
-  private JPanel logoPanel;
-
   /**
    * Mappt einen Menü-Namen auf ein entsprechendes JPopupMenu.
    */
@@ -318,17 +300,7 @@ public class WollMuxBar
    */
   private JPanel upAndAwayMinimizedPanel;
 
-  /**
-   * Die X-Koordinate des Icons im BECOME_ICON_MODE.
-   */
-  private int icon_x;
-  
-  /**
-   * Die Y-Koordinate des Icons im BECOME_ICON_MODE.
-   */
-  private int icon_y;
-
-  /**
+   /**
    * Die Menüleiste der WollMuxBar.
    */
   private JMenuBar menuBar;
@@ -341,7 +313,7 @@ public class WollMuxBar
   
   /**
    * Erzeugt eine neue WollMuxBar.
-   * @param winMode Anzeigemodus, z.B. {@link #BECOME_ICON_MODE}
+   * @param winMode Anzeigemodus, z.B. {@link #UP_AND_AWAY_WINDOW_MODE}.
    * @param conf der Inhalt der wollmux.conf 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -392,9 +364,9 @@ public class WollMuxBar
     //Mit file:///C:/Programme/j2sdk1.4.2_08/docs/api/java/awt/doc-files/FocusSpec.html  das Blink-Problem in Griff kriegen und vielleicht auch die WollMuxBar nicht mehr fokussierbar machen (vor allem die minimierte Version). Eventuell nuetzlich dazu sind JWindow-Klasse und evtl. muss ein blinder JFrame oder ein blindes JWindow als Parent in die Hierarchie eingefuegt werden (als Parent der eigentlichen WollMuxBar-Fenster)
    
     //Toolkit tk = Toolkit.getDefaultToolkit();
-    GraphicsEnvironment genv = GraphicsEnvironment.getLocalGraphicsEnvironment();
+    //GraphicsEnvironment genv = GraphicsEnvironment.getLocalGraphicsEnvironment();
     //Dimension screenSize = tk.getScreenSize();
-    Rectangle bounds = genv.getMaximumWindowBounds();
+    //Rectangle bounds = genv.getMaximumWindowBounds();
     
     String title = DEFAULT_TITLE;
     ConfigThingy wmBarConf = new ConfigThingy("");
@@ -465,12 +437,6 @@ public class WollMuxBar
       }
     }catch(Exception x) {}
     
-    icon_x = bounds.width - 96;
-    try{icon_x = Integer.parseInt(wmBarConf.get("ICONX").toString());}catch(Exception x) {}
-    
-    icon_y = bounds.height - 128;
-    try{icon_y = Integer.parseInt(wmBarConf.get("ICONY").toString());}catch(Exception x) {}
-    
     myFrame = new JFrame(title);
     //leave handling of close request to WindowListener.windowClosing
     myFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
@@ -519,7 +485,7 @@ public class WollMuxBar
     }
     myFrame.setJMenuBar(menuBar);
     
-    setupMinimizedFrame(title, wmBarConf, icon_x, icon_y);
+    setupMinimizedFrame(title, wmBarConf);
 
     if (windowMode != NORMAL_WINDOW_MODE) myFrame.setAlwaysOnTop(true);
     
@@ -622,38 +588,13 @@ public class WollMuxBar
    * schmaler Streifen).
    * @param title der Titel für das Fenster (nur für Anzeige in Taskleiste)
    * @param wmBarConf ConfigThingy des Fenster/WollMuxBar-Abschnitts.
-   * @param icon_x Start-Koordinate des Icons für Modus "Icon".
-   * @param icon_y Start-Koordinate des Icons für Modus "Icon".
    * @param upAndAwayWidth breite des Streifens für Modus "UpAndAway"
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private void setupMinimizedFrame(String title, ConfigThingy wmBarConf, int icon_x, int icon_y)
+  private void setupMinimizedFrame(String title, ConfigThingy wmBarConf)
   {
-    if (windowMode == BECOME_ICON_MODE)
-    {
-      URL iconUrl = ICON_URL;
-      try{
-        String urlStr = wmBarConf.get("ICON").toString();
-        URL iconUrl2 = new URL(WollMuxFiles.getDEFAULT_CONTEXT(), urlStr);
-        iconUrl2.openStream().close(); //testen ob URL erreichbar ist.
-        iconUrl = iconUrl2;
-      }catch(Exception x) {}
-      
-      JLabel logo = new JLabel(new ImageIcon(iconUrl));
-      logo.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
-      logoPanel = new JPanel(new GridLayout(1,1));
-      logoPanel.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
-      logoPanel.add(logo);
-      
-      LogoWindowTransformer myWindowTransformer = new LogoWindowTransformer();
-      logo.addMouseListener(myWindowTransformer);
-      logo.addMouseMotionListener(myWindowTransformer);
-    }
-    
     if (windowMode == UP_AND_AWAY_WINDOW_MODE)
     {
-      icon_x = 0;
-      icon_y = 0;
       upAndAwayMinimizedPanel = new JPanel();
       upAndAwayMinimizedPanel.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
     }
@@ -1179,7 +1120,7 @@ public class WollMuxBar
 
   
   /**
-   * Ein WindowListener, der auf die JFrames der Leiste und des Icons 
+   * Ein WindowListener, der auf die JFrames der Leiste 
    * registriert wird, damit als
    * Reaktion auf den Schliessen-Knopf auch die ACTION "abort" ausgeführt wird.
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -1199,7 +1140,7 @@ public class WollMuxBar
   /**
    * Wird auf das 
    * Leistenfenster als WindowFocusListener registriert, um falls erforderlich das
-   * minimieren zum Icon anzustoßen.
+   * minimieren anzustoßen.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private class WindowTransformer implements WindowFocusListener
@@ -1211,46 +1152,6 @@ public class WollMuxBar
       minimize();
     }
 
-  }
-  
-  /**
-   * Wird auf das Icon-Fenster als MouseListener und MouseMotionListener registriert,
-   * um das Anklicken und Verschieben des Icons zu managen.
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private class LogoWindowTransformer implements MouseListener, MouseMotionListener
-  {
-    /**
-     * Falls das Icon mit der Maus gezogen wird ist dies der Startpunkt an dem
-     * der Mausknopf heruntergedrückt wurde.
-     */
-    private Point dragStart = new Point(0,0);
-    
-    public void mouseClicked(MouseEvent e)
-    {
-      maximize();
-    }
-    
-    public void mousePressed(MouseEvent e)
-    {
-      dragStart = e.getPoint();
-    }
-
-    public void mouseReleased(MouseEvent e){}
-    public void mouseExited(MouseEvent e){}
-    public void mouseEntered(MouseEvent e){}
-    public void mouseMoved(MouseEvent e) {}
-    
-    public void mouseDragged(MouseEvent e)
-    {
-      Point winLoc = myFrame.getLocation();
-      Point p = e.getPoint();
-      winLoc.x += p.x - dragStart.x;
-      winLoc.y += p.y - dragStart.y;
-      icon_x = winLoc.x;
-      icon_y = winLoc.y;
-      myFrame.setLocation(icon_x, icon_y);
-    }
   }
   
   /**
@@ -1346,14 +1247,6 @@ public class WollMuxBar
       contentPane.add(upAndAwayMinimizedPanel);
       myFrame.setSize(minimizedWidth, 5);
       myFrame.addMouseListener(upAndAwayWindowTransformer);
-    } else if (windowMode == BECOME_ICON_MODE)
-    {
-      myFrame.setJMenuBar(null);
-      Container contentPane = myFrame.getContentPane();
-      contentPane.remove(contentPanel);
-      contentPane.add(logoPanel);
-      myFrame.pack();
-      myFrame.setLocation(icon_x, icon_y);
     }
   }
 
@@ -1375,13 +1268,6 @@ public class WollMuxBar
       myFrame.removeMouseListener(upAndAwayWindowTransformer);
       Container contentPane = myFrame.getContentPane();
       contentPane.remove(upAndAwayMinimizedPanel);
-      contentPane.add(contentPanel);
-      myFrame.setJMenuBar(menuBar);
-      setSizeAndLocation();
-    } else if (windowMode == BECOME_ICON_MODE)
-    {
-      Container contentPane = myFrame.getContentPane();
-      contentPane.remove(logoPanel);
       contentPane.add(contentPanel);
       myFrame.setJMenuBar(menuBar);
       setSizeAndLocation();
@@ -1425,9 +1311,7 @@ public class WollMuxBar
       
       try{
         String windowMode2 = wollmuxConf.query("Fenster").query("WollMuxBar").getLastChild().query("MODE").getLastChild().toString();
-        if (windowMode2.equalsIgnoreCase("Icon"))
-          windowMode = BECOME_ICON_MODE;
-        else if (windowMode2.equalsIgnoreCase("AlwaysOnTop"))
+        if (windowMode2.equalsIgnoreCase("AlwaysOnTop"))
           windowMode = ALWAYS_ON_TOP_WINDOW_MODE;
         else if (windowMode2.equalsIgnoreCase("Window"))
           windowMode = NORMAL_WINDOW_MODE;
