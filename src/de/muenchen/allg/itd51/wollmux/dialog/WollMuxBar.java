@@ -42,6 +42,8 @@
 * 19.10.2006 | BNK | +ACTION "kill" +ACTION "dumpInfo"    
 * 25.10.2006 | BNK | [P923][R3585]Für den minimierten Zustand wird kein extra Fenster mehr verwendet.
 * 25.10.2006 | BNK | Icon-Mode entfernt.
+* 26.10.2006 | LUT | +ACTION "about"
+*                  | +getBuildInfo(), das die buildinfo-Datei der WollMuxBar.jar ausliest
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -68,6 +70,9 @@ import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowFocusListener;
 import java.awt.event.WindowListener;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -902,6 +907,7 @@ public class WollMuxBar
     supportedActions.add("dumpInfo");
     supportedActions.add("abort");
     supportedActions.add("kill");
+    supportedActions.add("about");
     
     panelContext.supportedActions = supportedActions;
     menuContext.supportedActions = supportedActions;
@@ -949,6 +955,10 @@ public class WollMuxBar
         eventHandler.handleWollMuxUrl(WollMux.cmdKill, null);
         abort();
       }
+      else if (action.equals("about"))
+      {
+        eventHandler.handleWollMuxUrl(WollMux.cmdAbout, getBuildInfo());
+      }
     }
   }
   
@@ -964,8 +974,38 @@ public class WollMuxBar
     eventHandler.waitForThreadTermination();
 
     System.exit(0);
+  }  
+
+  /**
+   * Diese Methode liefert die erste Zeile aus der buildinfo-Datei der aktuellen
+   * WollMuxBar zurück. Der Build-Status wird während dem
+   * Build-Prozess mit dem Kommando "svn info" auf das Projektverzeichnis
+   * erstellt. Die Buildinfo-Datei buildinfo enthält die Paketnummer und die
+   * svn-Revision und ist in der Datei WollMuxBar.jar enthalten.
+   * 
+   * Kann dieses File nicht gelesen werden, so wird eine entsprechende
+   * Ersatzmeldung erzeugt (siehe Sourcecode).
+   * 
+   * @return Der Build-Status der aktuellen WollMuxBar.
+   */
+  public String getBuildInfo()
+  {
+    try
+    {
+      URL url = WollMuxBar.class.getClassLoader()
+          .getResource("buildinfo");
+      if (url != null)
+      {
+        BufferedReader in = new BufferedReader(new InputStreamReader(url
+            .openStream()));
+        return in.readLine().toString();
+      }
+    }
+    catch (java.lang.Exception x)
+    {
+    }
+    return "Version: unbekannt";
   }
-  
 
   /**
    * Wird aufgerufen, wenn ein Button aktiviert wird, dem ein Menü zugeordnet
