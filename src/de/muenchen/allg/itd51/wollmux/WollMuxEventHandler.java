@@ -43,9 +43,7 @@ import java.util.Set;
 import java.util.Vector;
 
 import com.sun.star.awt.XWindow;
-import com.sun.star.beans.PropertyValue;
 import com.sun.star.frame.XController;
-import com.sun.star.frame.XDispatch;
 import com.sun.star.frame.XFrame;
 import com.sun.star.lang.EventObject;
 import com.sun.star.lang.XComponent;
@@ -1996,36 +1994,27 @@ public class WollMuxEventHandler
    * OOo gedrückt wurde und eine evtl. definierte Komfortdruckfunktion
    * ausgeführt werden soll.
    * 
-   * Das Event wird ausgelöst, wenn der registrierte XDispatchInterceptor eines
-   * Dokuments eine entsprechende Nachricht bekommt.
+   * Das Event wird ausgelöst, wenn der registrierte WollMuxDispatchInterceptor
+   * eines Dokuments eine entsprechende Nachricht bekommt.
    */
-  public static void handlePrintButtonPressed(XTextDocument doc,
-      XDispatch origDisp, com.sun.star.util.URL arg0, PropertyValue[] arg1)
+  public static void handlePrintButtonPressed(XTextDocument doc)
   {
-    handle(new OnPrintButtonPressed(doc, origDisp, arg0, arg1));
+    handle(new OnPrintButtonPressed(doc));
   }
 
   private static class OnPrintButtonPressed extends BasicEvent
   {
     private XTextDocument doc;
 
-    private XDispatch origDisp;
-
-    private com.sun.star.util.URL arg0;
-
-    private PropertyValue[] arg1;
-
-    public OnPrintButtonPressed(XTextDocument doc, XDispatch origDisp,
-        com.sun.star.util.URL arg0, PropertyValue[] arg1)
+    public OnPrintButtonPressed(XTextDocument doc)
     {
       this.doc = doc;
-      this.origDisp = origDisp;
-      this.arg0 = arg0;
-      this.arg1 = arg1;
     }
 
     protected void doit() throws WollMuxFehlerException
     {
+      if (doc == null) return;
+
       // TODO: testen
       TextDocumentModel model = WollMuxSingleton.getInstance()
           .getTextDocumentModel(doc);
@@ -2047,7 +2036,7 @@ public class WollMuxEventHandler
       }
       else
       {
-        if (origDisp != null) origDisp.dispatch(arg0, arg1);
+        // TODO: call original wollMux:defaultUnoPrint
       }
     }
 

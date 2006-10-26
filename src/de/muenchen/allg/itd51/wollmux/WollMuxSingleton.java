@@ -43,14 +43,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Vector;
 
-import com.sun.star.beans.PropertyValue;
-import com.sun.star.frame.DispatchDescriptor;
-import com.sun.star.frame.XDispatch;
-import com.sun.star.frame.XDispatchProvider;
-import com.sun.star.frame.XDispatchProviderInterceptor;
-import com.sun.star.frame.XFrame;
-import com.sun.star.frame.XStatusListener;
 import com.sun.star.lang.EventObject;
+import com.sun.star.lang.XComponent;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
@@ -116,10 +110,8 @@ public class WollMuxSingleton implements XPALProvider
   private Vector registeredPALChangeListener;
 
   /**
-   * Enthält die Menge aller aktuell geöffneter TextDocuments in Form von
-   * TextDocumentModel-Elementen. Die HashMap enthält eine Zuordnung der
-   * TextDocumentModels auf sich selbst, damit die ursprüngliche Instanz des
-   * TextDocumentModels über get() wieder hervorgeholt werden kann.
+   * Enthält eine Zuordnung von HashableComponent Objekten, die die
+   * XTextDocumente repräsentieren, auf die zugehörigen TextDocumentModels
    */
   private HashMap currentTextDocumentModels;
 
@@ -518,31 +510,65 @@ public class WollMuxSingleton implements XPALProvider
    */
   public TextDocumentModel getTextDocumentModel(XTextDocument doc)
   {
-    TextDocumentModel refModel = new TextDocumentModel(doc);
-    TextDocumentModel curModel = (TextDocumentModel) currentTextDocumentModels
-        .get(refModel);
-    if (curModel == null)
+    HashableComponent key = new HashableComponent(doc);
+
+    TextDocumentModel model = (TextDocumentModel) currentTextDocumentModels
+        .get(key);
+    if (model == null)
     {
-      curModel = refModel;
-
-      currentTextDocumentModels.put(curModel, curModel);
-
-      curModel.registerCloseListener();
+      // Neues TextDocumentModel erzeugen, wenn es noch nicht existiert.
+      model = new TextDocumentModel(doc);
+      currentTextDocumentModels.put(key, model);
     }
-    return curModel;
+    return model;
   }
 
   /**
-   * Löscht das übergebene TextDocumentModel aus der internen Liste aller
-   * aktuellen TextDocumentModels.
+   * Löscht das übergebene TextDocumentModel von doc aus der internen Liste
+   * aller aktuellen TextDocumentModels.
    * 
-   * @param model
-   *          Das TextDocumentModel, das aus der internen Liste gelöscht werden
-   *          soll.
+   * @param doc
+   *          Das XTextDocument, dessen zugehöriges TextDocumentModel aus der
+   *          internen Liste gelöscht werden soll.
    */
-  public void disposedTextDocumentModel(TextDocumentModel model)
+  public void disposedTextDocument(XTextDocument doc)
   {
-    currentTextDocumentModels.remove(model);
+    HashableComponent key = new HashableComponent(doc);
+    currentTextDocumentModels.remove(key);
+  }
+
+  /**
+   * Hilfsklasse, die es ermöglicht, UNO-Componenten in HashMaps abzulegen; der
+   * Vergleich zweier HashableComponents mit equals(...) verwendet dazu den
+   * sicheren UNO-Vergleich UnoRuntime.areSame(...) und die Methode hashCode
+   * wird direkt an das UNO-Objekt weitergeleitet.
+   * 
+   * @author lut
+   */
+  public static class HashableComponent
+  {
+    private Object compo;
+
+    public HashableComponent(XComponent compo)
+    {
+      this.compo = compo;
+    }
+
+    public int hashCode()
+    {
+      if (compo != null) return compo.hashCode();
+      return 0;
+    }
+
+    public boolean equals(Object b)
+    {
+      if (b != null && b instanceof HashableComponent)
+      {
+        HashableComponent other = (HashableComponent) b;
+        return UnoRuntime.areSame(this.compo, other.compo);
+      }
+      return false;
+    }
   }
 
   /**
@@ -558,67 +584,34 @@ public class WollMuxSingleton implements XPALProvider
     url.openStream().close();
   }
 
+  /**
+   * Der GlobalEventListener sorgt dafür, dass der WollMux alle wichtigen
+   * globalen Ereignisse wie z.B. ein OnNew on OnLoad abfangen und darauf
+   * reagieren kann. In diesem Fall wird die Methode notifyEvent aufgerufen.
+   * 
+   * @author christoph.lutz
+   */
   public static class GlobalEventListener implements
       com.sun.star.document.XEventListener
   {
-    /**
-     * Wird vom GlobalEventBroadcaster aufgerufen.
-     * 
-     * @see com.sun.star.document.XEventListener#notifyEvent(com.sun.star.document.EventObject)
-     */
     public void notifyEvent(com.sun.star.document.EventObject docEvent)
     {
-      int code = 0;
-      try
-      {
-        code = docEvent.Source.hashCode();
-      }
-      catch (java.lang.Exception x)
-      {
-      }
-      Logger.debug2("Incoming documentEvent for #"
-                    + code
-                    + ": "
-                    + docEvent.EventName);
-      UnoService source = new UnoService(docEvent.Source);
+      XTextDocument doc = UNO.XTextDocument(docEvent.Source);
 
-      // Bekannte Event-Typen rausziehen:
-      if (source.xTextDocument() != null)
+      if (doc != null)
       {
-        // Ab OnLoad oder OnNew steht nun auch der Frame zur Verfügung und der
-        // WollMuxDispatchInterceptor kann eingebunden werden.
-        // TODO: auslagern der DispatchInterceptor-Registrierung in das
-        // TextDocumentModel.
+        Logger.debug2("Incoming documentEvent for #"
+                      + doc.hashCode()
+                      + ": "
+                      + docEvent.EventName);
+
         if (docEvent.EventName.equalsIgnoreCase("OnLoad")
             || docEvent.EventName.equalsIgnoreCase(("OnNew")))
         {
-          XFrame frame = getFrame(source);
-          if (UNO.XDispatchProviderInterception(frame) != null)
-          {
-            Logger.debug("register WollMuxDispatchInterceptor for frame #"
-                         + frame.hashCode());
-            UNO.XDispatchProviderInterception(frame)
-                .registerDispatchProviderInterceptor(
-                    new WollMuxDispatchInterceptor());
-          }
-
-          // starten der Dokumentbearbeitung:
-          WollMuxEventHandler.handleProcessTextDocument(source.xTextDocument());
+          // Verarbeitung von TextDocuments anstossen:
+          WollMuxEventHandler.handleProcessTextDocument(doc);
         }
       }
-    }
-
-    private XFrame getFrame(UnoService source)
-    {
-      XFrame frame = null;
-      try
-      {
-        frame = source.xModel().getCurrentController().getFrame();
-      }
-      catch (java.lang.Exception e)
-      {
-      }
-      return frame;
     }
 
     public void disposing(EventObject arg0)
@@ -626,167 +619,4 @@ public class WollMuxSingleton implements XPALProvider
       // nothing to do
     }
   }
-
-  /**
-   * Diese Klasse ermöglicht es dem WollMux, dispatch-Kommandos abzufangen und
-   * statt dessen eigene Aktionen durchzuführen. Jeder Frame
-   * 
-   * @author christoph.lutz
-   * 
-   */
-  public static class WollMuxDispatchInterceptor implements
-      XDispatchProviderInterceptor
-  {
-
-    XDispatchProvider slave = null;
-
-    XDispatchProvider master = null;
-
-    public XDispatchProvider getSlaveDispatchProvider()
-    {
-      return slave;
-    }
-
-    public void setSlaveDispatchProvider(XDispatchProvider slave)
-    {
-      this.slave = slave;
-    }
-
-    public XDispatchProvider getMasterDispatchProvider()
-    {
-      return master;
-    }
-
-    public void setMasterDispatchProvider(XDispatchProvider master)
-    {
-      this.master = master;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.sun.star.frame.XDispatchProvider#queryDispatch(com.sun.star.util.URL,
-     *      java.lang.String, int)
-     */
-    public XDispatch queryDispatch(com.sun.star.util.URL url, String frame,
-        int frameSearchFlags)
-    {
-      String urlStr = url.Complete;
-
-      // Logger.debug2("queryDispatch: '" + urlStr + "'");
-
-      final XDispatch origDisp = slave.queryDispatch(
-          url,
-          frame,
-          frameSearchFlags);
-
-      if (urlStr.equals(".uno:Print"))
-      {
-        Logger.debug("queryDispatch: '" + urlStr + "'");
-        return new XDispatch()
-        {
-          public void dispatch(com.sun.star.util.URL arg0, PropertyValue[] arg1)
-          {
-            XTextDocument doc = UNO.XTextDocument(UNO.desktop
-                .getCurrentComponent());
-            if (doc != null)
-              WollMuxEventHandler.handlePrintButtonPressed(
-                  doc,
-                  origDisp,
-                  arg0,
-                  arg1);
-          }
-
-          public void removeStatusListener(XStatusListener arg0,
-              com.sun.star.util.URL arg1)
-          {
-            if (origDisp != null) origDisp.removeStatusListener(arg0, arg1);
-          }
-
-          public void addStatusListener(XStatusListener arg0,
-              com.sun.star.util.URL arg1)
-          {
-            if (origDisp != null) origDisp.addStatusListener(arg0, arg1);
-          }
-        };
-      }
-
-      // Für Debug-Zwecke kann in der folgenden Zeile der ForwardDispatcher
-      // eingeschalten werden, der jede Dispatch-Anfrage durchreicht, dabei aber
-      // noch log-Meldungen produziert. ACHTUNG: hier darf (leider) nicht
-      // WollMuxFiles.isDebugMode() aufgerufen werden, da die Methode nicht im
-      // WollMuxEventHandler-Thread läuft.
-      if (false) return new ForwardDispatch(origDisp);
-
-      // Anfrage an das ursprüngliche DispatchObjekt weiterleiten.
-      return origDisp;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.sun.star.frame.XDispatchProvider#queryDispatches(com.sun.star.frame.DispatchDescriptor[])
-     */
-    public XDispatch[] queryDispatches(DispatchDescriptor[] seqDescripts)
-    {
-      int nCount = seqDescripts.length;
-      XDispatch[] lDispatcher = new XDispatch[nCount];
-
-      for (int i = 0; i < nCount; ++i)
-        lDispatcher[i] = queryDispatch(
-            seqDescripts[i].FeatureURL,
-            seqDescripts[i].FrameName,
-            seqDescripts[i].SearchFlags);
-
-      return lDispatcher;
-    }
-  }
-
-  /**
-   * Der ForwardDispatch ist ein Dispatch-Handler für Testzwecke, der jede
-   * Dispatch-Anfrag auf den Logger protokolliert, die Anfragen aber ansonsten
-   * unverändert an den ursprünglichen dispatch-Handler weiterreicht.
-   * 
-   * @author christoph.lutz
-   * 
-   */
-  private static class ForwardDispatch implements XDispatch
-  {
-    private XDispatch orig;
-
-    public ForwardDispatch(XDispatch orig)
-    {
-      this.orig = orig;
-    }
-
-    public void dispatch(com.sun.star.util.URL arg0, PropertyValue[] arg1)
-    {
-      Logger.debug2(ForwardDispatch.class.getName()
-                    + ".dispatch('"
-                    + arg0.Complete
-                    + "')");
-      orig.dispatch(arg0, arg1);
-    }
-
-    public void addStatusListener(XStatusListener arg0,
-        com.sun.star.util.URL arg1)
-    {
-      Logger.debug2(ForwardDispatch.class.getName()
-                    + ".addStatusListener('"
-                    + arg0.hashCode()
-                    + "')");
-      orig.addStatusListener(arg0, arg1);
-    }
-
-    public void removeStatusListener(XStatusListener arg0,
-        com.sun.star.util.URL arg1)
-    {
-      Logger.debug2(ForwardDispatch.class.getName()
-                    + ".removeStatusListener('"
-                    + arg0.hashCode()
-                    + "')");
-      orig.removeStatusListener(arg0, arg1);
-    }
-  }
-
 }

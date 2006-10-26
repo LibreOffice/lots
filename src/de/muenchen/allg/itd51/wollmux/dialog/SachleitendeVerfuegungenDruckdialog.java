@@ -697,8 +697,37 @@ public class SachleitendeVerfuegungenDruckdialog
    */
   private void printSettings()
   {
-    // TODO printSettings
+    pmodel.showPrintSetup(false);
+    toFront();
+  }
 
+  /**
+   * Bringt den Druckdialog in den Vordergrund.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1), Christoph Lutz (D-III-ITD-5.1)
+   */
+  public void toFront()
+  {
+    try
+    {
+      javax.swing.SwingUtilities.invokeLater(new Runnable()
+      {
+        public void run()
+        {
+          try
+          {
+            myFrame.toFront();
+          }
+          catch (Exception x)
+          {
+          }
+          ;
+        }
+      });
+    }
+    catch (Exception x)
+    {
+    }
   }
 
   /**

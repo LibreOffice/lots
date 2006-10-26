@@ -27,17 +27,24 @@ import com.sun.star.awt.DeviceInfo;
 import com.sun.star.awt.PosSize;
 import com.sun.star.awt.XWindow;
 import com.sun.star.beans.PropertyValue;
+import com.sun.star.frame.DispatchDescriptor;
 import com.sun.star.frame.FrameSearchFlag;
 import com.sun.star.frame.XController;
+import com.sun.star.frame.XDispatch;
+import com.sun.star.frame.XDispatchProvider;
+import com.sun.star.frame.XDispatchProviderInterceptor;
 import com.sun.star.frame.XFrame;
 import com.sun.star.frame.XModel;
+import com.sun.star.frame.XStatusListener;
 import com.sun.star.lang.EventObject;
 import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextViewCursorSupplier;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.util.CloseVetoException;
+import com.sun.star.util.URL;
 import com.sun.star.util.XCloseListener;
+import com.sun.star.util.XURLTransformer;
 import com.sun.star.view.DocumentZoomType;
 
 import de.muenchen.allg.afid.UNO;
@@ -143,10 +150,17 @@ public class TextDocumentModel
   private Vector draftOnlyBlocks;
 
   /**
+   * Über die Methode registerWollMuxDispatchInterceptor() wird hier der aktuell
+   * auf dem Frame registrierte WollMuxDispatchInterceptor abgelegt, der für das
+   * Abfangen von Dispatches wie z.B. dem .uno:Print erforderlich ist.
+   */
+  private WollMuxDispatchInterceptor dispatchInterceptor;
+
+  /**
    * Erzeugt ein neues TextDocumentModel zum XTextDocument doc und sollte nie
    * direkt aufgerufen werden, da neue TextDocumentModels über das
-   * WollMuxSingletonie (WollMuxSingleton.getTextDocumentModel()) erzeugt und
-   * verwaltet werden.
+   * WollMuxSingletonie (siehe WollMuxSingleton.getTextDocumentModel()) erzeugt
+   * und verwaltet werden.
    * 
    * @param doc
    */
@@ -161,36 +175,10 @@ public class TextDocumentModel
     this.docCmdTree = new DocumentCommandTree(UNO.XBookmarksSupplier(doc));
     this.notInOriginalBlocks = new Vector();
     this.draftOnlyBlocks = new Vector();
-  }
+    this.dispatchInterceptor = null;
 
-  /**
-   * TextDocumentModels forwarden die hashCode-Methode an das referenzierte
-   * XTextDocument weiter - so kann ein TextDocumentModel über eine HashMap
-   * verwaltet werden.
-   */
-  public int hashCode()
-  {
-    if (doc != null) return doc.hashCode();
-    return 0;
-  }
-
-  /**
-   * Zwei TextDocumentModels sind dann gleich, wenn sie das selbe XTextDocument
-   * doc referenzieren - so kann ein TextDocumentModel über eine HashMap
-   * verwaltet werden. ACHTUNG: Die Gleichheit zweier TextDocumentModes
-   * beschreibt nur die Gleichheit des verknüpften XTextDocuments, nicht jedoch
-   * die Gleichheit aller Felder des TextDocumentModels! Zwei Instanzen, die
-   * equals==true zurückliefern müssen also nicht unbedingt wirklich identisch
-   * sein.
-   */
-  public boolean equals(Object b)
-  {
-    if (b != null && b instanceof TextDocumentModel)
-    {
-      TextDocumentModel other = (TextDocumentModel) b;
-      return UnoRuntime.areSame(this.doc, other.doc);
-    }
-    return false;
+    registerCloseListener();
+    registerWollMuxDispatchInterceptor();
   }
 
   /**
@@ -396,8 +384,6 @@ public class TextDocumentModel
    * registriert war. War früher noch keine Druckfunktion registriert, so wird
    * das entsprechende setPrintFunction-Dokumentkommando aus dem Dokument
    * gelöscht.
-   * 
-   * TESTED
    * 
    * @param printFunctionName
    *          der Name der Druckfunktion (zum setzen) oder der Leerstring (zum
@@ -774,6 +760,12 @@ public class TextDocumentModel
     }
   }
 
+  /**
+   * Druckt das Dokument mit der Anzahl von Ausfertigungen numberOfCopies auf
+   * dem aktuell eingestellten Drucker aus.
+   * 
+   * @param numberOfCopies
+   */
   public void print(short numberOfCopies)
   {
     if (UNO.XPrintable(doc) != null)
@@ -846,8 +838,8 @@ public class TextDocumentModel
     if (formModel != null) formModel.dispose();
     formModel = null;
 
-    // Löscht das TextDocumentModel aus dem WollMux-Singleton.
-    WollMuxSingleton.getInstance().disposedTextDocumentModel(this);
+    // Löscht das TextDocumentModel von doc aus dem WollMux-Singleton.
+    WollMuxSingleton.getInstance().disposedTextDocument(doc);
   }
 
   /**
@@ -856,7 +848,7 @@ public class TextDocumentModel
    * WollMuxEvents ausgeführt werden - ist in diesem TextDocumentModel bereits
    * ein XCloseListener registriert, so wird nichts getan.
    */
-  public void registerCloseListener()
+  private void registerCloseListener()
   {
     if (closeListener == null && UNO.XCloseable(doc) != null)
     {
@@ -878,6 +870,295 @@ public class TextDocumentModel
         }
       };
       UNO.XCloseable(doc).addCloseListener(closeListener);
+    }
+  }
+
+  /**
+   * Registriert einen WollMuxDispatchProvider im Frame des Dokuments genau
+   * einmal und merkt sich den registrierten WollMuxDispatchProvider im model.
+   */
+  private void registerWollMuxDispatchInterceptor()
+  {
+    XFrame frame = null;
+    try
+    {
+      frame = UNO.XModel(doc).getCurrentController().getFrame();
+    }
+    catch (java.lang.Exception e)
+    {
+    }
+
+    if (dispatchInterceptor == null
+        && UNO.XDispatchProviderInterception(frame) != null)
+    {
+      Logger.debug("Register WollMuxDispatchInterceptor for doc #"
+                   + doc.hashCode()
+                   + " with frame #"
+                   + frame.hashCode());
+      dispatchInterceptor = new WollMuxDispatchInterceptor();
+      UNO.XDispatchProviderInterception(frame)
+          .registerDispatchProviderInterceptor(dispatchInterceptor);
+    }
+  }
+
+  /**
+   * Diese Klasse ermöglicht es dem WollMux, dispatch-Kommandos wie z.B.
+   * .uno:Print abzufangen und statt dessen eigene Aktionen durchzuführen.
+   * 
+   * @author christoph.lutz
+   */
+  public static class WollMuxDispatchInterceptor implements
+      XDispatchProviderInterceptor
+  {
+
+    private XDispatchProvider slave = null;
+
+    private XDispatchProvider master = null;
+
+    public XDispatchProvider getSlaveDispatchProvider()
+    {
+      return slave;
+    }
+
+    public void setSlaveDispatchProvider(XDispatchProvider slave)
+    {
+      this.slave = slave;
+    }
+
+    public XDispatchProvider getMasterDispatchProvider()
+    {
+      return master;
+    }
+
+    public void setMasterDispatchProvider(XDispatchProvider master)
+    {
+      this.master = master;
+    }
+
+    public XDispatch queryDispatch(com.sun.star.util.URL url, String frame,
+        int frameSearchFlags)
+    {
+      String urlStr = url.Complete;
+
+      // Logger.debug2("queryDispatch: '" + urlStr + "'");
+
+      // Ab hier kommen Dispatches, die die URL in irgend einer Form
+      // umschreiben:
+
+      // -------------- Dispatch für wollmux:defaultUNOPrint --------------
+      if (urlStr.equals("wollmux:defaultUnoPrint"))
+      {
+        Logger.debug("queryDispatch: '" + urlStr + "'");
+        final URL unoPrintUrl = getParsedUNOUrl(".uno:Print");
+        final XDispatch origDisp = slave.queryDispatch(
+            unoPrintUrl,
+            frame,
+            frameSearchFlags);
+        if (origDisp == null) return null;
+
+        return new XDispatch()
+        {
+          public void removeStatusListener(XStatusListener arg0, URL arg1)
+          {
+            if (origDisp != null)
+              origDisp.removeStatusListener(arg0, unoPrintUrl);
+          }
+
+          public void addStatusListener(XStatusListener arg0, URL arg1)
+          {
+            if (origDisp != null)
+              origDisp.addStatusListener(arg0, unoPrintUrl);
+          }
+
+          public void dispatch(URL arg0, PropertyValue[] arg1)
+          {
+            if (origDisp != null) origDisp.dispatch(unoPrintUrl, arg1);
+          }
+        };
+      }
+
+      // ----------- Dispatch für wollmux:defaultUNOPrintDefault -----------
+      if (urlStr.equals("wollmux:defaultUnoPrint"))
+      {
+        Logger.debug("queryDispatch: '" + urlStr + "'");
+        final URL unoPrintUrl = getParsedUNOUrl(".uno:PrintDefault");
+        final XDispatch origDisp = slave.queryDispatch(
+            unoPrintUrl,
+            frame,
+            frameSearchFlags);
+        if (origDisp == null) return null;
+
+        return new XDispatch()
+        {
+          public void removeStatusListener(XStatusListener arg0, URL arg1)
+          {
+            if (origDisp != null)
+              origDisp.removeStatusListener(arg0, unoPrintUrl);
+          }
+
+          public void addStatusListener(XStatusListener arg0, URL arg1)
+          {
+            if (origDisp != null)
+              origDisp.addStatusListener(arg0, unoPrintUrl);
+          }
+
+          public void dispatch(URL arg0, PropertyValue[] arg1)
+          {
+            if (origDisp != null) origDisp.dispatch(unoPrintUrl, arg1);
+          }
+        };
+      }
+
+      // Ab hier kommen Dispatches, die die URL unverändert übernehmen:
+      final XDispatch origDisp = slave.queryDispatch(
+          url,
+          frame,
+          frameSearchFlags);
+      if (origDisp == null) return null;
+
+      // ------------------ Dispatch für .uno:Print -------------------
+      if (urlStr.equals(".uno:Print"))
+      {
+        Logger.debug("queryDispatch: '" + urlStr + "'");
+
+        return new XDispatch()
+        {
+          public void dispatch(com.sun.star.util.URL arg0, PropertyValue[] arg1)
+          {
+            XTextDocument doc = UNO.XTextDocument(UNO.desktop
+                .getCurrentComponent());
+            if (doc != null) WollMuxEventHandler.handlePrintButtonPressed(doc);
+          }
+
+          public void removeStatusListener(XStatusListener arg0,
+              com.sun.star.util.URL arg1)
+          {
+            if (origDisp != null) origDisp.removeStatusListener(arg0, arg1);
+          }
+
+          public void addStatusListener(XStatusListener arg0,
+              com.sun.star.util.URL arg1)
+          {
+            if (origDisp != null) origDisp.addStatusListener(arg0, arg1);
+          }
+        };
+      }
+
+      // ------------------ Dispatch für .uno:PrintDefault -------------------
+      if (urlStr.equals(".uno:PrintDefault"))
+      {
+        Logger.debug("queryDispatch: '" + urlStr + "'");
+
+        return new XDispatch()
+        {
+          public void dispatch(com.sun.star.util.URL arg0, PropertyValue[] arg1)
+          {
+            XTextDocument doc = UNO.XTextDocument(UNO.desktop
+                .getCurrentComponent());
+            if (doc != null) WollMuxEventHandler.handlePrintButtonPressed(doc);
+          }
+
+          public void removeStatusListener(XStatusListener arg0,
+              com.sun.star.util.URL arg1)
+          {
+            if (origDisp != null) origDisp.removeStatusListener(arg0, arg1);
+          }
+
+          public void addStatusListener(XStatusListener arg0,
+              com.sun.star.util.URL arg1)
+          {
+            if (origDisp != null) origDisp.addStatusListener(arg0, arg1);
+          }
+        };
+      }
+
+      // Anfrage an das ursprüngliche DispatchObjekt weiterleiten.
+      boolean debug = true;
+      return (debug) ? new ForwardDispatch(origDisp) : origDisp;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.sun.star.frame.XDispatchProvider#queryDispatches(com.sun.star.frame.DispatchDescriptor[])
+     */
+    public XDispatch[] queryDispatches(DispatchDescriptor[] seqDescripts)
+    {
+      int nCount = seqDescripts.length;
+      XDispatch[] lDispatcher = new XDispatch[nCount];
+
+      for (int i = 0; i < nCount; ++i)
+        lDispatcher[i] = queryDispatch(
+            seqDescripts[i].FeatureURL,
+            seqDescripts[i].FrameName,
+            seqDescripts[i].SearchFlags);
+
+      return lDispatcher;
+    }
+  }
+
+  /**
+   * Liefert eine vorgeparste UNO-URL von urlStr.
+   * 
+   * @param urlStr
+   * @return vorgeparste UNO-URL von urlStr.
+   */
+  private static URL getParsedUNOUrl(String urlStr)
+  {
+    URL[] unoURL = new URL[] { new URL() };
+    unoURL[0].Complete = urlStr;
+
+    XURLTransformer trans = UNO.XURLTransformer(UNO
+        .createUNOService("com.sun.star.util.URLTransformer"));
+    if (trans != null) trans.parseStrict(unoURL);
+
+    return unoURL[0];
+  }
+
+  /**
+   * Der ForwardDispatch ist ein Dispatch-Handler für Testzwecke, der jede
+   * Dispatch-Anfrag auf den Logger protokolliert, die Anfragen aber ansonsten
+   * unverändert an den ursprünglichen dispatch-Handler weiterreicht.
+   * 
+   * @author christoph.lutz
+   * 
+   */
+  private static class ForwardDispatch implements XDispatch
+  {
+    private XDispatch orig;
+
+    public ForwardDispatch(XDispatch orig)
+    {
+      this.orig = orig;
+    }
+
+    public void dispatch(com.sun.star.util.URL url, PropertyValue[] args)
+    {
+      Logger.debug2(ForwardDispatch.class.getName()
+                    + ".dispatch('"
+                    + url.Complete
+                    + "')");
+      orig.dispatch(url, args);
+    }
+
+    public void addStatusListener(XStatusListener listener,
+        com.sun.star.util.URL url)
+    {
+      Logger.debug2(ForwardDispatch.class.getName()
+                    + ".addStatusListener('"
+                    + listener.hashCode()
+                    + "')");
+      orig.addStatusListener(listener, url);
+    }
+
+    public void removeStatusListener(XStatusListener listener,
+        com.sun.star.util.URL url)
+    {
+      Logger.debug2(ForwardDispatch.class.getName()
+                    + ".removeStatusListener('"
+                    + listener.hashCode()
+                    + "')");
+      orig.removeStatusListener(listener, url);
     }
   }
 
@@ -974,14 +1255,41 @@ public class TextDocumentModel
 
     /**
      * Zeigt den PrintSettings-Dialog an, über den der aktuelle Drucker
-     * ausgewählt und geändert werden kann genau dann an, wenn die Methode das
-     * erste Mal aufgerufen wurde.
+     * ausgewählt und geändert werden kann.
      * 
+     * @param onlyOnce
+     *          Gibt an, dass der Dialog nur beim ersten Aufruf der Methode
+     *          angezeigt wird. Wurde bereits vor dem Aufruf ein
+     *          PrintSetup-Dialog gestartet, so öffnet sich der Dialog nicht und
+     *          die Methode endet ohne Aktion.
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#showPrintSettingsOnce()
      */
-    public void showPrintSettingsOnce()
+    public void showPrintSetup(boolean onlyOnce)
     {
-      // TODO implementShowPrintSettingsOnce
+      XDispatchProvider dispProv = null;
+      try
+      {
+        dispProv = UNO.XDispatchProvider(UNO.XModel(doc).getCurrentController()
+            .getFrame());
+      }
+      catch (java.lang.Exception e)
+      {
+      }
+
+      if (dispProv != null)
+      {
+        URL url = getParsedUNOUrl(".uno:PrinterSetup");
+        XDispatch disp = dispProv.queryDispatch(
+            url,
+            "_self",
+            com.sun.star.frame.FrameSearchFlag.SELF);
+
+        Logger.debug2("Dispatch .uno:PrinterSetup");
+
+        if (disp != null) disp.dispatch(url, new PropertyValue[] {});
+
+        Logger.debug2("Dispatch .uno:PrinterSetup returned");
+      }
     }
 
     /**
