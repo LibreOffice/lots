@@ -1073,7 +1073,7 @@ public class TextDocumentModel
       }
 
       // Anfrage an das ursprüngliche DispatchObjekt weiterleiten.
-      boolean debug = true;
+      boolean debug = false;
       return (debug) ? new ForwardDispatch(origDisp) : origDisp;
     }
 
@@ -1266,6 +1266,7 @@ public class TextDocumentModel
      */
     public void showPrintSetup(boolean onlyOnce)
     {
+      // FIXME: Auslagern in den WollMuxEventHandler und synchron machen.
       XDispatchProvider dispProv = null;
       try
       {
