@@ -128,7 +128,7 @@ public class AllInsertionLineViewsPanel implements View
     buttonPanel.add(button, gbcButton);
     
     ++gbcButton.gridx;
-    button = new JButton("Button 2");
+    button = new JButton("TutNix");
     button.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e)
       {

@@ -34,9 +34,10 @@ import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTextArea;
-import javax.swing.JTextField;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.Timer;
 import javax.swing.event.DocumentEvent;
@@ -111,7 +112,7 @@ public class FunctionSelectionAccessView implements View
    * Wurde die manuelle Eingabe eines Stringliterals als Funktion gewählt, so erfolgt die
    * Eingabe in dieses Eingabefeld. 
    */
-  private JTextField literalValueField;
+  private JTextArea literalValueArea;
   
   /**
    * Wurde die manuelle Experten-Eingabe einer Funktion gewählt, so wird diese über diese
@@ -127,7 +128,7 @@ public class FunctionSelectionAccessView implements View
   
   /**
    * Wird von {@link #updateExpertFunction()} ausgewertet um festzustellen, ob die Funktion aus
-   * {@link #literalValueField} (Fall "false") oder {@link #complexFunctionArea} (fall "true")
+   * {@link #literalValueArea} (Fall "false") oder {@link #complexFunctionArea} (fall "true")
    * geparst werden muss. 
    */
   private boolean expertFunctionIsComplex;
@@ -172,7 +173,7 @@ public class FunctionSelectionAccessView implements View
     GridBagConstraints gbcHsep      = new GridBagConstraints(0, 0, 2, 1, 1.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL,       new Insets(3*TF_BORDER,0,2*TF_BORDER,0),0,0);
     GridBagConstraints gbcTextfield = new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0, GridBagConstraints.LINE_START,   GridBagConstraints.HORIZONTAL, new Insets(TF_BORDER,TF_BORDER,TF_BORDER,TF_BORDER),0,0);
     GridBagConstraints gbcTextarea  = new GridBagConstraints(0, 0, 2, 1, 1.0, 1.0, GridBagConstraints.LINE_START,   GridBagConstraints.BOTH, new Insets(TF_BORDER,TF_BORDER,TF_BORDER,TF_BORDER),0,0);
-    GridBagConstraints gbcGlue      = new GridBagConstraints(0, 0, 2, 1, 1.0, 1.0, GridBagConstraints.CENTER,   GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0);
+    GridBagConstraints gbcGlue      = new GridBagConstraints(0, 0, 2, 1, 1.0, 0.01, GridBagConstraints.CENTER,   GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0);
     
     int y = 0;
     JLabel label = new JLabel("Funktion");
@@ -199,11 +200,6 @@ public class FunctionSelectionAccessView implements View
       {
         expertFunctionIsComplex = false;
         
-        label = new JLabel("Wert");
-        gbcLabelLeft.gridx = 0;
-        gbcLabelLeft.gridy = y;
-        myPanel.add(label, gbcLabelLeft);
-        
         /*
          * Nur wenn es sich bei der Funktion um einen einfachen String handelt, wird dieser
          * als Vorbelegung genommen. Ist die aktuelle Funktion eine komplexere Funktion, so wird
@@ -214,12 +210,13 @@ public class FunctionSelectionAccessView implements View
         {
           literal = conf.toString();
         }
-        literalValueField = new JTextField(literal); 
-        gbcTextfield.gridx = 1;
-        gbcTextfield.gridy = y++;
-        myPanel.add(literalValueField, gbcTextfield);
+        literalValueArea = new JTextArea(literal); 
+        gbcTextarea.gridx = 0;
+        gbcTextarea.gridy = y++;
+        JScrollPane scrollPane = new JScrollPane(literalValueArea, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        myPanel.add(scrollPane, gbcTextarea);
         
-        literalValueField.getDocument().addDocumentListener(new ExpertFunctionChangeListener());
+        literalValueArea.getDocument().addDocumentListener(new ExpertFunctionChangeListener());
         
       } else //komplexere Expertenfunktion
       {
@@ -235,7 +232,8 @@ public class FunctionSelectionAccessView implements View
         complexFunctionArea = new JTextArea(code.toString());
         gbcTextarea.gridx = 0;
         gbcTextarea.gridy = y++;
-        myPanel.add(complexFunctionArea, gbcTextarea);
+        JScrollPane scrollPane = new JScrollPane(complexFunctionArea, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        myPanel.add(scrollPane, gbcTextarea);
         
         complexFunctionArea.getDocument().addDocumentListener(new ExpertFunctionChangeListener());
       }
@@ -392,13 +390,13 @@ public class FunctionSelectionAccessView implements View
     } else
     {
       ConfigThingy conf = new ConfigThingy("EXPERT");
-      conf.add(literalValueField.getText());
+      conf.add(literalValueArea.getText());
       funcSel.setExpertFunction(conf);
     }
   }
   
   /**
-   * Dieser Listener wird sowohl für {@link FunctionSelectionAccessView#literalValueField} als
+   * Dieser Listener wird sowohl für {@link FunctionSelectionAccessView#literalValueArea} als
    * auch {@link FunctionSelectionAccessView#complexFunctionArea} verwendet, um auf Benutzereingaben
    * zu reagieren.
    *

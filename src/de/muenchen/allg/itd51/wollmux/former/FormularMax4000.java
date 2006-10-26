@@ -16,6 +16,7 @@
 * 06.09.2006 | BNK | Hoch und Runterschieben funktionieren jetzt.
 * 19.10.2006 | BNK | Quelltexteditor nicht mehr in einem eigenen Frame
 * 20.10.2006 | BNK | Rückschreiben ins Dokument erfolgt jetzt automatisch.
+* 26.10.2006 | BNK | Magische gender: Syntax unterstützt. 
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -85,6 +86,7 @@ import de.muenchen.allg.itd51.wollmux.former.control.FormControlModel;
 import de.muenchen.allg.itd51.wollmux.former.control.FormControlModelList;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelection;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionProvider;
+import de.muenchen.allg.itd51.wollmux.former.function.ParamValue;
 import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModel;
 import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModelList;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
@@ -171,6 +173,16 @@ public class FormularMax4000
    *                        Wie bei Eingabefeldern auch ist die Angabe "<<ID>>" ohne Label
    *                        möglich und signalisiert, dass es sich um eine reine Einfügestelle
    *                        handelt, die kein Formularelement erzeugen soll.
+   *                        Wird als "Name" die Spezialsyntax "<<gender:ID>>" verwendet, so
+   *                        wird eine reine Einfügestelle erzeugt, die mit einer Gender-TRAFO
+   *                        versehen wird, die abhängig vom Formularfeld ID einen der Werte
+   *                        des Dropdowns auswählt, und zwar bei "Herr" oder "Herrn" den ersten
+   *                        Eintrag, bei "Frau" den zweiten Eintrag und bei allem sonstigen
+   *                        den dritten Eintrag. Hat das Dropdown nur 2 Einträge, so wird im
+   *                        sonstigen Fall das Feld ID untransformiert übernommen. Falls vorhanden
+   *                        werden ein bis 2 Spaces am Ende eines Eintrages der Dropdown-Liste 
+   *                        entfernt. Dies ermöglicht es, das selbe Wort mehrfach in die
+   *                        Liste aufzunehmen.
    * 
    * Checkbox: Bei Checkboxen kann als "Hilfetext" "Label<<ID>>" angegeben werden und wird
    *           beim Import entsprechend berücksichtigt.
@@ -186,6 +198,12 @@ public class FormularMax4000
    * ein insertValue anstatt eines insertFormValue erzeugt werden soll.
    */
   private static final String GLOBAL_PREFIX = "glob:";
+  
+  /**
+   * Präfix zur Markierung von IDs der magischen Deskriptor-Syntax um anzuzeigen, dass
+   * ein insertFormValue mit Gender-TRAFO erzeugt werden soll.
+   */
+  private static final String GENDER_PREFIX = "gender:";
 
   /**
    * ActionListener für Buttons mit der ACTION "abort". 
@@ -943,6 +961,8 @@ public class FormularMax4000
       }
     }
     
+    boolean doGenderTrafo = false;
+    
     String bookmarkName = insertFormValue(id);
     if (label == INSERTION_ONLY)
     {
@@ -950,6 +970,12 @@ public class FormularMax4000
       {
         id = id.substring(GLOBAL_PREFIX.length());
         bookmarkName = insertValue(id);
+      } else if (id.startsWith(GENDER_PREFIX))
+      {
+        id = id.substring(GENDER_PREFIX.length());
+        bookmarkName = insertFormValue(id);
+        if (control.getType() == DocumentTree.DROPDOWN_CONTROL)
+          doGenderTrafo = true;
       }
     }
     
@@ -957,6 +983,8 @@ public class FormularMax4000
 
     try{
       InsertionModel imodel = new InsertionModel(bookmarkName, UNO.XBookmarksSupplier(doc), functionSelectionProvider, this);
+      if (doGenderTrafo)
+        addGenderTrafo(imodel, (DropdownFormControl)control);
       insertionModelList.add(imodel);
     }catch(Exception x)
     {
@@ -966,6 +994,29 @@ public class FormularMax4000
     return model;
   }
 
+  /**
+   * Verpasst model eine Gender-TRAFO, die ihre Herr/Frau/Anders-Texte aus den Items von
+   * control bezieht.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private void addGenderTrafo(InsertionModel model, DropdownFormControl control)
+  {
+    String[] items = control.getItems();
+    FunctionSelection genderTrafo = functionSelectionProvider.getFunctionSelection("Gender");
+    String[] params = genderTrafo.getParameterNames();
+    
+    for (int i = 0; i < 3 && i < items.length; ++i)
+    {
+      String item = items[i];
+      //bis zu 2 Leerzeichen am Ende löschen, um mehrere gleiche Einträge zu erlauben.
+      if (item.endsWith(" ")) item = item.substring(0, item.length() - 1);
+      if (item.endsWith(" ")) item = item.substring(0, item.length() - 1);
+      genderTrafo.setParameterValue(params[i], ParamValue.literal(item));
+    }
+    
+    model.setTrafo(genderTrafo);
+  }
+  
   /**
    * Bastelt aus dem Ende des Textes text ein Label das maximal maxlen Zeichen lang ist.
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -1091,13 +1142,21 @@ public class FormularMax4000
   {
     if (label == INSERTION_ONLY)
     {
-      boolean glob = str.startsWith(GLOBAL_PREFIX);
-      if (glob) str = str.substring(GLOBAL_PREFIX.length());
+      String prefix = "";
+      if (str.startsWith(GLOBAL_PREFIX))
+      {
+        prefix = GLOBAL_PREFIX;
+        str = str.substring(GLOBAL_PREFIX.length());
+      }
+      else if (str.startsWith(GENDER_PREFIX))
+      {
+        prefix = GENDER_PREFIX;
+        str = str.substring(GENDER_PREFIX.length());
+      }
       str = str.replaceAll("[^a-zA-Z_0-9]","");
       if (str.length() == 0) str = "Einfuegung";
       if (!str.matches(STARTS_WITH_LETTER_RE)) str = "_" + str;
-      if (glob) str = GLOBAL_PREFIX + str;
-      return str;
+      return prefix + str;
     }
     else
     {

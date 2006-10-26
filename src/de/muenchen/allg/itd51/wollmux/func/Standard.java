@@ -12,6 +12,7 @@
  * 08.05.2006 | BNK | nach Standard umbenannt, da in Zukunft auch für Trafos etc.
  *                  | +anredeSuffix()
  * 26.07.2006 | BNK | formatInternalTelefonNumber5 -> formatiereTelefonnummerDIN5008
+ * 26.10.2006 | BNK | +gender()
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -74,6 +75,23 @@ public class Standard
       return herrText;
     else
       return frauText;
+  }
+  
+  /**
+   * Liefert herrText zurück, falls lowcase(anrede) == "herr" oder "herrn",
+   * liefert frauText zurück, falls lowcase(anrede) == "frau",
+   * liefert sonstText zurück, falls keiner der obigen Fälle zutrifft.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public static String gender(String herrText, String frauText, String sonstText, String anrede)
+  {
+    if (anrede.equalsIgnoreCase("herr") || anrede.equalsIgnoreCase("herrn"))
+      return herrText;
+    else if (anrede.equalsIgnoreCase("frau"))
+      return frauText;
+    else
+      return sonstText;
   }
 
   /**

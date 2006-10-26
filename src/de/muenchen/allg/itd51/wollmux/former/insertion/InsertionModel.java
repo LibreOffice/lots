@@ -282,6 +282,20 @@ public class InsertionModel
   }
   
   /**
+   * Setzt die TRAFO auf trafo, wobei das Objekt direkt übernommen (nicht kopiert) wird.
+   * ACHTUNG! Derzeit verständigt diese Funktion keine ModelChangeListener, d.h. Änderungen
+   * an diesem Attribut werden nicht im FM4000 propagiert. Diese Funktion kann also derzeit nur
+   * sinnvoll auf einem frischen InsertionModel verwendet werden, bevor es zur insertionModelList
+   * hinzugefügt wird. 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public void setTrafo(FunctionSelection trafo)
+  {
+    this.trafo = trafo;
+    formularMax4000.documentNeedsUpdating();
+  }
+  
+  /**
    * Interface für Listener, die über Änderungen eines Models informiert
    * werden wollen. 
    *
