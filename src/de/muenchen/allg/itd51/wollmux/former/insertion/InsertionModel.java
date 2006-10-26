@@ -38,6 +38,7 @@ import de.muenchen.allg.itd51.wollmux.former.control.FormControlModel;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelection;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionAccess;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionProvider;
+import de.muenchen.allg.itd51.wollmux.former.function.ParamValue;
 
 /**
  * Stellt eine Einfügestelle im Dokument (insertValue oder insertFormValue) dar.
@@ -343,6 +344,11 @@ public class InsertionModel
       trafo.setExpertFunction(funConf);
       formularMax4000.documentNeedsUpdating();
     }
+    public void setParameterValue(String paramName, ParamValue paramValue)
+    {
+      trafo.setParameterValue(paramName, paramValue);
+      formularMax4000.documentNeedsUpdating();
+    }
     public String[] getParameterNames()
     {
       return trafo.getParameterNames();
@@ -350,6 +356,10 @@ public class InsertionModel
     public boolean hasSpecifiedParameters()
     {
       return trafo.hasSpecifiedParameters();
+    }
+    public ParamValue getParameterValue(String paramName)
+    {
+      return trafo.getParameterValue(paramName);
     }
     
   }

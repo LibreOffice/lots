@@ -41,6 +41,9 @@ import javax.swing.SwingConstants;
 import javax.swing.Timer;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
+import javax.swing.text.JTextComponent;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
@@ -71,6 +74,12 @@ public class FunctionSelectionAccessView implements View
    * gewünscht ist.
    */
   private static final String STRING_ITEM = "<Wert>";
+  
+  /**
+   * Eintrag für die ComboBox zum Festlegen eines Parameters, der anzeigt, dass der Parameter
+   * nicht vorbelegt sein soll.
+   */
+  private static final String UNSPECIFIED_ITEM = "[nicht fest verdrahtet]";
   
   /**
    * Rand um Textfelder (wird auch für ein paar andere Ränder verwendet)
@@ -164,7 +173,7 @@ public class FunctionSelectionAccessView implements View
     GridBagConstraints gbcTextfield = new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0, GridBagConstraints.LINE_START,   GridBagConstraints.HORIZONTAL, new Insets(TF_BORDER,TF_BORDER,TF_BORDER,TF_BORDER),0,0);
     GridBagConstraints gbcTextarea  = new GridBagConstraints(0, 0, 2, 1, 1.0, 1.0, GridBagConstraints.LINE_START,   GridBagConstraints.BOTH, new Insets(TF_BORDER,TF_BORDER,TF_BORDER,TF_BORDER),0,0);
     GridBagConstraints gbcGlue      = new GridBagConstraints(0, 0, 2, 1, 1.0, 1.0, GridBagConstraints.CENTER,   GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0);
-    //FIXME Unterscheidung nach Funktionsart und Textarea falls Expert, Werteingabe falls die Expertenfunktion nur ein String-Literal ist; dann TODO Testen
+    
     int y = 0;
     JLabel label = new JLabel("Funktion");
     gbcLabelLeft.gridx = 0;
@@ -234,7 +243,19 @@ public class FunctionSelectionAccessView implements View
     }
     else if (funcSel.isReference())
     {
-      //TODO implementieren
+      String[] names = funcSel.getParameterNames();
+      for (int i = 0; i < names.length; ++i)
+      {
+        label = new JLabel(names[i]);
+        gbcLabelLeft.gridx = 0;
+        gbcLabelLeft.gridy = y;
+        myPanel.add(label, gbcLabelLeft);
+        
+        JComboBox box = buildParameterBox(names[i], funcSel.getParameterValue(names[i])); 
+        gbcTextfield.gridx = 1;
+        gbcTextfield.gridy = y++;
+        myPanel.add(box, gbcTextfield);
+      }
     }
     
     Component glue = Box.createGlue();
@@ -243,6 +264,51 @@ public class FunctionSelectionAccessView implements View
     myPanel.add(glue, gbcGlue);
     
     myPanel.validate();
+  }
+  
+  /**
+   * Liefert eine JComboBox zurück über die der Benutzer einen Parameter der Funktion
+   * festlegen kann.
+   * @param paramName der Name des Parameters.
+   * @param startValue der Wert, den die ComboBox zu Beginn eingestellt haben soll.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED
+   */
+  private JComboBox buildParameterBox(final String paramName, ParamValue startValue)
+  {
+    final JComboBox combo = new JComboBox();
+    combo.setEditable(true);
+    combo.addItem(UNSPECIFIED_ITEM);
+    JTextComponent tc = ((JTextComponent)combo.getEditor().getEditorComponent());
+    if (startValue.isUnspecified())
+      combo.setSelectedItem(UNSPECIFIED_ITEM);
+    else if (startValue.isFieldReference())
+      Logger.error("Feldreferenzen nicht implementiert");
+    else if (startValue.isLiteral())
+      combo.setSelectedItem(startValue.getString());
+      
+    tc.getDocument().addDocumentListener(new DocumentListener(){
+      private void update()
+      {
+        Document comboDoc = ((JTextComponent)combo.getEditor().getEditorComponent()).getDocument(); 
+        try{
+          String newValue = comboDoc.getText(0,comboDoc.getLength());
+          if (newValue.equals(UNSPECIFIED_ITEM))
+            funcSel.setParameterValue(paramName, ParamValue.unspecified());
+          else
+            funcSel.setParameterValue(paramName, ParamValue.literal(newValue));
+        }catch(BadLocationException x)
+        {
+          Logger.error(x);
+          return;
+        }
+      }
+      public void insertUpdate(DocumentEvent e) { update();}
+      public void removeUpdate(DocumentEvent e) { update();}
+      public void changedUpdate(DocumentEvent e){ update();}
+     });
+    
+    return combo;
   }
   
   /**

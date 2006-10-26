@@ -88,6 +88,23 @@ public interface FunctionSelectionAccess
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void setParameterValues(Map mapNameToParamValue);
+  
+  /**
+   * Liefert den für Parameter paramName gesetzten Wert. Ist für paramName kein Wert gesetzt,
+   * so wird dennoch ein ParamValue geliefert, jedoch eines für das {@link ParamValue#isUnspecified()}
+   * true liefert. Das zurückgelieferte Objekt ist kann vom Aufrufer verändert werden, ohne
+   * Auswirkungen auf das FunctionSelectionAccess Objekt.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public ParamValue getParameterValue(String paramName);
+  
+  /**
+   * Setzt den Wert für Parameter paramName auf paramValue.
+   * @param paramValue wird direkt als Referenz in die internen Datenstrukturen übernommen, darf also
+   *        vom Aufrufer nachher nicht mehr geändert werden.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public void setParameterValue(String paramName, ParamValue paramValue);
 
   /**
    * Ändert den Namen der Funktion auf functionName und die Liste der Namen ihrer

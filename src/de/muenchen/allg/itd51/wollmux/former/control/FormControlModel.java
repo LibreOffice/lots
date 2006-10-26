@@ -31,6 +31,7 @@ import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelection;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionAccess;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionProvider;
+import de.muenchen.allg.itd51.wollmux.former.function.ParamValue;
 
 /**
  * Repräsentiert ein Formularsteuerelement.
@@ -145,7 +146,7 @@ public class FormControlModel
       else if (name.equals("MINSIZE")) try{minsize = Integer.parseInt(str); }catch(Exception x){}
       else if (name.equals("VALUES")) items = parseValues(attr);
       else if (name.equals("GROUPS")) groups = parseGroups(attr);
-      else if (name.equals("PLAUSI")) plausi = funcSelProv.getFunctionSelection(attr);
+      else if (name.equals("PLAUSI")) plausi = funcSelProv.getFunctionSelection(attr, id);
       else if (name.equals("AUTOFILL")) autofill = funcSelProv.getFunctionSelection(attr);
     }
     
@@ -589,7 +590,7 @@ public class FormControlModel
       conf.addChild(autofill.export("AUTOFILL"));
     
     if (!plausi.isNone())
-      conf.addChild(plausi.export("PLAUSI"));
+      conf.addChild(plausi.export("PLAUSI", getId()));
     
     return conf; 
   }
@@ -701,6 +702,13 @@ public class FormControlModel
       sel.setExpertFunction(funConf);
       formularMax4000.documentNeedsUpdating();
     }
+
+    public void setParameterValue(String paramName, ParamValue paramValue)
+    {
+      sel.setParameterValue(paramName,paramValue);
+      formularMax4000.documentNeedsUpdating();
+    }
+    
     public String[] getParameterNames()
     {
       return sel.getParameterNames();
@@ -709,6 +717,12 @@ public class FormControlModel
     {
       return sel.hasSpecifiedParameters();
     }
+
+    public ParamValue getParameterValue(String paramName)
+    {
+      return sel.getParameterValue(paramName);
+    }
+
     
   }
 }

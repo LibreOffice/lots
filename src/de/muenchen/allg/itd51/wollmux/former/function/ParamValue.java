@@ -55,6 +55,16 @@ public class ParamValue
   }
   
   /**
+   * Copy Constructor.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public ParamValue(ParamValue orig)
+  {
+    this.idStr = orig.idStr;
+    this.type = orig.type;
+  }
+  
+  /**
    * Liefert true gdw dieser Parameterwert unspezifiziert ist.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */

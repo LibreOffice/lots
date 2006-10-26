@@ -164,6 +164,20 @@ public class FunctionSelection implements FunctionSelectionAccess
    */
   public ConfigThingy export(String root)
   {
+    return export(root, null);
+  }
+  
+  /**
+   * Liefert ein ConfigThingy, das diese FunctionSelection repräsentiert (ein leeres, falls
+   * keine Funktion ausgewählt).
+   * @param root der Name des Wurzelknotens des zu liefernden ConfigThingys.
+   * @param defaultBind falls nicht null, so werden alle unspezifizierten Parameter dieser
+   *        FunctionSelection an VALUE("<defaultBind>") gebunden. 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED 
+   */
+  public ConfigThingy export(String root, String defaultBind)
+  {
     ConfigThingy rootConf = new ConfigThingy(root); 
     
     if (isReference())
@@ -185,6 +199,11 @@ public class FunctionSelection implements FunctionSelectionAccess
           {
             set.add(value.getString());
           }
+        } else if (defaultBind != null)
+        {
+          ConfigThingy set = conf.add("SET");
+          set.add(params[i]);
+          set.add("VALUE").add(defaultBind);
         }
       }
     }
@@ -205,6 +224,18 @@ public class FunctionSelection implements FunctionSelectionAccess
       if (value != null && !value.isUnspecified()) return true;
     }
     return false;
+  }
+
+  public ParamValue getParameterValue(String paramName)
+  {
+    ParamValue val = (ParamValue)mapNameToParamValue.get(paramName);
+    if (val == null) return ParamValue.unspecified();
+    return new ParamValue(val);
+  }
+
+  public void setParameterValue(String paramName, ParamValue paramValue)
+  {
+    mapNameToParamValue.put(paramName, paramValue);
   }
 
 }

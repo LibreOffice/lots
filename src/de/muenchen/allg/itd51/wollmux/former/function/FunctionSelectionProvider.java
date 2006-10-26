@@ -101,6 +101,21 @@ public class FunctionSelectionProvider
    */
   public FunctionSelection getFunctionSelection(ConfigThingy conf)
   {
+    return getFunctionSelection(conf, null);
+  }
+  
+  /**
+   * Liefert zu einer Funktionsdefinition in conf eine FunctionSelection. conf muss einen
+   * beliebigen Wurzelknoten haben, der noch keine Grundfunktion ist 
+   * (z.B. "PLAUSI" oder "AUTOFILL").
+   * @param defaultValue falls nicht null, so werden bei einer Funktionsreferenz an 
+   * VALUE "&lt;defaultValue>" gebundene Parameter auf unspecified gesetzt.
+
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED
+   */
+  public FunctionSelection getFunctionSelection(ConfigThingy conf, String defaultValue)
+  {
     FunctionSelection funcSel = new FunctionSelection();
     
     if (conf.count() == 0) return funcSel;
@@ -142,7 +157,13 @@ public class FunctionSelectionProvider
         if (paramConf.count() == 0)
           paramValue = ParamValue.literal(paramConf.toString());
         else if (paramConf.count() == 1 && paramConf.getName().equals("VALUE"))
-          paramValue = ParamValue.field(paramConf.toString());
+        {
+          String valueName = paramConf.toString();
+          if (valueName.equals(defaultValue))
+            paramValue = ParamValue.unspecified();
+          else
+            paramValue = ParamValue.field(valueName);
+        }
         else
           return funcSel;
           
