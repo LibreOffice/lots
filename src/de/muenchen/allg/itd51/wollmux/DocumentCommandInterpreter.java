@@ -1487,9 +1487,10 @@ public class DocumentCommandInterpreter
   /**
    * Diese Methode berechnet die Transformation des Wertes value, wenn in dem
    * Dokumentkommando cmd ein TRAFO-Attribut gesetzt ist, wobei die
-   * Transformationsfunktion der Funktionsbibliothek funcLib verwendet wird. Ist
-   * kein TRAFO-Attribut definiert, so wird der Eingebewert value unverändert
-   * zurückgeliefert. Ist das TRAFO-Attribut zwar definiert, die
+   * Transformationsfunktion der Funktionsbibliothek funcLib verwendet wird und
+   * allen Parametern, die die Funktion erwartet der Wert value übergeben wird.
+   * Ist kein TRAFO-Attribut definiert, so wird der Eingebewert value
+   * unverändert zurückgeliefert. Ist das TRAFO-Attribut zwar definiert, die
    * Transformationsionfunktion jedoch nicht in der Funktionsbibliothek funcLib
    * enthalten, so wird eine Fehlermeldung zurückgeliefert und eine weitere
    * Fehlermeldung in die Log-Datei geschrieben.
@@ -1518,9 +1519,9 @@ public class DocumentCommandInterpreter
       {
         SimpleMap args = new SimpleMap();
         String[] pars = func.parameters();
-        if (pars.length >= 1)
+        for (int i = 0; i < pars.length; i++)
         {
-          args.put(pars[0], value);
+          args.put(pars[i], value);
         }
         transformed = func.getString(args);
       }
