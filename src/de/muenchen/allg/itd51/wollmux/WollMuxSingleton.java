@@ -49,6 +49,7 @@ import com.sun.star.text.XTextDocument;
 import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
+import com.sun.star.util.XURLTransformer;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoService;
@@ -582,6 +583,24 @@ public class WollMuxSingleton implements XPALProvider
   public static void checkURL(URL url) throws IOException
   {
     url.openStream().close();
+  }
+
+  /**
+   * Liefert eine vorgeparste UNO-URL von urlStr.
+   * 
+   * @param urlStr
+   * @return vorgeparste UNO-URL von urlStr.
+   */
+  public static com.sun.star.util.URL getParsedUNOUrl(String urlStr)
+  {
+    com.sun.star.util.URL[] unoURL = new com.sun.star.util.URL[] { new com.sun.star.util.URL() };
+    unoURL[0].Complete = urlStr;
+
+    XURLTransformer trans = UNO.XURLTransformer(UNO
+        .createUNOService("com.sun.star.util.URLTransformer"));
+    if (trans != null) trans.parseStrict(unoURL);
+
+    return unoURL[0];
   }
 
   /**

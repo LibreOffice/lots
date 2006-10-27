@@ -1036,21 +1036,7 @@ public class DocumentCommandInterpreter
 
       // URL durch den URLTransformer von OOo jagen, damit die URL auch von OOo
       // verarbeitet werden kann.
-      String urlStr = null;
-      try
-      {
-        UnoService trans = UnoService.createWithContext(
-            "com.sun.star.util.URLTransformer",
-            mux.getXComponentContext());
-        com.sun.star.util.URL[] unoURL = new com.sun.star.util.URL[] { new com.sun.star.util.URL() };
-        unoURL[0].Complete = url.toExternalForm();
-        trans.xURLTransformer().parseStrict(unoURL);
-        urlStr = unoURL[0].Complete;
-      }
-      catch (Exception e)
-      {
-        Logger.error(e);
-      }
+      String urlStr = WollMuxSingleton.getParsedUNOUrl(url.toExternalForm()).Complete;
 
       // Workaround: Alten Paragraphenstyle merken. Problembeschreibung siehe
       // http://qa.openoffice.org/issues/show_bug.cgi?id=60475
