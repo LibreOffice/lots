@@ -503,6 +503,22 @@ public class WollMuxSingleton implements XPALProvider
   }
 
   /**
+   * Liefert true, wenn für das XTextDocument doc ein TextDocumentModel im
+   * WollMuxSingleton registriert ist, ansonsten false.
+   * 
+   * @param doc
+   *          das Dokument für das ein TextDocumentModel gesucht wird.
+   * @return true, wenn für das XTextDocument doc ein TextDocumentModel im
+   *         WollMuxSingleton registriert ist, ansonsten false.
+   */
+  public boolean hasTextDocumentModel(XTextDocument doc)
+  {
+    HashableComponent key = new HashableComponent(doc);
+
+    return currentTextDocumentModels.containsKey(key);
+  }
+
+  /**
    * Liefert das aktuelle TextDocumentModel zum übergebenen XTextDocument doc;
    * existiert zu doc noch kein TextDocumentModel, so wird hier eines erzeugt
    * und das neu erzeugte zurück geliefert.

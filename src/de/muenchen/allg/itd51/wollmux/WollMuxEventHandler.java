@@ -850,10 +850,15 @@ public class WollMuxEventHandler
 
     protected void doit() throws WollMuxFehlerException
     {
-      TextDocumentModel model = WollMuxSingleton.getInstance()
-          .getTextDocumentModel(doc);
+      WollMuxSingleton mux = WollMuxSingleton.getInstance();
 
-      model.dispose();
+      if (mux.hasTextDocumentModel(doc))
+      {
+        TextDocumentModel model = WollMuxSingleton.getInstance()
+            .getTextDocumentModel(doc);
+
+        model.dispose();
+      }
     }
 
     public String toString()
