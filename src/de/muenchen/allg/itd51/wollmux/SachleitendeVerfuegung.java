@@ -610,7 +610,11 @@ public class SachleitendeVerfuegung
     // Verfügungspunkt1 hinzufügen wenn verfügbar.
     XTextRange punkt1 = getVerfuegungspunkt1(doc);
     if (punkt1 != null)
-      verfuegungspunkte.add(new VerfuegungspunktOriginal(punkt1));
+    {
+      Verfuegungspunkt original = new Verfuegungspunkt("I. Original");
+      original.addZuleitungszeile("Empfänger siehe Empfängerfeld");
+      verfuegungspunkte.add(original);
+    }
 
     Verfuegungspunkt currentVerfpunkt = null;
 
@@ -623,6 +627,12 @@ public class SachleitendeVerfuegung
     XParagraphCursor cursor = UNO.XParagraphCursor(doc.getText()
         .createTextCursorByRange(doc.getText().getStart()));
 
+    // Wenn kein Rahmen WollMuxVerfuegungspunkt1 vorhanden ist, wird der erste
+    // Verfügungspunkt aus dem Textbereich als Verfügungspunkt1 betrachtet. Für
+    // diesen gilt die Sonderregelung, dass die numberOfCopies mit 1 vorbelegt
+    // ist. (siehe auch weiter unten)
+    boolean first = (punkt1 == null);
+
     if (cursor != null) do
     {
       // ganzen Paragraphen markieren
@@ -631,11 +641,16 @@ public class SachleitendeVerfuegung
       if (isVerfuegungspunkt(cursor))
       {
         currentVerfpunkt = new Verfuegungspunkt(cursor.getString());
+        if (first)
+        {
+          first = false;
+          currentVerfpunkt.setNumberOfCopies(1);
+        }
         verfuegungspunkte.add(currentVerfpunkt);
       }
       else if (currentVerfpunkt != null && isZuleitungszeile(cursor))
       {
-        currentVerfpunkt.addZuleitungszeile(cursor);
+        currentVerfpunkt.addZuleitungszeile(cursor.getString());
       }
 
     } while (cursor.gotoNextParagraph(false));
@@ -667,6 +682,12 @@ public class SachleitendeVerfuegung
     protected Vector zuleitungszeilen;
 
     /**
+     * Enthält die Anzahl der Audrucke, die mit jeder hinzugefügten
+     * Zuleitungszeile erhöht wird, jedoch zusätzlich noch über
+     */
+    protected int numberOfCopies;
+
+    /**
      * Erzeugt einen neuen Verfügungspunkt, wobei firstPar der Absatz ist, der
      * die erste Zeile mit der römischen Ziffer und der Überschrift enthält.
      * 
@@ -678,6 +699,7 @@ public class SachleitendeVerfuegung
     {
       this.heading = heading;
       this.zuleitungszeilen = new Vector();
+      this.numberOfCopies = 0;
     }
 
     /**
@@ -688,22 +710,38 @@ public class SachleitendeVerfuegung
      *          XTextRange, das den gesamten Paragraphen der Zuleitungszeile
      *          enthält.
      */
-    public void addZuleitungszeile(XTextRange paragraph)
+    public void addZuleitungszeile(String zuleitung)
     {
-      if (paragraph == null) return;
-
-      zuleitungszeilen.add(paragraph.getString());
+      zuleitungszeilen.add(zuleitung);
+      numberOfCopies++;
     }
 
     /**
-     * Liefert die Anzahl der Zuleitungszeilen zurück, die dem Verfügungspunkt
-     * mit addParagraph hinzugefügt wurden.
+     * Liefert die Anzahl der Ausfertigungen zurück, mit denen der
+     * Verfügungspunkt ausgeduckt werden soll; Die Anzahl erhöht sich mit jeder
+     * hinzugefügten Zuleitungszeile, kann aber auch manuell mit
+     * setNumberOfCopies gesetzt werden.
      * 
-     * @return Anzahl der Zuleitungszeilen dieses Verfügungspunktes.
+     * @return Anzahl der Ausfertigungen mit denen der Verfügungspunkt gedruckt
+     *         werden soll.
      */
-    public int getZuleitungszeilenCount()
+    public int getNumberOfCopies()
     {
-      return zuleitungszeilen.size();
+      return numberOfCopies;
+    }
+
+    /**
+     * Setzt die Anzahl der Ausfertigungen zurück, mit denen der Verfügungspunkt
+     * ausgeduckt werden soll auf numberOfCopies. Die Anzahl erhöht sich
+     * zusätzlich mit jeder hinzugefügten Zuleitungszeile
+     * 
+     * @param numberOfCopies
+     *          Anzahl der Ausfertigungen mit denen der Verfügungspunkt
+     *          ausgedruckt werden soll.
+     */
+    public void setNumberOfCopies(int numberOfCopies)
+    {
+      this.numberOfCopies = numberOfCopies;
     }
 
     /**
@@ -732,29 +770,6 @@ public class SachleitendeVerfuegung
       text = text.replaceAll("\\s+", " ");
 
       return text;
-    }
-  }
-
-  /**
-   * Enthält die Besonderheiten des ersten Verfügungspunktes eines externen
-   * Briefkopfes wie z.B. die Darstellung der Überschrift als "I. Original".
-   * 
-   * @author christoph.lutz
-   * 
-   */
-  public static class VerfuegungspunktOriginal extends Verfuegungspunkt
-  {
-    public VerfuegungspunktOriginal(XTextRange punkt1)
-    {
-      super("I. Original");
-
-      zuleitungszeilen.add("Empfänger siehe Empfängerfeld");
-    }
-
-    public void addZuleitungszeile(XTextRange paragraph)
-    {
-      // addParagraph ergibt bei Verfuegungspunkt1 keinen Sinn und wird daher
-      // disabled.
     }
   }
 

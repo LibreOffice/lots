@@ -310,9 +310,9 @@ public class SachleitendeVerfuegungenDruckdialog
       // elementComboBoxes vorbelegen:
       Vector content = new Vector();
       content.add(verfPunkt.getHeading());
-      if (verfPunkt.getZuleitungszeilenCount() > 0)
+      if (zuleitungszeilen.size() > 0)
         content.add("------- Zuleitung an --------");
-      Iterator iter = verfPunkt.getZuleitungszeilen().iterator();
+      Iterator iter = zuleitungszeilen.iterator();
       while (iter.hasNext())
       {
         String zuleitung = (String) iter.next();
@@ -321,8 +321,8 @@ public class SachleitendeVerfuegungenDruckdialog
       elementComboBoxes[i] = new JComboBox(content);
 
       // elementCountComboBoxes vorbelegen:
-      SpinnerNumberModel model = new SpinnerNumberModel(
-          zuleitungszeilen.size(), 0, 50, 1);
+      SpinnerNumberModel model = new SpinnerNumberModel(verfPunkt
+          .getNumberOfCopies(), 0, 50, 1);
       elementCountSpinner[i] = new JSpinner(model);
 
       // printElementButtons vorbelegen:
