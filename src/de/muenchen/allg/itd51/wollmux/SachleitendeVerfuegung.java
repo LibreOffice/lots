@@ -34,6 +34,7 @@ import com.sun.star.uno.AnyConverter;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
+import de.muenchen.allg.itd51.wollmux.TextDocumentModel.PrintFailedException;
 import de.muenchen.allg.itd51.wollmux.dialog.SachleitendeVerfuegungenDruckdialog;
 
 public class SachleitendeVerfuegung
@@ -856,9 +857,11 @@ public class SachleitendeVerfuegung
    *          wenn isOriginal, wird die Ziffer des Verfügungspunktes I
    *          ausgeblendet und alle notInOriginal-Blöcke ebenso. Andernfalls
    *          sind Ziffer und notInOriginal-Blöcke eingeblendet.
+   * @throws PrintFailedException
    */
   public static void printVerfuegungspunkt(TextDocumentModel model,
       short verfPunkt, short numberOfCopies, boolean isDraft, boolean isOriginal)
+      throws PrintFailedException
   {
     // Zähler für Verfuegungspunktnummer auf 1 initialisieren, wenn ein
     // Verfuegungspunkt1 vorhanden ist.

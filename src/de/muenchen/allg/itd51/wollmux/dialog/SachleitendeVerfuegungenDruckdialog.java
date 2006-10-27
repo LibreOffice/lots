@@ -393,6 +393,7 @@ public class SachleitendeVerfuegungenDruckdialog
     myFrame.setLocation(x, y);
     myFrame.setResizable(false);
     myFrame.setVisible(true);
+    myFrame.setAlwaysOnTop(true);
     myFrame.requestFocus();
   }
 
@@ -697,37 +698,9 @@ public class SachleitendeVerfuegungenDruckdialog
    */
   private void printSettings()
   {
-    pmodel.showPrintSetup(false);
-    toFront();
-  }
-
-  /**
-   * Bringt den Druckdialog in den Vordergrund.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1), Christoph Lutz (D-III-ITD-5.1)
-   */
-  public void toFront()
-  {
-    try
-    {
-      javax.swing.SwingUtilities.invokeLater(new Runnable()
-      {
-        public void run()
-        {
-          try
-          {
-            myFrame.toFront();
-          }
-          catch (Exception x)
-          {
-          }
-          ;
-        }
-      });
-    }
-    catch (Exception x)
-    {
-    }
+    myFrame.setAlwaysOnTop(false);
+    pmodel.showPrinterSetupDialog(false);
+    myFrame.setAlwaysOnTop(true);
   }
 
   /**
@@ -738,29 +711,37 @@ public class SachleitendeVerfuegungenDruckdialog
    */
   private void printAll()
   {
-    int size = verfuegungspunkte.size();
-    for (int verfPunkt = 1; verfPunkt <= size; ++verfPunkt)
+    if (getAllElementCount() > 0)
     {
-      int numberOfCopies = 0;
-      try
-      {
-        numberOfCopies = new Integer(elementCountSpinner[verfPunkt - 1]
-            .getValue().toString()).intValue();
-      }
-      catch (Exception e)
-      {
-        Logger.error("Kann Anzahl der Ausfertigungen nicht bestimmen.", e);
-      }
+      // PrintSetup-Dialog beim ersten mal anzeigen:
+      myFrame.setAlwaysOnTop(false);
+      pmodel.showPrinterSetupDialog(true);
+      myFrame.setAlwaysOnTop(true);
 
-      boolean isDraft = (verfPunkt == size);
-      boolean isOriginal = (verfPunkt == 1);
+      int size = verfuegungspunkte.size();
+      for (int verfPunkt = 1; verfPunkt <= size; ++verfPunkt)
+      {
+        int numberOfCopies = 0;
+        try
+        {
+          numberOfCopies = new Integer(elementCountSpinner[verfPunkt - 1]
+              .getValue().toString()).intValue();
+        }
+        catch (Exception e)
+        {
+          Logger.error("Kann Anzahl der Ausfertigungen nicht bestimmen.", e);
+        }
 
-      if (numberOfCopies != 0)
-        pmodel.printVerfuegungspunkt(
-            (short) verfPunkt,
-            (short) numberOfCopies,
-            isDraft,
-            isOriginal);
+        boolean isDraft = (verfPunkt == size);
+        boolean isOriginal = (verfPunkt == 1);
+
+        if (numberOfCopies != 0)
+          pmodel.printVerfuegungspunkt(
+              (short) verfPunkt,
+              (short) numberOfCopies,
+              isDraft,
+              isOriginal);
+      }
     }
 
     abort();
@@ -798,15 +779,22 @@ public class SachleitendeVerfuegungenDruckdialog
         Logger.error("Kann Anzahl der Ausfertigungen nicht bestimmen.", e);
       }
 
-      boolean isDraft = (verfPunkt == verfuegungspunkte.size());
-      boolean isOriginal = (verfPunkt == 1);
+      if (numberOfCopies > 0)
+      {
+        // PrintSetup-Dialog beim ersten mal anzeigen:
+        myFrame.setAlwaysOnTop(false);
+        pmodel.showPrinterSetupDialog(true);
+        myFrame.setAlwaysOnTop(true);
 
-      if (numberOfCopies != 0)
+        boolean isDraft = (verfPunkt == verfuegungspunkte.size());
+        boolean isOriginal = (verfPunkt == 1);
+
         pmodel.printVerfuegungspunkt(
             (short) verfPunkt,
             (short) numberOfCopies,
             isDraft,
             isOriginal);
+      }
     }
 
     // Nach dem Drucken wird der Dialog geschlossen

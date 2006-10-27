@@ -43,6 +43,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Vector;
 
+import com.sun.star.frame.XDispatch;
+import com.sun.star.frame.XDispatchProvider;
+import com.sun.star.frame.XModel;
 import com.sun.star.lang.EventObject;
 import com.sun.star.lang.XComponent;
 import com.sun.star.text.XTextDocument;
@@ -601,6 +604,42 @@ public class WollMuxSingleton implements XPALProvider
     if (trans != null) trans.parseStrict(unoURL);
 
     return unoURL[0];
+  }
+
+  /**
+   * Holt sich den Frame von doc, führt auf diesem ein queryDispatch() mit der
+   * zu urlStr gehörenden URL aus und liefert den Ergebnis XDispatch zurück oder
+   * null, falls der XDispatch nicht verfügbar ist.
+   * 
+   * @param doc
+   *          Das Dokument, dessen Frame für den Dispatch verwendet werden soll.
+   * @param urlStr
+   *          die URL in Form eines Strings (wird intern zu URL umgewandelt).
+   * @return den gefundenen XDispatch oder null, wenn der XDispatch nicht
+   *         verfügbar ist.
+   */
+  public static XDispatch getDispatchForModel(XModel doc,
+      com.sun.star.util.URL url)
+  {
+    if (doc == null) return null;
+
+    XDispatchProvider dispProv = null;
+    try
+    {
+      dispProv = UNO.XDispatchProvider(doc.getCurrentController().getFrame());
+    }
+    catch (java.lang.Exception e)
+    {
+    }
+
+    if (dispProv != null)
+    {
+      return dispProv.queryDispatch(
+          url,
+          "_self",
+          com.sun.star.frame.FrameSearchFlag.SELF);
+    }
+    return null;
   }
 
   /**

@@ -53,7 +53,7 @@ public class PrintFunction
    * PrintFunction.
    * 
    * @throws ConfigurationErrorException
-   *           falls die Spezifikation in conf fehlerhaft ist. TODO: testen
+   *           falls die Spezifikation in conf fehlerhaft ist.
    */
   public PrintFunction(ConfigThingy conf) throws ConfigurationErrorException
   {
@@ -116,7 +116,7 @@ public class PrintFunction
    * @param pmod
    *          das XPrintModel des aktuellen Vordergrunddokuments, das die
    *          wichtigsten Druckkomandos bereitstellt, die die externe Funktion
-   *          verwenden kann. TODO: testen
+   *          verwenden kann.
    * @throws Exception
    */
   public void invoke(XPrintModel pmod)

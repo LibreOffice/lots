@@ -43,8 +43,13 @@ import java.util.Set;
 import java.util.Vector;
 
 import com.sun.star.awt.XWindow;
+import com.sun.star.beans.PropertyValue;
+import com.sun.star.frame.DispatchResultEvent;
 import com.sun.star.frame.XController;
+import com.sun.star.frame.XDispatch;
+import com.sun.star.frame.XDispatchResultListener;
 import com.sun.star.frame.XFrame;
+import com.sun.star.frame.XNotifyingDispatch;
 import com.sun.star.lang.EventObject;
 import com.sun.star.lang.XComponent;
 import com.sun.star.text.XTextCursor;
@@ -54,7 +59,6 @@ import com.sun.star.uno.Exception;
 import com.sun.star.uno.RuntimeException;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
-import com.sun.star.util.XURLTransformer;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoProps;
@@ -62,6 +66,7 @@ import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.FormFieldFactory.FormField;
+import de.muenchen.allg.itd51.wollmux.TextDocumentModel.PrintFailedException;
 import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.DJDataset;
 import de.muenchen.allg.itd51.wollmux.db.DJDatasetListElement;
@@ -277,7 +282,7 @@ public class WollMuxEventHandler
      * Logged die übergebene Fehlermeldung nach Logger.error() und erzeugt ein
      * Dialogfenster mit der Fehlernachricht.
      */
-    private void errorMessage(Throwable t)
+    protected void errorMessage(Throwable t)
     {
       Logger.error(t);
       String msg = "";
@@ -405,11 +410,35 @@ public class WollMuxEventHandler
 
       public void actionPerformed(ActionEvent arg0)
       {
-        setUnlock();
         actionEvent = arg0;
+        setUnlock();
       }
-    };
+    }
 
+    /**
+     * Dieser DispatchResultListener kann der Methode
+     * XNotifyableDispatch.dispatchWithNotification übergeben werden und sorgt
+     * in Verbindung mit den Methoden setLock() und waitForUnlock() dafür, dass
+     * ein Dispatch quasi synchron ausgeführt werden kann.
+     */
+    protected UnlockDispatchResultListener unlockDispatchResultListener = new UnlockDispatchResultListener();
+
+    protected class UnlockDispatchResultListener implements
+        XDispatchResultListener
+    {
+      public DispatchResultEvent resultEvent = null;
+
+      public void disposing(EventObject arg0)
+      {
+        setUnlock();
+      }
+
+      public void dispatchFinished(DispatchResultEvent arg0)
+      {
+        resultEvent = arg0;
+        setUnlock();
+      }
+    }
   }
 
   /**
@@ -1014,19 +1043,7 @@ public class WollMuxEventHandler
         }
 
         // URL durch den URL-Transformer jagen
-        try
-        {
-          XURLTransformer trans = UNO.XURLTransformer(UNO
-              .createUNOService("com.sun.star.util.URLTransformer"));
-          com.sun.star.util.URL[] unoURL = new com.sun.star.util.URL[] { new com.sun.star.util.URL() };
-          unoURL[0].Complete = urlStr;
-          if (trans != null) trans.parseStrict(unoURL);
-          urlStr = unoURL[0].Complete;
-        }
-        catch (java.lang.Exception e)
-        {
-          Logger.error(e);
-        }
+        urlStr = WollMuxSingleton.getParsedUNOUrl(urlStr).Complete;
 
         // Workaround für Fehler in insertDocumentFromURL: Prüfen ob URL
         // aufgelöst werden kann, da sonst der insertDocumentFromURL einfriert.
@@ -1069,7 +1086,7 @@ public class WollMuxEventHandler
 
         if (UNO.XTextDocument(doc) != null)
         {
-          TextDocumentModel model = new TextDocumentModel(UNO
+          TextDocumentModel model = mux.getTextDocumentModel(UNO
               .XTextDocument(doc));
           model.setFragUrls(fragUrls);
         }
@@ -1997,46 +2014,63 @@ public class WollMuxEventHandler
    * Das Event wird ausgelöst, wenn der registrierte WollMuxDispatchInterceptor
    * eines Dokuments eine entsprechende Nachricht bekommt.
    */
-  public static void handlePrintButtonPressed(XTextDocument doc)
+  public static void handlePrintButtonPressed(XTextDocument doc,
+      String fallbackDispatchUrlStr)
   {
-    handle(new OnPrintButtonPressed(doc));
+    handle(new OnPrintButtonPressed(doc, fallbackDispatchUrlStr));
   }
 
   private static class OnPrintButtonPressed extends BasicEvent
   {
     private XTextDocument doc;
 
-    public OnPrintButtonPressed(XTextDocument doc)
+    private String fallbackDispatchUrlStr;
+
+    public OnPrintButtonPressed(XTextDocument doc, String fallbackDispatchUrlStr)
     {
       this.doc = doc;
+      this.fallbackDispatchUrlStr = fallbackDispatchUrlStr;
     }
 
     protected void doit() throws WollMuxFehlerException
     {
       if (doc == null) return;
 
-      // TODO: testen
+      PrintFunction printFunc = null;
+
       TextDocumentModel model = WollMuxSingleton.getInstance()
           .getTextDocumentModel(doc);
+
       String printFunctionName = model.getPrintFunctionName();
       if (printFunctionName != null && !printFunctionName.equals(""))
       {
-        PrintFunction printFunc = WollMuxSingleton.getInstance()
-            .getGlobalPrintFunctions().get(printFunctionName);
+        printFunc = WollMuxSingleton.getInstance().getGlobalPrintFunctions()
+            .get(printFunctionName);
 
-        if (printFunc == null)
-          throw new WollMuxFehlerException("Druckfunktion '"
-                                           + printFunctionName
-                                           + "' nicht definiert.");
+        if (printFunc != null)
+        {
+          XPrintModel pmod = WollMuxSingleton.getInstance()
+              .getTextDocumentModel(doc).getPrintModel();
 
-        XPrintModel pmod = WollMuxSingleton.getInstance().getTextDocumentModel(
-            doc).getPrintModel();
-
-        printFunc.invoke(pmod);
+          printFunc.invoke(pmod);
+        }
+        else
+        {
+          Logger.error("Druckfunktion '"
+                       + printFunctionName
+                       + "' nicht definiert.");
+        }
       }
-      else
+
+      if (printFunc == null)
       {
-        // TODO: call original wollMux:defaultUnoPrint
+        // Fallback zum Dispatch über die URL von fallbackDispatchUrlStr
+        com.sun.star.util.URL url = WollMuxSingleton
+            .getParsedUNOUrl(fallbackDispatchUrlStr);
+        XDispatch disp = WollMuxSingleton.getDispatchForModel(
+            UNO.XModel(doc),
+            url);
+        if (disp != null) disp.dispatch(url, new PropertyValue[] {});
       }
     }
 
@@ -2083,7 +2117,14 @@ public class WollMuxEventHandler
     {
       TextDocumentModel model = WollMuxSingleton.getInstance()
           .getTextDocumentModel(doc);
-      model.print(numberOfCopies);
+      try
+      {
+        model.print(numberOfCopies);
+      }
+      catch (PrintFailedException e)
+      {
+        errorMessage(e);
+      }
       listener.actionPerformed(null);
     }
 
@@ -2360,6 +2401,10 @@ public class WollMuxEventHandler
             isDraft,
             isOriginal);
       }
+      catch (PrintFailedException e)
+      {
+        errorMessage(e);
+      }
       catch (java.lang.Exception e)
       {
         Logger.error(e);
@@ -2381,6 +2426,106 @@ public class WollMuxEventHandler
              + isDraft
              + ", isOriginal="
              + isOriginal
+             + ")";
+    }
+  }
+
+  // *******************************************************************************************
+
+  /**
+   * Erzeugt ein neues WollMuxEvent, das dafür sorgt, dass der PrintSetupDialog
+   * von OOo angezeigt wird, über den der aktuelle Drucker ausgewählt und
+   * geändert werden kann.
+   * 
+   * Das Event wird aus der Implementierung von XPrintModel (siehe
+   * TextDocumentModel) geworfen, wenn die gleichnamige Methode dort aufgerufen
+   * wird.
+   * 
+   * @param doc
+   *          Das Dokument für das die Druckereinstellung gelten sollen.
+   * @param onlyOnce
+   *          Gibt an, dass der Dialog nur beim ersten Aufruf (aus Sicht eines
+   *          Dokuments) der Methode angezeigt wird. Wurde bereits vor dem
+   *          Aufruf ein PrintSetup-Dialog gestartet, so öffnet sich der Dialog
+   *          nicht und die Methode endet ohne Aktion.
+   * @param unlockActionListener
+   *          Der unlockActionListener wird immer aufgerufen, wenn sich doit()
+   *          fertig ist.
+   */
+  public static void handleShowPrinterSetupDialog(XTextDocument doc,
+      boolean onlyOnce, ActionListener unlockActionListener)
+  {
+    handle(new OnShowPrinterSetup(doc, onlyOnce, unlockActionListener));
+  }
+
+  private static class OnShowPrinterSetup extends BasicEvent
+  {
+    private XTextDocument doc;
+
+    private boolean onlyOnce;
+
+    private ActionListener listener;
+
+    public OnShowPrinterSetup(XTextDocument doc, boolean onlyOnce,
+        ActionListener listener)
+    {
+      this.doc = doc;
+      this.onlyOnce = onlyOnce;
+      this.listener = listener;
+    }
+
+    protected void doit() throws WollMuxFehlerException
+    {
+      TextDocumentModel model = WollMuxSingleton.getInstance()
+          .getTextDocumentModel(doc);
+
+      // dialog nicht anzeigen, wenn er bereits einmal angezeigt wurde und
+      // onlyOnce gesetzt ist.
+      if (model.printSettingsDone && onlyOnce)
+      {
+        if (listener != null) listener.actionPerformed(null);
+        return;
+      }
+
+      // Dialog anzeigen:
+      try
+      {
+        com.sun.star.util.URL url = WollMuxSingleton
+            .getParsedUNOUrl(DispatchInterceptor.DISP_UNO_PRINTER_SETUP);
+        XNotifyingDispatch disp = UNO.XNotifyingDispatch(WollMuxSingleton
+            .getDispatchForModel(UNO.XModel(doc), url));
+
+        if (disp != null)
+        {
+          setLock();
+          disp.dispatchWithNotification(
+              url,
+              new PropertyValue[] {},
+              unlockDispatchResultListener);
+          waitForUnlock();
+        }
+      }
+      catch (java.lang.Exception e)
+      {
+        Logger.error(e);
+      }
+
+      // Leider gibt der Dialog keine verwertbare Statusinformation zurück, die
+      // beschreibt ob der Dialog mit "Abbrechen" oder mit "OK" beendet wurde.
+      // Dann würde ich printSettingsDone nur dann auf true sezten, wenn der
+      // Dialog mit OK beendet wurde...
+      model.printSettingsDone = true;
+
+      if (listener != null) listener.actionPerformed(null);
+    }
+
+    public String toString()
+    {
+      return this.getClass().getSimpleName()
+             + "(#"
+             + doc.hashCode()
+             + ", onlyOnce="
+             + onlyOnce
              + ")";
     }
   }

@@ -30,7 +30,7 @@ interface XPrintModel
      */
 	void print( [in] short listener);
 	
-	void showPrintSetup( [in] boolean onlyOnce);
+	void showPrinterSetupDialog( [in] boolean onlyOnce);
 		
 	void printVerfuegungspunkt( [in] short verfPunkt, [in] short numberOfCopies, [in] boolean isDraft, [in] boolean isOriginal);
 };
