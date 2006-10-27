@@ -854,9 +854,7 @@ public class WollMuxEventHandler
 
       if (mux.hasTextDocumentModel(doc))
       {
-        TextDocumentModel model = WollMuxSingleton.getInstance()
-            .getTextDocumentModel(doc);
-
+        TextDocumentModel model = mux.getTextDocumentModel(doc);
         model.dispose();
       }
     }
