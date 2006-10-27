@@ -371,6 +371,7 @@ public class FormControlModelList
       ItemListener listener = (ItemListener)iter.next();
       listener.itemAdded(model, index);
     }
+    formularMax4000.documentNeedsUpdating();
   }
   
   /**
@@ -386,6 +387,7 @@ public class FormControlModelList
       ItemListener listener = (ItemListener)iter.next();
       listener.itemSwapped(index1, index2);
     }
+    formularMax4000.documentNeedsUpdating();
   }
   
   /**

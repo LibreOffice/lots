@@ -1,7 +1,7 @@
 /*
 * Dateiname: AllInsertionTrafoViewsPanel.java
 * Projekt  : WollMux
-* Funktion : Eine View, die alle OneInsertionTrafoViews enthält.
+* Funktion : Eine View, die alle OneInsertionExtViews enthält.
 * 
 * Copyright: Landeshauptstadt München
 *
@@ -34,7 +34,7 @@ import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 
 /**
  * Eine View, die alle 
- * {@link de.muenchen.allg.itd51.wollmux.former.insertion.OneInsertionTrafoView}s enthält.
+ * {@link de.muenchen.allg.itd51.wollmux.former.insertion.OneInsertionExtView}s enthält.
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
@@ -47,7 +47,7 @@ public class AllInsertionTrafoViewsPanel implements View
   private static final String EMPTY_PANEL = "EMPTY_PANEL";
   
   /**
-   * Wird auf alle {@link OneInsertionTrafoView}s registriert.
+   * Wird auf alle {@link OneInsertionExtView}s registriert.
    */
   private ViewChangeListener myViewChangeListener;
   
@@ -73,7 +73,7 @@ public class AllInsertionTrafoViewsPanel implements View
   private InsertionModel currentModel;
   
   /**
-   * Die Liste der {@link OneInsertionTrafoView}s in dieser View.
+   * Die Liste der {@link OneInsertionExtView}s in dieser View.
    */
   private List views = new Vector();
   
@@ -101,13 +101,13 @@ public class AllInsertionTrafoViewsPanel implements View
   }
   
   /**
-   * Fügt dieser View eine {@link OneInsertionTrafoView} für model hinzu.
+   * Fügt dieser View eine {@link OneInsertionExtView} für model hinzu.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
   private void addItem(InsertionModel model)
   {
-    OneInsertionTrafoView view = new OneInsertionTrafoView(model, funcLib, myViewChangeListener);
+    OneInsertionExtView view = new OneInsertionExtView(model, funcLib, myViewChangeListener);
     views.add(view);
     
     myPanel.add(view.JComponent(), getCardIdFor(view.getModel()));
@@ -128,7 +128,7 @@ public class AllInsertionTrafoViewsPanel implements View
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
-  private void removeItem(OneInsertionTrafoView view)
+  private void removeItem(OneInsertionExtView view)
   {
     int index = views.indexOf(view);
     if (index < 0) return;
@@ -164,7 +164,7 @@ public class AllInsertionTrafoViewsPanel implements View
 
     public void viewShouldBeRemoved(View view)
     {
-      removeItem((OneInsertionTrafoView)view);
+      removeItem((OneInsertionExtView)view);
     }
     
   }

@@ -51,7 +51,8 @@ public class OneInsertionTrafoView extends FunctionSelectionAccessView
   {
     public void modelRemoved(InsertionModel model)
     {
-      bigDaddy.viewShouldBeRemoved(OneInsertionTrafoView.this);
+      if (bigDaddy != null)
+        bigDaddy.viewShouldBeRemoved(OneInsertionTrafoView.this);
     }
 
     public void attributeChanged(InsertionModel model, int attributeId, Object newValue)
