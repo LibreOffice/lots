@@ -156,7 +156,7 @@ public class Standard
    * 
    * @author Bettina Bauer (D-III-ITD 5.1)
    */
-  public static String formatiereTelefonnummer(String tel, String vorwahl)
+  private static String formatiereTelefonnummer(String tel, String vorwahl)
   {
     if (tel == null || tel.length() == 0)
     {
