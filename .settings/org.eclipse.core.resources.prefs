@@ -1,8 +1,10 @@
-#Mon Sep 18 16:08:22 CEST 2006
+#Mon Oct 30 11:51:00 CET 2006
 eclipse.preferences.version=1
+encoding//packages/WollMux/Addons.xcu=UTF-8
 encoding//packages/WollMux/Controller.xcu=UTF-8
 encoding//packages/WollMux/Jobs.xcu=UTF-8
 encoding//packages/WollMux/ProtocolHandler.xcu=UTF-8
+encoding//packages/WollMux/WriterWindowState.xcu=UTF-8
 encoding//src/data=UTF-8
 encoding/<project>=ISO-8859-1
 encoding/default=UTF-8
