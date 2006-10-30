@@ -607,6 +607,7 @@ public class FormControlModel
       ModelChangeListener listener = (ModelChangeListener)iter.next();
       listener.attributeChanged(this, attributeId, newValue);
     }
+    formularMax4000.documentNeedsUpdating();
   }
   
   /**
@@ -625,6 +626,7 @@ public class FormControlModel
       ModelChangeListener listener = (ModelChangeListener)iter.next();
       listener.modelRemoved(this);
     }
+    formularMax4000.documentNeedsUpdating();
   }
   
   /**

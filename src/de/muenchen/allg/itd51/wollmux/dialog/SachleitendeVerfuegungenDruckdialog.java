@@ -535,7 +535,7 @@ public class SachleitendeVerfuegungenDruckdialog
             {
               textField = new JTextField("" + getAllElementCount());
               textField.setEditable(false);
-              textField.setHorizontalAlignment(JTextField.CENTER);
+              textField.setHorizontalAlignment(SwingConstants.CENTER);
               allElementCountTextField = textField;
             }
             else

@@ -227,7 +227,7 @@ public class InsertionModel
   {
     dataId = newId;
     notifyListeners(ID_ATTR, newId);
-    formularMax4000.documentNeedsUpdating();
+    //formularMax4000.documentNeedsUpdating(); ist bereits in notifyListeners
   }
   
   /**
@@ -246,6 +246,7 @@ public class InsertionModel
       ModelChangeListener listener = (ModelChangeListener)iter.next();
       listener.modelRemoved(this);
     }
+    formularMax4000.documentNeedsUpdating();
   }
   
   /**
@@ -260,6 +261,7 @@ public class InsertionModel
       ModelChangeListener listener = (ModelChangeListener)iter.next();
       listener.attributeChanged(this, attributeId, newValue);
     }
+    formularMax4000.documentNeedsUpdating();
   }
   
   /**
