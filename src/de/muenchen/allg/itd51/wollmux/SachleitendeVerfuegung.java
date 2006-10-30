@@ -23,13 +23,16 @@ import java.util.Vector;
 
 import com.sun.star.awt.FontWeight;
 import com.sun.star.container.XEnumeration;
+import com.sun.star.container.XNameContainer;
 import com.sun.star.lang.IllegalArgumentException;
+import com.sun.star.style.XStyle;
 import com.sun.star.text.XParagraphCursor;
 import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextFrame;
 import com.sun.star.text.XTextRange;
 import com.sun.star.uno.AnyConverter;
+import com.sun.star.uno.Exception;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
@@ -89,6 +92,9 @@ public class SachleitendeVerfuegung
   {
     if (doc == null || range == null) return;
 
+    // Notwendige Absatzformate definieren (falls nicht bereits definiert)
+    createUsedParagraphStyles(doc);
+    
     XParagraphCursor cursor = UNO.XParagraphCursor(range.getText()
         .createTextCursorByRange(range));
 
@@ -124,6 +130,9 @@ public class SachleitendeVerfuegung
   {
     if (doc == null || range == null) return;
 
+    // Notwendige Absatzformate definieren (falls nicht bereits definiert)
+    createUsedParagraphStyles(doc);
+    
     XParagraphCursor cursor = UNO.XParagraphCursor(range.getText()
         .createTextCursorByRange(range));
 
@@ -162,6 +171,9 @@ public class SachleitendeVerfuegung
   {
     if (doc == null || range == null) return;
 
+    // Notwendige Absatzformate definieren (falls nicht bereits definiert)
+    createUsedParagraphStyles(doc);
+    
     XParagraphCursor cursor = UNO.XParagraphCursor(range.getText()
         .createTextCursorByRange(range));
 
@@ -184,7 +196,7 @@ public class SachleitendeVerfuegung
         UNO.XTextViewCursorSupplier(UNO.XModel(doc).getCurrentController())
             .getViewCursor().gotoRange(cursor.getEnd(), false);
       }
-      catch (Exception e)
+      catch (java.lang.Exception e)
       {
       }
     }
@@ -1033,7 +1045,165 @@ public class SachleitendeVerfuegung
     return UNO.XPageCursor(viewCursor).getPage();
   }
 
-  public static void main(String[] args) throws Exception
+  /**
+   * Liefert das Absatzformat (=ParagraphStyle) des Dokuments doc mit dem Namen
+   * name oder null, falls das Absatzformat nicht definiert ist.
+   * 
+   * @param doc
+   *          das Dokument in dem nach einem Absatzformat name gesucht werden
+   *          soll.
+   * @param name
+   *          der Name des gesuchten Absatzformates
+   * @return das Absatzformat des Dokuments doc mit dem Namen name oder null,
+   *         falls das Absatzformat nicht definiert ist.
+   */
+  private static XStyle getParagraphStyle(XTextDocument doc, String name)
+  {
+    XStyle style = null;
+
+    XNameContainer pss = getParagraphStyleContainer(doc);
+    if (pss != null) try
+    {
+      style = UNO.XStyle(pss.getByName(name));
+    }
+    catch (java.lang.Exception e)
+    {
+    }
+    return style;
+  }
+
+  /**
+   * Erzeugt im Dokument doc ein neues Absatzformat (=ParagraphStyle) mit dem
+   * Namen name und liefert das neu erzeugte Absatzformat zurück oder null,
+   * falls das Erzeugen nicht funktionierte.
+   * 
+   * @param doc
+   *          das Dokument in dem das Absatzformat name erzeugt werden soll.
+   * @param name
+   *          der Name des zu erzeugenden Absatzformates
+   * @return das neu erzeugte Absatzformat oder null, falls das Absatzformat
+   *         nicht erzeugt werden konnte.
+   */
+  private static XStyle createParagraphStyle(XTextDocument doc, String name)
+  {
+    XNameContainer pss = getParagraphStyleContainer(doc);
+    XStyle style = null;
+    try
+    {
+      style = UNO.XStyle(UNO.XMultiServiceFactory(doc).createInstance(
+          "com.sun.star.style.ParagraphStyle"));
+      pss.insertByName(name, style);
+      return style;
+    }
+    catch (Exception e)
+    {
+    }
+    return null;
+  }
+
+  /**
+   * Liefert den Container der ParagraphStyles des Dokuments doc.
+   * 
+   * @param doc
+   *          Das Dokument, dessen ParagraphStyleContainer zurückgeliefert
+   *          werden soll.
+   * @return Liefert den Container der ParagraphStyles des Dokuments doc oder
+   *         null, falls der Container nicht bestimmt werden konnte.
+   */
+  private static XNameContainer getParagraphStyleContainer(XTextDocument doc)
+  {
+    try
+    {
+      return UNO.XNameContainer(UNO.XNameAccess(
+          UNO.XStyleFamiliesSupplier(doc).getStyleFamilies()).getByName(
+          "ParagraphStyles"));
+    }
+    catch (java.lang.Exception e)
+    {
+    }
+    return null;
+  }
+
+  /**
+   * Falls die für Sachleitenden Verfügungen notwendigen Absatzformate nicht
+   * bereits existieren, werden sie hier erzeugt und mit fest verdrahteten
+   * Werten vorbelegt.
+   * 
+   * @param doc
+   */
+  private static void createUsedParagraphStyles(XTextDocument doc)
+  {
+    XStyle style = null;
+
+    style = getParagraphStyle(doc, ParaStyleNameDefault);
+    if (style == null)
+    {
+      style = createParagraphStyle(doc, ParaStyleNameDefault);
+      if (style != null)
+      {
+        UNO.setProperty(style, "FollowStyle", ParaStyleNameDefault);
+        UNO.setProperty(style, "CharHeight", new Integer(11));
+        UNO.setProperty(style, "CharFontCharSet", new Integer(76));
+        UNO.setProperty(style, "CharFontName", "Arial");
+      }
+    }
+
+    style = getParagraphStyle(doc, ParaStyleNameVerfuegungspunkt);
+    if (style == null)
+    {
+      style = createParagraphStyle(doc, ParaStyleNameVerfuegungspunkt);
+      if (style != null)
+      {
+        UNO.setProperty(style, "ParentStyle", ParaStyleNameDefault);
+        UNO.setProperty(style, "FollowStyle", ParaStyleNameDefault);
+        UNO.setProperty(style, "CharWeight", new Integer(150));
+        UNO.setProperty(style, "ParaFirstLineIndent", new Integer(-700));
+        UNO.setProperty(style, "ParaTopMargin", new Integer(460));
+      }
+    }
+
+    style = getParagraphStyle(doc, ParaStyleNameVerfuegungspunkt1);
+    if (style == null)
+    {
+      style = createParagraphStyle(doc, ParaStyleNameVerfuegungspunkt1);
+      if (style != null)
+      {
+        UNO.setProperty(style, "ParentStyle", ParaStyleNameVerfuegungspunkt);
+        UNO.setProperty(style, "FollowStyle", ParaStyleNameDefault);
+        UNO.setProperty(style, "ParaFirstLineIndent", new Integer(0));
+        UNO.setProperty(style, "ParaTopMargin", new Integer(0));
+      }
+    }
+
+    style = getParagraphStyle(doc, ParaStyleNameAbdruck);
+    if (style == null)
+    {
+      style = createParagraphStyle(doc, ParaStyleNameAbdruck);
+      if (style != null)
+      {
+        UNO.setProperty(style, "ParentStyle", ParaStyleNameVerfuegungspunkt);
+        UNO.setProperty(style, "FollowStyle", ParaStyleNameDefault);
+        UNO.setProperty(style, "CharWeight", new Integer(100));
+        UNO.setProperty(style, "ParaFirstLineIndent", new Integer(-700));
+        UNO.setProperty(style, "ParaTopMargin", new Integer(460));
+      }
+    }
+
+    style = getParagraphStyle(doc, ParaStyleNameZuleitungszeile);
+    if (style == null)
+    {
+      style = createParagraphStyle(doc, ParaStyleNameZuleitungszeile);
+      if (style != null)
+      {
+        UNO.setProperty(style, "ParentStyle", ParaStyleNameDefault);
+        UNO.setProperty(style, "FollowStyle", ParaStyleNameDefault);
+        UNO.setProperty(style, "CharUnderline", new Integer(1));
+        UNO.setProperty(style, "CharWeight", new Integer(150));
+      }
+    }
+  }
+
+  public static void main(String[] args) throws java.lang.Exception
   {
     UNO.init();
 
