@@ -1036,7 +1036,7 @@ public class DocumentCommandInterpreter
 
       // URL durch den URLTransformer von OOo jagen, damit die URL auch von OOo
       // verarbeitet werden kann.
-      String urlStr = WollMuxSingleton.getParsedUNOUrl(url.toExternalForm()).Complete;
+      String urlStr = UNO.getParsedUNOUrl(url.toExternalForm()).Complete;
 
       // Workaround: Alten Paragraphenstyle merken. Problembeschreibung siehe
       // http://qa.openoffice.org/issues/show_bug.cgi?id=60475

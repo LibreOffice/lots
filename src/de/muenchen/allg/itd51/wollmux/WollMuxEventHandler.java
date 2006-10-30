@@ -1046,7 +1046,7 @@ public class WollMuxEventHandler
         }
 
         // URL durch den URL-Transformer jagen
-        urlStr = WollMuxSingleton.getParsedUNOUrl(urlStr).Complete;
+        urlStr = UNO.getParsedUNOUrl(urlStr).Complete;
 
         // Workaround für Fehler in insertDocumentFromURL: Prüfen ob URL
         // aufgelöst werden kann, da sonst der insertDocumentFromURL einfriert.
@@ -2068,8 +2068,7 @@ public class WollMuxEventHandler
       if (printFunc == null)
       {
         // Fallback zum Dispatch über die URL von fallbackDispatchUrlStr
-        com.sun.star.util.URL url = WollMuxSingleton
-            .getParsedUNOUrl(fallbackDispatchUrlStr);
+        com.sun.star.util.URL url = UNO.getParsedUNOUrl(fallbackDispatchUrlStr);
         XDispatch disp = WollMuxSingleton.getDispatchForModel(
             UNO.XModel(doc),
             url);
@@ -2493,7 +2492,7 @@ public class WollMuxEventHandler
       // Dialog anzeigen:
       try
       {
-        com.sun.star.util.URL url = WollMuxSingleton
+        com.sun.star.util.URL url = UNO
             .getParsedUNOUrl(DispatchInterceptor.DISP_UNO_PRINTER_SETUP);
         XNotifyingDispatch disp = UNO.XNotifyingDispatch(WollMuxSingleton
             .getDispatchForModel(UNO.XModel(doc), url));

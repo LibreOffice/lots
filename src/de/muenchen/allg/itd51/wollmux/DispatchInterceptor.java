@@ -264,7 +264,7 @@ public class DispatchInterceptor
       XDispatchProvider provider, String urlStr, String frame,
       int frameSearchFlags)
   {
-    final URL unoUrl = WollMuxSingleton.getParsedUNOUrl(urlStr);
+    final URL unoUrl = UNO.getParsedUNOUrl(urlStr);
     final XDispatch origDisp = provider.queryDispatch(
         unoUrl,
         frame,
