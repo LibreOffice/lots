@@ -13,6 +13,7 @@
  *                  | +anredeSuffix()
  * 26.07.2006 | BNK | formatInternalTelefonNumber5 -> formatiereTelefonnummerDIN5008
  * 26.10.2006 | BNK | +gender()
+ * 30.10.2006 | BNK | Kommentare verbessert.
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -124,13 +125,11 @@ public class Standard
     return false;
   }
 
- /**
-   * Nach Aufruf über Funktion Telefonnummer. Übergabe der tel und vorwahlIntern
-   * an die Methode formatiereTelefonnummer.
+  /**
+   * Formatiert tel gemäss DIN 5008 und setzt dann die Vorwahl "089" davor.
    * 
    * @author Bettina Bauer (D-III-ITD 5.1)
-   */
-
+   */  
   public static String formatiereTelefonnummerDIN5008(String tel)
   {
     String vorwahlExtern = "089";
@@ -139,10 +138,8 @@ public class Standard
   }
 
   /**
-   * Nach Aufruf über Funktion TelefonnummerIntern. Übergabe der tel und
-   * vorwahlIntern an die Methode formatiereTelefonnummer. Die interne
-   * Telefonnummer wird so formatiert das sie von jedem internen Telefon aus
-   * gewählt werden kann.
+   * Formatiert tel gemäss DIN 5008 und setzt dann die Vorwahl "0" davor, getrennt durch
+   * Space. Dadurch entsteht eine Nummer, die von jedem internen Telefon aus funktioniert.
    * 
    * @author Bettina Bauer (D-III-ITD 5.1)
    */
@@ -154,7 +151,8 @@ public class Standard
   }
 
   /**
-   * Formatiert tel gemäss DIN 5008.
+   * Formatiert tel gemäss DIN 5008 und setzt dann die Vorwahl vorwahl davor, getrennt durch
+   * Space.
    * 
    * @author Bettina Bauer (D-III-ITD 5.1)
    */
