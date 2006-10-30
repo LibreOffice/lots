@@ -17,6 +17,7 @@
 * 19.10.2006 | BNK | Quelltexteditor nicht mehr in einem eigenen Frame
 * 20.10.2006 | BNK | Rückschreiben ins Dokument erfolgt jetzt automatisch.
 * 26.10.2006 | BNK | Magische gender: Syntax unterstützt. 
+* 30.10.2006 | BNK | Menüstruktur geändert; Datei/Speichern (unter...) hinzugefügt
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -62,8 +63,12 @@ import javax.swing.text.PlainView;
 import javax.swing.text.View;
 import javax.swing.text.ViewFactory;
 
+import com.sun.star.beans.PropertyValue;
 import com.sun.star.container.XNameAccess;
 import com.sun.star.document.XDocumentInfo;
+import com.sun.star.frame.FrameSearchFlag;
+import com.sun.star.frame.XDispatchHelper;
+import com.sun.star.frame.XDispatchProvider;
 import com.sun.star.text.XBookmarksSupplier;
 import com.sun.star.text.XTextContent;
 import com.sun.star.text.XTextDocument;
@@ -404,7 +409,35 @@ public class FormularMax4000
     //========================= Datei ============================
     JMenu menu = new JMenu("Datei");
     
-    JMenuItem menuItem = new JMenuItem("Formularfelder aus Dokument einlesen");
+    JMenuItem menuItem = new JMenuItem("Speichern");
+    menuItem.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent e)
+      {
+        save(doc);
+      }});
+    menu.add(menuItem);
+    
+    menuItem = new JMenuItem("Speichern unter...");
+    menuItem.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent e)
+      {
+        saveAs(doc);
+      }});
+    menu.add(menuItem);
+    
+    menuItem = new JMenuItem("FormularMax4000 schließen");
+    menuItem.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent e)
+      {
+        abort();
+      }});
+    menu.add(menuItem);
+    
+    mainMenuBar.add(menu);
+//  ========================= Formular ============================
+    menu = new JMenu("Formular");
+    
+    menuItem = new JMenuItem("Formularfelder aus Dokument einlesen");
     menuItem.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e)
       {
@@ -1278,6 +1311,30 @@ public class FormularMax4000
   private String insertFormValue(String id)
   {
     return "WM(CMD 'insertFormValue' ID '"+id+"')";
+  }
+  
+  /**
+   * Ruft die Datei/Speichern Funktion von OpenOffice.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private void save(XTextDocument doc)
+  {
+    XDispatchProvider prov = UNO.XDispatchProvider(doc.getCurrentController().getFrame());
+    XDispatchHelper dispatcher = UNO.XDispatchHelper(UNO.createUNOService("com.sun.star.frame.DispatchHelper"));
+    dispatcher.executeDispatch(prov, ".uno:Save", "", FrameSearchFlag.SELF, new PropertyValue[]{});
+  }
+  
+  /**
+   * Ruft die Datei/Speichern unter... Funktion von OpenOffice.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private void saveAs(XTextDocument doc)
+  {
+    XDispatchProvider prov = UNO.XDispatchProvider(doc.getCurrentController().getFrame());
+    XDispatchHelper dispatcher = UNO.XDispatchHelper(UNO.createUNOService("com.sun.star.frame.DispatchHelper"));
+    dispatcher.executeDispatch(prov, ".uno:SaveAs", "", FrameSearchFlag.SELF, new PropertyValue[]{});
   }
   
   /**
