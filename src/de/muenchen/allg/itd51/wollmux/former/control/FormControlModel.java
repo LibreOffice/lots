@@ -27,6 +27,8 @@ import java.util.Set;
 import java.util.Vector;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.former.Broadcast;
+import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelection;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionAccess;
@@ -440,11 +442,16 @@ public class FormControlModel
    * Setzt das ID-Attribut.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public void setId(String id)
+  public void setId(final String id)
   {
+    final String oldId = this.id;
     this.id = id;
     notifyListeners(ID_ATTR, id);
-    formularMax4000.documentNeedsUpdating();
+    formularMax4000.broadcast(new Broadcast(){
+      public void sendTo(BroadcastListener listener)
+      {
+        listener.broadcastFormControlIdHasChanged(oldId, id);
+      }});
   }
   
   /**
@@ -455,7 +462,6 @@ public class FormControlModel
   {
     this.label = label;
     notifyListeners(LABEL_ATTR, label);
-    formularMax4000.documentNeedsUpdating();
   }
   
   /**

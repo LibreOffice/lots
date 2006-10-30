@@ -23,6 +23,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
+import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
+
 /**
  * Verwaltet eine Liste von InsertionModels
  *
@@ -40,6 +43,16 @@ public class InsertionModelList
    * werden wollen.
    */
   private List listeners = new Vector(1);
+  
+  /**
+   * Erzeugt eine neue InsertionModelList.
+   * @param formularMax4000 der FormularMax4000 zu dem diese Liste gehört.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public InsertionModelList(FormularMax4000 formularMax4000)
+  {
+    formularMax4000.addBroadcastListener(new MyBroadcastListener());
+  }
   
   /**
    * Fügt model dieser Liste hinzu.
@@ -152,5 +165,18 @@ public class InsertionModelList
     public void itemAdded(InsertionModel model, int index);
   }
 
+  private class MyBroadcastListener extends BroadcastListener
+  {
+    public void broadcastFormControlIdHasChanged(String oldId, String newId) 
+    {
+      Iterator iter = models.iterator();
+      while (iter.hasNext())
+      {
+        InsertionModel model = (InsertionModel)iter.next();
+        model.broadcastFormControlIdHasChanged(oldId, newId);
+      }
+    
+    }
+  }
 }
 

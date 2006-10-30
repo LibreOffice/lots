@@ -389,7 +389,7 @@ public class FormularMax4000
     
     
     formControlModelList = new FormControlModelList(this);
-    insertionModelList = new InsertionModelList();
+    insertionModelList = new InsertionModelList(this);
     
     //  Create and set up the window.
     myFrame = new JFrame("FormularMax 4000");

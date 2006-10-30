@@ -282,7 +282,7 @@ public class OneFormControlLineView extends LineView
       int state = 1;
       if ((e.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) == InputEvent.CTRL_DOWN_MASK)
         state = 0;
-      //formularMax4000.broadcast(new BroadcastFormControlModelSelection(getModel(), state, state!=0));
+
       formularMax4000.broadcast(new BroadcastObjectSelection(getModel(), state, state!=0){
 
         public void sendTo(BroadcastListener listener)

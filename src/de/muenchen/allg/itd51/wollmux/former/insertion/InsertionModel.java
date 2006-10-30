@@ -298,6 +298,20 @@ public class InsertionModel
   }
   
   /**
+   * Teilt diesem InsertionModel mit, dass ein Formularsteuerelement seine ID von oldId auf
+   * newId geändert hat, damit das InsertionModel seine eigene ID anpassen kann falls nötig.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public void broadcastFormControlIdHasChanged(String oldId, String newId)
+  {
+    if (sourceType == FORM_TYPE && dataId.equals(oldId))
+    {
+      setDataID(newId);
+    }
+  }
+  
+  
+  /**
    * Interface für Listener, die über Änderungen eines Models informiert
    * werden wollen. 
    *
@@ -379,5 +393,6 @@ public class InsertionModel
     }
     
   }
+
   
 }
