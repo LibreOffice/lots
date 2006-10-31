@@ -24,14 +24,49 @@ module de {  module muenchen {  module allg { module itd51 { module wollmux {
 interface XPrintModel
 {
 
+    /**
+      Liefert das XTextDocument mit dem die Druckfunktion aufgerufen wurde.
+     */
 	com::sun::star::text::XTextDocument getTextDocument();
 
     /**
+      Druckt das TextDocument mit numberOfCopies Ausfertigungen auf dem aktuell
+      eingestellten Drucker aus.
      */
-	void print( [in] short listener);
+	void print( [in] short numberOfCopies);
 	
+    /**
+      Zeigt den PrintSetupDialog an, über den der aktuelle Drucker ausgewählt
+      und geändert werden kann.
+      
+      @param onlyOnce
+               Gibt an, dass der Dialog nur beim ersten Aufruf (aus Sicht eines
+               Dokuments) der Methode angezeigt wird. Wurde bereits vor dem
+               Aufruf ein PrintSetup-Dialog gestartet, so öffnet sich der
+               Dialog nicht und die Methode endet ohne Aktion.
+     */
 	void showPrinterSetupDialog( [in] boolean onlyOnce);
 		
+    /**
+      Falls das TextDocument Sachleitende Verfügungen enthält, ist es mit
+      dieser Methode möglich, den Verfügungspunkt mit der Nummer verfPunkt
+      auszudrucken, wobei alle darauffolgenden Verfügungspunkte ausgeblendet
+      werden.
+      
+      @param verfPunkt
+               Die Nummer des auszuduruckenden Verfügungspunktes, wobei alle
+               folgenden Verfügungspunkte ausgeblendet werden.
+      @param numberOfCopies
+               Die Anzahl der Ausfertigungen, in der verfPunkt ausgedruckt
+               werden soll.
+      @param isDraft
+               wenn isDraft==true, werden alle draftOnly-Blöcke eingeblendet,
+               ansonsten werden sie ausgeblendet.
+      @param isOriginal
+               wenn isOriginal, wird die Ziffer des Verfügungspunktes I
+               ausgeblendet und alle notInOriginal-Blöcke ebenso. Andernfalls
+               sind Ziffer und notInOriginal-Blöcke eingeblendet.
+     */
 	void printVerfuegungspunkt( [in] short verfPunkt, [in] short numberOfCopies, [in] boolean isDraft, [in] boolean isOriginal);
 };
 
