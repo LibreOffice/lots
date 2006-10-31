@@ -10,16 +10,8 @@ Sub FormularMax4000
   dispatchURL(&quot;wollmux:FormularMax4000&quot;)
 End Sub
 
-Sub ZifferEinfuegen
-  dispatchURL(&quot;wollmux:zifferEinfuegen&quot;)
-End Sub
-
-Sub Abdruck
-  dispatchURL(&quot;wollmux:Abdruck&quot;)
-End Sub
-
-Sub Zuleitungszeile
-  dispatchURL(&quot;wollmux:Zuleitungszeile&quot;)
+Sub Kill
+  dispatchURL(&quot;wollmux:Kill&quot;)
 End Sub
 
 Sub DumpInfo
@@ -28,10 +20,6 @@ End Sub
 
 Sub About
   dispatchURL(&quot;wollmux:About&quot;)
-End Sub
-
-Sub defaultUnoPrint
-  dispatchURL(&quot;wollmux:defaultUnoPrint&quot;)
 End Sub
 
 Sub dispatchURL(urlStr as String)
