@@ -15,6 +15,7 @@
  * 29.09.2006 | BNK | Unnötige renames vermeiden, um OOo nicht zu stressen
  * 29.09.2006 | BNK | Auch im optimierten Fall wo kein rename stattfindet auf BROKEN testen
  * 20.10.2006 | BNK | rename() Debug-Meldung nicht mehr ausgeben, wenn No Op Optimierung triggert.
+ * 31.10.2006 | BNK | +select() zum Setzen des ViewCursors
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -200,6 +201,25 @@ public class Bookmark
   public String getName()
   {
     return name;
+  }
+  
+  /**
+   * Setzt den ViewCursor auf dieses Bookmark.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED
+   */
+  public void select()
+  {
+    UnoService bm = getBookmarkService(getName(), document);
+    if (bm.getObject() != null)
+    {
+      try{
+        XTextRange anchor = bm.xTextContent().getAnchor(); 
+        XTextRange cursor = anchor.getText().createTextCursorByRange(anchor);
+        UNO.XTextViewCursorSupplier(document.xModel().getCurrentController()).getViewCursor().gotoRange(cursor, false);
+      }catch(java.lang.Exception x){}
+    }
   }
 
   /**
