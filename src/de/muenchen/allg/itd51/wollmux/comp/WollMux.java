@@ -85,8 +85,6 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
 
   public static final String cmdOpenDocument = "OpenDocument";
 
-  public static final String cmdSenderBox = "SenderBox";
-
   public static final String cmdFunctionDialog = "FunctionDialog";
 
   public static final String cmdFormularMax4000 = "FormularMax4000";
@@ -100,8 +98,6 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
   public static final String cmdDumpInfo = "DumpInfo";
 
   public static final String cmdKill = "Kill";
-
-  public static final String cmdMenu = "Menu";
 
   public static final String cmdAbout = "About";
 
@@ -227,12 +223,6 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
         xRet = this;
 
       else if (cmd.equalsIgnoreCase(cmdOpenDocument))
-        xRet = this;
-
-      else if (cmd.equalsIgnoreCase(cmdSenderBox))
-        xRet = this;
-
-      else if (cmd.equalsIgnoreCase(cmdMenu))
         xRet = this;
 
       else if (cmd.equalsIgnoreCase(cmdPALVerwalten))
@@ -369,11 +359,6 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
         Logger.debug2("Dispatch: Aufruf von WollMux:OpenDocument mit Args:"
                       + argStr);
         WollMuxEventHandler.handleOpenDocument(parsedURL, false);
-      }
-
-      else if (cmd.compareToIgnoreCase(cmdMenu) == 0)
-      {
-        Logger.debug2("Dispatch: Aufruf von WollMux:menu mit Arg:" + parsedURL);
       }
 
       else if (cmd.compareToIgnoreCase(cmdFunctionDialog) == 0)
