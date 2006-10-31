@@ -43,13 +43,13 @@ public class DispatchInterceptor
   /**
    * Url für den Forwarder auf den ursprünglichen Dispatch von ".uno:Print"
    */
-  public static final String DISP_UNO_PRINT_FORWARDER = "wollmux:defaultUnoPrint";
+  public static final String DISP_UNO_PRINT_FORWARDER = "wollmux:DefaultUnoPrint";
 
   /**
    * Url für den Forwarder auf den ursprünglichen Dispatch von
    * ".uno:PrintDefault"
    */
-  public static final String DISP_UNO_PRINT_DEFAULT_FORWARDER = "wollmux:defaultUnoPrintDefault";
+  public static final String DISP_UNO_PRINT_DEFAULT_FORWARDER = "wollmux:DefaultUnoPrintDefault";
 
   /**
    * Url für den Dispatch von ".uno:PrintDefault"
