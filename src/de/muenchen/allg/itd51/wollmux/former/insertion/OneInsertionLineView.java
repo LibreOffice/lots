@@ -177,11 +177,12 @@ public class OneInsertionLineView extends LineView
       if ((e.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) == InputEvent.CTRL_DOWN_MASK)
         state = 0;
       formularMax4000.broadcast(new BroadcastObjectSelection(getModel(), state, state!=0){
-
         public void sendTo(BroadcastListener listener)
         {
           listener.broadcastInsertionModelSelection(this);
         }});
+      
+      if (state != 0) getModel().selectBookmark();
     }
     public void mouseReleased(MouseEvent e) {}
     public void mouseEntered(MouseEvent e) {}

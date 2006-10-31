@@ -21,9 +21,11 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
 
 import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
+import de.muenchen.allg.itd51.wollmux.former.BroadcastObjectSelection;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
 
 /**
@@ -45,6 +47,11 @@ public class InsertionModelList
   private List listeners = new Vector(1);
   
   /**
+   * Der FormularMax4000 zu dem diese InsertionModelList gehört.
+   */
+  private FormularMax4000 formularMax4000;
+  
+  /**
    * Erzeugt eine neue InsertionModelList.
    * @param formularMax4000 der FormularMax4000 zu dem diese Liste gehört.
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -52,6 +59,7 @@ public class InsertionModelList
   public InsertionModelList(FormularMax4000 formularMax4000)
   {
     formularMax4000.addBroadcastListener(new MyBroadcastListener());
+    this.formularMax4000 = formularMax4000;
   }
   
   /**
@@ -167,6 +175,8 @@ public class InsertionModelList
 
   private class MyBroadcastListener extends BroadcastListener
   {
+    boolean insertionViewsSelected = false;
+    
     public void broadcastFormControlIdHasChanged(String oldId, String newId) 
     {
       Iterator iter = models.iterator();
@@ -175,7 +185,31 @@ public class InsertionModelList
         InsertionModel model = (InsertionModel)iter.next();
         model.broadcastFormControlIdHasChanged(oldId, newId);
       }
+    }
     
+    public void broadcastAllInsertionsViewSelected() {insertionViewsSelected = true;}
+    public void broadcastAllFormControlsViewSelected() {insertionViewsSelected = false;}
+    
+    public void broadcastBookmarkSelection(Set bookmarkNames) 
+    { //TESTED
+      if (!insertionViewsSelected) return;
+      boolean clearSelection = true;
+      Iterator iter = models.iterator();
+      while (iter.hasNext())
+      {
+        InsertionModel model = (InsertionModel)iter.next();
+        if (bookmarkNames.contains(model.getBookmarkName()))
+        {
+          formularMax4000.broadcast(new BroadcastObjectSelection(model, 1, clearSelection)
+          {
+            public void sendTo(BroadcastListener listener)
+            {
+              listener.broadcastInsertionModelSelection(this);
+            }
+          });
+          clearSelection = false;
+        }
+      }
     }
   }
 }

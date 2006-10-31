@@ -37,9 +37,11 @@ import java.awt.event.WindowListener;
 import java.io.StringReader;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -64,15 +66,25 @@ import javax.swing.text.View;
 import javax.swing.text.ViewFactory;
 
 import com.sun.star.beans.PropertyValue;
+import com.sun.star.container.XEnumeration;
+import com.sun.star.container.XEnumerationAccess;
+import com.sun.star.container.XIndexAccess;
 import com.sun.star.container.XNameAccess;
+import com.sun.star.container.XNamed;
 import com.sun.star.document.XDocumentInfo;
 import com.sun.star.frame.FrameSearchFlag;
 import com.sun.star.frame.XDispatchHelper;
 import com.sun.star.frame.XDispatchProvider;
+import com.sun.star.lang.EventObject;
+import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.text.XBookmarksSupplier;
 import com.sun.star.text.XTextContent;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextFramesSupplier;
+import com.sun.star.uno.AnyConverter;
+import com.sun.star.uno.XInterface;
+import com.sun.star.view.XSelectionChangeListener;
+import com.sun.star.view.XSelectionSupplier;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
@@ -322,7 +334,17 @@ public class FormularMax4000
    * Änderungen in das Dokument zu übertragen.
    */
   private Timer writeChangesTimer;
-  
+
+  /**
+   * Der XSelectionSupplier des Dokuments. 
+   */
+  private XSelectionSupplier selectionSupplier;
+
+  /**
+   * Wird auf {@link #selectionSupplier} registriert, um Änderungen der Cursorselektion zu beobachten.
+   */
+  private MyXSelectionChangedListener myXSelectionChangedListener;
+
   /**
    * Sendet die Nachricht b an alle Listener, die auf dem globalen Broadcast-Kanal registriert
    * sind.
@@ -520,6 +542,10 @@ public class FormularMax4000
     
     initEditor();
 
+    selectionSupplier = UNO.XSelectionSupplier(doc.getCurrentController());
+    myXSelectionChangedListener = new MyXSelectionChangedListener();
+    selectionSupplier.addSelectionChangeListener(myXSelectionChangedListener);
+    
     initModelsAndViews();
     
     writeChangesTimer.stop();
@@ -1348,10 +1374,16 @@ public class FormularMax4000
     {
       Logger.debug("Schreibe wartende Änderungen ins Dokument vor abort()");
       writeChangesTimer.stop();
-      updateDocument(doc);
+      try{
+        updateDocument(doc);
+      }catch(Exception x){};
     }
     myFrame.dispose();
     myFrame = null;
+    try{
+      selectionSupplier.removeSelectionChangeListener(myXSelectionChangedListener);
+    } catch(Exception x){Logger.error("Diese Fehlermeldung dient nur dem Debugging und sollte entfernt werden sobald sie das erste mal beobachtet wird.", x);}
+    
     if (abortListener != null)
       abortListener.actionPerformed(new ActionEvent(this, 0, ""));
   }
@@ -1436,6 +1468,62 @@ public class FormularMax4000
     frame.setBounds(frameBounds);
   }
 
+  /**
+   * Nimmt eine Menge von XTextRange Objekten, sucht alle umschlossenen Bookmarks und broadcastet
+   * eine entsprechende Nachricht, damit sich die entsprechenden Objekte selektieren. 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED
+   */
+  private void selectionChanged(XIndexAccess access)
+  {
+    Set bookmarkNames = null; //wird lazy initialisiert
+    
+    int count = access.getCount();
+    for (int i = 0; i < count; ++i)
+    {
+      XEnumerationAccess enuAccess = null;
+      try{
+        enuAccess = UNO.XEnumerationAccess(access.getByIndex(i));
+      } catch(Exception x)
+      {
+        Logger.error(x);
+      }
+      try{
+        if (enuAccess != null)
+        {
+          XEnumeration paraEnu = enuAccess.createEnumeration();
+          while (paraEnu.hasMoreElements())
+          {
+            XEnumeration textportionEnu = UNO.XEnumerationAccess(paraEnu.nextElement()).createEnumeration();
+            while (textportionEnu.hasMoreElements())
+            {
+              Object textportion = textportionEnu.nextElement();
+              if ("Bookmark".equals(UNO.getProperty(textportion, "TextPortionType")))
+              {
+                XNamed bookmark = null; 
+                try{
+                  //boolean isStart = ((Boolean)UNO.getProperty(textportion, "IsStart")).booleanValue();
+                  bookmark = UNO.XNamed(UNO.getProperty(textportion, "Bookmark"));
+                } catch(Exception x){ continue;}
+                
+                String name = bookmark.getName();
+                if (bookmarkNames == null) bookmarkNames = new HashSet();
+                bookmarkNames.add(name);
+              }
+            }
+          }
+        }
+      } catch(Exception x)
+      {
+        Logger.error(x);
+      }
+    }
+    
+    if (bookmarkNames != null && !bookmarkNames.isEmpty())
+      broadcast(new BroadcastObjectSelectionByBookmarks(bookmarkNames));
+  }
+  
+  
   private class MyWindowListener implements WindowListener
   {
     public void windowOpened(WindowEvent e) {}
@@ -1447,6 +1535,35 @@ public class FormularMax4000
     public void windowDeactivated(WindowEvent e){}   
     
   }
+  
+  
+  private class MyXSelectionChangedListener implements XSelectionChangeListener
+  {
+    public void selectionChanged(EventObject arg0)
+    {
+      try
+      {
+        Object selection = AnyConverter.toObject(XInterface.class, selectionSupplier.getSelection());
+        final XIndexAccess access = UNO.XIndexAccess(selection);
+        if (access == null) return;
+        try{
+          javax.swing.SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                try{FormularMax4000.this.selectionChanged(access);}catch(Exception x){};
+            }
+          });
+        }
+        catch(Exception x) {}
+      }
+      catch (IllegalArgumentException e)
+      {
+        Logger.error("Kann Selection nicht in Objekt umwandeln", e);
+      }
+    }
+
+    public void disposing(EventObject arg0) {}
+  }
+
   
   /**
    * Ruft den FormularMax4000 für das aktuelle Vordergrunddokument auf, falls dieses

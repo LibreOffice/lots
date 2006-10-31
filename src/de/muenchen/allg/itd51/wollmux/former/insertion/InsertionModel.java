@@ -231,6 +231,25 @@ public class InsertionModel
   }
   
   /**
+   * Liefert den Namen des Bookmarks das die Einfügestelle umschließt.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public String getBookmarkName()
+  {
+    return bookmark.getName();
+  }
+  
+  /**
+   * Setzt den ViewCursor auf die Einfügestelle.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public void selectBookmark()
+  {
+    bookmark.select();
+  }
+  
+  /**
    * Benachrichtigt alle auf diesem Model registrierten Listener, dass das Model aus
    * seinem Container entfernt wurde. ACHTUNG! Darf nur von einem entsprechenden Container
    * aufgerufen werden, der das Model enthält.

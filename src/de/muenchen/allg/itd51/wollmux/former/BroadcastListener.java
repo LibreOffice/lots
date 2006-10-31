@@ -17,6 +17,8 @@
 */
 package de.muenchen.allg.itd51.wollmux.former;
 
+import java.util.Set;
+
 /**
  * Abstrakte Basisklasse für Horcher auf dem globalen Broadcast-Kanal. 
  * Der globale Broadcast-Kanal wird für Nachrichten 
@@ -61,5 +63,11 @@ public abstract class BroadcastListener
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void broadcastFormControlIdHasChanged(String oldId, String newId) {}
+  
+  /**
+   * Eine Menge von Bookmarks wurde ausgewählt.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public void broadcastBookmarkSelection(Set bookmarkNames) {}
 }
 
