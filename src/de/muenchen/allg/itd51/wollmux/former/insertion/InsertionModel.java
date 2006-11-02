@@ -29,6 +29,7 @@ import java.util.regex.Pattern;
 
 import com.sun.star.container.NoSuchElementException;
 import com.sun.star.text.XBookmarksSupplier;
+import com.sun.star.text.XTextRange;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.SyntaxErrorException;
@@ -247,6 +248,31 @@ public class InsertionModel
   public void selectBookmark()
   {
     bookmark.select();
+  }
+  
+  /**
+   * Entfernt die Einfügestelle komplett aus dem Dokument, d,h, sowohl das WollMux-Bookmark als
+   * auch den Feldbefehl.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED
+   */
+  public void removeFromDocument()
+  {
+    XTextRange range = bookmark.getAnchor();
+    if (range != null) range.setString("");
+    bookmark.remove();
+  }
+  
+  /**
+   * Entfernt das WollMux-Bookmark um die Einfügestelle.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED
+   */
+  public void removeBookmark()
+  {
+    bookmark.remove();
   }
   
   /**

@@ -92,6 +92,11 @@ public class AllInsertionLineViewsPanel implements View
   private IndexList selection = new IndexList();
   
   /**
+   * Die Liste der Models, zu denen diese View die LineViews enthält.
+   */
+  private InsertionModelList insertionModelList;
+  
+  /**
    * Erzeugt ein AllInsertionLineViewsPanel, die den Inhalt von
    * insertionModelList anzeigt. ACHTUNG! insertionModelList sollte leer sein,
    * da nur neu hinzugekommene Elemente in der View angezeigt werden.
@@ -101,6 +106,7 @@ public class AllInsertionLineViewsPanel implements View
   public AllInsertionLineViewsPanel(InsertionModelList insertionModelList, FormularMax4000 formularMax4000)
   {
     this.formularMax4000 = formularMax4000;
+    this.insertionModelList = insertionModelList;
     insertionModelList.addListener(new MyItemListener());
     formularMax4000.addBroadcastListener(new MyBroadcastListener());
     myViewChangeListener = new MyViewChangeListener();
@@ -123,16 +129,16 @@ public class AllInsertionLineViewsPanel implements View
     button.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e)
       {
-        
+        deleteSelectedElements();
       }});
     buttonPanel.add(button, gbcButton);
     
     ++gbcButton.gridx;
-    button = new JButton("TutNix");
+    button = new JButton("DeMux");
     button.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e)
       {
-    
+        demuxSelectedElements();
       }});
     buttonPanel.add(button, gbcButton);
     
@@ -191,6 +197,57 @@ public class AllInsertionLineViewsPanel implements View
       view.unmark();
     }
     selection.clear();
+  }
+  
+  /**
+   * Löscht alle ausgewählten Elemente.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED
+   */
+  private void deleteSelectedElements()
+  {
+    /**
+     * Die folgende Schleife muss auf diese Weise geschrieben werden und nicht mit einem
+     * Iterator, weil es ansonsten eine ConcurrentModificationException gibt, da
+     * über {@link ViewChangeListener#viewShouldBeRemoved(View)}
+     * die Selektion während des remove() gleich verändert wird, was den Iterator
+     * invalidieren würde.
+     */
+    while (!selection.isEmpty())
+    {
+      int i = selection.lastElement();
+      OneInsertionLineView view = (OneInsertionLineView)views.get(i);
+      InsertionModel model = view.getModel();
+      model.removeFromDocument();
+      insertionModelList.remove(model);
+    }
+  }
+  
+  /**
+   * Löscht die WollMux-Bookmarks um alle ausgewählten Elemente. Da es damit keine Einfügestellen
+   * mehr sind, werden die entsprechenden LineViews ebenfalls entfernt.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED
+   */
+  private void demuxSelectedElements()
+  {
+    /**
+     * Die folgende Schleife muss auf diese Weise geschrieben werden und nicht mit einem
+     * Iterator, weil es ansonsten eine ConcurrentModificationException gibt, da
+     * über {@link ViewChangeListener#viewShouldBeRemoved(View)}
+     * die Selektion während des remove() gleich verändert wird, was den Iterator
+     * invalidieren würde.
+     */
+    while (!selection.isEmpty())
+    {
+      int i = selection.lastElement();
+      OneInsertionLineView view = (OneInsertionLineView)views.get(i);
+      InsertionModel model = view.getModel();
+      model.removeBookmark();
+      insertionModelList.remove(model);
+    }
   }
   
   public JComponent JComponent()

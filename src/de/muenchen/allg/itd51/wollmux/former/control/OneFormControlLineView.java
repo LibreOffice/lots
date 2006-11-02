@@ -20,11 +20,14 @@ package de.muenchen.allg.itd51.wollmux.former.control;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.InputEvent;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -85,11 +88,24 @@ public class OneFormControlLineView extends LineView
   private JTextField idTextfield;
   
   /**
+   * Die Komponente, die das Bearbeiten des TYPE-Attributs erlaubt.
+   */
+  private JComboBox typeView;
+
+  /**
    * Wird auf alle Teilkomponenten dieser View registriert.
    */
   private MyMouseListener myMouseListener = new MyMouseListener();
 
-    
+  /**
+   * Normales Font für ein Textfield.
+   */
+  private Font normalFont;
+  /**
+   * Dickes Font für ein Textfield.
+   */
+  private Font boldFont;
+  
   /**
    * Erzeugt eine View für model.
    * @param bigDaddy typischerweise ein Container, der die View enthält und daher über Änderungen
@@ -109,8 +125,17 @@ public class OneFormControlLineView extends LineView
     myPanel.addMouseListener(myMouseListener);
     myPanel.add(makeIdView());
     myPanel.add(makeLabelView());
+    myPanel.add(makeTypeView());
+    normalFont = labelTextfield.getFont();
+    boldFont = normalFont.deriveFont(Font.BOLD);
     unmarkedBackgroundColor = myPanel.getBackground();
+    setViewVisibility();
     model.addListener(new MyModelChangeListener());
+  }
+  
+  private void setViewVisibility()
+  {
+    typeView.setVisible(!model.isTab());
   }
   
   /**
@@ -169,9 +194,44 @@ public class OneFormControlLineView extends LineView
     
     idTextfield.setCaretPosition(0);
     idTextfield.addMouseListener(myMouseListener);
-    //setTypeSpecificTraits(idTextfield, model.getType());
     return idTextfield;
   }
+  
+  /**
+   * Liefert eine Komponente, die den TYPE des FormControlModels anzeigt und Änderungen
+   * an das Model weitergibt. 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED
+   */
+  private JComboBox makeTypeView()
+  {
+    typeView = new JComboBox();
+    typeView.setEditable(false);
+    typeView.addItem(FormControlModel.COMBOBOX_TYPE);
+    typeView.addItem(FormControlModel.TEXTFIELD_TYPE);
+    typeView.addItem(FormControlModel.TEXTAREA_TYPE);
+    typeView.addItem(FormControlModel.LABEL_TYPE);
+    typeView.addItem(FormControlModel.SEPARATOR_TYPE);
+    typeView.addItem(FormControlModel.GLUE_TYPE);
+    typeView.addItem(FormControlModel.CHECKBOX_TYPE);
+    typeView.addItem(FormControlModel.BUTTON_TYPE);
+
+    typeView.setSelectedItem(model.getType());
+    
+    typeView.addItemListener(new ItemListener(){
+      public void itemStateChanged(ItemEvent e)
+      {
+        if (e.getStateChange() == ItemEvent.SELECTED)
+        {
+          if (!ignoreAttributeChanged)
+            model.setType((String)typeView.getSelectedItem());
+        }
+      }});
+    
+    typeView.addMouseListener(myMouseListener);
+    return typeView;
+  }
+
 
   
   /**
@@ -182,22 +242,27 @@ public class OneFormControlLineView extends LineView
   {
     if (type == FormControlModel.TAB_TYPE)
     {
-      Font f = compo.getFont();
-      f = f.deriveFont(Font.BOLD);
-      compo.setFont(f);
-      compo.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3));
+      compo.setFont(boldFont);
       compo.setBackground(new Color(230,235,250));
+      compo.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3));
     }
     else if (type == FormControlModel.BUTTON_TYPE)
     {
+      compo.setFont(normalFont);
       compo.setBackground(Color.LIGHT_GRAY);
       compo.setBorder(BorderFactory.createRaisedBevelBorder());
     }
     else if (type == FormControlModel.LABEL_TYPE)
     {
-      Font f = compo.getFont();
-      f = f.deriveFont(Font.BOLD);
-      compo.setFont(f);
+      compo.setFont(boldFont);
+      compo.setBackground(Color.WHITE);
+      compo.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+    }
+    else
+    {
+      compo.setFont(normalFont);
+      compo.setBackground(Color.WHITE);
+      compo.setBorder(BorderFactory.createLineBorder(Color.BLACK));
     }
   }
   
@@ -216,13 +281,19 @@ public class OneFormControlLineView extends LineView
   
   /**
    * Wird aufgerufen, wenn das TYPE des durch diese View dargestellten {@link FormControlModel}s
-   * durch eine andere Ursache als diese View geändert wurde.
-   * @param newType das neue Label.
+   * geändert wurde (egal ob durch diese View selbst verursacht oder durch etwas anderes).
+   * @param newType der new TYPE-Wert.
    * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED
    */
   private void typeChanged(String newType)
   {
+    boolean ign = ignoreAttributeChanged;
+    ignoreAttributeChanged = true;
+    typeView.setSelectedItem(newType);
+    ignoreAttributeChanged = ign;
     setTypeSpecificTraits(labelTextfield, newType);
+    setViewVisibility();
   }
 
    /**
