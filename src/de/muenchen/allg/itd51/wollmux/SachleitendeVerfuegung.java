@@ -94,7 +94,7 @@ public class SachleitendeVerfuegung
 
     // Notwendige Absatzformate definieren (falls nicht bereits definiert)
     createUsedParagraphStyles(doc);
-    
+
     XParagraphCursor cursor = UNO.XParagraphCursor(range.getText()
         .createTextCursorByRange(range));
 
@@ -132,7 +132,7 @@ public class SachleitendeVerfuegung
 
     // Notwendige Absatzformate definieren (falls nicht bereits definiert)
     createUsedParagraphStyles(doc);
-    
+
     XParagraphCursor cursor = UNO.XParagraphCursor(range.getText()
         .createTextCursorByRange(range));
 
@@ -173,7 +173,7 @@ public class SachleitendeVerfuegung
 
     // Notwendige Absatzformate definieren (falls nicht bereits definiert)
     createUsedParagraphStyles(doc);
-    
+
     XParagraphCursor cursor = UNO.XParagraphCursor(range.getText()
         .createTextCursorByRange(range));
 
@@ -616,6 +616,16 @@ public class SachleitendeVerfuegung
     return number;
   }
 
+  /**
+   * Erzeugt einen Vector mit Elementen vom Typ Verfuegungspunkt, der dem
+   * Druckdialog übergeben werden kann und alle für den Druckdialog notwendigen
+   * Informationen enthält.
+   * 
+   * @param doc
+   *          Das zu scannende Dokument
+   * @return Vector of Verfuegungspunkt, der für jeden Verfuegungspunkt im
+   *         Dokument doc einen Eintrag enthält.
+   */
   private static Vector scanVerfuegungspunkte(XTextDocument doc)
   {
     Vector verfuegungspunkte = new Vector();
@@ -646,27 +656,31 @@ public class SachleitendeVerfuegung
     // ist. (siehe auch weiter unten)
     boolean first = (punkt1 == null);
 
-    if (cursor != null) do
-    {
-      // ganzen Paragraphen markieren
-      cursor.gotoEndOfParagraph(true);
-
-      if (isVerfuegungspunkt(cursor))
+    if (cursor != null)
+      do
       {
-        currentVerfpunkt = new Verfuegungspunkt(cursor.getString());
-        if (first)
+        // ganzen Paragraphen markieren
+        cursor.gotoEndOfParagraph(true);
+
+        if (isVerfuegungspunkt(cursor))
         {
-          first = false;
-          currentVerfpunkt.setNumberOfCopies(1);
+          currentVerfpunkt = new Verfuegungspunkt(cursor.getString());
+          if (first)
+          {
+            first = false;
+            currentVerfpunkt.setNumberOfCopies(1);
+          }
+          verfuegungspunkte.add(currentVerfpunkt);
         }
-        verfuegungspunkte.add(currentVerfpunkt);
-      }
-      else if (currentVerfpunkt != null && isZuleitungszeile(cursor))
-      {
-        currentVerfpunkt.addZuleitungszeile(cursor.getString());
-      }
+        else if (currentVerfpunkt != null && isZuleitungszeile(cursor))
+        {
+          String zuleit = cursor.getString();
+          // nicht leere Zuleitungszeilen zum Verfügungspunkt hinzufügen.
+          if (!zuleit.equals(""))
+            currentVerfpunkt.addZuleitungszeile(cursor.getString());
+        }
 
-    } while (cursor.gotoNextParagraph(false));
+      } while (cursor.gotoNextParagraph(false));
 
     return verfuegungspunkte;
   }
