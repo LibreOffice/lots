@@ -56,6 +56,10 @@ public class SachleitendeVerfuegung
 
   private static final String AbdruckDefaultStr = "Abdruck von <Vorgänger>.";
 
+  private static final String zifferOnlyPattern = "^([XIV]+|\\d+)\\.$";
+
+  private static final String zifferPattern = "^([XIV]+|\\d+)\\.\\s*";
+
   /**
    * Enthält einen Vector mit den ersten 15 römischen Ziffern. Mehr wird in
    * Sachleitenden Verfügungen sicherlich nicht benötigt :-)
@@ -527,13 +531,11 @@ public class SachleitendeVerfuegung
   {
     XTextCursor cursor = par.getText().createTextCursorByRange(par.getStart());
 
-    final String zifferPattern = "^([XIV]+|\\d+)\\.$";
-
     for (int i = 0; i < 6; i++)
     {
       cursor.goRight((short) 1, true);
       String text = cursor.getString();
-      if (text.matches(zifferPattern)) return cursor;
+      if (text.matches(zifferOnlyPattern)) return cursor;
     }
 
     return null;
@@ -664,12 +666,18 @@ public class SachleitendeVerfuegung
 
         if (isVerfuegungspunkt(cursor))
         {
-          currentVerfpunkt = new Verfuegungspunkt(cursor.getString());
+          String heading = cursor.getString();
+          currentVerfpunkt = new Verfuegungspunkt(heading);
+
+          // Originale und alle Verfügungspunkte, die Wiedervorlagen sind werden
+          // mit numerOfCopies 1 vorbelegt
           if (first)
           {
             first = false;
             currentVerfpunkt.setNumberOfCopies(1);
           }
+          if (isWiedervorlage(heading)) currentVerfpunkt.setNumberOfCopies(1);
+
           verfuegungspunkte.add(currentVerfpunkt);
         }
         else if (currentVerfpunkt != null && isZuleitungszeile(cursor))
@@ -683,6 +691,24 @@ public class SachleitendeVerfuegung
       } while (cursor.gotoNextParagraph(false));
 
     return verfuegungspunkte;
+  }
+
+  /**
+   * Liefert true, wenn die Überschrift heading eines Verfügungspunktes nach der
+   * römischen Ziffer die Typischen Merkmale einer Wiedervorlage besitzt, d.h.
+   * z.B. mit den Strings "w.V." oder ähnlichen beginnt.
+   */
+  public static boolean isWiedervorlage(String heading)
+  {
+    if (heading.matches(zifferPattern + "[wW]\\.?\\s?[vV](\\.|\\s|$)"))
+      return true;
+    if (heading.matches(zifferPattern + "[wW]iedervorlage")) return true;
+    if (heading.matches(zifferPattern + "[aA]blegen")) return true;
+    if (heading.matches(zifferPattern + "[wW]eglegen")) return true;
+    if (heading.matches(zifferPattern + "[zZ]um\\s[aA]kt")) return true;
+    if (heading.matches(zifferPattern + "[zZ]\\.?\\s?[aA](\\.|\\s|$)"))
+      return true;
+    return false;
   }
 
   /**
