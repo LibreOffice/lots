@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.Vector;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
@@ -146,6 +147,11 @@ public class PreferDatasource implements Datasource
     if (timeout <= 0) throw new TimeoutException("Datenquelle "+source1Name+" konnte Anfrage getDatasetsByKey() nicht schnell genug beantworten");
     
     return new QueryResultsOverride(results, overrideResults, source1, timeout);
+  }
+  
+  public QueryResults getContents(long timeout) throws TimeoutException
+  {
+    return new QueryResultsList(new Vector(0));
   }
 
   public QueryResults find(List query, long timeout) throws TimeoutException

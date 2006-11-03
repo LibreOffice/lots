@@ -67,4 +67,6 @@ public class Query
    * Liefert die Liste der QueryParts die diese Suchanfrage definieren.
    */
   public List getQueryParts() {return new Vector(listOfQueryParts);}
+  
+  public int numberOfQueryParts() { return listOfQueryParts.size();}
 }

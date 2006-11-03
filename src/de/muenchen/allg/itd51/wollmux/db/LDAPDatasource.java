@@ -458,6 +458,11 @@ public class LDAPDatasource implements Datasource
     return query;
   }
 
+  public QueryResults getContents(long timeout) throws TimeoutException
+  {
+    return new QueryResultsList(new Vector(0));
+  }
+  
   /*
    * (non-Javadoc)
    * 

@@ -108,6 +108,7 @@ public class RAMDatasource implements Datasource
    */
   public QueryResults find(List query, long timeout) throws TimeoutException
   { //TESTED
+    if (query.isEmpty()) return new QueryResultsList(new Vector(0));
     DatasetChecker checker = DatasetChecker.makeChecker(query);
     
     List results = new Vector();
@@ -119,6 +120,11 @@ public class RAMDatasource implements Datasource
       if (checker.matches(ds)) results.add(ds);
     }
     return new QueryResultsList(results);
+  }
+  
+  public QueryResults getContents(long timeout) throws TimeoutException
+  {
+    return new QueryResultsList(new Vector(data));
   }
 
   /* (non-Javadoc)

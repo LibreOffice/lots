@@ -170,6 +170,11 @@ public class SchemaDatasource implements Datasource
   {
     return wrapDatasets(source.getDatasetsByKey(keys, timeout));
   }
+  
+  public QueryResults getContents(long timeout) throws TimeoutException
+  {
+    return new QueryResultsList(new Vector(0));
+  }
 
   public QueryResults find(List query, long timeout) throws TimeoutException
   {

@@ -403,6 +403,11 @@ public class DatasourceSearchDialog implements Dialog
      * Das Textfeld in dem der Benutzer seine Suchanfrage eintippt.
      */
     private UIElement query = null;
+    
+    /**
+     * Suche automatisch ausführen, nach Aufbau des Tabs.
+     */
+    private boolean autosearch = false;
        
     /**
      * Liefert das JPanel, das die Elemente dieses Tabs enthält.
@@ -466,6 +471,8 @@ public class DatasourceSearchDialog implements Dialog
       mapDB_SPALTEtoUIElement = new HashMap();
       addUIElements(conf, "Vorschau", vorschau, 0, 1, previewContext, mapDB_SPALTEtoUIElement);
       addUIElements(conf, "Fussbereich", fussbereich, 1, 0, horiContext, null);
+      
+      if (autosearch) search();
     }
 
     
@@ -510,7 +517,15 @@ public class DatasourceSearchDialog implements Dialog
            */
           String id = uiElement.getId();
           if (id.equals("suchanfrage"))
+          {
+            autosearch = false;
             query = uiElement;
+            try{
+              String autofill = uiConf.get("AUTOFILL").toString();
+              query.setString(autofill);
+              autosearch = true;
+            }catch(Exception ex){}
+          }
             
           if (id.equals("suchergebnis"))
           {
@@ -675,7 +690,12 @@ public class DatasourceSearchDialog implements Dialog
         Iterator iter = queries.iterator();
         while (iter.hasNext())
         {
-          results = dj.find((Query)iter.next());
+          Query query = (Query)iter.next();
+          if (query.numberOfQueryParts() == 0)
+            results = dj.getContentsOf(query.getDatasourceName());
+          else
+            results = dj.find(query);
+          
           if (!results.isEmpty()) break;
         }
       }catch(TimeoutException x) { Logger.error(x);}
@@ -1056,16 +1076,15 @@ public class DatasourceSearchDialog implements Dialog
     /*
      * Passende Suchstrategie finden; falls nötig dazu Wörter am Ende weglassen.
      */
-    while( count > 0 && 
+    while( count >= 0 && 
            searchStrategy.getTemplate(count) == null
          )
       --count;
     
     /*
-     * leerer Suchstring (bzw. nur einzelne Sternchen)
-     * oder keine Suchstrategie gefunden
+     * keine Suchstrategie gefunden
      */
-    if (count == 0) return queryList; 
+    if (count < 0) return queryList; 
     
     List templateList = searchStrategy.getTemplate(count);
     Iterator iter = templateList.iterator();

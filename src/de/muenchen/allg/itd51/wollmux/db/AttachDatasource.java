@@ -189,6 +189,12 @@ public class AttachDatasource implements Datasource
     return attachColumns(results, timeout, new MatchAllDatasetChecker());
   }
 
+  public QueryResults getContents(long timeout) throws TimeoutException
+  {
+    return new QueryResultsList(new Vector(0));
+  }
+
+  
   /* (non-Javadoc)
    * @see de.muenchen.allg.itd51.wollmux.db.Datasource#find(java.util.List, long)
    */
@@ -359,4 +365,6 @@ public class AttachDatasource implements Datasource
     }
   }
 
+
+  
 }

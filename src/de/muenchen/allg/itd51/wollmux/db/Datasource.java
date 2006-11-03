@@ -46,7 +46,7 @@ import de.muenchen.allg.itd51.wollmux.TimeoutException;
  * geändert haben, und dann sollte die Operation gelingen. Dies bedeutet
  * insbesondere, dass Verbindungsaufbau zu Servern wo nötig jeweils neu
  * versucht wird und nicht nur einmalig im Konstruktor. In diesem
- * Zusammenhang seit darauf hingewiesen, dass Verbindungen explizit mit close()
+ * Zusammenhang sei darauf hingewiesen, dass Verbindungen explizit mit close()
  * beendet werden sollten (typischerweise in einem finally() Block, damit der
  * Befehl auch im Ausnahmefall ausgeführt wird), weil die Garbage Collection von
  * Java dies evtl. sehr spät tut.
@@ -92,6 +92,20 @@ public interface Datasource
    */
   public QueryResults find(List query, long timeout) 
     throws TimeoutException;
+  
+  /**
+   * Liefert eine implementierungsabhängige Teilmenge der Datensätze der Datenquelle.
+   * Wenn möglich sollte die Datenquelle hier all ihre Datensätze zurückliefern oder zumindest
+   * soviele wie möglich. Es ist jedoch auch erlaubt, dass hier gar keine Datensätze 
+   * zurückgeliefert werden. Wenn sinnvoll sollte anstatt des Werfens einer TimeoutException
+   * ein Teil der Daten zurückgeliefert werden.
+   * @throws TimeoutException, falls ein Fehler auftritt oder die Anfrage nicht rechtzeitig
+   * beendet werden konnte. In letzterem Fall ist das Werfen dieser Exception jedoch nicht Pflicht
+   * und die Datenquelle kann stattdessen den Teil der Ergebnisse zurückliefern, die in der
+   * gegebenen Zeit gewonnen werden konnten.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public QueryResults getContents(long timeout) throws TimeoutException;
   
   /**
    * Liefert den Namen dieser Datenquelle.

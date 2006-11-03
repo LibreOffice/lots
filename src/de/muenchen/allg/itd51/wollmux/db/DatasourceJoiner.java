@@ -375,6 +375,29 @@ X           "Vorname N."
     return new QueryResultsList(djDatasetsList);
   }
   
+  /**
+   * Liefert eine implementierungsabhängige Teilmenge der Datensätze der Datenquelle
+   * mit Name datasourceName. Wenn möglich sollte die Datenquelle hier all ihre Datensätze 
+   * zurückliefern oder zumindest soviele wie möglich. Es ist jedoch auch erlaubt, dass hier 
+   * gar keine Datensätze zurückgeliefert werden. Wenn sinnvoll sollte anstatt des Werfens einer TimeoutException
+   * ein Teil der Daten zurückgeliefert werden.
+   * @throws TimeoutException, falls ein Fehler auftritt oder die Anfrage nicht rechtzeitig
+   * beendet werden konnte. In letzterem Fall ist das Werfen dieser Exception jedoch nicht Pflicht
+   * und die Datenquelle kann stattdessen den Teil der Ergebnisse zurückliefern, die in der
+   * gegebenen Zeit gewonnen werden konnten.
+   * ACHTUNG! Die Ergebnisse sind keine DJDatasets!
+   * @throws IllegalArgumentException falls die Datenquelle nicht existiert.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public QueryResults getContentsOf(String datasourceName) throws TimeoutException
+  {
+    Datasource source = (Datasource)nameToDatasource.get(datasourceName);
+    if (source == null)
+      throw new IllegalArgumentException("Datenquelle \""+datasourceName+"\" soll abgefragt werden, ist aber nicht definiert");
+    
+    return source.getContents(queryTimeout());
+  }
+  
   protected long queryTimeout() {return QUERY_TIMEOUT;}
   
   /**

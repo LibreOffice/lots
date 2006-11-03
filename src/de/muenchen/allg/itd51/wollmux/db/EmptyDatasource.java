@@ -58,6 +58,11 @@ public class EmptyDatasource implements Datasource
     return emptyResults;
   }
   
+  public QueryResults getContents(long timeout) throws TimeoutException
+  {
+    return emptyResults;
+  }
+  
   public String getName()
   {
     return name;

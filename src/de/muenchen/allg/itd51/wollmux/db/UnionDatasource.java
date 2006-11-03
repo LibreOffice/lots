@@ -26,6 +26,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Vector;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
@@ -132,6 +133,11 @@ public class UnionDatasource implements Datasource
     if (timeout <= 0) throw new TimeoutException("Datenquelle "+source1Name+" konnte Anfrage getDatasetsByKey() nicht schnell genug beantworten");
     QueryResults res2 = source2.getDatasetsByKey(keys, timeout);
     return new QueryResultsUnion(res1,res2);
+  }
+  
+  public QueryResults getContents(long timeout) throws TimeoutException
+  {
+    return new QueryResultsList(new Vector(0));
   }
 
   public QueryResults find(List query, long timeout) throws TimeoutException
