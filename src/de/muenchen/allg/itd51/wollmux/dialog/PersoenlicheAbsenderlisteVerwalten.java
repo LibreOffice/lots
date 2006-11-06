@@ -28,6 +28,7 @@
 * 20.01.2006 | BNK | Default-Anrede für Tinchen WollMux ist "Frau"
 * 19.10.2006 | BNK | Credits
 * 23.10.2006 | BNK | Bugfix: Bei credits an wurden Personen ohne Mail nicht dargestellt.
+* 06.11.2006 | BNK | auf AlwaysOnTop gesetzt.
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -336,6 +337,7 @@ public class PersoenlicheAbsenderlisteVerwalten
     //leave handling of close request to WindowListener.windowClosing
     myFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
     myFrame.addWindowListener(new MyWindowListener());
+    myFrame.setAlwaysOnTop(true);
     
     mainPanel = new JPanel(new BorderLayout());
     mainPanel.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
