@@ -1243,26 +1243,6 @@ public class DocumentCommandInterpreter
       cmd.setDoneState(true);
       return 0;
     }
-
-    /**
-     * Merkt sich eine evtl. gesetzte Druckfunktion im TextDocumentModel
-     */
-    public int executeCommand(SetPrintFunction cmd)
-    {
-      if (model.getPrintFunctionName() == null)
-      {
-        model.setPrintFunction(cmd);
-        return 0;
-      }
-      else
-      {
-        insertErrorField(cmd, new Exception(
-            "Mehr als ein WM(CMD 'setPrintFunction' ...)-Kommando vorhanden!\n"
-                + "Es darf nur ein solches Kommando in der Vorlage vorkommen."));
-        cmd.setErrorState(true);
-        return 1;
-      }
-    }
   }
 
   /**
