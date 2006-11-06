@@ -65,4 +65,18 @@ public interface FormModel
    * WollMuxEventHandler.handleDisposeFormModel angesprochen werden!
    */
   public void dispose();
+  
+  /**
+   * Startet den Ausdruck unter Verwendung eventuell vorhandener Komfortdruckfunktionen.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public void print();
+  
+  /**
+   * Exportiert das Dokument als PDF.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public void pdf();
 }

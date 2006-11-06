@@ -19,14 +19,21 @@ package de.muenchen.allg.itd51.wollmux.former.control;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.Iterator;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
@@ -34,6 +41,7 @@ import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.Document;
+import javax.swing.text.JTextComponent;
 
 import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastObjectSelection;
@@ -91,6 +99,11 @@ public class OneFormControlLineView extends LineView
    * Die Komponente, die das Bearbeiten des TYPE-Attributs erlaubt.
    */
   private JComboBox typeView;
+  
+  /**
+   * Zusätzliche Elemente für FormControls mit TYPE "combobox".
+   */
+  private JPanel comboBoxAdditionalView;
 
   /**
    * Wird auf alle Teilkomponenten dieser View registriert.
@@ -126,6 +139,7 @@ public class OneFormControlLineView extends LineView
     myPanel.add(makeIdView());
     myPanel.add(makeLabelView());
     myPanel.add(makeTypeView());
+    myPanel.add(makeComboBoxAdditionalView());
     normalFont = labelTextfield.getFont();
     boldFont = normalFont.deriveFont(Font.BOLD);
     unmarkedBackgroundColor = myPanel.getBackground();
@@ -136,6 +150,7 @@ public class OneFormControlLineView extends LineView
   private void setViewVisibility()
   {
     typeView.setVisible(!model.isTab());
+    comboBoxAdditionalView.setVisible(model.isCombo());
   }
   
   /**
@@ -233,6 +248,85 @@ public class OneFormControlLineView extends LineView
   }
 
 
+  /**
+   * Liefert ein JPanel zurück mit zusätzlichen Bedienelementen für das Bearbeiten der Werteliste
+   * eines FormControls mit TYPE "combobox".
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED
+   */
+  private JPanel makeComboBoxAdditionalView()
+  {
+    comboBoxAdditionalView = new JPanel();
+    comboBoxAdditionalView.setLayout(new BoxLayout(comboBoxAdditionalView, BoxLayout.X_AXIS));
+    
+    final JComboBox combo = new JComboBox();
+    combo.setEditable(true);
+    combo.setPrototypeDisplayValue("Sicherungsgeberin");
+    List items = model.getItems();
+    Iterator iter = items.iterator();
+    while (iter.hasNext())
+    {
+      String item = (String)iter.next();
+      combo.addItem(item);
+    }
+    
+    /*
+     * Sicherstellen, dass der Anfang, nicht das Ende eines Items dargestellt wird, wenn
+     * die ComboBox zu klein für den ganzen Text ist. 
+     */
+    final JTextComponent tc = (JTextComponent)combo.getEditor().getEditorComponent();
+    tc.setCaretPosition(0);
+    combo.addItemListener(new ItemListener(){
+      public void itemStateChanged(ItemEvent e)
+      {
+        tc.setCaretPosition(0);
+      }});
+    
+    comboBoxAdditionalView.add(combo);
+    
+    final JCheckBox editBox = new JCheckBox();
+    editBox.setSelected(model.getEditable());
+    comboBoxAdditionalView.add(editBox);
+    editBox.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent e)
+      {
+        model.setEditable(editBox.isSelected());
+      }
+    });
+    final JButton newButton = new JButton("N");
+    Insets ins = newButton.getInsets();
+    newButton.setMargin(new Insets(ins.top,0,ins.bottom,0));
+    comboBoxAdditionalView.add(newButton);
+    newButton.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent e)
+      {
+        String sel = combo.getSelectedItem().toString();
+        combo.addItem(sel);
+        String[] items = new String[combo.getItemCount()];
+        for (int i = 0; i < items.length; ++i)
+          items[i] = combo.getItemAt(i).toString();
+        model.setItems(items);
+      }});
+    JButton delButton = new JButton("X");
+    ins = delButton.getInsets();
+    delButton.setMargin(new Insets(ins.top,0,ins.bottom,0));
+    comboBoxAdditionalView.add(delButton);
+    delButton.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent e)
+      {
+        int idx = combo.getSelectedIndex();
+        if (idx >= 0)
+        {
+          combo.removeItemAt(idx);
+          String[] items = new String[combo.getItemCount()];
+          for (int i = 0; i < items.length; ++i)
+            items[i] = combo.getItemAt(i).toString();
+          model.setItems(items);
+        }
+      }});
+    
+    return comboBoxAdditionalView;
+  }
   
   /**
    * Setzt optische Aspekte wie Rand von compo abhängig von type.

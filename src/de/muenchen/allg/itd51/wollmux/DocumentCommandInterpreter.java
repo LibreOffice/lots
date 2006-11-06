@@ -626,6 +626,16 @@ public class DocumentCommandInterpreter
       {
       }
     }
+
+    public void print()
+    {
+      //TODO WollMuxEventHandler.handlePrintTextDocument(textDocumentModel);
+    }
+
+    public void pdf()
+    {
+      //TODO WollMuxEventHandler.handleExportAsPDF(textDocumentModel);
+    }
   }
 
   /**

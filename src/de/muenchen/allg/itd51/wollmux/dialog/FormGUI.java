@@ -503,6 +503,14 @@ public class FormGUI
     {
       Logger.log("Dispose()"); 
     }
+
+    public void print()
+    {
+    }
+
+    public void pdf()
+    {
+    }
   }
   
   private class MyAbortRequestListener implements ActionListener

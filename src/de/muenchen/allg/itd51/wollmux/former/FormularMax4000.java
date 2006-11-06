@@ -65,16 +65,12 @@ import javax.swing.text.PlainView;
 import javax.swing.text.View;
 import javax.swing.text.ViewFactory;
 
-import com.sun.star.beans.PropertyValue;
 import com.sun.star.container.XEnumeration;
 import com.sun.star.container.XEnumerationAccess;
 import com.sun.star.container.XIndexAccess;
 import com.sun.star.container.XNameAccess;
 import com.sun.star.container.XNamed;
 import com.sun.star.document.XDocumentInfo;
-import com.sun.star.frame.FrameSearchFlag;
-import com.sun.star.frame.XDispatchHelper;
-import com.sun.star.frame.XDispatchProvider;
 import com.sun.star.lang.EventObject;
 import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.text.XBookmarksSupplier;
@@ -447,7 +443,7 @@ public class FormularMax4000
       }});
     menu.add(menuItem);
     
-    menuItem = new JMenuItem("FormularMax4000 schlieﬂen");
+    menuItem = new JMenuItem("Beenden");
     menuItem.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e)
       {
@@ -1346,9 +1342,7 @@ public class FormularMax4000
    */
   private void save(XTextDocument doc)
   {
-    XDispatchProvider prov = UNO.XDispatchProvider(doc.getCurrentController().getFrame());
-    XDispatchHelper dispatcher = UNO.XDispatchHelper(UNO.createUNOService("com.sun.star.frame.DispatchHelper"));
-    dispatcher.executeDispatch(prov, ".uno:Save", "", FrameSearchFlag.SELF, new PropertyValue[]{});
+    UNO.dispatch(doc, ".uno:Save");
   }
   
   /**
@@ -1358,9 +1352,7 @@ public class FormularMax4000
    */
   private void saveAs(XTextDocument doc)
   {
-    XDispatchProvider prov = UNO.XDispatchProvider(doc.getCurrentController().getFrame());
-    XDispatchHelper dispatcher = UNO.XDispatchHelper(UNO.createUNOService("com.sun.star.frame.DispatchHelper"));
-    dispatcher.executeDispatch(prov, ".uno:SaveAs", "", FrameSearchFlag.SELF, new PropertyValue[]{});
+    UNO.dispatch(doc, ".uno:SaveAs");
   }
   
   /**

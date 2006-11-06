@@ -864,6 +864,8 @@ public class FormController implements UIElementEventHandler
     supportedActions.add("nextTab");
     supportedActions.add("prevTab");
     supportedActions.add("funcDialog");
+    supportedActions.add("form2PDF");
+    supportedActions.add("printForm");
     panelContext.supportedActions = supportedActions;
     buttonContext.supportedActions = supportedActions;
     
@@ -967,6 +969,14 @@ public class FormController implements UIElementEventHandler
           {
             dlg.instanceFor(functionContext).show(new FunctionDialogEndListener(dialogName), funcLib, dialogLib);
           }
+        }
+        else if (action.equals("printForm"))
+        {
+          formModel.print();
+        }
+        else if (action.equals("form2PDF"))
+        {
+          formModel.pdf();
         }
       }
       else if (eventType.equals("focus"))

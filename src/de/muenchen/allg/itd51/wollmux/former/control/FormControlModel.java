@@ -286,6 +286,15 @@ public class FormControlModel
   }
   
   /**
+   * Liefert true gdw dieses FormControlModel eine ComboBox darstellt.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public boolean isCombo()
+  {
+    return type == COMBOBOX_TYPE;
+  }
+  
+  /**
    * Liefert true gdw dieses FormControlModel einen Glue darstellt.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -546,6 +555,18 @@ public class FormControlModel
     else if (type.equals(BUTTON_TYPE)) this.type = BUTTON_TYPE;
     else this.type = UNKNOWN_TYPE;
     notifyListeners(TYPE_ATTR, this.type);
+    formularMax4000.documentNeedsUpdating();
+  }
+  
+  /**
+   * Setzt items als neue VALUES Liste.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public void setItems(String[] items)
+  {
+    this.items.clear();
+    for (int i = 0; i < items.length; ++i)
+      this.items.add(items[i]);
     formularMax4000.documentNeedsUpdating();
   }
   
