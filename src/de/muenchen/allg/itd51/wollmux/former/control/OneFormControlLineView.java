@@ -284,6 +284,9 @@ public class OneFormControlLineView extends LineView
     
     comboBoxAdditionalView.add(combo);
     
+    tc.addMouseListener(myMouseListener);
+    comboBoxAdditionalView.addMouseListener(myMouseListener);
+    
     final JCheckBox editBox = new JCheckBox();
     editBox.setSelected(model.getEditable());
     comboBoxAdditionalView.add(editBox);
@@ -293,6 +296,7 @@ public class OneFormControlLineView extends LineView
         model.setEditable(editBox.isSelected());
       }
     });
+    editBox.addMouseListener(myMouseListener);
     final JButton newButton = new JButton("N");
     Insets ins = newButton.getInsets();
     newButton.setMargin(new Insets(ins.top,0,ins.bottom,0));
@@ -307,6 +311,7 @@ public class OneFormControlLineView extends LineView
           items[i] = combo.getItemAt(i).toString();
         model.setItems(items);
       }});
+    newButton.addMouseListener(myMouseListener);
     JButton delButton = new JButton("X");
     ins = delButton.getInsets();
     delButton.setMargin(new Insets(ins.top,0,ins.bottom,0));
@@ -324,6 +329,7 @@ public class OneFormControlLineView extends LineView
           model.setItems(items);
         }
       }});
+    delButton.addMouseListener(myMouseListener);
     
     return comboBoxAdditionalView;
   }
