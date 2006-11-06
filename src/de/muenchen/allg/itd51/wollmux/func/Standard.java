@@ -23,6 +23,8 @@
 package de.muenchen.allg.itd51.wollmux.func;
 
 import java.util.Calendar;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 /**
  * Standardfunktionen für Plausibilitätschecks, Trafos,... in Formularen.
@@ -211,5 +213,20 @@ public class Standard
       }
     }
     return tel;
+  }
+  
+  /**
+   * Liefert true gdw regex eingabe vollständig matcht.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public static boolean regex(String regex, String eingabe)
+  {
+    try{
+      Pattern pattern = Pattern.compile(regex);
+      return pattern.matcher(eingabe).matches();
+    }catch(PatternSyntaxException x)
+    {
+      return false;
+    }
   }
 }
