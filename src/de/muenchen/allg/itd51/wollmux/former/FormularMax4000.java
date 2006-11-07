@@ -1374,7 +1374,7 @@ public class FormularMax4000
     myFrame = null;
     try{
       selectionSupplier.removeSelectionChangeListener(myXSelectionChangedListener);
-    } catch(Exception x){Logger.error("Diese Fehlermeldung dient nur dem Debugging und sollte entfernt werden sobald sie das erste mal beobachtet wird.", x);}
+    } catch(Exception x){}
     
     if (abortListener != null)
       abortListener.actionPerformed(new ActionEvent(this, 0, ""));

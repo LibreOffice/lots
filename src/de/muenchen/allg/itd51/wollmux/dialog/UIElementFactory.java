@@ -27,7 +27,6 @@
 package de.muenchen.allg.itd51.wollmux.dialog;
 
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridLayout;
 import java.awt.Point;
@@ -50,7 +49,6 @@ import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
-import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
@@ -361,26 +359,12 @@ public class UIElementFactory
     {
       /*
        * ACHTUNG! Diese checkbox hat ihr Label fest integriert auf der
-       * letzten Seite und liefert als Zusatzlabel immer LABEL_NONE.
+       * rechten Seite und liefert als Zusatzlabel immer LABEL_NONE.
        */
-      
-      final JCheckBox boxBruceleitner = new JCheckBox();
+      final JCheckBox boxBruceleitner = new JCheckBox(label);
       boxBruceleitner.setEnabled(!readonly);
-      JPanel agentinMitHerz = new JPanel(new FlowLayout(FlowLayout.LEADING, 5,0));
-      agentinMitHerz.add(boxBruceleitner);
-      JLabel herzileinMusstNichtTraurigSein = new JLabel(label);
-      if (!tip.equals("")) herzileinMusstNichtTraurigSein.setToolTipText(tip);
       if (!tip.equals("")) boxBruceleitner.setToolTipText(tip);
-      agentinMitHerz.add(herzileinMusstNichtTraurigSein);
-      herzileinMusstNichtTraurigSein.addMouseListener(new MouseAdapter()
-          {
-            public void mouseClicked(MouseEvent e)
-            {
-              if (!e.isPopupTrigger())
-                boxBruceleitner.doClick();
-            }
-          });
-      uiElement = new UIElement.Checkbox(id, boxBruceleitner, agentinMitHerz, layoutConstraints);
+      uiElement = new UIElement.Checkbox(id, boxBruceleitner, layoutConstraints);
       boxBruceleitner.addActionListener(new UIElementActionListener(context.uiElementEventHandler, uiElement, true, "valueChanged", new Object[]{}));
       boxBruceleitner.addFocusListener(new UIElementFocusListener(context.uiElementEventHandler, uiElement));
       return uiElement;
