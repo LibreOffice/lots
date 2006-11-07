@@ -14,6 +14,7 @@
  * 26.07.2006 | BNK | formatInternalTelefonNumber5 -> formatiereTelefonnummerDIN5008
  * 26.10.2006 | BNK | +gender()
  * 30.10.2006 | BNK | Kommentare verbessert.
+ * 07.11.2006 | BNK | +datumNichtInVergangenheit()
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -105,8 +106,30 @@ public class Standard
    */
   public static boolean korrektesDatum(String datum)
   {
+    return checkDate(datum, false);
+  }
+
+  /**
+   * Liefert true gdw datum ein korrektes Datum der Form Monat.Tag.Jahr
+   * ist (wobei Jahr immer 4-stellig sein muss) und das Datum nicht in der Vergangenheit liegt.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public static boolean datumNichtInVergangenheit(String datum)
+  {
+    return checkDate(datum, true);
+  }
+  
+  /**
+   * Liefert true gdw datum ein korrektes Datum der Form Monat.Tag.Jahr
+   * ist (wobei Jahr immer 4-stellig sein muss) und entweder noPast == false ist oder 
+   * das Datum nicht in der Vergangenheit liegt.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private static boolean checkDate(String datum, boolean noPast)
+  {
     try
     {
+      Calendar current = Calendar.getInstance();
       String[] s = datum.split("\\.");
       if (s.length != 3) return false;
       int tag = Integer.parseInt(s[0]);
@@ -119,14 +142,16 @@ public class Standard
       cal.set(Calendar.MONTH, monat - 1);
       cal.set(Calendar.YEAR, jahr);
       return (cal.get(Calendar.DAY_OF_MONTH) == tag
-              && cal.get(Calendar.MONTH) == monat - 1 && cal.get(Calendar.YEAR) == jahr);
+              && cal.get(Calendar.MONTH) == monat - 1 && cal.get(Calendar.YEAR) == jahr)
+              && (noPast == false || cal.compareTo(current) >= 0);
     }
     catch (Exception x)
     {
     }
     return false;
-  }
 
+  }
+  
   /**
    * Formatiert tel gemäss DIN 5008 und setzt dann die Vorwahl "089" davor.
    * 
