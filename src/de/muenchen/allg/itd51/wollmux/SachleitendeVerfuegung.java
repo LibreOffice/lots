@@ -25,6 +25,7 @@ import com.sun.star.awt.FontWeight;
 import com.sun.star.container.XEnumeration;
 import com.sun.star.container.XNameContainer;
 import com.sun.star.lang.IllegalArgumentException;
+import com.sun.star.lang.WrappedTargetException;
 import com.sun.star.style.XStyle;
 import com.sun.star.text.XParagraphCursor;
 import com.sun.star.text.XTextCursor;
@@ -33,6 +34,7 @@ import com.sun.star.text.XTextFrame;
 import com.sun.star.text.XTextRange;
 import com.sun.star.uno.AnyConverter;
 import com.sun.star.uno.Exception;
+import com.sun.star.util.XChangesBatch;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
@@ -54,11 +56,11 @@ public class SachleitendeVerfuegung
 
   private static final String FrameNameVerfuegungspunkt1 = "WollMuxVerfuegungspunkt1";
 
-  private static final String AbdruckDefaultStr = "Abdruck von <Vorgänger>.";
-
   private static final String zifferOnlyPattern = "^([XIV]+|\\d+)\\.$";
 
   private static final String zifferPattern = "^([XIV]+|\\d+)\\.\\s*";
+
+  private static boolean firstTime = true;
 
   /**
    * Enthält einen Vector mit den ersten 15 römischen Ziffern. Mehr wird in
@@ -99,6 +101,9 @@ public class SachleitendeVerfuegung
     // Notwendige Absatzformate definieren (falls nicht bereits definiert)
     createUsedParagraphStyles(doc);
 
+    // AutoNummerierung abstellen:
+    switchOffAutoNumbering();
+
     XParagraphCursor cursor = UNO.XParagraphCursor(range.getText()
         .createTextCursorByRange(range));
 
@@ -137,6 +142,9 @@ public class SachleitendeVerfuegung
     // Notwendige Absatzformate definieren (falls nicht bereits definiert)
     createUsedParagraphStyles(doc);
 
+    // AutoNummerierung abstellen:
+    switchOffAutoNumbering();
+
     XParagraphCursor cursor = UNO.XParagraphCursor(range.getText()
         .createTextCursorByRange(range));
 
@@ -147,13 +155,14 @@ public class SachleitendeVerfuegung
     if (!deletedAtLeastOne)
     {
       // Abdruck einfügen, wenn kein Verfügungspunkt gelöscht wurde.
-      cursor.collapseToEnd();
       cursor.gotoEndOfParagraph(false);
-      cursor.setString("\r" + AbdruckDefaultStr);
+      int count = countVerfPunkteBefore(doc, cursor) + 1;
+      cursor.setString("\r" + abdruckString(count) + "\r");
       cursor.gotoNextParagraph(false);
+      cursor.gotoEndOfParagraph(true);
       UNO.setProperty(cursor, "ParaStyleName", ParaStyleNameAbdruck);
-      cursor.gotoEndOfParagraph(false);
-      cursor.setString("\r");
+      XTextCursor zifferOnly = getZifferOnly(cursor);
+      UNO.setProperty(zifferOnly, "CharWeight", new Float(FontWeight.BOLD));
     }
 
     // Ziffern anpassen:
@@ -177,6 +186,9 @@ public class SachleitendeVerfuegung
 
     // Notwendige Absatzformate definieren (falls nicht bereits definiert)
     createUsedParagraphStyles(doc);
+
+    // AutoNummerierung abstellen:
+    switchOffAutoNumbering();
 
     XParagraphCursor cursor = UNO.XParagraphCursor(range.getText()
         .createTextCursorByRange(range));
@@ -204,6 +216,39 @@ public class SachleitendeVerfuegung
       {
       }
     }
+  }
+
+  /**
+   * Zählt die Anzahl Verfügungspunkte im Dokument vor der Position von
+   * range.getStart() (einschließlich) und liefert deren Anzahl zurück, wobei
+   * auch ein evtl. vorhandener Rahmen WollMuxVerfuegungspunkt1 mit gezählt
+   * wird.
+   * 
+   * @param doc
+   *          Das Dokument in dem sich range befindet (wird benötigt für den
+   *          Rahmen WollMuxVerfuegungspunkt1)
+   * @param range
+   *          Die TextRange, bei der mit der Zählung begonnen werden soll.
+   * @return die Anzahl Verfügungspunkte vor und mit range.getStart()
+   */
+  public static int countVerfPunkteBefore(XTextDocument doc,
+      XParagraphCursor range)
+  {
+    int count = 0;
+
+    // Zähler für Verfuegungspunktnummer auf 1 initialisieren, wenn ein
+    // Verfuegungspunkt1 vorhanden ist.
+    XTextRange punkt1 = getVerfuegungspunkt1(doc);
+    if (punkt1 != null) count++;
+
+    XParagraphCursor cursor = UNO.XParagraphCursor(range.getText()
+        .createTextCursorByRange(range.getStart()));
+    if (cursor != null) do
+    {
+      if (isVerfuegungspunkt(cursor)) count++;
+    } while (cursor.gotoPreviousParagraph(false));
+
+    return count;
   }
 
   /**
@@ -267,8 +312,25 @@ public class SachleitendeVerfuegung
    */
   private static boolean isAbdruck(XTextRange paragraph)
   {
-    String text = paragraph.getString();
-    return text.matches(".*Abdruck von (I|<Vorgänger>)\\..*");
+    return paragraph.getString().contains("Abdruck von I.");
+  }
+
+  /**
+   * Liefert true, wenn die Überschrift heading eines Verfügungspunktes nach der
+   * römischen Ziffer die Typischen Merkmale einer Wiedervorlage besitzt, d.h.
+   * z.B. mit den Strings "w.V." oder ähnlichen beginnt.
+   */
+  public static boolean isWiedervorlage(String heading)
+  {
+    if (heading.matches(zifferPattern + "[wW]\\.?\\s?[vV](\\.|\\s|$)"))
+      return true;
+    if (heading.matches(zifferPattern + "[wW]iedervorlage")) return true;
+    if (heading.matches(zifferPattern + "[aA]blegen")) return true;
+    if (heading.matches(zifferPattern + "[wW]eglegen")) return true;
+    if (heading.matches(zifferPattern + "[zZ]um\\s[aA]kt")) return true;
+    if (heading.matches(zifferPattern + "[zZ]\\.?\\s?[aA](\\.|\\s|$)"))
+      return true;
+    return false;
   }
 
   /**
@@ -453,41 +515,37 @@ public class SachleitendeVerfuegung
         {
           count++;
 
-          // String mit römischer Zahl erzeugen
-          String number = romanNumber(count);
-
-          // Enthält der Paragraph einen "Abdruck"-String, so wird dieser neu
-          // gesetzt:
           if (isAbdruck(cursor))
           {
-            cursor.setString(abdruckString(count));
-          }
+            // Behandlung von Paragraphen mit einem "Abdruck"-String
+            String abdruckStr = abdruckString(count);
+            if (!cursor.getString().equals(abdruckStr))
+            {
+              cursor.setString(abdruckStr);
 
-          XTextRange zifferOnly = getZifferOnly(cursor);
-          if (zifferOnly != null)
-          {
-            // Nummer aktualisieren wenn sie nicht mehr stimmt.
-            if (!zifferOnly.getString().equals(number))
-              zifferOnly.setString(number);
+              XTextRange zifferOnly = getZifferOnly(cursor);
+              UNO.setProperty(zifferOnly, "CharWeight", new Float(
+                  FontWeight.BOLD));
+            }
           }
           else
           {
-            // zuerst den Tab einfügen, damit dieses in der Standardformatierung
-            // des Absatzes erhalten bleibt.
-            cursor.getStart().setString("\t"); // Rechtsverschiebung des
-            // Cursors
-            cursor.gotoStartOfParagraph(true); // Korrektur der Verschiebung
-
-            // neue Nummer erzeugen mit Formatierung "fett". Die Formatierung
-            // darf sich nur auf die Nummer auswirken und nicht auch noch auf
-            // das darauffolgende "\t"-Zeichen
-            zifferOnly = cursor.getText().createTextCursorByRange(
-                cursor.getStart());
-            UNO.setProperty(
-                zifferOnly,
-                "CharWeight",
-                new Float(FontWeight.BOLD));
-            zifferOnly.setString(number);
+            // Behandlung von normalen Verfügungspunkten:
+            String numberStr = romanNumber(count);
+            XTextRange zifferOnly = getZifferOnly(cursor);
+            if (zifferOnly != null)
+            {
+              // Nummer aktualisieren wenn sie nicht mehr stimmt.
+              if (!zifferOnly.getString().equals(numberStr))
+                zifferOnly.setString(numberStr);
+            }
+            else
+            {
+              // Nummer neu anlegen, wenn wie noch gar nicht existierte
+              zifferOnly = cursor.getText().createTextCursorByRange(
+                  cursor.getStart());
+              zifferOnly.setString(numberStr + "\t");
+            }
           }
         }
       } while (cursor.gotoNextParagraph(false));
@@ -569,6 +627,9 @@ public class SachleitendeVerfuegung
     {
       XTextCursor cursor = frame.getText().createTextCursorByRange(
           frame.getText());
+      if (isVerfuegungspunkt(cursor)) return cursor;
+
+      // Absatzformat WollMuxVerfuegungspunkt1 setzen wenn noch nicht gesetzt.
       UNO.setProperty(cursor, "ParaStyleName", ParaStyleNameVerfuegungspunkt1);
       return cursor;
     }
@@ -577,24 +638,22 @@ public class SachleitendeVerfuegung
   }
 
   /**
-   * Erzeugt einen String in der Form "Abdruck von I.[, II., ...][ und <i-1>]",
-   * der passend zu einem Abdruck mit der Verfügungsnummer i angezeigt werden
-   * soll.
+   * Erzeugt einen String in der Form "i.<tab>Abdruck von I.[, II., ...][ und
+   * <i-1>]", der passend zu einem Abdruck mit der Verfügungsnummer number
+   * angezeigt werden soll.
    * 
-   * @param i
+   * @param number
    *          Die Nummer des Verfügungspunktes des Abdrucks
    * @return String in der Form "Abdruck von I.[, II., ...][ und <i-1>]" oder
    *         AbdruckDefaultStr, wenn der Verfügungspunkt bei i==0 und i==1
    *         keinen Vorgänger besitzen kann.
    */
-  private static String abdruckString(int i)
+  private static String abdruckString(int number)
   {
-    if (i < 2) return AbdruckDefaultStr;
-
-    String str = "Abdruck von " + romanNumber(1);
-    for (int j = 2; j < (i - 1); ++j)
+    String str = romanNumber(number) + "\t" + "Abdruck von " + romanNumber(1);
+    for (int j = 2; j < (number - 1); ++j)
       str += ", " + romanNumber(j);
-    if (i >= 3) str += " und " + romanNumber(i - 1);
+    if (number >= 3) str += " und " + romanNumber(number - 1);
     return str;
   }
 
@@ -691,24 +750,6 @@ public class SachleitendeVerfuegung
       } while (cursor.gotoNextParagraph(false));
 
     return verfuegungspunkte;
-  }
-
-  /**
-   * Liefert true, wenn die Überschrift heading eines Verfügungspunktes nach der
-   * römischen Ziffer die Typischen Merkmale einer Wiedervorlage besitzt, d.h.
-   * z.B. mit den Strings "w.V." oder ähnlichen beginnt.
-   */
-  public static boolean isWiedervorlage(String heading)
-  {
-    if (heading.matches(zifferPattern + "[wW]\\.?\\s?[vV](\\.|\\s|$)"))
-      return true;
-    if (heading.matches(zifferPattern + "[wW]iedervorlage")) return true;
-    if (heading.matches(zifferPattern + "[aA]blegen")) return true;
-    if (heading.matches(zifferPattern + "[wW]eglegen")) return true;
-    if (heading.matches(zifferPattern + "[zZ]um\\s[aA]kt")) return true;
-    if (heading.matches(zifferPattern + "[zZ]\\.?\\s?[aA](\\.|\\s|$)"))
-      return true;
-    return false;
   }
 
   /**
@@ -915,6 +956,15 @@ public class SachleitendeVerfuegung
       short verfPunkt, short numberOfCopies, boolean isDraft, boolean isOriginal)
       throws PrintFailedException
   {
+    // Kontrollkästchen Ausgeblendeter Text (anzeigen) unter
+    // "Extras->Optionen->OOoWriter->Formatierungshilfen" deaktivieren, damit
+    // die Berechnung der Gesamtseitenzahl in jedem Fall richtig funktioniert.
+    // FIXME: updateAccess von hiddenCharacter geht noch nicht und wird erst
+    // nach einem Neustart aktiv -> Community fragen
+    XChangesBatch updateAccess = UNO
+        .getConfigurationUpdateAccess("/org.openoffice.Office.Writer/Content/NonprintingCharacter");
+    Object oldhiddenCharacter = setHiddenCharacter(updateAccess, Boolean.FALSE);
+
     // Zähler für Verfuegungspunktnummer auf 1 initialisieren, wenn ein
     // Verfuegungspunkt1 vorhanden ist.
     XTextRange punkt1 = getVerfuegungspunkt1(model.doc);
@@ -985,13 +1035,6 @@ public class SachleitendeVerfuegung
       UNO.setProperty(punkt1ZifferOnly, "CharHidden", Boolean.TRUE);
     }
 
-    // TODO: bevor dies hier abläuft sollte unter
-    // Extras->Optionen->OOoWriter->Formatierungshilfen die Kontrollkästchen
-    // Ausgeblendeter Text (anzeigen) deaktiviert sein, da sonst der
-    // viewcursor.Page falsche Seitenangaben liefern kann. Hier sollte also ein
-    // Stück code stehen, das diese Option deaktiviert und später wieder auf den
-    // vorher gesetzten Wert zurücksetzt.
-
     // Seitumbruch einbauen, damit der Text des letzten Verfügungspunktes
     // niemals zwischen verschiedenen Seiten auseinander gerissen wird.
     XTextCursor viewCursor = model.getViewCursor();
@@ -1045,7 +1088,9 @@ public class SachleitendeVerfuegung
       }
     }
 
-    // Druck des Dokuments mit den entsprechenden Ein/Ausbledungen
+    // -----------------------------------------------------------------------
+    // Druck des Dokuments
+    // -----------------------------------------------------------------------
     model.print(numberOfCopies);
 
     // zuvor eingefügten Seitenumbruch wieder entfernen:
@@ -1070,6 +1115,13 @@ public class SachleitendeVerfuegung
     // Verfügungspunkte wieder einblenden:
     if (setInvisibleRange != null)
       UNO.setProperty(setInvisibleRange, "CharHidden", Boolean.FALSE);
+
+    // Kontrollkästchen Ausgeblendeter Text (anzeigen) unter
+    // "Extras->Optionen->OOoWriter->Formatierungshilfen" wieder auf den alten
+    // Wert zurücksetzen:
+    setHiddenCharacter(updateAccess, oldhiddenCharacter);
+    if (UNO.XComponent(updateAccess) != null)
+      UNO.XComponent(updateAccess).dispose();
   }
 
   /**
@@ -1083,6 +1135,63 @@ public class SachleitendeVerfuegung
   {
     if (UNO.XPageCursor(viewCursor) == null) return 0;
     return UNO.XPageCursor(viewCursor).getPage();
+  }
+
+  /**
+   * Setzt die Property HiddenCharacter des übergebenen UNO-Objekts
+   * updateAccess, committed die Änderung an OOo und gibt den Wert zurück, den
+   * die Property vor dem setzen besaß.
+   * 
+   * @param updateAccess
+   *          das updateAcess-Objekt, auf dem die Operation durchgeführt werden
+   *          soll.
+   * @param newValue
+   *          der neu zu setzende Wert.
+   * @return der Wert, den die Property VORHER hatte.
+   */
+  private static Object setHiddenCharacter(XChangesBatch updateAccess,
+      Object newValue)
+  {
+    Object oldValue = UNO.getProperty(updateAccess, "HiddenCharacter");
+    UNO.setProperty(updateAccess, "HiddenCharacter", newValue);
+    if (updateAccess != null) try
+    {
+      updateAccess.commitChanges();
+    }
+    catch (WrappedTargetException e)
+    {
+      Logger.error(e);
+    }
+    return oldValue;
+  }
+
+  /**
+   * Schaltet die Option AutoNumbering unter
+   * Extras->AutoKorrektur...->Nummerierung anwenden aus, da diese im Umgang mit
+   * Sachleitenden Verfügungen nicht einsetzbar ist. OpenOffice interpretiert
+   * sonst jeden Verfügungspunkt als Beginn einer Nummerierung.
+   */
+  private static void switchOffAutoNumbering()
+  {
+    // FIXME: switchOffAutoNumbering: auch das wird erst nach einem Neustart
+    // aktiv. Warum?
+    if (firstTime)
+    {
+      firstTime = false;
+      XChangesBatch updateAccess = UNO
+          .getConfigurationUpdateAccess("/org.openoffice.Office.Writer/AutoFunction/Format/ByInput/ApplyNumbering");
+      UNO.setProperty(updateAccess, "Enable", Boolean.FALSE);
+      if (updateAccess != null) try
+      {
+        updateAccess.commitChanges();
+      }
+      catch (WrappedTargetException e)
+      {
+        Logger.error(e);
+      }
+      if (UNO.XComponent(updateAccess) != null)
+        UNO.XComponent(updateAccess).dispose();
+    }
   }
 
   /**
@@ -1254,6 +1363,5 @@ public class SachleitendeVerfuegung
       System.err.println("Keine Textdokument");
       return;
     }
-
   }
 }
