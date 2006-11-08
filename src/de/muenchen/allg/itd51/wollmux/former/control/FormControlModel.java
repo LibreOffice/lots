@@ -66,7 +66,13 @@ public class FormControlModel
    */
   public static final String NO_ACTION = "";
   
-  /** Attribut ID für das Attribut "LABEL". */
+  /** Attribut ID für das Attribut "LABEL". 
+   * F1XME: Eigentlich müsste jede der set... Funktionen einen entsprechenden Event an die
+   * ModelChangeListener absetzen, aber ich habe keine Lust(Zeit), das durchzuziehen. 
+   * Da derzeit bei den
+   * meisten set... Funktionen nur genau eine View den entsprechenden Wert anzeigt ist dies auch
+   * noch nicht erforderlich und wer weiß ob der FM4000 jemals so erweitert wird, dass es mehrere
+   * Views pro Wert gibt. Also warten wir einfach mal ab, bis was kaputt geht. */
   public static final int LABEL_ATTR = 0;
   /** Attribut ID für das Attribut "TYPE". */
   public static final int TYPE_ATTR = 1;
@@ -99,6 +105,8 @@ public class FormControlModel
   private int lines = 4;
   /** MINSIZE. */
   private int minsize = 0;
+  /** MAXSIZE. */
+  private int maxsize = 0;
   /** PLAUSI.  */
   private FunctionSelection plausi = new FunctionSelection();
   /** AUTOFILL. */
@@ -146,6 +154,7 @@ public class FormControlModel
       else if (name.equals("READONLY")) readonly = str.equalsIgnoreCase("true");
       else if (name.equals("LINES")) try{lines = Integer.parseInt(str); }catch(Exception x){}
       else if (name.equals("MINSIZE")) try{minsize = Integer.parseInt(str); }catch(Exception x){}
+      else if (name.equals("MAXSIZE")) try{maxsize = Integer.parseInt(str); }catch(Exception x){}
       else if (name.equals("VALUES")) items = parseValues(attr);
       else if (name.equals("GROUPS")) groups = parseGroups(attr);
       else if (name.equals("PLAUSI")) plausi = funcSelProv.getFunctionSelection(attr, id);
@@ -295,6 +304,15 @@ public class FormControlModel
   }
   
   /**
+   * Liefert true gdw dieses FormControlModel eine TextArea darstellt.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public boolean isTextArea()
+  {
+    return type == TEXTAREA_TYPE;
+  }
+  
+  /**
    * Liefert true gdw dieses FormControlModel einen Glue darstellt.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -383,6 +401,15 @@ public class FormControlModel
   public int getMinsize()
   {
     return minsize; 
+  }
+  
+  /**
+   * Liefert das MAXSIZE-Attribut dieses FormControlModels.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public int getMaxsize()
+  {
+    return maxsize; 
   }
   
   /**
@@ -534,6 +561,16 @@ public class FormControlModel
   }
   
   /**
+   * Setzt das MAXSIZE-Attribut.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public void setMaxsize(int maxsize)
+  {
+    this.maxsize = maxsize; 
+    formularMax4000.documentNeedsUpdating();
+  }
+  
+  /**
    * Setzt das TYPE-Attribut. Dabei wird der übergebene String in eine der
    * {@link #COMBOBOX_TYPE *_TYPE-Konstanten} übersetzt. ACHTUNG! Der TYPE von Tabs
    * kann nicht verändert werden und andere Elemente können auch nicht in Tabs verwandelt
@@ -583,9 +620,10 @@ public class FormControlModel
     conf.add("ID").add(getId());
     conf.add("TIP").add(getTooltip());
     conf.add("READONLY").add(""+getReadonly());
-    conf.add("EDIT").add(""+getEditable());
-    conf.add("LINES").add(""+getLines());
-    conf.add("MINSIZE").add(""+getMinsize());
+    if (isCombo()) conf.add("EDIT").add(""+getEditable());
+    if (isTextArea()) conf.add("LINES").add(""+getLines());
+    if (isGlue() && getMinsize() > 0) conf.add("MINSIZE").add(""+getMinsize());
+    if (isGlue() && getMaxsize() > 0) conf.add("MAXSIZE").add(""+getMaxsize());
     if (getAction().length() > 0) conf.add("ACTION").add(""+getAction());
     if (getDialog().length() > 0) conf.add("DIALOG").add(""+getDialog());
     if (getHotkey() > 0)

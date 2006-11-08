@@ -96,6 +96,11 @@ public class OneFormControlLineView extends LineView
   private JTextField idTextfield;
   
   /**
+   * Das JTextField, das die LINES anzeigt und ändern lässt.
+   */
+  private JTextField linesTextfield;
+  
+  /**
    * Die Komponente, die das Bearbeiten des TYPE-Attributs erlaubt.
    */
   private JComboBox typeView;
@@ -140,6 +145,7 @@ public class OneFormControlLineView extends LineView
     myPanel.add(makeLabelView());
     myPanel.add(makeTypeView());
     myPanel.add(makeComboBoxAdditionalView());
+    myPanel.add(makeTextAreaAdditionalView());
     normalFont = labelTextfield.getFont();
     boldFont = normalFont.deriveFont(Font.BOLD);
     unmarkedBackgroundColor = myPanel.getBackground();
@@ -151,6 +157,8 @@ public class OneFormControlLineView extends LineView
   {
     typeView.setVisible(!model.isTab());
     comboBoxAdditionalView.setVisible(model.isCombo());
+    linesTextfield.setVisible(model.isTextArea());
+    myPanel.validate();
   }
   
   /**
@@ -293,7 +301,9 @@ public class OneFormControlLineView extends LineView
     editBox.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e)
       {
+        ignoreAttributeChanged = true;
         model.setEditable(editBox.isSelected());
+        ignoreAttributeChanged = false;
       }
     });
     editBox.addMouseListener(myMouseListener);
@@ -309,7 +319,9 @@ public class OneFormControlLineView extends LineView
         String[] items = new String[combo.getItemCount()];
         for (int i = 0; i < items.length; ++i)
           items[i] = combo.getItemAt(i).toString();
+        ignoreAttributeChanged = true;
         model.setItems(items);
+        ignoreAttributeChanged = false;
       }});
     newButton.addMouseListener(myMouseListener);
     JButton delButton = new JButton("X");
@@ -326,12 +338,50 @@ public class OneFormControlLineView extends LineView
           String[] items = new String[combo.getItemCount()];
           for (int i = 0; i < items.length; ++i)
             items[i] = combo.getItemAt(i).toString();
+          ignoreAttributeChanged = true;
           model.setItems(items);
+          ignoreAttributeChanged = false;
         }
       }});
     delButton.addMouseListener(myMouseListener);
     
     return comboBoxAdditionalView;
+  }
+  
+  /**
+   * Liefert eine Komponente, die die ID des FormControlModels anzeigt und Änderungen
+   * an das Model weitergibt. 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED
+   */
+  private JComponent makeTextAreaAdditionalView()
+  {
+    linesTextfield = new JTextField(""+model.getLines(), 3);
+    Document tfdoc = linesTextfield.getDocument();
+    tfdoc.addDocumentListener(new DocumentListener(){
+      public void update()
+      {
+        int lines = -1;
+        try{
+          lines = Integer.parseInt(linesTextfield.getText());
+          if (lines > 200 || lines < 1) lines = -1;
+        }catch(NumberFormatException ex){}
+        if (lines > 0)
+        {
+          ignoreAttributeChanged = true;
+          model.setLines(lines);
+          ignoreAttributeChanged = false;
+        }
+      }
+
+      public void insertUpdate(DocumentEvent e) {update();}
+      public void removeUpdate(DocumentEvent e) {update();}
+      public void changedUpdate(DocumentEvent e) {update();}
+      });
+    
+    linesTextfield.setCaretPosition(0);
+    linesTextfield.addMouseListener(myMouseListener);
+    return linesTextfield;
   }
   
   /**
