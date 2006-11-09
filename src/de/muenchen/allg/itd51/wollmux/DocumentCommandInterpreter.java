@@ -185,7 +185,6 @@ public class DocumentCommandInterpreter
     if (formScanner == null) formScanner = new FormScanner();
     errors += formScanner.execute(tree);
     model.setIDToFormFields(formScanner.idToFormFields);
-    model.setFormDescriptor(formScanner.formDescriptor);
 
     // 7) Die Statusänderungen der Dokumentkommandos auf die Bookmarks
     // übertragen bzw. die Bookmarks abgearbeiteter Kommandos löschen.
@@ -226,21 +225,17 @@ public class DocumentCommandInterpreter
       formScanner = new FormScanner();
       errors += formScanner.execute(tree);
       model.setIDToFormFields(formScanner.idToFormFields);
-      model.setFormDescriptor(formScanner.formDescriptor);
     }
     HashMap idToPresetValue = mapIDToPresetValue(
-        formScanner.formDescriptor,
+        model,
         formScanner.idToFormFields);
 
     // 2) Bookmarks updaten
     tree.updateBookmarks(mux.isDebugMode());
 
-    // 3) Jetzt wird ein WM(CMD 'setType' TYPE 'formDocument)-Kommando an den
-    // Anfang des Dokuments gesetzt um das Dokument als Formulardokument
-    // auszuzeichnen.
-    if (model.doc != null)
-      new Bookmark("WM(CMD 'setType' TYPE 'formDocument')", model.doc, model
-          .getFrameWollMuxDaten(true).getText().getStart());
+    // 3) Jetzt wird der Dokumenttyp formDocument gesetzt, um das Dokument als
+    // Formulardokument auszuzeichnen.
+    model.setType("formDocument", true);
 
     // 4) Document-Modified auf false setzen, da nur wirkliche
     // Benutzerinteraktionen den Modified-Status beeinflussen sollen.
@@ -248,7 +243,7 @@ public class DocumentCommandInterpreter
 
     // FunctionContext erzeugen und im Formular definierte
     // Funktionen/DialogFunktionen parsen:
-    ConfigThingy descs = formScanner.formDescriptor.toConfigThingy();
+    ConfigThingy descs = model.getFormDescription();
     Map functionContext = new HashMap();
     DialogLibrary dialogLib = new DialogLibrary();
     FunctionLibrary funcLib = new FunctionLibrary();
@@ -284,7 +279,7 @@ public class DocumentCommandInterpreter
 
     // 5) Formulardialog starten:
     FormModelImpl fm = new FormModelImpl(model, funcLib,
-        formScanner.formDescriptor, formScanner.idToFormFields, tree);
+        formScanner.idToFormFields, tree);
 
     model.setFormModel(fm);
 
@@ -320,14 +315,15 @@ public class DocumentCommandInterpreter
    * @return eine vollständige Zuordnung von Feld IDs zu den aktuellen
    *         Vorbelegungen im Dokument.
    */
-  private HashMap mapIDToPresetValue(FormDescriptor fd, HashMap idToFormFields)
+  private static HashMap mapIDToPresetValue(TextDocumentModel model,
+      HashMap idToFormFields)
   {
     HashMap idToPresetValue = new HashMap();
 
     // durch alle Werte, die im FormDescriptor abgelegt sind gehen, und
     // vergleichen, ob sie mit den Inhalten der Formularfelder im Dokument
     // übereinstimmen.
-    Iterator idIter = fd.getFormFieldIDs().iterator();
+    Iterator idIter = model.getFormFieldIDs().iterator();
     while (idIter.hasNext())
     {
       String id = (String) idIter.next();
@@ -370,7 +366,7 @@ public class DocumentCommandInterpreter
         // gleiche Wert als neuer Formularwert übernommen.
         // 3) in allen anderen Fällen wird FISHY übergeben.
         if (allAreUnchanged)
-          value = fd.getFormFieldValue(id);
+          value = model.getFormFieldValue(id);
         else
         {
           if (allAreUntransformed
@@ -385,7 +381,7 @@ public class DocumentCommandInterpreter
       {
         // wenn kein Formularfeld vorhanden ist wird der zuletzt gesetzte
         // Formularwert übernommen.
-        value = fd.getFormFieldValue(id);
+        value = model.getFormFieldValue(id);
       }
 
       // neuen Wert übernehmen:
@@ -419,13 +415,11 @@ public class DocumentCommandInterpreter
 
     private final String defaultWindowAttributes;
 
-    private final FormDescriptor formDescriptor;
-
     private FormGUI formGUI;
 
     public FormModelImpl(TextDocumentModel textDocumentModel,
-        FunctionLibrary funcLib, FormDescriptor formDescriptor,
-        HashMap idToFormValues, DocumentCommandTree cmdTree)
+        FunctionLibrary funcLib, HashMap idToFormValues,
+        DocumentCommandTree cmdTree)
     {
       this.textDocumentModel = textDocumentModel;
       this.funcLib = funcLib;
@@ -433,7 +427,6 @@ public class DocumentCommandInterpreter
       this.cmdTree = cmdTree;
       this.invisibleGroups = new HashSet();
       this.formGUI = null;
-      this.formDescriptor = formDescriptor;
 
       // Standard-Fensterattribute vor dem Start der Form-GUI sichern um nach
       // dem Schließen des Formulardokuments die Standard-Werte wieder
@@ -629,7 +622,7 @@ public class DocumentCommandInterpreter
 
     public void print()
     {
-      // TODO WollMuxEventHandler.handlePrintTextDocument(textDocumentModel);
+      UNO.dispatch(textDocumentModel.doc, DispatchInterceptor.DISP_UNO_PRINT);
     }
 
     public void pdf()
@@ -661,21 +654,18 @@ public class DocumentCommandInterpreter
 
     public int executeCommand(SetType cmd)
     {
-      model.setTypeCommand(cmd);
+      // Wenn eine Mischvorlage zum Bearbeiten geöffnet wurde soll der typ
+      // "templateTemplate" NICHT gelöscht werden. In allen anderen Fällen ist
+      // er nur temporär und wird gelöscht.
+      boolean store = (model.hasURL() && cmd.getType().equalsIgnoreCase(
+          "templateTemplate"));
 
-      // Wenn eine Mischvorlage zum Bearbeiten geöffnet wurde soll das darin
-      // enthaltene setType "templateTemplate" Kommando NICHT
-      // gelöscht werden. In allen anderen Fällen schon.
-      if (!(model.hasURL() && cmd.getType()
-          .equalsIgnoreCase("templateTemplate")))
-      {
-        cmd.setDoneState(true);
+      model.setType(cmd, store);
 
-        // über ein sofortiges Update mit Parameter false sicherstellen, dass
-        // das Kommando auch wirklich aus dem Dokument gelöscht wird, auch wenn
-        // der debug-Modus gesetzt ist.
-        cmd.updateBookmark(false);
-      }
+      // Bookmark löschen:
+      cmd.setDoneState(true);
+      cmd.updateBookmark(false);
+
       return 0;
     }
 
@@ -1347,8 +1337,6 @@ public class DocumentCommandInterpreter
 
     private Map bookmarkNameToFormField = new HashMap();
 
-    private FormDescriptor formDescriptor = new FormDescriptor(model);
-
     /**
      * Ausführung starten
      */
@@ -1369,7 +1357,7 @@ public class DocumentCommandInterpreter
       cmd.setErrorState(false);
       try
       {
-        formDescriptor.add(cmd);
+        model.addFormCommand(cmd);
       }
       catch (ConfigurationErrorException e)
       {

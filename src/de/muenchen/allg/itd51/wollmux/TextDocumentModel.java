@@ -19,37 +19,27 @@ package de.muenchen.allg.itd51.wollmux;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.Vector;
 import java.util.regex.Pattern;
 
 import com.sun.star.awt.DeviceInfo;
 import com.sun.star.awt.PosSize;
-import com.sun.star.awt.Size;
 import com.sun.star.awt.XWindow;
 import com.sun.star.beans.PropertyValue;
-import com.sun.star.container.XEnumeration;
 import com.sun.star.container.XNameAccess;
-import com.sun.star.container.XNamed;
 import com.sun.star.frame.FrameSearchFlag;
 import com.sun.star.frame.XController;
 import com.sun.star.frame.XFrame;
 import com.sun.star.frame.XModel;
 import com.sun.star.lang.EventObject;
-import com.sun.star.table.BorderLine;
-import com.sun.star.text.HoriOrientation;
-import com.sun.star.text.RelOrientation;
-import com.sun.star.text.TextContentAnchorType;
-import com.sun.star.text.VertOrientation;
-import com.sun.star.text.WrapTextMode;
 import com.sun.star.text.XBookmarksSupplier;
-import com.sun.star.text.XText;
 import com.sun.star.text.XTextContent;
 import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
-import com.sun.star.text.XTextFrame;
-import com.sun.star.text.XTextFramesSupplier;
 import com.sun.star.text.XTextRange;
 import com.sun.star.text.XTextViewCursorSupplier;
 import com.sun.star.uno.UnoRuntime;
@@ -73,14 +63,6 @@ import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
 public class TextDocumentModel
 {
   /**
-   * Pattern zum Erkennen der Bookmarks, die {@link #deForm()} entfernen soll.
-   */
-  public static final Pattern BOOKMARK_KILL_PATTERN = Pattern
-      .compile("(\\A\\s*(WM\\s*\\(.*CMD\\s*'((form)|(setGroups)|(insertFormValue))'.*\\))\\s*\\d*\\z)"
-               + "|(\\A\\s*(WM\\s*\\(.*CMD\\s*'(setType)'.*'formDocument'\\))\\s*\\d*\\z)"
-               + "|(\\A\\s*(WM\\s*\\(.*'formDocument'.*CMD\\s*'(setType)'.*\\))\\s*\\d*\\z)");
-
-  /**
    * Enthält die Referenz auf das XTextDocument-interface des eigentlichen
    * TextDocument-Services der zugehörigen UNO-Komponente.
    */
@@ -96,18 +78,33 @@ public class TextDocumentModel
    * Die dataId unter der die WollMux-Formularbeschreibung in
    * {@link #persistentData} gespeichert wird.
    */
-  private static final String WOLLMUX_FORMULARBESCHREIBUNG = "WollMuxFormularbeschreibung";
+  private static final String DATA_ID_FORMULARBESCHREIBUNG = "WollMuxFormularbeschreibung";
 
   /**
    * Die dataId unter der die WollMux-Formularwerte in {@link #persistentData}
    * gespeichert werden.
    */
-  private static final String WOLLMUX_FORMULARWERTE = "WollMuxFormularwerte";
+  private static final String DATA_ID_FORMULARWERTE = "WollMuxFormularwerte";
 
   /**
-   * 
+   * Die dataId unter der der Name der Druckfunktion in {@link #persistentData}
+   * gespeichert wird.
    */
-  private static final String WOLLMUX_PRINTFUNCTION = "PrintFunction";
+  private static final String DATA_ID_PRINTFUNCTION = "PrintFunction";
+
+  /**
+   * Die dataId unter der der Name der Druckfunktion in {@link #persistentData}
+   * gespeichert wird.
+   */
+  private static final String DATA_ID_SETTYPE = "SetType";
+
+  /**
+   * Pattern zum Erkennen der Bookmarks, die {@link #deForm()} entfernen soll.
+   */
+  private static final Pattern BOOKMARK_KILL_PATTERN = Pattern
+      .compile("(\\A\\s*(WM\\s*\\(.*CMD\\s*'((form)|(setGroups)|(insertFormValue))'.*\\))\\s*\\d*\\z)"
+               + "|(\\A\\s*(WM\\s*\\(.*CMD\\s*'(setType)'.*'formDocument'\\))\\s*\\d*\\z)"
+               + "|(\\A\\s*(WM\\s*\\(.*'formDocument'.*CMD\\s*'(setType)'.*\\))\\s*\\d*\\z)");
 
   /**
    * Ermöglicht den Zugriff auf einen Vector aller FormField-Objekte in diesem
@@ -142,11 +139,15 @@ public class TextDocumentModel
   private String[] fragUrls;
 
   /**
-   * Enthält das SetPrintFunction-Dokumentkommando falls in diesem Dokument eine
-   * Druckfunktion definiert ist oder null, wenn keine Druckfunktion definiert
-   * ist.
+   * Enthält den Typ des Dokuments oder null, falls keiner gesetzt ist.
    */
-  private DocumentCommand.SetPrintFunction printFunction;
+  private String type = null;
+
+  /**
+   * Enthält den Namen der aktuell gesetzten Druckfunktion oder null, wenn keine
+   * Druckfunktion gesetzt ist.
+   */
+  private String printFunctionName;
 
   /**
    * Enthält den Namen der Druckfunktion, die vor dem letzten Aufruf der Methode
@@ -166,22 +167,21 @@ public class TextDocumentModel
   private DocumentCommandTree docCmdTree;
 
   /**
-   * Enthält die Formularbeschreibung falls es sich bei dem Dokument um ein
-   * Formular handelt und wird jedoch erst mit
-   * DocumentCommandInterpreter.executeNormalCommands() gesetzt.
+   * Enthält die Gesamtbeschreibung alle Formular-Abschnitte, die in den
+   * persistenten Daten bzw. in den mit add hinzugefügten Form-Kommandos
+   * gefunden wurden.
    */
-  private FormDescriptor formDescriptor = new FormDescriptor();
+  private ConfigThingy formularConf;
+
+  /**
+   * Enthält die aktuellen Werte der Formularfelder als Zuordnung id -> Wert.
+   */
+  private HashMap formFieldValues;
 
   /**
    * Verantwortlich für das Speichern persistenter Daten.
    */
   private PersistentData persistentData;
-
-  /**
-   * Enthält das setType-Dokumentkommando dieses Dokuments falls eines vorhanden
-   * ist.
-   */
-  private String type = null;
 
   /**
    * Enthält einen Vector aller notInOrininal-Dokumentkommandos des Dokuments,
@@ -217,13 +217,14 @@ public class TextDocumentModel
     this.fragUrls = new String[] {};
     this.currentMax4000 = null;
     this.closeListener = null;
-    this.printFunction = null;
+    this.printFunctionName = null;
     this.docCmdTree = new DocumentCommandTree(UNO.XBookmarksSupplier(doc));
     this.notInOriginalBlocks = new Vector();
     this.draftOnlyBlocks = new Vector();
     this.dispatchInterceptorController = null;
     this.printSettingsDone = false;
-    this.persistentData = new PersistentData(doc);
+    this.formularConf = new ConfigThingy("WM");
+    this.formFieldValues = new HashMap();
 
     registerCloseListener();
 
@@ -237,6 +238,94 @@ public class TextDocumentModel
     catch (java.lang.Exception e)
     {
       Logger.error("Kann DispatchInterceptor nicht registrieren:", e);
+    }
+
+    // Auslesen der Persistenten Daten:
+    this.persistentData = new PersistentData(doc);
+    this.type = persistentData.getData(DATA_ID_SETTYPE);
+    this.printFunctionName = persistentData.getData(DATA_ID_PRINTFUNCTION);
+    parseFormDescription(persistentData.getData(DATA_ID_FORMULARBESCHREIBUNG));
+    parseFormValues(persistentData.getData(DATA_ID_FORMULARWERTE));
+  }
+
+  /**
+   * Wertet den String-Inhalt value der Formularbeschreibungsnotiz aus, die von
+   * der Form "WM( Formular(...) )" sein muss und fügt diese der
+   * Gesamtbeschreibung hinzu.
+   * 
+   * @param value
+   *          darf null sein und wird in diesem Fall ignoriert, darf aber kein
+   *          leerer String sein, sonst Fehler.
+   */
+  private void parseFormDescription(String value)
+  {
+    if (value == null) return;
+
+    try
+    {
+      ConfigThingy conf = new ConfigThingy("", null, new StringReader(value));
+      // Formular-Abschnitt auswerten:
+      try
+      {
+        ConfigThingy formular = conf.get("WM").get("Formular");
+        formularConf.addChild(formular);
+      }
+      catch (NodeNotFoundException e)
+      {
+        Logger.error(new ConfigurationErrorException(
+            "Die Formularbeschreibung enthält keinen Abschnitt 'Formular':\n"
+                + e.getMessage()));
+      }
+    }
+    catch (java.lang.Exception e)
+    {
+      Logger.error(new ConfigurationErrorException(
+          "Formularbeschreibung ist fehlerhaft:\n" + e.getMessage()));
+      return;
+    }
+  }
+
+  /**
+   * Wertet werteStr aus (das von der Form "WM(FormularWerte(...))" sein muss
+   * und überträgt die gefundenen Werte nach formFieldValues.
+   * 
+   * @param werteStr
+   *          darf null sein (und wird dann ignoriert) aber nicht der leere
+   *          String.
+   */
+  private void parseFormValues(String werteStr)
+  {
+    if (werteStr == null) return;
+
+    // Werte-Abschnitt holen:
+    ConfigThingy werte;
+    try
+    {
+      ConfigThingy conf = new ConfigThingy("", null, new StringReader(werteStr));
+      werte = conf.get("WM").get("Formularwerte");
+    }
+    catch (java.lang.Exception e)
+    {
+      Logger.error(new ConfigurationErrorException(
+          "Formularwerte-Abschnitt ist fehlerhaft:\n" + e.getMessage()));
+      return;
+    }
+
+    // "Formularwerte"-Abschnitt auswerten.
+    Iterator iter = werte.iterator();
+    while (iter.hasNext())
+    {
+      ConfigThingy element = (ConfigThingy) iter.next();
+      try
+      {
+        String id = element.get("ID").toString();
+        String value = element.get("VALUE").toString();
+        formFieldValues.put(id, value);
+      }
+      catch (NodeNotFoundException e)
+      {
+        Logger.error(e);
+      }
     }
   }
 
@@ -407,43 +496,39 @@ public class TextDocumentModel
    */
   public boolean hasFormDescriptor()
   {
-    if (formDescriptor != null) return !formDescriptor.isEmpty();
-
-    return false;
+    return !(formularConf.count() == 0);
   }
 
   /**
-   * Setzt den Typ des Dokuments (setType-Kommando).
+   * Setzt den Typ des Dokuments auf type und speichert den Wert persistent im
+   * Dokument ab wenn persistent==true.
    */
-  public void setType(String type)
+  public void setType(String type, boolean persistent)
   {
     this.type = type;
-  }
-  
-  /** 
-   * Liest {@link #persistentData} aus und überschreibt eventuell vorhandene aus Bookmarks
-   * gezogene Werte mit den neuen Daten.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  public void evaluatePersistentData()
-  {
-    String printFunctionName = persistentData.getData(WOLLMUX_PRINTFUNCTION);
-    if (printFunctionName != null)
-    this.pr
-    String type = persistentData.getData(DATAID_TYPE);
-    if (type != null) setType(type);
+
+    if (!persistent) return;
+
+    // Persistente Daten entsprechend anpassen
+    if (type != null)
+    {
+      persistentData.setData(DATA_ID_SETTYPE, type);
+    }
+    else
+    {
+      persistentData.removeData(DATA_ID_SETTYPE);
+    }
   }
 
   /**
-   * Setzt die zu diesem Dokument zugehörige Formularbeschreibung auf
-   * formDescriptor.
-   * 
-   * @param formDescriptor
+   * Wird vom {@link DocumentCommandInterpreter} beim Scannen der
+   * Dokumentkommandos aufgerufen wenn ein setType-Dokumentkommando bearbeitet
+   * werden muss und setzt den Typ des Dokuments auf cmd.getType(), wenn nicht
+   * bereits ein type gesetzt ist. Ansonsten wird das Kommando ignoriert.
    */
-  public void setFormDescriptor(FormDescriptor formDescriptor)
+  public void setType(DocumentCommand.SetType cmd, boolean persistent)
   {
-    this.formDescriptor = formDescriptor;
+    if (type != null) setType(cmd.getType(), persistent);
   }
 
   /**
@@ -455,76 +540,64 @@ public class TextDocumentModel
    * das entsprechende setPrintFunction-Dokumentkommando aus dem Dokument
    * gelöscht.
    * 
-   * @param printFunctionName
-   *          der Name der Druckfunktion (zum setzen) oder der Leerstring (zum
-   *          löschen bzw. zurücksetzen). Der zu setzende Name muss ein gültiger
-   *          Funktionsbezeichner sein und in einem Abschnitt "Druckfunktionen"
-   *          in der wollmux.conf definiert sein.
+   * @param newFunctionName
+   *          der Name der Druckfunktion (zum setzen), der Leerstring "" (zum
+   *          zurücksetzen auf die zuletzt gesetzte Druckfunktion) oder
+   *          "default" zum Löschen der Druckfunktion. Der zu setzende Name muss
+   *          ein gültiger Funktionsbezeichner sein und in einem Abschnitt
+   *          "Druckfunktionen" in der wollmux.conf definiert sein.
    */
-  public void setPrintFunctionName(String printFunctionName)
+  public void setPrintFunction(String newFunctionName)
   {
     // nichts machen, wenn der Name bereits gesetzt ist.
-    if (printFunction != null
-        && printFunction.getFunctionName().equals(printFunctionName)) return;
+    if (printFunctionName != null && printFunctionName.equals(newFunctionName))
+      return;
 
     // Bei null oder Leerstring: Name der vorhergehenden Druckfunktion
     // verwenden.
-    if (printFunctionName == null || printFunctionName.equals(""))
-      printFunctionName = formerPrintFunctionName;
+    if (newFunctionName == null || newFunctionName.equals(""))
+      newFunctionName = formerPrintFunctionName;
+    else if (newFunctionName != null
+             && newFunctionName.equalsIgnoreCase("default"))
+      newFunctionName = null;
 
-    // Name der bisherigen Druckfunktion in formerPrintFunctionName sichern.
-    formerPrintFunctionName = null;
-    if (printFunction != null)
-      formerPrintFunctionName = printFunction.getFunctionName();
+    // Neuen Funktionsnamen setzen und alten merken
+    formerPrintFunctionName = printFunctionName;
+    printFunctionName = newFunctionName;
 
-    if (printFunction == null && printFunctionName != null)
+    // Persistente Daten entsprechend anpassen
+    if (printFunctionName != null)
     {
-      persistentData.setData(WOLLMUX_PRINTFUNCTION, printFunctionName);
+      persistentData.setData(DATA_ID_PRINTFUNCTION, printFunctionName);
     }
-    else if (printFunction != null && printFunctionName != null)
+    else
     {
-      // ansonsten den Namen auf printFunctionName ändern.
-      printFunction.setFunctionName(printFunctionName);
-      printFunction.updateBookmark(false);
-    }
-    else if (printFunction != null && printFunctionName == null)
-    {
-      // Bestehendes Dokumentkommando löschen
-      printFunction.setDoneState(true);
-      printFunction.updateBookmark(false);
-      printFunction = null;
+      persistentData.removeData(DATA_ID_PRINTFUNCTION);
     }
   }
 
   /**
    * Wird vom DocumentCommandInterpreter beim parsen des Dokumentkommandobaumes
-   * aufgerufen, wenn das Dokument ein setPrintFunction-Kommando enthält - das
-   * entsprechende Kommando cmd wird im Model abgespeichert und die relevante
-   * Information kann später über getPrintFunctionName() erfragt werden.
+   * aufgerufen, wenn das Dokument ein setPrintFunction-Kommando enthält und
+   * setzt die in cmd.getFunctionName() enthaltene Druckfunktion, falls nicht
+   * bereits eine Druckfunktion definiert ist. Ansonsten wird das
+   * Dokumentkommando ignoriert.
    * 
    * @param cmd
    *          Das gefundene setPrintFunction-Dokumentkommando.
    */
   public void setPrintFunction(SetPrintFunction cmd)
   {
-    // Name der bisherigen Druckfunktion in formerPrintFunctionName sichern.
-    formerPrintFunctionName = null;
-    if (printFunction != null)
-      formerPrintFunctionName = printFunction.getFunctionName();
-
-    printFunction = cmd;
+    if (printFunctionName == null) setPrintFunction(cmd.getFunctionName());
   }
 
   /**
-   * Liefert den Namen der aktuellen Druckfunktion, falls das Dokument ein
-   * entsprechendes Dokumentkomando enthält oder eine Druckfunktion mit
-   * setPrintFunctionName()-Methode gesetz wurde; ist keine Druckfunktion
-   * definiert, so wird null zurück geliefert.
+   * Liefert den Namen der aktuellen Druckfunktion zurück, oder null, wenn keine
+   * Druckfunktion definiert ist.
    */
   public String getPrintFunctionName()
   {
-    if (printFunction != null) return printFunction.getFunctionName();
-    return null;
+    return printFunctionName;
   }
 
   /**
@@ -624,8 +697,8 @@ public class TextDocumentModel
       }
     }
 
-    persistentData.removeData(WOLLMUX_FORMULARBESCHREIBUNG);
-    persistentData.removeData(WOLLMUX_FORMULARWERTE);
+    persistentData.removeData(DATA_ID_FORMULARBESCHREIBUNG);
+    persistentData.removeData(DATA_ID_FORMULARWERTE);
   }
 
   /**
@@ -635,7 +708,7 @@ public class TextDocumentModel
    */
   public ConfigThingy getFormDescription()
   {
-    return formDescriptor.toConfigThingy();
+    return formularConf;
   }
 
   /**
@@ -648,8 +721,8 @@ public class TextDocumentModel
    */
   public void setFormDescription(ConfigThingy conf)
   {
-    formDescriptor.fromConfigThingy(conf);
-    persistentData.setData(WOLLMUX_FORMULARBESCHREIBUNG, getFormDescription()
+    formularConf = conf;
+    persistentData.setData(DATA_ID_FORMULARBESCHREIBUNG, formularConf
         .stringRepresentation());
     setDocumentModified(true);
   }
@@ -661,9 +734,58 @@ public class TextDocumentModel
    */
   public void setFormFieldValue(String fieldId, String value)
   {
-    formDescriptor.setFormFieldValue(fieldId, value);
-    persistentData.setData(WOLLMUX_FORMULARWERTE, formDescriptor
-        .getFormFieldValues());
+    formFieldValues.put(fieldId, value);
+    persistentData.setData(DATA_ID_FORMULARWERTE, getFormFieldValues());
+  }
+
+  /**
+   * Serialisiert die aktuellen Werte aller Fomularfelder.
+   */
+  private String getFormFieldValues()
+  {
+    // Neues ConfigThingy für "Formularwerte"-Abschnitt erzeugen:
+    ConfigThingy werte = new ConfigThingy("WM");
+    ConfigThingy formwerte = new ConfigThingy("Formularwerte");
+    werte.addChild(formwerte);
+    Iterator iter = formFieldValues.keySet().iterator();
+    while (iter.hasNext())
+    {
+      String key = (String) iter.next();
+      String value = (String) formFieldValues.get(key);
+      if (key != null && value != null)
+      {
+        ConfigThingy entry = new ConfigThingy("");
+        ConfigThingy cfID = new ConfigThingy("ID");
+        cfID.add(key);
+        ConfigThingy cfVALUE = new ConfigThingy("VALUE");
+        cfVALUE.add(value);
+        entry.addChild(cfID);
+        entry.addChild(cfVALUE);
+        formwerte.addChild(entry);
+      }
+    }
+
+    return werte.stringRepresentation();
+  }
+
+  /**
+   * Liefert den Wert des WollMuxFormularfeldes mit der ID fieldId.
+   */
+  public String getFormFieldValue(String fieldId)
+  {
+    return (String) formFieldValues.get(fieldId);
+  }
+
+  /**
+   * Liefert ein Set zurück, das alle dem FormDescriptor bekannten IDs für
+   * Formularfelder enthält.
+   * 
+   * @return ein Set das alle dem FormDescriptor bekannten IDs für
+   *         Formularfelder enthält.
+   */
+  public Set getFormFieldIDs()
+  {
+    return formFieldValues.keySet();
   }
 
   /**
@@ -917,7 +1039,7 @@ public class TextDocumentModel
    *           Formularbeschreibung ist nicht vollständig oder kann nicht
    *           geparst werden.
    */
-  public void add(DocumentCommand.Form formCmd)
+  public void addFormCommand(DocumentCommand.Form formCmd)
       throws ConfigurationErrorException
   {
     XTextRange range = formCmd.getTextRange();
@@ -933,7 +1055,7 @@ public class TextDocumentModel
       throw new ConfigurationErrorException(
           "Die Notiz mit der Formularbeschreibung kann nicht gelesen werden.");
 
-    parseDocInfoFormularbeschreibung(content.toString());
+    parseFormDescription(content.toString());
   }
 
   /**

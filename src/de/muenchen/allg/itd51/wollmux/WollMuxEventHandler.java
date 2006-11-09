@@ -920,9 +920,9 @@ public class WollMuxEventHandler
 
       try
       {
-        // Dokumentkommandos setType und setPrintFunction auswerten
+        // Legacy: Dokumentkommandos setType und setPrintFunction auswerten
+        // globale Werte stehen jetzt in {@link PersistentData }.
         dci.scanDocumentSettings();
-        model.evaluatePersistentData();
 
         // Bei Vorlagen: Ausführung der Dokumentkommandos
         if (model.isTemplate()) dci.executeTemplateCommands();
@@ -1283,7 +1283,7 @@ public class WollMuxEventHandler
       TextDocumentModel model = WollMuxSingleton.getInstance()
           .getTextDocumentModel(doc);
 
-      model.setPrintFunctionName(functionName);
+      model.setPrintFunction(functionName);
     }
 
     public String toString()
