@@ -239,8 +239,8 @@ public class DocumentCommandInterpreter
     // Anfang des Dokuments gesetzt um das Dokument als Formulardokument
     // auszuzeichnen.
     if (model.doc != null)
-      new Bookmark("WM(CMD 'setType' TYPE 'formDocument')", model.doc,
-          model.doc.getText().getStart());
+      new Bookmark("WM(CMD 'setType' TYPE 'formDocument')", model.doc, model
+          .getFrameWollMuxDaten(true).getText().getStart());
 
     // 4) Document-Modified auf false setzen, da nur wirkliche
     // Benutzerinteraktionen den Modified-Status beeinflussen sollen.
@@ -629,12 +629,12 @@ public class DocumentCommandInterpreter
 
     public void print()
     {
-      //TODO WollMuxEventHandler.handlePrintTextDocument(textDocumentModel);
+      // TODO WollMuxEventHandler.handlePrintTextDocument(textDocumentModel);
     }
 
     public void pdf()
     {
-      //TODO WollMuxEventHandler.handleExportAsPDF(textDocumentModel);
+      // TODO WollMuxEventHandler.handleExportAsPDF(textDocumentModel);
     }
   }
 
@@ -1347,7 +1347,7 @@ public class DocumentCommandInterpreter
 
     private Map bookmarkNameToFormField = new HashMap();
 
-    private FormDescriptor formDescriptor = new FormDescriptor(model.doc);
+    private FormDescriptor formDescriptor = new FormDescriptor(model);
 
     /**
      * Ausführung starten

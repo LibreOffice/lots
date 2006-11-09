@@ -1427,20 +1427,24 @@ abstract public class DocumentCommand
     }
 
     /**
-     * Erzeugt ein neues SetPrintFunction-Dokumentkomando, das am Anfang
-     * doc.Text.Start liegt und auf die Druckfunktion functionName verweist.
+     * Erzeugt ein neues SetPrintFunction-Dokumentkomando für das Dokument doc
+     * das an der Position range liegt und auf die Druckfunktion functionName
+     * verweist.
      * 
      * @param doc
      *          das Dokument an dessen doc.Text.Start das neue Bookmark erzeugt
      *          werden soll.
      * @param functionName
      *          der Name der Druckfunktion
+     * @param range
+     *          Die TextRange, an der das zugehörige Bookmark erzeugt werden
+     *          soll.
      * @return das neue SetPrintFunction-Dokumentkommando
      */
-    public SetPrintFunction(XTextDocument doc, String functionName)
+    public SetPrintFunction(XTextDocument doc, XTextRange range,
+        String functionName)
     {
-      super(null, new Bookmark("setPrintFunction_tmp", doc, doc.getText()
-          .getStart()));
+      super(null, new Bookmark("setPrintFunction_tmp", doc, range));
       setFunctionName(functionName);
       this.funcName = functionName;
     }
@@ -1544,11 +1548,11 @@ abstract public class DocumentCommand
 
   // ********************************************************************************
   /**
-   * Beim Drucken von Sachleitenden Verfügungen wird der
-   * Verfügungspunkt I als Original bezeichnet. Mit dem
-   * NotInOriginal Kommando ist es möglich Blöcke im Text zu definieren, die
-   * NIEMALS in Originalen abgedruckt werden sollen, jedoch in allen anderen
-   * Ausdrucken, die nicht das Original sind (wie z.B. Abdrücke und Entwurf).
+   * Beim Drucken von Sachleitenden Verfügungen wird der Verfügungspunkt I als
+   * Original bezeichnet. Mit dem NotInOriginal Kommando ist es möglich Blöcke
+   * im Text zu definieren, die NIEMALS in Originalen abgedruckt werden sollen,
+   * jedoch in allen anderen Ausdrucken, die nicht das Original sind (wie z.B.
+   * Abdrücke und Entwurf).
    */
   static public class NotInOriginal extends DocumentCommand
   {

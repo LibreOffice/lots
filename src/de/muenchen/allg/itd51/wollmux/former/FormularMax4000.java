@@ -76,7 +76,6 @@ import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.text.XBookmarksSupplier;
 import com.sun.star.text.XTextContent;
 import com.sun.star.text.XTextDocument;
-import com.sun.star.text.XTextFramesSupplier;
 import com.sun.star.uno.AnyConverter;
 import com.sun.star.uno.XInterface;
 import com.sun.star.view.XSelectionChangeListener;
@@ -86,6 +85,7 @@ import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.FormDescriptor;
 import de.muenchen.allg.itd51.wollmux.Logger;
+import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.dialog.Common;
 import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
@@ -263,6 +263,11 @@ public class FormularMax4000
   private String formTitle = GENERATED_FORM_TITLE;
   
   /**
+   * Das TextDocumentModel, zu dem das Dokument doc gehört.
+   */
+  private TextDocumentModel textDocModel;
+  
+  /**
    * Das Dokument, an dem dieser FormularMax 4000 hängt.
    */
   private XTextDocument doc;
@@ -378,17 +383,18 @@ public class FormularMax4000
   }
   
   /**
-   * Startet eine Instanz des FormularMax 4000 für das Dokument doc.
+   * Startet eine Instanz des FormularMax 4000 für das Dokument des TextDocumentModels model.
    * @param abortListener (falls nicht null) wird aufgerufen, nachdem der FormularMax 4000 geschlossen wurde.
    * @param funcLib Funktionsbibliothek, die globale Funktionen zur Verfügung stellt.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public FormularMax4000(XTextDocument doc, ActionListener abortListener, FunctionLibrary funcLib)
+  public FormularMax4000(TextDocumentModel model, ActionListener abortListener, FunctionLibrary funcLib)
   {
-    this.doc = doc;
+    this.textDocModel = model;
+    this.doc = model.doc;
     this.abortListener = abortListener;
     this.functionLibrary = funcLib;
-    initFormDescriptor(doc);
+    initFormDescriptor(model);
     
     //  GUI im Event-Dispatching Thread erzeugen wg. Thread-Safety.
     try{
@@ -477,7 +483,7 @@ public class FormularMax4000
     menuItem.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e)
       {
-        deForm(doc); 
+        deForm(textDocModel); 
       }});
     menu.add(menuItem);
     
@@ -610,9 +616,9 @@ public class FormularMax4000
    * Dokuments doc.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private void initFormDescriptor(XTextDocument doc)
+  private void initFormDescriptor(TextDocumentModel model)
   {
-    formDescriptor = new FormDescriptor(doc);
+    formDescriptor = new FormDescriptor(model);
   }
   
   /**
@@ -667,9 +673,9 @@ public class FormularMax4000
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
-  private static void deForm(XTextDocument doc)
+  private static void deForm(TextDocumentModel model)
   {
-    XBookmarksSupplier bmSupp = UNO.XBookmarksSupplier(doc);
+    XBookmarksSupplier bmSupp = UNO.XBookmarksSupplier(model.doc);
     XNameAccess bookmarks = bmSupp.getBookmarks();
     String[] names = bookmarks.getElementNames();
     for (int i = 0; i < names.length; ++i)
@@ -687,20 +693,9 @@ public class FormularMax4000
         Logger.error(x);
       }
     }
+    //TODO: Formularbeschreibungsnotizen löschen...
     
-    XTextFramesSupplier frameSupp = UNO.XTextFramesSupplier(doc);
-    XNameAccess frames = frameSupp.getTextFrames();
-    try{
-      XTextContent frame = UNO.XTextContent(frames.getByName(FormDescriptor.WOLLMUX_FRAME_NAME));
-      /* Dies funktioniert nicht, weil für an der Seite verankerte Rahmen getAnchor() null liefert.
-       * Siehe Issue 70643
-       
-      XTextRange range = frame.getAnchor();
-      XText text = range.getText();
-      text.removeTextContent(frame);
-      */
-      doc.getText().removeTextContent(frame);
-    } catch(Exception x) {}
+    model.removeEmptyFrameWollMuxDaten();
   }
 
   /**
@@ -1571,7 +1566,7 @@ public class FormularMax4000
     XTextDocument doc = UNO.XTextDocument(UNO.desktop.getCurrentComponent());
     Map context = new HashMap();
     DialogLibrary dialogLib = WollMuxFiles.parseFunctionDialogs(WollMuxFiles.getWollmuxConf(), null, context);
-    new FormularMax4000(doc,null, WollMuxFiles.parseFunctions(WollMuxFiles.getWollmuxConf(), dialogLib, context, null));
+    new FormularMax4000(new TextDocumentModel(doc),null, WollMuxFiles.parseFunctions(WollMuxFiles.getWollmuxConf(), dialogLib, context, null));
   }
 
 }

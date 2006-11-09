@@ -25,15 +25,28 @@ import java.util.Vector;
 
 import com.sun.star.awt.DeviceInfo;
 import com.sun.star.awt.PosSize;
+import com.sun.star.awt.Size;
 import com.sun.star.awt.XWindow;
 import com.sun.star.beans.PropertyValue;
+import com.sun.star.container.XEnumeration;
+import com.sun.star.container.XNameAccess;
+import com.sun.star.container.XNamed;
 import com.sun.star.frame.FrameSearchFlag;
 import com.sun.star.frame.XController;
 import com.sun.star.frame.XFrame;
 import com.sun.star.frame.XModel;
 import com.sun.star.lang.EventObject;
+import com.sun.star.table.BorderLine;
+import com.sun.star.text.HoriOrientation;
+import com.sun.star.text.RelOrientation;
+import com.sun.star.text.TextContentAnchorType;
+import com.sun.star.text.VertOrientation;
+import com.sun.star.text.WrapTextMode;
+import com.sun.star.text.XText;
 import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
+import com.sun.star.text.XTextFrame;
+import com.sun.star.text.XTextFramesSupplier;
 import com.sun.star.text.XTextViewCursorSupplier;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.util.CloseVetoException;
@@ -55,6 +68,11 @@ import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
  */
 public class TextDocumentModel
 {
+  /**
+   * Der Name des Frames in dem der WollMux seine Metadaten speichert.
+   */
+  public static final String WOLLMUX_FRAME_NAME = "WollMuxDaten";
+
   /**
    * Enthält die Referenz auf das XTextDocument-interface des eigentlichen
    * TextDocument-Services der zugehörigen UNO-Komponente.
@@ -404,6 +422,10 @@ public class TextDocumentModel
    */
   public void setPrintFunctionName(String printFunctionName)
   {
+    // nichts machen, wenn der Name bereits gesetzt ist.
+    if (printFunction != null
+        && printFunction.getFunctionName().equals(printFunctionName)) return;
+
     // Bei null oder Leerstring: Name der vorhergehenden Druckfunktion
     // verwenden.
     if (printFunctionName == null || printFunctionName.equals(""))
@@ -417,7 +439,10 @@ public class TextDocumentModel
     if (printFunction == null && printFunctionName != null)
     {
       // Neues Dokumentkommando anlegen wenn noch nicht definiert.
-      printFunction = new SetPrintFunction(doc, printFunctionName);
+      XTextFrame frame = getFrameWollMuxDaten(true);
+      if (frame != null)
+        printFunction = new SetPrintFunction(doc, frame.getText().getStart(),
+            printFunctionName);
     }
     else if (printFunction != null && printFunctionName != null)
     {
@@ -431,6 +456,7 @@ public class TextDocumentModel
       printFunction.setDoneState(true);
       printFunction.updateBookmark(false);
       printFunction = null;
+      removeEmptyFrameWollMuxDaten();
     }
   }
 
@@ -530,6 +556,127 @@ public class TextDocumentModel
         .getCurrentController());
     if (suppl != null) return suppl.getViewCursor();
     return null;
+  }
+
+  /**
+   * Liefert den für den Benutzer unsichtbaren TextFrame "WollMuxDaten", in dem
+   * dokumentglobale Metadaten des WollMux abgelegt werden können, oder null
+   * falls der Rahmen nicht existiert und auch nicht (gesteuert über create)
+   * erzeugt werden soll. Ist noch kein solcher Rahmen im Dokument vorhanden und
+   * create==true, so erzeugt der WollMux einen neuen stark verkleinerten und
+   * nahezu unsichtbaren Rahmen.
+   * 
+   * @param create
+   *          steuert ob der TextFrame WollMuxDaten erzeugt werden soll wenn er
+   *          nicht existiert.
+   */
+  public XTextFrame getFrameWollMuxDaten(boolean create)
+  {
+    XTextFramesSupplier supp = UNO.XTextFramesSupplier(doc);
+
+    if (supp != null)
+      try
+      {
+        XNameAccess frameAccess = supp.getTextFrames();
+        XTextFrame frame = null;
+
+        if (frameAccess.hasByName(WOLLMUX_FRAME_NAME))
+        {
+          // bestehenden Frame zurückliefern
+          frame = UNO.XTextFrame(frameAccess.getByName(WOLLMUX_FRAME_NAME));
+          return frame;
+        }
+        else if (create)
+        {
+          // neuen Frame erzeugen wenn er nicht existiert.
+          frame = UNO.XTextFrame(UNO.XMultiServiceFactory(doc).createInstance(
+              "com.sun.star.text.TextFrame"));
+          Size frameSize = new Size();
+          frameSize.Height = 5;
+          frameSize.Width = 5;
+          UNO.XShape(frame).setSize(frameSize);
+          UNO.setProperty(frame, "AnchorType", TextContentAnchorType.AT_PAGE);
+          XText text = doc.getText();
+          text.insertTextContent(
+              text.getStart(),
+              UNO.XTextContent(frame),
+              false);
+
+          UNO.setProperty(frame, "BackTransparent", Boolean.TRUE);
+          UNO.setProperty(frame, "BorderDistance", new Integer(0));
+          BorderLine line = new BorderLine(0, (short) 0, (short) 0, (short) 0);
+          UNO.setProperty(frame, "LeftBorder", line);
+          UNO.setProperty(frame, "TopBorder", line);
+          UNO.setProperty(frame, "BottomBorder", line);
+          UNO.setProperty(frame, "RightBorder", line);
+          UNO.setProperty(frame, "TextWrap", WrapTextMode.THROUGHT);
+          UNO.setProperty(frame, "HoriOrient", new Short(HoriOrientation.NONE));
+          UNO.setProperty(frame, "HoriOrientPosition", new Integer(0));
+          UNO.setProperty(frame, "HoriOrientRelation", new Short(
+              RelOrientation.PAGE_LEFT));
+          UNO.setProperty(
+              frame,
+              "VertOrient",
+              new Short(VertOrientation.BOTTOM));
+          // UNO.setProperty(frame, "VertOrientPosition", new Integer(0));
+          UNO.setProperty(frame, "VertOrientRelation", new Short(
+              RelOrientation.PAGE_FRAME));
+          UNO.setProperty(frame, "FrameIsAutomaticHeight", Boolean.FALSE);
+
+          XNamed frameName = UNO.XNamed(frame);
+          frameName.setName(WOLLMUX_FRAME_NAME);
+          return frame;
+        }
+      }
+      catch (java.lang.Exception e)
+      {
+        Logger.error(e);
+      }
+    return null;
+  }
+
+  /**
+   * Diese Methode löscht den Frame "WollMuxDaten", wenn er keinen Inhalt
+   * besitzt.
+   */
+  public void removeEmptyFrameWollMuxDaten()
+  {
+    XTextFramesSupplier frameSupp = UNO.XTextFramesSupplier(doc);
+    XNameAccess frames = frameSupp.getTextFrames();
+    try
+    {
+      XTextFrame frame = UNO.XTextFrame(frames.getByName(WOLLMUX_FRAME_NAME));
+      int elementCount = 0;
+      XEnumeration parEnum = UNO.XEnumerationAccess(frame.getText())
+          .createEnumeration();
+      while (parEnum.hasMoreElements())
+      {
+        try
+        {
+          XEnumeration elemEnum = UNO.XEnumerationAccess(parEnum.nextElement())
+              .createEnumeration();
+          while (elemEnum.hasMoreElements())
+          {
+            Object element = (Object) elemEnum.nextElement();
+            if (element != null) elementCount++;
+          }
+        }
+        catch (java.lang.Exception e)
+        {
+        }
+      }
+
+      // Dies funktioniert nicht, weil für an der Seite verankerte Rahmen
+      // getAnchor() null liefert. Siehe Issue 70643
+      // XTextRange range = frame.getAnchor();
+      // XText text = range.getText();
+      // text.removeTextContent(frame);
+
+      if (elementCount <= 1) doc.getText().removeTextContent(frame);
+    }
+    catch (Exception x)
+    {
+    }
   }
 
   /**

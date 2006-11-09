@@ -767,7 +767,7 @@ public class WollMuxEventHandler
       }
       else
       {
-        max = new FormularMax4000(doc, new ActionListener()
+        max = new FormularMax4000(model, new ActionListener()
         {
           public void actionPerformed(ActionEvent actionEvent)
           {

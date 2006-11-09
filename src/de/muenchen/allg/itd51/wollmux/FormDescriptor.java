@@ -29,21 +29,10 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.Vector;
 
-import com.sun.star.awt.Size;
 import com.sun.star.container.XEnumeration;
-import com.sun.star.container.XNameAccess;
-import com.sun.star.container.XNamed;
-import com.sun.star.drawing.XShape;
-import com.sun.star.table.BorderLine;
-import com.sun.star.text.HoriOrientation;
-import com.sun.star.text.RelOrientation;
-import com.sun.star.text.TextContentAnchorType;
-import com.sun.star.text.VertOrientation;
-import com.sun.star.text.WrapTextMode;
 import com.sun.star.text.XText;
-import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextField;
-import com.sun.star.text.XTextFramesSupplier;
+import com.sun.star.text.XTextFrame;
 import com.sun.star.text.XTextRange;
 
 import de.muenchen.allg.afid.UNO;
@@ -95,14 +84,9 @@ public class FormDescriptor
   private static final String WOLLMUX_FORMULARWERTE = "WollMuxFormularwerte";
 
   /**
-   * Der Name des Frames in dem der WollMux seine Formulardaten speichert.
+   * Das TextDocumentModel, zu dem der FormDescriptor gehört.
    */
-  public static final String WOLLMUX_FRAME_NAME = "WollMuxDaten";
-  
-  /**
-   * Das Dokument, das als Fabrik für neue Annotations benötigt wird.
-   */
-  private XTextDocument doc;
+  private TextDocumentModel model;
 
   /**
    * Enthält alle Formular-Abschnitte, die in der DocumentInfo bzw. den mit add
@@ -128,9 +112,9 @@ public class FormDescriptor
    * sind. Danach können über add() weitere WM(CMD'Form')-Kommandos mit
    * Formularbeschreibungsnotizen hinzugefügt werden.
    */
-  public FormDescriptor(XTextDocument doc)
+  public FormDescriptor(TextDocumentModel model)
   {
-    this.doc = doc;
+    this.model = model;
     this.formularConf = new ConfigThingy("WM");
     this.formFieldValues = new HashMap();
     this.isEmpty = true;
@@ -254,106 +238,77 @@ public class FormDescriptor
    *       Auch bei size == 0 wird mindestens ein Block geliefert.
    * @return leeren Vector falls das Feld nicht existiert und create == false oder 
    *         falls ein Fehler auftritt.
-   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * @author Matthias Benkmann (D-III-ITD 5.1), Christoph Lutz (D-III-ITD 5.1)
    * TESTED
    */
   private Vector getWollMuxTextFields(String fieldName, boolean create, int size)
   {
     Vector textfields = new Vector();
-    XTextFramesSupplier supp = UNO.XTextFramesSupplier(doc);
-    if (supp != null)
+
+    int blockCount = (size + (TEXTFIELD_MAXLEN - 1)) / TEXTFIELD_MAXLEN;
+    if (blockCount == 0) blockCount = 1;
+
+    try
     {
-      int blockCount = (size + (TEXTFIELD_MAXLEN-1)) / TEXTFIELD_MAXLEN;
-      if (blockCount == 0) blockCount = 1;
-      try{
-        XNameAccess frameAccess = supp.getTextFrames();
-        XShape frame;
-        if (frameAccess.hasByName(WOLLMUX_FRAME_NAME))
-          frame = UNO.XShape(frameAccess.getByName(WOLLMUX_FRAME_NAME));
-        else
-        {
-          if (!create) return textfields;
-          
-          frame = UNO.XShape(UNO.XMultiServiceFactory(doc).createInstance("com.sun.star.text.TextFrame"));
-          Size frameSize = new Size();
-          frameSize.Height = 5;
-          frameSize.Width = 5;
-          frame.setSize(frameSize);
-          UNO.setProperty(frame, "AnchorType", TextContentAnchorType.AT_PAGE);
-          XText text = doc.getText();
-          text.insertTextContent(text.getStart(), UNO.XTextContent(frame), false);
-          
-          UNO.setProperty(frame, "BackTransparent", Boolean.TRUE);
-          UNO.setProperty(frame, "BorderDistance", new Integer(0));
-          BorderLine line = new BorderLine(0, (short)0, (short)0, (short)0);
-          UNO.setProperty(frame, "LeftBorder", line);
-          UNO.setProperty(frame, "TopBorder", line);
-          UNO.setProperty(frame, "BottomBorder", line);
-          UNO.setProperty(frame, "RightBorder", line);
-          UNO.setProperty(frame, "TextWrap", WrapTextMode.THROUGHT);
-          UNO.setProperty(frame, "HoriOrient", new Short(HoriOrientation.NONE));
-          UNO.setProperty(frame, "HoriOrientPosition", new Integer(0));
-          UNO.setProperty(frame, "HoriOrientRelation", new Short(RelOrientation.PAGE_LEFT));
-          UNO.setProperty(frame, "VertOrient", new Short(VertOrientation.BOTTOM));
-          //UNO.setProperty(frame, "VertOrientPosition", new Integer(0));
-          UNO.setProperty(frame, "VertOrientRelation", new Short(RelOrientation.PAGE_FRAME));
-          UNO.setProperty(frame, "FrameIsAutomaticHeight", Boolean.FALSE);
-          
-          XNamed frameName = UNO.XNamed(frame);
-          frameName.setName(WOLLMUX_FRAME_NAME);
-        }
-        
-        
-        XEnumeration paragraphEnu = UNO.XEnumerationAccess(frame).createEnumeration();
-        while (paragraphEnu.hasMoreElements())
-        {
-          XEnumeration textportionEnu = UNO.XEnumerationAccess(paragraphEnu.nextElement()).createEnumeration();
-          while (textportionEnu.hasMoreElements())
-          {
-            Object textfield = UNO.getProperty(textportionEnu.nextElement(), "TextField");
-            String author = (String)UNO.getProperty(textfield, "Author");
-            if (fieldName.equals(author))  //ACHTUNG! author.equals(fieldName) wäre falsch!
-            {
-              textfields.add(textfield);
-            }
-          }
-        }
-        
-        /*
-         * Falls create == true und zuviele Felder gefunden wurden, dann loesche die
-         * überzähligen.
-         */
-        if (create && textfields.size() > blockCount)
-        {
-          XText frameText = UNO.XTextFrame(frame).getText();
-          while (textfields.size() > blockCount)
-          {
-            Object textfield = textfields.remove(textfields.size()-1);
-            frameText.removeTextContent(UNO.XTextContent(textfield));
-          }
-        }
-        
-        /*
-         * Falls create == true und zu wenige Felder gefunden wurden, dann
-         * erzeuge zusätzliche.
-         */
-        if (create && textfields.size() < blockCount)
-        {
-          XText frameText = UNO.XTextFrame(frame).getText();
-          while (textfields.size() < blockCount)
-          {
-            Object annotation = UNO.XMultiServiceFactory(doc).createInstance("com.sun.star.text.TextField.Annotation");
-            frameText.insertTextContent(frameText.getEnd(), UNO.XTextContent(annotation), false);
-            UNO.setProperty(annotation, "Author", fieldName);
-            textfields.add(annotation);
-          }
-        }
-        
-      } catch(Exception x)
+      XTextFrame frame = model.getFrameWollMuxDaten(create);
+      if(frame == null) return textfields;
+
+      XEnumeration paragraphEnu = UNO.XEnumerationAccess(frame)
+          .createEnumeration();
+      while (paragraphEnu.hasMoreElements())
       {
-        return textfields;
+        XEnumeration textportionEnu = UNO.XEnumerationAccess(
+            paragraphEnu.nextElement()).createEnumeration();
+        while (textportionEnu.hasMoreElements())
+        {
+          Object textfield = UNO.getProperty(
+              textportionEnu.nextElement(),
+              "TextField");
+          String author = (String) UNO.getProperty(textfield, "Author");
+          if (fieldName.equals(author)) // ACHTUNG! author.equals(fieldName)
+                                        // wäre falsch!
+          {
+            textfields.add(textfield);
+          }
+        }
       }
-    } //if (supp != null)
+
+      /*
+       * Falls create == true und zuviele Felder gefunden wurden, dann loesche
+       * die überzähligen.
+       */
+      if (create && textfields.size() > blockCount)
+      {
+        XText frameText = UNO.XTextFrame(frame).getText();
+        while (textfields.size() > blockCount)
+        {
+          Object textfield = textfields.remove(textfields.size() - 1);
+          frameText.removeTextContent(UNO.XTextContent(textfield));
+        }
+      }
+
+      /*
+       * Falls create == true und zu wenige Felder gefunden wurden, dann erzeuge
+       * zusätzliche.
+       */
+      if (create && textfields.size() < blockCount)
+      {
+        XText frameText = UNO.XTextFrame(frame).getText();
+        while (textfields.size() < blockCount)
+        {
+          Object annotation = UNO.XMultiServiceFactory(model.doc)
+              .createInstance("com.sun.star.text.TextField.Annotation");
+          frameText.insertTextContent(frameText.getEnd(), UNO
+              .XTextContent(annotation), false);
+          UNO.setProperty(annotation, "Author", fieldName);
+          textfields.add(annotation);
+        }
+      }
+    }
+    catch (Exception x)
+    {
+      return textfields;
+    }
     return textfields;
   }
 
