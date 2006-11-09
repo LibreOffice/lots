@@ -22,6 +22,7 @@ import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Vector;
+import java.util.regex.Pattern;
 
 import com.sun.star.awt.DeviceInfo;
 import com.sun.star.awt.PosSize;
@@ -42,11 +43,14 @@ import com.sun.star.text.RelOrientation;
 import com.sun.star.text.TextContentAnchorType;
 import com.sun.star.text.VertOrientation;
 import com.sun.star.text.WrapTextMode;
+import com.sun.star.text.XBookmarksSupplier;
 import com.sun.star.text.XText;
+import com.sun.star.text.XTextContent;
 import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextFrame;
 import com.sun.star.text.XTextFramesSupplier;
+import com.sun.star.text.XTextRange;
 import com.sun.star.text.XTextViewCursorSupplier;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.util.CloseVetoException;
@@ -69,9 +73,12 @@ import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
 public class TextDocumentModel
 {
   /**
-   * Der Name des Frames in dem der WollMux seine Metadaten speichert.
+   * Pattern zum Erkennen der Bookmarks, die {@link #deForm()} entfernen soll.
    */
-  public static final String WOLLMUX_FRAME_NAME = "WollMuxDaten";
+  public static final Pattern BOOKMARK_KILL_PATTERN = Pattern
+      .compile("(\\A\\s*(WM\\s*\\(.*CMD\\s*'((form)|(setGroups)|(insertFormValue))'.*\\))\\s*\\d*\\z)"
+               + "|(\\A\\s*(WM\\s*\\(.*CMD\\s*'(setType)'.*'formDocument'\\))\\s*\\d*\\z)"
+               + "|(\\A\\s*(WM\\s*\\(.*'formDocument'.*CMD\\s*'(setType)'.*\\))\\s*\\d*\\z)");
 
   /**
    * Enthält die Referenz auf das XTextDocument-interface des eigentlichen
@@ -84,6 +91,23 @@ public class TextDocumentModel
    * false, wenn der Dialog noch nicht aufgerufen wurde.
    */
   public boolean printSettingsDone;
+
+  /**
+   * Die dataId unter der die WollMux-Formularbeschreibung in
+   * {@link #persistentData} gespeichert wird.
+   */
+  private static final String WOLLMUX_FORMULARBESCHREIBUNG = "WollMuxFormularbeschreibung";
+
+  /**
+   * Die dataId unter der die WollMux-Formularwerte in {@link #persistentData}
+   * gespeichert werden.
+   */
+  private static final String WOLLMUX_FORMULARWERTE = "WollMuxFormularwerte";
+
+  /**
+   * 
+   */
+  private static final String WOLLMUX_PRINTFUNCTION = "PrintFunction";
 
   /**
    * Ermöglicht den Zugriff auf einen Vector aller FormField-Objekte in diesem
@@ -146,13 +170,18 @@ public class TextDocumentModel
    * Formular handelt und wird jedoch erst mit
    * DocumentCommandInterpreter.executeNormalCommands() gesetzt.
    */
-  private FormDescriptor formDescriptor = null;
+  private FormDescriptor formDescriptor = new FormDescriptor();
+
+  /**
+   * Verantwortlich für das Speichern persistenter Daten.
+   */
+  private PersistentData persistentData;
 
   /**
    * Enthält das setType-Dokumentkommando dieses Dokuments falls eines vorhanden
    * ist.
    */
-  private DocumentCommand.SetType setTypeCommand = null;
+  private String type = null;
 
   /**
    * Enthält einen Vector aller notInOrininal-Dokumentkommandos des Dokuments,
@@ -194,6 +223,7 @@ public class TextDocumentModel
     this.draftOnlyBlocks = new Vector();
     this.dispatchInterceptorController = null;
     this.printSettingsDone = false;
+    this.persistentData = new PersistentData(doc);
 
     registerCloseListener();
 
@@ -320,14 +350,13 @@ public class TextDocumentModel
    */
   public boolean isTemplate()
   {
-    if (setTypeCommand != null)
+    if (type != null)
     {
-      if (setTypeCommand.getType().equalsIgnoreCase("normalTemplate"))
+      if (type.equalsIgnoreCase("normalTemplate"))
         return true;
-      else if (setTypeCommand.getType().equalsIgnoreCase("templateTemplate"))
+      else if (type.equalsIgnoreCase("templateTemplate"))
         return false;
-      else if (setTypeCommand.getType().equalsIgnoreCase("formDocument"))
-        return false;
+      else if (type.equalsIgnoreCase("formDocument")) return false;
     }
 
     // Das Dokument ist automatisch eine Vorlage, wenn es keine zugehörige URL
@@ -365,8 +394,7 @@ public class TextDocumentModel
    */
   public boolean isFormDocument()
   {
-    return (setTypeCommand != null && setTypeCommand.getType()
-        .equalsIgnoreCase("formDocument"));
+    return (type != null && type.equalsIgnoreCase("formDocument"));
   }
 
   /**
@@ -385,13 +413,26 @@ public class TextDocumentModel
   }
 
   /**
-   * Setzt das setTypeCommand dieses Dokuments, falls ein solches existiert.
-   * 
-   * @param setTypeCommand
+   * Setzt den Typ des Dokuments (setType-Kommando).
    */
-  public void setTypeCommand(DocumentCommand.SetType setTypeCommand)
+  public void setType(String type)
   {
-    this.setTypeCommand = setTypeCommand;
+    this.type = type;
+  }
+  
+  /** 
+   * Liest {@link #persistentData} aus und überschreibt eventuell vorhandene aus Bookmarks
+   * gezogene Werte mit den neuen Daten.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public void evaluatePersistentData()
+  {
+    String printFunctionName = persistentData.getData(WOLLMUX_PRINTFUNCTION);
+    if (printFunctionName != null)
+    this.pr
+    String type = persistentData.getData(DATAID_TYPE);
+    if (type != null) setType(type);
   }
 
   /**
@@ -438,11 +479,7 @@ public class TextDocumentModel
 
     if (printFunction == null && printFunctionName != null)
     {
-      // Neues Dokumentkommando anlegen wenn noch nicht definiert.
-      XTextFrame frame = getFrameWollMuxDaten(true);
-      if (frame != null)
-        printFunction = new SetPrintFunction(doc, frame.getText().getStart(),
-            printFunctionName);
+      persistentData.setData(WOLLMUX_PRINTFUNCTION, printFunctionName);
     }
     else if (printFunction != null && printFunctionName != null)
     {
@@ -456,7 +493,6 @@ public class TextDocumentModel
       printFunction.setDoneState(true);
       printFunction.updateBookmark(false);
       printFunction = null;
-      removeEmptyFrameWollMuxDaten();
     }
   }
 
@@ -559,124 +595,75 @@ public class TextDocumentModel
   }
 
   /**
-   * Liefert den für den Benutzer unsichtbaren TextFrame "WollMuxDaten", in dem
-   * dokumentglobale Metadaten des WollMux abgelegt werden können, oder null
-   * falls der Rahmen nicht existiert und auch nicht (gesteuert über create)
-   * erzeugt werden soll. Ist noch kein solcher Rahmen im Dokument vorhanden und
-   * create==true, so erzeugt der WollMux einen neuen stark verkleinerten und
-   * nahezu unsichtbaren Rahmen.
+   * Entfernt die WollMux-Kommandos "insertFormValue", "setGroups", "setType
+   * formDocument" und "form", sowie die WollMux-Formularbeschreibung und Daten
+   * aus dem Dokument doc.
    * 
-   * @param create
-   *          steuert ob der TextFrame WollMuxDaten erzeugt werden soll wenn er
-   *          nicht existiert.
+   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
-  public XTextFrame getFrameWollMuxDaten(boolean create)
+  public void deForm()
   {
-    XTextFramesSupplier supp = UNO.XTextFramesSupplier(doc);
-
-    if (supp != null)
+    XBookmarksSupplier bmSupp = UNO.XBookmarksSupplier(doc);
+    XNameAccess bookmarks = bmSupp.getBookmarks();
+    String[] names = bookmarks.getElementNames();
+    for (int i = 0; i < names.length; ++i)
+    {
       try
       {
-        XNameAccess frameAccess = supp.getTextFrames();
-        XTextFrame frame = null;
-
-        if (frameAccess.hasByName(WOLLMUX_FRAME_NAME))
+        String bookmark = names[i];
+        if (BOOKMARK_KILL_PATTERN.matcher(bookmark).matches())
         {
-          // bestehenden Frame zurückliefern
-          frame = UNO.XTextFrame(frameAccess.getByName(WOLLMUX_FRAME_NAME));
-          return frame;
+          XTextContent bm = UNO.XTextContent(bookmarks.getByName(bookmark));
+          bm.getAnchor().getText().removeTextContent(bm);
         }
-        else if (create)
-        {
-          // neuen Frame erzeugen wenn er nicht existiert.
-          frame = UNO.XTextFrame(UNO.XMultiServiceFactory(doc).createInstance(
-              "com.sun.star.text.TextFrame"));
-          Size frameSize = new Size();
-          frameSize.Height = 5;
-          frameSize.Width = 5;
-          UNO.XShape(frame).setSize(frameSize);
-          UNO.setProperty(frame, "AnchorType", TextContentAnchorType.AT_PAGE);
-          XText text = doc.getText();
-          text.insertTextContent(
-              text.getStart(),
-              UNO.XTextContent(frame),
-              false);
 
-          UNO.setProperty(frame, "BackTransparent", Boolean.TRUE);
-          UNO.setProperty(frame, "BorderDistance", new Integer(0));
-          BorderLine line = new BorderLine(0, (short) 0, (short) 0, (short) 0);
-          UNO.setProperty(frame, "LeftBorder", line);
-          UNO.setProperty(frame, "TopBorder", line);
-          UNO.setProperty(frame, "BottomBorder", line);
-          UNO.setProperty(frame, "RightBorder", line);
-          UNO.setProperty(frame, "TextWrap", WrapTextMode.THROUGHT);
-          UNO.setProperty(frame, "HoriOrient", new Short(HoriOrientation.NONE));
-          UNO.setProperty(frame, "HoriOrientPosition", new Integer(0));
-          UNO.setProperty(frame, "HoriOrientRelation", new Short(
-              RelOrientation.PAGE_LEFT));
-          UNO.setProperty(
-              frame,
-              "VertOrient",
-              new Short(VertOrientation.BOTTOM));
-          // UNO.setProperty(frame, "VertOrientPosition", new Integer(0));
-          UNO.setProperty(frame, "VertOrientRelation", new Short(
-              RelOrientation.PAGE_FRAME));
-          UNO.setProperty(frame, "FrameIsAutomaticHeight", Boolean.FALSE);
-
-          XNamed frameName = UNO.XNamed(frame);
-          frameName.setName(WOLLMUX_FRAME_NAME);
-          return frame;
-        }
       }
-      catch (java.lang.Exception e)
+      catch (Exception x)
       {
-        Logger.error(e);
+        Logger.error(x);
       }
-    return null;
+    }
+
+    persistentData.removeData(WOLLMUX_FORMULARBESCHREIBUNG);
+    persistentData.removeData(WOLLMUX_FORMULARWERTE);
   }
 
   /**
-   * Diese Methode löscht den Frame "WollMuxDaten", wenn er keinen Inhalt
-   * besitzt.
+   * Liefert die aktuelle Formularbeschreibung.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public void removeEmptyFrameWollMuxDaten()
+  public ConfigThingy getFormDescription()
   {
-    XTextFramesSupplier frameSupp = UNO.XTextFramesSupplier(doc);
-    XNameAccess frames = frameSupp.getTextFrames();
-    try
-    {
-      XTextFrame frame = UNO.XTextFrame(frames.getByName(WOLLMUX_FRAME_NAME));
-      int elementCount = 0;
-      XEnumeration parEnum = UNO.XEnumerationAccess(frame.getText())
-          .createEnumeration();
-      while (parEnum.hasMoreElements())
-      {
-        try
-        {
-          XEnumeration elemEnum = UNO.XEnumerationAccess(parEnum.nextElement())
-              .createEnumeration();
-          while (elemEnum.hasMoreElements())
-          {
-            Object element = (Object) elemEnum.nextElement();
-            if (element != null) elementCount++;
-          }
-        }
-        catch (java.lang.Exception e)
-        {
-        }
-      }
+    return formDescriptor.toConfigThingy();
+  }
 
-      // Dies funktioniert nicht, weil für an der Seite verankerte Rahmen
-      // getAnchor() null liefert. Siehe Issue 70643
-      // XTextRange range = frame.getAnchor();
-      // XText text = range.getText();
-      // text.removeTextContent(frame);
+  /**
+   * Ersetzt die Formularbeschreibung dieses Dokuments durch die aus conf.
+   * ACHTUNG! conf wird nicht kopiert sondern als Referenz eingebunden.
+   * 
+   * @param conf
+   *          ein WM-Knoten, der "Formular"-Kinder hat.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public void setFormDescription(ConfigThingy conf)
+  {
+    formDescriptor.fromConfigThingy(conf);
+    persistentData.setData(WOLLMUX_FORMULARBESCHREIBUNG, getFormDescription()
+        .stringRepresentation());
+    setDocumentModified(true);
+  }
 
-      if (elementCount <= 1) doc.getText().removeTextContent(frame);
-    }
-    catch (Exception x)
-    {
-    }
+  /**
+   * Setzt den Wert des WollMuxFormularfeldes fieldId auf value.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public void setFormFieldValue(String fieldId, String value)
+  {
+    formDescriptor.setFormFieldValue(fieldId, value);
+    persistentData.setData(WOLLMUX_FORMULARWERTE, formDescriptor
+        .getFormFieldValues());
   }
 
   /**
@@ -916,6 +903,37 @@ public class TextDocumentModel
     {
       Logger.error(e);
     }
+  }
+
+  /**
+   * Die Methode fügt die Formularbeschreibung, die unterhalb der Notiz des
+   * WM(CMD'Form')-Kommandos gefunden wird zur Gesamtformularbeschreibung hinzu.
+   * 
+   * @param formCmd
+   *          Das formCmd, das die Notzi mit der hinzuzufügenden
+   *          Formularbeschreibung enthält.
+   * @throws ConfigurationErrorException
+   *           Die Notiz der Formularbeschreibung ist nicht vorhanden, die
+   *           Formularbeschreibung ist nicht vollständig oder kann nicht
+   *           geparst werden.
+   */
+  public void add(DocumentCommand.Form formCmd)
+      throws ConfigurationErrorException
+  {
+    XTextRange range = formCmd.getTextRange();
+
+    Object annotationField = WollMuxSingleton
+        .findAnnotationFieldRecursive(range);
+    if (annotationField == null)
+      throw new ConfigurationErrorException(
+          "Die Notiz mit der Formularbeschreibung fehlt.");
+
+    Object content = UNO.getProperty(annotationField, "Content");
+    if (content == null)
+      throw new ConfigurationErrorException(
+          "Die Notiz mit der Formularbeschreibung kann nicht gelesen werden.");
+
+    parseDocInfoFormularbeschreibung(content.toString());
   }
 
   /**

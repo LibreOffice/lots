@@ -43,12 +43,14 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Vector;
 
+import com.sun.star.container.XEnumeration;
 import com.sun.star.frame.XDispatch;
 import com.sun.star.frame.XDispatchProvider;
 import com.sun.star.frame.XModel;
 import com.sun.star.lang.EventObject;
 import com.sun.star.lang.XComponent;
 import com.sun.star.text.XTextDocument;
+import com.sun.star.text.XTextField;
 import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
@@ -554,6 +556,55 @@ public class WollMuxSingleton implements XPALProvider
   {
     HashableComponent key = new HashableComponent(doc);
     currentTextDocumentModels.remove(key);
+  }
+
+  /**
+   * Diese Methode durchsucht das Element element bzw. dessen XEnumerationAccess
+   * Interface rekursiv nach TextField.Annotation-Objekten und liefert das erste
+   * gefundene TextField.Annotation-Objekt zurück, oder null, falls kein
+   * entsprechendes Element gefunden wurde.
+   * 
+   * @param element
+   *          Das erste gefundene AnnotationField oder null, wenn keines
+   *          gefunden wurde.
+   */
+  public static XTextField findAnnotationFieldRecursive(Object element)
+  {
+    // zuerst die Kinder durchsuchen (falls vorhanden):
+    if (UNO.XEnumerationAccess(element) != null)
+    {
+      XEnumeration xEnum = UNO.XEnumerationAccess(element).createEnumeration();
+  
+      while (xEnum.hasMoreElements())
+      {
+        try
+        {
+          Object child = xEnum.nextElement();
+          XTextField found = findAnnotationFieldRecursive(child);
+          // das erste gefundene Element zurückliefern.
+          if (found != null) return found;
+        }
+        catch (java.lang.Exception e)
+        {
+          Logger.error(e);
+        }
+      }
+    }
+  
+    // jetzt noch schauen, ob es sich bei dem Element um eine Annotation
+    // handelt:
+    if (UNO.XTextField(element) != null)
+    {
+      Object textField = UNO.getProperty(element, "TextField");
+      if (UNO.supportsService(
+          textField,
+          "com.sun.star.text.TextField.Annotation"))
+      {
+        return UNO.XTextField(textField);
+      }
+    }
+  
+    return null;
   }
 
   /**

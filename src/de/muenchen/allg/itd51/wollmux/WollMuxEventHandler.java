@@ -922,6 +922,7 @@ public class WollMuxEventHandler
       {
         // Dokumentkommandos setType und setPrintFunction auswerten
         dci.scanDocumentSettings();
+        model.evaluatePersistentData();
 
         // Bei Vorlagen: Ausführung der Dokumentkommandos
         if (model.isTemplate()) dci.executeTemplateCommands();
@@ -1315,11 +1316,11 @@ public class WollMuxEventHandler
    *          Die Funktionsbibliothek, die zur Gewinnung der Trafo-Funktion
    *          verwendet werden soll.
    */
-  public static void handleFormValueChanged(FormDescriptor fd,
+  public static void handleFormValueChanged(TextDocumentModel doc,
       HashMap idToFormValues, String fieldId, String newValue,
       FunctionLibrary funcLib)
   {
-    handle(new OnFormValueChanged(fd, idToFormValues, fieldId, newValue,
+    handle(new OnFormValueChanged(doc, idToFormValues, fieldId, newValue,
         funcLib));
   }
 
@@ -1341,16 +1342,16 @@ public class WollMuxEventHandler
 
     private FunctionLibrary funcLib;
 
-    private FormDescriptor fd;
+    private TextDocumentModel doc;
 
-    public OnFormValueChanged(FormDescriptor fd, HashMap idToFormValues,
+    public OnFormValueChanged(TextDocumentModel doc, HashMap idToFormValues,
         String fieldId, String newValue, FunctionLibrary funcLib)
     {
       this.idToFormValues = idToFormValues;
       this.fieldId = fieldId;
       this.newValue = newValue;
       this.funcLib = funcLib;
-      this.fd = fd;
+      this.doc = doc;
     }
 
     protected void doit()
@@ -1378,16 +1379,13 @@ public class WollMuxEventHandler
       // FormularDescriptor über die Änderung informieren. Dies ist vor allen
       // auch dazu notwendig, um Originalwerte zu sichern, zu denen es kein
       // FormField gibt.
-      fd.setFormFieldValue(fieldId, newValue);
-      fd.updateDocument();
+      doc.setFormFieldValue(fieldId, newValue);
     }
 
     public String toString()
     {
       return this.getClass().getSimpleName()
              + "("
-             + fd
-             + ", '"
              + fieldId
              + "', '"
              + newValue

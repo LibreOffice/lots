@@ -27,32 +27,25 @@ import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.Vector;
 
-import com.sun.star.container.XEnumeration;
-import com.sun.star.text.XText;
-import com.sun.star.text.XTextField;
-import com.sun.star.text.XTextFrame;
-import com.sun.star.text.XTextRange;
-
-import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 
 /**
- * TODO Doku anpassen an die Änderung dass jetzt nicht mehr die Infofelder verwendet werden. Am besten auch Methodennamen refaktorisieren
- * TODO Logger-Meldungen ebenfalls anpassen daran, dass nicht mehr Infofelder verwendet werden
- * Diese Klasse repräsentiert eine Formularbeschreibung eines Formulardokuments,
- * die sich zusammensetzt aus dem Feld "WollMuxFormularbeschreibung" aus der
- * DocumentInfo des Dokuments und/oder aus einem oder mehrereren
- * WM(CMD'Form')-Kommandos mit den zugehörigen Notizfeldern, die die
- * Beschreibungstexte in ConfigThingy-Syntax enthalten. Beim Aufruf des
- * Konstruktors wird zunächst die DocumentInfo des Dokuments ausgelesen und
- * evtl. dort enthaltene WollMuxFormularbeschreibungen übernommen. Anschließend
- * können über die add()-Methode einzelne DocumentCommand.Form-Objekte
- * hinzugefügt werden können. Logisch betrachtet werden alle Beschreibungstexte
- * zu einer großen ConfigThingy-Struktur zusammengefügt und über die Methode
- * toConfigThingy() bereitgestellt.
+ * TODO Doku anpassen an die Änderung dass jetzt nicht mehr die Infofelder
+ * verwendet werden. Am besten auch Methodennamen refaktorisieren TODO
+ * Logger-Meldungen ebenfalls anpassen daran, dass nicht mehr Infofelder
+ * verwendet werden Diese Klasse repräsentiert eine Formularbeschreibung eines
+ * Formulardokuments, die sich zusammensetzt aus dem Feld
+ * "WollMuxFormularbeschreibung" aus der DocumentInfo des Dokuments und/oder aus
+ * einem oder mehrereren WM(CMD'Form')-Kommandos mit den zugehörigen
+ * Notizfeldern, die die Beschreibungstexte in ConfigThingy-Syntax enthalten.
+ * Beim Aufruf des Konstruktors wird zunächst die DocumentInfo des Dokuments
+ * ausgelesen und evtl. dort enthaltene WollMuxFormularbeschreibungen
+ * übernommen. Anschließend können über die add()-Methode einzelne
+ * DocumentCommand.Form-Objekte hinzugefügt werden können. Logisch betrachtet
+ * werden alle Beschreibungstexte zu einer großen ConfigThingy-Struktur
+ * zusammengefügt und über die Methode toConfigThingy() bereitgestellt.
  * 
  * Die Klasse bietet darüber hinaus Methoden zum Abspeichern und Auslesen der
  * original-Feldwerte im DocumentInfo Feld "WollMuxFormularwerte" an.
@@ -61,32 +54,6 @@ import de.muenchen.allg.itd51.parser.NodeNotFoundException;
  */
 public class FormDescriptor
 {
- /**
-  * Maximale Länge von Textfeldern, die der WollMux schreibt. 
-  * Die Länge 32000 wurde gewählt, weil ich nicht sicher bin, ob die Grenze tatsächlich
-  * 64kZeichen oder 64kBytes sind. In letzterem Fall könnten Zeichen, die 2 Bytes belegen
-  * (eine interne UTF16 oder UTF8 kodierung angenommen) schon früher die Grenze treffen.
-  * Also lieber auf der sicheren Seite sein und 32000. Eigentlich wären es ja
-  * 32767, aber ich hab lieber den glatten Wert.
-  */
-  private static final int TEXTFIELD_MAXLEN = 32000;
-  
-  /**
-   * Der Name der DocumentInfo-Benutzervariable, in der die WollMux-Formularbeschreibung
-   * gespeichert wird.
-   */
-  private static final String WOLLMUX_FORMULARBESCHREIBUNG = "WollMuxFormularbeschreibung";
-
-  /**
-   * Der Name der DocumentInfo-Benutzervariable, in der die WollMux-Formularwerte
-   * gespeichert werden.
-   */
-  private static final String WOLLMUX_FORMULARWERTE = "WollMuxFormularwerte";
-
-  /**
-   * Das TextDocumentModel, zu dem der FormDescriptor gehört.
-   */
-  private TextDocumentModel model;
 
   /**
    * Enthält alle Formular-Abschnitte, die in der DocumentInfo bzw. den mit add
@@ -100,37 +67,32 @@ public class FormDescriptor
   private HashMap formFieldValues;
 
   /**
-   * Zeigt an, ob der FormDescriptor leer ist, oder ob mindestens ein gültiger
-   * Formulare-Abschnitt add() hinzugefügt wurde, das einen Formular-Abschnitt
-   * enthält.
+   * Erzeugt einen neuen FormDescriptor. Danach können über add()
+   * WM(CMD'Form')-Kommandos mit Formularbeschreibungsnotizen hinzugefügt
+   * werden.
    */
-  private boolean isEmpty;
-
-  /**
-   * Erzeugt einen neuen FormDescriptor und wertet die
-   * Formularbeschreibung/-Werte aus der DocumentInfo aus, falls sie vorhanden
-   * sind. Danach können über add() weitere WM(CMD'Form')-Kommandos mit
-   * Formularbeschreibungsnotizen hinzugefügt werden.
-   */
-  public FormDescriptor(TextDocumentModel model)
+  public FormDescriptor()
   {
-    this.model = model;
     this.formularConf = new ConfigThingy("WM");
     this.formFieldValues = new HashMap();
-    this.isEmpty = true;
 
-    readDocInfoFormularbeschreibung();
-    readDocInfoFormularwerte();
+    // TODO textDocumentModel readDocInfoFormularbeschreibung();
+    // TODO textDocumentModel readDocInfoFormularwerte();
   }
 
   /**
-   * Liest den Inhalt des WollMuxFormularbeschreibung-Feldes aus der
-   * DocumentInfo des Dokuments und fügt die Formularbeschreibung (falls eine
-   * gefunden wurde) der Gesamtbeschreibung hinzu.
+   * Wertet die WollMux-Formularbeschreibungsnotiz value aus, die von der Form
+   * "WM( Formular(...) )" sein muss und fügt diese der Gesamtbeschreibung
+   * hinzu.
+   * 
+   * @param value
+   *          darf null sein und wird in diesem Fall ignoriert, darf aber kein
+   *          leerer String sein, sonst Fehler.
    */
-  private void readDocInfoFormularbeschreibung()
+  public void parseDocInfoFormularbeschreibung(String value)
   {
-    String value = getDocInfoValue(WOLLMUX_FORMULARBESCHREIBUNG);
+    // TODO textDocumentModel String value =
+    // getDocInfoValue(WOLLMUX_FORMULARBESCHREIBUNG);
     if (value == null) return;
 
     try
@@ -147,27 +109,19 @@ public class FormDescriptor
       return;
     }
   }
-  
-  /**
-   * Schreibt die Formularbeschreibung dieses FormDescriptors in das Infofeld
-   * "WollMuxFormularbeschreibung" der DocumentInfo des Dokuments.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  public void writeDocInfoFormularbeschreibung()
-  {
-    writeDocInfo(WOLLMUX_FORMULARBESCHREIBUNG, toConfigThingy().stringRepresentation());
-  }
-  
 
   /**
-   * Liest den Inhalt des WollMuxFormularwerte-Feldes aus der DocumentInfo des
-   * Dokuments und überträgt die gefundenen Werte (falls welche gefunden werden)
-   * in die HashMap formFieldValues
+   * Wertet werteStr aus (das von der Form "WM(FormularWerte(...))" sein muss
+   * und überträgt die gefundenen Werte in die internen Datenstrukturen.
+   * 
+   * @param werteStr
+   *          darf null sein (und wird dann ignoriert) aber nicht der leere
+   *          String.
    */
-  private void readDocInfoFormularwerte()
+  public void parseDocInfoFormularwerte(String werteStr)
   {
-    String werteStr = getDocInfoValue(WOLLMUX_FORMULARWERTE);
+    // TODO TextDocumentModel String werteStr =
+    // getDocInfoValue(WOLLMUX_FORMULARWERTE);
     if (werteStr == null) return;
 
     // Werte-Abschnitt holen:
@@ -206,162 +160,11 @@ public class FormDescriptor
   }
 
   /**
-   * Die Methode liest den Wert des Feldes fieldName aus der
-   * DocumentInfo-Information des Dokuments oder gibt null zurück, wenn das Feld
-   * nicht vorhanden ist.
-   * 
-   * @param fieldName
-   *          Name des Feldes dessen Inhalt zurückgegeben werden soll.
-   * @return Den Wert des Feldes fieldName oder null, wenn das Feld nicht
-   *         vorhanden ist.
-   */
-  private String getDocInfoValue(String fieldName)
-  {
-    Vector textfields = getWollMuxTextFields(fieldName, false, 0);
-    if (textfields.size() == 0) return null;
-    Iterator iter = textfields.iterator();
-    StringBuilder buffy = new StringBuilder();
-    while (iter.hasNext())
-    {
-      buffy.append((String)UNO.getProperty(iter.next(), "Content"));
-    }
-    return buffy.toString();
-  }
-  
-  /**
-   * Liefert alle Informations-Textfelder mit Id fieldName zurück.
-   * @param create falls true so werden entsprechende Felder angelegt, wenn sie 
-   *        nicht existieren.
-   * @size falls create == true werden soviele Felder angelegt, dass darin size Zeichen
-   *       aufgeteilt in TEXTFIELD_MAXLEN lange Blöcke untergebracht werden können.
-   *       Eventuell vorhandene überschüssige Felder werden gelöscht.
-   *       Auch bei size == 0 wird mindestens ein Block geliefert.
-   * @return leeren Vector falls das Feld nicht existiert und create == false oder 
-   *         falls ein Fehler auftritt.
-   * @author Matthias Benkmann (D-III-ITD 5.1), Christoph Lutz (D-III-ITD 5.1)
-   * TESTED
-   */
-  private Vector getWollMuxTextFields(String fieldName, boolean create, int size)
-  {
-    Vector textfields = new Vector();
-
-    int blockCount = (size + (TEXTFIELD_MAXLEN - 1)) / TEXTFIELD_MAXLEN;
-    if (blockCount == 0) blockCount = 1;
-
-    try
-    {
-      XTextFrame frame = model.getFrameWollMuxDaten(create);
-      if(frame == null) return textfields;
-
-      XEnumeration paragraphEnu = UNO.XEnumerationAccess(frame)
-          .createEnumeration();
-      while (paragraphEnu.hasMoreElements())
-      {
-        XEnumeration textportionEnu = UNO.XEnumerationAccess(
-            paragraphEnu.nextElement()).createEnumeration();
-        while (textportionEnu.hasMoreElements())
-        {
-          Object textfield = UNO.getProperty(
-              textportionEnu.nextElement(),
-              "TextField");
-          String author = (String) UNO.getProperty(textfield, "Author");
-          if (fieldName.equals(author)) // ACHTUNG! author.equals(fieldName)
-                                        // wäre falsch!
-          {
-            textfields.add(textfield);
-          }
-        }
-      }
-
-      /*
-       * Falls create == true und zuviele Felder gefunden wurden, dann loesche
-       * die überzähligen.
-       */
-      if (create && textfields.size() > blockCount)
-      {
-        XText frameText = UNO.XTextFrame(frame).getText();
-        while (textfields.size() > blockCount)
-        {
-          Object textfield = textfields.remove(textfields.size() - 1);
-          frameText.removeTextContent(UNO.XTextContent(textfield));
-        }
-      }
-
-      /*
-       * Falls create == true und zu wenige Felder gefunden wurden, dann erzeuge
-       * zusätzliche.
-       */
-      if (create && textfields.size() < blockCount)
-      {
-        XText frameText = UNO.XTextFrame(frame).getText();
-        while (textfields.size() < blockCount)
-        {
-          Object annotation = UNO.XMultiServiceFactory(model.doc)
-              .createInstance("com.sun.star.text.TextField.Annotation");
-          frameText.insertTextContent(frameText.getEnd(), UNO
-              .XTextContent(annotation), false);
-          UNO.setProperty(annotation, "Author", fieldName);
-          textfields.add(annotation);
-        }
-      }
-    }
-    catch (Exception x)
-    {
-      return textfields;
-    }
-    return textfields;
-  }
-
-  /**
-   * Zeigt an, ob der FormDescriptor leer ist, oder ob mindestens ein gültiges
-   * WM(CMD'Form')-Kommando mit add() hinzugefügt wurde, das einen
-   * Formular-Abschnitt enthält.
+   * Liefert true gdw der FormDescriptor leer ist.
    */
   public boolean isEmpty()
   {
-    return isEmpty;
-  }
-
-  /**
-   * Die Methode fügt die Formularbeschreibung, die unterhalb der Notiz des
-   * WM(CMD'Form')-Kommandos gefunden wird zur Gesamtformularbeschreibung hinzu.
-   * 
-   * @param formCmd
-   *          Das formCmd, das die Notzi mit der hinzuzufügenden
-   *          Formularbeschreibung enthält.
-   * @throws ConfigurationErrorException
-   *           Die Notiz der Formularbeschreibung ist nicht vorhanden, die
-   *           Formularbeschreibung ist nicht vollständig oder kann nicht
-   *           geparst werden.
-   */
-  public void add(DocumentCommand.Form formCmd)
-      throws ConfigurationErrorException
-  {
-    XTextRange range = formCmd.getTextRange();
-
-    Object annotationField = findAnnotationFieldRecursive(range);
-    if (annotationField == null)
-      throw new ConfigurationErrorException(
-          "Die Notiz mit der Formularbeschreibung fehlt.");
-
-    Object content = UNO.getProperty(annotationField, "Content");
-    if (content == null)
-      throw new ConfigurationErrorException(
-          "Die Notiz mit der Formularbeschreibung kann nicht gelesen werden.");
-
-    ConfigThingy conf;
-    try
-    {
-      conf = new ConfigThingy("", null, new StringReader(content.toString()));
-    }
-    catch (java.lang.Exception e)
-    {
-      throw new ConfigurationErrorException(
-          "Die Formularbeschreibung innerhalb der Notiz ist fehlerhaft:\n"
-              + e.getMessage());
-    }
-
-    addFormularSection(conf);
+    return formularConf.count() == 0;
   }
 
   /**
@@ -380,7 +183,6 @@ public class FormDescriptor
     {
       ConfigThingy formular = conf.get("WM").get("Formular");
       formularConf.addChild(formular);
-      isEmpty = false;
     }
     catch (NodeNotFoundException e)
     {
@@ -394,7 +196,8 @@ public class FormDescriptor
    * Liefert eine ConfigThingy-Repräsentation, die unterhalb des Wurzelknotens
    * "WM" der Reihe nach die Vereinigung der "Formular"-Abschnitte aller
    * Formularbeschreibungen der enthaltenen WM(CMD'Form')-Kommandos enthält.
-   * ACHTUNG! Es wird eine Referenz auf ein internes Objekt geliefert! Nicht verändern!
+   * ACHTUNG! Es wird eine Referenz auf ein internes Objekt geliefert! Nicht
+   * verändern!
    * 
    * @return ConfigThingy-Repräsentation mit dem Wurzelknoten "WM", die alle
    *         "Formular"-Abschnitte der Formularbeschreibungen enthält.
@@ -403,11 +206,13 @@ public class FormDescriptor
   {
     return formularConf;
   }
-  
+
   /**
    * Ersetzt die Formularbeschreibung dieses FormDescriptors durch die aus conf.
    * ACHTUNG! conf wird nicht kopiert sondern als Referenz eingebunden.
-   * @param conf ein WM-Knoten, der "Formular"-Kinder hat.
+   * 
+   * @param conf
+   *          ein WM-Knoten, der "Formular"-Kinder hat.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void fromConfigThingy(ConfigThingy conf)
@@ -456,14 +261,10 @@ public class FormDescriptor
   }
 
   /**
-   * Diese Methode legt den aktuellen Werte aller Fomularfelder in einem Feld
-   * WollMuxFormularwerte in der DocumentInfo des Dokuments ab. Ist kein
-   * entsprechendes Feld in der DocumentInfo vorhanden, so wird es neu erzeugt.
+   * Serialisiert die aktuellen Werte aller Fomularfelder.
    */
-  public void updateDocument()
+  public String getFormFieldValues()
   {
-    Logger.debug2(this.getClass().getSimpleName() + ".updateDocument()");
-
     // Neues ConfigThingy für "Formularwerte"-Abschnitt erzeugen:
     ConfigThingy werte = new ConfigThingy("WM");
     ConfigThingy formwerte = new ConfigThingy("Formularwerte");
@@ -486,93 +287,9 @@ public class FormDescriptor
       }
     }
 
-    String infoFieldName = WOLLMUX_FORMULARWERTE;
-    String infoFieldValue = werte.stringRepresentation();
-    
-    writeDocInfo(infoFieldName, infoFieldValue);
-  }
-
-  /**
-   * Schreibt infoFieldValue in ein DocumentInfo-Benutzerfeld names infoFieldName. Ist ein
-   * Feld dieses Namens bereits vorhanden, wird es überschrieben. Ist kein Feld dieses Namens
-   * wird das letzte freie Feld verwendet. Ist kein freies Feld vorhanden, gibt es eine
-   * Log-Meldung und nichts wird geschrieben.
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TESTED */
-  private void writeDocInfo(String infoFieldName, String infoFieldValue)
-  {
-    Vector textfields = getWollMuxTextFields(infoFieldName, true, infoFieldValue.length());
-    if (textfields.size() == 0)
-    {
-      Logger.error("Konnte WollMux-Textfeld(er) \""+infoFieldName+"\" nicht anlegen");
-      return;
-    }
-    
-    Iterator iter = textfields.iterator();
-    int start = 0;
-    int len = infoFieldValue.length();
-    while (iter.hasNext())
-    {
-      int blocksize = len - start;
-      if (blocksize > TEXTFIELD_MAXLEN) blocksize = TEXTFIELD_MAXLEN; 
-      String str = "";
-      if (blocksize > 0)
-      {
-        str = infoFieldValue.substring(start, start + blocksize);
-        start += blocksize;
-      }
-      
-      UNO.setProperty(iter.next(), "Content", str);
-    }
-  }
-
-  /**
-   * Diese Methode durchsucht das Element element bzw. dessen XEnumerationAccess
-   * Interface rekursiv nach TextField.Annotation-Objekten und liefert das erste
-   * gefundene TextField.Annotation-Objekt zurück, oder null, falls kein
-   * entsprechendes Element gefunden wurde.
-   * 
-   * @param element
-   *          Das erste gefundene AnnotationField oder null, wenn keines
-   *          gefunden wurde.
-   */
-  private static XTextField findAnnotationFieldRecursive(Object element)
-  {
-    // zuerst die Kinder durchsuchen (falls vorhanden):
-    if (UNO.XEnumerationAccess(element) != null)
-    {
-      XEnumeration xEnum = UNO.XEnumerationAccess(element).createEnumeration();
-
-      while (xEnum.hasMoreElements())
-      {
-        try
-        {
-          Object child = xEnum.nextElement();
-          XTextField found = findAnnotationFieldRecursive(child);
-          // das erste gefundene Element zurückliefern.
-          if (found != null) return found;
-        }
-        catch (java.lang.Exception e)
-        {
-          Logger.error(e);
-        }
-      }
-    }
-
-    // jetzt noch schauen, ob es sich bei dem Element um eine Annotation
-    // handelt:
-    if (UNO.XTextField(element) != null)
-    {
-      Object textField = UNO.getProperty(element, "TextField");
-      if (UNO.supportsService(
-          textField,
-          "com.sun.star.text.TextField.Annotation"))
-      {
-        return UNO.XTextField(textField);
-      }
-    }
-
-    return null;
+    // TODO textdocumentmodel String infoFieldName = WOLLMUX_FORMULARWERTE;
+    // TODO textdocumentmodel writeDocInfo(infoFieldName, infoFieldValue);
+    return werte.stringRepresentation();
   }
 
 }

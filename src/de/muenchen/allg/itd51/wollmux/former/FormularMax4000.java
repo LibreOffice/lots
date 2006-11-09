@@ -68,13 +68,11 @@ import javax.swing.text.ViewFactory;
 import com.sun.star.container.XEnumeration;
 import com.sun.star.container.XEnumerationAccess;
 import com.sun.star.container.XIndexAccess;
-import com.sun.star.container.XNameAccess;
 import com.sun.star.container.XNamed;
 import com.sun.star.document.XDocumentInfo;
 import com.sun.star.lang.EventObject;
 import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.text.XBookmarksSupplier;
-import com.sun.star.text.XTextContent;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.uno.AnyConverter;
 import com.sun.star.uno.XInterface;
@@ -83,7 +81,6 @@ import com.sun.star.view.XSelectionSupplier;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.FormDescriptor;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
@@ -120,15 +117,7 @@ public class FormularMax4000
    */
   private static final String STARTS_WITH_LETTER_RE = "^[a-zA-Z_].*";
   
-  /**
-   * Pattern zum Erkennen der Bookmarks, die {@link #deForm(XTextDocument)} entfernen soll.
-   */
-  public static final Pattern BOOKMARK_KILL_PATTERN = Pattern.compile("(\\A\\s*(WM\\s*\\(.*CMD\\s*'((form)|(setGroups)|(insertFormValue))'.*\\))\\s*\\d*\\z)"+
-                                                                     "|(\\A\\s*(WM\\s*\\(.*CMD\\s*'(setType)'.*'formDocument'\\))\\s*\\d*\\z)"+
-                                                                     "|(\\A\\s*(WM\\s*\\(.*'formDocument'.*CMD\\s*'(setType)'.*\\))\\s*\\d*\\z)"
-                                                                     );
-
-  /**
+    /**
    * Der Standard-Formulartitel, solange kein anderer gesetzt wird.
    */
   private static final String GENERATED_FORM_TITLE = "Generiert durch FormularMax 4000";
@@ -265,12 +254,7 @@ public class FormularMax4000
   /**
    * Das TextDocumentModel, zu dem das Dokument doc gehört.
    */
-  private TextDocumentModel textDocModel;
-  
-  /**
-   * Das Dokument, an dem dieser FormularMax 4000 hängt.
-   */
-  private XTextDocument doc;
+  private TextDocumentModel doc;
   
   /**
    * Verwaltet die FormControlModels dieses Formulars.
@@ -281,11 +265,6 @@ public class FormularMax4000
    * Verwaltet die {@link InsertionModel}s dieses Formulars.
    */
   private InsertionModelList insertionModelList;
-  
-  /**
-   * Wird verwendet für das Auslesen und Zurückspeichern der Formularbeschreibung.
-   */
-  private FormDescriptor formDescriptor;
   
   /**
    * Funktionsbibliothek, die globale Funktionen zur Verfügung stellt.
@@ -390,11 +369,9 @@ public class FormularMax4000
    */
   public FormularMax4000(TextDocumentModel model, ActionListener abortListener, FunctionLibrary funcLib)
   {
-    this.textDocModel = model;
-    this.doc = model.doc;
+    this.doc = model;
     this.abortListener = abortListener;
     this.functionLibrary = funcLib;
-    initFormDescriptor(model);
     
     //  GUI im Event-Dispatching Thread erzeugen wg. Thread-Safety.
     try{
@@ -465,7 +442,7 @@ public class FormularMax4000
     menuItem.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e)
       {
-        scan(doc);
+        scan(doc.doc);
         setFrameSize();
       }});
     menu.add(menuItem);
@@ -483,7 +460,7 @@ public class FormularMax4000
     menuItem.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e)
       {
-        deForm(textDocModel); 
+        deForm(doc); 
       }});
     menu.add(menuItem);
     
@@ -544,11 +521,11 @@ public class FormularMax4000
     
     initEditor();
 
-    selectionSupplier = UNO.XSelectionSupplier(doc.getCurrentController());
+    selectionSupplier = UNO.XSelectionSupplier(doc.doc.getCurrentController());
     myXSelectionChangedListener = new MyXSelectionChangedListener();
     selectionSupplier.addSelectionChangeListener(myXSelectionChangedListener);
     
-    initModelsAndViews();
+    initModelsAndViews(doc.getFormDescription());
     
     writeChangesTimer.stop();
     
@@ -558,19 +535,18 @@ public class FormularMax4000
   }
   
   /**
-   * Wertet {@link #formDescriptor}, sowie die Bookmarks von {@link #doc} aus und initialisiert 
+   * Wertet formDescription sowie die Bookmarks von {@link #doc} aus und initialisiert 
    * alle internen
    * Strukturen entsprechend. Dies aktualisiert auch die entsprechenden Views.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
-  private void initModelsAndViews()
+  private void initModelsAndViews(ConfigThingy formDescription)
   {
     formControlModelList.clear();
-    ConfigThingy conf = formDescriptor.toConfigThingy();
-    parseGlobalFormInfo(conf);
+    parseGlobalFormInfo(formDescription);
     
-    ConfigThingy fensterAbschnitte = conf.query("Formular").query("Fenster");
+    ConfigThingy fensterAbschnitte = formDescription.query("Formular").query("Fenster");
     Iterator fensterAbschnittIterator = fensterAbschnitte.iterator();
     while (fensterAbschnittIterator.hasNext())
     {
@@ -594,7 +570,7 @@ public class FormularMax4000
     }
     
     insertionModelList.clear();
-    XBookmarksSupplier bmSupp = UNO.XBookmarksSupplier(doc); 
+    XBookmarksSupplier bmSupp = UNO.XBookmarksSupplier(doc.doc); 
     String[] bookmarks = bmSupp.getBookmarks().getElementNames();
     for (int i = 0; i < bookmarks.length; ++i)
     {
@@ -609,16 +585,6 @@ public class FormularMax4000
     }
 
     setFrameSize();
-  }
-  
-  /**
-   * Initialisiert den formDescriptor mit den Formularbeschreibungsdaten des
-   * Dokuments doc.
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private void initFormDescriptor(TextDocumentModel model)
-  {
-    formDescriptor = new FormDescriptor(model);
   }
   
   /**
@@ -644,58 +610,31 @@ public class FormularMax4000
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
-  private ConfigThingy updateDocument(XTextDocument doc)
+  private ConfigThingy updateDocument(TextDocumentModel doc)
   {
     Logger.debug("Übertrage Formularbeschreibung ins Dokument");
     Map mapFunctionNameToConfigThingy = new HashMap();
     insertionModelList.updateDocument(mapFunctionNameToConfigThingy);
     ConfigThingy conf = buildFormDescriptor(mapFunctionNameToConfigThingy);
-    formDescriptor.fromConfigThingy(new ConfigThingy(conf));
-    formDescriptor.writeDocInfoFormularbeschreibung();
-    setModifiedState(doc);
+    doc.setFormDescription(new ConfigThingy(conf));
     return conf;
-  }
-
-  /**
-   * Setzt den Geändert Status von doc auf wahr.
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private void setModifiedState(XTextDocument doc)
-  {
-    try{UNO.XModifiable(doc).setModified(true);}catch(Exception x) {}
   }
   
   /**
-   * Entfernt die WollMux-Kommandos "insertFormValue", "setGroups", "setType formDocument" und
-   *  "form", sowie einen Rahmen mit Namen {@link FormDescriptor#WOLLMUX_FRAME_NAME} aus dem
-   *  Dokument doc.
+   * Ruft {@link #updateDocument(TextDocumentModel)} auf, falls noch Änderungen anstehen.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TESTED
    */
-  private static void deForm(TextDocumentModel model)
+  private void flushChanges()
   {
-    XBookmarksSupplier bmSupp = UNO.XBookmarksSupplier(model.doc);
-    XNameAccess bookmarks = bmSupp.getBookmarks();
-    String[] names = bookmarks.getElementNames();
-    for (int i = 0; i < names.length; ++i)
+    if (writeChangesTimer.isRunning())
     {
+      Logger.debug("Schreibe wartende Änderungen ins Dokument");
+      writeChangesTimer.stop();
       try{
-        String bookmark = names[i];
-        if (BOOKMARK_KILL_PATTERN.matcher(bookmark).matches())
-        {
-          XTextContent bm = UNO.XTextContent(bookmarks.getByName(bookmark));
-          bm.getAnchor().getText().removeTextContent(bm);
-        }
-          
-      }catch(Exception x)
-      {
-        Logger.error(x);
-      }
+        updateDocument(doc);
+      }catch(Exception x){ Logger.error(x);};
     }
-    //TODO: Formularbeschreibungsnotizen löschen...
-    
-    model.removeEmptyFrameWollMuxDaten();
   }
 
   /**
@@ -1032,7 +971,7 @@ public class FormularMax4000
     bookmarkName = control.surroundWithBookmark(bookmarkName);
 
     try{
-      InsertionModel imodel = new InsertionModel(bookmarkName, UNO.XBookmarksSupplier(doc), functionSelectionProvider, this);
+      InsertionModel imodel = new InsertionModel(bookmarkName, UNO.XBookmarksSupplier(doc.doc), functionSelectionProvider, this);
       if (doGenderTrafo)
         addGenderTrafo(imodel, (DropdownFormControl)control);
       insertionModelList.add(imodel);
@@ -1261,9 +1200,8 @@ public class FormularMax4000
           myFrame.setJMenuBar(mainMenuBar);
           myFrame.getContentPane().remove(editorContentPanel);
           myFrame.getContentPane().add(mainContentPanel);
-          formDescriptor.fromConfigThingy(conf);
+          initModelsAndViews(conf);
           documentNeedsUpdating();
-          initModelsAndViews();
         }
         catch (Exception e1)
         {
@@ -1329,15 +1267,26 @@ public class FormularMax4000
   {
     return "WM(CMD 'insertFormValue' ID '"+id+"')";
   }
+
+  /**
+   * Entfernt die WollMux-Formularmerkmale aus dem Dokument.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private void deForm(TextDocumentModel doc)
+  {
+    doc.deForm();
+    initModelsAndViews(new ConfigThingy(""));
+  }
   
   /**
    * Ruft die Datei/Speichern Funktion von OpenOffice.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private void save(XTextDocument doc)
+  private void save(TextDocumentModel doc)
   {
-    UNO.dispatch(doc, ".uno:Save");
+    flushChanges();
+    UNO.dispatch(doc.doc, ".uno:Save");    
   }
   
   /**
@@ -1345,9 +1294,10 @@ public class FormularMax4000
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private void saveAs(XTextDocument doc)
+  private void saveAs(TextDocumentModel doc)
   {
-    UNO.dispatch(doc, ".uno:SaveAs");
+    flushChanges();
+    UNO.dispatch(doc.doc, ".uno:Save");
   }
   
   /**
@@ -1357,14 +1307,7 @@ public class FormularMax4000
    */
   private void abort()
   {
-    if (writeChangesTimer.isRunning())
-    {
-      Logger.debug("Schreibe wartende Änderungen ins Dokument vor abort()");
-      writeChangesTimer.stop();
-      try{
-        updateDocument(doc);
-      }catch(Exception x){};
-    }
+    flushChanges();
     myFrame.dispose();
     myFrame = null;
     try{

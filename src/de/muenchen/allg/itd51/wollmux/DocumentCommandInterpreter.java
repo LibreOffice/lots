@@ -505,7 +505,7 @@ public class DocumentCommandInterpreter
     public void valueChanged(String fieldId, String newValue)
     {
       WollMuxEventHandler.handleFormValueChanged(
-          formDescriptor,
+          textDocumentModel,
           idToFormValues,
           fieldId,
           newValue,
