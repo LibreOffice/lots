@@ -501,13 +501,11 @@ public class TextDocumentModel
 
   /**
    * Setzt den Typ des Dokuments auf type und speichert den Wert persistent im
-   * Dokument ab wenn persistent==true.
+   * Dokument ab.
    */
-  public void setType(String type, boolean persistent)
+  public void setType(String type)
   {
     this.type = type;
-
-    if (!persistent) return;
 
     // Persistente Daten entsprechend anpassen
     if (type != null)
@@ -523,12 +521,13 @@ public class TextDocumentModel
   /**
    * Wird vom {@link DocumentCommandInterpreter} beim Scannen der
    * Dokumentkommandos aufgerufen wenn ein setType-Dokumentkommando bearbeitet
-   * werden muss und setzt den Typ des Dokuments auf cmd.getType(), wenn nicht
-   * bereits ein type gesetzt ist. Ansonsten wird das Kommando ignoriert.
+   * werden muss und setzt den Typ des Dokuments NICHT PERSISTENT auf
+   * cmd.getType(), wenn nicht bereits ein type gesetzt ist. Ansonsten wird das
+   * Kommando ignoriert.
    */
-  public void setType(DocumentCommand.SetType cmd, boolean persistent)
+  public void setType(DocumentCommand.SetType cmd)
   {
-    if (type != null) setType(cmd.getType(), persistent);
+    if (type == null) this.type = cmd.getType();
   }
 
   /**
@@ -579,9 +578,9 @@ public class TextDocumentModel
   /**
    * Wird vom DocumentCommandInterpreter beim parsen des Dokumentkommandobaumes
    * aufgerufen, wenn das Dokument ein setPrintFunction-Kommando enthält und
-   * setzt die in cmd.getFunctionName() enthaltene Druckfunktion, falls nicht
-   * bereits eine Druckfunktion definiert ist. Ansonsten wird das
-   * Dokumentkommando ignoriert.
+   * setzt die in cmd.getFunctionName() enthaltene Druckfunktion PERSISTENT im
+   * Dokument, falls nicht bereits eine Druckfunktion definiert ist. Ansonsten
+   * wird das Dokumentkommando ignoriert.
    * 
    * @param cmd
    *          Das gefundene setPrintFunction-Dokumentkommando.

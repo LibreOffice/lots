@@ -235,7 +235,7 @@ public class DocumentCommandInterpreter
 
     // 3) Jetzt wird der Dokumenttyp formDocument gesetzt, um das Dokument als
     // Formulardokument auszuzeichnen.
-    model.setType("formDocument", true);
+    model.setType("formDocument");
 
     // 4) Document-Modified auf false setzen, da nur wirkliche
     // Benutzerinteraktionen den Modified-Status beeinflussen sollen.
@@ -649,23 +649,26 @@ public class DocumentCommandInterpreter
     public int executeCommand(SetPrintFunction cmd)
     {
       model.setPrintFunction(cmd);
+      
+      // Bookmark löschen:
+      cmd.setDoneState(true);
+      cmd.updateBookmark(false);
       return 0;
     }
 
     public int executeCommand(SetType cmd)
     {
+      model.setType(cmd);
+
       // Wenn eine Mischvorlage zum Bearbeiten geöffnet wurde soll der typ
-      // "templateTemplate" NICHT gelöscht werden. In allen anderen Fällen ist
-      // er nur temporär und wird gelöscht.
-      boolean store = (model.hasURL() && cmd.getType().equalsIgnoreCase(
-          "templateTemplate"));
-
-      model.setType(cmd, store);
-
-      // Bookmark löschen:
-      cmd.setDoneState(true);
-      cmd.updateBookmark(false);
-
+      // "templateTemplate" NICHT gelöscht werden, ansonsten schon.
+      if (!(model.hasURL() && cmd.getType()
+          .equalsIgnoreCase("templateTemplate")))
+      {
+        // Bookmark löschen:
+        cmd.setDoneState(true);
+        cmd.updateBookmark(false);
+      }
       return 0;
     }
 
