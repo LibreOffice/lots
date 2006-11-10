@@ -153,6 +153,9 @@ public class DocumentCommandInterpreter
     // kann.
     errors += new DocumentExpander(model.getFragUrls()).execute(tree);
 
+    // Ziffern-Anpassen der Sachleitenden Verfügungen aufrufen:
+    SachleitendeVerfuegung.ziffernAnpassen(model.doc);
+    
     // 2) Jetzt können die TextFelder innerhalb der updateFields Kommandos
     // geupdatet werden. Durch die Auslagerung in einen extra Schritt wird die
     // Reihenfolge der Abarbeitung klar definiert (zuerst die updateFields

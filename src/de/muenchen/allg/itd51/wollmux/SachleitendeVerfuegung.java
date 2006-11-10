@@ -322,13 +322,15 @@ public class SachleitendeVerfuegung
    */
   public static boolean isWiedervorlage(String heading)
   {
-    if (heading.matches(zifferPattern + "[wW]\\.?\\s?[vV](\\.|\\s|$)"))
+    final String rest = "(\\s+.*)?";
+    if (heading.matches(zifferPattern + "[wW]\\.?\\s?[vV]\\.?" + rest))
       return true;
-    if (heading.matches(zifferPattern + "[wW]iedervorlage")) return true;
-    if (heading.matches(zifferPattern + "[aA]blegen")) return true;
-    if (heading.matches(zifferPattern + "[wW]eglegen")) return true;
-    if (heading.matches(zifferPattern + "[zZ]um\\s[aA]kt")) return true;
-    if (heading.matches(zifferPattern + "[zZ]\\.?\\s?[aA](\\.|\\s|$)"))
+    if (heading.matches(zifferPattern + "[wW]iedervorlage" + rest))
+      return true;
+    if (heading.matches(zifferPattern + "[aA]blegen" + rest)) return true;
+    if (heading.matches(zifferPattern + "[wW]eglegen" + rest)) return true;
+    if (heading.matches(zifferPattern + "[zZ]um\\s[aA]kt" + rest)) return true;
+    if (heading.matches(zifferPattern + "[zZ]\\.?\\s?[aA]\\.?" + rest))
       return true;
     return false;
   }
@@ -488,7 +490,7 @@ public class SachleitendeVerfuegung
    *          Das Dokument, in dem alle Verfügungspunkte angepasst werden
    *          sollen.
    */
-  private static void ziffernAnpassen(XTextDocument doc)
+  public static void ziffernAnpassen(XTextDocument doc)
   {
     XTextRange punkt1 = getVerfuegungspunkt1(doc);
 
@@ -1223,17 +1225,25 @@ public class SachleitendeVerfuegung
 
   /**
    * Erzeugt im Dokument doc ein neues Absatzformat (=ParagraphStyle) mit dem
-   * Namen name und liefert das neu erzeugte Absatzformat zurück oder null,
-   * falls das Erzeugen nicht funktionierte.
+   * Namen name und dem ParentStyle parentStyleName und liefert das neu erzeugte
+   * Absatzformat zurück oder null, falls das Erzeugen nicht funktionierte.
    * 
    * @param doc
    *          das Dokument in dem das Absatzformat name erzeugt werden soll.
    * @param name
    *          der Name des zu erzeugenden Absatzformates
+   * @param parentStyleName
+   *          Name des Vorgänger-Styles von dem die Eigenschaften dieses Styles
+   *          abgeleitet werden soll oder null, wenn kein Vorgänger gesetzt
+   *          werden soll (in diesem Fall wird automatisch "Standard" verwendet)
    * @return das neu erzeugte Absatzformat oder null, falls das Absatzformat
    *         nicht erzeugt werden konnte.
    */
-  private static XStyle createParagraphStyle(XTextDocument doc, String name)
+  /**
+   * @return
+   */
+  private static XStyle createParagraphStyle(XTextDocument doc, String name,
+      String parentStyleName)
   {
     XNameContainer pss = getParagraphStyleContainer(doc);
     XStyle style = null;
@@ -1242,7 +1252,9 @@ public class SachleitendeVerfuegung
       style = UNO.XStyle(UNO.XMultiServiceFactory(doc).createInstance(
           "com.sun.star.style.ParagraphStyle"));
       pss.insertByName(name, style);
-      return style;
+      if (style != null && parentStyleName != null)
+        style.setParentStyle(parentStyleName);
+      return UNO.XStyle(pss.getByName(name));
     }
     catch (Exception e)
     {
@@ -1287,68 +1299,61 @@ public class SachleitendeVerfuegung
     style = getParagraphStyle(doc, ParaStyleNameDefault);
     if (style == null)
     {
-      style = createParagraphStyle(doc, ParaStyleNameDefault);
-      if (style != null)
-      {
-        UNO.setProperty(style, "FollowStyle", ParaStyleNameDefault);
-        UNO.setProperty(style, "CharHeight", new Integer(11));
-        UNO.setProperty(style, "CharFontCharSet", new Integer(76));
-        UNO.setProperty(style, "CharFontName", "Arial");
-      }
+      style = createParagraphStyle(doc, ParaStyleNameDefault, null);
+      UNO.setProperty(style, "FollowStyle", ParaStyleNameDefault);
+      UNO.setProperty(style, "CharHeight", new Integer(11));
+      UNO.setProperty(style, "CharFontName", "Arial");
     }
 
     style = getParagraphStyle(doc, ParaStyleNameVerfuegungspunkt);
     if (style == null)
     {
-      style = createParagraphStyle(doc, ParaStyleNameVerfuegungspunkt);
-      if (style != null)
-      {
-        UNO.setProperty(style, "ParentStyle", ParaStyleNameDefault);
-        UNO.setProperty(style, "FollowStyle", ParaStyleNameDefault);
-        UNO.setProperty(style, "CharWeight", new Integer(150));
-        UNO.setProperty(style, "ParaFirstLineIndent", new Integer(-700));
-        UNO.setProperty(style, "ParaTopMargin", new Integer(460));
-      }
+      style = createParagraphStyle(
+          doc,
+          ParaStyleNameVerfuegungspunkt,
+          ParaStyleNameDefault);
+      UNO.setProperty(style, "FollowStyle", ParaStyleNameDefault);
+      UNO.setProperty(style, "CharHeight", new Integer(11));
+      UNO.setProperty(style, "CharWeight", new Integer(150));
+      UNO.setProperty(style, "ParaFirstLineIndent", new Integer(-700));
+      UNO.setProperty(style, "ParaTopMargin", new Integer(460));
     }
 
     style = getParagraphStyle(doc, ParaStyleNameVerfuegungspunkt1);
     if (style == null)
     {
-      style = createParagraphStyle(doc, ParaStyleNameVerfuegungspunkt1);
-      if (style != null)
-      {
-        UNO.setProperty(style, "ParentStyle", ParaStyleNameVerfuegungspunkt);
-        UNO.setProperty(style, "FollowStyle", ParaStyleNameDefault);
-        UNO.setProperty(style, "ParaFirstLineIndent", new Integer(0));
-        UNO.setProperty(style, "ParaTopMargin", new Integer(0));
-      }
+      style = createParagraphStyle(
+          doc,
+          ParaStyleNameVerfuegungspunkt1,
+          ParaStyleNameVerfuegungspunkt);
+      UNO.setProperty(style, "FollowStyle", ParaStyleNameDefault);
+      UNO.setProperty(style, "ParaFirstLineIndent", new Integer(0));
+      UNO.setProperty(style, "ParaTopMargin", new Integer(0));
     }
 
     style = getParagraphStyle(doc, ParaStyleNameAbdruck);
     if (style == null)
     {
-      style = createParagraphStyle(doc, ParaStyleNameAbdruck);
-      if (style != null)
-      {
-        UNO.setProperty(style, "ParentStyle", ParaStyleNameVerfuegungspunkt);
-        UNO.setProperty(style, "FollowStyle", ParaStyleNameDefault);
-        UNO.setProperty(style, "CharWeight", new Integer(100));
-        UNO.setProperty(style, "ParaFirstLineIndent", new Integer(-700));
-        UNO.setProperty(style, "ParaTopMargin", new Integer(460));
-      }
+      style = createParagraphStyle(
+          doc,
+          ParaStyleNameAbdruck,
+          ParaStyleNameVerfuegungspunkt);
+      UNO.setProperty(style, "FollowStyle", ParaStyleNameDefault);
+      UNO.setProperty(style, "CharWeight", new Integer(100));
+      UNO.setProperty(style, "ParaFirstLineIndent", new Integer(-700));
+      UNO.setProperty(style, "ParaTopMargin", new Integer(460));
     }
 
     style = getParagraphStyle(doc, ParaStyleNameZuleitungszeile);
     if (style == null)
     {
-      style = createParagraphStyle(doc, ParaStyleNameZuleitungszeile);
-      if (style != null)
-      {
-        UNO.setProperty(style, "ParentStyle", ParaStyleNameDefault);
-        UNO.setProperty(style, "FollowStyle", ParaStyleNameDefault);
-        UNO.setProperty(style, "CharUnderline", new Integer(1));
-        UNO.setProperty(style, "CharWeight", new Integer(150));
-      }
+      style = createParagraphStyle(
+          doc,
+          ParaStyleNameZuleitungszeile,
+          ParaStyleNameDefault);
+      UNO.setProperty(style, "FollowStyle", ParaStyleNameDefault);
+      UNO.setProperty(style, "CharUnderline", new Integer(1));
+      UNO.setProperty(style, "CharWeight", new Integer(150));
     }
   }
 
