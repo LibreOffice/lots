@@ -1011,7 +1011,8 @@ public class SachleitendeVerfuegung
     if (setInvisibleRange != null)
       UNO.setProperty(setInvisibleRange, "CharHidden", Boolean.TRUE);
 
-    // Sichtbarkeitsstand der draftOnly bzw. notInOriginal-Blöcke merken.
+    // Sichtbarkeitsstand der all, draftOnly bzw. notInOriginal-Blöcke und
+    // merken.
     HashMap /* of DocumentCommand */oldVisibilityStates = new HashMap();
 
     // Ein/Ausblenden der draftOnly bzw. notInOriginal-Blöcke:
@@ -1029,6 +1030,14 @@ public class SachleitendeVerfuegung
       DocumentCommand cmd = (DocumentCommand) iter.next();
       oldVisibilityStates.put(cmd, new Boolean(cmd.isVisible()));
       cmd.setVisible(!isOriginal);
+    }
+
+    iter = model.getAllBlocksIterator();
+    while (iter.hasNext())
+    {
+      DocumentCommand cmd = (DocumentCommand) iter.next();
+      oldVisibilityStates.put(cmd, new Boolean(cmd.isVisible()));
+      cmd.setVisible(true);
     }
 
     // Ziffer von Punkt 1 ausblenden falls isOriginal

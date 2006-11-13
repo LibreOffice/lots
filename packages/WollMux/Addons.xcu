@@ -58,6 +58,78 @@
             <value>com.sun.star.text.TextDocument</value>
           </prop>
         </node>
+
+        <node oor:name="m4" oor:op="replace">
+          <prop oor:name="URL" oor:type="xs:string">
+            <value>private:separator</value>
+          </prop>
+          <prop oor:name="Title" oor:type="xs:string">
+            <value>Block</value>
+          </prop>
+          <prop oor:name="ImageIdentifier" oor:type="xs:string">
+            <value/>
+          </prop>
+          <prop oor:name="Target" oor:type="xs:string">
+            <value>_self</value>
+          </prop>
+          <prop oor:name="Context" oor:type="xs:string">
+            <value>com.sun.star.text.TextDocument</value>
+          </prop>
+        </node>
+
+        <node oor:name="m5" oor:op="replace">
+          <prop oor:name="URL" oor:type="xs:string">
+            <value>wollmux:markBlock#All</value>
+          </prop>
+          <prop oor:name="Title" oor:type="xs:string">
+            <value>BLOCK: immer drucken</value>
+          </prop>
+          <prop oor:name="ImageIdentifier" oor:type="xs:string">
+            <value/>
+          </prop>
+          <prop oor:name="Target" oor:type="xs:string">
+            <value>_self</value>
+          </prop>
+          <prop oor:name="Context" oor:type="xs:string">
+            <value>com.sun.star.text.TextDocument</value>
+          </prop>
+        </node>
+
+        <node oor:name="m6" oor:op="replace">
+          <prop oor:name="URL" oor:type="xs:string">
+            <value>wollmux:markBlock#NotInOriginal</value>
+          </prop>
+          <prop oor:name="Title" oor:type="xs:string">
+            <value>immer ausser Original</value>
+          </prop>
+          <prop oor:name="ImageIdentifier" oor:type="xs:string">
+            <value/>
+          </prop>
+          <prop oor:name="Target" oor:type="xs:string">
+            <value>_self</value>
+          </prop>
+          <prop oor:name="Context" oor:type="xs:string">
+            <value>com.sun.star.text.TextDocument</value>
+          </prop>
+        </node>
+
+        <node oor:name="m7" oor:op="replace">
+          <prop oor:name="URL" oor:type="xs:string">
+            <value>wollmux:markBlock#DraftOnly</value>
+          </prop>
+          <prop oor:name="Title" oor:type="xs:string">
+            <value>nur im Entwurf</value>
+          </prop>
+          <prop oor:name="ImageIdentifier" oor:type="xs:string">
+            <value/>
+          </prop>
+          <prop oor:name="Target" oor:type="xs:string">
+            <value>_self</value>
+          </prop>
+          <prop oor:name="Context" oor:type="xs:string">
+            <value>com.sun.star.text.TextDocument</value>
+          </prop>
+        </node>
         
       </node>
 

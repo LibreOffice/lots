@@ -804,6 +804,8 @@ abstract public class DocumentCommand
     public int executeCommand(DocumentCommand.DraftOnly cmd);
 
     public int executeCommand(DocumentCommand.NotInOriginal cmd);
+
+    public int executeCommand(DocumentCommand.All cmd);
   }
 
   // ********************************************************************************
@@ -1557,6 +1559,32 @@ abstract public class DocumentCommand
   static public class NotInOriginal extends DocumentCommand
   {
     public NotInOriginal(ConfigThingy wmCmd, Bookmark bookmark)
+    {
+      super(wmCmd, bookmark);
+    }
+
+    protected boolean canHaveChilds()
+    {
+      return true;
+    }
+
+    public int execute(DocumentCommand.Executor visitable)
+    {
+      return visitable.executeCommand(this);
+    }
+  }
+
+  // ********************************************************************************
+  /**
+   * Beim Drucken von Sachleitenden Verfügungen werden alle Verfügungspunkte
+   * unterhalb des ausgewählten Verfügungspunktes ausgeblendet. Mit dem All
+   * Kommando ist es möglich Blöcke im Text zu definieren, die IMMER ausgedruckt
+   * werden sollen, d.h. sowohl bei Originalen, als auch bei Abdrucken und
+   * Entwürfen.
+   */
+  static public class All extends DocumentCommand
+  {
+    public All(ConfigThingy wmCmd, Bookmark bookmark)
     {
       super(wmCmd, bookmark);
     }

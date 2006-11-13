@@ -196,6 +196,12 @@ public class TextDocumentModel
   private Vector draftOnlyBlocks;
 
   /**
+   * Enthält einen Vector aller all-Dokumentkommandos des Dokuments, die für die
+   * Ein/Ausblendungen in Sachleitenden Verfügungen benötigt werden.
+   */
+  private Vector allBlocks;
+
+  /**
    * Über die Methode registerWollMuxDispatchInterceptor() wird hier der aktuell
    * auf dem Frame registrierte WollMuxDispatchInterceptor abgelegt, der für das
    * Abfangen von Dispatches wie z.B. dem .uno:Print erforderlich ist.
@@ -219,12 +225,12 @@ public class TextDocumentModel
     this.closeListener = null;
     this.printFunctionName = null;
     this.docCmdTree = new DocumentCommandTree(UNO.XBookmarksSupplier(doc));
-    this.notInOriginalBlocks = new Vector();
-    this.draftOnlyBlocks = new Vector();
     this.dispatchInterceptorController = null;
     this.printSettingsDone = false;
     this.formularConf = new ConfigThingy("WM");
     this.formFieldValues = new HashMap();
+
+    resetPrintBlocks();
 
     registerCloseListener();
 
@@ -246,6 +252,19 @@ public class TextDocumentModel
     this.printFunctionName = persistentData.getData(DATA_ID_PRINTFUNCTION);
     parseFormDescription(persistentData.getData(DATA_ID_FORMULARBESCHREIBUNG));
     parseFormValues(persistentData.getData(DATA_ID_FORMULARWERTE));
+  }
+
+  /**
+   * Veranlasst das TextDocumentModel alle bisher erkannten Blöcke zur
+   * Drucksteuerung bei Sachleitenden Verfügungen (notInOriginal, DraftOnly,
+   * All) zu vergessen. Danach können die Blöcke mit add<Blockname>Blocks(...)
+   * neu hinzugefügt werden.
+   */
+  public void resetPrintBlocks()
+  {
+    this.notInOriginalBlocks = new Vector();
+    this.draftOnlyBlocks = new Vector();
+    this.allBlocks = new Vector();
   }
 
   /**
@@ -624,6 +643,18 @@ public class TextDocumentModel
   }
 
   /**
+   * Fügt der Liste der DraftOnly-Kommandos dieses Dokuments ein weiteres
+   * Dokumentkommando cmd dieses Typs hinzu.
+   * 
+   * @param cmd
+   *          das hinzuzufügende Dokumentkommando
+   */
+  public void addAllBlock(DocumentCommand.All cmd)
+  {
+    allBlocks.add(cmd);
+  }
+
+  /**
    * Liefert einen Iterator zurück, der die Iteration aller
    * NotInOrininal-Dokumentkommandos dieses Dokuments ermöglicht.
    * 
@@ -647,6 +678,19 @@ public class TextDocumentModel
   public Iterator getDraftOnlyBlocksIterator()
   {
     return draftOnlyBlocks.iterator();
+  }
+
+  /**
+   * Liefert einen Iterator zurück, der die Iteration aller
+   * All-Dokumentkommandos dieses Dokuments ermöglicht.
+   * 
+   * @return ein Iterator, der die Iteration aller All-Dokumentkommandos dieses
+   *         Dokuments ermöglicht. Der Iterator kann auch keine Elemente
+   *         enthalten.
+   */
+  public Iterator getAllBlocksIterator()
+  {
+    return allBlocks.iterator();
   }
 
   /**

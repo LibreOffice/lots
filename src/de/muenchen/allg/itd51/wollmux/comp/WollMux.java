@@ -97,6 +97,8 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
 
   public static final String cmdDumpInfo = "DumpInfo";
 
+  public static final String cmdMarkBlock = "MarkBlock";
+
   public static final String cmdKill = "Kill";
 
   public static final String cmdAbout = "About";
@@ -249,7 +251,10 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
       else if (cmd.equalsIgnoreCase(cmdKill))
         xRet = this;
 
-      else if (cmd.equalsIgnoreCase(cmdAbout)) xRet = this;
+      else if (cmd.equalsIgnoreCase(cmdAbout))
+        xRet = this;
+
+      else if (cmd.equalsIgnoreCase(cmdMarkBlock)) xRet = this;
     }
     return xRet;
   }
@@ -398,6 +403,18 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
             .XTextDocument(UNO.desktop.getCurrentComponent());
         if (doc != null && UNO.XModel(doc) != null)
           WollMuxEventHandler.handleButtonAbdruckPressed(doc);
+      }
+
+      else if (cmd.compareToIgnoreCase(cmdMarkBlock) == 0)
+      {
+        Logger.debug2("Dispatch: Aufruf von WollMux:MarkBlock");
+        XTextDocument doc = UNO
+            .XTextDocument(UNO.desktop.getCurrentComponent());
+        String blockname = null;
+        if (parsedURL.size() > 0)
+          blockname = parsedURL.get(0).toString();
+        if (doc != null && UNO.XModel(doc) != null)
+          WollMuxEventHandler.handleMarkBlock(doc, blockname);
       }
 
       else if (cmd.compareToIgnoreCase(cmdZuleitungszeile) == 0)

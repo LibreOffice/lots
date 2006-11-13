@@ -44,6 +44,9 @@ import java.util.Vector;
 
 import com.sun.star.awt.XWindow;
 import com.sun.star.beans.PropertyValue;
+import com.sun.star.container.NoSuchElementException;
+import com.sun.star.container.XEnumeration;
+import com.sun.star.container.XNamed;
 import com.sun.star.frame.DispatchResultEvent;
 import com.sun.star.frame.XController;
 import com.sun.star.frame.XDispatch;
@@ -52,6 +55,7 @@ import com.sun.star.frame.XFrame;
 import com.sun.star.frame.XNotifyingDispatch;
 import com.sun.star.lang.EventObject;
 import com.sun.star.lang.XComponent;
+import com.sun.star.text.XTextContent;
 import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextRange;
@@ -920,8 +924,8 @@ public class WollMuxEventHandler
 
       try
       {
-        // Legacy: Dokumentkommandos setType und setPrintFunction auswerten
-        // globale Werte stehen jetzt in {@link PersistentData }.
+        // Dokumentkommandos setType, setPrintFunction, all, draftOnly und
+        // notInOriginal auswerten.
         dci.scanDocumentSettings();
 
         // Bei Vorlagen: Ausführung der Dokumentkommandos
@@ -951,9 +955,67 @@ public class WollMuxEventHandler
       }
     }
 
-    public boolean requires(Object o)
+    public String toString()
     {
-      return UnoRuntime.areSame(xTextDoc, o);
+      return this.getClass().getSimpleName() + "(#" + xTextDoc.hashCode() + ")";
+    }
+  }
+
+  // *******************************************************************************************
+
+  /**
+   * TODO: anpassen! Erzeugt ein neues WollMuxEvent, das die eigentliche
+   * Dokumentbearbeitung eines TextDokuments startet.
+   * 
+   * @param xTextDoc
+   *          Das XTextDocument, das durch den WollMux verarbeitet werden soll.
+   */
+  public static void handleReprocessTextDocument(XTextDocument xTextDoc)
+  {
+    handle(new OnReprocessTextDocument(xTextDoc));
+  }
+
+  /**
+   * TODO: anpassen! Dieses Event wird immer dann ausgelöst, wenn der
+   * GlobalEventBroadcaster von OOo ein ON_NEW oder ein ON_LOAD-Event wirft. Das
+   * Event sorgt dafür, dass die eigentliche Dokumentbearbeitung durch den
+   * WollMux angestossen wird.
+   * 
+   * @author christoph.lutz
+   */
+  private static class OnReprocessTextDocument extends BasicEvent
+  {
+    XTextDocument xTextDoc;
+
+    public OnReprocessTextDocument(XTextDocument xTextDoc)
+    {
+      this.xTextDoc = xTextDoc;
+    }
+
+    protected void doit() throws WollMuxFehlerException
+    {
+      if (xTextDoc == null) return;
+
+      WollMuxSingleton mux = WollMuxSingleton.getInstance();
+      TextDocumentModel model = mux.getTextDocumentModel(xTextDoc);
+
+      model.resetPrintBlocks();
+
+      // Mögliche Aktionen für das neu geöffnete Dokument:
+      DocumentCommandInterpreter dci = new DocumentCommandInterpreter(model,
+          mux);
+
+      try
+      {
+        dci.scanDocumentSettings();
+
+        dci.executeTemplateCommands();
+      }
+      catch (java.lang.Exception e)
+      {
+        throw new WollMuxFehlerException("Fehler bei der Dokumentbearbeitung.",
+            e);
+      }
     }
 
     public String toString()
@@ -2254,6 +2316,178 @@ public class WollMuxEventHandler
              + "(#"
              + doc.hashCode()
              + ", viewCursor)";
+    }
+  }
+
+  // *******************************************************************************************
+
+  /**
+   * Legt über den Bereich range im Dokument doc ein neues Bookmark mit dem
+   * Namen "WM(CMD'<blockname>')", wenn nicht bereits ein solches Bookmark im
+   * markierten Block definiert ist oder löscht ein bestehendes Bookmark mit
+   * diesem Namen, falls ein solches Bookmark in diesem Bereich bereits
+   * existiert. Anschließend wird ein Event reprocessTextDocument abgesetzt.
+   * 
+   * @param doc
+   *          Das Textdokument, in dem der Block eingefügt werden soll.
+   * @param blockname
+   *          Derzeit werden folgende Blocknamen akzeptiert "draftOnly",
+   *          "notInOriginal" und "all". Alle anderen Blocknamen werden
+   *          ignoriert und keine Aktion ausgeführt.
+   * @param range
+   *          Der Bereicht über den das neue Bookmark gelegt werden soll und in
+   *          dem nachgeschaut werden soll, ob bereits ein solches Bookmark
+   *          existiert.
+   */
+  /**
+   * TODO: anpassen.Erzeugt ein neues WollMuxEvent, das signasisiert, dass eine
+   * Zuleitungszeile der Sachleitenden Verfügungen eingefügt werden, bzw. eine
+   * bestehende Zuleitungszeile gelöscht werden soll.
+   * 
+   * Das Event wird von WollMux.dispatch(...) geworfen, wenn Aufgrund eines
+   * Drucks auf den Knopf der OOo-Symbolleiste ein "wollmux:Zuleitungszeile"
+   * dispatch erfolgte.
+   */
+  public static void handleMarkBlock(XTextDocument doc, String blockname)
+  {
+    handle(new OnMarkBlock(doc, blockname));
+  }
+
+  private static class OnMarkBlock extends BasicEvent
+  {
+    private XTextDocument doc;
+
+    private String blockname;
+
+    public OnMarkBlock(XTextDocument doc, String blockname)
+    {
+      this.doc = doc;
+      this.blockname = blockname;
+    }
+
+    protected void doit() throws WollMuxFehlerException
+    {
+      if (doc == null
+          || UNO.XBookmarksSupplier(doc) == null
+          || blockname == null) return;
+
+      WollMuxSingleton mux = WollMuxSingleton.getInstance();
+      TextDocumentModel model = mux.getTextDocumentModel(doc);
+
+      XTextCursor range = model.getViewCursor();
+
+      if (range == null) return;
+      if (!(blockname.equalsIgnoreCase("draftOnly")
+            || blockname.equalsIgnoreCase("notInOriginal") || blockname
+          .equalsIgnoreCase("all"))) return;
+
+      String bookmarkName = "WM(CMD '" + blockname + "')";
+
+      Set bmNames = getBookmarkNamesStartingWith(bookmarkName, range);
+      if (bmNames.size() > 0)
+      {
+        // bereits bestehende Blöcke löschen
+        Iterator iter = bmNames.iterator();
+        while (iter.hasNext())
+        {
+          bookmarkName = iter.next().toString();
+          try
+          {
+            new Bookmark(bookmarkName, UNO.XBookmarksSupplier(doc)).remove();
+          }
+          catch (NoSuchElementException e)
+          {
+          }
+        }
+        showInfoModal(
+            blockname + "-Block entfernen",
+            "Der ausgewählte Block enthielt bereits eine Markierung als '"
+                + blockname
+                + "'-Block. Die bestehende Markierung wurde aufgehoben!\n\nÜber einen erneuten Klick auf den Button kann die gewünschte Markierung gesetzt werden.");
+      }
+      else
+      {
+        // neuen Block anlegen
+        new Bookmark(bookmarkName, doc, range);
+        showInfoModal("Block einfügen", "Der ausgewählte Block wurde als '"
+                                        + blockname
+                                        + "'-Block markiert.");
+      }
+
+      // PrintBlöcke neu einlesen:
+      model.resetPrintBlocks();
+      DocumentCommandInterpreter dci = new DocumentCommandInterpreter(model,
+          mux);
+      dci.scanDocumentSettings();
+    }
+
+    /**
+     * Liefert die Namen aller Bookmarks, die in im Bereich range existieren und
+     * (case insesitive) mit dem Namen bookmarkName anfangen.
+     * 
+     * @param bookmarkName
+     * @param range
+     */
+    private static HashSet getBookmarkNamesStartingWith(String bookmarkName,
+        XTextRange range)
+    {
+      bookmarkName = bookmarkName.toLowerCase();
+      HashSet found = new HashSet();
+      HashSet started = new HashSet();
+      XTextCursor cursor = range.getText().createTextCursorByRange(range);
+      if (UNO.XEnumerationAccess(cursor) != null)
+      {
+        XEnumeration xenum = UNO.XEnumerationAccess(cursor).createEnumeration();
+        while (xenum.hasMoreElements())
+        {
+          XEnumeration parEnum = null;
+          try
+          {
+            parEnum = UNO.XEnumerationAccess(xenum.nextElement())
+                .createEnumeration();
+          }
+          catch (java.lang.Exception e)
+          {
+          }
+
+          while (parEnum != null && parEnum.hasMoreElements())
+          {
+            XTextContent textPortion = null;
+            try
+            {
+              textPortion = UNO.XTextContent(parEnum.nextElement());
+            }
+            catch (java.lang.Exception e)
+            {
+            }
+            XNamed bookmark = UNO.XNamed(UNO.getProperty(
+                textPortion,
+                "Bookmark"));
+            String name = (bookmark != null) ? bookmark.getName() : "";
+
+            if (name.toLowerCase().startsWith(bookmarkName))
+            {
+              boolean isStart = ((Boolean) UNO.getProperty(
+                  textPortion,
+                  "IsStart")).booleanValue();
+              if (isStart)
+                started.add(name);
+              else if (started.contains(name)) found.add(name);
+            }
+          }
+        }
+      }
+      return found;
+    }
+
+    public String toString()
+    {
+      return this.getClass().getSimpleName()
+             + "(#"
+             + doc.hashCode()
+             + ", '"
+             + blockname
+             + "', viewCursor)";
     }
   }
 

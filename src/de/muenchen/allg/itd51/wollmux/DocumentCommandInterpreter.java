@@ -53,6 +53,7 @@ import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
+import de.muenchen.allg.itd51.wollmux.DocumentCommand.All;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.DraftOnly;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertContent;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertFormValue;
@@ -155,7 +156,7 @@ public class DocumentCommandInterpreter
 
     // Ziffern-Anpassen der Sachleitenden Verfügungen aufrufen:
     SachleitendeVerfuegung.ziffernAnpassen(model.doc);
-    
+
     // 2) Jetzt können die TextFelder innerhalb der updateFields Kommandos
     // geupdatet werden. Durch die Auslagerung in einen extra Schritt wird die
     // Reihenfolge der Abarbeitung klar definiert (zuerst die updateFields
@@ -652,7 +653,7 @@ public class DocumentCommandInterpreter
     public int executeCommand(SetPrintFunction cmd)
     {
       model.setPrintFunction(cmd);
-      
+
       // Bookmark löschen:
       cmd.setDoneState(true);
       cmd.updateBookmark(false);
@@ -684,6 +685,12 @@ public class DocumentCommandInterpreter
     public int executeCommand(NotInOriginal cmd)
     {
       model.addNotInOriginalBlock(cmd);
+      return 0;
+    }
+
+    public int executeCommand(All cmd)
+    {
+      model.addAllBlock(cmd);
       return 0;
     }
 
