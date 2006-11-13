@@ -312,7 +312,9 @@ public class SachleitendeVerfuegung
    */
   private static boolean isAbdruck(XTextRange paragraph)
   {
-    return paragraph.getString().contains("Abdruck von I.");
+    String str = paragraph.getString();
+    return str.contains("Abdruck von I.")
+           || str.contains("Abdruck von <Vorgänger>.");
   }
 
   /**
