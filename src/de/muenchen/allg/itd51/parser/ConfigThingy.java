@@ -42,6 +42,7 @@
 * 22.03.2006 | BNK | urlEncodierung von nicht-ASCII-Zeichen in %include URLs. (R1360)
 * 24.03.2006 | BNK | urlEncodierung nur noch von in URLs nicht erlaubten Zeichen (R1377)
 * 22.05.2006 | BNK | get und Konsorten erlauben jetzt ein maxlevel Argument
+* 13.11.2006 | BNK | %uXXXX Syntax wird verstanden und stringRepresentation(..,..,..) erzeugt sie.
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -58,6 +59,7 @@ import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -78,6 +80,16 @@ public class ConfigThingy
    * werden.
    */
   public static final String CHARSET = "UTF-8";
+  
+  /**
+   * Pattern für Unicode Buchstaben und Ziffern.
+   */
+  private static final Pattern NON_LETTER_OR_DIGITS = Pattern.compile("\\P{javaLetterOrDigit}");
+  
+  /**
+   * Pattern für Zeichen, die in ConfigThingys escapet werden müssen.
+   */
+  private static final Pattern CONFIGTHINGY_SPECIAL = Pattern.compile("[%\n\"']");
   
   /**
    * Einrückung für stringRepresentation().
@@ -650,10 +662,12 @@ public class ConfigThingy
    *        mit dem Namen von this erzeugt.
    * @param stringChar das Zeichen, das zum Einschliessen von Strings
    *        verwendet werden soll.
+   * @param escapeAll falls true werden in Strings alle Zeichen, die nicht Buchstabe oder
+   *        Ziffer sind mit der %u Syntax escapet.
    * @throws IllegalArgumentException falls stringChar nicht ' oder " ist.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public String stringRepresentation(boolean childrenOnly, char stringChar)
+  public String stringRepresentation(boolean childrenOnly, char stringChar, boolean escapeAll)
   throws java.lang.IllegalArgumentException
   {
     if (stringChar != '"' && stringChar != '\'')
@@ -661,17 +675,27 @@ public class ConfigThingy
     
     StringBuffer buf = new StringBuffer();
     if (!childrenOnly)
-      stringRepresentation(buf,"",stringChar);
+      stringRepresentation(buf,"",stringChar, escapeAll);
     else
     {
       Iterator iter = iterator();
       while (iter.hasNext())
       {
-        ((ConfigThingy)iter.next()).stringRepresentation(buf,"",stringChar);
+        ((ConfigThingy)iter.next()).stringRepresentation(buf,"",stringChar, escapeAll);
         buf.append('\n');
       }
     }
     return buf.toString();
+  }
+  
+  /**
+   * Wie {@link #stringRepresentation(boolean, char, boolean)} mit escapeAll == false.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public String stringRepresentation(boolean childrenOnly, char stringChar)
+  throws java.lang.IllegalArgumentException
+  {
+    return stringRepresentation(childrenOnly, stringChar, false);
   }
 
   /**
@@ -686,29 +710,67 @@ public class ConfigThingy
   /**
    * Ersetzt ' durch '', \n durch %n, % durch %%
    * @author Matthias Benkmann (D-III-ITD 5.1)
+   * @param escapeAll falls true werden alle {@link #NON_LETTER_OR_DIGITS} 
+   * als Unicode-Escapes escapet.
    */
-  private String escapeString(String str,char stringChar)
+  private String escapeString(String str,char stringChar, boolean escapeAll)
   {
-    return str.replaceAll("%","%%").replaceAll("\n","%n").replaceAll(""+stringChar,""+stringChar+stringChar);
+    Pattern p;
+    if (escapeAll)
+      p = NON_LETTER_OR_DIGITS;
+    else
+      p = CONFIGTHINGY_SPECIAL;
+    
+    Matcher m = p.matcher(str);
+    ArrayList locations = new ArrayList();
+    while (m.find()) locations.add(new Integer(m.start()));
+    StringBuilder buffy = new StringBuilder(str);
+    while (!locations.isEmpty())
+    {
+      int idx = ((Integer)locations.remove(locations.size() - 1)).intValue();
+      
+      String repstr = ""+buffy.charAt(idx);
+      
+      if (escapeAll)
+      {
+        repstr = Integer.toHexString(buffy.charAt(idx)); 
+        while(repstr.length() < 4) repstr = "0"+repstr;
+        repstr = "%u" + repstr;
+      } 
+      else
+      {
+        switch(buffy.charAt(idx))
+        {
+          case '\'': repstr = stringChar == '\'' ? "''" : "'"; break; 
+          case '"': repstr = stringChar == '"' ? "\"\"" : "\""; break;
+          case '\n': repstr = "%n"; break;
+          case '%': repstr = "%%" ; break;
+        }
+      }
+      buffy.replace(idx, idx + 1, repstr);
+    }
+    return buffy.toString();
   }
   
   /**
    * Hängt eine textuelle Darstellung diese ConfigThingys an buf an.
    * Jeder Zeile wird childPrefix vorangestellt.
+   * @param escapeAll falls true werden in Strings alle Zeichen, die nicht Buchstabe 
+   *        oder Ziffer sind mit der %u Syntax escapet.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private void stringRepresentation(StringBuffer buf, String childPrefix, char stringChar)
+  private void stringRepresentation(StringBuffer buf, String childPrefix, char stringChar, boolean escapeAll)
   {
     
     if (count() == 0) //Blatt
     {
-      buf.append(stringChar+escapeString(getName(),stringChar)+stringChar);
+      buf.append(stringChar+escapeString(getName(),stringChar, escapeAll)+stringChar);
     }
     else if (count() == 1 && getFirstChildNoThrow().count() == 0) //Schlüssel-Wert-Paar
     {
       buf.append(getName());
       buf.append(' ');
-      getFirstChildNoThrow().stringRepresentation(buf, childPrefix, stringChar);
+      getFirstChildNoThrow().stringRepresentation(buf, childPrefix, stringChar, escapeAll);
     }
     else
     {
@@ -722,7 +784,7 @@ public class ConfigThingy
         while (iter.hasNext())
         {
           ConfigThingy child = (ConfigThingy)iter.next();
-          child.stringRepresentation(buf, childPrefix, stringChar);
+          child.stringRepresentation(buf, childPrefix, stringChar, escapeAll);
           if (iter.hasNext()) 
           {
             if (type == ST_VALUE_LIST) buf.append(',');
@@ -746,7 +808,7 @@ public class ConfigThingy
              (child.count() == 1 && child.getFirstChildNoThrow().count() == 0))
             buf.append(childPrefix+INDENT);
           
-          child.stringRepresentation(buf, childPrefix+INDENT, stringChar);
+          child.stringRepresentation(buf, childPrefix+INDENT, stringChar, escapeAll);
           
           if (child.count() == 0 || 
              (child.count() == 1 && child.getFirstChildNoThrow().count() == 0))
@@ -883,7 +945,7 @@ public class ConfigThingy
       {
         //extract string inside "..." and replace "" with ", %n with "\n" and 
         //%% with %
-        content = m.group(1).replaceAll("\"\"","\"").replaceAll("%n","\n").replaceAll("%%","%");
+        content = m.group(1).replaceAll("\"\"","\"");
       }
       else
       {
@@ -892,9 +954,48 @@ public class ConfigThingy
         
         //extract string inside '...' and replace '' with ', %n with "\n" and 
         //%% with %
-        content = m.group(1).replaceAll("''","'").replaceAll("%n","\n").replaceAll("%%","%");
+        content = m.group(1).replaceAll("''","'");
+      }
+      /*
+       * %-Escapes auswerten
+       */
+      StringBuilder buffy = new StringBuilder(content);
+      int startidx = 0;
+      int idx;
+      while ((idx = buffy.indexOf("%", startidx)) > 0)
+      {
+        if (idx + 1 >= buffy.length()) break;
+        
+        int replen = 1;
+        String repstr = ""+buffy.charAt(idx);
+        switch(buffy.charAt(idx + 1))
+        {
+          case 'n': repstr = "\n"; replen = 2; break;
+          case '%': repstr = "%" ; replen = 2; break;
+          case 'u': repstr = parseUnicode(buffy, idx + 2); replen = 6; break;
+          // darf nicht gemacht werden, weil zum Beispiel in URLs %-escapes vorkommen: default: throw new IllegalArgumentException("Unknown escape in string token '%" + buffy.charAt(idx)+"'!");
+        }
+        
+        buffy.replace(idx, idx + replen, repstr);
+        startidx = idx + repstr.length();
+      }
+      
+      content = buffy.toString();
+    }
+    
+    private String parseUnicode(StringBuilder str, int idx)
+    {
+      if (idx + 4 >= str.length()) throw new IllegalArgumentException("Incomplete %u escape!");
+      String code = str.substring(idx, idx + 4);
+      try{
+        char ch = (char)Integer.parseInt(code, 16);
+        return ""+ch;
+      }catch(NumberFormatException x)
+      {
+        throw new IllegalArgumentException("Incorrect hex number in %u escape: \"%u"+code+"\"");
       }
     }
+    
     public int type() {return Token.STRING;}
     
     /**
@@ -1108,43 +1209,43 @@ public class ConfigThingy
         }
         
         int tokenLength;
-        if (0 != (tokenLength = KeyToken.atStartOf(line)))
-        {
-          tokens.add(new KeyToken(line,url,lineNo,pos+1));
-        }
-        else
-          if (0 != (tokenLength = StringToken.atStartOf(line)))
+        try{
+          if (0 != (tokenLength = KeyToken.atStartOf(line)))
+          {
+            tokens.add(new KeyToken(line,url,lineNo,pos+1));
+          }
+          else if (0 != (tokenLength = StringToken.atStartOf(line)))
           {
             tokens.add(new StringToken(line,url, lineNo,pos+1));
           }
+          else if (0 != (tokenLength = OpenParenToken.atStartOf(line)))
+          {
+            tokens.add(new OpenParenToken(url,lineNo,pos+1));
+          }
+          else if (0 != (tokenLength = CloseParenToken.atStartOf(line)))
+          {
+            tokens.add(new CloseParenToken(url,lineNo,pos+1));
+          }
+          else if (0 != (tokenLength = IncludeToken.atStartOf(line)))
+          {
+            tokens.add(new IncludeToken(url,lineNo,pos+1));
+          }
+          else if (0 != (tokenLength = LineCommentToken.atStartOf(line)))
+          {
+            //LineCommentTokens werden nicht in tokens eingefügt, weil
+            //der Parser im Fall von 2er Paaren wie KEY STRING nicht in
+            //der Lage ist über Kommentare hinwegzulesen. Anstatt ihm das
+            //Einzubauen ist es einfacher, Kommentare einfach wegzuschmeissen.
+            //tokens.add(new LineCommentToken(line,url,lineNo,pos+1));
+          }
           else
-            if (0 != (tokenLength = OpenParenToken.atStartOf(line)))
-            {
-              tokens.add(new OpenParenToken(url,lineNo,pos+1));
-            }
-            else
-              if (0 != (tokenLength = CloseParenToken.atStartOf(line)))
-              {
-                tokens.add(new CloseParenToken(url,lineNo,pos+1));
-              }
-              else
-                if (0 != (tokenLength = IncludeToken.atStartOf(line)))
-                {
-                  tokens.add(new IncludeToken(url,lineNo,pos+1));
-                }
-                else
-                  if (0 != (tokenLength = LineCommentToken.atStartOf(line)))
-                  {
-                    //LineCommentTokens werden nicht in tokens eingefügt, weil
-                    //der Parser im Fall von 2er Paaren wie KEY STRING nicht in
-                    //der Lage ist über Kommentare hinwegzulesen. Anstatt ihm das
-                    //Einzubauen ist es einfacher, Kommentare einfach wegzuschmeissen.
-                    //tokens.add(new LineCommentToken(line,url,lineNo,pos+1));
-                  }
-              else
-              {
-                throw new SyntaxErrorException(url+": Syntaxfehler in Zeile "+lineNo+" bei Zeichen "+(pos+1));
-              }
+          {
+            throw new SyntaxErrorException(url+": Syntaxfehler in Zeile "+lineNo+" bei Zeichen "+(pos+1));
+          }
+        }catch(IllegalArgumentException x)
+        {
+          throw new SyntaxErrorException(url+": Syntaxfehler in Zeile "+lineNo+" bei Zeichen "+(pos+1), x);
+        }
         
         pos += tokenLength;
         line = line.substring(tokenLength);
@@ -1205,6 +1306,7 @@ public class ConfigThingy
     ConfigThingy conf = new ConfigThingy(args[0], new URL(cwd.toURL(),args[0]));
     
     System.out.println("Dies ist die stringRepresentation(): \n\n"+conf.stringRepresentation());
+    System.out.println("Dies ist die stringRepresentation() unicodifiziert: \n\n"+conf.stringRepresentation(false, '"', true));
     
     System.out.println("Dies ist der Ergebnisbaum: \n\n"+treeDump(conf, ""));
     
