@@ -43,6 +43,7 @@
 * 24.03.2006 | BNK | urlEncodierung nur noch von in URLs nicht erlaubten Zeichen (R1377)
 * 22.05.2006 | BNK | get und Konsorten erlauben jetzt ein maxlevel Argument
 * 13.11.2006 | BNK | %uXXXX Syntax wird verstanden und stringRepresentation(..,..,..) erzeugt sie.
+* 14.11.2006 | BNK | %-Escapes am Anfang eines Strings werden korrekt geparst.
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -962,7 +963,7 @@ public class ConfigThingy
       StringBuilder buffy = new StringBuilder(content);
       int startidx = 0;
       int idx;
-      while ((idx = buffy.indexOf("%", startidx)) > 0)
+      while ((idx = buffy.indexOf("%", startidx)) >= 0)
       {
         if (idx + 1 >= buffy.length()) break;
         
