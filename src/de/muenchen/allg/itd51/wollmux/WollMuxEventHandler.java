@@ -2322,11 +2322,15 @@ public class WollMuxEventHandler
   // *******************************************************************************************
 
   /**
-   * Legt über den Bereich range im Dokument doc ein neues Bookmark mit dem
-   * Namen "WM(CMD'<blockname>')", wenn nicht bereits ein solches Bookmark im
-   * markierten Block definiert ist oder löscht ein bestehendes Bookmark mit
-   * diesem Namen, falls ein solches Bookmark in diesem Bereich bereits
-   * existiert. Anschließend wird ein Event reprocessTextDocument abgesetzt.
+   * Erzeugt ein neues WollMuxEvent, das über den Bereich des viewCursors im
+   * Dokument doc ein neues Bookmark mit dem Namen "WM(CMD'<blockname>')" legt,
+   * wenn nicht bereits ein solches Bookmark im markierten Block definiert ist.
+   * Ist bereits ein Bookmark mit diesem Namen vorhanden, so wird dieses
+   * gelöscht.
+   * 
+   * Das Event wird von WollMux.dispatch(...) geworfen, wenn Aufgrund eines
+   * Drucks auf den Knopf der OOo-Symbolleiste ein "wollmux:markBlock#<blockname>"
+   * dispatch erfolgte.
    * 
    * @param doc
    *          Das Textdokument, in dem der Block eingefügt werden soll.
@@ -2334,19 +2338,6 @@ public class WollMuxEventHandler
    *          Derzeit werden folgende Blocknamen akzeptiert "draftOnly",
    *          "notInOriginal" und "all". Alle anderen Blocknamen werden
    *          ignoriert und keine Aktion ausgeführt.
-   * @param range
-   *          Der Bereicht über den das neue Bookmark gelegt werden soll und in
-   *          dem nachgeschaut werden soll, ob bereits ein solches Bookmark
-   *          existiert.
-   */
-  /**
-   * TODO: anpassen.Erzeugt ein neues WollMuxEvent, das signasisiert, dass eine
-   * Zuleitungszeile der Sachleitenden Verfügungen eingefügt werden, bzw. eine
-   * bestehende Zuleitungszeile gelöscht werden soll.
-   * 
-   * Das Event wird von WollMux.dispatch(...) geworfen, wenn Aufgrund eines
-   * Drucks auf den Knopf der OOo-Symbolleiste ein "wollmux:Zuleitungszeile"
-   * dispatch erfolgte.
    */
   public static void handleMarkBlock(XTextDocument doc, String blockname)
   {
@@ -2403,7 +2394,7 @@ public class WollMuxEventHandler
             blockname + "-Block entfernen",
             "Der ausgewählte Block enthielt bereits eine Markierung als '"
                 + blockname
-                + "'-Block. Die bestehende Markierung wurde aufgehoben!\n\nÜber einen erneuten Klick auf den Button kann die gewünschte Markierung gesetzt werden.");
+                + "'-Block. Die bestehende Markierung wurde aufgehoben!");
       }
       else
       {
@@ -2431,6 +2422,10 @@ public class WollMuxEventHandler
     private static HashSet getBookmarkNamesStartingWith(String bookmarkName,
         XTextRange range)
     {
+      // Hier findet eine iteration des über den XEnumerationAccess des ranges
+      // statt. Man könnte statt dessen auch über range-compare mit den bereits
+      // bestehenden Blöcken aus TextDocumentModel.get<blockname>Blocks()
+      // vergleichen...
       bookmarkName = bookmarkName.toLowerCase();
       HashSet found = new HashSet();
       HashSet started = new HashSet();
