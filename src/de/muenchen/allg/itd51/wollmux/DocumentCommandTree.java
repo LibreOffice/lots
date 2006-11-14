@@ -43,7 +43,7 @@ import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.parser.SyntaxErrorException;
-import de.muenchen.allg.itd51.wollmux.DocumentCommand.All;
+import de.muenchen.allg.itd51.wollmux.DocumentCommand.AllVersions;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.DraftOnly;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.Form;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertContent;
@@ -269,9 +269,9 @@ public class DocumentCommandTree
         return new DocumentCommand.NotInOriginal(wmCmd, bookmark);
       }
 
-      else if (cmd.compareToIgnoreCase("all") == 0)
+      else if (cmd.compareToIgnoreCase("allVersions") == 0)
       {
-        return new DocumentCommand.All(wmCmd, bookmark);
+        return new DocumentCommand.AllVersions(wmCmd, bookmark);
       }
 
       throw new InvalidCommandException("Unbekanntes Kommando \"" + cmd + "\"");
@@ -542,7 +542,7 @@ public class DocumentCommandTree
       return 0;
     }
 
-    public int executeCommand(All cmd)
+    public int executeCommand(AllVersions cmd)
     {
       return 0;
     }

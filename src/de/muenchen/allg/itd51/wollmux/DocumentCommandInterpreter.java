@@ -53,7 +53,7 @@ import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
-import de.muenchen.allg.itd51.wollmux.DocumentCommand.All;
+import de.muenchen.allg.itd51.wollmux.DocumentCommand.AllVersions;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.DraftOnly;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertContent;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertFormValue;
@@ -688,9 +688,9 @@ public class DocumentCommandInterpreter
       return 0;
     }
 
-    public int executeCommand(All cmd)
+    public int executeCommand(AllVersions cmd)
     {
-      model.addAllBlock(cmd);
+      model.addAllVersionsBlock(cmd);
       return 0;
     }
 

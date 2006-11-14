@@ -199,7 +199,7 @@ public class TextDocumentModel
    * Enthält einen Vector aller all-Dokumentkommandos des Dokuments, die für die
    * Ein/Ausblendungen in Sachleitenden Verfügungen benötigt werden.
    */
-  private Vector allBlocks;
+  private Vector allVersionsBlocks;
 
   /**
    * Über die Methode registerWollMuxDispatchInterceptor() wird hier der aktuell
@@ -264,7 +264,7 @@ public class TextDocumentModel
   {
     this.notInOriginalBlocks = new Vector();
     this.draftOnlyBlocks = new Vector();
-    this.allBlocks = new Vector();
+    this.allVersionsBlocks = new Vector();
   }
 
   /**
@@ -649,9 +649,9 @@ public class TextDocumentModel
    * @param cmd
    *          das hinzuzufügende Dokumentkommando
    */
-  public void addAllBlock(DocumentCommand.All cmd)
+  public void addAllVersionsBlock(DocumentCommand.AllVersions cmd)
   {
-    allBlocks.add(cmd);
+    allVersionsBlocks.add(cmd);
   }
 
   /**
@@ -688,9 +688,9 @@ public class TextDocumentModel
    *         Dokuments ermöglicht. Der Iterator kann auch keine Elemente
    *         enthalten.
    */
-  public Iterator getAllBlocksIterator()
+  public Iterator getAllVersionsBlocksIterator()
   {
-    return allBlocks.iterator();
+    return allVersionsBlocks.iterator();
   }
 
   /**

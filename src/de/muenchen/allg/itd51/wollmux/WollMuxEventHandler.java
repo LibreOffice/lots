@@ -2370,7 +2370,7 @@ public class WollMuxEventHandler
       if (range == null) return;
       if (!(blockname.equalsIgnoreCase("draftOnly")
             || blockname.equalsIgnoreCase("notInOriginal") || blockname
-          .equalsIgnoreCase("all"))) return;
+          .equalsIgnoreCase("allVersions"))) return;
 
       String bookmarkName = "WM(CMD '" + blockname + "')";
 

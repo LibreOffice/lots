@@ -805,7 +805,7 @@ abstract public class DocumentCommand
 
     public int executeCommand(DocumentCommand.NotInOriginal cmd);
 
-    public int executeCommand(DocumentCommand.All cmd);
+    public int executeCommand(DocumentCommand.AllVersions cmd);
   }
 
   // ********************************************************************************
@@ -1577,14 +1577,14 @@ abstract public class DocumentCommand
   // ********************************************************************************
   /**
    * Beim Drucken von Sachleitenden Verfügungen werden alle Verfügungspunkte
-   * unterhalb des ausgewählten Verfügungspunktes ausgeblendet. Mit dem All
-   * Kommando ist es möglich Blöcke im Text zu definieren, die IMMER ausgedruckt
-   * werden sollen, d.h. sowohl bei Originalen, als auch bei Abdrucken und
-   * Entwürfen.
+   * unterhalb des ausgewählten Verfügungspunktes ausgeblendet. Mit dem
+   * AllVersions Kommando ist es möglich Blöcke im Text zu definieren, die IMMER
+   * ausgedruckt werden sollen, d.h. sowohl bei Originalen, als auch bei
+   * Abdrucken und Entwürfen.
    */
-  static public class All extends DocumentCommand
+  static public class AllVersions extends DocumentCommand
   {
-    public All(ConfigThingy wmCmd, Bookmark bookmark)
+    public AllVersions(ConfigThingy wmCmd, Bookmark bookmark)
     {
       super(wmCmd, bookmark);
     }

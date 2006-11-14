@@ -79,7 +79,7 @@
 
         <node oor:name="m5" oor:op="replace">
           <prop oor:name="URL" oor:type="xs:string">
-            <value>wollmux:markBlock#All</value>
+            <value>wollmux:markBlock#allVersions</value>
           </prop>
           <prop oor:name="Title" oor:type="xs:string">
             <value>Block: immer drucken</value>
@@ -97,7 +97,7 @@
 
         <node oor:name="m6" oor:op="replace">
           <prop oor:name="URL" oor:type="xs:string">
-            <value>wollmux:markBlock#NotInOriginal</value>
+            <value>wollmux:markBlock#notInOriginal</value>
           </prop>
           <prop oor:name="Title" oor:type="xs:string">
             <value>immer ausser Original</value>
@@ -115,7 +115,7 @@
 
         <node oor:name="m7" oor:op="replace">
           <prop oor:name="URL" oor:type="xs:string">
-            <value>wollmux:markBlock#DraftOnly</value>
+            <value>wollmux:markBlock#draftOnly</value>
           </prop>
           <prop oor:name="Title" oor:type="xs:string">
             <value>nur im Entwurf</value>

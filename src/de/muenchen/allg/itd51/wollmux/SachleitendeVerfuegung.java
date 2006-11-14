@@ -1032,7 +1032,7 @@ public class SachleitendeVerfuegung
       cmd.setVisible(!isOriginal);
     }
 
-    iter = model.getAllBlocksIterator();
+    iter = model.getAllVersionsBlocksIterator();
     while (iter.hasNext())
     {
       DocumentCommand cmd = (DocumentCommand) iter.next();
