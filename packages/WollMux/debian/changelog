@@ -1,3 +1,56 @@
+wollmux (1.4.0lhm1) siga; urgency=low
+
+  * Hilfen zum Einfügen und Drucken von Sachleitenden Verfügungen stehen (erstmalig)
+    zur Verfügung. Über Datei->Drucken startet jetzt der neue Druckdialog für
+    Sachleitende Verfügungen. 
+    ACHTUNG: Um die neuen Funktionen testen zu können ist zwingend eine 
+    WollMux-Standard-Config ab Version 2.3.0 erforderlich!
+  * Neue Symbolleiste "Sachleitende Verfügungen" mit den Schaltflächen
+    "Ziffer einfügen", "Abdruck", "Zuleitungszeile", "Block: immer drucken",
+    "immer ausser Original" und "nur im Entwurf".
+  * Enthält ein Dokument die für Sachleitende Verfügungen notwendigen Absatzformate
+    nicht, so werden diese vom WollMux erzeugt und mit festen Werten vorbelegt.
+  * Verbesserungen beim Bestimmen der Fenstergroesse der Formular-GUI (Vorfall 8417)
+  * Bei glues werden jetzt MINSIZE, MAXSIZE und PREFSIZE unterstützt
+  * Unter Windows kann jetzt als C:\Programme\wollmux\wollmux.conf eine Konfig-Datei
+    hinterlegt werden, die gelesen wird, wenn im Benutzerverzeichnis keine vorhanden
+    ist bzw. keinen DEFAULT_CONTEXT definiert. Details siehe Handbuch.
+  * Die WollMux-Leiste unterstützt jetzt die ACTION "about", die einen Dialog aufruft,
+    der wichtige (Versions)Informationen zum aktuell installierten WollMux enthält.
+  * Der "Icon" Modus wird von der WollMux-Leiste nicht mehr unterstützt, da zur
+    Fehlerbehebung größere Umstrukturierungen erforderlich waren und der Aufwand
+    für das Beibehalten des Icon-Modus aufgrund der negativen Nutzerresonanz nicht
+    gerechtfertigt erschien.
+  * In dbConf-Funktionsdialogen (z.B. Empfängerauswahl) ist es jetzt möglich, gleich
+    eine Ergebnisliste anzeigen zu lassen, ohne dass der Benutzer suchen muss. Bei
+    Datenquellen des Typs "conf" ist auch das Anzeigen des kompletten Inhalts möglich.
+    Dies ist zum Beispiel nützlich um dem Benutzer in der Empfängerauswahl eine Liste
+    aller Krankenkassen anzubieten.
+  * Checkboxen (bzw. ihre Label) werden durch eine Umrandung markiert, wenn sie den
+    Fokus haben
+  * FormularMax 4000: Automatische Vorbelegungen (AUTOFILL) und Plausibilitätsprüfungen
+                      (PLAUSI) lassen sich einstellen.
+  * FormularMax 4000: Transformationsfunktionen (TRAFO) lassen sich für Einfügestellen
+                      setzen.
+  * FormularMax 4000: Das Aktualisieren des Dokuments passiert jetzt bei jeder Änderung
+                      automatisch.
+  * FormularMax 4000: <<gender:ID>> Spezialsyntax, die es erlaubt, Felder automatisch von
+                      einem Anredefeld ableiten zu lassen (z.B. Falls Anrede="Frau",
+                      dann füge "die Sicherungsgeberin" ein, sonst "der Sicherungsgeber")
+  * FormularMax 4000: Buttons werden immer am Ende des sichtbaren Tabs eingefügt.
+  * FormularMax 4000: Datei/Formulartitel setzen
+  * FormularMax 4000: Es werden automatisch glue-Elemente eingefügt, so dass die
+                      Formularelemente nicht mehr vertikal zentriert angezeigt werden.
+  * FormularMax_4000: Mit "Neu" Button können jetzt Labels eingefügt werden
+  * FormularMax 4000: Die Standardbuttons werden besser platziert.
+  * FormularMax 4000: Bei Auswahl von Einfügestellen im Dokument wird die Einfügung in
+                      der GUI markiert und umgekehrt.
+  * FormularMax 4000: Der Standard-Empfängerauswahldialog hat den neuen Zustellungsvermerk
+                      "gegen Zustellungsurkunde" hinzugefügt bekommen.
+  * FormularMax 4000: TextAreas können erzeugt und konfiguriert werden (Anzahl Zeilen)
+
+ -- Christoph Lutz <christoph.lutz@muenchen.de>  Tue, 14 Nov 2006 16:13:16 +0200
+
 wollmux (1.3.4lhm1) siga; urgency=low
 
   * FormularMax 4000: Mit "Neu" Button können jetzt Labels eingefügt werden
