@@ -9,6 +9,7 @@
 * Datum      | Wer | Änderungsgrund
 * -------------------------------------------------------------------
 * 25.09.2006 | BNK | Erstellung
+* 16.11.2006 | BNK | null funclib unterstützt
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -45,7 +46,7 @@ public class FunctionSelectionProvider
   
   /**
    * Erzeugt einen FunctionSelectionProvider, der {@link FunctionSelection}s sowohl zu
-   * Funktionen aus funcLib als auch zu Funktionen, die funConf (welches ein
+   * Funktionen aus funcLib (darf null sein) als auch zu Funktionen, die funConf (welches ein
    * legaler "Funktionen"-Abschnitt eines Formulars sein muss) definiert liefern kann.
    * Bei gleichem Namen haben Funktionen aus funConf vorrang vor solchen aus funcLib.
    *  
@@ -83,7 +84,9 @@ public class FunctionSelectionProvider
     else
     {
       funcSel = new FunctionSelection();
-      Function func = funcLib.get(funcName);
+      Function func = null;
+      if (funcLib != null)
+        func = funcLib.get(funcName);
       if (func != null)
         funcSel.setFunction(funcName, func.parameters());
       else
