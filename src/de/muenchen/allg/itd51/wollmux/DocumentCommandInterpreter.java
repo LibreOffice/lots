@@ -190,6 +190,10 @@ public class DocumentCommandInterpreter
     errors += formScanner.execute(tree);
     model.setIDToFormFields(formScanner.idToFormFields);
 
+    // Jetzt wird der Dokumenttyp formDocument gesetzt, um das Dokument als
+    // Formulardokument auszuzeichnen.
+    if(model.hasFormDescriptor()) model.setType("formDocument");
+
     // 7) Die Statusänderungen der Dokumentkommandos auf die Bookmarks
     // übertragen bzw. die Bookmarks abgearbeiteter Kommandos löschen.
     tree.updateBookmarks(mux.isDebugMode());
@@ -236,10 +240,6 @@ public class DocumentCommandInterpreter
 
     // 2) Bookmarks updaten
     tree.updateBookmarks(mux.isDebugMode());
-
-    // 3) Jetzt wird der Dokumenttyp formDocument gesetzt, um das Dokument als
-    // Formulardokument auszuzeichnen.
-    model.setType("formDocument");
 
     // 4) Document-Modified auf false setzen, da nur wirkliche
     // Benutzerinteraktionen den Modified-Status beeinflussen sollen.

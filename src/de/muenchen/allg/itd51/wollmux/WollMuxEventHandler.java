@@ -932,7 +932,7 @@ public class WollMuxEventHandler
         if (model.isTemplate()) dci.executeTemplateCommands();
 
         // Bei Formularen: Konfigurationsabschnitt Fenster/Formular verarbeiten
-        if (model.isFormDocument() || model.hasFormDescriptor())
+        if (model.isFormDocument())
         {
           try
           {
@@ -945,8 +945,7 @@ public class WollMuxEventHandler
         }
 
         // Bei Formularen: Ausführung der Dokumentkommandos des Formularsystems
-        if (model.isFormDocument() || model.hasFormDescriptor())
-          dci.executeFormCommands();
+        if (model.isFormDocument()) dci.executeFormCommands();
       }
       catch (java.lang.Exception e)
       {
