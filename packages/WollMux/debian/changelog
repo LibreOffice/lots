@@ -1,3 +1,10 @@
+wollmux (1.4.1lhm1) siga; urgency=low
+
+  * [R4045] Bugfix eines kritischen Fehlers: Öffnen einer Mischvorlage expandiert
+            den Briefkopf nicht.
+
+ -- Christoph Lutz <christoph.lutz@muenchen.de>  Tue, 16 Nov 2006 16:13:16 +0200
+ 
 wollmux (1.4.0lhm1) siga; urgency=low
 
   * Hilfen zum Einfügen und Drucken von Sachleitenden Verfügungen stehen (erstmalig)
