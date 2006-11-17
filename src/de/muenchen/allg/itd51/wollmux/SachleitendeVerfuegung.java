@@ -572,8 +572,8 @@ public class SachleitendeVerfuegung
     // eingefügter Verfügungspunkt vorhanden ist. Ansonsten setze die
     // Druckfunktion zurück.
     int effectiveCount = (punkt1 != null) ? count - 1 : count;
-    if (effectiveCount == 0)
-      WollMuxEventHandler.handleSetPrintFunction(doc, "");
+    if (effectiveCount == 0) //FIXME Überbügelt gnadenlos jede im Dokument gesetzte PrintFunction
+      { Logger.error("FIXME!!FIXME!FIXME!FIXME!FIXME!FIXME!FIXME!FIXME!FIXME!"); /*WollMuxEventHandler.handleSetPrintFunction(doc, "");*/; }
     else
       WollMuxEventHandler.handleSetPrintFunction(doc, "SachleitendeVerfuegung");
   }

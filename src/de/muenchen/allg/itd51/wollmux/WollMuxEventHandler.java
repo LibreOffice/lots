@@ -2826,7 +2826,7 @@ public class WollMuxEventHandler
       }
       else
       {
-        // Werte selber setzen? hmm... mal überlegen...
+        // FIXME: LUT: Werte selber setzen? hmm... mal überlegen... BNK: Ja, definitiv. Sonst funktionieren PrintFunctions, die den Empfaenger setzen wollen (wie die Krankenkassenauswahl) nur mit Formularen.
       }
     }
 

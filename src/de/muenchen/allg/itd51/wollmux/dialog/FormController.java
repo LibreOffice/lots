@@ -899,10 +899,13 @@ public class FormController implements UIElementEventHandler
   public void setValue(String uiElementId, String value, ActionListener callback)
   {
     UIElement uiElement = (UIElement)mapIdToUIElement.get(uiElementId);
-    processUIElementEvents = false;
-    uiElement.setString(value);
-    processUIElementEvents = true;
-    processUiElementEvent(uiElement, "valueChanged", new Object[]{});
+    if (uiElement != null)
+    {
+      processUIElementEvents = false;
+      uiElement.setString(value);
+      processUIElementEvents = true;
+      processUiElementEvent(uiElement, "valueChanged", new Object[]{});
+    }
     callback.actionPerformed(new ActionEvent(this, 0, "setValue"));
   }
   
