@@ -279,7 +279,6 @@ public class InsertionModel
    * Benachrichtigt alle auf diesem Model registrierten Listener, dass das Model aus
    * seinem Container entfernt wurde. ACHTUNG! Darf nur von einem entsprechenden Container
    * aufgerufen werden, der das Model enthält.
-   * @param index der Index an dem sich das Model in seinem Container befand.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED */

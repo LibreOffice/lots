@@ -97,6 +97,8 @@ import de.muenchen.allg.itd51.wollmux.former.control.FormControlModelList;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelection;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionProvider;
 import de.muenchen.allg.itd51.wollmux.former.function.ParamValue;
+import de.muenchen.allg.itd51.wollmux.former.group.GroupModel;
+import de.muenchen.allg.itd51.wollmux.former.group.GroupModelList;
 import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModel;
 import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModelList;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
@@ -267,6 +269,11 @@ public class FormularMax4000
   private InsertionModelList insertionModelList;
   
   /**
+   * Verwaltet die {@link GroupModel}s dieses Formulars.
+   */
+  private GroupModelList groupModelList;
+  
+  /**
    * Funktionsbibliothek, die globale Funktionen zur Verfügung stellt.
    */
   private FunctionLibrary functionLibrary;
@@ -276,6 +283,12 @@ public class FormularMax4000
    * {@link FunctionSelection}s.
    */
   private FunctionSelectionProvider functionSelectionProvider;
+  
+  /**
+   * Verantwortlich für das Übersetzen von Gruppennamen in
+   * {@link FunctionSelection}s anhand des Sichtbarkeit-Abschnitts.
+   */
+  private FunctionSelectionProvider visibilityFunctionSelectionProvider;
   
   /**
    * Der globale Broadcast-Kanal wird für Nachrichten verwendet, die verschiedene permanente
@@ -391,6 +404,7 @@ public class FormularMax4000
     
     formControlModelList = new FormControlModelList(this);
     insertionModelList = new InsertionModelList(this);
+    groupModelList = new GroupModelList(this);
     
     //  Create and set up the window.
     myFrame = new JFrame("FormularMax 4000");
@@ -584,6 +598,22 @@ public class FormularMax4000
       }
     }
 
+    groupModelList.clear();
+    ConfigThingy visibilityConf = formDescription.query("Formular").query("Sichtbarkeit");
+    Iterator sichtbarkeitsAbschnittIterator = visibilityConf.iterator();
+    while (sichtbarkeitsAbschnittIterator.hasNext())
+    {
+      ConfigThingy sichtbarkeitsAbschnitt = (ConfigThingy)sichtbarkeitsAbschnittIterator.next();
+      Iterator sichtbarkeitsFunktionIterator = sichtbarkeitsAbschnitt.iterator();
+      while (sichtbarkeitsFunktionIterator.hasNext())
+      {
+        ConfigThingy sichtbarkeitsFunktion = (ConfigThingy)sichtbarkeitsFunktionIterator.next();
+        String groupName = sichtbarkeitsFunktion.getName(); 
+        FunctionSelection funcSel = visibilityFunctionSelectionProvider.getFunctionSelection(groupName);
+        groupModelList.add(new GroupModel(groupName, funcSel, this));
+      }
+    }
+    
     setFrameSize();
   }
   
@@ -652,6 +682,7 @@ public class FormularMax4000
     ConfigThingy form = conf.add("Formular");
     form.add("TITLE").add(formTitle);
     form.addChild(formControlModelList.export());
+    form.addChild(groupModelList.export());
     if (!mapFunctionNameToConfigThingy.isEmpty())
     {
       ConfigThingy funcs = form.add("Funktionen");
@@ -682,9 +713,20 @@ public class FormularMax4000
     }
     else
     {
-      tempConf = new ConfigThingy("Formular");
+      tempConf = new ConfigThingy("Funktionen");
     }
     functionSelectionProvider = new FunctionSelectionProvider(functionLibrary, tempConf);
+    
+    tempConf = conf.query("Formular").query("Sichtbarkeit");
+    if (tempConf.count() >= 1)
+    {
+      try{tempConf = tempConf.getFirstChild();}catch(Exception x){}
+    }
+    else
+    {
+      tempConf = new ConfigThingy("Sichtbarkeit");
+    }
+    visibilityFunctionSelectionProvider = new FunctionSelectionProvider(null, tempConf);
   }
   
   /**
@@ -1297,7 +1339,7 @@ public class FormularMax4000
   private void saveAs(TextDocumentModel doc)
   {
     flushChanges();
-    UNO.dispatch(doc.doc, ".uno:Save");
+    UNO.dispatch(doc.doc, ".uno:SaveAs");
   }
   
   /**
