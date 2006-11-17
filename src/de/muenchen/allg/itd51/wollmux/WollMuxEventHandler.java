@@ -2759,6 +2759,48 @@ public class WollMuxEventHandler
   }
 
   // *******************************************************************************************
+
+  /**
+   * Erzeugt ein neues WollMuxEvent, das signasisiert, das ein Textbaustein über
+   * den Textbaustein-Bezeichner direkt ins Dokument eingefügt wird.
+   * 
+   * Das Event wird von WollMux.dispatch(...) geworfen z.B über Druck eines
+   * Tastenkuerzels oder Druck auf den Knopf der OOo-Symbolleiste ein
+   * "wollmux:TextbausteinEinfuegen" dispatch erfolgte.
+   */
+  public static void handleTextbausteinEinfuegen(XTextDocument doc)
+  {
+    handle(new OnTextbausteinEinfuegen(doc));
+  }
+
+  private static class OnTextbausteinEinfuegen extends BasicEvent
+  {
+    private XTextDocument doc;
+
+    public OnTextbausteinEinfuegen(XTextDocument doc)
+    {
+      this.doc = doc;
+    }
+
+    protected void doit() throws WollMuxFehlerException
+    {
+      XTextCursor viewCursor = WollMuxSingleton.getInstance()
+          .getTextDocumentModel(doc).getViewCursor();
+      TextModule.createInsertFragFromIdentifier(doc, viewCursor);
+
+      handleReprocessTextDocument(doc);
+    }
+
+    public String toString()
+    {
+      return this.getClass().getSimpleName()
+             + "(#"
+             + doc.hashCode()
+             + ", viewCursor)";
+    }
+  }
+
+  // *******************************************************************************************
   // Globale Helper-Methoden
 
   /**

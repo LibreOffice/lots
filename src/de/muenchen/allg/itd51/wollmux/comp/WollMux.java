@@ -103,6 +103,8 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
 
   public static final String cmdAbout = "About";
 
+  public static final String cmdTextbausteinEinfuegen = "TextbausteinEinfuegen";
+
   /**
    * Der Konstruktor initialisiert das WollMuxSingleton und startet damit den
    * eigentlichen WollMux. Der Konstuktor wird aufgerufen, bevor OpenOffice.org
@@ -252,6 +254,9 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
         xRet = this;
 
       else if (cmd.equalsIgnoreCase(cmdAbout))
+        xRet = this;
+
+      else if (cmd.equalsIgnoreCase(cmdTextbausteinEinfuegen))
         xRet = this;
 
       else if (cmd.equalsIgnoreCase(cmdMarkBlock)) xRet = this;
@@ -411,8 +416,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
         XTextDocument doc = UNO
             .XTextDocument(UNO.desktop.getCurrentComponent());
         String blockname = null;
-        if (parsedURL.size() > 0)
-          blockname = parsedURL.get(0).toString();
+        if (parsedURL.size() > 0) blockname = parsedURL.get(0).toString();
         if (doc != null && UNO.XModel(doc) != null)
           WollMuxEventHandler.handleMarkBlock(doc, blockname);
       }
@@ -445,6 +449,13 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
         if (parsedURL.size() > 0)
           wollMuxBarVersion = parsedURL.get(0).toString();
         WollMuxEventHandler.handleAbout(wollMuxBarVersion);
+      }
+      else if (cmd.compareToIgnoreCase(cmdTextbausteinEinfuegen) == 0)
+      {
+        Logger.debug2("Dispatch: Aufruf von WollMux:TextbausteinEinfuegen");
+        XTextDocument doc = UNO
+            .XTextDocument(UNO.desktop.getCurrentComponent());
+        WollMuxEventHandler.handleTextbausteinEinfuegen(doc);
       }
     }
   }

@@ -13,6 +13,7 @@
  * 23.01.2006 | LUT | Erweiterung zum hierarchischen WM-Kommando
  * 26.04.2006 | LUT | Komplette Überarbeitung und Umbenennung in DocumentCommand
  * 17.05.2006 | LUT | Doku überarbeitet
+ * 13.11.2006 | BAB | Erweitern von 'insertFrag' um optionale Argumente 'ARGS'
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -586,11 +587,12 @@ abstract public class DocumentCommand
    *          werden soll.
    * @return Einen String, der als Bookmarkname verwendet werden kann.
    */
-  protected static String getCommandString(ConfigThingy conf)
+  public static String getCommandString(ConfigThingy conf)
   {
-    // Neues WM-String zusammenbauen, der keine Zeilenvorschübe und
+    // Neues WM-String zusammenbauen, der keine Zeilenvorschübe, Kommas und
     // abschließende Leerzeichen enthält:
-    String wmCmdString = conf.stringRepresentation(true, '\'');
+    String wmCmdString = conf.stringRepresentation(true, '\'', true);
+    wmCmdString = wmCmdString.replaceAll(",", " ");
     wmCmdString = wmCmdString.replaceAll("[\r\n]+", " ");
     while (wmCmdString.endsWith(" "))
       wmCmdString = wmCmdString.substring(0, wmCmdString.length() - 1);
@@ -609,18 +611,20 @@ abstract public class DocumentCommand
    */
   public String updateBookmark(boolean debug)
   {
-    if (!isDone())
+    if (!isDone() || debug)
     {
       String wmCmdString = getCommandString(toConfigThingy());
 
-      // Neuen Status rausschreiben:
-      bookmark.rename(wmCmdString);
+      // Neuen Status rausschreiben, wenn er sich geändert hat:
+      String name = bookmark.getName();
+      name = name.replaceFirst("\\s*\\d+\\s*$", "");
+      if (!wmCmdString.equals(name)) bookmark.rename(wmCmdString);
 
       return bookmark.getName();
     }
     else
     {
-      if (!debug) bookmark.remove();
+      bookmark.remove();
       return null;
     }
   }
@@ -981,6 +985,8 @@ abstract public class DocumentCommand
   {
     private String fragID;
 
+    private Vector args = null;
+
     public InsertFrag(ConfigThingy wmCmd, Bookmark bookmark)
         throws InvalidCommandException
     {
@@ -993,11 +999,32 @@ abstract public class DocumentCommand
       {
         throw new InvalidCommandException("Fehlendes Attribut FRAG_ID");
       }
+
+      args = new Vector();
+      try
+      {
+        ConfigThingy argsConf = wmCmd.get("WM").get("ARGS");
+        Iterator iter = argsConf.iterator();
+        while (iter.hasNext())
+        {
+          ConfigThingy arg = (ConfigThingy) iter.next();
+          args.add(arg.getName());
+        }
+      }
+      catch (NodeNotFoundException e)
+      {
+        // ARGS sind optional
+      }
     }
 
     public String getFragID()
     {
       return fragID;
+    }
+
+    public Vector getArgs()
+    {
+      return args;
     }
 
     protected boolean canHaveChilds()
