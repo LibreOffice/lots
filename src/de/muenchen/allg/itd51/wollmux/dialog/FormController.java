@@ -22,6 +22,7 @@
 * 19.06.2006 | BNK | Auch Werte für Felder, die nicht geautofilled sind an FormModel kommunizieren bei Startup
 * 10.09.2006 | BNK | [P1007]Abfangen von mehr als 512 Elementen auf einem Tab.
 * 10.09.2006 | BNK | Tabs scrollen, nicht hintereinander gruppieren.
+* 17.11.2006 | BNK | +setValue()
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -885,6 +886,22 @@ public class FormController implements UIElementEventHandler
       if (e.getActionCommand().equals("select"))
         processUiElementEvent(null, "funcDialogSelect", new Object[]{funcDialogName});  
     }
+  }
+  
+  /**
+   * Setzt den Wert des {@link UIElement}s mit ID uiElementId auf value und behandelt die
+   * Änderung so als wäre sie durch den Benutzer erfolgt. 
+   * @param callback Nach dem Abarbeiten dieser Änderung
+   * wird callback.actionPerformed() aufgerufen falls callback != null. ACHTUNG! Der Aufruf
+   * erfolgt im Event-Dispatching Thread!
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public void setValue(String uiElementId, String value, ActionListener callback)
+  {
+    UIElement uiElement = (UIElement)mapIdToUIElement.get(uiElementId);
+    uiElement.setString(value);
+    processUiElementEvent(uiElement, "valueChanged", new Object[]{});
+    callback.actionPerformed(new ActionEvent(this, 0, "setValue"));
   }
   
   /**

@@ -17,6 +17,7 @@
 * 05.07.2006 | BNK | optische Verbesserungen, insbes. bzgl. arrangeWindows()
 * 19.07.2006 | BNK | mehrere übelste Hacks, damit die Formular-GUI nie unsinnige Größe annimmt beim Starten
 * 14.09.2006 | BNK | üble Hacks hoffentlich robuster gemacht
+* 17.11.2006 | BNK | +getController()
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -115,6 +116,11 @@ public class FormGUI
    * wird getriggert bei windowClosing() Event.
    */
   private ActionListener closeAction = actionListener_abort;
+
+  /**
+   * Der {@link FormController} dieser FormGUI.
+   */
+  private FormController formController;
   
 
   /**
@@ -175,7 +181,6 @@ public class FormGUI
     //Writer-Fenster ebenfalls angepasst wird.
     myFrame.addComponentListener(oehrchen);
     
-    FormController formController;
     try{
       formController = new FormController(conf, myDoc, mapIdToPresetValue, functionContext, funcLib, dialogLib, new MyAbortRequestListener());
     }catch (ConfigurationErrorException x)
@@ -429,6 +434,15 @@ public class FormGUI
   {
     myDoc.close();
     myFrame.dispose();
+  }
+
+  /**
+   * Liefert den {@link FormController} zu dieser FormGUI.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public FormController getController()
+  {
+    return formController;
   }
   
   /**
