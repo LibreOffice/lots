@@ -36,6 +36,7 @@ import com.sun.star.frame.XController;
 import com.sun.star.frame.XFrame;
 import com.sun.star.frame.XModel;
 import com.sun.star.lang.EventObject;
+import com.sun.star.lang.XServiceInfo;
 import com.sun.star.text.XBookmarksSupplier;
 import com.sun.star.text.XTextContent;
 import com.sun.star.text.XTextCursor;
@@ -51,6 +52,7 @@ import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.SetPrintFunction;
+import de.muenchen.allg.itd51.wollmux.dialog.FormGUI;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
 
 /**
@@ -118,6 +120,13 @@ public class TextDocumentModel
    * geschlossen.
    */
   private FormModel formModel;
+
+  /**
+   * TODO: dokumentieren... Falls es sich bei dem Dokument um ein Formular
+   * handelt, wird das zugehörige FormModel hier gespeichert und beim dispose()
+   * des TextDocumentModels mit geschlossen.
+   */
+  private FormGUI formGUI;
 
   /**
    * In diesem Feld wird der CloseListener gespeichert, nachdem die Methode
@@ -229,6 +238,7 @@ public class TextDocumentModel
     this.printSettingsDone = false;
     this.formularConf = new ConfigThingy("WM");
     this.formFieldValues = new HashMap();
+    this.formGUI = null;
 
     resetPrintBlocks();
 
@@ -832,6 +842,26 @@ public class TextDocumentModel
   }
 
   /**
+   * TODO: dokumentieren getFormGUI
+   * 
+   * @return
+   */
+  public FormGUI getFormGUI()
+  {
+    return formGUI;
+  }
+
+  /**
+   * TODO: dokumentieren setFormGUI
+   * 
+   * @param formGUI
+   */
+  public void setFormGUI(FormGUI formGUI)
+  {
+    this.formGUI = formGUI;
+  }
+
+  /**
    * Setzt das Fensters des TextDokuments auf Sichtbar (visible==true) oder
    * unsichtbar (visible == false).
    * 
@@ -1251,8 +1281,14 @@ public class TextDocumentModel
    * 
    * @author christoph.lutz
    */
-  public class PrintModel implements XPrintModel
+  public class PrintModel implements XPrintModel, XServiceInfo
   {
+    /**
+     * Dieses Feld entält eine Liste aller Services, die dieser UNO-Service
+     * implementiert.
+     */
+    private final java.lang.String[] SERVICENAMES = { "de.muenchen.allg.itd51.wollmux.PrintModel" };
+
     /**
      * Das lock-Flag, das vor dem Einstellen eines WollMuxEvents auf true
      * gesetzt werden muss und signalisiert, ob das WollMuxEvent erfolgreich
@@ -1341,6 +1377,23 @@ public class TextDocumentModel
       waitForUnlock();
     }
 
+    /*
+     * TODO: dokumentieren setFormValue (auch in der IDL!!!) (non-Javadoc)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#setFormValue(java.lang.String,
+     *      java.lang.String)
+     */
+    public void setFormValue(String id, String value)
+    {
+      setLock();
+      WollMuxEventHandler.handleSetFormValueViaPrintModel(
+          doc,
+          id,
+          value,
+          unlockActionListener);
+      waitForUnlock();
+    }
+
     /**
      * Setzt einen lock, der in Verbindung mit setUnlock und der
      * waitForUnlock-Methode verwendet werden kann, um eine Synchronisierung mit
@@ -1411,6 +1464,43 @@ public class TextDocumentModel
       }
     }
 
-  }
+    // Folgende Methoden werden benötigt, damit der Service unter Basic
+    // angesprochen werden kann:
+    // FIXME: queryInterface(XPrintModel) auf das Objekt geht nicht.
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.sun.star.lang.XServiceInfo#getSupportedServiceNames()
+     */
+    public String[] getSupportedServiceNames()
+    {
+      return SERVICENAMES;
+    }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.sun.star.lang.XServiceInfo#supportsService(java.lang.String)
+     */
+    public boolean supportsService(String sService)
+    {
+      int len = SERVICENAMES.length;
+      for (int i = 0; i < len; i++)
+      {
+        if (sService.equals(SERVICENAMES[i])) return true;
+      }
+      return false;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.sun.star.lang.XServiceInfo#getImplementationName()
+     */
+    public String getImplementationName()
+    {
+      return (PrintModel.class.getName());
+    }
+
+  }
 }

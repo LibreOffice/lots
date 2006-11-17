@@ -282,7 +282,7 @@ public class DocumentCommandInterpreter
     }
 
     // 5) Formulardialog starten:
-    FormModelImpl fm = new FormModelImpl(model, funcLib,
+    FormModel fm = new FormModelImpl(model, funcLib,
         formScanner.idToFormFields, tree);
 
     model.setFormModel(fm);
@@ -298,7 +298,7 @@ public class DocumentCommandInterpreter
     }
     FormGUI gui = new FormGUI(formFensterConf, descs, fm, idToPresetValue,
         functionContext, funcLib, dialogLib);
-    fm.setFormGUI(gui);
+    model.setFormGUI(gui);
   }
 
   /**
@@ -419,8 +419,6 @@ public class DocumentCommandInterpreter
 
     private final String defaultWindowAttributes;
 
-    private FormGUI formGUI;
-
     public FormModelImpl(TextDocumentModel textDocumentModel,
         FunctionLibrary funcLib, HashMap idToFormValues,
         DocumentCommandTree cmdTree)
@@ -430,7 +428,6 @@ public class DocumentCommandInterpreter
       this.idToFormValues = idToFormValues;
       this.cmdTree = cmdTree;
       this.invisibleGroups = new HashSet();
-      this.formGUI = null;
 
       // Standard-Fensterattribute vor dem Start der Form-GUI sichern um nach
       // dem Schlieﬂen des Formulardokuments die Standard-Werte wieder
@@ -535,6 +532,7 @@ public class DocumentCommandInterpreter
      */
     public void dispose()
     {
+      FormGUI formGUI = textDocumentModel.getFormGUI();
       if (formGUI != null)
       {
         formGUI.dispose();
@@ -545,11 +543,6 @@ public class DocumentCommandInterpreter
       // des Formulardokuments.
       if (defaultWindowAttributes != null)
         setDefaultWindowAttributes(defaultWindowAttributes);
-    }
-
-    public void setFormGUI(FormGUI formGUI)
-    {
-      this.formGUI = formGUI;
     }
 
     /**

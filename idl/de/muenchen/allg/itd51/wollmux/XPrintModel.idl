@@ -68,7 +68,11 @@ interface XPrintModel
                sind Ziffer und notInOriginal-Blöcke eingeblendet.
      */
 	void printVerfuegungspunkt( [in] short verfPunkt, [in] short numberOfCopies, [in] boolean isDraft, [in] boolean isOriginal);
+
+	void setFormValue( [in] string id, [in] string value);
 };
+
+service PrintModel: XPrintModel;
 
 }; }; }; }; };
  

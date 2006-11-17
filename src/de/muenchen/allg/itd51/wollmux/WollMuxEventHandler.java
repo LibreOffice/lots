@@ -80,6 +80,7 @@ import de.muenchen.allg.itd51.wollmux.db.QueryResults;
 import de.muenchen.allg.itd51.wollmux.dialog.AbsenderAuswaehlen;
 import de.muenchen.allg.itd51.wollmux.dialog.Common;
 import de.muenchen.allg.itd51.wollmux.dialog.Dialog;
+import de.muenchen.allg.itd51.wollmux.dialog.FormGUI;
 import de.muenchen.allg.itd51.wollmux.dialog.PersoenlicheAbsenderlisteVerwalten;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
@@ -2755,6 +2756,139 @@ public class WollMuxEventHandler
              + ", onlyOnce="
              + onlyOnce
              + ")";
+    }
+  }
+
+  // *******************************************************************************************
+
+  /**
+   * TODO: doku anpassen!!! Erzeugt ein neues WollMuxEvent, das dafür sorgt,
+   * dass der PrintSetupDialog von OOo angezeigt wird, über den der aktuelle
+   * Drucker ausgewählt und geändert werden kann.
+   * 
+   * Das Event wird aus der Implementierung von XPrintModel (siehe
+   * TextDocumentModel) geworfen, wenn die gleichnamige Methode dort aufgerufen
+   * wird.
+   * 
+   * @param doc
+   *          Das Dokument für das die Druckereinstellung gelten sollen.
+   * @param onlyOnce
+   *          Gibt an, dass der Dialog nur beim ersten Aufruf (aus Sicht eines
+   *          Dokuments) der Methode angezeigt wird. Wurde bereits vor dem
+   *          Aufruf ein PrintSetup-Dialog gestartet, so öffnet sich der Dialog
+   *          nicht und die Methode endet ohne Aktion.
+   * @param unlockActionListener
+   *          Der unlockActionListener wird immer aufgerufen, wenn sich doit()
+   *          fertig ist.
+   */
+  public static void handleSetFormValueViaPrintModel(XTextDocument doc,
+      String id, String value, ActionListener unlockActionListener)
+  {
+    handle(new OnSetFormValueViaPrintModel(doc, id, value, unlockActionListener));
+  }
+
+  private static class OnSetFormValueViaPrintModel extends BasicEvent
+  {
+    private XTextDocument doc;
+
+    private String id;
+
+    private String value;
+
+    private final ActionListener listener;
+
+    public OnSetFormValueViaPrintModel(XTextDocument doc, String id,
+        String value, ActionListener listener)
+    {
+      this.doc = doc;
+      this.id = id;
+      this.value = value;
+      this.listener = listener;
+    }
+
+    protected void doit() throws WollMuxFehlerException
+    {
+      TextDocumentModel model = WollMuxSingleton.getInstance()
+          .getTextDocumentModel(doc);
+
+      FormGUI formGUI = model.getFormGUI();
+      if (formGUI != null)
+      {
+        // Werte über die FormGUI setzen lassen (damit sind auch automatisch
+        // alle Abhängigkeiten richtig aufgelöst)
+        formGUI.getController().setValue(id, value, new ActionListener()
+        {
+          public void actionPerformed(ActionEvent arg0)
+          {
+            handleSetFormValueViaPrintModelFinished(listener);
+          }
+        });
+      }
+      else
+      {
+        // Werte selber setzen? hmm... mal überlegen...
+      }
+    }
+
+    public String toString()
+    {
+      return this.getClass().getSimpleName()
+             + "(#"
+             + doc.hashCode()
+             + ", id='"
+             + id
+             + "', value='"
+             + value
+             + "')";
+    }
+  }
+
+  // *******************************************************************************************
+
+  /**
+   * TODO: doku anpassen!!! Erzeugt ein neues WollMuxEvent, das dafür sorgt,
+   * dass der PrintSetupDialog von OOo angezeigt wird, über den der aktuelle
+   * Drucker ausgewählt und geändert werden kann.
+   * 
+   * Das Event wird aus der Implementierung von XPrintModel (siehe
+   * TextDocumentModel) geworfen, wenn die gleichnamige Methode dort aufgerufen
+   * wird.
+   * 
+   * @param doc
+   *          Das Dokument für das die Druckereinstellung gelten sollen.
+   * @param onlyOnce
+   *          Gibt an, dass der Dialog nur beim ersten Aufruf (aus Sicht eines
+   *          Dokuments) der Methode angezeigt wird. Wurde bereits vor dem
+   *          Aufruf ein PrintSetup-Dialog gestartet, so öffnet sich der Dialog
+   *          nicht und die Methode endet ohne Aktion.
+   * @param unlockActionListener
+   *          Der unlockActionListener wird immer aufgerufen, wenn sich doit()
+   *          fertig ist.
+   */
+  public static void handleSetFormValueViaPrintModelFinished(
+      ActionListener unlockActionListener)
+  {
+    handle(new OnSetFormValueViaPrintModelFinished(unlockActionListener));
+  }
+
+  private static class OnSetFormValueViaPrintModelFinished extends BasicEvent
+  {
+    private ActionListener listener;
+
+    public OnSetFormValueViaPrintModelFinished(
+        ActionListener unlockActionListener)
+    {
+      this.listener = unlockActionListener;
+    }
+
+    protected void doit() throws WollMuxFehlerException
+    {
+      if (listener != null) listener.actionPerformed(null);
+    }
+
+    public String toString()
+    {
+      return this.getClass().getSimpleName() + "()";
     }
   }
 
