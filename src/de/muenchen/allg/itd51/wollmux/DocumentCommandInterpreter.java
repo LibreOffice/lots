@@ -192,7 +192,7 @@ public class DocumentCommandInterpreter
 
     // Jetzt wird der Dokumenttyp formDocument gesetzt, um das Dokument als
     // Formulardokument auszuzeichnen.
-    if(model.hasFormDescriptor()) model.setType("formDocument");
+    if (model.hasFormDescriptor()) model.setType("formDocument");
 
     // 7) Die Statusänderungen der Dokumentkommandos auf die Bookmarks
     // übertragen bzw. die Bookmarks abgearbeiteter Kommandos löschen.
@@ -282,8 +282,7 @@ public class DocumentCommandInterpreter
     }
 
     // 5) Formulardialog starten:
-    FormModel fm = new FormModelImpl(model, funcLib,
-        formScanner.idToFormFields, tree);
+    FormModel fm = new FormModelImpl(model, funcLib, tree);
 
     model.setFormModel(fm);
 
@@ -411,8 +410,6 @@ public class DocumentCommandInterpreter
 
     private final FunctionLibrary funcLib;
 
-    private final HashMap idToFormValues;
-
     private final DocumentCommandTree cmdTree;
 
     private final HashSet invisibleGroups;
@@ -420,12 +417,10 @@ public class DocumentCommandInterpreter
     private final String defaultWindowAttributes;
 
     public FormModelImpl(TextDocumentModel textDocumentModel,
-        FunctionLibrary funcLib, HashMap idToFormValues,
-        DocumentCommandTree cmdTree)
+        FunctionLibrary funcLib, DocumentCommandTree cmdTree)
     {
       this.textDocumentModel = textDocumentModel;
       this.funcLib = funcLib;
-      this.idToFormValues = idToFormValues;
       this.cmdTree = cmdTree;
       this.invisibleGroups = new HashSet();
 
@@ -500,7 +495,6 @@ public class DocumentCommandInterpreter
     {
       WollMuxEventHandler.handleFormValueChanged(
           textDocumentModel,
-          idToFormValues,
           fieldId,
           newValue,
           funcLib);
@@ -513,7 +507,7 @@ public class DocumentCommandInterpreter
      */
     public void focusGained(String fieldId)
     {
-      WollMuxEventHandler.handleFocusFormField(idToFormValues, fieldId);
+      WollMuxEventHandler.handleFocusFormField(textDocumentModel, fieldId);
     }
 
     /*

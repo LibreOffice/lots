@@ -69,7 +69,6 @@ import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
-import de.muenchen.allg.itd51.wollmux.FormFieldFactory.FormField;
 import de.muenchen.allg.itd51.wollmux.TextDocumentModel.PrintFailedException;
 import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.DJDataset;
@@ -319,31 +318,6 @@ public class WollMuxEventHandler
     public boolean requires(Object o)
     {
       return false;
-    }
-
-    /**
-     * Wenn in dem übergebenen Vector mit FormField-Elementen ein
-     * nicht-transformiertes Feld vorhanden ist, so wird das erste
-     * nicht-transformierte Feld zurückgegeben, ansonsten wird das erste
-     * transformierte Feld zurückgegeben, oder null, falls der Vector keine
-     * Elemente enthält.
-     * 
-     * @param formFields
-     *          Vektor mit FormField-Elementen
-     * @return Ein FormField Element, wobei untransformierte Felder bevorzugt
-     *         werden.
-     */
-    protected static FormField preferUntransformedFormField(Vector formFields)
-    {
-      Iterator iter = formFields.iterator();
-      FormField field = null;
-      while (iter.hasNext())
-      {
-        FormField f = (FormField) iter.next();
-        if (field == null) field = f;
-        if (!f.hasTrafo()) return f;
-      }
-      return field;
     }
 
     public String toString()
@@ -641,31 +615,17 @@ public class WollMuxEventHandler
 
       // Alle Werte die der Funktionsdialog sicher zurück liefert werden in
       // das Dokument übernommen.
-      HashMap idToFormFields = mux.getTextDocumentModel(doc)
-          .getIDToFormFields();
-      if (idToFormFields != null)
+      TextDocumentModel model = mux.getTextDocumentModel(doc);
+      Collection schema = dialogInst.getSchema();
+      Iterator iter = schema.iterator();
+      while (iter.hasNext())
       {
-        Collection schema = dialogInst.getSchema();
-        Iterator iter = schema.iterator();
-        while (iter.hasNext())
-        {
-          String id = (String) iter.next();
-          if (idToFormFields.containsKey(id))
-          {
-            Vector formFields = (Vector) idToFormFields.get(id);
-            String value = dialogInst.getData(id).toString();
+        String id = (String) iter.next();
+        String value = dialogInst.getData(id).toString();
 
-            // Formularwerte der entsprechenden Formularfelder auf value
-            // setzen.
-            Iterator ffiter = formFields.iterator();
-            while (ffiter.hasNext())
-            {
-              FormField formField = (FormField) ffiter.next();
-              if (formField != null)
-                formField.setValue(value, mux.getGlobalFunctions());
-            }
-          }
-        }
+        // Formularwerte ins Model uns ins Dokument übernehmen.
+        model.setFormFieldValue(id, value);
+        model.updateFormFields(id);
       }
     }
 
@@ -1424,6 +1384,11 @@ public class WollMuxEventHandler
    * Formularfeldern mit TRAFO-Funktion wird die Transformation entsprechend
    * durchgeführt.
    * 
+   * Dieses Event wird (derzeit) vom FormModelImpl ausgelöst, wenn in der
+   * Formular-GUI der Wert des Formularfeldes fieldID geändert wurde und sorgt
+   * dafür, dass die Wertänderung auf alle betroffenen Formularfelder im
+   * Dokument doc übertragen werden.
+   * 
    * @param idToFormValues
    *          Eine HashMap die unter dem Schlüssel fieldID den Vektor aller
    *          FormFields mit der ID fieldID liefert.
@@ -1436,25 +1401,13 @@ public class WollMuxEventHandler
    *          verwendet werden soll.
    */
   public static void handleFormValueChanged(TextDocumentModel doc,
-      HashMap idToFormValues, String fieldId, String newValue,
-      FunctionLibrary funcLib)
+      String fieldId, String newValue, FunctionLibrary funcLib)
   {
-    handle(new OnFormValueChanged(doc, idToFormValues, fieldId, newValue,
-        funcLib));
+    handle(new OnFormValueChanged(doc, fieldId, newValue, funcLib));
   }
 
-  /**
-   * Dieses Event wird (derzeit) vom FormModelImpl ausgelöst, wenn in der
-   * Formular-GUI der Wert des Formularfeldes fieldID geändert wurde und sorgt
-   * dafür, dass die Wertänderung auf alle betroffenen Formularfelder im
-   * Dokument doc übertragen werden.
-   * 
-   * @author christoph.lutz
-   */
   private static class OnFormValueChanged extends BasicEvent
   {
-    private HashMap idToFormValues;
-
     private String fieldId;
 
     private String newValue;
@@ -1463,10 +1416,9 @@ public class WollMuxEventHandler
 
     private TextDocumentModel doc;
 
-    public OnFormValueChanged(TextDocumentModel doc, HashMap idToFormValues,
-        String fieldId, String newValue, FunctionLibrary funcLib)
+    public OnFormValueChanged(TextDocumentModel doc, String fieldId,
+        String newValue, FunctionLibrary funcLib)
     {
-      this.idToFormValues = idToFormValues;
       this.fieldId = fieldId;
       this.newValue = newValue;
       this.funcLib = funcLib;
@@ -1475,30 +1427,8 @@ public class WollMuxEventHandler
 
     protected void doit()
     {
-      // Wenn es FormFields zu dieser id gibt, so werden alle FormFields auf den
-      // neuen Stand gebracht.
-      Vector formFields = (Vector) idToFormValues.get(fieldId);
-      if (formFields != null)
-      {
-        Iterator i = formFields.iterator();
-        while (i.hasNext())
-        {
-          FormField field = (FormField) i.next();
-          try
-          {
-            field.setValue(newValue, funcLib);
-          }
-          catch (RuntimeException e)
-          {
-            // Absicherung gegen das manuelle Löschen von Dokumentinhalten.
-          }
-        }
-      }
-
-      // FormularDescriptor über die Änderung informieren. Dies ist vor allen
-      // auch dazu notwendig, um Originalwerte zu sichern, zu denen es kein
-      // FormField gibt.
       doc.setFormFieldValue(fieldId, newValue);
+      doc.updateFormFields(fieldId, funcLib);
     }
 
     public String toString()
@@ -1667,6 +1597,11 @@ public class WollMuxEventHandler
    * Erzeugt ein Event, das den ViewCursor des Dokuments auf das aktuell in der
    * Formular-GUI bearbeitete Formularfeld setzt.
    * 
+   * Dieses Event wird (derzeit) vom FormModelImpl ausgelöst, wenn in der
+   * Formular-GUI ein Formularfeld den Fokus bekommen hat und es sorgt dafür,
+   * dass der View-Cursor des Dokuments das entsprechende FormField im Dokument
+   * anspringt.
+   * 
    * @param idToFormValues
    *          Eine HashMap die unter dem Schlüssel fieldID den Vektor aller
    *          FormFields mit der ID fieldID liefert.
@@ -1676,58 +1611,36 @@ public class WollMuxEventHandler
    *          Formularfeld aus dem Vektor genommen, das keine Trafo enthält.
    *          Ansonsten wird das erste Formularfeld im Vektor verwendet.
    */
-  public static void handleFocusFormField(HashMap idToFormValues, String fieldId)
+  public static void handleFocusFormField(TextDocumentModel doc, String fieldId)
   {
-    handle(new OnFocusFormField(idToFormValues, fieldId));
+    handle(new OnFocusFormField(doc, fieldId));
   }
 
-  /**
-   * Dieses Event wird (derzeit) vom FormModelImpl ausgelöst, wenn in der
-   * Formular-GUI ein Formularfeld den Fokus bekommen hat und es sorgt dafür,
-   * dass der View-Cursor des Dokuments das entsprechende FormField im Dokument
-   * anspringt.
-   * 
-   * @author christoph.lutz
-   */
   private static class OnFocusFormField extends BasicEvent
   {
-    private HashMap idToFormValues;
+    private TextDocumentModel doc;
 
     private String fieldId;
 
-    public OnFocusFormField(HashMap idToFormValues, String fieldId)
+    public OnFocusFormField(TextDocumentModel doc, String fieldId)
     {
-      this.idToFormValues = idToFormValues;
+      this.doc = doc;
       this.fieldId = fieldId;
     }
 
     protected void doit()
     {
-      if (idToFormValues.containsKey(fieldId))
-      {
-        Vector formFields = (Vector) idToFormValues.get(fieldId);
-        FormField field = preferUntransformedFormField(formFields);
-        try
-        {
-          if (field != null) field.focus();
-        }
-        catch (RuntimeException e)
-        {
-          // Absicherung gegen das manuelle Löschen von Dokumentinhalten.
-        }
-      }
-      else
-      {
-        Logger.debug(this
-                     + ": Es existiert kein Formularfeld mit der ID '"
-                     + fieldId
-                     + "' in diesem Dokument");
-      }
+      doc.focusFormField(fieldId);
     }
 
     public String toString()
     {
-      return this.getClass().getSimpleName() + "('" + fieldId + "')";
+      return this.getClass().getSimpleName()
+             + "(#"
+             + doc.doc
+             + ", '"
+             + fieldId
+             + "')";
     }
   }
 
@@ -2883,9 +2796,10 @@ public class WollMuxEventHandler
       }
       else
       {
-        // FIXME: LUT: Werte selber setzen? hmm... mal überlegen... BNK: Ja,
-        // definitiv. Sonst funktionieren PrintFunctions, die den Empfaenger
-        // setzen wollen (wie die Krankenkassenauswahl) nur mit Formularen.
+        // Werte selber setzen:
+        model.setFormFieldValue(id, value);
+        model.updateFormFields(id);
+        if (listener != null) listener.actionPerformed(null);
       }
     }
 

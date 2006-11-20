@@ -44,6 +44,7 @@ import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextRange;
 import com.sun.star.text.XTextViewCursorSupplier;
+import com.sun.star.uno.RuntimeException;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.util.CloseVetoException;
 import com.sun.star.util.XCloseListener;
@@ -53,8 +54,10 @@ import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.SetPrintFunction;
+import de.muenchen.allg.itd51.wollmux.FormFieldFactory.FormField;
 import de.muenchen.allg.itd51.wollmux.dialog.FormGUI;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
+import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 
 /**
  * Diese Klasse repräsentiert das Modell eines aktuell geöffneten TextDokuments
@@ -369,18 +372,6 @@ public class TextDocumentModel
   public void setIDToFormFields(HashMap idToFormFields)
   {
     this.idToFormFields = idToFormFields;
-  }
-
-  /**
-   * Ermöglicht den Zugriff auf einen Vector aller FormField-Objekte in diesem
-   * TextDokument über den Namen der zugeordneten ID.
-   * 
-   * @return Eine HashMap, die unter dem Schlüssel ID einen Vector mit den
-   *         entsprechenden FormFields bereithält.
-   */
-  public HashMap getIDToFormFields()
-  {
-    return idToFormFields;
   }
 
   /**
@@ -823,6 +814,54 @@ public class TextDocumentModel
   }
 
   /**
+   * Überträgt den aktuell gesetzten Wert des Formularfeldes mit der ID fieldID
+   * in die Formularfelder im Dokument.
+   * 
+   * @param fieldId
+   *          Die ID des Formularfeldes bzw. der Formularfelder, die im Dokument
+   *          angepasst werden sollen.
+   * @param funcLib
+   *          Die Funktionsbibliothek, die zum Auflösen der TRAFO-Attribute der
+   *          Formularfelder verwendet werden sollen.
+   */
+  public void updateFormFields(String fieldId, FunctionLibrary funcLib)
+  {
+    if (formFieldValues.containsKey(fieldId)
+        && idToFormFields.containsKey(fieldId))
+    {
+      String value = formFieldValues.get(fieldId).toString();
+      Iterator fields = ((Vector) idToFormFields.get(fieldId)).iterator();
+      while (fields.hasNext())
+      {
+        FormField field = (FormField) fields.next();
+        try
+        {
+          field.setValue(value, funcLib);
+        }
+        catch (RuntimeException e)
+        {
+          // Absicherung gegen das manuelle Löschen von Dokumentinhalten.
+        }
+      }
+    }
+  }
+
+  /**
+   * Überträgt den aktuell gesetzten Wert des Formularfeldes mit der ID fieldID
+   * in die Formularfelder im Dokument, wobei zum Auflösen der TRAFO-Attribute
+   * ausschließlich die globalen Funktionen verwendet werden.
+   * 
+   * @param fieldId
+   *          Die ID des Formularfeldes bzw. des Formularfelder, die im Dokument
+   *          angepasst werden sollen.
+   */
+  public void updateFormFields(String fieldId)
+  {
+    updateFormFields(fieldId, WollMuxSingleton.getInstance()
+        .getGlobalFunctions());
+  }
+
+  /**
    * Liefert den Wert des WollMuxFormularfeldes mit der ID fieldId.
    */
   public String getFormFieldValue(String fieldId)
@@ -840,6 +879,55 @@ public class TextDocumentModel
   public Set getFormFieldIDs()
   {
     return formFieldValues.keySet();
+  }
+
+  /**
+   * Setzt den ViewCursor auf das erste untransformierte Formularfeld, das den
+   * Formularwert mit der ID fieldID darstellt.
+   * 
+   * @param fieldId
+   *          Die ID des Formularfeldes, das angesprungen werden soll.
+   */
+  public void focusFormField(String fieldId)
+  {
+    if (idToFormFields.containsKey(fieldId))
+    {
+      Vector formFields = (Vector) idToFormFields.get(fieldId);
+      FormField field = preferUntransformedFormField(formFields);
+      try
+      {
+        if (field != null) field.focus();
+      }
+      catch (RuntimeException e)
+      {
+        // Absicherung gegen das manuelle Löschen von Dokumentinhalten.
+      }
+    }
+  }
+
+  /**
+   * Wenn in dem übergebenen Vector mit FormField-Elementen ein
+   * nicht-transformiertes Feld vorhanden ist, so wird das erste
+   * nicht-transformierte Feld zurückgegeben, ansonsten wird das erste
+   * transformierte Feld zurückgegeben, oder null, falls der Vector keine
+   * Elemente enthält.
+   * 
+   * @param formFields
+   *          Vektor mit FormField-Elementen
+   * @return Ein FormField Element, wobei untransformierte Felder bevorzugt
+   *         werden.
+   */
+  protected static FormField preferUntransformedFormField(Vector formFields)
+  {
+    Iterator iter = formFields.iterator();
+    FormField field = null;
+    while (iter.hasNext())
+    {
+      FormField f = (FormField) iter.next();
+      if (field == null) field = f;
+      if (!f.hasTrafo()) return f;
+    }
+    return field;
   }
 
   /**
