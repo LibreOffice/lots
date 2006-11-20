@@ -44,6 +44,8 @@ import de.muenchen.allg.itd51.wollmux.dialog.SachleitendeVerfuegungenDruckdialog
 
 public class SachleitendeVerfuegung
 {
+  private static final String PRINT_FUNCTION_NAME = "SachleitendeVerfuegung";
+
   private static final String ParaStyleNameVerfuegungspunkt = "WollMuxVerfuegungspunkt";
 
   private static final String ParaStyleNameVerfuegungspunkt1 = "WollMuxVerfuegungspunkt1";
@@ -572,10 +574,10 @@ public class SachleitendeVerfuegung
     // eingefügter Verfügungspunkt vorhanden ist. Ansonsten setze die
     // Druckfunktion zurück.
     int effectiveCount = (punkt1 != null) ? count - 1 : count;
-    if (effectiveCount == 0) //FIXME Überbügelt gnadenlos jede im Dokument gesetzte PrintFunction
-      { Logger.error("FIXME!!FIXME!FIXME!FIXME!FIXME!FIXME!FIXME!FIXME!FIXME!"); /*WollMuxEventHandler.handleSetPrintFunction(doc, "");*/; }
+    if (effectiveCount > 0)
+      WollMuxEventHandler.handleSetPrintFunction(doc, PRINT_FUNCTION_NAME);
     else
-      WollMuxEventHandler.handleSetPrintFunction(doc, "SachleitendeVerfuegung");
+      WollMuxEventHandler.handleResetPrintFunction(doc, PRINT_FUNCTION_NAME);
   }
 
   /**

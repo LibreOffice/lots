@@ -1362,6 +1362,63 @@ public class WollMuxEventHandler
   // *******************************************************************************************
 
   /**
+   * Erzeugt ein neues WollMuxEvent, das die Druckfunktion zum TextDokument doc
+   * auf die Druckfunktion zurücksetzt, gesetzt war, bevor die Druckfunktion
+   * functionName gesetzt wurde. Die Druckfunktion wird nur zurück gesetzt, wenn
+   * die aktuell gesetzte Druckfunktion functionName entspricht.
+   * 
+   * Wird z.B. in den Sachleitenden Verfügungen verwendet, um auf die
+   * ursprünglich gesetzte Druckfunktion zurück zu schalten, wenn keine
+   * Verfügungspunkte vorhanden sind.
+   * 
+   * @param doc
+   *          Das TextDokument, zu dem die Druckfunktion gesetzt werden soll.
+   * @param functionNameToReset
+   *          der Name der Druckfunktion, die zurück gesetzt werden soll (falls
+   *          sie aktuell gesetzt ist).
+   */
+  public static void handleResetPrintFunction(XTextDocument doc,
+      String functionNameToReset)
+  {
+    handle(new OnResetPrintFunction(doc, functionNameToReset));
+  }
+
+  private static class OnResetPrintFunction extends BasicEvent
+  {
+    private String functionName;
+
+    private XTextDocument doc;
+
+    public OnResetPrintFunction(XTextDocument doc, String functionName)
+    {
+      this.functionName = functionName;
+      this.doc = doc;
+    }
+
+    protected void doit()
+    {
+      TextDocumentModel model = WollMuxSingleton.getInstance()
+          .getTextDocumentModel(doc);
+
+      String currentName = model.getPrintFunctionName();
+      if (currentName != null && currentName.equals(functionName))
+        model.setPrintFunction("");
+    }
+
+    public String toString()
+    {
+      return this.getClass().getSimpleName()
+             + "(#"
+             + doc.hashCode()
+             + ", '"
+             + functionName
+             + "')";
+    }
+  }
+
+  // *******************************************************************************************
+
+  /**
    * Erzeugt ein neues WollMuxEvent, welches dafür sorgt, dass alle
    * Formularfelder Dokument auf den neuen Wert gesetzt werden. Bei
    * Formularfeldern mit TRAFO-Funktion wird die Transformation entsprechend
@@ -2826,7 +2883,9 @@ public class WollMuxEventHandler
       }
       else
       {
-        // FIXME: LUT: Werte selber setzen? hmm... mal überlegen... BNK: Ja, definitiv. Sonst funktionieren PrintFunctions, die den Empfaenger setzen wollen (wie die Krankenkassenauswahl) nur mit Formularen.
+        // FIXME: LUT: Werte selber setzen? hmm... mal überlegen... BNK: Ja,
+        // definitiv. Sonst funktionieren PrintFunctions, die den Empfaenger
+        // setzen wollen (wie die Krankenkassenauswahl) nur mit Formularen.
       }
     }
 
