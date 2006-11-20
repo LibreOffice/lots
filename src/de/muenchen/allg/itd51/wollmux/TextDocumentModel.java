@@ -37,6 +37,7 @@ import com.sun.star.frame.XFrame;
 import com.sun.star.frame.XModel;
 import com.sun.star.lang.EventObject;
 import com.sun.star.lang.XServiceInfo;
+import com.sun.star.lib.uno.helper.WeakBase;
 import com.sun.star.text.XBookmarksSupplier;
 import com.sun.star.text.XTextContent;
 import com.sun.star.text.XTextCursor;
@@ -1281,7 +1282,7 @@ public class TextDocumentModel
    * 
    * @author christoph.lutz
    */
-  public class PrintModel implements XPrintModel, XServiceInfo
+  public class PrintModel extends WeakBase implements XPrintModel, XServiceInfo
   {
     /**
      * Dieses Feld entält eine Liste aller Services, die dieser UNO-Service
