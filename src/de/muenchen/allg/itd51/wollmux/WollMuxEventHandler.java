@@ -28,6 +28,7 @@
  */
 package de.muenchen.allg.itd51.wollmux;
 
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
@@ -42,7 +43,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
-import com.sun.star.awt.XWindow;
+import javax.swing.ImageIcon;
+import javax.swing.JDialog;
+import javax.swing.JOptionPane;
+
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.container.NoSuchElementException;
 import com.sun.star.container.XEnumeration;
@@ -51,7 +55,6 @@ import com.sun.star.frame.DispatchResultEvent;
 import com.sun.star.frame.XController;
 import com.sun.star.frame.XDispatch;
 import com.sun.star.frame.XDispatchResultListener;
-import com.sun.star.frame.XFrame;
 import com.sun.star.frame.XNotifyingDispatch;
 import com.sun.star.lang.EventObject;
 import com.sun.star.lang.XComponent;
@@ -62,7 +65,6 @@ import com.sun.star.text.XTextRange;
 import com.sun.star.uno.Exception;
 import com.sun.star.uno.RuntimeException;
 import com.sun.star.uno.UnoRuntime;
-import com.sun.star.uno.XComponentContext;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoProps;
@@ -668,6 +670,9 @@ public class WollMuxEventHandler
   {
     private String wollMuxBarVersion;
 
+    private final URL WM_URL = this.getClass().getClassLoader().getResource(
+        "data/wollmux_klein.jpg");
+
     private OnAbout(String wollMuxBarVersion)
     {
       this.wollMuxBarVersion = wollMuxBarVersion;
@@ -684,7 +689,29 @@ public class WollMuxEventHandler
       str += "\n\nWollMux-Konfiguration: " + mux.getConfVersionInfo();
       str += "\n" + WollMuxFiles.getDEFAULT_CONTEXT().toExternalForm();
 
-      showInfoModal("Info über Vorlagen und Formulare (WollMux)", str);
+      Common.setLookAndFeelOnce();
+
+      ImageIcon icon = new ImageIcon(WM_URL);
+
+      JOptionPane pane = new JOptionPane(str, JOptionPane.INFORMATION_MESSAGE,
+          JOptionPane.DEFAULT_OPTION, icon);
+      JDialog dialog = pane.createDialog(
+          null,
+          "Info über Vorlagen und Formulare (WollMux)");
+
+      // Hintergrundfarbe aller Komponenten auf weiss setzen
+      try
+      {
+        pane.setBackground(Color.WHITE);
+        pane.getComponent(0).setBackground(Color.WHITE);
+        pane.getComponent(1).setBackground(Color.WHITE);
+      }
+      catch (java.lang.Exception e)
+      {
+      }
+
+      dialog.setAlwaysOnTop(true);
+      dialog.setVisible(true); // Wartet bis OK Dialog beendet!
     }
 
     public String toString()
@@ -2911,8 +2938,7 @@ public class WollMuxEventHandler
   // Globale Helper-Methoden
 
   /**
-   * Diese Methode erzeugt einen modalen UNO-Dialog zur Anzeige von
-   * Fehlermeldungen bei der Bearbeitung eines Events.
+   * Diese Methode erzeugt einen Swing-Dialog zur Anzeige von Informationen.
    * 
    * @param sTitle
    * @param sMessage
@@ -2922,88 +2948,38 @@ public class WollMuxEventHandler
   {
     try
     {
-      XComponentContext m_xCmpCtx = WollMuxSingleton.getInstance()
-          .getXComponentContext();
-
-      // hole aktuelles Window:
-      UnoService desktop = UnoService.createWithContext(
-          "com.sun.star.frame.Desktop",
-          m_xCmpCtx);
-
-      // wenn ein Frame vorhanden ist, wird dieser als Parent für die Erzeugung
-      // einer Infobox über das Toolkit verwendet, ansonsten wird ein
-      // swing-Dialog gestartet.
-      XFrame xFrame = desktop.xDesktop().getCurrentFrame();
-      if (xFrame != null)
+      // zu lange Strings umbrechen:
+      final int MAXCHARS = 50;
+      String formattedMessage = "";
+      String[] lines = sMessage.split("\n");
+      for (int i = 0; i < lines.length; i++)
       {
-        XWindow xParent = xFrame.getContainerWindow();
-
-        // get access to the office toolkit environment
-        com.sun.star.awt.XToolkit xKit = (com.sun.star.awt.XToolkit) UnoRuntime
-            .queryInterface(com.sun.star.awt.XToolkit.class, m_xCmpCtx
-                .getServiceManager().createInstanceWithContext(
-                    "com.sun.star.awt.Toolkit",
-                    m_xCmpCtx));
-
-        // describe the info box ini it's parameters
-        com.sun.star.awt.WindowDescriptor aDescriptor = new com.sun.star.awt.WindowDescriptor();
-        aDescriptor.WindowServiceName = "infobox";
-        aDescriptor.Bounds = new com.sun.star.awt.Rectangle(0, 0, 300, 200);
-        aDescriptor.WindowAttributes = com.sun.star.awt.WindowAttribute.BORDER
-                                       | com.sun.star.awt.WindowAttribute.MOVEABLE
-                                       | com.sun.star.awt.WindowAttribute.CLOSEABLE;
-        aDescriptor.Type = com.sun.star.awt.WindowClass.MODALTOP;
-        aDescriptor.ParentIndex = 1;
-        aDescriptor.Parent = (com.sun.star.awt.XWindowPeer) UnoRuntime
-            .queryInterface(com.sun.star.awt.XWindowPeer.class, xParent);
-
-        // create the info box window
-        com.sun.star.awt.XWindowPeer xPeer = xKit.createWindow(aDescriptor);
-        com.sun.star.awt.XMessageBox xInfoBox = (com.sun.star.awt.XMessageBox) UnoRuntime
-            .queryInterface(com.sun.star.awt.XMessageBox.class, xPeer);
-        if (xInfoBox == null) return;
-
-        // fill it with all given informations and show it
-        xInfoBox.setCaptionText("" + sTitle + "");
-        xInfoBox.setMessageText("" + sMessage + "");
-        xInfoBox.execute();
-      }
-      else
-      {
-        // zeige eine swing-infoBox an, falls kein OOo Parent vorhanden ist.
-
-        // zu lange Strings umbrechen:
-        final int MAXCHARS = 50;
-        String formattedMessage = "";
-        String[] lines = sMessage.split("\n");
-        for (int i = 0; i < lines.length; i++)
+        String[] words = lines[i].split(" ");
+        int chars = 0;
+        for (int j = 0; j < words.length; j++)
         {
-          String[] words = lines[i].split(" ");
-          int chars = 0;
-          for (int j = 0; j < words.length; j++)
+          String word = words[j];
+          if (chars > 0 && chars + word.length() > MAXCHARS)
           {
-            String word = words[j];
-            if (chars > 0 && chars + word.length() > MAXCHARS)
-            {
-              formattedMessage += "\n";
-              chars = 0;
-            }
-            formattedMessage += word + " ";
-            chars += word.length() + 1;
+            formattedMessage += "\n";
+            chars = 0;
           }
-          if (i != lines.length - 1) formattedMessage += "\n";
+          formattedMessage += word + " ";
+          chars += word.length() + 1;
         }
-
-        // infobox ausgeben:
-        Common.setLookAndFeelOnce();
-        javax.swing.JOptionPane.showMessageDialog(
-            null,
-            formattedMessage,
-            sTitle,
-            javax.swing.JOptionPane.INFORMATION_MESSAGE);
+        if (i != lines.length - 1) formattedMessage += "\n";
       }
+
+      // infobox ausgeben:
+      Common.setLookAndFeelOnce();
+
+      JOptionPane pane = new JOptionPane(formattedMessage,
+          javax.swing.JOptionPane.INFORMATION_MESSAGE);
+      JDialog dialog = pane.createDialog(null, sTitle);
+      dialog.setAlwaysOnTop(true);
+      dialog.setVisible(true);
     }
-    catch (Exception e)
+    catch (java.lang.Exception e)
     {
       Logger.error(e);
     }
