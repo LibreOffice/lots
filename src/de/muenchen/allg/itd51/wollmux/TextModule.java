@@ -186,8 +186,10 @@ public class TextModule
       }
     }
 
-    // identifierWithArgs splitten und erstes Argument holen
-    String[] args = identifierWithArgs.split(separatorString);
+    // identifierWithArgs splitten und erstes Argument holen, wenn am Schuß
+    // SEPERATOR steht wird -1 noch ein weiteres leeres Element in args[]
+    // erzeugt
+    String[] args = identifierWithArgs.split(separatorString, -1);
     String first = args[0];
 
     // Iterieren über alle Knoten der Form "(MATCH ... FRAG_ID ...)"
