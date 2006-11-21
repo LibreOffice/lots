@@ -29,6 +29,7 @@
 package de.muenchen.allg.itd51.wollmux;
 
 import java.net.URL;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -46,6 +47,7 @@ import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.text.XParagraphCursor;
 import com.sun.star.text.XTextContent;
 import com.sun.star.text.XTextCursor;
+import com.sun.star.text.XTextField;
 import com.sun.star.text.XTextRange;
 import com.sun.star.uno.Exception;
 
@@ -964,6 +966,7 @@ public class DocumentCommandInterpreter
 
         // fragment einfügen:
         insertDocumentFromURL(cmd, url);
+        fillPlaceholders(cmd.getTextRange(), cmd.getArgs());
       }
       catch (java.lang.Exception e)
       {
@@ -973,6 +976,90 @@ public class DocumentCommandInterpreter
       }
       cmd.setDoneState(true);
       return 0;
+    }
+
+    /**
+     * TODO: dokumentieren
+     * 
+     * @param range
+     * @param args
+     */
+    private void fillPlaceholders(XTextRange range, Vector args)
+    {
+      Vector placeholders = new Vector();
+
+      XEnumeration xEnum = UNO.XEnumerationAccess(range).createEnumeration();
+      XEnumerationAccess enuAccess;
+      while (xEnum.hasMoreElements())
+      {
+        Object ele = null;
+        try
+        {
+          ele = xEnum.nextElement();
+        }
+        catch (Exception e)
+        {
+          continue;
+        }
+        enuAccess = UNO.XEnumerationAccess(ele);
+        if (enuAccess != null) // ist wohl ein SwXParagraph
+        {
+          XEnumeration textPortionEnu = enuAccess.createEnumeration();
+          while (textPortionEnu.hasMoreElements())
+          {
+            Object textPortion;
+            try
+            {
+              textPortion = textPortionEnu.nextElement();
+            }
+            catch (java.lang.Exception x)
+            {
+              continue;
+            }
+            String textPortionType = (String) UNO.getProperty(
+                textPortion,
+                "TextPortionType");
+            if (textPortionType.equals("TextField"))
+            {
+              XTextField textField = null;
+              try
+              {
+                textField = UNO.XTextField(UNO.getProperty(
+                    textPortion,
+                    "TextField"));
+                if (UNO.supportsService(
+                    textField,
+                    "com.sun.star.text.TextField.JumpEdit"))
+                {
+                  placeholders.add(textField);
+                }
+              }
+              catch (java.lang.Exception e)
+              {
+                continue;
+              }
+            }
+          }
+        }
+      }
+      Enumeration enumPlaceholders = placeholders.elements();
+      for (int j = 0; j < args.size() && j < placeholders.size(); j++)
+      {
+        Object placeholderObj = enumPlaceholders.nextElement();
+        XTextField textField = (XTextField) UNO.XTextField(placeholderObj);
+        XTextRange textFieldAnchor = textField.getAnchor();
+
+        if (!(args.elementAt(j).equals("")))
+        {
+          textFieldAnchor.setString(args.elementAt(j).toString());
+        }
+
+      }
+
+      if (placeholders.size() > args.size())
+      {
+        // TODO selber konfigurierbare Fehlermeldung nach dem Einfügen
+      }
     }
 
     /**
