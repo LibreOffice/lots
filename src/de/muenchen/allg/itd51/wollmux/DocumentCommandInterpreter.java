@@ -924,6 +924,10 @@ public class DocumentCommandInterpreter
 
     private int fragUrlsCount = 0;
 
+    // Markierung des ersten nicht ausgefüllten Platzhalter nach dem Einfügen
+    // von Textbausteinen
+    private boolean firstEmptyPlaceholder = false;
+
     /**
      * Erzeugt einen neuen DocumentExpander, mit der Liste fragUrls, die die
      * URLs beschreibt, von denen die Textfragmente für den insertContent Befehl
@@ -966,7 +970,8 @@ public class DocumentCommandInterpreter
 
         // fragment einfügen:
         insertDocumentFromURL(cmd, url);
-        fillPlaceholders(cmd.getTextRange(), cmd.getArgs());
+        fillPlaceholders(model.getViewCursor(), cmd.getTextRange(), cmd
+            .getArgs());
       }
       catch (java.lang.Exception e)
       {
@@ -979,17 +984,23 @@ public class DocumentCommandInterpreter
     }
 
     /**
-     * TODO: dokumentieren
+     * Diese Methode füllt die Einfuegestellen(Platzhalter) aus dem eingefügten
+     * Textbaustein mit den übergebenen Argumente args
      * 
      * @param range
+     *          der Bereich des eingefügten Textbausteins
      * @param args
+     *          Argumente die beim Aufruf zum Einfügen übergeben werden
      */
-    private void fillPlaceholders(XTextRange range, Vector args)
+    private void fillPlaceholders(XTextCursor viewCursor, XTextRange range,
+        Vector args)
     {
+      // Vector mit allen Platzhalterfelder
       Vector placeholders = new Vector();
 
       XEnumeration xEnum = UNO.XEnumerationAccess(range).createEnumeration();
       XEnumerationAccess enuAccess;
+      // Schleife über den Textbereich
       while (xEnum.hasMoreElements())
       {
         Object ele = null;
@@ -1005,6 +1016,8 @@ public class DocumentCommandInterpreter
         if (enuAccess != null) // ist wohl ein SwXParagraph
         {
           XEnumeration textPortionEnu = enuAccess.createEnumeration();
+          // Schleife über SwXParagraph und schauen ob es Platzhalterfelder gibt
+          // diese diese werden dann im Vector placeholders gesammelt
           while (textPortionEnu.hasMoreElements())
           {
             Object textPortion;
@@ -1019,6 +1032,7 @@ public class DocumentCommandInterpreter
             String textPortionType = (String) UNO.getProperty(
                 textPortion,
                 "TextPortionType");
+            // Wenn es ein Textfeld ist
             if (textPortionType.equals("TextField"))
             {
               XTextField textField = null;
@@ -1027,6 +1041,7 @@ public class DocumentCommandInterpreter
                 textField = UNO.XTextField(UNO.getProperty(
                     textPortion,
                     "TextField"));
+                // Wenn es ein Platzhalterfeld ist, dem Vector placeholders hinzufügen
                 if (UNO.supportsService(
                     textField,
                     "com.sun.star.text.TextField.JumpEdit"))
@@ -1042,6 +1057,9 @@ public class DocumentCommandInterpreter
           }
         }
       }
+
+      // Enumeration über den Vector placeholders mit Platzhalterfeldern die mit
+      // den übergebenen Argumenten gefüllt werden
       Enumeration enumPlaceholders = placeholders.elements();
       for (int j = 0; j < args.size() && j < placeholders.size(); j++)
       {
@@ -1049,17 +1067,47 @@ public class DocumentCommandInterpreter
         XTextField textField = (XTextField) UNO.XTextField(placeholderObj);
         XTextRange textFieldAnchor = textField.getAnchor();
 
+        // bei einem Parameter ohne Inhalt bleibt die Einfügestelle und die
+        // erste ist nach dem Einfügen markiert sonst wird
+        // sie ersetzt
         if (!(args.elementAt(j).equals("")))
         {
           textFieldAnchor.setString(args.elementAt(j).toString());
+          // setzen des ViewCursor auf die erste nicht ausgefüllte Einfügestelle
+          // nach dem Einfügen des Textbausteines
         }
-
+        else if (firstEmptyPlaceholder != true)
+        {
+          try
+          {
+            firstEmptyPlaceholder = true;
+            viewCursor.gotoRange(textFieldAnchor, false);
+          }
+          catch (java.lang.Exception e)
+          {
+          }
+        }
       }
+
+      // wenn weniger Parameter als Einfügestellen angegeben wurden wird nach
+      // dem Einfügen des Textbaustein und füllen der Argumente, die erste
+      // unausgefüllte Einfügestelle markiert. Wenn mehr Platzhalter angegeben
+      // als Einfügestellen vorhanden, erscheint eine Fehlermeldung.
 
       if (placeholders.size() > args.size())
       {
         // TODO selber konfigurierbare Fehlermeldung nach dem Einfügen
+
+        if (firstEmptyPlaceholder == false)
+        {
+          XTextField textField = (XTextField) UNO.XTextField(placeholders
+              .get(args.size()));
+          XTextRange textFieldAnchor = textField.getAnchor();
+          viewCursor.gotoRange(textFieldAnchor, false);
+          firstEmptyPlaceholder = true;
+        }
       }
+
     }
 
     /**
