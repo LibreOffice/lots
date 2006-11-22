@@ -36,7 +36,6 @@ import com.sun.star.frame.XController;
 import com.sun.star.frame.XFrame;
 import com.sun.star.frame.XModel;
 import com.sun.star.lang.EventObject;
-import com.sun.star.lang.XServiceInfo;
 import com.sun.star.lib.uno.helper.WeakBase;
 import com.sun.star.text.XBookmarksSupplier;
 import com.sun.star.text.XTextContent;
@@ -126,9 +125,9 @@ public class TextDocumentModel
   private FormModel formModel;
 
   /**
-   * TODO: dokumentieren... Falls es sich bei dem Dokument um ein Formular
-   * handelt, wird das zugehörige FormModel hier gespeichert und beim dispose()
-   * des TextDocumentModels mit geschlossen.
+   * Dieses feld enthält die formGUI, die der DocumentCommandInterpreter in der
+   * Methode processFormCommands() gestartet hat, falls das Dokument ein
+   * Formulardokument ist. Andernfalls enthält es null.
    */
   private FormGUI formGUI;
 
@@ -931,9 +930,11 @@ public class TextDocumentModel
   }
 
   /**
-   * TODO: dokumentieren getFormGUI
+   * Liefert die zu diesem Dokument zugehörige FormularGUI, falls dem
+   * TextDocumentModel die Existent einer FormGUI über setFormGUI(...)
+   * mitgeteilt wurde - andernfalls wird null zurück geliefert.
    * 
-   * @return
+   * @return Die FormularGUI des Formulardokuments oder null
    */
   public FormGUI getFormGUI()
   {
@@ -941,9 +942,12 @@ public class TextDocumentModel
   }
 
   /**
-   * TODO: dokumentieren setFormGUI
+   * Gibt dem TextDocumentModel die Existent der FormularGUI formGUI bekannt und
+   * wird vom DocumentCommandInterpreter in der Methode processFormCommands()
+   * gestartet hat, falls das Dokument ein Formulardokument ist.
    * 
    * @param formGUI
+   *          Die zu diesem Dokument zugehörige formGUI
    */
   public void setFormGUI(FormGUI formGUI)
   {
@@ -1370,14 +1374,8 @@ public class TextDocumentModel
    * 
    * @author christoph.lutz
    */
-  public class PrintModel extends WeakBase implements XPrintModel, XServiceInfo
+  public class PrintModel extends WeakBase implements XPrintModel
   {
-    /**
-     * Dieses Feld entält eine Liste aller Services, die dieser UNO-Service
-     * implementiert.
-     */
-    private final java.lang.String[] SERVICENAMES = { "de.muenchen.allg.itd51.wollmux.PrintModel" };
-
     /**
      * Das lock-Flag, das vor dem Einstellen eines WollMuxEvents auf true
      * gesetzt werden muss und signalisiert, ob das WollMuxEvent erfolgreich
@@ -1466,8 +1464,21 @@ public class TextDocumentModel
       waitForUnlock();
     }
 
-    /*
-     * TODO: dokumentieren setFormValue (auch in der IDL!!!) (non-Javadoc)
+    /**
+     * Falls es sich bei dem zugehörigen Dokument um ein Formulardokument (mit
+     * einer Formularbeschreibung) handelt, wird das Formularfeld mit der ID id
+     * auf den neuen Wert value gesetzt und alle von diesem Formularfeld
+     * abhängigen Formularfelder entsprechend angepasst. Handelt es sich beim
+     * zugehörigen Dokument um ein Dokument ohne Formularbeschreibung, so werden
+     * nur alle insertFormValue-Kommandos dieses Dokuments angepasst, die die ID
+     * id besitzen.
+     * 
+     * @param id
+     *          Die ID des Formularfeldes, dessen Wert verändert werden soll.
+     *          Ist die FormGUI aktiv, so werden auch alle von id abhängigen
+     *          Formularwerte neu gesetzt.
+     * @param value
+     *          Der neue Wert des Formularfeldes id
      * 
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#setFormValue(java.lang.String,
      *      java.lang.String)
@@ -1552,44 +1563,6 @@ public class TextDocumentModel
         actionEvent = arg0;
       }
     }
-
-    // Folgende Methoden werden benötigt, damit der Service unter Basic
-    // angesprochen werden kann:
-    // FIXME: queryInterface(XPrintModel) auf das Objekt geht nicht.
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.sun.star.lang.XServiceInfo#getSupportedServiceNames()
-     */
-    public String[] getSupportedServiceNames()
-    {
-      return SERVICENAMES;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.sun.star.lang.XServiceInfo#supportsService(java.lang.String)
-     */
-    public boolean supportsService(String sService)
-    {
-      int len = SERVICENAMES.length;
-      for (int i = 0; i < len; i++)
-      {
-        if (sService.equals(SERVICENAMES[i])) return true;
-      }
-      return false;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.sun.star.lang.XServiceInfo#getImplementationName()
-     */
-    public String getImplementationName()
-    {
-      return (PrintModel.class.getName());
-    }
-
   }
+
 }

@@ -951,8 +951,12 @@ public class WollMuxEventHandler
   // *******************************************************************************************
 
   /**
-   * TODO: anpassen! Erzeugt ein neues WollMuxEvent, das die eigentliche
-   * Dokumentbearbeitung eines TextDokuments startet.
+   * Erzeugt ein neues WollMuxEvent, das die Bearbeitung aller neu
+   * hinzugekommener Dokumentkommandos übernimmt.
+   * 
+   * Dieses Event wird immer dann ausgelöst, wenn nach dem Öffnen eines
+   * Dokuments neue Dokumentkommandos eingefügt wurden, die nun bearbeitet
+   * werden sollen - z.B. wenn ein Textbaustein eingefügt wurde.
    * 
    * @param xTextDoc
    *          Das XTextDocument, das durch den WollMux verarbeitet werden soll.
@@ -962,14 +966,6 @@ public class WollMuxEventHandler
     handle(new OnReprocessTextDocument(xTextDoc));
   }
 
-  /**
-   * TODO: anpassen! Dieses Event wird immer dann ausgelöst, wenn der
-   * GlobalEventBroadcaster von OOo ein ON_NEW oder ein ON_LOAD-Event wirft. Das
-   * Event sorgt dafür, dass die eigentliche Dokumentbearbeitung durch den
-   * WollMux angestossen wird.
-   * 
-   * @author christoph.lutz
-   */
   private static class OnReprocessTextDocument extends BasicEvent
   {
     XTextDocument xTextDoc;
@@ -1000,8 +996,7 @@ public class WollMuxEventHandler
       }
       catch (java.lang.Exception e)
       {
-        throw new WollMuxFehlerException("Fehler bei der Dokumentbearbeitung.",
-            e);
+        // Eine Exception zu werfen ist hier nicht erwünscht.
       }
     }
 
@@ -2759,24 +2754,31 @@ public class WollMuxEventHandler
   // *******************************************************************************************
 
   /**
-   * TODO: doku anpassen!!! Erzeugt ein neues WollMuxEvent, das dafür sorgt,
-   * dass der PrintSetupDialog von OOo angezeigt wird, über den der aktuelle
-   * Drucker ausgewählt und geändert werden kann.
+   * Erzeugt ein neues WollMuxEvent, das dafür sorgt, dass im Textdokument doc
+   * das Formularfeld mit der ID id auf den Wert value gesetzt wird. Ist das
+   * Dokument ein Formulardokument (also mit einer angezeigten FormGUI), so wird
+   * die Änderung über die FormGUI vorgenommen, die zugleich dafür sorgt, dass
+   * von id abhängige Formularfelder mit angepasst werden. Besitzt das Dokument
+   * keine Formularbeschreibung, so wird der Wert direkt gesetzt, ohne
+   * Äbhängigkeiten zu beachten. Nach der erfolgreichen Ausführung aller
+   * notwendigen Anpassungen wird der unlockActionListener benachrichtigt.
    * 
    * Das Event wird aus der Implementierung von XPrintModel (siehe
-   * TextDocumentModel) geworfen, wenn die gleichnamige Methode dort aufgerufen
+   * TextDocumentModel) geworfen, wenn dort die Methode setFormValue aufgerufen
    * wird.
    * 
    * @param doc
-   *          Das Dokument für das die Druckereinstellung gelten sollen.
-   * @param onlyOnce
-   *          Gibt an, dass der Dialog nur beim ersten Aufruf (aus Sicht eines
-   *          Dokuments) der Methode angezeigt wird. Wurde bereits vor dem
-   *          Aufruf ein PrintSetup-Dialog gestartet, so öffnet sich der Dialog
-   *          nicht und die Methode endet ohne Aktion.
+   *          Das Dokument, in dem das Formularfeld mit der ID id neu gesetzt
+   *          werden soll.
+   * @param id
+   *          Die ID des Formularfeldes, dessen Wert verändert werden soll. Ist
+   *          die FormGUI aktiv, so werden auch alle von id abhängigen
+   *          Formularwerte neu gesetzt.
+   * @param value
+   *          Der neue Wert des Formularfeldes id
    * @param unlockActionListener
-   *          Der unlockActionListener wird immer aufgerufen, wenn sich doit()
-   *          fertig ist.
+   *          Der unlockActionListener wird immer informiert, wenn alle
+   *          notwendigen Anpassungen durchgeführt wurden.
    */
   public static void handleSetFormValueViaPrintModel(XTextDocument doc,
       String id, String value, ActionListener unlockActionListener)
@@ -2846,24 +2848,19 @@ public class WollMuxEventHandler
   // *******************************************************************************************
 
   /**
-   * TODO: doku anpassen!!! Erzeugt ein neues WollMuxEvent, das dafür sorgt,
-   * dass der PrintSetupDialog von OOo angezeigt wird, über den der aktuelle
-   * Drucker ausgewählt und geändert werden kann.
+   * Dieses WollMuxEvent ist das Gegenstück zu handleSetFormValueViaPrintModel
+   * und wird dann erzeugt, wenn nach einer Änderung eines Formularwertes -
+   * gesteuert durch die FormGUI - alle abhängigen Formularwerte angepasst
+   * wurden. In diesem Fall ist die einzige Aufgabe dieses Events, den
+   * unlockActionListener zu informieren, den handleSetFormValueViaPrintModel()
+   * nicht selbst informieren konnte.
    * 
-   * Das Event wird aus der Implementierung von XPrintModel (siehe
-   * TextDocumentModel) geworfen, wenn die gleichnamige Methode dort aufgerufen
-   * wird.
+   * Das Event wird aus der Implementierung vom
+   * OnSetFormValueViaPrintModel.doit() erzeugt, wenn Feldänderungen über die
+   * FormGUI laufen.
    * 
-   * @param doc
-   *          Das Dokument für das die Druckereinstellung gelten sollen.
-   * @param onlyOnce
-   *          Gibt an, dass der Dialog nur beim ersten Aufruf (aus Sicht eines
-   *          Dokuments) der Methode angezeigt wird. Wurde bereits vor dem
-   *          Aufruf ein PrintSetup-Dialog gestartet, so öffnet sich der Dialog
-   *          nicht und die Methode endet ohne Aktion.
    * @param unlockActionListener
-   *          Der unlockActionListener wird immer aufgerufen, wenn sich doit()
-   *          fertig ist.
+   *          Der zu informierende unlockActionListener.
    */
   public static void handleSetFormValueViaPrintModelFinished(
       ActionListener unlockActionListener)

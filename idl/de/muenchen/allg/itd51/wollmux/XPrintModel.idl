@@ -69,10 +69,24 @@ interface XPrintModel
      */
 	void printVerfuegungspunkt( [in] short verfPunkt, [in] short numberOfCopies, [in] boolean isDraft, [in] boolean isOriginal);
 
+    /**
+      Falls es sich bei dem zugehörigen Dokument um ein Formulardokument (mit
+      einer Formularbeschreibung) handelt, wird das Formularfeld mit der ID id
+      auf den neuen Wert value gesetzt und alle von diesem Formularfeld
+      abhängigen Formularfelder entsprechend angepasst. Handelt es sich beim
+      zugehörigen Dokument um ein Dokument ohne Formularbeschreibung, so werden
+      nur alle insertFormValue-Kommandos dieses Dokuments angepasst, die die ID
+      id besitzen.
+      
+      @param id
+               Die ID des Formularfeldes, dessen Wert verändert werden soll.
+               Ist die FormGUI aktiv, so werden auch alle von id abhängigen
+               Formularwerte neu gesetzt.
+      @param value
+               Der neue Wert des Formularfeldes id
+     */
 	void setFormValue( [in] string id, [in] string value);
 };
-
-service PrintModel: XPrintModel;
 
 }; }; }; }; };
  
