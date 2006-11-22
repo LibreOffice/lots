@@ -6,7 +6,8 @@
      <!-- 
       
            Diese Konfigurationsdatei wird benötigt, um die Symbolleiste "Add-on 1"
-           in "Sachleitende Verfügungen" umzubenennen.
+           in "Sachleitende Verfügungen" umzubenennen und die Leiste standardmäßig auf 
+           unsichtbar zu stellen.
            
            es handelt sich hierbei um ein neues Feature, das seit OOo2.0.3 genutzt werden
            kann. Früher konnte der Name nicht angepasst werden und der Titel der Symbolleiste
@@ -18,9 +19,25 @@
      
        <node oor:name="private:resource/toolbar/addon_de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung" oor:op="replace">
          <prop oor:name="UIName" oor:type="xs:string">
-           <value xml:lang="en-US">Sachleitende Verfügungen</value>
+           <value>Sachleitende Verfügungen</value>
+         </prop>
+         <prop oor:name="DockPos" oor:type="xs:string">
+           <value>0,2</value>
+         </prop>
+         <prop oor:name="DockingArea" oor:type="xs:int">
+           <value>0</value>
+         </prop>
+         <prop oor:name="Pos" oor:type="xs:string">
+           <value>2147483647,2147483647</value>
+         </prop>
+         <prop oor:name="Size" oor:type="xs:string">
+           <value>0,0</value>
+         </prop>
+         <prop oor:name="Visible" oor:type="xs:boolean">
+           <value>false</value>
          </prop>
        </node>
+       
      </node>
   </node>
 </oor:component-data>
