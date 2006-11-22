@@ -1,3 +1,20 @@
+wollmux (1.4.2lhm1) siga; urgency=low
+
+  * FormularMax 4000: Sichtbarkeit-Abschnitt wird nicht mehr gelöscht, d.h.
+                      Ein/Ausblendungen können realisiert werden.
+  * FormularMax 4000: "Speichern unter..." funktioniert (wieder) korrekt
+  * Fehler bei Sachleitenden Verfügungen unter Windows NT behoben: OpenOffice hängt,
+    wenn auf die Schaltfläche "Block: immer drucken" gedrückt wird.
+  * Komfortdruckfunktionen: Das XPrintModel unterstützt nun die neue Funktion
+    setFormValue(id, value), mit der Formularwerte vor dem Drucken programmatisch 
+    verändert werden können.
+  * Die Symbolleiste "Sachleitende Verfügungen" wird jetzt standardmäßig deaktiviert, 
+    kann aber über "Ansicht->Symbolleisten->Sachlteitende Verfügungen" jederzeit
+    leicht angezeigt werden. Sie befindet sich dann automatisch in der dritten Zeile
+    und verschiebt damit keine Standardsymbole von OpenOffice mehr.
+
+ -- Christoph Lutz <christoph.lutz@muenchen.de>  Wed, 22 Nov 2006 16:13:16 +0200
+ 
 wollmux (1.4.1lhm1) siga; urgency=low
 
   * [R4045] Bugfix eines kritischen Fehlers: Öffnen einer Mischvorlage expandiert
