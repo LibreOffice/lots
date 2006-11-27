@@ -987,6 +987,10 @@ abstract public class DocumentCommand
 
     private Vector args = null;
 
+    private String mode;
+
+    private boolean manualMode = false;
+
     public InsertFrag(ConfigThingy wmCmd, Bookmark bookmark)
         throws InvalidCommandException
     {
@@ -1015,6 +1019,20 @@ abstract public class DocumentCommand
       {
         // ARGS sind optional
       }
+
+      try
+      {
+        mode = wmCmd.get("WM").get("MODE").toString();
+        if (mode.equals("manual"))
+        {
+          manualMode = true;
+        }
+      }
+      catch (NodeNotFoundException e)
+      {
+        // MODE ist optional;
+      }
+
     }
 
     public String getFragID()
@@ -1025,6 +1043,11 @@ abstract public class DocumentCommand
     public Vector getArgs()
     {
       return args;
+    }
+
+    public boolean isManualMode()
+    {
+      return manualMode;
     }
 
     protected boolean canHaveChilds()
@@ -1044,14 +1067,17 @@ abstract public class DocumentCommand
         InsertFrag bif = (InsertFrag) b;
         // Falls sich ein Fragment selbst aufruft, wandle das Kommando um in ein
         // InvalidCommand - zur Vermeidung von Endlosschleifen.
-        if (this.getFragID().equals(bif.getFragID()))
+        if (!isManualMode())
         {
-          InvalidCommandException ivc = new InvalidCommandException(
-              "Das Fragment mit der FRAG_ID \""
-                  + fragID
-                  + "\" ruft sich direkt oder indirekt selbst auf "
-                  + "und würde damit eine Endlosschleife verursachen.");
-          b = new InvalidCommand(b.wmCmd, b.bookmark, ivc);
+          if (this.getFragID().equals(bif.getFragID()))
+          {
+            InvalidCommandException ivc = new InvalidCommandException(
+                "Das Fragment mit der FRAG_ID \""
+                    + fragID
+                    + "\" ruft sich direkt oder indirekt selbst auf "
+                    + "und würde damit eine Endlosschleife verursachen.");
+            b = new InvalidCommand(b.wmCmd, b.bookmark, ivc);
+          }
         }
       }
       return super.add(b);

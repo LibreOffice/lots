@@ -157,10 +157,6 @@ public class WollMuxSingleton implements XPALProvider
                  + "\"");
     Logger.debug("CONF_VERSION: " + getConfVersionInfo());
 
-    // VisibleTextFragmentList erzeugen
-    textFragmentList = new VisibleTextFragmentList(WollMuxFiles
-        .getWollmuxConf());
-
     // Versuchen, den DJ zu initialisieren und Flag setzen, falls nicht
     // erfolgreich.
     if (getDatasourceJoiner() == null) successfulStartup = false;
@@ -289,14 +285,6 @@ public class WollMuxSingleton implements XPALProvider
     {
       return "unbekannt";
     }
-  }
-
-  /**
-   * @return Returns the textFragmentList.
-   */
-  public VisibleTextFragmentList getTextFragmentList()
-  {
-    return textFragmentList;
   }
 
   /**
@@ -574,7 +562,7 @@ public class WollMuxSingleton implements XPALProvider
     if (UNO.XEnumerationAccess(element) != null)
     {
       XEnumeration xEnum = UNO.XEnumerationAccess(element).createEnumeration();
-  
+
       while (xEnum.hasMoreElements())
       {
         try
@@ -590,7 +578,7 @@ public class WollMuxSingleton implements XPALProvider
         }
       }
     }
-  
+
     // jetzt noch schauen, ob es sich bei dem Element um eine Annotation
     // handelt:
     if (UNO.XTextField(element) != null)
@@ -603,7 +591,7 @@ public class WollMuxSingleton implements XPALProvider
         return UNO.XTextField(textField);
       }
     }
-  
+
     return null;
   }
 

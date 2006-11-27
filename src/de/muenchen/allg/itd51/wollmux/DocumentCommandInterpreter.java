@@ -958,7 +958,15 @@ public class DocumentCommandInterpreter
       try
       {
         // Fragment-URL holen und aufbereiten. Kontext ist der DEFAULT_CONTEXT.
-        String urlStr = mux.getTextFragmentList().getURLByID(cmd.getFragID());
+        //TODO urls richtig einbinden nicht nur 1. Attribute anzeigen
+        Vector urls = new Vector();
+        String urlStr = null;
+        urls = VisibleTextFragmentList.getURLsByID(cmd.getFragID());
+        if(urls.size() == 0) {
+          throw new ConfigurationErrorException(
+              "Argument URL fehlt in Textfragment \"" + cmd.getFragID() + "\"!");
+        }
+        urlStr = (String) urls.elementAt(0);
 
         URL url = new URL(mux.getDEFAULT_CONTEXT(), urlStr);
 

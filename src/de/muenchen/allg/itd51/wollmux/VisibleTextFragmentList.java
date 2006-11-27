@@ -26,8 +26,10 @@ import java.io.File;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
+import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -108,7 +110,14 @@ public class VisibleTextFragmentList
         .debug("VisibleTextFragmentList: " + fragmentMap.size() + " entries.");
   }
 
-  private String expandVariable(ConfigThingy node, ConfigThingy root)
+  /**
+   * TODO: dok
+   * @param node
+   * @param root
+   * @return
+   * @throws EndlessLoopException
+   */
+  private static String expandVariable(ConfigThingy node, ConfigThingy root)
       throws EndlessLoopException
   {
     // Map der sichtbaren Variablen erzeugen:
@@ -187,43 +196,83 @@ public class VisibleTextFragmentList
   }
 
   /**
-   * Gibt die URL des unter der frag_id definierten Textfragmente zurück. Falls
-   * das Textfragment nicht existiert, wird eine TextfragmentNotDefinedException
-   * geworfen.
-   * 
-   * @param frag_id
-   *          Die ID des gesuchten Textfragments.
-   * @return die URL des unter der frag_id definierten Textfragments. Falls das
-   *         Textfragment nicht existiert oder die URL ungültig ist, wird null
-   *         zurückgeliefert.
-   * @throws NodeNotFoundException
-   *           Das Attribut URL des Textfragments ist nicht definiert.
-   * @throws TextFragmentNotDefinedException
-   *           Das gesuchte Textfragment ist nicht definiert.
-   * @throws EndlessLoopException
-   *           Bei der Ersetzung der Variablen in der URL trat eine
-   *           Endlosschleife auf.
+   * Gibt die URLs des unter der frag_id definierten Textfragmente zurück. 
+   * @param frag_id  Die ID des gesuchten Textfragments.
+   * @return die URL des unter der frag_id definierten Textfragments.
    */
-  public String getURLByID(String frag_id) throws ConfigurationErrorException,
-      TextFragmentNotDefinedException, EndlessLoopException
+  public static Vector getURLsByID(String frag_id)
   {
-    if (frag_id != null && fragmentMap.containsKey(frag_id))
+    ConfigThingy conf = WollMuxSingleton.getInstance().getWollmuxConf();
+
+    LinkedList tfListe = new LinkedList();
+    ConfigThingy tfConf = conf.query("Textfragmente");
+    Iterator iter = tfConf.iterator();
+    while (iter.hasNext())
     {
-      ConfigThingy frag = (ConfigThingy) fragmentMap.get(frag_id);
-      ConfigThingy url;
-      try
-      {
-        url = frag.get("URL");
-      }
-      catch (NodeNotFoundException e)
-      {
-        throw new ConfigurationErrorException(
-            "Argument URL fehlt in Textfragment \"" + frag_id + "\"!");
-      }
-      return expandVariable(url, root);
+      ConfigThingy confTextfragmente = (ConfigThingy) iter.next();
+      tfListe.addFirst(confTextfragmente);
     }
-    else
-      throw new TextFragmentNotDefinedException(frag_id);
+
+    Iterator iterTbListe = tfListe.iterator();
+    Vector urls = new Vector();
+    while (iterTbListe.hasNext())
+    {
+      ConfigThingy textfragmente = (ConfigThingy) iterTbListe.next();
+
+      ConfigThingy mappingsConf = textfragmente.queryByChild("FRAG_ID");
+      Iterator iterMappings = mappingsConf.iterator();
+
+      while (iterMappings.hasNext())
+      {
+        ConfigThingy mappingConf = (ConfigThingy) iterMappings.next();
+
+        String frag_idConf = null;
+        try
+        {
+          frag_idConf = mappingConf.get("FRAG_ID").toString();
+        }
+        catch (NodeNotFoundException e)
+        {
+          Logger.error("FRAG_ID Angabe fehlt in " +
+          mappingConf.stringRepresentation());
+          continue;
+        }
+
+        Iterator URLIterator = null;
+        try
+        {
+
+          URLIterator = mappingConf.get("URL").iterator();
+        }
+        catch (NodeNotFoundException e)
+        {
+          // kommt nicht vor, da obiger queryByChild immer URL liefert
+          continue;
+        }
+
+        if (frag_id.matches(frag_idConf))
+        {
+
+          while (URLIterator.hasNext())
+          {
+            ConfigThingy url_next = (ConfigThingy)URLIterator.next();
+            try
+            {
+              String urlStr =  expandVariable(url_next,conf);
+              urlStr = frag_id.replaceAll(frag_idConf,urlStr);
+              urls.add(urlStr);
+            }
+            catch (EndlessLoopException e)
+            {
+              Logger.error("Die URL zum Textfragment '" + mappingConf.stringRepresentation() + "' mit der FRAG_ID '"
+                  + frag_id
+                  + "' ist fehlerhaft.", e);
+              }
+          }
+        }
+      }
+    }
+    return urls;
   }
 
   /**
@@ -276,9 +325,9 @@ public class VisibleTextFragmentList
           Logger.debug("Textfragment: "
                        + ids[i]
                        + " --> "
-                       + tfrags.getURLByID(ids[i]));
+                       + tfrags.getURLsByID(ids[i]));
         }
-        catch (EndlessLoopException e)
+        catch (Exception e)
         {
           Logger.error(e);
         }

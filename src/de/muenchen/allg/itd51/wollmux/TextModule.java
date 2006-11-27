@@ -270,12 +270,18 @@ public class TextModule
       }
       werte.addChild(wm_args);
     }
+    
+    ConfigThingy wm_mode = new ConfigThingy("MODE");
+    werte.addChild(wm_mode);
 
     ConfigThingy insertFrag = new ConfigThingy("insertFrag");
     wm_cmd.addChild(insertFrag);
 
     ConfigThingy wm_frag_id_entry = new ConfigThingy(args[0]);
     wm_frag_id.addChild(wm_frag_id_entry);
+    
+    ConfigThingy wm_mode_entry = new ConfigThingy("manual");
+    wm_mode.addChild(wm_mode_entry);
 
     String bookmarkName = DocumentCommand.getCommandString(root);
 

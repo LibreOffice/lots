@@ -1063,9 +1063,16 @@ public class WollMuxEventHandler
 
         // Fragment-URL holen und aufbereiten:
         String urlStr;
+        Vector urls = new Vector();
         try
         {
-          urlStr = mux.getTextFragmentList().getURLByID(frag_id);
+          urls = VisibleTextFragmentList.getURLsByID(frag_id);
+          if(urls.size() == 0) {
+            throw new ConfigurationErrorException(
+                "Argument URL fehlt in Textfragment \"" + frag_id + "\"!");
+          }
+
+          urlStr = (String) urls.elementAt(0);
         }
         catch (java.lang.Exception e)
         {
