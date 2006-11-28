@@ -22,13 +22,10 @@
  */
 package de.muenchen.allg.itd51.wollmux;
 
-import java.io.File;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.Set;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -50,75 +47,19 @@ import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 public class VisibleTextFragmentList
 {
 
-  // TODO: Alles rausnehmen, was nicht mehr benötigt wird! z.B. alle Felder hier
-  // und der Konstruktor.
-
-  /**
-   * Speichert die Wurzel des Konfigurationsbaumes, um später Variablen auflösen
-   * zu können.
-   */
-  private ConfigThingy root;
-
-  /**
-   * Die fragmentMap (of ConfigThingy) enthält alle sichtbaren Textfragmente.
-   */
-  private Map fragmentMap;
-
   /**
    * Abbruchwert zur Vermeidung von Endlosloops bei Variablenersetzungen.
    */
   private static final int MAXCOUNT = 100;
 
   /**
-   * Der Konstruktor erzeugt eine neue VisibleTextFragmentList aus einer
-   * gegebenen Konfiguration.
-   * 
-   * @param root
-   *          Wurzel des Konfigurationsbaumes der Konfigurationsdatei.
-   * @throws NodeNotFoundException
-   */
-  public VisibleTextFragmentList(ConfigThingy root)
-  {
-    this.root = root;
-    this.fragmentMap = new HashMap();
-    ConfigThingy tfrags;
-    tfrags = root.query("Textfragmente").queryByChild("FRAG_ID");
-    Iterator s = tfrags.iterator();
-    while (s.hasNext())
-    {
-      ConfigThingy frag = (ConfigThingy) s.next();
-      try
-      {
-        String frag_id = frag.get("FRAG_ID").toString();
-        if (frag_id.matches("^([a-zA-Z_][a-zA-Z_0-9]*)$"))
-        {
-          fragmentMap.put(frag.get("FRAG_ID").toString(), frag);
-        }
-        else
-        {
-          String stringRep = frag.stringRepresentation();
-          stringRep = stringRep.substring(0, stringRep.length() - 1);
-          Logger
-              .error(new ConfigurationErrorException(
-                  "Fehler in Textfragment \""
-                      + stringRep
-                      + "\": Ungültiger Bezeichner für FRAG_ID - ignoriere Textfragment!"));
-        }
-      }
-      catch (NodeNotFoundException x)
-      {
-        // obiger query verhindert dies.
-      }
-    }
-    Logger
-        .debug("VisibleTextFragmentList: " + fragmentMap.size() + " entries.");
-  }
-
-  /**
-   * TODO: dok
+   * Ersetzen der zu dem Block gehörende Variable VAR durch den Wert VALUE
    * 
    * @param node
+   *          Knoten der die Url enthält die benötigt wird um die Variable zu
+   *          bestimmen die von ihm aus sichtbar ist.
    * @param root
+   *          das ConfigThingy das die gesamte Configuration enthält
    * @return
    * @throws EndlessLoopException
    */
@@ -282,71 +223,5 @@ public class VisibleTextFragmentList
       }
     }
     return urls;
-  }
-
-  /**
-   * Diese Methode erzeugt ein String-Array der IDs aller erkannten
-   * Textfragmente.
-   * 
-   * @return Ein String-Array der IDs aller erkannten Textfragmente.
-   */
-  public String[] getIDs()
-  {
-    Set keys = fragmentMap.keySet();
-    return (String[]) keys.toArray(new String[keys.size()]);
-  }
-
-  /**
-   * Testet die Funktionsweise der VisibleTextFragmentList. Eine in url
-   * angegebene Konfigdatei wird eingelesen und die dazugehörige
-   * VisibleTextFragmentList erstellt. Anschliessend wird die ausgegeben.
-   * 
-   * @param args
-   *          url, dabei ist url die URL einer zu lesenden Config-Datei. Das
-   *          Programm gibt die Liste der Textfragmente aus.
-   * @author Christoph Lutz (D-III-ITD 5.1)
-   */
-  public static void main(String[] args)
-  {
-    try
-    {
-      if (args.length < 1)
-      {
-        System.out.println("USAGE: <url>");
-        System.exit(0);
-      }
-      Logger.init(Logger.DEBUG);
-
-      File cwd = new File(".");
-
-      args[0] = args[0].replaceAll("\\\\", "/");
-      ConfigThingy conf = new ConfigThingy(args[0], new URL(cwd.toURL(),
-          args[0]));
-
-      VisibleTextFragmentList tfrags;
-      tfrags = new VisibleTextFragmentList(conf);
-
-      String[] ids = tfrags.getIDs();
-      for (int i = 0; i < ids.length; i++)
-      {
-        try
-        {
-          Logger.debug("Textfragment: "
-                       + ids[i]
-                       + " --> "
-                       + tfrags.getURLsByID(ids[i]));
-        }
-        catch (Exception e)
-        {
-          Logger.error(e);
-        }
-      }
-
-    }
-    catch (Exception e)
-    {
-      Logger.error(e);
-    }
-    System.exit(0);
   }
 }

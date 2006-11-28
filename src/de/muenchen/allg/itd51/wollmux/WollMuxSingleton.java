@@ -80,12 +80,6 @@ public class WollMuxSingleton implements XPALProvider
   private static WollMuxSingleton singletonInstance = null;
 
   /**
-   * Enthält die geparste Textfragmentliste, die in der wollmux.conf definiert
-   * wurde.
-   */
-  private VisibleTextFragmentList textFragmentList;
-
-  /**
    * Enthält die im Funktionen-Abschnitt der wollmux,conf definierten
    * Funktionen.
    */
