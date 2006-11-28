@@ -134,7 +134,13 @@ public class DocumentCommandInterpreter
   public void scanDocumentSettings()
   {
     Logger.debug("scanDocumentSettings");
+
+    // Die Print-Blöcke (AllVersions, DraftOnly und NotInOriginal) werden hier
+    // neu ausgelesen, daher müssen sie vorher im Model zurückgesetzt werden.
+    model.resetPrintBlocks();
+
     new DocumentSettingsScanner().execute(tree);
+
     model.setDocumentModified(false);
   }
 
@@ -171,11 +177,12 @@ public class DocumentCommandInterpreter
 
     // 3) Hauptverarbeitung: Jetzt alle noch übrigen DocumentCommands (z.B.
     // insertValues) in einem einzigen Durchlauf mit execute bearbeiten.
-    errors += new MainProcessor().execute(tree);
+    
+    // Die Print-Blöcke (AllVersions, DraftOnly und NotInOriginal) werden hier
+    // neu ausgelesen, daher müssen sie vorher im Model zurückgesetzt werden.
+    model.resetPrintBlocks();
 
-    SurroundingGarbageCollector collect = new SurroundingGarbageCollector();
-    errors += collect.execute(tree);
-    collect.removeGarbage();
+    errors += new MainProcessor().execute(tree);
 
     // 4) Da keine neuen Elemente mehr eingefügt werden müssen, können
     // jetzt die INSERT_MARKS "<" und ">" der insertFrags und
@@ -186,6 +193,9 @@ public class DocumentCommandInterpreter
     // Absätze zum Beginn und Ende der insertFrag bzw. insertContent-Kommandos
     // sauber erkennen und entfernen.
     // errors += new EmptyParagraphCleaner().execute(tree);
+    SurroundingGarbageCollector collect = new SurroundingGarbageCollector();
+    errors += collect.execute(tree);
+    collect.removeGarbage();
 
     // 6) Scannen aller für das Formular relevanten Informationen:
     if (formScanner == null) formScanner = new FormScanner();
@@ -958,11 +968,12 @@ public class DocumentCommandInterpreter
       try
       {
         // Fragment-URL holen und aufbereiten. Kontext ist der DEFAULT_CONTEXT.
-        //TODO urls richtig einbinden nicht nur 1. Attribute anzeigen
+        // TODO urls richtig einbinden nicht nur 1. Attribute anzeigen
         Vector urls = new Vector();
         String urlStr = null;
         urls = VisibleTextFragmentList.getURLsByID(cmd.getFragID());
-        if(urls.size() == 0) {
+        if (urls.size() == 0)
+        {
           throw new ConfigurationErrorException(
               "Argument URL fehlt in Textfragment \"" + cmd.getFragID() + "\"!");
         }
@@ -1049,7 +1060,8 @@ public class DocumentCommandInterpreter
                 textField = UNO.XTextField(UNO.getProperty(
                     textPortion,
                     "TextField"));
-                // Wenn es ein Platzhalterfeld ist, dem Vector placeholders hinzufügen
+                // Wenn es ein Platzhalterfeld ist, dem Vector placeholders
+                // hinzufügen
                 if (UNO.supportsService(
                     textField,
                     "com.sun.star.text.TextField.JumpEdit"))
@@ -1384,6 +1396,25 @@ public class DocumentCommandInterpreter
     public int executeCommand(SetType cmd)
     {
       cmd.setDoneState(true);
+      return 0;
+    }
+    
+
+    public int executeCommand(DraftOnly cmd)
+    {
+      model.addDraftOnlyBlock(cmd);
+      return 0;
+    }
+
+    public int executeCommand(NotInOriginal cmd)
+    {
+      model.addNotInOriginalBlock(cmd);
+      return 0;
+    }
+
+    public int executeCommand(AllVersions cmd)
+    {
+      model.addAllVersionsBlock(cmd);
       return 0;
     }
   }

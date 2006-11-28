@@ -982,12 +982,9 @@ public class WollMuxEventHandler
       WollMuxSingleton mux = WollMuxSingleton.getInstance();
       TextDocumentModel model = mux.getTextDocumentModel(xTextDoc);
 
-      model.resetPrintBlocks();
-
-      // Mögliche Aktionen für das neu geöffnete Dokument:
+      // Dokument über den DocumentCommandInterpreter neu bearbeiten:
       DocumentCommandInterpreter dci = new DocumentCommandInterpreter(model,
           mux);
-
       try
       {
         dci.scanDocumentSettings();
@@ -996,7 +993,9 @@ public class WollMuxEventHandler
       }
       catch (java.lang.Exception e)
       {
-        // Eine Exception zu werfen ist hier nicht erwünscht.
+        // Hier wird keine Exception erwartet, da Fehler (z.B. beim manuellen
+        // Einfügen von Textbausteinen) bereits dort als Popup angezeigt werden
+        // sollen, wo sie auftreten.
       }
     }
 
@@ -1067,7 +1066,8 @@ public class WollMuxEventHandler
         try
         {
           urls = VisibleTextFragmentList.getURLsByID(frag_id);
-          if(urls.size() == 0) {
+          if (urls.size() == 0)
+          {
             throw new ConfigurationErrorException(
                 "Argument URL fehlt in Textfragment \"" + frag_id + "\"!");
           }
