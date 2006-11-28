@@ -177,7 +177,7 @@ public class DocumentCommandInterpreter
 
     // 3) Hauptverarbeitung: Jetzt alle noch übrigen DocumentCommands (z.B.
     // insertValues) in einem einzigen Durchlauf mit execute bearbeiten.
-    
+
     // Die Print-Blöcke (AllVersions, DraftOnly und NotInOriginal) werden hier
     // neu ausgelesen, daher müssen sie vorher im Model zurückgesetzt werden.
     model.resetPrintBlocks();
@@ -780,13 +780,26 @@ public class DocumentCommandInterpreter
 
     public int executeCommand(InsertFrag cmd)
     {
-      collectSurroundingGarbageForCommand(cmd);
+      if (cmd.hasInsertMarks())
+      {
+        // ist der ManualMode gesetzt, so darf ein leerer Paragraph am Ende des
+        // Dokuments nicht gelöscht werden, da sonst der ViewCursor auf den
+        // Start des Textbereiches zurück gesetzt wird. Im Falle der
+        // automatischen Einfügung sollen aber ein leer Paragraph am Ende
+        // gelöscht werden.
+        collectSurroundingGarbageForCommand(cmd, cmd.isManualMode());
+      }
+      cmd.unsetHasInsertMarks();
       return 0;
     }
 
     public int executeCommand(InsertContent cmd)
     {
-      collectSurroundingGarbageForCommand(cmd);
+      if (cmd.hasInsertMarks())
+      {
+        collectSurroundingGarbageForCommand(cmd, false);
+      }
+      cmd.unsetHasInsertMarks();
       return 0;
     }
 
@@ -794,22 +807,26 @@ public class DocumentCommandInterpreter
 
     /**
      * Diese Methode erfasst Einfügemarken und leere Absätze zum Beginn und zum
-     * Ende des übergebenen Dokumentkommandos cmd.
+     * Ende des übergebenen Dokumentkommandos cmd, wobei über
+     * removeAnLastEmptyParagraph gesteuert werden kann, ob ein Absatz am Ende
+     * eines Textes gelöscht werden soll (bei true) oder nicht (bei false).
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
      */
-    private void collectSurroundingGarbageForCommand(DocumentCommand cmd)
+    private void collectSurroundingGarbageForCommand(DocumentCommand cmd,
+        boolean removeAnLastEmptyParagraph)
     {
       /*
        * Im folgenden steht eine 0 in der ersten Stelle dafür, dass vor dem
        * Einfügemarker kein Text mehr steht (der Marker also am Anfang des
        * Absatzes ist). Eine 0 an der zweiten Stelle steht dafür, dass hinter
        * dem Einfügemarker kein Text mehr folgt (der Einfügemarker also am Ende
-       * des Absatzes steht).
+       * des Absatzes steht). Ein "T" an dritter Stelle gibt an, dass hinter dem
+       * Absatz des Einfügemarkers eine Tabelle folgt. Ein "E" an dritter Stelle
+       * gibt an, dass hinter dem Cursor das Dokument aufhört und kein weiterer
+       * Absatz kommt.
        * 
        * Startmarke: Grundsätzlich gibt es die folgenden Fälle zu unterscheiden.
-       * Ein "T" an dritter Stelle gibt an, dass hinter dem Absatz des
-       * Einfügemarkers eine Tabelle folgt.
        * 
        * 00: Einfügemarker und Zeilenumbruch DAHINTER löschen
        * 
@@ -826,6 +843,8 @@ public class DocumentCommandInterpreter
        * Endmarke: Es gibt die folgenden Fälle:
        * 
        * 00: Einfügemarker und Zeilenumbruch DAHINTER löschen
+       * 
+       * 00E: Einfügemarker und Zeilenumbruch DAVOR löschen
        * 
        * 01, 10, 11: Einfügemarker löschen
        * 
@@ -846,7 +865,17 @@ public class DocumentCommandInterpreter
       }
 
       cursor = cmd.getEndMark();
-      if (cursor[0].isStartOfParagraph() && cursor[1].isEndOfParagraph())
+
+      // Cursor1 nach rechts und links zappeln lassen um zu prüfen, ob er am
+      // Ende des Dokuments steht.
+      boolean isEndOfDocument = !cursor[1].goRight((short) 1, false);
+      if (!isEndOfDocument) cursor[1].goLeft((short) 1, false);
+
+      if (removeAnLastEmptyParagraph == false) isEndOfDocument = false;
+
+      if (cursor[0].isStartOfParagraph()
+          && cursor[1].isEndOfParagraph()
+          && !isEndOfDocument)
       {
         muellmaenner.add(new ParagraphMuellmann(cursor[1]));
       }
@@ -895,29 +924,6 @@ public class DocumentCommandInterpreter
         Logger.error(e);
       }
     }
-  }
-
-  /**
-   * Veranlasst alle Dokumentkommandos in der Reihenfolge einer Tiefensuche ihre
-   * InsertMarks zu löschen.
-   */
-  public int cleanInsertMarks(DocumentCommandTree tree)
-  {
-    model.setLockControllers(true);
-
-    // Das Löschen muss mit einer Tiefensuche, aber in umgekehrter Reihenfolge
-    // ablaufen, da sonst leere Bookmarks (Ausdehnung=0) durch das Entfernen der
-    // INSERT_MARKs im unmittelbar darauffolgenden Bookmark ungewollt gelöscht
-    // werden. Bei der umgekehrten Reihenfolge tritt dieses Problem nicht auf.
-    Iterator i = tree.depthFirstIterator(true);
-    while (i.hasNext())
-    {
-      DocumentCommand cmd = (DocumentCommand) i.next();
-      cmd.cleanInsertMarks();
-    }
-
-    model.setLockControllers(false);
-    return 0;
   }
 
   /**
@@ -994,7 +1000,15 @@ public class DocumentCommandInterpreter
       }
       catch (java.lang.Exception e)
       {
-        insertErrorField(cmd, e);
+        if (cmd.isManualMode())
+          WollMuxSingleton.showInfoModal(
+              "WollMux-Fehler",
+              "Das Textfragment mit der ID '"
+                  + cmd.getFragID()
+                  + "' konnte nicht eingefügt werden.\n\n"
+                  + e);
+        else
+          insertErrorField(cmd, e);
         cmd.setErrorState(true);
         return 1;
       }
@@ -1398,7 +1412,6 @@ public class DocumentCommandInterpreter
       cmd.setDoneState(true);
       return 0;
     }
-    
 
     public int executeCommand(DraftOnly cmd)
     {

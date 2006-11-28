@@ -439,34 +439,23 @@ abstract public class DocumentCommand
   }
 
   /**
-   * Hat das DocumentCommand über createInsertCursor Einfügemarken erzeugt,
-   * werden diese aus dem Dokumentkommando gelöscht.
+   * Liefert true zurück, wenn das Dokumentkommando insertMarks besitzt, die
+   * zuvor über den Aufruf von createInsertCursor() erzeugt worden sind,
+   * ansonsten false.
    */
-  public void cleanInsertMarks()
+  public boolean hasInsertMarks()
   {
-    if (hasInsertMarks)
-    {
-      XTextRange range = bookmark.getTextRange();
-      if (range != null)
-      {
+    return hasInsertMarks;
+  }
 
-        // INSERT_MARKs mit Hilfe eines Cursors von links und rechts löschen
-        XTextCursor cursor;
-
-        // INSERT_MARK links löschen:
-        cursor = range.getText().createTextCursorByRange(range.getStart());
-        cursor.goRight(getStartMarkLength(), true);
-        Bookmark.removeTextFromInside(bookmark.getDocument(), cursor);
-        // cursor.setString("");
-
-        // INSERT_MARK rechts löschen:
-        cursor = range.getText().createTextCursorByRange(range.getEnd());
-        cursor.goLeft(getEndMarkLength(), true);
-        Bookmark.removeTextFromInside(bookmark.getDocument(), cursor);
-        // cursor.setString("");
-        hasInsertMarks = false;
-      }
-    }
+  /**
+   * Teilt dem Dokumentkommando mit, dass die insertMarks des Dokumentkommandos
+   * entfernt wurden und hasInsertMarks() in Folge dessen false zurück liefern
+   * muss.
+   */
+  public void unsetHasInsertMarks()
+  {
+    this.hasInsertMarks = false;
   }
 
   /**

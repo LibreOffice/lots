@@ -298,7 +298,7 @@ public class WollMuxEventHandler
       {
         msg += "\n\n" + c;
       }
-      showInfoModal("WollMux-Fehler", msg);
+      WollMuxSingleton.showInfoModal("WollMux-Fehler", msg);
     }
 
     /**
@@ -1948,7 +1948,7 @@ public class WollMuxEventHandler
                            + "\nWenn dieses Problem nicht temporärer "
                            + "Natur ist, sollten Sie diese Datensätze aus "
                            + "ihrer Absenderliste löschen und neu hinzufügen!";
-          showInfoModal("WollMux-Info", message);
+          WollMuxSingleton.showInfoModal("WollMux-Info", message);
         }
       }
     }
@@ -2389,7 +2389,7 @@ public class WollMuxEventHandler
           {
           }
         }
-        showInfoModal(
+        WollMuxSingleton.showInfoModal(
             blockname + "-Block entfernen",
             "Der ausgewählte Block enthielt bereits eine Markierung als '"
                 + blockname
@@ -2399,9 +2399,11 @@ public class WollMuxEventHandler
       {
         // neuen Block anlegen
         new Bookmark(bookmarkName, doc, range);
-        showInfoModal("Block einfügen", "Der ausgewählte Block wurde als '"
-                                        + blockname
-                                        + "'-Block markiert.");
+        WollMuxSingleton.showInfoModal(
+            "Block einfügen",
+            "Der ausgewählte Block wurde als '"
+                + blockname
+                + "'-Block markiert.");
       }
 
       // PrintBlöcke neu einlesen:
@@ -2940,54 +2942,6 @@ public class WollMuxEventHandler
 
   // *******************************************************************************************
   // Globale Helper-Methoden
-
-  /**
-   * Diese Methode erzeugt einen Swing-Dialog zur Anzeige von Informationen.
-   * 
-   * @param sTitle
-   * @param sMessage
-   */
-  private static void showInfoModal(java.lang.String sTitle,
-      java.lang.String sMessage)
-  {
-    try
-    {
-      // zu lange Strings umbrechen:
-      final int MAXCHARS = 50;
-      String formattedMessage = "";
-      String[] lines = sMessage.split("\n");
-      for (int i = 0; i < lines.length; i++)
-      {
-        String[] words = lines[i].split(" ");
-        int chars = 0;
-        for (int j = 0; j < words.length; j++)
-        {
-          String word = words[j];
-          if (chars > 0 && chars + word.length() > MAXCHARS)
-          {
-            formattedMessage += "\n";
-            chars = 0;
-          }
-          formattedMessage += word + " ";
-          chars += word.length() + 1;
-        }
-        if (i != lines.length - 1) formattedMessage += "\n";
-      }
-
-      // infobox ausgeben:
-      Common.setLookAndFeelOnce();
-
-      JOptionPane pane = new JOptionPane(formattedMessage,
-          javax.swing.JOptionPane.INFORMATION_MESSAGE);
-      JDialog dialog = pane.createDialog(null, sTitle);
-      dialog.setAlwaysOnTop(true);
-      dialog.setVisible(true);
-    }
-    catch (java.lang.Exception e)
-    {
-      Logger.error(e);
-    }
-  }
 
   private static ConfigThingy requireLastSection(ConfigThingy cf,
       String sectionName) throws ConfigurationErrorException

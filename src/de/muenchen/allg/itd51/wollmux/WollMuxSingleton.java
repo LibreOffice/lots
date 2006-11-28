@@ -43,6 +43,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Vector;
 
+import javax.swing.JDialog;
+import javax.swing.JOptionPane;
+
 import com.sun.star.container.XEnumeration;
 import com.sun.star.frame.XDispatch;
 import com.sun.star.frame.XDispatchProvider;
@@ -64,6 +67,7 @@ import de.muenchen.allg.itd51.wollmux.db.DJDatasetListElement;
 import de.muenchen.allg.itd51.wollmux.db.DatasetNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
 import de.muenchen.allg.itd51.wollmux.db.QueryResults;
+import de.muenchen.allg.itd51.wollmux.dialog.Common;
 import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.func.PrintFunctionLibrary;
@@ -634,6 +638,57 @@ public class WollMuxSingleton implements XPALProvider
   public static void checkURL(URL url) throws IOException
   {
     url.openStream().close();
+  }
+
+  /**
+   * Diese Methode erzeugt einen modalen Swing-Dialog zur Anzeige von
+   * Informationen und kehrt erst nach Beendigung des Dialogs wieder zurück.
+   * 
+   * @param sTitle
+   *          Titelzeile des Dialogs
+   * @param sMessage
+   *          die Nachricht, die im Dialog angezeigt werden soll.
+   */
+  public static void showInfoModal(java.lang.String sTitle,
+      java.lang.String sMessage)
+  {
+    try
+    {
+      // zu lange Strings umbrechen:
+      final int MAXCHARS = 50;
+      String formattedMessage = "";
+      String[] lines = sMessage.split("\n");
+      for (int i = 0; i < lines.length; i++)
+      {
+        String[] words = lines[i].split(" ");
+        int chars = 0;
+        for (int j = 0; j < words.length; j++)
+        {
+          String word = words[j];
+          if (chars > 0 && chars + word.length() > MAXCHARS)
+          {
+            formattedMessage += "\n";
+            chars = 0;
+          }
+          formattedMessage += word + " ";
+          chars += word.length() + 1;
+        }
+        if (i != lines.length - 1) formattedMessage += "\n";
+      }
+
+      // infobox ausgeben:
+      Common.setLookAndFeelOnce();
+
+      JOptionPane pane = new JOptionPane(formattedMessage,
+          javax.swing.JOptionPane.INFORMATION_MESSAGE);
+      JDialog dialog = pane.createDialog(null, sTitle);
+      dialog.setAlwaysOnTop(true);
+      dialog.setVisible(true);
+    }
+    catch (java.lang.Exception e)
+    {
+      Logger.error(e);
+    }
   }
 
   /**
