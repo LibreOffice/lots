@@ -37,17 +37,21 @@ import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 
 /**
- * Die VisibleTextFragmentList repräsentiert die ausgewertete Liste aller in den
- * Konfigurationsdateien beschriebener "Textfragmente" Abschnitte. Sie kümmert
- * sich insbesondere um das Auswerten der Variablen in den URL-Attributen und um
- * die Beachtung der Vorrangregelung: Immer das zuletzt definierte Textfragment
- * oder die zuletzt definierte Variable gewinnt.
+ * TODO: überarbeiten! Die VisibleTextFragmentList repräsentiert die
+ * ausgewertete Liste aller in den Konfigurationsdateien beschriebener
+ * "Textfragmente" Abschnitte. Sie kümmert sich insbesondere um das Auswerten
+ * der Variablen in den URL-Attributen und um die Beachtung der Vorrangregelung:
+ * Immer das zuletzt definierte Textfragment oder die zuletzt definierte
+ * Variable gewinnt.
  * 
  * @author Christoph Lutz (D-III-ITD 5.1)
  * 
  */
 public class VisibleTextFragmentList
 {
+
+  // TODO: Alles rausnehmen, was nicht mehr benötigt wird! z.B. alle Felder hier
+  // und der Konstruktor.
 
   /**
    * Speichert die Wurzel des Konfigurationsbaumes, um später Variablen auflösen
@@ -112,6 +116,7 @@ public class VisibleTextFragmentList
 
   /**
    * TODO: dok
+   * 
    * @param node
    * @param root
    * @return
@@ -196,8 +201,10 @@ public class VisibleTextFragmentList
   }
 
   /**
-   * Gibt die URLs des unter der frag_id definierten Textfragmente zurück. 
-   * @param frag_id  Die ID des gesuchten Textfragments.
+   * Gibt die URLs des unter der frag_id definierten Textfragmente zurück.
+   * 
+   * @param frag_id
+   *          Die ID des gesuchten Textfragments.
    * @return die URL des unter der frag_id definierten Textfragments.
    */
   public static Vector getURLsByID(String frag_id)
@@ -233,8 +240,8 @@ public class VisibleTextFragmentList
         }
         catch (NodeNotFoundException e)
         {
-          Logger.error("FRAG_ID Angabe fehlt in " +
-          mappingConf.stringRepresentation());
+          Logger.error("FRAG_ID Angabe fehlt in "
+                       + mappingConf.stringRepresentation());
           continue;
         }
 
@@ -255,19 +262,21 @@ public class VisibleTextFragmentList
 
           while (URLIterator.hasNext())
           {
-            ConfigThingy url_next = (ConfigThingy)URLIterator.next();
+            ConfigThingy url_next = (ConfigThingy) URLIterator.next();
             try
             {
-              String urlStr =  expandVariable(url_next,conf);
-              urlStr = frag_id.replaceAll(frag_idConf,urlStr);
+              String urlStr = expandVariable(url_next, conf);
+              urlStr = frag_id.replaceAll(frag_idConf, urlStr);
               urls.add(urlStr);
             }
             catch (EndlessLoopException e)
             {
-              Logger.error("Die URL zum Textfragment '" + mappingConf.stringRepresentation() + "' mit der FRAG_ID '"
-                  + frag_id
-                  + "' ist fehlerhaft.", e);
-              }
+              Logger.error("Die URL zum Textfragment '"
+                           + mappingConf.stringRepresentation()
+                           + "' mit der FRAG_ID '"
+                           + frag_id
+                           + "' ist fehlerhaft.", e);
+            }
           }
         }
       }
