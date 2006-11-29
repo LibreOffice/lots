@@ -2926,9 +2926,20 @@ public class WollMuxEventHandler
     {
       XTextCursor viewCursor = WollMuxSingleton.getInstance()
           .getTextDocumentModel(doc).getViewCursor();
-      TextModule.createInsertFragFromIdentifier(doc, viewCursor);
+      boolean atLeastOne = TextModule.createInsertFragFromIdentifier(
+          doc,
+          viewCursor);
+      if (atLeastOne)
+      {
+        handleReprocessTextDocument(doc);
+      }
+      else
+      {
+        WollMuxSingleton.showInfoModal(
+            "WollMux-Fehler",
+            "An der Einfügestelle konnte kein Textbaustein gefunden werden.");
+      }
 
-      handleReprocessTextDocument(doc);
     }
 
     public String toString()

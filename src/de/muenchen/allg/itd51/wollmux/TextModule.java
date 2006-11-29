@@ -39,18 +39,23 @@ public class TextModule
 {
   /**
    * Sucht ab der Stelle range rückwarts nach gültigen Textfragmentbezeichnern
-   * mit Argumenten und legt um jedes einzufügenden Textbaustein ein
-   * Dokumentkommando 'insertFrag' mit den gefundenen Argumenten.
+   * mit Argumenten, legt um jedes einzufügenden Textbaustein ein
+   * Dokumentkommando 'insertFrag' mit den gefundenen Argumenten und liefert
+   * true zurück wenn mind. ein Dokumentenkommando erzeugt wurde.
    * 
    * @param doc
    *          Aktuelle Textdocument in dem gesucht werden soll
    * @param range
-   * @param conf
+   *          Stelle in der nach Textfragmentbezeichnern gesucht werden soll.
+   *          Die Stelle kann ein markierter Bereich sein oder ein kollabierter
+   *          Cursor von dem rückwärts bis zur ersten Zeile die kein
+   *          Textfragment enthält gesucht wird. Meistens handelt es sich um den
+   *          viewCursor.
    */
-  public static void createInsertFragFromIdentifier(XTextDocument doc,
+  public static boolean createInsertFragFromIdentifier(XTextDocument doc,
       XTextRange range)
   {
-
+    boolean result = false;
     ConfigThingy conf = WollMuxSingleton.getInstance().getWollmuxConf();
 
     // holt sich Textbausteine aus .conf und sammelt sie in umgekehrter
@@ -93,6 +98,7 @@ public class TextModule
         matchedInLine = true;
         createInsertFrag(doc, cursor, results);
         cursor.collapseToStart();
+        result = true;
       }
 
       if (cursor.isStartOfParagraph())
@@ -116,6 +122,8 @@ public class TextModule
       if (!completeContent.equals("")
           && completeContent.equals(collectedContent)) evaluateNext = false;
     } while (evaluateNext);
+
+    return result;
   }
 
   /**
@@ -270,7 +278,7 @@ public class TextModule
       }
       werte.addChild(wm_args);
     }
-    
+
     ConfigThingy wm_mode = new ConfigThingy("MODE");
     werte.addChild(wm_mode);
 
@@ -279,7 +287,7 @@ public class TextModule
 
     ConfigThingy wm_frag_id_entry = new ConfigThingy(args[0]);
     wm_frag_id.addChild(wm_frag_id_entry);
-    
+
     ConfigThingy wm_mode_entry = new ConfigThingy("manual");
     wm_mode.addChild(wm_mode_entry);
 

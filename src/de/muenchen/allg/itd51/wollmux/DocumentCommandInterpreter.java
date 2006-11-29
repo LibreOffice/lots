@@ -981,7 +981,7 @@ public class DocumentCommandInterpreter
         if (urls.size() == 0)
         {
           throw new ConfigurationErrorException(
-              "Argument URL fehlt in Textfragment \"" + cmd.getFragID() + "\"!");
+              "Das Textfragment mit der FRAG_ID '" + cmd.getFragID() + "' ist nicht definiert!");
         }
         urlStr = (String) urls.elementAt(0);
 
