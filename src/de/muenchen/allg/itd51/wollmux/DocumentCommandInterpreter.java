@@ -971,44 +971,70 @@ public class DocumentCommandInterpreter
     {
       repeatScan = true;
       cmd.setErrorState(false);
+      boolean found = false;
+      String errors = "";
+      Vector urls = new Vector();
+
       try
       {
-        // Fragment-URL holen und aufbereiten. Kontext ist der DEFAULT_CONTEXT.
-        // TODO urls richtig einbinden nicht nur 1. Attribute anzeigen
-        Vector urls = new Vector();
-        String urlStr = null;
         urls = VisibleTextFragmentList.getURLsByID(cmd.getFragID());
         if (urls.size() == 0)
         {
           throw new ConfigurationErrorException(
-              "Das Textfragment mit der FRAG_ID '" + cmd.getFragID() + "' ist nicht definiert!");
+              "Das Textfragment mit der FRAG_ID '"
+                  + cmd.getFragID()
+                  + "' ist nicht definiert!");
         }
-        urlStr = (String) urls.elementAt(0);
+        //
+        Iterator iter = urls.iterator();
+        while (iter.hasNext() && found == false)
+        {
+          String urlStr = (String) iter.next();
+          try
+          {
+            URL url = new URL(mux.getDEFAULT_CONTEXT(), urlStr);
 
-        URL url = new URL(mux.getDEFAULT_CONTEXT(), urlStr);
+            Logger.debug("Füge Textfragment \""
+                         + cmd.getFragID()
+                         + "\" von URL \""
+                         + url.toExternalForm()
+                         + "\" ein.");
 
-        Logger.debug("Füge Textfragment \""
-                     + cmd.getFragID()
-                     + "\" von URL \""
-                     + url.toExternalForm()
-                     + "\" ein.");
-
-        // fragment einfügen:
-        insertDocumentFromURL(cmd, url);
-        fillPlaceholders(model.getViewCursor(), cmd.getTextRange(), cmd
-            .getArgs());
+            // fragment einfügen:
+            insertDocumentFromURL(cmd, url);
+            found = true;
+            fillPlaceholders(model.getViewCursor(), cmd.getTextRange(), cmd
+                .getArgs());
+          }
+          catch (java.lang.Exception e)
+          {
+            // Exception wird nicht beachtet. Wenn die aktuelle URL nicht
+            // funktioniert wird die nächste URL ausgewertet
+            errors += e.getLocalizedMessage() + "\n\n";
+            Logger.debug(e);
+          }
+        }
+        if (!found)
+        {
+          throw new Exception(errors);
+        }
       }
       catch (java.lang.Exception e)
       {
         if (cmd.isManualMode())
+        {
           WollMuxSingleton.showInfoModal(
               "WollMux-Fehler",
-              "Das Textfragment mit der ID '"
+              "Das Textfragment mit der FRAG_ID '"
                   + cmd.getFragID()
-                  + "' konnte nicht eingefügt werden.\n\n"
-                  + e);
+                  + "' konnte nicht eingefügt werden:\n\n"
+                  + e.getMessage());
+        }
         else
+        {
           insertErrorField(cmd, e);
+          Logger.error(e);
+        }
         cmd.setErrorState(true);
         return 1;
       }
