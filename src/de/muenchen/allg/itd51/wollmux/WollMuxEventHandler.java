@@ -1054,6 +1054,7 @@ public class WollMuxEventHandler
       // werden nach argsUrlStr aufgelöst.
       String loadUrlStr = "";
       String[] fragUrls = new String[fragIDs.size() - 1];
+      String urlStr = "";
 
       Iterator iter = fragIDs.iterator();
       for (int i = 0; iter.hasNext(); ++i)
@@ -1061,77 +1062,79 @@ public class WollMuxEventHandler
         String frag_id = (String) iter.next();
 
         // Fragment-URL holen und aufbereiten:
-        String urlStr;
         Vector urls = new Vector();
-        try
-        {
-          urls = VisibleTextFragmentList.getURLsByID(frag_id);
-          if (urls.size() == 0)
-          {
-            throw new ConfigurationErrorException(
-                "Argument URL fehlt in Textfragment \"" + frag_id + "\"!");
-          }
 
-          urlStr = (String) urls.elementAt(0);
-        }
-        catch (java.lang.Exception e)
+        urls = VisibleTextFragmentList.getURLsByID(frag_id);
+        if (urls.size() == 0)
         {
           throw new WollMuxFehlerException(
               "Die URL zum Textfragment mit der FRAG_ID '"
                   + frag_id
-                  + "' kann nicht bestimmt werden.", e);
-        }
-        URL url;
-        try
-        {
-          url = new URL(mux.getDEFAULT_CONTEXT(), urlStr);
-          urlStr = url.toExternalForm();
-        }
-        catch (MalformedURLException e)
-        {
-          throw new WollMuxFehlerException(
-              "Die URL '"
-                  + urlStr
-                  + "' des Textfragments mit der FRAG_ID '"
-                  + frag_id
-                  + "' ist ungültig.", e);
+                  + "' kann nicht bestimmt werden:",
+              new ConfigurationErrorException(
+                  "Das Textfragment mit der FRAG_ID '"
+                      + frag_id
+                      + "' ist nicht definiert!"));
         }
 
-        // URL durch den URL-Transformer jagen
-        urlStr = UNO.getParsedUNOUrl(urlStr).Complete;
+        // Nur die erste funktionierende URL verwenden. Dazu werden alle URL zu
+        // dieser FRAG_ID geprüft und in die Variablen loadUrlStr und fragUrls
+        // übernommen.
+        String errors = "";
+        boolean found = false;
+        Iterator iterUrls = urls.iterator();
+        while (iterUrls.hasNext() && !found)
+        {
+          urlStr = (String) iterUrls.next();
 
-        // Workaround für Fehler in insertDocumentFromURL: Prüfen ob URL
-        // aufgelöst werden kann, da sonst der insertDocumentFromURL einfriert.
-        try
-        {
-          url = new URL(urlStr);
+          // URL erzeugen und prüfen, ob sie aufgelöst werden kann
+          URL url;
+          try
+          {
+            url = new URL(mux.getDEFAULT_CONTEXT(), urlStr);
+            urlStr = UNO.getParsedUNOUrl(url.toExternalForm()).Complete;
+            url = new URL(urlStr);
+            WollMuxSingleton.checkURL(url);
+          }
+          catch (MalformedURLException e)
+          {
+            Logger.debug(e);
+            errors += "Die URL '"
+                      + urlStr
+                      + "' ist ungültig:\n"
+                      + e.getLocalizedMessage()
+                      + "\n\n";
+            continue;
+          }
+          catch (IOException e)
+          {
+            Logger.error(e);
+            errors += e.getLocalizedMessage() + "\n\n";
+            continue;
+          }
+
+          found = true;
         }
-        catch (MalformedURLException e)
+
+        if (!found)
         {
-          // darf nicht auftreten, da url bereits oben geprüft wurde...
-          Logger.error(e);
-        }
-        try
-        {
-          WollMuxSingleton.checkURL(url);
-        }
-        catch (IOException e)
-        {
-          Logger.error(e);
           throw new WollMuxFehlerException(
-              "Fehler beim Laden des Fragments mit der FRAG_ID '"
+              "Das Textfragment mit der FRAG_ID '"
                   + frag_id
-                  + "' von der URL '"
-                  + url.toExternalForm()
-                  + "'\n", e);
+                  + "' kann nicht aufgelöst werden:\n\n"
+                  + errors);
         }
 
         // URL in die in loadUrlStr (zum sofort öffnen) und in argsUrlStr (zum
         // später öffnen) aufnehmen
         if (i == 0)
+        {
           loadUrlStr = urlStr;
+        }
         else
+        {
           fragUrls[i - 1] = urlStr;
+        }
       }
 
       // open document as Template (or as document):
@@ -1148,6 +1151,7 @@ public class WollMuxEventHandler
       }
       catch (java.lang.Exception x)
       {
+        // sollte eigentlich nicht auftreten, da bereits oben geprüft.
         throw new WollMuxFehlerException("Die Vorlage mit der URL '"
                                          + loadUrlStr
                                          + "' kann nicht geöffnet werden.", x);
