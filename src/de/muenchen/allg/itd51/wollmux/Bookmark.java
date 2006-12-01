@@ -40,7 +40,6 @@ import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextRange;
 import com.sun.star.text.XTextRangeCompare;
 import com.sun.star.uno.Exception;
-import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoService;
@@ -54,11 +53,11 @@ import de.muenchen.allg.afid.UnoService;
 public class Bookmark
 {
   /**
-   * Wird festgestellt, dass das Bookmark aus dem Dokument gelöscht wurde, so wird der
-   * Name auf diesen String gesetzt (== vergleichbar).
+   * Wird festgestellt, dass das Bookmark aus dem Dokument gelöscht wurde, so
+   * wird der Name auf diesen String gesetzt (== vergleichbar).
    */
   public static final String BROKEN = "WM(CMD'bookmarkBroken')";
-  
+
   /**
    * Enthält den Namen des Bookmarks
    */
@@ -202,23 +201,27 @@ public class Bookmark
   {
     return name;
   }
-  
+
   /**
    * Setzt den ViewCursor auf dieses Bookmark.
    * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TESTED
+   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public void select()
   {
     UnoService bm = getBookmarkService(getName(), document);
     if (bm.getObject() != null)
     {
-      try{
-        XTextRange anchor = bm.xTextContent().getAnchor(); 
+      try
+      {
+        XTextRange anchor = bm.xTextContent().getAnchor();
         XTextRange cursor = anchor.getText().createTextCursorByRange(anchor);
-        UNO.XTextViewCursorSupplier(document.xModel().getCurrentController()).getViewCursor().gotoRange(cursor, false);
-      }catch(java.lang.Exception x){}
+        UNO.XTextViewCursorSupplier(document.xModel().getCurrentController())
+            .getViewCursor().gotoRange(cursor, false);
+      }
+      catch (java.lang.Exception x)
+      {
+      }
     }
   }
 
@@ -336,10 +339,7 @@ public class Bookmark
     // +4 = AAAABBBB bzw. AA88BB
 
     XTextRangeCompare compare = null;
-    if (a != null)
-      compare = (XTextRangeCompare) UnoRuntime.queryInterface(
-          XTextRangeCompare.class,
-          a.getText());
+    if (a != null) compare = UNO.XTextRangeCompare(a.getText());
     if (compare != null && a != null && b != null)
     {
       try
@@ -359,30 +359,30 @@ public class Bookmark
   }
 
   /**
-   * Diese Methode benennt dieses Bookmark in newName um. Ist der
-   * Name bereits definiert, so wird automatisch eine Nummer
-   * an den Namen angehängt. Die Methode gibt den tatsächlich erzeugten Bookmarknamen zurück.
+   * Diese Methode benennt dieses Bookmark in newName um. Ist der Name bereits
+   * definiert, so wird automatisch eine Nummer an den Namen angehängt. Die
+   * Methode gibt den tatsächlich erzeugten Bookmarknamen zurück.
    * 
-   * @return den tatsächlich erzeugten Namen des Bookmarks. Falls das Bookmark verschwunden
-   *         ist, so wird das Objekt {@link #BROKEN} zurückgeliefert (== vergleichbar). 
+   * @return den tatsächlich erzeugten Namen des Bookmarks. Falls das Bookmark
+   *         verschwunden ist, so wird das Objekt {@link #BROKEN}
+   *         zurückgeliefert (== vergleichbar).
    * @throws Exception
    */
   public String rename(String newName)
   {
     XNameAccess bookmarks = UNO.XBookmarksSupplier(document.getObject())
-    .getBookmarks();
-    
-      // Um OOo nicht zu stressen vermeiden wir unnötige Renames
-      // Wir testen aber trotzdem ob das Bookmark BROKEN ist
-    if (name.equals(newName)) 
+        .getBookmarks();
+
+    // Um OOo nicht zu stressen vermeiden wir unnötige Renames
+    // Wir testen aber trotzdem ob das Bookmark BROKEN ist
+    if (name.equals(newName))
     {
-      if (!bookmarks.hasByName(name))
-        name = BROKEN;
-      return name; 
+      if (!bookmarks.hasByName(name)) name = BROKEN;
+      return name;
     }
-    
+
     Logger.debug("Rename \"" + name + "\" --> \"" + newName + "\"");
-    
+
     if (bookmarks.hasByName(newName))
     {
       int count = 1;

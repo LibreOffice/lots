@@ -42,6 +42,7 @@ import com.sun.star.beans.PropertyValue;
 import com.sun.star.container.NoSuchElementException;
 import com.sun.star.container.XEnumeration;
 import com.sun.star.container.XEnumerationAccess;
+import com.sun.star.container.XNameAccess;
 import com.sun.star.io.IOException;
 import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.text.XParagraphCursor;
@@ -49,6 +50,9 @@ import com.sun.star.text.XTextContent;
 import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextField;
 import com.sun.star.text.XTextRange;
+import com.sun.star.text.XTextRangeCompare;
+import com.sun.star.text.XTextSection;
+import com.sun.star.text.XTextSectionsSupplier;
 import com.sun.star.uno.Exception;
 
 import de.muenchen.allg.afid.UNO;
@@ -630,7 +634,7 @@ public class DocumentCommandInterpreter
 
     public void pdf()
     {
-      // TODO WollMuxEventHandler.handleExportAsPDF(textDocumentModel);
+      UNO.dispatch(textDocumentModel.doc, ".uno:ExportToPDF");
     }
   }
 
@@ -733,14 +737,17 @@ public class DocumentCommandInterpreter
 
     private class ParagraphMuellmann extends Muellmann
     {
-      public ParagraphMuellmann(XTextRange range)
+      XTextSectionsSupplier suppl;
+
+      public ParagraphMuellmann(XTextRange range, XTextSectionsSupplier suppl)
       {
         super(range);
+        this.suppl = suppl;
       }
 
       public void tueDeinePflicht()
       {
-        deleteParagraph(range);
+        deleteParagraph(range, suppl);
       }
     }
 
@@ -787,7 +794,8 @@ public class DocumentCommandInterpreter
         // Start des Textbereiches zurück gesetzt wird. Im Falle der
         // automatischen Einfügung sollen aber ein leer Paragraph am Ende
         // gelöscht werden.
-        collectSurroundingGarbageForCommand(cmd, cmd.isManualMode());
+        collectSurroundingGarbageForCommand(cmd, UNO
+            .XTextSectionsSupplier(model.doc), cmd.isManualMode());
       }
       cmd.unsetHasInsertMarks();
       return 0;
@@ -797,7 +805,8 @@ public class DocumentCommandInterpreter
     {
       if (cmd.hasInsertMarks())
       {
-        collectSurroundingGarbageForCommand(cmd, false);
+        collectSurroundingGarbageForCommand(cmd, UNO
+            .XTextSectionsSupplier(model.doc), false);
       }
       cmd.unsetHasInsertMarks();
       return 0;
@@ -814,7 +823,7 @@ public class DocumentCommandInterpreter
      * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
      */
     private void collectSurroundingGarbageForCommand(DocumentCommand cmd,
-        boolean removeAnLastEmptyParagraph)
+        XTextSectionsSupplier suppl, boolean removeAnLastEmptyParagraph)
     {
       /*
        * Im folgenden steht eine 0 in der ersten Stelle dafür, dass vor dem
@@ -848,41 +857,58 @@ public class DocumentCommandInterpreter
        * 
        * 01, 10, 11: Einfügemarker löschen
        * 
+       * Ein Sonderfall ist der Fall, in dem der Inhalt des Dokumentkommandos
+       * leer ist und das Dokumentkommando das einzige Element eines Paragraphen
+       * ist. In diesem Fall wird der Paragraph gelöscht.
        * 
        */
-      XParagraphCursor[] cursor = cmd.getStartMark();
-      if (cursor == null) return;
+      XParagraphCursor[] start = cmd.getStartMark();
+      XParagraphCursor[] end = cmd.getEndMark();
+      if (start == null || end == null) return;
 
-      if (cursor[0].isStartOfParagraph() && cursor[1].isEndOfParagraph())
+      // Sonderfall: leerer Inhalt alleine im Paragraph
+      if (start[0].isStartOfParagraph() && end[1].isEndOfParagraph())
       {
-        muellmaenner.add(new ParagraphMuellmann(cursor[1]));
+        XParagraphCursor content = UNO.XParagraphCursor(start[1].getText()
+            .createTextCursorByRange(start[1]));
+        content.gotoRange(end[0], true);
+        if (content.isCollapsed())
+        {
+          muellmaenner.add(new ParagraphMuellmann(start[1], suppl));
+          return;
+        }
+      }
+
+      // Startmarke auswerten:
+      if (start[0].isStartOfParagraph() && start[1].isEndOfParagraph())
+      {
+        muellmaenner.add(new ParagraphMuellmann(start[1], suppl));
       }
       else
       // if start mark is not the only text in the paragraph
       {
-        cursor[1].goLeft((short) 1, true);
-        muellmaenner.add(new RangeMuellmann(cursor[1]));
+        start[1].goLeft((short) 1, true);
+        muellmaenner.add(new RangeMuellmann(start[1]));
       }
 
-      cursor = cmd.getEndMark();
-
-      // Cursor1 nach rechts und links zappeln lassen um zu prüfen, ob er am
-      // Ende des Dokuments steht.
-      boolean isEndOfDocument = !cursor[1].goRight((short) 1, false);
-      if (!isEndOfDocument) cursor[1].goLeft((short) 1, false);
+      // Endemarke auswerten:
+      // cursor end[1] nach rechts und links zappeln lassen um zu prüfen, ob er
+      // am Ende des Dokuments steht.
+      boolean isEndOfDocument = !end[1].goRight((short) 1, false);
+      if (!isEndOfDocument) end[1].goLeft((short) 1, false);
 
       if (removeAnLastEmptyParagraph == false) isEndOfDocument = false;
 
-      if (cursor[0].isStartOfParagraph()
-          && cursor[1].isEndOfParagraph()
+      if (end[0].isStartOfParagraph()
+          && end[1].isEndOfParagraph()
           && !isEndOfDocument)
       {
-        muellmaenner.add(new ParagraphMuellmann(cursor[1]));
+        muellmaenner.add(new ParagraphMuellmann(end[1], suppl));
       }
       else
       {
-        cursor[0].goRight(cmd.getEndMarkLength(), true);
-        muellmaenner.add(new RangeMuellmann(cursor[0]));
+        end[0].goRight(cmd.getEndMarkLength(), true);
+        muellmaenner.add(new RangeMuellmann(end[0]));
       }
     }
 
@@ -891,7 +917,7 @@ public class DocumentCommandInterpreter
      * 
      * @param range
      */
-    private void deleteParagraph(XTextRange range)
+    private void deleteParagraph(XTextRange range, XTextSectionsSupplier tsSuppl)
     {
       // Beim Löschen des Absatzes erzeugt OOo ein ungewolltes
       // "Zombie"-Bookmark.
@@ -913,10 +939,42 @@ public class DocumentCommandInterpreter
           Logger.error(e);
         }
       }
+      if (paragraph == null) return;
+
+      // Vergleichen, ob paragraph.getAnchor() eine TextSection vollständig
+      // ausfüllt und ggf. die entsprechende TextSection löschen.
+      if (tsSuppl != null)
+      {
+        XTextRange anchor = paragraph.getAnchor();
+        XTextRangeCompare comp = UNO.XTextRangeCompare(anchor.getText());
+
+        XNameAccess sections = tsSuppl.getTextSections();
+        String[] sectionNames = sections.getElementNames();
+        for (int i = 0; i < sectionNames.length; i++)
+        {
+          try
+          {
+            XTextSection section = UNO.XTextSection(sections
+                .getByName(sectionNames[i]));
+            if (comp.compareRegionEnds(anchor, section.getAnchor()) == 0
+                && comp.compareRegionStarts(anchor, section.getAnchor()) == 0)
+              anchor.getText().removeTextContent(UNO.XTextContent(section));
+          }
+          catch (java.lang.Exception e)
+          {
+          }
+        }
+      }
 
       // Lösche den Paragraph
-      if (paragraph != null) try
+      try
       {
+        // Ist der Paragraph der einzige Paragraph des Textes, dann kann er mit
+        // removeTextContent nicht gelöscht werden. In diesme Fall wird hier
+        // wenigstens der Inhalt entfernt:
+        paragraph.getAnchor().setString("");
+
+        // Paragraph löschen
         range.getText().removeTextContent(paragraph);
       }
       catch (NoSuchElementException e)
