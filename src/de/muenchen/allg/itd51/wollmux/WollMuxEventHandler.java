@@ -1098,7 +1098,7 @@ public class WollMuxEventHandler
           }
           catch (MalformedURLException e)
           {
-            Logger.debug(e);
+            Logger.log(e);
             errors += "Die URL '"
                       + urlStr
                       + "' ist ungültig:\n"
@@ -1108,7 +1108,7 @@ public class WollMuxEventHandler
           }
           catch (IOException e)
           {
-            Logger.error(e);
+            Logger.log(e);
             errors += e.getLocalizedMessage() + "\n\n";
             continue;
           }

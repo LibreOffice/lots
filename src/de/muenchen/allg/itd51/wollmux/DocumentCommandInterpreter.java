@@ -1151,13 +1151,9 @@ public class DocumentCommandInterpreter
 
       // wenn weniger Parameter als Einfügestellen angegeben wurden wird nach
       // dem Einfügen des Textbaustein und füllen der Argumente, die erste
-      // unausgefüllte Einfügestelle markiert. Wenn mehr Platzhalter angegeben
-      // als Einfügestellen vorhanden, erscheint eine Fehlermeldung.
-
+      // unausgefüllte Einfügestelle markiert.
       if (placeholders.size() > args.size())
       {
-        // TODO selber konfigurierbare Fehlermeldung nach dem Einfügen
-
         if (firstEmptyPlaceholder == false)
         {
           XTextField textField = (XTextField) UNO.XTextField(placeholders
@@ -1168,6 +1164,38 @@ public class DocumentCommandInterpreter
         }
       }
 
+      // Wenn mehr Platzhalter angegeben als Einfügestellen vorhanden, erscheint
+      // ein Eintrag in der wollmux.log. Wenn in einer Conf Datei im Bereich
+      // Textbausteine dort im Bereich Warnungen ein Eintrag mit
+      // MSG_TOO_MANY_ARGS "true|on|1" ist, erscheint die Fehlermeldung in einem
+      // Fenster im Writer.
+      if (placeholders.size() < args.size())
+      {
+
+        String error = ("Es sind mehr Parameter angegeben als Platzhalter vorhanden sind");
+
+        Logger.error(error);
+
+        ConfigThingy conf = mux.getWollmuxConf();
+        ConfigThingy WarnungenConf = conf.query("Textbausteine").query(
+            "Warnung");
+
+        String message = "";
+        try
+        {
+          message = WarnungenConf.getLastChild().toString();
+        }
+        catch (NodeNotFoundException e)
+        {
+        }
+
+        if (message.equals("true")
+            || message.equals("on")
+            || message.equals("1"))
+        {
+          WollMuxSingleton.showInfoModal("WollMux", error);
+        }
+      }
     }
 
     /**
