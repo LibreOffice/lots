@@ -2956,6 +2956,53 @@ public class WollMuxEventHandler
   }
 
   // *******************************************************************************************
+
+  /**
+   * Erzeugt ein neues WollMuxEvent, das signasisiert, das der nächste
+   * Platzhalter ausgehend vom Cursor angesprungen wird * Das Event wird von
+   * WollMux.dispatch(...) geworfen z.B über Druck eines Tastenkuerzels oder
+   * Druck auf den Knopf der OOo-Symbolleiste ein
+   * "wollmux:PlatzhalterAnspringen" dispatch erfolgte.
+   */
+  public static void handlePlatzhalterAnspringen(XTextDocument doc)
+  {
+    handle(new OnPlatzhalterAnspringen(doc));
+  }
+
+  private static class OnPlatzhalterAnspringen extends BasicEvent
+  {
+    private XTextDocument doc;
+
+    public OnPlatzhalterAnspringen(XTextDocument doc)
+    {
+      this.doc = doc;
+    }
+
+    protected void doit() throws WollMuxFehlerException
+    {
+      XTextCursor viewCursor = WollMuxSingleton.getInstance()
+          .getTextDocumentModel(doc).getViewCursor();
+
+      try
+      {
+        TextModule.jumpPlaceholders(viewCursor);
+      }
+      catch (java.lang.Exception e)
+      {
+        Logger.error(e);
+      }
+    }
+
+    public String toString()
+    {
+      return this.getClass().getSimpleName()
+             + "(#"
+             + doc.hashCode()
+             + ", viewCursor)";
+    }
+  }
+
+  // *******************************************************************************************
   // Globale Helper-Methoden
 
   private static ConfigThingy requireLastSection(ConfigThingy cf,

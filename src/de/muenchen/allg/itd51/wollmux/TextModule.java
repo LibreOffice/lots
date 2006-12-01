@@ -20,10 +20,18 @@ package de.muenchen.allg.itd51.wollmux;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Vector;
 
+import com.sun.star.container.XEnumeration;
+import com.sun.star.container.XEnumerationAccess;
+import com.sun.star.container.XNameAccess;
 import com.sun.star.text.XParagraphCursor;
+import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
+import com.sun.star.text.XTextField;
+import com.sun.star.text.XTextFieldsSupplier;
 import com.sun.star.text.XTextRange;
+import com.sun.star.uno.Exception;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
@@ -250,8 +258,11 @@ public class TextModule
    * ARGS('<args[1]>' '...' '<args[n]>')" im Dokument doc an der Stelle range.
    * 
    * @param doc
+   *          Aktuelles Textdokument
    * @param range
+   *          Stelle an der das Bookmark gesetzt werden soll
    * @param args
+   *          Übergebene Parameter
    */
   public static void createInsertFrag(XTextDocument doc, XTextRange range,
       String[] args)
@@ -296,5 +307,91 @@ public class TextModule
     Logger.debug2("Erzeuge Bookmark: '" + bookmarkName + "'");
 
     new Bookmark(bookmarkName, doc, range);
+  }
+
+  /**
+   * Methode springt ab dem aktuellen viewCursor von einem Platzhalterfeld zum
+   * nächsten und fängt dann nochmal von vorne an
+   * 
+   * @param viewCursor
+   *          Aktueller ViewCursor im Dokument
+   */
+  public static void jumpPlaceholders(XTextCursor viewCursor)
+  {
+    boolean found = false;
+
+    XTextCursor cursor = UNO.XTextCursor(viewCursor.getText()
+        .createTextCursorByRange(viewCursor.getEnd()));
+
+    cursor.gotoRange(cursor.getText().getEnd(), true);
+
+    for (int i = 0; i < 2 && found == false; i++)
+    {
+      XEnumeration xEnum = UNO.XEnumerationAccess(cursor).createEnumeration();
+      XEnumerationAccess enuAccess;
+
+      // Schleife über den Textbereich
+      while (xEnum.hasMoreElements() && found == false)
+      {
+        Object ele = null;
+        try
+        {
+          ele = xEnum.nextElement();
+        }
+        catch (Exception e)
+        {
+          continue;
+        }
+        enuAccess = UNO.XEnumerationAccess(ele);
+        if (enuAccess != null) // ist wohl ein SwXParagraph
+        {
+          XEnumeration textPortionEnu = enuAccess.createEnumeration();
+          // Schleife über SwXParagraph und schauen ob es Platzhalterfelder gibt
+          // diese diese werden dann im Vector placeholders gesammelt
+          while (textPortionEnu.hasMoreElements() && found == false)
+          {
+            Object textPortion;
+            try
+            {
+              textPortion = textPortionEnu.nextElement();
+            }
+            catch (java.lang.Exception x)
+            {
+              continue;
+            }
+            String textPortionType = (String) UNO.getProperty(
+                textPortion,
+                "TextPortionType");
+            // Wenn es ein Textfeld ist
+            if (textPortionType.equals("TextField"))
+            {
+              XTextField textField = null;
+              try
+              {
+                textField = UNO.XTextField(UNO.getProperty(
+                    textPortion,
+                    "TextField"));
+                // Wenn es ein Platzhalterfeld ist, dem Vector placeholders
+                // hinzufügen
+
+                if (UNO.supportsService(
+                    textField,
+                    "com.sun.star.text.TextField.JumpEdit"))
+                {
+                  viewCursor.gotoRange(textField.getAnchor(), false);
+                  found = true;
+                }
+              }
+              catch (java.lang.Exception e)
+              {
+                continue;
+              }
+            }
+          }
+        }
+      }
+      cursor = UNO.XTextCursor(viewCursor.getText().createTextCursorByRange(
+          cursor.getText()));
+    }
   }
 }
