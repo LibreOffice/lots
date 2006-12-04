@@ -892,10 +892,14 @@ public class DocumentCommandInterpreter
       }
 
       // Endemarke auswerten:
-      // cursor end[1] nach rechts und links zappeln lassen um zu prüfen, ob er
-      // am Ende des Dokuments steht.
-      boolean isEndOfDocument = !end[1].goRight((short) 1, false);
-      if (!isEndOfDocument) end[1].goLeft((short) 1, false);
+
+      // Prüfen ob der Cursor am Ende des Dokuments steht. Anmerkung: hier kann
+      // nicht der bereits vorhandene cursor end[1] zum Testen verwendet werden,
+      // weil dieser durch den goRight verändert würde. Man könnte ihn zwar mit
+      // goLeft nachträglich wieder zurück schieben, aber das funzt nicht wenn
+      // danach eine Tabelle kommt.
+      XParagraphCursor docEndTest = cmd.getEndMark()[1];
+      boolean isEndOfDocument = !docEndTest.goRight((short) 1, false);
 
       if (removeAnLastEmptyParagraph == false) isEndOfDocument = false;
 
