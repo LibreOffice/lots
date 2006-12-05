@@ -20,16 +20,13 @@ package de.muenchen.allg.itd51.wollmux;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Vector;
 
 import com.sun.star.container.XEnumeration;
 import com.sun.star.container.XEnumerationAccess;
-import com.sun.star.container.XNameAccess;
 import com.sun.star.text.XParagraphCursor;
 import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextField;
-import com.sun.star.text.XTextFieldsSupplier;
 import com.sun.star.text.XTextRange;
 import com.sun.star.uno.Exception;
 
