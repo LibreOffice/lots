@@ -15,6 +15,7 @@
 *                  | MATCH.getString() kann jetzt Function.ERROR liefern
 * 31.05.2006 | BNK | +getFunctionDialogReferences()
 * 26.07.2006 | BNK | +REPLACE-Grundfunktion
+* 05.12.2006 | BNK | WollMuxFiles.getClassLoader() wird für ExternalFunctions übergeben.
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -42,6 +43,7 @@ import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.Logger;
+import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.dialog.Dialog;
 import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
 
@@ -634,7 +636,7 @@ public class FunctionFactory
 
     public ExternalFunctionFunction(ConfigThingy conf) throws ConfigurationErrorException
     {
-      func = new ExternalFunction(conf);
+      func = new ExternalFunction(conf, WollMuxFiles.getClassLoader());
     }
     
     public String[] parameters()

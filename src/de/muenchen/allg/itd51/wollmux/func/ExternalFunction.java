@@ -9,6 +9,8 @@
 * Datum      | Wer | Änderungsgrund
 * -------------------------------------------------------------------
 * 25.01.2006 | BNK | Erstellung
+* 05.12.2006 | BNK | ClassLoader kann übergeben werden
+*                  | +invoke(Object[])
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -57,11 +59,23 @@ public class ExternalFunction
   
   /**
    * Erzeugt aus einem ConfigThingy (übergeben wird der EXTERN-Knoten) eine
-   * ExternalFunction.
+   * ExternalFunction, wobei zum Laden von Java-Klassen der selbe ClassLoader wie für das
+   * Laden dieser Klasse verwendet wird. 
    * @throws ConfigurationErrorException falls die Spezifikation in conf fehlerhaft ist.
    * TESTED */
   public ExternalFunction(ConfigThingy conf) throws ConfigurationErrorException
   {
+    this(conf, null);
+  }
+  
+  /**
+   * Erzeugt aus einem ConfigThingy (übergeben wird der EXTERN-Knoten) eine
+   * ExternalFunction, wobei zum Laden von Java-Klassen classLoader verwendet wird.
+   * @throws ConfigurationErrorException falls die Spezifikation in conf fehlerhaft ist.
+   * TESTED */
+  public ExternalFunction(ConfigThingy conf, ClassLoader classLoader) throws ConfigurationErrorException
+  {
+    if (classLoader == null) classLoader = this.getClass().getClassLoader();
     String url;
     try{
       url = conf.get("URL").toString();
@@ -76,7 +90,7 @@ public class ExternalFunction
       {
         String classStr = url.substring(5,url.lastIndexOf('.'));
         String methodStr = url.substring(url.lastIndexOf('.')+1);
-        Class c = this.getClass().getClassLoader().loadClass(classStr);
+        Class c = classLoader.loadClass(classStr);
         Method[] methods = c.getDeclaredMethods();
         for (int i = 0; i < methods.length; ++i)
           if (methods[i].getName().equals(methodStr))
@@ -145,6 +159,21 @@ public class ExternalFunction
     Object[] args = new Object[params.length];
     for (int i = 0; i < params.length; ++i)
       args[i] = parameters.getString(params[i]);
+    return invoke(args);
+  }
+
+  /**
+   * Ruft die Funktion auf mit den Argumenten args. 
+   * @param args muss für jeden der von {@link #parameters()} gelieferten
+   *        Namen einen Wert enthalten. 
+   * @return den Wert des Funktionsaufrufs oder null falls es ein Problem gab, das
+   *         nicht zu einer Exception geführt hat.
+   * @throws Exception falls ein Problem auftritt
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED
+   */
+  private Object invoke(Object[] args) throws Exception
+  {
     short[][] aOutParamIndex = new short[][]{new short[0]};
     Object[][] aOutParam = new Object[][]{new Object[0]};
     if (script != null) 

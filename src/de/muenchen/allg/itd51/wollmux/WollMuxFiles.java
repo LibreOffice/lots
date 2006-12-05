@@ -17,6 +17,7 @@
  * 07.09.2006 | BNK | isDebugMode effizienter gemacht.
  * 21.09.2006 | BNK | Unter Windows nach c:\programme\wollmux\wollmux.conf schauen
  * 19.10.2006 | BNK | +dumpInfo()
+ * 05.12.2006 | BNK | +getClassPath()
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -37,6 +38,7 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -65,6 +67,7 @@ public class WollMuxFiles
 {
   private static final String ETC_WOLLMUX_WOLLMUX_CONF = "/etc/wollmux/wollmux.conf";
   private static final String C_PROGRAMME_WOLLMUX_WOLLMUX_CONF = "C:\\Programme\\wollmux\\wollmux.conf";
+  private static final WollMuxClassLoader classLoader = new WollMuxClassLoader();
 
   /**
    * Die in der wollmux.conf mit DEFAULT_CONTEXT festgelegte URL.
@@ -231,6 +234,8 @@ public class WollMuxFiles
 
     determineDefaultContext();
 
+    initClassLoader();
+    
     initDebugMode();
 
     setLookAndFeel();
@@ -468,6 +473,57 @@ public class WollMuxFiles
     else
       debugMode = false;
   }
+  
+  /**
+   * Parst die CLASSPATH Direktiven und hängt für jede eine weitere URL an den
+   * Suchpfad von {@link #classLoader} an.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TODO Testen
+   */
+  private static void initClassLoader()
+  {
+    ConfigThingy conf = getWollmuxConf().query("CLASSPATH",1);
+    Iterator parentiter = conf.iterator();
+    while (parentiter.hasNext())
+    {
+      ConfigThingy CLASSPATHconf = (ConfigThingy)parentiter.next();
+      Iterator iter = CLASSPATHconf.iterator();
+      while (iter.hasNext())
+      {
+        String urlStr = iter.next().toString();
+        try
+        {
+          URL url = new URL(getDEFAULT_CONTEXT(), urlStr);
+          classLoader.addURL(url);
+        }
+        catch (MalformedURLException e)
+        {
+          Logger.error("Fehlerhafte CLASSPATH-Angabe: \""+urlStr+"\"", e);
+        }
+      }
+    }
+    
+    StringBuilder urllist = new StringBuilder();
+    URL[] urls = classLoader.getURLs();
+    for (int i = 0; i < urls.length; ++i)
+    {
+      urllist.append(urls[i].toExternalForm());
+      urllist.append("  ");
+    }
+    
+    Logger.debug("CLASSPATH="+urllist);
+  }
+  
+  /**
+   * Liefert einen ClassLoader, der die in wollmux,conf gesetzten CLASSPATH-Direktiven
+   * berücksichtigt.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public static ClassLoader getClassLoader()
+  {
+    return classLoader;
+  }
 
   /**
    * Parst die "Funktionsdialoge" Abschnitte aus conf und liefert als Ergebnis
@@ -689,6 +745,19 @@ public class WollMuxFiles
     catch(IOException x)
     {
       Logger.error("Fehler beim Erstellen des Dumps",x);
+    }
+  }
+  
+  private static class WollMuxClassLoader extends URLClassLoader
+  {
+    public WollMuxClassLoader()
+    {
+      super(new URL[]{});
+    }
+    
+    public void addURL(URL url)
+    {
+      super.addURL(url);
     }
   }
 
