@@ -17,16 +17,10 @@
  */
 package de.muenchen.allg.itd51.wollmux.func;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
-
-import com.sun.star.script.provider.XScript;
-
-import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
-import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.Logger;
+import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
 
 /**
@@ -36,17 +30,8 @@ import de.muenchen.allg.itd51.wollmux.XPrintModel;
  */
 public class PrintFunction
 {
-  /**
-   * Falls die Funktion eine Funktion des Scripting Frameworks ist, ist hier die
-   * Referenz auf das Skript gespeichert.
-   */
-  private XScript script = null;
 
-  /**
-   * Falls die Funktion eine statische Java-Methode ist, so wird hier die
-   * Referenz auf diese gespeichert.
-   */
-  private Method method = null;
+  private ExternalFunction func = null;
 
   /**
    * Erzeugt aus einem ConfigThingy (übergeben wird der EXTERN-Knoten) eine
@@ -57,56 +42,7 @@ public class PrintFunction
    */
   public PrintFunction(ConfigThingy conf) throws ConfigurationErrorException
   {
-    String url;
-    try
-    {
-      url = conf.get("URL").toString();
-    }
-    catch (NodeNotFoundException x)
-    {
-      throw new ConfigurationErrorException("URL fehlt in EXTERN");
-    }
-
-    try
-    {
-      if (url.startsWith("java:"))
-      {
-        String classStr = url.substring(5, url.lastIndexOf('.'));
-        String methodStr = url.substring(url.lastIndexOf('.') + 1);
-        Class c = this.getClass().getClassLoader().loadClass(classStr);
-        Method[] methods = c.getDeclaredMethods();
-
-        for (int i = 0; i < methods.length; ++i)
-        {
-          Method m = methods[i];
-          if (!m.getName().equals(methodStr)) continue;
-
-          // Typ des ersten (und einzigen Parameters) prüfen:
-          Type[] types = m.getParameterTypes();
-          if (types.length != 1) continue;
-
-          if (types[0].equals(XPrintModel.class)) method = m;
-        }
-
-        if (method == null)
-          throw new ConfigurationErrorException(
-              "Klasse \""
-                  + classStr
-                  + "\" enthält keine Methode namens \""
-                  + methodStr
-                  + "(XPrintModel model)\"");
-      }
-      else
-      {
-        script = UNO.masterScriptProvider.getScript(url);
-      }
-    }
-    catch (Exception e)
-    {
-      throw new ConfigurationErrorException("Skript \""
-                                            + url
-                                            + "\" nicht verfügbar", e);
-    }
+    func = new ExternalFunction(conf, WollMuxFiles.getClassLoader());
   }
 
   /**
@@ -122,48 +58,19 @@ public class PrintFunction
   public void invoke(XPrintModel pmod)
   {
     final Object[] args = new Object[] { pmod };
-    final short[][] aOutParamIndex = new short[][] { new short[0] };
-    final Object[][] aOutParam = new Object[][] { new Object[0] };
-
-    Thread externPrintFuncThread = null;
-
-    if (script != null)
+    new Thread(new Runnable()
     {
-      externPrintFuncThread = new Thread(new Runnable()
+      public void run()
       {
-        public void run()
+        try
         {
-          try
-          {
-            script.invoke(args, aOutParamIndex, aOutParam);
-          }
-          catch (java.lang.Exception e)
-          {
-            Logger.error(e);
-          }
+          func.invoke(args);
         }
-      });
-    }
-
-    else if (method != null)
-    {
-      externPrintFuncThread = new Thread(new Runnable()
-      {
-        public void run()
+        catch (java.lang.Exception e)
         {
-          try
-          {
-            method.invoke(null, args);
-          }
-          catch (java.lang.Exception e)
-          {
-            Logger.error(e);
-          }
+          Logger.error(e);
         }
-      });
-    }
-
-    // Thread starten:
-    if (externPrintFuncThread != null) externPrintFuncThread.start();
+      }
+    }).start();
   }
 }

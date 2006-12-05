@@ -172,7 +172,7 @@ public class ExternalFunction
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
-  private Object invoke(Object[] args) throws Exception
+  public Object invoke(Object[] args) throws Exception
   {
     short[][] aOutParamIndex = new short[][]{new short[0]};
     Object[][] aOutParam = new Object[][]{new Object[0]};
