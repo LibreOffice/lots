@@ -986,7 +986,7 @@ public class ConfigThingy
     
     private String parseUnicode(StringBuilder str, int idx)
     {
-      if (idx + 4 >= str.length()) throw new IllegalArgumentException("Incomplete %u escape!");
+      if (idx + 4 > str.length()) throw new IllegalArgumentException("Incomplete %u escape!");
       String code = str.substring(idx, idx + 4);
       try{
         char ch = (char)Integer.parseInt(code, 16);
