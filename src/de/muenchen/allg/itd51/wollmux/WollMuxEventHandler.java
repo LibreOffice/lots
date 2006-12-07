@@ -2102,6 +2102,12 @@ public class WollMuxEventHandler
     {
       if (doc == null) return;
 
+      // Ziffern anpassung der Sachleitenden Verfügungen durlaufen lassen, um zu
+      // erkennen, wenn Verfügungspunkte manuell aus dem Dokument gelöscht
+      // wurden ohne die entsprechenden Knöpfe zum Einfügen/Entfernen von
+      // Ziffern zu drücken.
+      SachleitendeVerfuegung.ziffernAnpassen(doc);
+
       PrintFunction printFunc = null;
 
       TextDocumentModel model = WollMuxSingleton.getInstance()
