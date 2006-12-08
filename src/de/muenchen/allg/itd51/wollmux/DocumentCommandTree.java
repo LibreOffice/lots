@@ -56,6 +56,7 @@ import de.muenchen.allg.itd51.wollmux.DocumentCommand.InvalidCommandException;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.NotInOriginal;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.RootElement;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.SetGroups;
+import de.muenchen.allg.itd51.wollmux.DocumentCommand.SetJumpMark;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.SetPrintFunction;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.SetType;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.UpdateFields;
@@ -272,6 +273,11 @@ public class DocumentCommandTree
       else if (cmd.compareToIgnoreCase("allVersions") == 0)
       {
         return new DocumentCommand.AllVersions(wmCmd, bookmark);
+      }
+
+      else if (cmd.compareToIgnoreCase("setJumpMark") == 0)
+      {
+        return new DocumentCommand.SetJumpMark(wmCmd, bookmark);
       }
 
       throw new InvalidCommandException("Unbekanntes Kommando \"" + cmd + "\"");
@@ -543,6 +549,11 @@ public class DocumentCommandTree
     }
 
     public int executeCommand(AllVersions cmd)
+    {
+      return 0;
+    }
+
+    public int executeCommand(SetJumpMark cmd)
     {
       return 0;
     }

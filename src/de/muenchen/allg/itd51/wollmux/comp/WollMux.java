@@ -467,7 +467,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
         Logger.debug2("Dispatch: Aufruf von WollMux:PlatzhalterAnspringen");
         XTextDocument doc = UNO
             .XTextDocument(UNO.desktop.getCurrentComponent());
-        WollMuxEventHandler.handlePlatzhalterAnspringen(doc);
+        WollMuxEventHandler.handleJumpToPlaceholder(doc);
       }
     }
   }

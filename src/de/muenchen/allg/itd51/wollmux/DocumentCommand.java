@@ -799,6 +799,8 @@ abstract public class DocumentCommand
     public int executeCommand(DocumentCommand.NotInOriginal cmd);
 
     public int executeCommand(DocumentCommand.AllVersions cmd);
+
+    public int executeCommand(DocumentCommand.SetJumpMark cmd);
   }
 
   // ********************************************************************************
@@ -1634,6 +1636,31 @@ abstract public class DocumentCommand
     protected boolean canHaveChilds()
     {
       return true;
+    }
+
+    public int execute(DocumentCommand.Executor visitable)
+    {
+      return visitable.executeCommand(this);
+    }
+  }
+
+  // ********************************************************************************
+  /**
+   * Falls nach dem Einfügen eines Textbausteines keine Einfügestelle vorhanden
+   * ist wird die Marke 'setJumpMark' falls vorhanden angesprungen. Wird auch
+   * falls vorhanden und keine Platzhalter vorhanden ist, mit
+   * PlatzhalterAnspringen angesprungen.
+   */
+  static public class SetJumpMark extends DocumentCommand
+  {
+    public SetJumpMark(ConfigThingy wmCmd, Bookmark bookmark)
+    {
+      super(wmCmd, bookmark);
+    }
+
+    protected boolean canHaveChilds()
+    {
+      return false;
     }
 
     public int execute(DocumentCommand.Executor visitable)

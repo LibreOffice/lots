@@ -22,6 +22,7 @@ import java.awt.event.ActionListener;
 import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Set;
 import java.util.Vector;
 import java.util.regex.Pattern;
@@ -52,6 +53,7 @@ import com.sun.star.view.DocumentZoomType;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
+import de.muenchen.allg.itd51.wollmux.DocumentCommand.SetJumpMark;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.SetPrintFunction;
 import de.muenchen.allg.itd51.wollmux.FormFieldFactory.FormField;
 import de.muenchen.allg.itd51.wollmux.dialog.FormGUI;
@@ -214,6 +216,13 @@ public class TextDocumentModel
   private Vector allVersionsBlocks;
 
   /**
+   * Enthält eine LinkedListe aller setJumpMark-Dokumentkommandos des Dokuments,
+   * die angesprungen werden falls nach dem Einfügen von Textbausteinen keine
+   * Einfügestelle vorhanden ist.
+   */
+  private LinkedList jumpMarks;
+
+  /**
    * Über die Methode registerWollMuxDispatchInterceptor() wird hier der aktuell
    * auf dem Frame registrierte WollMuxDispatchInterceptor abgelegt, der für das
    * Abfangen von Dispatches wie z.B. dem .uno:Print erforderlich ist.
@@ -244,6 +253,7 @@ public class TextDocumentModel
     this.formGUI = null;
 
     resetPrintBlocks();
+    resetJumpMarks();
 
     registerCloseListener();
 
@@ -278,6 +288,16 @@ public class TextDocumentModel
     this.notInOriginalBlocks = new Vector();
     this.draftOnlyBlocks = new Vector();
     this.allVersionsBlocks = new Vector();
+  }
+
+  /**
+   * Veranlasst das TextDocumentModel alle bisher erkannten Blöcke 'setJumpMark'
+   * zu vergessen. Danach können die Blöcke mit add<Blockname>Blocks(...) neu
+   * hinzugefügt werden.
+   */
+  public void resetJumpMarks()
+  {
+    this.jumpMarks = new LinkedList();
   }
 
   /**
@@ -692,6 +712,39 @@ public class TextDocumentModel
   public Iterator getAllVersionsBlocksIterator()
   {
     return allVersionsBlocks.iterator();
+  }
+
+  /**
+   * Fügt der Liste der setJumpMark-Kommandos dieses Dokuments ein weiteres
+   * Dokumentkommando cmd dieses Typs hinzu.
+   * 
+   * @param cmd
+   *          das hinzuzufügende Dokumentkommando
+   */
+  public void addSetJumpMarkBlock(DocumentCommand.SetJumpMark cmd)
+  {
+    jumpMarks.add(cmd);
+  }
+
+  /**
+   * Liefert eine SetJumpMark zurück, der das erste
+   * setJumpMark-Dokumentkommandos dieses Dokuments enthält oder null falls kein
+   * solches Dokumentkommando vorhanden ist.
+   * 
+   * @return Liefert eine SetJumpMark zurück, der das erste
+   *         setJumpMark-Dokumentkommandos dieses Dokuments enthält oder null
+   *         falls kein solches Dokumentkommando vorhanden ist.
+   */
+  public SetJumpMark getFirstJumpMark()
+  {
+    try
+    {
+      return (SetJumpMark) jumpMarks.removeFirst();
+    }
+    catch (Exception e)
+    {
+      return null;
+    }
   }
 
   /**

@@ -2417,7 +2417,6 @@ public class WollMuxEventHandler
       }
 
       // PrintBlöcke neu einlesen:
-      model.resetPrintBlocks();
       DocumentCommandInterpreter dci = new DocumentCommandInterpreter(model,
           mux);
       dci.scanDocumentSettings();
@@ -2970,16 +2969,16 @@ public class WollMuxEventHandler
    * Druck auf den Knopf der OOo-Symbolleiste ein
    * "wollmux:PlatzhalterAnspringen" dispatch erfolgte.
    */
-  public static void handlePlatzhalterAnspringen(XTextDocument doc)
+  public static void handleJumpToPlaceholder(XTextDocument doc)
   {
-    handle(new OnPlatzhalterAnspringen(doc));
+    handle(new OnJumpToPlaceholder(doc));
   }
 
-  private static class OnPlatzhalterAnspringen extends BasicEvent
+  private static class OnJumpToPlaceholder extends BasicEvent
   {
     private XTextDocument doc;
 
-    public OnPlatzhalterAnspringen(XTextDocument doc)
+    public OnJumpToPlaceholder(XTextDocument doc)
     {
       this.doc = doc;
     }
@@ -2991,11 +2990,83 @@ public class WollMuxEventHandler
 
       try
       {
-        TextModule.jumpPlaceholders(viewCursor);
+        TextModule.jumpPlaceholders(doc, viewCursor);
       }
       catch (java.lang.Exception e)
       {
         Logger.error(e);
+      }
+    }
+
+    public String toString()
+    {
+      return this.getClass().getSimpleName()
+             + "(#"
+             + doc.hashCode()
+             + ", viewCursor)";
+    }
+  }
+
+  // *******************************************************************************************
+
+  /**
+   * Erzeugt ein neues WollMuxEvent, das signasisiert, das die nächste Marke
+   * 'setJumpMark' angesprungen werden soll. Wird im
+   * DocumentCommandInterpreter.DocumentExpander.fillPlaceholders aufgerufen
+   * wenn nach dem Einfügen von Textbausteine keine Einfügestelle vorhanden ist
+   * aber eine Marke 'setJumpMark'
+   */
+  public static void handleJumpToMark(XTextDocument doc, boolean msg)
+  {
+    handle(new OnJumpToMark(doc, msg));
+  }
+
+  private static class OnJumpToMark extends BasicEvent
+  {
+    private XTextDocument doc;
+
+    private boolean msg;
+
+    public OnJumpToMark(XTextDocument doc, boolean msg)
+    {
+      this.doc = doc;
+      this.msg = msg;
+    }
+
+    protected void doit() throws WollMuxFehlerException
+    {
+
+      TextDocumentModel model = WollMuxSingleton.getInstance()
+          .getTextDocumentModel(doc);
+
+      XTextCursor viewCursor = model.getViewCursor();
+      if (viewCursor == null) return;
+
+      DocumentCommand cmd = model.getFirstJumpMark();
+
+      if (cmd != null)
+      {
+        try
+        {
+          viewCursor.gotoRange(cmd.getTextRange(), false);
+        }
+        catch (java.lang.Exception e)
+        {
+          Logger.error(e);
+        }
+
+        // Bookmark löschen:
+        cmd.setDoneState(true);
+        cmd.updateBookmark(false);
+      }
+      else
+      {
+        if (msg)
+        {
+          WollMuxSingleton.showInfoModal(
+              "WollMux",
+              "Kein Platzhalter und kein Marke 'setJumpMark' vorhanden!");
+        }
       }
     }
 

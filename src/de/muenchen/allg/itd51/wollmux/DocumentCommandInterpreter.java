@@ -48,6 +48,7 @@ import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.text.XParagraphCursor;
 import com.sun.star.text.XTextContent;
 import com.sun.star.text.XTextCursor;
+import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextField;
 import com.sun.star.text.XTextRange;
 import com.sun.star.text.XTextRangeCompare;
@@ -65,6 +66,7 @@ import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertContent;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertFormValue;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertFrag;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.NotInOriginal;
+import de.muenchen.allg.itd51.wollmux.DocumentCommand.SetJumpMark;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.SetPrintFunction;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.SetType;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.UpdateFields;
@@ -143,6 +145,10 @@ public class DocumentCommandInterpreter
     // neu ausgelesen, daher müssen sie vorher im Model zurückgesetzt werden.
     model.resetPrintBlocks();
 
+    // Der Blocke 'setJumpMark' wird hier neu ausgelesen, daher müssen sie
+    // vorher im Model zurückgesetzt werden.
+    model.resetJumpMarks();
+
     new DocumentSettingsScanner().execute(tree);
 
     model.setDocumentModified(false);
@@ -185,6 +191,10 @@ public class DocumentCommandInterpreter
     // Die Print-Blöcke (AllVersions, DraftOnly und NotInOriginal) werden hier
     // neu ausgelesen, daher müssen sie vorher im Model zurückgesetzt werden.
     model.resetPrintBlocks();
+
+    // Der Blocke 'setJumpMark' wird hier neu ausgelesen, daher müssen sie
+    // vorher im Model zurückgesetzt werden.
+    model.resetJumpMarks();
 
     errors += new MainProcessor().execute(tree);
 
@@ -697,6 +707,12 @@ public class DocumentCommandInterpreter
       return 0;
     }
 
+    public int executeCommand(SetJumpMark cmd)
+    {
+      model.addSetJumpMarkBlock(cmd);
+      return 0;
+    }
+
   }
 
   /**
@@ -1047,7 +1063,7 @@ public class DocumentCommandInterpreter
                   + cmd.getFragID()
                   + "' ist nicht definiert!");
         }
-        //
+        // Iterator über URLs
         Iterator iter = urls.iterator();
         while (iter.hasNext() && found == false)
         {
@@ -1065,8 +1081,8 @@ public class DocumentCommandInterpreter
             // fragment einfügen:
             insertDocumentFromURL(cmd, url);
             found = true;
-            fillPlaceholders(model.getViewCursor(), cmd.getTextRange(), cmd
-                .getArgs());
+            fillPlaceholders(model.doc, model.getViewCursor(), cmd
+                .getTextRange(), cmd.getArgs());
           }
           catch (java.lang.Exception e)
           {
@@ -1113,8 +1129,8 @@ public class DocumentCommandInterpreter
      * @param args
      *          Argumente die beim Aufruf zum Einfügen übergeben werden
      */
-    private void fillPlaceholders(XTextCursor viewCursor, XTextRange range,
-        Vector args)
+    private void fillPlaceholders(XTextDocument doc, XTextCursor viewCursor,
+        XTextRange range, Vector args)
     {
       // Vector mit allen Platzhalterfelder
       Vector placeholders = new Vector();
@@ -1226,6 +1242,13 @@ public class DocumentCommandInterpreter
         }
       }
 
+      // Wenn nach dem Einfügen keine Platzhalter vorhanden ist springt der
+      // Cursor auf die definierte Marke setJumpMark (falls Vorhanden)
+      if (placeholders.size() <= args.size())
+      {
+        WollMuxEventHandler.handleJumpToMark(doc, false);
+      }
+
       // Wenn mehr Platzhalter angegeben als Einfügestellen vorhanden, erscheint
       // ein Eintrag in der wollmux.log. Wenn in einer Conf Datei im Bereich
       // Textbausteine dort im Bereich Warnungen ein Eintrag mit
@@ -1258,6 +1281,7 @@ public class DocumentCommandInterpreter
           WollMuxSingleton.showInfoModal("WollMux", error);
         }
       }
+
     }
 
     /**
@@ -1544,6 +1568,12 @@ public class DocumentCommandInterpreter
     public int executeCommand(AllVersions cmd)
     {
       model.addAllVersionsBlock(cmd);
+      return 0;
+    }
+
+    public int executeCommand(SetJumpMark cmd)
+    {
+      model.addSetJumpMarkBlock(cmd);
       return 0;
     }
   }

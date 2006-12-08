@@ -313,7 +313,7 @@ public class TextModule
    * @param viewCursor
    *          Aktueller ViewCursor im Dokument
    */
-  public static void jumpPlaceholders(XTextCursor viewCursor)
+  public static void jumpPlaceholders(XTextDocument doc, XTextCursor viewCursor)
   {
     boolean found = false;
 
@@ -389,6 +389,13 @@ public class TextModule
       }
       cursor = UNO.XTextCursor(viewCursor.getText().createTextCursorByRange(
           cursor.getText()));
+    }
+    // Falls kein Platzhalter gefunden wurde wird zur Marke 'setJumpMark'
+    // gesprungen falls vorhanden sonst kommt eine Fehlermeldung -->
+    // Übergabeparameter true
+    if (found == false)
+    {
+      WollMuxEventHandler.handleJumpToMark(doc, true);
     }
   }
 }
