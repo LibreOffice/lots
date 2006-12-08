@@ -110,7 +110,7 @@ public class Standard
   }
 
   /**
-   * Liefert true gdw datum ein korrektes Datum der Form Monat.Tag.Jahr
+   * Liefert true gdw datum ein korrektes Datum der Form Tag.Monat.Jahr
    * ist (wobei Jahr immer 4-stellig sein muss) und das Datum nicht in der Vergangenheit liegt.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -120,7 +120,7 @@ public class Standard
   }
   
   /**
-   * Liefert true gdw datum ein korrektes Datum der Form Monat.Tag.Jahr
+   * Liefert true gdw datum ein korrektes Datum der Form Tag.Monat.Jahr
    * ist (wobei Jahr immer 4-stellig sein muss) und entweder noPast == false ist oder 
    * das Datum nicht in der Vergangenheit liegt.
    * @author Matthias Benkmann (D-III-ITD 5.1)
