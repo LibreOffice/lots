@@ -224,17 +224,11 @@ public class Standard
         tel = vorwahl + " " + tel;
 
       }
+      // Wenn "/" ersetzten durch Leerzeichen dann alle anderen Sonderzeichen löschen
       else
       {
-        for (int i = 0; i < tel.length(); i++)
-        {
-          if (tel.charAt(i) == '/')
-          {
-            tel = tel.replaceAll("\\p{Punct}", "");
-            tel = tel.substring(0, i) + " " + tel.substring(i, tel.length());
-          }
-        }
-
+        tel = tel.replaceAll("/", " ");
+        tel = tel.replaceAll("\\p{Punct}", "");
       }
     }
     return tel;
