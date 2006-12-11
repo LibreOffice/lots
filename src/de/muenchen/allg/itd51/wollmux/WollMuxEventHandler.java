@@ -1355,63 +1355,6 @@ public class WollMuxEventHandler
   // *******************************************************************************************
 
   /**
-   * Erzeugt ein neues WollMuxEvent, das die Druckfunktion zum TextDokument doc
-   * auf die Druckfunktion zurücksetzt, gesetzt war, bevor die Druckfunktion
-   * functionName gesetzt wurde. Die Druckfunktion wird nur zurück gesetzt, wenn
-   * die aktuell gesetzte Druckfunktion functionName entspricht.
-   * 
-   * Wird z.B. in den Sachleitenden Verfügungen verwendet, um auf die
-   * ursprünglich gesetzte Druckfunktion zurück zu schalten, wenn keine
-   * Verfügungspunkte vorhanden sind.
-   * 
-   * @param doc
-   *          Das TextDokument, zu dem die Druckfunktion gesetzt werden soll.
-   * @param functionNameToReset
-   *          der Name der Druckfunktion, die zurück gesetzt werden soll (falls
-   *          sie aktuell gesetzt ist).
-   */
-  public static void handleResetPrintFunction(XTextDocument doc,
-      String functionNameToReset)
-  {
-    handle(new OnResetPrintFunction(doc, functionNameToReset));
-  }
-
-  private static class OnResetPrintFunction extends BasicEvent
-  {
-    private String functionName;
-
-    private XTextDocument doc;
-
-    public OnResetPrintFunction(XTextDocument doc, String functionName)
-    {
-      this.functionName = functionName;
-      this.doc = doc;
-    }
-
-    protected void doit()
-    {
-      TextDocumentModel model = WollMuxSingleton.getInstance()
-          .getTextDocumentModel(doc);
-
-      String currentName = model.getPrintFunctionName();
-      if (currentName != null && currentName.equals(functionName))
-        model.setPrintFunction("");
-    }
-
-    public String toString()
-    {
-      return this.getClass().getSimpleName()
-             + "(#"
-             + doc.hashCode()
-             + ", '"
-             + functionName
-             + "')";
-    }
-  }
-
-  // *******************************************************************************************
-
-  /**
    * Erzeugt ein neues WollMuxEvent, welches dafür sorgt, dass alle
    * Formularfelder Dokument auf den neuen Wert gesetzt werden. Bei
    * Formularfeldern mit TRAFO-Funktion wird die Transformation entsprechend
@@ -2102,16 +2045,16 @@ public class WollMuxEventHandler
     {
       if (doc == null) return;
 
+      TextDocumentModel model = WollMuxSingleton.getInstance()
+          .getTextDocumentModel(doc);
+
       // Ziffern anpassung der Sachleitenden Verfügungen durlaufen lassen, um zu
       // erkennen, wenn Verfügungspunkte manuell aus dem Dokument gelöscht
       // wurden ohne die entsprechenden Knöpfe zum Einfügen/Entfernen von
       // Ziffern zu drücken.
-      SachleitendeVerfuegung.ziffernAnpassen(doc);
+      SachleitendeVerfuegung.ziffernAnpassen(model);
 
       PrintFunction printFunc = null;
-
-      TextDocumentModel model = WollMuxSingleton.getInstance()
-          .getTextDocumentModel(doc);
 
       String printFunctionName = model.getPrintFunctionName();
       if (printFunctionName != null && !printFunctionName.equals(""))
@@ -2232,9 +2175,18 @@ public class WollMuxEventHandler
 
     protected void doit() throws WollMuxFehlerException
     {
-      XTextCursor viewCursor = WollMuxSingleton.getInstance()
-          .getTextDocumentModel(doc).getViewCursor();
-      SachleitendeVerfuegung.verfuegungspunktEinfuegen(doc, viewCursor);
+      if (doc == null) return;
+
+      TextDocumentModel model = WollMuxSingleton.getInstance()
+          .getTextDocumentModel(doc);
+      XTextCursor viewCursor = model.getViewCursor();
+      if (viewCursor != null)
+      {
+        XTextRange vc = SachleitendeVerfuegung.insertVerfuegungspunkt(
+            model,
+            viewCursor);
+        if (vc != null) viewCursor.gotoRange(vc, false);
+      }
     }
 
     public String toString()
@@ -2273,9 +2225,16 @@ public class WollMuxEventHandler
 
     protected void doit() throws WollMuxFehlerException
     {
-      XTextCursor viewCursor = WollMuxSingleton.getInstance()
-          .getTextDocumentModel(doc).getViewCursor();
-      SachleitendeVerfuegung.abdruck(doc, viewCursor);
+      if (doc == null) return;
+
+      TextDocumentModel model = WollMuxSingleton.getInstance()
+          .getTextDocumentModel(doc);
+      XTextCursor viewCursor = model.getViewCursor();
+      if (viewCursor != null)
+      {
+        XTextRange vc = SachleitendeVerfuegung.insertAbdruck(model, viewCursor);
+        if (vc != null) viewCursor.gotoRange(vc, false);
+      }
     }
 
     public String toString()
@@ -2314,9 +2273,16 @@ public class WollMuxEventHandler
 
     protected void doit() throws WollMuxFehlerException
     {
-      XTextCursor viewCursor = WollMuxSingleton.getInstance()
-          .getTextDocumentModel(doc).getViewCursor();
-      SachleitendeVerfuegung.zuleitungszeile(doc, viewCursor);
+      TextDocumentModel model = WollMuxSingleton.getInstance()
+          .getTextDocumentModel(doc);
+      XTextCursor viewCursor = model.getViewCursor();
+      if (viewCursor != null)
+      {
+        XTextRange vc = SachleitendeVerfuegung.insertZuleitungszeile(
+            model,
+            viewCursor);
+        if (vc != null) viewCursor.gotoRange(vc, false);
+      }
     }
 
     public String toString()

@@ -44,6 +44,10 @@ import de.muenchen.allg.itd51.wollmux.dialog.SachleitendeVerfuegungenDruckdialog
 
 public class SachleitendeVerfuegung
 {
+  private static final String CHARACTER_STYLES = "CharacterStyles";
+
+  private static final String PARAGRAPH_STYLES = "ParagraphStyles";
+
   private static final String PRINT_FUNCTION_NAME = "SachleitendeVerfuegung";
 
   private static final String ParaStyleNameVerfuegungspunkt = "WollMuxVerfuegungspunkt";
@@ -52,15 +56,19 @@ public class SachleitendeVerfuegung
 
   private static final String ParaStyleNameAbdruck = "WollMuxVerfuegungspunktAbdruck";
 
+  private static final String ParaStyleNameVerfuegungspunktMitZuleitung = "WollMuxVerfuegungspunktMitZuleitung";
+
   private static final String ParaStyleNameZuleitungszeile = "WollMuxZuleitungszeile";
 
   private static final String ParaStyleNameDefault = "Fließtext";
 
+  private static final String CharStyleNameDefault = "Fließtext";
+
+  private static final String CharStyleNameRoemischeZiffer = "WollMuxRoemischeZiffer";
+
   private static final String FrameNameVerfuegungspunkt1 = "WollMuxVerfuegungspunkt1";
 
-  private static final String zifferOnlyPattern = "^([XIV]+|\\d+)\\.$";
-
-  private static final String zifferPattern = "^([XIV]+|\\d+)\\.\\s*";
+  private static final String zifferPattern = "^([XIV]+|\\d+)\\.\t";
 
   private static boolean firstTime = true;
 
@@ -94,14 +102,16 @@ public class SachleitendeVerfuegung
    * @param range
    *          Die XTextRange, in der sich zum Zeitpunkt des Aufrufs der Cursor
    *          befindet.
+   * @return die Position zurück, auf die der ViewCursor gesetzt werden soll
+   *         oder null, falls der ViewCursor unverändert bleibt.
    */
-  public static void verfuegungspunktEinfuegen(XTextDocument doc,
+  public static XTextRange insertVerfuegungspunkt(TextDocumentModel model,
       XTextRange range)
   {
-    if (doc == null || range == null) return;
+    if (range == null) return null;
 
     // Notwendige Absatzformate definieren (falls nicht bereits definiert)
-    createUsedParagraphStyles(doc);
+    createUsedStyles(model.doc);
 
     // AutoNummerierung abstellen:
     switchOffAutoNumbering();
@@ -111,17 +121,24 @@ public class SachleitendeVerfuegung
 
     // Enthält der markierte Bereich bereits Verfuegungspunkte, so werden diese
     // gelöscht
-    boolean deletedAtLeastOne = alleVerfuegungspunkteLoeschen(cursor);
+    boolean deletedAtLeastOne = removeAllVerfuegungspunkte(cursor);
 
     if (!deletedAtLeastOne)
     {
-      // Wenn kein Verfügungspunkt gelöscht wurde, sollen alle markierten
-      // Paragraphen als Verfuegungspunkte markiert werden.
-      UNO.setProperty(cursor, "ParaStyleName", ParaStyleNameVerfuegungspunkt);
+      // neuen Verfügungspunkt setzen:
+      cursor.collapseToStart();
+      cursor.gotoStartOfParagraph(false);
+      cursor.gotoEndOfParagraph(true);
+      if (isZuleitungszeile(cursor))
+        formatVerfuegungspunktWithZuleitung(cursor);
+      else
+        formatVerfuegungspunkt(cursor);
     }
 
     // Ziffernanpassung durchführen:
-    ziffernAnpassen(doc);
+    ziffernAnpassen(model);
+
+    return null;
   }
 
   /**
@@ -136,13 +153,16 @@ public class SachleitendeVerfuegung
    *          (wird für die Ziffernanpassung benötigt)
    * @param cursor
    *          Der Cursor, in dessen Bereich nach Verfügungspunkten gesucht wird.
+   * @return die Position zurück, auf die der ViewCursor gesetzt werden soll
+   *         oder null, falls der ViewCursor unverändert bleibt.
    */
-  public static void abdruck(XTextDocument doc, XTextRange range)
+  public static XTextRange insertAbdruck(TextDocumentModel model,
+      XTextRange range)
   {
-    if (doc == null || range == null) return;
+    if (range == null) return null;
 
     // Notwendige Absatzformate definieren (falls nicht bereits definiert)
-    createUsedParagraphStyles(doc);
+    createUsedStyles(model.doc);
 
     // AutoNummerierung abstellen:
     switchOffAutoNumbering();
@@ -152,23 +172,32 @@ public class SachleitendeVerfuegung
 
     // Enthält der markierte Bereich bereits Verfuegungspunkte, so werden diese
     // gelöscht
-    boolean deletedAtLeastOne = alleVerfuegungspunkteLoeschen(cursor);
+    boolean deletedAtLeastOne = removeAllAbdruecke(cursor);
 
     if (!deletedAtLeastOne)
     {
-      // Abdruck einfügen, wenn kein Verfügungspunkt gelöscht wurde.
-      cursor.gotoEndOfParagraph(false);
-      int count = countVerfPunkteBefore(doc, cursor) + 1;
+      // Abdruck einfügen, wenn kein Verfügungspunkt gelöscht wurde:
+
+      // Startposition des cursors setzen. Bereiche werden auf den Anfang
+      // kollabiert. Bei Verfügungspunkten wird am Absatzende eingefügt.
+      cursor.collapseToStart();
+      if (isVerfuegungspunkt(cursor)) cursor.gotoEndOfParagraph(false);
+
+      int count = countVerfPunkteBefore(model.doc, cursor) + 1;
       cursor.setString("\r" + abdruckString(count) + "\r");
+      // Falls Cursor auf dem Zeilenanfang stand, wird die Formatierung auf
+      // Standardformatierung gesetzt
+      if (cursor.isStartOfParagraph()) formatDefault(cursor.getStart());
       cursor.gotoNextParagraph(false);
       cursor.gotoEndOfParagraph(true);
-      UNO.setProperty(cursor, "ParaStyleName", ParaStyleNameAbdruck);
-      XTextCursor zifferOnly = getZifferOnly(cursor);
-      UNO.setProperty(zifferOnly, "CharWeight", new Float(FontWeight.BOLD));
+      formatAbdruck(cursor);
+      cursor.gotoNextParagraph(false);
     }
 
     // Ziffern anpassen:
-    ziffernAnpassen(doc);
+    ziffernAnpassen(model);
+
+    return cursor;
   }
 
   /**
@@ -181,76 +210,337 @@ public class SachleitendeVerfuegung
    * @param doc
    *          Das Dokument in dem die sich range befindet.
    * @param range
+   * @return die Position zurück, auf die der ViewCursor gesetzt werden soll
+   *         oder null, falls der ViewCursor unverändert bleibt.
    */
-  public static void zuleitungszeile(XTextDocument doc, XTextRange range)
+  public static XTextRange insertZuleitungszeile(TextDocumentModel model,
+      XTextRange range)
   {
-    if (doc == null || range == null) return;
+    if (range == null) return null;
 
     // Notwendige Absatzformate definieren (falls nicht bereits definiert)
-    createUsedParagraphStyles(doc);
+    createUsedStyles(model.doc);
 
     // AutoNummerierung abstellen:
     switchOffAutoNumbering();
 
     XParagraphCursor cursor = UNO.XParagraphCursor(range.getText()
         .createTextCursorByRange(range));
+    XTextCursor createdZuleitung = null;
 
-    boolean deletedAtLeastOne = alleZuleitungszeilenLoeschen(cursor);
+    boolean deletedAtLeastOne = removeAllZuleitungszeilen(cursor);
 
-    if (!deletedAtLeastOne)
+    if (!deletedAtLeastOne && UNO.XEnumerationAccess(cursor) != null)
     {
-      // Sind im markierten Bereich Verfügungspunkte enthalten, so werden diese
-      // zurückgesetzt und neu numeriert, damit die entsprechenden Absätze
-      // anschließend zu Zuleitungszeilen gemacht werden können.
-      if (alleVerfuegungspunkteLoeschen(cursor)) ziffernAnpassen(doc);
-
-      // Absatzformat für Zuleitungszeilen setzen (auf den gesamten Bereich)
-      UNO.setProperty(cursor, "ParaStyleName", ParaStyleNameZuleitungszeile);
-
-      // Nach dem Setzen einer Zuleitungszeile, soll der Cursor auf dem Ende der
-      // Markierung stehen, damit man direkt von dort weiter schreiben kann.
-      try
+      // Im cursor enthaltene Paragraphen einzeln iterieren und je nach Typ
+      // entweder eine Zuleitungszeile oder einen Verfügungspunkt mit Zuleitung
+      // setzen.
+      XEnumeration paragraphs = UNO.XEnumerationAccess(cursor)
+          .createEnumeration();
+      while (paragraphs.hasMoreElements())
       {
-        UNO.XTextViewCursorSupplier(UNO.XModel(doc).getCurrentController())
-            .getViewCursor().gotoRange(cursor.getEnd(), false);
+        XTextRange par = null;
+        try
+        {
+          par = UNO.XTextRange(paragraphs.nextElement());
+        }
+        catch (java.lang.Exception e)
+        {
+        }
+
+        if (par != null)
+        {
+          if (isAbdruck(par))
+          {
+            if (cursor.isCollapsed()) // Ignorieren, wenn Bereich ausgewählt.
+            {
+              // Zuleitung in neuer Zeile erzeugen:
+              par.getEnd().setString("\r");
+              createdZuleitung = par.getText().createTextCursorByRange(
+                  par.getEnd());
+              if (createdZuleitung != null)
+              {
+                createdZuleitung.goRight((short) 1, false);
+                formatZuleitungszeile(createdZuleitung);
+              }
+            }
+          }
+          else if (isVerfuegungspunkt(par))
+            formatVerfuegungspunktWithZuleitung(par);
+          else
+            formatZuleitungszeile(par);
+        }
       }
-      catch (java.lang.Exception e)
+    }
+    return createdZuleitung;
+  }
+
+  /**
+   * Diese Methode löscht alle Verfügungspunkte, die der Bereich des Cursors
+   * cursor berührt, und liefert true zurück, wenn mindestens ein
+   * Verfügungspunkt gelöscht wurde oder false, wenn sich in dem Bereich des
+   * Cursors kein Verfügungspunkt befand.
+   * 
+   * @param cursor
+   *          Der Cursor, in dessen Bereich nach Verfügungspunkten gesucht wird.
+   * 
+   * @return true, wenn mindestens ein Verfügungspunkt gelöscht wurde oder
+   *         false, wenn kein der cursor keinen Verfügungspunkt berührt.
+   */
+  private static boolean removeAllVerfuegungspunkte(XParagraphCursor cursor)
+  {
+    boolean deletedAtLeastOne = false;
+    if (UNO.XEnumerationAccess(cursor) != null)
+    {
+      XEnumeration xenum = UNO.XEnumerationAccess(cursor).createEnumeration();
+
+      while (xenum.hasMoreElements())
       {
+        XTextRange par = null;
+        try
+        {
+          par = UNO.XTextRange(xenum.nextElement());
+        }
+        catch (java.lang.Exception e)
+        {
+          Logger.error(e);
+        }
+
+        if (par != null)
+        {
+          boolean isVerfuegungspunktMitZuleitung = isVerfuegungspunktMitZuleitung(par);
+          if (isVerfuegungspunkt(par))
+          {
+            // Einen evtl. bestehenden Verfuegungspunkt zurücksetzen
+            removeSingleVerfuegungspunkt(par);
+            deletedAtLeastOne = true;
+          }
+          if (isVerfuegungspunktMitZuleitung) formatZuleitungszeile(par);
+        }
+      }
+    }
+    return deletedAtLeastOne;
+  }
+
+  /**
+   * Diese Methode löscht alle Abdruck-Zeilen, die der Bereich des Cursors
+   * cursor berührt, und liefert true zurück, wenn mindestens ein Abdruck
+   * gelöscht wurde oder false, wenn sich in dem Bereich des Cursors kein
+   * Abdruck befand.
+   * 
+   * @param cursor
+   *          Der Cursor, in dessen Bereich nach Abdrücken gesucht wird.
+   * 
+   * @return true, wenn mindestens ein Abdruck gelöscht wurde oder false, wenn
+   *         kein der cursor keinen Verfügungspunkt berührt.
+   */
+  private static boolean removeAllAbdruecke(XParagraphCursor cursor)
+  {
+    boolean deletedAtLeastOne = false;
+    if (UNO.XEnumerationAccess(cursor) != null)
+    {
+      XEnumeration xenum = UNO.XEnumerationAccess(cursor).createEnumeration();
+
+      while (xenum.hasMoreElements())
+      {
+        XTextRange par = null;
+        try
+        {
+          par = UNO.XTextRange(xenum.nextElement());
+        }
+        catch (java.lang.Exception e)
+        {
+          Logger.error(e);
+        }
+
+        if (par != null)
+        {
+          if (isAbdruck(par))
+          {
+            // Einen evtl. bestehenden Verfuegungspunkt zurücksetzen
+            removeSingleVerfuegungspunkt(par);
+            deletedAtLeastOne = true;
+          }
+        }
+      }
+    }
+    return deletedAtLeastOne;
+  }
+
+  /**
+   * Diese Methode löscht alle Zuleitungszeilen, die der Bereich des Cursors
+   * cursor berührt, und liefert true zurück, wenn mindestens eine
+   * Zuleitungszeile gelöscht wurde oder false, wenn sich in dem Bereich des
+   * Cursors keine Zuleitungszeile befand.
+   * 
+   * @param cursor
+   *          Der Cursor, in dessen Bereich nach Zuleitungszeilen gesucht wird.
+   * 
+   * @return true, wenn mindestens eine Zuleitungszeile gelöscht wurde oder
+   *         false, wenn kein der cursor keine Zuleitungszeile berührt.
+   */
+  private static boolean removeAllZuleitungszeilen(XParagraphCursor cursor)
+  {
+    boolean deletedAtLeastOne = false;
+    if (UNO.XEnumerationAccess(cursor) != null)
+    {
+      XEnumeration xenum = UNO.XEnumerationAccess(cursor).createEnumeration();
+
+      while (xenum.hasMoreElements())
+      {
+        XTextRange par = null;
+        try
+        {
+          par = UNO.XTextRange(xenum.nextElement());
+        }
+        catch (java.lang.Exception e)
+        {
+          Logger.error(e);
+        }
+
+        if (par != null)
+        {
+          if (isZuleitungszeile(par))
+          {
+            // Zuleitungszeile zurücksetzen
+            formatDefault(par);
+            deletedAtLeastOne = true;
+          }
+          else if (isVerfuegungspunktMitZuleitung(par))
+          {
+            // Zuleitung aus Verfügungspunkt entfernen:
+            formatVerfuegungspunkt(par);
+            deletedAtLeastOne = true;
+          }
+        }
+      }
+    }
+    return deletedAtLeastOne;
+  }
+
+  /**
+   * Löscht die römische Ziffer+PUNKT+Tab aus einem als
+   * "WollMuxVerfuegungspunkt[...]" markierten Absatz heraus und setzt das
+   * Absatzformat auf "Fließtext" zurück.
+   * 
+   * @param par
+   *          der Cursor, der sich in der entsprechenden Zeile befinden muss.
+   */
+  private static void removeSingleVerfuegungspunkt(XTextRange par)
+  {
+    formatDefault(par);
+
+    // Prüfe, ob der Absatz mit einer römischen Ziffer beginnt.
+    XTextCursor zifferOnly = getZifferOnly(par);
+
+    // römische Ziffer löschen.
+    if (zifferOnly != null) zifferOnly.setString("");
+
+    // wenn es sich bei dem Paragraphen um einen Abdruck handelt, wird dieser
+    // vollständig gelöscht.
+    if (isAbdruck(par))
+    {
+      // Den Absatz mit dem String "Ziffer.\tAbdruck von..." löschen
+      par.setString("");
+
+      XParagraphCursor parDeleter = UNO.XParagraphCursor(par.getText()
+          .createTextCursorByRange(par.getEnd()));
+
+      // Löscht das Leerzeichen vor dem Abdruck und nach dem Abdruck (falls eine
+      // Leerzeile folgt)
+      parDeleter.goLeft((short) 1, true);
+      parDeleter.setString("");
+      if (parDeleter.goRight((short) 1, false) && parDeleter.isEndOfParagraph())
+      {
+        parDeleter.goLeft((short) 1, true);
+        parDeleter.setString("");
       }
     }
   }
 
   /**
-   * Zählt die Anzahl Verfügungspunkte im Dokument vor der Position von
-   * range.getStart() (einschließlich) und liefert deren Anzahl zurück, wobei
-   * auch ein evtl. vorhandener Rahmen WollMuxVerfuegungspunkt1 mit gezählt
-   * wird.
+   * Formatiert den übergebenen Absatz paragraph in der Standardschriftart
+   * "Fließtext".
    * 
-   * @param doc
-   *          Das Dokument in dem sich range befindet (wird benötigt für den
-   *          Rahmen WollMuxVerfuegungspunkt1)
-   * @param range
-   *          Die TextRange, bei der mit der Zählung begonnen werden soll.
-   * @return die Anzahl Verfügungspunkte vor und mit range.getStart()
+   * @param paragraph
    */
-  public static int countVerfPunkteBefore(XTextDocument doc,
-      XParagraphCursor range)
+  private static void formatDefault(XTextRange paragraph)
   {
-    int count = 0;
+    UNO.setProperty(paragraph, "ParaStyleName", ParaStyleNameDefault);
+    formatRoemischeZifferOnly(paragraph);
+  }
 
-    // Zähler für Verfuegungspunktnummer auf 1 initialisieren, wenn ein
-    // Verfuegungspunkt1 vorhanden ist.
-    XTextRange punkt1 = getVerfuegungspunkt1(doc);
-    if (punkt1 != null) count++;
+  /**
+   * Formatiert den übergebenen Absatz paragraph als Abdruck.
+   * 
+   * @param paragraph
+   */
+  private static void formatAbdruck(XTextRange paragraph)
+  {
+    UNO.setProperty(paragraph, "ParaStyleName", ParaStyleNameAbdruck);
+    formatRoemischeZifferOnly(paragraph);
+  }
 
-    XParagraphCursor cursor = UNO.XParagraphCursor(range.getText()
-        .createTextCursorByRange(range.getStart()));
-    if (cursor != null) do
+  /**
+   * Formatiert den übergebenen Absatz paragraph als Verfügungspunkt mit
+   * Zuleitungszeile.
+   * 
+   * @param paragraph
+   */
+  private static void formatVerfuegungspunktWithZuleitung(XTextRange paragraph)
+  {
+    UNO.setProperty(
+        paragraph,
+        "ParaStyleName",
+        ParaStyleNameVerfuegungspunktMitZuleitung);
+    formatRoemischeZifferOnly(paragraph);
+  }
+
+  /**
+   * Formatiert den übergebenen Absatz paragraph als Verfügungspunkt.
+   * 
+   * @param paragraph
+   */
+  private static void formatVerfuegungspunkt(XTextRange paragraph)
+  {
+    UNO.setProperty(paragraph, "ParaStyleName", ParaStyleNameVerfuegungspunkt);
+    formatRoemischeZifferOnly(paragraph);
+  }
+
+  /**
+   * Formatiert den übergebenen Absatz paragraph als Zuleitungszeile.
+   * 
+   * @param paragraph
+   */
+  private static void formatZuleitungszeile(XTextRange paragraph)
+  {
+    UNO.setProperty(paragraph, "ParaStyleName", ParaStyleNameZuleitungszeile);
+    formatRoemischeZifferOnly(paragraph);
+  }
+
+  /**
+   * Holt sich aus dem übergebenen Absatz paragraph nur den Breich der römischen
+   * Ziffer (+Tab) und formatiert diesen im Zeichenformat
+   * WollMuxRoemischeZiffer.
+   * 
+   * @param paragraph
+   */
+  private static void formatRoemischeZifferOnly(XTextRange paragraph)
+  {
+    XTextCursor zifferOnly = getZifferOnly(paragraph);
+    if (zifferOnly != null)
     {
-      if (isVerfuegungspunkt(cursor)) count++;
-    } while (cursor.gotoPreviousParagraph(false));
+      UNO
+          .setProperty(
+              zifferOnly,
+              "CharStyleName",
+              CharStyleNameRoemischeZiffer);
 
-    return count;
+      // Zeichen danach auf Standardformatierung setzen, damit der Text, der
+      // danach geschrieben wird nicht auch obiges Zeichenformat besitzt:
+      // ("Standard" gilt laut DevGuide auch in englischen Versionen)
+      UNO.setProperty(zifferOnly.getEnd(), "CharStyleName", "Standard");
+    }
   }
 
   /**
@@ -276,6 +566,31 @@ public class SachleitendeVerfuegung
     {
     }
     return paraStyleName.startsWith(ParaStyleNameVerfuegungspunkt);
+  }
+
+  /**
+   * Liefert true, wenn es sich bei dem übergebenen Absatz paragraph um einen
+   * als VerfuegungspunktMitZuleitung markierten Absatz handelt.
+   * 
+   * @param paragraph
+   *          Das Objekt mit der Property ParaStyleName, die für den Vergleich
+   *          herangezogen wird.
+   * @return true, wenn der Name des Absatzformates mit
+   *         "WollMuxVerfuegungspunktMitZuleitung" beginnt.
+   */
+  private static boolean isVerfuegungspunktMitZuleitung(XTextRange paragraph)
+  {
+    String paraStyleName = "";
+    try
+    {
+      paraStyleName = AnyConverter.toString(UNO.getProperty(
+          paragraph,
+          "ParaStyleName"));
+    }
+    catch (IllegalArgumentException e)
+    {
+    }
+    return paraStyleName.startsWith(ParaStyleNameVerfuegungspunktMitZuleitung);
   }
 
   /**
@@ -324,7 +639,7 @@ public class SachleitendeVerfuegung
    * römischen Ziffer die Typischen Merkmale einer Wiedervorlage besitzt, d.h.
    * z.B. mit den Strings "w.V." oder ähnlichen beginnt.
    */
-  public static boolean isWiedervorlage(String heading)
+  private static boolean isWiedervorlage(String heading)
   {
     final String rest = "(\\s+.*)?";
     if (heading.matches(zifferPattern + "[wW]\\.?\\s?[vV]\\.?" + rest))
@@ -340,144 +655,36 @@ public class SachleitendeVerfuegung
   }
 
   /**
-   * Diese Methode löscht alle Verfügungspunkte, die der bereich des Cursors
-   * cursor berührt, und liefert true zurück, wenn mindestens ein
-   * Verfügungspunkt gelöscht wurde oder false, wenn sich in dem Bereich des
-   * Cursors kein Verfügungspunkt befand.
+   * Zählt die Anzahl Verfügungspunkte im Dokument vor der Position von
+   * range.getStart() (einschließlich) und liefert deren Anzahl zurück, wobei
+   * auch ein evtl. vorhandener Rahmen WollMuxVerfuegungspunkt1 mit gezählt
+   * wird.
    * 
    * @param doc
-   *          Das Dokument, in dem der Verfügungspunkt eingefügt werden soll
-   *          (wird für die Ziffernanpassung benötigt)
-   * @param cursor
-   *          Der Cursor, in dessen Bereich nach Verfügungspunkten gesucht wird.
-   * 
-   * @return true, wenn mindestens ein Verfügungspunkt gelöscht wurde oder
-   *         false, wenn kein der cursor keinen Verfügungspunkt berührt.
+   *          Das Dokument in dem sich range befindet (wird benötigt für den
+   *          Rahmen WollMuxVerfuegungspunkt1)
+   * @param range
+   *          Die TextRange, bei der mit der Zählung begonnen werden soll.
+   * @return die Anzahl Verfügungspunkte vor und mit range.getStart()
    */
-  private static boolean alleVerfuegungspunkteLoeschen(XParagraphCursor cursor)
+  public static int countVerfPunkteBefore(XTextDocument doc,
+      XParagraphCursor range)
   {
-    boolean deletedAtLeastOne = false;
-    if (UNO.XEnumerationAccess(cursor) != null)
+    int count = 0;
+
+    // Zähler für Verfuegungspunktnummer auf 1 initialisieren, wenn ein
+    // Verfuegungspunkt1 vorhanden ist.
+    XTextRange punkt1 = getVerfuegungspunkt1(doc);
+    if (punkt1 != null) count++;
+
+    XParagraphCursor cursor = UNO.XParagraphCursor(range.getText()
+        .createTextCursorByRange(range.getStart()));
+    if (cursor != null) do
     {
-      XEnumeration xenum = UNO.XEnumerationAccess(cursor).createEnumeration();
+      if (isVerfuegungspunkt(cursor)) count++;
+    } while (cursor.gotoPreviousParagraph(false));
 
-      while (xenum.hasMoreElements())
-      {
-        XTextRange par = null;
-        try
-        {
-          par = UNO.XTextRange(xenum.nextElement());
-        }
-        catch (java.lang.Exception e)
-        {
-          Logger.error(e);
-        }
-
-        if (par != null && isVerfuegungspunkt(par))
-        {
-          // Einen evtl. bestehenden Verfuegungspunkt zurücksetzen
-          verfuegungspunktLoeschen(par);
-          deletedAtLeastOne = true;
-        }
-      }
-    }
-    return deletedAtLeastOne;
-  }
-
-  /**
-   * Diese Methode löscht alle Zuleitungszeilen, die der bereich des Cursors
-   * cursor berührt, und liefert true zurück, wenn mindestens eine
-   * Zuleitungszeile gelöscht wurde oder false, wenn sich in dem Bereich des
-   * Cursors keine Zuleitungszeile befand.
-   * 
-   * @param doc
-   *          Das Dokument, in dem der Verfügungspunkt eingefügt werden soll
-   *          (wird für die Ziffernanpassung benötigt)
-   * @param cursor
-   *          Der Cursor, in dessen Bereich nach Verfügungspunkten gesucht wird.
-   * 
-   * @return true, wenn mindestens ein Verfügungspunkt gelöscht wurde oder
-   *         false, wenn kein der cursor keinen Verfügungspunkt berührt.
-   */
-  private static boolean alleZuleitungszeilenLoeschen(XParagraphCursor cursor)
-  {
-    boolean deletedAtLeastOne = false;
-    if (UNO.XEnumerationAccess(cursor) != null)
-    {
-      XEnumeration xenum = UNO.XEnumerationAccess(cursor).createEnumeration();
-
-      while (xenum.hasMoreElements())
-      {
-        XTextRange par = null;
-        try
-        {
-          par = UNO.XTextRange(xenum.nextElement());
-        }
-        catch (java.lang.Exception e)
-        {
-          Logger.error(e);
-        }
-
-        if (par != null && isZuleitungszeile(par))
-        {
-          // Zuleitungszeile zurücksetzen
-          UNO.setProperty(par, "ParaStyleName", ParaStyleNameDefault);
-
-          deletedAtLeastOne = true;
-        }
-      }
-    }
-    return deletedAtLeastOne;
-  }
-
-  /**
-   * Löscht die römische Ziffer+PUNKT+Tab aus einem als
-   * "WollMuxVerfuegungspunkt[...]" markierten Absatz heraus und setzt das
-   * Absatzformat auf "Fließtext" zurück.
-   * 
-   * @param par
-   *          der Cursor, der sich in der entsprechenden Zeile befinden muss.
-   */
-  private static void verfuegungspunktLoeschen(XTextRange par)
-  {
-    UNO.setProperty(par, "ParaStyleName", ParaStyleNameDefault);
-
-    // Prüfe, ob der Absatz mit einer römischen Ziffer beginnt.
-    XTextCursor zifferOnly = getZifferOnly(par);
-    if (zifferOnly != null)
-    {
-      // römische Ziffer löschen.
-      zifferOnly.setString("");
-
-      // wenn nächstes Zeichen ein Whitespace-Zeichen ist, wird dieses gelöscht
-      zifferOnly.goRight((short) 1, true);
-      if (zifferOnly.getString().matches("[ \t]")) zifferOnly.setString("");
-    }
-
-    // wenn es sich bei dem Paragraphen um einen Abdruck handelt, wird dieser
-    // vollständig gelöscht.
-    if (isAbdruck(par))
-    {
-      // löscht den String "Abdruck von..."
-      par.setString("");
-
-      // löscht das Returnzeichen ("\r") zum nächsten Absatz
-      XParagraphCursor parDeleter = UNO.XParagraphCursor(par.getText()
-          .createTextCursorByRange(par.getEnd()));
-      if (parDeleter.goRight((short) 1, false))
-      {
-        parDeleter.goLeft((short) 1, true);
-        parDeleter.setString("");
-
-        // wenn die auf die ehemalige Abdruckzeile folgende Zeile auch noch leer
-        // ist, so wird diese Zeile auch noch gelöscht.
-        if (parDeleter.isEndOfParagraph())
-        {
-          parDeleter.goLeft((short) 1, true);
-          parDeleter.setString("");
-        }
-      }
-    }
+    return count;
   }
 
   /**
@@ -494,9 +701,9 @@ public class SachleitendeVerfuegung
    *          Das Dokument, in dem alle Verfügungspunkte angepasst werden
    *          sollen.
    */
-  public static void ziffernAnpassen(XTextDocument doc)
+  public static void ziffernAnpassen(TextDocumentModel model)
   {
-    XTextRange punkt1 = getVerfuegungspunkt1(doc);
+    XTextRange punkt1 = getVerfuegungspunkt1(model.doc);
 
     // Zähler für Verfuegungspunktnummer auf 1 initialisieren, wenn ein
     // Verfuegungspunkt1 vorhanden ist.
@@ -509,8 +716,8 @@ public class SachleitendeVerfuegung
     // der es zu OOo-Abstürzen kam. Leider konnte ich das Problem nicht exakt
     // genug isolieren um ein entsprechende Ticket bei OOo dazu aufmachen zu
     // können, da der Absturz nur sporadisch auftrat.
-    XParagraphCursor cursor = UNO.XParagraphCursor(doc.getText()
-        .createTextCursorByRange(doc.getText().getStart()));
+    XParagraphCursor cursor = UNO.XParagraphCursor(model.doc.getText()
+        .createTextCursorByRange(model.doc.getText().getStart()));
     if (cursor != null)
       do
       {
@@ -528,16 +735,13 @@ public class SachleitendeVerfuegung
             if (!cursor.getString().equals(abdruckStr))
             {
               cursor.setString(abdruckStr);
-
-              XTextRange zifferOnly = getZifferOnly(cursor);
-              UNO.setProperty(zifferOnly, "CharWeight", new Float(
-                  FontWeight.BOLD));
+              formatRoemischeZifferOnly(cursor);
             }
           }
           else
           {
             // Behandlung von normalen Verfügungspunkten:
-            String numberStr = romanNumber(count);
+            String numberStr = romanNumber(count) + "\t";
             XTextRange zifferOnly = getZifferOnly(cursor);
             if (zifferOnly != null)
             {
@@ -550,7 +754,8 @@ public class SachleitendeVerfuegung
               // Nummer neu anlegen, wenn wie noch gar nicht existierte
               zifferOnly = cursor.getText().createTextCursorByRange(
                   cursor.getStart());
-              zifferOnly.setString(numberStr + "\t");
+              zifferOnly.setString(numberStr);
+              formatRoemischeZifferOnly(zifferOnly);
             }
           }
         }
@@ -575,15 +780,16 @@ public class SachleitendeVerfuegung
     // Druckfunktion zurück.
     int effectiveCount = (punkt1 != null) ? count - 1 : count;
     if (effectiveCount > 0)
-      WollMuxEventHandler.handleSetPrintFunction(doc, PRINT_FUNCTION_NAME);
+      model.setPrintFunction(PRINT_FUNCTION_NAME);
     else
-      WollMuxEventHandler.handleResetPrintFunction(doc, PRINT_FUNCTION_NAME);
+      model.resetPrintFunction(PRINT_FUNCTION_NAME);
   }
 
   /**
-   * Liefert eine XTextRange, die genau die römische Ziffer am Beginn eines
-   * Absatzes umschließt oder null, falls keine Ziffer gefunden wurde. Bei der
-   * Suche nach der Ziffer werden nur die ersten 6 Zeichen des Absatzes geprüft.
+   * Liefert eine XTextRange, die genau die römische Ziffer (falls vorhanden mit
+   * darauf folgendem \t-Zeichen) am Beginn eines Absatzes umschließt oder null,
+   * falls keine Ziffer gefunden wurde. Bei der Suche nach der Ziffer werden nur
+   * die ersten 7 Zeichen des Absatzes geprüft.
    * 
    * @param par
    *          die TextRange, die den Paragraphen umschließt, in dessen Anfang
@@ -593,13 +799,23 @@ public class SachleitendeVerfuegung
    */
   private static XTextCursor getZifferOnly(XTextRange par)
   {
-    XTextCursor cursor = par.getText().createTextCursorByRange(par.getStart());
+    XParagraphCursor cursor = UNO.XParagraphCursor(par.getText()
+        .createTextCursorByRange(par.getStart()));
 
-    for (int i = 0; i < 6; i++)
+    for (int i = 0; i < 7; i++)
     {
-      cursor.goRight((short) 1, true);
-      String text = cursor.getString();
-      if (text.matches(zifferOnlyPattern)) return cursor;
+      String text = "";
+      if (!cursor.isEndOfParagraph())
+      {
+        cursor.goRight((short) 1, true);
+        text = cursor.getString();
+      }
+      else
+      {
+        // auch eine Ziffer erkennen, die nicht mit \t endet.
+        text = cursor.getString() + "\t";
+      }
+      if (text.matches(zifferPattern + "$")) return cursor;
     }
 
     return null;
@@ -734,14 +950,16 @@ public class SachleitendeVerfuegung
           String heading = cursor.getString();
           currentVerfpunkt = new Verfuegungspunkt(heading);
 
-          // Originale und alle Verfügungspunkte, die Wiedervorlagen sind werden
-          // mit numerOfCopies 1 vorbelegt
+          // Originale und alle Verfügungspunkte mit Zuleitung oder welche, die
+          // Wiedervorlagen sind werden mit numerOfCopies 1 vorbelegt
           if (first)
           {
             first = false;
             currentVerfpunkt.setNumberOfCopies(1);
           }
           if (isWiedervorlage(heading)) currentVerfpunkt.setNumberOfCopies(1);
+          if (isVerfuegungspunktMitZuleitung(cursor))
+            currentVerfpunkt.setNumberOfCopies(1);
 
           verfuegungspunkte.add(currentVerfpunkt);
         }
@@ -1225,7 +1443,7 @@ public class SachleitendeVerfuegung
   {
     XStyle style = null;
 
-    XNameContainer pss = getParagraphStyleContainer(doc);
+    XNameContainer pss = getStyleContainer(doc, PARAGRAPH_STYLES);
     if (pss != null) try
     {
       style = UNO.XStyle(pss.getByName(name));
@@ -1252,13 +1470,10 @@ public class SachleitendeVerfuegung
    * @return das neu erzeugte Absatzformat oder null, falls das Absatzformat
    *         nicht erzeugt werden konnte.
    */
-  /**
-   * @return
-   */
   private static XStyle createParagraphStyle(XTextDocument doc, String name,
       String parentStyleName)
   {
-    XNameContainer pss = getParagraphStyleContainer(doc);
+    XNameContainer pss = getStyleContainer(doc, PARAGRAPH_STYLES);
     XStyle style = null;
     try
     {
@@ -1276,21 +1491,86 @@ public class SachleitendeVerfuegung
   }
 
   /**
-   * Liefert den Container der ParagraphStyles des Dokuments doc.
+   * Liefert das Zeichenformat (=CharacterStyle) des Dokuments doc mit dem Namen
+   * name oder null, falls das Format nicht definiert ist.
    * 
    * @param doc
-   *          Das Dokument, dessen ParagraphStyleContainer zurückgeliefert
-   *          werden soll.
-   * @return Liefert den Container der ParagraphStyles des Dokuments doc oder
-   *         null, falls der Container nicht bestimmt werden konnte.
+   *          das Dokument in dem nach einem Zeichenformat name gesucht werden
+   *          soll.
+   * @param name
+   *          der Name des gesuchten Zeichenformates
+   * @return das Zeichenformat des Dokuments doc mit dem Namen name oder null,
+   *         falls das Absatzformat nicht definiert ist.
    */
-  private static XNameContainer getParagraphStyleContainer(XTextDocument doc)
+  private static XStyle getCharacterStyle(XTextDocument doc, String name)
+  {
+    XStyle style = null;
+
+    XNameContainer pss = getStyleContainer(doc, CHARACTER_STYLES);
+    if (pss != null) try
+    {
+      style = UNO.XStyle(pss.getByName(name));
+    }
+    catch (java.lang.Exception e)
+    {
+    }
+    return style;
+  }
+
+  /**
+   * Erzeugt im Dokument doc ein neues Zeichenformat (=CharacterStyle) mit dem
+   * Namen name und dem ParentStyle parentStyleName und liefert das neu erzeugte
+   * Zeichenformat zurück oder null, falls das Erzeugen nicht funktionierte.
+   * 
+   * @param doc
+   *          das Dokument in dem das Zeichenformat name erzeugt werden soll.
+   * @param name
+   *          der Name des zu erzeugenden Zeichenformates
+   * @param parentStyleName
+   *          Name des Vorgänger-Styles von dem die Eigenschaften dieses Styles
+   *          abgeleitet werden soll oder null, wenn kein Vorgänger gesetzt
+   *          werden soll (in diesem Fall wird automatisch "Standard" verwendet)
+   * @return das neu erzeugte Zeichenformat oder null, falls das Zeichenformat
+   *         nicht erzeugt werden konnte.
+   */
+  private static XStyle createCharacterStyle(XTextDocument doc, String name,
+      String parentStyleName)
+  {
+    XNameContainer pss = getStyleContainer(doc, CHARACTER_STYLES);
+    XStyle style = null;
+    try
+    {
+      style = UNO.XStyle(UNO.XMultiServiceFactory(doc).createInstance(
+          "com.sun.star.style.CharacterStyle"));
+      pss.insertByName(name, style);
+      if (style != null && parentStyleName != null)
+        style.setParentStyle(parentStyleName);
+      return UNO.XStyle(pss.getByName(name));
+    }
+    catch (Exception e)
+    {
+    }
+    return null;
+  }
+
+  /**
+   * Liefert den Styles vom Typ type des Dokuments doc.
+   * 
+   * @param doc
+   *          Das Dokument, dessen StyleContainer zurückgeliefert werden soll.
+   * @param type
+   *          kann z.B. CHARACTER_STYLE oder PARAGRAPH_STYLE sein.
+   * @return Liefert den Container der Styles vom Typ type des Dokuments doc
+   *         oder null, falls der Container nicht bestimmt werden konnte.
+   */
+  private static XNameContainer getStyleContainer(XTextDocument doc,
+      String containerName)
   {
     try
     {
       return UNO.XNameContainer(UNO.XNameAccess(
           UNO.XStyleFamiliesSupplier(doc).getStyleFamilies()).getByName(
-          "ParagraphStyles"));
+          containerName));
     }
     catch (java.lang.Exception e)
     {
@@ -1299,15 +1579,17 @@ public class SachleitendeVerfuegung
   }
 
   /**
-   * Falls die für Sachleitenden Verfügungen notwendigen Absatzformate nicht
-   * bereits existieren, werden sie hier erzeugt und mit fest verdrahteten
-   * Werten vorbelegt.
+   * Falls die für Sachleitenden Verfügungen notwendigen Absatz- und
+   * Zeichenformate nicht bereits existieren, werden sie hier erzeugt und mit
+   * fest verdrahteten Werten vorbelegt.
    * 
    * @param doc
    */
-  private static void createUsedParagraphStyles(XTextDocument doc)
+  private static void createUsedStyles(XTextDocument doc)
   {
     XStyle style = null;
+
+    // Absatzformate:
 
     style = getParagraphStyle(doc, ParaStyleNameDefault);
     if (style == null)
@@ -1326,8 +1608,7 @@ public class SachleitendeVerfuegung
           ParaStyleNameVerfuegungspunkt,
           ParaStyleNameDefault);
       UNO.setProperty(style, "FollowStyle", ParaStyleNameDefault);
-      UNO.setProperty(style, "CharHeight", new Integer(11));
-      UNO.setProperty(style, "CharWeight", new Integer(150));
+      UNO.setProperty(style, "CharWeight", new Float(FontWeight.BOLD));
       UNO.setProperty(style, "ParaFirstLineIndent", new Integer(-700));
       UNO.setProperty(style, "ParaTopMargin", new Integer(460));
     }
@@ -1366,20 +1647,41 @@ public class SachleitendeVerfuegung
           ParaStyleNameDefault);
       UNO.setProperty(style, "FollowStyle", ParaStyleNameDefault);
       UNO.setProperty(style, "CharUnderline", new Integer(1));
-      UNO.setProperty(style, "CharWeight", new Integer(150));
+      UNO.setProperty(style, "CharWeight", new Float(FontWeight.BOLD));
     }
-  }
 
-  public static void main(String[] args) throws java.lang.Exception
-  {
-    UNO.init();
-
-    XTextDocument doc = UNO.XTextDocument(UNO.desktop.getCurrentComponent());
-
-    if (doc == null)
+    style = getParagraphStyle(doc, ParaStyleNameVerfuegungspunktMitZuleitung);
+    if (style == null)
     {
-      System.err.println("Keine Textdokument");
-      return;
+      style = createParagraphStyle(
+          doc,
+          ParaStyleNameVerfuegungspunktMitZuleitung,
+          ParaStyleNameVerfuegungspunkt);
+      UNO.setProperty(style, "FollowStyle", ParaStyleNameDefault);
+      UNO.setProperty(style, "CharUnderline", new Integer(1));
+    }
+
+    // Zeichenformate:
+
+    style = getCharacterStyle(doc, CharStyleNameDefault);
+    if (style == null)
+    {
+      style = createCharacterStyle(doc, CharStyleNameDefault, null);
+      UNO.setProperty(style, "FollowStyle", CharStyleNameDefault);
+      UNO.setProperty(style, "CharHeight", new Integer(11));
+      UNO.setProperty(style, "CharFontName", "Arial");
+      UNO.setProperty(style, "CharUnderline", new Integer(0));
+    }
+
+    style = getCharacterStyle(doc, CharStyleNameRoemischeZiffer);
+    if (style == null)
+    {
+      style = createCharacterStyle(
+          doc,
+          CharStyleNameRoemischeZiffer,
+          CharStyleNameDefault);
+      UNO.setProperty(style, "FollowStyle", CharStyleNameDefault);
+      UNO.setProperty(style, "CharWeight", new Float(FontWeight.BOLD));
     }
   }
 }

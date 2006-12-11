@@ -616,6 +616,26 @@ public class TextDocumentModel
   }
 
   /**
+   * Setzt die Druckfunktion die Druckfunktion zurück, die gesetzt war, bevor
+   * die Druckfunktion functionName gesetzt wurde. Die Druckfunktion wird nur
+   * zurück gesetzt, wenn die aktuell gesetzte Druckfunktion functionName
+   * entspricht.
+   * 
+   * Wird z.B. in den Sachleitenden Verfügungen verwendet, um auf die
+   * ursprünglich gesetzte Druckfunktion zurück zu schalten, wenn keine
+   * Verfügungspunkte vorhanden sind.
+   * 
+   * @param functionNameToReset
+   *          der Name der Druckfunktion, die zurück gesetzt werden soll (falls
+   *          sie aktuell gesetzt ist).
+   */
+  public void resetPrintFunction(String functionNameToReset)
+  {
+    if (printFunctionName != null
+        && printFunctionName.equals(functionNameToReset)) setPrintFunction("");
+  }
+
+  /**
    * Wird vom DocumentCommandInterpreter beim parsen des Dokumentkommandobaumes
    * aufgerufen, wenn das Dokument ein setPrintFunction-Kommando enthält und
    * setzt die in cmd.getFunctionName() enthaltene Druckfunktion PERSISTENT im
