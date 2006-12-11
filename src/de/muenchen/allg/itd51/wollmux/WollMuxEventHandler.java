@@ -2911,24 +2911,31 @@ public class WollMuxEventHandler
 
   /**
    * Erzeugt ein neues WollMuxEvent, das signasisiert, das ein Textbaustein über
-   * den Textbaustein-Bezeichner direkt ins Dokument eingefügt wird.
+   * den Textbaustein-Bezeichner direkt ins Dokument eingefügt wird. Mit
+   * reprocess wird übergeben, wann die Dokumentenkommandos ausgewertet werden
+   * soll. Mir reprocess = true sofort.
    * 
    * Das Event wird von WollMux.dispatch(...) geworfen z.B über Druck eines
    * Tastenkuerzels oder Druck auf den Knopf der OOo-Symbolleiste ein
    * "wollmux:TextbausteinEinfuegen" dispatch erfolgte.
    */
-  public static void handleTextbausteinEinfuegen(XTextDocument doc)
+  public static void handleTextbausteinEinfuegen(XTextDocument doc,
+      boolean reprocess)
   {
-    handle(new OnTextbausteinEinfuegen(doc));
+    handle(new OnTextbausteinEinfuegen(doc, reprocess));
   }
 
   private static class OnTextbausteinEinfuegen extends BasicEvent
   {
     private XTextDocument doc;
 
-    public OnTextbausteinEinfuegen(XTextDocument doc)
+    private boolean reprocess;
+
+    public OnTextbausteinEinfuegen(XTextDocument doc, boolean reprocess)
     {
       this.doc = doc;
+      this.reprocess = reprocess;
+
     }
 
     protected void doit() throws WollMuxFehlerException
@@ -2937,18 +2944,22 @@ public class WollMuxEventHandler
           .getTextDocumentModel(doc).getViewCursor();
       boolean atLeastOne = TextModule.createInsertFragFromIdentifier(
           doc,
-          viewCursor);
-      if (atLeastOne)
-      {
-        handleReprocessTextDocument(doc);
-      }
-      else
-      {
-        WollMuxSingleton.showInfoModal(
-            "WollMux-Fehler",
-            "An der Einfügestelle konnte kein Textbaustein gefunden werden.");
-      }
+          viewCursor,
+          reprocess);
 
+      if (reprocess)
+      {
+        if (atLeastOne)
+        {
+          handleReprocessTextDocument(doc);
+        }
+        else
+        {
+          WollMuxSingleton.showInfoModal(
+              "WollMux-Fehler",
+              "An der Einfügestelle konnte kein Textbaustein gefunden werden.");
+        }
+      }
     }
 
     public String toString()

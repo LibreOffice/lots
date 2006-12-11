@@ -56,9 +56,12 @@ public class TextModule
    *          Cursor von dem rückwärts bis zur ersten Zeile die kein
    *          Textfragment enthält gesucht wird. Meistens handelt es sich um den
    *          viewCursor.
+   * @param isManual
+   *          kennzeichnet Einfügungen, die manuell vorgenommen worden sind.
+   *          Setzt den optinalen Knoten MODE = "manual"
    */
   public static boolean createInsertFragFromIdentifier(XTextDocument doc,
-      XTextRange range)
+      XTextRange range, boolean isManual)
   {
     boolean result = false;
     ConfigThingy conf = WollMuxSingleton.getInstance().getWollmuxConf();
@@ -101,7 +104,7 @@ public class TextModule
       if (results != null)
       {
         matchedInLine = true;
-        createInsertFrag(doc, cursor, results);
+        createInsertFrag(doc, cursor, results, isManual);
         cursor.collapseToStart();
         result = true;
       }
@@ -260,9 +263,13 @@ public class TextModule
    *          Stelle an der das Bookmark gesetzt werden soll
    * @param args
    *          Übergebene Parameter
+   * @param isManual
+   *          kennzeichnet Einfügungen, die manuell vorgenommen worden sind.
+   *          Setzt den optinalen Knoten MODE = "manual"
    */
   public static void createInsertFrag(XTextDocument doc, XTextRange range,
-      String[] args)
+      String[] args, boolean isManual)
+
   {
 
     // Neues ConfigThingy für "insertFrag Textbaustein" erzeugen:
@@ -287,17 +294,20 @@ public class TextModule
       werte.addChild(wm_args);
     }
 
-    ConfigThingy wm_mode = new ConfigThingy("MODE");
-    werte.addChild(wm_mode);
-
     ConfigThingy insertFrag = new ConfigThingy("insertFrag");
     wm_cmd.addChild(insertFrag);
 
     ConfigThingy wm_frag_id_entry = new ConfigThingy(args[0]);
     wm_frag_id.addChild(wm_frag_id_entry);
 
-    ConfigThingy wm_mode_entry = new ConfigThingy("manual");
-    wm_mode.addChild(wm_mode_entry);
+    if (isManual)
+    {
+      ConfigThingy wm_mode = new ConfigThingy("MODE");
+      werte.addChild(wm_mode);
+
+      ConfigThingy wm_mode_entry = new ConfigThingy("manual");
+      wm_mode.addChild(wm_mode_entry);
+    }
 
     String bookmarkName = DocumentCommand.getCommandString(root);
 

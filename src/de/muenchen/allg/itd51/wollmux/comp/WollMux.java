@@ -107,6 +107,8 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
 
   public static final String cmdPlatzhalterAnspringen = "PlatzhalterAnspringen";
 
+  public static final String cmdTextbausteinVerweisEinfuegen = "TextbausteinVerweisEinfuegen";
+
   /**
    * Der Konstruktor initialisiert das WollMuxSingleton und startet damit den
    * eigentlichen WollMux. Der Konstuktor wird aufgerufen, bevor OpenOffice.org
@@ -264,7 +266,11 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
       else if (cmd.equalsIgnoreCase(cmdMarkBlock))
         xRet = this;
 
-      else if (cmd.equalsIgnoreCase(cmdPlatzhalterAnspringen)) xRet = this;
+      else if (cmd.equalsIgnoreCase(cmdPlatzhalterAnspringen))
+        xRet = this;
+
+      else if (cmd.equalsIgnoreCase(cmdTextbausteinVerweisEinfuegen))
+        xRet = this;
     }
     return xRet;
   }
@@ -460,7 +466,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
         Logger.debug2("Dispatch: Aufruf von WollMux:TextbausteinEinfuegen");
         XTextDocument doc = UNO
             .XTextDocument(UNO.desktop.getCurrentComponent());
-        WollMuxEventHandler.handleTextbausteinEinfuegen(doc);
+        WollMuxEventHandler.handleTextbausteinEinfuegen(doc, true);
       }
       else if (cmd.compareToIgnoreCase(cmdPlatzhalterAnspringen) == 0)
       {
@@ -468,6 +474,13 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
         XTextDocument doc = UNO
             .XTextDocument(UNO.desktop.getCurrentComponent());
         WollMuxEventHandler.handleJumpToPlaceholder(doc);
+      }
+      else if (cmd.compareToIgnoreCase(cmdTextbausteinVerweisEinfuegen) == 0)
+      {
+        Logger.debug2("Dispatch: Aufruf von WollMux:TextbausteinVerweisEinfuegen");
+        XTextDocument doc = UNO
+            .XTextDocument(UNO.desktop.getCurrentComponent());
+        WollMuxEventHandler.handleTextbausteinEinfuegen(doc,false);
       }
     }
   }
