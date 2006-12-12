@@ -431,7 +431,7 @@ public class SachleitendeVerfuegung
     formatDefault(par);
 
     // Prüfe, ob der Absatz mit einer römischen Ziffer beginnt.
-    XTextCursor zifferOnly = getZifferOnly(par);
+    XTextCursor zifferOnly = getZifferOnly(par, false);
 
     // römische Ziffer löschen.
     if (zifferOnly != null) zifferOnly.setString("");
@@ -527,7 +527,7 @@ public class SachleitendeVerfuegung
    */
   private static void formatRoemischeZifferOnly(XTextRange paragraph)
   {
-    XTextCursor zifferOnly = getZifferOnly(paragraph);
+    XTextCursor zifferOnly = getZifferOnly(paragraph, false);
     if (zifferOnly != null)
     {
       UNO
@@ -742,7 +742,7 @@ public class SachleitendeVerfuegung
           {
             // Behandlung von normalen Verfügungspunkten:
             String numberStr = romanNumber(count) + "\t";
-            XTextRange zifferOnly = getZifferOnly(cursor);
+            XTextRange zifferOnly = getZifferOnly(cursor, false);
             if (zifferOnly != null)
             {
               // Nummer aktualisieren wenn sie nicht mehr stimmt.
@@ -764,7 +764,7 @@ public class SachleitendeVerfuegung
     // Verfuegungspunt1 setzen
     if (punkt1 != null)
     {
-      XTextRange zifferOnly = getZifferOnly(punkt1);
+      XTextRange zifferOnly = getZifferOnly(punkt1, false);
       if (zifferOnly != null)
       {
         if (count == 1) zifferOnly.setString("");
@@ -794,10 +794,13 @@ public class SachleitendeVerfuegung
    * @param par
    *          die TextRange, die den Paragraphen umschließt, in dessen Anfang
    *          nach der römischen Ziffer gesucht werden soll.
+   * @param includeNoTab
+   *          ist includeNoTab == true, so enthält der cursor immer nur die
+   *          Ziffer ohne das darauf folgende Tab-Zeichen.
    * @return die TextRange, die genau die römische Ziffer umschließt falls eine
    *         gefunden wurde oder null, falls keine Ziffer gefunden wurde.
    */
-  private static XTextCursor getZifferOnly(XTextRange par)
+  private static XTextCursor getZifferOnly(XTextRange par, boolean includeNoTab)
   {
     XParagraphCursor cursor = UNO.XParagraphCursor(par.getText()
         .createTextCursorByRange(par.getStart()));
@@ -809,6 +812,7 @@ public class SachleitendeVerfuegung
       {
         cursor.goRight((short) 1, true);
         text = cursor.getString();
+        if (includeNoTab) text += "\t";
       }
       else
       {
@@ -1264,7 +1268,7 @@ public class SachleitendeVerfuegung
     XTextRange punkt1ZifferOnly = null;
     if (isOriginal && punkt1 != null)
     {
-      punkt1ZifferOnly = getZifferOnly(punkt1);
+      punkt1ZifferOnly = getZifferOnly(punkt1, true);
       UNO.setProperty(punkt1ZifferOnly, "CharHidden", Boolean.TRUE);
     }
 
