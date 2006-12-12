@@ -1263,7 +1263,7 @@ public class DocumentCommandInterpreter
 
         ConfigThingy conf = mux.getWollmuxConf();
         ConfigThingy WarnungenConf = conf.query("Textbausteine").query(
-            "Warnung");
+            "Warnungen");
 
         String message = "";
         try
