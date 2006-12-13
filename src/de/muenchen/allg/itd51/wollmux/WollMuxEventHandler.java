@@ -3042,7 +3042,7 @@ public class WollMuxEventHandler
         {
           WollMuxSingleton.showInfoModal(
               "WollMux",
-              "Kein Platzhalter und kein Marke 'setJumpMark' vorhanden!");
+              "Kein Platzhalter und keine Marke 'setJumpMark' vorhanden!");
         }
       }
     }
