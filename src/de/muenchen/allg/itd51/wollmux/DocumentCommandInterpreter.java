@@ -128,8 +128,9 @@ public class DocumentCommandInterpreter
   {
     this.model = model;
     this.mux = mux;
-    this.tree = model.getDocumentCommandTree();
+    this.tree = new DocumentCommandTree(UNO.XBookmarksSupplier(model.doc));
     this.formScanner = null;
+    model.resetDocumentCommands();
   }
 
   /**
@@ -140,14 +141,6 @@ public class DocumentCommandInterpreter
   public void scanDocumentSettings()
   {
     Logger.debug("scanDocumentSettings");
-
-    // Die Print-Blöcke (AllVersions, DraftOnly und NotInOriginal) werden hier
-    // neu ausgelesen, daher müssen sie vorher im Model zurückgesetzt werden.
-    model.resetPrintBlocks();
-
-    // Der Blocke 'setJumpMark' wird hier neu ausgelesen, daher müssen sie
-    // vorher im Model zurückgesetzt werden.
-    model.resetJumpMarks();
 
     new DocumentSettingsScanner().execute(tree);
 
@@ -187,15 +180,6 @@ public class DocumentCommandInterpreter
 
     // 3) Hauptverarbeitung: Jetzt alle noch übrigen DocumentCommands (z.B.
     // insertValues) in einem einzigen Durchlauf mit execute bearbeiten.
-
-    // Die Print-Blöcke (AllVersions, DraftOnly und NotInOriginal) werden hier
-    // neu ausgelesen, daher müssen sie vorher im Model zurückgesetzt werden.
-    model.resetPrintBlocks();
-
-    // Der Blocke 'setJumpMark' wird hier neu ausgelesen, daher müssen sie
-    // vorher im Model zurückgesetzt werden.
-    model.resetJumpMarks();
-
     errors += new MainProcessor().execute(tree);
 
     // 4) Da keine neuen Elemente mehr eingefügt werden müssen, können

@@ -176,11 +176,6 @@ public class TextDocumentModel
   private XPrintModel printModel = new PrintModel();
 
   /**
-   * Baum aller im Dokument enthaltenen Dokumentkommandos.
-   */
-  private DocumentCommandTree docCmdTree;
-
-  /**
    * Enthält die Gesamtbeschreibung alle Formular-Abschnitte, die in den
    * persistenten Daten bzw. in den mit add hinzugefügten Form-Kommandos
    * gefunden wurden.
@@ -245,15 +240,13 @@ public class TextDocumentModel
     this.currentMax4000 = null;
     this.closeListener = null;
     this.printFunctionName = null;
-    this.docCmdTree = new DocumentCommandTree(UNO.XBookmarksSupplier(doc));
     this.dispatchInterceptorController = null;
     this.printSettingsDone = false;
     this.formularConf = new ConfigThingy("WM");
     this.formFieldValues = new HashMap();
     this.formGUI = null;
 
-    resetPrintBlocks();
-    resetJumpMarks();
+    resetDocumentCommands();
 
     registerCloseListener();
 
@@ -278,25 +271,17 @@ public class TextDocumentModel
   }
 
   /**
-   * Veranlasst das TextDocumentModel alle bisher erkannten Blöcke zur
-   * Drucksteuerung bei Sachleitenden Verfügungen (notInOriginal, DraftOnly,
-   * All) zu vergessen. Danach können die Blöcke mit add<Blockname>Blocks(...)
-   * neu hinzugefügt werden.
+   * Veranlasst das TextDocumentModel alle bisher gespeicherten
+   * Dokumentkommandos zu löschen, damit diese in einem neuen Scan neu erfasst
+   * werden können. Dazu gehören Dokumentkommandos zur Drucksteuerung bei
+   * Sachleitenden Verfügungen (notInOriginal, DraftOnly, All) und die
+   * Sprungmarken 'setJumpMark'.
    */
-  public void resetPrintBlocks()
+  public void resetDocumentCommands()
   {
     this.notInOriginalBlocks = new Vector();
     this.draftOnlyBlocks = new Vector();
     this.allVersionsBlocks = new Vector();
-  }
-
-  /**
-   * Veranlasst das TextDocumentModel alle bisher erkannten Blöcke 'setJumpMark'
-   * zu vergessen. Danach können die Blöcke mit add<Blockname>Blocks(...) neu
-   * hinzugefügt werden.
-   */
-  public void resetJumpMarks()
-  {
     this.jumpMarks = new LinkedList();
   }
 
@@ -455,19 +440,6 @@ public class TextDocumentModel
   public FormularMax4000 getCurrentFormularMax4000()
   {
     return currentMax4000;
-  }
-
-  /**
-   * Liefert den Baum der Dokumentkommandos zu diesem Dokuments in einem nicht
-   * zwangsweise aktualisierten Zustand. Der Zustand kann über die
-   * update()-Methode des zurückgegebenen DocumentCommandTrees aktualisiert
-   * werden.
-   * 
-   * @return Baum der Dokumentkommandos dieses Dokuments.
-   */
-  public DocumentCommandTree getDocumentCommandTree()
-  {
-    return docCmdTree;
   }
 
   /**
