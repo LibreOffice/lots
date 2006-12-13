@@ -67,42 +67,43 @@ public class DispatchInterceptor
   public static final String DISP_UNO_PRINTER_SETUP = ".uno:PrinterSetup";
 
   /**
-   * Enthält den dispatchInterceptor falls in diesem Dokument ein
-   * dispatchInterceptor registiert wurde.
+   * Registriert einen WollMuxDispatchProvider im Frame frame (nur dann, wenn er
+   * nicht bereits registriert wurde).
    */
-  private WollMuxDispatchInterceptor dispatchInterceptor;
-
-  /**
-   * Der Frame, in dem der DispatchInterceptor registriert werden soll.
-   */
-  private XFrame frame;
-
-  /**
-   * Erzeugt einen neuen DispatchInterceptorController, der in der Lage ist im
-   * Frame frame einen WollMuxDispatchInterceptor zu registrieren.
-   * 
-   * @param frame
-   *          der zu verwaltende Frame.
-   */
-  public DispatchInterceptor(XFrame frame)
+  public static void registerWollMuxDispatchInterceptor(XFrame frame)
   {
-    this.frame = frame;
-  }
+    if (frame == null
+        || UNO.XDispatchProviderInterception(frame) == null
+        || UNO.XDispatchProvider(frame) == null) return;
 
-  /**
-   * Registriert einen WollMuxDispatchProvider im Frame frame genau einmal und
-   * merkt sich den registrierten WollMuxDispatchProvider.
-   */
-  public void registerWollMuxDispatchInterceptor()
-  {
-    if (dispatchInterceptor == null
-        && UNO.XDispatchProviderInterception(frame) != null)
+    Logger.debug("Register WollMuxDispatchInterceptor for frame #"
+                 + frame.hashCode());
+
+    // Hier möchte ich wissen, ob der WollMuxDispatchInterceptor bereits im
+    // Frame registriert ist. Ist das der Fall, so darf der
+    // WollMuxDispatchInterceptor nicht noch einmal registriert werden, weil
+    // es sonst zu Endlosschleifen kommt, da sich der
+    // WollMuxDispatchInterceptor selbst aufrufen würde.
+    //
+    // Leider gibt es keine Methode um aus dem Frame direkt abzulesen, ob der
+    // WollMuxDispatchInterceptor bereits registriert ist. Dieser Hack
+    // übernimmt das: Er sucht per queryDispatch nach einer Dispatch-URL, die
+    // der WollMux (weiter unten) selbst definiert. Kommt dabei ein Objekt vom
+    // Typ ForwardDispatch zurück, so ist der frame bereits registriert,
+    // ansonsten nicht.
+    com.sun.star.util.URL url = UNO.getParsedUNOUrl(DISP_UNO_PRINT_FORWARDER);
+    XDispatch disp = UNO.XDispatchProvider(frame).queryDispatch(
+        url,
+        "_self",
+        com.sun.star.frame.FrameSearchFlag.SELF);
+    boolean alreadyRegistered = disp instanceof ForwardDispatch;
+
+    // DispatchInterceptor registrieren (wenn nicht bereits registriert):
+    if (!alreadyRegistered)
     {
-      Logger.debug("Register WollMuxDispatchInterceptor for frame #"
-                   + frame.hashCode());
-      dispatchInterceptor = new WollMuxDispatchInterceptor();
+      XDispatchProviderInterceptor dpi = new WollMuxDispatchInterceptor();
       UNO.XDispatchProviderInterception(frame)
-          .registerDispatchProviderInterceptor(dispatchInterceptor);
+          .registerDispatchProviderInterceptor(dpi);
     }
   }
 
@@ -112,7 +113,7 @@ public class DispatchInterceptor
    * 
    * @author christoph.lutz
    */
-  public static class WollMuxDispatchInterceptor implements
+  private static class WollMuxDispatchInterceptor implements
       XDispatchProviderInterceptor
   {
     private XDispatchProvider slave = null;

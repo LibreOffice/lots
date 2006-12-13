@@ -218,13 +218,6 @@ public class TextDocumentModel
   private LinkedList jumpMarks;
 
   /**
-   * Über die Methode registerWollMuxDispatchInterceptor() wird hier der aktuell
-   * auf dem Frame registrierte WollMuxDispatchInterceptor abgelegt, der für das
-   * Abfangen von Dispatches wie z.B. dem .uno:Print erforderlich ist.
-   */
-  private DispatchInterceptor dispatchInterceptorController;
-
-  /**
    * Erzeugt ein neues TextDocumentModel zum XTextDocument doc und sollte nie
    * direkt aufgerufen werden, da neue TextDocumentModels über das
    * WollMuxSingletonie (siehe WollMuxSingleton.getTextDocumentModel()) erzeugt
@@ -240,7 +233,6 @@ public class TextDocumentModel
     this.currentMax4000 = null;
     this.closeListener = null;
     this.printFunctionName = null;
-    this.dispatchInterceptorController = null;
     this.printSettingsDone = false;
     this.formularConf = new ConfigThingy("WM");
     this.formFieldValues = new HashMap();
@@ -253,9 +245,8 @@ public class TextDocumentModel
     // WollMuxDispatchInterceptor registrieren
     try
     {
-      dispatchInterceptorController = new DispatchInterceptor(UNO.XModel(doc)
+      DispatchInterceptor.registerWollMuxDispatchInterceptor(UNO.XModel(doc)
           .getCurrentController().getFrame());
-      dispatchInterceptorController.registerWollMuxDispatchInterceptor();
     }
     catch (java.lang.Exception e)
     {
