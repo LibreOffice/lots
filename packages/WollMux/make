@@ -19,18 +19,22 @@ action()
         ;;
       
     _all) 
-        action removeold setversion package clean list
+        BRANCH=siga
+        action removeold setversion package clean
+        BRANCH=limux
+        action setversion package clean list
         ;;
 
     _removeold)
-        rm -f ../wollmux_*lhm1.{changes,deb,dsc,tar.gz}
+        rm -f ../wollmux_*lhm1*.{changes,deb,dsc,tar.gz}
         ;;
     
     _setversion)
-        if ! grep -q "(${VERSION}lhm1)" debian/changelog ; then
-          sed "s/<<VERSION>>/${VERSION}lhm1/" debian/bump >debian/changelog.bump
+        if ! grep -q "(${VERSION}-siga-lhm1)" debian/changelog ; then
+          sed "s/<<VERSION>>/${VERSION}-siga-lhm1/" debian/bump >debian/changelog.bump
           cat debian/changelog >>debian/changelog.bump
-          mv debian/changelog.bump debian/changelog
+          cp debian/changelog debian/changelog.saved
+          sed "s/\([^a-zA-Z0-9]\)siga\([^a-zA-Z0-9]\)/\1${BRANCH}\2/g" debian/changelog.bump >debian/changelog
         fi
         ;;
 
@@ -57,9 +61,8 @@ action()
 
     _clean)
 	fakeroot debian/rules clean
-	if grep -q "Version Bumper" debian/changelog ; then
-	  sed -i 1,6d debian/changelog
-	fi
+	cp debian/changelog.saved debian/changelog
+	rm -f debian/changelog.{bump,saved}
 	;;
   
   esac

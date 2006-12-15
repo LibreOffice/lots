@@ -1,4 +1,4 @@
-wollmux (1.4.2lhm1) siga; urgency=low
+wollmux (1.4.2-siga-lhm1) siga; urgency=low
 
   * FormularMax 4000: Sichtbarkeit-Abschnitt wird nicht mehr gelöscht, d.h.
                       Ein/Ausblendungen können realisiert werden.
@@ -15,14 +15,14 @@ wollmux (1.4.2lhm1) siga; urgency=low
 
  -- Christoph Lutz <christoph.lutz@muenchen.de>  Wed, 22 Nov 2006 16:13:16 +0200
  
-wollmux (1.4.1lhm1) siga; urgency=low
+wollmux (1.4.1-siga-lhm1) siga; urgency=low
 
   * [R4045] Bugfix eines kritischen Fehlers: Öffnen einer Mischvorlage expandiert
             den Briefkopf nicht.
 
  -- Christoph Lutz <christoph.lutz@muenchen.de>  Tue, 16 Nov 2006 16:13:16 +0200
  
-wollmux (1.4.0lhm1) siga; urgency=low
+wollmux (1.4.0-siga-lhm1) siga; urgency=low
 
   * Hilfen zum Einfügen und Drucken von Sachleitenden Verfügungen stehen (erstmalig)
     zur Verfügung. Über Datei->Drucken startet jetzt der neue Druckdialog für
