@@ -25,6 +25,7 @@
  *                  | +parseFunctionDialogs()
  * 26.05.2006 | BNK | DJ initialisierung ausgelagert nacht WollMuxFiles
  * 06.06.2006 | LUT | + Ablösung der Event-Klasse durch saubere Objektstruktur
+ * 19.12.2006 | BAB | + setzen von Shortcuts im Konstruktor
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -199,6 +200,25 @@ public class WollMuxSingleton implements XPALProvider
           new GlobalEventListener());
     }
     catch (Exception e)
+    {
+      Logger.error(e);
+    }
+
+    // setzen von shortcuts
+    ConfigThingy tastenkuerzel = new ConfigThingy("");
+    try
+    {
+      tastenkuerzel = WollMuxFiles.getWollmuxConf().query("Tastenkuerzel")
+          .getLastChild();
+    }
+    catch (NodeNotFoundException e)
+    {
+    }
+    try
+    {
+      Shortcuts.createShortcuts(tastenkuerzel);
+    }
+    catch (java.lang.Exception e)
     {
       Logger.error(e);
     }
