@@ -906,6 +906,10 @@ public class FormController implements UIElementEventHandler
       processUIElementEvents = true;
       processUiElementEvent(uiElement, "valueChanged", new Object[]{});
     }
+    else
+    {
+      formModel.valueChanged(uiElementId, value);
+    }
     callback.actionPerformed(new ActionEvent(this, 0, "setValue"));
   }
   
