@@ -52,7 +52,6 @@ import com.sun.star.container.NoSuchElementException;
 import com.sun.star.container.XEnumeration;
 import com.sun.star.container.XNamed;
 import com.sun.star.frame.DispatchResultEvent;
-import com.sun.star.frame.XController;
 import com.sun.star.frame.XDispatch;
 import com.sun.star.frame.XDispatchResultListener;
 import com.sun.star.frame.XNotifyingDispatch;
@@ -1439,11 +1438,11 @@ public class WollMuxEventHandler
    *          Die DocumentCommandTree-Struktur, die den Zustand der
    *          Sichtbarkeiten enthält.
    */
-  public static void handleSetVisibleState(XTextDocument doc,
+  public static void handleSetVisibleState(TextDocumentModel model,
       DocumentCommandTree cmdTree, HashSet invisibleGroups, String groupId,
       boolean visible)
   {
-    handle(new OnSetVisibleState(doc, cmdTree, invisibleGroups, groupId,
+    handle(new OnSetVisibleState(model, cmdTree, invisibleGroups, groupId,
         visible));
   }
 
@@ -1456,7 +1455,7 @@ public class WollMuxEventHandler
    */
   private static class OnSetVisibleState extends BasicEvent
   {
-    private XTextDocument doc;
+    private TextDocumentModel model;
 
     private String groupId;
 
@@ -1466,10 +1465,11 @@ public class WollMuxEventHandler
 
     private HashSet invisibleGroups;
 
-    public OnSetVisibleState(XTextDocument doc, DocumentCommandTree cmdTree,
-        HashSet invisibleGroups, String groupId, boolean visible)
+    public OnSetVisibleState(TextDocumentModel model,
+        DocumentCommandTree cmdTree, HashSet invisibleGroups, String groupId,
+        boolean visible)
     {
-      this.doc = doc;
+      this.model = model;
       this.cmdTree = cmdTree;
       this.invisibleGroups = invisibleGroups;
       this.groupId = groupId;
@@ -1542,18 +1542,13 @@ public class WollMuxEventHandler
      */
     private void focusRangeStart(DocumentCommand cmd)
     {
-      XTextRange range = cmd.getTextRange();
-      if (range != null)
-        try
-        {
-          XController controller = UNO.XModel(doc).getCurrentController();
-          XTextCursor cursor = UNO.XTextViewCursorSupplier(controller)
-              .getViewCursor();
-          cursor.gotoRange(range.getStart(), false);
-        }
-        catch (java.lang.Exception e)
-        {
-        }
+      try
+      {
+        model.getViewCursor().gotoRange(cmd.getTextRange().getStart(), false);
+      }
+      catch (java.lang.Exception e)
+      {
+      }
     }
 
     public String toString()

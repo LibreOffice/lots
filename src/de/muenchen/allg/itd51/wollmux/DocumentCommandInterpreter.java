@@ -488,7 +488,7 @@ public class DocumentCommandInterpreter
     public void setVisibleState(String groupId, boolean visible)
     {
       WollMuxEventHandler.handleSetVisibleState(
-          textDocumentModel.doc,
+          textDocumentModel,
           cmdTree,
           invisibleGroups,
           groupId,
