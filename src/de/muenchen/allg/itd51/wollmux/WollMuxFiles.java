@@ -18,6 +18,7 @@
  * 21.09.2006 | BNK | Unter Windows nach c:\programme\wollmux\wollmux.conf schauen
  * 19.10.2006 | BNK | +dumpInfo()
  * 05.12.2006 | BNK | +getClassPath()
+ * 20.12.2006 | BNK | CLASSPATH:Falls keine Dateierweiterung angegeben, / ans Ende setzen, weil nur so Verzeichnisse erkannt werden.
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -492,6 +493,8 @@ public class WollMuxFiles
       while (iter.hasNext())
       {
         String urlStr = iter.next().toString();
+        if (!urlStr.endsWith("/") && urlStr.lastIndexOf('/') > urlStr.lastIndexOf('.'))
+          urlStr = urlStr + "/"; //Falls keine Dateierweiterung angegeben, / ans Ende setzen, weil nur so Verzeichnisse erkannt werden.
         try
         {
           URL url = new URL(getDEFAULT_CONTEXT(), urlStr);
