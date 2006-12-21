@@ -193,6 +193,8 @@ public class DatasourceJoiner
           ds = new SchemaDatasource(nameToDatasource, sourceDesc, context);
         else if (type.equals("ldap"))
           ds = new LDAPDatasource(nameToDatasource, sourceDesc, context);
+        else if (type.equals("ooo"))
+          ds = new OOoDatasource(nameToDatasource, sourceDesc, context);
         else
           Logger.error("Ununterstützter Datenquellentyp: " + type);
       }
