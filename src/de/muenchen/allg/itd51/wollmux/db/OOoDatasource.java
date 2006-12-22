@@ -10,6 +10,7 @@
 * -------------------------------------------------------------------
 * 19.12.2006 | BNK | Erstellung
 * 21.12.2006 | BNK | Fertig+Test
+* 22.12.2006 | BNK | USER und PASSWORD unterstützt
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -85,6 +86,16 @@ public class OOoDatasource implements Datasource
   private String[] keyColumns;
   
   /**
+   * Benutzername für den Login bei der Datenbank.
+   */
+  private String userName = "";
+  
+  /**
+   * Passwort für den Login bei der Datenbank.
+   */
+  private String password = "";
+  
+  /**
    * Erzeugt eine neue OOoDatasource.
    * 
    * @param nameToDatasource
@@ -130,6 +141,17 @@ public class OOoDatasource implements Datasource
     catch (NodeNotFoundException x)
     { throw new ConfigurationErrorException("Datenquelle \""+datasourceName+"\": Name der Tabelle/Sicht innerhalb der OOo-Datenquelle muss als TABLE angegeben werden"); }
     
+    try
+    {
+      userName = sourceDesc.get("USER").toString();
+    }
+    catch (NodeNotFoundException x) {}
+    
+    try
+    {
+      password = sourceDesc.get("PASSWORD").toString();
+    }
+    catch (NodeNotFoundException x) {}
     
     schema = new HashSet();
     ConfigThingy schemaConf = sourceDesc.query("Schema");
@@ -153,7 +175,7 @@ public class OOoDatasource implements Datasource
       try{
         XDataSource ds = UNO.XDataSource(UNO.dbContext.getRegisteredObject(oooDatasourceName));
         ds.setLoginTimeout(LOGIN_TIMEOUT);
-        XConnection conn = ds.getConnection("","");
+        XConnection conn = ds.getConnection(userName,password);
         
         /*
          * Laut IDL-Doku zu "View" müssen hier auch die Views enthalten sein.
@@ -318,7 +340,7 @@ public class OOoDatasource implements Datasource
       long lgto = timeout / 1000;
       if (lgto < 1) lgto = 1;
       ds.setLoginTimeout((int)lgto);
-      conn = ds.getConnection("","");
+      conn = ds.getConnection(userName,password);
     } 
     catch(Exception x)
     {
