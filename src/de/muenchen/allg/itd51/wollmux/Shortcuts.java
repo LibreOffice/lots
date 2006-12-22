@@ -326,6 +326,7 @@ public class Shortcuts
     myMap.put("TABULATOR", new Short(Key.TAB));
     myMap.put("BACKSPACE", new Short(Key.BACKSPACE));
     myMap.put("RUECKSCHRITT", new Short(Key.BACKSPACE));
+    myMap.put("RÜCKSCHRITT", new Short(Key.BACKSPACE));
     myMap.put("SPACE", new Short(Key.SPACE));
     myMap.put("LEERTASTE", new Short(Key.SPACE));
     myMap.put("INSERT", new Short(Key.INSERT));
@@ -335,22 +336,21 @@ public class Shortcuts
     myMap.put("ADD", new Short(Key.ADD));
     myMap.put("PLUS", new Short(Key.ADD));
     myMap.put("SUBTRACT", new Short(Key.SUBTRACT));
-    myMap.put("MINUS", new Short(Key.SUBTRACT));
+    myMap.put("-", new Short(Key.SUBTRACT));
     myMap.put("MULTIPLY", new Short(Key.MULTIPLY));
-    myMap.put("ASTERISK", new Short(Key.MULTIPLY));
-    myMap.put("STERNCHEN", new Short(Key.MULTIPLY));
+    myMap.put("*", new Short(Key.MULTIPLY));
     myMap.put("DIVIDE", new Short(Key.DIVIDE));
-    myMap.put("SCHRAEGSTRICH", new Short(Key.DIVIDE));
+    myMap.put("/", new Short(Key.DIVIDE));
     myMap.put("POINT", new Short(Key.POINT));
-    myMap.put("PUNKT", new Short(Key.POINT));
+    myMap.put(".", new Short(Key.POINT));
     myMap.put("COMMA", new Short(Key.COMMA));
-    myMap.put("KOMMA", new Short(Key.COMMA));
+    myMap.put(",", new Short(Key.COMMA));
     myMap.put("LESS", new Short(Key.LESS));
-    myMap.put("KLEINERALS", new Short(Key.LESS));
+    myMap.put("<", new Short(Key.LESS));
     myMap.put("GREATER", new Short(Key.GREATER));
-    myMap.put("GROESSERALS", new Short(Key.GREATER));
+    myMap.put(">", new Short(Key.GREATER));
     myMap.put("EQUAL", new Short(Key.EQUAL));
-    myMap.put("GLEICH", new Short(Key.EQUAL));
+    myMap.put("=", new Short(Key.EQUAL));
 
     final Short keyCode = (Short) myMap.get(shortcut.toUpperCase());
 
