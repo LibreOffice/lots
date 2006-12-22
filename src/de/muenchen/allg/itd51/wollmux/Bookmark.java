@@ -606,4 +606,34 @@ public class Bookmark
       Logger.error(x);
     }
   }
+
+  /**
+   * Definition von equals, damit Bookmarks über HashMaps/HashSets verwaltet
+   * werden können.
+   * 
+   * @see java.lang.Object#equals(java.lang.Object)
+   */
+  public boolean equals(Object b)
+  {
+    try
+    {
+      return name.equals(((Bookmark) b).name);
+    }
+    catch (java.lang.Exception e)
+    {
+      return false;
+    }
+  }
+
+  /**
+   * Definition von hashCode, damit Bookmarks über HashMaps/HashSets verwaltet
+   * werden können.
+   * 
+   * @see java.lang.Object#hashCode()
+   */
+  public int hashCode()
+  {
+    return name.hashCode();
+  }
+
 }

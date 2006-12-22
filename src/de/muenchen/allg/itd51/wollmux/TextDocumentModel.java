@@ -21,6 +21,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.StringReader;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Set;
@@ -218,6 +219,17 @@ public class TextDocumentModel
   private LinkedList jumpMarks;
 
   /**
+   * Enthält den Kommandobaum dieses Dokuments.
+   */
+  private DocumentCommandTree documentCommandTree;
+
+  /**
+   * Enthält ein Setmit den Namen aller derzeit unsichtbar gestellter
+   * Sichtbarkeitsgruppen.
+   */
+  private HashSet /* of String */invisibleGroups;
+
+  /**
    * Erzeugt ein neues TextDocumentModel zum XTextDocument doc und sollte nie
    * direkt aufgerufen werden, da neue TextDocumentModels über das
    * WollMuxSingletonie (siehe WollMuxSingleton.getTextDocumentModel()) erzeugt
@@ -236,7 +248,13 @@ public class TextDocumentModel
     this.printSettingsDone = false;
     this.formularConf = new ConfigThingy("WM");
     this.formFieldValues = new HashMap();
+    this.invisibleGroups = new HashSet();
     this.formGUI = null;
+
+    // Kommandobaum erzeugen:
+    this.documentCommandTree = new DocumentCommandTree(UNO
+        .XBookmarksSupplier(doc));
+    documentCommandTree.update();
 
     resetDocumentCommands();
 
@@ -274,6 +292,16 @@ public class TextDocumentModel
     this.draftOnlyBlocks = new Vector();
     this.allVersionsBlocks = new Vector();
     this.jumpMarks = new LinkedList();
+  }
+
+  /**
+   * Liefert den Dokument-Kommandobaum dieses Dokuments.
+   * 
+   * @return der Dokument-Kommandobaum dieses Dokuments.
+   */
+  public DocumentCommandTree getDocumentCommandTree()
+  {
+    return documentCommandTree;
   }
 
   /**
@@ -644,6 +672,15 @@ public class TextDocumentModel
   public void addDraftOnlyBlock(DocumentCommand.DraftOnly cmd)
   {
     draftOnlyBlocks.add(cmd);
+  }
+
+  /**
+   * Liefert ein HashSet mit den Namen (Strings) aller als unsichtbar markierten
+   * Sichtbarkeitsgruppen.
+   */
+  public HashSet getInvisibleGroups()
+  {
+    return invisibleGroups;
   }
 
   /**

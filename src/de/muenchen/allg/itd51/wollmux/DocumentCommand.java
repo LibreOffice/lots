@@ -45,7 +45,7 @@ import de.muenchen.allg.itd51.parser.SyntaxErrorException;
 /**
  * Beschreibt ein Dokumentkommando, das als Element eines hierarchischen
  * Kommandobaumes weitere Kinder-Elemente enthalten kann und weitere
- * Eigenschaften wie z.B. den Gruppenzugehörigkeit, Sichtbarkeit und
+ * Eigenschaften wie z.B. die Gruppenzugehörigkeit, Sichtbarkeit und
  * Ausführstatus besitzt.
  * 
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -159,7 +159,13 @@ abstract public class DocumentCommand
    */
   public String toString()
   {
-    return "" + this.getClass().getSimpleName() + "[" + getBookmarkName() + "]";
+    return ""
+           + this.getClass().getSimpleName()
+           + "["
+           + (isRetired() ? "RETIRED:" : "")
+           + (isDone() ? "DONE:" : "")
+           + getBookmarkName()
+           + "]";
   }
 
   /**
@@ -233,6 +239,49 @@ abstract public class DocumentCommand
     b.parent = this;
     childsIterator.add(b);
     return compareCount;
+  }
+
+  /**
+   * Die Methode prüft in allen Kindern und Kindeskindern (rekusiv), ob ihre
+   * Bookmarks noch vorhanden sind und entfernt alle Kinder, deren Bookmarks
+   * nicht mehr vorhanden sind.
+   * 
+   * @return liefert true, wenn mindestens ein Kind oder Kindeskind entfernt
+   *         wurde, ansonsten false.
+   */
+  public boolean removeRetieredChilds()
+  {
+    boolean changed = false;
+
+    Vector lostChildren = new Vector();
+    Iterator iter = childs.iterator();
+    while (iter.hasNext())
+    {
+      DocumentCommand child = (DocumentCommand) iter.next();
+
+      // zuerst bei den Kindern aufräumen
+      if (child.removeRetieredChilds() == true) changed = true;
+
+      // und dann selber aufräumen
+      if (child.isRetired())
+      {
+        // Ungültiges Element entfernen
+        iter.remove();
+        changed = true;
+
+        // Verloren gegangene Kinder merken
+        Iterator lost = child.childs.iterator();
+        while (lost.hasNext())
+          lostChildren.add(lost.next());
+      }
+    }
+
+    // Verloren gegangene Kinder wieder hinzufügen:
+    iter = lostChildren.iterator();
+    while (iter.hasNext())
+      add((DocumentCommand) iter.next());
+
+    return changed;
   }
 
   /**
@@ -459,6 +508,20 @@ abstract public class DocumentCommand
   }
 
   /**
+   * Liefert true, wenn das Bookmark zu diesem Dokumentkommando nicht mehr
+   * existiert und das Dokumentkommando daher nicht mehr zu gebrauchen ist oder
+   * andernfalls false.
+   * 
+   * @return true, wenn das Bookmark zu diesem Dokumentkommando nicht mehr
+   *         existiert, ansonsten false.
+   */
+  public boolean isRetired()
+  {
+    if (bookmark != null) return bookmark.getAnchor() == null;
+    return false;
+  }
+
+  /**
    * Beschreibt ob das Kommando bereits abgearbeitet wurde. Ist DONE bisher noch
    * nicht definiert oder gesetzt worden, so wird der Defaultwert false
    * zurückgeliefert.
@@ -483,15 +546,20 @@ abstract public class DocumentCommand
   }
 
   /**
-   * Setzt den Status für das Attribut DONE.
+   * Markiert ein Dokumentkommando als bearbeitet; Das Dokumentkommando wird
+   * daraufhin aus dem Dokument gelöscht, wenn removeBookmark==true oder
+   * umbenannt, wenn removeBookmark==false.
    * 
-   * @param done
-   *          true, signalisiert, dass das Kommando bereits bearbeitet wurde,
-   *          false das Gegenteil.
+   * @param removeBookmark
+   *          true, signalisiert, dass das zugehörige Bookmark gelöscht werden
+   *          soll. False signalisiert, dass das Bookmark mit dem Zusatz "<alterName>
+   *          STATE(DONE 'true')" versehen wird.
    */
-  public void setDoneState(boolean done)
+  public void markDone(boolean removeBookmark)
   {
-    this.done = new Boolean(done);
+
+    this.done = Boolean.TRUE;
+    flushToBookmark(removeBookmark);
   }
 
   /**
@@ -593,14 +661,19 @@ abstract public class DocumentCommand
    * löscht ein Bookmark, wenn der Status DONE=true gesetzt ist - Die Methode
    * liefert entweder den Namen des neuen Bookmarks, welches die neuen
    * Statusinformationen enthält zurück, oder null, wenn das zugehörige Bookmark
-   * gelöscht wurde. Ist der debug-modus gesetzt, so werden in gar keinem Fall
+   * gelöscht wurde. Ist der DEBUG-modus gesetzt, so werden in gar keinem Fall
    * Bookmarks gelöscht, womit die Fehlersuche erleichtert werden soll.
    * 
    * @return der Name des neuen Bookmarks oder null.
    */
-  public String updateBookmark(boolean debug)
+  protected String flushToBookmark(boolean removeIfDone)
   {
-    if (!isDone() || debug)
+    if (isDone() && removeIfDone)
+    {
+      bookmark.remove();
+      return null;
+    }
+    else
     {
       String wmCmdString = getCommandString(toConfigThingy());
 
@@ -610,11 +683,6 @@ abstract public class DocumentCommand
       if (!wmCmdString.equals(name)) bookmark.rename(wmCmdString);
 
       return bookmark.getName();
-    }
-    else
-    {
-      bookmark.remove();
-      return null;
     }
   }
 
@@ -890,7 +958,7 @@ abstract public class DocumentCommand
     public NotYetImplemented(ConfigThingy wmCmd, Bookmark bookmark)
     {
       super(wmCmd, bookmark);
-      setDoneState(true);
+      markDone(false);
     }
 
     protected boolean canHaveChilds()
@@ -1267,6 +1335,7 @@ abstract public class DocumentCommand
     public void setMD5(String md5Str)
     {
       md5 = md5Str;
+      flushToBookmark(false);
     }
 
     protected boolean canHaveChilds()
@@ -1523,7 +1592,7 @@ abstract public class DocumentCommand
         Logger.error(e);
       }
 
-      updateBookmark(false);
+      flushToBookmark(false);
     }
 
     public String getFunctionName()

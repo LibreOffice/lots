@@ -551,7 +551,6 @@ public final class FormFieldFactory
       // md5-Wert bestimmen und setzen:
       String md5 = getMD5HexRepresentation(value);
       cmd.setMD5(md5);
-      cmd.updateBookmark(false);
 
       // Inhalt des Textfeldes setzen:
       setFormElementValue(value);

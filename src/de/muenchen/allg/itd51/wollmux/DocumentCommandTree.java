@@ -21,6 +21,7 @@ package de.muenchen.allg.itd51.wollmux;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -31,7 +32,6 @@ import java.util.regex.Pattern;
 
 import com.sun.star.comp.helper.Bootstrap;
 import com.sun.star.comp.helper.BootstrapException;
-import com.sun.star.container.NoSuchElementException;
 import com.sun.star.container.XNameAccess;
 import com.sun.star.frame.XDesktop;
 import com.sun.star.text.XBookmarksSupplier;
@@ -71,12 +71,19 @@ import de.muenchen.allg.itd51.wollmux.DocumentCommand.Version;
 public class DocumentCommandTree
 {
   /**
+   * Folgendes Pattern prüft ob es sich bei einem Bookmark um ein gültiges
+   * "WM"-Kommando handelt und entfernt evtl. vorhandene Zahlen-Suffixe.
+   */
+  public static final Pattern wmCmdPattern = Pattern
+      .compile("\\A\\p{Space}*(WM\\p{Space}*\\(.*\\))\\p{Space}*(\\d*)\\z");
+
+  /**
    * Das Dokument, welches die DokumentCommands enthält.
    */
   private XBookmarksSupplier xBookmarksSupplier;
 
   /**
-   * Ein HashSet aller bereits bekannter Bookmarks, die beim update nicht mehr
+   * Ein HashSet aller bereits bekannten Bookmarks, die beim update nicht mehr
    * erneut eingelesen werden müssen.
    */
   private HashSet scannedBookmarks;
@@ -102,81 +109,119 @@ public class DocumentCommandTree
 
   /**
    * Diese Methode durchsucht das Dokument nach neuen, bisher nicht gescannten
-   * Dokumentkommandos und fügt diese dem Baum hinzu. Das Kommando liefert das
-   * Wurzelelement des Kommandobaumes zurück.
+   * Dokumentkommandos und fügt diese dem Baum hinzu oder entfernt
+   * Dokumentkommandos, die nicht mehr gültig sind, weil ihr zugehöriges
+   * Bookmark nicht merh existiert. Das Kommando true zurück, wenn sich der
+   * Kommandobaum durch das update() verändert hat, ansonsten false.
    * 
-   * @return Das Wurzelelement des Kommandobaumes.
+   * @return true, wenn sich der Kommandobaum durch das update verändert hat und
+   *         false, wenn der Baum unverändert ist.
    */
-  public DocumentCommand update()
+  public boolean update()
   {
-    // Folgendes Pattern prüft ob es sich bei dem Bookmark um ein gültiges
-    // "WM"-Kommando handelt und entfernt evtl. vorhandene Zahlen-Suffixe.
-    Pattern wmCmdPattern = Pattern
-        .compile("\\A\\p{Space}*(WM\\p{Space}*\\(.*\\))\\p{Space}*(\\d*)\\z");
-
+    boolean changed = false;
     int compareCount = 0;
-    if (xBookmarksSupplier != null)
+
+    // Kommandos, deren Bookmark inzwischen gelöscht wurde sind ungültig und
+    // müssen aus dem Baum entfernt werden:
+    if (root.removeRetieredChilds() == true) changed = true;
+
+    Iterator iter = getSetOfNewBookmarks().iterator();
+    while (iter.hasNext())
     {
-      XNameAccess bma = xBookmarksSupplier.getBookmarks();
-      String[] elements = bma.getElementNames();
-      for (int i = 0; i < elements.length; i++)
+      Bookmark bookmark = (Bookmark) iter.next();
+
+      // Bookmark evaluieren. Ist Bookmark ein "WM"-Kommand?
+      Matcher m = wmCmdPattern.matcher(bookmark.getName());
+      DocumentCommand command = null;
+      if (m.find())
       {
-        String bookmarkName = elements[i];
-
-        // zum nächsten Bookmark springen wenn das Bookmark bereits bekannt ist
-        if (scannedBookmarks.contains(bookmarkName))
-          continue;
-        else
-          scannedBookmarks.add(bookmarkName);
-
-        // Bookmark-Objekt erzeugen:
-        Bookmark bookmark;
+        String cmdString = m.group(1);
         try
         {
-          bookmark = new Bookmark(bookmarkName, xBookmarksSupplier);
-        }
-        catch (NoSuchElementException e)
-        {
-          Logger.error(e);
-          continue;
-        }
-
-        // Bookmark evaluieren. Ist Bookmark ein "WM"-Kommand?
-        Matcher m = wmCmdPattern.matcher(bookmarkName);
-        ConfigThingy wmCmd = null;
-        DocumentCommand command = null;
-        if (m.find())
-        {
-          String cmdString = m.group(1);
-          try
-          {
-            wmCmd = new ConfigThingy("", null, new StringReader(cmdString));
-          }
-          catch (IOException e)
-          {
-            Logger.error(e);
-          }
-          catch (SyntaxErrorException e)
-          {
-            command = new InvalidCommand(bookmark, e);
-          }
-        }
-
-        if (wmCmd != null && bookmark != null)
-        {
+          ConfigThingy wmCmd = new ConfigThingy("", null, new StringReader(
+              cmdString));
           command = createCommand(wmCmd, bookmark);
         }
-
-        if (command != null)
+        catch (IOException e)
         {
-          Logger.debug2("Adding: " + command);
-          compareCount += root.add(command);
+          Logger.error(e);
         }
+        catch (SyntaxErrorException e)
+        {
+          command = new InvalidCommand(bookmark, e);
+        }
+      }
+
+      if (command != null)
+      {
+        Logger.debug2("Adding: " + command);
+        compareCount += root.add(command);
+        changed = true;
       }
     }
     Logger.debug2("Update fertig - compareCount=" + compareCount);
 
-    return root;
+    return changed;
+  }
+
+  /**
+   * Liefert ein Set das nur die Bookmarks enthält, die seit dem letzten Aufruf
+   * dieser Methode NEU hinzugekommen sind. Die bisher bekannten Bookmarks
+   * werden dabei in einem Set abgelegt, das stets die ältesten Instanzen der
+   * gültigen Bookmarks enthält. Das ist notwendig, damit Bookmarks nicht als
+   * "neu" erkannt werden, wenn sie der WollMux selbst umbenannt hat.
+   * 
+   * @return
+   */
+  private HashSet getSetOfNewBookmarks()
+  {
+    HashSet newBookmarks = new HashSet();
+    if (xBookmarksSupplier == null) return newBookmarks;
+
+    // Seit dem letzten scan können sich Bookmarknamen verändert haben. Die
+    // folgenden drei Zeilen übertragen die bisher bekannten Elemente in eine
+    // temporäre HashMap, womit auch die HashCodes der bekannten Elemente neu
+    // bestimmt werden. Die HashMap ist ausserdem notwendig, um über get auf die
+    // ursprünglichen Bookmark Instanzen zugreifen zu können.
+    HashMap oldBookmarks = new HashMap();
+    Iterator iter = scannedBookmarks.iterator();
+    while (iter.hasNext())
+    {
+      Object key = iter.next();
+      oldBookmarks.put(key, key);
+    }
+
+    // Aus oldBookmarks alle Bookmarks entfernen, die nicht mehr existieren
+    // und alle neuen Bookmarks hinzufügen. Die neuen Bookmarks zusätzlich in
+    // newBookmarks aufnehmen:
+    HashSet actualBookmarks = new HashSet();
+    XNameAccess bma = xBookmarksSupplier.getBookmarks();
+    String[] elements = bma.getElementNames();
+    for (int i = 0; i < elements.length; i++)
+      try
+      {
+        Bookmark bookmark = new Bookmark(elements[i], xBookmarksSupplier);
+        if (oldBookmarks.containsKey(bookmark))
+        {
+          // hier die ursprüngliche Instanz verwenden anstatt bookmark
+          actualBookmarks.add(oldBookmarks.get(bookmark));
+        }
+        else
+        {
+          actualBookmarks.add(bookmark);
+          newBookmarks.add(bookmark);
+        }
+      }
+      catch (java.lang.Exception e)
+      {
+        Logger.error(e);
+      }
+
+    // was jetzt aktuell ist wird später alt
+    scannedBookmarks = actualBookmarks;
+
+    return newBookmarks;
   }
 
   /**
@@ -373,33 +418,6 @@ public class DocumentCommandTree
   }
 
   /**
-   * Veranlasst alle Elemente in der Reihenfolge einer Tiefensuche die ihre
-   * Bookmarks im Dokument auf ihren neuen Status anzupassen um damit den Status
-   * im Dokument zu manifestieren.
-   */
-  public void updateBookmarks(boolean debug)
-  {
-    Iterator i = depthFirstIterator(false);
-    while (i.hasNext())
-    {
-      DocumentCommand cmd = (DocumentCommand) i.next();
-      String oldBookmarkName = cmd.getBookmarkName();
-      String newBookmarkName = cmd.updateBookmark(debug);
-
-      // Anpassen des scannedBookmarks-Set
-      if (newBookmarkName == null)
-      {
-        scannedBookmarks.remove(oldBookmarkName);
-      }
-      else if (!oldBookmarkName.equals(newBookmarkName))
-      {
-        scannedBookmarks.remove(oldBookmarkName);
-        scannedBookmarks.add(newBookmarkName);
-      }
-    }
-  }
-
-  /**
    * Main-Methode für Testzwecke. Erzeugt einen Kommandobaum aus dem aktuell in
    * OOo geöffneten Dokument und gibt diesen auf System.out aus.
    * 
@@ -432,12 +450,6 @@ public class DocumentCommandTree
   public static class TreeExecutor implements DocumentCommand.Executor
   {
     /**
-     * Kann während Ausführung eines Kommandos auf true gesetzt werden. Danach
-     * wird der gesamte Baum neu aufgebaut und erneut durchlaufen.
-     */
-    public boolean repeatScan;
-
-    /**
      * Durchläuft den Dokumentenbaum tree in der in reverse angegebener Richtung
      * und führt alle enthaltenen Dokumentkommandos aus, die nicht den Status
      * DONE=true oder ERROR=true besitzen. Der Wert reverse=false entspricht
@@ -452,24 +464,19 @@ public class DocumentCommandTree
     protected int executeDepthFirst(DocumentCommandTree tree, boolean reverse)
     {
       int errors = 0;
-      do
+
+      // Alle (neuen) DocumentCommands durchlaufen und mit execute aufrufen.
+      Iterator iter = tree.depthFirstIterator(reverse);
+      while (iter.hasNext())
       {
-        repeatScan = false;
+        DocumentCommand cmd = (DocumentCommand) iter.next();
 
-        // Alle (neuen) DocumentCommands durchlaufen und mit execute aufrufen.
-        tree.update();
-        Iterator iter = tree.depthFirstIterator(reverse);
-        while (iter.hasNext())
+        if (cmd.isDone() == false && cmd.hasError() == false)
         {
-          DocumentCommand cmd = (DocumentCommand) iter.next();
-
-          if (cmd.isDone() == false && cmd.hasError() == false)
-          {
-            // Kommando ausführen und Fehler zählen
-            errors += cmd.execute(this);
-          }
+          // Kommando ausführen und Fehler zählen
+          errors += cmd.execute(this);
         }
-      } while (repeatScan);
+      }
       return errors;
     }
 

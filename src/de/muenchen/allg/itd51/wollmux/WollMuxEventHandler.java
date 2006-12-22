@@ -981,7 +981,9 @@ public class WollMuxEventHandler
       WollMuxSingleton mux = WollMuxSingleton.getInstance();
       TextDocumentModel model = mux.getTextDocumentModel(xTextDoc);
 
-      // Dokument über den DocumentCommandInterpreter neu bearbeiten:
+      // Dokument mit neuen Dokumentkommandos über den
+      // DocumentCommandInterpreter bearbeiten:
+      model.getDocumentCommandTree().update();
       DocumentCommandInterpreter dci = new DocumentCommandInterpreter(model,
           mux);
       try
@@ -1439,11 +1441,9 @@ public class WollMuxEventHandler
    *          Sichtbarkeiten enthält.
    */
   public static void handleSetVisibleState(TextDocumentModel model,
-      DocumentCommandTree cmdTree, HashSet invisibleGroups, String groupId,
-      boolean visible)
+      String groupId, boolean visible)
   {
-    handle(new OnSetVisibleState(model, cmdTree, invisibleGroups, groupId,
-        visible));
+    handle(new OnSetVisibleState(model, groupId, visible));
   }
 
   /**
@@ -1461,17 +1461,10 @@ public class WollMuxEventHandler
 
     private boolean visible;
 
-    private DocumentCommandTree cmdTree;
-
-    private HashSet invisibleGroups;
-
-    public OnSetVisibleState(TextDocumentModel model,
-        DocumentCommandTree cmdTree, HashSet invisibleGroups, String groupId,
+    public OnSetVisibleState(TextDocumentModel model, String groupId,
         boolean visible)
     {
       this.model = model;
-      this.cmdTree = cmdTree;
-      this.invisibleGroups = invisibleGroups;
       this.groupId = groupId;
       this.visible = visible;
     }
@@ -1479,6 +1472,7 @@ public class WollMuxEventHandler
     protected void doit()
     {
       // invisibleGroups anpassen:
+      HashSet invisibleGroups = model.getInvisibleGroups();
       if (visible)
         invisibleGroups.remove(groupId);
       else
@@ -1487,7 +1481,7 @@ public class WollMuxEventHandler
       DocumentCommand firstChangedCmd = null;
 
       // Kommandobaum durchlaufen und alle betroffenen Elemente updaten:
-      Iterator iter = cmdTree.depthFirstIterator(false);
+      Iterator iter = model.getDocumentCommandTree().depthFirstIterator(false);
       while (iter.hasNext())
       {
         DocumentCommand cmd = (DocumentCommand) iter.next();
@@ -3027,9 +3021,8 @@ public class WollMuxEventHandler
           Logger.error(e);
         }
 
-        // Bookmark löschen:
-        cmd.setDoneState(true);
-        cmd.updateBookmark(false);
+        cmd.markDone(true);
+        model.getDocumentCommandTree().update();
       }
       else
       {

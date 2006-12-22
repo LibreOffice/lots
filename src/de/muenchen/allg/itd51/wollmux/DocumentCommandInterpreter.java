@@ -101,8 +101,7 @@ public class DocumentCommandInterpreter
   /**
    * Der geparste Dokumentkommando-Baum
    */
-  private DocumentCommandTree tree;
-
+  // private DocumentCommandTree tree;
   /**
    * Der FormScanner wird sowohl bei Vorlagen als auch bei Formulardokumenten
    * gestartet. Damit der FormScanner bei Formularvorlagen nicht zweimal
@@ -128,7 +127,7 @@ public class DocumentCommandInterpreter
   {
     this.model = model;
     this.mux = mux;
-    this.tree = new DocumentCommandTree(UNO.XBookmarksSupplier(model.doc));
+    // this.tree = model.getDocumentCommandTree();
     this.formScanner = null;
     model.resetDocumentCommands();
   }
@@ -142,7 +141,7 @@ public class DocumentCommandInterpreter
   {
     Logger.debug("scanDocumentSettings");
 
-    new DocumentSettingsScanner().execute(tree);
+    new DocumentSettingsScanner().execute(model.getDocumentCommandTree());
 
     model.setDocumentModified(false);
   }
@@ -163,7 +162,8 @@ public class DocumentCommandInterpreter
     // 1) Zuerst alle Kommandos bearbeiten, die irgendwie Kinder bekommen
     // können, damit der DocumentCommandTree vollständig aufgebaut werden
     // kann.
-    errors += new DocumentExpander(model.getFragUrls()).execute(tree);
+    errors += new DocumentExpander(model.getFragUrls()).execute(model
+        .getDocumentCommandTree());
 
     // Ziffern-Anpassen der Sachleitenden Verfügungen aufrufen:
     SachleitendeVerfuegung.ziffernAnpassen(model);
@@ -176,11 +176,11 @@ public class DocumentCommandInterpreter
     // übereinander liegen kann. Ausserdem liegt updateFields thematisch näher
     // am expandieren der Textfragmente, da updateFields im Prinzip nur dessen
     // Schwäche beseitigt.
-    errors += new TextFieldUpdater().execute(tree);
+    errors += new TextFieldUpdater().execute(model.getDocumentCommandTree());
 
     // 3) Hauptverarbeitung: Jetzt alle noch übrigen DocumentCommands (z.B.
     // insertValues) in einem einzigen Durchlauf mit execute bearbeiten.
-    errors += new MainProcessor().execute(tree);
+    errors += new MainProcessor().execute(model.getDocumentCommandTree());
 
     // 4) Da keine neuen Elemente mehr eingefügt werden müssen, können
     // jetzt die INSERT_MARKS "<" und ">" der insertFrags und
@@ -192,21 +192,20 @@ public class DocumentCommandInterpreter
     // sauber erkennen und entfernen.
     // errors += new EmptyParagraphCleaner().execute(tree);
     SurroundingGarbageCollector collect = new SurroundingGarbageCollector();
-    errors += collect.execute(tree);
+    errors += collect.execute(model.getDocumentCommandTree());
     collect.removeGarbage();
+
+    // da hier bookmarks entfernt werden, muss der Baum upgedatet werden
+    model.getDocumentCommandTree().update();
 
     // 6) Scannen aller für das Formular relevanten Informationen:
     if (formScanner == null) formScanner = new FormScanner();
-    errors += formScanner.execute(tree);
+    errors += formScanner.execute(model.getDocumentCommandTree());
     model.setIDToFormFields(formScanner.idToFormFields);
 
     // Jetzt wird der Dokumenttyp formDocument gesetzt, um das Dokument als
     // Formulardokument auszuzeichnen.
     if (model.hasFormDescriptor()) model.setType("formDocument");
-
-    // 7) Die Statusänderungen der Dokumentkommandos auf die Bookmarks
-    // übertragen bzw. die Bookmarks abgearbeiteter Kommandos löschen.
-    tree.updateBookmarks(mux.isDebugMode());
 
     // 8) Document-Modified auf false setzen, da nur wirkliche
     // Benutzerinteraktionen den Modified-Status beeinflussen sollen.
@@ -241,15 +240,12 @@ public class DocumentCommandInterpreter
     if (formScanner == null)
     {
       formScanner = new FormScanner();
-      errors += formScanner.execute(tree);
+      errors += formScanner.execute(model.getDocumentCommandTree());
       model.setIDToFormFields(formScanner.idToFormFields);
     }
     HashMap idToPresetValue = mapIDToPresetValue(
         model,
         formScanner.idToFormFields);
-
-    // 2) Bookmarks updaten
-    tree.updateBookmarks(mux.isDebugMode());
 
     // 4) Document-Modified auf false setzen, da nur wirkliche
     // Benutzerinteraktionen den Modified-Status beeinflussen sollen.
@@ -292,7 +288,7 @@ public class DocumentCommandInterpreter
     }
 
     // 5) Formulardialog starten:
-    FormModel fm = new FormModelImpl(model, funcLib, tree);
+    FormModel fm = new FormModelImpl(model, funcLib);
 
     model.setFormModel(fm);
 
@@ -420,19 +416,13 @@ public class DocumentCommandInterpreter
 
     private final FunctionLibrary funcLib;
 
-    private final DocumentCommandTree cmdTree;
-
-    private final HashSet invisibleGroups;
-
     private final String defaultWindowAttributes;
 
     public FormModelImpl(TextDocumentModel textDocumentModel,
-        FunctionLibrary funcLib, DocumentCommandTree cmdTree)
+        FunctionLibrary funcLib)
     {
       this.textDocumentModel = textDocumentModel;
       this.funcLib = funcLib;
-      this.cmdTree = cmdTree;
-      this.invisibleGroups = new HashSet();
 
       // Standard-Fensterattribute vor dem Start der Form-GUI sichern um nach
       // dem Schließen des Formulardokuments die Standard-Werte wieder
@@ -489,8 +479,6 @@ public class DocumentCommandInterpreter
     {
       WollMuxEventHandler.handleSetVisibleState(
           textDocumentModel,
-          cmdTree,
-          invisibleGroups,
           groupId,
           visible);
     }
@@ -651,9 +639,7 @@ public class DocumentCommandInterpreter
     {
       model.setPrintFunction(cmd);
 
-      // Bookmark löschen:
-      cmd.setDoneState(true);
-      cmd.updateBookmark(false);
+      cmd.markDone(true);
       return 0;
     }
 
@@ -664,12 +650,7 @@ public class DocumentCommandInterpreter
       // Wenn eine Mischvorlage zum Bearbeiten geöffnet wurde soll der typ
       // "templateTemplate" NICHT gelöscht werden, ansonsten schon.
       if (!(model.hasURL() && cmd.getType()
-          .equalsIgnoreCase("templateTemplate")))
-      {
-        // Bookmark löschen:
-        cmd.setDoneState(true);
-        cmd.updateBookmark(false);
-      }
+          .equalsIgnoreCase("templateTemplate"))) cmd.markDone(true);
       return 0;
     }
 
@@ -798,6 +779,10 @@ public class DocumentCommandInterpreter
             .XTextSectionsSupplier(model.doc), cmd.isManualMode());
       }
       cmd.unsetHasInsertMarks();
+
+      // Kommando löschen wenn der WollMux nicht im debugModus betrieben wird.
+      cmd.markDone(!mux.isDebugMode());
+
       return 0;
     }
 
@@ -809,6 +794,10 @@ public class DocumentCommandInterpreter
             .XTextSectionsSupplier(model.doc), false);
       }
       cmd.unsetHasInsertMarks();
+
+      // Kommando löschen wenn der WollMux nicht im debugModus betrieben wird.
+      cmd.markDone(!mux.isDebugMode());
+
       return 0;
     }
 
@@ -1019,9 +1008,24 @@ public class DocumentCommandInterpreter
       this.fragUrlsCount = 0;
     }
 
+    /**
+     * Führt die Dokumentkommandos von tree aus, der dabei so lange aktualisiert
+     * wird, bis der Baum vollständig aufgebaut ist.
+     * 
+     * @param tree
+     * @return
+     */
     public int execute(DocumentCommandTree tree)
     {
-      return executeDepthFirst(tree, false);
+      int errors = 0;
+
+      // so lange wiederholen, bis sich der Baum durch das Expandieren nicht
+      // mehr ändert.
+      do
+        errors += executeDepthFirst(tree, false);
+      while (tree.update());
+
+      return errors;
     }
 
     /**
@@ -1031,7 +1035,6 @@ public class DocumentCommandInterpreter
      */
     public int executeCommand(InsertFrag cmd)
     {
-      repeatScan = true;
       cmd.setErrorState(false);
       boolean found = false;
       String errors = "";
@@ -1100,8 +1103,134 @@ public class DocumentCommandInterpreter
         cmd.setErrorState(true);
         return 1;
       }
-      cmd.setDoneState(true);
+
+      // Kommando als Done markieren aber noch aufheben. Gelöscht wird das
+      // Bookmark dann erst durch den SurroundingGarbageCollector.
+      cmd.markDone(false);
       return 0;
+    }
+
+    /**
+     * Diese Methode fügt das nächste Textfragment aus der dem
+     * WMCommandInterpreter übergebenen frag_urls liste ein. Im Fehlerfall wird
+     * eine entsprechende Fehlermeldung eingefügt.
+     */
+    public int executeCommand(InsertContent cmd)
+    {
+      cmd.setErrorState(false);
+      if (fragUrls.length > fragUrlsCount)
+      {
+        String urlStr = fragUrls[fragUrlsCount++];
+
+        try
+        {
+          Logger.debug("Füge Textfragment von URL \"" + urlStr + "\" ein.");
+
+          insertDocumentFromURL(cmd, new URL(urlStr));
+        }
+        catch (java.lang.Exception e)
+        {
+          insertErrorField(cmd, e);
+          cmd.setErrorState(true);
+          return 1;
+        }
+      }
+      // Kommando als Done markieren aber noch aufheben. Gelöscht wird das
+      // Bookmark dann erst durch den SurroundingGarbageCollector.
+      cmd.markDone(false);
+      return 0;
+    }
+
+    // Helper-Methoden:
+
+    /**
+     * Die Methode fügt das externe Dokument von der URL url an die Stelle von
+     * cmd ein. Die Methode enthält desweiteren notwendige Workarounds für die
+     * Bugs des insertDocumentFromURL der UNO-API. public int
+     * execute(DocumentCommandTree tree) { return executeDepthFirst(tree,
+     * false); }
+     * 
+     * @param cmd
+     *          Einfügeposition
+     * @param url
+     *          die URL des einzufügenden Textfragments
+     * @throws java.io.IOException
+     * @throws IOException
+     * @throws IllegalArgumentException
+     * @throws java.io.IOException
+     * @throws IOException
+     */
+    private void insertDocumentFromURL(DocumentCommand cmd, URL url)
+        throws IllegalArgumentException, java.io.IOException, IOException
+    {
+
+      // Workaround: OOo friert ein, wenn ressource bei insertDocumentFromURL
+      // nicht auflösbar. http://qa.openoffice.org/issues/show_bug.cgi?id=57049
+      // Hier wird versucht, die URL über den java-Klasse url aufzulösen und bei
+      // Fehlern abgebrochen.
+      WollMuxSingleton.checkURL(url);
+
+      // URL durch den URLTransformer von OOo jagen, damit die URL auch von OOo
+      // verarbeitet werden kann.
+      String urlStr = UNO.getParsedUNOUrl(url.toExternalForm()).Complete;
+
+      // Workaround: Alten Paragraphenstyle merken. Problembeschreibung siehe
+      // http://qa.openoffice.org/issues/show_bug.cgi?id=60475
+      String paraStyleName = null;
+      UnoService endCursor = new UnoService(null);
+      XTextRange range = cmd.getTextRange();
+      if (range != null)
+      {
+        endCursor = new UnoService(range.getText().createTextCursorByRange(
+            range.getEnd()));
+      }
+      try
+      {
+        if (endCursor.xPropertySet() != null)
+          paraStyleName = endCursor.getPropertyValue("ParaStyleName")
+              .getObject().toString();
+      }
+      catch (java.lang.Exception e)
+      {
+        Logger.error(e);
+      }
+
+      // Liste aller TextFrames vor dem Einfügen zusammenstellen (benötigt für
+      // das
+      // Updaten der enthaltenen TextFields später).
+      HashSet textFrames = new HashSet();
+      if (UNO.XTextFramesSupplier(model.doc) != null)
+      {
+        String[] names = UNO.XTextFramesSupplier(model.doc).getTextFrames()
+            .getElementNames();
+        for (int i = 0; i < names.length; i++)
+        {
+          textFrames.add(names[i]);
+        }
+      }
+
+      // Textfragment einfügen:
+      UnoService insCursor = new UnoService(cmd.createInsertCursor());
+      if (insCursor.xDocumentInsertable() != null && urlStr != null)
+      {
+        insCursor.xDocumentInsertable().insertDocumentFromURL(
+            urlStr,
+            new PropertyValue[] {});
+      }
+
+      // Workaround: ParagraphStyleName für den letzten eingefügten Paragraphen
+      // wieder setzen (siehe oben).
+      if (endCursor.xPropertySet() != null && paraStyleName != null)
+      {
+        try
+        {
+          endCursor.setPropertyValue("ParaStyleName", paraStyleName);
+        }
+        catch (java.lang.Exception e)
+        {
+          Logger.error(e);
+        }
+      }
     }
 
     /**
@@ -1265,129 +1394,6 @@ public class DocumentCommandInterpreter
           WollMuxSingleton.showInfoModal("WollMux", error);
         }
       }
-
-    }
-
-    /**
-     * Diese Methode fügt das nächste Textfragment aus der dem
-     * WMCommandInterpreter übergebenen frag_urls liste ein. Im Fehlerfall wird
-     * eine entsprechende Fehlermeldung eingefügt.
-     */
-    public int executeCommand(InsertContent cmd)
-    {
-      repeatScan = true;
-      cmd.setErrorState(false);
-      if (fragUrls.length > fragUrlsCount)
-      {
-        String urlStr = fragUrls[fragUrlsCount++];
-
-        try
-        {
-          Logger.debug("Füge Textfragment von URL \"" + urlStr + "\" ein.");
-
-          insertDocumentFromURL(cmd, new URL(urlStr));
-        }
-        catch (java.lang.Exception e)
-        {
-          insertErrorField(cmd, e);
-          cmd.setErrorState(true);
-          return 1;
-        }
-      }
-      cmd.setDoneState(true);
-      return 0;
-    }
-
-    // Helper-Methoden:
-
-    /**
-     * Die Methode fügt das externe Dokument von der URL url an die Stelle von
-     * cmd ein. Die Methode enthält desweiteren notwendige Workarounds für die
-     * Bugs des insertDocumentFromURL der UNO-API. public int
-     * execute(DocumentCommandTree tree) { return executeDepthFirst(tree,
-     * false); }
-     * 
-     * @param cmd
-     *          Einfügeposition
-     * @param url
-     *          die URL des einzufügenden Textfragments
-     * @throws java.io.IOException
-     * @throws IOException
-     * @throws IllegalArgumentException
-     * @throws java.io.IOException
-     * @throws IOException
-     */
-    private void insertDocumentFromURL(DocumentCommand cmd, URL url)
-        throws IllegalArgumentException, java.io.IOException, IOException
-    {
-
-      // Workaround: OOo friert ein, wenn ressource bei insertDocumentFromURL
-      // nicht auflösbar. http://qa.openoffice.org/issues/show_bug.cgi?id=57049
-      // Hier wird versucht, die URL über den java-Klasse url aufzulösen und bei
-      // Fehlern abgebrochen.
-      WollMuxSingleton.checkURL(url);
-
-      // URL durch den URLTransformer von OOo jagen, damit die URL auch von OOo
-      // verarbeitet werden kann.
-      String urlStr = UNO.getParsedUNOUrl(url.toExternalForm()).Complete;
-
-      // Workaround: Alten Paragraphenstyle merken. Problembeschreibung siehe
-      // http://qa.openoffice.org/issues/show_bug.cgi?id=60475
-      String paraStyleName = null;
-      UnoService endCursor = new UnoService(null);
-      XTextRange range = cmd.getTextRange();
-      if (range != null)
-      {
-        endCursor = new UnoService(range.getText().createTextCursorByRange(
-            range.getEnd()));
-      }
-      try
-      {
-        if (endCursor.xPropertySet() != null)
-          paraStyleName = endCursor.getPropertyValue("ParaStyleName")
-              .getObject().toString();
-      }
-      catch (java.lang.Exception e)
-      {
-        Logger.error(e);
-      }
-
-      // Liste aller TextFrames vor dem Einfügen zusammenstellen (benötigt für
-      // das
-      // Updaten der enthaltenen TextFields später).
-      HashSet textFrames = new HashSet();
-      if (UNO.XTextFramesSupplier(model.doc) != null)
-      {
-        String[] names = UNO.XTextFramesSupplier(model.doc).getTextFrames()
-            .getElementNames();
-        for (int i = 0; i < names.length; i++)
-        {
-          textFrames.add(names[i]);
-        }
-      }
-
-      // Textfragment einfügen:
-      UnoService insCursor = new UnoService(cmd.createInsertCursor());
-      if (insCursor.xDocumentInsertable() != null && urlStr != null)
-      {
-        insCursor.xDocumentInsertable().insertDocumentFromURL(
-            urlStr,
-            new PropertyValue[] {});
-      }
-
-      // Workaround: ParagraphStyleName für den letzten eingefügten Paragraphen
-      // wieder setzen (siehe oben).
-      if (endCursor.xPropertySet() != null && paraStyleName != null)
-      {
-        try
-        {
-          endCursor.setPropertyValue("ParaStyleName", paraStyleName);
-        }
-        catch (java.lang.Exception e)
-        {
-          Logger.error(e);
-        }
-      }
     }
   }
 
@@ -1468,7 +1474,7 @@ public class DocumentCommandInterpreter
                               + cmd.getRightSeparator());
         }
       }
-      cmd.setDoneState(true);
+      cmd.markDone(!mux.isDebugMode());
       return 0;
     }
 
@@ -1508,7 +1514,7 @@ public class DocumentCommandInterpreter
 
       XTextCursor insCursor = cmd.createInsertCursor();
       if (insCursor != null) insCursor.setString(value);
-      cmd.setDoneState(true);
+      cmd.markDone(!mux.isDebugMode());
       return 0;
     }
 
@@ -1521,7 +1527,7 @@ public class DocumentCommandInterpreter
       if (insCurs != null)
         insCurs.setString("Build-Info: " + mux.getBuildInfo());
 
-      cmd.setDoneState(true);
+      cmd.markDone(!mux.isDebugMode());
       return 0;
     }
 
@@ -1533,7 +1539,7 @@ public class DocumentCommandInterpreter
      */
     public int executeCommand(SetType cmd)
     {
-      cmd.setDoneState(true);
+      cmd.markDone(true);
       return 0;
     }
 
@@ -1593,7 +1599,7 @@ public class DocumentCommandInterpreter
             .createTextCursorByRange(range));
         updateTextFieldsRecursive(cursor);
       }
-      cmd.setDoneState(true);
+      cmd.markDone(!mux.isDebugMode());
       return 0;
     }
 
