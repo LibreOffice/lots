@@ -879,68 +879,71 @@ public class FormularMax4000
           formTitle = tit;
       }catch(Exception x){}
       DocumentTree tree = new DocumentTree(doc);
-      Visitor visitor = new DocumentTree.Visitor(){
-        private Map insertions = new HashMap();
-        private StringBuilder text = new StringBuilder();
-        private StringBuilder fixupText = new StringBuilder();
-        private FormControlModel fixupCheckbox = null;
-        
-        private void fixup()
-        {
-          if (fixupCheckbox != null && fixupCheckbox.getLabel() == NO_LABEL)
-          {
-            fixupCheckbox.setLabel(makeLabelFromStartOf(fixupText, 2*GENERATED_LABEL_MAXLENGTH));
-            fixupCheckbox = null;
-          }
-          fixupText.setLength(0);
-        }
-        
-        public boolean container(Container container, int count)
-        {
-          fixup();
-          
-          if (container.getType() != DocumentTree.PARAGRAPH_TYPE) text.setLength(0);
-          
-          return true;
-        }
-        
-        public boolean textRange(TextRange textRange)
-        {
-          String str = textRange.getString(); 
-          text.append(str);
-          fixupText.append(str);
-          return true;
-        }
-        
-        public boolean insertionBookmark(InsertionBookmark bookmark)
-        {
-          if (bookmark.isStart())
-            insertions.put(bookmark.getName(), bookmark);
-          else
-            insertions.remove(bookmark.getName());
-          
-          return true;
-        }
-        
-        public boolean formControl(FormControl control)
-        {
-          fixup();
-          
-          if (insertions.isEmpty())
-          {
-            FormControlModel model = registerFormControl(control, text);
-            if (model != null && model.getType() == FormControlModel.CHECKBOX_TYPE)
-              fixupCheckbox = model;
-          }
-          
-          return true;
-        }
-      };
+      Visitor visitor = new ScanVisitor(); 
       visitor.visit(tree);
     } 
     catch(Exception x) {Logger.error("Fehler während des Scan-Vorgangs",x);}
     
     documentNeedsUpdating();
+  }
+  
+  private class ScanVisitor extends DocumentTree.Visitor
+  {
+    private Map insertions = new HashMap();
+    private StringBuilder text = new StringBuilder();
+    private StringBuilder fixupText = new StringBuilder();
+    private FormControlModel fixupCheckbox = null;
+    
+    private void fixup()
+    {
+      if (fixupCheckbox != null && fixupCheckbox.getLabel() == NO_LABEL)
+      {
+        fixupCheckbox.setLabel(makeLabelFromStartOf(fixupText, 2*GENERATED_LABEL_MAXLENGTH));
+        fixupCheckbox = null;
+      }
+      fixupText.setLength(0);
+    }
+    
+    public boolean container(Container container, int count)
+    {
+      fixup();
+      
+      if (container.getType() != DocumentTree.PARAGRAPH_TYPE) text.setLength(0);
+      
+      return true;
+    }
+    
+    public boolean textRange(TextRange textRange)
+    {
+      String str = textRange.getString(); 
+      text.append(str);
+      fixupText.append(str);
+      return true;
+    }
+    
+    public boolean insertionBookmark(InsertionBookmark bookmark)
+    {
+      if (bookmark.isStart())
+        insertions.put(bookmark.getName(), bookmark);
+      else
+        insertions.remove(bookmark.getName());
+      
+      return true;
+    }
+    
+    public boolean formControl(FormControl control)
+    {
+      fixup();
+      
+      if (insertions.isEmpty())
+      {
+        FormControlModel model = registerFormControl(control, text);
+        if (model != null && model.getType() == FormControlModel.CHECKBOX_TYPE)
+          fixupCheckbox = model;
+      }
+      
+      return true;
+    }
   }
   
   /**

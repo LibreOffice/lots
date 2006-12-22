@@ -203,9 +203,12 @@ public class DocumentTree
       if (textPortionType.equals("Bookmark"))
       {
         boolean isStart = false;
+        boolean isCollapsed = false;
         XNamed bookmark = null; 
         try{
           isStart = ((Boolean)UNO.getProperty(textPortion, "IsStart")).booleanValue();
+          isCollapsed = ((Boolean)UNO.getProperty(textPortion, "IsCollapsed")).booleanValue();
+          if (isCollapsed) isStart = true;
           bookmark = UNO.XNamed(UNO.getProperty(textPortion, "Bookmark"));
         } catch(Exception x){ continue;}
         if (bookmark == null) continue;
@@ -223,6 +226,8 @@ public class DocumentTree
             continue;
           }
           textPortions.add(new InsertionBookmarkNode(new Bookmark(bookmark, doc), isStart, conf));
+          if (isCollapsed)
+            textPortions.add(new InsertionBookmarkNode(new Bookmark(bookmark, doc), false, conf));
           continue;
         }
         
@@ -238,6 +243,8 @@ public class DocumentTree
             continue;
           }
           textPortions.add(new GroupBookmarkNode(new Bookmark(bookmark, doc), isStart, conf));
+          if (isCollapsed)
+            textPortions.add(new GroupBookmarkNode(new Bookmark(bookmark, doc), false, conf));
         }
         
       } else if (textPortionType.equals("TextField"))

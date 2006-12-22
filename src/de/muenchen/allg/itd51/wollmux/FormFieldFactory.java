@@ -191,10 +191,14 @@ public final class FormFieldFactory
       {
         XNamed bookmark = null;
         boolean isStart = false;
+        boolean isCollapsed = false;
         try
         {
           isStart = ((Boolean) UNO.getProperty(textPortion, "IsStart"))
               .booleanValue();
+          isCollapsed = ((Boolean) UNO.getProperty(textPortion, "IsCollapsed"))
+              .booleanValue();
+          if (isCollapsed) isStart = true;
           bookmark = UNO.XNamed(UNO.getProperty(textPortion, "Bookmark"));
         }
         catch (java.lang.Exception x)
@@ -212,7 +216,7 @@ public final class FormFieldFactory
             lastInsertFormValueStart = name;
             lastInsertFormValueBookmark = bookmark;
           }
-          else
+          if (!isStart || isCollapsed)
           {
             if (name.equals(lastInsertFormValueStart))
             {
