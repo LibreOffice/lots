@@ -18,7 +18,9 @@
 package de.muenchen.allg.itd51.wollmux.func;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Eine Bibliothek von benannten PrintFunctions
@@ -83,6 +85,18 @@ public class PrintFunctionLibrary
     PrintFunction func = (PrintFunction) mapIdToFunction.get(funcName);
     if (func == null && baselib != null) func = baselib.get(funcName);
     return func;
+  }
+  
+  /**
+   * Liefert die Namen aller Funktionen, die über diese Funktionsbibliothek
+   * verfügbar sind.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public Set getFunctionNames()
+  {
+    Set names = new HashSet(mapIdToFunction.keySet());
+    if (baselib != null) names.addAll(baselib.getFunctionNames());
+    return names;
   }
 
 }

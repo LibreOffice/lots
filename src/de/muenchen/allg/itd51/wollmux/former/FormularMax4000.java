@@ -27,9 +27,11 @@
 package de.muenchen.allg.itd51.wollmux.former;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GraphicsEnvironment;
 import java.awt.Rectangle;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
@@ -46,6 +48,10 @@ import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.swing.Box;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -102,6 +108,7 @@ import de.muenchen.allg.itd51.wollmux.former.group.GroupModelList;
 import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModel;
 import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModelList;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
+import de.muenchen.allg.itd51.wollmux.func.PrintFunctionLibrary;
 
 /**
  * Stellt eine GUI bereit zum Bearbeiten einer WollMux-Formularvorlage.
@@ -323,6 +330,11 @@ public class FormularMax4000
   private JEditorPane editor;
   
   /**
+   * Die Namen aller Druckfunktionen, die zur Auswahl stehen.
+   */
+  private Vector printFunctionNames;
+  
+  /**
    * Wird bei jeder Änderung von Formularaspekten gestartet, um nach einer Verzögerung die
    * Änderungen in das Dokument zu übertragen.
    */
@@ -378,13 +390,15 @@ public class FormularMax4000
    * Startet eine Instanz des FormularMax 4000 für das Dokument des TextDocumentModels model.
    * @param abortListener (falls nicht null) wird aufgerufen, nachdem der FormularMax 4000 geschlossen wurde.
    * @param funcLib Funktionsbibliothek, die globale Funktionen zur Verfügung stellt.
+   * @param printFuncLib Funktionsbibliothek, die Druckfunktionen zur Verfügung stellt.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public FormularMax4000(TextDocumentModel model, ActionListener abortListener, FunctionLibrary funcLib)
+  public FormularMax4000(TextDocumentModel model, ActionListener abortListener, FunctionLibrary funcLib, PrintFunctionLibrary printFuncLib)
   {
     this.doc = model;
     this.abortListener = abortListener;
     this.functionLibrary = funcLib;
+    this.printFunctionNames = new Vector(printFuncLib.getFunctionNames());
     
     //  GUI im Event-Dispatching Thread erzeugen wg. Thread-Safety.
     try{
@@ -466,6 +480,15 @@ public class FormularMax4000
       public void actionPerformed(ActionEvent e)
       {
         setFormTitle();
+        setFrameSize();
+      }});
+    menu.add(menuItem);
+    
+    menuItem = new JMenuItem("Druckfunktion setzen");
+    menuItem.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent e)
+      {
+        setPrintFunction();
         setFrameSize();
       }});
     menu.add(menuItem);
@@ -1295,6 +1318,71 @@ public class FormularMax4000
     setFrameSize();
   }
   
+  private void setPrintFunction()
+  {
+    final JEditorPane printFunctionConfigEditor = new JEditorPane("text/plain","");
+    printFunctionConfigEditor.setEditorKit(new NoWrapEditorKit());
+    
+    printFunctionConfigEditor.setFont(new Font("Monospaced",Font.PLAIN,printFunctionConfigEditor.getFont().getSize()+2));
+    JScrollPane scrollPane = new JScrollPane(printFunctionConfigEditor, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
+    JPanel printFunctionEditorContentPanel = new JPanel(new BorderLayout());
+    printFunctionEditorContentPanel.add(scrollPane, BorderLayout.CENTER);
+    
+    final JComboBox printFunctionComboBox = new JComboBox(printFunctionNames);
+    printFunctionComboBox.setEditable(true);
+    printFunctionComboBox.setSelectedItem(doc.getPrintFunctionName());
+    printFunctionEditorContentPanel.add(printFunctionComboBox, BorderLayout.NORTH);
+  
+    final JDialog dialog = new JDialog(myFrame, true);
+    
+    ActionListener setFunc = new ActionListener(){
+      public void actionPerformed(ActionEvent e)
+      {
+        doc.setPrintFunctionConfig(printFunctionConfigEditor.getText());
+        doc.setPrintFunction(printFunctionComboBox.getSelectedItem().toString());
+        dialog.dispose();
+      }
+    };
+    
+    JButton okay = new JButton("Setzen");
+    okay.addActionListener(setFunc);
+    
+    JButton abort = new JButton("Abbrechen");
+    abort.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent e)
+      {
+        dialog.dispose();
+      }});
+
+    Box buttons = Box.createHorizontalBox();
+    buttons.add(abort);
+    buttons.add(Box.createHorizontalGlue());
+    buttons.add(okay);
+    printFunctionEditorContentPanel.add(buttons, BorderLayout.SOUTH);
+    
+    printFunctionConfigEditor.setCaretPosition(0);
+    printFunctionConfigEditor.setText(doc.getPrintFunctionConfig());
+    
+    
+    dialog.setTitle("Druckfunktion setzen");
+    dialog.add(printFunctionEditorContentPanel);
+    dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+    
+    dialog.pack();
+    int frameWidth = dialog.getWidth();
+    int frameHeight = dialog.getHeight();
+    if (frameWidth < 384)
+      frameWidth = 384;
+    if (frameHeight < 384)
+      frameHeight = 384;
+    
+    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+    int x = screenSize.width/2 - frameWidth/2; 
+    int y = screenSize.height/2 - frameHeight/2;
+    dialog.setBounds(x, y, frameWidth, frameHeight);
+    dialog.setVisible(true);
+  }
+  
   /**
    * Liefert "WM(CMD'insertValue' DB_SPALTE '&lt;id>').
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -1554,7 +1642,7 @@ public class FormularMax4000
     XTextDocument doc = UNO.XTextDocument(UNO.desktop.getCurrentComponent());
     Map context = new HashMap();
     DialogLibrary dialogLib = WollMuxFiles.parseFunctionDialogs(WollMuxFiles.getWollmuxConf(), null, context);
-    new FormularMax4000(new TextDocumentModel(doc),null, WollMuxFiles.parseFunctions(WollMuxFiles.getWollmuxConf(), dialogLib, context, null));
+    new FormularMax4000(new TextDocumentModel(doc),null, WollMuxFiles.parseFunctions(WollMuxFiles.getWollmuxConf(), dialogLib, context, null), WollMuxFiles.parsePrintFunctions(WollMuxFiles.getWollmuxConf()));
   }
 
 }

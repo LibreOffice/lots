@@ -765,7 +765,8 @@ public class WollMuxEventHandler
             if (actionEvent.getSource() instanceof FormularMax4000)
               WollMuxEventHandler.handleFormularMax4000Returned(model);
           }
-        }, WollMuxSingleton.getInstance().getGlobalFunctions());
+        }, WollMuxSingleton.getInstance().getGlobalFunctions(),
+            WollMuxSingleton.getInstance().getGlobalPrintFunctions());
         model.setCurrentFormularMax4000(max);
       }
     }

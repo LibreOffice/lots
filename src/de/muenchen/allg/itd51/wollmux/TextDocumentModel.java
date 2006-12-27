@@ -649,6 +649,26 @@ public class TextDocumentModel
   {
     return printFunctionName;
   }
+  
+  /**
+   * Liefert die zusätzlichen Konfigurationsdaten für die Druckfunktion zurück (oder einen
+   * leerer String, falls nicht gesetzt).
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public String getPrintFunctionConfig()
+  {
+    //TODO getPrintFunctionConfig() implementieren
+    return "";
+  }
+  
+  /**
+   * Setzt die zusätzlichen Konfigurationsdaten für die Druckfunktion auf conf.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public void setPrintFunctionConfig(String conf)
+  {
+    //TODO setPrintFunctionConfig() implementieren
+  }
 
   /**
    * Fügt der Liste der NotInOriginal-Kommandos dieses Dokuments ein weiteres
