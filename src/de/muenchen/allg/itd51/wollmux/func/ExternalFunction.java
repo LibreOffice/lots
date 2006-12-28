@@ -11,6 +11,7 @@
 * 25.01.2006 | BNK | Erstellung
 * 05.12.2006 | BNK | ClassLoader kann übergeben werden
 *                  | +invoke(Object[])
+* 28.12.2006 | BNK | nur noch public Methoden als ExternalFunctions finden.
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -20,6 +21,7 @@
 package de.muenchen.allg.itd51.wollmux.func;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
@@ -93,7 +95,7 @@ public class ExternalFunction
         Class c = classLoader.loadClass(classStr);
         Method[] methods = c.getDeclaredMethods();
         for (int i = 0; i < methods.length; ++i)
-          if (methods[i].getName().equals(methodStr))
+          if (methods[i].getName().equals(methodStr) && Modifier.isPublic(methods[i].getModifiers()))
           {
             if (method != null)
             { 
@@ -103,7 +105,7 @@ public class ExternalFunction
             method = methods[i];
           }
         
-        if (method == null) throw new ConfigurationErrorException("Klasse \""+classStr+"\" enthält keine Methode namens \""+methodStr+"\"");
+        if (method == null) throw new ConfigurationErrorException("Klasse \""+classStr+"\" enthält keine PUBLIC Methode namens \""+methodStr+"\"");
       }
       else
       {
