@@ -26,6 +26,7 @@
  * 26.05.2006 | BNK | DJ initialisierung ausgelagert nacht WollMuxFiles
  * 06.06.2006 | LUT | + Ablösung der Event-Klasse durch saubere Objektstruktur
  * 19.12.2006 | BAB | + setzen von Shortcuts im Konstruktor
+ * 29.12.2006 | BNK | +registerDatasources()
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -155,6 +156,14 @@ public class WollMuxSingleton implements XPALProvider
                  + WollMuxFiles.getDEFAULT_CONTEXT().toString()
                  + "\"");
     Logger.debug("CONF_VERSION: " + getConfVersionInfo());
+
+    /*
+     * Datenquellen/Registriere Abschnitte verarbeiten. ACHTUNG! Dies muss vor
+     * getDatasourceJoiner() geschehen, da die entsprechenden Datenquellen
+     * womöglich schon für WollMux-Datenquellen benötigt werden.
+     */
+    registerDatasources(WollMuxFiles.getWollmuxConf(), WollMuxFiles
+        .getDEFAULT_CONTEXT());
 
     // Versuchen, den DJ zu initialisieren und Flag setzen, falls nicht
     // erfolgreich.
@@ -322,6 +331,121 @@ public class WollMuxSingleton implements XPALProvider
   public DatasourceJoiner getDatasourceJoiner()
   {
     return WollMuxFiles.getDatasourceJoiner();
+  }
+
+  /**
+   * Verarbeitet alle Datenquellen/Registriere-Unterabschnitte von conf und
+   * registriert die entsprechenden Datenquellen in OOo, falls dort noch nicht
+   * vorhanden.
+   * 
+   * @param context
+   *          gibt an relativ zu was relative URLs aufgelöst werden sollen.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
+   */
+  private static void registerDatasources(ConfigThingy conf, URL context)
+  {
+    Iterator iter = conf.query("Datenquellen").query("Registriere").iterator();
+    while (iter.hasNext())
+    {
+      ConfigThingy regConf = (ConfigThingy) iter.next();
+      String name;
+      try
+      {
+        name = regConf.get("NAME").toString();
+      }
+      catch (NodeNotFoundException e)
+      {
+        Logger.error(
+            "NAME-Attribut fehlt in Datenquellen/Registriere-Abschnitt",
+            e);
+        continue;
+      }
+
+      String urlStr;
+      try
+      {
+        urlStr = regConf.get("URL").toString();
+      }
+      catch (NodeNotFoundException e)
+      {
+        Logger.error(
+            "URL-Attribut fehlt in Datenquellen/Registriere-Abschnitt für Datenquelle \""
+                + name
+                + "\"",
+            e);
+        continue;
+      }
+
+      try
+      {
+        if (UNO.XNameAccess(UNO.dbContext).hasByName(name))
+        {
+          try
+          {
+            if (!regConf.get("REFRESH").toString().equalsIgnoreCase("true"))
+              continue;
+
+            // hierher (und damit weiter ohne continue) kommen wir nur, wenn
+            // ein REFRESH-Abschnitt vorhanden ist und "true" enthält.
+          }
+          catch (java.lang.Exception x) // vor allem NodeNotFoundException
+          {
+            continue;
+          }
+        }
+      }
+      catch (java.lang.Exception x)
+      {
+        Logger.error("Fehler beim Überprüfen, ob Datenquelle \""
+                     + name
+                     + "\" bereits registriert ist", x);
+      }
+
+      Logger.debug("Versuche, Datenquelle \""
+                   + name
+                   + "\" bei OOo zu registrieren für URL \""
+                   + urlStr
+                   + "\"");
+
+      String parsedUrl;
+      try
+      {
+        URL url = new URL(context, urlStr);
+        parsedUrl = UNO.getParsedUNOUrl(url.toExternalForm()).Complete;
+      }
+      catch (java.lang.Exception x)
+      {
+        Logger.error("Fehler beim Registrieren von Datenquelle \""
+                     + name
+                     + "\": Illegale URL: \""
+                     + urlStr
+                     + "\"", x);
+        continue;
+      }
+
+      try
+      {
+        Object datasource = UNO.XNameAccess(UNO.dbContext).getByName(parsedUrl);
+        UNO.dbContext.registerObject(name, datasource);
+        if (!UnoRuntime.areSame(
+            UNO.dbContext.getRegisteredObject(name),
+            datasource))
+          Logger.error("Testzugriff auf Datenquelle \""
+                       + name
+                       + "\" nach Registrierung fehlgeschlagen");
+      }
+      catch (Exception x)
+      {
+        Logger.error("Fehler beim Registrieren von Datenquelle \""
+                     + name
+                     + "\". Stellen Sie sicher, dass die URL \""
+                     + parsedUrl
+                     + "\" gültig ist.", x);
+        continue;
+      }
+
+    }
   }
 
   /**
