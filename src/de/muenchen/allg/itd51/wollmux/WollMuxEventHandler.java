@@ -1423,23 +1423,21 @@ public class WollMuxEventHandler
   // *******************************************************************************************
 
   /**
-   * Erzeugt ein neues WollMuxEvent, welches dafür sorgt, dass alle Textbereiche
-   * im übergebenen Dokument, die einer bestimmten Gruppe zugehören ein- oder
-   * ausgeblendet werden.
+   * Erzeugt ein neues WollMuxEvent, welches dafür sorgt, dass alle
+   * Sichtbarkeitselemente (Dokumentkommandos oder Bereiche mit Namensanhang
+   * 'GROUPS ...') im übergebenen Dokument, die einer bestimmten Gruppe groupId
+   * zugehören ein- oder ausgeblendet werden.
    * 
-   * @param doc
-   *          Das Dokument, welches die Textbereiche, die über Dokumentkommandos
-   *          spezifiziert sind enthält.
-   * @param invisibleGroups
-   *          Enthält ein HashSet, das die groupId's aller als unsichtbar
-   *          markierten Gruppen enthält.
+   * Dieses Event wird (derzeit) vom FormModelImpl ausgelöst, wenn in der
+   * Formular-GUI bestimmte Text-Teile des übergebenen Dokuments ein- oder
+   * ausgeblendet werden sollen.
+   * 
+   * @param model
+   *          Das TextDocumentModel, welches die Sichtbarkeitselemente enthält.
    * @param groupId
    *          Die GROUP (ID) der ein/auszublendenden Gruppe.
    * @param visible
    *          Der neue Sichtbarkeitsstatus (true=sichtbar, false=ausgeblendet)
-   * @param cmdTree
-   *          Die DocumentCommandTree-Struktur, die den Zustand der
-   *          Sichtbarkeiten enthält.
    */
   public static void handleSetVisibleState(TextDocumentModel model,
       String groupId, boolean visible)
@@ -1447,13 +1445,6 @@ public class WollMuxEventHandler
     handle(new OnSetVisibleState(model, groupId, visible));
   }
 
-  /**
-   * Dieses Event wird (derzeit) vom FormModelImpl ausgelöst, wenn in der
-   * Formular-GUI bestimmte Text-Teile des übergebenen Dokuments ein- oder
-   * ausgeblendet werden sollen.
-   * 
-   * @author christoph.lutz
-   */
   private static class OnSetVisibleState extends BasicEvent
   {
     private TextDocumentModel model;
@@ -1479,14 +1470,14 @@ public class WollMuxEventHandler
       else
         invisibleGroups.add(groupId);
 
-      DocumentCommand firstChangedCmd = null;
+      VisibilityElement firstChangedElement = null;
 
-      // Kommandobaum durchlaufen und alle betroffenen Elemente updaten:
-      Iterator iter = model.getDocumentCommandTree().depthFirstIterator(false);
+      // Sichtbarkeitselemente durchlaufen und alle ggf. updaten:
+      Iterator iter = model.visibleElementsIterator();
       while (iter.hasNext())
       {
-        DocumentCommand cmd = (DocumentCommand) iter.next();
-        Set groups = cmd.getGroups();
+        VisibilityElement visibleElement = (VisibilityElement) iter.next();
+        Set groups = visibleElement.getGroups();
         if (!groups.contains(groupId)) continue;
 
         // Visibility-Status neu bestimmen:
@@ -1498,22 +1489,23 @@ public class WollMuxEventHandler
           if (invisibleGroups.contains(groupId)) setVisible = false;
         }
 
-        // Kommando merken, dessen Sichtbarkeitsstatus sich zuerst ändert und
+        // Element merken, dessen Sichtbarkeitsstatus sich zuerst ändert und
         // den focus (ViewCursor) auf den Start des Bereichs setzen. Da das
         // Setzen eines ViewCursors in einen unsichtbaren Bereich nicht
         // funktioniert, wird die Methode focusRangeStart zwei mal aufgerufen,
         // je nach dem, ob der Bereich vor oder nach dem Setzen des neuen
         // Sichtbarkeitsstatus sichtbar ist.
-        if (setVisible != cmd.isVisible() && firstChangedCmd == null)
+        if (setVisible != visibleElement.isVisible()
+            && firstChangedElement == null)
         {
-          firstChangedCmd = cmd;
-          if (firstChangedCmd.isVisible()) focusRangeStart(cmd);
+          firstChangedElement = visibleElement;
+          if (firstChangedElement.isVisible()) focusRangeStart(visibleElement);
         }
 
         // neuen Sichtbarkeitsstatus setzen:
         try
         {
-          cmd.setVisible(setVisible);
+          visibleElement.setVisible(setVisible);
         }
         catch (RuntimeException e)
         {
@@ -1521,25 +1513,28 @@ public class WollMuxEventHandler
         }
       }
 
-      // Den Cursor (nochmal) auf den Anfang des Bookmarks setzen, dessen
-      // Sichtbarkeitsstatus sich zuerst geändert hat (siehe Begründung oben).
-      if (firstChangedCmd != null && firstChangedCmd.isVisible())
-        focusRangeStart(firstChangedCmd);
+      // Den Cursor (nochmal) auf den Anfang des Ankers des Elements setzen,
+      // dessen Sichtbarkeitsstatus sich zuerst geändert hat (siehe Begründung
+      // oben).
+      if (firstChangedElement != null && firstChangedElement.isVisible())
+        focusRangeStart(firstChangedElement);
     }
 
     /**
-     * Diese Methode setzt den ViewCursor auf den Anfang des Bookmarks des
-     * Dokumentkommandos cmd.
+     * Diese Methode setzt den ViewCursor auf den Anfang des Ankers des
+     * Sichtbarkeitselements.
      * 
-     * @param cmd
-     *          Das Dokumentkommando, auf dessen Start der ViewCursor gesetzt
-     *          werden soll.
+     * @param visibleElement
+     *          Das Sichtbarkeitselement, auf dessen Anfang des Ankers der
+     *          ViewCursor gesetzt werden soll.
      */
-    private void focusRangeStart(DocumentCommand cmd)
+    private void focusRangeStart(VisibilityElement visibleElement)
     {
       try
       {
-        model.getViewCursor().gotoRange(cmd.getTextRange().getStart(), false);
+        model.getViewCursor().gotoRange(
+            visibleElement.getAnchor().getStart(),
+            false);
       }
       catch (java.lang.Exception e)
       {

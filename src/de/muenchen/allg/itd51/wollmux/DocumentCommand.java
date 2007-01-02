@@ -50,7 +50,7 @@ import de.muenchen.allg.itd51.parser.SyntaxErrorException;
  * 
  * @author Christoph Lutz (D-III-ITD 5.1)
  */
-abstract public class DocumentCommand
+abstract public class DocumentCommand implements VisibilityElement
 {
   /**
    * Das geparste ConfigThingy des zugehörenden Bookmarks.
@@ -378,6 +378,7 @@ abstract public class DocumentCommand
    * oder null, falls das Bookmark nicht mehr existiert.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
+   * @see de.muenchen.allg.itd51.wollmux.VisibilityElement#getAnchor()
    */
   public XTextRange getAnchor()
   {
@@ -771,6 +772,7 @@ abstract public class DocumentCommand
    * zurück, der über das CharHidden-Attribut realisiert ist.
    * 
    * @return true=sichtbar, false=ausgeblendet
+   * @see de.muenchen.allg.itd51.wollmux.VisibilityElement#isVisible()
    */
   public boolean isVisible()
   {
@@ -784,6 +786,7 @@ abstract public class DocumentCommand
    * 
    * @param visible
    *          true=sichtbar, false=ausgeblendet
+   * @see de.muenchen.allg.itd51.wollmux.VisibilityElement#setVisible(boolean)
    */
   public void setVisible(boolean visible)
   {
@@ -803,6 +806,7 @@ abstract public class DocumentCommand
    * 
    * @return Ein Set, das alle zugeordneten groupId's, einschließlich der vom
    *         Vater geerbten, als Strings enthält.
+   * @see de.muenchen.allg.itd51.wollmux.VisibilityElement#getGroups()
    */
   public Set getGroups()
   {

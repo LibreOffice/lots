@@ -230,6 +230,12 @@ public class TextDocumentModel
   private HashSet /* of String */invisibleGroups;
 
   /**
+   * Enthält die Menge aller Textbereiche des Dokuments, die über den
+   * Namenszusatz "GROUPS (<Liste mit Gruppen>)" gekennzeichnet sind.
+   */
+  private Set /* of VisibleSection */visibleTextSections;
+
+  /**
    * Erzeugt ein neues TextDocumentModel zum XTextDocument doc und sollte nie
    * direkt aufgerufen werden, da neue TextDocumentModels über das
    * WollMuxSingletonie (siehe WollMuxSingleton.getTextDocumentModel()) erzeugt
@@ -259,6 +265,10 @@ public class TextDocumentModel
     resetDocumentCommands();
 
     registerCloseListener();
+
+    // Textbereiche mit Namenszusatz 'GROUPS (<Liste mit Gruppen>)' einlesen:
+    visibleTextSections = TextSection.createVisibleSections(UNO
+        .XTextSectionsSupplier(doc));
 
     // WollMuxDispatchInterceptor registrieren
     try
@@ -302,6 +312,23 @@ public class TextDocumentModel
   public DocumentCommandTree getDocumentCommandTree()
   {
     return documentCommandTree;
+  }
+
+  /**
+   * Erzeugt einen Iterator über alle Sichtbarkeitselemente (Dokumentkommandos
+   * und Textbereiche mit dem Namenszusatz 'GROUPS ...'), die in diesem Dokument
+   * enthalten sind. Der Iterator liefert dabei zuerst alle Textbereiche (mit
+   * GROUPS-Erweiterung) und dann alle Dokumentkommandos des Kommandobaumes in
+   * der Reihenfolge, die DocumentCommandTree.depthFirstIterator(false) liefert.
+   */
+  public Iterator visibleElementsIterator()
+  {
+    Vector visibleElements = new Vector();
+    visibleElements.addAll(visibleTextSections);
+    Iterator iter = documentCommandTree.depthFirstIterator(false);
+    while (iter.hasNext())
+      visibleElements.add(iter.next());
+    return visibleElements.iterator();
   }
 
   /**
@@ -649,25 +676,27 @@ public class TextDocumentModel
   {
     return printFunctionName;
   }
-  
+
   /**
-   * Liefert die zusätzlichen Konfigurationsdaten für die Druckfunktion zurück (oder einen
-   * leerer String, falls nicht gesetzt).
+   * Liefert die zusätzlichen Konfigurationsdaten für die Druckfunktion zurück
+   * (oder einen leerer String, falls nicht gesetzt).
+   * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public String getPrintFunctionConfig()
   {
-    //TODO getPrintFunctionConfig() implementieren
+    // TODO getPrintFunctionConfig() implementieren
     return "";
   }
-  
+
   /**
    * Setzt die zusätzlichen Konfigurationsdaten für die Druckfunktion auf conf.
+   * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void setPrintFunctionConfig(String conf)
   {
-    //TODO setPrintFunctionConfig() implementieren
+    // TODO setPrintFunctionConfig() implementieren
   }
 
   /**
