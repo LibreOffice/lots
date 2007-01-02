@@ -245,7 +245,13 @@ public class TextModule
         // if (identifierWithArgs.matches(match)) {
         if (first.matches(match))
         {
-          args[0] = first.replaceAll(match, frag_id);
+          try
+          {
+            args[0] = first.replaceAll(match, frag_id);
+          }
+          catch (java.lang.Exception e)
+          {
+            Logger.error("Die Reguläre Ausdruck Gruppierung $<zahl>, die in FRAG_ID verwendet wird gibt es nicht in MATCH. " + e);         }
           return args;
         }
       }
