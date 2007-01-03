@@ -1656,7 +1656,7 @@ public class DocumentCommandInterpreter
    */
   private class FormScanner extends TreeExecutor
   {
-    private HashMap idToFormFields = new HashMap();
+    public HashMap idToFormFields = new HashMap();
 
     private Map bookmarkNameToFormField = new HashMap();
 
