@@ -740,8 +740,8 @@ public class WollMuxSingleton implements XPALProvider
   /**
    * Hilfsklasse, die es ermöglicht, UNO-Componenten in HashMaps abzulegen; der
    * Vergleich zweier HashableComponents mit equals(...) verwendet dazu den
-   * sicheren UNO-Vergleich UnoRuntime.areSame(...) und die Methode hashCode
-   * wird direkt an das UNO-Objekt weitergeleitet.
+   * sicheren UNO-Vergleich UnoRuntime.areSame(...). Die Methode hashCode
+   * verwendet die sichere Oid, die UnoRuntime.generateOid(...) liefert.
    * 
    * @author lut
    */
