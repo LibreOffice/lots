@@ -15,6 +15,8 @@
  *                    von Checkboxen.
  * 07.09.2006 | BNK | Rewrite
  * 12.09.2006 | BNK | Bugfix: Bookmarks ohne Ausdehnung wurden nicht gefunden.
+ * 03.01.2007 | BNK | +TextFieldFormField
+ *                  | +createFormField(doc, textfield)
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -44,6 +46,7 @@ import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextField;
 import com.sun.star.text.XTextRange;
+import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertFormValue;
@@ -109,6 +112,23 @@ public final class FormFieldFactory
     }
 
     return (FormField) bookmarkNameToFormField.get(bookmarkName);
+  }
+
+  /**
+   * Erzeugt ein neues FormField für das UNO Objekt textfield (typischerweise
+   * ein c,s,s,text,textfield,*), das im Dokument doc liegt. Die Methoden
+   * {@link Object#equals(java.lang.Object)} und {@link Object#hashCode()}
+   * beziehen sich auf das zugrundeliegende UNO-Objekt, wobei verschiedene
+   * Proxies des selben Objekts als gleich behandelt werden.
+   * 
+   * @param textfield
+   *          muss mindestens eines der Properties "Content" oder
+   *          "CurrentPresentation" besitzen.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public static FormField createFormField(XTextDocument doc, Object o)
+  {
+    return new TextFieldFormField(doc, o);
   }
 
   /**
@@ -834,5 +854,91 @@ public final class FormFieldFactory
       else
         return "false";
     }
+  }
+
+  /**
+   * Kapselt ein beliebiges UNO-Objekt (normalerweise ein
+   * c,s,s,text,textfield,*) als FormField, solange es mindestens eines der
+   * Properties "Content" oder "CurrentPresentation" besitzt. Die Objekte dieser
+   * Klasse betrachten zum Zwecke von equals() und hashCode() die
+   * zugrundeliegenden UNO-Objekte.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private static class TextFieldFormField implements FormField
+  {
+    private Object textfield;
+
+    private XTextDocument doc;
+
+    public TextFieldFormField(XTextDocument doc, Object textfield)
+    {
+      this.textfield = textfield;
+      this.doc = doc;
+    }
+
+    /**
+     * Nicht verwendet.
+     */
+    public void setCommand(InsertFormValue cmd)
+    {
+      // nicht verwendet
+    }
+
+    public boolean hasChangedPreviously()
+    {
+      return false;
+    }
+
+    public boolean hasTrafo()
+    {
+      return false;
+    }
+
+    public void setValue(String value, FunctionLibrary funcLib)
+    {
+      UNO.setProperty(textfield, "Content", value);
+      UNO.setProperty(textfield, "CurrentPresentation", value);
+    }
+
+    public String getValue()
+    {
+      String cont = (String) UNO.getProperty(textfield, "Content");
+      if (cont == null)
+        cont = (String) UNO.getProperty(textfield, "CurrentPresentation");
+      if (cont != null) return cont;
+      return "";
+    }
+
+    public boolean hasChecksum()
+    {
+      return false;
+    }
+
+    public void focus()
+    {
+      try
+      {
+        XController controller = UNO.XModel(doc).getCurrentController();
+        XTextCursor cursor = UNO.XTextViewCursorSupplier(controller)
+            .getViewCursor();
+        XTextRange focusRange = UNO.XTextContent(textfield).getAnchor();
+        if (focusRange != null) cursor.gotoRange(focusRange, false);
+      }
+      catch (java.lang.Exception e)
+      {
+      }
+    }
+
+    public int hashCode()
+    {
+      return UnoRuntime.generateOid(textfield).hashCode();
+    }
+
+    public boolean equals(Object b)
+    {
+      return UnoRuntime.areSame(textfield, b);
+    }
+
   }
 }
