@@ -30,6 +30,25 @@ import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelection;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionAccess;
 import de.muenchen.allg.itd51.wollmux.former.function.ParamValue;
 
+/*
+ * '''2006-11-15''' BNK (2t): GroupModel, das 0 bis mehrere Bookmarks haben
+ * kann, die zu der Gruppe gehören + * Implementierung der Seriendruckfunktion
+ * des WollMux - *
+ * 
+ *  '''2006-11-17''' BNK (2t): OneFormControlGroupsView mit
+ * Eingabefeld und Button zum Hinzufügen einer neuen Gruppe (d.h. einer die
+ * bislang nicht existiert) + -
+ *  
+ * * '''2006-12-02''' BNK (2t): AllGroupNamesView
+ * mit Markierung aller FormControls, die Mitglieder der Gruppe sind bei
+ * Anklicken eines Gruppennamens + - *
+ *  
+ * '''2006-12-04''' BNK (5t): Unterstützung
+ * für Feldreferenzen in FunctionSelectionAccessView. Das FormControlModel muss
+ * Events broadcasten, wenn neue IDs hinzukommen oder alte IDs verschwinden.
+ * ID-Änderungen werden ja schon gebroadcastet, aber noch nicht in der
+ * FunctionSelectionAccessView ausgewertet.
+ */
 
 /**
  * Eine Sichtbarkeitsgruppe, zu der 0 bis mehrere setGroups-Bookmarks gehören können.
