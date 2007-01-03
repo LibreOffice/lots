@@ -203,6 +203,9 @@ public class DocumentCommandInterpreter
     errors += formScanner.execute(model.getDocumentCommandTree());
     model.setIDToFormFields(formScanner.idToFormFields);
 
+    // Nicht vom formScanner erfasste Formularfelder erfassen
+    model.collectNonWollMuxFormFields();
+
     // Jetzt wird der Dokumenttyp formDocument gesetzt, um das Dokument als
     // Formulardokument auszuzeichnen.
     if (model.hasFormDescriptor()) model.setType("formDocument");
