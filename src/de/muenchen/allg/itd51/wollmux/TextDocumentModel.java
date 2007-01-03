@@ -174,7 +174,7 @@ public class TextDocumentModel
   /**
    * Enthält das zu diesem TextDocumentModel zugehörige XPrintModel.
    */
-  private XPrintModel printModel = new PrintModel();
+  private XPrintModel printModel;
 
   /**
    * Enthält die Gesamtbeschreibung alle Formular-Abschnitte, die in den
@@ -256,6 +256,7 @@ public class TextDocumentModel
     this.formFieldValues = new HashMap();
     this.invisibleGroups = new HashSet();
     this.formGUI = null;
+    this.printModel = new PrintModel(this);
 
     // Kommandobaum erzeugen:
     this.documentCommandTree = new DocumentCommandTree(UNO
@@ -1096,6 +1097,24 @@ public class TextDocumentModel
   }
 
   /**
+   * Liefert true, wenn das Dokument als "modifiziert" markiert ist und damit
+   * z.B. die "Speichern?" Abfrage vor dem Schließen erscheint.
+   * 
+   * @param state
+   */
+  public boolean getDocumentModified()
+  {
+    try
+    {
+      return UNO.XModifiable(doc).isModified();
+    }
+    catch (java.lang.Exception x)
+    {
+      return false;
+    }
+  }
+
+  /**
    * Diese Methode setzt den DocumentModified-Status auf state.
    * 
    * @param state
@@ -1496,14 +1515,24 @@ public class TextDocumentModel
    * 
    * @author christoph.lutz
    */
-  public class PrintModel extends WeakBase implements XPrintModel
+  public static class PrintModel extends WeakBase implements XPrintModel
   {
+    /**
+     * Das TextDocumentModel zu diesem PrintModel
+     */
+    private TextDocumentModel model;
+
     /**
      * Das lock-Flag, das vor dem Einstellen eines WollMuxEvents auf true
      * gesetzt werden muss und signalisiert, ob das WollMuxEvent erfolgreich
      * abgearbeitet wurde.
      */
     private boolean[] lock = new boolean[] { true };
+
+    private PrintModel(TextDocumentModel model)
+    {
+      this.model = model;
+    }
 
     /**
      * Liefert das XTextDocument mit dem die Druckfunktion aufgerufen wurde.
@@ -1512,7 +1541,7 @@ public class TextDocumentModel
      */
     public XTextDocument getTextDocument()
     {
-      return doc;
+      return model.doc;
     }
 
     /**
@@ -1524,8 +1553,10 @@ public class TextDocumentModel
     public void print(short numberOfCopies)
     {
       setLock();
-      WollMuxEventHandler
-          .handlePrint(doc, numberOfCopies, unlockActionListener);
+      WollMuxEventHandler.handlePrint(
+          model.doc,
+          numberOfCopies,
+          unlockActionListener);
       waitForUnlock();
     }
 
@@ -1556,7 +1587,7 @@ public class TextDocumentModel
     {
       setLock();
       WollMuxEventHandler.handlePrintVerfuegungspunkt(
-          doc,
+          model.doc,
           verfPunkt,
           numberOfCopies,
           isDraft,
@@ -1580,7 +1611,7 @@ public class TextDocumentModel
     {
       setLock();
       WollMuxEventHandler.handleShowPrinterSetupDialog(
-          doc,
+          model.doc,
           onlyOnce,
           unlockActionListener);
       waitForUnlock();
@@ -1609,11 +1640,48 @@ public class TextDocumentModel
     {
       setLock();
       WollMuxEventHandler.handleSetFormValueViaPrintModel(
-          doc,
+          model.doc,
           id,
           value,
           unlockActionListener);
       waitForUnlock();
+    }
+
+    /**
+     * Liefert true, wenn das Dokument als "modifiziert" markiert ist und damit
+     * z.B. die "Speichern?" Abfrage vor dem Schließen erscheint.
+     * 
+     * Manche Druckfunktionen verändern u.U. den Inhalt von Dokumenten. Trotzdem
+     * kann es sein, dass eine solche Druckfunktion den "Modifiziert"-Status des
+     * Dokuments nicht verändern darf um ungewünschte "Speichern?"-Abfragen zu
+     * verhindern. In diesem Fall kann der "Modifiziert"-Status mit folgendem
+     * Konstrukt innerhalb der Druckfunktion unverändert gehalten werden:
+     * 
+     * boolean modified = pmod.getDocumentModified();
+     * 
+     * ...die eigentliche Druckfunktion, die das Dokument verändert...
+     * 
+     * pmod.setDocumentModified(modified);
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#getDocumentModified()
+     */
+    public boolean getDocumentModified()
+    {
+      // Keine WollMuxEvent notwendig, da keine WollMux-Datenstrukturen
+      // angefasst werden.
+      return model.getDocumentModified();
+    }
+
+    /**
+     * Diese Methode setzt den DocumentModified-Status auf modified.
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#setDocumentModified(boolean)
+     */
+    public void setDocumentModified(boolean modified)
+    {
+      // Keine WollMuxEvent notwendig, da keine WollMux-Datenstrukturen
+      // angefasst werden.
+      model.setDocumentModified(modified);
     }
 
     /**

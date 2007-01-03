@@ -86,6 +86,29 @@ interface XPrintModel
                Der neue Wert des Formularfeldes id
      */
 	void setFormValue( [in] string id, [in] string value);
+
+    /**
+      Liefert true, wenn das Dokument als "modifiziert" markiert ist und damit
+      z.B. die "Speichern?" Abfrage vor dem Schließen erscheint.
+      
+      Manche Druckfunktionen verändern u.U. den Inhalt von Dokumenten. Trotzdem
+      kann es sein, dass eine solche Druckfunktion den "Modifiziert"-Status des
+      Dokuments nicht verändern darf um ungewünschte "Speichern?"-Abfragen zu
+      verhindern. In diesem Fall kann der "Modifiziert"-Status mit folgendem
+      Konstrukt innerhalb der Druckfunktion unverändert gehalten werden:
+      
+      boolean modified = pmod.getDocumentModified();
+      
+      ...die eigentliche Druckfunktion, die das Dokument verändert...
+      
+      pmod.setDocumentModified(modified);
+     */
+	boolean getDocumentModified();
+
+    /**
+      Diese Methode setzt den DocumentModified-Status auf modified.
+     */
+	void setDocumentModified( [in] boolean modified);	
 };
 
 }; }; }; }; };

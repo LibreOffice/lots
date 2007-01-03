@@ -137,6 +137,8 @@ public class StandardPrint
    */
   private static void mailMerge(XPrintModel pmod, String datasource, String table, Integer type, boolean offerSelection)
   {
+    boolean modified = pmod.getDocumentModified();
+    
     /*
      * Kann nur mit Tabellennamen umgehen, nicht mit beliebigen Statements. Falls eine andere
      * Art von Kommando eingestellt ist, wird nichts getan. Der Benutzer soll in diesem Fall
@@ -210,6 +212,8 @@ public class StandardPrint
       }
       pmod.print((short)1);
     }
+    
+    pmod.setDocumentModified(modified);
   }
   
   private static class ListElement
