@@ -756,7 +756,7 @@ public class WollMuxSingleton implements XPALProvider
 
     public int hashCode()
     {
-      if (compo != null) return compo.hashCode();
+      if (compo != null) return UnoRuntime.generateOid(compo).hashCode();
       return 0;
     }
 
