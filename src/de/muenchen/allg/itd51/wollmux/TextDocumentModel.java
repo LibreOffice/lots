@@ -9,6 +9,7 @@
  * Datum      | Wer | Änderungsgrund
  * -------------------------------------------------------------------
  * 15.09.2006 | LUT | Erstellung als TextDocumentModel
+ * 03.01.2007 | BNK | +collectNonWollMuxFormFields
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -24,6 +25,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 import java.util.regex.Pattern;
@@ -32,6 +34,8 @@ import com.sun.star.awt.DeviceInfo;
 import com.sun.star.awt.PosSize;
 import com.sun.star.awt.XWindow;
 import com.sun.star.beans.PropertyValue;
+import com.sun.star.beans.XPropertySet;
+import com.sun.star.container.XEnumeration;
 import com.sun.star.container.XNameAccess;
 import com.sun.star.frame.FrameSearchFlag;
 import com.sun.star.frame.XController;
@@ -40,6 +44,7 @@ import com.sun.star.frame.XModel;
 import com.sun.star.lang.EventObject;
 import com.sun.star.lib.uno.helper.WeakBase;
 import com.sun.star.text.XBookmarksSupplier;
+import com.sun.star.text.XDependentTextField;
 import com.sun.star.text.XTextContent;
 import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
@@ -116,9 +121,19 @@ public class TextDocumentModel
 
   /**
    * Ermöglicht den Zugriff auf einen Vector aller FormField-Objekte in diesem
-   * TextDokument über den Namen der zugeordneten ID.
+   * TextDokument über den Namen der zugeordneten ID. Die in dieser Map
+   * enthaltenen FormFields sind nicht in {@link #idToTextFieldFormFields}
+   * enthalten und umgekehrt.
    */
   private HashMap idToFormFields;
+
+  /**
+   * Liefert zu einer ID eine {@link java.util.List} von FormField-Objekten, die
+   * alle zu einfachen Textfeldern (derzeit nur MailMerge-Feldern) gehören ohne
+   * ein umschließendes WollMux-Bookmark. Die in dieser Map enthaltenen
+   * FormFields sind nicht in {@link #idToFormFields} enthalten und umgekehrt.
+   */
+  private HashMap idToTextFieldFormFields;
 
   /**
    * Falls es sich bei dem Dokument um ein Formular handelt, wird das zugehörige
@@ -247,6 +262,7 @@ public class TextDocumentModel
   {
     this.doc = doc;
     this.idToFormFields = new HashMap();
+    this.idToTextFieldFormFields = new HashMap();
     this.fragUrls = new String[] {};
     this.currentMax4000 = null;
     this.closeListener = null;
@@ -423,6 +439,51 @@ public class TextDocumentModel
   public void setIDToFormFields(HashMap idToFormFields)
   {
     this.idToFormFields = idToFormFields;
+  }
+
+  /**
+   * Sammelt alle Formularfelder des Dokuments auf, die nicht von
+   * WollMux-Kommandos umgeben sind, jedoch trotzdem vom WollMux verstanden und
+   * befüllt werden (derzeit c,s,s,t,textfield,Database-Felder).
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1) TODO Testen
+   */
+  public void collectNonWollMuxFormFields()
+  {
+    idToTextFieldFormFields.clear();
+
+    try
+    {
+      XEnumeration xenu = UNO.XTextFieldsSupplier(doc).getTextFields()
+          .createEnumeration();
+      while (xenu.hasMoreElements())
+      {
+        try
+        {
+          XDependentTextField tf = UNO.XDependentTextField(xenu.nextElement());
+          if (tf == null) continue;
+          XPropertySet master = tf.getTextFieldMaster();
+          String column = (String) UNO.getProperty(master, "DataColumnName");
+          if (column != null && column.length() > 0)
+          {
+            if (!idToTextFieldFormFields.containsKey(column))
+              idToTextFieldFormFields.put(column, new Vector());
+
+            List formFields = (List) idToTextFieldFormFields.get(column);
+            formFields.add(FormFieldFactory.createFormField(doc, tf));
+          }
+
+        }
+        catch (Exception x)
+        {
+          Logger.error(x);
+        }
+      }
+    }
+    catch (Exception x)
+    {
+      Logger.error(x);
+    }
   }
 
   /**
@@ -948,22 +1009,51 @@ public class TextDocumentModel
    */
   public void updateFormFields(String fieldId, FunctionLibrary funcLib)
   {
-    if (formFieldValues.containsKey(fieldId)
-        && idToFormFields.containsKey(fieldId))
+    if (formFieldValues.containsKey(fieldId))
     {
       String value = formFieldValues.get(fieldId).toString();
-      Iterator fields = ((Vector) idToFormFields.get(fieldId)).iterator();
-      while (fields.hasNext())
+      setFormFields(fieldId, funcLib, value);
+    }
+  }
+
+  /**
+   * Setzt den Inhalt aller Formularfelder mit ID fieldId auf value.
+   * 
+   * @param funcLib
+   *          Funktionsbibliothek zum Berechnen von TRAFOs.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private void setFormFields(String fieldId, FunctionLibrary funcLib,
+      String value)
+  {
+    setFormFields((List) idToFormFields.get(fieldId), funcLib, value);
+    setFormFields((List) idToTextFieldFormFields.get(fieldId), funcLib, value);
+  }
+
+  /**
+   * Setzt den Inhalt aller Formularfelder aus der Liste formFields auf value.
+   * formFields kann null sein, dann passiert nichts.
+   * 
+   * @param funcLib
+   *          Funktionsbibliothek zum Berechnen von TRAFOs.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private void setFormFields(List formFields, FunctionLibrary funcLib,
+      String value)
+  {
+    if (formFields == null) return;
+    Iterator fields = formFields.iterator();
+    while (fields.hasNext())
+    {
+      FormField field = (FormField) fields.next();
+      try
       {
-        FormField field = (FormField) fields.next();
-        try
-        {
-          field.setValue(value, funcLib);
-        }
-        catch (RuntimeException e)
-        {
-          // Absicherung gegen das manuelle Löschen von Dokumentinhalten.
-        }
+        field.setValue(value, funcLib);
+      }
+      catch (RuntimeException e)
+      {
+        // Absicherung gegen das manuelle Löschen von Dokumentinhalten.
       }
     }
   }
@@ -1005,41 +1095,49 @@ public class TextDocumentModel
 
   /**
    * Setzt den ViewCursor auf das erste untransformierte Formularfeld, das den
-   * Formularwert mit der ID fieldID darstellt.
+   * Formularwert mit der ID fieldID darstellt. Falls kein untransformiertes
+   * Formularfeld vorhanden ist, wird ein transformiertes gewählt.
    * 
    * @param fieldId
    *          Die ID des Formularfeldes, das angesprungen werden soll.
    */
   public void focusFormField(String fieldId)
   {
-    if (idToFormFields.containsKey(fieldId))
+    FormField field = null;
+    List formFields = (List) idToTextFieldFormFields.get(fieldId);
+    if (formFields != null)
     {
-      Vector formFields = (Vector) idToFormFields.get(fieldId);
-      FormField field = preferUntransformedFormField(formFields);
-      try
-      {
-        if (field != null) field.focus();
-      }
-      catch (RuntimeException e)
-      {
-        // Absicherung gegen das manuelle Löschen von Dokumentinhalten.
-      }
+      field = (FormField) formFields.get(0);
+    }
+    else
+    {
+      formFields = (List) idToFormFields.get(fieldId);
+      field = preferUntransformedFormField(formFields);
+    }
+
+    try
+    {
+      if (field != null) field.focus();
+    }
+    catch (RuntimeException e)
+    {
+      // Absicherung gegen das manuelle Löschen von Dokumentinhalten.
     }
   }
 
   /**
-   * Wenn in dem übergebenen Vector mit FormField-Elementen ein
+   * Wenn in der übergebenen {@link List} mit FormField-Elementen ein
    * nicht-transformiertes Feld vorhanden ist, so wird das erste
    * nicht-transformierte Feld zurückgegeben, ansonsten wird das erste
    * transformierte Feld zurückgegeben, oder null, falls der Vector keine
    * Elemente enthält.
    * 
    * @param formFields
-   *          Vektor mit FormField-Elementen
+   *          Liste mit FormField-Elementen
    * @return Ein FormField Element, wobei untransformierte Felder bevorzugt
    *         werden.
    */
-  protected static FormField preferUntransformedFormField(Vector formFields)
+  protected static FormField preferUntransformedFormField(List formFields)
   {
     Iterator iter = formFields.iterator();
     FormField field = null;
