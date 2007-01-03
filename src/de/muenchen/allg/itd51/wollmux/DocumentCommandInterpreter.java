@@ -245,6 +245,9 @@ public class DocumentCommandInterpreter
       formScanner = new FormScanner();
       errors += formScanner.execute(model.getDocumentCommandTree());
       model.setIDToFormFields(formScanner.idToFormFields);
+      
+      // Nicht vom formScanner erfasste Formularfelder erfassen
+      model.collectNonWollMuxFormFields();
     }
     HashMap idToPresetValue = mapIDToPresetValue(
         model,
