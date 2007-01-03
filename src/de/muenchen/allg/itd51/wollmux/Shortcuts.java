@@ -93,15 +93,23 @@ public class Shortcuts
       removeComandFromAllKeyEvents(shortcutManager, url);
 
       KeyEvent keyEvent = createKeyEvent(shortcut);
-
-      // setzen der Tastenkombination mit KeyEvent und WollMux-Url
-      try
+      if (keyEvent != null)
       {
-        shortcutManager.setKeyEvent(keyEvent, url);
+        // setzen der Tastenkombination mit KeyEvent und WollMux-Url
+        try
+        {
+          shortcutManager.setKeyEvent(keyEvent, url);
+        }
+        catch (IllegalArgumentException e)
+        {
+          Logger.error(e);
+        }
       }
-      catch (IllegalArgumentException e)
+      else
       {
-        Logger.error(e);
+        Logger.error("Ungültige Tastenkombination '"
+                     + shortcut
+                     + "' im .conf Abschnitt Tastenkuerzel");
       }
     }
 
@@ -194,7 +202,8 @@ public class Shortcuts
    * 
    * @param shortcutWithSeparator
    *          Tastenkombination mit "+" als Separator
-   * @return gibt ein KeyEvent zurück
+   * @return gibt ein KeyEvent zurück oder null wenn kein keyCode sondern nur
+   *         keyModifier verwendet werden
    */
   private static KeyEvent createKeyEvent(String shortcutWithSeparator)
   {
@@ -202,6 +211,7 @@ public class Shortcuts
     if (shortcutWithSeparator == null) return null;
 
     String[] shortcuts = shortcutWithSeparator.split("\\+");
+    Short keyCode = null;
 
     KeyEvent key = new KeyEvent();
     key.Modifiers = 0;
@@ -210,7 +220,7 @@ public class Shortcuts
     for (int i = 0; i < shortcuts.length; i++)
     {
       String shortcut = shortcuts[i].replaceAll("\\s", "");
-      Short keyCode = returnKeyCode(shortcut);
+      keyCode = returnKeyCode(shortcut);
       if (keyCode != null)
       {
         key.KeyCode = keyCode.shortValue();
@@ -221,7 +231,15 @@ public class Shortcuts
         key.Modifiers |= keyModifier.shortValue();
       }
     }
-    return key;
+
+    if (keyCode == null)
+    {
+      return null;
+    }
+    else
+    {
+      return key;
+    }
   }
 
   /**
