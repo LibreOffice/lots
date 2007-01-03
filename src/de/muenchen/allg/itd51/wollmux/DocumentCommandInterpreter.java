@@ -1321,7 +1321,7 @@ public class DocumentCommandInterpreter
       for (int j = 0; j < args.size() && j < placeholders.size(); j++)
       {
         Object placeholderObj = enumPlaceholders.nextElement();
-        XTextField textField = (XTextField) UNO.XTextField(placeholderObj);
+        XTextField textField = UNO.XTextField(placeholderObj);
         XTextRange textFieldAnchor = textField.getAnchor();
 
         // bei einem Parameter ohne Inhalt bleibt die Einfügestelle und die
@@ -1353,7 +1353,7 @@ public class DocumentCommandInterpreter
       {
         if (firstEmptyPlaceholder == false)
         {
-          XTextField textField = (XTextField) UNO.XTextField(placeholders
+          XTextField textField = UNO.XTextField(placeholders
               .get(args.size()));
           XTextRange textFieldAnchor = textField.getAnchor();
           viewCursor.gotoRange(textFieldAnchor, false);
