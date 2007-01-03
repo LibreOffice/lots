@@ -446,7 +446,7 @@ public class TextDocumentModel
    * WollMux-Kommandos umgeben sind, jedoch trotzdem vom WollMux verstanden und
    * befüllt werden (derzeit c,s,s,t,textfield,Database-Felder).
    * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TODO Testen
+   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public void collectNonWollMuxFormFields()
   {
