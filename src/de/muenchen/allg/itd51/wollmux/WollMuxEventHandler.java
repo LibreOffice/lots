@@ -2817,6 +2817,66 @@ public class WollMuxEventHandler
   // *******************************************************************************************
 
   /**
+   * TODO: doku anpassen! Erzeugt ein neues WollMuxEvent, das dafür sorgt, dass
+   * im Textdokument doc das Formularfeld mit der ID id auf den Wert value
+   * gesetzt wird. Ist das Dokument ein Formulardokument (also mit einer
+   * angezeigten FormGUI), so wird die Änderung über die FormGUI vorgenommen,
+   * die zugleich dafür sorgt, dass von id abhängige Formularfelder mit
+   * angepasst werden. Besitzt das Dokument keine Formularbeschreibung, so wird
+   * der Wert direkt gesetzt, ohne Äbhängigkeiten zu beachten. Nach der
+   * erfolgreichen Ausführung aller notwendigen Anpassungen wird der
+   * unlockActionListener benachrichtigt.
+   * 
+   * Das Event wird aus der Implementierung von XPrintModel (siehe
+   * TextDocumentModel) geworfen, wenn dort die Methode
+   * collectNonWollMuxFormFields aufgerufen wird.
+   * 
+   * @param model
+   *          Das TextDokumentModel, in dem nach Nicht-WollMux Formularfeldern
+   *          gesucht werden soll.
+   * @param unlockActionListener
+   *          Der unlockActionListener wird immer informiert, wenn alle
+   *          notwendigen Anpassungen durchgeführt wurden.
+   */
+  public static void handleCollectNonWollMuxFormFieldsViaPrintModel(
+      TextDocumentModel model, ActionListener listener)
+  {
+    handle(new OnCollectNonWollMuxFormFieldsViaPrintModel(model, listener));
+  }
+
+  private static class OnCollectNonWollMuxFormFieldsViaPrintModel extends
+      BasicEvent
+  {
+    private TextDocumentModel model;
+
+    private ActionListener listener;
+
+    public OnCollectNonWollMuxFormFieldsViaPrintModel(TextDocumentModel model,
+        ActionListener listener)
+    {
+      this.model = model;
+      this.listener = listener;
+    }
+
+    protected void doit() throws WollMuxFehlerException
+    {
+      model.collectNonWollMuxFormFields();
+
+      listener.actionPerformed(null);
+    }
+
+    public String toString()
+    {
+      return this.getClass().getSimpleName()
+             + "(#"
+             + model.doc.hashCode()
+             + ")";
+    }
+  }
+
+  // *******************************************************************************************
+
+  /**
    * Dieses WollMuxEvent ist das Gegenstück zu handleSetFormValueViaPrintModel
    * und wird dann erzeugt, wenn nach einer Änderung eines Formularwertes -
    * gesteuert durch die FormGUI - alle abhängigen Formularwerte angepasst

@@ -1783,6 +1783,22 @@ public class TextDocumentModel
     }
 
     /**
+     * Sammelt alle Formularfelder des Dokuments auf, die nicht von
+     * WollMux-Kommandos umgeben sind, jedoch trotzdem vom WollMux verstanden
+     * und befüllt werden (derzeit c,s,s,t,textfield,Database-Felder). So werden
+     * z.B. Seriendruckfelder erkannt, die erst nach dem Öffnen des Dokuments
+     * manuell hinzugefügt wurden.
+     */
+    public void collectNonWollMuxFormFields()
+    {
+      setLock();
+      WollMuxEventHandler.handleCollectNonWollMuxFormFieldsViaPrintModel(
+          model,
+          unlockActionListener);
+      waitForUnlock();
+    }
+
+    /**
      * Setzt einen lock, der in Verbindung mit setUnlock und der
      * waitForUnlock-Methode verwendet werden kann, um eine Synchronisierung mit
      * dem WollMuxEventHandler-Thread zu realisieren. setLock() sollte stets vor

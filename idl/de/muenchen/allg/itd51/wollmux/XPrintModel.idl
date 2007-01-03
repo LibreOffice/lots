@@ -27,13 +27,13 @@ interface XPrintModel
     /**
       Liefert das XTextDocument mit dem die Druckfunktion aufgerufen wurde.
      */
-	com::sun::star::text::XTextDocument getTextDocument();
+    com::sun::star::text::XTextDocument getTextDocument();
 
     /**
       Druckt das TextDocument mit numberOfCopies Ausfertigungen auf dem aktuell
       eingestellten Drucker aus.
      */
-	void print( [in] short numberOfCopies);
+    void print( [in] short numberOfCopies);
 	
     /**
       Zeigt den PrintSetupDialog an, über den der aktuelle Drucker ausgewählt
@@ -45,7 +45,7 @@ interface XPrintModel
                Aufruf ein PrintSetup-Dialog gestartet, so öffnet sich der
                Dialog nicht und die Methode endet ohne Aktion.
      */
-	void showPrinterSetupDialog( [in] boolean onlyOnce);
+    void showPrinterSetupDialog( [in] boolean onlyOnce);
 		
     /**
       Falls das TextDocument Sachleitende Verfügungen enthält, ist es mit
@@ -67,7 +67,7 @@ interface XPrintModel
                ausgeblendet und alle notInOriginal-Blöcke ebenso. Andernfalls
                sind Ziffer und notInOriginal-Blöcke eingeblendet.
      */
-	void printVerfuegungspunkt( [in] short verfPunkt, [in] short numberOfCopies, [in] boolean isDraft, [in] boolean isOriginal);
+    void printVerfuegungspunkt( [in] short verfPunkt, [in] short numberOfCopies, [in] boolean isDraft, [in] boolean isOriginal);
 
     /**
       Falls es sich bei dem zugehörigen Dokument um ein Formulardokument (mit
@@ -85,7 +85,7 @@ interface XPrintModel
       @param value
                Der neue Wert des Formularfeldes id
      */
-	void setFormValue( [in] string id, [in] string value);
+    void setFormValue( [in] string id, [in] string value);
 
     /**
       Liefert true, wenn das Dokument als "modifiziert" markiert ist und damit
@@ -103,12 +103,22 @@ interface XPrintModel
       
       pmod.setDocumentModified(modified);
      */
-	boolean getDocumentModified();
+    boolean getDocumentModified();
 
     /**
       Diese Methode setzt den DocumentModified-Status auf modified.
      */
-	void setDocumentModified( [in] boolean modified);	
+    void setDocumentModified( [in] boolean modified);
+	
+    /**
+      Sammelt alle Formularfelder des Dokuments auf, die nicht von
+      WollMux-Kommandos umgeben sind, jedoch trotzdem vom WollMux verstanden
+      und befüllt werden (derzeit c,s,s,t,textfield,Database-Felder). So werden
+      z.B. Seriendruckfelder erkannt, die erst nach dem Öffnen des Dokuments
+      manuell hinzugefügt wurden.
+     */
+    void collectNonWollMuxFormFields();
+    
 };
 
 }; }; }; }; };
