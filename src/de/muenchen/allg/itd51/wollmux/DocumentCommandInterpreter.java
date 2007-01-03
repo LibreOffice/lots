@@ -245,7 +245,7 @@ public class DocumentCommandInterpreter
       formScanner = new FormScanner();
       errors += formScanner.execute(model.getDocumentCommandTree());
       model.setIDToFormFields(formScanner.idToFormFields);
-      
+
       // Nicht vom formScanner erfasste Formularfelder erfassen
       model.collectNonWollMuxFormFields();
     }
@@ -497,11 +497,12 @@ public class DocumentCommandInterpreter
      */
     public void valueChanged(String fieldId, String newValue)
     {
-      WollMuxEventHandler.handleFormValueChanged(
-          textDocumentModel,
-          fieldId,
-          newValue,
-          funcLib);
+      if (fieldId.length() > 0)
+        WollMuxEventHandler.handleFormValueChanged(
+            textDocumentModel,
+            fieldId,
+            newValue,
+            funcLib);
     }
 
     /*
