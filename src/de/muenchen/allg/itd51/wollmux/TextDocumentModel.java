@@ -1809,7 +1809,10 @@ public class TextDocumentModel
      */
     protected void setLock()
     {
-      lock[0] = true;
+      synchronized (lock)
+      {
+        lock[0] = true;
+      }
     }
 
     /**
