@@ -311,6 +311,24 @@ public class WollMuxEventHandler
     {
     };
 
+    /**
+     * Diese Methode kann am Ende einer doit()-Methode aufgerufen werden und
+     * versucht die Absturzwahrscheinlichkeit von OOo/WollMux zu senken in dem
+     * es den GarbageCollector der JavaVM triggert freien Speicher freizugeben.
+     * Durch derartige Aufräumaktionen insbesondere nach der Bearbeitung von
+     * Events, die viel mit Dokumenten/Cursorn/Uno-Objekten interagieren, wird
+     * die Stabilität des WollMux spürbar gesteigert.
+     * 
+     * In der Vergangenheit gab es z.B. sporadische, nicht immer reproduzierbare
+     * Abstürze von OOo, die vermutlich in einem fehlerhaften Speichermanagement
+     * in der schwer zu durchschauenden Kette JVM->UNO-Proxies->OOo begründet
+     * waren.
+     */
+    protected void stabilize()
+    {
+      //System.gc();
+    }
+
     /*
      * (non-Javadoc)
      * 
@@ -631,11 +649,8 @@ public class WollMuxEventHandler
         model.setFormFieldValue(id, value);
         model.updateFormFields(id);
       }
-    }
 
-    public boolean requires(Object o)
-    {
-      return UnoRuntime.areSame(doc, o);
+      stabilize();
     }
 
     public String toString()
@@ -774,11 +789,6 @@ public class WollMuxEventHandler
       }
     }
 
-    public boolean requires(Object o)
-    {
-      return UnoRuntime.areSame(doc, o);
-    }
-
     public String toString()
     {
       return this.getClass().getSimpleName() + "(#" + doc.hashCode() + ")";
@@ -852,6 +862,8 @@ public class WollMuxEventHandler
         TextDocumentModel model = mux.getTextDocumentModel(doc);
         model.dispose();
       }
+
+      stabilize();
     }
 
     public String toString()
@@ -943,6 +955,8 @@ public class WollMuxEventHandler
         throw new WollMuxFehlerException("Fehler bei der Dokumentbearbeitung.",
             e);
       }
+
+      stabilize();
     }
 
     public String toString()
@@ -1002,6 +1016,8 @@ public class WollMuxEventHandler
         // Einfügen von Textbausteinen) bereits dort als Popup angezeigt werden
         // sollen, wo sie auftreten.
       }
+
+      stabilize();
     }
 
     public String toString()
@@ -2074,6 +2090,8 @@ public class WollMuxEventHandler
             url);
         if (disp != null) disp.dispatch(url, new PropertyValue[] {});
       }
+
+      stabilize();
     }
 
     public String toString()
@@ -2127,6 +2145,8 @@ public class WollMuxEventHandler
       {
         errorMessage(e);
       }
+
+      stabilize();
       listener.actionPerformed(null);
     }
 
@@ -2175,6 +2195,8 @@ public class WollMuxEventHandler
             viewCursor);
         if (vc != null) viewCursor.gotoRange(vc, false);
       }
+
+      stabilize();
     }
 
     public String toString()
@@ -2223,6 +2245,8 @@ public class WollMuxEventHandler
         XTextRange vc = SachleitendeVerfuegung.insertAbdruck(model, viewCursor);
         if (vc != null) viewCursor.gotoRange(vc, false);
       }
+
+      stabilize();
     }
 
     public String toString()
@@ -2271,6 +2295,8 @@ public class WollMuxEventHandler
             viewCursor);
         if (vc != null) viewCursor.gotoRange(vc, false);
       }
+
+      stabilize();
     }
 
     public String toString()
@@ -2374,6 +2400,8 @@ public class WollMuxEventHandler
       DocumentCommandInterpreter dci = new DocumentCommandInterpreter(model,
           mux);
       dci.scanDocumentSettings();
+
+      stabilize();
     }
 
     /**
@@ -2510,7 +2538,6 @@ public class WollMuxEventHandler
     }
 
     public String toString()
-
     {
       return this.getClass().getSimpleName() + "()";
     }
@@ -2604,6 +2631,8 @@ public class WollMuxEventHandler
       }
 
       if (listener != null) listener.actionPerformed(null);
+
+      stabilize();
     }
 
     public String toString()
@@ -2710,6 +2739,8 @@ public class WollMuxEventHandler
       model.printSettingsDone = true;
 
       if (listener != null) listener.actionPerformed(null);
+
+      stabilize();
     }
 
     public String toString()
@@ -2820,23 +2851,15 @@ public class WollMuxEventHandler
   // *******************************************************************************************
 
   /**
-   * TODO: doku anpassen! Erzeugt ein neues WollMuxEvent, das dafür sorgt, dass
-   * im Textdokument doc das Formularfeld mit der ID id auf den Wert value
-   * gesetzt wird. Ist das Dokument ein Formulardokument (also mit einer
-   * angezeigten FormGUI), so wird die Änderung über die FormGUI vorgenommen,
-   * die zugleich dafür sorgt, dass von id abhängige Formularfelder mit
-   * angepasst werden. Besitzt das Dokument keine Formularbeschreibung, so wird
-   * der Wert direkt gesetzt, ohne Äbhängigkeiten zu beachten. Nach der
-   * erfolgreichen Ausführung aller notwendigen Anpassungen wird der
-   * unlockActionListener benachrichtigt.
+   * Sammelt alle Formularfelder des Dokuments model auf, die nicht von
+   * WollMux-Kommandos umgeben sind, jedoch trotzdem vom WollMux verstanden und
+   * befüllt werden (derzeit c,s,s,t,textfield,Database-Felder).
    * 
    * Das Event wird aus der Implementierung von XPrintModel (siehe
    * TextDocumentModel) geworfen, wenn dort die Methode
    * collectNonWollMuxFormFields aufgerufen wird.
    * 
    * @param model
-   *          Das TextDokumentModel, in dem nach Nicht-WollMux Formularfeldern
-   *          gesucht werden soll.
    * @param unlockActionListener
    *          Der unlockActionListener wird immer informiert, wenn alle
    *          notwendigen Anpassungen durchgeführt wurden.
@@ -2865,6 +2888,7 @@ public class WollMuxEventHandler
     {
       model.collectNonWollMuxFormFields();
 
+      stabilize();
       listener.actionPerformed(null);
     }
 
@@ -3021,6 +3045,8 @@ public class WollMuxEventHandler
       {
         Logger.error(e);
       }
+
+      stabilize();
     }
 
     public String toString()
@@ -3092,6 +3118,8 @@ public class WollMuxEventHandler
               "Kein Platzhalter und keine Marke 'setJumpMark' vorhanden!");
         }
       }
+
+      stabilize();
     }
 
     public String toString()
