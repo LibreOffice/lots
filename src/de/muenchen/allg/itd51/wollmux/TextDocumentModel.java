@@ -1129,8 +1129,8 @@ public class TextDocumentModel
    * Wenn in der übergebenen {@link List} mit FormField-Elementen ein
    * nicht-transformiertes Feld vorhanden ist, so wird das erste
    * nicht-transformierte Feld zurückgegeben, ansonsten wird das erste
-   * transformierte Feld zurückgegeben, oder null, falls der Vector keine
-   * Elemente enthält.
+   * transformierte Feld zurückgegeben, oder null, falls die Liste keine
+   * Elemente enthält bzw. null ist.
    * 
    * @param formFields
    *          Liste mit FormField-Elementen
@@ -1139,6 +1139,7 @@ public class TextDocumentModel
    */
   protected static FormField preferUntransformedFormField(List formFields)
   {
+    if (formFields == null) return null;
     Iterator iter = formFields.iterator();
     FormField field = null;
     while (iter.hasNext())
