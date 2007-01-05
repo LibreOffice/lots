@@ -326,7 +326,7 @@ public class WollMuxEventHandler
      */
     protected void stabilize()
     {
-      //System.gc();
+      System.gc();
     }
 
     /*
