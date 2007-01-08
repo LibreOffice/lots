@@ -99,10 +99,6 @@ public class DocumentCommandInterpreter
   private WollMuxSingleton mux;
 
   /**
-   * Der geparste Dokumentkommando-Baum
-   */
-  // private DocumentCommandTree tree;
-  /**
    * Der FormScanner wird sowohl bei Vorlagen als auch bei Formulardokumenten
    * gestartet. Damit der FormScanner bei Formularvorlagen nicht zweimal
    * aufgerufen wird, wird ein einmal bearbeiteter FormScanner hier abgelgt.
