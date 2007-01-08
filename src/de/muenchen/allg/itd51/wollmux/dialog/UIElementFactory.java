@@ -309,9 +309,16 @@ public class UIElementFactory
     else if (type.equals("textarea"))
     {
       int lines = 3;
+      boolean wrap = true;
       try{ lines = Integer.parseInt(conf.get("LINES").toString()); } catch(Exception x){}
+      try{ wrap = conf.get("WRAP").toString().equalsIgnoreCase("true"); } catch(Exception x){}
       JTextArea textarea = new JTextArea(lines,textfieldWidth);
       textarea.setEditable(!readonly);
+      if (wrap)
+      {
+        textarea.setLineWrap(true);
+        textarea.setWrapStyleWord(true);
+      }
       textarea.setFont(new JTextField().getFont());
       if (!tip.equals("")) textarea.setToolTipText(tip);
       

@@ -99,6 +99,8 @@ public class FormControlModel
   private boolean editable = false;
   /** READONLY. */
   private boolean readonly = false;
+  /** WRAP. */
+  private boolean wrap = true;
   /** GROUPS. */
   private Set groups = new HashSet();
   /** LINES. */
@@ -152,6 +154,7 @@ public class FormControlModel
       else if (name.equals("HOTKEY")) hotkey = str.length() > 0 ? str.charAt(0) : 0;
       else if (name.equals("EDIT")) editable = str.equalsIgnoreCase("true");
       else if (name.equals("READONLY")) readonly = str.equalsIgnoreCase("true");
+      else if (name.equals("WRAP")) readonly = str.equalsIgnoreCase("true");
       else if (name.equals("LINES")) try{lines = Integer.parseInt(str); }catch(Exception x){}
       else if (name.equals("MINSIZE")) try{minsize = Integer.parseInt(str); }catch(Exception x){}
       else if (name.equals("MAXSIZE")) try{maxsize = Integer.parseInt(str); }catch(Exception x){}
@@ -377,6 +380,15 @@ public class FormControlModel
   }
   
   /**
+   * Liefert das WRAP-Attribut dieses FormControlModels.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public boolean getWrap()
+  {
+    return wrap; 
+  }
+  
+  /**
    * Liefert das EDIT-Attribut dieses FormControlModels.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -531,6 +543,16 @@ public class FormControlModel
   }
   
   /**
+   * Setzt das WRAP-Attribut.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public void setWrap(boolean wrap)
+  {
+    this.wrap = wrap;
+    formularMax4000.documentNeedsUpdating();
+  }
+  
+  /**
    * Setzt das EDIT-Attribut.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -621,7 +643,11 @@ public class FormControlModel
     conf.add("TIP").add(getTooltip());
     conf.add("READONLY").add(""+getReadonly());
     if (isCombo()) conf.add("EDIT").add(""+getEditable());
-    if (isTextArea()) conf.add("LINES").add(""+getLines());
+    if (isTextArea()) 
+    {
+      conf.add("LINES").add(""+getLines());
+      conf.add("WRAP").add(""+getWrap());
+    }
     if (isGlue() && getMinsize() > 0) conf.add("MINSIZE").add(""+getMinsize());
     if (isGlue() && getMaxsize() > 0) conf.add("MAXSIZE").add(""+getMaxsize());
     if (getAction().length() > 0) conf.add("ACTION").add(""+getAction());

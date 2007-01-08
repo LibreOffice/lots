@@ -96,9 +96,9 @@ public class OneFormControlLineView extends LineView
   private JTextField idTextfield;
   
   /**
-   * Das JTextField, das die LINES anzeigt und ändern lässt.
+   * Zusätzliche Elemente, die nur für die Textarea benötigt werden.
    */
-  private JTextField linesTextfield;
+  private JPanel textAreaAdditionalView;
   
   /**
    * Die Komponente, die das Bearbeiten des TYPE-Attributs erlaubt.
@@ -157,7 +157,7 @@ public class OneFormControlLineView extends LineView
   {
     typeView.setVisible(!model.isTab());
     comboBoxAdditionalView.setVisible(model.isCombo());
-    linesTextfield.setVisible(model.isTextArea());
+    textAreaAdditionalView.setVisible(model.isTextArea());
     myPanel.validate();
   }
   
@@ -356,7 +356,9 @@ public class OneFormControlLineView extends LineView
    */
   private JComponent makeTextAreaAdditionalView()
   {
-    linesTextfield = new JTextField(""+model.getLines(), 3);
+    textAreaAdditionalView = new JPanel();
+    textAreaAdditionalView.setLayout(new BoxLayout(textAreaAdditionalView, BoxLayout.X_AXIS));
+    final JTextField linesTextfield = new JTextField(""+model.getLines(), 3);
     Document tfdoc = linesTextfield.getDocument();
     tfdoc.addDocumentListener(new DocumentListener(){
       public void update()
@@ -381,7 +383,20 @@ public class OneFormControlLineView extends LineView
     
     linesTextfield.setCaretPosition(0);
     linesTextfield.addMouseListener(myMouseListener);
-    return linesTextfield;
+    
+    final JCheckBox wrapBox = new JCheckBox();
+    wrapBox.setSelected(model.getWrap());
+    textAreaAdditionalView.add(wrapBox);
+    wrapBox.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent e)
+      {
+        ignoreAttributeChanged = true;
+        model.setWrap(wrapBox.isSelected());
+        ignoreAttributeChanged = false;
+      }
+    });
+    wrapBox.addMouseListener(myMouseListener);
+    return textAreaAdditionalView;
   }
   
   /**
