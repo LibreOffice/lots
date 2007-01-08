@@ -18,6 +18,8 @@
 * 31.05.2006 | BNK | +funcDialog
 * 16.06.2006 | BNK | Beim Ändern eines Checkbox-Werts holt sich die Checkbox jetzt den Fokus
 * 13.09.2006 | BNK | Bei glues werden jetzt MINSIZE, MAXSIZE und PREFSIZE unterstützt.
+* 08.01.2006 | BNK | [R4698]WRAP-Attribut bei textareas
+*                  | [R4296]Wenn READONLY, dann nicht fokussierbar
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -29,16 +31,20 @@ package de.muenchen.allg.itd51.wollmux.dialog;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridLayout;
+import java.awt.KeyboardFocusManager;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.awt.event.InputEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -56,6 +62,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
@@ -295,6 +302,7 @@ public class UIElementFactory
     {
       JTextField tf = new JTextField(textfieldWidth);
       tf.setEditable(!readonly);
+      tf.setFocusable(!readonly);
       if (!tip.equals("")) tf.setToolTipText(tip);
       uiElement = new UIElement.Textfield(id, tf, layoutConstraints, labelType, label, labelLayoutConstraints);
       tf.getDocument().addDocumentListener(new UIElementDocumentListener(context.uiElementEventHandler, uiElement, "valueChanged", new Object[]{}));
@@ -314,6 +322,7 @@ public class UIElementFactory
       try{ wrap = conf.get("WRAP").toString().equalsIgnoreCase("true"); } catch(Exception x){}
       JTextArea textarea = new JTextArea(lines,textfieldWidth);
       textarea.setEditable(!readonly);
+      textarea.setFocusable(!readonly);
       if (wrap)
       {
         textarea.setLineWrap(true);
@@ -321,6 +330,20 @@ public class UIElementFactory
       }
       textarea.setFont(new JTextField().getFont());
       if (!tip.equals("")) textarea.setToolTipText(tip);
+      
+      /*
+       * Tab auch zum Weiterschalten und Shift-Tab zum Zurückschalten erlauben
+       */
+      Set focusKeys = textarea.getFocusTraversalKeys(
+          KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS);
+      focusKeys = new HashSet(focusKeys);
+      focusKeys.add(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0));
+      textarea.setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS,focusKeys);
+      focusKeys = textarea.getFocusTraversalKeys(
+          KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS);
+      focusKeys = new HashSet(focusKeys);
+      focusKeys.add(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, InputEvent.SHIFT_DOWN_MASK ));
+      textarea.setFocusTraversalKeys(KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS,focusKeys);
       
       JPanel panel = new JPanel(new GridLayout(1,1));
       JScrollPane scrollPane = new JScrollPane(textarea);//, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER, JScrollPane.VERTICAL_SCROLLBAR_NEVER);
@@ -336,6 +359,7 @@ public class UIElementFactory
     {
       JComboBox combo = new JComboBox();
       combo.setEnabled(!readonly);
+      combo.setFocusable(!readonly);
       combo.setEditable(editable);
       if (!tip.equals("")) combo.setToolTipText(tip);
       try
@@ -370,6 +394,7 @@ public class UIElementFactory
        */
       final JCheckBox boxBruceleitner = new JCheckBox(label);
       boxBruceleitner.setEnabled(!readonly);
+      boxBruceleitner.setFocusable(!readonly);
       if (!tip.equals("")) boxBruceleitner.setToolTipText(tip);
       uiElement = new UIElement.Checkbox(id, boxBruceleitner, layoutConstraints);
       boxBruceleitner.addActionListener(new UIElementActionListener(context.uiElementEventHandler, uiElement, true, "valueChanged", new Object[]{}));
