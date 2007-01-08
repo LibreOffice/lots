@@ -18,7 +18,7 @@
 * 31.05.2006 | BNK | +funcDialog
 * 16.06.2006 | BNK | Beim Ändern eines Checkbox-Werts holt sich die Checkbox jetzt den Fokus
 * 13.09.2006 | BNK | Bei glues werden jetzt MINSIZE, MAXSIZE und PREFSIZE unterstützt.
-* 08.01.2006 | BNK | [R4698]WRAP-Attribut bei textareas
+* 08.01.2007 | BNK | [R4698]WRAP-Attribut bei textareas
 *                  | [R4296]Wenn READONLY, dann nicht fokussierbar
 * -------------------------------------------------------------------
 *
