@@ -670,7 +670,7 @@ public class FormControlModel
     if (groups.size() > 0)
     {
       ConfigThingy grps = conf.add("GROUPS");
-      Iterator iter = items.iterator();
+      Iterator iter = grps.iterator();
       while (iter.hasNext())
       {
         grps.add(iter.next().toString());
