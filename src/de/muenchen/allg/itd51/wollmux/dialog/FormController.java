@@ -48,6 +48,7 @@ import java.util.Vector;
 
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
@@ -597,16 +598,28 @@ public class FormController implements UIElementEventHandler
            * UI Element und evtl. vorhandenes Zusatzlabel zum GUI hinzufügen.
            *********************************************************************/
           int compoX = 0;
+          int compoWidthIncrement = 0;
           if (!uiElement.getLabelType().equals(UIElement.LABEL_NONE))
           {
+            Component label = uiElement.getLabel();
             int labelX = 0;
+            boolean labelIsEmpty = false;
             if (uiElement.getLabelType().equals(UIElement.LABEL_LEFT))
+            {
               compoX = 1;
+              try{
+                labelIsEmpty = ((JLabel)label).getText().length() == 0;
+                if (labelIsEmpty) 
+                {
+                  compoWidthIncrement = 1;
+                  compoX = 0;
+                }
+              } catch(Exception x){}
+            }
             else
               labelX = 1;
             
-            Component label = uiElement.getLabel();
-            if (label != null)
+            if (label != null && !labelIsEmpty)
             {
               GridBagConstraints gbc = (GridBagConstraints)uiElement.getLabelLayoutConstraints();
               gbc.gridx = labelX;
@@ -616,9 +629,11 @@ public class FormController implements UIElementEventHandler
           }
           GridBagConstraints gbc = (GridBagConstraints)uiElement.getLayoutConstraints();
           gbc.gridx = compoX;
+          gbc.gridwidth += compoWidthIncrement; //wird nachher wieder abgezogen weil Objekt shared ist
           gbc.gridy = y;
           ++y;
           mainPanel.add(uiElement.getComponent(), gbc);
+          gbc.gridwidth -= compoWidthIncrement; //wieder abziehen, weil Objekt ja shared ist
           if (!uiElement.isStatic()) increaseTabVisibleCount(tabIndex);
           
           if (y > GRID_MAX) break;
