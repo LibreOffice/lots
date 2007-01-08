@@ -23,6 +23,7 @@
 * 10.09.2006 | BNK | [P1007]Abfangen von mehr als 512 Elementen auf einem Tab.
 * 10.09.2006 | BNK | Tabs scrollen, nicht hintereinander gruppieren.
 * 17.11.2006 | BNK | +setValue()
+* 08.01.2007 | BNK | intelligentere Behandlung der TAB-Taste
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -38,6 +39,8 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -59,6 +62,7 @@ import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.FormModel;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
+import de.muenchen.allg.itd51.wollmux.dialog.UIElementFactory.Context;
 import de.muenchen.allg.itd51.wollmux.func.Function;
 import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
@@ -667,6 +671,7 @@ public class FormController implements UIElementEventHandler
       ++y;
       myPanel.add(buttonPanel,gbcButtonPanel);
       
+      addTabSwitcher(buttonPanel);
       int x = 0;
       
       parentiter = conf.query("Buttons").iterator();
@@ -717,6 +722,56 @@ public class FormController implements UIElementEventHandler
       }
       
       if (x > GRID_MAX) Logger.error("Zu viele Buttons auf einem Tab => nicht alle werden angezeigt");
+    }
+
+    /**
+     * Fügt buttonPanel (muss ein GridBagLayout verwenden) an Index 0 eine
+     * unsichtbare Komponente hinzu, die wenn sie den Fokus bekommt (was nur
+     * über die TAB-Taste geschehen kann) und zwar von einer anderen Komponente
+     * als der 2,Komponente des buttonPanels, einen action "nextTab" Event
+     * absetzt, falls es noch ein auf das aktuelle Tab folgendes Tab gibt, das
+     * aktiv ist. Falls es kein passendes Tab gibt, bekommt die letzte
+     * Komponente von buttonPanel den Fokus.
+     * 
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
+    private void addTabSwitcher(final JPanel buttonPanel)
+    {
+      GridBagConstraints gbc = new GridBagConstraints(0, 0, 0, 0, 0.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.NONE,       new Insets(0,0,0,0),0,0);
+      final JPanel tabSwitcherCompo = new JPanel();
+      tabSwitcherCompo.setSize(1,1);
+      tabSwitcherCompo.setFocusable(true);
+      tabSwitcherCompo.setOpaque(false);
+      tabSwitcherCompo.setFocusable(true);
+      tabSwitcherCompo.setRequestFocusEnabled(false);
+      tabSwitcherCompo.addFocusListener(new FocusListener(){
+
+        public void focusGained(FocusEvent e)
+        {
+          if (buttonPanel.getComponentCount() > 1 && 
+              e.getOppositeComponent() == buttonPanel.getComponent(1))
+          {
+            tabSwitcherCompo.transferFocusBackward();
+          }
+          else
+          {
+            int startIdx = myTabbedPane.getSelectedIndex(); 
+            int idx = startIdx;
+            do{
+              ++idx;
+              if (idx >= myTabbedPane.getTabCount()) {idx = -1; break;}
+              if (myTabbedPane.isEnabledAt(idx)) break;
+            } while (idx != startIdx);
+            if (idx > -1)
+              processUiElementEvent(null, "action", new String[]{"nextTab"});
+            else
+              buttonPanel.getComponent(buttonPanel.getComponentCount()-1).requestFocusInWindow();
+          }
+        }
+
+        public void focusLost(FocusEvent e)   {}});
+      
+      buttonPanel.add(tabSwitcherCompo, gbc, 0);
     }
 
     /**
