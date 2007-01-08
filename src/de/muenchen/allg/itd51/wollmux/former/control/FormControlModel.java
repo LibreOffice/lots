@@ -154,7 +154,7 @@ public class FormControlModel
       else if (name.equals("HOTKEY")) hotkey = str.length() > 0 ? str.charAt(0) : 0;
       else if (name.equals("EDIT")) editable = str.equalsIgnoreCase("true");
       else if (name.equals("READONLY")) readonly = str.equalsIgnoreCase("true");
-      else if (name.equals("WRAP")) readonly = str.equalsIgnoreCase("true");
+      else if (name.equals("WRAP")) wrap = str.equalsIgnoreCase("true");
       else if (name.equals("LINES")) try{lines = Integer.parseInt(str); }catch(Exception x){}
       else if (name.equals("MINSIZE")) try{minsize = Integer.parseInt(str); }catch(Exception x){}
       else if (name.equals("MAXSIZE")) try{maxsize = Integer.parseInt(str); }catch(Exception x){}
