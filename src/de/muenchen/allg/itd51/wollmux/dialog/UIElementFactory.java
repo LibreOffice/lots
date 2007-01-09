@@ -20,6 +20,7 @@
 * 13.09.2006 | BNK | Bei glues werden jetzt MINSIZE, MAXSIZE und PREFSIZE unterstützt.
 * 08.01.2007 | BNK | [R4698]WRAP-Attribut bei textareas
 *                  | [R4296]Wenn READONLY, dann nicht fokussierbar
+* 09.01.2007 | BNK | ENTER kann jetzt auch Checkboxen und Buttons aktivieren
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -52,9 +53,11 @@ import java.util.Set;
 import javax.swing.AbstractButton;
 import javax.swing.Box;
 import javax.swing.DefaultListModel;
+import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JList;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
@@ -95,8 +98,6 @@ public class UIElementFactory
    * stattdessen nach einem Eintrag für diesen Namen gesucht.
    */
   private static final String DEFAULT = "default";
-  
-  
   
   /**
    * Die Breite (in Zeichen) für Textfields und Textareas. Kann mit
@@ -280,7 +281,10 @@ public class UIElementFactory
     {
       AbstractButton button;
       if (type.equals("button"))
+      {
         button = new JButton(label);
+        copySpaceBindingToEnter(button);
+      }
       else
         button = new JMenuItem(label);
       
@@ -393,6 +397,7 @@ public class UIElementFactory
        * rechten Seite und liefert als Zusatzlabel immer LABEL_NONE.
        */
       final JCheckBox boxBruceleitner = new JCheckBox(label);
+      copySpaceBindingToEnter(boxBruceleitner);
       boxBruceleitner.setEnabled(!readonly);
       boxBruceleitner.setFocusable(!readonly);
       if (!tip.equals("")) boxBruceleitner.setToolTipText(tip);
@@ -459,6 +464,19 @@ public class UIElementFactory
     }
     else
       throw new ConfigurationErrorException("Ununterstützter TYPE für GUI Element: \""+type+"\"");
+  }
+
+  private void copySpaceBindingToEnter(AbstractButton button)
+  {
+    InputMap imap = button.getInputMap(JComponent.WHEN_FOCUSED);
+    
+    Object binding = imap.get(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0, true));
+    if (binding != null) 
+      imap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0, true), binding);
+    
+    binding = imap.get(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0, false));
+    if (binding != null) 
+      imap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0, false), binding);
   }
 
   /**
