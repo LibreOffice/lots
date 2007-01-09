@@ -1,8 +1,8 @@
 /*
  * Dateiname: DispatchInterceptor.java
  * Projekt  : WollMux
- * Funktion : Der DispatchInterceptor ermöglicht das Abfangen und überschreiben von 
- *            OOo-Dispatches (wie z.B. .uno:Print.) eines Frames
+ * Funktion : Dokumentgebundene Dispatch-Handler und Überschreiben von 
+ *            OOo-Dispatches (wie z.B. .uno:Print.)
  * 
  * Copyright: Landeshauptstadt München
  *
@@ -33,20 +33,22 @@ import com.sun.star.util.URL;
 import de.muenchen.allg.afid.UNO;
 
 /**
- * Der DispatchInterceptor ermöglicht das Abfangen und Überschreiben von
- * OOo-Dispatches (wie z.B. .uno:Print) eines Frames.
+ * Der DispatchInterceptor registriert den WollMuxDispatchInterceptor, der alle
+ * Dispatches behandeln kann, die dokumentgebunden sind. Er ermöglicht darüber
+ * hinaus das Abfangen und Überschreiben von OOo-Dispatches (wie z.B.
+ * .uno:Print).
  * 
  * @author christoph.lutz
  */
 public class DispatchInterceptor
 {
   /**
-   * Url für den Forwarder auf den ursprünglichen Dispatch von ".uno:Print"
+   * Url für den Redirect auf den ursprünglichen Dispatch von ".uno:Print"
    */
   public static final String DISP_UNO_PRINT_FORWARDER = "wollmux:DefaultUnoPrint";
 
   /**
-   * Url für den Forwarder auf den ursprünglichen Dispatch von
+   * Url für den Redirect auf den ursprünglichen Dispatch von
    * ".uno:PrintDefault"
    */
   public static final String DISP_UNO_PRINT_DEFAULT_FORWARDER = "wollmux:DefaultUnoPrintDefault";
@@ -82,34 +84,35 @@ public class DispatchInterceptor
     // Hier möchte ich wissen, ob der WollMuxDispatchInterceptor bereits im
     // Frame registriert ist. Ist das der Fall, so darf der
     // WollMuxDispatchInterceptor nicht noch einmal registriert werden, weil
-    // es sonst zu Endlosschleifen kommt, da sich der
-    // WollMuxDispatchInterceptor selbst aufrufen würde.
+    // es sonst zu Endlosschleifen kommt, da sich die Dispatches des
+    // WollMuxDispatchInterceptor gegenseitig aufrufen würden.
     //
     // Leider gibt es keine Methode um aus dem Frame direkt abzulesen, ob der
     // WollMuxDispatchInterceptor bereits registriert ist. Dieser Hack
     // übernimmt das: Er sucht per queryDispatch nach einer Dispatch-URL, die
     // der WollMux (weiter unten) selbst definiert. Kommt dabei ein Objekt vom
-    // Typ ForwardDispatch zurück, so ist der frame bereits registriert,
+    // Typ RedirectDispatch zurück, so ist der frame bereits registriert,
     // ansonsten nicht.
     com.sun.star.util.URL url = UNO.getParsedUNOUrl(DISP_UNO_PRINT_FORWARDER);
     XDispatch disp = UNO.XDispatchProvider(frame).queryDispatch(
         url,
         "_self",
         com.sun.star.frame.FrameSearchFlag.SELF);
-    boolean alreadyRegistered = disp instanceof ForwardDispatch;
+    boolean alreadyRegistered = disp instanceof RedirectDispatch;
 
     // DispatchInterceptor registrieren (wenn nicht bereits registriert):
     if (!alreadyRegistered)
     {
-      XDispatchProviderInterceptor dpi = new WollMuxDispatchInterceptor();
+      XDispatchProviderInterceptor dpi = new WollMuxDispatchInterceptor(frame);
       UNO.XDispatchProviderInterception(frame)
           .registerDispatchProviderInterceptor(dpi);
     }
   }
 
   /**
-   * Diese Klasse ermöglicht es dem WollMux, dispatch-Kommandos wie z.B.
-   * .uno:Print abzufangen und statt dessen eigene Aktionen durchzuführen.
+   * Diese Klasse stellt alle dokumentgebundenen WollMux-Dispatches zu Verfügung
+   * und ermöglicht es darüber hinaus, dispatch-Kommandos wie z.B. .uno:Print
+   * abzufangen und statt dessen eigene Aktionen durchzuführen.
    * 
    * @author christoph.lutz
    */
@@ -119,6 +122,13 @@ public class DispatchInterceptor
     private XDispatchProvider slave = null;
 
     private XDispatchProvider master = null;
+
+    private final XFrame frame;
+
+    public WollMuxDispatchInterceptor(XFrame frame)
+    {
+      this.frame = frame;
+    }
 
     public XDispatchProvider getSlaveDispatchProvider()
     {
@@ -140,12 +150,10 @@ public class DispatchInterceptor
       this.master = master;
     }
 
-    public XDispatch queryDispatch(com.sun.star.util.URL url, String frame,
+    public XDispatch queryDispatch(com.sun.star.util.URL url, String frameName,
         int fsFlag)
     {
       String urlStr = url.Complete;
-
-      // Logger.debug2("queryDispatch: '" + urlStr + "'");
 
       // Ab hier kommen Dispatches, die die URL in irgend einer Form
       // umschreiben (z.B. wird wollmux:defaultUnoPrint auf den alten .uno:Print
@@ -154,36 +162,37 @@ public class DispatchInterceptor
       // -------------- Dispatch für wollmux:defaultUNOPrint --------------
       if (urlStr.equals(DISP_UNO_PRINT_FORWARDER))
       {
-        Logger.debug("queryDispatch: '" + urlStr + "'");
-        return createForwardDispatch(slave, DISP_UNO_PRINT, frame, fsFlag);
+        Logger.debug2("queryDispatch: '" + urlStr + "'");
+        return createRedirectDispatch(slave, DISP_UNO_PRINT, frameName, fsFlag);
       }
 
       // ----------- Dispatch für wollmux:defaultUNOPrintDefault -----------
       if (urlStr.equals(DISP_UNO_PRINT_DEFAULT_FORWARDER))
       {
-        Logger.debug("queryDispatch: '" + urlStr + "'");
-        return createForwardDispatch(
+        Logger.debug2("queryDispatch: '" + urlStr + "'");
+        return createRedirectDispatch(
             slave,
             DISP_UNO_PRINT_DEFAULT,
-            frame,
+            frameName,
             fsFlag);
       }
 
       // Ab hier kommen Dispatches, die die URL unverändert übernehmen:
-      final XDispatch origDisp = slave.queryDispatch(url, frame, fsFlag);
+      final XDispatch origDisp = slave.queryDispatch(url, frameName, fsFlag);
       if (origDisp == null) return null;
 
       // ------------------ Dispatch für .uno:Print -------------------
       if (urlStr.equals(DISP_UNO_PRINT))
       {
-        Logger.debug("queryDispatch: '" + urlStr + "'");
+        Logger.debug2("queryDispatch: '" + urlStr + "'");
 
         return new XDispatch()
         {
-          public void dispatch(com.sun.star.util.URL arg0, PropertyValue[] arg1)
+          public void dispatch(com.sun.star.util.URL url, PropertyValue[] arg1)
           {
-            XTextDocument doc = UNO.XTextDocument(UNO.desktop
-                .getCurrentComponent());
+            Logger.debug2("XDispatch.dispatch('" + url.Complete + "')");
+            XTextDocument doc = UNO.XTextDocument(frame.getController()
+                .getModel());
             if (doc != null)
               WollMuxEventHandler.handlePrintButtonPressed(
                   doc,
@@ -193,12 +202,18 @@ public class DispatchInterceptor
           public void removeStatusListener(XStatusListener arg0,
               com.sun.star.util.URL arg1)
           {
+            Logger.debug2("XDispatch.removeStatusListener(#"
+                          + arg0.hashCode()
+                          + ")");
             if (origDisp != null) origDisp.removeStatusListener(arg0, arg1);
           }
 
           public void addStatusListener(XStatusListener arg0,
               com.sun.star.util.URL arg1)
           {
+            Logger.debug2("XDispatch.addStatusListener(#"
+                          + arg0.hashCode()
+                          + ")");
             if (origDisp != null) origDisp.addStatusListener(arg0, arg1);
           }
         };
@@ -207,14 +222,15 @@ public class DispatchInterceptor
       // ------------------ Dispatch für .uno:PrintDefault -------------------
       if (urlStr.equals(DISP_UNO_PRINT_DEFAULT))
       {
-        Logger.debug("queryDispatch: '" + urlStr + "'");
+        Logger.debug2("queryDispatch: '" + urlStr + "'");
 
         return new XDispatch()
         {
-          public void dispatch(com.sun.star.util.URL arg0, PropertyValue[] arg1)
+          public void dispatch(com.sun.star.util.URL url, PropertyValue[] arg1)
           {
-            XTextDocument doc = UNO.XTextDocument(UNO.desktop
-                .getCurrentComponent());
+            Logger.debug2("XDispatch.dispatch('" + url.Complete + "')");
+            XTextDocument doc = UNO.XTextDocument(frame.getController()
+                .getModel());
             if (doc != null)
               WollMuxEventHandler.handlePrintButtonPressed(
                   doc,
@@ -224,12 +240,18 @@ public class DispatchInterceptor
           public void removeStatusListener(XStatusListener arg0,
               com.sun.star.util.URL arg1)
           {
+            Logger.debug2("XDispatch.removeStatusListener(#"
+                          + arg0.hashCode()
+                          + ")");
             if (origDisp != null) origDisp.removeStatusListener(arg0, arg1);
           }
 
           public void addStatusListener(XStatusListener arg0,
               com.sun.star.util.URL arg1)
           {
+            Logger.debug2("XDispatch.addStatusListener(#"
+                          + arg0.hashCode()
+                          + ")");
             if (origDisp != null) origDisp.addStatusListener(arg0, arg1);
           }
         };
@@ -255,115 +277,104 @@ public class DispatchInterceptor
   }
 
   /**
-   * Erzeugt einen neuen ForwardDispatch zu urlStr oder null, falls kein
+   * Erzeugt einen neuen RedirectDispatch zu urlStr oder null, falls kein
    * Dispatch verfügbar ist.
    * 
    * @param urlStr
    * @return
    */
-  private static ForwardDispatch createForwardDispatch(
-      XDispatchProvider provider, String urlStr, String frame,
+  private static RedirectDispatch createRedirectDispatch(
+      XDispatchProvider provider, String urlStr, String frameName,
       int frameSearchFlags)
   {
     final URL unoUrl = UNO.getParsedUNOUrl(urlStr);
     final XDispatch origDisp = provider.queryDispatch(
         unoUrl,
-        frame,
+        frameName,
         frameSearchFlags);
 
     if (UNO.XNotifyingDispatch(origDisp) != null)
     {
-      return new ForwardNotifyingDispatch(UNO.XNotifyingDispatch(origDisp),
-          unoUrl, false);
+      return new RedirectNotifyingDispatch(UNO.XNotifyingDispatch(origDisp),
+          unoUrl);
     }
     else if (origDisp != null)
     {
-      return new ForwardDispatch(origDisp, unoUrl, false);
+      return new RedirectDispatch(origDisp, unoUrl);
     }
     else
       return null;
   }
 
   /**
-   * Der ForwardDispatch ist ein Dispatch-Handler, der Anfragen an den
+   * Der RedirectDispatch ist ein Dispatch-Handler, der Anfragen an den
    * ursprünglichen XDispatch-Handler weiter reicht, nachdem er die der
-   * jeweiligen Anfrage übergebenen URL angepasst hat. Ist debug auf true
-   * gesetzt, protokolliert der ForwardDispatch zudem jede Anfrage auf dem
-   * Logger.
+   * jeweiligen Anfrage übergebenen URL angepasst hat.
    * 
    * @author christoph.lutz
    */
-  private static class ForwardDispatch implements XDispatch
+  private static class RedirectDispatch implements XDispatch
   {
     protected XDispatch orig;
 
     protected URL url;
 
-    protected boolean debug;
-
-    public ForwardDispatch(XDispatch orig, URL url, boolean debug)
+    public RedirectDispatch(XDispatch orig, URL url)
     {
       this.orig = orig;
       this.url = url;
-      this.debug = debug;
     }
 
     public void dispatch(URL x, PropertyValue[] args)
     {
-      if (debug)
-        Logger.debug2(ForwardDispatch.class.getName()
-                      + ".dispatch('"
-                      + url.Complete
-                      + "')");
+      Logger.debug2(RedirectDispatch.class.getName()
+                    + ".dispatch('"
+                    + url.Complete
+                    + "')");
 
       if (orig != null) orig.dispatch(url, args);
     }
 
     public void addStatusListener(XStatusListener listener, URL x)
     {
-      if (debug)
-        Logger.debug2(ForwardDispatch.class.getName()
-                      + ".addStatusListener('"
-                      + listener.hashCode()
-                      + "')");
+      Logger.debug2(RedirectDispatch.class.getName()
+                    + ".addStatusListener('"
+                    + listener.hashCode()
+                    + "')");
 
       if (orig != null) orig.addStatusListener(listener, url);
     }
 
     public void removeStatusListener(XStatusListener listener, URL x)
     {
-      if (debug)
-        Logger.debug2(ForwardDispatch.class.getName()
-                      + ".removeStatusListener('"
-                      + listener.hashCode()
-                      + "')");
+      Logger.debug2(RedirectDispatch.class.getName()
+                    + ".removeStatusListener('"
+                    + listener.hashCode()
+                    + "')");
 
       if (orig != null) orig.removeStatusListener(listener, url);
     }
   }
 
   /**
-   * Der ForwardDispatch ist ein Dispatch-Handler, der Anfragen an den
+   * Der RedirectNotifyingDispatch ist ein Dispatch-Handler, der Anfragen an den
    * ursprünglichen XNotifyingDispatch-Handler weiter reicht, nachdem er die der
-   * jeweiligen Anfrage übergebenen URL angepasst hat. Ist debug auf true
-   * gesetzt, protokolliert der ForwardDispatch zudem jede Anfrage auf dem
-   * Logger.
+   * jeweiligen Anfrage übergebenen URL angepasst hat.
    * 
    * @author christoph.lutz
    */
-  private static class ForwardNotifyingDispatch extends ForwardDispatch
+  private static class RedirectNotifyingDispatch extends RedirectDispatch
       implements XNotifyingDispatch
   {
-    public ForwardNotifyingDispatch(XNotifyingDispatch disp, URL url,
-        boolean debug)
+    public RedirectNotifyingDispatch(XNotifyingDispatch disp, URL url)
     {
-      super(disp, url, debug);
+      super(disp, url);
     }
 
     public void dispatchWithNotification(URL x, PropertyValue[] args,
         XDispatchResultListener listener)
     {
-      Logger.debug2(ForwardDispatch.class.getName()
+      Logger.debug2(RedirectDispatch.class.getName()
                     + ".dispatchWithNotification('"
                     + url
                     + "')");
@@ -375,5 +386,4 @@ public class DispatchInterceptor
             listener);
     }
   }
-
 }
