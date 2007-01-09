@@ -383,6 +383,7 @@ public class OneFormControlLineView extends LineView
     
     linesTextfield.setCaretPosition(0);
     linesTextfield.addMouseListener(myMouseListener);
+    textAreaAdditionalView.add(linesTextfield);
     
     final JCheckBox wrapBox = new JCheckBox();
     wrapBox.setSelected(model.getWrap());
