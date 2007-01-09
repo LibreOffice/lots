@@ -109,8 +109,6 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
 
   public static final String cmdTextbausteinVerweisEinfuegen = "TextbausteinVerweisEinfuegen";
 
-  public static final String cmdOpenPath = "OpenPath";
-
   /**
    * Der Konstruktor initialisiert das WollMuxSingleton und startet damit den
    * eigentlichen WollMux. Der Konstuktor wird aufgerufen, bevor OpenOffice.org
@@ -272,9 +270,6 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
         xRet = this;
 
       else if (cmd.equalsIgnoreCase(cmdTextbausteinVerweisEinfuegen))
-        xRet = this;
-
-      else if (cmd.equalsIgnoreCase(cmdOpenPath))
         xRet = this;
     }
     return xRet;
@@ -486,12 +481,6 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
         XTextDocument doc = UNO
             .XTextDocument(UNO.desktop.getCurrentComponent());
         WollMuxEventHandler.handleTextbausteinEinfuegen(doc,false);
-      }
-      else if (cmd.compareToIgnoreCase(cmdOpenPath) == 0)
-      {
-        Logger.debug2("Dispatch: Aufruf von WollMux:OpenPath");
-        String path = aURL.Complete.split("#",2)[1];
-        WollMuxEventHandler.handleOpenPath(path);
       }
     }
   }

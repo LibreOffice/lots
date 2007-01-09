@@ -3140,35 +3140,6 @@ public class WollMuxEventHandler
   }
 
   // *******************************************************************************************
-
-  /**
-   * TODO dokumentieren
-   */
-  public static void handleOpenPath(String path)
-  {
-    handle(new OnOpenPath(path));
-  }
-
-  private static class OnOpenPath extends BasicEvent
-  {
-    private String path;
-
-    public OnOpenPath(String path)
-    {
-      this.path = path;
-    }
-
-    protected void doit() throws WollMuxFehlerException
-    {
-    }
-
-    public String toString()
-    {
-      return this.getClass().getSimpleName() + "('" + path + "')";
-    }
-  }
-
-  // *******************************************************************************************
   // Globale Helper-Methoden
 
   private static ConfigThingy requireLastSection(ConfigThingy cf,
