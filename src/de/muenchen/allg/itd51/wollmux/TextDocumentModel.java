@@ -253,7 +253,7 @@ public class TextDocumentModel
   /**
    * Erzeugt ein neues TextDocumentModel zum XTextDocument doc und sollte nie
    * direkt aufgerufen werden, da neue TextDocumentModels über das
-   * WollMuxSingletonie (siehe WollMuxSingleton.getTextDocumentModel()) erzeugt
+   * WollMuxSingleton (siehe WollMuxSingleton.getTextDocumentModel()) erzeugt
    * und verwaltet werden.
    * 
    * @param doc
