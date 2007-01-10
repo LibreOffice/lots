@@ -33,9 +33,11 @@ action()
         if ! grep -q "(${VERSION}-siga-lhm1)" debian/changelog ; then
           sed "s/<<VERSION>>/${VERSION}-siga-lhm1/" debian/bump >debian/changelog.bump
           cat debian/changelog >>debian/changelog.bump
-          cp debian/changelog debian/changelog.saved
-          sed "s/\([^a-zA-Z0-9]\)siga\([^a-zA-Z0-9]\)/\1${BRANCH}\2/g" debian/changelog.bump >debian/changelog
+        else
+          cp debian/changelog debian/changelog.bump
         fi
+        cp debian/changelog debian/changelog.saved
+        sed "s/\([^a-zA-Z0-9]\)siga\([^a-zA-Z0-9]\)/\1${BRANCH}\2/g" debian/changelog.bump >debian/changelog
         ;;
 
     _install)
