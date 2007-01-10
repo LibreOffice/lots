@@ -1,3 +1,69 @@
+wollmux (1.5.0-siga-lhm1) siga; urgency=low
+
+  * Das Textbausteinsystem steht (erstmalig) zur Verfügung. Über eine zugeordnete 
+    Tastenkombination können Textbausteine eingefügt werden. 
+     - Dabei können mit einem Seperator getrennte Parameter übergeben werden, die
+       in dem eingefügten Textbaustein in Platzhalter eingesetzt werden. Textbausteine
+       werden automatisch in verschiedenen Verzeichnissen gesucht und eingelesen. 
+     - Eine Tastenkombination kann über einen Eintrag in Konfigurationdateien im 
+       Anschnitt Tastenkuerzel gesetz werden.
+     - Über eine zugeordnete Tastenkombination kann der nächste Platzhalter nach
+       dem Cursor angesprungen werden.
+     - Es kann ein Textbausteinverweis eingefügt werden, der nicht gleich ausgeführt
+       wird z.B. für Vorlagenersteller. 
+  * Über CLASSPATH-Direktiven in wollmux.conf können Verzeichnisse und JAR-Dateien 
+    auf der lokalen Platte und oder einem Webserver angegeben werden in denen .class
+    Dateien gesucht werden für externe Funktionen (TRAFOs etc.) Dies erlaubt den 
+    Referaten auf einfache Weise, ihre eigenen WollMux-Plugins zu verteilen und auszurollen.
+  * Bleibt der Textinhalt eines insertFrag-Befehls nach dem Einfügen leer und ist
+    der insertFrag-Befehl das einzige Element in einem Absatz, so wird dieser Absatz
+    gelöscht. Dies ist z.B. sinnvoll, um die erste Zeile einer Mischvorlage 
+    ("<internerBriefkopf>" bzw. "<externerBriefkopf>") nach dem Einfügen zu löschen.
+  * FormularMax 4000: Das Einfügen des Empfängerauswahl-Tabs fügt nun auch ein 
+                      Eingabefeld für "Unser Zeichen" sowie weitere Alternativen
+                      für Zustellvermerke ein.
+  * Bei Sachleitenden Verfügungen ist es nun auch möglich, Zuleitungszeilen mit 
+    römischen Ziffern zu versehen. Eine solche Zuleitungszeile ist damit sowohl 
+    Zuleitungszeile als auch der Beginn eines neuen Verfügungspunktes und wird 
+    über die beiden Schaltflächen "Ziffer einfügen" und "Zuleitungszeile" 
+    (in beliebiger Reihenfolge) erstellt.
+  * Der neue Datenquellentyp "ooo" erlaubt die Anbindung des WollMux an beliebige 
+    in OpenOffice.org registrierte Datenbanken. Damit ist jetzt auch die Anbindung
+    des WollMux an Oracle und andere Datenbanken möglich.
+  * FormularMax 4000: Im Formular-Menü ist der Punkt Druckfunktion setzen
+                      hinzugekommen, der das Festlegen der Druckfunktion erlaubt.
+  * Der WollMux unterstützt jetzt Serienbriefdruck. Dabei können alle 
+    WollMux-Formularfelder belegt werden, wobei Transformationen wie üblich 
+    durchgeführt werden, d.h. automatische geschlechtsabhängige Texte 
+    (z.B. "Antragsteller" oder "Antragstellerin") sind möglich.
+  * In der wollmux.conf sind jetzt Datenquellen/Registriere-Abschnitte möglich, die den
+    WollMux Datenquellen bei OpenOffice.org registrieren lassen. Dies erleichtert die
+    zentrale Verteilung und Administration von OOo-Datenquellen.
+  * Mit dem Namenszusatz 'GROUPS ...' können jetzt auch über "Einfügen->Bereich..." 
+    erstellte Textbereiche mit Sichtbarkeitsgruppen für die Ein-/Ausblendung versehen 
+    werden. Damit können jetzt auch Tabellen und manuelle Seitenumbrücke vollständig 
+    ausgeblendet werden, die unter der Verwendung von Bookmarks nicht sauber 
+    ausgeblendet werden konnten.
+  * Der WollMux erfasst jetzt auch normale Serienbrieffelder und kann diese sowohl 
+    von der Formular-GUI als auch mit seinen eigenen Serienbrieffunktionen befüllen.
+  * Formularelemente des Typs "textarea" brechen ihren Inhalt jetzt automatisch 
+    am Rand um. Dies betrifft nur die Anzeige. Es werden keine harten Zeilenumbrüche 
+    eingefügt. Das alte Verhalten kann durch das Attribut WRAP "false" wiederhergestellt
+    werden. Der FormularMax 4000 bietet bei textareas eine Checkbox für dieses Attribut.
+  * Wenn das Label eines GUI-Elements in einem WollMux-Dialog (insbes. Formular-GUI) 
+    leer ist, nutzt das Element jetzt den ganzen verfügbaren Platz bis an den linken 
+    Rand aus. Dies ist insbesondere nützlich bei Verwendung von Elementen des Typs "textarea".
+    Bei diesen ist zu empfehlen, ihnen kein Label zu geben und stattdessen ein eigenständiges
+    Label in der Zeile davor zu verwenden.
+  * Auf READONLY gesetzte GUI-Elemente in Formularen bekommen nicht mehr den Fokus bei Tab.
+  * Tab und Shift-Tab können jetzt auch in mehrzeiligen Eingabefeldern (Typ "textarea")
+    verwendet werden, um zum nächsten bzw. vorhergehenden Eingabeelement zu springen.
+  * Die Tab-Taste springt jetzt in der WollMux Formular-GUI automatisch zum nächsten 
+    Tab, wenn sie auf dem letzten Eingabefeld eines Tabs gedrückt wird. Auf dem letzten
+    Tab springt sie zum rechtesten Button (normalerweise Drucken).
+
+ -- Christoph Lutz <christoph.lutz@muenchen.de>  Wed, 10 Jan 2007 16:13:16 +0200
+
 wollmux (1.4.2-siga-lhm1) siga; urgency=low
 
   * FormularMax 4000: Sichtbarkeit-Abschnitt wird nicht mehr gelöscht, d.h.
