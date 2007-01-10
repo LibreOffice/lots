@@ -41,7 +41,7 @@
        <!-- 
       
            Diese Konfigurationsdatei wird benötigt, um die Symbolleiste "Add-on 2"
-           in "Textbausteinsystem" umzubenennen und die Leiste standardmäßig auf 
+           in "Sachleitende Verfügungen" umzubenennen und die Leiste standardmäßig auf 
            unsichtbar zu stellen.
            
            es handelt sich hierbei um ein neues Feature, das seit OOo2.0.3 genutzt werden
@@ -50,7 +50,7 @@
            
            siehe http://www.mail-archive.com/dev@api.openoffice.org/msg03281.html
            
-      
+      --> 
      
        <node oor:name="private:resource/toolbar/addon_de.muenchen.allg.itd51.wollmux.Textbausteinsystem" oor:op="replace">
          <prop oor:name="UIName" oor:type="xs:string">
@@ -72,7 +72,7 @@
            <value>false</value>
          </prop>
        </node>
-      -->  
+       
      </node>
   </node>
 </oor:component-data>
