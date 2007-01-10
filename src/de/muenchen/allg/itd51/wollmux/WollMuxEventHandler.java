@@ -2364,21 +2364,26 @@ public class WollMuxEventHandler
       String bookmarkName = "WM(CMD '" + blockname + "')";
 
       Set bmNames = getBookmarkNamesStartingWith(bookmarkName, range);
-      
-      String markChange = null; 
-      
-      String allVersions = "wird immer gedruckt."; 
-      String draftOnly = "wird nur im Entwurf gedruckt."; 
-      String notInOriginal = "wird immer gedruckt, ausser im Original."; 
-       
-      if (blockname.equalsIgnoreCase("allVersions")){ 
-        markChange = allVersions; 
-      }else if(blockname.equalsIgnoreCase("draftOnly")){ 
-        markChange = draftOnly; 
-      }else if(blockname.equalsIgnoreCase("notInOriginal")){ 
+
+      String markChange = null;
+
+      String allVersions = "wird immer gedruckt.";
+      String draftOnly = "wird nur im Entwurf gedruckt.";
+      String notInOriginal = "wird immer gedruckt, ausser im Original.";
+
+      if (blockname.equalsIgnoreCase("allVersions"))
+      {
+        markChange = allVersions;
+      }
+      else if (blockname.equalsIgnoreCase("draftOnly"))
+      {
+        markChange = draftOnly;
+      }
+      else if (blockname.equalsIgnoreCase("notInOriginal"))
+      {
         markChange = notInOriginal;
       }
-      
+
       if (bmNames.size() > 0)
       {
         // bereits bestehende Blöcke löschen
@@ -2394,20 +2399,29 @@ public class WollMuxEventHandler
           {
           }
         }
-        WollMuxSingleton.showInfoModal("Markierung des Blockes aufgehoben", "Der ausgewählte Block enthielt bereits eine Markierung \"Block " +  markChange +  "\" Die bestehende Markierung wurde aufgehoben.");
+        WollMuxSingleton.showInfoModal(
+            "Markierung des Blockes aufgehoben",
+            "Der ausgewählte Block enthielt bereits eine Markierung \"Block "
+                + markChange
+                + "\" Die bestehende Markierung wurde aufgehoben.");
       }
       else
       {
         // neuen Block anlegen
         new Bookmark(bookmarkName, doc, range);
         WollMuxSingleton.showInfoModal(
-            "Block wurde markiert", "Der ausgewählte Block " + markChange);
+            "Block wurde markiert",
+            "Der ausgewählte Block " + markChange);
       }
 
       // PrintBlöcke neu einlesen:
       DocumentCommandInterpreter dci = new DocumentCommandInterpreter(model,
           mux);
       dci.scanDocumentSettings();
+
+      // wird in scanDocumentSettings auf false gesetzt aber das Dokument wurde
+      // tatsächlich verändert.
+      model.setDocumentModified(true);
 
       stabilize();
     }
