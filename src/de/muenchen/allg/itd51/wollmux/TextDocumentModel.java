@@ -40,7 +40,6 @@ import com.sun.star.container.XNameAccess;
 import com.sun.star.frame.FrameSearchFlag;
 import com.sun.star.frame.XController;
 import com.sun.star.frame.XFrame;
-import com.sun.star.frame.XModel;
 import com.sun.star.lang.EventObject;
 import com.sun.star.lib.uno.helper.WeakBase;
 import com.sun.star.text.XBookmarksSupplier;
@@ -290,8 +289,7 @@ public class TextDocumentModel
     // WollMuxDispatchInterceptor registrieren
     try
     {
-      DispatchInterceptor.registerWollMuxDispatchInterceptor(UNO.XModel(doc)
-          .getCurrentController().getFrame());
+      DispatchHandler.registerDocumentDispatchInterceptor(getFrame());
     }
     catch (java.lang.Exception e)
     {
@@ -1177,6 +1175,24 @@ public class TextDocumentModel
   }
 
   /**
+   * Liefert den Frame zu diesem TextDocument oder null, wenn der Frame nicht
+   * bestimmt werden kann.
+   * 
+   * @return
+   */
+  public XFrame getFrame()
+  {
+    try
+    {
+      return doc.getCurrentController().getFrame();
+    }
+    catch (java.lang.Exception e)
+    {
+      return null;
+    }
+  }
+
+  /**
    * Setzt das Fensters des TextDokuments auf Sichtbar (visible==true) oder
    * unsichtbar (visible == false).
    * 
@@ -1184,14 +1200,10 @@ public class TextDocumentModel
    */
   public void setWindowVisible(boolean visible)
   {
-    XModel xModel = UNO.XModel(doc);
-    if (xModel != null)
+    XFrame frame = getFrame();
+    if (frame != null)
     {
-      XFrame frame = xModel.getCurrentController().getFrame();
-      if (frame != null)
-      {
-        frame.getContainerWindow().setVisible(visible);
-      }
+      frame.getContainerWindow().setVisible(visible);
     }
   }
 
@@ -1269,8 +1281,12 @@ public class TextDocumentModel
   {
     try
     {
-      UNO.XModel(doc).getCurrentController().getFrame().getContainerWindow()
-          .setPosSize(docX, docY, docWidth, docHeight, PosSize.POSSIZE);
+      getFrame().getContainerWindow().setPosSize(
+          docX,
+          docY,
+          docWidth,
+          docHeight,
+          PosSize.POSSIZE);
     }
     catch (java.lang.Exception e)
     {
@@ -1355,8 +1371,7 @@ public class TextDocumentModel
     XWindow window = null;
     try
     {
-      window = UNO.XModel(doc).getCurrentController().getFrame()
-          .getContainerWindow();
+      window = getFrame().getContainerWindow();
     }
     catch (java.lang.Exception e)
     {
@@ -1559,6 +1574,38 @@ public class TextDocumentModel
 
     // Löscht das TextDocumentModel von doc aus dem WollMux-Singleton.
     WollMuxSingleton.getInstance().disposedTextDocument(doc);
+  }
+
+  /**
+   * Liefert den Titel des Dokuments, wie er im Fenster des Dokuments angezeigt
+   * wird, ohne den Zusatz " - OpenOffice.org Writer" oder "NoTitle", wenn der
+   * Titel nicht bestimmt werden kann. TextDocumentModel('<title>')
+   */
+  public String getTitle()
+  {
+    String title = "NoTitle";
+    try
+    {
+      title = UNO.getProperty(getFrame(), "Title").toString();
+      // "Untitled1 - OpenOffice.org Writer" -> cut " - OpenOffice.org Writer"
+      int i = title.lastIndexOf(" - ");
+      if (i >= 0) title = title.substring(0, i);
+    }
+    catch (java.lang.Exception e)
+    {
+    }
+    return title;
+  }
+
+  /**
+   * Liefert eine Stringrepräsentation des TextDocumentModels - Derzeit in der
+   * Form 'doc(<title>)'.
+   * 
+   * @see java.lang.Object#toString()
+   */
+  public String toString()
+  {
+    return "doc('" + getTitle() + "')";
   }
 
   /**
