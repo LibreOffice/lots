@@ -23,14 +23,10 @@
 
 package de.muenchen.allg.itd51.wollmux.comp;
 
-import java.util.Iterator;
-import java.util.Vector;
-
 import com.sun.star.beans.NamedValue;
 import com.sun.star.frame.DispatchDescriptor;
 import com.sun.star.frame.XDispatch;
 import com.sun.star.frame.XDispatchProvider;
-import com.sun.star.frame.XStatusListener;
 import com.sun.star.lang.XServiceInfo;
 import com.sun.star.lang.XSingleComponentFactory;
 import com.sun.star.lib.uno.helper.Factory;
@@ -41,6 +37,7 @@ import com.sun.star.text.XTextDocument;
 import com.sun.star.uno.XComponentContext;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.itd51.wollmux.DispatchHandler;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.WollMuxEventHandler;
 import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
@@ -56,7 +53,7 @@ import de.muenchen.allg.itd51.wollmux.XWollMux;
  * externe UNO-Komponenten dar.
  */
 public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
-    XDispatch, XDispatchProvider, XWollMux
+    XDispatchProvider, XWollMux
 {
 
   /**
@@ -66,48 +63,6 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
   public static final java.lang.String[] SERVICENAMES = {
                                                          "com.sun.star.task.AsyncJob",
                                                          "de.muenchen.allg.itd51.wollmux.WollMux" };
-
-  /*
-   * Felder des Protocol-Handlers: Hier kommt die Definition der Befehlsnamen,
-   * die über WollMux-Kommando-URLs abgesetzt werden können.
-   */
-
-  /**
-   * Dieses Feld enthält den Namen des Protokolls der WollMux-Kommando-URLs
-   */
-  public static final String wollmuxProtocol = "wollmux";
-
-  public static final String cmdAbsenderAuswaehlen = "AbsenderAuswaehlen";
-
-  public static final String cmdPALVerwalten = "PALVerwalten";
-
-  public static final String cmdOpenTemplate = "OpenTemplate";
-
-  public static final String cmdOpenDocument = "OpenDocument";
-
-  public static final String cmdFunctionDialog = "FunctionDialog";
-
-  public static final String cmdFormularMax4000 = "FormularMax4000";
-
-  public static final String cmdZifferEinfuegen = "ZifferEinfuegen";
-
-  public static final String cmdAbdruck = "Abdruck";
-
-  public static final String cmdZuleitungszeile = "Zuleitungszeile";
-
-  public static final String cmdDumpInfo = "DumpInfo";
-
-  public static final String cmdMarkBlock = "MarkBlock";
-
-  public static final String cmdKill = "Kill";
-
-  public static final String cmdAbout = "About";
-
-  public static final String cmdTextbausteinEinfuegen = "TextbausteinEinfuegen";
-
-  public static final String cmdPlatzhalterAnspringen = "PlatzhalterAnspringen";
-
-  public static final String cmdTextbausteinVerweisEinfuegen = "TextbausteinVerweisEinfuegen";
 
   /**
    * Der Konstruktor initialisiert das WollMuxSingleton und startet damit den
@@ -171,6 +126,33 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
     return (WollMux.class.getName());
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.sun.star.frame.XDispatchProvider#queryDispatch(com.sun.star.util.URL,
+   *      java.lang.String, int)
+   */
+  public XDispatch queryDispatch( /* IN */com.sun.star.util.URL aURL,
+  /* IN */String sTargetFrameName,
+  /* IN */int iSearchFlags)
+  {
+    return DispatchHandler.globalWollMuxDispatches.queryDispatch(
+        aURL,
+        sTargetFrameName,
+        iSearchFlags);
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.sun.star.frame.XDispatchProvider#queryDispatches(com.sun.star.frame.DispatchDescriptor[])
+   */
+  public XDispatch[] queryDispatches( /* IN */DispatchDescriptor[] seqDescripts)
+  {
+    return DispatchHandler.globalWollMuxDispatches
+        .queryDispatches(seqDescripts);
+  }
+
   /**
    * Diese Methode liefert eine Factory zurück, die in der Lage ist den
    * UNO-Service zu erzeugen. Die Methode wird von UNO intern benötigt. Die
@@ -205,312 +187,6 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
         WollMux.SERVICENAMES,
         xRegKey);
   }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.sun.star.frame.XDispatchProvider#queryDispatch(com.sun.star.util.URL,
-   *      java.lang.String, int)
-   */
-  public XDispatch queryDispatch( /* IN */com.sun.star.util.URL aURL,
-  /* IN */String sTargetFrameName,
-  /* IN */int iSearchFlags)
-  {
-    XDispatch xRet = null;
-    Logger.debug2("queryDispatch: " + aURL.Complete);
-
-    Vector parsedURL = parseWollmuxURL(aURL.Complete);
-    if (parsedURL != null && parsedURL.size() >= 1)
-    {
-      String cmd = (String) parsedURL.remove(0);
-
-      if (cmd.equalsIgnoreCase(cmdAbsenderAuswaehlen))
-        xRet = this;
-
-      else if (cmd.equalsIgnoreCase(cmdOpenTemplate))
-        xRet = this;
-
-      else if (cmd.equalsIgnoreCase(cmdOpenDocument))
-        xRet = this;
-
-      else if (cmd.equalsIgnoreCase(cmdPALVerwalten))
-        xRet = this;
-
-      else if (cmd.equalsIgnoreCase(cmdFunctionDialog))
-        xRet = this;
-
-      else if (cmd.equalsIgnoreCase(cmdFormularMax4000))
-        xRet = this;
-
-      else if (cmd.equalsIgnoreCase(cmdZifferEinfuegen))
-        xRet = this;
-
-      else if (cmd.equalsIgnoreCase(cmdAbdruck))
-        xRet = this;
-
-      else if (cmd.equalsIgnoreCase(cmdZuleitungszeile))
-        xRet = this;
-
-      else if (cmd.equalsIgnoreCase(cmdDumpInfo))
-        xRet = this;
-
-      else if (cmd.equalsIgnoreCase(cmdKill))
-        xRet = this;
-
-      else if (cmd.equalsIgnoreCase(cmdAbout))
-        xRet = this;
-
-      else if (cmd.equalsIgnoreCase(cmdTextbausteinEinfuegen))
-        xRet = this;
-
-      else if (cmd.equalsIgnoreCase(cmdMarkBlock))
-        xRet = this;
-
-      else if (cmd.equalsIgnoreCase(cmdPlatzhalterAnspringen))
-        xRet = this;
-
-      else if (cmd.equalsIgnoreCase(cmdTextbausteinVerweisEinfuegen))
-        xRet = this;
-    }
-    return xRet;
-  }
-
-  /**
-   * Diese Methode prüft, ob die in urlStr übergebene URL eine wollmux-URL ist
-   * (also mit "wollmux:" beginnt) und zerlegt die URL in die Teile (Kommando,
-   * Argument1, ..., ArgumentN), die sie in einem Vector zurückgibt. Ist die
-   * übergebene URL keine wollmux-URL, so liefert die Methode null zurück. Eine
-   * gültige WollMux-URL ist überlicherweise wie folgt aufgebaut:
-   * "wollmux:Kommando#Argument1&Argument2", wobei die Argumente nicht das
-   * '&'-Zeichen enthalten dürfen.
-   * 
-   * @param urlStr
-   * @return
-   */
-  private Vector parseWollmuxURL(String urlStr)
-  {
-    String[] parts = urlStr.split(":", 2);
-    if (parts != null
-        && parts.length == 2
-        && parts[0].compareToIgnoreCase(wollmuxProtocol) == 0)
-    {
-      Vector result = new Vector();
-      String cmdAndArgs = parts[1];
-      parts = cmdAndArgs.split("#", 2);
-      String cmd = parts[0];
-      result.add(cmd);
-      if (parts.length == 2)
-      {
-        String argStr = parts[1];
-        String[] args = argStr.split("&");
-        for (int i = 0; i < args.length; i++)
-        {
-          result.add(args[i]);
-        }
-      }
-      return result;
-    }
-    else
-      return null;
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.sun.star.frame.XDispatchProvider#queryDispatches(com.sun.star.frame.DispatchDescriptor[])
-   */
-  public XDispatch[] queryDispatches( /* IN */DispatchDescriptor[] seqDescripts)
-  {
-    int nCount = seqDescripts.length;
-    XDispatch[] lDispatcher = new XDispatch[nCount];
-
-    for (int i = 0; i < nCount; ++i)
-      lDispatcher[i] = queryDispatch(
-          seqDescripts[i].FeatureURL,
-          seqDescripts[i].FrameName,
-          seqDescripts[i].SearchFlags);
-
-    return lDispatcher;
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.sun.star.frame.XDispatch#dispatch(com.sun.star.util.URL,
-   *      com.sun.star.beans.PropertyValue[])
-   */
-  public void dispatch( /* IN */com.sun.star.util.URL aURL,
-  /* IN */com.sun.star.beans.PropertyValue[] aArguments)
-  {
-    Vector parsedURL = parseWollmuxURL(aURL.Complete);
-    if (parsedURL != null && parsedURL.size() >= 1)
-    {
-      String cmd = (String) parsedURL.remove(0);
-
-      // argStr zusammenbauen (wird nur für debug-Meldung benötigt)
-      String argStr = "";
-      Iterator i = parsedURL.iterator();
-      while (i.hasNext())
-      {
-        argStr += "" + i.next();
-        if (i.hasNext()) argStr += ", ";
-      }
-
-      if (cmd.compareToIgnoreCase(cmdAbsenderAuswaehlen) == 0)
-      {
-        Logger.debug2("Dispatch: Aufruf von WollMux:AbsenderAuswaehlenDialog");
-        WollMuxEventHandler.handleShowDialogAbsenderAuswaehlen();
-      }
-
-      else if (cmd.compareToIgnoreCase(cmdPALVerwalten) == 0)
-      {
-        Logger.debug2("Dispatch: Aufruf von WollMux:PALVerwalten");
-        WollMuxEventHandler.handleShowDialogPersoenlicheAbsenderliste();
-      }
-
-      else if (cmd.compareToIgnoreCase(cmdOpenTemplate) == 0)
-      {
-        Logger.debug2("Dispatch: Aufruf von WollMux:OpenTemplate mit Args:"
-                      + argStr);
-        WollMuxEventHandler.handleOpenDocument(parsedURL, true);
-      }
-
-      else if (cmd.compareToIgnoreCase(cmdOpenDocument) == 0)
-      {
-        Logger.debug2("Dispatch: Aufruf von WollMux:OpenDocument mit Args:"
-                      + argStr);
-        WollMuxEventHandler.handleOpenDocument(parsedURL, false);
-      }
-
-      else if (cmd.compareToIgnoreCase(cmdFunctionDialog) == 0)
-      {
-        Logger.debug2("Dispatch: Aufruf von WollMux:FunctionDialog mit Arg:"
-                      + parsedURL);
-        String dialogName = "";
-        if (parsedURL.size() > 0) dialogName = parsedURL.get(0).toString();
-        XTextDocument doc = UNO
-            .XTextDocument(UNO.desktop.getCurrentComponent());
-        if (doc != null)
-          WollMuxEventHandler.handleFunctionDialog(doc, dialogName);
-      }
-
-      else if (cmd.compareToIgnoreCase(cmdFormularMax4000) == 0)
-      {
-        Logger.debug2("Dispatch: Aufruf von WollMux:FormularMax4000 mit Arg:"
-                      + parsedURL);
-        XTextDocument doc = UNO
-            .XTextDocument(UNO.desktop.getCurrentComponent());
-        if (doc != null) WollMuxEventHandler.handleFormularMax4000Show(doc);
-      }
-
-      else if (cmd.compareToIgnoreCase(cmdZifferEinfuegen) == 0)
-      {
-        Logger.debug2("Dispatch: Aufruf von WollMux:ZifferEinfügen");
-        XTextDocument doc = UNO
-            .XTextDocument(UNO.desktop.getCurrentComponent());
-        if (doc != null && UNO.XModel(doc) != null)
-          WollMuxEventHandler.handleButtonZifferEinfuegenPressed(doc);
-      }
-
-      else if (cmd.compareToIgnoreCase(cmdAbdruck) == 0)
-      {
-        Logger.debug2("Dispatch: Aufruf von WollMux:Abdruck");
-        XTextDocument doc = UNO
-            .XTextDocument(UNO.desktop.getCurrentComponent());
-        if (doc != null && UNO.XModel(doc) != null)
-          WollMuxEventHandler.handleButtonAbdruckPressed(doc);
-      }
-
-      else if (cmd.compareToIgnoreCase(cmdMarkBlock) == 0)
-      {
-        Logger.debug2("Dispatch: Aufruf von WollMux:MarkBlock");
-        XTextDocument doc = UNO
-            .XTextDocument(UNO.desktop.getCurrentComponent());
-        String blockname = null;
-        if (parsedURL.size() > 0) blockname = parsedURL.get(0).toString();
-        if (doc != null && UNO.XModel(doc) != null)
-          WollMuxEventHandler.handleMarkBlock(doc, blockname);
-      }
-
-      else if (cmd.compareToIgnoreCase(cmdZuleitungszeile) == 0)
-      {
-        Logger.debug2("Dispatch: Aufruf von WollMux:Zuleitungszeile");
-        XTextDocument doc = UNO
-            .XTextDocument(UNO.desktop.getCurrentComponent());
-        if (doc != null && UNO.XModel(doc) != null)
-          WollMuxEventHandler.handleButtonZuleitungszeilePressed(doc);
-      }
-
-      else if (cmd.compareToIgnoreCase(cmdDumpInfo) == 0)
-      {
-        Logger.debug2("Dispatch: Aufruf von WollMux:DumpInfo");
-        WollMuxEventHandler.handleDumpInfo();
-      }
-
-      else if (cmd.compareToIgnoreCase(cmdKill) == 0)
-      {
-        Logger.debug2("Dispatch: Aufruf von WollMux:Kill");
-        WollMuxEventHandler.handleKill();
-      }
-
-      else if (cmd.compareToIgnoreCase(cmdAbout) == 0)
-      {
-        Logger.debug2("Dispatch: Aufruf von WollMux:About");
-        String wollMuxBarVersion = null;
-        if (parsedURL.size() > 0)
-          wollMuxBarVersion = parsedURL.get(0).toString();
-        WollMuxEventHandler.handleAbout(wollMuxBarVersion);
-      }
-      else if (cmd.compareToIgnoreCase(cmdTextbausteinEinfuegen) == 0)
-      {
-        Logger.debug2("Dispatch: Aufruf von WollMux:TextbausteinEinfuegen");
-        XTextDocument doc = UNO
-            .XTextDocument(UNO.desktop.getCurrentComponent());
-        WollMuxEventHandler.handleTextbausteinEinfuegen(doc, true);
-      }
-      else if (cmd.compareToIgnoreCase(cmdPlatzhalterAnspringen) == 0)
-      {
-        Logger.debug2("Dispatch: Aufruf von WollMux:PlatzhalterAnspringen");
-        XTextDocument doc = UNO
-            .XTextDocument(UNO.desktop.getCurrentComponent());
-        WollMuxEventHandler.handleJumpToPlaceholder(doc);
-      }
-      else if (cmd.compareToIgnoreCase(cmdTextbausteinVerweisEinfuegen) == 0)
-      {
-        Logger.debug2("Dispatch: Aufruf von WollMux:TextbausteinVerweisEinfuegen");
-        XTextDocument doc = UNO
-            .XTextDocument(UNO.desktop.getCurrentComponent());
-        WollMuxEventHandler.handleTextbausteinEinfuegen(doc,false);
-      }
-    }
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.sun.star.frame.XDispatch#removeStatusListener(com.sun.star.frame.XStatusListener,
-   *      com.sun.star.util.URL)
-   */
-  public void removeStatusListener(XStatusListener arg0,
-      com.sun.star.util.URL arg1)
-  {
-    // Es gibt keine sinnvolle Verwendung für StatusListener im WollMux
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.sun.star.frame.XDispatch#addStatusListener(com.sun.star.frame.XStatusListener,
-   *      com.sun.star.util.URL)
-   */
-  public void addStatusListener(XStatusListener arg0, com.sun.star.util.URL arg1)
-  {
-    // Es gibt keine sinnvolle Verwendung für StatusListener im WollMux
-  }
-
-  /*****************************************************************************
-   * XWollMux-Implementierung:
-   ****************************************************************************/
 
   /**
    * Diese Methode registriert einen XPALChangeEventListener, der updates

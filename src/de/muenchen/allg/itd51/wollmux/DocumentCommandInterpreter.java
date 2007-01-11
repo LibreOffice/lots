@@ -614,7 +614,7 @@ public class DocumentCommandInterpreter
 
     public void print()
     {
-      UNO.dispatch(textDocumentModel.doc, DispatchInterceptor.DISP_UNO_PRINT);
+      UNO.dispatch(textDocumentModel.doc, DispatchHandler.DISP_UNO_PRINT);
     }
 
     public void pdf()

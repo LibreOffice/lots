@@ -51,6 +51,7 @@ import javax.swing.JOptionPane;
 import com.sun.star.container.XEnumeration;
 import com.sun.star.frame.XDispatch;
 import com.sun.star.frame.XDispatchProvider;
+import com.sun.star.frame.XFrame;
 import com.sun.star.frame.XModel;
 import com.sun.star.lang.EventObject;
 import com.sun.star.lang.XComponent;
@@ -672,6 +673,41 @@ public class WollMuxSingleton implements XPALProvider
       currentTextDocumentModels.put(key, model);
     }
     return model;
+  }
+
+  /**
+   * Liefert das aktuelle TextDocumentModel zum übergebenen XFrame frame oder
+   * null, falls dem Frame kein entsprechendes TextDocumentModel zugeordnet
+   * werden kann.
+   * 
+   * ACHTUNG: Die Methode wird vom DispatchHandler verwendet, um das
+   * TextDocumentModel eines Frames zu bestimmen und wird daher NICHT mit dem
+   * WollMuxEventHandler synchronisiert aufgerufen. Daher darf z.B. im Gegensatz
+   * zu getTextDocumentModel(XTextDocument) hier auch kein TextDocumentModel
+   * erzeugt werden, wenn es nicht bereits existiert.
+   * 
+   * Der Zugriff auf das TextDocumentModel in der nicht synchronisierten
+   * Aufrufmethode des DispatchHandler darf daher auch auschließend lesend sein.
+   * 
+   * @param frame
+   *          Der Frame, über den das TextDocumentModel gesucht werden soll.
+   * @return Das zu frame zugehörige TextDocumentModel oder null, falls keine
+   *         Zuordnung gefunden werden konnte.
+   */
+  public TextDocumentModel getTextDocumentModelForFrame(XFrame frame)
+  {
+    if (frame == null) return null;
+
+    try
+    {
+      HashableComponent key = new HashableComponent(frame.getController()
+          .getModel());
+      return (TextDocumentModel) currentTextDocumentModels.get(key);
+    }
+    catch (java.lang.Exception e)
+    {
+      return null;
+    }
   }
 
   /**

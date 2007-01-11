@@ -52,7 +52,6 @@ import com.sun.star.container.NoSuchElementException;
 import com.sun.star.container.XEnumeration;
 import com.sun.star.container.XNamed;
 import com.sun.star.frame.DispatchResultEvent;
-import com.sun.star.frame.XDispatch;
 import com.sun.star.frame.XDispatchResultListener;
 import com.sun.star.frame.XNotifyingDispatch;
 import com.sun.star.lang.EventObject;
@@ -575,20 +574,21 @@ public class WollMuxEventHandler
    * Dieses Event wird vom WollMux-Service (...comp.WollMux) und aus dem
    * WollMuxEventHandler ausgelöst.
    */
-  public static void handleFunctionDialog(XTextDocument doc, String dialogName)
+  public static void handleFunctionDialog(TextDocumentModel model,
+      String dialogName)
   {
-    handle(new OnFunctionDialog(doc, dialogName));
+    handle(new OnFunctionDialog(model, dialogName));
   }
 
   private static class OnFunctionDialog extends BasicEvent
   {
-    private XTextDocument doc;
+    private TextDocumentModel model;
 
     private String dialogName;
 
-    private OnFunctionDialog(XTextDocument doc, String dialogName)
+    private OnFunctionDialog(TextDocumentModel model, String dialogName)
     {
-      this.doc = doc;
+      this.model = model;
       this.dialogName = dialogName;
     }
 
@@ -627,8 +627,7 @@ public class WollMuxEventHandler
       // transparent mit verfolgt werden können.
       try
       {
-        UNO.XModel(doc).getCurrentController().getFrame().getContainerWindow()
-            .setFocus();
+        model.getFrame().getContainerWindow().setFocus();
       }
       catch (java.lang.Exception e)
       {
@@ -637,7 +636,6 @@ public class WollMuxEventHandler
 
       // Alle Werte die der Funktionsdialog sicher zurück liefert werden in
       // das Dokument übernommen.
-      TextDocumentModel model = mux.getTextDocumentModel(doc);
       Collection schema = dialogInst.getSchema();
       Iterator iter = schema.iterator();
       while (iter.hasNext())
@@ -656,8 +654,8 @@ public class WollMuxEventHandler
     public String toString()
     {
       return this.getClass().getSimpleName()
-             + "(#"
-             + doc.hashCode()
+             + "("
+             + model
              + ", '"
              + dialogName
              + "')";
@@ -746,28 +744,22 @@ public class WollMuxEventHandler
    * Dieses Event wird vom WollMux-Service (...comp.WollMux) und aus dem
    * WollMuxEventHandler ausgelöst.
    */
-  public static void handleFormularMax4000Show(XTextDocument doc)
+  public static void handleFormularMax4000Show(TextDocumentModel model)
   {
-    handle(new OnFormularMax4000Show(doc));
+    handle(new OnFormularMax4000Show(model));
   }
 
   private static class OnFormularMax4000Show extends BasicEvent
   {
-    private final XTextDocument doc;
+    private final TextDocumentModel model;
 
-    private OnFormularMax4000Show(XTextDocument doc)
+    private OnFormularMax4000Show(TextDocumentModel model)
     {
-      this.doc = doc;
+      this.model = model;
     }
 
     protected void doit() throws WollMuxFehlerException
     {
-
-      if (doc == null) return;
-
-      final TextDocumentModel model = WollMuxSingleton.getInstance()
-          .getTextDocumentModel(doc);
-
       // Bestehenden Max in den Vordergrund holen oder neuen Max erzeugen.
       FormularMax4000 max = model.getCurrentFormularMax4000();
       if (max != null)
@@ -791,7 +783,7 @@ public class WollMuxEventHandler
 
     public String toString()
     {
-      return this.getClass().getSimpleName() + "(#" + doc.hashCode() + ")";
+      return this.getClass().getSimpleName() + "(" + model + ")";
     }
   }
 
@@ -975,35 +967,33 @@ public class WollMuxEventHandler
    * Dokuments neue Dokumentkommandos eingefügt wurden, die nun bearbeitet
    * werden sollen - z.B. wenn ein Textbaustein eingefügt wurde.
    * 
-   * @param xTextDoc
-   *          Das XTextDocument, das durch den WollMux verarbeitet werden soll.
+   * @param model
+   *          Das TextDocumentModel, das durch den WollMux verarbeitet werden
+   *          soll.
    */
-  public static void handleReprocessTextDocument(XTextDocument xTextDoc)
+  public static void handleReprocessTextDocument(TextDocumentModel model)
   {
-    handle(new OnReprocessTextDocument(xTextDoc));
+    handle(new OnReprocessTextDocument(model));
   }
 
   private static class OnReprocessTextDocument extends BasicEvent
   {
-    XTextDocument xTextDoc;
+    TextDocumentModel model;
 
-    public OnReprocessTextDocument(XTextDocument xTextDoc)
+    public OnReprocessTextDocument(TextDocumentModel model)
     {
-      this.xTextDoc = xTextDoc;
+      this.model = model;
     }
 
     protected void doit() throws WollMuxFehlerException
     {
-      if (xTextDoc == null) return;
-
-      WollMuxSingleton mux = WollMuxSingleton.getInstance();
-      TextDocumentModel model = mux.getTextDocumentModel(xTextDoc);
+      if (model == null) return;
 
       // Dokument mit neuen Dokumentkommandos über den
       // DocumentCommandInterpreter bearbeiten:
       model.getDocumentCommandTree().update();
       DocumentCommandInterpreter dci = new DocumentCommandInterpreter(model,
-          mux);
+          WollMuxSingleton.getInstance());
       try
       {
         dci.scanDocumentSettings();
@@ -1022,7 +1012,7 @@ public class WollMuxEventHandler
 
     public String toString()
     {
-      return this.getClass().getSimpleName() + "(#" + xTextDoc.hashCode() + ")";
+      return this.getClass().getSimpleName() + "(" + model + ")";
     }
   }
 
@@ -1356,10 +1346,12 @@ public class WollMuxEventHandler
 
     protected void doit()
     {
-      TextDocumentModel model = WollMuxSingleton.getInstance()
-          .getTextDocumentModel(doc);
-
-      model.setPrintFunction(functionName);
+      if (doc != null)
+      {
+        TextDocumentModel model = WollMuxSingleton.getInstance()
+            .getTextDocumentModel(doc);
+        model.setPrintFunction(functionName);
+      }
     }
 
     public String toString()
@@ -1397,10 +1389,10 @@ public class WollMuxEventHandler
    *          Die Funktionsbibliothek, die zur Gewinnung der Trafo-Funktion
    *          verwendet werden soll.
    */
-  public static void handleFormValueChanged(TextDocumentModel doc,
+  public static void handleFormValueChanged(TextDocumentModel model,
       String fieldId, String newValue, FunctionLibrary funcLib)
   {
-    handle(new OnFormValueChanged(doc, fieldId, newValue, funcLib));
+    handle(new OnFormValueChanged(model, fieldId, newValue, funcLib));
   }
 
   private static class OnFormValueChanged extends BasicEvent
@@ -1411,21 +1403,21 @@ public class WollMuxEventHandler
 
     private FunctionLibrary funcLib;
 
-    private TextDocumentModel doc;
+    private TextDocumentModel model;
 
-    public OnFormValueChanged(TextDocumentModel doc, String fieldId,
+    public OnFormValueChanged(TextDocumentModel model, String fieldId,
         String newValue, FunctionLibrary funcLib)
     {
       this.fieldId = fieldId;
       this.newValue = newValue;
       this.funcLib = funcLib;
-      this.doc = doc;
+      this.model = model;
     }
 
     protected void doit()
     {
-      doc.setFormFieldValue(fieldId, newValue);
-      doc.updateFormFields(fieldId, funcLib);
+      model.setFormFieldValue(fieldId, newValue);
+      model.updateFormFields(fieldId, funcLib);
     }
 
     public String toString()
@@ -1591,33 +1583,33 @@ public class WollMuxEventHandler
    *          Formularfeld aus dem Vektor genommen, das keine Trafo enthält.
    *          Ansonsten wird das erste Formularfeld im Vektor verwendet.
    */
-  public static void handleFocusFormField(TextDocumentModel doc, String fieldId)
+  public static void handleFocusFormField(TextDocumentModel model, String fieldId)
   {
-    handle(new OnFocusFormField(doc, fieldId));
+    handle(new OnFocusFormField(model, fieldId));
   }
 
   private static class OnFocusFormField extends BasicEvent
   {
-    private TextDocumentModel doc;
+    private TextDocumentModel model;
 
     private String fieldId;
 
-    public OnFocusFormField(TextDocumentModel doc, String fieldId)
+    public OnFocusFormField(TextDocumentModel model, String fieldId)
     {
-      this.doc = doc;
+      this.model = model;
       this.fieldId = fieldId;
     }
 
     protected void doit()
     {
-      doc.focusFormField(fieldId);
+      model.focusFormField(fieldId);
     }
 
     public String toString()
     {
       return this.getClass().getSimpleName()
              + "(#"
-             + doc.doc
+             + model.doc
              + ", '"
              + fieldId
              + "')";
@@ -1684,11 +1676,6 @@ public class WollMuxEventHandler
       model.setWindowPosSize(docX, docY, docWidth, docHeight);
     }
 
-    public boolean requires(Object o)
-    {
-      return UnoRuntime.areSame(model.doc, o);
-    }
-
     public String toString()
     {
       return this.getClass().getSimpleName()
@@ -1748,11 +1735,6 @@ public class WollMuxEventHandler
       model.setWindowVisible(visible);
     }
 
-    public boolean requires(Object o)
-    {
-      return UnoRuntime.areSame(model.doc, o);
-    }
-
     public String toString()
     {
       return this.getClass().getSimpleName() + "(" + visible + ")";
@@ -1764,8 +1746,8 @@ public class WollMuxEventHandler
   /**
    * Erzeugt ein Event, das das übergebene Dokument schließt.
    * 
-   * @param doc
-   *          Das zu schließende XTextDocument.
+   * @param model
+   *          Das zu schließende TextDocumentModel.
    */
   public static void handleCloseTextDocument(TextDocumentModel model)
   {
@@ -1791,11 +1773,6 @@ public class WollMuxEventHandler
     protected void doit()
     {
       model.close();
-    }
-
-    public boolean requires(Object o)
-    {
-      return UnoRuntime.areSame(model.doc, o);
     }
 
     public String toString()
@@ -2020,83 +1997,72 @@ public class WollMuxEventHandler
   // *******************************************************************************************
 
   /**
-   * Erzeugt ein neues WollMuxEvent das signaisiert, dass der Drucken-Knopf in
-   * OOo gedrückt wurde und eine evtl. definierte Komfortdruckfunktion
-   * ausgeführt werden soll.
+   * Erzeugt ein neues WollMuxEvent das signaisiert, dass die Druckfunktion
+   * aufgerufen werden soll, die im TextDocumentModel model aktuell definiert
+   * ist. Die Methode erwartet, dass vor dem Aufruf geprüft wurde, ob model eine
+   * Druckfunktion definiert. Ist dennoch keine Druckfunktion definiert, so
+   * erscheint eine Fehlermeldung im Log.
    * 
    * Das Event wird ausgelöst, wenn der registrierte WollMuxDispatchInterceptor
    * eines Dokuments eine entsprechende Nachricht bekommt.
    */
-  public static void handlePrintButtonPressed(XTextDocument doc,
-      String fallbackDispatchUrlStr)
+  public static void handleExecutePrintFunction(TextDocumentModel model)
   {
-    handle(new OnPrintButtonPressed(doc, fallbackDispatchUrlStr));
+    handle(new OnExecutePrintFunction(model));
   }
 
-  private static class OnPrintButtonPressed extends BasicEvent
+  private static class OnExecutePrintFunction extends BasicEvent
   {
-    private XTextDocument doc;
+    private TextDocumentModel model;
 
-    private String fallbackDispatchUrlStr;
-
-    public OnPrintButtonPressed(XTextDocument doc, String fallbackDispatchUrlStr)
+    public OnExecutePrintFunction(TextDocumentModel model)
     {
-      this.doc = doc;
-      this.fallbackDispatchUrlStr = fallbackDispatchUrlStr;
+      this.model = model;
     }
 
     protected void doit() throws WollMuxFehlerException
     {
-      if (doc == null) return;
-
-      TextDocumentModel model = WollMuxSingleton.getInstance()
-          .getTextDocumentModel(doc);
-
-      // Ziffern anpassung der Sachleitenden Verfügungen durlaufen lassen, um zu
-      // erkennen, wenn Verfügungspunkte manuell aus dem Dokument gelöscht
-      // wurden ohne die entsprechenden Knöpfe zum Einfügen/Entfernen von
-      // Ziffern zu drücken.
-      SachleitendeVerfuegung.ziffernAnpassen(model);
 
       PrintFunction printFunc = null;
-
       String printFunctionName = model.getPrintFunctionName();
-      if (printFunctionName != null && !printFunctionName.equals(""))
+      if (printFunctionName != null)
       {
         printFunc = WollMuxSingleton.getInstance().getGlobalPrintFunctions()
             .get(printFunctionName);
-
-        if (printFunc != null)
-        {
-          XPrintModel pmod = WollMuxSingleton.getInstance()
-              .getTextDocumentModel(doc).getPrintModel();
-
-          printFunc.invoke(pmod);
-        }
-        else
-        {
+        if (printFunc == null)
           Logger.error("Druckfunktion '"
                        + printFunctionName
                        + "' nicht definiert.");
+      }
+      else
+        Logger.error("Dem Textdokument ist keine Druckfunktion zugeordnet!");
+      if (printFunc == null) return;
+
+      // Ziffernanpassung der Sachleitenden Verfügungen durlaufen lassen, um zu
+      // erkennen, ob Verfügungspunkte manuell aus dem Dokument gelöscht
+      // wurden ohne die entsprechenden Knöpfe zum Einfügen/Entfernen von
+      // Ziffern zu drücken.
+      if (SachleitendeVerfuegung.PRINT_FUNCTION_NAME.equals(printFunctionName))
+      {
+        SachleitendeVerfuegung.ziffernAnpassen(model);
+        stabilize();
+        // hat ZiffernAnpassen die PrintFunction verändert?
+        if (!SachleitendeVerfuegung.PRINT_FUNCTION_NAME.equals(model
+            .getPrintFunctionName()))
+        {
+          // dann einen neuen Dispatch absetzen und beenden:
+          UNO.dispatch(model.doc, ".uno:Print");
+          return;
         }
       }
 
-      if (printFunc == null)
-      {
-        // Fallback zum Dispatch über die URL von fallbackDispatchUrlStr
-        com.sun.star.util.URL url = UNO.getParsedUNOUrl(fallbackDispatchUrlStr);
-        XDispatch disp = WollMuxSingleton.getDispatchForModel(
-            UNO.XModel(doc),
-            url);
-        if (disp != null) disp.dispatch(url, new PropertyValue[] {});
-      }
-
-      stabilize();
+      // Druckfunktion ausführen:
+      printFunc.invoke(model.getPrintModel());
     }
 
     public String toString()
     {
-      return this.getClass().getSimpleName() + "(#" + doc.hashCode() + ")";
+      return this.getClass().getSimpleName() + "(" + model + ")";
     }
   }
 
@@ -2167,26 +2133,22 @@ public class WollMuxEventHandler
    * Drucks auf den Knopf der OOo-Symbolleiste ein "wollmux:ZifferEinfuegen"
    * dispatch erfolgte.
    */
-  public static void handleButtonZifferEinfuegenPressed(XTextDocument doc)
+  public static void handleButtonZifferEinfuegenPressed(TextDocumentModel model)
   {
-    handle(new OnZifferEinfuegen(doc));
+    handle(new OnZifferEinfuegen(model));
   }
 
   private static class OnZifferEinfuegen extends BasicEvent
   {
-    private XTextDocument doc;
+    private TextDocumentModel model;
 
-    public OnZifferEinfuegen(XTextDocument doc)
+    public OnZifferEinfuegen(TextDocumentModel model)
     {
-      this.doc = doc;
+      this.model = model;
     }
 
     protected void doit() throws WollMuxFehlerException
     {
-      if (doc == null) return;
-
-      TextDocumentModel model = WollMuxSingleton.getInstance()
-          .getTextDocumentModel(doc);
       XTextCursor viewCursor = model.getViewCursor();
       if (viewCursor != null)
       {
@@ -2201,10 +2163,7 @@ public class WollMuxEventHandler
 
     public String toString()
     {
-      return this.getClass().getSimpleName()
-             + "(#"
-             + doc.hashCode()
-             + ", viewCursor)";
+      return this.getClass().getSimpleName() + "(" + model + ", viewCursor)";
     }
   }
 
@@ -2219,26 +2178,22 @@ public class WollMuxEventHandler
    * Drucks auf den Knopf der OOo-Symbolleiste ein "wollmux:Abdruck" dispatch
    * erfolgte.
    */
-  public static void handleButtonAbdruckPressed(XTextDocument doc)
+  public static void handleButtonAbdruckPressed(TextDocumentModel model)
   {
-    handle(new OnAbdruck(doc));
+    handle(new OnAbdruck(model));
   }
 
   private static class OnAbdruck extends BasicEvent
   {
-    private XTextDocument doc;
+    private TextDocumentModel model;
 
-    public OnAbdruck(XTextDocument doc)
+    public OnAbdruck(TextDocumentModel model)
     {
-      this.doc = doc;
+      this.model = model;
     }
 
     protected void doit() throws WollMuxFehlerException
     {
-      if (doc == null) return;
-
-      TextDocumentModel model = WollMuxSingleton.getInstance()
-          .getTextDocumentModel(doc);
       XTextCursor viewCursor = model.getViewCursor();
       if (viewCursor != null)
       {
@@ -2251,10 +2206,7 @@ public class WollMuxEventHandler
 
     public String toString()
     {
-      return this.getClass().getSimpleName()
-             + "(#"
-             + doc.hashCode()
-             + ", viewCursor)";
+      return this.getClass().getSimpleName() + "(" + model + ", viewCursor)";
     }
   }
 
@@ -2269,24 +2221,22 @@ public class WollMuxEventHandler
    * Drucks auf den Knopf der OOo-Symbolleiste ein "wollmux:Zuleitungszeile"
    * dispatch erfolgte.
    */
-  public static void handleButtonZuleitungszeilePressed(XTextDocument doc)
+  public static void handleButtonZuleitungszeilePressed(TextDocumentModel model)
   {
-    handle(new OnButtonZuleitungszeilePressed(doc));
+    handle(new OnButtonZuleitungszeilePressed(model));
   }
 
   private static class OnButtonZuleitungszeilePressed extends BasicEvent
   {
-    private XTextDocument doc;
+    private TextDocumentModel model;
 
-    public OnButtonZuleitungszeilePressed(XTextDocument doc)
+    public OnButtonZuleitungszeilePressed(TextDocumentModel model)
     {
-      this.doc = doc;
+      this.model = model;
     }
 
     protected void doit() throws WollMuxFehlerException
     {
-      TextDocumentModel model = WollMuxSingleton.getInstance()
-          .getTextDocumentModel(doc);
       XTextCursor viewCursor = model.getViewCursor();
       if (viewCursor != null)
       {
@@ -2301,10 +2251,7 @@ public class WollMuxEventHandler
 
     public String toString()
     {
-      return this.getClass().getSimpleName()
-             + "(#"
-             + doc.hashCode()
-             + ", viewCursor)";
+      return this.getClass().getSimpleName() + "(" + model + ", viewCursor)";
     }
   }
 
@@ -2321,38 +2268,34 @@ public class WollMuxEventHandler
    * Drucks auf den Knopf der OOo-Symbolleiste ein "wollmux:markBlock#<blockname>"
    * dispatch erfolgte.
    * 
-   * @param doc
+   * @param model
    *          Das Textdokument, in dem der Block eingefügt werden soll.
    * @param blockname
    *          Derzeit werden folgende Blocknamen akzeptiert "draftOnly",
    *          "notInOriginal" und "all". Alle anderen Blocknamen werden
    *          ignoriert und keine Aktion ausgeführt.
    */
-  public static void handleMarkBlock(XTextDocument doc, String blockname)
+  public static void handleMarkBlock(TextDocumentModel model, String blockname)
   {
-    handle(new OnMarkBlock(doc, blockname));
+    handle(new OnMarkBlock(model, blockname));
   }
 
   private static class OnMarkBlock extends BasicEvent
   {
-    private XTextDocument doc;
+    private TextDocumentModel model;
 
     private String blockname;
 
-    public OnMarkBlock(XTextDocument doc, String blockname)
+    public OnMarkBlock(TextDocumentModel model, String blockname)
     {
-      this.doc = doc;
+      this.model = model;
       this.blockname = blockname;
     }
 
     protected void doit() throws WollMuxFehlerException
     {
-      if (doc == null
-          || UNO.XBookmarksSupplier(doc) == null
-          || blockname == null) return;
-
-      WollMuxSingleton mux = WollMuxSingleton.getInstance();
-      TextDocumentModel model = mux.getTextDocumentModel(doc);
+      if (UNO.XBookmarksSupplier(model.doc) == null || blockname == null)
+        return;
 
       XTextCursor range = model.getViewCursor();
 
@@ -2393,7 +2336,8 @@ public class WollMuxEventHandler
           bookmarkName = iter.next().toString();
           try
           {
-            new Bookmark(bookmarkName, UNO.XBookmarksSupplier(doc)).remove();
+            new Bookmark(bookmarkName, UNO.XBookmarksSupplier(model.doc))
+                .remove();
           }
           catch (NoSuchElementException e)
           {
@@ -2408,7 +2352,7 @@ public class WollMuxEventHandler
       else
       {
         // neuen Block anlegen
-        new Bookmark(bookmarkName, doc, range);
+        new Bookmark(bookmarkName, model.doc, range);
         WollMuxSingleton.showInfoModal(
             "Block wurde markiert",
             "Der ausgewählte Block " + markChange);
@@ -2416,7 +2360,7 @@ public class WollMuxEventHandler
 
       // PrintBlöcke neu einlesen:
       DocumentCommandInterpreter dci = new DocumentCommandInterpreter(model,
-          mux);
+          WollMuxSingleton.getInstance());
       dci.scanDocumentSettings();
 
       // wird in scanDocumentSettings auf false gesetzt aber das Dokument wurde
@@ -2493,7 +2437,7 @@ public class WollMuxEventHandler
     {
       return this.getClass().getSimpleName()
              + "(#"
-             + doc.hashCode()
+             + model.hashCode()
              + ", '"
              + blockname
              + "', viewCursor)";
@@ -2735,7 +2679,7 @@ public class WollMuxEventHandler
       try
       {
         com.sun.star.util.URL url = UNO
-            .getParsedUNOUrl(DispatchInterceptor.DISP_UNO_PRINTER_SETUP);
+            .getParsedUNOUrl(DispatchHandler.DISP_UNO_PRINTER_SETUP);
         XNotifyingDispatch disp = UNO.XNotifyingDispatch(WollMuxSingleton
             .getDispatchForModel(UNO.XModel(doc), url));
 
@@ -2916,10 +2860,7 @@ public class WollMuxEventHandler
 
     public String toString()
     {
-      return this.getClass().getSimpleName()
-             + "(#"
-             + model.doc.hashCode()
-             + ")";
+      return this.getClass().getSimpleName() + "(" + model + ")";
     }
   }
 
@@ -2979,31 +2920,30 @@ public class WollMuxEventHandler
    * Tastenkuerzels oder Druck auf den Knopf der OOo-Symbolleiste ein
    * "wollmux:TextbausteinEinfuegen" dispatch erfolgte.
    */
-  public static void handleTextbausteinEinfuegen(XTextDocument doc,
+  public static void handleTextbausteinEinfuegen(TextDocumentModel model,
       boolean reprocess)
   {
-    handle(new OnTextbausteinEinfuegen(doc, reprocess));
+    handle(new OnTextbausteinEinfuegen(model, reprocess));
   }
 
   private static class OnTextbausteinEinfuegen extends BasicEvent
   {
-    private XTextDocument doc;
+    private TextDocumentModel model;
 
     private boolean reprocess;
 
-    public OnTextbausteinEinfuegen(XTextDocument doc, boolean reprocess)
+    public OnTextbausteinEinfuegen(TextDocumentModel model, boolean reprocess)
     {
-      this.doc = doc;
+      this.model = model;
       this.reprocess = reprocess;
 
     }
 
     protected void doit() throws WollMuxFehlerException
     {
-      XTextCursor viewCursor = WollMuxSingleton.getInstance()
-          .getTextDocumentModel(doc).getViewCursor();
+      XTextCursor viewCursor = model.getViewCursor();
       boolean atLeastOne = TextModule.createInsertFragFromIdentifier(
-          doc,
+          model.doc,
           viewCursor,
           reprocess);
 
@@ -3011,7 +2951,7 @@ public class WollMuxEventHandler
       {
         if (atLeastOne)
         {
-          handleReprocessTextDocument(doc);
+          handleReprocessTextDocument(model);
         }
         else
         {
@@ -3025,9 +2965,11 @@ public class WollMuxEventHandler
     public String toString()
     {
       return this.getClass().getSimpleName()
-             + "(#"
-             + doc.hashCode()
-             + ", viewCursor)";
+             + "("
+             + model
+             + ", "
+             + reprocess
+             + ")";
     }
   }
 
@@ -3040,28 +2982,27 @@ public class WollMuxEventHandler
    * Druck auf den Knopf der OOo-Symbolleiste ein
    * "wollmux:PlatzhalterAnspringen" dispatch erfolgte.
    */
-  public static void handleJumpToPlaceholder(XTextDocument doc)
+  public static void handleJumpToPlaceholder(TextDocumentModel model)
   {
-    handle(new OnJumpToPlaceholder(doc));
+    handle(new OnJumpToPlaceholder(model));
   }
 
   private static class OnJumpToPlaceholder extends BasicEvent
   {
-    private XTextDocument doc;
+    private TextDocumentModel model;
 
-    public OnJumpToPlaceholder(XTextDocument doc)
+    public OnJumpToPlaceholder(TextDocumentModel model)
     {
-      this.doc = doc;
+      this.model = model;
     }
 
     protected void doit() throws WollMuxFehlerException
     {
-      XTextCursor viewCursor = WollMuxSingleton.getInstance()
-          .getTextDocumentModel(doc).getViewCursor();
+      XTextCursor viewCursor = model.getViewCursor();
 
       try
       {
-        TextModule.jumpPlaceholders(doc, viewCursor);
+        TextModule.jumpPlaceholders(model.doc, viewCursor);
       }
       catch (java.lang.Exception e)
       {
@@ -3073,10 +3014,7 @@ public class WollMuxEventHandler
 
     public String toString()
     {
-      return this.getClass().getSimpleName()
-             + "(#"
-             + doc.hashCode()
-             + ", viewCursor)";
+      return this.getClass().getSimpleName() + "(" + model + ")";
     }
   }
 

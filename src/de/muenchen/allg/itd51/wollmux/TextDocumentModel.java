@@ -691,6 +691,16 @@ public class TextDocumentModel
     {
       persistentData.removeData(DATA_ID_PRINTFUNCTION);
     }
+
+    // Frame veranlassen, die dispatches neu einzulesen - z.B. damit File->Print
+    // auch auf die neue Druckfunktion reagiert.
+    try
+    {
+      getFrame().contextChanged();
+    }
+    catch (java.lang.Exception e)
+    {
+    }
   }
 
   /**

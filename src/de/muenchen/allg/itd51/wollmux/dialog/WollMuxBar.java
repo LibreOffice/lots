@@ -100,9 +100,9 @@ import javax.swing.border.BevelBorder;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
+import de.muenchen.allg.itd51.wollmux.DispatchHandler;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
-import de.muenchen.allg.itd51.wollmux.comp.WollMux;
 
 /**
  * Menü-Leiste als zentraler Ausgangspunkt für WollMux-Funktionen.
@@ -270,7 +270,7 @@ public class WollMuxBar
    */
   private ActionListener actionListener_editSenderList = new ActionListener() 
   { public void actionPerformed(ActionEvent e) { 
-    eventHandler.handleWollMuxUrl(WollMux.cmdPALVerwalten, null); 
+    eventHandler.handleWollMuxUrl(DispatchHandler.cmdPALVerwalten, null); 
     minimize(); } }; 
   
   /**
@@ -930,21 +930,21 @@ public class WollMuxBar
       if (action.equals("absenderAuswaehlen"))
       {
         minimize();
-        eventHandler.handleWollMuxUrl(WollMux.cmdAbsenderAuswaehlen,"");
+        eventHandler.handleWollMuxUrl(DispatchHandler.cmdAbsenderAuswaehlen,"");
       }
       else if (action.equals("openDocument"))
       {
         minimize();
-        eventHandler.handleWollMuxUrl(WollMux.cmdOpenDocument, args[1].toString());
+        eventHandler.handleWollMuxUrl(DispatchHandler.cmdOpenDocument, args[1].toString());
       }
       else if (action.equals("openTemplate"))
       {
         minimize();
-        eventHandler.handleWollMuxUrl(WollMux.cmdOpenTemplate, args[1].toString());
+        eventHandler.handleWollMuxUrl(DispatchHandler.cmdOpenTemplate, args[1].toString());
       }
       else if (action.equals("dumpInfo"))
       {
-        eventHandler.handleWollMuxUrl(WollMux.cmdDumpInfo, null);
+        eventHandler.handleWollMuxUrl(DispatchHandler.cmdDumpInfo, null);
       }
       else if (action.equals("abort"))
       {
@@ -952,12 +952,12 @@ public class WollMuxBar
       }
       else if (action.equals("kill"))
       {
-        eventHandler.handleWollMuxUrl(WollMux.cmdKill, null);
+        eventHandler.handleWollMuxUrl(DispatchHandler.cmdKill, null);
         abort();
       }
       else if (action.equals("about"))
       {
-        eventHandler.handleWollMuxUrl(WollMux.cmdAbout, getBuildInfo());
+        eventHandler.handleWollMuxUrl(DispatchHandler.cmdAbout, getBuildInfo());
       }
     }
   }

@@ -33,12 +33,12 @@ import com.sun.star.lang.XMultiServiceFactory;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
 
+import de.muenchen.allg.itd51.wollmux.DispatchHandler;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.XPALChangeEventListener;
 import de.muenchen.allg.itd51.wollmux.XPALProvider;
 import de.muenchen.allg.itd51.wollmux.XWollMux;
-import de.muenchen.allg.itd51.wollmux.comp.WollMux;
 
 /**
  * Dient der thread-safen Kommunikation der WollMuxBar mit dem WollMux im OOo.
@@ -203,7 +203,7 @@ public class WollMuxBarEventHandler
       else 
         arg = "";
       
-      url = WollMux.wollmuxProtocol + ":" + dispatchCmd + arg;
+      url = DispatchHandler.wollmuxProtocol + ":" + dispatchCmd + arg;
     }
     
     public void process()
