@@ -480,7 +480,7 @@ public class WollMuxFiles
    * Suchpfad von {@link #classLoader} an.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TODO Testen
+   * TESTED
    */
   private static void initClassLoader()
   {
