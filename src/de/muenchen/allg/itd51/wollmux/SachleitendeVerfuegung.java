@@ -44,11 +44,11 @@ import de.muenchen.allg.itd51.wollmux.dialog.SachleitendeVerfuegungenDruckdialog
 
 public class SachleitendeVerfuegung
 {
+  public static final String PRINT_FUNCTION_NAME = "SachleitendeVerfuegung";
+
   private static final String CHARACTER_STYLES = "CharacterStyles";
 
   private static final String PARAGRAPH_STYLES = "ParagraphStyles";
-
-  private static final String PRINT_FUNCTION_NAME = "SachleitendeVerfuegung";
 
   private static final String ParaStyleNameVerfuegungspunkt = "WollMuxVerfuegungspunkt";
 
