@@ -27,13 +27,13 @@ import java.util.List;
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.comp.helper.Bootstrap;
 import com.sun.star.frame.XDispatch;
+import com.sun.star.frame.XDispatchProvider;
 import com.sun.star.lang.DisposedException;
 import com.sun.star.lang.EventObject;
 import com.sun.star.lang.XMultiServiceFactory;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
 
-import de.muenchen.allg.itd51.wollmux.DispatchHandler;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.XPALChangeEventListener;
@@ -203,17 +203,19 @@ public class WollMuxBarEventHandler
       else 
         arg = "";
       
-      url = DispatchHandler.wollmuxProtocol + ":" + dispatchCmd + arg;
+      url = dispatchCmd + arg;
     }
     
     public void process()
     {
-      XDispatch disp = null;
-      disp = (XDispatch) UnoRuntime.queryInterface(XDispatch.class, getRemoteWollMux(true));
-      if(disp != null) {
+      XDispatchProvider dispProv = null;
+      dispProv = (XDispatchProvider) UnoRuntime.queryInterface(XDispatchProvider.class, getRemoteWollMux(true));
+      if (dispProv != null)
+      {
         com.sun.star.util.URL dispatchUrl = new com.sun.star.util.URL();
         dispatchUrl.Complete = url;
-        disp.dispatch(dispatchUrl, new PropertyValue[] {});
+        XDispatch disp = dispProv.queryDispatch(dispatchUrl, "_self", com.sun.star.frame.FrameSearchFlag.SELF);
+        if (disp != null) disp.dispatch(dispatchUrl, new PropertyValue[] {});
       }
     }
   }

@@ -270,7 +270,7 @@ public class WollMuxBar
    */
   private ActionListener actionListener_editSenderList = new ActionListener() 
   { public void actionPerformed(ActionEvent e) { 
-    eventHandler.handleWollMuxUrl(DispatchHandler.cmdPALVerwalten, null); 
+    eventHandler.handleWollMuxUrl(DispatchHandler.DISP_wmPALVerwalten, null); 
     minimize(); } }; 
   
   /**
@@ -930,21 +930,21 @@ public class WollMuxBar
       if (action.equals("absenderAuswaehlen"))
       {
         minimize();
-        eventHandler.handleWollMuxUrl(DispatchHandler.cmdAbsenderAuswaehlen,"");
+        eventHandler.handleWollMuxUrl(DispatchHandler.DISP_wmAbsenderAuswaehlen,"");
       }
       else if (action.equals("openDocument"))
       {
         minimize();
-        eventHandler.handleWollMuxUrl(DispatchHandler.cmdOpenDocument, args[1].toString());
+        eventHandler.handleWollMuxUrl(DispatchHandler.DISP_wmOpenDocument, args[1].toString());
       }
       else if (action.equals("openTemplate"))
       {
         minimize();
-        eventHandler.handleWollMuxUrl(DispatchHandler.cmdOpenTemplate, args[1].toString());
+        eventHandler.handleWollMuxUrl(DispatchHandler.DISP_wmOpenTemplate, args[1].toString());
       }
       else if (action.equals("dumpInfo"))
       {
-        eventHandler.handleWollMuxUrl(DispatchHandler.cmdDumpInfo, null);
+        eventHandler.handleWollMuxUrl(DispatchHandler.DISP_wmDumpInfo, null);
       }
       else if (action.equals("abort"))
       {
@@ -952,12 +952,12 @@ public class WollMuxBar
       }
       else if (action.equals("kill"))
       {
-        eventHandler.handleWollMuxUrl(DispatchHandler.cmdKill, null);
+        eventHandler.handleWollMuxUrl(DispatchHandler.DISP_wmKill, null);
         abort();
       }
       else if (action.equals("about"))
       {
-        eventHandler.handleWollMuxUrl(DispatchHandler.cmdAbout, getBuildInfo());
+        eventHandler.handleWollMuxUrl(DispatchHandler.DISP_wmAbout, getBuildInfo());
       }
     }
   }

@@ -2679,7 +2679,7 @@ public class WollMuxEventHandler
       try
       {
         com.sun.star.util.URL url = UNO
-            .getParsedUNOUrl(DispatchHandler.DISP_UNO_PRINTER_SETUP);
+            .getParsedUNOUrl(DispatchHandler.DISP_unoPrinterSetup);
         XNotifyingDispatch disp = UNO.XNotifyingDispatch(WollMuxSingleton
             .getDispatchForModel(UNO.XModel(doc), url));
 
