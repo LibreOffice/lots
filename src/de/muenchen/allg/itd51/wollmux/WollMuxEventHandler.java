@@ -84,6 +84,7 @@ import de.muenchen.allg.itd51.wollmux.dialog.PersoenlicheAbsenderlisteVerwalten;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.func.PrintFunction;
+import de.muenchen.allg.itd51.wollmux.func.StandardPrint;
 
 /**
  * Ermöglicht die Einstellung neuer WollMuxEvents in die EventQueue.
@@ -1583,7 +1584,8 @@ public class WollMuxEventHandler
    *          Formularfeld aus dem Vektor genommen, das keine Trafo enthält.
    *          Ansonsten wird das erste Formularfeld im Vektor verwendet.
    */
-  public static void handleFocusFormField(TextDocumentModel model, String fieldId)
+  public static void handleFocusFormField(TextDocumentModel model,
+      String fieldId)
   {
     handle(new OnFocusFormField(model, fieldId));
   }
@@ -2163,7 +2165,7 @@ public class WollMuxEventHandler
 
     public String toString()
     {
-      return this.getClass().getSimpleName() + "(" + model + ", viewCursor)";
+      return this.getClass().getSimpleName() + "(" + model + ")";
     }
   }
 
@@ -2206,7 +2208,7 @@ public class WollMuxEventHandler
 
     public String toString()
     {
-      return this.getClass().getSimpleName() + "(" + model + ", viewCursor)";
+      return this.getClass().getSimpleName() + "(" + model + ")";
     }
   }
 
@@ -2251,7 +2253,7 @@ public class WollMuxEventHandler
 
     public String toString()
     {
-      return this.getClass().getSimpleName() + "(" + model + ", viewCursor)";
+      return this.getClass().getSimpleName() + "(" + model + ")";
     }
   }
 
@@ -2440,7 +2442,7 @@ public class WollMuxEventHandler
              + model.hashCode()
              + ", '"
              + blockname
-             + "', viewCursor)";
+             + "')";
     }
   }
 
@@ -3087,7 +3089,53 @@ public class WollMuxEventHandler
       return this.getClass().getSimpleName()
              + "(#"
              + doc.hashCode()
-             + ", viewCursor)";
+             + ", "
+             + msg
+             + ")";
+    }
+  }
+
+  // *******************************************************************************************
+
+  /**
+   * Erzeugt ein neues WollMuxEvent, das signasisiert, das die nächste Marke
+   * 'setJumpMark' angesprungen werden soll. Wird im
+   * DocumentCommandInterpreter.DocumentExpander.fillPlaceholders aufgerufen
+   * wenn nach dem Einfügen von Textbausteine keine Einfügestelle vorhanden ist
+   * aber eine Marke 'setJumpMark'
+   */
+  public static void handleSeriendruck(TextDocumentModel model)
+  {
+    handle(new OnSeriendruck(model));
+  }
+
+  private static class OnSeriendruck extends BasicEvent
+  {
+    private TextDocumentModel model;
+
+    public OnSeriendruck(TextDocumentModel model)
+    {
+      this.model = model;
+    }
+
+    protected void doit() throws WollMuxFehlerException
+    {
+      // muss in eigenem Thread laufen, da sich das PrintModel bereits mit dem
+      // WollMux-Eventhandler synchronisiert.
+      final XPrintModel pmod = model.getPrintModel();
+      Thread t = new Thread(new Runnable()
+      {
+        public void run()
+        {
+          StandardPrint.superMailMerge(pmod);
+        }
+      });
+      t.start();
+    }
+
+    public String toString()
+    {
+      return this.getClass().getSimpleName() + "(" + model + ")";
     }
   }
 

@@ -95,6 +95,8 @@ public class DispatchHandler
 
   public static final String DISP_wmTextbausteinVerweisEinfuegen = "wollmux:TextbausteinVerweisEinfuegen";
 
+  public static final String DISP_wmSeriendruck = "wollmux:Seriendruck";
+
   /*****************************************************************************
    * Erzeugt alle globalen DispatchHandler
    ****************************************************************************/
@@ -277,6 +279,14 @@ public class DispatchHandler
       public void dispatch(String arg, PropertyValue[] props)
       {
         WollMuxEventHandler.handleTextbausteinEinfuegen(model, false);
+      }
+    });
+
+    handler.add(new DocumentDispatchHandler(DISP_wmSeriendruck, model)
+    {
+      public void dispatch(String arg, PropertyValue[] props)
+      {
+        WollMuxEventHandler.handleSeriendruck(model);
       }
     });
 
