@@ -1673,6 +1673,8 @@ public class TextDocumentModel
    */
   public static class PrintModel extends WeakBase implements XPrintModel
   {
+    // TODO: Wenn beim Drucken (oder auch bei anderen Aktionen) ein Fehler
+    // auftritt, soll das PrintModel alle weiteren Anfragen verweigern.
     /**
      * Das TextDocumentModel zu diesem PrintModel
      */
