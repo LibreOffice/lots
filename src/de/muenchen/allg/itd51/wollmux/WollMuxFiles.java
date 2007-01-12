@@ -67,7 +67,9 @@ import de.muenchen.allg.itd51.wollmux.func.PrintFunctionLibrary;
 public class WollMuxFiles
 {
   private static final String ETC_WOLLMUX_WOLLMUX_CONF = "/etc/wollmux/wollmux.conf";
+
   private static final String C_PROGRAMME_WOLLMUX_WOLLMUX_CONF = "C:\\Programme\\wollmux\\wollmux.conf";
+
   private static final WollMuxClassLoader classLoader = new WollMuxClassLoader();
 
   /**
@@ -115,7 +117,7 @@ public class WollMuxFiles
    * Gibt an, ob der debug-Modus aktiviert ist.
    */
   private static boolean debugMode;
-  
+
   public static boolean showCredits;
 
   /**
@@ -124,13 +126,14 @@ public class WollMuxFiles
    * keine wollmux.conf-Datei angelegt.
    */
   private static final String defaultWollmuxConf = null; // "# %include
-                                                          // \"<Entfernen Sie
-                                                          // das # am Anfang der
-                                                          // Zeile und tragen
-                                                          // Sie hier die URL
-                                                          // Ihrer zentralen
-                                                          // wollmux-Konfigurationsdatei
-                                                          // ein>\"\r\n";
+
+  // \"<Entfernen Sie
+  // das # am Anfang der
+  // Zeile und tragen
+  // Sie hier die URL
+  // Ihrer zentralen
+  // wollmux-Konfigurationsdatei
+  // ein>\"\r\n";
 
   /**
    * Erzeugt das ,wollmux-Verzeichnis, falls es noch nicht existiert und
@@ -205,10 +208,10 @@ public class WollMuxFiles
       try
       {
         File[] roots = File.listRoots();
-        String defaultWollmuxConfPath = ETC_WOLLMUX_WOLLMUX_CONF; 
+        String defaultWollmuxConfPath = ETC_WOLLMUX_WOLLMUX_CONF;
         if (roots.length > 0 && roots[0].toString().contains(":"))
           defaultWollmuxConfPath = C_PROGRAMME_WOLLMUX_WOLLMUX_CONF;
-        
+
         wollmuxConfFile = new File(defaultWollmuxConfPath);
         if (wollmuxConfFile.exists())
         {
@@ -230,13 +233,14 @@ public class WollMuxFiles
      * Logging-Mode endgültig setzen.
      */
     setLoggingMode(WollMuxFiles.getWollmuxConf());
-    
-    showCredits = WollMuxFiles.getWollmuxConf().query("SHOW_CREDITS",1).query("on").count() > 0;
+
+    showCredits = WollMuxFiles.getWollmuxConf().query("SHOW_CREDITS", 1).query(
+        "on").count() > 0;
 
     determineDefaultContext();
 
     initClassLoader();
-    
+
     initDebugMode();
 
     setLookAndFeel();
@@ -253,9 +257,9 @@ public class WollMuxFiles
   }
 
   /**
-   * Liefert das File-Objekt der wollmux,conf zurück, die gelesen wurde
-   * (kann z,B, auch die aus /etc/wollmux/ sein). Darf erst
-   * nach setupWollMuxDir() aufgerufen werden.
+   * Liefert das File-Objekt der wollmux,conf zurück, die gelesen wurde (kann
+   * z,B, auch die aus /etc/wollmux/ sein). Darf erst nach setupWollMuxDir()
+   * aufgerufen werden.
    */
   public static File getWollMuxConfFile()
   {
@@ -263,8 +267,8 @@ public class WollMuxFiles
   }
 
   /**
-   * Liefert das File-Objekt der Logdatei zurück. Darf erst
-   * nach setupWollMuxDir() aufgerufen werden.
+   * Liefert das File-Objekt der Logdatei zurück. Darf erst nach
+   * setupWollMuxDir() aufgerufen werden.
    * 
    */
   public static File getWollMuxLogFile()
@@ -361,7 +365,11 @@ public class WollMuxFiles
       }
 
       // url mit einem "/" aufhören lassen (falls noch nicht angegeben).
-      String urlVerzStr = (urlStr.endsWith("/")) ? urlStr : urlStr + "/";
+      String urlVerzStr;
+      if (urlStr.endsWith("/") || urlStr.endsWith("\\"))
+        urlVerzStr = urlStr;
+      else
+        urlVerzStr = urlStr + "/";
 
       try
       {
@@ -474,27 +482,29 @@ public class WollMuxFiles
     else
       debugMode = false;
   }
-  
+
   /**
    * Parst die CLASSPATH Direktiven und hängt für jede eine weitere URL an den
    * Suchpfad von {@link #classLoader} an.
    * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TESTED
+   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private static void initClassLoader()
   {
-    ConfigThingy conf = getWollmuxConf().query("CLASSPATH",1);
+    ConfigThingy conf = getWollmuxConf().query("CLASSPATH", 1);
     Iterator parentiter = conf.iterator();
     while (parentiter.hasNext())
     {
-      ConfigThingy CLASSPATHconf = (ConfigThingy)parentiter.next();
+      ConfigThingy CLASSPATHconf = (ConfigThingy) parentiter.next();
       Iterator iter = CLASSPATHconf.iterator();
       while (iter.hasNext())
       {
         String urlStr = iter.next().toString();
-        if (!urlStr.endsWith("/") && urlStr.lastIndexOf('/') > urlStr.lastIndexOf('.'))
-          urlStr = urlStr + "/"; //Falls keine Dateierweiterung angegeben, / ans Ende setzen, weil nur so Verzeichnisse erkannt werden.
+        if (!urlStr.endsWith("/")
+            && urlStr.lastIndexOf('/') > urlStr.lastIndexOf('.'))
+          urlStr = urlStr + "/"; // Falls keine Dateierweiterung angegeben, /
+                                  // ans Ende setzen, weil nur so Verzeichnisse
+                                  // erkannt werden.
         try
         {
           URL url = new URL(getDEFAULT_CONTEXT(), urlStr);
@@ -502,11 +512,11 @@ public class WollMuxFiles
         }
         catch (MalformedURLException e)
         {
-          Logger.error("Fehlerhafte CLASSPATH-Angabe: \""+urlStr+"\"", e);
+          Logger.error("Fehlerhafte CLASSPATH-Angabe: \"" + urlStr + "\"", e);
         }
       }
     }
-    
+
     StringBuilder urllist = new StringBuilder();
     URL[] urls = classLoader.getURLs();
     for (int i = 0; i < urls.length; ++i)
@@ -514,13 +524,14 @@ public class WollMuxFiles
       urllist.append(urls[i].toExternalForm());
       urllist.append("  ");
     }
-    
-    Logger.debug("CLASSPATH="+urllist);
+
+    Logger.debug("CLASSPATH=" + urllist);
   }
-  
+
   /**
-   * Liefert einen ClassLoader, der die in wollmux,conf gesetzten CLASSPATH-Direktiven
-   * berücksichtigt.
+   * Liefert einen ClassLoader, der die in wollmux,conf gesetzten
+   * CLASSPATH-Direktiven berücksichtigt.
+   * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static ClassLoader getClassLoader()
@@ -670,94 +681,119 @@ public class WollMuxFiles
         }
         catch (ConfigurationErrorException e)
         {
-          Logger.error("Fehler beim Parsen der Druckfunktion \"" + name + "\"", e);
+          Logger.error(
+              "Fehler beim Parsen der Druckfunktion \"" + name + "\"",
+              e);
         }
       }
     }
 
     return funcs;
   }
-  
+
   /**
-   * Erstellt eine Dump-Datei im WollMux-Verzeichnis, die wichtige Informationen zur Fehlersuche
-   * enthält.
+   * Erstellt eine Dump-Datei im WollMux-Verzeichnis, die wichtige Informationen
+   * zur Fehlersuche enthält.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static void dumpInfo()
   {
     Calendar cal = Calendar.getInstance();
-    String date = ""+cal.get(Calendar.YEAR)+"-"+(cal.get(Calendar.MONTH)+1)+"-"+cal.get(Calendar.DAY_OF_MONTH)+"_"+cal.getTimeInMillis();
-    File dumpFile = new File(getWollMuxDir(), "dump"+date);
-    try{
+    String date = ""
+                  + cal.get(Calendar.YEAR)
+                  + "-"
+                  + (cal.get(Calendar.MONTH) + 1)
+                  + "-"
+                  + cal.get(Calendar.DAY_OF_MONTH)
+                  + "_"
+                  + cal.getTimeInMillis();
+    File dumpFile = new File(getWollMuxDir(), "dump" + date);
+    try
+    {
       BufferedWriter out = new BufferedWriter(new FileWriter(dumpFile));
-      out.write("Dump time: "+date+"\n");
-      out.write(WollMuxSingleton.getInstance().getBuildInfo()+"\n");
-      out.write("DEFAULT_CONTEXT: "+getDEFAULT_CONTEXT()+"\n");
-      out.write("CONF_VERSION: " + WollMuxSingleton.getInstance().getConfVersionInfo() + "\n");
-      out.write("wollmuxDir: "+getWollMuxDir()+"\n");
-      out.write("wollmuxLogFile: "+getWollMuxLogFile()+"\n");
-      out.write("wollmuxConfFile: "+getWollMuxConfFile()+"\n");
-      out.write("losCacheFile: "+getLosCacheFile()+"\n");
-      out.write("===================== START wollmuxConfFile ==================\n");
-      try{
-        BufferedReader in = new BufferedReader(new FileReader(getWollMuxConfFile()));
+      out.write("Dump time: " + date + "\n");
+      out.write(WollMuxSingleton.getInstance().getBuildInfo() + "\n");
+      out.write("DEFAULT_CONTEXT: " + getDEFAULT_CONTEXT() + "\n");
+      out.write("CONF_VERSION: "
+                + WollMuxSingleton.getInstance().getConfVersionInfo()
+                + "\n");
+      out.write("wollmuxDir: " + getWollMuxDir() + "\n");
+      out.write("wollmuxLogFile: " + getWollMuxLogFile() + "\n");
+      out.write("wollmuxConfFile: " + getWollMuxConfFile() + "\n");
+      out.write("losCacheFile: " + getLosCacheFile() + "\n");
+      out
+          .write("===================== START wollmuxConfFile ==================\n");
+      try
+      {
+        BufferedReader in = new BufferedReader(new FileReader(
+            getWollMuxConfFile()));
         String line = null;
         while ((line = in.readLine()) != null)
         {
-          out.write(line+"\n");
+          out.write(line + "\n");
         }
-      }catch(IOException ex)
+      }
+      catch (IOException ex)
       {
         ex.printStackTrace(new PrintWriter(out));
       }
-      out.write("===================== END wollmuxConfFile ==================\n");
-      out.write("===================== START wollmux.conf ==================\n");
+      out
+          .write("===================== END wollmuxConfFile ==================\n");
+      out
+          .write("===================== START wollmux.conf ==================\n");
       out.write(getWollmuxConf().stringRepresentation());
       out.write("===================== END wollmux.conf ==================\n");
 
-      out.write("===================== START losCacheFile ==================\n");
-      try{
-        BufferedReader in = new BufferedReader(new FileReader(getLosCacheFile()));
+      out
+          .write("===================== START losCacheFile ==================\n");
+      try
+      {
+        BufferedReader in = new BufferedReader(
+            new FileReader(getLosCacheFile()));
         String line = null;
         while ((line = in.readLine()) != null)
         {
-          out.write(line+"\n");
+          out.write(line + "\n");
         }
-      }catch(IOException ex)
+      }
+      catch (IOException ex)
       {
         ex.printStackTrace(new PrintWriter(out));
       }
       out.write("===================== END losCacheFile ==================\n");
-      
+
       out.write("===================== START wollmux.log ==================\n");
-      try{
-        BufferedReader in = new BufferedReader(new FileReader(getWollMuxLogFile()));
+      try
+      {
+        BufferedReader in = new BufferedReader(new FileReader(
+            getWollMuxLogFile()));
         String line = null;
         while ((line = in.readLine()) != null)
         {
-          out.write(line+"\n");
+          out.write(line + "\n");
         }
-      }catch(IOException ex)
+      }
+      catch (IOException ex)
       {
         ex.printStackTrace(new PrintWriter(out));
       }
       out.write("===================== END wollmux.log ==================\n");
       out.close();
     }
-    catch(IOException x)
+    catch (IOException x)
     {
-      Logger.error("Fehler beim Erstellen des Dumps",x);
+      Logger.error("Fehler beim Erstellen des Dumps", x);
     }
   }
-  
+
   private static class WollMuxClassLoader extends URLClassLoader
   {
     public WollMuxClassLoader()
     {
-      super(new URL[]{});
+      super(new URL[] {});
     }
-    
+
     public void addURL(URL url)
     {
       super.addURL(url);
