@@ -44,6 +44,7 @@
 * 25.10.2006 | BNK | Icon-Mode entfernt.
 * 26.10.2006 | LUT | +ACTION "about"
 *                  | +getBuildInfo(), das die buildinfo-Datei der WollMuxBar.jar ausliest
+* 15.01.2007 | BNK | --load hinzugefuegt
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -71,6 +72,7 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowFocusListener;
 import java.awt.event.WindowListener;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.HashMap;
@@ -97,6 +99,9 @@ import javax.swing.Timer;
 import javax.swing.WindowConstants;
 import javax.swing.border.BevelBorder;
 
+import com.sun.star.document.MacroExecMode;
+
+import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
@@ -1315,6 +1320,34 @@ public class WollMuxBar
   }
 
   /**
+   * Öffnet path als Vorlage.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public static void load(String path)
+  {
+    String urlStr = "";
+    try{
+      UNO.init();
+      
+      File curDir = new File(System.getProperty("user.dir"));
+      File toOpen;
+      if (path.charAt(0) != '/')
+        toOpen = new File(curDir, path);
+      else
+        toOpen = new File(path);
+      URL toOpenUrl = toOpen.toURI().toURL();
+      urlStr = UNO.getParsedUNOUrl(toOpenUrl.toExternalForm()).Complete;
+      UNO.loadComponentFromURL(urlStr, true, MacroExecMode.USE_CONFIG);
+      System.exit(0);
+    }catch(Exception x)
+    {
+      System.err.println("Versuch, URL \""+urlStr+"\" zu öffnen gescheitert!");
+      x.printStackTrace();
+      System.exit(1);
+    }
+  }
+  
+  /**
    * Startet die WollMuxBar.
    * @param args --minimize, --topbar, --normalwindow um das Anzeigeverhalten festzulegen.
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -1329,6 +1362,12 @@ public class WollMuxBar
       if (args[0].equals("--topbar")) windowMode = ALWAYS_ON_TOP_WINDOW_MODE;
       else
       if (args[0].equals("--normalwindow")) windowMode = NORMAL_WINDOW_MODE;
+      else
+      if (args[0].equals("--load"))
+      {
+        if (args.length < 2 || args[1].length() == 0) System.exit(0);
+        load(args[1]);
+      }
       else
       {
         System.err.println("Unbekannter Aufrufparameter: "+args[0]);
