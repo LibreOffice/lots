@@ -9,6 +9,7 @@
 * Datum      | Wer | Änderungsgrund
 * -------------------------------------------------------------------
 * 05.01.2007 | BNK | Erstellung
+* 15.01.2007 | BNK | Fortschrittsindikator
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -50,6 +51,7 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 import com.sun.star.beans.XPropertySet;
@@ -198,9 +200,12 @@ public class MailMerge
     boolean modified = pmod.getDocumentModified(); //Modified-Zustand merken, um ihn nachher wiederherzustellen
     pmod.collectNonWollMuxFormFields(); //falls der Benutzer manuell welche hinzugefuegt hat
     
+    MailMergeProgressWindow progress = new MailMergeProgressWindow(list.size());
+    
     iter = list.iterator();
     while (iter.hasNext())
     {
+      progress.makeProgress();
       ListElement ele = (ListElement)iter.next();
       if (offerSelection && !ele.isSelected()) continue;
       Iterator colIter = schema.iterator();
@@ -220,10 +225,76 @@ public class MailMerge
         
         if (value != null) pmod.setFormValue(column, value);
       }
-      pmod.print((short)1);
+      //FIXME pmod.print((short)1);
     }
     
+    progress.close();
+    
     pmod.setDocumentModified(modified);
+  }
+  
+  private static class MailMergeProgressWindow
+  {
+    private JFrame myFrame;
+    private JLabel countLabel;
+    private int count = 0;
+    private int maxcount;
+    
+    MailMergeProgressWindow(final int maxcount)
+    {
+      this.maxcount = maxcount;
+      try{
+        SwingUtilities.invokeAndWait(new Runnable(){
+          public void run()
+          {
+            myFrame = new JFrame("Seriendruck");
+            Box vbox = Box.createVerticalBox();
+            myFrame.getContentPane().add(vbox);
+            Box hbox = Box.createHorizontalBox();
+            vbox.add(hbox);
+            hbox.add(Box.createHorizontalStrut(5));
+            hbox.add(new JLabel("Verarbeite Dokument"));
+            hbox.add(Box.createHorizontalStrut(5));
+            countLabel = new JLabel("   -");
+            hbox.add(countLabel);
+            hbox.add(new JLabel(" / "+maxcount+"     "));
+            hbox.add(Box.createHorizontalStrut(5));
+            myFrame.setAlwaysOnTop(true);
+            myFrame.pack();
+            int frameWidth = myFrame.getWidth();
+            int frameHeight = myFrame.getHeight();
+            Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+            int x = screenSize.width/2 - frameWidth/2; 
+            int y = screenSize.height/2 - frameHeight/2;
+            myFrame.setLocation(x,y);
+            myFrame.setVisible(true);
+          }});
+      }catch(Exception x){Logger.error(x);};
+    }
+
+    public void makeProgress()
+    {
+      try{
+        SwingUtilities.invokeLater(new Runnable(){
+          public void run()
+          {
+            ++count;
+            countLabel.setText(""+count);
+            if (maxcount > 0) myFrame.setTitle(""+Math.round(100*(double)count/maxcount)+"%");
+          }});
+      }catch(Exception x){Logger.error(x);};
+    }
+    
+    public void close()
+    {
+      try{
+        SwingUtilities.invokeLater(new Runnable(){
+          public void run()
+          {
+            myFrame.dispose();
+          }});
+      }catch(Exception x){Logger.error(x);};
+    }
   }
   
   /**
