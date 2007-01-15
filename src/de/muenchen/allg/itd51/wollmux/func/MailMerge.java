@@ -225,7 +225,7 @@ public class MailMerge
         
         if (value != null) pmod.setFormValue(column, value);
       }
-      //FIXME pmod.print((short)1);
+      pmod.print((short)1);
     }
     
     progress.close();
@@ -257,7 +257,7 @@ public class MailMerge
             hbox.add(Box.createHorizontalStrut(5));
             countLabel = new JLabel("   -");
             hbox.add(countLabel);
-            hbox.add(new JLabel(" / "+maxcount+"     "));
+            hbox.add(new JLabel(" / "+maxcount+"    "));
             hbox.add(Box.createHorizontalStrut(5));
             myFrame.setAlwaysOnTop(true);
             myFrame.pack();
