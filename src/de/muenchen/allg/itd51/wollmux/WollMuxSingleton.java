@@ -48,7 +48,11 @@ import java.util.Vector;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 
+import com.sun.star.beans.PropertyValue;
 import com.sun.star.container.XEnumeration;
+import com.sun.star.container.XIndexAccess;
+import com.sun.star.container.XIndexContainer;
+import com.sun.star.form.FormButtonType;
 import com.sun.star.frame.XDispatch;
 import com.sun.star.frame.XDispatchProvider;
 import com.sun.star.frame.XFrame;
@@ -57,11 +61,14 @@ import com.sun.star.lang.EventObject;
 import com.sun.star.lang.XComponent;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextField;
+import com.sun.star.ui.XModuleUIConfigurationManagerSupplier;
+import com.sun.star.ui.XUIConfigurationManager;
 import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
@@ -232,6 +239,9 @@ public class WollMuxSingleton implements XPALProvider
     {
       Logger.error(e);
     }
+
+    // Extras->Seriendruck (WollMux) erzeugen:
+    createSeriendruckButton();
   }
 
   /**
@@ -493,6 +503,92 @@ public class WollMuxSingleton implements XPALProvider
       Object l = i.next();
       if (UnoRuntime.areSame(l, listener)) i.remove();
     }
+  }
+
+  /**
+   * Erzeugt persistent im Menü des Writers direkt über dem Menüpunkt
+   * "Extras->Serianbrief Assistent" einen weiteren Menüpunkt "Seriendruck
+   * (WollMux)". Ist der Button bereits definiert, so wird er nicht erzeugt.
+   */
+  private static void createSeriendruckButton()
+  {
+    final String label = "Seriendruck (WollMux)";
+    final String cmdUrl = DispatchHandler.DISP_wmSeriendruck;
+
+    final String settingsUrl = "private:resource/menubar/menubar";
+    final String insertIntoMenuUrl = ".uno:ToolsMenu";
+    final String insertBeforeElementUrl = ".uno:MailMergeWizard";
+
+    try
+    {
+      // Menüleiste aus des Moduls com.sun.star.text.TextDocument holen:
+      XModuleUIConfigurationManagerSupplier suppl = UNO
+          .XModuleUIConfigurationManagerSupplier(UNO
+              .createUNOService("com.sun.star.ui.ModuleUIConfigurationManagerSupplier"));
+      XUIConfigurationManager cfgMgr = UNO.XUIConfigurationManager(suppl
+          .getUIConfigurationManager("com.sun.star.text.TextDocument"));
+      XIndexAccess menubar = UNO.XIndexAccess(cfgMgr.getSettings(
+          settingsUrl,
+          true));
+
+      // Elemente des .uno:ToolsMenu besorgen:
+      XIndexContainer toolsMenu = null;
+      int idx = findElementWithCmdURL(menubar, insertIntoMenuUrl);
+      if (idx >= 0)
+      {
+        UnoProps desc = new UnoProps((PropertyValue[]) menubar.getByIndex(idx));
+        toolsMenu = UNO.XIndexContainer(desc
+            .getPropertyValue("ItemDescriptorContainer"));
+      }
+
+      // Seriendruck-Button löschen, wenn er bereits vorhanden ist.
+      idx = findElementWithCmdURL(toolsMenu, cmdUrl);
+      if (idx >= 0) toolsMenu.removeByIndex(idx);
+
+      // SeriendruckAssistent suchen
+      idx = findElementWithCmdURL(toolsMenu, insertBeforeElementUrl);
+      if (idx >= 0)
+      {
+        UnoProps desc = new UnoProps();
+        desc.setPropertyValue("CommandURL", cmdUrl);
+        desc.setPropertyValue("Type", FormButtonType.PUSH);
+        desc.setPropertyValue("Label", label);
+        toolsMenu.insertByIndex(idx, desc.getProps());
+        cfgMgr.replaceSettings(settingsUrl, menubar);
+        UNO.XUIConfigurationPersistence(cfgMgr).store();
+      }
+    }
+    catch (java.lang.Exception e)
+    {
+    }
+  }
+
+  /**
+   * Liefert den Index des ersten Menüelements aus dem Menü menu zurück, dessen
+   * CommandURL mit cmdUrl identisch ist oder -1, falls kein solches Element
+   * gefunden wurde.
+   * 
+   * @return Liefert den Index des ersten Menüelements mit CommandURL cmdUrl
+   *         oder -1.
+   */
+  private static int findElementWithCmdURL(XIndexAccess menu, String cmdUrl)
+  {
+    try
+    {
+      for (int i = 0; i < menu.getCount(); ++i)
+      {
+        PropertyValue[] desc = (PropertyValue[]) menu.getByIndex(i);
+        for (int j = 0; j < desc.length; j++)
+        {
+          if ("CommandURL".equals(desc[j].Name) && cmdUrl.equals(desc[j].Value))
+            return i;
+        }
+      }
+    }
+    catch (java.lang.Exception e)
+    {
+    }
+    return -1;
   }
 
   /**
