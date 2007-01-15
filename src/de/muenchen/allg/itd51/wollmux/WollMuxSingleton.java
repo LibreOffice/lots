@@ -240,8 +240,18 @@ public class WollMuxSingleton implements XPALProvider
       Logger.error(e);
     }
 
-    // Extras->Seriendruck (WollMux) erzeugen:
-    createSeriendruckButton();
+    // "Extras->Seriendruck (WollMux)" erzeugen:
+    createMenuButton(
+        DispatchHandler.DISP_wmSeriendruck,
+        "Seriendruck (WollMux)",
+        ".uno:ToolsMenu",
+        ".uno:MailMergeWizard");
+    // "Help->Info über WollMux" erzeugen:
+    createMenuButton(
+        DispatchHandler.DISP_wmAbout,
+        "Info über Vorlagen und Formulare (WollMux)",
+        ".uno:HelpMenu",
+        ".uno:About");
   }
 
   /**
@@ -506,18 +516,16 @@ public class WollMuxSingleton implements XPALProvider
   }
 
   /**
-   * Erzeugt persistent im Menü des Writers direkt über dem Menüpunkt
-   * "Extras->Serianbrief Assistent" einen weiteren Menüpunkt "Seriendruck
-   * (WollMux)". Ist der Button bereits definiert, so wird er nicht erzeugt.
+   * Erzeugt einen persistenten Menüeintrag mit der KommandoUrl cmdUrl und dem
+   * Label label in dem durch mit insertIntoMenuUrl beschriebenen Toplevelmenü
+   * des Writers und ordnet ihn direkt oberhalb des bereits bestehenden
+   * Menüpunktes mit der URL insertBeforeElementUrl an. Ist der Button bereits
+   * definiert, so wird der bestehende Eintrag vorher gelöscht.
    */
-  private static void createSeriendruckButton()
+  private static void createMenuButton(String cmdUrl, String label,
+      String insertIntoMenuUrl, String insertBeforeElementUrl)
   {
-    final String label = "Seriendruck (WollMux)";
-    final String cmdUrl = DispatchHandler.DISP_wmSeriendruck;
-
     final String settingsUrl = "private:resource/menubar/menubar";
-    final String insertIntoMenuUrl = ".uno:ToolsMenu";
-    final String insertBeforeElementUrl = ".uno:MailMergeWizard";
 
     try
     {
