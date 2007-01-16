@@ -270,7 +270,7 @@
             <value>wollmux:dumpInfo</value>
           </prop>
           <prop oor:name="Title" oor:type="xs:string">
-            <value>Dump Info</value>
+            <value>Fehlerinfos erstellen</value>
           </prop>
           <prop oor:name="ImageIdentifier" oor:type="xs:string">
             <value/>

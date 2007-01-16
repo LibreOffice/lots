@@ -503,8 +503,8 @@ public class WollMuxFiles
         if (!urlStr.endsWith("/")
             && urlStr.lastIndexOf('/') > urlStr.lastIndexOf('.'))
           urlStr = urlStr + "/"; // Falls keine Dateierweiterung angegeben, /
-                                  // ans Ende setzen, weil nur so Verzeichnisse
-                                  // erkannt werden.
+        // ans Ende setzen, weil nur so Verzeichnisse
+        // erkannt werden.
         try
         {
           URL url = new URL(getDEFAULT_CONTEXT(), urlStr);
@@ -693,11 +693,12 @@ public class WollMuxFiles
 
   /**
    * Erstellt eine Dump-Datei im WollMux-Verzeichnis, die wichtige Informationen
-   * zur Fehlersuche enthält.
+   * zur Fehlersuche enthält und liefert den Namen dieser Datei als String
+   * zurück, oder null falls bei der Erstellung Fehler auftraten.
    * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * @author Matthias Benkmann (D-III-ITD 5.1), Christoph Lutz
    */
-  public static void dumpInfo()
+  public static String dumpInfo()
   {
     Calendar cal = Calendar.getInstance();
     String date = ""
@@ -784,7 +785,9 @@ public class WollMuxFiles
     catch (IOException x)
     {
       Logger.error("Fehler beim Erstellen des Dumps", x);
+      return null;
     }
+    return dumpFile.getAbsolutePath();
   }
 
   private static class WollMuxClassLoader extends URLClassLoader
