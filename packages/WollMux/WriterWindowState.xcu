@@ -19,7 +19,7 @@
      
        <node oor:name="private:resource/toolbar/addon_de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung" oor:op="replace">
          <prop oor:name="UIName" oor:type="xs:string">
-           <value>Sachleitende Verfügungen</value>
+           <value>Sachleitende Verfügungen (WollMux)</value>
          </prop>
          <prop oor:name="DockPos" oor:type="xs:string">
            <value>0,2</value>
@@ -54,7 +54,7 @@
      
        <node oor:name="private:resource/toolbar/addon_de.muenchen.allg.itd51.wollmux.Textbausteinsystem" oor:op="replace">
          <prop oor:name="UIName" oor:type="xs:string">
-           <value>Textbausteinsystem</value>
+           <value>Textbausteine (WollMux)</value>
          </prop>
          <prop oor:name="DockPos" oor:type="xs:string">
            <value>0,2</value>
@@ -89,7 +89,7 @@
      
        <node oor:name="private:resource/toolbar/addon_de.muenchen.allg.itd51.wollmux.WerkzeugeFuerVorlagenersteller" oor:op="replace">
          <prop oor:name="UIName" oor:type="xs:string">
-           <value>Werkzeuge für Vorlagenersteller</value>
+           <value>Werkzeuge für Vorlagenersteller (WollMux)</value>
          </prop>
          <prop oor:name="DockPos" oor:type="xs:string">
            <value>0,2</value>
