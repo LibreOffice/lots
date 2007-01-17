@@ -2471,7 +2471,7 @@ public class WollMuxEventHandler
     protected void doit() throws WollMuxFehlerException
     {
       final String title = "Fehlerinfos erstellen";
-      
+
       JFrame frame = new JFrame(title);
       JTextPane text = new JTextPane();
       text
@@ -3129,11 +3129,12 @@ public class WollMuxEventHandler
   // *******************************************************************************************
 
   /**
-   * Erzeugt ein neues WollMuxEvent, das signasisiert, das die nächste Marke
-   * 'setJumpMark' angesprungen werden soll. Wird im
-   * DocumentCommandInterpreter.DocumentExpander.fillPlaceholders aufgerufen
-   * wenn nach dem Einfügen von Textbausteine keine Einfügestelle vorhanden ist
-   * aber eine Marke 'setJumpMark'
+   * Erzeugt ein neues WollMuxEvent, das signasisiert, dass die
+   * Seriendruckfunktion des WollMux gestartet werden soll.
+   * 
+   * Das Event wird über den DispatchHandler aufgerufen, wenn z.B. über das Menü
+   * "Extras->Seriendruck (WollMux)" die dispatch-url wollmux:Seriendruck
+   * abgesetzt wurde.
    */
   public static void handleSeriendruck(TextDocumentModel model)
   {
