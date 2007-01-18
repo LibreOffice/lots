@@ -3092,7 +3092,14 @@ public class WollMuxEventHandler
       {
         try
         {
-          viewCursor.gotoRange(cmd.getTextRange(), false);
+          XTextRange range = cmd.getTextRange();
+          if (range == null)
+          {
+            Logger
+                .error("Aufruf von OnJumpToMark.doit() obwohl das setJumpMark-Bookmark nicht mehr da ist");
+          }
+          else
+            viewCursor.gotoRange(range, false);
         }
         catch (java.lang.Exception e)
         {
