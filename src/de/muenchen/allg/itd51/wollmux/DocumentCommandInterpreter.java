@@ -1539,30 +1539,6 @@ public class DocumentCommandInterpreter
       cmd.markDone(true);
       return 0;
     }
-
-    public int executeCommand(DraftOnly cmd)
-    {
-      model.addDraftOnlyBlock(cmd);
-      return 0;
-    }
-
-    public int executeCommand(NotInOriginal cmd)
-    {
-      model.addNotInOriginalBlock(cmd);
-      return 0;
-    }
-
-    public int executeCommand(AllVersions cmd)
-    {
-      model.addAllVersionsBlock(cmd);
-      return 0;
-    }
-
-    public int executeCommand(SetJumpMark cmd)
-    {
-      model.addSetJumpMarkBlock(cmd);
-      return 0;
-    }
   }
 
   /**
