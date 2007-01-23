@@ -302,6 +302,15 @@ public class TextDocumentModel
     this.printFunctionName = persistentData.getData(DATA_ID_PRINTFUNCTION);
     parseFormDescription(persistentData.getData(DATA_ID_FORMULARBESCHREIBUNG));
     parseFormValues(persistentData.getData(DATA_ID_FORMULARWERTE));
+
+    // Sicherstellen, dass die Schaltflächen der Symbolleisten aktiviert werden:
+    try
+    {
+      getFrame().contextChanged();
+    }
+    catch (java.lang.Exception e)
+    {
+    }
   }
 
   /**
