@@ -776,7 +776,7 @@ public class DocumentCommandInterpreter
         // ist der ManualMode gesetzt, so darf ein leerer Paragraph am Ende des
         // Dokuments nicht gelöscht werden, da sonst der ViewCursor auf den
         // Start des Textbereiches zurück gesetzt wird. Im Falle der
-        // automatischen Einfügung sollen aber ein leer Paragraph am Ende
+        // automatischen Einfügung soll aber ein leerer Paragraph am Ende
         // gelöscht werden.
         collectSurroundingGarbageForCommand(cmd, UNO
             .XTextSectionsSupplier(model.doc), cmd.isManualMode());
@@ -849,27 +849,22 @@ public class DocumentCommandInterpreter
        * 
        * 01, 10, 11: Einfügemarker löschen
        * 
-       * Ein Sonderfall ist der Fall, in dem der Inhalt des Dokumentkommandos
-       * leer ist und das Dokumentkommando das einzige Element eines Paragraphen
-       * ist. In diesem Fall wird der Paragraph gelöscht.
+       * DO NOT TOUCH THIS CODE ! Dieser Code ist komplex und
+       * fehleranfällig. Kleinste Änderungen können dafür sorgen, dass
+       * irgendeine der 1000e von Vorlagen plötzlich anders dargestellt wird.
+       * Das gewünschte Verhalten dieses Codes ist in diesem Kommentar
+       * vollständig dokumentiert und Änderungen sollten nur erfolgen, falls
+       * obiger Kommentar nicht korrekt umgesetzt wurde. Um neue Anforderungen
+       * umzusetzen sollten unbedingt alle anderen Möglichkeiten in Betracht
+       * gezogen werden bevor hier eine Änderung erfolgt. Sollte eine Änderung
+       * unumgehbar sein, so ist sie VOR der Implementierung im Wiki und in
+       * obigem Kommentar zu dokumentieren. Dabei ist darauf zu achten, dass ein
+       * neuer Fall sich mit keinem der anderen Fälle überschneidet.
        * 
        */
       XParagraphCursor[] start = cmd.getStartMark();
       XParagraphCursor[] end = cmd.getEndMark();
       if (start == null || end == null) return;
-
-      // Sonderfall: leerer Inhalt alleine im Paragraph
-      if (start[0].isStartOfParagraph() && end[1].isEndOfParagraph())
-      {
-        XParagraphCursor content = UNO.XParagraphCursor(start[1].getText()
-            .createTextCursorByRange(start[1]));
-        content.gotoRange(end[0], true);
-        if (content.isCollapsed())
-        {
-          muellmaenner.add(new ParagraphMuellmann(start[1], suppl));
-          return;
-        }
-      }
 
       // Startmarke auswerten:
       if (start[0].isStartOfParagraph() && start[1].isEndOfParagraph())
@@ -1350,8 +1345,7 @@ public class DocumentCommandInterpreter
       {
         if (firstEmptyPlaceholder == false)
         {
-          XTextField textField = UNO.XTextField(placeholders
-              .get(args.size()));
+          XTextField textField = UNO.XTextField(placeholders.get(args.size()));
           XTextRange textFieldAnchor = textField.getAnchor();
           viewCursor.gotoRange(textFieldAnchor, false);
           firstEmptyPlaceholder = true;
