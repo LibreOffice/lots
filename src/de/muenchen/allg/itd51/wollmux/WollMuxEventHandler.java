@@ -2363,6 +2363,7 @@ public class WollMuxEventHandler
       }
 
       // PrintBlöcke neu einlesen:
+      model.getDocumentCommandTree().update();
       DocumentCommandInterpreter dci = new DocumentCommandInterpreter(model,
           WollMuxSingleton.getInstance());
       dci.scanDocumentSettings();
