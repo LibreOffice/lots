@@ -1482,19 +1482,6 @@ public class DocumentCommandInterpreter
     }
 
     /**
-     * Gibt Informationen über die aktuelle Install-Version des WollMux aus.
-     */
-    public int executeCommand(DocumentCommand.Version cmd)
-    {
-      XTextCursor insCurs = cmd.createInsertCursor();
-      if (insCurs != null)
-        insCurs.setString("Build-Info: " + mux.getBuildInfo());
-
-      cmd.markDone(!mux.isDebugMode());
-      return 0;
-    }
-
-    /**
      * Da der DocumentTree zu diesem Zeitpunkt eigentlich gar kein
      * SetType-Kommando mehr beinhalten darf, wird jedes evtl. noch vorhandene
      * setType-Kommando auf DONE=true gesetzt, damit es beim updateBookmarks

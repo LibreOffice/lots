@@ -60,7 +60,6 @@ import de.muenchen.allg.itd51.wollmux.DocumentCommand.SetJumpMark;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.SetPrintFunction;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.SetType;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.UpdateFields;
-import de.muenchen.allg.itd51.wollmux.DocumentCommand.Version;
 
 /**
  * Diese Klasse repräsentiert einen Baum von Dokumentkommandos eines Dokuments.
@@ -273,11 +272,6 @@ public class DocumentCommandTree
       else if (cmd.compareToIgnoreCase("updateFields") == 0)
       {
         return new DocumentCommand.UpdateFields(wmCmd, bookmark);
-      }
-
-      else if (cmd.compareToIgnoreCase("version") == 0)
-      {
-        return new DocumentCommand.Version(wmCmd, bookmark);
       }
 
       else if (cmd.compareToIgnoreCase("setType") == 0)
@@ -506,11 +500,6 @@ public class DocumentCommandTree
     }
 
     public int executeCommand(InvalidCommand cmd)
-    {
-      return 0;
-    }
-
-    public int executeCommand(Version cmd)
     {
       return 0;
     }

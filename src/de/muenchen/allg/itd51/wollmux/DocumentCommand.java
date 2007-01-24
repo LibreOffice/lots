@@ -852,8 +852,6 @@ abstract public class DocumentCommand implements VisibilityElement
 
     public int executeCommand(DocumentCommand.InvalidCommand cmd);
 
-    public int executeCommand(DocumentCommand.Version cmd);
-
     public int executeCommand(DocumentCommand.UpdateFields cmd);
 
     public int executeCommand(DocumentCommand.SetType cmd);
@@ -1411,29 +1409,6 @@ abstract public class DocumentCommand implements VisibilityElement
     public Vector getArgs()
     {
       return args;
-    }
-
-    protected boolean canHaveChilds()
-    {
-      return false;
-    }
-
-    public int execute(DocumentCommand.Executor visitable)
-    {
-      return visitable.executeCommand(this);
-    }
-  }
-
-  // ********************************************************************************
-  /**
-   * Dieses Kommando fügt die Versionsnummer der aktuellen WollMux-Installation
-   * in das Dokument ein.
-   */
-  static public class Version extends DocumentCommand
-  {
-    public Version(ConfigThingy wmCmd, Bookmark bookmark)
-    {
-      super(wmCmd, bookmark);
     }
 
     protected boolean canHaveChilds()
