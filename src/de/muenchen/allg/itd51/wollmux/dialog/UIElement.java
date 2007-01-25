@@ -16,6 +16,7 @@
 * 30.05.2006 | BNK | UIElement.Listbox unterstützt jetzt Zusatzfunktionen
 * 16.06.2006 | BNK | +hasFocus(), +takeFocus()
 * 29.09.2006 | BNK | Verbessertes Auslesen von ComboBox-Daten 
+* 25.01.2006 | BNK | [R5038]Hintergrundfarbe von Textareas korrekt setzen
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -586,6 +587,11 @@ public interface UIElement extends Value
     public void setString(String str)
     {
       textarea.setText(str);
+    }
+    
+    public void setBackground(Color bg)
+    {
+      textarea.setBackground(bg);
     }
     
     public boolean isStatic() {return false;}
