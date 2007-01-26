@@ -1293,9 +1293,8 @@ public class SachleitendeVerfuegung
         && viewCursor != null
         && oldViewCursor != null)
     {
-      // (Position) Seitennummer des Textendes holen
-      viewCursor.gotoRange(model.doc.getText().getEnd(), false);
-      int pageOfLastLine = getPageOfViewCursor(viewCursor);
+      // Gesamtseitenzahl des Dokuments bestimmen
+      int pageCount = model.getPageCount();
 
       // (Position) Seitennummer des letzten sichtbaren Verfügungspunktes holen
       viewCursor.gotoRange(lastVisibleVerfPunkt, false);
@@ -1306,7 +1305,9 @@ public class SachleitendeVerfuegung
 
       // Seitenumbruch einfügen, wenn die Seitenzahlen der beiden Positionen
       // sich unterscheiden.
-      if (pageOfLastLine != pageOfLastVisibleVerfPunkt)
+      if (pageCount != 0
+          && pageOfLastVisibleVerfPunkt != 0
+          && pageCount != pageOfLastVisibleVerfPunkt)
       {
         Object pageDescName = UNO.getProperty(
             lastVisibleVerfPunkt,

@@ -49,6 +49,7 @@ import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextRange;
 import com.sun.star.text.XTextViewCursorSupplier;
+import com.sun.star.uno.AnyConverter;
 import com.sun.star.uno.RuntimeException;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.util.CloseVetoException;
@@ -1208,6 +1209,26 @@ public class TextDocumentModel
     catch (java.lang.Exception e)
     {
       return null;
+    }
+  }
+
+  /**
+   * Liefert die Gesamtseitenzahl des Dokuments oder 0, wenn die Seitenzahl
+   * nicht bestimmt werden kann.
+   * 
+   * @return Liefert die Gesamtseitenzahl des Dokuments oder 0, wenn die
+   *         Seitenzahl nicht bestimmt werden kann.
+   */
+  public int getPageCount()
+  {
+    try
+    {
+      return (int) AnyConverter.toLong(UNO.getProperty(doc
+          .getCurrentController(), "PageCount"));
+    }
+    catch (java.lang.Exception e)
+    {
+      return 0;
     }
   }
 
