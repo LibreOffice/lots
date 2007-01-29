@@ -472,7 +472,7 @@ public class MailMerge
     
     bottom.add(Box.createHorizontalGlue());
     
-    button = new JButton("Drucken");
+    button = new JButton("Start");
     button.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e)
       {
@@ -955,7 +955,7 @@ public class MailMerge
         }});
       hbox.add(button);
       
-      button = new JButton("Alle Drucken");
+      button = new JButton("Start");
       button.addActionListener(new ActionListener(){
         public void actionPerformed(ActionEvent e)
         {
