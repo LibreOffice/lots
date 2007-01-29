@@ -356,6 +356,7 @@ public class DatasourceSearchDialog implements Dialog
     int y = screenSize.height/2 - frameHeight/2;
     myFrame.setLocation(x,y);
     myFrame.setResizable(true);
+    myFrame.setAlwaysOnTop(true);
     myFrame.setVisible(true);
   }
 
