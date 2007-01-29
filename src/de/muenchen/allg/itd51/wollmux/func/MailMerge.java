@@ -10,6 +10,7 @@
 * -------------------------------------------------------------------
 * 05.01.2007 | BNK | Erstellung
 * 15.01.2007 | BNK | Fortschrittsindikator
+* 29.01.2007 | BNK | "Keine Beschreibung vorhanden" durch Datensatznummer ersetzt.
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -186,10 +187,12 @@ public class MailMerge
   {
     Vector list = new Vector();
     Iterator iter = data.iterator();
+    int index = 1;
     while (iter.hasNext())
     {
       Dataset dataset = (Dataset)iter.next();
-      list.add(new ListElement(dataset));
+      list.add(new ListElement(dataset, "Datensatz "+index));
+      ++index;
     }
     
     if (offerSelection) 
@@ -307,17 +310,19 @@ public class MailMerge
   {
     private Dataset ds;
     private boolean selected = false;
-    private String description = "Keine Beschreibung vorhanden";
+    private String description;
     
     /**
      * Initialisiert dieses ListElement mit dem Dataset ds, wobei falls vorhanden die Spalten
      * "WollMuxDescription" und "WollMuxSelected" ausgewertet werden, um den toString()
-     * respektive isSelected() Wert zu bestimmen.
+     * respektive isSelected() Wert zu bestimmen. Falls keine WollMuxDescription vorhanden ist,
+     * so wird description verwendet.
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
-    public ListElement(Dataset ds)
+    public ListElement(Dataset ds, String description)
     {
       this.ds = ds;
+      this.description = description;
       try{
         String des = ds.get("WollMuxDescription");
         if (des != null && des.length() > 0) description = des;
