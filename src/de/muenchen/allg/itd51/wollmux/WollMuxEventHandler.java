@@ -49,12 +49,15 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTextPane;
 
+import com.sun.star.awt.XWindow;
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.container.NoSuchElementException;
 import com.sun.star.container.XEnumeration;
 import com.sun.star.container.XNamed;
 import com.sun.star.frame.DispatchResultEvent;
 import com.sun.star.frame.XDispatchResultListener;
+import com.sun.star.frame.XFrame;
+import com.sun.star.frame.XFrames;
 import com.sun.star.frame.XNotifyingDispatch;
 import com.sun.star.lang.EventObject;
 import com.sun.star.lang.XComponent;
@@ -347,16 +350,50 @@ public class WollMuxEventHandler
     }
 
     /**
+     * Setzt den Enable-Status aller OOo-Fenster, die der desktop aktuell
+     * liefert auf enabled. Über den Status kann gesteuert werden, ob das
+     * Fenster Benutzerinteraktionen wie z.B. Mausklicks auf Menüpunkte oder
+     * Tastendrücke verarbeitet. Die Verarbeitung findet nicht statt, wenn
+     * enabled==false gesetzt ist, ansonsten schon.
+     * 
+     * @param enabled
+     */
+    static void enableAllOOoWindows(boolean enabled)
+    {
+      try
+      {
+        XFrames frames = UNO.XFramesSupplier(UNO.desktop).getFrames();
+        for (int i = 0; i < frames.getCount(); i++)
+        {
+          try
+          {
+            XFrame frame = UNO.XFrame(frames.getByIndex(i));
+            XWindow contWin = frame.getContainerWindow();
+            if (contWin != null) contWin.setEnable(enabled);
+          }
+          catch (java.lang.Exception e)
+          {
+          }
+        }
+      }
+      catch (java.lang.Exception e)
+      {
+      }
+    }
+
+    /**
      * Setzt einen lock, der in Verbindung mit setUnlock und der
      * waitForUnlock-Methode verwendet werden kann, um quasi Modalität für nicht
-     * modale Dialoge zu realisieren. setLock() sollte stets vor dem Aufruf des
-     * nicht modalen Dialogs erfolgen, nach dem Aufruf des nicht modalen Dialogs
-     * folgt der Aufruf der waitForUnlock()-Methode. Der nicht modale Dialog
-     * erzeugt bei der Beendigung ein ActionEvent, das dafür sorgt, dass
-     * setUnlock aufgerufen wird.
+     * modale Dialoge zu realisieren und setzt alle OOo-Fenster auf
+     * enabled==false. setLock() sollte stets vor dem Aufruf des nicht modalen
+     * Dialogs erfolgen, nach dem Aufruf des nicht modalen Dialogs folgt der
+     * Aufruf der waitForUnlock()-Methode. Der nicht modale Dialog erzeugt bei
+     * der Beendigung ein ActionEvent, das dafür sorgt, dass setUnlock
+     * aufgerufen wird.
      */
     protected void setLock()
     {
+      enableAllOOoWindows(false);
       synchronized (lock)
       {
         lock[0] = true;
@@ -364,8 +401,9 @@ public class WollMuxEventHandler
     }
 
     /**
-     * Macht einen mit setLock() gesetzten Lock rückgängig und bricht damit eine
-     * evtl. wartende waitForUnlock()-Methode ab.
+     * Macht einen mit setLock() gesetzten Lock rückgängig, und setzt alle
+     * OOo-Fenster auf enabled==true und bricht damit eine evtl. wartende
+     * waitForUnlock()-Methode ab.
      */
     protected void setUnlock()
     {
@@ -374,6 +412,7 @@ public class WollMuxEventHandler
         lock[0] = false;
         lock.notifyAll();
       }
+      enableAllOOoWindows(true);
     }
 
     /**

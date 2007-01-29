@@ -280,6 +280,7 @@ public class AbsenderAuswaehlen
       int y = screenSize.height/2 - frameHeight/2;
       myFrame.setLocation(x,y);
       myFrame.setResizable(false);
+      myFrame.setAlwaysOnTop(true);
       myFrame.setVisible(true);
       myFrame.requestFocus();
     }

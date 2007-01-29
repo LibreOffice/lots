@@ -443,6 +443,7 @@ public class DatensatzBearbeiten
     currentWindow = (DialogWindow)fenster.get(name);
 
     myFrame.setTitle(currentWindow.getTitle());
+    myFrame.setAlwaysOnTop(true);
     myFrame.setVisible(true);
     cardLayout.show(cardPanel,currentWindow.getName());
     closeAction = currentWindow.getCloseAction();
