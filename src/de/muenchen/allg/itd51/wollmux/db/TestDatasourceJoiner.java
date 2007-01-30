@@ -78,7 +78,7 @@ public class TestDatasourceJoiner extends DatasourceJoiner
       String confFile = "testdata/testdjjoin.conf";
       URL confURL = new URL(context,confFile);
       ConfigThingy joinConf = new ConfigThingy("",confURL);
-      init(joinConf, "Personal", losCache, context);
+      init(joinConf, "Personal", losCache, context, TEST_QUERY_TIMEOUT);
     }
     catch (Exception e)
     {

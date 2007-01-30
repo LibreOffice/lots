@@ -33,7 +33,8 @@
 *                  | cache.conf gespeichert und wieder restauriert, ohne LDAP
 *                  | Anbindung zu verlieren.
 * 18.04.2006 | BNK | Bugfix zur Behebung von P766: ausgewaehlten Datensatz richtig merken
-* 26.05.2006 | BNK | +find(Query)              
+* 26.05.2006 | BNK | +find(Query)       
+* 30.01.2007 | BNK | Timeout nicht mehr statisch, sondern an Konstruktor übergeben.       
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -81,7 +82,7 @@ public class DatasourceJoiner
    * Bearbeitung einer Suchanfrage zu begrenzen, damit nicht im Falle
    * eines Netzproblems alles einfriert.
    */
-  private static final long QUERY_TIMEOUT = 5000;
+  private long queryTimeout;
   
   /**
    * Muster für erlaubte Suchstrings für den Aufruf von find().
@@ -129,15 +130,17 @@ public class DatasourceJoiner
    *        Konstruktor eingelesen und verwendet.
    * @param context, der Kontext relativ zu dem Datenquellen URLs in ihrer Beschreibung
    *        auswerten sollen.
+   * @param datasourceTimeout Zeit in ms, die Suchanfragen maximal brauchen dürfen bevor
+   *        sie abgebrochen werden.
    * @throws ConfigurationErrorException falls ein schwerwiegender Fehler
    *         auftritt, der die Arbeit des DJ unmöglich macht, wie z.B.
    *         wenn die Datenquelle mainSourceName in der
    *         joinConf fehlt und gleichzeitig kein Cache verfügbar ist.
    */
-  public DatasourceJoiner(ConfigThingy joinConf, String mainSourceName, File losCache, URL context)
+  public DatasourceJoiner(ConfigThingy joinConf, String mainSourceName, File losCache, URL context, long datasourceTimeout)
   throws ConfigurationErrorException
   {
-    init(joinConf, mainSourceName, losCache, context);
+    init(joinConf, mainSourceName, losCache, context, datasourceTimeout);
   }
   
   /**
@@ -153,9 +156,10 @@ public class DatasourceJoiner
    * @throws ConfigurationErrorException
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  protected void init(ConfigThingy joinConf, String mainSourceName, File losCache, URL context)
+  protected void init(ConfigThingy joinConf, String mainSourceName, File losCache, URL context, long datasourceTimeout)
   throws ConfigurationErrorException
   { //TESTED
+    queryTimeout = datasourceTimeout;
     status = new Status();
     
     ConfigThingy datenquellen = joinConf.query("Datenquellen").query("Datenquelle");
@@ -400,7 +404,7 @@ X           "Vorname N."
     return source.getContents(queryTimeout());
   }
   
-  protected long queryTimeout() {return QUERY_TIMEOUT;}
+  protected long queryTimeout() {return queryTimeout;}
   
   /**
    * Speichert den aktuellen LOS samt zugehörigem Cache in die Datei
