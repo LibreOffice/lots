@@ -69,6 +69,8 @@ public class WollMuxFiles
   private static final String ETC_WOLLMUX_WOLLMUX_CONF = "/etc/wollmux/wollmux.conf";
 
   private static final String C_PROGRAMME_WOLLMUX_WOLLMUX_CONF = "C:\\Programme\\wollmux\\wollmux.conf";
+  
+  private static final long DATASOURCE_TIMEOUT = 10000;
 
   private static final WollMuxClassLoader classLoader = new WollMuxClassLoader();
 
@@ -135,6 +137,8 @@ public class WollMuxFiles
   // wollmux-Konfigurationsdatei
   // ein>\"\r\n";
 
+
+  
   /**
    * Erzeugt das ,wollmux-Verzeichnis, falls es noch nicht existiert und
    * erstellt eine Standard-wollmux,conf. Initialisiert auch den Logger.
@@ -318,7 +322,7 @@ public class WollMuxFiles
     {
       djInitialized = true;
       ConfigThingy senderSource = WollMuxFiles.getWollmuxConf().query(
-          "SENDER_SOURCE");
+          "SENDER_SOURCE",1);
       String senderSourceStr = "";
       try
       {
@@ -329,10 +333,28 @@ public class WollMuxFiles
         Logger
             .error("Keine Hauptdatenquelle SENDER_SOURCE definiert! Setze SENDER_SOURCE=\"\".");
       }
+      
+      ConfigThingy dataSourceTimeout = WollMuxFiles.getWollmuxConf().query(
+          "DATASOURCE_TIMEOUT",1);
+      String datasourceTimeoutStr = "";
+      long datasourceTimeoutLong;
+      try
+      {
+        datasourceTimeoutStr = dataSourceTimeout.getLastChild().toString();
+        datasourceTimeoutLong = new Long(datasourceTimeoutStr).longValue();
+        if(datasourceTimeoutLong <= 0){
+          Logger.error("DATASOURCE_TIMEOUT muss größer als 0 sein!");
+        }
+      }
+      catch (NodeNotFoundException e)
+      {
+        datasourceTimeoutLong = DATASOURCE_TIMEOUT;
+      }
+      
       try
       {
         datasourceJoiner = new DatasourceJoiner(getWollmuxConf(),
-            senderSourceStr, getLosCacheFile(), getDEFAULT_CONTEXT());
+            senderSourceStr, getLosCacheFile(), getDEFAULT_CONTEXT(),datasourceTimeoutLong);
       }
       catch (ConfigurationErrorException e)
       {
