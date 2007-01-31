@@ -450,6 +450,38 @@ public class TextDocumentModel
   }
 
   /**
+   * Liefert true, wenn das Dokument Serienbrieffelder enthält, ansonsten false.
+   */
+  public boolean hasMailMergeFields()
+  {
+    try
+    {
+      XEnumeration xenu = UNO.XTextFieldsSupplier(doc).getTextFields()
+          .createEnumeration();
+      while (xenu.hasMoreElements())
+      {
+        try
+        {
+          XDependentTextField tf = UNO.XDependentTextField(xenu.nextElement());
+          if (tf == null) continue;
+          XPropertySet master = tf.getTextFieldMaster();
+          String column = (String) UNO.getProperty(master, "DataColumnName");
+          if (column != null && column.length() > 0) return true;
+        }
+        catch (Exception x)
+        {
+          Logger.error(x);
+        }
+      }
+    }
+    catch (Exception x)
+    {
+      Logger.error(x);
+    }
+    return false;
+  }
+
+  /**
    * Sammelt alle Formularfelder des Dokuments auf, die nicht von
    * WollMux-Kommandos umgeben sind, jedoch trotzdem vom WollMux verstanden und
    * befüllt werden (derzeit c,s,s,t,textfield,Database-Felder).
@@ -1741,7 +1773,7 @@ public class TextDocumentModel
     public void print(short numberOfCopies)
     {
       setLock();
-      WollMuxEventHandler.handlePrint(
+      WollMuxEventHandler.handlePrintViaPrintModel(
           model.doc,
           numberOfCopies,
           unlockActionListener);

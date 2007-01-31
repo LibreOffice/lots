@@ -183,27 +183,39 @@ public class DispatchHandler
 
     handler.add(new DocumentDispatchHandler(DISP_unoPrint, model)
     {
+      private XDispatch origDisp = null;
+
+      private com.sun.star.util.URL origUrl = null;
+
       public void dispatch(String arg, PropertyValue[] props)
       {
-        WollMuxEventHandler.handleExecutePrintFunction(model);
+        WollMuxEventHandler.handlePrint(model, origDisp, origUrl, props);
       }
 
-      public boolean providesUrl(String url)
+      public void requireOrigDispatch(DocumentDispatchInterceptor provider,
+          com.sun.star.util.URL url, String frameName, int fsFlag)
       {
-        return super.providesUrl(url) && model.getPrintFunctionName() != null;
+        origUrl = url;
+        origDisp = provider.getOrigDispatch(url, frameName, fsFlag);
       }
     });
 
     handler.add(new DocumentDispatchHandler(DISP_unoPrintDefault, model)
     {
+      private XDispatch origDisp = null;
+
+      private com.sun.star.util.URL origUrl = null;
+
       public void dispatch(String arg, PropertyValue[] props)
       {
-        WollMuxEventHandler.handleExecutePrintFunction(model);
+        WollMuxEventHandler.handlePrint(model, origDisp, origUrl, props);
       }
 
-      public boolean providesUrl(String url)
+      public void requireOrigDispatch(DocumentDispatchInterceptor provider,
+          com.sun.star.util.URL url, String frameName, int fsFlag)
       {
-        return super.providesUrl(url) && model.getPrintFunctionName() != null;
+        origUrl = url;
+        origDisp = provider.getOrigDispatch(url, frameName, fsFlag);
       }
     });
 
@@ -456,6 +468,17 @@ public class DispatchHandler
       super(urlStr);
       this.model = model;
     }
+
+    /**
+     * Callback-Methode, die vom DispatchProvider provider aufgerufen wird,
+     * bevor dieser DispatchHandler über queryDispatch(...) zurückgegeben wird,
+     * über die es möglich ist, das Original-Dispatch-Objekt beim
+     * DispatchProvider abzufragen.
+     */
+    public void requireOrigDispatch(DocumentDispatchInterceptor provider,
+        com.sun.star.util.URL url, String frameName, int fsFlag)
+    {
+    }
   }
 
   // *****************************************************************************
@@ -640,12 +663,38 @@ public class DispatchHandler
           .getTextDocumentModelForFrame(frame);
       setDispatchHandlers(createDocumentDispatchHandler(model));
 
-      XDispatch myDisp = super.queryDispatch(url, frameName, fsFlag);
+      XDispatch myDisp = null;
+      myDisp = super.queryDispatch(url, frameName, fsFlag);
 
       if (myDisp != null)
+      {
+        if (myDisp instanceof DocumentDispatchHandler)
+          ((DocumentDispatchHandler) myDisp).requireOrigDispatch(
+              this,
+              url,
+              frameName,
+              fsFlag);
         return myDisp;
+      }
       else
-        return slave.queryDispatch(url, frameName, fsFlag);
+      {
+        return getOrigDispatch(url, frameName, fsFlag);
+      }
+    }
+
+    /**
+     * Liefert das OriginalDispatch-Objekt, das der registrierte
+     * slave-DispatchProvider liefert.
+     * 
+     * @param url
+     * @param frameName
+     * @param fsFlag
+     * @return
+     */
+    public XDispatch getOrigDispatch(com.sun.star.util.URL url,
+        String frameName, int fsFlag)
+    {
+      return slave.queryDispatch(url, frameName, fsFlag);
     }
   }
 

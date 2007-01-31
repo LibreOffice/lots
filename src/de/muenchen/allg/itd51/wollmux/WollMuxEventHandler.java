@@ -55,6 +55,7 @@ import com.sun.star.container.NoSuchElementException;
 import com.sun.star.container.XEnumeration;
 import com.sun.star.container.XNamed;
 import com.sun.star.frame.DispatchResultEvent;
+import com.sun.star.frame.XDispatch;
 import com.sun.star.frame.XDispatchResultListener;
 import com.sun.star.frame.XFrame;
 import com.sun.star.frame.XFrames;
@@ -2081,6 +2082,12 @@ public class WollMuxEventHandler
         Logger.error("Dem Textdokument ist keine Druckfunktion zugeordnet!");
       if (printFunc == null) return;
 
+      // TODO: sollte evtl. einmal durch eine allgemeine Funktion
+      // checkPreconditions() ersetzt werden, die prüft ob die Vorbedingungen
+      // für eine Druckfunktion noch erfüllt sind und andernfalls die Funktion
+      // löscht. Das erfordert aber die Möglichkeit, Vorbedingungen zu
+      // definieren und Druckfunktionen zuzuordnen...
+      //
       // Ziffernanpassung der Sachleitenden Verfügungen durlaufen lassen, um zu
       // erkennen, ob Verfügungspunkte manuell aus dem Dokument gelöscht
       // wurden ohne die entsprechenden Knöpfe zum Einfügen/Entfernen von
@@ -2120,13 +2127,13 @@ public class WollMuxEventHandler
    * Das Event dient als Hilfe für die Komfortdruckfunktionen und wird vom
    * XPrintModel aufgerufen und mit diesem synchronisiert.
    */
-  public static void handlePrint(XTextDocument doc, short numberOfCopies,
-      ActionListener listener)
+  public static void handlePrintViaPrintModel(XTextDocument doc,
+      short numberOfCopies, ActionListener listener)
   {
-    handle(new OnPrint(doc, numberOfCopies, listener));
+    handle(new OnPrintViaPrintModel(doc, numberOfCopies, listener));
   }
 
-  private static class OnPrint extends BasicEvent
+  private static class OnPrintViaPrintModel extends BasicEvent
   {
     private XTextDocument doc;
 
@@ -2134,7 +2141,7 @@ public class WollMuxEventHandler
 
     private ActionListener listener;
 
-    public OnPrint(XTextDocument doc, short numberOfCopies,
+    public OnPrintViaPrintModel(XTextDocument doc, short numberOfCopies,
         ActionListener listener)
     {
       this.doc = doc;
@@ -3210,6 +3217,122 @@ public class WollMuxEventHandler
         }
       });
       t.start();
+    }
+
+    public String toString()
+    {
+      return this.getClass().getSimpleName() + "(" + model + ")";
+    }
+  }
+
+  // *******************************************************************************************
+
+  /**
+   * Der Handler für das Drucken eines TextDokuments führt in Abhängigkeit von
+   * der Existenz von Serienbrieffeldern und Druckfunktion die entsprechenden
+   * Aktionen aus.
+   * 
+   * Das Event wird über den DispatchHandler aufgerufen, wenn z.B. über das Menü
+   * "Datei->Drucken" oder über die Symbolleiste die dispatch-url .uno:Print
+   * bzw. .uno:PrintDefault abgesetzt wurde.
+   */
+  public static void handlePrint(TextDocumentModel model, XDispatch origDisp,
+      com.sun.star.util.URL origUrl, PropertyValue[] origArgs)
+  {
+    handle(new OnPrint(model, origDisp, origUrl, origArgs));
+  }
+
+  private static class OnPrint extends BasicEvent
+  {
+    private TextDocumentModel model;
+
+    private XDispatch origDisp;
+
+    private com.sun.star.util.URL origUrl;
+
+    private PropertyValue[] origArgs;
+
+    public OnPrint(TextDocumentModel model, XDispatch origDisp,
+        com.sun.star.util.URL origUrl, PropertyValue[] origArgs)
+    {
+      this.model = model;
+      this.origDisp = origDisp;
+      this.origUrl = origUrl;
+      this.origArgs = origArgs;
+    }
+
+    protected void doit() throws WollMuxFehlerException
+    {
+      boolean hasPrintFunction = model.getPrintFunctionName() != null;
+      boolean hasMailMergeFields = model.hasMailMergeFields();
+
+      if (!hasMailMergeFields && !hasPrintFunction)
+      {
+        // Forward auf Standardfunktion
+        if (origDisp != null) origDisp.dispatch(origUrl, origArgs);
+      }
+      else if (!hasMailMergeFields && hasPrintFunction)
+      {
+        // Druckfunktion aufrufen
+        handleExecutePrintFunction(model);
+      }
+      else if (hasMailMergeFields && !hasPrintFunction)
+      {
+        // "Was tun?"-Dialog
+        if (!mailmergeWrapperDialog())
+          if (origDisp != null) origDisp.dispatch(origUrl, origArgs);
+      }
+      else if (hasMailMergeFields && hasPrintFunction)
+      {
+        // TODO: hier wird später die kombinierte Seriendruck+Printfunction
+        // Funktionalität integriert.
+        if (!mailmergeWrapperDialog()) handleExecutePrintFunction(model);
+      }
+    }
+
+    /**
+     * Liefert true, wenn der Dialog die Anfrage vollständig bearbeiten konnte
+     * oder false, wenn die Standard-Druckfunktion aufgerufen werden soll.
+     * 
+     * @return
+     */
+    private boolean mailmergeWrapperDialog()
+    {
+      final String SERIENBRIEF_WOLLMUX = "Seriendruck (WollMux)";
+      final String SERIENBRIEF_DEFAULT = "Seriendruck (Standard)";
+      final String PRINT_DEFAULT = "Drucken";
+
+      JOptionPane pane = new JOptionPane(
+          "Das Dokument enthält Serienbrief-Felder. Was wollen Sie tun?",
+          javax.swing.JOptionPane.INFORMATION_MESSAGE);
+      pane.setOptions(new String[] {
+                                    SERIENBRIEF_WOLLMUX,
+                                    SERIENBRIEF_DEFAULT,
+                                    PRINT_DEFAULT });
+      JDialog dialog = pane.createDialog(null, "Seriendruck");
+      dialog.setAlwaysOnTop(true);
+      dialog.setVisible(true);
+
+      Object value = pane.getValue();
+
+      if (SERIENBRIEF_WOLLMUX.equals(value))
+      {
+        handleSeriendruck(model);
+        return true;
+      }
+
+      if (SERIENBRIEF_DEFAULT.equals(value))
+      {
+        UNO.dispatch(model.doc, ".uno:MergeDialog");
+        return true;
+      }
+
+      if (PRINT_DEFAULT.equals(value))
+      {
+        return false;
+      }
+
+      return true;
     }
 
     public String toString()
