@@ -337,16 +337,19 @@ public class WollMuxFiles
       ConfigThingy dataSourceTimeout = WollMuxFiles.getWollmuxConf().query(
           "DATASOURCE_TIMEOUT",1);
       String datasourceTimeoutStr = "";
-      long datasourceTimeoutLong;
+      long datasourceTimeoutLong = 0;
       try
       {
-        @Bettina: dieser Code enthält einen Fehler. Er fängt eine wichtiges Problem
-                  nicht ab. Bitte finde den Fehler, behebe ihn, und merke es dir
-                  für die Zukunft, denn du wirst in deinem Java-Programmiererleben noch oft
-                  auf Situationen treffen, in denen du diesen Fehler machen kannst.
-        @Christoph: Nicht helfen :-)
         datasourceTimeoutStr = dataSourceTimeout.getLastChild().toString();
-        datasourceTimeoutLong = new Long(datasourceTimeoutStr).longValue();  
+        try
+        {
+          datasourceTimeoutLong = new Long(datasourceTimeoutStr).longValue();  
+        }
+        catch (NumberFormatException e)
+        {
+          Logger.error("DATASOURCE_TIMEOUT muss eine Zahl sein");
+          datasourceTimeoutLong = DATASOURCE_TIMEOUT;
+        }
         if(datasourceTimeoutLong <= 0){
           Logger.error("DATASOURCE_TIMEOUT muss größer als 0 sein!");
         }
