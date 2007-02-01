@@ -347,7 +347,7 @@ public class WollMuxFiles
         }
         catch (NumberFormatException e)
         {
-          Logger.error("DATASOURCE_TIMEOUT muss eine Zahl sein");
+          Logger.error("DATASOURCE_TIMEOUT muss eine ganze Zahl sein");
           datasourceTimeoutLong = DATASOURCE_TIMEOUT;
         }
         if(datasourceTimeoutLong <= 0){
