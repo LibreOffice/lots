@@ -87,6 +87,15 @@ public class GroupModelList
   }
   
   /**
+   * Liefert true gdw keine GroupModels in der Liste vorhanden sind.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public boolean isEmpty()
+  {
+    return models.isEmpty();
+  }
+  
+  /**
    * Liefert ein ConfigThingy, dessen Wurzel ein "Sichtbarkeit"-Knoten ist.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */

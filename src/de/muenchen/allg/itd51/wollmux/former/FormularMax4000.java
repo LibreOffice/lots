@@ -18,6 +18,7 @@
 * 20.10.2006 | BNK | Rückschreiben ins Dokument erfolgt jetzt automatisch.
 * 26.10.2006 | BNK | Magische gender: Syntax unterstützt. 
 * 30.10.2006 | BNK | Menüstruktur geändert; Datei/Speichern (unter...) hinzugefügt
+* 05.02.2007 | BNK | [R5214]Formularmerkmale entfernen hat fast leere Formularnotiz übriggelassen
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -669,7 +670,12 @@ public class FormularMax4000
     Map mapFunctionNameToConfigThingy = new HashMap();
     insertionModelList.updateDocument(mapFunctionNameToConfigThingy);
     ConfigThingy conf = buildFormDescriptor(mapFunctionNameToConfigThingy);
-    doc.setFormDescription(new ConfigThingy(conf));
+    if (!formTitle.equals(GENERATED_FORM_TITLE) 
+    || formControlModelList.size() > 1   // nur 1 Element wird ignoriert, weil nur ein leerer Reiter  
+    || !groupModelList.isEmpty())
+    {
+      doc.setFormDescription(new ConfigThingy(conf));
+    }
     return conf;
   }
   
