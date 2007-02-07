@@ -19,8 +19,11 @@
  */
 package de.muenchen.allg.itd51.wollmux;
 
+import java.io.StringReader;
+import java.net.URLDecoder;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
@@ -36,6 +39,7 @@ import com.sun.star.uno.UnoRuntime;
 import com.sun.star.util.URL;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.itd51.parser.ConfigThingy;
 
 /**
  * Der DispatchHandler behandelt alle globalen Dispatches des WollMux und
@@ -68,6 +72,8 @@ public class DispatchHandler
   public static final String DISP_wmPALVerwalten = "wollmux:PALVerwalten";
 
   public static final String DISP_wmOpenTemplate = "wollmux:OpenTemplate";
+
+  public static final String DISP_wmOpen = "wollmux:Open";
 
   public static final String DISP_wmOpenDocument = "wollmux:OpenDocument";
 
@@ -141,6 +147,64 @@ public class DispatchHandler
         for (int i = 0; i < parts.length; i++)
           fragIds.add(parts[i]);
         WollMuxEventHandler.handleOpenDocument(fragIds, false);
+      }
+    });
+
+    handler.add(new BasicDispatchHandler(DISP_wmOpen)
+    {
+      public void dispatch(String arg, PropertyValue[] props)
+      {
+        boolean asTemplate = true;
+        boolean merged = false;
+        ConfigThingy conf;
+        ConfigThingy fragConf;
+        try
+        {
+          arg = URLDecoder.decode(arg, ConfigThingy.CHARSET);
+          conf = new ConfigThingy("OPEN", null, new StringReader(arg));
+          fragConf = conf.get("Fragmente");
+        }
+        catch (Exception e)
+        {
+          Logger.error("Fehlerhaftes \"wollmux:Open\" Kommando");
+          return;
+        }
+
+        try
+        {
+          asTemplate = conf.get("AS_TEMPLATE", 1).toString().equalsIgnoreCase(
+              "true");
+        }
+        catch (Exception x)
+        {
+        }
+
+        try
+        {
+          merged = conf.get("FORMGUIS", 1).toString()
+              .equalsIgnoreCase("merged");
+
+          if (merged)
+            Logger
+                .error("FORMGUIS \"merged\" noch nicht implementiert => Fallback auf \"independent\"");
+        }
+        catch (Exception x)
+        {
+        }
+
+        Iterator iter = fragConf.iterator();
+        while (iter.hasNext())
+        {
+          ConfigThingy fragListConf = (ConfigThingy) iter.next();
+          List fragIds = new Vector();
+          Iterator fragIter = fragListConf.iterator();
+          while (fragIter.hasNext())
+          {
+            fragIds.add(fragIter.next().toString());
+          }
+          if (!fragIds.isEmpty())
+            WollMuxEventHandler.handleOpenDocument(fragIds, asTemplate);
+        }
       }
     });
 

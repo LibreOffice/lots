@@ -1066,7 +1066,7 @@ public class WollMuxEventHandler
    * geöffnet wird.
    * 
    * @param fragIDs
-   *          Ein Vector mit fragIDs, wobei das erste Element die FRAG_ID des zu
+   *          Eine List mit fragIDs, wobei das erste Element die FRAG_ID des zu
    *          öffnenden Dokuments beinhalten muss. Weitere Elemente werden in
    *          eine Liste zusammengefasst und als Parameter für das
    *          Dokumentkommando insertContent verwendet.
@@ -1075,7 +1075,7 @@ public class WollMuxEventHandler
    *          (also im "Template-Modus") und false, wenn das Dokument zum
    *          Bearbeiten geöffnet werden soll.
    */
-  public static void handleOpenDocument(Vector fragIDs, boolean asTemplate)
+  public static void handleOpenDocument(List fragIDs, boolean asTemplate)
   {
     handle(new OnOpenDocument(fragIDs, asTemplate));
   }
@@ -1091,9 +1091,9 @@ public class WollMuxEventHandler
   {
     private boolean asTemplate;
 
-    private Vector fragIDs;
+    private List fragIDs;
 
-    private OnOpenDocument(Vector fragIDs, boolean asTemplate)
+    private OnOpenDocument(List fragIDs, boolean asTemplate)
     {
       this.fragIDs = fragIDs;
       this.asTemplate = asTemplate;

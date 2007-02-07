@@ -21,6 +21,7 @@
 * 08.01.2007 | BNK | [R4698]WRAP-Attribut bei textareas
 *                  | [R4296]Wenn READONLY, dann nicht fokussierbar
 * 09.01.2007 | BNK | ENTER kann jetzt auch Checkboxen und Buttons aktivieren
+* 07.02.2007 | BNK | +ACTION "open"
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -704,6 +705,18 @@ public class UIElementFactory
       else
       {
         Logger.error("ACTION \""+action+"\" erfordert mindestens ein Attribut FRAG_ID");
+      }
+    }
+    else if (action.equals("open"))
+    {
+      try
+      {
+        ConfigThingy openConf = conf.get("OPEN");
+        return new UIElementActionListener(handler, uiElement, false, "action", new Object[]{action, openConf});
+      }
+      catch (NodeNotFoundException e)
+      {
+        Logger.error("ACTION \"open\" erfordert die Angabe OPEN \"...\"");
       }
     }
     else if (action.equals("funcDialog"))

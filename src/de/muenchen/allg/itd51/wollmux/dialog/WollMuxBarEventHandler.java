@@ -21,6 +21,8 @@
 */
 package de.muenchen.allg.itd51.wollmux.dialog;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -34,6 +36,7 @@ import com.sun.star.lang.XMultiServiceFactory;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
 
+import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.XPALChangeEventListener;
@@ -196,13 +199,20 @@ public class WollMuxBarEventHandler
   {
     private String url;
     
-    public WollMuxUrlEvent(String dispatchCmd, String arg) 
+    public WollMuxUrlEvent(String dispatchCmd, String arg)
     {
-      if(arg != null && !arg.equals("")) 
-        arg = "#" + arg;
-      else 
-        arg = "";
-      
+      try
+      {
+        if (arg != null && !arg.equals(""))
+          arg = "#" + URLEncoder.encode(arg, ConfigThingy.CHARSET);
+        else
+          arg = "";
+      }
+      catch (UnsupportedEncodingException e)
+      {
+        Logger.error(e);
+      }
+
       url = dispatchCmd + arg;
     }
     

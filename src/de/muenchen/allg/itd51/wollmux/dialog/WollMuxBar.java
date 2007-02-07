@@ -64,6 +64,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -85,7 +86,9 @@ import java.util.Vector;
 
 import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -617,7 +620,7 @@ public class WollMuxBar
    * @param menuConf die Kinder dieses ConfigThingys müssen "Menues"-Knoten sein,
    *        deren Kinder Menübeschreibungen sind für die Menüs, 
    *        die als UI Elemente verwendet werden.
-   * @param elementParent
+   * @param elementParent das Element, dessen Kinder die UI Elemente beschreiben.
    * @param context kann die Werte "menu" oder "panel" haben und gibt an, um was
    *        es sich bei compo handelt. Abhängig vom context werden manche 
    *        UI Elemente anders interpretiert, z.B. werden "button" Elemente im
@@ -909,6 +912,7 @@ public class WollMuxBar
     supportedActions.add("openTemplate");
     supportedActions.add("absenderAuswaehlen");
     supportedActions.add("openDocument");
+    supportedActions.add("open");
     supportedActions.add("dumpInfo");
     supportedActions.add("abort");
     supportedActions.add("kill");
@@ -947,6 +951,11 @@ public class WollMuxBar
         minimize();
         eventHandler.handleWollMuxUrl(DispatchHandler.DISP_wmOpenTemplate, args[1].toString());
       }
+      else if (action.equals("open"))
+      {
+        minimize();
+        multiOpenDialog((ConfigThingy)args[1]);
+      }
       else if (action.equals("dumpInfo"))
       {
         eventHandler.handleWollMuxUrl(DispatchHandler.DISP_wmDumpInfo, null);
@@ -965,6 +974,125 @@ public class WollMuxBar
         eventHandler.handleWollMuxUrl(DispatchHandler.DISP_wmAbout, getBuildInfo());
       }
     }
+  }
+  
+  /**
+   * Erwartet in conf eine Spezifikation gemäß wollmux:Open und bringt einen Auswahldialog, um
+   * die zu öffnenden Vorlagen/Dokumente auszuwählen.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED
+   */
+  private void multiOpenDialog(final ConfigThingy conf)
+  {
+    final JFrame multiOpenFrame = new JFrame("Was möchten Sie öffnen ?");
+    multiOpenFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+    Box vbox = Box.createVerticalBox();
+    multiOpenFrame.getContentPane().add(vbox);
+    vbox.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
+    Box hbox;
+    /* hbox = Box.createHorizontalBox();
+    hbox.add(new JLabel("Was möchten Sie öffnen ?"));
+    hbox.add(Box.createHorizontalGlue());
+    vbox.add(hbox); 
+    vbox.add(Box.createVerticalStrut(5)); */
+    final ConfigThingy openConf = new ConfigThingy(conf); //Kopie machen, die manipuliert werden darf.
+    Iterator iter;
+    try
+    {
+      iter = conf.get("Labels").iterator();
+    }
+    catch (NodeNotFoundException e2)
+    {
+      Logger.error("ACTION \"open\" erfordert Abschnitt \"Labels\" in den OPEN-Angaben");
+      return;
+    }
+    final List checkBoxes = new Vector();
+    while (iter.hasNext())
+    {
+      hbox = Box.createHorizontalBox();
+      String label = iter.next().toString();
+      JCheckBox checkbox = new JCheckBox(label, true);
+      checkBoxes.add(checkbox);
+      hbox.add(checkbox);
+      hbox.add(Box.createHorizontalGlue());
+      vbox.add(hbox);
+      vbox.add(Box.createVerticalStrut(5));
+    }
+    
+    hbox = Box.createHorizontalBox();
+    JButton button = new JButton("Abbrechen");
+    button.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent e)
+      {
+        multiOpenFrame.dispose();
+      }}
+    );
+    hbox.add(button);
+    hbox.add(Box.createHorizontalStrut(5));
+    hbox.add(Box.createHorizontalGlue());
+    
+    button = new JButton("Alle");
+    button.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent e)
+      {
+        Iterator iter = checkBoxes.iterator();
+        while (iter.hasNext()) ((JCheckBox)iter.next()).setSelected(true);
+      }}
+    );
+    hbox.add(button);
+    hbox.add(Box.createHorizontalStrut(5));
+    
+    button = new JButton("Keine");
+    button.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent e)
+      {
+        Iterator iter = checkBoxes.iterator();
+        while (iter.hasNext()) ((JCheckBox)iter.next()).setSelected(false);
+      }}
+    );
+    hbox.add(button);
+    hbox.add(Box.createHorizontalStrut(5));
+    hbox.add(Box.createHorizontalGlue());
+    
+    button = new JButton("Öffnen");
+    button.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent e)
+      {
+        multiOpenFrame.dispose();
+        Iterator iter = checkBoxes.iterator();
+        ConfigThingy fragConf;
+        try
+        {
+          fragConf = openConf.get("Fragmente", 1);
+        }
+        catch (NodeNotFoundException e1)
+        {
+          Logger.error("Abschnitt \"Fragmente\" fehlt in OPEN-Angabe");
+          return;
+        }
+        Iterator fragIter = fragConf.iterator();
+        while (iter.hasNext() && fragIter.hasNext()) 
+        {
+          JCheckBox checkbox = (JCheckBox)iter.next();
+          if (!checkbox.isSelected()) fragIter.remove();
+        }
+        
+        eventHandler.handleWollMuxUrl(DispatchHandler.DISP_wmOpen, openConf.stringRepresentation(true, '"', false));
+      }}
+    );
+    hbox.add(button);
+    
+    vbox.add(hbox);
+    
+    multiOpenFrame.setAlwaysOnTop(true);
+    multiOpenFrame.pack();
+    int frameWidth = multiOpenFrame.getWidth();
+    int frameHeight = multiOpenFrame.getHeight();
+    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+    int x = screenSize.width/2 - frameWidth/2; 
+    int y = screenSize.height/2 - frameHeight/2;
+    multiOpenFrame.setLocation(x,y);
+    multiOpenFrame.setVisible(true);
   }
   
   /**
