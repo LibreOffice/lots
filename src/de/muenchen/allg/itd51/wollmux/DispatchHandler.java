@@ -20,6 +20,7 @@
 package de.muenchen.allg.itd51.wollmux;
 
 import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -228,6 +229,14 @@ public class DispatchHandler
     {
       public void dispatch(String arg, PropertyValue[] props)
       {
+        try
+        {
+          arg = URLDecoder.decode(arg, ConfigThingy.CHARSET);
+        }
+        catch (UnsupportedEncodingException e)
+        {
+          Logger.error(e);
+        }
         String wollMuxBarVersion = null;
         if (arg.length() > 0) wollMuxBarVersion = arg;
         WollMuxEventHandler.handleAbout(wollMuxBarVersion);
