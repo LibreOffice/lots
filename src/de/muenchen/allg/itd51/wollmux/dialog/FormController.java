@@ -74,6 +74,9 @@ import de.muenchen.allg.itd51.wollmux.func.Values;
  */
 public class FormController implements UIElementEventHandler
 {
+  
+  public static final String MULTI_FORM_TITLE = "Mehrere Formulare gleichzeitig ausfüllen";
+  
   /**
    * Wird and FormGUI und FormController in mapIdToPresetValue übergeben, wenn
    * der Wert des entsprechenden Feldes nicht korrekt widerhergestellt werden kann.
@@ -1451,4 +1454,102 @@ public class FormController implements UIElementEventHandler
     }
   }
 
+  /**
+   * Nimmt eine Liste von ConfigThingys, von denen jedes ein "Formular"-Knoten mit enthaltener
+   * Formularbeschreibung ist, und liefert ein neues ConfigThingy zurück, das eine gemergte
+   * Formularbeschreibung enthält. Beim Merge wird von Reitern mit gleicher ID nur der
+   * letzte übernommen. Für die Reihenfolge wird die Reihenfolge des ersten Auftretens
+   * herangezogen.
+   * Der TITLE wird zu {@link #MULTI_FORM_TITLE}. Die Funktionen- und Funktionsdialoge-Abschnitte
+   * werden verschmolzen, wobei mehrfach auftretende Funktionen eine Fehlermeldung im Log
+   * produzieren (und die letzte Definition gewinnt). Selbiges gilt auch für die 
+   * Sichtbarkeit-Abschnitte
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TODO Testen
+   */
+  public static ConfigThingy mergeFormDescriptors(List desc)
+  {
+    String plausiColor = null;
+    Iterator iter = desc.iterator();
+    Map mapFensterIdToConfigThingy = new HashMap();
+    Map mapSichtbarkeitIdToConfigThingy = new HashMap();
+    Map mapFunktionenIdToConfigThingy = new HashMap();
+    Map mapFunktionsdialogeIdToConfigThingy = new HashMap();
+    List tabNames = new Vector();
+    while (iter.hasNext())
+    {
+      ConfigThingy conf = (ConfigThingy)iter.next();
+      try{
+        plausiColor = conf.get("PLAUSI_MARKER_COLOR",1).toString();
+      } catch(Exception x){}
+      
+      mergeSection(conf, "Fenster", mapFensterIdToConfigThingy, tabNames, true);
+      mergeSection(conf, "Sichtbarkeit", mapSichtbarkeitIdToConfigThingy, null,  false);
+      mergeSection(conf, "Funktionen", mapFunktionenIdToConfigThingy, null, false);
+      mergeSection(conf, "Funktionsdialoge", mapFunktionsdialogeIdToConfigThingy, null, false);
+    }
+    
+    ConfigThingy conf = new ConfigThingy("Formular");
+    conf.add("TITLE").add(MULTI_FORM_TITLE);
+    if (plausiColor != null) conf.add("PLAUSI_MARKER_COLOR").add(plausiColor);
+    
+    ConfigThingy subConf = conf.add("Fenster");
+    iter = tabNames.iterator();
+    while (iter.hasNext()) 
+      subConf.addChild((ConfigThingy)mapFensterIdToConfigThingy.get(iter.next()));
+    
+    if (!mapSichtbarkeitIdToConfigThingy.isEmpty())
+    {
+      subConf = conf.add("Sichtbarkeit");
+      iter = mapSichtbarkeitIdToConfigThingy.values().iterator();
+      while (iter.hasNext()) subConf.addChild((ConfigThingy)iter.next());
+    }
+    
+    if (!mapFunktionenIdToConfigThingy.isEmpty())
+    {
+      subConf = conf.add("Funktionen");
+      iter = mapFunktionenIdToConfigThingy.values().iterator();
+      while (iter.hasNext()) subConf.addChild((ConfigThingy)iter.next());
+    }
+    
+    if (!mapFunktionsdialogeIdToConfigThingy.isEmpty())
+    {
+      subConf = conf.add("Funktionsdialoge");
+      iter = mapFunktionsdialogeIdToConfigThingy.values().iterator();
+      while (iter.hasNext()) subConf.addChild((ConfigThingy)iter.next());
+    }
+    
+    return conf;
+  }
+  
+  /**
+   * Geht die Enkelkinder von conf,query(sectionName) durch und trägt für jedes ein 
+   * Mapping von seinem Namen auf eine Kopie seiner selbst in die Map sectionMap ein. Dabei
+   * wird ein vorher vorhandenes Mapping ersetzt. 
+   * Falls duplicatesAllowed==false, so wird eine Fehlermeldung geloggt, wenn eine Ersetzung eines
+   * Mappings für einen Bezeichner durch ein neues Mapping stattfindet.
+   * @param idList falls nicht null, so werden alle Namen von Enkeln, die noch nicht in idList
+   *        enthalten sind dieser in der Reihenfolge ihres Auftretens hinzugefügt.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TODO Testen
+   */
+  private static void mergeSection(ConfigThingy conf, String sectionName, Map sectionMap, List idList, boolean duplicatesAllowed)
+  {
+    Iterator parentIter = conf.query(sectionName).iterator();
+    while (parentIter.hasNext())
+    {
+      Iterator iter = ((ConfigThingy)parentIter.next()).iterator();
+      while (iter.hasNext())
+      {
+        ConfigThingy node = (ConfigThingy)iter.next();
+        String name = node.getName();
+        if (!idList.contains(name)) idList.add(name);
+        if (!duplicatesAllowed && sectionMap.containsKey(name))
+          Logger.error("Fehler beim Zusammenfassen mehrerer Formulare zum gemeinsamen Ausfüllen: Mehrere \""+sectionName+"\" Abschnitte enthalten \""+name+"\"");
+        
+        sectionMap.put(name, new ConfigThingy(node));
+      }
+    }
+  }
+  
 }
