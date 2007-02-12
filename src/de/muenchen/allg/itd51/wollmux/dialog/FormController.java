@@ -41,6 +41,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.io.File;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -1465,7 +1467,7 @@ public class FormController implements UIElementEventHandler
    * produzieren (und die letzte Definition gewinnt). Selbiges gilt auch für die 
    * Sichtbarkeit-Abschnitte
    * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TODO Testen
+   * TESTED
    */
   public static ConfigThingy mergeFormDescriptors(List desc)
   {
@@ -1531,7 +1533,7 @@ public class FormController implements UIElementEventHandler
    * @param idList falls nicht null, so werden alle Namen von Enkeln, die noch nicht in idList
    *        enthalten sind dieser in der Reihenfolge ihres Auftretens hinzugefügt.
    * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TODO Testen
+   * TESTED
    */
   private static void mergeSection(ConfigThingy conf, String sectionName, Map sectionMap, List idList, boolean duplicatesAllowed)
   {
@@ -1543,13 +1545,28 @@ public class FormController implements UIElementEventHandler
       {
         ConfigThingy node = (ConfigThingy)iter.next();
         String name = node.getName();
-        if (!idList.contains(name)) idList.add(name);
+        if (idList != null && !idList.contains(name)) idList.add(name);
         if (!duplicatesAllowed && sectionMap.containsKey(name))
           Logger.error("Fehler beim Zusammenfassen mehrerer Formulare zum gemeinsamen Ausfüllen: Mehrere \""+sectionName+"\" Abschnitte enthalten \""+name+"\"");
         
         sectionMap.put(name, new ConfigThingy(node));
       }
     }
+  }
+  
+  public static void main(String[] args) throws Exception
+  {
+    File curDir = new File(System.getProperty("user.dir"));
+    URL context = curDir.toURL();
+    URL merge1URL = new URL(context, "testdata/merge_form_1.conf");
+    URL merge2URL = new URL(context, "testdata/merge_form_2.conf");
+    ConfigThingy merge1Conf = new ConfigThingy("", merge1URL).get("Formular");
+    ConfigThingy merge2Conf = new ConfigThingy("", merge2URL).get("Formular");
+    List formDesc = new Vector();
+    formDesc.add(merge1Conf);
+    formDesc.add(merge2Conf);
+    ConfigThingy merged = mergeFormDescriptors(formDesc);
+    System.out.println(merged.stringRepresentation());
   }
   
 }
