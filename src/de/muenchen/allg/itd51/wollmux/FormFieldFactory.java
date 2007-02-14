@@ -368,11 +368,16 @@ public final class FormFieldFactory
       if (cursor != null && field != null)
       {
         text.insertTextContent(cursor, field, true);
-        // Dieser Code scheint nicht nötig zu sein. Ich hatte zuerst gedacht,
-        // ich müsste
-        // das Bookmark regenerieren, damit es das neue Feld korrekt
-        // umschliesst, aber es funzt
-        // offenbar auch ohne.
+        // nach Issue #73568 werden kollabierte Bookmarks nicht automatisch
+        // durch das Einfügen des TextContents expandiert. Folgende Zeilen
+        // sorgen dafür, dass ein früher kollabiertes Bookmarks das neu
+        // eingefügte Textfeld vollständig umschließt.
+        // 
+        // Da inzwischen jedoch die meisten Bookmarks über den FormularMax 4000
+        // erzeugt werden, und dieser keine kollabierten Bookmarks produziert,
+        // ist dieser Code in der aktuellen Praxis nicht relevant und wird daher
+        // auskommentiert.
+        //
         // text.removeTextContent(UNO.XTextContent(bookmark));
         // cursor = text.createTextCursorByRange(field.getAnchor());
         // bookmark = UNO.XNamed(UNO.XMultiServiceFactory(doc).createInstance(
