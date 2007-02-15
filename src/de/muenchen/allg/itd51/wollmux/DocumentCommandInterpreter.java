@@ -38,12 +38,20 @@ import java.util.Map;
 import java.util.Vector;
 
 import com.sun.star.awt.FontWeight;
+import com.sun.star.beans.Property;
+import com.sun.star.beans.PropertyAttribute;
 import com.sun.star.beans.PropertyValue;
+import com.sun.star.beans.XMultiPropertySet;
+import com.sun.star.beans.XPropertySetInfo;
 import com.sun.star.container.NoSuchElementException;
 import com.sun.star.container.XEnumeration;
 import com.sun.star.container.XEnumerationAccess;
+import com.sun.star.container.XNameAccess;
+import com.sun.star.container.XNameContainer;
 import com.sun.star.io.IOException;
 import com.sun.star.lang.IllegalArgumentException;
+import com.sun.star.style.XStyle;
+import com.sun.star.style.XStyleFamiliesSupplier;
 import com.sun.star.text.XParagraphCursor;
 import com.sun.star.text.XTextContent;
 import com.sun.star.text.XTextCursor;
@@ -150,17 +158,22 @@ public class DocumentCommandInterpreter
 
     // Zähler für aufgetretene Fehler bei der Bearbeitung der Kommandos.
     int errors = 0;
-
-    // 1) Zuerst alle Kommandos bearbeiten, die irgendwie Kinder bekommen
+ 
+    // Zuerst alle Kommandos bearbeiten, die irgendwie Kinder bekommen
     // können, damit der DocumentCommandTree vollständig aufgebaut werden
     // kann.
     errors += new DocumentExpander(model.getFragUrls()).execute(model
         .getDocumentCommandTree());
+    
+    // Überträgt beim übergebenen XTextDocument doc die Eigenschaften der
+    // Seitenvorlage Wollmuxseite auf die Seitenvorlage Standard, falls
+    // Seitenvorlage Wollmuxseite vorhanden ist.
+    pageStyleWollmuxseiteToStandard(model.doc);
 
     // Ziffern-Anpassen der Sachleitenden Verfügungen aufrufen:
     SachleitendeVerfuegung.ziffernAnpassen(model);
 
-    // 2) Jetzt können die TextFelder innerhalb der updateFields Kommandos
+    // Jetzt können die TextFelder innerhalb der updateFields Kommandos
     // geupdatet werden. Durch die Auslagerung in einen extra Schritt wird die
     // Reihenfolge der Abarbeitung klar definiert (zuerst die updateFields
     // Kommandos, dann die anderen Kommandos). Dies ist wichtig, da
@@ -170,16 +183,16 @@ public class DocumentCommandInterpreter
     // Schwäche beseitigt.
     errors += new TextFieldUpdater().execute(model.getDocumentCommandTree());
 
-    // 3) Hauptverarbeitung: Jetzt alle noch übrigen DocumentCommands (z.B.
+    // Hauptverarbeitung: Jetzt alle noch übrigen DocumentCommands (z.B.
     // insertValues) in einem einzigen Durchlauf mit execute bearbeiten.
     errors += new MainProcessor().execute(model.getDocumentCommandTree());
 
-    // 4) Da keine neuen Elemente mehr eingefügt werden müssen, können
+    // Da keine neuen Elemente mehr eingefügt werden müssen, können
     // jetzt die INSERT_MARKS "<" und ">" der insertFrags und
     // InsertContent-Kommandos gelöscht werden.
     // errors += cleanInsertMarks(tree);
 
-    // 5) Erst nachdem die INSERT_MARKS entfernt wurden, lassen sich leere
+    // Erst nachdem die INSERT_MARKS entfernt wurden, lassen sich leere
     // Absätze zum Beginn und Ende der insertFrag bzw. insertContent-Kommandos
     // sauber erkennen und entfernen.
     // errors += new EmptyParagraphCleaner().execute(tree);
@@ -190,7 +203,7 @@ public class DocumentCommandInterpreter
     // da hier bookmarks entfernt werden, muss der Baum upgedatet werden
     model.getDocumentCommandTree().update();
 
-    // 6) Scannen aller für das Formular relevanten Informationen:
+    // Scannen aller für das Formular relevanten Informationen:
     if (formScanner == null) formScanner = new FormScanner();
     errors += formScanner.execute(model.getDocumentCommandTree());
     model.setIDToFormFields(formScanner.idToFormFields);
@@ -202,7 +215,7 @@ public class DocumentCommandInterpreter
     // Formulardokument auszuzeichnen.
     if (model.hasFormDescriptor()) model.setType("formDocument");
 
-    // 8) Document-Modified auf false setzen, da nur wirkliche
+    // Document-Modified auf false setzen, da nur wirkliche
     // Benutzerinteraktionen den Modified-Status beeinflussen sollen.
     model.setDocumentModified(false);
 
@@ -302,6 +315,70 @@ public class DocumentCommandInterpreter
     FormGUI gui = new FormGUI(formFensterConf, descs, fm, idToPresetValue,
         functionContext, funcLib, dialogLib);
     model.setFormGUI(gui);
+  }
+
+  /**
+   * Überträgt beim übergebenen XTextDocument doc die Eigenschaften der
+   * Seitenvorlage Wollmuxseite auf die Seitenvorlage Standard, falls
+   * Seitenvorlage Wollmuxseite vorhanden ist.
+   * 
+   * @param doc
+   *          Das dessen Seitenvorlage Standard an die Seitenvorlage
+   *          Wollmuxseite angepasst werden soll, falls Wollmuxseite vorhanden
+   *          ist.
+   */
+  public static void pageStyleWollmuxseiteToStandard(XTextDocument doc)
+  {
+
+    XStyleFamiliesSupplier styleFamiliesSupplier = UNO
+        .XStyleFamiliesSupplier(doc);
+    XNameAccess nameAccess = styleFamiliesSupplier.getStyleFamilies();
+
+    XNameContainer nameContainer = null;
+    // Holt die Seitenvorlagen
+    try
+    {
+      nameContainer = UNO.XNameContainer(nameAccess.getByName("PageStyles"));
+    }
+    catch (java.lang.Exception e)
+    {
+      Logger.error(e);
+    }
+
+    XStyle styleWollmuxseite = null;
+    XStyle styleStandard = null;
+    // Holt die Seitenvorlage Wollmuxseite und Standard
+    try
+    {
+      styleWollmuxseite = UNO.XStyle(nameContainer.getByName("Wollmuxseite"));
+      styleStandard = UNO.XStyle(nameContainer.getByName("Standard"));
+    }
+    catch (java.lang.Exception e)
+    {
+    }
+
+    // Falls eine Seitenvorlage Wollmuxseite vorhanden ist, werden deren
+    // Properties ausgelesen und alle, die nicht READONLY sind, auf die
+    // Seitenvorlage Standard übertragen.
+    if (styleWollmuxseite != null)
+    {
+      XMultiPropertySet multiPropertySetWollmuxseite = UNO
+          .XMultiPropertySet(styleWollmuxseite);
+      XPropertySetInfo propertySetInfo = multiPropertySetWollmuxseite
+          .getPropertySetInfo();
+      Property[] propertys = propertySetInfo.getProperties();
+      for (int i = 0; i < propertys.length; i++)
+      {
+        String name = propertys[i].Name;
+        boolean readonly = (propertys[i].Attributes & PropertyAttribute.READONLY) != 0;
+        if (!readonly)
+        {
+          Object value = UNO.getProperty(styleWollmuxseite, name);
+          UNO.setProperty(styleStandard, name, value);
+
+        }
+      }
+    }
   }
 
   /**
