@@ -1073,6 +1073,7 @@ public class WollMuxBar
         Iterator fragIter = fragConf.iterator();
         while (iter.hasNext() && fragIter.hasNext()) 
         {
+          fragIter.next();
           JCheckBox checkbox = (JCheckBox)iter.next();
           if (!checkbox.isSelected()) fragIter.remove();
         }
