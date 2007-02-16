@@ -59,6 +59,7 @@ import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextField;
 import com.sun.star.text.XTextRange;
 import com.sun.star.uno.Exception;
+import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoService;
@@ -158,13 +159,13 @@ public class DocumentCommandInterpreter
 
     // Zähler für aufgetretene Fehler bei der Bearbeitung der Kommandos.
     int errors = 0;
- 
+
     // Zuerst alle Kommandos bearbeiten, die irgendwie Kinder bekommen
     // können, damit der DocumentCommandTree vollständig aufgebaut werden
     // kann.
     errors += new DocumentExpander(model.getFragUrls()).execute(model
         .getDocumentCommandTree());
-    
+
     // Überträgt beim übergebenen XTextDocument doc die Eigenschaften der
     // Seitenvorlage Wollmuxseite auf die Seitenvorlage Standard, falls
     // Seitenvorlage Wollmuxseite vorhanden ist.
@@ -367,17 +368,47 @@ public class DocumentCommandInterpreter
       XPropertySetInfo propertySetInfo = multiPropertySetWollmuxseite
           .getPropertySetInfo();
       Property[] propertys = propertySetInfo.getProperties();
+      HashSet set = new HashSet();
+      // Schleife über die Properties der Wollmuxseite. Wenn die Properties
+      // nicht read-only sind werden sie in einem HashSet set
+      // zwischengespeichert.
       for (int i = 0; i < propertys.length; i++)
       {
         String name = propertys[i].Name;
         boolean readonly = (propertys[i].Attributes & PropertyAttribute.READONLY) != 0;
         if (!readonly)
         {
-          Object value = UNO.getProperty(styleWollmuxseite, name);
-          UNO.setProperty(styleStandard, name, value);
-
+          set.add(name);
         }
       }
+      int size;
+      // Schleife wird so lange durchlaufen bis sich die Größe des HashSet set
+      // nicht mehr ändert. Es gibt Properties die auf das erste Mal nicht
+      // gesetzt werden können, weil es Abhängigkeiten zu anderen Properties
+      // gibt die zuerst gesetzt werden müssen. z.B muß die Property für
+      // Kopfzeile "HeaderIsOn" oder für Fußzeile "FooterIsOn" "true"
+      // sein, damit anderen Properties der Kopf-/Fußzeile verändert werden
+      // können. Die Properties "TextColumns" und "UserDefinesAttributes" werden
+      // nie gesetzt.
+      do
+      {
+        size = set.size();
+        // Schleife über die HashSet set. Über den Property-Name (aus dem
+        // HashSet) wird die entsprechende Property aus der Seitenvorlage
+        // "Wollmux" geholt und dann in die Seitenvorlage "Standard" übertragen
+        // und anschließend wenn dies funktioniert hat, wird der Property-Name
+        // aus dem Iterator gelöscht.
+        for (Iterator iter = set.iterator(); iter.hasNext();)
+        {
+          String element = (String) iter.next();
+          Object value = UNO.getProperty(styleWollmuxseite, element);
+          Object checkset = UNO.setProperty(styleStandard, element, value);
+          if (UnoRuntime.areSame(value, checkset))
+          {
+            iter.remove();
+          }
+        }
+      } while (size != set.size());
     }
   }
 
