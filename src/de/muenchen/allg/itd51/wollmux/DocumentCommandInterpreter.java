@@ -381,6 +381,15 @@ public class DocumentCommandInterpreter
           set.add(name);
         }
       }
+      // In der Property "HeaderText" und "FooterText" befindet sich der Text
+      // aus der Kopf-/Fußzeile, würde dieser mit der Seitenvorlage
+      // "Wollmuxseite" überschrieben geht der Text verloren.
+      set.remove("HeaderText");
+      set.remove("FooterText");
+      // Die Property "FollowStyle" wird nicht übertragen da sie in der
+      // Seitenvorlage "Wollmuxseite" Wollmuxseite ist und so die Folgeseiten
+      // ein Seitenformat "Wollmuxseite" bekommen würden.
+      set.remove("FollowStyle");
       int size;
       // Schleife wird so lange durchlaufen bis sich die Größe des HashSet set
       // nicht mehr ändert. Es gibt Properties die auf das erste Mal nicht
@@ -388,8 +397,8 @@ public class DocumentCommandInterpreter
       // gibt die zuerst gesetzt werden müssen. z.B muß die Property für
       // Kopfzeile "HeaderIsOn" oder für Fußzeile "FooterIsOn" "true"
       // sein, damit anderen Properties der Kopf-/Fußzeile verändert werden
-      // können. Die Properties "TextColumns" und "UserDefinesAttributes" werden
-      // nie gesetzt.
+      // können. Die Property "UserDefinesAttributes" wird nie gesetzt und
+      // "TextColumns" wird nicht als geändert erkannt.
       do
       {
         size = set.size();
