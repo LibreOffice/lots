@@ -1599,7 +1599,7 @@ public class TextDocumentModel
   /**
    * Schliesst das XTextDocument, das diesem Model zugeordnet ist. Ist der
    * closeListener registriert (was WollMuxSingleton bereits bei der Erstellung
-   * des TextDocumentModels standardmäig macht), so wird nach dem close() auch
+   * des TextDocumentModels standardmäßig macht), so wird nach dem close() auch
    * automatisch die dispose()-Methode aufgerufen.
    */
   public void close()
@@ -1608,26 +1608,56 @@ public class TextDocumentModel
     // save/dismiss-Dialog anzeigt, muss die suspend()-Methode aller
     // XController gestartet werden, die das Model der Komponente enthalten.
     // Man bekommt alle XController über die Frames, die der Desktop liefert.
-    Object desktop = UNO.createUNOService("com.sun.star.frame.Desktop");
-    if (UNO.XFramesSupplier(desktop) != null)
+    boolean closeOk = true;
+    if (UNO.XFramesSupplier(UNO.desktop) != null)
     {
-      XFrame[] frames = UNO.XFramesSupplier(desktop).getFrames().queryFrames(
-          FrameSearchFlag.ALL);
+      XFrame[] frames = UNO.XFramesSupplier(UNO.desktop).getFrames()
+          .queryFrames(FrameSearchFlag.ALL);
       for (int i = 0; i < frames.length; i++)
       {
         XController c = frames[i].getController();
         if (c != null && UnoRuntime.areSame(c.getModel(), doc))
-          c.suspend(true);
+        {
+          // closeOk wird auf false gesetzt, wenn im save/dismiss-Dialog auf die
+          // Schaltfläche "Speichern" und "Abbrechen" gedrückt wird. Bei
+          // "Verwerfen" bleibt closeOK unverÃ¤ndert (also true).
+          if (c.suspend(true) == false) closeOk = false;
+        }
       }
     }
 
-    // Hier das eigentliche Schließen:
-    try
+    // Wurde das Dokument erfolgreich gespeichert, so merkt dies der Test
+    // getDocumentModified() == false. Wurde der save/dismiss-Dialog mit
+    // "Verwerfen" beendet, so ist closeOK==true und es wird beendet. Wurde der
+    // save/dismiss Dialog abgebrochen, so soll das Dokument nicht geschlossen
+    // werden.
+    if (closeOk || getDocumentModified() == false)
     {
-      if (UNO.XCloseable(doc) != null) UNO.XCloseable(doc).close(true);
+
+      // Hier das eigentliche Schließen:
+      try
+      {
+        if (UNO.XCloseable(doc) != null) UNO.XCloseable(doc).close(true);
+      }
+      catch (CloseVetoException e)
+      {
+      }
+
     }
-    catch (CloseVetoException e)
+    else if (UNO.XFramesSupplier(UNO.desktop) != null)
     {
+
+      // Tritt in Kraft, wenn "Abbrechen" betätigt wurde. In diesem Fall werden
+      // die Controllers mit suspend(FALSE) wieder reaktiviert.
+      XFrame[] frames = UNO.XFramesSupplier(UNO.desktop).getFrames()
+          .queryFrames(FrameSearchFlag.ALL);
+      for (int i = 0; i < frames.length; i++)
+      {
+        XController c = frames[i].getController();
+        if (c != null && UnoRuntime.areSame(c.getModel(), doc))
+          c.suspend(false);
+      }
+
     }
   }
 
