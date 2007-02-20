@@ -32,6 +32,7 @@ import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collection;
@@ -75,6 +76,7 @@ import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
+import de.muenchen.allg.itd51.wollmux.FormModelImpl.InvalidFormDescriptorException;
 import de.muenchen.allg.itd51.wollmux.TextDocumentModel.PrintFailedException;
 import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.DJDataset;
@@ -85,7 +87,6 @@ import de.muenchen.allg.itd51.wollmux.db.QueryResults;
 import de.muenchen.allg.itd51.wollmux.dialog.AbsenderAuswaehlen;
 import de.muenchen.allg.itd51.wollmux.dialog.Common;
 import de.muenchen.allg.itd51.wollmux.dialog.Dialog;
-import de.muenchen.allg.itd51.wollmux.dialog.FormGUI;
 import de.muenchen.allg.itd51.wollmux.dialog.PersoenlicheAbsenderlisteVerwalten;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
@@ -969,9 +970,10 @@ public class WollMuxEventHandler
         // Bei Vorlagen: Ausführung der Dokumentkommandos
         if (model.isTemplate()) dci.executeTemplateCommands();
 
-        // Bei Formularen: Konfigurationsabschnitt Fenster/Formular verarbeiten
+        // Bei Formularen:
         if (model.isFormDocument())
         {
+          // Konfigurationsabschnitt Fenster/Formular verarbeiten
           try
           {
             model.setDocumentZoom(mux.getWollmuxConf().query("Fenster").query(
@@ -980,10 +982,29 @@ public class WollMuxEventHandler
           catch (java.lang.Exception e)
           {
           }
-        }
 
-        // Bei Formularen: Ausführung der Dokumentkommandos des Formularsystems
-        if (model.isFormDocument()) dci.executeFormCommands();
+          // Ausführung der Dokumentkommandos des Formularsystems
+          dci.executeFormCommands();
+
+          // FormGUI starten, falls es kein Teil eines Multiform-Dokuments ist.
+          if (!model.isPartOfMultiformDocument())
+          {
+            FormModel fm;
+            try
+            {
+              fm = FormModelImpl.createSingleDocumentFormModel(model);
+            }
+            catch (InvalidFormDescriptorException e)
+            {
+              throw new WMCommandsFailedException(
+                  "Die Vorlage bzw. das Formular enthält keine gültige Formularbeschreibung\n\n"
+                      + "Bitte kontaktieren Sie Ihre Systemadministration.");
+            }
+
+            model.setFormModel(fm);
+            fm.startFormGUI();
+          }
+        }
       }
       catch (java.lang.Exception e)
       {
@@ -997,6 +1018,66 @@ public class WollMuxEventHandler
     public String toString()
     {
       return this.getClass().getSimpleName() + "(#" + xTextDoc.hashCode() + ")";
+    }
+  }
+
+  // *******************************************************************************************
+
+  /**
+   * TODO: ... Erzeugt ein neues WollMuxEvent, das die eigentliche
+   * Dokumentbearbeitung eines TextDokuments startet.
+   * 
+   * Dieses Event wird immer dann ausgelöst, wenn der GlobalEventBroadcaster von
+   * OOo ein ON_NEW oder ein ON_LOAD-Event wirft. Das Event sorgt dafür, dass
+   * die eigentliche Dokumentbearbeitung durch den WollMux angestossen wird.
+   * 
+   * @param xTextDoc
+   *          Das XTextDocument, das durch den WollMux verarbeitet werden soll.
+   */
+  public static void handleProcessMultiform(
+      Vector /* of TextDocumentModel */docs)
+  {
+    handle(new OnProcessMultiform(docs));
+  }
+
+  private static class OnProcessMultiform extends BasicEvent
+  {
+    Vector docs;
+
+    public OnProcessMultiform(Vector /* of TextDocumentModel */docs)
+    {
+      this.docs = docs;
+    }
+
+    protected void doit() throws WollMuxFehlerException
+    {
+      FormModel fm;
+      try
+      {
+        fm = FormModelImpl.createMultiDocumentFormModel(docs);
+      }
+      catch (InvalidFormDescriptorException e)
+      {
+        throw new WollMuxFehlerException("Fehler bei der Dokumentbearbeitung.",
+            new WMCommandsFailedException(
+                "Die Vorlage bzw. das Formular enthält keine gültige Formularbeschreibung\n\n"
+                    + "Bitte kontaktieren Sie Ihre Systemadministration."));
+      }
+
+      // FormModel in allen Dokumenten registrieren:
+      for (Iterator iter = docs.iterator(); iter.hasNext();)
+      {
+        TextDocumentModel doc = (TextDocumentModel) iter.next();
+        doc.setFormModel(fm);
+      }
+
+      // FormGUI starten:
+      fm.startFormGUI();
+    }
+
+    public String toString()
+    {
+      return this.getClass().getSimpleName() + "(" + docs + ")";
     }
   }
 
@@ -1062,8 +1143,15 @@ public class WollMuxEventHandler
   // *******************************************************************************************
 
   /**
+   * Obsolete, aber aus Kompatibilitätgründen noch vorhanden. Bitte handleOpen()
+   * statt dessen verwenden.
+   * 
    * Erzeugt ein neues WollMuxEvent, welches dafür sorgt, dass ein Dokument
    * geöffnet wird.
+   * 
+   * Dieses Event wird gestartet, wenn der WollMux-Service (...comp.WollMux) das
+   * Dispatch-Kommando wollmux:openTemplate bzw. wollmux:openDocument empfängt
+   * und sort dafür, dass das entsprechende Dokument geöffnet wird.
    * 
    * @param fragIDs
    *          Eine List mit fragIDs, wobei das erste Element die FRAG_ID des zu
@@ -1080,13 +1168,6 @@ public class WollMuxEventHandler
     handle(new OnOpenDocument(fragIDs, asTemplate));
   }
 
-  /**
-   * Dieses Event wird gestartet, wenn der WollMux-Service (...comp.WollMux) das
-   * Dispatch-Kommando wollmux:openTemplate bzw. wollmux:openDocument empfängt
-   * und sort dafür, dass das entsprechende Dokument geöffnet wird.
-   * 
-   * @author christoph.lutz
-   */
   private static class OnOpenDocument extends BasicEvent
   {
     private boolean asTemplate;
@@ -1100,6 +1181,130 @@ public class WollMuxEventHandler
     }
 
     protected void doit() throws WollMuxFehlerException
+    {
+      // Baue ein ConfigThingy (als String), das die neue open-Methode versteht
+      // und leite es weiter an diese.
+      Iterator iter = fragIDs.iterator();
+      String fragIdStr = "";
+      while (iter.hasNext())
+        fragIdStr += "'" + iter.next() + "' ";
+      handleOpen("AS_TEMPLATE '"
+                 + asTemplate
+                 + "' FORMGUIS 'independent' Fragmente( FRAG_ID_LIST ("
+                 + fragIdStr
+                 + "))");
+    }
+
+    public String toString()
+    {
+      return this.getClass().getSimpleName()
+             + "("
+             + ((asTemplate) ? "asTemplate" : "asDocument")
+             + ", "
+             + fragIDs
+             + ")";
+    }
+  }
+
+  // *******************************************************************************************
+
+  /**
+   * Öffnet ein oder mehrere Dokumente anhand der Beschreibung openConfStr
+   * (ConfigThingy-Syntax) und ist ausführlicher beschrieben unter
+   * http://limux.tvc.muenchen.de/wiki/index.php/Schnittstellen_des_WollMux_f%C3%BCr_Experten#wollmux:Open
+   * 
+   * Dieses Event wird gestartet, wenn der WollMux-Service (...comp.WollMux) das
+   * Dispatch-Kommando wollmux:open empfängt.
+   * 
+   * @param openConfStr
+   *          Die Beschreibung der zu öffnenden Fragmente in ConfigThingy-Syntax
+   */
+  public static void handleOpen(String openConfStr)
+  {
+    handle(new OnOpen(openConfStr));
+  }
+
+  private static class OnOpen extends BasicEvent
+  {
+    private String openConfStr;
+
+    private OnOpen(String openConfStr)
+    {
+      this.openConfStr = openConfStr;
+    }
+
+    protected void doit() throws WollMuxFehlerException
+    {
+      boolean asTemplate = true;
+      boolean merged = false;
+      ConfigThingy conf;
+      ConfigThingy fragConf;
+      try
+      {
+        conf = new ConfigThingy("OPEN", null, new StringReader(openConfStr));
+        fragConf = conf.get("Fragmente");
+      }
+      catch (java.lang.Exception e)
+      {
+        throw new WollMuxFehlerException(
+            "Fehlerhaftes \"wollmux:Open\" Kommando", e);
+      }
+
+      try
+      {
+        asTemplate = conf.get("AS_TEMPLATE", 1).toString().equalsIgnoreCase(
+            "true");
+      }
+      catch (java.lang.Exception x)
+      {
+      }
+
+      try
+      {
+        merged = conf.get("FORMGUIS", 1).toString().equalsIgnoreCase("merged");
+      }
+      catch (java.lang.Exception x)
+      {
+      }
+
+      Iterator iter = fragConf.iterator();
+      Vector docs = new Vector();
+      while (iter.hasNext())
+      {
+        ConfigThingy fragListConf = (ConfigThingy) iter.next();
+        List fragIds = new Vector();
+        Iterator fragIter = fragListConf.iterator();
+        while (fragIter.hasNext())
+        {
+          fragIds.add(fragIter.next().toString());
+        }
+        if (!fragIds.isEmpty())
+        {
+          TextDocumentModel model = openTextDocument(
+              fragIds,
+              asTemplate,
+              merged);
+          if (model != null) docs.add(model);
+        }
+      }
+
+      if (merged)
+      {
+        handleProcessMultiform(docs);
+      }
+    }
+
+    /**
+     * 
+     * @param fragIDs
+     * @param asTemplate
+     * @param asPartOfMultiform
+     * @return
+     * @throws WollMuxFehlerException
+     */
+    private TextDocumentModel openTextDocument(List fragIDs,
+        boolean asTemplate, boolean asPartOfMultiform)
+        throws WollMuxFehlerException
     {
       WollMuxSingleton mux = WollMuxSingleton.getInstance();
 
@@ -1192,15 +1397,17 @@ public class WollMuxEventHandler
       }
 
       // open document as Template (or as document):
+      TextDocumentModel model = null;
       try
       {
         XComponent doc = UNO.loadComponentFromURL(loadUrlStr, asTemplate, true);
 
         if (UNO.XTextDocument(doc) != null)
         {
-          TextDocumentModel model = mux.getTextDocumentModel(UNO
-              .XTextDocument(doc));
+          model = mux.getTextDocumentModel(UNO.XTextDocument(doc));
           model.setFragUrls(fragUrls);
+          if (asPartOfMultiform)
+            model.setPartOfMultiformDocument(asPartOfMultiform);
         }
       }
       catch (java.lang.Exception x)
@@ -1210,16 +1417,12 @@ public class WollMuxEventHandler
                                          + loadUrlStr
                                          + "' kann nicht geöffnet werden.", x);
       }
+      return model;
     }
 
     public String toString()
     {
-      return this.getClass().getSimpleName()
-             + "("
-             + ((asTemplate) ? "asTemplate" : "asDocument")
-             + ", "
-             + fragIDs
-             + ")";
+      return this.getClass().getSimpleName() + "('" + openConfStr + "')";
     }
   }
 
@@ -2859,12 +3062,12 @@ public class WollMuxEventHandler
       TextDocumentModel model = WollMuxSingleton.getInstance()
           .getTextDocumentModel(doc);
 
-      FormGUI formGUI = model.getFormGUI();
-      if (formGUI != null)
+      FormModel formModel = model.getFormModel();
+      if (formModel != null)
       {
-        // Werte über die FormGUI setzen lassen (damit sind auch automatisch
-        // alle Abhängigkeiten richtig aufgelöst)
-        formGUI.getController().setValue(id, value, new ActionListener()
+        // Werte über den FormController (den das FormModel kennt) setzen lassen
+        // (damit sind auch automatisch alle Abhängigkeiten richtig aufgelöst)
+        formModel.setValue(id, value, new ActionListener()
         {
           public void actionPerformed(ActionEvent arg0)
           {

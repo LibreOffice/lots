@@ -1,0 +1,731 @@
+/*
+ * Dateiname: FormModelImpl.java
+ * Projekt  : WollMux
+ * Funktion : Implementierungen von FormModel (Zugriff auf die Formularbestandteile eines Dokuments)
+ * 
+ * Copyright: Landeshauptstadt München
+ *
+ * Änderungshistorie:
+ * Datum      | Wer | Änderungsgrund
+ * -------------------------------------------------------------------
+ * 09.02.2007 | LUT | Übernahme aus DocumentCommandInterpreter
+ *                    + MultiDocumentFormModel
+ * -------------------------------------------------------------------
+ *
+ * @author Christoph Lutz (D-III-ITD 5.1)
+ * @version 1.0
+ * 
+ */
+package de.muenchen.allg.itd51.wollmux;
+
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Vector;
+
+import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.itd51.parser.ConfigThingy;
+import de.muenchen.allg.itd51.parser.NodeNotFoundException;
+import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
+import de.muenchen.allg.itd51.wollmux.dialog.FormController;
+import de.muenchen.allg.itd51.wollmux.dialog.FormGUI;
+import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
+
+/**
+ * Enthält alle Implementierungen von FormModel für den Zugriff auf die
+ * Formularbestandteile eines Dokuments.
+ */
+public class FormModelImpl
+{
+
+  /**
+   * TODO: dok
+   * 
+   * @param doc
+   * @throws InvalidFormDescriptorException
+   */
+  public static FormModel createSingleDocumentFormModel(TextDocumentModel doc)
+      throws InvalidFormDescriptorException
+  {
+
+    // Abschnitt "Formular" holen:
+    ConfigThingy formConf = new ConfigThingy("");
+    try
+    {
+      formConf = doc.getFormDescription().get("Formular");
+    }
+    catch (NodeNotFoundException e)
+    {
+      throw new InvalidFormDescriptorException(
+          "Kein Abschnitt 'Formular' in der Formularbeschreibung vorhanden");
+    }
+
+    // FunctionContext erzeugen und im Formular definierte Funktionen /
+    // DialogFunktionen parsen:
+    Map functionContext = new HashMap();
+    DialogLibrary dialogLib = new DialogLibrary();
+    FunctionLibrary funcLib = new FunctionLibrary();
+    WollMuxSingleton mux = WollMuxSingleton.getInstance();
+    dialogLib = WollMuxFiles.parseFunctionDialogs(formConf, mux
+        .getFunctionDialogs(), functionContext);
+    funcLib = WollMuxFiles.parseFunctions(
+        formConf,
+        dialogLib,
+        functionContext,
+        mux.getGlobalFunctions());
+
+    // Abschnitt Fenster/Formular aus wollmuxConf holen:
+    ConfigThingy formFensterConf = new ConfigThingy("");
+    try
+    {
+      formFensterConf = WollMuxFiles.getWollmuxConf().query("Fenster").query(
+          "Formular").getLastChild();
+    }
+    catch (NodeNotFoundException x)
+    {
+    }
+
+    return new FormModelImpl.SingleDocumentFormModel(doc, formFensterConf,
+        formConf, functionContext, funcLib, dialogLib);
+  }
+
+  /**
+   * TODO: dok
+   * 
+   * @param docs
+   * @return
+   * @throws InvalidFormDescriptorException
+   */
+  public static FormModel createMultiDocumentFormModel(
+      Vector /* of TextDocumentModel */docs)
+      throws InvalidFormDescriptorException
+  {
+
+    // Formular-Abschnitte aller TextDocumentModels sammeln...
+    ArrayList formularSections = new ArrayList();
+    for (Iterator iter = docs.iterator(); iter.hasNext();)
+    {
+      TextDocumentModel model = (TextDocumentModel) iter.next();
+      try
+      {
+        ConfigThingy formular = model.getFormDescription().get("Formular");
+        formularSections.add(formular);
+      }
+      catch (NodeNotFoundException e)
+      {
+        Logger.error("Dokument '"
+                     + model.getTitle()
+                     + "' enthält keine gültige Formularbeschreibung", e);
+      }
+    }
+
+    // ...und mergen
+    ConfigThingy formConf = FormController
+        .mergeFormDescriptors(formularSections);
+
+    // mapIdToPresetValue aller Einzeldokumente vereinheitlichen:
+    HashMap commonMapIdToPresetValue = new HashMap();
+    for (Iterator iter = docs.iterator(); iter.hasNext();)
+    {
+      TextDocumentModel doc = (TextDocumentModel) iter.next();
+      HashMap myIdToPresetValue = doc.getIDToPresetValue();
+      Iterator piter = myIdToPresetValue.keySet().iterator();
+      while (piter.hasNext())
+      {
+        String id = piter.next().toString();
+        String myPresetValue = "" + myIdToPresetValue.get(id);
+        String commonPresetValue = (String) commonMapIdToPresetValue.get(id);
+        if (commonPresetValue == null)
+        {
+          commonMapIdToPresetValue.put(id, myPresetValue);
+        }
+        else if (!commonPresetValue.equals(myPresetValue))
+        {
+          commonMapIdToPresetValue.put(id, FormController.FISHY);
+        }
+      }
+    }
+
+    // FunctionContext erzeugen und im Formular definierte
+    // Funktionen/DialogFunktionen parsen:
+    Map functionContext = new HashMap();
+    DialogLibrary dialogLib = new DialogLibrary();
+    FunctionLibrary funcLib = new FunctionLibrary();
+    WollMuxSingleton mux = WollMuxSingleton.getInstance();
+    dialogLib = WollMuxFiles.parseFunctionDialogs(formConf, mux
+        .getFunctionDialogs(), functionContext);
+    funcLib = WollMuxFiles.parseFunctions(
+        formConf,
+        dialogLib,
+        functionContext,
+        mux.getGlobalFunctions());
+
+    // Abschnitt Fenster/Formular aus wollmuxConf holen:
+    ConfigThingy formFensterConf = new ConfigThingy("");
+    try
+    {
+      formFensterConf = WollMuxFiles.getWollmuxConf().query("Fenster").query(
+          "Formular").getLastChild();
+    }
+    catch (NodeNotFoundException x)
+    {
+    }
+
+    // FormModels für die Einzeldokumente erzeugen
+    HashMap mapDocsToFormModels = new HashMap();
+    for (Iterator iter = docs.iterator(); iter.hasNext();)
+    {
+      TextDocumentModel doc = (TextDocumentModel) iter.next();
+      FormModel fm = new FormModelImpl.SingleDocumentFormModel(doc,
+          formFensterConf, formConf, functionContext, funcLib, dialogLib);
+      mapDocsToFormModels.put(doc, fm);
+    }
+
+    return new FormModelImpl.MultiDocumentFormModel(mapDocsToFormModels,
+        formFensterConf, formConf, functionContext, commonMapIdToPresetValue,
+        funcLib, dialogLib);
+  }
+
+  /**
+   * TODO: dok
+   * 
+   * @author christoph.lutz
+   * 
+   */
+  public static class InvalidFormDescriptorException extends Exception
+  {
+    private static final long serialVersionUID = -4636262921405770907L;
+
+    public InvalidFormDescriptorException(String message)
+    {
+      super(message);
+    }
+  }
+
+  /**
+   * TODO dok
+   * 
+   * @author christoph.lutz
+   * 
+   */
+  private static class MultiDocumentFormModel implements FormModel
+  {
+    private HashMap mapDocsToFormModels;
+
+    private final ConfigThingy formFensterConf;
+
+    private final ConfigThingy formConf;
+
+    private final Map functionContext;
+
+    private final FunctionLibrary funcLib;
+
+    private final DialogLibrary dialogLib;
+
+    private final HashMap commonMapIdToPresetValue;
+
+    private FormGUI formGUI = null;
+
+    /**
+     * TODO: dok
+     * 
+     * @param mapDocsToFormModels
+     * @param formFensterConf
+     * @param formConf
+     * @param functionContext
+     * @param commonMapIdToPresetValue
+     * @param funcLib
+     * @param dialogLib
+     */
+    public MultiDocumentFormModel(HashMap mapDocsToFormModels,
+        final ConfigThingy formFensterConf, final ConfigThingy formConf,
+        final Map functionContext, final HashMap commonMapIdToPresetValue,
+        final FunctionLibrary funcLib, final DialogLibrary dialogLib)
+    {
+      this.mapDocsToFormModels = mapDocsToFormModels;
+      this.formFensterConf = formFensterConf;
+      this.formConf = formConf;
+      this.functionContext = functionContext;
+      this.commonMapIdToPresetValue = commonMapIdToPresetValue;
+      this.funcLib = funcLib;
+      this.dialogLib = dialogLib;
+
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.FormModel#setWindowPosSize(int, int,
+     *      int, int)
+     */
+    public void setWindowPosSize(int docX, int docY, int docWidth, int docHeight)
+    {
+      for (Iterator iter = mapDocsToFormModels.keySet().iterator(); iter
+          .hasNext();)
+      {
+        TextDocumentModel doc = (TextDocumentModel) iter.next();
+        FormModel fm = (FormModel) mapDocsToFormModels.get(doc);
+        fm.setWindowPosSize(docX, docY, docWidth, docHeight);
+      }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.FormModel#setWindowVisible(boolean)
+     */
+    public void setWindowVisible(boolean vis)
+    {
+      for (Iterator iter = mapDocsToFormModels.keySet().iterator(); iter
+          .hasNext();)
+      {
+        TextDocumentModel doc = (TextDocumentModel) iter.next();
+        FormModel fm = (FormModel) mapDocsToFormModels.get(doc);
+        fm.setWindowVisible(vis);
+      }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.FormModel#close()
+     */
+    public void close()
+    {
+      for (Iterator iter = mapDocsToFormModels.keySet().iterator(); iter
+          .hasNext();)
+      {
+        TextDocumentModel doc = (TextDocumentModel) iter.next();
+        FormModel fm = (FormModel) mapDocsToFormModels.get(doc);
+        fm.close();
+      }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.FormModel#setVisibleState(java.lang.String,
+     *      boolean)
+     */
+    public void setVisibleState(String groupId, boolean visible)
+    {
+      for (Iterator iter = mapDocsToFormModels.keySet().iterator(); iter
+          .hasNext();)
+      {
+        TextDocumentModel doc = (TextDocumentModel) iter.next();
+        FormModel fm = (FormModel) mapDocsToFormModels.get(doc);
+        fm.setVisibleState(groupId, visible);
+      }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.FormModel#valueChanged(java.lang.String,
+     *      java.lang.String)
+     */
+    public void valueChanged(String fieldId, String newValue)
+    {
+      for (Iterator iter = mapDocsToFormModels.keySet().iterator(); iter
+          .hasNext();)
+      {
+        TextDocumentModel doc = (TextDocumentModel) iter.next();
+        FormModel fm = (FormModel) mapDocsToFormModels.get(doc);
+        fm.valueChanged(fieldId, newValue);
+      }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.FormModel#focusGained(java.lang.String)
+     */
+    public void focusGained(String fieldId)
+    {
+      for (Iterator iter = mapDocsToFormModels.keySet().iterator(); iter
+          .hasNext();)
+      {
+        TextDocumentModel doc = (TextDocumentModel) iter.next();
+        FormModel fm = (FormModel) mapDocsToFormModels.get(doc);
+        fm.focusGained(fieldId);
+      }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.FormModel#focusLost(java.lang.String)
+     */
+    public void focusLost(String fieldId)
+    {
+      for (Iterator iter = mapDocsToFormModels.keySet().iterator(); iter
+          .hasNext();)
+      {
+        TextDocumentModel doc = (TextDocumentModel) iter.next();
+        FormModel fm = (FormModel) mapDocsToFormModels.get(doc);
+        fm.focusLost(fieldId);
+      }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.FormModel#print()
+     */
+    public void print()
+    {
+      for (Iterator iter = mapDocsToFormModels.keySet().iterator(); iter
+          .hasNext();)
+      {
+        TextDocumentModel doc = (TextDocumentModel) iter.next();
+        FormModel fm = (FormModel) mapDocsToFormModels.get(doc);
+        fm.print();
+      }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.FormModel#pdf()
+     */
+    public void pdf()
+    {
+      for (Iterator iter = mapDocsToFormModels.keySet().iterator(); iter
+          .hasNext();)
+      {
+        TextDocumentModel doc = (TextDocumentModel) iter.next();
+        FormModel fm = (FormModel) mapDocsToFormModels.get(doc);
+        fm.pdf();
+      }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.FormModel#disposing(de.muenchen.allg.itd51.wollmux.TextDocumentModel)
+     * 
+     * TESTED
+     */
+    public void disposing(TextDocumentModel source)
+    {
+      for (Iterator iter = mapDocsToFormModels.keySet().iterator(); iter
+          .hasNext();)
+      {
+        TextDocumentModel doc = (TextDocumentModel) iter.next();
+        FormModel fm = (FormModel) mapDocsToFormModels.get(doc);
+
+        if (doc.equals(source))
+        {
+          fm.disposing(source);
+          iter.remove();
+        }
+      }
+
+      // FormGUI beenden (falls bisher eine gesetzt ist)
+      if (mapDocsToFormModels.size() == 0 && formGUI != null)
+      {
+        formGUI.dispose();
+        formGUI = null;
+      }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.FormModel#setValue(java.lang.String,
+     *      java.lang.String, java.awt.event.ActionListener)
+     */
+    public void setValue(String fieldId, String value, ActionListener listener)
+    {
+      if (formGUI != null)
+        formGUI.getController().setValue(fieldId, value, listener);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.FormModel#startFormGUI()
+     */
+    public void startFormGUI()
+    {
+      formGUI = new FormGUI(formFensterConf, formConf, this,
+          commonMapIdToPresetValue, functionContext, funcLib, dialogLib);
+    }
+  }
+
+  /**
+   * TODO: anpassen. Diese Klasse implementiert das FormModel-Interface und
+   * sorgt als Wrapper im Wesentlichen nur dafür, dass alle Methodenaufrufe des
+   * FormModels in die ensprechenden WollMuxEvents verpackt werden.
+   */
+  private static class SingleDocumentFormModel implements FormModel
+  {
+    private final TextDocumentModel doc;
+
+    private final ConfigThingy formFensterConf;
+
+    private final ConfigThingy formConf;
+
+    private final Map functionContext;
+
+    private final FunctionLibrary funcLib;
+
+    private final DialogLibrary dialogLib;
+
+    private final String defaultWindowAttributes;
+
+    private FormGUI formGUI = null;
+
+    /**
+     * TODO: dok
+     * 
+     * @param doc
+     * @param formFensterConf
+     * @param formConf
+     * @param functionContext
+     * @param funcLib
+     * @param dialogLib
+     */
+    public SingleDocumentFormModel(final TextDocumentModel doc,
+        final ConfigThingy formFensterConf, final ConfigThingy formConf,
+        final Map functionContext, final FunctionLibrary funcLib,
+        final DialogLibrary dialogLib)
+    {
+      this.doc = doc;
+      this.formFensterConf = formFensterConf;
+      this.formConf = formConf;
+      this.functionContext = functionContext;
+      this.funcLib = funcLib;
+      this.dialogLib = dialogLib;
+
+      // Standard-Fensterattribute vor dem Start der Form-GUI sichern um nach
+      // dem Schließen des Formulardokuments die Standard-Werte wieder
+      // herstellen zu können. Die Standard-Attribute ändern sich (OOo-seitig)
+      // immer dann, wenn ein Dokument (mitsamt Fenster) geschlossen wird. Dann
+      // merkt sich OOo die Position und Größe des zuletzt geschlossenen
+      // Fensters.
+      this.defaultWindowAttributes = getDefaultWindowAttributes();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.FormModel#close()
+     */
+    public void close()
+    {
+      WollMuxEventHandler.handleCloseTextDocument(doc);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.FormModel#setWindowVisible(boolean)
+     */
+    public void setWindowVisible(boolean vis)
+    {
+      WollMuxEventHandler.handleSetWindowVisible(doc, vis);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.FormModel#setWindowPosSize(int, int,
+     *      int, int)
+     */
+    public void setWindowPosSize(int docX, int docY, int docWidth, int docHeight)
+    {
+      WollMuxEventHandler.handleSetWindowPosSize(
+          doc,
+          docX,
+          docY,
+          docWidth,
+          docHeight);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.FormModel#setVisibleState(java.lang.String,
+     *      boolean)
+     */
+    public void setVisibleState(String groupId, boolean visible)
+    {
+      WollMuxEventHandler.handleSetVisibleState(doc, groupId, visible);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.FormModel#valueChanged(java.lang.String,
+     *      java.lang.String)
+     */
+    public void valueChanged(String fieldId, String newValue)
+    {
+      if (fieldId.length() > 0)
+        WollMuxEventHandler.handleFormValueChanged(
+            doc,
+            fieldId,
+            newValue,
+            funcLib);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.FormModel#focusGained(java.lang.String)
+     */
+    public void focusGained(String fieldId)
+    {
+      WollMuxEventHandler.handleFocusFormField(doc, fieldId);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.FormModel#focusLost(java.lang.String)
+     */
+    public void focusLost(String fieldId)
+    {
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.FormModel#disposed(de.muenchen.allg.itd51.wollmux.TextDocumentModel)
+     */
+    public void disposing(TextDocumentModel source)
+    {
+      if (doc.equals(source))
+      {
+        if (formGUI != null)
+        {
+          formGUI.dispose();
+          formGUI = null;
+        }
+
+        // Rücksetzen des defaultWindowAttributes auf den Wert vor dem Schließen
+        // des Formulardokuments.
+        if (defaultWindowAttributes != null)
+          setDefaultWindowAttributes(defaultWindowAttributes);
+      }
+    }
+
+    /**
+     * Diese Hilfsmethode liest das Attribut ooSetupFactoryWindowAttributes aus
+     * dem Konfigurationsknoten
+     * "/org.openoffice.Setup/Office/Factories/com.sun.star.text.TextDocument"
+     * der OOo-Konfiguration, welches die Standard-FensterAttribute enthält, mit
+     * denen neue Fenster für TextDokumente erzeugt werden.
+     * 
+     * @return
+     */
+    private static String getDefaultWindowAttributes()
+    {
+      try
+      {
+        Object cp = UNO
+            .createUNOService("com.sun.star.configuration.ConfigurationProvider");
+
+        // creation arguments: nodepath
+        com.sun.star.beans.PropertyValue aPathArgument = new com.sun.star.beans.PropertyValue();
+        aPathArgument.Name = "nodepath";
+        aPathArgument.Value = "/org.openoffice.Setup/Office/Factories/com.sun.star.text.TextDocument";
+        Object[] aArguments = new Object[1];
+        aArguments[0] = aPathArgument;
+
+        Object ca = UNO.XMultiServiceFactory(cp).createInstanceWithArguments(
+            "com.sun.star.configuration.ConfigurationAccess",
+            aArguments);
+
+        return UNO.getProperty(ca, "ooSetupFactoryWindowAttributes").toString();
+      }
+      catch (java.lang.Exception e)
+      {
+      }
+      return null;
+    }
+
+    /**
+     * Diese Hilfsmethode setzt das Attribut ooSetupFactoryWindowAttributes aus
+     * dem Konfigurationsknoten
+     * "/org.openoffice.Setup/Office/Factories/com.sun.star.text.TextDocument"
+     * der OOo-Konfiguration auf den neuen Wert value, der (am besten) über
+     * einen vorhergehenden Aufruf von getDefaultWindowAttributes() gewonnen
+     * wird.
+     * 
+     * @param value
+     */
+    private static void setDefaultWindowAttributes(String value)
+    {
+      try
+      {
+        Object cp = UNO
+            .createUNOService("com.sun.star.configuration.ConfigurationProvider");
+
+        // creation arguments: nodepath
+        com.sun.star.beans.PropertyValue aPathArgument = new com.sun.star.beans.PropertyValue();
+        aPathArgument.Name = "nodepath";
+        aPathArgument.Value = "/org.openoffice.Setup/Office/Factories/com.sun.star.text.TextDocument";
+        Object[] aArguments = new Object[1];
+        aArguments[0] = aPathArgument;
+
+        Object ca = UNO.XMultiServiceFactory(cp).createInstanceWithArguments(
+            "com.sun.star.configuration.ConfigurationUpdateAccess",
+            aArguments);
+
+        UNO.setProperty(ca, "ooSetupFactoryWindowAttributes", value);
+
+        UNO.XChangesBatch(ca).commitChanges();
+      }
+      catch (java.lang.Exception e)
+      {
+      }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.FormModel#print()
+     */
+    public void print()
+    {
+      UNO.dispatch(doc.doc, DispatchHandler.DISP_unoPrint);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.FormModel#pdf()
+     */
+    public void pdf()
+    {
+      UNO.dispatch(doc.doc, ".uno:ExportToPDF");
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.FormModel#setValue(java.lang.String,
+     *      java.lang.String, java.awt.event.ActionListener)
+     */
+    public void setValue(String fieldId, String value, ActionListener listener)
+    {
+      if (formGUI != null)
+        formGUI.getController().setValue(fieldId, value, listener);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.FormModel#startFormGUI()
+     */
+    public void startFormGUI()
+    {
+      formGUI = new FormGUI(formFensterConf, formConf, this, doc
+          .getIDToPresetValue(), functionContext, funcLib, dialogLib);
+    }
+  }
+}

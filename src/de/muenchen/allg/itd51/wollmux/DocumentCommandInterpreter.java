@@ -80,9 +80,6 @@ import de.muenchen.allg.itd51.wollmux.FormFieldFactory.FormField;
 import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.db.DatasetNotFoundException;
-import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
-import de.muenchen.allg.itd51.wollmux.dialog.FormController;
-import de.muenchen.allg.itd51.wollmux.dialog.FormGUI;
 import de.muenchen.allg.itd51.wollmux.func.Function;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.func.Values.SimpleMap;
@@ -237,58 +234,25 @@ public class DocumentCommandInterpreter
    * 
    * @throws WMCommandsFailedException
    */
-  /**
-   * @throws WMCommandsFailedException
-   */
   public void executeFormCommands() throws WMCommandsFailedException
   {
     Logger.debug("executeFormCommands");
     int errors = 0;
 
-    // 1) Scannen aller für das Formular relevanten Informationen:
+    // Scannen aller für das Formular relevanten Informationen:
     if (formScanner == null)
     {
+      boolean modified = model.getDocumentModified();
+      
       formScanner = new FormScanner();
       errors += formScanner.execute(model.getDocumentCommandTree());
+     
       model.setIDToFormFields(formScanner.idToFormFields);
 
       // Nicht vom formScanner erfasste Formularfelder erfassen
       model.collectNonWollMuxFormFields();
-    }
-    HashMap idToPresetValue = mapIDToPresetValue(
-        model,
-        formScanner.idToFormFields);
-
-    // 4) Document-Modified auf false setzen, da nur wirkliche
-    // Benutzerinteraktionen den Modified-Status beeinflussen sollen.
-    model.setDocumentModified(false);
-
-    // FunctionContext erzeugen und im Formular definierte
-    // Funktionen/DialogFunktionen parsen:
-    ConfigThingy descs = model.getFormDescription();
-    Map functionContext = new HashMap();
-    DialogLibrary dialogLib = new DialogLibrary();
-    FunctionLibrary funcLib = new FunctionLibrary();
-    try
-    {
-      dialogLib = WollMuxFiles.parseFunctionDialogs(descs.get("Formular"), mux
-          .getFunctionDialogs(), functionContext);
-      funcLib = WollMuxFiles.parseFunctions(
-          descs.get("Formular"),
-          dialogLib,
-          functionContext,
-          mux.getGlobalFunctions());
-    }
-    catch (NodeNotFoundException e)
-    {
-    }
-
-    // ggf. entsprechende WMCommandsFailedException werfen:
-    if (descs.query("Formular").count() == 0)
-    {
-      throw new WMCommandsFailedException(
-          "Die Vorlage bzw. das Formular enthält keine gültige Formularbeschreibung\n\n"
-              + "Bitte kontaktieren Sie Ihre Systemadministration.");
+      
+      model.setDocumentModified(modified);
     }
     if (errors != 0)
     {
@@ -298,24 +262,6 @@ public class DocumentCommandInterpreter
               + " Fehler.\n\n"
               + "Bitte kontaktieren Sie Ihre Systemadministration.");
     }
-
-    // 5) Formulardialog starten:
-    FormModel fm = new FormModelImpl(model, funcLib);
-
-    model.setFormModel(fm);
-
-    ConfigThingy formFensterConf = new ConfigThingy("");
-    try
-    {
-      formFensterConf = WollMuxFiles.getWollmuxConf().query("Fenster").query(
-          "Formular").getLastChild();
-    }
-    catch (NodeNotFoundException x)
-    {
-    }
-    FormGUI gui = new FormGUI(formFensterConf, descs, fm, idToPresetValue,
-        functionContext, funcLib, dialogLib);
-    model.setFormGUI(gui);
   }
 
   /**
@@ -418,321 +364,6 @@ public class DocumentCommandInterpreter
           }
         }
       } while (size != set.size());
-    }
-  }
-
-  /**
-   * Diese Methode bestimmt die Vorbelegung der Formularfelder des Formulars und
-   * liefert eine HashMap zurück, die die id eines Formularfeldes auf den
-   * bestimmten Wert abbildet. Der Wert ist nur dann klar definiert, wenn alle
-   * FormFields zu einer ID unverändert geblieben sind, oder wenn nur
-   * untransformierte Felder vorhanden sind, die alle den selben Wert enthalten.
-   * Gibt es zu einer ID kein FormField-Objekt, so wird der zuletzt
-   * abgespeicherte Wert zu dieser ID aus dem FormDescriptor verwendet.
-   * 
-   * @param fd
-   *          Das FormDescriptor-Objekt, aus dem die zuletzt gesetzten Werte der
-   *          Formularfelder ausgelesen werden können.
-   * @param idToFormFields
-   *          Eine Map, die die vorhandenen IDs auf Vectoren von FormFields
-   *          abbildet.
-   * @return eine vollständige Zuordnung von Feld IDs zu den aktuellen
-   *         Vorbelegungen im Dokument.
-   */
-  private static HashMap mapIDToPresetValue(TextDocumentModel model,
-      HashMap idToFormFields)
-  {
-    HashMap idToPresetValue = new HashMap();
-
-    // durch alle Werte, die im FormDescriptor abgelegt sind gehen, und
-    // vergleichen, ob sie mit den Inhalten der Formularfelder im Dokument
-    // übereinstimmen.
-    Iterator idIter = model.getFormFieldIDs().iterator();
-    while (idIter.hasNext())
-    {
-      String id = (String) idIter.next();
-      String value;
-
-      Vector fields = (Vector) idToFormFields.get(id);
-      if (fields != null && fields.size() > 0)
-      {
-        boolean allAreUnchanged = true;
-        boolean allAreUntransformed = true;
-        boolean allUntransformedHaveSameValues = true;
-
-        String refValue = null;
-
-        Iterator j = fields.iterator();
-        while (j.hasNext())
-        {
-          FormField field = (FormField) j.next();
-          String thisValue = field.getValue();
-
-          if (field.hasChangedPreviously()) allAreUnchanged = false;
-
-          if (field.hasTrafo())
-            allAreUntransformed = false;
-          else
-          {
-            // Referenzwert bestimmen
-            if (refValue == null) refValue = thisValue;
-
-            if (thisValue == null || !thisValue.equals(refValue))
-              allUntransformedHaveSameValues = false;
-          }
-        }
-
-        // neuen Formularwert bestimmen. Regeln:
-        // 1) Wenn sich kein Formularfeld geändert hat, wird der zuletzt
-        // gesetzte Formularwert verwendet.
-        // 2) Wenn sich mindestens ein Formularfeld geandert hat, jedoch alle
-        // untransformiert sind und den selben Wert enhtalten, so wird dieser
-        // gleiche Wert als neuer Formularwert übernommen.
-        // 3) in allen anderen Fällen wird FISHY übergeben.
-        if (allAreUnchanged)
-          value = model.getFormFieldValue(id);
-        else
-        {
-          if (allAreUntransformed
-              && allUntransformedHaveSameValues
-              && refValue != null)
-            value = refValue;
-          else
-            value = FormController.FISHY;
-        }
-      }
-      else
-      {
-        // wenn kein Formularfeld vorhanden ist wird der zuletzt gesetzte
-        // Formularwert übernommen.
-        value = model.getFormFieldValue(id);
-      }
-
-      // neuen Wert übernehmen:
-      idToPresetValue.put(id, value);
-      Logger.debug2("Add IDToPresetValue: ID=\""
-                    + id
-                    + "\" --> Wert=\""
-                    + value
-                    + "\"");
-
-    }
-    return idToPresetValue;
-  }
-
-  /**
-   * Diese Klasse implementiert das FormModel-Interface und sorgt als Wrapper im
-   * Wesentlichen nur dafür, dass alle Methodenaufrufe des FormModels in die
-   * ensprechenden WollMuxEvents verpackt werden.
-   */
-  private static class FormModelImpl implements FormModel
-  {
-    private final TextDocumentModel textDocumentModel;
-
-    private final FunctionLibrary funcLib;
-
-    private final String defaultWindowAttributes;
-
-    public FormModelImpl(TextDocumentModel textDocumentModel,
-        FunctionLibrary funcLib)
-    {
-      this.textDocumentModel = textDocumentModel;
-      this.funcLib = funcLib;
-
-      // Standard-Fensterattribute vor dem Start der Form-GUI sichern um nach
-      // dem Schließen des Formulardokuments die Standard-Werte wieder
-      // herstellen zu können. Die Standard-Attribute ändern sich (OOo-seitig)
-      // immer dann, wenn ein Dokument (mitsamt Fenster) geschlossen wird. Dann
-      // merkt sich OOo die Position und Größe des zuletzt geschlossenen
-      // Fensters.
-      this.defaultWindowAttributes = getDefaultWindowAttributes();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see de.muenchen.allg.itd51.wollmux.FormModel#close()
-     */
-    public void close()
-    {
-      WollMuxEventHandler.handleCloseTextDocument(textDocumentModel);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see de.muenchen.allg.itd51.wollmux.FormModel#setWindowVisible(boolean)
-     */
-    public void setWindowVisible(boolean vis)
-    {
-      WollMuxEventHandler.handleSetWindowVisible(textDocumentModel, vis);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see de.muenchen.allg.itd51.wollmux.FormModel#setWindowPosSize(int, int,
-     *      int, int)
-     */
-    public void setWindowPosSize(int docX, int docY, int docWidth, int docHeight)
-    {
-      WollMuxEventHandler.handleSetWindowPosSize(
-          textDocumentModel,
-          docX,
-          docY,
-          docWidth,
-          docHeight);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see de.muenchen.allg.itd51.wollmux.FormModel#setVisibleState(java.lang.String,
-     *      boolean)
-     */
-    public void setVisibleState(String groupId, boolean visible)
-    {
-      WollMuxEventHandler.handleSetVisibleState(
-          textDocumentModel,
-          groupId,
-          visible);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see de.muenchen.allg.itd51.wollmux.FormModel#valueChanged(java.lang.String,
-     *      java.lang.String)
-     */
-    public void valueChanged(String fieldId, String newValue)
-    {
-      if (fieldId.length() > 0)
-        WollMuxEventHandler.handleFormValueChanged(
-            textDocumentModel,
-            fieldId,
-            newValue,
-            funcLib);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see de.muenchen.allg.itd51.wollmux.FormModel#focusGained(java.lang.String)
-     */
-    public void focusGained(String fieldId)
-    {
-      WollMuxEventHandler.handleFocusFormField(textDocumentModel, fieldId);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see de.muenchen.allg.itd51.wollmux.FormModel#focusLost(java.lang.String)
-     */
-    public void focusLost(String fieldId)
-    {
-    }
-
-    /**
-     * Diese Methode setzt die Fensterattribute wieder auf den Stand vor dem
-     * Starten der FormGUI und teilt der FormGUI mit, dass es (das FormModel)
-     * geschlossen wurde und in Zukunft nicht mehr angesprochen werden darf.
-     */
-    public void dispose()
-    {
-      FormGUI formGUI = textDocumentModel.getFormGUI();
-      if (formGUI != null)
-      {
-        formGUI.dispose();
-        formGUI = null;
-      }
-
-      // Rücksetzen des defaultWindowAttributes auf den Wert vor dem Schließen
-      // des Formulardokuments.
-      if (defaultWindowAttributes != null)
-        setDefaultWindowAttributes(defaultWindowAttributes);
-    }
-
-    /**
-     * Diese Hilfsmethode liest das Attribut ooSetupFactoryWindowAttributes aus
-     * dem Konfigurationsknoten
-     * "/org.openoffice.Setup/Office/Factories/com.sun.star.text.TextDocument"
-     * der OOo-Konfiguration, welches die Standard-FensterAttribute enthält, mit
-     * denen neue Fenster für TextDokumente erzeugt werden.
-     * 
-     * @return
-     */
-    private static String getDefaultWindowAttributes()
-    {
-      try
-      {
-        Object cp = UNO
-            .createUNOService("com.sun.star.configuration.ConfigurationProvider");
-
-        // creation arguments: nodepath
-        com.sun.star.beans.PropertyValue aPathArgument = new com.sun.star.beans.PropertyValue();
-        aPathArgument.Name = "nodepath";
-        aPathArgument.Value = "/org.openoffice.Setup/Office/Factories/com.sun.star.text.TextDocument";
-        Object[] aArguments = new Object[1];
-        aArguments[0] = aPathArgument;
-
-        Object ca = UNO.XMultiServiceFactory(cp).createInstanceWithArguments(
-            "com.sun.star.configuration.ConfigurationAccess",
-            aArguments);
-
-        return UNO.getProperty(ca, "ooSetupFactoryWindowAttributes").toString();
-      }
-      catch (java.lang.Exception e)
-      {
-      }
-      return null;
-    }
-
-    /**
-     * Diese Hilfsmethode setzt das Attribut ooSetupFactoryWindowAttributes aus
-     * dem Konfigurationsknoten
-     * "/org.openoffice.Setup/Office/Factories/com.sun.star.text.TextDocument"
-     * der OOo-Konfiguration auf den neuen Wert value, der (am besten) über
-     * einen vorhergehenden Aufruf von getDefaultWindowAttributes() gewonnen
-     * wird.
-     * 
-     * @param value
-     */
-    private static void setDefaultWindowAttributes(String value)
-    {
-      try
-      {
-        Object cp = UNO
-            .createUNOService("com.sun.star.configuration.ConfigurationProvider");
-
-        // creation arguments: nodepath
-        com.sun.star.beans.PropertyValue aPathArgument = new com.sun.star.beans.PropertyValue();
-        aPathArgument.Name = "nodepath";
-        aPathArgument.Value = "/org.openoffice.Setup/Office/Factories/com.sun.star.text.TextDocument";
-        Object[] aArguments = new Object[1];
-        aArguments[0] = aPathArgument;
-
-        Object ca = UNO.XMultiServiceFactory(cp).createInstanceWithArguments(
-            "com.sun.star.configuration.ConfigurationUpdateAccess",
-            aArguments);
-
-        UNO.setProperty(ca, "ooSetupFactoryWindowAttributes", value);
-
-        UNO.XChangesBatch(ca).commitChanges();
-      }
-      catch (java.lang.Exception e)
-      {
-      }
-    }
-
-    public void print()
-    {
-      UNO.dispatch(textDocumentModel.doc, DispatchHandler.DISP_unoPrint);
-    }
-
-    public void pdf()
-    {
-      UNO.dispatch(textDocumentModel.doc, ".uno:ExportToPDF");
     }
   }
 

@@ -62,7 +62,7 @@ import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.SetJumpMark;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.SetPrintFunction;
 import de.muenchen.allg.itd51.wollmux.FormFieldFactory.FormField;
-import de.muenchen.allg.itd51.wollmux.dialog.FormGUI;
+import de.muenchen.allg.itd51.wollmux.dialog.FormController;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 
@@ -141,13 +141,6 @@ public class TextDocumentModel
    * geschlossen.
    */
   private FormModel formModel;
-
-  /**
-   * Dieses feld enthält die formGUI, die der DocumentCommandInterpreter in der
-   * Methode processFormCommands() gestartet hat, falls das Dokument ein
-   * Formulardokument ist. Andernfalls enthält es null.
-   */
-  private FormGUI formGUI;
 
   /**
    * In diesem Feld wird der CloseListener gespeichert, nachdem die Methode
@@ -251,6 +244,12 @@ public class TextDocumentModel
   private Set /* of VisibleSection */visibleTextSections;
 
   /**
+   * Kann über setPartOfMultiformDocument gesetzt werden und sollte dann true
+   * enthalten, wenn das Dokument ein Teil eines Multiformdokuments ist.
+   */
+  private boolean partOfMultiform;
+
+  /**
    * Erzeugt ein neues TextDocumentModel zum XTextDocument doc und sollte nie
    * direkt aufgerufen werden, da neue TextDocumentModels über das
    * WollMuxSingleton (siehe WollMuxSingleton.getTextDocumentModel()) erzeugt
@@ -271,7 +270,7 @@ public class TextDocumentModel
     this.formularConf = new ConfigThingy("WM");
     this.formFieldValues = new HashMap();
     this.invisibleGroups = new HashSet();
-    this.formGUI = null;
+    this.formModel = null;
     this.printModel = new PrintModel(this);
 
     // Kommandobaum erzeugen:
@@ -450,6 +449,100 @@ public class TextDocumentModel
   }
 
   /**
+   * Diese Methode bestimmt die Vorbelegung der Formularfelder des Formulars und
+   * liefert eine HashMap zurück, die die id eines Formularfeldes auf den
+   * bestimmten Wert abbildet. Der Wert ist nur dann klar definiert, wenn alle
+   * FormFields zu einer ID unverändert geblieben sind, oder wenn nur
+   * untransformierte Felder vorhanden sind, die alle den selben Wert enthalten.
+   * Gibt es zu einer ID kein FormField-Objekt, so wird der zuletzt
+   * abgespeicherte Wert zu dieser ID aus dem FormDescriptor verwendet. Die
+   * Methode sollte erst aufgerufen werden, nachdem dem Model mit
+   * setIDToFormFields die verfügbaren Formularfelder bekanntgegeben wurden.
+   * 
+   * @return eine vollständige Zuordnung von Feld IDs zu den aktuellen
+   *         Vorbelegungen im Dokument.
+   */
+  public HashMap getIDToPresetValue()
+  {
+    HashMap idToPresetValue = new HashMap();
+
+    // durch alle Werte, die im FormDescriptor abgelegt sind gehen, und
+    // vergleichen, ob sie mit den Inhalten der Formularfelder im Dokument
+    // übereinstimmen.
+    Iterator idIter = formFieldValues.keySet().iterator();
+    while (idIter.hasNext())
+    {
+      String id = (String) idIter.next();
+      String value;
+
+      Vector fields = (Vector) idToFormFields.get(id);
+      if (fields != null && fields.size() > 0)
+      {
+        boolean allAreUnchanged = true;
+        boolean allAreUntransformed = true;
+        boolean allUntransformedHaveSameValues = true;
+
+        String refValue = null;
+
+        Iterator j = fields.iterator();
+        while (j.hasNext())
+        {
+          FormField field = (FormField) j.next();
+          String thisValue = field.getValue();
+
+          if (field.hasChangedPreviously()) allAreUnchanged = false;
+
+          if (field.hasTrafo())
+            allAreUntransformed = false;
+          else
+          {
+            // Referenzwert bestimmen
+            if (refValue == null) refValue = thisValue;
+
+            if (thisValue == null || !thisValue.equals(refValue))
+              allUntransformedHaveSameValues = false;
+          }
+        }
+
+        // neuen Formularwert bestimmen. Regeln:
+        // 1) Wenn sich kein Formularfeld geändert hat, wird der zuletzt
+        // gesetzte Formularwert verwendet.
+        // 2) Wenn sich mindestens ein Formularfeld geandert hat, jedoch alle
+        // untransformiert sind und den selben Wert enhtalten, so wird dieser
+        // gleiche Wert als neuer Formularwert übernommen.
+        // 3) in allen anderen Fällen wird FISHY übergeben.
+        if (allAreUnchanged)
+          value = (String) formFieldValues.get(id);
+        else
+        {
+          if (allAreUntransformed
+              && allUntransformedHaveSameValues
+              && refValue != null)
+            value = refValue;
+          else
+            value = FormController.FISHY;
+        }
+      }
+      else
+      {
+        // wenn kein Formularfeld vorhanden ist wird der zuletzt gesetzte
+        // Formularwert übernommen.
+        value = (String) formFieldValues.get(id);
+      }
+
+      // neuen Wert übernehmen:
+      idToPresetValue.put(id, value);
+      Logger.debug2("Add IDToPresetValue: ID=\""
+                    + id
+                    + "\" --> Wert=\""
+                    + value
+                    + "\"");
+
+    }
+    return idToPresetValue;
+  }
+
+  /**
    * Liefert true, wenn das Dokument Serienbrieffelder enthält, ansonsten false.
    */
   public boolean hasMailMergeFields()
@@ -524,27 +617,6 @@ public class TextDocumentModel
     {
       Logger.error(x);
     }
-  }
-
-  /**
-   * Speichert das FormModel formModel im TextDocumentModel und wird derzeit vom
-   * DocumentCommandInterpreter aufgerufen, wenn er ein FormModel erzeugt.
-   * 
-   * @param formModel
-   */
-  public void setFormModel(FormModel formModel)
-  {
-    this.formModel = formModel;
-  }
-
-  /**
-   * Liefert das zuletzt per setFormModel() gesetzte FormModel zurück.
-   * 
-   * @return
-   */
-  public FormModel getFormModel()
-  {
-    return this.formModel;
   }
 
   /**
@@ -644,6 +716,21 @@ public class TextDocumentModel
   public boolean isFormDocument()
   {
     return (type != null && type.equalsIgnoreCase("formDocument"));
+  }
+
+  /**
+   * Liefert true, wenn das Dokument ein Teil eines Multiformdokuments ist.
+   * 
+   * @return Liefert true, wenn das Dokument Teil eines Multiformdokuments ist.
+   */
+  public boolean isPartOfMultiformDocument()
+  {
+    return partOfMultiform;
+  }
+
+  public void setPartOfMultiformDocument(boolean partOfMultiform)
+  {
+    this.partOfMultiform = partOfMultiform;
   }
 
   /**
@@ -1124,26 +1211,6 @@ public class TextDocumentModel
   }
 
   /**
-   * Liefert den Wert des WollMuxFormularfeldes mit der ID fieldId.
-   */
-  public String getFormFieldValue(String fieldId)
-  {
-    return (String) formFieldValues.get(fieldId);
-  }
-
-  /**
-   * Liefert ein Set zurück, das alle dem FormDescriptor bekannten IDs für
-   * Formularfelder enthält.
-   * 
-   * @return ein Set das alle dem FormDescriptor bekannten IDs für
-   *         Formularfelder enthält.
-   */
-  public Set getFormFieldIDs()
-  {
-    return formFieldValues.keySet();
-  }
-
-  /**
    * Setzt den ViewCursor auf das erste untransformierte Formularfeld, das den
    * Formularwert mit der ID fieldID darstellt. Falls kein untransformiertes
    * Formularfeld vorhanden ist, wird ein transformiertes gewählt.
@@ -1208,9 +1275,9 @@ public class TextDocumentModel
    * 
    * @return Die FormularGUI des Formulardokuments oder null
    */
-  public FormGUI getFormGUI()
+  public FormModel getFormModel()
   {
-    return formGUI;
+    return formModel;
   }
 
   /**
@@ -1221,9 +1288,9 @@ public class TextDocumentModel
    * @param formGUI
    *          Die zu diesem Dokument zugehörige formGUI
    */
-  public void setFormGUI(FormGUI formGUI)
+  public void setFormModel(FormModel formModel)
   {
-    this.formGUI = formGUI;
+    this.formModel = formModel;
   }
 
   /**
@@ -1597,9 +1664,12 @@ public class TextDocumentModel
   }
 
   /**
-   * Schliesst das XTextDocument, das diesem Model zugeordnet ist. Ist der
-   * closeListener registriert (was WollMuxSingleton bereits bei der Erstellung
-   * des TextDocumentModels standardmäßig macht), so wird nach dem close() auch
+   * Versucht das Dokument zu schließen, wurde das Dokument jedoch verändert
+   * (Modified-Status des Dokuments==true), so erscheint der Dialog
+   * "Speichern"/"Verwerfen"/"Abbrechen" über den ein sofortiges Schließen des
+   * Dokuments durch den Benutzer verhindert werden kann. Ist der closeListener
+   * registriert (was WollMuxSingleton bereits bei der Erstellung des
+   * TextDocumentModels standardmäßig macht), so wird nach dem close() auch
    * automatisch die dispose()-Methode aufgerufen.
    */
   public void close()
@@ -1619,8 +1689,8 @@ public class TextDocumentModel
         if (c != null && UnoRuntime.areSame(c.getModel(), doc))
         {
           // closeOk wird auf false gesetzt, wenn im save/dismiss-Dialog auf die
-          // Schaltfläche "Speichern" und "Abbrechen" gedrückt wird. Bei
-          // "Verwerfen" bleibt closeOK unverÃ¤ndert (also true).
+          // Schaltflächen "Speichern" und "Abbrechen" gedrückt wird. Bei
+          // "Verwerfen" bleibt closeOK unverändert (also true).
           if (c.suspend(true) == false) closeOk = false;
         }
       }
@@ -1671,7 +1741,7 @@ public class TextDocumentModel
     if (currentMax4000 != null) currentMax4000.dispose();
     currentMax4000 = null;
 
-    if (formModel != null) formModel.dispose();
+    if (formModel != null) formModel.disposing(this);
     formModel = null;
 
     // Löscht das TextDocumentModel von doc aus dem WollMux-Singleton.

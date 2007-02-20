@@ -17,6 +17,8 @@
  */
 package de.muenchen.allg.itd51.wollmux;
 
+import java.awt.event.ActionListener;
+
 /**
  * Erlaubt Zugriff auf die Formularbestandteile eines Dokuments abstrahiert von
  * den dahinterstehenden OOo-Objekten. ACHTUNG! Der FormController ruft die
@@ -35,20 +37,69 @@ public interface FormModel
 {
 
   /**
+   * Setzt die Position und Größe des Fensters des zugehörigen Dokuments auf die
+   * vorgegebenen Werte setzt. ACHTUNG: Die Maßangaben beziehen sich auf die
+   * linke obere Ecke des Fensterinhalts OHNE die Titelzeile und die
+   * Fensterdekoration des Rahmens. Um die linke obere Ecke des gesamten
+   * Fensters richtig zu setzen, müssen die Größenangaben des Randes der
+   * Fensterdekoration und die Höhe der Titelzeile VOR dem Aufruf der Methode
+   * entsprechend eingerechnet werden.
+   * 
    * @param docX
+   *          Die linke obere Ecke des Fensterinhalts X-Koordinate der Position
+   *          in Pixel, gezählt von links oben.
    * @param docY
+   *          Die Y-Koordinate der Position in Pixel, gezählt von links oben.
    * @param docWidth
+   *          Die Größe des Dokuments auf der X-Achse in Pixel
    * @param docHeight
+   *          Die Größe des Dokuments auf der Y-Achse in Pixel. Auch hier wird
+   *          die Titelzeile des Rahmens nicht beachtet und muss vorher
+   *          entsprechend eingerechnet werden.
+   * 
+   * @author christoph.lutz
    */
   public void setWindowPosSize(int docX, int docY, int docWidth, int docHeight);
 
+  /**
+   * Setzt den Sichtbarkeitsstatus des Fensters des zugehörigen Dokuments auf
+   * vis (true=sichtbar, false=unsichtbar).
+   * 
+   * @param vis
+   *          true=sichtbar, false=unsichtbar
+   * 
+   * @author christoph.lutz
+   */
   public void setWindowVisible(boolean vis);
 
+  /**
+   * Versucht das Dokument zu schließen. Wurde das Dokument verändert
+   * (Modified-Status des Dokuments==true), so erscheint der Dialog
+   * "Speichern"/"Verwerfen"/"Abbrechen" (über den ein sofortiges Schließen des
+   * Dokuments durch den Benutzer verhindert werden kann)
+   * 
+   * @author christoph.lutz
+   */
   public void close();
 
+  /**
+   * Setzt den Sichtbarkeitsstatus der Sichtbarkeitsgruppe mit der ID groupID
+   * auf visible.
+   * 
+   * @param groupId
+   *          Die ID der Gruppe, die Sichtbar/unsichtbar geschalten werden soll.
+   * @param visible
+   *          true==sichtbar, false==unsichtbar
+   * 
+   * @author christoph.lutz
+   */
   public void setVisibleState(String groupId, boolean visible);
 
   /**
+   * Setzt den Wert aller Formularfelder im Dokument, die von fieldId abhängen
+   * auf den neuen Wert newValue (bzw. auf das Ergebnis der zu diesem
+   * Formularelement hinterlegten Trafo-Funktion).
+   * 
    * Es ist nicht garantiert, dass sich der Wert tatsächlich geändert hat. Die
    * fieldId kann leer sein (aber nie null).
    * 
@@ -56,23 +107,80 @@ public interface FormModel
    */
   public void valueChanged(String fieldId, String newValue);
 
+  /**
+   * Das Formularfeld im Dokument mit der ID fieldId erhält den Fokus. Gibt es
+   * im Dokument mehrere Formularfelder, die von der ID abhängen, so erhält
+   * immer das erste Formularfeld den Fokus - bevorzugt werden dabei auch die
+   * nicht transformierten Formularfelder.
+   * 
+   * @param fieldId
+   *          id des Formularfeldes, das den Fokus bekommen soll.
+   * 
+   * @author christoph.lutz
+   */
   public void focusGained(String fieldId);
 
+  /**
+   * Not Yet Implemented: Nimmt dem Formularfeld mit der ID fieldId den Fokus
+   * wieder weg - ergibt aber bisher keinen Sinn.
+   * 
+   * @param fieldId
+   * 
+   * @author christoph.lutz
+   */
   public void focusLost(String fieldId);
 
   /**
-   * ACHTUNG: dispose darf nur indirekt über
-   * WollMuxEventHandler.handleDisposeFormModel angesprochen werden!
+   * Informiert das FormModel, dass das zugrundeliegende Dokument source
+   * geschlossen wird und das FormModel entsprechend handeln soll um
+   * sicherzustellen, dass das Dokument in Zukunft nicht mehr angesprochen wird.
+   * 
+   * Abhängig von der Implementierung des FormModels werden unterschiedliche
+   * Aktionen erledigt. Dazu gehören z.B. das Beenden einer bereits gestarteten
+   * FormGUI oder das Wiederherstellen der Fensterattribute des Dokumentfensters
+   * auf die Werte, die das Fenster vor dem Starten der FormGUI hatte.
+   * 
+   * @param source
+   *          Das Dokument das geschlossen wurde.
+   * 
+   * @author christoph.lutz
    */
-  public void dispose();
-  
+  public void disposing(TextDocumentModel source);
+
   /**
-   * Startet den Ausdruck unter Verwendung eventuell vorhandener Komfortdruckfunktionen.
+   * Teilt der FormGUI die zu diesem FormModel gehört mit, dass der Wert des
+   * Formularfeldes mit der id fieldId auf den neuen Wert value gesetzt werden
+   * soll und ruft nach erfolgreicher aktion die Methode
+   * actionPerformed(ActionEvent arg0) des Listeners listener.
+   * 
+   * @param fieldId
+   *          die Id des Feldes das in der FormGUI auf den neuen Wert value
+   *          gesetzt werden soll.
+   * @param value
+   *          der neue Wert value.
+   * @param listener
+   *          der Listener der informiert wird, nachdem der Wert erfolgreich
+   *          gesetzt wurde.
+   * 
+   * @author christoph.lutz
+   */
+  public void setValue(String fieldId, String value, ActionListener listener);
+
+  /**
+   * Erzeugt eine FormGUI zu diesem FormModel und startet diese.
+   * 
+   * @author christoph.lutz
+   */
+  public void startFormGUI();
+
+  /**
+   * Startet den Ausdruck unter Verwendung eventuell vorhandener
+   * Komfortdruckfunktionen.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void print();
-  
+
   /**
    * Exportiert das Dokument als PDF.
    * 

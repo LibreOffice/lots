@@ -19,12 +19,10 @@
  */
 package de.muenchen.allg.itd51.wollmux;
 
-import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
@@ -155,57 +153,7 @@ public class DispatchHandler
     {
       public void dispatch(String arg, PropertyValue[] props)
       {
-        boolean asTemplate = true;
-        boolean merged = false;
-        ConfigThingy conf;
-        ConfigThingy fragConf;
-        try
-        {
-          arg = URLDecoder.decode(arg, ConfigThingy.CHARSET);
-          conf = new ConfigThingy("OPEN", null, new StringReader(arg));
-          fragConf = conf.get("Fragmente");
-        }
-        catch (Exception e)
-        {
-          Logger.error("Fehlerhaftes \"wollmux:Open\" Kommando");
-          return;
-        }
-
-        try
-        {
-          asTemplate = conf.get("AS_TEMPLATE", 1).toString().equalsIgnoreCase(
-              "true");
-        }
-        catch (Exception x)
-        {
-        }
-
-        try
-        {
-          merged = conf.get("FORMGUIS", 1).toString()
-              .equalsIgnoreCase("merged");
-
-          if (merged)
-            Logger
-                .error("FORMGUIS \"merged\" noch nicht implementiert => Fallback auf \"independent\"");
-        }
-        catch (Exception x)
-        {
-        }
-
-        Iterator iter = fragConf.iterator();
-        while (iter.hasNext())
-        {
-          ConfigThingy fragListConf = (ConfigThingy) iter.next();
-          List fragIds = new Vector();
-          Iterator fragIter = fragListConf.iterator();
-          while (fragIter.hasNext())
-          {
-            fragIds.add(fragIter.next().toString());
-          }
-          if (!fragIds.isEmpty())
-            WollMuxEventHandler.handleOpenDocument(fragIds, asTemplate);
-        }
+        WollMuxEventHandler.handleOpen(arg);
       }
     });
 
@@ -229,14 +177,6 @@ public class DispatchHandler
     {
       public void dispatch(String arg, PropertyValue[] props)
       {
-        try
-        {
-          arg = URLDecoder.decode(arg, ConfigThingy.CHARSET);
-        }
-        catch (UnsupportedEncodingException e)
-        {
-          Logger.error(e);
-        }
         String wollMuxBarVersion = null;
         if (arg.length() > 0) wollMuxBarVersion = arg;
         WollMuxEventHandler.handleAbout(wollMuxBarVersion);
@@ -478,6 +418,16 @@ public class DispatchHandler
       String arg = "";
       String[] parts = url.Complete.split("#", 2);
       if (parts.length == 2) arg = parts[1];
+
+      // arg durch den URL-Decoder jagen:
+      try
+      {
+        arg = URLDecoder.decode(arg, ConfigThingy.CHARSET);
+      }
+      catch (UnsupportedEncodingException e)
+      {
+        Logger.error("Fehler in Dispatch-URL '" + url.Complete + "':", e);
+      }
 
       dispatch(arg, props);
     }

@@ -54,6 +54,7 @@ import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.FormModel;
 import de.muenchen.allg.itd51.wollmux.Logger;
+import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 
@@ -513,17 +514,29 @@ public class FormGUI
       Logger.log("Feld \""+fieldId+"\" hat den Fokus verloren"); 
     }
 
-    public void dispose()
+    public void disposing(TextDocumentModel source)
     {
       Logger.log("Dispose()"); 
     }
 
     public void print()
     {
+      Logger.log("print()"); 
     }
 
     public void pdf()
     {
+      Logger.log("pdf()"); 
+    }
+
+    public void setValue(String fieldId, String value, ActionListener listener)
+    {
+      Logger.log("setValue()"); 
+    }
+
+    public void startFormGUI()
+    {
+      Logger.log("startFormGUI()"); 
     }
   }
   
