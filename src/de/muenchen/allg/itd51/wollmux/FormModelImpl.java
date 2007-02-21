@@ -586,7 +586,7 @@ public class FormModelImpl
      */
     public void close()
     {
-      UNO.dispatch(doc.doc, ".uno:CloseDoc");
+      WollMuxEventHandler.handleCloseTextDocument(doc);
     }
 
     /*
