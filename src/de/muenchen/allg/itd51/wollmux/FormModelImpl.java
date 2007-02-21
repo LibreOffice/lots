@@ -41,9 +41,12 @@ public class FormModelImpl
 {
 
   /**
-   * TODO: dok
+   * Erzeugt ein FormModel für ein einfaches Formular mit genau einem
+   * zugehörigen Formulardokument.
    * 
    * @param doc
+   *          Das Dokument zu dem ein FormModel erzeugt werden soll.
+   * @return ein FormModel dem genau ein Formulardokument zugeordnet ist.
    * @throws InvalidFormDescriptorException
    */
   public static FormModel createSingleDocumentFormModel(TextDocumentModel doc)
@@ -92,10 +95,18 @@ public class FormModelImpl
   }
 
   /**
-   * TODO: dok
+   * Erzeugt ein FormModel dem mehrere Formulardokumente zugeordnet sind, die
+   * alle in gleicher Weise über Änderungen (z.B. bei valueChanged()) informiert
+   * werden. So ist ein gleichzeitiges Befüllen meherer Dokumente über nur ein
+   * Formular möglich. Die Formularbeschreibungen der Einzeldokumente und die in
+   * ihnen enthaltenen IDs, Funktionen und Dialogfunktionen werden dabei zu
+   * einer Gesamtbeschreibung im selben Namensraum zusammengemerged.
    * 
    * @param docs
-   * @return
+   *          Ein Vector mit TextDocumentModel Objekten die dem neuen
+   *          MultiDocumentFormModel zugeordnet werden sollen.
+   * @return Ein FormModel, das alle Änderungen auf alle in docs enthaltenen
+   *         Formulardokumente überträgt.
    * @throws InvalidFormDescriptorException
    */
   public static FormModel createMultiDocumentFormModel(
@@ -189,10 +200,10 @@ public class FormModelImpl
   }
 
   /**
-   * TODO: dok
+   * Exception die eine ungültige Formularbeschreibung eines Formulardokuments
+   * repräsentiert.
    * 
    * @author christoph.lutz
-   * 
    */
   public static class InvalidFormDescriptorException extends Exception
   {
@@ -205,10 +216,15 @@ public class FormModelImpl
   }
 
   /**
-   * TODO dok
+   * Repräsentiert ein FormModel dem mehrere Formulardokumente zugeordnet sind,
+   * die alle in gleicher Weise über Änderungen (z.B. bei valueChanged())
+   * informiert werden. So ist ein gleichzeitiges Befüllen meherer Dokumente
+   * über nur ein Formular möglich. Die Formularbeschreibungen der
+   * Einzeldokumente und die in ihnen enthaltenen IDs, Funktionen und
+   * Dialogfunktionen müssen dabei vor dem Erzeugen des Objekts zu einer
+   * Gesamtbeschreibung zusammengemerged werden.
    * 
    * @author christoph.lutz
-   * 
    */
   private static class MultiDocumentFormModel implements FormModel
   {
@@ -229,15 +245,38 @@ public class FormModelImpl
     private FormGUI formGUI = null;
 
     /**
-     * TODO: dok
+     * Konstruktor für ein MultiDocumentFormModel mit den zugehörigen
+     * TextDocumentModel Objekten, die in einer HashMap abgelegt sind, die eine
+     * Zuordnung von TextDocumentModel auf ein FormModel (üblicherweise Objekte
+     * vom Typ SingleDocumentFormModel) enthalten. Das MultiDocumentFormModel
+     * leitet alle Anfragen an die mitgelieferten FormModel Objekte weiter.
      * 
      * @param mapDocsToFormModels
+     *          enthält die zugeordneten TextDocumentModels.
      * @param formFensterConf
+     *          Der Formular-Unterabschnitt des Fenster-Abschnitts von
+     *          wollmux.conf (wird für createFormGUI() benötigt).
      * @param formConf
-     * @param functionContext
+     *          der Formular-Knoten, der die Formularbeschreibung enthält (wird
+     *          für createFormGUI() benötigt).
      * @param commonMapIdToPresetValue
+     *          bildet IDs von Formularfeldern auf Vorgabewerte ab. Falls hier
+     *          ein Wert für ein Formularfeld vorhanden ist, so wird dieser
+     *          allen anderen automatischen Befüllungen vorgezogen. Wird das
+     *          Objekt {@link FormController#FISHY} als Wert für ein Feld
+     *          übergeben, so wird dieses Feld speziell markiert als ungültig
+     *          bis der Benutzer es manuell ändert (wird für createFormGUI()
+     *          benötigt).
+     * @param functionContext
+     *          der Kontext für Funktionen, die einen benötigen (wird für
+     *          createFormGUI() benötigt).
      * @param funcLib
+     *          die Funktionsbibliothek, die zur Auswertung von Trafos, Plausis
+     *          etc. herangezogen werden soll.
      * @param dialogLib
+     *          die Dialogbibliothek, die die Dialoge bereitstellt, die für
+     *          automatisch zu befüllende Formularfelder benötigt werden (wird
+     *          für createFormGUI() benötigt).
      */
     public MultiDocumentFormModel(HashMap mapDocsToFormModels,
         final ConfigThingy formFensterConf, final ConfigThingy formConf,
@@ -456,9 +495,11 @@ public class FormModelImpl
   }
 
   /**
-   * TODO: anpassen. Diese Klasse implementiert das FormModel-Interface und
-   * sorgt als Wrapper im Wesentlichen nur dafür, dass alle Methodenaufrufe des
-   * FormModels in die ensprechenden WollMuxEvents verpackt werden.
+   * Repräsentiert ein FormModel für ein einfaches Formular mit genau einem
+   * zugehörigen Formulardokument. Diese Klasse sorgt als Wrapper im
+   * Wesentlichen nur dafür, dass alle Methodenaufrufe des FormModels in die
+   * ensprechenden WollMuxEvents verpackt werden und somit korrekt
+   * synchronisiert ausgeführt werden.
    */
   private static class SingleDocumentFormModel implements FormModel
   {
@@ -479,14 +520,27 @@ public class FormModelImpl
     private FormGUI formGUI = null;
 
     /**
-     * TODO: dok
+     * Konstruktor für ein SingleDocumentFormModel mit dem zugehörigen
+     * TextDocumentModel doc.
      * 
      * @param doc
+     *          Das zugeordnete TextDocumentModel.
      * @param formFensterConf
+     *          Der Formular-Unterabschnitt des Fenster-Abschnitts von
+     *          wollmux.conf (wird für createFormGUI() benötigt).
      * @param formConf
+     *          der Formular-Knoten, der die Formularbeschreibung enthält (wird
+     *          für createFormGUI() benötigt).
      * @param functionContext
+     *          der Kontext für Funktionen, die einen benötigen (wird für
+     *          createFormGUI() benötigt).
      * @param funcLib
+     *          die Funktionsbibliothek, die zur Auswertung von Trafos, Plausis
+     *          etc. herangezogen werden soll.
      * @param dialogLib
+     *          die Dialogbibliothek, die die Dialoge bereitstellt, die für
+     *          automatisch zu befüllende Formularfelder benötigt werden (wird
+     *          für createFormGUI() benötigt).
      */
     public SingleDocumentFormModel(final TextDocumentModel doc,
         final ConfigThingy formFensterConf, final ConfigThingy formConf,
