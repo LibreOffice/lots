@@ -443,6 +443,22 @@ public class FormModelImpl
     /*
      * (non-Javadoc)
      * 
+     * @see de.muenchen.allg.itd51.wollmux.FormModel#formControllerInitCompleted()
+     */
+    public void formControllerInitCompleted()
+    {
+      for (Iterator iter = mapDocsToFormModels.keySet().iterator(); iter
+          .hasNext();)
+      {
+        TextDocumentModel doc = (TextDocumentModel) iter.next();
+        FormModel fm = (FormModel) mapDocsToFormModels.get(doc);
+        fm.formControllerInitCompleted();
+      }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see de.muenchen.allg.itd51.wollmux.FormModel#disposing(de.muenchen.allg.itd51.wollmux.TextDocumentModel)
      * 
      * TESTED
@@ -737,6 +753,16 @@ public class FormModelImpl
       catch (java.lang.Exception e)
       {
       }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.FormModel#controllerInitCompleted()
+     */
+    public void formControllerInitCompleted()
+    {
+      WollMuxEventHandler.handleFormControllerInitCompleted(doc);
     }
 
     /*

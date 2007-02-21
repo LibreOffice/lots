@@ -366,6 +366,12 @@ public class FormController implements UIElementEventHandler
     }
     
     /*
+     * FormModel informieren dass ich fertig bin und z.B. der Modified-Status
+     * des Dokuments auf false gesetzt werden kann.
+     */
+    formModel.formControllerInitCompleted();
+    
+    /*
      * Event-Verarbeitung starten.
      */
     processUIElementEvents = true;

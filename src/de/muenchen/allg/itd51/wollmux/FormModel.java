@@ -187,4 +187,11 @@ public interface FormModel
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void pdf();
+
+  /**
+   * Über diese Methode kann der FormController das FormModel informieren, dass
+   * er vollständig initialisiert wurde und notwendige Aktionen wie z.B. das
+   * zurücksetzen des modified-Status des Dokuments durchgeführt werden sollen.
+   */
+  public void formControllerInitCompleted();
 }

@@ -538,6 +538,11 @@ public class FormGUI
     {
       Logger.log("startFormGUI()"); 
     }
+
+    public void formControllerInitCompleted()
+    {
+      Logger.log("formControllerInitCompleted()"); 
+    }
   }
   
   private class MyAbortRequestListener implements ActionListener

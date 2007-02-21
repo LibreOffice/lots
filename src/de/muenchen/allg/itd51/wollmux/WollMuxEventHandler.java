@@ -3505,6 +3505,47 @@ public class WollMuxEventHandler
   }
 
   // *******************************************************************************************
+
+  /**
+   * Erzeugt ein neues WollMuxEvent, das signasisiert, dass der FormController
+   * (der zeitgleich mit einer FormGUI zum TextDocument model gestartet wird)
+   * vollständig initialisiert ist und notwendige Aktionen wie z.B. das
+   * Zurücksetzen des Modified-Status des Dokuments durchgeführt werden können.
+   * 
+   * Das Event wird vom FormModel erzeugt, wenn es vom FormController eine
+   * entsprechende Nachricht erhält.
+   */
+  public static void handleFormControllerInitCompleted(TextDocumentModel model)
+  {
+    handle(new OnFormControllerInitCompleted(model));
+  }
+
+  private static class OnFormControllerInitCompleted extends BasicEvent
+  {
+    private TextDocumentModel model;
+
+    public OnFormControllerInitCompleted(TextDocumentModel model)
+    {
+      this.model = model;
+    }
+
+    protected void doit() throws WollMuxFehlerException
+    {
+      // Beim Öffnen eines Formulars werden viele Änderungen am Dokument
+      // vorgenommen (z.B. das Setzen vieler Formularwerte), ohne dass jedoch
+      // eine entsprechende Benutzerinteraktion stattgefunden hat. Der
+      // Modified-Status des Dokuments wird daher zurückgesetzt, damit nur
+      // wirkliche Interaktionen durch den Benutzer modified=true setzen.
+      model.setDocumentModified(false);
+    }
+
+    public String toString()
+    {
+      return this.getClass().getSimpleName() + "(" + model + ")";
+    }
+  }
+
+  // *******************************************************************************************
   // Globale Helper-Methoden
 
   private static ConfigThingy requireLastSection(ConfigThingy cf,
