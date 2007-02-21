@@ -37,8 +37,6 @@ import com.sun.star.beans.PropertyValue;
 import com.sun.star.beans.XPropertySet;
 import com.sun.star.container.XEnumeration;
 import com.sun.star.container.XNameAccess;
-import com.sun.star.frame.FrameSearchFlag;
-import com.sun.star.frame.XController;
 import com.sun.star.frame.XFrame;
 import com.sun.star.lang.EventObject;
 import com.sun.star.lib.uno.helper.WeakBase;
@@ -51,7 +49,6 @@ import com.sun.star.text.XTextRange;
 import com.sun.star.text.XTextViewCursorSupplier;
 import com.sun.star.uno.AnyConverter;
 import com.sun.star.uno.RuntimeException;
-import com.sun.star.uno.UnoRuntime;
 import com.sun.star.util.CloseVetoException;
 import com.sun.star.util.XCloseListener;
 import com.sun.star.view.DocumentZoomType;
@@ -1663,75 +1660,7 @@ public class TextDocumentModel
     }
   }
 
-  /**
-   * Versucht das Dokument zu schließen, wurde das Dokument jedoch verändert
-   * (Modified-Status des Dokuments==true), so erscheint der Dialog
-   * "Speichern"/"Verwerfen"/"Abbrechen" über den ein sofortiges Schließen des
-   * Dokuments durch den Benutzer verhindert werden kann. Ist der closeListener
-   * registriert (was WollMuxSingleton bereits bei der Erstellung des
-   * TextDocumentModels standardmäßig macht), so wird nach dem close() auch
-   * automatisch die dispose()-Methode aufgerufen.
-   */
-  public void close()
-  {
-    // Damit OOo vor dem Schließen eines veränderten Dokuments den
-    // save/dismiss-Dialog anzeigt, muss die suspend()-Methode aller
-    // XController gestartet werden, die das Model der Komponente enthalten.
-    // Man bekommt alle XController über die Frames, die der Desktop liefert.
-    boolean closeOk = true;
-    if (UNO.XFramesSupplier(UNO.desktop) != null)
-    {
-      XFrame[] frames = UNO.XFramesSupplier(UNO.desktop).getFrames()
-          .queryFrames(FrameSearchFlag.ALL);
-      for (int i = 0; i < frames.length; i++)
-      {
-        XController c = frames[i].getController();
-        if (c != null && UnoRuntime.areSame(c.getModel(), doc))
-        {
-          // closeOk wird auf false gesetzt, wenn im save/dismiss-Dialog auf die
-          // Schaltflächen "Speichern" und "Abbrechen" gedrückt wird. Bei
-          // "Verwerfen" bleibt closeOK unverändert (also true).
-          if (c.suspend(true) == false) closeOk = false;
-        }
-      }
-    }
-
-    // Wurde das Dokument erfolgreich gespeichert, so merkt dies der Test
-    // getDocumentModified() == false. Wurde der save/dismiss-Dialog mit
-    // "Verwerfen" beendet, so ist closeOK==true und es wird beendet. Wurde der
-    // save/dismiss Dialog abgebrochen, so soll das Dokument nicht geschlossen
-    // werden.
-    if (closeOk || getDocumentModified() == false)
-    {
-
-      // Hier das eigentliche Schließen:
-      try
-      {
-        if (UNO.XCloseable(doc) != null) UNO.XCloseable(doc).close(true);
-      }
-      catch (CloseVetoException e)
-      {
-      }
-
-    }
-    else if (UNO.XFramesSupplier(UNO.desktop) != null)
-    {
-
-      // Tritt in Kraft, wenn "Abbrechen" betätigt wurde. In diesem Fall werden
-      // die Controllers mit suspend(FALSE) wieder reaktiviert.
-      XFrame[] frames = UNO.XFramesSupplier(UNO.desktop).getFrames()
-          .queryFrames(FrameSearchFlag.ALL);
-      for (int i = 0; i < frames.length; i++)
-      {
-        XController c = frames[i].getController();
-        if (c != null && UnoRuntime.areSame(c.getModel(), doc))
-          c.suspend(false);
-      }
-
-    }
-  }
-
-  /**
+   /**
    * Ruft die Dispose-Methoden von allen aktiven, dem TextDocumentModel
    * zugeordneten Dialogen auf und gibt den Speicher des TextDocumentModels
    * frei.

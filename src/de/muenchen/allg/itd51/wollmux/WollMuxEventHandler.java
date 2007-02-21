@@ -1991,46 +1991,6 @@ public class WollMuxEventHandler
   // *******************************************************************************************
 
   /**
-   * Erzeugt ein Event, das das übergebene Dokument schließt.
-   * 
-   * @param model
-   *          Das zu schließende TextDocumentModel.
-   */
-  public static void handleCloseTextDocument(TextDocumentModel model)
-  {
-    handle(new OnCloseTextDocument(model));
-  }
-
-  /**
-   * Dieses Event wird vom FormModelImpl ausgelöst, wenn der Benutzer die
-   * Formular-GUI schließt und damit auch das zugehörige TextDokument
-   * geschlossen werden soll.
-   * 
-   * @author christoph.lutz
-   */
-  private static class OnCloseTextDocument extends BasicEvent
-  {
-    private TextDocumentModel model;
-
-    public OnCloseTextDocument(TextDocumentModel model)
-    {
-      this.model = model;
-    }
-
-    protected void doit()
-    {
-      model.close();
-    }
-
-    public String toString()
-    {
-      return this.getClass().getSimpleName() + "(#" + model.hashCode() + ")";
-    }
-  }
-
-  // *******************************************************************************************
-
-  /**
    * Erzeugt ein neues WollMuxEvent, das ggf. notwendige interaktive
    * Initialisierungen vornimmt. Derzeit wird vor allem die Konsitenz der
    * persönlichen Absenderliste geprüft und der AbsenderAuswählen Dialog
