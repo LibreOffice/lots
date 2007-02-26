@@ -43,6 +43,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.ImageIcon;
 import javax.swing.JDialog;
@@ -2046,11 +2048,7 @@ public class WollMuxEventHandler
    * (interaktiven) Initialisierungen wie z.B. das Darstellen des
    * AbsenderAuswählen-Dialogs, falls die PAL leer ist.
    * 
-   * @author christoph.lutz
-   */
-  /**
-   * @author christoph.lutz
-   * 
+   * @author christoph.lutz TESTED
    */
   private static class OnInitialize extends BasicEvent
   {
@@ -2060,15 +2058,11 @@ public class WollMuxEventHandler
 
       DatasourceJoiner dsj = mux.getDatasourceJoiner();
 
-      // falls es immer noch keine Datensätze im LOS gibt:
-      // Die initialen Daten nach Heuristik versuchen zu finden:
       if (dsj.getLOS().size() == 0)
       {
-        int found = tryTofindByUsername(dsj);
-        if (found == 0)
-        {
-          found = tryTofindByOOoUserProfile(dsj);
-        }
+        // falls es keine Datensätze im LOS gibt:
+        // Die initialen Daten nach Heuristik versuchen zu finden:
+        int found = searchDefaultSender(dsj);
 
         // Absender Auswählen Dialog starten:
         // wurde genau ein Datensatz gefunden, kann davon ausgegangen werden,
@@ -2112,29 +2106,186 @@ public class WollMuxEventHandler
     }
 
     /**
-     * Liest die Felder "givenname" und "sn" aus der OOoRegistry des Benutzers
-     * (Extras->Optionen->Allgemein->Benutzerdaten) und sucht den entsprechenden
-     * Datensatz im DJ.
+     * Wertet den Konfigurationsabschnitt Absendervorbelegung/Suchstrategie aus
+     * und versucht nach der angegebenen Strategie (mindestens) einen Datensatz
+     * im DJ dsj zu finden, der den aktuellen Benutzer repräsentiert. Fehlt der
+     * Konfigurationsabschnitt, so wird die Defaultsuche
+     * BY_OOO_USER_PROFILE(Vorname "${givenname}" Nachname "${sn}") gestartet.
+     * Liefert ein Element der Suchstrategie mindestens einen Datensatz zurück,
+     * so werden die anderen Elemente der Suchstrategie nicht mehr ausgewertet.
      * 
      * @param dsj
-     *          Der DJ über den gesucht wird.
-     * @return liefert die Anzahl der gefundenen Datensätze.
+     *          Der DatasourceJoiner, in dem nach dem aktuellen Benutzer gesucht
+     *          wird.
+     * @return liefert die Anzahl der Datensätze, die nach Durchlaufen der
+     *         Suchstrategie gefunden wurden.
      */
-    private static int tryTofindByOOoUserProfile(DatasourceJoiner dsj)
+    private int searchDefaultSender(DatasourceJoiner dsj)
     {
-      String vorname = getUserProfileData("givenname");
-      String nachname = getUserProfileData("sn");
-      Logger.debug2("Initialize mit Vorname=\""
-                    + vorname
-                    + "\" und Nachname=\""
-                    + nachname
-                    + "\"");
-
-      // im DatasourceJoiner nach dem Benutzer suchen:
-      if (!vorname.equals("") && !nachname.equals("")) try
+      // Auswertung des Abschnitts Absendervorbelegung/Suchstrategie
+      ConfigThingy wmConf = WollMuxFiles.getWollmuxConf();
+      ConfigThingy strat = null;
+      try
       {
-        QueryResults r = dsj.find("Vorname", vorname, "Nachname", nachname);
-        // alle matches werden in die PAL kopiert:
+        strat = wmConf.query("Absendervorbelegung").query("Suchstrategie")
+            .getLastChild();
+      }
+      catch (NodeNotFoundException e)
+      {
+      }
+
+      if (strat != null)
+      {
+        // Suche über Suchstrategie aus Konfiguration
+        for (Iterator iter = strat.iterator(); iter.hasNext();)
+        {
+          ConfigThingy element = (ConfigThingy) iter.next();
+          int found = 0;
+          if (element.getName().equals("BY_JAVA_PROPERTY"))
+          {
+            found = new ByJavaPropertyFinder(dsj).tryToFind(element);
+          }
+          else if (element.getName().equals("BY_OOO_USER_PROFILE"))
+          {
+            found = new ByOOoUserProfileFinder(dsj).tryToFind(element);
+          }
+          else
+          {
+            Logger.error("Ungültiger Schlüssel in Suchstategie: "
+                         + element.stringRepresentation());
+          }
+          if (found != 0) return found;
+        }
+      }
+      else
+      {
+        // Standardsuche über das OOoUserProfile:
+        return new ByOOoUserProfileFinder(dsj).tryToFind(
+            "Vorname",
+            "${givenname}",
+            "Nachname",
+            "${sn}");
+      }
+
+      return 0;
+    }
+
+    /**
+     * Ein DataFinder ist in der Lage in einer fremden Datenquelle (z.B.
+     * OOoRegistry) nach Werten zu suchen und sie gesteuert über die Syntax
+     * "${varname}" als Suchstring für eine anschließende Suche im DJ zu
+     * evaluieren. Es handlet sich um eine Abstrakte Basisklasse für alle
+     * konkreten Finder-Objekte und eine Implementierung gemeinsam genutzter
+     * Funktionen.
+     */
+    private static abstract class DataFinder
+    {
+      private DatasourceJoiner dsj;
+
+      public DataFinder(DatasourceJoiner dsj)
+      {
+        this.dsj = dsj;
+      }
+
+      /**
+       * TODO: dok...Verwendet ein ConfigThingy in der Form "<KNOTEN>(
+       * @param conf
+       * @return
+       */
+      public int tryToFind(ConfigThingy conf)
+      {
+        int count = 0;
+        String id1 = "";
+        String id2 = "";
+        String value1 = "";
+        String value2 = "";
+        for (Iterator iter = conf.iterator(); iter.hasNext();)
+        {
+          ConfigThingy element = (ConfigThingy) iter.next();
+          if (count == 0)
+          {
+            id1 = element.getName();
+            value1 = element.toString();
+            count++;
+          }
+          else if (count == 1)
+          {
+            id2 = element.getName();
+            value2 = element.toString();
+            count++;
+          }
+          else
+          {
+            Logger
+                .error("Nur max zwei Schlüssel/Wert-Paare werden als Argumente für Suchanfragen akzeptiert!");
+          }
+        }
+
+        if (count == 1)
+        {
+          return tryToFind(id1, value1);
+        }
+        else if (count == 2)
+        {
+          return tryToFind(id1, value1, id2, value2);
+        }
+        return 0;
+      }
+
+      protected int tryToFind(String id, String value)
+      {
+        Logger.debug2(this.getClass().getSimpleName()
+                      + ".tryToFind("
+                      + id
+                      + " '"
+                      + value
+                      + "')");
+        try
+        {
+          QueryResults r = dsj.find(id, evaluate(value));
+          return addToPAL(r);
+        }
+        catch (TimeoutException e)
+        {
+          Logger.error(e);
+        }
+        return 0;
+      }
+
+      protected int tryToFind(String id1, String value1, String id2,
+          String value2)
+      {
+        Logger.debug2(this.getClass().getSimpleName()
+                      + ".tryToFind("
+                      + id1
+                      + " '"
+                      + value1
+                      + "' "
+                      + id2
+                      + " '"
+                      + value2
+                      + "')");
+        try
+        {
+          QueryResults r = dsj.find(
+              id1,
+              evaluate(value1),
+              id2,
+              evaluate(value2));
+          return addToPAL(r);
+        }
+        catch (TimeoutException e)
+        {
+          Logger.error(e);
+        }
+        return 0;
+      }
+
+      /**
+       * Kopiert alle matches von QueryResults in die PAL.
+       */
+      private int addToPAL(QueryResults r)
+      {
         for (Iterator iter = r.iterator(); iter.hasNext();)
         {
           DJDataset element = (DJDataset) iter.next();
@@ -2142,59 +2293,93 @@ public class WollMuxEventHandler
         }
         return r.size();
       }
-      catch (TimeoutException e)
+
+      protected String evaluate(String exp)
       {
-        Logger.error(e);
+        final Pattern VAR_PATTERN = Pattern.compile("\\$\\{([^\\}]*)\\}");
+        while (true)
+        {
+          Matcher m = VAR_PATTERN.matcher(exp);
+          if (!m.find()) break;
+          String key = m.group(1);
+          String value = getValueForKey(key);
+          exp = m.replaceFirst(value);
+        }
+        return exp;
       }
-      return 0;
+
+      /**
+       * Darf keinen Ausdruck zurückliefern, der "${...}" enthält, sonst kommt
+       * es zu einer Endlosschleife.
+       * 
+       * @param key
+       * @return
+       */
+      protected abstract String getValueForKey(String key);
     }
 
     /**
-     * Verwendet den Benutzernamen, hängt den String "@muenchen.de" dahinter und
-     * versucht eine entsprechende Mailadresse im DJ zu finden.
+     * TODO: Dok!
      * 
-     * @param dsj
-     *          Der DJ über den gesucht wird.
-     * @return liefert die Anzahl der gefundenen Datensätze.
+     * @author christoph.lutz
+     * 
      */
-    private static int tryTofindByUsername(DatasourceJoiner dsj)
+    private static class ByOOoUserProfileFinder extends DataFinder
     {
-      String tryMail = System.getProperty("user.name").toString()
-                       + "@muenchen.de";
-      try
+      public ByOOoUserProfileFinder(DatasourceJoiner dsj)
       {
-        QueryResults r = dsj.find("Mail", tryMail);
-        // matches in die PAL kopieren:
-        Iterator i = r.iterator();
-        while (i.hasNext())
+        super(dsj);
+      }
+
+      protected String getValueForKey(String key)
+      {
+        try
         {
-          ((DJDataset) i.next()).copy();
+          UnoService confProvider = UnoService.createWithContext(
+              "com.sun.star.configuration.ConfigurationProvider",
+              WollMuxSingleton.getInstance().getXComponentContext());
+
+          UnoService confView = confProvider.create(
+              "com.sun.star.configuration.ConfigurationAccess",
+              new UnoProps("nodepath", "/org.openoffice.UserProfile/Data")
+                  .getProps());
+          return confView.xNameAccess().getByName(key).toString();
         }
-        return r.size();
+        catch (Exception e)
+        {
+          Logger.error("Konnte den Wert zum Schlüssel '"
+                       + key
+                       + "' des OOoUserProfils nicht bestimmen:", e);
+        }
+        return "";
       }
-      catch (TimeoutException e)
-      {
-        Logger.error(e);
-      }
-      return 0;
     }
 
-    private static String getUserProfileData(String key)
+    /**
+     * TODO: Dok!
+     * 
+     * @author christoph.lutz
+     * 
+     */
+    private static class ByJavaPropertyFinder extends DataFinder
     {
-      try
+      public ByJavaPropertyFinder(DatasourceJoiner dsj)
       {
-        UnoService confProvider = UnoService.createWithContext(
-            "com.sun.star.configuration.ConfigurationProvider",
-            WollMuxSingleton.getInstance().getXComponentContext());
-
-        UnoService confView = confProvider.create(
-            "com.sun.star.configuration.ConfigurationAccess",
-            new UnoProps("nodepath", "/org.openoffice.UserProfile/Data")
-                .getProps());
-        return confView.xNameAccess().getByName(key).toString();
+        super(dsj);
       }
-      catch (Exception e)
+
+      protected String getValueForKey(String key)
       {
+        try
+        {
+          return System.getProperty(key).toString();
+        }
+        catch (java.lang.Exception e)
+        {
+          Logger.error("Konnte den Wert der JavaProperty '"
+                       + key
+                       + "' nicht bestimmen:", e);
+        }
         return "";
       }
     }
