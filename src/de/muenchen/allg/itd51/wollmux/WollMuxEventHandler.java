@@ -2049,6 +2049,10 @@ public class WollMuxEventHandler
    * 
    * @author christoph.lutz
    */
+  /**
+   * @author christoph.lutz
+   * 
+   */
   private static class OnInitialize extends BasicEvent
   {
     protected void doit()
@@ -2057,43 +2061,23 @@ public class WollMuxEventHandler
 
       DatasourceJoiner dsj = mux.getDatasourceJoiner();
 
-      // falls es noch keine Datensätze im LOS gibt.
+      // falls es immer noch keine Datensätze im LOS gibt:
+      // Die initialen Daten nach Heuristik versuchen zu finden:
       if (dsj.getLOS().size() == 0)
       {
-
-        // Die initialen Daten aus den OOo UserProfileData holen:
-        String vorname = getUserProfileData("givenname");
-        String nachname = getUserProfileData("sn");
-        Logger.debug2("Initialize mit Vorname=\""
-                      + vorname
-                      + "\" und Nachname=\""
-                      + nachname
-                      + "\"");
-
-        // im DatasourceJoiner nach dem Benutzer suchen:
-        QueryResults r = null;
-        if (!vorname.equals("") && !nachname.equals("")) try
+        int found = tryTofindByUsername(dsj);
+        if (found == 0)
         {
-          r = dsj.find("Vorname", vorname, "Nachname", nachname);
-        }
-        catch (TimeoutException e)
-        {
-          Logger.error(e);
-        }
-
-        // Auswertung der Suchergebnisse:
-        if (r != null)
-        {
-          // alle matches werden in die PAL kopiert:
-          Iterator i = r.iterator();
-          while (i.hasNext())
-          {
-            ((DJDataset) i.next()).copy();
-          }
+          found = tryTofindByOOoUserProfile(dsj);
         }
 
         // Absender Auswählen Dialog starten:
-        WollMuxEventHandler.handleShowDialogAbsenderAuswaehlen();
+        // wurde genau ein Datensatz gefunden, kann davon ausgegangen werden,
+        // dass dieser OK ist - der Dialog muss dann nicht erscheinen.
+        if (found != 1)
+          WollMuxEventHandler.handleShowDialogAbsenderAuswaehlen();
+        else
+          handlePALChangedNotify();
       }
       else
       {
@@ -2126,6 +2110,74 @@ public class WollMuxEventHandler
           WollMuxSingleton.showInfoModal("WollMux-Info", message);
         }
       }
+    }
+
+    /**
+     * Liest die Felder "givenname" und "sn" aus der OOoRegistry des Benutzers
+     * (Extras->Optionen->Allgemein->Benutzerdaten) und sucht den entsprechenden
+     * Datensatz im DJ.
+     * 
+     * @param dsj
+     *          Der DJ über den gesucht wird.
+     * @return liefert die Anzahl der gefundenen Datensätze.
+     */
+    private static int tryTofindByOOoUserProfile(DatasourceJoiner dsj)
+    {
+      String vorname = getUserProfileData("givenname");
+      String nachname = getUserProfileData("sn");
+      Logger.debug2("Initialize mit Vorname=\""
+                    + vorname
+                    + "\" und Nachname=\""
+                    + nachname
+                    + "\"");
+
+      // im DatasourceJoiner nach dem Benutzer suchen:
+      if (!vorname.equals("") && !nachname.equals("")) try
+      {
+        QueryResults r = dsj.find("Vorname", vorname, "Nachname", nachname);
+        // alle matches werden in die PAL kopiert:
+        for (Iterator iter = r.iterator(); iter.hasNext();)
+        {
+          DJDataset element = (DJDataset) iter.next();
+          element.copy();
+        }
+        return r.size();
+      }
+      catch (TimeoutException e)
+      {
+        Logger.error(e);
+      }
+      return 0;
+    }
+
+    /**
+     * Verwendet den Benutzernamen, hängt den String "@muenchen.de" dahinter und
+     * versucht eine entsprechende Mailadresse im DJ zu finden.
+     * 
+     * @param dsj
+     *          Der DJ über den gesucht wird.
+     * @return liefert die Anzahl der gefundenen Datensätze.
+     */
+    private static int tryTofindByUsername(DatasourceJoiner dsj)
+    {
+      String tryMail = System.getProperty("user.name").toString()
+                       + "@muenchen.de";
+      try
+      {
+        QueryResults r = dsj.find("Mail", tryMail);
+        // matches in die PAL kopieren:
+        Iterator i = r.iterator();
+        while (i.hasNext())
+        {
+          ((DJDataset) i.next()).copy();
+        }
+        return r.size();
+      }
+      catch (TimeoutException e)
+      {
+        Logger.error(e);
+      }
+      return 0;
     }
 
     private static String getUserProfileData(String key)
