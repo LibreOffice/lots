@@ -1024,15 +1024,14 @@ public class WollMuxEventHandler
   // *******************************************************************************************
 
   /**
-   * TODO: ... Erzeugt ein neues WollMuxEvent, das die eigentliche
-   * Dokumentbearbeitung eines TextDokuments startet.
+   * Wird wollmux:Open mit der Option FORMGUIS "merged" gestartet, so werden
+   * zuerst die Einzeldokumente geöffnet und dann dieses Event aufgerufen, das
+   * dafür zuständig ist, die eine FormGUI für den MultiDocument-Modus zu
+   * erzeugen und zu starten.
    * 
-   * Dieses Event wird immer dann ausgelöst, wenn der GlobalEventBroadcaster von
-   * OOo ein ON_NEW oder ein ON_LOAD-Event wirft. Das Event sorgt dafür, dass
-   * die eigentliche Dokumentbearbeitung durch den WollMux angestossen wird.
-   * 
-   * @param xTextDoc
-   *          Das XTextDocument, das durch den WollMux verarbeitet werden soll.
+   * @param docs
+   *          Ein Vector of TextDocumentModels, die in einem Multiformular
+   *          zusammengefasst werden sollen.
    */
   public static void handleProcessMultiform(
       Vector /* of TextDocumentModel */docs)
