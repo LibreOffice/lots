@@ -2143,11 +2143,11 @@ public class WollMuxEventHandler
           int found = 0;
           if (element.getName().equals("BY_JAVA_PROPERTY"))
           {
-            found = new ByJavaPropertyFinder(dsj).tryToFind(element);
+            found = new ByJavaPropertyFinder(dsj).find(element);
           }
           else if (element.getName().equals("BY_OOO_USER_PROFILE"))
           {
-            found = new ByOOoUserProfileFinder(dsj).tryToFind(element);
+            found = new ByOOoUserProfileFinder(dsj).find(element);
           }
           else
           {
@@ -2160,7 +2160,7 @@ public class WollMuxEventHandler
       else
       {
         // Standardsuche über das OOoUserProfile:
-        return new ByOOoUserProfileFinder(dsj).tryToFind(
+        return new ByOOoUserProfileFinder(dsj).find(
             "Vorname",
             "${givenname}",
             "Nachname",
@@ -2171,12 +2171,10 @@ public class WollMuxEventHandler
     }
 
     /**
-     * Ein DataFinder ist in der Lage in einer fremden Datenquelle (z.B.
-     * OOoRegistry) nach Werten zu suchen und sie gesteuert über die Syntax
-     * "${varname}" als Suchstring für eine anschließende Suche im DJ zu
-     * evaluieren. Es handlet sich um eine Abstrakte Basisklasse für alle
-     * konkreten Finder-Objekte und eine Implementierung gemeinsam genutzter
-     * Funktionen.
+     * Ein DataFinder sucht Datensätze im übergebenen dsj, wobei in der
+     * Beschreibung der gesuchten Werte Variablen in der Form "${varname}"
+     * verwendet werden können, die vor der Suche in einer anderen Datenquelle
+     * aufgelöst werden. Die Auflösung erledigt durch die konkrete Klasse.
      */
     private static abstract class DataFinder
     {
@@ -2188,11 +2186,18 @@ public class WollMuxEventHandler
       }
 
       /**
-       * TODO: dok...Verwendet ein ConfigThingy in der Form "<KNOTEN>(
+       * Erwartet ein ConfigThingy, das ein oder zwei Schlüssel-/Wertpaare
+       * enthält (in der Form "<KNOTEN>(<dbSpalte1> 'wert1' [<dbSpalte2>
+       * 'wert2'])" nach denen in der Datenquelle gesucht werden soll. Die
+       * Beiden Wertpaare werden dabei UND verknüpft. Die Werte wert1 und wert2
+       * können über die Syntax "${name}" Variablen referenzieren, die vor der
+       * Suche aufgelöst werden.
+       * 
        * @param conf
-       * @return
+       *          Das ConfigThingy, das die Suchabfrage beschreibt.
+       * @return Die Anzahl der gefundenen Datensätze.
        */
-      public int tryToFind(ConfigThingy conf)
+      public int find(ConfigThingy conf)
       {
         int count = 0;
         String id1 = "";
@@ -2223,26 +2228,40 @@ public class WollMuxEventHandler
 
         if (count == 1)
         {
-          return tryToFind(id1, value1);
+          return find(id1, value1);
         }
         else if (count == 2)
         {
-          return tryToFind(id1, value1, id2, value2);
+          return find(id1, value1, id2, value2);
         }
         return 0;
       }
 
-      protected int tryToFind(String id, String value)
+      /**
+       * Sucht in der Datenquelle nach Datensätzen deren Feld dbSpalte den
+       * evaluierten Wert von value enthält und überträgt die gefundenen Werte
+       * in die PAL.
+       * 
+       * @param dbSpalte
+       *          der Feldname über den nach dem evaluierten Wert von value
+       *          gesucht wird.
+       * @param value
+       *          value wird vor der Suche mittels evaluate() evaluiert (d.h.
+       *          evtl. vorhandene Variablen durch die entsprechenden Inhalte
+       *          ersetzt ersetzt).
+       * @return die Anzahl der gefundenen Datensätze
+       */
+      protected int find(String dbSpalte, String value)
       {
         Logger.debug2(this.getClass().getSimpleName()
                       + ".tryToFind("
-                      + id
+                      + dbSpalte
                       + " '"
                       + value
                       + "')");
         try
         {
-          QueryResults r = dsj.find(id, evaluate(value));
+          QueryResults r = dsj.find(dbSpalte, evaluate(value));
           return addToPAL(r);
         }
         catch (TimeoutException e)
@@ -2252,25 +2271,47 @@ public class WollMuxEventHandler
         return 0;
       }
 
-      protected int tryToFind(String id1, String value1, String id2,
+      /**
+       * Sucht in der Datenquelle nach Datensätzen wobei die beiden
+       * Suchbedingungen (dbSpalte1==evaluate(value1) und
+       * dbSpalte2==evaluate(value2)) mit UND verknüpft sind - die gefundenen
+       * Werte werden danach in die PAL kopiert.
+       * 
+       * @param dbSpalte1
+       *          der Feldname über den nach dem evaluierten Wert von value
+       *          gesucht wird.
+       * @param value1
+       *          value wird vor der Suche mittels evaluate() evaluiert (d.h.
+       *          evtl. vorhandene Variablen durch die entsprechenden Inhalte
+       *          ersetzt ersetzt).
+       * @param dbSpalte2
+       *          der Feldname über den nach dem evaluierten Wert von value
+       *          gesucht wird.
+       * @param value2
+       *          value wird vor der Suche mittels evaluate() evaluiert (d.h.
+       *          evtl. vorhandene Variablen durch die entsprechenden Inhalte
+       *          ersetzt ersetzt).
+       * @return die Anzahl der gefundenen Datensätze
+       */
+      protected int find(String dbSpalte1, String value1, String dbSpalte2,
           String value2)
       {
         Logger.debug2(this.getClass().getSimpleName()
                       + ".tryToFind("
-                      + id1
+                      + dbSpalte1
                       + " '"
                       + value1
                       + "' "
-                      + id2
+                      + dbSpalte2
                       + " '"
                       + value2
                       + "')");
         try
         {
           QueryResults r = dsj.find(
-              id1,
+              dbSpalte1,
               evaluate(value1),
-              id2,
+              dbSpalte2,
               evaluate(value2));
           return addToPAL(r);
         }
@@ -2294,6 +2335,18 @@ public class WollMuxEventHandler
         return r.size();
       }
 
+      /**
+       * Ersetzt die Variablen in exp durch deren evaluierten Inhalt, wobei die
+       * Evaluierung über getValueForKey() erfolgt, die von jeder konkreten
+       * Klasse implementiert wird. Evaluate() stellt auch sicher, dass die von
+       * getValueForKey() zurückgelieferten Werte nicht selbst Variablen
+       * enthalten können (indem die Variablenbegrenzer "${" und "}" durch "<"
+       * bzw. ">" ersetzt werden.
+       * 
+       * @param exp
+       *          der zu evaluierende Ausdruck
+       * @return
+       */
       protected String evaluate(String exp)
       {
         final Pattern VAR_PATTERN = Pattern.compile("\\$\\{([^\\}]*)\\}");
@@ -2303,26 +2356,31 @@ public class WollMuxEventHandler
           if (!m.find()) break;
           String key = m.group(1);
           String value = getValueForKey(key);
+          // keine Variablenbegrenzer "${" und "}" in value zulassen:
+          value = value.replaceAll("\\$\\{", "<");
+          value = value.replaceAll("\\}", ">");
           exp = m.replaceFirst(value);
         }
         return exp;
       }
 
       /**
-       * Darf keinen Ausdruck zurückliefern, der "${...}" enthält, sonst kommt
-       * es zu einer Endlosschleife.
+       * Liefert den Wert zu einer Variable namens key und muss von jeder
+       * konkreten Finder-Klasse implementiert werden.
        * 
        * @param key
-       * @return
+       *          Der Schlüssel, zu dem der Wert zurückgeliefert werden soll.
+       * @return der zugehörige Wert zum Schlüssel key.
        */
       protected abstract String getValueForKey(String key);
     }
 
     /**
-     * TODO: Dok!
+     * Ein konkreter DataFinder, der für die Auflösung der Variable in
+     * getValueForKey im Benutzerprofil der OOo Registry nachschaut (das selbe
+     * wie Extras->Optionen->OpenOffice.org->Benutzerdaten).
      * 
      * @author christoph.lutz
-     * 
      */
     private static class ByOOoUserProfileFinder extends DataFinder
     {
@@ -2356,10 +2414,10 @@ public class WollMuxEventHandler
     }
 
     /**
-     * TODO: Dok!
+     * Ein konkreter DataFinder, der für die Auflösung der Variable in
+     * getValueForKey die Methode System.getProperty(key) verwendet.
      * 
      * @author christoph.lutz
-     * 
      */
     private static class ByJavaPropertyFinder extends DataFinder
     {
