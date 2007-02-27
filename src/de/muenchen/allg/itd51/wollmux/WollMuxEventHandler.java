@@ -2106,9 +2106,10 @@ public class WollMuxEventHandler
     }
 
     /**
-     * Wertet den Konfigurationsabschnitt Absendervorbelegung/Suchstrategie aus
-     * und versucht nach der angegebenen Strategie (mindestens) einen Datensatz
-     * im DJ dsj zu finden, der den aktuellen Benutzer repräsentiert. Fehlt der
+     * Wertet den Konfigurationsabschnitt
+     * PersoenlicheAbsenderlisteInitialisierung/Suchstrategie aus und versucht
+     * nach der angegebenen Strategie (mindestens) einen Datensatz im DJ dsj zu
+     * finden, der den aktuellen Benutzer repräsentiert. Fehlt der
      * Konfigurationsabschnitt, so wird die Defaultsuche
      * BY_OOO_USER_PROFILE(Vorname "${givenname}" Nachname "${sn}") gestartet.
      * Liefert ein Element der Suchstrategie mindestens einen Datensatz zurück,
@@ -2122,13 +2123,14 @@ public class WollMuxEventHandler
      */
     private int searchDefaultSender(DatasourceJoiner dsj)
     {
-      // Auswertung des Abschnitts Absendervorbelegung/Suchstrategie
+      // Auswertung des Abschnitts
+      // PersoenlicheAbsenderlisteInitialisierung/Suchstrategie
       ConfigThingy wmConf = WollMuxFiles.getWollmuxConf();
       ConfigThingy strat = null;
       try
       {
-        strat = wmConf.query("Absendervorbelegung").query("Suchstrategie")
-            .getLastChild();
+        strat = wmConf.query("PersoenlicheAbsenderlisteInitialisierung").query(
+            "Suchstrategie").getLastChild();
       }
       catch (NodeNotFoundException e)
       {
