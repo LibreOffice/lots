@@ -3847,6 +3847,8 @@ public class WollMuxEventHandler
    * (der zeitgleich mit einer FormGUI zum TextDocument model gestartet wird)
    * vollständig initialisiert ist und notwendige Aktionen wie z.B. das
    * Zurücksetzen des Modified-Status des Dokuments durchgeführt werden können.
+   * Vor dem Zurücksetzen des Modified-Status, wird auf die erste Seite des
+   * Dokuments gesprungen.
    * 
    * Das Event wird vom FormModel erzeugt, wenn es vom FormController eine
    * entsprechende Nachricht erhält.
@@ -3867,6 +3869,11 @@ public class WollMuxEventHandler
 
     protected void doit() throws WollMuxFehlerException
     {
+      // Springt zum Dokumentenanfang (STRG+POS1)
+      // muss vor dem folgenden model.setDocumentModified stehen funktioniert
+      // sonst nicht zuverlässig
+      UNO.dispatch(model.doc, ".uno:GoToStartOfDoc");
+
       // Beim Öffnen eines Formulars werden viele Änderungen am Dokument
       // vorgenommen (z.B. das Setzen vieler Formularwerte), ohne dass jedoch
       // eine entsprechende Benutzerinteraktion stattgefunden hat. Der
