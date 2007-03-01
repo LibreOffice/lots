@@ -50,6 +50,35 @@ interface XWollMux
      */
 	void setPrintFunction([in] string functionName);
 
+    /**
+      Diese Methode liefert den Wert zur Datenbankspalte dbSpalte, der dem Wert
+      entspricht, den das Dokumentkommando WM(CMD'insertValue' DB_SPALTE'<dbSpalte>')
+      in das Dokument einfügen würde, oder den Leerstring "" wenn dieser Wert
+      nicht bestimmt werden kann (z.B. wenn ein ungültiger Spaltennamen dbSpalte
+      übergeben wurde). So ist es z.B. möglich, aus externen Anwendungen (z.B.
+      Basic-Makros) auf Werte des aktuell gesetzten Absenders des WollMux
+      zuzugreifen.
+    
+      Anmerkung: Ist die aufrufende Anwendung ein Basic-Makro, so muss damit
+      gerechnet werden, dass dieses Makro bereits in einer synchronisierten
+      Umgebung abläuft (das ist Standard bei Basic-Makros). Um Deadlocks in
+      Zusammenhang mit dem WollMux zu vermeiden, darf die Methode also nicht über
+      den WollMuxEventHandler synchonisiert werden. Aufgrund der fehlenden
+      Synchronisierung auf Seiten des WollMux ist die Methode jedoch mit Vorsicht
+      zu genießen. Insbesondere sollten die über diese Methode gelieferten Werte
+      NICHT verwendet werden, um z.B. mit setCurrentSender() Daten des WollMux zu
+      manipulieren.
+    
+      Zum Auslesen und Reagieren auf Änderungen der PersoenlichenAbsenderlist
+      (PAL) sollten die Methoden verwendet werden, die der XPALProvider anbietet.
+      Diese Methoden sind über den WollMuxEventHandler synchronisiert.
+    
+      @param dbSpalte
+               Name der Datenbankspalte deren Wert zurückgeliefert werden soll.
+      @return Der Wert der Datenbankspalte dbSpalte des aktuell ausgewählten
+              Absenders oder "", wenn der Wert nicht bestimmt werden kann.
+     */	
+    string getValue([in] string dbSpalte);
 }; 
   
 service WollMux: XWollMux;
