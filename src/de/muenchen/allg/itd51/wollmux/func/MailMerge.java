@@ -325,7 +325,7 @@ public class MailMerge
       this.description = description;
       try{
         String des = ds.get("WollMuxDescription");
-        if (des != null && des.length() > 0) description = des;
+        if (des != null && des.length() > 0) this.description = des;
       } catch(Exception x){}
       try{
         String sel = ds.get("WollMuxSelected");
