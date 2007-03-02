@@ -531,7 +531,7 @@ public class WollMuxFiles
       {
         String urlStr = iter.next().toString();
         if (!urlStr.endsWith("/")
-            && urlStr.lastIndexOf('/') > urlStr.lastIndexOf('.'))
+            && (urlStr.indexOf('.') < 0 || urlStr.lastIndexOf('/') > urlStr.lastIndexOf('.')))
           urlStr = urlStr + "/"; // Falls keine Dateierweiterung angegeben, /
         // ans Ende setzen, weil nur so Verzeichnisse
         // erkannt werden.
