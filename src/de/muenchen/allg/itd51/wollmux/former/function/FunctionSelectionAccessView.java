@@ -9,6 +9,7 @@
 * Datum      | Wer | Änderungsgrund
 * -------------------------------------------------------------------
 * 27.09.2006 | BNK | Erstellung
+* 02.03.2006 | BNK | Wenn Feldreferenzen vorhanden sind, dann Funktion in Expertenansicht darstellen.
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -192,7 +193,27 @@ public class FunctionSelectionAccessView implements View
     gbcHsep.gridy = y++;
     myPanel.add(seppl, gbcHsep);
     
-    if (funcSel.isExpert())
+    /**
+     * Da Feldreferenzen derzeit nicht implementiert sind und nur zu einer Fehlermeldung im
+     * Log führen würden (siehe {@link #buildParameterBox(String, ParamValue)}, fangen wir
+     * diese hier ab und stellen die FunctionSelection mit der Expertenansicht dar.
+     */
+    boolean expertOverride = false;
+    if (funcSel.isReference())
+    {
+      String[] names = funcSel.getParameterNames();
+      for (int i = 0; i < names.length; ++i)
+      {
+        ParamValue val = funcSel.getParameterValue(names[i]);
+        if (val.isFieldReference()) 
+        {
+          expertOverride = true;
+          break;
+        }
+      }
+    }
+    
+    if (funcSel.isExpert() || expertOverride)
     {
       ConfigThingy conf = funcSel.getExpertFunction();
       
