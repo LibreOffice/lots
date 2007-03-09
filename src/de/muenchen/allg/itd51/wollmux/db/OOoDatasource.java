@@ -11,6 +11,7 @@
 * 19.12.2006 | BNK | Erstellung
 * 21.12.2006 | BNK | Fertig+Test
 * 22.12.2006 | BNK | USER und PASSWORD unterstützt
+* 09.03.2007 | BNK | [P1257]Neuer Konstruktor, der Datenquelle auch ohne Angabe von Schlüssel erlaubt
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -96,6 +97,17 @@ public class OOoDatasource implements Datasource
   private String password = "";
   
   /**
+   * Wie {@link #OOoDatasource(Map, ConfigThingy, URL, boolean)}, wobei noKey==false
+   * übergeben wird.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public OOoDatasource(Map nameToDatasource, ConfigThingy sourceDesc,
+      URL context) throws ConfigurationErrorException
+  {
+    this(nameToDatasource, sourceDesc, context, false);
+  }
+  
+  /**
    * Erzeugt eine neue OOoDatasource.
    * 
    * @param nameToDatasource
@@ -108,6 +120,10 @@ public class OOoDatasource implements Datasource
    * @param context
    *          der Kontext relativ zu dem URLs aufgelöst werden sollen (zur Zeit
    *          nicht verwendet).
+   * @param noKey
+   *          Falls true, so wird immer die erste Spalte als Schlüsselspalte verwendet. Diese Option
+   *          sollte nur verwendet werden, wenn keine Operationen getätigt werden sollen, die
+   *          den Schlüssel verwenden.
    * @throws ConfigurationErrorException
    *           falls in der Definition in sourceDesc ein Fehler ist.
    *           Falls sourceDesc keinen Schema-Unterabschnitt aufweist, wird versucht,
@@ -118,7 +134,7 @@ public class OOoDatasource implements Datasource
    *           als leer behandelt. 
    * TESTED */
   public OOoDatasource(Map nameToDatasource, ConfigThingy sourceDesc,
-      URL context) throws ConfigurationErrorException
+      URL context, boolean noKey) throws ConfigurationErrorException
   {
     try
     {
@@ -158,16 +174,25 @@ public class OOoDatasource implements Datasource
     if (schemaConf.count() != 0)
     {
       Iterator iter = ((ConfigThingy)schemaConf.iterator().next()).iterator();
+      String firstColumnName = null;
       while (iter.hasNext())
       {
-        schema.add(iter.next().toString());
+        String columnName = iter.next().toString();
+        if (firstColumnName == null) firstColumnName = columnName;
+        schema.add(columnName);
       }
       if (schema.size() == 0) throw new ConfigurationErrorException("Datenquelle \""+datasourceName+"\": Schema-Abschnitt ist leer");
       ConfigThingy schluesselConf = sourceDesc.query("Schluessel");
       if (schluesselConf.count() == 0)
         throw new ConfigurationErrorException("Datenquelle \""+datasourceName+"\": Schluessel-Abschnitt fehlt");
 
-      parseKey(schluesselConf); //Test ob kein Schluessel vorhanden siehe weiter unten
+      if (noKey)
+      {
+        if (firstColumnName != null)
+          keyColumns = new String[]{firstColumnName};
+      }
+      else
+        parseKey(schluesselConf); //Test ob kein Schluessel vorhanden siehe weiter unten
     }
     else
     {
@@ -189,19 +214,36 @@ public class OOoDatasource implements Datasource
         
         if (schema.size() == 0) throw new ConfigurationErrorException("Datenquelle \""+datasourceName+"\": Tabelle \""+oooTableName+"\" hat keine Spalten");
         
-        ConfigThingy schluesselConf = sourceDesc.query("Schluessel");
-        if (schluesselConf.count() != 0)
-          parseKey(schluesselConf); //Test ob kein Schluessel vorhanden siehe weiter unten
-        else
-        {  //Schlüssel von Datenbank abfragen.
-          XKeysSupplier keysSupp = UNO.XKeysSupplier(table);
-          XColumnsSupplier colSupp = UNO.XColumnsSupplier(keysSupp.getKeys().getByIndex(0));
-          columns = colSupp.getColumns();
-          colNames = columns.getElementNames();
-          keyColumns = new String[colNames.length];
-          System.arraycopy(colNames, 0, keyColumns, 0, keyColumns.length);
-           //Test ob kein Schluessel vorhanden siehe weiter unten
+        if (noKey)
+        {
+          if (colNames.length > 0)
+            keyColumns = new String[]{colNames[0]};
         }
+        else
+        {
+          ConfigThingy schluesselConf = sourceDesc.query("Schluessel");
+          if (schluesselConf.count() != 0)
+            parseKey(schluesselConf); //Test ob kein Schluessel vorhanden siehe weiter unten
+          else
+          {  //Schlüssel von Datenbank abfragen.
+            try{
+              XKeysSupplier keysSupp = UNO.XKeysSupplier(table);
+              XColumnsSupplier colSupp = UNO.XColumnsSupplier(keysSupp.getKeys().getByIndex(0));
+              columns = colSupp.getColumns();
+              colNames = columns.getElementNames();
+              keyColumns = new String[colNames.length];
+              System.arraycopy(colNames, 0, keyColumns, 0, keyColumns.length);
+            }catch(Exception x)
+            {
+              throw new ConfigurationErrorException("Datenquelle \""+datasourceName+"\": Keine Schluessel-Spalten definiert. Automatisches bestimmen der Schlüsselspalten nicht möglich", x);
+            }
+            //Test ob kein Schluessel vorhanden siehe weiter unten
+          }
+        }
+      }
+      catch(ConfigurationErrorException x)
+      {
+        throw x;
       }
       catch(Exception x)
       {

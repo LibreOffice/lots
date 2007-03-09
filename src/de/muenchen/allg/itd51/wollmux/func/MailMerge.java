@@ -11,6 +11,7 @@
 * 05.01.2007 | BNK | Erstellung
 * 15.01.2007 | BNK | Fortschrittsindikator
 * 29.01.2007 | BNK | "Keine Beschreibung vorhanden" durch Datensatznummer ersetzt.
+* 09.03.2007 | BNK | [P1257]Auch Datenquellen unterstützen, die keine Schlüssel haben.
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -150,7 +151,7 @@ public class MailMerge
     conf.add("SOURCE").add(datasource);
     Datasource ds;
     try{
-      ds = new OOoDatasource(new HashMap(),conf,new URL("file:///"));
+      ds = new OOoDatasource(new HashMap(),conf,new URL("file:///"), true);
     }catch(Exception x)
     {
       Logger.error(x);
