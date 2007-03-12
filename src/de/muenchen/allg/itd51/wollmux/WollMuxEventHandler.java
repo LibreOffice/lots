@@ -2821,7 +2821,7 @@ public class WollMuxEventHandler
    *          Das Textdokument, in dem der Block eingefügt werden soll.
    * @param blockname
    *          Derzeit werden folgende Blocknamen akzeptiert "draftOnly",
-   *          "notInOriginal" und "all". Alle anderen Blocknamen werden
+   *          "notInOriginal" und "allVersions". Alle anderen Blocknamen werden
    *          ignoriert und keine Aktion ausgeführt.
    */
   public static void handleMarkBlock(TextDocumentModel model, String blockname)
@@ -2849,32 +2849,26 @@ public class WollMuxEventHandler
       XTextCursor range = model.getViewCursor();
 
       if (range == null) return;
-      if (!(blockname.equalsIgnoreCase("draftOnly")
-            || blockname.equalsIgnoreCase("notInOriginal") || blockname
-          .equalsIgnoreCase("allVersions"))) return;
+
+      String markChange = null;
+      if (blockname.equalsIgnoreCase("allVersions"))
+      {
+        markChange = "wird immer gedruckt";
+      }
+      else if (blockname.equalsIgnoreCase("draftOnly"))
+      {
+        markChange = "wird nur im Entwurf gedruckt";
+      }
+      else if (blockname.equalsIgnoreCase("notInOriginal"))
+      {
+        markChange = "wird immer gedruckt, ausser im Original";
+      }
+      else
+        return;
 
       String bookmarkName = "WM(CMD '" + blockname + "')";
 
       Set bmNames = getBookmarkNamesStartingWith(bookmarkName, range);
-
-      String markChange = null;
-
-      String allVersions = "wird immer gedruckt.";
-      String draftOnly = "wird nur im Entwurf gedruckt.";
-      String notInOriginal = "wird immer gedruckt, ausser im Original.";
-
-      if (blockname.equalsIgnoreCase("allVersions"))
-      {
-        markChange = allVersions;
-      }
-      else if (blockname.equalsIgnoreCase("draftOnly"))
-      {
-        markChange = draftOnly;
-      }
-      else if (blockname.equalsIgnoreCase("notInOriginal"))
-      {
-        markChange = notInOriginal;
-      }
 
       if (bmNames.size() > 0)
       {
@@ -2896,7 +2890,7 @@ public class WollMuxEventHandler
             "Markierung des Blockes aufgehoben",
             "Der ausgewählte Block enthielt bereits eine Markierung \"Block "
                 + markChange
-                + "\" Die bestehende Markierung wurde aufgehoben.");
+                + "\". Die bestehende Markierung wurde aufgehoben.");
       }
       else
       {
@@ -2904,7 +2898,7 @@ public class WollMuxEventHandler
         new Bookmark(bookmarkName, model.doc, range);
         WollMuxSingleton.showInfoModal(
             "Block wurde markiert",
-            "Der ausgewählte Block " + markChange);
+            "Der ausgewählte Block " + markChange + ".");
       }
 
       // PrintBlöcke neu einlesen:
@@ -2912,10 +2906,6 @@ public class WollMuxEventHandler
       DocumentCommandInterpreter dci = new DocumentCommandInterpreter(model,
           WollMuxSingleton.getInstance());
       dci.scanDocumentSettings();
-
-      // wird in scanDocumentSettings auf false gesetzt aber das Dokument wurde
-      // tatsächlich verändert.
-      model.setDocumentModified(true);
 
       stabilize();
     }
@@ -3639,21 +3629,19 @@ public class WollMuxEventHandler
         try
         {
           XTextRange range = cmd.getTextRange();
-          if (range == null)
-          {
-            Logger
-                .error("Aufruf von OnJumpToMark.doit() obwohl das setJumpMark-Bookmark nicht mehr da ist");
-          }
-          else
-            viewCursor.gotoRange(range, false);
+          if (range != null) viewCursor.gotoRange(range, false);
         }
         catch (java.lang.Exception e)
         {
           Logger.error(e);
         }
 
+        boolean modified = model.getDocumentModified();
         cmd.markDone(true);
+        model.setDocumentModified(modified);
+
         model.getDocumentCommandTree().update();
+
       }
       else
       {

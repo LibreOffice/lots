@@ -138,10 +138,11 @@ public class DocumentCommandInterpreter
   public void scanDocumentSettings()
   {
     Logger.debug("scanDocumentSettings");
-
+    boolean modified = model.getDocumentModified();
+    
     new DocumentSettingsScanner().execute(model.getDocumentCommandTree());
 
-    model.setDocumentModified(false);
+    model.setDocumentModified(modified);
   }
 
   /**
@@ -153,7 +154,8 @@ public class DocumentCommandInterpreter
   public void executeTemplateCommands() throws WMCommandsFailedException
   {
     Logger.debug("executeTemplateCommands");
-
+    boolean modified = model.getDocumentModified();
+    
     // Zähler für aufgetretene Fehler bei der Bearbeitung der Kommandos.
     int errors = 0;
 
@@ -215,7 +217,7 @@ public class DocumentCommandInterpreter
 
     // Document-Modified auf false setzen, da nur wirkliche
     // Benutzerinteraktionen den Modified-Status beeinflussen sollen.
-    model.setDocumentModified(false);
+    model.setDocumentModified(modified);
 
     // ggf. eine WMCommandsFailedException werfen:
     if (errors != 0)
