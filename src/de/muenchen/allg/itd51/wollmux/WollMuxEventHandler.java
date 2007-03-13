@@ -1020,6 +1020,15 @@ public class WollMuxEventHandler
             e);
       }
 
+      // ContextChanged auslösen, damit die Dispatches aktualisiert werden.
+      try
+      {
+        model.getFrame().contextChanged();
+      }
+      catch (java.lang.Exception e)
+      {
+      }
+
       stabilize();
     }
 
