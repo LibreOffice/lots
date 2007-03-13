@@ -125,9 +125,7 @@ public class DocumentCommandInterpreter
   {
     this.model = model;
     this.mux = mux;
-    // this.tree = model.getDocumentCommandTree();
     this.formScanner = null;
-    model.resetDocumentCommands();
   }
 
   /**
@@ -135,12 +133,14 @@ public class DocumentCommandInterpreter
    * executeFormCommands aufgerufen werden und sorgt dafür, dass alle globalen
    * Einstellungen des Dokuments an das TextDocumentModel weitergereicht werden.
    */
-  public void scanDocumentSettings()
+  public void scanGlobalDocumentCommands()
   {
     Logger.debug("scanDocumentSettings");
     boolean modified = model.getDocumentModified();
     
-    new DocumentSettingsScanner().execute(model.getDocumentCommandTree());
+    model.resetGlobalDocumentCommands();
+
+    new GlobalDocumentCommandsScanner().execute(model.getDocumentCommandTree());
 
     model.setDocumentModified(modified);
   }
@@ -245,15 +245,15 @@ public class DocumentCommandInterpreter
     if (formScanner == null)
     {
       boolean modified = model.getDocumentModified();
-      
+
       formScanner = new FormScanner();
       errors += formScanner.execute(model.getDocumentCommandTree());
-     
+
       model.setIDToFormFields(formScanner.idToFormFields);
 
       // Nicht vom formScanner erfasste Formularfelder erfassen
       model.collectNonWollMuxFormFields();
-      
+
       model.setDocumentModified(modified);
     }
     if (errors != 0)
@@ -376,7 +376,7 @@ public class DocumentCommandInterpreter
    * 
    * @author christoph.lutz
    */
-  private class DocumentSettingsScanner extends TreeExecutor
+  private class GlobalDocumentCommandsScanner extends TreeExecutor
   {
 
     public int execute(DocumentCommandTree tree)
@@ -1228,18 +1228,6 @@ public class DocumentCommandInterpreter
       XTextCursor insCursor = cmd.createInsertCursor();
       if (insCursor != null) insCursor.setString(value);
       cmd.markDone(!mux.isDebugMode());
-      return 0;
-    }
-
-    /**
-     * Da der DocumentTree zu diesem Zeitpunkt eigentlich gar kein
-     * SetType-Kommando mehr beinhalten darf, wird jedes evtl. noch vorhandene
-     * setType-Kommando auf DONE=true gesetzt, damit es beim updateBookmarks
-     * entfernt wird.
-     */
-    public int executeCommand(SetType cmd)
-    {
-      cmd.markDone(true);
       return 0;
     }
   }

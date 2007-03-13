@@ -278,7 +278,7 @@ public class TextDocumentModel
         .XBookmarksSupplier(doc));
     documentCommandTree.update();
 
-    resetDocumentCommands();
+    resetGlobalDocumentCommands();
 
     registerCloseListener();
 
@@ -320,7 +320,7 @@ public class TextDocumentModel
    * Sachleitenden Verfügungen (notInOriginal, DraftOnly, All) und die
    * Sprungmarken 'setJumpMark'.
    */
-  public void resetDocumentCommands()
+  public void resetGlobalDocumentCommands()
   {
     this.notInOriginalBlocks = new Vector();
     this.draftOnlyBlocks = new Vector();

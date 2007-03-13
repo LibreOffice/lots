@@ -967,10 +967,16 @@ public class WollMuxEventHandler
       {
         // Dokumentkommandos setType, setPrintFunction, all, draftOnly und
         // notInOriginal auswerten.
-        dci.scanDocumentSettings();
+        dci.scanGlobalDocumentCommands();
 
         // Bei Vorlagen: Ausführung der Dokumentkommandos
-        if (model.isTemplate()) dci.executeTemplateCommands();
+        if (model.isTemplate())
+        {
+          dci.executeTemplateCommands();
+
+          // manche Kommandos sind erst nach der Expansion verfügbar
+          dci.scanGlobalDocumentCommands();
+        }
 
         // Bei Formularen:
         if (model.isFormDocument())
@@ -1121,9 +1127,10 @@ public class WollMuxEventHandler
           WollMuxSingleton.getInstance());
       try
       {
-        dci.scanDocumentSettings();
-
         dci.executeTemplateCommands();
+
+        // manche Kommandos sind erst nach der Expansion verfügbar
+        dci.scanGlobalDocumentCommands();
       }
       catch (java.lang.Exception e)
       {
@@ -2905,7 +2912,7 @@ public class WollMuxEventHandler
       model.getDocumentCommandTree().update();
       DocumentCommandInterpreter dci = new DocumentCommandInterpreter(model,
           WollMuxSingleton.getInstance());
-      dci.scanDocumentSettings();
+      dci.scanGlobalDocumentCommands();
 
       stabilize();
     }
