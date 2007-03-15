@@ -97,7 +97,7 @@
 		<!-- md5sums file erstellen -->
 		<delete file="${MD5SUMS_FILE_NAME}"/>
 		<apply executable="md5sum" dir="packages" relative="true" failifexecutionfails="false" output="${MD5SUMS_FILE_NAME}" append="true">
-			<fileset dir="packages" includes="WollMux.uno.pkg, WollMuxBar.jar, wollmux*.deb"/>
+			<fileset dir="packages" includes="WollMux.uno.pkg, WollMuxBar.jar"/>
 		</apply>
 	</target>
 
