@@ -34,6 +34,7 @@
 	<property name="PKG_FILE" value="${basedir}/packages/${PKG_NAME}" />
 	<property name="RDB_DIR" value="${basedir}/packages/WollMux" />
 	<property name="PACKAGE_DIR" value="${basedir}/packages" />
+	<property name="MD5SUMS_FILE_NAME" value="${basedir}/packages/md5sums.txt" />
 	<property name="BUILD_INFO_FILE_NAME" value="buildinfo" />
 	<property name="BUILD_INFO_FILE" value="${RDB_DIR}/${BUILD_INFO_FILE_NAME}" />
 	<property name="LOGO" value="wollmux.jpg" />
@@ -93,6 +94,11 @@
 				<include name="basic/**/*" />
 			</fileset>
 		</zip>
+		<!-- md5sums file erstellen -->
+		<delete file="${MD5SUMS_FILE_NAME}"/>
+		<apply executable="md5sum" dir="packages" relative="true" failifexecutionfails="false" output="${MD5SUMS_FILE_NAME}" append="true">
+			<fileset dir="packages" includes="WollMux.uno.pkg, WollMuxBar.jar, wollmux*.deb"/>
+		</apply>
 	</target>
 
 	<!-- Das Target jarfile erzeugt die Java-Komponente WollMux -->
