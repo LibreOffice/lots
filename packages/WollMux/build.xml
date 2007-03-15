@@ -61,11 +61,10 @@
 	<property name="WOLLMUXBAR_MAIN_CLASS" value="de.muenchen.allg.itd51.wollmux.dialog.WollMuxBar" />
 	<property name="MAKE_DIR" value="${basedir}/packages/WollMux" />
 
-
-	<target name="main" depends="package, WollMuxBar.jar" />
+	<target name="main" depends="build" />
 
 	<!-- Das Target install installiert/reinstalliert das erzeugte uno-package -->
-	<target name="install" depends="package, WollMuxBar.jar">
+	<target name="install" depends="build">
 		<echo level="info">unopkg remove ${PKG_NAME}:</echo>
 		<exec executable="unopkg" failifexecutionfails="false">
 			<arg line="remove ${PKG_NAME}" />
@@ -78,6 +77,14 @@
 		<tstamp><format property="mytime" pattern="HH:mm:ss"/></tstamp>
 		<echo level="info" message="Install finished at ">${mytime}</echo>
 	</target>
+	
+	<!-- Das Target erzeugt das WollMux.uno.pkg, die WollMuxBar.jar und die md5sumsDatei -->
+	<target name="build" depends="package, WollMuxBar.jar">
+		<delete file="${MD5SUMS_FILE_NAME}"/>
+		<apply executable="md5sum" dir="packages" relative="true" failifexecutionfails="false" output="${MD5SUMS_FILE_NAME}" append="true">
+			<fileset dir="packages" includes="WollMux.uno.pkg, WollMuxBar.jar"/>
+		</apply>
+	</target>	
 
 	<!-- Das Target package registriert die Komponente und erzeugt ein uno.pkg-file -->
 	<target name="package" depends="jarfile, buildinfo">
@@ -94,11 +101,6 @@
 				<include name="basic/**/*" />
 			</fileset>
 		</zip>
-		<!-- md5sums file erstellen -->
-		<delete file="${MD5SUMS_FILE_NAME}"/>
-		<apply executable="md5sum" dir="packages" relative="true" failifexecutionfails="false" output="${MD5SUMS_FILE_NAME}" append="true">
-			<fileset dir="packages" includes="WollMux.uno.pkg, WollMuxBar.jar"/>
-		</apply>
 	</target>
 
 	<!-- Das Target jarfile erzeugt die Java-Komponente WollMux -->
@@ -166,9 +168,7 @@
 		</apply>
 	</target>
 
-	
-
-	
+	<!-- Das Target erzeugt die Datei WollMuxBar.jar -->		
 	<target name="WollMuxBar.jar">
 		<delete file="${WOLLMUXBAR_JAR}" />
 		<jar destfile="${WOLLMUXBAR_JAR}">
@@ -186,14 +186,12 @@
 			</manifest>
 		</jar>
 	</target>
-	
-	
+		
 	<!-- Das Target erzeugt das Debian-Paket -->
 	<target name="deb" depends="package, WollMuxBar.jar">
 		<exec executable="${MAKE_DIR}/make" dir="${MAKE_DIR}" failifexecutionfails="true" failonerror="true">
           <env key="VERSION" value="${VERSION}" />
 		</exec>
 	</target>
-
 
 </project>
