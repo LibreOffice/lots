@@ -188,7 +188,7 @@
 	</target>
 		
 	<!-- Das Target erzeugt das Debian-Paket -->
-	<target name="deb" depends="package, WollMuxBar.jar">
+	<target name="deb" depends="build">
 		<exec executable="${MAKE_DIR}/make" dir="${MAKE_DIR}" failifexecutionfails="true" failonerror="true">
           <env key="VERSION" value="${VERSION}" />
 		</exec>
