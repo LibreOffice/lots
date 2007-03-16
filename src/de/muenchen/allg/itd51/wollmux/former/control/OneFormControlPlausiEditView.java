@@ -50,7 +50,7 @@ public class OneFormControlPlausiEditView extends FunctionSelectionAccessView
    */
   public OneFormControlPlausiEditView(FormControlModel model, FunctionLibrary funcLib, ViewChangeListener bigDaddy)
   {
-    super(model.getPlausiAccess(), funcLib);
+    super(model.getPlausiAccess(), funcLib, model.getFormularMax4000());
     this.model = model;
     this.bigDaddy = bigDaddy;
     model.addListener(new MyModelChangeListener());

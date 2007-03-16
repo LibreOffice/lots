@@ -9,7 +9,8 @@
 * Datum      | Wer | Änderungsgrund
 * -------------------------------------------------------------------
 * 27.09.2006 | BNK | Erstellung
-* 02.03.2006 | BNK | Wenn Feldreferenzen vorhanden sind, dann Funktion in Expertenansicht darstellen.
+* 02.03.2007 | BNK | Wenn Feldreferenzen vorhanden sind, dann Funktion in Expertenansicht darstellen.
+* 16.03.2007 | BNK | [R5860]Unterstützung für Feldreferenzen
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -29,6 +30,8 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.StringReader;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Vector;
 
 import javax.swing.Box;
 import javax.swing.JComboBox;
@@ -50,6 +53,8 @@ import javax.swing.text.JTextComponent;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.Logger;
+import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
+import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
 import de.muenchen.allg.itd51.wollmux.former.view.View;
 import de.muenchen.allg.itd51.wollmux.func.Function;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
@@ -108,7 +113,20 @@ public class FunctionSelectionAccessView implements View
    * Die JComboBox, in der der Benutzer die Funktion auswählen kann.
    */
   private JComboBox functionSelectorBox;
-
+  
+  /**
+   * Die Liste aller JComboBoxes zur Festlegung von Parameterwerten (siehe {@link #buildParameterBox(String, ParamValue)}).
+   */
+  private List parameterBoxes = new Vector(1);
+  
+  /**
+   * Liste von {@link StringBuilder} Objekten (ACHTUNG: global für alle FunctionSelectionAccessViews),
+   * die alle momentan verfügbaren IDs für 
+   * Feldreferenzen in den Parameter-Komboboxen darstellen, wobei jede ID von "[" und "]"
+   * umschlossen ist.
+   */
+  private static List fieldIds = new Vector(1);
+  
   /**
    * Wurde die manuelle Eingabe eines Stringliterals als Funktion gewählt, so erfolgt die
    * Eingabe in dieses Eingabefeld. 
@@ -136,14 +154,15 @@ public class FunctionSelectionAccessView implements View
 
   /**
    * Erzeugt eine neue View über die funcSel angezeigt und bearbeitet werden kann.
-   * @param funcLib die Funktionsbibliothek, deren Funktionen auswählbar sein sollen. 
+   * @param funcLib die Funktionsbibliothek, deren Funktionen auswählbar sein sollen.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
-  public FunctionSelectionAccessView(FunctionSelectionAccess funcSel, FunctionLibrary funcLib)
+  public FunctionSelectionAccessView(FunctionSelectionAccess funcSel, FunctionLibrary funcLib, FormularMax4000 formularMax4000)
   {
     this.funcSel = funcSel;
     this.funcLib = funcLib;
+    formularMax4000.addBroadcastListener(new MyBroadcastListener());
     myPanel = new JPanel(new GridBagLayout());
     
     updateExpertFunctionTimer = new Timer(250, new ActionListener()
@@ -167,6 +186,7 @@ public class FunctionSelectionAccessView implements View
   private void buildPanel()
   {
     myPanel.removeAll();
+    parameterBoxes.clear();
     
     
     //  int gridx, int gridy, int gridwidth, int gridheight, double weightx, double weighty, int anchor,          int fill,                  Insets insets, int ipadx, int ipady)
@@ -193,27 +213,7 @@ public class FunctionSelectionAccessView implements View
     gbcHsep.gridy = y++;
     myPanel.add(seppl, gbcHsep);
     
-    /**
-     * Da Feldreferenzen derzeit nicht implementiert sind und nur zu einer Fehlermeldung im
-     * Log führen würden (siehe {@link #buildParameterBox(String, ParamValue)}, fangen wir
-     * diese hier ab und stellen die FunctionSelection mit der Expertenansicht dar.
-     */
-    boolean expertOverride = false;
-    if (funcSel.isReference())
-    {
-      String[] names = funcSel.getParameterNames();
-      for (int i = 0; i < names.length; ++i)
-      {
-        ParamValue val = funcSel.getParameterValue(names[i]);
-        if (val.isFieldReference()) 
-        {
-          expertOverride = true;
-          break;
-        }
-      }
-    }
-    
-    if (funcSel.isExpert() || expertOverride)
+    if (funcSel.isExpert())
     {
       ConfigThingy conf = funcSel.getExpertFunction();
       
@@ -296,13 +296,34 @@ public class FunctionSelectionAccessView implements View
   private JComboBox buildParameterBox(final String paramName, ParamValue startValue)
   {
     final JComboBox combo = new JComboBox();
+    parameterBoxes.add(combo);
     combo.setEditable(true);
     combo.addItem(UNSPECIFIED_ITEM);
+    String startStr = startValue.getString();
+    String brackStr = null;
+    if (startStr != null) brackStr = "[" + startStr + "]";
+    Iterator iter = fieldIds.iterator();
+    int selectedIndex = -1;
+    while (iter.hasNext()) 
+    {
+      Object item = iter.next();
+      if (item.toString().equals(brackStr)) selectedIndex = combo.getItemCount();
+      combo.addItem(item);
+    }
     JTextComponent tc = ((JTextComponent)combo.getEditor().getEditorComponent());
     if (startValue.isUnspecified())
       combo.setSelectedItem(UNSPECIFIED_ITEM);
     else if (startValue.isFieldReference())
-      Logger.error("Feldreferenzen nicht implementiert");
+    {
+      if (selectedIndex < 0)
+      {
+        selectedIndex = combo.getItemCount();
+        StringBuilder buffy = new StringBuilder(brackStr);
+        fieldIds.add(buffy);
+        combo.addItem(buffy);
+      }
+      combo.setSelectedIndex(selectedIndex);
+    }
     else if (startValue.isLiteral())
       combo.setSelectedItem(startValue.getString());
       
@@ -315,7 +336,21 @@ public class FunctionSelectionAccessView implements View
           if (newValue.equals(UNSPECIFIED_ITEM))
             funcSel.setParameterValue(paramName, ParamValue.unspecified());
           else
-            funcSel.setParameterValue(paramName, ParamValue.literal(newValue));
+          {
+            boolean isLiteral = true;
+            for (int i = 0; i < combo.getItemCount(); ++i)
+            {
+              if (combo.getItemAt(i).toString().equals(newValue))
+              {
+                String id = newValue.substring(1, newValue.length() - 1); // "[" und "]" entfernen
+                funcSel.setParameterValue(paramName, ParamValue.field(id));
+                isLiteral = false;
+                break;
+              }
+            }
+            
+            if (isLiteral) funcSel.setParameterValue(paramName, ParamValue.literal(newValue));
+          }
         }catch(BadLocationException x)
         {
           Logger.error(x);
@@ -484,5 +519,64 @@ public class FunctionSelectionAccessView implements View
   public JComponent JComponent()
   {
     return myPanel;
+  }
+  
+  private class MyBroadcastListener extends BroadcastListener
+  {
+    /**
+     * Ein FormControlModel hat seine ID von oldId auf newId geändert. 
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
+    public void broadcastFormControlIdHasChanged(String oldId, String newId) 
+    {
+      funcSel.updateFieldReferences(oldId, newId);
+      String bOldId = "[" + oldId + "]";
+      String bNewId = "[" + newId + "]";
+      Iterator iter = fieldIds.iterator();
+      while (iter.hasNext())
+      {
+        StringBuilder buffy = (StringBuilder)iter.next();
+        if (buffy.lastIndexOf(bOldId) == 0)
+        {
+          buffy.delete(0, buffy.length());
+          buffy.append(bNewId);
+        }
+        if (buffy.lastIndexOf(bNewId) == 0)
+        {
+          Iterator iter2 = parameterBoxes.iterator();
+          while (iter2.hasNext())
+          {
+            JComboBox box = (JComboBox)iter2.next();
+            Document comboDoc = ((JTextComponent)box.getEditor().getEditorComponent()).getDocument();
+            try{
+              if (bOldId.equals(comboDoc.getText(0,comboDoc.getLength())))
+              {
+                box.setSelectedItem("");
+                box.setSelectedItem(buffy);
+              }
+            }catch(Exception x){Logger.error(x);}
+          }
+        }
+      }
+    }
+    
+    /**
+     * Ein neues FormControlModel mit ID id ist hinzugekommen. 
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     * TESTED */
+    public void broadcastNewFormControlId(String id) 
+    {
+      if (id.length() == 0) return;
+      String brackId = "[" + id + "]";
+      Iterator iter = fieldIds.iterator();
+      while (iter.hasNext()) if (brackId.equals(iter.next().toString())) return;
+      fieldIds.add(new StringBuilder(brackId));
+      iter = parameterBoxes.iterator();
+      while (iter.hasNext())
+      {
+        JComboBox box = (JComboBox)iter.next();
+        box.addItem(brackId);
+      }
+    }
   }
 }

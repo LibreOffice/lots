@@ -9,6 +9,7 @@
 * Datum      | Wer | Änderungsgrund
 * -------------------------------------------------------------------
 * 04.09.2006 | BNK | Erstellung
+* 16.03.2007 | BNK | +broadcastNewFormControlId()
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -63,6 +64,12 @@ public abstract class BroadcastListener
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void broadcastFormControlIdHasChanged(String oldId, String newId) {}
+  
+  /**
+   * Ein neues FormControlModel mit ID id ist hinzugekommen. 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public void broadcastNewFormControlId(String id) {}
   
   /**
    * Eine Menge von Bookmarks wurde ausgewählt.

@@ -41,7 +41,7 @@ public class OneInsertionTrafoView extends FunctionSelectionAccessView
   
   public OneInsertionTrafoView(InsertionModel model, FunctionLibrary funcLib, ViewChangeListener bigDaddy)
   {
-    super(model.getTrafoAccess(), funcLib);
+    super(model.getTrafoAccess(), funcLib, model.getFormularMax4000());
     this.model = model;
     this.bigDaddy = bigDaddy;
     model.addListener(new MyModelChangeListener());

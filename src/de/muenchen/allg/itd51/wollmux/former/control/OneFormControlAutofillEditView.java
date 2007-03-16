@@ -50,7 +50,7 @@ public class OneFormControlAutofillEditView extends FunctionSelectionAccessView
    */
   public OneFormControlAutofillEditView(FormControlModel model, FunctionLibrary funcLib, ViewChangeListener bigDaddy)
   {
-    super(model.getAutofillAccess(), funcLib);
+    super(model.getAutofillAccess(), funcLib, model.getFormularMax4000());
     this.model = model;
     this.bigDaddy = bigDaddy;
     model.addListener(new MyModelChangeListener());

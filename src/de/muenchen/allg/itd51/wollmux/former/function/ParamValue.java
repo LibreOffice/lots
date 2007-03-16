@@ -9,6 +9,7 @@
 * Datum      | Wer | Änderungsgrund
 * -------------------------------------------------------------------
 * 25.09.2006 | BNK | Erstellung
+* 16.03.2007 | BNK | +setFieldReference()
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -102,6 +103,16 @@ public class ParamValue
   {
     if (isUnspecified()) return null;
     return idStr;
+  }
+  
+  /**
+   * Macht diesen Parameter zu einer Referenz auf das Feld mit ID id.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public void setFieldReference(String id)
+  {
+    idStr = id;
+    type = FIELD;
   }
   
   /**

@@ -9,6 +9,7 @@
  * Datum      | Wer | Änderungsgrund
  * -------------------------------------------------------------------
  * 27.09.2006 | BNK | Erstellung
+ * 16.03.2007 | BNK | +updateFieldReferences()
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -133,5 +134,11 @@ public interface FunctionSelectionAccess
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void setExpertFunction(ConfigThingy funConf);
+  
+  /**
+   * Alle Referenzen auf das Felder oldId werden geändert auf newId. 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public void updateFieldReferences(String oldId, String newId);
 
 }

@@ -10,6 +10,8 @@
 * -------------------------------------------------------------------
 * 07.08.2006 | BNK | Erstellung
 * 29.08.2006 | BNK | kommentiert
+* 16.03.2007 | BNK | +getFormularMax4000()
+*                  | +MyTrafoAccess.updateFieldReferences()
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -265,6 +267,15 @@ public class FormControlModel
     FormControlModel model = new FormControlModel(label, TAB_TYPE, id, formularMax4000);
     model.action = "abort";
     return model;
+  }
+  
+  /**
+   * Liefert den FormularMax4000 zu dem dieses Model gehört.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public FormularMax4000 getFormularMax4000()
+  {
+    return formularMax4000;
   }
   
   /**
@@ -802,6 +813,12 @@ public class FormControlModel
       formularMax4000.documentNeedsUpdating();
     }
     
+    public void updateFieldReferences(String oldId, String newId)
+    {
+      sel.updateFieldReferences(oldId, newId);
+      formularMax4000.documentNeedsUpdating();
+    }
+    
     public String[] getParameterNames()
     {
       return sel.getParameterNames();
@@ -815,7 +832,6 @@ public class FormControlModel
     {
       return sel.getParameterValue(paramName);
     }
-
     
   }
 }

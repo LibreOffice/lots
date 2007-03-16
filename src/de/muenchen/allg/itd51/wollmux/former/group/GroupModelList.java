@@ -58,6 +58,7 @@ public class GroupModelList
   public GroupModelList(FormularMax4000 formularMax4000)
   {
     this.formularMax4000 = formularMax4000;
+    this.formularMax4000.addBroadcastListener(new MyBroadcastListener());
   }
   
   /**
@@ -161,6 +162,10 @@ public class GroupModelList
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     public void itemAdded(GroupModel model, int index);
+  }
+  
+  private class MyBroadcastListener extends BroadcastListener
+  {
   }
 }
 

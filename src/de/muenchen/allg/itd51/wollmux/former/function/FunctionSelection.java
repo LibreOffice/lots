@@ -9,6 +9,7 @@
 * Datum      | Wer | Änderungsgrund
 * -------------------------------------------------------------------
 * 25.09.2006 | BNK | Erstellung
+* 16.03.2007 | BNK | +updateFieldReferences()
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -18,6 +19,7 @@
 package de.muenchen.allg.itd51.wollmux.former.function;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
@@ -236,6 +238,17 @@ public class FunctionSelection implements FunctionSelectionAccess
   public void setParameterValue(String paramName, ParamValue paramValue)
   {
     mapNameToParamValue.put(paramName, paramValue);
+  }
+
+  public void updateFieldReferences(String oldId, String newId)
+  {
+    Iterator iter = mapNameToParamValue.values().iterator();
+    while (iter.hasNext())
+    {
+      ParamValue val = (ParamValue)iter.next();
+      if (val.isFieldReference() && val.getString().equals(oldId))
+        val.setFieldReference(newId);
+    }
   }
 
 }

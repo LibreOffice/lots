@@ -10,6 +10,8 @@
 * -------------------------------------------------------------------
 * 06.09.2006 | BNK | Erstellung
 * 08.02.2007 | BNK | Beim Generieren von Trafo-Funktionsnamen Timestamp in den Namen codieren.
+* 16.03.2007 | BNK | +getFormularMax4000()
+*                  | +MyTrafoAccess.updateFieldReferences()
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -212,6 +214,15 @@ public class InsertionModel
     
     String newBookmarkName = conf.stringRepresentation(false, '\'');
     return bookmark.rename(newBookmarkName) != Bookmark.BROKEN;
+  }
+  
+  /**
+   * Liefert den FormularMax4000 zu dem dieses Model gehört.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public FormularMax4000 getFormularMax4000()
+  {
+    return formularMax4000;
   }
   
   /**
@@ -426,6 +437,12 @@ public class InsertionModel
       trafo.setParameterValue(paramName, paramValue);
       formularMax4000.documentNeedsUpdating();
     }
+    public void updateFieldReferences(String oldId, String newId)
+    {
+      trafo.updateFieldReferences(oldId, newId);
+      formularMax4000.documentNeedsUpdating();
+    }
+
     public String[] getParameterNames()
     {
       return trafo.getParameterNames();

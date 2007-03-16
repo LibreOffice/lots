@@ -100,6 +100,7 @@ public class GroupModel
     this.name = name;
     this.condition = condition;
     this.formularMax4000 = formularMax4000;
+    bookmarks.add(new Integer(0)); //Dummy-Statement, nur um die Warnung wegzukriegen, dass bookmarks derzeit nicht verwendet wird.
   }
   
   /**
@@ -225,6 +226,11 @@ public class GroupModel
     public void setParameterValue(String paramName, ParamValue paramValue)
     {
       condition.setParameterValue(paramName, paramValue);
+      formularMax4000.documentNeedsUpdating();
+    }
+    public void updateFieldReferences(String oldId, String newId)
+    {
+      condition.updateFieldReferences(oldId, newId);
       formularMax4000.documentNeedsUpdating();
     }
     public String[] getParameterNames()

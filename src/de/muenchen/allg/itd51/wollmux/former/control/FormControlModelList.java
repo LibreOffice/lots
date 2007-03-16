@@ -13,6 +13,7 @@
 * 10.09.2006 | BNK | [R3207]Maximale Anzahl von Steuerelementen pro Tab wird überwacht.
 * 10.09.2006 | BNK | automatisch Tab einfügen, wenn nach Button ein in der Button-Zeile
 *                    unsinniges Element auftaucht.
+* 16.03.2007 | BNK | Für jedes hinzugekommene FormControlModel die ID broadcasten. 
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -27,6 +28,8 @@ import java.util.ListIterator;
 import java.util.Vector;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.former.Broadcast;
+import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
 
 /**
@@ -148,12 +151,17 @@ public class FormControlModelList
    * falls idx < 0 wird model an das Ende der Liste angehängt.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public void add(FormControlModel model, int idx)
+  public void add(final FormControlModel model, int idx)
   {
     if (idx < 0) idx = models.size();
     models.add(idx, model);
     
     notifyListeners(model, idx);
+    formularMax4000.broadcast(new Broadcast(){
+      public void sendTo(BroadcastListener listener)
+      {
+        listener.broadcastNewFormControlId(model.getId());
+      }});
     
     enforceMaxModelsPerTab();
   }
