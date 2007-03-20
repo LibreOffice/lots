@@ -499,7 +499,7 @@ public class PersoenlicheAbsenderlisteVerwalten
             list.setVisibleRowCount(lines);
             list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
             list.setLayoutOrientation(JList.VERTICAL);
-            list.setPrototypeCellValue("Matthias S. Benkmann ist euer Gott (W-OLL-MUX-5.1)");
+            list.setPrototypeCellValue("Al-chman hemnal ulhillim el-WollMux(W-OLL-MUX-5.1)");
             
             list.addListSelectionListener(myListSelectionListener);
             
