@@ -16,6 +16,7 @@
 * 31.05.2006 | BNK | +getFunctionDialogReferences()
 * 26.07.2006 | BNK | +REPLACE-Grundfunktion
 * 05.12.2006 | BNK | WollMuxFiles.getClassLoader() wird für ExternalFunctions übergeben.
+* 21.03.2007 | BNK | BIND erweitert so dass auch direkt eine Funktion als FUNCTION verwendet werden kann.
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -355,15 +356,31 @@ public class FunctionFactory
     }
     else if (name.equals("BIND"))
     {
-      ConfigThingy funcNameConf = conf.query("FUNCTION");
-      if (funcNameConf.count() != 1)
+      ConfigThingy funcConf = conf.query("FUNCTION"); //funcConf = <query results> - FUNCTION - ...
+      if (funcConf.count() != 1)
         throw new ConfigurationErrorException("Funktion vom Typ \"BIND\" erfordert genau 1 Unterelement FUNCTION");
       
-      String funcName = funcNameConf.toString();
-   
-      Function func = funcLib.get(funcName);
-      if (func == null)
-        throw new ConfigurationErrorException("Funktion \""+funcName+"\" wird verwendet, bevor sie definiert ist");
+      Function func;
+      funcConf = (ConfigThingy)funcConf.iterator().next();  //funcConf = FUNCTION - ...
+      if (funcConf.count() == 0)
+        throw new ConfigurationErrorException("Bei Funktionen vom Typ \"BIND\" muss nach \"FUNCTION\" ein Funktionsname oder eine Funktion folgen.");
+      if (funcConf.count() > 1)
+        throw new ConfigurationErrorException("Bei Funktionen vom Typ \"BIND\" darf nach \"FUNCTION\" keine Liste sondern nur ein Funktionsname oder eine Funktion folgen.");
+
+      funcConf = (ConfigThingy)funcConf.iterator().next(); //<Funktionsname>|<Funktion> - ...
+      
+      if (funcConf.count() == 0) //d.h. es wurde nur ein <Funktionsname> angegeben
+      {
+        String funcName = funcConf.toString();
+        
+        func = funcLib.get(funcName);
+        if (func == null)
+          throw new ConfigurationErrorException("Funktion \""+funcName+"\" wird verwendet, bevor sie definiert ist");
+      }
+      else //if (funcConf.count() > 0) d.h. es wurde eine ganze Funktion angegeben
+      {
+        func = parse(funcConf, funcLib, dialogLib, context);
+      }
       
       return new BindFunction(func, conf, funcLib, dialogLib, context);
     }

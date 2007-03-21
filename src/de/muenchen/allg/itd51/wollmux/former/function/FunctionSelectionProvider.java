@@ -144,7 +144,12 @@ public class FunctionSelectionProvider
       ConfigThingy childConf = (ConfigThingy)iter.next();
       String name = childConf.getName();
       if (name.equals("FUNCTION"))
+      {
+        if (childConf.count() != 1) return funcSel;
+        if (((ConfigThingy)childConf.iterator().next()).count() != 0)
+          return funcSel;
         funcName = childConf.toString();
+      }
       else if (name.equals("SET"))
       {
         if (childConf.count() != 2) return funcSel;
