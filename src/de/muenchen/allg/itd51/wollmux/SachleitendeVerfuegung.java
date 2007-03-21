@@ -70,8 +70,6 @@ public class SachleitendeVerfuegung
 
   private static final String zifferPattern = "^([XIV]+|\\d+)\\.\t";
 
-  private static boolean firstTime = true;
-
   /**
    * Enthält einen Vector mit den ersten 15 römischen Ziffern. Mehr wird in
    * Sachleitenden Verfügungen sicherlich nicht benötigt :-)
@@ -112,9 +110,6 @@ public class SachleitendeVerfuegung
 
     // Notwendige Absatzformate definieren (falls nicht bereits definiert)
     createUsedStyles(model.doc);
-
-    // AutoNummerierung abstellen:
-    switchOffAutoNumbering();
 
     XParagraphCursor cursor = UNO.XParagraphCursor(range.getText()
         .createTextCursorByRange(range));
@@ -163,9 +158,6 @@ public class SachleitendeVerfuegung
 
     // Notwendige Absatzformate definieren (falls nicht bereits definiert)
     createUsedStyles(model.doc);
-
-    // AutoNummerierung abstellen:
-    switchOffAutoNumbering();
 
     XParagraphCursor cursor = UNO.XParagraphCursor(range.getText()
         .createTextCursorByRange(range));
@@ -220,9 +212,6 @@ public class SachleitendeVerfuegung
 
     // Notwendige Absatzformate definieren (falls nicht bereits definiert)
     createUsedStyles(model.doc);
-
-    // AutoNummerierung abstellen:
-    switchOffAutoNumbering();
 
     XParagraphCursor cursor = UNO.XParagraphCursor(range.getText()
         .createTextCursorByRange(range));
@@ -1184,15 +1173,6 @@ public class SachleitendeVerfuegung
       short verfPunkt, short numberOfCopies, boolean isDraft, boolean isOriginal)
       throws PrintFailedException
   {
-    // Kontrollkästchen Ausgeblendeter Text (anzeigen) unter
-    // "Extras->Optionen->OOoWriter->Formatierungshilfen" deaktivieren, damit
-    // die Berechnung der Gesamtseitenzahl in jedem Fall richtig funktioniert.
-    // FIXME: updateAccess von hiddenCharacter geht noch nicht und wird erst
-    // nach einem Neustart aktiv -> Community fragen
-    XChangesBatch updateAccess = UNO
-        .getConfigurationUpdateAccess("/org.openoffice.Office.Writer/Content/NonprintingCharacter");
-    Object oldhiddenCharacter = setHiddenCharacter(updateAccess, Boolean.FALSE);
-
     // Zähler für Verfuegungspunktnummer auf 1 initialisieren, wenn ein
     // Verfuegungspunkt1 vorhanden ist.
     XTextRange punkt1 = getVerfuegungspunkt1(model.doc);
@@ -1305,13 +1285,6 @@ public class SachleitendeVerfuegung
     // Verfügungspunkte wieder einblenden:
     if (setInvisibleRange != null)
       UNO.setProperty(setInvisibleRange, "CharHidden", Boolean.FALSE);
-
-    // Kontrollkästchen Ausgeblendeter Text (anzeigen) unter
-    // "Extras->Optionen->OOoWriter->Formatierungshilfen" wieder auf den alten
-    // Wert zurücksetzen:
-    setHiddenCharacter(updateAccess, oldhiddenCharacter);
-    if (UNO.XComponent(updateAccess) != null)
-      UNO.XComponent(updateAccess).dispose();
   }
 
   /**
@@ -1400,22 +1373,30 @@ public class SachleitendeVerfuegung
   }
 
   /**
-   * Setzt die Property HiddenCharacter des übergebenen UNO-Objekts
-   * updateAccess, committed die Änderung an OOo und gibt den Wert zurück, den
-   * die Property vor dem setzen besaß.
-   * 
-   * @param updateAccess
-   *          das updateAcess-Objekt, auf dem die Operation durchgeführt werden
-   *          soll.
-   * @param newValue
-   *          der neu zu setzende Wert.
-   * @return der Wert, den die Property VORHER hatte.
+   * Setzt die für die korrekte Funktionsfähigkeit der SachleitendenVerfügungen
+   * notwendigen Configurations-Optionen (derzeit
+   * NonprintingCharacters/HiddenCharacter=false und ApplyNumbering/Enable =
+   * false) und sollte zu Beginn der Initialisierung des WollMux gesetzt werden.
    */
-  private static Object setHiddenCharacter(XChangesBatch updateAccess,
-      Object newValue)
+  public static void setRequiredConfigOptions()
   {
-    Object oldValue = UNO.getProperty(updateAccess, "HiddenCharacter");
-    UNO.setProperty(updateAccess, "HiddenCharacter", newValue);
+    switchOffAutoNumbering();
+    switchOffPrintingOfHiddenCharacters();
+  }
+
+  /**
+   * Schaltet die Option "Extras->Optionen->Writer->Formierungshilfen->Anzeigen:
+   * versteckten Text" aus, damit versteckter Text nicht angezeigt wird (und
+   * damit die Berechnung der Gesamtseitenzahl eines Dokuments verfälscht, die
+   * in SachleitendenVerfügungen benötigt wird). Die Einstellung wird nur für
+   * OpenOffice-Fenster aktiv, die NACH dem Aufruf dieser Methode erzeugt werden
+   * und nicht für Fenster, die bereits geöffnet sind.
+   */
+  private static void switchOffPrintingOfHiddenCharacters()
+  {
+    XChangesBatch updateAccess = UNO
+        .getConfigurationUpdateAccess("/org.openoffice.Office.Writer/Content/NonprintingCharacter");
+    UNO.setProperty(updateAccess, "HiddenCharacter", Boolean.FALSE);
     if (updateAccess != null) try
     {
       updateAccess.commitChanges();
@@ -1424,35 +1405,28 @@ public class SachleitendeVerfuegung
     {
       Logger.error(e);
     }
-    return oldValue;
   }
 
   /**
    * Schaltet die Option AutoNumbering unter
    * Extras->AutoKorrektur...->Nummerierung anwenden aus, da diese im Umgang mit
    * Sachleitenden Verfügungen nicht einsetzbar ist. OpenOffice interpretiert
-   * sonst jeden Verfügungspunkt als Beginn einer Nummerierung.
+   * sonst jeden Verfügungspunkt als Beginn einer Nummerierung. Die Änderung
+   * wird nur für neue OpenOffice-Fenster aktiv und nicht für bereits geöffnete
+   * Dokumente.
    */
   private static void switchOffAutoNumbering()
   {
-    // FIXME: switchOffAutoNumbering: auch das wird erst nach einem Neustart
-    // aktiv. Warum?
-    if (firstTime)
+    XChangesBatch updateAccess = UNO
+        .getConfigurationUpdateAccess("/org.openoffice.Office.Writer/AutoFunction/Format/ByInput/ApplyNumbering");
+    UNO.setProperty(updateAccess, "Enable", Boolean.FALSE);
+    if (updateAccess != null) try
     {
-      firstTime = false;
-      XChangesBatch updateAccess = UNO
-          .getConfigurationUpdateAccess("/org.openoffice.Office.Writer/AutoFunction/Format/ByInput/ApplyNumbering");
-      UNO.setProperty(updateAccess, "Enable", Boolean.FALSE);
-      if (updateAccess != null) try
-      {
-        updateAccess.commitChanges();
-      }
-      catch (WrappedTargetException e)
-      {
-        Logger.error(e);
-      }
-      if (UNO.XComponent(updateAccess) != null)
-        UNO.XComponent(updateAccess).dispose();
+      updateAccess.commitChanges();
+    }
+    catch (WrappedTargetException e)
+    {
+      Logger.error(e);
     }
   }
 

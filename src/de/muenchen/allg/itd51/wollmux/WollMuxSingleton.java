@@ -252,6 +252,9 @@ public class WollMuxSingleton implements XPALProvider
         "Info über Vorlagen und Formulare (WollMux)",
         ".uno:HelpMenu",
         ".uno:About");
+
+    // Setzen von Konfigurationsoptionen für die Sachleitenden Verfügungen.
+    SachleitendeVerfuegung.setRequiredConfigOptions();
   }
 
   /**
