@@ -22,6 +22,7 @@
 *                  | [R4296]Wenn READONLY, dann nicht fokussierbar
 * 09.01.2007 | BNK | ENTER kann jetzt auch Checkboxen und Buttons aktivieren
 * 07.02.2007 | BNK | +ACTION "open"
+* 23.03.2007 | BNK | openExt implementiert
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -705,6 +706,26 @@ public class UIElementFactory
       else
       {
         Logger.error("ACTION \""+action+"\" erfordert mindestens ein Attribut FRAG_ID");
+      }
+    }
+    else if (action.equals("openExt"))
+    {
+      ConfigThingy ext = conf.query("EXT");
+      if (ext.count() != 1)
+      {
+        Logger.error("ACTION \""+action+"\" erfordert genau ein Attribut EXT");
+      }
+      else
+      {
+        ConfigThingy url = conf.query("URL");
+        if (url.count() != 1)
+        {
+          Logger.error("ACTION \""+action+"\" erfordert genau ein Attribut URL");
+        }
+        else
+        {
+          return new UIElementActionListener(handler, uiElement, false, "action", new Object[]{action, ext.toString(), url.toString()});
+        }
       }
     }
     else if (action.equals("open"))

@@ -45,6 +45,7 @@
 * 26.10.2006 | LUT | +ACTION "about"
 *                  | +getBuildInfo(), das die buildinfo-Datei der WollMuxBar.jar ausliest
 * 15.01.2007 | BNK | --load hinzugefuegt
+* 23.03.2007 | BNK | openExt implementiert
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -74,6 +75,9 @@ import java.awt.event.WindowFocusListener;
 import java.awt.event.WindowListener;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.HashMap;
@@ -128,6 +132,11 @@ public class WollMuxBar
    * der genau dann vorhanden ist, wenn die Absenderliste leer ist.
    */
   private static final String LEERE_LISTE = "<kein Absender vorhanden>";
+  
+  /**
+   * Präfix für Verzeichnisnamen zum Herunterladen von URLs für ACTION "openExt".
+   */
+  private static final String WOLLMUX_DOWNLOAD_DIR_PREFIX = "wollmuxbar-temp-download-";
   
   /**
    * Wenn die WollMuxBar den Fokus verliert, minimiert sich das Fenster.
@@ -211,6 +220,11 @@ public class WollMuxBar
    * Mappt einen Menü-Namen auf ein entsprechendes JPopupMenu.
    */
   private Map mapMenuNameToJPopupMenu = new HashMap();
+  
+  /**
+   * Mappt einen EXT Attributwert auf die zugehörige {@link WollMuxBar.ExternalApplication}.
+   */
+  private Map mapExtToExternalApplication = new HashMap();
   
   /**
    * Die UIElementFactory, die verwendet wird, um das GUI aufzubauen.
@@ -334,6 +348,8 @@ public class WollMuxBar
   {
     windowMode = winMode;
 
+    parseExternalApplications(conf.query("ExterneAnwendungen"));
+    
     eventHandler = new WollMuxBarEventHandler(this);
     
     /*
@@ -912,6 +928,7 @@ public class WollMuxBar
     supportedActions.add("openTemplate");
     supportedActions.add("absenderAuswaehlen");
     supportedActions.add("openDocument");
+    supportedActions.add("openExt");
     supportedActions.add("open");
     supportedActions.add("dumpInfo");
     supportedActions.add("abort");
@@ -955,6 +972,13 @@ public class WollMuxBar
       {
         minimize();
         multiOpenDialog((ConfigThingy)args[1]);
+      }
+      else if (action.equals("openExt"))
+      {
+        minimize();
+        OpenExt openExt = new OpenExt((String)args[1],(ExternalApplication)mapExtToExternalApplication.get(args[1]), (String)args[2]);
+        openExt.setDaemon(false);
+        openExt.start();
       }
       else if (action.equals("dumpInfo"))
       {
@@ -1448,6 +1472,218 @@ public class WollMuxBar
     }
   }
 
+  private static class ExternalApplication
+  {
+    public boolean downloadUrl = false;
+    public List commands = new Vector();
+  }
+  
+  /**
+   * Parst ExterneAnwendungen-Abschnitte und initialisiert {@link #mapExtToExternalApplication}.
+   * @param conf Knoten, dessen Kinder "ExterneAnwendungen" Knoten sein müssen.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED
+   */
+  private void parseExternalApplications(ConfigThingy conf)
+  {
+    Iterator parentIter = conf.iterator();
+    while (parentIter.hasNext())
+    {
+      ConfigThingy parentConf = (ConfigThingy)parentIter.next();
+      Iterator iter = parentConf.iterator();
+      while (iter.hasNext())
+      {
+        ConfigThingy appConf = (ConfigThingy)iter.next();
+        ExternalApplication app = new ExternalApplication();
+        ConfigThingy extConf;
+        try
+        {
+          extConf = appConf.get("EXT");
+          extConf.getFirstChild(); //Testen, ob mindestens ein Kind vorhanden ist, ansonsten Exception
+        }
+        catch (NodeNotFoundException e)
+        {
+          Logger.error("Ein Eintrag im Abschnitt \"ExterneAnwendungen\" enthält keine gültige EXT-Angabe.");
+          continue;
+        }
+
+        try{ app.downloadUrl = appConf.get("DOWNLOAD").toString().equalsIgnoreCase("true") ;}catch(Exception x){}
+        
+        try
+        {
+          ConfigThingy programConf = appConf.get("PROGRAM");
+          programConf.getFirstChild(); //Testen, ob mindestens ein Kind vorhanden ist, ansonsten Exception
+          Iterator progiter = programConf.iterator();
+          while (progiter.hasNext())
+          {
+            String prog = progiter.next().toString();
+            app.commands.add(prog);
+          }
+        }
+        catch (NodeNotFoundException e)
+        {
+          Logger.error("Ein Eintrag im Abschnitt \"ExterneAnwendungen\" enthält keine gültige PROGRAM-Angabe.");
+          continue;        
+        }
+        
+        Iterator extIter = extConf.iterator();
+        while (extIter.hasNext())
+        {
+          mapExtToExternalApplication.put(extIter.next().toString(), app);
+        }
+      }
+    }
+  }
+  
+  /**
+   * Ruft eine {@link WollMuxBar.ExternalApplication} auf, nachdem falls nötig eine
+   * URL in eine temporäre Datei heruntergeladen wurde.
+   *
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private static class OpenExt extends Thread
+  {
+    private String ext;
+    private ExternalApplication app;
+    private String url;
+    
+    /**
+     * Erzeugt ein neues OpenExt Objekt.
+     * @param ext ID-String für die Anwendung, normalerweise die Dateierweiterung. Falls aus
+     *            der url kein Dateiname abgeleitet werden konnte wird dieser String an einen
+     *            generierten Dateinamen angehängt.
+     * @param app die zu startende {@link WollMuxBar.ExternalApplication}. 
+     * Falls null, so wird eine Fehlermeldung geloggt und nichts weiter getan.
+     * @param url die URL die der Anwendung als Argument übergeben werden soll (bzw. die 
+     *            heruntergeladen und als temporäre Datei an die Anwendung übergeben werden soll.)
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     * TESTED
+     */
+    public OpenExt(String ext, ExternalApplication app, String url)
+    {
+      this.ext = ext;
+      this.app = app;
+      this.url = url;
+    }
+    
+    public void run()
+    { //TESTED
+      try{
+        if (app == null)
+        {
+          error("Für die Erweiterung \""+ext+"\" wurde keine Anwendung definiert.");
+          return;
+        }
+        
+        URL srcUrl = new URL(WollMuxFiles.getDEFAULT_CONTEXT(), url);
+        String appArgument = srcUrl.toExternalForm();
+        
+        if (app.downloadUrl)
+        {
+          File tmpDir = new File(System.getProperty("java.io.tmpdir"));
+          if (!tmpDir.isDirectory() && !tmpDir.canWrite())
+          {
+            error("Temporäres Verzeichnis\n\""+tmpDir.getPath()+"\"\nexistiert nicht oder kann nicht beschrieben werden!");
+            return;
+          }
+          
+          File downloadDir = null;
+          for (int i = 0; i < 1000; ++i)
+          {
+            downloadDir = new File(tmpDir, WOLLMUX_DOWNLOAD_DIR_PREFIX+i);
+            if (downloadDir.mkdir())
+              break;
+            else 
+              downloadDir = null;
+          }
+          
+          if (downloadDir == null)
+          {
+            error("Konnte kein temporäres Verzeichnis für den Download der Datei anlegen!");
+            return;
+          }
+          
+          String srcFile = srcUrl.getPath();
+          int idx1 = srcFile.lastIndexOf('/');
+          int idx2 = srcFile.lastIndexOf('\\');
+          if (idx2 > idx1) idx1 = idx2;
+          if (idx1 >= 0)
+            srcFile = srcFile.substring(idx1+1);
+          
+          if (srcFile.length() == 0)
+            srcFile = "foo" + ext;
+          
+          File destFile = new File(downloadDir, srcFile);
+          appArgument = destFile.getAbsolutePath();
+          
+          try{
+            InputStream istream = srcUrl.openStream();
+            if (!destFile.createNewFile()) throw new IOException("Konnte temporäre Datei \""+destFile.getPath()+"\" nicht anlegen");
+            FileOutputStream out = new FileOutputStream(destFile);
+            byte[] buffy = new byte[4096];
+            int len;
+            while ( 0 <= (len = istream.read(buffy))) out.write(buffy, 0, len);
+            out.close();
+            istream.close();
+          }catch(IOException x)
+          {
+            Logger.error(x);
+            JOptionPane.showMessageDialog(null, "Fehler beim Download der Datei:\n"+x.getMessage()+"\nVerständigen Sie Ihre Systemadministration.", "Fehlerhafte Konfiguration", JOptionPane.ERROR_MESSAGE);
+            return;
+          }
+        }
+        
+        Iterator iter = app.commands.iterator();
+        while (iter.hasNext())
+        {
+          String command = (String)iter.next();
+          ProcessBuilder proc = new ProcessBuilder(new String[]{command,appArgument});
+          proc.redirectErrorStream(true);
+          try{
+            Process process = proc.start();
+            /*
+             * Wenn der gestartete Prozess Ein- oder Ausgabe tätigt, so wird er blocken,
+             * wenn an der anderen Seite nichts hängt das schreibt oder liest. Am liebsten
+             * würden wir natürlich nach /dev/null umleiten, aber das kann Java nicht (vor allem
+             * nicht portabel). Für Stdin ist die Lösung einfach. Man schließt den Strom. Damit
+             * muss jedes Programm zurecht kommen. Für Stdout/Stderr (oben über redirectErrorStream
+             * zusammengelegt) kann man das zwar auch machen (und das tut der unten stehende Code
+             * auch), aber das ist etwas böse, weil Programme zumindest unter Unix für gewöhnlich 
+             * nicht dafür ausgelegt sind, kein Stdout+Stderr zu haben. Falls ein Programm
+             * damit Probleme hat, kann ein einfaches Shell-Skript als Wrapper verwendet werden,
+             * das die Umleitung nach /dev/null erledigt.
+             * Eine alternative Lösung wäre der unten auskommentierte Code, der einfach Stdout+Stderr
+             * ausliest. Unschön an dieser Lösung ist, dass der Java-Thread weiterläuft solange
+             * wie das externe Programm läuft.
+             */
+            process.getOutputStream().close(); //Prozess daran hindern zu blocken durch Eingabe
+            process.getInputStream().close(); //böse
+            process.getErrorStream().close(); //böse
+            /*InputStream istream = process.getInputStream();
+            byte[] buffy = new byte[256];
+            while (( 0 <= istream.read(buffy)));*/
+            return;
+          }catch(Exception x) {}
+        }
+        
+        error("Keines der für die Erweiterung \""+ext+"\" konfigurierten Programme konnte gestartet werden!");
+        return;
+        
+      }catch(Exception x)
+      {
+        Logger.error(x);
+        JOptionPane.showMessageDialog(null, x.getMessage()+"\nVerständigen Sie Ihre Systemadministration.", "Fehlerhafte Konfiguration", JOptionPane.ERROR_MESSAGE);
+        return;
+      }
+    }
+
+    private void error(String errorMsg)
+    {
+      Logger.error(errorMsg);
+      JOptionPane.showMessageDialog(null, errorMsg+"\nVerständigen Sie Ihre Systemadministration.", "Fehlerhafte Konfiguration", JOptionPane.ERROR_MESSAGE);
+    }
+  }
+  
   /**
    * Öffnet path als Vorlage.
    * @author Matthias Benkmann (D-III-ITD 5.1)
