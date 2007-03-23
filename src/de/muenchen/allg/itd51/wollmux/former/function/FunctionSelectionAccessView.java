@@ -533,13 +533,15 @@ public class FunctionSelectionAccessView implements View
       String bOldId = "[" + oldId + "]";
       String bNewId = "[" + newId + "]";
       Iterator iter = fieldIds.iterator();
-      while (iter.hasNext())
+      boolean finished = false;
+      while (!finished && iter.hasNext())
       {
         StringBuilder buffy = (StringBuilder)iter.next();
         if (buffy.lastIndexOf(bOldId) == 0)
         {
           buffy.delete(0, buffy.length());
           buffy.append(bNewId);
+          finished = true; //nur einen Eintrag umbenennen, falls es mehrere gibt, damit nicht Auswahlmöglichkeiten verloren gehen
         }
         if (buffy.lastIndexOf(bNewId) == 0)
         {
