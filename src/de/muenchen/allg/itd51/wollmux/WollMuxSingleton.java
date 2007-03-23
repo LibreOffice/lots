@@ -39,6 +39,7 @@ package de.muenchen.allg.itd51.wollmux;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -58,6 +59,7 @@ import com.sun.star.frame.XDispatchProvider;
 import com.sun.star.frame.XFrame;
 import com.sun.star.frame.XModel;
 import com.sun.star.lang.EventObject;
+import com.sun.star.lang.WrappedTargetException;
 import com.sun.star.lang.XComponent;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextField;
@@ -66,6 +68,7 @@ import com.sun.star.ui.XUIConfigurationManager;
 import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
+import com.sun.star.util.XChangesBatch;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoProps;
@@ -253,8 +256,33 @@ public class WollMuxSingleton implements XPALProvider
         ".uno:HelpMenu",
         ".uno:About");
 
-    // Setzen von Konfigurationsoptionen für die Sachleitenden Verfügungen.
-    SachleitendeVerfuegung.setRequiredConfigOptions();
+    // Setzen der in den Abschnitten OOoEinstellungen eingestellten
+    // Konfigurationsoptionen
+    ConfigThingy oooEinstellungenConf = WollMuxFiles.getWollmuxConf().query(
+        "OOoEinstellungen");
+    // ggf. fest verdrahtete Standardeinstellungen verwenden
+    if (oooEinstellungenConf.count() == 0)
+      try
+      {
+        String defaultSettings = "oooEinstellungen("
+                                 + "(NODE '/org.openoffice.Office.Writer/AutoFunction/Format/ByInput/ApplyNumbering'"
+                                 + " PROP 'Enable' TYPE 'boolean'"
+                                 + " VALUE 'false')"
+                                 + "(NODE '/org.openoffice.Office.Writer/Content/NonprintingCharacter'"
+                                 + " PROP 'HiddenCharacter' TYPE 'boolean'"
+                                 + " VALUE 'false'))";
+
+        oooEinstellungenConf = new ConfigThingy("DefaultSettings", null,
+            new StringReader(defaultSettings));
+      }
+      catch (java.lang.Exception e)
+      {
+      }
+    for (Iterator iter = oooEinstellungenConf.iterator(); iter.hasNext();)
+    {
+      ConfigThingy settings = (ConfigThingy) iter.next();
+      setConfigurationValues(settings);
+    }
   }
 
   /**
@@ -600,6 +628,103 @@ public class WollMuxSingleton implements XPALProvider
     {
     }
     return -1;
+  }
+
+  /**
+   * Setzt die im ConfigThingy übergebenen OOoEinstellungen-Abschnitt
+   * enthaltenen Einstellungen in der OOo-Registry.
+   * 
+   * @param oooEinstellungenConf
+   *          Der Knoten OOoEinstellungen eines solchen Abschnitts.
+   */
+  private static void setConfigurationValues(ConfigThingy oooEinstellungenConf)
+  {
+    for (Iterator iter = oooEinstellungenConf.iterator(); iter.hasNext();)
+    {
+      ConfigThingy element = (ConfigThingy) iter.next();
+      try
+      {
+        String node = element.get("NODE").toString();
+        String prop = element.get("PROP").toString();
+        String type = element.get("TYPE").toString();
+        String value = element.get("VALUE").toString();
+        Object v = getObjectByType(type, value);
+
+        setConfigurationValue(node, prop, v);
+      }
+      catch (java.lang.Exception e)
+      {
+        Logger.error("OOoEinstellungen: Konnte Einstellung '"
+                     + element.stringRepresentation()
+                     + "'nicht setzen:", e);
+      }
+    }
+  }
+
+  /**
+   * Konvertiert den als String übergebenen Wert value in ein Objekt vom Typ
+   * type oder liefert eine IllegalArgumentException, wenn die Werte nicht
+   * konvertiert werden können.
+   * 
+   * @param type
+   *          Der Typ in den konvertiert werden soll ('boolean', 'integer',
+   *          'float', 'string').
+   * @param value
+   *          Der zu konvertierende Wert.
+   * @return Das neue Objekt vom entsprechenden Typ.
+   * @throws IllegalArgumentException
+   *           type oder value sind ungültig oder fehlerhaft.
+   */
+  private static Object getObjectByType(String type, String value)
+      throws IllegalArgumentException
+  {
+    if (type.equalsIgnoreCase("boolean"))
+    {
+      return new Boolean(value);
+    }
+    else if (type.equalsIgnoreCase("integer"))
+    {
+      return new Integer(value);
+    }
+    else if (type.equalsIgnoreCase("float"))
+    {
+      return new Float(value);
+    }
+    else if (type.equalsIgnoreCase("string"))
+    {
+      return new String(value);
+    }
+
+    throw new IllegalArgumentException(
+        "Der TYPE '"
+            + type
+            + "' ist nicht gültig. Gültig sind 'boolean', 'integer', 'float' und 'string'.");
+  }
+
+  /**
+   * Setzt eine Einstellung value in der OOo-Registry, wobei die Position im
+   * Registry-Baum durch node und prop beschrieben wird.
+   * 
+   * @param node
+   *          z.B. "/org.openoffice.Inet/Settings"
+   * @param prop
+   *          z.B. "ooInetProxyType"
+   * @param value
+   *          der zu setzende Wert als Objekt vom entsprechenden Typ.
+   */
+  private static void setConfigurationValue(String node, String prop,
+      Object value)
+  {
+    XChangesBatch updateAccess = UNO.getConfigurationUpdateAccess(node);
+    if (value != null) UNO.setProperty(updateAccess, prop, value);
+    if (updateAccess != null) try
+    {
+      updateAccess.commitChanges();
+    }
+    catch (WrappedTargetException e)
+    {
+      Logger.error(e);
+    }
   }
 
   /**

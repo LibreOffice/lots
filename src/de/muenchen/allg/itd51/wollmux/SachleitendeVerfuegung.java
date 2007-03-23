@@ -25,7 +25,6 @@ import com.sun.star.awt.FontWeight;
 import com.sun.star.container.XEnumeration;
 import com.sun.star.container.XNameContainer;
 import com.sun.star.lang.IllegalArgumentException;
-import com.sun.star.lang.WrappedTargetException;
 import com.sun.star.style.XStyle;
 import com.sun.star.text.XParagraphCursor;
 import com.sun.star.text.XTextCursor;
@@ -34,7 +33,6 @@ import com.sun.star.text.XTextFrame;
 import com.sun.star.text.XTextRange;
 import com.sun.star.uno.AnyConverter;
 import com.sun.star.uno.Exception;
-import com.sun.star.util.XChangesBatch;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
@@ -1370,64 +1368,6 @@ public class SachleitendeVerfuegung
   {
     if (UNO.XPageCursor(viewCursor) == null) return 0;
     return UNO.XPageCursor(viewCursor).getPage();
-  }
-
-  /**
-   * Setzt die für die korrekte Funktionsfähigkeit der SachleitendenVerfügungen
-   * notwendigen Configurations-Optionen (derzeit
-   * NonprintingCharacters/HiddenCharacter=false und ApplyNumbering/Enable =
-   * false) und sollte zu Beginn der Initialisierung des WollMux gesetzt werden.
-   */
-  public static void setRequiredConfigOptions()
-  {
-    switchOffAutoNumbering();
-    switchOffPrintingOfHiddenCharacters();
-  }
-
-  /**
-   * Schaltet die Option "Extras->Optionen->Writer->Formierungshilfen->Anzeigen:
-   * versteckten Text" aus, damit versteckter Text nicht angezeigt wird (und
-   * damit die Berechnung der Gesamtseitenzahl eines Dokuments verfälscht, die
-   * in SachleitendenVerfügungen benötigt wird). Die Einstellung wird nur für
-   * OpenOffice-Fenster aktiv, die NACH dem Aufruf dieser Methode erzeugt werden
-   * und nicht für Fenster, die bereits geöffnet sind.
-   */
-  private static void switchOffPrintingOfHiddenCharacters()
-  {
-    XChangesBatch updateAccess = UNO
-        .getConfigurationUpdateAccess("/org.openoffice.Office.Writer/Content/NonprintingCharacter");
-    UNO.setProperty(updateAccess, "HiddenCharacter", Boolean.FALSE);
-    if (updateAccess != null) try
-    {
-      updateAccess.commitChanges();
-    }
-    catch (WrappedTargetException e)
-    {
-      Logger.error(e);
-    }
-  }
-
-  /**
-   * Schaltet die Option AutoNumbering unter
-   * Extras->AutoKorrektur...->Nummerierung anwenden aus, da diese im Umgang mit
-   * Sachleitenden Verfügungen nicht einsetzbar ist. OpenOffice interpretiert
-   * sonst jeden Verfügungspunkt als Beginn einer Nummerierung. Die Änderung
-   * wird nur für neue OpenOffice-Fenster aktiv und nicht für bereits geöffnete
-   * Dokumente.
-   */
-  private static void switchOffAutoNumbering()
-  {
-    XChangesBatch updateAccess = UNO
-        .getConfigurationUpdateAccess("/org.openoffice.Office.Writer/AutoFunction/Format/ByInput/ApplyNumbering");
-    UNO.setProperty(updateAccess, "Enable", Boolean.FALSE);
-    if (updateAccess != null) try
-    {
-      updateAccess.commitChanges();
-    }
-    catch (WrappedTargetException e)
-    {
-      Logger.error(e);
-    }
   }
 
   /**
