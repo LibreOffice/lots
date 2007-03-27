@@ -27,6 +27,7 @@
  * 06.06.2006 | LUT | + Ablösung der Event-Klasse durch saubere Objektstruktur
  * 19.12.2006 | BAB | + setzen von Shortcuts im Konstruktor
  * 29.12.2006 | BNK | +registerDatasources()
+ * 27.03.2007 | BNK | Default-oooEinstellungen ausgelagert nach data/...
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -39,7 +40,6 @@ package de.muenchen.allg.itd51.wollmux;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.StringReader;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -93,6 +93,11 @@ import de.muenchen.allg.itd51.wollmux.func.PrintFunctionLibrary;
  */
 public class WollMuxSingleton implements XPALProvider
 {
+  /**
+   * Default-oooEinstellungen-Abschnitt (Übergangslösung).
+   */
+  private final URL OOOEINSTELLUNGEN_URL = this.getClass().getClassLoader()
+      .getResource("data/oooEinstellungen.conf");
 
   private static WollMuxSingleton singletonInstance = null;
 
@@ -261,19 +266,20 @@ public class WollMuxSingleton implements XPALProvider
     ConfigThingy oooEinstellungenConf = WollMuxFiles.getWollmuxConf().query(
         "OOoEinstellungen");
     // ggf. fest verdrahtete Standardeinstellungen verwenden
-    if (oooEinstellungenConf.count() == 0)
+    // Solange wir dieses Fallback-Verhalten haben (es soll 2008 entfernt
+    // werden, (siehe R5973)), wenden wir es auch an, wenn ein leerer
+    // oooEinstellungen-Abschnitt gefunden wird. Wir wollen nicht, dass
+    // besonders "clevere" Admins unsere Fehlermeldung totmachen, indem sie
+    // einfach einen leeren Abschnitt anlegen, ohne dass sie wissen, was sie
+    // damit anrichten.
+    if (oooEinstellungenConf.count() == 0
+        || ((ConfigThingy) oooEinstellungenConf.iterator().next()).count() == 0)
       try
       {
-        String defaultSettings = "oooEinstellungen("
-                                 + "(NODE '/org.openoffice.Office.Writer/AutoFunction/Format/ByInput/ApplyNumbering'"
-                                 + " PROP 'Enable' TYPE 'boolean'"
-                                 + " VALUE 'false')"
-                                 + "(NODE '/org.openoffice.Office.Writer/Content/NonprintingCharacter'"
-                                 + " PROP 'HiddenCharacter' TYPE 'boolean'"
-                                 + " VALUE 'false'))";
-
-        oooEinstellungenConf = new ConfigThingy("DefaultSettings", null,
-            new StringReader(defaultSettings));
+        oooEinstellungenConf = new ConfigThingy("DefaultSettings",
+            OOOEINSTELLUNGEN_URL);
+        Logger
+            .error("Kein Konfigurationsabschnitt oooEinstellungen gefunden => Verwende interne Vorgabe. ACHTUNG! Dieses Fallback-Verhalten wird mittelfristig entfernt. Bitte updaten Sie auf eine neue Standardkonfig, oder falls Sie dies nicht können/wollen wenden Sie sich an D-III-ITD-5.1");
       }
       catch (java.lang.Exception e)
       {
