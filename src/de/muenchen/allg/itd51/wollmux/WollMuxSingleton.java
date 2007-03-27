@@ -268,7 +268,7 @@ public class WollMuxSingleton implements XPALProvider
     // ggf. fest verdrahtete Standardeinstellungen verwenden
     // Solange wir dieses Fallback-Verhalten haben (es soll 2008 entfernt
     // werden, (siehe R5973)), wenden wir es auch an, wenn ein leerer
-    // oooEinstellungen-Abschnitt gefunden wird. Wir wollen nicht, dass
+    // OOoEinstellungen-Abschnitt gefunden wird. Wir wollen nicht, dass
     // besonders "clevere" Admins unsere Fehlermeldung totmachen, indem sie
     // einfach einen leeren Abschnitt anlegen, ohne dass sie wissen, was sie
     // damit anrichten.
@@ -279,7 +279,7 @@ public class WollMuxSingleton implements XPALProvider
         oooEinstellungenConf = new ConfigThingy("DefaultSettings",
             OOOEINSTELLUNGEN_URL);
         Logger
-            .error("Kein Konfigurationsabschnitt oooEinstellungen gefunden => Verwende interne Vorgabe. ACHTUNG! Dieses Fallback-Verhalten wird mittelfristig entfernt. Bitte updaten Sie auf eine neue Standardkonfig, oder falls Sie dies nicht können/wollen wenden Sie sich an D-III-ITD-5.1");
+            .error("Kein Konfigurationsabschnitt OOoEinstellungen gefunden => Verwende interne Vorgabe. ACHTUNG! Dieses Fallback-Verhalten wird mittelfristig entfernt. Bitte updaten Sie auf eine neue Standardkonfig, oder falls Sie dies nicht können/wollen wenden Sie sich an D-III-ITD-5.1");
       }
       catch (java.lang.Exception e)
       {
