@@ -25,7 +25,7 @@ case "$1" in
     echo "postinst log: $TEMPDIR/messages"
 	export HOME="$TEMPDIR" # um das lockfile-Problem zu umgehen
     cd /usr/lib/wollmux
-    echo "***** Eine Fehlermeldung 'Package ist nicht bekannt' ist meist harmlos *****" >>"$TEMPDIR"/messages
+    echo "***** Eine Fehlermeldung 'There is no such extension deployed' o.ä. ist meist harmlos *****" >>"$TEMPDIR"/messages
     unopkg remove WollMux.uno.pkg --shared >>"$TEMPDIR"/messages 2>&1 || true
     echo "***** Ende des Abschnitts der meist harmlosen Fehlermeldungen ******" >>"$TEMPDIR"/messages
     unopkg add WollMux.uno.pkg -v --shared 2>>"$TEMPDIR"/messages | grep -q 'unopkg done'
