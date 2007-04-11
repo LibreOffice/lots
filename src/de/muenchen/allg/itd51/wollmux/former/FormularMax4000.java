@@ -20,6 +20,7 @@
 * 30.10.2006 | BNK | Menüstruktur geändert; Datei/Speichern (unter...) hinzugefügt
 * 05.02.2007 | BNK | [R5214]Formularmerkmale entfernen hat fast leere Formularnotiz übriggelassen
 * 11.04.2007 | BNK | [R6176]Nicht-WM-Bookmarks killen
+*                  | Nicht-WM-Bookmarks killen Funktion derzeit auskommentiert wegen Zerstörung von Referenzen
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -503,13 +504,17 @@ public class FormularMax4000
       }});
     menu.add(menuItem);
     
-    menuItem = new JMenuItem("Ladezeit des Dokuments optimieren");
+    /* Das Entfernen von Bookmarks kann Referenzfelder (Felder die Kopien anderer
+     * Teile des Dokuments enthalten) zerstören, da diese dann ins Leere greifen.
+     * Solange dies nicht erkannt wird, muss die Funktion deaktiviert sein.
+     * 
+     menuItem = new JMenuItem("Ladezeit des Dokuments optimieren");
     menuItem.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e)
       {
         removeNonWMBookmarks(doc); 
       }});
-    menu.add(menuItem);
+    menu.add(menuItem);*/
     
     menuItem = new JMenuItem("Formularbeschreibung editieren");
     menuItem.addActionListener(new ActionListener(){
