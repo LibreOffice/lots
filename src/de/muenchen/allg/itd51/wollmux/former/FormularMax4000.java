@@ -19,6 +19,7 @@
 * 26.10.2006 | BNK | Magische gender: Syntax unterstützt. 
 * 30.10.2006 | BNK | Menüstruktur geändert; Datei/Speichern (unter...) hinzugefügt
 * 05.02.2007 | BNK | [R5214]Formularmerkmale entfernen hat fast leere Formularnotiz übriggelassen
+* 11.04.2007 | BNK | [R6176]Nicht-WM-Bookmarks killen
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -499,6 +500,14 @@ public class FormularMax4000
       public void actionPerformed(ActionEvent e)
       {
         deForm(doc); 
+      }});
+    menu.add(menuItem);
+    
+    menuItem = new JMenuItem("Ladezeit des Dokuments optimieren");
+    menuItem.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent e)
+      {
+        removeNonWMBookmarks(doc); 
       }});
     menu.add(menuItem);
     
@@ -1407,6 +1416,17 @@ public class FormularMax4000
     return "WM(CMD 'insertFormValue' ID '"+id+"')";
   }
 
+  /**
+   * Entfernt alle Bookmarks, die keine WollMux-Bookmarks sind aus dem Dokument
+   * doc.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private void removeNonWMBookmarks(TextDocumentModel doc)
+  {
+    doc.removeNonWMBookmarks();
+  }
+  
   /**
    * Entfernt die WollMux-Formularmerkmale aus dem Dokument.
    * @author Matthias Benkmann (D-III-ITD 5.1)

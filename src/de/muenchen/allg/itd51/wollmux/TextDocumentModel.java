@@ -10,6 +10,7 @@
  * -------------------------------------------------------------------
  * 15.09.2006 | LUT | Erstellung als TextDocumentModel
  * 03.01.2007 | BNK | +collectNonWollMuxFormFields
+ * 11.04.2007 | BNK | [R6176]+removeNonWMBookmarks()
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -118,6 +119,12 @@ public class TextDocumentModel
       .compile("(\\A\\s*(WM\\s*\\(.*CMD\\s*'((form)|(setGroups)|(insertFormValue))'.*\\))\\s*\\d*\\z)"
                + "|(\\A\\s*(WM\\s*\\(.*CMD\\s*'(setType)'.*'formDocument'\\))\\s*\\d*\\z)"
                + "|(\\A\\s*(WM\\s*\\(.*'formDocument'.*CMD\\s*'(setType)'.*\\))\\s*\\d*\\z)");
+
+  /**
+   * Pattern zum Erkennen von WollMux-Bookmarks.
+   */
+  private static final Pattern WOLLMUX_BOOKMARK_PATTERN = Pattern
+      .compile("(\\A\\s*WM\\s*\\(.*\\)\\s*\\d*\\z)");
 
   /**
    * Ermöglicht den Zugriff auf einen Vector aller FormField-Objekte in diesem
@@ -1041,6 +1048,36 @@ public class TextDocumentModel
         .getCurrentController());
     if (suppl != null) return suppl.getViewCursor();
     return null;
+  }
+
+  /**
+   * Entfernt alle Bookmarks, die keine WollMux-Bookmarks sind aus dem Dokument
+   * doc.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public void removeNonWMBookmarks()
+  {
+    XBookmarksSupplier bmSupp = UNO.XBookmarksSupplier(doc);
+    XNameAccess bookmarks = bmSupp.getBookmarks();
+    String[] names = bookmarks.getElementNames();
+    for (int i = 0; i < names.length; ++i)
+    {
+      try
+      {
+        String bookmark = names[i];
+        if (!WOLLMUX_BOOKMARK_PATTERN.matcher(bookmark).matches())
+        {
+          XTextContent bm = UNO.XTextContent(bookmarks.getByName(bookmark));
+          bm.getAnchor().getText().removeTextContent(bm);
+        }
+
+      }
+      catch (Exception x)
+      {
+        Logger.error(x);
+      }
+    }
   }
 
   /**
