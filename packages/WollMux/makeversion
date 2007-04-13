@@ -1,2 +1,2 @@
 #!/bin/sh
-echo "$(($(date +%Y) - 2005)).$(date +%m|sed s/^0//).$(($(date +%d|sed s/^0//) / 10))"
+echo "$(($(date +%Y) - 2004)).$(date +%m|sed s/^0//).$(($(date +%d|sed s/^0//) / 10))"
