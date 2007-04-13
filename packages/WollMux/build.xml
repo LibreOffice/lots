@@ -29,6 +29,8 @@
 	-->
 
 	<property name="COMPONENT" value="WollMux" />
+	<property name="MAKE_DIR" value="${basedir}/packages/WollMux" />
+	<exec executable="${MAKE_DIR}/makeversion" dir="${MAKE_DIR}" failifexecutionfails="true" failonerror="true" outputproperty="VERSION"/>
 	<property name="VERSION" value="1.5.1" />
 	<property name="PKG_NAME" value="${COMPONENT}.uno.pkg" />
 	<property name="PKG_FILE" value="${basedir}/packages/${PKG_NAME}" />
@@ -59,7 +61,6 @@
 	<property name="TOOLING" value="${basedir}/../OOo-SDK/classes" />
 	<property name="TOOLING_MAIN_CLASS" value="com.sun.star.lib.loader.Loader" />
 	<property name="WOLLMUXBAR_MAIN_CLASS" value="de.muenchen.allg.itd51.wollmux.dialog.WollMuxBar" />
-	<property name="MAKE_DIR" value="${basedir}/packages/WollMux" />
 
 	<target name="main" depends="build" />
 
@@ -169,7 +170,7 @@
 	</target>
 
 	<!-- Das Target erzeugt die Datei WollMuxBar.jar -->		
-	<target name="WollMuxBar.jar">
+	<target name="WollMuxBar.jar" depends="buildinfo">
 		<delete file="${WOLLMUXBAR_JAR}" />
 		<jar destfile="${WOLLMUXBAR_JAR}">
 			<fileset dir="${BIN}" includes="**/*.class" />
