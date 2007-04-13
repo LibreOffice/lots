@@ -41,8 +41,8 @@ public class Shortcuts
 {
   /**
    * Liest alle Attribute SHORTCUT und URL aus tastenkombinationenConf aus,
-   * löscht alle bisher vorhandenen Tastenkombinationen die diese URLs verwenden
-   * und setzt neue Tastenkombination in OOo-Writer.
+   * löscht alle bisher vorhandenen Tastenkombinationen deren URL mit "wollmux:"
+   * beginnt und setzt neue Tastenkombination in OOo-Writer.
    * 
    * @param tastenkombinationenConf
    *          .conf Abschnitt Tastenkuerzel mit allen Knoten
@@ -52,6 +52,9 @@ public class Shortcuts
     XAcceleratorConfiguration shortcutManager = UNO
         .getShortcutManager("com.sun.star.text.TextDocument");
     if (shortcutManager == null) return;
+
+    // löschen aller KeyEvents die mit "wollmux:" beginnen
+    removeComandFromAllKeyEvents(shortcutManager);
 
     // lesen des Knoten SHORTCUT
     ConfigThingy shortcutConf = tastenkombinationenConf
@@ -90,8 +93,6 @@ public class Shortcuts
         continue;
       }
 
-      removeComandFromAllKeyEvents(shortcutManager, url);
-
       KeyEvent keyEvent = createKeyEvent(shortcut);
       if (keyEvent != null)
       {
@@ -125,34 +126,33 @@ public class Shortcuts
     {
       Logger.error(e);
     }
-  }
+}
 
   /**
-   * Wenn es Tastenkuerzel mit einem Kommando url gibt, werden diese gelöscht.
-   * Workaround wegen nicht funktionierendem
+   * Wenn es Tastenkuerzel mit einer UNO-url beginnent mit "wollmux:" gibt,
+   * werden diese gelöscht. Workaround wegen nicht funktionierendem
    * xAcceleratorConfiguration.removeCommandFromAllKeyEvents(). OOo Issue #72558
    * 
    * @param xAcceleratorConfiguration
    *          AcceleratorConfiguration (muß danach noch mit store() persistent
    *          gemacht werden)
-   * @param url
-   *          zu löschendes Kommando mit Tastenkombination
    */
   private static void removeComandFromAllKeyEvents(
-      XAcceleratorConfiguration xAcceleratorConfiguration, String url)
+      XAcceleratorConfiguration xAcceleratorConfiguration)
   {
     // lesen aller gesetzten Tastenkombinationen
     KeyEvent[] keys = xAcceleratorConfiguration.getAllKeyEvents();
 
-    // Wenn es Tastenkombinationen TextbausteinEinfuegen gibt,
-    // werden diese gelöscht Workaround wegen nicht funktionierendem
+    // Wenn es Tastenkombinationen mit der UNO-url beginnent mit "wollmux:"
+    // gibt, werden diese gelöscht. Workaround wegen nicht funktionierendem
     // xAcceleratorConfiguration.removeCommandFromAllKeyEvents().
     for (int i = 0; i < keys.length; i++)
     {
       try
       {
-        // wenn es die URL als Tastenkombination gibt
-        if (xAcceleratorConfiguration.getCommandByKeyEvent(keys[i]).equals(url))
+        String event = xAcceleratorConfiguration.getCommandByKeyEvent(keys[i]);
+        // wenn die UNO-url mit "wollmux:" beginnt, wird sie gelöscht
+        if (event.startsWith("wollmux:"))
         {
           // löschen der Tastenkombination
           xAcceleratorConfiguration.removeKeyEvent(keys[i]);
@@ -414,7 +414,7 @@ public class Shortcuts
 
     // lesen der conf --> fällt nachher weg
     ConfigThingy conf = null;
-    String confFile = "./Tastenkombination.conf";
+    String confFile = "../../.wollmux/wollmux.conf";
 
     try
     {
