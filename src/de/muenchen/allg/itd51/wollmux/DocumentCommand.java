@@ -25,8 +25,6 @@ package de.muenchen.allg.itd51.wollmux;
 import java.io.StringReader;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.ListIterator;
 import java.util.Set;
 import java.util.Vector;
 
@@ -56,11 +54,6 @@ abstract public class DocumentCommand implements VisibilityElement
    * Das geparste ConfigThingy des zugehörenden Bookmarks.
    */
   protected ConfigThingy wmCmd;
-
-  /**
-   * Die Liste aller Kinder-Elemente.
-   */
-  private LinkedList childs; // Kinder vom Typ DocumentCommand
 
   /**
    * Der Vaterknoten des Dokumentkommandos im Kommando-Baum.
@@ -111,18 +104,6 @@ abstract public class DocumentCommand implements VisibilityElement
 
   private static final String INSERT_MARK_CLOSE = ">";
 
-  // Relationen zweier Dokument-Kommandos A und B:
-
-  private static final int REL_B_IS_CHILD_OF_A = 1;
-
-  private static final int REL_B_IS_PARENT_OF_A = -1;
-
-  private static final int REL_B_OVERLAPS_A = 0;
-
-  private static final int REL_B_IS_SIBLING_BEFORE_A = -2;
-
-  private static final int REL_B_IS_SIBLING_AFTER_A = 2;
-
   /* ************************************************************ */
 
   /**
@@ -139,7 +120,6 @@ abstract public class DocumentCommand implements VisibilityElement
     this.wmCmd = wmCmd;
     this.bookmark = bookmark;
     this.parent = null;
-    this.childs = new LinkedList();
     this.hasInsertMarks = false;
   }
 
@@ -162,175 +142,23 @@ abstract public class DocumentCommand implements VisibilityElement
     return ""
            + this.getClass().getSimpleName()
            + "["
-           + (isRetired() ? "RETIRED:" : "")
            + (isDone() ? "DONE:" : "")
            + getBookmarkName()
            + "]";
   }
 
   /**
-   * Fügt dem aktuellen Dokumentkommando ein neues Kind-Element b hinzu. Dabei
-   * werden die TextRanges der beiden Kommandos verglichen und deren Relation
-   * bestimmt. Je nach Relation wird das neue Kommando als Kind vor oder nach
-   * einem bereits bestehenden Kind eingehängt oder die Anfrage an ein
-   * Kind-Element weitergereicht.
+   * Setzt den Elternknoten parent dieses Dokumentkommandos im Kommandobaum, von
+   * dem es Eigenschaften wie z.B. die Zugehörigkeit zu einer
+   * Sichtbarkeitsgruppe erbt.
    * 
-   * @param b
-   *          Das Kindelement b
-   * @return Die Anzahl der aufkummulierten TextRange Vergleiche, die zum
-   *         Hinzufügen benötigt wurden. Kann für Performance-Statistiken
-   *         verwendet werden.
+   * @param parent
+   *          Der Elternknoten im Kommandobaum, von dem dieses Dokumentkommando
+   *          Eigenschaften erbt.
    */
-  protected int add(DocumentCommand b)
+  protected void setParent(DocumentCommand parent)
   {
-    int compareCount = 0;
-
-    ListIterator childsIterator = childs.listIterator(childs.size());
-    while (childsIterator.hasPrevious())
-    {
-      DocumentCommand a = (DocumentCommand) childsIterator.previous();
-      int rel = a.getRelation(b);
-      compareCount++;
-
-      // b liegt vor a: weiter gehen
-      if (rel == REL_B_IS_SIBLING_BEFORE_A)
-      {
-        // Weiter gehen
-      }
-
-      // b liegt nach a: danach einfügen
-      if (rel == REL_B_IS_SIBLING_AFTER_A)
-      {
-        b.parent = this;
-        childsIterator.next();
-        childsIterator.add(b);
-        return compareCount;
-      }
-
-      // b ist Vater von a: a aushängen und zum Kind von b machen.
-      if (rel == REL_B_IS_PARENT_OF_A)
-      {
-        a.parent = b;
-        b.add(a);
-        childsIterator.remove();
-      }
-
-      // a ist Vater von b:
-      if (rel == REL_B_IS_CHILD_OF_A)
-      {
-        compareCount += a.add(b);
-        return compareCount;
-      }
-
-      // identische ranges
-      if (rel == REL_B_OVERLAPS_A)
-      {
-        Logger
-            .error("Ignoriere Dokumentkommando \""
-                   + b.getBookmarkName()
-                   + "\", da es sich mit dem Dokumentkommando \""
-                   + a.getBookmarkName()
-                   + "\" überlappt. Diese beiden Kommandos dürfen sich nicht überlappen!");
-        return compareCount;
-      }
-    }
-
-    // falls bisher noch nicht hinzugefügt: am Anfang einfügen.
-    b.parent = this;
-    childsIterator.add(b);
-    return compareCount;
-  }
-
-  /**
-   * Die Methode prüft in allen Kindern und Kindeskindern (rekusiv), ob ihre
-   * Bookmarks noch vorhanden sind und entfernt alle Kinder, deren Bookmarks
-   * nicht mehr vorhanden sind.
-   * 
-   * @return liefert true, wenn mindestens ein Kind oder Kindeskind entfernt
-   *         wurde, ansonsten false.
-   */
-  public boolean removeRetieredChilds()
-  {
-    boolean changed = false;
-
-    Vector lostChildren = new Vector();
-    Iterator iter = childs.iterator();
-    while (iter.hasNext())
-    {
-      DocumentCommand child = (DocumentCommand) iter.next();
-
-      // zuerst bei den Kindern aufräumen
-      if (child.removeRetieredChilds() == true) changed = true;
-
-      // und dann selber aufräumen
-      if (child.isRetired())
-      {
-        // Ungültiges Element entfernen
-        iter.remove();
-        changed = true;
-
-        // Verloren gegangene Kinder merken
-        Iterator lost = child.childs.iterator();
-        while (lost.hasNext())
-          lostChildren.add(lost.next());
-      }
-    }
-
-    // Verloren gegangene Kinder wieder hinzufügen:
-    iter = lostChildren.iterator();
-    while (iter.hasNext())
-      add((DocumentCommand) iter.next());
-
-    return changed;
-  }
-
-  /**
-   * Liefert einen ListIterator über alle Kinder-Elemente des Dokumentkommandos.
-   * 
-   * @return Liefert einen ListIterator über alle Kinder-Elemente des
-   *         Dokumentkommandos.
-   */
-  protected ListIterator getChildIterator()
-  {
-    return childs.listIterator();
-  }
-
-  /**
-   * Diese Methode liefert die Beziehung des aktuellen DocumentCommand und des
-   * DocumentCommand b in Form einer Konstante DocumentCommand.REL_xxx zurück.
-   * 
-   * @param b
-   *          Das DocumentCommand b, mit dem das aktuelle DocumentCommand
-   *          verglichen wird.
-   * @return Die Relation der zwei DocumentCommands in Form einer Konstante
-   *         DocumentCommand.REL_xxx.
-   */
-  protected int getRelation(DocumentCommand b)
-  {
-    int cmp = bookmark.compare(b.bookmark);
-
-    if (cmp == Bookmark.POS_AABB) return REL_B_IS_SIBLING_AFTER_A;
-    if (cmp == Bookmark.POS_BBAA) return REL_B_IS_SIBLING_BEFORE_A;
-
-    if (cmp == Bookmark.POS_88AA) return REL_B_IS_CHILD_OF_A;
-    if (cmp == Bookmark.POS_A88A) return REL_B_IS_CHILD_OF_A;
-    if (cmp == Bookmark.POS_AA88) return REL_B_IS_CHILD_OF_A;
-
-    if (cmp == Bookmark.POS_88BB) return REL_B_IS_PARENT_OF_A;
-    if (cmp == Bookmark.POS_B88B) return REL_B_IS_PARENT_OF_A;
-    if (cmp == Bookmark.POS_BB88) return REL_B_IS_PARENT_OF_A;
-
-    if (cmp == Bookmark.POS_8888)
-    {
-      if (this.canHaveChilds() && b.canHaveChilds())
-        return REL_B_IS_CHILD_OF_A;
-      else if (this.canHaveChilds())
-        return REL_B_IS_CHILD_OF_A;
-      else if (b.canHaveChilds()) return REL_B_IS_PARENT_OF_A;
-      return REL_B_OVERLAPS_A;
-    }
-
-    return REL_B_IS_SIBLING_AFTER_A;
+    this.parent = parent;
   }
 
   /**
@@ -506,20 +334,6 @@ abstract public class DocumentCommand implements VisibilityElement
   public void unsetHasInsertMarks()
   {
     this.hasInsertMarks = false;
-  }
-
-  /**
-   * Liefert true, wenn das Bookmark zu diesem Dokumentkommando nicht mehr
-   * existiert und das Dokumentkommando daher nicht mehr zu gebrauchen ist oder
-   * andernfalls false.
-   * 
-   * @return true, wenn das Bookmark zu diesem Dokumentkommando nicht mehr
-   *         existiert, ansonsten false.
-   */
-  public boolean isRetired()
-  {
-    if (bookmark != null) return bookmark.getAnchor() == null;
-    return false;
   }
 
   /**
@@ -820,7 +634,9 @@ abstract public class DocumentCommand implements VisibilityElement
     {
     }
 
-    Set groupsSet = (parent != null) ? parent.getGroups() : new HashSet();
+    Set groupsSet = (parent != null)
+                                    ? new HashSet(parent.getGroups())
+                                    : new HashSet();
     Iterator i = groups.iterator();
     while (i.hasNext())
     {
@@ -829,6 +645,29 @@ abstract public class DocumentCommand implements VisibilityElement
     }
 
     return groupsSet;
+  }
+
+  /**
+   * Liefert alle die FragID's aller Textfragmente, die dieses Dokumentkommando
+   * umschließen.
+   * 
+   * @return Ein Set, das die FragIDs aller umschließenden Textfragmente
+   *         enthält.
+   * @see de.muenchen.allg.itd51.wollmux.VisibilityElement#getParentFragIDs()
+   */
+  public Set getParentFragIDs()
+  {
+    if (parent == null)
+      return new HashSet();
+    else
+    {
+      HashSet parentFragIDs = new HashSet(parent.getParentFragIDs());
+      if (parent instanceof InsertFrag)
+        parentFragIDs.add(((InsertFrag) parent).getFragID());
+      if (parent instanceof InsertContent)
+        parentFragIDs.add(((InsertContent) parent).getFragID());
+      return parentFragIDs;
+    }
   }
 
   // ********************************************************************************
@@ -840,8 +679,6 @@ abstract public class DocumentCommand implements VisibilityElement
    */
   static interface Executor
   {
-    public int executeCommand(DocumentCommand.RootElement cmd);
-
     public int executeCommand(DocumentCommand.InsertFrag cmd);
 
     public int executeCommand(DocumentCommand.InsertValue cmd);
@@ -932,7 +769,7 @@ abstract public class DocumentCommand implements VisibilityElement
 
     protected boolean canHaveChilds()
     {
-      return true;
+      return false;
     }
 
     public int execute(DocumentCommand.Executor visitable)
@@ -965,7 +802,7 @@ abstract public class DocumentCommand implements VisibilityElement
 
     protected boolean canHaveChilds()
     {
-      return true;
+      return false;
     }
 
     public int execute(DocumentCommand.Executor visitable)
@@ -998,43 +835,6 @@ abstract public class DocumentCommand implements VisibilityElement
     public int execute(DocumentCommand.Executor visitable)
     {
       return visitable.executeCommand(this);
-    }
-  }
-
-  // ********************************************************************************
-  /**
-   * Dieses besondere Element dient als Wurzel für den DocumentCommandTree.
-   */
-  static public class RootElement extends DocumentCommand
-  {
-    public RootElement()
-    {
-      super(new ConfigThingy("WM"), null);
-    }
-
-    public String getBookmarkName()
-    {
-      return "<root>";
-    }
-
-    protected int getRelation(DocumentCommand b)
-    {
-      return REL_B_IS_CHILD_OF_A;
-    }
-
-    protected boolean canHaveChilds()
-    {
-      return true;
-    }
-
-    public int execute(DocumentCommand.Executor e)
-    {
-      return e.executeCommand(this);
-    }
-
-    public Set getGroups()
-    {
-      return new HashSet();
     }
   }
 
@@ -1119,29 +919,6 @@ abstract public class DocumentCommand implements VisibilityElement
     public int execute(DocumentCommand.Executor visitable)
     {
       return visitable.executeCommand(this);
-    }
-
-    protected int add(DocumentCommand b)
-    {
-      if (b instanceof InsertFrag)
-      {
-        InsertFrag bif = (InsertFrag) b;
-        // Falls sich ein Fragment selbst aufruft, wandle das Kommando um in ein
-        // InvalidCommand - zur Vermeidung von Endlosschleifen.
-        if (!isManualMode())
-        {
-          if (this.getFragID().equals(bif.getFragID()))
-          {
-            InvalidCommandException ivc = new InvalidCommandException(
-                "Das Fragment mit der FRAG_ID \""
-                    + fragID
-                    + "\" ruft sich direkt oder indirekt selbst auf "
-                    + "und würde damit eine Endlosschleife verursachen.");
-            b = new InvalidCommand(b.wmCmd, b.bookmark, ivc);
-          }
-        }
-      }
-      return super.add(b);
     }
   }
 

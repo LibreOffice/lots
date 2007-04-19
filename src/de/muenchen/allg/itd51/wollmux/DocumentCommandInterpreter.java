@@ -137,7 +137,7 @@ public class DocumentCommandInterpreter
   {
     Logger.debug("scanDocumentSettings");
     boolean modified = model.getDocumentModified();
-    
+
     model.resetGlobalDocumentCommands();
 
     new GlobalDocumentCommandsScanner().execute(model.getDocumentCommandTree());
@@ -155,7 +155,7 @@ public class DocumentCommandInterpreter
   {
     Logger.debug("executeTemplateCommands");
     boolean modified = model.getDocumentModified();
-    
+
     // Zähler für aufgetretene Fehler bei der Bearbeitung der Kommandos.
     int errors = 0;
 
@@ -381,7 +381,7 @@ public class DocumentCommandInterpreter
 
     public int execute(DocumentCommandTree tree)
     {
-      return executeDepthFirst(tree, false);
+      return executeDepthFirst(tree);
     }
 
     public int executeCommand(SetPrintFunction cmd)
@@ -485,7 +485,7 @@ public class DocumentCommandInterpreter
     private int execute(DocumentCommandTree tree)
     {
       int errors = 0;
-      Iterator iter = tree.depthFirstIterator(false);
+      Iterator iter = tree.iterator();
       while (iter.hasNext())
       {
         DocumentCommand cmd = (DocumentCommand) iter.next();
@@ -736,7 +736,7 @@ public class DocumentCommandInterpreter
       // so lange wiederholen, bis sich der Baum durch das Expandieren nicht
       // mehr ändert.
       do
-        errors += executeDepthFirst(tree, false);
+        errors += executeDepthFirst(tree);
       while (tree.update());
 
       return errors;
@@ -756,6 +756,13 @@ public class DocumentCommandInterpreter
 
       try
       {
+        if (!cmd.isManualMode()
+            && cmd.getParentFragIDs().contains(cmd.getFragID()))
+          throw new EndlessLoopException(
+              "Das Textfragment mit der FRAG_ID '"
+                  + cmd.getFragID()
+                  + "' ruft sich direkt oder indirekt selbst auf.");
+
         urls = VisibleTextFragmentList.getURLsByID(cmd.getFragID());
         if (urls.size() == 0)
         {
@@ -1126,7 +1133,7 @@ public class DocumentCommandInterpreter
     {
       model.setLockControllers(true);
 
-      int errors = executeDepthFirst(tree, false);
+      int errors = executeDepthFirst(tree);
 
       model.setLockControllers(false);
 
@@ -1244,7 +1251,7 @@ public class DocumentCommandInterpreter
     {
       model.setLockControllers(true);
 
-      int errors = executeDepthFirst(tree, false);
+      int errors = executeDepthFirst(tree);
 
       model.setLockControllers(false);
 
@@ -1329,7 +1336,7 @@ public class DocumentCommandInterpreter
      */
     private int execute(DocumentCommandTree tree)
     {
-      return executeDepthFirst(tree, false);
+      return executeDepthFirst(tree);
     }
 
     /**
