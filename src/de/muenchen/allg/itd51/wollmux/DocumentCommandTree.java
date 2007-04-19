@@ -787,6 +787,7 @@ public class DocumentCommandTree
      */
     private void reduceStack(Stack stack, HashSet finished)
     {
+      if(stack.size() == 0) return;
       String top = ((DocumentCommand) stack.peek()).getBookmarkName();
       if (finished.contains(top))
       {
