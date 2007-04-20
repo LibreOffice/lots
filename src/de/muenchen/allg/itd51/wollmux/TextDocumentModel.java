@@ -356,7 +356,7 @@ public class TextDocumentModel
   {
     Vector visibleElements = new Vector();
     visibleElements.addAll(visibleTextSections);
-    Iterator iter = documentCommandTree.iterator();
+    Iterator iter = documentCommandTree.depthFirstIterator(false);
     while (iter.hasNext())
       visibleElements.add(iter.next());
     return visibleElements.iterator();

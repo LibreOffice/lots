@@ -38,6 +38,7 @@ import com.sun.star.text.XBookmarksSupplier;
 import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextRange;
+import com.sun.star.text.XTextRangeCompare;
 import com.sun.star.uno.Exception;
 
 import de.muenchen.allg.afid.UNO;
@@ -239,6 +240,122 @@ public class Bookmark
   public XTextDocument getDocument()
   {
     return document.xTextDocument();
+  }
+
+  /**
+   * Diese Methode vergleicht zwei Bookmarks und liefert ihre Relation zurück.
+   * Folgende Rückgabewerte sind möglich: POS_BBAA = B kommt vor A; POS_BB88 = B
+   * startet vor A, aber endet gemeinsam mit A; POS_B88B = B enthält A, beginnt
+   * und endet aber nicht mit A; POS_88AA = B startet mit A und endet vor A;
+   * POS_8888 = A und B starten und enden gleich; POS_88BB = A und B starten
+   * gleichzeitig, aber A endet vor B; POS_A88A = A enthält B, beginnt und endet
+   * jedoch nicht mit B; POS_AA88 = A startet vor B, aber endet mit B; POS_AABB =
+   * A kommt vor B; Im Fehlerfall (wenn z.B. einer der beiden Bookmarks nicht
+   * (mehr) im Dokument vorhanden ist), wird POS_AABB zurückgeliefert - es wird
+   * also so getan, als käme B nach A.
+   * 
+   * @param b
+   *          Das Bookmark B, das mit this (Bookmark A) verglichen werden soll.
+   * @return Die Relation der beiden Bookmark in Form einer Konstante
+   *         Bookmark.POS_XXX (siehe Beschreibung)
+   */
+  public int compare(Bookmark b)
+  {
+    Logger.debug2("compare: " + this + " <--> " + b);
+    return compareTextRanges(this.getTextRange(), b.getTextRange());
+  }
+
+  // Positionsangaben als Rückgabewerte von compareTextRanges
+  // Fälle: A:=a alleine, 8:=Überlagerung von a und b, B:=b alleine
+
+  /**
+   * Das Bookmark B tritt im Dokument vor dem Bookmark A auf.
+   */
+  public static final int POS_BBAA = -4;
+
+  /**
+   * Das Bookmark B startet vor dem Bookmark A, aber hört gleichzeitig mit A
+   * auf.
+   */
+  public static final int POS_BB88 = -3;
+
+  /**
+   * Das Bookmark B enthält das Bookmark A vollständig.
+   */
+  public static final int POS_B88B = -2;
+
+  /**
+   * Das Bookmark B startet mit dem Bookmark A, hört jedoch vor dem Bookmark A
+   * auf.
+   */
+  public static final int POS_88AA = -1;
+
+  /**
+   * A und B liegen an der selben Position.
+   */
+  public static final int POS_8888 = -0;
+
+  /**
+   * Das Bookmark A startet mit dem Bookmark B, hört jedoch vor dem Bookmark B
+   * auf.
+   */
+  public static final int POS_88BB = 1;
+
+  /**
+   * Das Bookmark A enthält das Bookmark B vollständig.
+   */
+  public static final int POS_A88A = 2;
+
+  /**
+   * Das Bookmark A startet vor dem Bookmark B, hört jedoch gemeinsam mit dem
+   * Bookmark B auf.
+   */
+  public static final int POS_AA88 = 3;
+
+  /**
+   * Das Bookmark A liegt im Dokument vor dem Bookmark B.
+   */
+  public static final int POS_AABB = 4;
+
+  /**
+   * Diese Methode vergleicht die beiden TextRanges a und b und liefert ihre
+   * Relation in Form der Konstanten Bookmark.POS_xxx zurück.
+   * 
+   * @param a
+   * @param b
+   * @return Die Relation von a und b in Form einer Konstanten Bookmark.POS_xxx.
+   */
+  private static int compareTextRanges(XTextRange a, XTextRange b)
+  {
+    // Fälle: A:=a alleine, 8:=Überlagerung von a und b, B:=b alleine
+    // -4 = BBBBAAAA bzw. BB88AA
+    // -3 = BB88
+    // -2 = B88B
+    // -1 = 88AA
+    // +0 = 8888
+    // +1 = 88BB
+    // +2 = A88A
+    // +3 = AA88
+    // +4 = AAAABBBB bzw. AA88BB
+
+    XTextRangeCompare compare = null;
+    if (a != null) compare = UNO.XTextRangeCompare(a.getText());
+    if (compare != null && a != null && b != null)
+    {
+      try
+      {
+        int start = compare.compareRegionStarts(a, b) + 1;
+        int end = compare.compareRegionEnds(a, b) + 1;
+        return (3 * start + 1 * end) - 4;
+      }
+      catch (IllegalArgumentException e)
+      {
+        // nicht loggen! Tritt regulär auf, wenn Bookmarks aus unterschiedlichen
+        // Frames verglichen werden.
+      }
+    }
+    // Im Fehlerfall wird so getan als käme B nach A
+    return POS_AABB;
   }
 
   /**
