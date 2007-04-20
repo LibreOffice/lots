@@ -118,6 +118,7 @@ public class DocumentCommandTree
    */
   public boolean update()
   {
+    long millis = System.currentTimeMillis();
     Logger.debug("update(#" + xBookmarksSupplier.hashCode() + ")");
 
     // map der bereits bekannten bookmarks/Dokumentkommandos erstellen.
@@ -134,10 +135,15 @@ public class DocumentCommandTree
     Parser p = new Parser();
     commands = p.parse(marks, knownDocumentCommands, xBookmarksSupplier);
 
-    if (p.hasChanged())
-      Logger.debug("update: Dokumentkommandobaum wurde geändert --> "
-                   + commands.size()
-                   + " Dokumentkommandos.");
+    Logger.debug("update finished in "
+                 + (System.currentTimeMillis() - millis)
+                 + " millis: "
+                 + ((p.hasChanged())
+                                    ? "Dokumentkommandobaum wurde geändert"
+                                    : "keine Änderung")
+                 + " --> "
+                 + commands.size()
+                 + " Dokumentkommandos.");
     return p.hasChanged();
   }
 
@@ -787,7 +793,7 @@ public class DocumentCommandTree
      */
     private void reduceStack(Stack stack, HashSet finished)
     {
-      if(stack.size() == 0) return;
+      if (stack.size() == 0) return;
       String top = ((DocumentCommand) stack.peek()).getBookmarkName();
       if (finished.contains(top))
       {
