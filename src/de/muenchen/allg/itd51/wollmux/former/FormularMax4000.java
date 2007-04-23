@@ -508,13 +508,17 @@ public class FormularMax4000
      * Teile des Dokuments enthalten) zerstören, da diese dann ins Leere greifen.
      * Solange dies nicht erkannt wird, muss die Funktion deaktiviert sein.
      * 
-     menuItem = new JMenuItem("Ladezeit des Dokuments optimieren");
+     */
+    if (new Integer(3).equals(new Integer(0)))
+    {
+    menuItem = new JMenuItem("Ladezeit des Dokuments optimieren");
     menuItem.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e)
       {
         removeNonWMBookmarks(doc); 
       }});
-    menu.add(menuItem);*/
+    menu.add(menuItem);
+    }
     
     menuItem = new JMenuItem("Formularbeschreibung editieren");
     menuItem.addActionListener(new ActionListener(){

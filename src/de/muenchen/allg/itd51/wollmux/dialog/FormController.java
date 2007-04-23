@@ -24,6 +24,7 @@
 * 10.09.2006 | BNK | Tabs scrollen, nicht hintereinander gruppieren.
 * 17.11.2006 | BNK | +setValue()
 * 08.01.2007 | BNK | intelligentere Behandlung der TAB-Taste
+* 28.03.2007 | BNK | Buttonanpassung verarbeiten bei mergeFormDescriptors().
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -1472,10 +1473,11 @@ public class FormController implements UIElementEventHandler
    * werden verschmolzen, wobei mehrfach auftretende Funktionen eine Fehlermeldung im Log
    * produzieren (und die letzte Definition gewinnt). Selbiges gilt auch für die 
    * Sichtbarkeit-Abschnitte
+   * @param buttonAnpassung ein ButtonAnpassung-Abschnitt wie bei wollmux:Open dokumentiert.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
-  public static ConfigThingy mergeFormDescriptors(List desc)
+  public static ConfigThingy mergeFormDescriptors(List desc, ConfigThingy buttonAnpassung)
   {
     String plausiColor = null;
     Iterator iter = desc.iterator();
@@ -1502,9 +1504,16 @@ public class FormController implements UIElementEventHandler
     if (plausiColor != null) conf.add("PLAUSI_MARKER_COLOR").add(plausiColor);
     
     ConfigThingy subConf = conf.add("Fenster");
+    int tabNum = -1;
+    if (tabNames.size() > 1) tabNum = 0;
     iter = tabNames.iterator();
-    while (iter.hasNext()) 
-      subConf.addChild((ConfigThingy)mapFensterIdToConfigThingy.get(iter.next()));
+    while (iter.hasNext())
+    {
+      ConfigThingy tabConf = (ConfigThingy)mapFensterIdToConfigThingy.get(iter.next());
+      buttonAnpassung(tabNum, tabConf, buttonAnpassung);
+      if (++tabNum == tabNames.size()-1) tabNum = Integer.MAX_VALUE;
+      subConf.addChild(tabConf);
+    }
     
     if (!mapSichtbarkeitIdToConfigThingy.isEmpty())
     {
@@ -1560,18 +1569,191 @@ public class FormController implements UIElementEventHandler
     }
   }
   
+  /**
+   * Passt die in tabConf gespeicherte Beschreibung eines Reiters einer FormularGUI an
+   * entsprechend dem ButtonAnpassung-Abschnitt in buttonAnpassung.
+   * @param tabNum 0: tabConf beschreibt den ersten Tab, Integer.MAX_VALUE: tabConf beschreibt den
+   *        letzten Tab, -1: tabConf beschreibt den einzigen Tab.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED
+   */
+  public static void buttonAnpassung(int tabNum, ConfigThingy tabConf, ConfigThingy buttonAnpassung)
+  {
+    ConfigThingy anpassung;
+    switch(tabNum)
+    {
+      case -1: anpassung = buttonAnpassung.query("EinzigerTab"); break;
+      case  0: anpassung = buttonAnpassung.query("ErsterTab"); break;
+      case Integer.MAX_VALUE: anpassung = buttonAnpassung.query("LetzterTab"); break;
+      default: anpassung = buttonAnpassung.query("MittlererTab"); break;
+    }
+    
+     /*
+      * NEVER und ALWAYS Angaben aufsammeln
+      */
+    Set neverActions = new HashSet();
+    List alwaysActions = new Vector(); //of ActionUIElementPair
+    Iterator anpOuterIter = anpassung.iterator(); //durchläuft die *Tab Abschnitte
+    while (anpOuterIter.hasNext())
+    {
+      Iterator anpInnerIter = ((ConfigThingy)anpOuterIter.next()).iterator(); //durchläuft die NEVER und ALWAYS Angaben
+      while (anpInnerIter.hasNext())
+      {
+        ConfigThingy neverOrAlwaysConf = (ConfigThingy)anpInnerIter.next();
+        if (neverOrAlwaysConf.getName().equals("NEVER"))
+        {
+          Iterator neverActionIter = neverOrAlwaysConf.iterator();
+          while (neverActionIter.hasNext())
+            neverActions.add(neverActionIter.next().toString());
+        }
+        else if (neverOrAlwaysConf.getName().equals("ALWAYS"))
+        {
+          try{
+            String action = neverOrAlwaysConf.get("ACTION").toString();
+            neverOrAlwaysConf.setName("");
+            alwaysActions.add(new ActionUIElementPair(action, neverOrAlwaysConf));
+          }catch(Exception x)
+          {
+            Logger.error("Fehlerhafter ALWAYS-Angabe in ButtonAnpassung-Abschnitt", x);
+          }
+        }
+      }
+    }
+    
+     /*
+      * Existierende Buttons-Abschnitte durchgehen, ihre Elemente aufsammeln (außer denen,
+      * die durch NEVER verboten sind) 
+      */
+    List existingUIElements = new Vector(); //of ActionUIElementPair
+    ConfigThingy buttonsConf = tabConf.query("Buttons");
+    Iterator buttonsOuterIter = buttonsConf.iterator(); //durchläuft die Buttons-Abschnitte
+    while (buttonsOuterIter.hasNext())
+    {
+      Iterator buttonsInnerIter = ((ConfigThingy)buttonsOuterIter.next()).iterator(); //durchläuft die Eingabeelemente im Buttons-Abschnitt
+      while (buttonsInnerIter.hasNext())
+      {
+        ConfigThingy buttonConf = (ConfigThingy)buttonsInnerIter.next();
+        String action = null;
+        try{ action = buttonConf.get("ACTION").toString(); }catch(Exception x){}
+        if (action == null || !neverActions.contains(action))
+            existingUIElements.add(new ActionUIElementPair(action, buttonConf));
+      }
+    }
+    
+    /*
+     * den Buttons-Abschnitt löschen (weil nachher ein neuer generiert wird)
+     */
+    Iterator iter = tabConf.iterator();
+    while (iter.hasNext())
+    {
+      ConfigThingy possiblyButtonsConf = (ConfigThingy)iter.next();
+      if (possiblyButtonsConf.getName().equals("Buttons")) iter.remove();
+    }
+    
+    /*
+     * alwaysActions Liste in existingUIElements hineinmergen.
+     */
+    integrateAlwaysButtons: 
+      for (int i = 0; i < alwaysActions.size(); ++i)
+    {
+      ActionUIElementPair act = (ActionUIElementPair)alwaysActions.get(i);
+       /* zuerst schauen, ob schon ein Button entsprechender ACTION vorhanden ist
+        * und falls ja, dann mit dem nächsten Element aus alwaysActions weitermachen.
+        */
+      iter = existingUIElements.iterator();
+      while (iter.hasNext())
+      {
+        ActionUIElementPair act2 = (ActionUIElementPair)iter.next();
+        if (act2.action != null && act2.action.equals(act.action))
+          continue integrateAlwaysButtons;
+      }
+      
+      /*
+       * Okay, das Element gibt's noch nicht. Wir versuchen zuerst, eine Einfügestelle
+       * zu finden hinter einem Button mit selber ACTION wie der Vorgänger in
+       * alwaysActions (falls es einen gibt).
+       */
+      if (i > 0)
+      {
+        String predecessorAction = ((ActionUIElementPair)alwaysActions.get(i-1)).action;
+        if (predecessorAction != null)
+        {
+          for (int k = 0; k < existingUIElements.size(); ++k)
+          {
+            ActionUIElementPair act2 = (ActionUIElementPair)existingUIElements.get(k);
+            if (act2.action != null && act2.action.equals(predecessorAction))
+            {
+              existingUIElements.add(k + 1, act);
+              continue integrateAlwaysButtons;
+            }
+          }
+        }
+      }
+      
+      /*
+       * Wenn wir keine passende Einfügestelle finden konnten, versuchen wir eine Stelle
+       * zu finden vor einem Button mit selber ACTION wie der Nachfolger in
+       * alwaysActions (falls es einen gibt).
+       */
+      if (i + 1 < alwaysActions.size())
+      {
+        String successorAction = ((ActionUIElementPair)alwaysActions.get(i+1)).action;
+        if (successorAction != null)
+        {
+          for (int k = 0; k < existingUIElements.size(); ++k)
+          {
+            ActionUIElementPair act2 = (ActionUIElementPair)existingUIElements.get(k);
+            if (act2.action != null && act2.action.equals(successorAction))
+            {
+              existingUIElements.add(k, act);
+              continue integrateAlwaysButtons;
+            }
+          }
+        }
+      }
+      
+      /*
+       * Keine Einfügestelle gefunden? Dann hängen wir den Button einfach ans Ende.
+       */
+      existingUIElements.add(act);
+    }
+    
+    
+    ConfigThingy newButtons = new ConfigThingy("Buttons");
+    iter = existingUIElements.iterator();
+    while (iter.hasNext())
+    {
+      ActionUIElementPair act = (ActionUIElementPair)iter.next();
+      newButtons.addChild(act.uiElementDesc);
+    }
+    tabConf.addChild(newButtons);
+  }
+
+  private static class ActionUIElementPair
+  {
+    public String action;
+    public ConfigThingy uiElementDesc;
+    public ActionUIElementPair(String action, ConfigThingy uiElementDesc)
+    {
+      this.action = action;
+      this.uiElementDesc = uiElementDesc;
+    }
+  }
+  
   public static void main(String[] args) throws Exception
   {
     File curDir = new File(System.getProperty("user.dir"));
     URL context = curDir.toURL();
     URL merge1URL = new URL(context, "testdata/merge_form_1.conf");
     URL merge2URL = new URL(context, "testdata/merge_form_2.conf");
+    URL anpassungURL = new URL(context, "testdata/buttonanpassung.conf");
     ConfigThingy merge1Conf = new ConfigThingy("", merge1URL).get("Formular");
     ConfigThingy merge2Conf = new ConfigThingy("", merge2URL).get("Formular");
+    ConfigThingy buttonanpassung = new ConfigThingy("Buttonanpassung",anpassungURL);
     List formDesc = new Vector();
     formDesc.add(merge1Conf);
     formDesc.add(merge2Conf);
-    ConfigThingy merged = mergeFormDescriptors(formDesc);
+    ConfigThingy merged = mergeFormDescriptors(formDesc, buttonanpassung);
     System.out.println(merged.stringRepresentation());
   }
   
