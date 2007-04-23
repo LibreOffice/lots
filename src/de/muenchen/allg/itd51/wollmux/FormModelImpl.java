@@ -110,7 +110,7 @@ public class FormModelImpl
    * @throws InvalidFormDescriptorException
    */
   public static FormModel createMultiDocumentFormModel(
-      Vector /* of TextDocumentModel */docs)
+      Vector /* of TextDocumentModel */docs, ConfigThingy buttonAnpassung)
       throws InvalidFormDescriptorException
   {
 
@@ -134,7 +134,7 @@ public class FormModelImpl
 
     // ...und mergen
     ConfigThingy formConf = FormController
-        .mergeFormDescriptors(formularSections);
+        .mergeFormDescriptors(formularSections, buttonAnpassung);
 
     // mapIdToPresetValue aller Einzeldokumente vereinheitlichen:
     HashMap commonMapIdToPresetValue = new HashMap();

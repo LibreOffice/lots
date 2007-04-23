@@ -1051,18 +1051,20 @@ public class WollMuxEventHandler
    *          zusammengefasst werden sollen.
    */
   public static void handleProcessMultiform(
-      Vector /* of TextDocumentModel */docs)
+      Vector /* of TextDocumentModel */docs, ConfigThingy buttonAnpassung)
   {
-    handle(new OnProcessMultiform(docs));
+    handle(new OnProcessMultiform(docs, buttonAnpassung));
   }
 
   private static class OnProcessMultiform extends BasicEvent
   {
     Vector docs;
+    ConfigThingy buttonAnpassung;
 
-    public OnProcessMultiform(Vector /* of TextDocumentModel */docs)
+    public OnProcessMultiform(Vector /* of TextDocumentModel */docs, ConfigThingy buttonAnpassung)
     {
       this.docs = docs;
+      this.buttonAnpassung = buttonAnpassung;
     }
 
     protected void doit() throws WollMuxFehlerException
@@ -1070,7 +1072,7 @@ public class WollMuxEventHandler
       FormModel fm;
       try
       {
-        fm = FormModelImpl.createMultiDocumentFormModel(docs);
+        fm = FormModelImpl.createMultiDocumentFormModel(docs, buttonAnpassung);
       }
       catch (InvalidFormDescriptorException e)
       {
@@ -1256,6 +1258,7 @@ public class WollMuxEventHandler
       boolean merged = false;
       ConfigThingy conf;
       ConfigThingy fragConf;
+      ConfigThingy buttonAnpassung = null;
       try
       {
         conf = new ConfigThingy("OPEN", null, new StringReader(openConfStr));
@@ -1271,6 +1274,14 @@ public class WollMuxEventHandler
       {
         asTemplate = conf.get("AS_TEMPLATE", 1).toString().equalsIgnoreCase(
             "true");
+      }
+      catch (java.lang.Exception x)
+      {
+      }
+
+      try
+      {
+        buttonAnpassung = conf.get("Buttonanpassung", 1);
       }
       catch (java.lang.Exception x)
       {
@@ -1307,7 +1318,7 @@ public class WollMuxEventHandler
 
       if (merged)
       {
-        handleProcessMultiform(docs);
+        handleProcessMultiform(docs, buttonAnpassung);
       }
     }
 
