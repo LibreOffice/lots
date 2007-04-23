@@ -48,6 +48,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
@@ -1473,12 +1474,14 @@ public class FormController implements UIElementEventHandler
    * werden verschmolzen, wobei mehrfach auftretende Funktionen eine Fehlermeldung im Log
    * produzieren (und die letzte Definition gewinnt). Selbiges gilt auch für die 
    * Sichtbarkeit-Abschnitte
-   * @param buttonAnpassung ein ButtonAnpassung-Abschnitt wie bei wollmux:Open dokumentiert.
+   * @param buttonAnpassung ein ButtonAnpassung-Abschnitt wie bei wollmux:Open dokumentiert, oder
+   *                        null, wenn keine Anpassung erforderlich.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
   public static ConfigThingy mergeFormDescriptors(List desc, ConfigThingy buttonAnpassung)
   {
+    if (buttonAnpassung == null) buttonAnpassung = new ConfigThingy("Buttonanpassung");
     String plausiColor = null;
     Iterator iter = desc.iterator();
     Map mapFensterIdToConfigThingy = new HashMap();
@@ -1587,6 +1590,11 @@ public class FormController implements UIElementEventHandler
       case Integer.MAX_VALUE: anpassung = buttonAnpassung.query("LetzterTab"); break;
       default: anpassung = buttonAnpassung.query("MittlererTab"); break;
     }
+    
+    /*
+     * Kopie machen, da wir evtl. Veränderungenv vornehmen (z.B. "ALWAYS" entfernen)
+     */
+    anpassung = new ConfigThingy(anpassung);
     
      /*
       * NEVER und ALWAYS Angaben aufsammeln
@@ -1718,6 +1726,23 @@ public class FormController implements UIElementEventHandler
       existingUIElements.add(act);
     }
     
+    /*
+     * "glue" Elemente am Ende der Buttonliste löschen, da diese dort normalerweise nicht erwünscht
+     * sind. 
+     */
+    ListIterator liter = existingUIElements.listIterator(existingUIElements.size());
+    while (liter.hasPrevious())
+    {
+      ActionUIElementPair act = (ActionUIElementPair)liter.previous();
+      String type = null;
+      try{
+        type = act.uiElementDesc.get("TYPE").toString();
+      }catch(Exception x){}
+      if (type != null && type.equals("glue")) 
+        liter.remove();
+      else
+        break;
+    }
     
     ConfigThingy newButtons = new ConfigThingy("Buttons");
     iter = existingUIElements.iterator();
