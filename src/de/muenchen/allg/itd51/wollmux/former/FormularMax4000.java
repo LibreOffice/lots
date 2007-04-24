@@ -1592,7 +1592,11 @@ public class FormularMax4000
           XEnumeration paraEnu = enuAccess.createEnumeration();
           while (paraEnu.hasMoreElements())
           {
-            XEnumeration textportionEnu = UNO.XEnumerationAccess(paraEnu.nextElement()).createEnumeration();
+            Object nextEle = paraEnu.nextElement();
+            if (nextEle == null) throw new NullPointerException("nextElement() == null obwohl hasMoreElements()==true");
+            XEnumerationAccess xs = UNO.XEnumerationAccess(nextEle);
+            if (xs == null) throw new NullPointerException("Paragraph unterstützt nicht XEnumerationAccess?!?");
+            XEnumeration textportionEnu = xs.createEnumeration();
             while (textportionEnu.hasMoreElements())
             {
               Object textportion = textportionEnu.nextElement();
