@@ -118,6 +118,8 @@ public class DocumentCommandTree
    */
   public boolean update()
   {
+    long startTime = System.currentTimeMillis();
+
     boolean changed = false;
     int compareCount = 0;
 
@@ -159,7 +161,10 @@ public class DocumentCommandTree
         changed = true;
       }
     }
-    Logger.debug2("Update fertig - compareCount=" + compareCount);
+    Logger.debug2("Update fertig nach "
+                  + (System.currentTimeMillis() - startTime)
+                  + " ms. CompareCount="
+                  + compareCount);
 
     return changed;
   }
@@ -357,7 +362,7 @@ public class DocumentCommandTree
    * @param list
    * @param reverse
    */
-  private void depthFirstAddToList(DocumentCommand cmd, List list,
+  private static void depthFirstAddToList(DocumentCommand cmd, List list,
       boolean reverse)
   {
     // Element hinzufügen (ausser RootElement)
