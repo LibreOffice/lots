@@ -1059,9 +1059,11 @@ public class WollMuxEventHandler
   private static class OnProcessMultiform extends BasicEvent
   {
     Vector docs;
+
     ConfigThingy buttonAnpassung;
 
-    public OnProcessMultiform(Vector /* of TextDocumentModel */docs, ConfigThingy buttonAnpassung)
+    public OnProcessMultiform(Vector /* of TextDocumentModel */docs,
+        ConfigThingy buttonAnpassung)
     {
       this.docs = docs;
       this.buttonAnpassung = buttonAnpassung;
@@ -2873,29 +2875,59 @@ public class WollMuxEventHandler
       if (UNO.XBookmarksSupplier(model.doc) == null || blockname == null)
         return;
 
+      ConfigThingy slvConf = WollMuxSingleton.getInstance().getWollmuxConf()
+          .query("SachleitendeVerfuegungen");
+      Integer highlightColor = null;
+
       XTextCursor range = model.getViewCursor();
 
       if (range == null) return;
+
+      if (range.isCollapsed())
+      {
+        WollMuxSingleton.showInfoModal(
+            "Fehler",
+            "Bitte wählen Sie einen Bereich aus, der markiert werden soll.");
+        return;
+      }
 
       String markChange = null;
       if (blockname.equalsIgnoreCase("allVersions"))
       {
         markChange = "wird immer gedruckt";
+        highlightColor = getHighlightColor(
+            slvConf,
+            "ALL_VERSIONS_HIGHLIGHT_COLOR");
       }
       else if (blockname.equalsIgnoreCase("draftOnly"))
       {
         markChange = "wird nur im Entwurf gedruckt";
+        highlightColor = getHighlightColor(
+            slvConf,
+            "DRAFT_ONLY_HIGHLIGHT_COLOR");
       }
       else if (blockname.equalsIgnoreCase("notInOriginal"))
       {
         markChange = "wird immer gedruckt, ausser im Original";
+        highlightColor = getHighlightColor(
+            slvConf,
+            "NOT_IN_ORIGINAL_HIGHLIGHT_COLOR");
       }
       else
         return;
 
-      String bookmarkName = "WM(CMD '" + blockname + "')";
+      String bookmarkStart = "WM(CMD '" + blockname + "'";
+      String hcAtt = "";
+      if (highlightColor != null)
+      {
+        String colStr = "00000000";
+        colStr += Integer.toHexString(highlightColor.intValue());
+        colStr = colStr.substring(colStr.length() - 8, colStr.length());
+        hcAtt = " HIGHLIGHT_COLOR '" + colStr + "'";
+      }
+      String bookmarkName = bookmarkStart + hcAtt + ")";
 
-      Set bmNames = getBookmarkNamesStartingWith(bookmarkName, range);
+      Set bmNames = getBookmarkNamesStartingWith(bookmarkStart, range);
 
       if (bmNames.size() > 0)
       {
@@ -2906,8 +2938,11 @@ public class WollMuxEventHandler
           bookmarkName = iter.next().toString();
           try
           {
-            new Bookmark(bookmarkName, UNO.XBookmarksSupplier(model.doc))
-                .remove();
+            Bookmark b = new Bookmark(bookmarkName, UNO
+                .XBookmarksSupplier(model.doc));
+            if (bookmarkName.contains("HIGHLIGHT_COLOR"))
+              UNO.setPropertyToDefault(b.getTextRange(), "CharBackColor");
+            b.remove();
           }
           catch (NoSuchElementException e)
           {
@@ -2922,7 +2957,15 @@ public class WollMuxEventHandler
       else
       {
         // neuen Block anlegen
-        new Bookmark(bookmarkName, model.doc, range);
+        Bookmark b = new Bookmark(bookmarkName, model.doc, range);
+        if (highlightColor != null)
+        {
+          UNO.setProperty(b.getTextRange(), "CharBackColor", highlightColor);
+          // ViewCursor kollabieren, da die Markierung die Farben verfälscht
+          // darstellt.
+          XTextCursor vc = model.getViewCursor();
+          if (vc != null) vc.collapseToEnd();
+        }
         WollMuxSingleton.showInfoModal(
             "Block wurde markiert",
             "Der ausgewählte Block " + markChange + ".");
@@ -2935,6 +2978,35 @@ public class WollMuxEventHandler
       dci.scanGlobalDocumentCommands();
 
       stabilize();
+    }
+
+    /**
+     * TODO: dok
+     * 
+     * @param slvConf
+     * @param attribute
+     */
+    private static Integer getHighlightColor(ConfigThingy slvConf,
+        String attribute)
+    {
+      try
+      {
+        String highlightColor = slvConf.query(attribute).getLastChild()
+            .toString();
+        int hc = Integer.parseInt(highlightColor, 16);
+        return new Integer(hc);
+      }
+      catch (NodeNotFoundException e)
+      {
+        return null;
+      }
+      catch (NumberFormatException e)
+      {
+        Logger.error("Der angegebene Farbwert im Attribut '"
+                     + attribute
+                     + "' ist ungültig!");
+        return null;
+      }
     }
 
     /**

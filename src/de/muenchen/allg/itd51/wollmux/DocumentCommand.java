@@ -886,6 +886,18 @@ abstract public class DocumentCommand implements VisibilityElement
 
   // ********************************************************************************
   /**
+   * Beschreibt ein Dokumentkommando, das das optionale Attribut HIGHLIGHT_COLOR
+   * enthalten kann (derzeit AllVersions, DraftOnly und NotInOriginal)
+   */
+  public static interface OptionalHighlightColorProvider
+  {
+    public String getHighlightColor();
+
+    public XTextRange getTextRange();
+  }
+
+  // ********************************************************************************
+  /**
    * Eine Exception die geworfen wird, wenn ein Dokumentkommando als ungültig
    * erkannt wurde, z,b, aufgrund eines fehlenden Parameters.
    */
@@ -1622,11 +1634,28 @@ abstract public class DocumentCommand implements VisibilityElement
    * DraftOnly-Kommando können Blöcke im Text definiert werden (auch an anderen
    * Stellen), die ausschließlich im Entwurf angezeigt werden sollen.
    */
-  static public class DraftOnly extends DocumentCommand
+  static public class DraftOnly extends DocumentCommand implements
+      OptionalHighlightColorProvider
   {
+    String highlightColor = null;
+
     public DraftOnly(ConfigThingy wmCmd, Bookmark bookmark)
     {
       super(wmCmd, bookmark);
+
+      try
+      {
+        highlightColor = wmCmd.get("WM").get("HIGHLIGHT_COLOR").toString();
+      }
+      catch (NodeNotFoundException e)
+      {
+        // HIGHLIGHT_COLOR ist optional
+      }
+    }
+
+    public String getHighlightColor()
+    {
+      return highlightColor;
     }
 
     protected boolean canHaveChilds()
@@ -1648,11 +1677,28 @@ abstract public class DocumentCommand implements VisibilityElement
    * jedoch in allen anderen Ausdrucken, die nicht das Original sind (wie z.B.
    * Abdrücke und Entwurf).
    */
-  static public class NotInOriginal extends DocumentCommand
+  static public class NotInOriginal extends DocumentCommand implements
+      OptionalHighlightColorProvider
   {
+    String highlightColor = null;
+
     public NotInOriginal(ConfigThingy wmCmd, Bookmark bookmark)
     {
       super(wmCmd, bookmark);
+
+      try
+      {
+        highlightColor = wmCmd.get("WM").get("HIGHLIGHT_COLOR").toString();
+      }
+      catch (NodeNotFoundException e)
+      {
+        // HIGHLIGHT_COLOR ist optional
+      }
+    }
+
+    public String getHighlightColor()
+    {
+      return highlightColor;
     }
 
     protected boolean canHaveChilds()
@@ -1674,11 +1720,28 @@ abstract public class DocumentCommand implements VisibilityElement
    * ausgedruckt werden sollen, d.h. sowohl bei Originalen, als auch bei
    * Abdrucken und Entwürfen.
    */
-  static public class AllVersions extends DocumentCommand
+  static public class AllVersions extends DocumentCommand implements
+      OptionalHighlightColorProvider
   {
+    String highlightColor = null;
+
     public AllVersions(ConfigThingy wmCmd, Bookmark bookmark)
     {
       super(wmCmd, bookmark);
+
+      try
+      {
+        highlightColor = wmCmd.get("WM").get("HIGHLIGHT_COLOR").toString();
+      }
+      catch (NodeNotFoundException e)
+      {
+        // HIGHLIGHT_COLOR ist optional
+      }
+    }
+
+    public String getHighlightColor()
+    {
+      return highlightColor;
     }
 
     protected boolean canHaveChilds()

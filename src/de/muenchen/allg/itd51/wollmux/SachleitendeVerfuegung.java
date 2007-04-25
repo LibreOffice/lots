@@ -37,6 +37,7 @@ import com.sun.star.uno.Exception;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
+import de.muenchen.allg.itd51.wollmux.DocumentCommand.OptionalHighlightColorProvider;
 import de.muenchen.allg.itd51.wollmux.TextDocumentModel.PrintFailedException;
 import de.muenchen.allg.itd51.wollmux.dialog.SachleitendeVerfuegungenDruckdialog;
 
@@ -1218,28 +1219,35 @@ public class SachleitendeVerfuegung
     HashMap /* of DocumentCommand */oldVisibilityStates = new HashMap();
 
     // Ein/Ausblenden der draftOnly bzw. notInOriginal-Blöcke:
-    Iterator iter = model.getDraftOnlyBlocksIterator();
-    while (iter.hasNext())
+    for (Iterator iter = model.getDraftOnlyBlocksIterator(); iter.hasNext();)
     {
       DocumentCommand cmd = (DocumentCommand) iter.next();
       oldVisibilityStates.put(cmd, new Boolean(cmd.isVisible()));
       cmd.setVisible(isDraft);
     }
 
-    iter = model.getNotInOrininalBlocksIterator();
-    while (iter.hasNext())
+    for (Iterator iter = model.getNotInOrininalBlocksIterator(); iter.hasNext();)
     {
       DocumentCommand cmd = (DocumentCommand) iter.next();
       oldVisibilityStates.put(cmd, new Boolean(cmd.isVisible()));
       cmd.setVisible(!isOriginal);
     }
 
-    iter = model.getAllVersionsBlocksIterator();
-    while (iter.hasNext())
+    for (Iterator iter = model.getAllVersionsBlocksIterator(); iter.hasNext();)
     {
       DocumentCommand cmd = (DocumentCommand) iter.next();
       oldVisibilityStates.put(cmd, new Boolean(cmd.isVisible()));
       cmd.setVisible(true);
+    }
+
+    // Hintergrundfarbe der Printblöcke aufheben, wenn eine gesetzt ist.
+    for (Iterator iter = oldVisibilityStates.keySet().iterator(); iter
+        .hasNext();)
+    {
+      OptionalHighlightColorProvider cmd = (OptionalHighlightColorProvider) iter
+          .next();
+      if (cmd.getHighlightColor() != null)
+        UNO.setPropertyToDefault(cmd.getTextRange(), "CharBackColor");
     }
 
     // Ziffer von Punkt 1 ausblenden falls isOriginal
@@ -1271,10 +1279,36 @@ public class SachleitendeVerfuegung
     if (punkt1ZifferOnly != null)
       UNO.setProperty(punkt1ZifferOnly, "CharHidden", Boolean.FALSE);
 
+    // Alte Hintergrundfarben der Sichtbarkeitsblöcke wieder herstellen, wenn
+    // welche gesetzt sind:
+    for (Iterator iter = oldVisibilityStates.keySet().iterator(); iter
+        .hasNext();)
+    {
+      OptionalHighlightColorProvider cmd = (OptionalHighlightColorProvider) iter
+          .next();
+      if (cmd.getHighlightColor() != null)
+      {
+        try
+        {
+          Integer bgColor = new Integer(Integer.parseInt(cmd
+              .getHighlightColor(), 16));
+          UNO.setProperty(cmd.getTextRange(), "CharBackColor", bgColor);
+        }
+        catch (NumberFormatException e)
+        {
+          Logger.error("Fehler in Dokumentkommando '"
+                       + cmd
+                       + "': Die Farbe HIGHLIGHT_COLOR mit dem Wert '"
+                       + cmd.getHighlightColor()
+                       + "' ist ungültig.");
+        }
+      }
+    }
+
     // Alte Sichtbarkeitszustände der draftOnly bzw. notInOriginal-Blöcke
     // zurücksetzten.
-    iter = oldVisibilityStates.keySet().iterator();
-    while (iter.hasNext())
+    for (Iterator iter = oldVisibilityStates.keySet().iterator(); iter
+        .hasNext();)
     {
       DocumentCommand cmd = (DocumentCommand) iter.next();
       cmd.setVisible(((Boolean) oldVisibilityStates.get(cmd)).booleanValue());
