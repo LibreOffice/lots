@@ -25,7 +25,6 @@ import java.io.StringReader;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.Vector;
@@ -127,8 +126,8 @@ public class TextDocumentModel
       .compile("(\\A\\s*WM\\s*\\(.*\\)\\s*\\d*\\z)");
 
   /**
-   * Ermöglicht den Zugriff auf einen Vector aller FormField-Objekte in diesem
-   * TextDokument über den Namen der zugeordneten ID. Die in dieser Map
+   * Ermöglicht den Zugriff auf eine Collection aller FormField-Objekte in
+   * diesem TextDokument über den Namen der zugeordneten ID. Die in dieser Map
    * enthaltenen FormFields sind nicht in {@link #idToTextFieldFormFields}
    * enthalten und umgekehrt.
    */
@@ -209,34 +208,9 @@ public class TextDocumentModel
   private PersistentData persistentData;
 
   /**
-   * Enthält einen Vector aller notInOrininal-Dokumentkommandos des Dokuments,
-   * die für die Ein/Ausblendungen in Sachleitenden Verfügungen benötigt werden.
+   * Enthält die Kommandos dieses Dokuments.
    */
-  private Vector notInOriginalBlocks;
-
-  /**
-   * Enthält einen Vector aller draftOnly-Dokumentkommandos des Dokuments, die
-   * für die Ein/Ausblendungen in Sachleitenden Verfügungen benötigt werden.
-   */
-  private Vector draftOnlyBlocks;
-
-  /**
-   * Enthält einen Vector aller all-Dokumentkommandos des Dokuments, die für die
-   * Ein/Ausblendungen in Sachleitenden Verfügungen benötigt werden.
-   */
-  private Vector allVersionsBlocks;
-
-  /**
-   * Enthält eine LinkedListe aller setJumpMark-Dokumentkommandos des Dokuments,
-   * die angesprungen werden falls nach dem Einfügen von Textbausteinen keine
-   * Einfügestelle vorhanden ist.
-   */
-  private LinkedList jumpMarks;
-
-  /**
-   * Enthält den Kommandobaum dieses Dokuments.
-   */
-  private DocumentCommandTree documentCommandTree;
+  private DocumentCommands documentCommands;
 
   /**
    * Enthält ein Setmit den Namen aller derzeit unsichtbar gestellter
@@ -281,11 +255,8 @@ public class TextDocumentModel
     this.printModel = new PrintModel(this);
 
     // Kommandobaum erzeugen:
-    this.documentCommandTree = new DocumentCommandTree(UNO
-        .XBookmarksSupplier(doc));
-    documentCommandTree.update();
-
-    resetGlobalDocumentCommands();
+    this.documentCommands = new DocumentCommands(UNO.XBookmarksSupplier(doc));
+    documentCommands.update();
 
     registerCloseListener();
 
@@ -321,28 +292,13 @@ public class TextDocumentModel
   }
 
   /**
-   * Veranlasst das TextDocumentModel alle bisher gespeicherten
-   * Dokumentkommandos zu löschen, damit diese in einem neuen Scan neu erfasst
-   * werden können. Dazu gehören Dokumentkommandos zur Drucksteuerung bei
-   * Sachleitenden Verfügungen (notInOriginal, DraftOnly, All) und die
-   * Sprungmarken 'setJumpMark'.
-   */
-  public void resetGlobalDocumentCommands()
-  {
-    this.notInOriginalBlocks = new Vector();
-    this.draftOnlyBlocks = new Vector();
-    this.allVersionsBlocks = new Vector();
-    this.jumpMarks = new LinkedList();
-  }
-
-  /**
    * Liefert den Dokument-Kommandobaum dieses Dokuments.
    * 
    * @return der Dokument-Kommandobaum dieses Dokuments.
    */
-  public DocumentCommandTree getDocumentCommandTree()
+  public DocumentCommands getDocumentCommands()
   {
-    return documentCommandTree;
+    return documentCommands;
   }
 
   /**
@@ -356,8 +312,7 @@ public class TextDocumentModel
   {
     Vector visibleElements = new Vector();
     visibleElements.addAll(visibleTextSections);
-    Iterator iter = documentCommandTree.depthFirstIterator(false);
-    while (iter.hasNext())
+    for (Iterator iter = documentCommands.setGroupsIterator(); iter.hasNext();)
       visibleElements.add(iter.next());
     return visibleElements.iterator();
   }
@@ -482,7 +437,7 @@ public class TextDocumentModel
       String id = (String) idIter.next();
       String value;
 
-      Vector fields = (Vector) idToFormFields.get(id);
+      List fields = (List) idToFormFields.get(id);
       if (fields != null && fields.size() > 0)
       {
         boolean allAreUnchanged = true;
@@ -917,48 +872,12 @@ public class TextDocumentModel
   }
 
   /**
-   * Fügt der Liste der NotInOriginal-Kommandos dieses Dokuments ein weiteres
-   * Dokumentkommando cmd dieses Typs hinzu.
-   * 
-   * @param cmd
-   *          das hinzuzufügende Dokumentkommando
-   */
-  public void addNotInOriginalBlock(DocumentCommand.NotInOriginal cmd)
-  {
-    notInOriginalBlocks.add(cmd);
-  }
-
-  /**
-   * Fügt der Liste der DraftOnly-Kommandos dieses Dokuments ein weiteres
-   * Dokumentkommando cmd dieses Typs hinzu.
-   * 
-   * @param cmd
-   *          das hinzuzufügende Dokumentkommando
-   */
-  public void addDraftOnlyBlock(DocumentCommand.DraftOnly cmd)
-  {
-    draftOnlyBlocks.add(cmd);
-  }
-
-  /**
    * Liefert ein HashSet mit den Namen (Strings) aller als unsichtbar markierten
    * Sichtbarkeitsgruppen.
    */
   public HashSet getInvisibleGroups()
   {
     return invisibleGroups;
-  }
-
-  /**
-   * Fügt der Liste der DraftOnly-Kommandos dieses Dokuments ein weiteres
-   * Dokumentkommando cmd dieses Typs hinzu.
-   * 
-   * @param cmd
-   *          das hinzuzufügende Dokumentkommando
-   */
-  public void addAllVersionsBlock(DocumentCommand.AllVersions cmd)
-  {
-    allVersionsBlocks.add(cmd);
   }
 
   /**
@@ -971,7 +890,7 @@ public class TextDocumentModel
    */
   public Iterator getNotInOrininalBlocksIterator()
   {
-    return notInOriginalBlocks.iterator();
+    return documentCommands.notInOriginalIterator();
   }
 
   /**
@@ -984,7 +903,7 @@ public class TextDocumentModel
    */
   public Iterator getDraftOnlyBlocksIterator()
   {
-    return draftOnlyBlocks.iterator();
+    return documentCommands.draftOnlyIterator();
   }
 
   /**
@@ -997,19 +916,7 @@ public class TextDocumentModel
    */
   public Iterator getAllVersionsBlocksIterator()
   {
-    return allVersionsBlocks.iterator();
-  }
-
-  /**
-   * Fügt der Liste der setJumpMark-Kommandos dieses Dokuments ein weiteres
-   * Dokumentkommando cmd dieses Typs hinzu.
-   * 
-   * @param cmd
-   *          das hinzuzufügende Dokumentkommando
-   */
-  public void addSetJumpMarkBlock(DocumentCommand.SetJumpMark cmd)
-  {
-    jumpMarks.add(cmd);
+    return documentCommands.allVersionsIterator();
   }
 
   /**
@@ -1023,14 +930,7 @@ public class TextDocumentModel
    */
   public SetJumpMark getFirstJumpMark()
   {
-    try
-    {
-      return (SetJumpMark) jumpMarks.removeFirst();
-    }
-    catch (Exception e)
-    {
-      return null;
-    }
+    return documentCommands.getFirstJumpMark();
   }
 
   /**

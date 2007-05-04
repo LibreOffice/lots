@@ -434,7 +434,7 @@ public final class FormFieldFactory
    * 
    * @author Christoph Lutz (D-III-ITD 5.1)
    */
-  interface FormField
+  interface FormField extends Comparable
   {
     /**
      * FIXME Unschöne Fixup-Funktion, die in FormScanner.executeCommand()
@@ -638,6 +638,35 @@ public final class FormFieldFactory
       catch (java.lang.Exception e)
       {
       }
+    }
+
+    /**
+     * Vergleicht die Positionen der Dokumentkommandos der Formularfelder im
+     * Dokument liefert -1 zurück, wenn this vor other liegt, 1, wenn this nach
+     * other liegt und beide Formularfelder dem selben Text-Objekt zugeordnet
+     * sind und 0, wenn sich die Dokumentkommandos überlappen; lässt sich die
+     * Ordnung nicht bestimmen, da die Text-Objekte sich unterscheiden, dann
+     * wird -1 geliefert.
+     * 
+     * @param other
+     *          Das Vergleichsobjekt.
+     * 
+     * @return
+     */
+    public int compareTo(Object other)
+    {
+      int rel = cmd.getRelation(((BasicFormField) other).cmd);
+      if (rel == DocumentCommand.REL_B_IS_SIBLING_BEFORE_A)
+        return 1;
+      else if (rel == DocumentCommand.REL_B_IS_SIBLING_AFTER_A)
+        return -1;
+      else if (rel == DocumentCommand.REL_B_IS_CHILD_OF_A)
+        return -1;
+      else if (rel == DocumentCommand.REL_B_IS_PARENT_OF_A)
+        return 1;
+      else if (rel == DocumentCommand.REL_B_OVERLAPS_A) return 0;
+
+      return -1;
     }
 
     // Helper-Methoden:
@@ -945,5 +974,10 @@ public final class FormFieldFactory
       return UnoRuntime.areSame(textfield, b);
     }
 
+    public int compareTo(Object arg0)
+    {
+      // wird nicht aufgerufen, daher nicht implementiert.
+      return -1;
+    }
   }
 }

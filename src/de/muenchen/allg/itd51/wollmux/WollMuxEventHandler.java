@@ -1135,7 +1135,7 @@ public class WollMuxEventHandler
 
       // Dokument mit neuen Dokumentkommandos über den
       // DocumentCommandInterpreter bearbeiten:
-      model.getDocumentCommandTree().update();
+      model.getDocumentCommands().update();
       DocumentCommandInterpreter dci = new DocumentCommandInterpreter(model,
           WollMuxSingleton.getInstance());
       try
@@ -2972,7 +2972,7 @@ public class WollMuxEventHandler
       }
 
       // PrintBlöcke neu einlesen:
-      model.getDocumentCommandTree().update();
+      model.getDocumentCommands().update();
       DocumentCommandInterpreter dci = new DocumentCommandInterpreter(model,
           WollMuxSingleton.getInstance());
       dci.scanGlobalDocumentCommands();
@@ -2981,7 +2981,10 @@ public class WollMuxEventHandler
     }
 
     /**
-     * TODO: dok
+     * Liefert einen Integer der Form AARRGGBB (hex), der den Farbwert
+     * repräsentiert, der in slvConf im Attribut attribute hinterlegt ist oder
+     * null, wenn das Attribut nicht existiert oder der dort enthaltene
+     * String-Wert sich nicht in eine Integerzahl konvertieren lässt.
      * 
      * @param slvConf
      * @param attribute
@@ -3739,7 +3742,7 @@ public class WollMuxEventHandler
         cmd.markDone(true);
         model.setDocumentModified(modified);
 
-        model.getDocumentCommandTree().update();
+        model.getDocumentCommands().update();
 
       }
       else

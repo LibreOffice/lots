@@ -1,8 +1,7 @@
 /*
  * Dateiname: DocumentCommand.java
  * Projekt  : WollMux
- * Funktion : Beschreibt ein Element aus einer hierarchischen Struktur von
- *            DokumentKommandos und dessen Status.
+ * Funktion : Beschreibt ein Dokumentkommando mit allen zugehörigen Eigenschaften.
  * 
  * Copyright: Landeshauptstadt München
  *
@@ -25,8 +24,6 @@ package de.muenchen.allg.itd51.wollmux;
 import java.io.StringReader;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.ListIterator;
 import java.util.Set;
 import java.util.Vector;
 
@@ -43,29 +40,17 @@ import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.parser.SyntaxErrorException;
 
 /**
- * Beschreibt ein Dokumentkommando, das als Element eines hierarchischen
- * Kommandobaumes weitere Kinder-Elemente enthalten kann und weitere
- * Eigenschaften wie z.B. die Gruppenzugehörigkeit, Sichtbarkeit und
- * Ausführstatus besitzt.
+ * Beschreibt ein Dokumentkommando mit allen zugehörigen Eigenschaften wie z.B.
+ * die Gruppenzugehörigkeit, Sichtbarkeit und Ausführstatus.
  * 
  * @author Christoph Lutz (D-III-ITD 5.1)
  */
-abstract public class DocumentCommand implements VisibilityElement
+abstract public class DocumentCommand
 {
   /**
    * Das geparste ConfigThingy des zugehörenden Bookmarks.
    */
   protected ConfigThingy wmCmd;
-
-  /**
-   * Die Liste aller Kinder-Elemente.
-   */
-  private LinkedList childs; // Kinder vom Typ DocumentCommand
-
-  /**
-   * Der Vaterknoten des Dokumentkommandos im Kommando-Baum.
-   */
-  private DocumentCommand parent;
 
   /**
    * Das zu diesem DokumentCommand gehörende Bookmark.
@@ -113,15 +98,15 @@ abstract public class DocumentCommand implements VisibilityElement
 
   // Relationen zweier Dokument-Kommandos A und B:
 
-  private static final int REL_B_IS_CHILD_OF_A = 1;
+  public static final int REL_B_IS_CHILD_OF_A = 1;
 
-  private static final int REL_B_IS_PARENT_OF_A = -1;
+  public static final int REL_B_IS_PARENT_OF_A = -1;
 
-  private static final int REL_B_OVERLAPS_A = 0;
+  public static final int REL_B_OVERLAPS_A = 0;
 
-  private static final int REL_B_IS_SIBLING_BEFORE_A = -2;
+  public static final int REL_B_IS_SIBLING_BEFORE_A = -2;
 
-  private static final int REL_B_IS_SIBLING_AFTER_A = 2;
+  public static final int REL_B_IS_SIBLING_AFTER_A = 2;
 
   /* ************************************************************ */
 
@@ -138,8 +123,6 @@ abstract public class DocumentCommand implements VisibilityElement
   {
     this.wmCmd = wmCmd;
     this.bookmark = bookmark;
-    this.parent = null;
-    this.childs = new LinkedList();
     this.hasInsertMarks = false;
   }
 
@@ -169,133 +152,6 @@ abstract public class DocumentCommand implements VisibilityElement
   }
 
   /**
-   * Fügt dem aktuellen Dokumentkommando ein neues Kind-Element b hinzu. Dabei
-   * werden die TextRanges der beiden Kommandos verglichen und deren Relation
-   * bestimmt. Je nach Relation wird das neue Kommando als Kind vor oder nach
-   * einem bereits bestehenden Kind eingehängt oder die Anfrage an ein
-   * Kind-Element weitergereicht.
-   * 
-   * @param b
-   *          Das Kindelement b
-   * @return Die Anzahl der aufkummulierten TextRange Vergleiche, die zum
-   *         Hinzufügen benötigt wurden. Kann für Performance-Statistiken
-   *         verwendet werden.
-   */
-  protected int add(DocumentCommand b)
-  {
-    int compareCount = 0;
-
-    ListIterator childsIterator = childs.listIterator(childs.size());
-    while (childsIterator.hasPrevious())
-    {
-      DocumentCommand a = (DocumentCommand) childsIterator.previous();
-      int rel = a.getRelation(b);
-      compareCount++;
-
-      // b liegt vor a: weiter gehen
-      if (rel == REL_B_IS_SIBLING_BEFORE_A)
-      {
-        // Weiter gehen
-      }
-
-      // b liegt nach a: danach einfügen
-      if (rel == REL_B_IS_SIBLING_AFTER_A)
-      {
-        b.parent = this;
-        childsIterator.next();
-        childsIterator.add(b);
-        return compareCount;
-      }
-
-      // b ist Vater von a: a aushängen und zum Kind von b machen.
-      if (rel == REL_B_IS_PARENT_OF_A)
-      {
-        a.parent = b;
-        b.add(a);
-        childsIterator.remove();
-      }
-
-      // a ist Vater von b:
-      if (rel == REL_B_IS_CHILD_OF_A)
-      {
-        compareCount += a.add(b);
-        return compareCount;
-      }
-
-      // identische ranges
-      if (rel == REL_B_OVERLAPS_A)
-      {
-        Logger
-            .error("Ignoriere Dokumentkommando \""
-                   + b.getBookmarkName()
-                   + "\", da es sich mit dem Dokumentkommando \""
-                   + a.getBookmarkName()
-                   + "\" überlappt. Diese beiden Kommandos dürfen sich nicht überlappen!");
-        return compareCount;
-      }
-    }
-
-    // falls bisher noch nicht hinzugefügt: am Anfang einfügen.
-    b.parent = this;
-    childsIterator.add(b);
-    return compareCount;
-  }
-
-  /**
-   * Die Methode prüft in allen Kindern und Kindeskindern (rekusiv), ob ihre
-   * Bookmarks noch vorhanden sind und entfernt alle Kinder, deren Bookmarks
-   * nicht mehr vorhanden sind.
-   * 
-   * @return liefert true, wenn mindestens ein Kind oder Kindeskind entfernt
-   *         wurde, ansonsten false.
-   */
-  public boolean removeRetieredChilds()
-  {
-    boolean changed = false;
-
-    Vector lostChildren = new Vector();
-    Iterator iter = childs.iterator();
-    while (iter.hasNext())
-    {
-      DocumentCommand child = (DocumentCommand) iter.next();
-
-      // zuerst bei den Kindern aufräumen
-      if (child.removeRetieredChilds() == true) changed = true;
-
-      // und dann selber aufräumen
-      if (child.isRetired())
-      {
-        // Ungültiges Element entfernen
-        iter.remove();
-        changed = true;
-
-        // Verloren gegangene Kinder merken
-        Iterator lost = child.childs.iterator();
-        while (lost.hasNext())
-          lostChildren.add(lost.next());
-      }
-    }
-
-    // Verloren gegangene Kinder wieder hinzufügen:
-    iter = lostChildren.iterator();
-    while (iter.hasNext())
-      add((DocumentCommand) iter.next());
-
-    return changed;
-  }
-
-  /**
-   * Liefert einen ListIterator über alle Kinder-Elemente des Dokumentkommandos.
-   * 
-   * @return Liefert einen ListIterator über alle Kinder-Elemente des
-   *         Dokumentkommandos.
-   */
-  protected ListIterator getChildIterator()
-  {
-    return childs.listIterator();
-  }
-
-  /**
    * Diese Methode liefert die Beziehung des aktuellen DocumentCommand und des
    * DocumentCommand b in Form einer Konstante DocumentCommand.REL_xxx zurück.
    * 
@@ -305,7 +161,7 @@ abstract public class DocumentCommand implements VisibilityElement
    * @return Die Relation der zwei DocumentCommands in Form einer Konstante
    *         DocumentCommand.REL_xxx.
    */
-  protected int getRelation(DocumentCommand b)
+  public int getRelation(DocumentCommand b)
   {
     int cmp = bookmark.compare(b.bookmark);
 
@@ -320,32 +176,10 @@ abstract public class DocumentCommand implements VisibilityElement
     if (cmp == Bookmark.POS_B88B) return REL_B_IS_PARENT_OF_A;
     if (cmp == Bookmark.POS_BB88) return REL_B_IS_PARENT_OF_A;
 
-    if (cmp == Bookmark.POS_8888)
-    {
-      if (this.canHaveChilds() && b.canHaveChilds())
-        return REL_B_IS_CHILD_OF_A;
-      else if (this.canHaveChilds())
-        return REL_B_IS_CHILD_OF_A;
-      else if (b.canHaveChilds()) return REL_B_IS_PARENT_OF_A;
-      return REL_B_OVERLAPS_A;
-    }
+    if (cmp == Bookmark.POS_8888) return REL_B_OVERLAPS_A;
 
     return REL_B_IS_SIBLING_AFTER_A;
   }
-
-  /**
-   * Diese Methode gibt Auskunft darüber, ob ein DocumentCommand Unterkommandos
-   * besitzen darf. Ein Kommando darf Kinder besitzen, wenn es theoretisch mehr
-   * als einen atomaren Textinhalt umschließen kann. Ein Atom (kleinste, nicht
-   * teilbare Einheit) selbst darf jedoch keine Kinder besitzen. Beispiel: Ein
-   * WM(CMD'insertFrag'...) kann nach der Auflösung mehrere Unterelemente
-   * besitzen und würde daher "true" zurückliefern. Ein Kommando
-   * WM(CMD'insertValue'...) hingegen repräsentiert exakt einen atomaren Wert
-   * und darf keine weiteren Kinder mehr enthalten.
-   * 
-   * @return
-   */
-  protected abstract boolean canHaveChilds();
 
   /**
    * Callbackfunktion für die Ausführung des Dokumentkommandos in einem
@@ -402,15 +236,14 @@ abstract public class DocumentCommand implements VisibilityElement
    * 
    * @return XTextCursor zum Einfügen oder null
    */
-  public XTextCursor createInsertCursor()
+  public XTextCursor createInsertCursor(boolean createInsertMarks)
   {
     XTextRange range = bookmark.getTextRange();
 
     if (range != null)
     {
-      if (canHaveChilds())
+      if (createInsertMarks)
       {
-        // wenn
         XTextCursor cursor = range.getText().createTextCursorByRange(range);
         cursor.setString(INSERT_MARK_OPEN + INSERT_MARK_CLOSE);
         hasInsertMarks = true;
@@ -799,38 +632,6 @@ abstract public class DocumentCommand implements VisibilityElement
     }
   }
 
-  /**
-   * Liefert alle Gruppen, die dem Dokumentkommando zugeordnet sind, wobei jede
-   * Gruppe auch die Gruppenzugehörigkeit des Vaterelements im
-   * DocumentCommand-Baum erbt.
-   * 
-   * @return Ein Set, das alle zugeordneten groupId's, einschließlich der vom
-   *         Vater geerbten, als Strings enthält.
-   * @see de.muenchen.allg.itd51.wollmux.VisibilityElement#getGroups()
-   */
-  public Set getGroups()
-  {
-    // GROUPS-Attribut auslesen falls vorhanden.
-    ConfigThingy groups = new ConfigThingy("");
-    try
-    {
-      groups = wmCmd.get("GROUPS");
-    }
-    catch (NodeNotFoundException e)
-    {
-    }
-
-    Set groupsSet = (parent != null) ? parent.getGroups() : new HashSet();
-    Iterator i = groups.iterator();
-    while (i.hasNext())
-    {
-      String groupId = i.next().toString();
-      groupsSet.add(groupId);
-    }
-
-    return groupsSet;
-  }
-
   // ********************************************************************************
   /**
    * Kommandos werden extern definiert - um das zu ermöglichen greift hier das
@@ -840,8 +641,6 @@ abstract public class DocumentCommand implements VisibilityElement
    */
   static interface Executor
   {
-    public int executeCommand(DocumentCommand.RootElement cmd);
-
     public int executeCommand(DocumentCommand.InsertFrag cmd);
 
     public int executeCommand(DocumentCommand.InsertValue cmd);
@@ -942,11 +741,6 @@ abstract public class DocumentCommand implements VisibilityElement
       return exception;
     }
 
-    protected boolean canHaveChilds()
-    {
-      return true;
-    }
-
     public int execute(DocumentCommand.Executor visitable)
     {
       return visitable.executeCommand(this);
@@ -975,11 +769,6 @@ abstract public class DocumentCommand implements VisibilityElement
       markDone(false);
     }
 
-    protected boolean canHaveChilds()
-    {
-      return true;
-    }
-
     public int execute(DocumentCommand.Executor visitable)
     {
       return 0;
@@ -1002,51 +791,9 @@ abstract public class DocumentCommand implements VisibilityElement
       super(wmCmd, bookmark);
     }
 
-    protected boolean canHaveChilds()
-    {
-      return false;
-    }
-
     public int execute(DocumentCommand.Executor visitable)
     {
       return visitable.executeCommand(this);
-    }
-  }
-
-  // ********************************************************************************
-  /**
-   * Dieses besondere Element dient als Wurzel für den DocumentCommandTree.
-   */
-  static public class RootElement extends DocumentCommand
-  {
-    public RootElement()
-    {
-      super(new ConfigThingy("WM"), null);
-    }
-
-    public String getBookmarkName()
-    {
-      return "<root>";
-    }
-
-    protected int getRelation(DocumentCommand b)
-    {
-      return REL_B_IS_CHILD_OF_A;
-    }
-
-    protected boolean canHaveChilds()
-    {
-      return true;
-    }
-
-    public int execute(DocumentCommand.Executor e)
-    {
-      return e.executeCommand(this);
-    }
-
-    public Set getGroups()
-    {
-      return new HashSet();
     }
   }
 
@@ -1123,37 +870,9 @@ abstract public class DocumentCommand implements VisibilityElement
       return manualMode;
     }
 
-    protected boolean canHaveChilds()
-    {
-      return true;
-    }
-
     public int execute(DocumentCommand.Executor visitable)
     {
       return visitable.executeCommand(this);
-    }
-
-    protected int add(DocumentCommand b)
-    {
-      if (b instanceof InsertFrag)
-      {
-        InsertFrag bif = (InsertFrag) b;
-        // Falls sich ein Fragment selbst aufruft, wandle das Kommando um in ein
-        // InvalidCommand - zur Vermeidung von Endlosschleifen.
-        if (!isManualMode())
-        {
-          if (this.getFragID().equals(bif.getFragID()))
-          {
-            InvalidCommandException ivc = new InvalidCommandException(
-                "Das Fragment mit der FRAG_ID \""
-                    + fragID
-                    + "\" ruft sich direkt oder indirekt selbst auf "
-                    + "und würde damit eine Endlosschleife verursachen.");
-            b = new InvalidCommand(b.wmCmd, b.bookmark, ivc);
-          }
-        }
-      }
-      return super.add(b);
     }
   }
 
@@ -1174,11 +893,6 @@ abstract public class DocumentCommand implements VisibilityElement
     public String getFragID()
     {
       return fragID;
-    }
-
-    protected boolean canHaveChilds()
-    {
-      return true;
     }
 
     public int execute(DocumentCommand.Executor visitable)
@@ -1265,11 +979,6 @@ abstract public class DocumentCommand implements VisibilityElement
       return dbSpalte;
     }
 
-    protected boolean canHaveChilds()
-    {
-      return false;
-    }
-
     public String getLeftSeparator()
     {
       return leftSeparator;
@@ -1352,11 +1061,6 @@ abstract public class DocumentCommand implements VisibilityElement
       flushToBookmark(false);
     }
 
-    protected boolean canHaveChilds()
-    {
-      return false;
-    }
-
     public int execute(DocumentCommand.Executor visitable)
     {
       return visitable.executeCommand(this);
@@ -1423,11 +1127,6 @@ abstract public class DocumentCommand implements VisibilityElement
       return args;
     }
 
-    protected boolean canHaveChilds()
-    {
-      return false;
-    }
-
     public int execute(DocumentCommand.Executor visitable)
     {
       return visitable.executeCommand(this);
@@ -1444,11 +1143,6 @@ abstract public class DocumentCommand implements VisibilityElement
     public UpdateFields(ConfigThingy wmCmd, Bookmark bookmark)
     {
       super(wmCmd, bookmark);
-    }
-
-    protected boolean canHaveChilds()
-    {
-      return true;
     }
 
     public int execute(DocumentCommand.Executor visitable)
@@ -1492,11 +1186,6 @@ abstract public class DocumentCommand implements VisibilityElement
     String getType()
     {
       return type;
-    }
-
-    protected boolean canHaveChilds()
-    {
-      return false;
     }
 
     public int execute(DocumentCommand.Executor visitable)
@@ -1591,11 +1280,6 @@ abstract public class DocumentCommand implements VisibilityElement
       return funcName;
     }
 
-    protected boolean canHaveChilds()
-    {
-      return false;
-    }
-
     public int execute(DocumentCommand.Executor visitable)
     {
       return visitable.executeCommand(this);
@@ -1604,26 +1288,62 @@ abstract public class DocumentCommand implements VisibilityElement
 
   // ********************************************************************************
   /**
-   * Das Kommando SetGrups dient dazu, dem vom Bookmark umschlossenen Textinhalt
-   * eine oder mehrere Gruppen zuweisen zu können. Im gegensatz zu anderen
-   * Dokumentkommandos, die auch das GROUPS Attribut unterstützen, besitzt
-   * dieses Kommando ausser der Zuordnung von Gruppen keine weitere Funktion.
+   * Das Kommando SetGroups dient dazu, dem vom Bookmark umschlossenen
+   * Textinhalt eine oder mehrere Gruppen zuweisen zu können. Im Gegensatz zu
+   * anderen Dokumentkommandos, die auch das GROUPS Attribut unterstützen,
+   * besitzt dieses Kommando ausser der Zuordnung von Gruppen keine weitere
+   * Funktion.
    */
-  static public class SetGroups extends DocumentCommand
+  static public class SetGroups extends DocumentCommand implements
+      VisibilityElement
   {
+    private Set groupsSet;
+
     public SetGroups(ConfigThingy wmCmd, Bookmark bookmark)
     {
       super(wmCmd, bookmark);
-    }
-
-    protected boolean canHaveChilds()
-    {
-      return true;
+      groupsSet = new HashSet();
     }
 
     public int execute(DocumentCommand.Executor visitable)
     {
       return visitable.executeCommand(this);
+    }
+
+    /**
+     * Liefert alle Gruppen, die dem Dokumentkommando zugeordnet sind, wobei
+     * jede Gruppe auch die Gruppenzugehörigkeit des Vaterelements im
+     * DocumentCommand-Baum erbt.
+     * 
+     * @return Ein Set, das alle zugeordneten groupId's, einschließlich der vom
+     *         Vater geerbten, als Strings enthält.
+     * @see de.muenchen.allg.itd51.wollmux.VisibilityElement#getGroups()
+     */
+    public Set getGroups()
+    {
+      // GROUPS-Attribut auslesen falls vorhanden.
+      ConfigThingy groups = new ConfigThingy("");
+      try
+      {
+        groups = wmCmd.get("GROUPS");
+      }
+      catch (NodeNotFoundException e)
+      {
+      }
+
+      // Gruppen aus dem GROUPS-Argument in das Set aufnehmen:
+      for (Iterator iter = groups.iterator(); iter.hasNext();)
+      {
+        String groupId = iter.next().toString();
+        groupsSet.add(groupId);
+      }
+
+      return groupsSet;
+    }
+
+    public void addGroups(Set groups)
+    {
+      groupsSet.addAll(groups);
     }
   }
 
@@ -1656,11 +1376,6 @@ abstract public class DocumentCommand implements VisibilityElement
     public String getHighlightColor()
     {
       return highlightColor;
-    }
-
-    protected boolean canHaveChilds()
-    {
-      return true;
     }
 
     public int execute(DocumentCommand.Executor visitable)
@@ -1701,11 +1416,6 @@ abstract public class DocumentCommand implements VisibilityElement
       return highlightColor;
     }
 
-    protected boolean canHaveChilds()
-    {
-      return true;
-    }
-
     public int execute(DocumentCommand.Executor visitable)
     {
       return visitable.executeCommand(this);
@@ -1744,11 +1454,6 @@ abstract public class DocumentCommand implements VisibilityElement
       return highlightColor;
     }
 
-    protected boolean canHaveChilds()
-    {
-      return true;
-    }
-
     public int execute(DocumentCommand.Executor visitable)
     {
       return visitable.executeCommand(this);
@@ -1767,11 +1472,6 @@ abstract public class DocumentCommand implements VisibilityElement
     public SetJumpMark(ConfigThingy wmCmd, Bookmark bookmark)
     {
       super(wmCmd, bookmark);
-    }
-
-    protected boolean canHaveChilds()
-    {
-      return false;
     }
 
     public int execute(DocumentCommand.Executor visitable)

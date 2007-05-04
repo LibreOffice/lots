@@ -33,7 +33,9 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Vector;
 
@@ -65,17 +67,12 @@ import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
-import de.muenchen.allg.itd51.wollmux.DocumentCommand.AllVersions;
-import de.muenchen.allg.itd51.wollmux.DocumentCommand.DraftOnly;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertContent;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertFormValue;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertFrag;
-import de.muenchen.allg.itd51.wollmux.DocumentCommand.NotInOriginal;
-import de.muenchen.allg.itd51.wollmux.DocumentCommand.SetJumpMark;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.SetPrintFunction;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.SetType;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.UpdateFields;
-import de.muenchen.allg.itd51.wollmux.DocumentCommandTree.TreeExecutor;
 import de.muenchen.allg.itd51.wollmux.FormFieldFactory.FormField;
 import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.Dataset;
@@ -137,10 +134,8 @@ public class DocumentCommandInterpreter
   {
     Logger.debug("scanDocumentSettings");
     boolean modified = model.getDocumentModified();
-    
-    model.resetGlobalDocumentCommands();
 
-    new GlobalDocumentCommandsScanner().execute(model.getDocumentCommandTree());
+    new GlobalDocumentCommandsScanner().execute(model.getDocumentCommands());
 
     model.setDocumentModified(modified);
   }
@@ -155,7 +150,7 @@ public class DocumentCommandInterpreter
   {
     Logger.debug("executeTemplateCommands");
     boolean modified = model.getDocumentModified();
-    
+
     // Zähler für aufgetretene Fehler bei der Bearbeitung der Kommandos.
     int errors = 0;
 
@@ -163,7 +158,7 @@ public class DocumentCommandInterpreter
     // können, damit der DocumentCommandTree vollständig aufgebaut werden
     // kann.
     errors += new DocumentExpander(model.getFragUrls()).execute(model
-        .getDocumentCommandTree());
+        .getDocumentCommands());
 
     // Überträgt beim übergebenen XTextDocument doc die Eigenschaften der
     // Seitenvorlage Wollmuxseite auf die Seitenvorlage Standard, falls
@@ -181,11 +176,11 @@ public class DocumentCommandInterpreter
     // übereinander liegen kann. Ausserdem liegt updateFields thematisch näher
     // am expandieren der Textfragmente, da updateFields im Prinzip nur dessen
     // Schwäche beseitigt.
-    errors += new TextFieldUpdater().execute(model.getDocumentCommandTree());
+    errors += new TextFieldUpdater().execute(model.getDocumentCommands());
 
     // Hauptverarbeitung: Jetzt alle noch übrigen DocumentCommands (z.B.
     // insertValues) in einem einzigen Durchlauf mit execute bearbeiten.
-    errors += new MainProcessor().execute(model.getDocumentCommandTree());
+    errors += new MainProcessor().execute(model.getDocumentCommands());
 
     // Da keine neuen Elemente mehr eingefügt werden müssen, können
     // jetzt die INSERT_MARKS "<" und ">" der insertFrags und
@@ -197,15 +192,15 @@ public class DocumentCommandInterpreter
     // sauber erkennen und entfernen.
     // errors += new EmptyParagraphCleaner().execute(tree);
     SurroundingGarbageCollector collect = new SurroundingGarbageCollector();
-    errors += collect.execute(model.getDocumentCommandTree());
+    errors += collect.execute(model.getDocumentCommands());
     collect.removeGarbage();
 
     // da hier bookmarks entfernt werden, muss der Baum upgedatet werden
-    model.getDocumentCommandTree().update();
+    model.getDocumentCommands().update();
 
     // Scannen aller für das Formular relevanten Informationen:
     if (formScanner == null) formScanner = new FormScanner();
-    errors += formScanner.execute(model.getDocumentCommandTree());
+    errors += formScanner.execute(model.getDocumentCommands());
     model.setIDToFormFields(formScanner.idToFormFields);
 
     // Nicht vom formScanner erfasste Formularfelder erfassen
@@ -247,7 +242,7 @@ public class DocumentCommandInterpreter
       boolean modified = model.getDocumentModified();
 
       formScanner = new FormScanner();
-      errors += formScanner.execute(model.getDocumentCommandTree());
+      errors += formScanner.execute(model.getDocumentCommands());
 
       model.setIDToFormFields(formScanner.idToFormFields);
 
@@ -376,12 +371,11 @@ public class DocumentCommandInterpreter
    * 
    * @author christoph.lutz
    */
-  private class GlobalDocumentCommandsScanner extends TreeExecutor
+  private class GlobalDocumentCommandsScanner extends DocumentCommands.Executor
   {
-
-    public int execute(DocumentCommandTree tree)
+    public int execute(DocumentCommands commands)
     {
-      return executeDepthFirst(tree, false);
+      return executeAll(commands);
     }
 
     public int executeCommand(SetPrintFunction cmd)
@@ -402,38 +396,13 @@ public class DocumentCommandInterpreter
           .equalsIgnoreCase("templateTemplate"))) cmd.markDone(true);
       return 0;
     }
-
-    public int executeCommand(DraftOnly cmd)
-    {
-      model.addDraftOnlyBlock(cmd);
-      return 0;
-    }
-
-    public int executeCommand(NotInOriginal cmd)
-    {
-      model.addNotInOriginalBlock(cmd);
-      return 0;
-    }
-
-    public int executeCommand(AllVersions cmd)
-    {
-      model.addAllVersionsBlock(cmd);
-      return 0;
-    }
-
-    public int executeCommand(SetJumpMark cmd)
-    {
-      model.addSetJumpMarkBlock(cmd);
-      return 0;
-    }
-
   }
 
   /**
    * Der SurroundingGarbageCollector erfasst leere Absätze und Einfügemarker um
    * Dokumentkommandos herum.
    */
-  private class SurroundingGarbageCollector extends TreeExecutor
+  private class SurroundingGarbageCollector extends DocumentCommands.Executor
   {
     /**
      * Speichert Muellmann-Objekte, die zu löschenden Müll entfernen.
@@ -482,10 +451,10 @@ public class DocumentCommandInterpreter
      * Diese Methode erfasst leere Absätze und Einfügemarker, die sich um die im
      * Kommandobaum tree enthaltenen Dokumentkommandos befinden.
      */
-    private int execute(DocumentCommandTree tree)
+    private int execute(DocumentCommands commands)
     {
       int errors = 0;
-      Iterator iter = tree.depthFirstIterator(false);
+      Iterator iter = commands.iterator();
       while (iter.hasNext())
       {
         DocumentCommand cmd = (DocumentCommand) iter.next();
@@ -699,7 +668,7 @@ public class DocumentCommandInterpreter
    * @author christoph.lutz
    * 
    */
-  private class DocumentExpander extends TreeExecutor
+  private class DocumentExpander extends DocumentCommands.Executor
   {
     private String[] fragUrls;
 
@@ -729,15 +698,15 @@ public class DocumentCommandInterpreter
      * @param tree
      * @return
      */
-    public int execute(DocumentCommandTree tree)
+    public int execute(DocumentCommands commands)
     {
       int errors = 0;
 
       // so lange wiederholen, bis sich der Baum durch das Expandieren nicht
       // mehr ändert.
       do
-        errors += executeDepthFirst(tree, false);
-      while (tree.update());
+        errors += executeAll(commands);
+      while (commands.update());
 
       return errors;
     }
@@ -924,7 +893,7 @@ public class DocumentCommandInterpreter
       }
 
       // Textfragment einfügen:
-      UnoService insCursor = new UnoService(cmd.createInsertCursor());
+      UnoService insCursor = new UnoService(cmd.createInsertCursor(true));
       if (insCursor.xDocumentInsertable() != null && urlStr != null)
       {
         insCursor.xDocumentInsertable().insertDocumentFromURL(
@@ -1117,16 +1086,16 @@ public class DocumentCommandInterpreter
    * @author christoph.lutz
    * 
    */
-  private class MainProcessor extends TreeExecutor
+  private class MainProcessor extends DocumentCommands.Executor
   {
     /**
      * Hauptverarbeitungsschritt starten.
      */
-    private int execute(DocumentCommandTree tree)
+    private int execute(DocumentCommands commands)
     {
       model.setLockControllers(true);
 
-      int errors = executeDepthFirst(tree, false);
+      int errors = executeAll(commands);
 
       model.setLockControllers(false);
 
@@ -1173,7 +1142,7 @@ public class DocumentCommandInterpreter
         return 1;
       }
 
-      XTextCursor insCursor = cmd.createInsertCursor();
+      XTextCursor insCursor = cmd.createInsertCursor(false);
       if (insCursor != null)
       {
         if (value == null || value.equals(""))
@@ -1225,7 +1194,7 @@ public class DocumentCommandInterpreter
                      + "' ist nicht definiert.");
       }
 
-      XTextCursor insCursor = cmd.createInsertCursor();
+      XTextCursor insCursor = cmd.createInsertCursor(false);
       if (insCursor != null) insCursor.setString(value);
       cmd.markDone(!mux.isDebugMode());
       return 0;
@@ -1235,16 +1204,16 @@ public class DocumentCommandInterpreter
   /**
    * Dieser Executor hat die Aufgabe alle updateFields-Befehle zu verarbeiten.
    */
-  private class TextFieldUpdater extends TreeExecutor
+  private class TextFieldUpdater extends DocumentCommands.Executor
   {
     /**
      * Ausführung starten
      */
-    private int execute(DocumentCommandTree tree)
+    private int execute(DocumentCommands commands)
     {
       model.setLockControllers(true);
 
-      int errors = executeDepthFirst(tree, false);
+      int errors = executeAll(commands);
 
       model.setLockControllers(false);
 
@@ -1318,7 +1287,7 @@ public class DocumentCommandInterpreter
    * Der FormScanner erstellt alle Datenstrukturen, die für die Ausführung der
    * FormGUI notwendig sind.
    */
-  private class FormScanner extends TreeExecutor
+  private class FormScanner extends DocumentCommands.Executor
   {
     public HashMap idToFormFields = new HashMap();
 
@@ -1327,9 +1296,9 @@ public class DocumentCommandInterpreter
     /**
      * Ausführung starten
      */
-    private int execute(DocumentCommandTree tree)
+    private int execute(DocumentCommands commands)
     {
-      return executeDepthFirst(tree, false);
+      return executeAll(commands);
     }
 
     /**
@@ -1364,14 +1333,14 @@ public class DocumentCommandInterpreter
     {
       // idToFormFields aufbauen
       String id = cmd.getID();
-      Vector fields;
+      LinkedList fields;
       if (idToFormFields.containsKey(id))
       {
-        fields = (Vector) idToFormFields.get(id);
+        fields = (LinkedList) idToFormFields.get(id);
       }
       else
       {
-        fields = new Vector();
+        fields = new LinkedList();
         idToFormFields.put(id, fields);
       }
       FormField field = FormFieldFactory.createFormField(
@@ -1382,7 +1351,19 @@ public class DocumentCommandInterpreter
       if (field != null)
       {
         field.setCommand(cmd);
-        fields.add(field);
+
+        // sortiertes Hinzufügen des neuen FormFields zur Liste:
+        ListIterator iter = fields.listIterator();
+        while (iter.hasNext())
+        {
+          FormField fieldA = (FormField) iter.next();
+          if (field.compareTo(fieldA) < 0)
+          {
+            iter.previous();
+            break;
+          }
+        }
+        iter.add(field);
       }
 
       return 0;
@@ -1404,7 +1385,7 @@ public class DocumentCommandInterpreter
     else
       Logger.error(msg);
 
-    UnoService cursor = new UnoService(cmd.createInsertCursor());
+    UnoService cursor = new UnoService(cmd.createInsertCursor(false));
     cursor.xTextCursor().setString("<FEHLER:  >");
 
     // Text fett und rot machen:
