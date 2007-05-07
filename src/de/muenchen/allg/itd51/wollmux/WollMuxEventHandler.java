@@ -2996,6 +2996,8 @@ public class WollMuxEventHandler
       {
         String highlightColor = slvConf.query(attribute).getLastChild()
             .toString();
+        if (highlightColor.equals("")
+            || highlightColor.equalsIgnoreCase("none")) return null;
         int hc = Integer.parseInt(highlightColor, 16);
         return new Integer(hc);
       }
