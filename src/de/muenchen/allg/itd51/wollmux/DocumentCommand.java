@@ -124,6 +124,30 @@ abstract public class DocumentCommand
     this.wmCmd = wmCmd;
     this.bookmark = bookmark;
     this.hasInsertMarks = false;
+
+    // Sicher ist sicher: Fehlermeldung wenn normale Dokumentkommandos ein
+    // GROUPS-Attribut besitzen (die jetzt nicht merh unterstützt werden).
+    if (wmCmd.query("GROUPS").count() > 0 && !canHaveGroupsAttribute())
+    {
+      Logger.error("Das Dokumentkommando '"
+                   + getBookmarkName()
+                   + "' darf kein GROUPS-Attribut besitzen.");
+    }
+  }
+
+  /**
+   * Seit der Umstellung auf den neuen Scan über DocumentCommands darf nur noch
+   * das Dokumentkommando SetGroups ein GROUPS-Attribut besitzen. Diese Methode
+   * stellt das sicher und wird vom SetGroups-Kommando mit Rückgabewert true
+   * überschrieben.
+   * 
+   * @return false außer es ist ein SetGroups-Kommando
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  protected boolean canHaveGroupsAttribute()
+  {
+    return false;
   }
 
   /**
@@ -1344,6 +1368,11 @@ abstract public class DocumentCommand
     public void addGroups(Set groups)
     {
       groupsSet.addAll(groups);
+    }
+
+    protected boolean canHaveGroupsAttribute()
+    {
+      return true;
     }
   }
 
