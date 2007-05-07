@@ -1374,6 +1374,23 @@ abstract public class DocumentCommand
     {
       return true;
     }
+
+    /**
+     * Diese Methode liefert eine String-Repräsentation des DokumentCommands
+     * zurück. Die String-Repräsentation hat den Aufbau DocumentCommand[<bookmarkName>].
+     */
+    public String toString()
+    {
+      return ""
+             + this.getClass().getSimpleName()
+             + "["
+             + (isRetired() ? "RETIRED:" : "")
+             + (isDone() ? "DONE:" : "")
+             + "GROUPS:"
+             + groupsSet.toString()
+             + getBookmarkName()
+             + "]";
+    }
   }
 
   // ********************************************************************************

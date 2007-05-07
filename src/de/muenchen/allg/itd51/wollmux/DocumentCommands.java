@@ -222,13 +222,14 @@ public class DocumentCommands
    *          das hinzuzufügende SetGroups-Kommando.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
+   * TESTED
    */
   private void addNewSetGroups(SetGroups cmdB)
   {
     for (Iterator iter = setGroupsCommands.iterator(); iter.hasNext();)
     {
       SetGroups cmdA = (SetGroups) iter.next();
-      int rel = cmdB.getRelation(cmdA);
+      int rel = cmdA.getRelation(cmdB);
       if (rel == DocumentCommand.REL_B_IS_CHILD_OF_A)
         cmdB.addGroups(cmdA.getGroups());
       else if (rel == DocumentCommand.REL_B_IS_PARENT_OF_A)
@@ -250,6 +251,7 @@ public class DocumentCommands
    *          das hinzuzufügende SetJumpMark-Kommando.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
+   * TESTED
    */
   private void addNewSetJumpMark(SetJumpMark cmdB)
   {
