@@ -1,3 +1,33 @@
+wollmux (3.5.0-siga-lhm1) siga; urgency=low
+
+    *  Neue Symbolleisten und Menüeinträge in OpenOffice.org Writer
+          o Symbolleiste Textbausteine (WollMux): Buttons "Textbaustein einfügen", "Platzhalter anspringen" und "Empfänger auswählen"
+          o Symbolleiste Werkzeuge für Vorlagenersteller (WollMux): Buttons "FormularMax 4000", "Textbausteinverweis einfügen", "Dump Info" und "Info über Vorlagen und Formulare"
+          o Menüpunkt Hilfe->Info über Vorlagen und Formulare (WollMux): liefert die Versionsinformation des WollMux. Achtung: Damit der Menüpunkt in OOo erscheint, ist mindestens OOo 2.0.4 notwendig.
+          o Menüpunkt Extras->Seriendruck (WollMux): ruft die neue Seriendruckfunktion (siehe unten) auf. Achtung: Damit der Menüpunkt in OOo erscheint, ist mindestens OOo 2.0.4 notwendig. 
+    * Interaktive Seriendruck-Funktion superMailMerge
+          o Lässt den Benutzer die Daten für den Seriendruck zusätzlich zu den normalen OOo-Datenquellen auch aus Tabellenblättern offener Calc-Dokumente wählen (ohne die Notwendigkeit einer Datenquellen-Registrierung in OOo). Dabei werden nur die sichtbaren Zellen verwendet, so dass die Datensätze in Calc gefiltert werden können.
+          o Über den Menüpunkt Extras->Seriendruck (WollMux) kann die neue Seriendruckfunktion aufgerufen werden. Achtung: Damit der Menüpunkt in OOo erscheint, ist mindestens OOo 2.0.4 notwendig.
+          o Für Makro-Programmierer steht die neue Seriendruckfunktion auch über die Dispatch-URL 'wollmux:Seriendruck' zur Verfügung. 
+    * Verbesserungen des Formularsystems
+          o Verbessertes Verhalten nach dem Betätigen der Schaltfläche "Abbrechen" in der FormularGUI: Nach dem Betätigen der Schaltfläche "Abbrechen" kam früher ein Dialog mit der Frage "Speichern", "Verwerfen" und "Abbrechen". Wurde dort auf "Abbrechen" geklickt, so wurde das Dokument trotzdem geschlossen. Dies ist jetzt nicht mehr der Fall.
+          o Multi-Form: Multi-Form ist ein Mechanismus der es ermöglicht, mehrere Formulardokumente über ein gemeinsames Formularfenster zu befüllen, wobei in mehreren Formularen benutzte Daten nur einmal eingegeben werden müssen.
+          o Bei WollMux-Formularen wird jetzt an den Dokumentanfang gesprungen nachdem alles vollständig initialisiert wurde.
+          o Im FormularMax 4000 können jetzt bei Funktionen (z.B. AUTOFILL) als Parameter auch Referenzen auf Steuerelemente ausgewählt werden.
+          o Verbesserungen bei der Unterstützung referatseigener Plugins. 
+    * Verbesserungen des Komfortdrucks für Sachleitende Verfügungen
+          o Beim Drucken von Sachleitenden Verfügungen wurden bisher gelegentlich unnötige Seitenumbrüche vor die Verfügungspunkte gesetzt. Dieser Fehler ist nun behoben.
+          o Über den Abschnitt SachleitendeVerfügungen können jetzt Hintergrundfarben für die Druckblöcke der Sachleitenden Verfügungen "immer drucken", "immer außer Original" und "nur im Entwurf" vergeben werden, mit denen die Blöcke optisch hervorgehoben werden können. 
+    * Sonstiges
+          o Enthält ein Dokument Serienbrieffelder, so erscheint beim Drucken ein Dialog, über den ausgewählt werden kann, ob die Seriendruckfunktion des WollMux, die Seriendruckfunktion von OpenOffice oder die aktuelle Standard-Druckfunktion (die erscheinen würde, wenn das Dokument keine Serienbrieffelder hätte) verwendet werden soll.
+          o Beim Öffnen einer Vorlage oder eines Dokuments mit WollMux-Kommandos, wird die Seitenvorlage "Wollmuxseite" nach "Standard"-Seite übertragen, falls die Seitenvorlage "Wollmuxseite" vorhanden ist. Dadurch wird jede Vorlage oder jedes Dokument an das Visuelle Erscheinungsbild angepasst, dessen Vorgaben in der Seitenvorlage "Wollmuxseite" realisiert wurden.
+          o Der WollMux wurde um eine Schnittstelle erweitert, die es ermöglicht Daten des aktuell im WollMux gesetzten Absenders in Makros Anwendungen zu verwenden und dadurch zum Beispiel die Sachbearbeiterdaten in Calc-Tabellen einzufügen.
+          o Im Download-Verzeichnis finden Sie in Zukunft immer eine Datei md5sums.txt, die die MD5-Werte der Dateien WollMux.uno.pkg und WollMuxBar.jar enthält, über die geprüft werden kann, ob der Download dieser Dateien korrekt funktioniert hat.
+          o In die WollMux-Leiste können jetzt auch PDF-Formulare , Links auf Webseiten und andere Aufrufe externer Anwendungen aufgenommen werden.
+          o Die Ladezeit von komplexen WollMux-Formularen wurde stark reduziert. Bislang gab es einige Vorlagen, deren Ladezeit über einer Minute lag. Dies sollte nun nicht mehr vorkommen. 
+
+ -- Matthias Benkmann <matthias.benkmann@muenchen.de>  Wed, 09 May 2007 16:13:16 +0200
+
 wollmux (1.5.0-siga-lhm1) siga; urgency=low
 
   * Das Textbausteinsystem steht (erstmalig) zur Verfügung. Über eine zugeordnete 
