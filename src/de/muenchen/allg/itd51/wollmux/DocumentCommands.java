@@ -221,8 +221,7 @@ public class DocumentCommands
    * @param cmdB
    *          das hinzuzufügende SetGroups-Kommando.
    * 
-   * @author Christoph Lutz (D-III-ITD-5.1)
-   * TESTED
+   * @author Christoph Lutz (D-III-ITD-5.1) TESTED
    */
   private void addNewSetGroups(SetGroups cmdB)
   {
@@ -250,8 +249,7 @@ public class DocumentCommands
    * @param cmdB
    *          das hinzuzufügende SetJumpMark-Kommando.
    * 
-   * @author Christoph Lutz (D-III-ITD-5.1)
-   * TESTED
+   * @author Christoph Lutz (D-III-ITD-5.1) TESTED
    */
   private void addNewSetJumpMark(SetJumpMark cmdB)
   {
@@ -412,6 +410,21 @@ public class DocumentCommands
       {
         return new InvalidCommand(b, e);
       }
+    }
+    catch (NoSuchElementException e)
+    {
+      // Eigentlich sollte diese Exception niemals fliegen, da nur ültige Namen
+      // beim Scan verwendet werden. Es kommt leider gelegentlich vor, dass
+      // XBookmarksSupplier.getElementNames() auch Namen von korrupten Bookmarks
+      // liefert, die nicht mehr über XBookmarksSupplier.getByName(...) gefunden
+      // werden können. Die korrupten Bookmarks zeichnen sich dadurch aus, dass
+      // sie zwar eine Startmarke, jedoch keine Endemarke besitzen. Häufig
+      // entstehen solche korrupten Bookmarks beim Löschen der leeren
+      // Paragraphen im GarbageCollector. Ich habe bereits probiert, einen
+      // minimalen Testfall ohne WollMux für dieses Problem zu extrahieren, war
+      // aber damit nicht erfolgreich.
+      Logger.debug("Warnung: inkonsistentes Bookmark entdeckt:");
+      Logger.debug(e);
     }
     catch (Exception e)
     {
