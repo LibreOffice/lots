@@ -2524,7 +2524,7 @@ public class WollMuxEventHandler
             .hashCode();
         if (myWmConfHash != wollmuxConfHashCode.intValue())
           errorMessage(new InvalidBindingStateException(
-              "Die Konfiguration des WollMux muss neu eingelesen werden.\n\nBitte beenden Sie den WollMux und OpenOffice.org schießen Sie alle laufenden 'soffice.bin'-Prozesse über den Taskmanager ab."));
+              "Die Konfiguration des WollMux muss neu eingelesen werden.\n\nBitte beenden Sie den WollMux und OpenOffice.org und schießen Sie alle laufenden 'soffice.bin'-Prozesse über den Taskmanager ab."));
       }
     }
 
