@@ -2524,7 +2524,7 @@ public class WollMuxEventHandler
             .hashCode();
         if (myWmConfHash != wollmuxConfHashCode.intValue())
           errorMessage(new InvalidBindingStateException(
-              "Die Konfiguration des WollMux entspricht nicht der Konfiguration der entfernten Komponente.\n\nBitte schließen Sie OpenOffice.org (einschließlich dem Schnellstarter) und die entfernte Komponente (z.B. eine WollMux-Leiste) um Fehler zu vermeiden, die aufgrund dieser Inkonsistenz entstehen könnten."));
+              "Die Konfiguration des WollMux muss neu eingelesen werden.\n\nBitte beenden Sie den WollMux und OpenOffice.org schießen Sie alle laufenden 'soffice.bin'-Prozesse über den Taskmanager ab."));
       }
     }
 
