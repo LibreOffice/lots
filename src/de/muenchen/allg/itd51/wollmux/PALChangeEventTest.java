@@ -63,4 +63,10 @@ public class PALChangeEventTest implements XPALChangeEventListener
     System.out.println("disposing");
   }
 
+  public int getWollMuxConfHashCode()
+  {
+    // Keine Konsistenzprüfung im Testfall
+    return 0;
+  }
+
 }

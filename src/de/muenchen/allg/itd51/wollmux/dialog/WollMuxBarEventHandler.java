@@ -403,7 +403,8 @@ public class WollMuxBarEventHandler
         XMultiServiceFactory factory = (XMultiServiceFactory) UnoRuntime.queryInterface(XMultiServiceFactory.class, ctx.getServiceManager());
         remoteWollMux = factory.createInstance("de.muenchen.allg.itd51.wollmux.WollMux");
         XWollMux mux = (XWollMux) UnoRuntime.queryInterface(XWollMux.class, remoteWollMux);
-        mux.addPALChangeEventListener(myPALChangeEventListener);
+        int wmConfHashCode = WollMuxFiles.getWollmuxConf().stringRepresentation().hashCode();
+        mux.addPALChangeEventListenerWithConsistencyCheck(myPALChangeEventListener, wmConfHashCode);
         return mux;
       } 
       catch (Exception e) 

@@ -57,6 +57,7 @@ import com.sun.star.beans.PropertyValue;
 import com.sun.star.container.NoSuchElementException;
 import com.sun.star.container.XEnumeration;
 import com.sun.star.container.XNamed;
+import com.sun.star.form.binding.InvalidBindingStateException;
 import com.sun.star.frame.DispatchResultEvent;
 import com.sun.star.frame.XDispatch;
 import com.sun.star.frame.XDispatchResultListener;
@@ -2483,9 +2484,9 @@ public class WollMuxEventHandler
    * @param listener
    */
   public static void handleAddPALChangeEventListener(
-      XPALChangeEventListener listener)
+      XPALChangeEventListener listener, Integer wollmuxConfHashCode)
   {
-    handle(new OnAddPALChangeEventListener(listener));
+    handle(new OnAddPALChangeEventListener(listener, wollmuxConfHashCode));
   }
 
   /**
@@ -2500,9 +2501,13 @@ public class WollMuxEventHandler
   {
     private XPALChangeEventListener listener;
 
-    public OnAddPALChangeEventListener(XPALChangeEventListener listener)
+    private Integer wollmuxConfHashCode;
+
+    public OnAddPALChangeEventListener(XPALChangeEventListener listener,
+        Integer wollmuxConfHashCode)
     {
       this.listener = listener;
+      this.wollmuxConfHashCode = wollmuxConfHashCode;
     }
 
     protected void doit()
@@ -2510,6 +2515,17 @@ public class WollMuxEventHandler
       WollMuxSingleton.getInstance().addPALChangeEventListener(listener);
 
       WollMuxEventHandler.handlePALChangedNotify();
+
+      // Konsistenzprüfung: Stimmt WollMux-Konfiguration der entfernten
+      // Komponente mit meiner Konfiguration überein? Ansonsten Fehlermeldung.
+      if (wollmuxConfHashCode != null)
+      {
+        int myWmConfHash = WollMuxFiles.getWollmuxConf().stringRepresentation()
+            .hashCode();
+        if (myWmConfHash != wollmuxConfHashCode.intValue())
+          errorMessage(new InvalidBindingStateException(
+              "Die Konfiguration des WollMux entspricht nicht der Konfiguration der entfernten Komponente.\n\nBitte schließen Sie OpenOffice.org (einschließlich dem Schnellstarter) und die entfernte Komponente (z.B. eine WollMux-Leiste) um Fehler zu vermeiden, die aufgrund dieser Inkonsistenz entstehen könnten."));
+      }
     }
 
     public boolean requires(Object o)

@@ -200,7 +200,39 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
    */
   public void addPALChangeEventListener(XPALChangeEventListener l)
   {
-    WollMuxEventHandler.handleAddPALChangeEventListener(l);
+    WollMuxEventHandler.handleAddPALChangeEventListener(l, null);
+  }
+
+  /**
+   * Diese Methode registriert einen XPALChangeEventListener, der updates
+   * empfängt wenn sich die PAL ändert; nach der Registrierung wird geprüft, ob
+   * der WollMux und der XPALChangeEventListener die selbe WollMux-Konfiguration
+   * verwenden, wozu der Listener den HashCode wollmuxConfHashCode der aktuellen
+   * WollMux-Konfiguration übermittelt. Stimmt wollmuxConfHashCode nicht mit dem
+   * HashCode der WollMux-Konfiguration des WollMux überein, so erscheint ein
+   * Dialog, der vor möglichen Fehlern warnt. Nach dem Registrieren wird sofort
+   * ein ON_SELECTION_CHANGED Ereignis ausgelöst, welches dafür sort, dass
+   * sofort ein erster update aller Listener ausgeführt wird. Die Methode
+   * ignoriert alle XPALChangeEventListenener-Instanzen, die bereits registriert
+   * wurden. Mehrfachregistrierung der selben Instanz ist also nicht möglich.
+   * 
+   * @param l
+   *          Der zu registrierende XPALChangeEventListener
+   * @param wollmuxConfHashCode
+   *          Der HashCode der WollMux-Config der zur Konsistenzprüfung
+   *          herangezogen wird und über
+   *          WollMuxFiles.getWollMuxConf().getStringRepresentation().hashCode()
+   *          erzeugt wird.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   * @see de.muenchen.allg.itd51.wollmux.XPALChangeEventBroadcaster#addPALChangeEventListenerWithConsistencyCheck(de.muenchen.allg.itd51.wollmux.XPALChangeEventListener,
+   *      int)
+   */
+  public void addPALChangeEventListenerWithConsistencyCheck(
+      XPALChangeEventListener l, int wollmuxConfHashCode)
+  {
+    WollMuxEventHandler.handleAddPALChangeEventListener(l, new Integer(
+        wollmuxConfHashCode));
   }
 
   /**
