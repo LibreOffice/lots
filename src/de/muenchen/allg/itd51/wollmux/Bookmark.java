@@ -39,6 +39,7 @@ import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextRange;
 import com.sun.star.text.XTextRangeCompare;
+import com.sun.star.uno.AnyConverter;
 import com.sun.star.uno.Exception;
 
 import de.muenchen.allg.afid.UNO;
@@ -383,6 +384,8 @@ public class Bookmark
 
     Logger.debug("Rename \"" + name + "\" --> \"" + newName + "\"");
 
+    // Falls bookmark <newName> bereits existiert, <newName>N verwenden (N ist
+    // eine natürliche Zahl)
     if (bookmarks.hasByName(newName))
     {
       int count = 1;
@@ -604,6 +607,87 @@ public class Bookmark
     catch (Exception x)
     {
       Logger.error(x);
+    }
+  }
+
+  /**
+   * Diese Methode liefert den Wert der Property IsCollapsed zurück, wenn das
+   * Ankerobjekt des Bookmarks diese Property besitzt, ansonsten wird false
+   * geliefert. Das entsprechende Ankerobjekt wird durch entsprechende
+   * Enumerationen über das Bookmarkobject gewonnen.
+   * 
+   * @return true, wenn die Property IsCollapsed existiert und true ist.
+   *         Ansonsten wird false geliefert.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  public boolean isCollapsed()
+  {
+    XTextRange anchor = getAnchor();
+    if (anchor == null) return false;
+    try
+    {
+      Object par = UNO.XEnumerationAccess(anchor).createEnumeration()
+          .nextElement();
+      XEnumeration xenum = UNO.XEnumerationAccess(par).createEnumeration();
+      while (xenum.hasMoreElements())
+      {
+        try
+        {
+          Object element = xenum.nextElement();
+          String tpt = "" + UNO.getProperty(element, "TextPortionType");
+          if (!tpt.equals("Bookmark")) continue;
+          XNamed bm = UNO.XNamed(UNO.getProperty(element, "Bookmark"));
+          if (bm == null || !name.equals(bm.getName())) continue;
+          return AnyConverter
+              .toBoolean(UNO.getProperty(element, "IsCollapsed"));
+        }
+        catch (java.lang.Exception e2)
+        {
+        }
+      }
+    }
+    catch (java.lang.Exception e)
+    {
+    }
+    return false;
+  }
+
+  /**
+   * Diese Methode wandelt ein kollabiertes Bookmark (IsCollapsed()==true) in
+   * ein nicht-kollabiertes Bookmark (IsCollapsed()==false) ohne Ausdehnung um.
+   * Auf diese Weise wird OOo-Issue #73568 umgangen, gemäß dem kein Inhalt in
+   * das Bookmark eingefügt werden kann, wenn IsCollapsed==true ist. Ist das
+   * Bookmark bereits nicht-kollabiert, so wird nichts unternommen.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  public void decollapseBookmark()
+  {
+    XTextRange range = getAnchor();
+    if (range == null) return;
+
+    // alte Range sichern und beenden, wenn nicht-kolabiert.
+    XTextCursor cursor = range.getText().createTextCursorByRange(range);
+    if (!cursor.isCollapsed()) return;
+
+    Logger.debug("Dekollabiere Bookmark '" + name + "'");
+
+    // altes Bookmark löschen.
+    remove();
+
+    // neues Bookmark unter dem alten Namen mit neuer Ausdehnung hinzufügen.
+    try
+    {
+      UnoService bookmark = document.create("com.sun.star.text.Bookmark");
+      bookmark.xNamed().setName(name);
+      cursor.setString("x");
+      cursor.getText().insertTextContent(cursor, bookmark.xTextContent(), true);
+      bookmark.xTextContent().getAnchor().setString("");
+    }
+    catch (Exception e)
+    {
+      Logger.error(e);
     }
   }
 

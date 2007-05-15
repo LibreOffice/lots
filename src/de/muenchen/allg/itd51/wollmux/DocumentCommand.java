@@ -133,6 +133,11 @@ abstract public class DocumentCommand
                    + getBookmarkName()
                    + "' darf kein GROUPS-Attribut besitzen.");
     }
+
+    // Workaround für OOo-Issue #73568
+    if(insertsTextContent() && bookmark.isCollapsed()) {
+      bookmark.decollapseBookmark();
+    }
   }
 
   /**
@@ -146,6 +151,17 @@ abstract public class DocumentCommand
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
   protected boolean canHaveGroupsAttribute()
+  {
+    return false;
+  }
+
+  /**
+   * Liefert true, wenn das Dokumentkommando Textinhalte in das zugehörige
+   * Bookmark einfügen möchte, ansonsten false.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  protected boolean insertsTextContent()
   {
     return false;
   }
@@ -898,6 +914,11 @@ abstract public class DocumentCommand
     {
       return visitable.executeCommand(this);
     }
+
+    protected boolean insertsTextContent()
+    {
+      return true;
+    }
   }
 
   // ********************************************************************************
@@ -922,6 +943,11 @@ abstract public class DocumentCommand
     public int execute(DocumentCommand.Executor visitable)
     {
       return visitable.executeCommand(this);
+    }
+
+    protected boolean insertsTextContent()
+    {
+      return true;
     }
   }
 
@@ -1022,6 +1048,11 @@ abstract public class DocumentCommand
     {
       return visitable.executeCommand(this);
     }
+    
+    protected boolean insertsTextContent()
+    {
+      return true;
+    }
   }
 
   // ********************************************************************************
@@ -1098,6 +1129,11 @@ abstract public class DocumentCommand
       return super.toConfigThingy();
     }
 
+    protected boolean insertsTextContent()
+    {
+      return true;
+    }
+
   }
 
   // ********************************************************************************
@@ -1154,6 +1190,11 @@ abstract public class DocumentCommand
     public int execute(DocumentCommand.Executor visitable)
     {
       return visitable.executeCommand(this);
+    }
+
+    protected boolean insertsTextContent()
+    {
+      return true;
     }
   }
 

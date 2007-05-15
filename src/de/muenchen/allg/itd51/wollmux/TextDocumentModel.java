@@ -254,9 +254,11 @@ public class TextDocumentModel
     this.formModel = null;
     this.printModel = new PrintModel(this);
 
-    // Kommandobaum erzeugen:
+    // Kommandobaum erzeugen (modified-Status dabei unberührt lassen):
+    boolean modified = getDocumentModified();
     this.documentCommands = new DocumentCommands(UNO.XBookmarksSupplier(doc));
     documentCommands.update();
+    setDocumentModified(modified);
 
     registerCloseListener();
 
