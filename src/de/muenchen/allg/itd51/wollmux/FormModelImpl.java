@@ -133,8 +133,9 @@ public class FormModelImpl
     }
 
     // ...und mergen
-    ConfigThingy formConf = FormController
-        .mergeFormDescriptors(formularSections, buttonAnpassung);
+    ConfigThingy formConf = FormController.mergeFormDescriptors(
+        formularSections,
+        buttonAnpassung);
 
     // mapIdToPresetValue aller Einzeldokumente vereinheitlichen:
     HashMap commonMapIdToPresetValue = new HashMap();
@@ -185,18 +186,17 @@ public class FormModelImpl
     }
 
     // FormModels für die Einzeldokumente erzeugen
-    HashMap mapDocsToFormModels = new HashMap();
+    Vector /* of FormModel */fms = new Vector();
     for (Iterator iter = docs.iterator(); iter.hasNext();)
     {
       TextDocumentModel doc = (TextDocumentModel) iter.next();
       FormModel fm = new FormModelImpl.SingleDocumentFormModel(doc,
           formFensterConf, formConf, functionContext, funcLib, dialogLib);
-      mapDocsToFormModels.put(doc, fm);
+      fms.add(fm);
     }
 
-    return new FormModelImpl.MultiDocumentFormModel(mapDocsToFormModels,
-        formFensterConf, formConf, functionContext, commonMapIdToPresetValue,
-        funcLib, dialogLib);
+    return new FormModelImpl.MultiDocumentFormModel(docs, fms, formFensterConf,
+        formConf, functionContext, commonMapIdToPresetValue, funcLib, dialogLib);
   }
 
   /**
@@ -228,7 +228,9 @@ public class FormModelImpl
    */
   private static class MultiDocumentFormModel implements FormModel
   {
-    private HashMap mapDocsToFormModels;
+    private Vector docs;
+
+    private Vector formModels;
 
     private final ConfigThingy formFensterConf;
 
@@ -246,11 +248,16 @@ public class FormModelImpl
 
     /**
      * Konstruktor für ein MultiDocumentFormModel mit den zugehörigen
-     * TextDocumentModel Objekten, die in einer HashMap abgelegt sind, die eine
-     * Zuordnung von TextDocumentModel auf ein FormModel (üblicherweise Objekte
-     * vom Typ SingleDocumentFormModel) enthalten. Das MultiDocumentFormModel
-     * leitet alle Anfragen an die mitgelieferten FormModel Objekte weiter.
+     * TextDocumentModel Objekten docs und den zugehörigen FormModel Objekten
+     * formModels. Das MultiDocumentFormModel leitet alle Anfragen an die
+     * mitgelieferten FormModel Objekte weiter.
      * 
+     * @param docs
+     *          Vektor mit den TextDocumentModel Objekten der Einzeldokumente.
+     * @param formModels
+     *          Vektor mit den zu den Einzeldokumenten zugehörigen
+     *          FormModel-Objekten (muss die selbe Größe und die selbe
+     *          Reihenfolge wie docs haben).
      * @param mapDocsToFormModels
      *          enthält die zugeordneten TextDocumentModels.
      * @param formFensterConf
@@ -278,19 +285,19 @@ public class FormModelImpl
      *          automatisch zu befüllende Formularfelder benötigt werden (wird
      *          für createFormGUI() benötigt).
      */
-    public MultiDocumentFormModel(HashMap mapDocsToFormModels,
+    public MultiDocumentFormModel(Vector docs, Vector formModels,
         final ConfigThingy formFensterConf, final ConfigThingy formConf,
         final Map functionContext, final HashMap commonMapIdToPresetValue,
         final FunctionLibrary funcLib, final DialogLibrary dialogLib)
     {
-      this.mapDocsToFormModels = mapDocsToFormModels;
+      this.docs = docs;
+      this.formModels = formModels;
       this.formFensterConf = formFensterConf;
       this.formConf = formConf;
       this.functionContext = functionContext;
       this.commonMapIdToPresetValue = commonMapIdToPresetValue;
       this.funcLib = funcLib;
       this.dialogLib = dialogLib;
-
     }
 
     /*
@@ -301,11 +308,9 @@ public class FormModelImpl
      */
     public void setWindowPosSize(int docX, int docY, int docWidth, int docHeight)
     {
-      for (Iterator iter = mapDocsToFormModels.keySet().iterator(); iter
-          .hasNext();)
+      for (int i = 0; i < docs.size(); i++)
       {
-        TextDocumentModel doc = (TextDocumentModel) iter.next();
-        FormModel fm = (FormModel) mapDocsToFormModels.get(doc);
+        FormModel fm = (FormModel) formModels.get(i);
         fm.setWindowPosSize(docX, docY, docWidth, docHeight);
       }
     }
@@ -317,11 +322,9 @@ public class FormModelImpl
      */
     public void setWindowVisible(boolean vis)
     {
-      for (Iterator iter = mapDocsToFormModels.keySet().iterator(); iter
-          .hasNext();)
+      for (int i = 0; i < docs.size(); i++)
       {
-        TextDocumentModel doc = (TextDocumentModel) iter.next();
-        FormModel fm = (FormModel) mapDocsToFormModels.get(doc);
+        FormModel fm = (FormModel) formModels.get(i);
         fm.setWindowVisible(vis);
       }
     }
@@ -333,11 +336,9 @@ public class FormModelImpl
      */
     public void close()
     {
-      for (Iterator iter = mapDocsToFormModels.keySet().iterator(); iter
-          .hasNext();)
+      for (int i = 0; i < docs.size(); i++)
       {
-        TextDocumentModel doc = (TextDocumentModel) iter.next();
-        FormModel fm = (FormModel) mapDocsToFormModels.get(doc);
+        FormModel fm = (FormModel) formModels.get(i);
         fm.close();
       }
     }
@@ -350,11 +351,9 @@ public class FormModelImpl
      */
     public void setVisibleState(String groupId, boolean visible)
     {
-      for (Iterator iter = mapDocsToFormModels.keySet().iterator(); iter
-          .hasNext();)
+      for (int i = 0; i < docs.size(); i++)
       {
-        TextDocumentModel doc = (TextDocumentModel) iter.next();
-        FormModel fm = (FormModel) mapDocsToFormModels.get(doc);
+        FormModel fm = (FormModel) formModels.get(i);
         fm.setVisibleState(groupId, visible);
       }
     }
@@ -367,11 +366,9 @@ public class FormModelImpl
      */
     public void valueChanged(String fieldId, String newValue)
     {
-      for (Iterator iter = mapDocsToFormModels.keySet().iterator(); iter
-          .hasNext();)
+      for (int i = 0; i < docs.size(); i++)
       {
-        TextDocumentModel doc = (TextDocumentModel) iter.next();
-        FormModel fm = (FormModel) mapDocsToFormModels.get(doc);
+        FormModel fm = (FormModel) formModels.get(i);
         fm.valueChanged(fieldId, newValue);
       }
     }
@@ -383,11 +380,9 @@ public class FormModelImpl
      */
     public void focusGained(String fieldId)
     {
-      for (Iterator iter = mapDocsToFormModels.keySet().iterator(); iter
-          .hasNext();)
+      for (int i = 0; i < docs.size(); i++)
       {
-        TextDocumentModel doc = (TextDocumentModel) iter.next();
-        FormModel fm = (FormModel) mapDocsToFormModels.get(doc);
+        FormModel fm = (FormModel) formModels.get(i);
         fm.focusGained(fieldId);
       }
     }
@@ -399,11 +394,9 @@ public class FormModelImpl
      */
     public void focusLost(String fieldId)
     {
-      for (Iterator iter = mapDocsToFormModels.keySet().iterator(); iter
-          .hasNext();)
+      for (int i = 0; i < docs.size(); i++)
       {
-        TextDocumentModel doc = (TextDocumentModel) iter.next();
-        FormModel fm = (FormModel) mapDocsToFormModels.get(doc);
+        FormModel fm = (FormModel) formModels.get(i);
         fm.focusLost(fieldId);
       }
     }
@@ -415,11 +408,9 @@ public class FormModelImpl
      */
     public void print()
     {
-      for (Iterator iter = mapDocsToFormModels.keySet().iterator(); iter
-          .hasNext();)
+      for (int i = 0; i < docs.size(); i++)
       {
-        TextDocumentModel doc = (TextDocumentModel) iter.next();
-        FormModel fm = (FormModel) mapDocsToFormModels.get(doc);
+        FormModel fm = (FormModel) formModels.get(i);
         fm.print();
       }
     }
@@ -431,11 +422,9 @@ public class FormModelImpl
      */
     public void pdf()
     {
-      for (Iterator iter = mapDocsToFormModels.keySet().iterator(); iter
-          .hasNext();)
+      for (int i = 0; i < docs.size(); i++)
       {
-        TextDocumentModel doc = (TextDocumentModel) iter.next();
-        FormModel fm = (FormModel) mapDocsToFormModels.get(doc);
+        FormModel fm = (FormModel) formModels.get(i);
         fm.pdf();
       }
     }
@@ -447,11 +436,9 @@ public class FormModelImpl
      */
     public void formControllerInitCompleted()
     {
-      for (Iterator iter = mapDocsToFormModels.keySet().iterator(); iter
-          .hasNext();)
+      for (int i = 0; i < docs.size(); i++)
       {
-        TextDocumentModel doc = (TextDocumentModel) iter.next();
-        FormModel fm = (FormModel) mapDocsToFormModels.get(doc);
+        FormModel fm = (FormModel) formModels.get(i);
         fm.formControllerInitCompleted();
       }
     }
@@ -465,21 +452,21 @@ public class FormModelImpl
      */
     public void disposing(TextDocumentModel source)
     {
-      for (Iterator iter = mapDocsToFormModels.keySet().iterator(); iter
-          .hasNext();)
+      for (int i = 0; i < docs.size(); i++)
       {
-        TextDocumentModel doc = (TextDocumentModel) iter.next();
-        FormModel fm = (FormModel) mapDocsToFormModels.get(doc);
+        TextDocumentModel doc = (TextDocumentModel) docs.get(i);
+        FormModel fm = (FormModel) formModels.get(i);
 
         if (doc.equals(source))
         {
           fm.disposing(source);
-          iter.remove();
+          docs.remove(i);
+          formModels.remove(i);
         }
       }
 
       // FormGUI beenden (falls bisher eine gesetzt ist)
-      if (mapDocsToFormModels.size() == 0 && formGUI != null)
+      if (docs.size() == 0 && formGUI != null)
       {
         formGUI.dispose();
         formGUI = null;
