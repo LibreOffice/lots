@@ -46,6 +46,11 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import com.sun.star.beans.Property;
+import com.sun.star.container.XNameAccess;
+
+import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
@@ -810,6 +815,10 @@ public class WollMuxFiles
         ex.printStackTrace(new PrintWriter(out));
       }
       out.write("===================== END wollmux.log ==================\n");
+      
+      out.write("===================== START OOo-Configuration dump ==================\n");
+      out.write(dumpOOoConfiguration("/org.openoffice.Office.Writer/") + "\n");
+      out.write("===================== END OOo-Configuration dump ==================\n");
       out.close();
     }
     catch (IOException x)
@@ -820,6 +829,91 @@ public class WollMuxFiles
     return dumpFile.getAbsolutePath();
   }
 
+  /**
+   * Gibt den Inhalt der OOo-Konfiguration einschließlich aller Unterknoten am
+   * Knoten nodePath zurück.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  public static String dumpOOoConfiguration(String nodePath)
+  {
+    try
+    {
+      Object cfgProvider = UNO
+          .createUNOService("com.sun.star.configuration.ConfigurationProvider");
+
+      Object cfgAccess = UNO.XMultiServiceFactory(cfgProvider)
+          .createInstanceWithArguments(
+              "com.sun.star.configuration.ConfigurationAccess",
+              new UnoProps("nodepath", nodePath).getProps());
+
+      return dumpNode(cfgAccess, "");
+    }
+    catch (java.lang.Exception e)
+    {
+      Logger.error(e);
+      return "Fehler beim Auslesen der OOo-Konfiguration mit dem Nodepath '"
+             + nodePath
+             + "'";
+    }
+  }
+
+  /**
+   * Gibt den Inhalt eines Knotens element der OOo-Konfiguration mit dem
+   * Knotennamen und allen enthaltenen Properties zurück, wobei die Inhalte pro
+   * Zeile um den String spaces eingerückt werden.
+   * 
+   * @param element
+   * @param spaces
+   * @return
+   * @throws Exception
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  public static String dumpNode(Object element, String spaces)
+  {
+    String result = "";
+
+    // Eigenen Elementnamen ausgeben:
+    if (UNO.XNamed(element) != null)
+    {
+      result += spaces + "+ " + UNO.XNamed(element).getName() + "\n";
+    }
+
+    // Properties (Elemente mit Werten) durchsuchen:
+    if (UNO.XPropertySet(element) != null)
+    {
+      Property[] props = UNO.XPropertySet(element).getPropertySetInfo()
+          .getProperties();
+      for (int i = 0; i < props.length; i++)
+      {
+        Object prop = UNO.getProperty(element, props[i].Name);
+        String propStr = "" + prop;
+        if (UNO.XInterface(prop) != null) propStr = "UNO-Proxy-Objekt";
+        result += spaces + "|    " + props[i].Name + ": " + propStr + "\n";
+      }
+    }
+
+    // Kinder durchsuchen.
+    XNameAccess xna = UNO.XNameAccess(element);
+    if (xna != null)
+    {
+      String[] elements = xna.getElementNames();
+      for (int i = 0; i < elements.length; i++)
+      {
+        try
+        {
+          result += dumpNode(xna.getByName(elements[i]), spaces + "|    ");
+        }
+        catch (java.lang.Exception e)
+        {
+        }
+      }
+    }
+
+    return result;
+  }
+  
   private static class WollMuxClassLoader extends URLClassLoader
   {
     public WollMuxClassLoader()
