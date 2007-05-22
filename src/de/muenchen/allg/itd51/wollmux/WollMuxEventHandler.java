@@ -48,9 +48,7 @@ import java.util.regex.Pattern;
 
 import javax.swing.ImageIcon;
 import javax.swing.JDialog;
-import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import javax.swing.JTextPane;
 
 import com.sun.star.awt.XWindow;
 import com.sun.star.beans.PropertyValue;
@@ -3128,21 +3126,7 @@ public class WollMuxEventHandler
     {
       final String title = "Fehlerinfos erstellen";
 
-      JFrame frame = new JFrame(title);
-      JTextPane text = new JTextPane();
-      text
-          .setText("Die Fehlerinformationen des WollMux werden erzeugt...\n\nDieser Vorgang dauert ca. 30 Sekunden!");
-      text.setEditable(false);
-      frame.add(text);
-      frame.pack();
-      frame.setAlwaysOnTop(true);
-      frame.setVisible(true);
-
-      // das kann etwas länger dauern...
       String name = WollMuxFiles.dumpInfo();
-
-      frame.setVisible(false);
-      frame.dispose();
 
       if (name != null)
         WollMuxSingleton.showInfoModal(

@@ -48,6 +48,7 @@ import java.util.Set;
 
 import com.sun.star.beans.Property;
 import com.sun.star.container.XNameAccess;
+import com.sun.star.uno.AnyConverter;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoProps;
@@ -74,7 +75,7 @@ public class WollMuxFiles
   private static final String ETC_WOLLMUX_WOLLMUX_CONF = "/etc/wollmux/wollmux.conf";
 
   private static final String C_PROGRAMME_WOLLMUX_WOLLMUX_CONF = "C:\\Programme\\wollmux\\wollmux.conf";
-  
+
   private static final long DATASOURCE_TIMEOUT = 10000;
 
   private static final WollMuxClassLoader classLoader = new WollMuxClassLoader();
@@ -142,8 +143,6 @@ public class WollMuxFiles
   // wollmux-Konfigurationsdatei
   // ein>\"\r\n";
 
-
-  
   /**
    * Erzeugt das ,wollmux-Verzeichnis, falls es noch nicht existiert und
    * erstellt eine Standard-wollmux,conf. Initialisiert auch den Logger.
@@ -327,7 +326,8 @@ public class WollMuxFiles
     {
       djInitialized = true;
       ConfigThingy senderSource = WollMuxFiles.getWollmuxConf().query(
-          "SENDER_SOURCE",1);
+          "SENDER_SOURCE",
+          1);
       String senderSourceStr = "";
       try
       {
@@ -338,9 +338,10 @@ public class WollMuxFiles
         Logger
             .error("Keine Hauptdatenquelle SENDER_SOURCE definiert! Setze SENDER_SOURCE=\"\".");
       }
-      
+
       ConfigThingy dataSourceTimeout = WollMuxFiles.getWollmuxConf().query(
-          "DATASOURCE_TIMEOUT",1);
+          "DATASOURCE_TIMEOUT",
+          1);
       String datasourceTimeoutStr = "";
       long datasourceTimeoutLong = 0;
       try
@@ -348,14 +349,15 @@ public class WollMuxFiles
         datasourceTimeoutStr = dataSourceTimeout.getLastChild().toString();
         try
         {
-          datasourceTimeoutLong = new Long(datasourceTimeoutStr).longValue();  
+          datasourceTimeoutLong = new Long(datasourceTimeoutStr).longValue();
         }
         catch (NumberFormatException e)
         {
           Logger.error("DATASOURCE_TIMEOUT muss eine ganze Zahl sein");
           datasourceTimeoutLong = DATASOURCE_TIMEOUT;
         }
-        if(datasourceTimeoutLong <= 0){
+        if (datasourceTimeoutLong <= 0)
+        {
           Logger.error("DATASOURCE_TIMEOUT muss größer als 0 sein!");
         }
       }
@@ -363,11 +365,12 @@ public class WollMuxFiles
       {
         datasourceTimeoutLong = DATASOURCE_TIMEOUT;
       }
-      
+
       try
       {
         datasourceJoiner = new DatasourceJoiner(getWollmuxConf(),
-            senderSourceStr, getLosCacheFile(), getDEFAULT_CONTEXT(),datasourceTimeoutLong);
+            senderSourceStr, getLosCacheFile(), getDEFAULT_CONTEXT(),
+            datasourceTimeoutLong);
       }
       catch (ConfigurationErrorException e)
       {
@@ -536,8 +539,10 @@ public class WollMuxFiles
       {
         String urlStr = iter.next().toString();
         if (!urlStr.endsWith("/")
-            && (urlStr.indexOf('.') < 0 || urlStr.lastIndexOf('/') > urlStr.lastIndexOf('.')))
-          urlStr = urlStr + "/"; // Falls keine Dateierweiterung angegeben, /
+            && (urlStr.indexOf('.') < 0 || urlStr.lastIndexOf('/') > urlStr
+                .lastIndexOf('.'))) urlStr = urlStr + "/"; // Falls keine
+        // Dateierweiterung
+        // angegeben, /
         // ans Ende setzen, weil nur so Verzeichnisse
         // erkannt werden.
         try
@@ -815,10 +820,13 @@ public class WollMuxFiles
         ex.printStackTrace(new PrintWriter(out));
       }
       out.write("===================== END wollmux.log ==================\n");
-      
-      out.write("===================== START OOo-Configuration dump ==================\n");
+
+      out
+          .write("===================== START OOo-Configuration dump ==================\n");
       out.write(dumpOOoConfiguration("/org.openoffice.Office.Writer/") + "\n");
-      out.write("===================== END OOo-Configuration dump ==================\n");
+      out.write(dumpOOoConfiguration("/org.openoffice.Inet/") + "\n");
+      out
+          .write("===================== END OOo-Configuration dump ==================\n");
       out.close();
     }
     catch (IOException x)
@@ -872,15 +880,8 @@ public class WollMuxFiles
    */
   public static String dumpNode(Object element, String spaces)
   {
-    String result = "";
-
-    // Eigenen Elementnamen ausgeben:
-    if (UNO.XNamed(element) != null)
-    {
-      result += spaces + "+ " + UNO.XNamed(element).getName() + "\n";
-    }
-
     // Properties (Elemente mit Werten) durchsuchen:
+    String properties = "";
     if (UNO.XPropertySet(element) != null)
     {
       Property[] props = UNO.XPropertySet(element).getPropertySetInfo()
@@ -888,13 +889,24 @@ public class WollMuxFiles
       for (int i = 0; i < props.length; i++)
       {
         Object prop = UNO.getProperty(element, props[i].Name);
-        String propStr = "" + prop;
-        if (UNO.XInterface(prop) != null) propStr = "UNO-Proxy-Objekt";
-        result += spaces + "|    " + props[i].Name + ": " + propStr + "\n";
+        if (UNO.XInterface(prop) != null) continue;
+        if (AnyConverter.isVoid(prop)) continue;
+        String propStr = "'" + prop + "'";
+        // arrays anzeigen:
+        if (prop instanceof Object[])
+        {
+          Object[] arr = (Object[]) prop;
+          propStr = "[";
+          for (int j = 0; j < arr.length; j++)
+            propStr += "'" + arr[j] + "'" + ((j == arr.length - 1) ? "" : ", ");
+          propStr += "]";
+        }
+        properties += spaces + "|    " + props[i].Name + ": " + propStr + "\n";
       }
     }
 
     // Kinder durchsuchen.
+    String childs = "";
     XNameAccess xna = UNO.XNameAccess(element);
     if (xna != null)
     {
@@ -903,7 +915,7 @@ public class WollMuxFiles
       {
         try
         {
-          result += dumpNode(xna.getByName(elements[i]), spaces + "|    ");
+          childs += dumpNode(xna.getByName(elements[i]), spaces + "|    ");
         }
         catch (java.lang.Exception e)
         {
@@ -911,9 +923,20 @@ public class WollMuxFiles
       }
     }
 
-    return result;
+    // Knoten zusammenbauen: Eigener Name + properties + kinder (nur wenn der
+    // Knoten auch angezeigte Properties oder Kinder hat):
+    if (UNO.XNamed(element) != null
+        && (properties.length() > 0 || childs.length() > 0))
+      return spaces
+             + "+ "
+             + UNO.XNamed(element).getName()
+             + "\n"
+             + properties
+             + childs;
+
+    return "";
   }
-  
+
   private static class WollMuxClassLoader extends URLClassLoader
   {
     public WollMuxClassLoader()
