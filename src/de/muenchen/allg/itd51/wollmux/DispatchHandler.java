@@ -102,6 +102,8 @@ public class DispatchHandler
 
   public static final String DISP_wmSeriendruck = "wollmux:Seriendruck";
 
+  public static final String DISP_wmTest = "wollmux:Test";
+
   /*****************************************************************************
    * Erzeugt alle globalen DispatchHandler
    ****************************************************************************/
@@ -312,6 +314,14 @@ public class DispatchHandler
       public void dispatch(String arg, PropertyValue[] props)
       {
         WollMuxEventHandler.handleSeriendruck(model);
+      }
+    });
+
+    handler.add(new DocumentDispatchHandler(DISP_wmTest, model)
+    {
+      public void dispatch(String arg, PropertyValue[] props)
+      {
+        TestHandler.doTest(model, arg);
       }
     });
 

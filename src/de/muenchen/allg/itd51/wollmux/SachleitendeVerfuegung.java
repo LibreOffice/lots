@@ -1145,6 +1145,24 @@ public class SachleitendeVerfuegung
   }
 
   /**
+   * Liefert die Anzahl der im XTextDocument doc enthaltenen Verfügungspunkte
+   * zurück.
+   * 
+   * @param doc
+   *          das TextDocument in dem gezählt werden soll.
+   * @return die Anzahl der im XTextDocument doc enthaltenen Verfügungspunkte
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  public static int countVerfuegungspunkte(XTextDocument doc)
+  {
+    if (doc != null)
+      return scanVerfuegungspunkte(doc).size();
+    else
+      return 0;
+  }
+
+  /**
    * Druckt den Verfügungpunkt verfPunkt aus dem Dokument doc in der gewünschten
    * Anzahl numberOfCopies aus. ACHTUNG: Diese Methode darf nur aus dem
    * WollMuxEventHandler-Thread gestartet werden, da sie auf Datenstrukturen des
