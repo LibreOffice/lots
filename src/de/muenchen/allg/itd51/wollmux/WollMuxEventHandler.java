@@ -2291,10 +2291,12 @@ public class WollMuxEventHandler
                       + "')");
         try
         {
-          QueryResults r = dsj.find(dbSpalte, evaluate(value));
+          String v = evaluate(value);
+          if (v.length() == 0) return 0;
+          QueryResults r = dsj.find(dbSpalte, v);
           return addToPAL(r);
         }
-        catch (TimeoutException e)
+        catch (java.lang.Exception e)
         {
           Logger.error(e);
         }
@@ -2338,14 +2340,13 @@ public class WollMuxEventHandler
                       + "')");
         try
         {
-          QueryResults r = dsj.find(
-              dbSpalte1,
-              evaluate(value1),
-              dbSpalte2,
-              evaluate(value2));
+          String v1 = evaluate(value1);
+          String v2 = evaluate(value2);
+          if (v1.length() == 0 || v2.length() == 0) return 0;
+          QueryResults r = dsj.find(dbSpalte1, v1, dbSpalte2, v2);
           return addToPAL(r);
         }
-        catch (TimeoutException e)
+        catch (java.lang.Exception e)
         {
           Logger.error(e);
         }
