@@ -2296,9 +2296,13 @@ public class WollMuxEventHandler
           QueryResults r = dsj.find(dbSpalte, v);
           return addToPAL(r);
         }
-        catch (java.lang.Exception e)
+        catch (TimeoutException e)
         {
           Logger.error(e);
+        }
+        catch (IllegalArgumentException e)
+        {
+          Logger.debug(e);
         }
         return 0;
       }
@@ -2346,9 +2350,13 @@ public class WollMuxEventHandler
           QueryResults r = dsj.find(dbSpalte1, v1, dbSpalte2, v2);
           return addToPAL(r);
         }
-        catch (java.lang.Exception e)
+        catch (TimeoutException e)
         {
           Logger.error(e);
+        }
+        catch (IllegalArgumentException e)
+        {
+          Logger.debug(e);
         }
         return 0;
       }
