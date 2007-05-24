@@ -623,26 +623,6 @@ public class SachleitendeVerfuegung
   }
 
   /**
-   * Liefert true, wenn die Überschrift heading eines Verfügungspunktes nach der
-   * römischen Ziffer die Typischen Merkmale einer Wiedervorlage besitzt, d.h.
-   * z.B. mit den Strings "w.V." oder ähnlichen beginnt.
-   */
-  private static boolean isWiedervorlage(String heading)
-  {
-    final String rest = "(\\s+.*)?";
-    if (heading.matches(zifferPattern + "[wW]\\.?\\s?[vV]\\.?" + rest))
-      return true;
-    if (heading.matches(zifferPattern + "[wW]iedervorlage" + rest))
-      return true;
-    if (heading.matches(zifferPattern + "[aA]blegen" + rest)) return true;
-    if (heading.matches(zifferPattern + "[wW]eglegen" + rest)) return true;
-    if (heading.matches(zifferPattern + "[zZ]um\\s[aA]kt" + rest)) return true;
-    if (heading.matches(zifferPattern + "[zZ]\\.?\\s?[aA]\\.?" + rest))
-      return true;
-    return false;
-  }
-
-  /**
    * Zählt die Anzahl Verfügungspunkte im Dokument vor der Position von
    * range.getStart() (einschließlich) und liefert deren Anzahl zurück, wobei
    * auch ein evtl. vorhandener Rahmen WollMuxVerfuegungspunkt1 mit gezählt
@@ -925,12 +905,6 @@ public class SachleitendeVerfuegung
     XParagraphCursor cursor = UNO.XParagraphCursor(doc.getText()
         .createTextCursorByRange(doc.getText().getStart()));
 
-    // Wenn kein Rahmen WollMuxVerfuegungspunkt1 vorhanden ist, wird der erste
-    // Verfügungspunkt aus dem Textbereich als Verfügungspunkt1 betrachtet. Für
-    // diesen gilt die Sonderregelung, dass die numberOfCopies mit 1 vorbelegt
-    // ist. (siehe auch weiter unten)
-    boolean first = (punkt1 == null);
-
     if (cursor != null)
       do
       {
@@ -941,28 +915,20 @@ public class SachleitendeVerfuegung
         {
           String heading = cursor.getString();
           currentVerfpunkt = new Verfuegungspunkt(heading);
-
-          // Originale und alle Verfügungspunkte mit Zuleitung oder welche, die
-          // Wiedervorlagen sind werden mit numerOfCopies 1 vorbelegt
-          if (first)
-          {
-            first = false;
-            currentVerfpunkt.setNumberOfCopies(1);
-          }
-          if (isWiedervorlage(heading)) currentVerfpunkt.setNumberOfCopies(1);
-          if (isVerfuegungspunktMitZuleitung(cursor))
-            currentVerfpunkt.setNumberOfCopies(1);
-
+          currentVerfpunkt.setMinNumberOfCopies(1);
           verfuegungspunkte.add(currentVerfpunkt);
         }
-        else if (currentVerfpunkt != null && isZuleitungszeile(cursor))
+
+        // Zuleitungszeilen hinzufügen (auch wenn der Paragraph Verfügungspunkt
+        // und Zuleitungszeile zugleich ist)
+        if ((isZuleitungszeile(cursor) || isVerfuegungspunktMitZuleitung(cursor))
+            && currentVerfpunkt != null)
         {
           String zuleit = cursor.getString();
           // nicht leere Zuleitungszeilen zum Verfügungspunkt hinzufügen.
-          if (!zuleit.equals(""))
-            currentVerfpunkt.addZuleitungszeile(cursor.getString());
+          if (!(zuleit.length() == 0))
+            currentVerfpunkt.addZuleitungszeile(zuleit);
         }
-
       } while (cursor.gotoNextParagraph(false));
 
     return verfuegungspunkte;
@@ -992,10 +958,10 @@ public class SachleitendeVerfuegung
     protected Vector zuleitungszeilen;
 
     /**
-     * Enthält die Anzahl der Audrucke, die mit jeder hinzugefügten
-     * Zuleitungszeile erhöht wird, jedoch zusätzlich noch über
+     * Enthält die Anzahl der Ausdrucke, die mindestens ausgedruckt werden
+     * sollen.
      */
-    protected int numberOfCopies;
+    protected int minNumberOfCopies;
 
     /**
      * Erzeugt einen neuen Verfügungspunkt, wobei firstPar der Absatz ist, der
@@ -1009,7 +975,7 @@ public class SachleitendeVerfuegung
     {
       this.heading = heading;
       this.zuleitungszeilen = new Vector();
-      this.numberOfCopies = 0;
+      this.minNumberOfCopies = 0;
     }
 
     /**
@@ -1023,35 +989,36 @@ public class SachleitendeVerfuegung
     public void addZuleitungszeile(String zuleitung)
     {
       zuleitungszeilen.add(zuleitung);
-      numberOfCopies++;
     }
 
     /**
      * Liefert die Anzahl der Ausfertigungen zurück, mit denen der
      * Verfügungspunkt ausgeduckt werden soll; Die Anzahl erhöht sich mit jeder
-     * hinzugefügten Zuleitungszeile, kann aber auch manuell mit
-     * setNumberOfCopies gesetzt werden.
+     * hinzugefügten Zuleitungszeile. Der Mindestwert kann mit
+     * setMinNumberOfCopies gesetzt werden.
      * 
      * @return Anzahl der Ausfertigungen mit denen der Verfügungspunkt gedruckt
      *         werden soll.
      */
     public int getNumberOfCopies()
     {
-      return numberOfCopies;
+      if (zuleitungszeilen.size() > minNumberOfCopies)
+        return zuleitungszeilen.size();
+      else
+        return minNumberOfCopies;
     }
 
     /**
-     * Setzt die Anzahl der Ausfertigungen zurück, mit denen der Verfügungspunkt
-     * ausgeduckt werden soll auf numberOfCopies. Die Anzahl erhöht sich
-     * zusätzlich mit jeder hinzugefügten Zuleitungszeile
+     * Setzt die Anzahl der Ausfertigungen, die Mindestens ausgedruckt werden
+     * sollen, auch dann wenn z.B. keine Zuleitungszeilen vorhanden sind.
      * 
-     * @param numberOfCopies
+     * @param minNumberOfCopies
      *          Anzahl der Ausfertigungen mit denen der Verfügungspunkt
-     *          ausgedruckt werden soll.
+     *          mindestens ausgedruckt werden soll.
      */
-    public void setNumberOfCopies(int numberOfCopies)
+    public void setMinNumberOfCopies(int minNumberOfCopies)
     {
-      this.numberOfCopies = numberOfCopies;
+      this.minNumberOfCopies = minNumberOfCopies;
     }
 
     /**
