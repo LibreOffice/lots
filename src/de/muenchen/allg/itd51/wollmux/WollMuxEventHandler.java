@@ -3970,10 +3970,15 @@ public class WollMuxEventHandler
 
     protected void doit() throws WollMuxFehlerException
     {
-      // Springt zum Dokumentenanfang (STRG+POS1)
-      // muss vor dem folgenden model.setDocumentModified stehen funktioniert
-      // sonst nicht zuverlässig
-      UNO.dispatch(model.doc, ".uno:GoToStartOfDoc");
+      // Springt zum Dokumentenanfang
+      try
+      {
+        model.getViewCursor().gotoRange(model.doc.getText().getStart(), false);
+      }
+      catch (java.lang.Exception e)
+      {
+        Logger.debug(e);
+      }
 
       // Beim Öffnen eines Formulars werden viele Änderungen am Dokument
       // vorgenommen (z.B. das Setzen vieler Formularwerte), ohne dass jedoch
