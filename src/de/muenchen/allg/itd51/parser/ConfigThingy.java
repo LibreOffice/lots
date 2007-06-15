@@ -44,6 +44,8 @@
 * 22.05.2006 | BNK | get und Konsorten erlauben jetzt ein maxlevel Argument
 * 13.11.2006 | BNK | %uXXXX Syntax wird verstanden und stringRepresentation(..,..,..) erzeugt sie.
 * 14.11.2006 | BNK | %-Escapes am Anfang eines Strings werden korrekt geparst.
+* 15.06.2007 | BNK | urlEncode() Sonderbehandlung für Leerzeichen ("%20" statt "+")
+*                  | urlEncode() public gemacht. Nicht wirklich schöne Lösung, aber mei.
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -264,11 +266,14 @@ public class ConfigThingy
   }
 
   /**
-   * Jagt alle in URLs verbotenen Zeichen durch URLEncoder.encode(...,CHARSET)
+   * Jagt alle in URLs verbotenen Zeichen durch URLEncoder,encode(ch,{@link #CHARSET}).
+   * Das Leerzeichen bekommt eine Sonderbehandlung (Umsetzung nach %20), weil
+   * URLEncoder.encode() es nach "+" umsetzen würde, was zumindest bei unseren
+   * Webservern nicht zum gewünschten Ergebnis führt.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
-  private String urlEncode(String url)
+  public static String urlEncode(String url)
   {
     url = url.replaceAll("\\\\","/");
     StringBuffer buffy = new StringBuffer();
@@ -276,7 +281,9 @@ public class ConfigThingy
       for (int i = 0; i < url.length(); ++i)
       {
         char ch = url.charAt(i);
-        if ((('a' <= ch) && (ch <= 'z')) || (('A' <= ch) && (ch <= 'Z')) ||
+        if (ch == ' ')
+          buffy.append("%20");
+        else if ((('a' <= ch) && (ch <= 'z')) || (('A' <= ch) && (ch <= 'Z')) ||
             (('0' <= ch) && (ch <= '9')) ||
             ch == ';' || ch == '/' || ch == '?' || ch == ':' || ch == '@' || 
             ch == '&' || ch == '=' || ch == '+' || ch == '$' || ch == ',' ||
