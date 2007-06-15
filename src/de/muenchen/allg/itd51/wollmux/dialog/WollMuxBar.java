@@ -46,6 +46,7 @@
 *                  | +getBuildInfo(), das die buildinfo-Datei der WollMuxBar.jar ausliest
 * 15.01.2007 | BNK | --load hinzugefuegt
 * 23.03.2007 | BNK | openExt implementiert
+* 15.06.2007 | BNK | Beim Download für openExt URL urlEncoden genau wie ConfigThingy für %include
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -1575,7 +1576,7 @@ public class WollMuxBar
           return;
         }
         
-        URL srcUrl = new URL(WollMuxFiles.getDEFAULT_CONTEXT(), url);
+        URL srcUrl = new URL(WollMuxFiles.getDEFAULT_CONTEXT(), ConfigThingy.urlEncode(url));
         String appArgument = srcUrl.toExternalForm();
         
         if (app.downloadUrl)
