@@ -47,6 +47,7 @@
 * 15.01.2007 | BNK | --load hinzugefuegt
 * 23.03.2007 | BNK | openExt implementiert
 * 15.06.2007 | BNK | Beim Download für openExt URL urlEncoden genau wie ConfigThingy für %include
+* 25.06.2007 | BNK | [R7224]Im Minimize-Modus bei Absenderauswahl nicht minimieren
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -1204,7 +1205,7 @@ public class WollMuxBar
     int index = Integer.parseInt(str[0]);
     String item = str[1];
     eventHandler.handleSelectPALEntry(item, index);
-    minimize();
+    myIsInsideMonitor.delayedMinimize();
   }
   
   /**
@@ -1414,6 +1415,11 @@ public class WollMuxBar
     }
 
     public void mouseExited(MouseEvent e)
+    {
+      delayedMinimize();
+    }
+    
+    public void delayedMinimize()
     {
       if (windowMode != UP_AND_AWAY_WINDOW_MODE) return;
       timer.restart();
