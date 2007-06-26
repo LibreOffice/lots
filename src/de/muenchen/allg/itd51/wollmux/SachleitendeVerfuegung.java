@@ -1197,7 +1197,13 @@ public class SachleitendeVerfuegung
 
     // ensprechende Verfügungspunkte ausblenden
     if (setInvisibleRange != null)
+    {
       UNO.setProperty(setInvisibleRange, "CharHidden", Boolean.TRUE);
+      // Workaround für update Bug
+      // http://qa.openoffice.org/issues/show_bug.cgi?id=78896
+      UNO.setProperty(setInvisibleRange, "CharHidden", Boolean.FALSE);
+      UNO.setProperty(setInvisibleRange, "CharHidden", Boolean.TRUE);
+    }
 
     // Sichtbarkeitsstand der all, draftOnly bzw. notInOriginal-Blöcke und
     // merken.
