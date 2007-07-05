@@ -17,6 +17,7 @@
 * 16.06.2006 | BNK | +hasFocus(), +takeFocus()
 * 29.09.2006 | BNK | Verbessertes Auslesen von ComboBox-Daten 
 * 25.01.2006 | BNK | [R5038]Hintergrundfarbe von Textareas korrekt setzen
+* 05.07.2007 | BNK | [R7464]revalidate() auf Parent nach setVisible()
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -38,6 +39,7 @@ import javax.swing.AbstractButton;
 import javax.swing.DefaultListModel;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JScrollPane;
@@ -252,6 +254,12 @@ public interface UIElement extends Value
     {
       if (getLabel() != null) getLabel().setVisible(vis);
       getComponent().setVisible(vis);
+        /* 
+         * einige Komponenten (z.B. JTextField) tun dies nicht richtig
+         * siehe
+         * http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4403550
+         */
+      ((JComponent)getComponent().getParent()).revalidate();
     }
     
     public abstract String getString();
