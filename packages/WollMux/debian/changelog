@@ -1,3 +1,16 @@
+wollmux (3.7.0-siga-lhm1) siga; urgency=low
+
+    * Vermeidung von potentiellen Fehlern nach Konfigurationsänderungen: Wenn die Konfiguration neu eingelesen werden muss, dann erscheint jetzt eine Meldung mit klaren Anweisungen.
+    * Erweiterung der Funktionalität "Fehlerinfos erstellen", bei der die für die Fehlersuche relevanten Teile der OOo-Konfiguration in die dump-Datei übernommen wird.
+    * Sachleitende-Verfügungen Komfortdruckdialog: Verfügungspunkte werden immer mit 1 (Anzahl Ausfertigungen) vorbelegt, auch wenn in Ihnen keine Zuleitungszeilen vorhanden sind.
+    * Der Download von Dokumenten für externe Anwendungen (z.B. PDFs) aus der WollMuxBar sollte jetzt auch funktionieren, wenn der Quellpfad Umlaute und/oder Leerzeichen enthält.
+    * Die Behandlung von Pfaden mit Leerzeichen bei %include wurde geändert, da die alte Umsetzung mit manchen Servern nicht funktioniert hat. Wenn Sie die Standardkonfiguration verwenden und nicht selbst %includes mit Leerzeichen in der URL eingefügt haben, waren Sie von dem Problem nicht betroffen.
+    * Sachleitende Verfügungen: Durch einen Fehler in OOo wurde beim Drucken des Originals oft ein ungewünschter Abstand zwischen die Zeilen "Mit freundlichen Grüßen" und "im Auftrag" eingefügt. Für diesen Fehler konnte ein Workaround gefunden und implementiert werden, so dass der Fehler jetzt nicht mehr auftritt.
+    * FormularMax 4000: Die Attribute AUTOSEP und SEPARATOR bleiben jetzt auch nach Bearbeitung mit dem FM4000 erhalten.
+    * Probleme beim Ein/Ausblenden von Textfeldern ohne Label behoben. 
+
+ -- Matthias Benkmann <matthias.benkmann@muenchen.de>  Wed, 06 Jul 2007 16:13:16 +0200
+
 wollmux (3.5.0-siga-lhm1) siga; urgency=low
 
     *  Neue Symbolleisten und Menüeinträge in OpenOffice.org Writer

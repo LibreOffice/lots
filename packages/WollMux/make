@@ -19,7 +19,7 @@ action()
         ;;
       
     _all) 
-        BRANCH=siga
+        BRANCH=halut
         action removeold setversion package clean
         BRANCH=limux
         action setversion package clean list
