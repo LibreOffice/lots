@@ -19,6 +19,7 @@
  * 19.10.2006 | BNK | +dumpInfo()
  * 05.12.2006 | BNK | +getClassPath()
  * 20.12.2006 | BNK | CLASSPATH:Falls keine Dateierweiterung angegeben, / ans Ende setzen, weil nur so Verzeichnisse erkannt werden.
+ * 09.07.2006 | BNK | [R7134]Popup, wenn Server langsam
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -45,6 +46,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+
+import javax.swing.JDialog;
+import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 
 import com.sun.star.beans.Property;
 import com.sun.star.container.XNameAccess;
@@ -77,6 +82,17 @@ public class WollMuxFiles
   private static final String C_PROGRAMME_WOLLMUX_WOLLMUX_CONF = "C:\\Programme\\wollmux\\wollmux.conf";
 
   private static final long DATASOURCE_TIMEOUT = 10000;
+  
+  /**
+   * Wenn nach dieser Anzahl Millisekunden die Konfiguration noch nicht vollständig eingelesen
+   * ist, wird ein Popup mit der Meldung {@link #SLOW_SERVER_MESSAGE} gebracht.
+   */
+  private static final long SLOW_SERVER_TIMEOUT = 3000;
+  
+  /**
+   * Siehe {@link #SLOW_SERVER_TIMEOUT}.
+   */
+  private static final String SLOW_SERVER_MESSAGE = "Ihr Vorlagen-Server und/oder Ihre Netzwerkverbindung sind sehr langsam.\nDies kann die Arbeit mit OpenOffice.org stark beeinträchtigen.\nBitte wenden Sie sich an Ihre Systemadministration.";
 
   private static final WollMuxClassLoader classLoader = new WollMuxClassLoader();
 
@@ -151,6 +167,10 @@ public class WollMuxFiles
    */
   public static void setupWollMuxDir()
   {
+    long time = System.currentTimeMillis();
+    SlowServerWatchdog fido = new SlowServerWatchdog(SLOW_SERVER_TIMEOUT);
+    fido.start();
+    
     String userHome = System.getProperty("user.home");
     wollmuxDir = new File(userHome, ".wollmux");
 
@@ -252,6 +272,9 @@ public class WollMuxFiles
     initDebugMode();
 
     setLookAndFeel();
+    
+    fido.dontBark();
+    Logger.debug(".wollmux init time: "+(System.currentTimeMillis() - time)+"ms");
   }
 
   /**
@@ -937,6 +960,57 @@ public class WollMuxFiles
     return "";
   }
 
+  private static class SlowServerWatchdog extends Thread
+  {
+    private long endTime;
+    private boolean[] bark = new boolean[]{true};
+    
+    public SlowServerWatchdog(long timeout)
+    {
+      endTime = System.currentTimeMillis() + timeout;
+      setDaemon(true);
+    }
+    
+    public void run()
+    {
+      while (true)
+      {
+        long wait = endTime - System.currentTimeMillis();
+        if (wait <= 0) break;
+        try
+        {
+          Thread.sleep(wait);
+        }
+        catch (InterruptedException e)
+        {
+        }
+      }
+      
+      synchronized(bark)
+      {
+        if (!bark[0]) return;
+      }
+      
+      SwingUtilities.invokeLater(new Runnable(){
+        public void run()
+        {
+          JOptionPane pane = new JOptionPane(SLOW_SERVER_MESSAGE, JOptionPane.WARNING_MESSAGE, JOptionPane.DEFAULT_OPTION);
+          JDialog dialog = pane.createDialog(null, "Hinweis");
+          dialog.setModal(false);
+          dialog.setVisible(true);
+        }});
+    }
+    
+    public void dontBark()
+    {
+      synchronized(bark)
+      {
+        bark[0] = false;
+      }
+    }
+    
+  }
+  
   private static class WollMuxClassLoader extends URLClassLoader
   {
     public WollMuxClassLoader()
