@@ -20,6 +20,7 @@
  * 05.12.2006 | BNK | +getClassPath()
  * 20.12.2006 | BNK | CLASSPATH:Falls keine Dateierweiterung angegeben, / ans Ende setzen, weil nur so Verzeichnisse erkannt werden.
  * 09.07.2006 | BNK | [R7134]Popup, wenn Server langsam
+ * 09.07.2006 | BNK | [R7137]IP-Adresse in Dumpinfo
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -38,9 +39,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.net.UnknownHostException;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -778,7 +781,27 @@ public class WollMuxFiles
       BufferedWriter out = new BufferedWriter(new FileWriter(dumpFile));
       out.write("Dump time: " + date + "\n");
       out.write(WollMuxSingleton.getInstance().getBuildInfo() + "\n");
-      out.write("DEFAULT_CONTEXT: " + getDEFAULT_CONTEXT() + "\n");
+      StringBuilder buffy = new StringBuilder();
+      
+      /*
+       * IP-Adressen bestimmen
+       */
+      try
+      {
+        InetAddress[] addresses = InetAddress.getAllByName(getDEFAULT_CONTEXT().getHost());
+        for (int i = 0; i < addresses.length; ++i)
+        {
+          if (i > 0) buffy.append(", ");
+          buffy.append(addresses[i].getHostAddress());
+        }
+      }
+      catch (UnknownHostException e)
+      {
+        Logger.error(e);
+        buffy.append("------");
+      }
+      
+      out.write("DEFAULT_CONTEXT: \"" + getDEFAULT_CONTEXT() + "\" (" + buffy + ")\n");
       out.write("CONF_VERSION: "
                 + WollMuxSingleton.getInstance().getConfVersionInfo()
                 + "\n");
