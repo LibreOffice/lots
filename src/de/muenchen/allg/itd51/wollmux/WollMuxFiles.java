@@ -994,6 +994,7 @@ public class WollMuxFiles
       SwingUtilities.invokeLater(new Runnable(){
         public void run()
         {
+          Logger.error(SLOW_SERVER_MESSAGE);
           JOptionPane pane = new JOptionPane(SLOW_SERVER_MESSAGE, JOptionPane.WARNING_MESSAGE, JOptionPane.DEFAULT_OPTION);
           JDialog dialog = pane.createDialog(null, "Hinweis");
           dialog.setModal(false);
