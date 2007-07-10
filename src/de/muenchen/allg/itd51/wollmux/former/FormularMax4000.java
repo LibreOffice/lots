@@ -21,6 +21,7 @@
 * 05.02.2007 | BNK | [R5214]Formularmerkmale entfernen hat fast leere Formularnotiz übriggelassen
 * 11.04.2007 | BNK | [R6176]Nicht-WM-Bookmarks killen
 *                  | Nicht-WM-Bookmarks killen Funktion derzeit auskommentiert wegen Zerstörung von Referenzen
+* 10.07.2007 | BNK | [P1403]abort() verbessert, damit FM4000 gemuellentsorgt werden kann                 
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -1476,6 +1477,18 @@ public class FormularMax4000
   private void abort()
   {
     flushChanges();
+    
+    /*
+     * Wegen folgendem Java Bug (WONTFIX) 
+     *   http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4259304
+     * sind die folgenden 3 Zeilen nötig, damit der FormularMax4000 gc'ed werden
+     * kann. Die Befehle sorgen dafür, dass kein globales Objekt (wie z.B.
+     * der Keyboard-Fokus-Manager) indirekt über den JFrame den FM4000 kennt.  
+     */
+    myFrame.removeWindowListener(oehrchen);
+    myFrame.getContentPane().remove(0);
+    myFrame.setJMenuBar(null);
+    
     myFrame.dispose();
     myFrame = null;
     try{
