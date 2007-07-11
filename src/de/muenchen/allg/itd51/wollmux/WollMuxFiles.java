@@ -85,13 +85,14 @@ public class WollMuxFiles
   private static final String C_PROGRAMME_WOLLMUX_WOLLMUX_CONF = "C:\\Programme\\wollmux\\wollmux.conf";
 
   private static final long DATASOURCE_TIMEOUT = 10000;
-  
+
   /**
-   * Wenn nach dieser Anzahl Millisekunden die Konfiguration noch nicht vollständig eingelesen
-   * ist, wird ein Popup mit der Meldung {@link #SLOW_SERVER_MESSAGE} gebracht.
+   * Wenn nach dieser Anzahl Millisekunden die Konfiguration noch nicht
+   * vollständig eingelesen ist, wird ein Popup mit der Meldung
+   * {@link #SLOW_SERVER_MESSAGE} gebracht.
    */
   private static final long SLOW_SERVER_TIMEOUT = 3000;
-  
+
   /**
    * Siehe {@link #SLOW_SERVER_TIMEOUT}.
    */
@@ -173,7 +174,7 @@ public class WollMuxFiles
     long time = System.currentTimeMillis();
     SlowServerWatchdog fido = new SlowServerWatchdog(SLOW_SERVER_TIMEOUT);
     fido.start();
-    
+
     String userHome = System.getProperty("user.home");
     wollmuxDir = new File(userHome, ".wollmux");
 
@@ -275,9 +276,11 @@ public class WollMuxFiles
     initDebugMode();
 
     setLookAndFeel();
-    
+
     fido.dontBark();
-    Logger.debug(".wollmux init time: "+(System.currentTimeMillis() - time)+"ms");
+    Logger.debug(".wollmux init time: "
+                 + (System.currentTimeMillis() - time)
+                 + "ms");
   }
 
   /**
@@ -782,13 +785,14 @@ public class WollMuxFiles
       out.write("Dump time: " + date + "\n");
       out.write(WollMuxSingleton.getInstance().getBuildInfo() + "\n");
       StringBuilder buffy = new StringBuilder();
-      
+
       /*
        * IP-Adressen bestimmen
        */
       try
       {
-        InetAddress[] addresses = InetAddress.getAllByName(getDEFAULT_CONTEXT().getHost());
+        InetAddress[] addresses = InetAddress.getAllByName(getDEFAULT_CONTEXT()
+            .getHost());
         for (int i = 0; i < addresses.length; ++i)
         {
           if (i > 0) buffy.append(", ");
@@ -800,8 +804,12 @@ public class WollMuxFiles
         Logger.error(e);
         buffy.append("------");
       }
-      
-      out.write("DEFAULT_CONTEXT: \"" + getDEFAULT_CONTEXT() + "\" (" + buffy + ")\n");
+
+      out.write("DEFAULT_CONTEXT: \""
+                + getDEFAULT_CONTEXT()
+                + "\" ("
+                + buffy
+                + ")\n");
       out.write("CONF_VERSION: "
                 + WollMuxSingleton.getInstance().getConfVersionInfo()
                 + "\n");
@@ -986,14 +994,15 @@ public class WollMuxFiles
   private static class SlowServerWatchdog extends Thread
   {
     private long endTime;
-    private boolean[] bark = new boolean[]{true};
-    
+
+    private boolean[] bark = new boolean[] { true };
+
     public SlowServerWatchdog(long timeout)
     {
       endTime = System.currentTimeMillis() + timeout;
       setDaemon(true);
     }
-    
+
     public void run()
     {
       while (true)
@@ -1008,33 +1017,36 @@ public class WollMuxFiles
         {
         }
       }
-      
-      synchronized(bark)
+
+      synchronized (bark)
       {
         if (!bark[0]) return;
       }
-      
-      SwingUtilities.invokeLater(new Runnable(){
+
+      SwingUtilities.invokeLater(new Runnable()
+      {
         public void run()
         {
           Logger.error(SLOW_SERVER_MESSAGE);
-          JOptionPane pane = new JOptionPane(SLOW_SERVER_MESSAGE, JOptionPane.WARNING_MESSAGE, JOptionPane.DEFAULT_OPTION);
+          JOptionPane pane = new JOptionPane(SLOW_SERVER_MESSAGE,
+              JOptionPane.WARNING_MESSAGE, JOptionPane.DEFAULT_OPTION);
           JDialog dialog = pane.createDialog(null, "Hinweis");
           dialog.setModal(false);
           dialog.setVisible(true);
-        }});
+        }
+      });
     }
-    
+
     public void dontBark()
     {
-      synchronized(bark)
+      synchronized (bark)
       {
         bark[0] = false;
       }
     }
-    
+
   }
-  
+
   private static class WollMuxClassLoader extends URLClassLoader
   {
     public WollMuxClassLoader()
