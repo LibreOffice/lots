@@ -174,7 +174,7 @@ public class FunctionSelection implements FunctionSelectionAccess
    * keine Funktion ausgewählt).
    * @param root der Name des Wurzelknotens des zu liefernden ConfigThingys.
    * @param defaultBind falls nicht null, so werden alle unspezifizierten Parameter dieser
-   *        FunctionSelection an VALUE("<defaultBind>") gebunden. 
+   *        FunctionSelection an VALUE("&lt;defaultBind>") gebunden. 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED 
    */

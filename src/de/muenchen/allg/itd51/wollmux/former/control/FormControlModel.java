@@ -12,6 +12,8 @@
 * 29.08.2006 | BNK | kommentiert
 * 16.03.2007 | BNK | +getFormularMax4000()
 *                  | +MyTrafoAccess.updateFieldReferences()
+* 12.07.2007 | BNK | umgestellt auf die Verwendung von IDManager
+*                  | +hasBeenAdded()
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -31,7 +33,9 @@ import java.util.Vector;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.former.Broadcast;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
+import de.muenchen.allg.itd51.wollmux.former.DuplicateIDException;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
+import de.muenchen.allg.itd51.wollmux.former.IDManager;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelection;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionAccess;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionProvider;
@@ -85,8 +89,8 @@ public class FormControlModel
   private String label;
   /** TYPE. Muss eine der *_TYPE Konstanten sein, da mit == verglichen wird. */
   private String type;
-  /** ID. */
-  private String id;
+  /** ID (null => keine ID). */
+  private IDManager.ID id = null;
   /** ACTION. */
   private String action = NO_ACTION;
   /** DIALOG. */
@@ -129,6 +133,10 @@ public class FormControlModel
   
   /**
    * Parst conf als Steuerelement und erzeugt ein entsprechendes FormControlModel.
+   * ACHTUNG! Es wird der {@link IDManager} von formularMax4000 verwendet, um
+   * sicherzustellen, dass keine doppelten IDs vorkommen. Im Falle einer
+   * doppelten ID wird automatisch durch ein Suffix disambiguiert. Nicht-existierende
+   * bzw. leere IDs sind allerdings okay. 
    * @param conf direkter Vorfahre von "TYPE", "LABEL", usw.
    * @param funcSelProv der {@link FunctionSelectionProvider}, der zu PLAUSI und AUTOFILL
    *        passende {@link FunctionSelection}s liefern kann.
@@ -139,7 +147,8 @@ public class FormControlModel
     this.formularMax4000 = formularMax4000;
     label = "Steuerelement";
     type = TEXTFIELD_TYPE;
-    id = "";
+    String idStr = "";
+    ConfigThingy plausiConf = null;
     
     Iterator iter = conf.iterator();
     while (iter.hasNext())
@@ -149,7 +158,7 @@ public class FormControlModel
       String str = attr.toString();
       if (name.equals("LABEL")) label = str;
       else if (name.equals("TYPE")) setType(str);
-      else if (name.equals("ID")) id = str;
+      else if (name.equals("ID")) idStr = str;
       else if (name.equals("ACTION")) action = str;
       else if (name.equals("DIALOG")) dialog = str;
       else if (name.equals("TIP")) tooltip = str;
@@ -162,9 +171,15 @@ public class FormControlModel
       else if (name.equals("MAXSIZE")) try{maxsize = Integer.parseInt(str); }catch(Exception x){}
       else if (name.equals("VALUES")) items = parseValues(attr);
       else if (name.equals("GROUPS")) groups = parseGroups(attr);
-      else if (name.equals("PLAUSI")) plausi = funcSelProv.getFunctionSelection(attr, id);
+      else if (name.equals("PLAUSI")) plausiConf = attr;
       else if (name.equals("AUTOFILL")) autofill = funcSelProv.getFunctionSelection(attr);
     }
+    
+    if (plausiConf != null)
+      plausi = funcSelProv.getFunctionSelection(plausiConf, idStr);
+    
+    if (idStr.length() > 0)
+      makeInactiveID(idStr);
     
     if (isGlue())
       label = "glue";
@@ -203,14 +218,18 @@ public class FormControlModel
   /**
    * Erzeugt ein neues FormControlModel mit den gegebenen Parametern. Alle anderen
    * Eigenschaften erhalten Default-Werte (normalerweise der leere String).
+   * ACHTUNG! Es wird der {@link IDManager} von formularMax4000 verwendet, um
+   * sicherzustellen, dass keine doppelten IDs vorkommen. Im Falle einer
+   * doppelten ID wird automatisch durch ein Suffix disambiguiert. Nicht-existierende
+   * bzw. leere IDs sind allerdings okay.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private FormControlModel(String label, String type, String id, FormularMax4000 formularMax4000)
   {
     this.label = label;
     this.type = type;
-    this.id = id;
     this.formularMax4000 = formularMax4000;
+    makeInactiveID(id);
   }
   
   /**
@@ -279,11 +298,11 @@ public class FormControlModel
   }
   
   /**
-   * Liefert die ID dieses FormControlModels.
+   * Liefert die ID dieses FormControlModels oder null, falls keine gesetzt.
    * @return
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public String getId()
+  public IDManager.ID getId()
   {
     return id;
   }
@@ -498,19 +517,104 @@ public class FormControlModel
   }
   
   /**
-   * Setzt das ID-Attribut.
+   * Setzt das ID-Attribut. Falls id=="", wird die ID gelöscht.
+   * @throws DuplicateIDException falls es bereits ein anderes FormControlModel mit der ID id
+   *                              gibt.
    * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED
    */
-  public void setId(final String id)
+  public void setId(final String id) throws DuplicateIDException
   {
-    final String oldId = this.id;
-    this.id = id;
-    notifyListeners(ID_ATTR, id);
+    IDManager.ID idO = getId();
+    final String oldId = (idO!=null) ? idO.toString() : "";
+    if (id.length() == 0)
+    {
+      if (idO == null) return;
+      idO.deactivate();
+      this.id = null;
+    }
+    else
+    {
+      if (idO == null)
+      {
+        this.id = formularMax4000.getIDManager().getActiveID(FormularMax4000.NAMESPACE_FORMCONTROLMODEL, id);
+      }
+      else
+      {
+        idO.setID(id);
+      }
+    }
+    notifyListeners(ID_ATTR, getId());
     formularMax4000.broadcast(new Broadcast(){
       public void sendTo(BroadcastListener listener)
       {
         listener.broadcastFormControlIdHasChanged(oldId, id);
       }});
+  }
+  
+  /**
+   * Initialisiert das Feld {@link #id} mit einer inaktiven ID basierend auf
+   * idStr (falls noch keine aktive ID idStr existiert, wird idStr
+   * verwendet). Falls idStr == "", wird die ID gelöscht.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private void makeInactiveID(String idStr)
+  {
+    if (idStr.length() == 0)
+    {
+      if (id == null) return;
+      id.deactivate();
+      id = null;
+      return;
+    }
+    IDManager idMan = formularMax4000.getIDManager();
+    String idStr2 = idStr;
+    int count = 1;
+    while(true)
+    {
+      IDManager.ID id = idMan.getID(FormularMax4000.NAMESPACE_FORMCONTROLMODEL, idStr2);
+      if (!id.isActive())
+      {
+        this.id = id;
+        return;
+      }
+      ++count;
+      idStr2 = idStr + count;
+    }
+  }
+  
+  
+  /**
+   * Initialisiert das Feld {@link #id} mit einer eindeutigen ID basierend auf
+   * idStr (falls noch kein FormControlModel mit ID idStr existiert, wird idStr
+   * verwendet). Falls idStr == "", wird die ID gelöscht.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED
+   */
+  private void makeActiveID(String idStr)
+  {
+    if (idStr.length() == 0)
+    {
+      if (id == null) return;
+      id.deactivate();
+      this.id = null;
+      return;
+    }
+    IDManager idMan = formularMax4000.getIDManager();
+    String idStr2 = idStr;
+    int count = 1;
+    while(true)
+    {
+      try
+      {
+        IDManager.ID id = idMan.getActiveID(FormularMax4000.NAMESPACE_FORMCONTROLMODEL, idStr2);
+        this.id = id;
+        return;
+      }
+      catch (DuplicateIDException e)  {}
+      ++count;
+      idStr2 = idStr + count;
+    }
   }
   
   /**
@@ -650,7 +754,9 @@ public class FormControlModel
     ConfigThingy conf = new ConfigThingy("");
     conf.add("LABEL").add(getLabel());
     conf.add("TYPE").add(getType().toLowerCase());
-    conf.add("ID").add(getId());
+    IDManager.ID id = getId();
+    if (id != null)
+      conf.add("ID").add(id.toString());
     conf.add("TIP").add(getTooltip());
     conf.add("READONLY").add(""+getReadonly());
     if (isCombo()) conf.add("EDIT").add(""+getEditable());
@@ -691,8 +797,11 @@ public class FormControlModel
     if (!autofill.isNone())
       conf.addChild(autofill.export("AUTOFILL"));
     
+    String idStr = null;
+    if (id != null)
+      idStr = id.toString();
     if (!plausi.isNone())
-      conf.addChild(plausi.export("PLAUSI", getId()));
+      conf.addChild(plausi.export("PLAUSI", idStr));
     
     return conf; 
   }
@@ -713,6 +822,16 @@ public class FormControlModel
   }
   
   /**
+   * Sagt dem Model, dass es einem Container hinzugefügt wurde.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public void hasBeenAdded()
+  {
+    makeActiveID((id == null)? "":id.toString());
+  }
+  
+  /**
    * Benachrichtigt alle auf diesem Model registrierten Listener, dass das Model aus
    * seinem Container entfernt wurde. ACHTUNG! Darf nur von einem entsprechenden Container
    * aufgerufen werden, der das Model enthält.
@@ -722,6 +841,7 @@ public class FormControlModel
    * TESTED */
   public void hasBeenRemoved()
   {
+    if (id != null) id.deactivate();
     Iterator iter = listeners.iterator();
     while (iter.hasNext())
     {

@@ -219,6 +219,13 @@ public class FormularMax4000
    * ein insertFormValue mit Gender-TRAFO erzeugt werden soll.
    */
   private static final String GENDER_PREFIX = "gender:";
+  
+  /**
+   * Der {@link IDManager}-Namensraum für die IDs von {@link FormControlModel}s.
+   */
+  public static final Integer NAMESPACE_FORMCONTROLMODEL = new Integer(0);
+  
+  
 
   /**
    * ActionListener für Buttons mit der ACTION "abort". 
@@ -268,6 +275,12 @@ public class FormularMax4000
    * Das TextDocumentModel, zu dem das Dokument doc gehört.
    */
   private TextDocumentModel doc;
+  
+  /**
+   * Verwaltet die IDs von Objekten.
+   * @see #NAMESPACE_FORMCONTROLMODEL
+   */
+  private IDManager idManager = new IDManager();
   
   /**
    * Verwaltet die FormControlModels dieses Formulars.
@@ -389,6 +402,13 @@ public class FormularMax4000
   {
     writeChangesTimer.restart();
   }
+  
+  /**
+   * Liefert den {@link IDManager}, der für Objekte im Formular verwendet wird.
+   * @see #NAMESPACE_FORMCONTROLMODEL
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public IDManager getIDManager() {return idManager;}
   
   /**
    * Startet eine Instanz des FormularMax 4000 für das Dokument des TextDocumentModels model.

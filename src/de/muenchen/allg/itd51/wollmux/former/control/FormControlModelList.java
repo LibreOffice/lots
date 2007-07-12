@@ -14,6 +14,7 @@
 * 10.09.2006 | BNK | automatisch Tab einfügen, wenn nach Button ein in der Button-Zeile
 *                    unsinniges Element auftaucht.
 * 16.03.2007 | BNK | Für jedes hinzugekommene FormControlModel die ID broadcasten. 
+* 12.07.2007 | BNK | Umgestellt auf Verwendung von IDManager.
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -31,6 +32,7 @@ import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.former.Broadcast;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
+import de.muenchen.allg.itd51.wollmux.former.IDManager;
 
 /**
  * Verwaltet eine Liste von FormControlModels.
@@ -117,21 +119,22 @@ public class FormControlModelList
   
   /**
    * Macht aus str einen Identifier, der noch von keinem FormControlModel dieser Liste
-   * verwendet wird und liefert diesen Identifier zurück.
+   * verwendet wird und liefert diesen Identifier zurück. Falls str == "" wird str zurückgeliefert.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public String makeUniqueId(String str)
   {
+    if (str.equals("")) return str;
     Iterator iter = models.iterator();
     int count = 0;
     while (iter.hasNext())
     {
       FormControlModel model = (FormControlModel)iter.next();
-      String id = model.getId();
-      if (id.startsWith(str))
+      IDManager.ID id = model.getId();
+      if (id != null && id.toString().startsWith(str))
       {
         if (count == 0) ++count;
-        String suffix = id.substring(str.length());
+        String suffix = id.toString().substring(str.length());
         try{
           int idx = Integer.parseInt(suffix);
           if (idx >= count) count = idx + 1;
@@ -155,12 +158,13 @@ public class FormControlModelList
   {
     if (idx < 0) idx = models.size();
     models.add(idx, model);
+    model.hasBeenAdded();
     
     notifyListeners(model, idx);
     formularMax4000.broadcast(new Broadcast(){
       public void sendTo(BroadcastListener listener)
       {
-        listener.broadcastNewFormControlId(model.getId());
+        listener.broadcastNewFormControlId((model.getId() == null) ? "" : model.getId().toString());
       }});
     
     enforceMaxModelsPerTab();
@@ -347,7 +351,7 @@ public class FormControlModelList
    */
   private ConfigThingy outputTab(FormControlModel tab, ConfigThingy conf)
   {
-    conf = conf.add(tab.getId());
+    conf = conf.add((tab.getId() == null)? "Reiter" : tab.getId().toString());
     conf.add("TITLE").add(tab.getLabel());
     conf.add("CLOSEACTION").add(tab.getAction());
     conf.add("TIP").add(tab.getTooltip());

@@ -45,7 +45,9 @@ import javax.swing.text.JTextComponent;
 
 import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastObjectSelection;
+import de.muenchen.allg.itd51.wollmux.former.DuplicateIDException;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
+import de.muenchen.allg.itd51.wollmux.former.IDManager;
 import de.muenchen.allg.itd51.wollmux.former.view.LineView;
 
 
@@ -200,13 +202,21 @@ public class OneFormControlLineView extends LineView
    */
   private JComponent makeIdView()
   {
-    idTextfield = new JTextField(model.getId(), ID_COLUMNS);
+    IDManager.ID id = model.getId();
+    idTextfield = new JTextField((id == null) ? "":id.toString(), ID_COLUMNS);
+    final Color defaultBackground = idTextfield.getBackground();
     Document tfdoc = idTextfield.getDocument();
     tfdoc.addDocumentListener(new DocumentListener(){
       public void update()
       {
         ignoreAttributeChanged = true;
-        model.setId(idTextfield.getText());
+        try{
+          model.setId(idTextfield.getText());
+          idTextfield.setBackground(defaultBackground);
+        }catch(DuplicateIDException x)
+        {
+          idTextfield.setBackground(Color.RED);
+        }
         ignoreAttributeChanged = false;
       }
 

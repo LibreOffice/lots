@@ -1,0 +1,232 @@
+/*
+* Dateiname: IDManager.java
+* Projekt  : WollMux
+* Funktion : Verwaltet Objekte, die ID-Strings repräsentieren.
+* 
+* Copyright: Landeshauptstadt München
+*
+* Änderungshistorie:
+* Datum      | Wer | Änderungsgrund
+* -------------------------------------------------------------------
+* 11.07.2007 | BNK | Erstellung
+* -------------------------------------------------------------------
+*
+* @author Matthias Benkmann (D-III-ITD 5.1)
+* @version 1.0
+* 
+*/
+package de.muenchen.allg.itd51.wollmux.former;
+
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Vector;
+
+/**
+ * verwaltet Objekte, die ID-Strings repräsentieren. Die ID-Objekte können an
+ * mehreren Stellen verwendet werden und da jedes ID-Objekt alle seine Verwender
+ * kennt (wenn sie sich als Listener registrieren) können Änderungen an der ID 
+ * allen Verwendern mitgeteilt
+ * werden.
+ *
+ * @author Matthias Benkmann (D-III-ITD 5.1)
+ */
+public class IDManager
+{
+  private Map mapNamespace2mapString2ID = new HashMap();
+  
+  /**
+   * Liefert ein {@link IDManager.ID}-Objekt zur String-ID id im Namensraum
+   * namespace. Falls dieser Manager
+   * zu dieser String-ID noch kein Objekt hatte, wird ein neues angelegt, ansonsten
+   * das bereits existierende zurückgeliefert. Wird ein neues ID-Objekt angelegt,
+   * so ist dieses inaktiv (siehe {@link IDManager.ID#isActive()}). Diese Funktion
+   * darf also nur von Aufrufern verwendet werden, die die ID als Referenz auf ein
+   * anderes Objekt benötigen. Aufrufer, die sich selbst mit der ID identifizieren
+   * wollen müssen {@link #getActiveID(Object, String)} verwenden. 
+   * @param namespace ein beliebiger Identifikator für den gewünschten Namensraum.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED
+   */
+  public ID getID(Object namespace, String id)
+  {
+    if (!mapNamespace2mapString2ID.containsKey(namespace))
+      mapNamespace2mapString2ID.put(namespace, new HashMap());
+    
+    Map mapString2ID = (Map)mapNamespace2mapString2ID.get(namespace);
+    
+    if (!mapString2ID.containsKey(id))
+      mapString2ID.put(id, new ID(mapString2ID, id));
+    
+    return (ID)mapString2ID.get(id);
+  }
+  
+  /**
+   * Falls im angegebenen namespace bereits ein ID Objekt für die String-ID id
+   * existiert und dieses {@link IDManager.ID#isActive()} aktiv ist, so wird eine
+   * {@link DuplicateIDException} geworfen, ansonsten wird das existierende ID Objekt
+   * aktiviert oder (falls noch keins existierte) ein aktiviertes ID Objekt neu 
+   * angelegt und dann zurückgeliefert. Diese Funktion ist dafür vorgesehen, von
+   * Aufrufern verwendet zu werden, die sich selbst mit der ID identifizieren wollen.
+   * Aufrufer, die die ID als Referenz auf ein anderes Objekt verwenden, müssen
+   * {@link #getID(Object, String)} verwenden.
+   * @param namespace ein beliebiger Identifikator für den gewünschten Namensraum.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public ID getActiveID(Object namespace, String id) throws DuplicateIDException
+  {
+    ID idO = getID(namespace, id);
+    idO.activate();
+    return idO;
+  }
+  
+  /**
+   * Ein Objekt, das eine String-ID repräsentiert.
+   *
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public static class ID
+  {
+    /**
+     * Die String-ID, die dieses Objekt repräsentiert.
+     */
+    private String id;
+    
+    /**
+     * Die Map des verwaltenden IDManagers, in der diese ID gespeichert ist.
+     * Wird verwendet, um Kollisionen zu überprüfen und das Mapping anzupassen,
+     * wenn der ID-String dieses Objekts geändert wird.
+     */
+    private Map mapString2ID;
+    
+    /**
+     * true bedeutet, dass irgendwo ein Objekt tatsächlich verwendet wird, das sich
+     * mit dieser ID identifiziert. False bedeutet, dass alle Verwender dieser ID
+     * damit nur ein anderes Objekt referenzieren wollen (das derzeit nicht existiert).
+     */
+    private boolean active = false;
+    
+    /**
+     * Liste von {@link WeakReference}s auf {@link IDManager.IDChangeListener}.
+     */
+    private List listeners = new Vector();
+    
+    /**
+     * Erstellt ein neues ID Objekt, das inaktiv (siehe {@link #isActive()} ist.
+     */
+    private ID(Map mapString2ID, String id)
+    {
+      this.id = id;
+      this.mapString2ID = mapString2ID;
+    }
+    
+    /**
+     * Liefert true, wenn irgendwo ein Objekt tatsächlich verwendet wird, das sich
+     * mit dieser ID identifiziert. False bedeutet, dass alle Verwender dieser ID
+     * damit nur ein anderes Objekt referenzieren wollen (das derzeit nicht existiert).
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
+    public boolean isActive() { return active;}
+    
+    /**
+     * Setzt diese ID auf {@link #isActive() aktiv} oder wirft 
+     * {@link DuplicateIDException}, falls sie es schon ist.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
+    public void activate() throws DuplicateIDException
+    {
+      if (isActive()) throw new DuplicateIDException();
+      active = true;
+    }
+    
+    /**
+     * Setzt diese ID auf {@link #isActive() inaktiv}.
+     * 
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
+    public void deactivate()
+    {
+      active = false;
+    }
+    
+    /**
+     * listen wird benachrichtigt, wenn sich dieses ID-Objekt ändert.
+     * ACHTUNG! listen wird nur über eine {@link java.lang.ref.WeakReference}
+     * referenziert. Daher ist eine removeIDChangeListener() Methode
+     * überflüssig. Ist listen bereits registriert, wird nichts getan.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     * TODO Testen
+     */
+    public void addIDChangeListener(IDChangeListener listen)
+    {
+      Iterator iter = listeners.iterator();
+      while (iter.hasNext())
+      {
+        Reference ref = (Reference)iter.next();
+        IDChangeListener listen2 = (IDChangeListener)ref.get();
+        if (listen2 == null) 
+          iter.remove();
+        else
+          if (listen2 == listen) return;
+      }
+      listeners.add(new WeakReference(listen));
+    }
+    
+    /**
+     * Ändert die String-ID dieses Objekts auf newID und benachrichtigt alle
+     * {@link IDManager.IDChangeListener}. Falls newID == {@link #getID()}, so
+     * passiert nichts, es werden keine Listener benachrichtigt und es gibt keine
+     * Exception. ACHTUNG! Normalerweise darf diese Funktion nur von dem Objekt aufgerufen
+     * werden, das sich mit dieser ID identifiziert, nicht von Objekten die diese ID nur
+     * als Referenz verwenden.
+     * @see #addIDChangeListener(IDChangeListener)
+     * @throws DuplicateIDException wenn newID bereits im Namensraum dieses
+     *         ID-Objekts verwendet wird. 
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     * TESTED
+     */
+    public void setID(String newID) throws DuplicateIDException
+    {
+      if (newID.equals(id)) return;
+      if (mapString2ID.containsKey(newID)) throw new DuplicateIDException("Kollision beim Versuch ID von \""+id+"\" auf \""+newID+"\" zu ändern");
+      mapString2ID.remove(id);
+      id = newID;
+      mapString2ID.put(id, this);
+      Iterator iter = listeners.iterator();
+      while (iter.hasNext())
+      {
+        Reference ref = (Reference)iter.next();
+        IDChangeListener listen = (IDChangeListener)ref.get();
+        if (listen == null) 
+          iter.remove();
+        else
+          listen.idHasChanged(this);
+      }
+    }
+    
+    /**
+     * Liefert die String-ID zurück, die dieses Objekt repräsentiert.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
+    public String getID() {return id;}
+    /**
+     * wie {@link #getID()}.
+     */
+    public String toString() {return id;}
+  }
+  
+  /**
+   * Ein IDChangeListener wird benachrichtigt, wenn sich ein
+   * {@link IDManager.ID} Objekt ändert.
+   *
+   * @see IDManager.ID#addIDChangeListener(IDChangeListener)
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public interface IDChangeListener
+  {
+    public void idHasChanged(ID id);
+  }
+}

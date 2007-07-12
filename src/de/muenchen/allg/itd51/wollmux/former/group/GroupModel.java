@@ -93,7 +93,6 @@ public class GroupModel
    *        dieser Gruppe.
    * @param formularMax4000 der {@link FormularMax4000} zu dem diese Gruppe gehört.
    * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TODO Testen
    */
   public GroupModel(String name, FunctionSelection condition, FormularMax4000 formularMax4000)
   {
