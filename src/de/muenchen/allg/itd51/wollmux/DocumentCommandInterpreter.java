@@ -846,6 +846,9 @@ public class DocumentCommandInterpreter
     private void insertDocumentFromURL(DocumentCommand cmd, URL url)
         throws IllegalArgumentException, java.io.IOException, IOException
     {
+      // fromUrl durch urlEncode jagen um einheitliches Encoding von url sicher
+      // zu stellen.
+      url = new URL(ConfigThingy.urlEncode(url.toExternalForm()));
 
       // Workaround: OOo friert ein, wenn ressource bei insertDocumentFromURL
       // nicht auflösbar. http://qa.openoffice.org/issues/show_bug.cgi?id=57049
