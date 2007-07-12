@@ -469,7 +469,7 @@ public class WollMuxSingleton implements XPALProvider
       String parsedUrl;
       try
       {
-        URL url = new URL(context, urlStr);
+        URL url = new URL(context, ConfigThingy.urlEncode(urlStr));
         parsedUrl = UNO.getParsedUNOUrl(url.toExternalForm()).Complete;
       }
       catch (java.lang.Exception x)

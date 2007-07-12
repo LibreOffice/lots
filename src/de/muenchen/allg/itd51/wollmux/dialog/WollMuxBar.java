@@ -1582,7 +1582,7 @@ public class WollMuxBar
           return;
         }
         
-        URL srcUrl = new URL(WollMuxFiles.getDEFAULT_CONTEXT(), ConfigThingy.urlEncode(url));
+        URL srcUrl = WollMuxFiles.makeURL(url);
         String appArgument = srcUrl.toExternalForm();
         
         if (app.downloadUrl)

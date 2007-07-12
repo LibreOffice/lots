@@ -342,6 +342,17 @@ public class WollMuxFiles
   {
     return defaultContextURL;
   }
+  
+  /**
+   * Liefert eine URL zum String urlStr, wobei relative Pfade relativ zum DEFAULT_CONTEXT
+   * aufgelöst werden.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * @throws MalformedURLException falls urlStr keine legale URL darstellt.
+   */
+  public static URL makeURL(String urlStr) throws MalformedURLException
+  {
+    return new URL(WollMuxFiles.getDEFAULT_CONTEXT(), ConfigThingy.urlEncode(urlStr));
+  }
 
   /**
    * Initialisiert den DJ wenn nötig und liefert ihn dann zurück (oder null,
@@ -576,7 +587,7 @@ public class WollMuxFiles
         // erkannt werden.
         try
         {
-          URL url = new URL(getDEFAULT_CONTEXT(), urlStr);
+          URL url = WollMuxFiles.makeURL(urlStr);
           classLoader.addURL(url);
         }
         catch (MalformedURLException e)

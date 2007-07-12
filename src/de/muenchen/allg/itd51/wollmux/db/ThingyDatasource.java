@@ -68,7 +68,7 @@ public class ThingyDatasource extends RAMDatasource
     
     try
     {
-      URL url = new URL(context, urlStr);
+      URL url = new URL(context, ConfigThingy.urlEncode(urlStr));
       ConfigThingy conf = new ConfigThingy(name, url);
       
       ConfigThingy schemaDesc;

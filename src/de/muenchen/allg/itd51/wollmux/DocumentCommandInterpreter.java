@@ -740,7 +740,7 @@ public class DocumentCommandInterpreter
           String urlStr = (String) iter.next();
           try
           {
-            URL url = new URL(mux.getDEFAULT_CONTEXT(), urlStr);
+            URL url = WollMuxFiles.makeURL(urlStr);
 
             Logger.debug("Füge Textfragment \""
                          + cmd.getFragID()
@@ -809,7 +809,7 @@ public class DocumentCommandInterpreter
         {
           Logger.debug("Füge Textfragment von URL \"" + urlStr + "\" ein.");
 
-          insertDocumentFromURL(cmd, new URL(urlStr));
+          insertDocumentFromURL(cmd, WollMuxFiles.makeURL(urlStr));
         }
         catch (java.lang.Exception e)
         {
@@ -846,10 +846,6 @@ public class DocumentCommandInterpreter
     private void insertDocumentFromURL(DocumentCommand cmd, URL url)
         throws IllegalArgumentException, java.io.IOException, IOException
     {
-      // fromUrl durch urlEncode jagen um einheitliches Encoding von url sicher
-      // zu stellen.
-      url = new URL(ConfigThingy.urlEncode(url.toExternalForm()));
-
       // Workaround: OOo friert ein, wenn ressource bei insertDocumentFromURL
       // nicht auflösbar. http://qa.openoffice.org/issues/show_bug.cgi?id=57049
       // Hier wird versucht, die URL über den java-Klasse url aufzulösen und bei

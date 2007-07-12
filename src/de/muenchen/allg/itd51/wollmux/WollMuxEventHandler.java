@@ -1379,9 +1379,9 @@ public class WollMuxEventHandler
           URL url;
           try
           {
-            url = new URL(mux.getDEFAULT_CONTEXT(), urlStr);
+            url = WollMuxFiles.makeURL(urlStr);
             urlStr = UNO.getParsedUNOUrl(url.toExternalForm()).Complete;
-            url = new URL(urlStr);
+            url = WollMuxFiles.makeURL(urlStr);
             WollMuxSingleton.checkURL(url);
           }
           catch (MalformedURLException e)
