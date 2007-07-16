@@ -227,11 +227,6 @@ public class GroupModel
       condition.setParameterValue(paramName, paramValue);
       formularMax4000.documentNeedsUpdating();
     }
-    public void updateFieldReferences(String oldId, String newId)
-    {
-      condition.updateFieldReferences(oldId, newId);
-      formularMax4000.documentNeedsUpdating();
-    }
     public String[] getParameterNames()
     {
       return condition.getParameterNames();

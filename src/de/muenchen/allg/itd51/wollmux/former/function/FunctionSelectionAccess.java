@@ -134,11 +134,5 @@ public interface FunctionSelectionAccess
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void setExpertFunction(ConfigThingy funConf);
-  
-  /**
-   * Alle Referenzen auf das Felder oldId werden geändert auf newId. 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  public void updateFieldReferences(String oldId, String newId);
 
 }

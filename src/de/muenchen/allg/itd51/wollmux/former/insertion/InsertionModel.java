@@ -507,11 +507,6 @@ public class InsertionModel
       trafo.setParameterValue(paramName, paramValue);
       formularMax4000.documentNeedsUpdating();
     }
-    public void updateFieldReferences(String oldId, String newId)
-    {
-      trafo.updateFieldReferences(oldId, newId);
-      formularMax4000.documentNeedsUpdating();
-    }
 
     public String[] getParameterNames()
     {

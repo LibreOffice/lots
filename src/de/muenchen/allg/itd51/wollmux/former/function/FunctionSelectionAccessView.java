@@ -30,8 +30,6 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.StringReader;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Vector;
 
 import javax.swing.Box;
 import javax.swing.JComboBox;
@@ -46,6 +44,8 @@ import javax.swing.SwingConstants;
 import javax.swing.Timer;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
@@ -53,8 +53,7 @@ import javax.swing.text.JTextComponent;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.Logger;
-import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
-import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
+import de.muenchen.allg.itd51.wollmux.former.IDManager;
 import de.muenchen.allg.itd51.wollmux.former.view.View;
 import de.muenchen.allg.itd51.wollmux.func.Function;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
@@ -115,17 +114,14 @@ public class FunctionSelectionAccessView implements View
   private JComboBox functionSelectorBox;
   
   /**
-   * Die Liste aller JComboBoxes zur Festlegung von Parameterwerten (siehe {@link #buildParameterBox(String, ParamValue)}).
+   * Der {@link IDManager}, dessen aktive IDs für Feldreferenzen auswählbar sind.
    */
-  private List parameterBoxes = new Vector(1);
+  private IDManager idManager;
   
   /**
-   * Liste von {@link StringBuilder} Objekten (ACHTUNG: global für alle FunctionSelectionAccessViews),
-   * die alle momentan verfügbaren IDs für 
-   * Feldreferenzen in den Parameter-Komboboxen darstellen, wobei jede ID von "[" und "]"
-   * umschlossen ist.
+   * Der Namensraum aus dem die IDs von {@link #idManager} genommen werden.
    */
-  private static List fieldIds = new Vector(1);
+  private Object namespace;
   
   /**
    * Wurde die manuelle Eingabe eines Stringliterals als Funktion gewählt, so erfolgt die
@@ -151,18 +147,21 @@ public class FunctionSelectionAccessView implements View
    * geparst werden muss. 
    */
   private boolean expertFunctionIsComplex;
-
+  
   /**
    * Erzeugt eine neue View über die funcSel angezeigt und bearbeitet werden kann.
    * @param funcLib die Funktionsbibliothek, deren Funktionen auswählbar sein sollen.
+   * @param idManager Als Feldreferenzen sind alle aktiven IDs dieses {@link IDManager}s auswählbar.
+   * @param namespace der Namensraum aus dem die IDs von idManager genommen werden sollen.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
-  public FunctionSelectionAccessView(FunctionSelectionAccess funcSel, FunctionLibrary funcLib, FormularMax4000 formularMax4000)
+  public FunctionSelectionAccessView(FunctionSelectionAccess funcSel, FunctionLibrary funcLib, IDManager idManager, Object namespace)
   {
     this.funcSel = funcSel;
     this.funcLib = funcLib;
-    formularMax4000.addBroadcastListener(new MyBroadcastListener());
+    this.idManager = idManager;
+    this.namespace = namespace;
     myPanel = new JPanel(new GridBagLayout());
     
     updateExpertFunctionTimer = new Timer(250, new ActionListener()
@@ -186,8 +185,6 @@ public class FunctionSelectionAccessView implements View
   private void buildPanel()
   {
     myPanel.removeAll();
-    parameterBoxes.clear();
-    
     
     //  int gridx, int gridy, int gridwidth, int gridheight, double weightx, double weighty, int anchor,          int fill,                  Insets insets, int ipadx, int ipady)
     GridBagConstraints gbcLabelLeft = new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.NONE,       new Insets(TF_BORDER,TF_BORDER,TF_BORDER,TF_BORDER),0,0);
@@ -296,37 +293,35 @@ public class FunctionSelectionAccessView implements View
   private JComboBox buildParameterBox(final String paramName, ParamValue startValue)
   {
     final JComboBox combo = new JComboBox();
-    parameterBoxes.add(combo);
     combo.setEditable(true);
+    
     combo.addItem(UNSPECIFIED_ITEM);
-    String startStr = startValue.getString();
-    String brackStr = null;
-    if (startStr != null) brackStr = "[" + startStr + "]";
-    Iterator iter = fieldIds.iterator();
-    int selectedIndex = -1;
-    while (iter.hasNext()) 
+    combo.setSelectedIndex(0);
+    if (startValue.isLiteral())
     {
-      Object item = iter.next();
-      if (item.toString().equals(brackStr)) selectedIndex = combo.getItemCount();
-      combo.addItem(item);
+      String lit = startValue.getString();
+      combo.addItem(lit);
+      combo.setSelectedIndex(combo.getItemCount() - 1);
     }
-    JTextComponent tc = ((JTextComponent)combo.getEditor().getEditorComponent());
-    if (startValue.isUnspecified())
-      combo.setSelectedItem(UNSPECIFIED_ITEM);
     else if (startValue.isFieldReference())
     {
-      if (selectedIndex < 0)
-      {
-        selectedIndex = combo.getItemCount();
-        StringBuilder buffy = new StringBuilder(brackStr);
-        fieldIds.add(buffy);
-        combo.addItem(buffy);
-      }
-      combo.setSelectedIndex(selectedIndex);
+      String brackId = "[" + startValue.getString() + "]";
+      combo.addItem(brackId);
+      combo.setSelectedIndex(combo.getItemCount() - 1);
     }
-    else if (startValue.isLiteral())
-      combo.setSelectedItem(startValue.getString());
-      
+    
+    updateParameterBox(combo);
+    
+    combo.addPopupMenuListener(new PopupMenuListener(){
+      public void popupMenuWillBecomeVisible(PopupMenuEvent e)
+      {
+        updateParameterBox(combo);
+      }
+      public void popupMenuWillBecomeInvisible(PopupMenuEvent e)  {}
+      public void popupMenuCanceled(PopupMenuEvent e)  {}
+    });
+    
+    JTextComponent tc = ((JTextComponent)combo.getEditor().getEditorComponent());
     tc.getDocument().addDocumentListener(new DocumentListener(){
       private void update()
       {
@@ -336,16 +331,19 @@ public class FunctionSelectionAccessView implements View
           if (newValue.equals(UNSPECIFIED_ITEM))
             funcSel.setParameterValue(paramName, ParamValue.unspecified());
           else
-          {
+          { 
             boolean isLiteral = true;
-            for (int i = 0; i < combo.getItemCount(); ++i)
+            
+            //wenn newValue die Form [...] hat (also potentiell eine Feldreferenz ist)
+            if (newValue.length() >2 && newValue.charAt(0) == '[' 
+                                     && newValue.charAt(newValue.length() - 1) == ']')
             {
-              if (combo.getItemAt(i).toString().equals(newValue))
+              String idStr = newValue.substring(1, newValue.length() - 1); // "[" und "]" entfernen
+              IDManager.ID id = idManager.getExistingID(namespace, idStr);
+              if (id != null && id.isActive())
               {
-                String id = newValue.substring(1, newValue.length() - 1); // "[" und "]" entfernen
                 funcSel.setParameterValue(paramName, ParamValue.field(id));
                 isLiteral = false;
-                break;
               }
             }
             
@@ -363,6 +361,51 @@ public class FunctionSelectionAccessView implements View
      });
     
     return combo;
+  }
+  
+  /**
+   * Aktualisiert die Liste der Einträge in combo, so dass sie den aktiven IDs von
+   * {@link #idManager} entspricht.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED
+   */
+  private void updateParameterBox(JComboBox combo)
+  {
+    Document comboDoc = ((JTextComponent)combo.getEditor().getEditorComponent()).getDocument();
+    String currentValue = "";
+    try
+    {
+      currentValue = comboDoc.getText(0,comboDoc.getLength());
+    }
+    catch (BadLocationException e)
+    {
+      Logger.error(e);
+    }
+    combo.removeAllItems();
+    combo.addItem(UNSPECIFIED_ITEM);
+    combo.setSelectedIndex(0);
+    boolean found = currentValue.equals(UNSPECIFIED_ITEM);
+    Iterator iter = idManager.getAllIDs(namespace).iterator();
+    while (iter.hasNext())
+    {
+      IDManager.ID id = (IDManager.ID)iter.next();
+      if (id.isActive())
+      {
+        String brackId = "[" + id.toString() + "]";
+        combo.addItem(brackId);
+        if (currentValue.equals(brackId))
+        {
+          combo.setSelectedIndex(combo.getItemCount() - 1);
+          found = true;
+        }
+      }
+    }
+    
+    if (!found)
+    {
+      combo.addItem(currentValue);
+      combo.setSelectedIndex(combo.getItemCount() - 1);
+    }
   }
   
   /**
@@ -521,64 +564,4 @@ public class FunctionSelectionAccessView implements View
     return myPanel;
   }
   
-  private class MyBroadcastListener extends BroadcastListener
-  {
-    /**
-     * Ein FormControlModel hat seine ID von oldId auf newId geändert. 
-     * @author Matthias Benkmann (D-III-ITD 5.1)
-     */
-    public void broadcastFormControlIdHasChanged(String oldId, String newId) 
-    {
-      funcSel.updateFieldReferences(oldId, newId);
-      String bOldId = "[" + oldId + "]";
-      String bNewId = "[" + newId + "]";
-      Iterator iter = fieldIds.iterator();
-      boolean finished = false;
-      while (!finished && iter.hasNext())
-      {
-        StringBuilder buffy = (StringBuilder)iter.next();
-        if (buffy.lastIndexOf(bOldId) == 0)
-        {
-          buffy.delete(0, buffy.length());
-          buffy.append(bNewId);
-          finished = true; //nur einen Eintrag umbenennen, falls es mehrere gibt, damit nicht Auswahlmöglichkeiten verloren gehen
-        }
-        if (buffy.lastIndexOf(bNewId) == 0)
-        {
-          Iterator iter2 = parameterBoxes.iterator();
-          while (iter2.hasNext())
-          {
-            JComboBox box = (JComboBox)iter2.next();
-            Document comboDoc = ((JTextComponent)box.getEditor().getEditorComponent()).getDocument();
-            try{
-              if (bOldId.equals(comboDoc.getText(0,comboDoc.getLength())))
-              {
-                box.setSelectedItem("");
-                box.setSelectedItem(buffy);
-              }
-            }catch(Exception x){Logger.error(x);}
-          }
-        }
-      }
-    }
-    
-    /**
-     * Ein neues FormControlModel mit ID id ist hinzugekommen. 
-     * @author Matthias Benkmann (D-III-ITD 5.1)
-     * TESTED */
-    public void broadcastNewFormControlId(String id) 
-    {
-      if (id.length() == 0) return;
-      String brackId = "[" + id + "]";
-      Iterator iter = fieldIds.iterator();
-      while (iter.hasNext()) if (brackId.equals(iter.next().toString())) return;
-      fieldIds.add(new StringBuilder(brackId));
-      iter = parameterBoxes.iterator();
-      while (iter.hasNext())
-      {
-        JComboBox box = (JComboBox)iter.next();
-        box.addItem(brackId);
-      }
-    }
-  }
 }

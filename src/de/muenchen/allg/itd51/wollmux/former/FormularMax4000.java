@@ -783,7 +783,7 @@ public class FormularMax4000
     {
       tempConf = new ConfigThingy("Funktionen");
     }
-    functionSelectionProvider = new FunctionSelectionProvider(functionLibrary, tempConf);
+    functionSelectionProvider = new FunctionSelectionProvider(functionLibrary, tempConf, getIDManager(), NAMESPACE_FORMCONTROLMODEL);
     
     tempConf = conf.query("Formular").query("Sichtbarkeit");
     if (tempConf.count() >= 1)
@@ -794,7 +794,7 @@ public class FormularMax4000
     {
       tempConf = new ConfigThingy("Sichtbarkeit");
     }
-    visibilityFunctionSelectionProvider = new FunctionSelectionProvider(null, tempConf);
+    visibilityFunctionSelectionProvider = new FunctionSelectionProvider(null, tempConf, getIDManager(), NAMESPACE_FORMCONTROLMODEL);
   }
   
   /**

@@ -23,6 +23,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.former.IDManager;
 import de.muenchen.allg.itd51.wollmux.func.Function;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 
@@ -45,17 +46,33 @@ public class FunctionSelectionProvider
   private Map mapNameToFunctionSelection;
   
   /**
+   * Der {@link IDManager}, der die IDs von Feldreferenzen verwaltet.
+   */
+  private IDManager idManager;
+  
+  /**
+   * Der Namensraum von {@link #idManager} aus dem die IDs für Feldreferenzen kommen.
+   */
+  private Object namespace;
+  
+  /**
    * Erzeugt einen FunctionSelectionProvider, der {@link FunctionSelection}s sowohl zu
    * Funktionen aus funcLib (darf null sein) als auch zu Funktionen, die funConf (welches ein
    * legaler "Funktionen"-Abschnitt eines Formulars sein muss) definiert liefern kann.
    * Bei gleichem Namen haben Funktionen aus funConf vorrang vor solchen aus funcLib.
+   * 
+   * @param idManager der IDManager, dessen IDs für Feldreferenzen (VALUE "&lt;id>")verwendet 
+   *        werden sollen.
+   * @param namespace der Namensraum von idManager, aus dem die IDs für Feldreferenzen kommen.
    *  
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
-  public FunctionSelectionProvider(FunctionLibrary funcLib, ConfigThingy funConf)
+  public FunctionSelectionProvider(FunctionLibrary funcLib, ConfigThingy funConf, IDManager idManager, Object namespace)
   {
     this.funcLib = funcLib;
+    this.idManager = idManager;
+    this.namespace = namespace;
     mapNameToFunctionSelection = new HashMap();
     Iterator iter = funConf.iterator();
     while (iter.hasNext())
@@ -170,7 +187,7 @@ public class FunctionSelectionProvider
           if (valueName.equals(defaultValue))
             paramValue = ParamValue.unspecified();
           else
-            paramValue = ParamValue.field(valueName);
+            paramValue = ParamValue.field(idManager.getID(namespace, valueName));
         }
         else
           return funcSel;

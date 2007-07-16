@@ -19,7 +19,6 @@
 package de.muenchen.allg.itd51.wollmux.former.function;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
@@ -238,17 +237,6 @@ public class FunctionSelection implements FunctionSelectionAccess
   public void setParameterValue(String paramName, ParamValue paramValue)
   {
     mapNameToParamValue.put(paramName, paramValue);
-  }
-
-  public void updateFieldReferences(String oldId, String newId)
-  {
-    Iterator iter = mapNameToParamValue.values().iterator();
-    while (iter.hasNext())
-    {
-      ParamValue val = (ParamValue)iter.next();
-      if (val.isFieldReference() && val.getString().equals(oldId))
-        val.setFieldReference(newId);
-    }
   }
 
 }

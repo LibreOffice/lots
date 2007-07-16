@@ -19,6 +19,8 @@
 
 package de.muenchen.allg.itd51.wollmux.former.function;
 
+import de.muenchen.allg.itd51.wollmux.former.IDManager;
+
 /**
  * Repräsentiert einen vom Benutzer konfigurierten Parameter für eine Funktion.
  *
@@ -31,28 +33,34 @@ public class ParamValue
    */
   public static final int UNSPECIFIED = 0;
   /**
-   * Als Wert soll der Wert des Feldes mit ID {@link #idStr} verwendet werden.
+   * Als Wert soll der Wert des Feldes mit ID {@link #fieldId} verwendet werden.
    */
   public static final int FIELD = 1;
   /**
-   * Als Wert soll {@link #idStr} als Literal verwendet werden.
+   * Als Wert soll {@link #literal} als Literal verwendet werden.
    */
   public static final int LITERAL = 2;
   
   /**
-   * Je nach {@link #type} enthält dies ein Literal oder eine Feld-ID.
+   * Falls {@link #type} == {@link #LITERAL} enthält dies ein Literal.
    */
-  private String idStr;
+  private String literal;
+  
+  /**
+   * Falls {@link #type} == {@link #FIELD}, dann speichert dies die ID.
+   */
+  private IDManager.ID fieldId = null;
   
   /**
    * Der Typ dieses Parameter-Wertes.
    */
   private int type;
   
-  private ParamValue(int type, String str)
+  private ParamValue(int type, String str, IDManager.ID fieldId)
   {
     this.type = type;
-    this.idStr = str;
+    this.literal = str;
+    this.fieldId = fieldId;
   }
   
   /**
@@ -61,8 +69,9 @@ public class ParamValue
    */
   public ParamValue(ParamValue orig)
   {
-    this.idStr = orig.idStr;
+    this.literal = orig.literal;
     this.type = orig.type;
+    this.fieldId = orig.fieldId;
   }
   
   /**
@@ -102,17 +111,8 @@ public class ParamValue
   public String getString()
   {
     if (isUnspecified()) return null;
-    return idStr;
-  }
-  
-  /**
-   * Macht diesen Parameter zu einer Referenz auf das Feld mit ID id.
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  public void setFieldReference(String id)
-  {
-    idStr = id;
-    type = FIELD;
+    if (isFieldReference()) return fieldId.toString();
+    return literal;
   }
   
   /**
@@ -121,16 +121,16 @@ public class ParamValue
    */
   public static ParamValue unspecified()
   {
-    return new ParamValue(UNSPECIFIED,"");
+    return new ParamValue(UNSPECIFIED,"",null);
   }
   
   /**
    * Liefert einen ParamValue der eine Referenz auf das Feld mit ID id darstellt.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public static ParamValue field(String id)
+  public static ParamValue field(IDManager.ID id)
   {
-    return new ParamValue(FIELD,id);
+    return new ParamValue(FIELD,"",id);
   }
   
   /**
@@ -139,6 +139,6 @@ public class ParamValue
    */
   public static ParamValue literal(String str)
   {
-    return new ParamValue(LITERAL,str);
+    return new ParamValue(LITERAL,str,null);
   }
 }

@@ -17,6 +17,7 @@
 */
 package de.muenchen.allg.itd51.wollmux.former.insertion;
 
+import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionAccessView;
 import de.muenchen.allg.itd51.wollmux.former.view.ViewChangeListener;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
@@ -41,7 +42,7 @@ public class OneInsertionTrafoView extends FunctionSelectionAccessView
   
   public OneInsertionTrafoView(InsertionModel model, FunctionLibrary funcLib, ViewChangeListener bigDaddy)
   {
-    super(model.getTrafoAccess(), funcLib, model.getFormularMax4000());
+    super(model.getTrafoAccess(), funcLib, model.getFormularMax4000().getIDManager(), FormularMax4000.NAMESPACE_FORMCONTROLMODEL);
     this.model = model;
     this.bigDaddy = bigDaddy;
     model.addListener(new MyModelChangeListener());

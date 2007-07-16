@@ -19,6 +19,8 @@ package de.muenchen.allg.itd51.wollmux.former;
 
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -65,6 +67,24 @@ public class IDManager
   }
   
   /**
+   * Falls dieser Manager im Namensraum namespace ein Objekt mit String-ID id hat,
+   * so wird dieses zurückgeliefert, ansonsten null.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public ID getExistingID(Object namespace, String id)
+  {
+    if (!mapNamespace2mapString2ID.containsKey(namespace))
+      return null;
+    
+    Map mapString2ID = (Map)mapNamespace2mapString2ID.get(namespace);
+    
+    if (!mapString2ID.containsKey(id))
+      return null;
+    
+    return (ID)mapString2ID.get(id); 
+  }
+  
+  /**
    * Falls im angegebenen namespace bereits ein ID Objekt für die String-ID id
    * existiert und dieses {@link IDManager.ID#isActive()} aktiv ist, so wird eine
    * {@link DuplicateIDException} geworfen, ansonsten wird das existierende ID Objekt
@@ -81,6 +101,20 @@ public class IDManager
     ID idO = getID(namespace, id);
     idO.activate();
     return idO;
+  }
+  
+  /**
+   * Liefert eine {@link Collection} mit allen {@link IDManager.ID} Objekten, die im
+   * Namensraum namespace registriert sind. ACHTUNG! Die zurückgegebene Collection darf nicht
+   * geändert oder gespeichert werden, da sie direkt eine interne Datenstruktur ist! 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public Collection getAllIDs(Object namespace)
+  {
+    if (!mapNamespace2mapString2ID.containsKey(namespace)) return new ArrayList();
+    
+    Map mapString2ID = (Map)mapNamespace2mapString2ID.get(namespace);
+    return mapString2ID.values();
   }
   
   /**

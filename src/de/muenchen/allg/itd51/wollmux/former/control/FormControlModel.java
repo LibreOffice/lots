@@ -933,12 +933,6 @@ public class FormControlModel
       formularMax4000.documentNeedsUpdating();
     }
     
-    public void updateFieldReferences(String oldId, String newId)
-    {
-      sel.updateFieldReferences(oldId, newId);
-      formularMax4000.documentNeedsUpdating();
-    }
-    
     public String[] getParameterNames()
     {
       return sel.getParameterNames();
