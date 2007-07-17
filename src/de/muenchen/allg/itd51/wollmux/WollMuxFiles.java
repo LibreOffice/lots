@@ -21,6 +21,7 @@
  * 20.12.2006 | BNK | CLASSPATH:Falls keine Dateierweiterung angegeben, / ans Ende setzen, weil nur so Verzeichnisse erkannt werden.
  * 09.07.2006 | BNK | [R7134]Popup, wenn Server langsam
  * 09.07.2006 | BNK | [R7137]IP-Adresse in Dumpinfo
+ * 17.07.2006 | BNK | [R7605]Dateien binär kopieren in dumpInfo(), außerdem immer als UTF-8 schreiben
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -29,14 +30,15 @@
  */
 package de.muenchen.allg.itd51.wollmux;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.net.InetAddress;
@@ -342,16 +344,19 @@ public class WollMuxFiles
   {
     return defaultContextURL;
   }
-  
+
   /**
-   * Liefert eine URL zum String urlStr, wobei relative Pfade relativ zum DEFAULT_CONTEXT
-   * aufgelöst werden.
+   * Liefert eine URL zum String urlStr, wobei relative Pfade relativ zum
+   * DEFAULT_CONTEXT aufgelöst werden.
+   * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
-   * @throws MalformedURLException falls urlStr keine legale URL darstellt.
+   * @throws MalformedURLException
+   *           falls urlStr keine legale URL darstellt.
    */
   public static URL makeURL(String urlStr) throws MalformedURLException
   {
-    return new URL(WollMuxFiles.getDEFAULT_CONTEXT(), ConfigThingy.urlEncode(urlStr));
+    return new URL(WollMuxFiles.getDEFAULT_CONTEXT(), ConfigThingy
+        .urlEncode(urlStr));
   }
 
   /**
@@ -792,7 +797,9 @@ public class WollMuxFiles
     File dumpFile = new File(getWollMuxDir(), "dump" + date);
     try
     {
-      BufferedWriter out = new BufferedWriter(new FileWriter(dumpFile));
+      OutputStream outStream = new FileOutputStream(dumpFile);
+      BufferedWriter out = new BufferedWriter(new OutputStreamWriter(outStream,
+          ConfigThingy.CHARSET));
       out.write("Dump time: " + date + "\n");
       out.write(WollMuxSingleton.getInstance().getBuildInfo() + "\n");
       StringBuilder buffy = new StringBuilder();
@@ -830,22 +837,13 @@ public class WollMuxFiles
       out.write("losCacheFile: " + getLosCacheFile() + "\n");
       out
           .write("===================== START wollmuxConfFile ==================\n");
-      try
-      {
-        BufferedReader in = new BufferedReader(new FileReader(
-            getWollMuxConfFile()));
-        String line = null;
-        while ((line = in.readLine()) != null)
-        {
-          out.write(line + "\n");
-        }
-      }
-      catch (IOException ex)
-      {
-        ex.printStackTrace(new PrintWriter(out));
-      }
+      out.flush(); // weil wir gleich direkt auf den Stream zugreifen
+      copyFile(getWollMuxConfFile(), outStream);
+      outStream.flush(); // sollte nicht nötig sein, schadet aber nicht
+      out.write("\n");
       out
           .write("===================== END wollmuxConfFile ==================\n");
+
       out
           .write("===================== START wollmux.conf ==================\n");
       out.write(getWollmuxConf().stringRepresentation());
@@ -853,37 +851,17 @@ public class WollMuxFiles
 
       out
           .write("===================== START losCacheFile ==================\n");
-      try
-      {
-        BufferedReader in = new BufferedReader(
-            new FileReader(getLosCacheFile()));
-        String line = null;
-        while ((line = in.readLine()) != null)
-        {
-          out.write(line + "\n");
-        }
-      }
-      catch (IOException ex)
-      {
-        ex.printStackTrace(new PrintWriter(out));
-      }
+      out.flush(); // weil wir gleich direkt auf den Stream zugreifen
+      copyFile(getLosCacheFile(), outStream);
+      outStream.flush(); // sollte nicht nötig sein, schadet aber nicht
+      out.write("\n");
       out.write("===================== END losCacheFile ==================\n");
 
       out.write("===================== START wollmux.log ==================\n");
-      try
-      {
-        BufferedReader in = new BufferedReader(new FileReader(
-            getWollMuxLogFile()));
-        String line = null;
-        while ((line = in.readLine()) != null)
-        {
-          out.write(line + "\n");
-        }
-      }
-      catch (IOException ex)
-      {
-        ex.printStackTrace(new PrintWriter(out));
-      }
+      out.flush(); // weil wir gleich direkt auf den Stream zugreifen
+      copyFile(getWollMuxLogFile(), outStream);
+      outStream.flush(); // sollte nicht nötig sein, schadet aber nicht
+      out.write("\n");
       out.write("===================== END wollmux.log ==================\n");
 
       out
@@ -900,6 +878,40 @@ public class WollMuxFiles
       return null;
     }
     return dumpFile.getAbsolutePath();
+  }
+
+  /**
+   * Kopiert den Inhalt von file nach out (binär).
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1) TODO Testen
+   */
+  private static void copyFile(File file, OutputStream out)
+  {
+    InputStream in = null;
+    try
+    {
+      in = new FileInputStream(file);
+      byte[] buffy = new byte[2048];
+      int len;
+      while ((len = in.read(buffy)) >= 0)
+      {
+        out.write(buffy, 0, len);
+      }
+    }
+    catch (IOException ex)
+    {
+      ex.printStackTrace(new PrintWriter(out));
+    }
+    finally
+    {
+      try
+      {
+        in.close();
+      }
+      catch (Exception x)
+      {
+      }
+    }
   }
 
   /**
