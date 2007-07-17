@@ -177,16 +177,6 @@ public class InsertionModelList
   {
     boolean insertionViewsSelected = false;
     
-    public void broadcastFormControlIdHasChanged(String oldId, String newId) 
-    {
-      Iterator iter = models.iterator();
-      while (iter.hasNext())
-      {
-        InsertionModel model = (InsertionModel)iter.next();
-        model.broadcastFormControlIdHasChanged(oldId, newId);
-      }
-    }
-    
     public void broadcastAllInsertionsViewSelected() {insertionViewsSelected = true;}
     public void broadcastAllFormControlsViewSelected() {insertionViewsSelected = false;}
     

@@ -60,18 +60,6 @@ public abstract class BroadcastListener
   public void broadcastAllFormControlsViewSelected() {}
 
   /**
-   * Ein FormControlModel hat seine ID von oldId auf newId geändert. 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  public void broadcastFormControlIdHasChanged(String oldId, String newId) {}
-  
-  /**
-   * Ein neues FormControlModel mit ID id ist hinzugekommen. 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  public void broadcastNewFormControlId(String id) {}
-  
-  /**
    * Eine Menge von Bookmarks wurde ausgewählt.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */

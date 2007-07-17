@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import de.muenchen.allg.itd51.wollmux.DuplicateIDException;
+
 /**
  * verwaltet Objekte, die ID-Strings repräsentieren. Die ID-Objekte können an
  * mehreren Stellen verwendet werden und da jedes ID-Objekt alle seine Verwender
@@ -189,10 +191,11 @@ public class IDManager
     /**
      * listen wird benachrichtigt, wenn sich dieses ID-Objekt ändert.
      * ACHTUNG! listen wird nur über eine {@link java.lang.ref.WeakReference}
-     * referenziert. Daher ist eine removeIDChangeListener() Methode
-     * überflüssig. Ist listen bereits registriert, wird nichts getan.
+     * referenziert. Daher ist der Aufruf von {@link #removeIDChangeListener(IDChangeListener)} nur
+     * notwendig, wenn man keine Events mehr empfangen möcht, nicht jedoch vor der
+     * Zerstörung des Listeners.
      * @author Matthias Benkmann (D-III-ITD 5.1)
-     * TODO Testen
+     * TESTED
      */
     public void addIDChangeListener(IDChangeListener listen)
     {
@@ -207,6 +210,28 @@ public class IDManager
           if (listen2 == listen) return;
       }
       listeners.add(new WeakReference(listen));
+    }
+    
+    /**
+     * listen wird NICHT MEHR benachrichtigt, wenn sich dieses ID-Objekt ändert.
+     * ACHTUNG! listen wird von {@link #addIDChangeListener(IDChangeListener)} nur über eine 
+     * {@link java.lang.ref.WeakReference}
+     * referenziert. Daher ist der Aufruf von {@link #removeIDChangeListener(IDChangeListener)} nur
+     * notwendig, wenn man keine Events mehr empfangen möcht, nicht jedoch vor der
+     * Zerstörung des Listeners. 
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     * TESTED
+     */
+    public void removeIDChangeListener(IDChangeListener listen)
+    {
+      Iterator iter = listeners.iterator();
+      while (iter.hasNext())
+      {
+        Reference ref = (Reference)iter.next();
+        IDChangeListener listen2 = (IDChangeListener)ref.get();
+        if (listen2 == null || listen2 == listen) 
+          iter.remove();
+      }
     }
     
     /**

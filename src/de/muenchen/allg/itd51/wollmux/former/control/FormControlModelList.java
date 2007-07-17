@@ -29,8 +29,6 @@ import java.util.ListIterator;
 import java.util.Vector;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.former.Broadcast;
-import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
 import de.muenchen.allg.itd51.wollmux.former.IDManager;
 
@@ -161,11 +159,6 @@ public class FormControlModelList
     model.hasBeenAdded();
     
     notifyListeners(model, idx);
-    formularMax4000.broadcast(new Broadcast(){
-      public void sendTo(BroadcastListener listener)
-      {
-        listener.broadcastNewFormControlId((model.getId() == null) ? "" : model.getId().toString());
-      }});
     
     enforceMaxModelsPerTab();
   }

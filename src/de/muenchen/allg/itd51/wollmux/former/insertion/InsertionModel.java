@@ -38,7 +38,11 @@ import com.sun.star.text.XTextRange;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.SyntaxErrorException;
 import de.muenchen.allg.itd51.wollmux.Bookmark;
+import de.muenchen.allg.itd51.wollmux.Logger;
+import de.muenchen.allg.itd51.wollmux.UnknownIDException;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
+import de.muenchen.allg.itd51.wollmux.former.IDManager;
+import de.muenchen.allg.itd51.wollmux.former.IDManager.ID;
 import de.muenchen.allg.itd51.wollmux.former.control.FormControlModel;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelection;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionAccess;
@@ -80,13 +84,13 @@ public class InsertionModel
   
   /** 
    * Konstante für {@link #sourceType}, die angibt, dass die Daten für die Einfügung
-   * aus einer externen Datenquelle kommen. 
+   * aus einer externen Datenquelle kommen (insertValue). 
    */
   private static final int DATABASE_TYPE = 0;
   
   /** 
    * Konstante für {@link #sourceType}, die angibt, dass die Daten für die Einfügung
-   * aus dem Formular kommen. 
+   * aus dem Formular kommen (insertFormValue). 
    */
   private static final int FORM_TYPE = 1;
   
@@ -100,7 +104,7 @@ public class InsertionModel
   /**
    * DB_SPALTE oder ID je nach {@link #sourceType}.
    */
-  private String dataId = "";
+  private IDManager.ID dataId;
   
   /**
    * Liste von {@link InsertionModel.AutosepInfo} Objekten.
@@ -121,6 +125,8 @@ public class InsertionModel
    * Die {@link ModelChangeListener}, die über Änderungen dieses Models informiert werden wollen.
    */
   private List listeners = new Vector(1);
+  
+  private IDManager.IDChangeListener myIDChangeListener = new MyIDChangeListener();
   
   /**
    * Der FormularMax4000 zu dem dieses Model gehört.
@@ -163,13 +169,15 @@ public class InsertionModel
     {
       ConfigThingy dbSpalteConf = conf.query("DB_SPALTE");
       if (dbSpalteConf.count() == 0) throw new SyntaxErrorException();
-      dataId = dbSpalteConf.toString();
+      dataId = formularMax4000.getIDManager().getID(FormularMax4000.NAMESPACE_DB_SPALTE, dbSpalteConf.toString());
+      dataId.addIDChangeListener(myIDChangeListener);
       sourceType = DATABASE_TYPE;
     } else if (cmd.equals("insertFormValue"))
     {
       ConfigThingy idConf = conf.query("ID");
       if (idConf.count() == 0) throw new SyntaxErrorException();
-      dataId = idConf.toString();
+      dataId = formularMax4000.getIDManager().getID(FormularMax4000.NAMESPACE_FORMCONTROLMODEL, idConf.toString());
+      dataId.addIDChangeListener(myIDChangeListener);
       sourceType = FORM_TYPE;
     } else 
       throw new SyntaxErrorException();
@@ -244,7 +252,7 @@ public class InsertionModel
     }
     
     conf.add("CMD").add(cmd);
-    conf.add(idType).add(getDataID());
+    conf.add(idType).add(getDataID().toString());
     
     if (!trafo.isNone())
     {
@@ -299,19 +307,46 @@ public class InsertionModel
    * Liefert je nach Typ der Einfügung das DB_SPALTE oder ID Attribut.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public String getDataID()
+  public IDManager.ID getDataID()
   {
     return dataId;
   }
   
   /**
-   * Ändert je nach Type der Einfügung DB_SPALTE oder ID Attribut auf den Wert newId.
+   * Ändert je nach Type der Einfügung DB_SPALTE oder ID Attribut auf den Wert newId
+   * (falls newId gleich der alten ID ist, wird nichts getan).
+   * ACHTUNG! Die Änderung betrifft nur die Einfügung und wird nicht auf die
+   * Formularelemente übertragen (wogegen umgekehrt Änderungen an den Formularelemente-IDs
+   * zu Änderungen der Einfügungen führen). Hintergrund dieser Implementierung ist, dass
+   * man einerseits normalerweise nicht in der Einfügungen-Sicht IDs von Steuerelementen
+   * ändern möchte und andererseits nur so ermöglicht wird, die Quelle einer Einfügung
+   * auf ein anderes Steuerelement zu ändern.
+   * @throws UnknownIDException falls diese Einfügung eine Formularwert-Einfügung ist
+   *         (d.h. das ID-Attribut betroffen wäre) und newID dem IDManager im
+   *         Namensraum {@link FormularMax4000#NAMESPACE_FORMCONTROLMODEL}
+   *         unbekannt ist, oder falls newId der leere String ist. 
+   *         Im Falle des DB_SPALTE Attributs wird nur geworfen, wenn newId der
+   *         leere String ist.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public void setDataID(String newId)
+  public void setDataID(String newId) throws UnknownIDException
   {
-    dataId = newId;
-    notifyListeners(ID_ATTR, newId);
+    if (newId.equals(dataId.toString())) return;
+    if (newId.length() == 0) throw new UnknownIDException("Leere ID");
+    if (sourceType == FORM_TYPE)
+    {
+      IDManager.ID newDataId = formularMax4000.getIDManager().getExistingID(FormularMax4000.NAMESPACE_FORMCONTROLMODEL, newId);
+      if (newDataId == null) throw new UnknownIDException(newId);
+      dataId.removeIDChangeListener(myIDChangeListener);
+      dataId = newDataId;
+      dataId.addIDChangeListener(myIDChangeListener);
+    } else //if (sourceType == DATABASE_TYPE)
+    {
+      dataId.removeIDChangeListener(myIDChangeListener);
+      dataId = formularMax4000.getIDManager().getID(FormularMax4000.NAMESPACE_DB_SPALTE, newId);
+      dataId.addIDChangeListener(myIDChangeListener);
+    }
+    notifyListeners(ID_ATTR, dataId);
     //formularMax4000.documentNeedsUpdating(); ist bereits in notifyListeners
   }
   
@@ -425,19 +460,6 @@ public class InsertionModel
     formularMax4000.documentNeedsUpdating();
   }
   
-  /**
-   * Teilt diesem InsertionModel mit, dass ein Formularsteuerelement seine ID von oldId auf
-   * newId geändert hat, damit das InsertionModel seine eigene ID anpassen kann falls nötig.
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  public void broadcastFormControlIdHasChanged(String oldId, String newId)
-  {
-    if (sourceType == FORM_TYPE && dataId.equals(oldId))
-    {
-      setDataID(newId);
-    }
-  }
-  
   
   /**
    * Interface für Listener, die über Änderungen eines Models informiert
@@ -530,6 +552,20 @@ public class InsertionModel
      * Defaultwert Leerzeichen, wenn nicht definiert (siehe WollMux-Doku).
      */
     public String separator = " "; 
+  }
+  
+  private class MyIDChangeListener implements IDManager.IDChangeListener
+  {
+    public void idHasChanged(ID id)
+    {
+      if (id != dataId)
+      {
+        Logger.error("Event für eine ID erhalten, die ich nicht kenne: "+id.toString());
+        return;
+      }
+      notifyListeners(ID_ATTR, dataId);
+      //formularMax4000.documentNeedsUpdating(); ist bereits in notifyListeners
+    }
   }
   
 }

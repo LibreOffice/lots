@@ -225,6 +225,11 @@ public class FormularMax4000
    */
   public static final Integer NAMESPACE_FORMCONTROLMODEL = new Integer(0);
   
+  /**
+   * Der {@link IDManager}-Namensraum für die DB_SPALTE-Angaben von {@link InsertionModel}s.
+   */
+  public static final Integer NAMESPACE_DB_SPALTE = new Integer(1);
+  
   
 
   /**

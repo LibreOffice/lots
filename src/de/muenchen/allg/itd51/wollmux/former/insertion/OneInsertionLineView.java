@@ -17,6 +17,7 @@
 */
 package de.muenchen.allg.itd51.wollmux.former.insertion;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
@@ -34,9 +35,11 @@ import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 
 import de.muenchen.allg.itd51.wollmux.Logger;
+import de.muenchen.allg.itd51.wollmux.UnknownIDException;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastObjectSelection;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
+import de.muenchen.allg.itd51.wollmux.former.IDManager;
 import de.muenchen.allg.itd51.wollmux.former.view.LineView;
 import de.muenchen.allg.itd51.wollmux.former.view.ViewChangeListener;
 
@@ -106,8 +109,9 @@ public class OneInsertionLineView extends LineView
     idBox = new JComboBox();
     idBox.setEditable(true);
     idBox.setSelectedItem(model.getDataID());
-    JTextComponent tc = ((JTextComponent)idBox.getEditor().getEditorComponent());
+    final JTextComponent tc = ((JTextComponent)idBox.getEditor().getEditorComponent());
     final Document comboDoc = tc.getDocument();
+    final Color defaultBackground = tc.getBackground();
     
     idBox.addMouseListener(myMouseListener);
     tc.addMouseListener(myMouseListener);
@@ -118,7 +122,16 @@ public class OneInsertionLineView extends LineView
         ignoreAttributeChanged = true;
         try{
           model.setDataID(comboDoc.getText(0, comboDoc.getLength()));
-        }catch(BadLocationException x){Logger.error(x);}
+          tc.setBackground(defaultBackground);
+        }
+        catch(BadLocationException x)
+        {
+          Logger.error(x);
+        }
+        catch (UnknownIDException x)
+        {
+          tc.setBackground(Color.RED);
+        }
         ignoreAttributeChanged = false;
       }
       
@@ -139,9 +152,9 @@ public class OneInsertionLineView extends LineView
     return model;
   }
   
-  private void idChangedDueToExternalReasons(String newId)
+  private void idChangedDueToExternalReasons(IDManager.ID newId)
   {
-    idBox.setSelectedItem(newId);
+    idBox.setSelectedItem(newId.toString());
   }
   
   private class MyModelChangeListener implements InsertionModel.ModelChangeListener
@@ -156,7 +169,7 @@ public class OneInsertionLineView extends LineView
       if (ignoreAttributeChanged) return;
       switch(attributeId)
       {
-        case InsertionModel.ID_ATTR: idChangedDueToExternalReasons((String)newValue); break;
+        case InsertionModel.ID_ATTR: idChangedDueToExternalReasons((IDManager.ID)newValue); break;
       }
     }
   }

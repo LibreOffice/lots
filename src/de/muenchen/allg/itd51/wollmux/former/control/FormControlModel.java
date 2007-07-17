@@ -31,9 +31,7 @@ import java.util.Set;
 import java.util.Vector;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.former.Broadcast;
-import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
-import de.muenchen.allg.itd51.wollmux.former.DuplicateIDException;
+import de.muenchen.allg.itd51.wollmux.DuplicateIDException;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
 import de.muenchen.allg.itd51.wollmux.former.IDManager;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelection;
@@ -526,7 +524,6 @@ public class FormControlModel
   public void setId(final String id) throws DuplicateIDException
   {
     IDManager.ID idO = getId();
-    final String oldId = (idO!=null) ? idO.toString() : "";
     if (id.length() == 0)
     {
       if (idO == null) return;
@@ -545,11 +542,6 @@ public class FormControlModel
       }
     }
     notifyListeners(ID_ATTR, getId());
-    formularMax4000.broadcast(new Broadcast(){
-      public void sendTo(BroadcastListener listener)
-      {
-        listener.broadcastFormControlIdHasChanged(oldId, id);
-      }});
   }
   
   /**
