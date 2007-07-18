@@ -22,6 +22,7 @@
  * 09.07.2006 | BNK | [R7134]Popup, wenn Server langsam
  * 09.07.2006 | BNK | [R7137]IP-Adresse in Dumpinfo
  * 17.07.2006 | BNK | [R7605]Dateien bin‰r kopieren in dumpInfo(), auﬂerdem immer als UTF-8 schreiben
+ * 18.07.2006 | BNK | Alle Java-Properties in dumpInfo() ausgeben
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -47,9 +48,11 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.UnknownHostException;
 import java.util.Calendar;
+import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import javax.swing.JDialog;
@@ -835,6 +838,13 @@ public class WollMuxFiles
       out.write("wollmuxLogFile: " + getWollMuxLogFile() + "\n");
       out.write("wollmuxConfFile: " + getWollMuxConfFile() + "\n");
       out.write("losCacheFile: " + getLosCacheFile() + "\n");
+      Properties props = System.getProperties();
+      Enumeration enu = props.propertyNames();
+      while (enu.hasMoreElements())
+      {
+        String key = enu.nextElement().toString();
+        out.write(key + ": " + props.getProperty(key) +"\n");
+      }
       out
           .write("===================== START wollmuxConfFile ==================\n");
       out.flush(); // weil wir gleich direkt auf den Stream zugreifen
