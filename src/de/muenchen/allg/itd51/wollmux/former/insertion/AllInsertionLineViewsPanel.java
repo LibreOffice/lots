@@ -264,6 +264,10 @@ public class AllInsertionLineViewsPanel implements View
     {
       addItem(model);
     }
+
+    public void itemRemoved(InsertionModel model, int index)
+    {
+    }
     
   }
   

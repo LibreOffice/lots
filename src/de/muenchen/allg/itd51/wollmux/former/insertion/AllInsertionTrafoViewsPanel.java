@@ -18,9 +18,17 @@
 package de.muenchen.allg.itd51.wollmux.former.insertion;
 
 import java.awt.CardLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.Vector;
 
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -45,6 +53,14 @@ public class AllInsertionTrafoViewsPanel implements View
    * wenn keine bestimmte Einfügung ausgewählt ist.
    */
   private static final String EMPTY_PANEL = "EMPTY_PANEL";
+  
+  /**
+   * Wird für das CardLayout verwendet als ID-String des Panels, das nur einen Button anzeigt,
+   * der für das momentan ausgewählte InsertionModel die entsprechende 
+   * {@link de.muenchen.allg.itd51.wollmux.former.insertion.OneInsertionExtView}
+   * aktiviert.
+   */
+  private static final String INACTIVE_PANEL = "INACTIVE PANEL";
   
   /**
    * Wird auf alle {@link OneInsertionExtView}s registriert.
@@ -78,9 +94,15 @@ public class AllInsertionTrafoViewsPanel implements View
   private List views = new Vector();
   
   /**
+   * Enthält alle cardIds (wie von {@link #getCardIdFor(Object)} zurückgeliefert) von
+   * InsertionModels mit aktiver Sicht, d,h, von all denen, für die nicht
+   * das {@link #INACTIVE_PANEL} angezeigt wird. 
+   */
+  private Set activeModelCardIds = new HashSet();
+  
+  /**
    * Erzeugt ein {@link AllInsertionTrafoViewsPanel}, das den Inhalt von
-   * insertionModelList anzeigt. ACHTUNG! insertionModelList sollte leer sein,
-   * da nur neu hinzugekommene Elemente in der View angezeigt werden.
+   * insertionModelList anzeigt. 
    * @param funcLib die Funktionsbibliothek, die die Funktionen enthält, die die Views 
    *        zur Auswahl anbieten sollen.
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -98,6 +120,15 @@ public class AllInsertionTrafoViewsPanel implements View
     JPanel emptyPanel = new JPanel();
     emptyPanel.add(new JLabel("TRAFO-View"));
     myPanel.add(emptyPanel, EMPTY_PANEL);
+    
+    myPanel.add(makeInactivePanel(), INACTIVE_PANEL);
+    
+    Iterator iter = insertionModelList.iterator();
+    while (iter.hasNext()) 
+    {
+      InsertionModel model = (InsertionModel)iter.next();
+      if (model.hasTrafo()) addItem(model);
+    }
   }
   
   /**
@@ -109,8 +140,9 @@ public class AllInsertionTrafoViewsPanel implements View
   {
     OneInsertionExtView view = new OneInsertionExtView(model, funcLib, myViewChangeListener);
     views.add(view);
-    
-    myPanel.add(view.JComponent(), getCardIdFor(view.getModel()));
+    String cardId = getCardIdFor(view.getModel());
+    activeModelCardIds.add(cardId);
+    myPanel.add(view.JComponent(), cardId);
     myPanel.validate();
   }
   
@@ -135,7 +167,9 @@ public class AllInsertionTrafoViewsPanel implements View
     views.remove(index);
     myPanel.remove(view.JComponent());
     myPanel.validate();
-    if (view.getModel() == currentModel)
+    InsertionModel model = view.getModel();
+    activeModelCardIds.remove(getCardIdFor(model));
+    if (model == currentModel)
     {
       cards.show(myPanel, EMPTY_PANEL);
       currentModel = null;
@@ -147,16 +181,53 @@ public class AllInsertionTrafoViewsPanel implements View
     return myPanel;
   }
   
+  /**
+   * Liefert ein JPanel, das nur einen Button enthält zum Aktivieren der
+   * {@link OneInsertionExtView} des aktiven Models.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED
+   */
+  private JPanel makeInactivePanel()
+  {
+    JPanel inactivePanel = new JPanel();
+    inactivePanel.setLayout(new BoxLayout(inactivePanel, BoxLayout.Y_AXIS));
+    inactivePanel.add(Box.createGlue());
+    Box hbox = Box.createHorizontalBox();
+    hbox.add(Box.createHorizontalGlue());
+    JButton button = new JButton("Aktivieren");
+    hbox.add(button);
+    hbox.add(Box.createHorizontalGlue());
+    inactivePanel.add(hbox);
+    inactivePanel.add(Box.createGlue());
+    
+    button.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent e)
+      {
+        if (currentModel == null) return; //sollte nicht passieren können, aber zur Sicherheit
+        addItem(currentModel);
+        cards.show(myPanel, getCardIdFor(currentModel));
+      }}
+    );
+    
+    return inactivePanel;
+  }
   
   
   private class MyItemListener implements InsertionModelList.ItemListener
   {
-
     public void itemAdded(InsertionModel model, int index)
     {
-      addItem(model);
+      if (model.hasTrafo()) addItem(model);
     }
-    
+
+    public void itemRemoved(InsertionModel model, int index)
+    {
+      if (model == currentModel)
+      {
+        cards.show(myPanel, EMPTY_PANEL);
+        currentModel = null;
+      }
+    }
   }
   
   private class MyViewChangeListener implements ViewChangeListener
@@ -182,8 +253,12 @@ public class AllInsertionTrafoViewsPanel implements View
       if (b.getState() == 1)
       {
         InsertionModel model = (InsertionModel)b.getObject();
-        cards.show(myPanel, getCardIdFor(model));
         currentModel = model;
+        String cardId = getCardIdFor(model);
+        if (activeModelCardIds.contains(cardId))
+          cards.show(myPanel, cardId);
+        else
+          cards.show(myPanel, INACTIVE_PANEL);
       }
       else
       {

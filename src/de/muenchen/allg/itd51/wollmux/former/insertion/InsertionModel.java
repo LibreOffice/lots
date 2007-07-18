@@ -460,6 +460,14 @@ public class InsertionModel
     formularMax4000.documentNeedsUpdating();
   }
   
+  /**
+   * Liefert true gdw dieses InsertionModel eine TRAFO gesetzt hat.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public boolean hasTrafo()
+  {
+    return !trafo.isNone();
+  }
   
   /**
    * Interface für Listener, die über Änderungen eines Models informiert

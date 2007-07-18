@@ -70,7 +70,7 @@ public class InsertionModelList
   {
     int idx = models.size();
     models.add(idx, model);
-    notifyListeners(model, idx);
+    notifyListeners(model, idx, false);
   }
   
   /**
@@ -85,7 +85,22 @@ public class InsertionModelList
       int index = models.size() - 1;
       InsertionModel model = (InsertionModel)models.remove(index);
       model.hasBeenRemoved();
+      notifyListeners(model, index, true);
     }
+  }
+  
+  /**
+   * Liefert einen Iterator über alle {@link InsertionModel}s in dieser Liste.
+   * ACHTUNG! Es dürfen keine Veränderungen über den Iterator (z.B. {@link Iterator#remove()})
+   * vorgenommen werden. Auch dürfen während der Iteration keine Veränderungen an der
+   * InsertionModelList vorkommen, da der Iterator direkt auf der internen Datenstruktur 
+   * arbeitet und es daher zur {@link java.util.ConcurrentModificationException} kommen
+   * würde.  
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public Iterator iterator()
+  {
+    return models.iterator();
   }
   
   /**
@@ -100,6 +115,7 @@ public class InsertionModelList
     if (index < 0) return;
     models.remove(index);
     model.hasBeenRemoved();
+    notifyListeners(model, index, true);
   }
   
   /**
@@ -145,16 +161,21 @@ public class InsertionModelList
   }
   
   /**
-   * Benachrichtigt alle ItemListener über das Hinzufügen von model zur Liste an Index index.
+   * Benachrichtigt alle ItemListener über das Hinzufügen oder Entfernen von model zur bzw.
+   * aus der Liste an/von Index index.
+   * @param removed falls true, wurde model entfernt, ansonsten hinzugefügt.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private void notifyListeners(InsertionModel model, int index)
+  private void notifyListeners(InsertionModel model, int index, boolean removed)
   {
     Iterator iter = listeners.iterator();
     while (iter.hasNext())
     {
       ItemListener listener = (ItemListener)iter.next();
-      listener.itemAdded(model, index);
+      if (removed)
+        listener.itemRemoved(model, index);
+      else
+        listener.itemAdded(model, index);
     }
   }
   
@@ -171,6 +192,12 @@ public class InsertionModelList
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     public void itemAdded(InsertionModel model, int index);
+    /**
+     * Wird aufgerufen, nachdem model aus der Liste entfernt wurde.
+     * @param index der alte Index von model in der Liste.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
+    public void itemRemoved(InsertionModel model, int index);
   }
 
   private class MyBroadcastListener extends BroadcastListener
