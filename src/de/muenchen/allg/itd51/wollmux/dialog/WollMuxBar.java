@@ -48,6 +48,7 @@
 * 23.03.2007 | BNK | openExt implementiert
 * 15.06.2007 | BNK | Beim Download für openExt URL urlEncoden genau wie ConfigThingy für %include
 * 25.06.2007 | BNK | [R7224]Im Minimize-Modus bei Absenderauswahl nicht minimieren
+* 19.07.2007 | BNK | [22882]--load sollte jetzt auch unter Windows funzen
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -1701,12 +1702,7 @@ public class WollMuxBar
     try{
       UNO.init();
       
-      File curDir = new File(System.getProperty("user.dir"));
-      File toOpen;
-      if (path.charAt(0) != '/')
-        toOpen = new File(curDir, path);
-      else
-        toOpen = new File(path);
+      File toOpen = new File(path).getAbsoluteFile();
       URL toOpenUrl = toOpen.toURI().toURL();
       urlStr = UNO.getParsedUNOUrl(toOpenUrl.toExternalForm()).Complete;
       UNO.loadComponentFromURL(urlStr, true, MacroExecMode.USE_CONFIG);
