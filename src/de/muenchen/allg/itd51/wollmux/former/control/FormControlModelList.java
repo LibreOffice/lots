@@ -100,6 +100,20 @@ public class FormControlModelList
   }
   
   /**
+   * Liefert einen Iterator über alle {@link FormControlModel}s in dieser Liste.
+   * ACHTUNG! Es dürfen keine Veränderungen über den Iterator (z.B. {@link Iterator#remove()})
+   * vorgenommen werden. Auch dürfen während der Iteration keine Veränderungen an der
+   * InsertionModelList vorkommen, da der Iterator direkt auf der internen Datenstruktur 
+   * arbeitet und es daher zur {@link java.util.ConcurrentModificationException} kommen
+   * würde.  
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public Iterator iterator()
+  {
+    return models.iterator();
+  }
+  
+  /**
    * Bittet die FormControlModelList darum, das Element model aus sich zu entfernen
    * (falls es in der Liste ist).
    * @author Matthias Benkmann (D-III-ITD 5.1)

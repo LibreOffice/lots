@@ -503,6 +503,24 @@ public class FormControlModel
   }
   
   /**
+   * Liefert true gdw ein AUTOFILL gesetzt ist.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public boolean hasAutofill()
+  {
+    return !autofill.isNone();
+  }
+  
+  /**
+   * Liefert true gdw eine PLAUSI gesetzt ist.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public boolean hasPlausi()
+  {
+    return !plausi.isNone();
+  }
+  
+  /**
    * Setzt das ACTION-Attribut auf action, wobei ein leerer String zu {@link #NO_ACTION}
    * konvertiert wird.
    * @author Matthias Benkmann (D-III-ITD 5.1)
