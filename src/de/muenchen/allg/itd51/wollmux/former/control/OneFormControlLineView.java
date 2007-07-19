@@ -9,6 +9,7 @@
 * Datum      | Wer | Änderungsgrund
 * -------------------------------------------------------------------
 * 29.08.2006 | BNK | Erstellung
+* 19.07.2007 | BNK | [R5406]Teile der View können nach Benutzerwunsch ein- oder ausgeblendet werden
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -48,6 +49,7 @@ import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastObjectSelection;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
 import de.muenchen.allg.itd51.wollmux.former.IDManager;
+import de.muenchen.allg.itd51.wollmux.former.ViewVisibilityDescriptor;
 import de.muenchen.allg.itd51.wollmux.former.view.LineView;
 
 
@@ -127,6 +129,12 @@ public class OneFormControlLineView extends LineView
   private Font boldFont;
   
   /**
+   * Gibt an, welche Teile dieser View eingeblendet werden sollen. 
+   * null bedeutet, dass alle Teile angezeigt werden sollen. 
+   */
+  private ViewVisibilityDescriptor viewVisibilityDescriptor = null;
+  
+  /**
    * Erzeugt eine View für model.
    * @param bigDaddy typischerweise ein Container, der die View enthält und daher über Änderungen
    *        auf dem Laufenden gehalten werden muss.
@@ -155,11 +163,52 @@ public class OneFormControlLineView extends LineView
     model.addListener(new MyModelChangeListener());
   }
   
+  /**
+   * Setzt den {@link ViewVisibilityDescriptor}, der bestimmt, welche Teile dieser
+   * View angezeigt werden. ACHTUNG! Das Objekt wird als Referenz gemerkt (jedoch
+   * nie durch diese Klasse geändert).
+   * Wird null übergeben, so wird für alles true angenommen.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public void setViewVisibilityDescriptor(ViewVisibilityDescriptor desc)
+  {
+    viewVisibilityDescriptor = desc;
+    setViewVisibility();
+  }
+  
   private void setViewVisibility()
   {
-    typeView.setVisible(!model.isTab());
-    comboBoxAdditionalView.setVisible(model.isCombo());
-    textAreaAdditionalView.setVisible(model.isTextArea());
+    /*
+     * ACHTUNG! viewVisibilityDescriptor kann null sein!!
+     * Dies wird als alles true interpretiert.
+     */
+    
+    idTextfield.setVisible(model.isTab()
+                        || viewVisibilityDescriptor == null
+                        || viewVisibilityDescriptor.formControlLineViewId);
+    labelTextfield.setVisible(model.isTab()
+                  || viewVisibilityDescriptor == null
+                  || viewVisibilityDescriptor.formControlLineViewLabel);
+    typeView.setVisible(!model.isTab()
+                    &&   (viewVisibilityDescriptor == null 
+                       || viewVisibilityDescriptor.formControlLineViewType));
+    comboBoxAdditionalView.setVisible(model.isCombo()
+                    &&    (viewVisibilityDescriptor == null 
+                        || viewVisibilityDescriptor.formControlLineViewAdditional));
+    textAreaAdditionalView.setVisible(model.isTextArea()
+                    &&    (viewVisibilityDescriptor == null 
+                        || viewVisibilityDescriptor.formControlLineViewAdditional));
+    /*
+     * Wenn alle abgeschaltet sind, aktiviere zumindest das ID-Feld
+     */
+    if (viewVisibilityDescriptor != null &&
+        !viewVisibilityDescriptor.formControlLineViewAdditional &&
+        !viewVisibilityDescriptor.formControlLineViewId &&
+        !viewVisibilityDescriptor.formControlLineViewLabel &&
+        !viewVisibilityDescriptor.formControlLineViewType)
+    {
+      idTextfield.setVisible(true);
+    }
     myPanel.validate();
   }
   

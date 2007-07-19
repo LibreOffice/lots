@@ -64,5 +64,11 @@ public abstract class BroadcastListener
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void broadcastBookmarkSelection(Set bookmarkNames) {}
+  
+  /**
+   * Der {@link ViewVisibilityDescriptor} hat sich geändert.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public void broadcastViewVisibilitySettings(ViewVisibilityDescriptor desc){};
 }
 

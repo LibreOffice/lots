@@ -21,7 +21,10 @@
 * 05.02.2007 | BNK | [R5214]Formularmerkmale entfernen hat fast leere Formularnotiz übriggelassen
 * 11.04.2007 | BNK | [R6176]Nicht-WM-Bookmarks killen
 *                  | Nicht-WM-Bookmarks killen Funktion derzeit auskommentiert wegen Zerstörung von Referenzen
-* 10.07.2007 | BNK | [P1403]abort() verbessert, damit FM4000 gemuellentsorgt werden kann                 
+* 10.07.2007 | BNK | [P1403]abort() verbessert, damit FM4000 gemuellentsorgt werden kann
+* 19.07.2007 | BNK | [R5406]Views und Teile der Views können nach Benutzerwunsch ein- oder ausgeblendet werden
+*                  | Änderung der Menüstruktur (Einführung Ansicht und Bearbeiten Menü, Einfügen wandert nach Bearbeiten)
+*                  | JSplitPane besser initialisiert, um verschieben des Dividers zu verbessern.                  
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -52,8 +55,10 @@ import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.swing.AbstractButton;
 import javax.swing.Box;
 import javax.swing.JButton;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JEditorPane;
@@ -261,6 +266,11 @@ public class FormularMax4000
   private JSplitPane mainContentPanel;
   
   /**
+   * Die normale Größe des Dividers von {@link #mainContentPanel}.
+   */
+  private int defaultDividerSize;
+  
+  /**
    * Oberster Container für den Quelltexteditor. Wird direkt in die ContentPane von myFrame
    * gesteckt. 
    */
@@ -270,6 +280,22 @@ public class FormularMax4000
    * Der Übercontainer für die linke Hälfte des FM4000.
    */
   private LeftPanel leftPanel;
+  
+  /**
+   * Der Übercontainer für die rechte Hälfte des FM4000. 
+   */
+  private RightPanel rightPanel;
+  
+  /**
+   * Ein JPanel mit minimaler und bevorzugter Größe 0, das für die rechte
+   * Seite des FM4000 verwendet wird, wenn diese ausgeblendet sein soll.
+   */
+  private JPanel nonExistingRightPanel;
+
+  /**
+   * Beschreibt die aktuellen Sichtbarkeitseinstellungen des Benutzers.
+   */
+  private ViewVisibilityDescriptor viewVisibilityDescriptor = new ViewVisibilityDescriptor();
   
   /**
    * Der Titel des Formulars.
@@ -458,9 +484,17 @@ public class FormularMax4000
     myFrame.addWindowListener(oehrchen);
     
     leftPanel = new LeftPanel(insertionModelList, formControlModelList, this);
-    RightPanel rightPanel = new RightPanel(insertionModelList, formControlModelList, functionLibrary, this);
+    rightPanel = new RightPanel(insertionModelList, formControlModelList, functionLibrary, this);
+    rightPanel.JComponent().setMinimumSize(new Dimension(100,0)); //damit sich Slider von JSplitPane vernünftig bewegen lässt.
+    nonExistingRightPanel = new JPanel();
+    nonExistingRightPanel.setMinimumSize(new Dimension(0,0));
+    nonExistingRightPanel.setPreferredSize(nonExistingRightPanel.getMinimumSize());
+    nonExistingRightPanel.setMaximumSize(nonExistingRightPanel.getMinimumSize());
+    mainContentPanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel.JComponent(), nonExistingRightPanel);
+    mainContentPanel.setResizeWeight(1.0);
+    defaultDividerSize = mainContentPanel.getDividerSize();
+    mainContentPanel.setDividerSize(0);
     
-    mainContentPanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel.JComponent(), rightPanel.JComponent());
     myFrame.getContentPane().add(mainContentPanel);
     
     mainMenuBar = new JMenuBar();
@@ -488,6 +522,127 @@ public class FormularMax4000
       public void actionPerformed(ActionEvent e)
       {
         abort();
+      }});
+    menu.add(menuItem);
+    
+    mainMenuBar.add(menu);
+//  ========================= Bearbeiten ============================
+    menu = new JMenu("Bearbeiten");
+    
+//  ========================= Bearbeiten/Einfügen ============================
+    JMenu submenu = new JMenu("Standardelemente einfügen");
+    menuItem = new JMenuItem("Empfängerauswahl-Tab");
+    menuItem.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent e)
+      {
+        insertStandardEmpfaengerauswahl();
+        setFrameSize();
+      }
+      });
+    submenu.add(menuItem);
+    
+    menuItem = new JMenuItem("Abbrechen, <-Zurück, Weiter->");
+    menuItem.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent e)
+      {
+        insertStandardButtonsMiddle();
+        setFrameSize();
+      }
+      });
+    submenu.add(menuItem);
+    
+    menuItem = new JMenuItem("Abbrechen, <-Zurück, PDF, Drucken");
+    menuItem.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent e)
+      {
+        insertStandardButtonsLast();
+        setFrameSize();
+      }
+      });
+    submenu.add(menuItem);
+    
+    menu.add(submenu);
+//  ========================= Bearbeiten (Fortsetzung) ============================
+ 
+    menu.addSeparator();
+    
+    menuItem = new JMenuItem("[SPÄTER]Checkboxen zusammenfassen");
+    menuItem.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent e)
+      {
+    
+      }});
+    menu.add(menuItem);
+    
+    menuItem = new JMenuItem("[SPÄTER]ComboBox zerlegen");
+    menuItem.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent e)
+      {
+    
+      }});
+    menu.add(menuItem);
+
+    mainMenuBar.add(menu);
+//  ========================= Ansicht ============================
+    menu = new JMenu("Ansicht");
+    
+    menuItem = new JCheckBoxMenuItem("ID");
+    menuItem.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent e)
+      {
+        viewVisibilityDescriptor.formControlLineViewId = ((AbstractButton)e.getSource()).isSelected();
+        broadcast(new BroadcastViewVisibilitySettings(viewVisibilityDescriptor));
+      }});
+    menuItem.setSelected(viewVisibilityDescriptor.formControlLineViewId);
+    menu.add(menuItem);
+    
+    menuItem = new JCheckBoxMenuItem("LABEL");
+    menuItem.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent e)
+      {
+        viewVisibilityDescriptor.formControlLineViewLabel = ((AbstractButton)e.getSource()).isSelected();
+        broadcast(new BroadcastViewVisibilitySettings(viewVisibilityDescriptor));
+      }});
+    menuItem.setSelected(viewVisibilityDescriptor.formControlLineViewLabel);
+    menu.add(menuItem);
+    
+    menuItem = new JCheckBoxMenuItem("TYPE");
+    menuItem.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent e)
+      {
+        viewVisibilityDescriptor.formControlLineViewType = ((AbstractButton)e.getSource()).isSelected();
+        broadcast(new BroadcastViewVisibilitySettings(viewVisibilityDescriptor));
+      }});
+    menuItem.setSelected(viewVisibilityDescriptor.formControlLineViewType);
+    menu.add(menuItem);
+    
+    menuItem = new JCheckBoxMenuItem("Elementspezifische Felder");
+    menuItem.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent e)
+      {
+        viewVisibilityDescriptor.formControlLineViewAdditional = ((AbstractButton)e.getSource()).isSelected();
+        broadcast(new BroadcastViewVisibilitySettings(viewVisibilityDescriptor));
+      }});
+    menuItem.setSelected(viewVisibilityDescriptor.formControlLineViewAdditional);
+    menu.add(menuItem);
+    
+    menuItem = new JCheckBoxMenuItem("TRAFO, PLAUSI, AUTOFILL");
+    menuItem.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent e)
+      {
+        if (((AbstractButton)e.getSource()).isSelected())
+        {
+          mainContentPanel.setDividerSize(defaultDividerSize); 
+          mainContentPanel.setRightComponent(rightPanel.JComponent());
+          mainContentPanel.setResizeWeight(0.6);
+        }
+        else
+        {
+          mainContentPanel.setDividerSize(0); 
+          mainContentPanel.setRightComponent(nonExistingRightPanel);
+          mainContentPanel.setResizeWeight(1.0);
+        }
+        setFrameSize();
       }});
     menu.add(menuItem);
     
@@ -554,40 +709,6 @@ public class FormularMax4000
       }});
     menu.add(menuItem);
 
-    
-    mainMenuBar.add(menu);
-//  ========================= Einfügen ============================
-    menu = new JMenu("Einfügen");
-    menuItem = new JMenuItem("Empfängerauswahl-Tab");
-    menuItem.addActionListener(new ActionListener(){
-      public void actionPerformed(ActionEvent e)
-      {
-        insertStandardEmpfaengerauswahl();
-        setFrameSize();
-      }
-      });
-    menu.add(menuItem);
-    
-    menuItem = new JMenuItem("Abbrechen, <-Zurück, Weiter->");
-    menuItem.addActionListener(new ActionListener(){
-      public void actionPerformed(ActionEvent e)
-      {
-        insertStandardButtonsMiddle();
-        setFrameSize();
-      }
-      });
-    menu.add(menuItem);
-    
-    menuItem = new JMenuItem("Abbrechen, <-Zurück, PDF, Drucken");
-    menuItem.addActionListener(new ActionListener(){
-      public void actionPerformed(ActionEvent e)
-      {
-        insertStandardButtonsLast();
-        setFrameSize();
-      }
-      });
-    menu.add(menuItem);
-    
     
     mainMenuBar.add(menu);
 

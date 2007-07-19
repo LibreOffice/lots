@@ -10,6 +10,7 @@
 * -------------------------------------------------------------------
 * 30.08.2006 | BNK | Erstellung
 * 10.09.2006 | BNK | [R3208]Tab-Struktur des Formulars bereits im FM4000 anzeigen
+* 19.01.2007 | BNK | [R5406]+broadcastViewVisibilitySettings()
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -36,6 +37,7 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 
 import de.muenchen.allg.itd51.wollmux.Logger;
@@ -43,6 +45,7 @@ import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastObjectSelection;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
 import de.muenchen.allg.itd51.wollmux.former.IndexList;
+import de.muenchen.allg.itd51.wollmux.former.ViewVisibilityDescriptor;
 import de.muenchen.allg.itd51.wollmux.former.control.FormControlModelList.ItemListener;
 import de.muenchen.allg.itd51.wollmux.former.view.View;
 
@@ -137,6 +140,10 @@ public class AllFormControlLineViewsPanel implements View, ItemListener, OneForm
     firstTab.add(Box.createGlue(), gbcBottomGlue);
     
     scrollPane = new JScrollPane(tabPane);
+      // Scrollbars immer anzeigen, da sonst die preferred size zu klein berechnet wird,
+      // was den nervigen Effekt hat, dass das Fenster ein bisschen zu klein ist.
+    scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
+    scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
     scrollPane.setBorder(BorderFactory.createLineBorder(Color.WHITE, 1));
     
      //    int gridx, int gridy, int gridwidth, int gridheight, double weightx, double weighty, int anchor,          int fill,                  Insets insets, int ipadx, int ipady)
@@ -584,6 +591,24 @@ public class AllFormControlLineViewsPanel implements View, ItemListener, OneForm
         }
       }
 
+    }
+    
+    public void broadcastViewVisibilitySettings(ViewVisibilityDescriptor desc)
+    {
+      /*
+       * Unabhängige Kopie des Deskriptors machen, da die
+       * OneFormControlLineViews sich den Deskriptor merken. Eine Kopie reicht
+       * für alle OneFormControlLineViews, da diese keine Änderungen daran
+       * vornehmen.
+       */
+      ViewVisibilityDescriptor newDesc = new ViewVisibilityDescriptor(desc);
+      
+      Iterator iter = viewDescriptors.iterator();
+      while (iter.hasNext())
+      {
+        ViewDescriptor viewDescriptor = (ViewDescriptor)iter.next();
+        viewDescriptor.view.setViewVisibilityDescriptor(newDesc);
+      }
     }
   }
   

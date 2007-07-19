@@ -105,7 +105,7 @@ public abstract class OnDemandCardView implements View
     emptyPanel.add(new JLabel(label));
     myPanel.add(emptyPanel, EMPTY_PANEL);
     
-    myPanel.add(makeInactivePanel(), INACTIVE_PANEL);
+    myPanel.add(makeInactivePanel(label), INACTIVE_PANEL);
   }
 
   /**
@@ -174,17 +174,28 @@ public abstract class OnDemandCardView implements View
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
-  private JPanel makeInactivePanel()
+  private JPanel makeInactivePanel(String label)
   {
     JPanel inactivePanel = new JPanel();
     inactivePanel.setLayout(new BoxLayout(inactivePanel, BoxLayout.Y_AXIS));
-    inactivePanel.add(Box.createGlue());
+    
+    inactivePanel.add(Box.createVerticalStrut(5));
+    
     Box hbox = Box.createHorizontalBox();
+    hbox.add(Box.createHorizontalGlue());
+    hbox.add(new JLabel(label));
+    hbox.add(Box.createHorizontalGlue());
+    inactivePanel.add(hbox);
+    
+    inactivePanel.add(Box.createGlue());
+    
+    hbox = Box.createHorizontalBox();
     hbox.add(Box.createHorizontalGlue());
     JButton button = new JButton("Aktivieren");
     hbox.add(button);
     hbox.add(Box.createHorizontalGlue());
     inactivePanel.add(hbox);
+    
     inactivePanel.add(Box.createGlue());
     
     button.addActionListener(new ActionListener(){
