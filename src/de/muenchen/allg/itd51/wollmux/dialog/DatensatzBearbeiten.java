@@ -27,7 +27,8 @@
 * 19.04.2006 | BNK | [R1337]Fehlermeldung, bei unbekanntem TYPE
 * 15.05.2006 | BNK | nicht-editierbare Comboboxen funktionieren jetzt hoffentlich 
 *                  | richtig mit Vorgabewerten, die nicht in der Liste sind.
-* 29.09.2006 | BNK | Verbessertes Auslesen von ComboBox-Daten                 
+* 29.09.2006 | BNK | Verbessertes Auslesen von ComboBox-Daten            
+* 23.07.2006 | BNK | [R2551][23097]Scrollbar machen     
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -849,13 +850,15 @@ public class DatensatzBearbeiten
       
       myPanel = new JPanel(new BorderLayout());
       myInputPanel = new JPanel();
+      JScrollPane pain = new JScrollPane(myInputPanel, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+      pain.setBorder(null);
       myButtonPanel = new JPanel();
       
       myInputPanel.setLayout(new GridBagLayout());//new BoxLayout(myInputPanel, BoxLayout.PAGE_AXIS));
       myButtonPanel.setLayout(new BoxLayout(myButtonPanel, BoxLayout.LINE_AXIS));
       myButtonPanel.setBorder(BorderFactory.createEmptyBorder(TF_BORDER,0,0,0));
       
-      myPanel.add(myInputPanel, BorderLayout.CENTER);
+      myPanel.add(pain, BorderLayout.CENTER);
       myPanel.add(myButtonPanel, BorderLayout.PAGE_END);
       
         //int gridx, int gridy, int gridwidth, int gridheight, double weightx, double weighty, int anchor,          int fill,                  Insets insets, int ipadx, int ipady) 
