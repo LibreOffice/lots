@@ -96,7 +96,7 @@ public class WollMuxFiles
    * vollständig eingelesen ist, wird ein Popup mit der Meldung
    * {@link #SLOW_SERVER_MESSAGE} gebracht.
    */
-  private static final long SLOW_SERVER_TIMEOUT = 3000;
+  private static final long SLOW_SERVER_TIMEOUT = 5000;
 
   /**
    * Siehe {@link #SLOW_SERVER_TIMEOUT}.
