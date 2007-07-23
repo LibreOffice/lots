@@ -873,6 +873,43 @@ public class WollMuxSingleton implements XPALProvider
   }
 
   /**
+   * Diese Methode tut nichts ausser zu prüfen, ob es sich bei dem übergebenen
+   * String id um einen gültigen Bezeichner gemäß der Syntax für
+   * WollMux-Config-Dateien handelt und im negativen Fall eine
+   * InvalidIdentifierException zu werfen.
+   * 
+   * @param id
+   *          zu prüfende ID
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   * @throws InvalidIdentifierException
+   */
+  public static void checkIdentifier(String id)
+      throws InvalidIdentifierException
+  {
+    if (!id.matches("^[a-zA-Z_][a-zA-Z_0-9]*$"))
+      throw new InvalidIdentifierException(id);
+  }
+
+  public static class InvalidIdentifierException extends java.lang.Exception
+  {
+    private static final long serialVersionUID = 495666967644874471L;
+
+    private String invalidId;
+
+    public InvalidIdentifierException(String invalidId)
+    {
+      this.invalidId = invalidId;
+    }
+
+    public String getMessage()
+    {
+      return "Der Bezeichner '"
+             + invalidId
+             + "' ist ungültig, und darf nur die Zeichen a-z, A-Z, _ und 0-9 enthalten, wobei das erste Zeichen keine Ziffer sein darf.";
+    }
+  }
+
+  /**
    * Liefert true, wenn für das XTextDocument doc ein TextDocumentModel im
    * WollMuxSingleton registriert ist, ansonsten false.
    * 

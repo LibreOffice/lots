@@ -32,6 +32,7 @@ import java.util.regex.Pattern;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
+import de.muenchen.allg.itd51.wollmux.WollMuxSingleton.InvalidIdentifierException;
 
 /**
  * TODO: überarbeiten! Die VisibleTextFragmentList repräsentiert die
@@ -147,9 +148,13 @@ public class VisibleTextFragmentList
    * @param frag_id
    *          Die ID des gesuchten Textfragments.
    * @return die URL des unter der frag_id definierten Textfragments.
+   * @throws InvalidIdentifierException
    */
   public static Vector getURLsByID(String frag_id)
+      throws InvalidIdentifierException
   {
+    WollMuxSingleton.checkIdentifier(frag_id);
+
     ConfigThingy conf = WollMuxSingleton.getInstance().getWollmuxConf();
 
     LinkedList tfListe = new LinkedList();
@@ -224,4 +229,5 @@ public class VisibleTextFragmentList
     }
     return urls;
   }
+
 }

@@ -79,6 +79,7 @@ import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.FormModelImpl.InvalidFormDescriptorException;
 import de.muenchen.allg.itd51.wollmux.TextDocumentModel.PrintFailedException;
+import de.muenchen.allg.itd51.wollmux.WollMuxSingleton.InvalidIdentifierException;
 import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.DJDataset;
 import de.muenchen.allg.itd51.wollmux.db.DJDatasetListElement;
@@ -1352,17 +1353,24 @@ public class WollMuxEventHandler
         // Fragment-URL holen und aufbereiten:
         Vector urls = new Vector();
 
-        urls = VisibleTextFragmentList.getURLsByID(frag_id);
+        java.lang.Exception error = new ConfigurationErrorException(
+            "Das Textfragment mit der FRAG_ID '"
+                + frag_id
+                + "' ist nicht definiert!");
+        try
+        {
+          urls = VisibleTextFragmentList.getURLsByID(frag_id);
+        }
+        catch (InvalidIdentifierException e)
+        {
+          error = e;
+        }
         if (urls.size() == 0)
         {
           throw new WollMuxFehlerException(
               "Die URL zum Textfragment mit der FRAG_ID '"
                   + frag_id
-                  + "' kann nicht bestimmt werden:",
-              new ConfigurationErrorException(
-                  "Das Textfragment mit der FRAG_ID '"
-                      + frag_id
-                      + "' ist nicht definiert!"));
+                  + "' kann nicht bestimmt werden:", error);
         }
 
         // Nur die erste funktionierende URL verwenden. Dazu werden alle URL zu
