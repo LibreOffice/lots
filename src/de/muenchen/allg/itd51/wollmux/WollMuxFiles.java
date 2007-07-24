@@ -96,12 +96,12 @@ public class WollMuxFiles
    * vollständig eingelesen ist, wird ein Popup mit der Meldung
    * {@link #SLOW_SERVER_MESSAGE} gebracht.
    */
-  private static final long SLOW_SERVER_TIMEOUT = 5000;
+  private static final long SLOW_SERVER_TIMEOUT = 10000;
 
   /**
    * Siehe {@link #SLOW_SERVER_TIMEOUT}.
    */
-  private static final String SLOW_SERVER_MESSAGE = "Ihr Vorlagen-Server und/oder Ihre Netzwerkverbindung sind sehr langsam.\nDies kann die Arbeit mit OpenOffice.org stark beeinträchtigen.\nBitte wenden Sie sich an Ihre Systemadministration.";
+  private static final String SLOW_SERVER_MESSAGE = "Ihr Vorlagen-Server und/oder Ihre Netzwerkverbindung sind sehr langsam.\nDies kann die Arbeit mit OpenOffice.org stark beeinträchtigen.";
 
   private static final WollMuxClassLoader classLoader = new WollMuxClassLoader();
 
