@@ -70,6 +70,7 @@ import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertContent;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertFormValue;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertFrag;
+import de.muenchen.allg.itd51.wollmux.DocumentCommand.OverrideFrag;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.SetPrintFunction;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.SetType;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.UpdateFields;
@@ -692,23 +693,70 @@ public class DocumentCommandInterpreter
     }
 
     /**
-     * Führt die Dokumentkommandos von tree aus, der dabei so lange aktualisiert
-     * wird, bis der Baum vollständig aufgebaut ist.
+     * Führt die Dokumentkommandos von commands aus, welche so lange
+     * aktualisiert werden, bis das Dokument vollständig aufgebaut ist. Die
+     * Dokumentkommandos OverrideFrags erhalten dabei eine Sonderrolle, da sie
+     * bereits vor den anderen Dokumentkommandos (insertFrag/insertContent)
+     * abgefeiert werden.
      * 
      * @param tree
      * @return
+     * @throws WMCommandsFailedException
      */
     public int execute(DocumentCommands commands)
+        throws WMCommandsFailedException
     {
       int errors = 0;
 
       // so lange wiederholen, bis sich der Baum durch das Expandieren nicht
       // mehr ändert.
       do
+      {
+        errors += executeOverrideFrags(commands);
         errors += executeAll(commands);
-      while (commands.update());
+      } while (commands.update());
 
       return errors;
+    }
+
+    /**
+     * führt alle OverrideFrag-Kommandos aus commands aus, wenn sie nicht den
+     * Status DONE=true oder ERROR=true besitzen.
+     * 
+     * @param commands
+     * @return Anzahl der bei der Ausführung aufgetretenen Fehler.
+     */
+    protected int executeOverrideFrags(DocumentCommands commands)
+    {
+      int errors = 0;
+
+      // Alle DocumentCommands durchlaufen und mit execute aufrufen.
+      for (Iterator iter = commands.iterator(); iter.hasNext();)
+      {
+
+        DocumentCommand cmd = (DocumentCommand) iter.next();
+        if (!(cmd instanceof OverrideFrag)) continue;
+
+        if (cmd.isDone() == false && cmd.hasError() == false)
+        {
+          // Kommando ausführen und Fehler zählen
+          errors += cmd.execute(this);
+        }
+      }
+      return errors;
+    }
+
+    /**
+     * Wertet ein OverrideFrag-Kommandos aus, über das Fragmente umgemapped
+     * werden können, und setzt das Kommando sofort auf DONE. Dies geschieht vor
+     * der Bearbeitung der anderen Kommandos (insertFrag/insertContent), da das
+     * mapping beim insertFrag/insertContent benötigt wird.
+     */
+    public int executeCommand(OverrideFrag cmd)
+    {
+      model.setOverrideFrag(cmd.getFragID(), cmd.getNewFragID());
+      cmd.markDone(!mux.isDebugMode());
+      return 0;
     }
 
     /**
@@ -722,10 +770,23 @@ public class DocumentCommandInterpreter
       boolean found = false;
       String errors = "";
       Vector urls = new Vector();
+      String fragId = "";
 
       try
       {
-        urls = VisibleTextFragmentList.getURLsByID(cmd.getFragID());
+        fragId = model.getOverrideFrag(cmd.getFragID());
+
+        // Bei leeren FragIds wird nur der Text unter dem Dokumentkommando
+        // gelöscht und das Dokumentkommando auf DONE gesetzt.
+        if (fragId.length() == 0)
+        {
+          XTextCursor insCursor = cmd.createInsertCursor(false);
+          if (insCursor != null) insCursor.setString("");
+          cmd.markDone(false);
+          return 0;
+        }
+
+        urls = VisibleTextFragmentList.getURLsByID(fragId);
         if (urls.size() == 0)
         {
           throw new ConfigurationErrorException(

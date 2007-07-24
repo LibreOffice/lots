@@ -231,6 +231,13 @@ public class TextDocumentModel
   private boolean partOfMultiform;
 
   /**
+   * Enthält ein ein Mapping von alten FRAG_IDs fragId auf die jeweils neuen
+   * FRAG_IDs newFragId, die über im Dokument enthaltene Dokumentkommando WM(CMD
+   * 'overrideFrag' FRAG_ID 'fragId' NEW_FRAG_ID 'newFragId') entstanden sind.
+   */
+  private HashMap /* of String */overrideFragMap;
+
+  /**
    * Erzeugt ein neues TextDocumentModel zum XTextDocument doc und sollte nie
    * direkt aufgerufen werden, da neue TextDocumentModels über das
    * WollMuxSingleton (siehe WollMuxSingleton.getTextDocumentModel()) erzeugt
@@ -251,6 +258,7 @@ public class TextDocumentModel
     this.formularConf = new ConfigThingy("WM");
     this.formFieldValues = new HashMap();
     this.invisibleGroups = new HashSet();
+    this.overrideFragMap = new HashMap();
     this.formModel = null;
     this.printModel = new PrintModel(this);
 
@@ -613,6 +621,30 @@ public class TextDocumentModel
   public void setFragUrls(String[] fragUrls)
   {
     this.fragUrls = fragUrls;
+  }
+
+  /**
+   * Registriert das Überschreiben des Textfragments fragId auf den neuen Namen
+   * newFragId im TextDocumentModel, wenn das Textfragment fragId nicht bereits
+   * überschrieben wurde.
+   */
+  public void setOverrideFrag(String fragId, String newFragId)
+  {
+    if (!overrideFragMap.containsKey(fragId))
+      overrideFragMap.put(fragId, newFragId);
+  }
+
+  /**
+   * Liefert die neue FragId zurück, die anstelle der FRAG_ID fragId verwendet
+   * werden soll und durch ein WM(CMD 'overrideFrag'...)-Kommando gesetzt wurde,
+   * oder fragId (also sich selbst), wenn keine Überschreibung definiert ist.
+   */
+  public String getOverrideFrag(String fragId)
+  {
+    if (overrideFragMap.containsKey(fragId))
+      return overrideFragMap.get(fragId).toString();
+    else
+      return fragId;
   }
 
   /**

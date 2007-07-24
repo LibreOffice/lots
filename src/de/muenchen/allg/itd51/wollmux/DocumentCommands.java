@@ -42,6 +42,7 @@ import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertFunctionValue;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertValue;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InvalidCommand;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.NotInOriginal;
+import de.muenchen.allg.itd51.wollmux.DocumentCommand.OverrideFrag;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.SetGroups;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.SetJumpMark;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.SetPrintFunction;
@@ -531,6 +532,11 @@ public class DocumentCommands
         return new DocumentCommand.SetJumpMark(wmCmd, bookmark);
       }
 
+      else if (cmd.compareToIgnoreCase("overrideFrag") == 0)
+      {
+        return new DocumentCommand.OverrideFrag(wmCmd, bookmark);
+      }
+
       throw new DocumentCommand.InvalidCommandException(
           "Unbekanntes Kommando \"" + cmd + "\"");
     }
@@ -550,15 +556,10 @@ public class DocumentCommands
   public static class Executor implements DocumentCommand.Executor
   {
     /**
-     * Durchläuft den Dokumentenbaum tree in der in reverse angegebener Richtung
-     * und führt alle enthaltenen Dokumentkommandos aus, die nicht den Status
-     * DONE=true oder ERROR=true besitzen. Der Wert reverse=false entspricht
-     * dabei der normalen Reihenfolge einer Tiefensuche, bei reverse=true wird
-     * der Baum zwar ebenfalls in einer Tiefensuche durchlaufen, jedoch wird
-     * stets mit dem letzten Kind angefangen.
+     * Führt alle Dokumentkommandos aus commands aus, die nicht den Status
+     * DONE=true oder ERROR=true besitzen. 
      * 
      * @param commands
-     * @param reverse
      * @return Anzahl der bei der Ausführung aufgetretenen Fehler.
      */
     protected int executeAll(DocumentCommands commands)
@@ -650,6 +651,11 @@ public class DocumentCommands
     }
 
     public int executeCommand(SetJumpMark cmd)
+    {
+      return 0;
+    }
+
+    public int executeCommand(OverrideFrag cmd)
     {
       return 0;
     }

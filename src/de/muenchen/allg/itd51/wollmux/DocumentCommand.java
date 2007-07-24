@@ -135,7 +135,8 @@ abstract public class DocumentCommand
     }
 
     // Workaround für OOo-Issue #73568
-    if(insertsTextContent() && bookmark.isCollapsed()) {
+    if (insertsTextContent() && bookmark.isCollapsed())
+    {
       bookmark.decollapseBookmark();
     }
   }
@@ -710,6 +711,8 @@ abstract public class DocumentCommand
     public int executeCommand(DocumentCommand.AllVersions cmd);
 
     public int executeCommand(DocumentCommand.SetJumpMark cmd);
+
+    public int executeCommand(DocumentCommand.OverrideFrag cmd);
   }
 
   // ********************************************************************************
@@ -1048,7 +1051,7 @@ abstract public class DocumentCommand
     {
       return visitable.executeCommand(this);
     }
-    
+
     protected boolean insertsTextContent()
     {
       return true;
@@ -1251,6 +1254,63 @@ abstract public class DocumentCommand
     String getType()
     {
       return type;
+    }
+
+    public int execute(DocumentCommand.Executor visitable)
+    {
+      return visitable.executeCommand(this);
+    }
+  }
+
+  // ********************************************************************************
+  /**
+   * Dieses Kommando dient zum Überschreiben von FRAG_IDs, die mit insertFrag
+   * oder insertContent eingefügt werden sollen.
+   */
+  static public class OverrideFrag extends DocumentCommand
+  {
+    private String fragId;
+
+    private String newFragId = null;
+
+    public OverrideFrag(ConfigThingy wmCmd, Bookmark bookmark)
+        throws InvalidCommandException
+    {
+      super(wmCmd, bookmark);
+      fragId = "";
+      try
+      {
+        fragId = wmCmd.get("WM").get("FRAG_ID").toString();
+      }
+      catch (NodeNotFoundException e)
+      {
+        throw new InvalidCommandException("Fehlendes Attribut FRAG_ID");
+      }
+      try
+      {
+        newFragId = wmCmd.get("WM").get("NEW_FRAG_ID").toString();
+      }
+      catch (NodeNotFoundException e)
+      {
+        // NEW_FRAG_ID ist optional
+      }
+    }
+
+    String getFragID()
+    {
+      return fragId;
+    }
+
+    /**
+     * Liefert die neue FragID oder den Leerstring, wenn keine FragID angegeben
+     * wurde.
+     * 
+     * @author Christoph Lutz (D-III-ITD-5.1)
+     */
+    String getNewFragID()
+    {
+      if (newFragId == null) return "";
+      return newFragId;
     }
 
     public int execute(DocumentCommand.Executor visitable)
