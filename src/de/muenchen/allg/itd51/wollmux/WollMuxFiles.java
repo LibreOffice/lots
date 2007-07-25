@@ -62,6 +62,7 @@ import javax.swing.SwingUtilities;
 import com.sun.star.beans.Property;
 import com.sun.star.container.XNameAccess;
 import com.sun.star.uno.AnyConverter;
+import com.sun.star.util.XStringSubstitution;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoProps;
@@ -838,6 +839,33 @@ public class WollMuxFiles
       out.write("wollmuxLogFile: " + getWollMuxLogFile() + "\n");
       out.write("wollmuxConfFile: " + getWollMuxConfFile() + "\n");
       out.write("losCacheFile: " + getLosCacheFile() + "\n");
+
+      out.write("===================== START JVM-Settings ==================\n");
+      try
+      {
+        XStringSubstitution subst = UNO.XStringSubstitution(UNO.createUNOService("com.sun.star.util.PathSubstitution"));
+        URL jConfPath = new URL(subst.substituteVariables("$(user)/config", true));
+        File[] jConfFiles = new File(jConfPath.getFile()).listFiles();
+        boolean found = false;
+        for (int i = 0; i < jConfFiles.length; i++)
+        {
+          if (!jConfFiles[i].getName().matches("^[Jj]avasettings_.*_.*\\.(xml|XML)$")) continue;
+          out.flush(); // weil wir gleich direkt auf den Stream zugreifen
+          copyFile(jConfFiles[i], outStream);
+          outStream.flush(); // sollte nicht nötig sein, schadet aber nicht
+          out.write("\n");
+          found = true;
+          break;
+        }
+        if (!found) out.write("Datei '" + jConfPath + "/javasettings_*_*.xml' konnte nicht gefunden werden.\n");
+      }
+      catch (java.lang.Exception e)
+      {
+        out.write("Kann JVM-Settings nicht bestimmen: " + e.getMessage() + "\n");
+      }
+      out.write("===================== END JVM-Settings ==================\n");
+      
+      out.write("===================== START java-properties ==================\n");
       Properties props = System.getProperties();
       Enumeration enu = props.propertyNames();
       while (enu.hasMoreElements())
@@ -845,22 +873,20 @@ public class WollMuxFiles
         String key = enu.nextElement().toString();
         out.write(key + ": " + props.getProperty(key) +"\n");
       }
-      out
-          .write("===================== START wollmuxConfFile ==================\n");
+      out.write("===================== END java-properties ==================\n");
+      
+      out.write("===================== START wollmuxConfFile ==================\n");
       out.flush(); // weil wir gleich direkt auf den Stream zugreifen
       copyFile(getWollMuxConfFile(), outStream);
       outStream.flush(); // sollte nicht nötig sein, schadet aber nicht
       out.write("\n");
-      out
-          .write("===================== END wollmuxConfFile ==================\n");
+      out.write("===================== END wollmuxConfFile ==================\n");
 
-      out
-          .write("===================== START wollmux.conf ==================\n");
+      out.write("===================== START wollmux.conf ==================\n");
       out.write(getWollmuxConf().stringRepresentation());
       out.write("===================== END wollmux.conf ==================\n");
 
-      out
-          .write("===================== START losCacheFile ==================\n");
+      out.write("===================== START losCacheFile ==================\n");
       out.flush(); // weil wir gleich direkt auf den Stream zugreifen
       copyFile(getLosCacheFile(), outStream);
       outStream.flush(); // sollte nicht nötig sein, schadet aber nicht
@@ -874,12 +900,10 @@ public class WollMuxFiles
       out.write("\n");
       out.write("===================== END wollmux.log ==================\n");
 
-      out
-          .write("===================== START OOo-Configuration dump ==================\n");
+      out.write("===================== START OOo-Configuration dump ==================\n");
       out.write(dumpOOoConfiguration("/org.openoffice.Office.Writer/") + "\n");
       out.write(dumpOOoConfiguration("/org.openoffice.Inet/") + "\n");
-      out
-          .write("===================== END OOo-Configuration dump ==================\n");
+      out.write("===================== END OOo-Configuration dump ==================\n");
       out.close();
     }
     catch (IOException x)
