@@ -54,6 +54,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
@@ -844,12 +845,13 @@ public class WollMuxFiles
       try
       {
         XStringSubstitution subst = UNO.XStringSubstitution(UNO.createUNOService("com.sun.star.util.PathSubstitution"));
-        URL jConfPath = new URL(subst.substituteVariables("$(user)/config", true));
-        File[] jConfFiles = new File(jConfPath.getFile()).listFiles();
+        String jConfPath = new URL(subst.substituteVariables("$(user)/config", true)).toURI().getPath();
+        File[] jConfFiles = new File(jConfPath).listFiles();
+        Pattern p = Pattern.compile("^javasettings_.*\\.xml$", Pattern.CASE_INSENSITIVE);
         boolean found = false;
         for (int i = 0; i < jConfFiles.length; i++)
         {
-          if (!jConfFiles[i].getName().matches("^[Jj]avasettings_.*_.*\\.(xml|XML)$")) continue;
+          if (!p.matcher(jConfFiles[i].getName()).matches()) continue;
           out.flush(); // weil wir gleich direkt auf den Stream zugreifen
           copyFile(jConfFiles[i], outStream);
           outStream.flush(); // sollte nicht nötig sein, schadet aber nicht
@@ -857,11 +859,11 @@ public class WollMuxFiles
           found = true;
           break;
         }
-        if (!found) out.write("Datei '" + jConfPath + "/javasettings_*_*.xml' konnte nicht gefunden werden.\n");
+        if (!found) out.write("Datei '" + jConfPath + "/javasettings_*.xml' konnte nicht gefunden werden.\n");
       }
       catch (java.lang.Exception e)
       {
-        out.write("Kann JVM-Settings nicht bestimmen: " + e.getMessage() + "\n");
+        out.write("Kann JVM-Settings nicht bestimmen: " + e + "\n");
       }
       out.write("===================== END JVM-Settings ==================\n");
       
