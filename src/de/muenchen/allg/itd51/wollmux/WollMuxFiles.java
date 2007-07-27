@@ -19,10 +19,11 @@
  * 19.10.2006 | BNK | +dumpInfo()
  * 05.12.2006 | BNK | +getClassPath()
  * 20.12.2006 | BNK | CLASSPATH:Falls keine Dateierweiterung angegeben, / ans Ende setzen, weil nur so Verzeichnisse erkannt werden.
- * 09.07.2006 | BNK | [R7134]Popup, wenn Server langsam
- * 09.07.2006 | BNK | [R7137]IP-Adresse in Dumpinfo
- * 17.07.2006 | BNK | [R7605]Dateien bin‰r kopieren in dumpInfo(), auﬂerdem immer als UTF-8 schreiben
- * 18.07.2006 | BNK | Alle Java-Properties in dumpInfo() ausgeben
+ * 09.07.2007 | BNK | [R7134]Popup, wenn Server langsam
+ * 09.07.2007 | BNK | [R7137]IP-Adresse in Dumpinfo
+ * 17.07.2007 | BNK | [R7605]Dateien bin‰r kopieren in dumpInfo(), auﬂerdem immer als UTF-8 schreiben
+ * 18.07.2007 | BNK | Alle Java-Properties in dumpInfo() ausgeben
+ * 27.07.2007 | BNK | [P1448]WollMuxClassLoader.class.getClassLoader() als parent verwenden 
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -179,9 +180,6 @@ public class WollMuxFiles
   public static void setupWollMuxDir()
   {
     long time = System.currentTimeMillis();
-    SlowServerWatchdog fido = new SlowServerWatchdog(SLOW_SERVER_TIMEOUT);
-    fido.start();
-
     String userHome = System.getProperty("user.home");
     wollmuxDir = new File(userHome, ".wollmux");
 
@@ -218,6 +216,9 @@ public class WollMuxFiles
     if (WollMuxFiles.getWollMuxLogFile() != null)
       Logger.init(WollMuxFiles.getWollMuxLogFile(), Logger.LOG);
 
+    SlowServerWatchdog fido = new SlowServerWatchdog(SLOW_SERVER_TIMEOUT);
+    fido.start();
+    
     /*
      * Jetzt versuchen, die wollmux.conf zu parsen (falls die Datei existiert).
      */
@@ -231,6 +232,8 @@ public class WollMuxFiles
     {
       Logger.error(e);
     }
+    
+    fido.dontBark();
 
     /*
      * Logging-Mode zum ersten Mal setzen. Wird nachher nochmal gesetzt, nachdem
@@ -284,7 +287,6 @@ public class WollMuxFiles
 
     setLookAndFeel();
 
-    fido.dontBark();
     Logger.debug(".wollmux init time: "
                  + (System.currentTimeMillis() - time)
                  + "ms");
@@ -1110,7 +1112,7 @@ public class WollMuxFiles
   {
     public WollMuxClassLoader()
     {
-      super(new URL[] {});
+      super(new URL[] {}, WollMuxClassLoader.class.getClassLoader());
     }
 
     public void addURL(URL url)
