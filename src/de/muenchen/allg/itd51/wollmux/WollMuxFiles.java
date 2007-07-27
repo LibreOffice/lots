@@ -275,6 +275,8 @@ public class WollMuxFiles
      * Logging-Mode endgültig setzen.
      */
     setLoggingMode(WollMuxFiles.getWollmuxConf());
+    
+    fido.logTimes();
 
     showCredits = WollMuxFiles.getWollmuxConf().query("SHOW_CREDITS", 1).query(
         "on").count() > 0;
@@ -1054,18 +1056,26 @@ public class WollMuxFiles
 
   private static class SlowServerWatchdog extends Thread
   {
+    private long initTime;
+    private long startTime;
     private long endTime;
+    private long timeout;
+    private long testTime;
+    private long dontBarkTime = 0;
 
     private boolean[] bark = new boolean[] { true };
 
     public SlowServerWatchdog(long timeout)
     {
-      endTime = System.currentTimeMillis() + timeout;
+      initTime = System.currentTimeMillis();
+      this.timeout = timeout;
       setDaemon(true);
     }
 
     public void run()
     {
+      startTime = System.currentTimeMillis();
+      endTime = startTime + timeout;
       while (true)
       {
         long wait = endTime - System.currentTimeMillis();
@@ -1081,6 +1091,7 @@ public class WollMuxFiles
 
       synchronized (bark)
       {
+        testTime = System.currentTimeMillis();
         if (!bark[0]) return;
       }
 
@@ -1102,8 +1113,14 @@ public class WollMuxFiles
     {
       synchronized (bark)
       {
+        dontBarkTime = System.currentTimeMillis();
         bark[0] = false;
       }
+    }
+    
+    public void logTimes()
+    {
+      Logger.debug("init: "+initTime+" start: "+startTime+" end: "+endTime+ " test: "+testTime+ " dontBark: "+dontBarkTime);
     }
 
   }
