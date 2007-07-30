@@ -33,14 +33,23 @@ import java.util.regex.Pattern;
 import com.sun.star.awt.DeviceInfo;
 import com.sun.star.awt.PosSize;
 import com.sun.star.awt.XWindow;
+import com.sun.star.beans.Property;
+import com.sun.star.beans.PropertyAttribute;
 import com.sun.star.beans.PropertyValue;
+import com.sun.star.beans.PropertyVetoException;
+import com.sun.star.beans.UnknownPropertyException;
+import com.sun.star.beans.XPropertyChangeListener;
 import com.sun.star.beans.XPropertySet;
+import com.sun.star.beans.XPropertySetInfo;
+import com.sun.star.beans.XVetoableChangeListener;
 import com.sun.star.container.XEnumeration;
 import com.sun.star.container.XNameAccess;
 import com.sun.star.frame.FrameSearchFlag;
 import com.sun.star.frame.XController;
 import com.sun.star.frame.XFrame;
 import com.sun.star.lang.EventObject;
+import com.sun.star.lang.IllegalArgumentException;
+import com.sun.star.lang.WrappedTargetException;
 import com.sun.star.lib.uno.helper.WeakBase;
 import com.sun.star.text.XBookmarksSupplier;
 import com.sun.star.text.XDependentTextField;
@@ -51,6 +60,7 @@ import com.sun.star.text.XTextRange;
 import com.sun.star.text.XTextViewCursorSupplier;
 import com.sun.star.uno.AnyConverter;
 import com.sun.star.uno.RuntimeException;
+import com.sun.star.uno.Type;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.util.CloseVetoException;
 import com.sun.star.util.XCloseListener;
@@ -124,6 +134,37 @@ public class TextDocumentModel
    */
   private static final Pattern WOLLMUX_BOOKMARK_PATTERN = Pattern
       .compile("(\\A\\s*WM\\s*\\(.*\\)\\s*\\d*\\z)");
+
+  /**
+   * Wird von printWithPageRange ausgewertet und enthält die Möglichen Typen,
+   * über die bestimmt wird, welcher Bereich des Dokuments ausgedruckt werden
+   * soll - *_ALL steht dabei für alle Seiten des Dokuments.
+   */
+  public static final short PAGE_RANGE_TYPE_ALL = 1;
+
+  /**
+   * Wird von printWithPageRange ausgewertet und enthält die Möglichen Typen,
+   * über die bestimmt wird, welcher Bereich des Dokuments ausgedruckt werden
+   * soll - *_CURRENT steht dabei für die Seite in der sich aktuell der
+   * ViewCursor befindet.
+   */
+  public static final short PAGE_RANGE_TYPE_CURRENT = 2;
+
+  /**
+   * Wird von printWithPageRange ausgewertet und enthält die Möglichen Typen,
+   * über die bestimmt wird, welcher Bereich des Dokuments ausgedruckt werden
+   * soll - *_CURRENT steht dabei für die Seite in der sich aktuell der
+   * ViewCursor befindet und alle Folgeseiten bis zum Dokumentende.
+   */
+  public static final short PAGE_RANGE_TYPE_CURRENTFF = 3;
+
+  /**
+   * Wird von printWithPageRange ausgewertet und enthält die Möglichen Typen,
+   * über die bestimmt wird, welcher Bereich des Dokuments ausgedruckt werden
+   * soll - *_MANUAL steht dabei für die Manuelle Eingabe eines Bereichs über
+   * eine Variable pageBreakValue.
+   */
+  public static final short PAGE_RANGE_TYPE_MANUAL = 4;
 
   /**
    * Ermöglicht den Zugriff auf eine Collection aller FormField-Objekte in
@@ -1621,6 +1662,80 @@ public class TextDocumentModel
 
       try
       {
+        Logger.debug("Drucke "
+                     + this
+                     + " mit CopyCount="
+                     + numberOfCopies
+                     + " und allen Seiten.");
+        UNO.XPrintable(doc).print(args);
+      }
+      catch (java.lang.Exception e)
+      {
+        throw new PrintFailedException(e);
+      }
+    }
+  }
+
+  /**
+   * Druckt den über pageRangeType/pageRangeValue spezifizierten Bereich des
+   * Dokuments in der Anzahl numberOfCopies auf dem aktuell eingestellten
+   * Drucker aus.
+   * 
+   * @param numberOfCopies
+   *          Bestimmt die Anzahl der Kopien
+   * @param pageRangeType
+   *          Legt den Typ des Druckbereichs fest. Folgende Möglichkeiten gibt
+   *          es: TextDocumentModel. PAGE_RANGE_TYPE_ALL,
+   *          PAGE_RANGE_TYPE_CURRENT, PAGE_RANGE_TYPE_CURRENTFF,
+   *          PAGE_RANGE_TYPE_MANUAL (hier wird pageRangeValue zwingend
+   *          benötigt).
+   * @param pageRangeValue
+   *          wird in Verbindung mit dem pageRangeType PAGE_RANGE_TYPE_MANUAL
+   *          zwingend benötigt und enthält den zu druckenden Bereich als
+   *          String.
+   * @throws PrintFailedException
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  public void printWithPageRange(short numberOfCopies, int pageRangeType,
+      String pageRangeValue) throws PrintFailedException
+  {
+    // pr mit aktueller Seite vorbelegen (oder 1 als fallback)
+    String pr = "1";
+    if (UNO.XPageCursor(getViewCursor()) != null)
+      pr = "" + UNO.XPageCursor(getViewCursor()).getPage();
+
+    if (pageRangeType == PAGE_RANGE_TYPE_ALL)
+    {
+      print(numberOfCopies);
+      return;
+    }
+    else if (pageRangeType == PAGE_RANGE_TYPE_CURRENTFF)
+      pr += "-" + getPageCount();
+    else if (pageRangeType == PAGE_RANGE_TYPE_MANUAL) pr = pageRangeValue;
+
+    if (UNO.XPrintable(doc) != null)
+    {
+      PropertyValue[] args = new PropertyValue[] {
+                                                  new PropertyValue(),
+                                                  new PropertyValue(),
+                                                  new PropertyValue() };
+      args[0].Name = "CopyCount";
+      args[0].Value = new Short(numberOfCopies);
+      args[1].Name = "Wait";
+      args[1].Value = Boolean.TRUE;
+      args[2].Name = "Pages";
+      args[2].Value = pr;
+
+      try
+      {
+        Logger.debug("Drucke "
+                     + this
+                     + " mit CopyCount="
+                     + numberOfCopies
+                     + " und PageRange='"
+                     + pr
+                     + "'");
         UNO.XPrintable(doc).print(args);
       }
       catch (java.lang.Exception e)
@@ -1817,6 +1932,13 @@ public class TextDocumentModel
    */
   public static class PrintModel extends WeakBase implements XPrintModel
   {
+    /**
+     * Enthält die Properties, die in printWithProps() ausgewertet werden und
+     * über die get/setPropertyValue-Methoden frei gesetzt und gelesen werden
+     * können.
+     */
+    private HashMap props;
+
     // TODO: Wenn beim Drucken (oder auch bei anderen Aktionen) ein Fehler
     // auftritt, soll das PrintModel alle weiteren Anfragen verweigern.
     /**
@@ -1834,6 +1956,7 @@ public class TextDocumentModel
     private PrintModel(TextDocumentModel model)
     {
       this.model = model;
+      this.props = new HashMap();
     }
 
     /**
@@ -1854,12 +1977,8 @@ public class TextDocumentModel
      */
     public void print(short numberOfCopies)
     {
-      setLock();
-      WollMuxEventHandler.handlePrintViaPrintModel(
-          model.doc,
-          numberOfCopies,
-          unlockActionListener);
-      waitForUnlock();
+      props.put("CopyCount", new Integer(numberOfCopies));
+      printWithProps();
     }
 
     /**
@@ -1885,7 +2004,8 @@ public class TextDocumentModel
      *      short, boolean, boolean)
      */
     public void printVerfuegungspunkt(short verfPunkt, short numberOfCopies,
-        boolean isDraft, boolean isOriginal)
+        boolean isDraft, boolean isOriginal, short pageRangeType,
+        String pageRangeValue)
     {
       setLock();
       WollMuxEventHandler.handlePrintVerfuegungspunkt(
@@ -1894,6 +2014,8 @@ public class TextDocumentModel
           numberOfCopies,
           isDraft,
           isOriginal,
+          pageRangeType,
+          pageRangeValue,
           unlockActionListener);
       waitForUnlock();
     }
@@ -2073,6 +2195,98 @@ public class TextDocumentModel
         setUnlock();
         actionEvent = arg0;
       }
+    }
+
+    public void printWithProps()
+    {
+      setLock();
+      WollMuxEventHandler.handlePrintViaPrintModel(
+          model.doc,
+          props,
+          unlockActionListener);
+      waitForUnlock();
+    }
+
+    public XPropertySetInfo getPropertySetInfo()
+    {
+      return new XPropertySetInfo()
+      {
+        public boolean hasPropertyByName(String arg0)
+        {
+          return props.containsKey(arg0);
+        }
+
+        public Property getPropertyByName(String arg0)
+            throws UnknownPropertyException
+        {
+          if (hasPropertyByName(arg0))
+            return new Property(arg0, -1, Type.ANY, PropertyAttribute.OPTIONAL);
+          else
+            throw new UnknownPropertyException(arg0);
+        }
+
+        public Property[] getProperties()
+        {
+          Property[] ps = new Property[props.size()];
+          int i = 0;
+          for (Iterator iter = props.keySet().iterator(); iter.hasNext();)
+          {
+            String name = (String) iter.next();
+            try
+            {
+              ps[i++] = getPropertyByName(name);
+            }
+            catch (UnknownPropertyException e)
+            {
+            }
+          }
+          return ps;
+        }
+      };
+    }
+
+    public void setPropertyValue(String arg0, Object arg1)
+        throws UnknownPropertyException, PropertyVetoException,
+        IllegalArgumentException, WrappedTargetException
+    {
+      props.put(arg0, arg1);
+    }
+
+    public Object getPropertyValue(String arg0)
+        throws UnknownPropertyException, WrappedTargetException
+    {
+      if (props.containsKey(arg0))
+        return props.get(arg0);
+      else
+        throw new UnknownPropertyException(arg0);
+    }
+
+    public void addPropertyChangeListener(String arg0,
+        XPropertyChangeListener arg1) throws UnknownPropertyException,
+        WrappedTargetException
+    {
+      // NOT IMPLEMENTED
+    }
+
+    public void removePropertyChangeListener(String arg0,
+        XPropertyChangeListener arg1) throws UnknownPropertyException,
+        WrappedTargetException
+    {
+      // NOT IMPLEMENTED
+    }
+
+    public void addVetoableChangeListener(String arg0,
+        XVetoableChangeListener arg1) throws UnknownPropertyException,
+        WrappedTargetException
+    {
+      // NOT IMPLEMENTED
+    }
+
+    public void removeVetoableChangeListener(String arg0,
+        XVetoableChangeListener arg1) throws UnknownPropertyException,
+        WrappedTargetException
+    {
+      // NOT IMPLEMENTED
     }
   }
 

@@ -1154,7 +1154,8 @@ public class SachleitendeVerfuegung
    * @throws PrintFailedException
    */
   public static void printVerfuegungspunkt(TextDocumentModel model,
-      short verfPunkt, short numberOfCopies, boolean isDraft, boolean isOriginal)
+      short verfPunkt, short numberOfCopies, boolean isDraft,
+      boolean isOriginal, int pageRangeType, String pageRangeValue)
       throws PrintFailedException
   {
     // Zähler für Verfuegungspunktnummer auf 1 initialisieren, wenn ein
@@ -1251,6 +1252,7 @@ public class SachleitendeVerfuegung
 
     // fügt einen Seitenumbruch vor dem letzten Verfügungspunkt ein, wenn Teile
     // des Punktes auf die nächste Seite umgebrochen werden müssen.
+//    boolean insertedPageBreak = false;                        
     boolean insertedPageBreak = insertPageBreakIfNecessary(
         model,
         lastVisibleVerfPunkt);
@@ -1258,7 +1260,7 @@ public class SachleitendeVerfuegung
     // -----------------------------------------------------------------------
     // Druck des Dokuments
     // -----------------------------------------------------------------------
-    model.print(numberOfCopies);
+    model.printWithPageRange(numberOfCopies, pageRangeType, pageRangeValue);
 
     // zuvor eingefügten Seitenumbruch wieder entfernen:
     if (insertedPageBreak && lastVisibleVerfPunkt != null)

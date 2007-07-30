@@ -72,6 +72,8 @@ public class TestHandler
             (short) 1,
             isDraft,
             isOriginal,
+            TextDocumentModel.PAGE_RANGE_TYPE_ALL,
+            "",
             null);
       }
     }

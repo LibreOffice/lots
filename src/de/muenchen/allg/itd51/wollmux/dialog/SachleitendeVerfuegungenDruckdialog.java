@@ -54,6 +54,7 @@ import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.Logger;
+import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung.Verfuegungspunkt;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
@@ -83,6 +84,12 @@ public class SachleitendeVerfuegungenDruckdialog
    * Rand um Buttons (in Pixeln).
    */
   private final static int BUTTON_BORDER = 2;
+
+  /**
+   * Anzahl der Zeichen, nach der der Text der Verfügungspunkte abgeschnitten
+   * wird, damit der Dialog nicht platzt.
+   */
+  private final static int CONTENT_CUT = 75;
 
   /**
    * ActionListener für Buttons mit der ACTION "printElement".
@@ -169,6 +176,40 @@ public class SachleitendeVerfuegungenDruckdialog
   };
 
   /**
+   * ChangeListener, der steuert ob die pageRangeCombobox editierbar ist,
+   * welcher Text im editierbaren Bereich ausgewählt ist und welcher ToolTip
+   * gesetzt ist.
+   */
+  private ItemListener pageRangeCboxItemListener = new ItemListener()
+  {
+    public void itemStateChanged(ItemEvent arg0)
+    {
+      Object source = arg0.getSource();
+      if (source != null && source instanceof JComboBox)
+      {
+        JComboBox cbox = (JComboBox) source;
+        int idx = cbox.getSelectedIndex();
+        if (idx < 0 || idx >= pageRangeDescriptions.length) return;
+
+        int type = pageRangeDescriptions[idx].type;
+        String hint = pageRangeDescriptions[idx].hint;
+
+        if (type == TextDocumentModel.PAGE_RANGE_TYPE_MANUAL)
+        {
+          cbox.setEditable(true);
+          cbox.getEditor().selectAll();
+          cbox.setToolTipText(hint);
+        }
+        else
+        {
+          cbox.setEditable(false);
+          cbox.setToolTipText(hint);
+        }
+      }
+    }
+  };
+
+  /**
    * wird getriggert bei windowClosing() Event.
    */
   private ActionListener closeAction = actionListener_abort;
@@ -193,6 +234,52 @@ public class SachleitendeVerfuegungenDruckdialog
    * beinhalten.
    */
   private JComboBox[] elementComboBoxes;
+
+  /**
+   * Array mit allen comboBoxen, die die Auswahl der Druckseiten enthält.
+   */
+  private JComboBox[] pageRangeComboBoxes;
+
+  /**
+   * Struktur benötigt für die Beschreibung der möglichen Einträge in den
+   * pageRangeComboBoxes
+   */
+  private static class PageRangeElement
+  {
+    public final short type;
+
+    public final String label;
+
+    public final String hint;
+
+    public PageRangeElement(short type, String label, String hint)
+    {
+      this.type = type;
+      this.label = label;
+      this.hint = hint;
+    }
+  }
+
+  /**
+   * Beschreibung der möglichen Einträge in den pageRangeComboBoxes.
+   */
+  private PageRangeElement[] pageRangeDescriptions = new PageRangeElement[] {
+                                                                             new PageRangeElement(
+                                                                                 TextDocumentModel.PAGE_RANGE_TYPE_ALL,
+                                                                                 "Alle",
+                                                                                 "Wählen Sie aus, welche Seiten dieses Verfügungspunktes gedruckt werden sollen"),
+                                                                             new PageRangeElement(
+                                                                                 TextDocumentModel.PAGE_RANGE_TYPE_CURRENT,
+                                                                                 "Nur die aktuelle",
+                                                                                 "Wählen Sie aus, welche Seiten dieses Verfügungspunktes gedruckt werden sollen"),
+                                                                             new PageRangeElement(
+                                                                                 TextDocumentModel.PAGE_RANGE_TYPE_CURRENTFF,
+                                                                                 "Ab der aktuellen",
+                                                                                 "Wählen Sie aus, welche Seiten dieses Verfügungspunktes gedruckt werden sollen"),
+                                                                             new PageRangeElement(
+                                                                                 TextDocumentModel.PAGE_RANGE_TYPE_MANUAL,
+                                                                                 "<Eingabe>",
+                                                                                 "Mögliche Eingaben sind z.B. '1', '2-5' oder '1,3,5'") };
 
   /**
    * Die Array mit allen buttons auf printElement-Actions
@@ -299,6 +386,7 @@ public class SachleitendeVerfuegungenDruckdialog
 
     // element
     elementComboBoxes = new JComboBox[size];
+    pageRangeComboBoxes = new JComboBox[size];
     elementCountSpinner = new JSpinner[size];
     printElementButtons = new JButton[size];
 
@@ -309,16 +397,27 @@ public class SachleitendeVerfuegungenDruckdialog
 
       // elementComboBoxes vorbelegen:
       Vector content = new Vector();
-      content.add(verfPunkt.getHeading());
+      content.add(cutContent(verfPunkt.getHeading()));
       if (zuleitungszeilen.size() > 0)
-        content.add("------- Zuleitung an --------");
+        content.add(cutContent("------- Zuleitung an --------"));
       Iterator iter = zuleitungszeilen.iterator();
       while (iter.hasNext())
       {
         String zuleitung = (String) iter.next();
-        content.add(zuleitung);
+        content.add(cutContent(zuleitung));
       }
       elementComboBoxes[i] = new JComboBox(content);
+
+      // pageRangeComboboxes vorbelegen
+      pageRangeComboBoxes[i] = new JComboBox();
+      for (int j = 0; j < pageRangeDescriptions.length; j++)
+      {
+        pageRangeComboBoxes[i].addItem(pageRangeDescriptions[j].label);
+      }
+      pageRangeComboBoxes[i].setEditable(false);
+      if (pageRangeDescriptions.length >= 1)
+        pageRangeComboBoxes[i].setToolTipText(pageRangeDescriptions[0].hint);
+      // pageRangeComboBoxes[i].setPrototypeDisplayValue("Alle Seiten");
 
       // elementCountComboBoxes vorbelegen:
       SpinnerNumberModel model = new SpinnerNumberModel(verfPunkt
@@ -362,9 +461,18 @@ public class SachleitendeVerfuegungenDruckdialog
     mainPanel.add(verfPunktPanel, BorderLayout.CENTER);
     mainPanel.add(buttons, BorderLayout.PAGE_END);
 
+    addUIElements(fensterDesc, "Headers", 0, 0, verfPunktPanel, 1, 0);
+
     for (int i = 0; i < size; i++)
     {
-      addUIElements(fensterDesc, "Verfuegungspunkt", i, verfPunktPanel, 1, 0);
+      addUIElements(
+          fensterDesc,
+          "Verfuegungspunkt",
+          i,
+          i + 1 /* Headers */,
+          verfPunktPanel,
+          1,
+          0);
     }
 
     // separator zwischen Verfügungspunkte und Summenzeile hinzufügen
@@ -378,11 +486,18 @@ public class SachleitendeVerfuegungenDruckdialog
         0,
         SEP_BORDER,
         0));
-    gbcSeparator.gridy = size;
+    gbcSeparator.gridy = size + 1;
     verfPunktPanel.add(uiElement, gbcSeparator);
 
-    addUIElements(fensterDesc, "AllElements", size + 1, verfPunktPanel, 1, 0);
-    addUIElements(fensterDesc, "Buttons", 0, buttons, 1, 0);
+    addUIElements(
+        fensterDesc,
+        "AllElements",
+        0,
+        size + 2 /* Headers und Separator */,
+        verfPunktPanel,
+        1,
+        0);
+    addUIElements(fensterDesc, "Buttons", 0, 0, buttons, 1, 0);
 
     myFrame.pack();
     int frameWidth = myFrame.getWidth();
@@ -398,13 +513,31 @@ public class SachleitendeVerfuegungenDruckdialog
   }
 
   /**
+   * Wenn value mehr als CONTENT_CUT Zeichen besitzt, dann wird eine gekürzte
+   * Form von value zurückgeliefert (mit "..." ergänzt) oder ansonsten value
+   * selbst.
+   * 
+   * @param value
+   *          der zu kürzende String
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  private static String cutContent(String value)
+  {
+    if (value.length() > CONTENT_CUT)
+      return value.substring(0, CONTENT_CUT) + " ...";
+    else
+      return value;
+  }
+
+  /**
    * Fügt compo UI Elemente gemäss den Kindern von conf.query(key) hinzu. compo
    * muss ein GridBagLayout haben. stepx und stepy geben an um wieviel mit jedem
    * UI Element die x und die y Koordinate der Zelle erhöht werden soll.
    * Wirklich sinnvoll sind hier nur (0,1) und (1,0).
    */
   private void addUIElements(ConfigThingy conf, String key, int verfPunktNr,
-      JComponent compo, int stepx, int stepy)
+      int yOffset, JComponent compo, int stepx, int stepy)
   {
     // int gridx, int gridy, int gridwidth, int gridheight, double weightx,
     // double weighty, int anchor, int fill, Insets insets, int ipadx, int
@@ -432,7 +565,7 @@ public class SachleitendeVerfuegungenDruckdialog
             TF_BORDER, TF_BORDER, TF_BORDER, TF_BORDER), 0, 0);
 
     ConfigThingy felderParent = conf.query(key);
-    int y = -stepy + verfPunktNr;
+    int y = -stepy + yOffset;
     int x = -stepx;
 
     Iterator piter = felderParent.iterator();
@@ -518,6 +651,14 @@ public class SachleitendeVerfuegungenDruckdialog
               comboBox = elementComboBoxes[verfPunktNr];
               comboBox.addItemListener(cboxItemListener);
             }
+
+            else if (id.equals("pageRange")
+                     && verfPunktNr < pageRangeComboBoxes.length)
+            {
+              comboBox = pageRangeComboBoxes[verfPunktNr];
+              comboBox.addItemListener(pageRangeCboxItemListener);
+            }
+
             else
               comboBox = new JComboBox();
 
@@ -571,6 +712,7 @@ public class SachleitendeVerfuegungenDruckdialog
             // Bei printElement-Actions die vordefinierten Buttons verwenden,
             // ansonsten einen neuen erzeugen.
             JButton button = null;
+
             if (action.equalsIgnoreCase("printElement")
                 && verfPunktNr >= 0
                 && verfPunktNr < printElementButtons.length)
@@ -704,8 +846,7 @@ public class SachleitendeVerfuegungenDruckdialog
   }
 
   /**
-   * Druckt alle Ausfertigungen aller Verfügungspunkte aus und beendet den
-   * Dialog.
+   * Druckt alle Kopien aller Verfügungspunkte aus und beendet den Dialog.
    * 
    * @author christoph.lutz
    */
@@ -713,92 +854,77 @@ public class SachleitendeVerfuegungenDruckdialog
   {
     if (getAllElementCount() > 0)
     {
-      // PrintSetup-Dialog beim ersten mal anzeigen:
-      myFrame.setAlwaysOnTop(false);
-      pmodel.showPrinterSetupDialog(true);
-      myFrame.setAlwaysOnTop(true);
-
       int size = verfuegungspunkte.size();
       for (int verfPunkt = 1; verfPunkt <= size; ++verfPunkt)
-      {
-        int numberOfCopies = 0;
-        try
-        {
-          numberOfCopies = new Integer(elementCountSpinner[verfPunkt - 1]
-              .getValue().toString()).intValue();
-        }
-        catch (Exception e)
-        {
-          Logger.error("Kann Anzahl der Ausfertigungen nicht bestimmen.", e);
-        }
-
-        boolean isDraft = (verfPunkt == size);
-        boolean isOriginal = (verfPunkt == 1);
-
-        if (numberOfCopies != 0)
-          pmodel.printVerfuegungspunkt(
-              (short) verfPunkt,
-              (short) numberOfCopies,
-              isDraft,
-              isOriginal);
-      }
+        printElement(verfPunkt);
     }
-
     abort();
   }
 
   /**
-   * Druckt alle Ausfertigungen des Verfügungspunktes, dessen "Drucken" Button
-   * gedrückt wurde und beendet den Dialog.
+   * Druckt alle Kopien des Verfügungspunktes, dessen "Drucken" Button gedrückt
+   * wurde und beendet den Dialog.
    * 
    * @author christoph.lutz
    */
   private void printElement(JButton button)
   {
-    // Button in printElementButtons suchen:
-    int verfPunkt = 0;
+    // Button in printElementButtons suchen und drucken:
     for (int i = 0; i < printElementButtons.length; i++)
     {
       if (printElementButtons[i] == button)
       {
-        verfPunkt = i + 1;
+        printElement(i + 1);
         break;
       }
     }
+    abort();
+  }
 
-    if (verfPunkt > 0)
+  /**
+   * Druckt alle Kopien des einen Verfügungspunktes verfPunkt.
+   * 
+   * @author christoph.lutz
+   */
+  private void printElement(int verfPunkt)
+  {
+    // Anzahl der Kopien bestimmen:
+    int numberOfCopies = 0;
+    try
     {
-      int numberOfCopies = 0;
-      try
-      {
-        numberOfCopies = new Integer(elementCountSpinner[verfPunkt - 1]
-            .getValue().toString()).intValue();
-      }
-      catch (Exception e)
-      {
-        Logger.error("Kann Anzahl der Ausfertigungen nicht bestimmen.", e);
-      }
-
-      if (numberOfCopies > 0)
-      {
-        // PrintSetup-Dialog beim ersten mal anzeigen:
-        myFrame.setAlwaysOnTop(false);
-        pmodel.showPrinterSetupDialog(true);
-        myFrame.setAlwaysOnTop(true);
-
-        boolean isDraft = (verfPunkt == verfuegungspunkte.size());
-        boolean isOriginal = (verfPunkt == 1);
-
-        pmodel.printVerfuegungspunkt(
-            (short) verfPunkt,
-            (short) numberOfCopies,
-            isDraft,
-            isOriginal);
-      }
+      numberOfCopies = new Integer(elementCountSpinner[verfPunkt - 1]
+          .getValue().toString()).intValue();
+    }
+    catch (Exception e)
+    {
+      Logger.error("Kann Anzahl der Ausfertigungen nicht bestimmen.", e);
     }
 
-    // Nach dem Drucken wird der Dialog geschlossen
-    abort();
+    // pageRange bestimmen:
+    int idx = pageRangeComboBoxes[verfPunkt - 1].getSelectedIndex();
+    String pageRangeValue = pageRangeComboBoxes[verfPunkt - 1]
+        .getSelectedItem().toString();
+    short pageRangeType = TextDocumentModel.PAGE_RANGE_TYPE_MANUAL;
+    if (idx >= 0) pageRangeType = pageRangeDescriptions[idx].type;
+
+    if (numberOfCopies > 0)
+    {
+      // PrintSetup-Dialog beim ersten mal anzeigen:
+      myFrame.setAlwaysOnTop(false);
+      pmodel.showPrinterSetupDialog(true);
+      myFrame.setAlwaysOnTop(true);
+
+      boolean isDraft = (verfPunkt == verfuegungspunkte.size());
+      boolean isOriginal = (verfPunkt == 1);
+
+      pmodel.printVerfuegungspunkt(
+          (short) verfPunkt,
+          (short) numberOfCopies,
+          isDraft,
+          isOriginal,
+          pageRangeType,
+          pageRangeValue);
+    }
   }
 
   /**

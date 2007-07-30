@@ -15,6 +15,7 @@
  
 #include <com/sun/star/uno/XInterface.idl> 
 #include <com/sun/star/text/XTextDocument.idl> 
+#include <com/sun/star/beans/XPropertySet.idl>
   
 module de {  module muenchen {  module allg { module itd51 { module wollmux {
  
@@ -24,6 +25,8 @@ module de {  module muenchen {  module allg { module itd51 { module wollmux {
 interface XPrintModel
 {
 
+	interface com::sun::star::beans::XPropertySet;
+	
     /**
       Liefert das XTextDocument mit dem die Druckfunktion aufgerufen wurde.
      */
@@ -34,6 +37,13 @@ interface XPrintModel
       eingestellten Drucker aus.
      */
     void print( [in] short numberOfCopies);
+
+    /**
+      Druckt das TextDocument auf dem aktuell eingestellten Drucker aus, manche
+      der akuell eingestellten Properties ausgewertet werden. Welche Properties
+      ausgewertet werden, hängt von der konkreten Implementierung ab.
+     */
+    void printWithProps();
 	
     /**
       Zeigt den PrintSetupDialog an, über den der aktuelle Drucker ausgewählt
@@ -67,7 +77,7 @@ interface XPrintModel
                ausgeblendet und alle notInOriginal-Blöcke ebenso. Andernfalls
                sind Ziffer und notInOriginal-Blöcke eingeblendet.
      */
-    void printVerfuegungspunkt( [in] short verfPunkt, [in] short numberOfCopies, [in] boolean isDraft, [in] boolean isOriginal);
+    void printVerfuegungspunkt( [in] short verfPunkt, [in] short numberOfCopies, [in] boolean isDraft, [in] boolean isOriginal, [in] short pageRangeType, [in] string pageRangeValue);
 
     /**
       Falls es sich bei dem zugehörigen Dokument um ein Formulardokument (mit

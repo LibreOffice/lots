@@ -2686,25 +2686,25 @@ public class WollMuxEventHandler
    * Das Event dient als Hilfe für die Komfortdruckfunktionen und wird vom
    * XPrintModel aufgerufen und mit diesem synchronisiert.
    */
-  public static void handlePrintViaPrintModel(XTextDocument doc,
-      short numberOfCopies, ActionListener listener)
+  public static void handlePrintViaPrintModel(XTextDocument doc, HashMap props,
+      ActionListener listener)
   {
-    handle(new OnPrintViaPrintModel(doc, numberOfCopies, listener));
+    handle(new OnPrintViaPrintModel(doc, props, listener));
   }
 
   private static class OnPrintViaPrintModel extends BasicEvent
   {
     private XTextDocument doc;
 
-    private short numberOfCopies;
+    private HashMap props;
 
     private ActionListener listener;
 
-    public OnPrintViaPrintModel(XTextDocument doc, short numberOfCopies,
+    public OnPrintViaPrintModel(XTextDocument doc, HashMap props,
         ActionListener listener)
     {
       this.doc = doc;
-      this.numberOfCopies = numberOfCopies;
+      this.props = props;
       this.listener = listener;
     }
 
@@ -2712,9 +2712,11 @@ public class WollMuxEventHandler
     {
       TextDocumentModel model = WollMuxSingleton.getInstance()
           .getTextDocumentModel(doc);
+      Integer cc = (Integer) props.get("CopyCount");
+      if (cc == null) cc = new Integer(1);
       try
       {
-        model.print(numberOfCopies);
+        model.print(cc.shortValue());
       }
       catch (PrintFailedException e)
       {
@@ -3231,10 +3233,11 @@ public class WollMuxEventHandler
    */
   public static void handlePrintVerfuegungspunkt(XTextDocument doc,
       short verfPunkt, short numberOfCopies, boolean isDraft,
-      boolean isOriginal, ActionListener unlockActionListener)
+      boolean isOriginal, short pageRangeType, String pageRangeValue,
+      ActionListener unlockActionListener)
   {
     handle(new OnPrintVerfuegungspunkt(doc, verfPunkt, numberOfCopies, isDraft,
-        isOriginal, unlockActionListener));
+        isOriginal, pageRangeType, pageRangeValue, unlockActionListener));
   }
 
   private static class OnPrintVerfuegungspunkt extends BasicEvent
@@ -3249,17 +3252,23 @@ public class WollMuxEventHandler
 
     private boolean isOriginal;
 
+    private short pageRangeType;
+
+    private String pageRangeValue;
+
     private ActionListener listener;
 
     public OnPrintVerfuegungspunkt(XTextDocument doc, short verfPunkt,
         short numberOfCopies, boolean isDraft, boolean isOriginal,
-        ActionListener listener)
+        short pageRangeType, String pageRangeValue, ActionListener listener)
     {
       this.doc = doc;
       this.verfPunkt = verfPunkt;
       this.numberOfCopies = numberOfCopies;
       this.isDraft = isDraft;
       this.isOriginal = isOriginal;
+      this.pageRangeType = pageRangeType;
+      this.pageRangeValue = pageRangeValue;
       this.listener = listener;
     }
 
@@ -3275,7 +3284,9 @@ public class WollMuxEventHandler
             verfPunkt,
             numberOfCopies,
             isDraft,
-            isOriginal);
+            isOriginal,
+            pageRangeType,
+            pageRangeValue);
       }
       catch (PrintFailedException e)
       {
