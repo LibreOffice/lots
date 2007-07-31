@@ -1252,7 +1252,7 @@ public class SachleitendeVerfuegung
 
     // fügt einen Seitenumbruch vor dem letzten Verfügungspunkt ein, wenn Teile
     // des Punktes auf die nächste Seite umgebrochen werden müssen.
-//    boolean insertedPageBreak = false;                        
+    // boolean insertedPageBreak = false;
     boolean insertedPageBreak = insertPageBreakIfNecessary(
         model,
         lastVisibleVerfPunkt);
@@ -1352,9 +1352,9 @@ public class SachleitendeVerfuegung
       int b = getPageOfViewCursor(viewCursor);
       viewCursor.gotoRange(oldViewCursor, false);
 
-      // Seitenumbruch einfügen, wenn die Seitenzahlen der beiden Positionen
-      // sich unterscheiden.
-      if (a != 0 && b != 0 && a != b)
+      // Seitenumbruch einfügen, wenn sich die Seitenzahlen der beiden Positionen
+      // um genau eins unterscheiden (wenn die Differenz größer ist bringt auch das Einfügen des Seitenumbruchs keine 
+      if (a != 0 && b != 0 && (a - b) == 1)
       {
         Object pageDescName = UNO.getProperty(par, "PageDescName");
         if (pageDescName != null && !pageDescName.toString().equals(""))
