@@ -1158,6 +1158,14 @@ public class SachleitendeVerfuegung
       boolean isOriginal, int pageRangeType, String pageRangeValue)
       throws PrintFailedException
   {
+    // Steht der viewCursor in einem Bereich, der im folgenden ausgeblendet
+    // wird, dann wird der ViewCursor in einen sichtbaren Bereich verschoben. Um
+    // den viewCursor wieder herstellen zu können, wird er hier gesichert und
+    // später wieder hergestellt.
+    XTextCursor vc = model.getViewCursor();
+    XTextCursor oldViewCursor = null;
+    if (vc != null) oldViewCursor = vc.getText().createTextCursorByRange(vc);
+
     // Zähler für Verfuegungspunktnummer auf 1 initialisieren, wenn ein
     // Verfuegungspunkt1 vorhanden ist.
     XTextRange punkt1 = getVerfuegungspunkt1(model.doc);
@@ -1310,6 +1318,10 @@ public class SachleitendeVerfuegung
     // Verfügungspunkte wieder einblenden:
     if (setInvisibleRange != null)
       UNO.setProperty(setInvisibleRange, "CharHidden", Boolean.FALSE);
+
+    // ViewCursor wieder herstellen:
+    if (vc != null && oldViewCursor != null)
+      vc.gotoRange(oldViewCursor, false);
   }
 
   /**
@@ -1352,8 +1364,9 @@ public class SachleitendeVerfuegung
       int b = getPageOfViewCursor(viewCursor);
       viewCursor.gotoRange(oldViewCursor, false);
 
-      // Seitenumbruch einfügen, wenn sich die Seitenzahlen der beiden Positionen
-      // um genau eins unterscheiden (wenn die Differenz größer ist bringt auch das Einfügen des Seitenumbruchs keine 
+      // Seitenumbruch einfügen, wenn sich die Seitenzahlen der beiden
+      // Positionen um genau eins unterscheiden (wenn die Differenz größer ist
+      // bringt auch das Einfügen des Seitenumbruchs keine
       if (a != 0 && b != 0 && (a - b) == 1)
       {
         Object pageDescName = UNO.getProperty(par, "PageDescName");
