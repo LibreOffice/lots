@@ -1174,7 +1174,6 @@ public class SachleitendeVerfuegung
 
     // Auszublendenden Bereich festlegen:
     XTextRange setInvisibleRange = null;
-    XTextRange lastVisibleVerfPunkt = null;
     XParagraphCursor cursor = UNO.XParagraphCursor(model.doc.getText()
         .createTextCursorByRange(model.doc.getText().getStart()));
     if (cursor != null)
@@ -1189,11 +1188,6 @@ public class SachleitendeVerfuegung
             punkt1 = cursor.getText().createTextCursorByRange(cursor);
 
           count++;
-
-          // range des zuletzt sichtbaren Verfügungspunktes sichern
-          if (count == verfPunkt)
-            lastVisibleVerfPunkt = cursor.getText().createTextCursorByRange(
-                cursor);
 
           if (count == (verfPunkt + 1))
           {
@@ -1258,23 +1252,10 @@ public class SachleitendeVerfuegung
       UNO.setProperty(punkt1ZifferOnly, "CharHidden", Boolean.TRUE);
     }
 
-    // fügt einen Seitenumbruch vor dem letzten Verfügungspunkt ein, wenn Teile
-    // des Punktes auf die nächste Seite umgebrochen werden müssen.
-    // boolean insertedPageBreak = false;
-    boolean insertedPageBreak = insertPageBreakIfNecessary(
-        model,
-        lastVisibleVerfPunkt);
-
     // -----------------------------------------------------------------------
     // Druck des Dokuments
     // -----------------------------------------------------------------------
     model.printWithPageRange(numberOfCopies, pageRangeType, pageRangeValue);
-
-    // zuvor eingefügten Seitenumbruch wieder entfernen:
-    if (insertedPageBreak && lastVisibleVerfPunkt != null)
-    {
-      UNO.setProperty(lastVisibleVerfPunkt, "PageDescName", "");
-    }
 
     // Ausblendung von Ziffer von Punkt 1 wieder aufheben
     if (punkt1ZifferOnly != null)
@@ -1322,92 +1303,6 @@ public class SachleitendeVerfuegung
     // ViewCursor wieder herstellen:
     if (vc != null && oldViewCursor != null)
       vc.gotoRange(oldViewCursor, false);
-  }
-
-  /**
-   * Fügt einen Seitenumbruch vor dem Absatz par ein, wenn der Text ab par bis
-   * zum Dokumentende nicht auf die selbe Seite passt und Teile des Rests
-   * dadurch alleine stehen würden. Der Seitenumbruch wird nicht eingebaut, wenn
-   * sich der Rest ab par sowieso über mehr als eine Seite erstreckt, da in
-   * diesem Fall ein auseinanderreissen unvermeidbar ist.
-   * 
-   * @param model
-   *          Das TextDocumentModel, in dem sich par befindet.
-   * @param par
-   *          Der Absatz, vor dem der PageBreak bei Bedarf eingefügt werden
-   *          soll.
-   * @return true, wenn ein Seitenumbruch eingefügt wurde, ansonsten false.
-   */
-  private static boolean insertPageBreakIfNecessary(TextDocumentModel model,
-      XTextRange par)
-  {
-    XTextCursor viewCursor = model.getViewCursor();
-    XTextCursor oldViewCursor = null;
-    try
-    {
-      // Dieser Aufruf fliegt auf die Schnauze, wenn der Cursor nicht im Text
-      // steht, sondern z.b. ein Rahmen markiert ist. Dann kann der viewCursor
-      // so nicht verwendet werden.
-      oldViewCursor = viewCursor.getText().createTextCursorByRange(viewCursor);
-    }
-    catch (java.lang.Exception e)
-    {
-    }
-
-    boolean insertedPageBreak = false;
-
-    if (par != null && viewCursor != null && oldViewCursor != null)
-    {
-      // Gesamtseitenzahl des Dokuments und Seitennummer von par bestimmen
-      viewCursor.gotoRange(par, false);
-      int a = model.getPageCount();
-      int b = getPageOfViewCursor(viewCursor);
-      viewCursor.gotoRange(oldViewCursor, false);
-
-      // Seitenumbruch einfügen, wenn sich die Seitenzahlen der beiden
-      // Positionen um genau eins unterscheiden (wenn die Differenz größer ist
-      // bringt auch das Einfügen des Seitenumbruchs keine
-      if (a != 0 && b != 0 && (a - b) == 1)
-      {
-        Object pageDescName = UNO.getProperty(par, "PageDescName");
-        if (pageDescName != null && !pageDescName.toString().equals(""))
-        {
-          Object pageStyleName = UNO.getProperty(par, "PageStyleName");
-          // ist diese Property gesetzt, so wird der Seitenumbruch eingefügt:
-          UNO.setProperty(par, "PageDescName", pageStyleName);
-          UNO.setProperty(par, "PageNumberOffset", new Short((short) (b + 1)));
-          insertedPageBreak = true;
-        }
-
-        // nochmal die Seitenzahlen bestimmen:
-        viewCursor.gotoRange(par, false);
-        a = model.getPageCount();
-        b = getPageOfViewCursor(viewCursor);
-        viewCursor.gotoRange(oldViewCursor, false);
-
-        // Wenn der Rest auch mit Umbruch nicht draufpasst, wird der Umbruch
-        // wieder rausgenommen, da er eh nichts bringt.
-        if (a != 0 && b != 0 && a != b)
-        {
-          UNO.setProperty(par, "PageDescName", "");
-          insertedPageBreak = false;
-        }
-      }
-    }
-    return insertedPageBreak;
-  }
-
-  /**
-   * Liefert die Seite (>0) in der sich der ViewCursor viewCursor befindet oder
-   * 0, falls der ViewCursor diese Information nicht bereitstellen kann.
-   * 
-   * @param viewCursor
-   * @return
-   */
-  private static int getPageOfViewCursor(XTextCursor viewCursor)
-  {
-    if (UNO.XPageCursor(viewCursor) == null) return 0;
-    return UNO.XPageCursor(viewCursor).getPage();
   }
 
   /**
