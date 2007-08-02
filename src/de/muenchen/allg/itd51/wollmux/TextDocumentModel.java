@@ -668,11 +668,47 @@ public class TextDocumentModel
    * Registriert das Überschreiben des Textfragments fragId auf den neuen Namen
    * newFragId im TextDocumentModel, wenn das Textfragment fragId nicht bereits
    * überschrieben wurde.
+   * 
+   * @param fragId
+   *          Die alte FRAG_ID, die durch newFragId überschrieben werden soll.
+   * @param newFragId
+   *          die neue FRAG_ID, die die alte FRAG_ID ersetzt.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   * @throws OverrideFragChainException
+   *           Wenn eine fragId oder newFragId bereits Ziel/Quelle einer anderen
+   *           Ersetzungsregel sind, dann entsteht eine Ersetzungskette, die
+   *           nicht zugelassen ist.
    */
   public void setOverrideFrag(String fragId, String newFragId)
+      throws OverrideFragChainException
   {
+    if (overrideFragMap.containsKey(newFragId))
+      throw new OverrideFragChainException(newFragId);
+    if (overrideFragMap.containsValue(fragId))
+      throw new OverrideFragChainException(fragId);
     if (!overrideFragMap.containsKey(fragId))
       overrideFragMap.put(fragId, newFragId);
+  }
+
+  public static class OverrideFragChainException extends Exception
+  {
+    private static final long serialVersionUID = 6792199728784265252L;
+
+    private String fragId;
+
+    public OverrideFragChainException(String fragId)
+    {
+      this.fragId = fragId;
+    }
+
+    public String getMessage()
+    {
+      return "Mit overrideFrag können keine Ersetzungsketten definiert werden, das Fragment '"
+             + fragId
+             + "' taucht jedoch bereits in einem anderen overrideFrag-Kommando auf.";
+    }
+
   }
 
   /**

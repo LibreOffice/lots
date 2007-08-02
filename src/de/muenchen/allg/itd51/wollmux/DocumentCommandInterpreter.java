@@ -75,6 +75,7 @@ import de.muenchen.allg.itd51.wollmux.DocumentCommand.SetPrintFunction;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.SetType;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.UpdateFields;
 import de.muenchen.allg.itd51.wollmux.FormFieldFactory.FormField;
+import de.muenchen.allg.itd51.wollmux.TextDocumentModel.OverrideFragChainException;
 import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.db.DatasetNotFoundException;
@@ -733,7 +734,6 @@ public class DocumentCommandInterpreter
       // Alle DocumentCommands durchlaufen und mit execute aufrufen.
       for (Iterator iter = commands.iterator(); iter.hasNext();)
       {
-
         DocumentCommand cmd = (DocumentCommand) iter.next();
         if (!(cmd instanceof OverrideFrag)) continue;
 
@@ -754,9 +754,19 @@ public class DocumentCommandInterpreter
      */
     public int executeCommand(OverrideFrag cmd)
     {
-      model.setOverrideFrag(cmd.getFragID(), cmd.getNewFragID());
-      cmd.markDone(!mux.isDebugMode());
-      return 0;
+      try
+      {
+        model.setOverrideFrag(cmd.getFragID(), cmd.getNewFragID());
+        cmd.markDone(!mux.isDebugMode());
+        return 0;
+      }
+      catch (OverrideFragChainException e)
+      {
+        insertErrorField(cmd, e);
+        Logger.error(e);
+        cmd.setErrorState(true);
+        return 1;
+      }
     }
 
     /**
