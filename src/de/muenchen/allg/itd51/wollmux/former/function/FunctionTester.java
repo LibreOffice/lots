@@ -273,7 +273,7 @@ public class FunctionTester
     functionInsertPanel.add(makeCodeInsertionButton("MATCH", "MATCH(String, RegEx)"));
     functionInsertPanel.add(makeCodeInsertionButton("REPLACE", "REPLACE(String, \"RegEx\", \"RepStr\")"));
     functionInsertPanel.add(makeCodeInsertionButton("CAT", "CAT(String1, String2 ,,,)"));
-    functionInsertPanel.add(makeCodeInsertionButton("FORMAT", "FORMAT(Zahl MINSCALE \"Zahl\" MAXSCALE \"Zahl\")"));
+    functionInsertPanel.add(makeCodeInsertionButton("FORMAT", "FORMAT(Zahl MIN \"Zahl\" MAX \"Zahl\")"));
     functionInsertPanel.add(makeCodeInsertionButton("IF", "IF(Bedingung THEN(Dann) ELSE(Sonst))"));
     functionInsertPanel.add(makeCodeInsertionButton("SELECT", "SELECT(\nFunktion1\nFunktion2\n,,,\nELSE(Sonst)\n)"));
     functionInsertPanel.add(makeCodeInsertionButton("AND", "AND(Boolean1, Boolean2 ,,,)"));
@@ -283,7 +283,7 @@ public class FunctionTester
     functionInsertPanel.add(makeCodeInsertionButton("MINUS", "MINUS(Zahl1, Zahl2 ,,,)"));
     functionInsertPanel.add(makeCodeInsertionButton("DIFF", "DIFF(Zahl1, Zahl2 ,,,)"));
     functionInsertPanel.add(makeCodeInsertionButton("PRODUCT", "PRODUCT(Zahl1, Zahl2 ,,,)"));
-    functionInsertPanel.add(makeCodeInsertionButton("DIVIDE", "DIVIDE(Zahl BY(Zahl) MINSCALE \"Zahl\" MAXSCALE \"Zahl\")"));
+    functionInsertPanel.add(makeCodeInsertionButton("DIVIDE", "DIVIDE(Zahl BY(Zahl) MIN \"Zahl\" MAX \"Zahl\")"));
     functionInsertPanel.add(makeCodeInsertionButton("ABS", "ABS(Zahl)"));
     functionInsertPanel.add(makeCodeInsertionButton("SIGN", "SIGN(Zahl)"));
     functionInsertPanel.add(makeCodeInsertionButton("STRCMP", "STRCMP(String1, String2 ,,,)"));

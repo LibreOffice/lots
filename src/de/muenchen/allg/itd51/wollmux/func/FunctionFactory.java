@@ -18,6 +18,7 @@
 * 05.12.2006 | BNK | WollMuxFiles.getClassLoader() wird für ExternalFunctions übergeben.
 * 21.03.2007 | BNK | BIND erweitert so dass auch direkt eine Funktion als FUNCTION verwendet werden kann.
 * 25.07.2007 | BNK | +DIVIDE/FORMAT
+* 03.08.2007 | BNK | +SUM,MINUS,PRODUCT,DIFF,ABS,SIGN
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -188,15 +189,15 @@ public class FunctionFactory
     
     if (name.equals("AND"))
     {
-      return parseAND(conf, funcLib, dialogLib, context);
+      return new AndFunction(conf, funcLib, dialogLib, context);
     }
     else if (name.equals("NOT"))
     {
-      return parseNOT(conf, funcLib, dialogLib, context);
+      return new NotFunction(conf, funcLib, dialogLib, context);
     }
     else if (name.equals("OR"))
     {
-      return parseOR(conf, funcLib, dialogLib, context);
+      return new OrFunction(conf, funcLib, dialogLib, context);
     }
     else if (name.equals("VALUE"))
     {
@@ -228,46 +229,42 @@ public class FunctionFactory
     }
     else if (name.equals("SELECT"))
     {
-      return parseSELECT(conf, funcLib, dialogLib, context);
+      return new SelectFunction(conf, funcLib, dialogLib, context);
     }
     else if (name.equals("CAT") || name.equals("THEN") || name.equals("ELSE"))
     {
-      return parseCAT(conf, funcLib, dialogLib, context);
+      return new CatFunction(conf, funcLib, dialogLib, context);
     }
     else if (name.equals("FORMAT") || name.equals("DIVIDE"))
     {
       return parseDIVIDE(conf, funcLib, dialogLib, context);
     }
+    else if (name.equals("MINUS"))
+    {
+      return new MinusFunction(conf, funcLib, dialogLib, context);
+    }
+    else if (name.equals("SUM"))
+    {
+      return new SumFunction(conf, funcLib, dialogLib, context);
+    }
+    else if (name.equals("DIFF"))
+    {
+      return new DiffFunction(conf, funcLib, dialogLib, context);
+    }
+    else if (name.equals("PRODUCT"))
+    {
+      return new ProductFunction(conf, funcLib, dialogLib, context);
+    }
+    else if (name.equals("ABS"))
+    {
+      return new AbsFunction(conf, funcLib, dialogLib, context);
+    }
+    else if (name.equals("SIGN"))
+    {
+      return new SignFunction(conf, funcLib, dialogLib, context);
+    }
     
     throw new ConfigurationErrorException("\""+name+"\" ist keine unterstützte Grundfunktion");
-  }
-
-  private static Function parseCAT(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
-  {
-    Vector catFunction = new Vector(conf.count());
-    Iterator iter = conf.iterator();
-    while (iter.hasNext())
-    {
-      Function fun = parse((ConfigThingy)iter.next(), funcLib, dialogLib, context);
-      catFunction.add(fun);
-    }
-    
-    catFunction.trimToSize();
-    return new CatFunction(catFunction);
-  }
-
-  private static Function parseSELECT(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
-  {
-    Vector selFunction = new Vector(conf.count());
-    Iterator iter = conf.iterator();
-    while (iter.hasNext())
-    {
-      Function fun = parse((ConfigThingy)iter.next(), funcLib, dialogLib, context);
-      selFunction.add(fun);
-    }
-    
-    selFunction.trimToSize();
-    return new SelectFunction(selFunction);
   }
 
   private static Function parseBIND(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
@@ -435,49 +432,7 @@ public class FunctionFactory
     
     return new ValueFunction(valueNameFun.getString(noValues));
   }
-
-  private static Function parseOR(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
-  {
-    Vector orFunction = new Vector();
-    Iterator iter = conf.iterator();
-    while (iter.hasNext())
-    {
-      Function cons = parse((ConfigThingy)iter.next(), funcLib, dialogLib, context);
-      orFunction.add(cons);
-    }
     
-    orFunction.trimToSize();
-    return new OrFunction(orFunction);
-  }
-
-  private static Function parseNOT(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
-  {
-    Vector notFunction = new Vector();
-    Iterator iter = conf.iterator();
-    while (iter.hasNext())
-    {
-      Function cons = parse((ConfigThingy)iter.next(), funcLib, dialogLib, context);
-      notFunction.add(cons);
-    }
-    
-    notFunction.trimToSize();
-    return new NotFunction(notFunction);
-  }
-
-  private static Function parseAND(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
-  {
-    Vector andFunction = new Vector();
-    Iterator iter = conf.iterator();
-    while (iter.hasNext())
-    {
-      Function cons = parse((ConfigThingy)iter.next(), funcLib, dialogLib, context);
-      andFunction.add(cons);
-    }
-    
-    andFunction.trimToSize();
-    return new AndFunction(andFunction);
-  }
-  
   private static Function parseDIVIDE(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
   {
     Function dividendFun = null;
@@ -498,7 +453,7 @@ public class FunctionFactory
           throw new ConfigurationErrorException("DIVIDE/FORMAT-Funktion darf maximal eine BY-Angabe haben");
         
         byFun = parseChildren(funConf, funcLib, dialogLib, context);
-      } else if (name.equals("MINSCALE"))
+      } else if (name.equals("MIN"))
       {
         int num = -1;
         try{
@@ -509,11 +464,11 @@ public class FunctionFactory
         }catch(Exception x){}
         
         if (num < 0)
-          throw new ConfigurationErrorException("MINSCALE-Angabe von DIVIDE/FORMAT muss \"<NichtNegativeZahl>\" sein");
+          throw new ConfigurationErrorException("MIN-Angabe von DIVIDE/FORMAT muss \"<NichtNegativeZahl>\" sein");
 
         minScale = num;
         
-      } else if (name.equals("MAXSCALE"))
+      } else if (name.equals("MAX"))
       {
         int num = -1;
         try{
@@ -524,7 +479,7 @@ public class FunctionFactory
         }catch(Exception x){}
         
         if (num < 0)
-          throw new ConfigurationErrorException("MAXSCALE-Angabe von DIVIDE/FORMAT muss \"<NichtNegativeZahl>\" sein");
+          throw new ConfigurationErrorException("MAX-Angabe von DIVIDE/FORMAT muss \"<NichtNegativeZahl>\" sein");
 
         maxScale = num;        
       } else
@@ -538,10 +493,15 @@ public class FunctionFactory
       throw new ConfigurationErrorException("Bei DIVIDE/FORMAT-Funktion muss genau eine unqualifizierte Funktion angegeben werden");
     
     if (maxScale < 0)
-      throw new ConfigurationErrorException("DIVIDE/FORMAT erfordert die Angabe MAXSCALE \"<NichtNegativeZahl>\"");
+    {
+      if (byFun == null) //falls kein Divisor, dann ist MAX nicht erforderlich, da Division durch 1 nichts kaputt macht
+        maxScale = Integer.MAX_VALUE;
+      else
+        throw new ConfigurationErrorException("DIVIDE/FORMAT erfordert die Angabe MAX \"<NichtNegativeZahl>\", wenn mit BY ein Divisor angegeben wird");
+    }
     
     if (maxScale < minScale)
-      throw new ConfigurationErrorException("MINSCALE muss kleiner oder gleich MAXSCALE sein");
+      throw new ConfigurationErrorException("MIN muss kleiner oder gleich MAX sein");
     
     return new DivideFunction(dividendFun, byFun, minScale, maxScale);
   }
@@ -900,8 +860,37 @@ public class FunctionFactory
     protected Collection subFunction;
     private String[] params;
     
+    public MultiFunction(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
+    {
+      Vector subFunction = new Vector(conf.count());
+      Iterator iter = conf.iterator();
+      while (iter.hasNext())
+      {
+        ConfigThingy subFunConf =(ConfigThingy)iter.next();
+        if (handleParam(subFunConf)) continue;
+        Function fun = parse(subFunConf, funcLib, dialogLib, context);
+        subFunction.add(fun);
+      }
+      
+      subFunction.trimToSize();
+      init(subFunction);
+    }
+    
+    /**
+     * Liefert true, wenn conf von handleParam bereits vollständig behandelt wurde
+     * und nicht mehr als Subfunktion erfasst werden soll. Diese Funktion wird
+     * von Unterklassen überschrieben, um spezielle Parameter zu behandeln.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
+    protected boolean handleParam(ConfigThingy conf) {return false;}
+    
     public MultiFunction(Collection subFunction)
-    { 
+    {
+      init(subFunction);
+    }
+    
+    private void init(Collection subFunction)
+    {
       this.subFunction = subFunction;
       Collection deps = new Vector();
       Iterator iter = subFunction.iterator();
@@ -948,6 +937,11 @@ public class FunctionFactory
     {
       super(subFunction);
     }
+    
+    public CatFunction(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
+    {
+      super(conf, funcLib, dialogLib, context);
+    }
 
     public String getString(Values parameters)
     {
@@ -972,6 +966,11 @@ public class FunctionFactory
       super(subFunction);
     }
     
+    public AndFunction(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
+    {
+      super(conf, funcLib, dialogLib, context);
+    }
+    
     public String getString(Values parameters)
     { 
       Iterator iter = subFunction.iterator();
@@ -992,6 +991,11 @@ public class FunctionFactory
     public NotFunction(Collection subFunction)
     { 
       super(subFunction);
+    }
+    
+    public NotFunction(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
+    {
+      super(conf, funcLib, dialogLib, context);
     }
     
     public String getString(Values parameters)
@@ -1016,6 +1020,11 @@ public class FunctionFactory
       super(subFunction);
     }
     
+    public OrFunction(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
+    {
+      super(conf, funcLib, dialogLib, context);
+    }
+    
     public String getString(Values parameters)
     {
       Iterator iter = subFunction.iterator();
@@ -1036,6 +1045,11 @@ public class FunctionFactory
     {
       super(subFunction);
     }
+    
+    public SelectFunction(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
+    {
+      super(conf, funcLib, dialogLib, context);
+    }
 
     public String getString(Values parameters)
     {
@@ -1049,6 +1063,236 @@ public class FunctionFactory
         if (str.length() > 0) return str;
       }
       return str;
+    }
+  }
+  
+  private static abstract class NumberFunction extends MultiFunction
+  {
+    protected char decimalPoint = '.';
+    
+    public NumberFunction(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
+    {
+      super(conf, funcLib, dialogLib, context);
+      try{
+        decimalPoint = ((DecimalFormat)NumberFormat.getInstance()).getDecimalFormatSymbols().getDecimalSeparator();
+      }catch(Exception x){};
+    }
+
+    /**
+     * Startet eine neue Auswertung der Funktion für Parameter parameters. Im Falle
+     * einer Summen-Funktion würde dies den Summenzähler mit 0 initialisieren.
+     * @return Falls zu diesem Zeitpunkt bereits ein Ergebnis bestimmt werden kann
+     *         (z.B. Function.ERROR, wenn ein benötigter Parameter nicht in parameters
+     *         übergeben wurde), so wird dieses zurückgeliefert, ansonsten null.
+     */
+    protected abstract String initComputation(Values parameters);
+    
+    /**
+     * Fügt den Wert num der aktuellen Berechnung hinzu. Im Falle einer Summen-Funktion
+     * würde er auf den Summen-Zähler addiert. Darf eine Exception werfen. 
+     * In diesem Fall wird die Funktion Function.ERROR zurückliefern.
+     * @return Falls zu diesem Zeitpunkt bereits ein Ergebnis bestimmt werden kann
+     *         (z.B. im Falle einer Vergleichsfunktion, die Kurzschlussauswertung macht),
+     *          so wird dieses zurückgeliefert, ansonsten null.
+     */
+    protected abstract String addToComputation(BigDecimal num);
+    
+    /**
+     * Wird aufgerufen, nachdem der letzte Wert mittels addComputation() verarbeitet wurde,
+     * wenn jeder addComputation()-Aufruf null geliefert hat. 
+     * @return das Endergebnis der Berechnung. null ist NICHT erlaubt.
+     */
+    protected abstract String computationResult();
+    
+    public String getString(Values parameters)
+    {
+      String result = initComputation(parameters);
+      if (result != null) return result;
+      Iterator iter = subFunction.iterator();
+      while (iter.hasNext())
+      {
+        Function func = (Function)iter.next();
+        String str = func.getString(parameters);
+        if (str == Function.ERROR) return Function.ERROR;
+        try{
+          BigDecimal num = makeBigDecimal(str);
+          result = addToComputation(num);
+          if (result != null) return result; 
+        }catch(Exception x)
+        {
+          return Function.ERROR;
+        }
+      }
+      return computationResult();
+    }
+    
+    protected BigDecimal makeBigDecimal(String str)
+    {
+      /*
+       * Falls der Dezimaltrenner nicht '.' ist, ersetzte alle '.' durch
+       * etwas, das kein Dezimaltrenner ist, um eine NumberFormatException
+       * beim Konvertieren zu provozieren. Dies ist eine Vorsichtsmaßnahme, da
+       * '.' zum Beispiel in Deutschland alls Gruppierungszeichen verwendet wird
+       * und wir wollen nicht fälschlicher weise "100.000" als 100 interpretieren,
+       * wenn die eingebende Person 100000 gemeint hat.
+       */
+      if (decimalPoint != '.') str = str.replace('.','ß');
+      
+      return new BigDecimal(str.replace(decimalPoint,'.'));
+    }
+    
+    /**
+     * Liefert eine Stringrepräsentation von num
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
+    protected String formatBigDecimal(BigDecimal num)
+    {
+      /*
+       * Workaround für Bug http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6480539
+       * stripTrailingZeros() funktioniert nicht für 0.
+       */
+      String result;
+      if (num.compareTo(BigDecimal.ZERO) == 0)
+        result = "0";
+      else
+        result = num.stripTrailingZeros().toPlainString().replace('.', decimalPoint);
+      return result;
+    }
+  }
+  
+  private static class SumFunction extends NumberFunction
+  {
+    private BigDecimal sum;
+    
+    public SumFunction(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
+    {
+      super(conf, funcLib, dialogLib, context);
+    }
+    
+    protected String initComputation(Values parameters)
+    {
+      sum = BigDecimal.ZERO;
+      return null;
+    }
+    
+    protected String addToComputation(BigDecimal num)
+    {
+      sum = sum.add(num);
+      return null;
+    }
+    
+    protected String computationResult()
+    {
+      return formatBigDecimal(numericComputationResult());
+    }
+    
+    protected BigDecimal numericComputationResult()
+    {
+      return sum;
+    }
+  }
+  
+  private static class MinusFunction extends SumFunction
+  {
+    public MinusFunction(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
+    {
+      super(conf, funcLib, dialogLib, context);
+    }
+    
+    protected String computationResult()
+    {
+      return formatBigDecimal(numericComputationResult().negate());
+    }
+  }
+  
+  private static class AbsFunction extends SumFunction
+  {
+    public AbsFunction(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
+    {
+      super(conf, funcLib, dialogLib, context);
+    }
+    
+    protected String computationResult()
+    {
+      return formatBigDecimal(numericComputationResult().abs());
+    }
+  }
+  
+  private static class SignFunction extends SumFunction
+  {
+    public SignFunction(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
+    {
+      super(conf, funcLib, dialogLib, context);
+    }
+    
+    protected String computationResult()
+    {
+      //signum() liefert int, deswegen hier nur ""+  und nicht formatBigDecimal()
+      return ""+numericComputationResult().signum();
+    }
+  }
+  
+  private static class DiffFunction extends NumberFunction
+  {
+    private BigDecimal sum;
+    private boolean first;
+    
+    public DiffFunction(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
+    {
+      super(conf, funcLib, dialogLib, context);
+    }
+    
+    protected String initComputation(Values parameters)
+    {
+      sum = BigDecimal.ZERO;
+      first = true;
+      return null;
+    }
+    
+    protected String addToComputation(BigDecimal num)
+    {
+      if (first)
+      {
+        sum = sum.add(num);
+        first = false;
+      }
+      else
+      {
+        sum = sum.subtract(num);
+      }
+      return null;
+    }
+    
+    protected String computationResult()
+    {
+      return formatBigDecimal(sum);
+    }
+  }
+  
+  private static class ProductFunction extends NumberFunction
+  {
+    private BigDecimal prod;
+    
+    public ProductFunction(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
+    {
+      super(conf, funcLib, dialogLib, context);
+    }
+    
+    protected String initComputation(Values parameters)
+    {
+      prod = BigDecimal.ONE;
+      return null;
+    }
+    
+    protected String addToComputation(BigDecimal num)
+    {
+      prod = prod.multiply(num);
+      return null;
+    }
+    
+    protected String computationResult()
+    {
+      return formatBigDecimal(prod);
     }
   }
   
@@ -1184,7 +1428,16 @@ public class FunctionFactory
        * Genauigkeit von double hat (laut Java Doc).
        */
       
-      String result = bigResult.stripTrailingZeros().toPlainString();
+      /*
+       * Workaround für Bug http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6480539
+       * stripTrailingZeros() funktioniert nicht für 0.
+       */
+      String result;
+      if (bigResult.compareTo(BigDecimal.ZERO) == 0)
+        result = "0";
+      else
+        result = bigResult.stripTrailingZeros().toPlainString();
+      
       StringBuilder buffy = new StringBuilder(result);
       int idx = result.indexOf('.');
       if (idx == 0)
