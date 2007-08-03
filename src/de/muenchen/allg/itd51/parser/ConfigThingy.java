@@ -46,6 +46,7 @@
 * 14.11.2006 | BNK | %-Escapes am Anfang eines Strings werden korrekt geparst.
 * 15.06.2007 | BNK | urlEncode() Sonderbehandlung für Leerzeichen ("%20" statt "+")
 *                  | urlEncode() public gemacht. Nicht wirklich schöne Lösung, aber mei.
+* 02.08.2007 | BNK | +ConfigThingy(String, String)                 
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -59,6 +60,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -120,12 +122,24 @@ public class ConfigThingy
   }
   
   /**
+   * Parst den String confString im Kontext der null URL (d,h, includes mit
+   * relativen URLs dürfen in confString nicht vorkommen). 
+   * @param name der Name der Wurzel des erzeugten ConfigThingy-Baumes.
+   * @throws IOException falls das Laden vonr einer includeten URL fehlschlägt.
+   * @throws SyntaxErrorException falls beim Parsen der Daten ein
+   * syntaktischer Fehler gefunden wird.
+   */
+  public ConfigThingy(String name, String confString) throws IOException, SyntaxErrorException
+  {
+    this(name, null, new StringReader(confString));
+  }
+  
+  /**
    * Parst die Daten aus read im Kontext der URL url. read wird sowohl im
    * Fehlerfalle als auch nach dem erfolgreichen Einlesen geschlossen.
    * @param name der Name der Wurzel des erzeugten ConfigThingy-Baumes.
    * @throws IOException falls das Laden von Daten von url (oder einer includeten
    * URL) fehlschlägt.
-   * @throws SyntaxErrorException 
    * @throws SyntaxErrorException falls beim Parsen der Daten von url ein
    * syntaktischer Fehler gefunden wird.
    */
