@@ -17,6 +17,7 @@
 * 26.07.2006 | BNK | +REPLACE-Grundfunktion
 * 05.12.2006 | BNK | WollMuxFiles.getClassLoader() wird für ExternalFunctions übergeben.
 * 21.03.2007 | BNK | BIND erweitert so dass auch direkt eine Funktion als FUNCTION verwendet werden kann.
+* 25.07.2007 | BNK | +DIVIDE/FORMAT
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -27,7 +28,11 @@ package de.muenchen.allg.itd51.wollmux.func;
 
 import java.awt.event.ActionListener;
 import java.io.StringReader;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.URL;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -183,145 +188,31 @@ public class FunctionFactory
     
     if (name.equals("AND"))
     {
-      Vector andFunction = new Vector();
-      Iterator iter = conf.iterator();
-      while (iter.hasNext())
-      {
-        Function cons = parse((ConfigThingy)iter.next(), funcLib, dialogLib, context);
-        andFunction.add(cons);
-      }
-      
-      andFunction.trimToSize();
-      return new AndFunction(andFunction);
+      return parseAND(conf, funcLib, dialogLib, context);
     }
     else if (name.equals("NOT"))
     {
-      Vector notFunction = new Vector();
-      Iterator iter = conf.iterator();
-      while (iter.hasNext())
-      {
-        Function cons = parse((ConfigThingy)iter.next(), funcLib, dialogLib, context);
-        notFunction.add(cons);
-      }
-      
-      notFunction.trimToSize();
-      return new NotFunction(notFunction);
+      return parseNOT(conf, funcLib, dialogLib, context);
     }
     else if (name.equals("OR"))
     {
-      Vector orFunction = new Vector();
-      Iterator iter = conf.iterator();
-      while (iter.hasNext())
-      {
-        Function cons = parse((ConfigThingy)iter.next(), funcLib, dialogLib, context);
-        orFunction.add(cons);
-      }
-      
-      orFunction.trimToSize();
-      return new OrFunction(orFunction);
+      return parseOR(conf, funcLib, dialogLib, context);
     }
     else if (name.equals("VALUE"))
     {
-      if (conf.count() != 1)
-        throw new ConfigurationErrorException("Funktion vom Typ \"VALUE\" erfordert genau 1 Parameter, nicht "+conf.count()); 
-      
-      Function valueNameFun;
-      try
-      {
-        valueNameFun = parse(conf.getFirstChild(), funcLib, dialogLib, context);
-      }
-      catch (NodeNotFoundException e) { 
-        /* Kann nicht passieren. Hab count() getestet. */
-        valueNameFun = null;
-      }
-      
-      return new ValueFunction(valueNameFun.getString(noValues));
+      return parseVALUE(conf, funcLib, dialogLib, context);
     }
     else if (name.equals("MATCH"))
     {
-      if (conf.count() != 2)
-        throw new ConfigurationErrorException("Funktion vom Typ \"MATCH\" erfordert genau 2 Parameter, nicht "+conf.count());
-      
-      Function strFun;
-      Function reFun; 
-      
-      try{
-        strFun = parse(conf.getFirstChild(), funcLib, dialogLib, context);
-        reFun = parse(conf.getLastChild(), funcLib, dialogLib, context);
-      }catch(NodeNotFoundException x)
-      {
-        /*Kann nicht sein, weil count() getestet*/
-        strFun = null;
-        reFun = null;
-      }
-      
-      String regex = reFun.getString(noValues);
-      Pattern p;
-      try{
-        p = Pattern.compile(regex);
-      }catch(PatternSyntaxException x)
-      {
-        throw new ConfigurationErrorException("Fehler in regex \""+regex+"\"", x);
-      }
-      return new MatchFunction(strFun, p);
+      return parseMATCH(conf, funcLib, dialogLib, context);
     }
     else if (name.equals("REPLACE"))
     {
-      if (conf.count() != 3)
-        throw new ConfigurationErrorException("Funktion vom Typ \"REPLACE\" erfordert genau 3 Parameter, nicht "+conf.count());
-      
-      Function strFun;
-      Function reFun;
-      Function repFun;
-      
-      Iterator iter = conf.iterator();
-      strFun = parse((ConfigThingy)iter.next(), funcLib, dialogLib, context);
-      reFun  = parse((ConfigThingy)iter.next(), funcLib, dialogLib, context);
-      repFun = parse((ConfigThingy)iter.next(), funcLib, dialogLib, context);
-      
-      String regex = reFun.getString(noValues);
-      Pattern p;
-      try{
-        p = Pattern.compile(regex);
-      }catch(PatternSyntaxException x)
-      {
-        throw new ConfigurationErrorException("Fehler in regex \""+regex+"\"", x);
-      }
-      return new ReplaceFunction(strFun, p, repFun);
+      return parseREPLACE(conf, funcLib, dialogLib, context);
     }
     else if (name.equals("IF"))
     {
-      ConfigThingy thenConf = conf.query("THEN");
-      ConfigThingy elseConf = conf.query("ELSE");
-      if (thenConf.count() > 1 || elseConf.count() > 1)
-        throw new ConfigurationErrorException("In IF darf maximal ein THEN und ein ELSE vorhanden sein");
-      
-      if (conf.count() - thenConf.count() - elseConf.count() != 1)
-        throw new ConfigurationErrorException("IF muss genau eine Bedingung enthalten.");
-      
-      if (thenConf.count() == 0)
-      {
-        thenConf = new ConfigThingy("dummy");
-        thenConf.add("THEN").add("");
-      }
-      
-      if (elseConf.count() == 0)
-      {
-        elseConf = new ConfigThingy("dummy");
-        elseConf.add("ELSE").add("");
-      }
-      
-      Iterator iter = conf.iterator();
-      ConfigThingy condition;
-      do{ //oben wurde überprüft, dass es genau einen Knoten gibt, der nicht ELSE oder THEN ist
-        condition = (ConfigThingy)iter.next();
-      } while(condition.getName().equals("THEN") || condition.equals("ELSE"));
-      
-      Function ifFun = parse(condition, funcLib, dialogLib, context);
-      Function thenFun = parseChildren(thenConf, funcLib, dialogLib, context);
-      Function elseFun = parseChildren(elseConf, funcLib, dialogLib, context);
-      
-      return new IfFunction(ifFun, thenFun, elseFun);
+      return parseIF(conf, funcLib, dialogLib, context);
     }
     else if (name.equals("EXTERN"))
     {
@@ -329,89 +220,330 @@ public class FunctionFactory
     }
     else if (name.equals("DIALOG"))
     {
-      if (conf.count() != 2)
-        throw new ConfigurationErrorException("Funktion vom Typ \"DIALOG\" erfordert genau 2 Parameter, nicht "+conf.count());
-      
-      String dialogName;
-      String dataName; 
-      
-      try{
-        dialogName = conf.getFirstChild().toString();
-        dataName = conf.getLastChild().toString();
-      }catch(NodeNotFoundException x)
-      {
-        /*Kann nicht sein, weil count() getestet*/
-        dialogName = null;
-        dataName = null;
-      }
-      
-      Dialog dialog = dialogLib.get(dialogName);
-      if (dialog == null)
-        throw new ConfigurationErrorException("Dialog \""+dialogName+"\" ist nicht definiert, aber wird in DIALOG-Funktion verwendet");
-      
-      if (context == null)
-        throw new ConfigurationErrorException("DIALOG-Funktion ist kontextabhängig und kann deshalb hier nicht verwendet werden.");
-      
-      return new DialogFunction(dialogName, dialog, dataName, context);
+      return parseDIALOG(conf, dialogLib, context);
     }
     else if (name.equals("BIND"))
     {
-      ConfigThingy funcConf = conf.query("FUNCTION"); //funcConf = <query results> - FUNCTION - ...
-      if (funcConf.count() != 1)
-        throw new ConfigurationErrorException("Funktion vom Typ \"BIND\" erfordert genau 1 Unterelement FUNCTION");
-      
-      Function func;
-      funcConf = (ConfigThingy)funcConf.iterator().next();  //funcConf = FUNCTION - ...
-      if (funcConf.count() == 0)
-        throw new ConfigurationErrorException("Bei Funktionen vom Typ \"BIND\" muss nach \"FUNCTION\" ein Funktionsname oder eine Funktion folgen.");
-      if (funcConf.count() > 1)
-        throw new ConfigurationErrorException("Bei Funktionen vom Typ \"BIND\" darf nach \"FUNCTION\" keine Liste sondern nur ein Funktionsname oder eine Funktion folgen.");
-
-      funcConf = (ConfigThingy)funcConf.iterator().next(); //<Funktionsname>|<Funktion> - ...
-      
-      if (funcConf.count() == 0) //d.h. es wurde nur ein <Funktionsname> angegeben
-      {
-        String funcName = funcConf.toString();
-        
-        func = funcLib.get(funcName);
-        if (func == null)
-          throw new ConfigurationErrorException("Funktion \""+funcName+"\" wird verwendet, bevor sie definiert ist");
-      }
-      else //if (funcConf.count() > 0) d.h. es wurde eine ganze Funktion angegeben
-      {
-        func = parse(funcConf, funcLib, dialogLib, context);
-      }
-      
-      return new BindFunction(func, conf, funcLib, dialogLib, context);
+      return parseBIND(conf, funcLib, dialogLib, context);
     }
     else if (name.equals("SELECT"))
     {
-      Vector selFunction = new Vector(conf.count());
-      Iterator iter = conf.iterator();
-      while (iter.hasNext())
-      {
-        Function fun = parse((ConfigThingy)iter.next(), funcLib, dialogLib, context);
-        selFunction.add(fun);
-      }
-      
-      selFunction.trimToSize();
-      return new SelectFunction(selFunction);
+      return parseSELECT(conf, funcLib, dialogLib, context);
     }
     else if (name.equals("CAT") || name.equals("THEN") || name.equals("ELSE"))
     {
-      Vector catFunction = new Vector(conf.count());
-      Iterator iter = conf.iterator();
-      while (iter.hasNext())
-      {
-        Function fun = parse((ConfigThingy)iter.next(), funcLib, dialogLib, context);
-        catFunction.add(fun);
-      }
-      
-      catFunction.trimToSize();
-      return new CatFunction(catFunction);
+      return parseCAT(conf, funcLib, dialogLib, context);
+    }
+    else if (name.equals("FORMAT") || name.equals("DIVIDE"))
+    {
+      return parseDIVIDE(conf, funcLib, dialogLib, context);
     }
     
     throw new ConfigurationErrorException("\""+name+"\" ist keine unterstützte Grundfunktion");
+  }
+
+  private static Function parseCAT(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
+  {
+    Vector catFunction = new Vector(conf.count());
+    Iterator iter = conf.iterator();
+    while (iter.hasNext())
+    {
+      Function fun = parse((ConfigThingy)iter.next(), funcLib, dialogLib, context);
+      catFunction.add(fun);
+    }
+    
+    catFunction.trimToSize();
+    return new CatFunction(catFunction);
+  }
+
+  private static Function parseSELECT(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
+  {
+    Vector selFunction = new Vector(conf.count());
+    Iterator iter = conf.iterator();
+    while (iter.hasNext())
+    {
+      Function fun = parse((ConfigThingy)iter.next(), funcLib, dialogLib, context);
+      selFunction.add(fun);
+    }
+    
+    selFunction.trimToSize();
+    return new SelectFunction(selFunction);
+  }
+
+  private static Function parseBIND(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
+  {
+    ConfigThingy funcConf = conf.query("FUNCTION"); //funcConf = <query results> - FUNCTION - ...
+    if (funcConf.count() != 1)
+      throw new ConfigurationErrorException("Funktion vom Typ \"BIND\" erfordert genau 1 Unterelement FUNCTION");
+    
+    Function func;
+    funcConf = (ConfigThingy)funcConf.iterator().next();  //funcConf = FUNCTION - ...
+    if (funcConf.count() == 0)
+      throw new ConfigurationErrorException("Bei Funktionen vom Typ \"BIND\" muss nach \"FUNCTION\" ein Funktionsname oder eine Funktion folgen.");
+    if (funcConf.count() > 1)
+      throw new ConfigurationErrorException("Bei Funktionen vom Typ \"BIND\" darf nach \"FUNCTION\" keine Liste sondern nur ein Funktionsname oder eine Funktion folgen.");
+
+    funcConf = (ConfigThingy)funcConf.iterator().next(); //<Funktionsname>|<Funktion> - ...
+    
+    if (funcConf.count() == 0) //d.h. es wurde nur ein <Funktionsname> angegeben
+    {
+      String funcName = funcConf.toString();
+      
+      func = funcLib.get(funcName);
+      if (func == null)
+        throw new ConfigurationErrorException("Funktion \""+funcName+"\" wird verwendet, bevor sie definiert ist");
+    }
+    else //if (funcConf.count() > 0) d.h. es wurde eine ganze Funktion angegeben
+    {
+      func = parse(funcConf, funcLib, dialogLib, context);
+    }
+    
+    return new BindFunction(func, conf, funcLib, dialogLib, context);
+  }
+
+  private static Function parseDIALOG(ConfigThingy conf, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
+  {
+    if (conf.count() != 2)
+      throw new ConfigurationErrorException("Funktion vom Typ \"DIALOG\" erfordert genau 2 Parameter, nicht "+conf.count());
+    
+    String dialogName;
+    String dataName; 
+    
+    try{
+      dialogName = conf.getFirstChild().toString();
+      dataName = conf.getLastChild().toString();
+    }catch(NodeNotFoundException x)
+    {
+      /*Kann nicht sein, weil count() getestet*/
+      dialogName = null;
+      dataName = null;
+    }
+    
+    Dialog dialog = dialogLib.get(dialogName);
+    if (dialog == null)
+      throw new ConfigurationErrorException("Dialog \""+dialogName+"\" ist nicht definiert, aber wird in DIALOG-Funktion verwendet");
+    
+    if (context == null)
+      throw new ConfigurationErrorException("DIALOG-Funktion ist kontextabhängig und kann deshalb hier nicht verwendet werden.");
+    
+    return new DialogFunction(dialogName, dialog, dataName, context);
+  }
+
+  private static Function parseIF(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
+  {
+    ConfigThingy thenConf = conf.query("THEN");
+    ConfigThingy elseConf = conf.query("ELSE");
+    if (thenConf.count() > 1 || elseConf.count() > 1)
+      throw new ConfigurationErrorException("In IF darf maximal ein THEN und ein ELSE vorhanden sein");
+    
+    if (conf.count() - thenConf.count() - elseConf.count() != 1)
+      throw new ConfigurationErrorException("IF muss genau eine Bedingung enthalten.");
+    
+    if (thenConf.count() == 0)
+    {
+      thenConf = new ConfigThingy("dummy");
+      thenConf.add("THEN").add("");
+    }
+    
+    if (elseConf.count() == 0)
+    {
+      elseConf = new ConfigThingy("dummy");
+      elseConf.add("ELSE").add("");
+    }
+    
+    Iterator iter = conf.iterator();
+    ConfigThingy condition;
+    do{ //oben wurde überprüft, dass es genau einen Knoten gibt, der nicht ELSE oder THEN ist
+      condition = (ConfigThingy)iter.next();
+    } while(condition.getName().equals("THEN") || condition.equals("ELSE"));
+    
+    Function ifFun = parse(condition, funcLib, dialogLib, context);
+    Function thenFun = parseChildren(thenConf, funcLib, dialogLib, context);
+    Function elseFun = parseChildren(elseConf, funcLib, dialogLib, context);
+    
+    return new IfFunction(ifFun, thenFun, elseFun);
+  }
+
+  private static Function parseREPLACE(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
+  {
+    if (conf.count() != 3)
+      throw new ConfigurationErrorException("Funktion vom Typ \"REPLACE\" erfordert genau 3 Parameter, nicht "+conf.count());
+    
+    Function strFun;
+    Function reFun;
+    Function repFun;
+    
+    Iterator iter = conf.iterator();
+    strFun = parse((ConfigThingy)iter.next(), funcLib, dialogLib, context);
+    reFun  = parse((ConfigThingy)iter.next(), funcLib, dialogLib, context);
+    repFun = parse((ConfigThingy)iter.next(), funcLib, dialogLib, context);
+    
+    String regex = reFun.getString(noValues);
+    Pattern p;
+    try{
+      p = Pattern.compile(regex);
+    }catch(PatternSyntaxException x)
+    {
+      throw new ConfigurationErrorException("Fehler in regex \""+regex+"\"", x);
+    }
+    return new ReplaceFunction(strFun, p, repFun);
+  }
+
+  private static Function parseMATCH(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
+  {
+    if (conf.count() != 2)
+      throw new ConfigurationErrorException("Funktion vom Typ \"MATCH\" erfordert genau 2 Parameter, nicht "+conf.count());
+    
+    Function strFun;
+    Function reFun; 
+    
+    try{
+      strFun = parse(conf.getFirstChild(), funcLib, dialogLib, context);
+      reFun = parse(conf.getLastChild(), funcLib, dialogLib, context);
+    }catch(NodeNotFoundException x)
+    {
+      /*Kann nicht sein, weil count() getestet*/
+      strFun = null;
+      reFun = null;
+    }
+    
+    String regex = reFun.getString(noValues);
+    Pattern p;
+    try{
+      p = Pattern.compile(regex);
+    }catch(PatternSyntaxException x)
+    {
+      throw new ConfigurationErrorException("Fehler in regex \""+regex+"\"", x);
+    }
+    return new MatchFunction(strFun, p);
+  }
+
+  private static Function parseVALUE(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
+  {
+    if (conf.count() != 1)
+      throw new ConfigurationErrorException("Funktion vom Typ \"VALUE\" erfordert genau 1 Parameter, nicht "+conf.count()); 
+    
+    Function valueNameFun;
+    try
+    {
+      valueNameFun = parse(conf.getFirstChild(), funcLib, dialogLib, context);
+    }
+    catch (NodeNotFoundException e) { 
+      /* Kann nicht passieren. Hab count() getestet. */
+      valueNameFun = null;
+    }
+    
+    return new ValueFunction(valueNameFun.getString(noValues));
+  }
+
+  private static Function parseOR(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
+  {
+    Vector orFunction = new Vector();
+    Iterator iter = conf.iterator();
+    while (iter.hasNext())
+    {
+      Function cons = parse((ConfigThingy)iter.next(), funcLib, dialogLib, context);
+      orFunction.add(cons);
+    }
+    
+    orFunction.trimToSize();
+    return new OrFunction(orFunction);
+  }
+
+  private static Function parseNOT(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
+  {
+    Vector notFunction = new Vector();
+    Iterator iter = conf.iterator();
+    while (iter.hasNext())
+    {
+      Function cons = parse((ConfigThingy)iter.next(), funcLib, dialogLib, context);
+      notFunction.add(cons);
+    }
+    
+    notFunction.trimToSize();
+    return new NotFunction(notFunction);
+  }
+
+  private static Function parseAND(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
+  {
+    Vector andFunction = new Vector();
+    Iterator iter = conf.iterator();
+    while (iter.hasNext())
+    {
+      Function cons = parse((ConfigThingy)iter.next(), funcLib, dialogLib, context);
+      andFunction.add(cons);
+    }
+    
+    andFunction.trimToSize();
+    return new AndFunction(andFunction);
+  }
+  
+  private static Function parseDIVIDE(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
+  {
+    Function dividendFun = null;
+    Function byFun = null;
+    int minScale = 0;
+    int maxScale = -1;
+    Iterator iter = conf.iterator();
+    while (iter.hasNext())
+    {
+      ConfigThingy funConf = (ConfigThingy)iter.next();
+      String name = funConf.getName();
+      if (name.equals("BY"))
+      {
+        if (funConf.count() != 1)
+          throw new ConfigurationErrorException("BY-Angabe von DIVIDE/FORMAT muss genau eine Funktion oder einen String enthalten");
+        
+        if (byFun != null)
+          throw new ConfigurationErrorException("DIVIDE/FORMAT-Funktion darf maximal eine BY-Angabe haben");
+        
+        byFun = parseChildren(funConf, funcLib, dialogLib, context);
+      } else if (name.equals("MINSCALE"))
+      {
+        int num = -1;
+        try{
+          if (funConf.getFirstChild().count() == 0)
+          {
+            num = Integer.parseInt(funConf.toString());
+          }
+        }catch(Exception x){}
+        
+        if (num < 0)
+          throw new ConfigurationErrorException("MINSCALE-Angabe von DIVIDE/FORMAT muss \"<NichtNegativeZahl>\" sein");
+
+        minScale = num;
+        
+      } else if (name.equals("MAXSCALE"))
+      {
+        int num = -1;
+        try{
+          if (funConf.getFirstChild().count() == 0)
+          {
+            num = Integer.parseInt(funConf.toString());
+          }
+        }catch(Exception x){}
+        
+        if (num < 0)
+          throw new ConfigurationErrorException("MAXSCALE-Angabe von DIVIDE/FORMAT muss \"<NichtNegativeZahl>\" sein");
+
+        maxScale = num;        
+      } else
+      {
+        if (dividendFun != null) throw new ConfigurationErrorException("Bei DIVIDE/FORMAT-Funktion wurde mehr als eine unqualifizierte Funktion angegeben. Beachten Sie, dass der Divisor mit BY(...) umschlossen sein muss.");
+        dividendFun = parse(funConf, funcLib, dialogLib, context);
+      }
+    }
+    
+    if (dividendFun == null)
+      throw new ConfigurationErrorException("Bei DIVIDE/FORMAT-Funktion muss genau eine unqualifizierte Funktion angegeben werden");
+    
+    if (maxScale < 0)
+      throw new ConfigurationErrorException("DIVIDE/FORMAT erfordert die Angabe MAXSCALE \"<NichtNegativeZahl>\"");
+    
+    if (maxScale < minScale)
+      throw new ConfigurationErrorException("MINSCALE muss kleiner oder gleich MAXSCALE sein");
+    
+    return new DivideFunction(dividendFun, byFun, minScale, maxScale);
   }
 
   private static class DialogFunction implements Function
@@ -972,6 +1104,113 @@ public class FunctionFactory
     }
   }
   
+  private static class DivideFunction implements Function
+  {
+    private Function dividendFunction;
+    private Function divisorFunction = null;
+    private int minScale;
+    private int maxScale;
+    private String[] params;
+    
+    /**
+     * Wenn divisorFunction null ist wird 1 angenommen.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     * TESTED*/
+    public DivideFunction(Function dividendFunction, Function divisorFunction, int minScale, int maxScale)
+    {
+      Set myparams = new HashSet();
+      myparams.addAll(Arrays.asList(dividendFunction.parameters()));
+      if (divisorFunction != null) myparams.addAll(Arrays.asList(divisorFunction.parameters()));
+      params = (String[])myparams.toArray(new String[0]);
+      this.dividendFunction = dividendFunction;
+      this.divisorFunction = divisorFunction;
+      this.minScale = minScale;
+      this.maxScale = maxScale;
+    }
+    
+    public String[] parameters()
+    {
+      return params;
+    }
+    
+    public void getFunctionDialogReferences(Collection set)
+    {
+      dividendFunction.getFunctionDialogReferences(set);
+      if (divisorFunction != null) divisorFunction.getFunctionDialogReferences(set);
+    }
+
+    public String getString(Values parameters)
+    { //TESTED
+      char decimalPoint = '.';
+      try{
+        decimalPoint = ((DecimalFormat)NumberFormat.getInstance()).getDecimalFormatSymbols().getDecimalSeparator();
+      }catch(Exception x){};
+      
+      String dividend = dividendFunction.getString(parameters);
+      if (dividend == Function.ERROR) return Function.ERROR;
+      
+      String divisor = "1";
+      if (divisorFunction != null)
+        divisor = divisorFunction.getString(parameters);
+      if (divisor == Function.ERROR) return Function.ERROR;
+      
+      /*
+       * Falls der Dezimaltrenner nicht '.' ist, ersetzte alle '.' durch
+       * etwas, das kein Dezimaltrenner ist, um eine NumberFormatException
+       * beim Konvertieren zu provozieren. Dies ist eine Vorsichtsmaßnahme, da
+       * '.' zum Beispiel in Deutschland alls Gruppierungszeichen verwendet wird
+       * und wir wollen nicht fälschlicher weise "100.000" als 100 interpretieren,
+       * wenn die eingebende Person 100000 gemeint hat.
+       */
+      if (decimalPoint != '.')
+      {
+        dividend = dividend.replace('.','ß');
+        divisor = divisor.replace('.','ß');
+      }
+      
+      BigDecimal bigResult;
+      try{
+        BigDecimal bigDividend = new BigDecimal(dividend.replace(decimalPoint,'.'));
+        BigDecimal bigDivisor  = new BigDecimal(divisor.replace(decimalPoint,'.'));
+        
+        bigResult = bigDividend.divide(bigDivisor, maxScale, RoundingMode.HALF_UP);
+      }catch(Exception x)
+      {
+        return Function.ERROR;
+      }
+
+      /*
+       * NumberFormat kann leider nicht zum formatieren verwendet werden, da es nur die
+       * Genauigkeit von double hat (laut Java Doc).
+       */
+      
+      String result = bigResult.stripTrailingZeros().toPlainString();
+      StringBuilder buffy = new StringBuilder(result);
+      int idx = result.indexOf('.');
+      if (idx == 0)
+      {
+        buffy.insert(0,"0");
+        idx = 1;
+      }
+      if (idx < 0 && minScale > 0)
+      {
+        buffy.append(".0");
+        idx = buffy.length() - 2;
+      }
+      
+      int decimalDigits = (idx < 0) ? 0 : buffy.length() - idx - 1;
+      for (int i = decimalDigits; i < minScale; ++i) buffy.append('0');
+
+      result = buffy.toString().replace('.', decimalPoint);
+      return result;
+    }
+
+    public boolean getBoolean(Values parameters)
+    {
+      return false;
+    }
+  }
+
   
   private static class AlwaysTrueFunction implements Function
   {
