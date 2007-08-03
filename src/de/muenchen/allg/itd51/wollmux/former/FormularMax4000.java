@@ -24,7 +24,8 @@
 * 10.07.2007 | BNK | [P1403]abort() verbessert, damit FM4000 gemuellentsorgt werden kann
 * 19.07.2007 | BNK | [R5406]Views und Teile der Views können nach Benutzerwunsch ein- oder ausgeblendet werden
 *                  | Änderung der Menüstruktur (Einführung Ansicht und Bearbeiten Menü, Einfügen wandert nach Bearbeiten)
-*                  | JSplitPane besser initialisiert, um verschieben des Dividers zu verbessern.                  
+*                  | JSplitPane besser initialisiert, um verschieben des Dividers zu verbessern.
+* 01.08.2007 | BNK | FunctionTester eingebaut                                   
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -111,6 +112,7 @@ import de.muenchen.allg.itd51.wollmux.former.control.FormControlModel;
 import de.muenchen.allg.itd51.wollmux.former.control.FormControlModelList;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelection;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionProvider;
+import de.muenchen.allg.itd51.wollmux.former.function.FunctionTester;
 import de.muenchen.allg.itd51.wollmux.former.function.ParamValue;
 import de.muenchen.allg.itd51.wollmux.former.group.GroupModel;
 import de.muenchen.allg.itd51.wollmux.former.group.GroupModelList;
@@ -296,6 +298,11 @@ public class FormularMax4000
    * Beschreibt die aktuellen Sichtbarkeitseinstellungen des Benutzers.
    */
   private ViewVisibilityDescriptor viewVisibilityDescriptor = new ViewVisibilityDescriptor();
+  
+  /**
+   * GUI zum interaktiven Zusammenbauen und Testen von Funktionen.
+   */
+  private FunctionTester functionTester = null;
   
   /**
    * Der Titel des Formulars.
@@ -643,6 +650,26 @@ public class FormularMax4000
           mainContentPanel.setResizeWeight(1.0);
         }
         setFrameSize();
+      }});
+    menu.add(menuItem);
+    
+    menu.addSeparator();
+    menuItem = new JMenuItem("Funktionstester");
+    menuItem.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent e)
+      { 
+        if (functionTester == null)
+        {
+          functionTester = new FunctionTester(functionLibrary, new ActionListener(){
+            public void actionPerformed(ActionEvent e)
+            {
+              functionTester = null;
+            }}
+          , idManager, NAMESPACE_FORMCONTROLMODEL);
+        } else
+        {
+          functionTester.toFront();
+        }
       }});
     menu.add(menuItem);
     
@@ -1637,6 +1664,9 @@ public class FormularMax4000
     
     myFrame.dispose();
     myFrame = null;
+    
+    if (functionTester != null) functionTester.abort();
+    
     try{
       selectionSupplier.removeSelectionChangeListener(myXSelectionChangedListener);
     } catch(Exception x){}
