@@ -29,8 +29,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
+import java.util.regex.Pattern;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
+import de.muenchen.allg.itd51.parser.SyntaxErrorException;
 import de.muenchen.allg.itd51.wollmux.DuplicateIDException;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
 import de.muenchen.allg.itd51.wollmux.former.IDManager;
@@ -46,6 +48,11 @@ import de.muenchen.allg.itd51.wollmux.former.function.ParamValue;
  */
 public class FormControlModel
 {
+  /**
+   * {@link Pattern} für legale IDs.
+   */
+  private static Pattern ID_PATTERN = Pattern.compile("^([a-zA-Z_][a-zA-Z_0-9]*)");
+  
   /**
    * Die *_TYPE-Konstanten haben eine Doppelfunktion. Einerseits sind sie Typ-IDs, die mit
    *  == verglichen werden, andererseits wird bei der Ausgabe der String direkt als TYPE-Wert
@@ -536,10 +543,11 @@ public class FormControlModel
    * Setzt das ID-Attribut. Falls id=="", wird die ID gelöscht.
    * @throws DuplicateIDException falls es bereits ein anderes FormControlModel mit der ID id
    *                              gibt.
+   * @throws SyntaxErrorException falls id nicht leer und keine legale ID ist. 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
-  public void setId(final String id) throws DuplicateIDException
+  public void setId(final String id) throws DuplicateIDException, SyntaxErrorException
   {
     IDManager.ID idO = getId();
     if (id.length() == 0)
@@ -550,6 +558,7 @@ public class FormControlModel
     }
     else
     {
+      if (!isLegalID(id)) throw new SyntaxErrorException("'"+id+"' ist keine syntaktisch korrekte ID");
       if (idO == null)
       {
         this.id = formularMax4000.getIDManager().getActiveID(FormularMax4000.NAMESPACE_FORMCONTROLMODEL, id);
@@ -560,6 +569,15 @@ public class FormControlModel
       }
     }
     notifyListeners(ID_ATTR, getId());
+  }
+  
+  /**
+   * Liefert true gdw, id auf {@link #ID_PATTERN} matcht.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private boolean isLegalID(String id)
+  {
+    return ID_PATTERN.matcher(id).matches();    
   }
   
   /**
