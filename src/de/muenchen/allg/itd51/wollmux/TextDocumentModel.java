@@ -392,14 +392,14 @@ public class TextDocumentModel
       }
       catch (NodeNotFoundException e)
       {
-        Logger.error(new ConfigurationErrorException(
-            "Die Formularbeschreibung enthält keinen Abschnitt 'Formular':\n"
-                + e.getMessage()));
+        Logger.error(
+            "Die Formularbeschreibung enthält keinen Abschnitt 'Formular'",
+            e);
       }
     }
     catch (java.lang.Exception e)
     {
-      Logger.error("Formularbeschreibung ist fehlerhaft", e);
+      Logger.error("Die Formularbeschreibung ist fehlerhaft", e);
       return;
     }
   }
@@ -425,8 +425,7 @@ public class TextDocumentModel
     }
     catch (java.lang.Exception e)
     {
-      Logger.error(new ConfigurationErrorException(
-          "Formularwerte-Abschnitt ist fehlerhaft:\n" + e.getMessage()));
+      Logger.error("Formularwerte-Abschnitt ist fehlerhaft", e);
       return;
     }
 
