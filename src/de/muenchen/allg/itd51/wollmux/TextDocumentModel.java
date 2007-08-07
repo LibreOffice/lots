@@ -399,8 +399,7 @@ public class TextDocumentModel
     }
     catch (java.lang.Exception e)
     {
-      Logger.error(new ConfigurationErrorException(
-          "Formularbeschreibung ist fehlerhaft:\n" + e.getMessage()));
+      Logger.error("Formularbeschreibung ist fehlerhaft", e);
       return;
     }
   }
