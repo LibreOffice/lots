@@ -20,6 +20,7 @@
 * 25.07.2007 | BNK | +DIVIDE/FORMAT
 * 03.08.2007 | BNK | +SUM,MINUS,PRODUCT,DIFF,ABS,SIGN
 * 08.08.2007 | BNK | SELECT-Verhalten im Fehlerfalle entsprechend Doku implementiert
+*                  | +NUMCMP, LE, GE, GT, LT 
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -130,7 +131,7 @@ public class FunctionFactory
   /**
    * Erzeugt ein Function-Objekt aus den KINDERN von conf.
    * Hat conf keine Kinder, so wird null geliefert. Hat conf genau ein Kind,
-   * so wird eine Funktion geliefert, die diesem Enkel entspricht. Hat conf
+   * so wird eine Funktion geliefert, die diesem Kind entspricht. Hat conf
    * mehr als ein Kind, so wird eine Funktion geliefert, die alle Kinder als
    * Booleans auswertet und UND-verknüpft.
    * @param funcLib die Funktionsbibliothek anhand derer Referenzen auf Funktionen
@@ -263,6 +264,26 @@ public class FunctionFactory
     else if (name.equals("SIGN"))
     {
       return new SignFunction(conf, funcLib, dialogLib, context);
+    }
+    else if (name.equals("LT"))
+    {
+      return new NumberCompareFunction(0, 1, "true", conf, funcLib, dialogLib, context);
+    }
+    else if (name.equals("LE"))
+    {
+      return new NumberCompareFunction(1, 1, "true", conf, funcLib, dialogLib, context);
+    }
+    else if (name.equals("GT"))
+    {
+      return new NumberCompareFunction(0, -1, "true", conf, funcLib, dialogLib, context);
+    }
+    else if (name.equals("GE"))
+    {
+      return new NumberCompareFunction(-1, -1, "true", conf, funcLib, dialogLib, context);
+    }
+    else if (name.equals("NUMCMP"))
+    {
+      return new NumberCompareFunction(Integer.MAX_VALUE, Integer.MAX_VALUE, null, conf, funcLib, dialogLib, context);
     }
     
     throw new ConfigurationErrorException("\""+name+"\" ist keine unterstützte Grundfunktion");
@@ -868,10 +889,12 @@ public class FunctionFactory
       while (iter.hasNext())
       {
         ConfigThingy subFunConf =(ConfigThingy)iter.next();
-        if (handleParam(subFunConf)) continue;
+        if (handleParam(subFunConf, funcLib, dialogLib, context)) continue;
         Function fun = parse(subFunConf, funcLib, dialogLib, context);
         subFunction.add(fun);
       }
+      
+      if (subFunction.size() == 0) throw new ConfigurationErrorException("Funktion "+conf.getName()+" erfordert mindestens einen Parameter");
       
       subFunction.trimToSize();
       init(subFunction);
@@ -883,7 +906,9 @@ public class FunctionFactory
      * von Unterklassen überschrieben, um spezielle Parameter zu behandeln.
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
-    protected boolean handleParam(ConfigThingy conf) {return false;}
+    protected boolean handleParam(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) 
+    throws ConfigurationErrorException
+    {return false;}
     
     public MultiFunction(Collection subFunction)
     {
@@ -1130,7 +1155,7 @@ public class FunctionFactory
       return computationResult();
     }
     
-    protected BigDecimal makeBigDecimal(String str)
+    protected BigDecimal makeBigDecimal(String str) throws NumberFormatException
     {
       /*
        * Falls der Dezimaltrenner nicht '.' ist, ersetzte alle '.' durch
@@ -1297,6 +1322,120 @@ public class FunctionFactory
     protected String computationResult()
     {
       return formatBigDecimal(prod);
+    }
+  }
+  
+  private static class NumberCompareFunction extends NumberFunction
+  {
+    private BigDecimal compare;
+    private BigDecimal lowBound;
+    private BigDecimal highBound;
+    private int cmp1;
+    private int cmp2;
+    private int prevCompare;
+    private String result;
+    private BigDecimal margin;
+    Function marginFun;
+    
+    /**
+     * Die Unterfunktionen von conf werden als BigDecimals ausgewertet und jeweils
+     * mit dem Ergebnis der ersten Funktion verglichen via compareTo, wobei falls
+     * MARGIN angegeben ist, dessen Abstand <= abs(MARGIN) ist als gleich angesehen
+     * wird (entspricht compareTo Ergebnis 0).
+     *  cmp1 und cmp2 sind 
+     * Abbruchergebnisse dieses Vergleichs. Sobald ein compareTo cmp1 oder cmp2 liefert
+     * bricht die Berechnung ab und es wird das Ergebnis "false" geliefert.
+     * Falls ein compareTo +1 liefert und ein späteres compareTo -1, so wird abgebrochen
+     * und als Ergebnis "0" geliefert. Analog wenn ein compareTo -1 liefert und
+     * eine späteres +1.
+     * Falls result nicht null ist, so wird dieser String als Ergebnis geliefert,
+     * wenn nicht wie oben beschrieben mit "false" oder "0" abgebrochen wurde.
+     * Falls result null ist, so wird falls alle compareTos 0 geliefert haben "true"
+     * geliefert. Falls mindestens ein compareTo -1 geliefert hat wird "-1" 
+     * zurückgeliefert. Falls mindestens ein compareTo +1 geliefert hat wird
+     * "1" geliefert. Der Fall, dass ein compareTo -1 und ein anderer +1 geliefert hat
+     * wird wie bereits oben beschrieben schon früher abgefangen.
+     * @throws ConfigurationErrorException falls nicht mindestens 2 Unterfunktionen in
+     * conf enthalten sind.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
+    public NumberCompareFunction(int cmp1, int cmp2, String result, ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
+    {
+      super(conf, funcLib, dialogLib, context);
+      if (subFunction.size() < 2) throw new ConfigurationErrorException("Funktion "+conf.getName()+" erfordert mindestens 2 Parameter");
+      this.cmp1 = cmp1;
+      this.cmp2 = cmp2;
+      this.result = result;
+    }
+    
+    protected boolean handleParam(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context)
+    throws ConfigurationErrorException
+    {
+      if (conf.getName().equals("MARGIN"))
+      {
+        if (conf.count() != 1)
+          throw new ConfigurationErrorException("MARGIN muss genau eine Funktion enthalten");
+        marginFun = parseChildren(conf, funcLib, dialogLib, context);
+        return true;
+      }
+      else
+        return false;
+    }
+    
+    protected String initComputation(Values parameters)
+    {
+      compare = null;
+      prevCompare = 0;
+      if (marginFun != null)
+      {
+        String str = marginFun.getString(parameters);
+        if (str == Function.ERROR) return Function.ERROR;
+        try{
+          margin = makeBigDecimal(str);
+          margin = margin.abs();
+        }catch(Exception x)
+        {
+          return Function.ERROR;
+        }
+      }
+      else
+        margin = BigDecimal.ZERO;
+      
+      return null;
+    }
+    
+    protected String addToComputation(BigDecimal num)
+    {
+      if (compare == null)
+      {
+        compare = num;
+        lowBound = compare.subtract(margin);
+        highBound = compare.add(margin);
+        return null;
+      }
+      
+      int res; 
+      if (lowBound.compareTo(num) <= 0 && num.compareTo(highBound) <= 0)
+        res = 0;
+      else
+        res = compare.compareTo(num);
+      
+      if (res == cmp1 || res == cmp2) return "false";
+      if (res * prevCompare < 0) return "0";
+      prevCompare += res;
+        
+      return null;
+    }
+    
+    protected String computationResult()
+    {
+      if (result != null) return result;
+      switch(Integer.signum(prevCompare))
+      {
+        case  1: return "1";
+        case -1: return "-1";
+        default: return "true";
+      }
     }
   }
   

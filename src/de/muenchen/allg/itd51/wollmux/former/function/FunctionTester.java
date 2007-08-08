@@ -287,7 +287,7 @@ public class FunctionTester
     functionInsertPanel.add(makeCodeInsertionButton("ABS", "ABS(Zahl)"));
     functionInsertPanel.add(makeCodeInsertionButton("SIGN", "SIGN(Zahl)"));
     functionInsertPanel.add(makeCodeInsertionButton("STRCMP", "STRCMP(String1, String2 ,,,)"));
-    functionInsertPanel.add(makeCodeInsertionButton("NUMCMP", "NUMCMP(Zahl1, Zahl2 ,,,)"));
+    functionInsertPanel.add(makeCodeInsertionButton("NUMCMP", "NUMCMP(Zahl1, Zahl2 ,,, MARGIN(\"0\"))"));
     functionInsertPanel.add(makeCodeInsertionButton("LT", "LT(Zahl1, Zahl2 ,,,)"));
     functionInsertPanel.add(makeCodeInsertionButton("LE", "LE(Zahl1, Zahl2 ,,,)"));
     functionInsertPanel.add(makeCodeInsertionButton("GT", "GT(Zahl1, Zahl2 ,,,)"));
