@@ -19,6 +19,7 @@
 * 21.03.2007 | BNK | BIND erweitert so dass auch direkt eine Funktion als FUNCTION verwendet werden kann.
 * 25.07.2007 | BNK | +DIVIDE/FORMAT
 * 03.08.2007 | BNK | +SUM,MINUS,PRODUCT,DIFF,ABS,SIGN
+* 08.08.2007 | BNK | SELECT-Verhalten im Fehlerfalle entsprechend Doku implementiert
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -1054,15 +1055,18 @@ public class FunctionFactory
     public String getString(Values parameters)
     {
       Iterator iter = subFunction.iterator();
-      String str = Function.ERROR; //wird nie zurückgeliefert, da subFunction nie leer sein kann
+      String result = Function.ERROR;
       while (iter.hasNext())
       {
         Function func = (Function)iter.next();
-        str = func.getString(parameters);
-        if (str == Function.ERROR) return Function.ERROR;
-        if (str.length() > 0) return str;
+        String str = func.getString(parameters);
+        if (str != Function.ERROR) 
+        {
+          result = str;
+          if (str.length() > 0) break;
+        }
       }
-      return str;
+      return result;
     }
   }
   
