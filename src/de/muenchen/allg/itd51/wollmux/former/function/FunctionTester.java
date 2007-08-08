@@ -18,6 +18,7 @@
 package de.muenchen.allg.itd51.wollmux.former.function;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -29,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -155,6 +157,7 @@ public class FunctionTester
     myFrame.addWindowListener(oehrchen);
     
     myPanel = new JPanel(new BorderLayout());
+    myPanel.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
     myFrame.add(myPanel);
     
     JPanel valuePanel = new JPanel();
@@ -165,7 +168,9 @@ public class FunctionTester
       ValueBox valbox = makeValueBox();
       valueBoxes.add(valbox);
       valuePanel.add(valbox.JComponent());
+      valuePanel.add(Box.createVerticalStrut(3));
     }
+    valuePanel.add(Box.createVerticalStrut(2));
     
     codeArea = new JTextArea(10,40);
     codeArea.setLineWrap(true);
@@ -268,6 +273,7 @@ public class FunctionTester
   private JComponent makeFunctionInsertPanel()
   {
     JPanel functionInsertPanel = new JPanel();
+    functionInsertPanel.setBorder(BorderFactory.createEmptyBorder(0,5,0,2));
     functionInsertPanel.setLayout(new GridLayout(13, 2));
     
     functionInsertPanel.add(makeCodeInsertionButton("MATCH", "MATCH(String, RegEx)"));
@@ -279,8 +285,8 @@ public class FunctionTester
     functionInsertPanel.add(makeCodeInsertionButton("AND", "AND(Boolean1, Boolean2 ,,,)"));
     functionInsertPanel.add(makeCodeInsertionButton("OR", "OR(Boolean1, Boolean2 ,,,)"));
     functionInsertPanel.add(makeCodeInsertionButton("NOT", "NOT(Boolean1, Boolean2 ,,,)"));
-    functionInsertPanel.add(makeCodeInsertionButton("SUM", "SUM(Zahl1, Zahl2 ,,,)"));
     functionInsertPanel.add(makeCodeInsertionButton("MINUS", "MINUS(Zahl1, Zahl2 ,,,)"));
+    functionInsertPanel.add(makeCodeInsertionButton("SUM", "SUM(Zahl1, Zahl2 ,,,)"));
     functionInsertPanel.add(makeCodeInsertionButton("DIFF", "DIFF(Zahl1, Zahl2 ,,,)"));
     functionInsertPanel.add(makeCodeInsertionButton("PRODUCT", "PRODUCT(Zahl1, Zahl2 ,,,)"));
     functionInsertPanel.add(makeCodeInsertionButton("DIVIDE", "DIVIDE(Zahl BY(Zahl) MIN \"Zahl\" MAX \"Zahl\")"));
@@ -306,12 +312,22 @@ public class FunctionTester
     JPanel evaluatePanel = new JPanel();
     evaluatePanel.setLayout(new BoxLayout(evaluatePanel, BoxLayout.Y_AXIS));
     
+    evaluatePanel.add(Box.createVerticalStrut(5));
+    
+    JPanel buttonPanel = new JPanel(new GridLayout(1,1));
     JButton button = new JButton("Auswerten");
-    evaluatePanel.add(button);
+    Dimension prefSize = button.getPreferredSize();
+    button.setPreferredSize(new Dimension(prefSize.width, prefSize.height * 2));
+    buttonPanel.add(button);
+    evaluatePanel.add(buttonPanel);
+    
+    evaluatePanel.add(Box.createVerticalStrut(5));
     
     final JTextArea stringResult = new JTextArea(3,20);
     JScrollPane stringResultPane = new JScrollPane(stringResult, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
     evaluatePanel.add(stringResultPane);
+    
+    evaluatePanel.add(Box.createVerticalStrut(5));
     
     Box hbox = Box.createHorizontalBox();
     hbox.add(new JLabel("Boolean: "));

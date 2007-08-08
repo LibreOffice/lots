@@ -285,6 +285,10 @@ public class FunctionFactory
     {
       return new NumberCompareFunction(Integer.MAX_VALUE, Integer.MAX_VALUE, null, conf, funcLib, dialogLib, context);
     }
+    else if (name.equals("STRCMP"))
+    {
+      return new StrCmpFunction(conf, funcLib, dialogLib, context);
+    }
     
     throw new ConfigurationErrorException("\""+name+"\" ist keine unterstützte Grundfunktion");
   }
@@ -1092,6 +1096,40 @@ public class FunctionFactory
         }
       }
       return result;
+    }
+  }
+  
+  private static class StrCmpFunction extends MultiFunction
+  {
+    public StrCmpFunction(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
+    {
+      super(conf, funcLib, dialogLib, context);
+      if (subFunction.size() < 2) throw new ConfigurationErrorException("Funktion "+conf.getName()+" erfordert mindestens 2 Parameter");
+    }
+
+    public String getString(Values parameters)
+    {
+      Iterator iter = subFunction.iterator();
+      Function func = (Function)iter.next();
+      String compare = func.getString(parameters);
+      if (compare == Function.ERROR) return Function.ERROR;
+      int prevCompare = 0;
+      while (iter.hasNext())
+      {
+        func = (Function)iter.next();
+        String str = func.getString(parameters);
+        if (str == Function.ERROR) return Function.ERROR; 
+        int res = Integer.signum(compare.compareTo(str));
+        if (res * prevCompare < 0) return "0";
+        prevCompare += res;
+      }
+      
+      switch(Integer.signum(prevCompare))
+      {
+        case -1: return "-1";
+        case  1: return "1";
+        default: return "true";
+      }
     }
   }
   
