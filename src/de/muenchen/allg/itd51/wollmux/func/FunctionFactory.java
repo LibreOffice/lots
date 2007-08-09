@@ -21,6 +21,7 @@
 * 03.08.2007 | BNK | +SUM,MINUS,PRODUCT,DIFF,ABS,SIGN
 * 08.08.2007 | BNK | SELECT-Verhalten im Fehlerfalle entsprechend Doku implementiert
 *                  | +NUMCMP, LE, GE, GT, LT 
+* 09.08.2007 | BNK | +ISERROR, ISERRORSTRING, ONERROR (für SELECT)
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -289,6 +290,15 @@ public class FunctionFactory
     {
       return new StrCmpFunction(conf, funcLib, dialogLib, context);
     }
+    else if (name.equals("ISERROR"))
+    {
+      return new IsErrorFunction(true, conf, funcLib, dialogLib, context);
+    }
+    else if (name.equals("ISERRORSTRING"))
+    {
+      return new IsErrorFunction(false, conf, funcLib, dialogLib, context);
+    }
+    
     
     throw new ConfigurationErrorException("\""+name+"\" ist keine unterstützte Grundfunktion");
   }
@@ -712,6 +722,64 @@ public class FunctionFactory
     }
   }
   
+  private static class IsErrorFunction implements Function
+  {
+    private Function func;
+    private boolean objectCompare;
+    
+    /**
+     * Falls objectCompare == true, wird == Function,ERROR getestet, ansonsten 
+     * equals(Function,ERROR).
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
+    public IsErrorFunction(boolean objectCompare, ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
+    {
+      if (conf.count() != 1)
+        throw new ConfigurationErrorException("Funktion "+conf.getName()+" muss genau einen Parameter haben");
+
+      this.objectCompare = objectCompare;
+      func = parseChildren(conf, funcLib, dialogLib, context);
+    }
+    
+    public String[] parameters()
+    {
+      return func.parameters();
+    }
+
+    public void getFunctionDialogReferences(Collection set)
+    {
+      func.getFunctionDialogReferences(set);
+    }
+
+    public String getString(Values parameters)
+    {
+      String str = func.getString(parameters);
+      if (isError(str)) 
+        return "true";
+      else
+        return "false";
+    }
+
+    public boolean getBoolean(Values parameters)
+    {
+      String str = func.getString(parameters);
+      return isError(str); 
+    }
+    
+    private boolean isError(String str)
+    {
+      if (objectCompare)
+      {
+        return Function.ERROR == str;
+      } 
+      else
+      {
+        return Function.ERROR.equals(str);
+      }
+    }
+    
+  }
+  
   private static class ValueFunction implements Function
   {
     String[] params;
@@ -908,11 +976,23 @@ public class FunctionFactory
      * Liefert true, wenn conf von handleParam bereits vollständig behandelt wurde
      * und nicht mehr als Subfunktion erfasst werden soll. Diese Funktion wird
      * von Unterklassen überschrieben, um spezielle Parameter zu behandeln.
+     * ACHTUNG! Wird diese Methode überschrieben, so sind normalerweise auch
+     * {@link #getAdditionalParams()} und {@link #getFunctionDialogReferences(Collection)}
+     * zu überschreiben, um die zusätzlichen Funktionen aus dem behandelten Parameter
+     * zu behandeln.
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     protected boolean handleParam(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) 
     throws ConfigurationErrorException
     {return false;}
+    
+    /**
+     * Liefert die Namen der Parameter der zusätzlichen Funktionen, die von
+     * {@link #handleParam(ConfigThingy, FunctionLibrary, DialogLibrary, Map)} geparst wurden
+     * oder null, falls es keine gibt.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
+    protected String[] getAdditionalParams() {return null;}
     
     public MultiFunction(Collection subFunction)
     {
@@ -930,6 +1010,13 @@ public class FunctionFactory
         String[] params = ((Function)iter.next()).parameters();
         count += params.length;
         deps.add(params);
+      }
+      
+      String[] additionalparams = getAdditionalParams();
+      if (additionalparams != null)
+      {
+        count += additionalparams.length;
+        deps.add(additionalparams);
       }
       
       params = new String[count];
@@ -1071,6 +1158,8 @@ public class FunctionFactory
   
   private static class SelectFunction extends MultiFunction
   {
+    private Function onErrorFunction;
+    
     public SelectFunction(Collection subFunction)
     {
       super(subFunction);
@@ -1079,6 +1168,32 @@ public class FunctionFactory
     public SelectFunction(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
     {
       super(conf, funcLib, dialogLib, context);
+    }
+    
+    protected boolean handleParam(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) 
+    throws ConfigurationErrorException
+    {
+      if (conf.getName().equals("ONERROR"))
+      {
+        onErrorFunction = new CatFunction(conf, funcLib, dialogLib, context);
+        return true;
+      }
+      return false;
+    }
+    
+    protected String[] getAdditionalParams() 
+    {
+      if (onErrorFunction != null)
+        return onErrorFunction.parameters();
+      else
+        return null;
+    }
+    
+    public void getFunctionDialogReferences(Collection set)
+    {
+      super.getFunctionDialogReferences(set);
+      if (onErrorFunction != null)
+        onErrorFunction.getFunctionDialogReferences(set);
     }
 
     public String getString(Values parameters)
@@ -1093,6 +1208,10 @@ public class FunctionFactory
         {
           result = str;
           if (str.length() > 0) break;
+        }
+        else if (onErrorFunction != null)
+        {
+          return onErrorFunction.getString(parameters);
         }
       }
       return result;
@@ -1418,6 +1537,21 @@ public class FunctionFactory
       }
       else
         return false;
+    }
+    
+    protected String[] getAdditionalParams() 
+    {
+      if (marginFun != null)
+        return marginFun.parameters();
+      else
+        return null;
+    }
+    
+    public void getFunctionDialogReferences(Collection set)
+    {
+      super.getFunctionDialogReferences(set);
+      if (marginFun != null)
+        marginFun.getFunctionDialogReferences(set);
     }
     
     protected String initComputation(Values parameters)

@@ -274,7 +274,7 @@ public class FunctionTester
   {
     JPanel functionInsertPanel = new JPanel();
     functionInsertPanel.setBorder(BorderFactory.createEmptyBorder(0,5,0,2));
-    functionInsertPanel.setLayout(new GridLayout(13, 2));
+    functionInsertPanel.setLayout(new GridLayout(14, 2));
     
     functionInsertPanel.add(makeCodeInsertionButton("MATCH", "MATCH(String, RegEx)"));
     functionInsertPanel.add(makeCodeInsertionButton("REPLACE", "REPLACE(String, \"RegEx\", \"RepStr\")"));
@@ -282,6 +282,8 @@ public class FunctionTester
     functionInsertPanel.add(makeCodeInsertionButton("FORMAT", "FORMAT(Zahl MIN \"Zahl\" MAX \"Zahl\")"));
     functionInsertPanel.add(makeCodeInsertionButton("IF", "IF(Bedingung THEN(Dann) ELSE(Sonst))"));
     functionInsertPanel.add(makeCodeInsertionButton("SELECT", "SELECT(\nFunktion1\nFunktion2\n,,,\nELSE(Sonst)\n)"));
+    functionInsertPanel.add(makeCodeInsertionButton("ISERROR", "ISERROR(Funktion)"));
+    functionInsertPanel.add(makeCodeInsertionButton("ISE.STR.", "ISERRORSTRING(Funktion)"));
     functionInsertPanel.add(makeCodeInsertionButton("AND", "AND(Boolean1, Boolean2 ,,,)"));
     functionInsertPanel.add(makeCodeInsertionButton("OR", "OR(Boolean1, Boolean2 ,,,)"));
     functionInsertPanel.add(makeCodeInsertionButton("NOT", "NOT(Boolean1, Boolean2 ,,,)"));
