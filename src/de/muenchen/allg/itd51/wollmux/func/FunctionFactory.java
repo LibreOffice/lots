@@ -483,10 +483,10 @@ public class FunctionFactory
       if (name.equals("BY"))
       {
         if (funConf.count() != 1)
-          throw new ConfigurationErrorException("BY-Angabe von DIVIDE/FORMAT muss genau eine Funktion oder einen String enthalten");
+          throw new ConfigurationErrorException("BY-Angabe von "+conf.getName()+" muss genau eine Funktion oder einen String enthalten");
         
         if (byFun != null)
-          throw new ConfigurationErrorException("DIVIDE/FORMAT-Funktion darf maximal eine BY-Angabe haben");
+          throw new ConfigurationErrorException(conf.getName()+"-Funktion darf maximal eine BY-Angabe haben");
         
         byFun = parseChildren(funConf, funcLib, dialogLib, context);
       } else if (name.equals("MIN"))
@@ -500,7 +500,7 @@ public class FunctionFactory
         }catch(Exception x){}
         
         if (num < 0)
-          throw new ConfigurationErrorException("MIN-Angabe von DIVIDE/FORMAT muss \"<NichtNegativeZahl>\" sein");
+          throw new ConfigurationErrorException("MIN-Angabe von "+conf.getName()+" muss \"<NichtNegativeZahl>\" sein");
 
         minScale = num;
         
@@ -515,29 +515,29 @@ public class FunctionFactory
         }catch(Exception x){}
         
         if (num < 0)
-          throw new ConfigurationErrorException("MAX-Angabe von DIVIDE/FORMAT muss \"<NichtNegativeZahl>\" sein");
+          throw new ConfigurationErrorException("MAX-Angabe von "+conf.getName()+" muss \"<NichtNegativeZahl>\" sein");
 
         maxScale = num;        
       } else
       {
-        if (dividendFun != null) throw new ConfigurationErrorException("Bei DIVIDE/FORMAT-Funktion wurde mehr als eine unqualifizierte Funktion angegeben. Beachten Sie, dass der Divisor mit BY(...) umschlossen sein muss.");
+        if (dividendFun != null) throw new ConfigurationErrorException("Bei "+conf.getName()+"-Funktion wurde mehr als eine unqualifizierte Funktion angegeben. Beachten Sie, dass der Divisor mit BY(...) umschlossen sein muss.");
         dividendFun = parse(funConf, funcLib, dialogLib, context);
       }
     }
     
     if (dividendFun == null)
-      throw new ConfigurationErrorException("Bei DIVIDE/FORMAT-Funktion muss genau eine unqualifizierte Funktion angegeben werden");
+      throw new ConfigurationErrorException("Bei "+conf.getName()+"-Funktion muss genau eine unqualifizierte Funktion angegeben werden");
     
     if (maxScale < 0)
     {
       if (byFun == null) //falls kein Divisor, dann ist MAX nicht erforderlich, da Division durch 1 nichts kaputt macht
         maxScale = Integer.MAX_VALUE;
       else
-        throw new ConfigurationErrorException("DIVIDE/FORMAT erfordert die Angabe MAX \"<NichtNegativeZahl>\", wenn mit BY ein Divisor angegeben wird");
+        throw new ConfigurationErrorException(conf.getName()+" erfordert die Angabe MAX \"<NichtNegativeZahl>\", wenn mit BY ein Divisor angegeben wird");
     }
     
     if (maxScale < minScale)
-      throw new ConfigurationErrorException("MIN muss kleiner oder gleich MAX sein");
+      throw new ConfigurationErrorException("Bei "+conf.getName()+" muss MIN kleiner oder gleich MAX sein");
     
     return new DivideFunction(dividendFun, byFun, minScale, maxScale);
   }
