@@ -299,10 +299,26 @@ public class FunctionFactory
       return new IsErrorFunction(false, conf, funcLib, dialogLib, context);
     }
     
-    
-    throw new ConfigurationErrorException("\""+name+"\" ist keine unterstützte Grundfunktion");
+    if (name.length() == 0)
+      throw new ConfigurationErrorException("Öffnende Klammer ohne voranstehenden Funktionsnamen gefunden. "+outputErrorPosition(conf));
+    else
+      throw new ConfigurationErrorException("\""+name+"\" ist keine unterstützte Grundfunktion. "+outputErrorPosition(conf));
   }
 
+  /**
+   * Liefert "Text an der Fehlerstelle: " + 
+   * die ersten 40 Zeichen der Stringdarstellung von conf
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private static String outputErrorPosition(ConfigThingy conf)
+  {
+    String str = conf.stringRepresentation();
+    //str = str.replaceAll("\\p{Space}", " ");
+    int end = 40;
+    if (str.length() < end) end = str.length();
+    return "Text an der Fehlerstelle: " + str.substring(0, end);
+  }
+  
   private static Function parseBIND(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
   {
     ConfigThingy funcConf = conf.query("FUNCTION"); //funcConf = <query results> - FUNCTION - ...

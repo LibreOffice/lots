@@ -352,10 +352,12 @@ public class FunctionTester
           String result = func.getString(myParameters);
           if (result == Function.ERROR) throw new Exception("Illegaler oder fehlender Parameter!");
           stringResult.setText(result);
+          stringResult.setCaretPosition(0);
           booleanResult.setText(""+func.getBoolean(myParameters));
         } catch(Exception x)
         {
           stringResult.setText(x.getMessage());
+          stringResult.setCaretPosition(0);
         }
       }}
     );
