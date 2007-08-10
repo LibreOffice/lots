@@ -47,7 +47,8 @@
 * 15.06.2007 | BNK | urlEncode() Sonderbehandlung für Leerzeichen ("%20" statt "+")
 *                  | urlEncode() public gemacht. Nicht wirklich schöne Lösung, aber mei.
 * 02.08.2007 | BNK | +ConfigThingy(String, String)       
-* 07.08.2007 | BNK | Bei Syntaxfehlern im Exceptiontext den beanstandeten Text angeben.           
+* 07.08.2007 | BNK | Bei Syntaxfehlern im Exceptiontext den beanstandeten Text angeben.
+* 10.08.2007 | BNK | Fehler bei der stringRepresentation() von Listen mit nur einem Element behoben.           
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -791,9 +792,19 @@ public class ConfigThingy
     }
     else if (count() == 1 && getFirstChildNoThrow().count() == 0) //Schlüssel-Wert-Paar
     {
+       /*
+        * Normalerweise werden Schlüssel-Wert-Paare ohne Klammern repräsentiert,
+        * aber im Spezialfall, dass der Schlüssel leer ist (Liste mit nur einem
+        * Element) dürfen die Klammern nicht weggelassen werden.
+        */
       buf.append(getName());
-      buf.append(' ');
+      if (getName().length() == 0) 
+        buf.append('(');
+      else
+        buf.append(' ');
+      
       getFirstChildNoThrow().stringRepresentation(buf, childPrefix, stringChar, escapeAll);
+      if (getName().length() == 0) buf.append(')');
     }
     else
     {
