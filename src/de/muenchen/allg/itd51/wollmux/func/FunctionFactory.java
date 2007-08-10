@@ -500,7 +500,7 @@ public class FunctionFactory
         }catch(Exception x){}
         
         if (num < 0)
-          throw new ConfigurationErrorException("MIN-Angabe von "+conf.getName()+" muss \"<NichtNegativeZahl>\" sein");
+          throw new ConfigurationErrorException("MIN-Angabe von "+conf.getName()+" muss \"<NichtNegativeGanzeZahl>\" sein");
 
         minScale = num;
         
@@ -515,7 +515,7 @@ public class FunctionFactory
         }catch(Exception x){}
         
         if (num < 0)
-          throw new ConfigurationErrorException("MAX-Angabe von "+conf.getName()+" muss \"<NichtNegativeZahl>\" sein");
+          throw new ConfigurationErrorException("MAX-Angabe von "+conf.getName()+" muss \"<NichtNegativeGanzeZahl>\" sein");
 
         maxScale = num;        
       } else
@@ -531,7 +531,7 @@ public class FunctionFactory
     if (maxScale < 0)
     {
       if (byFun == null) //falls kein Divisor, dann ist MAX nicht erforderlich, da Division durch 1 nichts kaputt macht
-        maxScale = Integer.MAX_VALUE;
+        maxScale = 1024; //eigentlich sollte hier Integer.MAX_SIZE stehen, aber auch bei Division durch 1 reserviert die BigDecimal-Klasse Speicher entsprechend der maximalen Stelligkeit
       else
         throw new ConfigurationErrorException(conf.getName()+" erfordert die Angabe MAX \"<NichtNegativeZahl>\", wenn mit BY ein Divisor angegeben wird");
     }
