@@ -307,14 +307,14 @@ public class FunctionFactory
 
   /**
    * Liefert "Text an der Fehlerstelle: " + 
-   * die ersten 40 Zeichen der Stringdarstellung von conf
+   * die ersten 100 Zeichen der Stringdarstellung von conf
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private static String outputErrorPosition(ConfigThingy conf)
   {
     String str = conf.stringRepresentation();
     //str = str.replaceAll("\\p{Space}", " ");
-    int end = 40;
+    int end = 100;
     if (str.length() < end) end = str.length();
     return "Text an der Fehlerstelle: " + str.substring(0, end);
   }
