@@ -1134,18 +1134,28 @@ public class TextDocumentModel
   }
 
   /**
-   * Ersetzt die Formularbeschreibung dieses Dokuments durch die aus conf.
-   * ACHTUNG! conf wird nicht kopiert sondern als Referenz eingebunden.
+   * Ersetzt die Formularbeschreibung dieses Dokuments durch die aus conf. Falls
+   * conf == null, so wird die Formularbeschreibung gelöscht. ACHTUNG! conf wird
+   * nicht kopiert sondern als Referenz eingebunden.
    * 
    * @param conf
-   *          ein WM-Knoten, der "Formular"-Kinder hat.
+   *          ein WM-Knoten, der "Formular"-Kinder hat. Falls conf == null, so
+   *          wird die Formularbeschreibungsnotiz gelöscht.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void setFormDescription(ConfigThingy conf)
   {
-    formularConf = conf;
-    persistentData.setData(DATA_ID_FORMULARBESCHREIBUNG, formularConf
-        .stringRepresentation());
+    if (conf != null)
+    {
+      formularConf = conf;
+      persistentData.setData(DATA_ID_FORMULARBESCHREIBUNG, formularConf
+          .stringRepresentation());
+    }
+    else
+    {
+      formularConf = new ConfigThingy("WM");
+      persistentData.removeData(DATA_ID_FORMULARBESCHREIBUNG);
+    }
     setDocumentModified(true);
   }
 

@@ -97,6 +97,7 @@ import com.sun.star.view.XSelectionSupplier;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
+import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
@@ -862,11 +863,22 @@ public class FormularMax4000
     Map mapFunctionNameToConfigThingy = new HashMap();
     insertionModelList.updateDocument(mapFunctionNameToConfigThingy);
     ConfigThingy conf = buildFormDescriptor(mapFunctionNameToConfigThingy);
-    if (!formTitle.equals(GENERATED_FORM_TITLE) 
-    || formControlModelList.size() > 1   // nur 1 Element wird ignoriert, weil nur ein leerer Reiter  
-    || !groupModelList.isEmpty())
+    try
     {
-      doc.setFormDescription(new ConfigThingy(conf));
+      if ( 
+         (conf.query("Fenster").count() > 0 && conf.get("Fenster").count() > 0)  
+      || (conf.query("Sichtbarkeit").count() > 0 && conf.get("Sichtbarkeit").count() > 0)
+      || (conf.query("Funktionen").count() > 0 && conf.get("Funktionen").count() > 0))
+      {
+        doc.setFormDescription(new ConfigThingy(conf));
+      }
+      else
+        doc.setFormDescription(null);
+        
+    }
+    catch (NodeNotFoundException e)
+    {
+      Logger.error("Dies kann nicht passieren.", e);
     }
     return conf;
   }
