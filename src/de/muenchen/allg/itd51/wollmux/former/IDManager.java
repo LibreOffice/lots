@@ -275,6 +275,22 @@ public class IDManager
      * wie {@link #getID()}.
      */
     public String toString() {return id;}
+    
+    /**
+     * Liefert true, wenn this == obj, da über den IDManager sichergestellt wird,
+     * dass zu einem ID-String in einem Namensraum jeweils nur ein einziges ID-Objekt
+     * existiert. Dies ist auch Voraussetzung dafür, dass die IDs ihre
+     * Funktion erfüllen können.
+     */
+    public boolean equals(Object obj)
+    {
+      return this == obj;
+    }
+    
+    public int hashCode()
+    {
+      return super.hashCode();
+    }
   }
   
   /**

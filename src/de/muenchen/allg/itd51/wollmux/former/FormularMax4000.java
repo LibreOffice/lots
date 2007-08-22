@@ -432,6 +432,16 @@ public class FormularMax4000
   }
   
   /**
+   * Wird von {@link FormControlModel#setItems(String[])} auf model aufgerufen.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public void comboBoxItemsHaveChanged(FormControlModel model)
+  {
+    insertionModelList.fixComboboxInsertions(model);
+  }
+  
+  /**
    * Wird bei jeder Änderung einer internen Datenstruktur aufgerufen, die ein Updaten des
    * Dokuments erforderlich macht um persistent zu werden.
    * 
@@ -574,22 +584,16 @@ public class FormularMax4000
  
     menu.addSeparator();
     
-    menuItem = new JMenuItem("[SPÄTER]Checkboxen zusammenfassen");
+    menuItem = new JMenuItem("Checkboxen zu ComboBox");
     menuItem.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e)
       {
-    
+        ComboboxMergeDescriptor desc = leftPanel.mergeCheckboxesIntoCombobox();
+        if (desc != null)
+          insertionModelList.mergeCheckboxesIntoCombobox(desc);
       }});
     menu.add(menuItem);
     
-    menuItem = new JMenuItem("[SPÄTER]ComboBox zerlegen");
-    menuItem.addActionListener(new ActionListener(){
-      public void actionPerformed(ActionEvent e)
-      {
-    
-      }});
-    menu.add(menuItem);
-
     mainMenuBar.add(menu);
 //  ========================= Ansicht ============================
     menu = new JMenu("Ansicht");
@@ -1209,7 +1213,10 @@ public class FormularMax4000
     }
     else
     {
-      label = makeLabelFromEndOf(text, GENERATED_LABEL_MAXLENGTH);
+      if (control.getType() == DocumentTree.CHECKBOX_CONTROL)
+        label = NO_LABEL; //immer fixUp-Text von hinter der Checkbox benutzen, weil meist bessere Ergebnisse als Text von vorne
+      else
+        label = makeLabelFromEndOf(text, GENERATED_LABEL_MAXLENGTH);
       id = descriptor;
     }
     
@@ -1325,7 +1332,6 @@ public class FormularMax4000
   private FormControlModel registerCheckbox(FormControl control, String label, String id)
   {
     FormControlModel model = null;
-    label = NO_LABEL; //immer fixUp-Text von hinter der Checkbox benutzen, weil meist bessere Ergebnisse
     model = FormControlModel.createCheckbox(label, id, this);
     if (control.getString().equalsIgnoreCase("true"))
     {

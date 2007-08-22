@@ -17,16 +17,27 @@
 */
 package de.muenchen.allg.itd51.wollmux.former.insertion;
 
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
+import java.util.regex.Pattern;
 
+import de.muenchen.allg.itd51.parser.ConfigThingy;
+import de.muenchen.allg.itd51.parser.NodeNotFoundException;
+import de.muenchen.allg.itd51.wollmux.Logger;
+import de.muenchen.allg.itd51.wollmux.UnknownIDException;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastObjectSelection;
+import de.muenchen.allg.itd51.wollmux.former.ComboboxMergeDescriptor;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
+import de.muenchen.allg.itd51.wollmux.former.IDManager;
+import de.muenchen.allg.itd51.wollmux.former.control.FormControlModel;
+import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionAccess;
 
 /**
  * Verwaltet eine Liste von InsertionModels
@@ -35,6 +46,8 @@ import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
  */
 public class InsertionModelList
 {
+  private final static String COMBO_PARAM_ID = "ComboBoxWert";
+  
   /**
    * Die Liste der {@link InsertionModel}s. 
    */
@@ -116,6 +129,162 @@ public class InsertionModelList
     models.remove(index);
     model.hasBeenRemoved();
     notifyListeners(model, index, true);
+  }
+  
+  /**
+   * Wird aufgerufen, nachdem mehrere Checkboxen in der Formularbeschreibung zu einer
+   * ComboBox zusammengefasst wurden, damit die {@link InsertionModel}s, die vorher auf
+   * die Checkboxen verwiesen haben entsprechend angepasst werden, so dass sie jetzt auf
+   * die neue ComboBox verweisen und eine passende TRAFO bekommen.
+   * @param desc
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED
+   */
+  public void mergeCheckboxesIntoCombobox(ComboboxMergeDescriptor desc)
+  {
+    FormControlModel combo = desc.combo;
+    IDManager.ID comboIdd = combo.getId();
+    if (comboIdd == null)
+    {
+      Logger.error("Programmfehler: Durch Merge erstellte ComboBox hat keine ID bekommen");
+      return;
+    }
+    String comboId = comboIdd.toString();
+    Iterator iter = iterator();
+    while (iter.hasNext())
+    {
+      InsertionModel model = (InsertionModel)iter.next();
+      String comboValue = (String)desc.mapCheckboxId2ComboboxEntry.get(model.getDataID());
+      if (comboValue != null)
+      {
+        try
+        {
+          model.setDataID(comboId);
+        }
+        catch (UnknownIDException e)
+        {
+          Logger.error("Programmfehler",e);
+          return;
+        }
+        
+        setMatchTrafo(model, comboValue);
+      }
+    }
+  }
+
+  /**
+   * Setzt die TRAFO von model auf 
+   *    MATCH(VALUE "COMBO_PARAM_ID", "re_escape(comboValue)").
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private void setMatchTrafo(InsertionModel model, String comboValue)
+  {
+    ConfigThingy trafoConf = new ConfigThingy("TRAFO");
+    ConfigThingy matchConf = trafoConf.add("MATCH");
+    matchConf.add("VALUE").add(COMBO_PARAM_ID);
+    matchConf.add(re_escape(comboValue));
+    FunctionSelectionAccess trafo = model.getTrafoAccess();
+    trafo.setExpertFunction(trafoConf);
+  }
+  
+  /**
+   * Versucht TRAFOs von Einfügungen der ComboBox combo zu reparieren,
+   * die durch eine Änderung der Werte-Liste von combo zerbrochen sind.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED
+   */
+  public void fixComboboxInsertions(FormControlModel combo)
+  {
+    IDManager.ID comboId = combo.getId();
+    if (comboId == null) return;
+    Collection items = combo.getItems();
+    Collection unusedItems = new HashSet(items);
+    Collection brokenInsertionModels = new Vector();
+    Iterator iter = iterator();
+    while (iter.hasNext())
+    {
+      InsertionModel model = (InsertionModel)iter.next();
+      if (model.getDataID().equals(comboId))
+      {
+        FunctionSelectionAccess trafo = model.getTrafoAccess();
+        if (!trafo.isExpert()) continue;
+        ConfigThingy trafoConf = trafo.getExpertFunction();
+        String regex;
+        try
+        {
+          if (trafoConf.count() != 1 || !trafoConf.getFirstChild().getName().equals("MATCH")) 
+            continue;
+          
+          trafoConf = trafoConf.getFirstChild();
+          if (trafoConf.count() != 2 || !trafoConf.getFirstChild().getName().equals("VALUE"))
+            continue;
+          
+          trafoConf = trafoConf.getLastChild();
+          if (trafoConf.count() != 0) continue;
+          regex = trafoConf.toString();
+        }
+        catch (NodeNotFoundException e)
+        {
+          Logger.error("Kann nicht passieren",e);
+          return;
+        }
+        
+        Pattern p = Pattern.compile(regex);
+        boolean found = false;
+        Iterator itemsIter = items.iterator();
+        while (itemsIter.hasNext())
+        {
+          String item = (String)itemsIter.next();
+          if (p.matcher(item).matches())
+          {
+            unusedItems.remove(item);
+            found = true;
+            break;
+          }
+        }
+        if (!found) brokenInsertionModels.add(model);
+      }
+    }
+    
+    /*
+     * Wenn wir ein unbenutztes Item haben, dann ändern wir alle TRAFOs, die
+     * broken sind so, dass sie auf dieses matchen.
+     */
+    if (unusedItems.size() > 0)
+    {
+      String item = (String)unusedItems.iterator().next();
+      iter = brokenInsertionModels.iterator();
+      while(iter.hasNext())
+      {
+        InsertionModel model = (InsertionModel)iter.next();
+        setMatchTrafo(model, item);
+      }
+    }
+  }
+
+  /**
+   * Liefert einen regulären Ausdruck, der genau den String str matcht
+   * (aber ohne ^ und $).
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED
+   */
+  private String re_escape(String str)
+  {
+    StringBuilder buffy = new StringBuilder();
+    for (int i = 0; i < str.length(); ++i)
+    {
+      char ch = str.charAt(i);
+      if (ch == ' ' || Character.isLetterOrDigit(ch))
+        buffy.append(ch);
+      else
+      {
+        buffy.append("\\u");
+        String hexstr = Integer.toHexString(ch);
+        for (int j = 4; j > hexstr.length(); --j) buffy.append('0');
+        buffy.append(hexstr);
+      }
+    }
+    return buffy.toString();
   }
   
   /**

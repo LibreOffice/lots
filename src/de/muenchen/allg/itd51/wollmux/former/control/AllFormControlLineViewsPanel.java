@@ -25,8 +25,11 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
@@ -43,7 +46,9 @@ import javax.swing.SwingConstants;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastObjectSelection;
+import de.muenchen.allg.itd51.wollmux.former.ComboboxMergeDescriptor;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
+import de.muenchen.allg.itd51.wollmux.former.IDManager;
 import de.muenchen.allg.itd51.wollmux.former.IndexList;
 import de.muenchen.allg.itd51.wollmux.former.ViewVisibilityDescriptor;
 import de.muenchen.allg.itd51.wollmux.former.control.FormControlModelList.ItemListener;
@@ -433,6 +438,80 @@ public class AllFormControlLineViewsPanel implements View, ItemListener, OneForm
     }
   }
   
+
+  /**
+   * Falls mindestens 2 Elemente selektiert sind und alle momentan selektierten 
+   * Elemente Checkboxen sind, die nicht-leere IDs haben so werden diese
+   * entfernt und stattdessen eine nicht-editierbare ComboBox eingefügt, 
+   * deren Werte-Liste sich aus den Labels aller entfernten Checkboxen zusammensetzt.
+   * Die Labels aller selektierten Checkboxen müssen verschieden sein. Ein leeres Label
+   * ist jedoch erlaubt (auch die Combobox enthält dann einen leeren Eintrag).
+   * 
+   * @return null, falls die Funktion nicht durchgeführt werden konnte (z.B. keine Checkboxen
+   *         selektiert oder eine Checkbox hat keine ID). 
+   *         Ansonsten wird ein {@link ComboboxMergeDescriptor} geliefert, der
+   *         das Ergebnis der Operation beschreibt.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED
+   */
+  public ComboboxMergeDescriptor mergeCheckboxesIntoCombobox()
+  {
+    Map mapCheckboxId2ComboboxEntry = new HashMap();
+    int count = 0;
+    ArrayList itemList = new ArrayList();
+    Iterator iter = selection.iterator();
+    while (iter.hasNext())
+    {
+      int idx = ((Integer)iter.next()).intValue();
+      OneFormControlLineView view = ((ViewDescriptor)viewDescriptors.get(idx)).view;
+      FormControlModel model = view.getModel();
+      if (model.getType() != FormControlModel.CHECKBOX_TYPE)
+      {
+        Logger.log("FM4000: Beim Aufruf von Checkbox->Combobox ist ein Element selektiert, das keine Checkbox ist");
+        return null;
+      }
+      else
+      {
+        IDManager.ID id = model.getId();
+        if (id == null) 
+        {
+          Logger.log("FM4000: Beim Aufruf von Checkbox->Combobox ist eine Checkbox ohne ID selektiert");
+          return null;
+        }
+        String label = model.getLabel();
+        if (mapCheckboxId2ComboboxEntry.containsValue(label)) 
+        {
+          Logger.log("FM4000: Beim Aufruf von Checkbox->Combobox sind 2 Checkboxen mit gleichem Label selektiert");
+          return null;
+        }
+        mapCheckboxId2ComboboxEntry.put(id, label);
+        itemList.add(label);
+        ++count;
+      }
+    }
+    
+    if (count < 2)
+    {
+      Logger.log("FM4000: Beim Aufruf von Checkbox->Combobox sind weniger als 2 Checkboxen selektiert");
+      return null;
+    }
+    
+    String id = formControlModelList.makeUniqueId("CheckCombo");
+    String[] items = new String[itemList.size()];
+    items = (String[])itemList.toArray(items);
+    FormControlModel comboModel = FormControlModel.createComboBox("Auswahl", id, items, formularMax4000);
+    comboModel.setEditable(false);
+    int index = getInsertionIndex();
+    formControlModelList.add(comboModel, index);
+    deleteSelectedElements();
+    ComboboxMergeDescriptor desc = new ComboboxMergeDescriptor();
+    desc.combo = comboModel;
+    desc.mapCheckboxId2ComboboxEntry = mapCheckboxId2ComboboxEntry;
+    return desc;
+  }
+
+  
   /**
    * Liefert true gdw sich kein ausgewähltes Element auf dem momentan angezeigten Tab
    * befindet.
@@ -651,5 +730,4 @@ public class AllFormControlLineViewsPanel implements View, ItemListener, OneForm
       this.isTab = isTab;
     }
   }
-    
 }

@@ -114,5 +114,16 @@ public class LeftPanel implements View
   {
     return myTabbedPane;
   }
+  
+  /**
+   * Ruft {@link AllFormControlLineViewsPanel#mergeCheckboxesIntoCombobox()} auf und
+   * liefert dessen Ergebnis zurück.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public ComboboxMergeDescriptor mergeCheckboxesIntoCombobox()
+  {
+    return allFormControlModelLineViewsPanel.mergeCheckboxesIntoCombobox();   
+  }
 
 }
