@@ -278,7 +278,7 @@ public class SachleitendeVerfuegungenDruckdialog
                                                                                  "Wählen Sie aus, welche Seiten dieses Verfügungspunktes gedruckt werden sollen"),
                                                                              new PageRangeElement(
                                                                                  TextDocumentModel.PAGE_RANGE_TYPE_MANUAL,
-                                                                                 "<Eingabe>",
+                                                                                 "<Seitennummern>",
                                                                                  "Mögliche Eingaben sind z.B. '1', '2-5' oder '1,3,5'") };
 
   /**
