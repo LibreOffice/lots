@@ -45,6 +45,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Vector;
+import java.util.Date;
 
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
@@ -137,6 +138,15 @@ public class WollMuxSingleton implements XPALProvider
   private HashMap currentTextDocumentModels;
 
   /**
+   * Enthält null (wenn noch keine Installations-Prüfung erfolgte) oder den
+   * Zeitstempel der jungsten WollMuxInstallation, die auf dem System gefunden
+   * wurde. Ändert sich dieser Zeitstempel im laufenden Betrieb, dann liegt eine
+   * Mehrfachinstallation des WollMux vor
+   * {@see WollMuxEventHandler.handleCheckInstallation()}.
+   */
+  private Date currentWollMuxInstallationDate;
+
+  /**
    * Die WollMux-Hauptklasse ist als singleton realisiert.
    */
   private WollMuxSingleton(XComponentContext ctx)
@@ -146,6 +156,8 @@ public class WollMuxSingleton implements XPALProvider
     this.ctx = ctx;
 
     this.currentTextDocumentModels = new HashMap();
+
+    this.currentWollMuxInstallationDate = null;
 
     // Initialisiere die UNO-Klasse, so dass auch mit dieser Hilfsklasse
     // gearbeitet werden kann.
@@ -311,6 +323,9 @@ public class WollMuxSingleton implements XPALProvider
     if (singletonInstance == null)
     {
       singletonInstance = new WollMuxSingleton(ctx);
+
+      // Prüfen ob Dippelt- oder Halbinstallation vorliegt.
+      WollMuxEventHandler.handleCheckInstallation();
 
       // Event ON_FIRST_INITIALIZE erzeugen:
       WollMuxEventHandler.handleInitialize();
@@ -863,6 +878,35 @@ public class WollMuxSingleton implements XPALProvider
   }
 
   /**
+   * Liefert null (wenn noch keine Installations-Prüfung erfolgte) oder den
+   * Zeitstempel der jungsten WollMuxInstallation, die auf dem System gefunden
+   * wurde. Ändert sich dieser Zeitstempel im laufenden Betrieb, dann liegt eine
+   * Mehrfachinstallation des WollMux vor
+   * {@see WollMuxEventHandler.handleCheckInstallation()}.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  public Date getCurrentWollMuxInstallationDate()
+  {
+    return currentWollMuxInstallationDate;
+  }
+
+  /**
+   * Ermöglicht das Setzen des Datums der jüngsten WollMux-Installation, die in
+   * WollMuxEventHandler.handleCheckInstallation(...) auf dem System gefunden
+   * wurde.
+   * 
+   * @param currentWollMuxInstallationDate
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  public void setCurrentWollMuxInstallationDate(
+      Date currentWollMuxInstallationDate)
+  {
+    this.currentWollMuxInstallationDate = currentWollMuxInstallationDate;
+  }
+
+  /**
    * siehe {@link WollMuxFiles#isDebugMode()}.
    * 
    * @author Christoph Lutz (D-III-ITD 5.1)
@@ -1097,7 +1141,9 @@ public class WollMuxSingleton implements XPALProvider
 
   /**
    * Diese Methode erzeugt einen modalen Swing-Dialog zur Anzeige von
-   * Informationen und kehrt erst nach Beendigung des Dialogs wieder zurück.
+   * Informationen und kehrt erst nach Beendigung des Dialogs wieder zurück. Der
+   * sichtbare Text wird dabei ab einer Länge von 50 Zeichen automatisch
+   * umgebrochen.
    * 
    * @param sTitle
    *          Titelzeile des Dialogs
@@ -1107,10 +1153,27 @@ public class WollMuxSingleton implements XPALProvider
   public static void showInfoModal(java.lang.String sTitle,
       java.lang.String sMessage)
   {
+    showInfoModal(sTitle, sMessage, 50);
+  }
+
+  /**
+   * Diese Methode erzeugt einen modalen Swing-Dialog zur Anzeige von
+   * Informationen und kehrt erst nach Beendigung des Dialogs wieder zurück.
+   * 
+   * @param sTitle
+   *          Titelzeile des Dialogs
+   * @param sMessage
+   *          die Nachricht, die im Dialog angezeigt werden soll.
+   * @param margin
+   *          ist margin > 0 und sind in einer Zeile mehr als margin Zeichen
+   *          vorhanden, so wird der Text beim nächsten Leerzeichen umgebrochen.
+   */
+  public static void showInfoModal(java.lang.String sTitle,
+      java.lang.String sMessage, int margin)
+  {
     try
     {
-      // zu lange Strings umbrechen:
-      final int MAXCHARS = 50;
+      // zu lange Strings ab margin Zeichen umbrechen:
       String formattedMessage = "";
       String[] lines = sMessage.split("\n");
       for (int i = 0; i < lines.length; i++)
@@ -1120,7 +1183,7 @@ public class WollMuxSingleton implements XPALProvider
         for (int j = 0; j < words.length; j++)
         {
           String word = words[j];
-          if (chars > 0 && chars + word.length() > MAXCHARS)
+          if (margin > 0 && chars > 0 && chars + word.length() > margin)
           {
             formattedMessage += "\n";
             chars = 0;

@@ -31,11 +31,16 @@ package de.muenchen.allg.itd51.wollmux;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.text.DateFormat;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -71,6 +76,7 @@ import com.sun.star.text.XTextRange;
 import com.sun.star.uno.Exception;
 import com.sun.star.uno.RuntimeException;
 import com.sun.star.uno.UnoRuntime;
+import com.sun.star.util.XStringSubstitution;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoProps;
@@ -2531,6 +2537,10 @@ public class WollMuxEventHandler
 
       WollMuxEventHandler.handlePALChangedNotify();
 
+      // Prüfen, ob WollMux-Installation noch passt (keine Halb- oder
+      // Doppelinstallation)
+      WollMuxEventHandler.handleCheckInstallation();
+
       // Konsistenzprüfung: Stimmt WollMux-Konfiguration der entfernten
       // Komponente mit meiner Konfiguration überein? Ansonsten Fehlermeldung.
       if (wollmuxConfHashCode != null)
@@ -2541,6 +2551,7 @@ public class WollMuxEventHandler
           errorMessage(new InvalidBindingStateException(
               "Die Konfiguration des WollMux muss neu eingelesen werden.\n\nBitte beenden Sie den WollMux und OpenOffice.org und schießen Sie alle laufenden 'soffice.bin'-Prozesse über den Taskmanager ab."));
       }
+
     }
 
     public boolean requires(Object o)
@@ -4010,6 +4021,235 @@ public class WollMuxEventHandler
     public String toString()
     {
       return this.getClass().getSimpleName() + "(" + model + ")";
+    }
+  }
+
+  // *******************************************************************************************
+
+  /**
+   * Erzeugt ein neues WollMux-Event, in dem geprüft wird, ob der WollMux
+   * korrekt installiert ist und keine Doppel- oder Halbinstallationen
+   * vorliegen. Ist der WollMux fehlerhaft installiert, erscheint eine
+   * Fehlermeldung mit entsprechenden Hinweisen.
+   * 
+   * Das Event wird geworfen, wenn der WollMux startet oder wenn ein der
+   * Sachleitenden Verfügungen eingefügt werden, bzw. eine bestehende Ziffer
+   * gelöscht werden soll.
+   */
+  public static void handleCheckInstallation()
+  {
+    handle(new OnCheckInstallation());
+  }
+
+  private static class OnCheckInstallation extends BasicEvent
+  {
+    protected void doit() throws WollMuxFehlerException
+    {
+      // Standardwerte für den Warndialog:
+      boolean showdialog = true;
+      String title = "Mehrfachinstallation des WollMux";
+      String msg = "Der WollMux ist mehrfach auf Ihrem System installiert.";
+      String logMsg = msg;
+
+      // Abschnitt Dialoge/MehrfachinstallationWarndialog auswerten
+      try
+      {
+        ConfigThingy warndialog = WollMuxSingleton.getInstance()
+            .getWollmuxConf().query("Dialoge").query(
+                "MehrfachinstallationWarndialog").getLastChild();
+        try
+        {
+          msg = warndialog.get("MSG").toString();
+        }
+        catch (NodeNotFoundException e)
+        {
+          showdialog = false;
+        }
+      }
+      catch (NodeNotFoundException e)
+      {
+        // Ist der Abschnitt nicht vorhanden, so greifen Standardwerte.
+      }
+
+      // Infos der Installationen einlesen.
+      HashMap wmInsts = getInstallations();
+
+      // Variablen currentInstPath / currentInstLastModified bestimmen
+      String currentInstPath = "";
+      Date currentInstLastModified = null;
+      for (Iterator iter = wmInsts.keySet().iterator(); iter.hasNext();)
+      {
+        String path = (String) iter.next();
+        Date d = (Date) wmInsts.get(path);
+        if (currentInstLastModified == null
+            || d.compareTo(currentInstLastModified) > 0)
+        {
+          currentInstLastModified = d;
+          currentInstPath = path;
+        }
+      }
+
+      // Variable wrongInstList bestimmen:
+      String wrongInstList = "";
+      for (Iterator iter = wmInsts.keySet().iterator(); iter.hasNext();)
+      {
+        String path = (String) iter.next();
+        if (path.equals(currentInstPath)) continue;
+        wrongInstList += "- " + path + "\n";
+      }
+
+      // currentInstlastModifiedDate vergleichen mit dem Zeitstempel der
+      // Installation, die in der letzten Prüfung gefunden wurde.
+      boolean newerInstallationDetected = false;
+      boolean firstCheck = false;
+
+      WollMuxSingleton mux = WollMuxSingleton.getInstance();
+      Date oldCurrentInstLastModified = mux.getCurrentWollMuxInstallationDate();
+      if (oldCurrentInstLastModified == null)
+      {
+        firstCheck = true;
+        mux.setCurrentWollMuxInstallationDate(currentInstLastModified);
+        oldCurrentInstLastModified = currentInstLastModified;
+      }
+      if (currentInstLastModified != null)
+        newerInstallationDetected = oldCurrentInstLastModified
+            .compareTo(currentInstLastModified) < 0;
+
+      // Im Fehlerfall Dialog und Fehlermeldung bringen.
+      if ((wmInsts.size() > 1 && firstCheck) || newerInstallationDetected)
+      {
+
+        // Variablen in msg evaluieren:
+        DateFormat f = DateFormat.getDateInstance();
+        msg = msg.replaceAll("\\$\\{CURRENT_INST_PATH\\}", currentInstPath);
+        msg = msg.replaceAll("\\$\\{CURRENT_INST_LAST_MODIFIED\\}", f
+            .format(currentInstLastModified));
+        msg = msg.replaceAll("\\$\\{WRONG_INST_LIST\\}", wrongInstList);
+
+        logMsg += "\nDie juengste WollMux-Installation liegt unter:\n- "
+                  + currentInstPath
+                  + "\nAusserdem wurden folgende WollMux-Installationen gefunden:\n"
+                  + wrongInstList;
+        Logger.error(logMsg);
+
+        if (showdialog) WollMuxSingleton.showInfoModal(title, msg, 0);
+      }
+    }
+
+    /**
+     * Liefert eine HashMap mit den aktuell auf dem System vorhandenen
+     * WollMux-Installationen, die in den Schüssel/Wert-Paaren
+     * Pfad/Modified-Datum belegt sind.
+     * 
+     * @author Christoph Lutz (D-III-ITD-5.1)
+     */
+    private HashMap getInstallations()
+    {
+      HashMap wmInstallations = new HashMap();
+
+      // Installationspfade der Pakete bestimmen:
+      String myPath = null; // user-Pfad
+      String oooPath = null; // shared-Pfad
+
+      try
+      {
+        XStringSubstitution xSS = UNO.XStringSubstitution(UNO
+            .createUNOService("com.sun.star.util.PathSubstitution"));
+
+        // Benutzerinstallationspfad LiMux =
+        // /home/<Benutzer>/.openoffice.org2/user
+        // Benutzerinstallationspfad Windows 2000 C:/Dokumente und
+        // Einstellungen/<Benutzer>/Anwendungsdaten/OpenOffice.org2/user
+        myPath = xSS.substituteVariables(
+            "$(user)/uno_packages/cache/uno_packages/",
+            true);
+        // Sharedinstallationspfad LiMux /opt/openoffice.org2.0/
+        // Sharedinstallationspfad Windows C:/Programme/OpenOffice.org<version>
+        oooPath = xSS.substituteVariables(
+            "$(inst)/share/uno_packages/cache/uno_packages/",
+            true);
+      }
+      catch (java.lang.Exception e)
+      {
+        Logger.error(e);
+        return wmInstallations;
+      }
+
+      if (myPath == null || oooPath == null)
+      {
+        Logger
+            .error("Bestimmung der Installationspfade für das WollMux-Paket fehlgeschlagen.");
+        return wmInstallations;
+      }
+
+      findWollMuxInstallations(wmInstallations, myPath);
+      findWollMuxInstallations(wmInstallations, oooPath);
+
+      return wmInstallations;
+    }
+
+    /**
+     * Sucht im übergebenen Pfad path nach Verzeichnissen die WollMux.uno.pkg
+     * enthalten und fügt die Schlüssel-/Wertpaare
+     * <VerzeichnisDasWollMuxEnthält>/<DatumDesVerzeichnis> zur übergebenen
+     * HashMap wmInstallations
+     * 
+     * @param wmInstallations
+     *          HashMap, in der gefundene WollMux-Installationen abgelegt werden
+     *          als Pfas(als String) und Datum(als Date).
+     * @param path
+     *          Der Pfad in dem nach WollMux-Installationen gesucht werden soll.
+     * 
+     * @author Bettina Bauer (D-III-ITD-5.1), Christoph Lutz (D-III-ITD-5.1)
+     */
+    private static void findWollMuxInstallations(HashMap wmInstallations,
+        String path)
+    {
+      URI uriPath;
+      uriPath = null;
+      try
+      {
+        uriPath = new URI(path);
+      }
+      catch (URISyntaxException e)
+      {
+        Logger.error(e);
+        return;
+      }
+
+      File[] installedPackages = new File(uriPath).listFiles();
+      if (installedPackages != null)
+      {
+        // iterieren über die Installationsverzeichnisse mit automatisch
+        // generierten Namen (z.B. 31GFBd_)
+        for (int i = 0; i < installedPackages.length; i++)
+        {
+          if (installedPackages[i].isDirectory())
+          {
+            File dir = installedPackages[i];
+            File[] dateien = dir.listFiles();
+            for (int j = 0; j < dateien.length; j++)
+            {
+              // Wenn das Verzeichnis WollMux.uno.pkg enthält, speichern des
+              // Verzeichnisnames und des Verzeichnisdatum in einer HashMap
+              if (dateien[j].isDirectory()
+                  && dateien[j].getName().startsWith("WollMux."))
+              {
+                // Name des Verzeichnis in dem sich WollMux.uno.pkg befindet
+                String directoryName = dateien[j].getAbsolutePath();
+                // Datum des Verzeichnis in dem sich WollMux.uno.pkg befindet
+                Date directoryDate = new Date(dateien[j].lastModified());
+                wmInstallations.put(directoryName, directoryDate);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    public String toString()
+    {
+      return this.getClass().getSimpleName() + "()";
     }
   }
 
