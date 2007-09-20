@@ -12,6 +12,7 @@
 * 21.12.2006 | BNK | Fertig+Test
 * 22.12.2006 | BNK | USER und PASSWORD unterstützt
 * 09.03.2007 | BNK | [P1257]Neuer Konstruktor, der Datenquelle auch ohne Angabe von Schlüssel erlaubt
+* 20.09.2007 | BNK | EscapeProcessing = false setzen in Abfragen, "|" als ESCAPE-Zeichen
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -61,6 +62,29 @@ public class OOoDatasource implements Datasource
    * Datenbank brauchen darf.
    */
   private static final int LOGIN_TIMEOUT = 5;
+  
+  /**
+   * Konstante für {@link #sqlSyntax}, die angibt, dass SQL Queries in
+   * Oracle-Syntax abgesetzt werden sollen.
+   */
+  private static final int SQL_SYNTAX_ANSI = 0;
+  
+  /**
+   * Konstante für {@link #sqlSyntax}, die angibt, dass SQL Queries in
+   * Oracle-Syntax abgesetzt werden sollen.
+   */
+  private static final int SQL_SYNTAX_ORACLE = 1;
+  
+  /**
+   * Konstante für {@link #sqlSyntax}, die angibt, dass SQL Queries in
+   * MySQL-Syntax abgesetzt werden sollen.
+   */
+  private static final int SQL_SYNTAX_MYSQL = 2;
+  
+  /**
+   * Welche Syntax soll verwendet werden. Default ist Oracle-Syntax.
+   */
+  private int sqlSyntax = SQL_SYNTAX_ANSI;
   
   /**
    * Der Name dieser Datenquelle.
@@ -167,6 +191,20 @@ public class OOoDatasource implements Datasource
     try
     {
       password = sourceDesc.get("PASSWORD").toString();
+    }
+    catch (NodeNotFoundException x) {}
+    
+    try
+    {
+      String sqlSyntaxStr = sourceDesc.get("SQL_SYNTAX").toString();
+      if (sqlSyntaxStr.equalsIgnoreCase("ansi"))
+        sqlSyntax = SQL_SYNTAX_ANSI;
+      else if (sqlSyntaxStr.equalsIgnoreCase("oracle"))
+        sqlSyntax = SQL_SYNTAX_ORACLE;
+      else if (sqlSyntaxStr.equalsIgnoreCase("mysql"))
+        sqlSyntax = SQL_SYNTAX_MYSQL;
+      else
+        throw new ConfigurationErrorException("SQL_SYNTAX \""+sqlSyntaxStr+"\" nicht unterstützt");
     }
     catch (NodeNotFoundException x) {}
     
@@ -337,7 +375,7 @@ public class OOoDatasource implements Datasource
       buffy.append(" LIKE ");
       buffy.append("lower(");
       buffy.append(sqlLiteral(sqlSearchPattern(part.getSearchString())));
-      buffy.append(") ESCAPE '\\'");
+      buffy.append(") ESCAPE '|'");
 
       buffy.append(')');
     }
@@ -397,18 +435,26 @@ public class OOoDatasource implements Datasource
       Object  rowSet = UNO.createUNOService("com.sun.star.sdb.RowSet");
       results = UNO.XRowSet(rowSet);
       
-      // set the properties needed to connect to a database
       XPropertySet xProp = UNO.XPropertySet(results);
       
       xProp.setPropertyValue("DataSourceName", oooDatasourceName);
       
-      // the CommandType must be TABLE, QUERY or COMMAND ? here we use COMMAND
+      /*
+       * EscapeProcessing == false bedeutet, dass OOo die Query nicht selbst
+       * anfassen darf, sondern direkt an die Datenbank weiterleiten soll.
+       * Wird dies verwendet ist das Ergebnis (derzeit) immer read-only, da
+       * OOo keine Updates von Statements durchführen kann, die es nicht
+       * geparst hat. Siehe Kommentar zu
+       * http://qa.openoffice.org/issues/show_bug.cgi?id=78522
+       * Entspricht dem Button SQL mit grünem Haken (SQL-Kommando direkt ausführen)
+       * im Base-Abfrageentwurf.
+       */
+      xProp.setPropertyValue("EscapeProcessing", new Boolean(false));
+      
       xProp.setPropertyValue("CommandType", new Integer(com.sun.star.sdb.CommandType.COMMAND));
       
-      // the Command could be a table or query name or a SQL command, depending on the CommandType
       xProp.setPropertyValue("Command", query);
       
-      // if your database requires logon, you can use the properties User and Password
       xProp.setPropertyValue("User", userName);
       xProp.setPropertyValue("Password", password);
       
@@ -500,12 +546,13 @@ public class OOoDatasource implements Datasource
   }
 
   /**
-   * Ersetzt das * Wildcard so dass ein SQL-Suchmuster entsteht.
+   * Ersetzt das * Wildcard so dass ein SQL-Suchmuster entsteht und escapet Zeichen,
+   * die für SQL eine Bedeutung haben mit "|".
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private static String sqlSearchPattern(String str)
   {
-    return str.replaceAll("\\\\","\\\\\\\\").replaceAll("_","\\\\_").replaceAll("%","\\\\%").replaceAll("\\*","%"); 
+    return str.replaceAll("\\|","||").replaceAll("_","|_").replaceAll("%","|%").replaceAll("\\*","%"); 
   }
   
   public String getName()
