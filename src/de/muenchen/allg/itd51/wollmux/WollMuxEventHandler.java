@@ -4065,6 +4065,13 @@ public class WollMuxEventHandler
         {
           showdialog = false;
         }
+        try
+        {
+          title = warndialog.get("TITLE").toString();
+        }
+        catch (NodeNotFoundException e)
+        {
+        }
       }
       catch (NodeNotFoundException e)
       {
