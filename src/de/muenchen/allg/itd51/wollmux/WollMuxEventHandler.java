@@ -4081,31 +4081,31 @@ public class WollMuxEventHandler
       // Infos der Installationen einlesen.
       HashMap wmInsts = getInstallations();
 
-      // Variablen currentInstPath / currentInstLastModified bestimmen
-      String currentInstPath = "";
-      Date currentInstLastModified = null;
+      // Variablen recentInstPath / recentInstLastModified bestimmen
+      String recentInstPath = "";
+      Date recentInstLastModified = null;
       for (Iterator iter = wmInsts.keySet().iterator(); iter.hasNext();)
       {
         String path = (String) iter.next();
         Date d = (Date) wmInsts.get(path);
-        if (currentInstLastModified == null
-            || d.compareTo(currentInstLastModified) > 0)
+        if (recentInstLastModified == null
+            || d.compareTo(recentInstLastModified) > 0)
         {
-          currentInstLastModified = d;
-          currentInstPath = path;
+          recentInstLastModified = d;
+          recentInstPath = path;
         }
       }
 
       // Variable wrongInstList bestimmen:
-      String wrongInstList = "";
+      String otherInstsList = "";
       for (Iterator iter = wmInsts.keySet().iterator(); iter.hasNext();)
       {
         String path = (String) iter.next();
-        if (path.equals(currentInstPath)) continue;
-        wrongInstList += "- " + path + "\n";
+        if (path.equals(recentInstPath)) continue;
+        otherInstsList += "- " + path + "\n";
       }
 
-      // currentInstlastModifiedDate vergleichen mit dem Zeitstempel der
+      // recentInstlastModifiedDate vergleichen mit dem Zeitstempel der
       // Installation, die in der letzten Prüfung gefunden wurde.
       boolean newerInstallationDetected = false;
       boolean firstCheck = false;
@@ -4115,12 +4115,12 @@ public class WollMuxEventHandler
       if (oldCurrentInstLastModified == null)
       {
         firstCheck = true;
-        mux.setCurrentWollMuxInstallationDate(currentInstLastModified);
-        oldCurrentInstLastModified = currentInstLastModified;
+        mux.setCurrentWollMuxInstallationDate(recentInstLastModified);
+        oldCurrentInstLastModified = recentInstLastModified;
       }
-      if (currentInstLastModified != null)
+      if (recentInstLastModified != null)
         newerInstallationDetected = oldCurrentInstLastModified
-            .compareTo(currentInstLastModified) < 0;
+            .compareTo(recentInstLastModified) < 0;
 
       // Im Fehlerfall Dialog und Fehlermeldung bringen.
       if ((wmInsts.size() > 1 && firstCheck) || newerInstallationDetected)
@@ -4128,15 +4128,15 @@ public class WollMuxEventHandler
 
         // Variablen in msg evaluieren:
         DateFormat f = DateFormat.getDateInstance();
-        msg = msg.replaceAll("\\$\\{CURRENT_INST_PATH\\}", currentInstPath);
-        msg = msg.replaceAll("\\$\\{CURRENT_INST_LAST_MODIFIED\\}", f
-            .format(currentInstLastModified));
-        msg = msg.replaceAll("\\$\\{WRONG_INST_LIST\\}", wrongInstList);
+        msg = msg.replaceAll("\\$\\{RECENT_INST_PATH\\}", recentInstPath);
+        msg = msg.replaceAll("\\$\\{RECENT_INST_LAST_MODIFIED\\}", f
+            .format(recentInstLastModified));
+        msg = msg.replaceAll("\\$\\{OTHER_INSTS_LIST\\}", otherInstsList);
 
         logMsg += "\nDie juengste WollMux-Installation liegt unter:\n- "
-                  + currentInstPath
+                  + recentInstPath
                   + "\nAusserdem wurden folgende WollMux-Installationen gefunden:\n"
-                  + wrongInstList;
+                  + otherInstsList;
         Logger.error(logMsg);
 
         if (showdialog) WollMuxSingleton.showInfoModal(title, msg, 0);
