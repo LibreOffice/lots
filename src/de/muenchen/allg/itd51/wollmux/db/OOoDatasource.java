@@ -83,6 +83,33 @@ public class OOoDatasource implements Datasource
   
   /**
    * Welche Syntax soll verwendet werden. Default ist Oracle-Syntax.
+   *  **** ANSI *********
+<doublequote symbol> ::= 2 consecutive double quote characters (Lexical Elements, 135 Foundation)
+Ein delimited Identifier ist ein von "..." umschlossener Identifier. 
+Im Identifier enthaltene Doublequotes werden durch <doublequote symbol> ersetzt. (Lexical Elements, 134 Foundation)
+<quote symbol> ::= <quote><quote> (2 consecutive quote characters) (Lexical elements, 143 Foundation)
+In einem <character string literal> werden einzelne <quote>s durch <quote symbol> ersetzt.(Lexical elements, 143 Foundation)
+**** Datensätze zu vorgegebener Schlüsselliste finden *********
+SELECT * FROM "<id>" WHERE ("<colId>"='<colVal>' AND "<colId>"='<colVal>' AND ...) OR (...) OR ...;
+In <id> und <colId> sind Doublequotes durch <doublequote symbol> ersetzt.
+In <colVal> sind Quotes durch <quote symbol> ersetzt.
+***** Datensätze finden, die bestimmte Kriterien erfüllen ********
+8.5 <like predicate> (385 Foundation)
+Der String hinter ESCAPE muss genau ein Zeichen lang sein. Ansonsten gibt es eine Exception (387 Foundation, 8.5 General Rules 3b))
+_ und % sowie das ESCAPE-Zeichen selbst müssen im String-Ausdruck hinter LIKE escapet werden (durch Voranstellen des Escape-Zeichens). Andere Zeichen dürfen nicht escapet werden.
+
+SELECT * FROM "<id>" WHERE (lower("<colId>") LIKE lower('<pattern>') ESCAPE '|') AND (...) AND ...;
+In <id> und <colId> sind Doublequotes durch <doublequote symbol> ersetzt.
+In <pattern> sind "_",  "%" und "|" ersetzt durch "|_", "|%" und "||".
+***** Alle Datensätze auslesen ******
+
+SELECT * FROM "<id>";
+In <id> sind Doublequotes durch <doublequote symbol> ersetzt.
+
+**** Oracle *****
+Wie ANSI
+****** MySQL *******
+Wie ANSI, aber mit lcase() statt lower()
    */
   private int sqlSyntax = SQL_SYNTAX_ANSI;
   
@@ -369,11 +396,13 @@ public class OOoDatasource implements Datasource
       if (!first) buffy.append(" AND ");
       first = false;
       buffy.append('(');
-      buffy.append("lower(");
+      buffy.append(sqlLower());
+      buffy.append('(');
       buffy.append(sqlIdentifier(part.getColumnName()));
       buffy.append(')');
       buffy.append(" LIKE ");
-      buffy.append("lower(");
+      buffy.append(sqlLower());
+      buffy.append('(');
       buffy.append(sqlLiteral(sqlSearchPattern(part.getSearchString())));
       buffy.append(") ESCAPE '|'");
 
@@ -437,7 +466,7 @@ public class OOoDatasource implements Datasource
       
       XPropertySet xProp = UNO.XPropertySet(results);
       
-      xProp.setPropertyValue("DataSourceName", oooDatasourceName);
+      xProp.setPropertyValue("ActiveConnection", conn);
       
       /*
        * EscapeProcessing == false bedeutet, dass OOo die Query nicht selbst
@@ -454,9 +483,6 @@ public class OOoDatasource implements Datasource
       xProp.setPropertyValue("CommandType", new Integer(com.sun.star.sdb.CommandType.COMMAND));
       
       xProp.setPropertyValue("Command", query);
-      
-      xProp.setPropertyValue("User", userName);
-      xProp.setPropertyValue("Password", password);
       
       results.execute();
       
@@ -523,6 +549,19 @@ public class OOoDatasource implements Datasource
       mapColumnNameToIndex.put(column, new Integer(idx));
     }
     return mapColumnNameToIndex;
+  }
+  
+  /**
+   * Liefert abhängig von {@link #sqlSyntax} den "richtigen" Namen der lower()-Funktion.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private String sqlLower()
+  {
+    switch(sqlSyntax)
+    {
+      case SQL_SYNTAX_MYSQL: return "lcase";
+      default: return "lower";
+    }
   }
   
   /**
