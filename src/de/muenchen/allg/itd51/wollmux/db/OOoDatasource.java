@@ -31,13 +31,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
+import com.sun.star.beans.XPropertySet;
 import com.sun.star.container.XNameAccess;
 import com.sun.star.sdbc.XColumnLocate;
 import com.sun.star.sdbc.XConnection;
 import com.sun.star.sdbc.XDataSource;
 import com.sun.star.sdbc.XResultSet;
 import com.sun.star.sdbc.XRow;
-import com.sun.star.sdbc.XStatement;
+import com.sun.star.sdbc.XRowSet;
 import com.sun.star.sdbcx.XColumnsSupplier;
 import com.sun.star.sdbcx.XKeysSupplier;
 
@@ -351,23 +352,22 @@ public class OOoDatasource implements Datasource
     String command = "SELECT * FROM "+sqlIdentifier(oooTableName)+";";
     return sqlQuery(command, timeout, false);
   }
-
+  
   /**
-   * Setzt die SQL-Anfrage query an die Datenbank ab und liefert die Resultate.
-   * @param timeout maximale Zeit in Millisekunden, die die Anfrage dauern darf.
-   * @param throwOnTimeout falls true wird im Falle des Überschreitens des Timeouts eine
-   *        TimeoutException geworfen, ansonsten wird die unvollständige Ergebnisliste 
-   *        zurückgeliefert.
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TESTED
-   */
+  * Setzt die SQL-Anfrage query an die Datenbank ab und liefert die Resultate.
+  * @param timeout maximale Zeit in Millisekunden, die die Anfrage dauern darf.
+  * @param throwOnTimeout falls true wird im Falle des überschreitens des Timeouts eine
+  *        TimeoutException geworfen, ansonsten wird die unvollständige Ergebnisliste
+  *        zurückgeliefert.
+  * @author bettina.bauer, Matthias Benkmann       
+  */
   private QueryResults sqlQuery(String query, long timeout, boolean throwOnTimeout) throws TimeoutException
   {
     Logger.debug("sqlQuery(\""+query+"\", "+timeout+", "+throwOnTimeout+")");
     long endTime = System.currentTimeMillis() + timeout;
     
     Vector datasets = new Vector();
-    
+
     if (System.currentTimeMillis() > endTime)
     {
       if (throwOnTimeout)
@@ -375,23 +375,45 @@ public class OOoDatasource implements Datasource
       else
         return new QueryResultsList(datasets);
     }
+ 
+
     
-    XConnection conn;
+    XRowSet results = null;
+    XConnection conn = null;
     try{
-      XDataSource ds = UNO.XDataSource(UNO.dbContext.getRegisteredObject(oooDatasourceName));
-      long lgto = timeout / 1000;
-      if (lgto < 1) lgto = 1;
-      ds.setLoginTimeout((int)lgto);
-      conn = ds.getConnection(userName,password);
-    } 
-    catch(Exception x)
-    {
-      throw new TimeoutException("Kann keine Verbindung zur Datenquelle \""+oooDatasourceName+"\" herstellen");
-    }
-    
-    try{
-      XStatement statement = conn.createStatement();
-      XResultSet results = statement.executeQuery(query);
+     
+      try{
+        XDataSource ds = UNO.XDataSource(UNO.dbContext.getRegisteredObject(oooDatasourceName));
+        long lgto = timeout / 1000;
+        if (lgto < 1) lgto = 1;
+        ds.setLoginTimeout((int)lgto);
+        conn = ds.getConnection(userName,password);
+      }
+      catch(Exception x)
+      {
+        throw new TimeoutException("Kann keine Verbindung zur Datenquelle \""+oooDatasourceName+"\" herstellen");
+      }
+
+      Object  rowSet = UNO.createUNOService("com.sun.star.sdb.RowSet");
+      results = UNO.XRowSet(rowSet);
+      
+      // set the properties needed to connect to a database
+      XPropertySet xProp = UNO.XPropertySet(results);
+      
+      xProp.setPropertyValue("DataSourceName", oooDatasourceName);
+      
+      // the CommandType must be TABLE, QUERY or COMMAND ? here we use COMMAND
+      xProp.setPropertyValue("CommandType", new Integer(com.sun.star.sdb.CommandType.COMMAND));
+      
+      // the Command could be a table or query name or a SQL command, depending on the CommandType
+      xProp.setPropertyValue("Command", query);
+      
+      // if your database requires logon, you can use the properties User and Password
+      xProp.setPropertyValue("User", userName);
+      xProp.setPropertyValue("Password", password);
+      
+      results.execute();
+      
       Map mapColumnNameToIndex = getColumnMapping(results);
       XRow row = UNO.XRow(results);
       
@@ -417,12 +439,21 @@ public class OOoDatasource implements Datasource
             break;
         }
       }
-    } catch(Exception x)
-    {
-      throw new TimeoutException("Fehler beim Absetzen der Anfrage",x);
-    }
-    return new QueryResultsList(datasets);
+  } catch(Exception x)
+  {
+    throw new TimeoutException("Fehler beim Absetzen der Anfrage",x);
   }
+  finally{
+    if (results != null) UNO.XComponent(results).dispose();
+    if (conn != null) try { conn.close(); } catch (Exception e){}
+  }
+  
+  return new QueryResultsList(datasets);
+
+  } 
+  
+
+  
   
   /**
    * Liefert eine Abbildung der Spaltennamen aus {@link #schema} auf Integer-Indizes, die die 
