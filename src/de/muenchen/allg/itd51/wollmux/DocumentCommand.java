@@ -850,16 +850,15 @@ abstract public class DocumentCommand
 
     private Vector args = null;
 
-    private String mode;
-
     private boolean manualMode = false;
 
-    private boolean stylesMode = false;
+    private Set styles = null;
 
     public InsertFrag(ConfigThingy wmCmd, Bookmark bookmark)
         throws InvalidCommandException
     {
       super(wmCmd, bookmark);
+
       try
       {
         fragID = wmCmd.get("WM").get("FRAG_ID").toString();
@@ -885,6 +884,7 @@ abstract public class DocumentCommand
         // ARGS sind optional
       }
 
+      String mode = "";
       try
       {
         mode = wmCmd.get("WM").get("MODE").toString();
@@ -892,14 +892,46 @@ abstract public class DocumentCommand
         {
           manualMode = true;
         }
-        else if (mode.equalsIgnoreCase("styles"))
-        {
-          stylesMode = true;
-        }
       }
       catch (NodeNotFoundException e)
       {
         // MODE ist optional;
+      }
+
+      styles = new HashSet();
+      try
+      {
+        ConfigThingy stylesConf = wmCmd.get("WM").get("STYLES");
+        for (Iterator iter = stylesConf.iterator(); iter.hasNext();)
+        {
+          String s = iter.next().toString();
+          if (s.equalsIgnoreCase("all"))
+          {
+            styles.add("textstyles");
+            styles.add("pagestyles");
+            styles.add("numberingstyles");
+          }
+          else if (s.equalsIgnoreCase("textStyles"))
+          {
+            styles.add(s.toLowerCase());
+          }
+          else if (s.equalsIgnoreCase("pageStyles"))
+          {
+            styles.add(s.toLowerCase());
+          }
+          else if (s.equalsIgnoreCase("numberingStyles"))
+          {
+            styles.add(s.toLowerCase());
+          }
+          else
+            throw new InvalidCommandException("STYLE '"
+                                              + s
+                                              + "' ist unbekannt.");
+        }
+      }
+      catch (NodeNotFoundException e)
+      {
+        // STYLES ist optional;
       }
 
     }
@@ -919,9 +951,14 @@ abstract public class DocumentCommand
       return manualMode;
     }
 
-    public boolean isStylesMode()
+    public boolean importStylesOnly()
     {
-      return stylesMode;
+      return styles.size() > 0;
+    }
+
+    public Set getStyles()
+    {
+      return styles;
     }
 
     public int execute(DocumentCommand.Executor visitable)

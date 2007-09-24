@@ -37,6 +37,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
 
 import com.sun.star.awt.FontWeight;
@@ -65,6 +66,7 @@ import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
@@ -821,8 +823,8 @@ public class DocumentCommandInterpreter
                          + "\" ein.");
 
             // styles bzw. fragment einfügen:
-            if (cmd.isStylesMode())
-              insertStylesFromURL(url);
+            if (cmd.importStylesOnly())
+              insertStylesFromURL(cmd.getStyles(), url);
             else
               insertDocumentFromURL(cmd, url);
 
@@ -992,17 +994,20 @@ public class DocumentCommandInterpreter
     }
 
     /**
-     * Diese Methode importiert alle Styles, die durch url beschriebenen
-     * Fragment definiert sind und ersetzt dabei auch die bereits bestehenden
-     * Formatvorlagen des aktuellen Dokuments.
+     * Diese Methode importiert alle in styles angegebenen Formatvorlagen aus
+     * dem durch url beschriebenen Fragment definiert und ersetzt dabei auch die
+     * bereits bestehenden Formatvorlagen des aktuellen Dokuments.
      * 
+     * @param styles
+     *          ein Set mit den in Kleinbuchstaben geschriebenen Namen der zu
+     *          importierenden styles.
      * @param url
      *          die URL des einzufügenden Textfragments
      * @throws java.io.IOException
      * @throws IOException
      */
-    private void insertStylesFromURL(URL url) throws java.io.IOException,
-        IOException
+    private void insertStylesFromURL(Set styles, URL url)
+        throws java.io.IOException, IOException
     {
       // Workaround für Einfrierfehler von OOo, wenn ressource nicht auflösbar
       // (ich habe nicht geprüft, ob das für insertStylesFromURL notwendig ist,
@@ -1016,9 +1021,21 @@ public class DocumentCommandInterpreter
       // Styles einfügen:
       try
       {
+        UnoProps props = new UnoProps();
+        props.setPropertyValue("OverwriteStyles", Boolean.TRUE);
+        props.setPropertyValue("LoadCellStyles", new Boolean(styles
+            .contains("cellstyles")));
+        props.setPropertyValue("LoadTextStyles", new Boolean(styles
+            .contains("textstyles")));
+        props.setPropertyValue("LoadFrameStyles", new Boolean(styles
+            .contains("framestyles")));
+        props.setPropertyValue("LoadPageStyles", new Boolean(styles
+            .contains("pagestyles")));
+        props.setPropertyValue("LoadNumberingStyles", new Boolean(styles
+            .contains("numberingstyles")));
         XStyleFamiliesSupplier sfs = UNO.XStyleFamiliesSupplier(model.doc);
         XStyleLoader loader = UNO.XStyleLoader(sfs.getStyleFamilies());
-        loader.loadStylesFromURL(urlStr, new PropertyValue[] {});
+        loader.loadStylesFromURL(urlStr, props.getProps());
       }
       catch (NullPointerException e)
       {
