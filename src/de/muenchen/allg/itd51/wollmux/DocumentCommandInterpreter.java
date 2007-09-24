@@ -824,7 +824,7 @@ public class DocumentCommandInterpreter
 
             // styles bzw. fragment einfügen:
             if (cmd.importStylesOnly())
-              insertStylesFromURL(cmd.getStyles(), url);
+              insertStylesFromURL(cmd, cmd.getStyles(), url);
             else
               insertDocumentFromURL(cmd, url);
 
@@ -996,8 +996,14 @@ public class DocumentCommandInterpreter
     /**
      * Diese Methode importiert alle in styles angegebenen Formatvorlagen aus
      * dem durch url beschriebenen Fragment definiert und ersetzt dabei auch die
-     * bereits bestehenden Formatvorlagen des aktuellen Dokuments.
+     * bereits bestehenden Formatvorlagen des aktuellen Dokuments. Nach der
+     * erfolgreichen Einfügung der Formatvorlagen wird der Inhalt des
+     * Dokumentkommandos gelöscht, da ja mit dem Einfügen keine Textinhalte
+     * eingefügt werden.
      * 
+     * @param cmd
+     *          das Dokumentkommando dessen Inhalt nach dem erfolgreichen
+     *          Einfügen gelöscht wird.
      * @param styles
      *          ein Set mit den in Kleinbuchstaben geschriebenen Namen der zu
      *          importierenden styles.
@@ -1006,7 +1012,7 @@ public class DocumentCommandInterpreter
      * @throws java.io.IOException
      * @throws IOException
      */
-    private void insertStylesFromURL(Set styles, URL url)
+    private void insertStylesFromURL(DocumentCommand cmd, Set styles, URL url)
         throws java.io.IOException, IOException
     {
       // Workaround für Einfrierfehler von OOo, wenn ressource nicht auflösbar
@@ -1041,6 +1047,10 @@ public class DocumentCommandInterpreter
       {
         Logger.error(e);
       }
+
+      // Textinhalt löschen
+      XTextRange range = cmd.getTextRange();
+      if (range != null) range.setString("");
     }
 
     /**
