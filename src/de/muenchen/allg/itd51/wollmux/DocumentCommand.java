@@ -854,6 +854,8 @@ abstract public class DocumentCommand
 
     private boolean manualMode = false;
 
+    private boolean stylesMode = false;
+
     public InsertFrag(ConfigThingy wmCmd, Bookmark bookmark)
         throws InvalidCommandException
     {
@@ -886,9 +888,13 @@ abstract public class DocumentCommand
       try
       {
         mode = wmCmd.get("WM").get("MODE").toString();
-        if (mode.equals("manual"))
+        if (mode.equalsIgnoreCase("manual"))
         {
           manualMode = true;
+        }
+        else if (mode.equalsIgnoreCase("styles"))
+        {
+          stylesMode = true;
         }
       }
       catch (NodeNotFoundException e)
@@ -911,6 +917,11 @@ abstract public class DocumentCommand
     public boolean isManualMode()
     {
       return manualMode;
+    }
+
+    public boolean isStylesMode()
+    {
+      return stylesMode;
     }
 
     public int execute(DocumentCommand.Executor visitable)

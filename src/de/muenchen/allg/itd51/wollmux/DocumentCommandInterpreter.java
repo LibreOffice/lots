@@ -54,6 +54,7 @@ import com.sun.star.io.IOException;
 import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.style.XStyle;
 import com.sun.star.style.XStyleFamiliesSupplier;
+import com.sun.star.style.XStyleLoader;
 import com.sun.star.text.XParagraphCursor;
 import com.sun.star.text.XTextContent;
 import com.sun.star.text.XTextCursor;
@@ -819,8 +820,12 @@ public class DocumentCommandInterpreter
                          + url.toExternalForm()
                          + "\" ein.");
 
-            // fragment einfügen:
-            insertDocumentFromURL(cmd, url);
+            // styles bzw. fragment einfügen:
+            if (cmd.isStylesMode())
+              insertStylesFromURL(url);
+            else
+              insertDocumentFromURL(cmd, url);
+
             found = true;
             fillPlaceholders(model.doc, model.getViewCursor(), cmd
                 .getTextRange(), cmd.getArgs());
@@ -983,6 +988,41 @@ public class DocumentCommandInterpreter
         {
           Logger.error(e);
         }
+      }
+    }
+
+    /**
+     * Diese Methode importiert alle Styles, die durch url beschriebenen
+     * Fragment definiert sind und ersetzt dabei auch die bereits bestehenden
+     * Formatvorlagen des aktuellen Dokuments.
+     * 
+     * @param url
+     *          die URL des einzufügenden Textfragments
+     * @throws java.io.IOException
+     * @throws IOException
+     */
+    private void insertStylesFromURL(URL url) throws java.io.IOException,
+        IOException
+    {
+      // Workaround für Einfrierfehler von OOo, wenn ressource nicht auflösbar
+      // (ich habe nicht geprüft, ob das für insertStylesFromURL notwendig ist,
+      // aber schaden kann es bestimmt nicht)
+      WollMuxSingleton.checkURL(url);
+
+      // URL durch den URLTransformer von OOo jagen, damit die URL auch von OOo
+      // verarbeitet werden kann.
+      String urlStr = UNO.getParsedUNOUrl(url.toExternalForm()).Complete;
+
+      // Styles einfügen:
+      try
+      {
+        XStyleFamiliesSupplier sfs = UNO.XStyleFamiliesSupplier(model.doc);
+        XStyleLoader loader = UNO.XStyleLoader(sfs.getStyleFamilies());
+        loader.loadStylesFromURL(urlStr, new PropertyValue[] {});
+      }
+      catch (NullPointerException e)
+      {
+        Logger.error(e);
       }
     }
 
