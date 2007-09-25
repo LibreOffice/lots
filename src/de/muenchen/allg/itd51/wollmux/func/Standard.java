@@ -34,6 +34,8 @@ import java.util.regex.PatternSyntaxException;
  */
 public class Standard
 {
+  private static final Pattern DATE_SYNTAX = Pattern.compile("\\d{1,2}\\.\\d{1,2}\\.\\d{4}");
+  
   /**
    * Liefert immer true.
    * 
@@ -129,6 +131,7 @@ public class Standard
   {
     try
     {
+      if (!DATE_SYNTAX.matcher(datum).matches()) return false;
       Calendar current = Calendar.getInstance();
       String[] s = datum.split("\\.");
       if (s.length != 3) return false;
