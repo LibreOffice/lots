@@ -46,6 +46,7 @@ import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -841,8 +842,22 @@ public class SachleitendeVerfuegungenDruckdialog
   private void printSettings()
   {
     myFrame.setAlwaysOnTop(false);
-    pmodel.showPrinterSetupDialog(false);
-    myFrame.setAlwaysOnTop(true);
+    Thread t = new Thread()
+    {
+      public void run()
+      {
+        pmodel.showPrinterSetupDialog(false);
+        SwingUtilities.invokeLater(new Runnable()
+        {
+          public void run()
+          {
+            if (myFrame != null) myFrame.setAlwaysOnTop(true);
+          }
+        });
+      }
+    };
+    t.setDaemon(false);
+    t.start();
   }
 
   /**
