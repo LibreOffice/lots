@@ -702,7 +702,10 @@ public final class FormFieldFactory
   /**
    * Repräsentiert ein FormField-Objekt, das zunächst kein Formularelement
    * enthält, aber eines vom Typ c,s,s,text,TextField,InputField erzeugt, wenn
-   * mittels focus() oder setFormElementValue(...) darauf zugegriffen wird.
+   * mittels focus() oder setFormElementValue(...) darauf zugegriffen wird und
+   * der zu setzende Wert nicht der Leerstring ist. Wird setFormElementValue()
+   * der Leerstring übergeben, so werden der Inhalt des Bookmarks und das
+   * Formularelement gelöscht.
    * 
    * @author Christoph Lutz (D-III-ITD 5.1)
    */
@@ -716,8 +719,20 @@ public final class FormFieldFactory
 
     public void setFormElementValue(String value)
     {
-      if (inputField == null) createInputField();
-      super.setFormElementValue(value);
+      if (value.length() == 0)
+      {
+        // wenn value leer ist, wird das Formularelement und der Inhalt des
+        // Bookmarks gelöscht.
+        inputField = null;
+        XTextRange range = cmd.createInsertCursor(false);
+        if (range != null) range.setString("");
+      }
+      else
+      {
+        // Erzeuge Formularelement wenn notwendig und setze Wert
+        if (inputField == null) createInputField();
+        super.setFormElementValue(value);
+      }
     }
 
     public void focus()
