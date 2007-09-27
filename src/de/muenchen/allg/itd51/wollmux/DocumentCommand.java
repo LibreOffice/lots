@@ -55,7 +55,7 @@ abstract public class DocumentCommand
   /**
    * Das zu diesem DokumentCommand gehörende Bookmark.
    */
-  protected Bookmark bookmark;
+  private Bookmark bookmark;
 
   // Status-Attribute:
 
@@ -132,12 +132,6 @@ abstract public class DocumentCommand
       Logger.error("Das Dokumentkommando '"
                    + getBookmarkName()
                    + "' darf kein GROUPS-Attribut besitzen.");
-    }
-
-    // Workaround für OOo-Issue #73568
-    if (insertsTextContent() && bookmark.isCollapsed())
-    {
-      bookmark.decollapseBookmark();
     }
   }
 
@@ -279,6 +273,9 @@ abstract public class DocumentCommand
    */
   public XTextCursor createInsertCursor(boolean createInsertMarks)
   {
+    // Workaround für OOo-Issue #73568
+    if (bookmark.isCollapsed()) bookmark.decollapseBookmark();
+
     XTextRange range = bookmark.getTextRange();
 
     if (range != null)

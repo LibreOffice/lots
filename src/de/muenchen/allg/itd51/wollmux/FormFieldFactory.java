@@ -347,55 +347,13 @@ public final class FormFieldFactory
    * ein dazugehöriges FormField und setzt ein passendes Mapping von
    * bookmarkName auf dieses FormField in mapBookmarkNameToFormField
    * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
+   * @author Matthias Benkmann (D-III-ITD 5.1), Christoph Lutz (D-III-ITD 5.1)
    */
   private static void handleNewInputField(String bookmarkName, XNamed bookmark,
       Map mapBookmarkNameToFormField, XTextDocument doc)
   {
-    XTextField field = null;
-
-    Logger.debug2("Erzeuge neues Input-Field für Bookmark \""
-                  + bookmarkName
-                  + "\"");
-    try
-    {
-      XTextRange range = UNO.XTextContent(bookmark).getAnchor();
-      XText text = range.getText();
-      field = UNO.XTextField(UNO.XMultiServiceFactory(doc).createInstance(
-          "com.sun.star.text.TextField.Input"));
-      XTextCursor cursor = text.createTextCursorByRange(range);
-
-      if (cursor != null && field != null)
-      {
-        text.insertTextContent(cursor, field, true);
-        // nach Issue #73568 werden kollabierte Bookmarks nicht automatisch
-        // durch das Einfügen des TextContents expandiert. Folgende Zeilen
-        // sorgen dafür, dass ein früher kollabiertes Bookmarks das neu
-        // eingefügte Textfeld vollständig umschließt.
-        // 
-        // Da inzwischen jedoch die meisten Bookmarks über den FormularMax 4000
-        // erzeugt werden, und dieser keine kollabierten Bookmarks produziert,
-        // ist dieser Code in der aktuellen Praxis nicht relevant und wird daher
-        // auskommentiert.
-        //
-        // text.removeTextContent(UNO.XTextContent(bookmark));
-        // cursor = text.createTextCursorByRange(field.getAnchor());
-        // bookmark = UNO.XNamed(UNO.XMultiServiceFactory(doc).createInstance(
-        // "com.sun.star.text.Bookmark"));
-        // bookmark.setName(bookmarkName);
-        // text.insertTextContent(cursor, UNO.XTextContent(bookmark), true);
-      }
-    }
-    catch (java.lang.Exception e)
-    {
-      Logger.error(e);
-    }
-
-    if (field != null)
-    {
-      FormField formField = new InputFormField(doc, null, field);
-      mapBookmarkNameToFormField.put(bookmarkName, formField);
-    }
+    FormField formField = new DynamicInputFormField(doc, null);
+    mapBookmarkNameToFormField.put(bookmarkName, formField);
   }
 
   private static void handleInputField(XDependentTextField textfield,
@@ -499,9 +457,9 @@ public final class FormFieldFactory
 
   private static abstract class BasicFormField implements FormField
   {
-    private XTextDocument doc;
+    protected XTextDocument doc;
 
-    private InsertFormValue cmd;
+    protected InsertFormValue cmd;
 
     public void setCommand(InsertFormValue cmd)
     {
@@ -712,7 +670,7 @@ public final class FormFieldFactory
    */
   private static class InputFormField extends BasicFormField
   {
-    private XTextField inputField;
+    protected XTextField inputField;
 
     public InputFormField(XTextDocument doc, InsertFormValue cmd,
         XTextField inputField)
@@ -738,6 +696,62 @@ public final class FormFieldFactory
         if (content != null) return content.toString();
       }
       return "";
+    }
+  }
+
+  /**
+   * Repräsentiert ein FormField-Objekt, das zunächst kein Formularelement
+   * enthält, aber eines vom Typ c,s,s,text,TextField,InputField erzeugt, wenn
+   * mittels focus() oder setFormElementValue(...) darauf zugegriffen wird.
+   * 
+   * @author Christoph Lutz (D-III-ITD 5.1)
+   */
+  private static class DynamicInputFormField extends InputFormField
+  {
+
+    public DynamicInputFormField(XTextDocument doc, InsertFormValue cmd)
+    {
+      super(doc, cmd, null);
+    }
+
+    public void setFormElementValue(String value)
+    {
+      if (inputField == null) createInputField();
+      super.setFormElementValue(value);
+    }
+
+    public void focus()
+    {
+      if (inputField == null) createInputField();
+      super.focus();
+    }
+
+    private void createInputField()
+    {
+      if (cmd == null) return;
+
+      String bookmarkName = cmd.getBookmarkName();
+
+      Logger.debug2("Erzeuge neues Input-Field für Bookmark \""
+                    + bookmarkName
+                    + "\"");
+      try
+      {
+        XTextRange range = cmd.createInsertCursor(false);
+        XText text = range.getText();
+        XTextField field = UNO.XTextField(UNO.XMultiServiceFactory(doc)
+            .createInstance("com.sun.star.text.TextField.Input"));
+        XTextCursor cursor = text.createTextCursorByRange(range);
+
+        if (cursor != null && field != null)
+          text.insertTextContent(cursor, field, true);
+
+        inputField = field;
+      }
+      catch (java.lang.Exception e)
+      {
+        Logger.error(e);
+      }
     }
   }
 

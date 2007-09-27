@@ -830,7 +830,7 @@ public class DocumentCommandInterpreter
 
             found = true;
             fillPlaceholders(model.doc, model.getViewCursor(), cmd
-                .getTextRange(), cmd.getArgs());
+                .createInsertCursor(false), cmd.getArgs());
           }
           catch (java.lang.Exception e)
           {
@@ -1049,7 +1049,7 @@ public class DocumentCommandInterpreter
       }
 
       // Textinhalt löschen
-      XTextRange range = cmd.getTextRange();
+      XTextRange range = cmd.createInsertCursor(false);
       if (range != null) range.setString("");
     }
 
@@ -1365,8 +1365,7 @@ public class DocumentCommandInterpreter
       XTextRange range = cmd.getTextRange();
       if (range != null)
       {
-        UnoService cursor = new UnoService(range.getText()
-            .createTextCursorByRange(range));
+        UnoService cursor = new UnoService(range);
         updateTextFieldsRecursive(cursor);
       }
       cmd.markDone(!mux.isDebugMode());
