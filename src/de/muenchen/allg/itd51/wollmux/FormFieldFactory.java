@@ -721,18 +721,20 @@ public final class FormFieldFactory
     {
       if (value.length() == 0)
       {
-        // wenn value leer ist, wird das Formularelement und der Inhalt des
-        // Bookmarks gelöscht.
-        inputField = null;
-        XTextRange range = cmd.createInsertCursor(false);
-        if (range != null) range.setString("");
+        // wenn kein inputField vorhanden ist, so wird der Inhalt des Bookmarks
+        // gelöscht.
+        if (inputField == null)
+        {
+          XTextRange range = cmd.createInsertCursor(false);
+          if (range != null) range.setString("");
+        }
       }
       else
       {
-        // Erzeuge Formularelement wenn notwendig und setze Wert
+        // Erzeuge Formularelement wenn notwendig
         if (inputField == null) createInputField();
-        super.setFormElementValue(value);
       }
+      super.setFormElementValue(value);
     }
 
     public void focus()
