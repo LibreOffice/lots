@@ -971,8 +971,8 @@ public class WollMuxEventHandler
 
       try
       {
-        // Dokumentkommandos setType, setPrintFunction, all, draftOnly und
-        // notInOriginal auswerten.
+        // Globale Dokumentkommandos wie z.B. setType, setPrintFunction,
+        // insertFormValue, ... auswerten.
         dci.scanGlobalDocumentCommands();
 
         // Bei Vorlagen: Ausführung der Dokumentkommandos
@@ -996,9 +996,6 @@ public class WollMuxEventHandler
           catch (java.lang.Exception e)
           {
           }
-
-          // Ausführung der Dokumentkommandos des Formularsystems
-          dci.executeFormCommands();
 
           // FormGUI starten, falls es kein Teil eines Multiform-Dokuments ist.
           if (!model.isPartOfMultiformDocument())

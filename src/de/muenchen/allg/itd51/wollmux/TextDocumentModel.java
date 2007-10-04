@@ -42,6 +42,7 @@ import com.sun.star.beans.XPropertyChangeListener;
 import com.sun.star.beans.XPropertySet;
 import com.sun.star.beans.XPropertySetInfo;
 import com.sun.star.beans.XVetoableChangeListener;
+import com.sun.star.container.NoSuchElementException;
 import com.sun.star.container.XEnumeration;
 import com.sun.star.container.XNameAccess;
 import com.sun.star.frame.FrameSearchFlag;
@@ -232,9 +233,8 @@ public class TextDocumentModel
   private XPrintModel printModel;
 
   /**
-   * Enthält die Gesamtbeschreibung alle Formular-Abschnitte, die in den
-   * persistenten Daten bzw. in den mit add hinzugefügten Form-Kommandos
-   * gefunden wurden.
+   * Enthält die Formularbeschreibung des Dokuments oder null, wenn die
+   * Formularbeschreibung noch nicht eingelesen wurde.
    */
   private ConfigThingy formularConf;
 
@@ -296,7 +296,7 @@ public class TextDocumentModel
     this.closeListener = null;
     this.printFunctionName = null;
     this.printSettingsDone = false;
-    this.formularConf = new ConfigThingy("WM");
+    this.formularConf = null;
     this.formFieldValues = new HashMap();
     this.invisibleGroups = new HashSet();
     this.overrideFragMap = new HashMap();
@@ -329,7 +329,6 @@ public class TextDocumentModel
     this.persistentData = new PersistentData(doc);
     this.type = persistentData.getData(DATA_ID_SETTYPE);
     this.printFunctionName = persistentData.getData(DATA_ID_PRINTFUNCTION);
-    parseFormDescription(persistentData.getData(DATA_ID_FORMULARBESCHREIBUNG));
     parseFormValues(persistentData.getData(DATA_ID_FORMULARWERTE));
 
     // Sicherstellen, dass die Schaltflächen der Symbolleisten aktiviert werden:
@@ -373,11 +372,15 @@ public class TextDocumentModel
    * der Form "WM( Formular(...) )" sein muss und fügt diese der
    * Gesamtbeschreibung hinzu.
    * 
+   * @param formularConf
+   *          Wurzelknoten (WM) dem die neue Formularbeschreibung hinzugefügt
+   *          werden soll.
    * @param value
    *          darf null sein und wird in diesem Fall ignoriert, darf aber kein
    *          leerer String sein, sonst Fehler.
    */
-  private void parseFormDescription(String value)
+  private static void parseFormDescription(ConfigThingy formularConf,
+      String value)
   {
     if (value == null) return;
 
@@ -825,7 +828,7 @@ public class TextDocumentModel
    */
   public boolean hasFormDescriptor()
   {
-    return !(formularConf.count() == 0);
+    return getFormDescription().count() != 0;
   }
 
   /**
@@ -1124,12 +1127,21 @@ public class TextDocumentModel
   }
 
   /**
-   * Liefert die aktuelle Formularbeschreibung.
+   * Liefert die aktuelle Formularbeschreibung; Wurde die Formularbeschreibung
+   * bis jetzt noch nicht eingelesen, so wird sie spätestens jetzt eingelesen.
    * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * @author Matthias Benkmann, Christoph Lutz (D-III-ITD 5.1)
    */
   public ConfigThingy getFormDescription()
   {
+    if (formularConf == null)
+    {
+      Logger.debug("Einlesen der Formularbeschreibung von " + this);
+      formularConf = new ConfigThingy("WM");
+      parseFormDescription(formularConf, persistentData
+          .getData(DATA_ID_FORMULARBESCHREIBUNG));
+    }
+
     return formularConf;
   }
 
@@ -1655,8 +1667,9 @@ public class TextDocumentModel
   }
 
   /**
-   * Die Methode fügt die Formularbeschreibung, die unterhalb der Notiz des
-   * WM(CMD'Form')-Kommandos gefunden wird zur Gesamtformularbeschreibung hinzu.
+   * Die Methode kopiert die Formularbeschreibung aus der Notiz von formCmd in
+   * die persistente Formularbeschreibung, wenn nicht bereits eine
+   * Formularbeschreibung existiert.
    * 
    * @param formCmd
    *          Das formCmd, das die Notzi mit der hinzuzufügenden
@@ -1666,13 +1679,15 @@ public class TextDocumentModel
    *           Formularbeschreibung ist nicht vollständig oder kann nicht
    *           geparst werden.
    */
-  public void addFormCommand(DocumentCommand.Form formCmd)
+  public void setFormCommand(DocumentCommand.Form formCmd)
       throws ConfigurationErrorException
   {
+    if (hasFormDescriptor()) return;
+
     XTextRange range = formCmd.getTextRange();
 
-    Object annotationField = WollMuxSingleton
-        .findAnnotationFieldRecursive(range);
+    XTextContent annotationField = UNO.XTextContent(WollMuxSingleton
+        .findAnnotationFieldRecursive(range));
     if (annotationField == null)
       throw new ConfigurationErrorException(
           "Die Notiz mit der Formularbeschreibung fehlt.");
@@ -1682,7 +1697,19 @@ public class TextDocumentModel
       throw new ConfigurationErrorException(
           "Die Notiz mit der Formularbeschreibung kann nicht gelesen werden.");
 
-    parseFormDescription(content.toString());
+    // Formularbeschreibung übernehmen und persistent speichern:
+    parseFormDescription(getFormDescription(), content.toString());
+    setFormDescription(getFormDescription());
+
+    // Notiz löschen
+    try
+    {
+      range.getText().removeTextContent(annotationField);
+    }
+    catch (NoSuchElementException e)
+    {
+      Logger.error(e);
+    }
   }
 
   /**

@@ -103,13 +103,6 @@ public class DocumentCommandInterpreter
   private WollMuxSingleton mux;
 
   /**
-   * Der FormScanner wird sowohl bei Vorlagen als auch bei Formulardokumenten
-   * gestartet. Damit der FormScanner bei Formularvorlagen nicht zweimal
-   * aufgerufen wird, wird ein einmal bearbeiteter FormScanner hier abgelgt.
-   */
-  private FormScanner formScanner;
-
-  /**
    * Der Konstruktor erzeugt einen neuen Kommandointerpreter, der alle
    * Dokumentkommandos im übergebenen Dokument xDoc scannen und interpretieren
    * kann.
@@ -127,7 +120,6 @@ public class DocumentCommandInterpreter
   {
     this.model = model;
     this.mux = mux;
-    this.formScanner = null;
   }
 
   /**
@@ -137,10 +129,14 @@ public class DocumentCommandInterpreter
    */
   public void scanGlobalDocumentCommands()
   {
-    Logger.debug("scanDocumentSettings");
+    Logger.debug("scanGlobalDocumentCommands");
     boolean modified = model.getDocumentModified();
 
-    new GlobalDocumentCommandsScanner().execute(model.getDocumentCommands());
+    GlobalDocumentCommandsScanner s = new GlobalDocumentCommandsScanner();
+    s.execute(model.getDocumentCommands());
+
+    model.setIDToFormFields(s.idToFormFields);
+    model.collectNonWollMuxFormFields();
 
     model.setDocumentModified(modified);
   }
@@ -203,14 +199,6 @@ public class DocumentCommandInterpreter
     // da hier bookmarks entfernt werden, muss der Baum upgedatet werden
     model.getDocumentCommands().update();
 
-    // Scannen aller für das Formular relevanten Informationen:
-    if (formScanner == null) formScanner = new FormScanner();
-    errors += formScanner.execute(model.getDocumentCommands());
-    model.setIDToFormFields(formScanner.idToFormFields);
-
-    // Nicht vom formScanner erfasste Formularfelder erfassen
-    model.collectNonWollMuxFormFields();
-
     // Jetzt wird der Dokumenttyp formDocument gesetzt, um das Dokument als
     // Formulardokument auszuzeichnen.
     if (model.hasFormDescriptor()) model.setType("formDocument");
@@ -220,42 +208,6 @@ public class DocumentCommandInterpreter
     model.setDocumentModified(modified);
 
     // ggf. eine WMCommandsFailedException werfen:
-    if (errors != 0)
-    {
-      throw new WMCommandsFailedException(
-          "Die verwendete Vorlage enthält "
-              + ((errors == 1) ? "einen" : "" + errors)
-              + " Fehler.\n\n"
-              + "Bitte kontaktieren Sie Ihre Systemadministration.");
-    }
-  }
-
-  /**
-   * Diese Methode führt alle Kommandos aus, im Zusammenhang mit der
-   * Formularbearbeitung ausgeführt werden müssen.
-   * 
-   * @throws WMCommandsFailedException
-   */
-  public void executeFormCommands() throws WMCommandsFailedException
-  {
-    Logger.debug("executeFormCommands");
-    int errors = 0;
-
-    // Scannen aller für das Formular relevanten Informationen:
-    if (formScanner == null)
-    {
-      boolean modified = model.getDocumentModified();
-
-      formScanner = new FormScanner();
-      errors += formScanner.execute(model.getDocumentCommands());
-
-      model.setIDToFormFields(formScanner.idToFormFields);
-
-      // Nicht vom formScanner erfasste Formularfelder erfassen
-      model.collectNonWollMuxFormFields();
-
-      model.setDocumentModified(modified);
-    }
     if (errors != 0)
     {
       throw new WMCommandsFailedException(
@@ -378,15 +330,23 @@ public class DocumentCommandInterpreter
    */
   private class GlobalDocumentCommandsScanner extends DocumentCommands.Executor
   {
+    public HashMap idToFormFields = new HashMap();
+
+    private Map bookmarkNameToFormField = new HashMap();
+
     public int execute(DocumentCommands commands)
     {
       return executeAll(commands);
     }
 
+    /**
+     * Legacy-Methode: Stellt sicher, dass die im veralteten Dokumentkommando
+     * SetPrintFunction gesetzten Werte in die persistenten Daten des Dokuments
+     * übertragen werden und das Dokumentkommando danach gelöscht wird.
+     */
     public int executeCommand(SetPrintFunction cmd)
     {
       model.setPrintFunction(cmd);
-
       cmd.markDone(true);
       return 0;
     }
@@ -401,6 +361,47 @@ public class DocumentCommandInterpreter
           .equalsIgnoreCase("templateTemplate"))) cmd.markDone(true);
       return 0;
     }
+
+    public int executeCommand(InsertFormValue cmd)
+    {
+      // idToFormFields aufbauen
+      String id = cmd.getID();
+      LinkedList fields;
+      if (idToFormFields.containsKey(id))
+      {
+        fields = (LinkedList) idToFormFields.get(id);
+      }
+      else
+      {
+        fields = new LinkedList();
+        idToFormFields.put(id, fields);
+      }
+      FormField field = FormFieldFactory.createFormField(
+          model.doc,
+          cmd,
+          bookmarkNameToFormField);
+
+      if (field != null)
+      {
+        field.setCommand(cmd);
+
+        // sortiertes Hinzufügen des neuen FormFields zur Liste:
+        ListIterator iter = fields.listIterator();
+        while (iter.hasNext())
+        {
+          FormField fieldA = (FormField) iter.next();
+          if (field.compareTo(fieldA) < 0)
+          {
+            iter.previous();
+            break;
+          }
+        }
+        iter.add(field);
+      }
+
+      return 0;
+    }
+
   }
 
   /**
@@ -1240,6 +1241,29 @@ public class DocumentCommandInterpreter
     }
 
     /**
+     * Besitzt das Dokument ein (inzwischen veraltetes) Form-Dokumentkommando,
+     * so wird dieses in die persistenten Daten des Dokuments kopiert und die
+     * zugehörige Notiz gelöscht, wenn nicht bereits eine Formularbeschreibung
+     * dort existiert.
+     */
+    public int executeCommand(DocumentCommand.Form cmd)
+    {
+      cmd.setErrorState(false);
+      try
+      {
+        model.setFormCommand(cmd);
+      }
+      catch (ConfigurationErrorException e)
+      {
+        insertErrorField(cmd, e);
+        cmd.setErrorState(true);
+        return 1;
+      }
+      cmd.markDone(!mux.isDebugMode());
+      return 0;
+    }
+
+    /**
      * Diese Methode bearbeitet ein InvalidCommand und fügt ein Fehlerfeld an
      * der Stelle des Dokumentkommandos ein.
      */
@@ -1416,93 +1440,6 @@ public class DocumentCommandInterpreter
         {
         }
       }
-    }
-  }
-
-  /**
-   * Der FormScanner erstellt alle Datenstrukturen, die für die Ausführung der
-   * FormGUI notwendig sind.
-   */
-  private class FormScanner extends DocumentCommands.Executor
-  {
-    public HashMap idToFormFields = new HashMap();
-
-    private Map bookmarkNameToFormField = new HashMap();
-
-    /**
-     * Ausführung starten
-     */
-    private int execute(DocumentCommands commands)
-    {
-      return executeAll(commands);
-    }
-
-    /**
-     * Hinter einem Form-Kommando verbirgt sich eine Notiz, die das Formular
-     * beschreibt, das in der FormularGUI angezeigt werden soll. Das Kommando
-     * executeForm sammelt alle solchen Formularbeschreibungen im
-     * formDescriptor. Enthält der formDescriptor mehr als einen Eintrag, wird
-     * nach dem interpret-Vorgang die FormGUI gestartet.
-     */
-    public int executeCommand(DocumentCommand.Form cmd)
-    {
-      cmd.setErrorState(false);
-      try
-      {
-        model.addFormCommand(cmd);
-      }
-      catch (ConfigurationErrorException e)
-      {
-        insertErrorField(cmd, e);
-        cmd.setErrorState(true);
-        return 1;
-      }
-      return 0;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see de.muenchen.allg.itd51.wollmux.DocumentCommand.Executor#executeCommand(de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertFormValue)
-     */
-    public int executeCommand(InsertFormValue cmd)
-    {
-      // idToFormFields aufbauen
-      String id = cmd.getID();
-      LinkedList fields;
-      if (idToFormFields.containsKey(id))
-      {
-        fields = (LinkedList) idToFormFields.get(id);
-      }
-      else
-      {
-        fields = new LinkedList();
-        idToFormFields.put(id, fields);
-      }
-      FormField field = FormFieldFactory.createFormField(
-          model.doc,
-          cmd,
-          bookmarkNameToFormField);
-
-      if (field != null)
-      {
-        field.setCommand(cmd);
-
-        // sortiertes Hinzufügen des neuen FormFields zur Liste:
-        ListIterator iter = fields.listIterator();
-        while (iter.hasNext())
-        {
-          FormField fieldA = (FormField) iter.next();
-          if (field.compareTo(fieldA) < 0)
-          {
-            iter.previous();
-            break;
-          }
-        }
-        iter.add(field);
-      }
-
-      return 0;
     }
   }
 
