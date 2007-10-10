@@ -30,6 +30,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Vector;
 
@@ -867,12 +868,50 @@ public class SachleitendeVerfuegungenDruckdialog
    */
   private void printAll()
   {
-    if (getAllElementCount() > 0)
+    int size = verfuegungspunkte.size();
+    HashMap multidata = new HashMap();
+
+    // Arrays mit den Druckdaten aller Verfügungspunkte aufbauen:
+    for (int verfPunkt = 1; verfPunkt <= size; ++verfPunkt)
     {
-      int size = verfuegungspunkte.size();
-      for (int verfPunkt = 1; verfPunkt <= size; ++verfPunkt)
-        printElement(verfPunkt);
+      HashMap data = getPrintDataForElement(verfPunkt);
+      for (Iterator iter = data.keySet().iterator(); iter.hasNext();)
+      {
+        String key = (String) iter.next();
+        Object[] arr = (Object[]) multidata.get(key);
+        if (arr == null)
+        {
+          arr = new Object[size];
+          multidata.put(key, arr);
+        }
+        arr[verfPunkt - 1] = data.get(key);
+      }
     }
+
+    // Properties für das PrintModel setzten:
+    for (Iterator iter = multidata.keySet().iterator(); iter.hasNext();)
+    {
+      String key = (String) iter.next();
+      try
+      {
+        pmodel.setPropertyValue(key, multidata.get(key));
+      }
+      catch (java.lang.Exception e)
+      {
+        Logger.error(e);
+      }
+    }
+
+    // Drucken starten
+    myFrame.setAlwaysOnTop(false);
+    new Thread()
+    {
+      public void run()
+      {
+        pmodel.showPrinterSetupDialog(true);
+        pmodel.printWithProps();
+      }
+    }.start();
     abort();
   }
 
@@ -901,7 +940,45 @@ public class SachleitendeVerfuegungenDruckdialog
    * 
    * @author christoph.lutz
    */
-  private void printElement(int verfPunkt)
+  private void printElement(final int verfPunkt)
+  {
+    // Properties für das PrintModel setzten:
+    HashMap data = getPrintDataForElement(verfPunkt);
+    for (Iterator iter = data.keySet().iterator(); iter.hasNext();)
+    {
+      String key = (String) iter.next();
+      try
+      {
+        pmodel.setPropertyValue(key, new Object[] { data.get(key) });
+      }
+      catch (java.lang.Exception e)
+      {
+        Logger.error(e);
+      }
+    }
+
+    // Drucken starten
+    myFrame.setAlwaysOnTop(false);
+    new Thread()
+    {
+      public void run()
+      {
+        pmodel.showPrinterSetupDialog(true);
+        pmodel.printWithProps();
+      }
+    }.start();
+  }
+
+  /**
+   * Ermittelt die Druckdaten (Verfügungspunkt, Anzahl-Ausfertigungen,
+   * Druckbereich, ...) zum Verfügungspunkt verfPunkt und liefert sie in einer
+   * HashMap zurück in der die Schlüsselnamen den Properties und die Werte den
+   * Objekten entsprechen, die später dem XPrintModel zum Drucken übergeben
+   * werden.
+   * 
+   * @author christoph.lutz
+   */
+  private HashMap getPrintDataForElement(int verfPunkt)
   {
     // Anzahl der Kopien bestimmen:
     int numberOfCopies = 0;
@@ -919,27 +996,25 @@ public class SachleitendeVerfuegungenDruckdialog
     int idx = pageRangeComboBoxes[verfPunkt - 1].getSelectedIndex();
     String pageRangeValue = pageRangeComboBoxes[verfPunkt - 1]
         .getSelectedItem().toString();
-    short pageRangeType = TextDocumentModel.PAGE_RANGE_TYPE_MANUAL;
-    if (idx >= 0) pageRangeType = pageRangeDescriptions[idx].type;
+    short pageRangeType;
+    if (idx >= 0)
+      pageRangeType = pageRangeDescriptions[idx].type;
+    else
+      pageRangeType = TextDocumentModel.PAGE_RANGE_TYPE_MANUAL;
 
-    if (numberOfCopies > 0)
-    {
-      // PrintSetup-Dialog beim ersten mal anzeigen:
-      myFrame.setAlwaysOnTop(false);
-      pmodel.showPrinterSetupDialog(true);
-      myFrame.setAlwaysOnTop(true);
+    boolean isDraft = (verfPunkt == verfuegungspunkte.size());
+    boolean isOriginal = (verfPunkt == 1);
 
-      boolean isDraft = (verfPunkt == verfuegungspunkte.size());
-      boolean isOriginal = (verfPunkt == 1);
+    HashMap data = new HashMap();
 
-      pmodel.printVerfuegungspunkt(
-          (short) verfPunkt,
-          (short) numberOfCopies,
-          isDraft,
-          isOriginal,
-          pageRangeType,
-          pageRangeValue);
-    }
+    data.put("SLV_verfPunkte", new Short((short) verfPunkt));
+    data.put("SLV_isDraftFlags", new Boolean(isDraft));
+    data.put("SLV_isOriginalFlags", new Boolean(isOriginal));
+    data.put("SLV_PageRangeTypes", new Short(pageRangeType));
+    data.put("SLV_PageRangeValues", pageRangeValue);
+    data.put("SLV_CopyCounts", new Short((short) numberOfCopies));
+
+    return data;
   }
 
   /**

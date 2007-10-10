@@ -346,7 +346,7 @@ public class DocumentCommandInterpreter
      */
     public int executeCommand(SetPrintFunction cmd)
     {
-      model.setPrintFunction(cmd);
+      model.addPrintFunction(cmd.getFunctionName());
       cmd.markDone(true);
       return 0;
     }
@@ -860,8 +860,8 @@ public class DocumentCommandInterpreter
         else
         {
           insertErrorField(cmd, e);
-          Logger.error(e);
         }
+        Logger.error(e);
         cmd.setErrorState(true);
         return 1;
       }

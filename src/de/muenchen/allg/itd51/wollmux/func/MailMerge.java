@@ -229,7 +229,7 @@ public class MailMerge
         
         if (value != null) pmod.setFormValue(column, value);
       }
-      pmod.print((short)1);
+      pmod.printWithProps();
     }
     
     progress.close();
@@ -1209,8 +1209,9 @@ public class MailMerge
        System.exit(1);
      }
      
-     XPrintModel pmod = new TextDocumentModel(doc).getPrintModel();
-     superMailMerge(pmod);
+     XPrintModel pmod = new TextDocumentModel(doc).createPrintModel(false);
+     pmod.usePrintFunction("Seriendruck");
+     pmod.printWithProps();
      
      System.exit(0);
   }

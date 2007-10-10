@@ -98,8 +98,6 @@ import de.muenchen.allg.itd51.wollmux.dialog.Dialog;
 import de.muenchen.allg.itd51.wollmux.dialog.PersoenlicheAbsenderlisteVerwalten;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
-import de.muenchen.allg.itd51.wollmux.func.PrintFunction;
-import de.muenchen.allg.itd51.wollmux.func.StandardPrint;
 
 /**
  * Ermöglicht die Einstellung neuer WollMuxEvents in die EventQueue.
@@ -1598,62 +1596,6 @@ public class WollMuxEventHandler
   // *******************************************************************************************
 
   /**
-   * Erzeugt ein neues WollMuxEvent, das die Druckfunktion zum TextDokument doc
-   * auf functionName setzt.
-   * 
-   * Kann derzeit über den XWollMux-Service aufgerufen werden und steht damit
-   * als Teil der Komfortdruckfunktionen auch in externen Routinen (z.B.
-   * Basic-Makros, ...) zur Verfügung.
-   * 
-   * @param doc
-   *          Das TextDokument, zu dem die Druckfunktion gesetzt werden soll.
-   * @param functionName
-   *          der Name der Druckfunktion. Der Name muss ein gültiger
-   *          Funktionsbezeichner sein und in einem Abschnitt "Druckfunktionen"
-   *          in der wollmux.conf definiert sein.
-   */
-  public static void handleSetPrintFunction(XTextDocument doc,
-      String functionName)
-  {
-    handle(new OnSetPrintFunction(doc, functionName));
-  }
-
-  private static class OnSetPrintFunction extends BasicEvent
-  {
-    private String functionName;
-
-    private XTextDocument doc;
-
-    public OnSetPrintFunction(XTextDocument doc, String functionName)
-    {
-      this.functionName = functionName;
-      this.doc = doc;
-    }
-
-    protected void doit()
-    {
-      if (doc != null)
-      {
-        TextDocumentModel model = WollMuxSingleton.getInstance()
-            .getTextDocumentModel(doc);
-        model.setPrintFunction(functionName);
-      }
-    }
-
-    public String toString()
-    {
-      return this.getClass().getSimpleName()
-             + "(#"
-             + doc.hashCode()
-             + ", '"
-             + functionName
-             + "')";
-    }
-  }
-
-  // *******************************************************************************************
-
-  /**
    * Erzeugt ein neues WollMuxEvent, welches dafür sorgt, dass alle
    * Formularfelder Dokument auf den neuen Wert gesetzt werden. Bei
    * Formularfeldern mit TRAFO-Funktion wird die Transformation entsprechend
@@ -2617,7 +2559,7 @@ public class WollMuxEventHandler
    * Das Event wird ausgelöst, wenn der registrierte WollMuxDispatchInterceptor
    * eines Dokuments eine entsprechende Nachricht bekommt.
    */
-  public static void handleExecutePrintFunction(TextDocumentModel model)
+  public static void handleExecutePrintFunctions(TextDocumentModel model)
   {
     handle(new OnExecutePrintFunction(model));
   }
@@ -2633,48 +2575,41 @@ public class WollMuxEventHandler
 
     protected void doit() throws WollMuxFehlerException
     {
+      // Prüfen, ob alle gesetzten Druckfunktionen im aktuellen Kontext noch
+      // Sinn machen:
+      checkPrintPreconditions(model);
+      stabilize();
 
-      PrintFunction printFunc = null;
-      String printFunctionName = model.getPrintFunctionName();
-      if (printFunctionName != null)
-      {
-        printFunc = WollMuxSingleton.getInstance().getGlobalPrintFunctions()
-            .get(printFunctionName);
-        if (printFunc == null)
-          Logger.error("Druckfunktion '"
-                       + printFunctionName
-                       + "' nicht definiert.");
-      }
-      else
-        Logger.error("Dem Textdokument ist keine Druckfunktion zugeordnet!");
-      if (printFunc == null) return;
+      // Die im Dokument gesetzten Druckfunktionen ausführen:
+      XPrintModel pmod = model.createPrintModel(true);
+      pmod.printWithProps();
+    }
 
-      // TODO: sollte evtl. einmal durch eine allgemeine Funktion
-      // checkPreconditions() ersetzt werden, die prüft ob die Vorbedingungen
-      // für eine Druckfunktion noch erfüllt sind und andernfalls die Funktion
-      // löscht. Das erfordert aber die Möglichkeit, Vorbedingungen zu
-      // definieren und Druckfunktionen zuzuordnen...
-      //
+    /**
+     * Es kann sein, dass zum Zeitpunkt des Drucken-Aufrufs eine Druckfunktion
+     * gesetzt hat, die in der aktuellen Situation nicht mehr sinnvoll ist;
+     * Dieser Umstand wird in checkPreconditons geprüft und die betroffene
+     * Druckfunktion ggf. aus der Liste der Druckfunktionen entfernt.
+     * 
+     * @param printFunctions
+     *          Menge der aktuell gesetzten Druckfunktionen.
+     * 
+     * @author Christoph Lutz (D-III-ITD-5.1)
+     */
+    protected static void checkPrintPreconditions(TextDocumentModel model)
+    {
+      Set printFunctions = model.getPrintFunctions();
+
       // Ziffernanpassung der Sachleitenden Verfügungen durlaufen lassen, um zu
       // erkennen, ob Verfügungspunkte manuell aus dem Dokument gelöscht
       // wurden ohne die entsprechenden Knöpfe zum Einfügen/Entfernen von
       // Ziffern zu drücken.
-      if (SachleitendeVerfuegung.PRINT_FUNCTION_NAME.equals(printFunctionName))
+      if (printFunctions.contains(SachleitendeVerfuegung.PRINT_FUNCTION_NAME))
       {
         SachleitendeVerfuegung.ziffernAnpassen(model);
-        stabilize();
-        // hat ZiffernAnpassen die PrintFunction verändert?
-        if (!SachleitendeVerfuegung.PRINT_FUNCTION_NAME.equals(model
-            .getPrintFunctionName()))
-        {
-          // dann einen neuen Dispatch absetzen und beenden:
-          UNO.dispatch(model.doc, ".uno:Print");
-          return;
-        }
       }
 
-      // Druckfunktion ausführen:
-      printFunc.invoke(model.getPrintModel());
+      // ...Platz für weitere Prüfungen.....
     }
 
     public String toString()
@@ -2720,11 +2655,9 @@ public class WollMuxEventHandler
     {
       TextDocumentModel model = WollMuxSingleton.getInstance()
           .getTextDocumentModel(doc);
-      Integer cc = (Integer) props.get("CopyCount");
-      if (cc == null) cc = new Integer(1);
       try
       {
-        model.print(cc.shortValue());
+        model.printWithProps(props);
       }
       catch (PrintFailedException e)
       {
@@ -3817,33 +3750,36 @@ public class WollMuxEventHandler
    * "Extras->Seriendruck (WollMux)" die dispatch-url wollmux:Seriendruck
    * abgesetzt wurde.
    */
-  public static void handleSeriendruck(TextDocumentModel model)
+  public static void handleSeriendruck(TextDocumentModel model,
+      boolean useDocPrintFunctions)
   {
-    handle(new OnSeriendruck(model));
+    handle(new OnSeriendruck(model, useDocPrintFunctions));
   }
 
   private static class OnSeriendruck extends BasicEvent
   {
     private TextDocumentModel model;
 
-    public OnSeriendruck(TextDocumentModel model)
+    boolean useDocPrintFunctions;
+
+    public OnSeriendruck(TextDocumentModel model,
+        boolean useDocumentPrintFunctions)
     {
       this.model = model;
+      this.useDocPrintFunctions = useDocumentPrintFunctions;
     }
 
     protected void doit() throws WollMuxFehlerException
     {
-      // muss in eigenem Thread laufen, da sich das PrintModel bereits mit dem
-      // WollMux-Eventhandler synchronisiert.
-      final XPrintModel pmod = model.getPrintModel();
-      Thread t = new Thread(new Runnable()
+      if (useDocPrintFunctions)
       {
-        public void run()
-        {
-          StandardPrint.superMailMerge(pmod);
-        }
-      });
-      t.start();
+        OnExecutePrintFunction.checkPrintPreconditions(model);
+        stabilize();
+      }
+
+      final XPrintModel pmod = model.createPrintModel(useDocPrintFunctions);
+      pmod.usePrintFunction("Seriendruck");
+      pmod.printWithProps();
     }
 
     public String toString()
@@ -3890,7 +3826,7 @@ public class WollMuxEventHandler
 
     protected void doit() throws WollMuxFehlerException
     {
-      boolean hasPrintFunction = model.getPrintFunctionName() != null;
+      boolean hasPrintFunction = model.getPrintFunctions().size() > 0;
       boolean hasMailMergeFields = model.hasMailMergeFields();
 
       if (!hasMailMergeFields && !hasPrintFunction)
@@ -3901,7 +3837,7 @@ public class WollMuxEventHandler
       else if (!hasMailMergeFields && hasPrintFunction)
       {
         // Druckfunktion aufrufen
-        handleExecutePrintFunction(model);
+        handleExecutePrintFunctions(model);
       }
       else if (hasMailMergeFields && !hasPrintFunction)
       {
@@ -3911,9 +3847,7 @@ public class WollMuxEventHandler
       }
       else if (hasMailMergeFields && hasPrintFunction)
       {
-        // TODO: hier wird später die kombinierte Seriendruck+Printfunction
-        // Funktionalität integriert.
-        if (!mailmergeWrapperDialog()) handleExecutePrintFunction(model);
+        handleSeriendruck(model, true);
       }
     }
 
@@ -3944,7 +3878,7 @@ public class WollMuxEventHandler
 
       if (SERIENBRIEF_WOLLMUX.equals(value))
       {
-        handleSeriendruck(model);
+        handleSeriendruck(model, false);
         return true;
       }
 

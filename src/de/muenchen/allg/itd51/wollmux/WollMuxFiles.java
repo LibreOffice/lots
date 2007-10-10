@@ -163,6 +163,12 @@ public class WollMuxFiles
    */
   private static final String defaultWollmuxConf = null; // "# %include
 
+  /**
+   * Druckfunktionen, bei denen kein ORDER-Attribut angegeben ist, werden
+   * automatisch mit diesem ORDER-Wert versehen.
+   */
+  private static final String DEFAULT_PRINTFUNCTION_ORDER_VALUE = "100";
+
   // \"<Entfernen Sie
   // das # am Anfang der
   // Zeile und tragen
@@ -769,7 +775,35 @@ public class WollMuxFiles
             continue;
           }
 
-          PrintFunction func = new PrintFunction(extConf);
+          String orderStr = DEFAULT_PRINTFUNCTION_ORDER_VALUE;
+          int order;
+          try
+          {
+            orderStr = funcConf.get("ORDER").toString();
+          }
+          catch (NodeNotFoundException e)
+          {
+            Logger
+                .debug("Druckfunktion '"
+                       + name
+                       + "' enthält keinen Schlüssel ORDER. Verwende Standard-Wert "
+                       + DEFAULT_PRINTFUNCTION_ORDER_VALUE);
+          }
+          try
+          {
+            order = new Integer(orderStr).intValue();
+          }
+          catch (NumberFormatException e)
+          {
+            Logger.error("Der Wert '"
+                         + orderStr
+                         + "' des Schlüssels ORDER in der Druckfunktion '"
+                         + name
+                         + "' ist ungültig.", e);
+            continue;
+          }
+
+          PrintFunction func = new PrintFunction(extConf, name, order);
 
           funcs.add(name, func);
         }

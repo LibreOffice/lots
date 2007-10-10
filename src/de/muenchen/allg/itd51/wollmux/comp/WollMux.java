@@ -262,25 +262,6 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
   }
 
   /**
-   * Diese Methode setzt die zugehörige Druckfunktion des aktuellen
-   * Vordergrunddokuments auf functionName, der ein gültiger Funktionsbezeichner
-   * sein muss oder löscht eine bereits gesetzte Druckfunktion, wenn
-   * functionName der Leerstring ist.
-   * 
-   * @param functionName
-   *          der Name der Druckfunktion (zum setzen) oder der Leerstring (zum
-   *          löschen). Der zu setzende Name muss ein gültiger
-   *          Funktionsbezeichner sein und in einem Abschnitt "Druckfunktionen"
-   *          in der wollmux.conf definiert sein.
-   */
-  public void setPrintFunction(String functionName)
-  {
-    XTextDocument doc = UNO.XTextDocument(UNO.desktop.getCurrentComponent());
-    if (doc != null)
-      WollMuxEventHandler.handleSetPrintFunction(doc, functionName);
-  }
-
-  /**
    * Diese Methode liefert den Wert zur Datenbankspalte dbSpalte, der dem Wert
    * entspricht, den das Dokumentkommando WM(CMD'insertValue' DB_SPALTE'<dbSpalte>')
    * in das Dokument einfügen würde, oder den Leerstring "" wenn dieser Wert

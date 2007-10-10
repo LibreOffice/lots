@@ -313,7 +313,7 @@ public class DispatchHandler
     {
       public void dispatch(String arg, PropertyValue[] props)
       {
-        WollMuxEventHandler.handleSeriendruck(model);
+        WollMuxEventHandler.handleSeriendruck(model, false);
       }
     });
 

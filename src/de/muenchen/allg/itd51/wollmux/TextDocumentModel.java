@@ -19,9 +19,10 @@
  */
 package de.muenchen.allg.itd51.wollmux;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -33,15 +34,7 @@ import java.util.regex.Pattern;
 import com.sun.star.awt.DeviceInfo;
 import com.sun.star.awt.PosSize;
 import com.sun.star.awt.XWindow;
-import com.sun.star.beans.Property;
-import com.sun.star.beans.PropertyAttribute;
-import com.sun.star.beans.PropertyValue;
-import com.sun.star.beans.PropertyVetoException;
-import com.sun.star.beans.UnknownPropertyException;
-import com.sun.star.beans.XPropertyChangeListener;
 import com.sun.star.beans.XPropertySet;
-import com.sun.star.beans.XPropertySetInfo;
-import com.sun.star.beans.XVetoableChangeListener;
 import com.sun.star.container.NoSuchElementException;
 import com.sun.star.container.XEnumeration;
 import com.sun.star.container.XNameAccess;
@@ -49,9 +42,6 @@ import com.sun.star.frame.FrameSearchFlag;
 import com.sun.star.frame.XController;
 import com.sun.star.frame.XFrame;
 import com.sun.star.lang.EventObject;
-import com.sun.star.lang.IllegalArgumentException;
-import com.sun.star.lang.WrappedTargetException;
-import com.sun.star.lib.uno.helper.WeakBase;
 import com.sun.star.text.XBookmarksSupplier;
 import com.sun.star.text.XDependentTextField;
 import com.sun.star.text.XTextContent;
@@ -61,17 +51,17 @@ import com.sun.star.text.XTextRange;
 import com.sun.star.text.XTextViewCursorSupplier;
 import com.sun.star.uno.AnyConverter;
 import com.sun.star.uno.RuntimeException;
-import com.sun.star.uno.Type;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.util.CloseVetoException;
 import com.sun.star.util.XCloseListener;
 import com.sun.star.view.DocumentZoomType;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
+import de.muenchen.allg.itd51.parser.SyntaxErrorException;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.SetJumpMark;
-import de.muenchen.allg.itd51.wollmux.DocumentCommand.SetPrintFunction;
 import de.muenchen.allg.itd51.wollmux.FormFieldFactory.FormField;
 import de.muenchen.allg.itd51.wollmux.dialog.FormController;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
@@ -215,22 +205,10 @@ public class TextDocumentModel
   private String type = null;
 
   /**
-   * Enthält den Namen der aktuell gesetzten Druckfunktion oder null, wenn keine
-   * Druckfunktion gesetzt ist.
+   * Enthält als Schlüssel die Namen der aktuell gesetzten Druckfunktionen und
+   * als Werte die Argumente, das den Druckfunktionen übergeben werden sollen.
    */
-  private String printFunctionName;
-
-  /**
-   * Enthält den Namen der Druckfunktion, die vor dem letzten Aufruf der Methode
-   * setPrintFunction(...) gesetzt war oder null wenn noch keine Druckfunktion
-   * gesetzt war.
-   */
-  private String formerPrintFunctionName;
-
-  /**
-   * Enthält das zu diesem TextDocumentModel zugehörige XPrintModel.
-   */
-  private XPrintModel printModel;
+  private HashMap printFunctions;
 
   /**
    * Enthält die Formularbeschreibung des Dokuments oder null, wenn die
@@ -294,14 +272,13 @@ public class TextDocumentModel
     this.fragUrls = new String[] {};
     this.currentMax4000 = null;
     this.closeListener = null;
-    this.printFunctionName = null;
+    this.printFunctions = new HashMap();
     this.printSettingsDone = false;
     this.formularConf = null;
     this.formFieldValues = new HashMap();
     this.invisibleGroups = new HashSet();
     this.overrideFragMap = new HashMap();
     this.formModel = null;
-    this.printModel = new PrintModel(this);
 
     // Kommandobaum erzeugen (modified-Status dabei unberührt lassen):
     boolean modified = getDocumentModified();
@@ -328,7 +305,7 @@ public class TextDocumentModel
     // Auslesen der Persistenten Daten:
     this.persistentData = new PersistentData(doc);
     this.type = persistentData.getData(DATA_ID_SETTYPE);
-    this.printFunctionName = persistentData.getData(DATA_ID_PRINTFUNCTION);
+    parsePrintFunctions(persistentData.getData(DATA_ID_PRINTFUNCTION));
     parseFormValues(persistentData.getData(DATA_ID_FORMULARWERTE));
 
     // Sicherstellen, dass die Schaltflächen der Symbolleisten aktiviert werden:
@@ -365,6 +342,81 @@ public class TextDocumentModel
     for (Iterator iter = documentCommands.setGroupsIterator(); iter.hasNext();)
       visibleElements.add(iter.next());
     return visibleElements.iterator();
+  }
+
+  /**
+   * Diese Methode wertet den im Dokument enthaltenen PrintFunction-Abschnitt
+   * aus, der entweder im ConfigThingy-Format (siehe storePrintFunctions()) oder
+   * in dem legacy-Format vorliegen kann, in dem früher der Name genau einer
+   * Druckfunktion abgelegt war.
+   * 
+   * @param data
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  private void parsePrintFunctions(String data)
+  {
+    if (data == null || data.length() == 0) return;
+
+    final String errmsg = "Fehler beim Einlesen des Druckfunktionen-Abschnitts '"
+                          + data
+                          + "':";
+
+    ConfigThingy conf = new ConfigThingy("dummy");
+    try
+    {
+      conf = new ConfigThingy("dummy", data);
+    }
+    catch (IOException e)
+    {
+      Logger.error(errmsg, e);
+    }
+    catch (SyntaxErrorException e)
+    {
+      try
+      {
+        // Abwärtskompatibilität mit älteren PrintFunction-Blöcken, in denen nur
+        // der Funktionsname steht:
+        WollMuxSingleton.checkIdentifier(data);
+        conf = new ConfigThingy("dummy", "WM(Druckfunktionen((FUNCTION '"
+                                         + data
+                                         + "')))");
+      }
+      catch (java.lang.Exception forgetMe)
+      {
+        // Fehlermeldung des SyntaxFehlers ausgeben
+        Logger.error(errmsg, e);
+      }
+    }
+
+    ConfigThingy functions = conf.query("WM").query("Druckfunktionen")
+        .queryByChild("FUNCTION");
+    for (Iterator iter = functions.iterator(); iter.hasNext();)
+    {
+      ConfigThingy func = (ConfigThingy) iter.next();
+      String name;
+      try
+      {
+        name = func.get("FUNCTION").toString();
+      }
+      catch (NodeNotFoundException e)
+      {
+        // kann nicht vorkommen wg. obigem Query
+        continue;
+      }
+
+      String arg = null;
+      try
+      {
+        arg = func.get("ARG").toString();
+      }
+      catch (NodeNotFoundException e)
+      {
+        // ARG ist optional
+      }
+
+      printFunctions.put(name, arg);
+    }
   }
 
   /**
@@ -863,13 +915,24 @@ public class TextDocumentModel
   }
 
   /**
-   * Diese Methode setzt die diesem TextDocumentModel zugehörige Druckfunktion
-   * auf den Wert functionName, der ein gültiger Funktionsbezeichner sein muss
-   * oder setzt eine Druckfunktion auf den davor zuletzt gesetzten Wert zurück,
-   * wenn functionName der Leerstring ist und früher bereits eine Druckfunktion
-   * registriert war. War früher noch keine Druckfunktion registriert, so wird
-   * das entsprechende setPrintFunction-Dokumentkommando aus dem Dokument
-   * gelöscht.
+   * Diese Methode fügt die Druckfunktion functionName der Menge der dem
+   * Dokument zugeordneten Druckfunktionen hinzu. FunctionName muss dabei ein
+   * gültiger Funktionsbezeichner sein.
+   * 
+   * @param functionName
+   *          der Name der Druckfunktion, der ein gültiger Funktionsbezeichner
+   *          sein und in einem Abschnitt "Druckfunktionen" in der wollmux.conf
+   *          definiert sein muss.
+   */
+  public void addPrintFunction(String functionName)
+  {
+    addPrintFunction(functionName, null);
+  }
+
+  /**
+   * Diese Methode fügt die Druckfunktion functionName mit dem Funktionsargument
+   * arg der Menge der dem Dokument zugeordneten Druckfunktionen hinzu.
+   * FunctionName muss dabei ein gültiger Funktionsbezeichner sein.
    * 
    * @param newFunctionName
    *          der Name der Druckfunktion (zum setzen), der Leerstring "" (zum
@@ -878,33 +941,10 @@ public class TextDocumentModel
    *          ein gültiger Funktionsbezeichner sein und in einem Abschnitt
    *          "Druckfunktionen" in der wollmux.conf definiert sein.
    */
-  public void setPrintFunction(String newFunctionName)
+  public void addPrintFunction(String newFunctionName, Object arg)
   {
-    // nichts machen, wenn der Name bereits gesetzt ist.
-    if (printFunctionName != null && printFunctionName.equals(newFunctionName))
-      return;
-
-    // Bei null oder Leerstring: Name der vorhergehenden Druckfunktion
-    // verwenden.
-    if (newFunctionName == null || newFunctionName.equals(""))
-      newFunctionName = formerPrintFunctionName;
-    else if (newFunctionName != null
-             && newFunctionName.equalsIgnoreCase("default"))
-      newFunctionName = null;
-
-    // Neuen Funktionsnamen setzen und alten merken
-    formerPrintFunctionName = printFunctionName;
-    printFunctionName = newFunctionName;
-
-    // Persistente Daten entsprechend anpassen
-    if (printFunctionName != null)
-    {
-      persistentData.setData(DATA_ID_PRINTFUNCTION, printFunctionName);
-    }
-    else
-    {
-      persistentData.removeData(DATA_ID_PRINTFUNCTION);
-    }
+    printFunctions.put(newFunctionName, arg);
+    storePrintFunctions();
 
     // Frame veranlassen, die dispatches neu einzulesen - z.B. damit File->Print
     // auch auf die neue Druckfunktion reagiert.
@@ -918,69 +958,157 @@ public class TextDocumentModel
   }
 
   /**
-   * Setzt die Druckfunktion die Druckfunktion zurück, die gesetzt war, bevor
-   * die Druckfunktion functionName gesetzt wurde. Die Druckfunktion wird nur
-   * zurück gesetzt, wenn die aktuell gesetzte Druckfunktion functionName
-   * entspricht.
+   * Löscht die Druckfunktion functionName aus der Menge der dem Dokument
+   * zugeordneten Druckfunktionen.
    * 
    * Wird z.B. in den Sachleitenden Verfügungen verwendet, um auf die
    * ursprünglich gesetzte Druckfunktion zurück zu schalten, wenn keine
    * Verfügungspunkte vorhanden sind.
    * 
-   * @param functionNameToReset
-   *          der Name der Druckfunktion, die zurück gesetzt werden soll (falls
-   *          sie aktuell gesetzt ist).
+   * @param functionName
+   *          der Name der Druckfunktion, die aus der Menge gelöscht werden
+   *          soll.
    */
-  public void resetPrintFunction(String functionNameToReset)
+  public void removePrintFunction(String functionName)
   {
-    if (printFunctionName != null
-        && printFunctionName.equals(functionNameToReset)) setPrintFunction("");
+    printFunctions.remove(functionName);
+    storePrintFunctions();
+
+    // Frame veranlassen, die dispatches neu einzulesen - z.B. damit File->Print
+    // auch auf gelöschte Druckfunktion reagiert.
+    try
+    {
+      getFrame().contextChanged();
+    }
+    catch (java.lang.Exception e)
+    {
+    }
   }
 
   /**
-   * Wird vom DocumentCommandInterpreter beim parsen des Dokumentkommandobaumes
-   * aufgerufen, wenn das Dokument ein setPrintFunction-Kommando enthält und
-   * setzt die in cmd.getFunctionName() enthaltene Druckfunktion PERSISTENT im
-   * Dokument, falls nicht bereits eine Druckfunktion definiert ist. Ansonsten
-   * wird das Dokumentkommando ignoriert.
+   * Schreibt den neuen Zustand der internen HashMap printFunctions in die
+   * persistent Data oder löscht den Datenblock, wenn keine Druckfunktion
+   * gesetzt ist. Die Druckfunktionen werden in ConfigThingy-Syntax abgelegt und
+   * haben den Aufbau WM(Druckfunktionen( ... (FUNCTION 'name' ARG 'arg') ...)).
+   * Das Argument ARG ist dabei optional und wird nur gesetzt, wenn ARG nicht
+   * leer ist.
    * 
-   * @param cmd
-   *          Das gefundene setPrintFunction-Dokumentkommando.
+   * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  public void setPrintFunction(SetPrintFunction cmd)
+  private void storePrintFunctions()
   {
-    if (printFunctionName == null) setPrintFunction(cmd.getFunctionName());
+    // Elemente nach Namen sortieren (definierte Reihenfolge bei der Ausgabe)
+    ArrayList names = new ArrayList(printFunctions.keySet());
+    Collections.sort(names);
+
+    ConfigThingy wm = new ConfigThingy("WM");
+    ConfigThingy druckfunktionen = new ConfigThingy("Druckfunktionen");
+    wm.addChild(druckfunktionen);
+    for (Iterator iter = names.iterator(); iter.hasNext();)
+    {
+      String name = (String) iter.next();
+      ConfigThingy list = new ConfigThingy("");
+      ConfigThingy nameConf = new ConfigThingy("FUNCTION");
+      nameConf.addChild(new ConfigThingy(name));
+      list.addChild(nameConf);
+      Object arg = printFunctions.get(name);
+      if (arg != null && arg.toString().length() > 0)
+      {
+        ConfigThingy argConf = new ConfigThingy("ARG");
+        argConf.addChild(new ConfigThingy(arg.toString()));
+        list.addChild(argConf);
+      }
+      druckfunktionen.addChild(list);
+    }
+
+    // Persistente Daten entsprechend anpassen
+    if (printFunctions.size() > 0)
+    {
+      persistentData.setData(DATA_ID_PRINTFUNCTION, wm.stringRepresentation());
+    }
+    else
+    {
+      persistentData.removeData(DATA_ID_PRINTFUNCTION);
+    }
   }
 
   /**
-   * Liefert den Namen der aktuellen Druckfunktion zurück, oder null, wenn keine
-   * Druckfunktion definiert ist.
+   * Liefert eine Menge mit den Namen der aktuell gesetzten Druckfunktionen.
    */
-  public String getPrintFunctionName()
+  public Set getPrintFunctions()
   {
-    return printFunctionName;
+    return printFunctions.keySet();
   }
 
   /**
-   * Liefert die zusätzlichen Konfigurationsdaten für die Druckfunktion zurück
-   * (oder einen leerer String, falls nicht gesetzt).
+   * Liefert die zusätzlichen Konfigurationsdaten für die Druckfunktion
+   * functionName als String zurück (oder einen Leerstring, falls nicht
+   * gesetzt).
    * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * Anmerkung: Diese Methode liefert immer einen String zurück und ist für das
+   * Bearbeiten der Konfigurationsdaten in einer GUI gedacht. Die zugehörige
+   * Repräsentation als Objekt (z.B. als ConfigThingy-Objekt) wird von den
+   * Methoden getPrintFunctionArgAs<Typ>(functionName) zurückgeliefert.
+   * 
+   * @author Matthias Benkmann, Christoph Lutz (D-III-ITD 5.1)
    */
-  public String getPrintFunctionConfig()
+  public String getPrintFunctionConfig(String functionName)
   {
-    // TODO getPrintFunctionConfig() implementieren
-    return "";
+    Object arg = printFunctions.get(functionName);
+    return (arg != null) ? arg.toString() : "";
   }
 
   /**
-   * Setzt die zusätzlichen Konfigurationsdaten für die Druckfunktion auf conf.
+   * Setzt die zusätzlichen Konfigurationsdaten für die Druckfunktion
+   * functionName auf conf, wenn die Druckfunktion functionName existiert;
+   * ansonsten geschieht nichts.
    * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * @author Matthias Benkmann, Christoph Lutz (D-III-ITD 5.1)
    */
-  public void setPrintFunctionConfig(String conf)
+  public void setPrintFunctionConfig(String functionName, String conf)
   {
-    // TODO setPrintFunctionConfig() implementieren
+    if (printFunctions.containsKey(functionName))
+    {
+      printFunctions.put(functionName, conf);
+      storePrintFunctions();
+    }
+  }
+
+  /**
+   * Liefert das Argument der Druckfunktion functionName als ConfigThingy mit
+   * dem Kontext DEFAULT_CONTEXT zurück, oder null, wenn kein Argument gesetzt
+   * ist oder das Argument nicht als ConfigThingy geparst werden kann. Treten
+   * beim Parsen Fehler auf, so werden diese als Fehler in wollmux.log gebracht
+   * wenn required==true. Ist required==false, so werden die Fehlermeldungen
+   * ignoriert.
+   * 
+   * @param functionName
+   *          Name der Druckfunktion zu der das Argument als ConfigThingy
+   *          geparst werden soll.
+   * @return das geparste ConfigThingy oder null, wenn kein Argument zu dieser
+   *         Druckfunktion vorhanden ist oder Fehler beim Parsen auftraten.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  public ConfigThingy getPrintFunctionArgAsConfigThingy(String functionName,
+      boolean required)
+  {
+    Object arg = printFunctions.get(functionName);
+    if (arg == null) return null;
+
+    // Parse das Argument als ConfigThingy:
+    try
+    {
+      // erzeuge ConfigThingy mit DEFAULT_CONTEXT:
+      ConfigThingy conf = new ConfigThingy("ARG", WollMuxSingleton
+          .getInstance().getDEFAULT_CONTEXT(), new StringReader(arg.toString()));
+      return conf;
+    }
+    catch (java.lang.Exception e)
+    {
+      if (required) Logger.error(e);
+      return null;
+    }
   }
 
   /**
@@ -1713,41 +1841,6 @@ public class TextDocumentModel
   }
 
   /**
-   * Druckt das Dokument mit der Anzahl von Ausfertigungen numberOfCopies auf
-   * dem aktuell eingestellten Drucker aus.
-   * 
-   * @param numberOfCopies
-   * @throws PrintFailedException
-   */
-  public void print(short numberOfCopies) throws PrintFailedException
-  {
-    if (UNO.XPrintable(doc) != null)
-    {
-      PropertyValue[] args = new PropertyValue[] {
-                                                  new PropertyValue(),
-                                                  new PropertyValue() };
-      args[0].Name = "CopyCount";
-      args[0].Value = new Short(numberOfCopies);
-      args[1].Name = "Wait";
-      args[1].Value = Boolean.TRUE;
-
-      try
-      {
-        Logger.debug("Drucke "
-                     + this
-                     + " mit CopyCount="
-                     + numberOfCopies
-                     + " und allen Seiten.");
-        UNO.XPrintable(doc).print(args);
-      }
-      catch (java.lang.Exception e)
-      {
-        throw new PrintFailedException(e);
-      }
-    }
-  }
-
-  /**
    * Druckt den über pageRangeType/pageRangeValue spezifizierten Bereich des
    * Dokuments in der Anzahl numberOfCopies auf dem aktuell eingestellten
    * Drucker aus.
@@ -1771,48 +1864,66 @@ public class TextDocumentModel
   public void printWithPageRange(short numberOfCopies, int pageRangeType,
       String pageRangeValue) throws PrintFailedException
   {
-    // pr mit aktueller Seite vorbelegen (oder 1 als fallback)
-    String pr = "1";
-    if (UNO.XPageCursor(getViewCursor()) != null)
-      pr = "" + UNO.XPageCursor(getViewCursor()).getPage();
+    HashMap props = new HashMap();
+    props.put("PageRangeType", new Integer(pageRangeType));
+    props.put("PageRangeValue", pageRangeValue);
+    props.put("CopyCount", new Short(numberOfCopies));
+    printWithProps(props);
+  }
 
-    if (pageRangeType == PAGE_RANGE_TYPE_ALL)
+  /**
+   * Druckt das Dokument auf dem aktuell eingestellten Drucker aus, wobei die in
+   * props übergebenen Properties CopyCount, Pages, PageRangeType und
+   * PageRangeValue ausgewertet werden, wenn sie vorhanden sind.
+   * 
+   * @param props
+   *          HashMap, die Properties enthält, die ausgewertet werden sollen.
+   * @throws PrintFailedException
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  public void printWithProps(HashMap props) throws PrintFailedException
+  {
+    if (props == null) props = new HashMap();
+    UnoProps myProps = new UnoProps("Wait", Boolean.TRUE);
+
+    // Property "CopyCount" bestimmen:
+    if (props.containsKey("CopyCount"))
+      myProps.setPropertyValue("CopyCount", props.get("CopyCount"));
+
+    // Property "Pages" bestimmen:
+    if (props.containsKey("Pages"))
+      myProps.setPropertyValue("Pages", props.get("Pages"));
+    else if (props.containsKey("PageRangeType"))
     {
-      print(numberOfCopies);
-      return;
+      // pr mit aktueller Seite vorbelegen (oder 1 als fallback)
+      String pr = "1";
+      if (UNO.XPageCursor(getViewCursor()) != null)
+        pr = "" + UNO.XPageCursor(getViewCursor()).getPage();
+
+      int pageRangeType = ((Integer) props.get("PageRangeType")).intValue();
+      String pageRangeValue = null;
+      if (props.containsKey("PageRangeValue"))
+        pageRangeValue = "" + props.get("PageRangeValue");
+
+      if (pageRangeType == PAGE_RANGE_TYPE_CURRENT)
+        myProps.setPropertyValue("Pages", pr);
+      else if (pageRangeType == PAGE_RANGE_TYPE_CURRENTFF)
+        myProps.setPropertyValue("Pages", pr + "-" + getPageCount());
+      else if (pageRangeType == PAGE_RANGE_TYPE_MANUAL
+               && pageRangeValue != null)
+        myProps.setPropertyValue("Pages", pageRangeValue);
     }
-    else if (pageRangeType == PAGE_RANGE_TYPE_CURRENTFF)
-      pr += "-" + getPageCount();
-    else if (pageRangeType == PAGE_RANGE_TYPE_MANUAL) pr = pageRangeValue;
 
-    if (UNO.XPrintable(doc) != null)
+    // Drucken:
+    try
     {
-      PropertyValue[] args = new PropertyValue[] {
-                                                  new PropertyValue(),
-                                                  new PropertyValue(),
-                                                  new PropertyValue() };
-      args[0].Name = "CopyCount";
-      args[0].Value = new Short(numberOfCopies);
-      args[1].Name = "Wait";
-      args[1].Value = Boolean.TRUE;
-      args[2].Name = "Pages";
-      args[2].Value = pr;
-
-      try
-      {
-        Logger.debug("Drucke "
-                     + this
-                     + " mit CopyCount="
-                     + numberOfCopies
-                     + " und PageRange='"
-                     + pr
-                     + "'");
-        UNO.XPrintable(doc).print(args);
-      }
-      catch (java.lang.Exception e)
-      {
-        throw new PrintFailedException(e);
-      }
+      if (UNO.XPrintable(doc) != null)
+        UNO.XPrintable(doc).print(myProps.getProps());
+    }
+    catch (java.lang.Exception e)
+    {
+      throw new PrintFailedException(e);
     }
   }
 
@@ -1980,385 +2091,29 @@ public class TextDocumentModel
   }
 
   /**
-   * Liefert das zu diesem TextDocumentModel zugehörige XPrintModel.
-   */
-  public XPrintModel getPrintModel()
-  {
-    return printModel;
-  }
-
-  /**
-   * Das XPrintModel ist Bestandteil der Komfortdruckfunktionen, wobei jede
-   * Druckfunktion ein XPrintModel übergeben bekommt, das das Drucken aus der
-   * Komfortdruckfunktion heraus erleichtern soll. Da die einzelnen
-   * Druckfunktionen in eigenen Threads laufen, muss jede Druckfunktion sicher
-   * stellen, dass die zu erledigenden Aktionen mit dem
-   * WollMuxEventHandler-Thread synchronisiert werden. Dies geschieht über einen
-   * lock-wait-callback-Mechanismus. Vor dem Einstellen des Action-Ereignisses
-   * in den WollMuxEventHandler wird ein lock gesetzt. Nach dem Einstellen des
-   * Ereignisses wird so lange gewartet, bis der WollMuxEventHandler die
-   * übergebene Callback-Methode aufruft.
+   * Liefert ein neues zu diesem TextDocumentModel zugehörige XPrintModel für
+   * einen Druckvorgang; ist useDocumentPrintFunctions==true, so werden bereits
+   * alle im Dokument gesetzten Druckfunktionen per
+   * XPrintModel.usePrintFunctionWithArgument(...) hinzugeladen.
    * 
-   * @author christoph.lutz
+   * @param useDocPrintFunctions
+   *          steuert ob das PrintModel mit den im Dokument gesetzten
+   *          Druckfunktionen vorbelegt sein soll.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  public static class PrintModel extends WeakBase implements XPrintModel
+  public XPrintModel createPrintModel(boolean useDocPrintFunctions)
   {
-    /**
-     * Enthält die Properties, die in printWithProps() ausgewertet werden und
-     * über die get/setPropertyValue-Methoden frei gesetzt und gelesen werden
-     * können.
-     */
-    private HashMap props;
-
-    // TODO: Wenn beim Drucken (oder auch bei anderen Aktionen) ein Fehler
-    // auftritt, soll das PrintModel alle weiteren Anfragen verweigern.
-    /**
-     * Das TextDocumentModel zu diesem PrintModel
-     */
-    private TextDocumentModel model;
-
-    /**
-     * Das lock-Flag, das vor dem Einstellen eines WollMuxEvents auf true
-     * gesetzt werden muss und signalisiert, ob das WollMuxEvent erfolgreich
-     * abgearbeitet wurde.
-     */
-    private boolean[] lock = new boolean[] { true };
-
-    private PrintModel(TextDocumentModel model)
+    XPrintModel pmod = PrintModelFactory.createPrintModel(this);
+    if (useDocPrintFunctions)
     {
-      this.model = model;
-      this.props = new HashMap();
-    }
-
-    /**
-     * Liefert das XTextDocument mit dem die Druckfunktion aufgerufen wurde.
-     * 
-     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#getTextDocument()
-     */
-    public XTextDocument getTextDocument()
-    {
-      return model.doc;
-    }
-
-    /**
-     * Druckt das TextDocument mit numberOfCopies Ausfertigungen auf dem aktuell
-     * eingestellten Drucker aus.
-     * 
-     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#print(short)
-     */
-    public void print(short numberOfCopies)
-    {
-      props.put("CopyCount", new Integer(numberOfCopies));
-      printWithProps();
-    }
-
-    /**
-     * Falls das TextDocument Sachleitende Verfügungen enthält, ist es mit
-     * dieser Methode möglich, den Verfügungspunkt mit der Nummer verfPunkt
-     * auszudrucken, wobei alle darauffolgenden Verfügungspunkte ausgeblendet
-     * werden.
-     * 
-     * @param verfPunkt
-     *          Die Nummer des auszuduruckenden Verfügungspunktes, wobei alle
-     *          folgenden Verfügungspunkte ausgeblendet werden.
-     * @param numberOfCopies
-     *          Die Anzahl der Ausfertigungen, in der verfPunkt ausgedruckt
-     *          werden soll.
-     * @param isDraft
-     *          wenn isDraft==true, werden alle draftOnly-Blöcke eingeblendet,
-     *          ansonsten werden sie ausgeblendet.
-     * @param isOriginal
-     *          wenn isOriginal, wird die Ziffer des Verfügungspunktes I
-     *          ausgeblendet und alle notInOriginal-Blöcke ebenso. Andernfalls
-     *          sind Ziffer und notInOriginal-Blöcke eingeblendet.
-     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#printVerfuegungspunkt(short,
-     *      short, boolean, boolean)
-     */
-    public void printVerfuegungspunkt(short verfPunkt, short numberOfCopies,
-        boolean isDraft, boolean isOriginal, short pageRangeType,
-        String pageRangeValue)
-    {
-      setLock();
-      WollMuxEventHandler.handlePrintVerfuegungspunkt(
-          model.doc,
-          verfPunkt,
-          numberOfCopies,
-          isDraft,
-          isOriginal,
-          pageRangeType,
-          pageRangeValue,
-          unlockActionListener);
-      waitForUnlock();
-    }
-
-    /**
-     * Zeigt den PrintSetupDialog an, über den der aktuelle Drucker ausgewählt
-     * und geändert werden kann.
-     * 
-     * @param onlyOnce
-     *          Gibt an, dass der Dialog nur beim ersten Aufruf (aus Sicht eines
-     *          Dokuments) der Methode angezeigt wird. Wurde bereits vor dem
-     *          Aufruf ein PrintSetup-Dialog gestartet, so öffnet sich der
-     *          Dialog nicht und die Methode endet ohne Aktion.
-     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#showPrinterSetupDialog()
-     */
-    public void showPrinterSetupDialog(boolean onlyOnce)
-    {
-      setLock();
-      WollMuxEventHandler.handleShowPrinterSetupDialog(
-          model.doc,
-          onlyOnce,
-          unlockActionListener);
-      waitForUnlock();
-    }
-
-    /**
-     * Falls es sich bei dem zugehörigen Dokument um ein Formulardokument (mit
-     * einer Formularbeschreibung) handelt, wird das Formularfeld mit der ID id
-     * auf den neuen Wert value gesetzt und alle von diesem Formularfeld
-     * abhängigen Formularfelder entsprechend angepasst. Handelt es sich beim
-     * zugehörigen Dokument um ein Dokument ohne Formularbeschreibung, so werden
-     * nur alle insertFormValue-Kommandos dieses Dokuments angepasst, die die ID
-     * id besitzen.
-     * 
-     * @param id
-     *          Die ID des Formularfeldes, dessen Wert verändert werden soll.
-     *          Ist die FormGUI aktiv, so werden auch alle von id abhängigen
-     *          Formularwerte neu gesetzt.
-     * @param value
-     *          Der neue Wert des Formularfeldes id
-     * 
-     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#setFormValue(java.lang.String,
-     *      java.lang.String)
-     */
-    public void setFormValue(String id, String value)
-    {
-      setLock();
-      WollMuxEventHandler.handleSetFormValueViaPrintModel(
-          model.doc,
-          id,
-          value,
-          unlockActionListener);
-      waitForUnlock();
-    }
-
-    /**
-     * Liefert true, wenn das Dokument als "modifiziert" markiert ist und damit
-     * z.B. die "Speichern?" Abfrage vor dem Schließen erscheint.
-     * 
-     * Manche Druckfunktionen verändern u.U. den Inhalt von Dokumenten. Trotzdem
-     * kann es sein, dass eine solche Druckfunktion den "Modifiziert"-Status des
-     * Dokuments nicht verändern darf um ungewünschte "Speichern?"-Abfragen zu
-     * verhindern. In diesem Fall kann der "Modifiziert"-Status mit folgendem
-     * Konstrukt innerhalb der Druckfunktion unverändert gehalten werden:
-     * 
-     * boolean modified = pmod.getDocumentModified();
-     * 
-     * ...die eigentliche Druckfunktion, die das Dokument verändert...
-     * 
-     * pmod.setDocumentModified(modified);
-     * 
-     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#getDocumentModified()
-     */
-    public boolean getDocumentModified()
-    {
-      // Keine WollMuxEvent notwendig, da keine WollMux-Datenstrukturen
-      // angefasst werden.
-      return model.getDocumentModified();
-    }
-
-    /**
-     * Diese Methode setzt den DocumentModified-Status auf modified.
-     * 
-     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#setDocumentModified(boolean)
-     */
-    public void setDocumentModified(boolean modified)
-    {
-      // Keine WollMuxEvent notwendig, da keine WollMux-Datenstrukturen
-      // angefasst werden.
-      model.setDocumentModified(modified);
-    }
-
-    /**
-     * Sammelt alle Formularfelder des Dokuments auf, die nicht von
-     * WollMux-Kommandos umgeben sind, jedoch trotzdem vom WollMux verstanden
-     * und befüllt werden (derzeit c,s,s,t,textfield,Database-Felder). So werden
-     * z.B. Seriendruckfelder erkannt, die erst nach dem Öffnen des Dokuments
-     * manuell hinzugefügt wurden.
-     */
-    public void collectNonWollMuxFormFields()
-    {
-      setLock();
-      WollMuxEventHandler.handleCollectNonWollMuxFormFieldsViaPrintModel(
-          model,
-          unlockActionListener);
-      waitForUnlock();
-    }
-
-    /**
-     * Setzt einen lock, der in Verbindung mit setUnlock und der
-     * waitForUnlock-Methode verwendet werden kann, um eine Synchronisierung mit
-     * dem WollMuxEventHandler-Thread zu realisieren. setLock() sollte stets vor
-     * dem Absetzen des WollMux-Events erfolgen, nach dem Absetzen des
-     * WollMux-Events folgt der Aufruf der waitForUnlock()-Methode. Das
-     * WollMuxEventHandler-Event erzeugt bei der Beendigung ein ActionEvent, das
-     * dafür sorgt, dass setUnlock aufgerufen wird.
-     */
-    protected void setLock()
-    {
-      synchronized (lock)
+      for (Iterator iter = printFunctions.keySet().iterator(); iter.hasNext();)
       {
-        lock[0] = true;
+        String name = (String) iter.next();
+        Object arg = getPrintFunctionArgAsConfigThingy(name, true);
+        pmod.usePrintFunctionWithArgument(name, arg);
       }
     }
-
-    /**
-     * Macht einen mit setLock() gesetzten Lock rückgängig und bricht damit eine
-     * evtl. wartende waitForUnlock()-Methode ab.
-     */
-    protected void setUnlock()
-    {
-      synchronized (lock)
-      {
-        lock[0] = false;
-        lock.notifyAll();
-      }
-    }
-
-    /**
-     * Wartet so lange, bis der vorher mit setLock() gesetzt lock mit der
-     * Methode setUnlock() aufgehoben wird. So kann die Synchronisierung mit
-     * Events aus dem WollMuxEventHandler-Thread realisiert werden. setLock()
-     * sollte stets vor dem Aufruf des Events erfolgen, nach dem Aufruf des
-     * Events folgt der Aufruf der waitForUnlock()-Methode. Das Event erzeugt
-     * bei der Beendigung ein ActionEvent, das dafür sorgt, dass setUnlock
-     * aufgerufen wird.
-     */
-    protected void waitForUnlock()
-    {
-      try
-      {
-        synchronized (lock)
-        {
-          while (lock[0] == true)
-            lock.wait();
-        }
-      }
-      catch (InterruptedException e)
-      {
-      }
-    }
-
-    /**
-     * Dieser ActionListener kann WollMuxHandler-Events übergeben werden und
-     * sorgt in Verbindung mit den Methoden setLock() und waitForUnlock() dafür,
-     * dass eine Synchronisierung mit dem WollMuxEventHandler-Thread realisiert
-     * werden kann.
-     */
-    protected UnlockActionListener unlockActionListener = new UnlockActionListener();
-
-    protected class UnlockActionListener implements ActionListener
-    {
-      public ActionEvent actionEvent = null;
-
-      public void actionPerformed(ActionEvent arg0)
-      {
-        setUnlock();
-        actionEvent = arg0;
-      }
-    }
-
-    public void printWithProps()
-    {
-      setLock();
-      WollMuxEventHandler.handlePrintViaPrintModel(
-          model.doc,
-          props,
-          unlockActionListener);
-      waitForUnlock();
-    }
-
-    public XPropertySetInfo getPropertySetInfo()
-    {
-      return new XPropertySetInfo()
-      {
-        public boolean hasPropertyByName(String arg0)
-        {
-          return props.containsKey(arg0);
-        }
-
-        public Property getPropertyByName(String arg0)
-            throws UnknownPropertyException
-        {
-          if (hasPropertyByName(arg0))
-            return new Property(arg0, -1, Type.ANY, PropertyAttribute.OPTIONAL);
-          else
-            throw new UnknownPropertyException(arg0);
-        }
-
-        public Property[] getProperties()
-        {
-          Property[] ps = new Property[props.size()];
-          int i = 0;
-          for (Iterator iter = props.keySet().iterator(); iter.hasNext();)
-          {
-            String name = (String) iter.next();
-            try
-            {
-              ps[i++] = getPropertyByName(name);
-            }
-            catch (UnknownPropertyException e)
-            {
-            }
-          }
-          return ps;
-        }
-      };
-    }
-
-    public void setPropertyValue(String arg0, Object arg1)
-        throws UnknownPropertyException, PropertyVetoException,
-        IllegalArgumentException, WrappedTargetException
-    {
-      props.put(arg0, arg1);
-    }
-
-    public Object getPropertyValue(String arg0)
-        throws UnknownPropertyException, WrappedTargetException
-    {
-      if (props.containsKey(arg0))
-        return props.get(arg0);
-      else
-        throw new UnknownPropertyException(arg0);
-    }
-
-    public void addPropertyChangeListener(String arg0,
-        XPropertyChangeListener arg1) throws UnknownPropertyException,
-        WrappedTargetException
-    {
-      // NOT IMPLEMENTED
-    }
-
-    public void removePropertyChangeListener(String arg0,
-        XPropertyChangeListener arg1) throws UnknownPropertyException,
-        WrappedTargetException
-    {
-      // NOT IMPLEMENTED
-    }
-
-    public void addVetoableChangeListener(String arg0,
-        XVetoableChangeListener arg1) throws UnknownPropertyException,
-        WrappedTargetException
-    {
-      // NOT IMPLEMENTED
-    }
-
-    public void removeVetoableChangeListener(String arg0,
-        XVetoableChangeListener arg1) throws UnknownPropertyException,
-        WrappedTargetException
-    {
-      // NOT IMPLEMENTED
-    }
+    return pmod;
   }
-
 }

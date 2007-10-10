@@ -1536,6 +1536,16 @@ public class FormularMax4000
   
   private void setPrintFunction()
   {
+    // FIXME: hier wird nur die erste vom iterator zurückgelieferte Druckfunktion betrachtet
+    // wir können jetzt aber mehrere Druckfunktionen jeweils mit Parametern setzen, so dass
+    // der Dialog entsprechend umgestaltet werden muss.
+    String currentFunctionName = null;
+    Iterator i = doc.getPrintFunctions().iterator();
+    if(i.hasNext()) currentFunctionName = (String) i.next();
+    if(currentFunctionName == null) currentFunctionName = "";
+
+    String printFunctionConfig = doc.getPrintFunctionConfig(currentFunctionName);
+    
     final JEditorPane printFunctionConfigEditor = new JEditorPane("text/plain","");
     printFunctionConfigEditor.setEditorKit(new NoWrapEditorKit());
     
@@ -1546,16 +1556,24 @@ public class FormularMax4000
     
     final JComboBox printFunctionComboBox = new JComboBox(printFunctionNames);
     printFunctionComboBox.setEditable(true);
-    printFunctionComboBox.setSelectedItem(doc.getPrintFunctionName());
-    printFunctionEditorContentPanel.add(printFunctionComboBox, BorderLayout.NORTH);
-  
+    
+    printFunctionComboBox.setSelectedItem(currentFunctionName);
+    printFunctionEditorContentPanel.add(printFunctionComboBox, BorderLayout.NORTH);  
     final JDialog dialog = new JDialog(myFrame, true);
     
     ActionListener setFunc = new ActionListener(){
       public void actionPerformed(ActionEvent e)
       {
-        doc.setPrintFunctionConfig(printFunctionConfigEditor.getText());
-        doc.setPrintFunction(printFunctionComboBox.getSelectedItem().toString());
+        //Liste der Druckfunktionen leeren:
+        for (Iterator iter = doc.getPrintFunctions().iterator(); iter.hasNext();)
+        {
+          String name = (String) iter.next();
+          doc.removePrintFunction(name);
+        }
+        
+        String newFunctionName = printFunctionComboBox.getSelectedItem().toString();
+        doc.addPrintFunction(newFunctionName);
+        doc.setPrintFunctionConfig(newFunctionName, printFunctionConfigEditor.getText());
         dialog.dispose();
       }
     };
@@ -1577,7 +1595,7 @@ public class FormularMax4000
     printFunctionEditorContentPanel.add(buttons, BorderLayout.SOUTH);
     
     printFunctionConfigEditor.setCaretPosition(0);
-    printFunctionConfigEditor.setText(doc.getPrintFunctionConfig());
+    printFunctionConfigEditor.setText(printFunctionConfig);
     
     
     dialog.setTitle("Druckfunktion setzen");

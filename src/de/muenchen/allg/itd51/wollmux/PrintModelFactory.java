@@ -1,0 +1,1076 @@
+/*
+ * Dateiname: PrintModelFactory.java
+ * Projekt  : WollMux
+ * Funktion : Diese Klasse enthält eine Fabrik für die Erzeugung eines PrintModels
+ *            und die Klassendefinitionen des MasterPrintModels und des SlavePrintModels.
+ * 
+ * Copyright: Landeshauptstadt München
+ *
+ * Änderungshistorie:
+ * Datum      | Wer | Änderungsgrund
+ * -------------------------------------------------------------------
+ * 01.10.2007 | LUT | Erstellung als PrintModelFactory
+ * -------------------------------------------------------------------
+ *
+ * @author Christoph Lutz (D-III-ITD 5.1)
+ * @version 1.0
+ * 
+ */
+package de.muenchen.allg.itd51.wollmux;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+
+import com.sun.star.beans.Property;
+import com.sun.star.beans.PropertyAttribute;
+import com.sun.star.beans.PropertyVetoException;
+import com.sun.star.beans.UnknownPropertyException;
+import com.sun.star.beans.XPropertyChangeListener;
+import com.sun.star.beans.XPropertySetInfo;
+import com.sun.star.beans.XVetoableChangeListener;
+import com.sun.star.lang.IllegalArgumentException;
+import com.sun.star.lang.WrappedTargetException;
+import com.sun.star.lib.uno.helper.WeakBase;
+import com.sun.star.text.XTextDocument;
+import com.sun.star.uno.Type;
+
+import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.itd51.wollmux.func.PrintFunction;
+
+/**
+ * Diese Klasse enthält eine Fabrik für die Erzeugung eines XPrintModels und die
+ * Klassendefinitionen des MasterPrintModels und des SlavePrintModels, mit deren
+ * Hilfe die Verkettung mehrerer PrintFunctions möglich ist. Ein XPrintModel
+ * hält alle Daten und Methoden bereit, die beim Drucken aus einer Druckfunktion
+ * heraus benötigt werden.
+ * 
+ * @author Christoph Lutz (D-III-ITD-5.1)
+ */
+public class PrintModelFactory
+{
+
+  /**
+   * Erzeugt ein PrintModel-Objekt, das einen Druckvorgang zum Dokument
+   * TextDocumentModel model repräsentiert. Pro Druckvorgang wird dabei ein
+   * neuer PrintModelMaster erzeugt, der ein oder mehrere PrintModelSlaves
+   * anspricht und so eine Verkettung mehrerer Druckfunktionen ermöglicht.
+   * 
+   * @param model
+   *          Das Dokument das gedruckt werden soll
+   * @return das neue PrintModel für diesen Druckvorgang
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  public static XPrintModel createPrintModel(TextDocumentModel model)
+  {
+    return new MasterPrintModel(model);
+  }
+
+  /**
+   * Das MasterPrintModel repräsentiert einen kompletten Druckvorgang und
+   * verwaltet alle Druckfunktionen, die an diesem Druckvorgang beteiligt sind.
+   * Es kann dynamisch weitere Druckfunktionen nachladen und diese in der durch
+   * das ORDER-Attribut vorgegebenen Reihenfolge zu einer Aufrufkette anordnen.
+   * Für die Kommunikation zwischen den verschiedenen Druckfunktionen
+   * implementiert es das XPropertySet()-Interface und kann in einer HashMap
+   * beliebige funktionsspezifische Daten ablegen.
+   * 
+   * Eine einzelne Druckfunktion wird immer mit einem zugehörigen
+   * SlavePrintModel ausgeführt, das seine Position in der Aufrufkette des
+   * MasterPrintModles kennt und die Weiterleitung an die nächste Druckfunktion
+   * der Aufrufkette erledigt. Da die einzelnen Druckfunktionen in eigenen
+   * Threads laufen, muss an einer zentralen Stelle sicher gestellt sein, dass
+   * die zu erledigenden Aktionen mit dem WollMuxEventHandler-Thread
+   * synchronisiert werden. Dies geschieht in dieser Klasse, die über einen
+   * lock-wait-callback-Mechanismus die Synchronisierung garantiert. Vor dem
+   * Einstellen des Action-Ereignisses in den WollMuxEventHandler wird dabei ein
+   * lock gesetzt. Nach dem Einstellen des Ereignisses wird so lange gewartet,
+   * bis der WollMuxEventHandler die übergebene Callback-Methode aufruft.
+   * 
+   * @author christoph.lutz
+   */
+  private static class MasterPrintModel implements XPrintModel
+  {
+    /**
+     * Enthält eine sortierte Liste aller (verketteten) Druckfunktionen.
+     */
+    private List /* of PrintFunction */functions;
+
+    /**
+     * Enthält eine Zuordnung von Funktionsnamen auf die Funktionsargumente, die
+     * später beim Funktionsaufruf (PrintFunction.invoke(...)) übergeben werden.
+     */
+    private HashMap functionsAndArgs = new HashMap();
+
+    /**
+     * Enthält die Properties, die in printWithProps() ausgewertet werden und
+     * über die get/setPropertyValue-Methoden frei gesetzt und gelesen werden
+     * können.
+     */
+    private HashMap props;
+
+    /**
+     * Das TextDocumentModel zu diesem PrintModel
+     */
+    private TextDocumentModel model;
+
+    /**
+     * Das lock-Flag, das vor dem Einstellen eines WollMuxEvents auf true
+     * gesetzt werden muss und signalisiert, ob das WollMuxEvent erfolgreich
+     * abgearbeitet wurde.
+     */
+    private boolean[] lock = new boolean[] { true };
+
+    /**
+     * Erzeugt ein neues MasterPrintModel-Objekt für das Dokument model, das
+     * einen Druckvorgang repräsentiert, der mit einer leeren Aufrufkette (Liste
+     * von Druckfunktionen) und einer leeren HashMap für den
+     * Informationsaustausch zwischen den Druckfunktionen vorbelegt ist. Nach
+     * der Erzeugung können weitere Druckfunktionen über
+     * usePrintFunction/useInternalPrintFunction... hinzugeladen werden und
+     * Properties über get/setPropertyValue gesetzt bzw. gelesen werden.
+     * 
+     * @param model
+     */
+    private MasterPrintModel(TextDocumentModel model)
+    {
+      this.model = model;
+      this.props = new HashMap();
+      this.functions = new ArrayList();
+      this.functionsAndArgs = new HashMap();
+    }
+
+    /**
+     * Lädt die in der wollmux.conf definierte Druckfunktion mit dem Namen
+     * functionName in das XPrintModel und ordnet sie gemäß dem ORDER-Attribut
+     * an der richtigen Position in die Aufrufkette der zu bearbeitenden
+     * Druckfunktionen ein; Die Druckfunktion wird im Fall des Aufrufs ohne ein
+     * zusätzliches Argument gestartet. Sie wird nicht nochmal in die
+     * Aufrufkette eingefügt, wenn bereits eine Druckfunktion mit dem selben
+     * Namen im XPrintModel vorhanden ist.
+     * 
+     * @param functionName
+     *          Name der Druckfunktion, die durch das MasterPrintModel verwaltet
+     *          und ohne Argumente aufgerufen werden soll.
+     * @return liefert true, wenn die Druckfunktion erfolgreich in die
+     *         Aufrufkette übernommen wurde oder bereits geladen war und false,
+     *         wenn die Druckfunktion aufgrund vorangegangener Fehler nicht in
+     *         die Aufrufkette aufgenommen werden konnte.
+     * 
+     * @author Christoph Lutz (D-III-ITD-5.1)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#usePrintFunction(java.lang.String)
+     */
+    public boolean usePrintFunction(String functionName)
+    {
+      return usePrintFunctionWithArgument(functionName, null);
+    }
+
+    /**
+     * Lädt die in der wollmux.conf definierte Druckfunktion mit dem Namen
+     * functionName in das XPrintModel und ordnet sie gemäß dem ORDER-Attribut
+     * an der richtigen Position in die Aufrufkette der zu bearbeitenden
+     * Druckfunktionen ein; Die Druckfunktion wird im Fall des Aufrufs mit dem
+     * zusätzlichen Argument arg gestartet. Sie wird nicht nochmal in die
+     * Aufrufkette eingefügt, wenn bereits eine Druckfunktion mit dem selben
+     * Namen im XPrintModel vorhanden ist, das Argument arg wird aber in jedem
+     * Fall übernommen.
+     * 
+     * @param functionName
+     *          Name der Druckfunktion, die durch das MasterPrintModel verwaltet
+     *          und mit dem Argument arg aufgerufen werden soll.
+     * @param arg
+     *          Das Argument das der Druckfunktion beim Aufruf übergeben wird.
+     * @return liefert true, wenn die Druckfunktion erfolgreich in die
+     *         Aufrufkette übernommen wurde oder bereits geladen war und false,
+     *         wenn die Druckfunktion aufgrund vorangegangener Fehler nicht in
+     *         die Aufrufkette aufgenommen werden konnte.
+     * 
+     * @author Christoph Lutz (D-III-ITD-5.1)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#usePrintFunctionWithArgument(java.lang.String,
+     *      java.lang.Object)
+     */
+    public boolean usePrintFunctionWithArgument(String functionName, Object arg)
+    {
+      PrintFunction newFunc = WollMuxSingleton.getInstance()
+          .getGlobalPrintFunctions().get(functionName);
+      if (newFunc != null)
+      {
+        return useInternalPrintFunctionWithArgument(newFunc, arg);
+      }
+      else
+      {
+        Logger.error("Druckfunktion '" + functionName + "' nicht definiert.");
+        return false;
+      }
+    }
+
+    /**
+     * Lädt die WollMux-interne Druckfunktion printFunction (muss als
+     * PrintFunction-Objekt vorliegen) in das XPrintModel und ordnet sie gemäß
+     * dem ORDER-Attribut an der richtigen Position in die Aufrufkette der zu
+     * bearbeitenden Druckfunktionen ein; Die Druckfunktion wird im Fall des
+     * Aufrufs ohne ein zusätzliches Argument gestartet. Sie wird nicht nochmal
+     * in die Aufrufkette eingefügt, wenn bereits eine Druckfunktion mit dem
+     * selben Namen im XPrintModel vorhanden ist.
+     * 
+     * @param functionName
+     *          Name der Druckfunktion, die durch das MasterPrintModel verwaltet
+     *          und ohne Argumente aufgerufen werden soll.
+     * @return liefert true, wenn die Druckfunktion erfolgreich in die
+     *         Aufrufkette übernommen wurde oder bereits geladen war und false,
+     *         wenn die Druckfunktion aufgrund vorangegangener Fehler nicht in
+     *         die Aufrufkette aufgenommen werden konnte.
+     * 
+     * @author Christoph Lutz (D-III-ITD-5.1)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#useInternalPrintFunction(java.lang.Object)
+     */
+    public boolean useInternalPrintFunction(Object printFunction)
+    {
+      return useInternalPrintFunctionWithArgument(printFunction, null);
+    }
+
+    /**
+     * Lädt die WollMux-interne Druckfunktion printFunction (muss als
+     * PrintFunction-Objekt vorliegen) in das XPrintModel und ordnet sie gemäß
+     * dem ORDER-Attribut an der richtigen Position in die Aufrufkette der zu
+     * bearbeitenden Druckfunktionen ein; Die Druckfunktion wird im Fall des
+     * Aufrufs mit dem zusätzlichen Argument arg gestartet. Sie wird nicht
+     * nochmal in die Aufrufkette eingefügt, wenn bereits eine Druckfunktion mit
+     * dem selben Namen im XPrintModel vorhanden ist, das Argument arg wird aber
+     * in jedem Fall übernommen.
+     * 
+     * @param functionName
+     *          Name der Druckfunktion, die durch das MasterPrintModel verwaltet
+     *          und mit dem Argument arg aufgerufen werden soll.
+     * @param arg
+     *          Das Argument das der Druckfunktion beim Aufruf übergeben wird.
+     * @return liefert true, wenn die Druckfunktion erfolgreich in die
+     *         Aufrufkette übernommen wurde oder bereits geladen war und false,
+     *         wenn die Druckfunktion aufgrund vorangegangener Fehler nicht in
+     *         die Aufrufkette aufgenommen werden konnte.
+     * 
+     * @author Christoph Lutz (D-III-ITD-5.1)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#useInternalPrintFunctionWithArgument(java.lang.Object,
+     *      java.lang.Object)
+     */
+    public boolean useInternalPrintFunctionWithArgument(Object printFunction,
+        Object arg)
+    {
+      if (printFunction != null && printFunction instanceof PrintFunction)
+      {
+        PrintFunction f = (PrintFunction) printFunction;
+        if (!functionsAndArgs.containsKey(f.getFunctionName()))
+        {
+          functions.add(f);
+          Collections.sort(functions);
+        }
+        functionsAndArgs.put(f.getFunctionName(), arg);
+        return true;
+      }
+      else
+      {
+        Logger.error("Die angeforderte interne Druckfunktion ist ungültig.");
+        return false;
+      }
+    }
+
+    /**
+     * Alle im MasterPrintModel geladenen Druckfuntkionen werden in die durch
+     * das ORDER-Attribut definierte Reihenfolge in einer Aufrufkette
+     * angeordnet; Diese Methode liefert die Druckfunktion an der Position idx
+     * dieser Aufrufkette (die Zählung beginnt mit 0).
+     * 
+     * @param idx
+     *          Die Position der Druckfunktion
+     * @return Die Druckfunktion an der Position idx in der sortierten
+     *         Reihenfolge oder null, wenn es an der Position idx keine
+     *         Druckfunktion gibt (z.B. IndexOutOfRange)
+     * 
+     * @author Christoph Lutz (D-III-ITD-5.1)
+     */
+    protected PrintFunction getPrintFunction(int idx)
+    {
+      if (idx >= 0 && idx < functions.size())
+        return (PrintFunction) functions.get(idx);
+      else
+        return null;
+    }
+
+    /**
+     * Liefert das Argument, das beim Aufruf der Druckfunktion functionName mit
+     * übergeben werden soll oder null, wenn der Funktion kein zusätzliches
+     * Argument übegeben werden soll.
+     * 
+     * @param functionName
+     *          Name der Druckfunktion, zu der der Aufrufparameter bestimmt
+     *          werden soll.
+     * @return Das Aufrufargument oder null, wenn der Funktion kein zusätzliches
+     *         Argument übergeben werden soll.
+     * 
+     * @author Christoph Lutz (D-III-ITD-5.1)
+     */
+    protected Object getPrintFunctionArg(String functionName)
+    {
+      return functionsAndArgs.get(functionName);
+    }
+
+    /**
+     * Liefert das XTextDocument mit dem die Druckfunktion aufgerufen wurde.
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#getTextDocument()
+     */
+    public XTextDocument getTextDocument()
+    {
+      return model.doc;
+    }
+
+    /**
+     * Deprecated: Bitte benutzen Sie statt dieser Methode die Methode
+     * printWithProps() mit dem entsprechend gesetzten Property "CopyCount".
+     * Diese Methode dient nur der Abwärtskompatibilität mit älteren
+     * XPrintModels und verwendet intern ebenfalls die Methode printWithProps()
+     * und der Property "CopyCount".
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#print(short)
+     */
+    public void print(short numberOfCopies)
+    {
+      try
+      {
+        setPropertyValue("CopyCount", new Short(numberOfCopies));
+        printWithProps();
+      }
+      catch (java.lang.Exception e)
+      {
+        Logger.error(e);
+      }
+    }
+
+    /**
+     * Druckt das TextDocument auf dem aktuell eingestellten Drucker aus oder
+     * leitet die Anfrage an die nächste verfügbare Druckfunktion in der
+     * Aufrufkette weiter, wenn eine weitere Druckfunktion vorhanden ist;
+     * Abhängig von der gesetzten Druckfunktion werden dabei verschiedene
+     * Properties, die über setPropertyValue(...) gesetzt wurden.
+     * 
+     * Im MasterPrintModel sorgt der Aufruf dieser Methode dafür, dass (nur) die
+     * erste verfügbare Druckfunktion aufgerufen wird. Das Weiterreichen der
+     * Anfrage an die jeweils nächste Druckfunktion übernimmt dann das
+     * SlavePrintModel. Ist die Aufrufkette zum Zeitpunkt des Aufrufs leer, so
+     * wird ein Dispatch ".uno:Print" abgesetzt, damit der Standarddruckdialog
+     * von OOo aufgerufen wird.
+     * 
+     * @author Christoph Lutz (D-III-ITD-5.1)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#printWithProps()
+     */
+    public void printWithProps()
+    {
+      PrintFunction f = getPrintFunction(0);
+      if (f != null)
+      {
+        XPrintModel pmod = new SlavePrintModel(this, 0);
+        f.invoke(pmod, getPrintFunctionArg(f.getFunctionName()));
+      }
+      else
+      {
+        // Es ist keine Druckfunktion definiert, darum wird ein erneuter
+        // Dispatch-Aufruf gestartet, der den Standard-Druckdialog aufruft.
+        UNO.dispatch(model.doc, ".uno:Print");
+      }
+    }
+
+    /**
+     * Wird vom SlavePrintModel aufgerufen, wenn beim Aufruf von
+     * printWithProps() keine weitere Druckfunktion mehr in der Aufrufkette
+     * verfügbar ist und das Dokument damit tatsächlich physikalisch gedruckt
+     * werden soll.
+     * 
+     * @author Christoph Lutz (D-III-ITD-5.1)
+     */
+    protected void finalPrintWithProps()
+    {
+      setLock();
+      WollMuxEventHandler.handlePrintViaPrintModel(
+          model.doc,
+          props,
+          unlockActionListener);
+      waitForUnlock();
+    }
+
+    /**
+     * Falls das TextDocument Sachleitende Verfügungen enthält, ist es mit
+     * dieser Methode möglich, den Verfügungspunkt mit der Nummer verfPunkt
+     * auszudrucken, wobei alle darauffolgenden Verfügungspunkte ausgeblendet
+     * werden.
+     * 
+     * @param verfPunkt
+     *          Die Nummer des auszuduruckenden Verfügungspunktes, wobei alle
+     *          folgenden Verfügungspunkte ausgeblendet werden.
+     * @param numberOfCopies
+     *          Die Anzahl der Ausfertigungen, in der verfPunkt ausgedruckt
+     *          werden soll.
+     * @param isDraft
+     *          wenn isDraft==true, werden alle draftOnly-Blöcke eingeblendet,
+     *          ansonsten werden sie ausgeblendet.
+     * @param isOriginal
+     *          wenn isOriginal, wird die Ziffer des Verfügungspunktes I
+     *          ausgeblendet und alle notInOriginal-Blöcke ebenso. Andernfalls
+     *          sind Ziffer und notInOriginal-Blöcke eingeblendet.
+     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#printVerfuegungspunkt(short,
+     *      short, boolean, boolean)
+     */
+    public void printVerfuegungspunkt(short verfPunkt, short numberOfCopies,
+        boolean isDraft, boolean isOriginal, short pageRangeType,
+        String pageRangeValue)
+    {
+      setLock();
+      WollMuxEventHandler.handlePrintVerfuegungspunkt(
+          model.doc,
+          verfPunkt,
+          numberOfCopies,
+          isDraft,
+          isOriginal,
+          pageRangeType,
+          pageRangeValue,
+          unlockActionListener);
+      waitForUnlock();
+    }
+
+    /**
+     * Zeigt den PrintSetupDialog an, über den der aktuelle Drucker ausgewählt
+     * und geändert werden kann.
+     * 
+     * @param onlyOnce
+     *          Gibt an, dass der Dialog nur beim ersten Aufruf (aus Sicht eines
+     *          Dokuments) der Methode angezeigt wird. Wurde bereits vor dem
+     *          Aufruf ein PrintSetup-Dialog gestartet, so öffnet sich der
+     *          Dialog nicht und die Methode endet ohne Aktion.
+     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#showPrinterSetupDialog()
+     */
+    public void showPrinterSetupDialog(boolean onlyOnce)
+    {
+      setLock();
+      WollMuxEventHandler.handleShowPrinterSetupDialog(
+          model.doc,
+          onlyOnce,
+          unlockActionListener);
+      waitForUnlock();
+    }
+
+    /**
+     * Falls es sich bei dem zugehörigen Dokument um ein Formulardokument (mit
+     * einer Formularbeschreibung) handelt, wird das Formularfeld mit der ID id
+     * auf den neuen Wert value gesetzt und alle von diesem Formularfeld
+     * abhängigen Formularfelder entsprechend angepasst. Handelt es sich beim
+     * zugehörigen Dokument um ein Dokument ohne Formularbeschreibung, so werden
+     * nur alle insertFormValue-Kommandos dieses Dokuments angepasst, die die ID
+     * id besitzen.
+     * 
+     * @param id
+     *          Die ID des Formularfeldes, dessen Wert verändert werden soll.
+     *          Ist die FormGUI aktiv, so werden auch alle von id abhängigen
+     *          Formularwerte neu gesetzt.
+     * @param value
+     *          Der neue Wert des Formularfeldes id
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#setFormValue(java.lang.String,
+     *      java.lang.String)
+     */
+    public void setFormValue(String id, String value)
+    {
+      setLock();
+      WollMuxEventHandler.handleSetFormValueViaPrintModel(
+          model.doc,
+          id,
+          value,
+          unlockActionListener);
+      waitForUnlock();
+    }
+
+    /**
+     * Liefert true, wenn das Dokument als "modifiziert" markiert ist und damit
+     * z.B. die "Speichern?" Abfrage vor dem Schließen erscheint.
+     * 
+     * Manche Druckfunktionen verändern u.U. den Inhalt von Dokumenten. Trotzdem
+     * kann es sein, dass eine solche Druckfunktion den "Modifiziert"-Status des
+     * Dokuments nicht verändern darf um ungewünschte "Speichern?"-Abfragen zu
+     * verhindern. In diesem Fall kann der "Modifiziert"-Status mit folgendem
+     * Konstrukt innerhalb der Druckfunktion unverändert gehalten werden:
+     * 
+     * boolean modified = pmod.getDocumentModified();
+     * 
+     * ...die eigentliche Druckfunktion, die das Dokument verändert...
+     * 
+     * pmod.setDocumentModified(modified);
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#getDocumentModified()
+     */
+    public boolean getDocumentModified()
+    {
+      // Keine WollMuxEvent notwendig, da keine WollMux-Datenstrukturen
+      // angefasst werden.
+      return model.getDocumentModified();
+    }
+
+    /**
+     * Diese Methode setzt den DocumentModified-Status auf modified.
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#setDocumentModified(boolean)
+     */
+    public void setDocumentModified(boolean modified)
+    {
+      // Keine WollMuxEvent notwendig, da keine WollMux-Datenstrukturen
+      // angefasst werden.
+      model.setDocumentModified(modified);
+    }
+
+    /**
+     * Sammelt alle Formularfelder des Dokuments auf, die nicht von
+     * WollMux-Kommandos umgeben sind, jedoch trotzdem vom WollMux verstanden
+     * und befüllt werden (derzeit c,s,s,t,textfield,Database-Felder). So werden
+     * z.B. Seriendruckfelder erkannt, die erst nach dem Öffnen des Dokuments
+     * manuell hinzugefügt wurden.
+     */
+    public void collectNonWollMuxFormFields()
+    {
+      setLock();
+      WollMuxEventHandler.handleCollectNonWollMuxFormFieldsViaPrintModel(
+          model,
+          unlockActionListener);
+      waitForUnlock();
+    }
+
+    /**
+     * Setzt einen lock, der in Verbindung mit setUnlock und der
+     * waitForUnlock-Methode verwendet werden kann, um eine Synchronisierung mit
+     * dem WollMuxEventHandler-Thread zu realisieren. setLock() sollte stets vor
+     * dem Absetzen des WollMux-Events erfolgen, nach dem Absetzen des
+     * WollMux-Events folgt der Aufruf der waitForUnlock()-Methode. Das
+     * WollMuxEventHandler-Event erzeugt bei der Beendigung ein ActionEvent, das
+     * dafür sorgt, dass setUnlock aufgerufen wird.
+     */
+    protected void setLock()
+    {
+      synchronized (lock)
+      {
+        lock[0] = true;
+      }
+    }
+
+    /**
+     * Macht einen mit setLock() gesetzten Lock rückgängig und bricht damit eine
+     * evtl. wartende waitForUnlock()-Methode ab.
+     */
+    protected void setUnlock()
+    {
+      synchronized (lock)
+      {
+        lock[0] = false;
+        lock.notifyAll();
+      }
+    }
+
+    /**
+     * Wartet so lange, bis der vorher mit setLock() gesetzt lock mit der
+     * Methode setUnlock() aufgehoben wird. So kann die Synchronisierung mit
+     * Events aus dem WollMuxEventHandler-Thread realisiert werden. setLock()
+     * sollte stets vor dem Aufruf des Events erfolgen, nach dem Aufruf des
+     * Events folgt der Aufruf der waitForUnlock()-Methode. Das Event erzeugt
+     * bei der Beendigung ein ActionEvent, das dafür sorgt, dass setUnlock
+     * aufgerufen wird.
+     */
+    protected void waitForUnlock()
+    {
+      try
+      {
+        synchronized (lock)
+        {
+          while (lock[0] == true)
+            lock.wait();
+        }
+      }
+      catch (InterruptedException e)
+      {
+      }
+    }
+
+    /**
+     * Dieser ActionListener kann WollMuxHandler-Events übergeben werden und
+     * sorgt in Verbindung mit den Methoden setLock() und waitForUnlock() dafür,
+     * dass eine Synchronisierung mit dem WollMuxEventHandler-Thread realisiert
+     * werden kann.
+     */
+    protected UnlockActionListener unlockActionListener = new UnlockActionListener();
+
+    protected class UnlockActionListener implements ActionListener
+    {
+      public ActionEvent actionEvent = null;
+
+      public void actionPerformed(ActionEvent arg0)
+      {
+        setUnlock();
+        actionEvent = arg0;
+      }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.sun.star.beans.XPropertySet#getPropertySetInfo()
+     */
+    public XPropertySetInfo getPropertySetInfo()
+    {
+      return new XPropertySetInfo()
+      {
+        public boolean hasPropertyByName(String arg0)
+        {
+          return props.containsKey(arg0);
+        }
+
+        public Property getPropertyByName(String arg0)
+            throws UnknownPropertyException
+        {
+          if (hasPropertyByName(arg0))
+            return new Property(arg0, -1, Type.ANY, PropertyAttribute.OPTIONAL);
+          else
+            throw new UnknownPropertyException(arg0);
+        }
+
+        public Property[] getProperties()
+        {
+          Property[] ps = new Property[props.size()];
+          int i = 0;
+          for (Iterator iter = props.keySet().iterator(); iter.hasNext();)
+          {
+            String name = (String) iter.next();
+            try
+            {
+              ps[i++] = getPropertyByName(name);
+            }
+            catch (UnknownPropertyException e)
+            {
+            }
+          }
+          return ps;
+        }
+      };
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.sun.star.beans.XPropertySet#setPropertyValue(java.lang.String,
+     *      java.lang.Object)
+     */
+    public void setPropertyValue(String arg0, Object arg1)
+        throws UnknownPropertyException, PropertyVetoException,
+        IllegalArgumentException, WrappedTargetException
+    {
+      props.put(arg0, arg1);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.sun.star.beans.XPropertySet#getPropertyValue(java.lang.String)
+     */
+    public Object getPropertyValue(String arg0)
+        throws UnknownPropertyException, WrappedTargetException
+    {
+      if (props.containsKey(arg0))
+        return props.get(arg0);
+      else
+        throw new UnknownPropertyException(arg0);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.sun.star.beans.XPropertySet#addPropertyChangeListener(java.lang.String,
+     *      com.sun.star.beans.XPropertyChangeListener)
+     */
+    public void addPropertyChangeListener(String arg0,
+        XPropertyChangeListener arg1) throws UnknownPropertyException,
+        WrappedTargetException
+    {
+      // NOT IMPLEMENTED
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.sun.star.beans.XPropertySet#removePropertyChangeListener(java.lang.String,
+     *      com.sun.star.beans.XPropertyChangeListener)
+     */
+    public void removePropertyChangeListener(String arg0,
+        XPropertyChangeListener arg1) throws UnknownPropertyException,
+        WrappedTargetException
+    {
+      // NOT IMPLEMENTED
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.sun.star.beans.XPropertySet#addVetoableChangeListener(java.lang.String,
+     *      com.sun.star.beans.XVetoableChangeListener)
+     */
+    public void addVetoableChangeListener(String arg0,
+        XVetoableChangeListener arg1) throws UnknownPropertyException,
+        WrappedTargetException
+    {
+      // NOT IMPLEMENTED
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.sun.star.beans.XPropertySet#removeVetoableChangeListener(java.lang.String,
+     *      com.sun.star.beans.XVetoableChangeListener)
+     */
+    public void removeVetoableChangeListener(String arg0,
+        XVetoableChangeListener arg1) throws UnknownPropertyException,
+        WrappedTargetException
+    {
+      // NOT IMPLEMENTED
+    }
+  }
+
+  /**
+   * Beim Aufruf einer einzelnen Druckfunktion wird dieser Druckfunktion ein
+   * XPrintModel, repräsentiert durch das SlavePrintModel, übergeben. Für jede
+   * im MaserPrintModel verwaltete und aufgerufene Druckfunktion existiert also
+   * genau ein SlavePrintModel, das im wesentlichen alle Anfragen
+   * (Methodenaufrufe) an das MasterPrintModel weiterleitet. Das SlavePrintModel
+   * kennt seine Position (idx) in der Aufrufkette und sorgt vor allem dafür,
+   * dass beim Aufruf von printWithProps() die nächste Druckfunktion der
+   * Aufrufkette gestartet wird.
+   * 
+   * Das SlavePrintModel ist von WeakBase abgeleitet, damit es in der
+   * Druckfunktion mit den UNO-Mitteln inspiziert werden kann.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  private static class SlavePrintModel extends WeakBase implements XPrintModel
+  {
+    private int idx;
+
+    private MasterPrintModel master;
+
+    /**
+     * Erzeugt ein neues SlavePrintModel, das in der Aufrufkette, die durch das
+     * MasterPrintModel master verwaltet wird, an der Stelle idx steht.
+     * 
+     * @param master
+     *          Das MasterPrintModel, an das die meisten Anfragen weitergeleitet
+     *          werden und das die Aufrufkette der Druckfunktionen verwaltet.
+     * @param idx
+     *          Die Position der zu diesem SlavePrintModel zugehörigen
+     *          Druckfunktion in der Aufrufkette von master.
+     */
+    public SlavePrintModel(MasterPrintModel master, int idx)
+    {
+      this.master = master;
+      this.idx = idx;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#getTextDocument()
+     */
+    public XTextDocument getTextDocument()
+    {
+      return master.getTextDocument();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#print(short)
+     */
+    public void print(short numberOfCopies)
+    {
+      try
+      {
+        setPropertyValue("CopyCount", new Short(numberOfCopies));
+        printWithProps();
+      }
+      catch (java.lang.Exception e)
+      {
+        Logger.error(e);
+      }
+    }
+
+    /**
+     * Diese Methode ist die wichtigste Methode im SlavePrintModel, denn sie
+     * sorgt dafür, dass beim Aufruf von PrintWithProps die Weiterleitung an die
+     * nächste Druckfunktion der Aufrufkette veranlasst wird.
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#printWithProps()
+     */
+    public void printWithProps()
+    {
+      PrintFunction f = master.getPrintFunction(idx + 1);
+      if (f != null)
+      {
+        XPrintModel pmod = new SlavePrintModel(master, idx + 1);
+        Thread t = f.invoke(pmod, master.getPrintFunctionArg(f
+            .getFunctionName()));
+        try
+        {
+          t.join();
+        }
+        catch (InterruptedException e)
+        {
+          Logger.error(e);
+        }
+      }
+      else
+      {
+        master.finalPrintWithProps();
+      }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#showPrinterSetupDialog(boolean)
+     */
+    public void showPrinterSetupDialog(boolean arg0)
+    {
+      master.showPrinterSetupDialog(arg0);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#printVerfuegungspunkt(short,
+     *      short, boolean, boolean, short, java.lang.String)
+     */
+    public void printVerfuegungspunkt(short arg0, short arg1, boolean arg2,
+        boolean arg3, short arg4, String arg5)
+    {
+      master.printVerfuegungspunkt(arg0, arg1, arg2, arg3, arg4, arg5);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#setFormValue(java.lang.String,
+     *      java.lang.String)
+     */
+    public void setFormValue(String arg0, String arg1)
+    {
+      master.setFormValue(arg0, arg1);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#getDocumentModified()
+     */
+    public boolean getDocumentModified()
+    {
+      return master.getDocumentModified();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#setDocumentModified(boolean)
+     */
+    public void setDocumentModified(boolean arg0)
+    {
+      master.setDocumentModified(arg0);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#collectNonWollMuxFormFields()
+     */
+    public void collectNonWollMuxFormFields()
+    {
+      master.collectNonWollMuxFormFields();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.sun.star.beans.XPropertySet#getPropertySetInfo()
+     */
+    public XPropertySetInfo getPropertySetInfo()
+    {
+      return master.getPropertySetInfo();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.sun.star.beans.XPropertySet#setPropertyValue(java.lang.String,
+     *      java.lang.Object)
+     */
+    public void setPropertyValue(String arg0, Object arg1)
+        throws UnknownPropertyException, PropertyVetoException,
+        IllegalArgumentException, WrappedTargetException
+    {
+      master.setPropertyValue(arg0, arg1);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.sun.star.beans.XPropertySet#getPropertyValue(java.lang.String)
+     */
+    public Object getPropertyValue(String arg0)
+        throws UnknownPropertyException, WrappedTargetException
+    {
+      return master.getPropertyValue(arg0);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.sun.star.beans.XPropertySet#addPropertyChangeListener(java.lang.String,
+     *      com.sun.star.beans.XPropertyChangeListener)
+     */
+    public void addPropertyChangeListener(String arg0,
+        XPropertyChangeListener arg1) throws UnknownPropertyException,
+        WrappedTargetException
+    {
+      master.addPropertyChangeListener(arg0, arg1);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.sun.star.beans.XPropertySet#removePropertyChangeListener(java.lang.String,
+     *      com.sun.star.beans.XPropertyChangeListener)
+     */
+    public void removePropertyChangeListener(String arg0,
+        XPropertyChangeListener arg1) throws UnknownPropertyException,
+        WrappedTargetException
+    {
+      master.removePropertyChangeListener(arg0, arg1);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.sun.star.beans.XPropertySet#addVetoableChangeListener(java.lang.String,
+     *      com.sun.star.beans.XVetoableChangeListener)
+     */
+    public void addVetoableChangeListener(String arg0,
+        XVetoableChangeListener arg1) throws UnknownPropertyException,
+        WrappedTargetException
+    {
+      master.addVetoableChangeListener(arg0, arg1);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.sun.star.beans.XPropertySet#removeVetoableChangeListener(java.lang.String,
+     *      com.sun.star.beans.XVetoableChangeListener)
+     */
+    public void removeVetoableChangeListener(String arg0,
+        XVetoableChangeListener arg1) throws UnknownPropertyException,
+        WrappedTargetException
+    {
+      master.removeVetoableChangeListener(arg0, arg1);
+    }
+
+    /**
+     * Der wesentliche Unterschied zur gleichnamigen Methode des Masters ist es,
+     * dass nur Druckfunktionen angenommen werden, deren ORDER-Wert höher als
+     * der ORDER-Wert der aktuellen Druckfunktion ist.
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#usePrintFunction(java.lang.String)
+     */
+    public boolean usePrintFunction(String arg0)
+    {
+      return usePrintFunctionWithArgument(arg0, null);
+    }
+
+    /**
+     * Der wesentliche Unterschied zur gleichnamigen Methode des Masters ist es,
+     * dass nur Druckfunktionen angenommen werden, deren ORDER-Wert höher als
+     * der ORDER-Wert der aktuellen Druckfunktion ist.
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#usePrintFunctionWithArgument(java.lang.String,
+     *      java.lang.Object)
+     */
+    public boolean usePrintFunctionWithArgument(String functionName, Object arg)
+    {
+      PrintFunction newFunc = WollMuxSingleton.getInstance()
+          .getGlobalPrintFunctions().get(functionName);
+      if (newFunc != null)
+      {
+        return useInternalPrintFunctionWithArgument(newFunc, arg);
+      }
+      else
+      {
+        Logger.error("Druckfunktion '" + functionName + "' nicht definiert.");
+        return false;
+      }
+    }
+
+    /**
+     * Der wesentliche Unterschied zur gleichnamigen Methode des Masters ist es,
+     * dass nur Druckfunktionen angenommen werden, deren ORDER-Wert höher als
+     * der ORDER-Wert der aktuellen Druckfunktion ist.
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#useInternalPrintFunction(java.lang.Object)
+     */
+    public boolean useInternalPrintFunction(Object arg0)
+    {
+      return useInternalPrintFunctionWithArgument(arg0, null);
+    }
+
+    /**
+     * Der wesentliche Unterschied zur gleichnamigen Methode des Masters ist es,
+     * dass nur Druckfunktionen angenommen werden, deren ORDER-Wert höher als
+     * der ORDER-Wert der aktuellen Druckfunktion ist.
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#useInternalPrintFunctionWithArgument(java.lang.Object,
+     *      java.lang.Object)
+     */
+    public boolean useInternalPrintFunctionWithArgument(Object function,
+        Object arg)
+    {
+      if (function != null && function instanceof PrintFunction)
+      {
+        PrintFunction f = (PrintFunction) function;
+        PrintFunction currentFunc = master.getPrintFunction(idx);
+        if (f.compareTo(currentFunc) <= 0)
+        {
+          Logger
+              .error("Druckfunktion '"
+                     + f.getFunctionName()
+                     + "' muss einen höheren ORDER-Wert besitzen als die Druckfunktion '"
+                     + currentFunc.getFunctionName()
+                     + "'");
+          return false;
+        }
+        else
+          return master.useInternalPrintFunctionWithArgument(f, arg);
+      }
+      else
+      {
+        Logger.error("Die angeforderte interne Druckfunktion ist ungültig.");
+        return false;
+      }
+    }
+  }
+}

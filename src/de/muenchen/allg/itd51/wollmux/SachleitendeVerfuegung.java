@@ -748,9 +748,9 @@ public class SachleitendeVerfuegung
     // Druckfunktion zurück.
     int effectiveCount = (punkt1 != null) ? count - 1 : count;
     if (effectiveCount > 0)
-      model.setPrintFunction(PRINT_FUNCTION_NAME);
+      model.addPrintFunction(PRINT_FUNCTION_NAME);
     else
-      model.resetPrintFunction(PRINT_FUNCTION_NAME);
+      model.removePrintFunction(PRINT_FUNCTION_NAME);
   }
 
   /**
