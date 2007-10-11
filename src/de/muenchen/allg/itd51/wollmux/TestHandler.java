@@ -79,6 +79,27 @@ public class TestHandler
     }
 
     /** ************************************************************** */
+    if (cmd.equalsIgnoreCase("VerfuegungspunktDrucken"))
+    {
+      Map idsAndValues = getWollmuxTestArgs();
+      short count = (short) SachleitendeVerfuegung
+          .countVerfuegungspunkte(model.doc);
+      short verfPunkt = new Short(idsAndValues.get("VerfPunkt").toString())
+          .shortValue();
+      boolean isDraft = (verfPunkt == count) ? true : false;
+      boolean isOriginal = (verfPunkt == 1) ? true : false;
+      WollMuxEventHandler.handlePrintVerfuegungspunkt(
+          model.doc,
+          verfPunkt,
+          (short) 1,
+          isDraft,
+          isOriginal,
+          TextDocumentModel.PAGE_RANGE_TYPE_ALL,
+          "",
+          null);
+    }
+
+    /** ************************************************************** */
     if (cmd.equalsIgnoreCase("SchreibeFormularwerte"))
     {
       Map idsAndValues = getWollmuxTestArgs();
