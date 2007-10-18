@@ -28,6 +28,7 @@ import java.util.List;
 
 import com.sun.star.beans.Property;
 import com.sun.star.beans.PropertyAttribute;
+import com.sun.star.beans.PropertyValue;
 import com.sun.star.beans.PropertyVetoException;
 import com.sun.star.beans.UnknownPropertyException;
 import com.sun.star.beans.XPropertyChangeListener;
@@ -43,16 +44,178 @@ import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.func.PrintFunction;
 
 /**
- * Diese Klasse enthält eine Fabrik für die Erzeugung eines XPrintModels und die
+ * Diese Klasse enthält eine Fabrik für die Erzeugung eines XPrintModels, die
  * Klassendefinitionen des MasterPrintModels und des SlavePrintModels, mit deren
- * Hilfe die Verkettung mehrerer PrintFunctions möglich ist. Ein XPrintModel
- * hält alle Daten und Methoden bereit, die beim Drucken aus einer Druckfunktion
+ * Hilfe die Verkettung mehrerer PrintFunctions möglich ist und die Definitionen
+ * der Properties, die beim Drucken zum Einsatz kommen. Ein XPrintModel hält
+ * alle Daten und Methoden bereit, die beim Drucken aus einer Druckfunktion
  * heraus benötigt werden.
  * 
  * @author Christoph Lutz (D-III-ITD-5.1)
  */
-public class PrintModelFactory
+public class PrintModels
 {
+  /**
+   * Diese Klasse definiert alle Properties, die in einem PrintModel gesetzt
+   * werden können und beim Drucken über die Methode printWithProps() von den
+   * mit dem WollMux mitgelieferten Druckfunktionen ausgewertet werden.
+   * Benutzerdefinierte (also nicht mit dem WollMux mitgeliferte)
+   * Druckfunktionen können natürlich auch weitere Properties auswerten, die
+   * nicht hier aufgeführt sind.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  public static class PrintModelProps
+  {
+    /**
+     * Diese Property vom Typ Short enthält die Anzahl der Ausfertigungen die
+     * von dem Dokument gedruckt werden sollen. Sie wird von der letzten
+     * Druckfunktion ausgewertet, die bei printWithProps() automatisch gestartet
+     * wird, wenn keine andere Druckfunktion mehr in der Aufrufkette vorhanden
+     * ist.
+     */
+    public static final String PROP_COPY_COUNT = "CopyCount";
+
+    /**
+     * Diese Property vom Typ Short enthält einen der Werte PAGE_RANGE_TYPE_*
+     * und spezifiziert den Typ des Seitenbereichs, der ausgedruckt werden soll.
+     * Dabei sind über diese Property auch automatische Bestimmungen des
+     * Seitenbereichs wie z.B. über die aktuelle Cursorposition möglich. Die
+     * Property ist nur in Verbindung mit der Property PROP_PAGE_RANGE_VALUE
+     * sinnvoll. Sie wird von der letzten Druckfunktion ausgewertet, die bei
+     * printWithProps() automatisch gestartet wird, wenn keine andere
+     * Druckfunktion mehr in der Aufrufkette vorhanden ist.
+     */
+    public static final String PROP_PAGE_RANGE_TYPE = "PageRangeType";
+
+    /**
+     * Diese Property vom Typ String spezifiziert den zu druckenden
+     * Seitenbereich als String in der Form, wie er auch bei Datei->Drucken in
+     * OOo angegeben werden kann (z.B. "1-3", "1,2,5"). Die Property wird nur in
+     * Verbindung mit dem Wert PAGE_RANGE_TYPE_MANUAL der Property
+     * PROP_PAGE_RANGE_TYPE gelesen. Sie wird von der letzten Druckfunktion
+     * ausgewertet, die bei printWithProps() automatisch gestartet wird, wenn
+     * keine andere Druckfunktion mehr in der Aufrufkette vorhanden ist.
+     */
+    public static final String PROP_PAGE_RANGE_VALUE = "PageRangeValue";
+
+    /**
+     * Ist diese Property vom Typ String gesetzt, so wird der Wert direkt als
+     * der zu druckende Seitenbereich übernommen. Er ist in der Form, wie er
+     * auch bei Datei->Drucken in OOo angegeben werden kann (z.B. "1-3",
+     * "1,2,5"). Die Property hat Vorrang vor den Properties PROP_PAGE_RANGE_*
+     * und ermöglicht so die direkte manuelle Angabe des zu druckenden
+     * Seitenbereichs. Sie wird von der letzten Druckfunktion ausgewertet, die
+     * bei printWithProps() automatisch gestartet wird, wenn keine andere
+     * Druckfunktion mehr in der Aufrufkette vorhanden ist.
+     */
+    public static final String PROP_PAGES = "Pages";
+
+    /**
+     * Diese Property vom Typ Array Of Short enthält die Anzahl der
+     * Ausfertigungen, die für jeden in PROP_SLV_VERF_PUNKTE angegebenen
+     * Verfügungspunkt beim Drucken gesetzt werden soll. Sie wird von der
+     * Komfortdruckfunktion SachleitendeVerfuegungOutput ausgewertet.
+     */
+    public static final String PROP_SLV_COPY_COUNTS = "SLV_CopyCounts";
+
+    /**
+     * Diese Property vom Typ Array Of String enthält den PageRange-Wert, der
+     * für jeden in PROP_SLV_VERF_PUNKTE angegebenen Verfügungspunkt beim
+     * Drucken gesetzt werden soll. Sie wird von der Komfortdruckfunktion
+     * SachleitendeVerfuegungOutput ausgewertet.
+     */
+    public static final String PROP_SLV_PAGE_RANGE_VALUES = "SLV_PageRangeValues";
+
+    /**
+     * Diese Property vom Typ Array Of Short enthält den PageRange-Typ, der für
+     * jeden in PROP_SLV_VERF_PUNKTE angegebenen Verfügungspunkt beim Drucken
+     * gesetzt werden soll. Sie wird von der Komfortdruckfunktion
+     * SachleitendeVerfuegungOutput ausgewertet.
+     */
+    public static final String PROP_SLV_PAGE_RANGE_TYPES = "SLV_PageRangeTypes";
+
+    /**
+     * Diese Property vom Typ Array Of Boolean enthält das isOriginal-Flag, das
+     * für jeden in PROP_SLV_VERF_PUNKTE angegebenen Verfügungspunkt beim
+     * Drucken gesetzt werden soll. Sie wird von der Komfortdruckfunktion
+     * SachleitendeVerfuegungOutput ausgewertet.
+     */
+    public static final String PROP_SLV_IS_ORIGINAL_FLAGS = "SLV_isOriginalFlags";
+
+    /**
+     * Diese Property vom Typ Array Of Boolean enthält das isDraft-Flag, das für
+     * jeden in PROP_SLV_VERF_PUNKTE angegebenen Verfügungspunkt beim Drucken
+     * gesetzt werden soll. Sie wird von der Komfortdruckfunktion
+     * SachleitendeVerfuegungOutput ausgewertet.
+     */
+    public static final String PROP_SLV_IS_DRAFT_FLAGS = "SLV_isDraftFlags";
+
+    /**
+     * Diese Property vom Typ Array Of Short enthält die Nummern der zu
+     * druckenden Verfügungspunkte. Sie wird von der Komfortdruckfunktion
+     * SachleitendeVerfuegungOutput ausgewertet.
+     */
+    public static final String PROP_SLV_VERF_PUNKTE = "SLV_verfPunkte";
+
+    /**
+     * Wert der Property PROP_PAGE_RANGE_TYPE: Alle Seiten des Textdokuments
+     * sollen gedruckt werden.
+     */
+    public static final short PAGE_RANGE_TYPE_ALL = 1;
+
+    /**
+     * Wert der Property PROP_PAGE_RANGE_TYPE: Nur die aktuelle Seite des
+     * Textdokuments, auf der der Cursor gerade steht, soll gedruckt werden.
+     */
+    public static final short PAGE_RANGE_TYPE_CURRENT = 2;
+
+    /**
+     * Wert der Property PROP_PAGE_RANGE_TYPE: Der Druckbereich erstreckt sich
+     * von der aktuellen Seite des Textdokuments, auf der der Cursor gerade
+     * steht, bis zum Dokumentende.
+     */
+    public static final short PAGE_RANGE_TYPE_CURRENTFF = 3;
+
+    /**
+     * Wert der Property PROP_PAGE_RANGE_TYPE: Sorgt dafür, dass der Wert der
+     * Property PAGE_RANGE_VALUE als Druckbereich übernommen wird.
+     */
+    public static final short PAGE_RANGE_TYPE_MANUAL = 4;
+  }
+
+  /**
+   * Definiert Properties, die in der Methode setPrintBlocksProps relevant sind.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  public static class PrintBlocksProps
+  {
+    /**
+     * Diese Property vom Typ Boolean ermöglicht das Anzeigen bzw. Ausblenden
+     * der DraftOnly-Druckblöcke.
+     */
+    public static final String PROP_DRAFT_ONLY_VISIBLE = "DraftOnlyVisible";
+
+    /**
+     * Diese Property vom Typ Boolean ermöglicht das Anzeigen bzw. Ausblenden
+     * der NotInOriginal-Druckblöcke.
+     */
+    public static final String PROP_NOT_IN_ORIGINAL_VISIBLE = "NotInOriginalVisible";
+
+    /**
+     * Diese Property vom Typ Boolean ermöglicht das Anzeigen bzw. Ausblenden
+     * der AllVersions-Druckblöcke.
+     */
+    public static final String PROP_ALL_VERSIONS_VISIBLE = "AllVersionsVisible";
+
+    /**
+     * Ist diese Property vom Typ Boolean true, so werden alle Hintergrundfarben
+     * der über die Properties "*Visible" angesprochenen Druckblöcke auf den
+     * Standardhintergrund zurückgesetzt.
+     */
+    public static final String PROP_HIDE_HIGHLIGHT_COLOR = "HideHighlightColor";
+  };
 
   /**
    * Erzeugt ein PrintModel-Objekt, das einen Druckvorgang zum Dokument
@@ -346,7 +509,8 @@ public class PrintModelFactory
     {
       try
       {
-        setPropertyValue("CopyCount", new Short(numberOfCopies));
+        setPropertyValue(PrintModelProps.PROP_COPY_COUNT, new Short(
+            numberOfCopies));
         printWithProps();
       }
       catch (java.lang.Exception e)
@@ -403,45 +567,6 @@ public class PrintModelFactory
       WollMuxEventHandler.handlePrintViaPrintModel(
           model.doc,
           props,
-          unlockActionListener);
-      waitForUnlock();
-    }
-
-    /**
-     * Falls das TextDocument Sachleitende Verfügungen enthält, ist es mit
-     * dieser Methode möglich, den Verfügungspunkt mit der Nummer verfPunkt
-     * auszudrucken, wobei alle darauffolgenden Verfügungspunkte ausgeblendet
-     * werden.
-     * 
-     * @param verfPunkt
-     *          Die Nummer des auszuduruckenden Verfügungspunktes, wobei alle
-     *          folgenden Verfügungspunkte ausgeblendet werden.
-     * @param numberOfCopies
-     *          Die Anzahl der Ausfertigungen, in der verfPunkt ausgedruckt
-     *          werden soll.
-     * @param isDraft
-     *          wenn isDraft==true, werden alle draftOnly-Blöcke eingeblendet,
-     *          ansonsten werden sie ausgeblendet.
-     * @param isOriginal
-     *          wenn isOriginal, wird die Ziffer des Verfügungspunktes I
-     *          ausgeblendet und alle notInOriginal-Blöcke ebenso. Andernfalls
-     *          sind Ziffer und notInOriginal-Blöcke eingeblendet.
-     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#printVerfuegungspunkt(short,
-     *      short, boolean, boolean)
-     */
-    public void printVerfuegungspunkt(short verfPunkt, short numberOfCopies,
-        boolean isDraft, boolean isOriginal, short pageRangeType,
-        String pageRangeValue)
-    {
-      setLock();
-      WollMuxEventHandler.handlePrintVerfuegungspunkt(
-          model.doc,
-          verfPunkt,
-          numberOfCopies,
-          isDraft,
-          isOriginal,
-          pageRangeType,
-          pageRangeValue,
           unlockActionListener);
       waitForUnlock();
     }
@@ -744,6 +869,68 @@ public class PrintModelFactory
     {
       // NOT IMPLEMENTED
     }
+
+    /**
+     * Diese Methode setzt neue Eigenschaften für die Druckblöcke (z.B.
+     * allVersions), die in properties spezifiziert sind, und speichert die
+     * ursprünglichen Eigenschaften der Druckblölcke in einer internen HashMap
+     * unter dem Schlüssel key ab. Mit Hilfe von restorePrintBlocksProps(key)
+     * können die ürsprünglichen Einstellungen später wieder hergestellt werden.
+     * 
+     * @param key
+     *          Ein belibiges Objekt das als Schlüssel verwendet wird, um mit
+     *          Hilfe von restorePrintBlocksProps(key) die Einstellungen wieder
+     *          herstellen zu können, die vor dem Aufruf dieser Methode gesetzt
+     *          waren.
+     * @param properties
+     *          Array von PropertyValue-Objekten. Folgende Properties werden
+     *          dabei von dieser Methode ausgewertet wenn sie angegeben sind:
+     *          Das Property "NotInOriginalVisible" (Boolean) ermöglicht das
+     *          Anzeigen/Ausblenden der NotInOriginal-Druckblöcke. Das Property
+     *          "DraftOnlyVisible" (Boolean) ermöglicht das Anzeigen/Ausblenden
+     *          der DraftOnly-Druckblöcke. Das Property "AllVersionsVisible"
+     *          (Boolean) ermöglicht das Anzeigen/Ausblenden der
+     *          allVersions-Druckblöcke. Ist "HideHighlightColor" (Boolean) ==
+     *          True, so werden all Hintergrundfarben der über die Properties
+     *          "*Visible" angesprochenen Druckblöcke auf den
+     *          Standardhintergrund zurückgesetzt.
+     * 
+     * @author Christoph Lutz (D-III-ITD-5.1)
+     */
+    public void setPrintBlocksProps(Object key, PropertyValue[] properties)
+    {
+      setLock();
+      WollMuxEventHandler.handleSetPrintBlocksPropsViaPrintModel(
+          model.doc,
+          key,
+          properties,
+          unlockActionListener);
+      waitForUnlock();
+    }
+
+    /**
+     * Diese Methode ermöglicht, gesteuert über den Schlüssel key, das
+     * Wiederherstellen der Eigenschaften der Druckblöcke, die vor dem Aufruf
+     * von setPrintBlocksProperties(key, props) gesetzt waren.
+     * 
+     * @param key
+     *          Der Key ist ein belibiges Objekt, das intern als Schlüssel für
+     *          eine HashMap verwendet wird, in der die ursprünglichen Zustände
+     *          der Druckblöcke abgelegt wurden. Nach dem Durchlauf dieser
+     *          Methode wird der Schlüssel key aus der internen HashMap
+     *          entfernt.
+     * 
+     * @author Christoph Lutz (D-III-ITD-5.1)
+     */
+    public void restorePrintBlocksProps(Object key)
+    {
+      setLock();
+      WollMuxEventHandler.handleRestorePrintBlocksViaPrintModel(
+          model.doc,
+          key,
+          unlockActionListener);
+      waitForUnlock();
+    }
   }
 
   /**
@@ -803,7 +990,8 @@ public class PrintModelFactory
     {
       try
       {
-        setPropertyValue("CopyCount", new Short(numberOfCopies));
+        setPropertyValue(PrintModelProps.PROP_COPY_COUNT, new Short(
+            numberOfCopies));
         printWithProps();
       }
       catch (java.lang.Exception e)
@@ -855,18 +1043,6 @@ public class PrintModelFactory
     /*
      * (non-Javadoc)
      * 
-     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#printVerfuegungspunkt(short,
-     *      short, boolean, boolean, short, java.lang.String)
-     */
-    public void printVerfuegungspunkt(short arg0, short arg1, boolean arg2,
-        boolean arg3, short arg4, String arg5)
-    {
-      master.printVerfuegungspunkt(arg0, arg1, arg2, arg3, arg4, arg5);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#setFormValue(java.lang.String,
      *      java.lang.String)
      */
@@ -903,6 +1079,27 @@ public class PrintModelFactory
     public void collectNonWollMuxFormFields()
     {
       master.collectNonWollMuxFormFields();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#setPrintBlocksProps(java.lang.Object,
+     *      com.sun.star.beans.PropertyValue[])
+     */
+    public void setPrintBlocksProps(Object arg0, PropertyValue[] arg1)
+    {
+      master.setPrintBlocksProps(arg0, arg1);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#restorePrintBlocksProps(java.lang.Object)
+     */
+    public void restorePrintBlocksProps(Object arg0)
+    {
+      master.restorePrintBlocksProps(arg0);
     }
 
     /*

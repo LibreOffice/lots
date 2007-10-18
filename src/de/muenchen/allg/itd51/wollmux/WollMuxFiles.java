@@ -957,7 +957,7 @@ public class WollMuxFiles
   /**
    * Kopiert den Inhalt von file nach out (binär).
    * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TODO Testen
+   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private static void copyFile(File file, OutputStream out)
   {

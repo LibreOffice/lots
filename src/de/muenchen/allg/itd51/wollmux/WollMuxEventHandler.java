@@ -2621,13 +2621,17 @@ public class WollMuxEventHandler
   // *******************************************************************************************
 
   /**
-   * Erzeugt ein neues WollMuxEvent, das signasisiert, dass das Dokument doc in
-   * der Anzahl numberOfCopies ausgedruckt werden soll. Nach Beendigung des
-   * Events soll der CallBack des übergebenen ActionsListeners aufgerufen
-   * werden.
+   * Erzeugt ein neues WollMuxEvent, das signasisiert, dass das Dokument doc mit
+   * den Argumenten props ausgedruckt werden soll. Nach Beendigung des Events
+   * soll der CallBack des übergebenen ActionsListeners aufgerufen werden.
    * 
    * Das Event dient als Hilfe für die Komfortdruckfunktionen und wird vom
    * XPrintModel aufgerufen und mit diesem synchronisiert.
+   * 
+   * @param props
+   *          HashMap mit Properties aus
+   *          {@see de.muenchen.allg.itd51.wollmux.PrintModels.PrintModelProps},
+   *          die ausgewertet werden sollen.
    */
   public static void handlePrintViaPrintModel(XTextDocument doc, HashMap props,
       ActionListener listener)
@@ -2671,6 +2675,152 @@ public class WollMuxEventHandler
     public String toString()
     {
       return this.getClass().getSimpleName() + "(#" + doc.hashCode() + ")";
+    }
+  }
+
+  // *******************************************************************************************
+
+  /**
+   * Diese Methode erzeugt ein neues WollMuxEvent, mit dem die Eigenschaften der
+   * Druckblöcke (z.B. allVersions), die in properties spezifiziert sind, neu
+   * gesetzt werden können, wobei die ursprünglichen Eigenschaften der
+   * Druckblölcke in einer internen HashMap unter dem Schlüssel key
+   * abgespeichert werden. Mit Hilfe von
+   * handleRestorePrintBlocksViaPrintModel(key) können die ürsprünglichen
+   * Einstellungen später wieder hergestellt werden.
+   * 
+   * Das Event dient als Hilfe für die Komfortdruckfunktionen und wird vom
+   * XPrintModel aufgerufen und mit diesem synchronisiert.
+   * 
+   * @param key
+   *          Ein belibiges Objekt das als Schlüssel verwendet wird, um mit
+   *          Hilfe von restorePrintBlocksProps(key) die Einstellungen wieder
+   *          herstellen zu können, die vor dem Aufruf dieser Methode gesetzt
+   *          waren.
+   * @param properties
+   *          Array von PropertyValue-Objekten. Dabei werden alle in
+   *          {@see de.muenchen.allg.itd51.wollmux.PrintModels.PrintBlocksProps}
+   *          spezifizierten Properties ausgegwertet.
+   */
+  public static void handleSetPrintBlocksPropsViaPrintModel(XTextDocument doc,
+      Object key, PropertyValue[] props, ActionListener listener)
+  {
+    handle(new OnSetPrintBlocksPropsViaPrintModel(doc, key, props, listener));
+  }
+
+  private static class OnSetPrintBlocksPropsViaPrintModel extends BasicEvent
+  {
+    private XTextDocument doc;
+
+    private PropertyValue[] props;
+
+    private Object key;
+
+    private ActionListener listener;
+
+    public OnSetPrintBlocksPropsViaPrintModel(XTextDocument doc, Object key,
+        PropertyValue[] props, ActionListener listener)
+    {
+      this.doc = doc;
+      this.props = props;
+      this.key = key;
+      this.listener = listener;
+    }
+
+    protected void doit() throws WollMuxFehlerException
+    {
+      TextDocumentModel model = WollMuxSingleton.getInstance()
+          .getTextDocumentModel(doc);
+      try
+      {
+        model.setPrintBlocksProps(key, props);
+      }
+      catch (java.lang.Exception e)
+      {
+        errorMessage(e);
+      }
+
+      stabilize();
+      listener.actionPerformed(null);
+    }
+
+    public String toString()
+    {
+      return this.getClass().getSimpleName()
+             + "(#"
+             + doc.hashCode()
+             + ", '"
+             + key
+             + "', "
+             + props
+             + ")";
+    }
+  }
+
+  // *******************************************************************************************
+
+  /**
+   * Erzeugt ein neues WollMuxEvent, das, gesteuert über den Schlüssel key, das
+   * Wiederherstellen der Eigenschaften der Druckblöcke ermöglicht, die vor dem
+   * Aufruf von handleSetPrintBlocksViaPrintModel(...) gesetzt waren.
+   * 
+   * Das Event dient als Hilfe für die Komfortdruckfunktionen und wird vom
+   * XPrintModel aufgerufen und mit diesem über den ActionListener listener
+   * synchronisiert.
+   * 
+   * @param key
+   *          Der Key ist ein belibiges Objekt, das intern als Schlüssel für
+   *          eine HashMap verwendet wird, in der die ursprünglichen Zustände
+   *          der Druckblöcke abgelegt wurden. Nach dem Durchlauf dieser Methode
+   *          wird der Schlüssel key aus der internen HashMap entfernt.
+   */
+  public static void handleRestorePrintBlocksViaPrintModel(XTextDocument doc,
+      Object key, ActionListener listener)
+  {
+    handle(new OnRestorePrintBlocksViaPrintModel(doc, key, listener));
+  }
+
+  private static class OnRestorePrintBlocksViaPrintModel extends BasicEvent
+  {
+    private XTextDocument doc;
+
+    private Object key;
+
+    private ActionListener listener;
+
+    public OnRestorePrintBlocksViaPrintModel(XTextDocument doc, Object key,
+        ActionListener listener)
+    {
+      this.doc = doc;
+      this.key = key;
+      this.listener = listener;
+    }
+
+    protected void doit() throws WollMuxFehlerException
+    {
+      TextDocumentModel model = WollMuxSingleton.getInstance()
+          .getTextDocumentModel(doc);
+      try
+      {
+        model.restorePrintBlocksProps(key);
+      }
+      catch (java.lang.Exception e)
+      {
+        errorMessage(e);
+      }
+
+      stabilize();
+      listener.actionPerformed(null);
+    }
+
+    public String toString()
+    {
+      return this.getClass().getSimpleName()
+             + "(#"
+             + doc.hashCode()
+             + ", '"
+             + key
+             + "')";
     }
   }
 
@@ -3139,124 +3289,6 @@ public class WollMuxEventHandler
     public String toString()
     {
       return this.getClass().getSimpleName() + "()";
-    }
-  }
-
-  // *******************************************************************************************
-
-  /**
-   * Erzeugt ein neues WollMuxEvent, das dafür sorgt, dass bei Sachleitenden
-   * Verfügungen der Verfügungspunkt mit der Nummer verfPunkt ausgedruck wird,
-   * wobei alle darauffolgenden Verfügungspunkte ausgeblendet sind.
-   * 
-   * Das Event wird üblicherweise von einer XPrintModel Implementierung (z.B.
-   * TextDocument.PrintModel) geworfen, wenn aus der Druckfunktion die
-   * zugehörige Methode aufgerufen wurde.
-   * 
-   * @param doc
-   *          Das Dokument, welches die Verfügungspunkte enthält.
-   * @param verfPunkt
-   *          Die Nummer des auszuduruckenden Verfügungspunktes, wobei alle
-   *          folgenden Verfügungspunkte ausgeblendet werden.
-   * @param numberOfCopies
-   *          Die Anzahl der Ausfertigungen, in der verfPunkt ausgedruckt werden
-   *          soll.
-   * @param isDraft
-   *          wenn isDraft==true, werden alle draftOnly-Blöcke eingeblendet,
-   *          ansonsten werden sie ausgeblendet.
-   * @param isOriginal
-   *          wenn isOriginal, wird die Ziffer des Verfügungspunktes I
-   *          ausgeblendet und alle notInOriginal-Blöcke ebenso. Andernfalls
-   *          sind Ziffer und notInOriginal-Blöcke eingeblendet.
-   * @param unlockActionListener
-   *          Der unlockActionListener wird nach Beendigung des Druckens
-   *          aufgerufen, wenn er != null.
-   */
-  public static void handlePrintVerfuegungspunkt(XTextDocument doc,
-      short verfPunkt, short numberOfCopies, boolean isDraft,
-      boolean isOriginal, short pageRangeType, String pageRangeValue,
-      ActionListener unlockActionListener)
-  {
-    handle(new OnPrintVerfuegungspunkt(doc, verfPunkt, numberOfCopies, isDraft,
-        isOriginal, pageRangeType, pageRangeValue, unlockActionListener));
-  }
-
-  private static class OnPrintVerfuegungspunkt extends BasicEvent
-  {
-    private XTextDocument doc;
-
-    private short verfPunkt;
-
-    private short numberOfCopies;
-
-    private boolean isDraft;
-
-    private boolean isOriginal;
-
-    private short pageRangeType;
-
-    private String pageRangeValue;
-
-    private ActionListener listener;
-
-    public OnPrintVerfuegungspunkt(XTextDocument doc, short verfPunkt,
-        short numberOfCopies, boolean isDraft, boolean isOriginal,
-        short pageRangeType, String pageRangeValue, ActionListener listener)
-    {
-      this.doc = doc;
-      this.verfPunkt = verfPunkt;
-      this.numberOfCopies = numberOfCopies;
-      this.isDraft = isDraft;
-      this.isOriginal = isOriginal;
-      this.pageRangeType = pageRangeType;
-      this.pageRangeValue = pageRangeValue;
-      this.listener = listener;
-    }
-
-    protected void doit() throws WollMuxFehlerException
-    {
-      TextDocumentModel model = WollMuxSingleton.getInstance()
-          .getTextDocumentModel(doc);
-
-      try
-      {
-        SachleitendeVerfuegung.printVerfuegungspunkt(
-            model,
-            verfPunkt,
-            numberOfCopies,
-            isDraft,
-            isOriginal,
-            pageRangeType,
-            pageRangeValue);
-      }
-      catch (PrintFailedException e)
-      {
-        errorMessage(e);
-      }
-      catch (java.lang.Exception e)
-      {
-        Logger.error(e);
-      }
-
-      if (listener != null) listener.actionPerformed(null);
-
-      stabilize();
-    }
-
-    public String toString()
-    {
-      return this.getClass().getSimpleName()
-             + "(#"
-             + doc.hashCode()
-             + ", verfPunkt="
-             + verfPunkt
-             + ", copies="
-             + numberOfCopies
-             + ", isDraft="
-             + isDraft
-             + ", isOriginal="
-             + isOriginal
-             + ")";
     }
   }
 

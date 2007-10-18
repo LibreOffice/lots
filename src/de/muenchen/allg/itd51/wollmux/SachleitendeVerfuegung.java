@@ -17,7 +17,6 @@
  */
 package de.muenchen.allg.itd51.wollmux;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Vector;
 
@@ -31,13 +30,15 @@ import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextFrame;
 import com.sun.star.text.XTextRange;
+import com.sun.star.text.XTextViewCursorSupplier;
 import com.sun.star.uno.AnyConverter;
 import com.sun.star.uno.Exception;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
-import de.muenchen.allg.itd51.wollmux.DocumentCommand.OptionalHighlightColorProvider;
+import de.muenchen.allg.itd51.wollmux.PrintModels.PrintBlocksProps;
 import de.muenchen.allg.itd51.wollmux.TextDocumentModel.PrintFailedException;
 import de.muenchen.allg.itd51.wollmux.dialog.SachleitendeVerfuegungenDruckdialog;
 
@@ -1130,20 +1131,14 @@ public class SachleitendeVerfuegung
   }
 
   /**
-   * Druckt den Verfügungpunkt verfPunkt aus dem Dokument doc in der gewünschten
-   * Anzahl numberOfCopies aus. ACHTUNG: Diese Methode darf nur aus dem
-   * WollMuxEventHandler-Thread gestartet werden, da sie auf Datenstrukturen des
-   * WollMux zugreift.
+   * Druckt den Verfügungpunkt Nummer verfPunkt aus dem Dokument aus, das im
+   * XPrintModel pmod hinterlegt ist.
    * 
-   * @param model
-   *          Das TextDocumentModel, dessen Inhalt Sachleitende Verfügungen
-   *          enthält und ausgedruckt werden soll.
+   * @param pmod
+   *          Das PrintModel zu diesem Druckvorgang.
    * @param verfPunkt
    *          Die Nummer des auszuduruckenden Verfügungspunktes, wobei alle
    *          folgenden Verfügungspunkte ausgeblendet werden.
-   * @param numberOfCopies
-   *          Die Anzahl der Ausfertigungen, in der verfPunkt ausgedruckt werden
-   *          soll.
    * @param isDraft
    *          wenn isDraft==true, werden alle draftOnly-Blöcke eingeblendet,
    *          ansonsten werden sie ausgeblendet.
@@ -1153,29 +1148,32 @@ public class SachleitendeVerfuegung
    *          sind Ziffer und notInOriginal-Blöcke eingeblendet.
    * @throws PrintFailedException
    */
-  public static void printVerfuegungspunkt(TextDocumentModel model,
-      short verfPunkt, short numberOfCopies, boolean isDraft,
-      boolean isOriginal, int pageRangeType, String pageRangeValue)
-      throws PrintFailedException
+  public static void printVerfuegungspunkt(XPrintModel pmod, short verfPunkt,
+      boolean isDraft, boolean isOriginal) throws PrintFailedException
   {
+    XTextDocument doc = pmod.getTextDocument();
+
     // Steht der viewCursor in einem Bereich, der im folgenden ausgeblendet
     // wird, dann wird der ViewCursor in einen sichtbaren Bereich verschoben. Um
     // den viewCursor wieder herstellen zu können, wird er hier gesichert und
     // später wieder hergestellt.
-    XTextCursor vc = model.getViewCursor();
+    XTextCursor vc = null;
     XTextCursor oldViewCursor = null;
+    XTextViewCursorSupplier suppl = UNO.XTextViewCursorSupplier(UNO.XModel(
+        pmod.getTextDocument()).getCurrentController());
+    if (suppl != null) vc = suppl.getViewCursor();
     if (vc != null) oldViewCursor = vc.getText().createTextCursorByRange(vc);
 
     // Zähler für Verfuegungspunktnummer auf 1 initialisieren, wenn ein
     // Verfuegungspunkt1 vorhanden ist.
-    XTextRange punkt1 = getVerfuegungspunkt1(model.doc);
+    XTextRange punkt1 = getVerfuegungspunkt1(doc);
     int count = 0;
     if (punkt1 != null) count++;
 
     // Auszublendenden Bereich festlegen:
     XTextRange setInvisibleRange = null;
-    XParagraphCursor cursor = UNO.XParagraphCursor(model.doc.getText()
-        .createTextCursorByRange(model.doc.getText().getStart()));
+    XParagraphCursor cursor = UNO.XParagraphCursor(doc.getText()
+        .createTextCursorByRange(doc.getText().getStart()));
     if (cursor != null)
       do
       {
@@ -1208,41 +1206,21 @@ public class SachleitendeVerfuegung
       UNO.setProperty(setInvisibleRange, "CharHidden", Boolean.TRUE);
     }
 
-    // Sichtbarkeitsstand der all, draftOnly bzw. notInOriginal-Blöcke und
-    // merken.
-    HashMap /* of DocumentCommand */oldVisibilityStates = new HashMap();
-
-    // Ein/Ausblenden der draftOnly bzw. notInOriginal-Blöcke:
-    for (Iterator iter = model.getDraftOnlyBlocksIterator(); iter.hasNext();)
-    {
-      DocumentCommand cmd = (DocumentCommand) iter.next();
-      oldVisibilityStates.put(cmd, new Boolean(cmd.isVisible()));
-      cmd.setVisible(isDraft);
-    }
-
-    for (Iterator iter = model.getNotInOrininalBlocksIterator(); iter.hasNext();)
-    {
-      DocumentCommand cmd = (DocumentCommand) iter.next();
-      oldVisibilityStates.put(cmd, new Boolean(cmd.isVisible()));
-      cmd.setVisible(!isOriginal);
-    }
-
-    for (Iterator iter = model.getAllVersionsBlocksIterator(); iter.hasNext();)
-    {
-      DocumentCommand cmd = (DocumentCommand) iter.next();
-      oldVisibilityStates.put(cmd, new Boolean(cmd.isVisible()));
-      cmd.setVisible(true);
-    }
-
-    // Hintergrundfarbe der Printblöcke aufheben, wenn eine gesetzt ist.
-    for (Iterator iter = oldVisibilityStates.keySet().iterator(); iter
-        .hasNext();)
-    {
-      OptionalHighlightColorProvider cmd = (OptionalHighlightColorProvider) iter
-          .next();
-      if (cmd.getHighlightColor() != null)
-        UNO.setPropertyToDefault(cmd.getTextRange(), "CharBackColor");
-    }
+    // Ein/Ausblenden Druckblöcke (z.B. draftOnly):
+    UnoProps printBlocks = new UnoProps();
+    printBlocks.setPropertyValue(
+        PrintBlocksProps.PROP_DRAFT_ONLY_VISIBLE,
+        new Boolean(isDraft));
+    printBlocks.setPropertyValue(
+        PrintBlocksProps.PROP_NOT_IN_ORIGINAL_VISIBLE,
+        new Boolean(!isOriginal));
+    printBlocks.setPropertyValue(
+        PrintBlocksProps.PROP_ALL_VERSIONS_VISIBLE,
+        Boolean.TRUE);
+    printBlocks.setPropertyValue(
+        PrintBlocksProps.PROP_HIDE_HIGHLIGHT_COLOR,
+        Boolean.TRUE);
+    pmod.setPrintBlocksProps(pmod.toString(), printBlocks.getProps());
 
     // Ziffer von Punkt 1 ausblenden falls isOriginal
     XTextRange punkt1ZifferOnly = null;
@@ -1255,46 +1233,14 @@ public class SachleitendeVerfuegung
     // -----------------------------------------------------------------------
     // Druck des Dokuments
     // -----------------------------------------------------------------------
-    model.printWithPageRange(numberOfCopies, pageRangeType, pageRangeValue);
+    pmod.printWithProps();
 
     // Ausblendung von Ziffer von Punkt 1 wieder aufheben
     if (punkt1ZifferOnly != null)
       UNO.setProperty(punkt1ZifferOnly, "CharHidden", Boolean.FALSE);
 
-    // Alte Hintergrundfarben der Sichtbarkeitsblöcke wieder herstellen, wenn
-    // welche gesetzt sind:
-    for (Iterator iter = oldVisibilityStates.keySet().iterator(); iter
-        .hasNext();)
-    {
-      OptionalHighlightColorProvider cmd = (OptionalHighlightColorProvider) iter
-          .next();
-      if (cmd.getHighlightColor() != null)
-      {
-        try
-        {
-          Integer bgColor = new Integer(Integer.parseInt(cmd
-              .getHighlightColor(), 16));
-          UNO.setProperty(cmd.getTextRange(), "CharBackColor", bgColor);
-        }
-        catch (NumberFormatException e)
-        {
-          Logger.error("Fehler in Dokumentkommando '"
-                       + cmd
-                       + "': Die Farbe HIGHLIGHT_COLOR mit dem Wert '"
-                       + cmd.getHighlightColor()
-                       + "' ist ungültig.");
-        }
-      }
-    }
-
-    // Alte Sichtbarkeitszustände der draftOnly bzw. notInOriginal-Blöcke
-    // zurücksetzten.
-    for (Iterator iter = oldVisibilityStates.keySet().iterator(); iter
-        .hasNext();)
-    {
-      DocumentCommand cmd = (DocumentCommand) iter.next();
-      cmd.setVisible(((Boolean) oldVisibilityStates.get(cmd)).booleanValue());
-    }
+    // Alte Eigenschaften der Druckblöcke wieder herstellen:
+    pmod.restorePrintBlocksProps(pmod.toString());
 
     // Verfügungspunkte wieder einblenden:
     if (setInvisibleRange != null)

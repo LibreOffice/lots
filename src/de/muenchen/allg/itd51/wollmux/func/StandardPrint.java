@@ -7,12 +7,25 @@ import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung;
-import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
+import de.muenchen.allg.itd51.wollmux.PrintModels.PrintModelProps;
 
 public class StandardPrint
 {  
   
+  /**
+   * GUI der Sachleitenden Verfügungen: Diese Komfortdruckfunktion erzeugt die
+   * GUI, mit deren Hilfe die Steuerdaten (in Form der Properties "SLV_*") für
+   * den Druck der Sachleitenden Verfügungen festgelegt werden können und leitet
+   * den Druck mittels pmod.printWithProps() an die nächste Druckfunktion der
+   * Aufrufkette (kann z.B. Seriendruck sein) weiter. Damit die SLVs
+   * letztendlich auch wirklich in den benötigten Ausfertigungen gedruckt
+   * werden, lädt die Druckfunktion noch das Ausgabemodul
+   * "SachleitendeVerfuegungOutput" zur Liste der auszuführenden Druckfunktionen
+   * hinzu.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
   public static void sachleitendeVerfuegung(XPrintModel pmod)
   {
     // Druckfunktion SachleitendeVerfuegungOutput für SLV-Ausgabe hinzuladen:
@@ -26,27 +39,45 @@ public class StandardPrint
     SachleitendeVerfuegung.showPrintDialog(pmod);
   }
 
+  /**
+   * Ausgabemodul der Sachleitenden Verfügungen: Diese Komfortdruckfunktion
+   * druckt die Verfügungspunkte aus, die in der Property "SLV_verfPunkte"
+   * angegeben sind; dabei werden auch die anderen Steuerdaten in Form der
+   * Properties "SLV_*" entsprechend für jeden Verfügungspunkt ausgewertet und
+   * der Druck über pmod.printWithProps() gestartet.
+   * 
+   * So ist es z.B. möglich, die Steuerdaten für den SLV-Druck in einem
+   * vorgeschalteten Dialog zu erzeugen und mit dieser Komfortdruckfunktion die
+   * Ausfertigungen drucken zu lassen. Es ist aber auch möglich, die Steuerdaten
+   * in einem nicht interaktiven Druckermodul zu belegen.
+   * 
+   * Diese Komfortdruckfunktion überschreibt die Properties "CopyCount",
+   * "PageRangeType" und "PageRangeValue"
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
   public static void sachleitendeVerfuegungOutput(XPrintModel pmod)
   {
     try
     {
-      Object[] verfPunkte = (Object[]) pmod.getPropertyValue("SLV_verfPunkte");
-      Object[] isDraftFlags = (Object[]) pmod.getPropertyValue("SLV_isDraftFlags");
-      Object[] isOriginalFlags = (Object[]) pmod.getPropertyValue("SLV_isOriginalFlags");
-      Object[] pageRangeTypes = (Object[]) pmod.getPropertyValue("SLV_PageRangeTypes");
-      Object[] pageRangeValues = (Object[]) pmod.getPropertyValue("SLV_PageRangeValues");
-      Object[] copyCounts = (Object[]) pmod.getPropertyValue("SLV_CopyCounts");
+      Object[] verfPunkte = (Object[]) pmod.getPropertyValue(PrintModelProps.PROP_SLV_VERF_PUNKTE);
+      Object[] isDraftFlags = (Object[]) pmod.getPropertyValue(PrintModelProps.PROP_SLV_IS_DRAFT_FLAGS);
+      Object[] isOriginalFlags = (Object[]) pmod.getPropertyValue(PrintModelProps.PROP_SLV_IS_ORIGINAL_FLAGS);
+      Object[] pageRangeTypes = (Object[]) pmod.getPropertyValue(PrintModelProps.PROP_SLV_PAGE_RANGE_TYPES);
+      Object[] pageRangeValues = (Object[]) pmod.getPropertyValue(PrintModelProps.PROP_SLV_PAGE_RANGE_VALUES);
+      Object[] copyCounts = (Object[]) pmod.getPropertyValue(PrintModelProps.PROP_SLV_COPY_COUNTS);
 
       for (int i = 0; i < verfPunkte.length; i++)
       {
+        pmod.setPropertyValue(PrintModelProps.PROP_PAGE_RANGE_TYPE, pageRangeTypes[i]);
+        pmod.setPropertyValue(PrintModelProps.PROP_PAGE_RANGE_VALUE, pageRangeValues[i]);
+        pmod.setPropertyValue(PrintModelProps.PROP_COPY_COUNT, copyCounts[i]);
+
         short verfPunkt = AnyConverter.toShort(verfPunkte[i]);
         boolean isDraft = AnyConverter.toBoolean(isDraftFlags[i]);
         boolean isOriginal = AnyConverter.toBoolean(isOriginalFlags[i]);
-        short pageRangeType = AnyConverter.toShort(pageRangeTypes[i]);
-        String pageRangeValue = AnyConverter.toString(pageRangeValues[i]);
-        short copyCount = AnyConverter.toShort(copyCounts[i]);
-
-        pmod.printVerfuegungspunkt(verfPunkt, copyCount, isDraft, isOriginal, pageRangeType, pageRangeValue);
+        
+        SachleitendeVerfuegung.printVerfuegungspunkt(pmod, verfPunkt, isDraft, isOriginal);
       }
     }
     catch (java.lang.Exception e)
@@ -55,14 +86,13 @@ public class StandardPrint
     }
   }
 
-  public static void printVerfuegungspunktTest(XPrintModel pmod)
-  {
-    pmod.printVerfuegungspunkt((short) 1, (short) 1, false, true, TextDocumentModel.PAGE_RANGE_TYPE_ALL, "");
-    pmod.printVerfuegungspunkt((short) 2, (short) 1, false, false, TextDocumentModel.PAGE_RANGE_TYPE_ALL, "");
-    pmod.printVerfuegungspunkt((short) 3, (short) 1, false, false, TextDocumentModel.PAGE_RANGE_TYPE_ALL, "");
-    pmod.printVerfuegungspunkt((short) 4, (short) 1, true, false, TextDocumentModel.PAGE_RANGE_TYPE_ALL, "");
-  }
-
+  /**
+   * mit dieser Komfortdruckfuntion habe ich getestet, ob die Parameterübergabe
+   * bei Druckfunktionen (arg als ConfigThingy) funktioniert und ob pmod sich
+   * über die UNO-Mechanismen korrekt inspizieren lässt.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
   public static void myTestPrintFunction(XPrintModel pmod, Object arg)
   {
     ConfigThingy conf = new ConfigThingy("ARG");
@@ -125,7 +155,7 @@ public class StandardPrint
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  private static PrintFunction getInternalPrintFunction(
+  public static PrintFunction getInternalPrintFunction(
       final String functionName, int order)
   {
     ConfigThingy conf = new ConfigThingy("EXTERN");

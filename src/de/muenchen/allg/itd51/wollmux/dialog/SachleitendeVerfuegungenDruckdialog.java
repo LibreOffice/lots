@@ -56,8 +56,8 @@ import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.Logger;
-import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
+import de.muenchen.allg.itd51.wollmux.PrintModels.PrintModelProps;
 import de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung.Verfuegungspunkt;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
 
@@ -196,7 +196,7 @@ public class SachleitendeVerfuegungenDruckdialog
         int type = pageRangeDescriptions[idx].type;
         String hint = pageRangeDescriptions[idx].hint;
 
-        if (type == TextDocumentModel.PAGE_RANGE_TYPE_MANUAL)
+        if (type == PrintModelProps.PAGE_RANGE_TYPE_MANUAL)
         {
           cbox.setEditable(true);
           cbox.getEditor().selectAll();
@@ -267,19 +267,19 @@ public class SachleitendeVerfuegungenDruckdialog
    */
   private PageRangeElement[] pageRangeDescriptions = new PageRangeElement[] {
                                                                              new PageRangeElement(
-                                                                                 TextDocumentModel.PAGE_RANGE_TYPE_ALL,
+                                                                                 PrintModelProps.PAGE_RANGE_TYPE_ALL,
                                                                                  "Alle",
                                                                                  "Wählen Sie aus, welche Seiten dieses Verfügungspunktes gedruckt werden sollen"),
                                                                              new PageRangeElement(
-                                                                                 TextDocumentModel.PAGE_RANGE_TYPE_CURRENT,
+                                                                                 PrintModelProps.PAGE_RANGE_TYPE_CURRENT,
                                                                                  "Nur die aktuelle",
                                                                                  "Wählen Sie aus, welche Seiten dieses Verfügungspunktes gedruckt werden sollen"),
                                                                              new PageRangeElement(
-                                                                                 TextDocumentModel.PAGE_RANGE_TYPE_CURRENTFF,
+                                                                                 PrintModelProps.PAGE_RANGE_TYPE_CURRENTFF,
                                                                                  "Ab der aktuellen",
                                                                                  "Wählen Sie aus, welche Seiten dieses Verfügungspunktes gedruckt werden sollen"),
                                                                              new PageRangeElement(
-                                                                                 TextDocumentModel.PAGE_RANGE_TYPE_MANUAL,
+                                                                                 PrintModelProps.PAGE_RANGE_TYPE_MANUAL,
                                                                                  "<Seitennummern>",
                                                                                  "Mögliche Eingaben sind z.B. '1', '2-5' oder '1,3,5'") };
 
@@ -1000,19 +1000,25 @@ public class SachleitendeVerfuegungenDruckdialog
     if (idx >= 0)
       pageRangeType = pageRangeDescriptions[idx].type;
     else
-      pageRangeType = TextDocumentModel.PAGE_RANGE_TYPE_MANUAL;
+      pageRangeType = PrintModelProps.PAGE_RANGE_TYPE_MANUAL;
 
     boolean isDraft = (verfPunkt == verfuegungspunkte.size());
     boolean isOriginal = (verfPunkt == 1);
 
     HashMap data = new HashMap();
 
-    data.put("SLV_verfPunkte", new Short((short) verfPunkt));
-    data.put("SLV_isDraftFlags", new Boolean(isDraft));
-    data.put("SLV_isOriginalFlags", new Boolean(isOriginal));
-    data.put("SLV_PageRangeTypes", new Short(pageRangeType));
-    data.put("SLV_PageRangeValues", pageRangeValue);
-    data.put("SLV_CopyCounts", new Short((short) numberOfCopies));
+    data
+        .put(PrintModelProps.PROP_SLV_VERF_PUNKTE, new Short((short) verfPunkt));
+    data.put(PrintModelProps.PROP_SLV_IS_DRAFT_FLAGS, new Boolean(isDraft));
+    data.put(
+        PrintModelProps.PROP_SLV_IS_ORIGINAL_FLAGS,
+        new Boolean(isOriginal));
+    data.put(
+        PrintModelProps.PROP_SLV_PAGE_RANGE_TYPES,
+        new Short(pageRangeType));
+    data.put(PrintModelProps.PROP_SLV_PAGE_RANGE_VALUES, pageRangeValue);
+    data.put(PrintModelProps.PROP_SLV_COPY_COUNTS, new Short(
+        (short) numberOfCopies));
 
     return data;
   }

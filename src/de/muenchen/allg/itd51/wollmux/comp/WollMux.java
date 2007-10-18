@@ -33,10 +33,8 @@ import com.sun.star.lib.uno.helper.Factory;
 import com.sun.star.lib.uno.helper.WeakBase;
 import com.sun.star.registry.XRegistryKey;
 import com.sun.star.task.XAsyncJob;
-import com.sun.star.text.XTextDocument;
 import com.sun.star.uno.XComponentContext;
 
-import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.DispatchHandler;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.WollMuxEventHandler;

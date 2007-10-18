@@ -34,6 +34,7 @@ import java.util.regex.Pattern;
 import com.sun.star.awt.DeviceInfo;
 import com.sun.star.awt.PosSize;
 import com.sun.star.awt.XWindow;
+import com.sun.star.beans.PropertyValue;
 import com.sun.star.beans.XPropertySet;
 import com.sun.star.container.NoSuchElementException;
 import com.sun.star.container.XEnumeration;
@@ -61,8 +62,11 @@ import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.parser.SyntaxErrorException;
+import de.muenchen.allg.itd51.wollmux.DocumentCommand.OptionalHighlightColorProvider;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.SetJumpMark;
 import de.muenchen.allg.itd51.wollmux.FormFieldFactory.FormField;
+import de.muenchen.allg.itd51.wollmux.PrintModels.PrintBlocksProps;
+import de.muenchen.allg.itd51.wollmux.PrintModels.PrintModelProps;
 import de.muenchen.allg.itd51.wollmux.dialog.FormController;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
@@ -125,37 +129,6 @@ public class TextDocumentModel
    */
   private static final Pattern WOLLMUX_BOOKMARK_PATTERN = Pattern
       .compile("(\\A\\s*WM\\s*\\(.*\\)\\s*\\d*\\z)");
-
-  /**
-   * Wird von printWithPageRange ausgewertet und enthält die Möglichen Typen,
-   * über die bestimmt wird, welcher Bereich des Dokuments ausgedruckt werden
-   * soll - *_ALL steht dabei für alle Seiten des Dokuments.
-   */
-  public static final short PAGE_RANGE_TYPE_ALL = 1;
-
-  /**
-   * Wird von printWithPageRange ausgewertet und enthält die Möglichen Typen,
-   * über die bestimmt wird, welcher Bereich des Dokuments ausgedruckt werden
-   * soll - *_CURRENT steht dabei für die Seite in der sich aktuell der
-   * ViewCursor befindet.
-   */
-  public static final short PAGE_RANGE_TYPE_CURRENT = 2;
-
-  /**
-   * Wird von printWithPageRange ausgewertet und enthält die Möglichen Typen,
-   * über die bestimmt wird, welcher Bereich des Dokuments ausgedruckt werden
-   * soll - *_CURRENT steht dabei für die Seite in der sich aktuell der
-   * ViewCursor befindet und alle Folgeseiten bis zum Dokumentende.
-   */
-  public static final short PAGE_RANGE_TYPE_CURRENTFF = 3;
-
-  /**
-   * Wird von printWithPageRange ausgewertet und enthält die Möglichen Typen,
-   * über die bestimmt wird, welcher Bereich des Dokuments ausgedruckt werden
-   * soll - *_MANUAL steht dabei für die Manuelle Eingabe eines Bereichs über
-   * eine Variable pageBreakValue.
-   */
-  public static final short PAGE_RANGE_TYPE_MANUAL = 4;
 
   /**
    * Ermöglicht den Zugriff auf eine Collection aller FormField-Objekte in
@@ -244,6 +217,16 @@ public class TextDocumentModel
   private Set /* of VisibleSection */visibleTextSections;
 
   /**
+   * Diese HashMap wird speichert die Eigenschaften der Druckblöcke (z.B.
+   * allVersions), die vor dem Aufruf von setPrintBlocksProperties(key,...)
+   * gesetzt waren. Über den Aufruf der Methode
+   * restorePrintBlocksProperties(key) wird der Schlüssel key wieder aus der
+   * HashMap gelöscht. Der Wert von key ist eine HashMap, die für jeden
+   * Druckblock die alten Sichtbarkeitswerte enthält.
+   */
+  private HashMap /* of HashMaps */printBlocksProps;
+
+  /**
    * Kann über setPartOfMultiformDocument gesetzt werden und sollte dann true
    * enthalten, wenn das Dokument ein Teil eines Multiformdokuments ist.
    */
@@ -277,6 +260,7 @@ public class TextDocumentModel
     this.formularConf = null;
     this.formFieldValues = new HashMap();
     this.invisibleGroups = new HashSet();
+    this.printBlocksProps = new HashMap();
     this.overrideFragMap = new HashMap();
     this.formModel = null;
 
@@ -1121,16 +1105,157 @@ public class TextDocumentModel
   }
 
   /**
-   * Liefert einen Iterator zurück, der die Iteration aller
-   * NotInOrininal-Dokumentkommandos dieses Dokuments ermöglicht.
+   * Diese Methode setzt neue Eigenschaften für die Druckblöcke (z.B.
+   * allVersions), die in properties spezifiziert sind, und speichert die
+   * ursprünglichen Eigenschaften der Druckblölcke in einer internen HashMap
+   * unter dem Schlüssel key ab. Mit Hilfe von restorePrintBlocksProps(key)
+   * können die ürsprünglichen Einstellungen später wieder hergestellt werden.
    * 
-   * @return ein Iterator, der die Iteration aller
-   *         NotInOrininal-Dokumentkommandos dieses Dokuments ermöglicht. Der
-   *         Iterator kann auch keine Elemente enthalten.
+   * @param key
+   *          Ein belibiges Objekt das als Schlüssel verwendet wird, um mit
+   *          Hilfe von restorePrintBlocksProps(key) die Einstellungen wieder
+   *          herstellen zu können, die vor dem Aufruf dieser Methode gesetzt
+   *          waren.
+   * @param properties
+   *          Array von PropertyValue-Objekten. Dabei werden alle in
+   *          {@see de.muenchen.allg.itd51.wollmux.PrintModels.PrintBlocksProps}
+   *          spezifizierten Properties ausgegwertet.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  public Iterator getNotInOrininalBlocksIterator()
+  public void setPrintBlocksProps(Object key, PropertyValue[] properties)
   {
-    return documentCommands.notInOriginalIterator();
+    HashMap states = (HashMap) printBlocksProps.get(key);
+    if (states == null)
+    {
+      states = new HashMap();
+      printBlocksProps.put(key, states);
+    }
+
+    UnoProps props = new UnoProps(properties);
+    boolean visible = false;
+
+    // setze NotInOriginal-Blocks
+    try
+    {
+      visible = AnyConverter.toBoolean(props
+          .getPropertyValue(PrintBlocksProps.PROP_NOT_IN_ORIGINAL_VISIBLE));
+      for (Iterator iter = documentCommands.notInOriginalIterator(); iter
+          .hasNext();)
+      {
+        DocumentCommand cmd = (DocumentCommand) iter.next();
+        states.put(cmd, new Boolean(cmd.isVisible()));
+        cmd.setVisible(visible);
+      }
+    }
+    catch (java.lang.Exception e)
+    {
+    }
+
+    // setze DraftOnly-Blocks
+    try
+    {
+      visible = AnyConverter.toBoolean(props
+          .getPropertyValue(PrintBlocksProps.PROP_DRAFT_ONLY_VISIBLE));
+      for (Iterator iter = documentCommands.draftOnlyIterator(); iter.hasNext();)
+      {
+        DocumentCommand cmd = (DocumentCommand) iter.next();
+        states.put(cmd, new Boolean(cmd.isVisible()));
+        cmd.setVisible(visible);
+      }
+    }
+    catch (java.lang.Exception e)
+    {
+    }
+
+    // setze AllVersions-Blocks
+    try
+    {
+      visible = AnyConverter.toBoolean(props
+          .getPropertyValue(PrintBlocksProps.PROP_ALL_VERSIONS_VISIBLE));
+      for (Iterator iter = documentCommands.allVersionsIterator(); iter
+          .hasNext();)
+      {
+        DocumentCommand cmd = (DocumentCommand) iter.next();
+        states.put(cmd, new Boolean(cmd.isVisible()));
+        cmd.setVisible(visible);
+      }
+    }
+    catch (java.lang.Exception e)
+    {
+    }
+
+    // Aufheben der HighlightColor für alle angesprochenen Druckblöcke, wenn die
+    // Property "HideHighlightColor" gesetzt ist:
+    try
+    {
+      boolean hide = AnyConverter.toBoolean(props
+          .getPropertyValue(PrintBlocksProps.PROP_HIDE_HIGHLIGHT_COLOR));
+      if (hide)
+      {
+        for (Iterator iter = states.keySet().iterator(); iter.hasNext();)
+        {
+          OptionalHighlightColorProvider cmd = (OptionalHighlightColorProvider) iter
+              .next();
+          if (cmd.getHighlightColor() != null)
+            UNO.setPropertyToDefault(cmd.getTextRange(), "CharBackColor");
+        }
+      }
+    }
+    catch (java.lang.Exception e)
+    {
+    }
+  }
+
+  /**
+   * Diese Methode ermöglicht, gesteuert über den Schlüssel key, das
+   * Wiederherstellen der Eigenschaften der Druckblöcke, die vor dem Aufruf von
+   * setPrintBlocksProperties(key, props) gesetzt waren.
+   * 
+   * @param key
+   *          Der Key ist ein belibiges Objekt, das intern als Schlüssel für
+   *          eine HashMap verwendet wird, in der die ursprünglichen Zustände
+   *          der Druckblöcke abgelegt wurden. Nach dem Durchlauf dieser Methode
+   *          wird der Schlüssel key aus der internen HashMap entfernt.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  public void restorePrintBlocksProps(Object key)
+  {
+    HashMap states = (HashMap) printBlocksProps.remove(key);
+    if (states != null)
+    {
+      for (Iterator iter = states.keySet().iterator(); iter.hasNext();)
+      {
+        // Ursprüngliche Sichtbarkeitszustände wieder herstellen:
+        DocumentCommand cmd = (DocumentCommand) iter.next();
+        Boolean vis = (Boolean) states.get(cmd);
+        if (vis != null) cmd.setVisible(vis.booleanValue());
+
+        // HighlightColor wieder herstellen wenn eine definiert ist:
+        if (cmd instanceof OptionalHighlightColorProvider)
+        {
+          OptionalHighlightColorProvider hp = (OptionalHighlightColorProvider) cmd;
+          if (hp.getHighlightColor() != null)
+          {
+            try
+            {
+              Integer bgColor = new Integer(Integer.parseInt(hp
+                  .getHighlightColor(), 16));
+              UNO.setProperty(hp.getTextRange(), "CharBackColor", bgColor);
+            }
+            catch (NumberFormatException e)
+            {
+              Logger.error("Fehler in Dokumentkommando '"
+                           + hp
+                           + "': Die Farbe HIGHLIGHT_COLOR mit dem Wert '"
+                           + hp.getHighlightColor()
+                           + "' ist ungültig.");
+            }
+          }
+        }
+      }
+    }
   }
 
   /**
@@ -1848,11 +1973,8 @@ public class TextDocumentModel
    * @param numberOfCopies
    *          Bestimmt die Anzahl der Kopien
    * @param pageRangeType
-   *          Legt den Typ des Druckbereichs fest. Folgende Möglichkeiten gibt
-   *          es: TextDocumentModel. PAGE_RANGE_TYPE_ALL,
-   *          PAGE_RANGE_TYPE_CURRENT, PAGE_RANGE_TYPE_CURRENTFF,
-   *          PAGE_RANGE_TYPE_MANUAL (hier wird pageRangeValue zwingend
-   *          benötigt).
+   *          Legt den Typ des Druckbereichs fest und enthält einen der Werte
+   *          PrintModels.PrintModelProps.PAGE_RANGE_TYPE_*.
    * @param pageRangeValue
    *          wird in Verbindung mit dem pageRangeType PAGE_RANGE_TYPE_MANUAL
    *          zwingend benötigt und enthält den zu druckenden Bereich als
@@ -1861,13 +1983,13 @@ public class TextDocumentModel
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  public void printWithPageRange(short numberOfCopies, int pageRangeType,
+  public void printWithPageRange(short numberOfCopies, short pageRangeType,
       String pageRangeValue) throws PrintFailedException
   {
     HashMap props = new HashMap();
-    props.put("PageRangeType", new Integer(pageRangeType));
-    props.put("PageRangeValue", pageRangeValue);
-    props.put("CopyCount", new Short(numberOfCopies));
+    props.put(PrintModelProps.PROP_PAGE_RANGE_TYPE, new Short(pageRangeType));
+    props.put(PrintModelProps.PROP_PAGE_RANGE_VALUE, pageRangeValue);
+    props.put(PrintModelProps.PROP_COPY_COUNT, new Short(numberOfCopies));
     printWithProps(props);
   }
 
@@ -1877,47 +1999,53 @@ public class TextDocumentModel
    * PageRangeValue ausgewertet werden, wenn sie vorhanden sind.
    * 
    * @param props
-   *          HashMap, die Properties enthält, die ausgewertet werden sollen.
+   *          HashMap mit Properties aus
+   *          {@see de.muenchen.allg.itd51.wollmux.PrintModels.PrintModelProps},
+   *          die ausgewertet werden sollen.
    * @throws PrintFailedException
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
   public void printWithProps(HashMap props) throws PrintFailedException
   {
-    if (props == null) props = new HashMap();
-    UnoProps myProps = new UnoProps("Wait", Boolean.TRUE);
-
-    // Property "CopyCount" bestimmen:
-    if (props.containsKey("CopyCount"))
-      myProps.setPropertyValue("CopyCount", props.get("CopyCount"));
-
-    // Property "Pages" bestimmen:
-    if (props.containsKey("Pages"))
-      myProps.setPropertyValue("Pages", props.get("Pages"));
-    else if (props.containsKey("PageRangeType"))
-    {
-      // pr mit aktueller Seite vorbelegen (oder 1 als fallback)
-      String pr = "1";
-      if (UNO.XPageCursor(getViewCursor()) != null)
-        pr = "" + UNO.XPageCursor(getViewCursor()).getPage();
-
-      int pageRangeType = ((Integer) props.get("PageRangeType")).intValue();
-      String pageRangeValue = null;
-      if (props.containsKey("PageRangeValue"))
-        pageRangeValue = "" + props.get("PageRangeValue");
-
-      if (pageRangeType == PAGE_RANGE_TYPE_CURRENT)
-        myProps.setPropertyValue("Pages", pr);
-      else if (pageRangeType == PAGE_RANGE_TYPE_CURRENTFF)
-        myProps.setPropertyValue("Pages", pr + "-" + getPageCount());
-      else if (pageRangeType == PAGE_RANGE_TYPE_MANUAL
-               && pageRangeValue != null)
-        myProps.setPropertyValue("Pages", pageRangeValue);
-    }
-
-    // Drucken:
     try
     {
+      if (props == null) props = new HashMap();
+      UnoProps myProps = new UnoProps("Wait", Boolean.TRUE);
+
+      // Property "CopyCount" bestimmen:
+      if (props.containsKey(PrintModelProps.PROP_COPY_COUNT))
+        myProps.setPropertyValue("CopyCount", props
+            .get(PrintModelProps.PROP_COPY_COUNT));
+
+      // Property "Pages" bestimmen:
+      if (props.containsKey(PrintModelProps.PROP_PAGES))
+        myProps
+            .setPropertyValue("Pages", props.get(PrintModelProps.PROP_PAGES));
+      else if (props.containsKey(PrintModelProps.PROP_PAGE_RANGE_TYPE))
+      {
+        // pr mit aktueller Seite vorbelegen (oder 1 als fallback)
+        String pr = "1";
+        if (UNO.XPageCursor(getViewCursor()) != null)
+          pr = "" + UNO.XPageCursor(getViewCursor()).getPage();
+
+        short pageRangeType = ((Short) props
+            .get(PrintModelProps.PROP_PAGE_RANGE_TYPE)).shortValue();
+        String pageRangeValue = null;
+        if (props.containsKey(PrintModelProps.PROP_PAGE_RANGE_VALUE))
+          pageRangeValue = ""
+                           + props.get(PrintModelProps.PROP_PAGE_RANGE_VALUE);
+
+        if (pageRangeType == PrintModelProps.PAGE_RANGE_TYPE_CURRENT)
+          myProps.setPropertyValue("Pages", pr);
+        else if (pageRangeType == PrintModelProps.PAGE_RANGE_TYPE_CURRENTFF)
+          myProps.setPropertyValue("Pages", pr + "-" + getPageCount());
+        else if (pageRangeType == PrintModelProps.PAGE_RANGE_TYPE_MANUAL
+                 && pageRangeValue != null)
+          myProps.setPropertyValue("Pages", pageRangeValue);
+      }
+
+      // Drucken:
       if (UNO.XPrintable(doc) != null)
         UNO.XPrintable(doc).print(myProps.getProps());
     }
@@ -2104,7 +2232,7 @@ public class TextDocumentModel
    */
   public XPrintModel createPrintModel(boolean useDocPrintFunctions)
   {
-    XPrintModel pmod = PrintModelFactory.createPrintModel(this);
+    XPrintModel pmod = PrintModels.createPrintModel(this);
     if (useDocPrintFunctions)
     {
       for (Iterator iter = printFunctions.keySet().iterator(); iter.hasNext();)

@@ -25,6 +25,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import de.muenchen.allg.itd51.wollmux.PrintModels.PrintModelProps;
+import de.muenchen.allg.itd51.wollmux.func.StandardPrint;
+
 /**
  * Enthält die DispatchHandler für alle dispatch-Urls, die mit "wollmux:Test"
  * anfangen und für den automatisierten Test durch wollmux-qatest benötigt
@@ -58,27 +61,6 @@ public class TestHandler
     String cmd = args[0];
 
     /** ************************************************************** */
-    if (cmd.equalsIgnoreCase("AlleVerfuegungspunkteDrucken"))
-    {
-      short count = (short) SachleitendeVerfuegung
-          .countVerfuegungspunkte(model.doc);
-      for (short i = 1; i <= count; i++)
-      {
-        boolean isDraft = (i == count) ? true : false;
-        boolean isOriginal = (i == 1) ? true : false;
-        WollMuxEventHandler.handlePrintVerfuegungspunkt(
-            model.doc,
-            i,
-            (short) 1,
-            isDraft,
-            isOriginal,
-            TextDocumentModel.PAGE_RANGE_TYPE_ALL,
-            "",
-            null);
-      }
-    }
-
-    /** ************************************************************** */
     if (cmd.equalsIgnoreCase("VerfuegungspunktDrucken"))
     {
       Map idsAndValues = getWollmuxTestArgs();
@@ -88,15 +70,36 @@ public class TestHandler
           .shortValue();
       boolean isDraft = (verfPunkt == count) ? true : false;
       boolean isOriginal = (verfPunkt == 1) ? true : false;
-      WollMuxEventHandler.handlePrintVerfuegungspunkt(
-          model.doc,
-          verfPunkt,
-          (short) 1,
-          isDraft,
-          isOriginal,
-          TextDocumentModel.PAGE_RANGE_TYPE_ALL,
-          "",
-          null);
+      XPrintModel pmod = model.createPrintModel(false);
+      try
+      {
+        pmod.setPropertyValue(
+            PrintModelProps.PROP_SLV_VERF_PUNKTE,
+            new Object[] { new Short(verfPunkt) });
+        pmod.setPropertyValue(
+            PrintModelProps.PROP_SLV_IS_DRAFT_FLAGS,
+            new Object[] { new Boolean(isDraft) });
+        pmod.setPropertyValue(
+            PrintModelProps.PROP_SLV_IS_ORIGINAL_FLAGS,
+            new Object[] { new Boolean(isOriginal) });
+        pmod.setPropertyValue(
+            PrintModelProps.PROP_SLV_COPY_COUNTS,
+            new Object[] { new Short((short) 1) });
+        pmod.setPropertyValue(
+            PrintModelProps.PROP_SLV_PAGE_RANGE_TYPES,
+            new Object[] { new Short(PrintModelProps.PAGE_RANGE_TYPE_ALL) });
+        pmod.setPropertyValue(
+            PrintModelProps.PROP_SLV_PAGE_RANGE_VALUES,
+            new Object[] { "" });
+      }
+      catch (java.lang.Exception e)
+      {
+        Logger.error(e);
+      }
+      pmod.useInternalPrintFunction(StandardPrint.getInternalPrintFunction(
+          "sachleitendeVerfuegungOutput",
+          10));
+      pmod.printWithProps();
     }
 
     /** ************************************************************** */
