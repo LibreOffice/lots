@@ -34,7 +34,6 @@ import java.util.regex.Pattern;
 import com.sun.star.awt.DeviceInfo;
 import com.sun.star.awt.PosSize;
 import com.sun.star.awt.XWindow;
-import com.sun.star.beans.PropertyValue;
 import com.sun.star.beans.XPropertySet;
 import com.sun.star.container.NoSuchElementException;
 import com.sun.star.container.XEnumeration;
@@ -65,7 +64,6 @@ import de.muenchen.allg.itd51.parser.SyntaxErrorException;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.OptionalHighlightColorProvider;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.SetJumpMark;
 import de.muenchen.allg.itd51.wollmux.FormFieldFactory.FormField;
-import de.muenchen.allg.itd51.wollmux.PrintModels.PrintBlocksProps;
 import de.muenchen.allg.itd51.wollmux.PrintModels.PrintModelProps;
 import de.muenchen.allg.itd51.wollmux.dialog.FormController;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
@@ -217,16 +215,6 @@ public class TextDocumentModel
   private Set /* of VisibleSection */visibleTextSections;
 
   /**
-   * Diese HashMap wird speichert die Eigenschaften der Druckblöcke (z.B.
-   * allVersions), die vor dem Aufruf von setPrintBlocksProperties(key,...)
-   * gesetzt waren. Über den Aufruf der Methode
-   * restorePrintBlocksProperties(key) wird der Schlüssel key wieder aus der
-   * HashMap gelöscht. Der Wert von key ist eine HashMap, die für jeden
-   * Druckblock die alten Sichtbarkeitswerte enthält.
-   */
-  private HashMap /* of HashMaps */printBlocksProps;
-
-  /**
    * Kann über setPartOfMultiformDocument gesetzt werden und sollte dann true
    * enthalten, wenn das Dokument ein Teil eines Multiformdokuments ist.
    */
@@ -260,7 +248,6 @@ public class TextDocumentModel
     this.formularConf = null;
     this.formFieldValues = new HashMap();
     this.invisibleGroups = new HashSet();
-    this.printBlocksProps = new HashMap();
     this.overrideFragMap = new HashMap();
     this.formModel = null;
 
@@ -1105,156 +1092,64 @@ public class TextDocumentModel
   }
 
   /**
-   * Diese Methode setzt neue Eigenschaften für die Druckblöcke (z.B.
-   * allVersions), die in properties spezifiziert sind, und speichert die
-   * ursprünglichen Eigenschaften der Druckblölcke in einer internen HashMap
-   * unter dem Schlüssel key ab. Mit Hilfe von restorePrintBlocksProps(key)
-   * können die ürsprünglichen Einstellungen später wieder hergestellt werden.
+   * Diese Methode setzt die Eigenschaften "Sichtbar" (visible) und die Anzeige
+   * der Hintergrundfarbe (showHighlightColor) für alle Druckblöcke eines
+   * bestimmten Blocktyps blockName (z.B. allVersions).
    * 
-   * @param key
-   *          Ein belibiges Objekt das als Schlüssel verwendet wird, um mit
-   *          Hilfe von restorePrintBlocksProps(key) die Einstellungen wieder
-   *          herstellen zu können, die vor dem Aufruf dieser Methode gesetzt
-   *          waren.
-   * @param properties
-   *          Array von PropertyValue-Objekten. Dabei werden alle in
-   *          {@see de.muenchen.allg.itd51.wollmux.PrintModels.PrintBlocksProps}
-   *          spezifizierten Properties ausgegwertet.
+   * @param blockName
+   *          Der Blocktyp dessen Druckblöcke behandelt werden sollen.
+   * @param visible
+   *          Der Block wird sichtbar, wenn visible==true und unsichtbar, wenn
+   *          visible==false.
+   * @param showHighlightColor
+   *          gibt an ob die Hintergrundfarbe angezeigt werden soll (gilt nur,
+   *          wenn zu einem betroffenen Druckblock auch eine Hintergrundfarbe
+   *          angegeben ist).
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  public void setPrintBlocksProps(Object key, PropertyValue[] properties)
+  public void setPrintBlocksProps(String blockName, boolean visible,
+      boolean showHighlightColor)
   {
-    HashMap states = (HashMap) printBlocksProps.get(key);
-    if (states == null)
-    {
-      states = new HashMap();
-      printBlocksProps.put(key, states);
-    }
+    Iterator iter = new HashSet().iterator();
+    if (SachleitendeVerfuegung.BLOCKNAME_SLV_ALL_VERSIONS.equals(blockName))
+      iter = documentCommands.allVersionsIterator();
+    if (SachleitendeVerfuegung.BLOCKNAME_SLV_DRAFT_ONLY.equals(blockName))
+      iter = documentCommands.draftOnlyIterator();
+    if (SachleitendeVerfuegung.BLOCKNAME_SLV_NOT_IN_ORIGINAL.equals(blockName))
+      iter = documentCommands.notInOriginalIterator();
+    // if(SachleitendeVerfuegung.BLOCKNAME_SLV_ORIGINAL_ONLY.equals(blockName))
+    // iter = documentCommands.originalOnlyIterator();
 
-    UnoProps props = new UnoProps(properties);
-    boolean visible = false;
-
-    // setze NotInOriginal-Blocks
-    try
+    while (iter.hasNext())
     {
-      visible = AnyConverter.toBoolean(props
-          .getPropertyValue(PrintBlocksProps.PROP_NOT_IN_ORIGINAL_VISIBLE));
-      for (Iterator iter = documentCommands.notInOriginalIterator(); iter
-          .hasNext();)
+      DocumentCommand cmd = (DocumentCommand) iter.next();
+      cmd.setVisible(visible);
+      String highlightColor = ((OptionalHighlightColorProvider) cmd)
+          .getHighlightColor();
+
+      if (highlightColor != null)
       {
-        DocumentCommand cmd = (DocumentCommand) iter.next();
-        states.put(cmd, new Boolean(cmd.isVisible()));
-        cmd.setVisible(visible);
-      }
-    }
-    catch (java.lang.Exception e)
-    {
-    }
-
-    // setze DraftOnly-Blocks
-    try
-    {
-      visible = AnyConverter.toBoolean(props
-          .getPropertyValue(PrintBlocksProps.PROP_DRAFT_ONLY_VISIBLE));
-      for (Iterator iter = documentCommands.draftOnlyIterator(); iter.hasNext();)
-      {
-        DocumentCommand cmd = (DocumentCommand) iter.next();
-        states.put(cmd, new Boolean(cmd.isVisible()));
-        cmd.setVisible(visible);
-      }
-    }
-    catch (java.lang.Exception e)
-    {
-    }
-
-    // setze AllVersions-Blocks
-    try
-    {
-      visible = AnyConverter.toBoolean(props
-          .getPropertyValue(PrintBlocksProps.PROP_ALL_VERSIONS_VISIBLE));
-      for (Iterator iter = documentCommands.allVersionsIterator(); iter
-          .hasNext();)
-      {
-        DocumentCommand cmd = (DocumentCommand) iter.next();
-        states.put(cmd, new Boolean(cmd.isVisible()));
-        cmd.setVisible(visible);
-      }
-    }
-    catch (java.lang.Exception e)
-    {
-    }
-
-    // Aufheben der HighlightColor für alle angesprochenen Druckblöcke, wenn die
-    // Property "HideHighlightColor" gesetzt ist:
-    try
-    {
-      boolean hide = AnyConverter.toBoolean(props
-          .getPropertyValue(PrintBlocksProps.PROP_HIDE_HIGHLIGHT_COLOR));
-      if (hide)
-      {
-        for (Iterator iter = states.keySet().iterator(); iter.hasNext();)
-        {
-          OptionalHighlightColorProvider cmd = (OptionalHighlightColorProvider) iter
-              .next();
-          if (cmd.getHighlightColor() != null)
-            UNO.setPropertyToDefault(cmd.getTextRange(), "CharBackColor");
-        }
-      }
-    }
-    catch (java.lang.Exception e)
-    {
-    }
-  }
-
-  /**
-   * Diese Methode ermöglicht, gesteuert über den Schlüssel key, das
-   * Wiederherstellen der Eigenschaften der Druckblöcke, die vor dem Aufruf von
-   * setPrintBlocksProperties(key, props) gesetzt waren.
-   * 
-   * @param key
-   *          Der Key ist ein belibiges Objekt, das intern als Schlüssel für
-   *          eine HashMap verwendet wird, in der die ursprünglichen Zustände
-   *          der Druckblöcke abgelegt wurden. Nach dem Durchlauf dieser Methode
-   *          wird der Schlüssel key aus der internen HashMap entfernt.
-   * 
-   * @author Christoph Lutz (D-III-ITD-5.1)
-   */
-  public void restorePrintBlocksProps(Object key)
-  {
-    HashMap states = (HashMap) printBlocksProps.remove(key);
-    if (states != null)
-    {
-      for (Iterator iter = states.keySet().iterator(); iter.hasNext();)
-      {
-        // Ursprüngliche Sichtbarkeitszustände wieder herstellen:
-        DocumentCommand cmd = (DocumentCommand) iter.next();
-        Boolean vis = (Boolean) states.get(cmd);
-        if (vis != null) cmd.setVisible(vis.booleanValue());
-
-        // HighlightColor wieder herstellen wenn eine definiert ist:
-        if (cmd instanceof OptionalHighlightColorProvider)
-        {
-          OptionalHighlightColorProvider hp = (OptionalHighlightColorProvider) cmd;
-          if (hp.getHighlightColor() != null)
+        if (showHighlightColor)
+          try
           {
-            try
-            {
-              Integer bgColor = new Integer(Integer.parseInt(hp
-                  .getHighlightColor(), 16));
-              UNO.setProperty(hp.getTextRange(), "CharBackColor", bgColor);
-            }
-            catch (NumberFormatException e)
-            {
-              Logger.error("Fehler in Dokumentkommando '"
-                           + hp
-                           + "': Die Farbe HIGHLIGHT_COLOR mit dem Wert '"
-                           + hp.getHighlightColor()
-                           + "' ist ungültig.");
-            }
+            Integer bgColor = new Integer(Integer.parseInt(highlightColor, 16));
+            UNO.setProperty(cmd.getTextRange(), "CharBackColor", bgColor);
           }
+          catch (NumberFormatException e)
+          {
+            Logger.error("Fehler in Dokumentkommando '"
+                         + cmd
+                         + "': Die Farbe HIGHLIGHT_COLOR mit dem Wert '"
+                         + highlightColor
+                         + "' ist ungültig.");
+          }
+        else
+        {
+          UNO.setPropertyToDefault(cmd.getTextRange(), "CharBackColor");
         }
       }
+
     }
   }
 

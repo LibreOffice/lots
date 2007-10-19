@@ -35,15 +35,21 @@ import com.sun.star.uno.AnyConverter;
 import com.sun.star.uno.Exception;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
-import de.muenchen.allg.itd51.wollmux.PrintModels.PrintBlocksProps;
 import de.muenchen.allg.itd51.wollmux.TextDocumentModel.PrintFailedException;
 import de.muenchen.allg.itd51.wollmux.dialog.SachleitendeVerfuegungenDruckdialog;
 
 public class SachleitendeVerfuegung
 {
+  public static final String BLOCKNAME_SLV_ALL_VERSIONS = "AllVersions";
+
+  public static final String BLOCKNAME_SLV_ORIGINAL_ONLY = "OriginalOnly";
+
+  public static final String BLOCKNAME_SLV_NOT_IN_ORIGINAL = "NotInOriginal";
+
+  public static final String BLOCKNAME_SLV_DRAFT_ONLY = "DraftOnly";
+
   public static final String PRINT_FUNCTION_NAME = "SachleitendeVerfuegung";
 
   private static final String CHARACTER_STYLES = "CharacterStyles";
@@ -1207,20 +1213,10 @@ public class SachleitendeVerfuegung
     }
 
     // Ein/Ausblenden Druckblöcke (z.B. draftOnly):
-    UnoProps printBlocks = new UnoProps();
-    printBlocks.setPropertyValue(
-        PrintBlocksProps.PROP_DRAFT_ONLY_VISIBLE,
-        new Boolean(isDraft));
-    printBlocks.setPropertyValue(
-        PrintBlocksProps.PROP_NOT_IN_ORIGINAL_VISIBLE,
-        new Boolean(!isOriginal));
-    printBlocks.setPropertyValue(
-        PrintBlocksProps.PROP_ALL_VERSIONS_VISIBLE,
-        Boolean.TRUE);
-    printBlocks.setPropertyValue(
-        PrintBlocksProps.PROP_HIDE_HIGHLIGHT_COLOR,
-        Boolean.TRUE);
-    pmod.setPrintBlocksProps(pmod.toString(), printBlocks.getProps());
+    pmod.setPrintBlocksProps(BLOCKNAME_SLV_DRAFT_ONLY, isDraft, false);
+    pmod.setPrintBlocksProps(BLOCKNAME_SLV_NOT_IN_ORIGINAL, !isOriginal, false);
+    pmod.setPrintBlocksProps(BLOCKNAME_SLV_ORIGINAL_ONLY, isOriginal, false);
+    pmod.setPrintBlocksProps(BLOCKNAME_SLV_ALL_VERSIONS, true, false);
 
     // Ziffer von Punkt 1 ausblenden falls isOriginal
     XTextRange punkt1ZifferOnly = null;
@@ -1240,7 +1236,10 @@ public class SachleitendeVerfuegung
       UNO.setProperty(punkt1ZifferOnly, "CharHidden", Boolean.FALSE);
 
     // Alte Eigenschaften der Druckblöcke wieder herstellen:
-    pmod.restorePrintBlocksProps(pmod.toString());
+    pmod.setPrintBlocksProps(BLOCKNAME_SLV_DRAFT_ONLY, true, true);
+    pmod.setPrintBlocksProps(BLOCKNAME_SLV_NOT_IN_ORIGINAL, true, true);
+    pmod.setPrintBlocksProps(BLOCKNAME_SLV_ORIGINAL_ONLY, true, true);
+    pmod.setPrintBlocksProps(BLOCKNAME_SLV_ALL_VERSIONS, true, true);
 
     // Verfügungspunkte wieder einblenden:
     if (setInvisibleRange != null)

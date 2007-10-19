@@ -28,7 +28,6 @@ import java.util.List;
 
 import com.sun.star.beans.Property;
 import com.sun.star.beans.PropertyAttribute;
-import com.sun.star.beans.PropertyValue;
 import com.sun.star.beans.PropertyVetoException;
 import com.sun.star.beans.UnknownPropertyException;
 import com.sun.star.beans.XPropertyChangeListener;
@@ -183,39 +182,6 @@ public class PrintModels
      */
     public static final short PAGE_RANGE_TYPE_MANUAL = 4;
   }
-
-  /**
-   * Definiert Properties, die in der Methode setPrintBlocksProps relevant sind.
-   * 
-   * @author Christoph Lutz (D-III-ITD-5.1)
-   */
-  public static class PrintBlocksProps
-  {
-    /**
-     * Diese Property vom Typ Boolean ermöglicht das Anzeigen bzw. Ausblenden
-     * der DraftOnly-Druckblöcke.
-     */
-    public static final String PROP_DRAFT_ONLY_VISIBLE = "DraftOnlyVisible";
-
-    /**
-     * Diese Property vom Typ Boolean ermöglicht das Anzeigen bzw. Ausblenden
-     * der NotInOriginal-Druckblöcke.
-     */
-    public static final String PROP_NOT_IN_ORIGINAL_VISIBLE = "NotInOriginalVisible";
-
-    /**
-     * Diese Property vom Typ Boolean ermöglicht das Anzeigen bzw. Ausblenden
-     * der AllVersions-Druckblöcke.
-     */
-    public static final String PROP_ALL_VERSIONS_VISIBLE = "AllVersionsVisible";
-
-    /**
-     * Ist diese Property vom Typ Boolean true, so werden alle Hintergrundfarben
-     * der über die Properties "*Visible" angesprochenen Druckblöcke auf den
-     * Standardhintergrund zurückgesetzt.
-     */
-    public static final String PROP_HIDE_HIGHLIGHT_COLOR = "HideHighlightColor";
-  };
 
   /**
    * Erzeugt ein PrintModel-Objekt, das einen Druckvorgang zum Dokument
@@ -871,63 +837,33 @@ public class PrintModels
     }
 
     /**
-     * Diese Methode setzt neue Eigenschaften für die Druckblöcke (z.B.
-     * allVersions), die in properties spezifiziert sind, und speichert die
-     * ursprünglichen Eigenschaften der Druckblölcke in einer internen HashMap
-     * unter dem Schlüssel key ab. Mit Hilfe von restorePrintBlocksProps(key)
-     * können die ürsprünglichen Einstellungen später wieder hergestellt werden.
+     * Diese Methode setzt die Eigenschaften "Sichtbar" (visible) und die
+     * Anzeige der Hintergrundfarbe (showHighlightColor) für alle Druckblöcke
+     * eines bestimmten Blocktyps blockName (z.B. allVersions).
      * 
-     * @param key
-     *          Ein belibiges Objekt das als Schlüssel verwendet wird, um mit
-     *          Hilfe von restorePrintBlocksProps(key) die Einstellungen wieder
-     *          herstellen zu können, die vor dem Aufruf dieser Methode gesetzt
-     *          waren.
-     * @param properties
-     *          Array von PropertyValue-Objekten. Folgende Properties werden
-     *          dabei von dieser Methode ausgewertet wenn sie angegeben sind:
-     *          Das Property "NotInOriginalVisible" (Boolean) ermöglicht das
-     *          Anzeigen/Ausblenden der NotInOriginal-Druckblöcke. Das Property
-     *          "DraftOnlyVisible" (Boolean) ermöglicht das Anzeigen/Ausblenden
-     *          der DraftOnly-Druckblöcke. Das Property "AllVersionsVisible"
-     *          (Boolean) ermöglicht das Anzeigen/Ausblenden der
-     *          allVersions-Druckblöcke. Ist "HideHighlightColor" (Boolean) ==
-     *          True, so werden all Hintergrundfarben der über die Properties
-     *          "*Visible" angesprochenen Druckblöcke auf den
-     *          Standardhintergrund zurückgesetzt.
+     * @param blockName
+     *          Der Blocktyp dessen Druckblöcke behandelt werden sollen.
+     *          Folgende Blocknamen werden derzeit unterstützt: "AllVersions",
+     *          "DraftOnly" und "NotInOriginal"
+     * @param visible
+     *          Der Block wird sichtbar, wenn visible==true und unsichtbar, wenn
+     *          visible==false.
+     * @param showHighlightColor
+     *          gibt an ob die Hintergrundfarbe angezeigt werden soll (gilt nur,
+     *          wenn zu einem betroffenen Druckblock auch eine Hintergrundfarbe
+     *          angegeben ist).
      * 
      * @author Christoph Lutz (D-III-ITD-5.1)
      */
-    public void setPrintBlocksProps(Object key, PropertyValue[] properties)
+    public void setPrintBlocksProps(String blockName, boolean visible,
+        boolean showHighlightColor)
     {
       setLock();
       WollMuxEventHandler.handleSetPrintBlocksPropsViaPrintModel(
           model.doc,
-          key,
-          properties,
-          unlockActionListener);
-      waitForUnlock();
-    }
-
-    /**
-     * Diese Methode ermöglicht, gesteuert über den Schlüssel key, das
-     * Wiederherstellen der Eigenschaften der Druckblöcke, die vor dem Aufruf
-     * von setPrintBlocksProperties(key, props) gesetzt waren.
-     * 
-     * @param key
-     *          Der Key ist ein belibiges Objekt, das intern als Schlüssel für
-     *          eine HashMap verwendet wird, in der die ursprünglichen Zustände
-     *          der Druckblöcke abgelegt wurden. Nach dem Durchlauf dieser
-     *          Methode wird der Schlüssel key aus der internen HashMap
-     *          entfernt.
-     * 
-     * @author Christoph Lutz (D-III-ITD-5.1)
-     */
-    public void restorePrintBlocksProps(Object key)
-    {
-      setLock();
-      WollMuxEventHandler.handleRestorePrintBlocksViaPrintModel(
-          model.doc,
-          key,
+          blockName,
+          visible,
+          showHighlightColor,
           unlockActionListener);
       waitForUnlock();
     }
@@ -1084,22 +1020,12 @@ public class PrintModels
     /*
      * (non-Javadoc)
      * 
-     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#setPrintBlocksProps(java.lang.Object,
-     *      com.sun.star.beans.PropertyValue[])
+     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#setPrintBlocksProps(java.lang.String,
+     *      boolean, boolean)
      */
-    public void setPrintBlocksProps(Object arg0, PropertyValue[] arg1)
+    public void setPrintBlocksProps(String arg0, boolean arg1, boolean arg2)
     {
-      master.setPrintBlocksProps(arg0, arg1);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#restorePrintBlocksProps(java.lang.Object)
-     */
-    public void restorePrintBlocksProps(Object arg0)
-    {
-      master.restorePrintBlocksProps(arg0);
+      master.setPrintBlocksProps(arg0, arg1, arg2);
     }
 
     /*

@@ -206,45 +206,26 @@ interface XPrintModel
     boolean useInternalPrintFunctionWithArgument([in] any printFunction, [in] any arg);
 
     /**
-     * Diese Methode setzt neue Eigenschaften für die Druckblöcke (z.B.
-     * allVersions), die in properties spezifiziert sind, und speichert die
-     * ursprünglichen Eigenschaften der Druckblölcke in einer internen HashMap
-     * unter dem Schlüssel key ab. Mit Hilfe von restorePrintBlocksProps(key)
-     * können die ürsprünglichen Einstellungen später wieder hergestellt werden.
+     * Diese Methode setzt die Eigenschaften "Sichtbar" (visible) und die
+     * Anzeige der Hintergrundfarbe (showHighlightColor) für alle Druckblöcke
+     * eines bestimmten Blocktyps blockName (z.B. allVersions).
      * 
-     * @param key
-     *          Ein belibiges Objekt das als Schlüssel verwendet wird, um mit
-     *          Hilfe von restorePrintBlocksProps(key) die Einstellungen wieder
-     *          herstellen zu können, die vor dem Aufruf dieser Methode gesetzt
-     *          waren.
-     * @param properties
-     *          Array von PropertyValue-Objekten. Folgende Properties werden
-     *          dabei von dieser Methode ausgewertet wenn sie angegeben sind:
-     *          Das Property "NotInOriginalVisible" (Boolean) ermöglicht das
-     *          Anzeigen/Ausblenden der NotInOriginal-Druckblöcke. Das Property
-     *          "DraftOnlyVisible" (Boolean) ermöglicht das Anzeigen/Ausblenden
-     *          der DraftOnly-Druckblöcke. Das Property "AllVersionsVisible"
-     *          (Boolean) ermöglicht das Anzeigen/Ausblenden der
-     *          allVersions-Druckblöcke. Ist "HideHighlightColor" (Boolean) ==
-     *          True, so werden all Hintergrundfarben der über die Properties
-     *          "*Visible" angesprochenen Druckblöcke auf den
-     *          Standardhintergrund zurückgesetzt.
+     * @param blockName
+     *          Der Blocktyp dessen Druckblöcke behandelt werden sollen.
+     *          Folgende Blocknamen werden derzeit unterstützt: "AllVersions",
+     *          "DraftOnly" und "NotInOriginal"
+     * @param visible
+     *          Der Block wird sichtbar, wenn visible==true und unsichtbar, wenn
+     *          visible==false.
+     * @param showHighlightColor
+     *          gibt an ob die Hintergrundfarbe angezeigt werden soll (gilt nur,
+     *          wenn zu einem betroffenen Druckblock auch eine Hintergrundfarbe
+     *          angegeben ist).
+     * 
+     * @author Christoph Lutz (D-III-ITD-5.1)
      */
-	void setPrintBlocksProps([in] any key, [in] sequence<com::sun::star::beans::PropertyValue> props);
+	void setPrintBlocksProps([in] string blockname, [in] boolean visible, [in] boolean showHighlightColor);
 
-    /**
-     * Diese Methode ermöglicht, gesteuert über den Schlüssel key, das
-     * Wiederherstellen der Eigenschaften der Druckblöcke, die vor dem Aufruf
-     * von setPrintBlocksProperties(key, props) gesetzt waren.
-     * 
-     * @param key
-     *          Der Key ist ein belibiges Objekt, das intern als Schlüssel für
-     *          eine HashMap verwendet wird, in der die ursprünglichen Zustände
-     *          der Druckblöcke abgelegt wurden. Nach dem Durchlauf dieser
-     *          Methode wird der Schlüssel key aus der internen HashMap
-     *          entfernt.
-     */
-	void restorePrintBlocksProps([in] any key);
 };
 
 }; }; }; }; };

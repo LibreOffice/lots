@@ -2682,117 +2682,51 @@ public class WollMuxEventHandler
 
   /**
    * Diese Methode erzeugt ein neues WollMuxEvent, mit dem die Eigenschaften der
-   * Druckblöcke (z.B. allVersions), die in properties spezifiziert sind, neu
-   * gesetzt werden können, wobei die ursprünglichen Eigenschaften der
-   * Druckblölcke in einer internen HashMap unter dem Schlüssel key
-   * abgespeichert werden. Mit Hilfe von
-   * handleRestorePrintBlocksViaPrintModel(key) können die ürsprünglichen
-   * Einstellungen später wieder hergestellt werden.
+   * Druckblöcke (z.B. allVersions) gesetzt werden können.
    * 
    * Das Event dient als Hilfe für die Komfortdruckfunktionen und wird vom
    * XPrintModel aufgerufen und mit diesem synchronisiert.
    * 
-   * @param key
-   *          Ein belibiges Objekt das als Schlüssel verwendet wird, um mit
-   *          Hilfe von restorePrintBlocksProps(key) die Einstellungen wieder
-   *          herstellen zu können, die vor dem Aufruf dieser Methode gesetzt
-   *          waren.
-   * @param properties
-   *          Array von PropertyValue-Objekten. Dabei werden alle in
-   *          {@see de.muenchen.allg.itd51.wollmux.PrintModels.PrintBlocksProps}
-   *          spezifizierten Properties ausgegwertet.
+   * @param blockName
+   *          Der Blocktyp dessen Druckblöcke behandelt werden sollen.
+   * @param visible
+   *          Der Block wird sichtbar, wenn visible==true und unsichtbar, wenn
+   *          visible==false.
+   * @param showHighlightColor
+   *          gibt an ob die Hintergrundfarbe angezeigt werden soll (gilt nur,
+   *          wenn zu einem betroffenen Druckblock auch eine Hintergrundfarbe
+   *          angegeben ist).
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
    */
   public static void handleSetPrintBlocksPropsViaPrintModel(XTextDocument doc,
-      Object key, PropertyValue[] props, ActionListener listener)
+      String blockName, boolean visible, boolean showHighlightColor,
+      ActionListener listener)
   {
-    handle(new OnSetPrintBlocksPropsViaPrintModel(doc, key, props, listener));
+    handle(new OnSetPrintBlocksPropsViaPrintModel(doc, blockName, visible,
+        showHighlightColor, listener));
   }
 
   private static class OnSetPrintBlocksPropsViaPrintModel extends BasicEvent
   {
     private XTextDocument doc;
 
-    private PropertyValue[] props;
+    private String blockName;
 
-    private Object key;
+    private boolean visible;
 
-    private ActionListener listener;
-
-    public OnSetPrintBlocksPropsViaPrintModel(XTextDocument doc, Object key,
-        PropertyValue[] props, ActionListener listener)
-    {
-      this.doc = doc;
-      this.props = props;
-      this.key = key;
-      this.listener = listener;
-    }
-
-    protected void doit() throws WollMuxFehlerException
-    {
-      TextDocumentModel model = WollMuxSingleton.getInstance()
-          .getTextDocumentModel(doc);
-      try
-      {
-        model.setPrintBlocksProps(key, props);
-      }
-      catch (java.lang.Exception e)
-      {
-        errorMessage(e);
-      }
-
-      stabilize();
-      listener.actionPerformed(null);
-    }
-
-    public String toString()
-    {
-      return this.getClass().getSimpleName()
-             + "(#"
-             + doc.hashCode()
-             + ", '"
-             + key
-             + "', "
-             + props
-             + ")";
-    }
-  }
-
-  // *******************************************************************************************
-
-  /**
-   * Erzeugt ein neues WollMuxEvent, das, gesteuert über den Schlüssel key, das
-   * Wiederherstellen der Eigenschaften der Druckblöcke ermöglicht, die vor dem
-   * Aufruf von handleSetPrintBlocksViaPrintModel(...) gesetzt waren.
-   * 
-   * Das Event dient als Hilfe für die Komfortdruckfunktionen und wird vom
-   * XPrintModel aufgerufen und mit diesem über den ActionListener listener
-   * synchronisiert.
-   * 
-   * @param key
-   *          Der Key ist ein belibiges Objekt, das intern als Schlüssel für
-   *          eine HashMap verwendet wird, in der die ursprünglichen Zustände
-   *          der Druckblöcke abgelegt wurden. Nach dem Durchlauf dieser Methode
-   *          wird der Schlüssel key aus der internen HashMap entfernt.
-   */
-  public static void handleRestorePrintBlocksViaPrintModel(XTextDocument doc,
-      Object key, ActionListener listener)
-  {
-    handle(new OnRestorePrintBlocksViaPrintModel(doc, key, listener));
-  }
-
-  private static class OnRestorePrintBlocksViaPrintModel extends BasicEvent
-  {
-    private XTextDocument doc;
-
-    private Object key;
+    private boolean showHighlightColor;
 
     private ActionListener listener;
 
-    public OnRestorePrintBlocksViaPrintModel(XTextDocument doc, Object key,
+    public OnSetPrintBlocksPropsViaPrintModel(XTextDocument doc,
+        String blockName, boolean visible, boolean showHighlightColor,
         ActionListener listener)
     {
       this.doc = doc;
-      this.key = key;
+      this.blockName = blockName;
+      this.visible = visible;
+      this.showHighlightColor = showHighlightColor;
       this.listener = listener;
     }
 
@@ -2802,7 +2736,7 @@ public class WollMuxEventHandler
           .getTextDocumentModel(doc);
       try
       {
-        model.restorePrintBlocksProps(key);
+        model.setPrintBlocksProps(blockName, visible, showHighlightColor);
       }
       catch (java.lang.Exception e)
       {
@@ -2819,7 +2753,11 @@ public class WollMuxEventHandler
              + "(#"
              + doc.hashCode()
              + ", '"
-             + key
+             + blockName
+             + "', '"
+             + visible
+             + "', '"
+             + showHighlightColor
              + "')";
     }
   }
