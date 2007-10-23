@@ -1275,6 +1275,15 @@ public class TextDocumentModel
   }
 
   /**
+   * Fügt an Stelle der aktuellen Selektion ein Serienbrieffeld ein, das auf die
+   * Spalte name zugreift.
+   */
+  public void insertMailMergeFieldAtCursorPosition(String name)
+  {
+    getViewCursor().setString("<"+name+">"); //FIXME: insertMailMergeFieldAtCursorPosition(String name)
+  }
+
+  /**
    * Liefert die aktuelle Formularbeschreibung; Wurde die Formularbeschreibung
    * bis jetzt noch nicht eingelesen, so wird sie spätestens jetzt eingelesen.
    * 

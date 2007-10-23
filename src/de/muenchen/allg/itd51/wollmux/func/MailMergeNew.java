@@ -24,7 +24,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.Vector;
@@ -48,16 +53,25 @@ import javax.swing.WindowConstants;
 import javax.swing.border.Border;
 
 import com.sun.star.container.XEnumeration;
+import com.sun.star.document.XEventListener;
+import com.sun.star.lang.EventObject;
 import com.sun.star.sheet.XCellRangesQuery;
 import com.sun.star.sheet.XSheetCellRanges;
 import com.sun.star.sheet.XSpreadsheetDocument;
 import com.sun.star.sheet.XSpreadsheets;
 import com.sun.star.table.CellRangeAddress;
+import com.sun.star.table.XCellRange;
 import com.sun.star.text.XTextDocument;
+import com.sun.star.ui.dialogs.XFilePicker;
+import com.sun.star.uno.UnoRuntime;
+import com.sun.star.util.CloseVetoException;
+import com.sun.star.util.XCloseListener;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
+import de.muenchen.allg.itd51.wollmux.UnavailableException;
+import de.muenchen.allg.itd51.wollmux.dialog.DimAdjust;
 
 /**
  * Die neuen erweiterten Serienbrief-Funktionalitäten.
@@ -148,18 +162,16 @@ public class MailMergeNew
     
     hbox.add(new JSeparator(SwingConstants.VERTICAL));
     
+    //FIXME: Ausgrauen, wenn kein Datenquelle ausgewählt
     button = new JButton("Serienbrieffeld");
     final JButton mailmergeFieldButton = button;
     button.addActionListener(new ActionListener()
-        {
+    {
       public void actionPerformed(ActionEvent e)
       {
-        if (ds.hasDatasource()) 
-          showInsertFieldPopup(mailmergeFieldButton, 0, mailmergeFieldButton.getSize().height);
-        else
-          ds.showDatasourceSelectionDialog(myFrame);
+        showInsertFieldPopup(mailmergeFieldButton, 0, mailmergeFieldButton.getSize().height);
       }
-        });
+    });
     hbox.add(button);
     
     button = new JButton("Spezialfeld");
@@ -225,7 +237,7 @@ public class MailMergeNew
     //  FIXME: Muss ausgegraut sein, wenn nicht im Vorschau-Modus.
     previewDatasetNumberTextfield = new JTextField("1",3);
     previewDatasetNumberTextfield.addActionListener(new ActionListener()
-        {
+    {
       public void actionPerformed(ActionEvent e)
       {
         String tfValue = previewDatasetNumberTextfield.getText();
@@ -238,7 +250,8 @@ public class MailMergeNew
         }
         //TODO updatePreviewFields();
       }
-        });
+    });
+    previewDatasetNumberTextfield.setMaximumSize(new Dimension(Integer.MAX_VALUE,button.getPreferredSize().height));
     hbox.add(previewDatasetNumberTextfield);
     
     //  FIXME: Muss ausgegraut sein, wenn nicht im Vorschau-Modus.
@@ -298,12 +311,12 @@ public class MailMergeNew
     // Spalten enthalten sind.
     item = new JMenuItem("Tabellenspalten ergänzen");
     item.addActionListener(new ActionListener()
-        {
+    {
       public void actionPerformed(ActionEvent e)
       {
         //TODO Tabellenspalten ergänzen Button
       }
-        });
+    });
     tabelleMenu.add(item);
 
 //  FIXME: Button darf nur angezeigt werden, wenn tatsächlich eine Calc-Tabelle
@@ -427,40 +440,6 @@ public class MailMergeNew
   }
 
   /**
-   * Liefert von Tabellenblatt sheet die Indizes aller Zeilen und Spalten, in denen
-   * mindestens eine sichtbare nicht-leere Zelle existiert.
-   * @param sheet das zu scannende Tabellenblatt
-   * @param columnIndexes diesem Set werden die Spaltenindizes hinzugefügt
-   * @param rowIndexes diesem Set werden die Zeilenindizes hinzugefügt
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private static void getVisibleNonemptyRowsAndColumns(XCellRangesQuery sheet, SortedSet columnIndexes, SortedSet rowIndexes)
-  {
-    XSheetCellRanges visibleCellRanges = sheet.queryVisibleCells();
-    XSheetCellRanges nonEmptyCellRanges = sheet
-        .queryContentCells((short) ( com.sun.star.sheet.CellFlags.VALUE
-                                   | com.sun.star.sheet.CellFlags.DATETIME
-                                   | com.sun.star.sheet.CellFlags.STRING 
-                                   | com.sun.star.sheet.CellFlags.FORMULA));
-    CellRangeAddress[] nonEmptyCellRangeAddresses = nonEmptyCellRanges.getRangeAddresses();
-    for (int i = 0; i < nonEmptyCellRangeAddresses.length; ++i)
-    {
-      XSheetCellRanges ranges = UNO.XCellRangesQuery(visibleCellRanges).queryIntersection(nonEmptyCellRangeAddresses[i]);
-      CellRangeAddress[] rangeAddresses = ranges.getRangeAddresses();
-      for (int k = 0; k < rangeAddresses.length; ++k)
-      {
-        CellRangeAddress addr = rangeAddresses[k];
-        for (int x = addr.StartColumn; x <= addr.EndColumn; ++x)
-          columnIndexes.add(new Integer(x));
-        
-        for (int y = addr.StartRow; y <= addr.EndRow; ++y)
-          rowIndexes.add(new Integer(y));
-      }
-    }
-  }
-  
-  
-  /**
    * Erzeugt ein neues JPopupMenu mit Einträgen für alle Namen aus 
    * {@link #ds},getColumnNames()
    * und zeigt es an neben invoker an der relativen Position x,y. 
@@ -468,12 +447,34 @@ public class MailMergeNew
    * @param x Koordinate des Popups im Koordinatenraum von invoker.
    * @param y Koordinate des Popups im Koordinatenraum von invoker.
    * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TODO Testen
+   * TESTED
    */
   private void showInsertFieldPopup(JComponent invoker, int x, int y)
   {
     List columnNames = ds.getColumnNames();
     if (columnNames.isEmpty()) return;
+
+    Collections.sort(columnNames);
+    
+    JPopupMenu menu = new JPopupMenu();
+    
+    JMenuItem button;
+    Iterator iter = columnNames.iterator();
+    while (iter.hasNext())
+    {
+      final String name = (String)iter.next();
+      button = new JMenuItem(name);
+      button.addActionListener(new ActionListener()
+      {
+        public void actionPerformed(ActionEvent e)
+        {
+          mod.insertMailMergeFieldAtCursorPosition(name);
+        }
+      });
+      menu.add(button);
+    }
+        
+    menu.show(invoker, x, y);
   }
 
   /**
@@ -607,9 +608,18 @@ public class MailMergeNew
     
     /**
      * Speichert den Namen der Tabelle bzw, des Tabellenblattes, die als
-     * Quelle der Serienbriefdaten ausgewählt wurde.
+     * Quelle der Serienbriefdaten ausgewählt wurde. Ist niemals null, kann
+     * aber der leere String sein oder ein Name, der gar nicht in der
+     * entsprechenden Datenquelle existiert.
      */
-    private String tableName = null;
+    private String tableName = "";
+    
+    /**
+     * Wenn als aktuelle Datenquelle ein Calc-Dokument ausgewählt ist, dann
+     * wird dieser Listener darauf registriert um Änderungen des Speicherorts,
+     * so wie das Schließen des Dokuments zu überwachen.
+     */
+    private MyCalcListener myCalcListener = new MyCalcListener();
     
     /**
      * Wird verwendet zum Speichern/Wiedereinlesen der zuletzt ausgewählten
@@ -644,11 +654,77 @@ public class MailMergeNew
      * Tabelle keine benannten Spalten, so wird ein leerer Vector geliefert.
      * @return
      * @author Matthias Benkmann (D-III-ITD 5.1)
+     * TESTED
+     */
+    public List getColumnNames()
+    {
+      try{
+        switch(sourceType)
+        {
+          case SOURCE_CALC: return getColumnNames(getCalcDoc(), tableName);
+          case SOURCE_DB: return getDbColumnNames(oooDatasourceName, tableName);
+          default: return new Vector();
+        }
+      }catch(Exception x)
+      {
+        Logger.error(x);
+        return new Vector();
+      }
+    }
+    
+    
+    /**
+     * Liefert die Spaltennamen der Tabelle tableName aus der
+     * OOo-Datenquelle oooDatasourceName.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
      * TODO Testen
      */
-    public Vector getColumnNames()
+    private List getDbColumnNames(String oooDatasourceName, String tableName)
     {
-      return new Vector(); //FIXME: getColumnNames()
+      return new Vector(); //FIXME: getDbColumnNames()
+    }
+
+    /**
+     * Liefert die Inhalte (als Strings) der nicht-leeren Zellen der ersten
+     * sichtbaren Zeile von Tabellenblatt tableName in Calc-Dokument calcDoc.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     * TESTED
+     */
+    private List getColumnNames(XSpreadsheetDocument calcDoc, String tableName)
+    {
+      List columnNames = new Vector();
+      if (calcDoc == null) return columnNames;
+      try{
+        XCellRangesQuery sheet = UNO.XCellRangesQuery(calcDoc.getSheets().getByName(tableName));
+        SortedSet columnIndexes = new TreeSet();
+        SortedSet rowIndexes = new TreeSet();
+        getVisibleNonemptyRowsAndColumns(sheet, columnIndexes, rowIndexes);
+        
+        if (columnIndexes.size() > 0 && rowIndexes.size() > 0)
+        {
+          XCellRange sheetCellRange = UNO.XCellRange(sheet);
+          
+          /*
+           * Erste sichtbare Zeile durchscannen und alle nicht-leeren Zelleninhalte als
+           * Tabellenspaltennamen interpretieren. 
+           */
+          int ymin = ((Number)rowIndexes.first()).intValue();
+          Iterator iter = columnIndexes.iterator();
+          while (iter.hasNext())
+          {
+            int x = ((Number)iter.next()).intValue();
+            String columnName = UNO.XTextRange(sheetCellRange.getCellByPosition(x, ymin)).getString();
+            if (columnName.length() > 0)
+            {
+              columnNames.add(columnName);
+            }
+          }
+        }        
+      }catch(Exception x)
+      {
+        Logger.error("Kann Spaltennamen nicht bestimmen",x);
+      }
+      return columnNames;  
     }
 
     /**
@@ -668,7 +744,7 @@ public class MailMergeNew
      * @author Matthias Benkmann (D-III-ITD 5.1)
      * TESTED
      */
-    public void showDatasourceSelectionDialog(JFrame parent)
+    public void showDatasourceSelectionDialog(final JFrame parent)
     {
       final JDialog datasourceSelector = new JDialog(parent, "Wo sind Ihre Serienbriefdaten ?", true);
       
@@ -679,25 +755,27 @@ public class MailMergeNew
       vbox.add(label);
       
       JButton button;
-      button = new JButton("Datei...");
-      button.addActionListener(new ActionListener(){
-        public void actionPerformed(ActionEvent e)
-        {
-          //TODO selectFileAsDatasource();
-        }
-      });
-      vbox.add(button);
-      
       button = createDatasourceSelectorCalcWindowButton();
       if (button != null) 
       {
         button.addActionListener(new ActionListener(){
           public void actionPerformed(ActionEvent e)
           {
-            //TODO selectOpenCalcWindowAsDatasource
+            datasourceSelector.dispose();
+            selectOpenCalcWindowAsDatasource(parent);
           }});
-        vbox.add(button);
+        vbox.add(DimAdjust.maxWidthUnlimited(button));
       }
+      
+      button = new JButton("Datei...");
+      button.addActionListener(new ActionListener(){
+        public void actionPerformed(ActionEvent e)
+        {
+          datasourceSelector.dispose();
+          selectFileAsDatasource(parent);
+        }
+      });
+      vbox.add(DimAdjust.maxWidthUnlimited(button));
       
       button = new JButton("Neue Calc-Tabelle...");
       button.addActionListener(new ActionListener(){
@@ -706,7 +784,7 @@ public class MailMergeNew
           //TODO openAndselectNewCalcTableAsDatasource();
         }
       });
-      vbox.add(button);
+      vbox.add(DimAdjust.maxWidthUnlimited(button));
       
       button = new JButton("Datenbank...");
       button.addActionListener(new ActionListener(){
@@ -715,7 +793,7 @@ public class MailMergeNew
           //TODO selectOOoDatasourceAsDatasource();
         }
       });
-      vbox.add(button);
+      vbox.add(DimAdjust.maxWidthUnlimited(button));
       
       label = new JLabel("Aktuell ausgewählte Tabelle");
       vbox.add(label);
@@ -737,7 +815,7 @@ public class MailMergeNew
         str = oooDatasourceName;
       }
 
-      if (tableName != null && tableName.length() > 0)
+      if (tableName.length() > 0)
         str = str + "." + tableName;
       
       label = new JLabel(str);
@@ -750,7 +828,7 @@ public class MailMergeNew
           datasourceSelector.dispose();
         }
       });
-      vbox.add(button);
+      vbox.add(DimAdjust.maxWidthUnlimited(button));
       
       datasourceSelector.pack();
       int frameWidth = datasourceSelector.getWidth();
@@ -761,6 +839,202 @@ public class MailMergeNew
       datasourceSelector.setLocation(x,y);
       datasourceSelector.setResizable(false);
       datasourceSelector.setVisible(true);
+    }
+    
+    /**
+     * Präsentiert dem Benutzer einen Dialog, in dem er aus allen offenen Calc-Fenstern
+     * eines als Datenquelle auswählen kann. Falls es nur ein
+     * offenes Calc-Fenster gibt, wird dieses automatisch gewählt.
+     * 
+     * @param parent der JFrame zu dem der die Dialoge gehören sollen.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     * TESTED
+     */
+    private void selectOpenCalcWindowAsDatasource(final JFrame parent)
+    {
+      List[] calcWindows = getOpenCalcWindows();
+      List names = calcWindows[0];
+      
+      if (names.isEmpty()) return;
+      
+      if (names.size() == 1)
+      {
+        getCalcDoc((XSpreadsheetDocument)calcWindows[1].get(0));
+        selectTable(parent);
+        return;
+      }
+      
+      final JDialog calcWinSelector = new JDialog(parent, "Welche Tabelle möchten Sie verwenden ?", true);
+      
+      Box vbox = Box.createVerticalBox();
+      calcWinSelector.add(vbox);
+      
+      JLabel label = new JLabel("Welches Calc-Dokument möchten Sie verwenden ?");
+      vbox.add(label);
+      
+      for (int i = 0; i < names.size(); ++i)
+      {
+        final String name = (String)names.get(i);
+        final XSpreadsheetDocument spread = (XSpreadsheetDocument)calcWindows[1].get(i);
+        JButton button;
+        button = new JButton(name);
+        button.addActionListener(new ActionListener(){
+          public void actionPerformed(ActionEvent e)
+          {
+            calcWinSelector.dispose();
+            getCalcDoc(spread);
+            selectTable(parent);
+          }
+        });
+        vbox.add(DimAdjust.maxWidthUnlimited(button));
+      }
+      
+      calcWinSelector.pack();
+      int frameWidth = calcWinSelector.getWidth();
+      int frameHeight = calcWinSelector.getHeight();
+      Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+      int x = screenSize.width/2 - frameWidth/2; 
+      int y = screenSize.height/2 - frameHeight/2;
+      calcWinSelector.setLocation(x,y);
+      calcWinSelector.setResizable(false);
+      calcWinSelector.setVisible(true);
+
+    }
+    
+    /**
+     * Öffnet einen FilePicker und falls der Benutzer dort eine Tabelle auswählt, wird diese
+     * geöffnet und als Datenquelle verwendet.
+     * 
+     * @param parent der JFrame zu dem der die Dialoge gehören sollen.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     * TESTED
+     */
+    private void selectFileAsDatasource(JFrame parent)
+    {
+      XFilePicker picker = UNO.XFilePicker(UNO.createUNOService("com.sun.star.ui.dialogs.FilePicker"));
+      short res = picker.execute();
+      if (res == com.sun.star.ui.dialogs.ExecutableDialogResults.OK)
+      {
+        String[] files = picker.getFiles();
+        if (files.length == 0) return;
+        try
+        {
+          Logger.debug("Öffne "+files[0]+" als Datenquelle für Seriendruck");
+          try{
+            getCalcDoc(files[0]);
+          }catch(UnavailableException x)
+          {
+            return;
+          }
+          selectTable(parent);
+        }
+        catch (Exception e)
+        {
+          Logger.error(e);
+        }
+      }
+    }
+    
+    /**
+     * Bringt einen Dialog, mit dem der Benutzer in der aktuell ausgewählten
+     * Datenquelle eine Tabelle auswählen kann. Falls die Datenquelle genau eine
+     * nicht-leere Tabelle hat, so wird diese ohne Dialog automatisch ausgewählt.
+     * Falls der Benutzer den Dialog abbricht, so wird die erste Tabelle gewählt.
+     * 
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     * @parent Das Hauptfenster, zu dem dieser Dialog gehört.
+     * TESTED
+     */
+    private void selectTable(JFrame parent)
+    {
+      List names = getNamesOfNonEmptyTables();
+      List allNames = getTableNames();
+      if (allNames.isEmpty())
+      {
+        tableName = "";
+        return;
+      }
+      if (names.isEmpty()) names = allNames;
+      
+      tableName = (String)names.get(0); //Falls der Benutzer den Dialog abbricht ohne Auswahl
+      
+      final JDialog tableSelector = new JDialog(parent, "Welche Tabelle möchten Sie verwenden ?", true);
+      
+      Box vbox = Box.createVerticalBox();
+      tableSelector.add(vbox);
+      
+      JLabel label = new JLabel("Welche Tabelle möchten Sie verwenden ?");
+      vbox.add(label);
+      
+      Iterator iter = names.iterator();
+      while (iter.hasNext())
+      {
+        final String name = (String)iter.next();
+        JButton button;
+        button = new JButton(name);
+        button.addActionListener(new ActionListener(){
+          public void actionPerformed(ActionEvent e)
+          {
+            tableSelector.dispose();
+            tableName = name;
+          }
+        });
+        vbox.add(DimAdjust.maxWidthUnlimited(button));
+      }
+      
+      tableSelector.pack();
+      int frameWidth = tableSelector.getWidth();
+      int frameHeight = tableSelector.getHeight();
+      Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+      int x = screenSize.width/2 - frameWidth/2; 
+      int y = screenSize.height/2 - frameHeight/2;
+      tableSelector.setLocation(x,y);
+      tableSelector.setResizable(false);
+      tableSelector.setVisible(true);
+    }
+
+    /**
+     * Registriert {@link #myCalcListener} auf calcDoc, falls calcDoc != null.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
+    private void setListeners(XSpreadsheetDocument calcDoc)
+    {
+      if (calcDoc == null) return;
+      try{
+        UNO.XCloseBroadcaster(calcDoc).addCloseListener(myCalcListener);
+      }catch(Exception x)
+      {
+        Logger.error("Kann CloseListener nicht auf Calc-Dokument registrieren",x);
+      }
+      try{
+        UNO.XEventBroadcaster(calcDoc).addEventListener(myCalcListener);
+      }catch(Exception x)
+      {
+        Logger.error("Kann EventListener nicht auf Calc-Dokument registrieren",x);
+      }
+    }
+
+    /**
+     * Falls calcDoc != null wird versucht, {@link #myCalcListener} davon zu deregistrieren.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
+    private void removeListeners(XSpreadsheetDocument calcDoc)
+    {
+      if (calcDoc == null) return;
+      
+      try{
+        UNO.XCloseBroadcaster(calcDoc).removeCloseListener(myCalcListener);
+      }catch(Exception x)
+      {
+        Logger.error("Konnte alten XCloseListener nicht deregistrieren",x);
+      }
+      try{
+        UNO.XEventBroadcaster(calcDoc).removeEventListener(myCalcListener);
+      }catch(Exception x)
+      {
+        Logger.error("Konnte alten XEventListener nicht deregistrieren",x);
+      }
+      
     }
 
     private static String stripOpenOfficeFromWindowName(String str)
@@ -789,8 +1063,34 @@ public class MailMergeNew
      */
     private JButton createDatasourceSelectorCalcWindowButton()
     {
-      List calcWindowTitles = new Vector();
-      XSpreadsheetDocument calcSheet = null;
+      List[] calcWindows = getOpenCalcWindows();
+      
+      if (calcWindows[0].isEmpty()) return null;
+      if (calcWindows[0].size() > 1) return new JButton("Offenes Calc-Fenster...");
+      
+      //Es gibt offenbar genau ein offenes Calc-Fenster
+      //das XSpreadsheetDocument dazu ist in calcSheet zu finden
+      List nonEmptyTableNames = getNamesOfNonEmptyTables((XSpreadsheetDocument)calcWindows[1].get(0));
+      
+      String str = calcWindows[0].get(0).toString();
+      if (nonEmptyTableNames.size() == 1) str = str + "." + nonEmptyTableNames.get(0);
+      
+      return new JButton(str);
+    }
+
+    /**
+     * Liefert die Titel und zugehörigen XSpreadsheetDocuments aller offenen Calc-Fenster.
+     * @return ein Array mit 2 Elementen. Das erste ist eine Liste aller Titel von Calc-Fenstern,
+     *         wobei jeder Titel bereits mit {@link #stripOpenOfficeFromWindowName(String)}
+     *         bearbeitet wurde. Das zweite Element ist eine Liste von
+     *         XSpreadsheetDocuments, wobei jeder Eintrag zum Fenstertitel mit dem selben
+     *         Index in der ersten Liste gehört.
+     *         Im Fehlerfalle sind beide Listen leer.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
+    private List[] getOpenCalcWindows()
+    {
+      List[] calcWindows = new List[]{new Vector(), new Vector()};
       try{
         XSpreadsheetDocument spread = null;
         XEnumeration xenu = UNO.desktop.getComponents().createEnumeration();
@@ -799,9 +1099,62 @@ public class MailMergeNew
           spread = UNO.XSpreadsheetDocument(xenu.nextElement());
           if (spread != null)
           {
-            calcSheet = spread;
             String title = (String)UNO.getProperty(UNO.XModel(spread).getCurrentController().getFrame(),"Title");
-            calcWindowTitles.add(title);
+            calcWindows[0].add(stripOpenOfficeFromWindowName(title));
+            calcWindows[1].add(spread);
+          }
+        }
+      }catch(Exception x)
+      {
+        Logger.error(x);
+      }
+      return calcWindows;
+    }
+
+    /**
+     * Falls aktuell eine Calc-Tabelle als Datenquelle ausgewählt ist, so
+     * wird versucht, diese zurückzuliefern. Falls nötig wird die Datei
+     * anhand von {@link #calcUrl} neu geöffnet. Falls es aus irgendeinem
+     * Grund nicht möglich ist, diese zurückzuliefern, wird eine
+     * {@link de.muenchen.allg.itd51.wollmux.UnavailableException} geworfen.
+     * ACHTUNG! Das zurückgelieferte Objekt könnte bereits disposed sein!
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
+    private XSpreadsheetDocument getCalcDoc() throws UnavailableException
+    {
+      if (sourceType != SOURCE_CALC) throw new UnavailableException("Keine Calc-Tabelle ausgewählt");
+      if (calcDoc != null) return calcDoc;
+      return getCalcDoc(calcUrl);
+    }
+    
+    /**
+     * Falls url bereits offen ist oder geöffnet werden kann und ein
+     * Tabellendokument ist, so wird der {@link #sourceType} auf 
+     * {@link #SOURCE_CALC} gestellt und die Calc-Tabelle als neue
+     * Datenquelle ausgewählt.
+     * @return das Tabellendokument
+     * @throws UnavailableException falls ein Fehler auftritt oder die
+     *         url kein Tabellendokument beschreibt. 
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     * TESTED
+     */
+    private XSpreadsheetDocument getCalcDoc(String url) throws UnavailableException
+    {
+      /**
+       * Falls schon ein offenes Fenster mit der entsprechenden URL
+       * existiert, liefere dieses zurück und setze {@link #calcDoc}.
+       */
+      XSpreadsheetDocument newCalcDoc = null;
+      try{
+        XSpreadsheetDocument spread;
+        XEnumeration xenu = UNO.desktop.getComponents().createEnumeration();
+        while(xenu.hasMoreElements())
+        {
+          spread = UNO.XSpreadsheetDocument(xenu.nextElement());
+          if (spread != null && url.equals(UNO.XModel(spread).getURL()))
+          {
+            newCalcDoc = spread;
+            break;
           }
         }
       }catch(Exception x)
@@ -809,39 +1162,254 @@ public class MailMergeNew
         Logger.error(x);
       }
       
-      if (calcWindowTitles.isEmpty()) return null;
-      if (calcWindowTitles.size() > 1) return new JButton("Offenes Calc-Fenster...");
-      
-      //Es gibt offenbar genau ein offenes Calc-Fenster
-      //das XSpreadsheetDocument dazu ist in calcSheet zu finden
-      XSpreadsheets sheets = calcSheet.getSheets();
-      String[] tableNames = sheets.getElementNames();
-      SortedSet columns = new TreeSet();
-      SortedSet rows = new TreeSet();
-      String tableName = null;
-      int count = 0;
-      for (int i = 0; i < tableNames.length; ++i)
+      /**
+       * Ansonsten versuchen wir das Dokument zu öffnen.
+       */
+      if (newCalcDoc == null)
       {
         try{
-          XCellRangesQuery sheet = UNO.XCellRangesQuery(sheets.getByName(tableNames[i]));
-          columns.clear();
-          rows.clear();
-          getVisibleNonemptyRowsAndColumns(sheet, columns, rows);
-          if (columns.size() > 0 && rows.size() > 0)
-          {
-            if (++count > 1) break;
-            tableName = tableNames[i];
-          }
-        }catch(Exception x)
+          Object ss = UNO.loadComponentFromURL(url, false, true); //FIXME: Dragndrop-Problem
+          newCalcDoc = UNO.XSpreadsheetDocument(ss);
+          if (newCalcDoc == null) throw new UnavailableException("URL \""+url+"\" ist kein Tabellendokument");
+        }catch(Exception x) 
         {
-          Logger.error(x);
+          throw new UnavailableException(x);
         }
       }
-      
-      String str = stripOpenOfficeFromWindowName(calcWindowTitles.get(0).toString());
-      if (count == 1) str = str + "." + tableName;
-      
-      return new JButton(str);
+
+      getCalcDoc(newCalcDoc);
+      return calcDoc;
+    }
+
+    /**
+     * Setzt newCalcDoc als Datenquelle für den Seriendruck.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
+    private void getCalcDoc(XSpreadsheetDocument newCalcDoc)
+    {
+      try{
+        calcUrl = UNO.XModel(newCalcDoc).getURL();
+      }catch(Exception x) //typischerweise DisposedException  
+      { 
+        return;
+      }
+      if (calcUrl.length() == 0) calcUrl = null;
+      sourceType = SOURCE_CALC;
+      removeListeners(calcDoc); //falls altes calcDoc vorhanden, dort deregistrieren.
+      calcDoc = newCalcDoc;
+      setListeners(calcDoc);
+//    TODO Änderung muss ins Dokument übertragen werden, damit beim nächsten Mal richtige Datenquelle geöffnet werden kann
+    }
+    
+    
+    /**
+     * Liefert von Tabellenblatt sheet die Indizes aller Zeilen und Spalten, in denen
+     * mindestens eine sichtbare nicht-leere Zelle existiert.
+     * @param sheet das zu scannende Tabellenblatt
+     * @param columnIndexes diesem Set werden die Spaltenindizes hinzugefügt
+     * @param rowIndexes diesem Set werden die Zeilenindizes hinzugefügt
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
+    private static void getVisibleNonemptyRowsAndColumns(XCellRangesQuery sheet, SortedSet columnIndexes, SortedSet rowIndexes)
+    {
+      XSheetCellRanges visibleCellRanges = sheet.queryVisibleCells();
+      XSheetCellRanges nonEmptyCellRanges = sheet
+          .queryContentCells((short) ( com.sun.star.sheet.CellFlags.VALUE
+                                     | com.sun.star.sheet.CellFlags.DATETIME
+                                     | com.sun.star.sheet.CellFlags.STRING 
+                                     | com.sun.star.sheet.CellFlags.FORMULA));
+      CellRangeAddress[] nonEmptyCellRangeAddresses = nonEmptyCellRanges.getRangeAddresses();
+      for (int i = 0; i < nonEmptyCellRangeAddresses.length; ++i)
+      {
+        XSheetCellRanges ranges = UNO.XCellRangesQuery(visibleCellRanges).queryIntersection(nonEmptyCellRangeAddresses[i]);
+        CellRangeAddress[] rangeAddresses = ranges.getRangeAddresses();
+        for (int k = 0; k < rangeAddresses.length; ++k)
+        {
+          CellRangeAddress addr = rangeAddresses[k];
+          for (int x = addr.StartColumn; x <= addr.EndColumn; ++x)
+            columnIndexes.add(new Integer(x));
+          
+          for (int y = addr.StartRow; y <= addr.EndRow; ++y)
+            rowIndexes.add(new Integer(y));
+        }
+      }
+    }
+
+    /**
+     * Liefert die Namen aller nicht-leeren Tabellenblätter der aktuell
+     * ausgewählten Datenquelle. Wenn keine Datenquelle ausgewählt ist, oder
+     * es keine nicht-leere Tabelle gibt, so wird eine leere Liste geliefert.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
+    private List getNamesOfNonEmptyTables()
+    {
+      try{
+        switch(sourceType)
+        {
+          case SOURCE_CALC: return getNamesOfNonEmptyTables(getCalcDoc());
+          case SOURCE_DB: return getNamesOfNonEmptyDbTables();
+          default: return new Vector();
+        }
+      }catch(Exception x)
+      {
+        Logger.error(x);
+        return new Vector();
+      }
+    }
+
+    
+    /**
+     * Liefert die Namen aller Tabellen der aktuell
+     * ausgewählten Datenquelle. Wenn keine Datenquelle ausgewählt ist, oder
+     * es keine nicht-leere Tabelle gibt, so wird eine leere Liste geliefert.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
+    private List getTableNames()
+    {
+      try{
+        switch(sourceType)
+        {
+          case SOURCE_CALC: return getTableNames(getCalcDoc());
+          case SOURCE_DB: return getDbTableNames();
+          default: return new Vector();
+        }
+      }catch(Exception x)
+      {
+        Logger.error(x);
+        return new Vector();
+      }
+    }
+    
+    /**
+     * Liefert die Namen aller Tabellen der aktuell
+     * ausgewählten OOo-Datenquelle. Wenn keine OOo-Datenquelle ausgewählt ist, oder
+     * es keine nicht-leere Tabelle gibt, so wird eine leere Liste geliefert.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
+    private List getDbTableNames()
+    {
+      return new Vector();
+    }
+    
+    /**
+     * Liefert die Namen aller Tabellenblätter von calcDoc.
+     * Falls calcDoc == null, wird eine leere Liste geliefert.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
+    private List getTableNames(XSpreadsheetDocument calcDoc)
+    {
+      List nonEmptyTableNames = new Vector();
+      if (calcDoc != null) 
+      try{
+        XSpreadsheets sheets = calcDoc.getSheets();
+        String[] tableNames = sheets.getElementNames();
+        nonEmptyTableNames.addAll(Arrays.asList(tableNames));
+      }catch(Exception x)
+      {
+        Logger.error(x);
+      }
+      return nonEmptyTableNames;
+    }
+    
+    /**
+     * Liefert die Namen aller nicht-leeren Tabellen der aktuell
+     * ausgewählten OOo-Datenquelle. Wenn keine OOo-Datenquelle ausgewählt ist, oder
+     * es keine nicht-leere Tabelle gibt, so wird eine leere Liste geliefert.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
+    private List getNamesOfNonEmptyDbTables()
+    {
+      return new Vector();
+    }
+    
+    
+    /**
+     * Liefert die Namen aller nicht-leeren Tabellenblätter von calcDoc.
+     * Falls calcDoc == null wird eine leere Liste geliefert.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     * TESTED*/
+    private List getNamesOfNonEmptyTables(XSpreadsheetDocument calcDoc)
+    {
+      List nonEmptyTableNames = new Vector();
+      if (calcDoc != null) 
+      try{
+        XSpreadsheets sheets = calcDoc.getSheets();
+        String[] tableNames = sheets.getElementNames();
+        SortedSet columns = new TreeSet();
+        SortedSet rows = new TreeSet();
+        for (int i = 0; i < tableNames.length; ++i)
+        {
+          try{
+            XCellRangesQuery sheet = UNO.XCellRangesQuery(sheets.getByName(tableNames[i]));
+            columns.clear();
+            rows.clear();
+            getVisibleNonemptyRowsAndColumns(sheet, columns, rows);
+            if (columns.size() > 0 && rows.size() > 0)
+            {
+              nonEmptyTableNames.add(tableNames[i]);
+            }
+          }catch(Exception x)
+          {
+            Logger.error(x);
+          }
+        }
+      }catch(Exception x)
+      {
+        Logger.error(x);
+      }
+      return nonEmptyTableNames;
+    }
+    
+    private class MyCalcListener implements XCloseListener, XEventListener
+    {
+
+      public void queryClosing(EventObject arg0, boolean arg1) throws CloseVetoException
+      {
+      }
+
+      public void notifyClosing(EventObject arg0)
+      {
+        Logger.debug("Calc-Datenquelle wurde unerwartet geschlossen");
+        javax.swing.SwingUtilities.invokeLater(new Runnable() {
+          public void run() {
+            calcDoc = null;
+          }
+        });
+      }
+
+      public void disposing(EventObject arg0)
+      {
+        Logger.debug("Calc-Datenquelle wurde disposed()");
+        javax.swing.SwingUtilities.invokeLater(new Runnable() {
+          public void run() {
+            calcDoc = null;
+          }
+        });
+      }
+    
+      public void notifyEvent(com.sun.star.document.EventObject event)
+      {  
+        if (event.EventName.equals("OnSaveAsDone") && UnoRuntime.areSame(event.Source, calcDoc))
+        {
+          javax.swing.SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+              calcUrl = UNO.XModel(calcDoc).getURL();
+              Logger.debug("Speicherort der Tabelle hat sich geändert: \""+calcUrl+"\"");
+              //TODO Änderung muss ins Dokument übertragen werden, damit beim nächsten Mal richtige Datenquelle geöffnet werden kann
+            }
+          });
+        }
+      }
+    }
+
+    /**
+     * Gibt Ressourcen frei und deregistriert Listener.
+     * 
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
+    public void dispose()
+    {
+      removeListeners(calcDoc);
     }
   }
   
@@ -875,12 +1443,13 @@ public class MailMergeNew
     myFrame.dispose();
     myFrame = null;
     
+    ds.dispose();
   }
   
   public static void main(String[] args) throws Exception
   {
      UNO.init();
-     
+     Logger.init(Logger.ALL);
      XTextDocument doc = UNO.XTextDocument(UNO.desktop.getCurrentComponent());
      if (doc == null) 
      {
