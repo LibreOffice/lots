@@ -18,10 +18,12 @@
 package de.muenchen.allg.itd51.wollmux;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.Vector;
 
 import com.sun.star.awt.FontWeight;
 import com.sun.star.container.XEnumeration;
+import com.sun.star.container.XNameAccess;
 import com.sun.star.container.XNameContainer;
 import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.style.XStyle;
@@ -30,6 +32,9 @@ import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextFrame;
 import com.sun.star.text.XTextRange;
+import com.sun.star.text.XTextRangeCompare;
+import com.sun.star.text.XTextSection;
+import com.sun.star.text.XTextSectionsSupplier;
 import com.sun.star.text.XTextViewCursorSupplier;
 import com.sun.star.uno.AnyConverter;
 import com.sun.star.uno.Exception;
@@ -1202,6 +1207,15 @@ public class SachleitendeVerfuegung
         }
       } while (setInvisibleRange == null && cursor.gotoNextParagraph(false));
 
+    // Prüfen, welche Textsections im ausgeblendeten Bereich liegen und diese
+    // ebenfalls ausblenden:
+    List hidingSections = getSectionsFromPosition(pmod
+        .getTextDocument(), setInvisibleRange);
+    for (Iterator iter = hidingSections.iterator(); iter.hasNext();)
+    {
+      UNO.setProperty(iter.next(), "IsVisible", Boolean.FALSE);
+    }
+
     // ensprechende Verfügungspunkte ausblenden
     if (setInvisibleRange != null)
     {
@@ -1241,6 +1255,12 @@ public class SachleitendeVerfuegung
     pmod.setPrintBlocksProps(BLOCKNAME_SLV_ORIGINAL_ONLY, true, true);
     pmod.setPrintBlocksProps(BLOCKNAME_SLV_ALL_VERSIONS, true, true);
 
+    // ausgeblendete TextSections wieder einblenden
+    for (Iterator iter = hidingSections.iterator(); iter.hasNext();)
+    {
+      UNO.setProperty(iter.next(), "IsVisible", Boolean.TRUE);
+    }
+
     // Verfügungspunkte wieder einblenden:
     if (setInvisibleRange != null)
       UNO.setProperty(setInvisibleRange, "CharHidden", Boolean.FALSE);
@@ -1248,6 +1268,62 @@ public class SachleitendeVerfuegung
     // ViewCursor wieder herstellen:
     if (vc != null && oldViewCursor != null)
       vc.gotoRange(oldViewCursor, false);
+  }
+
+  /**
+   * Diese Methode liefert in eine Liste aller Textsections aus doc, deren Anker
+   * an der selben Position oder hinter der Position der TextRange pos liegt.
+   * 
+   * @param doc
+   *          Textdokument in dem alle enthaltenen Textsections geprüft werden.
+   * @param pos
+   *          Position, ab der die TextSections in den Vector aufgenommen werden
+   *          sollen.
+   * @return eine Liste aller TextSections, die an oder nach pos starten oder
+   *         eine leere Liste, wenn es Fehler gab oder keine Textsection
+   *         gefunden wurde.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  private static List getSectionsFromPosition(XTextDocument doc,
+      XTextRange pos)
+  {
+    Vector v = new Vector();
+    if (pos == null) return v;
+    XTextRangeCompare comp = UNO.XTextRangeCompare(pos.getText());
+    if (comp == null) return v;
+    XTextSectionsSupplier suppl = UNO.XTextSectionsSupplier(doc);
+    if (suppl == null) return v;
+
+    XNameAccess sections = suppl.getTextSections();
+    String[] names = sections.getElementNames();
+    for (int i = 0; i < names.length; i++)
+    {
+      XTextSection section = null;
+      try
+      {
+        section = UNO.XTextSection(sections.getByName(names[i]));
+      }
+      catch (java.lang.Exception e)
+      {
+        Logger.error(e);
+      }
+
+      if (section != null)
+      {
+        try
+        {
+          int diff = comp.compareRegionStarts(pos, section.getAnchor());
+          if (diff >= 0) v.add(section);
+        }
+        catch (IllegalArgumentException e)
+        {
+          // kein Fehler, da die Exceptions immer fliegt, wenn die ranges in
+          // unterschiedlichen Textobjekten liegen.
+        }
+      }
+    }
+    return v;
   }
 
   /**
