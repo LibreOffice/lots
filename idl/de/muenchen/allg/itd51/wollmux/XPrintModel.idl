@@ -56,6 +56,8 @@ interface XPrintModel
      * Aufrufkette weiter, wenn eine weitere Druckfunktion vorhanden ist;
      * Abhängig von der gesetzten Druckfunktion werden dabei verschiedene
      * Properties, die über setPropertyValue(...) gesetzt wurden.
+     * FIXME: Der vorherige Satz ist doch nicht vollständig, oder?
+     * Ich nix verstehen!
      */
     void printWithProps();
 	
@@ -129,10 +131,13 @@ interface XPrintModel
      * zusätzliches Argument gestartet. Sie wird nicht nochmal in die
      * Aufrufkette eingefügt, wenn bereits eine Druckfunktion mit dem selben
      * Namen im XPrintModel vorhanden ist.
+     * FIXME: Ohne ein zusätzliches Argument??? Häh? Jede Druckfunktion kriegt doch ein
+     * XPrintModel, oder nicht? Ich nix verstehen!
      * 
      * @param functionName
      *          Name der Druckfunktion, die durch das MasterPrintModel verwaltet
      *          und ohne Argumente aufgerufen werden soll.
+     *          FIXME: Wieso ohne Argumente? Siehe oben. Ich nix verstehen!
      * @return liefert true, wenn die Druckfunktion erfolgreich in die
      *         Aufrufkette übernommen wurde oder bereits geladen war und false,
      *         wenn die Druckfunktion aufgrund vorangegangener Fehler nicht in
@@ -149,6 +154,10 @@ interface XPrintModel
      * Aufrufkette eingefügt, wenn bereits eine Druckfunktion mit dem selben
      * Namen im XPrintModel vorhanden ist, das Argument arg wird aber in jedem
      * Fall übernommen.
+     * FIXME: Wie funktioniert das? Java-Funktionen haben doch eine feste Signatur.
+     * Die Aufrufparameter sind also durch die Funktion vorgegeben. Wie soll das
+     * Funktionieren, dass ich eine Druckfunktion mal mit, mal ohne Zusatzparameter
+     * verwende? Ich nix verstehen!
      * 
      * @param functionName
      *          Name der Druckfunktion, die durch das MasterPrintModel verwaltet
@@ -170,10 +179,13 @@ interface XPrintModel
      * Aufrufs ohne ein zusätzliches Argument gestartet. Sie wird nicht nochmal
      * in die Aufrufkette eingefügt, wenn bereits eine Druckfunktion mit dem
      * selben Namen im XPrintModel vorhanden ist.
+     * FIXME: Was ist eine WollMux-interne Druckfunktion? Wo sind die dokumentiert?
+     * Muss sowas in einem öffentlichen Interface sein?
      * 
      * @param functionName
      *          Name der Druckfunktion, die durch das MasterPrintModel verwaltet
      *          und ohne Argumente aufgerufen werden soll.
+     *          FIXME: Entspricht nicht der untenstehenden Signatur.
      * @return liefert true, wenn die Druckfunktion erfolgreich in die
      *         Aufrufkette übernommen wurde oder bereits geladen war und false,
      *         wenn die Druckfunktion aufgrund vorangegangener Fehler nicht in
@@ -190,6 +202,7 @@ interface XPrintModel
      * nochmal in die Aufrufkette eingefügt, wenn bereits eine Druckfunktion mit
      * dem selben Namen im XPrintModel vorhanden ist, das Argument arg wird aber
      * in jedem Fall übernommen.
+     * FIXME: siehe vorherige Fixmes. Was ist eine interne Funktion? Woher kommen die extra Argumente?
      * 
      * @param functionName
      *          Name der Druckfunktion, die durch das MasterPrintModel verwaltet
@@ -208,7 +221,8 @@ interface XPrintModel
     /**
      * Diese Methode setzt die Eigenschaften "Sichtbar" (visible) und die
      * Anzeige der Hintergrundfarbe (showHighlightColor) für alle Druckblöcke
-     * eines bestimmten Blocktyps blockName (z.B. allVersions).
+     * eines bestimmten Blocktyps blockName (z.B. allVersions). 
+     * FIXME: Gross oder Kleinschreibung von allVersions?
      * 
      * @param blockName
      *          Der Blocktyp dessen Druckblöcke behandelt werden sollen.
