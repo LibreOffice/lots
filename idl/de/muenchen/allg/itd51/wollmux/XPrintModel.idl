@@ -33,6 +33,9 @@ interface XPrintModel
      * Jede Druckfunktion kann über dieses Interface funktionsspezifische 
      * Properties im XPrintModel setzen, die von anderen Druckfunktionen in der
      * Aufrufkette des XPrintModels ausgewertet werden können.
+     * FIXME: Es sollte dokumentiert werden, dass dieses XPropertySet alle
+     * Property-Namen schluckt und wenn nötig ein neues anlegt. Das ist nämlich
+     * nicht Standardverhalten von XPropertySets.
      */
 	interface com::sun::star::beans::XPropertySet;
 	
