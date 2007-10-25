@@ -1174,9 +1174,8 @@ public class TextDocumentModel
    */
   public void insertMailMergeFieldAtCursorPosition(String name)
   {
-    getViewCursor().setString("<" + name + ">"); // FIXME:
-    // insertMailMergeFieldAtCursorPosition(String
-    // name)
+    getViewCursor().setString("<" + name + ">");
+    // FIXME: insertMailMergeFieldAtCursorPosition(String name)
   }
 
   /**
