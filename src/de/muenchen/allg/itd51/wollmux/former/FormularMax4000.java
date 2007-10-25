@@ -64,6 +64,7 @@ import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
+import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -1536,68 +1537,56 @@ public class FormularMax4000
   
   private void setPrintFunction()
   {
-    // FIXME: hier wird nur die erste vom iterator zurückgelieferte Druckfunktion betrachtet
-    // wir können jetzt aber mehrere Druckfunktionen jeweils mit Parametern setzen, so dass
-    // der Dialog entsprechend umgestaltet werden muss.
-    String currentFunctionName = null;
-    Iterator i = doc.getPrintFunctions().iterator();
-    if(i.hasNext()) currentFunctionName = (String) i.next();
-    if(currentFunctionName == null) currentFunctionName = "";
-
-    String printFunctionConfig = doc.getPrintFunctionConfig(currentFunctionName);
-    
-    final JEditorPane printFunctionConfigEditor = new JEditorPane("text/plain","");
-    printFunctionConfigEditor.setEditorKit(new NoWrapEditorKit());
-    
-    printFunctionConfigEditor.setFont(new Font("Monospaced",Font.PLAIN,printFunctionConfigEditor.getFont().getSize()+2));
-    JScrollPane scrollPane = new JScrollPane(printFunctionConfigEditor, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
+    final JList printFunctionCurrentList = new JList(new Vector(doc.getPrintFunctions()));
     JPanel printFunctionEditorContentPanel = new JPanel(new BorderLayout());
-    printFunctionEditorContentPanel.add(scrollPane, BorderLayout.CENTER);
+    printFunctionEditorContentPanel.add(printFunctionCurrentList, BorderLayout.CENTER);
     
     final JComboBox printFunctionComboBox = new JComboBox(printFunctionNames);
     printFunctionComboBox.setEditable(true);
     
-    printFunctionComboBox.setSelectedItem(currentFunctionName);
     printFunctionEditorContentPanel.add(printFunctionComboBox, BorderLayout.NORTH);  
     final JDialog dialog = new JDialog(myFrame, true);
     
-    ActionListener setFunc = new ActionListener(){
+    ActionListener removeFunc = new ActionListener(){
       public void actionPerformed(ActionEvent e)
       {
-        //Liste der Druckfunktionen leeren:
-        for (Iterator iter = doc.getPrintFunctions().iterator(); iter.hasNext();)
-        {
-          String name = (String) iter.next();
-          doc.removePrintFunction(name);
-        }
-        
+        Object[] todel = printFunctionCurrentList.getSelectedValues();
+        for (int i = 0; i < todel.length; i++)
+          doc.removePrintFunction("" + todel[i]);        
+        printFunctionCurrentList.setListData(new Vector(doc.getPrintFunctions()));
+      }
+    };
+
+    ActionListener addFunc = new ActionListener(){
+      public void actionPerformed(ActionEvent e)
+      {
         String newFunctionName = printFunctionComboBox.getSelectedItem().toString();
         doc.addPrintFunction(newFunctionName);
-        doc.setPrintFunctionConfig(newFunctionName, printFunctionConfigEditor.getText());
-        dialog.dispose();
+        printFunctionCurrentList.setListData(new Vector(doc.getPrintFunctions()));
       }
     };
     
-    JButton okay = new JButton("Setzen");
-    okay.addActionListener(setFunc);
+    JButton wegDamit = new JButton("Entfernen");
+    wegDamit.addActionListener(removeFunc);
+
+    JButton machDazu = new JButton("Hinzufügen");
+    machDazu.addActionListener(addFunc);
     
-    JButton abort = new JButton("Abbrechen");
-    abort.addActionListener(new ActionListener(){
+    JButton ok = new JButton("OK");
+    ok.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e)
       {
         dialog.dispose();
       }});
 
     Box buttons = Box.createHorizontalBox();
-    buttons.add(abort);
+    buttons.add(wegDamit);
     buttons.add(Box.createHorizontalGlue());
-    buttons.add(okay);
+    buttons.add(machDazu);
+    buttons.add(Box.createHorizontalGlue());
+    buttons.add(ok);
     printFunctionEditorContentPanel.add(buttons, BorderLayout.SOUTH);
-    
-    printFunctionConfigEditor.setCaretPosition(0);
-    printFunctionConfigEditor.setText(printFunctionConfig);
-    
-    
+        
     dialog.setTitle("Druckfunktion setzen");
     dialog.add(printFunctionEditorContentPanel);
     dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
@@ -1605,10 +1594,7 @@ public class FormularMax4000
     dialog.pack();
     int frameWidth = dialog.getWidth();
     int frameHeight = dialog.getHeight();
-    if (frameWidth < 384)
-      frameWidth = 384;
-    if (frameHeight < 384)
-      frameHeight = 384;
+    if(frameHeight < 200) frameHeight=200;
     
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
     int x = screenSize.width/2 - frameWidth/2; 

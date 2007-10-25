@@ -8,6 +8,7 @@ import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
+import de.muenchen.allg.itd51.wollmux.PrintModels.InternalPrintModel;
 import de.muenchen.allg.itd51.wollmux.PrintModels.PrintModelProps;
 
 public class StandardPrint
@@ -29,11 +30,15 @@ public class StandardPrint
   public static void sachleitendeVerfuegung(XPrintModel pmod)
   {
     // Druckfunktion SachleitendeVerfuegungOutput für SLV-Ausgabe hinzuladen:
-    if(! pmod.usePrintFunction("SachleitendeVerfuegungOutput")) {
+    if (!pmod.usePrintFunction("SachleitendeVerfuegungOutput"))
+    {
       String method = "sachleitendeVerfuegungOutput";
       int order = 150;
-      Logger.debug("Verwende interne Druckfunktion '" + method + "' mit ORDER-Wert '" + order + "' als Fallback.");
-      pmod.useInternalPrintFunction(getInternalPrintFunction(method, order));
+      PrintFunction func = getInternalPrintFunction(method, order);
+      if (pmod instanceof InternalPrintModel) {
+        Logger.debug("Verwende interne Druckfunktion '" + method + "' mit ORDER-Wert '" + order + "' als Fallback.");
+        ((InternalPrintModel) pmod).useInternalPrintFunction(func);
+      }
     }
 
     SachleitendeVerfuegung.showPrintDialog(pmod);

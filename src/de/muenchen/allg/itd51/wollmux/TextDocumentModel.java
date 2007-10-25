@@ -176,10 +176,9 @@ public class TextDocumentModel
   private String type = null;
 
   /**
-   * Enthält als Schlüssel die Namen der aktuell gesetzten Druckfunktionen und
-   * als Werte die Argumente, das den Druckfunktionen übergeben werden sollen.
+   * Enthält die Namen der aktuell gesetzten Druckfunktionen.
    */
-  private HashMap printFunctions;
+  private HashSet printFunctions;
 
   /**
    * Enthält die Formularbeschreibung des Dokuments oder null, wenn die
@@ -243,7 +242,7 @@ public class TextDocumentModel
     this.fragUrls = new String[] {};
     this.currentMax4000 = null;
     this.closeListener = null;
-    this.printFunctions = new HashMap();
+    this.printFunctions = new HashSet();
     this.printSettingsDone = false;
     this.formularConf = null;
     this.formFieldValues = new HashMap();
@@ -376,17 +375,7 @@ public class TextDocumentModel
         continue;
       }
 
-      String arg = null;
-      try
-      {
-        arg = func.get("ARG").toString();
-      }
-      catch (NodeNotFoundException e)
-      {
-        // ARG ist optional
-      }
-
-      printFunctions.put(name, arg);
+      printFunctions.add(name);
     }
   }
 
@@ -897,24 +886,7 @@ public class TextDocumentModel
    */
   public void addPrintFunction(String functionName)
   {
-    addPrintFunction(functionName, null);
-  }
-
-  /**
-   * Diese Methode fügt die Druckfunktion functionName mit dem Funktionsargument
-   * arg der Menge der dem Dokument zugeordneten Druckfunktionen hinzu.
-   * FunctionName muss dabei ein gültiger Funktionsbezeichner sein.
-   * 
-   * @param newFunctionName
-   *          der Name der Druckfunktion (zum setzen), der Leerstring "" (zum
-   *          zurücksetzen auf die zuletzt gesetzte Druckfunktion) oder
-   *          "default" zum Löschen der Druckfunktion. Der zu setzende Name muss
-   *          ein gültiger Funktionsbezeichner sein und in einem Abschnitt
-   *          "Druckfunktionen" in der wollmux.conf definiert sein.
-   */
-  public void addPrintFunction(String newFunctionName, Object arg)
-  {
-    printFunctions.put(newFunctionName, arg);
+    printFunctions.add(functionName);
     storePrintFunctions();
 
     // Frame veranlassen, die dispatches neu einzulesen - z.B. damit File->Print
@@ -969,7 +941,7 @@ public class TextDocumentModel
   private void storePrintFunctions()
   {
     // Elemente nach Namen sortieren (definierte Reihenfolge bei der Ausgabe)
-    ArrayList names = new ArrayList(printFunctions.keySet());
+    ArrayList names = new ArrayList(printFunctions);
     Collections.sort(names);
 
     ConfigThingy wm = new ConfigThingy("WM");
@@ -982,13 +954,6 @@ public class TextDocumentModel
       ConfigThingy nameConf = new ConfigThingy("FUNCTION");
       nameConf.addChild(new ConfigThingy(name));
       list.addChild(nameConf);
-      Object arg = printFunctions.get(name);
-      if (arg != null && arg.toString().length() > 0)
-      {
-        ConfigThingy argConf = new ConfigThingy("ARG");
-        argConf.addChild(new ConfigThingy(arg.toString()));
-        list.addChild(argConf);
-      }
       druckfunktionen.addChild(list);
     }
 
@@ -1008,78 +973,7 @@ public class TextDocumentModel
    */
   public Set getPrintFunctions()
   {
-    return printFunctions.keySet();
-  }
-
-  /**
-   * Liefert die zusätzlichen Konfigurationsdaten für die Druckfunktion
-   * functionName als String zurück (oder einen Leerstring, falls nicht
-   * gesetzt).
-   * 
-   * Anmerkung: Diese Methode liefert immer einen String zurück und ist für das
-   * Bearbeiten der Konfigurationsdaten in einer GUI gedacht. Die zugehörige
-   * Repräsentation als Objekt (z.B. als ConfigThingy-Objekt) wird von den
-   * Methoden getPrintFunctionArgAs<Typ>(functionName) zurückgeliefert.
-   * 
-   * @author Matthias Benkmann, Christoph Lutz (D-III-ITD 5.1)
-   */
-  public String getPrintFunctionConfig(String functionName)
-  {
-    Object arg = printFunctions.get(functionName);
-    return (arg != null) ? arg.toString() : "";
-  }
-
-  /**
-   * Setzt die zusätzlichen Konfigurationsdaten für die Druckfunktion
-   * functionName auf conf, wenn die Druckfunktion functionName existiert;
-   * ansonsten geschieht nichts.
-   * 
-   * @author Matthias Benkmann, Christoph Lutz (D-III-ITD 5.1)
-   */
-  public void setPrintFunctionConfig(String functionName, String conf)
-  {
-    if (printFunctions.containsKey(functionName))
-    {
-      printFunctions.put(functionName, conf);
-      storePrintFunctions();
-    }
-  }
-
-  /**
-   * Liefert das Argument der Druckfunktion functionName als ConfigThingy mit
-   * dem Kontext DEFAULT_CONTEXT zurück, oder null, wenn kein Argument gesetzt
-   * ist oder das Argument nicht als ConfigThingy geparst werden kann. Treten
-   * beim Parsen Fehler auf, so werden diese als Fehler in wollmux.log gebracht
-   * wenn required==true. Ist required==false, so werden die Fehlermeldungen
-   * ignoriert.
-   * 
-   * @param functionName
-   *          Name der Druckfunktion zu der das Argument als ConfigThingy
-   *          geparst werden soll.
-   * @return das geparste ConfigThingy oder null, wenn kein Argument zu dieser
-   *         Druckfunktion vorhanden ist oder Fehler beim Parsen auftraten.
-   * 
-   * @author Christoph Lutz (D-III-ITD-5.1)
-   */
-  public ConfigThingy getPrintFunctionArgAsConfigThingy(String functionName,
-      boolean required)
-  {
-    Object arg = printFunctions.get(functionName);
-    if (arg == null) return null;
-
-    // Parse das Argument als ConfigThingy:
-    try
-    {
-      // erzeuge ConfigThingy mit DEFAULT_CONTEXT:
-      ConfigThingy conf = new ConfigThingy("ARG", WollMuxSingleton
-          .getInstance().getDEFAULT_CONTEXT(), new StringReader(arg.toString()));
-      return conf;
-    }
-    catch (java.lang.Exception e)
-    {
-      if (required) Logger.error(e);
-      return null;
-    }
+    return printFunctions;
   }
 
   /**
@@ -1280,7 +1174,9 @@ public class TextDocumentModel
    */
   public void insertMailMergeFieldAtCursorPosition(String name)
   {
-    getViewCursor().setString("<"+name+">"); //FIXME: insertMailMergeFieldAtCursorPosition(String name)
+    getViewCursor().setString("<" + name + ">"); // FIXME:
+    // insertMailMergeFieldAtCursorPosition(String
+    // name)
   }
 
   /**
@@ -2139,11 +2035,10 @@ public class TextDocumentModel
     XPrintModel pmod = PrintModels.createPrintModel(this);
     if (useDocPrintFunctions)
     {
-      for (Iterator iter = printFunctions.keySet().iterator(); iter.hasNext();)
+      for (Iterator iter = printFunctions.iterator(); iter.hasNext();)
       {
         String name = (String) iter.next();
-        Object arg = getPrintFunctionArgAsConfigThingy(name, true);
-        pmod.usePrintFunctionWithArgument(name, arg);
+        pmod.usePrintFunction(name);
       }
     }
     return pmod;

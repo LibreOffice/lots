@@ -30,15 +30,32 @@ interface XPrintModel
 {
 
     /**
-     * Jede Druckfunktion kann über dieses Interface funktionsspezifische 
+     * Jede Druckfunktion kann über dieses Interface beliebige funktionsspezifische 
      * Properties im XPrintModel setzen, die von anderen Druckfunktionen in der
-     * Aufrufkette des XPrintModels ausgewertet werden können.
-     * FIXME: Es sollte dokumentiert werden, dass dieses XPropertySet alle
-     * Property-Namen schluckt und wenn nötig ein neues anlegt. Das ist nämlich
-     * nicht Standardverhalten von XPropertySets.
+     * Aufrufkette des XPrintModels ausgewertet werden können. Abweichend vom
+     * Standardverhalten von XPropertySet akzeptiert diese Implementierung alle
+     * Property-Namen und fügt Properties neu hinzu, wenn sie noch nicht vorhanden
+     * sind.
      */
 	interface com::sun::star::beans::XPropertySet;
 	
+    /**
+     * Lädt die in der wollmux.conf definierte Druckfunktion mit dem Namen
+     * functionName in das XPrintModel und ordnet sie gemäß dem ORDER-Attribut
+     * an der richtigen Position in die Aufrufkette der zu bearbeitenden
+     * Druckfunktionen ein; Wird die Druckfunktion aufgerufen, so bekommt sie
+     * genau ein Argument (dieses XPrintModel) übergeben.
+     * 
+     * @param functionName
+     *          Name der Druckfunktion, die durch das MasterPrintModel verwaltet
+     *          werden soll.
+     * @return liefert true, wenn die Druckfunktion erfolgreich in die
+     *         Aufrufkette übernommen wurde oder bereits geladen war und false,
+     *         wenn die Druckfunktion aufgrund vorangegangener Fehler nicht in
+     *         die Aufrufkette aufgenommen werden konnte.
+     */
+    boolean usePrintFunction([in] string functionName);
+
     /**
      * Liefert das XTextDocument mit dem die Druckfunktion aufgerufen wurde.
      */
@@ -58,9 +75,7 @@ interface XPrintModel
      * leitet die Anfrage an die nächste verfügbare Druckfunktion in der
      * Aufrufkette weiter, wenn eine weitere Druckfunktion vorhanden ist;
      * Abhängig von der gesetzten Druckfunktion werden dabei verschiedene
-     * Properties, die über setPropertyValue(...) gesetzt wurden.
-     * FIXME: Der vorherige Satz ist doch nicht vollständig, oder?
-     * Ich nix verstehen!
+     * Properties, die über setPropertyValue(...) gesetzt wurden ausgewertet.
      */
     void printWithProps();
 	
@@ -127,105 +142,9 @@ interface XPrintModel
     void collectNonWollMuxFormFields();
     
     /**
-     * Lädt die in der wollmux.conf definierte Druckfunktion mit dem Namen
-     * functionName in das XPrintModel und ordnet sie gemäß dem ORDER-Attribut
-     * an der richtigen Position in die Aufrufkette der zu bearbeitenden
-     * Druckfunktionen ein; Die Druckfunktion wird im Fall des Aufrufs ohne ein
-     * zusätzliches Argument gestartet. Sie wird nicht nochmal in die
-     * Aufrufkette eingefügt, wenn bereits eine Druckfunktion mit dem selben
-     * Namen im XPrintModel vorhanden ist.
-     * FIXME: Ohne ein zusätzliches Argument??? Häh? Jede Druckfunktion kriegt doch ein
-     * XPrintModel, oder nicht? Ich nix verstehen!
-     * 
-     * @param functionName
-     *          Name der Druckfunktion, die durch das MasterPrintModel verwaltet
-     *          und ohne Argumente aufgerufen werden soll.
-     *          FIXME: Wieso ohne Argumente? Siehe oben. Ich nix verstehen!
-     * @return liefert true, wenn die Druckfunktion erfolgreich in die
-     *         Aufrufkette übernommen wurde oder bereits geladen war und false,
-     *         wenn die Druckfunktion aufgrund vorangegangener Fehler nicht in
-     *         die Aufrufkette aufgenommen werden konnte.
-     */
-    boolean usePrintFunction([in] string functionName);
-
-    /**
-     * Lädt die in der wollmux.conf definierte Druckfunktion mit dem Namen
-     * functionName in das XPrintModel und ordnet sie gemäß dem ORDER-Attribut
-     * an der richtigen Position in die Aufrufkette der zu bearbeitenden
-     * Druckfunktionen ein; Die Druckfunktion wird im Fall des Aufrufs mit dem
-     * zusätzlichen Argument arg gestartet. Sie wird nicht nochmal in die
-     * Aufrufkette eingefügt, wenn bereits eine Druckfunktion mit dem selben
-     * Namen im XPrintModel vorhanden ist, das Argument arg wird aber in jedem
-     * Fall übernommen.
-     * FIXME: Wie funktioniert das? Java-Funktionen haben doch eine feste Signatur.
-     * Die Aufrufparameter sind also durch die Funktion vorgegeben. Wie soll das
-     * Funktionieren, dass ich eine Druckfunktion mal mit, mal ohne Zusatzparameter
-     * verwende? Ich nix verstehen!
-     * 
-     * @param functionName
-     *          Name der Druckfunktion, die durch das MasterPrintModel verwaltet
-     *          und mit dem Argument arg aufgerufen werden soll.
-     * @param arg
-     *          Das Argument das der Druckfunktion beim Aufruf übergeben wird.
-     * @return liefert true, wenn die Druckfunktion erfolgreich in die
-     *         Aufrufkette übernommen wurde oder bereits geladen war und false,
-     *         wenn die Druckfunktion aufgrund vorangegangener Fehler nicht in
-     *         die Aufrufkette aufgenommen werden konnte.
-     */
-    boolean usePrintFunctionWithArgument([in] string functionName, [in] any arg);
-
-    /**
-     * Lädt die WollMux-interne Druckfunktion printFunction (muss als
-     * PrintFunction-Objekt vorliegen) in das XPrintModel und ordnet sie gemäß
-     * dem ORDER-Attribut an der richtigen Position in die Aufrufkette der zu
-     * bearbeitenden Druckfunktionen ein; Die Druckfunktion wird im Fall des
-     * Aufrufs ohne ein zusätzliches Argument gestartet. Sie wird nicht nochmal
-     * in die Aufrufkette eingefügt, wenn bereits eine Druckfunktion mit dem
-     * selben Namen im XPrintModel vorhanden ist.
-     * FIXME: Was ist eine WollMux-interne Druckfunktion? Wo sind die dokumentiert?
-     * Muss sowas in einem öffentlichen Interface sein?
-     * 
-     * @param functionName
-     *          Name der Druckfunktion, die durch das MasterPrintModel verwaltet
-     *          und ohne Argumente aufgerufen werden soll.
-     *          FIXME: Entspricht nicht der untenstehenden Signatur.
-     * @return liefert true, wenn die Druckfunktion erfolgreich in die
-     *         Aufrufkette übernommen wurde oder bereits geladen war und false,
-     *         wenn die Druckfunktion aufgrund vorangegangener Fehler nicht in
-     *         die Aufrufkette aufgenommen werden konnte.
-     */
-    boolean useInternalPrintFunction([in] any printFunction);
-
-    /**
-     * Lädt die WollMux-interne Druckfunktion printFunction (muss als
-     * PrintFunction-Objekt vorliegen) in das XPrintModel und ordnet sie gemäß
-     * dem ORDER-Attribut an der richtigen Position in die Aufrufkette der zu
-     * bearbeitenden Druckfunktionen ein; Die Druckfunktion wird im Fall des
-     * Aufrufs mit dem zusätzlichen Argument arg gestartet. Sie wird nicht
-     * nochmal in die Aufrufkette eingefügt, wenn bereits eine Druckfunktion mit
-     * dem selben Namen im XPrintModel vorhanden ist, das Argument arg wird aber
-     * in jedem Fall übernommen.
-     * FIXME: siehe vorherige Fixmes. Was ist eine interne Funktion? Woher kommen die extra Argumente?
-     * 
-     * @param functionName
-     *          Name der Druckfunktion, die durch das MasterPrintModel verwaltet
-     *          und mit dem Argument arg aufgerufen werden soll.
-     * @param arg
-     *          Das Argument das der Druckfunktion beim Aufruf übergeben wird.
-     * @return liefert true, wenn die Druckfunktion erfolgreich in die
-     *         Aufrufkette übernommen wurde oder bereits geladen war und false,
-     *         wenn die Druckfunktion aufgrund vorangegangener Fehler nicht in
-     *         die Aufrufkette aufgenommen werden konnte.
-     * 
-     * @author Christoph Lutz (D-III-ITD-5.1)
-     */
-    boolean useInternalPrintFunctionWithArgument([in] any printFunction, [in] any arg);
-
-    /**
      * Diese Methode setzt die Eigenschaften "Sichtbar" (visible) und die
      * Anzeige der Hintergrundfarbe (showHighlightColor) für alle Druckblöcke
-     * eines bestimmten Blocktyps blockName (z.B. allVersions). 
-     * FIXME: Gross oder Kleinschreibung von allVersions?
+     * eines bestimmten Blocktyps blockName (z.B. "AllVersions"). 
      * 
      * @param blockName
      *          Der Blocktyp dessen Druckblöcke behandelt werden sollen.

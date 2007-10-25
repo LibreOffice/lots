@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import de.muenchen.allg.itd51.wollmux.PrintModels.InternalPrintModel;
 import de.muenchen.allg.itd51.wollmux.PrintModels.PrintModelProps;
 import de.muenchen.allg.itd51.wollmux.func.StandardPrint;
 
@@ -96,9 +97,8 @@ public class TestHandler
       {
         Logger.error(e);
       }
-      pmod.useInternalPrintFunction(StandardPrint.getInternalPrintFunction(
-          "sachleitendeVerfuegungOutput",
-          10));
+      ((InternalPrintModel) pmod).useInternalPrintFunction(StandardPrint
+          .getInternalPrintFunction("sachleitendeVerfuegungOutput", 10));
       pmod.printWithProps();
     }
 

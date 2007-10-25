@@ -20,11 +20,10 @@ package de.muenchen.allg.itd51.wollmux;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import com.sun.star.beans.Property;
 import com.sun.star.beans.PropertyAttribute;
@@ -201,6 +200,33 @@ public class PrintModels
   }
 
   /**
+   * Jedes hier definierte konkrete PrintModel definiert dieses Interface und
+   * kann (ausschließlich) innerhalb der Java-VM des WollMux verwendet werden um
+   * auf nicht im XPrintModel exportierte Methode der PrintModels zuzugreifen.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  public static interface InternalPrintModel
+  {
+    /**
+     * Lädt die WollMux-interne Druckfunktion printFunction (muss als
+     * PrintFunction-Objekt vorliegen) in das XPrintModel und ordnet sie gemäß
+     * dem ORDER-Attribut an der richtigen Position in die Aufrufkette der zu
+     * bearbeitenden Druckfunktionen ein.
+     * 
+     * @param printFunction
+     *          Druckfunktion, die durch das PrintModel verwaltet werden soll.
+     * @return liefert true, wenn die Druckfunktion erfolgreich in die
+     *         Aufrufkette übernommen wurde oder bereits geladen war und false,
+     *         wenn die Druckfunktion aufgrund vorangegangener Fehler nicht in
+     *         die Aufrufkette aufgenommen werden konnte.
+     * 
+     * @author Christoph Lutz (D-III-ITD-5.1)
+     */
+    public boolean useInternalPrintFunction(PrintFunction printFunction);
+  }
+
+  /**
    * Das MasterPrintModel repräsentiert einen kompletten Druckvorgang und
    * verwaltet alle Druckfunktionen, die an diesem Druckvorgang beteiligt sind.
    * Es kann dynamisch weitere Druckfunktionen nachladen und diese in der durch
@@ -223,18 +249,13 @@ public class PrintModels
    * 
    * @author christoph.lutz
    */
-  private static class MasterPrintModel implements XPrintModel
+  private static class MasterPrintModel implements XPrintModel,
+      InternalPrintModel
   {
     /**
-     * Enthält eine sortierte Liste aller (verketteten) Druckfunktionen.
+     * Enthält die sortierte Menge aller PrintFunction-Objekte der Aufrufkette.
      */
-    private List /* of PrintFunction */functions;
-
-    /**
-     * Enthält eine Zuordnung von Funktionsnamen auf die Funktionsargumente, die
-     * später beim Funktionsaufruf (PrintFunction.invoke(...)) übergeben werden.
-     */
-    private HashMap functionsAndArgs = new HashMap();
+    private SortedSet functions;
 
     /**
      * Enthält die Properties, die in printWithProps() ausgewertet werden und
@@ -270,22 +291,19 @@ public class PrintModels
     {
       this.model = model;
       this.props = new HashMap();
-      this.functions = new ArrayList();
-      this.functionsAndArgs = new HashMap();
+      this.functions = new TreeSet();
     }
 
     /**
      * Lädt die in der wollmux.conf definierte Druckfunktion mit dem Namen
      * functionName in das XPrintModel und ordnet sie gemäß dem ORDER-Attribut
      * an der richtigen Position in die Aufrufkette der zu bearbeitenden
-     * Druckfunktionen ein; Die Druckfunktion wird im Fall des Aufrufs ohne ein
-     * zusätzliches Argument gestartet. Sie wird nicht nochmal in die
-     * Aufrufkette eingefügt, wenn bereits eine Druckfunktion mit dem selben
-     * Namen im XPrintModel vorhanden ist.
+     * Druckfunktionen ein; Wird die Druckfunktion aufgerufen, so bekommt sie
+     * genau ein Argument (dieses XPrintModel) übergeben.
      * 
      * @param functionName
      *          Name der Druckfunktion, die durch das MasterPrintModel verwaltet
-     *          und ohne Argumente aufgerufen werden soll.
+     *          werden soll.
      * @return liefert true, wenn die Druckfunktion erfolgreich in die
      *         Aufrufkette übernommen wurde oder bereits geladen war und false,
      *         wenn die Druckfunktion aufgrund vorangegangener Fehler nicht in
@@ -297,41 +315,11 @@ public class PrintModels
      */
     public boolean usePrintFunction(String functionName)
     {
-      return usePrintFunctionWithArgument(functionName, null);
-    }
-
-    /**
-     * Lädt die in der wollmux.conf definierte Druckfunktion mit dem Namen
-     * functionName in das XPrintModel und ordnet sie gemäß dem ORDER-Attribut
-     * an der richtigen Position in die Aufrufkette der zu bearbeitenden
-     * Druckfunktionen ein; Die Druckfunktion wird im Fall des Aufrufs mit dem
-     * zusätzlichen Argument arg gestartet. Sie wird nicht nochmal in die
-     * Aufrufkette eingefügt, wenn bereits eine Druckfunktion mit dem selben
-     * Namen im XPrintModel vorhanden ist, das Argument arg wird aber in jedem
-     * Fall übernommen.
-     * 
-     * @param functionName
-     *          Name der Druckfunktion, die durch das MasterPrintModel verwaltet
-     *          und mit dem Argument arg aufgerufen werden soll.
-     * @param arg
-     *          Das Argument das der Druckfunktion beim Aufruf übergeben wird.
-     * @return liefert true, wenn die Druckfunktion erfolgreich in die
-     *         Aufrufkette übernommen wurde oder bereits geladen war und false,
-     *         wenn die Druckfunktion aufgrund vorangegangener Fehler nicht in
-     *         die Aufrufkette aufgenommen werden konnte.
-     * 
-     * @author Christoph Lutz (D-III-ITD-5.1)
-     * 
-     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#usePrintFunctionWithArgument(java.lang.String,
-     *      java.lang.Object)
-     */
-    public boolean usePrintFunctionWithArgument(String functionName, Object arg)
-    {
       PrintFunction newFunc = WollMuxSingleton.getInstance()
           .getGlobalPrintFunctions().get(functionName);
       if (newFunc != null)
       {
-        return useInternalPrintFunctionWithArgument(newFunc, arg);
+        return useInternalPrintFunction(newFunc);
       }
       else
       {
@@ -340,76 +328,19 @@ public class PrintModels
       }
     }
 
-    /**
-     * Lädt die WollMux-interne Druckfunktion printFunction (muss als
-     * PrintFunction-Objekt vorliegen) in das XPrintModel und ordnet sie gemäß
-     * dem ORDER-Attribut an der richtigen Position in die Aufrufkette der zu
-     * bearbeitenden Druckfunktionen ein; Die Druckfunktion wird im Fall des
-     * Aufrufs ohne ein zusätzliches Argument gestartet. Sie wird nicht nochmal
-     * in die Aufrufkette eingefügt, wenn bereits eine Druckfunktion mit dem
-     * selben Namen im XPrintModel vorhanden ist.
+    /*
+     * (non-Javadoc)
      * 
-     * @param functionName
-     *          Name der Druckfunktion, die durch das MasterPrintModel verwaltet
-     *          und ohne Argumente aufgerufen werden soll.
-     * @return liefert true, wenn die Druckfunktion erfolgreich in die
-     *         Aufrufkette übernommen wurde oder bereits geladen war und false,
-     *         wenn die Druckfunktion aufgrund vorangegangener Fehler nicht in
-     *         die Aufrufkette aufgenommen werden konnte.
-     * 
-     * @author Christoph Lutz (D-III-ITD-5.1)
-     * 
-     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#useInternalPrintFunction(java.lang.Object)
+     * @see de.muenchen.allg.itd51.wollmux.PrintModels.InternalPrintModel#useInternalPrintFunction(de.muenchen.allg.itd51.wollmux.func.PrintFunction)
      */
-    public boolean useInternalPrintFunction(Object printFunction)
+    public boolean useInternalPrintFunction(PrintFunction printFunction)
     {
-      return useInternalPrintFunctionWithArgument(printFunction, null);
-    }
-
-    /**
-     * Lädt die WollMux-interne Druckfunktion printFunction (muss als
-     * PrintFunction-Objekt vorliegen) in das XPrintModel und ordnet sie gemäß
-     * dem ORDER-Attribut an der richtigen Position in die Aufrufkette der zu
-     * bearbeitenden Druckfunktionen ein; Die Druckfunktion wird im Fall des
-     * Aufrufs mit dem zusätzlichen Argument arg gestartet. Sie wird nicht
-     * nochmal in die Aufrufkette eingefügt, wenn bereits eine Druckfunktion mit
-     * dem selben Namen im XPrintModel vorhanden ist, das Argument arg wird aber
-     * in jedem Fall übernommen.
-     * 
-     * @param functionName
-     *          Name der Druckfunktion, die durch das MasterPrintModel verwaltet
-     *          und mit dem Argument arg aufgerufen werden soll.
-     * @param arg
-     *          Das Argument das der Druckfunktion beim Aufruf übergeben wird.
-     * @return liefert true, wenn die Druckfunktion erfolgreich in die
-     *         Aufrufkette übernommen wurde oder bereits geladen war und false,
-     *         wenn die Druckfunktion aufgrund vorangegangener Fehler nicht in
-     *         die Aufrufkette aufgenommen werden konnte.
-     * 
-     * @author Christoph Lutz (D-III-ITD-5.1)
-     * 
-     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#useInternalPrintFunctionWithArgument(java.lang.Object,
-     *      java.lang.Object)
-     */
-    public boolean useInternalPrintFunctionWithArgument(Object printFunction,
-        Object arg)
-    {
-      if (printFunction != null && printFunction instanceof PrintFunction)
+      if (printFunction != null)
       {
-        PrintFunction f = (PrintFunction) printFunction;
-        if (!functionsAndArgs.containsKey(f.getFunctionName()))
-        {
-          functions.add(f);
-          Collections.sort(functions);
-        }
-        functionsAndArgs.put(f.getFunctionName(), arg);
+        functions.add(printFunction);
         return true;
       }
-      else
-      {
-        Logger.error("Die angeforderte interne Druckfunktion ist ungültig.");
-        return false;
-      }
+      return false;
     }
 
     /**
@@ -428,28 +359,11 @@ public class PrintModels
      */
     protected PrintFunction getPrintFunction(int idx)
     {
-      if (idx >= 0 && idx < functions.size())
-        return (PrintFunction) functions.get(idx);
+      Object[] funcs = functions.toArray();
+      if (idx >= 0 && idx < funcs.length)
+        return (PrintFunction) funcs[idx];
       else
         return null;
-    }
-
-    /**
-     * Liefert das Argument, das beim Aufruf der Druckfunktion functionName mit
-     * übergeben werden soll oder null, wenn der Funktion kein zusätzliches
-     * Argument übegeben werden soll.
-     * 
-     * @param functionName
-     *          Name der Druckfunktion, zu der der Aufrufparameter bestimmt
-     *          werden soll.
-     * @return Das Aufrufargument oder null, wenn der Funktion kein zusätzliches
-     *         Argument übergeben werden soll.
-     * 
-     * @author Christoph Lutz (D-III-ITD-5.1)
-     */
-    protected Object getPrintFunctionArg(String functionName)
-    {
-      return functionsAndArgs.get(functionName);
     }
 
     /**
@@ -490,7 +404,7 @@ public class PrintModels
      * leitet die Anfrage an die nächste verfügbare Druckfunktion in der
      * Aufrufkette weiter, wenn eine weitere Druckfunktion vorhanden ist;
      * Abhängig von der gesetzten Druckfunktion werden dabei verschiedene
-     * Properties, die über setPropertyValue(...) gesetzt wurden.
+     * Properties, die über setPropertyValue(...) gesetzt wurden ausgewertet.
      * 
      * Im MasterPrintModel sorgt der Aufruf dieser Methode dafür, dass (nur) die
      * erste verfügbare Druckfunktion aufgerufen wird. Das Weiterreichen der
@@ -509,7 +423,7 @@ public class PrintModels
       if (f != null)
       {
         XPrintModel pmod = new SlavePrintModel(this, 0);
-        f.invoke(pmod, getPrintFunctionArg(f.getFunctionName()));
+        f.invoke(pmod);
       }
       else
       {
@@ -839,7 +753,7 @@ public class PrintModels
     /**
      * Diese Methode setzt die Eigenschaften "Sichtbar" (visible) und die
      * Anzeige der Hintergrundfarbe (showHighlightColor) für alle Druckblöcke
-     * eines bestimmten Blocktyps blockName (z.B. allVersions).
+     * eines bestimmten Blocktyps blockName (z.B. "AllVersions").
      * 
      * @param blockName
      *          Der Blocktyp dessen Druckblöcke behandelt werden sollen.
@@ -884,7 +798,8 @@ public class PrintModels
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  private static class SlavePrintModel extends WeakBase implements XPrintModel
+  private static class SlavePrintModel extends WeakBase implements XPrintModel,
+      InternalPrintModel
   {
     private int idx;
 
@@ -949,8 +864,7 @@ public class PrintModels
       if (f != null)
       {
         XPrintModel pmod = new SlavePrintModel(master, idx + 1);
-        Thread t = f.invoke(pmod, master.getPrintFunctionArg(f
-            .getFunctionName()));
+        Thread t = f.invoke(pmod);
         try
         {
           t.join();
@@ -1121,26 +1035,13 @@ public class PrintModels
      * 
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#usePrintFunction(java.lang.String)
      */
-    public boolean usePrintFunction(String arg0)
-    {
-      return usePrintFunctionWithArgument(arg0, null);
-    }
-
-    /**
-     * Der wesentliche Unterschied zur gleichnamigen Methode des Masters ist es,
-     * dass nur Druckfunktionen angenommen werden, deren ORDER-Wert höher als
-     * der ORDER-Wert der aktuellen Druckfunktion ist.
-     * 
-     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#usePrintFunctionWithArgument(java.lang.String,
-     *      java.lang.Object)
-     */
-    public boolean usePrintFunctionWithArgument(String functionName, Object arg)
+    public boolean usePrintFunction(String functionName)
     {
       PrintFunction newFunc = WollMuxSingleton.getInstance()
           .getGlobalPrintFunctions().get(functionName);
       if (newFunc != null)
       {
-        return useInternalPrintFunctionWithArgument(newFunc, arg);
+        return useInternalPrintFunction(newFunc);
       }
       else
       {
@@ -1154,40 +1055,25 @@ public class PrintModels
      * dass nur Druckfunktionen angenommen werden, deren ORDER-Wert höher als
      * der ORDER-Wert der aktuellen Druckfunktion ist.
      * 
-     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#useInternalPrintFunction(java.lang.Object)
+     * @see de.muenchen.allg.itd51.wollmux.PrintModels.InternalPrintModel#useInternalPrintFunction(de.muenchen.allg.itd51.wollmux.func.PrintFunction)
      */
-    public boolean useInternalPrintFunction(Object arg0)
+    public boolean useInternalPrintFunction(PrintFunction function)
     {
-      return useInternalPrintFunctionWithArgument(arg0, null);
-    }
-
-    /**
-     * Der wesentliche Unterschied zur gleichnamigen Methode des Masters ist es,
-     * dass nur Druckfunktionen angenommen werden, deren ORDER-Wert höher als
-     * der ORDER-Wert der aktuellen Druckfunktion ist.
-     * 
-     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#useInternalPrintFunctionWithArgument(java.lang.Object,
-     *      java.lang.Object)
-     */
-    public boolean useInternalPrintFunctionWithArgument(Object function,
-        Object arg)
-    {
-      if (function != null && function instanceof PrintFunction)
+      if (function != null)
       {
-        PrintFunction f = (PrintFunction) function;
         PrintFunction currentFunc = master.getPrintFunction(idx);
-        if (f.compareTo(currentFunc) <= 0)
+        if (function.compareTo(currentFunc) <= 0)
         {
           Logger
               .error("Druckfunktion '"
-                     + f.getFunctionName()
+                     + function.getFunctionName()
                      + "' muss einen höheren ORDER-Wert besitzen als die Druckfunktion '"
                      + currentFunc.getFunctionName()
                      + "'");
           return false;
         }
         else
-          return master.useInternalPrintFunctionWithArgument(f, arg);
+          return master.useInternalPrintFunction(function);
       }
       else
       {
@@ -1195,5 +1081,6 @@ public class PrintModels
         return false;
       }
     }
+
   }
 }
