@@ -74,15 +74,19 @@ public class StandardPrint
 
       for (int i = 0; i < verfPunkte.length; i++)
       {
-        pmod.setPropertyValue(PrintModelProps.PROP_PAGE_RANGE_TYPE, pageRangeTypes[i]);
-        pmod.setPropertyValue(PrintModelProps.PROP_PAGE_RANGE_VALUE, pageRangeValues[i]);
-        pmod.setPropertyValue(PrintModelProps.PROP_COPY_COUNT, copyCounts[i]);
+        short copyCount = AnyConverter.toShort(copyCounts[i]);
+        if (copyCount > 0)
+        {
+          pmod.setPropertyValue(PrintModelProps.PROP_PAGE_RANGE_TYPE, pageRangeTypes[i]);
+          pmod.setPropertyValue(PrintModelProps.PROP_PAGE_RANGE_VALUE, pageRangeValues[i]);
+          pmod.setPropertyValue(PrintModelProps.PROP_COPY_COUNT, copyCounts[i]);
 
-        short verfPunkt = AnyConverter.toShort(verfPunkte[i]);
-        boolean isDraft = AnyConverter.toBoolean(isDraftFlags[i]);
-        boolean isOriginal = AnyConverter.toBoolean(isOriginalFlags[i]);
-        
-        SachleitendeVerfuegung.printVerfuegungspunkt(pmod, verfPunkt, isDraft, isOriginal);
+          short verfPunkt = AnyConverter.toShort(verfPunkte[i]);
+          boolean isDraft = AnyConverter.toBoolean(isDraftFlags[i]);
+          boolean isOriginal = AnyConverter.toBoolean(isOriginalFlags[i]);
+
+          SachleitendeVerfuegung.printVerfuegungspunkt(pmod, verfPunkt, isDraft, isOriginal);
+        }
       }
     }
     catch (java.lang.Exception e)
