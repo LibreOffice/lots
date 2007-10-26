@@ -610,7 +610,7 @@ public class FormModelImpl
      */
     public void setVisibleState(String groupId, boolean visible)
     {
-      WollMuxEventHandler.handleSetVisibleState(doc, groupId, visible);
+      WollMuxEventHandler.handleSetVisibleState(doc, groupId, visible, null);
     }
 
     /*

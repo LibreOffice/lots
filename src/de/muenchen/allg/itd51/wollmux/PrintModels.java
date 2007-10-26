@@ -781,6 +781,34 @@ public class PrintModels
           unlockActionListener);
       waitForUnlock();
     }
+
+    /**
+     * Setzt den Sichtbarkeitsstatus der Sichtbarkeitsgruppe groupID auf den
+     * neuen Status visible und wirkt sich damit auf alle Dokumentkommandos
+     * WM(CMD'setGroups'...) bzw. alle Textbereiche aus, die über eine
+     * GROUPS-Zuordnung die Sichtbarkeitsgruppe groupId verknüpft haben.
+     * 
+     * @param groupID
+     *          Name der Sichtbarkeitsgruppe, deren Sichtbarkeitsstatus
+     *          verändert werden soll
+     * @param visible
+     *          Bei dem Wert true ist die Sichtbarkeitsgruppe sichtbar und bei
+     *          false unsichtbar.
+     * 
+     * @author Christoph Lutz (D-III-ITD-5.1)
+     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#setGroupVisible(java.lang.String,
+     *      boolean)
+     */
+    public void setGroupVisible(String groupID, boolean visible)
+    {
+      setLock();
+      WollMuxEventHandler.handleSetVisibleState(
+          model,
+          groupID,
+          visible,
+          unlockActionListener);
+      waitForUnlock();
+    }
   }
 
   /**
@@ -1080,6 +1108,17 @@ public class PrintModels
         Logger.error("Die angeforderte interne Druckfunktion ist ungültig.");
         return false;
       }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#setGroupVisible(java.lang.String,
+     *      boolean)
+     */
+    public void setGroupVisible(String arg0, boolean arg1)
+    {
+      master.setGroupVisible(arg0, arg1);
     }
 
   }

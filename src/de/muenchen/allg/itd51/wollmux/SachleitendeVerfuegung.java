@@ -55,6 +55,18 @@ public class SachleitendeVerfuegung
 
   public static final String BLOCKNAME_SLV_DRAFT_ONLY = "DraftOnly";
 
+  public static final String GROUP_ID_SLV_ALL_VERSIONS = "SLV_"
+                                                         + BLOCKNAME_SLV_ALL_VERSIONS;
+
+  public static final String GROUP_ID_SLV_ORIGINAL_ONLY = "SLV_"
+                                                          + BLOCKNAME_SLV_ORIGINAL_ONLY;
+
+  public static final String GROUP_ID_SLV_NOT_IN_ORIGINAL = "SLV_"
+                                                            + BLOCKNAME_SLV_NOT_IN_ORIGINAL;
+
+  public static final String GROUP_ID_SLV_DRAFT_ONLY = "SLV_"
+                                                       + BLOCKNAME_SLV_DRAFT_ONLY;
+
   public static final String PRINT_FUNCTION_NAME = "SachleitendeVerfuegung";
 
   private static final String CHARACTER_STYLES = "CharacterStyles";
@@ -1209,8 +1221,9 @@ public class SachleitendeVerfuegung
 
     // Prüfen, welche Textsections im ausgeblendeten Bereich liegen und diese
     // ebenfalls ausblenden:
-    List hidingSections = getSectionsFromPosition(pmod
-        .getTextDocument(), setInvisibleRange);
+    List hidingSections = getSectionsFromPosition(
+        pmod.getTextDocument(),
+        setInvisibleRange);
     for (Iterator iter = hidingSections.iterator(); iter.hasNext();)
     {
       UNO.setProperty(iter.next(), "IsVisible", Boolean.FALSE);
@@ -1232,6 +1245,12 @@ public class SachleitendeVerfuegung
     pmod.setPrintBlocksProps(BLOCKNAME_SLV_ORIGINAL_ONLY, isOriginal, false);
     pmod.setPrintBlocksProps(BLOCKNAME_SLV_ALL_VERSIONS, true, false);
 
+    // Ein/Ausblenden der Sichtbarkeitsgruppen:
+    pmod.setGroupVisible(GROUP_ID_SLV_DRAFT_ONLY, isDraft);
+    pmod.setGroupVisible(GROUP_ID_SLV_NOT_IN_ORIGINAL, !isOriginal);
+    pmod.setGroupVisible(GROUP_ID_SLV_ORIGINAL_ONLY, isOriginal);
+    pmod.setGroupVisible(GROUP_ID_SLV_ALL_VERSIONS, true);
+
     // Ziffer von Punkt 1 ausblenden falls isOriginal
     XTextRange punkt1ZifferOnly = null;
     if (isOriginal && punkt1 != null)
@@ -1248,6 +1267,12 @@ public class SachleitendeVerfuegung
     // Ausblendung von Ziffer von Punkt 1 wieder aufheben
     if (punkt1ZifferOnly != null)
       UNO.setProperty(punkt1ZifferOnly, "CharHidden", Boolean.FALSE);
+
+    // Sichtbarkeitsgruppen wieder einblenden
+    pmod.setGroupVisible(GROUP_ID_SLV_DRAFT_ONLY, true);
+    pmod.setGroupVisible(GROUP_ID_SLV_NOT_IN_ORIGINAL, true);
+    pmod.setGroupVisible(GROUP_ID_SLV_ORIGINAL_ONLY, true);
+    pmod.setGroupVisible(GROUP_ID_SLV_ALL_VERSIONS, true);
 
     // Alte Eigenschaften der Druckblöcke wieder herstellen:
     pmod.setPrintBlocksProps(BLOCKNAME_SLV_DRAFT_ONLY, true, true);
@@ -1285,8 +1310,7 @@ public class SachleitendeVerfuegung
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  private static List getSectionsFromPosition(XTextDocument doc,
-      XTextRange pos)
+  private static List getSectionsFromPosition(XTextDocument doc, XTextRange pos)
   {
     Vector v = new Vector();
     if (pos == null) return v;

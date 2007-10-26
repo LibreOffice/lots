@@ -133,8 +133,7 @@ public class TextSection implements VisibilityElement
    * @param section
    *          UNO-Objekt des Bereichs
    * @param groups
-   *         * 
-  Set mit den Namen (als String) aller Sichtbarkeitsgruppen, die
+   *          Set mit den Namen (als String) aller Sichtbarkeitsgruppen, die
    *          diesen Bereich sichtbar oder unsichtbar machen können.
    */
   private TextSection(XTextSection section, Set groups)
@@ -143,7 +142,9 @@ public class TextSection implements VisibilityElement
     this.groups = groups;
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see de.muenchen.allg.itd51.wollmux.VisibilityElement#isVisible()
    */
   public boolean isVisible()
@@ -158,15 +159,20 @@ public class TextSection implements VisibilityElement
     }
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see de.muenchen.allg.itd51.wollmux.VisibilityElement#setVisible(boolean)
    */
   public void setVisible(boolean visible)
   {
     UNO.setProperty(section, "IsVisible", new Boolean(visible));
+    UNO.setProperty(section.getAnchor(), "CharHidden", new Boolean(!visible));
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see de.muenchen.allg.itd51.wollmux.VisibilityElement#getGroups()
    */
   public Set getGroups()
@@ -174,7 +180,9 @@ public class TextSection implements VisibilityElement
     return groups;
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see de.muenchen.allg.itd51.wollmux.VisibilityElement#getAnchor()
    */
   public XTextRange getAnchor()

@@ -1705,7 +1705,8 @@ public class WollMuxEventHandler
    * 
    * Dieses Event wird (derzeit) vom FormModelImpl ausgelöst, wenn in der
    * Formular-GUI bestimmte Text-Teile des übergebenen Dokuments ein- oder
-   * ausgeblendet werden sollen.
+   * ausgeblendet werden sollen. Auch das PrintModel verwendet dieses Event,
+   * wenn XPrintModel.setGroupVisible() aufgerufen wurde.
    * 
    * @param model
    *          Das TextDocumentModel, welches die Sichtbarkeitselemente enthält.
@@ -1713,11 +1714,16 @@ public class WollMuxEventHandler
    *          Die GROUP (ID) der ein/auszublendenden Gruppe.
    * @param visible
    *          Der neue Sichtbarkeitsstatus (true=sichtbar, false=ausgeblendet)
+   * @param listener
+   *          Der listener, der nach Durchführung des Events benachrichtigt wird
+   *          (kann auch null sein, dann gibt's keine Nachricht).
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
    */
   public static void handleSetVisibleState(TextDocumentModel model,
-      String groupId, boolean visible)
+      String groupId, boolean visible, ActionListener listener)
   {
-    handle(new OnSetVisibleState(model, groupId, visible));
+    handle(new OnSetVisibleState(model, groupId, visible, listener));
   }
 
   private static class OnSetVisibleState extends BasicEvent
@@ -1728,71 +1734,84 @@ public class WollMuxEventHandler
 
     private boolean visible;
 
+    private ActionListener listener;
+
     public OnSetVisibleState(TextDocumentModel model, String groupId,
-        boolean visible)
+        boolean visible, ActionListener listener)
     {
       this.model = model;
       this.groupId = groupId;
       this.visible = visible;
+      this.listener = listener;
     }
 
     protected void doit()
     {
-      // invisibleGroups anpassen:
-      HashSet invisibleGroups = model.getInvisibleGroups();
-      if (visible)
-        invisibleGroups.remove(groupId);
-      else
-        invisibleGroups.add(groupId);
-
-      VisibilityElement firstChangedElement = null;
-
-      // Sichtbarkeitselemente durchlaufen und alle ggf. updaten:
-      Iterator iter = model.visibleElementsIterator();
-      while (iter.hasNext())
+      try
       {
-        VisibilityElement visibleElement = (VisibilityElement) iter.next();
-        Set groups = visibleElement.getGroups();
-        if (!groups.contains(groupId)) continue;
+        // invisibleGroups anpassen:
+        HashSet invisibleGroups = model.getInvisibleGroups();
+        if (visible)
+          invisibleGroups.remove(groupId);
+        else
+          invisibleGroups.add(groupId);
 
-        // Visibility-Status neu bestimmen:
-        boolean setVisible = true;
-        Iterator i = groups.iterator();
-        while (i.hasNext())
+        VisibilityElement firstChangedElement = null;
+
+        // Sichtbarkeitselemente durchlaufen und alle ggf. updaten:
+        Iterator iter = model.visibleElementsIterator();
+        while (iter.hasNext())
         {
-          String groupId = (String) i.next();
-          if (invisibleGroups.contains(groupId)) setVisible = false;
+          VisibilityElement visibleElement = (VisibilityElement) iter.next();
+          Set groups = visibleElement.getGroups();
+          if (!groups.contains(groupId)) continue;
+
+          // Visibility-Status neu bestimmen:
+          boolean setVisible = true;
+          Iterator i = groups.iterator();
+          while (i.hasNext())
+          {
+            String groupId = (String) i.next();
+            if (invisibleGroups.contains(groupId)) setVisible = false;
+          }
+
+          // Element merken, dessen Sichtbarkeitsstatus sich zuerst ändert und
+          // den focus (ViewCursor) auf den Start des Bereichs setzen. Da das
+          // Setzen eines ViewCursors in einen unsichtbaren Bereich nicht
+          // funktioniert, wird die Methode focusRangeStart zwei mal aufgerufen,
+          // je nach dem, ob der Bereich vor oder nach dem Setzen des neuen
+          // Sichtbarkeitsstatus sichtbar ist.
+          if (setVisible != visibleElement.isVisible()
+              && firstChangedElement == null)
+          {
+            firstChangedElement = visibleElement;
+            if (firstChangedElement.isVisible())
+              focusRangeStart(visibleElement);
+          }
+
+          // neuen Sichtbarkeitsstatus setzen:
+          try
+          {
+            visibleElement.setVisible(setVisible);
+          }
+          catch (RuntimeException e)
+          {
+            // Absicherung gegen das manuelle Löschen von Dokumentinhalten
+          }
         }
 
-        // Element merken, dessen Sichtbarkeitsstatus sich zuerst ändert und
-        // den focus (ViewCursor) auf den Start des Bereichs setzen. Da das
-        // Setzen eines ViewCursors in einen unsichtbaren Bereich nicht
-        // funktioniert, wird die Methode focusRangeStart zwei mal aufgerufen,
-        // je nach dem, ob der Bereich vor oder nach dem Setzen des neuen
-        // Sichtbarkeitsstatus sichtbar ist.
-        if (setVisible != visibleElement.isVisible()
-            && firstChangedElement == null)
-        {
-          firstChangedElement = visibleElement;
-          if (firstChangedElement.isVisible()) focusRangeStart(visibleElement);
-        }
-
-        // neuen Sichtbarkeitsstatus setzen:
-        try
-        {
-          visibleElement.setVisible(setVisible);
-        }
-        catch (RuntimeException e)
-        {
-          // Absicherung gegen das manuelle Löschen von Dokumentinhalten
-        }
+        // Den Cursor (nochmal) auf den Anfang des Ankers des Elements setzen,
+        // dessen Sichtbarkeitsstatus sich zuerst geändert hat (siehe Begründung
+        // oben).
+        if (firstChangedElement != null && firstChangedElement.isVisible())
+          focusRangeStart(firstChangedElement);
+      }
+      catch (java.lang.Exception e)
+      {
+        Logger.error(e);
       }
 
-      // Den Cursor (nochmal) auf den Anfang des Ankers des Elements setzen,
-      // dessen Sichtbarkeitsstatus sich zuerst geändert hat (siehe Begründung
-      // oben).
-      if (firstChangedElement != null && firstChangedElement.isVisible())
-        focusRangeStart(firstChangedElement);
+      if (listener != null) listener.actionPerformed(null);
     }
 
     /**
@@ -2705,7 +2724,7 @@ public class WollMuxEventHandler
       }
 
       stabilize();
-      listener.actionPerformed(null);
+      if (listener != null) listener.actionPerformed(null);
     }
 
     public String toString()
@@ -2780,7 +2799,7 @@ public class WollMuxEventHandler
       }
 
       stabilize();
-      listener.actionPerformed(null);
+      if (listener != null) listener.actionPerformed(null);
     }
 
     public String toString()
@@ -3503,7 +3522,7 @@ public class WollMuxEventHandler
       model.collectNonWollMuxFormFields();
 
       stabilize();
-      listener.actionPerformed(null);
+      if (listener != null) listener.actionPerformed(null);
     }
 
     public String toString()

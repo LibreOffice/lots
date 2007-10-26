@@ -162,6 +162,21 @@ interface XPrintModel
      */
 	void setPrintBlocksProps([in] string blockname, [in] boolean visible, [in] boolean showHighlightColor);
 
+    /**
+     * Setzt den Sichtbarkeitsstatus der Sichtbarkeitsgruppe groupID auf den
+     * neuen Status visible und wirkt sich damit auf alle Dokumentkommandos
+     * WM(CMD'setGroups'...) bzw. alle Textbereiche aus, die über eine
+     * GROUPS-Zuordnung die Sichtbarkeitsgruppe groupId verknüpft haben.
+     * 
+     * @param groupID
+     *          Name der Sichtbarkeitsgruppe, deren Sichtbarkeitsstatus
+     *          verändert werden soll
+     * @param visible
+     *          Bei dem Wert true ist die Sichtbarkeitsgruppe sichtbar und bei
+     *          false unsichtbar.
+     */
+	void setGroupVisible([in] string groupID, [in] boolean visible);
+	
 };
 
 }; }; }; }; };
