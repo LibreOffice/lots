@@ -28,7 +28,7 @@ import java.util.Vector;
  *  Verfügung zu stellen.
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
-class QueryResultsList implements QueryResults
+public class QueryResultsList implements QueryResults
 {
   /**
    * Die Liste der Datasets.

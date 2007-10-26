@@ -22,14 +22,22 @@ import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.Vector;
@@ -68,9 +76,19 @@ import com.sun.star.util.CloseVetoException;
 import com.sun.star.util.XCloseListener;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.itd51.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
+import de.muenchen.allg.itd51.wollmux.TimeoutException;
 import de.muenchen.allg.itd51.wollmux.UnavailableException;
+import de.muenchen.allg.itd51.wollmux.XPrintModel;
+import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
+import de.muenchen.allg.itd51.wollmux.db.Dataset;
+import de.muenchen.allg.itd51.wollmux.db.Datasource;
+import de.muenchen.allg.itd51.wollmux.db.OOoDatasource;
+import de.muenchen.allg.itd51.wollmux.db.QueryResults;
+import de.muenchen.allg.itd51.wollmux.db.QueryResultsList;
 import de.muenchen.allg.itd51.wollmux.dialog.DimAdjust;
 
 /**
@@ -102,6 +120,12 @@ public class MailMergeNew
    * als die Anzahl der Datensätze. Darauf muss geachtet werden.
    */
   private int previewDatasetNumber = 1;
+  
+  /**
+   * Wird auf true gesetzt, wenn der Benutzer beim Seriendruck auswählt, dass er
+   * die Ausgabe in einem neuen Dokument haben möchte.
+   */
+  private boolean printIntoDocument = true;
   
   /**
    * Das Textfield in dem Benutzer direkt eine Datensatznummer für die Vorschau
@@ -279,18 +303,17 @@ public class MailMergeNew
     hbox.add(button);
     
     hbox.add(new JSeparator(SwingConstants.VERTICAL));
-    
+
+    //FIXME: Ausgrauen, wenn keine Datenquelle gewählt ist.
     button = new JButton("Drucken");
     button.addActionListener(new ActionListener()
-        {
+    {
       public void actionPerformed(ActionEvent e)
       {
         if (ds.hasDatasource())
           showMailmergeTypeSelectionDialog();
-        else
-          ds.showDatasourceSelectionDialog(myFrame);
       }
-        });
+    });
     hbox.add(button);
     
     hbox.add(new JSeparator(SwingConstants.VERTICAL));
@@ -334,6 +357,12 @@ public class MailMergeNew
     
     myFrame.setAlwaysOnTop(true);
     myFrame.pack();
+    int frameWidth = myFrame.getWidth();
+    int frameHeight = myFrame.getHeight();
+    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+    int x = screenSize.width/2 - frameWidth/2; 
+    int y = frameHeight*3;//screenSize.height/2 - frameHeight/2;
+    myFrame.setLocation(x,y);
     myFrame.setResizable(false);
     myFrame.setVisible(true);
   }
@@ -356,11 +385,17 @@ public class MailMergeNew
     Box hbox = Box.createHorizontalBox();
     JLabel label = new JLabel("Serienbriefe");
     hbox.add(label);
+    hbox.add(Box.createHorizontalStrut(5));
     
     Vector types = new Vector();
     types.add("in neues Dokument schreiben");
     types.add("auf dem Drucker ausgeben");
-    JComboBox typeBox = new JComboBox(types);
+    final JComboBox typeBox = new JComboBox(types);
+    typeBox.addItemListener(new ItemListener(){
+      public void itemStateChanged(ItemEvent e)
+      {
+        printIntoDocument = (typeBox.getSelectedIndex() == 0);
+      }});
     hbox.add(typeBox);
     
     //FIXME: darf nur sichtbar sein, wenn in typeBox "auf dem Drucker ausgeben" gewählt ist
@@ -428,7 +463,7 @@ public class MailMergeNew
     {
       public void actionPerformed(ActionEvent e)
       {
-        //TODO Seriendruck durchführen
+        doMailMerge();
       }
     });
     hbox.add(button);
@@ -436,6 +471,13 @@ public class MailMergeNew
     vbox.add(hbox);
     
     dialog.pack();
+    int frameWidth = dialog.getWidth();
+    int frameHeight = dialog.getHeight();
+    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+    int x = screenSize.width/2 - frameWidth/2; 
+    int y = screenSize.height/2 - frameHeight/2;
+    dialog.setLocation(x,y);
+    dialog.setResizable(false);
     dialog.setVisible(true);
   }
 
@@ -477,7 +519,7 @@ public class MailMergeNew
     menu.show(invoker, x, y);
   }
 
-  /**
+    /**
    * Erzeugt ein JPopupMenu, das Einträge für das Einfügen von Spezialfeldern
    * enthält und zeigt es an neben invoker an der relativen
    * Position x,y.
@@ -547,6 +589,147 @@ public class MailMergeNew
   }
   
   /**
+   * Führt den Seriendruck durch.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TODO Testen
+   */
+  private void doMailMerge()
+  {
+    QueryResultsWithSchema data = ds.getData();
+    XPrintModel pmod = mod.createPrintModel(true);
+    try{
+      pmod.setPropertyValue("MailMergeNew_Data", data);
+    }catch(Exception x)
+    {
+      Logger.error(x);
+      return;
+    }
+    pmod.usePrintFunction("MailMergeNewSetFormValue");
+    if (printIntoDocument) pmod.usePrintFunction("Gesamtdokument");
+    pmod.printWithProps();
+  }
+  
+  /**
+   * Liefert die sichtbaren Zellen des Arbeitsblattes mit Namen sheetName aus dem Calc 
+   * Dokument doc. Die erste sichtbare Zeile der Calc-Tabelle wird herangezogen
+   * als Spaltennamen. Diese Spaltennamen werden zu schema hinzugefügt.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED
+   */
+  private static QueryResults getVisibleCalcData(XSpreadsheetDocument doc, String sheetName, Set schema)
+  {
+    CalcCellQueryResults results = new CalcCellQueryResults();
+    
+    try{
+      if (doc != null)
+      {
+        XCellRangesQuery sheet = UNO.XCellRangesQuery(doc.getSheets().getByName(sheetName));
+        if (sheet != null)
+        {
+          SortedSet columnIndexes = new TreeSet();
+          SortedSet rowIndexes = new TreeSet();
+          getVisibleNonemptyRowsAndColumns(sheet, columnIndexes, rowIndexes);
+          
+          if (columnIndexes.size() > 0 && rowIndexes.size() > 0)
+          {
+            XCellRange sheetCellRange = UNO.XCellRange(sheet);
+            
+            /*
+             * Erste sichtbare Zeile durchscannen und alle nicht-leeren Zelleninhalte als
+             * Tabellenspaltennamen interpretieren. Ein Mapping in
+             * mapColumnNameToIndex wird erzeugt, wobei NICHT auf den Index in
+             * der Calc-Tabelle gemappt wird, sondern auf den Index im später für jeden
+             * Datensatz existierenden String[]-Array.
+             */
+            int ymin = ((Number)rowIndexes.first()).intValue();
+            Map mapColumnNameToIndex = new HashMap();
+            int idx = 0;
+            Iterator iter = columnIndexes.iterator();
+            while (iter.hasNext())
+            {
+              int x = ((Number)iter.next()).intValue();
+              String columnName = UNO.XTextRange(sheetCellRange.getCellByPosition(x, ymin)).getString();
+              if (columnName.length() > 0)
+              {
+                mapColumnNameToIndex.put(columnName, new Integer(idx));
+                schema.add(columnName);
+                ++idx;  
+              }
+              else 
+                iter.remove(); //Spalten mit leerem Spaltennamen werden nicht benötigt.
+            }
+            
+            results.setColumnNameToIndexMap(mapColumnNameToIndex);
+            
+            /*
+             * Datensätze erzeugen
+             */
+            Iterator rowIndexIter = rowIndexes.iterator();
+            rowIndexIter.next(); //erste Zeile enthält die Tabellennamen, keinen Datensatz
+            while (rowIndexIter.hasNext())
+            {
+              int y = ((Number)rowIndexIter.next()).intValue();
+              String[] data = new String[columnIndexes.size()];
+              Iterator columnIndexIter = columnIndexes.iterator();
+              idx = 0;
+              while (columnIndexIter.hasNext())
+              {
+                int x = ((Number)columnIndexIter.next()).intValue();
+                String value = UNO.XTextRange(sheetCellRange.getCellByPosition(x, y)).getString();
+                data[idx++] = value;
+              }
+              
+              results.addDataset(data);
+            }
+          }
+        }
+      }
+    }catch(Exception x)
+    {
+      Logger.error(x);
+    }
+    
+    return results;
+  }
+
+  
+  /**
+   * Liefert von Tabellenblatt sheet die Indizes aller Zeilen und Spalten, in denen
+   * mindestens eine sichtbare nicht-leere Zelle existiert.
+   * @param sheet das zu scannende Tabellenblatt
+   * @param columnIndexes diesem Set werden die Spaltenindizes hinzugefügt
+   * @param rowIndexes diesem Set werden die Zeilenindizes hinzugefügt
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private static void getVisibleNonemptyRowsAndColumns(XCellRangesQuery sheet, SortedSet columnIndexes, SortedSet rowIndexes)
+  {
+    XSheetCellRanges visibleCellRanges = sheet.queryVisibleCells();
+    XSheetCellRanges nonEmptyCellRanges = sheet
+        .queryContentCells((short) ( com.sun.star.sheet.CellFlags.VALUE
+                                   | com.sun.star.sheet.CellFlags.DATETIME
+                                   | com.sun.star.sheet.CellFlags.STRING 
+                                   | com.sun.star.sheet.CellFlags.FORMULA));
+    CellRangeAddress[] nonEmptyCellRangeAddresses = nonEmptyCellRanges.getRangeAddresses();
+    for (int i = 0; i < nonEmptyCellRangeAddresses.length; ++i)
+    {
+      XSheetCellRanges ranges = UNO.XCellRangesQuery(visibleCellRanges).queryIntersection(nonEmptyCellRangeAddresses[i]);
+      CellRangeAddress[] rangeAddresses = ranges.getRangeAddresses();
+      for (int k = 0; k < rangeAddresses.length; ++k)
+      {
+        CellRangeAddress addr = rangeAddresses[k];
+        for (int x = addr.StartColumn; x <= addr.EndColumn; ++x)
+          columnIndexes.add(new Integer(x));
+        
+        for (int y = addr.StartRow; y <= addr.EndRow; ++y)
+          rowIndexes.add(new Integer(y));
+      }
+    }
+  }
+
+
+  
+  /**
    * Stellt eine OOo-Datenquelle oder ein offenes Calc-Dokument über ein gemeinsames
    * Interface zur Verfügung. Ist auch zuständig dafür, das Calc-Dokument falls nötig
    * wieder zu öffnen und Änderungen seines Fenstertitels und/oder seiner
@@ -573,6 +756,14 @@ public class MailMergeNew
      * als Datenquelle ausgewählt ist.
      */
     private static final int SOURCE_DB = 2;
+
+    /**
+     * Wenn nach dieser Zeit in ms nicht alle Daten des Seriendruckauftrags
+     * ausgelesen werden konnten, dann wird der Druckauftrag nicht ausgeführt
+     * (und muss eventuell über die Von Bis Auswahl in mehrere Aufträge
+     * zerteilt werden). 
+     */
+    private static final long MAILMERGE_GETCONTENTS_TIMEOUT = 60000;
     
     /**
      * Zeigt an, was derzeit als Datenquelle ausgewählt ist.
@@ -632,20 +823,10 @@ public class MailMergeNew
      * @param mod wird verwendet zum Speichern/Wiedereinlesen der zuletzt ausgewählten
      *        Datenquelle.
      * @author Matthias Benkmann (D-III-ITD 5.1)
-     * TODO Testen
      */
     public MailMergeDatasource(TextDocumentModel mod)
     {
       this.mod = mod;
-//    FIXME: Mit dem Problem umgehen, dass das verknüpfte Calc-Dokument jederzeit
-      //geschlossen werden kann. Vielleicht kann/soll man das Schliessen dieses
-      //Calc-Dokuments verhindern solange es die ausgewählte Datenquelle ist?
-      //Oder es wird bei Bedarf wieder geöffnet? Da wir vermutlich ohnehin einen
-      //XStorageChangeListener registrieren müssen auf das Calc-Dokument, können
-      //wir auch gleich noch einen CloseListener registrieren, der zumindest merkt, dass
-      //die Datei geschlossen wurde.
-      //Vielleicht sollte man das Schließen auch nur dann verhindern, wenn das
-      //Dokument ungespeichert ist?
     }
 
     /**
@@ -726,7 +907,62 @@ public class MailMergeNew
       }
       return columnNames;  
     }
+    
+    /**
+     * Liefert den Inhalt der aktuell ausgewählten Serienbriefdatenquelle (leer, wenn
+     * keine ausgewählt).
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     * TODO Testen
+     */
+    public QueryResultsWithSchema getData()
+    {
+      try{
+        switch(sourceType)
+        {
+          case SOURCE_CALC: return getData(getCalcDoc(), tableName);
+          case SOURCE_DB: return getDbData(oooDatasourceName, tableName);
+          default: return new QueryResultsWithSchema();
+        }
+      }catch(Exception x)
+      {
+        Logger.error(x);
+        return new QueryResultsWithSchema();
+      }
+    }
 
+    /**
+     * Liefert den Inhalt der Tabelle tableName aus der OOo Datenquelle 
+     * mit Namen oooDatasourceName.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     * TODO Testen
+     */
+    private QueryResultsWithSchema getDbData(String oooDatasourceName, String tableName) throws Exception, ConfigurationErrorException
+    {
+      ConfigThingy conf = new ConfigThingy("Datenquelle");
+      conf.add("NAME").add("Knuddel");
+      conf.add("TABLE").add(tableName);
+      conf.add("SOURCE").add(oooDatasourceName);
+      Datasource ds;
+      ds = new OOoDatasource(new HashMap(),conf,new URL("file:///"), true);
+      
+      Set schema = ds.getSchema();
+      QueryResults res = ds.getContents(MAILMERGE_GETCONTENTS_TIMEOUT);
+      return new QueryResultsWithSchema(res, schema);
+    }
+
+    /**
+     * Liefert die sichtbaren Zellen aus der Tabelle tableName des Dokuments
+     * calcDoc als QueryResultsWithSchema zurück.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     * TODO Testen
+     */
+    private QueryResultsWithSchema getData(XSpreadsheetDocument calcDoc, String tableName)
+    {
+      Set schema = new HashSet();
+      QueryResults res = getVisibleCalcData(calcDoc, tableName, schema);
+      return new QueryResultsWithSchema(res, schema);
+    }
+    
     /**
      * Liefert true, wenn derzeit eine Datenquelle ausgewählt ist.
      * @return
@@ -957,6 +1193,8 @@ public class MailMergeNew
       if (names.isEmpty()) names = allNames;
       
       tableName = (String)names.get(0); //Falls der Benutzer den Dialog abbricht ohne Auswahl
+      
+      if (names.size() == 1) return; //Falls es nur eine Tabelle gibt, Dialog unnötig.
       
       final JDialog tableSelector = new JDialog(parent, "Welche Tabelle möchten Sie verwenden ?", true);
       
@@ -1203,39 +1441,6 @@ public class MailMergeNew
     
     
     /**
-     * Liefert von Tabellenblatt sheet die Indizes aller Zeilen und Spalten, in denen
-     * mindestens eine sichtbare nicht-leere Zelle existiert.
-     * @param sheet das zu scannende Tabellenblatt
-     * @param columnIndexes diesem Set werden die Spaltenindizes hinzugefügt
-     * @param rowIndexes diesem Set werden die Zeilenindizes hinzugefügt
-     * @author Matthias Benkmann (D-III-ITD 5.1)
-     */
-    private static void getVisibleNonemptyRowsAndColumns(XCellRangesQuery sheet, SortedSet columnIndexes, SortedSet rowIndexes)
-    {
-      XSheetCellRanges visibleCellRanges = sheet.queryVisibleCells();
-      XSheetCellRanges nonEmptyCellRanges = sheet
-          .queryContentCells((short) ( com.sun.star.sheet.CellFlags.VALUE
-                                     | com.sun.star.sheet.CellFlags.DATETIME
-                                     | com.sun.star.sheet.CellFlags.STRING 
-                                     | com.sun.star.sheet.CellFlags.FORMULA));
-      CellRangeAddress[] nonEmptyCellRangeAddresses = nonEmptyCellRanges.getRangeAddresses();
-      for (int i = 0; i < nonEmptyCellRangeAddresses.length; ++i)
-      {
-        XSheetCellRanges ranges = UNO.XCellRangesQuery(visibleCellRanges).queryIntersection(nonEmptyCellRangeAddresses[i]);
-        CellRangeAddress[] rangeAddresses = ranges.getRangeAddresses();
-        for (int k = 0; k < rangeAddresses.length; ++k)
-        {
-          CellRangeAddress addr = rangeAddresses[k];
-          for (int x = addr.StartColumn; x <= addr.EndColumn; ++x)
-            columnIndexes.add(new Integer(x));
-          
-          for (int y = addr.StartRow; y <= addr.EndRow; ++y)
-            rowIndexes.add(new Integer(y));
-        }
-      }
-    }
-
-    /**
      * Liefert die Namen aller nicht-leeren Tabellenblätter der aktuell
      * ausgewählten Datenquelle. Wenn keine Datenquelle ausgewählt ist, oder
      * es keine nicht-leere Tabelle gibt, so wird eine leere Liste geliefert.
@@ -1413,7 +1618,108 @@ public class MailMergeNew
     }
   }
   
+  private static class QueryResultsWithSchema implements QueryResults
+  {
+    protected QueryResults results;
+    protected Set schema;
     
+    /**
+     * Constructs an empty QueryResultsWithSchema.
+     */
+    public QueryResultsWithSchema()
+    {
+      results = new QueryResultsList(new ArrayList());
+      schema = new HashSet();
+    }
+    
+    /**
+     * Erzeugt ein neues QueryResultsWithSchema, das den Inhalt von res und das Schema
+     * schema zusammenfasst. ACHTUNG! res und schema werden als Referenzen übernommen.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
+    public QueryResultsWithSchema(QueryResults res, Set schema)
+    {
+      this.schema = schema;
+      this.results = res;
+    }
+
+    public int size()
+    {
+      return results.size();
+    }
+
+    public Iterator iterator()
+    {
+      return results.iterator();
+    }
+
+    public boolean isEmpty()
+    {
+      return results.isEmpty();
+    }
+    
+    public Set getSchema() { return new HashSet(schema);}
+    
+  }
+  
+  private static class CalcCellQueryResults implements QueryResults
+  {
+    /**
+     * Bildet einen Spaltennamen auf den Index in dem zu dem Datensatz gehörenden
+     * String[]-Array ab.
+     */
+    private Map mapColumnNameToIndex;
+   
+    private List datasets = new ArrayList();
+    
+    public int size()
+    {
+      return datasets.size();
+    }
+
+    public Iterator iterator()
+    {
+      return datasets.iterator();
+    }
+
+    public boolean isEmpty()
+    {
+      return datasets.isEmpty();
+    }
+
+    public void setColumnNameToIndexMap(Map mapColumnNameToIndex)
+    {
+      this.mapColumnNameToIndex = mapColumnNameToIndex;
+    }
+
+    public void addDataset(String[] data)
+    {
+      datasets.add(new MyDataset(data));
+    }
+    
+    private class MyDataset implements Dataset
+    {
+      private String[] data;
+      public MyDataset(String[] data)
+      {
+        this.data = data;
+      }
+
+      public String get(String columnName) throws ColumnNotFoundException
+      {
+        Number idx = (Number)mapColumnNameToIndex.get(columnName);
+        if (idx == null) throw new ColumnNotFoundException("Spalte "+columnName+" existiert nicht!");
+        return data[idx.intValue()];
+      }
+
+      public String getKey()
+      {
+        return "key";
+      }
+      
+    }
+    
+  }
   
   private class MyWindowListener implements WindowListener
   {
