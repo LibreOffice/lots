@@ -26,7 +26,6 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -80,7 +79,6 @@ import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
-import de.muenchen.allg.itd51.wollmux.TimeoutException;
 import de.muenchen.allg.itd51.wollmux.UnavailableException;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
@@ -144,15 +142,22 @@ public class MailMergeNew
   private MyWindowListener oehrchen;
   
   /**
+   * Falls nicht null wird dieser Listener aufgerufen nachdem der MailMergeNew
+   * geschlossen wurde.
+   */
+  private ActionListener abortListener = null;
+  
+  /**
    * Die zentrale Klasse, die die Serienbrieffunktionalität bereitstellt.
    * @param mod das {@link TextDocumentModel} an dem die Toolbar hängt.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
-  public MailMergeNew(TextDocumentModel mod)
+  public MailMergeNew(TextDocumentModel mod, ActionListener abortListener)
   {
     this.mod = mod;
     this.ds = new MailMergeDatasource(mod);
+    this.abortListener = abortListener;
     
 //  GUI im Event-Dispatching Thread erzeugen wg. Thread-Safety.
     try{
@@ -211,7 +216,8 @@ public class MailMergeNew
     
     hbox.add(new JSeparator(SwingConstants.VERTICAL));
     
-    button = new JButton("Vorschau");
+    final String VORSCHAU = "   Vorschau   ";
+    button = new JButton(VORSCHAU);
     previewMode = false;
     final JButton previewButton = button;
     button.addActionListener(new ActionListener()
@@ -221,17 +227,21 @@ public class MailMergeNew
         if (!ds.hasDatasource()) return;
         if (previewMode)
         {
-          previewButton.setText("<<Feldname>>");
+          mod.collectNonWollMuxFormFields();
+          previewButton.setText(VORSCHAU);
+          previewMode = false;
           //TODO showFieldNames();
         }
         else
         {
-          previewButton.setText("Vorschau");
+          mod.collectNonWollMuxFormFields();
+          previewButton.setText("<Feldname>");
+          previewMode = true;
           //TODO updatePreviewFields();
         }
       }
         });
-    hbox.add(button);
+    hbox.add(DimAdjust.fixedSize(button));
     
     //  FIXME: Muss ausgegraut sein, wenn nicht im Vorschau-Modus.
     button = new JButton("|<");
@@ -365,6 +375,8 @@ public class MailMergeNew
     myFrame.setLocation(x,y);
     myFrame.setResizable(false);
     myFrame.setVisible(true);
+    
+    if (!ds.hasDatasource()) ds.showDatasourceSelectionDialog(myFrame);
   }
   
   /**
@@ -463,6 +475,7 @@ public class MailMergeNew
     {
       public void actionPerformed(ActionEvent e)
       {
+        dialog.dispose();
         doMailMerge();
       }
     });
@@ -596,10 +609,12 @@ public class MailMergeNew
    */
   private void doMailMerge()
   {
+    mod.collectNonWollMuxFormFields();
     QueryResultsWithSchema data = ds.getData();
     XPrintModel pmod = mod.createPrintModel(true);
     try{
-      pmod.setPropertyValue("MailMergeNew_Data", data);
+      pmod.setPropertyValue("MailMergeNew_Schema", data.getSchema());
+      pmod.setPropertyValue("MailMergeNew_QueryResultsIterator", data.iterator());
     }catch(Exception x)
     {
       Logger.error(x);
@@ -609,6 +624,36 @@ public class MailMergeNew
     if (printIntoDocument) pmod.usePrintFunction("Gesamtdokument");
     pmod.printWithProps();
   }
+  
+  
+  /**
+   * PrintFunction, die das jeweils nächste Element der Seriendruckdaten
+   * nimmt und die Seriendruckfelder im Dokument entsprechend setzt.
+   * Herangezogen werden die Properties "MailMergeNew_QueryResultsIterator"
+   * (ein Iterator der von einem {@link QueryResults} Objekt zurückgeliefert wurde
+   * und "MailMergeNew_Schema", was ein Set mit den Spaltennamen enthält.
+   * Dies Funktion natürlich nur dann, wenn pmod kein Proxy ist.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TODO Testen
+   */
+  public static void mailMergeNewSetFormValue(XPrintModel pmod) throws Exception
+  {
+    Iterator iter = (Iterator)pmod.getPropertyValue("MailMergeNew_QueryResultsIterator");
+    Collection schema = (Collection)pmod.getPropertyValue("MailMergeNew_Schema");
+    
+    while (iter.hasNext())
+    {
+      Dataset ds = (Dataset)iter.next();
+      Iterator schemaIter = schema.iterator();
+      while (schemaIter.hasNext())
+      {
+        String spalte = (String)schemaIter.next();
+        pmod.setFormValue(spalte, ds.get(spalte));
+      }
+      pmod.printWithProps();
+    }
+  }
+  
   
   /**
    * Liefert die sichtbaren Zellen des Arbeitsblattes mit Namen sheetName aus dem Calc 
@@ -1017,7 +1062,8 @@ public class MailMergeNew
       button.addActionListener(new ActionListener(){
         public void actionPerformed(ActionEvent e)
         {
-          //TODO openAndselectNewCalcTableAsDatasource();
+          datasourceSelector.dispose();
+          openAndselectNewCalcTableAsDatasource(parent);
         }
       });
       vbox.add(DimAdjust.maxWidthUnlimited(button));
@@ -1138,6 +1184,34 @@ public class MailMergeNew
     }
     
     /**
+     * Öffnet ein neues Calc-Dokument und setzt es als Seriendruckdatenquelle.
+     * 
+     * @param parent der JFrame zu dem der die Dialoge gehören sollen.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     * TESTED
+     */
+    private void openAndselectNewCalcTableAsDatasource(JFrame parent)
+    {
+      try
+      {
+        Logger.debug("Öffne neues Calc-Dokument als Datenquelle für Seriendruck");
+        XSpreadsheetDocument spread = UNO.XSpreadsheetDocument(UNO.loadComponentFromURL("private:factory/scalc", true, true));
+        XSpreadsheets sheets = spread.getSheets();
+        String[] sheetNames = sheets.getElementNames();
+
+        for (int i = 1; i < sheetNames.length; ++i)
+          sheets.removeByName(sheetNames[i]);
+        
+        getCalcDoc(spread);
+        selectTable(parent);
+      }
+      catch (Exception e)
+      {
+        Logger.error(e);
+      }
+    }
+    
+    /**
      * Öffnet einen FilePicker und falls der Benutzer dort eine Tabelle auswählt, wird diese
      * geöffnet und als Datenquelle verwendet.
      * 
@@ -1237,6 +1311,7 @@ public class MailMergeNew
      */
     private void setListeners(XSpreadsheetDocument calcDoc)
     {
+      //FIXME: Das Ändern des Names eines Sheets muss überwacht werden damit tableName angepasst wird.
       if (calcDoc == null) return;
       try{
         UNO.XCloseBroadcaster(calcDoc).addCloseListener(myCalcListener);
@@ -1750,8 +1825,11 @@ public class MailMergeNew
     myFrame = null;
     
     ds.dispose();
+    
+    if (abortListener != null)
+      abortListener.actionPerformed(new ActionEvent(this, 0, ""));
   }
-  
+ 
   public static void main(String[] args) throws Exception
   {
      UNO.init();
@@ -1763,7 +1841,7 @@ public class MailMergeNew
        System.exit(1);
      }
      
-     MailMergeNew mm = new MailMergeNew(new TextDocumentModel(doc));
+     MailMergeNew mm = new MailMergeNew(new TextDocumentModel(doc), null);
      
      while(mm.myFrame == null) Thread.sleep(1000);
      while(mm.myFrame != null) Thread.sleep(1000);

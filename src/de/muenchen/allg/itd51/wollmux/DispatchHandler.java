@@ -102,6 +102,8 @@ public class DispatchHandler
 
   public static final String DISP_wmSeriendruck = "wollmux:Seriendruck";
 
+  public static final String DISP_wmSeriendruckNeu = "wollmux:SeriendruckNeu";
+
   public static final String DISP_wmTest = "wollmux:Test";
 
   /*****************************************************************************
@@ -314,6 +316,14 @@ public class DispatchHandler
       public void dispatch(String arg, PropertyValue[] props)
       {
         WollMuxEventHandler.handleSeriendruck(model, false);
+      }
+    });
+
+    handler.add(new DocumentDispatchHandler(DISP_wmSeriendruckNeu, model)
+    {
+      public void dispatch(String arg, PropertyValue[] props)
+      {
+        WollMuxEventHandler.handleSeriendruckNeu(model, false);
       }
     });
 

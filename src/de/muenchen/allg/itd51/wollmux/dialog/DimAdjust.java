@@ -55,4 +55,15 @@ public class DimAdjust
     return compo;
   }
   
+  /**
+   * Nagelt die preferred size von compo auf den aktuellen Wert fest.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public static JComponent fixedSize(JComponent compo)
+  {
+    Dimension dim = compo.getPreferredSize();
+    compo.setPreferredSize(dim);
+    return compo;
+  }
+  
 }

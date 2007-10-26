@@ -98,6 +98,7 @@ import de.muenchen.allg.itd51.wollmux.dialog.Dialog;
 import de.muenchen.allg.itd51.wollmux.dialog.PersoenlicheAbsenderlisteVerwalten;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
+import de.muenchen.allg.itd51.wollmux.func.MailMergeNew;
 
 /**
  * Ermöglicht die Einstellung neuer WollMuxEvents in die EventQueue.
@@ -864,6 +865,41 @@ public class WollMuxEventHandler
     protected void doit() throws WollMuxFehlerException
     {
       model.setCurrentFormularMax4000(null);
+    }
+
+    public String toString()
+    {
+      return this.getClass().getSimpleName() + "(#" + model.hashCode() + ")";
+    }
+  }
+
+  // *******************************************************************************************
+
+  /**
+   * Erzeugt ein neues WollMuxEvent, das aufgerufen wird, wenn ein
+   * FormularMax4000 beendet wird und die entsprechenden internen Referenzen
+   * gelöscht werden können.
+   * 
+   * Dieses Event wird vom EventProcessor geworfen, wenn der FormularMax
+   * zurückkehrt.
+   */
+  public static void handleMailMergeNewReturned(TextDocumentModel model)
+  {
+    handle(new OnHandleMailMergeNewReturned(model));
+  }
+
+  private static class OnHandleMailMergeNewReturned extends BasicEvent
+  {
+    private TextDocumentModel model;
+
+    private OnHandleMailMergeNewReturned(TextDocumentModel model)
+    {
+      this.model = model;
+    }
+
+    protected void doit() throws WollMuxFehlerException
+    {
+      model.setCurrentMailMergeNew(null);
     }
 
     public String toString()
@@ -3750,6 +3786,60 @@ public class WollMuxEventHandler
       final XPrintModel pmod = model.createPrintModel(useDocPrintFunctions);
       pmod.usePrintFunction("Seriendruck");
       pmod.printWithProps();
+    }
+
+    public String toString()
+    {
+      return this.getClass().getSimpleName() + "(" + model + ")";
+    }
+  }
+
+  // *******************************************************************************************
+
+  /**
+   * Erzeugt ein neues WollMuxEvent, das signasisiert, dass die neue
+   * Seriendruckfunktion des WollMux gestartet werden soll.
+   * 
+   * Das Event wird über den DispatchHandler aufgerufen, wenn z.B. über das Menü
+   * "Extras->Seriendruck (WollMux)" die dispatch-url wollmux:SeriendruckNeu
+   * abgesetzt wurde.
+   */
+  public static void handleSeriendruckNeu(TextDocumentModel model,
+      boolean useDocPrintFunctions)
+  {
+    handle(new OnSeriendruckNeu(model, useDocPrintFunctions));
+  }
+
+  private static class OnSeriendruckNeu extends BasicEvent
+  {
+    private TextDocumentModel model;
+
+    public OnSeriendruckNeu(TextDocumentModel model,
+        boolean useDocumentPrintFunctions)
+    {
+      this.model = model;
+    }
+
+    protected void doit() throws WollMuxFehlerException
+    {
+      // Bestehenden Max in den Vordergrund holen oder neuen Max erzeugen.
+      MailMergeNew max = model.getCurrentMailMergeNew();
+      if (max != null)
+      {
+        return;
+      }
+      else
+      {
+        max = new MailMergeNew(model, new ActionListener()
+        {
+          public void actionPerformed(ActionEvent actionEvent)
+          {
+            if (actionEvent.getSource() instanceof MailMergeNew)
+              WollMuxEventHandler.handleMailMergeNewReturned(model);
+          }
+        });
+        model.setCurrentMailMergeNew(max);
+      }
     }
 
     public String toString()

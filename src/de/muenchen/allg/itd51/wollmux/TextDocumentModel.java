@@ -68,6 +68,7 @@ import de.muenchen.allg.itd51.wollmux.PrintModels.PrintModelProps;
 import de.muenchen.allg.itd51.wollmux.dialog.FormController;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
+import de.muenchen.allg.itd51.wollmux.func.MailMergeNew;
 
 /**
  * Diese Klasse repräsentiert das Modell eines aktuell geöffneten TextDokuments
@@ -162,6 +163,12 @@ public class TextDocumentModel
    * FormularMax4000.
    */
   private FormularMax4000 currentMax4000;
+
+  /**
+   * Enthält die Instanz des aktuell geöffneten, zu diesem Dokument gehörenden
+   * MailMergeNew.
+   */
+  private MailMergeNew currentMM;
 
   /**
    * Dieses Feld stellt ein Zwischenspeicher für Fragment-Urls dar. Es wird dazu
@@ -760,6 +767,28 @@ public class TextDocumentModel
   }
 
   /**
+   * Setzt die Instanz des aktuell geöffneten, zu diesem Dokument gehörenden
+   * MailMergeNew.
+   * 
+   * @param max
+   */
+  public void setCurrentMailMergeNew(MailMergeNew max)
+  {
+    currentMM = max;
+  }
+
+  /**
+   * Liefert die Instanz des aktuell geöffneten, zu diesem Dokument gehörenden
+   * MailMergeNew zurück, oder null, falls kein FormularMax gestartet wurde.
+   * 
+   * @return
+   */
+  public MailMergeNew getCurrentMailMergeNew()
+  {
+    return currentMM;
+  }
+
+  /**
    * Liefert true, wenn das Dokument eine Vorlage ist oder wie eine Vorlage
    * behandelt werden soll, ansonsten false.
    * 
@@ -1175,6 +1204,7 @@ public class TextDocumentModel
   public void insertMailMergeFieldAtCursorPosition(String name)
   {
     getViewCursor().setString("<" + name + ">");
+    getViewCursor().collapseToEnd();
     // FIXME: insertMailMergeFieldAtCursorPosition(String name)
   }
 
