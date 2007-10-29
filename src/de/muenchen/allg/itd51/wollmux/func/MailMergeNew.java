@@ -605,10 +605,10 @@ public class MailMergeNew
    * Führt den Seriendruck durch.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TODO Testen
    */
   private void doMailMerge()
   {
+    //TODO Fortschrittsanzeiger
     mod.collectNonWollMuxFormFields();
     QueryResultsWithSchema data = ds.getData();
     XPrintModel pmod = mod.createPrintModel(true);
