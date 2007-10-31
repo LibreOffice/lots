@@ -96,18 +96,6 @@ abstract public class DocumentCommand
 
   private static final String INSERT_MARK_CLOSE = ">";
 
-  // Relationen zweier Dokument-Kommandos A und B:
-
-  public static final int REL_B_IS_CHILD_OF_A = 1;
-
-  public static final int REL_B_IS_PARENT_OF_A = -1;
-
-  public static final int REL_B_OVERLAPS_A = 0;
-
-  public static final int REL_B_IS_SIBLING_BEFORE_A = -2;
-
-  public static final int REL_B_IS_SIBLING_AFTER_A = 2;
-
   /* ************************************************************ */
 
   /**
@@ -184,36 +172,6 @@ abstract public class DocumentCommand
            + (isDone() ? "DONE:" : "")
            + getBookmarkName()
            + "]";
-  }
-
-  /**
-   * Diese Methode liefert die Beziehung des aktuellen DocumentCommand und des
-   * DocumentCommand b in Form einer Konstante DocumentCommand.REL_xxx zurück.
-   * 
-   * @param b
-   *          Das DocumentCommand b, mit dem das aktuelle DocumentCommand
-   *          verglichen wird.
-   * @return Die Relation der zwei DocumentCommands in Form einer Konstante
-   *         DocumentCommand.REL_xxx.
-   */
-  public int getRelation(DocumentCommand b)
-  {
-    int cmp = bookmark.compare(b.bookmark);
-
-    if (cmp == Bookmark.POS_AABB) return REL_B_IS_SIBLING_AFTER_A;
-    if (cmp == Bookmark.POS_BBAA) return REL_B_IS_SIBLING_BEFORE_A;
-
-    if (cmp == Bookmark.POS_88AA) return REL_B_IS_CHILD_OF_A;
-    if (cmp == Bookmark.POS_A88A) return REL_B_IS_CHILD_OF_A;
-    if (cmp == Bookmark.POS_AA88) return REL_B_IS_CHILD_OF_A;
-
-    if (cmp == Bookmark.POS_88BB) return REL_B_IS_PARENT_OF_A;
-    if (cmp == Bookmark.POS_B88B) return REL_B_IS_PARENT_OF_A;
-    if (cmp == Bookmark.POS_BB88) return REL_B_IS_PARENT_OF_A;
-
-    if (cmp == Bookmark.POS_8888) return REL_B_OVERLAPS_A;
-
-    return REL_B_IS_SIBLING_AFTER_A;
   }
 
   /**

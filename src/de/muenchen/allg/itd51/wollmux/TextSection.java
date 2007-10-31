@@ -18,21 +18,15 @@
  */
 package de.muenchen.allg.itd51.wollmux;
 
-import java.io.StringReader;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import com.sun.star.container.XNameAccess;
+import com.sun.star.container.XNamed;
 import com.sun.star.text.XTextRange;
 import com.sun.star.text.XTextSection;
-import com.sun.star.text.XTextSectionsSupplier;
 import com.sun.star.uno.AnyConverter;
+import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.itd51.parser.ConfigThingy;
 
 /**
  * Diese Klasse repräsentiert einen Textbereich (TextSection), dessen Namen um
@@ -44,14 +38,6 @@ import de.muenchen.allg.itd51.parser.ConfigThingy;
  */
 public class TextSection implements VisibilityElement
 {
-
-  /**
-   * Das Pattern über das der Namenszusatz mit der Festlegung der
-   * Sichtbarkeitsgruppen dieses Bereichs
-   */
-  private static final Pattern groupedSection = Pattern
-      .compile("^.*(GROUPS.*)$");
-
   /**
    * Der Bereich selbst
    */
@@ -63,71 +49,6 @@ public class TextSection implements VisibilityElement
   private Set groups;
 
   /**
-   * Diese Methode erzeugt ein Set mit Elementen vom Typ TextSection, das alle
-   * TextSections enthält, die mit einem Namenszusatz 'GROUPS ...' versehen sind
-   * und sich im Dokument doc befinden.
-   * 
-   * @param doc
-   *          Das Textdokument, in dem die Bereiche gesucht werden.
-   * @return Eine Menge aller TextSections mit Namenszusatz 'GROUPS ...', die in
-   *         diesem Dokument gefunden wurden.
-   */
-  public static Set createVisibleSections(XTextSectionsSupplier doc)
-  {
-    Set visibleSections = new HashSet();
-
-    if (doc == null) return visibleSections;
-    XNameAccess sectionsAccess = UNO.XNameAccess(doc.getTextSections());
-    if (sectionsAccess == null) return visibleSections;
-
-    // Alle Elementnamen herausfiltern, die GROUPS enthalten und damit als
-    // VisibleSection erzeugt werden sollen.
-    String[] names = sectionsAccess.getElementNames();
-    for (int i = 0; i < names.length; i++)
-    {
-      String name = names[i];
-      Matcher m = groupedSection.matcher(name);
-      if (m.matches())
-      {
-
-        // HashSet mit allen Gruppen GROUPS aufbauen:
-        Set groups = new HashSet();
-        String groupsStr = m.group(1);
-        try
-        {
-          ConfigThingy groupsCfg = new ConfigThingy("", null, new StringReader(
-              groupsStr));
-          Iterator giter = groupsCfg.get("GROUPS").iterator();
-          while (giter.hasNext())
-            groups.add(giter.next().toString());
-        }
-        catch (java.lang.Exception e)
-        {
-          Logger.error("Der Textbereich mit dem Namen '"
-                       + name
-                       + "' enthält ein fehlerhaftes GROUPS-Attribut.", e);
-        }
-
-        try
-        {
-          XTextSection section = UNO.XTextSection(sectionsAccess
-              .getByName(name));
-          if (section != null)
-          {
-            visibleSections.add(new TextSection(section, groups));
-          }
-        }
-        catch (java.lang.Exception e)
-        {
-          Logger.error(e);
-        }
-      }
-    }
-
-    return visibleSections;
-  }
-
-  /**
    * Erzeugt ein neues TextSection-Objekt.
    * 
    * @param section
@@ -136,7 +57,7 @@ public class TextSection implements VisibilityElement
    *          Set mit den Namen (als String) aller Sichtbarkeitsgruppen, die
    *          diesen Bereich sichtbar oder unsichtbar machen können.
    */
-  private TextSection(XTextSection section, Set groups)
+  public TextSection(XTextSection section, Set groups)
   {
     this.section = section;
     this.groups = groups;
@@ -183,11 +104,78 @@ public class TextSection implements VisibilityElement
   /*
    * (non-Javadoc)
    * 
+   * @see de.muenchen.allg.itd51.wollmux.VisibilityElement#addGroups(java.util.Set)
+   */
+  public void addGroups(Set groups)
+  {
+    this.groups.addAll(groups);
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
    * @see de.muenchen.allg.itd51.wollmux.VisibilityElement#getAnchor()
    */
   public XTextRange getAnchor()
   {
-    return section.getAnchor();
+    try
+    {
+      return section.getAnchor();
+    }
+    catch (java.lang.Exception e)
+    {
+      return null;
+    }
   }
 
+  /**
+   * Liefert den Namen der TextSection, der auch dann noch aktuell bleibt, wenn
+   * der Name manuell im Dokument geändert wurde, oder "<disposedTextSection>",
+   * wenn die TextSection nicht mehr existiert.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  public String getName()
+  {
+    XNamed xNamed = UNO.XNamed(section);
+    return (xNamed != null) ? xNamed.getName() : "<disposedTextSection>";
+  }
+
+  /**
+   * Liefert den HashCode von getName() und ermöglicht das Verwenden der
+   * TextSection in einem HashSet.
+   * 
+   * @see java.lang.Object#hashCode()
+   */
+  public int hashCode()
+  {
+    return getName().hashCode();
+  }
+
+  /**
+   * Vergleicht die beiden TextSections über UNORuntime.areSame()
+   * 
+   * @see java.lang.Object#equals(java.lang.Object)
+   */
+  public boolean equals(Object obj)
+  {
+    try
+    {
+      return UnoRuntime.areSame(((TextSection) obj).section, this.section);
+    }
+    catch (java.lang.Exception e)
+    {
+      return false;
+    }
+  }
+
+  /**
+   * Liefert true, wenn die TextSection (bzw. Ihr Anchor) nicht mehr existiert.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  public boolean isRetired()
+  {
+    return getAnchor() == null;
+  }
 }

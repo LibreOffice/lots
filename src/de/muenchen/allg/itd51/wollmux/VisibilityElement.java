@@ -57,6 +57,11 @@ public interface VisibilityElement
   public abstract Set getGroups();
 
   /**
+   * fügt diesem Elements all in groups definierten Sichtbarkeitsgruppen hinzu.
+   */
+  public abstract void addGroups(Set groups);
+
+  /**
    * Liefert die TextRange an der das VisibleElement verankert ist oder null,
    * falls das VisibleElement nicht mehr existiert.
    */

@@ -50,6 +50,7 @@ import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertFormValue;
+import de.muenchen.allg.itd51.wollmux.TextRangeRelation.TreeRelation;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 
 /**
@@ -613,16 +614,13 @@ public final class FormFieldFactory
      */
     public int compareTo(Object other)
     {
-      int rel = cmd.getRelation(((BasicFormField) other).cmd);
-      if (rel == DocumentCommand.REL_B_IS_SIBLING_BEFORE_A)
+      TreeRelation rel = new TreeRelation(cmd.getAnchor(),
+          ((BasicFormField) other).cmd.getAnchor());
+      if (rel.isAGreaterThanB())
         return 1;
-      else if (rel == DocumentCommand.REL_B_IS_SIBLING_AFTER_A)
+      else if (rel.isALessThanB())
         return -1;
-      else if (rel == DocumentCommand.REL_B_IS_CHILD_OF_A)
-        return -1;
-      else if (rel == DocumentCommand.REL_B_IS_PARENT_OF_A)
-        return 1;
-      else if (rel == DocumentCommand.REL_B_OVERLAPS_A) return 0;
+      else if (rel.isAEqualB()) return 0;
 
       return -1;
     }

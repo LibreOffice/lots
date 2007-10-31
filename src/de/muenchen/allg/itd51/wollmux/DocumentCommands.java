@@ -24,11 +24,17 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.sun.star.container.XNameAccess;
 import com.sun.star.text.XBookmarksSupplier;
+import com.sun.star.text.XTextRange;
+import com.sun.star.text.XTextSection;
+import com.sun.star.text.XTextSectionsSupplier;
 
+import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.parser.SyntaxErrorException;
@@ -48,6 +54,7 @@ import de.muenchen.allg.itd51.wollmux.DocumentCommand.SetJumpMark;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.SetPrintFunction;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.SetType;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.UpdateFields;
+import de.muenchen.allg.itd51.wollmux.TextRangeRelation.TreeRelation;
 
 /**
  * Diese Klasse verwaltet die Dokumentkommandos eines Textdokuments und kann
@@ -71,6 +78,13 @@ public class DocumentCommands
       .compile("\\A\\p{Space}*(WM\\p{Space}*\\(.*\\))\\p{Space}*(\\d*)\\z");
 
   /**
+   * Das Pattern zur Erkennung von TextSections mit einem GROUPS-Attribut als
+   * Namenszusatz zur Definition der Sichtbarkeitsgruppen dieses Bereichs
+   */
+  private static final Pattern sectionWithGROUPSPattern = Pattern
+      .compile("\\A.*(GROUPS.*)\\d*\\z");
+
+  /**
    * Das Dokument, in dem die Bookmarks enthalten sind und das dazu ein
    * XBookmarksSupplier sein muss.
    */
@@ -83,10 +97,17 @@ public class DocumentCommands
   private HashSet allCommands;
 
   /**
-   * Enthält die Menge aller setGroups-Kommandos des Dokuments und wird über
-   * update() aktualisiert.
+   * Enthält die aktuelle Menge aller TextSections mit GROUPS-Attribut und wird
+   * über update() aktualisiert.
    */
-  private HashSet setGroupsCommands;
+  private HashSet allTextSectionsWithGROUPS;
+
+  /**
+   * Enthält die nach Position sortierte Liste aller Sichtbarkeitselemente
+   * (setGroups-Kommando und TextSection mit GROUPS-Attribut) des Dokuments und
+   * wird über update() aktualisiert.
+   */
+  private LinkedList visibilityElements;
 
   /**
    * Enthält eine nach Position sortierte Liste aller setJumpMark-Kommandos und
@@ -122,11 +143,33 @@ public class DocumentCommands
     this.doc = doc;
     this.allCommands = new HashSet();
 
-    this.setGroupsCommands = new HashSet();
+    this.visibilityElements = new LinkedList();
     this.setJumpMarkCommands = new LinkedList();
     this.notInOriginalCommands = new HashSet();
     this.draftOnlyCommands = new HashSet();
     this.allVersionsCommands = new HashSet();
+    this.allTextSectionsWithGROUPS = new HashSet();
+  }
+
+  /**
+   * Diese Methode aktualisiert die Dokumentkommandos und TextSections des
+   * Dokuments, so dass neue und manuell gelöschte Dokumentkommandos oder
+   * TextSections erkannt und mit den Datenstrukturen abgeglichen werden. Die
+   * Methode liefert true zurück, wenn seit dem letzten update() Änderungen am
+   * Bestand der Dokumentkommandos bzw. TextSections erkannt wurden und false,
+   * wenn es keine Änderungen gab.
+   * 
+   * @return true, wenn sich die Menge der Dokumentkommandos bzw. TextSections
+   *         seit dem letzten update() verändert hat und false, wenn es keine
+   *         Änderung gab.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  public boolean update()
+  {
+    boolean bookmarksChanged = updateBookmarks();
+    boolean textSectionsChanged = updateTextSections();
+    return bookmarksChanged || textSectionsChanged;
   }
 
   /**
@@ -141,7 +184,7 @@ public class DocumentCommands
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  public boolean update()
+  public boolean updateBookmarks()
   {
     if (doc == null) return false;
     long startTime = System.currentTimeMillis();
@@ -178,13 +221,73 @@ public class DocumentCommands
     removeRetiredDocumentCommands(retiredDocumentCommands);
     addNewDocumentCommands(newDocumentCommands);
 
-    Logger.debug2("Update fertig nach "
+    Logger.debug2("updateBookmarks fertig nach "
                   + (System.currentTimeMillis() - startTime)
                   + " ms. Entfernte/Neue Dokumentkommandos: "
                   + retiredDocumentCommands.size()
                   + " / "
                   + newDocumentCommands.size());
     return retiredDocumentCommands.size() > 0 || newDocumentCommands.size() > 0;
+  }
+
+  /**
+   * Diese Methode aktualisiert die TextSections, so dass neue und gelöschte
+   * TextSections im Dokument erkannt und mit den Datenstrukturen abgeglichen
+   * werden. Die Methode liefert true zurück, wenn seit dem letzten update()
+   * Änderungen am Bestand der TextSections erkannt wurden und false, wenn es
+   * keine Änderungen gab.
+   * 
+   * @return true, wenn sich die Menge der TextSections seit dem letzten
+   *         update() verändert hat und false, wenn es keine Änderung gab.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  public boolean updateTextSections()
+  {
+    XTextSectionsSupplier supp = UNO.XTextSectionsSupplier(doc);
+    if (supp == null) return false;
+    long startTime = System.currentTimeMillis();
+
+    // HashSets mit den Namen der bekannten, gültigen TextSections
+    // und den ungültigen TextSections erstellen:
+    HashSet knownTextSections = new HashSet();
+    HashSet retiredTextSections = new HashSet();
+    for (Iterator iter = allTextSectionsWithGROUPS.iterator(); iter.hasNext();)
+    {
+      TextSection s = (TextSection) iter.next();
+      if (s.isRetired())
+        retiredTextSections.add(s);
+      else
+        knownTextSections.add(s.getName());
+    }
+
+    // TextSections scannen und HashSet mit allen TextSections aufbauen:
+    HashSet newTextSections = new HashSet();
+    String[] textSectionNames = supp.getTextSections().getElementNames();
+    for (int i = 0; i < textSectionNames.length; i++)
+    {
+      String name = textSectionNames[i];
+      Matcher m = sectionWithGROUPSPattern.matcher(name);
+
+      if (m.find() && !knownTextSections.contains(name))
+      {
+        TextSection s = createTextSection(name, m.group(1), UNO
+            .XTextSectionsSupplier(doc));
+        if (s != null) newTextSections.add(s);
+      }
+    }
+
+    // lokale Kommandosets aktualisieren:
+    removeRetiredTextSections(retiredTextSections);
+    addNewTextSections(newTextSections);
+
+    Logger.debug2("updateTextSections fertig nach "
+                  + (System.currentTimeMillis() - startTime)
+                  + " ms. Entfernte/Neue TextSections: "
+                  + retiredTextSections.size()
+                  + " / "
+                  + newTextSections.size());
+    return retiredTextSections.size() > 0 || newTextSections.size() > 0;
   }
 
   /**
@@ -205,7 +308,7 @@ public class DocumentCommands
 
       allCommands.add(cmd);
 
-      if (cmd instanceof SetGroups) addNewSetGroups((SetGroups) cmd);
+      if (cmd instanceof SetGroups) addNewVisibilityElement((SetGroups) cmd);
       if (cmd instanceof SetJumpMark) addNewSetJumpMark((SetJumpMark) cmd);
       if (cmd instanceof NotInOriginal) notInOriginalCommands.add(cmd);
       if (cmd instanceof DraftOnly) draftOnlyCommands.add(cmd);
@@ -214,33 +317,78 @@ public class DocumentCommands
   }
 
   /**
-   * Fügt das neue SetGroups-Kommando cmdB zum internen Set der
-   * SetGroups-Kommandos hinzu, wobei die Gruppenzuordnung von verschachtelten
-   * setGroups-Kommandos gemäß der Vererbungsstruktur der Sichtbarkeitsgruppen
-   * auf untergeordnete SetGroups-Kommandos übertragen werden.
+   * Abgleich der internen Datenstrukturen: fügt alle in newElements enthaltenen
+   * TextSections in die entsprechenden Sets/Listen hinzu.
    * 
-   * @param cmdB
-   *          das hinzuzufügende SetGroups-Kommando.
+   * @param newElements
+   *          Set mit allen TextSections, die seit dem letzten update
+   *          hinzugekommen sind.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  private void addNewTextSections(HashSet newElements)
+  {
+    for (Iterator iter = newElements.iterator(); iter.hasNext();)
+    {
+      TextSection s = (TextSection) iter.next();
+
+      allTextSectionsWithGROUPS.add(s);
+
+      addNewVisibilityElement(s);
+    }
+  }
+
+  /**
+   * Fügt das neue Sichtbarkeitselement (SetGroups-Kommando bzw. Textbereich mit
+   * GROUPS im Namen) sortiert in die bereits vorsortierte LinkedList aller
+   * Sichtbarkeitselemente hinzu, wobei die Gruppenzuordnung von verschachtelten
+   * Sichtbarkeitselementen gemäß der Vererbungsstruktur der
+   * Sichtbarkeitsgruppen auf untergeordnete Sichtbarkeitselemente übertragen
+   * werden.
+   * 
+   * @param element
+   *          das hinzuzufügende Sichtbarkeitselement.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1) TESTED
    */
-  private void addNewSetGroups(SetGroups cmdB)
+  private void addNewVisibilityElement(VisibilityElement element)
   {
-    for (Iterator iter = setGroupsCommands.iterator(); iter.hasNext();)
+    boolean inserted = false;
+    XTextRange anchor = element.getAnchor();
+    if (anchor == null) return;
+
+    ListIterator iter = visibilityElements.listIterator();
+    while (iter.hasNext())
     {
-      SetGroups cmdA = (SetGroups) iter.next();
-      int rel = cmdA.getRelation(cmdB);
-      if (rel == DocumentCommand.REL_B_IS_CHILD_OF_A)
-        cmdB.addGroups(cmdA.getGroups());
-      else if (rel == DocumentCommand.REL_B_IS_PARENT_OF_A)
-        cmdA.addGroups(cmdB.getGroups());
-      else if (rel == DocumentCommand.REL_B_OVERLAPS_A)
+      VisibilityElement current = (VisibilityElement) iter.next();
+
+      TreeRelation rel = new TreeRelation(current.getAnchor(), anchor);
+
+      // setzen der Gruppen:
+      if (rel.isAEqualB())
       {
-        cmdA.addGroups(cmdB.getGroups());
-        cmdB.addGroups(cmdA.getGroups());
+        element.addGroups(current.getGroups());
+        current.addGroups(element.getGroups());
+      }
+      else if (rel.isAChildOfB())
+      {
+        current.addGroups(element.getGroups());
+      }
+      else if (rel.isBChildOfA())
+      {
+        element.addGroups(current.getGroups());
+      }
+
+      // sortiertes Einfügen:
+      if (!inserted && (rel.isAGreaterThanB() || rel.isAEqualB()))
+      {
+        iter.previous();
+        iter.add(element);
+        inserted = true;
+        iter.next();
       }
     }
-    setGroupsCommands.add(cmdB);
+    if (!inserted) visibilityElements.add(element);
   }
 
   /**
@@ -258,7 +406,8 @@ public class DocumentCommands
     while (iter.hasNext())
     {
       SetJumpMark cmdA = (SetJumpMark) iter.next();
-      if (cmdA.getRelation(cmdB) == DocumentCommand.REL_B_IS_SIBLING_BEFORE_A)
+      TreeRelation rel = new TreeRelation(cmdA.getAnchor(), cmdB.getAnchor());
+      if (rel.isAGreaterThanB() || rel.isAEqualB())
       {
         iter.previous();
         break;
@@ -271,20 +420,36 @@ public class DocumentCommands
    * Abgleich der internen Datenstrukturen: löscht alle in newDocumentCommands
    * enthaltenen Dokumentkommandos aus den entsprechenden Sets/Listen.
    * 
-   * @param retiredDocumentCommands
+   * @param retired
    *          Set mit allen Dokumentkommandos, die seit dem letzten update
    *          ungültig (gelöscht) wurden.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  private void removeRetiredDocumentCommands(HashSet retiredDocumentCommands)
+  private void removeRetiredDocumentCommands(HashSet retired)
   {
-    allCommands.removeAll(retiredDocumentCommands);
-    setGroupsCommands.removeAll(retiredDocumentCommands);
-    setJumpMarkCommands.removeAll(retiredDocumentCommands);
-    notInOriginalCommands.removeAll(retiredDocumentCommands);
-    draftOnlyCommands.removeAll(retiredDocumentCommands);
-    allVersionsCommands.removeAll(retiredDocumentCommands);
+    allCommands.removeAll(retired);
+    visibilityElements.removeAll(retired);
+    setJumpMarkCommands.removeAll(retired);
+    notInOriginalCommands.removeAll(retired);
+    draftOnlyCommands.removeAll(retired);
+    allVersionsCommands.removeAll(retired);
+  }
+
+  /**
+   * Abgleich der internen Datenstrukturen: löscht alle in newDocumentCommands
+   * enthaltenen Dokumentkommandos aus den entsprechenden Sets/Listen.
+   * 
+   * @param retired
+   *          Set mit allen Dokumentkommandos, die seit dem letzten update
+   *          ungültig (gelöscht) wurden.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  private void removeRetiredTextSections(HashSet retired)
+  {
+    allTextSectionsWithGROUPS.removeAll(retired);
+    visibilityElements.removeAll(retired);
   }
 
   /**
@@ -317,7 +482,7 @@ public class DocumentCommands
    */
   public Iterator setGroupsIterator()
   {
-    return setGroupsCommands.iterator();
+    return visibilityElements.iterator();
   }
 
   /**
@@ -431,6 +596,61 @@ public class DocumentCommands
     {
       Logger.error(e);
     }
+    return null;
+  }
+
+  /**
+   * Erzeugt ein neues TextSection-Objekt zur TextSection name aus dem
+   * TextSectionsSupplier doc, dessen Gruppen mit dem in groupsStr beschriebenen
+   * ConfigThingy definiert sind oder null, wenn die TextSection nicht erzeugt
+   * werden konnte.
+   * 
+   * @param name
+   *          Der Name der zu erzeugenden TextSection
+   * @param groupsStr
+   *          der GROUPS-Knoten im ConfigThingy-Format als String
+   * @param doc
+   *          der XTextSectionsSupplier (das Dokument)
+   * @return
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  private static TextSection createTextSection(String name, String groupsStr,
+      XTextSectionsSupplier doc)
+  {
+    if (doc == null) return null;
+    XNameAccess sectionsAccess = doc.getTextSections();
+
+    // HashSet mit allen Gruppen GROUPS aufbauen:
+    Set groups = new HashSet();
+    try
+    {
+      ConfigThingy groupsCfg = new ConfigThingy("", null, new StringReader(
+          groupsStr));
+      Iterator giter = groupsCfg.get("GROUPS").iterator();
+      while (giter.hasNext())
+        groups.add(giter.next().toString());
+    }
+    catch (java.lang.Exception e)
+    {
+      Logger.error("Der Textbereich mit dem Namen '"
+                   + name
+                   + "' enthält ein fehlerhaftes GROUPS-Attribut.", e);
+    }
+
+    try
+    {
+      XTextSection section = UNO.XTextSection(sectionsAccess.getByName(name));
+      if (section != null)
+      {
+        return new TextSection(section, groups);
+      }
+    }
+    catch (java.lang.Exception e)
+    {
+      Logger.error(e);
+    }
+
     return null;
   }
 
@@ -557,7 +777,7 @@ public class DocumentCommands
   {
     /**
      * Führt alle Dokumentkommandos aus commands aus, die nicht den Status
-     * DONE=true oder ERROR=true besitzen. 
+     * DONE=true oder ERROR=true besitzen.
      * 
      * @param commands
      * @return Anzahl der bei der Ausführung aufgetretenen Fehler.

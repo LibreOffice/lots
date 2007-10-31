@@ -215,12 +215,6 @@ public class TextDocumentModel
   private HashSet /* of String */invisibleGroups;
 
   /**
-   * Enthält die Menge aller Textbereiche des Dokuments, die über den
-   * Namenszusatz "GROUPS (<Liste mit Gruppen>)" gekennzeichnet sind.
-   */
-  private Set /* of VisibleSection */visibleTextSections;
-
-  /**
    * Kann über setPartOfMultiformDocument gesetzt werden und sollte dann true
    * enthalten, wenn das Dokument ein Teil eines Multiformdokuments ist.
    */
@@ -264,10 +258,6 @@ public class TextDocumentModel
     setDocumentModified(modified);
 
     registerCloseListener();
-
-    // Textbereiche mit Namenszusatz 'GROUPS (<Liste mit Gruppen>)' einlesen:
-    visibleTextSections = TextSection.createVisibleSections(UNO
-        .XTextSectionsSupplier(doc));
 
     // WollMuxDispatchInterceptor registrieren
     try
@@ -315,7 +305,6 @@ public class TextDocumentModel
   public Iterator visibleElementsIterator()
   {
     Vector visibleElements = new Vector();
-    visibleElements.addAll(visibleTextSections);
     for (Iterator iter = documentCommands.setGroupsIterator(); iter.hasNext();)
       visibleElements.add(iter.next());
     return visibleElements.iterator();
