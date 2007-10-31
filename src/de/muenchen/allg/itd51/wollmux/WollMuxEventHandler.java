@@ -3727,7 +3727,7 @@ public class WollMuxEventHandler
         try
         {
           XTextRange range = cmd.getTextRange();
-          if (range != null) viewCursor.gotoRange(range, false);
+          if (range != null) viewCursor.gotoRange(range.getStart(), false);
         }
         catch (java.lang.Exception e)
         {
