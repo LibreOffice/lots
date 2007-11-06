@@ -3030,6 +3030,13 @@ public class WollMuxEventHandler
             slvConf,
             "NOT_IN_ORIGINAL_HIGHLIGHT_COLOR");
       }
+      else if (blockname.equalsIgnoreCase("originalOnly"))
+      {
+        markChange = "wird ausschlieﬂlich im Original gedruckt";
+        highlightColor = getHighlightColor(
+            slvConf,
+            "ORIGINAL_ONLY_HIGHLIGHT_COLOR");
+      }
       else
         return;
 

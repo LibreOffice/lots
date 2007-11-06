@@ -663,6 +663,8 @@ abstract public class DocumentCommand
 
     public int executeCommand(DocumentCommand.NotInOriginal cmd);
 
+    public int executeCommand(DocumentCommand.OriginalOnly cmd);
+
     public int executeCommand(DocumentCommand.AllVersions cmd);
 
     public int executeCommand(DocumentCommand.SetJumpMark cmd);
@@ -1548,6 +1550,43 @@ abstract public class DocumentCommand
     String highlightColor = null;
 
     public NotInOriginal(ConfigThingy wmCmd, Bookmark bookmark)
+    {
+      super(wmCmd, bookmark);
+
+      try
+      {
+        highlightColor = wmCmd.get("WM").get("HIGHLIGHT_COLOR").toString();
+      }
+      catch (NodeNotFoundException e)
+      {
+        // HIGHLIGHT_COLOR ist optional
+      }
+    }
+
+    public String getHighlightColor()
+    {
+      return highlightColor;
+    }
+
+    public int execute(DocumentCommand.Executor visitable)
+    {
+      return visitable.executeCommand(this);
+    }
+  }
+
+  // ********************************************************************************
+  /**
+   * Beim Drucken von Sachleitenden Verfügungen wird der Verfügungspunkt I als
+   * Original bezeichnet. Mit dem OriginalOnly Kommando ist es möglich Blöcke im
+   * Text zu definieren, die ausschließlich in Originalen abgedruckt werden
+   * sollen.
+   */
+  static public class OriginalOnly extends DocumentCommand implements
+      OptionalHighlightColorProvider
+  {
+    String highlightColor = null;
+
+    public OriginalOnly(ConfigThingy wmCmd, Bookmark bookmark)
     {
       super(wmCmd, bookmark);
 

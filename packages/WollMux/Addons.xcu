@@ -115,6 +115,24 @@
 
         <node oor:name="m7" oor:op="replace">
           <prop oor:name="URL" oor:type="xs:string">
+            <value>wollmux:markBlock#originalOnly</value>
+          </prop>
+          <prop oor:name="Title" oor:type="xs:string">
+            <value>nur im Original</value>
+          </prop>
+          <prop oor:name="ImageIdentifier" oor:type="xs:string">
+            <value/>
+          </prop>
+          <prop oor:name="Target" oor:type="xs:string">
+            <value>_self</value>
+          </prop>
+          <prop oor:name="Context" oor:type="xs:string">
+            <value>com.sun.star.text.TextDocument</value>
+          </prop>
+        </node>
+
+        <node oor:name="m8" oor:op="replace">
+          <prop oor:name="URL" oor:type="xs:string">
             <value>wollmux:markBlock#draftOnly</value>
           </prop>
           <prop oor:name="Title" oor:type="xs:string">

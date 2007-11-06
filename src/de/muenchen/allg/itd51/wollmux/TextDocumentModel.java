@@ -1030,8 +1030,8 @@ public class TextDocumentModel
       iter = documentCommands.draftOnlyIterator();
     if (SachleitendeVerfuegung.BLOCKNAME_SLV_NOT_IN_ORIGINAL.equals(blockName))
       iter = documentCommands.notInOriginalIterator();
-    // if(SachleitendeVerfuegung.BLOCKNAME_SLV_ORIGINAL_ONLY.equals(blockName))
-    // iter = documentCommands.originalOnlyIterator();
+     if(SachleitendeVerfuegung.BLOCKNAME_SLV_ORIGINAL_ONLY.equals(blockName))
+     iter = documentCommands.originalOnlyIterator();
 
     while (iter.hasNext())
     {

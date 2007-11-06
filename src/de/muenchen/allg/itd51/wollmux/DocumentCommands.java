@@ -48,6 +48,7 @@ import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertFunctionValue;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertValue;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InvalidCommand;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.NotInOriginal;
+import de.muenchen.allg.itd51.wollmux.DocumentCommand.OriginalOnly;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.OverrideFrag;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.SetGroups;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.SetJumpMark;
@@ -122,6 +123,12 @@ public class DocumentCommands
   private HashSet notInOriginalCommands;
 
   /**
+   * Enthält ein Set aller OrininalOnly-Dokumentkommandos des Dokuments, die für
+   * die Ein/Ausblendungen in Sachleitenden Verfügungen benötigt werden.
+   */
+  private HashSet originalOnlyCommands;
+
+  /**
    * Enthält ein Set aller draftOnly-Dokumentkommandos des Dokuments, die für
    * die Ein/Ausblendungen in Sachleitenden Verfügungen benötigt werden.
    */
@@ -146,6 +153,7 @@ public class DocumentCommands
     this.visibilityElements = new LinkedList();
     this.setJumpMarkCommands = new LinkedList();
     this.notInOriginalCommands = new HashSet();
+    this.originalOnlyCommands = new HashSet();
     this.draftOnlyCommands = new HashSet();
     this.allVersionsCommands = new HashSet();
     this.allTextSectionsWithGROUPS = new HashSet();
@@ -311,6 +319,7 @@ public class DocumentCommands
       if (cmd instanceof SetGroups) addNewVisibilityElement((SetGroups) cmd);
       if (cmd instanceof SetJumpMark) addNewSetJumpMark((SetJumpMark) cmd);
       if (cmd instanceof NotInOriginal) notInOriginalCommands.add(cmd);
+      if (cmd instanceof OriginalOnly) originalOnlyCommands.add(cmd);
       if (cmd instanceof DraftOnly) draftOnlyCommands.add(cmd);
       if (cmd instanceof AllVersions) allVersionsCommands.add(cmd);
     }
@@ -432,6 +441,7 @@ public class DocumentCommands
     visibilityElements.removeAll(retired);
     setJumpMarkCommands.removeAll(retired);
     notInOriginalCommands.removeAll(retired);
+    originalOnlyCommands.removeAll(retired);
     draftOnlyCommands.removeAll(retired);
     allVersionsCommands.removeAll(retired);
   }
@@ -517,6 +527,20 @@ public class DocumentCommands
   public Iterator notInOriginalIterator()
   {
     return notInOriginalCommands.iterator();
+  }
+
+  /**
+   * Liefert einen Iterator zurück, der die Iteration aller
+   * OrininalOnly-Dokumentkommandos dieses Dokuments ermöglicht.
+   * 
+   * @return ein Iterator, der die Iteration aller
+   *         OriginalOnly-Dokumentkommandos dieses Dokuments ermöglicht. Der
+   *         Iterator kann auch keine Elemente enthalten.
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  public Iterator originalOnlyIterator()
+  {
+    return originalOnlyCommands.iterator();
   }
 
   /**
@@ -742,6 +766,11 @@ public class DocumentCommands
         return new DocumentCommand.NotInOriginal(wmCmd, bookmark);
       }
 
+      else if (cmd.compareToIgnoreCase("originalOnly") == 0)
+      {
+        return new DocumentCommand.OriginalOnly(wmCmd, bookmark);
+      }
+
       else if (cmd.compareToIgnoreCase("allVersions") == 0)
       {
         return new DocumentCommand.AllVersions(wmCmd, bookmark);
@@ -861,6 +890,11 @@ public class DocumentCommands
     }
 
     public int executeCommand(NotInOriginal cmd)
+    {
+      return 0;
+    }
+
+    public int executeCommand(OriginalOnly cmd)
     {
       return 0;
     }
