@@ -96,6 +96,11 @@ import de.muenchen.allg.itd51.wollmux.dialog.DimAdjust;
  */
 public class MailMergeNew
 {
+  /**
+   * ID der Property in der die Serienbriefdaten gespeichert werden.
+   */
+  private static final String PROP_QUERYRESULTS = "MailMergeNew_QueryResults";
+
 
   /**
    * Das {@link TextDocumentModel} zu dem Dokument an dem diese Toolbar hängt.
@@ -614,7 +619,7 @@ public class MailMergeNew
     XPrintModel pmod = mod.createPrintModel(true);
     try{
       pmod.setPropertyValue("MailMergeNew_Schema", data.getSchema());
-      pmod.setPropertyValue("MailMergeNew_QueryResultsIterator", data.iterator());
+      pmod.setPropertyValue(PROP_QUERYRESULTS, data);
     }catch(Exception x)
     {
       Logger.error(x);
@@ -629,17 +634,19 @@ public class MailMergeNew
   /**
    * PrintFunction, die das jeweils nächste Element der Seriendruckdaten
    * nimmt und die Seriendruckfelder im Dokument entsprechend setzt.
-   * Herangezogen werden die Properties "MailMergeNew_QueryResultsIterator"
-   * (ein Iterator der von einem {@link QueryResults} Objekt zurückgeliefert wurde
-   * und "MailMergeNew_Schema", was ein Set mit den Spaltennamen enthält.
-   * Dies Funktion natürlich nur dann, wenn pmod kein Proxy ist.
+   * Herangezogen werden die Properties {@link #PROP_QUERYRESULTS}
+   * (ein Objekt vom Typ {@link QueryResults}) und 
+   * "MailMergeNew_Schema", was ein Set mit den Spaltennamen enthält.
+   * Dies funktioniert natürlich nur dann, wenn pmod kein Proxy ist.
    * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TODO Testen
+   * TESTED
    */
   public static void mailMergeNewSetFormValue(XPrintModel pmod) throws Exception
   {
-    Iterator iter = (Iterator)pmod.getPropertyValue("MailMergeNew_QueryResultsIterator");
+    QueryResults data = (QueryResults)pmod.getPropertyValue(PROP_QUERYRESULTS);
     Collection schema = (Collection)pmod.getPropertyValue("MailMergeNew_Schema");
+    
+    Iterator iter = data.iterator();
     
     while (iter.hasNext())
     {
