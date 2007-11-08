@@ -127,9 +127,9 @@ public final class FormFieldFactory
    *          "CurrentPresentation" besitzen.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public static FormField createFormField(XTextDocument doc, Object o)
+  public static FormField createFormField(XTextDocument doc, Object textfield)
   {
-    return new TextFieldFormField(doc, o);
+    return new TextFieldFormField(doc, textfield);
   }
 
   /**
