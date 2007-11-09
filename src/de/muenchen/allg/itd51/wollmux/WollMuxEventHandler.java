@@ -2550,7 +2550,7 @@ public class WollMuxEventHandler
 
     public boolean requires(Object o)
     {
-      return UnoRuntime.areSame(listener, o);
+      return UnoRuntime.areSame(listener, UNO.XInterface(o));
     }
 
     public String toString()

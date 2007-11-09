@@ -47,6 +47,7 @@ import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextField;
 import com.sun.star.text.XTextRange;
 import com.sun.star.uno.UnoRuntime;
+import com.sun.star.uno.XInterface;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertFormValue;
@@ -129,7 +130,7 @@ public final class FormFieldFactory
    */
   public static FormField createFormField(XTextDocument doc, Object textfield)
   {
-    return new TextFieldFormField(doc, textfield);
+    return new TextFieldFormField(doc, UNO.XInterface(textfield));
   }
 
   /**
@@ -930,11 +931,11 @@ public final class FormFieldFactory
    */
   private static class TextFieldFormField implements FormField
   {
-    private Object textfield;
+    private XInterface textfield;
 
     private XTextDocument doc;
 
-    public TextFieldFormField(XTextDocument doc, Object textfield)
+    public TextFieldFormField(XTextDocument doc, XInterface textfield)
     {
       this.textfield = textfield;
       this.doc = doc;
@@ -1000,7 +1001,7 @@ public final class FormFieldFactory
 
     public boolean equals(Object b)
     {
-      return UnoRuntime.areSame(textfield, b);
+      return UnoRuntime.areSame(textfield, UNO.XInterface(b));
     }
 
     public int compareTo(Object arg0)

@@ -463,7 +463,7 @@ public class DispatchHandler
       boolean alreadyRegistered = false;
       Iterator iter = statusListener.iterator();
       while (iter.hasNext())
-        if (UnoRuntime.areSame(iter.next(), listener))
+        if (UnoRuntime.areSame(UNO.XInterface(iter.next()), listener))
           alreadyRegistered = true;
 
       if (!alreadyRegistered) statusListener.add(listener);
@@ -481,7 +481,7 @@ public class DispatchHandler
     {
       Iterator iter = statusListener.iterator();
       while (iter.hasNext())
-        if (UnoRuntime.areSame(iter.next(), listener)) iter.remove();
+        if (UnoRuntime.areSame(UNO.XInterface(iter.next()), listener)) iter.remove();
     }
 
     /*

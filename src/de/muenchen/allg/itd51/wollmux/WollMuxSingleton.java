@@ -69,6 +69,7 @@ import com.sun.star.ui.XUIConfigurationManager;
 import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
+import com.sun.star.uno.XInterface;
 import com.sun.star.util.XChangesBatch;
 
 import de.muenchen.allg.afid.UNO;
@@ -541,7 +542,7 @@ public class WollMuxSingleton implements XPALProvider
     Iterator i = registeredPALChangeListener.iterator();
     while (i.hasNext())
     {
-      Object l = i.next();
+      XInterface l = UNO.XInterface(i.next());
       if (UnoRuntime.areSame(l, listener)) return;
     }
     registeredPALChangeListener.add(listener);
@@ -562,7 +563,7 @@ public class WollMuxSingleton implements XPALProvider
     Iterator i = registeredPALChangeListener.iterator();
     while (i.hasNext())
     {
-      Object l = i.next();
+      XInterface l = UNO.XInterface(i.next());
       if (UnoRuntime.areSame(l, listener)) i.remove();
     }
   }
@@ -1102,7 +1103,7 @@ public class WollMuxSingleton implements XPALProvider
    */
   public static class HashableComponent
   {
-    private Object compo;
+    private XComponent compo;
 
     public HashableComponent(XComponent compo)
     {
