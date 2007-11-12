@@ -216,6 +216,13 @@ public class TextDocumentModel
   private HashSet /* of String */invisibleGroups;
 
   /**
+   * Der Vorschaumodus ist standardmäßig immer gesetzt - ist dieser Modus nicht
+   * gesetzt, so werden in den Formularfeldern des Dokuments nur die Feldnamen
+   * in spitzen Klammern angezeigt.
+   */
+  private boolean formFieldPreviewMode;
+
+  /**
    * Kann über setPartOfMultiformDocument gesetzt werden und sollte dann true
    * enthalten, wenn das Dokument ein Teil eines Multiformdokuments ist.
    */
@@ -251,6 +258,7 @@ public class TextDocumentModel
     this.invisibleGroups = new HashSet();
     this.overrideFragMap = new HashMap();
     this.formModel = null;
+    this.formFieldPreviewMode = true;
 
     // Kommandobaum erzeugen (modified-Status dabei unberührt lassen):
     boolean modified = getDocumentModified();
@@ -1264,9 +1272,10 @@ public class TextDocumentModel
   }
 
   /**
-   * Setzt den Wert des WollMuxFormularfeldes fieldId auf value.
+   * Speichert den neuen Wert value zum Formularfeld fieldId im
+   * Formularwerte-Abschnitt in den persistenten Daten.
    * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * @author Matthias Benkmann, Christoph Lutz (D-III-ITD 5.1)
    */
   public void setFormFieldValue(String fieldId, String value)
   {
@@ -1305,22 +1314,72 @@ public class TextDocumentModel
   }
 
   /**
-   * Überträgt den aktuell gesetzten Wert des Formularfeldes mit der ID fieldID
-   * in die Formularfelder im Dokument.
+   * Im Vorschaumodus überträgt diese Methode den Formularwert zum Feldes
+   * fieldId aus dem persistenten Formularwerte-Abschnitt in die zugehörigen
+   * Formularfelder im Dokument, wobei zum Auflösen der TRAFO-Attribute
+   * ausschließlich die globalen Funktionen verwendet werden; Ist der
+   * Vorschaumodus nicht aktiv, so werden jeweils nur die Spaltennamen in
+   * spitzen Klammern angezeigt.
+   * 
+   * @param fieldId
+   *          Die ID des Formularfeldes bzw. des Formularfelder, die im Dokument
+   *          angepasst werden sollen.
+   */
+  public void updateFormFields(String fieldId)
+  {
+    updateFormFields(fieldId, WollMuxSingleton.getInstance()
+        .getGlobalFunctions());
+  }
+
+  /**
+   * Im Vorschaumodus überträgt diese Methode den Formularwert zum Feldes
+   * fieldId aus dem persistenten Formularwerte-Abschnitt in die zugehörigen
+   * Formularfelder im Dokument; Ist der Vorschaumodus nicht aktiv, so werden
+   * jeweils nur die Spaltennamen in spitzen Klammern angezeigt.
    * 
    * @param fieldId
    *          Die ID des Formularfeldes bzw. der Formularfelder, die im Dokument
    *          angepasst werden sollen.
    * @param funcLib
    *          Die Funktionsbibliothek, die zum Auflösen der TRAFO-Attribute der
-   *          Formularfelder verwendet werden sollen.
+   *          Formularfelder verwendet werden sollen. funcLib darf null sein,
+   *          dann werden die Formularwerte in jedem Fall untransformiert
+   *          gesetzt.
    */
   public void updateFormFields(String fieldId, FunctionLibrary funcLib)
   {
-    if (formFieldValues.containsKey(fieldId))
+    if (formFieldPreviewMode)
     {
-      String value = formFieldValues.get(fieldId).toString();
-      setFormFields(fieldId, funcLib, value);
+      String value = (String) formFieldValues.get(fieldId);
+      if (value != null) setFormFields(fieldId, funcLib, value);
+    }
+    else
+    {
+      setFormFields(fieldId, null, "<" + fieldId + ">");
+    }
+  }
+
+  /**
+   * Im Vorschaumodus überträgt diese Methode alle Formularwerte aus dem
+   * Formularwerte-Abschnitt der persistenten Daten in die zugehörigen
+   * Formularfelder im Dokument; Ist der Vorschaumodus nicht aktiv, so werden
+   * jeweils nur die Spaltennamen in spitzen Klammern angezeigt.
+   * 
+   * @param funcLib
+   *          Die Funktionsbibliothek, die zum Auflösen der TRAFO-Attribute der
+   *          Formularfelder verwendet werden sollen. funcLib darf null sein,
+   *          dann werden die Formularwerte in jedem Fall untransformiert
+   *          gesetzt.
+   */
+  private void updateAllFormFields(FunctionLibrary funcLib)
+  {
+    for (Iterator iter = formFieldValues.keySet().iterator(); iter.hasNext();)
+    {
+      String fieldId = (String) iter.next();
+      if (formFieldPreviewMode)
+        updateFormFields(fieldId, funcLib);
+      else
+        updateFormFields(fieldId, null);
     }
   }
 
@@ -1328,7 +1387,9 @@ public class TextDocumentModel
    * Setzt den Inhalt aller Formularfelder mit ID fieldId auf value.
    * 
    * @param funcLib
-   *          Funktionsbibliothek zum Berechnen von TRAFOs.
+   *          Funktionsbibliothek zum Berechnen von TRAFOs. funcLib darf null
+   *          sein, dann werden die Formularwerte in jedem Fall untransformiert
+   *          gesetzt.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void setFormFields(String fieldId, FunctionLibrary funcLib,
@@ -1343,9 +1404,11 @@ public class TextDocumentModel
    * formFields kann null sein, dann passiert nichts.
    * 
    * @param funcLib
-   *          Funktionsbibliothek zum Berechnen von TRAFOs.
+   *          Funktionsbibliothek zum Berechnen von TRAFOs. funcLib darf null
+   *          sein, dann werden die Formularwerte in jedem Fall untransformiert
+   *          gesetzt.
    * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * @author Matthias Benkmann, Christoph Lutz (D-III-ITD 5.1)
    */
   private void setFormFields(List formFields, FunctionLibrary funcLib,
       String value)
@@ -1367,18 +1430,21 @@ public class TextDocumentModel
   }
 
   /**
-   * Überträgt den aktuell gesetzten Wert des Formularfeldes mit der ID fieldID
-   * in die Formularfelder im Dokument, wobei zum Auflösen der TRAFO-Attribute
-   * ausschließlich die globalen Funktionen verwendet werden.
+   * Schaltet den Vorschaumodus für Formularfelder an oder aus - ist der
+   * Vorschaumodus aktiviert, so werden alle Formularfelder mit den zuvor
+   * gesetzten Formularwerten angezeigt, ist der Preview-Modus nicht aktiv, so
+   * werden nur die Spaltennamen in spitzen Klammern angezeigt.
    * 
-   * @param fieldId
-   *          Die ID des Formularfeldes bzw. des Formularfelder, die im Dokument
-   *          angepasst werden sollen.
+   * @param previewMode
+   *          true schaltet den Modus an, false schaltet auf den Vorschaumodus
+   *          zurück in dem die aktuell gesetzten Werte wieder angezeigt werden.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  public void updateFormFields(String fieldId)
+  public void setFormFieldsPreviewMode(boolean previewMode)
   {
-    updateFormFields(fieldId, WollMuxSingleton.getInstance()
-        .getGlobalFunctions());
+    this.formFieldPreviewMode = previewMode;
+    updateAllFormFields(WollMuxSingleton.getInstance().getGlobalFunctions());
   }
 
   /**

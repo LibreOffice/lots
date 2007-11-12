@@ -426,8 +426,10 @@ public final class FormFieldFactory
     /**
      * Diese Methode belegt den Wert des Formularfeldes im Dokument mit dem
      * neuen Inhalt value; ist das Formularfeld mit einer TRAFO belegt, so wird
-     * vor dem setzen des neuen Inhaltes die TRAFO-Funktion ausgeführt und der
-     * neu berechnete Wert stattdessen eingefügt.
+     * vor dem setzen des neuen Inhaltes die entsprechende TRAFO-Funktion aus
+     * der Funktionsbibliothek funcLib ausgeführt und der neu berechnete Wert
+     * stattdessen eingefügt. Ist funcLib == null, so wird in jedem Fall nur der
+     * untransformierte Wert value eingefügt.
      * 
      * @param value
      */
@@ -528,10 +530,11 @@ public final class FormFieldFactory
     public void setValue(String value, FunctionLibrary funcLib)
     {
       // ggf. TRAFO durchführen
-      value = DocumentCommandInterpreter.getOptionalTrafoValue(
-          value,
-          cmd,
-          funcLib);
+      if (funcLib != null)
+        value = DocumentCommandInterpreter.getOptionalTrafoValue(
+            value,
+            cmd,
+            funcLib);
 
       // md5-Wert bestimmen und setzen:
       String md5 = getMD5HexRepresentation(value);

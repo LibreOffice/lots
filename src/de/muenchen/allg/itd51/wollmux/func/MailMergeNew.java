@@ -235,7 +235,7 @@ public class MailMergeNew
           mod.collectNonWollMuxFormFields();
           previewButton.setText(VORSCHAU);
           previewMode = false;
-          //TODO showFieldNames();
+          mod.setFormFieldsPreviewMode(false);
         }
         else
         {
@@ -243,6 +243,7 @@ public class MailMergeNew
           previewButton.setText("<Feldname>");
           previewMode = true;
           //TODO updatePreviewFields();
+          mod.setFormFieldsPreviewMode(true);          
         }
       }
         });
