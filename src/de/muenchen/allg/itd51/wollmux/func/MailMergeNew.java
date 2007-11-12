@@ -1676,7 +1676,7 @@ public class MailMergeNew
     
       public void notifyEvent(com.sun.star.document.EventObject event)
       {  
-        if (event.EventName.equals("OnSaveAsDone") && UnoRuntime.areSame(event.Source, calcDoc))
+        if (event.EventName.equals("OnSaveAsDone") && UnoRuntime.areSame(UNO.XInterface(event.Source), calcDoc))
         {
           javax.swing.SwingUtilities.invokeLater(new Runnable() {
             public void run() {
