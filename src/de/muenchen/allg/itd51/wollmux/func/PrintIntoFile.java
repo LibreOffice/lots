@@ -28,9 +28,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import javax.swing.JButton;
@@ -40,12 +38,12 @@ import javax.swing.WindowConstants;
 
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.beans.UnknownPropertyException;
-import com.sun.star.beans.XPropertyChangeListener;
-import com.sun.star.beans.XPropertySet;
-import com.sun.star.beans.XPropertySetInfo;
-import com.sun.star.beans.XVetoableChangeListener;
+import com.sun.star.container.NoSuchElementException;
 import com.sun.star.container.XEnumeration;
+import com.sun.star.container.XEnumerationAccess;
+import com.sun.star.container.XIndexAccess;
 import com.sun.star.container.XNameAccess;
+import com.sun.star.container.XNamed;
 import com.sun.star.lang.WrappedTargetException;
 import com.sun.star.style.XStyleFamiliesSupplier;
 import com.sun.star.style.XStyleLoader;
@@ -53,11 +51,13 @@ import com.sun.star.text.TextContentAnchorType;
 import com.sun.star.text.XText;
 import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
+import com.sun.star.text.XTextRange;
 import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.itd51.wollmux.Logger;
+import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
 
 /**
@@ -68,12 +68,6 @@ import de.muenchen.allg.itd51.wollmux.XPrintModel;
 public class PrintIntoFile
 {
   /**
-   * Name des Properties in dem der Seitenoffset für das nächste anzuhängende Dokument
-   * gespeichert ist.
-   */
-  private static final String PROP_PAGENUMBEROFFSET = "PrintIntoFile_PageNumberOffset";
-  
-  /**
    * Präfix, das vor den Namen des angelegten temporären Verzeichnisses gesetzt wird.
    */
   private static final String TEMP_DIR_PREFIX = "wollmux-seriendruck-";
@@ -82,10 +76,8 @@ public class PrintIntoFile
    * Hängt das zu pmod gehörige TextDocument an das im Property
    * PrintIntoFile_OutputDocument gespeicherte XTextDocument an. Falls
    * noch kein solches Property existiert, wird ein leeres Dokument angelegt.
-   * Als Offset für Seitennummern wird das Property PrintIntoFile_PageNumberOffset verwendet.
-   * @throws Exception
+   * @throws Exception falls was schief geht.
    * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TODO Testen
    */
   public static void printIntofile(XPrintModel pmod) throws Exception
   {
@@ -100,10 +92,9 @@ public class PrintIntoFile
     {
       outputDoc = UNO.XTextDocument(UNO.loadComponentFromURL("private:factory/swriter", true, true));
       pmod.setPropertyValue("PrintIntoFile_OutputDocument", outputDoc);
-      pmod.setPropertyValue(PROP_PAGENUMBEROFFSET, new Integer(0));
     }
     
-    appendToFile(outputDoc, pmod.getTextDocument(), firstAppend, pmod);
+    appendToFile(outputDoc, pmod.getTextDocument(), firstAppend);
   }
   
   /**
@@ -112,12 +103,10 @@ public class PrintIntoFile
    *        etwas an das Gesamtdokument angehängt wird. In diesem Fall 
    *        werden die Formate aus inputDoc zuerst nach outputDoc übertragen und es
    *        wird kein Zeilenumbruch eingefügt. 
-   * @param docProps weitere Properties zur Steuerung des Anhängens werden hieraus gelesen und
-   *        hier rein geschrieben (z.B. {@link #PROP_PAGENUMBEROFFSET}).
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
-  public static void appendToFile(XTextDocument outputDoc, XTextDocument inputDoc, boolean firstAppend, XPropertySet docProps)
+  public static void appendToFile(XTextDocument outputDoc, XTextDocument inputDoc, boolean firstAppend)
   {
     File[] dest = new File[]{null, null}; //dest[0] ist das temp. Verzeichnis, dest[1] die temp. Datei darin
     try{
@@ -149,12 +138,33 @@ public class PrintIntoFile
         UNO.setProperty(cursor, "PageDescName", pageStyleName);
         /** Format-->Absatz-->Textfluss-->Umbrüche--> Checkbox "mit
          Seitenvorlage" --> Seitennummer 1 (Seitennummer mit 1 beginnen nach
-         dem Seitenumbruch) */
+         dem Seitenumbruch) 
+         ACHTUNG! OOo lässt ungerade Seitennummern nur auf wirklich ungeraden
+         Seiten zu. Ist die betreffende Seite eine gerade Seite, so wird durch
+         das Setzen von PageNumberOffset auf 1 eine leere Seite davor eingefügt!
+         Siehe dazu auch den Kommentar weiter unten bei pageNumberOffset*/
         UNO.setProperty(cursor, "PageNumberOffset", new Short((short)1));
       }
       
+      /**
+       * OOo lässt nicht zu, dass eine Seite mit gerader realer Nummer eine
+       * ungerade Seitenummer bekommt (durch einen Seitenumbruch mit gesetztem
+       * PageNumberOffset (wie wir ihn ein Stück weiter oben eingefügt haben).
+       * Wird dies doch getan, dann fügt OOo eine leere Seiten, die zwar
+       * gezählt, aber nicht angezeigt wird. Es ist also wichtig das pageNumberOffset
+       * so wie hier nach dem Einfügen des Seitenumbruchs zu berechnen, weil
+       * der eine eingefügte Seitenumbruch evtl. die Seitenanzahl um 2 steigen lässt.
+       */
+      int pageNumberOffset = ((Number)UNO.getProperty(outputDoc.getCurrentController(), "PageCount")).intValue();
+      --pageNumberOffset; //Die gerade eben angehängte Seite darf nicht mitgezählt werden.
+      
       String[] frameNames = UNO.XTextFramesSupplier(outputDoc).getTextFrames().getElementNames();
       String[] imageNames = UNO.XTextGraphicObjectsSupplier(outputDoc).getGraphicObjects().getElementNames();
+      XIndexAccess shapes = UNO.XIndexAccess(UNO.XDrawPageSupplier(outputDoc).getDrawPage());
+      Set oids = new HashSet(shapes.getCount());
+      int shapeCount = shapes.getCount();
+      for (int i = 0; i < shapeCount; ++i) 
+        oids.add(UnoRuntime.generateOid(shapes.getByIndex(i)));
       
       /**
        *  Einfügen des 2. Dokuments
@@ -165,30 +175,22 @@ public class PrintIntoFile
        * paragraph works as expected.
        */
       XTextCursor cursor = text.createTextCursorByRange(text.getEnd());
+      Logger.debug2("================= OID dump VOR insert ==================");
+      dumpOids(outputDoc);
       UNO.XDocumentInsertable(cursor).insertDocumentFromURL(url, new PropertyValue[] {});
-      
-      int pageNumberOffset = 0;
-      try
-      {
-        Integer pNO = (Integer)docProps.getPropertyValue(PROP_PAGENUMBEROFFSET);
-        pageNumberOffset = pNO.intValue();
-      }
-      catch (UnknownPropertyException e)
-      {
-        Logger.error(e);
-      }
+      Logger.debug2("================= OID dump NACH insert ==================");
+      dumpOids(outputDoc);
       
       if (!firstAppend)
       {
-        fixPageAnchoredObjects(UNO.XTextFramesSupplier(outputDoc).getTextFrames(), frameNames, pageNumberOffset);
-        fixPageAnchoredObjects(UNO.XTextGraphicObjectsSupplier(outputDoc).getGraphicObjects(), imageNames, pageNumberOffset);
+        //fixPageAnchoredObjects(UNO.XTextFramesSupplier(outputDoc).getTextFrames(), frameNames, pageNumberOffset);
+        //fixPageAnchoredObjects(UNO.XTextGraphicObjectsSupplier(outputDoc).getGraphicObjects(), imageNames, pageNumberOffset);
+        fixPageAnchoredObjects(shapes, oids, pageNumberOffset);
       }
-
-      /**
-       * Neuen PageNumberOffset speichern.
-       */
-      pageNumberOffset = ((Number)UNO.getProperty(outputDoc.getCurrentController(), "PageCount")).intValue();
-      UNO.setProperty(docProps, PROP_PAGENUMBEROFFSET, new Integer(pageNumberOffset));
+      
+      int pageCount = ((Number)UNO.getProperty(outputDoc.getCurrentController(), "PageCount")).intValue();
+      pageCount -= pageNumberOffset;
+      fixPageCountFields(UNO.XTextFieldsSupplier(outputDoc).getTextFields(), pageCount);
     }
     catch(Exception x)
     {
@@ -197,6 +199,48 @@ public class PrintIntoFile
     finally{
       try{dest[1].delete();}catch(Exception x){}
       try{dest[0].delete();}catch(Exception x){}
+    }
+  }
+
+  private static void dumpOids(XTextDocument outputDoc) throws Exception
+  {
+    //TODO if (!WollMuxFiles.isDebugMode()) return;
+    XIndexAccess shapes = UNO.XIndexAccess(UNO.XDrawPageSupplier(outputDoc).getDrawPage());
+    int shapeCount = shapes.getCount();
+    for (int i = 0; i < shapeCount; ++i)
+    {
+      Object ob = shapes.getByIndex(i);
+      XNamed named = UNO.XNamed(ob);
+      String name = "<Unknown>";
+      if (named != null) name = named.getName();
+      Logger.debug2(name+" -> "+UnoRuntime.generateOid(ob));
+    }
+    
+  }
+  
+  /**
+   * Ersetzt alle TextFields des Typs PageCount in textFields durch den Wert
+   * pageCount.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TODO Testen
+   * @throws WrappedTargetException 
+   * @throws NoSuchElementException sollte nie geworfen werden
+   */
+  private static void fixPageCountFields(XEnumerationAccess textFields, int pageCount) throws NoSuchElementException, WrappedTargetException
+  {
+    String pc = ""+pageCount;
+    XEnumeration enu = textFields.createEnumeration();
+    while (enu.hasMoreElements())
+    {
+      Object textfield = enu.nextElement();
+      //Der eigentlich redundante Test auf das Property NumberingType ist eine Optimierung,
+      //da supportsService sehr langsam ist.
+      if (UNO.getProperty(textfield, "NumberingType") != null 
+          && UNO.supportsService(textfield, "com.sun.star.text.textfield.PageCount"))
+      {
+        XTextRange range = UNO.XTextContent(textfield).getAnchor();
+        range.setString(pc);
+      }
     }
   }
 
@@ -234,6 +278,52 @@ public class PrintIntoFile
       }
     }
   }
+  
+  /**
+   * Addiert auf die AnchorPageNo Property aller Objekte aus objects, deren OID nicht
+   * in oids enthalten ist den Wert pageNumberOffset.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED
+   */
+  private static void fixPageAnchoredObjects(XIndexAccess objects, Set oids, int pageNumberOffset)
+  {
+    int count = objects.getCount();
+    for (int i = 0; i < count; ++i)
+    {
+      try{
+        Object ob = objects.getByIndex(i);
+        XNamed named = UNO.XNamed(ob);
+        String name = "<Unknown>";
+        if (named != null) name = named.getName();
+        if (!oids.contains(UnoRuntime.generateOid(ob)))
+        {
+          if (TextContentAnchorType.AT_PAGE.equals(UNO.getProperty(ob, "AnchorType")))
+          {
+            int oldPageNo = ((Number)UNO.getProperty(ob, "AnchorPageNo")).intValue();
+            int newPageNo = oldPageNo + pageNumberOffset;
+            Logger.debug2("Verschiebe \""+name+"\" von Seite "+oldPageNo+" nach Seite "+newPageNo);
+            Object afterMovePageNo = UNO.setProperty(ob, "AnchorPageNo", new Short((short)newPageNo)); 
+            if (null == afterMovePageNo || ((Number)afterMovePageNo).intValue() != newPageNo)
+            {
+              Logger.error("Kann AnchorPageNo von Objekt #\""+i+"\" nicht auf "+newPageNo+" setzen");
+            }
+          }
+          else
+          {
+            Logger.debug2("Verschiebe \""+name+"\" NICHT, weil zwar neu dazugekommen, aber nicht an der Seite verankert");
+          }
+        }
+        else
+        {
+          Logger.debug2("Verschiebe \""+name+"\" NICHT, weil nicht neu dazugekommen");
+        }
+      }catch(Exception x) {
+        Logger.error(x);
+      }
+    }
+  }
+
 
   /**
    * Speichert inputDoc in einer temporären Datei und liefert eine UNO-taugliche URL zu
@@ -276,12 +366,11 @@ public class PrintIntoFile
     dest[1] = new File(dest[0], "serienbrief.odt");
     String url = UNO.getParsedUNOUrl(dest[1].toURI().toURL().toExternalForm()).Complete;
     
-    PropertyValue[] arguments = new PropertyValue[]{new PropertyValue(), new PropertyValue()};
-    arguments[0].Name = "Overwrite";
-    arguments[0].Value = Boolean.FALSE;
-    arguments[1].Name = "FilterName"; //found in /opt/openoffice.org/share/registry/modules/org/openoffice/TypeDetection/Filter/fcfg_writer_filters.xcu
-    arguments[1].Value = "StarOffice XML (Writer)";
-    UNO.XStorable(inputDoc).storeToURL(url, arguments);
+    UnoProps arguments = new UnoProps();
+    arguments.setPropertyValue("Overwrite", Boolean.FALSE);
+    //FilterName setzen auskommentiert, damit OOo automatisch den besten Filter wählt
+    arguments.setPropertyValue("FilterName", "writer8"); //found in /opt/openoffice.org/share/registry/modules/org/openoffice/TypeDetection/Filter/fcfg_writer_filters.xcu
+    UNO.XStorable(inputDoc).storeToURL(url, arguments.getProps());
     return url;
   }
 
@@ -297,16 +386,17 @@ public class PrintIntoFile
     SwingUtilities.invokeAndWait(new Runnable(){
       public void run()
       {
+        final XTextDocument[] doc = new XTextDocument[]{null};
+        final boolean[] firstAppend = new boolean[]{true};
+
         JFrame myFrame = new JFrame("PrintIntoFile");
         myFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         myFrame.addWindowListener(new WindowAdapter()
         {
-          public void windowClosing(WindowEvent e) {synchronized(done){done[0] = true; done.notifyAll();} }
+          public void windowClosing(WindowEvent e) {
+            try{ UNO.XCloseable(doc[0]).close(true);}catch(Exception x){}
+            synchronized(done){done[0] = true; done.notifyAll();} }
         });
-        
-        final XTextDocument[] doc = new XTextDocument[]{null};
-        final MyXPropertySet docProps = new MyXPropertySet();
-        final boolean[] firstAppend = new boolean[]{true};
         
         myFrame.setLayout(new GridLayout(1,2));
         JButton button = new JButton("Neues Gesamtdokument");
@@ -319,7 +409,6 @@ public class PrintIntoFile
               doc[0] = null;
             }
             firstAppend[0] = true;
-            docProps.setPropertyValue(PROP_PAGENUMBEROFFSET, new Integer(0));
             try{ doc[0] = UNO.XTextDocument(UNO.loadComponentFromURL("private:factory/swriter", true, true));}catch(Exception x){}
           }});
         myFrame.add(button);
@@ -359,7 +448,7 @@ public class PrintIntoFile
              */
             if (inputDoc == null) inputDoc = doc[0];
             
-            appendToFile(doc[0], inputDoc, firstAppend[0], docProps );
+            appendToFile(doc[0], inputDoc, firstAppend[0] );
             firstAppend[0] = false;
           }});
         myFrame.add(button);
@@ -382,43 +471,6 @@ public class PrintIntoFile
     }
     
     System.exit(0);
-  }
-  
-  public static class MyXPropertySet implements XPropertySet
-  {
-    Map map = new HashMap();
-    
-    public XPropertySetInfo getPropertySetInfo()
-    {
-      return null;
-    }
-
-    public void setPropertyValue(String arg0, Object arg1)
-    {
-      map.put(arg0, arg1);
-    }
-
-    public Object getPropertyValue(String arg0)
-    {
-      return map.get(arg0);
-    }
-
-    public void addPropertyChangeListener(String arg0, XPropertyChangeListener arg1) throws UnknownPropertyException, WrappedTargetException
-    {
-    }
-
-    public void removePropertyChangeListener(String arg0, XPropertyChangeListener arg1) throws UnknownPropertyException, WrappedTargetException
-    {
-    }
-
-    public void addVetoableChangeListener(String arg0, XVetoableChangeListener arg1) throws UnknownPropertyException, WrappedTargetException
-    {
-    }
-
-    public void removeVetoableChangeListener(String arg0, XVetoableChangeListener arg1) throws UnknownPropertyException, WrappedTargetException
-    {
-    }
-    
   }
 
 }
