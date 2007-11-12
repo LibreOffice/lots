@@ -42,6 +42,7 @@ import com.sun.star.frame.FrameSearchFlag;
 import com.sun.star.frame.XController;
 import com.sun.star.frame.XFrame;
 import com.sun.star.lang.EventObject;
+import com.sun.star.lang.XMultiServiceFactory;
 import com.sun.star.text.XBookmarksSupplier;
 import com.sun.star.text.XDependentTextField;
 import com.sun.star.text.XTextContent;
@@ -1030,8 +1031,8 @@ public class TextDocumentModel
       iter = documentCommands.draftOnlyIterator();
     if (SachleitendeVerfuegung.BLOCKNAME_SLV_NOT_IN_ORIGINAL.equals(blockName))
       iter = documentCommands.notInOriginalIterator();
-     if(SachleitendeVerfuegung.BLOCKNAME_SLV_ORIGINAL_ONLY.equals(blockName))
-     iter = documentCommands.originalOnlyIterator();
+    if (SachleitendeVerfuegung.BLOCKNAME_SLV_ORIGINAL_ONLY.equals(blockName))
+      iter = documentCommands.originalOnlyIterator();
 
     while (iter.hasNext())
     {
@@ -1192,9 +1193,29 @@ public class TextDocumentModel
    */
   public void insertMailMergeFieldAtCursorPosition(String name)
   {
-    getViewCursor().setString("<" + name + ">");
-    getViewCursor().collapseToEnd();
-    // FIXME: insertMailMergeFieldAtCursorPosition(String name)
+    name = name.trim();
+    if (name.length() > 0)
+      try
+      {
+        XMultiServiceFactory factory = UNO.XMultiServiceFactory(doc);
+        XDependentTextField field = UNO.XDependentTextField(factory
+            .createInstance("com.sun.star.text.TextField.Database"));
+        XPropertySet master = UNO.XPropertySet(factory
+            .createInstance("com.sun.star.text.FieldMaster.Database"));
+        UNO.setProperty(master, "DataBaseName", "DataBase");
+        UNO.setProperty(master, "DataTableName", "Table");
+        UNO.setProperty(master, "DataColumnName", name);
+        UNO.setProperty(field, "Content", "<" + name + ">");
+        field.attachTextFieldMaster(master);
+
+        XTextCursor vc = getViewCursor();
+        vc.getText().insertTextContent(vc, field, true);
+        vc.collapseToEnd();
+      }
+      catch (java.lang.Exception e)
+      {
+        Logger.error(e);
+      }
   }
 
   /**
