@@ -299,7 +299,7 @@ public class TextDocumentModel
    * 
    * @return der Dokument-Kommandobaum dieses Dokuments.
    */
-  public DocumentCommands getDocumentCommands()
+  synchronized public DocumentCommands getDocumentCommands()
   {
     return documentCommands;
   }
@@ -311,7 +311,7 @@ public class TextDocumentModel
    * GROUPS-Erweiterung) und dann alle Dokumentkommandos des Kommandobaumes in
    * der Reihenfolge, die DocumentCommandTree.depthFirstIterator(false) liefert.
    */
-  public Iterator visibleElementsIterator()
+  synchronized public Iterator visibleElementsIterator()
   {
     Vector visibleElements = new Vector();
     for (Iterator iter = documentCommands.setGroupsIterator(); iter.hasNext();)
@@ -474,7 +474,7 @@ public class TextDocumentModel
    * 
    * @param idToFormFields
    */
-  public void setIDToFormFields(HashMap idToFormFields)
+  synchronized public void setIDToFormFields(HashMap idToFormFields)
   {
     this.idToFormFields = idToFormFields;
   }
@@ -493,7 +493,7 @@ public class TextDocumentModel
    * @return eine vollständige Zuordnung von Feld IDs zu den aktuellen
    *         Vorbelegungen im Dokument.
    */
-  public HashMap getIDToPresetValue()
+  synchronized public HashMap getIDToPresetValue()
   {
     HashMap idToPresetValue = new HashMap();
 
@@ -576,7 +576,7 @@ public class TextDocumentModel
   /**
    * Liefert true, wenn das Dokument Serienbrieffelder enthält, ansonsten false.
    */
-  public boolean hasMailMergeFields()
+  synchronized public boolean hasMailMergeFields()
   {
     try
     {
@@ -623,7 +623,7 @@ public class TextDocumentModel
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
-  public void collectNonWollMuxFormFields()
+  synchronized public void collectNonWollMuxFormFields()
   {
     idToTextFieldFormFields.clear();
 
@@ -668,7 +668,7 @@ public class TextDocumentModel
    * 
    * @return
    */
-  public String[] getFragUrls()
+  synchronized public String[] getFragUrls()
   {
     return fragUrls;
   }
@@ -677,7 +677,7 @@ public class TextDocumentModel
    * Über diese Methode kann der openDocument-Eventhandler die Liste der mit
    * einem insertContent-Kommando zu öffnenden frag-urls speichern.
    */
-  public void setFragUrls(String[] fragUrls)
+  synchronized public void setFragUrls(String[] fragUrls)
   {
     this.fragUrls = fragUrls;
   }
@@ -698,7 +698,7 @@ public class TextDocumentModel
    *           Ersetzungsregel sind, dann entsteht eine Ersetzungskette, die
    *           nicht zugelassen ist.
    */
-  public void setOverrideFrag(String fragId, String newFragId)
+  synchronized public void setOverrideFrag(String fragId, String newFragId)
       throws OverrideFragChainException
   {
     if (overrideFragMap.containsKey(newFragId))
@@ -734,7 +734,7 @@ public class TextDocumentModel
    * werden soll und durch ein WM(CMD 'overrideFrag'...)-Kommando gesetzt wurde,
    * oder fragId (also sich selbst), wenn keine Überschreibung definiert ist.
    */
-  public String getOverrideFrag(String fragId)
+  synchronized public String getOverrideFrag(String fragId)
   {
     if (overrideFragMap.containsKey(fragId))
       return overrideFragMap.get(fragId).toString();
@@ -748,7 +748,7 @@ public class TextDocumentModel
    * 
    * @param max
    */
-  public void setCurrentFormularMax4000(FormularMax4000 max)
+  synchronized public void setCurrentFormularMax4000(FormularMax4000 max)
   {
     currentMax4000 = max;
   }
@@ -759,7 +759,7 @@ public class TextDocumentModel
    * 
    * @return
    */
-  public FormularMax4000 getCurrentFormularMax4000()
+  synchronized public FormularMax4000 getCurrentFormularMax4000()
   {
     return currentMax4000;
   }
@@ -770,7 +770,7 @@ public class TextDocumentModel
    * 
    * @param max
    */
-  public void setCurrentMailMergeNew(MailMergeNew max)
+  synchronized public void setCurrentMailMergeNew(MailMergeNew max)
   {
     currentMM = max;
   }
@@ -781,7 +781,7 @@ public class TextDocumentModel
    * 
    * @return
    */
-  public MailMergeNew getCurrentMailMergeNew()
+  synchronized public MailMergeNew getCurrentMailMergeNew()
   {
     return currentMM;
   }
@@ -793,7 +793,7 @@ public class TextDocumentModel
    * @return true, wenn das Dokument eine Vorlage ist oder wie eine Vorlage
    *         behandelt werden soll, ansonsten false.
    */
-  public boolean isTemplate()
+  synchronized public boolean isTemplate()
   {
     if (type != null)
     {
@@ -822,7 +822,7 @@ public class TextDocumentModel
    *         Dokument keine URL besitzt und es sich damit um eine Vorlage
    *         handelt.
    */
-  public boolean hasURL()
+  synchronized public boolean hasURL()
   {
     return doc.getURL() != null && !doc.getURL().equals("");
   }
@@ -837,7 +837,7 @@ public class TextDocumentModel
    * @return Liefert true, wenn das Dokument vom Typ formDocument ist ansonsten
    *         false.
    */
-  public boolean isFormDocument()
+  synchronized public boolean isFormDocument()
   {
     return (type != null && type.equalsIgnoreCase("formDocument"));
   }
@@ -847,12 +847,12 @@ public class TextDocumentModel
    * 
    * @return Liefert true, wenn das Dokument Teil eines Multiformdokuments ist.
    */
-  public boolean isPartOfMultiformDocument()
+  synchronized public boolean isPartOfMultiformDocument()
   {
     return partOfMultiform;
   }
 
-  public void setPartOfMultiformDocument(boolean partOfMultiform)
+  synchronized public void setPartOfMultiformDocument(boolean partOfMultiform)
   {
     this.partOfMultiform = partOfMultiform;
   }
@@ -865,7 +865,7 @@ public class TextDocumentModel
    * @return true, wenn das Dokument ein Formular mit einer gültigen
    *         Formularbeschreibung ist, ansonsten false.
    */
-  public boolean hasFormDescriptor()
+  synchronized public boolean hasFormDescriptor()
   {
     return getFormDescription().count() != 0;
   }
@@ -874,7 +874,7 @@ public class TextDocumentModel
    * Setzt den Typ des Dokuments auf type und speichert den Wert persistent im
    * Dokument ab.
    */
-  public void setType(String type)
+  synchronized public void setType(String type)
   {
     this.type = type;
 
@@ -896,7 +896,7 @@ public class TextDocumentModel
    * cmd.getType(), wenn nicht bereits ein type gesetzt ist. Ansonsten wird das
    * Kommando ignoriert.
    */
-  public void setType(DocumentCommand.SetType cmd)
+  synchronized public void setType(DocumentCommand.SetType cmd)
   {
     if (type == null) this.type = cmd.getType();
   }
@@ -911,7 +911,7 @@ public class TextDocumentModel
    *          sein und in einem Abschnitt "Druckfunktionen" in der wollmux.conf
    *          definiert sein muss.
    */
-  public void addPrintFunction(String functionName)
+  synchronized public void addPrintFunction(String functionName)
   {
     printFunctions.add(functionName);
     storePrintFunctions();
@@ -939,7 +939,7 @@ public class TextDocumentModel
    *          der Name der Druckfunktion, die aus der Menge gelöscht werden
    *          soll.
    */
-  public void removePrintFunction(String functionName)
+  synchronized public void removePrintFunction(String functionName)
   {
     printFunctions.remove(functionName);
     storePrintFunctions();
@@ -998,7 +998,7 @@ public class TextDocumentModel
   /**
    * Liefert eine Menge mit den Namen der aktuell gesetzten Druckfunktionen.
    */
-  public Set getPrintFunctions()
+  synchronized public Set getPrintFunctions()
   {
     return printFunctions;
   }
@@ -1007,7 +1007,7 @@ public class TextDocumentModel
    * Liefert ein HashSet mit den Namen (Strings) aller als unsichtbar markierten
    * Sichtbarkeitsgruppen.
    */
-  public HashSet getInvisibleGroups()
+  synchronized public HashSet getInvisibleGroups()
   {
     return invisibleGroups;
   }
@@ -1029,8 +1029,8 @@ public class TextDocumentModel
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  public void setPrintBlocksProps(String blockName, boolean visible,
-      boolean showHighlightColor)
+  synchronized public void setPrintBlocksProps(String blockName,
+      boolean visible, boolean showHighlightColor)
   {
     Iterator iter = new HashSet().iterator();
     if (SachleitendeVerfuegung.BLOCKNAME_SLV_ALL_VERSIONS.equals(blockName))
@@ -1082,7 +1082,7 @@ public class TextDocumentModel
    *         dieses Dokuments ermöglicht. Der Iterator kann auch keine Elemente
    *         enthalten.
    */
-  public Iterator getDraftOnlyBlocksIterator()
+  synchronized public Iterator getDraftOnlyBlocksIterator()
   {
     return documentCommands.draftOnlyIterator();
   }
@@ -1095,7 +1095,7 @@ public class TextDocumentModel
    *         Dokuments ermöglicht. Der Iterator kann auch keine Elemente
    *         enthalten.
    */
-  public Iterator getAllVersionsBlocksIterator()
+  synchronized public Iterator getAllVersionsBlocksIterator()
   {
     return documentCommands.allVersionsIterator();
   }
@@ -1109,7 +1109,7 @@ public class TextDocumentModel
    *         setJumpMark-Dokumentkommandos dieses Dokuments enthält oder null
    *         falls kein solches Dokumentkommando vorhanden ist.
    */
-  public SetJumpMark getFirstJumpMark()
+  synchronized public SetJumpMark getFirstJumpMark()
   {
     return documentCommands.getFirstJumpMark();
   }
@@ -1122,7 +1122,7 @@ public class TextDocumentModel
    *         Controller (oder auch kein ViewCursor) für das Dokument verfügbar
    *         ist.
    */
-  public XTextCursor getViewCursor()
+  synchronized public XTextCursor getViewCursor()
   {
     if (UNO.XModel(doc) == null) return null;
     XTextViewCursorSupplier suppl = UNO.XTextViewCursorSupplier(UNO.XModel(doc)
@@ -1137,7 +1137,7 @@ public class TextDocumentModel
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public void removeNonWMBookmarks()
+  synchronized public void removeNonWMBookmarks()
   {
     XBookmarksSupplier bmSupp = UNO.XBookmarksSupplier(doc);
     XNameAccess bookmarks = bmSupp.getBookmarks();
@@ -1168,7 +1168,7 @@ public class TextDocumentModel
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
-  public void deForm()
+  synchronized public void deForm()
   {
     XBookmarksSupplier bmSupp = UNO.XBookmarksSupplier(doc);
     XNameAccess bookmarks = bmSupp.getBookmarks();
@@ -1201,7 +1201,7 @@ public class TextDocumentModel
    * Wert für fieldId gesetzt wurde. Das Serienbrieffeld wird im WollMux
    * registriert und kann damit sofort verwendet werden.
    */
-  public void insertMailMergeFieldAtCursorPosition(String fieldId)
+  synchronized public void insertMailMergeFieldAtCursorPosition(String fieldId)
   {
     if (fieldId.length() > 0)
       try
@@ -1248,7 +1248,7 @@ public class TextDocumentModel
    * 
    * @author Matthias Benkmann, Christoph Lutz (D-III-ITD 5.1)
    */
-  public ConfigThingy getFormDescription()
+  synchronized public ConfigThingy getFormDescription()
   {
     if (formularConf == null)
     {
@@ -1271,7 +1271,7 @@ public class TextDocumentModel
    *          wird die Formularbeschreibungsnotiz gelöscht.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public void setFormDescription(ConfigThingy conf)
+  synchronized public void setFormDescription(ConfigThingy conf)
   {
     if (conf != null)
     {
@@ -1293,7 +1293,7 @@ public class TextDocumentModel
    * 
    * @author Matthias Benkmann, Christoph Lutz (D-III-ITD 5.1)
    */
-  public void setFormFieldValue(String fieldId, String value)
+  synchronized public void setFormFieldValue(String fieldId, String value)
   {
     formFieldValues.put(fieldId, value);
     persistentData.setData(DATA_ID_FORMULARWERTE, getFormFieldValues());
@@ -1341,7 +1341,7 @@ public class TextDocumentModel
    *          Die ID des Formularfeldes bzw. des Formularfelder, die im Dokument
    *          angepasst werden sollen.
    */
-  public void updateFormFields(String fieldId)
+  synchronized public void updateFormFields(String fieldId)
   {
     updateFormFields(fieldId, WollMuxSingleton.getInstance()
         .getGlobalFunctions());
@@ -1362,7 +1362,8 @@ public class TextDocumentModel
    *          dann werden die Formularwerte in jedem Fall untransformiert
    *          gesetzt.
    */
-  public void updateFormFields(String fieldId, FunctionLibrary funcLib)
+  synchronized public void updateFormFields(String fieldId,
+      FunctionLibrary funcLib)
   {
     if (formFieldPreviewMode)
     {
@@ -1457,7 +1458,7 @@ public class TextDocumentModel
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  public void setFormFieldsPreviewMode(boolean previewMode)
+  synchronized public void setFormFieldsPreviewMode(boolean previewMode)
   {
     this.formFieldPreviewMode = previewMode;
     updateAllFormFields(WollMuxSingleton.getInstance().getGlobalFunctions());
@@ -1471,7 +1472,7 @@ public class TextDocumentModel
    * @param fieldId
    *          Die ID des Formularfeldes, das angesprungen werden soll.
    */
-  public void focusFormField(String fieldId)
+  synchronized public void focusFormField(String fieldId)
   {
     FormField field = null;
     List formFields = (List) idToTextFieldFormFields.get(fieldId);
@@ -1528,7 +1529,7 @@ public class TextDocumentModel
    * 
    * @return Die FormularGUI des Formulardokuments oder null
    */
-  public FormModel getFormModel()
+  synchronized public FormModel getFormModel()
   {
     return formModel;
   }
@@ -1541,7 +1542,7 @@ public class TextDocumentModel
    * @param formGUI
    *          Die zu diesem Dokument zugehörige formGUI
    */
-  public void setFormModel(FormModel formModel)
+  synchronized public void setFormModel(FormModel formModel)
   {
     this.formModel = formModel;
   }
@@ -1552,7 +1553,7 @@ public class TextDocumentModel
    * 
    * @return
    */
-  public XFrame getFrame()
+  synchronized public XFrame getFrame()
   {
     try
     {
@@ -1571,7 +1572,7 @@ public class TextDocumentModel
    * @return Liefert die Gesamtseitenzahl des Dokuments oder 0, wenn die
    *         Seitenzahl nicht bestimmt werden kann.
    */
-  public int getPageCount()
+  synchronized public int getPageCount()
   {
     try
     {
@@ -1590,7 +1591,7 @@ public class TextDocumentModel
    * 
    * @param visible
    */
-  public void setWindowVisible(boolean visible)
+  synchronized public void setWindowVisible(boolean visible)
   {
     XFrame frame = getFrame();
     if (frame != null)
@@ -1605,7 +1606,7 @@ public class TextDocumentModel
    * 
    * @param state
    */
-  public boolean getDocumentModified()
+  synchronized public boolean getDocumentModified()
   {
     try
     {
@@ -1622,7 +1623,7 @@ public class TextDocumentModel
    * 
    * @param state
    */
-  public void setDocumentModified(boolean state)
+  synchronized public void setDocumentModified(boolean state)
   {
     try
     {
@@ -1640,7 +1641,7 @@ public class TextDocumentModel
    * 
    * @param state
    */
-  public void setLockControllers(boolean lock)
+  synchronized public void setLockControllers(boolean lock)
   {
     try
     {
@@ -1669,7 +1670,8 @@ public class TextDocumentModel
    * @param docWidth
    * @param docHeight
    */
-  public void setWindowPosSize(int docX, int docY, int docWidth, int docHeight)
+  synchronized public void setWindowPosSize(int docX, int docY, int docWidth,
+      int docHeight)
   {
     try
     {
@@ -1757,7 +1759,7 @@ public class TextDocumentModel
    *          der Konfigurationsabschnitt, der X, Y, WIDHT, HEIGHT und ZOOM als
    *          direkte Kinder enthält.
    */
-  public void setWindowViewSettings(ConfigThingy settings)
+  synchronized public void setWindowViewSettings(ConfigThingy settings)
   {
     // Fenster holen (zum setzen der Fensterposition und des Zooms)
     XWindow window = null;
@@ -1824,7 +1826,7 @@ public class TextDocumentModel
    * @param zoom
    * @throws ConfigurationErrorException
    */
-  public void setDocumentZoom(ConfigThingy conf)
+  synchronized public void setDocumentZoom(ConfigThingy conf)
   {
     try
     {
@@ -1853,7 +1855,7 @@ public class TextDocumentModel
    *           Formularbeschreibung ist nicht vollständig oder kann nicht
    *           geparst werden.
    */
-  public void setFormCommand(DocumentCommand.Form formCmd)
+  synchronized public void setFormCommand(DocumentCommand.Form formCmd)
       throws ConfigurationErrorException
   {
     if (hasFormDescriptor()) return;
@@ -1904,8 +1906,8 @@ public class TextDocumentModel
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  public void printWithPageRange(short numberOfCopies, short pageRangeType,
-      String pageRangeValue) throws PrintFailedException
+  synchronized public void printWithPageRange(short numberOfCopies,
+      short pageRangeType, String pageRangeValue) throws PrintFailedException
   {
     HashMap props = new HashMap();
     props.put(PrintModelProps.PROP_PAGE_RANGE_TYPE, new Short(pageRangeType));
@@ -1927,7 +1929,8 @@ public class TextDocumentModel
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  public void printWithProps(HashMap props) throws PrintFailedException
+  synchronized public void printWithProps(HashMap props)
+      throws PrintFailedException
   {
     try
     {
@@ -2000,7 +2003,7 @@ public class TextDocumentModel
    * TextDocumentModels standardmäßig macht), so wird nach dem close() auch
    * automatisch die dispose()-Methode aufgerufen.
    */
-  public void close()
+  synchronized public void close()
   {
     // Damit OOo vor dem Schließen eines veränderten Dokuments den
     // save/dismiss-Dialog anzeigt, muss die suspend()-Methode aller
@@ -2064,7 +2067,7 @@ public class TextDocumentModel
    * zugeordneten Dialogen auf und gibt den Speicher des TextDocumentModels
    * frei.
    */
-  public void dispose()
+  synchronized public void dispose()
   {
     if (currentMax4000 != null) currentMax4000.dispose();
     currentMax4000 = null;
@@ -2081,7 +2084,7 @@ public class TextDocumentModel
    * wird, ohne den Zusatz " - OpenOffice.org Writer" oder "NoTitle", wenn der
    * Titel nicht bestimmt werden kann. TextDocumentModel('<title>')
    */
-  public String getTitle()
+  synchronized public String getTitle()
   {
     String title = "NoTitle";
     try
@@ -2103,7 +2106,7 @@ public class TextDocumentModel
    * 
    * @see java.lang.Object#toString()
    */
-  public String toString()
+  synchronized public String toString()
   {
     return "doc('" + getTitle() + "')";
   }
@@ -2151,7 +2154,7 @@ public class TextDocumentModel
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  public XPrintModel createPrintModel(boolean useDocPrintFunctions)
+  synchronized public XPrintModel createPrintModel(boolean useDocPrintFunctions)
   {
     XPrintModel pmod = PrintModels.createPrintModel(this);
     if (useDocPrintFunctions)
