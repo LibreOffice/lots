@@ -1197,14 +1197,16 @@ public class TextDocumentModel
 
   /**
    * Fügt an Stelle der aktuellen Selektion ein Serienbrieffeld ein, das auf die
-   * Spalte name zugreift.
+   * Spalte fieldId zugreift und mit dem Wert "" vorbelegt ist, falls noch kein
+   * Wert für fieldId gesetzt wurde. Das Serienbrieffeld wird im WollMux
+   * registriert und kann damit sofort verwendet werden.
    */
-  public void insertMailMergeFieldAtCursorPosition(String name)
+  public void insertMailMergeFieldAtCursorPosition(String fieldId)
   {
-    name = name.trim();
-    if (name.length() > 0)
+    if (fieldId.length() > 0)
       try
       {
+        // Feld einfügen
         XMultiServiceFactory factory = UNO.XMultiServiceFactory(doc);
         XDependentTextField field = UNO.XDependentTextField(factory
             .createInstance("com.sun.star.text.TextField.Database"));
@@ -1212,13 +1214,27 @@ public class TextDocumentModel
             .createInstance("com.sun.star.text.FieldMaster.Database"));
         UNO.setProperty(master, "DataBaseName", "DataBase");
         UNO.setProperty(master, "DataTableName", "Table");
-        UNO.setProperty(master, "DataColumnName", name);
-        UNO.setProperty(field, "Content", "<" + name + ">");
+        UNO.setProperty(master, "DataColumnName", fieldId);
+        if (!formFieldPreviewMode)
+          UNO.setProperty(field, "Content", "<" + fieldId + ">");
         field.attachTextFieldMaster(master);
 
         XTextCursor vc = getViewCursor();
         vc.getText().insertTextContent(vc, field, true);
         vc.collapseToEnd();
+
+        // Feldwert mit leerem Inhalt vorbelegen
+        if (!formFieldValues.containsKey(fieldId))
+          setFormFieldValue(fieldId, "");
+
+        // Formularfeld bekanntmachen, damit es vom WollMux verwendet wird.
+        if (!idToTextFieldFormFields.containsKey(fieldId))
+          idToTextFieldFormFields.put(fieldId, new Vector());
+        List formFields = (List) idToTextFieldFormFields.get(fieldId);
+        formFields.add(FormFieldFactory.createFormField(doc, field));
+
+        // Ansicht des Formularfeldes aktualisieren:
+        updateFormFields(fieldId);
       }
       catch (java.lang.Exception e)
       {
