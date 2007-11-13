@@ -224,6 +224,7 @@ public class MailMergeNew
     final String VORSCHAU = "   Vorschau   ";
     button = new JButton(VORSCHAU);
     previewMode = false;
+    mod.setFormFieldsPreviewMode(previewMode); //TODO updatePreviewFields()
     final JButton previewButton = button;
     button.addActionListener(new ActionListener()
         {
@@ -235,7 +236,7 @@ public class MailMergeNew
           mod.collectNonWollMuxFormFields();
           previewButton.setText(VORSCHAU);
           previewMode = false;
-          mod.setFormFieldsPreviewMode(false);
+          mod.setFormFieldsPreviewMode(false);//TODO updatePreviewFields()
         }
         else
         {
