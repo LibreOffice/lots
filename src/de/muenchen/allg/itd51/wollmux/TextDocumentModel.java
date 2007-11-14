@@ -2167,4 +2167,89 @@ public class TextDocumentModel
     }
     return pmod;
   }
+  
+  /**
+   * Ersetzt die aktuelle Selektion (falls vorhanden) durch ein WollMux-Formularfeld mit
+   * ID id und der durch trafoConf definierten TRAFO. Das Formularfeld ist direkt einsetzbar, d.h.
+   * sobald diese Methode zurückkehrt, kann über setFormFieldValue(id,...) das Feld
+   * befüllt werden. Ist keine Selektion vorhanden, so tut die Funktion nichts.
+   * @param id die ID über die das Feld mit {@link #setFormFieldValue(String, String)} 
+   *        befüllt werden kann.
+   * @param trafoConf darf null sein, dann wird keine TRAFO gesetzt. Ansonsten ein ConfigThingy
+   *        mit dem Aufbau "Bezeichner( FUNKTIONSDEFINITION )", wobei Bezeichner ein beliebiger
+   *        Bezeichner ist und FUNKTIONSDEFINITION ein erlaubter Parameter für 
+   *        {@link de.muenchen.allg.itd51.wollmux.func.FunctionFactory#parse(ConfigThingy, FunctionLibrary, DialogLibrary, Map)},
+   *        d.h. der oberste Knoten von FUNKTIONSDEFINITION muss eine erlaubter Funktionsname,
+   *        z.B. "AND" sein.
+   *        Der Bezeichner wird NICHT als Name der TRAFO verwendet. Stattdessen wird ein
+   *        neuer eindeutiger TRAFO-Name generiert.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TODO Testen
+   */
+  synchronized public void replaceSelectionWithFormField(String id, ConfigThingy trafoConf)
+  {
+    /*
+     * ANMERKUNG: Der automatisch generierte Name sollte, um eindeutigkeit garantieren
+     * nach dem Prinzip  PRAEFIX_aktuelleZeitinMillisekunden_Zufallszahl aufgebaut werden,
+     * dann kann man sich Kollisionstests sparen, weil es praktisch nicht passieren kann,
+     * dass diese Funktion in der selben Millisekunde mehrfach aufgerufen werden kann UND
+     * der Generator die gleiche Zufallszahl ausspuckt. Falls ein Kollisionscheck mit
+     * vertretbarem Aufwand möglich ist, ist dieser natürlich vorzuziehen. 100%ig sicher ist
+     * besser als 99,9999% sicher.  
+     */
+    
+    /* ANMERKUNG: Beim Umschalten von Vorschau<->Nicht-vorschau werden ohnehin alle
+     * Felder durchgegangen und das Dokument verändert. Bei dieser Gelegenheit sollte man die
+     * Liste aller im Einsatz befindlichen TRAFOs aufsammeln und aus der Formularbeschreibung
+     * alle unbenutzten TRAFOs entfernen.
+     *   
+     * Anmerkungen hierzu:
+     * 
+     * - Um nicht unbeteiligte Funktionen zu erwischen (z.B. welche, die für insertValue
+     * verwendet werden), sollten nur solche Funktionen aus der Formularbeschreibung
+     * entfernt werden, die den Präfix für die obige autogenerierung haben, d.h. solche,
+     * die durch diese Funktion hier angelegt wurden.
+     * 
+     * - Ich habe zwar der FunctionLibrary eine remove() Methode hinzugefügt, dann ist mir
+     * aber klargeworden, dass es keinen Grund gibt, die Funktion aus der FunctionLibrary zu
+     * entfernen, da die FunctionLibrary ja nicht persistent ist. Es reicht vollkommen aus, die
+     * Funktion aus der Formularbeschreibungsnotiz zu entfernen.
+     */
+  }
+  
+  /**
+   * Falls die aktuelle Selektion genau ein Formularfeld enthält (die Selektion muss nicht
+   * bündig mit den Grenzen dieses Feldes sein, aber es darf kein zweites Formularfeld in der
+   * Selektion enthalten sein) und dieses eine TRAFO gesetzt hat, so wird die Definition dieser
+   * TRAFO als ConfigThingy zurückgeliefert, ansonsten null.
+   * @return null oder die Definition der TRAFO in der Form "TrafoName(FUNKTIONSDEFINITION)", 
+   * wobei TrafoName die Bezeichnung ist, unter der die TRAFO 
+   * mittels {@link #setTrafo(String, ConfigThingy)} modifiziert werden kann. 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TODO Testen
+   */
+  synchronized public ConfigThingy getFormFieldTrafoFromSelection()
+  {
+    return null;
+  }
+  
+  /**
+   * Ändert die Definition der TRAFO mit Name trafoName auf trafoConf. Die neue Definition
+   * wirkt sich sofort auf folgende {@link #setFormFieldValue(String, String)} Aufrufe aus.
+   * @param trafoConf ein ConfigThingy
+   *        mit dem Aufbau "Bezeichner( FUNKTIONSDEFINITION )", wobei Bezeichner ein beliebiger
+   *        Bezeichner ist und FUNKTIONSDEFINITION ein erlaubter Parameter für 
+   *        {@link de.muenchen.allg.itd51.wollmux.func.FunctionFactory#parse(ConfigThingy, FunctionLibrary, DialogLibrary, Map)},
+   *        d.h. der oberste Knoten von FUNKTIONSDEFINITION muss eine erlaubter Funktionsname,
+   *        z.B. "AND" sein.
+   *        Der Bezeichner wird NICHT verwendet. Der Name der TRAFO wird ausschließlich durch
+   *        trafoName festgelegt.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TODO Testen
+   */
+  synchronized public void setTrafo(String trafoName, ConfigThingy trafoConf)
+  {
+    
+  }
+  
 }
