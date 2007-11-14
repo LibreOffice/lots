@@ -12,6 +12,7 @@
 * 08.05.2006 | BNK | Fertig implementiert.
 * 26.09.2006 | BNK | +hasFunction()
 * 27.09.2006 | BNK | +getFunctionNames()
+* 15.11.2007 | BNK | +remove()
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -57,8 +58,7 @@ public class FunctionLibrary
 
   /**
    * Fügt func dieser Funktionsbibliothek unter dem Namen funcName hinzu.
-   * Eine bereits existierende Funthis.paramNames = new String[paramNames.length];
-      System.arraycopy(paramNames, 0, this.paramNames, 0, paramNames.length);ktion mit diesem Namen wird dabei ersetzt.
+   * Eine bereits existierende Funktion mit diesem Namen wird dabei ersetzt.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void add(String funcName, Function func)
@@ -80,6 +80,25 @@ public class FunctionLibrary
     Function func = (Function)mapIdToFunction.get(funcName);
     if (func == null && baselib != null) func = baselib.get(funcName);
     return func;
+  }
+  
+  /**
+   * Versucht, alle Funktionen namens funcName aus dieser und evtl, verketteter
+   * Funktionsbibliotheken zu entfernen.
+   * @return true, falls nach Ausführung des Befehls {@link #hasFunction(String)) für
+   *         funcName false zurückliefert, false sonst.
+   *         D.h. true wird geliefert, wenn 
+   *         alle Funktionen entfernt werden konnten. Falls false
+   *         zurückgeliefert wird, wurden evtl. manche, aber definitiv nicht alle Funktionen
+   *         entfernt. Falls von vorneherein keine Funktion funcName vorhanden war,
+   *         wird auch true geliefert.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public boolean remove(String funcName)
+  {
+    mapIdToFunction.remove(funcName);
+    if (baselib != null) return baselib.remove(funcName);
+    return true;
   }
   
   /**
