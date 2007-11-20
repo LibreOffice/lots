@@ -54,6 +54,7 @@ import com.sun.star.beans.PropertyValue;
 import com.sun.star.container.XEnumeration;
 import com.sun.star.container.XIndexAccess;
 import com.sun.star.container.XIndexContainer;
+import com.sun.star.document.XEventListener;
 import com.sun.star.form.FormButtonType;
 import com.sun.star.frame.XDispatch;
 import com.sun.star.frame.XDispatchProvider;
@@ -133,6 +134,12 @@ public class WollMuxSingleton implements XPALProvider
   private Vector registeredPALChangeListener;
 
   /**
+   * Enthält alle registrierten XEventListener, die bei Statusänderungen der
+   * Dokumentbearbeitung informiert werden.
+   */
+  private Vector registeredDocumentEventListener;
+
+  /**
    * Enthält eine Zuordnung von HashableComponent Objekten, die die
    * XTextDocumente repräsentieren, auf die zugehörigen TextDocumentModels
    */
@@ -174,6 +181,8 @@ public class WollMuxSingleton implements XPALProvider
     boolean successfulStartup = true;
 
     registeredPALChangeListener = new Vector();
+
+    registeredDocumentEventListener = new Vector();
 
     WollMuxFiles.setupWollMuxDir();
 
@@ -549,6 +558,32 @@ public class WollMuxSingleton implements XPALProvider
   }
 
   /**
+   * Diese Methode registriert einen XEventListener, der Nachrichten empfängt
+   * wenn sich der Status der Dokumentbearbeitung ändert (z.B. wenn ein Dokument
+   * vollständig bearbeitet/expandiert wurde). Die Methode ignoriert alle
+   * XEventListenener-Instanzen, die bereits registriert wurden.
+   * Mehrfachregistrierung der selben Instanz ist also nicht möglich.
+   * 
+   * Achtung: Die Methode darf nicht direkt von einem UNO-Service aufgerufen
+   * werden, sondern jeder Aufruf muss über den EventHandler laufen. Deswegen
+   * exportiert WollMuxSingleton auch nicht das XEventBroadcaster-Interface.
+   */
+  public void addDocumentEventListener(XEventListener listener)
+  {
+    Logger.debug2("WollMuxSingleton::addDocumentEventListener()");
+
+    if (listener == null) return;
+
+    Iterator i = registeredDocumentEventListener.iterator();
+    while (i.hasNext())
+    {
+      XInterface l = UNO.XInterface(i.next());
+      if (UnoRuntime.areSame(l, listener)) return;
+    }
+    registeredDocumentEventListener.add(listener);
+  }
+
+  /**
    * Diese Methode deregistriert einen XPALChangeEventListener wenn er bereits
    * registriert war.
    * 
@@ -561,6 +596,25 @@ public class WollMuxSingleton implements XPALProvider
   {
     Logger.debug2("WollMuxSingleton::removePALChangeEventListener()");
     Iterator i = registeredPALChangeListener.iterator();
+    while (i.hasNext())
+    {
+      XInterface l = UNO.XInterface(i.next());
+      if (UnoRuntime.areSame(l, listener)) i.remove();
+    }
+  }
+
+  /**
+   * Diese Methode deregistriert einen XEventListener wenn er bereits
+   * registriert war.
+   * 
+   * Achtung: Die Methode darf nicht direkt von einem UNO-Service aufgerufen
+   * werden, sondern jeder Aufruf muss über den EventHandler laufen. Deswegen
+   * exportiert WollMuxSingleton auch nicht das XEventBroadcaster-Interface.
+   */
+  public void removeDocumentEventListener(XEventListener listener)
+  {
+    Logger.debug2("WollMuxSingleton::removeDocumentEventListener()");
+    Iterator i = registeredDocumentEventListener.iterator();
     while (i.hasNext())
     {
       XInterface l = UNO.XInterface(i.next());
@@ -757,6 +811,18 @@ public class WollMuxSingleton implements XPALProvider
   public Iterator palChangeListenerIterator()
   {
     return registeredPALChangeListener.iterator();
+  }
+
+  /**
+   * Liefert einen Iterator auf alle registrierten XEventListener-Objekte, die
+   * über Änderungen am Status der Dokumentverarbeitung informiert werden
+   * sollen.
+   * 
+   * @return Iterator auf alle registrierten XEventListener-Objekte.
+   */
+  public Iterator documentEventListenerIterator()
+  {
+    return registeredDocumentEventListener.iterator();
   }
 
   /**
@@ -1273,6 +1339,12 @@ public class WollMuxSingleton implements XPALProvider
           // Verarbeitung von TextDocuments anstossen:
           WollMuxEventHandler.handleProcessTextDocument(doc);
         }
+      }
+      else
+      {
+        WollMuxEventHandler.handleNotifyDocumentEventListener(
+            "OnWollMuxProcessingFinished",
+            docEvent.Source);
       }
     }
 

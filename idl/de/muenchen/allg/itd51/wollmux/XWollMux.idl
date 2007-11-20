@@ -14,6 +14,7 @@
 #define __de_muenchen_allg_itd51_wollmux_XWollMux_idl__ 
 
 #include "XPALChangeEventBroadcaster.idl"
+#include <com/sun/star/document/XEventBroadcaster.idl>
  
 module de {  module muenchen {  module allg { module itd51 { module wollmux {
 
@@ -24,6 +25,28 @@ interface XWollMux
 {
 	// Methoden zum Registrieren/Deregistieren von XPALChangeEventListenern.
 	interface XPALChangeEventBroadcaster;
+
+    /**
+     * Die in diesem Interface beschriebenen Methoden registrieren bzw. deregistrieren
+     * enstprechende Listener vom Typ XEventListener, über die der WollMux
+     * über den Status der Dokumentbearbeitung informiert (z.B. wenn ein Dokument
+     * vollständig bearbeitet/expandiert wurde). Die register-Methode ignoriert alle
+     * XEventListenener-Instanzen, die bereits registriert wurden.
+     * Mehrfachregistrierung der selben Instanz sind also nicht möglich.
+     * 
+     * Tritt ein entstprechendes Ereignis ein, so erfolgt der Aufruf der
+     * entsprechenden Methoden XEventListener.notifyEvent(...) immer gleichzeitig
+     * (d.h. für jeden Listener in einem eigenen Thread).
+     * 
+     * Der WollMux liefert derzeit folgende Events:
+     * 
+     * OnWollMuxProcessingFinished: Dieses Event wird erzeugt, wenn ein
+     * Textdokument nach dem Öffnen vollständig vom WollMux bearbeitet und
+     * expandiert wurde oder bei allen anderen Dokumenttypen direkt nach dem
+     * Öffnen. D.h. für jedes in OOo geöffnete Dokument erfolgt früher oder später
+     * ein solches Event.
+     */	
+	interface com::sun::star::document::XEventBroadcaster;
 
     /**
       Diese Methode setzt den aktuellen Absender der Persönlichen Absenderliste

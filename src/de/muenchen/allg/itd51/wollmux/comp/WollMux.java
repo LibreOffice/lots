@@ -24,6 +24,7 @@
 package de.muenchen.allg.itd51.wollmux.comp;
 
 import com.sun.star.beans.NamedValue;
+import com.sun.star.document.XEventListener;
 import com.sun.star.frame.DispatchDescriptor;
 import com.sun.star.frame.XDispatch;
 import com.sun.star.frame.XDispatchProvider;
@@ -234,6 +235,37 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
   }
 
   /**
+   * Diese Methode registriert einen Listener im WollMux, über den der WollMux
+   * über den Status der Dokumentbearbeitung informiert (z.B. wenn ein Dokument
+   * vollständig bearbeitet/expandiert wurde). Die Methode ignoriert alle
+   * XEventListenener-Instanzen, die bereits registriert wurden.
+   * Mehrfachregistrierung der selben Instanz ist also nicht möglich.
+   * 
+   * Tritt ein entstprechendes Ereignis ein, so erfolgt der Aufruf der
+   * entsprechenden Methoden XEventListener.notifyEvent(...) immer gleichzeitig
+   * (d.h. für jeden Listener in einem eigenen Thread).
+   * 
+   * Der WollMux liefert derzeit folgende Events:
+   * 
+   * OnWollMuxProcessingFinished: Dieses Event wird erzeugt, wenn ein
+   * Textdokument nach dem Öffnen vollständig vom WollMux bearbeitet und
+   * expandiert wurde oder bei allen anderen Dokumenttypen direkt nach dem
+   * Öffnen. D.h. für jedes in OOo geöffnete Dokument erfolgt früher oder später
+   * ein solches Event.
+   * 
+   * @param l
+   *          Der XEventListener, der bei Statusänderungen der
+   *          Dokumentbearbeitung informiert werden soll.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   * @see com.sun.star.document.XEventBroadcaster#addEventListener(com.sun.star.document.XEventListener)
+   */
+  public void addEventListener(XEventListener l)
+  {
+    WollMuxEventHandler.handleAddDocumentEventListener(l);
+  }
+
+  /**
    * Diese Methode deregistriert einen XPALChangeEventListener wenn er bereits
    * registriert war.
    * 
@@ -242,6 +274,21 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
   public void removePALChangeEventListener(XPALChangeEventListener l)
   {
     WollMuxEventHandler.handleRemovePALChangeEventListener(l);
+  }
+
+  /**
+   * Diese Methode deregistriert einen mit registerEventListener(XEventListener
+   * l) registrierten XEventListener.
+   * 
+   * @param l
+   *          der XEventListener, der deregistriert werden soll.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   * @see com.sun.star.document.XEventBroadcaster#removeEventListener(com.sun.star.document.XEventListener)
+   */
+  public void removeEventListener(XEventListener l)
+  {
+    WollMuxEventHandler.handleRemoveDocumentEventListener(l);
   }
 
   /**

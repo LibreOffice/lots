@@ -60,6 +60,7 @@ import com.sun.star.beans.PropertyValue;
 import com.sun.star.container.NoSuchElementException;
 import com.sun.star.container.XEnumeration;
 import com.sun.star.container.XNamed;
+import com.sun.star.document.XEventListener;
 import com.sun.star.form.binding.InvalidBindingStateException;
 import com.sun.star.frame.DispatchResultEvent;
 import com.sun.star.frame.XDispatch;
@@ -1056,6 +1057,12 @@ public class WollMuxEventHandler
         throw new WollMuxFehlerException("Fehler bei der Dokumentbearbeitung.",
             e);
       }
+
+      // Registrierte XEventListener (etwas später) informieren, dass die
+      // Dokumentbearbeitung fertig ist.
+      handleNotifyDocumentEventListener(
+          "OnWollMuxProcessingFinished",
+          model.doc);
 
       // ContextChanged auslösen, damit die Dispatches aktualisiert werden.
       try
@@ -2599,6 +2606,158 @@ public class WollMuxEventHandler
     public String toString()
     {
       return this.getClass().getSimpleName() + "(#" + listener.hashCode() + ")";
+    }
+  }
+
+  // *******************************************************************************************
+
+  /**
+   * Erzeugt ein neues WollMuxEvent zum Registrieren des übergebenen
+   * XEventListeners und wird vom WollMux-Service aufgerufen.
+   * 
+   * @param listener
+   *          der zu registrierende XEventListener.
+   */
+  public static void handleAddDocumentEventListener(XEventListener listener)
+  {
+    handle(new OnAddDocumentEventListener(listener));
+  }
+
+  private static class OnAddDocumentEventListener extends BasicEvent
+  {
+    private XEventListener listener;
+
+    public OnAddDocumentEventListener(XEventListener listener)
+    {
+      this.listener = listener;
+    }
+
+    protected void doit()
+    {
+      WollMuxSingleton.getInstance().addDocumentEventListener(listener);
+    }
+
+    public boolean requires(Object o)
+    {
+      return UnoRuntime.areSame(listener, UNO.XInterface(o));
+    }
+
+    public String toString()
+    {
+      return this.getClass().getSimpleName() + "(#" + listener.hashCode() + ")";
+    }
+  }
+
+  // *******************************************************************************************
+
+  /**
+   * Erzeugt ein neues WollMuxEvent, das den übergebenen XEventListener zu
+   * deregistriert.
+   * 
+   * @param listener
+   *          der zu deregistrierende XEventListener
+   */
+  public static void handleRemoveDocumentEventListener(XEventListener listener)
+  {
+    handle(new OnRemoveDocumentEventListener(listener));
+  }
+
+  private static class OnRemoveDocumentEventListener extends BasicEvent
+  {
+    private XEventListener listener;
+
+    public OnRemoveDocumentEventListener(XEventListener listener)
+    {
+      this.listener = listener;
+    }
+
+    protected void doit()
+    {
+      WollMuxSingleton.getInstance().removeDocumentEventListener(listener);
+    }
+
+    public String toString()
+    {
+      return this.getClass().getSimpleName() + "(#" + listener.hashCode() + ")";
+    }
+  }
+
+  // *******************************************************************************************
+
+  /**
+   * Über dieses Event werden alle registrierten DocumentEventListener
+   * (XEventListener-Objekte) über Statusänderungen der Dokumentbearbeitung
+   * informiert
+   * 
+   * @param eventName
+   *          Name des Events
+   * @param source
+   *          Das von der Statusänderung betroffene Dokument (üblicherweise eine
+   *          XComponent)
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  public static void handleNotifyDocumentEventListener(String eventName,
+      Object source)
+  {
+    handle(new OnNotifyDocumentEventListener(eventName, source));
+  }
+
+  private static class OnNotifyDocumentEventListener extends BasicEvent
+  {
+    private String eventName;
+
+    private Object source;
+
+    public OnNotifyDocumentEventListener(String eventName, Object source)
+    {
+      this.eventName = eventName;
+      this.source = source;
+    }
+
+    protected void doit()
+    {
+      final com.sun.star.document.EventObject eventObject = new com.sun.star.document.EventObject();
+      eventObject.Source = source;
+      eventObject.EventName = eventName;
+
+      Iterator i = WollMuxSingleton.getInstance()
+          .documentEventListenerIterator();
+      while (i.hasNext())
+      {
+        Logger.debug2("notifying XEventListener (event '" + eventName + "')");
+        try
+        {
+          final XEventListener listener = (XEventListener) i.next();
+          new Thread()
+          {
+            public void run()
+            {
+              try
+              {
+                listener.notifyEvent(eventObject);
+              }
+              catch (java.lang.Exception x)
+              {
+              }
+            }
+          }.start();
+        }
+        catch (java.lang.Exception e)
+        {
+          i.remove();
+        }
+      }
+    }
+
+    public String toString()
+    {
+      return this.getClass().getSimpleName()
+             + "('"
+             + eventName
+             + "', #"
+             + source.hashCode()
+             + ")";
     }
   }
 
