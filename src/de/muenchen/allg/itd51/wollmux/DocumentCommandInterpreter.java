@@ -200,8 +200,8 @@ public class DocumentCommandInterpreter
     model.getDocumentCommands().update();
 
     // Jetzt wird der Dokumenttyp formDocument gesetzt, um das Dokument als
-    // Formulardokument auszuzeichnen.
-    if (model.hasFormDescriptor()) model.setType("formDocument");
+    // Formulardokument auszuzeichnen, falls es ein Formularfenster definiert.
+    if (model.hasFormGUIWindow()) model.setType("formDocument");
 
     // Document-Modified auf false setzen, da nur wirkliche
     // Benutzerinteraktionen den Modified-Status beeinflussen sollen.
@@ -1251,7 +1251,7 @@ public class DocumentCommandInterpreter
       cmd.setErrorState(false);
       try
       {
-        model.setFormCommand(cmd);
+        model.addToCurrentFormDescription(cmd);
       }
       catch (ConfigurationErrorException e)
       {

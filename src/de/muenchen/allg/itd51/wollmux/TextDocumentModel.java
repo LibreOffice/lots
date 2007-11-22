@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 import java.util.regex.Pattern;
@@ -66,8 +67,10 @@ import de.muenchen.allg.itd51.wollmux.DocumentCommand.OptionalHighlightColorProv
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.SetJumpMark;
 import de.muenchen.allg.itd51.wollmux.FormFieldFactory.FormField;
 import de.muenchen.allg.itd51.wollmux.PrintModels.PrintModelProps;
+import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
 import de.muenchen.allg.itd51.wollmux.dialog.FormController;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
+import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.func.MailMergeNew;
 
@@ -236,6 +239,26 @@ public class TextDocumentModel
   private HashMap /* of String */overrideFragMap;
 
   /**
+   * Enthält den Kontext für die Funktionsbibliotheken und Dialogbibliotheken
+   * dieses Dokuments.
+   */
+  private HashMap functionContext;
+
+  /**
+   * Enthält die Dialogbibliothek mit den globalen und dokumentlokalen
+   * Dialogfunktionen oder null, wenn die Dialogbibliothek noch nicht benötigt
+   * wurde.
+   */
+  private DialogLibrary dialogLib;
+
+  /**
+   * Enthält die Funktionsbibliothek mit den globalen und dokumentlokalen
+   * Funktionen oder null, wenn die Funktionsbilbiothek noch nicht benötigt
+   * wurde.
+   */
+  private FunctionLibrary functionLib;
+
+  /**
    * Erzeugt ein neues TextDocumentModel zum XTextDocument doc und sollte nie
    * direkt aufgerufen werden, da neue TextDocumentModels über das
    * WollMuxSingleton (siehe WollMuxSingleton.getTextDocumentModel()) erzeugt
@@ -257,6 +280,7 @@ public class TextDocumentModel
     this.formFieldValues = new HashMap();
     this.invisibleGroups = new HashSet();
     this.overrideFragMap = new HashMap();
+    this.functionContext = new HashMap();
     this.formModel = null;
     this.formFieldPreviewMode = true;
 
@@ -385,42 +409,39 @@ public class TextDocumentModel
   }
 
   /**
-   * Wertet den String-Inhalt value der Formularbeschreibungsnotiz aus, die von
-   * der Form "WM( Formular(...) )" sein muss und fügt diese der
-   * Gesamtbeschreibung hinzu.
+   * Parst den String value als ConfigThingy und überträgt alle in diesem
+   * enthaltenen Formular-Abschnitte in die übergebene Formularbeschreibung
+   * formularConf.
    * 
-   * @param formularConf
-   *          Wurzelknoten (WM) dem die neue Formularbeschreibung hinzugefügt
-   *          werden soll.
+   * @param formDesc
+   *          Wurzelknoten WM einer Formularbeschreibung dem die neuen
+   *          Formular-Abschnitte hinzugefügt werden soll.
    * @param value
-   *          darf null sein und wird in diesem Fall ignoriert, darf aber kein
-   *          leerer String sein, sonst Fehler.
+   *          darf null oder leer sein und wird in diesem Fall ignoriert; value
+   *          muss sich fehlerfrei als ConfigThingy parsen lassen, sonst gibt's
+   *          eine Fehlermeldung und es wird nichts hinzugefügt.
    */
-  private static void parseFormDescription(ConfigThingy formularConf,
-      String value)
+  private static void addToFormDescription(ConfigThingy formDesc, String value)
   {
-    if (value == null) return;
+    if (value == null || value.length() == 0) return;
 
+    ConfigThingy conf = new ConfigThingy("");
     try
     {
-      ConfigThingy conf = new ConfigThingy("", null, new StringReader(value));
-      // Formular-Abschnitt auswerten:
-      try
-      {
-        ConfigThingy formular = conf.get("WM").get("Formular");
-        formularConf.addChild(formular);
-      }
-      catch (NodeNotFoundException e)
-      {
-        Logger.error(
-            "Die Formularbeschreibung enthält keinen Abschnitt 'Formular'",
-            e);
-      }
+      conf = new ConfigThingy("", null, new StringReader(value));
     }
     catch (java.lang.Exception e)
     {
       Logger.error("Die Formularbeschreibung ist fehlerhaft", e);
       return;
+    }
+
+    // enthaltene Formular-Abschnitte übertragen:
+    ConfigThingy formulare = conf.query("Formular");
+    for (Iterator iter = formulare.iterator(); iter.hasNext();)
+    {
+      ConfigThingy formular = (ConfigThingy) iter.next();
+      formDesc.addChild(formular);
     }
   }
 
@@ -637,6 +658,20 @@ public class TextDocumentModel
         {
           XDependentTextField tf = UNO.XDependentTextField(xenu.nextElement());
           if (tf == null) continue;
+
+          // Workaround für bug
+          // http://www.openoffice.org/issues/show_bug.cgi?id=83873: Der Fehler
+          // tritt auf wenn ein Textfeld vom Typ css.TextField.Annotation
+          // eingefügt wurde und hier auf den TextFieldMaster des Feldes
+          // zugegriffen wird. Ich vermute einen Initialisierungfehler in der
+          // Implementierung des Notizfeldes. Durch den Ausschluss aller
+          // Textfelder mit einer Property Author erreiche ich, dass auf
+          // jeden Fall alle Notizfelder ausgefiltert werden. Uns interessieren
+          // an dieser Stelle ohnehin nur die Textfelder vom Typ
+          // css.TextField.Database, die keine Property Author besitzen.
+          Object author = UNO.getProperty(tf, "Author");
+          if (author != null) continue;
+
           XPropertySet master = tf.getTextFieldMaster();
           String column = (String) UNO.getProperty(master, "DataColumnName");
           if (column != null && column.length() > 0)
@@ -858,16 +893,13 @@ public class TextDocumentModel
   }
 
   /**
-   * Liefert true, wenn das Dokument ein Formular mit einer gültigen
-   * Formularbeschreibung enthält und damit die Dokumentkommandos des
-   * Formularsystems bearbeitet werden sollen.
-   * 
-   * @return true, wenn das Dokument ein Formular mit einer gültigen
-   *         Formularbeschreibung ist, ansonsten false.
+   * Liefert true, wenn das Dokument eine nicht leere Formularbeschreibung mit
+   * einem Fenster-Abschnitt enthält. In diesem Fall soll das die FormGUI
+   * gestartet werden.
    */
-  synchronized public boolean hasFormDescriptor()
+  synchronized public boolean hasFormGUIWindow()
   {
-    return getFormDescription().count() != 0;
+    return getFormDescription().query("Formular").query("Fenster").count() != 0;
   }
 
   /**
@@ -1243,8 +1275,9 @@ public class TextDocumentModel
   }
 
   /**
-   * Liefert die aktuelle Formularbeschreibung; Wurde die Formularbeschreibung
-   * bis jetzt noch nicht eingelesen, so wird sie spätestens jetzt eingelesen.
+   * Liefert die aktuelle Formularbeschreibung des Dokuments; Wurde die
+   * Formularbeschreibung bis jetzt noch nicht eingelesen, so wird sie
+   * spätestens jetzt eingelesen.
    * 
    * @author Matthias Benkmann, Christoph Lutz (D-III-ITD 5.1)
    */
@@ -1254,11 +1287,57 @@ public class TextDocumentModel
     {
       Logger.debug("Einlesen der Formularbeschreibung von " + this);
       formularConf = new ConfigThingy("WM");
-      parseFormDescription(formularConf, persistentData
+      addToFormDescription(formularConf, persistentData
           .getData(DATA_ID_FORMULARBESCHREIBUNG));
     }
 
     return formularConf;
+  }
+
+  /**
+   * Liefert einen Funktionen-Abschnitt der Formularbeschreibung, in dem die
+   * lokalen Auto-Funktionen abgelegt werden können. Besitzt die
+   * Formularbeschreibung keinen Funktionen-Abschnitt, so wird der
+   * Funktionen-Abschnitt und ggf. auch ein übergeordneter Formular-Abschnitt
+   * neu erzeugt.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  private ConfigThingy getFunktionenConf()
+  {
+    ConfigThingy formDesc = getFormDescription();
+    try
+    {
+      return formDesc.query("Formular").query("Funktionen").getLastChild();
+    }
+    catch (NodeNotFoundException e)
+    {
+      ConfigThingy funktionen = new ConfigThingy("Funktionen");
+      ConfigThingy formular;
+      try
+      {
+        formular = formDesc.query("Formular").getLastChild();
+      }
+      catch (NodeNotFoundException e1)
+      {
+        formular = new ConfigThingy("Formular");
+        formDesc.addChild(formular);
+      }
+      formular.addChild(funktionen);
+      return funktionen;
+    }
+  }
+
+  /**
+   * Speichert die aktuelle Formularbeschreibung, die immer mindestens aus einem
+   * WM-Knoten besteht in den persistenten Daten des Dokuments.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  private void storeCurrentFormDescription()
+  {
+    persistentData.setData(DATA_ID_FORMULARBESCHREIBUNG, getFormDescription()
+        .stringRepresentation());
   }
 
   /**
@@ -1276,8 +1355,7 @@ public class TextDocumentModel
     if (conf != null)
     {
       formularConf = conf;
-      persistentData.setData(DATA_ID_FORMULARBESCHREIBUNG, formularConf
-          .stringRepresentation());
+      storeCurrentFormDescription();
     }
     else
     {
@@ -1330,37 +1408,140 @@ public class TextDocumentModel
   }
 
   /**
-   * Im Vorschaumodus überträgt diese Methode den Formularwert zum Feldes
-   * fieldId aus dem persistenten Formularwerte-Abschnitt in die zugehörigen
-   * Formularfelder im Dokument, wobei zum Auflösen der TRAFO-Attribute
-   * ausschließlich die globalen Funktionen verwendet werden; Ist der
-   * Vorschaumodus nicht aktiv, so werden jeweils nur die Spaltennamen in
-   * spitzen Klammern angezeigt.
+   * Liefert den Kontext mit dem die dokumentlokalen Dokumentfunktionen beim
+   * Aufruf von getFunctionLibrary() und getDialogLibrary() erzeugt werden.
    * 
-   * @param fieldId
-   *          Die ID des Formularfeldes bzw. des Formularfelder, die im Dokument
-   *          angepasst werden sollen.
+   * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  synchronized public void updateFormFields(String fieldId)
+  synchronized public Map getFunctionContext()
   {
-    updateFormFields(fieldId, WollMuxSingleton.getInstance()
-        .getGlobalFunctions());
+    return functionContext;
+  }
+
+  /**
+   * Liefert die Funktionsbibliothek mit den globalen Funktionen des WollMux und
+   * den lokalen Funktionen dieses Dokuments.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  synchronized public FunctionLibrary getFunctionLibrary()
+  {
+    if (functionLib == null)
+    {
+      ConfigThingy formConf = new ConfigThingy("");
+      try
+      {
+        formConf = getFormDescription().get("Formular");
+      }
+      catch (NodeNotFoundException e)
+      {
+      }
+      functionLib = WollMuxFiles.parseFunctions(
+          formConf,
+          getDialogLibrary(),
+          functionContext,
+          WollMuxSingleton.getInstance().getGlobalFunctions());
+    }
+    return functionLib;
+  }
+
+  /**
+   * Liefert die eine Bibliothek mit den globalen Dialogfunktionen des WollMux
+   * und den lokalen Dialogfunktionen dieses Dokuments.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  synchronized public DialogLibrary getDialogLibrary()
+  {
+    if (dialogLib == null)
+    {
+      ConfigThingy formConf = new ConfigThingy("");
+      try
+      {
+        formConf = getFormDescription().get("Formular");
+      }
+      catch (NodeNotFoundException e)
+      {
+      }
+      dialogLib = WollMuxFiles.parseFunctionDialogs(formConf, WollMuxSingleton
+          .getInstance().getFunctionDialogs(), functionContext);
+    }
+    return dialogLib;
+  }
+
+  /**
+   * Erzeugt in der Funktionsbeschreibung eine neue Funktion mit einem
+   * automatisch generierten Namen, registriert sie in der Funktionsbibliothek,
+   * so dass diese sofort z.B. als TRAFO-Funktion genutzt werden kann und
+   * liefert den neuen generierten Funktionsnamen zurück oder null, wenn
+   * funcConf fehlerhaft ist.
+   * 
+   * Der automatisch generierte Name ist, nach dem Prinzip
+   * PRAEFIX_aktuelleZeitinMillisekunden_zahl aufgebaut. Es wird aber in jedem
+   * Fall garantiert, dass der neue Name eindeutig ist und nicht bereits in der
+   * Funktionsbibliothek vorkommt.
+   * 
+   * @param funcConf
+   *          Ein ConfigThingy mit dem Aufbau "Bezeichner( FUNKTIONSDEFINITION
+   *          )", wobei Bezeichner ein beliebiger Bezeichner ist und
+   *          FUNKTIONSDEFINITION ein erlaubter Parameter für
+   *          {@link de.muenchen.allg.itd51.wollmux.func.FunctionFactory#parse(ConfigThingy, FunctionLibrary, DialogLibrary, Map)},
+   *          d.h. der oberste Knoten von FUNKTIONSDEFINITION muss eine
+   *          erlaubter Funktionsname, z.B. "AND" sein. Der Bezeichner wird
+   *          NICHT als Name der TRAFO verwendet. Stattdessen wird ein neuer
+   *          eindeutiger TRAFO-Name generiert.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  private String addLocalAutofunction(ConfigThingy funcConf)
+  {
+    FunctionLibrary funcLib = getFunctionLibrary();
+    DialogLibrary dialogLib = getDialogLibrary();
+    Map context = getFunctionContext();
+
+    // eindeutigen Namen für die neue Autofunktion erzeugen:
+    Set currentFunctionNames = funcLib.getFunctionNames();
+    String name = null;
+    for (int i = 0; name == null || currentFunctionNames.contains(name); ++i)
+      name = "AUTOFUNCTION_" + System.currentTimeMillis() + "_" + i;
+
+    try
+    {
+      funcLib.add(name, FunctionFactory.parseChildren(
+          funcConf,
+          funcLib,
+          dialogLib,
+          context));
+
+      // Funktion zur Formularbeschreibung hinzufügen:
+      ConfigThingy betterNameFunc = new ConfigThingy(name);
+      for (Iterator iter = funcConf.iterator(); iter.hasNext();)
+      {
+        ConfigThingy func = (ConfigThingy) iter.next();
+        betterNameFunc.addChild(func);
+      }
+      getFunktionenConf().addChild(betterNameFunc);
+
+      storeCurrentFormDescription();
+      return name;
+    }
+    catch (ConfigurationErrorException e)
+    {
+      Logger.error(e);
+      return null;
+    }
   }
 
   /**
    * Im Vorschaumodus überträgt diese Methode den Formularwert zum Feldes
    * fieldId aus dem persistenten Formularwerte-Abschnitt in die zugehörigen
    * Formularfelder im Dokument; Ist der Vorschaumodus nicht aktiv, so werden
-   * jeweils nur die Spaltennamen in spitzen Klammern angezeigt.
+   * jeweils nur die Spaltennamen in spitzen Klammern angezeigt; Für die
+   * Auflösung der TRAFOs wird dabei die Funktionsbibliothek funcLib verwendet.
    * 
    * @param fieldId
    *          Die ID des Formularfeldes bzw. der Formularfelder, die im Dokument
    *          angepasst werden sollen.
-   * @param funcLib
-   *          Die Funktionsbibliothek, die zum Auflösen der TRAFO-Attribute der
-   *          Formularfelder verwendet werden sollen. funcLib darf null sein,
-   *          dann werden die Formularwerte in jedem Fall untransformiert
-   *          gesetzt.
    */
   synchronized public void updateFormFields(String fieldId,
       FunctionLibrary funcLib)
@@ -1377,6 +1558,23 @@ public class TextDocumentModel
   }
 
   /**
+   * Im Vorschaumodus überträgt diese Methode den Formularwert zum Feldes
+   * fieldId aus dem persistenten Formularwerte-Abschnitt in die zugehörigen
+   * Formularfelder im Dokument; Ist der Vorschaumodus nicht aktiv, so werden
+   * jeweils nur die Spaltennamen in spitzen Klammern angezeigt. Für die
+   * Auflösung der Trafos wird dabei die dokumentlokale Funktionsbibliothek
+   * verwendet, die getFunctionLibrary() zurückliefert.
+   * 
+   * @param fieldId
+   *          Die ID des Formularfeldes bzw. der Formularfelder, die im Dokument
+   *          angepasst werden sollen.
+   */
+  synchronized public void updateFormFields(String fieldId)
+  {
+    updateFormFields(fieldId, getFunctionLibrary());
+  }
+
+  /**
    * Im Vorschaumodus überträgt diese Methode alle Formularwerte aus dem
    * Formularwerte-Abschnitt der persistenten Daten in die zugehörigen
    * Formularfelder im Dokument; Ist der Vorschaumodus nicht aktiv, so werden
@@ -1388,15 +1586,12 @@ public class TextDocumentModel
    *          dann werden die Formularwerte in jedem Fall untransformiert
    *          gesetzt.
    */
-  private void updateAllFormFields(FunctionLibrary funcLib)
+  private void updateAllFormFields()
   {
     for (Iterator iter = formFieldValues.keySet().iterator(); iter.hasNext();)
     {
       String fieldId = (String) iter.next();
-      if (formFieldPreviewMode)
-        updateFormFields(fieldId, funcLib);
-      else
-        updateFormFields(fieldId, null);
+      updateFormFields(fieldId);
     }
   }
 
@@ -1461,7 +1656,7 @@ public class TextDocumentModel
   synchronized public void setFormFieldsPreviewMode(boolean previewMode)
   {
     this.formFieldPreviewMode = previewMode;
-    updateAllFormFields(WollMuxSingleton.getInstance().getGlobalFunctions());
+    updateAllFormFields();
   }
 
   /**
@@ -1843,39 +2038,37 @@ public class TextDocumentModel
   }
 
   /**
-   * Die Methode kopiert die Formularbeschreibung aus der Notiz von formCmd in
-   * die persistente Formularbeschreibung, wenn nicht bereits eine
-   * Formularbeschreibung existiert.
+   * Die Methode fügt die Formular-Abschnitte aus der Formularbeschreibung der
+   * Notiz von formCmd zur aktuellen Formularbeschreibung des Dokuments in den
+   * persistenten Daten hinzu und löscht die Notiz.
    * 
    * @param formCmd
-   *          Das formCmd, das die Notzi mit der hinzuzufügenden
-   *          Formularbeschreibung enthält.
+   *          Das formCmd, das die Notzi mit den hinzuzufügenden
+   *          Formular-Abschnitten einer Formularbeschreibung enthält.
    * @throws ConfigurationErrorException
    *           Die Notiz der Formularbeschreibung ist nicht vorhanden, die
    *           Formularbeschreibung ist nicht vollständig oder kann nicht
    *           geparst werden.
    */
-  synchronized public void setFormCommand(DocumentCommand.Form formCmd)
-      throws ConfigurationErrorException
+  synchronized public void addToCurrentFormDescription(
+      DocumentCommand.Form formCmd) throws ConfigurationErrorException
   {
-    if (hasFormDescriptor()) return;
-
     XTextRange range = formCmd.getTextRange();
 
     XTextContent annotationField = UNO.XTextContent(WollMuxSingleton
         .findAnnotationFieldRecursive(range));
     if (annotationField == null)
       throw new ConfigurationErrorException(
-          "Die Notiz mit der Formularbeschreibung fehlt.");
+          "Die zugehörige Notiz mit der Formularbeschreibung fehlt.");
 
     Object content = UNO.getProperty(annotationField, "Content");
     if (content == null)
       throw new ConfigurationErrorException(
-          "Die Notiz mit der Formularbeschreibung kann nicht gelesen werden.");
+          "Die zugehörige Notiz mit der Formularbeschreibung kann nicht gelesen werden.");
 
     // Formularbeschreibung übernehmen und persistent speichern:
-    parseFormDescription(getFormDescription(), content.toString());
-    setFormDescription(getFormDescription());
+    addToFormDescription(getFormDescription(), content.toString());
+    storeCurrentFormDescription();
 
     // Notiz löschen
     try
@@ -2167,89 +2360,118 @@ public class TextDocumentModel
     }
     return pmod;
   }
-  
+
   /**
-   * Ersetzt die aktuelle Selektion (falls vorhanden) durch ein WollMux-Formularfeld mit
-   * ID id und der durch trafoConf definierten TRAFO. Das Formularfeld ist direkt einsetzbar, d.h.
-   * sobald diese Methode zurückkehrt, kann über setFormFieldValue(id,...) das Feld
-   * befüllt werden. Ist keine Selektion vorhanden, so tut die Funktion nichts.
-   * @param id die ID über die das Feld mit {@link #setFormFieldValue(String, String)} 
-   *        befüllt werden kann.
-   * @param trafoConf darf null sein, dann wird keine TRAFO gesetzt. Ansonsten ein ConfigThingy
-   *        mit dem Aufbau "Bezeichner( FUNKTIONSDEFINITION )", wobei Bezeichner ein beliebiger
-   *        Bezeichner ist und FUNKTIONSDEFINITION ein erlaubter Parameter für 
-   *        {@link de.muenchen.allg.itd51.wollmux.func.FunctionFactory#parse(ConfigThingy, FunctionLibrary, DialogLibrary, Map)},
-   *        d.h. der oberste Knoten von FUNKTIONSDEFINITION muss eine erlaubter Funktionsname,
-   *        z.B. "AND" sein.
-   *        Der Bezeichner wird NICHT als Name der TRAFO verwendet. Stattdessen wird ein
-   *        neuer eindeutiger TRAFO-Name generiert.
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TODO Testen
+   * Ersetzt die aktuelle Selektion (falls vorhanden) durch ein
+   * WollMux-Formularfeld mit ID id und der durch trafoConf definierten TRAFO.
+   * Das Formularfeld ist direkt einsetzbar, d.h. sobald diese Methode
+   * zurückkehrt, kann über setFormFieldValue(id,...) das Feld befüllt werden.
+   * Ist keine Selektion vorhanden, so tut die Funktion nichts.
+   * 
+   * @param id
+   *          die ID über die das Feld mit
+   *          {@link #setFormFieldValue(String, String)} befüllt werden kann.
+   * @param trafoConf
+   *          darf null sein, dann wird keine TRAFO gesetzt. Ansonsten ein
+   *          ConfigThingy mit dem Aufbau "Bezeichner( FUNKTIONSDEFINITION )",
+   *          wobei Bezeichner ein beliebiger Bezeichner ist und
+   *          FUNKTIONSDEFINITION ein erlaubter Parameter für
+   *          {@link de.muenchen.allg.itd51.wollmux.func.FunctionFactory#parse(ConfigThingy, FunctionLibrary, DialogLibrary, Map)},
+   *          d.h. der oberste Knoten von FUNKTIONSDEFINITION muss eine
+   *          erlaubter Funktionsname, z.B. "AND" sein. Der Bezeichner wird
+   *          NICHT als Name der TRAFO verwendet. Stattdessen wird ein neuer
+   *          eindeutiger TRAFO-Name generiert.
+   * @author Matthias Benkmann (D-III-ITD 5.1) TODO Testen
    */
-  synchronized public void replaceSelectionWithFormField(String id, ConfigThingy trafoConf)
+  synchronized public void replaceSelectionWithFormField(String fieldId,
+      ConfigThingy trafoConf)
   {
-    /*
-     * ANMERKUNG: Der automatisch generierte Name sollte, um eindeutigkeit garantieren
-     * nach dem Prinzip  PRAEFIX_aktuelleZeitinMillisekunden_Zufallszahl aufgebaut werden,
-     * dann kann man sich Kollisionstests sparen, weil es praktisch nicht passieren kann,
-     * dass diese Funktion in der selben Millisekunde mehrfach aufgerufen werden kann UND
-     * der Generator die gleiche Zufallszahl ausspuckt. Falls ein Kollisionscheck mit
-     * vertretbarem Aufwand möglich ist, ist dieser natürlich vorzuziehen. 100%ig sicher ist
-     * besser als 99,9999% sicher.  
-     */
-    
-    /* ANMERKUNG: Beim Umschalten von Vorschau<->Nicht-vorschau werden ohnehin alle
-     * Felder durchgegangen und das Dokument verändert. Bei dieser Gelegenheit sollte man die
-     * Liste aller im Einsatz befindlichen TRAFOs aufsammeln und aus der Formularbeschreibung
-     * alle unbenutzten TRAFOs entfernen.
-     *   
-     * Anmerkungen hierzu:
-     * 
-     * - Um nicht unbeteiligte Funktionen zu erwischen (z.B. welche, die für insertValue
-     * verwendet werden), sollten nur solche Funktionen aus der Formularbeschreibung
-     * entfernt werden, die den Präfix für die obige autogenerierung haben, d.h. solche,
-     * die durch diese Funktion hier angelegt wurden.
-     * 
-     * - Ich habe zwar der FunctionLibrary eine remove() Methode hinzugefügt, dann ist mir
-     * aber klargeworden, dass es keinen Grund gibt, die Funktion aus der FunctionLibrary zu
-     * entfernen, da die FunctionLibrary ja nicht persistent ist. Es reicht vollkommen aus, die
-     * Funktion aus der Formularbeschreibungsnotiz zu entfernen.
-     */
+    // long startTime = System.currentTimeMillis();
+    // Logger.debug("RSWFF 1: " + (System.currentTimeMillis() - startTime));
+    String trafoName = addLocalAutofunction(trafoConf);
+
+    String wm = "WM(CMD 'insertFormValue' ID '" + fieldId + "'";
+    if (trafoName != null)
+      wm += " TRAFO '" + trafoName + "')";
+    else
+      wm += ")";
+    // Logger.debug("RSWFF 2: " + (System.currentTimeMillis() - startTime));
+
+    // Feld einfügen
+    try
+    {
+      XMultiServiceFactory factory = UNO.XMultiServiceFactory(doc);
+      XDependentTextField field = UNO.XDependentTextField(factory
+          .createInstance("com.sun.star.text.TextField.Input"));
+      if (!formFieldPreviewMode)
+        UNO.setProperty(field, "Content", "<" + fieldId + ">");
+      // Logger.debug("RSWFF 3: " + (System.currentTimeMillis() - startTime));
+
+      XTextCursor vc = getViewCursor();
+      vc.getText().insertTextContent(vc, field, true);
+      new Bookmark(wm, doc, vc);
+      vc.collapseToEnd();
+      // Logger.debug("RSWFF 4: " + (System.currentTimeMillis() - startTime));
+
+      // Feldwert mit leerem Inhalt vorbelegen
+      if (!formFieldValues.containsKey(fieldId))
+        setFormFieldValue(fieldId, "");
+
+      // Logger.debug("RSWFF 5: " + (System.currentTimeMillis() - startTime));
+      // Formularfeld bekanntmachen, damit es vom WollMux verwendet wird.
+      documentCommands.update(); // FIXME: bei Bedarf optimieren.
+      DocumentCommandInterpreter dci = new DocumentCommandInterpreter(this,
+          WollMuxSingleton.getInstance());
+      dci.scanGlobalDocumentCommands();
+      // Logger.debug("RSWFF 6: " + (System.currentTimeMillis() - startTime));
+
+      // Ansicht des Formularfeldes aktualisieren:
+      updateFormFields(fieldId);
+      // Logger.debug("RSWFF 7: " + (System.currentTimeMillis() - startTime));
+    }
+    catch (java.lang.Exception e)
+    {
+      Logger.error(e);
+    }
   }
-  
+
   /**
-   * Falls die aktuelle Selektion genau ein Formularfeld enthält (die Selektion muss nicht
-   * bündig mit den Grenzen dieses Feldes sein, aber es darf kein zweites Formularfeld in der
-   * Selektion enthalten sein) und dieses eine TRAFO gesetzt hat, so wird die Definition dieser
-   * TRAFO als ConfigThingy zurückgeliefert, ansonsten null.
-   * @return null oder die Definition der TRAFO in der Form "TrafoName(FUNKTIONSDEFINITION)", 
-   * wobei TrafoName die Bezeichnung ist, unter der die TRAFO 
-   * mittels {@link #setTrafo(String, ConfigThingy)} modifiziert werden kann. 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TODO Testen
+   * Falls die aktuelle Selektion genau ein Formularfeld enthält (die Selektion
+   * muss nicht bündig mit den Grenzen dieses Feldes sein, aber es darf kein
+   * zweites Formularfeld in der Selektion enthalten sein) und dieses eine TRAFO
+   * gesetzt hat, so wird die Definition dieser TRAFO als ConfigThingy
+   * zurückgeliefert, ansonsten null.
+   * 
+   * @return null oder die Definition der TRAFO in der Form
+   *         "TrafoName(FUNKTIONSDEFINITION)", wobei TrafoName die Bezeichnung
+   *         ist, unter der die TRAFO mittels
+   *         {@link #setTrafo(String, ConfigThingy)} modifiziert werden kann.
+   * @author Matthias Benkmann (D-III-ITD 5.1) TODO Testen
    */
   synchronized public ConfigThingy getFormFieldTrafoFromSelection()
   {
     return null;
   }
-  
+
   /**
-   * Ändert die Definition der TRAFO mit Name trafoName auf trafoConf. Die neue Definition
-   * wirkt sich sofort auf folgende {@link #setFormFieldValue(String, String)} Aufrufe aus.
-   * @param trafoConf ein ConfigThingy
-   *        mit dem Aufbau "Bezeichner( FUNKTIONSDEFINITION )", wobei Bezeichner ein beliebiger
-   *        Bezeichner ist und FUNKTIONSDEFINITION ein erlaubter Parameter für 
-   *        {@link de.muenchen.allg.itd51.wollmux.func.FunctionFactory#parse(ConfigThingy, FunctionLibrary, DialogLibrary, Map)},
-   *        d.h. der oberste Knoten von FUNKTIONSDEFINITION muss eine erlaubter Funktionsname,
-   *        z.B. "AND" sein.
-   *        Der Bezeichner wird NICHT verwendet. Der Name der TRAFO wird ausschließlich durch
-   *        trafoName festgelegt.
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TODO Testen
+   * Ändert die Definition der TRAFO mit Name trafoName auf trafoConf. Die neue
+   * Definition wirkt sich sofort auf folgende
+   * {@link #setFormFieldValue(String, String)} Aufrufe aus.
+   * 
+   * @param trafoConf
+   *          ein ConfigThingy mit dem Aufbau "Bezeichner( FUNKTIONSDEFINITION
+   *          )", wobei Bezeichner ein beliebiger Bezeichner ist und
+   *          FUNKTIONSDEFINITION ein erlaubter Parameter für
+   *          {@link de.muenchen.allg.itd51.wollmux.func.FunctionFactory#parse(ConfigThingy, FunctionLibrary, DialogLibrary, Map)},
+   *          d.h. der oberste Knoten von FUNKTIONSDEFINITION muss eine
+   *          erlaubter Funktionsname, z.B. "AND" sein. Der Bezeichner wird
+   *          NICHT verwendet. Der Name der TRAFO wird ausschließlich durch
+   *          trafoName festgelegt.
+   * @author Matthias Benkmann (D-III-ITD 5.1) TODO Testen
    */
   synchronized public void setTrafo(String trafoName, ConfigThingy trafoConf)
   {
-    
+
   }
-  
+
 }

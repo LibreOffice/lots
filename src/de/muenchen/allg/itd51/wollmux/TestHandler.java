@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.PrintModels.InternalPrintModel;
 import de.muenchen.allg.itd51.wollmux.PrintModels.PrintModelProps;
 import de.muenchen.allg.itd51.wollmux.func.StandardPrint;
@@ -115,6 +116,19 @@ public class TestHandler
             id,
             value,
             null);
+      }
+    }
+
+    /** ************************************************************** */
+    if (cmd.equalsIgnoreCase("EinTest"))
+    {
+      String t = model.getViewCursor().getString();
+      t = t.replaceAll("[^(a-zA-Z)]", "");
+      if (t.length() > 0)
+      {
+        ConfigThingy c = new ConfigThingy("Funktion");
+        c.addChild(new ConfigThingy("Hallo_" + t));
+        model.replaceSelectionWithFormField(t, c);
       }
     }
   }

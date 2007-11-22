@@ -65,20 +65,6 @@ public class FormModelImpl
           "Kein Abschnitt 'Formular' in der Formularbeschreibung vorhanden");
     }
 
-    // FunctionContext erzeugen und im Formular definierte Funktionen /
-    // DialogFunktionen parsen:
-    Map functionContext = new HashMap();
-    DialogLibrary dialogLib = new DialogLibrary();
-    FunctionLibrary funcLib = new FunctionLibrary();
-    WollMuxSingleton mux = WollMuxSingleton.getInstance();
-    dialogLib = WollMuxFiles.parseFunctionDialogs(formConf, mux
-        .getFunctionDialogs(), functionContext);
-    funcLib = WollMuxFiles.parseFunctions(
-        formConf,
-        dialogLib,
-        functionContext,
-        mux.getGlobalFunctions());
-
     // Abschnitt Fenster/Formular aus wollmuxConf holen:
     ConfigThingy formFensterConf = new ConfigThingy("");
     try
@@ -91,7 +77,8 @@ public class FormModelImpl
     }
 
     return new FormModelImpl.SingleDocumentFormModel(doc, formFensterConf,
-        formConf, functionContext, funcLib, dialogLib);
+        formConf, doc.getFunctionContext(), doc.getFunctionLibrary(), doc
+            .getDialogLibrary());
   }
 
   /**
