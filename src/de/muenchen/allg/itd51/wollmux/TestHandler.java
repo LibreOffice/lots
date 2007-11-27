@@ -123,13 +123,10 @@ public class TestHandler
     if (cmd.equalsIgnoreCase("EinTest"))
     {
       String t = model.getViewCursor().getString();
-      t = t.replaceAll("[^(a-zA-Z)]", "");
-      if (t.length() > 0)
-      {
-        ConfigThingy c = new ConfigThingy("Funktion");
-        c.addChild(new ConfigThingy("Hallo_" + t));
-        model.replaceSelectionWithFormField(t, c);
-      }
+      t = "id_" + t.replaceAll("[^(a-zA-Z)]", "");
+      ConfigThingy c = new ConfigThingy("Funktion");
+      c.addChild(new ConfigThingy("Hallo_" + t));
+      model.replaceSelectionWithFormField(t, c);
     }
   }
 
