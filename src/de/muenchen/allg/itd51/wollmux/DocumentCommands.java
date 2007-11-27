@@ -181,6 +181,33 @@ public class DocumentCommands
   }
 
   /**
+   * Fügt ein neues Dokumentkommando mit dem Kommandostring cmdStr, der in der
+   * Form "WM(...)" erwartet wird, in das Dokument an der TextRange r ein. Dabei
+   * wird ein neues Bookmark erstellt und dieses als Dokumenkommando
+   * registriert. Dieses Bookmark wird genau über r gelegt, so dass abhängig vom
+   * Dokumentkommando der Inhalt der TextRange r durch eine eventuelle spätere
+   * Ausführung des Dokumentkommandos überschrieben wird. cmdStr muss nur das
+   * gewünschte Kommando enthalten ohne eine abschließende Zahl, die zur
+   * Herstellung eindeutiger Bookmarks benötigt wird - diese Zahl wird bei
+   * Bedarf automatisch an den Bookmarknamen angehängt.
+   * 
+   * @param r
+   *          Die TextRange, an der das neue Bookmark mit diesem
+   *          Dokumentkommando eingefügt werden soll. r darf auch null sein und
+   *          wird in diesem Fall ignoriert.
+   * @param cmdStr
+   *          Das Kommando als String der Form "WM(...)".
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  public void addNewDocumentCommand(XTextRange r, String cmdStr)
+  {
+    if (r == null) return;
+    new Bookmark(cmdStr, UNO.XTextDocument(doc), r);
+    update();
+  }
+
+  /**
    * Diese Methode aktualisiert die Dokumentkommandos, so dass neue und
    * entfernte Dokumentkommandos im Dokument erkannt und mit den Datenstrukturen
    * abgeglichen werden. Die Methode liefert true zurück, wenn seit dem letzten
@@ -192,7 +219,7 @@ public class DocumentCommands
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  public boolean updateBookmarks()
+  private boolean updateBookmarks()
   {
     if (doc == null) return false;
     long startTime = System.currentTimeMillis();
@@ -250,7 +277,7 @@ public class DocumentCommands
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  public boolean updateTextSections()
+  private boolean updateTextSections()
   {
     XTextSectionsSupplier supp = UNO.XTextSectionsSupplier(doc);
     if (supp == null) return false;

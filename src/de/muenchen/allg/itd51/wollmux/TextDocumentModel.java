@@ -669,8 +669,12 @@ public class TextDocumentModel
           // jeden Fall alle Notizfelder ausgefiltert werden. Uns interessieren
           // an dieser Stelle ohnehin nur die Textfelder vom Typ
           // css.TextField.Database, die keine Property Author besitzen.
+          // TODO: Der Fehler soll in OOo 2.4 behoben sein. Damit kann auch
+          // dieser Workaround verschwinden, wenn OOo 2.4 flächendeckend
+          // ausgerollt ist.
           Object author = UNO.getProperty(tf, "Author");
           if (author != null) continue;
+          // Ende des Workarounds
 
           XPropertySet master = tf.getTextFieldMaster();
           String column = (String) UNO.getProperty(master, "DataColumnName");
@@ -2362,6 +2366,31 @@ public class TextDocumentModel
   }
 
   /**
+   * Fügt ein neues Dokumentkommando mit dem Kommandostring cmdStr, der in der
+   * Form "WM(...)" erwartet wird, in das Dokument an der TextRange r ein. Dabei
+   * wird ein neues Bookmark erstellt und dieses als Dokumenkommando
+   * registriert. Dieses Bookmark wird genau über r gelegt, so dass abhängig vom
+   * Dokumentkommando der Inhalt der TextRange r durch eine eventuelle spätere
+   * Ausführung des Dokumentkommandos überschrieben wird. cmdStr muss nur das
+   * gewünschte Kommando enthalten ohne eine abschließende Zahl, die zur
+   * Herstellung eindeutiger Bookmarks benötigt wird - diese Zahl wird bei
+   * Bedarf automatisch an den Bookmarknamen angehängt.
+   * 
+   * @param r
+   *          Die TextRange, an der das neue Bookmark mit diesem
+   *          Dokumentkommando eingefügt werden soll. r darf auch null sein und
+   *          wird in diesem Fall ignoriert.
+   * @param cmdStr
+   *          Das Kommando als String der Form "WM(...)".
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  synchronized public void addNewDocumentCommand(XTextRange r, String cmdStr)
+  {
+    documentCommands.addNewDocumentCommand(r, cmdStr);
+  }
+
+  /**
    * Ersetzt die aktuelle Selektion (falls vorhanden) durch ein
    * WollMux-Formularfeld mit ID id und der durch trafoConf definierten TRAFO.
    * Das Formularfeld ist direkt einsetzbar, d.h. sobald diese Methode
@@ -2386,48 +2415,29 @@ public class TextDocumentModel
   synchronized public void replaceSelectionWithFormField(String fieldId,
       ConfigThingy trafoConf)
   {
-    // long startTime = System.currentTimeMillis();
-    // Logger.debug("RSWFF 1: " + (System.currentTimeMillis() - startTime));
     String trafoName = addLocalAutofunction(trafoConf);
 
-    String wm = "WM(CMD 'insertFormValue' ID '" + fieldId + "'";
-    if (trafoName != null)
-      wm += " TRAFO '" + trafoName + "')";
-    else
-      wm += ")";
-    // Logger.debug("RSWFF 2: " + (System.currentTimeMillis() - startTime));
-
-    // Feld einfügen
     try
     {
-      XMultiServiceFactory factory = UNO.XMultiServiceFactory(doc);
-      XDependentTextField field = UNO.XDependentTextField(factory
-          .createInstance("com.sun.star.text.TextField.Input"));
-      if (!formFieldPreviewMode)
-        UNO.setProperty(field, "Content", "<" + fieldId + ">");
-      // Logger.debug("RSWFF 3: " + (System.currentTimeMillis() - startTime));
+      // Neues Dokumentkommando an der Cursorposition einfügen und registrieren
+      String wm = "WM(CMD 'insertFormValue' ID '" + fieldId + "'";
+      if (trafoName != null)
+        wm += " TRAFO '" + trafoName + "')";
+      else
+        wm += ")";
+      addNewDocumentCommand(getViewCursor(), wm);
 
-      XTextCursor vc = getViewCursor();
-      vc.getText().insertTextContent(vc, field, true);
-      new Bookmark(wm, doc, vc);
-      vc.collapseToEnd();
-      // Logger.debug("RSWFF 4: " + (System.currentTimeMillis() - startTime));
-
-      // Feldwert mit leerem Inhalt vorbelegen
+      // Feldwert mit leerem Inhalt vorbelegen, wenn noch kein Wert gesetzt ist.
       if (!formFieldValues.containsKey(fieldId))
         setFormFieldValue(fieldId, "");
 
-      // Logger.debug("RSWFF 5: " + (System.currentTimeMillis() - startTime));
-      // Formularfeld bekanntmachen, damit es vom WollMux verwendet wird.
-      documentCommands.update(); // FIXME: bei Bedarf optimieren.
+      // Formularfeld einscannen, damit es vom WollMux verwendet wird.
       DocumentCommandInterpreter dci = new DocumentCommandInterpreter(this,
           WollMuxSingleton.getInstance());
       dci.scanGlobalDocumentCommands();
-      // Logger.debug("RSWFF 6: " + (System.currentTimeMillis() - startTime));
 
       // Ansicht des Formularfeldes aktualisieren:
       updateFormFields(fieldId);
-      // Logger.debug("RSWFF 7: " + (System.currentTimeMillis() - startTime));
     }
     catch (java.lang.Exception e)
     {

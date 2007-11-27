@@ -2755,8 +2755,8 @@ public class WollMuxEventHandler
       return this.getClass().getSimpleName()
              + "('"
              + eventName
-             + "', #"
-             + source.hashCode()
+             + "', "
+             + ((source != null) ? "#" + source.hashCode() : "null")
              + ")";
     }
   }
@@ -3240,10 +3240,10 @@ public class WollMuxEventHandler
       else
       {
         // neuen Block anlegen
-        Bookmark b = new Bookmark(bookmarkName, model.doc, range);
+        model.addNewDocumentCommand(range, bookmarkName);
         if (highlightColor != null)
         {
-          UNO.setProperty(b.getTextRange(), "CharBackColor", highlightColor);
+          UNO.setProperty(range, "CharBackColor", highlightColor);
           // ViewCursor kollabieren, da die Markierung die Farben verfälscht
           // darstellt.
           XTextCursor vc = model.getViewCursor();

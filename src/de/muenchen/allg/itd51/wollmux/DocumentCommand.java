@@ -21,7 +21,6 @@
  */
 package de.muenchen.allg.itd51.wollmux;
 
-import java.io.StringReader;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -30,7 +29,6 @@ import java.util.Vector;
 import com.sun.star.text.XParagraphCursor;
 import com.sun.star.text.XText;
 import com.sun.star.text.XTextCursor;
-import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextRange;
 import com.sun.star.uno.Exception;
 
@@ -1349,60 +1347,6 @@ abstract public class DocumentCommand
       {
         throw new InvalidCommandException("Fehlendes Attribut FUNCTION");
       }
-    }
-
-    /**
-     * Erzeugt ein neues SetPrintFunction-Dokumentkomando für das Dokument doc
-     * das an der Position range liegt und auf die Druckfunktion functionName
-     * verweist.
-     * 
-     * @param doc
-     *          das Dokument an dessen doc.Text.Start das neue Bookmark erzeugt
-     *          werden soll.
-     * @param functionName
-     *          der Name der Druckfunktion
-     * @param range
-     *          Die TextRange, an der das zugehörige Bookmark erzeugt werden
-     *          soll.
-     * @return das neue SetPrintFunction-Dokumentkommando
-     */
-    public SetPrintFunction(XTextDocument doc, XTextRange range,
-        String functionName)
-    {
-      super(null, new Bookmark("setPrintFunction_tmp", doc, range));
-      setFunctionName(functionName);
-      this.funcName = functionName;
-    }
-
-    /**
-     * Setzt den neuen Funktionsnamen im Attribut FUNCTION auf den Bezeichner
-     * functionName oder logged eine Fehlermeldung, falls es sich bei der
-     * functionName um einen ungültigen Funktionsbezeichner handelt.
-     * 
-     * @param functionName
-     */
-    public void setFunctionName(String functionName)
-    {
-      if (functionName == null
-          || !functionName.matches("^([a-zA-Z_][a-zA-Z_0-9]*)$"))
-      {
-        Logger.error("SetPrintFunction: ungültiger Funktionsbezeichner '"
-                     + functionName
-                     + "'");
-        return;
-      }
-
-      try
-      {
-        wmCmd = new ConfigThingy("", null, new StringReader(
-            "WM(CMD 'setPrintFunction' FUNCTION '" + functionName + "')"));
-      }
-      catch (java.lang.Exception e)
-      {
-        Logger.error(e);
-      }
-
-      flushToBookmark(false);
     }
 
     public String getFunctionName()
