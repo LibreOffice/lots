@@ -25,6 +25,7 @@
 * 17.11.2006 | BNK | +setValue()
 * 08.01.2007 | BNK | intelligentere Behandlung der TAB-Taste
 * 28.03.2007 | BNK | Buttonanpassung verarbeiten bei mergeFormDescriptors().
+* 10.12.2007 | BNK | [R3582]Vertikale Scrollbar immer anzeigen
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -59,6 +60,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
@@ -525,7 +527,7 @@ public class FormController implements UIElementEventHandler
       JPanel mainPanel = new JPanel(new GridBagLayout());
        //    int gridx, int gridy, int gridwidth, int gridheight, double weightx, double weighty, int anchor,          int fill,                  Insets insets, int ipadx, int ipady)
       GridBagConstraints gbcMainPanel = new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH,       new Insets(0,0,0,0),0,0);
-      JScrollPane scrollPane = new JScrollPane(mainPanel);
+      JScrollPane scrollPane = new JScrollPane(mainPanel, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
       scrollPane.setBorder(BorderFactory.createLineBorder(Color.WHITE, 1));
       myPanel.add(scrollPane, gbcMainPanel);
       
