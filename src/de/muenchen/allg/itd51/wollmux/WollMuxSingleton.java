@@ -62,7 +62,6 @@ import com.sun.star.frame.XFrame;
 import com.sun.star.frame.XModel;
 import com.sun.star.lang.EventObject;
 import com.sun.star.lang.WrappedTargetException;
-import com.sun.star.lang.XComponent;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextField;
 import com.sun.star.ui.XModuleUIConfigurationManagerSupplier;
@@ -1157,40 +1156,6 @@ public class WollMuxSingleton implements XPALProvider
     }
 
     return null;
-  }
-
-  /**
-   * Hilfsklasse, die es ermöglicht, UNO-Componenten in HashMaps abzulegen; der
-   * Vergleich zweier HashableComponents mit equals(...) verwendet dazu den
-   * sicheren UNO-Vergleich UnoRuntime.areSame(...). Die Methode hashCode
-   * verwendet die sichere Oid, die UnoRuntime.generateOid(...) liefert.
-   * 
-   * @author lut
-   */
-  public static class HashableComponent
-  {
-    private XComponent compo;
-
-    public HashableComponent(XComponent compo)
-    {
-      this.compo = compo;
-    }
-
-    public int hashCode()
-    {
-      if (compo != null) return UnoRuntime.generateOid(compo).hashCode();
-      return 0;
-    }
-
-    public boolean equals(Object b)
-    {
-      if (b != null && b instanceof HashableComponent)
-      {
-        HashableComponent other = (HashableComponent) b;
-        return UnoRuntime.areSame(this.compo, other.compo);
-      }
-      return false;
-    }
   }
 
   /**
