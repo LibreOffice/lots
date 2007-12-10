@@ -250,6 +250,19 @@ public class IDManager
     public void setID(String newID) throws DuplicateIDException
     {
       if (newID.equals(id)) return;
+      /*
+       * Achtung! Hier wird bewusst nicht nach aktiven und inaktiven IDs unterschieden.
+       * Man könnte versucht sein, Kollisionen mit inaktiven IDs zuzulassen und so
+       * aufzulösen, dass die aktive ID die inaktive ID "aufsammelt". 
+       * Vorteile:
+       *   Anlegen einer Einfügung mit nicht vergebener ID und nachträgliches erzeugen eines
+       *   Controls mit dieser ID würde funktionieren
+       * Nachteile:
+       *   - Während des Tippens einer neuen ID würde evtl. schon eine ungewollte ID aufgesammelt.
+       *   Beispiel: inaktive IDs "Anrede" und "Anrede2" existieren parallel. Es würde bereits
+       *   "Anrede" aufgesammelt während des Tippens, auch wenn am Ende "Anrede2" gewünscht ist.
+       *   - Eventuell noch weitere. Die Folgen sind nicht so leicht abzuschätzen. 
+       */
       if (mapString2ID.containsKey(newID)) throw new DuplicateIDException("Kollision beim Versuch ID von \""+id+"\" auf \""+newID+"\" zu ändern");
       mapString2ID.remove(id);
       id = newID;
