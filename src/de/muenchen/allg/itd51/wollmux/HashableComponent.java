@@ -21,6 +21,8 @@ package de.muenchen.allg.itd51.wollmux;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XInterface;
 
+import de.muenchen.allg.afid.UNO;
+
 /**
  * Hilfsklasse, die es ermöglicht, UNO-Componenten in HashMaps abzulegen; der
  * Vergleich zweier HashableComponents mit equals(...) verwendet dazu den
@@ -33,9 +35,10 @@ public class HashableComponent
 {
   private XInterface compo;
 
-  public HashableComponent(XInterface compo)
+  public HashableComponent(Object compo)
   {
-    this.compo = compo;
+    this.compo = UNO.XInterface(compo);
+    if (this.compo == null) throw new ClassCastException();
   }
 
   public int hashCode()
