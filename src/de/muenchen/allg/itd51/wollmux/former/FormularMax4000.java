@@ -25,7 +25,8 @@
 * 19.07.2007 | BNK | [R5406]Views und Teile der Views können nach Benutzerwunsch ein- oder ausgeblendet werden
 *                  | Änderung der Menüstruktur (Einführung Ansicht und Bearbeiten Menü, Einfügen wandert nach Bearbeiten)
 *                  | JSplitPane besser initialisiert, um verschieben des Dividers zu verbessern.
-* 01.08.2007 | BNK | FunctionTester eingebaut                                   
+* 01.08.2007 | BNK | FunctionTester eingebaut      
+* 10.12.2007 | BNK | [R11302]intelligentere Behandlung von Leerzeichen am Ende von gender-Dropdown-Listen                             
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -203,9 +204,12 @@ public class FormularMax4000
    *                        des Dropdowns auswählt, und zwar bei "Herr" oder "Herrn" den ersten
    *                        Eintrag, bei "Frau" den zweiten Eintrag und bei allem sonstigen
    *                        den dritten Eintrag. Hat das Dropdown nur 2 Einträge, so wird im
-   *                        sonstigen Fall das Feld ID untransformiert übernommen. Falls vorhanden
-   *                        werden ein bis 2 Spaces am Ende eines Eintrages der Dropdown-Liste 
-   *                        entfernt. Dies ermöglicht es, das selbe Wort mehrfach in die
+   *                        sonstigen Fall das Feld ID untransformiert übernommen. 
+   *                        Falls vorhanden werden bis zu N-1 Leerzeichen am Ende eines Eintrages 
+   *                        der Dropdown-Liste 
+   *                        entfernt, wobei N die Anzahl der Einträge ist, die bis auf
+   *                        folgende Leerzeichen identisch zu diesem Eintrag sind. 
+   *                        Dies ermöglicht es, das selbe Wort mehrfach in die
    *                        Liste aufzunehmen.
    * 
    * Checkbox: Bei Checkboxen kann als "Hilfetext" "Label<<ID>>" angegeben werden und wird
@@ -1283,9 +1287,24 @@ public class FormularMax4000
     for (int i = 0; i < 3 && i < items.length; ++i)
     {
       String item = items[i];
-      //bis zu 2 Leerzeichen am Ende löschen, um mehrere gleiche Einträge zu erlauben.
-      if (item.endsWith(" ")) item = item.substring(0, item.length() - 1);
-      if (item.endsWith(" ")) item = item.substring(0, item.length() - 1);
+    
+      /*
+       * Bestimme die maximal am Ende des Eintrags zu entfernende Anzahl Leerzeichen.
+       * Dies ist die Anzahl an Einträgen, die bis auf folgende Leerzeichen identisch sind
+       * MINUS 1.
+       */
+      String item1 = item;
+      while (item1.endsWith(" ")) item1 = item1.substring(0, item1.length() - 1);
+      int n = 0;
+      for (int j = 0; j < items.length; ++j)
+      {
+        String item2 = items[j];
+        while (item2.endsWith(" ")) item2 = item2.substring(0, item2.length() - 1);
+        if (item1.equals(item2)) ++n;
+      }
+      
+      //bis zu N-1 Leerzeichen am Ende löschen, um mehrere gleiche Einträge zu erlauben.
+      for (; n > 1 && item.endsWith(" "); --n) item = item.substring(0, item.length() - 1);
       genderTrafo.setParameterValue(params[i], ParamValue.literal(item));
     }
     
