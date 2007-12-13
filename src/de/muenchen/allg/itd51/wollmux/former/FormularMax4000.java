@@ -1390,7 +1390,7 @@ public class FormularMax4000
     }
     model = FormControlModel.createComboBox(label, id, items, this);
     model.setEditable(editable);
-    String preset = control.getString().trim();
+    String preset = unicodeTrim(control.getString());
     if (preset.length() > 0)
     {
       ConfigThingy autofill = new ConfigThingy("AUTOFILL");
@@ -1413,7 +1413,7 @@ public class FormularMax4000
   {
     FormControlModel model = null;
     model = FormControlModel.createTextfield(label, id, this);
-    String preset = control.getString().trim();
+    String preset = unicodeTrim(control.getString());
     if (preset.length() > 0)
     {
       ConfigThingy autofill = new ConfigThingy("AUTOFILL");
@@ -1422,6 +1422,29 @@ public class FormularMax4000
     }
     formControlModelList.add(model);
     return model;
+  }
+  
+  /**
+   * Liefert str zurück minus führende und folgende Whitespace (wobei Unicode-Leerzeichen)
+   * korrekt berücksichtigt werden.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED
+   */
+  private String unicodeTrim(String str)
+  {
+    if (str.length() == 0) return str;
+    
+    if (Character.isWhitespace(str.charAt(0)) || Character.isWhitespace(str.charAt(str.length()-1)))
+    {
+      int i = 0;
+      while (i < str.length() && Character.isWhitespace(str.charAt(i))) ++i;
+      int j = str.length() - 1;
+      while (j >= 0 && Character.isWhitespace(str.charAt(j))) --j;
+      if (i > j) return "";
+      return str.substring(i,j + 1);
+    }
+    else
+      return str;
   }
   
   /**
