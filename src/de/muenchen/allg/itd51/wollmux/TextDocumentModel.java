@@ -43,6 +43,7 @@ import com.sun.star.frame.FrameSearchFlag;
 import com.sun.star.frame.XController;
 import com.sun.star.frame.XFrame;
 import com.sun.star.lang.EventObject;
+import com.sun.star.lang.XComponent;
 import com.sun.star.lang.XMultiServiceFactory;
 import com.sun.star.text.XBookmarksSupplier;
 import com.sun.star.text.XDependentTextField;
@@ -70,9 +71,11 @@ import de.muenchen.allg.itd51.wollmux.PrintModels.PrintModelProps;
 import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
 import de.muenchen.allg.itd51.wollmux.dialog.FormController;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
+import de.muenchen.allg.itd51.wollmux.func.Function;
 import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.func.MailMergeNew;
+import de.muenchen.allg.itd51.wollmux.func.Values.SimpleMap;
 
 /**
  * Diese Klasse repräsentiert das Modell eines aktuell geöffneten TextDokuments
@@ -83,6 +86,12 @@ import de.muenchen.allg.itd51.wollmux.func.MailMergeNew;
  */
 public class TextDocumentModel
 {
+  /**
+   * Prefix, mit dem die Namen aller automatisch generierten dokumentlokalen
+   * Funktionen beginnen.
+   */
+  private static final String AUTOFUNCTION_PREFIX = "AUTOFUNCTION_";
+
   /**
    * Enthält die Referenz auf das XTextDocument-interface des eigentlichen
    * TextDocument-Services der zugehörigen UNO-Komponente.
@@ -143,11 +152,21 @@ public class TextDocumentModel
 
   /**
    * Liefert zu einer ID eine {@link java.util.List} von FormField-Objekten, die
-   * alle zu einfachen Textfeldern (derzeit nur MailMerge-Feldern) gehören ohne
-   * ein umschließendes WollMux-Bookmark. Die in dieser Map enthaltenen
+   * alle zu Textfeldern ohne ein umschließendes WollMux-Bookmark gehören, aber
+   * trotzdem vom WollMux interpretiert werden. Die in dieser Map enthaltenen
    * FormFields sind nicht in {@link #idToFormFields} enthalten und umgekehrt.
    */
   private HashMap idToTextFieldFormFields;
+
+  /**
+   * Enthält alle Textfelder ohne ein umschließendes WollMux-Bookmark, die vom
+   * WollMux interpretiert werden sollen, aber TRAFO-Funktionen verwenden, die
+   * nur einen feste Werte zurückliefern (d.h. keine Parameter erwarten) Die in
+   * dieser Map enthaltenen FormFields sind nicht in
+   * {@link #idToTextFieldFormFields} enthalten, da sie keine ID besitzen der
+   * sie zugeordnet werden können.
+   */
+  private List staticTextFieldFormFields;
 
   /**
    * Falls es sich bei dem Dokument um ein Formular handelt, wird das zugehörige
@@ -271,6 +290,7 @@ public class TextDocumentModel
     this.doc = doc;
     this.idToFormFields = new HashMap();
     this.idToTextFieldFormFields = new HashMap();
+    this.staticTextFieldFormFields = new Vector();
     this.fragUrls = new String[] {};
     this.currentMax4000 = null;
     this.closeListener = null;
@@ -316,6 +336,8 @@ public class TextDocumentModel
     catch (java.lang.Exception e)
     {
     }
+
+    cleanupGarbageOfUnreferencedAutofunctions();
   }
 
   /**
@@ -512,7 +534,7 @@ public class TextDocumentModel
    * setIDToFormFields die verfügbaren Formularfelder bekanntgegeben wurden.
    * 
    * @return eine vollständige Zuordnung von Feld IDs zu den aktuellen
-   *         Vorbelegungen im Dokument.
+   *         Vorbelegungen im Dokument. TESTED
    */
   synchronized public HashMap getIDToPresetValue()
   {
@@ -526,6 +548,7 @@ public class TextDocumentModel
     {
       String id = (String) idIter.next();
       String value;
+      String lastStoredValue = (String) formFieldValues.get(id);
 
       List fields = (List) idToFormFields.get(id);
       if (fields != null && fields.size() > 0)
@@ -542,9 +565,16 @@ public class TextDocumentModel
           FormField field = (FormField) j.next();
           String thisValue = field.getValue();
 
-          if (field.hasChangedPreviously()) allAreUnchanged = false;
+          // Wurde der Wert des Feldes gegenüber dem zusetzt gespeicherten Wert
+          // verändert?
+          String transformedLastStoredValue = getTranformedValue(
+              lastStoredValue,
+              field.getTrafoName(),
+              true);
+          if (!thisValue.equals(transformedLastStoredValue))
+            allAreUnchanged = false;
 
-          if (field.hasTrafo())
+          if (field.getTrafoName() != null)
             allAreUntransformed = false;
           else
           {
@@ -564,7 +594,7 @@ public class TextDocumentModel
         // gleiche Wert als neuer Formularwert übernommen.
         // 3) in allen anderen Fällen wird FISHY übergeben.
         if (allAreUnchanged)
-          value = (String) formFieldValues.get(id);
+          value = lastStoredValue;
         else
         {
           if (allAreUntransformed
@@ -579,7 +609,7 @@ public class TextDocumentModel
       {
         // wenn kein Formularfeld vorhanden ist wird der zuletzt gesetzte
         // Formularwert übernommen.
-        value = (String) formFieldValues.get(id);
+        value = lastStoredValue;
       }
 
       // neuen Wert übernehmen:
@@ -640,13 +670,15 @@ public class TextDocumentModel
   /**
    * Sammelt alle Formularfelder des Dokuments auf, die nicht von
    * WollMux-Kommandos umgeben sind, jedoch trotzdem vom WollMux verstanden und
-   * befüllt werden (derzeit c,s,s,t,textfield,Database-Felder).
+   * befüllt werden (derzeit c,s,s,t,textfield,Database-Felder und manche
+   * c,s,s,t,textfield,InputUser-Felder).
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   synchronized public void collectNonWollMuxFormFields()
   {
     idToTextFieldFormFields.clear();
+    staticTextFieldFormFields.clear();
 
     try
     {
@@ -659,34 +691,53 @@ public class TextDocumentModel
           XDependentTextField tf = UNO.XDependentTextField(xenu.nextElement());
           if (tf == null) continue;
 
-          // Workaround für bug
-          // http://www.openoffice.org/issues/show_bug.cgi?id=83873: Der Fehler
-          // tritt auf wenn ein Textfeld vom Typ css.TextField.Annotation
-          // eingefügt wurde und hier auf den TextFieldMaster des Feldes
-          // zugegriffen wird. Ich vermute einen Initialisierungfehler in der
-          // Implementierung des Notizfeldes. Durch den Ausschluss aller
-          // Textfelder mit einer Property Author erreiche ich, dass auf
-          // jeden Fall alle Notizfelder ausgefiltert werden. Uns interessieren
-          // an dieser Stelle ohnehin nur die Textfelder vom Typ
-          // css.TextField.Database, die keine Property Author besitzen.
-          // TODO: Der Fehler soll in OOo 2.4 behoben sein. Damit kann auch
-          // dieser Workaround verschwinden, wenn OOo 2.4 flächendeckend
-          // ausgerollt ist.
-          Object author = UNO.getProperty(tf, "Author");
-          if (author != null) continue;
-          // Ende des Workarounds
-
-          XPropertySet master = tf.getTextFieldMaster();
-          String column = (String) UNO.getProperty(master, "DataColumnName");
-          if (column != null && column.length() > 0)
+          if (UNO.supportsService(tf, "com.sun.star.text.TextField.InputUser"))
           {
-            if (!idToTextFieldFormFields.containsKey(column))
-              idToTextFieldFormFields.put(column, new Vector());
+            String content = "" + UNO.getProperty(tf, "Content");
+            if (!content.startsWith("WM(TRAFO '")) continue;
+            XPropertySet master = getUserFieldMaster(content);
+            FormField f = FormFieldFactory.createInputUserFormField(
+                doc,
+                tf,
+                master);
+            String trafoName = f.getTrafoName();
+            Function func = getFunctionLibrary().get(trafoName);
+            if (func == null)
+            {
+              Logger.error("Die im Formularfeld verwendete TRAFO '"
+                           + trafoName
+                           + "' ist nicht definiert.");
+              continue;
+            }
+            String[] pars = func.parameters();
+            if (pars.length == 0) staticTextFieldFormFields.add(f);
+            for (int i = 0; i < pars.length; i++)
+            {
+              String id = pars[i];
+              if (id != null && id.length() > 0)
+              {
+                if (!idToTextFieldFormFields.containsKey(id))
+                  idToTextFieldFormFields.put(id, new Vector());
 
-            List formFields = (List) idToTextFieldFormFields.get(column);
-            formFields.add(FormFieldFactory.createFormField(doc, tf));
+                List formFields = (List) idToTextFieldFormFields.get(id);
+                formFields.add(f);
+              }
+            }
           }
 
+          if (UNO.supportsService(tf, "com.sun.star.text.TextField.Database"))
+          {
+            XPropertySet master = tf.getTextFieldMaster();
+            String id = (String) UNO.getProperty(master, "DataColumnName");
+            if (id != null && id.length() > 0)
+            {
+              if (!idToTextFieldFormFields.containsKey(id))
+                idToTextFieldFormFields.put(id, new Vector());
+
+              List formFields = (List) idToTextFieldFormFields.get(id);
+              formFields.add(FormFieldFactory.createDatabaseFormField(doc, tf));
+            }
+          }
         }
         catch (Exception x)
         {
@@ -1267,7 +1318,7 @@ public class TextDocumentModel
         if (!idToTextFieldFormFields.containsKey(fieldId))
           idToTextFieldFormFields.put(fieldId, new Vector());
         List formFields = (List) idToTextFieldFormFields.get(fieldId);
-        formFields.add(FormFieldFactory.createFormField(doc, field));
+        formFields.add(FormFieldFactory.createDatabaseFormField(doc, field));
 
         // Ansicht des Formularfeldes aktualisieren:
         updateFormFields(fieldId);
@@ -1507,7 +1558,7 @@ public class TextDocumentModel
     Set currentFunctionNames = funcLib.getFunctionNames();
     String name = null;
     for (int i = 0; name == null || currentFunctionNames.contains(name); ++i)
-      name = "AUTOFUNCTION_" + System.currentTimeMillis() + "_" + i;
+      name = AUTOFUNCTION_PREFIX + System.currentTimeMillis() + "_" + i;
 
     try
     {
@@ -1613,6 +1664,7 @@ public class TextDocumentModel
   {
     setFormFields((List) idToFormFields.get(fieldId), funcLib, value);
     setFormFields((List) idToTextFieldFormFields.get(fieldId), funcLib, value);
+    setFormFields(staticTextFieldFormFields, funcLib, value);
   }
 
   /**
@@ -1636,7 +1688,8 @@ public class TextDocumentModel
       FormField field = (FormField) fields.next();
       try
       {
-        field.setValue(value, funcLib);
+        String trafoName = field.getTrafoName();
+        field.setValue(getTranformedValue(value, trafoName, true));
       }
       catch (RuntimeException e)
       {
@@ -1661,6 +1714,7 @@ public class TextDocumentModel
   {
     this.formFieldPreviewMode = previewMode;
     updateAllFormFields();
+    cleanupGarbageOfUnreferencedAutofunctions();
   }
 
   /**
@@ -1716,9 +1770,65 @@ public class TextDocumentModel
     {
       FormField f = (FormField) iter.next();
       if (field == null) field = f;
-      if (!f.hasTrafo()) return f;
+      if (f.getTrafoName() == null) return f;
     }
     return field;
+  }
+
+  /**
+   * Diese Methode berechnet die Transformation des Wertes value mit der
+   * Trafofunktion trafoName, die global oder dokumentlokal definiert sein muss;
+   * dabei steuert useKnownFormValues, ob der Trafo die Menge aller bekannten
+   * Formularwerte als parameter übergeben wird, oder ob aus Gründen der
+   * Abwärtskompatiblilität jeder durch die Trafofunktion gelesene Parameter den
+   * selben Wert value übergeben bekommt. Ist trafoName==null, so wird value
+   * zurückgegeben. Ist die Transformationsionfunktion nicht in der globalen
+   * oder dokumentlokalen Funktionsbibliothek enthalten, so wird eine
+   * Fehlermeldung zurückgeliefert und eine weitere Fehlermeldung in die
+   * Log-Datei geschrieben.
+   * 
+   * @param value
+   *          Der zu transformierende Wert.
+   * @param trafoName
+   *          Der Name der Trafofunktion, der auch null sein darf.
+   * @param useKnownFormValues
+   *          steuert, ob der Trafo die Menge aller bekannten Formularwerte als
+   *          parameter übergeben wird, oder ob aus Gründen der
+   *          Abwärtskompatiblilität jeder durch die Trafofunktion gelesene
+   *          Parameter den selben Wert value übergeben bekommt.
+   * @return Der transformierte Wert falls das trafoName gesetzt ist und die
+   *         Trafo korrekt definiert ist. Ist trafoName==null, so wird value
+   *         unverändert zurückgeliefert. Ist die Funktion trafoName nicht
+   *         definiert, wird eine Fehlermeldung zurückgeliefert. TESTED
+   */
+  public String getTranformedValue(String value, String trafoName,
+      boolean useKnownFormValues)
+  {
+    String transformed = value;
+    if (trafoName != null)
+    {
+      Function func = getFunctionLibrary().get(trafoName);
+      if (func != null)
+      {
+        SimpleMap args = new SimpleMap();
+        String[] pars = func.parameters();
+        for (int i = 0; i < pars.length; i++)
+        {
+          if (useKnownFormValues)
+            args.put(pars[i], (String) formFieldValues.get(pars[i]));
+          else
+            args.put(pars[i], value);
+        }
+        transformed = func.getString(args);
+      }
+      else
+      {
+        transformed = "<FEHLER: TRAFO '" + trafoName + "' nicht definiert>";
+        Logger.error("Die TRAFO '" + trafoName + "' ist nicht definiert.");
+      }
+    }
+
+    return transformed;
   }
 
   /**
@@ -2391,6 +2501,184 @@ public class TextDocumentModel
   }
 
   /**
+   * Fügt an der Stelle r ein neues Textelement vom Typ
+   * css.text.TextField.InputUser ein, und verknüpft das Feld so, dass die Trafo
+   * trafo verwendet wird, um den angezeigten Feldwert zu berechnen.
+   * 
+   * @param r
+   *          die Textrange, an der das Feld eingefügt werden soll
+   * @param trafoName
+   *          der Name der zu verwendenden Trafofunktion
+   * @param hint
+   *          Ein Hinweistext, der im Feld angezeigt werden soll, wenn man mit
+   *          der Maus drüber fährt - kann auch null sein, dann wird der Hint
+   *          nicht gesetzt.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  synchronized public void addNewInputUserField(XTextRange r, String trafoName,
+      String hint)
+  {
+    try
+    {
+      String userFieldName = "WM(TRAFO '" + trafoName + "')";
+
+      // master erzeugen
+      XPropertySet master = getUserFieldMaster(userFieldName);
+      if (master == null)
+      {
+        master = UNO.XPropertySet(UNO.XMultiServiceFactory(doc).createInstance(
+            "com.sun.star.text.FieldMaster.User"));
+        UNO.setProperty(master, "Value", new Integer(0));
+        UNO.setProperty(master, "Name", userFieldName);
+      }
+
+      // textField erzeugen
+      XTextContent f = UNO.XTextContent(UNO.XMultiServiceFactory(doc)
+          .createInstance("com.sun.star.text.TextField.InputUser"));
+      UNO.setProperty(f, "Content", userFieldName);
+      if (hint != null) UNO.setProperty(f, "Hint", hint);
+      r.getText().insertTextContent(r, f, true);
+    }
+    catch (java.lang.Exception e)
+    {
+      Logger.error(e);
+    }
+  }
+
+  /**
+   * Diese Methode entfernt alle Reste, die von nicht mehr referenzierten
+   * AUTOFUNCTIONS übrig bleiben: AUTOFUNCTIONS-Definitionen aus der
+   * Funktionsbibliothek, der Formularbeschreibung in den persistenten Daten und
+   * nicht mehr benötigte TextFieldMaster von ehemaligen InputUser-Textfeldern -
+   * Durch die Aufräumaktion ändert sich der DocumentModified-Status des
+   * Dokuments nicht.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1) TODO: TESTEN
+   */
+  private void cleanupGarbageOfUnreferencedAutofunctions()
+  {
+    boolean modified = getDocumentModified();
+
+    // Liste aller derzeit eingesetzten Trafos aufbauen:
+    HashSet usedFunctions = new HashSet();
+    for (Iterator iter = idToFormFields.keySet().iterator(); iter.hasNext();)
+    {
+      String id = (String) iter.next();
+      List l = (List) idToFormFields.get(id);
+      for (Iterator iterator = l.iterator(); iterator.hasNext();)
+      {
+        FormField f = (FormField) iterator.next();
+        String trafoName = f.getTrafoName();
+        if (trafoName != null) usedFunctions.add(trafoName);
+      }
+    }
+    for (Iterator iter = idToTextFieldFormFields.keySet().iterator(); iter
+        .hasNext();)
+    {
+      String id = (String) iter.next();
+      List l = (List) idToTextFieldFormFields.get(id);
+      for (Iterator iterator = l.iterator(); iterator.hasNext();)
+      {
+        FormField f = (FormField) iterator.next();
+        String trafoName = f.getTrafoName();
+        if (trafoName != null) usedFunctions.add(trafoName);
+      }
+    }
+    for (Iterator iterator = staticTextFieldFormFields.iterator(); iterator
+        .hasNext();)
+    {
+      FormField f = (FormField) iterator.next();
+      String trafoName = f.getTrafoName();
+      if (trafoName != null) usedFunctions.add(trafoName);
+    }
+
+    // Nicht mehr benötigte Autofunctions aus der Funktionsbibliothek löschen:
+    FunctionLibrary funcLib = getFunctionLibrary();
+    for (Iterator iter = funcLib.getFunctionNames().iterator(); iter.hasNext();)
+    {
+      String name = (String) iter.next();
+      if (name == null
+          || !name.startsWith(AUTOFUNCTION_PREFIX)
+          || usedFunctions.contains(name)) continue;
+      funcLib.remove(name);
+    }
+
+    // Nicht mehr benötigte Autofunctions aus der Formularbeschreibung der
+    // persistenten Daten löschen.
+    ConfigThingy functions = getFormDescription().query("Formular").query(
+        "Funktionen");
+    for (Iterator iter = functions.iterator(); iter.hasNext();)
+    {
+      ConfigThingy funcs = (ConfigThingy) iter.next();
+      for (Iterator iterator = funcs.iterator(); iterator.hasNext();)
+      {
+        String name = ((ConfigThingy) iterator.next()).getName();
+        if (name == null
+            || !name.startsWith(AUTOFUNCTION_PREFIX)
+            || usedFunctions.contains(name)) continue;
+        iterator.remove();
+      }
+    }
+    storeCurrentFormDescription();
+
+    // Nicht mehr benötigte TextFieldMaster von ehemaligen InputUser-Textfeldern
+    // löschen:
+    XNameAccess masters = UNO.XTextFieldsSupplier(doc).getTextFieldMasters();
+    String prefix = "com.sun.star.text.FieldMaster.User.WM(TRAFO '"
+                    + AUTOFUNCTION_PREFIX;
+    String[] masterNames = masters.getElementNames();
+    for (int i = 0; i < masterNames.length; i++)
+    {
+      String master = masterNames[i];
+      if (master == null || !master.startsWith(prefix)) continue;
+      String trafoName = master.substring(45, master.length() - 2);
+      if (!usedFunctions.contains(trafoName))
+      {
+        try
+        {
+          XComponent m = UNO.XComponent(masters.getByName(master));
+          m.dispose();
+        }
+        catch (java.lang.Exception e)
+        {
+          Logger.error(e);
+        }
+      }
+    }
+
+    setDocumentModified(modified);
+  }
+
+  /**
+   * Diese Methode liefert den TextFieldMaster, der für Zugriffe auf das
+   * Benutzerfeld mit den Namen userFieldName zuständig ist.
+   * 
+   * @param userFieldName
+   * @return den TextFieldMaster oder null, wenn das Benutzerfeld userFieldName
+   *         nicht existiert.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  private XPropertySet getUserFieldMaster(String userFieldName)
+  {
+    XNameAccess masters = UNO.XTextFieldsSupplier(doc).getTextFieldMasters();
+    String elementName = "com.sun.star.text.FieldMaster.User." + userFieldName;
+    if (masters.hasByName(elementName))
+    {
+      try
+      {
+        return UNO.XPropertySet(masters.getByName(elementName));
+      }
+      catch (java.lang.Exception e)
+      {
+        Logger.error(e);
+      }
+    }
+    return null;
+  }
+
+  /**
    * Ersetzt die aktuelle Selektion (falls vorhanden) durch ein
    * WollMux-Formularfeld mit ID id und der durch trafoConf definierten TRAFO.
    * Das Formularfeld ist direkt einsetzbar, d.h. sobald diese Methode
@@ -2410,7 +2698,7 @@ public class TextDocumentModel
    *          erlaubter Funktionsname, z.B. "AND" sein. Der Bezeichner wird
    *          NICHT als Name der TRAFO verwendet. Stattdessen wird ein neuer
    *          eindeutiger TRAFO-Name generiert.
-   * @author Matthias Benkmann (D-III-ITD 5.1) TODO Testen
+   * @author Matthias Benkmann, Christoph Lutz (D-III-ITD 5.1) TESTED
    */
   synchronized public void replaceSelectionWithFormField(String fieldId,
       ConfigThingy trafoConf)
@@ -2419,25 +2707,19 @@ public class TextDocumentModel
 
     try
     {
-      // Neues Dokumentkommando an der Cursorposition einfügen und registrieren
-      String wm = "WM(CMD 'insertFormValue' ID '" + fieldId + "'";
-      if (trafoName != null)
-        wm += " TRAFO '" + trafoName + "')";
-      else
-        wm += ")";
-      addNewDocumentCommand(getViewCursor(), wm);
+      // Neues UserField an der Cursorposition einfügen
+      addNewInputUserField(getViewCursor(), trafoName, "<" + fieldId + ">");
 
       // Feldwert mit leerem Inhalt vorbelegen, wenn noch kein Wert gesetzt ist.
       if (!formFieldValues.containsKey(fieldId))
         setFormFieldValue(fieldId, "");
 
-      // Formularfeld einscannen, damit es vom WollMux verwendet wird.
-      DocumentCommandInterpreter dci = new DocumentCommandInterpreter(this,
-          WollMuxSingleton.getInstance());
-      dci.scanGlobalDocumentCommands();
-
       // Ansicht des Formularfeldes aktualisieren:
+      collectNonWollMuxFormFields();
       updateFormFields(fieldId);
+
+      // Nicht referenzierte Autofunktionen/InputUser-TextFieldMaster löschen
+      cleanupGarbageOfUnreferencedAutofunctions();
     }
     catch (java.lang.Exception e)
     {

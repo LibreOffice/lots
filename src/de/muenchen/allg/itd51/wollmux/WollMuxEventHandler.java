@@ -662,8 +662,8 @@ public class WollMuxEventHandler
         dialogInst = dialog.instanceFor(new HashMap());
 
         setLock();
-        dialogInst.show(unlockActionListener, mux.getGlobalFunctions(), mux
-            .getFunctionDialogs());
+        dialogInst.show(unlockActionListener, model.getFunctionLibrary(), model
+            .getDialogLibrary());
         waitForUnlock();
       }
       catch (ConfigurationErrorException e)
@@ -820,15 +820,22 @@ public class WollMuxEventHandler
       }
       else
       {
-        max = new FormularMax4000(model, new ActionListener()
+        ActionListener l = new ActionListener()
         {
           public void actionPerformed(ActionEvent actionEvent)
           {
             if (actionEvent.getSource() instanceof FormularMax4000)
               WollMuxEventHandler.handleFormularMax4000Returned(model);
           }
-        }, WollMuxSingleton.getInstance().getGlobalFunctions(),
-            WollMuxSingleton.getInstance().getGlobalPrintFunctions());
+        };
+
+        // Der Konstruktor von FormularMax erwartet hier nur die globalen
+        // Funktionsbibliotheken, nicht jedoch die neuen dokumentlokalen
+        // Bibliotheken, die das model bereitstellt. Die dokumentlokalen
+        // Bibliotheken kann der FM4000 selbst auflösen.
+        max = new FormularMax4000(model, l, WollMuxSingleton.getInstance()
+            .getGlobalFunctions(), WollMuxSingleton.getInstance()
+            .getGlobalPrintFunctions());
         model.setCurrentFormularMax4000(max);
       }
     }

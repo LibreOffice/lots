@@ -155,6 +155,10 @@ public class FormModelImpl
     WollMuxSingleton mux = WollMuxSingleton.getInstance();
     dialogLib = WollMuxFiles.parseFunctionDialogs(formConf, mux
         .getFunctionDialogs(), functionContext);
+    // FIXME: hier müsste eine gemergte Variante der Funktionsbibliotheken der
+    // einzel-TextDocumentModels erzeugt werden, damit auch dokumentlokale
+    // Trafos funktionieren - aber wer verwendet schon Multiform? Warten wir mit
+    // der Änderung sie jemand benötigt.
     funcLib = WollMuxFiles.parseFunctions(
         formConf,
         dialogLib,

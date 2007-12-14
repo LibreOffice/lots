@@ -1072,8 +1072,6 @@ abstract public class DocumentCommand
 
     private String trafo = null;
 
-    private String md5 = null;
-
     public InsertFormValue(ConfigThingy wmCmd, Bookmark bookmark)
         throws InvalidCommandException
     {
@@ -1108,20 +1106,6 @@ abstract public class DocumentCommand
       return trafo;
     }
 
-    public String getMD5()
-    {
-      if (md5 != null)
-        return md5;
-      else if (isDefinedState("MD5")) return getState("MD5").toString();
-      return null;
-    }
-
-    public void setMD5(String md5Str)
-    {
-      md5 = md5Str;
-      flushToBookmark(false);
-    }
-
     public int execute(DocumentCommand.Executor visitable)
     {
       return visitable.executeCommand(this);
@@ -1129,9 +1113,6 @@ abstract public class DocumentCommand
 
     protected ConfigThingy toConfigThingy()
     {
-      // MD5 im wmCmd setzen:
-      if (md5 != null) setOrCreate("MD5", md5);
-
       return super.toConfigThingy();
     }
 

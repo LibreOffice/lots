@@ -1290,7 +1290,7 @@ public class DocumentCommandInterpreter
         value = ds.get(spaltenname);
 
         // ggf. TRAFO durchführen
-        value = getOptionalTrafoValue(value, cmd, mux.getGlobalFunctions());
+        value = model.getTranformedValue(value, cmd.getTrafoName(), false);
       }
       catch (DatasetNotFoundException e)
       {
@@ -1329,7 +1329,7 @@ public class DocumentCommandInterpreter
       cmd.setErrorState(false);
 
       String value;
-      FunctionLibrary funcLib = mux.getGlobalFunctions();
+      FunctionLibrary funcLib = model.getFunctionLibrary();
       Function func = funcLib.get(cmd.getFunctionName());
       if (func != null)
       {
@@ -1487,62 +1487,5 @@ public class DocumentCommandInterpreter
     {
       Logger.error(x);
     }
-  }
-
-  /**
-   * Diese Methode berechnet die Transformation des Wertes value, wenn in dem
-   * Dokumentkommando cmd ein TRAFO-Attribut gesetzt ist, wobei die
-   * Transformationsfunktion der Funktionsbibliothek funcLib verwendet wird und
-   * allen Parametern, die die Funktion erwartet der Wert value übergeben wird.
-   * Ist kein TRAFO-Attribut definiert, so wird der Eingebewert value
-   * unverändert zurückgeliefert. Ist das TRAFO-Attribut zwar definiert, die
-   * Transformationsionfunktion jedoch nicht in der Funktionsbibliothek funcLib
-   * enthalten, so wird eine Fehlermeldung zurückgeliefert und eine weitere
-   * Fehlermeldung in die Log-Datei geschrieben.
-   * 
-   * @param value
-   *          Der zu transformierende Wert.
-   * @param cmd
-   *          Das Dokumentkommando, welches das optionale TRAFO Attribut
-   *          besitzt.
-   * @param funcLib
-   *          Die Funktionsbibliothek, in der nach der Transformatiosfunktion
-   *          gesucht werden soll.
-   * @return Der Transformierte Wert falls das TRAFO-Attribut gesetzt ist und
-   *         die Trafo korrekt definiert ist. Ist kein TRAFO-Attribut gesetzt,
-   *         so wird value unverändert zurückgeliefert. Ist die TRAFO-Funktion
-   *         nicht definiert, wird eine Fehlermeldung zurückgeliefert.
-   */
-  public static String getOptionalTrafoValue(String value,
-      DocumentCommand.OptionalTrafoProvider cmd, FunctionLibrary funcLib)
-  {
-    String transformed = value;
-    if (cmd.getTrafoName() != null)
-    {
-      Function func = funcLib.get(cmd.getTrafoName());
-      if (func != null)
-      {
-        SimpleMap args = new SimpleMap();
-        String[] pars = func.parameters();
-        for (int i = 0; i < pars.length; i++)
-        {
-          args.put(pars[i], value);
-        }
-        transformed = func.getString(args);
-      }
-      else
-      {
-        transformed = "<FEHLER: TRAFO '"
-                      + cmd.getTrafoName()
-                      + "' nicht definiert>";
-        Logger.error("Die in Kommando '"
-                     + cmd
-                     + " verwendete TRAFO '"
-                     + cmd.getTrafoName()
-                     + "' ist nicht definiert.");
-      }
-    }
-
-    return transformed;
   }
 }
