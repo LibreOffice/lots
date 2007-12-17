@@ -2708,7 +2708,7 @@ public class TextDocumentModel
     try
     {
       // Neues UserField an der Cursorposition einfügen
-      addNewInputUserField(getViewCursor(), trafoName, "<" + fieldId + ">");
+      addNewInputUserField(getViewCursor(), trafoName, null);
 
       // Feldwert mit leerem Inhalt vorbelegen, wenn noch kein Wert gesetzt ist.
       if (!formFieldValues.containsKey(fieldId))
