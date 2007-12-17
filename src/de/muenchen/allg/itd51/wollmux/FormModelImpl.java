@@ -613,11 +613,7 @@ public class FormModelImpl
     public void valueChanged(String fieldId, String newValue)
     {
       if (fieldId.length() > 0)
-        WollMuxEventHandler.handleFormValueChanged(
-            doc,
-            fieldId,
-            newValue,
-            funcLib);
+        WollMuxEventHandler.handleFormValueChanged(doc, fieldId, newValue);
     }
 
     /*

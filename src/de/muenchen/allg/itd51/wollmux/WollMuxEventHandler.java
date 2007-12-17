@@ -98,7 +98,6 @@ import de.muenchen.allg.itd51.wollmux.dialog.Common;
 import de.muenchen.allg.itd51.wollmux.dialog.Dialog;
 import de.muenchen.allg.itd51.wollmux.dialog.PersoenlicheAbsenderlisteVerwalten;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
-import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.func.MailMergeNew;
 
 /**
@@ -1668,9 +1667,9 @@ public class WollMuxEventHandler
    *          verwendet werden soll.
    */
   public static void handleFormValueChanged(TextDocumentModel model,
-      String fieldId, String newValue, FunctionLibrary funcLib)
+      String fieldId, String newValue)
   {
-    handle(new OnFormValueChanged(model, fieldId, newValue, funcLib));
+    handle(new OnFormValueChanged(model, fieldId, newValue));
   }
 
   private static class OnFormValueChanged extends BasicEvent
@@ -1679,23 +1678,20 @@ public class WollMuxEventHandler
 
     private String newValue;
 
-    private FunctionLibrary funcLib;
-
     private TextDocumentModel model;
 
     public OnFormValueChanged(TextDocumentModel model, String fieldId,
-        String newValue, FunctionLibrary funcLib)
+        String newValue)
     {
       this.fieldId = fieldId;
       this.newValue = newValue;
-      this.funcLib = funcLib;
       this.model = model;
     }
 
     protected void doit()
     {
       model.setFormFieldValue(fieldId, newValue);
-      model.updateFormFields(fieldId, funcLib);
+      model.updateFormFields(fieldId);
     }
 
     public String toString()

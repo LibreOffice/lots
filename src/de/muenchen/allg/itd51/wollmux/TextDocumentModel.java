@@ -87,12 +87,6 @@ import de.muenchen.allg.itd51.wollmux.func.Values.SimpleMap;
 public class TextDocumentModel
 {
   /**
-   * Prefix, mit dem die Namen aller automatisch generierten dokumentlokalen
-   * Funktionen beginnen.
-   */
-  private static final String AUTOFUNCTION_PREFIX = "AUTOFUNCTION_";
-
-  /**
    * Enthält die Referenz auf das XTextDocument-interface des eigentlichen
    * TextDocument-Services der zugehörigen UNO-Komponente.
    */
@@ -141,6 +135,18 @@ public class TextDocumentModel
    */
   private static final Pattern WOLLMUX_BOOKMARK_PATTERN = Pattern
       .compile("(\\A\\s*WM\\s*\\(.*\\)\\s*\\d*\\z)");
+
+  /**
+   * Prefix, mit dem die Namen aller automatisch generierten dokumentlokalen
+   * Funktionen beginnen.
+   */
+  private static final String AUTOFUNCTION_PREFIX = "AUTOFUNCTION_";
+
+  /**
+   * Prefix "WM(FUNCTION '", mit dem die Namen von Benutzerfelder mit
+   * WollMux-Funktionen beginnen.
+   */
+  public static final String USER_FIELD_NAME_PREFIX = "WM(FUNCTION '";
 
   /**
    * Ermöglicht den Zugriff auf eine Collection aller FormField-Objekte in
@@ -694,18 +700,18 @@ public class TextDocumentModel
           if (UNO.supportsService(tf, "com.sun.star.text.TextField.InputUser"))
           {
             String content = "" + UNO.getProperty(tf, "Content");
-            if (!content.startsWith("WM(TRAFO '")) continue;
+            if (!content.startsWith(USER_FIELD_NAME_PREFIX)) continue;
             XPropertySet master = getUserFieldMaster(content);
             FormField f = FormFieldFactory.createInputUserFormField(
                 doc,
                 tf,
                 master);
-            String trafoName = f.getTrafoName();
-            Function func = getFunctionLibrary().get(trafoName);
+            String funcName = f.getTrafoName();
+            Function func = getFunctionLibrary().get(funcName);
             if (func == null)
             {
-              Logger.error("Die im Formularfeld verwendete TRAFO '"
-                           + trafoName
+              Logger.error("Die im Formularfeld verwendete Funktion '"
+                           + funcName
                            + "' ist nicht definiert.");
               continue;
             }
@@ -1598,48 +1604,24 @@ public class TextDocumentModel
    *          Die ID des Formularfeldes bzw. der Formularfelder, die im Dokument
    *          angepasst werden sollen.
    */
-  synchronized public void updateFormFields(String fieldId,
-      FunctionLibrary funcLib)
+  synchronized public void updateFormFields(String fieldId)
   {
     if (formFieldPreviewMode)
     {
       String value = (String) formFieldValues.get(fieldId);
-      if (value != null) setFormFields(fieldId, funcLib, value);
+      if (value != null) setFormFields(fieldId, value, true);
     }
     else
     {
-      setFormFields(fieldId, null, "<" + fieldId + ">");
+      setFormFields(fieldId, "<" + fieldId + ">", false);
     }
-  }
-
-  /**
-   * Im Vorschaumodus überträgt diese Methode den Formularwert zum Feldes
-   * fieldId aus dem persistenten Formularwerte-Abschnitt in die zugehörigen
-   * Formularfelder im Dokument; Ist der Vorschaumodus nicht aktiv, so werden
-   * jeweils nur die Spaltennamen in spitzen Klammern angezeigt. Für die
-   * Auflösung der Trafos wird dabei die dokumentlokale Funktionsbibliothek
-   * verwendet, die getFunctionLibrary() zurückliefert.
-   * 
-   * @param fieldId
-   *          Die ID des Formularfeldes bzw. der Formularfelder, die im Dokument
-   *          angepasst werden sollen.
-   */
-  synchronized public void updateFormFields(String fieldId)
-  {
-    updateFormFields(fieldId, getFunctionLibrary());
   }
 
   /**
    * Im Vorschaumodus überträgt diese Methode alle Formularwerte aus dem
    * Formularwerte-Abschnitt der persistenten Daten in die zugehörigen
    * Formularfelder im Dokument; Ist der Vorschaumodus nicht aktiv, so werden
-   * jeweils nur die Spaltennamen in spitzen Klammern angezeigt.
-   * 
-   * @param funcLib
-   *          Die Funktionsbibliothek, die zum Auflösen der TRAFO-Attribute der
-   *          Formularfelder verwendet werden sollen. funcLib darf null sein,
-   *          dann werden die Formularwerte in jedem Fall untransformiert
-   *          gesetzt.
+   * jeweils nur die Spaltennamen in spitzen Klammern angezeigt. *
    */
   private void updateAllFormFields()
   {
@@ -1653,18 +1635,19 @@ public class TextDocumentModel
   /**
    * Setzt den Inhalt aller Formularfelder mit ID fieldId auf value.
    * 
-   * @param funcLib
-   *          Funktionsbibliothek zum Berechnen von TRAFOs. funcLib darf null
-   *          sein, dann werden die Formularwerte in jedem Fall untransformiert
-   *          gesetzt.
-   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * @param applyTrafo
+   *          gibt an, ob eine evtl. vorhandene TRAFO-Funktion angewendet werden
+   *          soll (true) oder nicht (false).
+   * @author Matthias Benkmann, Christoph Lutz (D-III-ITD 5.1)
    */
-  private void setFormFields(String fieldId, FunctionLibrary funcLib,
-      String value)
+  private void setFormFields(String fieldId, String value, boolean applyTrafo)
   {
-    setFormFields((List) idToFormFields.get(fieldId), funcLib, value);
-    setFormFields((List) idToTextFieldFormFields.get(fieldId), funcLib, value);
-    setFormFields(staticTextFieldFormFields, funcLib, value);
+    setFormFields((List) idToFormFields.get(fieldId), value, applyTrafo);
+    setFormFields(
+        (List) idToTextFieldFormFields.get(fieldId),
+        value,
+        applyTrafo);
+    setFormFields(staticTextFieldFormFields, value, applyTrafo);
   }
 
   /**
@@ -1675,11 +1658,13 @@ public class TextDocumentModel
    *          Funktionsbibliothek zum Berechnen von TRAFOs. funcLib darf null
    *          sein, dann werden die Formularwerte in jedem Fall untransformiert
    *          gesetzt.
+   * @param applyTrafo
+   *          gibt an ob eine evtl. vorhandenen Trafofunktion verwendet werden
+   *          soll.
    * 
    * @author Matthias Benkmann, Christoph Lutz (D-III-ITD 5.1)
    */
-  private void setFormFields(List formFields, FunctionLibrary funcLib,
-      String value)
+  private void setFormFields(List formFields, String value, boolean applyTrafo)
   {
     if (formFields == null) return;
     Iterator fields = formFields.iterator();
@@ -1688,8 +1673,13 @@ public class TextDocumentModel
       FormField field = (FormField) fields.next();
       try
       {
-        String trafoName = field.getTrafoName();
-        field.setValue(getTranformedValue(value, trafoName, true));
+        if (applyTrafo)
+        {
+          String trafoName = field.getTrafoName();
+          field.setValue(getTranformedValue(value, trafoName, true));
+        }
+        else
+          field.setValue(value);
       }
       catch (RuntimeException e)
       {
@@ -2521,7 +2511,7 @@ public class TextDocumentModel
   {
     try
     {
-      String userFieldName = "WM(TRAFO '" + trafoName + "')";
+      String userFieldName = USER_FIELD_NAME_PREFIX + trafoName + "')";
 
       // master erzeugen
       XPropertySet master = getUserFieldMaster(userFieldName);
@@ -2625,14 +2615,14 @@ public class TextDocumentModel
     // Nicht mehr benötigte TextFieldMaster von ehemaligen InputUser-Textfeldern
     // löschen:
     XNameAccess masters = UNO.XTextFieldsSupplier(doc).getTextFieldMasters();
-    String prefix = "com.sun.star.text.FieldMaster.User.WM(TRAFO '"
-                    + AUTOFUNCTION_PREFIX;
+    String prefix = "com.sun.star.text.FieldMaster.User."
+                    + USER_FIELD_NAME_PREFIX;
     String[] masterNames = masters.getElementNames();
     for (int i = 0; i < masterNames.length; i++)
     {
       String master = masterNames[i];
       if (master == null || !master.startsWith(prefix)) continue;
-      String trafoName = master.substring(45, master.length() - 2);
+      String trafoName = master.substring(prefix.length(), master.length() - 2);
       if (!usedFunctions.contains(trafoName))
       {
         try
