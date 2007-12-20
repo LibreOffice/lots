@@ -1657,12 +1657,13 @@ public class TextDocumentModel
    */
   private void setFormFields(String fieldId, String value, boolean applyTrafo)
   {
-    setFormFields((List) idToFormFields.get(fieldId), value, applyTrafo);
+    setFormFields((List) idToFormFields.get(fieldId), value, applyTrafo, false);
     setFormFields(
         (List) idToTextFieldFormFields.get(fieldId),
         value,
-        applyTrafo);
-    setFormFields(staticTextFieldFormFields, value, applyTrafo);
+        applyTrafo,
+        true);
+    setFormFields(staticTextFieldFormFields, value, applyTrafo, true);
   }
 
   /**
@@ -1676,10 +1677,17 @@ public class TextDocumentModel
    * @param applyTrafo
    *          gibt an ob eine evtl. vorhandenen Trafofunktion verwendet werden
    *          soll.
+   * @param useKnownFormValues
+   *          gibt an, ob die Trafofunktion mit den bekannten Formularwerten
+   *          (true) als Parameter, oder ob alle erwarteten Parameter mit dem
+   *          Wert value (false) versorgt werden - wird aus Gründen der
+   *          Abwärtskompatiblität zu den bisherigen insertFormValue-Kommandos
+   *          benötigt.
    * 
    * @author Matthias Benkmann, Christoph Lutz (D-III-ITD 5.1)
    */
-  private void setFormFields(List formFields, String value, boolean applyTrafo)
+  private void setFormFields(List formFields, String value, boolean applyTrafo,
+      boolean useKnownFormValues)
   {
     if (formFields == null) return;
     Iterator fields = formFields.iterator();
@@ -1691,7 +1699,10 @@ public class TextDocumentModel
         if (applyTrafo)
         {
           String trafoName = field.getTrafoName();
-          field.setValue(getTranformedValue(value, trafoName, true));
+          field.setValue(getTranformedValue(
+              value,
+              trafoName,
+              useKnownFormValues));
         }
         else
           field.setValue(value);
