@@ -963,11 +963,10 @@ public final class FormFieldFactory
 
     public String getTrafoName()
     {
-      String content = "" + UNO.getProperty(textfield, "Content");
-      if (content.startsWith(TextDocumentModel.USER_FIELD_NAME_PREFIX))
-        return content.substring(TextDocumentModel.USER_FIELD_NAME_PREFIX
-            .length(), content.length() - 2);
-      return null;
+      return TextDocumentModel.getFunctionNameForUserFieldName(""
+                                                            + UNO.getProperty(
+                                                                textfield,
+                                                                "Content"));
     }
 
     public String getValue()

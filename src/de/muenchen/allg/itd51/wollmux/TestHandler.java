@@ -122,11 +122,26 @@ public class TestHandler
     /** ************************************************************** */
     if (cmd.equalsIgnoreCase("EinTest"))
     {
-      String t = model.getViewCursor().getString();
-      t = "id_" + t.replaceAll("[^(a-zA-Z)]", "");
+      // String t = model.getViewCursor().getString();
+      // t = "id_" + t.replaceAll("[^(a-zA-Z)]", "");
       ConfigThingy c = new ConfigThingy("Funktion");
-      c.addChild(new ConfigThingy("Hallo_" + t));
-      model.replaceSelectionWithFormField(t, c);
+      c.addChild(new ConfigThingy("Hallo"));
+      // model.replaceSelectionWithFormField(t, c);
+      ConfigThingy trafo = model.getFormFieldTrafoFromSelection();
+      Logger.error("EinTest Trafo = '"
+                   + ((trafo != null) ? trafo.stringRepresentation() : "null")
+                   + "'");
+      if (trafo != null)
+      {
+        try
+        {
+          model.setTrafo(trafo.getName(), c);
+        }
+        catch (java.lang.Exception e)
+        {
+          Logger.error(e);
+        }
+      }
     }
   }
 

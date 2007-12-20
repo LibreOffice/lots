@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.sun.star.awt.DeviceInfo;
@@ -38,11 +39,14 @@ import com.sun.star.awt.XWindow;
 import com.sun.star.beans.XPropertySet;
 import com.sun.star.container.NoSuchElementException;
 import com.sun.star.container.XEnumeration;
+import com.sun.star.container.XEnumerationAccess;
 import com.sun.star.container.XNameAccess;
+import com.sun.star.container.XNamed;
 import com.sun.star.frame.FrameSearchFlag;
 import com.sun.star.frame.XController;
 import com.sun.star.frame.XFrame;
 import com.sun.star.lang.EventObject;
+import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.lang.XComponent;
 import com.sun.star.lang.XMultiServiceFactory;
 import com.sun.star.text.XBookmarksSupplier;
@@ -50,6 +54,7 @@ import com.sun.star.text.XDependentTextField;
 import com.sun.star.text.XTextContent;
 import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
+import com.sun.star.text.XTextField;
 import com.sun.star.text.XTextRange;
 import com.sun.star.text.XTextViewCursorSupplier;
 import com.sun.star.uno.AnyConverter;
@@ -134,7 +139,7 @@ public class TextDocumentModel
    * Pattern zum Erkennen von WollMux-Bookmarks.
    */
   private static final Pattern WOLLMUX_BOOKMARK_PATTERN = Pattern
-      .compile("(\\A\\s*WM\\s*\\(.*\\)\\s*\\d*\\z)");
+      .compile("(\\A\\s*(WM\\s*\\(.*\\))\\s*\\d*\\z)");
 
   /**
    * Prefix, mit dem die Namen aller automatisch generierten dokumentlokalen
@@ -342,8 +347,6 @@ public class TextDocumentModel
     catch (java.lang.Exception e)
     {
     }
-
-    cleanupGarbageOfUnreferencedAutofunctions();
   }
 
   /**
@@ -699,14 +702,14 @@ public class TextDocumentModel
 
           if (UNO.supportsService(tf, "com.sun.star.text.TextField.InputUser"))
           {
-            String content = "" + UNO.getProperty(tf, "Content");
-            if (!content.startsWith(USER_FIELD_NAME_PREFIX)) continue;
-            XPropertySet master = getUserFieldMaster(content);
+            String varName = "" + UNO.getProperty(tf, "Content");
+            String funcName = getFunctionNameForUserFieldName(varName);
+            if (funcName == null) continue;
+            XPropertySet master = getUserFieldMaster(varName);
             FormField f = FormFieldFactory.createInputUserFormField(
                 doc,
                 tf,
                 master);
-            String funcName = f.getTrafoName();
             Function func = getFunctionLibrary().get(funcName);
             if (func == null)
             {
@@ -1620,8 +1623,9 @@ public class TextDocumentModel
   /**
    * Im Vorschaumodus überträgt diese Methode alle Formularwerte aus dem
    * Formularwerte-Abschnitt der persistenten Daten in die zugehörigen
-   * Formularfelder im Dokument; Ist der Vorschaumodus nicht aktiv, so werden
-   * jeweils nur die Spaltennamen in spitzen Klammern angezeigt. *
+   * Formularfelder im Dokument, wobei evtl. gesetzte Trafo-Funktionen
+   * ausgeführt werden; Ist der Vorschaumodus nicht aktiv, so werden jeweils nur
+   * die Spaltennamen in spitzen Klammern angezeigt.
    */
   private void updateAllFormFields()
   {
@@ -1630,6 +1634,17 @@ public class TextDocumentModel
       String fieldId = (String) iter.next();
       updateFormFields(fieldId);
     }
+  }
+
+  /**
+   * Macht das selbe wie updateAllFormFields, allerdings werden nur die
+   * Formularfelder aktualisiert, die die Trafo trafoName gesetzt haben.
+   */
+  private void updateAllFormFieldsWithTrafo(String trafoName)
+  {
+    updateAllFormFields();
+    // TODO: Implementieren der Funktion zur Optimierung falls
+    // Performance-Probleme auftreten.
   }
 
   /**
@@ -2615,19 +2630,19 @@ public class TextDocumentModel
     // Nicht mehr benötigte TextFieldMaster von ehemaligen InputUser-Textfeldern
     // löschen:
     XNameAccess masters = UNO.XTextFieldsSupplier(doc).getTextFieldMasters();
-    String prefix = "com.sun.star.text.FieldMaster.User."
-                    + USER_FIELD_NAME_PREFIX;
+    String prefix = "com.sun.star.text.FieldMaster.User.";
     String[] masterNames = masters.getElementNames();
     for (int i = 0; i < masterNames.length; i++)
     {
-      String master = masterNames[i];
-      if (master == null || !master.startsWith(prefix)) continue;
-      String trafoName = master.substring(prefix.length(), master.length() - 2);
-      if (!usedFunctions.contains(trafoName))
+      String masterName = masterNames[i];
+      if (masterName == null || !masterName.startsWith(prefix)) continue;
+      String varName = masterName.substring(prefix.length());
+      String trafoName = getFunctionNameForUserFieldName(varName);
+      if (trafoName != null && !usedFunctions.contains(trafoName))
       {
         try
         {
-          XComponent m = UNO.XComponent(masters.getByName(master));
+          XComponent m = UNO.XComponent(masters.getByName(masterName));
           m.dispose();
         }
         catch (java.lang.Exception e)
@@ -2664,6 +2679,72 @@ public class TextDocumentModel
       {
         Logger.error(e);
       }
+    }
+    return null;
+  }
+
+  /**
+   * Wenn das Benutzerfeld mit dem Namen userFieldName vom WollMux interpretiert
+   * wird (weil der Name in der Form "WM(FUNCTION '<name>')" aufgebaut ist),
+   * dann liefert diese Funktion den Namen <name> der Funktion zurück; in allen
+   * anderen Fällen liefert die Methode null zurück.
+   * 
+   * @param userFieldName
+   *          Name des Benutzerfeldes
+   * @return den Namen der in diesem Benutzerfeld verwendeten Funktion oder
+   *         null, wenn das Benutzerfeld nicht vom WollMux interpretiert wird.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  public static String getFunctionNameForUserFieldName(String userFieldName)
+  {
+    if (userFieldName == null) return null;
+    if (userFieldName.startsWith(TextDocumentModel.USER_FIELD_NAME_PREFIX))
+      return userFieldName.substring(TextDocumentModel.USER_FIELD_NAME_PREFIX
+          .length(), userFieldName.length() - 2);
+    return null;
+  }
+
+  /**
+   * Wenn das als Kommandostring cmdStr übergebene Dokumentkommando (derzeit nur
+   * insertFormValue) eine Trafofunktion gesetzt hat, so wird der Name dieser
+   * Funktion zurückgeliefert; Bildet cmdStr kein gültiges Dokumentkommando ab
+   * oder verwendet dieses Dokumentkommando keine Funktion, so wird null zurück
+   * geliefert.
+   * 
+   * @param cmdStr
+   *          Ein Kommandostring eines Dokumentkommandos in der Form "WM(CMD '<command>'
+   *          ...)"
+   * @return
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  public static String getFunctionNameForDocumentCommand(String cmdStr)
+  {
+    ConfigThingy wm = new ConfigThingy("");
+    try
+    {
+      wm = new ConfigThingy("", cmdStr).get("WM");
+    }
+    catch (java.lang.Exception e)
+    {
+    }
+
+    String cmd = "";
+    try
+    {
+      cmd = wm.get("CMD").toString();
+    }
+    catch (NodeNotFoundException e)
+    {
+    }
+
+    if (cmd.equalsIgnoreCase("insertFormValue")) try
+    {
+      return wm.get("TRAFO").toString();
+    }
+    catch (NodeNotFoundException e)
+    {
     }
     return null;
   }
@@ -2722,17 +2803,160 @@ public class TextDocumentModel
    * muss nicht bündig mit den Grenzen dieses Feldes sein, aber es darf kein
    * zweites Formularfeld in der Selektion enthalten sein) und dieses eine TRAFO
    * gesetzt hat, so wird die Definition dieser TRAFO als ConfigThingy
-   * zurückgeliefert, ansonsten null.
+   * zurückgeliefert, ansonsten null. Wird eine TRAFO gefunden, die in einem
+   * globalen Konfigurationsabschnitt definiert ist (also nicht dokumentlokal)
+   * und damit auch nicht verändert werden kann, so wird ebenfalls null zurück
+   * geliefert.
    * 
    * @return null oder die Definition der TRAFO in der Form
    *         "TrafoName(FUNKTIONSDEFINITION)", wobei TrafoName die Bezeichnung
    *         ist, unter der die TRAFO mittels
    *         {@link #setTrafo(String, ConfigThingy)} modifiziert werden kann.
-   * @author Matthias Benkmann (D-III-ITD 5.1) TODO Testen
+   * @author Matthias Benkmann, Christoph Lutz (D-III-ITD 5.1) TESTED
    */
   synchronized public ConfigThingy getFormFieldTrafoFromSelection()
   {
+    XTextCursor vc = getViewCursor();
+    if (vc == null) return null;
+
+    HashMap collectedTrafos = collectTrafosFromEnumeration(vc);
+
+    // Auswertung von collectedTrafos
+    HashSet completeFields = new HashSet();
+    HashSet startedFields = new HashSet();
+    HashSet finishedFields = new HashSet();
+    for (Iterator iter = collectedTrafos.keySet().iterator(); iter.hasNext();)
+    {
+      String trafo = (String) iter.next();
+      int complete = ((Integer) collectedTrafos.get(trafo)).intValue();
+      if (complete == 1) startedFields.add(trafo);
+      if (complete == 2) finishedFields.add(trafo);
+      if (complete == 3) completeFields.add(trafo);
+    }
+
+    // Das Feld ist eindeutig bestimmbar, wenn genau ein vollständiges Feld oder
+    // als Fallback genau eine Startmarke gefunden wurde.
+    String trafoName = null;
+    if (completeFields.size() > 1)
+      return null; // nicht eindeutige Felder
+    else if (completeFields.size() == 1)
+      trafoName = completeFields.iterator().next().toString();
+    else if (startedFields.size() > 1)
+      return null; // nicht eindeutige Felder
+    else if (startedFields.size() == 1)
+      trafoName = startedFields.iterator().next().toString();
+
+    // zugehöriges ConfigThingy aus der Formularbeschreibung zurückliefern.
+    if (trafoName != null)
+      try
+      {
+        return getFormDescription().query("Formular").query("Funktionen")
+            .query(trafoName, 2).getLastChild();
+      }
+      catch (NodeNotFoundException e)
+      {
+      }
+
     return null;
+  }
+
+  /**
+   * Gibt die Namen aller in der XTextRange gefunden Trafos als Schlüssel einer
+   * HashMap zurück. Die zusätzlichen Integer-Werte in der HashMap geben an, ob
+   * (1) nur die Startmarke, (2) nur die Endemarke oder (3) ein vollständiges
+   * Bookmark/Feld gefunden wurde (Bei atomaren Feldern wird gleich 3 als Wert
+   * gesetzt).
+   * 
+   * @param textRange
+   *          die XTextRange an der gesucht werden soll.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  private static HashMap collectTrafosFromEnumeration(XTextRange textRange)
+  {
+    HashMap collectedTrafos = new HashMap();
+
+    if (textRange == null) return collectedTrafos;
+    XEnumerationAccess parEnumAcc = UNO.XEnumerationAccess(textRange.getText()
+        .createTextCursorByRange(textRange));
+    if (parEnumAcc == null) return collectedTrafos;
+
+    XEnumeration parEnum = parEnumAcc.createEnumeration();
+    while (parEnum.hasMoreElements())
+    {
+      XEnumerationAccess porEnumAcc = null;
+      try
+      {
+        porEnumAcc = UNO.XEnumerationAccess(parEnum.nextElement());
+      }
+      catch (java.lang.Exception e)
+      {
+        Logger.error(e);
+      }
+      if (porEnumAcc == null) continue;
+
+      XEnumeration porEnum = porEnumAcc.createEnumeration();
+      while (porEnum.hasMoreElements())
+      {
+        Object portion = null;
+        try
+        {
+          portion = porEnum.nextElement();
+        }
+        catch (java.lang.Exception e)
+        {
+          Logger.error(e);
+        }
+
+        // InputUser-Textfelder verarbeiten
+        XTextField tf = UNO.XTextField(UNO.getProperty(portion, "TextField"));
+        if (tf != null
+            && UNO.supportsService(tf, "com.sun.star.text.TextField.InputUser"))
+        {
+          String varName = "" + UNO.getProperty(tf, "Content");
+          String t = getFunctionNameForUserFieldName(varName);
+          if (t != null) collectedTrafos.put(t, new Integer(3));
+        }
+
+        // Dokumentkommandos (derzeit insertFormValue) verarbeiten
+        XNamed bm = UNO.XNamed(UNO.getProperty(portion, "Bookmark"));
+        if (bm != null)
+        {
+          String name = "" + bm.getName();
+
+          boolean isStart = false;
+          boolean isEnd = false;
+          try
+          {
+            boolean isCollapsed = AnyConverter.toBoolean(UNO.getProperty(
+                portion,
+                "IsCollapsed"));
+            isStart = AnyConverter.toBoolean(UNO
+                .getProperty(portion, "IsStart"))
+                      || isCollapsed;
+            isEnd = !isStart || isCollapsed;
+          }
+          catch (IllegalArgumentException e)
+          {
+          }
+
+          Matcher m = WOLLMUX_BOOKMARK_PATTERN.matcher(name);
+          if (m.matches())
+          {
+            String t = getFunctionNameForDocumentCommand(m.group(1));
+            if (t != null)
+            {
+              Integer s = (Integer) collectedTrafos.get(t);
+              if (s == null) s = new Integer(0);
+              if (isStart) s = new Integer(s.intValue() | 1);
+              if (isEnd) s = new Integer(s.intValue() | 2);
+              collectedTrafos.put(t, s);
+            }
+          }
+        }
+      }
+    }
+    return collectedTrafos;
   }
 
   /**
@@ -2749,11 +2973,67 @@ public class TextDocumentModel
    *          erlaubter Funktionsname, z.B. "AND" sein. Der Bezeichner wird
    *          NICHT verwendet. Der Name der TRAFO wird ausschließlich durch
    *          trafoName festgelegt.
-   * @author Matthias Benkmann (D-III-ITD 5.1) TODO Testen
+   * @throws UnavailableException
+   *           wird geworfen, wenn die Trafo trafoName nicht schreibend
+   *           verändert werden kann, weil sie z.B. in einer globalen
+   *           Funktionsbeschreibung definiert ist.
+   * @throws ConfigurationErrorException
+   *           beim Parsen der Funktion trafoConf trat ein Fehler auf.
+   * @author Matthias Benkmann, Christoph Lutz (D-III-ITD 5.1) TODO Testen
    */
   synchronized public void setTrafo(String trafoName, ConfigThingy trafoConf)
+      throws UnavailableException, ConfigurationErrorException
   {
+    // Funktion parsen und in Funktionsbibliothek setzen:
+    FunctionLibrary funcLib = getFunctionLibrary();
+    Function function = FunctionFactory.parseChildren(
+        trafoConf,
+        funcLib,
+        getDialogLibrary(),
+        getFunctionContext());
+    funcLib.remove(trafoName);
+    funcLib.add(trafoName, function);
 
+    // Funktionsknoten aus Formularbeschreibung zum Anpassen holen
+    ConfigThingy func;
+    try
+    {
+      func = getFormDescription().query("Formular").query("Funktionen").query(
+          trafoName,
+          2).getLastChild();
+    }
+    catch (NodeNotFoundException e)
+    {
+      throw new UnavailableException(e);
+    }
+
+    // Kinder von func löschen, damit sie später neu gesetzt werden können
+    for (Iterator iter = func.iterator(); iter.hasNext();)
+    {
+      iter.next();
+      iter.remove();
+    }
+
+    // Kinder von trafoConf auf func übertragen
+    for (Iterator iter = trafoConf.iterator(); iter.hasNext();)
+    {
+      ConfigThingy f = (ConfigThingy) iter.next();
+      func.addChild(new ConfigThingy(f));
+    }
+
+    // neue Formularbeschreibung sichern
+    storeCurrentFormDescription();
+
+    // Die neue Funktion kann von anderen IDs abhängen als die bisherige
+    // Funktion. Hier muss dafür gesorgt werden, dass in idToTextFieldFormFields
+    // veraltete ID-Zuordnungen gelöscht und neue ID-Zuordungen eingetragen
+    // werden. Am einfachsten macht dies vermutlich ein
+    // collectNonWollMuxFormFields(). InsertFormValue-Dokumentkommandos haben
+    // eine feste ID-Zuordnung und kommen aus dieser auch nicht aus. D.h.
+    // InsertFormValue-Bookmarks müssen nicht aktualisiert werden.
+    collectNonWollMuxFormFields();
+
+    // alle Felder updaten, die die Trafo trafoName verwenden:
+    updateAllFormFieldsWithTrafo(trafoName);
   }
-
 }
