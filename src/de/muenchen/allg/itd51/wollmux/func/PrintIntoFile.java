@@ -56,6 +56,7 @@ import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoProps;
+import de.muenchen.allg.itd51.wollmux.HashableComponent;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
@@ -161,10 +162,10 @@ public class PrintIntoFile
       String[] frameNames = UNO.XTextFramesSupplier(outputDoc).getTextFrames().getElementNames();
       String[] imageNames = UNO.XTextGraphicObjectsSupplier(outputDoc).getGraphicObjects().getElementNames();
       XIndexAccess shapes = UNO.XIndexAccess(UNO.XDrawPageSupplier(outputDoc).getDrawPage());
-      Set oids = new HashSet(shapes.getCount());
+      Set oldShapes = new HashSet(shapes.getCount());
       int shapeCount = shapes.getCount();
       for (int i = 0; i < shapeCount; ++i) 
-        oids.add(UnoRuntime.generateOid(shapes.getByIndex(i)));
+        oldShapes.add(new HashableComponent(UNO.XInterface(shapes.getByIndex(i))));
       
       /**
        *  Einfügen des 2. Dokuments
@@ -185,12 +186,15 @@ public class PrintIntoFile
       {
         //fixPageAnchoredObjects(UNO.XTextFramesSupplier(outputDoc).getTextFrames(), frameNames, pageNumberOffset);
         //fixPageAnchoredObjects(UNO.XTextGraphicObjectsSupplier(outputDoc).getGraphicObjects(), imageNames, pageNumberOffset);
-        fixPageAnchoredObjects(shapes, oids, pageNumberOffset);
+        fixPageAnchoredObjects(shapes, oldShapes, pageNumberOffset);
       }
       
       int pageCount = ((Number)UNO.getProperty(outputDoc.getCurrentController(), "PageCount")).intValue();
       pageCount -= pageNumberOffset;
       fixPageCountFields(UNO.XTextFieldsSupplier(outputDoc).getTextFields(), pageCount);
+      
+      oldShapes = null;
+      System.gc();
     }
     catch(Exception x)
     {
@@ -280,13 +284,13 @@ public class PrintIntoFile
   }
   
   /**
-   * Addiert auf die AnchorPageNo Property aller Objekte aus objects, deren OID nicht
-   * in oids enthalten ist den Wert pageNumberOffset.
+   * Addiert auf die AnchorPageNo Property aller Objekte aus objects, die nicht (als
+   * HashableComponent) in old enthalten sind den Wert pageNumberOffset.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
-  private static void fixPageAnchoredObjects(XIndexAccess objects, Set oids, int pageNumberOffset)
+  private static void fixPageAnchoredObjects(XIndexAccess objects, Set old, int pageNumberOffset)
   {
     int count = objects.getCount();
     for (int i = 0; i < count; ++i)
@@ -296,7 +300,7 @@ public class PrintIntoFile
         XNamed named = UNO.XNamed(ob);
         String name = "<Unknown>";
         if (named != null) name = named.getName();
-        if (!oids.contains(UnoRuntime.generateOid(ob)))
+        if (!old.contains(new HashableComponent(ob)))
         {
           if (TextContentAnchorType.AT_PAGE.equals(UNO.getProperty(ob, "AnchorType")))
           {
