@@ -2570,7 +2570,7 @@ public class TextDocumentModel
    * Durch die Aufräumaktion ändert sich der DocumentModified-Status des
    * Dokuments nicht.
    * 
-   * @author Christoph Lutz (D-III-ITD-5.1) TODO: TESTEN
+   * @author Christoph Lutz (D-III-ITD-5.1) TESTED
    */
   private void cleanupGarbageOfUnreferencedAutofunctions()
   {
@@ -2762,14 +2762,16 @@ public class TextDocumentModel
 
   /**
    * Ersetzt die aktuelle Selektion (falls vorhanden) durch ein
-   * WollMux-Formularfeld mit ID id und der durch trafoConf definierten TRAFO.
-   * Das Formularfeld ist direkt einsetzbar, d.h. sobald diese Methode
-   * zurückkehrt, kann über setFormFieldValue(id,...) das Feld befüllt werden.
-   * Ist keine Selektion vorhanden, so tut die Funktion nichts.
+   * WollMux-Formularfeld mit ID id, dem Hinweistext hint und der durch
+   * trafoConf definierten TRAFO. Das Formularfeld ist direkt einsetzbar, d.h.
+   * sobald diese Methode zurückkehrt, kann über setFormFieldValue(id,...) das
+   * Feld befüllt werden. Ist keine Selektion vorhanden, so tut die Funktion
+   * nichts.
    * 
-   * @param id
-   *          die ID über die das Feld mit
-   *          {@link #setFormFieldValue(String, String)} befüllt werden kann.
+   * @param hint
+   *          Ein Hinweistext der als Tooltip des neuen Formularfeldes angezeigt
+   *          werden soll. hint kann null sein, dann wird kein Hinweistext
+   *          angezeigt.
    * @param trafoConf
    *          darf null sein, dann wird keine TRAFO gesetzt. Ansonsten ein
    *          ConfigThingy mit dem Aufbau "Bezeichner( FUNKTIONSDEFINITION )",
@@ -2780,17 +2782,21 @@ public class TextDocumentModel
    *          erlaubter Funktionsname, z.B. "AND" sein. Der Bezeichner wird
    *          NICHT als Name der TRAFO verwendet. Stattdessen wird ein neuer
    *          eindeutiger TRAFO-Name generiert.
+   * @param id
+   *          die ID über die das Feld mit
+   *          {@link #setFormFieldValue(String, String)} befüllt werden kann.
+   * 
    * @author Matthias Benkmann, Christoph Lutz (D-III-ITD 5.1) TESTED
    */
   synchronized public void replaceSelectionWithFormField(String fieldId,
-      ConfigThingy trafoConf)
+      String hint, ConfigThingy trafoConf)
   {
     String trafoName = addLocalAutofunction(trafoConf);
 
     try
     {
       // Neues UserField an der Cursorposition einfügen
-      addNewInputUserField(getViewCursor(), trafoName, null);
+      addNewInputUserField(getViewCursor(), trafoName, hint);
 
       // Feldwert mit leerem Inhalt vorbelegen, wenn noch kein Wert gesetzt ist.
       if (!formFieldValues.containsKey(fieldId))
@@ -2986,25 +2992,15 @@ public class TextDocumentModel
    *          trafoName festgelegt.
    * @throws UnavailableException
    *           wird geworfen, wenn die Trafo trafoName nicht schreibend
-   *           verändert werden kann, weil sie z.B. in einer globalen
-   *           Funktionsbeschreibung definiert ist.
+   *           verändert werden kann, weil sie z.B. nicht existiert oder in
+   *           einer globalen Funktionsbeschreibung definiert ist.
    * @throws ConfigurationErrorException
    *           beim Parsen der Funktion trafoConf trat ein Fehler auf.
-   * @author Matthias Benkmann, Christoph Lutz (D-III-ITD 5.1) TODO Testen
+   * @author Matthias Benkmann, Christoph Lutz (D-III-ITD 5.1) TESTED
    */
   synchronized public void setTrafo(String trafoName, ConfigThingy trafoConf)
       throws UnavailableException, ConfigurationErrorException
   {
-    // Funktion parsen und in Funktionsbibliothek setzen:
-    FunctionLibrary funcLib = getFunctionLibrary();
-    Function function = FunctionFactory.parseChildren(
-        trafoConf,
-        funcLib,
-        getDialogLibrary(),
-        getFunctionContext());
-    funcLib.remove(trafoName);
-    funcLib.add(trafoName, function);
-
     // Funktionsknoten aus Formularbeschreibung zum Anpassen holen
     ConfigThingy func;
     try
@@ -3017,6 +3013,15 @@ public class TextDocumentModel
     {
       throw new UnavailableException(e);
     }
+
+    // Funktion parsen und in Funktionsbibliothek setzen:
+    FunctionLibrary funcLib = getFunctionLibrary();
+    Function function = FunctionFactory.parseChildren(
+        trafoConf,
+        funcLib,
+        getDialogLibrary(),
+        getFunctionContext());
+    funcLib.add(trafoName, function);
 
     // Kinder von func löschen, damit sie später neu gesetzt werden können
     for (Iterator iter = func.iterator(); iter.hasNext();)
