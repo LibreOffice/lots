@@ -76,6 +76,7 @@ import com.sun.star.util.XCloseListener;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
+import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
@@ -880,9 +881,98 @@ public class MailMergeNew
      */
     public MailMergeDatasource(TextDocumentModel mod)
     {
-      this.mod = mod;
+      this.mod = mod;      
+      openDatasourceFromLastStoredSettings();
     }
 
+    /**
+     * Öffnet die Datenquelle die durch einen früheren Aufruf von
+     * storeDatasourceSettings() im Dokument hinterlegt wurde.
+     * 
+     * @author Christoph Lutz (D-III-ITD-5.1) TODO: Testen
+     */
+    private void openDatasourceFromLastStoredSettings()
+    {
+      ConfigThingy mmconf = mod.getMailmergeConfig();
+      ConfigThingy datenquelle = new ConfigThingy("");
+      try{
+        datenquelle = mmconf.query("Datenquelle").getLastChild();
+      }catch (NodeNotFoundException e){}
+      
+      String type = null;
+      try{
+        type = datenquelle.get("TYPE").toString();
+      }catch (NodeNotFoundException e){}
+      
+      if("calc".equalsIgnoreCase(type)) {
+        try{
+          String url = datenquelle.get("URL").toString();
+          String table = datenquelle.get("TABLE").toString();
+          try{
+            Object d = getCalcDoc(url);
+            if(d != null) setTable(table);
+          }catch (UnavailableException e){Logger.debug(e);}
+        }catch (NodeNotFoundException e){
+          Logger.error("Fehlendes Argument für Datenquelle vom Typ '" + type + "':", e);
+        }
+      } else if("ooo".equalsIgnoreCase(type)) {
+        try{
+          String source = datenquelle.get("SOURCE").toString();
+          String table = datenquelle.get("TABLE").toString();
+          // TODO: bestehende OOo-Datenbank verwenden
+        }catch (NodeNotFoundException e){
+          Logger.error("Fehlendes Argument für Datenquelle vom Typ '" + type + "':", e);
+        }        
+      } else if (type != null) {
+        Logger.error("Ignoriere Datenquelle mit unbekanntem Typ '" + type + "'");
+      }
+    }
+
+    /**
+     * Speichert die aktuellen Einstellungen zu dieser Datenquelle im
+     * zugehörigen Dokument persistent ab, damit die Datenquelle beim nächsten
+     * mal wieder automatisch geöffnet/verbunden werden kann.
+     * 
+     * @author Christoph Lutz (D-III-ITD-5.1) TODO: Testen
+     */
+    private void storeDatasourceSettings()
+    {
+      // ConfigThingy für Einstellungen der Datenquelle erstellen:
+      ConfigThingy dq = new ConfigThingy("Datenquelle");
+      ConfigThingy arg;
+      switch (sourceType)
+      {
+        case SOURCE_CALC:
+          if(calcUrl == null || tableName.length() == 0) break;
+          arg = new ConfigThingy("TYPE");
+          arg.addChild(new ConfigThingy("calc"));
+          dq.addChild(arg);
+          arg = new ConfigThingy("URL");
+          arg.addChild(new ConfigThingy(calcUrl));
+          dq.addChild(arg);
+          arg = new ConfigThingy("TABLE");
+          arg.addChild(new ConfigThingy(tableName));
+          dq.addChild(arg);
+          break;
+        case SOURCE_DB:
+          if(oooDatasourceName == null || tableName.length() == 0) break;
+          arg = new ConfigThingy("TYPE");
+          arg.addChild(new ConfigThingy("ooo"));
+          dq.addChild(arg);
+          arg = new ConfigThingy("SOURCE");
+          arg.addChild(new ConfigThingy(oooDatasourceName));
+          dq.addChild(arg);
+          arg = new ConfigThingy("TABLE");
+          arg.addChild(new ConfigThingy(tableName));
+          dq.addChild(arg);
+          break;
+      }
+
+      ConfigThingy seriendruck = new ConfigThingy("Seriendruck");
+      if(dq.count() > 0) seriendruck.addChild(dq);
+      mod.setMailmergeConfig(seriendruck);
+    }    
+    
     /**
      * Liefert die Titel der Spalten der aktuell ausgewählten Tabelle.
      * Ist derzeit keine Tabelle ausgewählt oder enthält die ausgewählte
@@ -1270,12 +1360,12 @@ public class MailMergeNew
       List allNames = getTableNames();
       if (allNames.isEmpty())
       {
-        tableName = "";
+        setTable("");
         return;
       }
       if (names.isEmpty()) names = allNames;
       
-      tableName = (String)names.get(0); //Falls der Benutzer den Dialog abbricht ohne Auswahl
+      setTable((String)names.get(0)); //Falls der Benutzer den Dialog abbricht ohne Auswahl
       
       if (names.size() == 1) return; //Falls es nur eine Tabelle gibt, Dialog unnötig.
       
@@ -1297,7 +1387,7 @@ public class MailMergeNew
           public void actionPerformed(ActionEvent e)
           {
             tableSelector.dispose();
-            tableName = name;
+            setTable(name);
           }
         });
         vbox.add(DimAdjust.maxWidthUnlimited(button));
@@ -1312,6 +1402,22 @@ public class MailMergeNew
       tableSelector.setLocation(x,y);
       tableSelector.setResizable(false);
       tableSelector.setVisible(true);
+    }
+
+    /**
+     * Setzt die zu verwendende Tabelle auf den Namen name und speichert die
+     * Einstellungen persistent im zugehörigen Dokument ab, damit sie bei der
+     * nächsten Bearbeitung des Dokuments wieder verfügbar sind.
+     * 
+     * @param name Name der Tabelle die aktuell eingestellt werden soll.
+     * 
+     * @author Christoph Lutz (D-III-ITD-5.1)
+     */
+    private void setTable(String name)
+    {
+      if (name == null) tableName = "";
+      else tableName = name;
+      storeDatasourceSettings();
     }
 
     /**
@@ -1520,7 +1626,7 @@ public class MailMergeNew
       removeListeners(calcDoc); //falls altes calcDoc vorhanden, dort deregistrieren.
       calcDoc = newCalcDoc;
       setListeners(calcDoc);
-//    TODO Änderung muss ins Dokument übertragen werden, damit beim nächsten Mal richtige Datenquelle geöffnet werden kann
+      storeDatasourceSettings();
     }
     
     
@@ -1684,7 +1790,7 @@ public class MailMergeNew
             public void run() {
               calcUrl = UNO.XModel(calcDoc).getURL();
               Logger.debug("Speicherort der Tabelle hat sich geändert: \""+calcUrl+"\"");
-              //TODO Änderung muss ins Dokument übertragen werden, damit beim nächsten Mal richtige Datenquelle geöffnet werden kann
+              storeDatasourceSettings();
             }
           });
         }

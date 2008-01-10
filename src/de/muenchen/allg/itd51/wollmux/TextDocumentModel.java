@@ -116,6 +116,12 @@ public class TextDocumentModel
   private static final String DATA_ID_FORMULARWERTE = "WollMuxFormularwerte";
 
   /**
+   * Die dataId unter der die Metadaten der Seriendruckfunktion in
+   * {@link #persistentData} gespeichert werden.
+   */
+  private static final String DATA_ID_SERIENDRUCK = "WollMuxSeriendruck";
+
+  /**
    * Die dataId unter der der Name der Druckfunktion in {@link #persistentData}
    * gespeichert wird.
    */
@@ -287,6 +293,13 @@ public class TextDocumentModel
    * wurde.
    */
   private FunctionLibrary functionLib;
+
+  /**
+   * Enthält null oder ab dem ersten Aufruf von getMailmergeConf() die Metadaten
+   * für den Seriendruck in einem ConfigThingy, das derzeit in der Form
+   * "Seriendruck(Datenquelle(...))" aufgebaut ist.
+   */
+  private ConfigThingy mailmergeConf;
 
   /**
    * Erzeugt ein neues TextDocumentModel zum XTextDocument doc und sollte nie
@@ -1356,6 +1369,64 @@ public class TextDocumentModel
     }
 
     return formularConf;
+  }
+
+  /**
+   * Liefert den Seriendruck-Knoten der im Dokument gespeicherten
+   * Seriendruck-Metadaten zurück. Die Metadaten liegen im Dokument
+   * beispielsweise in der Form "WM(Seriendruck(Datenquelle(...)))" vor - diese
+   * Methode liefert aber nur der Knoten "Seriendruck" zurück. Enthält das
+   * Dokument keine Seriendruck-Metadaten, so liefert diese Methode einen leeren
+   * "Seriendruck"-Knoten zurück.
+   * 
+   * @author Christoph Lutz (D-III-ITD 5.1) TESTED
+   */
+  synchronized public ConfigThingy getMailmergeConfig()
+  {
+    if (mailmergeConf == null)
+    {
+      String data = persistentData.getData(DATA_ID_SERIENDRUCK);
+      mailmergeConf = new ConfigThingy("Seriendruck");
+      if (data != null)
+        try
+        {
+          mailmergeConf = new ConfigThingy("", data).query("WM").query(
+              "Seriendruck").getLastChild();
+        }
+        catch (java.lang.Exception e)
+        {
+          Logger.error(e);
+        }
+    }
+    return mailmergeConf;
+  }
+
+  /**
+   * Diese Methode speichert die als Kinder von conf übergebenen Metadaten für
+   * den Seriendruck persistent im Dokument oder löscht die Metadaten aus dem
+   * Dokument, wenn conf keine Kinder besitzt. conf kann dabei ein beliebig
+   * benannter Konten sein, dessen Kinder müssen aber gültige Schlüssel des
+   * Abschnitts WM(Seriendruck(...) darstellen. So ist z.B. "Datenquelle" ein
+   * gültiger Kindknoten von conf.
+   * 
+   * @param conf
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1) TESTED
+   */
+  synchronized public void setMailmergeConfig(ConfigThingy conf)
+  {
+    mailmergeConf = new ConfigThingy("Seriendruck");
+    for (Iterator iter = conf.iterator(); iter.hasNext();)
+    {
+      ConfigThingy c = new ConfigThingy((ConfigThingy) iter.next());
+      mailmergeConf.addChild(c);
+    }
+    ConfigThingy wm = new ConfigThingy("WM");
+    wm.addChild(mailmergeConf);
+    if (mailmergeConf.count() > 0)
+      persistentData.setData(DATA_ID_SERIENDRUCK, wm.stringRepresentation());
+    else
+      persistentData.removeData(DATA_ID_SERIENDRUCK);
   }
 
   /**
