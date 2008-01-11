@@ -2478,6 +2478,9 @@ public class TextDocumentModel
     if (currentMax4000 != null) currentMax4000.dispose();
     currentMax4000 = null;
 
+    if (currentMM != null) currentMM.dispose();
+    currentMM = null;
+
     if (formModel != null) formModel.disposing(this);
     formModel = null;
 

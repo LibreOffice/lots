@@ -386,7 +386,24 @@ public class MailMergeNew
     
     if (!ds.hasDatasource()) ds.showDatasourceSelectionDialog(myFrame);
   }
-  
+
+  /**
+   * Schliesst den MailMergeNew und alle zugehörigen Fenster.
+   * 
+   * @author Christoph Lutz (D-III-ITD 5.1)
+   */
+  public void dispose()
+  {
+    try{
+      javax.swing.SwingUtilities.invokeLater(new Runnable() {
+        public void run() {
+            try{abort();}catch(Exception x){};
+        }
+      });
+    }
+    catch(Exception x) {}
+  }
+
   /**
    * Zeigt den Dialog an, der die Serienbriefverarbeitung (Direktdruck oder in neues Dokument)
    * anwirft.
