@@ -1466,19 +1466,30 @@ public class TextDocumentModel
   /**
    * Speichert die aktuelle Formularbeschreibung in den persistenten Daten des
    * Dokuments oder löscht den entsprechenden Abschnitt aus den persistenten
-   * Daten, wenn der oberste Knoten ("WM") der Formularbeschreibung keine Kinder
-   * hat.
+   * Daten, wenn die Formularbeschreibung nur aus einer leeren Struktur ohne
+   * eigentlichen Formularinhalt besteht.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
   private void storeCurrentFormDescription()
   {
-    ConfigThingy wm = getFormDescription();
-    if (wm.count() > 0)
-      persistentData.setData(DATA_ID_FORMULARBESCHREIBUNG, wm
-          .stringRepresentation());
-    else
-      persistentData.removeData(DATA_ID_FORMULARBESCHREIBUNG);
+    ConfigThingy conf = getFormDescription();
+    try
+    {
+      if ((conf.query("Fenster").count() > 0 && conf.get("Fenster").count() > 0)
+          || (conf.query("Sichtbarkeit").count() > 0 && conf
+              .get("Sichtbarkeit").count() > 0)
+          || (conf.query("Funktionen").count() > 0 && conf.get("Funktionen")
+              .count() > 0))
+        persistentData.setData(DATA_ID_FORMULARBESCHREIBUNG, conf
+            .stringRepresentation());
+      else
+        persistentData.removeData(DATA_ID_FORMULARBESCHREIBUNG);
+    }
+    catch (NodeNotFoundException e)
+    {
+      Logger.error("Dies kann nicht passieren.", e);
+    }
   }
 
   /**
