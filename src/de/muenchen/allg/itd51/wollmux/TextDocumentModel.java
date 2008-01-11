@@ -1464,15 +1464,21 @@ public class TextDocumentModel
   }
 
   /**
-   * Speichert die aktuelle Formularbeschreibung, die immer mindestens aus einem
-   * WM-Knoten besteht in den persistenten Daten des Dokuments.
+   * Speichert die aktuelle Formularbeschreibung in den persistenten Daten des
+   * Dokuments oder löscht den entsprechenden Abschnitt aus den persistenten
+   * Daten, wenn der oberste Knoten ("WM") der Formularbeschreibung keine Kinder
+   * hat.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
   private void storeCurrentFormDescription()
   {
-    persistentData.setData(DATA_ID_FORMULARBESCHREIBUNG, getFormDescription()
-        .stringRepresentation());
+    ConfigThingy wm = getFormDescription();
+    if (wm.count() > 0)
+      persistentData.setData(DATA_ID_FORMULARBESCHREIBUNG, wm
+          .stringRepresentation());
+    else
+      persistentData.removeData(DATA_ID_FORMULARBESCHREIBUNG);
   }
 
   /**
@@ -1488,15 +1494,10 @@ public class TextDocumentModel
   synchronized public void setFormDescription(ConfigThingy conf)
   {
     if (conf != null)
-    {
       formularConf = conf;
-      storeCurrentFormDescription();
-    }
     else
-    {
       formularConf = new ConfigThingy("WM");
-      persistentData.removeData(DATA_ID_FORMULARBESCHREIBUNG);
-    }
+    storeCurrentFormDescription();
     setDocumentModified(true);
   }
 
