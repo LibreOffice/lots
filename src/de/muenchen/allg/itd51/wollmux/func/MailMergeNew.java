@@ -382,6 +382,7 @@ public class MailMergeNew
     int y = frameHeight*3;//screenSize.height/2 - frameHeight/2;
     myFrame.setLocation(x,y);
     myFrame.setResizable(false);
+    mod.addCoupledWindow(myFrame);
     myFrame.setVisible(true);
     
     if (!ds.hasDatasource()) ds.showDatasourceSelectionDialog(myFrame);
@@ -488,6 +489,7 @@ public class MailMergeNew
     {
       public void actionPerformed(ActionEvent e)
       {
+        mod.removeCoupledWindow(dialog);
         dialog.dispose();
       }
     });
@@ -500,6 +502,7 @@ public class MailMergeNew
     {
       public void actionPerformed(ActionEvent e)
       {
+        mod.removeCoupledWindow(dialog);
         dialog.dispose();
         doMailMerge();
       }
@@ -516,6 +519,7 @@ public class MailMergeNew
     int y = screenSize.height/2 - frameHeight/2;
     dialog.setLocation(x,y);
     dialog.setResizable(false);
+    mod.addCoupledWindow(dialog);
     dialog.setVisible(true);
   }
 
@@ -1158,6 +1162,7 @@ public class MailMergeNew
         button.addActionListener(new ActionListener(){
           public void actionPerformed(ActionEvent e)
           {
+            mod.removeCoupledWindow(datasourceSelector);
             datasourceSelector.dispose();
             selectOpenCalcWindowAsDatasource(parent);
           }});
@@ -1168,6 +1173,7 @@ public class MailMergeNew
       button.addActionListener(new ActionListener(){
         public void actionPerformed(ActionEvent e)
         {
+          mod.removeCoupledWindow(datasourceSelector);
           datasourceSelector.dispose();
           selectFileAsDatasource(parent);
         }
@@ -1178,6 +1184,7 @@ public class MailMergeNew
       button.addActionListener(new ActionListener(){
         public void actionPerformed(ActionEvent e)
         {
+          mod.removeCoupledWindow(datasourceSelector);
           datasourceSelector.dispose();
           openAndselectNewCalcTableAsDatasource(parent);
         }
@@ -1223,6 +1230,7 @@ public class MailMergeNew
       button.addActionListener(new ActionListener(){
         public void actionPerformed(ActionEvent e)
         {
+          mod.removeCoupledWindow(datasourceSelector);
           datasourceSelector.dispose();
         }
       });
@@ -1236,6 +1244,7 @@ public class MailMergeNew
       int y = screenSize.height/2 - frameHeight/2;
       datasourceSelector.setLocation(x,y);
       datasourceSelector.setResizable(false);
+      mod.addCoupledWindow(datasourceSelector);
       datasourceSelector.setVisible(true);
     }
     
@@ -1279,6 +1288,7 @@ public class MailMergeNew
         button.addActionListener(new ActionListener(){
           public void actionPerformed(ActionEvent e)
           {
+            mod.removeCoupledWindow(calcWinSelector);
             calcWinSelector.dispose();
             getCalcDoc(spread);
             selectTable(parent);
@@ -1295,8 +1305,8 @@ public class MailMergeNew
       int y = screenSize.height/2 - frameHeight/2;
       calcWinSelector.setLocation(x,y);
       calcWinSelector.setResizable(false);
+      mod.addCoupledWindow(calcWinSelector);
       calcWinSelector.setVisible(true);
-
     }
     
     /**
@@ -1403,6 +1413,7 @@ public class MailMergeNew
         button.addActionListener(new ActionListener(){
           public void actionPerformed(ActionEvent e)
           {
+            mod.removeCoupledWindow(tableSelector);
             tableSelector.dispose();
             setTable(name);
           }
@@ -1418,6 +1429,7 @@ public class MailMergeNew
       int y = screenSize.height/2 - frameHeight/2;
       tableSelector.setLocation(x,y);
       tableSelector.setResizable(false);
+      mod.addCoupledWindow(tableSelector);
       tableSelector.setVisible(true);
     }
 
@@ -1942,6 +1954,7 @@ public class MailMergeNew
   
   private void abort()
   {
+    mod.removeCoupledWindow(myFrame);
     /*
      * Wegen folgendem Java Bug (WONTFIX) 
      *   http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4259304

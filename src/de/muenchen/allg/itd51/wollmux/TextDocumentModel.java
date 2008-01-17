@@ -19,6 +19,7 @@
  */
 package de.muenchen.allg.itd51.wollmux;
 
+import java.awt.Window;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -35,6 +36,7 @@ import java.util.regex.Pattern;
 
 import com.sun.star.awt.DeviceInfo;
 import com.sun.star.awt.PosSize;
+import com.sun.star.awt.XTopWindow;
 import com.sun.star.awt.XWindow;
 import com.sun.star.beans.XPropertySet;
 import com.sun.star.container.NoSuchElementException;
@@ -69,6 +71,7 @@ import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.parser.SyntaxErrorException;
+import de.muenchen.allg.itd51.wollmux.CoupledWindowController.CoupledWindow;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.OptionalHighlightColorProvider;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.SetJumpMark;
 import de.muenchen.allg.itd51.wollmux.FormFieldFactory.FormField;
@@ -300,6 +303,12 @@ public class TextDocumentModel
    * "Seriendruck(Datenquelle(...))" aufgebaut ist.
    */
   private ConfigThingy mailmergeConf;
+
+  /**
+   * Enthält den Controller, der an das Dokumentfenster dieses Dokuments
+   * angekoppelte Fenster überwacht und steuert.
+   */
+  private CoupledWindowController coupledWindowController = null;
 
   /**
    * Erzeugt ein neues TextDocumentModel zum XTextDocument doc und sollte nie
@@ -2575,6 +2584,52 @@ public class TextDocumentModel
       }
     }
     return pmod;
+  }
+
+  /**
+   * TODO: comment TextDocumentModel.addCoupledWindow
+   * 
+   * @param w
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1) TODO: TESTEN
+   */
+  synchronized public void addCoupledWindow(Window window)
+  {
+    if (window == null) return;
+    if (coupledWindowController == null)
+    {
+      coupledWindowController = new CoupledWindowController();
+      XFrame f = getFrame();
+      XTopWindow w = null;
+      if (f != null) w = UNO.XTopWindow(f.getContainerWindow());
+      if (w != null) coupledWindowController.setTopWindow(w);
+    }
+
+    coupledWindowController.addCoupledWindow(window);
+  }
+
+  /**
+   * TODO: comment TextDocumentModel.removeCoupledWindow
+   * 
+   * @param w
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1) TODO: TESTEN
+   */
+  synchronized public void removeCoupledWindow(Window window)
+  {
+    if (window == null || coupledWindowController == null) return;
+
+    coupledWindowController.removeCoupledWindow(window);
+    
+    if (!coupledWindowController.hasCoupledWindows())
+    {
+      // deregistriert den windowListener.
+      XFrame f = getFrame();
+      XTopWindow w = null;
+      if (f != null) w = UNO.XTopWindow(f.getContainerWindow());
+      if (w != null) coupledWindowController.unsetTopWindow(w);
+      coupledWindowController = null;
+    }
   }
 
   /**
