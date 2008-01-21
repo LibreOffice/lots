@@ -71,7 +71,6 @@ import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.parser.SyntaxErrorException;
-import de.muenchen.allg.itd51.wollmux.CoupledWindowController.CoupledWindow;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.OptionalHighlightColorProvider;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.SetJumpMark;
 import de.muenchen.allg.itd51.wollmux.FormFieldFactory.FormField;

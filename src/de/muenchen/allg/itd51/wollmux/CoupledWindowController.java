@@ -28,6 +28,7 @@ import java.awt.Window;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 
 import com.sun.star.awt.XTopWindow;
@@ -63,145 +64,52 @@ public class CoupledWindowController
    */
   private class WindowStateWatcher
   {
-    private int[] state = new int[] { 1 };
+    private HashSet activeWindows = new HashSet();
 
     private int lastValidTimeoutEvent = 0;
 
     public void timeoutEvent(int nr)
     {
-      if (nr != lastValidTimeoutEvent)
+      synchronized (activeWindows)
       {
-        Logger.debug2("ignoriere ungültiges timeout event");
-        return;
-      }
-
-      synchronized (state)
-      {
-        int lastState = state[0];
-        switch (state[0])
+        if (nr != lastValidTimeoutEvent)
         {
-          case 6:
-            state[0] = 1;
-            setCoupledWindowsVisible(false);
-            break;
-          case 2:
-            state[0] = 5;
-            break;
+          Logger.debug2("ignoriere ungültiges timeout event");
+          return;
         }
+        Logger.debug2(activeWindows.size()
+                      + " aktive Fenster nach Timeout-Event");
 
-        Logger.debug2("Wechsel des Fensterstatus von "
-                      + lastState
-                      + " --timeout--> "
-                      + state[0]);
-      }
-
-    }
-
-    public void coupledWindowRemovedEvent()
-    {
-      synchronized (state)
-      {
-        int lastState = state[0];
-        switch (state[0])
+        if (activeWindows.size() == 0)
         {
-          case 5:
-            state[0] = 8;
-            break;
+          setCoupledWindowsVisible(false);
         }
-
-        Logger.debug2("Wechsel des Fensterstatus von "
-                      + lastState
-                      + " --windowRemoved--> "
-                      + state[0]);
       }
     }
 
-    public void activationOrDeactivationEvent(Object win, boolean active)
+    public void activationEvent(int hashCode)
     {
-      synchronized (state)
+      synchronized (activeWindows)
       {
-        int lastState = state[0];
-        if (win == null && active == true)
-        {
-          switch (state[0])
-          {
-            case 1:
-              state[0] = 2;
-              startWaitForTimeout();
-              setCoupledWindowsVisible(true);
-              break;
-            case 5:
-              state[0] = 7;
-              break;
-            case 6:
-              state[0] = 5;
-              break;
-            case 8:
-              state[0] = 5;
-              break;
-          }
-        }
-        else if (win == null && active == false)
-        {
-          switch (state[0])
-          {
-            case 2:
-              state[0] = 4;
-              break;
-            case 3:
-              state[0] = 5;
-              break;
-            case 5:
-              state[0] = 6;
-              startWaitForTimeout();
-              break;
-            case 7:
-              state[0] = 5;
-              break;
-          }
-        }
-        else if (win != null && active == true)
-        {
-          switch (state[0])
-          {
-            case 2:
-              state[0] = 3;
-              break;
-            case 4:
-              state[0] = 5;
-              break;
-            case 5:
-              state[0] = 7;
-              break;
-            case 6:
-              state[0] = 5;
-              break;
-            case 8:
-              state[0] = 5;
-              break;
-          }
-        }
-        else if (win != null && active == false)
-        {
-          switch (state[0])
-          {
-            case 5:
-              state[0] = 6;
-              startWaitForTimeout();
-              break;
-            case 7:
-              state[0] = 5;
-              break;
-          }
-        }
+        activeWindows.add(new Integer(hashCode));
+        setCoupledWindowsVisible(true);
 
-        Logger.debug2("Wechsel des Fensterstatus von "
-                      + lastState
-                      + " --"
-                      + ((active) ? "activation(" : "deactivation(")
-                      + ((win == null) ? "H" : "A")
-                      + ")--> "
-                      + state[0]);
+        Logger.debug2(activeWindows.size()
+                      + " aktive Fenster nach Aktivierung von #"
+                      + hashCode);
+      }
+    }
+
+    public void deactivationEvent(int hashCode)
+    {
+      synchronized (activeWindows)
+      {
+        activeWindows.remove(new Integer(hashCode));
+        startWaitForTimeout();
+
+        Logger.debug2(activeWindows.size()
+                      + " aktive Fenster nach Deaktivierung von #"
+                      + hashCode);
       }
     }
 
@@ -214,7 +122,7 @@ public class CoupledWindowController
         {
           try
           {
-            Thread.sleep(100);
+            Thread.sleep(200);
           }
           catch (InterruptedException e)
           {
@@ -235,12 +143,12 @@ public class CoupledWindowController
     {
       public void windowDeactivated(EventObject arg0)
       {
-        windowState.activationOrDeactivationEvent(null, false);
+        windowState.deactivationEvent(arg0.Source.hashCode());
       }
 
       public void windowActivated(EventObject arg0)
       {
-        windowState.activationOrDeactivationEvent(null, true);
+        windowState.activationEvent(arg0.Source.hashCode());
       }
 
       public void windowNormalized(EventObject arg0)
@@ -251,6 +159,10 @@ public class CoupledWindowController
       public void windowMinimized(EventObject arg0)
       {
         setCoupledWindowsVisible(false);
+        synchronized (activeWindows)
+        {
+          activeWindows.clear();
+        }
       }
 
       public void windowClosed(EventObject arg0)
@@ -281,7 +193,7 @@ public class CoupledWindowController
     {
       public void windowActivated(WindowEvent e)
       {
-        windowState.activationOrDeactivationEvent(e.getSource(), true);
+        windowState.activationEvent(e.getSource().hashCode());
       }
 
       public void windowClosed(WindowEvent e)
@@ -296,7 +208,7 @@ public class CoupledWindowController
 
       public void windowDeactivated(WindowEvent e)
       {
-        windowState.activationOrDeactivationEvent(e.getSource(), false);
+        windowState.deactivationEvent(e.getSource().hashCode());
       }
 
       public void windowDeiconified(WindowEvent e)
@@ -314,21 +226,6 @@ public class CoupledWindowController
         // nicht relevant
       }
     };
-
-    /**
-     * TODO: comment WindowStateWatcher.setStateActive
-     * 
-     * @param active
-     * 
-     * @author Christoph Lutz (D-III-ITD-5.1)
-     */
-    public void setStateActive(boolean active)
-    {
-      synchronized (state)
-      {
-        state[0] = (active) ? 5 : 1;
-      }
-    }
   }
 
   /**
@@ -350,6 +247,9 @@ public class CoupledWindowController
   /**
    * TODO: comment TextDocumentModel.removeCoupledWindow
    * 
+   * muss aufgerufen werden, nachdem das Fenster auf unsichtbar gestellt wurde
+   * (sonst kommt der Zähler durcheinander, der die aktiven Fenster überwacht).
+   * 
    * @param w
    * 
    * @author Christoph Lutz (D-III-ITD-5.1) TODO: TESTEN
@@ -368,11 +268,14 @@ public class CoupledWindowController
         toRemove.removeWindowListener(windowState.coupledWindowListener);
       }
     }
-    windowState.coupledWindowRemovedEvent();
+    windowState.deactivationEvent(window.hashCode());
   }
 
   /**
    * TODO: comment TextDocumentModel.setCoupledWindowsVisisble
+   * 
+   * Diese Methode muss aufgerufen werden, wenn das Fenster noch nicht sichtbar
+   * ist.
    * 
    * @param visible
    * 
@@ -396,9 +299,9 @@ public class CoupledWindowController
    */
   public void setTopWindow(XTopWindow w)
   {
-    windowState.setStateActive(true);
     if (w == null) return;
     w.addTopWindowListener(windowState.topWindowListener);
+    windowState.activationEvent(w.hashCode());
   }
 
   /**
@@ -412,7 +315,7 @@ public class CoupledWindowController
   {
     if (w == null) return;
     w.removeTopWindowListener(windowState.topWindowListener);
-    windowState.setStateActive(false);
+    windowState.deactivationEvent(w.hashCode());
   }
 
   /**
