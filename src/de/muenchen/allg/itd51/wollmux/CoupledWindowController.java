@@ -91,6 +91,14 @@ public class CoupledWindowController
     {
       synchronized (activeWindows)
       {
+        // Eigentlich kann zu einem Zeitpunkt immer nur ein Fenster aktiv sein.
+        // Unter Windows wird diese Anforderung aber nicht immer eingehalten.
+        // Gerade beim Umschalten zwischen zwei Fenstern kann es durch zeitliche
+        // Schwankungen dazu kommen, dass das Activation-Event des neuen
+        // Fensters vor der Deaktivierung des alten Fensters erfolgt. Durch den
+        // Einsatz des HashSets und durch activeWindows.clear() kann das
+        // gewuenschte Verhalten hier aber nachgebildet werden.
+        activeWindows.clear();
         activeWindows.add(new Integer(hashCode));
         setCoupledWindowsVisible(true);
 
