@@ -73,6 +73,7 @@ import com.sun.star.ui.dialogs.XFilePicker;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.util.CloseVetoException;
 import com.sun.star.util.XCloseListener;
+import com.sun.star.util.XModifiable;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
@@ -1325,8 +1326,13 @@ public class MailMergeNew
         XSpreadsheets sheets = spread.getSheets();
         String[] sheetNames = sheets.getElementNames();
 
+        // Lösche alle bis auf das erste Tabellenblatt ohne Änderung des
+        // Modified-Status.
+        XModifiable xmo = UNO.XModifiable(spread);
+        boolean modified = (xmo != null)? xmo.isModified() : false;
         for (int i = 1; i < sheetNames.length; ++i)
           sheets.removeByName(sheetNames[i]);
+        if(xmo != null) xmo.setModified(modified);
         
         getCalcDoc(spread);
         selectTable(parent);
