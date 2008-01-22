@@ -1,21 +1,14 @@
 /*
- * TODO Dateiname: Bookmark.java
+ * Dateiname: CoupledWindowController.java
  * Projekt  : WollMux
- * Funktion : Diese Klasse repräsentiert ein Bookmark in OOo und bietet Methoden
- *            für den vereinfachten Zugriff und die Manipulation von Bookmarks an.
+ * Funktion : Diese Klasse steuert die Ankopplung von Fenstern an ein XTopWindow-Hauptfenster von OOo.
  * 
  * Copyright: Landeshauptstadt München
  *
  * Änderungshistorie:
  * Datum      | Wer | Änderungsgrund
  * -------------------------------------------------------------------
- * 17.05.2006 | LUT | Dokumentation ergänzt
- * 07.08.2006 | BNK | +Bookmark(XNamed bookmark, XTextDocument doc)
- * 29.09.2006 | BNK | rename() gibt nun im Fehlerfall das BROKEN-String-Objekt zurück
- * 29.09.2006 | BNK | Unnötige renames vermeiden, um OOo nicht zu stressen
- * 29.09.2006 | BNK | Auch im optimierten Fall wo kein rename stattfindet auf BROKEN testen
- * 20.10.2006 | BNK | rename() Debug-Meldung nicht mehr ausgeben, wenn No Op Optimierung triggert.
- * 31.10.2006 | BNK | +select() zum Setzen des ViewCursors
+ * 22.01.2008 | LUT | Erstellung als CoupledWindowController
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -28,15 +21,35 @@ import java.awt.Window;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
 
 import com.sun.star.awt.XTopWindow;
 import com.sun.star.awt.XTopWindowListener;
 import com.sun.star.lang.EventObject;
 
+import de.muenchen.allg.afid.UNO;
+
 /**
- * TODO: comment
+ * Diese Klasse steuert die logische Ankopplung von eigentlich unabhängigen
+ * Fenstern an ein XTopWindow-Hauptfenster von OOo. Die angekoppelten Fenster
+ * werden nur sichtbar, wenn das Hauptfenster den Fokus erhält. Verliert das
+ * Hauptfenster oder ein angeoppeltes Fenster den Fokus an ein Fenster, das
+ * nicht vom CoupledWindowController überwacht wird, so werden alle
+ * angekoppelten Fenster unsichtbar gestellt.
+ * 
+ * ACHTUNG: Die Windowmanager unter Windows und auf dem Basisclient verhalten
+ * sich unterschiedlich und es werden unterschiedliche Ereignisse für gleiche
+ * Aktionen generiert: z.B. erhält die Seriendruckleiste (das erste Beispiel
+ * eines angekoppelten Fensters) auf dem Basisclient immer den Fokus, wenn
+ * setCoupledWindowsVisible(true) aufgerufen wurde. Unter Windows wird das
+ * Fenster zwar kurz aktiv, bekommt aber nicht den Fokus. Auch Situationen wie
+ * das Schließen eines AWT-Fensters, das ein Parent-Window gesetzt hat, führen
+ * zu unterschiedlichen Events auf dem Basisclient und unter Windows. Es ist
+ * auch nicht gewährleistet, dass die Ereignisse Deaktivierung/Aktivierung beim
+ * Fensterwechsel immer in der selben Reihenfolge eintreffen. Diese Klasse
+ * enthält einen Stand, der nach langer Arbeit und Probiererei nun endlich in
+ * den meisten Fällen funktioniert. Wenn hier etwas geändert werden muss, dann
+ * unbedingt unter Windows und auf dem Basisclient ausführlich testen!!!
  * 
  * @author Christoph Lutz (D-III-ITD-5.1)
  */
@@ -44,83 +57,175 @@ public class CoupledWindowController
 {
 
   /**
-   * Enthält alle mit addCoupledWindow registrierten an dieses Dokument
-   * gekoppelten Fenster. Dieses Feld ist als ArrayList angelegt, damit
-   * gewährleistet ist, dass die Fenster immer in der Reihenfolge der
-   * Registrierung sichtbar/unsichtbar geschalten werden (also nicht in
-   * willkürlicher Reihenfolge, die ein HashSet mit sich bringen würde).
+   * Enthält alle mit addCoupledWindow registrierten angekoppelten Fenster.
+   * Dieses Feld ist als ArrayList angelegt, damit gewährleistet ist, dass die
+   * Fenster immer in der Reihenfolge der Registrierung sichtbar/unsichtbar
+   * geschalten werden (also nicht in willkürlicher Reihenfolge, die ein HashSet
+   * mit sich bringen würde).
    */
   private ArrayList coupledWindows = new ArrayList();
 
   /**
-   * TODO: dok
+   * Enthält den WindowStateWatcher, mit dem der Fensterstatus überwacht und die
+   * notwendigen Aktionen angestossen werden.
    */
   private WindowStateWatcher windowState = new WindowStateWatcher();
 
   /**
-   * TODO: comment TextDocumentModel
-   * 
-   * @author Christoph Lutz (D-III-ITD-5.1)
+   * Der WindowStateWatcher überwacht den Fensterstatus der angekoppelten
+   * Fenster und stößt ggf. die notwendigen Aktionen an. Der WindowStateWatcher
+   * enthält die Listener, mit denen das Hauptfenster und die angeoppelten
+   * Fenster überwacht werden und weiss immer bescheid, welches (registrierte)
+   * Fenster aktuell den Fokus besitzt. Er veranlasst entsprechende Aktionen,
+   * wenn das Hauptfenster den Fokus bekommt oder die Anwendung den Fokus an ein
+   * fremdes Fenster abgibt.
    */
   private class WindowStateWatcher
   {
-    private HashSet activeWindows = new HashSet();
+    /**
+     * Wenn ein Fenster deaktiviert und nach DEACTIVATION_TIMEOUT Millisekunden
+     * kein neues Fenster aktiviert wurde, dann werden alle angekoppelten
+     * Fenster auf unsichtbar gestellt.
+     */
+    private static final int DEACTIVATION_TIMEOUT = 200;
 
+    /**
+     * Enthält das aktuell aktive Fenster oder null, wenn kein Fenster aktiv
+     * ist.
+     */
+    private Object[] activeWindow = new Object[] { null };
+
+    /**
+     * Enthält eine eindeutige Nummer, die dem zuletzt gestarteten Warte-Thread
+     * für ein TimeoutEvent übergeben wurde.
+     */
     private int lastValidTimeoutEvent = 0;
 
+    /**
+     * Nachdem alle angekoppelten Fenster unsichtbar gestellt wurden, wird
+     * dieses Flag auf true gesetzt und gibt an, dass die Reaktivierung
+     * ausschließlich durch des Hauptfenster veranlasst werden darf.
+     */
+    private boolean acceptMainWindowOnly = true;
+
+    /**
+     * Behandelt ein timeoutEvent, das beim Fokusverlust an ein fremdes Fenster
+     * erzeugt wird. Ein Timeout-Event hat eine eindeutige Nummer, die mit
+     * lastValideTimeoutEvent übereinstimmen muss, damit das Event gültig ist
+     * (dient dazu, damit ein bereits laufender Warte-Thread nicht abgewürgt
+     * werden muss, wenn bereits der nächste - dann gültige - Warte-Thread
+     * angestossen wurde). Ist kein aktives Fenster vorhanden, so werden alle
+     * angekoppelten Fenster unsichtbar gemacht.
+     * 
+     * @param nr
+     *          eindeutige Nummer des timeout-Events, die mit
+     *          lastValidTimeoutEvent übereinstimmen muss, damit das Event
+     *          ausgeführt wird.
+     * 
+     * @author Christoph Lutz (D-III-ITD-5.1)
+     */
     public void timeoutEvent(int nr)
     {
-      synchronized (activeWindows)
+      synchronized (activeWindow)
       {
         if (nr != lastValidTimeoutEvent)
         {
           Logger.debug2("ignoriere ungültiges timeout event");
           return;
         }
-        Logger.debug2(activeWindows.size()
-                      + " aktive Fenster nach Timeout-Event");
 
-        if (activeWindows.size() == 0)
+        if (activeWindow[0] == null)
         {
+          Logger
+              .debug2("Timeout und kein aktives Fenster - stelle angekoppelte Fenster unsichtbar");
           setCoupledWindowsVisible(false);
+          acceptMainWindowOnly = true;
+        }
+        else
+        {
+          Logger.debug2("Timeout aber keine Aktion da Fenster aktiv #"
+                        + activeWindow[0].hashCode());
         }
       }
     }
 
-    public void activationEvent(int hashCode)
+    /**
+     * Registriert die Aktivierung eines Fensters, das durch den Schlüssel key
+     * eindeutig beschrieben wird.
+     * 
+     * @param key
+     *          der Schlüssel des derzeit aktiven Fensters, mit dem das Fenster
+     *          später deaktiviert werden kann.
+     * @param isMainWindow
+     *          Das Hauptfenster hat eine Sonderrolle, da nur die Aktivierung
+     *          des Hauptfenster das acceptMainWindow-Flag zurücksetzen darf.
+     *          Über diesen Parameter kann angegeben werden, ob das Fenster als
+     *          Hauptfenster interpretiert gewertet werden soll.
+     * 
+     * @author Christoph Lutz (D-III-ITD-5.1)
+     */
+    public void activationEvent(Object key, boolean isMainWindow)
     {
-      synchronized (activeWindows)
-      {
-        // Eigentlich kann zu einem Zeitpunkt immer nur ein Fenster aktiv sein.
-        // Unter Windows wird diese Anforderung aber nicht immer eingehalten.
-        // Gerade beim Umschalten zwischen zwei Fenstern kann es durch zeitliche
-        // Schwankungen dazu kommen, dass das Activation-Event des neuen
-        // Fensters vor der Deaktivierung des alten Fensters erfolgt. Durch den
-        // Einsatz des HashSets und durch activeWindows.clear() kann das
-        // gewuenschte Verhalten hier aber nachgebildet werden.
-        activeWindows.clear();
-        activeWindows.add(new Integer(hashCode));
-        setCoupledWindowsVisible(true);
+      if (key == null) return;
 
-        Logger.debug2(activeWindows.size()
-                      + " aktive Fenster nach Aktivierung von #"
-                      + hashCode);
+      if (acceptMainWindowOnly && !isMainWindow)
+      {
+        Logger.debug2("Aktivierung ignoriert da Fenster kein Hauptfenster #"
+                      + key.hashCode());
+        return;
+      }
+
+      synchronized (activeWindow)
+      {
+        Object lastActiveWindow = activeWindow[0];
+        activeWindow[0] = key;
+        if (lastActiveWindow == null)
+        {
+          setCoupledWindowsVisible(true);
+          acceptMainWindowOnly = false;
+        }
+
+        Logger.debug2("Aktivierung von Fenster #" + activeWindow[0].hashCode());
       }
     }
 
-    public void deactivationEvent(int hashCode)
+    /**
+     * Registriert die Deaktivierung eines Fensters, das durch den Schlüssel key
+     * eindeutig beschrieben ist. Key muss dabei identisch mit dem Schlüssel
+     * sein, mit dem das Fenster aktiviert wurde, sonst wird auch nichts
+     * unternommen. Eine bestimmte Zeit nach dem Deaktivieren des Fensters wird
+     * ein Timeout-Event abgesetzt.
+     * 
+     * @param key
+     * 
+     * @author Christoph Lutz (D-III-ITD-5.1)
+     */
+    public void deactivationEvent(Object key)
     {
-      synchronized (activeWindows)
+      if (key == null) return;
+      synchronized (activeWindow)
       {
-        activeWindows.remove(new Integer(hashCode));
-        startWaitForTimeout();
-
-        Logger.debug2(activeWindows.size()
-                      + " aktive Fenster nach Deaktivierung von #"
-                      + hashCode);
+        if (key.equals(activeWindow[0]))
+        {
+          Logger.debug2("Deaktivierung von Fenster #" + key.hashCode());
+          activeWindow[0] = null;
+          startWaitForTimeout();
+        }
+        else
+        {
+          Logger.debug2("Deaktierung ignoriert, da Fenster nicht aktiv #"
+                        + key.hashCode());
+        }
       }
     }
 
+    /**
+     * Erzeugt nach einer bestimmten Zeit ein Timeout-Event über das die
+     * angekoppelten Fenster unsichtbar geschalten werden, wenn bei Ausführung
+     * des Timeout-Events kein Fenster aktiv ist.
+     * 
+     * @author Christoph Lutz (D-III-ITD-5.1)
+     */
     private void startWaitForTimeout()
     {
       final int nr = ++lastValidTimeoutEvent;
@@ -130,7 +235,7 @@ public class CoupledWindowController
         {
           try
           {
-            Thread.sleep(200);
+            Thread.sleep(DEACTIVATION_TIMEOUT);
           }
           catch (InterruptedException e)
           {
@@ -143,20 +248,18 @@ public class CoupledWindowController
     }
 
     /**
-     * Enthält den WindowListener, über den festgestellt wird, ob das zu dieser
-     * Serienbriefleiste gehörende Textdokument derzeit aktiv ist (also den
-     * Fokus besitzt) oder nicht.
+     * Enthält den WindowListener der das Hauptfenster überwacht.
      */
     private final XTopWindowListener topWindowListener = new XTopWindowListener()
     {
       public void windowDeactivated(EventObject arg0)
       {
-        windowState.deactivationEvent(arg0.Source.hashCode());
+        windowState.deactivationEvent(UNO.XInterface(arg0.Source));
       }
 
       public void windowActivated(EventObject arg0)
       {
-        windowState.activationEvent(arg0.Source.hashCode());
+        windowState.activationEvent(UNO.XInterface(arg0.Source), true);
       }
 
       public void windowNormalized(EventObject arg0)
@@ -166,11 +269,12 @@ public class CoupledWindowController
 
       public void windowMinimized(EventObject arg0)
       {
-        setCoupledWindowsVisible(false);
-        synchronized (activeWindows)
+        synchronized (activeWindow)
         {
-          activeWindows.clear();
+          activeWindow[0] = null;
+          acceptMainWindowOnly = true;
         }
+        setCoupledWindowsVisible(false);
       }
 
       public void windowClosed(EventObject arg0)
@@ -195,13 +299,13 @@ public class CoupledWindowController
     };
 
     /**
-     * TODO: dok
+     * Enthält den WindowListener mit dem angekoppelte Fenster überwacht werden
      */
     private final WindowListener coupledWindowListener = new WindowListener()
     {
       public void windowActivated(WindowEvent e)
       {
-        windowState.activationEvent(e.getSource().hashCode());
+        windowState.activationEvent(e.getSource(), false);
       }
 
       public void windowClosed(WindowEvent e)
@@ -216,7 +320,7 @@ public class CoupledWindowController
 
       public void windowDeactivated(WindowEvent e)
       {
-        windowState.deactivationEvent(e.getSource().hashCode());
+        windowState.deactivationEvent(e.getSource());
       }
 
       public void windowDeiconified(WindowEvent e)
@@ -237,36 +341,38 @@ public class CoupledWindowController
   }
 
   /**
-   * TODO: comment TextDocumentModel.addCoupledWindow
+   * Koppelt das AWT-Window window an das Hauptfenster an. Die Methode muss
+   * aufgerufen werden, solange das Fenster window unsichtbar und nicht aktiv
+   * ist (also z.B. vor dem Aufruf von window.setVisible(true)).
    * 
-   * @param w
+   * @param window
+   *          das Fenster, das an das Hauptfenster angekoppelt werden soll.
    * 
-   * @author Christoph Lutz (D-III-ITD-5.1) TODO: TESTEN
+   * @author Christoph Lutz (D-III-ITD-5.1)
    */
   public void addCoupledWindow(Window window)
   {
     if (window == null) return;
     CoupledWindow toAdd = new CoupledAWTWindow(window);
-    Logger.debug2("addCoupledWindow + #" + toAdd.hashCode());
+    Logger.debug2("addCoupledWindow #" + toAdd.hashCode());
     toAdd.addWindowListener(windowState.coupledWindowListener);
     coupledWindows.add(toAdd);
   }
 
   /**
-   * TODO: comment TextDocumentModel.removeCoupledWindow
+   * Löst die Bindung eines angekoppelten Fensters window an das Hauptfenster.
    * 
-   * muss aufgerufen werden, nachdem das Fenster auf unsichtbar gestellt wurde
-   * (sonst kommt der Zähler durcheinander, der die aktiven Fenster überwacht).
+   * @param window
+   *          das Fenster, dessen Bindung zum Hauptfenster gelöst werden soll.
+   *          Ist das Fenster nicht angekoppelt, dann passiert nichts.
    * 
-   * @param w
-   * 
-   * @author Christoph Lutz (D-III-ITD-5.1) TODO: TESTEN
+   * @author Christoph Lutz (D-III-ITD-5.1)
    */
   public void removeCoupledWindow(Window window)
   {
     if (window == null) return;
     CoupledWindow toRemove = new CoupledAWTWindow(window);
-    Logger.debug2("removeCoupledWindow + #" + toRemove.hashCode());
+    Logger.debug2("removeCoupledWindow #" + toRemove.hashCode());
     for (Iterator iter = coupledWindows.iterator(); iter.hasNext();)
     {
       CoupledWindow w = (CoupledWindow) iter.next();
@@ -276,16 +382,11 @@ public class CoupledWindowController
         toRemove.removeWindowListener(windowState.coupledWindowListener);
       }
     }
-    windowState.deactivationEvent(window.hashCode());
+    windowState.deactivationEvent(window);
   }
 
   /**
-   * TODO: comment TextDocumentModel.setCoupledWindowsVisisble
-   * 
-   * Diese Methode muss aufgerufen werden, wenn das Fenster noch nicht sichtbar
-   * ist.
-   * 
-   * @param visible
+   * Diese Methode macht alle angekoppelten Fenster sichtbar oder unsichtbar.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
@@ -299,9 +400,11 @@ public class CoupledWindowController
   }
 
   /**
-   * TODO: comment CoupledWindowController.setTopWindow
+   * Registriert ein Hauptfenster in diesem CoupledWindowController und sollte
+   * immer vor der Benutzung des Controllers aufgerufen werden.
    * 
    * @param w
+   *          Das XTopWindow welches das entsprechende Hauptfenster ist.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
@@ -309,13 +412,15 @@ public class CoupledWindowController
   {
     if (w == null) return;
     w.addTopWindowListener(windowState.topWindowListener);
-    windowState.activationEvent(w.hashCode());
+    windowState.activationEvent(UNO.XInterface(w), true);
   }
 
   /**
-   * TODO: comment CoupledWindowController.unsetTopWindow
+   * Deregistriert ein Hauptfenster und sollte aufgerufen werden, wenn der
+   * Controller nicht mehr benötigt wird und aufgeräumt werden kann.
    * 
    * @param w
+   *          Das XTopWindow welches früher als Hauptfenster diente.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
@@ -323,13 +428,12 @@ public class CoupledWindowController
   {
     if (w == null) return;
     w.removeTopWindowListener(windowState.topWindowListener);
-    windowState.deactivationEvent(w.hashCode());
+    windowState.deactivationEvent(UNO.XInterface(w));
   }
 
   /**
-   * TODO: comment CoupledWindowController.hasCoupledWindows
-   * 
-   * @return
+   * Gibt an, ob in diesem CoupledWindowController angekoppelte Fenster
+   * registriert wurden.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
@@ -339,11 +443,11 @@ public class CoupledWindowController
   }
 
   /**
-   * TODO: comment TextDocumentModel
+   * Beschreibt ein beliebiges ankoppelbares Fenster.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  public interface CoupledWindow
+  private interface CoupledWindow
   {
     /**
      * Setzt das angekoppelte Fenster auf sichtbar oder unsichtbar und kann
@@ -382,7 +486,8 @@ public class CoupledWindowController
   /**
    * Diese Klasse repräsentiert ein CoupledWindow-Objekt, dem ein
    * java.awt.Window-Objekt zugrundeliegt und implementiert die Methoden
-   * hashCode() und equals() damit das Objekt sinnvoll verwaltet werden kann.
+   * hashCode() und equals() damit das Objekt sinnvoll verglichen und in einer
+   * HashMap verwaltet werden kann.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */

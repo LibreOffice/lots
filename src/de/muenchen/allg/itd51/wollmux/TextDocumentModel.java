@@ -2586,11 +2586,14 @@ public class TextDocumentModel
   }
 
   /**
-   * TODO: comment TextDocumentModel.addCoupledWindow
+   * Koppelt das AWT-Window window an das Fenster dieses Textdokuments an. Die
+   * Methode muss aufgerufen werden, solange das Fenster window unsichtbar und
+   * nicht aktiv ist (also z.B. vor dem Aufruf von window.setVisible(true)).
    * 
-   * @param w
+   * @param window
+   *          das Fenster, das an das Hauptfenster angekoppelt werden soll.
    * 
-   * @author Christoph Lutz (D-III-ITD-5.1) TODO: TESTEN
+   * @author Christoph Lutz (D-III-ITD-5.1)
    */
   synchronized public void addCoupledWindow(Window window)
   {
@@ -2608,18 +2611,21 @@ public class TextDocumentModel
   }
 
   /**
-   * TODO: comment TextDocumentModel.removeCoupledWindow
+   * Löst die Bindung eines angekoppelten Fensters window an das
+   * Dokumentfenster.
    * 
-   * @param w
+   * @param window
+   *          das Fenster, dessen Bindung zum Hauptfenster gelöst werden soll.
+   *          Ist das Fenster nicht angekoppelt, dann passiert nichts.
    * 
-   * @author Christoph Lutz (D-III-ITD-5.1) TODO: TESTEN
+   * @author Christoph Lutz (D-III-ITD-5.1)
    */
   synchronized public void removeCoupledWindow(Window window)
   {
     if (window == null || coupledWindowController == null) return;
 
     coupledWindowController.removeCoupledWindow(window);
-    
+
     if (!coupledWindowController.hasCoupledWindows())
     {
       // deregistriert den windowListener.
