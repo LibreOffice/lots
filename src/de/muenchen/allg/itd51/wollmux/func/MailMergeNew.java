@@ -59,6 +59,7 @@ import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
 import javax.swing.border.Border;
 
+import com.sun.star.awt.XTopWindow;
 import com.sun.star.container.XEnumeration;
 import com.sun.star.document.XEventListener;
 import com.sun.star.lang.EventObject;
@@ -343,7 +344,7 @@ public class MailMergeNew
         {
       public void actionPerformed(ActionEvent e)
       {
-        //TODO Tabelle bearbeiten Button
+        ds.toFront();
       }
         });
     tabelleMenu.add(item);
@@ -1503,6 +1504,7 @@ public class MailMergeNew
     private static String stripOpenOfficeFromWindowName(String str)
     {
       int idx = str.indexOf(" - OpenOffice");
+      //FIXME: kann unter StarOffice natürlich anders heissen oder bei einer anderen Office-Version
       if (idx > 0) str = str.substring(0, idx);
       return str;
     }
@@ -1833,6 +1835,26 @@ public class MailMergeNew
     }
 
     /**
+     * Versucht die Datenquelle in den Vordergrund zu holen und wird vom Button
+     * "Tabelle bearbeiten" aufgerufen.
+     * 
+     * @author Christoph Lutz (D-III-ITD-5.1)
+     */
+    public void toFront()
+    {
+      if (sourceType == SOURCE_CALC)
+      {
+        if (UNO.XModel(calcDoc) != null)
+        {
+          XTopWindow win = UNO.XTopWindow(UNO.XModel(calcDoc)
+              .getCurrentController().getFrame().getContainerWindow());
+          win.toFront();
+        }
+      }
+      // TODO: Behandlung der anderen Datenquellentypen
+    }
+    
+    /**
      * Gibt Ressourcen frei und deregistriert Listener.
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -1840,7 +1862,7 @@ public class MailMergeNew
     public void dispose()
     {
       removeListeners(calcDoc);
-    }
+    }    
   }
   
   private static class QueryResultsWithSchema implements QueryResults
