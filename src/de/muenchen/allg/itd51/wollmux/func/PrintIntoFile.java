@@ -27,8 +27,9 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import javax.swing.JButton;
@@ -38,6 +39,7 @@ import javax.swing.WindowConstants;
 
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.beans.UnknownPropertyException;
+import com.sun.star.beans.XPropertySet;
 import com.sun.star.container.NoSuchElementException;
 import com.sun.star.container.XEnumeration;
 import com.sun.star.container.XEnumerationAccess;
@@ -48,18 +50,20 @@ import com.sun.star.lang.WrappedTargetException;
 import com.sun.star.style.XStyleFamiliesSupplier;
 import com.sun.star.style.XStyleLoader;
 import com.sun.star.text.TextContentAnchorType;
+import com.sun.star.text.XParagraphCursor;
 import com.sun.star.text.XText;
 import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextRange;
+import com.sun.star.uno.AnyConverter;
 import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.itd51.wollmux.HashableComponent;
 import de.muenchen.allg.itd51.wollmux.Logger;
-import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
+import de.muenchen.allg.ooo.TextDocument;
 
 /**
  * "Druck"funktion, die das zu druckende Dokument an ein Ergebnisdokument anhängt.
@@ -113,6 +117,10 @@ public class PrintIntoFile
     try{
       String url = storeInTemporaryFile(inputDoc, dest);
       
+      String inputDocFirstPageStyleName = (String)UNO.getProperty(UNO.XEnumerationAccess(inputDoc.getText()).createEnumeration().nextElement(),"PageStyleName");
+      if ("Standard".equals(inputDocFirstPageStyleName))
+        inputDocFirstPageStyleName = null;
+      
       XText text = outputDoc.getText();
       if (firstAppend)
       {
@@ -127,16 +135,17 @@ public class PrintIntoFile
         XStyleLoader loader = UNO.XStyleLoader(sfs.getStyleFamilies());
         loader.loadStylesFromURL(url, props.getProps());
       }  
+      else // if (!firstAppend)
+      {
+        //Neuen Absatz am Ende einfügen für den Seitenumbruch
+        text.getEnd().setString("\r");
+      }
        
+      XTextCursor cursor = text.createTextCursorByRange(text.getEnd());
+      UNO.setProperty(cursor, "PageDescName", inputDocFirstPageStyleName);
+      
       if (!firstAppend)
       {
-        //    Seitenumbruch einfügen
-        text.getEnd().setString("\r");
-        XTextCursor cursor = text.createTextCursorByRange(text.getEnd());
-        Object pageStyleName = UNO.getProperty(cursor, "PageStyleName");
-        // Format-->Absatz-->Textfluss-->Umbrüche--> Checkbox "Einfügen" und
-        // "mit Seitenvorlage"
-        UNO.setProperty(cursor, "PageDescName", pageStyleName);
         /** Format-->Absatz-->Textfluss-->Umbrüche--> Checkbox "mit
          Seitenvorlage" --> Seitennummer 1 (Seitennummer mit 1 beginnen nach
          dem Seitenumbruch) 
@@ -147,11 +156,12 @@ public class PrintIntoFile
         UNO.setProperty(cursor, "PageNumberOffset", new Short((short)1));
       }
       
+      
       /**
        * OOo lässt nicht zu, dass eine Seite mit gerader realer Nummer eine
        * ungerade Seitenummer bekommt (durch einen Seitenumbruch mit gesetztem
        * PageNumberOffset (wie wir ihn ein Stück weiter oben eingefügt haben).
-       * Wird dies doch getan, dann fügt OOo eine leere Seiten, die zwar
+       * Wird dies doch getan, dann fügt OOo eine leere Seite ein, die zwar
        * gezählt, aber nicht angezeigt wird. Es ist also wichtig das pageNumberOffset
        * so wie hier nach dem Einfügen des Seitenumbruchs zu berechnen, weil
        * der eine eingefügte Seitenumbruch evtl. die Seitenanzahl um 2 steigen lässt.
@@ -159,13 +169,13 @@ public class PrintIntoFile
       int pageNumberOffset = ((Number)UNO.getProperty(outputDoc.getCurrentController(), "PageCount")).intValue();
       --pageNumberOffset; //Die gerade eben angehängte Seite darf nicht mitgezählt werden.
       
-      String[] frameNames = UNO.XTextFramesSupplier(outputDoc).getTextFrames().getElementNames();
-      String[] imageNames = UNO.XTextGraphicObjectsSupplier(outputDoc).getGraphicObjects().getElementNames();
+      //String[] frameNames = UNO.XTextFramesSupplier(outputDoc).getTextFrames().getElementNames();
+      //String[] imageNames = UNO.XTextGraphicObjectsSupplier(outputDoc).getGraphicObjects().getElementNames();
       XIndexAccess shapes = UNO.XIndexAccess(UNO.XDrawPageSupplier(outputDoc).getDrawPage());
       Set oldShapes = new HashSet(shapes.getCount());
       int shapeCount = shapes.getCount();
       for (int i = 0; i < shapeCount; ++i) 
-        oldShapes.add(new HashableComponent(UNO.XInterface(shapes.getByIndex(i))));
+        oldShapes.add(new HashableComponent(shapes.getByIndex(i)));
       
       /**
        *  Einfügen des 2. Dokuments
@@ -175,12 +185,17 @@ public class PrintIntoFile
        * pagebreak will be removed. Inserting documents with more than one
        * paragraph works as expected.
        */
-      XTextCursor cursor = text.createTextCursorByRange(text.getEnd());
+      cursor = text.createTextCursorByRange(text.getEnd());
       Logger.debug2("================= OID dump VOR insert ==================");
       dumpOids(outputDoc);
       UNO.XDocumentInsertable(cursor).insertDocumentFromURL(url, new PropertyValue[] {});
       Logger.debug2("================= OID dump NACH insert ==================");
       dumpOids(outputDoc);
+      
+      cursor.collapseToStart();
+      XParagraphCursor paraCursor = UNO.XParagraphCursor(cursor);
+      XNameAccess inputDocPageStyles = UNO.XNameAccess(UNO.XStyleFamiliesSupplier(inputDoc).getStyleFamilies().getByName("PageStyles"));
+      renamePageStyles(paraCursor, outputDoc, inputDocPageStyles);
       
       if (!firstAppend)
       {
@@ -206,20 +221,73 @@ public class PrintIntoFile
     }
   }
 
-  private static void dumpOids(XTextDocument outputDoc) throws Exception
+  /**
+   * Latscht mit dem Cursor solange die Paragraphen durch bis zum Ende und für jedes
+   * PageDescName Property wird das entsprechende Seitenformat auf ein neues kopiert mit einem
+   * noch nicht verwendeten Namen und das PageDescName-Property entsprechend geändert, dass
+   * es auf das neue Format verweist. Das selbe Format wird jeweils nur einmal kopiert.
+   * @param doc, das Dokument in dem der Cursor wandert
+   * @param oldPageStyles die PageStyles Familie des alten Dokuments
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TODO Testen
+   */
+  private static void renamePageStyles(XParagraphCursor cursor, XTextDocument doc, XNameAccess oldPageStyles)
+  {
+    XNameAccess newPageStyles;
+    try{
+      newPageStyles = UNO.XNameAccess(UNO.XStyleFamiliesSupplier(doc).getStyleFamilies().getByName("PageStyles"));
+    }catch(Exception x)
+    {
+      Logger.error(x);
+      return;
+    }
+    Map mapOldPageStyleName2NewPageStyleName = new HashMap();
+    while(true)
+    {
+      try{
+        Object ob = UNO.getProperty(cursor, "PageDescName");
+        if (AnyConverter.isString(ob))
+        {
+          String pageDescName = AnyConverter.toString(ob);
+          String newPageStyleName = (String)mapOldPageStyleName2NewPageStyleName.get(pageDescName); 
+          if (newPageStyleName == null)
+          {
+            XPropertySet oldStyle = UNO.XPropertySet(oldPageStyles.getByName(pageDescName));
+            do{
+              newPageStyleName = pageDescName + (int)(Math.random()*1000000.0);
+            } while (newPageStyles.hasByName(newPageStyleName));
+            TextDocument.copyPageStyle(doc, oldStyle, newPageStyleName);
+            mapOldPageStyleName2NewPageStyleName.put(pageDescName, newPageStyleName);
+          }
+          UNO.setProperty(cursor,"PageDescName", newPageStyleName);
+        }
+      }catch(Exception x)  
+      {
+        Logger.error(x);
+      }
+      if (!cursor.gotoNextParagraph(false)) break;
+    }
+  }
+  
+  /**
+   * Gibt die OIDs aller Shapes von outputDoc aus.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private static void dumpOids(XTextDocument outputDoc)
   {
     //TODO if (!WollMuxFiles.isDebugMode()) return;
     XIndexAccess shapes = UNO.XIndexAccess(UNO.XDrawPageSupplier(outputDoc).getDrawPage());
     int shapeCount = shapes.getCount();
-    for (int i = 0; i < shapeCount; ++i)
-    {
-      Object ob = shapes.getByIndex(i);
-      XNamed named = UNO.XNamed(ob);
-      String name = "<Unknown>";
-      if (named != null) name = named.getName();
-      Logger.debug2(name+" -> "+UnoRuntime.generateOid(ob));
-    }
-    
+    try{
+      for (int i = 0; i < shapeCount; ++i)
+      {
+        Object ob = shapes.getByIndex(i);
+        XNamed named = UNO.XNamed(ob);
+        String name = "<Unknown>";
+        if (named != null) name = named.getName();
+        Logger.debug2(name+" -> "+UnoRuntime.generateOid(ob));
+      }
+    }catch(Exception x){ Logger.debug2(x);}
   }
   
   /**
@@ -244,41 +312,6 @@ public class PrintIntoFile
       {
         XTextRange range = UNO.XTextContent(textfield).getAnchor();
         range.setString(pc);
-      }
-    }
-  }
-
-  /**
-   * Addiert auf die AnchorPageNo Property aller Objekte aus objects, deren Namen nicht in
-   * names stehen den Wert pageNumberOffset.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TESTED
-   */
-  private static void fixPageAnchoredObjects(XNameAccess objects, String[] names, int pageNumberOffset)
-  {
-    Set ignore = new HashSet(Arrays.asList(names));
-    
-    String allNames[] = objects.getElementNames();
-    for (int i = 0; i < allNames.length; ++i)
-    {
-      if (!ignore.contains(allNames[i]))
-      {
-        try{
-          Object ob = objects.getByName(allNames[i]);
-          if (TextContentAnchorType.AT_PAGE.equals(UNO.getProperty(ob, "AnchorType")))
-          {
-            int oldPageNo = ((Number)UNO.getProperty(ob, "AnchorPageNo")).intValue();
-            int newPageNo = oldPageNo + pageNumberOffset;
-            Object afterMovePageNo = UNO.setProperty(ob, "AnchorPageNo", new Short((short)newPageNo)); 
-            if (null == afterMovePageNo || ((Number)afterMovePageNo).intValue() != newPageNo)
-            {
-              Logger.error("Kann AnchorPageNo von Objekt \""+allNames[i]+"\" nicht auf "+newPageNo+" setzen");
-            }
-          }
-        }catch(Exception x) {
-          Logger.error(x);
-        }
       }
     }
   }
