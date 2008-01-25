@@ -311,7 +311,10 @@ public class PrintIntoFile
           && UNO.supportsService(textfield, "com.sun.star.text.textfield.PageCount"))
       {
         XTextRange range = UNO.XTextContent(textfield).getAnchor();
-        range.setString(pc);
+        XTextCursor cursor = range.getText().createTextCursorByRange(range.getStart());
+        cursor.setString(pc);
+        TextDocument.copyDirectValueCharAttributes(UNO.XPropertyState(range), UNO.XPropertySet(cursor));
+        range.setString("");
       }
     }
   }
