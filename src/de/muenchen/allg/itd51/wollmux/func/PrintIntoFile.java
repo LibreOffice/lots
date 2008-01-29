@@ -9,6 +9,7 @@
 * Datum      | Wer | Änderungsgrund
 * -------------------------------------------------------------------
 * 29.10.2007 | BNK | Erstellung
+* 29.01.2008 | BNK | Fertigstellung
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -107,7 +108,8 @@ public class PrintIntoFile
    * @param firstAppend muss auf true gesetzt werden, wenn dies das erste Mal ist, das
    *        etwas an das Gesamtdokument angehängt wird. In diesem Fall 
    *        werden die Formate aus inputDoc zuerst nach outputDoc übertragen und es
-   *        wird kein Zeilenumbruch eingefügt. 
+   *        wird kein Zeilenumbruch eingefügt. Außerdem werden in diesem Fall die
+   *        com.sun.star.document.Settings von inputDoc auf outputDoc übertragen.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
@@ -134,6 +136,11 @@ public class PrintIntoFile
         XStyleFamiliesSupplier sfs = UNO.XStyleFamiliesSupplier(outputDoc);
         XStyleLoader loader = UNO.XStyleLoader(sfs.getStyleFamilies());
         loader.loadStylesFromURL(url, props.getProps());
+        
+        XPropertySet inSettings = UNO.XPropertySet(UNO.XMultiServiceFactory(inputDoc).createInstance("com.sun.star.document.Settings"));
+        XPropertySet outSettings = UNO.XPropertySet(UNO.XMultiServiceFactory(outputDoc).createInstance("com.sun.star.document.Settings"));
+
+        TextDocument.copySimpleProperties(inSettings, outSettings);
       }  
       else // if (!firstAppend)
       {
