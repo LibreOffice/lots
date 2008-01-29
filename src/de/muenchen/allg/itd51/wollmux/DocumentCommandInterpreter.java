@@ -46,7 +46,6 @@ import com.sun.star.beans.PropertyAttribute;
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.beans.XMultiPropertySet;
 import com.sun.star.beans.XPropertySetInfo;
-import com.sun.star.container.NoSuchElementException;
 import com.sun.star.container.XEnumeration;
 import com.sun.star.container.XEnumerationAccess;
 import com.sun.star.container.XNameAccess;
@@ -85,6 +84,7 @@ import de.muenchen.allg.itd51.wollmux.db.DatasetNotFoundException;
 import de.muenchen.allg.itd51.wollmux.func.Function;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.func.Values.SimpleMap;
+import de.muenchen.allg.ooo.TextDocument;
 
 /**
  * Diese Klasse repräsentiert den Kommando-Interpreter zur Auswertung von
@@ -449,7 +449,7 @@ public class DocumentCommandInterpreter
 
       public void tueDeinePflicht()
       {
-        deleteParagraph(range);
+        TextDocument.deleteParagraph(range);
       }
     }
 
@@ -616,52 +616,6 @@ public class DocumentCommandInterpreter
       {
         end[0].goRight(cmd.getEndMarkLength(), true);
         muellmaenner.add(new RangeMuellmann(end[0]));
-      }
-    }
-
-    /**
-     * Löscht den ganzen ersten Absatz an der Cursorposition textCursor.
-     * 
-     * @param range
-     */
-    private void deleteParagraph(XTextRange range)
-    {
-      // Beim Löschen des Absatzes erzeugt OOo ein ungewolltes
-      // "Zombie"-Bookmark.
-      // Issue Siehe http://qa.openoffice.org/issues/show_bug.cgi?id=65247
-
-      XTextContent paragraph = null;
-
-      // Ersten Absatz des Bookmarks holen:
-      XEnumerationAccess access = UNO.XEnumerationAccess(range);
-      if (access != null)
-      {
-        XEnumeration xenum = access.createEnumeration();
-        if (xenum.hasMoreElements()) try
-        {
-          paragraph = UNO.XTextContent(xenum.nextElement());
-        }
-        catch (Exception e)
-        {
-          Logger.error(e);
-        }
-      }
-      if (paragraph == null) return;
-
-      // Lösche den Paragraph
-      try
-      {
-        // Ist der Paragraph der einzige Paragraph des Textes, dann kann er mit
-        // removeTextContent nicht gelöscht werden. In diesme Fall wird hier
-        // wenigstens der Inhalt entfernt:
-        paragraph.getAnchor().setString("");
-
-        // Paragraph löschen
-        range.getText().removeTextContent(paragraph);
-      }
-      catch (NoSuchElementException e)
-      {
-        Logger.error(e);
       }
     }
   }
