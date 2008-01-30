@@ -10,6 +10,7 @@
 * -------------------------------------------------------------------
 * 29.10.2007 | BNK | Erstellung
 * 29.01.2008 | BNK | Fertigstellung
+* 30.01.2008 | BNK | Workaround für Issue 73229
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -28,6 +29,7 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -56,6 +58,7 @@ import com.sun.star.text.XText;
 import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextRange;
+import com.sun.star.text.XTextRangeCompare;
 import com.sun.star.uno.AnyConverter;
 import com.sun.star.uno.UnoRuntime;
 
@@ -85,7 +88,7 @@ public class PrintIntoFile
    * @throws Exception falls was schief geht.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public static void printIntofile(XPrintModel pmod) throws Exception
+  public static void printIntoFile(XPrintModel pmod) throws Exception
   {
     boolean firstAppend = true;
     XTextDocument outputDoc = null;
@@ -120,8 +123,8 @@ public class PrintIntoFile
       String url = storeInTemporaryFile(inputDoc, dest);
       
       String inputDocFirstPageStyleName = (String)UNO.getProperty(UNO.XEnumerationAccess(inputDoc.getText()).createEnumeration().nextElement(),"PageStyleName");
-      if ("Standard".equals(inputDocFirstPageStyleName))
-        inputDocFirstPageStyleName = null;
+      
+      boolean startsWithSection = startsWithSection(inputDoc);
       
       XText text = outputDoc.getText();
       if (firstAppend)
@@ -147,9 +150,12 @@ public class PrintIntoFile
         //Neuen Absatz am Ende einfügen für den Seitenumbruch
         text.getEnd().setString("\r");
       }
-       
+      
       XTextCursor cursor = text.createTextCursorByRange(text.getEnd());
-      UNO.setProperty(cursor, "PageDescName", inputDocFirstPageStyleName);
+      if (! (firstAppend && "Standard".equals(inputDocFirstPageStyleName)))
+      {
+        UNO.setProperty(cursor, "PageDescName", inputDocFirstPageStyleName);
+      }
       
       if (!firstAppend)
       {
@@ -184,6 +190,14 @@ public class PrintIntoFile
       for (int i = 0; i < shapeCount; ++i) 
         oldShapes.add(new HashableComponent(shapes.getByIndex(i)));
       
+      Set oldSections = new HashSet();
+      if (startsWithSection)
+      {
+        String[] sectionNames = UNO.XTextSectionsSupplier(outputDoc).getTextSections().getElementNames();
+        oldSections.addAll(Arrays.asList(sectionNames));
+      }
+        
+      
       /**
        *  Einfügen des 2. Dokuments
        *  OOo Issue 37417 beachten --> When inserting a document (via
@@ -200,6 +214,12 @@ public class PrintIntoFile
       dumpOids(outputDoc);
       
       cursor.collapseToStart();
+      
+      // Workaround für 
+      // http://www.openoffice.org/issues/show_bug.cgi?id=73229
+      if (startsWithSection && !rangeStartTouchesNewSection(cursor, oldSections, outputDoc)) 
+        TextDocument.disappearParagraph(cursor);
+      
       XParagraphCursor paraCursor = UNO.XParagraphCursor(cursor);
       XNameAccess inputDocPageStyles = UNO.XNameAccess(UNO.XStyleFamiliesSupplier(inputDoc).getStyleFamilies().getByName("PageStyles"));
       renamePageStyles(paraCursor, outputDoc, inputDocPageStyles);
@@ -228,6 +248,61 @@ public class PrintIntoFile
     }
   }
 
+  /**
+   * Liefert true gdw der Anfang von range mit dem Anfang einer Section aus doc
+   * zusammenfällt, deren Name nicht in oldSections ist.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED
+   */
+  private static boolean rangeStartTouchesNewSection(XTextRange range, Set oldSectionNames, XTextDocument doc)
+  {
+    XTextRange docText = doc.getText();
+    XTextRangeCompare compare = UNO.XTextRangeCompare(docText);
+    XNameAccess sections = UNO.XTextSectionsSupplier(doc).getTextSections();
+    String[] names = sections.getElementNames();
+    for (int i = 0; i < names.length; ++i)
+    {
+      if (!oldSectionNames.contains(names[i]))
+      {
+        try{
+          XTextRange sectionRange = UNO.XTextContent(sections.getByName(names[i])).getAnchor();
+          if (compare.compareRegionStarts(range, sectionRange) == 0) return true;
+        }catch(Exception x)
+        {
+          //keine Logger-Meldung. Dies tritt regulär auf bei Bereichen, die in anderen
+          //Rahmen liegen und daher nicht mit einem Cursor im Dokumenthaupttext
+          //vergleichbar sind.
+        }
+      }
+    }
+    return false;
+  }
+  
+  /**
+   * Liefert true gdw der Start von doc mit dem Starter einer Section von doc
+   * zusammenfällt.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TESTED
+   */
+  private static boolean startsWithSection(XTextDocument doc)
+  {
+    XTextRange docText = doc.getText();
+    XTextRangeCompare compare = UNO.XTextRangeCompare(docText);
+    XNameAccess sections = UNO.XTextSectionsSupplier(doc).getTextSections();
+    String[] names = sections.getElementNames();
+    for (int i = 0; i < names.length; ++i)
+    {
+      try{
+        XTextRange range = UNO.XTextContent(sections.getByName(names[i])).getAnchor();
+        if (compare.compareRegionStarts(docText, range) == 0) return true;
+      }catch(Exception x)
+      {
+        Logger.error(x);
+      }
+    }
+    return false;
+  }
+  
   /**
    * Latscht mit dem Cursor solange die Paragraphen durch bis zum Ende und für jedes
    * PageDescName Property wird das entsprechende Seitenformat auf ein neues kopiert mit einem
