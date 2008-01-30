@@ -1,7 +1,10 @@
 package de.muenchen.allg.itd51.wollmux.func;
 
+import com.sun.star.beans.UnknownPropertyException;
+import com.sun.star.text.XTextDocument;
 import com.sun.star.uno.AnyConverter;
 
+import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
@@ -180,6 +183,31 @@ public class StandardPrint
       Logger.error("Interne Druckfunktion '" + functionName + "' nicht definiert!", e);
       return null;
     }
+  }
+
+  /**
+   * Hängt das zu pmod gehörige TextDocument an das im Property
+   * PrintIntoFile_OutputDocument gespeicherte XTextDocument an. Falls
+   * noch kein solches Property existiert, wird ein leeres Dokument angelegt.
+   * @throws Exception falls was schief geht.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public static void printIntoFile(XPrintModel pmod) throws Exception
+  {
+    boolean firstAppend = true;
+    XTextDocument outputDoc = null;
+    try
+    {
+      outputDoc = UNO.XTextDocument(pmod.getPropertyValue("PrintIntoFile_OutputDocument"));
+      firstAppend = false;
+    }
+    catch (UnknownPropertyException e)
+    {
+      outputDoc = UNO.XTextDocument(UNO.loadComponentFromURL("private:factory/swriter", true, true));
+      pmod.setPropertyValue("PrintIntoFile_OutputDocument", outputDoc);
+    }
+    
+    PrintIntoFile.appendToFile(outputDoc, pmod.getTextDocument(), firstAppend);
   }
   
   
