@@ -3198,4 +3198,168 @@ public class TextDocumentModel
     // alle Felder updaten, die die Trafo trafoName verwenden:
     updateAllFormFieldsWithTrafo(trafoName);
   }
+
+  /**
+   * Diese Methode liefert eine Liste aller IDs, die in der aktuellen Selektion
+   * in insertFormValue-Kommandos, Serienbrieffeldern, UserFeldern und evtl.
+   * hinterlegten Trafofunktionen verwendet werden. Die Liste ist in der
+   * Reihenfolge aufgebaut, in der die IDs in der Selektion angesprochen werden.
+   * 
+   * @return Eine Liste aller IDs, die in irgendeiner Form in der aktuellen
+   *         Selektion enthalten sind.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  synchronized public List getFieldsIDsFromSelection()
+  {
+    // TODO: Testwerte:
+    List l = new ArrayList();
+    l.add("EmpfaengerZustellvermerk");
+    l.add("EmpfaengerZeile1");
+    l.add("EmpfaengerZeile2");
+    l.add("EmpfaengerZeile3");
+    l.add("EmpfaengerZeile4");
+    l.add("EmpfaengerZeile5");
+    l.add("EmpfaengerZeile6");
+    return l;
+  }
+
+  /**
+   * Diese Methode ersetzt den Namen der ID fieldId, der in insertFormValue,
+   * Serienbrieffeldern, UserFeldern und evtl. hinterlegten Trafo-Funktionen
+   * referenziert wird, durch neue IDs, die in Ersetzungsregel enthalten sind.
+   * Die Ersetzungsregel ist vom Typ FieldSubstitution und kann mehrere Elemente
+   * (fester Text oder Felder) enthalten, die an Stelle des alten Feldes gesetzt
+   * werden sollen. Damit kann eine Ersetzungsregel auch dafür sorgen, dass aus
+   * einem früher atomaren Feld in Zukunft ein deutlich komplexeres Feld bzw.
+   * mehrere Felder entstehen. Folgender Abschnitt beschreibt, wie sich die
+   * Ersetzung auf verschiedene Elemente auswirkt.
+   * 
+   * 1) Ersetzungsregel "<neueID>" - Einfache Ersetzung mit genau einem neuen
+   * Serienbrieffeld (z.B. "<Vorname>"): bei insertFormValue-Kommandos wird
+   * WM(CMD'insertFormValue' ID '<alteID>' [TRAFO...]) ersetzt durch WM(CMD
+   * 'insertFormValue' ID '<neueID>' [TRAFO...]). Bei Serienbrieffeldern wird
+   * die ID ebenfalls direkt ersetzt durch <neueID>. Bei
+   * WollMux-Benutzerfeldern, die ja immer eine Trafo hinterlegt haben, wird
+   * jede vorkommende Funktion VALUE 'alteID' ersetzt durch VALUE 'neueID'.
+   * 
+   * 2) Ersetzungsregel "<A> <B>" - Kompexe Ersetzung mit mehreren neuen IDs
+   * und Text: ein bestehendes insertFormValue-Kommando ohne Trafo wird wie
+   * folgt manipuliert: das Bookmark WM(CMD'insertFormValue' ID 'alteId') wird
+   * ersetzt durch ein WollMux-Benutzerfeld mit folgender Trafo: CONCAT(VALUE
+   * 'A', ' ', VALUE 'B'). Besitzt das insertFormValue-Kommando eine Trafo, wird
+   * das Bookmark ebenfalls durch ein WollMux-Benutzerfeld ersetzt und die
+   * bestehende Trafo übernommen, dabei jedoch jeder Aufruf von VALUE '*' durch
+   * CONCAT(VALUE 'A', ' ', VALUE 'B') ersetzt. Ein Serienbrieffeld wird ersetzt
+   * durch zwei neue Serienbrieffelder, die durch ein Leerzeichen getrennt sind.
+   * Bei WollMux-Benutzerfeldern, die ja immer eine Trafo hinterlegt haben, wird
+   * jede vorkommende Funktion VALUE 'alteID' ersetzt durch CONCAT(VALUE 'A', ' ',
+   * VALUE 'B').
+   * 
+   * 2) (Alternative) Ersetzungsregel "<A> <B>" - Kompexe Ersetzung mit
+   * mehreren neuen IDs und Text: ein bestehendes insertFormValue-Kommando ohne
+   * Trafo wird wie folgt manipuliert: das Bookmark WM(CMD'insertFormValue' ID
+   * 'alteId') wird ersetzt durch ein Serienbrieffeld mit Verweis auf A, ein
+   * Leerzeichen und ein weiteres Serienbrieffeld mit Verweis auf B. Besitzt das
+   * insertFormValue-Kommando eine Trafo, so wird das Bookmark durch ein
+   * WollMux-Benutzerfeld ersetzt und die bestehende Trafo übernommen, dabei
+   * jedoch jeder Aufruf von VALUE '*' durch CONCAT(VALUE 'A', ' ', VALUE 'B')
+   * ersetzt. Ein Serienbrieffeld wird ersetzt durch zwei neue
+   * Serienbrieffelder, die durch ein Leerzeichen getrennt sind. Bei
+   * WollMux-Benutzerfeldern, die ja immer eine Trafo hinterlegt haben, wird
+   * jede vorkommende Funktion VALUE 'alteID' ersetzt durch CONCAT(VALUE 'A', ' ',
+   * VALUE 'B').
+   * 
+   * In allen Fällen gilt, dass die Änderung nach Ausführung dieser Methode
+   * sofort aktiv sind und der Aufruf von setFormFieldValue(...) bzw.
+   * updateFormFields(...) mit den neuen IDs direkt in den veränderten Feldern
+   * Wirkung zeigt. Ebenso werden aus dem Formularwerte-Abschnitt in den
+   * persistenten Daten die alten Werte der ersetzten IDs gelöscht.
+   * 
+   * @param fieldId
+   *          Feld, das mit Hilfe der Ersetzungsregel subst ersetzt werden soll.
+   * @param subst
+   *          die Ersetzungsregel, die beschreibt, welche Inhalte an Stelle des
+   *          alten Feldes eingesetzt werden sollen.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  synchronized public void applyFieldSubstitution(String fieldId,
+      FieldSubstitution subst)
+  {
+    // TODO Auto-generated method stub
+    String substStr = "";
+    for (Iterator iter = subst.iterator(); iter.hasNext();)
+    {
+      FieldSubstitution.SubstElement element = (FieldSubstitution.SubstElement) iter
+          .next();
+      if (element.isField()) substStr += "<<" + element.getValue() + ">>";
+      if (element.isFixedText()) substStr += element.getValue();
+    }
+    Logger.debug2("applyFieldSubstitution: "
+                  + fieldId
+                  + " --> '"
+                  + substStr
+                  + "'");
+  }
+
+  /**
+   * Diese Klasse beschreibt die Ersetzung eines bestehendes Formularfeldes
+   * durch neue Felder oder konstante Textinhalte. Sie liefert einen Iterator,
+   * über den die einzelnen Elemente (Felder bzw. fester Text) vom Typ
+   * SubstElement iteriert werden können.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  public static class FieldSubstitution
+  {
+    private List list = new ArrayList();
+
+    public void addField(String fieldname)
+    {
+      list.add(new SubstElement(SubstElement.FIELD, fieldname));
+    }
+
+    public void addFixedText(String text)
+    {
+      list.add(new SubstElement(SubstElement.FIXED_TEXT, text));
+    }
+
+    public Iterator iterator()
+    {
+      return list.iterator();
+    }
+
+    private static class SubstElement
+    {
+      private static final int FIXED_TEXT = 0;
+
+      private static final int FIELD = 1;
+
+      private int type;
+
+      private String value;
+
+      public SubstElement(int type, String value)
+      {
+        this.value = value;
+        this.type = type;
+      }
+
+      public String getValue()
+      {
+        return value;
+      }
+
+      public boolean isField()
+      {
+        return type == FIELD;
+      }
+
+      public boolean isFixedText()
+      {
+        return type == FIXED_TEXT;
+      }
+    }
+  }
 }

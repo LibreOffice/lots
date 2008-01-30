@@ -19,9 +19,12 @@ package de.muenchen.allg.itd51.wollmux.func;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.WindowEvent;
@@ -40,10 +43,14 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.ButtonGroup;
+import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
@@ -53,11 +60,19 @@ import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
 import javax.swing.border.Border;
+import javax.swing.event.CaretEvent;
+import javax.swing.event.CaretListener;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DefaultHighlighter;
+import javax.swing.text.Highlighter;
 
 import com.sun.star.awt.XTopWindow;
 import com.sun.star.container.XEnumeration;
@@ -84,6 +99,7 @@ import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.UnavailableException;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
+import de.muenchen.allg.itd51.wollmux.TextDocumentModel.FieldSubstitution;
 import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.db.Datasource;
@@ -357,7 +373,20 @@ public class MailMergeNew
     {
       public void actionPerformed(ActionEvent e)
       {
-        //TODO Tabellenspalten ergänzen Button
+        showAddMissingColumnsDialog();
+      }
+    });
+    tabelleMenu.add(item);
+
+    //  FIXME: Button muss ausgegraut sein, wenn aktuelle Cursor-Selektion
+    // keine Seriendruckfelder enthält, die in der Tabelle noch nicht als
+    // Spalten enthalten sind.
+    item = new JMenuItem("Felder anpassen");
+    item.addActionListener(new ActionListener()
+    {
+      public void actionPerformed(ActionEvent e)
+      {
+        showAdjustFieldsDialog();
       }
     });
     tabelleMenu.add(item);
@@ -391,10 +420,779 @@ public class MailMergeNew
   }
 
   /**
-   * Schliesst den MailMergeNew und alle zugehörigen Fenster.
+   * Diese Methode zeigt den Dialog an, mit dem die Felder im Dokument an eine
+   * Datenquelle angepasst werden können, die nicht die selben Spalten enthält
+   * wie die Datenquelle, für die das Dokument gemacht wurde.
    * 
-   * @author Christoph Lutz (D-III-ITD 5.1)
+   * @author Christoph Lutz (D-III-ITD-5.1)
    */
+  protected void showAdjustFieldsDialog()
+  {
+    List fieldIDs = mod.getFieldsIDsFromSelection();
+    ActionListener submitActionListener = new ActionListener()
+    {
+      public void actionPerformed(ActionEvent e)
+      {
+        HashMap mapIdToSubstitution = (HashMap) e.getSource();
+        for (Iterator iter = mapIdToSubstitution.keySet().iterator(); iter
+            .hasNext();)
+        {
+          String fieldId = (String) iter.next();
+          FieldSubstitution subst = (FieldSubstitution) mapIdToSubstitution
+              .get(fieldId);
+          mod.applyFieldSubstitution(fieldId, subst);
+        }
+      }
+    };
+    showFieldMappingDialog(
+        fieldIDs,
+        ds.getData().getSchema(),
+        "Felder anpassen",
+        "Altes Feld",
+        "Neue Belegung",
+        "Felder anpassen",
+        submitActionListener);
+  }
+
+  /**
+   * Diese Methode zeigt den Dialog an, mit dem die Spalten der Tabelle ergänzt
+   * werden können, wenn es zu Feldern im Dokument keine passenden Spalten in
+   * der Tabelle gibt.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  protected void showAddMissingColumnsDialog()
+  {
+    List fieldIDs = mod.getFieldsIDsFromSelection();
+    ActionListener submitActionListener = new ActionListener()
+    {
+      public void actionPerformed(ActionEvent e)
+      {
+        HashMap mapIdToSubstitution = (HashMap) e.getSource();
+        // TODO: tabellenspalten wie in mapIdToSubstitution beschrieben ergänzen
+      }
+    };
+    showFieldMappingDialog(
+        fieldIDs,
+        ds.getData().getSchema(),
+        "Tabellenspalten ergänzen",
+        "Spalte",
+        "Vorbelegung",
+        "Spalten ergänzen",
+        submitActionListener);
+  }
+
+  /**
+   * Zeigt einen Dialog mit dem bestehende Felder fieldIDs über ein Textfeld neu
+   * belegt werden können; für die neue Belegung stehen die neuen Felder
+   * availableFieldnames und Freitext zur Verfügung. Die Felder fieldIDs werden
+   * dabei in der Reihenfolge angezeigt, in der sie in der Liste aufgeführt
+   * sind, ein bereits aufgeführtes Feld wird aber nicht zweimal angezeigt.
+   * 
+   * @param fieldIDs
+   *          Die field-IDs der alten, bereits im Dokument enthaltenen Felder,
+   *          die in der Listen-Reihenfolge angezeigt werden, Dupletten werden
+   *          aber entfernt.
+   * @param availableFieldnames
+   *          Die field-IDs der neuen, aktuell in der Datenquelle vorhandenen
+   *          Felder.
+   * @param title
+   *          Die Titelzeile des Dialogs
+   * @param labelOldFields
+   *          Die Spaltenüberschrift für die linke Spalte, in der die alten
+   *          Felder angezeigt werden.
+   * @param labelNewFields
+   *          Die Spaltenüberschrift für die rechte Spalte, in dem die neue
+   *          Zuordnung getroffen wird.
+   * @param labelSubmitButton
+   *          Die Beschriftung des Submit-Knopfes unten rechts, der die
+   *          entsprechende Aktion auslöst.
+   * @param submitActionListener
+   *          Nach Beendigung des Dialogs über den Submit-Knopf (unten rechts)
+   *          wird die Methode submitActionListener.actionPerformed(actionEvent)
+   *          in einem separaten Thread aufgerufen. Dort kann der Code stehen,
+   *          der gewünschten Aktionen durchführt. Der ActionListener bekommt
+   *          dabei in actionEvent eine HashMap übergeben, die eine Zuordnung
+   *          von den alten fieldIDs auf den jeweiligen im Dialog gewählten
+   *          Ersatzstring enthält.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  private void showFieldMappingDialog(List fieldIDs, Set availableFieldnames,
+      String title, String labelOldFields, String labelNewFields,
+      String labelSubmitButton, final ActionListener submitActionListener)
+  {
+    // Feldnamen sortieren
+    final ArrayList sortedFieldnames = new ArrayList(availableFieldnames);
+    Collections.sort(sortedFieldnames);
+    
+    final JDialog dialog = new JDialog(myFrame, title, true);
+    dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+
+    final MailMergeMappingTextField[] currentField = new MailMergeMappingTextField[] { null };
+    final List mailMergeMappingFields = new ArrayList(); 
+
+    Box headers = Box.createHorizontalBox();
+    final JButton insertFieldButton = new JButton("Serienbrieffeld");
+    insertFieldButton.addActionListener(new ActionListener()
+    {
+      public void actionPerformed(ActionEvent e)
+      {
+        JPopupMenu menu = new JPopupMenu();
+        for (Iterator iter = sortedFieldnames.iterator(); iter.hasNext();)
+        {
+          final String fname = iter.next().toString();
+
+          JMenuItem item = new JMenuItem(fname);
+          item.addActionListener(new ActionListener()
+          {
+            public void actionPerformed(ActionEvent e)
+            {
+              if (currentField[0] != null)
+                currentField[0].insertMailMergeField(fname);
+            }
+          });
+
+          menu.add(item);
+        }
+        menu.show(insertFieldButton, 0, insertFieldButton.getSize().height);
+      }
+    });
+    insertFieldButton.setFocusable(false);
+    headers.add(Box.createHorizontalGlue());
+    headers.add(insertFieldButton);
+
+    Box itemBox = Box.createVerticalBox();
+    ArrayList labels = new ArrayList();
+    int maxLabelWidth = 0;
+
+    Box hbox = Box.createHorizontalBox();
+    JLabel label = new JLabel(labelOldFields);
+    labels.add(label);
+    maxLabelWidth = DimAdjust.maxWidth(maxLabelWidth, label);
+    label.setBorder(BorderFactory.createEmptyBorder(5, 5, 10, 5));
+    hbox.add(label);
+    label = new JLabel(labelNewFields);
+    label.setBorder(BorderFactory.createEmptyBorder(5, 5, 10, 5));
+    DimAdjust.maxHeightIsPrefMaxWidthUnlimited(label);
+    hbox.add(label);
+    hbox.add(Box.createHorizontalStrut(200));
+    DimAdjust.maxHeightIsPrefMaxWidthUnlimited(hbox);
+    itemBox.add(hbox);
+
+    HashSet addedFields = new HashSet();
+    for (Iterator iter = fieldIDs.iterator(); iter.hasNext();)
+    {
+      String fieldId = (String) iter.next();
+      if (addedFields.contains(fieldId)) continue;
+      addedFields.add(fieldId);
+
+      hbox = Box.createHorizontalBox();
+
+      label = new JLabel(fieldId);
+      label.setFont(label.getFont().deriveFont(Font.PLAIN));
+      labels.add(label);
+      maxLabelWidth = DimAdjust.maxWidth(maxLabelWidth, label);
+      label.setBorder(BorderFactory.createEmptyBorder(5, 5, 10, 5));
+      hbox.add(label);
+
+      final MailMergeMappingTextField field = new MailMergeMappingTextField(
+          fieldId);
+      mailMergeMappingFields.add(field);
+      Box fbox = Box.createHorizontalBox();
+      hbox.add(fbox); // fbox für zeilenbündige Ausrichtung benötigt
+      fbox.setBorder(BorderFactory.createEmptyBorder(5, 5, 10, 5));
+      field.addFocusListener(new FocusListener()
+      {
+        public void focusLost(FocusEvent e)
+        {
+        }
+
+        public void focusGained(FocusEvent e)
+        {
+          currentField[0] = field;
+        }
+      });
+      DimAdjust.maxHeightIsPrefMaxWidthUnlimited(field);
+      fbox.add(field);
+
+      itemBox.add(hbox);
+    }
+
+    // einheitliche Breite für alle Labels vergeben:
+    for (Iterator iter = labels.iterator(); iter.hasNext();)
+    {
+      label = (JLabel) iter.next();
+
+      Dimension d = label.getPreferredSize();
+      d.width = maxLabelWidth + 10;
+      label.setPreferredSize(d);
+    }
+
+    Box buttonBox = Box.createHorizontalBox();
+    JButton button = new JButton("Abbrechen");
+    button.addActionListener(new ActionListener()
+    {
+      public void actionPerformed(ActionEvent e)
+      {
+        dialog.dispose();
+        mod.removeCoupledWindow(dialog);
+      }
+    });
+    buttonBox.add(button);
+
+    buttonBox.add(Box.createHorizontalGlue());
+
+    button = new JButton(labelSubmitButton);
+    button.addActionListener(new ActionListener()
+    {
+      public void actionPerformed(ActionEvent e)
+      {
+        final HashMap result = new HashMap();
+        for (Iterator iter = mailMergeMappingFields.iterator(); iter.hasNext();)
+        {
+          MailMergeMappingTextField f = (MailMergeMappingTextField) iter.next();
+          result.put(f.getFieldname(), f.getFieldSubstitution());          
+        }
+        dialog.dispose();
+        mod.removeCoupledWindow(dialog);
+        if (submitActionListener != null) new Thread()
+        {
+          public void run()
+          {
+            submitActionListener.actionPerformed(new ActionEvent(result, 0,
+                "showSubstitutionDialogReturned"));
+          }
+        }.start();
+      }
+    });
+    buttonBox.add(button);
+
+    JScrollPane spane = new JScrollPane(itemBox,
+        ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+        ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+    spane.setBorder(BorderFactory.createEmptyBorder());
+    dialog.add(spane);
+
+    Box vbox = Box.createVerticalBox();
+    vbox.add(headers);
+    vbox.add(spane);
+    vbox.add(Box.createVerticalGlue());
+    vbox.add(buttonBox);
+    vbox.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+
+    dialog.add(vbox);
+
+    dialog.pack();
+    int frameWidth = dialog.getWidth();
+    int frameHeight = dialog.getHeight();
+    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+    int x = screenSize.width / 2 - frameWidth / 2;
+    int y = screenSize.height / 2 - frameHeight / 2;
+    dialog.setLocation(x, y);
+    mod.addCoupledWindow(dialog);
+    dialog.setVisible(true);
+
+    // Testimplementierung
+    HashMap subst = new HashMap();
+    for (Iterator iter = fieldIDs.iterator(); iter.hasNext();)
+    {
+      String id = (String) iter.next();
+      subst.put(id, "<" + id + ">");
+    }
+  }
+
+  /**
+   * Implementiert eine JTextField, die als &quot;&lt;feldname&gt;&quot;
+   * angezeigte MailMerge-Felder beim Editieren wie atomare Elemente behandelt.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  public static class MailMergeMappingTextField extends JTextField
+  {
+    private static final long serialVersionUID = -5137462739029884033L;
+
+    /**
+     * Enthält den Namen des Feldes, für das die neue Zuordnung gelten soll.
+     */
+    private String fieldname;
+    
+    /**
+     * Prefix, mit dem Textfelder in der Anzeige der Zuordnung angezeigt werden.
+     * Die Zuordnung beginnt mit einem zero width space (nicht sichtbar, aber
+     * zur Unterscheidung des Prefix von den Benutzereingaben) und dem "<"-Zeichen.
+     */
+    private final static String FIELD_PREFIX = ""
+                                               + Character.toChars(0x200B)[0]
+                                               + "<";
+
+    /**
+     * Suffix, mit dem Textfelder in der Anzeige der Zuordnung angezeigt werden.
+     * Die Zuordnung beginnt mit einem zero width space (nicht sichtbar, aber
+     * zur Unterscheidung des Prefix von den Benutzereingaben) und dem
+     * ">"-Zeichen.
+     */
+    private final static String FIELD_SUFFIX = ""
+                                               + Character.toChars(0x200B)[0]
+                                               + ">";
+
+    /**
+     * Beschreibt einen regulären Ausdruck, mit dem nach Feldern im Text gesucht
+     * werden kann. Ein Match liefert in Gruppe 1 den Text vor dem Feld, in
+     * Gruppe 2 das Feld mit Prefix und Suffix und in Gruppe 3 den Feldnamen
+     * zurück.
+     */
+    private final static Pattern FIELD_PATTERN = Pattern
+        .compile("([^(" + FIELD_PREFIX + ")]*)(" + FIELD_PREFIX + "([^(" + FIELD_SUFFIX + ")]*)" + FIELD_SUFFIX + ")");
+
+    /**
+     * Erzeugt die MailMergeMappingTextField und nimmt die notwendigen
+     * Änderungen am Standardverhalten der JTextField vor.
+     */
+    public MailMergeMappingTextField(String fieldname)
+    {
+      this.fieldname = fieldname;
+      changeInputMap();
+      changeCaretListener();
+      changeFocusLostListener();
+    }
+
+    /**
+     * Liefert den Namen des Feldes zurück, für das die neue Zuordnung gelten
+     * soll.
+     * 
+     * @author Christoph Lutz (D-III-ITD-5.1)
+     */
+    public String getFieldname()
+    {
+      return fieldname;
+    }
+    
+    /**
+     * Liefert die Ersetzungsregel, die in diesem Textfeld erstellt wurde.
+     * 
+     * @author Christoph Lutz (D-III-ITD-5.1)
+     */
+    public FieldSubstitution getFieldSubstitution()
+    {
+      FieldSubstitution subst = new FieldSubstitution();
+      String t = getText();
+      Matcher m = FIELD_PATTERN.matcher(t);
+      int lastEndPos = 0;
+      while (m.find())
+      {
+        lastEndPos = m.end();
+        String fixedText = m.group(1);
+        String fieldname = m.group(3);
+        if (fixedText.length() > 0) subst.addFixedText(fixedText);
+        if (fieldname.length() > 0) subst.addField(fieldname);
+      }
+      String fixedText = t.substring(lastEndPos);
+      if (fixedText.length() > 0) subst.addFixedText(fixedText);
+      return subst;
+    }
+    
+    /**
+     * Immer wenn der Cursor mit der Maus in einen Bereich innerhalb eines
+     * Seriendruckfeldes gesetzt wird, sorgt der hier registrierte caret
+     * Listender dafür, dass der Bereich auf das gesamte Formularfeld ausgedehnt
+     * wird.
+     * 
+     * @author Christoph Lutz (D-III-ITD-5.1)
+     */
+    private void changeCaretListener()
+    {
+      addCaretListener(new CaretListener()
+      {
+        public void caretUpdate(CaretEvent e)
+        {
+          extraHighlightOff();
+          int dot = getCaret().getDot();
+          int mark = getCaret().getMark();
+
+          for (Iterator iter = getfieldPosIterator(); iter.hasNext();)
+          {
+            FieldPos fp = (FieldPos) iter.next();
+            if (dot > fp.start && dot < fp.end)
+            {
+              if (dot < mark)
+              {
+                caretMoveDot(fp.start);
+              }
+              else if (dot > mark)
+              {
+                caretMoveDot(fp.end);
+              }
+              else
+              {
+                caretSetDot(fp.end);
+                extraHighlight(fp.start, fp.end);
+              }
+            }
+          }
+        }
+      });
+    }
+
+    /**
+     * Der FocusLostListener wird hier registriert, damit nach einem FocusLost
+     * ein evtl. gesetztes Extra-Highlight aufgehoben werden kann.
+     * 
+     * @author Christoph Lutz (D-III-ITD-5.1)
+     */
+    private void changeFocusLostListener()
+    {
+      addFocusListener(new FocusListener()
+      {
+        public void focusLost(FocusEvent e)
+        {
+          extraHighlightOff();
+        }
+
+        public void focusGained(FocusEvent e)
+        {
+        }
+      });
+    }
+
+    /**
+     * Implementiert die Aktionen für die Tastendrücke Cursor-links,
+     * Cursor-rechts, Delete und Backspace neu und berücksichtigt dabei die
+     * Seriendruckfelder
+     * 
+     * @author Christoph Lutz (D-III-ITD-5.1)
+     */
+    private void changeInputMap()
+    {
+      InputMap m = getInputMap();
+      m.put(KeyStroke.getKeyStroke("LEFT"), "goLeft");
+      m.put(KeyStroke.getKeyStroke("RIGHT"), "goRight");
+      m.put(KeyStroke.getKeyStroke("shift LEFT"), "expandLeft");
+      m.put(KeyStroke.getKeyStroke("shift RIGHT"), "expandRight");
+      m.put(KeyStroke.getKeyStroke("DELETE"), "deleteRight");
+      m.put(KeyStroke.getKeyStroke("BACK_SPACE"), "deleteLeft");
+
+      getActionMap().put("goLeft", new AbstractAction("goLeft")
+      {
+        private static final long serialVersionUID = 2098288193497911628L;
+
+        public void actionPerformed(ActionEvent evt)
+        {
+          extraHighlightOff();
+          int dot = getCaret().getDot();
+
+          // evtl. vorhandenes Feld überspringen
+          for (Iterator iter = getfieldPosIterator(); iter.hasNext();)
+          {
+            FieldPos fp = (FieldPos) iter.next();
+            if (dot == fp.end)
+            {
+              caretSetDot(fp.start);
+              extraHighlight(fp.start, fp.end);
+              return;
+            }
+          }
+
+          caretSetDot(dot - 1);
+        }
+      });
+
+      getActionMap().put("goRight", new AbstractAction("goRight")
+      {
+        private static final long serialVersionUID = 2098288193497911628L;
+
+        public void actionPerformed(ActionEvent evt)
+        {
+          extraHighlightOff();
+          int dot = getCaret().getDot();
+
+          // evtl. vorhandenes Feld überspringen
+          for (Iterator iter = getfieldPosIterator(); iter.hasNext();)
+          {
+            FieldPos fp = (FieldPos) iter.next();
+            if (dot == fp.start)
+            {
+              caretSetDot(fp.end);
+              extraHighlight(fp.start, fp.end);
+              return;
+            }
+          }
+
+          caretSetDot(dot + 1);
+        }
+      });
+
+      getActionMap().put("expandLeft", new AbstractAction("expandLeft")
+      {
+        private static final long serialVersionUID = 2098288193497911628L;
+
+        public void actionPerformed(ActionEvent evt)
+        {
+          extraHighlightOff();
+          int dot = getCaret().getDot();
+
+          // evtl. vorhandenes Feld überspringen
+          for (Iterator iter = getfieldPosIterator(); iter.hasNext();)
+          {
+            FieldPos fp = (FieldPos) iter.next();
+            if (dot == fp.end)
+            {
+              caretMoveDot(fp.start);
+              return;
+            }
+          }
+
+          caretMoveDot(dot - 1);
+        }
+      });
+
+      getActionMap().put("expandRight", new AbstractAction("expandRight")
+      {
+        private static final long serialVersionUID = 2098288193497911628L;
+
+        public void actionPerformed(ActionEvent evt)
+        {
+          extraHighlightOff();
+          int dot = getCaret().getDot();
+
+          // evtl. vorhandenes Feld überspringen
+          for (Iterator iter = getfieldPosIterator(); iter.hasNext();)
+          {
+            FieldPos fp = (FieldPos) iter.next();
+            if (dot == fp.start)
+            {
+              caretMoveDot(fp.end);
+              return;
+            }
+          }
+
+          caretMoveDot(dot + 1);
+        }
+      });
+
+      getActionMap().put("deleteRight", new AbstractAction("deleteRight")
+      {
+        private static final long serialVersionUID = 2098288193497911628L;
+
+        public void actionPerformed(ActionEvent evt)
+        {
+          extraHighlightOff();
+          int dot = getCaret().getDot();
+          int mark = getCaret().getMark();
+
+          // evtl. vorhandene Selektion löschen
+          if (dot != mark)
+          {
+            deleteAPartOfTheText(dot, mark);
+            return;
+          }
+
+          // Endposition des zu löschenden Bereichs bestimmen
+          int pos2 = dot + 1;
+          for (Iterator iter = getfieldPosIterator(); iter.hasNext();)
+          {
+            FieldPos fp = (FieldPos) iter.next();
+            if (dot == fp.start) pos2 = fp.end;
+          }
+
+          deleteAPartOfTheText(dot, pos2);
+        }
+
+      });
+
+      getActionMap().put("deleteLeft", new AbstractAction("deleteLeft")
+      {
+        private static final long serialVersionUID = 2098288193497911628L;
+
+        public void actionPerformed(ActionEvent evt)
+        {
+          extraHighlightOff();
+          int dot = getCaret().getDot();
+          int mark = getCaret().getMark();
+
+          // evtl. vorhandene Selektion löschen
+          if (dot != mark)
+          {
+            deleteAPartOfTheText(dot, mark);
+            return;
+          }
+
+          // Anfangsposition des zu löschenden Bereichs bestimmen
+          int pos2 = dot - 1;
+          for (Iterator iter = getfieldPosIterator(); iter.hasNext();)
+          {
+            FieldPos fp = (FieldPos) iter.next();
+            if (dot == fp.end) pos2 = fp.start;
+          }
+
+          deleteAPartOfTheText(dot, pos2);
+        }
+      });
+
+    }
+
+    /**
+     * Löscht einen Teil des aktuellen Texts zwischen den zwei Positionen pos1
+     * und pos2. pos1 kann größer, kleiner oder gleich pos2 sein.
+     * 
+     * @author Christoph Lutz (D-III-ITD-5.1)
+     */
+    private void deleteAPartOfTheText(int pos1, int pos2)
+    {
+      // sicherstellen dass pos1 <= pos2
+      if (pos1 > pos2)
+      {
+        int tmp = pos2;
+        pos2 = pos1;
+        pos1 = tmp;
+      }
+      String t = getText();
+      String part1 = (pos1 > 0) ? t.substring(0, pos1) : "";
+      String part2 = (pos2 < t.length()) ? t.substring(pos2) : "";
+      setText(part1 + part2);
+      getCaret().setDot(pos1);
+    }
+
+    /**
+     * Macht das selbe wie getCaret().setDot(pos), aber nur wenn pos >= 0 und
+     * pos <= getText().length() gilt.
+     * 
+     * @author Christoph Lutz (D-III-ITD-5.1)
+     */
+    private void caretSetDot(int pos)
+    {
+      if (pos >= 0 && pos <= getText().length()) getCaret().setDot(pos);
+    }
+
+    /**
+     * Macht das selbe wie getCaret().setDot(pos), aber nur wenn pos >= 0 und
+     * pos <= getText().length() gilt.
+     * 
+     * @author Christoph Lutz (D-III-ITD-5.1)
+     */
+    private void caretMoveDot(int pos)
+    {
+      if (pos >= 0 && pos <= getText().length()) getCaret().moveDot(pos);
+    }
+
+    /**
+     * Diese Klasse beschreibt die Position eines Seriendruckfeldes innerhalb
+     * des Textes des Textfeldes.
+     * 
+     * @author Christoph Lutz (D-III-ITD-5.1)
+     */
+    private static class FieldPos
+    {
+      public final String name;
+
+      public final int start;
+
+      public final int end;
+
+      FieldPos(int start, int end, String name)
+      {
+        this.start = start;
+        this.end = end;
+        this.name = name;
+      }
+    }
+
+    /**
+     * Liefert einen Iterator von FieldPos-Elementen, die beschreiben an welcher
+     * Position im aktuellen Text Seriendruckfelder gefunden werden.
+     * 
+     * @author Christoph Lutz (D-III-ITD-5.1)
+     */
+    private Iterator getfieldPosIterator()
+    {
+      List results = new ArrayList();
+      Matcher m = FIELD_PATTERN.matcher(getText());
+      while (m.find())
+      {
+        results.add(new FieldPos(m.start(2), m.end(2), m.group(3)));
+      }
+      return results.iterator();
+    }
+
+    /**
+     * Enthält das tag das beim Erzeugen des Extra-Highlights zurückgeliefert
+     * wurde und das Highlight-Objekt auszeichnet.
+     */
+    private Object extraHighlightTag = null;
+
+    /**
+     * Deaktiviert die Anzeige des Extra-Highlights
+     * 
+     * @author Christoph Lutz (D-III-ITD-5.1)
+     */
+    private void extraHighlightOff()
+    {
+      if (extraHighlightTag != null)
+      {
+        Highlighter hl = getHighlighter();
+        hl.removeHighlight(extraHighlightTag);
+        extraHighlightTag = null;
+      }
+    }
+
+    /**
+     * Highlightet den Textbereich zwischen pos1 und pos2
+     * 
+     * @param pos1
+     * @param pos2
+     * 
+     * @author Christoph Lutz (D-III-ITD-5.1)
+     */
+    private void extraHighlight(int pos1, int pos2)
+    {
+      Highlighter hl = getHighlighter();
+      try
+      {
+
+        if (extraHighlightTag == null)
+        {
+          Highlighter.HighlightPainter hp = new DefaultHighlighter.DefaultHighlightPainter(
+              new Color(0xddddff));
+          extraHighlightTag = hl.addHighlight(pos1, pos2, hp);
+        }
+        else
+          hl.changeHighlight(extraHighlightTag, pos1, pos2);
+      }
+      catch (BadLocationException e1)
+      {
+      }
+    }
+
+    /**
+     * Fügt an der aktuellen Cursorposition ein neues Seriendruckfeld feldname
+     * ein, das anschließen mit der Darstellung &quot;&lt;feldname&gt;&quot;
+     * angezeigt wird und bezüglich der Editierung wie ein atomares Element
+     * behandelt wird.
+     * 
+     * @param fieldname
+     *          Der Name des Feldes, das in diesem Textfeld an der
+     *          Cursorposition eingefügt und angezeigt werden soll.
+     * 
+     * @author Christoph Lutz (D-III-ITD-5.1)
+     */
+    public void insertMailMergeField(String fieldname)
+    {
+      String t = getText();
+      int inspos = getCaretPosition();
+      String p1 = (inspos > 0) ? t.substring(0, inspos) : "";
+      String p2 = (inspos < t.length()) ? t.substring(inspos, t.length()) : "";
+      t = FIELD_PREFIX + fieldname + FIELD_SUFFIX;
+      setText(p1 + t + p2);
+      getCaret().setDot(inspos + t.length());
+      extraHighlight(inspos, inspos + t.length());
+    }
+  }    
+
+    /**
+     * Schliesst den MailMergeNew und alle zugehörigen Fenster.
+     * 
+     * @author Christoph Lutz (D-III-ITD 5.1)
+     */
   public void dispose()
   {
     try{
