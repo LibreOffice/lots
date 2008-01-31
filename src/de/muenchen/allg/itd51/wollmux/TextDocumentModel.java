@@ -58,6 +58,7 @@ import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextField;
 import com.sun.star.text.XTextRange;
+import com.sun.star.text.XTextViewCursor;
 import com.sun.star.text.XTextViewCursorSupplier;
 import com.sun.star.uno.AnyConverter;
 import com.sun.star.uno.RuntimeException;
@@ -1232,6 +1233,19 @@ public class TextDocumentModel
   }
 
   /**
+   * Diese Methode liefert die FeldIDs aller im Dokument enthaltenen Felder.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  synchronized public Set getAllFieldIDs()
+  {
+    HashSet ids = new HashSet();
+    ids.addAll(idToFormFields.keySet());
+    ids.addAll(idToTextFieldFormFields.keySet());
+    return ids;
+  }
+
+  /**
    * Liefert den ViewCursor des aktuellen Dokuments oder null, wenn kein
    * Controller (oder auch kein ViewCursor) für das Dokument verfügbar ist.
    * 
@@ -1239,13 +1253,30 @@ public class TextDocumentModel
    *         Controller (oder auch kein ViewCursor) für das Dokument verfügbar
    *         ist.
    */
-  synchronized public XTextCursor getViewCursor()
+  synchronized public XTextViewCursor getViewCursor()
   {
     if (UNO.XModel(doc) == null) return null;
     XTextViewCursorSupplier suppl = UNO.XTextViewCursorSupplier(UNO.XModel(doc)
         .getCurrentController());
     if (suppl != null) return suppl.getViewCursor();
     return null;
+  }
+
+  /**
+   * Diese Methode liefert true, wenn der viewCursor im Dokument aktuell nicht
+   * kollabiert ist und damit einen markierten Bereich aufspannt, andernfalls
+   * false.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  synchronized public boolean hasSelection()
+  {
+    XTextViewCursor vc = getViewCursor();
+    if (vc != null)
+    {
+      return !vc.isCollapsed();
+    }
+    return false;
   }
 
   /**
@@ -1720,22 +1751,11 @@ public class TextDocumentModel
    */
   private void updateAllFormFields()
   {
-    for (Iterator iter = formFieldValues.keySet().iterator(); iter.hasNext();)
+    for (Iterator iter = getAllFieldIDs().iterator(); iter.hasNext();)
     {
       String fieldId = (String) iter.next();
       updateFormFields(fieldId);
     }
-  }
-
-  /**
-   * Macht das selbe wie updateAllFormFields, allerdings werden nur die
-   * Formularfelder aktualisiert, die die Trafo trafoName gesetzt haben.
-   */
-  private void updateAllFormFieldsWithTrafo(String trafoName)
-  {
-    updateAllFormFields();
-    // TODO: Implementieren der Funktion zur Optimierung falls
-    // Performance-Probleme auftreten.
   }
 
   /**
@@ -3195,33 +3215,41 @@ public class TextDocumentModel
     // InsertFormValue-Bookmarks müssen nicht aktualisiert werden.
     collectNonWollMuxFormFields();
 
-    // alle Felder updaten, die die Trafo trafoName verwenden:
-    updateAllFormFieldsWithTrafo(trafoName);
+    // Felder updaten:
+    updateAllFormFields();
   }
 
   /**
    * Diese Methode liefert eine Liste aller IDs, die in der aktuellen Selektion
-   * in insertFormValue-Kommandos, Serienbrieffeldern, UserFeldern und evtl.
-   * hinterlegten Trafofunktionen verwendet werden. Die Liste ist in der
-   * Reihenfolge aufgebaut, in der die IDs in der Selektion angesprochen werden.
+   * (falls der ViewCursor eine Selektion aufspannt) oder im gesamten Dokument
+   * in insertFormValue-Kommandos und Serienbrieffeldern verwendet werden und
+   * NICHT im übergebenen Set set aufgeführt sind. Ist eine Selektion vorhanden,
+   * so ist die Liste in der Reihenfolge aufgebaut, in der die IDs im Dokument
+   * angesprochen werden. Ist keine Selektion vorhanden, so werden die Felder in
+   * alphabetisch sortierter Reihenfolge zurückgeliefert.
    * 
-   * @return Eine Liste aller IDs, die in irgendeiner Form in der aktuellen
-   *         Selektion enthalten sind.
+   * @return Eine Liste aller IDs, des Dokuments oder der aktuellen Selektion,
+   *         die nicht in set enthalten sind.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  synchronized public List getFieldsIDsFromSelection()
+  synchronized public List getSelectedFieldIDsThatAreNotInSchema(Set set)
   {
-    // TODO: Testwerte:
-    List l = new ArrayList();
-    l.add("EmpfaengerZustellvermerk");
-    l.add("EmpfaengerZeile1");
-    l.add("EmpfaengerZeile2");
-    l.add("EmpfaengerZeile3");
-    l.add("EmpfaengerZeile4");
-    l.add("EmpfaengerZeile5");
-    l.add("EmpfaengerZeile6");
-    return l;
+    if (hasSelection())
+    {
+      // Nur Felder der aktuellen Selektion zurückliefern.
+      // TODO: diesen Fall implementieren
+      return new ArrayList();
+    }
+    else
+    {
+      // Alle Felder des Dokuments alphabetisch sortiert zurückliefern.
+      Set ids = getAllFieldIDs();
+      ids.removeAll(set);
+      ArrayList sortedFieldnames = new ArrayList(ids);
+      Collections.sort(sortedFieldnames);
+      return sortedFieldnames;
+    }
   }
 
   /**

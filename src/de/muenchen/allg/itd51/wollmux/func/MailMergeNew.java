@@ -365,31 +365,25 @@ public class MailMergeNew
         });
     tabelleMenu.add(item);
     
-    //  FIXME: Button muss ausgegraut sein, wenn aktuelle Cursor-Selektion
-    // keine Seriendruckfelder enthält, die in der Tabelle noch nicht als
-    // Spalten enthalten sind.
-    item = new JMenuItem("Tabellenspalten ergänzen");
-    item.addActionListener(new ActionListener()
+    final JMenuItem addColumnsMenuItem = new JMenuItem("Tabellenspalten ergänzen");
+    addColumnsMenuItem.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
       {
         showAddMissingColumnsDialog();
       }
     });
-    tabelleMenu.add(item);
+    tabelleMenu.add(addColumnsMenuItem);
 
-    //  FIXME: Button muss ausgegraut sein, wenn aktuelle Cursor-Selektion
-    // keine Seriendruckfelder enthält, die in der Tabelle noch nicht als
-    // Spalten enthalten sind.
-    item = new JMenuItem("Felder anpassen");
-    item.addActionListener(new ActionListener()
+    final JMenuItem adjustFieldsMenuItem = new JMenuItem("alle Felder anpassen");
+    adjustFieldsMenuItem.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
       {
         showAdjustFieldsDialog();
       }
     });
-    tabelleMenu.add(item);
+    tabelleMenu.add(adjustFieldsMenuItem);
 
 //  FIXME: Button darf nur angezeigt werden, wenn tatsächlich eine Calc-Tabelle
     //ausgewählt ist.
@@ -398,7 +392,20 @@ public class MailMergeNew
     button.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
-      {
+      {        
+        // Anpassen des Menüpunktes "Felder anpassen"
+        if(mod.hasSelection()) {
+          adjustFieldsMenuItem.setText("ausgewählte Felder anpassen");
+        } else {
+          adjustFieldsMenuItem.setText("alle Felder anpassen");
+        }
+        
+        // Ausgrauen der Anpassen-Knöpfe, wenn alle Felder mit den
+        // entsprechenden Datenquellenfeldern zugeordnet werden können.
+        boolean hasUnmappedFields = mod.getSelectedFieldIDsThatAreNotInSchema(ds.getData().getSchema()).size() > 0; 
+        adjustFieldsMenuItem.setEnabled(hasUnmappedFields);
+        addColumnsMenuItem.setEnabled(hasUnmappedFields);
+        
         tabelleMenu.show(tabelleButton, 0, tabelleButton.getSize().height);
       }
     });
@@ -428,7 +435,8 @@ public class MailMergeNew
    */
   protected void showAdjustFieldsDialog()
   {
-    List fieldIDs = mod.getFieldsIDsFromSelection();
+    Set schema = ds.getData().getSchema();
+    List fieldIDs = mod.getSelectedFieldIDsThatAreNotInSchema(schema);
     ActionListener submitActionListener = new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
@@ -446,7 +454,7 @@ public class MailMergeNew
     };
     showFieldMappingDialog(
         fieldIDs,
-        ds.getData().getSchema(),
+        schema,
         "Felder anpassen",
         "Altes Feld",
         "Neue Belegung",
@@ -463,7 +471,7 @@ public class MailMergeNew
    */
   protected void showAddMissingColumnsDialog()
   {
-    List fieldIDs = mod.getFieldsIDsFromSelection();
+    List fieldIDs = mod.getSelectedFieldIDsThatAreNotInSchema(ds.getData().getSchema());
     ActionListener submitActionListener = new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
@@ -481,7 +489,7 @@ public class MailMergeNew
         "Spalten ergänzen",
         submitActionListener);
   }
-
+  
   /**
    * Zeigt einen Dialog mit dem bestehende Felder fieldIDs über ein Textfeld neu
    * belegt werden können; für die neue Belegung stehen die neuen Felder
@@ -1438,6 +1446,7 @@ public class MailMergeNew
   private void doMailMerge()
   {
     //TODO Fortschrittsanzeiger
+    //TODO hier kann man mit lockControllers auf das Gesamtdokument vielleicht noch etwas Performance rausholen - das bitte testen.
     mod.collectNonWollMuxFormFields();
     QueryResultsWithSchema data = ds.getData();
     XPrintModel pmod = mod.createPrintModel(true);
