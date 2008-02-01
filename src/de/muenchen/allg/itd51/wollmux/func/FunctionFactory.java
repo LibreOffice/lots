@@ -22,6 +22,7 @@
 * 08.08.2007 | BNK | SELECT-Verhalten im Fehlerfalle entsprechend Doku implementiert
 *                  | +NUMCMP, LE, GE, GT, LT 
 * 09.08.2007 | BNK | +ISERROR, ISERRORSTRING, ONERROR (für SELECT)
+* 01.02.2008 | BNK | +LENGTH
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -237,6 +238,10 @@ public class FunctionFactory
     else if (name.equals("CAT") || name.equals("THEN") || name.equals("ELSE"))
     {
       return new CatFunction(conf, funcLib, dialogLib, context);
+    }
+    else if (name.equals("LENGTH"))
+    {
+      return new LengthFunction(conf, funcLib, dialogLib, context);
     }
     else if (name.equals("FORMAT") || name.equals("DIVIDE"))
     {
@@ -1090,6 +1095,27 @@ public class FunctionFactory
       return res.toString();
     }
   }
+  
+  private static class LengthFunction extends CatFunction
+  {
+    public LengthFunction(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
+    {
+      super(conf, funcLib, dialogLib, context);
+    }
+
+    public String getString(Values parameters)
+    {
+      String res = super.getString(parameters);
+      if (res == Function.ERROR) return Function.ERROR;
+      return "" + res.length();
+    }
+    
+    public boolean getBoolean(Values parameters)
+    {
+      return false;
+    } 
+  }
+
   
   private static class AndFunction extends MultiFunction
   {

@@ -305,6 +305,7 @@ public class FunctionTester
     functionInsertPanel.add(makeCodeInsertionButton("EXTERN", "EXTERN(URL \"url\" PARAMS(\"ParamName1\" \"ParamName2\" ,,,))"));
     
     functionInsertPanel.add(makeCodeInsertionButton("DIALOG", "DIALOG(\"Dialogname\", \"Feldname\")"));
+    functionInsertPanel.add(makeCodeInsertionButton("LENGTH", "LENGTH(String1, String2 ,,,)"));
     
     return functionInsertPanel;
   }
