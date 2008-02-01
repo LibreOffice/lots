@@ -76,6 +76,9 @@ interface XPrintModel
      * Aufrufkette weiter, wenn eine weitere Druckfunktion vorhanden ist;
      * Abhängig von der gesetzten Druckfunktion werden dabei verschiedene
      * Properties, die über setPropertyValue(...) gesetzt wurden ausgewertet.
+     * Die Methode kehrt erst dann wieder zurück, wenn der gesamte Druckvorgang
+     * dieser und der darunterliegenden Druckfunktionen vollständig ausgeführt
+     * wurde.
      */
     void printWithProps();
 	

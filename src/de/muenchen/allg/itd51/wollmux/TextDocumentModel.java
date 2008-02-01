@@ -1734,7 +1734,8 @@ public class TextDocumentModel
     if (formFieldPreviewMode)
     {
       String value = (String) formFieldValues.get(fieldId);
-      if (value != null) setFormFields(fieldId, value, true);
+      if (value == null) value = "";
+      setFormFields(fieldId, value, true);
     }
     else
     {
@@ -3222,11 +3223,18 @@ public class TextDocumentModel
   /**
    * Diese Methode liefert eine Liste aller IDs, die in der aktuellen Selektion
    * (falls der ViewCursor eine Selektion aufspannt) oder im gesamten Dokument
-   * in insertFormValue-Kommandos und Serienbrieffeldern verwendet werden und
-   * NICHT im übergebenen Set set aufgeführt sind. Ist eine Selektion vorhanden,
-   * so ist die Liste in der Reihenfolge aufgebaut, in der die IDs im Dokument
-   * angesprochen werden. Ist keine Selektion vorhanden, so werden die Felder in
-   * alphabetisch sortierter Reihenfolge zurückgeliefert.
+   * in insertFormValue-Kommandos, Serienbrieffeldern, Benutzerfeldern und
+   * referenzierte Trafos verwendet werden und NICHT im übergebenen Set set
+   * aufgeführt sind. Ist eine Selektion vorhanden, so ist die Liste in der
+   * Reihenfolge aufgebaut, in der die IDs im Dokument angesprochen werden. Ist
+   * keine Selektion vorhanden, so werden die Felder in alphabetisch sortierter
+   * Reihenfolge zurückgeliefert.
+   * 
+   * TODO: Die Liste als Returnwert reicht nicht aus. Es muss auch noch die
+   * Information übermittelt werden, ob das Feld einfach oder komplex verändert
+   * werden darf (oder anders, ob das Feld nie in einer Trafo verwendet wird,
+   * oder schon). Kommt das Feld in einer Trafo vor, dann ist eine komplexe
+   * Ersetzung (z.B. "Herr <Vorname> <Nachname>") nicht erlaubt.
    * 
    * @return Eine Liste aller IDs, des Dokuments oder der aktuellen Selektion,
    *         die nicht in set enthalten sind.

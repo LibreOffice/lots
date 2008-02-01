@@ -405,6 +405,9 @@ public class PrintModels
      * Aufrufkette weiter, wenn eine weitere Druckfunktion vorhanden ist;
      * Abhängig von der gesetzten Druckfunktion werden dabei verschiedene
      * Properties, die über setPropertyValue(...) gesetzt wurden ausgewertet.
+     * Die Methode kehrt erst dann wieder zurück, wenn der gesamte Druckvorgang
+     * dieser und der darunterliegenden Druckfunktionen vollständig ausgeführt
+     * wurde.
      * 
      * Im MasterPrintModel sorgt der Aufruf dieser Methode dafür, dass (nur) die
      * erste verfügbare Druckfunktion aufgerufen wird. Das Weiterreichen der
@@ -423,7 +426,15 @@ public class PrintModels
       if (f != null)
       {
         XPrintModel pmod = new SlavePrintModel(this, 0);
-        f.invoke(pmod);
+        Thread t = f.invoke(pmod);
+        try
+        {
+          t.join();
+        }
+        catch (InterruptedException e)
+        {
+          Logger.error(e);
+        }
       }
       else
       {

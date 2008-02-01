@@ -72,7 +72,7 @@ public class TestHandler
           .shortValue();
       boolean isDraft = (verfPunkt == count) ? true : false;
       boolean isOriginal = (verfPunkt == 1) ? true : false;
-      XPrintModel pmod = model.createPrintModel(false);
+      final XPrintModel pmod = model.createPrintModel(false);
       try
       {
         pmod.setPropertyValue(
@@ -100,7 +100,14 @@ public class TestHandler
       }
       ((InternalPrintModel) pmod).useInternalPrintFunction(StandardPrint
           .getInternalPrintFunction("sachleitendeVerfuegungOutput", 10));
-      pmod.printWithProps();
+      // Drucken im Hintergrund, damit der WollMux weiterläuft.
+      new Thread()
+      {
+        public void run()
+        {
+          pmod.printWithProps();
+        }
+      }.start();
     }
 
     /** ************************************************************** */

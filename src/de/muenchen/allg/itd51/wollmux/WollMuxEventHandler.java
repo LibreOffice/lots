@@ -2798,8 +2798,16 @@ public class WollMuxEventHandler
       stabilize();
 
       // Die im Dokument gesetzten Druckfunktionen ausführen:
-      XPrintModel pmod = model.createPrintModel(true);
-      pmod.printWithProps();
+      final XPrintModel pmod = model.createPrintModel(true);
+
+      // Drucken im Hintergrund, damit der WollMuxEventHandler weiterläuft.
+      new Thread()
+      {
+        public void run()
+        {
+          pmod.printWithProps();
+        }
+      }.start();
     }
 
     /**
@@ -3973,7 +3981,15 @@ public class WollMuxEventHandler
 
       final XPrintModel pmod = model.createPrintModel(useDocPrintFunctions);
       pmod.usePrintFunction("Seriendruck");
-      pmod.printWithProps();
+
+      // Drucken im Hintergrund, damit der WollMuxEventHandler weiterläuft.
+      new Thread()
+      {
+        public void run()
+        {
+          pmod.printWithProps();
+        }
+      }.start();
     }
 
     public String toString()

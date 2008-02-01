@@ -1449,7 +1449,7 @@ public class MailMergeNew
     //TODO hier kann man mit lockControllers auf das Gesamtdokument vielleicht noch etwas Performance rausholen - das bitte testen.
     mod.collectNonWollMuxFormFields();
     QueryResultsWithSchema data = ds.getData();
-    XPrintModel pmod = mod.createPrintModel(true);
+    final XPrintModel pmod = mod.createPrintModel(true);
     try{
       pmod.setPropertyValue("MailMergeNew_Schema", data.getSchema());
       pmod.setPropertyValue(PROP_QUERYRESULTS, data);
@@ -1460,7 +1460,17 @@ public class MailMergeNew
     }
     pmod.usePrintFunction("MailMergeNewSetFormValue");
     if (printIntoDocument) pmod.usePrintFunction("Gesamtdokument");
-    pmod.printWithProps();
+
+    // Drucken im Hintergrund, damit der EDT nicht blockiert.
+    new Thread()
+    {
+      public void run()
+      {
+        mod.setFormFieldsPreviewMode(true);
+        pmod.printWithProps();
+        mod.setFormFieldsPreviewMode(previewMode);
+      }
+    }.start();
   }
   
   
