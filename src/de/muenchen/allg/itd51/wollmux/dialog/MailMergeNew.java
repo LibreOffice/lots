@@ -15,7 +15,7 @@
 * @version 1.0
 * 
 */
-package de.muenchen.allg.itd51.wollmux.func;
+package de.muenchen.allg.itd51.wollmux.dialog;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -106,7 +106,6 @@ import de.muenchen.allg.itd51.wollmux.db.Datasource;
 import de.muenchen.allg.itd51.wollmux.db.OOoDatasource;
 import de.muenchen.allg.itd51.wollmux.db.QueryResults;
 import de.muenchen.allg.itd51.wollmux.db.QueryResultsList;
-import de.muenchen.allg.itd51.wollmux.dialog.DimAdjust;
 
 /**
  * Die neuen erweiterten Serienbrief-Funktionalitäten.
