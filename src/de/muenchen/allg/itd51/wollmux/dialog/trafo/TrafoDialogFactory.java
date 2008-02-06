@@ -35,6 +35,11 @@ public class TrafoDialogFactory
    * Versucht, einen zu params passenden Dialog zu instanziieren und liefert ihn
    * zurück, falls es klappt.
    * 
+   * @param params spezifiziert die Informationen, die der Dialog braucht und bestimmt,
+   *               was für ein Dialog angezeigt wird. ACHTUNG! Das Objekt darf nach dem
+   *               Aufruf dieser Methode nicht mehr verändert werden, da der Dialog es
+   *               evtl. permanent speichert und für seine Arbeit verwendet.
+   * 
    * @throws UnavailableException wenn kein passender Dialog gefunden wurde.
    *  
    * @author Matthias Benkmann (D-III-ITD 5.1)

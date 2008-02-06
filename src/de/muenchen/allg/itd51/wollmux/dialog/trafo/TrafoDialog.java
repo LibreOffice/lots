@@ -17,6 +17,8 @@
 */
 package de.muenchen.allg.itd51.wollmux.dialog.trafo;
 
+import java.awt.event.ActionListener;
+
 /**
  * Ein Dialog zum Bearbeiten einer TRAFO-Funktion.
  *
@@ -24,4 +26,21 @@ package de.muenchen.allg.itd51.wollmux.dialog.trafo;
  */
 public abstract class TrafoDialog
 {
+  /**
+   * Zeigt den Dialog an.
+   * @param closeAction wird aufgerufen, wenn der Dialog beendet wird. Als source wird
+   * im übergebenen ActionEvent ein {@link TrafoDialogParameters} Objekt übergeben, das
+   * den geänderten Trafo-Zustand beschreibt.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TODO Testen
+   */
+  public abstract void show(ActionListener closeAction);
+  
+  /**
+   * Schließt den Dialog. Darf nur aufgerufen werden, wenn er gerade angezeigt wird.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * TODO Testen
+   */
+  public abstract void dispose();
 }

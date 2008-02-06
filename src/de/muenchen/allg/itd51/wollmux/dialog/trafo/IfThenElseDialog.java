@@ -17,6 +17,8 @@
 */
 package de.muenchen.allg.itd51.wollmux.dialog.trafo;
 
+import java.awt.event.ActionListener;
+
 /**
  * Erlaubt die Bearbeitung der Funktion eines Wenn-Dann-Sonst-Feldes.
  *
@@ -29,4 +31,9 @@ public class IfThenElseDialog extends TrafoDialog
     throw new IllegalArgumentException();
   }
   
+  public void show(ActionListener closeAction)
+  {}
+  
+  
+  public void dispose() {};
 }
