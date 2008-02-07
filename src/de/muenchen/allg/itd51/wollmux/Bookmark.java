@@ -506,7 +506,7 @@ public class Bookmark
    */
   public boolean isCollapsed()
   {
-    XTextRange anchor = getAnchor();
+    XTextRange anchor = getTextRange();
     if (anchor == null) return false;
     try
     {
