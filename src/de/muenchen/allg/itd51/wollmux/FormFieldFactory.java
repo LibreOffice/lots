@@ -45,7 +45,6 @@ import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextField;
 import com.sun.star.text.XTextRange;
 import com.sun.star.uno.UnoRuntime;
-import com.sun.star.uno.XInterface;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertFormValue;
@@ -129,9 +128,9 @@ public final class FormFieldFactory
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static FormField createDatabaseFormField(XTextDocument doc,
-      Object textfield)
+      XTextField textfield)
   {
-    return new DatabaseFormField(doc, UNO.XInterface(textfield));
+    return new DatabaseFormField(doc, textfield);
   }
 
   /**
@@ -439,6 +438,19 @@ public final class FormFieldFactory
     public abstract void setCommand(InsertFormValue cmd);
 
     /**
+     * Ersetzt jede vorhandene Referenz auf die Feld-ID oldFieldId durch eine
+     * neue Referenz auf newFieldId und liefert true zurück, wenn mindestens
+     * eine Ersetzung vorgenommen wurde (ansonsten false).
+     */
+    public abstract boolean substituteFieldID(String oldFieldId,
+        String newFieldId);
+
+    /**
+     * Liefert die XTextRange, an der das Formularfeld verankert ist.
+     */
+    public XTextRange getAnchor();
+
+    /**
      * Die Methode liefert den Namen der Trafo, die auf dieses Formularfeld
      * gesetzt ist oder null, wenn keine Trafo gesetzt ist.
      */
@@ -576,6 +588,22 @@ public final class FormFieldFactory
       else if (rel.isAEqualB()) return 0;
 
       return -1;
+    }
+
+    public boolean substituteFieldID(String oldFieldId, String newFieldId)
+    {
+      if (oldFieldId == null || newFieldId == null) return false;
+      if (cmd.getID().equals(oldFieldId))
+      {
+        cmd.setID(newFieldId);
+        return true;
+      }
+      return false;
+    }
+
+    public XTextRange getAnchor()
+    {
+      return cmd.getAnchor();
     }
   }
 
@@ -844,11 +872,11 @@ public final class FormFieldFactory
    */
   private static class DatabaseFormField implements FormField
   {
-    private XInterface textfield;
+    private XTextField textfield;
 
     private XTextDocument doc;
 
-    public DatabaseFormField(XTextDocument doc, XInterface textfield)
+    public DatabaseFormField(XTextDocument doc, XTextField textfield)
     {
       this.textfield = textfield;
       this.doc = doc;
@@ -914,6 +942,29 @@ public final class FormFieldFactory
       // wird nicht aufgerufen und daher auch nicht implementiert.
       return -1;
     }
+
+    public boolean substituteFieldID(String oldFieldId, String newFieldId)
+    {
+      if (oldFieldId == null || newFieldId == null) return false;
+      if (UNO.XDependentTextField(textfield) != null)
+      {
+        Object master = UNO.XDependentTextField(textfield).getTextFieldMaster();
+        Object currentName = UNO.getProperty(master, "DataColumnName");
+        if (oldFieldId.equals(currentName))
+        {
+          UNO.setProperty(master, "DataColumnName", newFieldId);
+          if (UNO.XUpdatable(textfield) != null)
+            UNO.XUpdatable(textfield).update();
+          return true;
+        }
+      }
+      return false;
+    }
+
+    public XTextRange getAnchor()
+    {
+      return textfield.getAnchor();
+    }
   }
 
   /**
@@ -963,10 +1014,11 @@ public final class FormFieldFactory
 
     public String getTrafoName()
     {
-      return TextDocumentModel.getFunctionNameForUserFieldName(""
-                                                            + UNO.getProperty(
-                                                                textfield,
-                                                                "Content"));
+      return TextDocumentModel
+          .getFunctionNameForUserFieldName(""
+                                           + UNO.getProperty(
+                                               textfield,
+                                               "Content"));
     }
 
     public String getValue()
@@ -1004,6 +1056,17 @@ public final class FormFieldFactory
     public boolean equals(Object b)
     {
       return UnoRuntime.areSame(UNO.XInterface(textfield), UNO.XInterface(b));
+    }
+
+    public boolean substituteFieldID(String oldFieldId, String newFieldId)
+    {
+      // Ersetzung mss in der Trafofunktion vorgenommen werden.
+      return false;
+    }
+
+    public XTextRange getAnchor()
+    {
+      return textfield.getAnchor();
     }
   }
 }

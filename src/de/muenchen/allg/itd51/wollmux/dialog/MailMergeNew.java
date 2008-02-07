@@ -1388,6 +1388,16 @@ public class MailMergeNew
     {
       public void actionPerformed(ActionEvent e)
       {
+        Logger.error("ID=" + e.getID());
+        ConfigThingy c = new ConfigThingy("Funktion");
+        ConfigThingy cat = new ConfigThingy("CAT");
+        c.addChild(cat);
+//        c.addChild(new ConfigThingy("Hallo_fixed"));
+        cat.addChild(new ConfigThingy("Hallo_"));
+        ConfigThingy value = new ConfigThingy("VALUE");
+        value.addChild(new ConfigThingy("Gender"));
+        cat.addChild(value);
+        mod.replaceSelectionWithFormField("Gender", null, c);
    // TODO    insertGenderField();
       }
     });

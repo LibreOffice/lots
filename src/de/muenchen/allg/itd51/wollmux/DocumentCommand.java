@@ -1101,6 +1101,29 @@ abstract public class DocumentCommand
       return id;
     }
 
+    public void setID(String id)
+    {
+      this.id = id;
+      // Dokumentkommando anpassen:
+      try
+      {
+        ConfigThingy idConf = wmCmd.query("WM").query("ID").getLastChild();
+        // alten Wert von ID löschen
+        for (Iterator iter = idConf.iterator(); iter.hasNext();)
+        {
+          iter.next();
+          iter.remove();
+        }
+        // neuen Wert für ID setzen
+        idConf.addChild(new ConfigThingy(id));
+      }
+      catch (NodeNotFoundException e)
+      {
+        Logger.error(e);
+      }
+      flushToBookmark(false);
+    }
+
     public String getTrafoName()
     {
       return trafo;
@@ -1111,16 +1134,10 @@ abstract public class DocumentCommand
       return visitable.executeCommand(this);
     }
 
-    protected ConfigThingy toConfigThingy()
-    {
-      return super.toConfigThingy();
-    }
-
     protected boolean insertsTextContent()
     {
       return true;
     }
-
   }
 
   // ********************************************************************************

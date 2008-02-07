@@ -23,6 +23,7 @@ import java.awt.Window;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -3261,15 +3262,14 @@ public class TextDocumentModel
   }
 
   /**
-   * Diese Methode ersetzt den Namen der ID fieldId, der in insertFormValue,
-   * Serienbrieffeldern, UserFeldern und evtl. hinterlegten Trafo-Funktionen
-   * referenziert wird, durch neue IDs, die in Ersetzungsregel enthalten sind.
-   * Die Ersetzungsregel ist vom Typ FieldSubstitution und kann mehrere Elemente
-   * (fester Text oder Felder) enthalten, die an Stelle des alten Feldes gesetzt
-   * werden sollen. Damit kann eine Ersetzungsregel auch dafür sorgen, dass aus
-   * einem früher atomaren Feld in Zukunft ein deutlich komplexeres Feld bzw.
-   * mehrere Felder entstehen. Folgender Abschnitt beschreibt, wie sich die
-   * Ersetzung auf verschiedene Elemente auswirkt.
+   * Diese Methode ersetzt die Referenzen der ID fieldId im gesamten Dokument
+   * durch neue IDs, die in der Ersetzungsregel subst spezifiziert sind. Die
+   * Ersetzungsregel ist vom Typ FieldSubstitution und kann mehrere Elemente
+   * (fester Text oder Felder) enthalten, die an Stelle eines alten Feldes
+   * gesetzt werden sollen. Damit kann eine Ersetzungsregel auch dafür sorgen,
+   * dass aus einem früher atomaren Feld in Zukunft mehrere Felder entstehen.
+   * Folgender Abschnitt beschreibt, wie sich die Ersetzung auf verschiedene
+   * Elemente auswirkt.
    * 
    * 1) Ersetzungsregel "<neueID>" - Einfache Ersetzung mit genau einem neuen
    * Serienbrieffeld (z.B. "<Vorname>"): bei insertFormValue-Kommandos wird
@@ -3280,31 +3280,13 @@ public class TextDocumentModel
    * jede vorkommende Funktion VALUE 'alteID' ersetzt durch VALUE 'neueID'.
    * 
    * 2) Ersetzungsregel "<A> <B>" - Kompexe Ersetzung mit mehreren neuen IDs
-   * und Text: ein bestehendes insertFormValue-Kommando ohne Trafo wird wie
-   * folgt manipuliert: das Bookmark WM(CMD'insertFormValue' ID 'alteId') wird
-   * ersetzt durch ein WollMux-Benutzerfeld mit folgender Trafo: CONCAT(VALUE
-   * 'A', ' ', VALUE 'B'). Besitzt das insertFormValue-Kommando eine Trafo, wird
-   * das Bookmark ebenfalls durch ein WollMux-Benutzerfeld ersetzt und die
-   * bestehende Trafo übernommen, dabei jedoch jeder Aufruf von VALUE '*' durch
-   * CONCAT(VALUE 'A', ' ', VALUE 'B') ersetzt. Ein Serienbrieffeld wird ersetzt
-   * durch zwei neue Serienbrieffelder, die durch ein Leerzeichen getrennt sind.
-   * Bei WollMux-Benutzerfeldern, die ja immer eine Trafo hinterlegt haben, wird
-   * jede vorkommende Funktion VALUE 'alteID' ersetzt durch CONCAT(VALUE 'A', ' ',
-   * VALUE 'B').
-   * 
-   * 2) (Alternative) Ersetzungsregel "<A> <B>" - Kompexe Ersetzung mit
-   * mehreren neuen IDs und Text: ein bestehendes insertFormValue-Kommando ohne
-   * Trafo wird wie folgt manipuliert: das Bookmark WM(CMD'insertFormValue' ID
-   * 'alteId') wird ersetzt durch ein Serienbrieffeld mit Verweis auf A, ein
-   * Leerzeichen und ein weiteres Serienbrieffeld mit Verweis auf B. Besitzt das
-   * insertFormValue-Kommando eine Trafo, so wird das Bookmark durch ein
-   * WollMux-Benutzerfeld ersetzt und die bestehende Trafo übernommen, dabei
-   * jedoch jeder Aufruf von VALUE '*' durch CONCAT(VALUE 'A', ' ', VALUE 'B')
-   * ersetzt. Ein Serienbrieffeld wird ersetzt durch zwei neue
-   * Serienbrieffelder, die durch ein Leerzeichen getrennt sind. Bei
-   * WollMux-Benutzerfeldern, die ja immer eine Trafo hinterlegt haben, wird
-   * jede vorkommende Funktion VALUE 'alteID' ersetzt durch CONCAT(VALUE 'A', ' ',
-   * VALUE 'B').
+   * und Text: Diese Ersetzung ist bei transformierten Feldern grundsätzlich
+   * nicht zugelassen. Ein bestehendes insertFormValue-Kommando ohne Trafo wird
+   * wie folgt manipuliert: anstelle des alten Bookmarks WM(CMD'insertFormValue'
+   * ID 'alteId') wird der entsprechende Freitext und entsprechende neue
+   * WM(CMD'insertFormValue' ID 'neueIDn') Bookmarks in den Text eingefügt. Ein
+   * Serienbrieffeld wird ersetzt durch entsprechende neue Serienbrieffelder,
+   * die durch den entsprechenden Freitext getrennt sind.
    * 
    * In allen Fällen gilt, dass die Änderung nach Ausführung dieser Methode
    * sofort aktiv sind und der Aufruf von setFormFieldValue(...) bzw.
@@ -3337,6 +3319,142 @@ public class TextDocumentModel
                   + " --> '"
                   + substStr
                   + "'");
+
+    // Behandlung einer einfachen Ersetzungsregel:
+    Iterator iter = subst.iterator();
+    if (iter.hasNext())
+    {
+      FieldSubstitution.SubstElement field = (FieldSubstitution.SubstElement) iter
+          .next();
+      if (field.isField() && !iter.hasNext())
+      {
+        applySimpleFieldSubstitution(fieldId, field.value);
+        return;
+      }
+    }
+
+    // TODO: komplexe Ersetzungsregel anwenden
+  }
+
+  /**
+   * Wendet eine einfach Ersetzungsregel (1-zu-1 Zuordnung von alter ID
+   * oldFieldId auf neue ID newFieldId) auf alle Felder des Dokuments an und
+   * aktualisiert die internen Datenstrukturen und die Ansicht der geänderten
+   * Formularfelder.
+   * 
+   * @param oldFieldId
+   *          ID, die durch newFieldId ersetzt werden soll.
+   * @param newFieldId
+   *          neue ID, die oldFieldId ersetzt.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  private void applySimpleFieldSubstitution(String oldFieldId, String newFieldId)
+  {
+    // Alle InsertFormValue-Felder anpassen:
+    Collection c = (Collection) idToFormFields.remove(oldFieldId);
+    if (c != null)
+    {
+      for (Iterator iter = c.iterator(); iter.hasNext();)
+      {
+        FormField f = (FormField) iter.next();
+        f.substituteFieldID(oldFieldId, newFieldId);
+      }
+      idToFormFields.put(newFieldId, c);
+    }
+
+    // Alle Datenbankfelder und Benutzerfelder anpassen:
+    c = (Collection) idToTextFieldFormFields.remove(oldFieldId);
+    if (c != null)
+    {
+      for (Iterator iter = c.iterator(); iter.hasNext();)
+      {
+        FormField f = (FormField) iter.next();
+        // Felder oder ggf. die entsprechende Trafo anpassen
+        if (!f.substituteFieldID(oldFieldId, newFieldId))
+          substituteFieldIdInTrafo(f.getTrafoName(), oldFieldId, newFieldId);
+      }
+      idToTextFieldFormFields.put(newFieldId, c);
+    }
+
+    // Formularwerte in den persistenten Daten anpassen
+    String value = (String) formFieldValues.remove(oldFieldId);
+    if (value != null) setFormFieldValue(newFieldId, value);
+
+    // Ansicht der Felder aktualisieren
+    updateFormFields(newFieldId);
+  }
+
+  /**
+   * Diese Methode ersetzt jedes Vorkommen von VALUE "oldFieldId" in der
+   * dokumentlokalen Trafo-Funktion trafoName durch VALUE "newFieldId",
+   * speichert die neue Formularbeschreibung persistent im Dokument ab und passt
+   * die aktuelle Funktionsbibliothek entsprechend an. Ist einer der Werte
+   * trafoName, oldFieldId oder newFieldId null, dann macht diese Methode
+   * nichts.
+   * 
+   * @param trafoName
+   *          Die Funktion, in der die Ersetzung vorgenommen werden soll.
+   * @param oldFieldId
+   *          Die alte Feld-ID, die durch newFieldId ersetzt werden soll.
+   * @param newFieldId
+   *          die neue Feld-ID, die oldFieldId ersetzt.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  private void substituteFieldIdInTrafo(String trafoName, String oldFieldId,
+      String newFieldId)
+  {
+    if (trafoName == null || oldFieldId == null || newFieldId == null) return;
+    try
+    {
+      ConfigThingy trafoConf = getFormDescription().query("Formular").query(
+          "Funktionen").query(trafoName, 2).getLastChild();
+      ConfigThingy values = trafoConf.query("VALUE");
+      for (Iterator valuesIter = values.iterator(); valuesIter.hasNext();)
+      {
+        ConfigThingy v = (ConfigThingy) valuesIter.next();
+        if (v.count() == 1 && v.toString().equals(oldFieldId))
+        {
+          try
+          {
+            v.getLastChild().setName(newFieldId);
+          }
+          catch (NodeNotFoundException e)
+          {
+            // kann wg. der obigen Prüfung nicht auftreten.
+          }
+        }
+      }
+
+      // neue Formularbeschreibung persistent machen
+      storeCurrentFormDescription();
+
+      // Funktion neu parsen und Funktionsbibliothek anpassen
+      FunctionLibrary funcLib = getFunctionLibrary();
+      try
+      {
+        Function func = FunctionFactory.parseChildren(
+            trafoConf,
+            funcLib,
+            dialogLib,
+            getFunctionContext());
+        getFunctionLibrary().add(trafoName, func);
+      }
+      catch (ConfigurationErrorException e)
+      {
+        // sollte eigentlich nicht auftreten, da die alte Trafo ja auch schon
+        // einmal erfolgreich geparsed werden konnte.
+        Logger.error(e);
+      }
+    }
+    catch (NodeNotFoundException e)
+    {
+      Logger
+          .error("Die trafo '"
+                 + trafoName
+                 + "' ist nicht dokumentlokal und kann daher nicht verändert werden.");
+    }
   }
 
   /**

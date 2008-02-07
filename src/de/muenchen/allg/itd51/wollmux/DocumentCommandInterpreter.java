@@ -123,6 +123,23 @@ public class DocumentCommandInterpreter
   }
 
   /**
+   * Der Konstruktor erzeugt einen neuen Kommandointerpreter, der alle
+   * Dokumentkommandos im übergebenen Dokument xDoc scannen und interpretieren
+   * kann.
+   * 
+   * @param xDoc
+   *          Das Dokument, dessen Kommandos ausgeführt werden sollen.
+   * @param frag_urls
+   *          Eine Liste mit fragment-urls, die für das Kommando insertContent
+   *          benötigt wird.
+   */
+  public DocumentCommandInterpreter(TextDocumentModel model)
+  {
+    this.model = model;
+    this.mux = WollMuxSingleton.getInstance();
+  }
+
+  /**
    * Diese Methode sollte vor executeTemplateCommands und vor
    * executeFormCommands aufgerufen werden und sorgt dafür, dass alle globalen
    * Einstellungen des Dokuments an das TextDocumentModel weitergereicht werden.
