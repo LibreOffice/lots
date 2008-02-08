@@ -65,6 +65,7 @@ import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.itd51.wollmux.HashableComponent;
 import de.muenchen.allg.itd51.wollmux.Logger;
+import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.ooo.TextDocument;
 
 /**
@@ -206,7 +207,7 @@ public class PrintIntoFile
       
       int pageCount = ((Number)UNO.getProperty(outputDoc.getCurrentController(), "PageCount")).intValue();
       pageCount -= pageNumberOffset;
-      fixPageCountFields(UNO.XTextFieldsSupplier(outputDoc).getTextFields(), pageCount);
+      fixTextFields(UNO.XTextFieldsSupplier(outputDoc).getTextFields(), pageCount);
       
       oldShapes = null;
       System.gc();
@@ -284,7 +285,6 @@ public class PrintIntoFile
    * @param doc, das Dokument in dem der Cursor wandert
    * @param oldPageStyles die PageStyles Familie des alten Dokuments
    * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TODO Testen
    */
   private static void renamePageStyles(XParagraphCursor cursor, XTextDocument doc, XNameAccess oldPageStyles)
   {
@@ -330,7 +330,7 @@ public class PrintIntoFile
    */
   private static void dumpOids(XTextDocument outputDoc)
   {
-    //TODO if (!WollMuxFiles.isDebugMode()) return;
+    if (!WollMuxFiles.isDebugMode()) return;
     XIndexAccess shapes = UNO.XIndexAccess(UNO.XDrawPageSupplier(outputDoc).getDrawPage());
     int shapeCount = shapes.getCount();
     try{
@@ -349,11 +349,10 @@ public class PrintIntoFile
    * Ersetzt alle TextFields des Typs PageCount in textFields durch den Wert
    * pageCount.
    * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TODO Testen
    * @throws WrappedTargetException 
    * @throws NoSuchElementException sollte nie geworfen werden
    */
-  private static void fixPageCountFields(XEnumerationAccess textFields, int pageCount) throws NoSuchElementException, WrappedTargetException
+  private static void fixTextFields(XEnumerationAccess textFields, int pageCount) throws NoSuchElementException, WrappedTargetException
   {
     String pc = ""+pageCount;
     XEnumeration enu = textFields.createEnumeration();
@@ -362,8 +361,9 @@ public class PrintIntoFile
       Object textfield = enu.nextElement();
       //Der eigentlich redundante Test auf das Property NumberingType ist eine Optimierung,
       //da supportsService sehr langsam ist.
-      if (UNO.getProperty(textfield, "NumberingType") != null 
-          && UNO.supportsService(textfield, "com.sun.star.text.textfield.PageCount"))
+      //if (UNO.getProperty(textfield, "NumberingType") != null 
+      //    && UNO.supportsService(textfield, "com.sun.star.text.textfield.PageCount"))
+      //auch InputUser-Felder und weiﬂ der Teufel was noch macht Probleme
       {
         XTextRange range = UNO.XTextContent(textfield).getAnchor();
         XTextCursor cursor = range.getText().createTextCursorByRange(range.getStart());
