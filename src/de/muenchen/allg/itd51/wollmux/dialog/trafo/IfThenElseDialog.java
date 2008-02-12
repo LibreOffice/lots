@@ -29,6 +29,12 @@ public class IfThenElseDialog extends TrafoDialog
   public IfThenElseDialog(TrafoDialogParameters params)
   {
     throw new IllegalArgumentException();
+    
+    /*
+     * gleich (mit gross/klein):  STRCMP(VALUE "feld" "vergleichswert")
+     * ungleich (mit gross/klein): NOT(STRCMP(VALUE "feld" "vergleichswert"))
+     * 
+     */
   }
   
   public void show(ActionListener closeAction)
