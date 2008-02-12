@@ -1352,43 +1352,54 @@ public class TextDocumentModel
    */
   synchronized public void insertMailMergeFieldAtCursorPosition(String fieldId)
   {
-    if (fieldId.length() > 0)
-      try
-      {
-        // Feld einfügen
-        XMultiServiceFactory factory = UNO.XMultiServiceFactory(doc);
-        XDependentTextField field = UNO.XDependentTextField(factory
-            .createInstance("com.sun.star.text.TextField.Database"));
-        XPropertySet master = UNO.XPropertySet(factory
-            .createInstance("com.sun.star.text.FieldMaster.Database"));
-        UNO.setProperty(master, "DataBaseName", "DataBase");
-        UNO.setProperty(master, "DataTableName", "Table");
-        UNO.setProperty(master, "DataColumnName", fieldId);
-        if (!formFieldPreviewMode)
-          UNO.setProperty(field, "Content", "<" + fieldId + ">");
-        field.attachTextFieldMaster(master);
+    insertMailMergeField(fieldId, getViewCursor());
+  }
 
-        XTextCursor vc = getViewCursor();
-        vc.getText().insertTextContent(vc, field, true);
-        vc.collapseToEnd();
+  /**
+   * Fügt an Stelle range ein Serienbrieffeld ein, das auf die Spalte fieldId
+   * zugreift und mit dem Wert "" vorbelegt ist, falls noch kein Wert für
+   * fieldId gesetzt wurde. Das Serienbrieffeld wird im WollMux registriert und
+   * kann damit sofort verwendet werden.
+   */
+  private void insertMailMergeField(String fieldId, XTextRange range)
+  {
+    if (fieldId == null || fieldId.length() == 0 || range == null) return;
+    try
+    {
+      // Feld einfügen
+      XMultiServiceFactory factory = UNO.XMultiServiceFactory(doc);
+      XDependentTextField field = UNO.XDependentTextField(factory
+          .createInstance("com.sun.star.text.TextField.Database"));
+      XPropertySet master = UNO.XPropertySet(factory
+          .createInstance("com.sun.star.text.FieldMaster.Database"));
+      UNO.setProperty(master, "DataBaseName", "DataBase");
+      UNO.setProperty(master, "DataTableName", "Table");
+      UNO.setProperty(master, "DataColumnName", fieldId);
+      if (!formFieldPreviewMode)
+        UNO.setProperty(field, "Content", "<" + fieldId + ">");
+      field.attachTextFieldMaster(master);
 
-        // Feldwert mit leerem Inhalt vorbelegen
-        if (!formFieldValues.containsKey(fieldId))
-          setFormFieldValue(fieldId, "");
+      XTextCursor cursor = range.getText().createTextCursorByRange(range);
+      cursor.getText().insertTextContent(cursor, field, true);
+      cursor.collapseToEnd();
 
-        // Formularfeld bekanntmachen, damit es vom WollMux verwendet wird.
-        if (!idToTextFieldFormFields.containsKey(fieldId))
-          idToTextFieldFormFields.put(fieldId, new Vector());
-        List formFields = (List) idToTextFieldFormFields.get(fieldId);
-        formFields.add(FormFieldFactory.createDatabaseFormField(doc, field));
+      // Feldwert mit leerem Inhalt vorbelegen
+      if (!formFieldValues.containsKey(fieldId))
+        setFormFieldValue(fieldId, "");
 
-        // Ansicht des Formularfeldes aktualisieren:
-        updateFormFields(fieldId);
-      }
-      catch (java.lang.Exception e)
-      {
-        Logger.error(e);
-      }
+      // Formularfeld bekanntmachen, damit es vom WollMux verwendet wird.
+      if (!idToTextFieldFormFields.containsKey(fieldId))
+        idToTextFieldFormFields.put(fieldId, new Vector());
+      List formFields = (List) idToTextFieldFormFields.get(fieldId);
+      formFields.add(FormFieldFactory.createDatabaseFormField(doc, field));
+
+      // Ansicht des Formularfeldes aktualisieren:
+      updateFormFields(fieldId);
+    }
+    catch (java.lang.Exception e)
+    {
+      Logger.error(e);
+    }
   }
 
   /**
@@ -1554,13 +1565,17 @@ public class TextDocumentModel
 
   /**
    * Speichert den neuen Wert value zum Formularfeld fieldId im
-   * Formularwerte-Abschnitt in den persistenten Daten.
+   * Formularwerte-Abschnitt in den persistenten Daten oder löscht den Eintrag
+   * für fieldId aus den persistenten Daten, wenn value==null ist.
    * 
    * @author Matthias Benkmann, Christoph Lutz (D-III-ITD 5.1)
    */
   synchronized public void setFormFieldValue(String fieldId, String value)
   {
-    formFieldValues.put(fieldId, value);
+    if (value == null)
+      formFieldValues.remove(fieldId);
+    else
+      formFieldValues.put(fieldId, value);
     persistentData.setData(DATA_ID_FORMULARWERTE, getFormFieldValues());
   }
 
@@ -3271,22 +3286,26 @@ public class TextDocumentModel
    * Folgender Abschnitt beschreibt, wie sich die Ersetzung auf verschiedene
    * Elemente auswirkt.
    * 
-   * 1) Ersetzungsregel "<neueID>" - Einfache Ersetzung mit genau einem neuen
-   * Serienbrieffeld (z.B. "<Vorname>"): bei insertFormValue-Kommandos wird
-   * WM(CMD'insertFormValue' ID '<alteID>' [TRAFO...]) ersetzt durch WM(CMD
-   * 'insertFormValue' ID '<neueID>' [TRAFO...]). Bei Serienbrieffeldern wird
-   * die ID ebenfalls direkt ersetzt durch <neueID>. Bei
-   * WollMux-Benutzerfeldern, die ja immer eine Trafo hinterlegt haben, wird
-   * jede vorkommende Funktion VALUE 'alteID' ersetzt durch VALUE 'neueID'.
+   * 1) Ersetzungsregel "&lt;neueID&gt;" - Einfache Ersetzung mit genau einem
+   * neuen Serienbrieffeld (z.B. "&lt;Vorname&gt;"): bei
+   * insertFormValue-Kommandos wird WM(CMD'insertFormValue' ID '&lt;alteID&gt;'
+   * [TRAFO...]) ersetzt durch WM(CMD 'insertFormValue' ID '&lt;neueID&gt;'
+   * [TRAFO...]). Bei Serienbrieffeldern wird die ID ebenfalls direkt ersetzt
+   * durch &lt;neueID&gt;. Bei WollMux-Benutzerfeldern, die ja immer eine Trafo
+   * hinterlegt haben, wird jede vorkommende Funktion VALUE 'alteID' ersetzt
+   * durch VALUE 'neueID'.
    * 
-   * 2) Ersetzungsregel "<A> <B>" - Kompexe Ersetzung mit mehreren neuen IDs
-   * und Text: Diese Ersetzung ist bei transformierten Feldern grundsätzlich
-   * nicht zugelassen. Ein bestehendes insertFormValue-Kommando ohne Trafo wird
-   * wie folgt manipuliert: anstelle des alten Bookmarks WM(CMD'insertFormValue'
-   * ID 'alteId') wird der entsprechende Freitext und entsprechende neue
-   * WM(CMD'insertFormValue' ID 'neueIDn') Bookmarks in den Text eingefügt. Ein
-   * Serienbrieffeld wird ersetzt durch entsprechende neue Serienbrieffelder,
-   * die durch den entsprechenden Freitext getrennt sind.
+   * 2) Ersetzungsregel "&lt;A&gt; &lt;B&gt;" - Kompexe Ersetzung mit mehreren
+   * neuen IDs und Text: Diese Ersetzung ist bei transformierten Feldern
+   * grundsätzlich nicht zugelassen. Ein bestehendes insertFormValue-Kommando
+   * ohne Trafo wird wie folgt manipuliert: anstelle des alten Bookmarks
+   * WM(CMD'insertFormValue' ID 'alteId') wird der entsprechende Freitext und
+   * entsprechende neue WM(CMD'insertFormValue' ID 'neueIDn') Bookmarks in den
+   * Text eingefügt. Ein Serienbrieffeld wird ersetzt durch entsprechende neue
+   * Serienbrieffelder, die durch den entsprechenden Freitext getrennt sind.
+   * 
+   * 3) Leere Ersetzungsregel - in diesem Fall wird keine Ersetzung vorgenommen
+   * und die Methode kehrt sofort zurück.
    * 
    * In allen Fällen gilt, dass die Änderung nach Ausführung dieser Methode
    * sofort aktiv sind und der Aufruf von setFormFieldValue(...) bzw.
@@ -3300,89 +3319,157 @@ public class TextDocumentModel
    *          die Ersetzungsregel, die beschreibt, welche Inhalte an Stelle des
    *          alten Feldes eingesetzt werden sollen.
    * 
-   * @author Christoph Lutz (D-III-ITD-5.1)
+   * @author Christoph Lutz (D-III-ITD-5.1) TESTED
    */
   synchronized public void applyFieldSubstitution(String fieldId,
       FieldSubstitution subst)
   {
-    // TODO Auto-generated method stub
+    // keine Ersetzung, wenn subst leer ist.
+    if (!subst.iterator().hasNext()) return;
+
+    // enthält später die neue FieldId, wenn eine 1-zu-1-Zuordnung vorliegt
+    String newFieldId = null;
+
+    // Neuen Text zusammenbauen, Felder sind darin mit <feldname> gekennzeichnet
     String substStr = "";
+    int count = 0;
+    for (Iterator substIter = subst.iterator(); substIter.hasNext();)
+    {
+      FieldSubstitution.SubstElement ele = (FieldSubstitution.SubstElement) substIter
+          .next();
+      if (ele.isFixedText())
+      {
+        substStr += ele.getValue();
+      }
+      else if (ele.isField())
+      {
+        substStr += "<" + ele.getValue() + ">";
+        newFieldId = ele.getValue();
+      }
+      count++;
+    }
+    if (count != 1) newFieldId = null;
+
+    // Alle InsertFormValue-Felder anpassen:
+    Collection c = (Collection) idToFormFields.get(fieldId);
+    if (c != null)
+    {
+      for (Iterator iter = c.iterator(); iter.hasNext();)
+      {
+        FormField f = (FormField) iter.next();
+        if (f.getTrafoName() != null)
+        {
+          // Transformierte Felder soweit möglich behandeln
+          if (newFieldId != null)
+            // 1-zu-1 Zuordnung: Hier kann substitueFieldID verwendet werden
+            f.substituteFieldID(fieldId, newFieldId);
+          else
+            Logger
+                .error("Kann transformiertes Feld nur durch eine 1-zu-1 Zuordnung ersetzen.");
+        }
+        else
+        {
+          // Untransformierte Felder durch neue Felder ersetzen
+          XTextRange anchor = f.getAnchor();
+          if (f.getAnchor() != null)
+          {
+            // Cursor erzeugen, Formularfeld löschen und neuen String setzen
+            XTextCursor cursor = anchor.getText().createTextCursorByRange(
+                anchor);
+            f.dispose();
+            cursor.setString(substStr);
+
+            // Neue Bookmarks passend zum Text platzieren
+            cursor.collapseToStart();
+            for (Iterator substIter = subst.iterator(); substIter.hasNext();)
+            {
+              FieldSubstitution.SubstElement ele = (FieldSubstitution.SubstElement) substIter
+                  .next();
+              if (ele.isFixedText())
+              {
+                cursor.goRight((short) ele.getValue().length(), false);
+              }
+              else if (ele.isField())
+              {
+                cursor.goRight((short) (1 + ele.getValue().length() + 1), true);
+                new Bookmark("WM(CMD 'insertFormValue' ID '"
+                             + ele.getValue()
+                             + "')", doc, cursor);
+                cursor.collapseToEnd();
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // Alle Datenbank- und Benutzerfelder anpassen:
+    c = (Collection) idToTextFieldFormFields.remove(fieldId);
+    if (c != null)
+    {
+      for (Iterator iter = c.iterator(); iter.hasNext();)
+      {
+        FormField f = (FormField) iter.next();
+        if (f.getTrafoName() != null)
+        {
+          // Transformierte Felder soweit möglich behandeln
+          if (newFieldId != null)
+            // 1-zu-1 Zuordnung: hier kann f.substitueFieldId nicht verwendet
+            // werden, dafür kann aber die Trafo angepasst werden.
+            substituteFieldIdInTrafo(f.getTrafoName(), fieldId, newFieldId);
+          else
+            Logger
+                .error("Kann transformiertes Feld nur durch eine 1-zu-1 Zuordnung ersetzen.");
+        }
+        else
+        {
+          // Untransformierte Felder durch neue Felder ersetzen
+          XTextRange anchor = f.getAnchor();
+          if (f.getAnchor() != null)
+          {
+            // Cursor über den Anker erzeugen und Formularfeld löschen
+            XTextCursor cursor = anchor.getText().createTextCursorByRange(
+                anchor);
+            f.dispose();
+            cursor.setString(substStr);
+
+            // Neue Datenbankfelder passend zum Text einfügen
+            cursor.collapseToStart();
+            for (Iterator substIter = subst.iterator(); substIter.hasNext();)
+            {
+              FieldSubstitution.SubstElement ele = (FieldSubstitution.SubstElement) substIter
+                  .next();
+              if (ele.isFixedText())
+              {
+                cursor.goRight((short) ele.getValue().length(), false);
+              }
+              else if (ele.isField())
+              {
+                cursor.goRight((short) (1 + ele.getValue().length() + 1), true);
+                insertMailMergeField(ele.getValue(), cursor);
+                cursor.collapseToEnd();
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // Datenstrukturen aktualisieren
+    getDocumentCommands().update();
+    // collectNonWollMuxFormFields() wird im folgenden scan auch noch erledigt
+    new DocumentCommandInterpreter(this).scanGlobalDocumentCommands();
+
+    // Alte Formularwerte aus den persistenten Daten entfernen
+    setFormFieldValue(fieldId, null);
+
+    // Ansicht der betroffenen Felder aktualisieren
     for (Iterator iter = subst.iterator(); iter.hasNext();)
     {
-      FieldSubstitution.SubstElement element = (FieldSubstitution.SubstElement) iter
+      FieldSubstitution.SubstElement ele = (FieldSubstitution.SubstElement) iter
           .next();
-      if (element.isField()) substStr += "<<" + element.getValue() + ">>";
-      if (element.isFixedText()) substStr += element.getValue();
+      if (ele.isField()) updateFormFields(ele.getValue());
     }
-    Logger.debug2("applyFieldSubstitution: "
-                  + fieldId
-                  + " --> '"
-                  + substStr
-                  + "'");
-
-    // Behandlung einer einfachen Ersetzungsregel:
-    Iterator iter = subst.iterator();
-    if (iter.hasNext())
-    {
-      FieldSubstitution.SubstElement field = (FieldSubstitution.SubstElement) iter
-          .next();
-      if (field.isField() && !iter.hasNext())
-      {
-        applySimpleFieldSubstitution(fieldId, field.value);
-        return;
-      }
-    }
-
-    // TODO: komplexe Ersetzungsregel anwenden
-  }
-
-  /**
-   * Wendet eine einfach Ersetzungsregel (1-zu-1 Zuordnung von alter ID
-   * oldFieldId auf neue ID newFieldId) auf alle Felder des Dokuments an und
-   * aktualisiert die internen Datenstrukturen und die Ansicht der geänderten
-   * Formularfelder.
-   * 
-   * @param oldFieldId
-   *          ID, die durch newFieldId ersetzt werden soll.
-   * @param newFieldId
-   *          neue ID, die oldFieldId ersetzt.
-   * 
-   * @author Christoph Lutz (D-III-ITD-5.1)
-   */
-  private void applySimpleFieldSubstitution(String oldFieldId, String newFieldId)
-  {
-    // Alle InsertFormValue-Felder anpassen:
-    Collection c = (Collection) idToFormFields.remove(oldFieldId);
-    if (c != null)
-    {
-      for (Iterator iter = c.iterator(); iter.hasNext();)
-      {
-        FormField f = (FormField) iter.next();
-        f.substituteFieldID(oldFieldId, newFieldId);
-      }
-      idToFormFields.put(newFieldId, c);
-    }
-
-    // Alle Datenbankfelder und Benutzerfelder anpassen:
-    c = (Collection) idToTextFieldFormFields.remove(oldFieldId);
-    if (c != null)
-    {
-      for (Iterator iter = c.iterator(); iter.hasNext();)
-      {
-        FormField f = (FormField) iter.next();
-        // Felder oder ggf. die entsprechende Trafo anpassen
-        if (!f.substituteFieldID(oldFieldId, newFieldId))
-          substituteFieldIdInTrafo(f.getTrafoName(), oldFieldId, newFieldId);
-      }
-      idToTextFieldFormFields.put(newFieldId, c);
-    }
-
-    // Formularwerte in den persistenten Daten anpassen
-    String value = (String) formFieldValues.remove(oldFieldId);
-    if (value != null) setFormFieldValue(newFieldId, value);
-
-    // Ansicht der Felder aktualisieren
-    updateFormFields(newFieldId);
   }
 
   /**
@@ -3400,7 +3487,7 @@ public class TextDocumentModel
    * @param newFieldId
    *          die neue Feld-ID, die oldFieldId ersetzt.
    * 
-   * @author Christoph Lutz (D-III-ITD-5.1)
+   * @author Christoph Lutz (D-III-ITD-5.1) TESTED
    */
   private void substituteFieldIdInTrafo(String trafoName, String oldFieldId,
       String newFieldId)
@@ -3453,7 +3540,7 @@ public class TextDocumentModel
       Logger
           .error("Die trafo '"
                  + trafoName
-                 + "' ist nicht dokumentlokal und kann daher nicht verändert werden.");
+                 + "' ist nicht in diesem Dokument definiert und kann daher nicht verändert werden.");
     }
   }
 

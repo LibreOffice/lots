@@ -438,9 +438,9 @@ public final class FormFieldFactory
     public abstract void setCommand(InsertFormValue cmd);
 
     /**
-     * Ersetzt jede vorhandene Referenz auf die Feld-ID oldFieldId durch eine
-     * neue Referenz auf newFieldId und liefert true zurück, wenn mindestens
-     * eine Ersetzung vorgenommen wurde (ansonsten false).
+     * Wenn das Feld die 1-zu-1 Ersetzung der Referenz auf die ID oldFieldId
+     * durch eine neue ID newFieldId unterstützt, dann wird diese Ersetzung
+     * vorgenommen und true zurückgeliefert, ansonsten false.
      */
     public abstract boolean substituteFieldID(String oldFieldId,
         String newFieldId);
@@ -478,6 +478,13 @@ public final class FormFieldFactory
      * @param doc
      */
     public abstract void focus();
+
+    /**
+     * Löscht das Formularfeld aus dem Dokument
+     * 
+     * @author Christoph Lutz (D-III-ITD-5.1)
+     */
+    public abstract void dispose();
   }
 
   private static abstract class BasicFormField implements FormField
@@ -604,6 +611,11 @@ public final class FormFieldFactory
     public XTextRange getAnchor()
     {
       return cmd.getAnchor();
+    }
+
+    public void dispose()
+    {
+      cmd.markDone(true);
     }
   }
 
@@ -945,25 +957,17 @@ public final class FormFieldFactory
 
     public boolean substituteFieldID(String oldFieldId, String newFieldId)
     {
-      if (oldFieldId == null || newFieldId == null) return false;
-      if (UNO.XDependentTextField(textfield) != null)
-      {
-        Object master = UNO.XDependentTextField(textfield).getTextFieldMaster();
-        Object currentName = UNO.getProperty(master, "DataColumnName");
-        if (oldFieldId.equals(currentName))
-        {
-          UNO.setProperty(master, "DataColumnName", newFieldId);
-          if (UNO.XUpdatable(textfield) != null)
-            UNO.XUpdatable(textfield).update();
-          return true;
-        }
-      }
       return false;
     }
 
     public XTextRange getAnchor()
     {
       return textfield.getAnchor();
+    }
+
+    public void dispose()
+    {
+      if (textfield != null) textfield.dispose();
     }
   }
 
@@ -1060,13 +1064,17 @@ public final class FormFieldFactory
 
     public boolean substituteFieldID(String oldFieldId, String newFieldId)
     {
-      // Ersetzung mss in der Trafofunktion vorgenommen werden.
       return false;
     }
 
     public XTextRange getAnchor()
     {
       return textfield.getAnchor();
+    }
+
+    public void dispose()
+    {
+      if (textfield != null) textfield.dispose();
     }
   }
 }
