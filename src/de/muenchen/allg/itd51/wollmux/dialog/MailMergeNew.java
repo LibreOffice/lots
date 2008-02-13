@@ -523,8 +523,8 @@ public class MailMergeNew
     final JDialog dialog = new JDialog(myFrame, title, true);
     dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
-    final JTextFieldWithTags[] currentField = new JTextFieldWithTags[] { null };
-    final HashMap mapTextFieldsWithTagsToFieldname = new HashMap();
+    final TextComponentTags[] currentField = new TextComponentTags[] { null };
+    final HashMap mapTextComponentTagsToFieldname = new HashMap();
 
     Box headers = Box.createHorizontalBox();
     final JButton insertFieldButton = new JButton("Serienbrieffeld");
@@ -590,12 +590,12 @@ public class MailMergeNew
       label.setBorder(BorderFactory.createEmptyBorder(5, 5, 10, 5));
       hbox.add(label);
 
-      final JTextFieldWithTags field = new JTextFieldWithTags();
-      mapTextFieldsWithTagsToFieldname.put(field, fieldId);
+      final TextComponentTags field = new TextComponentTags(new JTextField());
+      mapTextComponentTagsToFieldname.put(field, fieldId);
       Box fbox = Box.createHorizontalBox();
       hbox.add(fbox); // fbox für zeilenbündige Ausrichtung benötigt
       fbox.setBorder(BorderFactory.createEmptyBorder(5, 5, 10, 5));
-      field.addFocusListener(new FocusListener()
+      field.getJTextComponent().addFocusListener(new FocusListener()
       {
         public void focusLost(FocusEvent e)
         {
@@ -606,8 +606,8 @@ public class MailMergeNew
           currentField[0] = field;
         }
       });
-      DimAdjust.maxHeightIsPrefMaxWidthUnlimited(field);
-      fbox.add(field);
+      DimAdjust.maxHeightIsPrefMaxWidthUnlimited(field.getJTextComponent());
+      fbox.add(field.getJTextComponent());
 
       itemBox.add(hbox);
     }
@@ -642,15 +642,15 @@ public class MailMergeNew
       public void actionPerformed(ActionEvent e)
       {
         final HashMap result = new HashMap();
-        for (Iterator iter = mapTextFieldsWithTagsToFieldname.keySet().iterator(); iter
+        for (Iterator iter = mapTextComponentTagsToFieldname.keySet().iterator(); iter
             .hasNext();)
         {
-          JTextFieldWithTags f = (JTextFieldWithTags) iter.next();
-          String fieldId = "" + mapTextFieldsWithTagsToFieldname.get(f);
+          TextComponentTags f = (TextComponentTags) iter.next();
+          String fieldId = "" + mapTextComponentTagsToFieldname.get(f);
           FieldSubstitution subst = new TextDocumentModel.FieldSubstitution();
           for (Iterator contentIter = f.getContent().iterator(); contentIter.hasNext();)
           {
-            JTextFieldWithTags.ContentElement ce = (JTextFieldWithTags.ContentElement) contentIter.next();
+            TextComponentTags.ContentElement ce = (TextComponentTags.ContentElement) contentIter.next();
             if (ce.isTag())
               subst.addField(ce.toString());
             else

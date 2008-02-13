@@ -1,7 +1,8 @@
 /*
  * Dateiname: JTextFieldWithTags.java
  * Projekt  : WollMux
- * Funktion : Repräsentiert ein TextField, in dem Tags als atomare Elemente eingefügt werden können.
+ * Funktion : Erweiterte eine JTextComponent um die Fähigkeit, Tags, die als
+ *            <tag> angezeigt werden, wie atomare Elemente zu behandeln.
  * 
  * Copyright: Landeshauptstadt München
  *
@@ -9,6 +10,7 @@
  * Datum      | Wer | Änderungsgrund
  * -------------------------------------------------------------------
  * 13.02.2008 | LUT | Erstellung als JTextFieldWithTags
+ * 13.02.2008 | LUT | Verallgemeinerung zur Klasse TextComponentTags
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD D.10)
@@ -29,24 +31,22 @@ import java.util.regex.Pattern;
 
 import javax.swing.AbstractAction;
 import javax.swing.InputMap;
-import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultHighlighter;
 import javax.swing.text.Highlighter;
+import javax.swing.text.JTextComponent;
 
 /**
- * Implementiert eine JTextField, die als &quot;&lt;tag&gt;&quot; angezeigte
- * Tags beim Editieren wie atomare Elemente behandelt.
+ * Erweiterte eine JTextComponent um die Fähigkeit, Tags, die als
+ * &quot;&lt;tag&gt;&quot; angezeigt werden, wie atomare Elemente zu behandeln.
  * 
  * @author Christoph Lutz (D-III-ITD-5.1)
  */
-public class JTextFieldWithTags extends JTextField
+public class TextComponentTags
 {
-  private static final long serialVersionUID = -5137462739029884033L;
-
   /**
    * Prefix, mit dem Tags in der Anzeige der Zuordnung angezeigt werden. Die
    * Zuordnung beginnt mit einem zero width space (nicht sichtbar, aber zur
@@ -81,11 +81,17 @@ public class JTextFieldWithTags extends JTextField
                                                              + ")");
 
   /**
+   * Die JTextComponent, die durch diese Wrapperklasse erweitert wird.
+   */
+  private JTextComponent compo;
+
+  /**
    * Erzeugt das Textfeld und nimmt die notwendigen Änderungen am
    * Standardverhalten der JTextField vor.
    */
-  public JTextFieldWithTags()
+  public TextComponentTags(JTextComponent component)
   {
+    this.compo = component;
     changeInputMap();
     changeCaretListener();
     changeFocusLostListener();
@@ -101,7 +107,7 @@ public class JTextFieldWithTags extends JTextField
   public List getContent()
   {
     List list = new ArrayList();
-    String t = getText();
+    String t = compo.getText();
     Matcher m = TAG_PATTERN.matcher(t);
     int lastEndPos = 0;
     while (m.find())
@@ -163,18 +169,17 @@ public class JTextFieldWithTags extends JTextField
    */
   private void changeCaretListener()
   {
-    addCaretListener(new CaretListener()
+    compo.addCaretListener(new CaretListener()
     {
       public void caretUpdate(CaretEvent e)
       {
         extraHighlightOff();
-        int dot = getCaret().getDot();
-        int mark = getCaret().getMark();
+        int dot = compo.getCaret().getDot();
+        int mark = compo.getCaret().getMark();
 
         for (Iterator iter = getTagPosIterator(); iter.hasNext();)
         {
-          JTextFieldWithTags.TagPos fp = (JTextFieldWithTags.TagPos) iter
-              .next();
+          TextComponentTags.TagPos fp = (TextComponentTags.TagPos) iter.next();
           if (dot > fp.start && dot < fp.end)
           {
             if (dot < mark)
@@ -204,7 +209,7 @@ public class JTextFieldWithTags extends JTextField
    */
   private void changeFocusLostListener()
   {
-    addFocusListener(new FocusListener()
+    compo.addFocusListener(new FocusListener()
     {
       public void focusLost(FocusEvent e)
       {
@@ -226,7 +231,7 @@ public class JTextFieldWithTags extends JTextField
    */
   private void changeInputMap()
   {
-    InputMap m = getInputMap();
+    InputMap m = compo.getInputMap();
     m.put(KeyStroke.getKeyStroke("LEFT"), "goLeft");
     m.put(KeyStroke.getKeyStroke("RIGHT"), "goRight");
     m.put(KeyStroke.getKeyStroke("shift LEFT"), "expandLeft");
@@ -234,20 +239,19 @@ public class JTextFieldWithTags extends JTextField
     m.put(KeyStroke.getKeyStroke("DELETE"), "deleteRight");
     m.put(KeyStroke.getKeyStroke("BACK_SPACE"), "deleteLeft");
 
-    getActionMap().put("goLeft", new AbstractAction("goLeft")
+    compo.getActionMap().put("goLeft", new AbstractAction("goLeft")
     {
       private static final long serialVersionUID = 2098288193497911628L;
 
       public void actionPerformed(ActionEvent evt)
       {
         extraHighlightOff();
-        int dot = getCaret().getDot();
+        int dot = compo.getCaret().getDot();
 
         // evtl. vorhandenes Tag überspringen
         for (Iterator iter = getTagPosIterator(); iter.hasNext();)
         {
-          JTextFieldWithTags.TagPos fp = (JTextFieldWithTags.TagPos) iter
-              .next();
+          TextComponentTags.TagPos fp = (TextComponentTags.TagPos) iter.next();
           if (dot == fp.end)
           {
             caretSetDot(fp.start);
@@ -260,20 +264,19 @@ public class JTextFieldWithTags extends JTextField
       }
     });
 
-    getActionMap().put("goRight", new AbstractAction("goRight")
+    compo.getActionMap().put("goRight", new AbstractAction("goRight")
     {
       private static final long serialVersionUID = 2098288193497911628L;
 
       public void actionPerformed(ActionEvent evt)
       {
         extraHighlightOff();
-        int dot = getCaret().getDot();
+        int dot = compo.getCaret().getDot();
 
         // evtl. vorhandenes Tag überspringen
         for (Iterator iter = getTagPosIterator(); iter.hasNext();)
         {
-          JTextFieldWithTags.TagPos fp = (JTextFieldWithTags.TagPos) iter
-              .next();
+          TextComponentTags.TagPos fp = (TextComponentTags.TagPos) iter.next();
           if (dot == fp.start)
           {
             caretSetDot(fp.end);
@@ -286,20 +289,19 @@ public class JTextFieldWithTags extends JTextField
       }
     });
 
-    getActionMap().put("expandLeft", new AbstractAction("expandLeft")
+    compo.getActionMap().put("expandLeft", new AbstractAction("expandLeft")
     {
       private static final long serialVersionUID = 2098288193497911628L;
 
       public void actionPerformed(ActionEvent evt)
       {
         extraHighlightOff();
-        int dot = getCaret().getDot();
+        int dot = compo.getCaret().getDot();
 
         // evtl. vorhandenes Tag überspringen
         for (Iterator iter = getTagPosIterator(); iter.hasNext();)
         {
-          JTextFieldWithTags.TagPos fp = (JTextFieldWithTags.TagPos) iter
-              .next();
+          TextComponentTags.TagPos fp = (TextComponentTags.TagPos) iter.next();
           if (dot == fp.end)
           {
             caretMoveDot(fp.start);
@@ -311,20 +313,19 @@ public class JTextFieldWithTags extends JTextField
       }
     });
 
-    getActionMap().put("expandRight", new AbstractAction("expandRight")
+    compo.getActionMap().put("expandRight", new AbstractAction("expandRight")
     {
       private static final long serialVersionUID = 2098288193497911628L;
 
       public void actionPerformed(ActionEvent evt)
       {
         extraHighlightOff();
-        int dot = getCaret().getDot();
+        int dot = compo.getCaret().getDot();
 
         // evtl. vorhandenes Tag überspringen
         for (Iterator iter = getTagPosIterator(); iter.hasNext();)
         {
-          JTextFieldWithTags.TagPos fp = (JTextFieldWithTags.TagPos) iter
-              .next();
+          TextComponentTags.TagPos fp = (TextComponentTags.TagPos) iter.next();
           if (dot == fp.start)
           {
             caretMoveDot(fp.end);
@@ -336,15 +337,15 @@ public class JTextFieldWithTags extends JTextField
       }
     });
 
-    getActionMap().put("deleteRight", new AbstractAction("deleteRight")
+    compo.getActionMap().put("deleteRight", new AbstractAction("deleteRight")
     {
       private static final long serialVersionUID = 2098288193497911628L;
 
       public void actionPerformed(ActionEvent evt)
       {
         extraHighlightOff();
-        int dot = getCaret().getDot();
-        int mark = getCaret().getMark();
+        int dot = compo.getCaret().getDot();
+        int mark = compo.getCaret().getMark();
 
         // evtl. vorhandene Selektion löschen
         if (dot != mark)
@@ -357,8 +358,7 @@ public class JTextFieldWithTags extends JTextField
         int pos2 = dot + 1;
         for (Iterator iter = getTagPosIterator(); iter.hasNext();)
         {
-          JTextFieldWithTags.TagPos fp = (JTextFieldWithTags.TagPos) iter
-              .next();
+          TextComponentTags.TagPos fp = (TextComponentTags.TagPos) iter.next();
           if (dot == fp.start) pos2 = fp.end;
         }
 
@@ -367,15 +367,15 @@ public class JTextFieldWithTags extends JTextField
 
     });
 
-    getActionMap().put("deleteLeft", new AbstractAction("deleteLeft")
+    compo.getActionMap().put("deleteLeft", new AbstractAction("deleteLeft")
     {
       private static final long serialVersionUID = 2098288193497911628L;
 
       public void actionPerformed(ActionEvent evt)
       {
         extraHighlightOff();
-        int dot = getCaret().getDot();
-        int mark = getCaret().getMark();
+        int dot = compo.getCaret().getDot();
+        int mark = compo.getCaret().getMark();
 
         // evtl. vorhandene Selektion löschen
         if (dot != mark)
@@ -388,8 +388,7 @@ public class JTextFieldWithTags extends JTextField
         int pos2 = dot - 1;
         for (Iterator iter = getTagPosIterator(); iter.hasNext();)
         {
-          JTextFieldWithTags.TagPos fp = (JTextFieldWithTags.TagPos) iter
-              .next();
+          TextComponentTags.TagPos fp = (TextComponentTags.TagPos) iter.next();
           if (dot == fp.end) pos2 = fp.start;
         }
 
@@ -414,11 +413,11 @@ public class JTextFieldWithTags extends JTextField
       pos2 = pos1;
       pos1 = tmp;
     }
-    String t = getText();
+    String t = compo.getText();
     String part1 = (pos1 > 0) ? t.substring(0, pos1) : "";
     String part2 = (pos2 < t.length()) ? t.substring(pos2) : "";
-    setText(part1 + part2);
-    getCaret().setDot(pos1);
+    compo.setText(part1 + part2);
+    compo.getCaret().setDot(pos1);
   }
 
   /**
@@ -429,7 +428,8 @@ public class JTextFieldWithTags extends JTextField
    */
   private void caretSetDot(int pos)
   {
-    if (pos >= 0 && pos <= getText().length()) getCaret().setDot(pos);
+    if (pos >= 0 && pos <= compo.getText().length())
+      compo.getCaret().setDot(pos);
   }
 
   /**
@@ -440,7 +440,8 @@ public class JTextFieldWithTags extends JTextField
    */
   private void caretMoveDot(int pos)
   {
-    if (pos >= 0 && pos <= getText().length()) getCaret().moveDot(pos);
+    if (pos >= 0 && pos <= compo.getText().length())
+      compo.getCaret().moveDot(pos);
   }
 
   /**
@@ -474,7 +475,7 @@ public class JTextFieldWithTags extends JTextField
   private Iterator getTagPosIterator()
   {
     List results = new ArrayList();
-    Matcher m = TAG_PATTERN.matcher(getText());
+    Matcher m = TAG_PATTERN.matcher(compo.getText());
     while (m.find())
     {
       results.add(new TagPos(m.start(2), m.end(2), m.group(3)));
@@ -497,7 +498,7 @@ public class JTextFieldWithTags extends JTextField
   {
     if (extraHighlightTag != null)
     {
-      Highlighter hl = getHighlighter();
+      Highlighter hl = compo.getHighlighter();
       hl.removeHighlight(extraHighlightTag);
       extraHighlightTag = null;
     }
@@ -513,10 +514,9 @@ public class JTextFieldWithTags extends JTextField
    */
   private void extraHighlight(int pos1, int pos2)
   {
-    Highlighter hl = getHighlighter();
+    Highlighter hl = compo.getHighlighter();
     try
     {
-
       if (extraHighlightTag == null)
       {
         Highlighter.HighlightPainter hp = new DefaultHighlighter.DefaultHighlightPainter(
@@ -544,13 +544,23 @@ public class JTextFieldWithTags extends JTextField
    */
   public void insertTag(String tag)
   {
-    String t = getText();
-    int inspos = getCaretPosition();
+    String t = compo.getText();
+    int inspos = compo.getCaretPosition();
     String p1 = (inspos > 0) ? t.substring(0, inspos) : "";
     String p2 = (inspos < t.length()) ? t.substring(inspos, t.length()) : "";
     t = TAG_PREFIX + tag + TAG_SUFFIX;
-    setText(p1 + t + p2);
-    getCaret().setDot(inspos + t.length());
+    compo.setText(p1 + t + p2);
+    compo.getCaret().setDot(inspos + t.length());
     extraHighlight(inspos, inspos + t.length());
+  }
+
+  /**
+   * Liefert die JTextComponent, die durch diesen Wrapper erweitert wird.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  public JTextComponent getJTextComponent()
+  {
+    return compo;
   }
 }
