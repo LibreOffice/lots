@@ -26,7 +26,7 @@ import java.util.Collection;
  */
 public interface Function
 {
-  public static final String ERROR = "!不!FEHLER BEI DER FUNKTIONSBERECHNUNG!不!";
+  public static final String ERROR = "!不!FEHLERHAFTE DATEN!不!";
   
   /**
    * Liefert die Namen der Parameter, die die Funktion erwartet.
