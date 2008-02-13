@@ -99,7 +99,7 @@ public class TextComponentTags
   }
 
   /**
-   * Fügt an der aktuellen Cursorposition ein neues Tag tag ein, das anschließen
+   * Fügt an der aktuellen Cursorposition ein neues Tag tag ein, das anschließend
    * mit der Darstellung &quot;&lt;tag&gt;&quot; angezeigt wird und bezüglich
    * der Editierung wie ein atomares Element behandelt wird.
    * 
