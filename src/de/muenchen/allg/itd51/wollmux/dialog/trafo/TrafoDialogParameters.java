@@ -17,6 +17,7 @@
 */
 package de.muenchen.allg.itd51.wollmux.dialog.trafo;
 
+import java.awt.event.ActionListener;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
@@ -33,7 +34,7 @@ public class TrafoDialogParameters
   /**
    * Gibt an, ob der Inhalt dieses Objekts gültig ist. Dieser Parameter hat nur eine
    * Bedeutung, wenn ein Dialog die TrafoDialogParameters bei seiner Beendigung an 
-   * den wartenden ActionListener übergibt. Wurde der Dialog abgebrochen ohne dass
+   * den wartenden {@link #closeAction} übergibt. Wurde der Dialog abgebrochen ohne dass
    * gültige Änderungen vorgenommen wurden, ist dieses Feld auf false gesetzt und
    * die Daten dürfen nicht übernommen werden.
    */
@@ -53,26 +54,10 @@ public class TrafoDialogParameters
   public List fieldNames;
   
   /**
-   * Erzeugt ein neues TrafoDialogParameters-Objekt. Alle Parameter dürfen null sein.
-   * Alle Parameter werden kopiert. Änderungen an den Objekten nach dem Konstruktoraufruf
-   * schlagen also nicht auf das TrafoDialogParameters-Objekt durch.
-   * 
-   * @param funConf
-   *          Die Beschreibung der Funktion, mit der der Dialog vorbelegt werden
-   *          soll. Oberster Knoten ist ein beliebiger Bezeichner
-   *          (typischerweise der Funktionsname). Das ConfigThingy kann also
-   *          direkt aus einem Funktionen-Abschnitt eines Formulars übernommen
-   *          werden.
-   * @param fieldNames
-   *          Für Dialoge, die Feldnamen zur Auswahl stellen gibt diese Liste
-   *          von Strings an, welche Namen angeboten werden sollen.
-   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * Falls nicht null, so wird bei Beendigung des Dialogs dieser Listener aufgerufen,
+   * wobei als source der TrafoDialog übergeben wird. 
    */
-  public TrafoDialogParameters(ConfigThingy funConf, List fieldNames)
-  {
-    if (funConf != null) this.conf = new ConfigThingy(funConf);
-    if (fieldNames != null) this.fieldNames = new Vector(fieldNames);
-  }
+  public ActionListener closeAction;
   
   public String toString()
   {
