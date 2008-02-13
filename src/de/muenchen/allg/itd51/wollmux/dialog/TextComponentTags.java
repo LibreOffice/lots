@@ -11,6 +11,7 @@
  * -------------------------------------------------------------------
  * 13.02.2008 | LUT | Erstellung als JTextFieldWithTags
  * 13.02.2008 | LUT | Verallgemeinerung zur Klasse TextComponentTags
+ * 13.02.2008 | BNK | public Methoden zusammengruppiert, Ortografie         
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD D.10)
@@ -48,9 +49,9 @@ import javax.swing.text.JTextComponent;
 public class TextComponentTags
 {
   /**
-   * Prefix, mit dem Tags in der Anzeige der Zuordnung angezeigt werden. Die
+   * Präfix, mit dem Tags in der Anzeige der Zuordnung angezeigt werden. Die
    * Zuordnung beginnt mit einem zero width space (nicht sichtbar, aber zur
-   * Unterscheidung des Prefix von den Benutzereingaben) und dem "<"-Zeichen.
+   * Unterscheidung des Präfix von den Benutzereingaben) und dem "<"-Zeichen.
    */
   private final static String TAG_PREFIX = ""
                                            + Character.toChars(0x200B)[0]
@@ -59,7 +60,7 @@ public class TextComponentTags
   /**
    * Suffix, mit dem Tags in der Anzeige der Zuordnung angezeigt werden. Die
    * Zuordnung beginnt mit einem zero width space (nicht sichtbar, aber zur
-   * Unterscheidung des Prefix von den Benutzereingaben) und dem ">"-Zeichen.
+   * Unterscheidung des Präfix von den Benutzereingaben) und dem ">"-Zeichen.
    */
   private final static String TAG_SUFFIX = ""
                                            + Character.toChars(0x200B)[0]
@@ -68,7 +69,7 @@ public class TextComponentTags
   /**
    * Beschreibt einen regulären Ausdruck, mit dem nach Tags im Text gesucht
    * werden kann. Ein Match liefert in Gruppe 1 den Text vor dem Tag, in Gruppe
-   * 2 das Tag mit Prefix und Suffix und in Gruppe 3 den Tag-Namen zurück.
+   * 2 das Tag mit Präfix und Suffix und in Gruppe 3 den Tag-Namen zurück.
    */
   private final static Pattern TAG_PATTERN = Pattern.compile("([^("
                                                              + TAG_PREFIX
@@ -97,6 +98,40 @@ public class TextComponentTags
     changeFocusLostListener();
   }
 
+  /**
+   * Fügt an der aktuellen Cursorposition ein neues Tag tag ein, das anschließen
+   * mit der Darstellung &quot;&lt;tag&gt;&quot; angezeigt wird und bezüglich
+   * der Editierung wie ein atomares Element behandelt wird.
+   * 
+   * @param tag
+   *          Der Name des tags, das in dieser JTextComponent an der
+   *          Cursorposition eingefügt und angezeigt werden soll.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  public void insertTag(String tag)
+  {
+    String t = compo.getText();
+    int inspos = compo.getCaretPosition();
+    String p1 = (inspos > 0) ? t.substring(0, inspos) : "";
+    String p2 = (inspos < t.length()) ? t.substring(inspos, t.length()) : "";
+    t = TAG_PREFIX + tag + TAG_SUFFIX;
+    compo.setText(p1 + t + p2);
+    compo.getCaret().setDot(inspos + t.length());
+    extraHighlight(inspos, inspos + t.length());
+  }
+
+  /**
+   * Liefert die JTextComponent, die durch diesen Wrapper erweitert wird.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  public JTextComponent getJTextComponent()
+  {
+    return compo;
+  }
+
+  
   /**
    * Liefert eine Liste von {@link ContentElement}-Objekten, die den aktuellen
    * Inhalt der JTextComponent repräsentiert und dabei enthaltenen Text und
@@ -531,36 +566,4 @@ public class TextComponentTags
     }
   }
 
-  /**
-   * Fügt an der aktuellen Cursorposition ein neues Tag tag ein, das anschließen
-   * mit der Darstellung &quot;&lt;tag&gt;&quot; angezeigt wird und bezüglich
-   * der Editierung wie ein atomares Element behandelt wird.
-   * 
-   * @param tag
-   *          Der Name des tags, das in dieser JTextComponent an der
-   *          Cursorposition eingefügt und angezeigt werden soll.
-   * 
-   * @author Christoph Lutz (D-III-ITD-5.1)
-   */
-  public void insertTag(String tag)
-  {
-    String t = compo.getText();
-    int inspos = compo.getCaretPosition();
-    String p1 = (inspos > 0) ? t.substring(0, inspos) : "";
-    String p2 = (inspos < t.length()) ? t.substring(inspos, t.length()) : "";
-    t = TAG_PREFIX + tag + TAG_SUFFIX;
-    compo.setText(p1 + t + p2);
-    compo.getCaret().setDot(inspos + t.length());
-    extraHighlight(inspos, inspos + t.length());
-  }
-
-  /**
-   * Liefert die JTextComponent, die durch diesen Wrapper erweitert wird.
-   * 
-   * @author Christoph Lutz (D-III-ITD-5.1)
-   */
-  public JTextComponent getJTextComponent()
-  {
-    return compo;
-  }
 }
