@@ -215,9 +215,11 @@ public class MailMergeNew
     
     hbox.add(new JSeparator(SwingConstants.VERTICAL));
     
-    List insertMailMergeFieldActions = getInsertFieldActionList();
     //FIXME: Ausgrauen, wenn kein Datenquelle ausgewählt
-    button = new JPotentiallyOverlongPopupMenuButton("Serienbrieffeld", insertMailMergeFieldActions);
+    button = new JPotentiallyOverlongPopupMenuButton("Serienbrieffeld",new Iterable()
+        {public Iterator iterator(){
+            return getInsertFieldActionList().iterator();
+          }});
     hbox.add(button);
     
     button = new JButton("Spezialfeld");
@@ -1341,7 +1343,7 @@ public class MailMergeNew
     while (iter.hasNext())
     {
       final String name = (String)iter.next();
-      Action button = new AbstractAction()
+      Action button = new AbstractAction(name)
       {
         private static final long serialVersionUID = 0; //Eclipse-Warnung totmachen
 

@@ -48,27 +48,29 @@ public class JPotentiallyOverlongPopupMenuButton extends JButton
    * etwas intelligentes.
    * Die Elemente von actions können {@link javax.swing.Action} oder
    * {@link java.awt.Component} Objekte sein.
+   * ACHTUNG! Bei jeder Betätigung des Buttons wird das Menü neu aufgebaut,
+   * d.h. wenn sich die actions ändert, ändert sich das Menü.
    * @author Matthias Benkmann (D-III-ITD D.10)
    */
-  public JPotentiallyOverlongPopupMenuButton(String label, List actions)
+  public JPotentiallyOverlongPopupMenuButton(String label, final Iterable actions)
   {
     super(label);
-    final JPopupMenu menu = new JPopupMenu();
-    
-    Iterator iter = actions.iterator();
-    while (iter.hasNext())
-    {
-      Object action = iter.next();
-      if (action instanceof Action)
-        menu.add((Action)action);
-      else
-        menu.add((Component)action);
-    }
-    
+
     this.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
       {
+        JPopupMenu menu = new JPopupMenu();
+        Iterator iter = actions.iterator();
+        while (iter.hasNext())
+        {
+          Object action = iter.next();
+          if (action instanceof Action)
+            menu.add((Action)action);
+          else
+            menu.add((Component)action);
+        }
+      
         menu.show(JPotentiallyOverlongPopupMenuButton.this, 0, JPotentiallyOverlongPopupMenuButton.this.getSize().height);
       }
     });
