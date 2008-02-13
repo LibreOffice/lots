@@ -462,6 +462,8 @@ public class MailMergeNew
     {
       public void actionPerformed(ActionEvent e)
       {
+        // Enthält die Zuordnung ID -> de.muenchen.allg.itd51.wollmux.TextDocumentModel.FieldSubstitution,
+        // in der die anzuwendende Ersetzungsregel beschrieben ist.
         HashMap mapIdToSubstitution = (HashMap) e.getSource();
         // TODO: tabellenspalten wie in mapIdToSubstitution beschrieben ergänzen
       }
@@ -1471,6 +1473,14 @@ public class MailMergeNew
     public void showDatasourceSelectionDialog(final JFrame parent)
     {
       final JDialog datasourceSelector = new JDialog(parent, "Wo sind Ihre Serienbriefdaten ?", true);
+      // TODO: default close operation funzt derzeit nicht wg. fehlender
+      // Deregistrierung von mod.removeCoupledWindow(datasourceSelector)
+      // FIXME: alle removCoupledWindow()-Aufrufe sollten entfallen können und
+      // statt dessen nur die Serienbriefleiste registriert sein. Ein
+      // registrierter FocusListener auf der Serienbriefleiste kann feststellen,
+      // an welches Fenster der Fokus verloren wurde. Wenn die Hierarchie dieses
+      // Fensters (fenster.getOwner()) am Schluss zur Serienbriefleiste
+      // zurückführt, dann soll der Fokuswechsel ignoriert werden.
       
       Box vbox = Box.createVerticalBox();
       datasourceSelector.add(vbox);
