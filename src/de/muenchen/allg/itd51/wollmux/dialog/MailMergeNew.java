@@ -47,6 +47,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.ButtonGroup;
@@ -214,16 +215,9 @@ public class MailMergeNew
     
     hbox.add(new JSeparator(SwingConstants.VERTICAL));
     
+    List insertMailMergeFieldActions = getInsertFieldActionList();
     //FIXME: Ausgrauen, wenn kein Datenquelle ausgewählt
-    button = new JButton("Serienbrieffeld");
-    final JButton mailmergeFieldButton = button;
-    button.addActionListener(new ActionListener()
-    {
-      public void actionPerformed(ActionEvent e)
-      {
-        showInsertFieldPopup(mailmergeFieldButton, 0, mailmergeFieldButton.getSize().height);
-      }
-    });
+    button = new JPotentiallyOverlongPopupMenuButton("Serienbrieffeld", insertMailMergeFieldActions);
     hbox.add(button);
     
     button = new JButton("Spezialfeld");
@@ -1331,41 +1325,35 @@ public class MailMergeNew
   }
 
   /**
-   * Erzeugt ein neues JPopupMenu mit Einträgen für alle Namen aus 
-   * {@link #ds},getColumnNames()
-   * und zeigt es an neben invoker an der relativen Position x,y. 
-   * @param invoker zu welcher Komponente gehört das Popup
-   * @param x Koordinate des Popups im Koordinatenraum von invoker.
-   * @param y Koordinate des Popups im Koordinatenraum von invoker.
+   * Erzeugt eine Liste mit {@link javax.swing.Action}s für 
+   * alle Namen aus {@link #ds},getColumnNames(), die ein entsprechendes
+   * Seriendruckfeld einfügen.
    * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TESTED
    */
-  private void showInsertFieldPopup(JComponent invoker, int x, int y)
+  private List getInsertFieldActionList()
   {
+    List actions = new Vector();
     List columnNames = ds.getColumnNames();
-    if (columnNames.isEmpty()) return;
 
     Collections.sort(columnNames);
     
-    JPopupMenu menu = new JPopupMenu();
-    
-    JMenuItem button;
     Iterator iter = columnNames.iterator();
     while (iter.hasNext())
     {
       final String name = (String)iter.next();
-      button = new JMenuItem(name);
-      button.addActionListener(new ActionListener()
+      Action button = new AbstractAction()
       {
+        private static final long serialVersionUID = 0; //Eclipse-Warnung totmachen
+
         public void actionPerformed(ActionEvent e)
         {
           mod.insertMailMergeFieldAtCursorPosition(name);
         }
-      });
-      menu.add(button);
+      };
+      actions.add(button);
     }
-        
-    menu.show(invoker, x, y);
+    
+    return actions;
   }
 
     /**
