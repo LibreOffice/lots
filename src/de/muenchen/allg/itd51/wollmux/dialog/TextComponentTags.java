@@ -67,8 +67,8 @@ public class TextComponentTags
 
   /**
    * Beschreibt einen regulären Ausdruck, mit dem nach Tags im Text gesucht
-   * werden kann. Ein Match liefert in Gruppe 1 den Text vor dem Feld, in Gruppe
-   * 2 das Feld mit Prefix und Suffix und in Gruppe 3 den Tag-Namen zurück.
+   * werden kann. Ein Match liefert in Gruppe 1 den Text vor dem Tag, in Gruppe
+   * 2 das Tag mit Prefix und Suffix und in Gruppe 3 den Tag-Namen zurück.
    */
   private final static Pattern TAG_PATTERN = Pattern.compile("([^("
                                                              + TAG_PREFIX
@@ -86,8 +86,8 @@ public class TextComponentTags
   private JTextComponent compo;
 
   /**
-   * Erzeugt das Textfeld und nimmt die notwendigen Änderungen am
-   * Standardverhalten der JTextField vor.
+   * Erzeugt den Wrapper und nimmt die notwendigen Änderungen am
+   * Standardverhalten der JTextComponent component vor.
    */
   public TextComponentTags(JTextComponent component)
   {
@@ -99,8 +99,8 @@ public class TextComponentTags
 
   /**
    * Liefert eine Liste von {@link ContentElement}-Objekten, die den aktuellen
-   * Inhalt des Textfeldes repräsentiert und dabei enthaltenen Text und evtl.
-   * enthaltene Tags als eigene Objekte kapselt.
+   * Inhalt der JTextComponent repräsentiert und dabei enthaltenen Text und
+   * evtl. enthaltene Tags als eigene Objekte kapselt.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
@@ -124,9 +124,9 @@ public class TextComponentTags
   }
 
   /**
-   * Beschreibt ein Element des Inhalts dieses Textfeldes und kann entweder ein
-   * eingefügtes Tag oder ein normaler String sein. Auskunft über den Typ des
-   * Elements erteilt die Methode isTag(), auf den String-Wert kann über die
+   * Beschreibt ein Element des Inhalts dieser JTextComponent und kann entweder
+   * ein eingefügtes Tag oder ein normaler String sein. Auskunft über den Typ
+   * des Elements erteilt die Methode isTag(), auf den String-Wert kann über die
    * toString()-Methode zugegriffen werden.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
@@ -445,8 +445,8 @@ public class TextComponentTags
   }
 
   /**
-   * Diese Klasse beschreibt die Position eines Tags innerhalb des Textes des
-   * Textfeldes.
+   * Diese Klasse beschreibt die Position eines Tags innerhalb des Textes der
+   * JTextComponent.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
@@ -537,8 +537,8 @@ public class TextComponentTags
    * der Editierung wie ein atomares Element behandelt wird.
    * 
    * @param tag
-   *          Der Name des tags, das in diesem Textfeld an der Cursorposition
-   *          eingefügt und angezeigt werden soll.
+   *          Der Name des tags, das in dieser JTextComponent an der
+   *          Cursorposition eingefügt und angezeigt werden soll.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
