@@ -3237,42 +3237,104 @@ public class TextDocumentModel
   }
 
   /**
-   * Diese Methode liefert eine Liste aller IDs, die in der aktuellen Selektion
-   * (falls der ViewCursor eine Selektion aufspannt) oder im gesamten Dokument
-   * in insertFormValue-Kommandos, Serienbrieffeldern, Benutzerfeldern und
-   * referenzierte Trafos verwendet werden und NICHT im übergebenen Set set
-   * aufgeführt sind. Ist eine Selektion vorhanden, so ist die Liste in der
-   * Reihenfolge aufgebaut, in der die IDs im Dokument angesprochen werden. Ist
-   * keine Selektion vorhanden, so werden die Felder in alphabetisch sortierter
+   * Diese Methode liefert ein Array von FieldInfo-Objekten, das Informationen
+   * über FeldIDs enthält, die in der aktuellen Selektion (falls der ViewCursor
+   * eine Selektion aufspannt) oder im gesamten Dokument in
+   * insertFormValue-Kommandos, Serienbrieffelder, Benutzerfelder und evtl.
+   * gesetzten Trafos referenziert werden und nicht im Schema schema aufgeführt
+   * sind. Ist eine Selektion vorhanden, so ist die Liste in der Reihenfolge
+   * aufgebaut, in der die IDs im Dokument angesprochen werden. Ist keine
+   * Selektion vorhanden, so werden die Felder in alphabetisch sortierter
    * Reihenfolge zurückgeliefert.
    * 
-   * TODO: Die Liste als Returnwert reicht nicht aus. Es muss auch noch die
-   * Information übermittelt werden, ob das Feld einfach oder komplex verändert
-   * werden darf (oder anders, ob das Feld nie in einer Trafo verwendet wird,
-   * oder schon). Kommt das Feld in einer Trafo vor, dann ist eine komplexe
-   * Ersetzung (z.B. "Herr <Vorname> <Nachname>") nicht erlaubt.
-   * 
-   * @return Eine Liste aller IDs, des Dokuments oder der aktuellen Selektion,
-   *         die nicht in set enthalten sind.
+   * @return Eine Liste aller Referenzierten FeldIDs, des Dokuments oder der
+   *         aktuellen Selektion, die nicht in schema enthalten sind.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  synchronized public List getSelectedFieldIDsThatAreNotInSchema(Set set)
+  synchronized public ReferencedFieldID[] getReferencedFieldIDsThatAreNotInSchema(
+      Set schema)
   {
+    ArrayList list = new ArrayList();
     if (hasSelection())
     {
       // Nur Felder der aktuellen Selektion zurückliefern.
       // TODO: diesen Fall implementieren
-      return new ArrayList();
     }
     else
     {
-      // Alle Felder des Dokuments alphabetisch sortiert zurückliefern.
-      Set ids = getAllFieldIDs();
-      ids.removeAll(set);
-      ArrayList sortedFieldnames = new ArrayList(ids);
-      Collections.sort(sortedFieldnames);
-      return sortedFieldnames;
+      // Alle ReferencedFieldIDs des Dokuments alphabetisch sortiert
+      // zurückliefern.
+      List sortedIDs = new ArrayList(getAllFieldIDs());
+      Collections.sort(sortedIDs);
+      for (Iterator iter = sortedIDs.iterator(); iter.hasNext();)
+      {
+        String id = (String) iter.next();
+        if (schema.contains(id)) continue;
+        List fields = new ArrayList();
+        if (idToFormFields.containsKey(id))
+          fields.addAll((Collection) idToFormFields.get(id));
+        if (idToTextFieldFormFields.containsKey(id))
+          fields.addAll((Collection) idToTextFieldFormFields.get(id));
+        boolean hasTrafo = false;
+        for (Iterator fieldIter = fields.iterator(); fieldIter.hasNext();)
+        {
+          FormField field = (FormField) fieldIter.next();
+          if (field.getTrafoName() != null) hasTrafo = true;
+        }
+        list.add(new ReferencedFieldID(id, hasTrafo));
+      }
+    }
+
+    // Array FieldInfo erstellen
+    ReferencedFieldID[] fieldInfos = new ReferencedFieldID[list.size()];
+    int i = 0;
+    for (Iterator iter = list.iterator(); iter.hasNext();)
+    {
+      ReferencedFieldID fieldInfo = (ReferencedFieldID) iter.next();
+      fieldInfos[i++] = fieldInfo;
+    }
+    return fieldInfos;
+  }
+
+  /**
+   * Enthält Informationen über die in der Selektion oder im gesamten Dokument
+   * in Feldern referenzierten FeldIDs.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  public static class ReferencedFieldID
+  {
+    private final String fieldId;
+
+    private final boolean isTransformed;
+
+    public ReferencedFieldID(String fieldId, boolean isTransformed)
+    {
+      this.fieldId = fieldId;
+      this.isTransformed = isTransformed;
+    }
+
+    /**
+     * Liefert die FieldID als String.
+     * 
+     * @author Christoph Lutz (D-III-ITD-5.1)
+     */
+    public String getFieldId()
+    {
+      return fieldId;
+    }
+
+    /**
+     * Liefert true, wenn das Feld TODO: comment FieldInfo.isTransformed
+     * 
+     * @return
+     * 
+     * @author Christoph Lutz (D-III-ITD-5.1)
+     */
+    public boolean isTransformed()
+    {
+      return isTransformed;
     }
   }
 
@@ -3404,7 +3466,7 @@ public class TextDocumentModel
     }
 
     // Alle Datenbank- und Benutzerfelder anpassen:
-    c = (Collection) idToTextFieldFormFields.remove(fieldId);
+    c = (Collection) idToTextFieldFormFields.get(fieldId);
     if (c != null)
     {
       for (Iterator iter = c.iterator(); iter.hasNext();)

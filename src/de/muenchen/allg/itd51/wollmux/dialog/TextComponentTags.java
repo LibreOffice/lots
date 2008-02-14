@@ -35,6 +35,8 @@ import javax.swing.InputMap;
 import javax.swing.KeyStroke;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultHighlighter;
 import javax.swing.text.Highlighter;
@@ -82,6 +84,12 @@ public class TextComponentTags
                                                              + ")");
 
   /**
+   * Farbe, mit dem der Hintergund eines Textfeldes im Dialog "Felder anpassen"
+   * eingefärbt wird, wenn ein ungültiger Inhalt enthalten ist.
+   */
+  private static final Color invalidEntryBGColor = Color.PINK;
+
+  /**
    * Die JTextComponent, die durch diese Wrapperklasse erweitert wird.
    */
   private JTextComponent compo;
@@ -94,8 +102,9 @@ public class TextComponentTags
   {
     this.compo = component;
     changeInputMap();
-    changeCaretListener();
-    changeFocusLostListener();
+    changeCaretHandling();
+    changeFocusLostHandling();
+    changeDocumentUpdateHandling();
   }
 
   /**
@@ -131,7 +140,6 @@ public class TextComponentTags
     return compo;
   }
 
-  
   /**
    * Liefert eine Liste von {@link ContentElement}-Objekten, die den aktuellen
    * Inhalt der JTextComponent repräsentiert und dabei enthaltenen Text und
@@ -156,6 +164,21 @@ public class TextComponentTags
     String text = t.substring(lastEndPos);
     if (text.length() > 0) list.add(new ContentElement(text, false));
     return list;
+  }
+
+  /**
+   * Kann überschrieben werden um eine Logik zu hinterlegen, die berechnet, ob
+   * das Feld einen gültigen Inhalt besitzt. Ist der Inhalt nicht gültig, dann
+   * wird das Feld mit einem roten Hintergrund hinterlegt.
+   * 
+   * @return true, wenn der Inhalt gültig ist und false, wenn der Inhalt nicht
+   *         gültig ist.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  public boolean isContentValid()
+  {
+    return true;
   }
 
   /**
@@ -202,7 +225,7 @@ public class TextComponentTags
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  private void changeCaretListener()
+  private void changeCaretHandling()
   {
     compo.addCaretListener(new CaretListener()
     {
@@ -242,7 +265,7 @@ public class TextComponentTags
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  private void changeFocusLostListener()
+  private void changeFocusLostHandling()
   {
     compo.addFocusListener(new FocusListener()
     {
@@ -431,6 +454,50 @@ public class TextComponentTags
       }
     });
 
+  }
+
+  /**
+   * Der hier registrierte DocumentListener sorgt dafür, dass nach jeder
+   * Textänderung geprüft wird, ob der Inhalt der JTextComponent noch gültig ist
+   * und im Fehlerfall mit der Hintergrundfarbe invalidEntryBGColor eingefärbt
+   * wird.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  private void changeDocumentUpdateHandling()
+  {
+    compo.getDocument().addDocumentListener(new DocumentListener()
+    {
+      private Color oldColor = null;
+
+      public void changedUpdate(DocumentEvent e)
+      {
+        update();
+      }
+
+      public void removeUpdate(DocumentEvent e)
+      {
+        update();
+      }
+
+      public void insertUpdate(DocumentEvent e)
+      {
+        update();
+      }
+
+      private void update()
+      {
+        if (isContentValid())
+        {
+          if (oldColor != null) compo.setBackground(oldColor);
+        }
+        else
+        {
+          if (oldColor == null) oldColor = compo.getBackground();
+          compo.setBackground(invalidEntryBGColor);
+        }
+      }
+    });
   }
 
   /**

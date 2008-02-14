@@ -92,6 +92,7 @@ import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.UnavailableException;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.TextDocumentModel.FieldSubstitution;
+import de.muenchen.allg.itd51.wollmux.TextDocumentModel.ReferencedFieldID;
 import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.db.Datasource;
@@ -110,7 +111,6 @@ public class MailMergeNew
    * ID der Property in der die Serienbriefdaten gespeichert werden.
    */
   private static final String PROP_QUERYRESULTS = "MailMergeNew_QueryResults";
-
 
   /**
    * Das {@link TextDocumentModel} zu dem Dokument an dem diese Toolbar hängt.
@@ -161,7 +161,7 @@ public class MailMergeNew
    * geschlossen wurde.
    */
   private ActionListener abortListener = null;
-  
+
   /**
    * Die zentrale Klasse, die die Serienbrieffunktionalität bereitstellt.
    * @param mod das {@link TextDocumentModel} an dem die Toolbar hängt.
@@ -350,7 +350,7 @@ public class MailMergeNew
       }
         });
     tabelleMenu.add(item);
-    
+
     final JMenuItem addColumnsMenuItem = new JMenuItem("Tabellenspalten ergänzen");
     addColumnsMenuItem.addActionListener(new ActionListener()
     {
@@ -388,9 +388,11 @@ public class MailMergeNew
         
         // Ausgrauen der Anpassen-Knöpfe, wenn alle Felder mit den
         // entsprechenden Datenquellenfeldern zugeordnet werden können.
-        boolean hasUnmappedFields = mod.getSelectedFieldIDsThatAreNotInSchema(ds.getData().getSchema()).size() > 0; 
+        boolean hasUnmappedFields = mod.getReferencedFieldIDsThatAreNotInSchema(new HashSet(ds.getColumnNames())).length > 0; 
         adjustFieldsMenuItem.setEnabled(hasUnmappedFields);
-        addColumnsMenuItem.setEnabled(hasUnmappedFields);
+        //TODO: einkommentieren wenn implementiert:
+        //addColumnsMenuItem.setEnabled(hasUnmappedFields);
+        addColumnsMenuItem.setEnabled(false);
         
         tabelleMenu.show(tabelleButton, 0, tabelleButton.getSize().height);
       }
@@ -421,8 +423,7 @@ public class MailMergeNew
    */
   protected void showAdjustFieldsDialog()
   {
-    Set schema = ds.getData().getSchema();
-    List fieldIDs = mod.getSelectedFieldIDsThatAreNotInSchema(schema);
+    ReferencedFieldID[] fieldIDs = mod.getReferencedFieldIDsThatAreNotInSchema(new HashSet(ds.getColumnNames()));
     ActionListener submitActionListener = new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
@@ -438,14 +439,7 @@ public class MailMergeNew
         }
       }
     };
-    showFieldMappingDialog(
-        fieldIDs,
-        schema,
-        "Felder anpassen",
-        "Altes Feld",
-        "Neue Belegung",
-        "Felder anpassen",
-        submitActionListener);
+    showFieldMappingDialog(fieldIDs, "Felder anpassen", "Altes Feld", "Neue Belegung", "Felder anpassen", submitActionListener);
   }
 
   /**
@@ -457,7 +451,7 @@ public class MailMergeNew
    */
   protected void showAddMissingColumnsDialog()
   {
-    List fieldIDs = mod.getSelectedFieldIDsThatAreNotInSchema(ds.getData().getSchema());
+    ReferencedFieldID[] fieldIDs = mod.getReferencedFieldIDsThatAreNotInSchema(new HashSet(ds.getColumnNames()));
     ActionListener submitActionListener = new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
@@ -468,30 +462,24 @@ public class MailMergeNew
         // TODO: tabellenspalten wie in mapIdToSubstitution beschrieben ergänzen
       }
     };
-    showFieldMappingDialog(
-        fieldIDs,
-        ds.getData().getSchema(),
-        "Tabellenspalten ergänzen",
-        "Spalte",
-        "Vorbelegung",
-        "Spalten ergänzen",
-        submitActionListener);
+    showFieldMappingDialog(fieldIDs, "Tabellenspalten ergänzen", "Spalte", "Vorbelegung", "Spalten ergänzen", submitActionListener);
   }
   
   /**
    * Zeigt einen Dialog mit dem bestehende Felder fieldIDs über ein Textfeld neu
-   * belegt werden können; für die neue Belegung stehen die neuen Felder
-   * availableFieldnames und Freitext zur Verfügung. Die Felder fieldIDs werden
+   * belegt werden können; für die neue Belegung stehen die neuen Felder der
+   * aktuellen Datasource und Freitext zur Verfügung. Die Felder fieldIDs werden
    * dabei in der Reihenfolge angezeigt, in der sie in der Liste aufgeführt
-   * sind, ein bereits aufgeführtes Feld wird aber nicht zweimal angezeigt.
+   * sind, ein bereits aufgeführtes Feld wird aber nicht zweimal angezeigt. Ist
+   * bei einem Feld die Eigenschaft isTransformed()==true, dann wird für dieses
+   * Feld nur die Eingabe einer 1-zu-1 Zuordnung von Feldern akzeptiert, das
+   * andere Zuordnungen für transformierte Felder derzeit nicht unterstützt
+   * werden.
    * 
    * @param fieldIDs
    *          Die field-IDs der alten, bereits im Dokument enthaltenen Felder,
-   *          die in der Listen-Reihenfolge angezeigt werden, Dupletten werden
-   *          aber entfernt.
-   * @param availableFieldnames
-   *          Die field-IDs der neuen, aktuell in der Datenquelle vorhandenen
-   *          Felder.
+   *          die in der gegebenen Reihenfolge angezeigt werden, Dupletten
+   *          werden aber entfernt.
    * @param title
    *          Die Titelzeile des Dialogs
    * @param labelOldFields
@@ -514,14 +502,10 @@ public class MailMergeNew
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  private void showFieldMappingDialog(List fieldIDs, Set availableFieldnames,
+  private void showFieldMappingDialog(ReferencedFieldID[] fieldIDs,
       String title, String labelOldFields, String labelNewFields,
       String labelSubmitButton, final ActionListener submitActionListener)
   {
-    // Feldnamen sortieren
-    final ArrayList sortedFieldnames = new ArrayList(availableFieldnames);
-    Collections.sort(sortedFieldnames);
-
     final JDialog dialog = new JDialog(myFrame, title, true);
     dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -529,31 +513,35 @@ public class MailMergeNew
     final HashMap mapTextComponentTagsToFieldname = new HashMap();
 
     Box headers = Box.createHorizontalBox();
-    final JButton insertFieldButton = new JButton("Serienbrieffeld");
-    insertFieldButton.addActionListener(new ActionListener()
-    {
-      public void actionPerformed(ActionEvent e)
-      {
-        JPopupMenu menu = new JPopupMenu();
-        for (Iterator iter = sortedFieldnames.iterator(); iter.hasNext();)
+    final JButton insertFieldButton = new JPotentiallyOverlongPopupMenuButton(
+        "Serienbrieffeld", new Iterable()
         {
-          final String fname = iter.next().toString();
-
-          JMenuItem item = new JMenuItem(fname);
-          item.addActionListener(new ActionListener()
+          public Iterator iterator()
           {
-            public void actionPerformed(ActionEvent e)
-            {
-              if (currentField[0] != null)
-                currentField[0].insertTag(fname);
-            }
-          });
+            List actions = new Vector();
+            List columnNames = ds.getColumnNames();
 
-          menu.add(item);
-        }
-        menu.show(insertFieldButton, 0, insertFieldButton.getSize().height);
-      }
-    });
+            Collections.sort(columnNames);
+
+            Iterator iter = columnNames.iterator();
+            while (iter.hasNext())
+            {
+              final String name = (String) iter.next();
+              Action button = new AbstractAction(name)
+              {
+                private static final long serialVersionUID = 0;
+
+                public void actionPerformed(ActionEvent e)
+                {
+                  if (currentField[0] != null) currentField[0].insertTag(name);
+                }
+              };
+              actions.add(button);
+            }
+
+            return actions.iterator();
+          }
+        });
     insertFieldButton.setFocusable(false);
     headers.add(Box.createHorizontalGlue());
     headers.add(insertFieldButton);
@@ -577,10 +565,11 @@ public class MailMergeNew
     itemBox.add(hbox);
 
     HashSet addedFields = new HashSet();
-    for (Iterator iter = fieldIDs.iterator(); iter.hasNext();)
+    for (int i = 0; i < fieldIDs.length; i++)
     {
-      String fieldId = (String) iter.next();
+      String fieldId = fieldIDs[i].getFieldId();
       if (addedFields.contains(fieldId)) continue;
+      final boolean isTransformed = fieldIDs[i].isTransformed();
       addedFields.add(fieldId);
 
       hbox = Box.createHorizontalBox();
@@ -592,7 +581,14 @@ public class MailMergeNew
       label.setBorder(BorderFactory.createEmptyBorder(5, 5, 10, 5));
       hbox.add(label);
 
-      final TextComponentTags field = new TextComponentTags(new JTextField());
+      final TextComponentTags field = new TextComponentTags(new JTextField()) {
+          public boolean isContentValid() {
+            if(!isTransformed) return true;
+            List c = getContent();
+            if(c.size() == 0) return true;
+            return c.size() == 1 && ((TextComponentTags.ContentElement) c.get(0)).isTag();  
+          }
+      };
       mapTextComponentTagsToFieldname.put(field, fieldId);
       Box fbox = Box.createHorizontalBox();
       hbox.add(fbox); // fbox für zeilenbündige Ausrichtung benötigt
@@ -648,6 +644,7 @@ public class MailMergeNew
             .hasNext();)
         {
           TextComponentTags f = (TextComponentTags) iter.next();
+          if(!f.isContentValid()) continue;
           String fieldId = "" + mapTextComponentTagsToFieldname.get(f);
           FieldSubstitution subst = new TextDocumentModel.FieldSubstitution();
           for (Iterator contentIter = f.getContent().iterator(); contentIter.hasNext();)
@@ -698,14 +695,6 @@ public class MailMergeNew
     dialog.setLocation(x, y);
     mod.addCoupledWindow(dialog);
     dialog.setVisible(true);
-
-    // Testimplementierung
-    HashMap subst = new HashMap();
-    for (Iterator iter = fieldIDs.iterator(); iter.hasNext();)
-    {
-      String id = (String) iter.next();
-      subst.put(id, "<" + id + ">");
-    }
   }
 
     /**
