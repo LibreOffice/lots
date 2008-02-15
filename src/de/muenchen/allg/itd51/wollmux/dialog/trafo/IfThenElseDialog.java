@@ -23,6 +23,7 @@ import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.util.Iterator;
@@ -38,6 +39,7 @@ import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -47,7 +49,9 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.WindowConstants;
-import javax.swing.border.BevelBorder;
+import javax.swing.border.Border;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
@@ -62,6 +66,12 @@ import de.muenchen.allg.itd51.wollmux.dialog.TextComponentTags;
  */
 public class IfThenElseDialog extends TrafoDialog
 {
+  private static Border CASCADED_ITE_BORDER = BorderFactory.createCompoundBorder(
+          BorderFactory.createEmptyBorder(0, 20, 0, 0),
+          BorderFactory.createCompoundBorder(
+             BorderFactory.createRaisedBevelBorder(), 
+             BorderFactory.createEmptyBorder(5,5,5,5)));
+  
   /**
    * Das Panel, das den Dialoginhalt präsentiert.
    */
@@ -92,7 +102,15 @@ public class IfThenElseDialog extends TrafoDialog
     
     params.isValid = false; //erst bei Beendigung mit Okay werden sie wieder valid
     
-    ifThenElsePanel = new JIfThenElsePanel(params.conf, params.fieldNames);
+    ifThenElsePanel = new JIfThenElsePanel(params.conf, params.fieldNames, new MyRepackActionListener());
+  }
+
+  private class MyRepackActionListener implements ActionListener
+  {
+    public void actionPerformed(ActionEvent e)
+    {
+      repack();
+    }
   }
   
   private static class JIfThenElsePanel extends JPanel
@@ -185,19 +203,27 @@ public class IfThenElseDialog extends TrafoDialog
      */
     private ConditionalResult elseResult = new ConditionalResult();
     
-    
+    private ActionListener packNecessary;
     
     /**
      * Erzeugt eine Dialog-Komponente, die mit den Werten aus conf vorbelegt ist, wobei
-     * fieldNames die angebotenen Feldnamen als Strings enthält.
+     * fieldNames die angebotenen Feldnamen als Strings enthält. Der oberste Knoten von
+     * conf ist ein beliebiger Bezeichner (typischwerweise der Funktionsname).
+     *
+     * @param packNecessary wird aufgerufen, wannimmer sich im Panelinhalt soviel getan
+     *        hat, dass ein erneutes pack() sinnvoll wäre.
      *
      * @throws IllegalArgumentException falls conf nicht verstanden wird.
      * 
      * @author Matthias Benkmann (D-III-ITD D.10)
      * TESTED
      */
-    public JIfThenElsePanel(ConfigThingy conf, List fieldNames)
+    public JIfThenElsePanel(ConfigThingy conf, List fieldNames, ActionListener packNecessary)
     {
+      this.packNecessary = packNecessary;
+      
+      if (conf.count() != 1) throw new IllegalArgumentException();
+      try{ conf = conf.getFirstChild(); }catch(Exception x){};
       if (conf.getName().equals("IF"))
       {
         if (conf.count() == 3)
@@ -225,49 +251,123 @@ public class IfThenElseDialog extends TrafoDialog
       this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
       
       Box ifBox = Box.createHorizontalBox();
-      //ifBox.setBorder(BorderFactory.createTitledBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED), "Wenn"));
-      ifBox.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Wenn"));
+      Border border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Wenn");
+      border = new CompoundBorder(border, new EmptyBorder(2,5,5,5));
+      ifBox.setBorder(border);
       ifBox.add(fieldSelector);
+      ifBox.add(Box.createHorizontalStrut(10));
       ifBox.add(notSelector);
+      ifBox.add(Box.createHorizontalStrut(10));
       ifBox.add(testSelector);
+      ifBox.add(Box.createHorizontalStrut(10));
       ifBox.add(compareTo);
       this.add(DimAdjust.maxHeightIsPrefMaxWidthUnlimited(ifBox));
       
-      Box thenControls = Box.createHorizontalBox();
-      this.add(thenControls);
-      thenControls.add(new JLabel("Dann"));
-      AbstractButton thenTextRadioButton = new JRadioButton("Text", true);
-      thenControls.add(thenTextRadioButton);
-      AbstractButton thenITERadioButton = new JRadioButton("Wenn...Dann..Sonst...");
-      thenControls.add(thenITERadioButton);
-      ButtonGroup thenRadioGroup = new ButtonGroup();
-      thenRadioGroup.add(thenTextRadioButton);
-      thenRadioGroup.add(thenITERadioButton);
-      thenControls.add(Box.createHorizontalGlue());
-      JPotentiallyOverlongPopupMenuButton butt = new JPotentiallyOverlongPopupMenuButton("Serienbrieffeld", makeInsertFieldActions(fieldNames, thenResult.text));
+      Box thenElseBox = Box.createVerticalBox();
+      thenElseBox.setBorder(new EmptyBorder(10,8,0,8));
+      this.add(thenElseBox);
+      
+      buildConditionalResultGUI(fieldNames, thenElseBox, "Dann", thenResult); 
+      
+      thenElseBox.add(Box.createVerticalStrut(10));
+
+      buildConditionalResultGUI(fieldNames, thenElseBox, "Sonst", elseResult); 
+    }
+
+    /**
+     * Fügt zu guiContainer die GUI-Elemente zum Bearbeiten von
+     * conditionalResult hinzu.
+     * @param fieldNames die Namen der Felder, die über einen Button in den Text
+     *        eingefügt werden können.
+     * @param label "Dann" oder "Sonst" (wird zur Beschriftung verwendet)
+     * @author Matthias Benkmann (D-III-ITD D.10)
+     */
+    private void buildConditionalResultGUI(final List fieldNames, final JComponent guiContainer, String label, final ConditionalResult conditionalResult)
+    {
+      Box controls = Box.createHorizontalBox();
+      guiContainer.add(controls);
+      guiContainer.add(Box.createVerticalStrut(4));
+      controls.add(new JLabel(label));
+      controls.add(Box.createHorizontalGlue());
+      AbstractButton textRadioButton = new JRadioButton("Text", conditionalResult.type == 0);
+      textRadioButton.addActionListener(new ActionListener(){
+        public void actionPerformed(ActionEvent e)
+        {
+          if (conditionalResult.type != 0) 
+          {
+            conditionalResult.type = 0;
+            if (conditionalResult.panel != null)
+            {
+              for (int i = guiContainer.getComponentCount() - 1; i >= 0; --i)
+              {
+                if (guiContainer.getComponent(i) == conditionalResult.panel)
+                {
+                  guiContainer.remove(i);
+                  guiContainer.add(conditionalResult.scrollPane, i);
+                  break;
+                }
+              }
+              
+              guiContainer.revalidate();
+            }
+          }
+        }});
+      controls.add(textRadioButton);
+      controls.add(Box.createHorizontalGlue());
+      AbstractButton ifThenElseRadioButton = new JRadioButton("Wenn...Dann..Sonst...", conditionalResult.type == 1);
+      ifThenElseRadioButton.addActionListener(new ActionListener(){
+        public void actionPerformed(ActionEvent e)
+        {
+          if (conditionalResult.type != 1) 
+          {
+            conditionalResult.type = 1;
+            
+            if (conditionalResult.panel == null)
+            {
+              ConfigThingy conf = null;
+              try{ 
+                conf = new ConfigThingy("Func","IF(STRCMP(VALUE \""+fieldNames.get(0)+"\" \"\") THEN(\"\") ELSE(\"\"))");
+                //ACHTUNG! neue JIfThenElsePanels werden noch anderswo instanziiert
+                conditionalResult.panel = new JIfThenElsePanel(conf, fieldNames, packNecessary);
+                conditionalResult.panel.setBorder(CASCADED_ITE_BORDER);
+              } catch(Exception x) 
+              { 
+                // Kann eigentlich nur passieren, wenn fieldNames verbockt ist.
+                conditionalResult.panel = null;
+                conditionalResult.type = 0;
+              }
+            }
+           
+            if (conditionalResult.panel != null)
+            {
+              for (int i = guiContainer.getComponentCount() - 1; i >= 0; --i)
+              {
+                if (guiContainer.getComponent(i) == conditionalResult.scrollPane)
+                {
+                  guiContainer.remove(i);
+                  guiContainer.add(conditionalResult.panel, i);
+                  break;
+                }
+              }
+              
+              guiContainer.revalidate();
+              if (packNecessary != null) packNecessary.actionPerformed(null);
+            }
+          }
+
+        }});
+      controls.add(ifThenElseRadioButton);
+      ButtonGroup radioGroup = new ButtonGroup();
+      radioGroup.add(textRadioButton);
+      radioGroup.add(ifThenElseRadioButton);
+      controls.add(Box.createHorizontalGlue());
+      JPotentiallyOverlongPopupMenuButton butt = new JPotentiallyOverlongPopupMenuButton("Serienbrieffeld", makeInsertFieldActions(fieldNames, conditionalResult.text));
       butt.setFocusable(false);
-      thenControls.add(butt); 
-                      
-      
-      this.add(thenResult.scrollPane);
-      
-      Box elseControls = Box.createHorizontalBox();
-      this.add(elseControls);
-      elseControls.add(new JLabel("Sonst"));
-      AbstractButton elseTextRadioButton = new JRadioButton("Text", true);
-      elseControls.add(elseTextRadioButton);
-      AbstractButton elseITERadioButton = new JRadioButton("Wenn...Dann..Sonst...");
-      elseControls.add(elseITERadioButton);
-      ButtonGroup elseRadioGroup = new ButtonGroup();
-      elseRadioGroup.add(elseTextRadioButton);
-      elseRadioGroup.add(elseITERadioButton);
-      elseControls.add(Box.createHorizontalGlue());
-      butt = new JPotentiallyOverlongPopupMenuButton("Serienbrieffeld", 
-          makeInsertFieldActions(fieldNames, elseResult.text));
-      butt.setFocusable(false);
-      elseControls.add(butt);
-      
-      this.add(elseResult.scrollPane);
+      controls.add(butt);
+      if (conditionalResult.type == 0)
+        guiContainer.add(conditionalResult.scrollPane);
+      else
+        guiContainer.add(conditionalResult.panel);
     }
     
     /**
@@ -296,7 +396,8 @@ public class IfThenElseDialog extends TrafoDialog
     
     /**
      * Erzeugt {@link #fieldSelector}, {@link #notSelector}, {@link #testSelector} und
-     * {@link #compareTo} auf Basis von conf.
+     * {@link #compareTo} auf Basis von conf. Falls das Vergleichsfeld nicht in fieldNames
+     * gelistet ist wird es hinzugefügt.
      * genau =         STRCMP(VALUE "feld" "vergleichswert")
      * numerisch =     NUMCMP(VALUE "feld" "vergleichswert")
      * numerisch <     LT(VALUE "feld" "vergleichswert")
@@ -353,6 +454,7 @@ public class IfThenElseDialog extends TrafoDialog
                   break findFieldName;
                 }
               }
+              fieldNames.add(fieldName);
               fieldSelector.addItem(fieldName);
               fieldSelector.setSelectedItem(fieldName);
               break findFieldName;
@@ -384,22 +486,23 @@ public class IfThenElseDialog extends TrafoDialog
         if (conf.count() == 1 && 
            (conf.getName().equals("THEN") || conf.getName().equals("ELSE")))
         {
-          conf = conf.getFirstChild();
+          ConfigThingy innerConf = conf.getFirstChild();
           
           JTextArea textArea = new JTextArea(3, 40);
           textArea.setLineWrap(true);
           res.scrollPane = new JScrollPane(textArea, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
           res.text = new TextComponentTags(textArea); 
           
-          if (conf.count() == 0)
+          if (innerConf.count() == 0)
           {
             res.type = 0;
-            textArea.setText(conf.toString());
+            textArea.setText(innerConf.toString());
             return;
-          } else if (conf.count() == 1)
-          { //TODO Diesen Fall testen
-            res.type = 1;
-            res.panel = new JIfThenElsePanel(conf, fieldNames);
+          } else
+          { 
+            res.type = 1; //ACHTUNG! neue JIfThenElsePanels werden noch anderswo instanziiert
+            res.panel = new JIfThenElsePanel(conf, fieldNames, packNecessary);
+            res.panel.setBorder(CASCADED_ITE_BORDER);
             return;
           }
         }
@@ -419,47 +522,70 @@ public class IfThenElseDialog extends TrafoDialog
    * @author Matthias Benkmann (D-III-ITD D.10)
    * TESTED
    */
-  private void show(JDialog dialog)
+  private void show(String windowTitle, JDialog dialog)
   {
     dialog.setAlwaysOnTop(true);
+    dialog.setTitle(windowTitle);
     oehrchen = new MyWindowListener();
     dialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
     dialog.addWindowListener(oehrchen);
     
-    dialog.setLayout(new BorderLayout());
-    dialog.add(ifThenElsePanel, BorderLayout.CENTER);
+    JPanel myPanel = new JPanel(new BorderLayout());
+    myPanel.setBorder(new EmptyBorder(2,2,2,2));
+    dialog.add(myPanel);
+    JScrollPane scrollPane = new JScrollPane(ifThenElsePanel);
+    scrollPane.setBorder(null);
+    myPanel.add(scrollPane, BorderLayout.CENTER);
     Box lowerButtons = Box.createHorizontalBox();
-    dialog.add(lowerButtons, BorderLayout.SOUTH);
+    lowerButtons.setBorder(new EmptyBorder(10,4,5,4));
+    myPanel.add(lowerButtons, BorderLayout.SOUTH);
     JButton cancel = new JButton("Abbrechen");
+    cancel.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent e)
+      {
+        abort();
+      }});
     JButton insert = new JButton("Einfügen");
     lowerButtons.add(cancel);
     lowerButtons.add(Box.createHorizontalGlue());
     lowerButtons.add(insert);
-    dialog.pack();
-    int frameWidth = dialog.getWidth();
-    int frameHeight = dialog.getHeight();
+    this.myDialog = dialog;
+    repack();
+  }
+
+  /**
+   * Führt myDialog.pack() aus (falls myDialog nicht null) und setzt ihn sichtbar
+   * in der Mitte des Bildschirms. 
+   * 
+   * @author Matthias Benkmann (D-III-ITD D.10)
+   */
+  private void repack()
+  {
+    if (myDialog == null) return;
+    myDialog.pack();
+    int frameWidth = myDialog.getWidth();
+    int frameHeight = myDialog.getHeight();
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
     int x = screenSize.width / 2 - frameWidth / 2;
     int y = screenSize.height / 2 - frameHeight / 2;
-    dialog.setLocation(x, y);
-    this.myDialog = dialog;
-    dialog.setVisible(true);
+    myDialog.setLocation(x, y);
+    myDialog.setVisible(true);
   }
   
-  public void show(Dialog owner)
+  public void show(String windowTitle, Dialog owner)
   {
     if (owner == null)
-      show(new JDialog());
+      show(windowTitle, new JDialog());
     else
-      show(new JDialog(owner));
+      show(windowTitle, new JDialog(owner));
   }
   
-  public void show(Frame owner)
+  public void show(String windowTitle, Frame owner)
   {
     if (owner == null)
-      show(new JDialog());
+      show(windowTitle, new JDialog());
     else
-      show(new JDialog(owner));
+      show(windowTitle, new JDialog(owner));
   }
 
   public TrafoDialogParameters getExitStatus()
@@ -516,7 +642,7 @@ public class IfThenElseDialog extends TrafoDialog
   
   public static void main(String [] args) throws Exception
   {
-    ConfigThingy funConf = new ConfigThingy("IF","STRCMP(VALUE \"foo\", \"bar\") THEN(\"Krass, ey!\") ELSE(\"Oder sonst!\")");
+    ConfigThingy funConf = new ConfigThingy("Func","IF(STRCMP(VALUE \"foo\", \"bar\") THEN(\"Krass, ey!\") ELSE( IF(MATCH(VALUE \"doof\" \"^foo\") THEN \"blarg\" ELSE \"Dusel\")) )");
     Vector fieldNames = new Vector();
     fieldNames.add("Du");
     fieldNames.add("bist");
@@ -525,7 +651,7 @@ public class IfThenElseDialog extends TrafoDialog
     params.conf = funConf;
     params.fieldNames = fieldNames;
     IfThenElseDialog dialog = new IfThenElseDialog(params);
-    dialog.show((Dialog)null);
+    dialog.show("Wenn-Dann-Sonst-Test", (Dialog)null);
   }
 
 }

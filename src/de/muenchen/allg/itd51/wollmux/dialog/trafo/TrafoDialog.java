@@ -46,7 +46,7 @@ public abstract class TrafoDialog
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public abstract void show(Dialog owner);
+  public abstract void show(String windowTitle, Dialog owner);
   
   /**
    * Zeigt den Dialog an.
@@ -58,7 +58,7 @@ public abstract class TrafoDialog
    *
    * @author Matthias Benkmann (D-III-ITD 5.1) 
    */
-  public abstract void show(Frame owner);
+  public abstract void show(String windowTitle, Frame owner);
   
   /**
    * Schlieﬂt den Dialog. Darf nur aufgerufen werden, wenn er gerade angezeigt wird.
