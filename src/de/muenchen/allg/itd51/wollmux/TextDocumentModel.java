@@ -2951,10 +2951,6 @@ public class TextDocumentModel
    * Feld befüllt werden. Ist keine Selektion vorhanden, so tut die Funktion
    * nichts.
    * 
-   * @param hint
-   *          Ein Hinweistext der als Tooltip des neuen Formularfeldes angezeigt
-   *          werden soll. hint kann null sein, dann wird kein Hinweistext
-   *          angezeigt.
    * @param trafoConf
    *          darf null sein, dann wird keine TRAFO gesetzt. Ansonsten ein
    *          ConfigThingy mit dem Aufbau "Bezeichner( FUNKTIONSDEFINITION )",
@@ -2965,37 +2961,49 @@ public class TextDocumentModel
    *          erlaubter Funktionsname, z.B. "AND" sein. Der Bezeichner wird
    *          NICHT als Name der TRAFO verwendet. Stattdessen wird ein neuer
    *          eindeutiger TRAFO-Name generiert.
-   * @param id
-   *          die ID über die das Feld mit
-   *          {@link #setFormFieldValue(String, String)} befüllt werden kann.
+   * @param hint
+   *          Ein Hinweistext der als Tooltip des neuen Formularfeldes angezeigt
+   *          werden soll. hint kann null sein, dann wird kein Hinweistext
+   *          angezeigt.
    * 
    * @author Matthias Benkmann, Christoph Lutz (D-III-ITD 5.1) TESTED
    */
-  synchronized public void replaceSelectionWithFormField(String fieldId,
-      String hint, ConfigThingy trafoConf)
+  synchronized public void replaceSelectionWithTrafoField(
+      ConfigThingy trafoConf, String hint)
   {
     String trafoName = addLocalAutofunction(trafoConf);
 
-    try
-    {
-      // Neues UserField an der Cursorposition einfügen
-      addNewInputUserField(getViewCursor(), trafoName, hint);
+    if (trafoName != null)
+      try
+      {
+        // Neues UserField an der Cursorposition einfügen
+        addNewInputUserField(getViewCursor(), trafoName, hint);
 
-      // Feldwert mit leerem Inhalt vorbelegen, wenn noch kein Wert gesetzt ist.
-      if (!formFieldValues.containsKey(fieldId))
-        setFormFieldValue(fieldId, "");
+        // Datenstrukturen aktualisieren
+        collectNonWollMuxFormFields();
 
-      // Ansicht des Formularfeldes aktualisieren:
-      collectNonWollMuxFormFields();
-      updateFormFields(fieldId);
+        // Formularwerte-Abschnitt für alle referenzierten fieldIDs vorbelegen
+        // wenn noch kein Wert gesetzt ist und Anzeige aktualisieren.
+        Function f = getFunctionLibrary().get(trafoName);
+        String[] fieldIds = new String[] {};
+        if (f != null) fieldIds = f.parameters();
+        for (int i = 0; i < fieldIds.length; i++)
+        {
+          String fieldId = fieldIds[i];
+          // Feldwert mit leerem Inhalt vorbelegen, wenn noch kein Wert gesetzt
+          // ist.
+          if (!formFieldValues.containsKey(fieldId))
+            setFormFieldValue(fieldId, "");
+          updateFormFields(fieldId);
+        }
 
-      // Nicht referenzierte Autofunktionen/InputUser-TextFieldMaster löschen
-      cleanupGarbageOfUnreferencedAutofunctions();
-    }
-    catch (java.lang.Exception e)
-    {
-      Logger.error(e);
-    }
+        // Nicht referenzierte Autofunktionen/InputUser-TextFieldMaster löschen
+        cleanupGarbageOfUnreferencedAutofunctions();
+      }
+      catch (java.lang.Exception e)
+      {
+        Logger.error(e);
+      }
   }
 
   /**
@@ -3559,6 +3567,8 @@ public class TextDocumentModel
     {
       ConfigThingy trafoConf = getFormDescription().query("Formular").query(
           "Funktionen").query(trafoName, 2).getLastChild();
+      // FIXME: query("VALUE") reicht nicht aus, da immer nur in einer Ebene
+      // gesucht wird.
       ConfigThingy values = trafoConf.query("VALUE");
       for (Iterator valuesIter = values.iterator(); valuesIter.hasNext();)
       {

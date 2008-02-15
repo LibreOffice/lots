@@ -320,6 +320,22 @@ public class CoupledWindowController
 
       public void windowDeactivated(WindowEvent e)
       {
+        // Deaktivierungsevent ignorieren, wenn die Aktivierung an ein
+        // Unterfenster eines registrierten Fensters abgegeben wurde. Dies wird
+        // über eine Rückwärtssuche in der Owner-Hierarchie des OppositeWindows
+        // festgestellt werden.
+        Window w = e.getOppositeWindow();
+        while (w != null)
+        {
+          for (Iterator iter = coupledWindows.iterator(); iter.hasNext();)
+          {
+            CoupledWindow win = (CoupledWindow) iter.next();
+            if (win.equals(w)) return;
+          }
+          w = w.getOwner();
+        }
+
+        // Deaktivierungsevent weiterreichen
         windowState.deactivationEvent(e.getSource());
       }
 
@@ -502,25 +518,7 @@ public class CoupledWindowController
 
     public void setVisible(final boolean visible)
     {
-      try
-      {
-        javax.swing.SwingUtilities.invokeLater(new Runnable()
-        {
-          public void run()
-          {
-            try
-            {
-              if (window.isVisible() != visible) window.setVisible(visible);
-            }
-            catch (Exception x)
-            {
-            }
-          }
-        });
-      }
-      catch (Exception x)
-      {
-      }
+      if (window.isVisible() != visible) window.setVisible(visible);
     }
 
     public void addWindowListener(final WindowListener l)
@@ -580,6 +578,11 @@ public class CoupledWindowController
       {
         CoupledAWTWindow w = (CoupledAWTWindow) o;
         return window.equals(w.window);
+      }
+      else if (o instanceof Window)
+      {
+        Window w = (Window) o;
+        return window.equals(w);
       }
       else
         return false;

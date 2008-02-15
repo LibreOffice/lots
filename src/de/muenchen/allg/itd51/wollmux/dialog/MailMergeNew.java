@@ -90,6 +90,7 @@ import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.UnavailableException;
+import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.TextDocumentModel.FieldSubstitution;
 import de.muenchen.allg.itd51.wollmux.TextDocumentModel.ReferencedFieldID;
@@ -99,6 +100,10 @@ import de.muenchen.allg.itd51.wollmux.db.Datasource;
 import de.muenchen.allg.itd51.wollmux.db.OOoDatasource;
 import de.muenchen.allg.itd51.wollmux.db.QueryResults;
 import de.muenchen.allg.itd51.wollmux.db.QueryResultsList;
+import de.muenchen.allg.itd51.wollmux.dialog.trafo.IfThenElseDialog;
+import de.muenchen.allg.itd51.wollmux.dialog.trafo.TrafoDialog;
+import de.muenchen.allg.itd51.wollmux.dialog.trafo.TrafoDialogFactory;
+import de.muenchen.allg.itd51.wollmux.dialog.trafo.TrafoDialogParameters;
 
 /**
  * Die neuen erweiterten Serienbrief-Funktionalitäten.
@@ -627,7 +632,6 @@ public class MailMergeNew
       public void actionPerformed(ActionEvent e)
       {
         dialog.dispose();
-        mod.removeCoupledWindow(dialog);
       }
     });
     buttonBox.add(button);
@@ -657,8 +661,9 @@ public class MailMergeNew
           }
           result.put(fieldId, subst);
         }
+
         dialog.dispose();
-        mod.removeCoupledWindow(dialog);
+
         if (submitActionListener != null) new Thread()
         {
           public void run()
@@ -693,7 +698,6 @@ public class MailMergeNew
     int x = screenSize.width / 2 - frameWidth / 2;
     int y = screenSize.height / 2 - frameHeight / 2;
     dialog.setLocation(x, y);
-    mod.addCoupledWindow(dialog);
     dialog.setVisible(true);
   }
 
@@ -798,7 +802,6 @@ public class MailMergeNew
     {
       public void actionPerformed(ActionEvent e)
       {
-        mod.removeCoupledWindow(dialog);
         dialog.dispose();
       }
     });
@@ -811,7 +814,6 @@ public class MailMergeNew
     {
       public void actionPerformed(ActionEvent e)
       {
-        mod.removeCoupledWindow(dialog);
         dialog.dispose();
         doMailMerge();
       }
@@ -828,7 +830,6 @@ public class MailMergeNew
     int y = screenSize.height/2 - frameHeight/2;
     dialog.setLocation(x,y);
     dialog.setResizable(false);
-    mod.addCoupledWindow(dialog);
     dialog.setVisible(true);
   }
 
@@ -879,6 +880,8 @@ public class MailMergeNew
     JPopupMenu menu = new JPopupMenu();
     
     JMenuItem button;
+
+    // TODO: Knopf ausgrauen, wenn die Datenquelle keine Spalten definiert.
     button = new JMenuItem("Gender");
     button.addActionListener(new ActionListener()
     {
@@ -889,12 +892,13 @@ public class MailMergeNew
     });
     menu.add(button);
     
+    // TODO: Knopf ausgrauen, wenn die Datenquelle keine Spalten definiert.
     button = new JMenuItem("Wenn...Dann...Sonst...");
     button.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
       {
-      //TODO  insertIfThenElseField();
+        insertIfThenElseField();
       }
     });
     menu.add(button);
@@ -925,12 +929,126 @@ public class MailMergeNew
     {
       public void actionPerformed(ActionEvent e)
       {
-        //TODO editSpecialField();
+        editSpecialField();
       }
+
     });
     menu.add(button);
     
     menu.show(invoker, x, y);
+  }
+  
+  /**
+   * Öffnet den IfThenElse-Dialog, erzeugt daraus ein transformiertes Feld und
+   * fügt dieses Feld in das Dokument mod ein.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  protected void insertIfThenElseField()
+  {
+    List fieldNames = ds.getColumnNames();
+    if (fieldNames.size() == 0) {
+      Logger.error("Die Datenquelle hat keine Spalte, von der das Feld abhängig sein könnte");
+      return;
+    }
+
+    // ConfigThingy für leere WennDannSonst-Funktion zusammenbauen. Aufbau:
+    // WennDannSonst(IF(STRCMP(VALUE '<firstField>', '') THEN('') ELSE('')))
+    String firstField = "" + fieldNames.get(0);
+    ConfigThingy conf = new ConfigThingy("WennDannSonst");
+    ConfigThingy ifConf = new ConfigThingy("IF");
+    ConfigThingy strcmpConf = new ConfigThingy("STRCMP");
+    ConfigThingy valueConf = new ConfigThingy("VALUE");
+    valueConf.addChild(new ConfigThingy(firstField));
+    strcmpConf.addChild(valueConf);
+    strcmpConf.addChild(new ConfigThingy(""));
+    ifConf.addChild(strcmpConf);
+    ConfigThingy thenConf = new ConfigThingy("THEN");
+    thenConf.addChild(new ConfigThingy(""));
+    ifConf.addChild(thenConf);
+    ConfigThingy elseConf = new ConfigThingy("ELSE");
+    elseConf.addChild(new ConfigThingy(""));
+    ifConf.addChild(elseConf);
+    conf.addChild(ifConf);
+
+    TrafoDialogParameters params = new TrafoDialogParameters();
+    params.conf = conf;
+    params.isValid = true;
+    params.fieldNames = fieldNames;
+    params.closeAction = new ActionListener()
+    {
+      public void actionPerformed(ActionEvent e)
+      {
+        TrafoDialog dialog = (TrafoDialog) e.getSource();
+        TrafoDialogParameters status = dialog.getExitStatus();
+        if (status.isValid)
+        {
+          try
+          {
+            mod.replaceSelectionWithTrafoField(status.conf, "Wenn...Dann...Sonst...");
+          }
+          catch (Exception x)
+          {
+            Logger.error(x);
+          }
+        }
+      }
+    };
+
+    TrafoDialog ite = new IfThenElseDialog(params);
+    ite.show("Spezialfeld Wenn...Dann...Sonst... einfügen", myFrame);
+  }
+
+  /**
+   * Öffnet den entsprechenden Dialog, mit dem das gerade ausgewählte
+   * Spezialfeld bearbeitet werden kann.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  private void editSpecialField()
+  {
+    ConfigThingy trafoConf = mod.getFormFieldTrafoFromSelection();
+    if (trafoConf != null)
+    {
+      final String trafoName = trafoConf.getName();
+
+      TrafoDialogParameters params = new TrafoDialogParameters();
+      params.conf = trafoConf;
+      params.isValid = true;
+      params.fieldNames = ds.getColumnNames();
+      params.closeAction = new ActionListener()
+      {
+        public void actionPerformed(ActionEvent e)
+        {
+          TrafoDialog dialog = (TrafoDialog) e.getSource();
+          TrafoDialogParameters status = dialog.getExitStatus();
+          if(status.isValid) {
+            try
+            {
+              mod.setTrafo(trafoName, status.conf);
+            }
+            catch (Exception x)
+            {
+              Logger.error(x);
+            }
+          }
+        }
+      };
+      
+      try
+      {
+        TrafoDialog dialog = TrafoDialogFactory.createDialog(params);
+        dialog.show("Spezialfeld bearbeiten", myFrame);
+      }
+      catch (UnavailableException e)
+      {
+        WollMuxSingleton.showInfoModal(
+            "Spezialfeld bearbeiten",
+            "Bitte bearbeiten Sie dieses Feld mit Hilfe des FormularMax.\n\n"
+                + e.getMessage());
+        Logger.error(e);
+      }
+    }
   }
   
   /**
@@ -1462,14 +1580,6 @@ public class MailMergeNew
     public void showDatasourceSelectionDialog(final JFrame parent)
     {
       final JDialog datasourceSelector = new JDialog(parent, "Wo sind Ihre Serienbriefdaten ?", true);
-      // TODO: default close operation funzt derzeit nicht wg. fehlender
-      // Deregistrierung von mod.removeCoupledWindow(datasourceSelector)
-      // FIXME: alle removCoupledWindow()-Aufrufe sollten entfallen können und
-      // statt dessen nur die Serienbriefleiste registriert sein. Ein
-      // registrierter FocusListener auf der Serienbriefleiste kann feststellen,
-      // an welches Fenster der Fokus verloren wurde. Wenn die Hierarchie dieses
-      // Fensters (fenster.getOwner()) am Schluss zur Serienbriefleiste
-      // zurückführt, dann soll der Fokuswechsel ignoriert werden.
       
       Box vbox = Box.createVerticalBox();
       datasourceSelector.add(vbox);
@@ -1484,7 +1594,6 @@ public class MailMergeNew
         button.addActionListener(new ActionListener(){
           public void actionPerformed(ActionEvent e)
           {
-            mod.removeCoupledWindow(datasourceSelector);
             datasourceSelector.dispose();
             selectOpenCalcWindowAsDatasource(parent);
           }});
@@ -1495,7 +1604,6 @@ public class MailMergeNew
       button.addActionListener(new ActionListener(){
         public void actionPerformed(ActionEvent e)
         {
-          mod.removeCoupledWindow(datasourceSelector);
           datasourceSelector.dispose();
           selectFileAsDatasource(parent);
         }
@@ -1506,7 +1614,6 @@ public class MailMergeNew
       button.addActionListener(new ActionListener(){
         public void actionPerformed(ActionEvent e)
         {
-          mod.removeCoupledWindow(datasourceSelector);
           datasourceSelector.dispose();
           openAndselectNewCalcTableAsDatasource(parent);
         }
@@ -1552,7 +1659,6 @@ public class MailMergeNew
       button.addActionListener(new ActionListener(){
         public void actionPerformed(ActionEvent e)
         {
-          mod.removeCoupledWindow(datasourceSelector);
           datasourceSelector.dispose();
         }
       });
@@ -1566,7 +1672,6 @@ public class MailMergeNew
       int y = screenSize.height/2 - frameHeight/2;
       datasourceSelector.setLocation(x,y);
       datasourceSelector.setResizable(false);
-      mod.addCoupledWindow(datasourceSelector);
       datasourceSelector.setVisible(true);
     }
     
@@ -1610,7 +1715,6 @@ public class MailMergeNew
         button.addActionListener(new ActionListener(){
           public void actionPerformed(ActionEvent e)
           {
-            mod.removeCoupledWindow(calcWinSelector);
             calcWinSelector.dispose();
             getCalcDoc(spread);
             selectTable(parent);
@@ -1627,7 +1731,6 @@ public class MailMergeNew
       int y = screenSize.height/2 - frameHeight/2;
       calcWinSelector.setLocation(x,y);
       calcWinSelector.setResizable(false);
-      mod.addCoupledWindow(calcWinSelector);
       calcWinSelector.setVisible(true);
     }
     
@@ -1740,7 +1843,6 @@ public class MailMergeNew
         button.addActionListener(new ActionListener(){
           public void actionPerformed(ActionEvent e)
           {
-            mod.removeCoupledWindow(tableSelector);
             tableSelector.dispose();
             setTable(name);
           }
@@ -1756,7 +1858,6 @@ public class MailMergeNew
       int y = screenSize.height/2 - frameHeight/2;
       tableSelector.setLocation(x,y);
       tableSelector.setResizable(false);
-      mod.addCoupledWindow(tableSelector);
       tableSelector.setVisible(true);
     }
 
