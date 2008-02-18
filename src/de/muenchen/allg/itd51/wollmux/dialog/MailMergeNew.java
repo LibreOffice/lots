@@ -366,7 +366,7 @@ public class MailMergeNew
     });
     tabelleMenu.add(addColumnsMenuItem);
 
-    final JMenuItem adjustFieldsMenuItem = new JMenuItem("alle Felder anpassen");
+    final JMenuItem adjustFieldsMenuItem = new JMenuItem("Alle Felder anpassen");
     adjustFieldsMenuItem.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
@@ -386,9 +386,9 @@ public class MailMergeNew
       {        
         // Anpassen des Menüpunktes "Felder anpassen"
         if(mod.hasSelection()) {
-          adjustFieldsMenuItem.setText("ausgewählte Felder anpassen");
+          adjustFieldsMenuItem.setText("Ausgewählte Felder anpassen");
         } else {
-          adjustFieldsMenuItem.setText("alle Felder anpassen");
+          adjustFieldsMenuItem.setText("Alle Felder anpassen");
         }
         
         // Ausgrauen der Anpassen-Knöpfe, wenn alle Felder mit den
