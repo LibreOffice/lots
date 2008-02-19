@@ -118,7 +118,6 @@ public class L
       String lcMessages = System.getenv("LC_MESSAGES");
       if (lcMessages != null && lcMessages.length() >= 2)
         messageLanguage = lcMessages.substring(0, 2);
-      messageLanguage = "en";
 
       ConfigThingy messages = l10n.get("Messages", 2);
       Iterator iter = messages.iterator();
