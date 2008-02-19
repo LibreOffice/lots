@@ -3495,24 +3495,7 @@ public class TextDocumentModel
     {
       ConfigThingy trafoConf = getFormDescription().query("Formular").query(
         "Funktionen").query(trafoName, 2).getLastChild();
-      // FIXME: query("VALUE") reicht nicht aus, da immer nur in einer Ebene
-      // gesucht wird.
-      ConfigThingy values = trafoConf.query("VALUE");
-      for (Iterator valuesIter = values.iterator(); valuesIter.hasNext();)
-      {
-        ConfigThingy v = (ConfigThingy) valuesIter.next();
-        if (v.count() == 1 && v.toString().equals(oldFieldId))
-        {
-          try
-          {
-            v.getLastChild().setName(newFieldId);
-          }
-          catch (NodeNotFoundException e)
-          {
-            // kann wg. der obigen Prüfung nicht auftreten.
-          }
-        }
-      }
+      substituteValueRecursive(trafoConf, oldFieldId, newFieldId);
 
       // neue Formularbeschreibung persistent machen
       storeCurrentFormDescription();
@@ -3537,6 +3520,41 @@ public class TextDocumentModel
       Logger.error(L.m(
         "Die trafo '%1' ist nicht in diesem Dokument definiert und kann daher nicht verändert werden.",
         trafoName));
+    }
+  }
+
+  /**
+   * Durchsucht das ConfigThingy conf rekursiv und ersetzt alle VALUE-Knoten,
+   * die genau ein Kind besitzen durch VALUE-Knoten mit dem neuen Kind newId.
+   * 
+   * @param conf
+   *          Das ConfigThingy, in dem rekursiv ersetzt wird.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  private void substituteValueRecursive(ConfigThingy conf, String oldFieldId,
+      String newFieldId)
+  {
+    if (conf == null) return;
+
+    if (conf.getName().equals("VALUE") && conf.count() == 1
+        && conf.toString().equals(oldFieldId))
+    {
+      try
+      {
+        conf.getLastChild().setName(newFieldId);
+      }
+      catch (NodeNotFoundException e)
+      {
+        // kann wg. der obigen Prüfung nicht auftreten.
+      }
+      return;
+    }
+
+    for (Iterator iter = conf.iterator(); iter.hasNext();)
+    {
+      ConfigThingy child = (ConfigThingy) iter.next();
+      substituteValueRecursive(child, oldFieldId, newFieldId);
     }
   }
 
