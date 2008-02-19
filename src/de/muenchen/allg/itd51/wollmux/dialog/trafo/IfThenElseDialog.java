@@ -503,7 +503,10 @@ public class IfThenElseDialog extends TrafoDialog
           if (innerConf.count() == 0 || innerConf.getName().equals("CAT"))
           {
             res.type = 0;
-            res.text.setContent(TextComponentTags.CAT_VALUE_SYNTAX, innerConf);
+            if (innerConf.getName().equals("CAT"))
+              res.text.setContent(TextComponentTags.CAT_VALUE_SYNTAX, innerConf);
+            else
+              textArea.setText(innerConf.toString());
             return;
           } else
           { 
