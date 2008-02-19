@@ -104,7 +104,7 @@ public class WollMuxFiles
   /**
    * Siehe {@link #SLOW_SERVER_TIMEOUT}.
    */
-  private static final String SLOW_SERVER_MESSAGE = "Ihr Vorlagen-Server und/oder Ihre Netzwerkverbindung sind sehr langsam.\nDies kann die Arbeit mit OpenOffice.org stark beeinträchtigen.";
+  private static final String SLOW_SERVER_MESSAGE = L.m("Ihr Vorlagen-Server und/oder Ihre Netzwerkverbindung sind sehr langsam.\nDies kann die Arbeit mit OpenOffice.org stark beeinträchtigen.");
 
   private static final WollMuxClassLoader classLoader = new WollMuxClassLoader();
 
@@ -202,8 +202,7 @@ public class WollMuxFiles
     {
       try
       {
-        PrintStream wmconf = new PrintStream(new FileOutputStream(
-            wollmuxConfFile));
+        PrintStream wmconf = new PrintStream(new FileOutputStream(wollmuxConfFile));
         wmconf.println(defaultWollmuxConf);
         wmconf.close();
       }
@@ -224,21 +223,21 @@ public class WollMuxFiles
 
     SlowServerWatchdog fido = new SlowServerWatchdog(SLOW_SERVER_TIMEOUT);
     fido.start();
-    
+
     /*
      * Jetzt versuchen, die wollmux.conf zu parsen (falls die Datei existiert).
      */
     try
     {
       if (getWollMuxConfFile().exists())
-        wollmuxConf = new ConfigThingy("wollmuxConf", getWollMuxConfFile()
-            .toURI().toURL());
+        wollmuxConf = new ConfigThingy("wollmuxConf",
+          getWollMuxConfFile().toURI().toURL());
     }
     catch (Exception e)
     {
       Logger.error(e);
     }
-    
+
     fido.dontBark();
 
     /*
@@ -264,7 +263,7 @@ public class WollMuxFiles
         if (wollmuxConfFile.exists())
         {
           ConfigThingy etcWollmuxConf = new ConfigThingy("etcWollmuxConf",
-              wollmuxConfFile.toURI().toURL());
+            wollmuxConfFile.toURI().toURL());
 
           Iterator iter = wollmuxConf.iterator();
           while (iter.hasNext())
@@ -281,11 +280,10 @@ public class WollMuxFiles
      * Logging-Mode endgültig setzen.
      */
     setLoggingMode(WollMuxFiles.getWollmuxConf());
-    
+
     fido.logTimes();
 
-    showCredits = WollMuxFiles.getWollmuxConf().query("SHOW_CREDITS", 1).query(
-        "on").count() > 0;
+    showCredits = WollMuxFiles.getWollmuxConf().query("SHOW_CREDITS", 1).query("on").count() > 0;
 
     determineDefaultContext();
 
@@ -295,9 +293,8 @@ public class WollMuxFiles
 
     setLookAndFeel();
 
-    Logger.debug(".wollmux init time: "
-                 + (System.currentTimeMillis() - time)
-                 + "ms");
+    Logger.debug(L.m(".wollmux init time: %1ms",
+      "" + (System.currentTimeMillis() - time)));
   }
 
   /**
@@ -370,8 +367,7 @@ public class WollMuxFiles
    */
   public static URL makeURL(String urlStr) throws MalformedURLException
   {
-    return new URL(WollMuxFiles.getDEFAULT_CONTEXT(), ConfigThingy
-        .urlEncode(urlStr));
+    return new URL(WollMuxFiles.getDEFAULT_CONTEXT(), ConfigThingy.urlEncode(urlStr));
   }
 
   /**
@@ -386,8 +382,7 @@ public class WollMuxFiles
     {
       djInitialized = true;
       ConfigThingy senderSource = WollMuxFiles.getWollmuxConf().query(
-          "SENDER_SOURCE",
-          1);
+        "SENDER_SOURCE", 1);
       String senderSourceStr = "";
       try
       {
@@ -395,13 +390,11 @@ public class WollMuxFiles
       }
       catch (NodeNotFoundException e)
       {
-        Logger
-            .error("Keine Hauptdatenquelle SENDER_SOURCE definiert! Setze SENDER_SOURCE=\"\".");
+        Logger.error(L.m("Keine Hauptdatenquelle SENDER_SOURCE definiert! Setze SENDER_SOURCE=\"\"."));
       }
 
       ConfigThingy dataSourceTimeout = WollMuxFiles.getWollmuxConf().query(
-          "DATASOURCE_TIMEOUT",
-          1);
+        "DATASOURCE_TIMEOUT", 1);
       String datasourceTimeoutStr = "";
       long datasourceTimeoutLong = 0;
       try
@@ -413,12 +406,12 @@ public class WollMuxFiles
         }
         catch (NumberFormatException e)
         {
-          Logger.error("DATASOURCE_TIMEOUT muss eine ganze Zahl sein");
+          Logger.error(L.m("DATASOURCE_TIMEOUT muss eine ganze Zahl sein"));
           datasourceTimeoutLong = DATASOURCE_TIMEOUT;
         }
         if (datasourceTimeoutLong <= 0)
         {
-          Logger.error("DATASOURCE_TIMEOUT muss größer als 0 sein!");
+          Logger.error(L.m("DATASOURCE_TIMEOUT muss größer als 0 sein!"));
         }
       }
       catch (NodeNotFoundException e)
@@ -428,9 +421,8 @@ public class WollMuxFiles
 
       try
       {
-        datasourceJoiner = new DatasourceJoiner(getWollmuxConf(),
-            senderSourceStr, getLosCacheFile(), getDEFAULT_CONTEXT(),
-            datasourceTimeoutLong);
+        datasourceJoiner = new DatasourceJoiner(getWollmuxConf(), senderSourceStr,
+          getLosCacheFile(), getDEFAULT_CONTEXT(), datasourceTimeoutLong);
       }
       catch (ConfigurationErrorException e)
       {
@@ -506,12 +498,12 @@ public class WollMuxFiles
         double zoomFactor = Double.parseDouble(zoom.getLastChild().toString());
         if (zoomFactor < 0.5 || zoomFactor > 10)
         {
-          Logger.error("Unsinniger FONT_ZOOM Wert angegeben: " + zoomFactor);
+          Logger.error(L.m("Unsinniger FONT_ZOOM Wert angegeben: %1", ""
+                                                                      + zoomFactor));
         }
         else
         {
-          if (zoomFactor < 0.99 || zoomFactor > 1.01)
-            Common.zoomFonts(zoomFactor);
+          if (zoomFactor < 0.99 || zoomFactor > 1.01) Common.zoomFonts(zoomFactor);
         }
       }
       catch (Exception x)
@@ -599,8 +591,8 @@ public class WollMuxFiles
       {
         String urlStr = iter.next().toString();
         if (!urlStr.endsWith("/")
-            && (urlStr.indexOf('.') < 0 || urlStr.lastIndexOf('/') > urlStr
-                .lastIndexOf('.'))) urlStr = urlStr + "/"; // Falls keine
+            && (urlStr.indexOf('.') < 0 || urlStr.lastIndexOf('/') > urlStr.lastIndexOf('.')))
+          urlStr = urlStr + "/"; // Falls keine
         // Dateierweiterung
         // angegeben, /
         // ans Ende setzen, weil nur so Verzeichnisse
@@ -612,7 +604,7 @@ public class WollMuxFiles
         }
         catch (MalformedURLException e)
         {
-          Logger.error("Fehlerhafte CLASSPATH-Angabe: \"" + urlStr + "\"", e);
+          Logger.error(L.m("Fehlerhafte CLASSPATH-Angabe: \"%1\"", urlStr), e);
         }
       }
     }
@@ -672,20 +664,18 @@ public class WollMuxFiles
         ConfigThingy dialogConf = (ConfigThingy) iter.next();
         String name = dialogConf.getName();
         if (dialogsInBlock.contains(name))
-          Logger
-              .error("Funktionsdialog \""
-                     + name
-                     + "\" im selben Funktionsdialoge-Abschnitt mehrmals definiert");
+          Logger.error(L.m(
+            "Funktionsdialog \"%1\" im selben Funktionsdialoge-Abschnitt mehrmals definiert",
+            name));
         dialogsInBlock.add(name);
         try
         {
-          funcDialogs.add(name, DatasourceSearchDialog.create(
-              dialogConf,
-              getDatasourceJoiner()));
+          funcDialogs.add(name, DatasourceSearchDialog.create(dialogConf,
+            getDatasourceJoiner()));
         }
         catch (ConfigurationErrorException e)
         {
-          Logger.error("Fehler in Funktionsdialog" + name, e);
+          Logger.error(L.m("Fehler in Funktionsdialog %1", name), e);
         }
       }
     }
@@ -724,16 +714,13 @@ public class WollMuxFiles
         String name = funcConf.getName();
         try
         {
-          Function func = FunctionFactory.parseChildren(
-              funcConf,
-              funcs,
-              dialogLib,
-              context);
+          Function func = FunctionFactory.parseChildren(funcConf, funcs, dialogLib,
+            context);
           funcs.add(name, func);
         }
         catch (ConfigurationErrorException e)
         {
-          Logger.error("Fehler beim Parsen der Funktion \"" + name + "\"", e);
+          Logger.error(L.m("Fehler beim Parsen der Funktion \"%1\"", name), e);
         }
       }
     }
@@ -769,9 +756,8 @@ public class WollMuxFiles
           }
           catch (NodeNotFoundException e)
           {
-            Logger.error("Druckfunktion '"
-                         + name
-                         + "' enthält keinen Schlüssel EXTERN", e);
+            Logger.error(L.m("Druckfunktion '%1' enthält keinen Schlüssel EXTERN",
+              name), e);
             continue;
           }
 
@@ -783,11 +769,9 @@ public class WollMuxFiles
           }
           catch (NodeNotFoundException e)
           {
-            Logger
-                .debug("Druckfunktion '"
-                       + name
-                       + "' enthält keinen Schlüssel ORDER. Verwende Standard-Wert "
-                       + DEFAULT_PRINTFUNCTION_ORDER_VALUE);
+            Logger.debug(L.m(
+              "Druckfunktion '%1' enthält keinen Schlüssel ORDER. Verwende Standard-Wert %2",
+              name, "" + DEFAULT_PRINTFUNCTION_ORDER_VALUE));
           }
           try
           {
@@ -795,11 +779,10 @@ public class WollMuxFiles
           }
           catch (NumberFormatException e)
           {
-            Logger.error("Der Wert '"
-                         + orderStr
-                         + "' des Schlüssels ORDER in der Druckfunktion '"
-                         + name
-                         + "' ist ungültig.", e);
+            Logger.error(
+              L.m(
+                "Der Wert '%1' des Schlüssels ORDER in der Druckfunktion '%2' ist ungültig.",
+                orderStr, name), e);
             continue;
           }
 
@@ -809,9 +792,7 @@ public class WollMuxFiles
         }
         catch (ConfigurationErrorException e)
         {
-          Logger.error(
-              "Fehler beim Parsen der Druckfunktion \"" + name + "\"",
-              e);
+          Logger.error(L.m("Fehler beim Parsen der Druckfunktion \"%1\"", name), e);
         }
       }
     }
@@ -829,20 +810,15 @@ public class WollMuxFiles
   public static String dumpInfo()
   {
     Calendar cal = Calendar.getInstance();
-    String date = ""
-                  + cal.get(Calendar.YEAR)
-                  + "-"
-                  + (cal.get(Calendar.MONTH) + 1)
-                  + "-"
-                  + cal.get(Calendar.DAY_OF_MONTH)
-                  + "_"
+    String date = "" + cal.get(Calendar.YEAR) + "-" + (cal.get(Calendar.MONTH) + 1)
+                  + "-" + cal.get(Calendar.DAY_OF_MONTH) + "_"
                   + cal.getTimeInMillis();
     File dumpFile = new File(getWollMuxDir(), "dump" + date);
     try
     {
       OutputStream outStream = new FileOutputStream(dumpFile);
       BufferedWriter out = new BufferedWriter(new OutputStreamWriter(outStream,
-          ConfigThingy.CHARSET));
+        ConfigThingy.CHARSET));
       out.write("Dump time: " + date + "\n");
       out.write(WollMuxSingleton.getInstance().getBuildInfo() + "\n");
       StringBuilder buffy = new StringBuilder();
@@ -852,8 +828,7 @@ public class WollMuxFiles
        */
       try
       {
-        InetAddress[] addresses = InetAddress.getAllByName(getDEFAULT_CONTEXT()
-            .getHost());
+        InetAddress[] addresses = InetAddress.getAllByName(getDEFAULT_CONTEXT().getHost());
         for (int i = 0; i < addresses.length; ++i)
         {
           if (i > 0) buffy.append(", ");
@@ -866,14 +841,10 @@ public class WollMuxFiles
         buffy.append("------");
       }
 
-      out.write("DEFAULT_CONTEXT: \""
-                + getDEFAULT_CONTEXT()
-                + "\" ("
-                + buffy
+      out.write("DEFAULT_CONTEXT: \"" + getDEFAULT_CONTEXT() + "\" (" + buffy
                 + ")\n");
       out.write("CONF_VERSION: "
-                + WollMuxSingleton.getInstance().getConfVersionInfo()
-                + "\n");
+                + WollMuxSingleton.getInstance().getConfVersionInfo() + "\n");
       out.write("wollmuxDir: " + getWollMuxDir() + "\n");
       out.write("wollmuxLogFile: " + getWollMuxLogFile() + "\n");
       out.write("wollmuxConfFile: " + getWollMuxConfFile() + "\n");
@@ -885,7 +856,8 @@ public class WollMuxFiles
         XStringSubstitution subst = UNO.XStringSubstitution(UNO.createUNOService("com.sun.star.util.PathSubstitution"));
         String jConfPath = new URL(subst.substituteVariables("$(user)/config", true)).toURI().getPath();
         File[] jConfFiles = new File(jConfPath).listFiles();
-        Pattern p = Pattern.compile("^javasettings_.*\\.xml$", Pattern.CASE_INSENSITIVE);
+        Pattern p = Pattern.compile("^javasettings_.*\\.xml$",
+          Pattern.CASE_INSENSITIVE);
         boolean found = false;
         for (int i = 0; i < jConfFiles.length; i++)
         {
@@ -897,24 +869,26 @@ public class WollMuxFiles
           found = true;
           break;
         }
-        if (!found) out.write("Datei '" + jConfPath + "/javasettings_*.xml' konnte nicht gefunden werden.\n");
+        if (!found)
+          out.write(L.m("Datei '%1' konnte nicht gefunden werden.\n",
+            jConfPath + "/javasettings_*.xml"));
       }
       catch (java.lang.Exception e)
       {
-        out.write("Kann JVM-Settings nicht bestimmen: " + e + "\n");
+        out.write(L.m("Kann JVM-Settings nicht bestimmen: %1\n", "" + e));
       }
       out.write("===================== END JVM-Settings ==================\n");
-      
+
       out.write("===================== START java-properties ==================\n");
       Properties props = System.getProperties();
       Enumeration enu = props.propertyNames();
       while (enu.hasMoreElements())
       {
         String key = enu.nextElement().toString();
-        out.write(key + ": " + props.getProperty(key) +"\n");
+        out.write(key + ": " + props.getProperty(key) + "\n");
       }
       out.write("===================== END java-properties ==================\n");
-      
+
       out.write("===================== START wollmuxConfFile ==================\n");
       out.flush(); // weil wir gleich direkt auf den Stream zugreifen
       copyFile(getWollMuxConfFile(), outStream);
@@ -948,7 +922,7 @@ public class WollMuxFiles
     }
     catch (IOException x)
     {
-      Logger.error("Fehler beim Erstellen des Dumps", x);
+      Logger.error(L.m("Fehler beim Erstellen des Dumps"), x);
       return null;
     }
     return dumpFile.getAbsolutePath();
@@ -998,22 +972,19 @@ public class WollMuxFiles
   {
     try
     {
-      Object cfgProvider = UNO
-          .createUNOService("com.sun.star.configuration.ConfigurationProvider");
+      Object cfgProvider = UNO.createUNOService("com.sun.star.configuration.ConfigurationProvider");
 
-      Object cfgAccess = UNO.XMultiServiceFactory(cfgProvider)
-          .createInstanceWithArguments(
-              "com.sun.star.configuration.ConfigurationAccess",
-              new UnoProps("nodepath", nodePath).getProps());
+      Object cfgAccess = UNO.XMultiServiceFactory(cfgProvider).createInstanceWithArguments(
+        "com.sun.star.configuration.ConfigurationAccess",
+        new UnoProps("nodepath", nodePath).getProps());
 
       return dumpNode(cfgAccess, "");
     }
     catch (java.lang.Exception e)
     {
       Logger.error(e);
-      return "Fehler beim Auslesen der OOo-Konfiguration mit dem Nodepath '"
-             + nodePath
-             + "'";
+      return L.m("Fehler beim Auslesen der OOo-Konfiguration mit dem Nodepath '%1'",
+        nodePath);
     }
   }
 
@@ -1035,8 +1006,7 @@ public class WollMuxFiles
     String properties = "";
     if (UNO.XPropertySet(element) != null)
     {
-      Property[] props = UNO.XPropertySet(element).getPropertySetInfo()
-          .getProperties();
+      Property[] props = UNO.XPropertySet(element).getPropertySetInfo().getProperties();
       for (int i = 0; i < props.length; i++)
       {
         Object prop = UNO.getProperty(element, props[i].Name);
@@ -1078,11 +1048,7 @@ public class WollMuxFiles
     // Knoten auch angezeigte Properties oder Kinder hat):
     if (UNO.XNamed(element) != null
         && (properties.length() > 0 || childs.length() > 0))
-      return spaces
-             + "+ "
-             + UNO.XNamed(element).getName()
-             + "\n"
-             + properties
+      return spaces + "+ " + UNO.XNamed(element).getName() + "\n" + properties
              + childs;
 
     return "";
@@ -1091,10 +1057,15 @@ public class WollMuxFiles
   private static class SlowServerWatchdog extends Thread
   {
     private long initTime;
+
     private long startTime;
+
     private long endTime;
+
     private long timeout;
+
     private long testTime;
+
     private long dontBarkTime = 0;
 
     private boolean[] bark = new boolean[] { true };
@@ -1135,8 +1106,8 @@ public class WollMuxFiles
         {
           Logger.error(SLOW_SERVER_MESSAGE);
           JOptionPane pane = new JOptionPane(SLOW_SERVER_MESSAGE,
-              JOptionPane.WARNING_MESSAGE, JOptionPane.DEFAULT_OPTION);
-          JDialog dialog = pane.createDialog(null, "Hinweis");
+            JOptionPane.WARNING_MESSAGE, JOptionPane.DEFAULT_OPTION);
+          JDialog dialog = pane.createDialog(null, L.m("Hinweis"));
           dialog.setModal(false);
           dialog.setVisible(true);
         }
@@ -1151,10 +1122,11 @@ public class WollMuxFiles
         bark[0] = false;
       }
     }
-    
+
     public void logTimes()
     {
-      Logger.debug("init: "+initTime+" start: "+startTime+" end: "+endTime+ " test: "+testTime+ " dontBark: "+dontBarkTime);
+      Logger.debug("init: " + initTime + " start: " + startTime + " end: " + endTime
+                   + " test: " + testTime + " dontBark: " + dontBarkTime);
     }
 
   }
