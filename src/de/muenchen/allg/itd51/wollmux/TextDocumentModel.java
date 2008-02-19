@@ -1,4 +1,3 @@
-//TODO L.m()
 /*
  * Dateiname: TextDocumentModel.java
  * Projekt  : WollMux
@@ -352,7 +351,7 @@ public class TextDocumentModel
     }
     catch (java.lang.Exception e)
     {
-      Logger.error("Kann DispatchInterceptor nicht registrieren:", e);
+      Logger.error(L.m("Kann DispatchInterceptor nicht registrieren:"), e);
     }
 
     // Auslesen der Persistenten Daten:
@@ -410,8 +409,8 @@ public class TextDocumentModel
   {
     if (data == null || data.length() == 0) return;
 
-    final String errmsg = "Fehler beim Einlesen des Druckfunktionen-Abschnitts '"
-                          + data + "':";
+    final String errmsg = L.m(
+      "Fehler beim Einlesen des Druckfunktionen-Abschnitts '%1':", data);
 
     ConfigThingy conf = new ConfigThingy("dummy");
     try
@@ -483,7 +482,7 @@ public class TextDocumentModel
     }
     catch (java.lang.Exception e)
     {
-      Logger.error("Die Formularbeschreibung ist fehlerhaft", e);
+      Logger.error(L.m("Die Formularbeschreibung ist fehlerhaft"), e);
       return;
     }
 
@@ -517,7 +516,7 @@ public class TextDocumentModel
     }
     catch (java.lang.Exception e)
     {
-      Logger.error("Formularwerte-Abschnitt ist fehlerhaft", e);
+      Logger.error(L.m("Formularwerte-Abschnitt ist fehlerhaft"), e);
       return;
     }
 
@@ -722,8 +721,9 @@ public class TextDocumentModel
             Function func = getFunctionLibrary().get(funcName);
             if (func == null)
             {
-              Logger.error("Die im Formularfeld verwendete Funktion '" + funcName
-                           + "' ist nicht definiert.");
+              Logger.error(L.m(
+                "Die im Formularfeld verwendete Funktion '%1' ist nicht definiert.",
+                funcName));
               continue;
             }
             String[] pars = func.parameters();
@@ -829,9 +829,9 @@ public class TextDocumentModel
 
     public String getMessage()
     {
-      return "Mit overrideFrag können keine Ersetzungsketten definiert werden, das Fragment '"
-             + fragId
-             + "' taucht jedoch bereits in einem anderen overrideFrag-Kommando auf.";
+      return L.m(
+        "Mit overrideFrag können keine Ersetzungsketten definiert werden, das Fragment '%1' taucht jedoch bereits in einem anderen overrideFrag-Kommando auf.",
+        fragId);
     }
 
   }
@@ -1162,9 +1162,9 @@ public class TextDocumentModel
           }
           catch (NumberFormatException e)
           {
-            Logger.error("Fehler in Dokumentkommando '" + cmd
-                         + "': Die Farbe HIGHLIGHT_COLOR mit dem Wert '"
-                         + highlightColor + "' ist ungültig.");
+            Logger.error(L.m(
+              "Fehler in Dokumentkommando '%1': Die Farbe HIGHLIGHT_COLOR mit dem Wert '%2' ist ungültig.",
+              "" + cmd, highlightColor));
           }
         else
         {
@@ -1391,7 +1391,7 @@ public class TextDocumentModel
   {
     if (formularConf == null)
     {
-      Logger.debug("Einlesen der Formularbeschreibung von " + this);
+      Logger.debug(L.m("Einlesen der Formularbeschreibung von %1", this));
       formularConf = new ConfigThingy("WM");
       addToFormDescription(formularConf,
         persistentData.getData(DATA_ID_FORMULARBESCHREIBUNG));
@@ -1514,7 +1514,7 @@ public class TextDocumentModel
     }
     catch (NodeNotFoundException e)
     {
-      Logger.error("Dies kann nicht passieren.", e);
+      Logger.error(L.m("Dies kann nicht passieren."), e);
     }
   }
 
@@ -1930,8 +1930,8 @@ public class TextDocumentModel
       }
       else
       {
-        transformed = "<FEHLER: TRAFO '" + trafoName + "' nicht definiert>";
-        Logger.error("Die TRAFO '" + trafoName + "' ist nicht definiert.");
+        transformed = L.m("<FEHLER: TRAFO '%1' nicht definiert>", trafoName);
+        Logger.error(L.m("Die TRAFO '%1' ist nicht definiert.", trafoName));
       }
     }
 
@@ -2154,7 +2154,7 @@ public class TextDocumentModel
     else if (zoomValue != null)
       UNO.setProperty(viewSettings, "ZoomValue", zoomValue);
     else
-      throw new ConfigurationErrorException("Ungültiger ZOOM-Wert '" + zoom + "'");
+      throw new ConfigurationErrorException(L.m("Ungültiger ZOOM-Wert '%1'", zoom));
   }
 
   /**
@@ -2269,12 +2269,12 @@ public class TextDocumentModel
     XTextContent annotationField = UNO.XTextContent(WollMuxSingleton.findAnnotationFieldRecursive(range));
     if (annotationField == null)
       throw new ConfigurationErrorException(
-        "Die zugehörige Notiz mit der Formularbeschreibung fehlt.");
+        L.m("Die zugehörige Notiz mit der Formularbeschreibung fehlt."));
 
     Object content = UNO.getProperty(annotationField, "Content");
     if (content == null)
       throw new ConfigurationErrorException(
-        "Die zugehörige Notiz mit der Formularbeschreibung kann nicht gelesen werden.");
+        L.m("Die zugehörige Notiz mit der Formularbeschreibung kann nicht gelesen werden."));
 
     // Formularbeschreibung übernehmen und persistent speichern:
     addToFormDescription(getFormDescription(), content.toString());
@@ -2389,7 +2389,7 @@ public class TextDocumentModel
 
     PrintFailedException(Exception e)
     {
-      super("Das Drucken des Dokuments schlug fehl: ", e);
+      super(L.m("Das Drucken des Dokuments schlug fehl: "), e);
     }
   }
 
@@ -3369,7 +3369,7 @@ public class TextDocumentModel
             // 1-zu-1 Zuordnung: Hier kann substitueFieldID verwendet werden
             f.substituteFieldID(fieldId, newFieldId);
           else
-            Logger.error("Kann transformiertes Feld nur durch eine 1-zu-1 Zuordnung ersetzen.");
+            Logger.error(L.m("Kann transformiertes Feld nur durch eine 1-zu-1 Zuordnung ersetzen."));
         }
         else
         {
@@ -3420,7 +3420,7 @@ public class TextDocumentModel
             // werden, dafür kann aber die Trafo angepasst werden.
             substituteFieldIdInTrafo(f.getTrafoName(), fieldId, newFieldId);
           else
-            Logger.error("Kann transformiertes Feld nur durch eine 1-zu-1 Zuordnung ersetzen.");
+            Logger.error(L.m("Kann transformiertes Feld nur durch eine 1-zu-1 Zuordnung ersetzen."));
         }
         else
         {
@@ -3534,9 +3534,9 @@ public class TextDocumentModel
     }
     catch (NodeNotFoundException e)
     {
-      Logger.error("Die trafo '"
-                   + trafoName
-                   + "' ist nicht in diesem Dokument definiert und kann daher nicht verändert werden.");
+      Logger.error(L.m(
+        "Die trafo '%1' ist nicht in diesem Dokument definiert und kann daher nicht verändert werden.",
+        trafoName));
     }
   }
 
