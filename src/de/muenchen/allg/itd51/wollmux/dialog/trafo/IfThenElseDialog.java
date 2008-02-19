@@ -500,10 +500,10 @@ public class IfThenElseDialog extends TrafoDialog
           res.scrollPane = new JScrollPane(textArea, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
           res.text = new TextComponentTags(textArea); 
           
-          if (innerConf.count() == 0)
+          if (innerConf.count() == 0 || innerConf.getName().equals("CAT"))
           {
             res.type = 0;
-            textArea.setText(innerConf.toString());
+            res.text.setContent(TextComponentTags.CAT_VALUE_SYNTAX, innerConf);
             return;
           } else
           { 
