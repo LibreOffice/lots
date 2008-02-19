@@ -1,4 +1,3 @@
-//TODO L.m()
 /*
 * Dateiname: MailMergeNew.java
 * Projekt  : WollMux
@@ -88,6 +87,7 @@ import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
+import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.UnavailableException;
@@ -193,7 +193,7 @@ public class MailMergeNew
   
   private void createGUI()
   {
-    myFrame = new JFrame("Seriendruck (WollMux)");
+    myFrame = new JFrame(L.m("Seriendruck (WollMux)"));
     myFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
     oehrchen = new MyWindowListener();
     myFrame.addWindowListener(oehrchen);
@@ -201,7 +201,7 @@ public class MailMergeNew
     Box hbox = Box.createHorizontalBox();
     myFrame.add(hbox);
     JButton button;
-    button = new JButton("Datenquelle");
+    button = new JButton(L.m("Datenquelle"));
     button.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e)
       {
@@ -213,13 +213,13 @@ public class MailMergeNew
     hbox.add(new JSeparator(SwingConstants.VERTICAL));
     
     //FIXME: Ausgrauen, wenn kein Datenquelle ausgewählt
-    button = new JPotentiallyOverlongPopupMenuButton("Serienbrieffeld",new Iterable()
+    button = new JPotentiallyOverlongPopupMenuButton(L.m("Serienbrieffeld"),new Iterable()
         {public Iterator iterator(){
             return getInsertFieldActionList().iterator();
           }});
     hbox.add(button);
     
-    button = new JButton("Spezialfeld");
+    button = new JButton(L.m("Spezialfeld"));
     final JButton specialFieldButton = button;
     button.addActionListener(new ActionListener()
         {
@@ -232,7 +232,7 @@ public class MailMergeNew
     
     hbox.add(new JSeparator(SwingConstants.VERTICAL));
     
-    final String VORSCHAU = "   Vorschau   ";
+    final String VORSCHAU = L.m("   Vorschau   ");
     button = new JButton(VORSCHAU);
     previewMode = false;
     mod.setFormFieldsPreviewMode(previewMode); //TODO updatePreviewFields()
@@ -252,7 +252,7 @@ public class MailMergeNew
         else
         {
           mod.collectNonWollMuxFormFields();
-          previewButton.setText("<Feldname>");
+          previewButton.setText(L.m("<Feldname>"));
           previewMode = true;
           //TODO updatePreviewFields();
           mod.setFormFieldsPreviewMode(true);          
@@ -333,7 +333,7 @@ public class MailMergeNew
     hbox.add(new JSeparator(SwingConstants.VERTICAL));
 
     //FIXME: Ausgrauen, wenn keine Datenquelle gewählt ist.
-    button = new JButton("Drucken");
+    button = new JButton(L.m("Drucken"));
     button.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
@@ -347,7 +347,7 @@ public class MailMergeNew
     hbox.add(new JSeparator(SwingConstants.VERTICAL));
     
     final JPopupMenu tabelleMenu = new JPopupMenu();
-    JMenuItem item = new JMenuItem("Tabelle bearbeiten");
+    JMenuItem item = new JMenuItem(L.m("Tabelle bearbeiten"));
     item.addActionListener(new ActionListener()
         {
       public void actionPerformed(ActionEvent e)
@@ -357,7 +357,7 @@ public class MailMergeNew
         });
     tabelleMenu.add(item);
 
-    final JMenuItem addColumnsMenuItem = new JMenuItem("Tabellenspalten ergänzen");
+    final JMenuItem addColumnsMenuItem = new JMenuItem(L.m("Tabellenspalten ergänzen"));
     addColumnsMenuItem.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
@@ -367,7 +367,7 @@ public class MailMergeNew
     });
     tabelleMenu.add(addColumnsMenuItem);
 
-    final JMenuItem adjustFieldsMenuItem = new JMenuItem("Alle Felder anpassen");
+    final JMenuItem adjustFieldsMenuItem = new JMenuItem(L.m("Alle Felder anpassen"));
     adjustFieldsMenuItem.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
@@ -379,7 +379,7 @@ public class MailMergeNew
 
 //  FIXME: Button darf nur angezeigt werden, wenn tatsächlich eine Calc-Tabelle
     //ausgewählt ist.
-    button = new JButton("Tabelle");
+    button = new JButton(L.m("Tabelle"));
     final JButton tabelleButton = button;
     button.addActionListener(new ActionListener()
     {
@@ -387,9 +387,9 @@ public class MailMergeNew
       {        
         // Anpassen des Menüpunktes "Felder anpassen"
         if(mod.hasSelection()) {
-          adjustFieldsMenuItem.setText("Ausgewählte Felder anpassen");
+          adjustFieldsMenuItem.setText(L.m("Ausgewählte Felder anpassen"));
         } else {
-          adjustFieldsMenuItem.setText("Alle Felder anpassen");
+          adjustFieldsMenuItem.setText(L.m("Alle Felder anpassen"));
         }
         
         // Ausgrauen der Anpassen-Knöpfe, wenn alle Felder mit den
@@ -445,7 +445,7 @@ public class MailMergeNew
         }
       }
     };
-    showFieldMappingDialog(fieldIDs, "Felder anpassen", "Altes Feld", "Neue Belegung", "Felder anpassen", submitActionListener);
+    showFieldMappingDialog(fieldIDs, L.m("Felder anpassen"), L.m("Altes Feld"), L.m("Neue Belegung"), L.m("Felder anpassen"), submitActionListener);
   }
 
   /**
@@ -468,7 +468,7 @@ public class MailMergeNew
         // TODO: tabellenspalten wie in mapIdToSubstitution beschrieben ergänzen
       }
     };
-    showFieldMappingDialog(fieldIDs, "Tabellenspalten ergänzen", "Spalte", "Vorbelegung", "Spalten ergänzen", submitActionListener);
+    showFieldMappingDialog(fieldIDs, L.m("Tabellenspalten ergänzen"), L.m("Spalte"), L.m("Vorbelegung"), L.m("Spalten ergänzen"), submitActionListener);
   }
   
   /**
@@ -520,7 +520,7 @@ public class MailMergeNew
 
     Box headers = Box.createHorizontalBox();
     final JButton insertFieldButton = new JPotentiallyOverlongPopupMenuButton(
-        "Serienbrieffeld", new Iterable()
+        L.m("Serienbrieffeld"), new Iterable()
         {
           public Iterator iterator()
           {
@@ -627,7 +627,7 @@ public class MailMergeNew
     }
 
     Box buttonBox = Box.createHorizontalBox();
-    JButton button = new JButton("Abbrechen");
+    JButton button = new JButton(L.m("Abbrechen"));
     button.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
@@ -728,20 +728,20 @@ public class MailMergeNew
    */
   private void showMailmergeTypeSelectionDialog()
   {
-    final JDialog dialog = new JDialog(myFrame, "Seriendruck", true);
+    final JDialog dialog = new JDialog(myFrame, L.m("Seriendruck"), true);
     dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
     
     Box vbox = Box.createVerticalBox();
     dialog.add(vbox);
     
     Box hbox = Box.createHorizontalBox();
-    JLabel label = new JLabel("Serienbriefe");
+    JLabel label = new JLabel(L.m("Serienbriefe"));
     hbox.add(label);
     hbox.add(Box.createHorizontalStrut(5));
     
     Vector types = new Vector();
-    types.add("in neues Dokument schreiben");
-    types.add("auf dem Drucker ausgeben");
+    types.add(L.m("in neues Dokument schreiben"));
+    types.add(L.m("auf dem Drucker ausgeben"));
     final JComboBox typeBox = new JComboBox(types);
     typeBox.addItemListener(new ItemListener(){
       public void itemStateChanged(ItemEvent e)
@@ -751,7 +751,7 @@ public class MailMergeNew
     hbox.add(typeBox);
     
     //FIXME: darf nur sichtbar sein, wenn in typeBox "auf dem Drucker ausgeben" gewählt ist
-    JButton button = new JButton("Drucker einrichten");
+    JButton button = new JButton(L.m("Drucker einrichten"));
     button.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
@@ -764,15 +764,15 @@ public class MailMergeNew
     vbox.add(hbox);
     
     hbox = Box.createHorizontalBox();
-    Border border = BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.GRAY), "Folgende Datensätze verwenden");
+    Border border = BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.GRAY), L.m("Folgende Datensätze verwenden"));
     hbox.setBorder(border);
     
     ButtonGroup radioGroup = new ButtonGroup();
     JRadioButton rbutton;
-    rbutton = new JRadioButton("Alle", true);
+    rbutton = new JRadioButton(L.m("Alle"), true);
     hbox.add(rbutton);
     radioGroup.add(rbutton);
-    rbutton = new JRadioButton("Von", false);
+    rbutton = new JRadioButton(L.m("Von"), false);
     hbox.add(rbutton);
     radioGroup.add(rbutton);
     JTextField start = new JTextField("     "); //TODO Handler, der Eingabe validiert (nur Zahl erlaubt) und evtl. das end Textfield anpasst (insbes. wenn dort noch nichts drinsteht). Hierzu sind bereits Zugriffe auf die Datenquelle erforderlich. Auch der Von-Radiobutton muss angewählt werden.
@@ -785,7 +785,7 @@ public class MailMergeNew
     hbox.add(rbutton);
     radioGroup.add(rbutton);
     
-    button = new JButton("Einzelauswahl...");
+    button = new JButton(L.m("Einzelauswahl..."));
     button.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
@@ -798,7 +798,7 @@ public class MailMergeNew
     vbox.add(hbox);
     
     hbox = Box.createHorizontalBox();
-    button = new JButton("Abbrechen");
+    button = new JButton(L.m("Abbrechen"));
     button.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
@@ -810,7 +810,7 @@ public class MailMergeNew
 
     hbox.add(Box.createHorizontalGlue());
     
-    button = new JButton("Los geht's!");
+    button = new JButton(L.m("Los geht's!"));
     button.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
@@ -883,7 +883,7 @@ public class MailMergeNew
     JMenuItem button;
 
     // TODO: Knopf ausgrauen, wenn die Datenquelle keine Spalten definiert.
-    button = new JMenuItem("Gender");
+    button = new JMenuItem(L.m("Gender"));
     button.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
@@ -894,7 +894,7 @@ public class MailMergeNew
     menu.add(button);
     
     // TODO: Knopf ausgrauen, wenn die Datenquelle keine Spalten definiert.
-    button = new JMenuItem("Wenn...Dann...Sonst...");
+    button = new JMenuItem(L.m("Wenn...Dann...Sonst..."));
     button.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
@@ -904,7 +904,7 @@ public class MailMergeNew
     });
     menu.add(button);
     
-    button = new JMenuItem("Datensatznummer");
+    button = new JMenuItem(L.m("Datensatznummer"));
     button.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
@@ -914,7 +914,7 @@ public class MailMergeNew
     });
     menu.add(button);
     
-    button = new JMenuItem("Serienbriefnummer");
+    button = new JMenuItem(L.m("Serienbriefnummer"));
     button.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
@@ -925,7 +925,7 @@ public class MailMergeNew
     menu.add(button);
     
     //FIXME: ausgegraut, wenn nicht genau ein Spezialfeld selektiert.
-    button = new JMenuItem("Feld bearbeiten...");
+    button = new JMenuItem(L.m("Feld bearbeiten..."));
     button.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
@@ -949,7 +949,7 @@ public class MailMergeNew
   {
     List fieldNames = ds.getColumnNames();
     if (fieldNames.size() == 0) {
-      Logger.error("Die Datenquelle hat keine Spalte, von der das Feld abhängig sein könnte");
+      Logger.error(L.m("Die Datenquelle hat keine Spalte, von der das Feld abhängig sein könnte"));
       return;
     }
 
@@ -977,7 +977,7 @@ public class MailMergeNew
         {
           try
           {
-            mod.replaceSelectionWithTrafoField(status.conf, "Wenn...Dann...Sonst...");
+            mod.replaceSelectionWithTrafoField(status.conf, L.m("Wenn...Dann...Sonst..."));
           }
           catch (Exception x)
           {
@@ -988,7 +988,7 @@ public class MailMergeNew
     };
 
     TrafoDialog ite = new IfThenElseDialog(params);
-    ite.show("Spezialfeld Wenn...Dann...Sonst... einfügen", myFrame);
+    ite.show(L.m("Spezialfeld Wenn...Dann...Sonst... einfügen"), myFrame);
   }
 
   /**
@@ -1030,14 +1030,13 @@ public class MailMergeNew
       try
       {
         TrafoDialog dialog = TrafoDialogFactory.createDialog(params);
-        dialog.show("Spezialfeld bearbeiten", myFrame);
+        dialog.show(L.m("Spezialfeld bearbeiten"), myFrame);
       }
       catch (UnavailableException e)
       {
         WollMuxSingleton.showInfoModal(
-            "Spezialfeld bearbeiten",
-            "Bitte bearbeiten Sie dieses Feld mit Hilfe des FormularMax.\n\n"
-                + e.getMessage());
+            L.m("Spezialfeld bearbeiten"),
+            L.m("Bitte bearbeiten Sie dieses Feld mit Hilfe des FormularMax.\n\n%1", e.getMessage()));
         Logger.error(e);
       }
     }
@@ -1358,7 +1357,7 @@ public class MailMergeNew
             if(d != null) setTable(table);
           }catch (UnavailableException e){Logger.debug(e);}
         }catch (NodeNotFoundException e){
-          Logger.error("Fehlendes Argument für Datenquelle vom Typ '" + type + "':", e);
+          Logger.error(L.m("Fehlendes Argument für Datenquelle vom Typ '%1':", type), e);
         }
       } else if("ooo".equalsIgnoreCase(type)) {
         try{
@@ -1366,10 +1365,10 @@ public class MailMergeNew
           String table = datenquelle.get("TABLE").toString();
           // TODO: bestehende OOo-Datenbank verwenden
         }catch (NodeNotFoundException e){
-          Logger.error("Fehlendes Argument für Datenquelle vom Typ '" + type + "':", e);
+          Logger.error(L.m("Fehlendes Argument für Datenquelle vom Typ '%1':", type), e);
         }        
       } else if (type != null) {
-        Logger.error("Ignoriere Datenquelle mit unbekanntem Typ '" + type + "'");
+        Logger.error(L.m("Ignoriere Datenquelle mit unbekanntem Typ '%1'", type));
       }
     }
 
@@ -1492,7 +1491,7 @@ public class MailMergeNew
         }        
       }catch(Exception x)
       {
-        Logger.error("Kann Spaltennamen nicht bestimmen",x);
+        Logger.error(L.m("Kann Spaltennamen nicht bestimmen"),x);
       }
       return columnNames;  
     }
@@ -1571,12 +1570,12 @@ public class MailMergeNew
      */
     public void showDatasourceSelectionDialog(final JFrame parent)
     {
-      final JDialog datasourceSelector = new JDialog(parent, "Wo sind Ihre Serienbriefdaten ?", true);
+      final JDialog datasourceSelector = new JDialog(parent, L.m("Wo sind Ihre Serienbriefdaten ?"), true);
       
       Box vbox = Box.createVerticalBox();
       datasourceSelector.add(vbox);
       
-      JLabel label = new JLabel("Wo sind Ihre Serienbriefdaten ?");
+      JLabel label = new JLabel(L.m("Wo sind Ihre Serienbriefdaten ?"));
       vbox.add(label);
       
       JButton button;
@@ -1592,7 +1591,7 @@ public class MailMergeNew
         vbox.add(DimAdjust.maxWidthUnlimited(button));
       }
       
-      button = new JButton("Datei...");
+      button = new JButton(L.m("Datei..."));
       button.addActionListener(new ActionListener(){
         public void actionPerformed(ActionEvent e)
         {
@@ -1602,7 +1601,7 @@ public class MailMergeNew
       });
       vbox.add(DimAdjust.maxWidthUnlimited(button));
       
-      button = new JButton("Neue Calc-Tabelle...");
+      button = new JButton(L.m("Neue Calc-Tabelle..."));
       button.addActionListener(new ActionListener(){
         public void actionPerformed(ActionEvent e)
         {
@@ -1612,7 +1611,7 @@ public class MailMergeNew
       });
       vbox.add(DimAdjust.maxWidthUnlimited(button));
       
-      button = new JButton("Datenbank...");
+      button = new JButton(L.m("Datenbank..."));
       button.addActionListener(new ActionListener(){
         public void actionPerformed(ActionEvent e)
         {
@@ -1621,9 +1620,9 @@ public class MailMergeNew
       });
       vbox.add(DimAdjust.maxWidthUnlimited(button));
       
-      label = new JLabel("Aktuell ausgewählte Tabelle");
+      label = new JLabel(L.m("Aktuell ausgewählte Tabelle"));
       vbox.add(label);
-      String str = "<keine>";
+      String str = L.m("<keine>");
       if (sourceType == SOURCE_CALC)
       { //TODO Testen
         if (calcDoc != null)
@@ -1647,7 +1646,7 @@ public class MailMergeNew
       label = new JLabel(str);
       vbox.add(label);
       
-      button = new JButton("Abbrechen");
+      button = new JButton(L.m("Abbrechen"));
       button.addActionListener(new ActionListener(){
         public void actionPerformed(ActionEvent e)
         {
@@ -1690,12 +1689,12 @@ public class MailMergeNew
         return;
       }
       
-      final JDialog calcWinSelector = new JDialog(parent, "Welche Tabelle möchten Sie verwenden ?", true);
+      final JDialog calcWinSelector = new JDialog(parent, L.m("Welche Tabelle möchten Sie verwenden ?"), true);
       
       Box vbox = Box.createVerticalBox();
       calcWinSelector.add(vbox);
       
-      JLabel label = new JLabel("Welches Calc-Dokument möchten Sie verwenden ?");
+      JLabel label = new JLabel(L.m("Welches Calc-Dokument möchten Sie verwenden ?"));
       vbox.add(label);
       
       for (int i = 0; i < names.size(); ++i)
@@ -1737,7 +1736,7 @@ public class MailMergeNew
     {
       try
       {
-        Logger.debug("Öffne neues Calc-Dokument als Datenquelle für Seriendruck");
+        Logger.debug(L.m("Öffne neues Calc-Dokument als Datenquelle für Seriendruck"));
         XSpreadsheetDocument spread = UNO.XSpreadsheetDocument(UNO.loadComponentFromURL("private:factory/scalc", true, true));
         XSpreadsheets sheets = spread.getSheets();
         String[] sheetNames = sheets.getElementNames();
@@ -1777,7 +1776,7 @@ public class MailMergeNew
         if (files.length == 0) return;
         try
         {
-          Logger.debug("Öffne "+files[0]+" als Datenquelle für Seriendruck");
+          Logger.debug(L.m("Öffne %1 als Datenquelle für Seriendruck", files[0]));
           try{
             getCalcDoc(files[0]);
           }catch(UnavailableException x)
@@ -1818,12 +1817,12 @@ public class MailMergeNew
       
       if (names.size() == 1) return; //Falls es nur eine Tabelle gibt, Dialog unnötig.
       
-      final JDialog tableSelector = new JDialog(parent, "Welche Tabelle möchten Sie verwenden ?", true);
+      final JDialog tableSelector = new JDialog(parent, L.m("Welche Tabelle möchten Sie verwenden ?"), true);
       
       Box vbox = Box.createVerticalBox();
       tableSelector.add(vbox);
       
-      JLabel label = new JLabel("Welche Tabelle möchten Sie verwenden ?");
+      JLabel label = new JLabel(L.m("Welche Tabelle möchten Sie verwenden ?"));
       vbox.add(label);
       
       Iterator iter = names.iterator();
@@ -1881,13 +1880,13 @@ public class MailMergeNew
         UNO.XCloseBroadcaster(calcDoc).addCloseListener(myCalcListener);
       }catch(Exception x)
       {
-        Logger.error("Kann CloseListener nicht auf Calc-Dokument registrieren",x);
+        Logger.error(L.m("Kann CloseListener nicht auf Calc-Dokument registrieren"),x);
       }
       try{
         UNO.XEventBroadcaster(calcDoc).addEventListener(myCalcListener);
       }catch(Exception x)
       {
-        Logger.error("Kann EventListener nicht auf Calc-Dokument registrieren",x);
+        Logger.error(L.m("Kann EventListener nicht auf Calc-Dokument registrieren"),x);
       }
     }
 
@@ -1903,13 +1902,13 @@ public class MailMergeNew
         UNO.XCloseBroadcaster(calcDoc).removeCloseListener(myCalcListener);
       }catch(Exception x)
       {
-        Logger.error("Konnte alten XCloseListener nicht deregistrieren",x);
+        Logger.error(L.m("Konnte alten XCloseListener nicht deregistrieren"),x);
       }
       try{
         UNO.XEventBroadcaster(calcDoc).removeEventListener(myCalcListener);
       }catch(Exception x)
       {
-        Logger.error("Konnte alten XEventListener nicht deregistrieren",x);
+        Logger.error(L.m("Konnte alten XEventListener nicht deregistrieren"),x);
       }
       
     }
@@ -1944,7 +1943,7 @@ public class MailMergeNew
       List[] calcWindows = getOpenCalcWindows();
       
       if (calcWindows[0].isEmpty()) return null;
-      if (calcWindows[0].size() > 1) return new JButton("Offenes Calc-Fenster...");
+      if (calcWindows[0].size() > 1) return new JButton(L.m("Offenes Calc-Fenster..."));
       
       //Es gibt offenbar genau ein offenes Calc-Fenster
       //das XSpreadsheetDocument dazu ist in calcSheet zu finden
@@ -2000,7 +1999,7 @@ public class MailMergeNew
      */
     private XSpreadsheetDocument getCalcDoc() throws UnavailableException
     {
-      if (sourceType != SOURCE_CALC) throw new UnavailableException("Keine Calc-Tabelle ausgewählt");
+      if (sourceType != SOURCE_CALC) throw new UnavailableException(L.m("Keine Calc-Tabelle ausgewählt"));
       if (calcDoc != null) return calcDoc;
       return getCalcDoc(calcUrl);
     }
@@ -2048,7 +2047,7 @@ public class MailMergeNew
         try{
           Object ss = UNO.loadComponentFromURL(url, false, true); //FIXME: Dragndrop-Problem
           newCalcDoc = UNO.XSpreadsheetDocument(ss);
-          if (newCalcDoc == null) throw new UnavailableException("URL \""+url+"\" ist kein Tabellendokument");
+          if (newCalcDoc == null) throw new UnavailableException(L.m("URL \"%1\" ist kein Tabellendokument", url));
         }catch(Exception x) 
         {
           throw new UnavailableException(x);
@@ -2214,7 +2213,7 @@ public class MailMergeNew
 
       public void notifyClosing(EventObject arg0)
       {
-        Logger.debug("Calc-Datenquelle wurde unerwartet geschlossen");
+        Logger.debug(L.m("Calc-Datenquelle wurde unerwartet geschlossen"));
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
           public void run() {
             calcDoc = null;
@@ -2224,7 +2223,7 @@ public class MailMergeNew
 
       public void disposing(EventObject arg0)
       {
-        Logger.debug("Calc-Datenquelle wurde disposed()");
+        Logger.debug(L.m("Calc-Datenquelle wurde disposed()"));
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
           public void run() {
             calcDoc = null;
@@ -2239,7 +2238,7 @@ public class MailMergeNew
           javax.swing.SwingUtilities.invokeLater(new Runnable() {
             public void run() {
               calcUrl = UNO.XModel(calcDoc).getURL();
-              Logger.debug("Speicherort der Tabelle hat sich geändert: \""+calcUrl+"\"");
+              Logger.debug(L.m("Speicherort der Tabelle hat sich geändert: \"%1\"", calcUrl));
               storeDatasourceSettings();
             }
           });
@@ -2368,7 +2367,7 @@ public class MailMergeNew
       public String get(String columnName) throws ColumnNotFoundException
       {
         Number idx = (Number)mapColumnNameToIndex.get(columnName);
-        if (idx == null) throw new ColumnNotFoundException("Spalte "+columnName+" existiert nicht!");
+        if (idx == null) throw new ColumnNotFoundException(L.m("Spalte %1 existiert nicht!", columnName));
         return data[idx.intValue()];
       }
 
@@ -2423,7 +2422,7 @@ public class MailMergeNew
      XTextDocument doc = UNO.XTextDocument(UNO.desktop.getCurrentComponent());
      if (doc == null) 
      {
-       System.err.println("Vordergrunddokument ist kein XTextDocument!");
+       System.err.println(L.m("Vordergrunddokument ist kein XTextDocument!"));
        System.exit(1);
      }
      
