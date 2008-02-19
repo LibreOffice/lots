@@ -955,22 +955,13 @@ public class MailMergeNew
 
     // ConfigThingy für leere WennDannSonst-Funktion zusammenbauen. Aufbau:
     // WennDannSonst(IF(STRCMP(VALUE '<firstField>', '') THEN('') ELSE('')))
-    String firstField = "" + fieldNames.get(0);
-    ConfigThingy conf = new ConfigThingy("WennDannSonst");
-    ConfigThingy ifConf = new ConfigThingy("IF");
-    ConfigThingy strcmpConf = new ConfigThingy("STRCMP");
-    ConfigThingy valueConf = new ConfigThingy("VALUE");
-    valueConf.addChild(new ConfigThingy(firstField));
-    strcmpConf.addChild(valueConf);
-    strcmpConf.addChild(new ConfigThingy(""));
-    ifConf.addChild(strcmpConf);
-    ConfigThingy thenConf = new ConfigThingy("THEN");
-    thenConf.addChild(new ConfigThingy(""));
-    ifConf.addChild(thenConf);
-    ConfigThingy elseConf = new ConfigThingy("ELSE");
-    elseConf.addChild(new ConfigThingy(""));
-    ifConf.addChild(elseConf);
-    conf.addChild(ifConf);
+    ConfigThingy conf = new ConfigThingy("Func");
+    ConfigThingy ifConf = conf.add("IF");
+    ConfigThingy strCmpConf = ifConf.add("STRCMP");
+    strCmpConf.add("VALUE").add((String)fieldNames.get(0));
+    strCmpConf.add("");
+    ifConf.add("THEN").add("");
+    ifConf.add("ELSE").add("");
 
     TrafoDialogParameters params = new TrafoDialogParameters();
     params.conf = conf;
