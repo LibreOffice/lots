@@ -21,7 +21,6 @@ package de.muenchen.allg.itd51.wollmux.dialog.trafo;
 import java.awt.event.ActionListener;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Vector;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 
@@ -63,6 +62,9 @@ public class TrafoDialogParameters
   public String toString()
   {
     StringBuilder buffy = new StringBuilder();
+    buffy.append("isValid: ");
+    buffy.append(isValid);
+    buffy.append('\n');
     buffy.append("conf: ");
     if (conf == null) 
       buffy.append("null");

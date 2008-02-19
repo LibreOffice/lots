@@ -1,4 +1,3 @@
-//TODO L.m()
 /*
 * Dateiname: IfThenElseDialog.java
 * Projekt  : WollMux
@@ -56,6 +55,7 @@ import javax.swing.border.EmptyBorder;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
+import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.dialog.DimAdjust;
 import de.muenchen.allg.itd51.wollmux.dialog.JPotentiallyOverlongPopupMenuButton;
 import de.muenchen.allg.itd51.wollmux.dialog.TextComponentTags;
@@ -141,13 +141,13 @@ public class IfThenElseDialog extends TrafoDialog
     /**
      * Die Einträge für {@link #testSelector}.
      */
-    private static final TestType[] testTypes = {new TestType("genau =","STRCMP"),
-                                                 new TestType("numerisch =", "NUMCMP"),
-                                                 new TestType("numerisch <", "LT"),
-                                                 new TestType("numerisch <=", "LE"),
-                                                 new TestType("numerisch >", "GT"),
-                                                 new TestType("numerisch >=", "GE"),
-                                                 new TestType("regulärer A.", "MATCH")};
+    private static final TestType[] testTypes = {new TestType(L.m("genau ="),"STRCMP"),
+                                                 new TestType(L.m("numerisch ="), "NUMCMP"),
+                                                 new TestType(L.m("numerisch <"), "LT"),
+                                                 new TestType(L.m("numerisch <="), "LE"),
+                                                 new TestType(L.m("numerisch >"), "GT"),
+                                                 new TestType(L.m("numerisch >="), "GE"),
+                                                 new TestType(L.m("regulärer A."), "MATCH")};
     
     /**
      * Auswahl des zu vergleichenden Feldes.
@@ -252,7 +252,7 @@ public class IfThenElseDialog extends TrafoDialog
       this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
       
       Box ifBox = Box.createHorizontalBox();
-      Border border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Wenn");
+      Border border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), L.m("Wenn"));
       border = new CompoundBorder(border, new EmptyBorder(2,5,5,5));
       ifBox.setBorder(border);
       ifBox.add(fieldSelector);
@@ -268,11 +268,11 @@ public class IfThenElseDialog extends TrafoDialog
       thenElseBox.setBorder(new EmptyBorder(10,8,0,8));
       this.add(thenElseBox);
       
-      buildConditionalResultGUI(fieldNames, thenElseBox, "Dann", thenResult); 
+      buildConditionalResultGUI(fieldNames, thenElseBox, L.m("Dann"), thenResult); 
       
       thenElseBox.add(Box.createVerticalStrut(10));
 
-      buildConditionalResultGUI(fieldNames, thenElseBox, "Sonst", elseResult); 
+      buildConditionalResultGUI(fieldNames, thenElseBox, L.m("Sonst"), elseResult); 
     }
 
     /**
@@ -290,7 +290,7 @@ public class IfThenElseDialog extends TrafoDialog
       guiContainer.add(Box.createVerticalStrut(4));
       controls.add(new JLabel(label));
       controls.add(Box.createHorizontalGlue());
-      AbstractButton textRadioButton = new JRadioButton("Text", conditionalResult.type == 0);
+      AbstractButton textRadioButton = new JRadioButton(L.m("Text"), conditionalResult.type == 0);
       textRadioButton.addActionListener(new ActionListener(){
         public void actionPerformed(ActionEvent e)
         {
@@ -315,7 +315,7 @@ public class IfThenElseDialog extends TrafoDialog
         }});
       controls.add(textRadioButton);
       controls.add(Box.createHorizontalGlue());
-      AbstractButton ifThenElseRadioButton = new JRadioButton("Wenn...Dann..Sonst...", conditionalResult.type == 1);
+      AbstractButton ifThenElseRadioButton = new JRadioButton(L.m("Wenn...Dann..Sonst..."), conditionalResult.type == 1);
       ifThenElseRadioButton.addActionListener(new ActionListener(){
         public void actionPerformed(ActionEvent e)
         {
@@ -362,7 +362,7 @@ public class IfThenElseDialog extends TrafoDialog
       radioGroup.add(textRadioButton);
       radioGroup.add(ifThenElseRadioButton);
       controls.add(Box.createHorizontalGlue());
-      JPotentiallyOverlongPopupMenuButton butt = new JPotentiallyOverlongPopupMenuButton("Serienbrieffeld", makeInsertFieldActions(fieldNames, conditionalResult.text));
+      JPotentiallyOverlongPopupMenuButton butt = new JPotentiallyOverlongPopupMenuButton(L.m("Serienbrieffeld"), makeInsertFieldActions(fieldNames, conditionalResult.text));
       butt.setFocusable(false);
       controls.add(butt);
       if (conditionalResult.type == 0)
@@ -411,7 +411,7 @@ public class IfThenElseDialog extends TrafoDialog
      */
     private void parseCondition(ConfigThingy conf, List fieldNames)
     {
-      notSelector = new JComboBox(new String[]{"","nicht"});
+      notSelector = new JComboBox(new String[]{"",L.m("nicht")});
       if (conf.getName().equals("NOT"))
       {
         try { conf = conf.getFirstChild(); }
@@ -519,7 +519,7 @@ public class IfThenElseDialog extends TrafoDialog
      * Liefert ein frisches ConfigThingy, das die von diesem Panel repräsentierte
      * Trafo darstellt. Oberster Knoten ist immer "IF".
      * @author Matthias Benkmann (D-III-ITD D.10)
-     * TODO Testen
+     * TESTED
      */
     public ConfigThingy getConf()
     {
@@ -544,10 +544,7 @@ public class IfThenElseDialog extends TrafoDialog
         elseConf.addChild(elseResult.text.getContent(TextComponentTags.CAT_VALUE_SYNTAX));
       else if (elseResult.type == 1)
         elseConf.addChild(elseResult.panel.getConf());
-      
-      conf.addChild(conditionConf);
-      conf.addChild(thenConf);
-      conf.addChild(elseConf);
+
       return conf;
     }
   }
@@ -587,17 +584,18 @@ public class IfThenElseDialog extends TrafoDialog
     Box lowerButtons = Box.createHorizontalBox();
     lowerButtons.setBorder(new EmptyBorder(10,4,5,4));
     myPanel.add(lowerButtons, BorderLayout.SOUTH);
-    JButton cancel = new JButton("Abbrechen");
+    JButton cancel = new JButton(L.m("Abbrechen"));
     cancel.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e)
       {
         abort();
       }});
-    JButton insert = new JButton("OK");
+    JButton insert = new JButton(L.m("OK"));
     insert.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e)
       {
         updateTrafoConf();
+        abort();
       }});
     lowerButtons.add(cancel);
     lowerButtons.add(Box.createHorizontalGlue());
@@ -701,9 +699,17 @@ public class IfThenElseDialog extends TrafoDialog
     fieldNames.add("Du");
     fieldNames.add("bist");
     fieldNames.add("doof");
-    TrafoDialogParameters params = new TrafoDialogParameters();
+    final TrafoDialogParameters params = new TrafoDialogParameters();
     params.conf = funConf;
     params.fieldNames = fieldNames;
+    params.closeAction = new ActionListener(){
+      public void actionPerformed(ActionEvent e)
+      {
+        if (params.isValid)
+          System.out.println(params.conf.stringRepresentation());
+        else
+          System.out.println("ABORTED!");
+      }};
     IfThenElseDialog dialog = new IfThenElseDialog(params);
     dialog.show("Wenn-Dann-Sonst-Test", (Dialog)null);
   }

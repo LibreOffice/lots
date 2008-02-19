@@ -64,32 +64,24 @@ public class TextComponentTags
    * Zuordnung beginnt mit einem zero width space (nicht sichtbar, aber zur
    * Unterscheidung des Präfix von den Benutzereingaben) und dem "<"-Zeichen.
    */
-  private final static String TAG_PREFIX = ""
-                                           + Character.toChars(0x200B)[0]
-                                           + "<";
+  private final static String TAG_PREFIX = "" + Character.toChars(0x200B)[0] + "<";
 
   /**
    * Suffix, mit dem Tags in der Anzeige der Zuordnung angezeigt werden. Die
    * Zuordnung beginnt mit einem zero width space (nicht sichtbar, aber zur
    * Unterscheidung des Präfix von den Benutzereingaben) und dem ">"-Zeichen.
    */
-  private final static String TAG_SUFFIX = ""
-                                           + Character.toChars(0x200B)[0]
-                                           + ">";
+  private final static String TAG_SUFFIX = "" + Character.toChars(0x200B)[0] + ">";
 
   /**
    * Beschreibt einen regulären Ausdruck, mit dem nach Tags im Text gesucht
    * werden kann. Ein Match liefert in Gruppe 1 den Text vor dem Tag, in Gruppe
    * 2 das Tag mit Präfix und Suffix und in Gruppe 3 den Tag-Namen zurück.
    */
-  private final static Pattern TAG_PATTERN = Pattern.compile("([^("
-                                                             + TAG_PREFIX
-                                                             + ")]*)("
-                                                             + TAG_PREFIX
-                                                             + "([^("
-                                                             + TAG_SUFFIX
-                                                             + ")]*)"
-                                                             + TAG_SUFFIX
+  private final static Pattern TAG_PATTERN = Pattern.compile("([^(" + TAG_PREFIX
+                                                             + ")]*)(" + TAG_PREFIX
+                                                             + "([^(" + TAG_SUFFIX
+                                                             + ")]*)" + TAG_SUFFIX
                                                              + ")");
 
   /**
@@ -184,13 +176,12 @@ public class TextComponentTags
    * @throws IllegalArgumentException
    *           falls der syntaxType nicht existiert.
    * 
-   * @author Matthias Benkmann (D-III-ITD D.10)
+   * @author Matthias Benkmann (D-III-ITD D.10) TESTED
    */
   public ConfigThingy getContent(int syntaxType)
   {
     if (syntaxType != CAT_VALUE_SYNTAX)
-      throw new IllegalArgumentException("Unbekannter syntaxType: "
-                                         + syntaxType);
+      throw new IllegalArgumentException("Unbekannter syntaxType: " + syntaxType);
 
     ConfigThingy conf = new ConfigThingy("CAT");
     List content = getContent();
@@ -218,8 +209,7 @@ public class TextComponentTags
   public void setContent(int syntaxType, ConfigThingy conf)
   {
     if (syntaxType != CAT_VALUE_SYNTAX)
-      throw new IllegalArgumentException("Unbekannter syntaxType: "
-                                         + syntaxType);
+      throw new IllegalArgumentException("Unbekannter syntaxType: " + syntaxType);
 
     if (!conf.getName().equals("CAT"))
       throw new IllegalArgumentException("Oberster Knoten muss \"CAT\" sein");
@@ -610,8 +600,7 @@ public class TextComponentTags
    */
   private void caretSetDot(int pos)
   {
-    if (pos >= 0 && pos <= compo.getText().length())
-      compo.getCaret().setDot(pos);
+    if (pos >= 0 && pos <= compo.getText().length()) compo.getCaret().setDot(pos);
   }
 
   /**
@@ -622,8 +611,7 @@ public class TextComponentTags
    */
   private void caretMoveDot(int pos)
   {
-    if (pos >= 0 && pos <= compo.getText().length())
-      compo.getCaret().moveDot(pos);
+    if (pos >= 0 && pos <= compo.getText().length()) compo.getCaret().moveDot(pos);
   }
 
   /**
@@ -702,7 +690,7 @@ public class TextComponentTags
       if (extraHighlightTag == null)
       {
         Highlighter.HighlightPainter hp = new DefaultHighlighter.DefaultHighlightPainter(
-            new Color(0xddddff));
+          new Color(0xddddff));
         extraHighlightTag = hl.addHighlight(pos1, pos2, hp);
       }
       else
