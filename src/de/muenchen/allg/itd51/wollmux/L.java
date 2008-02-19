@@ -1,4 +1,3 @@
-//TODO L.m()
 /*
  * Dateiname: L.java
  * Projekt  : WollMux
@@ -67,11 +66,11 @@ public class L
    * 
    * @author Matthias Benkmann (D-III-ITD D.10) TESTED
    */
-  public static String m(String original, String insertion1)
+  public static String m(String original, Object insertion1)
   {
     // nicht replaceAll verwenden, weil es \ und $ besonders
     // interpretiert
-    return replace(m(original), "%1", insertion1);
+    return replace(m(original), "%1", "" + insertion1);
   }
   
   /**
@@ -81,11 +80,11 @@ public class L
    * 
    * @author Matthias Benkmann (D-III-ITD D.10) TESTED
    */
-  public static String m(String original, String insertion1, String insertion2)
+  public static String m(String original, Object insertion1, Object insertion2)
   {
     // nicht replaceAll verwenden, weil es \ und $ besonders
     // interpretiert
-    return replace(m(original, insertion1), "%2", insertion2);
+    return replace(m(original, insertion1), "%2", "" + insertion2);
   }
 
   /**
