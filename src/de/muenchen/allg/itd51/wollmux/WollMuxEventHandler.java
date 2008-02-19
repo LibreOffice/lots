@@ -474,8 +474,7 @@ public class WollMuxEventHandler
      */
     protected UnlockDispatchResultListener unlockDispatchResultListener = new UnlockDispatchResultListener();
 
-    protected class UnlockDispatchResultListener implements
-        XDispatchResultListener
+    protected class UnlockDispatchResultListener implements XDispatchResultListener
     {
       public DispatchResultEvent resultEvent = null;
 
@@ -546,8 +545,8 @@ public class WollMuxEventHandler
       try
       {
         setLock();
-        new AbsenderAuswaehlen(whoAmIconf, PALconf, ADBconf, mux
-            .getDatasourceJoiner(), unlockActionListener);
+        new AbsenderAuswaehlen(whoAmIconf, PALconf, ADBconf,
+          mux.getDatasourceJoiner(), unlockActionListener);
         waitForUnlock();
       }
       catch (java.lang.Exception e)
@@ -602,8 +601,8 @@ public class WollMuxEventHandler
       try
       {
         setLock();
-        new PersoenlicheAbsenderlisteVerwalten(PALconf, ADBconf, mux
-            .getDatasourceJoiner(), unlockActionListener);
+        new PersoenlicheAbsenderlisteVerwalten(PALconf, ADBconf,
+          mux.getDatasourceJoiner(), unlockActionListener);
         waitForUnlock();
       }
       catch (java.lang.Exception e)
@@ -625,8 +624,7 @@ public class WollMuxEventHandler
    * Dieses Event wird vom WollMux-Service (...comp.WollMux) und aus dem
    * WollMuxEventHandler ausgelöst.
    */
-  public static void handleFunctionDialog(TextDocumentModel model,
-      String dialogName)
+  public static void handleFunctionDialog(TextDocumentModel model, String dialogName)
   {
     handle(new OnFunctionDialog(model, dialogName));
   }
@@ -650,8 +648,7 @@ public class WollMuxEventHandler
       // Dialog aus Funktionsdialog-Bibliothek holen:
       Dialog dialog = mux.getFunctionDialogs().get(dialogName);
       if (dialog == null)
-        throw new WollMuxFehlerException("Funktionsdialog '"
-                                         + dialogName
+        throw new WollMuxFehlerException("Funktionsdialog '" + dialogName
                                          + "' ist nicht definiert.");
 
       // Dialoginstanz erzeugen und modal anzeigen:
@@ -661,8 +658,8 @@ public class WollMuxEventHandler
         dialogInst = dialog.instanceFor(new HashMap());
 
         setLock();
-        dialogInst.show(unlockActionListener, model.getFunctionLibrary(), model
-            .getDialogLibrary());
+        dialogInst.show(unlockActionListener, model.getFunctionLibrary(),
+          model.getDialogLibrary());
         waitForUnlock();
       }
       catch (ConfigurationErrorException e)
@@ -704,11 +701,7 @@ public class WollMuxEventHandler
 
     public String toString()
     {
-      return this.getClass().getSimpleName()
-             + "("
-             + model
-             + ", '"
-             + dialogName
+      return this.getClass().getSimpleName() + "(" + model + ", '" + dialogName
              + "')";
     }
   }
@@ -737,7 +730,7 @@ public class WollMuxEventHandler
     private String wollMuxBarVersion;
 
     private final URL WM_URL = this.getClass().getClassLoader().getResource(
-        "data/wollmux_klein.jpg");
+      "data/wollmux_klein.jpg");
 
     private OnAbout(String wollMuxBarVersion)
     {
@@ -760,10 +753,9 @@ public class WollMuxEventHandler
       ImageIcon icon = new ImageIcon(WM_URL);
 
       JOptionPane pane = new JOptionPane(str, JOptionPane.INFORMATION_MESSAGE,
-          JOptionPane.DEFAULT_OPTION, icon);
-      JDialog dialog = pane.createDialog(
-          null,
-          "Info über Vorlagen und Formulare (WollMux)");
+        JOptionPane.DEFAULT_OPTION, icon);
+      JDialog dialog = pane.createDialog(null,
+        "Info über Vorlagen und Formulare (WollMux)");
 
       // Hintergrundfarbe aller Komponenten auf weiss setzen
       try
@@ -832,9 +824,9 @@ public class WollMuxEventHandler
         // Funktionsbibliotheken, nicht jedoch die neuen dokumentlokalen
         // Bibliotheken, die das model bereitstellt. Die dokumentlokalen
         // Bibliotheken kann der FM4000 selbst auflösen.
-        max = new FormularMax4000(model, l, WollMuxSingleton.getInstance()
-            .getGlobalFunctions(), WollMuxSingleton.getInstance()
-            .getGlobalPrintFunctions());
+        max = new FormularMax4000(model, l,
+          WollMuxSingleton.getInstance().getGlobalFunctions(),
+          WollMuxSingleton.getInstance().getGlobalPrintFunctions());
         model.setCurrentFormularMax4000(max);
       }
     }
@@ -998,8 +990,7 @@ public class WollMuxEventHandler
       ConfigThingy tds = new ConfigThingy("Textdokument");
       try
       {
-        tds = mux.getWollmuxConf().query("Fenster").query("Textdokument")
-            .getLastChild();
+        tds = mux.getWollmuxConf().query("Fenster").query("Textdokument").getLastChild();
         model.setWindowViewSettings(tds);
       }
       catch (NodeNotFoundException e)
@@ -1007,8 +998,7 @@ public class WollMuxEventHandler
       }
 
       // Mögliche Aktionen für das neu geöffnete Dokument:
-      DocumentCommandInterpreter dci = new DocumentCommandInterpreter(model,
-          mux);
+      DocumentCommandInterpreter dci = new DocumentCommandInterpreter(model, mux);
 
       try
       {
@@ -1032,7 +1022,7 @@ public class WollMuxEventHandler
           try
           {
             model.setDocumentZoom(mux.getWollmuxConf().query("Fenster").query(
-                "Formular").getLastChild().query("ZOOM"));
+              "Formular").getLastChild().query("ZOOM"));
           }
           catch (java.lang.Exception e)
           {
@@ -1049,8 +1039,8 @@ public class WollMuxEventHandler
             catch (InvalidFormDescriptorException e)
             {
               throw new WMCommandsFailedException(
-                  "Die Vorlage bzw. das Formular enthält keine gültige Formularbeschreibung\n\n"
-                      + "Bitte kontaktieren Sie Ihre Systemadministration.");
+                "Die Vorlage bzw. das Formular enthält keine gültige Formularbeschreibung\n\n"
+                    + "Bitte kontaktieren Sie Ihre Systemadministration.");
             }
 
             model.setFormModel(fm);
@@ -1060,15 +1050,12 @@ public class WollMuxEventHandler
       }
       catch (java.lang.Exception e)
       {
-        throw new WollMuxFehlerException("Fehler bei der Dokumentbearbeitung.",
-            e);
+        throw new WollMuxFehlerException("Fehler bei der Dokumentbearbeitung.", e);
       }
 
       // Registrierte XEventListener (etwas später) informieren, dass die
       // Dokumentbearbeitung fertig ist.
-      handleNotifyDocumentEventListener(
-          "OnWollMuxProcessingFinished",
-          model.doc);
+      handleNotifyDocumentEventListener("OnWollMuxProcessingFinished", model.doc);
 
       // ContextChanged auslösen, damit die Dispatches aktualisiert werden.
       try
@@ -1100,8 +1087,8 @@ public class WollMuxEventHandler
    *          Ein Vector of TextDocumentModels, die in einem Multiformular
    *          zusammengefasst werden sollen.
    */
-  public static void handleProcessMultiform(
-      Vector /* of TextDocumentModel */docs, ConfigThingy buttonAnpassung)
+  public static void handleProcessMultiform(Vector /* of TextDocumentModel */docs,
+      ConfigThingy buttonAnpassung)
   {
     handle(new OnProcessMultiform(docs, buttonAnpassung));
   }
@@ -1129,9 +1116,9 @@ public class WollMuxEventHandler
       catch (InvalidFormDescriptorException e)
       {
         throw new WollMuxFehlerException("Fehler bei der Dokumentbearbeitung.",
-            new WMCommandsFailedException(
-                "Die Vorlage bzw. das Formular enthält keine gültige Formularbeschreibung\n\n"
-                    + "Bitte kontaktieren Sie Ihre Systemadministration."));
+          new WMCommandsFailedException(
+            "Die Vorlage bzw. das Formular enthält keine gültige Formularbeschreibung\n\n"
+                + "Bitte kontaktieren Sie Ihre Systemadministration."));
       }
 
       // FormModel in allen Dokumenten registrieren:
@@ -1187,7 +1174,7 @@ public class WollMuxEventHandler
       // DocumentCommandInterpreter bearbeiten:
       model.getDocumentCommands().update();
       DocumentCommandInterpreter dci = new DocumentCommandInterpreter(model,
-          WollMuxSingleton.getInstance());
+        WollMuxSingleton.getInstance());
       try
       {
         dci.executeTemplateCommands();
@@ -1259,21 +1246,15 @@ public class WollMuxEventHandler
       String fragIdStr = "";
       while (iter.hasNext())
         fragIdStr += "'" + iter.next() + "' ";
-      handleOpen("AS_TEMPLATE '"
-                 + asTemplate
-                 + "' FORMGUIS 'independent' Fragmente( FRAG_ID_LIST ("
-                 + fragIdStr
+      handleOpen("AS_TEMPLATE '" + asTemplate
+                 + "' FORMGUIS 'independent' Fragmente( FRAG_ID_LIST (" + fragIdStr
                  + "))");
     }
 
     public String toString()
     {
-      return this.getClass().getSimpleName()
-             + "("
-             + ((asTemplate) ? "asTemplate" : "asDocument")
-             + ", "
-             + fragIDs
-             + ")";
+      return this.getClass().getSimpleName() + "("
+             + ((asTemplate) ? "asTemplate" : "asDocument") + ", " + fragIDs + ")";
     }
   }
 
@@ -1318,14 +1299,12 @@ public class WollMuxEventHandler
       }
       catch (java.lang.Exception e)
       {
-        throw new WollMuxFehlerException(
-            "Fehlerhaftes \"wollmux:Open\" Kommando", e);
+        throw new WollMuxFehlerException("Fehlerhaftes \"wollmux:Open\" Kommando", e);
       }
 
       try
       {
-        asTemplate = conf.get("AS_TEMPLATE", 1).toString().equalsIgnoreCase(
-            "true");
+        asTemplate = conf.get("AS_TEMPLATE", 1).toString().equalsIgnoreCase("true");
       }
       catch (java.lang.Exception x)
       {
@@ -1360,10 +1339,7 @@ public class WollMuxEventHandler
         }
         if (!fragIds.isEmpty())
         {
-          TextDocumentModel model = openTextDocument(
-              fragIds,
-              asTemplate,
-              merged);
+          TextDocumentModel model = openTextDocument(fragIds, asTemplate, merged);
           if (model != null) docs.add(model);
         }
       }
@@ -1382,9 +1358,8 @@ public class WollMuxEventHandler
      * @return
      * @throws WollMuxFehlerException
      */
-    private TextDocumentModel openTextDocument(List fragIDs,
-        boolean asTemplate, boolean asPartOfMultiform)
-        throws WollMuxFehlerException
+    private TextDocumentModel openTextDocument(List fragIDs, boolean asTemplate,
+        boolean asPartOfMultiform) throws WollMuxFehlerException
     {
       WollMuxSingleton mux = WollMuxSingleton.getInstance();
 
@@ -1404,9 +1379,7 @@ public class WollMuxEventHandler
         Vector urls = new Vector();
 
         java.lang.Exception error = new ConfigurationErrorException(
-            "Das Textfragment mit der FRAG_ID '"
-                + frag_id
-                + "' ist nicht definiert!");
+          "Das Textfragment mit der FRAG_ID '" + frag_id + "' ist nicht definiert!");
         try
         {
           urls = VisibleTextFragmentList.getURLsByID(frag_id);
@@ -1418,9 +1391,8 @@ public class WollMuxEventHandler
         if (urls.size() == 0)
         {
           throw new WollMuxFehlerException(
-              "Die URL zum Textfragment mit der FRAG_ID '"
-                  + frag_id
-                  + "' kann nicht bestimmt werden:", error);
+            "Die URL zum Textfragment mit der FRAG_ID '" + frag_id
+                + "' kann nicht bestimmt werden:", error);
         }
 
         // Nur die erste funktionierende URL verwenden. Dazu werden alle URL zu
@@ -1445,11 +1417,8 @@ public class WollMuxEventHandler
           catch (MalformedURLException e)
           {
             Logger.log(e);
-            errors += "Die URL '"
-                      + urlStr
-                      + "' ist ungültig:\n"
-                      + e.getLocalizedMessage()
-                      + "\n\n";
+            errors += "Die URL '" + urlStr + "' ist ungültig:\n"
+                      + e.getLocalizedMessage() + "\n\n";
             continue;
           }
           catch (IOException e)
@@ -1464,11 +1433,10 @@ public class WollMuxEventHandler
 
         if (!found)
         {
-          throw new WollMuxFehlerException(
-              "Das Textfragment mit der FRAG_ID '"
-                  + frag_id
-                  + "' kann nicht aufgelöst werden:\n\n"
-                  + errors);
+          throw new WollMuxFehlerException("Das Textfragment mit der FRAG_ID '"
+                                           + frag_id
+                                           + "' kann nicht aufgelöst werden:\n\n"
+                                           + errors);
         }
 
         // URL in die in loadUrlStr (zum sofort öffnen) und in argsUrlStr (zum
@@ -1500,8 +1468,7 @@ public class WollMuxEventHandler
       catch (java.lang.Exception x)
       {
         // sollte eigentlich nicht auftreten, da bereits oben geprüft.
-        throw new WollMuxFehlerException("Die Vorlage mit der URL '"
-                                         + loadUrlStr
+        throw new WollMuxFehlerException("Die Vorlage mit der URL '" + loadUrlStr
                                          + "' kann nicht geöffnet werden.", x);
       }
       return model;
@@ -1558,8 +1525,7 @@ public class WollMuxEventHandler
       // Cache und LOS auf Platte speichern.
       try
       {
-        mux.getDatasourceJoiner().saveCacheAndLOS(
-            WollMuxFiles.getLosCacheFile());
+        mux.getDatasourceJoiner().saveCacheAndLOS(WollMuxFiles.getLosCacheFile());
       }
       catch (IOException e)
       {
@@ -1607,24 +1573,19 @@ public class WollMuxEventHandler
 
     protected void doit()
     {
-      DJDatasetListElement[] pal = WollMuxSingleton.getInstance()
-          .getSortedPALEntries();
+      DJDatasetListElement[] pal = WollMuxSingleton.getInstance().getSortedPALEntries();
 
       // nur den neuen Absender setzen, wenn index und sender übereinstimmen,
       // d.h.
       // die Absenderliste der entfernten WollMuxBar konsistent war.
-      if (idx >= 0
-          && idx < pal.length
-          && pal[idx].toString().equals(senderName))
+      if (idx >= 0 && idx < pal.length && pal[idx].toString().equals(senderName))
       {
         pal[idx].getDataset().select();
       }
       else
       {
-        Logger.error("Setzen des Senders '"
-                     + senderName
-                     + "' schlug fehl, da der index '"
-                     + idx
+        Logger.error("Setzen des Senders '" + senderName
+                     + "' schlug fehl, da der index '" + idx
                      + "' nicht mit der PAL übereinstimmt (Inkosistenzen?)");
       }
 
@@ -1633,12 +1594,7 @@ public class WollMuxEventHandler
 
     public String toString()
     {
-      return this.getClass().getSimpleName()
-             + "("
-             + senderName
-             + ", "
-             + idx
-             + ")";
+      return this.getClass().getSimpleName() + "(" + senderName + ", " + idx + ")";
     }
   }
 
@@ -1666,8 +1622,8 @@ public class WollMuxEventHandler
    *          Die Funktionsbibliothek, die zur Gewinnung der Trafo-Funktion
    *          verwendet werden soll.
    */
-  public static void handleFormValueChanged(TextDocumentModel model,
-      String fieldId, String newValue)
+  public static void handleFormValueChanged(TextDocumentModel model, String fieldId,
+      String newValue)
   {
     handle(new OnFormValueChanged(model, fieldId, newValue));
   }
@@ -1696,11 +1652,7 @@ public class WollMuxEventHandler
 
     public String toString()
     {
-      return this.getClass().getSimpleName()
-             + "("
-             + fieldId
-             + "', '"
-             + newValue
+      return this.getClass().getSimpleName() + "(" + fieldId + "', '" + newValue
              + "')";
     }
   }
@@ -1730,8 +1682,8 @@ public class WollMuxEventHandler
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  public static void handleSetVisibleState(TextDocumentModel model,
-      String groupId, boolean visible, ActionListener listener)
+  public static void handleSetVisibleState(TextDocumentModel model, String groupId,
+      boolean visible, ActionListener listener)
   {
     handle(new OnSetVisibleState(model, groupId, visible, listener));
   }
@@ -1795,8 +1747,7 @@ public class WollMuxEventHandler
               && firstChangedElement == null)
           {
             firstChangedElement = visibleElement;
-            if (firstChangedElement.isVisible())
-              focusRangeStart(visibleElement);
+            if (firstChangedElement.isVisible()) focusRangeStart(visibleElement);
           }
 
           // neuen Sichtbarkeitsstatus setzen:
@@ -1836,9 +1787,7 @@ public class WollMuxEventHandler
     {
       try
       {
-        model.getViewCursor().gotoRange(
-            visibleElement.getAnchor().getStart(),
-            false);
+        model.getViewCursor().gotoRange(visibleElement.getAnchor().getStart(), false);
       }
       catch (java.lang.Exception e)
       {
@@ -1847,11 +1796,7 @@ public class WollMuxEventHandler
 
     public String toString()
     {
-      return this.getClass().getSimpleName()
-             + "('"
-             + groupId
-             + "', "
-             + visible
+      return this.getClass().getSimpleName() + "('" + groupId + "', " + visible
              + ")";
     }
   }
@@ -1876,8 +1821,7 @@ public class WollMuxEventHandler
    *          Formularfeld aus dem Vektor genommen, das keine Trafo enthält.
    *          Ansonsten wird das erste Formularfeld im Vektor verwendet.
    */
-  public static void handleFocusFormField(TextDocumentModel model,
-      String fieldId)
+  public static void handleFocusFormField(TextDocumentModel model, String fieldId)
   {
     handle(new OnFocusFormField(model, fieldId));
   }
@@ -1901,11 +1845,7 @@ public class WollMuxEventHandler
 
     public String toString()
     {
-      return this.getClass().getSimpleName()
-             + "(#"
-             + model.doc
-             + ", '"
-             + fieldId
+      return this.getClass().getSimpleName() + "(#" + model.doc + ", '" + fieldId
              + "')";
     }
   }
@@ -1972,16 +1912,8 @@ public class WollMuxEventHandler
 
     public String toString()
     {
-      return this.getClass().getSimpleName()
-             + "("
-             + docX
-             + ", "
-             + docY
-             + ", "
-             + docWidth
-             + ", "
-             + docHeight
-             + ")";
+      return this.getClass().getSimpleName() + "(" + docX + ", " + docY + ", "
+             + docWidth + ", " + docHeight + ")";
     }
   }
 
@@ -1999,8 +1931,7 @@ public class WollMuxEventHandler
    *          true, wenn das Dokument sichtbar geschaltet werden soll und false,
    *          wenn das Dokument unsichtbar geschaltet werden soll.
    */
-  public static void handleSetWindowVisible(TextDocumentModel model,
-      boolean visible)
+  public static void handleSetWindowVisible(TextDocumentModel model, boolean visible)
   {
     handle(new OnSetWindowVisible(model, visible));
   }
@@ -2141,8 +2072,7 @@ public class WollMuxEventHandler
             }
           }
           String message = "Die folgenden Datensätze konnten nicht "
-                           + "aus der Datenbank aktualisiert werden:\n\n"
-                           + names
+                           + "aus der Datenbank aktualisiert werden:\n\n" + names
                            + "\nWenn dieses Problem nicht temporärer "
                            + "Natur ist, sollten Sie diese Datensätze aus "
                            + "ihrer Absenderliste löschen und neu hinzufügen!";
@@ -2176,7 +2106,7 @@ public class WollMuxEventHandler
       try
       {
         strat = wmConf.query("PersoenlicheAbsenderlisteInitialisierung").query(
-            "Suchstrategie").getLastChild();
+          "Suchstrategie").getLastChild();
       }
       catch (NodeNotFoundException e)
       {
@@ -2208,11 +2138,8 @@ public class WollMuxEventHandler
       else
       {
         // Standardsuche über das OOoUserProfile:
-        return new ByOOoUserProfileFinder(dsj).find(
-            "Vorname",
-            "${givenname}",
-            "Nachname",
-            "${sn}");
+        return new ByOOoUserProfileFinder(dsj).find("Vorname", "${givenname}",
+          "Nachname", "${sn}");
       }
 
       return 0;
@@ -2269,8 +2196,7 @@ public class WollMuxEventHandler
           }
           else
           {
-            Logger
-                .error("Nur max zwei Schlüssel/Wert-Paare werden als Argumente für Suchanfragen akzeptiert!");
+            Logger.error("Nur max zwei Schlüssel/Wert-Paare werden als Argumente für Suchanfragen akzeptiert!");
           }
         }
 
@@ -2301,12 +2227,8 @@ public class WollMuxEventHandler
        */
       protected int find(String dbSpalte, String value)
       {
-        Logger.debug2(this.getClass().getSimpleName()
-                      + ".tryToFind("
-                      + dbSpalte
-                      + " '"
-                      + value
-                      + "')");
+        Logger.debug2(this.getClass().getSimpleName() + ".tryToFind(" + dbSpalte
+                      + " '" + value + "')");
         try
         {
           String v = evaluate(value);
@@ -2350,16 +2272,8 @@ public class WollMuxEventHandler
       protected int find(String dbSpalte1, String value1, String dbSpalte2,
           String value2)
       {
-        Logger.debug2(this.getClass().getSimpleName()
-                      + ".tryToFind("
-                      + dbSpalte1
-                      + " '"
-                      + value1
-                      + "' "
-                      + dbSpalte2
-                      + " '"
-                      + value2
-                      + "')");
+        Logger.debug2(this.getClass().getSimpleName() + ".tryToFind(" + dbSpalte1
+                      + " '" + value1 + "' " + dbSpalte2 + " '" + value2 + "')");
         try
         {
           String v1 = evaluate(value1);
@@ -2451,19 +2365,17 @@ public class WollMuxEventHandler
         try
         {
           UnoService confProvider = UnoService.createWithContext(
-              "com.sun.star.configuration.ConfigurationProvider",
-              WollMuxSingleton.getInstance().getXComponentContext());
+            "com.sun.star.configuration.ConfigurationProvider",
+            WollMuxSingleton.getInstance().getXComponentContext());
 
           UnoService confView = confProvider.create(
-              "com.sun.star.configuration.ConfigurationAccess",
-              new UnoProps("nodepath", "/org.openoffice.UserProfile/Data")
-                  .getProps());
+            "com.sun.star.configuration.ConfigurationAccess", new UnoProps(
+              "nodepath", "/org.openoffice.UserProfile/Data").getProps());
           return confView.xNameAccess().getByName(key).toString();
         }
         catch (Exception e)
         {
-          Logger.error("Konnte den Wert zum Schlüssel '"
-                       + key
+          Logger.error("Konnte den Wert zum Schlüssel '" + key
                        + "' des OOoUserProfils nicht bestimmen:", e);
         }
         return "";
@@ -2491,8 +2403,7 @@ public class WollMuxEventHandler
         }
         catch (java.lang.Exception e)
         {
-          Logger.error("Konnte den Wert der JavaProperty '"
-                       + key
+          Logger.error("Konnte den Wert der JavaProperty '" + key
                        + "' nicht bestimmen:", e);
         }
         return "";
@@ -2549,11 +2460,10 @@ public class WollMuxEventHandler
       // Komponente mit meiner Konfiguration überein? Ansonsten Fehlermeldung.
       if (wollmuxConfHashCode != null)
       {
-        int myWmConfHash = WollMuxFiles.getWollmuxConf().stringRepresentation()
-            .hashCode();
+        int myWmConfHash = WollMuxFiles.getWollmuxConf().stringRepresentation().hashCode();
         if (myWmConfHash != wollmuxConfHashCode.intValue())
           errorMessage(new InvalidBindingStateException(
-              "Die Konfiguration des WollMux muss neu eingelesen werden.\n\nBitte beenden Sie den WollMux und OpenOffice.org und schießen Sie alle laufenden 'soffice.bin'-Prozesse über den Taskmanager ab."));
+            "Die Konfiguration des WollMux muss neu eingelesen werden.\n\nBitte beenden Sie den WollMux und OpenOffice.org und schießen Sie alle laufenden 'soffice.bin'-Prozesse über den Taskmanager ab."));
       }
 
     }
@@ -2724,8 +2634,7 @@ public class WollMuxEventHandler
       eventObject.Source = source;
       eventObject.EventName = eventName;
 
-      Iterator i = WollMuxSingleton.getInstance()
-          .documentEventListenerIterator();
+      Iterator i = WollMuxSingleton.getInstance().documentEventListenerIterator();
       while (i.hasNext())
       {
         Logger.debug2("notifying XEventListener (event '" + eventName + "')");
@@ -2755,12 +2664,8 @@ public class WollMuxEventHandler
 
     public String toString()
     {
-      return this.getClass().getSimpleName()
-             + "('"
-             + eventName
-             + "', "
-             + ((source != null) ? "#" + source.hashCode() : "null")
-             + ")";
+      return this.getClass().getSimpleName() + "('" + eventName + "', "
+             + ((source != null) ? "#" + source.hashCode() : "null") + ")";
     }
   }
 
@@ -2882,8 +2787,8 @@ public class WollMuxEventHandler
 
     protected void doit() throws WollMuxFehlerException
     {
-      TextDocumentModel model = WollMuxSingleton.getInstance()
-          .getTextDocumentModel(doc);
+      TextDocumentModel model = WollMuxSingleton.getInstance().getTextDocumentModel(
+        doc);
       try
       {
         model.printWithProps(props);
@@ -2929,7 +2834,7 @@ public class WollMuxEventHandler
       ActionListener listener)
   {
     handle(new OnSetPrintBlocksPropsViaPrintModel(doc, blockName, visible,
-        showHighlightColor, listener));
+      showHighlightColor, listener));
   }
 
   private static class OnSetPrintBlocksPropsViaPrintModel extends BasicEvent
@@ -2944,9 +2849,8 @@ public class WollMuxEventHandler
 
     private ActionListener listener;
 
-    public OnSetPrintBlocksPropsViaPrintModel(XTextDocument doc,
-        String blockName, boolean visible, boolean showHighlightColor,
-        ActionListener listener)
+    public OnSetPrintBlocksPropsViaPrintModel(XTextDocument doc, String blockName,
+        boolean visible, boolean showHighlightColor, ActionListener listener)
     {
       this.doc = doc;
       this.blockName = blockName;
@@ -2957,8 +2861,8 @@ public class WollMuxEventHandler
 
     protected void doit() throws WollMuxFehlerException
     {
-      TextDocumentModel model = WollMuxSingleton.getInstance()
-          .getTextDocumentModel(doc);
+      TextDocumentModel model = WollMuxSingleton.getInstance().getTextDocumentModel(
+        doc);
       try
       {
         model.setPrintBlocksProps(blockName, visible, showHighlightColor);
@@ -2974,16 +2878,8 @@ public class WollMuxEventHandler
 
     public String toString()
     {
-      return this.getClass().getSimpleName()
-             + "(#"
-             + doc.hashCode()
-             + ", '"
-             + blockName
-             + "', '"
-             + visible
-             + "', '"
-             + showHighlightColor
-             + "')";
+      return this.getClass().getSimpleName() + "(#" + doc.hashCode() + ", '"
+             + blockName + "', '" + visible + "', '" + showHighlightColor + "')";
     }
   }
 
@@ -3017,9 +2913,8 @@ public class WollMuxEventHandler
       XTextCursor viewCursor = model.getViewCursor();
       if (viewCursor != null)
       {
-        XTextRange vc = SachleitendeVerfuegung.insertVerfuegungspunkt(
-            model,
-            viewCursor);
+        XTextRange vc = SachleitendeVerfuegung.insertVerfuegungspunkt(model,
+          viewCursor);
         if (vc != null) viewCursor.gotoRange(vc, false);
       }
 
@@ -3105,9 +3000,8 @@ public class WollMuxEventHandler
       XTextCursor viewCursor = model.getViewCursor();
       if (viewCursor != null)
       {
-        XTextRange vc = SachleitendeVerfuegung.insertZuleitungszeile(
-            model,
-            viewCursor);
+        XTextRange vc = SachleitendeVerfuegung.insertZuleitungszeile(model,
+          viewCursor);
         if (vc != null) viewCursor.gotoRange(vc, false);
       }
 
@@ -3159,11 +3053,10 @@ public class WollMuxEventHandler
 
     protected void doit() throws WollMuxFehlerException
     {
-      if (UNO.XBookmarksSupplier(model.doc) == null || blockname == null)
-        return;
+      if (UNO.XBookmarksSupplier(model.doc) == null || blockname == null) return;
 
-      ConfigThingy slvConf = WollMuxSingleton.getInstance().getWollmuxConf()
-          .query("SachleitendeVerfuegungen");
+      ConfigThingy slvConf = WollMuxSingleton.getInstance().getWollmuxConf().query(
+        "SachleitendeVerfuegungen");
       Integer highlightColor = null;
 
       XTextCursor range = model.getViewCursor();
@@ -3172,9 +3065,8 @@ public class WollMuxEventHandler
 
       if (range.isCollapsed())
       {
-        WollMuxSingleton.showInfoModal(
-            "Fehler",
-            "Bitte wählen Sie einen Bereich aus, der markiert werden soll.");
+        WollMuxSingleton.showInfoModal("Fehler",
+          "Bitte wählen Sie einen Bereich aus, der markiert werden soll.");
         return;
       }
 
@@ -3182,30 +3074,23 @@ public class WollMuxEventHandler
       if (blockname.equalsIgnoreCase("allVersions"))
       {
         markChange = "wird immer gedruckt";
-        highlightColor = getHighlightColor(
-            slvConf,
-            "ALL_VERSIONS_HIGHLIGHT_COLOR");
+        highlightColor = getHighlightColor(slvConf, "ALL_VERSIONS_HIGHLIGHT_COLOR");
       }
       else if (blockname.equalsIgnoreCase("draftOnly"))
       {
         markChange = "wird nur im Entwurf gedruckt";
-        highlightColor = getHighlightColor(
-            slvConf,
-            "DRAFT_ONLY_HIGHLIGHT_COLOR");
+        highlightColor = getHighlightColor(slvConf, "DRAFT_ONLY_HIGHLIGHT_COLOR");
       }
       else if (blockname.equalsIgnoreCase("notInOriginal"))
       {
         markChange = "wird immer gedruckt, ausser im Original";
-        highlightColor = getHighlightColor(
-            slvConf,
-            "NOT_IN_ORIGINAL_HIGHLIGHT_COLOR");
+        highlightColor = getHighlightColor(slvConf,
+          "NOT_IN_ORIGINAL_HIGHLIGHT_COLOR");
       }
       else if (blockname.equalsIgnoreCase("originalOnly"))
       {
         markChange = "wird ausschließlich im Original gedruckt";
-        highlightColor = getHighlightColor(
-            slvConf,
-            "ORIGINAL_ONLY_HIGHLIGHT_COLOR");
+        highlightColor = getHighlightColor(slvConf, "ORIGINAL_ONLY_HIGHLIGHT_COLOR");
       }
       else
         return;
@@ -3232,8 +3117,8 @@ public class WollMuxEventHandler
           bookmarkName = iter.next().toString();
           try
           {
-            Bookmark b = new Bookmark(bookmarkName, UNO
-                .XBookmarksSupplier(model.doc));
+            Bookmark b = new Bookmark(bookmarkName,
+              UNO.XBookmarksSupplier(model.doc));
             if (bookmarkName.contains("HIGHLIGHT_COLOR"))
               UNO.setPropertyToDefault(b.getTextRange(), "CharBackColor");
             b.remove();
@@ -3242,11 +3127,9 @@ public class WollMuxEventHandler
           {
           }
         }
-        WollMuxSingleton.showInfoModal(
-            "Markierung des Blockes aufgehoben",
-            "Der ausgewählte Block enthielt bereits eine Markierung \"Block "
-                + markChange
-                + "\". Die bestehende Markierung wurde aufgehoben.");
+        WollMuxSingleton.showInfoModal("Markierung des Blockes aufgehoben",
+          "Der ausgewählte Block enthielt bereits eine Markierung \"Block "
+              + markChange + "\". Die bestehende Markierung wurde aufgehoben.");
       }
       else
       {
@@ -3260,15 +3143,14 @@ public class WollMuxEventHandler
           XTextCursor vc = model.getViewCursor();
           if (vc != null) vc.collapseToEnd();
         }
-        WollMuxSingleton.showInfoModal(
-            "Block wurde markiert",
-            "Der ausgewählte Block " + markChange + ".");
+        WollMuxSingleton.showInfoModal("Block wurde markiert",
+          "Der ausgewählte Block " + markChange + ".");
       }
 
       // PrintBlöcke neu einlesen:
       model.getDocumentCommands().update();
       DocumentCommandInterpreter dci = new DocumentCommandInterpreter(model,
-          WollMuxSingleton.getInstance());
+        WollMuxSingleton.getInstance());
       dci.scanGlobalDocumentCommands();
 
       stabilize();
@@ -3283,15 +3165,13 @@ public class WollMuxEventHandler
      * @param slvConf
      * @param attribute
      */
-    private static Integer getHighlightColor(ConfigThingy slvConf,
-        String attribute)
+    private static Integer getHighlightColor(ConfigThingy slvConf, String attribute)
     {
       try
       {
-        String highlightColor = slvConf.query(attribute).getLastChild()
-            .toString();
-        if (highlightColor.equals("")
-            || highlightColor.equalsIgnoreCase("none")) return null;
+        String highlightColor = slvConf.query(attribute).getLastChild().toString();
+        if (highlightColor.equals("") || highlightColor.equalsIgnoreCase("none"))
+          return null;
         int hc = Integer.parseInt(highlightColor, 16);
         return new Integer(hc);
       }
@@ -3301,8 +3181,7 @@ public class WollMuxEventHandler
       }
       catch (NumberFormatException e)
       {
-        Logger.error("Der angegebene Farbwert im Attribut '"
-                     + attribute
+        Logger.error("Der angegebene Farbwert im Attribut '" + attribute
                      + "' ist ungültig!");
         return null;
       }
@@ -3334,8 +3213,7 @@ public class WollMuxEventHandler
           XEnumeration parEnum = null;
           try
           {
-            parEnum = UNO.XEnumerationAccess(xenum.nextElement())
-                .createEnumeration();
+            parEnum = UNO.XEnumerationAccess(xenum.nextElement()).createEnumeration();
           }
           catch (java.lang.Exception e)
           {
@@ -3351,16 +3229,12 @@ public class WollMuxEventHandler
             catch (java.lang.Exception e)
             {
             }
-            XNamed bookmark = UNO.XNamed(UNO.getProperty(
-                textPortion,
-                "Bookmark"));
+            XNamed bookmark = UNO.XNamed(UNO.getProperty(textPortion, "Bookmark"));
             String name = (bookmark != null) ? bookmark.getName() : "";
 
             if (name.toLowerCase().startsWith(bookmarkName))
             {
-              boolean isStart = ((Boolean) UNO.getProperty(
-                  textPortion,
-                  "IsStart")).booleanValue();
+              boolean isStart = ((Boolean) UNO.getProperty(textPortion, "IsStart")).booleanValue();
               if (isStart)
                 started.add(name);
               else if (started.contains(name)) found.add(name);
@@ -3373,12 +3247,8 @@ public class WollMuxEventHandler
 
     public String toString()
     {
-      return this.getClass().getSimpleName()
-             + "(#"
-             + model.hashCode()
-             + ", '"
-             + blockname
-             + "')";
+      return this.getClass().getSimpleName() + "(#" + model.hashCode() + ", '"
+             + blockname + "')";
     }
   }
 
@@ -3409,16 +3279,13 @@ public class WollMuxEventHandler
       String name = WollMuxFiles.dumpInfo();
 
       if (name != null)
-        WollMuxSingleton.showInfoModal(
-            title,
-            "Die Fehlerinformationen des WollMux wurden erfolgreich in die Datei '"
-                + name
-                + "' geschrieben.");
+        WollMuxSingleton.showInfoModal(title,
+          "Die Fehlerinformationen des WollMux wurden erfolgreich in die Datei '"
+              + name + "' geschrieben.");
       else
-        WollMuxSingleton
-            .showInfoModal(
-                title,
-                "Die Fehlerinformationen des WollMux konnten nicht geschrieben werden\n\nDetails siehe Datei wollmux.log!");
+        WollMuxSingleton.showInfoModal(
+          title,
+          "Die Fehlerinformationen des WollMux konnten nicht geschrieben werden\n\nDetails siehe Datei wollmux.log!");
     }
 
     public String toString()
@@ -3508,8 +3375,8 @@ public class WollMuxEventHandler
 
     protected void doit() throws WollMuxFehlerException
     {
-      TextDocumentModel model = WollMuxSingleton.getInstance()
-          .getTextDocumentModel(doc);
+      TextDocumentModel model = WollMuxSingleton.getInstance().getTextDocumentModel(
+        doc);
 
       // dialog nicht anzeigen, wenn er bereits einmal angezeigt wurde und
       // onlyOnce gesetzt ist.
@@ -3522,18 +3389,15 @@ public class WollMuxEventHandler
       // Dialog anzeigen:
       try
       {
-        com.sun.star.util.URL url = UNO
-            .getParsedUNOUrl(DispatchHandler.DISP_unoPrinterSetup);
-        XNotifyingDispatch disp = UNO.XNotifyingDispatch(WollMuxSingleton
-            .getDispatchForModel(UNO.XModel(doc), url));
+        com.sun.star.util.URL url = UNO.getParsedUNOUrl(DispatchHandler.DISP_unoPrinterSetup);
+        XNotifyingDispatch disp = UNO.XNotifyingDispatch(WollMuxSingleton.getDispatchForModel(
+          UNO.XModel(doc), url));
 
         if (disp != null)
         {
           setLock();
-          disp.dispatchWithNotification(
-              url,
-              new PropertyValue[] {},
-              unlockDispatchResultListener);
+          disp.dispatchWithNotification(url, new PropertyValue[] {},
+            unlockDispatchResultListener);
           waitForUnlock();
         }
       }
@@ -3555,12 +3419,8 @@ public class WollMuxEventHandler
 
     public String toString()
     {
-      return this.getClass().getSimpleName()
-             + "(#"
-             + doc.hashCode()
-             + ", onlyOnce="
-             + onlyOnce
-             + ")";
+      return this.getClass().getSimpleName() + "(#" + doc.hashCode() + ", onlyOnce="
+             + onlyOnce + ")";
     }
   }
 
@@ -3593,8 +3453,8 @@ public class WollMuxEventHandler
    *          Der unlockActionListener wird immer informiert, wenn alle
    *          notwendigen Anpassungen durchgeführt wurden.
    */
-  public static void handleSetFormValueViaPrintModel(XTextDocument doc,
-      String id, String value, ActionListener unlockActionListener)
+  public static void handleSetFormValueViaPrintModel(XTextDocument doc, String id,
+      String value, ActionListener unlockActionListener)
   {
     handle(new OnSetFormValueViaPrintModel(doc, id, value, unlockActionListener));
   }
@@ -3609,8 +3469,8 @@ public class WollMuxEventHandler
 
     private final ActionListener listener;
 
-    public OnSetFormValueViaPrintModel(XTextDocument doc, String id,
-        String value, ActionListener listener)
+    public OnSetFormValueViaPrintModel(XTextDocument doc, String id, String value,
+        ActionListener listener)
     {
       this.doc = doc;
       this.id = id;
@@ -3620,8 +3480,8 @@ public class WollMuxEventHandler
 
     protected void doit() throws WollMuxFehlerException
     {
-      TextDocumentModel model = WollMuxSingleton.getInstance()
-          .getTextDocumentModel(doc);
+      TextDocumentModel model = WollMuxSingleton.getInstance().getTextDocumentModel(
+        doc);
 
       FormModel formModel = model.getFormModel();
       if (formModel != null)
@@ -3647,14 +3507,8 @@ public class WollMuxEventHandler
 
     public String toString()
     {
-      return this.getClass().getSimpleName()
-             + "(#"
-             + doc.hashCode()
-             + ", id='"
-             + id
-             + "', value='"
-             + value
-             + "')";
+      return this.getClass().getSimpleName() + "(#" + doc.hashCode() + ", id='" + id
+             + "', value='" + value + "')";
     }
   }
 
@@ -3680,8 +3534,7 @@ public class WollMuxEventHandler
     handle(new OnCollectNonWollMuxFormFieldsViaPrintModel(model, listener));
   }
 
-  private static class OnCollectNonWollMuxFormFieldsViaPrintModel extends
-      BasicEvent
+  private static class OnCollectNonWollMuxFormFieldsViaPrintModel extends BasicEvent
   {
     private TextDocumentModel model;
 
@@ -3735,8 +3588,7 @@ public class WollMuxEventHandler
   {
     private ActionListener listener;
 
-    public OnSetFormValueViaPrintModelFinished(
-        ActionListener unlockActionListener)
+    public OnSetFormValueViaPrintModelFinished(ActionListener unlockActionListener)
     {
       this.listener = unlockActionListener;
     }
@@ -3786,10 +3638,8 @@ public class WollMuxEventHandler
     protected void doit() throws WollMuxFehlerException
     {
       XTextCursor viewCursor = model.getViewCursor();
-      boolean atLeastOne = TextModule.createInsertFragFromIdentifier(
-          model.doc,
-          viewCursor,
-          reprocess);
+      boolean atLeastOne = TextModule.createInsertFragFromIdentifier(model.doc,
+        viewCursor, reprocess);
 
       if (reprocess)
       {
@@ -3799,21 +3649,15 @@ public class WollMuxEventHandler
         }
         else
         {
-          WollMuxSingleton.showInfoModal(
-              "WollMux-Fehler",
-              "An der Einfügestelle konnte kein Textbaustein gefunden werden.");
+          WollMuxSingleton.showInfoModal("WollMux-Fehler",
+            "An der Einfügestelle konnte kein Textbaustein gefunden werden.");
         }
       }
     }
 
     public String toString()
     {
-      return this.getClass().getSimpleName()
-             + "("
-             + model
-             + ", "
-             + reprocess
-             + ")";
+      return this.getClass().getSimpleName() + "(" + model + ", " + reprocess + ")";
     }
   }
 
@@ -3891,8 +3735,8 @@ public class WollMuxEventHandler
     protected void doit() throws WollMuxFehlerException
     {
 
-      TextDocumentModel model = WollMuxSingleton.getInstance()
-          .getTextDocumentModel(doc);
+      TextDocumentModel model = WollMuxSingleton.getInstance().getTextDocumentModel(
+        doc);
 
       XTextCursor viewCursor = model.getViewCursor();
       if (viewCursor == null) return;
@@ -3922,9 +3766,8 @@ public class WollMuxEventHandler
       {
         if (msg)
         {
-          WollMuxSingleton.showInfoModal(
-              "WollMux",
-              "Kein Platzhalter und keine Marke 'setJumpMark' vorhanden!");
+          WollMuxSingleton.showInfoModal("WollMux",
+            "Kein Platzhalter und keine Marke 'setJumpMark' vorhanden!");
         }
       }
 
@@ -3933,11 +3776,7 @@ public class WollMuxEventHandler
 
     public String toString()
     {
-      return this.getClass().getSimpleName()
-             + "(#"
-             + doc.hashCode()
-             + ", "
-             + msg
+      return this.getClass().getSimpleName() + "(#" + doc.hashCode() + ", " + msg
              + ")";
     }
   }
@@ -3964,8 +3803,7 @@ public class WollMuxEventHandler
 
     boolean useDocPrintFunctions;
 
-    public OnSeriendruck(TextDocumentModel model,
-        boolean useDocumentPrintFunctions)
+    public OnSeriendruck(TextDocumentModel model, boolean useDocumentPrintFunctions)
     {
       this.model = model;
       this.useDocPrintFunctions = useDocumentPrintFunctions;
@@ -4128,11 +3966,9 @@ public class WollMuxEventHandler
       final String PRINT_DEFAULT = "Drucken";
 
       JOptionPane pane = new JOptionPane(
-          "Das Dokument enthält Serienbrief-Felder. Was wollen Sie tun?",
-          javax.swing.JOptionPane.INFORMATION_MESSAGE);
-      pane.setOptions(new String[] {
-                                    SERIENBRIEF_WOLLMUX,
-                                    SERIENBRIEF_DEFAULT,
+        "Das Dokument enthält Serienbrief-Felder. Was wollen Sie tun?",
+        javax.swing.JOptionPane.INFORMATION_MESSAGE);
+      pane.setOptions(new String[] { SERIENBRIEF_WOLLMUX, SERIENBRIEF_DEFAULT,
                                     PRINT_DEFAULT });
       JDialog dialog = pane.createDialog(null, "Seriendruck");
       dialog.setAlwaysOnTop(true);
@@ -4249,9 +4085,8 @@ public class WollMuxEventHandler
       // Abschnitt Dialoge/MehrfachinstallationWarndialog auswerten
       try
       {
-        ConfigThingy warndialog = WollMuxSingleton.getInstance()
-            .getWollmuxConf().query("Dialoge").query(
-                "MehrfachinstallationWarndialog").getLastChild();
+        ConfigThingy warndialog = WollMuxSingleton.getInstance().getWollmuxConf().query(
+          "Dialoge").query("MehrfachinstallationWarndialog").getLastChild();
         try
         {
           msg = warndialog.get("MSG").toString();
@@ -4314,8 +4149,7 @@ public class WollMuxEventHandler
         oldCurrentInstLastModified = recentInstLastModified;
       }
       if (recentInstLastModified != null)
-        newerInstallationDetected = oldCurrentInstLastModified
-            .compareTo(recentInstLastModified) < 0;
+        newerInstallationDetected = oldCurrentInstLastModified.compareTo(recentInstLastModified) < 0;
 
       // Im Fehlerfall Dialog und Fehlermeldung bringen.
       if ((wmInsts.size() > 1 && firstCheck) || newerInstallationDetected)
@@ -4324,8 +4158,8 @@ public class WollMuxEventHandler
         // Variablen in msg evaluieren:
         DateFormat f = DateFormat.getDateInstance();
         msg = msg.replaceAll("\\$\\{RECENT_INST_PATH\\}", recentInstPath);
-        msg = msg.replaceAll("\\$\\{RECENT_INST_LAST_MODIFIED\\}", f
-            .format(recentInstLastModified));
+        msg = msg.replaceAll("\\$\\{RECENT_INST_LAST_MODIFIED\\}",
+          f.format(recentInstLastModified));
         msg = msg.replaceAll("\\$\\{OTHER_INSTS_LIST\\}", otherInstsList);
 
         logMsg += "\nDie juengste WollMux-Installation liegt unter:\n- "
@@ -4355,21 +4189,18 @@ public class WollMuxEventHandler
 
       try
       {
-        XStringSubstitution xSS = UNO.XStringSubstitution(UNO
-            .createUNOService("com.sun.star.util.PathSubstitution"));
+        XStringSubstitution xSS = UNO.XStringSubstitution(UNO.createUNOService("com.sun.star.util.PathSubstitution"));
 
         // Benutzerinstallationspfad LiMux =
         // /home/<Benutzer>/.openoffice.org2/user
         // Benutzerinstallationspfad Windows 2000 C:/Dokumente und
         // Einstellungen/<Benutzer>/Anwendungsdaten/OpenOffice.org2/user
-        myPath = xSS.substituteVariables(
-            "$(user)/uno_packages/cache/uno_packages/",
-            true);
+        myPath = xSS.substituteVariables("$(user)/uno_packages/cache/uno_packages/",
+          true);
         // Sharedinstallationspfad LiMux /opt/openoffice.org2.0/
         // Sharedinstallationspfad Windows C:/Programme/OpenOffice.org<version>
         oooPath = xSS.substituteVariables(
-            "$(inst)/share/uno_packages/cache/uno_packages/",
-            true);
+          "$(inst)/share/uno_packages/cache/uno_packages/", true);
       }
       catch (java.lang.Exception e)
       {
@@ -4379,8 +4210,7 @@ public class WollMuxEventHandler
 
       if (myPath == null || oooPath == null)
       {
-        Logger
-            .error("Bestimmung der Installationspfade für das WollMux-Paket fehlgeschlagen.");
+        Logger.error("Bestimmung der Installationspfade für das WollMux-Paket fehlgeschlagen.");
         return wmInstallations;
       }
 
@@ -4404,8 +4234,7 @@ public class WollMuxEventHandler
      * 
      * @author Bettina Bauer (D-III-ITD-5.1), Christoph Lutz (D-III-ITD-5.1)
      */
-    private static void findWollMuxInstallations(HashMap wmInstallations,
-        String path)
+    private static void findWollMuxInstallations(HashMap wmInstallations, String path)
     {
       URI uriPath;
       uriPath = null;
@@ -4458,8 +4287,8 @@ public class WollMuxEventHandler
   // *******************************************************************************************
   // Globale Helper-Methoden
 
-  private static ConfigThingy requireLastSection(ConfigThingy cf,
-      String sectionName) throws ConfigurationErrorException
+  private static ConfigThingy requireLastSection(ConfigThingy cf, String sectionName)
+      throws ConfigurationErrorException
   {
     try
     {
@@ -4467,10 +4296,9 @@ public class WollMuxEventHandler
     }
     catch (NodeNotFoundException e)
     {
-      throw new ConfigurationErrorException(
-          "Der Schlüssel '"
-              + sectionName
-              + "' fehlt in der Konfigurationsdatei.", e);
+      throw new ConfigurationErrorException("Der Schlüssel '" + sectionName
+                                            + "' fehlt in der Konfigurationsdatei.",
+        e);
     }
   }
 }

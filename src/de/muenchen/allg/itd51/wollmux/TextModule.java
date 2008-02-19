@@ -78,8 +78,8 @@ public class TextModule
       tbListe.addFirst(confTextbaustein);
     }
 
-    XParagraphCursor cursor = UNO.XParagraphCursor(range.getText()
-        .createTextCursorByRange(range));
+    XParagraphCursor cursor = UNO.XParagraphCursor(range.getText().createTextCursorByRange(
+      range));
 
     // Sonderbehandlung, wenn der viewCursor bereits eine Bereich markiert.
     // In diesem Fall soll ausschließlich der Inhalt des Bereichs evaluiert
@@ -96,8 +96,7 @@ public class TextModule
     {
       String identifierWithArgs = cursor.getString();
       if (!identifierWithArgs.equals(""))
-        collectedContent = identifierWithArgs.substring(0, 1)
-                           + collectedContent;
+        collectedContent = identifierWithArgs.substring(0, 1) + collectedContent;
 
       String[] results = parseIdentifier(identifierWithArgs, tbListe);
 
@@ -127,8 +126,8 @@ public class TextModule
       // Hier der Vergleich completeContent<->collectedContent: wenn beide
       // übereinstimmen, kann abgebrochen werden, da der Bereich dann
       // vollständig evaluiert wurde.
-      if (!completeContent.equals("")
-          && completeContent.equals(collectedContent)) evaluateNext = false;
+      if (!completeContent.equals("") && completeContent.equals(collectedContent))
+        evaluateNext = false;
     } while (evaluateNext);
 
     return result;
@@ -151,17 +150,15 @@ public class TextModule
    *          enthält, in der sie ausgewertet werden sollen.
    * @return Stringarray mit (frag_id + args) oder null
    */
-  private static String[] parseIdentifier(String identifierWithArgs,
-      List tbListe)
+  private static String[] parseIdentifier(String identifierWithArgs, List tbListe)
   {
     Iterator iterTbListe = tbListe.iterator();
     while (iterTbListe.hasNext())
     {
       ConfigThingy textbausteine = (ConfigThingy) iterTbListe.next();
 
-      String[] results = parseIdentifierInTextbausteine(
-          identifierWithArgs,
-          textbausteine);
+      String[] results = parseIdentifierInTextbausteine(identifierWithArgs,
+        textbausteine);
       if (results != null) return results;
     }
     return null;
@@ -184,8 +181,8 @@ public class TextModule
    *          "Textbausteine(SEPARATOR ... Kuerzel(...))"
    * @return Stringarray mit (frag_id + args) oder null
    */
-  public static String[] parseIdentifierInTextbausteine(
-      String identifierWithArgs, ConfigThingy textbausteine)
+  public static String[] parseIdentifierInTextbausteine(String identifierWithArgs,
+      ConfigThingy textbausteine)
   {
     // Separator für diesen Textbaustein-Block bestimmen
     String separatorString = "#";
@@ -222,8 +219,7 @@ public class TextModule
       }
       catch (NodeNotFoundException e)
       {
-        Logger.error("FRAG_ID Angabe fehlt in "
-                     + mappingConf.stringRepresentation());
+        Logger.error("FRAG_ID Angabe fehlt in " + mappingConf.stringRepresentation());
         continue;
       }
 
@@ -251,7 +247,9 @@ public class TextModule
           }
           catch (java.lang.Exception e)
           {
-            Logger.error("Die Reguläre Ausdruck Gruppierung $<zahl>, die in FRAG_ID verwendet wird gibt es nicht in MATCH. " + e);         }
+            Logger.error("Die Reguläre Ausdruck Gruppierung $<zahl>, die in FRAG_ID verwendet wird gibt es nicht in MATCH. "
+                         + e);
+          }
           return args;
         }
       }
@@ -333,8 +331,8 @@ public class TextModule
   {
     boolean found = false;
 
-    XTextCursor cursor = UNO.XTextCursor(viewCursor.getText()
-        .createTextCursorByRange(viewCursor.getEnd()));
+    XTextCursor cursor = UNO.XTextCursor(viewCursor.getText().createTextCursorByRange(
+      viewCursor.getEnd()));
 
     cursor.gotoRange(cursor.getText().getEnd(), true);
 
@@ -372,24 +370,20 @@ public class TextModule
             {
               continue;
             }
-            String textPortionType = (String) UNO.getProperty(
-                textPortion,
-                "TextPortionType");
+            String textPortionType = (String) UNO.getProperty(textPortion,
+              "TextPortionType");
             // Wenn es ein Textfeld ist
             if (textPortionType.equals("TextField"))
             {
               XTextField textField = null;
               try
               {
-                textField = UNO.XTextField(UNO.getProperty(
-                    textPortion,
-                    "TextField"));
+                textField = UNO.XTextField(UNO.getProperty(textPortion, "TextField"));
                 // Wenn es ein Platzhalterfeld ist, dem Vector placeholders
                 // hinzufügen
 
-                if (UNO.supportsService(
-                    textField,
-                    "com.sun.star.text.TextField.JumpEdit"))
+                if (UNO.supportsService(textField,
+                  "com.sun.star.text.TextField.JumpEdit"))
                 {
                   viewCursor.gotoRange(textField.getAnchor(), false);
                   found = true;
@@ -404,7 +398,7 @@ public class TextModule
         }
       }
       cursor = UNO.XTextCursor(viewCursor.getText().createTextCursorByRange(
-          cursor.getText()));
+        cursor.getText()));
     }
     // Falls kein Platzhalter gefunden wurde wird zur Marke 'setJumpMark'
     // gesprungen falls vorhanden sonst kommt eine Fehlermeldung -->

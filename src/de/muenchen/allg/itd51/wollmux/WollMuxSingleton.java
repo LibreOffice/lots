@@ -98,8 +98,8 @@ public class WollMuxSingleton implements XPALProvider
   /**
    * Default-oooEinstellungen-Abschnitt (Übergangslösung).
    */
-  private final URL OOOEINSTELLUNGEN_URL = this.getClass().getClassLoader()
-      .getResource("data/oooEinstellungen.conf");
+  private final URL OOOEINSTELLUNGEN_URL = this.getClass().getClassLoader().getResource(
+    "data/oooEinstellungen.conf");
 
   private static WollMuxSingleton singletonInstance = null;
 
@@ -187,10 +187,8 @@ public class WollMuxSingleton implements XPALProvider
 
     Logger.debug("StartupWollMux");
     Logger.debug("Build-Info: " + getBuildInfo());
-    Logger.debug("wollmuxConfFile = "
-                 + WollMuxFiles.getWollMuxConfFile().toString());
-    Logger.debug("DEFAULT_CONTEXT \""
-                 + WollMuxFiles.getDEFAULT_CONTEXT().toString()
+    Logger.debug("wollmuxConfFile = " + WollMuxFiles.getWollMuxConfFile().toString());
+    Logger.debug("DEFAULT_CONTEXT \"" + WollMuxFiles.getDEFAULT_CONTEXT().toString()
                  + "\"");
     Logger.debug("CONF_VERSION: " + getConfVersionInfo());
 
@@ -199,8 +197,8 @@ public class WollMuxSingleton implements XPALProvider
      * getDatasourceJoiner() geschehen, da die entsprechenden Datenquellen
      * womöglich schon für WollMux-Datenquellen benötigt werden.
      */
-    registerDatasources(WollMuxFiles.getWollmuxConf(), WollMuxFiles
-        .getDEFAULT_CONTEXT());
+    registerDatasources(WollMuxFiles.getWollmuxConf(),
+      WollMuxFiles.getDEFAULT_CONTEXT());
 
     // Versuchen, den DJ zu initialisieren und Flag setzen, falls nicht
     // erfolgreich.
@@ -213,25 +211,21 @@ public class WollMuxSingleton implements XPALProvider
      * könnte. Dadurch könnten globale Funktionen globale Funktionsdialoge
      * darstellen, die global einheitliche Werte haben.
      */
-    funcDialogs = WollMuxFiles.parseFunctionDialogs(WollMuxFiles
-        .getWollmuxConf(), null, null);
+    funcDialogs = WollMuxFiles.parseFunctionDialogs(WollMuxFiles.getWollmuxConf(),
+      null, null);
 
     /*
      * Globale Funktionen parsen. ACHTUNG! Verwendet die Funktionsdialoge. Diese
      * müssen also vorher geparst sein. Als context wird null übergeben, weil
      * globale Funktionen keinen Kontext haben.
      */
-    globalFunctions = WollMuxFiles.parseFunctions(
-        WollMuxFiles.getWollmuxConf(),
-        getFunctionDialogs(),
-        null,
-        null);
+    globalFunctions = WollMuxFiles.parseFunctions(WollMuxFiles.getWollmuxConf(),
+      getFunctionDialogs(), null, null);
 
     /*
      * Globale Druckfunktionen parsen.
      */
-    globalPrintFunctions = WollMuxFiles.parsePrintFunctions(WollMuxFiles
-        .getWollmuxConf());
+    globalPrintFunctions = WollMuxFiles.parsePrintFunctions(WollMuxFiles.getWollmuxConf());
 
     // Initialisiere EventProcessor
     WollMuxEventHandler.setAcceptEvents(successfulStartup);
@@ -240,10 +234,9 @@ public class WollMuxSingleton implements XPALProvider
     try
     {
       UnoService eventBroadcaster = UnoService.createWithContext(
-          "com.sun.star.frame.GlobalEventBroadcaster",
-          ctx);
+        "com.sun.star.frame.GlobalEventBroadcaster", ctx);
       eventBroadcaster.xEventBroadcaster().addEventListener(
-          new GlobalEventListener());
+        new GlobalEventListener());
     }
     catch (Exception e)
     {
@@ -254,8 +247,7 @@ public class WollMuxSingleton implements XPALProvider
     ConfigThingy tastenkuerzel = new ConfigThingy("");
     try
     {
-      tastenkuerzel = WollMuxFiles.getWollmuxConf().query("Tastenkuerzel")
-          .getLastChild();
+      tastenkuerzel = WollMuxFiles.getWollmuxConf().query("Tastenkuerzel").getLastChild();
     }
     catch (NodeNotFoundException e)
     {
@@ -270,22 +262,16 @@ public class WollMuxSingleton implements XPALProvider
     }
 
     // "Extras->Seriendruck (WollMux)" erzeugen:
-    createMenuButton(
-        DispatchHandler.DISP_wmSeriendruck,
-        "Seriendruck (WollMux)",
-        ".uno:ToolsMenu",
-        ".uno:MailMergeWizard");
+    createMenuButton(DispatchHandler.DISP_wmSeriendruck, "Seriendruck (WollMux)",
+      ".uno:ToolsMenu", ".uno:MailMergeWizard");
     // "Help->Info über WollMux" erzeugen:
-    createMenuButton(
-        DispatchHandler.DISP_wmAbout,
-        "Info über Vorlagen und Formulare (WollMux)",
-        ".uno:HelpMenu",
-        ".uno:About");
+    createMenuButton(DispatchHandler.DISP_wmAbout,
+      "Info über Vorlagen und Formulare (WollMux)", ".uno:HelpMenu", ".uno:About");
 
     // Setzen der in den Abschnitten OOoEinstellungen eingestellten
     // Konfigurationsoptionen
     ConfigThingy oooEinstellungenConf = WollMuxFiles.getWollmuxConf().query(
-        "OOoEinstellungen");
+      "OOoEinstellungen");
     // ggf. fest verdrahtete Standardeinstellungen verwenden
     // Solange wir dieses Fallback-Verhalten haben (es soll 2008 entfernt
     // werden, (siehe R5973)), wenden wir es auch an, wenn ein leerer
@@ -298,9 +284,8 @@ public class WollMuxSingleton implements XPALProvider
       try
       {
         oooEinstellungenConf = new ConfigThingy("DefaultSettings",
-            OOOEINSTELLUNGEN_URL);
-        Logger
-            .error("Kein Konfigurationsabschnitt OOoEinstellungen gefunden => Verwende interne Vorgabe. ACHTUNG! Dieses Fallback-Verhalten wird mittelfristig entfernt. Bitte updaten Sie auf eine neue Standardkonfig, oder falls Sie dies nicht können/wollen wenden Sie sich an D-III-ITD-5.1");
+          OOOEINSTELLUNGEN_URL);
+        Logger.error("Kein Konfigurationsabschnitt OOoEinstellungen gefunden => Verwende interne Vorgabe. ACHTUNG! Dieses Fallback-Verhalten wird mittelfristig entfernt. Bitte updaten Sie auf eine neue Standardkonfig, oder falls Sie dies nicht können/wollen wenden Sie sich an D-III-ITD-5.1");
       }
       catch (java.lang.Exception e)
       {
@@ -358,12 +343,11 @@ public class WollMuxSingleton implements XPALProvider
   {
     try
     {
-      URL url = WollMuxSingleton.class.getClassLoader()
-          .getResource("buildinfo");
+      URL url = WollMuxSingleton.class.getClassLoader().getResource("buildinfo");
       if (url != null)
       {
-        BufferedReader in = new BufferedReader(new InputStreamReader(url
-            .openStream()));
+        BufferedReader in = new BufferedReader(new InputStreamReader(
+          url.openStream()));
         return in.readLine().toString();
       }
     }
@@ -438,9 +422,7 @@ public class WollMuxSingleton implements XPALProvider
       }
       catch (NodeNotFoundException e)
       {
-        Logger.error(
-            "NAME-Attribut fehlt in Datenquellen/Registriere-Abschnitt",
-            e);
+        Logger.error("NAME-Attribut fehlt in Datenquellen/Registriere-Abschnitt", e);
         continue;
       }
 
@@ -452,10 +434,8 @@ public class WollMuxSingleton implements XPALProvider
       catch (NodeNotFoundException e)
       {
         Logger.error(
-            "URL-Attribut fehlt in Datenquellen/Registriere-Abschnitt für Datenquelle \""
-                + name
-                + "\"",
-            e);
+          "URL-Attribut fehlt in Datenquellen/Registriere-Abschnitt für Datenquelle \""
+              + name + "\"", e);
         continue;
       }
 
@@ -479,16 +459,12 @@ public class WollMuxSingleton implements XPALProvider
       }
       catch (java.lang.Exception x)
       {
-        Logger.error("Fehler beim Überprüfen, ob Datenquelle \""
-                     + name
+        Logger.error("Fehler beim Überprüfen, ob Datenquelle \"" + name
                      + "\" bereits registriert ist", x);
       }
 
-      Logger.debug("Versuche, Datenquelle \""
-                   + name
-                   + "\" bei OOo zu registrieren für URL \""
-                   + urlStr
-                   + "\"");
+      Logger.debug("Versuche, Datenquelle \"" + name
+                   + "\" bei OOo zu registrieren für URL \"" + urlStr + "\"");
 
       String parsedUrl;
       try
@@ -498,11 +474,8 @@ public class WollMuxSingleton implements XPALProvider
       }
       catch (java.lang.Exception x)
       {
-        Logger.error("Fehler beim Registrieren von Datenquelle \""
-                     + name
-                     + "\": Illegale URL: \""
-                     + urlStr
-                     + "\"", x);
+        Logger.error("Fehler beim Registrieren von Datenquelle \"" + name
+                     + "\": Illegale URL: \"" + urlStr + "\"", x);
         continue;
       }
 
@@ -510,19 +483,14 @@ public class WollMuxSingleton implements XPALProvider
       {
         Object datasource = UNO.XNameAccess(UNO.dbContext).getByName(parsedUrl);
         UNO.dbContext.registerObject(name, datasource);
-        if (!UnoRuntime.areSame(
-            UNO.dbContext.getRegisteredObject(name),
-            datasource))
-          Logger.error("Testzugriff auf Datenquelle \""
-                       + name
+        if (!UnoRuntime.areSame(UNO.dbContext.getRegisteredObject(name), datasource))
+          Logger.error("Testzugriff auf Datenquelle \"" + name
                        + "\" nach Registrierung fehlgeschlagen");
       }
       catch (Exception x)
       {
-        Logger.error("Fehler beim Registrieren von Datenquelle \""
-                     + name
-                     + "\". Stellen Sie sicher, dass die URL \""
-                     + parsedUrl
+        Logger.error("Fehler beim Registrieren von Datenquelle \"" + name
+                     + "\". Stellen Sie sicher, dass die URL \"" + parsedUrl
                      + "\" gültig ist.", x);
         continue;
       }
@@ -636,14 +604,9 @@ public class WollMuxSingleton implements XPALProvider
     try
     {
       // Menüleiste aus des Moduls com.sun.star.text.TextDocument holen:
-      XModuleUIConfigurationManagerSupplier suppl = UNO
-          .XModuleUIConfigurationManagerSupplier(UNO
-              .createUNOService("com.sun.star.ui.ModuleUIConfigurationManagerSupplier"));
-      XUIConfigurationManager cfgMgr = UNO.XUIConfigurationManager(suppl
-          .getUIConfigurationManager("com.sun.star.text.TextDocument"));
-      XIndexAccess menubar = UNO.XIndexAccess(cfgMgr.getSettings(
-          settingsUrl,
-          true));
+      XModuleUIConfigurationManagerSupplier suppl = UNO.XModuleUIConfigurationManagerSupplier(UNO.createUNOService("com.sun.star.ui.ModuleUIConfigurationManagerSupplier"));
+      XUIConfigurationManager cfgMgr = UNO.XUIConfigurationManager(suppl.getUIConfigurationManager("com.sun.star.text.TextDocument"));
+      XIndexAccess menubar = UNO.XIndexAccess(cfgMgr.getSettings(settingsUrl, true));
 
       // Elemente des .uno:ToolsMenu besorgen:
       XIndexContainer toolsMenu = null;
@@ -651,8 +614,7 @@ public class WollMuxSingleton implements XPALProvider
       if (idx >= 0)
       {
         UnoProps desc = new UnoProps((PropertyValue[]) menubar.getByIndex(idx));
-        toolsMenu = UNO.XIndexContainer(desc
-            .getPropertyValue("ItemDescriptorContainer"));
+        toolsMenu = UNO.XIndexContainer(desc.getPropertyValue("ItemDescriptorContainer"));
       }
 
       // Seriendruck-Button löschen, wenn er bereits vorhanden ist.
@@ -730,8 +692,7 @@ public class WollMuxSingleton implements XPALProvider
       catch (java.lang.Exception e)
       {
         Logger.error("OOoEinstellungen: Konnte Einstellung '"
-                     + element.stringRepresentation()
-                     + "'nicht setzen:", e);
+                     + element.stringRepresentation() + "'nicht setzen:", e);
       }
     }
   }
@@ -771,9 +732,9 @@ public class WollMuxSingleton implements XPALProvider
     }
 
     throw new IllegalArgumentException(
-        "Der TYPE '"
-            + type
-            + "' ist nicht gültig. Gültig sind 'boolean', 'integer', 'float' und 'string'.");
+      "Der TYPE '"
+          + type
+          + "' ist nicht gültig. Gültig sind 'boolean', 'integer', 'float' und 'string'.");
   }
 
   /**
@@ -787,8 +748,7 @@ public class WollMuxSingleton implements XPALProvider
    * @param value
    *          der zu setzende Wert als Objekt vom entsprechenden Typ.
    */
-  private static void setConfigurationValue(String node, String prop,
-      Object value)
+  private static void setConfigurationValue(String node, String prop, Object value)
   {
     XChangesBatch updateAccess = UNO.getConfigurationUpdateAccess(node);
     if (value != null) UNO.setProperty(updateAccess, prop, value);
@@ -966,8 +926,7 @@ public class WollMuxSingleton implements XPALProvider
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  public void setCurrentWollMuxInstallationDate(
-      Date currentWollMuxInstallationDate)
+  public void setCurrentWollMuxInstallationDate(Date currentWollMuxInstallationDate)
   {
     this.currentWollMuxInstallationDate = currentWollMuxInstallationDate;
   }
@@ -993,8 +952,7 @@ public class WollMuxSingleton implements XPALProvider
    * @author Christoph Lutz (D-III-ITD-5.1)
    * @throws InvalidIdentifierException
    */
-  public static void checkIdentifier(String id)
-      throws InvalidIdentifierException
+  public static void checkIdentifier(String id) throws InvalidIdentifierException
   {
     if (!id.matches("^[a-zA-Z_][a-zA-Z_0-9]*$"))
       throw new InvalidIdentifierException(id);
@@ -1049,8 +1007,7 @@ public class WollMuxSingleton implements XPALProvider
   {
     HashableComponent key = new HashableComponent(doc);
 
-    TextDocumentModel model = (TextDocumentModel) currentTextDocumentModels
-        .get(key);
+    TextDocumentModel model = (TextDocumentModel) currentTextDocumentModels.get(key);
     if (model == null)
     {
       // Neues TextDocumentModel erzeugen, wenn es noch nicht existiert.
@@ -1085,8 +1042,7 @@ public class WollMuxSingleton implements XPALProvider
 
     try
     {
-      HashableComponent key = new HashableComponent(frame.getController()
-          .getModel());
+      HashableComponent key = new HashableComponent(frame.getController().getModel());
       return (TextDocumentModel) currentTextDocumentModels.get(key);
     }
     catch (java.lang.Exception e)
@@ -1147,9 +1103,7 @@ public class WollMuxSingleton implements XPALProvider
     if (UNO.XTextField(element) != null)
     {
       Object textField = UNO.getProperty(element, "TextField");
-      if (UNO.supportsService(
-          textField,
-          "com.sun.star.text.TextField.Annotation"))
+      if (UNO.supportsService(textField, "com.sun.star.text.TextField.Annotation"))
       {
         return UNO.XTextField(textField);
       }
@@ -1182,8 +1136,7 @@ public class WollMuxSingleton implements XPALProvider
    * @param sMessage
    *          die Nachricht, die im Dialog angezeigt werden soll.
    */
-  public static void showInfoModal(java.lang.String sTitle,
-      java.lang.String sMessage)
+  public static void showInfoModal(java.lang.String sTitle, java.lang.String sMessage)
   {
     showInfoModal(sTitle, sMessage, 50);
   }
@@ -1230,7 +1183,7 @@ public class WollMuxSingleton implements XPALProvider
       Common.setLookAndFeelOnce();
 
       JOptionPane pane = new JOptionPane(formattedMessage,
-          javax.swing.JOptionPane.INFORMATION_MESSAGE);
+        javax.swing.JOptionPane.INFORMATION_MESSAGE);
       JDialog dialog = pane.createDialog(null, sTitle);
       dialog.setAlwaysOnTop(true);
       dialog.setVisible(true);
@@ -1253,8 +1206,7 @@ public class WollMuxSingleton implements XPALProvider
    * @return den gefundenen XDispatch oder null, wenn der XDispatch nicht
    *         verfügbar ist.
    */
-  public static XDispatch getDispatchForModel(XModel doc,
-      com.sun.star.util.URL url)
+  public static XDispatch getDispatchForModel(XModel doc, com.sun.star.util.URL url)
   {
     if (doc == null) return null;
 
@@ -1269,10 +1221,8 @@ public class WollMuxSingleton implements XPALProvider
 
     if (dispProv != null)
     {
-      return dispProv.queryDispatch(
-          url,
-          "_self",
-          com.sun.star.frame.FrameSearchFlag.SELF);
+      return dispProv.queryDispatch(url, "_self",
+        com.sun.star.frame.FrameSearchFlag.SELF);
     }
     return null;
   }
@@ -1293,9 +1243,7 @@ public class WollMuxSingleton implements XPALProvider
 
       if (doc != null)
       {
-        Logger.debug2("Incoming documentEvent for #"
-                      + doc.hashCode()
-                      + ": "
+        Logger.debug2("Incoming documentEvent for #" + doc.hashCode() + ": "
                       + docEvent.EventName);
 
         if (docEvent.EventName.equalsIgnoreCase("OnLoad")
@@ -1308,8 +1256,7 @@ public class WollMuxSingleton implements XPALProvider
       else
       {
         WollMuxEventHandler.handleNotifyDocumentEventListener(
-            "OnWollMuxProcessingFinished",
-            docEvent.Source);
+          "OnWollMuxProcessingFinished", docEvent.Source);
       }
     }
 

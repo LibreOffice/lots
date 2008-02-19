@@ -45,8 +45,7 @@ public class TestHandler
    * sollen und vor dem Aufruf des Teshandlers über das testtool geschrieben
    * wurden.
    */
-  public static File WOLLMUX_QATEST_ARGS_FILE = new File(
-      "/tmp/wollmux_qatest.args");
+  public static File WOLLMUX_QATEST_ARGS_FILE = new File("/tmp/wollmux_qatest.args");
 
   /**
    * Bearbeitet den Test, der im Argument arg spezifiziert ist und im
@@ -66,40 +65,32 @@ public class TestHandler
     if (cmd.equalsIgnoreCase("VerfuegungspunktDrucken"))
     {
       Map idsAndValues = getWollmuxTestArgs();
-      short count = (short) SachleitendeVerfuegung
-          .countVerfuegungspunkte(model.doc);
-      short verfPunkt = new Short(idsAndValues.get("VerfPunkt").toString())
-          .shortValue();
+      short count = (short) SachleitendeVerfuegung.countVerfuegungspunkte(model.doc);
+      short verfPunkt = new Short(idsAndValues.get("VerfPunkt").toString()).shortValue();
       boolean isDraft = (verfPunkt == count) ? true : false;
       boolean isOriginal = (verfPunkt == 1) ? true : false;
       final XPrintModel pmod = model.createPrintModel(false);
       try
       {
-        pmod.setPropertyValue(
-            PrintModelProps.PROP_SLV_VERF_PUNKTE,
-            new Object[] { new Short(verfPunkt) });
-        pmod.setPropertyValue(
-            PrintModelProps.PROP_SLV_IS_DRAFT_FLAGS,
-            new Object[] { new Boolean(isDraft) });
-        pmod.setPropertyValue(
-            PrintModelProps.PROP_SLV_IS_ORIGINAL_FLAGS,
-            new Object[] { new Boolean(isOriginal) });
-        pmod.setPropertyValue(
-            PrintModelProps.PROP_SLV_COPY_COUNTS,
-            new Object[] { new Short((short) 1) });
-        pmod.setPropertyValue(
-            PrintModelProps.PROP_SLV_PAGE_RANGE_TYPES,
-            new Object[] { new Short(PrintModelProps.PAGE_RANGE_TYPE_ALL) });
-        pmod.setPropertyValue(
-            PrintModelProps.PROP_SLV_PAGE_RANGE_VALUES,
-            new Object[] { "" });
+        pmod.setPropertyValue(PrintModelProps.PROP_SLV_VERF_PUNKTE,
+          new Object[] { new Short(verfPunkt) });
+        pmod.setPropertyValue(PrintModelProps.PROP_SLV_IS_DRAFT_FLAGS,
+          new Object[] { new Boolean(isDraft) });
+        pmod.setPropertyValue(PrintModelProps.PROP_SLV_IS_ORIGINAL_FLAGS,
+          new Object[] { new Boolean(isOriginal) });
+        pmod.setPropertyValue(PrintModelProps.PROP_SLV_COPY_COUNTS,
+          new Object[] { new Short((short) 1) });
+        pmod.setPropertyValue(PrintModelProps.PROP_SLV_PAGE_RANGE_TYPES,
+          new Object[] { new Short(PrintModelProps.PAGE_RANGE_TYPE_ALL) });
+        pmod.setPropertyValue(PrintModelProps.PROP_SLV_PAGE_RANGE_VALUES,
+          new Object[] { "" });
       }
       catch (java.lang.Exception e)
       {
         Logger.error(e);
       }
-      ((InternalPrintModel) pmod).useInternalPrintFunction(StandardPrint
-          .getInternalPrintFunction("sachleitendeVerfuegungOutput", 10));
+      ((InternalPrintModel) pmod).useInternalPrintFunction(StandardPrint.getInternalPrintFunction(
+        "sachleitendeVerfuegungOutput", 10));
       // Drucken im Hintergrund, damit der WollMux weiterläuft.
       new Thread()
       {
@@ -118,11 +109,8 @@ public class TestHandler
       {
         String id = "" + iter.next();
         String value = "" + idsAndValues.get(id);
-        WollMuxEventHandler.handleSetFormValueViaPrintModel(
-            model.doc,
-            id,
-            value,
-            null);
+        WollMuxEventHandler.handleSetFormValueViaPrintModel(model.doc, id, value,
+          null);
       }
     }
 
@@ -136,8 +124,7 @@ public class TestHandler
       // model.replaceSelectionWithFormField(t, c);
       ConfigThingy trafo = model.getFormFieldTrafoFromSelection();
       Logger.error("EinTest Trafo = '"
-                   + ((trafo != null) ? trafo.stringRepresentation() : "null")
-                   + "'");
+                   + ((trafo != null) ? trafo.stringRepresentation() : "null") + "'");
       if (trafo != null)
       {
         try
@@ -167,8 +154,8 @@ public class TestHandler
     HashMap args = new HashMap();
     try
     {
-      BufferedReader br = new BufferedReader(new FileReader(
-          WOLLMUX_QATEST_ARGS_FILE));
+      BufferedReader br = new BufferedReader(
+        new FileReader(WOLLMUX_QATEST_ARGS_FILE));
 
       for (String line = null; (line = br.readLine()) != null;)
       {
@@ -178,9 +165,7 @@ public class TestHandler
     }
     catch (java.lang.Exception e)
     {
-      Logger.error(
-          "Argumentdatei für wollmux-qatest konnte nicht gelesen werden",
-          e);
+      Logger.error("Argumentdatei für wollmux-qatest konnte nicht gelesen werden", e);
     }
     return args;
   }

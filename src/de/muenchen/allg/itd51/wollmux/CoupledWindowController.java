@@ -144,8 +144,7 @@ public class CoupledWindowController
 
         if (activeWindow[0] == null)
         {
-          Logger
-              .debug2("Timeout und kein aktives Fenster - stelle angekoppelte Fenster unsichtbar");
+          Logger.debug2("Timeout und kein aktives Fenster - stelle angekoppelte Fenster unsichtbar");
           setCoupledWindowsVisible(false);
           acceptMainWindowOnly = true;
         }
@@ -340,7 +339,8 @@ public class CoupledWindowController
           for (Iterator iter = coupledWindows.iterator(); iter.hasNext();)
           {
             CoupledWindow win = (CoupledWindow) iter.next();
-            if (win.equals(w)) {
+            if (win.equals(w))
+            {
               collectChildWindow(e.getOppositeWindow());
               return;
             }

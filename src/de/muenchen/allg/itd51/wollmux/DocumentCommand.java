@@ -115,8 +115,7 @@ abstract public class DocumentCommand
     // GROUPS-Attribut besitzen (die jetzt nicht merh unterstützt werden).
     if (wmCmd.query("GROUPS").count() > 0 && !canHaveGroupsAttribute())
     {
-      Logger.error("Das Dokumentkommando '"
-                   + getBookmarkName()
+      Logger.error("Das Dokumentkommando '" + getBookmarkName()
                    + "' darf kein GROUPS-Attribut besitzen.");
     }
   }
@@ -163,13 +162,9 @@ abstract public class DocumentCommand
    */
   public String toString()
   {
-    return ""
-           + this.getClass().getSimpleName()
-           + "["
-           + (isRetired() ? "RETIRED:" : "")
-           + (isDone() ? "DONE:" : "")
-           + getBookmarkName()
-           + "]";
+    return "" + this.getClass().getSimpleName() + "["
+           + (isRetired() ? "RETIRED:" : "") + (isDone() ? "DONE:" : "")
+           + getBookmarkName() + "]";
   }
 
   /**
@@ -288,8 +283,7 @@ abstract public class DocumentCommand
     if (range == null || !hasInsertMarks) return null;
     XParagraphCursor[] cursor = new XParagraphCursor[2];
     XText text = range.getText();
-    cursor[0] = UNO.XParagraphCursor(text.createTextCursorByRange(range
-        .getStart()));
+    cursor[0] = UNO.XParagraphCursor(text.createTextCursorByRange(range.getStart()));
     cursor[1] = UNO.XParagraphCursor(text.createTextCursorByRange(cursor[0]));
     cursor[1].goRight(getStartMarkLength(), false);
     return cursor;
@@ -308,8 +302,7 @@ abstract public class DocumentCommand
     if (range == null || !hasInsertMarks) return null;
     XParagraphCursor[] cursor = new XParagraphCursor[2];
     XText text = range.getText();
-    cursor[0] = UNO.XParagraphCursor(text.createTextCursorByRange(range
-        .getEnd()));
+    cursor[0] = UNO.XParagraphCursor(text.createTextCursorByRange(range.getEnd()));
     cursor[1] = UNO.XParagraphCursor(text.createTextCursorByRange(cursor[0]));
     cursor[0].goLeft(getStartMarkLength(), false);
     return cursor;
@@ -879,9 +872,7 @@ abstract public class DocumentCommand
             styles.add(s.toLowerCase());
           }
           else
-            throw new InvalidCommandException("STYLE '"
-                                              + s
-                                              + "' ist unbekannt.");
+            throw new InvalidCommandException("STYLE '" + s + "' ist unbekannt.");
         }
       }
       catch (NodeNotFoundException e)
@@ -1012,9 +1003,8 @@ abstract public class DocumentCommand
         else
         {
           throw new InvalidCommandException(
-              "Unbekannter AUTOSEP-Typ \""
-                  + as.toString()
-                  + "\". Erwarte \"left\", \"right\" oder \"both\".");
+            "Unbekannter AUTOSEP-Typ \"" + as.toString()
+                + "\". Erwarte \"left\", \"right\" oder \"both\".");
         }
         currentSep = sep;
       }
@@ -1249,7 +1239,7 @@ abstract public class DocumentCommand
           && type.compareToIgnoreCase("normalTemplate") != 0
           && type.compareToIgnoreCase("formDocument") != 0)
         throw new InvalidCommandException(
-            "Angegebener TYPE ist ungültig oder falsch geschrieben. Erwarte \"templateTemplate\", \"normalTemplate\" oder \"formDocument\"!");
+          "Angegebener TYPE ist ungültig oder falsch geschrieben. Erwarte \"templateTemplate\", \"normalTemplate\" oder \"formDocument\"!");
     }
 
     String getType()
@@ -1366,8 +1356,7 @@ abstract public class DocumentCommand
    * besitzt dieses Kommando ausser der Zuordnung von Gruppen keine weitere
    * Funktion.
    */
-  static public class SetGroups extends DocumentCommand implements
-      VisibilityElement
+  static public class SetGroups extends DocumentCommand implements VisibilityElement
   {
     private Set groupsSet;
 
@@ -1429,15 +1418,9 @@ abstract public class DocumentCommand
      */
     public String toString()
     {
-      return ""
-             + this.getClass().getSimpleName()
-             + "["
-             + (isRetired() ? "RETIRED:" : "")
-             + (isDone() ? "DONE:" : "")
-             + "GROUPS:"
-             + groupsSet.toString()
-             + getBookmarkName()
-             + "]";
+      return "" + this.getClass().getSimpleName() + "["
+             + (isRetired() ? "RETIRED:" : "") + (isDone() ? "DONE:" : "")
+             + "GROUPS:" + groupsSet.toString() + getBookmarkName() + "]";
     }
   }
 

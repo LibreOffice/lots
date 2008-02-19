@@ -75,15 +75,13 @@ public class DocumentCommands
    * Folgendes Pattern prüft ob es sich bei einem Bookmark um ein gültiges
    * "WM"-Kommando handelt und entfernt evtl. vorhandene Zahlen-Suffixe.
    */
-  public static final Pattern wmCmdPattern = Pattern
-      .compile("\\A\\p{Space}*(WM\\p{Space}*\\(.*\\))\\p{Space}*(\\d*)\\z");
+  public static final Pattern wmCmdPattern = Pattern.compile("\\A\\p{Space}*(WM\\p{Space}*\\(.*\\))\\p{Space}*(\\d*)\\z");
 
   /**
    * Das Pattern zur Erkennung von TextSections mit einem GROUPS-Attribut als
    * Namenszusatz zur Definition der Sichtbarkeitsgruppen dieses Bereichs
    */
-  private static final Pattern sectionWithGROUPSPattern = Pattern
-      .compile("\\A.*(GROUPS.*)\\d*\\z");
+  private static final Pattern sectionWithGROUPSPattern = Pattern.compile("\\A.*(GROUPS.*)\\d*\\z");
 
   /**
    * Das Dokument, in dem die Bookmarks enthalten sind und das dazu ein
@@ -259,8 +257,7 @@ public class DocumentCommands
     Logger.debug2("updateBookmarks fertig nach "
                   + (System.currentTimeMillis() - startTime)
                   + " ms. Entfernte/Neue Dokumentkommandos: "
-                  + retiredDocumentCommands.size()
-                  + " / "
+                  + retiredDocumentCommands.size() + " / "
                   + newDocumentCommands.size());
     return retiredDocumentCommands.size() > 0 || newDocumentCommands.size() > 0;
   }
@@ -306,8 +303,8 @@ public class DocumentCommands
 
       if (m.find() && !knownTextSections.contains(name))
       {
-        TextSection s = createTextSection(name, m.group(1), UNO
-            .XTextSectionsSupplier(doc));
+        TextSection s = createTextSection(name, m.group(1),
+          UNO.XTextSectionsSupplier(doc));
         if (s != null) newTextSections.add(s);
       }
     }
@@ -319,9 +316,7 @@ public class DocumentCommands
     Logger.debug2("updateTextSections fertig nach "
                   + (System.currentTimeMillis() - startTime)
                   + " ms. Entfernte/Neue TextSections: "
-                  + retiredTextSections.size()
-                  + " / "
-                  + newTextSections.size());
+                  + retiredTextSections.size() + " / " + newTextSections.size());
     return retiredTextSections.size() > 0 || newTextSections.size() > 0;
   }
 
@@ -611,16 +606,15 @@ public class DocumentCommands
    * @param doc
    * @return
    */
-  private static DocumentCommand createCommand(String bookmarkName,
-      String cmdStr, XBookmarksSupplier doc)
+  private static DocumentCommand createCommand(String bookmarkName, String cmdStr,
+      XBookmarksSupplier doc)
   {
     try
     {
       Bookmark b = new Bookmark(bookmarkName, doc);
       try
       {
-        ConfigThingy wmCmd = new ConfigThingy("", null,
-            new StringReader(cmdStr));
+        ConfigThingy wmCmd = new ConfigThingy("", null, new StringReader(cmdStr));
         return createCommand(wmCmd, b);
       }
       catch (SyntaxErrorException e)
@@ -676,16 +670,15 @@ public class DocumentCommands
     Set groups = new HashSet();
     try
     {
-      ConfigThingy groupsCfg = new ConfigThingy("", null, new StringReader(
-          groupsStr));
+      ConfigThingy groupsCfg = new ConfigThingy("", null,
+        new StringReader(groupsStr));
       Iterator giter = groupsCfg.get("GROUPS").iterator();
       while (giter.hasNext())
         groups.add(giter.next().toString());
     }
     catch (java.lang.Exception e)
     {
-      Logger.error("Der Textbereich mit dem Namen '"
-                   + name
+      Logger.error("Der Textbereich mit dem Namen '" + name
                    + "' enthält ein fehlerhaftes GROUPS-Attribut.", e);
     }
 
@@ -715,8 +708,7 @@ public class DocumentCommands
    *          Das Bookmark zu dem Dokumentkommando
    * @return Ein passende konkretes DocumentCommand-Instanz.
    */
-  private static DocumentCommand createCommand(ConfigThingy wmCmd,
-      Bookmark bookmark)
+  private static DocumentCommand createCommand(ConfigThingy wmCmd, Bookmark bookmark)
   {
     String cmd = "";
     try
@@ -728,8 +720,7 @@ public class DocumentCommands
       }
       catch (NodeNotFoundException e)
       {
-        throw new DocumentCommand.InvalidCommandException(
-            "Fehlendes CMD-Attribut");
+        throw new DocumentCommand.InvalidCommandException("Fehlendes CMD-Attribut");
       }
 
       // spezielle Kommando-Instanzen erzeugen
@@ -813,8 +804,8 @@ public class DocumentCommands
         return new DocumentCommand.OverrideFrag(wmCmd, bookmark);
       }
 
-      throw new DocumentCommand.InvalidCommandException(
-          "Unbekanntes Kommando \"" + cmd + "\"");
+      throw new DocumentCommand.InvalidCommandException("Unbekanntes Kommando \""
+                                                        + cmd + "\"");
     }
     catch (DocumentCommand.InvalidCommandException e)
     {

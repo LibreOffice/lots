@@ -284,26 +284,24 @@ public class DispatchHandler
       }
     });
 
-    handler
-        .add(new DocumentDispatchHandler(DISP_wmTextbausteinEinfuegen, model)
-        {
-          public void dispatch(String arg, PropertyValue[] props)
-          {
-            WollMuxEventHandler.handleTextbausteinEinfuegen(model, true);
-          }
-        });
+    handler.add(new DocumentDispatchHandler(DISP_wmTextbausteinEinfuegen, model)
+    {
+      public void dispatch(String arg, PropertyValue[] props)
+      {
+        WollMuxEventHandler.handleTextbausteinEinfuegen(model, true);
+      }
+    });
 
-    handler
-        .add(new DocumentDispatchHandler(DISP_wmPlatzhalterAnspringen, model)
-        {
-          public void dispatch(String arg, PropertyValue[] props)
-          {
-            WollMuxEventHandler.handleJumpToPlaceholder(model);
-          }
-        });
+    handler.add(new DocumentDispatchHandler(DISP_wmPlatzhalterAnspringen, model)
+    {
+      public void dispatch(String arg, PropertyValue[] props)
+      {
+        WollMuxEventHandler.handleJumpToPlaceholder(model);
+      }
+    });
 
-    handler.add(new DocumentDispatchHandler(
-        DISP_wmTextbausteinVerweisEinfuegen, model)
+    handler.add(new DocumentDispatchHandler(DISP_wmTextbausteinVerweisEinfuegen,
+      model)
     {
       public void dispatch(String arg, PropertyValue[] props)
       {
@@ -428,9 +426,7 @@ public class DispatchHandler
      */
     public void dispatch(URL url, PropertyValue[] props)
     {
-      Logger.debug2(this.getClass().getSimpleName()
-                    + ".dispatch('"
-                    + url.Complete
+      Logger.debug2(this.getClass().getSimpleName() + ".dispatch('" + url.Complete
                     + "')");
 
       // z.B. "wollmux:OpenTemplate#internerBriefkopf"
@@ -481,7 +477,8 @@ public class DispatchHandler
     {
       Iterator iter = statusListener.iterator();
       while (iter.hasNext())
-        if (UnoRuntime.areSame(UNO.XInterface(iter.next()), listener)) iter.remove();
+        if (UnoRuntime.areSame(UNO.XInterface(iter.next()), listener))
+          iter.remove();
     }
 
     /*
@@ -501,8 +498,7 @@ public class DispatchHandler
    * 
    * @author christoph.lutz
    */
-  public static abstract class DocumentDispatchHandler extends
-      BasicDispatchHandler
+  public static abstract class DocumentDispatchHandler extends BasicDispatchHandler
   {
     protected final TextDocumentModel model;
 
@@ -610,10 +606,8 @@ public class DispatchHandler
       XDispatch[] lDispatcher = new XDispatch[nCount];
 
       for (int i = 0; i < nCount; ++i)
-        lDispatcher[i] = queryDispatch(
-            seqDescripts[i].FeatureURL,
-            seqDescripts[i].FrameName,
-            seqDescripts[i].SearchFlags);
+        lDispatcher[i] = queryDispatch(seqDescripts[i].FeatureURL,
+          seqDescripts[i].FrameName, seqDescripts[i].SearchFlags);
 
       return lDispatcher;
     }
@@ -624,8 +618,7 @@ public class DispatchHandler
    * 
    * @author christoph.lutz
    */
-  private static class GlobalDispatchProvider extends
-      BasicWollMuxDispatchProvider
+  private static class GlobalDispatchProvider extends BasicWollMuxDispatchProvider
   {
     public GlobalDispatchProvider()
     {
@@ -702,8 +695,8 @@ public class DispatchHandler
     public XDispatch queryDispatch(com.sun.star.util.URL url, String frameName,
         int fsFlag)
     {
-      TextDocumentModel model = WollMuxSingleton.getInstance()
-          .getTextDocumentModelForFrame(frame);
+      TextDocumentModel model = WollMuxSingleton.getInstance().getTextDocumentModelForFrame(
+        frame);
       setDispatchHandlers(createDocumentDispatchHandler(model));
 
       XDispatch myDisp = null;
@@ -712,11 +705,8 @@ public class DispatchHandler
       if (myDisp != null)
       {
         if (myDisp instanceof DocumentDispatchHandler)
-          ((DocumentDispatchHandler) myDisp).requireOrigDispatch(
-              this,
-              url,
-              frameName,
-              fsFlag);
+          ((DocumentDispatchHandler) myDisp).requireOrigDispatch(this, url,
+            frameName, fsFlag);
         return myDisp;
       }
       else
@@ -734,8 +724,8 @@ public class DispatchHandler
      * @param fsFlag
      * @return
      */
-    public XDispatch getOrigDispatch(com.sun.star.util.URL url,
-        String frameName, int fsFlag)
+    public XDispatch getOrigDispatch(com.sun.star.util.URL url, String frameName,
+        int fsFlag)
     {
       return slave.queryDispatch(url, frameName, fsFlag);
     }
@@ -747,8 +737,7 @@ public class DispatchHandler
    */
   public static void registerDocumentDispatchInterceptor(XFrame frame)
   {
-    if (frame == null
-        || UNO.XDispatchProviderInterception(frame) == null
+    if (frame == null || UNO.XDispatchProviderInterception(frame) == null
         || UNO.XDispatchProvider(frame) == null) return;
 
     Logger.debug("Register DocumentDispatchInterceptor for frame #"
@@ -767,18 +756,16 @@ public class DispatchHandler
     // Objekt =! null zurück, so ist der frame bereits registriert, ansonsten
     // nicht.
     com.sun.star.util.URL url = UNO.getParsedUNOUrl(DISP_wmAbdruck);
-    XDispatch disp = UNO.XDispatchProvider(frame).queryDispatch(
-        url,
-        "_self",
-        com.sun.star.frame.FrameSearchFlag.SELF);
+    XDispatch disp = UNO.XDispatchProvider(frame).queryDispatch(url, "_self",
+      com.sun.star.frame.FrameSearchFlag.SELF);
     boolean alreadyRegistered = disp != null;
 
     // DispatchInterceptor registrieren (wenn nicht bereits registriert):
     if (!alreadyRegistered)
     {
       XDispatchProviderInterceptor dpi = new DocumentDispatchInterceptor(frame);
-      UNO.XDispatchProviderInterception(frame)
-          .registerDispatchProviderInterceptor(dpi);
+      UNO.XDispatchProviderInterception(frame).registerDispatchProviderInterceptor(
+        dpi);
     }
   }
 }

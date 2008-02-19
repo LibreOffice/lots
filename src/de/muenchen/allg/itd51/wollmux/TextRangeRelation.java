@@ -202,8 +202,7 @@ public class TextRangeRelation
      */
     public boolean isBChildOfA()
     {
-      return rel.followsOrderscheme88AA()
-             || rel.followsOrderschemeA88A()
+      return rel.followsOrderscheme88AA() || rel.followsOrderschemeA88A()
              || rel.followsOrderschemeAA88();
     }
 
@@ -212,8 +211,7 @@ public class TextRangeRelation
      */
     public boolean isAChildOfB()
     {
-      return rel.followsOrderscheme88BB()
-             || rel.followsOrderschemeB88B()
+      return rel.followsOrderscheme88BB() || rel.followsOrderschemeB88B()
              || rel.followsOrderschemeBB88();
     }
 

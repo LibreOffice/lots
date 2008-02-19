@@ -115,8 +115,7 @@ public class DocumentCommandInterpreter
    *          Eine Liste mit fragment-urls, die für das Kommando insertContent
    *          benötigt wird.
    */
-  public DocumentCommandInterpreter(TextDocumentModel model,
-      WollMuxSingleton mux)
+  public DocumentCommandInterpreter(TextDocumentModel model, WollMuxSingleton mux)
   {
     this.model = model;
     this.mux = mux;
@@ -175,8 +174,7 @@ public class DocumentCommandInterpreter
     // Zuerst alle Kommandos bearbeiten, die irgendwie Kinder bekommen
     // können, damit der DocumentCommandTree vollständig aufgebaut werden
     // kann.
-    errors += new DocumentExpander(model.getFragUrls()).execute(model
-        .getDocumentCommands());
+    errors += new DocumentExpander(model.getFragUrls()).execute(model.getDocumentCommands());
 
     // Überträgt beim übergebenen XTextDocument doc die Eigenschaften der
     // Seitenvorlage Wollmuxseite auf die Seitenvorlage Standard, falls
@@ -228,10 +226,8 @@ public class DocumentCommandInterpreter
     if (errors != 0)
     {
       throw new WMCommandsFailedException(
-          "Die verwendete Vorlage enthält "
-              + ((errors == 1) ? "einen" : "" + errors)
-              + " Fehler.\n\n"
-              + "Bitte kontaktieren Sie Ihre Systemadministration.");
+        "Die verwendete Vorlage enthält " + ((errors == 1) ? "einen" : "" + errors)
+            + " Fehler.\n\n" + "Bitte kontaktieren Sie Ihre Systemadministration.");
     }
   }
 
@@ -248,8 +244,7 @@ public class DocumentCommandInterpreter
   public static void pageStyleWollmuxseiteToStandard(XTextDocument doc)
   {
 
-    XStyleFamiliesSupplier styleFamiliesSupplier = UNO
-        .XStyleFamiliesSupplier(doc);
+    XStyleFamiliesSupplier styleFamiliesSupplier = UNO.XStyleFamiliesSupplier(doc);
     XNameAccess nameAccess = styleFamiliesSupplier.getStyleFamilies();
 
     XNameContainer nameContainer = null;
@@ -280,10 +275,8 @@ public class DocumentCommandInterpreter
     // Seitenvorlage Standard übertragen.
     if (styleWollmuxseite != null)
     {
-      XMultiPropertySet multiPropertySetWollmuxseite = UNO
-          .XMultiPropertySet(styleWollmuxseite);
-      XPropertySetInfo propertySetInfo = multiPropertySetWollmuxseite
-          .getPropertySetInfo();
+      XMultiPropertySet multiPropertySetWollmuxseite = UNO.XMultiPropertySet(styleWollmuxseite);
+      XPropertySetInfo propertySetInfo = multiPropertySetWollmuxseite.getPropertySetInfo();
       Property[] propertys = propertySetInfo.getProperties();
       HashSet set = new HashSet();
       // Schleife über die Properties der Wollmuxseite. Wenn die Properties
@@ -374,8 +367,8 @@ public class DocumentCommandInterpreter
 
       // Wenn eine Mischvorlage zum Bearbeiten geöffnet wurde soll der typ
       // "templateTemplate" NICHT gelöscht werden, ansonsten schon.
-      if (!(model.hasURL() && cmd.getType()
-          .equalsIgnoreCase("templateTemplate"))) cmd.markDone(true);
+      if (!(model.hasURL() && cmd.getType().equalsIgnoreCase("templateTemplate")))
+        cmd.markDone(true);
       return 0;
     }
 
@@ -393,10 +386,8 @@ public class DocumentCommandInterpreter
         fields = new LinkedList();
         idToFormFields.put(id, fields);
       }
-      FormField field = FormFieldFactory.createFormField(
-          model.doc,
-          cmd,
-          bookmarkNameToFormField);
+      FormField field = FormFieldFactory.createFormField(model.doc, cmd,
+        bookmarkNameToFormField);
 
       if (field != null)
       {
@@ -623,8 +614,7 @@ public class DocumentCommandInterpreter
 
       if (removeAnLastEmptyParagraph == false) isEndOfDocument = false;
 
-      if (end[0].isStartOfParagraph()
-          && end[1].isEndOfParagraph()
+      if (end[0].isStartOfParagraph() && end[1].isEndOfParagraph()
           && !isEndOfDocument)
       {
         muellmaenner.add(new ParagraphMuellmann(end[1]));
@@ -679,8 +669,7 @@ public class DocumentCommandInterpreter
      * @return
      * @throws WMCommandsFailedException
      */
-    public int execute(DocumentCommands commands)
-        throws WMCommandsFailedException
+    public int execute(DocumentCommands commands) throws WMCommandsFailedException
     {
       int errors = 0;
 
@@ -774,10 +763,9 @@ public class DocumentCommandInterpreter
         urls = VisibleTextFragmentList.getURLsByID(fragId);
         if (urls.size() == 0)
         {
-          throw new ConfigurationErrorException(
-              "Das Textfragment mit der FRAG_ID '"
-                  + cmd.getFragID()
-                  + "' ist nicht definiert!");
+          throw new ConfigurationErrorException("Das Textfragment mit der FRAG_ID '"
+                                                + cmd.getFragID()
+                                                + "' ist nicht definiert!");
         }
         // Iterator über URLs
         Iterator iter = urls.iterator();
@@ -788,11 +776,8 @@ public class DocumentCommandInterpreter
           {
             URL url = WollMuxFiles.makeURL(urlStr);
 
-            Logger.debug("Füge Textfragment \""
-                         + cmd.getFragID()
-                         + "\" von URL \""
-                         + url.toExternalForm()
-                         + "\" ein.");
+            Logger.debug("Füge Textfragment \"" + cmd.getFragID() + "\" von URL \""
+                         + url.toExternalForm() + "\" ein.");
 
             // styles bzw. fragment einfügen:
             if (cmd.importStylesOnly())
@@ -801,8 +786,8 @@ public class DocumentCommandInterpreter
               insertDocumentFromURL(cmd, url);
 
             found = true;
-            fillPlaceholders(model.doc, model.getViewCursor(), cmd
-                .createInsertCursor(false), cmd.getArgs());
+            fillPlaceholders(model.doc, model.getViewCursor(),
+              cmd.createInsertCursor(false), cmd.getArgs());
           }
           catch (java.lang.Exception e)
           {
@@ -821,12 +806,9 @@ public class DocumentCommandInterpreter
       {
         if (cmd.isManualMode())
         {
-          WollMuxSingleton.showInfoModal(
-              "WollMux-Fehler",
-              "Das Textfragment mit der FRAG_ID '"
-                  + cmd.getFragID()
-                  + "' konnte nicht eingefügt werden:\n\n"
-                  + e.getMessage());
+          WollMuxSingleton.showInfoModal("WollMux-Fehler",
+            "Das Textfragment mit der FRAG_ID '" + cmd.getFragID()
+                + "' konnte nicht eingefügt werden:\n\n" + e.getMessage());
         }
         else
         {
@@ -914,13 +896,12 @@ public class DocumentCommandInterpreter
       if (range != null)
       {
         endCursor = new UnoService(range.getText().createTextCursorByRange(
-            range.getEnd()));
+          range.getEnd()));
       }
       try
       {
         if (endCursor.xPropertySet() != null)
-          paraStyleName = endCursor.getPropertyValue("ParaStyleName")
-              .getObject().toString();
+          paraStyleName = endCursor.getPropertyValue("ParaStyleName").getObject().toString();
       }
       catch (java.lang.Exception e)
       {
@@ -933,8 +914,7 @@ public class DocumentCommandInterpreter
       HashSet textFrames = new HashSet();
       if (UNO.XTextFramesSupplier(model.doc) != null)
       {
-        String[] names = UNO.XTextFramesSupplier(model.doc).getTextFrames()
-            .getElementNames();
+        String[] names = UNO.XTextFramesSupplier(model.doc).getTextFrames().getElementNames();
         for (int i = 0; i < names.length; i++)
         {
           textFrames.add(names[i]);
@@ -945,9 +925,8 @@ public class DocumentCommandInterpreter
       UnoService insCursor = new UnoService(cmd.createInsertCursor(true));
       if (insCursor.xDocumentInsertable() != null && urlStr != null)
       {
-        insCursor.xDocumentInsertable().insertDocumentFromURL(
-            urlStr,
-            new PropertyValue[] {});
+        insCursor.xDocumentInsertable().insertDocumentFromURL(urlStr,
+          new PropertyValue[] {});
       }
 
       // Workaround: ParagraphStyleName für den letzten eingefügten Paragraphen
@@ -1001,16 +980,16 @@ public class DocumentCommandInterpreter
       {
         UnoProps props = new UnoProps();
         props.setPropertyValue("OverwriteStyles", Boolean.TRUE);
-        props.setPropertyValue("LoadCellStyles", new Boolean(styles
-            .contains("cellstyles")));
-        props.setPropertyValue("LoadTextStyles", new Boolean(styles
-            .contains("textstyles")));
-        props.setPropertyValue("LoadFrameStyles", new Boolean(styles
-            .contains("framestyles")));
-        props.setPropertyValue("LoadPageStyles", new Boolean(styles
-            .contains("pagestyles")));
-        props.setPropertyValue("LoadNumberingStyles", new Boolean(styles
-            .contains("numberingstyles")));
+        props.setPropertyValue("LoadCellStyles", new Boolean(
+          styles.contains("cellstyles")));
+        props.setPropertyValue("LoadTextStyles", new Boolean(
+          styles.contains("textstyles")));
+        props.setPropertyValue("LoadFrameStyles", new Boolean(
+          styles.contains("framestyles")));
+        props.setPropertyValue("LoadPageStyles", new Boolean(
+          styles.contains("pagestyles")));
+        props.setPropertyValue("LoadNumberingStyles", new Boolean(
+          styles.contains("numberingstyles")));
         XStyleFamiliesSupplier sfs = UNO.XStyleFamiliesSupplier(model.doc);
         XStyleLoader loader = UNO.XStyleLoader(sfs.getStyleFamilies());
         loader.loadStylesFromURL(urlStr, props.getProps());
@@ -1071,23 +1050,19 @@ public class DocumentCommandInterpreter
             {
               continue;
             }
-            String textPortionType = (String) UNO.getProperty(
-                textPortion,
-                "TextPortionType");
+            String textPortionType = (String) UNO.getProperty(textPortion,
+              "TextPortionType");
             // Wenn es ein Textfeld ist
             if (textPortionType.equals("TextField"))
             {
               XTextField textField = null;
               try
               {
-                textField = UNO.XTextField(UNO.getProperty(
-                    textPortion,
-                    "TextField"));
+                textField = UNO.XTextField(UNO.getProperty(textPortion, "TextField"));
                 // Wenn es ein Platzhalterfeld ist, dem Vector placeholders
                 // hinzufügen
-                if (UNO.supportsService(
-                    textField,
-                    "com.sun.star.text.TextField.JumpEdit"))
+                if (UNO.supportsService(textField,
+                  "com.sun.star.text.TextField.JumpEdit"))
                 {
                   placeholders.add(textField);
                 }
@@ -1166,8 +1141,7 @@ public class DocumentCommandInterpreter
         Logger.error(error);
 
         ConfigThingy conf = mux.getWollmuxConf();
-        ConfigThingy WarnungenConf = conf.query("Textbausteine").query(
-            "Warnungen");
+        ConfigThingy WarnungenConf = conf.query("Textbausteine").query("Warnungen");
 
         String message = "";
         try
@@ -1178,9 +1152,7 @@ public class DocumentCommandInterpreter
         {
         }
 
-        if (message.equals("true")
-            || message.equals("on")
-            || message.equals("1"))
+        if (message.equals("true") || message.equals("on") || message.equals("1"))
         {
           WollMuxSingleton.showInfoModal("WollMux", error);
         }
@@ -1283,8 +1255,7 @@ public class DocumentCommandInterpreter
         }
         else
         {
-          insCursor.setString(cmd.getLeftSeparator()
-                              + value
+          insCursor.setString(cmd.getLeftSeparator() + value
                               + cmd.getRightSeparator());
         }
       }
@@ -1316,14 +1287,9 @@ public class DocumentCommandInterpreter
       }
       else
       {
-        value = "<FEHLER: FUNCTION '"
-                + cmd.getFunctionName()
-                + "' nicht definiert>";
-        Logger.error("Die in Kommando '"
-                     + cmd
-                     + " verwendete FUNCTION '"
-                     + cmd.getFunctionName()
-                     + "' ist nicht definiert.");
+        value = "<FEHLER: FUNCTION '" + cmd.getFunctionName() + "' nicht definiert>";
+        Logger.error("Die in Kommando '" + cmd + " verwendete FUNCTION '"
+                     + cmd.getFunctionName() + "' ist nicht definiert.");
       }
 
       XTextCursor insCursor = cmd.createInsertCursor(false);
@@ -1449,8 +1415,8 @@ public class DocumentCommandInterpreter
       XTextRange range = cursor.xTextCursor().getEnd();
       XTextCursor c = range.getText().createTextCursorByRange(range);
       c.goLeft((short) 2, false);
-      XTextContent note = UNO.XTextContent(UNO.XMultiServiceFactory(model.doc)
-          .createInstance("com.sun.star.text.TextField.Annotation"));
+      XTextContent note = UNO.XTextContent(UNO.XMultiServiceFactory(model.doc).createInstance(
+        "com.sun.star.text.TextField.Annotation"));
       UNO.setProperty(note, "Content", msg + ":\n\n" + e.getMessage());
       c.getText().insertTextContent(c, note, false);
     }

@@ -49,16 +49,14 @@ public class Shortcuts
    */
   public static void createShortcuts(ConfigThingy tastenkombinationenConf)
   {
-    XAcceleratorConfiguration shortcutManager = UNO
-        .getShortcutManager("com.sun.star.text.TextDocument");
+    XAcceleratorConfiguration shortcutManager = UNO.getShortcutManager("com.sun.star.text.TextDocument");
     if (shortcutManager == null) return;
 
     // löschen aller KeyEvents die mit "wollmux:" beginnen
     removeComandFromAllKeyEvents(shortcutManager);
 
     // lesen des Knoten SHORTCUT
-    ConfigThingy shortcutConf = tastenkombinationenConf
-        .queryByChild("SHORTCUT");
+    ConfigThingy shortcutConf = tastenkombinationenConf.queryByChild("SHORTCUT");
 
     // Iterieren über die Knoten SHORTCUT
     Iterator iterShortcut = shortcutConf.iterator();
@@ -108,8 +106,7 @@ public class Shortcuts
       }
       else
       {
-        Logger.error("Ungültige Tastenkombination '"
-                     + shortcut
+        Logger.error("Ungültige Tastenkombination '" + shortcut
                      + "' im .conf Abschnitt Tastenkuerzel");
       }
     }
@@ -126,7 +123,7 @@ public class Shortcuts
     {
       Logger.error(e);
     }
-}
+  }
 
   /**
    * Wenn es Tastenkuerzel mit einer UNO-url beginnent mit "wollmux:" gibt,
@@ -181,11 +178,8 @@ public class Shortcuts
     {
       for (int i = 0; i < keys.length; i++)
       {
-        System.out.println("Modifiers: "
-                           + keys[i].Modifiers
-                           + " KeyCode: "
-                           + keys[i].KeyCode
-                           + " --> "
+        System.out.println("Modifiers: " + keys[i].Modifiers + " KeyCode: "
+                           + keys[i].KeyCode + " --> "
                            + xac.getCommandByKeyEvent(keys[i]));
 
       }

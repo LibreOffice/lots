@@ -249,8 +249,7 @@ public class PrintModels
    * 
    * @author christoph.lutz
    */
-  private static class MasterPrintModel implements XPrintModel,
-      InternalPrintModel
+  private static class MasterPrintModel implements XPrintModel, InternalPrintModel
   {
     /**
      * Enthält die sortierte Menge aller PrintFunction-Objekte der Aufrufkette.
@@ -315,8 +314,8 @@ public class PrintModels
      */
     public boolean usePrintFunction(String functionName)
     {
-      PrintFunction newFunc = WollMuxSingleton.getInstance()
-          .getGlobalPrintFunctions().get(functionName);
+      PrintFunction newFunc = WollMuxSingleton.getInstance().getGlobalPrintFunctions().get(
+        functionName);
       if (newFunc != null)
       {
         return useInternalPrintFunction(newFunc);
@@ -389,8 +388,7 @@ public class PrintModels
     {
       try
       {
-        setPropertyValue(PrintModelProps.PROP_COPY_COUNT, new Short(
-            numberOfCopies));
+        setPropertyValue(PrintModelProps.PROP_COPY_COUNT, new Short(numberOfCopies));
         printWithProps();
       }
       catch (java.lang.Exception e)
@@ -455,10 +453,8 @@ public class PrintModels
     protected void finalPrintWithProps()
     {
       setLock();
-      WollMuxEventHandler.handlePrintViaPrintModel(
-          model.doc,
-          props,
-          unlockActionListener);
+      WollMuxEventHandler.handlePrintViaPrintModel(model.doc, props,
+        unlockActionListener);
       waitForUnlock();
     }
 
@@ -476,10 +472,8 @@ public class PrintModels
     public void showPrinterSetupDialog(boolean onlyOnce)
     {
       setLock();
-      WollMuxEventHandler.handleShowPrinterSetupDialog(
-          model.doc,
-          onlyOnce,
-          unlockActionListener);
+      WollMuxEventHandler.handleShowPrinterSetupDialog(model.doc, onlyOnce,
+        unlockActionListener);
       waitForUnlock();
     }
 
@@ -505,11 +499,8 @@ public class PrintModels
     public void setFormValue(String id, String value)
     {
       setLock();
-      WollMuxEventHandler.handleSetFormValueViaPrintModel(
-          model.doc,
-          id,
-          value,
-          unlockActionListener);
+      WollMuxEventHandler.handleSetFormValueViaPrintModel(model.doc, id, value,
+        unlockActionListener);
       waitForUnlock();
     }
 
@@ -560,9 +551,8 @@ public class PrintModels
     public void collectNonWollMuxFormFields()
     {
       setLock();
-      WollMuxEventHandler.handleCollectNonWollMuxFormFieldsViaPrintModel(
-          model,
-          unlockActionListener);
+      WollMuxEventHandler.handleCollectNonWollMuxFormFieldsViaPrintModel(model,
+        unlockActionListener);
       waitForUnlock();
     }
 
@@ -700,8 +690,8 @@ public class PrintModels
      * 
      * @see com.sun.star.beans.XPropertySet#getPropertyValue(java.lang.String)
      */
-    public Object getPropertyValue(String arg0)
-        throws UnknownPropertyException, WrappedTargetException
+    public Object getPropertyValue(String arg0) throws UnknownPropertyException,
+        WrappedTargetException
     {
       if (props.containsKey(arg0))
         return props.get(arg0);
@@ -715,9 +705,8 @@ public class PrintModels
      * @see com.sun.star.beans.XPropertySet#addPropertyChangeListener(java.lang.String,
      *      com.sun.star.beans.XPropertyChangeListener)
      */
-    public void addPropertyChangeListener(String arg0,
-        XPropertyChangeListener arg1) throws UnknownPropertyException,
-        WrappedTargetException
+    public void addPropertyChangeListener(String arg0, XPropertyChangeListener arg1)
+        throws UnknownPropertyException, WrappedTargetException
     {
       // NOT IMPLEMENTED
     }
@@ -741,9 +730,8 @@ public class PrintModels
      * @see com.sun.star.beans.XPropertySet#addVetoableChangeListener(java.lang.String,
      *      com.sun.star.beans.XVetoableChangeListener)
      */
-    public void addVetoableChangeListener(String arg0,
-        XVetoableChangeListener arg1) throws UnknownPropertyException,
-        WrappedTargetException
+    public void addVetoableChangeListener(String arg0, XVetoableChangeListener arg1)
+        throws UnknownPropertyException, WrappedTargetException
     {
       // NOT IMPLEMENTED
     }
@@ -784,12 +772,8 @@ public class PrintModels
         boolean showHighlightColor)
     {
       setLock();
-      WollMuxEventHandler.handleSetPrintBlocksPropsViaPrintModel(
-          model.doc,
-          blockName,
-          visible,
-          showHighlightColor,
-          unlockActionListener);
+      WollMuxEventHandler.handleSetPrintBlocksPropsViaPrintModel(model.doc,
+        blockName, visible, showHighlightColor, unlockActionListener);
       waitForUnlock();
     }
 
@@ -813,11 +797,8 @@ public class PrintModels
     public void setGroupVisible(String groupID, boolean visible)
     {
       setLock();
-      WollMuxEventHandler.handleSetVisibleState(
-          model,
-          groupID,
-          visible,
-          unlockActionListener);
+      WollMuxEventHandler.handleSetVisibleState(model, groupID, visible,
+        unlockActionListener);
       waitForUnlock();
     }
   }
@@ -880,8 +861,7 @@ public class PrintModels
     {
       try
       {
-        setPropertyValue(PrintModelProps.PROP_COPY_COUNT, new Short(
-            numberOfCopies));
+        setPropertyValue(PrintModelProps.PROP_COPY_COUNT, new Short(numberOfCopies));
         printWithProps();
       }
       catch (java.lang.Exception e)
@@ -1009,8 +989,8 @@ public class PrintModels
      * 
      * @see com.sun.star.beans.XPropertySet#getPropertyValue(java.lang.String)
      */
-    public Object getPropertyValue(String arg0)
-        throws UnknownPropertyException, WrappedTargetException
+    public Object getPropertyValue(String arg0) throws UnknownPropertyException,
+        WrappedTargetException
     {
       return master.getPropertyValue(arg0);
     }
@@ -1021,9 +1001,8 @@ public class PrintModels
      * @see com.sun.star.beans.XPropertySet#addPropertyChangeListener(java.lang.String,
      *      com.sun.star.beans.XPropertyChangeListener)
      */
-    public void addPropertyChangeListener(String arg0,
-        XPropertyChangeListener arg1) throws UnknownPropertyException,
-        WrappedTargetException
+    public void addPropertyChangeListener(String arg0, XPropertyChangeListener arg1)
+        throws UnknownPropertyException, WrappedTargetException
     {
       master.addPropertyChangeListener(arg0, arg1);
     }
@@ -1047,9 +1026,8 @@ public class PrintModels
      * @see com.sun.star.beans.XPropertySet#addVetoableChangeListener(java.lang.String,
      *      com.sun.star.beans.XVetoableChangeListener)
      */
-    public void addVetoableChangeListener(String arg0,
-        XVetoableChangeListener arg1) throws UnknownPropertyException,
-        WrappedTargetException
+    public void addVetoableChangeListener(String arg0, XVetoableChangeListener arg1)
+        throws UnknownPropertyException, WrappedTargetException
     {
       master.addVetoableChangeListener(arg0, arg1);
     }
@@ -1076,8 +1054,8 @@ public class PrintModels
      */
     public boolean usePrintFunction(String functionName)
     {
-      PrintFunction newFunc = WollMuxSingleton.getInstance()
-          .getGlobalPrintFunctions().get(functionName);
+      PrintFunction newFunc = WollMuxSingleton.getInstance().getGlobalPrintFunctions().get(
+        functionName);
       if (newFunc != null)
       {
         return useInternalPrintFunction(newFunc);
@@ -1103,12 +1081,10 @@ public class PrintModels
         PrintFunction currentFunc = master.getPrintFunction(idx);
         if (function.compareTo(currentFunc) <= 0)
         {
-          Logger
-              .error("Druckfunktion '"
-                     + function.getFunctionName()
-                     + "' muss einen höheren ORDER-Wert besitzen als die Druckfunktion '"
-                     + currentFunc.getFunctionName()
-                     + "'");
+          Logger.error("Druckfunktion '"
+                       + function.getFunctionName()
+                       + "' muss einen höheren ORDER-Wert besitzen als die Druckfunktion '"
+                       + currentFunc.getFunctionName() + "'");
           return false;
         }
         else

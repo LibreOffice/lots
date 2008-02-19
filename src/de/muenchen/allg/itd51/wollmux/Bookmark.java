@@ -81,16 +81,13 @@ public class Bookmark
    * @throws NoSuchElementException
    *           Das Bookmark name ist im angegebenen Dokument nicht enthalten.
    */
-  public Bookmark(String name, XBookmarksSupplier doc)
-      throws NoSuchElementException
+  public Bookmark(String name, XBookmarksSupplier doc) throws NoSuchElementException
   {
     this.document = new UnoService(doc);
     this.name = name;
     UnoService bookmark = getBookmarkService(name, document);
     if (bookmark.xTextContent() == null)
-      throw new NoSuchElementException("Bookmark \""
-                                       + name
-                                       + "\" existiert nicht.");
+      throw new NoSuchElementException("Bookmark \"" + name + "\" existiert nicht.");
   }
 
   /**
@@ -137,8 +134,7 @@ public class Bookmark
     }
 
     // Bookmark ins Dokument einfügen
-    if (document.xTextDocument() != null
-        && bookmark.xTextContent() != null
+    if (document.xTextDocument() != null && bookmark.xTextContent() != null
         && range != null)
     {
       try
@@ -147,8 +143,7 @@ public class Bookmark
         // erfolgreich gesetzt werden können. Das geht mit normalen TextRanges
         // nicht.
         XTextCursor cursor = range.getText().createTextCursorByRange(range);
-        range.getText()
-            .insertTextContent(cursor, bookmark.xTextContent(), true);
+        range.getText().insertTextContent(cursor, bookmark.xTextContent(), true);
         this.name = bookmark.xNamed().getName();
       }
       catch (IllegalArgumentException e)
@@ -177,8 +172,8 @@ public class Bookmark
     {
       try
       {
-        return new UnoService(document.xBookmarksSupplier().getBookmarks()
-            .getByName(name));
+        return new UnoService(
+          document.xBookmarksSupplier().getBookmarks().getByName(name));
       }
       catch (WrappedTargetException e)
       {
@@ -216,8 +211,8 @@ public class Bookmark
       {
         XTextRange anchor = bm.xTextContent().getAnchor();
         XTextRange cursor = anchor.getText().createTextCursorByRange(anchor);
-        UNO.XTextViewCursorSupplier(document.xModel().getCurrentController())
-            .getViewCursor().gotoRange(cursor, false);
+        UNO.XTextViewCursorSupplier(document.xModel().getCurrentController()).getViewCursor().gotoRange(
+          cursor, false);
       }
       catch (java.lang.Exception x)
       {
@@ -254,8 +249,7 @@ public class Bookmark
    */
   public String rename(String newName)
   {
-    XNameAccess bookmarks = UNO.XBookmarksSupplier(document.getObject())
-        .getBookmarks();
+    XNameAccess bookmarks = UNO.XBookmarksSupplier(document.getObject()).getBookmarks();
 
     // Um OOo nicht zu stressen vermeiden wir unnötige Renames
     // Wir testen aber trotzdem ob das Bookmark BROKEN ist
@@ -284,8 +278,7 @@ public class Bookmark
     }
     catch (NoSuchElementException x)
     {
-      Logger
-          .debug("Umbenennung kann nicht durchgeführt werden, da die Textmarke verschwunden ist :~-(");
+      Logger.debug("Umbenennung kann nicht durchgeführt werden, da die Textmarke verschwunden ist :~-(");
     }
     catch (java.lang.Exception x)
     {
@@ -319,10 +312,8 @@ public class Bookmark
     {
       UnoService bookmark = document.create("com.sun.star.text.Bookmark");
       bookmark.xNamed().setName(name);
-      xTextRange.getText().insertTextContent(
-          xTextRange,
-          bookmark.xTextContent(),
-          true);
+      xTextRange.getText().insertTextContent(xTextRange, bookmark.xTextContent(),
+        true);
     }
     catch (Exception e)
     {
@@ -405,10 +396,9 @@ public class Bookmark
       // eine
       // eigene Textportion ist.
       Object bookmark = UNO.XMultiServiceFactory(doc).createInstance(
-          "com.sun.star.text.Bookmark");
+        "com.sun.star.text.Bookmark");
       UNO.XNamed(bookmark).setName("killer");
-      range.getText()
-          .insertTextContent(range, UNO.XTextContent(bookmark), true);
+      range.getText().insertTextContent(range, UNO.XTextContent(bookmark), true);
       String name = UNO.XNamed(bookmark).getName();
 
       // Aufsammeln der zu entfernenden TextPortions (sollte genau eine sein)
@@ -427,24 +417,20 @@ public class Bookmark
           while (xEnum2.hasMoreElements())
           {
             Object textPortion = xEnum2.nextElement();
-            if ("Bookmark".equals(UNO.getProperty(
-                textPortion,
-                "TextPortionType")))
+            if ("Bookmark".equals(UNO.getProperty(textPortion, "TextPortionType")))
             {
               String portionName = UNO.XNamed(
-                  UNO.getProperty(textPortion, "Bookmark")).getName();
+                UNO.getProperty(textPortion, "Bookmark")).getName();
               if (name.equals(portionName))
               {
-                kill = ((Boolean) UNO.getProperty(textPortion, "IsStart"))
-                    .booleanValue();
+                kill = ((Boolean) UNO.getProperty(textPortion, "IsStart")).booleanValue();
               }
               else
                 collateral.add(portionName);
             }
 
             if (kill
-                && "Text".equals(UNO
-                    .getProperty(textPortion, "TextPortionType")))
+                && "Text".equals(UNO.getProperty(textPortion, "TextPortionType")))
             {
               victims.add(textPortion);
             }
@@ -463,7 +449,7 @@ public class Bookmark
       range.setString("");
 
       UNO.XTextContent(bookmark).getAnchor().getText().removeTextContent(
-          UNO.XTextContent(bookmark));
+        UNO.XTextContent(bookmark));
 
       /*
        * Verlorene Bookmarks regenerieren.
@@ -477,12 +463,9 @@ public class Bookmark
         {
           Logger.debug("Regeneriere Bookmark \"" + portionName + "\"");
           bookmark = UNO.XMultiServiceFactory(doc).createInstance(
-              "com.sun.star.text.Bookmark");
+            "com.sun.star.text.Bookmark");
           UNO.XNamed(bookmark).setName(portionName);
-          range.getText().insertTextContent(
-              range,
-              UNO.XTextContent(bookmark),
-              true);
+          range.getText().insertTextContent(range, UNO.XTextContent(bookmark), true);
         }
 
       }
@@ -510,8 +493,7 @@ public class Bookmark
     if (anchor == null) return false;
     try
     {
-      Object par = UNO.XEnumerationAccess(anchor).createEnumeration()
-          .nextElement();
+      Object par = UNO.XEnumerationAccess(anchor).createEnumeration().nextElement();
       XEnumeration xenum = UNO.XEnumerationAccess(par).createEnumeration();
       while (xenum.hasMoreElements())
       {
@@ -522,8 +504,7 @@ public class Bookmark
           if (!tpt.equals("Bookmark")) continue;
           XNamed bm = UNO.XNamed(UNO.getProperty(element, "Bookmark"));
           if (bm == null || !name.equals(bm.getName())) continue;
-          return AnyConverter
-              .toBoolean(UNO.getProperty(element, "IsCollapsed"));
+          return AnyConverter.toBoolean(UNO.getProperty(element, "IsCollapsed"));
         }
         catch (java.lang.Exception e2)
         {

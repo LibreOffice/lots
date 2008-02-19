@@ -97,22 +97,11 @@ public class SachleitendeVerfuegung
    * Enthält einen Vector mit den ersten 15 römischen Ziffern. Mehr wird in
    * Sachleitenden Verfügungen sicherlich nicht benötigt :-)
    */
-  private static final String[] romanNumbers = new String[] {
-                                                             "I.",
-                                                             "II.",
-                                                             "III.",
-                                                             "IV.",
-                                                             "V.",
-                                                             "VI.",
-                                                             "VII.",
-                                                             "VIII.",
-                                                             "IX.",
-                                                             "X.",
-                                                             "XI.",
-                                                             "XII.",
-                                                             "XIII.",
-                                                             "XIV.",
-                                                             "XV." };
+  private static final String[] romanNumbers = new String[] { "I.", "II.", "III.",
+                                                             "IV.", "V.", "VI.",
+                                                             "VII.", "VIII.", "IX.",
+                                                             "X.", "XI.", "XII.",
+                                                             "XIII.", "XIV.", "XV." };
 
   /**
    * Setzt das Absatzformat des Absatzes, der range berührt, auf
@@ -134,8 +123,8 @@ public class SachleitendeVerfuegung
     // Notwendige Absatzformate definieren (falls nicht bereits definiert)
     createUsedStyles(model.doc);
 
-    XParagraphCursor cursor = UNO.XParagraphCursor(range.getText()
-        .createTextCursorByRange(range));
+    XParagraphCursor cursor = UNO.XParagraphCursor(range.getText().createTextCursorByRange(
+      range));
 
     // Enthält der markierte Bereich bereits Verfuegungspunkte, so werden diese
     // gelöscht
@@ -174,16 +163,15 @@ public class SachleitendeVerfuegung
    * @return die Position zurück, auf die der ViewCursor gesetzt werden soll
    *         oder null, falls der ViewCursor unverändert bleibt.
    */
-  public static XTextRange insertAbdruck(TextDocumentModel model,
-      XTextRange range)
+  public static XTextRange insertAbdruck(TextDocumentModel model, XTextRange range)
   {
     if (range == null) return null;
 
     // Notwendige Absatzformate definieren (falls nicht bereits definiert)
     createUsedStyles(model.doc);
 
-    XParagraphCursor cursor = UNO.XParagraphCursor(range.getText()
-        .createTextCursorByRange(range));
+    XParagraphCursor cursor = UNO.XParagraphCursor(range.getText().createTextCursorByRange(
+      range));
 
     // Enthält der markierte Bereich bereits Verfuegungspunkte, so werden diese
     // gelöscht
@@ -236,8 +224,8 @@ public class SachleitendeVerfuegung
     // Notwendige Absatzformate definieren (falls nicht bereits definiert)
     createUsedStyles(model.doc);
 
-    XParagraphCursor cursor = UNO.XParagraphCursor(range.getText()
-        .createTextCursorByRange(range));
+    XParagraphCursor cursor = UNO.XParagraphCursor(range.getText().createTextCursorByRange(
+      range));
     XTextCursor createdZuleitung = null;
 
     boolean deletedAtLeastOne = removeAllZuleitungszeilen(cursor);
@@ -247,8 +235,7 @@ public class SachleitendeVerfuegung
       // Im cursor enthaltene Paragraphen einzeln iterieren und je nach Typ
       // entweder eine Zuleitungszeile oder einen Verfügungspunkt mit Zuleitung
       // setzen.
-      XEnumeration paragraphs = UNO.XEnumerationAccess(cursor)
-          .createEnumeration();
+      XEnumeration paragraphs = UNO.XEnumerationAccess(cursor).createEnumeration();
       while (paragraphs.hasMoreElements())
       {
         XTextRange par = null;
@@ -268,8 +255,7 @@ public class SachleitendeVerfuegung
             {
               // Zuleitung in neuer Zeile erzeugen:
               par.getEnd().setString("\r");
-              createdZuleitung = par.getText().createTextCursorByRange(
-                  par.getEnd());
+              createdZuleitung = par.getText().createTextCursorByRange(par.getEnd());
               if (createdZuleitung != null)
               {
                 createdZuleitung.goRight((short) 1, false);
@@ -455,8 +441,8 @@ public class SachleitendeVerfuegung
       // Den Absatz mit dem String "Ziffer.\tAbdruck von..." löschen
       par.setString("");
 
-      XParagraphCursor parDeleter = UNO.XParagraphCursor(par.getText()
-          .createTextCursorByRange(par.getEnd()));
+      XParagraphCursor parDeleter = UNO.XParagraphCursor(par.getText().createTextCursorByRange(
+        par.getEnd()));
 
       // Löscht das Leerzeichen vor dem Abdruck und nach dem Abdruck (falls eine
       // Leerzeile folgt)
@@ -501,10 +487,8 @@ public class SachleitendeVerfuegung
    */
   private static void formatVerfuegungspunktWithZuleitung(XTextRange paragraph)
   {
-    UNO.setProperty(
-        paragraph,
-        "ParaStyleName",
-        ParaStyleNameVerfuegungspunktMitZuleitung);
+    UNO.setProperty(paragraph, "ParaStyleName",
+      ParaStyleNameVerfuegungspunktMitZuleitung);
     formatRoemischeZifferOnly(paragraph);
   }
 
@@ -542,11 +526,7 @@ public class SachleitendeVerfuegung
     XTextCursor zifferOnly = getZifferOnly(paragraph, false);
     if (zifferOnly != null)
     {
-      UNO
-          .setProperty(
-              zifferOnly,
-              "CharStyleName",
-              CharStyleNameRoemischeZiffer);
+      UNO.setProperty(zifferOnly, "CharStyleName", CharStyleNameRoemischeZiffer);
 
       // Zeichen danach auf Standardformatierung setzen, damit der Text, der
       // danach geschrieben wird nicht auch obiges Zeichenformat besitzt:
@@ -570,9 +550,8 @@ public class SachleitendeVerfuegung
     String paraStyleName = "";
     try
     {
-      paraStyleName = AnyConverter.toString(UNO.getProperty(
-          paragraph,
-          "ParaStyleName"));
+      paraStyleName = AnyConverter.toString(UNO.getProperty(paragraph,
+        "ParaStyleName"));
     }
     catch (IllegalArgumentException e)
     {
@@ -595,9 +574,8 @@ public class SachleitendeVerfuegung
     String paraStyleName = "";
     try
     {
-      paraStyleName = AnyConverter.toString(UNO.getProperty(
-          paragraph,
-          "ParaStyleName"));
+      paraStyleName = AnyConverter.toString(UNO.getProperty(paragraph,
+        "ParaStyleName"));
     }
     catch (IllegalArgumentException e)
     {
@@ -620,9 +598,8 @@ public class SachleitendeVerfuegung
     String paraStyleName = "";
     try
     {
-      paraStyleName = AnyConverter.toString(UNO.getProperty(
-          paragraph,
-          "ParaStyleName"));
+      paraStyleName = AnyConverter.toString(UNO.getProperty(paragraph,
+        "ParaStyleName"));
     }
     catch (IllegalArgumentException e)
     {
@@ -659,8 +636,7 @@ public class SachleitendeVerfuegung
    *          Die TextRange, bei der mit der Zählung begonnen werden soll.
    * @return die Anzahl Verfügungspunkte vor und mit range.getStart()
    */
-  public static int countVerfPunkteBefore(XTextDocument doc,
-      XParagraphCursor range)
+  public static int countVerfPunkteBefore(XTextDocument doc, XParagraphCursor range)
   {
     int count = 0;
 
@@ -669,8 +645,8 @@ public class SachleitendeVerfuegung
     XTextRange punkt1 = getVerfuegungspunkt1(doc);
     if (punkt1 != null) count++;
 
-    XParagraphCursor cursor = UNO.XParagraphCursor(range.getText()
-        .createTextCursorByRange(range.getStart()));
+    XParagraphCursor cursor = UNO.XParagraphCursor(range.getText().createTextCursorByRange(
+      range.getStart()));
     if (cursor != null) do
     {
       if (isVerfuegungspunkt(cursor)) count++;
@@ -708,8 +684,8 @@ public class SachleitendeVerfuegung
     // der es zu OOo-Abstürzen kam. Leider konnte ich das Problem nicht exakt
     // genug isolieren um ein entsprechende Ticket bei OOo dazu aufmachen zu
     // können, da der Absturz nur sporadisch auftrat.
-    XParagraphCursor cursor = UNO.XParagraphCursor(model.doc.getText()
-        .createTextCursorByRange(model.doc.getText().getStart()));
+    XParagraphCursor cursor = UNO.XParagraphCursor(model.doc.getText().createTextCursorByRange(
+      model.doc.getText().getStart()));
     if (cursor != null)
       do
       {
@@ -745,7 +721,7 @@ public class SachleitendeVerfuegung
             {
               // Nummer neu anlegen, wenn wie noch gar nicht existierte
               zifferOnly = cursor.getText().createTextCursorByRange(
-                  cursor.getStart());
+                cursor.getStart());
               zifferOnly.setString(numberStr);
               formatRoemischeZifferOnly(zifferOnly);
             }
@@ -794,8 +770,8 @@ public class SachleitendeVerfuegung
    */
   private static XTextCursor getZifferOnly(XTextRange par, boolean includeNoTab)
   {
-    XParagraphCursor cursor = UNO.XParagraphCursor(par.getText()
-        .createTextCursorByRange(par.getStart()));
+    XParagraphCursor cursor = UNO.XParagraphCursor(par.getText().createTextCursorByRange(
+      par.getStart()));
 
     for (int i = 0; i < 7; i++)
     {
@@ -834,8 +810,8 @@ public class SachleitendeVerfuegung
     XTextFrame frame = null;
     try
     {
-      frame = UNO.XTextFrame(UNO.XTextFramesSupplier(doc).getTextFrames()
-          .getByName(FrameNameVerfuegungspunkt1));
+      frame = UNO.XTextFrame(UNO.XTextFramesSupplier(doc).getTextFrames().getByName(
+        FrameNameVerfuegungspunkt1));
     }
     catch (java.lang.Exception e)
     {
@@ -843,8 +819,7 @@ public class SachleitendeVerfuegung
 
     if (frame != null)
     {
-      XTextCursor cursor = frame.getText().createTextCursorByRange(
-          frame.getText());
+      XTextCursor cursor = frame.getText().createTextCursorByRange(frame.getText());
       if (isVerfuegungspunkt(cursor)) return cursor;
 
       // Absatzformat WollMuxVerfuegungspunkt1 setzen wenn noch nicht gesetzt.
@@ -926,8 +901,8 @@ public class SachleitendeVerfuegung
     // der es zu OOo-Abstürzen kam. Leider konnte ich das Problem nicht exakt
     // genug isolieren um ein entsprechende Ticket bei OOo dazu aufmachen zu
     // können, da der Absturz nur sporadisch auftrat.
-    XParagraphCursor cursor = UNO.XParagraphCursor(doc.getText()
-        .createTextCursorByRange(doc.getText().getStart()));
+    XParagraphCursor cursor = UNO.XParagraphCursor(doc.getText().createTextCursorByRange(
+      doc.getText().getStart()));
 
     if (cursor != null)
       do
@@ -950,8 +925,7 @@ public class SachleitendeVerfuegung
         {
           String zuleit = cursor.getString();
           // nicht leere Zuleitungszeilen zum Verfügungspunkt hinzufügen.
-          if (!(zuleit.length() == 0))
-            currentVerfpunkt.addZuleitungszeile(zuleit);
+          if (!(zuleit.length() == 0)) currentVerfpunkt.addZuleitungszeile(zuleit);
         }
       } while (cursor.gotoNextParagraph(false));
 
@@ -1105,7 +1079,7 @@ public class SachleitendeVerfuegung
     // Beschreibung des Druckdialogs auslesen.
     ConfigThingy conf = WollMuxSingleton.getInstance().getWollmuxConf();
     ConfigThingy svdds = conf.query("Dialoge").query(
-        "SachleitendeVerfuegungenDruckdialog");
+      "SachleitendeVerfuegungenDruckdialog");
     ConfigThingy printDialogConf = null;
     try
     {
@@ -1113,10 +1087,9 @@ public class SachleitendeVerfuegung
     }
     catch (NodeNotFoundException e)
     {
-      Logger
-          .error(
-              "Fehlende Dialogbeschreibung für den Dialog 'SachleitendeVerfuegungenDruckdialog'.",
-              e);
+      Logger.error(
+        "Fehlende Dialogbeschreibung für den Dialog 'SachleitendeVerfuegungenDruckdialog'.",
+        e);
       return;
     }
 
@@ -1183,7 +1156,7 @@ public class SachleitendeVerfuegung
     XTextCursor vc = null;
     XTextCursor oldViewCursor = null;
     XTextViewCursorSupplier suppl = UNO.XTextViewCursorSupplier(UNO.XModel(
-        pmod.getTextDocument()).getCurrentController());
+      pmod.getTextDocument()).getCurrentController());
     if (suppl != null) vc = suppl.getViewCursor();
     if (vc != null) oldViewCursor = vc.getText().createTextCursorByRange(vc);
 
@@ -1195,8 +1168,8 @@ public class SachleitendeVerfuegung
 
     // Auszublendenden Bereich festlegen:
     XTextRange setInvisibleRange = null;
-    XParagraphCursor cursor = UNO.XParagraphCursor(doc.getText()
-        .createTextCursorByRange(doc.getText().getStart()));
+    XParagraphCursor cursor = UNO.XParagraphCursor(doc.getText().createTextCursorByRange(
+      doc.getText().getStart()));
     if (cursor != null)
       do
       {
@@ -1221,9 +1194,8 @@ public class SachleitendeVerfuegung
 
     // Prüfen, welche Textsections im ausgeblendeten Bereich liegen und diese
     // ebenfalls ausblenden:
-    List hidingSections = getSectionsFromPosition(
-        pmod.getTextDocument(),
-        setInvisibleRange);
+    List hidingSections = getSectionsFromPosition(pmod.getTextDocument(),
+      setInvisibleRange);
     for (Iterator iter = hidingSections.iterator(); iter.hasNext();)
     {
       UNO.setProperty(iter.next(), "IsVisible", Boolean.FALSE);
@@ -1291,8 +1263,7 @@ public class SachleitendeVerfuegung
       UNO.setProperty(setInvisibleRange, "CharHidden", Boolean.FALSE);
 
     // ViewCursor wieder herstellen:
-    if (vc != null && oldViewCursor != null)
-      vc.gotoRange(oldViewCursor, false);
+    if (vc != null && oldViewCursor != null) vc.gotoRange(oldViewCursor, false);
   }
 
   /**
@@ -1401,7 +1372,7 @@ public class SachleitendeVerfuegung
     try
     {
       style = UNO.XStyle(UNO.XMultiServiceFactory(doc).createInstance(
-          "com.sun.star.style.ParagraphStyle"));
+        "com.sun.star.style.ParagraphStyle"));
       pss.insertByName(name, style);
       if (style != null && parentStyleName != null)
         style.setParentStyle(parentStyleName);
@@ -1464,7 +1435,7 @@ public class SachleitendeVerfuegung
     try
     {
       style = UNO.XStyle(UNO.XMultiServiceFactory(doc).createInstance(
-          "com.sun.star.style.CharacterStyle"));
+        "com.sun.star.style.CharacterStyle"));
       pss.insertByName(name, style);
       if (style != null && parentStyleName != null)
         style.setParentStyle(parentStyleName);
@@ -1492,8 +1463,7 @@ public class SachleitendeVerfuegung
     try
     {
       return UNO.XNameContainer(UNO.XNameAccess(
-          UNO.XStyleFamiliesSupplier(doc).getStyleFamilies()).getByName(
-          containerName));
+        UNO.XStyleFamiliesSupplier(doc).getStyleFamilies()).getByName(containerName));
     }
     catch (java.lang.Exception e)
     {
@@ -1526,10 +1496,8 @@ public class SachleitendeVerfuegung
     style = getParagraphStyle(doc, ParaStyleNameVerfuegungspunkt);
     if (style == null)
     {
-      style = createParagraphStyle(
-          doc,
-          ParaStyleNameVerfuegungspunkt,
-          ParaStyleNameDefault);
+      style = createParagraphStyle(doc, ParaStyleNameVerfuegungspunkt,
+        ParaStyleNameDefault);
       UNO.setProperty(style, "FollowStyle", ParaStyleNameDefault);
       UNO.setProperty(style, "CharWeight", new Float(FontWeight.BOLD));
       UNO.setProperty(style, "ParaFirstLineIndent", new Integer(-700));
@@ -1539,10 +1507,8 @@ public class SachleitendeVerfuegung
     style = getParagraphStyle(doc, ParaStyleNameVerfuegungspunkt1);
     if (style == null)
     {
-      style = createParagraphStyle(
-          doc,
-          ParaStyleNameVerfuegungspunkt1,
-          ParaStyleNameVerfuegungspunkt);
+      style = createParagraphStyle(doc, ParaStyleNameVerfuegungspunkt1,
+        ParaStyleNameVerfuegungspunkt);
       UNO.setProperty(style, "FollowStyle", ParaStyleNameDefault);
       UNO.setProperty(style, "ParaFirstLineIndent", new Integer(0));
       UNO.setProperty(style, "ParaTopMargin", new Integer(0));
@@ -1551,10 +1517,8 @@ public class SachleitendeVerfuegung
     style = getParagraphStyle(doc, ParaStyleNameAbdruck);
     if (style == null)
     {
-      style = createParagraphStyle(
-          doc,
-          ParaStyleNameAbdruck,
-          ParaStyleNameVerfuegungspunkt);
+      style = createParagraphStyle(doc, ParaStyleNameAbdruck,
+        ParaStyleNameVerfuegungspunkt);
       UNO.setProperty(style, "FollowStyle", ParaStyleNameDefault);
       UNO.setProperty(style, "CharWeight", new Integer(100));
       UNO.setProperty(style, "ParaFirstLineIndent", new Integer(-700));
@@ -1564,10 +1528,8 @@ public class SachleitendeVerfuegung
     style = getParagraphStyle(doc, ParaStyleNameZuleitungszeile);
     if (style == null)
     {
-      style = createParagraphStyle(
-          doc,
-          ParaStyleNameZuleitungszeile,
-          ParaStyleNameDefault);
+      style = createParagraphStyle(doc, ParaStyleNameZuleitungszeile,
+        ParaStyleNameDefault);
       UNO.setProperty(style, "FollowStyle", ParaStyleNameDefault);
       UNO.setProperty(style, "CharUnderline", new Integer(1));
       UNO.setProperty(style, "CharWeight", new Float(FontWeight.BOLD));
@@ -1576,10 +1538,8 @@ public class SachleitendeVerfuegung
     style = getParagraphStyle(doc, ParaStyleNameVerfuegungspunktMitZuleitung);
     if (style == null)
     {
-      style = createParagraphStyle(
-          doc,
-          ParaStyleNameVerfuegungspunktMitZuleitung,
-          ParaStyleNameVerfuegungspunkt);
+      style = createParagraphStyle(doc, ParaStyleNameVerfuegungspunktMitZuleitung,
+        ParaStyleNameVerfuegungspunkt);
       UNO.setProperty(style, "FollowStyle", ParaStyleNameDefault);
       UNO.setProperty(style, "CharUnderline", new Integer(1));
     }
@@ -1599,10 +1559,8 @@ public class SachleitendeVerfuegung
     style = getCharacterStyle(doc, CharStyleNameRoemischeZiffer);
     if (style == null)
     {
-      style = createCharacterStyle(
-          doc,
-          CharStyleNameRoemischeZiffer,
-          CharStyleNameDefault);
+      style = createCharacterStyle(doc, CharStyleNameRoemischeZiffer,
+        CharStyleNameDefault);
       UNO.setProperty(style, "FollowStyle", CharStyleNameDefault);
       UNO.setProperty(style, "CharWeight", new Float(FontWeight.BOLD));
     }

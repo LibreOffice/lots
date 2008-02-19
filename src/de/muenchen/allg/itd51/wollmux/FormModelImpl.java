@@ -62,7 +62,7 @@ public class FormModelImpl
     catch (NodeNotFoundException e)
     {
       throw new InvalidFormDescriptorException(
-          "Kein Abschnitt 'Formular' in der Formularbeschreibung vorhanden");
+        "Kein Abschnitt 'Formular' in der Formularbeschreibung vorhanden");
     }
 
     // Abschnitt Fenster/Formular aus wollmuxConf holen:
@@ -70,15 +70,14 @@ public class FormModelImpl
     try
     {
       formFensterConf = WollMuxFiles.getWollmuxConf().query("Fenster").query(
-          "Formular").getLastChild();
+        "Formular").getLastChild();
     }
     catch (NodeNotFoundException x)
     {
     }
 
-    return new FormModelImpl.SingleDocumentFormModel(doc, formFensterConf,
-        formConf, doc.getFunctionContext(), doc.getFunctionLibrary(), doc
-            .getDialogLibrary());
+    return new FormModelImpl.SingleDocumentFormModel(doc, formFensterConf, formConf,
+      doc.getFunctionContext(), doc.getFunctionLibrary(), doc.getDialogLibrary());
   }
 
   /**
@@ -113,16 +112,14 @@ public class FormModelImpl
       }
       catch (NodeNotFoundException e)
       {
-        Logger.error("Dokument '"
-                     + model.getTitle()
+        Logger.error("Dokument '" + model.getTitle()
                      + "' enthält keine gültige Formularbeschreibung", e);
       }
     }
 
     // ...und mergen
-    ConfigThingy formConf = FormController.mergeFormDescriptors(
-        formularSections,
-        buttonAnpassung);
+    ConfigThingy formConf = FormController.mergeFormDescriptors(formularSections,
+      buttonAnpassung);
 
     // mapIdToPresetValue aller Einzeldokumente vereinheitlichen:
     HashMap commonMapIdToPresetValue = new HashMap();
@@ -153,24 +150,21 @@ public class FormModelImpl
     DialogLibrary dialogLib = new DialogLibrary();
     FunctionLibrary funcLib = new FunctionLibrary();
     WollMuxSingleton mux = WollMuxSingleton.getInstance();
-    dialogLib = WollMuxFiles.parseFunctionDialogs(formConf, mux
-        .getFunctionDialogs(), functionContext);
+    dialogLib = WollMuxFiles.parseFunctionDialogs(formConf,
+      mux.getFunctionDialogs(), functionContext);
     // FIXME: hier müsste eine gemergte Variante der Funktionsbibliotheken der
     // einzel-TextDocumentModels erzeugt werden, damit auch dokumentlokale
     // Trafos funktionieren - aber wer verwendet schon Multiform? Warten wir mit
     // der Änderung sie jemand benötigt.
-    funcLib = WollMuxFiles.parseFunctions(
-        formConf,
-        dialogLib,
-        functionContext,
-        mux.getGlobalFunctions());
+    funcLib = WollMuxFiles.parseFunctions(formConf, dialogLib, functionContext,
+      mux.getGlobalFunctions());
 
     // Abschnitt Fenster/Formular aus wollmuxConf holen:
     ConfigThingy formFensterConf = new ConfigThingy("");
     try
     {
       formFensterConf = WollMuxFiles.getWollmuxConf().query("Fenster").query(
-          "Formular").getLastChild();
+        "Formular").getLastChild();
     }
     catch (NodeNotFoundException x)
     {
@@ -181,13 +175,13 @@ public class FormModelImpl
     for (Iterator iter = docs.iterator(); iter.hasNext();)
     {
       TextDocumentModel doc = (TextDocumentModel) iter.next();
-      FormModel fm = new FormModelImpl.SingleDocumentFormModel(doc,
-          formFensterConf, formConf, functionContext, funcLib, dialogLib);
+      FormModel fm = new FormModelImpl.SingleDocumentFormModel(doc, formFensterConf,
+        formConf, functionContext, funcLib, dialogLib);
       fms.add(fm);
     }
 
     return new FormModelImpl.MultiDocumentFormModel(docs, fms, formFensterConf,
-        formConf, functionContext, commonMapIdToPresetValue, funcLib, dialogLib);
+      formConf, functionContext, commonMapIdToPresetValue, funcLib, dialogLib);
   }
 
   /**
@@ -484,7 +478,7 @@ public class FormModelImpl
     public void startFormGUI()
     {
       formGUI = new FormGUI(formFensterConf, formConf, this,
-          commonMapIdToPresetValue, functionContext, funcLib, dialogLib);
+        commonMapIdToPresetValue, functionContext, funcLib, dialogLib);
     }
   }
 
@@ -585,12 +579,8 @@ public class FormModelImpl
      */
     public void setWindowPosSize(int docX, int docY, int docWidth, int docHeight)
     {
-      WollMuxEventHandler.handleSetWindowPosSize(
-          doc,
-          docX,
-          docY,
-          docWidth,
-          docHeight);
+      WollMuxEventHandler.handleSetWindowPosSize(doc, docX, docY, docWidth,
+        docHeight);
     }
 
     /*
@@ -670,8 +660,7 @@ public class FormModelImpl
     {
       try
       {
-        Object cp = UNO
-            .createUNOService("com.sun.star.configuration.ConfigurationProvider");
+        Object cp = UNO.createUNOService("com.sun.star.configuration.ConfigurationProvider");
 
         // creation arguments: nodepath
         com.sun.star.beans.PropertyValue aPathArgument = new com.sun.star.beans.PropertyValue();
@@ -681,8 +670,7 @@ public class FormModelImpl
         aArguments[0] = aPathArgument;
 
         Object ca = UNO.XMultiServiceFactory(cp).createInstanceWithArguments(
-            "com.sun.star.configuration.ConfigurationAccess",
-            aArguments);
+          "com.sun.star.configuration.ConfigurationAccess", aArguments);
 
         return UNO.getProperty(ca, "ooSetupFactoryWindowAttributes").toString();
       }
@@ -706,8 +694,7 @@ public class FormModelImpl
     {
       try
       {
-        Object cp = UNO
-            .createUNOService("com.sun.star.configuration.ConfigurationProvider");
+        Object cp = UNO.createUNOService("com.sun.star.configuration.ConfigurationProvider");
 
         // creation arguments: nodepath
         com.sun.star.beans.PropertyValue aPathArgument = new com.sun.star.beans.PropertyValue();
@@ -717,8 +704,7 @@ public class FormModelImpl
         aArguments[0] = aPathArgument;
 
         Object ca = UNO.XMultiServiceFactory(cp).createInstanceWithArguments(
-            "com.sun.star.configuration.ConfigurationUpdateAccess",
-            aArguments);
+          "com.sun.star.configuration.ConfigurationUpdateAccess", aArguments);
 
         UNO.setProperty(ca, "ooSetupFactoryWindowAttributes", value);
 
@@ -778,8 +764,8 @@ public class FormModelImpl
      */
     public void startFormGUI()
     {
-      formGUI = new FormGUI(formFensterConf, formConf, this, doc
-          .getIDToPresetValue(), functionContext, funcLib, dialogLib);
+      formGUI = new FormGUI(formFensterConf, formConf, this,
+        doc.getIDToPresetValue(), functionContext, funcLib, dialogLib);
     }
   }
 }

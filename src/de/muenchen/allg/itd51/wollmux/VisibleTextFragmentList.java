@@ -84,11 +84,8 @@ public class VisibleTextFragmentList
     }
 
     // Debug-Ausgabe:
-    Logger.debug2("Variablenset an Knoten "
-                  + node.getName()
-                  + " \""
-                  + node.toString()
-                  + "\":");
+    Logger.debug2("Variablenset an Knoten " + node.getName() + " \""
+                  + node.toString() + "\":");
     Iterator keys = variables.keySet().iterator();
     while (keys.hasNext())
     {
@@ -111,14 +108,10 @@ public class VisibleTextFragmentList
       String key = m.group(1);
       if (variables.containsKey(key))
       {
-        string = string.substring(0, m.start())
-                 + (String) variables.get(key)
+        string = string.substring(0, m.start()) + (String) variables.get(key)
                  + string.substring(m.end());
         // string = m.replaceFirst((String) variables.get(key));
-        Logger.debug2("  Ersetzen der Variable "
-                      + m.group(0)
-                      + " --> "
-                      + string);
+        Logger.debug2("  Ersetzen der Variable " + m.group(0) + " --> " + string);
         // Nach jeder Ersetzung wieder von vorne anfangen.
         m = var.matcher(string);
       }
@@ -127,18 +120,14 @@ public class VisibleTextFragmentList
         // Die Variable kann nicht ersetzt werden und wird auch nicht
         // ersetzt. Eine Exception muss deswegen nicht geworfen werden, es ist
         // aber sinnvoll, die Fehlermeldung in einem Logger rauszuschreiben.
-        Logger.error("Die Variable \""
-                     + key
-                     + "\" in der URL \""
-                     + string
+        Logger.error("Die Variable \"" + key + "\" in der URL \"" + string
                      + "\" ist nicht definiert.");
       }
     }
     if (count == MAXCOUNT)
       throw new EndlessLoopException(
-          "Endlosschleife ber der Ersetzung der Variablen in URL \""
-              + node.toString()
-              + "\".");
+        "Endlosschleife ber der Ersetzung der Variablen in URL \"" + node.toString()
+            + "\".");
     return string;
   }
 
@@ -150,8 +139,7 @@ public class VisibleTextFragmentList
    * @return die URL des unter der frag_id definierten Textfragments.
    * @throws InvalidIdentifierException
    */
-  public static Vector getURLsByID(String frag_id)
-      throws InvalidIdentifierException
+  public static Vector getURLsByID(String frag_id) throws InvalidIdentifierException
   {
     WollMuxSingleton.checkIdentifier(frag_id);
 
@@ -219,9 +207,8 @@ public class VisibleTextFragmentList
             {
               Logger.error("Die URL zum Textfragment '"
                            + mappingConf.stringRepresentation()
-                           + "' mit der FRAG_ID '"
-                           + frag_id
-                           + "' ist fehlerhaft.", e);
+                           + "' mit der FRAG_ID '" + frag_id + "' ist fehlerhaft.",
+                e);
             }
           }
         }

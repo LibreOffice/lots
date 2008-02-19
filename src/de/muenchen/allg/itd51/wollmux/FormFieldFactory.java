@@ -58,8 +58,7 @@ import de.muenchen.allg.itd51.wollmux.TextRangeRelation.TreeRelation;
  */
 public final class FormFieldFactory
 {
-  public static final Pattern INSERTFORMVALUE = Pattern
-      .compile("\\A\\s*(WM\\s*\\(.*CMD\\s*'((insertFormValue))'.*\\))\\s*\\d*\\z");
+  public static final Pattern INSERTFORMVALUE = Pattern.compile("\\A\\s*(WM\\s*\\(.*CMD\\s*'((insertFormValue))'.*\\))\\s*\\d*\\z");
 
   /**
    * Erzeugt ein Formualfeld im Dokument doc an der Stelle des
@@ -77,8 +76,8 @@ public final class FormFieldFactory
    * @param cmd
    *          das zugehörige insertFormValue-Kommando.
    */
-  public static FormField createFormField(XTextDocument doc,
-      InsertFormValue cmd, Map bookmarkNameToFormField)
+  public static FormField createFormField(XTextDocument doc, InsertFormValue cmd,
+      Map bookmarkNameToFormField)
   {
     String bookmarkName = cmd.getBookmarkName();
     FormField formField = (FormField) bookmarkNameToFormField.get(bookmarkName);
@@ -238,9 +237,8 @@ public final class FormFieldFactory
       }
       ;
 
-      String textPortionType = (String) UNO.getProperty(
-          textPortion,
-          "TextPortionType");
+      String textPortionType = (String) UNO.getProperty(textPortion,
+        "TextPortionType");
       if (textPortionType.equals("Bookmark"))
       {
         XNamed bookmark = null;
@@ -248,10 +246,8 @@ public final class FormFieldFactory
         boolean isCollapsed = false;
         try
         {
-          isStart = ((Boolean) UNO.getProperty(textPortion, "IsStart"))
-              .booleanValue();
-          isCollapsed = ((Boolean) UNO.getProperty(textPortion, "IsCollapsed"))
-              .booleanValue();
+          isStart = ((Boolean) UNO.getProperty(textPortion, "IsStart")).booleanValue();
+          isCollapsed = ((Boolean) UNO.getProperty(textPortion, "IsCollapsed")).booleanValue();
           if (isCollapsed) isStart = true;
           bookmark = UNO.XNamed(UNO.getProperty(textPortion, "Bookmark"));
         }
@@ -274,11 +270,8 @@ public final class FormFieldFactory
           {
             if (name.equals(lastInsertFormValueStart))
             {
-              handleNewInputField(
-                  lastInsertFormValueStart,
-                  bookmark,
-                  mapBookmarkNameToFormField,
-                  doc);
+              handleNewInputField(lastInsertFormValueStart, bookmark,
+                mapBookmarkNameToFormField, doc);
               lastInsertFormValueStart = null;
             }
           }
@@ -290,9 +283,8 @@ public final class FormFieldFactory
         int textfieldType = 0; // 0:input, 1:dropdown, 2: reference
         try
         {
-          textField = UNO.XDependentTextField(UNO.getProperty(
-              textPortion,
-              "TextField"));
+          textField = UNO.XDependentTextField(UNO.getProperty(textPortion,
+            "TextField"));
           XServiceInfo info = UNO.XServiceInfo(textField);
           if (info.supportsService("com.sun.star.text.TextField.DropDown"))
             textfieldType = 1;
@@ -309,18 +301,12 @@ public final class FormFieldFactory
         switch (textfieldType)
         {
           case 0:
-            handleInputField(
-                textField,
-                lastInsertFormValueStart,
-                mapBookmarkNameToFormField,
-                doc);
+            handleInputField(textField, lastInsertFormValueStart,
+              mapBookmarkNameToFormField, doc);
             break;
           case 1:
-            handleDropdown(
-                textField,
-                lastInsertFormValueStart,
-                mapBookmarkNameToFormField,
-                doc);
+            handleDropdown(textField, lastInsertFormValueStart,
+              mapBookmarkNameToFormField, doc);
             break;
         }
         lastInsertFormValueStart = null;
@@ -330,8 +316,8 @@ public final class FormFieldFactory
         XControlModel model = null;
         try
         {
-          XEnumeration contentEnum = UNO.XContentEnumerationAccess(textPortion)
-              .createContentEnumeration("com.sun.star.text.TextPortion");
+          XEnumeration contentEnum = UNO.XContentEnumerationAccess(textPortion).createContentEnumeration(
+            "com.sun.star.text.TextPortion");
           while (contentEnum.hasMoreElements())
           {
             XControlShape tempShape = null;
@@ -355,11 +341,8 @@ public final class FormFieldFactory
           continue;
         }
 
-        handleCheckbox(
-            model,
-            lastInsertFormValueStart,
-            mapBookmarkNameToFormField,
-            doc);
+        handleCheckbox(model, lastInsertFormValueStart, mapBookmarkNameToFormField,
+          doc);
         lastInsertFormValueStart = null;
       }
       else
@@ -368,11 +351,8 @@ public final class FormFieldFactory
     }
 
     if (lastInsertFormValueStart != null)
-      handleNewInputField(
-          lastInsertFormValueStart,
-          lastInsertFormValueBookmark,
-          mapBookmarkNameToFormField,
-          doc);
+      handleNewInputField(lastInsertFormValueStart, lastInsertFormValueBookmark,
+        mapBookmarkNameToFormField, doc);
 
   }
 
@@ -410,8 +390,8 @@ public final class FormFieldFactory
     }
   }
 
-  private static void handleCheckbox(XControlModel checkbox,
-      String bookmarkName, Map mapBookmarkNameToFormField, XTextDocument doc)
+  private static void handleCheckbox(XControlModel checkbox, String bookmarkName,
+      Map mapBookmarkNameToFormField, XTextDocument doc)
   {
     if (checkbox != null)
     {
@@ -442,8 +422,7 @@ public final class FormFieldFactory
      * durch eine neue ID newFieldId unterstützt, dann wird diese Ersetzung
      * vorgenommen und true zurückgeliefert, ansonsten false.
      */
-    public abstract boolean substituteFieldID(String oldFieldId,
-        String newFieldId);
+    public abstract boolean substituteFieldID(String oldFieldId, String newFieldId);
 
     /**
      * Liefert die XTextRange, an der das Formularfeld verankert ist.
@@ -561,8 +540,7 @@ public final class FormFieldFactory
       try
       {
         XController controller = UNO.XModel(doc).getCurrentController();
-        XTextCursor cursor = UNO.XTextViewCursorSupplier(controller)
-            .getViewCursor();
+        XTextCursor cursor = UNO.XTextViewCursorSupplier(controller).getViewCursor();
         XTextRange focusRange = cmd.getTextRange();
         if (focusRange != null) cursor.gotoRange(focusRange, false);
       }
@@ -587,7 +565,7 @@ public final class FormFieldFactory
     public int compareTo(Object other)
     {
       TreeRelation rel = new TreeRelation(cmd.getAnchor(),
-          ((BasicFormField) other).cmd.getAnchor());
+        ((BasicFormField) other).cmd.getAnchor());
       if (rel.isAGreaterThanB())
         return 1;
       else if (rel.isALessThanB())
@@ -706,15 +684,14 @@ public final class FormFieldFactory
 
       String bookmarkName = cmd.getBookmarkName();
 
-      Logger.debug2("Erzeuge neues Input-Field für Bookmark \""
-                    + bookmarkName
+      Logger.debug2("Erzeuge neues Input-Field für Bookmark \"" + bookmarkName
                     + "\"");
       try
       {
         XTextRange range = cmd.createInsertCursor(false);
         XText text = range.getText();
-        XTextField field = UNO.XTextField(UNO.XMultiServiceFactory(doc)
-            .createInstance("com.sun.star.text.TextField.Input"));
+        XTextField field = UNO.XTextField(UNO.XMultiServiceFactory(doc).createInstance(
+          "com.sun.star.text.TextField.Input"));
         XTextCursor cursor = text.createTextCursorByRange(range);
 
         if (cursor != null && field != null)
@@ -842,8 +819,7 @@ public final class FormFieldFactory
      *          Beschreibt die range, auf die der ViewCursor beim Aufruf der
      *          focus()-methode gesetzt werden soll.
      */
-    public CheckboxFormField(XTextDocument doc, InsertFormValue cmd,
-        Object checkbox)
+    public CheckboxFormField(XTextDocument doc, InsertFormValue cmd, Object checkbox)
     {
       super(doc, cmd);
 
@@ -854,8 +830,8 @@ public final class FormFieldFactory
     {
       Boolean bv = new Boolean(value);
 
-      UNO.setProperty(checkbox, "State", ((bv.booleanValue()) ? new Short(
-          (short) 1) : new Short((short) 0)));
+      UNO.setProperty(checkbox, "State", ((bv.booleanValue()) ? new Short((short) 1)
+                                                             : new Short((short) 0)));
     }
 
     /*
@@ -929,8 +905,7 @@ public final class FormFieldFactory
       try
       {
         XController controller = UNO.XModel(doc).getCurrentController();
-        XTextCursor cursor = UNO.XTextViewCursorSupplier(controller)
-            .getViewCursor();
+        XTextCursor cursor = UNO.XTextViewCursorSupplier(controller).getViewCursor();
         XTextRange focusRange = UNO.XTextContent(textfield).getAnchor();
         if (focusRange != null) cursor.gotoRange(focusRange, false);
       }
@@ -1012,17 +987,15 @@ public final class FormFieldFactory
     {
       if (value == null) return;
       UNO.setProperty(master, "Content", value);
-      if (UNO.XUpdatable(textfield) != null)
-        UNO.XUpdatable(textfield).update();
+      if (UNO.XUpdatable(textfield) != null) UNO.XUpdatable(textfield).update();
     }
 
     public String getTrafoName()
     {
-      return TextDocumentModel
-          .getFunctionNameForUserFieldName(""
-                                           + UNO.getProperty(
-                                               textfield,
-                                               "Content"));
+      return TextDocumentModel.getFunctionNameForUserFieldName(""
+                                                               + UNO.getProperty(
+                                                                 textfield,
+                                                                 "Content"));
     }
 
     public String getValue()
@@ -1036,8 +1009,7 @@ public final class FormFieldFactory
       try
       {
         XController controller = UNO.XModel(doc).getCurrentController();
-        XTextCursor cursor = UNO.XTextViewCursorSupplier(controller)
-            .getViewCursor();
+        XTextCursor cursor = UNO.XTextViewCursorSupplier(controller).getViewCursor();
         XTextRange focusRange = UNO.XTextContent(textfield).getAnchor();
         if (focusRange != null) cursor.gotoRange(focusRange, false);
       }
