@@ -42,6 +42,8 @@ import javax.swing.text.DefaultHighlighter;
 import javax.swing.text.Highlighter;
 import javax.swing.text.JTextComponent;
 
+import de.muenchen.allg.itd51.parser.ConfigThingy;
+
 /**
  * Erweiterte eine JTextComponent um die Fähigkeit, Tags, die als
  * &quot;&lt;tag&gt;&quot; angezeigt werden, wie atomare Elemente zu behandeln.
@@ -50,6 +52,12 @@ import javax.swing.text.JTextComponent;
  */
 public class TextComponentTags
 {
+  /**
+   * Syntax für {@link #getContent(int)}: CAT(... VALUE "&lt;tagname>" ...
+   * VALUE "&lt;tagname"> ...)
+   */
+  final public static int CAT_VALUE_SYNTAX = 0;
+
   /**
    * Präfix, mit dem Tags in der Anzeige der Zuordnung angezeigt werden. Die
    * Zuordnung beginnt mit einem zero width space (nicht sichtbar, aber zur
@@ -108,9 +116,9 @@ public class TextComponentTags
   }
 
   /**
-   * Fügt an der aktuellen Cursorposition ein neues Tag tag ein, das anschließend
-   * mit der Darstellung &quot;&lt;tag&gt;&quot; angezeigt wird und bezüglich
-   * der Editierung wie ein atomares Element behandelt wird.
+   * Fügt an der aktuellen Cursorposition ein neues Tag tag ein, das
+   * anschließend mit der Darstellung &quot;&lt;tag&gt;&quot; angezeigt wird und
+   * bezüglich der Editierung wie ein atomares Element behandelt wird.
    * 
    * @param tag
    *          Der Name des tags, das in dieser JTextComponent an der
@@ -124,6 +132,7 @@ public class TextComponentTags
     int inspos = compo.getCaretPosition();
     String p1 = (inspos > 0) ? t.substring(0, inspos) : "";
     String p2 = (inspos < t.length()) ? t.substring(inspos, t.length()) : "";
+    // ACHTUNG! Änderungen hier müssen auch in setContent() gemacht werden
     t = TAG_PREFIX + tag + TAG_SUFFIX;
     compo.setText(p1 + t + p2);
     compo.getCaret().setDot(inspos + t.length());
@@ -164,6 +173,76 @@ public class TextComponentTags
     String text = t.substring(lastEndPos);
     if (text.length() > 0) list.add(new ContentElement(text, false));
     return list;
+  }
+
+  /**
+   * Liefert den Inhalt der Textkomponente in der durch syntaxType
+   * spezifizierten Syntax.
+   * 
+   * @see #CAT_VALUE_SYNTAX
+   * @throws IllegalArgumentException
+   *           falls der syntaxType nicht existiert.
+   * 
+   * @author Matthias Benkmann (D-III-ITD D.10)
+   */
+  public ConfigThingy getContent(int syntaxType)
+  {
+    if (syntaxType != CAT_VALUE_SYNTAX)
+      throw new IllegalArgumentException("Unbekannter syntaxType: "
+                                         + syntaxType);
+
+    ConfigThingy conf = new ConfigThingy("CAT");
+    List content = getContent();
+    Iterator iter = content.iterator();
+    while (iter.hasNext())
+    {
+      ContentElement ele = (ContentElement) iter.next();
+      if (ele.isTag())
+        conf.add("VALUE").add(ele.toString());
+      else
+        conf.add(ele.toString());
+    }
+
+    return conf;
+  }
+
+  /**
+   * Das Gegenstück zu {@link #getContent(int)}.
+   * 
+   * @throws IllegalArgumentException
+   *           wenn syntaxType illegal oder ein Fehler in conf ist.
+   * 
+   * @author Matthias Benkmann (D-III-ITD D.10)
+   */
+  public void setContent(int syntaxType, ConfigThingy conf)
+  {
+    if (syntaxType != CAT_VALUE_SYNTAX)
+      throw new IllegalArgumentException("Unbekannter syntaxType: "
+                                         + syntaxType);
+
+    if (!conf.getName().equals("CAT"))
+      throw new IllegalArgumentException("Oberster Knoten muss \"CAT\" sein");
+
+    StringBuilder buffy = new StringBuilder();
+    Iterator iter = conf.iterator();
+    while (iter.hasNext())
+    {
+      ConfigThingy subConf = (ConfigThingy) iter.next();
+      if (subConf.getName().equals("VALUE") && subConf.count() == 1)
+      {
+        // ACHTUNG! Änderungen hier müssen auch in insertTag() gemacht werden
+        buffy.append(TAG_PREFIX);
+        buffy.append(subConf.toString());
+        buffy.append(TAG_SUFFIX);
+      }
+      else
+      {
+        buffy.append(subConf.toString());
+      }
+    }
+
+    extraHighlightOff();
+    compo.setText(buffy.toString());
   }
 
   /**

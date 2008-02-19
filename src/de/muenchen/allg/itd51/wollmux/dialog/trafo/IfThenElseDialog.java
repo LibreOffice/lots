@@ -514,6 +514,53 @@ public class IfThenElseDialog extends TrafoDialog
       throw new IllegalArgumentException();
     }
     
+    /**
+     * Liefert ein frisches ConfigThingy, das die von diesem Panel repräsentierte
+     * Trafo darstellt. Oberster Knoten ist immer "IF".
+     * @author Matthias Benkmann (D-III-ITD D.10)
+     * TODO Testen
+     */
+    public ConfigThingy getConf()
+    {
+      ConfigThingy conf = new ConfigThingy("IF");
+      ConfigThingy conditionConf = conf;
+      if (notSelector.getSelectedIndex() == 1) 
+        conditionConf = conf.add("NOT");
+      
+      TestType test = (TestType)testSelector.getSelectedItem();
+      conditionConf = conditionConf.add(test.func);
+      conditionConf.add("VALUE").add(fieldSelector.getSelectedItem().toString());
+      conditionConf.add(compareTo.getText());
+      
+      ConfigThingy thenConf = conf.add("THEN");
+      if (thenResult.type == 0)
+        thenConf.addChild(thenResult.text.getContent(TextComponentTags.CAT_VALUE_SYNTAX));
+      else if (thenResult.type == 1)
+        thenConf.addChild(thenResult.panel.getConf());
+      
+      ConfigThingy elseConf = conf.add("ELSE");
+      if (elseResult.type == 0)
+        elseConf.addChild(elseResult.text.getContent(TextComponentTags.CAT_VALUE_SYNTAX));
+      else if (elseResult.type == 1)
+        elseConf.addChild(elseResult.panel.getConf());
+      
+      conf.addChild(conditionConf);
+      conf.addChild(thenConf);
+      conf.addChild(elseConf);
+      return conf;
+    }
+  }
+  
+  /**
+   * Aktualisiert {@link #params},conf anhand des aktuellen Dialogzustandes und 
+   * setzt params,isValid auf true.
+   * 
+   */
+  private void updateTrafoConf()
+  {
+    params.conf = new ConfigThingy(params.conf.getName());
+    params.conf.addChild(ifThenElsePanel.getConf());
+    params.isValid = true;
   }
   
   /**
@@ -545,7 +592,12 @@ public class IfThenElseDialog extends TrafoDialog
       {
         abort();
       }});
-    JButton insert = new JButton("Einfügen");
+    JButton insert = new JButton("OK");
+    insert.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent e)
+      {
+        updateTrafoConf();
+      }});
     lowerButtons.add(cancel);
     lowerButtons.add(Box.createHorizontalGlue());
     lowerButtons.add(insert);
@@ -562,6 +614,7 @@ public class IfThenElseDialog extends TrafoDialog
   private void repack()
   {
     if (myDialog == null) return;
+    myDialog.setVisible(false);
     myDialog.pack();
     int frameWidth = myDialog.getWidth();
     int frameHeight = myDialog.getHeight();
@@ -598,7 +651,7 @@ public class IfThenElseDialog extends TrafoDialog
     /*
      * Wegen folgendem Java Bug (WONTFIX) 
      *   http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4259304
-     * sind die folgenden 3 Zeilen nötig, damit der MailMerge gc'ed werden
+     * sind die folgenden 3 Zeilen nötig, damit der Dialog gc'ed werden
      * kann. Die Befehle sorgen dafür, dass kein globales Objekt (wie z.B.
      * der Keyboard-Fokus-Manager) indirekt über den JFrame den MailMerge kennt.  
      */
@@ -612,8 +665,8 @@ public class IfThenElseDialog extends TrafoDialog
       myDialog = null;
     }
     
-//    if (abortListener != null)
-//      abortListener.actionPerformed(new ActionEvent(this, 0, ""));
+    if (params.closeAction != null)
+      params.closeAction.actionPerformed(new ActionEvent(this, 0, ""));
   }
   
   public void dispose() 
