@@ -1,3 +1,4 @@
+//TODO L.m()
 package de.muenchen.allg.itd51.wollmux.func;
 
 import com.sun.star.beans.UnknownPropertyException;

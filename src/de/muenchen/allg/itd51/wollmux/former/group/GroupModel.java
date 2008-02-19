@@ -1,3 +1,4 @@
+//TODO L.m()
 /*
 * Dateiname: GroupModel.java
 * Projekt  : WollMux
