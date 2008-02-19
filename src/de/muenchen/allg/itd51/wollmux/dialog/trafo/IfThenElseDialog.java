@@ -327,7 +327,13 @@ public class IfThenElseDialog extends TrafoDialog
             {
               ConfigThingy conf = null;
               try{ 
-                conf = new ConfigThingy("Func","IF(STRCMP(VALUE \""+fieldNames.get(0)+"\" \"\") THEN(\"\") ELSE(\"\"))");
+                conf = new ConfigThingy("Func");
+                ConfigThingy ifConf = conf.add("IF");
+                ConfigThingy strCmpConf = ifConf.add("STRCMP");
+                strCmpConf.add("VALUE").add((String)fieldNames.get(0));
+                strCmpConf.add("");
+                ifConf.add("THEN").add("");
+                ifConf.add("ELSE").add("");
                 //ACHTUNG! neue JIfThenElsePanels werden noch anderswo instanziiert
                 conditionalResult.panel = new JIfThenElsePanel(conf, fieldNames, packNecessary);
                 conditionalResult.panel.setBorder(CASCADED_ITE_BORDER);
