@@ -20,6 +20,7 @@ package de.muenchen.allg.itd51.wollmux;
 import java.awt.Window;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -64,6 +65,13 @@ public class CoupledWindowController
    * mit sich bringen würde).
    */
   private ArrayList coupledWindows = new ArrayList();
+
+  /**
+   * Enthält eine Liste mit WeakReference-Objekten, die auf Unterfenster von
+   * coupledWindows zeigen, die die verschiedenen CoupledWindowListener
+   * aufsammeln.
+   */
+  private ArrayList collectedChildWindows = new ArrayList();
 
   /**
    * Enthält den WindowStateWatcher, mit dem der Fensterstatus überwacht und die
@@ -320,17 +328,22 @@ public class CoupledWindowController
 
       public void windowDeactivated(WindowEvent e)
       {
-        // Deaktivierungsevent ignorieren, wenn die Aktivierung an ein
-        // Unterfenster eines registrierten Fensters abgegeben wurde. Dies wird
-        // über eine Rückwärtssuche in der Owner-Hierarchie des OppositeWindows
-        // festgestellt werden.
+        // Wird der Fokus an ein Unterfenster eines registrierten Fensters
+        // abgegeben, so wird dieses Fenster aufgesammelt und ein
+        // coupledWindowListener registriert, über den Statusänderungen dieses
+        // Fensters mitverfolgt werden können. Die Zugehörigkeit des
+        // Unterfensters zum Parent wird über eine Rückwärtssuche in der
+        // Owner-Hierarchie des OppositeWindows festgestellt.
         Window w = e.getOppositeWindow();
         while (w != null)
         {
           for (Iterator iter = coupledWindows.iterator(); iter.hasNext();)
           {
             CoupledWindow win = (CoupledWindow) iter.next();
-            if (win.equals(w)) return;
+            if (win.equals(w)) {
+              collectChildWindow(e.getOppositeWindow());
+              return;
+            }
           }
           w = w.getOwner();
         }
@@ -354,6 +367,40 @@ public class CoupledWindowController
         // nicht relevant
       }
     };
+
+    /**
+     * Fügt eine WeakReference auf das Unterfenster childWindow zu
+     * collectedChildWindows hinzu und registriert einen coupledWindowListener
+     * auf childWindow, aber nur dann, wenn das Fenster nicht bereits
+     * registriert ist. Bei der Prüfung, ob das Fenster bereits registriert ist,
+     * werden alle WeakReference-Objekte aus der Liste collectedChildWindows
+     * gelöscht, deren referenzierte Objekte nicht mehr existent sind.
+     * 
+     * @param childWindow
+     *          das aufzusammelnde Kindfenster
+     * 
+     * @author Christoph Lutz (D-III-ITD-5.1)
+     */
+    private void collectChildWindow(Window childWindow)
+    {
+      for (Iterator iter = collectedChildWindows.iterator(); iter.hasNext();)
+      {
+        WeakReference ref = (WeakReference) iter.next();
+        Object win = ref.get();
+        if (win != null)
+        {
+          if (win.equals(childWindow)) return;
+        }
+        else
+        {
+          iter.remove();
+        }
+      }
+
+      Logger.debug("Registriere Kinfenster #" + childWindow);
+      collectedChildWindows.add(new WeakReference(childWindow));
+      childWindow.addWindowListener(coupledWindowListener);
+    }
   }
 
   /**
@@ -518,7 +565,25 @@ public class CoupledWindowController
 
     public void setVisible(final boolean visible)
     {
-      if (window.isVisible() != visible) window.setVisible(visible);
+      try
+      {
+        javax.swing.SwingUtilities.invokeLater(new Runnable()
+        {
+          public void run()
+          {
+            try
+            {
+              if (window.isVisible() != visible) window.setVisible(visible);
+            }
+            catch (Exception x)
+            {
+            }
+          }
+        });
+      }
+      catch (Exception x)
+      {
+      }
     }
 
     public void addWindowListener(final WindowListener l)
