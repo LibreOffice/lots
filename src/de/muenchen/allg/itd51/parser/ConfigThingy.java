@@ -273,7 +273,12 @@ public class ConfigThingy
   }
   
   /**
-   * Erzeugt ein ConfigThingy mit Name/Wert name, ohne Kinder.
+   * Erzeugt ein ConfigThingy mit Name/Wert name, ohne Kinder. 
+   * Achtung! Mit dieser Methode
+   * ist es möglich, ConfigThingys zu erzeugen, die sich nicht an die 
+   * Syntaxbeschränkungen des Parsers für Schlüssel halten. Wird so ein
+   * ConfigThingy mittels stringRepresentation() in Text konvertiert, entsteht
+   * etwas, das der Parser nicht wieder einlesen kann.
    */
   public ConfigThingy(String name)
   {
