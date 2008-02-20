@@ -1,4 +1,3 @@
-//TODO L.m()
 /*
  * Dateiname: Bookmark.java
  * Projekt  : WollMux
@@ -88,7 +87,7 @@ public class Bookmark
     this.name = name;
     UnoService bookmark = getBookmarkService(name, document);
     if (bookmark.xTextContent() == null)
-      throw new NoSuchElementException("Bookmark \"" + name + "\" existiert nicht.");
+      throw new NoSuchElementException(L.m("Bookmark '%1' existiert nicht.", name));
   }
 
   /**
@@ -279,7 +278,7 @@ public class Bookmark
     }
     catch (NoSuchElementException x)
     {
-      Logger.debug("Umbenennung kann nicht durchgeführt werden, da die Textmarke verschwunden ist :~-(");
+      Logger.debug(L.m("Umbenennung kann nicht durchgeführt werden, da die Textmarke verschwunden ist :~-("));
     }
     catch (java.lang.Exception x)
     {
@@ -462,7 +461,7 @@ public class Bookmark
         String portionName = (String) iter.next();
         if (!bookmarks.hasByName(portionName))
         {
-          Logger.debug("Regeneriere Bookmark \"" + portionName + "\"");
+          Logger.debug(L.m("Regeneriere Bookmark '%1'", portionName));
           bookmark = UNO.XMultiServiceFactory(doc).createInstance(
             "com.sun.star.text.Bookmark");
           UNO.XNamed(bookmark).setName(portionName);
@@ -536,7 +535,7 @@ public class Bookmark
     XTextCursor cursor = range.getText().createTextCursorByRange(range);
     if (!cursor.isCollapsed()) return;
 
-    Logger.debug("Dekollabiere Bookmark '" + name + "'");
+    Logger.debug(L.m("Dekollabiere Bookmark '%1'", name));
 
     // altes Bookmark löschen.
     remove();
