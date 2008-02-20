@@ -1,4 +1,3 @@
-//TODO L.m()
 /*
  * Dateiname: CoupledWindowController.java
  * Projekt  : WollMux
@@ -139,20 +138,20 @@ public class CoupledWindowController
       {
         if (nr != lastValidTimeoutEvent)
         {
-          Logger.debug2("ignoriere ungültiges timeout event");
+          Logger.debug2(L.m("ignoriere ungültiges timeout event"));
           return;
         }
 
         if (activeWindow[0] == null)
         {
-          Logger.debug2("Timeout und kein aktives Fenster - stelle angekoppelte Fenster unsichtbar");
+          Logger.debug2(L.m("Timeout und kein aktives Fenster - stelle angekoppelte Fenster unsichtbar"));
           setCoupledWindowsVisible(false);
           acceptMainWindowOnly = true;
         }
         else
         {
-          Logger.debug2("Timeout aber keine Aktion da Fenster aktiv #"
-                        + activeWindow[0].hashCode());
+          Logger.debug2(L.m("Timeout aber keine Aktion da Fenster #%1 aktiv.",
+            new Integer(activeWindow[0].hashCode())));
         }
       }
     }
@@ -178,8 +177,8 @@ public class CoupledWindowController
 
       if (acceptMainWindowOnly && !isMainWindow)
       {
-        Logger.debug2("Aktivierung ignoriert da Fenster kein Hauptfenster #"
-                      + key.hashCode());
+        Logger.debug2(L.m("Aktivierung ignoriert da Fenster #%1 kein Hauptfenster.",
+          new Integer(key.hashCode())));
         return;
       }
 
@@ -193,7 +192,8 @@ public class CoupledWindowController
           acceptMainWindowOnly = false;
         }
 
-        Logger.debug2("Aktivierung von Fenster #" + activeWindow[0].hashCode());
+        Logger.debug2(L.m("Aktivierung von Fenster #%1", new Integer(
+          activeWindow[0].hashCode())));
       }
     }
 
@@ -215,14 +215,15 @@ public class CoupledWindowController
       {
         if (key.equals(activeWindow[0]))
         {
-          Logger.debug2("Deaktivierung von Fenster #" + key.hashCode());
+          Logger.debug2(L.m("Deaktivierung von Fenster #%1", new Integer(
+            key.hashCode())));
           activeWindow[0] = null;
           startWaitForTimeout();
         }
         else
         {
-          Logger.debug2("Deaktierung ignoriert, da Fenster nicht aktiv #"
-                        + key.hashCode());
+          Logger.debug2(L.m("Deaktierung ignoriert, da Fenster #%1 nicht aktiv.",
+            new Integer(key.hashCode())));
         }
       }
     }
@@ -398,7 +399,8 @@ public class CoupledWindowController
         }
       }
 
-      Logger.debug("Registriere Kinfenster #" + childWindow);
+      Logger.debug(L.m("Registriere Kinfenster #%1", new Integer(
+        childWindow.hashCode())));
       collectedChildWindows.add(new WeakReference(childWindow));
       childWindow.addWindowListener(coupledWindowListener);
     }

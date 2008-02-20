@@ -1,4 +1,3 @@
-//TODO L.m()
 /*
 * Dateiname: ConfigurationErrorException.java
 * Projekt  : WollMux

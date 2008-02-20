@@ -1,4 +1,3 @@
-//TODO L.m()
 /*
 * Dateiname: NodeNotFoundException.java
 * Projekt  : WollMux

@@ -1,4 +1,3 @@
-//TODO L.m()
 /*
 * Dateiname: SyntaxErrorException.java
 * Projekt  : WollMux
