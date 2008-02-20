@@ -1,4 +1,3 @@
-//TODO L.m()
 /*
 * Dateiname: FormularMax4000.java
 * Projekt  : WollMux
@@ -100,6 +99,7 @@ import com.sun.star.view.XSelectionSupplier;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
@@ -131,7 +131,7 @@ import de.muenchen.allg.itd51.wollmux.func.PrintFunctionLibrary;
  */
 public class FormularMax4000
 {
-  public static final String STANDARD_TAB_NAME = "Reiter";
+  public static final String STANDARD_TAB_NAME = L.m("Reiter");
 
   /**
    * Regex für Test ob String mit Buchstabe oder Underscore beginnt.
@@ -143,7 +143,7 @@ public class FormularMax4000
     /**
    * Der Standard-Formulartitel, solange kein anderer gesetzt wird.
    */
-  private static final String GENERATED_FORM_TITLE = "Generiert durch FormularMax 4000";
+  private static final String GENERATED_FORM_TITLE = L.m("Generiert durch FormularMax 4000");
 
   /**
    * Maximale Anzahl Zeichen für ein automatisch generiertes Label.
@@ -522,9 +522,9 @@ public class FormularMax4000
     
     mainMenuBar = new JMenuBar();
     //========================= Datei ============================
-    JMenu menu = new JMenu("Datei");
+    JMenu menu = new JMenu(L.m("Datei"));
     
-    JMenuItem menuItem = new JMenuItem("Speichern");
+    JMenuItem menuItem = new JMenuItem(L.m("Speichern"));
     menuItem.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e)
       {
@@ -532,7 +532,7 @@ public class FormularMax4000
       }});
     menu.add(menuItem);
     
-    menuItem = new JMenuItem("Speichern unter...");
+    menuItem = new JMenuItem(L.m("Speichern unter..."));
     menuItem.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e)
       {
@@ -540,7 +540,7 @@ public class FormularMax4000
       }});
     menu.add(menuItem);
     
-    menuItem = new JMenuItem("Beenden");
+    menuItem = new JMenuItem(L.m("Beenden"));
     menuItem.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e)
       {
@@ -550,11 +550,11 @@ public class FormularMax4000
     
     mainMenuBar.add(menu);
 //  ========================= Bearbeiten ============================
-    menu = new JMenu("Bearbeiten");
+    menu = new JMenu(L.m("Bearbeiten"));
     
 //  ========================= Bearbeiten/Einfügen ============================
-    JMenu submenu = new JMenu("Standardelemente einfügen");
-    menuItem = new JMenuItem("Empfängerauswahl-Tab");
+    JMenu submenu = new JMenu(L.m("Standardelemente einfügen"));
+    menuItem = new JMenuItem(L.m("Empfängerauswahl-Tab"));
     menuItem.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e)
       {
@@ -564,7 +564,7 @@ public class FormularMax4000
       });
     submenu.add(menuItem);
     
-    menuItem = new JMenuItem("Abbrechen, <-Zurück, Weiter->");
+    menuItem = new JMenuItem(L.m("Abbrechen, <-Zurück, Weiter->"));
     menuItem.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e)
       {
@@ -574,7 +574,7 @@ public class FormularMax4000
       });
     submenu.add(menuItem);
     
-    menuItem = new JMenuItem("Abbrechen, <-Zurück, PDF, Drucken");
+    menuItem = new JMenuItem(L.m("Abbrechen, <-Zurück, PDF, Drucken"));
     menuItem.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e)
       {
@@ -589,7 +589,7 @@ public class FormularMax4000
  
     menu.addSeparator();
     
-    menuItem = new JMenuItem("Checkboxen zu ComboBox");
+    menuItem = new JMenuItem(L.m("Checkboxen zu ComboBox"));
     menuItem.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e)
       {
@@ -601,7 +601,7 @@ public class FormularMax4000
     
     mainMenuBar.add(menu);
 //  ========================= Ansicht ============================
-    menu = new JMenu("Ansicht");
+    menu = new JMenu(L.m("Ansicht"));
     
     menuItem = new JCheckBoxMenuItem("ID");
     menuItem.addActionListener(new ActionListener(){
@@ -633,7 +633,7 @@ public class FormularMax4000
     menuItem.setSelected(viewVisibilityDescriptor.formControlLineViewType);
     menu.add(menuItem);
     
-    menuItem = new JCheckBoxMenuItem("Elementspezifische Felder");
+    menuItem = new JCheckBoxMenuItem(L.m("Elementspezifische Felder"));
     menuItem.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e)
       {
@@ -664,7 +664,7 @@ public class FormularMax4000
     menu.add(menuItem);
     
     menu.addSeparator();
-    menuItem = new JMenuItem("Funktionstester");
+    menuItem = new JMenuItem(L.m("Funktionstester"));
     menuItem.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e)
       { 
@@ -685,9 +685,9 @@ public class FormularMax4000
     
     mainMenuBar.add(menu);
 //  ========================= Formular ============================
-    menu = new JMenu("Formular");
+    menu = new JMenu(L.m("Formular"));
     
-    menuItem = new JMenuItem("Formularfelder aus Dokument einlesen");
+    menuItem = new JMenuItem(L.m("Formularfelder aus Dokument einlesen"));
     menuItem.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e)
       {
@@ -696,7 +696,7 @@ public class FormularMax4000
       }});
     menu.add(menuItem);
     
-    menuItem = new JMenuItem("Formulartitel setzen");
+    menuItem = new JMenuItem(L.m("Formulartitel setzen"));
     menuItem.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e)
       {
@@ -705,7 +705,7 @@ public class FormularMax4000
       }});
     menu.add(menuItem);
     
-    menuItem = new JMenuItem("Druckfunktion setzen");
+    menuItem = new JMenuItem(L.m("Druckfunktion setzen"));
     menuItem.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e)
       {
@@ -714,7 +714,7 @@ public class FormularMax4000
       }});
     menu.add(menuItem);
     
-    menuItem = new JMenuItem("WollMux-Formularmerkmale aus Dokument entfernen");
+    menuItem = new JMenuItem(L.m("WollMux-Formularmerkmale aus Dokument entfernen"));
     menuItem.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e)
       {
@@ -729,7 +729,7 @@ public class FormularMax4000
      */
     if (new Integer(3).equals(new Integer(0)))
     {
-    menuItem = new JMenuItem("Ladezeit des Dokuments optimieren");
+    menuItem = new JMenuItem(L.m("Ladezeit des Dokuments optimieren"));
     menuItem.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e)
       {
@@ -738,7 +738,7 @@ public class FormularMax4000
     menu.add(menuItem);
     }
     
-    menuItem = new JMenuItem("Formularbeschreibung editieren");
+    menuItem = new JMenuItem(L.m("Formularbeschreibung editieren"));
     menuItem.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e)
       {
@@ -850,7 +850,7 @@ public class FormularMax4000
    */
   private void setFormTitle()
   {
-    String newTitle = JOptionPane.showInputDialog(myFrame, "Bitte Formulartitel eingeben", formTitle);
+    String newTitle = JOptionPane.showInputDialog(myFrame, L.m("Bitte Formulartitel eingeben"), formTitle);
     if (newTitle != null)
     {
       formTitle = newTitle;
@@ -868,7 +868,7 @@ public class FormularMax4000
    */
   private ConfigThingy updateDocument(TextDocumentModel doc)
   {
-    Logger.debug("Übertrage Formularbeschreibung ins Dokument");
+    Logger.debug(L.m("Übertrage Formularbeschreibung ins Dokument"));
     Map mapFunctionNameToConfigThingy = new HashMap();
     insertionModelList.updateDocument(mapFunctionNameToConfigThingy);
     ConfigThingy conf = buildFormDescriptor(mapFunctionNameToConfigThingy);
@@ -885,7 +885,7 @@ public class FormularMax4000
   {
     if (writeChangesTimer.isRunning())
     {
-      Logger.debug("Schreibe wartende Änderungen ins Dokument");
+      Logger.debug(L.m("Schreibe wartende Änderungen ins Dokument"));
       writeChangesTimer.stop();
       try{
         updateDocument(doc);
@@ -1108,7 +1108,7 @@ public class FormularMax4000
       Visitor visitor = new ScanVisitor(); 
       visitor.visit(tree);
     } 
-    catch(Exception x) {Logger.error("Fehler während des Scan-Vorgangs",x);}
+    catch(Exception x) {Logger.error(L.m("Fehler während des Scan-Vorgangs"),x);}
     
     documentNeedsUpdating();
   }
@@ -1220,7 +1220,7 @@ public class FormularMax4000
         case DocumentTree.CHECKBOX_CONTROL: model = registerCheckbox(control, label, id); break;
         case DocumentTree.DROPDOWN_CONTROL: model = registerDropdown((DropdownFormControl)control, label, id); break;
         case DocumentTree.INPUT_CONTROL:    model = registerInput(control, label, id); break;
-        default: Logger.error("Unbekannter Typ Formular-Steuerelement"); return null;
+        default: Logger.error(L.m("Unbekannter Typ Formular-Steuerelement")); return null;
       }
     }
     
@@ -1251,7 +1251,7 @@ public class FormularMax4000
       insertionModelList.add(imodel);
     }catch(Exception x)
     {
-      Logger.error("Es wurde ein fehlerhaftes Bookmark generiert: \""+bookmarkName+"\"", x);
+      Logger.error(L.m("Es wurde ein fehlerhaftes Bookmark generiert: \"%1\"", bookmarkName), x);
     }
     
     return model;
@@ -1499,9 +1499,9 @@ public class FormularMax4000
     JMenuItem menuItem;
     editorMenuBar = new JMenuBar();
     //========================= Datei ============================
-    menu = new JMenu("Datei");
+    menu = new JMenu(L.m("Datei"));
     
-    menuItem = new JMenuItem("Speichern");
+    menuItem = new JMenuItem(L.m("Speichern"));
     menuItem.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e)
       {
@@ -1516,12 +1516,12 @@ public class FormularMax4000
         }
         catch (Exception e1)
         {
-          JOptionPane.showMessageDialog(myFrame, e1.getMessage(), "Fehler beim Parsen der Formularbeschreibung", JOptionPane.WARNING_MESSAGE);
+          JOptionPane.showMessageDialog(myFrame, e1.getMessage(), L.m("Fehler beim Parsen der Formularbeschreibung"), JOptionPane.WARNING_MESSAGE);
         }
       }});
     menu.add(menuItem);
     
-    menuItem = new JMenuItem("Abbrechen");
+    menuItem = new JMenuItem(L.m("Abbrechen"));
     menuItem.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e)
       {
@@ -1592,13 +1592,13 @@ public class FormularMax4000
       }
     };
     
-    JButton wegDamit = new JButton("Entfernen");
+    JButton wegDamit = new JButton(L.m("Entfernen"));
     wegDamit.addActionListener(removeFunc);
 
-    JButton machDazu = new JButton("Hinzufügen");
+    JButton machDazu = new JButton(L.m("Hinzufügen"));
     machDazu.addActionListener(addFunc);
     
-    JButton ok = new JButton("OK");
+    JButton ok = new JButton(L.m("OK"));
     ok.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e)
       {
@@ -1613,7 +1613,7 @@ public class FormularMax4000
     buttons.add(ok);
     printFunctionEditorContentPanel.add(buttons, BorderLayout.SOUTH);
         
-    dialog.setTitle("Druckfunktion setzen");
+    dialog.setTitle(L.m("Druckfunktion setzen"));
     dialog.add(printFunctionEditorContentPanel);
     dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
     
@@ -1830,9 +1830,9 @@ public class FormularMax4000
           while (paraEnu.hasMoreElements())
           {
             Object nextEle = paraEnu.nextElement();
-            if (nextEle == null) throw new NullPointerException("nextElement() == null obwohl hasMoreElements()==true");
+            if (nextEle == null) throw new NullPointerException(L.m("nextElement() == null obwohl hasMoreElements()==true"));
             XEnumerationAccess xs = UNO.XEnumerationAccess(nextEle);
-            if (xs == null) throw new NullPointerException("Paragraph unterstützt nicht XEnumerationAccess?!?");
+            if (xs == null) throw new NullPointerException(L.m("Paragraph unterstützt nicht XEnumerationAccess?!?"));
             XEnumeration textportionEnu = xs.createEnumeration();
             while (textportionEnu.hasMoreElements())
             {
@@ -1896,7 +1896,7 @@ public class FormularMax4000
       }
       catch (IllegalArgumentException e)
       {
-        Logger.error("Kann Selection nicht in Objekt umwandeln", e);
+        Logger.error(L.m("Kann Selection nicht in Objekt umwandeln"), e);
       }
     }
 
