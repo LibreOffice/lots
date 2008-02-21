@@ -1,4 +1,3 @@
-//TODO L.m()
 /*
  * Dateiname: JTextFieldWithTags.java
  * Projekt  : WollMux
@@ -44,6 +43,7 @@ import javax.swing.text.Highlighter;
 import javax.swing.text.JTextComponent;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.L;
 
 /**
  * Erweiterte eine JTextComponent um die Fähigkeit, Tags, die als
@@ -181,7 +181,7 @@ public class TextComponentTags
   public ConfigThingy getContent(int syntaxType)
   {
     if (syntaxType != CAT_VALUE_SYNTAX)
-      throw new IllegalArgumentException("Unbekannter syntaxType: " + syntaxType);
+      throw new IllegalArgumentException(L.m("Unbekannter syntaxType: %1",""+syntaxType));
 
     ConfigThingy conf = new ConfigThingy("CAT");
     List content = getContent();
@@ -209,10 +209,10 @@ public class TextComponentTags
   public void setContent(int syntaxType, ConfigThingy conf)
   {
     if (syntaxType != CAT_VALUE_SYNTAX)
-      throw new IllegalArgumentException("Unbekannter syntaxType: " + syntaxType);
+      throw new IllegalArgumentException(L.m("Unbekannter syntaxType: %1", ""+syntaxType));
 
     if (!conf.getName().equals("CAT"))
-      throw new IllegalArgumentException("Oberster Knoten muss \"CAT\" sein");
+      throw new IllegalArgumentException(L.m("Oberster Knoten muss \"CAT\" sein"));
 
     StringBuilder buffy = new StringBuilder();
     Iterator iter = conf.iterator();
