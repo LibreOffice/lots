@@ -195,4 +195,9 @@
 		</exec>
 	</target>
 
+	<!-- Das Target aktualisiert das LocalizationConf-File -->
+	<target name="updateLocalizationConf">
+		<java classname="de.muenchen.allg.itd51.wollmux.LocalizationUpdater" classpath="${MY_CLASSES}"/>
+	</target>
+
 </project>
