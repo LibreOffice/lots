@@ -1,4 +1,3 @@
-//TODO L.m()
 /*
 * Dateiname: TrafoDialogFactory.java
 * Projekt  : WollMux
@@ -20,6 +19,7 @@ package de.muenchen.allg.itd51.wollmux.dialog.trafo;
 
 import java.lang.reflect.Constructor;
 
+import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.UnavailableException;
 
 /**
@@ -59,7 +59,7 @@ public class TrafoDialogFactory
       catch(Exception x){};
     }
     
-    throw new UnavailableException("Kein Dialog verfügbar für die übergebenen Parameter:"+params);
+    throw new UnavailableException(L.m("Kein Dialog verfügbar für die übergebenen Parameter: %1",params));
   }
   
 }

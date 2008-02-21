@@ -1,4 +1,3 @@
-//TODO L.m()
 /*
 * Dateiname: TrafoDialog.java
 * Projekt  : WollMux
@@ -65,7 +64,6 @@ public abstract class TrafoDialog
    * Schlieﬂt den Dialog. Darf nur aufgerufen werden, wenn er gerade angezeigt wird.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TODO Testen
    */
   public abstract void dispose();
 }

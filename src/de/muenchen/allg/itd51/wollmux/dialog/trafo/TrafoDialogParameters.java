@@ -1,4 +1,3 @@
-//TODO L.m()
 /*
 * Dateiname: TrafoDialogParameters.java
 * Projekt  : WollMux
