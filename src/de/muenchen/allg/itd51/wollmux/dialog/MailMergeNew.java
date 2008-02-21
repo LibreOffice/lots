@@ -91,7 +91,6 @@ import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.UnavailableException;
-import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.TextDocumentModel.FieldSubstitution;
 import de.muenchen.allg.itd51.wollmux.TextDocumentModel.ReferencedFieldID;
@@ -101,7 +100,7 @@ import de.muenchen.allg.itd51.wollmux.db.Datasource;
 import de.muenchen.allg.itd51.wollmux.db.OOoDatasource;
 import de.muenchen.allg.itd51.wollmux.db.QueryResults;
 import de.muenchen.allg.itd51.wollmux.db.QueryResultsList;
-import de.muenchen.allg.itd51.wollmux.dialog.trafo.IfThenElseDialog;
+import de.muenchen.allg.itd51.wollmux.dialog.trafo.GenderDialog;
 import de.muenchen.allg.itd51.wollmux.dialog.trafo.TrafoDialog;
 import de.muenchen.allg.itd51.wollmux.dialog.trafo.TrafoDialogFactory;
 import de.muenchen.allg.itd51.wollmux.dialog.trafo.TrafoDialogParameters;
@@ -885,24 +884,37 @@ public class MailMergeNew
     
     JMenuItem button;
 
-    button = new JMenuItem(L.m("Gender"));
+    final String genderButtonName = L.m("Gender");
+    button = new JMenuItem(genderButtonName);
     button.setEnabled(dsHasFields);
     button.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
       {
-   // TODO    insertGenderField();
+        // ConfigThingy für leere Gender-Funktion zusammenbauen.
+        ConfigThingy genderConf = GenderDialog.generateGenderTrafoConf(
+          ds.getColumnNames().get(0).toString(), "", "", "");
+        insertFieldFromTrafoDialog(ds.getColumnNames(), genderButtonName, genderConf);
       }
     });
     menu.add(button);
-    
-    button = new JMenuItem(L.m("Wenn...Dann...Sonst..."));
+
+    final String iteButtonName = L.m("Wenn...Dann...Sonst...");
+    button = new JMenuItem(iteButtonName);
     button.setEnabled(dsHasFields);
     button.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
       {
-        insertIfThenElseField();
+        // ConfigThingy für leere WennDannSonst-Funktion zusammenbauen. Aufbau:
+        // IF(STRCMP(VALUE '<firstField>', '') THEN('') ELSE(''))
+        ConfigThingy ifConf = new ConfigThingy("IF");
+        ConfigThingy strCmpConf = ifConf.add("STRCMP");
+        strCmpConf.add("VALUE").add(ds.getColumnNames().get(0).toString());
+        strCmpConf.add("");
+        ifConf.add("THEN").add("");
+        ifConf.add("ELSE").add("");
+        insertFieldFromTrafoDialog(ds.getColumnNames(), iteButtonName, ifConf);
       }
     });
     menu.add(button);
@@ -945,31 +957,33 @@ public class MailMergeNew
   }
   
   /**
-   * Öffnet den IfThenElse-Dialog, erzeugt daraus ein transformiertes Feld und
-   * fügt dieses Feld in das Dokument mod ein.
+   * Öffnet den Dialog zum Einfügen eines Spezialfeldes, das über die Funktion
+   * trafoConf beschrieben ist, erzeugt daraus ein transformiertes Feld und fügt
+   * dieses Feld in das Dokument mod ein; Es erwartet darüber hinaus den Namen
+   * des Buttons buttonName, aus dem das Label des Dialogs, und später der
+   * Mouse-Over hint erzeugt wird und die Liste der aktuellen Felder, die evtl.
+   * im Dialog zur Verfügung stehen sollen.
+   * 
+   * @param fieldNames
+   *          Eine Liste der Feldnamen, die der Dialog anzeigt, falls er Buttons
+   *          zum Einfügen von Serienbrieffeldern bereitstellt.
+   * @param buttonName
+   *          Der Name des Buttons, aus dem die Titelzeile des Dialogs und der
+   *          Mouse-Over Hint des neu erzeugten Formularfeldes generiert wird.
+   * @param trafoConf
+   *          ConfigThingy, das die Funktion und damit den aufzurufenden Dialog
+   *          spezifiziert. Der von den Dialogen benötigte äußere Knoten
+   *          "Func(...trafoConf...) wird dabei von dieser Methode erzeugt, so
+   *          dass trafoConf nur die eigentliche Funktion darstellen muss.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  protected void insertIfThenElseField()
+  protected void insertFieldFromTrafoDialog(List fieldNames,
+      final String buttonName, ConfigThingy trafoConf)
   {
-    List fieldNames = ds.getColumnNames();
-    if (fieldNames.size() == 0) {
-      Logger.error(L.m("Die Datenquelle hat keine Spalte, von der das Feld abhängig sein könnte"));
-      return;
-    }
-
-    // ConfigThingy für leere WennDannSonst-Funktion zusammenbauen. Aufbau:
-    // WennDannSonst(IF(STRCMP(VALUE '<firstField>', '') THEN('') ELSE('')))
-    ConfigThingy conf = new ConfigThingy("Func");
-    ConfigThingy ifConf = conf.add("IF");
-    ConfigThingy strCmpConf = ifConf.add("STRCMP");
-    strCmpConf.add("VALUE").add((String)fieldNames.get(0));
-    strCmpConf.add("");
-    ifConf.add("THEN").add("");
-    ifConf.add("ELSE").add("");
-
     TrafoDialogParameters params = new TrafoDialogParameters();
-    params.conf = conf;
+    params.conf = new ConfigThingy("Func");
+    params.conf.addChild(trafoConf);
     params.isValid = true;
     params.fieldNames = fieldNames;
     params.closeAction = new ActionListener()
@@ -982,7 +996,7 @@ public class MailMergeNew
         {
           try
           {
-            mod.replaceSelectionWithTrafoField(status.conf, L.m("Wenn...Dann...Sonst..."));
+            mod.replaceSelectionWithTrafoField(status.conf, buttonName);
           }
           catch (Exception x)
           {
@@ -992,8 +1006,15 @@ public class MailMergeNew
       }
     };
 
-    TrafoDialog ite = new IfThenElseDialog(params);
-    ite.show(L.m("Spezialfeld Wenn...Dann...Sonst... einfügen"), myFrame);
+    try
+    {
+      TrafoDialogFactory.createDialog(params).show(
+        L.m("Spezialfeld %1 einfügen", buttonName), myFrame);
+    }
+    catch (UnavailableException e)
+    {
+      Logger.error(L.m("Das darf nicht passieren!"));
+    }
   }
 
   /**
