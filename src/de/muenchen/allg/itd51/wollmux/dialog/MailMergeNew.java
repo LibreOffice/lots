@@ -878,12 +878,15 @@ public class MailMergeNew
    */
   private void showInsertSpecialFieldPopup(JComponent invoker, int x, int y)
   {
+    boolean dsHasFields = ds.getColumnNames().size() > 0;
+    final TrafoDialog editFieldDialog = getTrafoDialogForCurrentSelection();
+    
     JPopupMenu menu = new JPopupMenu();
     
     JMenuItem button;
 
-    // TODO: Knopf ausgrauen, wenn die Datenquelle keine Spalten definiert.
     button = new JMenuItem(L.m("Gender"));
+    button.setEnabled(dsHasFields);
     button.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
@@ -893,8 +896,8 @@ public class MailMergeNew
     });
     menu.add(button);
     
-    // TODO: Knopf ausgrauen, wenn die Datenquelle keine Spalten definiert.
     button = new JMenuItem(L.m("Wenn...Dann...Sonst..."));
+    button.setEnabled(dsHasFields);
     button.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
@@ -905,6 +908,7 @@ public class MailMergeNew
     menu.add(button);
     
     button = new JMenuItem(L.m("Datensatznummer"));
+    button.setEnabled(false); // NOT YET IMPLEMENTED
     button.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
@@ -915,6 +919,7 @@ public class MailMergeNew
     menu.add(button);
     
     button = new JMenuItem(L.m("Serienbriefnummer"));
+    button.setEnabled(false); // NOT YET IMPLEMENTED
     button.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
@@ -924,13 +929,13 @@ public class MailMergeNew
     });
     menu.add(button);
     
-    //FIXME: ausgegraut, wenn nicht genau ein Spezialfeld selektiert.
     button = new JMenuItem(L.m("Feld bearbeiten..."));
+    button.setEnabled(editFieldDialog != null);
     button.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
       {
-        editSpecialField();
+        editFieldDialog.show(L.m("Spezialfeld bearbeiten"), myFrame);
       }
 
     });
@@ -992,53 +997,51 @@ public class MailMergeNew
   }
 
   /**
-   * Öffnet den entsprechenden Dialog, mit dem das gerade ausgewählte
-   * Spezialfeld bearbeitet werden kann.
+   * Prüft, ob sich in der akutellen Selektion ein transformiertes Feld befindet
+   * und liefert ein mit Hilfe der TrafoDialogFactory erzeugtes zugehöriges
+   * TrafoDialog-Objekt zurück, oder null, wenn keine transformierte Funktion
+   * selektiert ist oder für die Trafo kein Dialog existiert.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  private void editSpecialField()
+  private TrafoDialog getTrafoDialogForCurrentSelection()
   {
     ConfigThingy trafoConf = mod.getFormFieldTrafoFromSelection();
-    if (trafoConf != null)
-    {
-      final String trafoName = trafoConf.getName();
+    if (trafoConf == null) return null;
 
-      TrafoDialogParameters params = new TrafoDialogParameters();
-      params.conf = trafoConf;
-      params.isValid = true;
-      params.fieldNames = ds.getColumnNames();
-      params.closeAction = new ActionListener()
+    final String trafoName = trafoConf.getName();
+
+    TrafoDialogParameters params = new TrafoDialogParameters();
+    params.conf = trafoConf;
+    params.isValid = true;
+    params.fieldNames = ds.getColumnNames();
+    params.closeAction = new ActionListener()
+    {
+      public void actionPerformed(ActionEvent e)
       {
-        public void actionPerformed(ActionEvent e)
+        TrafoDialog dialog = (TrafoDialog) e.getSource();
+        TrafoDialogParameters status = dialog.getExitStatus();
+        if (status.isValid)
         {
-          TrafoDialog dialog = (TrafoDialog) e.getSource();
-          TrafoDialogParameters status = dialog.getExitStatus();
-          if(status.isValid) {
-            try
-            {
-              mod.setTrafo(trafoName, status.conf);
-            }
-            catch (Exception x)
-            {
-              Logger.error(x);
-            }
+          try
+          {
+            mod.setTrafo(trafoName, status.conf);
+          }
+          catch (Exception x)
+          {
+            Logger.error(x);
           }
         }
-      };
-      
-      try
-      {
-        TrafoDialog dialog = TrafoDialogFactory.createDialog(params);
-        dialog.show(L.m("Spezialfeld bearbeiten"), myFrame);
       }
-      catch (UnavailableException e)
-      {
-        WollMuxSingleton.showInfoModal(
-            L.m("Spezialfeld bearbeiten"),
-            L.m("Bitte bearbeiten Sie dieses Feld mit Hilfe des FormularMax.\n\n%1", e.getMessage()));
-        Logger.error(e);
-      }
+    };
+
+    try
+    {
+      return TrafoDialogFactory.createDialog(params);
+    }
+    catch (UnavailableException e)
+    {
+      return null;
     }
   }
   
