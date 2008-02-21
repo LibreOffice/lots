@@ -1,4 +1,3 @@
-//TODO L.m()
 /*
  * Dateiname: DocumentCommand.java
  * Projekt  : WollMux
@@ -116,8 +115,9 @@ abstract public class DocumentCommand
     // GROUPS-Attribut besitzen (die jetzt nicht merh unterstützt werden).
     if (wmCmd.query("GROUPS").count() > 0 && !canHaveGroupsAttribute())
     {
-      Logger.error("Das Dokumentkommando '" + getBookmarkName()
-                   + "' darf kein GROUPS-Attribut besitzen.");
+      Logger.error(L.m(
+        "Das Dokumentkommando '%1' darf kein GROUPS-Attribut besitzen.",
+        getBookmarkName()));
     }
   }
 
@@ -814,7 +814,7 @@ abstract public class DocumentCommand
       }
       catch (NodeNotFoundException e)
       {
-        throw new InvalidCommandException("Fehlendes Attribut FRAG_ID");
+        throw new InvalidCommandException(L.m("Fehlendes Attribut FRAG_ID"));
       }
 
       args = new Vector();
@@ -873,7 +873,7 @@ abstract public class DocumentCommand
             styles.add(s.toLowerCase());
           }
           else
-            throw new InvalidCommandException("STYLE '" + s + "' ist unbekannt.");
+            throw new InvalidCommandException(L.m("STYLE '%1' ist unbekannt.", s));
         }
       }
       catch (NodeNotFoundException e)
@@ -974,7 +974,7 @@ abstract public class DocumentCommand
       }
       catch (NodeNotFoundException e)
       {
-        throw new InvalidCommandException("Fehlendes Attribut DB_SPALTE");
+        throw new InvalidCommandException(L.m("Fehlendes Attribut DB_SPALTE"));
       }
 
       // Auswertung der AUTOSEP bzw SEPERATOR-Attribute
@@ -1004,8 +1004,9 @@ abstract public class DocumentCommand
         else
         {
           throw new InvalidCommandException(
-            "Unbekannter AUTOSEP-Typ \"" + as.toString()
-                + "\". Erwarte \"left\", \"right\" oder \"both\".");
+            L.m(
+              "Unbekannter AUTOSEP-Typ \"%1\". Erwarte \"left\", \"right\" oder \"both\".",
+              as.toString()));
         }
         currentSep = sep;
       }
@@ -1074,7 +1075,7 @@ abstract public class DocumentCommand
       }
       catch (NodeNotFoundException e)
       {
-        throw new InvalidCommandException("Fehlendes Attribut ID");
+        throw new InvalidCommandException(L.m("Fehlendes Attribut ID"));
       }
 
       try
@@ -1152,7 +1153,7 @@ abstract public class DocumentCommand
       }
       catch (NodeNotFoundException e)
       {
-        throw new InvalidCommandException("Fehlendes Attribut FUNCTION");
+        throw new InvalidCommandException(L.m("Fehlendes Attribut FUNCTION"));
       }
 
       args = new Vector();
@@ -1234,13 +1235,13 @@ abstract public class DocumentCommand
       }
       catch (NodeNotFoundException e)
       {
-        throw new InvalidCommandException("Fehlendes Attribut TYPE");
+        throw new InvalidCommandException(L.m("Fehlendes Attribut TYPE"));
       }
       if (type.compareToIgnoreCase("templateTemplate") != 0
           && type.compareToIgnoreCase("normalTemplate") != 0
           && type.compareToIgnoreCase("formDocument") != 0)
         throw new InvalidCommandException(
-          "Angegebener TYPE ist ungültig oder falsch geschrieben. Erwarte \"templateTemplate\", \"normalTemplate\" oder \"formDocument\"!");
+          L.m("Angegebener TYPE ist ungültig oder falsch geschrieben. Erwarte \"templateTemplate\", \"normalTemplate\" oder \"formDocument\"!"));
     }
 
     String getType()
@@ -1276,7 +1277,7 @@ abstract public class DocumentCommand
       }
       catch (NodeNotFoundException e)
       {
-        throw new InvalidCommandException("Fehlendes Attribut FRAG_ID");
+        throw new InvalidCommandException(L.m("Fehlendes Attribut FRAG_ID"));
       }
       try
       {
@@ -1334,7 +1335,7 @@ abstract public class DocumentCommand
       }
       catch (NodeNotFoundException e)
       {
-        throw new InvalidCommandException("Fehlendes Attribut FUNCTION");
+        throw new InvalidCommandException(L.m("Fehlendes Attribut FUNCTION"));
       }
     }
 

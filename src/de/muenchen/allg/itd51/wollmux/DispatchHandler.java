@@ -1,4 +1,3 @@
-//TODO L.m()
 /*
  * Dateiname: DispatchInterceptor.java
  * Projekt  : WollMux
@@ -443,7 +442,7 @@ public class DispatchHandler
       }
       catch (UnsupportedEncodingException e)
       {
-        Logger.error("Fehler in Dispatch-URL '" + url.Complete + "':", e);
+        Logger.error(L.m("Fehler in Dispatch-URL '%1':", url.Complete), e);
       }
 
       dispatch(arg, props);
@@ -590,7 +589,7 @@ public class DispatchHandler
       BasicDispatchHandler myDisp = getDispatchHandlerForUrl(urlStr);
       if (myDisp != null)
       {
-        Logger.debug2("queryDispatch: verwende " + myDisp);
+        Logger.debug2(L.m("queryDispatch: verwende %1", myDisp));
         return myDisp;
       }
       return null;
@@ -741,8 +740,8 @@ public class DispatchHandler
     if (frame == null || UNO.XDispatchProviderInterception(frame) == null
         || UNO.XDispatchProvider(frame) == null) return;
 
-    Logger.debug("Register DocumentDispatchInterceptor for frame #"
-                 + frame.hashCode());
+    Logger.debug(L.m("Registriere DocumentDispatchInterceptor für frame #%1",
+      new Integer(frame.hashCode())));
 
     // Hier möchte ich wissen, ob der DocumentDispatchInterceptor bereits im
     // Frame registriert ist. Ist das der Fall, so darf der
