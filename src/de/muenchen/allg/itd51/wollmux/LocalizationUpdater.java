@@ -25,6 +25,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -162,7 +163,7 @@ public class LocalizationUpdater
     String str = "L10n(\n  Messages(\n";
     String removed = "";
     int countRemoved = 0;
-    int countTranslations = 0;
+    HashMap countTranslations = new HashMap();
     boolean valid = false;
     boolean removedTranslatedMessagesWarning = false;
     for (Iterator iter = messages.iterator(); iter.hasNext();)
@@ -189,7 +190,10 @@ public class LocalizationUpdater
         if (valid)
         {
           str += "       " + elementStr + "\n";
-          countTranslations++;
+          String language = element.getName().toLowerCase();
+          Integer ct = (Integer) countTranslations.get(language);
+          int cti = (ct != null) ? ct.intValue() : 0;
+          countTranslations.put(language, new Integer(cti + 1));
         }
         else
         {
@@ -218,8 +222,13 @@ public class LocalizationUpdater
       countRemoved)));
     System.out.println(L.m("Gesamtzahl aktuelle original-Strings: %1", new Integer(
       currentOriginals.size())));
-    System.out.println(L.m("Davon nicht übersetzt: %1", new Integer(
-      currentOriginals.size() - countTranslations)));
+    for (Iterator iter = countTranslations.keySet().iterator(); iter.hasNext();)
+    {
+      String language = (String) iter.next();
+      int ct = ((Integer) countTranslations.get(language)).intValue();
+      System.out.println(L.m("Davon nicht übersetzt in Sprache %1: %2", language,
+        new Integer(currentOriginals.size() - ct)));
+    }
 
     if (removedTranslatedMessagesWarning)
       System.err.println("\n"
