@@ -132,7 +132,7 @@ public class LocalizationUpdater
     {
       File file = (File) iter.next();
 
-      String str = readSourceFile(file);
+      String str = readFile(file, "ISO-8859-1");
 
       Matcher m = L_m_Pattern.matcher(str);
       while (m.find())
@@ -157,10 +157,18 @@ public class LocalizationUpdater
       }
     }
 
-    // Neue localization.conf erzeugen (die StringRepresentation von
-    // ConfigThingy macht das nicht schön genug, deshalb hier eine eigene
-    // Ausgaberoutine.
-    String str = "L10n(\n  Messages(\n";
+    // Messages-Abschnitt der localization.conf neu erzeugen (die
+    // StringRepresentation von ConfigThingy macht das nicht schön genug,
+    // deshalb hier eine eigene Ausgaberoutine) und dabei vorangestellte
+    // Abschnitte unverändert lassen.
+    String str = "";
+    String origContent = readFile(localizationConfFile, "UTF-8");
+    String origContentBeforeMessages = origContent.split("\\sMessages\\s*\\(", 2)[0];
+    if (origContentBeforeMessages.length() == 0)
+      str += "L10n(\n  Messages(\n";
+    else
+      str += origContentBeforeMessages + " Messages(\n";
+
     String removed = "";
     int countRemoved = 0;
     HashMap countTranslations = new HashMap();
@@ -204,6 +212,7 @@ public class LocalizationUpdater
     }
     str += removed;
     str += "\n  )\n)";
+
     try
     {
       FileWriter writer = new FileWriter(localizationConfFile);
@@ -236,21 +245,21 @@ public class LocalizationUpdater
   }
 
   /**
-   * Liefert den kompletten Inhalt der ISO-8859-1 encodierten Quelldatei file
-   * als String zurück.
+   * Liefert den kompletten Inhalt der mit encoding encodierten Datei file als
+   * String zurück.
    * 
    * @param file
    * @throws FileNotFoundException
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  private static String readSourceFile(File file)
+  private static String readFile(File file, String encoding)
   {
     String str = "";
     try
     {
       InputStreamReader r = new InputStreamReader(new FileInputStream(file),
-        "ISO-8859-1");
+        encoding);
       char[] buff = new char[1024];
       int count;
       while ((count = r.read(buff)) > 0)
