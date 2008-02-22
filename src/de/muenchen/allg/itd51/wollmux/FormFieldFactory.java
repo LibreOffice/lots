@@ -1,4 +1,3 @@
-//TODO L.m()
 /*
  * Dateiname: FormFieldFactory.java
  * Projekt  : WollMux
@@ -99,7 +98,7 @@ public final class FormFieldFactory
       else if (WollMuxFiles.isDebugMode())
       {
         String cellName = (String) UNO.getProperty(cell, "CellName");
-        Logger.debug("Scanne Zelle " + cellName);
+        Logger.debug(L.m("Scanne Zelle %1",cellName));
       }
     }
 
@@ -685,8 +684,7 @@ public final class FormFieldFactory
 
       String bookmarkName = cmd.getBookmarkName();
 
-      Logger.debug2("Erzeuge neues Input-Field für Bookmark \"" + bookmarkName
-                    + "\"");
+      Logger.debug2(L.m("Erzeuge neues Input-Field für Bookmark \"%1\"",bookmarkName));
       try
       {
         XTextRange range = cmd.createInsertCursor(false);

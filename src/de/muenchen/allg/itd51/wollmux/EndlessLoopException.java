@@ -1,4 +1,3 @@
-//TODO L.m()
 /*
  * Dateiname: EndlessLoopException.java
  * Projekt  : WollMux
