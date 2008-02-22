@@ -32,11 +32,13 @@ import de.muenchen.allg.itd51.parser.ConfigThingy;
  */
 public class L
 {
+  public static StringBuilder debugMessages = new StringBuilder();
+
   /**
    * Die URL der Daten und Übersetzungen zur Lokalisierung.
    */
-  private static final URL LOCALIZE_DATA_URL = L.class.getClassLoader()
-      .getResource("data/localization.conf");
+  private static final URL LOCALIZE_DATA_URL = L.class.getClassLoader().getResource(
+    "data/localization.conf");
 
   /**
    * Wird für die aktuelle Sprache initialisiert und bildet einen Originalstring
@@ -72,7 +74,7 @@ public class L
     // interpretiert
     return replace(m(original), "%1", "" + insertion1);
   }
-  
+
   /**
    * Falls für original eine Übersetzung verfügbar ist, wird diese
    * zurückgeliefert, ansonsten der Originalstring. Dabei werden alle Vorkommen
@@ -114,19 +116,55 @@ public class L
     {
       ConfigThingy l10n = new ConfigThingy("l10n", LOCALIZE_DATA_URL);
 
-      String messageLanguage = Locale.getDefault().getCountry();
+      String messageLanguage = Locale.getDefault().getLanguage();
+      debugMessages.append("Message language from locale: " + messageLanguage + '\n');
       String lcMessages = System.getenv("LC_MESSAGES");
       if (lcMessages != null && lcMessages.length() >= 2)
-        messageLanguage = lcMessages.substring(0, 2);
+      {
+        int i = lcMessages.indexOf('.');
+        if (i >= 0) lcMessages = lcMessages.substring(0, i);
+        i = lcMessages.indexOf('@');
+        if (i >= 0) lcMessages = lcMessages.substring(0, i);
+        debugMessages.append("LC_MESSAGES override: " + lcMessages + '\n');
+        messageLanguage = lcMessages;
+      }
+
+      ConfigThingy aliases = l10n.get("LanguageAliases", 2);
+      Iterator iter = aliases.iterator();
+      findAlias: while (iter.hasNext())
+      {
+        ConfigThingy aliasConf = (ConfigThingy) iter.next();
+        if (aliasConf.count() > 1)
+        {
+          Iterator subIter = aliasConf.iterator();
+          String languageCode = subIter.next().toString();
+          if (messageLanguage.equals(languageCode)) break;
+          while (subIter.hasNext())
+          {
+            String alias = subIter.next().toString();
+            if (messageLanguage.equals(alias))
+            {
+              debugMessages.append("Alias mapping => " + languageCode + '\n');
+              messageLanguage = languageCode;
+              break findAlias;
+            }
+          }
+        }
+        else
+        {
+          debugMessages.append("Aliases line with less than 2 entries: "
+                               + aliasConf.stringRepresentation());
+          debugMessages.append('\n');
+        }
+      }
 
       ConfigThingy messages = l10n.get("Messages", 2);
-      Iterator iter = messages.iterator();
+      iter = messages.iterator();
       String original = "foo";
       while (iter.hasNext())
       {
         ConfigThingy conf = (ConfigThingy) iter.next();
-        if (conf.getName().equalsIgnoreCase("original"))
-          original = conf.toString();
+        if (conf.getName().equalsIgnoreCase("original")) original = conf.toString();
 
         if (conf.getName().equalsIgnoreCase(messageLanguage))
           mapMessageToTranslation.put(original, conf.toString());

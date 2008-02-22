@@ -282,6 +282,9 @@ public class WollMuxFiles
      */
     setLoggingMode(WollMuxFiles.getWollmuxConf());
 
+    Logger.debug(L.debugMessages.toString());
+    L.debugMessages = null;  //Speicherplatz freigeben
+    
     fido.logTimes();
 
     showCredits = WollMuxFiles.getWollmuxConf().query("SHOW_CREDITS", 1).query("on").count() > 0;
