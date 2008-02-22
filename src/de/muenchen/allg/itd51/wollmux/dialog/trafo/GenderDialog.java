@@ -20,6 +20,7 @@ package de.muenchen.allg.itd51.wollmux.dialog.trafo;
 import java.awt.BorderLayout;
 import java.awt.Dialog;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Frame;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
@@ -27,14 +28,19 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
+import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
@@ -44,6 +50,7 @@ import javax.swing.border.EmptyBorder;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.L;
+import de.muenchen.allg.itd51.wollmux.dialog.DimAdjust;
 
 /**
  * Erlaubt die Bearbeitung der Funktion eines Gender-Feldes.
@@ -73,8 +80,6 @@ public class GenderDialog extends TrafoDialog
     this.params = params;
     if (!params.isValid || params.conf == null || params.fieldNames == null
         || params.fieldNames.size() == 0) throw new IllegalArgumentException();
-
-    params.isValid = false; // wird später in updateTrafoConf auf true gesetzt.
 
     ConfigThingy conf = params.conf;
 
@@ -119,7 +124,12 @@ public class GenderDialog extends TrafoDialog
       if (anredeId == null || textHerr == null || textFrau == null
           || textSonst == null) stop();
 
-      buildGUI(anredeId, textHerr, textFrau, textSonst, params.fieldNames);
+      HashSet uniqueFieldNames = new HashSet(params.fieldNames);
+      uniqueFieldNames.add(anredeId);
+      List sortedNames = new ArrayList(uniqueFieldNames);
+      Collections.sort(sortedNames);
+
+      buildGUI(anredeId, textHerr, textFrau, textSonst, sortedNames);
     }
     catch (NodeNotFoundException e)
     {
@@ -127,30 +137,122 @@ public class GenderDialog extends TrafoDialog
     }
   }
 
+  /**
+   * Schreiberleichterung für throw new IllegalArgumentException();
+   * 
+   * @throws IllegalArgumentException
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
   private void stop() throws IllegalArgumentException
   {
     throw new IllegalArgumentException();
   }
 
+  /**
+   * Baut das genderPanel auf.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
   private void buildGUI(String anredeId, String textHerr, String textFrau,
-      String textSonst, List fieldNames)
+      String textSonst, final List fieldNames)
   {
-    genderPanel = new JPanel();
+    genderPanel = new JPanel(new BorderLayout());
+    genderPanel.setBorder(BorderFactory.createTitledBorder(
+      BorderFactory.createEtchedBorder(),
+      L.m("Verschiedene Texte abhängig vom Geschlecht")));
     Box vbox = Box.createVerticalBox();
-    genderPanel.add(vbox);
+    vbox.setBorder(BorderFactory.createEmptyBorder(5, 5, 2, 5));
+    genderPanel.add(vbox, BorderLayout.CENTER);
 
+    Box hbox;
+    JLabel label;
+    int maxLabelWidth = 0;
+    List labels = new ArrayList();
+
+    hbox = Box.createHorizontalBox();
+    label = new JLabel(L.m("Geschlechtsbestimmendes Feld"));
+    label.setFont(label.getFont().deriveFont(Font.PLAIN));
+    hbox.add(label);
     cbAnrede = new JComboBox(new Vector(fieldNames));
     cbAnrede.setSelectedItem(anredeId);
     cbAnrede.setEditable(false);
-    tfHerr = new JTextField(textHerr);
+    hbox.add(Box.createHorizontalGlue());
+    hbox.add(cbAnrede);
+    vbox.add(hbox);
+
+    addText(vbox, L.m("(Kann z.B. 'Herr', 'weibl.', 'm', 'w' enthalten)") + "\n ");
+
+    hbox = Box.createHorizontalBox();
+    label = new JLabel(L.m("Text weibl."));
+    labels.add(label);
+    maxLabelWidth = DimAdjust.maxWidth(maxLabelWidth, label);
+    hbox.add(label);
     tfFrau = new JTextField(textFrau);
+    hbox.add(tfFrau);
+    vbox.add(hbox);
+    addText(vbox, " ");
+
+    hbox = Box.createHorizontalBox();
+    label = new JLabel(L.m("Text männl."));
+    labels.add(label);
+    maxLabelWidth = DimAdjust.maxWidth(maxLabelWidth, label);
+    hbox.add(label);
+    tfHerr = new JTextField(textHerr);
+    hbox.add(tfHerr);
+    vbox.add(hbox);
+    addText(vbox, " ");
+
+    hbox = Box.createHorizontalBox();
+    label = new JLabel(L.m("Text sonst."));
+    labels.add(label);
+    maxLabelWidth = DimAdjust.maxWidth(maxLabelWidth, label);
+    hbox.add(label);
     tfSonst = new JTextField(textSonst);
-    vbox.add(cbAnrede);
-    vbox.add(tfHerr);
-    vbox.add(tfFrau);
-    vbox.add(tfSonst);
+    hbox.add(tfSonst);
+    vbox.add(hbox);
+    addText(vbox, " ");
+
+    // einheitliche Breite für alle Labels vergeben:
+    for (Iterator iter = labels.iterator(); iter.hasNext();)
+    {
+      label = (JLabel) iter.next();
+      Dimension d = label.getPreferredSize();
+      d.width = maxLabelWidth + 10;
+      label.setPreferredSize(d);
+    }
+
+    addText(
+      vbox,
+      L.m("Der Text sonst. wird z.B. verwendet, um bei der Anrede\nvon Firma 'geehrte Damen und Herren' einzufügen."));
   }
 
+  /**
+   * Fügt der JComponent compo abhängig vom Text ein oder mehrere H-Boxen mit
+   * dem Text text hinzu, wobei der Text an Zeilenumbrüchen umgebrochen und
+   * linksbündig dargestellt wird.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
+  private void addText(JComponent compo, String text)
+  {
+    String[] split = text.split("\n");
+    for (int i = 0; i < split.length; i++)
+    {
+      Box hbox = Box.createHorizontalBox();
+      JLabel label = new JLabel(split[i]);
+      label.setFont(label.getFont().deriveFont(Font.PLAIN));
+      hbox.add(label);
+      hbox.add(Box.createHorizontalGlue());
+      compo.add(hbox);
+    }
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see de.muenchen.allg.itd51.wollmux.dialog.trafo.TrafoDialog#getExitStatus()
+   */
   public TrafoDialogParameters getExitStatus()
   {
     return params;
@@ -171,13 +273,15 @@ public class GenderDialog extends TrafoDialog
   }
 
   /**
-   * Fügt {@link #ifThenElsePanel} in dialog ein und zeigt ihn an.
+   * Fügt {@link #genderPanel} in dialog ein und zeigt ihn an.
    * 
    * @param dialog
-   * @author Matthias Benkmann (D-III-ITD D.10) TESTED
+   * @author Matthias Benkmann (D-III-ITD D.10), Christoph Lutz (D-III-ITD D.10)
    */
   private void show(String windowTitle, JDialog dialog)
   {
+    params.isValid = false; // wird später in updateTrafoConf auf true gesetzt.
+
     dialog.setAlwaysOnTop(true);
     dialog.setTitle(windowTitle);
     oehrchen = new MyWindowListener();
@@ -222,11 +326,18 @@ public class GenderDialog extends TrafoDialog
     int x = screenSize.width / 2 - frameWidth / 2;
     int y = screenSize.height / 2 - frameHeight / 2;
     dialog.setLocation(x, y);
+    dialog.setResizable(false);
     dialog.setVisible(true);
 
     this.myDialog = dialog;
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see de.muenchen.allg.itd51.wollmux.dialog.trafo.TrafoDialog#show(java.lang.String,
+   *      java.awt.Dialog)
+   */
   public void show(String windowTitle, Dialog owner)
   {
     if (owner == null)
@@ -235,6 +346,12 @@ public class GenderDialog extends TrafoDialog
       show(windowTitle, new JDialog(owner));
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see de.muenchen.allg.itd51.wollmux.dialog.trafo.TrafoDialog#show(java.lang.String,
+   *      java.awt.Frame)
+   */
   public void show(String windowTitle, Frame owner)
   {
     if (owner == null)
@@ -243,6 +360,12 @@ public class GenderDialog extends TrafoDialog
       show(windowTitle, new JDialog(owner));
   }
 
+  /**
+   * Der Windowlistener, der die Close-Action des "X"-Knopfs abfängt und den
+   * Dialog sauber mit abort beendet.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
   private class MyWindowListener implements WindowListener
   {
     public void windowOpened(WindowEvent e)
@@ -275,6 +398,12 @@ public class GenderDialog extends TrafoDialog
     }
   }
 
+  /**
+   * Beendet den Dialog und ruft insbesondere den close-ActionListener der
+   * darüberliegenden Anwendung auf.
+   * 
+   * @author Christoph Lutz (D-III-ITD-5.1)
+   */
   private void abort()
   {
     /*
@@ -298,6 +427,11 @@ public class GenderDialog extends TrafoDialog
       params.closeAction.actionPerformed(new ActionEvent(this, 0, ""));
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see de.muenchen.allg.itd51.wollmux.dialog.trafo.TrafoDialog#dispose()
+   */
   public void dispose()
   {
     try
