@@ -1,4 +1,3 @@
-//TODO L.m()
 /*
  * Dateiname: DocumentCommandInterpreter.java
  * Projekt  : WollMux
@@ -227,8 +226,9 @@ public class DocumentCommandInterpreter
     if (errors != 0)
     {
       throw new WMCommandsFailedException(
-        "Die verwendete Vorlage enthält " + ((errors == 1) ? "einen" : "" + errors)
-            + " Fehler.\n\n" + "Bitte kontaktieren Sie Ihre Systemadministration.");
+        L.m(
+          "Die verwendete Vorlage enthält %1 Fehler.\n\nBitte kontaktieren Sie Ihre Systemadministration.",
+          ((errors == 1) ? "einen" : "" + errors)));
     }
   }
 
@@ -764,9 +764,9 @@ public class DocumentCommandInterpreter
         urls = VisibleTextFragmentList.getURLsByID(fragId);
         if (urls.size() == 0)
         {
-          throw new ConfigurationErrorException("Das Textfragment mit der FRAG_ID '"
-                                                + cmd.getFragID()
-                                                + "' ist nicht definiert!");
+          throw new ConfigurationErrorException(L.m(
+            "Das Textfragment mit der FRAG_ID '%1' ist nicht definiert!",
+            cmd.getFragID()));
         }
         // Iterator über URLs
         Iterator iter = urls.iterator();
@@ -777,8 +777,8 @@ public class DocumentCommandInterpreter
           {
             URL url = WollMuxFiles.makeURL(urlStr);
 
-            Logger.debug("Füge Textfragment \"" + cmd.getFragID() + "\" von URL \""
-                         + url.toExternalForm() + "\" ein.");
+            Logger.debug(L.m("Füge Textfragment '%1' von URL '%2' ein.",
+              cmd.getFragID(), url.toExternalForm()));
 
             // styles bzw. fragment einfügen:
             if (cmd.importStylesOnly())
@@ -807,9 +807,11 @@ public class DocumentCommandInterpreter
       {
         if (cmd.isManualMode())
         {
-          WollMuxSingleton.showInfoModal("WollMux-Fehler",
-            "Das Textfragment mit der FRAG_ID '" + cmd.getFragID()
-                + "' konnte nicht eingefügt werden:\n\n" + e.getMessage());
+          WollMuxSingleton.showInfoModal(L.m("WollMux-Fehler"), L.m(
+            "Das Textfragment mit der FRAG_ID '%1' konnte nicht eingefügt werden:",
+            cmd.getFragID())
+                                                                + "\n\n"
+                                                                + e.getMessage());
         }
         else
         {
@@ -840,7 +842,7 @@ public class DocumentCommandInterpreter
 
         try
         {
-          Logger.debug("Füge Textfragment von URL \"" + urlStr + "\" ein.");
+          Logger.debug(L.m("Füge Textfragment von URL '%1' ein.", urlStr));
 
           insertDocumentFromURL(cmd, WollMuxFiles.makeURL(urlStr));
         }
@@ -1137,7 +1139,7 @@ public class DocumentCommandInterpreter
       if (placeholders.size() < args.size())
       {
 
-        String error = ("Es sind mehr Parameter angegeben als Platzhalter vorhanden sind");
+        String error = (L.m("Es sind mehr Parameter angegeben als Platzhalter vorhanden sind"));
 
         Logger.error(error);
 
@@ -1238,7 +1240,7 @@ public class DocumentCommandInterpreter
       }
       catch (DatasetNotFoundException e)
       {
-        value = "<FEHLER: Kein Absender ausgewählt!>";
+        value = L.m("<FEHLER: Kein Absender ausgewählt!>");
       }
       catch (ColumnNotFoundException e)
       {
@@ -1288,9 +1290,10 @@ public class DocumentCommandInterpreter
       }
       else
       {
-        value = "<FEHLER: FUNCTION '" + cmd.getFunctionName() + "' nicht definiert>";
-        Logger.error("Die in Kommando '" + cmd + " verwendete FUNCTION '"
-                     + cmd.getFunctionName() + "' ist nicht definiert.");
+        value = L.m("<FEHLER: FUNCTION '%1' nicht definiert>", cmd.getFunctionName());
+        Logger.error(L.m(
+          "Die in Kommando '%1' verwendete FUNCTION '%2' ist nicht definiert.", cmd,
+          cmd.getFunctionName()));
       }
 
       XTextCursor insCursor = cmd.createInsertCursor(false);
@@ -1388,7 +1391,7 @@ public class DocumentCommandInterpreter
    */
   private void insertErrorField(DocumentCommand cmd, java.lang.Exception e)
   {
-    String msg = "Fehler in Dokumentkommando \"" + cmd.getBookmarkName() + "\"";
+    String msg = L.m("Fehler in Dokumentkommando '%1'", cmd.getBookmarkName());
 
     // Meldung auch auf dem Logger ausgeben
     if (e != null)
@@ -1397,7 +1400,7 @@ public class DocumentCommandInterpreter
       Logger.error(msg);
 
     UnoService cursor = new UnoService(cmd.createInsertCursor(false));
-    cursor.xTextCursor().setString("<FEHLER:  >");
+    cursor.xTextCursor().setString(L.m("<FEHLER:  >"));
 
     // Text fett und rot machen:
     try

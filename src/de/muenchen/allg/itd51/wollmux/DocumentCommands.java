@@ -1,4 +1,3 @@
-//TODO L.m()
 /*
  * Dateiname: DocumentCommands.java
  * Projekt  : WollMux
@@ -255,10 +254,11 @@ public class DocumentCommands
     removeRetiredDocumentCommands(retiredDocumentCommands);
     addNewDocumentCommands(newDocumentCommands);
 
-    Logger.debug2("updateBookmarks fertig nach "
-                  + (System.currentTimeMillis() - startTime)
-                  + " ms. Entfernte/Neue Dokumentkommandos: "
-                  + retiredDocumentCommands.size() + " / "
+    Logger.debug2(L.m(
+      "updateBookmarks fertig nach %1 ms. Entfernte/Neue Dokumentkommandos: ",
+      new Integer((int) (System.currentTimeMillis() - startTime)))
+                  + retiredDocumentCommands.size()
+                  + " / "
                   + newDocumentCommands.size());
     return retiredDocumentCommands.size() > 0 || newDocumentCommands.size() > 0;
   }
@@ -314,9 +314,9 @@ public class DocumentCommands
     removeRetiredTextSections(retiredTextSections);
     addNewTextSections(newTextSections);
 
-    Logger.debug2("updateTextSections fertig nach "
-                  + (System.currentTimeMillis() - startTime)
-                  + " ms. Entfernte/Neue TextSections: "
+    Logger.debug2(L.m(
+      "updateTextSections fertig nach %1 ms. Entfernte/Neue TextSections: ",
+      new Integer((int) (System.currentTimeMillis() - startTime)))
                   + retiredTextSections.size() + " / " + newTextSections.size());
     return retiredTextSections.size() > 0 || newTextSections.size() > 0;
   }
@@ -635,7 +635,7 @@ public class DocumentCommands
       // Paragraphen im GarbageCollector. Ich habe bereits probiert, einen
       // minimalen Testfall ohne WollMux für dieses Problem zu extrahieren, war
       // aber damit nicht erfolgreich.
-      Logger.debug("Warnung: inkonsistentes Bookmark entdeckt:");
+      Logger.debug(L.m("Warnung: inkonsistentes Bookmark entdeckt:"));
       Logger.debug(e);
     }
     catch (Exception e)
@@ -679,8 +679,10 @@ public class DocumentCommands
     }
     catch (java.lang.Exception e)
     {
-      Logger.error("Der Textbereich mit dem Namen '" + name
-                   + "' enthält ein fehlerhaftes GROUPS-Attribut.", e);
+      Logger.error(
+        L.m(
+          "Der Textbereich mit dem Namen '%1' enthält ein fehlerhaftes GROUPS-Attribut.",
+          name), e);
     }
 
     try
@@ -721,7 +723,8 @@ public class DocumentCommands
       }
       catch (NodeNotFoundException e)
       {
-        throw new DocumentCommand.InvalidCommandException("Fehlendes CMD-Attribut");
+        throw new DocumentCommand.InvalidCommandException(
+          L.m("Fehlendes CMD-Attribut"));
       }
 
       // spezielle Kommando-Instanzen erzeugen
@@ -805,8 +808,8 @@ public class DocumentCommands
         return new DocumentCommand.OverrideFrag(wmCmd, bookmark);
       }
 
-      throw new DocumentCommand.InvalidCommandException("Unbekanntes Kommando \""
-                                                        + cmd + "\"");
+      throw new DocumentCommand.InvalidCommandException(L.m(
+        "Unbekanntes Kommando '%1'", cmd));
     }
     catch (DocumentCommand.InvalidCommandException e)
     {
