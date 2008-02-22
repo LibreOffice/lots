@@ -44,7 +44,7 @@ public class TrafoDialogFactory
    * @throws UnavailableException wenn kein passender Dialog gefunden wurde.
    *  
    * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TODO Testen
+   * TESTED
    */
   public static TrafoDialog createDialog(TrafoDialogParameters params)
   throws UnavailableException
