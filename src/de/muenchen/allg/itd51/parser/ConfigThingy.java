@@ -48,7 +48,8 @@
 *                  | urlEncode() public gemacht. Nicht wirklich schöne Lösung, aber mei.
 * 02.08.2007 | BNK | +ConfigThingy(String, String)       
 * 07.08.2007 | BNK | Bei Syntaxfehlern im Exceptiontext den beanstandeten Text angeben.
-* 10.08.2007 | BNK | Fehler bei der stringRepresentation() von Listen mit nur einem Element behoben.           
+* 10.08.2007 | BNK | Fehler bei der stringRepresentation() von Listen mit nur einem Element behoben.
+* 25.02.2008 | BNK | ConfigThingy generisiert           
 * -------------------------------------------------------------------
 *
 * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -80,7 +81,7 @@ import java.util.regex.Pattern;
  * Parsen einer WollMux-Konfigurationsdatei entsteht. 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
-public class ConfigThingy
+public class ConfigThingy implements Iterable<ConfigThingy>
 {
   /**
    * Der Name des Zeichensatzes, in dem ConfigThingy-Dateien gespeichert
@@ -104,7 +105,7 @@ public class ConfigThingy
   private static final String INDENT = "  ";
   
   /** Die Kindknoten. */
-  private List children;
+  private List<ConfigThingy> children;
   /** Der Name des Knotens. Bei Blättern ist dies der (String-)Wert des Knotens. */
   private String name;
   
@@ -170,10 +171,8 @@ public class ConfigThingy
    */
   public void addChildCopiesFrom(ConfigThingy conf)
   {
-    Iterator iter = conf.iterator();
-    while (iter.hasNext())
+    for (ConfigThingy childToCopy: conf)
     {
-      ConfigThingy childToCopy = (ConfigThingy)iter.next();
       ConfigThingy childCopy = new ConfigThingy(childToCopy.getName());
       childCopy.addChildCopiesFrom(childToCopy);
       this.addChild(childCopy);
@@ -190,23 +189,23 @@ public class ConfigThingy
   protected void childrenFromUrl(URL url, Reader read) throws IOException, SyntaxErrorException
   {
     try{
-      Stack stack = new Stack();
+      Stack<ConfigThingy> stack = new Stack<ConfigThingy>();
       stack.push(this);
-      List tokens = tokenize(url, read);
-      Iterator liter = tokens.iterator();
+      List<StringContentToken> tokens = tokenize(url, read);
+      Iterator<StringContentToken> liter = tokens.iterator();
       Token token1, token2;
       do{
-        token1 = (Token)liter.next();
+        token1 = liter.next();
         ConfigThingy child;
         switch (token1.type())
         {
           case Token.INCLUDE:
-            token2 = (Token)liter.next();
+            token2 = liter.next();
             if(token2.type() == Token.STRING && !token2.contentString().equals(""))
             {
               try{
                 URL includeURL = new URL(url, urlEncode(token2.contentString()));
-                ((ConfigThingy)stack.peek()).childrenFromUrl(includeURL, new InputStreamReader(includeURL.openStream(),CHARSET) );
+                stack.peek().childrenFromUrl(includeURL, new InputStreamReader(includeURL.openStream(),CHARSET) );
               } catch(IOException iox)
               {
                 throw new IOException(token2.url()+" in Zeile "+token2.line()+" bei Zeichen "+token2.position()+": %include fehlgeschlagen: "+iox.toString());
@@ -219,19 +218,19 @@ public class ConfigThingy
             break;
             
           case Token.KEY:
-            token2 = (Token)liter.next();
+            token2 = liter.next();
             switch (token2.type())
             {
               case Token.OPENPAREN:
                 child = new ConfigThingy(token1.contentString());
-                ((ConfigThingy)stack.peek()).addChild(child);
+                stack.peek().addChild(child);
                 stack.push(child);
                 break;
               case Token.STRING:
                 child = new ConfigThingy(token1.contentString());
                 ConfigThingy grandchild = new ConfigThingy(token2.contentString());
                 child.addChild(grandchild);
-                ((ConfigThingy)stack.peek()).addChild(child);
+                stack.peek().addChild(child);
                 break;
               default:
                 throw new SyntaxErrorException(token2.url()+": Syntaxfehler in Zeile "+token2.line()+" bei Zeichen "+token2.position());
@@ -240,7 +239,7 @@ public class ConfigThingy
             
           case Token.STRING:
             child = new ConfigThingy(token1.contentString());
-            ((ConfigThingy)stack.peek()).addChild(child);
+            stack.peek().addChild(child);
             break;
             
           case Token.CLOSEPAREN:
@@ -251,7 +250,7 @@ public class ConfigThingy
             
           case Token.OPENPAREN:
             child = new ConfigThingy("");
-            ((ConfigThingy)stack.peek()).addChild(child);
+            stack.peek().addChild(child);
             stack.push(child);
             break;
             
@@ -283,7 +282,7 @@ public class ConfigThingy
   public ConfigThingy(String name)
   {
     this.name = name;
-    this.children = new Vector();
+    this.children = new Vector<ConfigThingy>();
   }
 
   /**
@@ -325,7 +324,7 @@ public class ConfigThingy
   /**
    * Erzeugt ein anonymes ConfigThingy mit Kindern aus children.
    */
-  private ConfigThingy(String name, List children)
+  private ConfigThingy(String name, List<ConfigThingy> children)
   {
     this.name=name;
     this.children = children;
@@ -370,7 +369,7 @@ public class ConfigThingy
    * Liefert einen Iterator über die Kinder dieses ConfigThingys.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public Iterator iterator()
+  public Iterator<ConfigThingy> iterator()
   {
     return children.iterator();
   }
@@ -386,39 +385,31 @@ public class ConfigThingy
    */
   public static ConfigThingy getNodesVisibleAt(ConfigThingy node, String nodeNameToScanFor, ConfigThingy root)
   {
-    Stack s = new Stack();
-    Vector r = new Vector();
+    Stack<Vector<ConfigThingy>> s = new Stack<Vector<ConfigThingy>>();
+    Vector<ConfigThingy> r = new Vector<ConfigThingy>();
     getNodesVisibleAt(node,nodeNameToScanFor, s, root, r);
     return new ConfigThingy("<visible nodes>", r);
   }
   
-  private static boolean getNodesVisibleAt(ConfigThingy node, String nodeNameToScanFor, Stack /* of Vector*/ s, ConfigThingy root, Collection result)
+  private static boolean getNodesVisibleAt(ConfigThingy node, String nodeNameToScanFor, Stack<Vector<ConfigThingy>> s, ConfigThingy root, Collection<ConfigThingy> result)
   {
     if (root == node)
     {
-      Iterator iter = s.iterator();
-      while (iter.hasNext())
-      {
-        result.addAll((Collection)iter.next());
-      }
+      for (Vector<ConfigThingy> v: s) result.addAll(v);
       return true;
     }
     
-    Iterator iter = root.iterator();
-    Vector v = new Vector();
-    while (iter.hasNext())
+    Vector<ConfigThingy> v = new Vector<ConfigThingy>();
+    for (ConfigThingy child: root)
     {
-      ConfigThingy child = (ConfigThingy)iter.next();
       if (child.getName().equals(nodeNameToScanFor))
       v.add(child);
     }
     
     s.push(v);
     
-    iter = root.iterator();
-    while (iter.hasNext())
+    for (ConfigThingy child : root)
     {
-      ConfigThingy child = (ConfigThingy)iter.next();
       if (getNodesVisibleAt(node, nodeNameToScanFor, s, child, result)) return true;
     }
     
@@ -459,7 +450,7 @@ public class ConfigThingy
   public ConfigThingy getFirstChild() throws NodeNotFoundException
   {
     if (children.isEmpty()) throw new NodeNotFoundException("Knoten "+getName()+" hat keine Kinder");
-    return (ConfigThingy)children.get(0);
+    return children.get(0);
   }
   
   /** Wie getFirstChild(), aber falls kein Kind vorhanden wird
@@ -468,7 +459,7 @@ public class ConfigThingy
    */
   private ConfigThingy getFirstChildNoThrow()
   {
-    return (ConfigThingy)children.get(0);
+    return children.get(0);
   }
   
   /**
@@ -479,7 +470,7 @@ public class ConfigThingy
   public ConfigThingy getLastChild() throws NodeNotFoundException
   {
     if (children.isEmpty()) throw new NodeNotFoundException("Knoten "+getName()+" hat keine Kinder");
-    return (ConfigThingy)children.get(children.size()-1);
+    return children.get(children.size()-1);
   }
 
   /**
@@ -504,7 +495,7 @@ public class ConfigThingy
    *         prinzipiell Ergebnisse bringen könnte.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private boolean rollcall(ConfigThingy parent, String name, List found, int parentLevel, int searchLevel, boolean getParents)
+  private boolean rollcall(ConfigThingy parent, String name, List<ConfigThingy> found, int parentLevel, int searchLevel, boolean getParents)
   {
     int level = parentLevel + 1;
     if (searchLevel == level)
@@ -521,11 +512,9 @@ public class ConfigThingy
     }
     else //if searchLevel < level
     {
-      Iterator iter = children.iterator();
       boolean haveMore = false;
-      while (iter.hasNext())
+      for (ConfigThingy child : children)
       {
-        ConfigThingy child = (ConfigThingy)iter.next();
         boolean result = child.rollcall(this, name, found, level, searchLevel, getParents); 
         haveMore = haveMore || result;
       }
@@ -565,7 +554,7 @@ public class ConfigThingy
     ConfigThingy res = query(name, false, maxlevel);
     if (res.count() == 0) throw new NodeNotFoundException("Knoten "+getName()+ " hat keinen Nachfahren '"+name+"'");
     if (res.count() == 1)
-      res = (ConfigThingy)res.iterator().next();
+      res = res.iterator().next();
     return res;
   }
   
@@ -621,7 +610,7 @@ public class ConfigThingy
     ConfigThingy res = query(name, true, maxlevel);
     if (res.count() == 0) throw new NodeNotFoundException("Knoten "+getName()+ " hat keinen Nachfahren '"+name+"'");
     if (res.count() == 1)
-      res = (ConfigThingy)res.iterator().next();
+      res = res.iterator().next();
     return res;
   }
   
@@ -656,7 +645,7 @@ public class ConfigThingy
    */
   protected ConfigThingy query(String name, boolean getParents, int maxlevel)
   {
-    List found = new Vector();
+    List<ConfigThingy> found = new Vector<ConfigThingy>();
     boolean haveMore;
     int searchlevel = 1;
     do{
@@ -678,8 +667,8 @@ public class ConfigThingy
   {
     if (children.isEmpty()) return name;
     StringBuffer buf = new StringBuffer();
-    Iterator iter = children.iterator();
-    while (iter.hasNext()) buf.append(iter.next().toString());
+    for (ConfigThingy child : children)
+      buf.append(child.toString());
     return buf.toString();
   }
   
@@ -707,10 +696,9 @@ public class ConfigThingy
       stringRepresentation(buf,"",stringChar, escapeAll);
     else
     {
-      Iterator iter = iterator();
-      while (iter.hasNext())
+      for (ConfigThingy child : children)
       {
-        ((ConfigThingy)iter.next()).stringRepresentation(buf,"",stringChar, escapeAll);
+        child.stringRepresentation(buf,"",stringChar, escapeAll);
         buf.append('\n');
       }
     }
@@ -751,12 +739,12 @@ public class ConfigThingy
       p = CONFIGTHINGY_SPECIAL;
     
     Matcher m = p.matcher(str);
-    ArrayList locations = new ArrayList();
+    ArrayList<Integer> locations = new ArrayList<Integer>();
     while (m.find()) locations.add(new Integer(m.start()));
     StringBuilder buffy = new StringBuilder(str);
     while (!locations.isEmpty())
     {
-      int idx = ((Integer)locations.remove(locations.size() - 1)).intValue();
+      int idx = locations.remove(locations.size() - 1).intValue();
       
       String repstr = ""+buffy.charAt(idx);
       
@@ -819,10 +807,10 @@ public class ConfigThingy
         buf.append(childPrefix);
         buf.append(getName());
         buf.append('(');
-        Iterator iter = iterator();
+        Iterator<ConfigThingy> iter = iterator();
         while (iter.hasNext())
         {
-          ConfigThingy child = (ConfigThingy)iter.next();
+          ConfigThingy child = iter.next();
           child.stringRepresentation(buf, childPrefix, stringChar, escapeAll);
           if (iter.hasNext()) 
           {
@@ -839,10 +827,8 @@ public class ConfigThingy
         buf.append(childPrefix);
         buf.append(getName());
         buf.append("(\n");
-        Iterator iter = iterator();
-        while (iter.hasNext())
+        for (ConfigThingy child : children)
         {
-          ConfigThingy child = (ConfigThingy)iter.next();
           if (child.count() == 0 || 
              (child.count() == 1 && child.getFirstChildNoThrow().count() == 0))
             buf.append(childPrefix+INDENT);
@@ -866,11 +852,9 @@ public class ConfigThingy
   
   private int structureType()
   {
-    Iterator iter = iterator();
     int count = -1;
-    while (iter.hasNext())
+    for (ConfigThingy child : children)
     {
-      ConfigThingy child = (ConfigThingy)iter.next();
       if (count == -1) count = child.count();
       if (count != child.count())  return ST_OTHER;
       if (count > 1) return ST_OTHER;
@@ -1224,9 +1208,9 @@ public class ConfigThingy
    * identifiziert werden kann.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private static List tokenize(URL url, Reader read) throws IOException, SyntaxErrorException
+  private static List<StringContentToken> tokenize(URL url, Reader read) throws IOException, SyntaxErrorException
   {
-    List tokens = new Vector();
+    List<StringContentToken> tokens = new Vector<StringContentToken>();
     BufferedReader in = new BufferedReader(read);
     String line;
     
@@ -1308,10 +1292,10 @@ public class ConfigThingy
   {
     StringBuffer buf = new StringBuffer();
     buf.append("\""+conf.name+"\"\n");
-    Iterator iter = conf.iterator();
+    Iterator<ConfigThingy> iter = conf.iterator();
     while (iter.hasNext())
     {
-      ConfigThingy child = (ConfigThingy)iter.next();
+      ConfigThingy child = iter.next();
       buf.append(childPrefix+"|\n"+childPrefix+"+--");
       char ch = iter.hasNext()?'|':' ';
       buf.append(treeDump(child, childPrefix+ch+"  "));
