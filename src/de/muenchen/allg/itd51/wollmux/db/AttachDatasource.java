@@ -77,7 +77,7 @@ public class AttachDatasource implements Datasource
   private String source2Name;
   private Datasource source1;
   private Datasource source2;
-  private Set schema;
+  private Set<String> schema;
   private String[] match1;
   private String[] match2;
   private String source2Prefix;
@@ -119,12 +119,12 @@ public class AttachDatasource implements Datasource
     if (source2 == null)
       throw new ConfigurationErrorException("Fehler bei Initialisierung von Datenquelle \""+name+"\": Referenzierte Datenquelle \""+source2Name+"\" nicht (oder fehlerhaft) definiert");
 
-    Set schema1 = source1.getSchema();
+    Set<String> schema1 = source1.getSchema();
     Set schema2 = source2.getSchema();
     
     source2Prefix = source2Name + CONCAT_SEPARATOR;
     
-    schema = new HashSet(schema1);
+    schema = new HashSet<String>(schema1);
     Iterator iter = schema2.iterator();
     while (iter.hasNext())
     {
@@ -171,7 +171,7 @@ public class AttachDatasource implements Datasource
   /* (non-Javadoc)
    * @see de.muenchen.allg.itd51.wollmux.db.Datasource#getSchema()
    */
-  public Set getSchema()
+  public Set<String> getSchema()
   {
     return schema;
   }
@@ -179,7 +179,7 @@ public class AttachDatasource implements Datasource
   /* (non-Javadoc)
    * @see de.muenchen.allg.itd51.wollmux.db.Datasource#getDatasetsByKey(java.util.Collection, long)
    */
-  public QueryResults getDatasetsByKey(Collection keys, long timeout)
+  public QueryResults getDatasetsByKey(Collection<String> keys, long timeout)
       throws TimeoutException
   {
     long time = new Date().getTime();
@@ -192,23 +192,23 @@ public class AttachDatasource implements Datasource
 
   public QueryResults getContents(long timeout) throws TimeoutException
   {
-    return new QueryResultsList(new Vector(0));
+    return new QueryResultsList(new Vector<Dataset>(0));
   }
 
   
   /* (non-Javadoc)
    * @see de.muenchen.allg.itd51.wollmux.db.Datasource#find(java.util.List, long)
    */
-  public QueryResults find(List query, long timeout) throws TimeoutException
+  public QueryResults find(List<QueryPart> query, long timeout) throws TimeoutException
   {
     long time = new Date().getTime();
-    List query1 = new Vector(query.size()/2);
-    List query2 = new Vector(query.size()/2);
-    List query2WithPrefix = new Vector(query.size()/2);
-    Iterator iter = query.iterator();
+    List<QueryPart> query1 = new Vector<QueryPart>(query.size()/2);
+    List<QueryPart> query2 = new Vector<QueryPart>(query.size()/2);
+    List<QueryPart> query2WithPrefix = new Vector<QueryPart>(query.size()/2);
+    Iterator<QueryPart> iter = query.iterator();
     while (iter.hasNext())
     {
-      QueryPart p = (QueryPart)iter.next();
+      QueryPart p = iter.next();
       if (p.getColumnName().startsWith(source2Prefix))
       {
         query2.add(new QueryPart(p.getColumnName().substring(source2Prefix.length()),p.getSearchString()));
@@ -257,14 +257,14 @@ public class AttachDatasource implements Datasource
   {
     long endTime = new Date().getTime() + timeout;
     
-    List resultsWithAttachments = new Vector(results.size());
+    List<Dataset> resultsWithAttachments = new Vector<Dataset>(results.size());
     
     Iterator iter = results.iterator();
     while (iter.hasNext())
     {
       Dataset ds = (Dataset)iter.next();
      
-      List query = new Vector(match1.length);
+      List<QueryPart> query = new Vector<QueryPart>(match1.length);
       for (int i = 0; i < match1.length; ++i)
       {
         try{
@@ -305,13 +305,13 @@ public class AttachDatasource implements Datasource
   {
     long endTime = new Date().getTime() + timeout;
     
-    List resultsWithAttachments = new Vector(results.size());
+    List<ConcatDataset> resultsWithAttachments = new Vector<ConcatDataset>(results.size());
     
     Iterator iter = results.iterator();
     while (iter.hasNext())
     {
       Dataset ds = (Dataset)iter.next();
-      List query = new Vector(match1.length);
+      List<QueryPart> query = new Vector<QueryPart>(match1.length);
       for (int i = 0; i < match1.length; ++i)
       {
         try{

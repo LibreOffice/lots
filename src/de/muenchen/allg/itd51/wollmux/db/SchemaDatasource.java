@@ -48,8 +48,8 @@ public class SchemaDatasource implements Datasource
   private Datasource source;
   private String sourceName;
   private String name;
-  private Set schema;
-  private Map mapNewToOld;
+  private Set<String> schema;
+  private Map<String, String> mapNewToOld;
   
   /**
    * Erzeugt eine neue SchemaDatasource.
@@ -79,16 +79,16 @@ public class SchemaDatasource implements Datasource
     if (source == null)
       throw new ConfigurationErrorException("Fehler bei Initialisierung von Datenquelle \""+name+"\": Referenzierte Datenquelle \""+sourceName+"\" nicht (oder fehlerhaft) definiert");
   
-    schema = new HashSet(source.getSchema());
-    mapNewToOld = new HashMap();
+    schema = new HashSet<String>(source.getSchema());
+    mapNewToOld = new HashMap<String, String>();
     
-    List columnsToDrop = new Vector();
+    List<String> columnsToDrop = new Vector<String>();
     
     ConfigThingy drops = sourceDesc.query("DROP");
-    Iterator iter = drops.iterator();
+    Iterator<ConfigThingy> iter = drops.iterator();
     while (iter.hasNext())
     {
-      Iterator iter2 = ((ConfigThingy)iter.next()).iterator();
+      Iterator iter2 = iter.next().iterator();
       while (iter2.hasNext())
       {
         String spalte = iter2.next().toString();
@@ -98,13 +98,13 @@ public class SchemaDatasource implements Datasource
       }
     }
     
-    List columnsToAdd = new Vector();
+    List<String> columnsToAdd = new Vector<String>();
     
     ConfigThingy adds = sourceDesc.query("ADD");
     iter = adds.iterator();
     while (iter.hasNext())
     {
-      Iterator iter2 = ((ConfigThingy)iter.next()).iterator();
+      Iterator iter2 = iter.next().iterator();
       while (iter2.hasNext())
       {
         String spalte = iter2.next().toString();
@@ -120,7 +120,7 @@ public class SchemaDatasource implements Datasource
     iter = renamesDesc.iterator();
     while (iter.hasNext())
     {
-      ConfigThingy renameDesc = (ConfigThingy)iter.next();
+      ConfigThingy renameDesc = iter.next();
       if (renameDesc.count() != 2)
         throw new ConfigurationErrorException("Fehlerhafte RENAME Angabe in Datenquelle \""+name+"\"");
       
@@ -149,10 +149,8 @@ public class SchemaDatasource implements Datasource
      * abgebildet werden, füge ein Pseudomapping auf EMPTY_COLUMN hinzu,
      * damit RenameDataset.get() weiss, dass es für die Spalte null liefern soll.
      */
-    iter = columnsToAdd.iterator();
-    while (iter.hasNext())
+    for (String spalte : columnsToAdd)
     {
-      String spalte = (String)iter.next();
       if (!schema.contains(spalte) && !mapNewToOld.containsKey(spalte))
         mapNewToOld.put(spalte, EMPTY_COLUMN);
     }
@@ -162,37 +160,37 @@ public class SchemaDatasource implements Datasource
     
   }
 
-  public Set getSchema()
+  public Set<String> getSchema()
   {
     return schema;
   }
 
-  public QueryResults getDatasetsByKey(Collection keys, long timeout) throws TimeoutException
+  public QueryResults getDatasetsByKey(Collection<String> keys, long timeout) throws TimeoutException
   {
     return wrapDatasets(source.getDatasetsByKey(keys, timeout));
   }
   
   public QueryResults getContents(long timeout) throws TimeoutException
   {
-    return new QueryResultsList(new Vector(0));
+    return new QueryResultsList(new Vector<RenameDataset>(0));
   }
 
-  public QueryResults find(List query, long timeout) throws TimeoutException
+  public QueryResults find(List<QueryPart> query, long timeout) throws TimeoutException
   {
-    List translatedQuery = new Vector(query.size());
-    Iterator iter = query.iterator();
+    List<QueryPart> translatedQuery = new Vector<QueryPart>(query.size());
+    Iterator<QueryPart> iter = query.iterator();
     while (iter.hasNext())
     {
-      QueryPart p = (QueryPart)iter.next();
+      QueryPart p = iter.next();
       String spalte = p.getColumnName();
       
       if (!schema.contains(spalte)) //dieser Test ist nicht redundant wegen DROPs
-        return new QueryResultsList(new Vector(0));
+        return new QueryResultsList(new Vector<RenameDataset>(0));
       
-      String alteSpalte = (String)mapNewToOld.get(spalte);
+      String alteSpalte = mapNewToOld.get(spalte);
       
       if (alteSpalte == /*nicht equals()!!!!*/ EMPTY_COLUMN) 
-        return new QueryResultsList(new Vector(0));
+        return new QueryResultsList(new Vector<RenameDataset>(0));
       
       if (alteSpalte != null) 
         translatedQuery.add(new QueryPart(alteSpalte,p.getSearchString()));
@@ -209,7 +207,7 @@ public class SchemaDatasource implements Datasource
   
   private QueryResults wrapDatasets(QueryResults res)
   {
-    List wrappedRes = new Vector(res.size());
+    List<RenameDataset> wrappedRes = new Vector<RenameDataset>(res.size());
     Iterator iter = res.iterator();
     while (iter.hasNext())
       wrappedRes.add(new RenameDataset((Dataset)iter.next()));
@@ -232,7 +230,7 @@ public class SchemaDatasource implements Datasource
         //dieser Test ist nicht redundant wegen DROPs
       if (!schema.contains(columnName)) throw new ColumnNotFoundException("Spalte "+columnName+" existiert nicht!");
       
-      String alteSpalte = (String)mapNewToOld.get(columnName);
+      String alteSpalte = mapNewToOld.get(columnName);
       
       if (alteSpalte == /*nicht equals()!!!!*/ EMPTY_COLUMN) 
         return null;

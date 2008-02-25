@@ -78,7 +78,7 @@ public class ThingyDatasource extends RAMDatasource
         throw new ConfigurationErrorException("Fehler in Conf-Datei von Datenquelle "+name+": Abschnitt 'Schema' fehlt"); 
       }
       
-      Set schema = new HashSet();
+      Set<String> schema = new HashSet<String>();
       String[] schemaOrdered = new String[schemaDesc.count()];
       Iterator iter = schemaDesc.iterator();
       int i = 0;
@@ -117,7 +117,7 @@ public class ThingyDatasource extends RAMDatasource
         throw new ConfigurationErrorException("Fehler in Conf-Datei von Datenquelle "+name+": Abschnitt 'Daten' fehlt"); 
       }
       
-      List data = new Vector(daten.count());
+      List<Dataset> data = new Vector<Dataset>(daten.count());
       
       iter = daten.iterator();
       while (iter.hasNext())
@@ -159,7 +159,7 @@ public class ThingyDatasource extends RAMDatasource
    * Regeln.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private Dataset createDataset(ConfigThingy dsDesc, Set schema, String[] schemaOrdered, String[] keyCols) throws ConfigurationErrorException
+  private Dataset createDataset(ConfigThingy dsDesc, Set<String> schema, String[] schemaOrdered, String[] keyCols) throws ConfigurationErrorException
   { //TESTED
     if (!dsDesc.getName().equals("")) throw new ConfigurationErrorException("Öffnende Klammer erwartet vor \""+dsDesc.getName()+"\"");
     if (dsDesc.count() == 0) return new MyDataset(schema, keyCols);
@@ -180,9 +180,9 @@ public class ThingyDatasource extends RAMDatasource
    * @throws ConfigurationErrorException bei verstössen gegen diverse Regeln
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private Dataset createDatasetUnordered(ConfigThingy dsDesc, Set schema, String[] keyCols) throws ConfigurationErrorException
+  private Dataset createDatasetUnordered(ConfigThingy dsDesc, Set<String> schema, String[] keyCols) throws ConfigurationErrorException
   { //TESTED
-    Map data = new HashMap();
+    Map<String, String> data = new HashMap<String, String>();
     Iterator iter = dsDesc.iterator();
     while (iter.hasNext())
     {
@@ -202,12 +202,12 @@ public class ThingyDatasource extends RAMDatasource
    * @throws ConfigurationErrorException bei verstössen gegen diverse Regeln
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private Dataset createDatasetOrdered(ConfigThingy dsDesc, Set schema, String[] schemaOrdered, String[] keyCols) throws ConfigurationErrorException
+  private Dataset createDatasetOrdered(ConfigThingy dsDesc, Set<String> schema, String[] schemaOrdered, String[] keyCols) throws ConfigurationErrorException
   { //TESTED
     if (dsDesc.count() > schemaOrdered.length)
       throw new ConfigurationErrorException("Datensatz hat mehr Felder als das Schema");
 
-    Map data = new HashMap();
+    Map<String, String> data = new HashMap<String, String>();
     int i = 0;
     Iterator iter = dsDesc.iterator();
     while (iter.hasNext())
@@ -223,18 +223,18 @@ public class ThingyDatasource extends RAMDatasource
   private static class MyDataset implements Dataset
   {
     private static final String KEY_SEPARATOR = "£#%&|";
-    private Map data;
+    private Map<String, String> data;
     private String key;
-    private Set schema;
+    private Set<String> schema;
     
-    public MyDataset(Set schema, String[] keyCols)
+    public MyDataset(Set<String> schema, String[] keyCols)
     {
       this.schema = schema;
-      data = new HashMap();
+      data = new HashMap<String, String>();
       initKey(keyCols);
     }
     
-    public MyDataset(Set schema, Map data, String[] keyCols) 
+    public MyDataset(Set<String> schema, Map<String, String> data, String[] keyCols) 
     { //TESTED
       this.schema = schema;
       this.data = data;
@@ -252,7 +252,7 @@ public class ThingyDatasource extends RAMDatasource
       StringBuffer buffy = new StringBuffer();
       for (int i = 0; i < keyCols.length; ++i)
       {
-        String str = (String)data.get(keyCols[i]);
+        String str = data.get(keyCols[i]);
         if (str != null) buffy.append(str);
         if (i + 1 < keyCols.length) buffy.append(KEY_SEPARATOR);
       }
@@ -262,7 +262,7 @@ public class ThingyDatasource extends RAMDatasource
     public String get(String columnName) throws ColumnNotFoundException
     {
       if (!schema.contains(columnName)) throw new ColumnNotFoundException("Spalte "+columnName+" existiert nicht!");
-      return (String)data.get(columnName);
+      return data.get(columnName);
     }
     
     public String getKey()

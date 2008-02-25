@@ -99,7 +99,7 @@ public class TestDatasourceJoiner extends DatasourceJoiner
    * @param results die Ergebnisse der Anfrage.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public static void printResults(String query, Set schema, QueryResults results)
+  public static void printResults(String query, Set<String> schema, QueryResults results)
   {
     System.out.println("Results for query \""+query+"\":");
     Iterator resIter = results.iterator();
@@ -111,10 +111,10 @@ public class TestDatasourceJoiner extends DatasourceJoiner
       System.out.print(result.get("Nachname")+": ");
       }catch(Exception x){}
       
-      Iterator spiter = schema.iterator();
+      Iterator<String> spiter = schema.iterator();
       while (spiter.hasNext())
       {
-        String spalte = (String)spiter.next();
+        String spalte = spiter.next();
         String wert = "Spalte "+spalte+" nicht gefunden!";
         try{ 
           wert = result.get(spalte);
@@ -141,7 +141,7 @@ public class TestDatasourceJoiner extends DatasourceJoiner
     
     System.out.println("find(Query) mit unbekanntem Datenquellennamen:");
     try{
-      dj.find(new Query("GibtsNicht", new Vector()));
+      dj.find(new Query("GibtsNicht", new Vector<QueryPart>()));
     }catch(Exception x)
     {
       System.out.println(x.getClass().getCanonicalName()+": "+x.getMessage());
@@ -149,7 +149,7 @@ public class TestDatasourceJoiner extends DatasourceJoiner
     System.out.println();
     System.out.println("find(Query) mit illegalem Suchstring:");
     try{
-      List l = new Vector();
+      List<QueryPart> l = new Vector<QueryPart>();
       l.add(new QueryPart("A****","f***en"));
       dj.find(new Query("Personal", l));
     }catch(Exception x)
@@ -157,10 +157,10 @@ public class TestDatasourceJoiner extends DatasourceJoiner
       System.out.println(x.getClass().getCanonicalName()+": "+x.getMessage());
     }
     
-    Set testSchema = new HashSet();
+    Set<String> testSchema = new HashSet<String>();
     testSchema.add("OrgaKurz");
     testSchema.add("Homepage");
-    List listOfQueryParts = new Vector();
+    List<QueryPart> listOfQueryParts = new Vector<QueryPart>();
     listOfQueryParts.add(new QueryPart("Homepage", "*limux"));
     Query query = new Query("OrgaSpezifischeErgaenzungen", listOfQueryParts);
     printResults("OrgaSpezifischeErgaenzungen: Homepage = *limux", testSchema, dj.find(query));

@@ -34,7 +34,7 @@ public class QueryResultsList implements QueryResults
   /**
    * Die Liste der Datasets.
    */
-  private List data;
+  private List<Dataset> data;
   
   /**
    * Erzeugt eine neue QueryResultsList, die die Elemente enthält 
@@ -43,9 +43,9 @@ public class QueryResultsList implements QueryResults
    * enthalten, die der Iterator zurückliefern wird. Ist dies nicht bekannt,
    * kann 0 übergeben werden.
    */
-  public QueryResultsList(Iterator iter, int count)
+  public QueryResultsList(Iterator<? extends Dataset> iter, int count)
   {
-    data = new Vector(count);
+    data = new Vector<Dataset>(count);
     while(iter.hasNext()) data.add(iter.next());
   }
 
@@ -53,14 +53,16 @@ public class QueryResultsList implements QueryResults
    * Erzeugt eine neue QueryResultsList aus einer bestehenden Liste.
    * Achtung! Die Liste wird nicht kopiert, sondern als Referenz übernommen.
    */
-  public QueryResultsList(List datasets)
+  @SuppressWarnings("unchecked")
+  public QueryResultsList(List<? extends Dataset> datasets)
   {
-    data = datasets;
+    List foo = datasets;
+    data = foo;
   }
   
   public int size() { return data.size();}
   
-  public Iterator iterator(){ return data.iterator(); }
+  public Iterator<Dataset> iterator(){ return data.iterator(); }
   
   public boolean isEmpty() { return data.isEmpty(); }
 }

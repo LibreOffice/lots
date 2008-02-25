@@ -51,7 +51,7 @@ public class PreferDatasource implements Datasource
   private Datasource source2;
   private String source1Name;
   private String source2Name;
-  private Set schema;
+  private Set<String> schema;
   private String name;
   
   /**
@@ -100,41 +100,41 @@ public class PreferDatasource implements Datasource
      * geliefert werden das selbe Schema haben. Solange dafür keine
      * Notwendigkeit ersichtlich ist, spare ich mir diesen Aufwand.
      */
-    Set schema1 = source1.getSchema();
-    Set schema2 = source2.getSchema();
+    Set<String> schema1 = source1.getSchema();
+    Set<String> schema2 = source2.getSchema();
     if (!schema1.containsAll(schema2) || !schema2.containsAll(schema1))
     {
-      Set difference1 = new HashSet(schema1);
+      Set<String> difference1 = new HashSet<String>(schema1);
       difference1.removeAll(schema2);
-      Set difference2 = new HashSet(schema2);
+      Set<String> difference2 = new HashSet<String>(schema2);
       difference2.removeAll(schema1);
       StringBuffer buf1 = new StringBuffer();
-      Iterator iter = difference1.iterator();
+      Iterator<String> iter = difference1.iterator();
       while (iter.hasNext())
       {
-        buf1.append((String)iter.next());
+        buf1.append(iter.next());
         if (iter.hasNext()) buf1.append(", ");
       }
       StringBuffer buf2 = new StringBuffer();
       iter = difference2.iterator();
       while (iter.hasNext())
       {
-        buf2.append((String)iter.next());
+        buf2.append(iter.next());
         if (iter.hasNext()) buf2.append(", ");
       }
       throw new ConfigurationErrorException("Datenquelle \""+source1Name+"\" fehlen die Spalten: "+buf2+" und Datenquelle \""+source2Name+"\" fehlen die Spalten: "+buf1);
     }
 
     
-    schema = new HashSet(schema1);
+    schema = new HashSet<String>(schema1);
   }
 
-  public Set getSchema()
+  public Set<String> getSchema()
   {
     return schema;
   }
 
-  public QueryResults getDatasetsByKey(Collection keys, long timeout) throws TimeoutException
+  public QueryResults getDatasetsByKey(Collection<String> keys, long timeout) throws TimeoutException
   {
     long endTime = System.currentTimeMillis() + timeout;
     QueryResults results = source2.getDatasetsByKey(keys, timeout);
@@ -152,10 +152,10 @@ public class PreferDatasource implements Datasource
   
   public QueryResults getContents(long timeout) throws TimeoutException
   {
-    return new QueryResultsList(new Vector(0));
+    return new QueryResultsList(new Vector<Dataset>(0));
   }
 
-  public QueryResults find(List query, long timeout) throws TimeoutException
+  public QueryResults find(List<QueryPart> query, long timeout) throws TimeoutException
   {
     long endTime = System.currentTimeMillis() + timeout;
     QueryResults results = source2.find(query, timeout);
@@ -179,7 +179,7 @@ public class PreferDatasource implements Datasource
   private static class QueryResultsOverride implements QueryResults
   {
     private int size;
-    private Set keyBlacklist = new HashSet();
+    private Set<String> keyBlacklist = new HashSet<String>();
     private QueryResults overrideResults;
     private QueryResults results;
     
@@ -192,7 +192,7 @@ public class PreferDatasource implements Datasource
       this.results = results;
       size = results.size();
         
-      Map keyToCount = new HashMap(); //of int[]
+      Map<String, int[]> keyToCount = new HashMap<String, int[]>(); //of int[]
       
       Iterator iter = results.iterator();
       while (iter.hasNext())
@@ -201,7 +201,7 @@ public class PreferDatasource implements Datasource
         String key = ds.getKey();
         if (!keyToCount.containsKey(key))
           keyToCount.put(key, new int[]{0});
-        int[] count = (int[])keyToCount.get(key);
+        int[] count = keyToCount.get(key);
         ++count[0];
         if (System.currentTimeMillis() > endTime)
           throw new TimeoutException();
@@ -229,7 +229,7 @@ public class PreferDatasource implements Datasource
           Dataset ds = (Dataset)iter.next();
           String key = ds.getKey();
           
-          int[] count = (int[])keyToCount.get(key);
+          int[] count = keyToCount.get(key);
           if (count != null)
           {
             size -= count[0];
@@ -247,7 +247,7 @@ public class PreferDatasource implements Datasource
       return size;
     }
 
-    public Iterator iterator()
+    public Iterator<Dataset> iterator()
     {
       return new MyIterator();
     }
@@ -257,9 +257,9 @@ public class PreferDatasource implements Datasource
       return size == 0;
     }
     
-    private class MyIterator implements Iterator
+    private class MyIterator implements Iterator<Dataset>
     {
-      private Iterator iter;
+      private Iterator<Dataset> iter;
       private boolean inOverride;
       private int remaining;
       
@@ -280,7 +280,7 @@ public class PreferDatasource implements Datasource
         return (remaining > 0);
       }
 
-      public Object next()
+      public Dataset next()
       {
         if (remaining == 0)
           throw new NoSuchElementException();
@@ -296,7 +296,7 @@ public class PreferDatasource implements Datasource
         
         Dataset ds;
         do{
-          ds = (Dataset)iter.next();
+          ds = iter.next();
         }while (keyBlacklist.contains(ds.getKey()));
         
         return ds;

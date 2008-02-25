@@ -28,12 +28,12 @@ import java.util.Vector;
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
-public class Query
+public class Query implements Iterable<QueryPart>
 {
   /**
    * Liste von QueryParts, die die eigentliche Query beschreiben.
    */
-  private List listOfQueryParts;
+  private List<QueryPart> listOfQueryParts;
   
   /**
    * Der Name der Datenquelle auf der die Suche erfolgen soll.
@@ -46,7 +46,7 @@ public class Query
    * @param listOfQueryParts Liste von QueryParts, die die eigentliche Query 
    *        beschreiben. ACHTUNG! Wird als Referenz eingebunden.
    */
-  public Query(String dbName, List listOfQueryParts)
+  public Query(String dbName, List<QueryPart> listOfQueryParts)
   {
     this.listOfQueryParts = listOfQueryParts;
     this.dbName = dbName;
@@ -62,12 +62,12 @@ public class Query
    * Iteriert über die QueryParts, die diese Suchanfrage ausmachen.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public Iterator iterator() {return listOfQueryParts.iterator();}
+  public Iterator<QueryPart> iterator() {return listOfQueryParts.iterator();}
   
   /**
    * Liefert die Liste der QueryParts die diese Suchanfrage definieren.
    */
-  public List getQueryParts() {return new Vector(listOfQueryParts);}
+  public List<QueryPart> getQueryParts() {return new Vector<QueryPart>(listOfQueryParts);}
   
   public int numberOfQueryParts() { return listOfQueryParts.size();}
 }

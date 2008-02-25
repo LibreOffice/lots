@@ -37,14 +37,14 @@ public class TestDJDataset extends DJDatasetBase
   /**
    * siehe Konstruktor.
    */
-  private Map fallback = null;
+  private Map<String, String> fallback = null;
   
   /** Erzeugt einen TestDJDataset, der jedes Schema unterstützt und 
    * als aus dem LOS kommend betrachtet wird.
    */
   public TestDJDataset() 
   {
-    super(new HashMap(), new HashMap(), null);
+    super(new HashMap<String, String>(), new HashMap<String, String>(), null);
   }
   
   /**
@@ -64,9 +64,9 @@ public class TestDJDataset extends DJDatasetBase
    *        anhand dieser Map den Spaltennamen auf einen anderen Spaltennamen
    *        umzusetzen, dessen Wert dann geliefert wird. 
    */
-  public TestDJDataset(Map backingStore, Set schema, boolean isFromLOS, Map fallback)
+  public TestDJDataset(Map<String, String> backingStore, Set<String> schema, boolean isFromLOS, Map<String, String> fallback)
   {
-    super(backingStore, isFromLOS?new HashMap():null,schema);
+    super(backingStore, isFromLOS?new HashMap<String, String>():null,schema);
     this.fallback = fallback;
   }
   
@@ -75,7 +75,7 @@ public class TestDJDataset extends DJDatasetBase
    * wurde.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public Map getBS()
+  public Map<String, String> getBS()
   {
     return myBS;
   }
@@ -86,12 +86,12 @@ public class TestDJDataset extends DJDatasetBase
     if (str != null) return str;
     
     if (fallback != null && fallback.containsKey(spaltenName)) 
-      return get((String)fallback.get(spaltenName)); 
+      return get(fallback.get(spaltenName)); 
 
     return spaltenName;
   }
 
-  public DJDataset copy() { return new TestDJDataset(hasBackingStore()? new HashMap(myBS):null, schema, true, fallback);}
+  public DJDataset copy() { return new TestDJDataset(hasBackingStore()? new HashMap<String, String>(myBS):null, schema, true, fallback);}
   
   public void remove(){}
 

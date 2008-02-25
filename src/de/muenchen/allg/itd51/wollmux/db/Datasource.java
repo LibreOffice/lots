@@ -77,7 +77,7 @@ public interface Datasource
    * werden konnte.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public QueryResults getDatasetsByKey(Collection keys, long timeout) 
+  public QueryResults getDatasetsByKey(Collection<String> keys, long timeout) 
     throws TimeoutException;
   
   /**
@@ -91,7 +91,7 @@ public interface Datasource
    * werden konnte.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public QueryResults find(List<? extends QueryPart> query, long timeout) 
+  public QueryResults find(List<QueryPart> query, long timeout) 
     throws TimeoutException;
   
   /**

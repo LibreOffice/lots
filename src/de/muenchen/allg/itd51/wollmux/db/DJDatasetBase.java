@@ -34,20 +34,20 @@ public abstract class DJDatasetBase implements DJDataset
    * myLOS kann null sein, dann wird der Datensatz als nicht aus dem LOS kommend
    * betrachtet. 
    */
-  protected Map myLOS;
+  protected Map<String, String> myLOS;
   /**
    * Bildet Spaltennamen auf (String-)Werte ab. Die Daten in myLOS repräsentieren
    * den lokalen Override, die in myBS die (gecachten) Daten aus der Hintergrunddatenbank.
    * myBS kann null sein, dann wird der Datensatz als nur aus dem LOS kommend
    * und nicht mit einer Hintergrunddatenbank verknüpft betrachtet. 
    */
-  protected Map myBS;
+  protected Map<String, String> myBS;
   /**
    * Die Menge aller Spaltennamen, die dieser Datensatz kennt. Falls dieses
    * Set nicht null ist, werfen Versuche, auf unbekannte Spalten zuzugreifen
    * eine Exception.
    */
-  protected Set schema;
+  protected Set<String> schema;
   
   /**
    * Erzeugt einen neuen Datensatz.
@@ -63,7 +63,7 @@ public abstract class DJDatasetBase implements DJDataset
    * @param schema falls nicht null übergeben wird, erzeugen Zugriffe auf
    *        Spalten mit Namen, die nicht in schema sind Exceptions.
    */
-  public DJDatasetBase(Map backingStore, Map overrideStore, Set schema)
+  public DJDatasetBase(Map<String, String> backingStore, Map<String, String> overrideStore, Set<String> schema)
   { //TESTED
     myBS = backingStore;
     myLOS = overrideStore;
@@ -75,7 +75,7 @@ public abstract class DJDatasetBase implements DJDataset
    * wurde.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public Map getBS()
+  public Map<String, String> getBS()
   {
     return myBS;
   }
@@ -85,7 +85,7 @@ public abstract class DJDatasetBase implements DJDataset
    * wurde.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public Map getLOS()
+  public Map<String, String> getLOS()
   { //TESTED
     return myLOS;
   }
@@ -103,11 +103,11 @@ public abstract class DJDatasetBase implements DJDataset
   {
     if (schema != null && !schema.contains(spaltenName)) throw new ColumnNotFoundException("Spalte "+spaltenName+" existiert nicht!");
     String res;
-    res = (String)myLOS.get(spaltenName);
+    res = myLOS.get(spaltenName);
     if (res != null) return res;
     if (myBS != null)
     {
-      res = (String)myBS.get(spaltenName);
+      res = myBS.get(spaltenName);
       return res;
     }
     return null;

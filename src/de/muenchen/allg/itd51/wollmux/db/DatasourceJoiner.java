@@ -95,7 +95,7 @@ public class DatasourceJoiner
    * unter einem Namen in der Config-Datei aufgeführte Datebank ist hier
    * verzeichnet.
    */
-  private Map nameToDatasource = new HashMap();
+  private Map<String, Datasource> nameToDatasource = new HashMap<String, Datasource>();
   private LocalOverrideStorage myLOS;
   
   /**
@@ -114,7 +114,7 @@ public class DatasourceJoiner
      * Hintergrunddatenbank verknüpft sind, deren Schlüssel jedoch darin nicht
      * mehr gefunden wurde und deshalb nicht aktualisiert werden konnte. 
      */
-    public List lostDatasets = new Vector(0);
+    public List<Dataset> lostDatasets = new Vector<Dataset>(0);
   }
   
   private Status status;
@@ -226,7 +226,7 @@ public class DatasourceJoiner
     
     myLOS = new LocalOverrideStorage(losCache, context);
     
-    Set schema = myLOS.getSchema();
+    Set<String> schema = myLOS.getSchema();
     
     if (!nameToDatasource.containsKey(mainSourceName))
     { 
@@ -238,7 +238,7 @@ public class DatasourceJoiner
     }
     else
     {
-      mainDatasource = (Datasource)nameToDatasource.get(mainSourceName);
+      mainDatasource = nameToDatasource.get(mainSourceName);
 
       try{
         myLOS.refreshFromDatabase(mainDatasource, queryTimeout(), status);
@@ -255,7 +255,7 @@ public class DatasourceJoiner
    * @return
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public Set getMainDatasourceSchema()
+  public Set<String> getMainDatasourceSchema()
   { //TESTED
     return mainDatasource.getSchema();
   }
@@ -309,7 +309,7 @@ X           "Vorname N."
     if (suchString == null || !SUCHSTRING_PATTERN.matcher(suchString).matches())
       throw new IllegalArgumentException("Illegaler Suchstring: "+suchString);
     
-    List query = new Vector();
+    List<QueryPart> query = new Vector<QueryPart>();
     query.add(new QueryPart(spaltenName, suchString));
     return find(query);
   }
@@ -327,7 +327,7 @@ X           "Vorname N."
     if (suchString2 == null || !SUCHSTRING_PATTERN.matcher(suchString2).matches())
       throw new IllegalArgumentException("Illegaler Suchstring: "+suchString2);
     
-    List query = new Vector();
+    List<QueryPart> query = new Vector<QueryPart>();
     query.add(new QueryPart(spaltenName1, suchString1));
     query.add(new QueryPart(spaltenName2, suchString2));
     return find(query);
@@ -344,7 +344,7 @@ X           "Vorname N."
    */
   public QueryResults find(Query query) throws TimeoutException
   {
-    Datasource source = (Datasource)nameToDatasource.get(query.getDatasourceName());
+    Datasource source = nameToDatasource.get(query.getDatasourceName());
     if (source == null)
       throw new IllegalArgumentException("Datenquelle \""+query.getDatasourceName()+"\" soll durchsucht werden, ist aber nicht definiert");
     
@@ -369,10 +369,10 @@ X           "Vorname N."
    * @throws TimeoutException
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  protected QueryResults find(List query) throws TimeoutException
+  protected QueryResults find(List<QueryPart> query) throws TimeoutException
   { //TESTED
     QueryResults res = mainDatasource.find(query, queryTimeout());
-    List djDatasetsList = new Vector(res.size());
+    List<DJDatasetWrapper> djDatasetsList = new Vector<DJDatasetWrapper>(res.size());
     Iterator iter = res.iterator();
     while (iter.hasNext())
     {
@@ -398,7 +398,7 @@ X           "Vorname N."
    */
   public QueryResults getContentsOf(String datasourceName) throws TimeoutException
   {
-    Datasource source = (Datasource)nameToDatasource.get(datasourceName);
+    Datasource source = nameToDatasource.get(datasourceName);
     if (source == null)
       throw new IllegalArgumentException("Datenquelle \""+datasourceName+"\" soll abgefragt werden, ist aber nicht definiert");
     
@@ -415,7 +415,7 @@ X           "Vorname N."
    */
   public void saveCacheAndLOS(File cacheFile) throws IOException
   {
-    Set schema = myLOS.getSchema();
+    Set<String> schema = myLOS.getSchema();
     if (schema == null)
     {
       Logger.error("Kann Cache nicht speichern, weil nicht initialisiert.");
@@ -424,10 +424,10 @@ X           "Vorname N."
     
     ConfigThingy conf = new ConfigThingy(cacheFile.getPath());
     ConfigThingy schemaConf = conf.add("Schema");
-    Iterator iter = schema.iterator();
+    Iterator<String> iter = schema.iterator();
     while (iter.hasNext())
     {
-      schemaConf.add((String)iter.next());
+      schemaConf.add(iter.next());
     }
     
     ConfigThingy datenConf = conf.add("Daten");
@@ -505,14 +505,14 @@ X           "Vorname N."
      * mit gleichem Schlüssel über ihre Position in der Liste identifiziert
      * werden können.
      */
-    private List data = new LinkedList();
+    private List<LOSDJDataset> data = new LinkedList<LOSDJDataset>();
     
     /**
      * Das Schema des LOS. Dies ist null solange es nicht initialisiert wurde.
      * Falls beim Laden des Cache ein Fehler auftritt kann dies auch nach
      * dem Konstruktor noch null sein.
      */
-    private Set losSchema = null;
+    private Set<String> losSchema = null;
     /**
      * Der ausgewählte Datensatz. Nur dann null, wenn data leer ist.
      */
@@ -542,8 +542,8 @@ X           "Vorname N."
            * temporären Variablen und kopieren diese nachher in die Felder
            * losSchema und this.data. 
            */
-          Set newSchema = new HashSet();
-          List data = new LinkedList();
+          Set<String> newSchema = new HashSet<String>();
+          List<LOSDJDataset> data = new LinkedList<LOSDJDataset>();
           Iterator iter = cacheData.get("Schema").iterator();
           while (iter.hasNext())
             newSchema.add(iter.next().toString());
@@ -553,11 +553,11 @@ X           "Vorname N."
           {
             ConfigThingy dsconf = (ConfigThingy)iter.next();
             
-            Map dscache = null;
+            Map<String, String> dscache = null;
             ConfigThingy cacheColumns = dsconf.query("Cache");
             if (cacheColumns.count() > 0)
             {
-              dscache = new HashMap();
+              dscache = new HashMap<String, String>();
               Iterator iter2 = cacheColumns.getFirstChild().iterator();
               while (iter2.hasNext())
               {
@@ -574,7 +574,7 @@ X           "Vorname N."
             }
             //else LOS-only Datensatz, dscache bleibt null
             
-            Map dsoverride = new HashMap();
+            Map<String, String> dsoverride = new HashMap<String, String>();
             Iterator iter2 = dsconf.get("Override").iterator();
             while (iter2.hasNext())
             {
@@ -628,11 +628,11 @@ X           "Vorname N."
      */
     public void selectDataset(String selectKey, int sameKeyIndex)
     {
-      if (!data.isEmpty()) selectedDataset = (DJDataset)data.get(0);
-      Iterator iter = data.iterator();
+      if (!data.isEmpty()) selectedDataset = data.get(0);
+      Iterator<LOSDJDataset> iter = data.iterator();
       while (iter.hasNext())
       {
-        LOSDJDataset ds = (LOSDJDataset)iter.next();
+        LOSDJDataset ds = iter.next();
         if (selectKey.equals(ds.getKey()))
         {
           selectedDataset = ds;
@@ -658,14 +658,14 @@ X           "Vorname N."
      */
     public DJDataset newDataset()
     {
-      Map dsoverride = new HashMap();
-      Iterator iter = losSchema.iterator();
+      Map<String, String> dsoverride = new HashMap<String, String>();
+      Iterator<String> iter = losSchema.iterator();
       while (iter.hasNext())
       {
-        String spalte = (String)iter.next();
+        String spalte = iter.next();
         dsoverride.put(spalte,spalte);
       }
-      DJDataset ds = new LOSDJDataset(null, dsoverride, losSchema, generateKey()); 
+      LOSDJDataset ds = new LOSDJDataset(null, dsoverride, losSchema, generateKey()); 
       data.add(ds);
       if (selectedDataset == null) selectedDataset = ds;
       return ds;
@@ -681,12 +681,12 @@ X           "Vorname N."
       if (ds instanceof LOSDJDataset)
         Logger.error("Diese Funktion darf nicht für LOSDJDatasets aufgerufen werden, da sie immer eine Kopie mit Backing Store erzeugt.");
       
-      Map dsoverride = new HashMap();
-      Map dscache = new HashMap();
-      Iterator iter = losSchema.iterator();
+      Map<String, String> dsoverride = new HashMap<String, String>();
+      Map<String, String> dscache = new HashMap<String, String>();
+      Iterator<String> iter = losSchema.iterator();
       while (iter.hasNext())
       {
-        String spalte = (String)iter.next();
+        String spalte = iter.next();
         try
         {
           String wert = ds.get(spalte);
@@ -697,7 +697,7 @@ X           "Vorname N."
           Logger.error(e);
         }
       }
-      DJDataset newDs = new LOSDJDataset(dscache, dsoverride, losSchema, ds.getKey()); 
+      LOSDJDataset newDs = new LOSDJDataset(dscache, dsoverride, losSchema, ds.getKey()); 
       data.add(newDs);
       if (selectedDataset == null) selectedDataset = newDs;
       return newDs;
@@ -727,10 +727,10 @@ X           "Vorname N."
       DJDataset ds = getSelectedDataset();
       String key = ds.getKey();
       int idx = 0;
-      Iterator iter = data.iterator();
+      Iterator<LOSDJDataset> iter = data.iterator();
       while (iter.hasNext())
       {
-        LOSDJDataset ds2 = (LOSDJDataset)iter.next();
+        LOSDJDataset ds2 = iter.next();
         if (ds2 == ds) return idx;
         if (ds2.getKey().equals(key)) ++idx;
       }
@@ -765,16 +765,16 @@ X           "Vorname N."
        * haben können, z.B. wenn der selbe LDAP-Datensatz mehrfach eingefügt wurde
        * um mit verschiedenen Rollen verwendet zu werden.
        */
-      Map keyToLOSDJDatasetList = new HashMap();
+      Map<String, List<LOSDJDataset>> keyToLOSDJDatasetList = new HashMap<String, List<LOSDJDataset>>();
       
-      Iterator iter = data.iterator();
+      Iterator<LOSDJDataset> iter = data.iterator();
       while (iter.hasNext())
       {
-        LOSDJDataset ds = (LOSDJDataset)iter.next();
+        LOSDJDataset ds = iter.next();
         String key = ds.getKey();
         if (!keyToLOSDJDatasetList.containsKey(key))
-          keyToLOSDJDatasetList.put(key, new Vector(1));
-        List djdslist = (List)keyToLOSDJDatasetList.get(key);
+          keyToLOSDJDatasetList.put(key, new Vector<LOSDJDataset>(1));
+        List<LOSDJDataset> djdslist = keyToLOSDJDatasetList.get(key);
         djdslist.add(ds);
       }
       
@@ -808,18 +808,15 @@ X           "Vorname N."
        * Bei evtl. Änderungen bitte beachten!!!
        */
 
-      iter = res.iterator();
-      while (iter.hasNext())
+      for (Dataset sourceDS : res)
       {
         try{
-          Dataset sourceDS = (Dataset)iter.next();
+          Map<String, String> dscache = new HashMap<String, String>();
           
-          Map dscache = new HashMap();
-          
-          Iterator spalte = losSchema.iterator();
+          Iterator<String> spalte = losSchema.iterator();
           while (spalte.hasNext())
           {
-            String spaltenName = (String)spalte.next();
+            String spaltenName = spalte.next();
             String spaltenWert = sourceDS.get(spaltenName);
             if (spaltenWert != null)
               dscache.put(spaltenName, spaltenWert);
@@ -827,9 +824,9 @@ X           "Vorname N."
           
           String key = sourceDS.getKey();
           
-          List overrideList = (List)keyToLOSDJDatasetList.remove(key);
+          List overrideList = keyToLOSDJDatasetList.remove(key);
           if (overrideList == null)
-            data.add(new LOSDJDataset(dscache, new HashMap(), losSchema, key));
+            data.add(new LOSDJDataset(dscache, new HashMap<String, String>(), losSchema, key));
           else
           {
             Iterator djDsIter = overrideList.iterator();
@@ -870,15 +867,11 @@ X           "Vorname N."
        *     wird der Eintrag in der Absenderliste mit dem neuen Eintrag
        *     verknüpft, obwohl dieser nichts mit dem alten zu tun hat.
        */
-      Vector lostDatasets = new Vector();
-      iter = keyToLOSDJDatasetList.values().iterator();
-      while (iter.hasNext())
+      Vector<Dataset> lostDatasets = new Vector<Dataset>();
+      for (List<LOSDJDataset> djDatasetList : keyToLOSDJDatasetList.values())
       {
-        List djDatasetList = (List)iter.next();
-        Iterator iter2 = djDatasetList.iterator();
-        while (iter2.hasNext())
+        for (LOSDJDataset ds : djDatasetList)
         {
-          DJDataset ds = (DJDataset)iter2.next();
           try{
             if (ds.hasBackingStore()) lostDatasets.add(new SimpleDataset(losSchema, ds));
           }catch(ColumnNotFoundException x)
@@ -893,12 +886,12 @@ X           "Vorname N."
       status.lostDatasets = lostDatasets;
       
       StringBuffer buffyTheVampireSlayer = new StringBuffer();
-      iter = lostDatasets.iterator();
-      while (iter.hasNext())
+      Iterator<Dataset> iter2 = lostDatasets.iterator();
+      while (iter2.hasNext())
       {
-        Dataset ds = ((Dataset)iter.next());
+        Dataset ds = iter2.next();
         buffyTheVampireSlayer.append(ds.getKey());
-        if (iter.hasNext()) buffyTheVampireSlayer.append(", ");
+        if (iter2.hasNext()) buffyTheVampireSlayer.append(", ");
       }
       if (buffyTheVampireSlayer.length() > 0)
         Logger.log("Die Datensätze mit folgenden Schlüsseln konnten nicht aus der Datenbank aktualisiert werden: "+buffyTheVampireSlayer);
@@ -911,7 +904,7 @@ X           "Vorname N."
      * der Cache-Datei im Konstruktur fehlgeschlagen ist).
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
-    public Set getSchema() {return losSchema;} //TESTED
+    public Set<String> getSchema() {return losSchema;} //TESTED
     
     /**
      * Fügt conf die Beschreibung der Datensätze im LOS als Kinder hinzu.
@@ -919,10 +912,10 @@ X           "Vorname N."
      */
     public void dumpData(ConfigThingy conf)
     {
-      Iterator iter = data.iterator();
+      Iterator<LOSDJDataset> iter = data.iterator();
       while (iter.hasNext())
       {
-        LOSDJDataset ds = (LOSDJDataset)iter.next();
+        LOSDJDataset ds = iter.next();
         ConfigThingy dsConf = conf.add("");
         dsConf.add("Key").add(ds.getKey());
         
@@ -958,20 +951,20 @@ X           "Vorname N."
      * als unbelegt betrachtet. 
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
-    public void setSchema(Set schema)
+    public void setSchema(Set<String> schema)
     { //TESTED
       if (losSchema == null)
       {
-        losSchema = new HashSet(schema);
+        losSchema = new HashSet<String>(schema);
         return;
       }
       
-      Set spaltenDieDazuGekommenSind = new HashSet(schema);
+      Set<String> spaltenDieDazuGekommenSind = new HashSet<String>(schema);
       spaltenDieDazuGekommenSind.removeAll(losSchema);
       
       losSchema.addAll(spaltenDieDazuGekommenSind);
       
-      Set spaltenDieWeggefallenSind = new HashSet(losSchema);
+      Set<String> spaltenDieWeggefallenSind = new HashSet<String>(losSchema);
       spaltenDieWeggefallenSind.removeAll(schema);
       
       losSchema.removeAll(spaltenDieWeggefallenSind);
@@ -981,14 +974,14 @@ X           "Vorname N."
       
       Logger.log("Das Datenbank-Schema wurde geändert. Der Cache wird angepasst.");
       
-      Iterator iter = data.iterator();
+      Iterator<LOSDJDataset> iter = data.iterator();
       while (iter.hasNext())
       {
-        LOSDJDataset ds = (LOSDJDataset)iter.next();
+        LOSDJDataset ds = iter.next();
         
-        Iterator spalte = spaltenDieWeggefallenSind.iterator();
+        Iterator<String> spalte = spaltenDieWeggefallenSind.iterator();
         while (spalte.hasNext())
-          ds.drop((String)spalte.next());
+          ds.drop(spalte.next());
         
         ds.setSchema(losSchema);
       }
@@ -1007,7 +1000,7 @@ X           "Vorname N."
      * Iterator über alle Datensätze im LOS.
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
-    public Iterator iterator()
+    public Iterator<? extends Dataset> iterator()
     {
       return data.iterator();
     }
@@ -1041,7 +1034,7 @@ X           "Vorname N."
        * @param schema das Schema des LOS zu dem dieser Datensatz gehört.
        * @param key der Schlüsselwert dieses Datensatzes.
        */
-      public LOSDJDataset(Map dscache, Map dsoverride, Set schema, String key)
+      public LOSDJDataset(Map<String, String> dscache, Map<String, String> dsoverride, Set<String> schema, String key)
       { //TESTED
         super(dscache, dsoverride, schema);
         this.key = key;
@@ -1065,7 +1058,7 @@ X           "Vorname N."
        * drop() verwendet werden.
        * @author Matthias Benkmann (D-III-ITD 5.1)
        */
-      public void setSchema(Set losSchema)
+      public void setSchema(Set<String> losSchema)
       { //TESTED
         this.schema = losSchema;        
       }
@@ -1075,7 +1068,7 @@ X           "Vorname N."
        */
       public DJDataset copy()
       {
-        DJDataset newDS = new LOSDJDataset(this.myBS, isFromLOS()? new HashMap(this.myLOS): new HashMap(), this.schema, this.key);
+        LOSDJDataset newDS = new LOSDJDataset(this.myBS, isFromLOS()? new HashMap<String,String>(this.myLOS): new HashMap<String,String>(), this.schema, this.key);
         LocalOverrideStorage.this.data.add(newDS);
         if (selectedDataset == null) selectedDataset = newDS;
         return newDS;
@@ -1097,7 +1090,7 @@ X           "Vorname N."
           if (LocalOverrideStorage.this.data.isEmpty()) 
             selectedDataset = null;
           else
-            selectedDataset = (DJDataset)LocalOverrideStorage.this.data.get(0);
+            selectedDataset = LocalOverrideStorage.this.data.get(0);
         }
       }
 

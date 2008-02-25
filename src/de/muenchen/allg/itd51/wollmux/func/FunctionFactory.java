@@ -109,7 +109,7 @@ public class FunctionFactory
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
-  public static Function parseGrandchildren(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
+  public static Function parseGrandchildren(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map<Object, Object> context) throws ConfigurationErrorException
   {
     Vector<Function> andFunction = new Vector<Function>();
     Iterator iter1 = conf.iterator();
@@ -151,7 +151,7 @@ public class FunctionFactory
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
-  public static Function parseChildren(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
+  public static Function parseChildren(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map<Object, Object> context) throws ConfigurationErrorException
   {
     Vector<Function> andFunction = new Vector<Function>();
     Iterator iter = conf.iterator();
@@ -185,7 +185,7 @@ public class FunctionFactory
    * 
    * TESTED
    */
-  public static Function parse(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
+  public static Function parse(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map<Object, Object> context) throws ConfigurationErrorException
   {
     String name = conf.getName();
     
@@ -325,7 +325,7 @@ public class FunctionFactory
     return "Text an der Fehlerstelle: " + str.substring(0, end);
   }
   
-  private static Function parseBIND(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
+  private static Function parseBIND(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map<Object, Object> context) throws ConfigurationErrorException
   {
     ConfigThingy funcConf = conf.query("FUNCTION"); //funcConf = <query results> - FUNCTION - ...
     if (funcConf.count() != 1)
@@ -356,7 +356,7 @@ public class FunctionFactory
     return new BindFunction(func, conf, funcLib, dialogLib, context);
   }
 
-  private static Function parseDIALOG(ConfigThingy conf, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
+  private static Function parseDIALOG(ConfigThingy conf, DialogLibrary dialogLib, Map<Object, Object> context) throws ConfigurationErrorException
   {
     if (conf.count() != 2)
       throw new ConfigurationErrorException("Funktion vom Typ \"DIALOG\" erfordert genau 2 Parameter, nicht "+conf.count());
@@ -384,7 +384,7 @@ public class FunctionFactory
     return new DialogFunction(dialogName, dialog, dataName, context);
   }
 
-  private static Function parseIF(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
+  private static Function parseIF(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map<Object, Object> context) throws ConfigurationErrorException
   {
     ConfigThingy thenConf = conf.query("THEN");
     ConfigThingy elseConf = conf.query("ELSE");
@@ -419,7 +419,7 @@ public class FunctionFactory
     return new IfFunction(ifFun, thenFun, elseFun);
   }
 
-  private static Function parseREPLACE(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
+  private static Function parseREPLACE(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map<Object, Object> context) throws ConfigurationErrorException
   {
     if (conf.count() != 3)
       throw new ConfigurationErrorException("Funktion vom Typ \"REPLACE\" erfordert genau 3 Parameter, nicht "+conf.count());
@@ -444,7 +444,7 @@ public class FunctionFactory
     return new ReplaceFunction(strFun, p, repFun);
   }
 
-  private static Function parseMATCH(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
+  private static Function parseMATCH(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map<Object, Object> context) throws ConfigurationErrorException
   {
     if (conf.count() != 2)
       throw new ConfigurationErrorException("Funktion vom Typ \"MATCH\" erfordert genau 2 Parameter, nicht "+conf.count());
@@ -473,7 +473,7 @@ public class FunctionFactory
     return new MatchFunction(strFun, p);
   }
 
-  private static Function parseVALUE(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
+  private static Function parseVALUE(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map<Object, Object> context) throws ConfigurationErrorException
   {
     if (conf.count() != 1)
       throw new ConfigurationErrorException("Funktion vom Typ \"VALUE\" erfordert genau 1 Parameter, nicht "+conf.count()); 
@@ -491,7 +491,7 @@ public class FunctionFactory
     return new ValueFunction(valueNameFun.getString(noValues));
   }
     
-  private static Function parseDIVIDE(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
+  private static Function parseDIVIDE(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map<Object, Object> context) throws ConfigurationErrorException
   {
     Function dividendFun = null;
     Function byFun = null;
@@ -570,7 +570,7 @@ public class FunctionFactory
     private String dataName;
     private String dialogName;
     
-    public DialogFunction(String dialogName, Dialog dialog, String dataName, Map context)
+    public DialogFunction(String dialogName, Dialog dialog, String dataName, Map<Object, Object> context)
     throws ConfigurationErrorException
     {
       this.dialog = dialog.instanceFor(context);
@@ -604,7 +604,7 @@ public class FunctionFactory
     private String[] params;
     private Set<String> functionDialogReferences = new HashSet<String>();
     
-    public BindFunction(Function func, ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
+    public BindFunction(Function func, ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map<Object, Object> context) throws ConfigurationErrorException
     {
       this.func = func;
       
@@ -754,7 +754,7 @@ public class FunctionFactory
      * equals(Function,ERROR).
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
-    public IsErrorFunction(boolean objectCompare, ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
+    public IsErrorFunction(boolean objectCompare, ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map<Object, Object> context) throws ConfigurationErrorException
     {
       if (conf.count() != 1)
         throw new ConfigurationErrorException("Funktion "+conf.getName()+" muss genau einen Parameter haben");
@@ -976,7 +976,7 @@ public class FunctionFactory
     protected Collection<Function> subFunction;
     private String[] params;
     
-    public MultiFunction(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
+    public MultiFunction(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map<Object, Object> context) throws ConfigurationErrorException
     {
       Vector<Function> subFunction = new Vector<Function>(conf.count());
       Iterator iter = conf.iterator();
@@ -1004,7 +1004,7 @@ public class FunctionFactory
      * zu behandeln.
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
-    protected boolean handleParam(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) 
+    protected boolean handleParam(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map<Object, Object> context) 
     throws ConfigurationErrorException
     {return false;}
     
@@ -1076,7 +1076,7 @@ public class FunctionFactory
       super(subFunction);
     }
     
-    public CatFunction(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
+    public CatFunction(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map<Object, Object> context) throws ConfigurationErrorException
     {
       super(conf, funcLib, dialogLib, context);
     }
@@ -1098,7 +1098,7 @@ public class FunctionFactory
   
   private static class LengthFunction extends CatFunction
   {
-    public LengthFunction(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
+    public LengthFunction(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map<Object, Object> context) throws ConfigurationErrorException
     {
       super(conf, funcLib, dialogLib, context);
     }
@@ -1125,7 +1125,7 @@ public class FunctionFactory
       super(subFunction);
     }
     
-    public AndFunction(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
+    public AndFunction(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map<Object, Object> context) throws ConfigurationErrorException
     {
       super(conf, funcLib, dialogLib, context);
     }
@@ -1152,7 +1152,7 @@ public class FunctionFactory
       super(subFunction);
     }
     
-    public NotFunction(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
+    public NotFunction(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map<Object, Object> context) throws ConfigurationErrorException
     {
       super(conf, funcLib, dialogLib, context);
     }
@@ -1179,7 +1179,7 @@ public class FunctionFactory
       super(subFunction);
     }
     
-    public OrFunction(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
+    public OrFunction(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map<Object, Object> context) throws ConfigurationErrorException
     {
       super(conf, funcLib, dialogLib, context);
     }
@@ -1207,12 +1207,12 @@ public class FunctionFactory
       super(subFunction);
     }
     
-    public SelectFunction(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
+    public SelectFunction(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map<Object, Object> context) throws ConfigurationErrorException
     {
       super(conf, funcLib, dialogLib, context);
     }
     
-    protected boolean handleParam(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) 
+    protected boolean handleParam(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map<Object, Object> context) 
     throws ConfigurationErrorException
     {
       if (conf.getName().equals("ONERROR"))
@@ -1262,7 +1262,7 @@ public class FunctionFactory
   
   private static class StrCmpFunction extends MultiFunction
   {
-    public StrCmpFunction(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
+    public StrCmpFunction(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map<Object, Object> context) throws ConfigurationErrorException
     {
       super(conf, funcLib, dialogLib, context);
       if (subFunction.size() < 2) throw new ConfigurationErrorException("Funktion "+conf.getName()+" erfordert mindestens 2 Parameter");
@@ -1298,7 +1298,7 @@ public class FunctionFactory
   {
     protected char decimalPoint = '.';
     
-    public NumberFunction(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
+    public NumberFunction(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map<Object, Object> context) throws ConfigurationErrorException
     {
       super(conf, funcLib, dialogLib, context);
       try{
@@ -1392,7 +1392,7 @@ public class FunctionFactory
   {
     private BigDecimal sum;
     
-    public SumFunction(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
+    public SumFunction(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map<Object, Object> context) throws ConfigurationErrorException
     {
       super(conf, funcLib, dialogLib, context);
     }
@@ -1422,7 +1422,7 @@ public class FunctionFactory
   
   private static class MinusFunction extends SumFunction
   {
-    public MinusFunction(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
+    public MinusFunction(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map<Object, Object> context) throws ConfigurationErrorException
     {
       super(conf, funcLib, dialogLib, context);
     }
@@ -1435,7 +1435,7 @@ public class FunctionFactory
   
   private static class AbsFunction extends SumFunction
   {
-    public AbsFunction(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
+    public AbsFunction(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map<Object, Object> context) throws ConfigurationErrorException
     {
       super(conf, funcLib, dialogLib, context);
     }
@@ -1448,7 +1448,7 @@ public class FunctionFactory
   
   private static class SignFunction extends SumFunction
   {
-    public SignFunction(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
+    public SignFunction(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map<Object, Object> context) throws ConfigurationErrorException
     {
       super(conf, funcLib, dialogLib, context);
     }
@@ -1465,7 +1465,7 @@ public class FunctionFactory
     private BigDecimal sum;
     private boolean first;
     
-    public DiffFunction(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
+    public DiffFunction(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map<Object, Object> context) throws ConfigurationErrorException
     {
       super(conf, funcLib, dialogLib, context);
     }
@@ -1501,7 +1501,7 @@ public class FunctionFactory
   {
     private BigDecimal prod;
     
-    public ProductFunction(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
+    public ProductFunction(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map<Object, Object> context) throws ConfigurationErrorException
     {
       super(conf, funcLib, dialogLib, context);
     }
@@ -1558,7 +1558,7 @@ public class FunctionFactory
      * conf enthalten sind.
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
-    public NumberCompareFunction(int cmp1, int cmp2, String result, ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
+    public NumberCompareFunction(int cmp1, int cmp2, String result, ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map<Object, Object> context) throws ConfigurationErrorException
     {
       super(conf, funcLib, dialogLib, context);
       if (subFunction.size() < 2) throw new ConfigurationErrorException("Funktion "+conf.getName()+" erfordert mindestens 2 Parameter");
@@ -1567,7 +1567,7 @@ public class FunctionFactory
       this.result = result;
     }
     
-    protected boolean handleParam(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context)
+    protected boolean handleParam(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map<Object, Object> context)
     throws ConfigurationErrorException
     {
       if (conf.getName().equals("MARGIN"))
@@ -1863,12 +1863,12 @@ public class FunctionFactory
   {
     UNO.init();
     
-    Map context = new HashMap();
+    Map<Object, Object> context = new HashMap<Object, Object>();
     FunctionLibrary funcLib = new FunctionLibrary();
     DialogLibrary dialogLib = new DialogLibrary();
     
     dialogLib.add("Empfaenger", new Dialog(){
-      public Dialog instanceFor(Map context) { return this;}
+      public Dialog instanceFor(Map<Object, Object> context) { return this;}
       public Object getData(String id)
       { if (id.equals("Strasse")) return "Herzog-Wilhelm-Str. 22";
         return null; }

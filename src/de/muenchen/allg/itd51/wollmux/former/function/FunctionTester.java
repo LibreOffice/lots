@@ -116,7 +116,7 @@ public class FunctionTester
   /**
    * Kontext für die parse()-Funktionen von {@link FunctionFactory}.
    */
-  private Map myContext = new HashMap();
+  private Map<Object, Object> myContext = new HashMap<Object, Object>();
   
   /**
    * Liefert die Parameter für das Auswerten der Funktion, wobei die Werte aus

@@ -30,7 +30,7 @@ import java.util.Map;
  */
 public class SimpleDataset implements Dataset
 {
-  private Map data;
+  private Map<String, String> data;
   private String key;
   
    /**
@@ -46,7 +46,7 @@ public class SimpleDataset implements Dataset
   public SimpleDataset(Collection schema, Dataset ds) throws ColumnNotFoundException
   {
     key = ds.getKey();
-    data = new HashMap();
+    data = new HashMap<String, String>();
     Iterator iter = schema.iterator();
     while (iter.hasNext())
     {
@@ -64,7 +64,7 @@ public class SimpleDataset implements Dataset
    * per Referenz eingebunden.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public SimpleDataset(String key, Map data)
+  public SimpleDataset(String key, Map<String, String> data)
   {
     this.key = key;
     this.data = data;
@@ -76,7 +76,7 @@ public class SimpleDataset implements Dataset
   public String get(String columnName) throws ColumnNotFoundException
   {
     if (!data.containsKey(columnName)) throw new ColumnNotFoundException("Datensatz kennt Spalte \""+columnName+"\" nicht!");
-    return (String)data.get(columnName);
+    return data.get(columnName);
   }
 
   /* (non-Javadoc)

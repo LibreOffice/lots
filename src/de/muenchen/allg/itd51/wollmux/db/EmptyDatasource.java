@@ -33,11 +33,11 @@ import de.muenchen.allg.itd51.wollmux.TimeoutException;
  */
 public class EmptyDatasource implements Datasource
 {
-  private static QueryResults emptyResults = new QueryResultsList(new Vector(0));
-  private Set schema;
+  private static QueryResults emptyResults = new QueryResultsList(new Vector<Dataset>(0));
+  private Set<String> schema;
   private String name;
   
-  public EmptyDatasource(Set schema, String name)  
+  public EmptyDatasource(Set<String> schema, String name)  
   {
     this.schema = schema;
     this.name = name;
@@ -46,7 +46,7 @@ public class EmptyDatasource implements Datasource
   /* (non-Javadoc)
    * @see de.muenchen.allg.itd51.wollmux.db.Datasource#getSchema()
    */
-  public Set getSchema()
+  public Set<String> getSchema()
   {
     return schema;
   }
@@ -54,7 +54,7 @@ public class EmptyDatasource implements Datasource
   /* (non-Javadoc)
    * @see de.muenchen.allg.itd51.wollmux.db.Datasource#getDatasetsByKey(java.util.Collection, long)
    */
-  public QueryResults getDatasetsByKey(Collection keys, long timeout)
+  public QueryResults getDatasetsByKey(Collection<String> keys, long timeout)
   {
     return emptyResults;
   }
@@ -69,7 +69,7 @@ public class EmptyDatasource implements Datasource
     return name;
   }
 
-  public QueryResults find(List query, long timeout) throws TimeoutException
+  public QueryResults find(List<QueryPart> query, long timeout) throws TimeoutException
   {
     return emptyResults;
   }

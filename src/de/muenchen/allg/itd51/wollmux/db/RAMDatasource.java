@@ -41,12 +41,12 @@ public class RAMDatasource implements Datasource
   /**
    * Das Schema dieser Datenquelle.
    */
-  private Set schema;
+  private Set<String> schema;
   
   /**
    * Liste aller Datasets, die in dieser Datasource gespeichert sind.
    */
-  private List data;
+  private List<Dataset> data;
   
   /**
    * Der Name dieser Datenquelle.
@@ -60,7 +60,7 @@ public class RAMDatasource implements Datasource
    * @param schema das Schema der Datenquelle
    * @param data die Datensätze der Datenquelle
    */
-  public RAMDatasource(String name, Set schema, List data)
+  public RAMDatasource(String name, Set<String> schema, List<Dataset> data)
   {
     init(name, schema, data);
   }
@@ -71,7 +71,7 @@ public class RAMDatasource implements Datasource
    * werden, wenn sie den Konstruktor ohne Argumente verwenden.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  protected void init(String name, Set schema, List data)
+  protected void init(String name, Set<String> schema, List<Dataset> data)
   {
     this.schema = schema; 
     this.data = data;
@@ -85,19 +85,19 @@ public class RAMDatasource implements Datasource
   */
   protected RAMDatasource(){};
 
-  public Set getSchema()
+  public Set<String> getSchema()
   { //TESTED
-    return new HashSet(schema);
+    return new HashSet<String>(schema);
   }
 
-  public QueryResults getDatasetsByKey(Collection keys, long timeout)
+  public QueryResults getDatasetsByKey(Collection<String> keys, long timeout)
       throws TimeoutException
   { //TESTED
-    Vector res = new Vector();
-    Iterator iter = data.iterator();
+    Vector<Dataset> res = new Vector<Dataset>();
+    Iterator<Dataset> iter = data.iterator();
     while (iter.hasNext())
     {
-      Dataset ds = (Dataset)iter.next();
+      Dataset ds = iter.next();
       if (keys.contains(ds.getKey())) res.add(ds);
     }
         
@@ -107,17 +107,17 @@ public class RAMDatasource implements Datasource
   /* (non-Javadoc)
    * @see de.muenchen.allg.itd51.wollmux.db.Datasource#find(java.util.List, long)
    */
-  public QueryResults find(List query, long timeout) throws TimeoutException
+  public QueryResults find(List<QueryPart> query, long timeout) throws TimeoutException
   { //TESTED
-    if (query.isEmpty()) return new QueryResultsList(new Vector(0));
+    if (query.isEmpty()) return new QueryResultsList(new Vector<Dataset>(0));
     DatasetChecker checker = DatasetChecker.makeChecker(query);
     
-    List results = new Vector();
+    List<Dataset> results = new Vector<Dataset>();
     
-    Iterator iter = data.iterator();
+    Iterator<Dataset> iter = data.iterator();
     while (iter.hasNext())
     {
-      Dataset ds = (Dataset)iter.next();
+      Dataset ds = iter.next();
       if (checker.matches(ds)) results.add(ds);
     }
     return new QueryResultsList(results);
@@ -125,7 +125,7 @@ public class RAMDatasource implements Datasource
   
   public QueryResults getContents(long timeout) throws TimeoutException
   {
-    return new QueryResultsList(new Vector(data));
+    return new QueryResultsList(new Vector<Dataset>(data));
   }
 
   /* (non-Javadoc)

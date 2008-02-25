@@ -2320,7 +2320,7 @@ public class MailMergeNew
      */
     public QueryResultsWithSchema()
     {
-      results = new QueryResultsList(new ArrayList());
+      results = new QueryResultsList(new ArrayList<Dataset>());
       schema = new HashSet<String>();
     }
     

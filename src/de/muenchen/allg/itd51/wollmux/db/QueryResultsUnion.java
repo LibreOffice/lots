@@ -50,7 +50,7 @@ public class QueryResultsUnion implements QueryResults
   /* (non-Javadoc)
    * @see de.muenchen.allg.itd51.wollmux.db.QueryResults#iterator()
    */
-  public Iterator iterator()
+  public Iterator<Dataset> iterator()
   {
     return new UnionIterator(results1.iterator(), results2.iterator());
   }
@@ -63,13 +63,13 @@ public class QueryResultsUnion implements QueryResults
     return results1.isEmpty() && results2.isEmpty();
   }
 
-  private static class UnionIterator implements Iterator
+  private static class UnionIterator implements Iterator<Dataset>
   {
-    private Iterator iter1;
-    private Iterator iter2;
-    private Iterator iter;
+    private Iterator<Dataset> iter1;
+    private Iterator<Dataset> iter2;
+    private Iterator<Dataset> iter;
     
-    public UnionIterator(Iterator iter1, Iterator iter2)
+    public UnionIterator(Iterator<Dataset> iter1, Iterator<Dataset> iter2)
     {
       this.iter1 = iter1;
       this.iter2 = iter2;
@@ -90,7 +90,7 @@ public class QueryResultsUnion implements QueryResults
       return iter.hasNext();
     }
 
-    public Object next()
+    public Dataset next()
     {
       this.hasNext(); //weiterschalten auf iter2 falls nötig
       return iter.next();

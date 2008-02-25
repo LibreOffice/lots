@@ -132,7 +132,7 @@ Wie ANSI, aber mit lcase() statt lower()
   /**
    * Das Schema dieser Datenquelle.
    */
-  private Set schema;
+  private Set<String> schema;
   
   /**
    * Die Namen der Spalten, die den Primärschlüssel bilden.
@@ -236,11 +236,11 @@ Wie ANSI, aber mit lcase() statt lower()
     }
     catch (NodeNotFoundException x) {}
     
-    schema = new HashSet();
+    schema = new HashSet<String>();
     ConfigThingy schemaConf = sourceDesc.query("Schema");
     if (schemaConf.count() != 0)
     {
-      Iterator iter = ((ConfigThingy)schemaConf.iterator().next()).iterator();
+      Iterator iter = schemaConf.iterator().next().iterator();
       String firstColumnName = null;
       while (iter.hasNext())
       {
@@ -330,9 +330,9 @@ Wie ANSI, aber mit lcase() statt lower()
    * TESTED*/
   private void parseKey(ConfigThingy conf) throws ConfigurationErrorException
   {
-    conf = (ConfigThingy)conf.iterator().next();
+    conf = conf.iterator().next();
     Iterator iter = conf.iterator();
-    ArrayList columns = new ArrayList();
+    ArrayList<String> columns = new ArrayList<String>();
     while (iter.hasNext())
     {
       String column = iter.next().toString();
@@ -344,26 +344,26 @@ Wie ANSI, aber mit lcase() statt lower()
       columns.add(column);
     }
     keyColumns = new String[columns.size()];
-    keyColumns = (String[])columns.toArray(keyColumns);
+    keyColumns = columns.toArray(keyColumns);
   }
   
-  public Set getSchema()
+  public Set<String> getSchema()
   {
     return schema;
   }
 
-  public QueryResults getDatasetsByKey(Collection keys, long timeout) throws TimeoutException
+  public QueryResults getDatasetsByKey(Collection<String> keys, long timeout) throws TimeoutException
   { //TESTED
     long endTime = System.currentTimeMillis() + timeout;
     StringBuilder buffy = new StringBuilder("SELECT * FROM "+sqlIdentifier(oooTableName)+" WHERE ");
     
-    Iterator iter = keys.iterator();
+    Iterator<String> iter = keys.iterator();
     boolean first = true;
     while (iter.hasNext())
     {
       if (!first) buffy.append(" OR "); 
       first = false;
-      String key = (String)iter.next();
+      String key = iter.next();
       String[] parts = key.split("#",-1);
       buffy.append('(');
       for (int i = 1; i < parts.length; i+=2)
@@ -383,17 +383,17 @@ Wie ANSI, aber mit lcase() statt lower()
     return sqlQuery(buffy.toString(), timeout, true);
   }
 
-  public QueryResults find(List query, long timeout) throws TimeoutException
+  public QueryResults find(List<QueryPart> query, long timeout) throws TimeoutException
   { //TESTED 
-    if (query.isEmpty()) return new QueryResultsList(new Vector(0));
+    if (query.isEmpty()) return new QueryResultsList(new Vector<Dataset>(0));
     
     StringBuilder buffy = new StringBuilder("SELECT * FROM "+sqlIdentifier(oooTableName)+" WHERE ");
     
-    Iterator iter = query.iterator();
+    Iterator<QueryPart> iter = query.iterator();
     boolean first = true;
     while (iter.hasNext())
     {
-      QueryPart part = (QueryPart)iter.next();
+      QueryPart part = iter.next();
       if (!first) buffy.append(" AND ");
       first = false;
       buffy.append('(');
@@ -434,7 +434,7 @@ Wie ANSI, aber mit lcase() statt lower()
     Logger.debug("sqlQuery(\""+query+"\", "+timeout+", "+throwOnTimeout+")");
     long endTime = System.currentTimeMillis() + timeout;
     
-    Vector datasets = new Vector();
+    Vector<OOoDataset> datasets = new Vector<OOoDataset>();
 
     if (System.currentTimeMillis() > endTime)
     {
@@ -487,12 +487,12 @@ Wie ANSI, aber mit lcase() statt lower()
       
       results.execute();
       
-      Map mapColumnNameToIndex = getColumnMapping(results);
+      Map<String, Integer> mapColumnNameToIndex = getColumnMapping(results);
       XRow row = UNO.XRow(results);
       
       while (results != null && results.next())
       {
-        Map data = new HashMap();
+        Map<String, String> data = new HashMap<String, String>();
         Iterator iter = mapColumnNameToIndex.entrySet().iterator();
         while (iter.hasNext())
         {
@@ -535,9 +535,9 @@ Wie ANSI, aber mit lcase() statt lower()
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
-  private Map getColumnMapping(XResultSet results)
+  private Map<String, Integer> getColumnMapping(XResultSet results)
   {
-    Map mapColumnNameToIndex = new HashMap();
+    Map<String, Integer> mapColumnNameToIndex = new HashMap<String, Integer>();
     XColumnLocate loc = UNO.XColumnLocate(results);
     Iterator iter = getSchema().iterator();
     while (iter.hasNext())
@@ -602,10 +602,10 @@ Wie ANSI, aber mit lcase() statt lower()
   
   private class OOoDataset implements Dataset
   {
-    private Map data;
+    private Map<String, String> data;
     private String key;
     
-    public OOoDataset(Map data)
+    public OOoDataset(Map<String, String> data)
     {
       this.data = data;
       initKey(keyColumns);
@@ -621,7 +621,7 @@ Wie ANSI, aber mit lcase() statt lower()
       StringBuilder buffy = new StringBuilder();
       for (int i = 0; i < keyCols.length; ++i)
       {
-        String str = (String)data.get(keyCols[i]);
+        String str = data.get(keyCols[i]);
         if (str != null) 
         {
           buffy.append(encode(keyCols[i]));
@@ -637,7 +637,7 @@ Wie ANSI, aber mit lcase() statt lower()
     public String get(String columnName) throws ColumnNotFoundException
     {
       if (!schema.contains(columnName)) throw new ColumnNotFoundException("Spalte "+columnName+" existiert nicht!");
-      return (String)data.get(columnName);
+      return data.get(columnName);
     }
 
     public String getKey()
@@ -668,7 +668,7 @@ Wie ANSI, aber mit lcase() statt lower()
   }
 
   
-  private static void printQueryResults(Set schema, QueryResults res, Vector keys) throws ColumnNotFoundException
+  private static void printQueryResults(Set<String> schema, QueryResults res, Vector<String> keys) throws ColumnNotFoundException
   {
     keys.clear();
     Iterator iter;
@@ -677,10 +677,10 @@ Wie ANSI, aber mit lcase() statt lower()
     {
       Dataset data = (Dataset)iter.next();
       keys.add(data.getKey());
-      Iterator colIter = schema.iterator();
+      Iterator<String> colIter = schema.iterator();
       while (colIter.hasNext())
       {
-        String col = (String)colIter.next();
+        String col = colIter.next();
         String val = data.get(col); 
         if (val == null) 
           val = "unbelegt";
@@ -706,7 +706,7 @@ Wie ANSI, aber mit lcase() statt lower()
    *          die Ergebnisse der Anfrage.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public static void printResults(String query, Set schema, QueryResults results)
+  public static void printResults(String query, Set<String> schema, QueryResults results)
   {
     System.out.println("Results for query \"" + query + "\":");
     Iterator resIter = results.iterator();
@@ -714,10 +714,10 @@ Wie ANSI, aber mit lcase() statt lower()
     {
       Dataset result = (Dataset) resIter.next();
 
-      Iterator spiter = schema.iterator();
+      Iterator<String> spiter = schema.iterator();
       while (spiter.hasNext())
       {
-        String spalte = (String) spiter.next();
+        String spalte = spiter.next();
         String wert = "Spalte " + spalte + " nicht gefunden!";
         try
         {
@@ -749,7 +749,7 @@ Wie ANSI, aber mit lcase() statt lower()
   private QueryResults simpleFind(String spaltenName, String suchString)
       throws TimeoutException
   {
-    List query = new Vector();
+    List<QueryPart> query = new Vector<QueryPart>();
     query.add(new QueryPart(spaltenName, suchString));
     QueryResults find = find(query, 3000000);
     return find;
@@ -768,7 +768,7 @@ Wie ANSI, aber mit lcase() statt lower()
   private QueryResults simpleFind(String spaltenName1, String suchString1,
       String spaltenName2, String suchString2) throws TimeoutException
   {
-    List query = new Vector();
+    List<QueryPart> query = new Vector<QueryPart>();
     query.add(new QueryPart(spaltenName1, suchString1));
     query.add(new QueryPart(spaltenName2, suchString2));
     QueryResults find = find(query, 3000000);
@@ -808,8 +808,8 @@ Wie ANSI, aber mit lcase() statt lower()
       OOoDatasource ds = new OOoDatasource(null, conf, null);
       System.out.println("Name: "+ds.getName());
       System.out.print("Schema: ");
-      Set schema = ds.getSchema();
-      Iterator iter = schema.iterator();
+      Set<String> schema = ds.getSchema();
+      Iterator<String> iter = schema.iterator();
       while (iter.hasNext())
       {
         System.out.print("\""+iter.next()+"\" ");
@@ -821,7 +821,7 @@ Wie ANSI, aber mit lcase() statt lower()
       
       System.out.println("Datensätze:");
       QueryResults res = ds.getContents(1000000);
-      Vector keys = new Vector();
+      Vector<String> keys = new Vector<String>();
       printQueryResults(schema, res, keys);
       
       keys.remove(0);
