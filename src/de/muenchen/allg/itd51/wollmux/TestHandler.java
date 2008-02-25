@@ -65,7 +65,7 @@ public class TestHandler
     /** ************************************************************** */
     if (cmd.equalsIgnoreCase("VerfuegungspunktDrucken"))
     {
-      Map idsAndValues = getWollmuxTestArgs();
+      Map<String, String> idsAndValues = getWollmuxTestArgs();
       short count = (short) SachleitendeVerfuegung.countVerfuegungspunkte(model.doc);
       short verfPunkt = new Short(idsAndValues.get("VerfPunkt").toString()).shortValue();
       boolean isDraft = (verfPunkt == count) ? true : false;
@@ -105,8 +105,8 @@ public class TestHandler
     /** ************************************************************** */
     if (cmd.equalsIgnoreCase("SchreibeFormularwerte"))
     {
-      Map idsAndValues = getWollmuxTestArgs();
-      for (Iterator iter = idsAndValues.keySet().iterator(); iter.hasNext();)
+      Map<String, String> idsAndValues = getWollmuxTestArgs();
+      for (Iterator<String> iter = idsAndValues.keySet().iterator(); iter.hasNext();)
       {
         String id = "" + iter.next();
         String value = "" + idsAndValues.get(id);
@@ -150,9 +150,9 @@ public class TestHandler
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  private static HashMap getWollmuxTestArgs()
+  private static HashMap<String, String> getWollmuxTestArgs()
   {
-    HashMap args = new HashMap();
+    HashMap<String, String> args = new HashMap<String, String>();
     try
     {
       BufferedReader br = new BufferedReader(

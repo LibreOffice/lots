@@ -47,7 +47,7 @@ public class TextSection implements VisibilityElement
   /**
    * Ein Set das die Gruppennamen dieses Sichtbarkeitselements enthält.
    */
-  private Set groups;
+  private Set<String> groups;
 
   /**
    * Erzeugt ein neues TextSection-Objekt.
@@ -58,7 +58,7 @@ public class TextSection implements VisibilityElement
    *          Set mit den Namen (als String) aller Sichtbarkeitsgruppen, die
    *          diesen Bereich sichtbar oder unsichtbar machen können.
    */
-  public TextSection(XTextSection section, Set groups)
+  public TextSection(XTextSection section, Set<String> groups)
   {
     this.section = section;
     this.groups = groups;
@@ -97,7 +97,7 @@ public class TextSection implements VisibilityElement
    * 
    * @see de.muenchen.allg.itd51.wollmux.VisibilityElement#getGroups()
    */
-  public Set getGroups()
+  public Set<String> getGroups()
   {
     return groups;
   }
@@ -107,7 +107,7 @@ public class TextSection implements VisibilityElement
    * 
    * @see de.muenchen.allg.itd51.wollmux.VisibilityElement#addGroups(java.util.Set)
    */
-  public void addGroups(Set groups)
+  public void addGroups(Set<String> groups)
   {
     this.groups.addAll(groups);
   }

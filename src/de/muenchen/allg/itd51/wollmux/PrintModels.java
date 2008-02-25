@@ -255,14 +255,14 @@ public class PrintModels
     /**
      * Enthält die sortierte Menge aller PrintFunction-Objekte der Aufrufkette.
      */
-    private SortedSet functions;
+    private SortedSet<PrintFunction> functions;
 
     /**
      * Enthält die Properties, die in printWithProps() ausgewertet werden und
      * über die get/setPropertyValue-Methoden frei gesetzt und gelesen werden
      * können.
      */
-    private HashMap props;
+    private HashMap<String, Object> props;
 
     /**
      * Das TextDocumentModel zu diesem PrintModel
@@ -290,8 +290,8 @@ public class PrintModels
     private MasterPrintModel(TextDocumentModel model)
     {
       this.model = model;
-      this.props = new HashMap();
-      this.functions = new TreeSet();
+      this.props = new HashMap<String, Object>();
+      this.functions = new TreeSet<PrintFunction>();
     }
 
     /**
@@ -657,9 +657,9 @@ public class PrintModels
         {
           Property[] ps = new Property[props.size()];
           int i = 0;
-          for (Iterator iter = props.keySet().iterator(); iter.hasNext();)
+          for (Iterator<String> iter = props.keySet().iterator(); iter.hasNext();)
           {
-            String name = (String) iter.next();
+            String name = iter.next();
             try
             {
               ps[i++] = getPropertyByName(name);

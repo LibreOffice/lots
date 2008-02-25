@@ -881,9 +881,9 @@ public class SachleitendeVerfuegung
    * @return Vector of Verfuegungspunkt, der für jeden Verfuegungspunkt im
    *         Dokument doc einen Eintrag enthält.
    */
-  private static Vector scanVerfuegungspunkte(XTextDocument doc)
+  private static Vector<Verfuegungspunkt> scanVerfuegungspunkte(XTextDocument doc)
   {
-    Vector verfuegungspunkte = new Vector();
+    Vector<Verfuegungspunkt> verfuegungspunkte = new Vector<Verfuegungspunkt>();
 
     // Verfügungspunkt1 hinzufügen wenn verfügbar.
     XTextRange punkt1 = getVerfuegungspunkt1(doc);
@@ -954,7 +954,7 @@ public class SachleitendeVerfuegung
      * Vector of String, der alle Zuleitungszeilen enthält, die mit addParagraph
      * hinzugefügt wurden.
      */
-    protected Vector zuleitungszeilen;
+    protected Vector<String> zuleitungszeilen;
 
     /**
      * Enthält die Anzahl der Ausdrucke, die mindestens ausgedruckt werden
@@ -973,7 +973,7 @@ public class SachleitendeVerfuegung
     public Verfuegungspunkt(String heading)
     {
       this.heading = heading;
-      this.zuleitungszeilen = new Vector();
+      this.zuleitungszeilen = new Vector<String>();
       this.minNumberOfCopies = 0;
     }
 
@@ -1026,7 +1026,7 @@ public class SachleitendeVerfuegung
      * 
      * @return Vector of Strings mit den Texten der Zuleitungszeilen.
      */
-    public Vector getZuleitungszeilen()
+    public Vector<String> getZuleitungszeilen()
     {
       return zuleitungszeilen;
     }
@@ -1062,16 +1062,16 @@ public class SachleitendeVerfuegung
   {
     Logger.debug("SachleitendeVerfuegung.print - started");
 
-    Vector vps = scanVerfuegungspunkte(pmod.getTextDocument());
-    Iterator iter = vps.iterator();
+    Vector<Verfuegungspunkt> vps = scanVerfuegungspunkte(pmod.getTextDocument());
+    Iterator<Verfuegungspunkt> iter = vps.iterator();
     while (iter.hasNext())
     {
-      Verfuegungspunkt vp = (Verfuegungspunkt) iter.next();
+      Verfuegungspunkt vp = iter.next();
       String text = "Verfügungspunkt '" + vp.getHeading() + "'";
-      Iterator zuleits = vp.getZuleitungszeilen().iterator();
+      Iterator<String> zuleits = vp.getZuleitungszeilen().iterator();
       while (zuleits.hasNext())
       {
-        String zuleit = (String) zuleits.next();
+        String zuleit = zuleits.next();
         text += "\n  --> '" + zuleit + "'";
       }
       Logger.debug2(text);
@@ -1195,9 +1195,9 @@ public class SachleitendeVerfuegung
 
     // Prüfen, welche Textsections im ausgeblendeten Bereich liegen und diese
     // ebenfalls ausblenden:
-    List hidingSections = getSectionsFromPosition(pmod.getTextDocument(),
+    List<XTextSection> hidingSections = getSectionsFromPosition(pmod.getTextDocument(),
       setInvisibleRange);
-    for (Iterator iter = hidingSections.iterator(); iter.hasNext();)
+    for (Iterator<XTextSection> iter = hidingSections.iterator(); iter.hasNext();)
     {
       UNO.setProperty(iter.next(), "IsVisible", Boolean.FALSE);
     }
@@ -1254,7 +1254,7 @@ public class SachleitendeVerfuegung
     pmod.setPrintBlocksProps(BLOCKNAME_SLV_ALL_VERSIONS, true, true);
 
     // ausgeblendete TextSections wieder einblenden
-    for (Iterator iter = hidingSections.iterator(); iter.hasNext();)
+    for (Iterator<XTextSection> iter = hidingSections.iterator(); iter.hasNext();)
     {
       UNO.setProperty(iter.next(), "IsVisible", Boolean.TRUE);
     }
@@ -1282,9 +1282,9 @@ public class SachleitendeVerfuegung
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  private static List getSectionsFromPosition(XTextDocument doc, XTextRange pos)
+  private static List<XTextSection> getSectionsFromPosition(XTextDocument doc, XTextRange pos)
   {
-    Vector v = new Vector();
+    Vector<XTextSection> v = new Vector<XTextSection>();
     if (pos == null) return v;
     XTextRangeCompare comp = UNO.XTextRangeCompare(pos.getText());
     if (comp == null) return v;

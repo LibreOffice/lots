@@ -109,9 +109,9 @@ public class DispatchHandler
   /*****************************************************************************
    * Erzeugt alle globalen DispatchHandler
    ****************************************************************************/
-  private static Set createGlobalDispatchHandlers()
+  private static Set<BasicDispatchHandler> createGlobalDispatchHandlers()
   {
-    Set handler = new HashSet();
+    Set<BasicDispatchHandler> handler = new HashSet<BasicDispatchHandler>();
 
     handler.add(new BasicDispatchHandler(DISP_wmAbsenderAuswaehlen)
     {
@@ -133,7 +133,7 @@ public class DispatchHandler
     {
       public void dispatch(String arg, PropertyValue[] props)
       {
-        Vector fragIds = new Vector();
+        Vector<String> fragIds = new Vector<String>();
         String[] parts = arg.split("&");
         for (int i = 0; i < parts.length; i++)
           fragIds.add(parts[i]);
@@ -145,7 +145,7 @@ public class DispatchHandler
     {
       public void dispatch(String arg, PropertyValue[] props)
       {
-        Vector fragIds = new Vector();
+        Vector<String> fragIds = new Vector<String>();
         String[] parts = arg.split("&");
         for (int i = 0; i < parts.length; i++)
           fragIds.add(parts[i]);
@@ -193,9 +193,9 @@ public class DispatchHandler
   /*****************************************************************************
    * Erzeugt alle dokumentgebundenen Dispatchhandler
    ****************************************************************************/
-  private static Set createDocumentDispatchHandler(TextDocumentModel model)
+  private static Set<BasicDispatchHandler> createDocumentDispatchHandler(TextDocumentModel model)
   {
-    Set handler = new HashSet();
+    Set<BasicDispatchHandler> handler = new HashSet<BasicDispatchHandler>();
     if (model == null) return handler;
 
     handler.add(new DocumentDispatchHandler(DISP_unoPrint, model)
@@ -357,7 +357,7 @@ public class DispatchHandler
     /**
      * Enthält alle aktuell registrierten StatusListener
      */
-    protected final Vector statusListener = new Vector();
+    protected final Vector<XStatusListener> statusListener = new Vector<XStatusListener>();
 
     /**
      * Erzeugt einen DispatchHandler, der Dispatches mit der url urlStr
@@ -457,7 +457,7 @@ public class DispatchHandler
     public void addStatusListener(XStatusListener listener, URL url)
     {
       boolean alreadyRegistered = false;
-      Iterator iter = statusListener.iterator();
+      Iterator<XStatusListener> iter = statusListener.iterator();
       while (iter.hasNext())
         if (UnoRuntime.areSame(UNO.XInterface(iter.next()), listener))
           alreadyRegistered = true;
@@ -475,7 +475,7 @@ public class DispatchHandler
      */
     public void removeStatusListener(XStatusListener listener, URL x)
     {
-      Iterator iter = statusListener.iterator();
+      Iterator<XStatusListener> iter = statusListener.iterator();
       while (iter.hasNext())
         if (UnoRuntime.areSame(UNO.XInterface(iter.next()), listener))
           iter.remove();
@@ -535,7 +535,7 @@ public class DispatchHandler
   private static abstract class BasicWollMuxDispatchProvider implements
       XDispatchProvider
   {
-    private Set dispatchHandlers = new HashSet();
+    private Set<BasicDispatchHandler> dispatchHandlers = new HashSet<BasicDispatchHandler>();
 
     /**
      * Teilt dem DispatchProvider mit, dass er in Zukunft alle in
@@ -545,7 +545,7 @@ public class DispatchHandler
      * @param dispatchHandlers
      *          Set of BasicDispatchHandler
      */
-    protected void setDispatchHandlers(Set dispatchHandlers)
+    protected void setDispatchHandlers(Set<BasicDispatchHandler> dispatchHandlers)
     {
       this.dispatchHandlers = dispatchHandlers;
     }
@@ -566,10 +566,10 @@ public class DispatchHandler
       // =====> {"wollmux:OpenTemplate", "internerBriefkopf"}
       String[] parts = urlStr.split("#", 2);
 
-      Iterator iter = dispatchHandlers.iterator();
+      Iterator<BasicDispatchHandler> iter = dispatchHandlers.iterator();
       while (iter.hasNext())
       {
-        BasicDispatchHandler handler = (BasicDispatchHandler) iter.next();
+        BasicDispatchHandler handler = iter.next();
         if (handler.providesUrl(parts[0])) return handler;
       }
       return null;

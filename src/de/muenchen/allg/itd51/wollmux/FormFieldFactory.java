@@ -77,10 +77,10 @@ public final class FormFieldFactory
    *          das zugehörige insertFormValue-Kommando.
    */
   public static FormField createFormField(XTextDocument doc, InsertFormValue cmd,
-      Map bookmarkNameToFormField)
+      Map<String, FormField> bookmarkNameToFormField)
   {
     String bookmarkName = cmd.getBookmarkName();
-    FormField formField = (FormField) bookmarkNameToFormField.get(bookmarkName);
+    FormField formField = bookmarkNameToFormField.get(bookmarkName);
     if (formField != null) return formField;
 
     /*
@@ -98,7 +98,7 @@ public final class FormFieldFactory
       else if (WollMuxFiles.isDebugMode())
       {
         String cellName = (String) UNO.getProperty(cell, "CellName");
-        Logger.debug(L.m("Scanne Zelle %1",cellName));
+        Logger.debug(L.m("Scanne Zelle %1", cellName));
       }
     }
 
@@ -110,7 +110,7 @@ public final class FormFieldFactory
       handleParagraphEnumeration(xenum, doc, bookmarkNameToFormField);
     }
 
-    return (FormField) bookmarkNameToFormField.get(bookmarkName);
+    return bookmarkNameToFormField.get(bookmarkName);
   }
 
   /**
@@ -175,7 +175,7 @@ public final class FormFieldFactory
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private static void handleParagraphEnumeration(XEnumeration enu,
-      XTextDocument doc, Map mapBookmarkNameToFormField)
+      XTextDocument doc, Map<String, FormField> mapBookmarkNameToFormField)
   {
     XEnumerationAccess enuAccess;
     while (enu.hasMoreElements())
@@ -208,7 +208,7 @@ public final class FormFieldFactory
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private static void handleParagraph(XEnumerationAccess paragraph,
-      XTextDocument doc, Map mapBookmarkNameToFormField)
+      XTextDocument doc, Map<String, FormField> mapBookmarkNameToFormField)
   {
     /*
      * Der Name des zuletzt gestarteten insertFormValue-Bookmarks.
@@ -364,14 +364,15 @@ public final class FormFieldFactory
    * @author Matthias Benkmann (D-III-ITD 5.1), Christoph Lutz (D-III-ITD 5.1)
    */
   private static void handleNewInputField(String bookmarkName, XNamed bookmark,
-      Map mapBookmarkNameToFormField, XTextDocument doc)
+      Map<String, FormField> mapBookmarkNameToFormField, XTextDocument doc)
   {
     FormField formField = new DynamicInputFormField(doc, null);
     mapBookmarkNameToFormField.put(bookmarkName, formField);
   }
 
   private static void handleInputField(XDependentTextField textfield,
-      String bookmarkName, Map mapBookmarkNameToFormField, XTextDocument doc)
+      String bookmarkName, Map<String, FormField> mapBookmarkNameToFormField,
+      XTextDocument doc)
   {
     if (textfield != null)
     {
@@ -381,7 +382,8 @@ public final class FormFieldFactory
   }
 
   private static void handleDropdown(XDependentTextField textfield,
-      String bookmarkName, Map mapBookmarkNameToFormField, XTextDocument doc)
+      String bookmarkName, Map<String, FormField> mapBookmarkNameToFormField,
+      XTextDocument doc)
   {
     if (textfield != null)
     {
@@ -391,7 +393,7 @@ public final class FormFieldFactory
   }
 
   private static void handleCheckbox(XControlModel checkbox, String bookmarkName,
-      Map mapBookmarkNameToFormField, XTextDocument doc)
+      Map<String, FormField> mapBookmarkNameToFormField, XTextDocument doc)
   {
     if (checkbox != null)
     {
@@ -406,7 +408,7 @@ public final class FormFieldFactory
    * 
    * @author Christoph Lutz (D-III-ITD 5.1)
    */
-  interface FormField extends Comparable
+  interface FormField extends Comparable<FormField>
   {
     /**
      * FIXME Unschöne Fixup-Funktion, die in FormScanner.executeCommand()
@@ -562,10 +564,19 @@ public final class FormFieldFactory
      * 
      * @return
      */
-    public int compareTo(Object other)
+    public int compareTo(FormField other)
     {
-      TreeRelation rel = new TreeRelation(cmd.getAnchor(),
-        ((BasicFormField) other).cmd.getAnchor());
+      BasicFormField other2;
+      try
+      {
+        other2 = (BasicFormField) other;
+      }
+      catch (Exception x)
+      {
+        return -1;
+      }
+
+      TreeRelation rel = new TreeRelation(cmd.getAnchor(), other2.cmd.getAnchor());
       if (rel.isAGreaterThanB())
         return 1;
       else if (rel.isALessThanB())
@@ -684,7 +695,8 @@ public final class FormFieldFactory
 
       String bookmarkName = cmd.getBookmarkName();
 
-      Logger.debug2(L.m("Erzeuge neues Input-Field für Bookmark \"%1\"",bookmarkName));
+      Logger.debug2(L.m("Erzeuge neues Input-Field für Bookmark \"%1\"",
+        bookmarkName));
       try
       {
         XTextRange range = cmd.createInsertCursor(false);
@@ -923,12 +935,6 @@ public final class FormFieldFactory
       return UnoRuntime.areSame(textfield, UNO.XInterface(b));
     }
 
-    public int compareTo(Object arg0)
-    {
-      // wird nicht aufgerufen und daher auch nicht implementiert.
-      return -1;
-    }
-
     public boolean substituteFieldID(String oldFieldId, String newFieldId)
     {
       return false;
@@ -942,6 +948,11 @@ public final class FormFieldFactory
     public void dispose()
     {
       if (textfield != null) textfield.dispose();
+    }
+
+    public int compareTo(FormField o)
+    {
+      throw new UnsupportedOperationException();
     }
   }
 
@@ -1017,12 +1028,6 @@ public final class FormFieldFactory
       }
     }
 
-    public int compareTo(Object arg0)
-    {
-      // wird nicht aufgerufen und daher auch nicht implementiert
-      return -1;
-    }
-
     public int hashCode()
     {
       return UnoRuntime.generateOid(UNO.XInterface(textfield)).hashCode();
@@ -1046,6 +1051,11 @@ public final class FormFieldFactory
     public void dispose()
     {
       if (textfield != null) textfield.dispose();
+    }
+    
+    public int compareTo(FormField o)
+    {
+      throw new UnsupportedOperationException();
     }
   }
 }

@@ -64,14 +64,14 @@ public class CoupledWindowController
    * geschalten werden (also nicht in willkürlicher Reihenfolge, die ein HashSet
    * mit sich bringen würde).
    */
-  private ArrayList coupledWindows = new ArrayList();
+  private ArrayList<CoupledWindow> coupledWindows = new ArrayList<CoupledWindow>();
 
   /**
    * Enthält eine Liste mit WeakReference-Objekten, die auf Unterfenster von
    * coupledWindows zeigen, die die verschiedenen CoupledWindowListener
    * aufsammeln.
    */
-  private ArrayList collectedChildWindows = new ArrayList();
+  private ArrayList<WeakReference<Window>> collectedChildWindows = new ArrayList<WeakReference<Window>>();
 
   /**
    * Enthält den WindowStateWatcher, mit dem der Fensterstatus überwacht und die
@@ -338,9 +338,9 @@ public class CoupledWindowController
         Window w = e.getOppositeWindow();
         while (w != null)
         {
-          for (Iterator iter = coupledWindows.iterator(); iter.hasNext();)
+          for (Iterator<CoupledWindow> iter = coupledWindows.iterator(); iter.hasNext();)
           {
-            CoupledWindow win = (CoupledWindow) iter.next();
+            CoupledWindow win = iter.next();
             if (win.equals(w))
             {
               collectChildWindow(e.getOppositeWindow());
@@ -385,9 +385,9 @@ public class CoupledWindowController
      */
     private void collectChildWindow(Window childWindow)
     {
-      for (Iterator iter = collectedChildWindows.iterator(); iter.hasNext();)
+      for (Iterator<WeakReference<Window>> iter = collectedChildWindows.iterator(); iter.hasNext();)
       {
-        WeakReference ref = (WeakReference) iter.next();
+        WeakReference ref = iter.next();
         Object win = ref.get();
         if (win != null)
         {
@@ -401,7 +401,7 @@ public class CoupledWindowController
 
       Logger.debug(L.m("Registriere Kinfenster #%1", new Integer(
         childWindow.hashCode())));
-      collectedChildWindows.add(new WeakReference(childWindow));
+      collectedChildWindows.add(new WeakReference<Window>(childWindow));
       childWindow.addWindowListener(coupledWindowListener);
     }
   }
@@ -439,9 +439,9 @@ public class CoupledWindowController
     if (window == null) return;
     CoupledWindow toRemove = new CoupledAWTWindow(window);
     Logger.debug2("removeCoupledWindow #" + toRemove.hashCode());
-    for (Iterator iter = coupledWindows.iterator(); iter.hasNext();)
+    for (Iterator<CoupledWindow> iter = coupledWindows.iterator(); iter.hasNext();)
     {
-      CoupledWindow w = (CoupledWindow) iter.next();
+      CoupledWindow w = iter.next();
       if (w.equals(toRemove))
       {
         iter.remove();
@@ -458,9 +458,9 @@ public class CoupledWindowController
    */
   private void setCoupledWindowsVisible(boolean visible)
   {
-    for (Iterator iter = coupledWindows.iterator(); iter.hasNext();)
+    for (Iterator<CoupledWindow> iter = coupledWindows.iterator(); iter.hasNext();)
     {
-      CoupledWindow win = (CoupledWindow) iter.next();
+      CoupledWindow win = iter.next();
       win.setVisible(visible);
     }
   }

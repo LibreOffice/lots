@@ -279,7 +279,7 @@ public class TextDocumentModel
    * Enthält den Kontext für die Funktionsbibliotheken und Dialogbibliotheken
    * dieses Dokuments.
    */
-  private HashMap functionContext;
+  private HashMap<Object, Object> functionContext;
 
   /**
    * Enthält die Dialogbibliothek mit den globalen und dokumentlokalen
@@ -331,7 +331,7 @@ public class TextDocumentModel
     this.formFieldValues = new HashMap<String, String>();
     this.invisibleGroups = new HashSet();
     this.overrideFragMap = new HashMap<String, String>();
-    this.functionContext = new HashMap();
+    this.functionContext = new HashMap<Object, Object>();
     this.formModel = null;
     this.formFieldPreviewMode = true;
 
@@ -586,10 +586,10 @@ public class TextDocumentModel
 
         String refValue = null;
 
-        Iterator j = fields.iterator();
+        Iterator<FormField> j = fields.iterator();
         while (j.hasNext())
         {
-          FormField field = (FormField) j.next();
+          FormField field = j.next();
           String thisValue = field.getValue();
 
           // Wurde der Wert des Feldes gegenüber dem zusetzt gespeicherten Wert
@@ -1589,7 +1589,7 @@ public class TextDocumentModel
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  synchronized public Map getFunctionContext()
+  synchronized public Map<Object, Object> getFunctionContext()
   {
     return functionContext;
   }
@@ -1670,7 +1670,7 @@ public class TextDocumentModel
   {
     FunctionLibrary funcLib = getFunctionLibrary();
     DialogLibrary dialogLib = getDialogLibrary();
-    Map context = getFunctionContext();
+    Map<Object, Object> context = getFunctionContext();
 
     // eindeutigen Namen für die neue Autofunktion erzeugen:
     Set currentFunctionNames = funcLib.getFunctionNames();
@@ -1867,14 +1867,14 @@ public class TextDocumentModel
    * @return Ein FormField Element, wobei untransformierte Felder bevorzugt
    *         werden.
    */
-  protected static FormField preferUntransformedFormField(List formFields)
+  protected static FormField preferUntransformedFormField(List<FormField> formFields)
   {
     if (formFields == null) return null;
-    Iterator iter = formFields.iterator();
+    Iterator<FormField> iter = formFields.iterator();
     FormField field = null;
     while (iter.hasNext())
     {
-      FormField f = (FormField) iter.next();
+      FormField f = iter.next();
       if (field == null) field = f;
       if (f.getTrafoName() == null) return f;
     }
@@ -2711,9 +2711,9 @@ public class TextDocumentModel
     {
       String id = iter.next();
       List<FormField> l = idToFormFields.get(id);
-      for (Iterator iterator = l.iterator(); iterator.hasNext();)
+      for (Iterator<FormField> iterator = l.iterator(); iterator.hasNext();)
       {
-        FormField f = (FormField) iterator.next();
+        FormField f = iterator.next();
         String trafoName = f.getTrafoName();
         if (trafoName != null) usedFunctions.add(trafoName);
       }
@@ -3220,9 +3220,9 @@ public class TextDocumentModel
         if (idToTextFieldFormFields.containsKey(id))
           fields.addAll(idToTextFieldFormFields.get(id));
         boolean hasTrafo = false;
-        for (Iterator fieldIter = fields.iterator(); fieldIter.hasNext();)
+        for (Iterator<FormField> fieldIter = fields.iterator(); fieldIter.hasNext();)
         {
-          FormField field = (FormField) fieldIter.next();
+          FormField field = fieldIter.next();
           if (field.getTrafoName() != null) hasTrafo = true;
         }
         list.add(new ReferencedFieldID(id, hasTrafo));
@@ -3358,9 +3358,9 @@ public class TextDocumentModel
     List<FormField> c = idToFormFields.get(fieldId);
     if (c != null)
     {
-      for (Iterator iter = c.iterator(); iter.hasNext();)
+      for (Iterator<FormField> iter = c.iterator(); iter.hasNext();)
       {
-        FormField f = (FormField) iter.next();
+        FormField f = iter.next();
         if (f.getTrafoName() != null)
         {
           // Transformierte Felder soweit möglich behandeln
@@ -3408,9 +3408,9 @@ public class TextDocumentModel
     c = idToTextFieldFormFields.get(fieldId);
     if (c != null)
     {
-      for (Iterator iter = c.iterator(); iter.hasNext();)
+      for (Iterator<FormField> iter = c.iterator(); iter.hasNext();)
       {
-        FormField f = (FormField) iter.next();
+        FormField f = iter.next();
         if (f.getTrafoName() != null)
         {
           // Transformierte Felder soweit möglich behandeln

@@ -102,7 +102,7 @@ public class FormModelImpl
   {
 
     // Formular-Abschnitte aller TextDocumentModels sammeln...
-    ArrayList formularSections = new ArrayList();
+    ArrayList<Object> formularSections = new ArrayList<Object>();
     for (Iterator iter = docs.iterator(); iter.hasNext();)
     {
       TextDocumentModel model = (TextDocumentModel) iter.next();
@@ -123,7 +123,7 @@ public class FormModelImpl
       buttonAnpassung);
 
     // mapIdToPresetValue aller Einzeldokumente vereinheitlichen:
-    HashMap commonMapIdToPresetValue = new HashMap();
+    HashMap<String, String> commonMapIdToPresetValue = new HashMap<String, String>();
     for (Iterator iter = docs.iterator(); iter.hasNext();)
     {
       TextDocumentModel doc = (TextDocumentModel) iter.next();
@@ -133,7 +133,7 @@ public class FormModelImpl
       {
         String id = piter.next().toString();
         String myPresetValue = "" + myIdToPresetValue.get(id);
-        String commonPresetValue = (String) commonMapIdToPresetValue.get(id);
+        String commonPresetValue = commonMapIdToPresetValue.get(id);
         if (commonPresetValue == null)
         {
           commonMapIdToPresetValue.put(id, myPresetValue);
@@ -147,7 +147,7 @@ public class FormModelImpl
 
     // FunctionContext erzeugen und im Formular definierte
     // Funktionen/DialogFunktionen parsen:
-    Map functionContext = new HashMap();
+    Map<Object, Object> functionContext = new HashMap<Object, Object>();
     DialogLibrary dialogLib = new DialogLibrary();
     FunctionLibrary funcLib = new FunctionLibrary();
     WollMuxSingleton mux = WollMuxSingleton.getInstance();
@@ -172,7 +172,7 @@ public class FormModelImpl
     }
 
     // FormModels für die Einzeldokumente erzeugen
-    Vector /* of FormModel */fms = new Vector();
+    Vector /* of FormModel */<FormModel>fms = new Vector<FormModel>();
     for (Iterator iter = docs.iterator(); iter.hasNext();)
     {
       TextDocumentModel doc = (TextDocumentModel) iter.next();
@@ -216,19 +216,19 @@ public class FormModelImpl
   {
     private Vector docs;
 
-    private Vector formModels;
+    private Vector<FormModel> formModels;
 
     private final ConfigThingy formFensterConf;
 
     private final ConfigThingy formConf;
 
-    private final Map functionContext;
+    private final Map<Object, Object> functionContext;
 
     private final FunctionLibrary funcLib;
 
     private final DialogLibrary dialogLib;
 
-    private final HashMap commonMapIdToPresetValue;
+    private final HashMap<String, String> commonMapIdToPresetValue;
 
     private FormGUI formGUI = null;
 
@@ -271,9 +271,9 @@ public class FormModelImpl
      *          automatisch zu befüllende Formularfelder benötigt werden (wird
      *          für createFormGUI() benötigt).
      */
-    public MultiDocumentFormModel(Vector docs, Vector formModels,
+    public MultiDocumentFormModel(Vector docs, Vector<FormModel> formModels,
         final ConfigThingy formFensterConf, final ConfigThingy formConf,
-        final Map functionContext, final HashMap commonMapIdToPresetValue,
+        final Map<Object, Object> functionContext, final HashMap<String, String> commonMapIdToPresetValue,
         final FunctionLibrary funcLib, final DialogLibrary dialogLib)
     {
       this.docs = docs;
@@ -296,7 +296,7 @@ public class FormModelImpl
     {
       for (int i = 0; i < docs.size(); i++)
       {
-        FormModel fm = (FormModel) formModels.get(i);
+        FormModel fm = formModels.get(i);
         fm.setWindowPosSize(docX, docY, docWidth, docHeight);
       }
     }
@@ -310,7 +310,7 @@ public class FormModelImpl
     {
       for (int i = 0; i < docs.size(); i++)
       {
-        FormModel fm = (FormModel) formModels.get(i);
+        FormModel fm = formModels.get(i);
         fm.setWindowVisible(vis);
       }
     }
@@ -324,7 +324,7 @@ public class FormModelImpl
     {
       for (int i = 0; i < docs.size(); i++)
       {
-        FormModel fm = (FormModel) formModels.get(i);
+        FormModel fm = formModels.get(i);
         fm.close();
       }
     }
@@ -339,7 +339,7 @@ public class FormModelImpl
     {
       for (int i = 0; i < docs.size(); i++)
       {
-        FormModel fm = (FormModel) formModels.get(i);
+        FormModel fm = formModels.get(i);
         fm.setVisibleState(groupId, visible);
       }
     }
@@ -354,7 +354,7 @@ public class FormModelImpl
     {
       for (int i = 0; i < docs.size(); i++)
       {
-        FormModel fm = (FormModel) formModels.get(i);
+        FormModel fm = formModels.get(i);
         fm.valueChanged(fieldId, newValue);
       }
     }
@@ -368,7 +368,7 @@ public class FormModelImpl
     {
       for (int i = 0; i < docs.size(); i++)
       {
-        FormModel fm = (FormModel) formModels.get(i);
+        FormModel fm = formModels.get(i);
         fm.focusGained(fieldId);
       }
     }
@@ -382,7 +382,7 @@ public class FormModelImpl
     {
       for (int i = 0; i < docs.size(); i++)
       {
-        FormModel fm = (FormModel) formModels.get(i);
+        FormModel fm = formModels.get(i);
         fm.focusLost(fieldId);
       }
     }
@@ -396,7 +396,7 @@ public class FormModelImpl
     {
       for (int i = 0; i < docs.size(); i++)
       {
-        FormModel fm = (FormModel) formModels.get(i);
+        FormModel fm = formModels.get(i);
         fm.print();
       }
     }
@@ -410,7 +410,7 @@ public class FormModelImpl
     {
       for (int i = 0; i < docs.size(); i++)
       {
-        FormModel fm = (FormModel) formModels.get(i);
+        FormModel fm = formModels.get(i);
         fm.pdf();
       }
     }
@@ -424,7 +424,7 @@ public class FormModelImpl
     {
       for (int i = 0; i < docs.size(); i++)
       {
-        FormModel fm = (FormModel) formModels.get(i);
+        FormModel fm = formModels.get(i);
         fm.formControllerInitCompleted();
       }
     }
@@ -441,7 +441,7 @@ public class FormModelImpl
       for (int i = 0; i < docs.size(); i++)
       {
         TextDocumentModel doc = (TextDocumentModel) docs.get(i);
-        FormModel fm = (FormModel) formModels.get(i);
+        FormModel fm = formModels.get(i);
 
         if (doc.equals(source))
         {
@@ -498,7 +498,7 @@ public class FormModelImpl
 
     private final ConfigThingy formConf;
 
-    private final Map functionContext;
+    private final Map<Object, Object> functionContext;
 
     private final FunctionLibrary funcLib;
 
@@ -533,7 +533,7 @@ public class FormModelImpl
      */
     public SingleDocumentFormModel(final TextDocumentModel doc,
         final ConfigThingy formFensterConf, final ConfigThingy formConf,
-        final Map functionContext, final FunctionLibrary funcLib,
+        final Map<Object, Object> functionContext, final FunctionLibrary funcLib,
         final DialogLibrary dialogLib)
     {
       this.doc = doc;

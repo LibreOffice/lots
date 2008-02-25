@@ -70,7 +70,7 @@ public class TextModule
     // holt sich Textbausteine aus .conf und sammelt sie in umgekehrter
     // Reihenfolge in der LinkedList tbListe. Damit später definierte
     // Textbaustein Abschnitte immer Vorrang haben.
-    LinkedList tbListe = new LinkedList();
+    LinkedList<ConfigThingy> tbListe = new LinkedList<ConfigThingy>();
     ConfigThingy tbConf = conf.query("Textbausteine");
     Iterator iter = tbConf.iterator();
     while (iter.hasNext())
@@ -151,12 +151,12 @@ public class TextModule
    *          enthält, in der sie ausgewertet werden sollen.
    * @return Stringarray mit (frag_id + args) oder null
    */
-  private static String[] parseIdentifier(String identifierWithArgs, List tbListe)
+  private static String[] parseIdentifier(String identifierWithArgs, List<ConfigThingy> tbListe)
   {
-    Iterator iterTbListe = tbListe.iterator();
+    Iterator<ConfigThingy> iterTbListe = tbListe.iterator();
     while (iterTbListe.hasNext())
     {
-      ConfigThingy textbausteine = (ConfigThingy) iterTbListe.next();
+      ConfigThingy textbausteine = iterTbListe.next();
 
       String[] results = parseIdentifierInTextbausteine(identifierWithArgs,
         textbausteine);

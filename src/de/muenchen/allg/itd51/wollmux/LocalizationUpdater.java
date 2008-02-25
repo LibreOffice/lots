@@ -94,8 +94,8 @@ public class LocalizationUpdater
     System.out.println(L.m("Aktualisiere die Datei localization.conf"));
 
     // localization.conf einlesen und knownOriginals sammeln.
-    HashSet knownOriginals = new HashSet();
-    HashSet currentOriginals = new HashSet();
+    HashSet<String> knownOriginals = new HashSet<String>();
+    HashSet<String> currentOriginals = new HashSet<String>();
     ConfigThingy localizationConf = new ConfigThingy("localization");
     ConfigThingy messages;
     try
@@ -124,13 +124,13 @@ public class LocalizationUpdater
 
     // Alle .java Files aus scanForSourcesDir iterieren und L.m()s rausziehen
     int countNew = 0;
-    List sources = new ArrayList();
+    List<File> sources = new ArrayList<File>();
     addJavaFilesRecursive(sources, sourcesDir);
     int count = 0;
     int lastProgress = 0;
-    for (Iterator iter = sources.iterator(); iter.hasNext();)
+    for (Iterator<File> iter = sources.iterator(); iter.hasNext();)
     {
-      File file = (File) iter.next();
+      File file = iter.next();
 
       String str = readFile(file, "ISO-8859-1");
 
@@ -171,7 +171,7 @@ public class LocalizationUpdater
 
     String removed = "";
     int countRemoved = 0;
-    HashMap countTranslations = new HashMap();
+    HashMap<String, Integer> countTranslations = new HashMap<String, Integer>();
     boolean valid = false;
     boolean removedTranslatedMessagesWarning = false;
     for (Iterator iter = messages.iterator(); iter.hasNext();)
@@ -199,7 +199,7 @@ public class LocalizationUpdater
         {
           str += "       " + elementStr + "\n";
           String language = element.getName().toLowerCase();
-          Integer ct = (Integer) countTranslations.get(language);
+          Integer ct = countTranslations.get(language);
           int cti = (ct != null) ? ct.intValue() : 0;
           countTranslations.put(language, new Integer(cti + 1));
         }
@@ -231,10 +231,10 @@ public class LocalizationUpdater
       countRemoved)));
     System.out.println(L.m("Gesamtzahl aktuelle original-Strings: %1", new Integer(
       currentOriginals.size())));
-    for (Iterator iter = countTranslations.keySet().iterator(); iter.hasNext();)
+    for (Iterator<String> iter = countTranslations.keySet().iterator(); iter.hasNext();)
     {
-      String language = (String) iter.next();
-      int ct = ((Integer) countTranslations.get(language)).intValue();
+      String language = iter.next();
+      int ct = countTranslations.get(language).intValue();
       System.out.println(L.m("Davon nicht übersetzt in Sprache %1: %2", language,
         new Integer(currentOriginals.size() - ct)));
     }
@@ -281,7 +281,7 @@ public class LocalizationUpdater
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  private static void addJavaFilesRecursive(List l, File fileOrDir)
+  private static void addJavaFilesRecursive(List<File> l, File fileOrDir)
   {
     if (fileOrDir.isFile() && fileOrDir.getName().endsWith(".java"))
     {

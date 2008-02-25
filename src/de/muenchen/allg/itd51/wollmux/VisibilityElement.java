@@ -55,12 +55,12 @@ public interface VisibilityElement
    * 
    * @return Ein Set, das alle zugeordneten groupId's als Strings enthält.
    */
-  public abstract Set getGroups();
+  public abstract Set<String> getGroups();
 
   /**
    * fügt diesem Elements all in groups definierten Sichtbarkeitsgruppen hinzu.
    */
-  public abstract void addGroups(Set groups);
+  public abstract void addGroups(Set<String> groups);
 
   /**
    * Liefert die TextRange an der das VisibleElement verankert ist oder null,

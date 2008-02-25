@@ -797,11 +797,11 @@ abstract public class DocumentCommand
   {
     private String fragID;
 
-    private Vector args = null;
+    private Vector<String> args = null;
 
     private boolean manualMode = false;
 
-    private Set styles = null;
+    private Set<String> styles = null;
 
     public InsertFrag(ConfigThingy wmCmd, Bookmark bookmark)
         throws InvalidCommandException
@@ -817,7 +817,7 @@ abstract public class DocumentCommand
         throw new InvalidCommandException(L.m("Fehlendes Attribut FRAG_ID"));
       }
 
-      args = new Vector();
+      args = new Vector<String>();
       try
       {
         ConfigThingy argsConf = wmCmd.get("WM").get("ARGS");
@@ -847,7 +847,7 @@ abstract public class DocumentCommand
         // MODE ist optional;
       }
 
-      styles = new HashSet();
+      styles = new HashSet<String>();
       try
       {
         ConfigThingy stylesConf = wmCmd.get("WM").get("STYLES");
@@ -888,7 +888,7 @@ abstract public class DocumentCommand
       return fragID;
     }
 
-    public Vector getArgs()
+    public Vector<String> getArgs()
     {
       return args;
     }
@@ -903,7 +903,7 @@ abstract public class DocumentCommand
       return styles.size() > 0;
     }
 
-    public Set getStyles()
+    public Set<String> getStyles()
     {
       return styles;
     }
@@ -1138,7 +1138,7 @@ abstract public class DocumentCommand
    */
   static public class InsertFunctionValue extends DocumentCommand
   {
-    private Vector args = null;
+    private Vector<String> args = null;
 
     private String function = null;
 
@@ -1156,7 +1156,7 @@ abstract public class DocumentCommand
         throw new InvalidCommandException(L.m("Fehlendes Attribut FUNCTION"));
       }
 
-      args = new Vector();
+      args = new Vector<String>();
       try
       {
         ConfigThingy argsConf = wmCmd.get("WM").get("ARGS");
@@ -1178,7 +1178,7 @@ abstract public class DocumentCommand
       return function;
     }
 
-    public Vector getArgs()
+    public Vector<String> getArgs()
     {
       return args;
     }
@@ -1360,12 +1360,12 @@ abstract public class DocumentCommand
    */
   static public class SetGroups extends DocumentCommand implements VisibilityElement
   {
-    private Set groupsSet;
+    private Set<String> groupsSet;
 
     public SetGroups(ConfigThingy wmCmd, Bookmark bookmark)
     {
       super(wmCmd, bookmark);
-      groupsSet = new HashSet();
+      groupsSet = new HashSet<String>();
     }
 
     public int execute(DocumentCommand.Executor visitable)
@@ -1382,7 +1382,7 @@ abstract public class DocumentCommand
      *         Vater geerbten, als Strings enthält.
      * @see de.muenchen.allg.itd51.wollmux.VisibilityElement#getGroups()
      */
-    public Set getGroups()
+    public Set<String> getGroups()
     {
       // GROUPS-Attribut auslesen falls vorhanden.
       ConfigThingy groups = new ConfigThingy("");
@@ -1404,7 +1404,7 @@ abstract public class DocumentCommand
       return groupsSet;
     }
 
-    public void addGroups(Set groups)
+    public void addGroups(Set<String> groups)
     {
       groupsSet.addAll(groups);
     }

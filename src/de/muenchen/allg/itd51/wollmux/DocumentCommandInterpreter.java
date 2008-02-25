@@ -279,7 +279,7 @@ public class DocumentCommandInterpreter
       XMultiPropertySet multiPropertySetWollmuxseite = UNO.XMultiPropertySet(styleWollmuxseite);
       XPropertySetInfo propertySetInfo = multiPropertySetWollmuxseite.getPropertySetInfo();
       Property[] propertys = propertySetInfo.getProperties();
-      HashSet set = new HashSet();
+      HashSet<String> set = new HashSet<String>();
       // Schleife über die Properties der Wollmuxseite. Wenn die Properties
       // nicht read-only sind werden sie in einem HashSet set
       // zwischengespeichert.
@@ -318,9 +318,9 @@ public class DocumentCommandInterpreter
         // "Wollmux" geholt und dann in die Seitenvorlage "Standard" übertragen
         // und anschließend wenn dies funktioniert hat, wird der Property-Name
         // aus dem Iterator gelöscht.
-        for (Iterator iter = set.iterator(); iter.hasNext();)
+        for (Iterator<String> iter = set.iterator(); iter.hasNext();)
         {
-          String element = (String) iter.next();
+          String element = iter.next();
           Object value = UNO.getProperty(styleWollmuxseite, element);
           Object checkset = UNO.setProperty(styleStandard, element, value);
           if (UnoRuntime.areSame(value, checkset))
@@ -341,9 +341,9 @@ public class DocumentCommandInterpreter
    */
   private class GlobalDocumentCommandsScanner extends DocumentCommands.Executor
   {
-    public HashMap idToFormFields = new HashMap();
+    public HashMap<String, List<FormField>> idToFormFields = new HashMap<String, List<FormField>>();
 
-    private Map bookmarkNameToFormField = new HashMap();
+    private Map<String, FormField> bookmarkNameToFormField = new HashMap<String, FormField>();
 
     public int execute(DocumentCommands commands)
     {
@@ -377,14 +377,14 @@ public class DocumentCommandInterpreter
     {
       // idToFormFields aufbauen
       String id = cmd.getID();
-      LinkedList fields;
+      LinkedList<FormField> fields;
       if (idToFormFields.containsKey(id))
       {
-        fields = (LinkedList) idToFormFields.get(id);
+        fields = (LinkedList<FormField>) idToFormFields.get(id);
       }
       else
       {
-        fields = new LinkedList();
+        fields = new LinkedList<FormField>();
         idToFormFields.put(id, fields);
       }
       FormField field = FormFieldFactory.createFormField(model.doc, cmd,
@@ -395,10 +395,10 @@ public class DocumentCommandInterpreter
         field.setCommand(cmd);
 
         // sortiertes Hinzufügen des neuen FormFields zur Liste:
-        ListIterator iter = fields.listIterator();
+        ListIterator<FormField> iter = fields.listIterator();
         while (iter.hasNext())
         {
-          FormField fieldA = (FormField) iter.next();
+          FormField fieldA = iter.next();
           if (field.compareTo(fieldA) < 0)
           {
             iter.previous();
@@ -422,7 +422,7 @@ public class DocumentCommandInterpreter
     /**
      * Speichert Muellmann-Objekte, die zu löschenden Müll entfernen.
      */
-    private List muellmaenner = new Vector();
+    private List<Muellmann> muellmaenner = new Vector<Muellmann>();
 
     private abstract class Muellmann
     {
@@ -487,10 +487,10 @@ public class DocumentCommandInterpreter
     private void removeGarbage()
     {
       model.setLockControllers(true);
-      Iterator iter = muellmaenner.iterator();
+      Iterator<Muellmann> iter = muellmaenner.iterator();
       while (iter.hasNext())
       {
-        Muellmann muellmann = (Muellmann) iter.next();
+        Muellmann muellmann = iter.next();
         muellmann.tueDeinePflicht();
       }
       model.setLockControllers(false);
@@ -914,7 +914,7 @@ public class DocumentCommandInterpreter
       // Liste aller TextFrames vor dem Einfügen zusammenstellen (benötigt für
       // das
       // Updaten der enthaltenen TextFields später).
-      HashSet textFrames = new HashSet();
+      HashSet<String> textFrames = new HashSet<String>();
       if (UNO.XTextFramesSupplier(model.doc) != null)
       {
         String[] names = UNO.XTextFramesSupplier(model.doc).getTextFrames().getElementNames();
@@ -1020,7 +1020,7 @@ public class DocumentCommandInterpreter
         XTextRange range, Vector args)
     {
       // Vector mit allen Platzhalterfelder
-      Vector placeholders = new Vector();
+      Vector<XTextField> placeholders = new Vector<XTextField>();
 
       XEnumeration xEnum = UNO.XEnumerationAccess(range).createEnumeration();
       XEnumerationAccess enuAccess;
@@ -1081,7 +1081,7 @@ public class DocumentCommandInterpreter
 
       // Enumeration über den Vector placeholders mit Platzhalterfeldern die mit
       // den übergebenen Argumenten gefüllt werden
-      Enumeration enumPlaceholders = placeholders.elements();
+      Enumeration<XTextField> enumPlaceholders = placeholders.elements();
       for (int j = 0; j < args.size() && j < placeholders.size(); j++)
       {
         Object placeholderObj = enumPlaceholders.nextElement();

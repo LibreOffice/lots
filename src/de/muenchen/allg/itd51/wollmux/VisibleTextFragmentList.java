@@ -69,7 +69,7 @@ public class VisibleTextFragmentList
       throws EndlessLoopException
   {
     // Map der sichtbaren Variablen erzeugen:
-    Map variables = new HashMap();
+    Map<String, String> variables = new HashMap<String, String>();
     Iterator i = ConfigThingy.getNodesVisibleAt(node, "VAR", root).iterator();
     while (i.hasNext())
     {
@@ -87,11 +87,11 @@ public class VisibleTextFragmentList
     // Debug-Ausgabe:
     Logger.debug2("Variablenset an Knoten " + node.getName() + " \""
                   + node.toString() + "\":");
-    Iterator keys = variables.keySet().iterator();
+    Iterator<String> keys = variables.keySet().iterator();
     while (keys.hasNext())
     {
-      String key = (String) keys.next();
-      String value = (String) variables.get(key);
+      String key = keys.next();
+      String value = variables.get(key);
       Logger.debug2("  " + key + "=\"" + value + "\"");
     }
 
@@ -109,7 +109,7 @@ public class VisibleTextFragmentList
       String key = m.group(1);
       if (variables.containsKey(key))
       {
-        string = string.substring(0, m.start()) + (String) variables.get(key)
+        string = string.substring(0, m.start()) + variables.get(key)
                  + string.substring(m.end());
         // string = m.replaceFirst((String) variables.get(key));
         Logger.debug2("  Ersetzen der Variable " + m.group(0) + " --> " + string);
@@ -140,13 +140,13 @@ public class VisibleTextFragmentList
    * @return die URL des unter der frag_id definierten Textfragments.
    * @throws InvalidIdentifierException
    */
-  public static Vector getURLsByID(String frag_id) throws InvalidIdentifierException
+  public static Vector<String> getURLsByID(String frag_id) throws InvalidIdentifierException
   {
     WollMuxSingleton.checkIdentifier(frag_id);
 
     ConfigThingy conf = WollMuxSingleton.getInstance().getWollmuxConf();
 
-    LinkedList tfListe = new LinkedList();
+    LinkedList<ConfigThingy> tfListe = new LinkedList<ConfigThingy>();
     ConfigThingy tfConf = conf.query("Textfragmente");
     Iterator iter = tfConf.iterator();
     while (iter.hasNext())
@@ -155,11 +155,11 @@ public class VisibleTextFragmentList
       tfListe.addFirst(confTextfragmente);
     }
 
-    Iterator iterTbListe = tfListe.iterator();
-    Vector urls = new Vector();
+    Iterator<ConfigThingy> iterTbListe = tfListe.iterator();
+    Vector<String> urls = new Vector<String>();
     while (iterTbListe.hasNext())
     {
-      ConfigThingy textfragmente = (ConfigThingy) iterTbListe.next();
+      ConfigThingy textfragmente = iterTbListe.next();
 
       ConfigThingy mappingsConf = textfragmente.queryByChild("FRAG_ID");
       Iterator iterMappings = mappingsConf.iterator();

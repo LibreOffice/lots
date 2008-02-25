@@ -655,7 +655,7 @@ public class WollMuxFiles
   {
     DialogLibrary funcDialogs = new DialogLibrary(baselib);
 
-    Set dialogsInBlock = new HashSet();
+    Set<String> dialogsInBlock = new HashSet<String>();
 
     conf = conf.query("Funktionsdialoge");
     Iterator parentIter = conf.iterator();
@@ -703,7 +703,7 @@ public class WollMuxFiles
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static FunctionLibrary parseFunctions(ConfigThingy conf,
-      DialogLibrary dialogLib, Map context, FunctionLibrary baselib)
+      DialogLibrary dialogLib, Map<Object, Object> context, FunctionLibrary baselib)
   {
     FunctionLibrary funcs = new FunctionLibrary(baselib);
 
@@ -885,7 +885,7 @@ public class WollMuxFiles
 
       out.write("===================== START java-properties ==================\n");
       Properties props = System.getProperties();
-      Enumeration enu = props.propertyNames();
+      Enumeration<?> enu = props.propertyNames();
       while (enu.hasMoreElements())
       {
         String key = enu.nextElement().toString();

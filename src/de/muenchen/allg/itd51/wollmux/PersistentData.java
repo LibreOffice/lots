@@ -80,9 +80,9 @@ public class PersistentData
    */
   public String getData(String dataId)
   {
-    Vector textfields = getWollMuxTextFields(dataId, false, 0);
+    Vector<Object> textfields = getWollMuxTextFields(dataId, false, 0);
     if (textfields.size() == 0) return null;
-    Iterator iter = textfields.iterator();
+    Iterator<Object> iter = textfields.iterator();
     StringBuilder buffy = new StringBuilder();
     while (iter.hasNext())
     {
@@ -105,9 +105,9 @@ public class PersistentData
    *         oder falls ein Fehler auftritt.
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
-  private Vector getWollMuxTextFields(String fieldName, boolean create, int size)
+  private Vector<Object> getWollMuxTextFields(String fieldName, boolean create, int size)
   {
-    Vector textfields = new Vector();
+    Vector<Object> textfields = new Vector<Object>();
     XTextFramesSupplier supp = UNO.XTextFramesSupplier(doc);
     if (supp != null)
     {
@@ -230,7 +230,7 @@ public class PersistentData
    */
   public void setData(String dataId, String dataValue)
   {
-    Vector textfields = getWollMuxTextFields(dataId, true, dataValue.length());
+    Vector<Object> textfields = getWollMuxTextFields(dataId, true, dataValue.length());
     if (textfields.size() == 0)
     {
       Logger.error("Konnte WollMux-Textfeld(er) \""
@@ -239,7 +239,7 @@ public class PersistentData
       return;
     }
 
-    Iterator iter = textfields.iterator();
+    Iterator<Object> iter = textfields.iterator();
     int start = 0;
     int len = dataValue.length();
     while (iter.hasNext())
@@ -264,10 +264,10 @@ public class PersistentData
    */
   public void removeData(String dataId)
   {
-    Vector textfields = getWollMuxTextFields(dataId, false, 0);
+    Vector<Object> textfields = getWollMuxTextFields(dataId, false, 0);
     if (textfields.size() > 0)
     {
-      Iterator iter = textfields.iterator();
+      Iterator<Object> iter = textfields.iterator();
       while (iter.hasNext())
       {
         XTextContent txt = UNO.XTextContent(iter.next());
