@@ -1,4 +1,3 @@
-//TODO L.m()
 /*
  * Dateiname: WollMuxSingleton.java
  * Projekt  : WollMux
@@ -186,7 +185,7 @@ public class WollMuxSingleton implements XPALProvider
 
     WollMuxFiles.setupWollMuxDir();
 
-    Logger.debug("StartupWollMux");
+    Logger.debug(L.m("StartupWollMux"));
     Logger.debug("Build-Info: " + getBuildInfo());
     Logger.debug("wollmuxConfFile = " + WollMuxFiles.getWollMuxConfFile().toString());
     Logger.debug("DEFAULT_CONTEXT \"" + WollMuxFiles.getDEFAULT_CONTEXT().toString()
@@ -263,11 +262,12 @@ public class WollMuxSingleton implements XPALProvider
     }
 
     // "Extras->Seriendruck (WollMux)" erzeugen:
-    createMenuButton(DispatchHandler.DISP_wmSeriendruck, "Seriendruck (WollMux)",
-      ".uno:ToolsMenu", ".uno:MailMergeWizard");
+    createMenuButton(DispatchHandler.DISP_wmSeriendruck,
+      L.m("Seriendruck (WollMux)"), ".uno:ToolsMenu", ".uno:MailMergeWizard");
     // "Help->Info über WollMux" erzeugen:
     createMenuButton(DispatchHandler.DISP_wmAbout,
-      "Info über Vorlagen und Formulare (WollMux)", ".uno:HelpMenu", ".uno:About");
+      L.m("Info über Vorlagen und Formulare (WollMux)"), ".uno:HelpMenu",
+      ".uno:About");
 
     // Setzen der in den Abschnitten OOoEinstellungen eingestellten
     // Konfigurationsoptionen
@@ -286,7 +286,7 @@ public class WollMuxSingleton implements XPALProvider
       {
         oooEinstellungenConf = new ConfigThingy("DefaultSettings",
           OOOEINSTELLUNGEN_URL);
-        Logger.error("Kein Konfigurationsabschnitt OOoEinstellungen gefunden => Verwende interne Vorgabe. ACHTUNG! Dieses Fallback-Verhalten wird mittelfristig entfernt. Bitte updaten Sie auf eine neue Standardkonfig, oder falls Sie dies nicht können/wollen wenden Sie sich an D-III-ITD-5.1");
+        Logger.error(L.m("Kein Konfigurationsabschnitt OOoEinstellungen gefunden => Verwende interne Vorgabe. ACHTUNG! Dieses Fallback-Verhalten wird mittelfristig entfernt. Bitte updaten Sie auf eine neue Standardkonfig, oder falls Sie dies nicht können/wollen wenden Sie sich an D-III-ITD-5.1"));
       }
       catch (java.lang.Exception e)
       {
@@ -355,7 +355,7 @@ public class WollMuxSingleton implements XPALProvider
     catch (java.lang.Exception x)
     {
     }
-    return "Version: unbekannt";
+    return L.m("Version: unbekannt");
   }
 
   /**
@@ -377,7 +377,7 @@ public class WollMuxSingleton implements XPALProvider
     }
     catch (NodeNotFoundException e)
     {
-      return "unbekannt";
+      return L.m("unbekannt");
     }
   }
 
@@ -423,7 +423,8 @@ public class WollMuxSingleton implements XPALProvider
       }
       catch (NodeNotFoundException e)
       {
-        Logger.error("NAME-Attribut fehlt in Datenquellen/Registriere-Abschnitt", e);
+        Logger.error(
+          L.m("NAME-Attribut fehlt in Datenquellen/Registriere-Abschnitt"), e);
         continue;
       }
 
@@ -435,8 +436,9 @@ public class WollMuxSingleton implements XPALProvider
       catch (NodeNotFoundException e)
       {
         Logger.error(
-          "URL-Attribut fehlt in Datenquellen/Registriere-Abschnitt für Datenquelle \""
-              + name + "\"", e);
+          L.m(
+            "URL-Attribut fehlt in Datenquellen/Registriere-Abschnitt für Datenquelle '%1'",
+            name), e);
         continue;
       }
 
@@ -460,12 +462,14 @@ public class WollMuxSingleton implements XPALProvider
       }
       catch (java.lang.Exception x)
       {
-        Logger.error("Fehler beim Überprüfen, ob Datenquelle \"" + name
-                     + "\" bereits registriert ist", x);
+        Logger.error(L.m(
+          "Fehler beim Überprüfen, ob Datenquelle '%1' bereits registriert ist",
+          name), x);
       }
 
-      Logger.debug("Versuche, Datenquelle \"" + name
-                   + "\" bei OOo zu registrieren für URL \"" + urlStr + "\"");
+      Logger.debug(L.m(
+        "Versuche, Datenquelle '%1' bei OOo zu registrieren für URL '%2'", name,
+        urlStr));
 
       String parsedUrl;
       try
@@ -475,8 +479,9 @@ public class WollMuxSingleton implements XPALProvider
       }
       catch (java.lang.Exception x)
       {
-        Logger.error("Fehler beim Registrieren von Datenquelle \"" + name
-                     + "\": Illegale URL: \"" + urlStr + "\"", x);
+        Logger.error(L.m(
+          "Fehler beim Registrieren von Datenquelle '%1': Illegale URL: '%2'", name,
+          urlStr), x);
         continue;
       }
 
@@ -485,14 +490,16 @@ public class WollMuxSingleton implements XPALProvider
         Object datasource = UNO.XNameAccess(UNO.dbContext).getByName(parsedUrl);
         UNO.dbContext.registerObject(name, datasource);
         if (!UnoRuntime.areSame(UNO.dbContext.getRegisteredObject(name), datasource))
-          Logger.error("Testzugriff auf Datenquelle \"" + name
-                       + "\" nach Registrierung fehlgeschlagen");
+          Logger.error(L.m(
+            "Testzugriff auf Datenquelle '%1' nach Registrierung fehlgeschlagen",
+            name));
       }
       catch (Exception x)
       {
-        Logger.error("Fehler beim Registrieren von Datenquelle \"" + name
-                     + "\". Stellen Sie sicher, dass die URL \"" + parsedUrl
-                     + "\" gültig ist.", x);
+        Logger.error(
+          L.m(
+            "Fehler beim Registrieren von Datenquelle '%1'. Stellen Sie sicher, dass die URL '%2' gültig ist.",
+            name, parsedUrl), x);
         continue;
       }
 
@@ -692,8 +699,8 @@ public class WollMuxSingleton implements XPALProvider
       }
       catch (java.lang.Exception e)
       {
-        Logger.error("OOoEinstellungen: Konnte Einstellung '"
-                     + element.stringRepresentation() + "'nicht setzen:", e);
+        Logger.error(L.m("OOoEinstellungen: Konnte Einstellung '%1'nicht setzen:",
+          element.stringRepresentation()), e);
       }
     }
   }
@@ -733,9 +740,9 @@ public class WollMuxSingleton implements XPALProvider
     }
 
     throw new IllegalArgumentException(
-      "Der TYPE '"
-          + type
-          + "' ist nicht gültig. Gültig sind 'boolean', 'integer', 'float' und 'string'.");
+      L.m(
+        "Der TYPE '%1' ist nicht gültig. Gültig sind 'boolean', 'integer', 'float' und 'string'.",
+        type));
   }
 
   /**
@@ -972,9 +979,9 @@ public class WollMuxSingleton implements XPALProvider
 
     public String getMessage()
     {
-      return "Der Bezeichner '"
-             + invalidId
-             + "' ist ungültig, und darf nur die Zeichen a-z, A-Z, _ und 0-9 enthalten, wobei das erste Zeichen keine Ziffer sein darf.";
+      return L.m(
+        "Der Bezeichner '%1' ist ungültig, und darf nur die Zeichen a-z, A-Z, _ und 0-9 enthalten, wobei das erste Zeichen keine Ziffer sein darf.",
+        invalidId);
     }
   }
 
