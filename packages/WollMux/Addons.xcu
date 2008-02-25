@@ -11,6 +11,8 @@
           </prop>
           <prop oor:name="Title" oor:type="xs:string">
             <value>Ziffer einfügen</value>
+            <value xml:lang="de">Ziffer einfügen</value>
+            <value xml:lang="nl">Cijfer toevoegen</value>
           </prop>
           <prop oor:name="ImageIdentifier" oor:type="xs:string">
             <value/>
@@ -29,6 +31,8 @@
           </prop>
           <prop oor:name="Title" oor:type="xs:string">
             <value>Abdruck</value>
+            <value xml:lang="de">Abdruck</value>
+            <value xml:lang="nl">Afrdruk</value>
           </prop>
           <prop oor:name="ImageIdentifier" oor:type="xs:string">
             <value/>
@@ -47,6 +51,8 @@
           </prop>
           <prop oor:name="Title" oor:type="xs:string">
             <value>Zuleitungszeile</value>
+            <value xml:lang="de">Zuleitungszeile</value>
+            <value xml:lang="nl">Toezendingsregel</value>
           </prop>
           <prop oor:name="ImageIdentifier" oor:type="xs:string">
             <value/>
@@ -83,6 +89,8 @@
           </prop>
           <prop oor:name="Title" oor:type="xs:string">
             <value>Block: immer drucken</value>
+            <value xml:lang="de">Block: immer drucken</value>
+            <value xml:lang="nl">Textblok: altijd printen</value>
           </prop>
           <prop oor:name="ImageIdentifier" oor:type="xs:string">
             <value/>
@@ -101,6 +109,8 @@
           </prop>
           <prop oor:name="Title" oor:type="xs:string">
             <value>immer ausser Original</value>
+            <value xml:lang="de">immer ausser Original</value>
+            <value xml:lang="nl">altijd zonder originaal</value>
           </prop>
           <prop oor:name="ImageIdentifier" oor:type="xs:string">
             <value/>
@@ -119,6 +129,8 @@
           </prop>
           <prop oor:name="Title" oor:type="xs:string">
             <value>nur im Original</value>
+            <value xml:lang="de">nur im Original</value>
+            <value xml:lang="nl">alleen in het originaal</value>
           </prop>
           <prop oor:name="ImageIdentifier" oor:type="xs:string">
             <value/>
@@ -137,6 +149,8 @@
           </prop>
           <prop oor:name="Title" oor:type="xs:string">
             <value>nur im Entwurf</value>
+            <value xml:lang="de">nur im Entwurf</value>
+            <value xml:lang="nl">alleen in het ontwerp</value>
           </prop>
           <prop oor:name="ImageIdentifier" oor:type="xs:string">
             <value/>
@@ -159,6 +173,8 @@
           </prop>
           <prop oor:name="Title" oor:type="xs:string">
             <value>Textbaustein einfügen</value>
+            <value xml:lang="de">Textbaustein einfügen</value>
+            <value xml:lang="nl">Textbouwsteen toevoegen</value>
           </prop>
           <prop oor:name="ImageIdentifier" oor:type="xs:string">
             <value/>
@@ -177,6 +193,8 @@
           </prop>
           <prop oor:name="Title" oor:type="xs:string">
             <value>Platzhalter anspringen</value>
+            <value xml:lang="de">Platzhalter anspringen</value>
+            <value xml:lang="nl">Plaatshouder aanspringen</value>
           </prop>
           <prop oor:name="ImageIdentifier" oor:type="xs:string">
             <value/>
@@ -195,6 +213,8 @@
           </prop>
           <prop oor:name="Title" oor:type="xs:string">
             <value>Empfänger auswählen</value>
+            <value xml:lang="de">Empfänger auswählen</value>
+            <value xml:lang="nl">Ontvanger kiezen</value>
           </prop>
           <prop oor:name="ImageIdentifier" oor:type="xs:string">
             <value/>
@@ -253,6 +273,8 @@
           </prop>
           <prop oor:name="Title" oor:type="xs:string">
             <value>Textbausteinverweis einfügen</value>
+            <value xml:lang="de">Textbausteinverweis einfügen</value>
+            <value xml:lang="nl">Tekstbouwsteenverwijzing invoegen</value>
           </prop>
           <prop oor:name="ImageIdentifier" oor:type="xs:string">
             <value/>
@@ -289,6 +311,8 @@
           </prop>
           <prop oor:name="Title" oor:type="xs:string">
             <value>Fehlerinfos erstellen</value>
+            <value xml:lang="de">Fehlerinfos erstellen</value>
+            <value xml:lang="nl">Info over fouten opstellen</value>
           </prop>
           <prop oor:name="ImageIdentifier" oor:type="xs:string">
             <value/>
