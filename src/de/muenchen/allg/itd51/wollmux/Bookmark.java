@@ -404,8 +404,8 @@ public class Bookmark
       // Aufsammeln der zu entfernenden TextPortions (sollte genau eine sein)
       // und
       // der Bookmarks, die evtl. als Kollateralschaden entfernt werden.
-      Vector collateral = new Vector();
-      Vector victims = new Vector();
+      Vector<String> collateral = new Vector<String>();
+      Vector<Object> victims = new Vector<Object>();
       XEnumeration xEnum = UNO.XEnumerationAccess(range).createEnumeration();
       while (xEnum.hasMoreElements())
       {
@@ -455,10 +455,10 @@ public class Bookmark
        * Verlorene Bookmarks regenerieren.
        */
       XNameAccess bookmarks = UNO.XBookmarksSupplier(doc).getBookmarks();
-      Iterator iter = collateral.iterator();
+      Iterator<String> iter = collateral.iterator();
       while (iter.hasNext())
       {
-        String portionName = (String) iter.next();
+        String portionName = iter.next();
         if (!bookmarks.hasByName(portionName))
         {
           Logger.debug(L.m("Regeneriere Bookmark '%1'", portionName));
