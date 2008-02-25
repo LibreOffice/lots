@@ -38,13 +38,13 @@ public class GroupModelList
   /**
    * Die Liste der {@link GroupModel}s. 
    */
-  private List models = new LinkedList();
+  private List<GroupModel> models = new LinkedList<GroupModel>();
   
   /**
    * Liste aller {@link ItemListener}, die über Änderungen des Listeninhalts informiert
    * werden wollen.
    */
-  private List listeners = new Vector(1);
+  private List<ItemListener> listeners = new Vector<ItemListener>(1);
   
   /**
    * Der FormularMax4000 zu dem diese GroupModelList gehört.
@@ -83,7 +83,7 @@ public class GroupModelList
     while (!models.isEmpty())
     {
       int index = models.size() - 1;
-      GroupModel model = (GroupModel)models.remove(index);
+      GroupModel model = models.remove(index);
       model.hasBeenRemoved();
     }
   }
@@ -104,10 +104,10 @@ public class GroupModelList
   public ConfigThingy export()
   {
     ConfigThingy conf = new ConfigThingy("Sichtbarkeit");
-    Iterator iter = models.iterator();
+    Iterator<GroupModel> iter = models.iterator();
     while (iter.hasNext())
     {
-      GroupModel model = (GroupModel)iter.next();
+      GroupModel model = iter.next();
       conf.addChild(model.export());
     }
     return conf;
@@ -142,10 +142,10 @@ public class GroupModelList
    */
   private void notifyListeners(GroupModel model, int index)
   {
-    Iterator iter = listeners.iterator();
+    Iterator<ItemListener> iter = listeners.iterator();
     while (iter.hasNext())
     {
-      ItemListener listener = (ItemListener)iter.next();
+      ItemListener listener = iter.next();
       listener.itemAdded(model, index);
     }
   }

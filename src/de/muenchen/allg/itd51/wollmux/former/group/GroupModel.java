@@ -61,7 +61,7 @@ public class GroupModel
   /**
    * 
    */
-  private Map mapBookmarkNameToBookmark = new HashMap();
+  private Map<String, Bookmark> mapBookmarkNameToBookmark = new HashMap<String, Bookmark>();
   
   /**
    * Der Name dieser Gruppe.
@@ -71,7 +71,7 @@ public class GroupModel
   /**
    * Die Liste der setGroups-{@link Bookmark}s, die zu dieser Gruppe gehören.
    */
-  private List bookmarks = new Vector(1);
+  private List<Integer> bookmarks = new Vector<Integer>(1);
   
   /**
    * Die Sichtbarkeitsbedingung für diese Gruppe.
@@ -81,7 +81,7 @@ public class GroupModel
   /**
    * Die {@link ModelChangeListener}, die über Änderungen dieses Models informiert werden wollen.
    */
-  private List listeners = new Vector(1);
+  private List<ModelChangeListener> listeners = new Vector<ModelChangeListener>(1);
   
   /**
    * Der FormularMax4000 zu dem dieses Model gehört.
@@ -122,10 +122,10 @@ public class GroupModel
    * TESTED */
   public void hasBeenRemoved()
   {
-    Iterator iter = listeners.iterator();
+    Iterator<ModelChangeListener> iter = listeners.iterator();
     while (iter.hasNext())
     {
-      ModelChangeListener listener = (ModelChangeListener)iter.next();
+      ModelChangeListener listener = iter.next();
       listener.modelRemoved(this);
     }
     formularMax4000.documentNeedsUpdating();
