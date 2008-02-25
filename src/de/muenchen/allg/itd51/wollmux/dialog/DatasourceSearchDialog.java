@@ -128,7 +128,7 @@ public class DatasourceSearchDialog implements Dialog
   /**
    * Alle ids, die durch Spaltenumsetzungsabschnitte definiert werden.
    */
-  private Set schema = new HashSet();
+  private Set<String> schema = new HashSet<String>();
   
   /**
    * Der Rahmen des gesamten Dialogs.
@@ -187,7 +187,7 @@ public class DatasourceSearchDialog implements Dialog
    * Werden durch diesen Funktionsdialog weitere Funktionsdialoge erzeugt, so
    * wird dieser Kontext übergeben. 
    */
-  private Map context = new HashMap();
+  private Map<Object, Object> context = new HashMap<Object, Object>();
   
   /**
    * Der show übergebene dialogEndListener.
@@ -206,7 +206,7 @@ public class DatasourceSearchDialog implements Dialog
    *        soll.
    * @param conf die Beschreibung des Dialogs.
    */
-  private DatasourceSearchDialog(Instantiator ilse, Set schema, ConfigThingy conf, DatasourceJoiner dj)
+  private DatasourceSearchDialog(Instantiator ilse, Set<String> schema, ConfigThingy conf, DatasourceJoiner dj)
   throws ConfigurationErrorException
   {
     this.myConf = conf;
@@ -215,14 +215,14 @@ public class DatasourceSearchDialog implements Dialog
     this.schema = schema;
   }
 
-  public Dialog instanceFor(Map context) throws ConfigurationErrorException
+  public Dialog instanceFor(Map<Object, Object> context) throws ConfigurationErrorException
   {
     return ilse.instanceFor(context);
   }
 
-  public Collection getSchema()
+  public Collection<String> getSchema()
   {
-    return new HashSet(schema);
+    return new HashSet<String>(schema);
   }
 
   
@@ -375,7 +375,7 @@ public class DatasourceSearchDialog implements Dialog
     /**
      * Die durch den Spaltenumsetzung-Abschnitt definierten Spaltennamen.
      */
-    private Set dialogWindowSchema;
+    private Set<String> dialogWindowSchema;
     
     /**
      * Die Suchstrategie für Suchanfragen. 
@@ -388,7 +388,7 @@ public class DatasourceSearchDialog implements Dialog
      * realisieren. Jede ColumnTranslation entspricht einem Eintrag des
      * Spaltenumsetzung-Abschnitts. 
      */
-    private List columnTranslations;
+    private List<ColumnTranslation> columnTranslations;
     
     /**
      * Legt fest, wie die Datensätze in der Ergebnisliste dargestellt werden
@@ -426,7 +426,7 @@ public class DatasourceSearchDialog implements Dialog
      * Bildet DB_SPALTE Werte des Vorschau-Abschnitts auf die entsprechenden
      * UIElemente ab (jeweils 1 UIElement pro DB_SPALTE, keine Liste).
      */
-    private Map mapDB_SPALTEtoUIElement;
+    private Map<String, UIElement> mapDB_SPALTEtoUIElement;
     
     
     /**
@@ -441,7 +441,7 @@ public class DatasourceSearchDialog implements Dialog
     public DialogWindow(int tabIndex, ConfigThingy conf)
     {
       searchStrategy = SearchStrategy.parse(conf);
-      dialogWindowSchema = new HashSet();
+      dialogWindowSchema = new HashSet<String>();
       columnTranslations = parseColumnTranslations(conf, dialogWindowSchema);
       initFactories();
       
@@ -470,7 +470,7 @@ public class DatasourceSearchDialog implements Dialog
       addUIElements(conf, "Intro", intro, 0, 1, vertiContext, null);
       addUIElements(conf, "Suche", suche, 1, 0, horiContext, null);
       addUIElements(conf, "Suchergebnis", suchergebnis, 0, 1, vertiContext, null);
-      mapDB_SPALTEtoUIElement = new HashMap();
+      mapDB_SPALTEtoUIElement = new HashMap<String, UIElement>();
       addUIElements(conf, "Vorschau", vorschau, 0, 1, previewContext, mapDB_SPALTEtoUIElement);
       addUIElements(conf, "Fussbereich", fussbereich, 1, 0, horiContext, null);
       
@@ -489,7 +489,7 @@ public class DatasourceSearchDialog implements Dialog
      *        DB_SPALTE Attribut haben. null ist nicht erlaubt.   
      * TESTED 
      */
-    private void addUIElements(ConfigThingy conf, String key, JComponent compo, int stepx, int stepy, UIElementFactory.Context context, Map mapDB_SPALTEtoUIElement)
+    private void addUIElements(ConfigThingy conf, String key, JComponent compo, int stepx, int stepy, UIElementFactory.Context context, Map<String, UIElement> mapDB_SPALTEtoUIElement)
     {
       int y = 0;
       int x = 0; 
@@ -627,7 +627,7 @@ public class DatasourceSearchDialog implements Dialog
         Iterator iter = data.iterator();
         int i = 0;
         while (iter.hasNext()) elements[i++] = new ListElement((Dataset)iter.next());
-        Arrays.sort(elements, new Comparator()
+        Arrays.sort(elements, new Comparator<Object>()
         {
           public int compare(Object o1, Object o2)
           {
@@ -685,14 +685,14 @@ public class DatasourceSearchDialog implements Dialog
     public void search()
     {
       if (query == null) return;
-      List queries = parseQuery(searchStrategy, query.getString());
+      List<Query> queries = parseQuery(searchStrategy, query.getString());
       
       QueryResults results = null;
       try{
-        Iterator iter = queries.iterator();
+        Iterator<Query> iter = queries.iterator();
         while (iter.hasNext())
         {
-          Query query = (Query)iter.next();
+          Query query = iter.next();
           if (query.numberOfQueryParts() == 0)
             results = dj.getContentsOf(query.getDatasourceName());
           else
@@ -776,9 +776,9 @@ public class DatasourceSearchDialog implements Dialog
      */
     private void initFactories()
     {
-      Map mapTypeToLayoutConstraints = new HashMap();
-      Map mapTypeToLabelType = new HashMap();
-      Map mapTypeToLabelLayoutConstraints = new HashMap();
+      Map<String, GridBagConstraints> mapTypeToLayoutConstraints = new HashMap<String, GridBagConstraints>();
+      Map<String, Integer> mapTypeToLabelType = new HashMap<String, Integer>();
+      Map<String, GridBagConstraints> mapTypeToLabelLayoutConstraints = new HashMap<String, GridBagConstraints>();
       
       //int gridx, int gridy, int gridwidth, int gridheight, double weightx, double weighty, int anchor,          int fill,                  Insets insets, int ipadx, int ipady) 
       GridBagConstraints gbcTextfield = new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0, GridBagConstraints.LINE_START,   GridBagConstraints.HORIZONTAL, new Insets(TF_BORDER,TF_BORDER,TF_BORDER,TF_BORDER),0,0);
@@ -842,7 +842,7 @@ public class DatasourceSearchDialog implements Dialog
       mapTypeToLabelType.put("v-separator", UIElement.LABEL_NONE);
       mapTypeToLabelLayoutConstraints.put("v-separator", null);
 
-      Set supportedActions = new HashSet();
+      Set<String> supportedActions = new HashSet<String>();
       supportedActions.add("abort");
       supportedActions.add("back");
       supportedActions.add("search");
@@ -853,7 +853,7 @@ public class DatasourceSearchDialog implements Dialog
       vertiContext.mapTypeToLabelType = mapTypeToLabelType;
       vertiContext.mapTypeToLayoutConstraints = mapTypeToLayoutConstraints;
       vertiContext.uiElementEventHandler = this;
-      vertiContext.mapTypeToType = new HashMap();
+      vertiContext.mapTypeToType = new HashMap<String, String>();
       vertiContext.mapTypeToType.put("separator","h-separator");
       vertiContext.mapTypeToType.put("glue","v-glue");
       vertiContext.supportedActions = supportedActions;
@@ -864,17 +864,17 @@ public class DatasourceSearchDialog implements Dialog
       horiContext.mapTypeToLabelType = mapTypeToLabelType;
       horiContext.mapTypeToLayoutConstraints = mapTypeToLayoutConstraints;
       horiContext.uiElementEventHandler = this;
-      horiContext.mapTypeToType = new HashMap();
+      horiContext.mapTypeToType = new HashMap<String, String>();
       horiContext.mapTypeToType.put("separator","v-separator");
       horiContext.mapTypeToType.put("glue","h-glue");
       horiContext.supportedActions = supportedActions;
       horiContext.uiElementEventHandler = this;
 
-      Map previewLabelLayoutConstraints = new HashMap(mapTypeToLabelLayoutConstraints);
+      Map<String, GridBagConstraints> previewLabelLayoutConstraints = new HashMap<String, GridBagConstraints>(mapTypeToLabelLayoutConstraints);
       previewLabelLayoutConstraints.put("textfield",gbcLabelLeft);
-      Map previewLabelType = new HashMap(mapTypeToLabelType);
+      Map<String, Integer> previewLabelType = new HashMap<String, Integer>(mapTypeToLabelType);
       previewLabelType.put("textfield", UIElement.LABEL_LEFT);
-      Map previewLayoutConstraints = new HashMap(mapTypeToLayoutConstraints);
+      Map<String, GridBagConstraints> previewLayoutConstraints = new HashMap<String, GridBagConstraints>(mapTypeToLayoutConstraints);
       previewLayoutConstraints.put("h-glue", gbcPreviewGlue);
       previewLayoutConstraints.put("v-glue", gbcPreviewGlue);
       previewLayoutConstraints.put("label", gbcPreviewLabel);
@@ -884,7 +884,7 @@ public class DatasourceSearchDialog implements Dialog
       previewContext.mapTypeToLabelType = previewLabelType;
       previewContext.mapTypeToLayoutConstraints = previewLayoutConstraints;
       previewContext.uiElementEventHandler = this;
-      previewContext.mapTypeToType = new HashMap();
+      previewContext.mapTypeToType = new HashMap<String, String>();
       previewContext.mapTypeToType.put("separator","h-separator");
       previewContext.mapTypeToType.put("glue","v-glue");
       previewContext.supportedActions = supportedActions;
@@ -917,7 +917,7 @@ public class DatasourceSearchDialog implements Dialog
      * Bildet eine Wortanzahl ab auf eine Liste von Query Objekten, die
      * passende Templates darstellen.
      */
-    private Map mapWordcountToListOfQuerys;
+    private Map<Integer, List<Query>> mapWordcountToListOfQuerys;
     
     /**
      * Parst den "Suchstrategie"-Abschnitt von conf und liefert eine entsprechende
@@ -928,7 +928,7 @@ public class DatasourceSearchDialog implements Dialog
      */
     public static SearchStrategy parse(ConfigThingy conf)
     {
-      Map mapWordcountToListOfQuerys = new HashMap();
+      Map<Integer, List<Query>> mapWordcountToListOfQuerys = new HashMap<Integer, List<Query>>();
       conf = conf.query("Suchstrategie");
       Iterator parentIter = conf.iterator();
       while (parentIter.hasNext())
@@ -938,7 +938,7 @@ public class DatasourceSearchDialog implements Dialog
         {
           ConfigThingy queryConf = (ConfigThingy)iter.next();
           String datasource = queryConf.getName();
-          List listOfQueryParts = new Vector();
+          List<QueryPart> listOfQueryParts = new Vector<QueryPart>();
           Iterator columnIter = queryConf.iterator();
           int wordcount = 0;
           while (columnIter.hasNext())
@@ -957,9 +957,9 @@ public class DatasourceSearchDialog implements Dialog
           
           Integer wc = new Integer(wordcount);
           if (!mapWordcountToListOfQuerys.containsKey(wc))
-            mapWordcountToListOfQuerys.put(wc, new Vector());
+            mapWordcountToListOfQuerys.put(wc, new Vector<Query>());
           
-          List listOfQueries = (List)mapWordcountToListOfQuerys.get(wc);
+          List<Query> listOfQueries = mapWordcountToListOfQuerys.get(wc);
           listOfQueries.add(new Query(datasource, listOfQueryParts));
         }
       }
@@ -972,7 +972,7 @@ public class DatasourceSearchDialog implements Dialog
      * mapWordcountToListOfQueries wird per Referenz eingebunden und entsprechende
      * Ergebnisse aus dieser Map werden von {@link #getTemplate(int)} zurückgeliefert.
      */
-    private SearchStrategy(Map mapWordcountToListOfQuerys)
+    private SearchStrategy(Map<Integer, List<Query>> mapWordcountToListOfQuerys)
     {
       this.mapWordcountToListOfQuerys = mapWordcountToListOfQuerys; 
     }
@@ -988,7 +988,7 @@ public class DatasourceSearchDialog implements Dialog
      */
     public List getTemplate(int wordcount)
     {
-      return (List)mapWordcountToListOfQuerys.get(new Integer(wordcount));
+      return mapWordcountToListOfQuerys.get(new Integer(wordcount));
     }
   }
   
@@ -1002,7 +1002,7 @@ public class DatasourceSearchDialog implements Dialog
   private Query resolveTemplate(Query template, String[] words, int wordcount)
   {
     String dbName = template.getDatasourceName();
-    List listOfQueryParts = new Vector();
+    List<QueryPart> listOfQueryParts = new Vector<QueryPart>();
     Iterator qpIter = template.iterator();
     while (qpIter.hasNext())
     {
@@ -1031,9 +1031,9 @@ public class DatasourceSearchDialog implements Dialog
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
-  private List parseQuery(SearchStrategy searchStrategy, String queryString)
+  private List<Query> parseQuery(SearchStrategy searchStrategy, String queryString)
   {
-    List queryList = new Vector();
+    List<Query> queryList = new Vector<Query>();
     
     /*
      * Kommata durch Space ersetzen (d.h. "Benkmann,Matthias" -> "Benkmann Matthias")
@@ -1153,15 +1153,15 @@ public class DatasourceSearchDialog implements Dialog
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private void select(Collection schema, Dataset ds)
+  private void select(Collection<String> schema, Dataset ds)
   {
     if (ds != null)
     {
-      Map newData = new HashMap();
-      Iterator iter = schema.iterator();
+      Map<String, String> newData = new HashMap<String, String>();
+      Iterator<String> iter = schema.iterator();
       while (iter.hasNext())
       {
-        String columnName = (String)iter.next();
+        String columnName = iter.next();
         try{
           newData.put(columnName, ds.get(columnName));
         }catch(Exception x) {Logger.error("Huh? Dies sollte nicht passieren können", x);}
@@ -1206,7 +1206,7 @@ public class DatasourceSearchDialog implements Dialog
   {
     private ConfigThingy conf;
     private DatasourceJoiner dj;
-    private Set schema;
+    private Set<String> schema;
     
     public Instantiator(ConfigThingy conf, DatasourceJoiner dj) throws ConfigurationErrorException
     {
@@ -1216,7 +1216,7 @@ public class DatasourceSearchDialog implements Dialog
       if (schema.size() == 0) throw new ConfigurationErrorException("Fehler in Funktionsdialog: Abschnitt 'Spaltenumsetzung' konnte nicht geparst werden!");
     }
     
-    public Dialog instanceFor(Map context) throws ConfigurationErrorException
+    public Dialog instanceFor(Map<Object, Object> context) throws ConfigurationErrorException
     {
       if (!context.containsKey(this))
         context.put(this, new DatasourceSearchDialog(this, schema, conf, dj));
@@ -1226,14 +1226,14 @@ public class DatasourceSearchDialog implements Dialog
     public Object getData(String id)  { return null;}
     public void show(ActionListener dialogEndListener, FunctionLibrary funcLib, DialogLibrary dialogLib) {}
 
-    public Collection getSchema()
+    public Collection<String> getSchema()
     {
-      return new HashSet(schema);
+      return new HashSet<String>(schema);
     }
     
-    private HashSet parseSchema(ConfigThingy conf)
+    private HashSet<String> parseSchema(ConfigThingy conf)
     {
-      HashSet schema = new HashSet();
+      HashSet<String> schema = new HashSet<String>();
       Iterator fensterIter = conf.query("Fenster").iterator();
       while (fensterIter.hasNext())
       {
@@ -1330,9 +1330,9 @@ public class DatasourceSearchDialog implements Dialog
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
-  private List parseColumnTranslations(ConfigThingy conf, Collection schema)
+  private List<ColumnTranslation> parseColumnTranslations(ConfigThingy conf, Collection<String> schema)
   {
-    Vector columnTrans = new Vector();
+    Vector<ColumnTranslation> columnTrans = new Vector<ColumnTranslation>();
     Iterator parentIter = conf.query("Spaltenumsetzung").iterator();
     while (parentIter.hasNext())
     {
@@ -1407,24 +1407,24 @@ public class DatasourceSearchDialog implements Dialog
    */
   private class TranslatedQueryResults implements QueryResults
   {
-    private List qres;
+    private List<Dataset> qres;
     
     /**
      * Die QueryResults res werden mit den columnTranslations (Liste von
      * ColumnTranslation Objekten) übersetzt. 
      */
-    public TranslatedQueryResults(QueryResults res, List columnTranslations)
+    public TranslatedQueryResults(QueryResults res, List<ColumnTranslation> columnTranslations)
     {
-      qres = new Vector(res.size());
+      qres = new Vector<Dataset>(res.size());
       Iterator iter = res.iterator();
       while (iter.hasNext())
       {
         Dataset ds = (Dataset)iter.next();
-        Map data = new HashMap();
-        Iterator transIter = columnTranslations.iterator();
+        Map<String, String> data = new HashMap<String, String>();
+        Iterator<ColumnTranslation> transIter = columnTranslations.iterator();
         while (transIter.hasNext())
         {
-          ColumnTranslation trans = (ColumnTranslation)transIter.next();
+          ColumnTranslation trans = transIter.next();
           data.put(trans.getNewColumnName(), trans.getNewColumnValue(ds));
         }
         qres.add(new SimpleDataset(ds.getKey(), data));
@@ -1432,7 +1432,7 @@ public class DatasourceSearchDialog implements Dialog
     }
     
     public int size() {  return qres.size();}
-    public Iterator iterator() { return qres.iterator(); }
+    public Iterator<Dataset> iterator() { return qres.iterator(); }
     public boolean isEmpty() { return qres.isEmpty(); }
   }
   
@@ -1447,7 +1447,7 @@ public class DatasourceSearchDialog implements Dialog
     ConfigThingy conf = new ConfigThingy("", new URL(new File(System
         .getProperty("user.dir")).toURL(), confFile));
     Dialog dialog = DatasourceSearchDialog.create(conf.get("Funktionsdialoge").get("Empfaengerauswahl"), WollMuxFiles.getDatasourceJoiner());
-    Map myContext = new HashMap();
+    Map<Object, Object> myContext = new HashMap<Object, Object>();
     dialog.instanceFor(myContext).show(null, new FunctionLibrary(), new DialogLibrary());
   }
 

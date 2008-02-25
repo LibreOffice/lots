@@ -124,9 +124,9 @@ public class GenderDialog extends TrafoDialog
       if (anredeId == null || textHerr == null || textFrau == null
           || textSonst == null) stop();
 
-      HashSet uniqueFieldNames = new HashSet(params.fieldNames);
+      HashSet<String> uniqueFieldNames = new HashSet<String>(params.fieldNames);
       uniqueFieldNames.add(anredeId);
-      List sortedNames = new ArrayList(uniqueFieldNames);
+      List<String> sortedNames = new ArrayList<String>(uniqueFieldNames);
       Collections.sort(sortedNames);
 
       buildGUI(anredeId, textHerr, textFrau, textSonst, sortedNames);
@@ -155,7 +155,7 @@ public class GenderDialog extends TrafoDialog
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
   private void buildGUI(String anredeId, String textHerr, String textFrau,
-      String textSonst, final List fieldNames)
+      String textSonst, final List<String> fieldNames)
   {
     genderPanel = new JPanel(new BorderLayout());
     genderPanel.setBorder(BorderFactory.createTitledBorder(
@@ -168,13 +168,13 @@ public class GenderDialog extends TrafoDialog
     Box hbox;
     JLabel label;
     int maxLabelWidth = 0;
-    List labels = new ArrayList();
+    List<JLabel> labels = new ArrayList<JLabel>();
 
     hbox = Box.createHorizontalBox();
     label = new JLabel(L.m("Geschlechtsbestimmendes Feld"));
     label.setFont(label.getFont().deriveFont(Font.PLAIN));
     hbox.add(label);
-    cbAnrede = new JComboBox(new Vector(fieldNames));
+    cbAnrede = new JComboBox(new Vector<String>(fieldNames));
     cbAnrede.setSelectedItem(anredeId);
     cbAnrede.setEditable(false);
     hbox.add(Box.createHorizontalGlue());
@@ -214,9 +214,9 @@ public class GenderDialog extends TrafoDialog
     addText(vbox, " ");
 
     // einheitliche Breite für alle Labels vergeben:
-    for (Iterator iter = labels.iterator(); iter.hasNext();)
+    for (Iterator<JLabel> iter = labels.iterator(); iter.hasNext();)
     {
-      label = (JLabel) iter.next();
+      label = iter.next();
       Dimension d = label.getPreferredSize();
       d.width = maxLabelWidth + 10;
       label.setPreferredSize(d);
@@ -508,7 +508,7 @@ public class GenderDialog extends TrafoDialog
     params.conf = new ConfigThingy("Func");
     params.conf.addChild(generateGenderTrafoConf("Anrede", "Hallo Herr",
       "Hallo Frau", "Liebe Firma"));
-    params.fieldNames = new ArrayList();
+    params.fieldNames = new ArrayList<String>();
     params.fieldNames.add("MyAnrede");
 
     new GenderDialog(params).show("Test GenderDialog", (Frame) null);

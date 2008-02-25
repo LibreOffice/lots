@@ -32,6 +32,7 @@
 */
 package de.muenchen.allg.itd51.wollmux.dialog;
 
+import java.awt.AWTKeyStroke;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridLayout;
@@ -244,7 +245,7 @@ public class UIElementFactory
      * Den richtigen type aus dem context bestimmen.
      */
     if (context.mapTypeToType != null && context.mapTypeToType.containsKey(type)) 
-      type = (String)context.mapTypeToType.get(type);
+      type = context.mapTypeToType.get(type);
 
     /*
      * ACHTUNG! Hier wird immer erst mit containsKey() getestet, anstatt
@@ -273,9 +274,9 @@ public class UIElementFactory
         
     Integer labelType;
     if (context.mapTypeToLabelType.containsKey(type)) 
-      labelType = (Integer)context.mapTypeToLabelType.get(type);
+      labelType = context.mapTypeToLabelType.get(type);
     else
-      labelType = (Integer)context.mapTypeToLabelType.get(DEFAULT);
+      labelType = context.mapTypeToLabelType.get(DEFAULT);
   
     UIElement uiElement;
     
@@ -341,14 +342,14 @@ public class UIElementFactory
       /*
        * Tab auch zum Weiterschalten und Shift-Tab zum Zurückschalten erlauben
        */
-      Set focusKeys = textarea.getFocusTraversalKeys(
+      Set<AWTKeyStroke> focusKeys = textarea.getFocusTraversalKeys(
           KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS);
-      focusKeys = new HashSet(focusKeys);
+      focusKeys = new HashSet<AWTKeyStroke>(focusKeys);
       focusKeys.add(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0));
       textarea.setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS,focusKeys);
       focusKeys = textarea.getFocusTraversalKeys(
           KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS);
-      focusKeys = new HashSet(focusKeys);
+      focusKeys = new HashSet<AWTKeyStroke>(focusKeys);
       focusKeys.add(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, InputEvent.SHIFT_DOWN_MASK ));
       textarea.setFocusTraversalKeys(KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS,focusKeys);
       
@@ -770,7 +771,7 @@ public class UIElementFactory
    * für "default" vorhanden ist. Falls ja, so wird dieses der entsprechenden
    * Eigenschaft des erzeugten UIElements zugewiesen, ansonsten null.
      */
-    public Map mapTypeToLayoutConstraints;
+    public Map<String, ?> mapTypeToLayoutConstraints;
     
     /**
      * Bildet einen TYPE auf einen Integer ab, der angibt, ob das UI Element ein
@@ -781,7 +782,7 @@ public class UIElementFactory
    * für "default" vorhanden ist. Falls ja, so wird dieses der entsprechenden
    * Eigenschaft des erzeugten UIElements zugewiesen, ansonsten null.
      */
-    public Map mapTypeToLabelType;
+    public Map<String, Integer> mapTypeToLabelType;
     
     /**
      * Für UI Elemente, die ein zusätzliches Label links oder rechts bekommen sollen
@@ -794,13 +795,13 @@ public class UIElementFactory
    * für "default" vorhanden ist. Falls ja, so wird dieses der entsprechenden
    * Eigenschaft des erzeugten UIElements zugewiesen, ansonsten null.  
      */
-    public Map mapTypeToLabelLayoutConstraints;
+    public Map<String, ?> mapTypeToLabelLayoutConstraints;
     
     /**
      * Die Menge (von Strings) der ACTIONs, die akzeptiert werden sollen. Alle 
      * anderen produzieren eine Fehlermeldung.
      */
-    public Set supportedActions;
+    public Set<String> supportedActions;
     
     /**
      * Der {@link UIElementEventHandler}, an den die erzeugten UI Elemente ihre
@@ -813,7 +814,7 @@ public class UIElementFactory
      * wird der andere TYPE verwendet. Dies ist nützlich, um abhängig vom Kontext
      * den TYPE "separator" entweder auf "h-separator" oder "v-separator" abzubilden.
      */
-    public Map mapTypeToType;
+    public Map<String, String> mapTypeToType;
   }
 
 }

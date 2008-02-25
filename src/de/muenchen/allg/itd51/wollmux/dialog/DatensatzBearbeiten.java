@@ -131,7 +131,7 @@ public class DatensatzBearbeiten
    * auf {@link DialogWindow}s ab. Wird unter anderem zum Auflösen der Bezeichner
    * der switchTo-ACTION verwendet.
    */
-  private Map fenster;
+  private Map<String, DialogWindow> fenster;
   /**
    * das momentan angezeigte Dialogfenster.
    */
@@ -224,7 +224,7 @@ public class DatensatzBearbeiten
     this.datensatz = datensatz;
     this.dialogEndListener = dialogEndListener;
     
-    fenster = new HashMap();
+    fenster = new HashMap<String, DialogWindow>();
     
     modColor = Color.PINK;
     try{
@@ -349,16 +349,16 @@ public class DatensatzBearbeiten
   private boolean save() 
   {
     boolean hasChanges = false;
-    Iterator iter = fenster.values().iterator();
+    Iterator<DialogWindow> iter = fenster.values().iterator();
     while (iter.hasNext())
-      hasChanges = ((DialogWindow)iter.next()).hasChanges() || hasChanges;
+      hasChanges = iter.next().hasChanges() || hasChanges;
     
     if (!hasChanges) return true;
     int res = JOptionPane.showConfirmDialog(myFrame, "Wollen Sie Ihre Änderungen wirklich speichern\nund auf die Aktualisierung der entsprechenden Felder\naus der zentralen Datenbank verzichten?","Änderungen speichern?",JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
     if (res != JOptionPane.YES_OPTION) return false;
     
     iter = fenster.values().iterator();
-    while (iter.hasNext()) ((DialogWindow)iter.next()).save();
+    while (iter.hasNext()) iter.next().save();
     return true; 
   };
 
@@ -442,7 +442,7 @@ public class DatensatzBearbeiten
   {
     if (!fenster.containsKey(name)) return;
     
-    currentWindow = (DialogWindow)fenster.get(name);
+    currentWindow = fenster.get(name);
 
     myFrame.setTitle(currentWindow.getTitle());
     myFrame.setAlwaysOnTop(true);
@@ -507,7 +507,7 @@ public class DatensatzBearbeiten
      * true, falls der Hintegrund des Controls aktuell in normalColor eingefärbt ist.
      */
     boolean isCurrentlyNormalColor;
-    List listeners = new Vector();
+    List<ColorChangeListener> listeners = new Vector<ColorChangeListener>();
     
     public void initCompo(String colName, JComponent compo, Color localColor)
     {
@@ -534,8 +534,8 @@ public class DatensatzBearbeiten
     
     public void notifyColorChangeListeners()
     {
-      Iterator iter = listeners.iterator();
-      while (iter.hasNext()) ((ColorChangeListener)iter.next()).colorChanged();
+      Iterator<ColorChangeListener> iter = listeners.iterator();
+      while (iter.hasNext()) iter.next().colorChanged();
     }
     
     public void setBackground(Color c)
@@ -737,12 +737,12 @@ public class DatensatzBearbeiten
      * des Dialogs fehlerhaft sind kann es sein, dass nicht zu jedem Control ein
      * DataControl existiert.
      */
-    private List dataControls = new Vector();
+    private List<DataControl> dataControls = new Vector<DataControl>();
     /**
      * Liste aller JButtons, die ausgegraut werden müssen, wenn keines der
      * DataControls einen hasBeenModified() Zustand hat.
      */
-    private List buttonsToGreyOutIfNoChanges = new Vector();
+    private List<JButton> buttonsToGreyOutIfNoChanges = new Vector<JButton>();
     
     private ActionListener dialogWindowCloseAction = actionListener_abort;
     
@@ -781,23 +781,23 @@ public class DatensatzBearbeiten
     
     public void save()
     {
-      Iterator iter = dataControls.iterator();
-      while (iter.hasNext()) ((DataControl)iter.next()).save();
+      Iterator<DataControl> iter = dataControls.iterator();
+      while (iter.hasNext()) iter.next().save();
     }
     
     public boolean hasChanges()
     {
-      Iterator iter = dataControls.iterator();
-      while (iter.hasNext()) if (((DataControl)iter.next()).hasBeenModified()) return true;
+      Iterator<DataControl> iter = dataControls.iterator();
+      while (iter.hasNext()) if (iter.next().hasBeenModified()) return true;
       return false;
     }
     
     public boolean hasLocalValues()
     {
-      Iterator iter = dataControls.iterator();
+      Iterator<DataControl> iter = dataControls.iterator();
       while (iter.hasNext()) 
       {
-        DataControl ctrl = (DataControl)iter.next();
+        DataControl ctrl = iter.next();
         if (ctrl.datasetIsLocal() || ctrl.hasBeenModified()) return true;
       }
       return false;
@@ -806,14 +806,14 @@ public class DatensatzBearbeiten
     public void colorChanged()
     {
       boolean enabled = hasLocalValues() && datensatz.hasBackingStore();
-      Iterator iter = buttonsToGreyOutIfNoChanges.iterator();
-      while (iter.hasNext()) ((JButton)iter.next()).setEnabled(enabled);
+      Iterator<JButton> iter = buttonsToGreyOutIfNoChanges.iterator();
+      while (iter.hasNext()) iter.next().setEnabled(enabled);
     }
     
     public void restoreStandard()
     {
-      Iterator iter = dataControls.iterator();
-      while (iter.hasNext()) ((DataControl)iter.next()).restoreStandard();
+      Iterator<DataControl> iter = dataControls.iterator();
+      while (iter.hasNext()) iter.next().restoreStandard();
     }
     
 /**
@@ -1084,8 +1084,8 @@ public class DatensatzBearbeiten
         }
       }
       
-      Iterator iter = dataControls.iterator();
-      while (iter.hasNext()) ((DataControl)iter.next()).addColorChangeListener(this);
+      Iterator<DataControl> iter = dataControls.iterator();
+      while (iter.hasNext()) iter.next().addColorChangeListener(this);
       colorChanged();
 
     }

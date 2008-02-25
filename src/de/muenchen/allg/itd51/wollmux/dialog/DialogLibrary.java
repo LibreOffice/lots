@@ -27,7 +27,7 @@ import java.util.Map;
  */
 public class DialogLibrary
 {
-  private Map mapIdToDialog = new HashMap();
+  private Map<String, Dialog> mapIdToDialog = new HashMap<String, Dialog>();
   private DialogLibrary baselib;
   
   
@@ -68,7 +68,7 @@ public class DialogLibrary
    */
   public Dialog get(String dlgName)
   {
-    Dialog dialog = (Dialog)mapIdToDialog.get(dlgName);
+    Dialog dialog = mapIdToDialog.get(dlgName);
     if (dialog == null && baselib != null) dialog = baselib.get(dlgName);
     return dialog;
   }

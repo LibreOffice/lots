@@ -42,7 +42,7 @@ public interface Dialog
    *         diagnostiziert werden konnte).
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public Dialog instanceFor(Map context) throws ConfigurationErrorException;
+  public Dialog instanceFor(Map<Object, Object> context) throws ConfigurationErrorException;
   
   /**
    * Liefert den durch id identifizierten Wert des Dialogs. Falls der Dialog noch

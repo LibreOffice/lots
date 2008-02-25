@@ -53,7 +53,7 @@ public class WollMuxBarEventHandler
   /**
    * Die Event-Queue.
    */
-  private List eventQueue = new LinkedList();
+  private List<Event> eventQueue = new LinkedList<Event>();
   
   /**
    * Die WollMuxBar, für die Events behandelt werden.
@@ -340,7 +340,7 @@ public class WollMuxBarEventHandler
           synchronized(eventQueue)
           {
             while (eventQueue.isEmpty()) {eventQueue.wait();}
-            e = (Event)eventQueue.remove(0);
+            e = eventQueue.remove(0);
           }
           
           processEvent(e);

@@ -490,7 +490,7 @@ public class AbsenderAuswaehlen
     Iterator iter = data.iterator();
     int i = 0;
     while (iter.hasNext()) elements[i++] = new ListElement((DJDataset)iter.next());
-    Arrays.sort(elements, new Comparator()
+    Arrays.sort(elements, new Comparator<Object>()
     {
       public int compare(Object o1, Object o2)
       {

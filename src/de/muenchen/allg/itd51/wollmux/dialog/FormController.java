@@ -158,45 +158,45 @@ public class FormController implements UIElementEventHandler
   /**
    * Der Kontext, in dem Funktionen geparst werden.
    */
-  private Map functionContext;
+  private Map<Object, Object> functionContext;
   
   /**
    * Bildet IDs auf die dazugehörigen UIElements ab.
    */
-  private Map mapIdToUIElement = new HashMap();
+  private Map<String, UIElement> mapIdToUIElement = new HashMap<String, UIElement>();
   
   /**
    * Bildet IDs auf Lists von UIElements ab, deren Plausi vom UIElement ID abhängt.
    */
-  private Map mapIdToListOfUIElementsWithDependingPlausi = new HashMap();
+  private Map<String, List<UIElement>> mapIdToListOfUIElementsWithDependingPlausi = new HashMap<String, List<UIElement>>();
   
   /**
    * Bildet IDs auf Lists von UIElements ab, deren AUTOFILL vom UIElement ID abhängt.
    */
-  private Map mapIdToListOfUIElementsWithDependingAutofill = new HashMap();
+  private Map<String, List<UIElement>> mapIdToListOfUIElementsWithDependingAutofill = new HashMap<String, List<UIElement>>();
   
   /**
    * Bildet Namen von Funktionsdialogen auf Lists von UIElements ab, deren AUTOFILL
    * von diesem Funktionsdialog abhängen.
    */
-  private Map mapDialogNameToListOfUIElementsWithDependingAutofill = new HashMap();
+  private Map<String, List<UIElement>> mapDialogNameToListOfUIElementsWithDependingAutofill = new HashMap<String, List<UIElement>>();
   
   /**
    * Bildet die ID eines UIElements ab auf eine List der Groups, die von
    * Änderungen des UIElements betroffen sind (zum Beispiel weil die 
    * Sichtbarkeitsfunktion der Gruppe von dem UIElement abhängt).
    */
-  private Map mapIdToListOfDependingGroups = new HashMap();
+  private Map<String, List<Group>> mapIdToListOfDependingGroups = new HashMap<String, List<Group>>();
   
   /**
    * Bildet GROUPS Bezeichner auf die entsprechenden Group-Instanzen ab.
    */
-  private Map mapGroupIdToGroup = new HashMap();
+  private Map<String, Group> mapGroupIdToGroup = new HashMap<String, Group>();
   
   /**
    * Diese Liste enthält alle UIElements.
    */
-  private Vector uiElements = new Vector();
+  private Vector<UIElement> uiElements = new Vector<UIElement>();
   
   /**
    * Die Inhalte der UIElemente aus {@link #mapIdToUIElement} als Values zur
@@ -244,7 +244,7 @@ public class FormController implements UIElementEventHandler
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public FormController(ConfigThingy conf, FormModel model, final Map mapIdToPresetValue, 
-      Map functionContext, FunctionLibrary funcLib, DialogLibrary dialogLib, ActionListener abortRequestListener)
+      Map<Object, Object> functionContext, FunctionLibrary funcLib, DialogLibrary dialogLib, ActionListener abortRequestListener)
   throws ConfigurationErrorException
   {
     this.functionContext = functionContext;
@@ -308,13 +308,9 @@ public class FormController implements UIElementEventHandler
     /********************************************************
      * Tabs erzeugen.
      ******************************************************/
-    Iterator iter = fensterDesc.iterator();
     int tabIndex = 0;
-    while (iter.hasNext())
+    for (ConfigThingy neuesFenster : fensterDesc)
     {
-      ConfigThingy neuesFenster = (ConfigThingy)iter.next();
-      
-      
       /*
        * Die folgende Schleife ist nicht nur eleganter als mehrere try-catch-Blöcke
        * um get()-Befehle, sie verhindert auch, dass TIP oder HOTKEY aus Versehen
@@ -363,10 +359,8 @@ public class FormController implements UIElementEventHandler
      * Plausis und fishy-Zustand checken und Hintergrundfarben entsprechend
      * setzen. 
      ******************************************************************/
-    iter = uiElements.iterator();
-    while (iter.hasNext())
+    for (UIElement uiElement : uiElements)
     {
-      UIElement uiElement = ((UIElement)iter.next());
       checkPlausi(uiElement);
     }
     
@@ -420,7 +414,7 @@ public class FormController implements UIElementEventHandler
        * Group mit der entsprechenden Bezeichnung heraussuchen und ihr 
        * condition-Feld setzten. Fehler ausgeben wenn condition bereits gesetzt.
        */
-      Group group = (Group)mapGroupIdToGroup.get(groupId);
+      Group group = mapGroupIdToGroup.get(groupId);
       if (group.condition != null)
         Logger.error("Mehrere Sichtbarkeitsregeln für Gruppe \""+groupId+"\" angegeben.");
       group.condition = cond;
@@ -435,9 +429,9 @@ public class FormController implements UIElementEventHandler
       {
         String elementId = deps[i];
         if (!mapIdToListOfDependingGroups.containsKey(elementId))
-          mapIdToListOfDependingGroups.put(elementId,new Vector(1));
+          mapIdToListOfDependingGroups.put(elementId,new Vector<Group>(1));
         
-        ((List)mapIdToListOfDependingGroups.get(elementId)).add(group);
+        mapIdToListOfDependingGroups.get(elementId).add(group);
       }
       
       /*
@@ -457,10 +451,10 @@ public class FormController implements UIElementEventHandler
    * TESTED*/
   private void initialStateForUIElementsNotInMapIdToPresetValue(Map mapIdToPresetValue)
   {
-    Iterator iter = uiElements.iterator();
+    Iterator<UIElement> iter = uiElements.iterator();
     while (iter.hasNext())
     {
-      UIElement uiElement = (UIElement)iter.next();
+      UIElement uiElement = iter.next();
       String id = uiElement.getId();
       if (mapIdToPresetValue.containsKey(id)) continue;
       UIElementState state = (UIElementState)uiElement.getAdditionalData();
@@ -484,16 +478,16 @@ public class FormController implements UIElementEventHandler
   {
     if (func == null) return;
     
-    Set funcDialogNames = new HashSet();
+    Set<String> funcDialogNames = new HashSet<String>();
     func.getFunctionDialogReferences(funcDialogNames);
-    Iterator iter = funcDialogNames.iterator();
+    Iterator<String> iter = funcDialogNames.iterator();
     while (iter.hasNext())
     {
-      String dialogName = (String)iter.next();
+      String dialogName = iter.next();
       if (!mapDialogNameToListOfUIElementsWithDependingAutofill.containsKey(dialogName))
-        mapDialogNameToListOfUIElementsWithDependingAutofill.put(dialogName, new Vector(1));
+        mapDialogNameToListOfUIElementsWithDependingAutofill.put(dialogName, new Vector<UIElement>(1));
    
-      List l = (List)mapDialogNameToListOfUIElementsWithDependingAutofill.get(dialogName);
+      List<UIElement> l = mapDialogNameToListOfUIElementsWithDependingAutofill.get(dialogName);
       l.add(uiElement);
     }
   }
@@ -610,8 +604,8 @@ public class FormController implements UIElementEventHandler
            * FISHY-Zustand neu gesetzt wird, wenn sich das Feld ändert.
            */
           if (!mapIdToListOfUIElementsWithDependingPlausi.containsKey(uiElement.getId()))
-            mapIdToListOfUIElementsWithDependingPlausi.put(uiElement.getId(), new Vector(1));
-          List deps = (List)mapIdToListOfUIElementsWithDependingPlausi.get(uiElement.getId());
+            mapIdToListOfUIElementsWithDependingPlausi.put(uiElement.getId(), new Vector<UIElement>(1));
+          List<UIElement> deps = mapIdToListOfUIElementsWithDependingPlausi.get(uiElement.getId());
           if (!deps.contains(uiElement)) deps.add(uiElement);
           
           /********************************************************************
@@ -800,7 +794,7 @@ public class FormController implements UIElementEventHandler
     {
       UIElementState state = ((UIElementState)uiElement.getAdditionalData()); 
       Function func = state.plausi;
-      Map mapIdToListOfDependingUIElements = mapIdToListOfUIElementsWithDependingPlausi;
+      Map<String, List<UIElement>> mapIdToListOfDependingUIElements = mapIdToListOfUIElementsWithDependingPlausi;
       
       /**
        * Für alle Felder von denen die Function abhängt das uiElement in
@@ -816,9 +810,9 @@ public class FormController implements UIElementEventHandler
           {
             String dependency = params[i];
             if (!mapIdToListOfDependingUIElements.containsKey(dependency))
-              mapIdToListOfDependingUIElements.put(dependency, new Vector(1));
+              mapIdToListOfDependingUIElements.put(dependency, new Vector<UIElement>(1));
             
-            List deps = (List)mapIdToListOfDependingUIElements.get(dependency);
+            List<UIElement> deps = mapIdToListOfDependingUIElements.get(dependency);
             deps.add(uiElement);
           }
         }
@@ -843,7 +837,7 @@ public class FormController implements UIElementEventHandler
           if (!mapGroupIdToGroup.containsKey(groupId))
             mapGroupIdToGroup.put(groupId, new Group(groupId));
           
-          Group g = (Group)mapGroupIdToGroup.get(groupId);
+          Group g = mapGroupIdToGroup.get(groupId);
           g.uiElements.add(uiElement);
           
         }
@@ -870,9 +864,9 @@ public class FormController implements UIElementEventHandler
    */
   private void initFactories()
   {
-    Map mapTypeToLayoutConstraints = new HashMap();
-    Map mapTypeToLabelType = new HashMap();
-    Map mapTypeToLabelLayoutConstraints = new HashMap();
+    Map<String, GridBagConstraints> mapTypeToLayoutConstraints = new HashMap<String, GridBagConstraints>();
+    Map<String, Integer> mapTypeToLabelType = new HashMap<String, Integer>();
+    Map<String, GridBagConstraints> mapTypeToLabelLayoutConstraints = new HashMap<String, GridBagConstraints>();
 
     //int gridx, int gridy, int gridwidth, int gridheight, double weightx, double weighty, int anchor,          int fill,                  Insets insets, int ipadx, int ipady) 
     GridBagConstraints gbcTextfield = new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0, GridBagConstraints.LINE_START,   GridBagConstraints.HORIZONTAL, new Insets(TF_BORDER,TF_BORDER,TF_BORDER,TF_BORDER),0,0);
@@ -933,7 +927,7 @@ public class FormController implements UIElementEventHandler
     panelContext.mapTypeToLabelType = mapTypeToLabelType;
     panelContext.mapTypeToLayoutConstraints = mapTypeToLayoutConstraints;
     panelContext.uiElementEventHandler = this;
-    panelContext.mapTypeToType = new HashMap();
+    panelContext.mapTypeToType = new HashMap<String, String>();
     panelContext.mapTypeToType.put("separator","h-separator");
     panelContext.mapTypeToType.put("glue","v-glue");
     
@@ -942,11 +936,11 @@ public class FormController implements UIElementEventHandler
     buttonContext.mapTypeToLabelType = mapTypeToLabelType;
     buttonContext.mapTypeToLayoutConstraints = mapTypeToLayoutConstraints;
     buttonContext.uiElementEventHandler = this;
-    buttonContext.mapTypeToType = new HashMap();
+    buttonContext.mapTypeToType = new HashMap<String, String>();
     buttonContext.mapTypeToType.put("separator","v-separator");
     buttonContext.mapTypeToType.put("glue","h-glue");
     
-    Set supportedActions = new HashSet();
+    Set<String> supportedActions = new HashSet<String>();
     supportedActions.add("abort");
     supportedActions.add("nextTab");
     supportedActions.add("prevTab");
@@ -984,7 +978,7 @@ public class FormController implements UIElementEventHandler
    */
   public void setValue(String uiElementId, String value, ActionListener callback)
   {
-    UIElement uiElement = (UIElement)mapIdToUIElement.get(uiElementId);
+    UIElement uiElement = mapIdToUIElement.get(uiElementId);
     if (uiElement != null)
     {
       processUIElementEvents = false;
@@ -1029,13 +1023,13 @@ public class FormController implements UIElementEventHandler
         // informiert.
         formModel.valueChanged(source.getId(), source.getString());
         
-        Set todo = new HashSet();
+        Set<UIElement> todo = new HashSet<UIElement>();
         todo.add(source);
         /*
          * Der folgende Code wird ebenfalls für den eventType funcDialogSelect
          * verwendet. Die beiden sollten vermutlich immer synchron gehalten werden. 
          */
-        Set changedElements = computeChangesCausedByChangeOf(todo);
+        Set<UIElement> changedElements = computeChangesCausedByChangeOf(todo);
         recomputeAutofills(changedElements, source);
         checkDependingPlausis(changedElements);
         checkDependingVisibilityGroups(changedElements);
@@ -1101,8 +1095,8 @@ public class FormController implements UIElementEventHandler
       else if (eventType.equals("funcDialogSelect"))
       {
         String dialogName = (String)args[0];
-        Set todo = new HashSet();
-        List depending = (List)mapDialogNameToListOfUIElementsWithDependingAutofill.get(dialogName);
+        Set<UIElement> todo = new HashSet<UIElement>();
+        List depending = mapDialogNameToListOfUIElementsWithDependingAutofill.get(dialogName);
         if (depending != null)
         {
           Iterator iter = depending.iterator();
@@ -1116,7 +1110,7 @@ public class FormController implements UIElementEventHandler
          * Der folgende Code wird ebenfalls für den eventType valueChanged
          * verwendet. Die beiden sollten vermutlich immer synchron gehalten werden. 
          */
-        Set changedElements = computeChangesCausedByChangeOf(todo);
+        Set<UIElement> changedElements = computeChangesCausedByChangeOf(todo);
         recomputeAutofills(changedElements, source);
         checkDependingPlausis(changedElements);
         checkDependingVisibilityGroups(changedElements);
@@ -1140,18 +1134,18 @@ public class FormController implements UIElementEventHandler
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
-  public Set computeChangesCausedByChangeOf(Set todo)
+  public Set<UIElement> computeChangesCausedByChangeOf(Set<UIElement> todo)
   {
-    Set elements = new HashSet();
+    Set<UIElement> elements = new HashSet<UIElement>();
     while (!todo.isEmpty())
     {
-      Iterator iter = todo.iterator();
-      UIElement uiElement = (UIElement)iter.next();
+      Iterator<UIElement> iter = todo.iterator();
+      UIElement uiElement = iter.next();
       iter.remove();
       if (!elements.contains(uiElement))
       {
         elements.add(uiElement);
-        List deps = (List)mapIdToListOfUIElementsWithDependingAutofill.get(uiElement.getId());
+        List deps = mapIdToListOfUIElementsWithDependingAutofill.get(uiElement.getId());
         if (deps == null) continue;
         Iterator iter2 = deps.iterator();
         while (iter2.hasNext())
@@ -1171,16 +1165,16 @@ public class FormController implements UIElementEventHandler
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
-  public void recomputeAutofills(Set elements, UIElement exception)
+  public void recomputeAutofills(Set<UIElement> elements, UIElement exception)
   {
       // Alle UIElemente in der Reihenfolge ihrer Definition durchgehen,
       // damit die AUTOFILLs in der richtigen Reihenfolge ausgewertet werden
       // (Annahme ist hier, dass jedes AUTOFILL maximal von vorher definierten
       // Feldern abhängt)
-    Iterator iter = uiElements.iterator();
+    Iterator<UIElement> iter = uiElements.iterator();
     while (iter.hasNext())
     {
-      UIElement uiElement = (UIElement)iter.next();
+      UIElement uiElement = iter.next();
       if (uiElement == exception) continue;
       if (!elements.contains(uiElement)) continue;
       UIElementState state = (UIElementState)uiElement.getAdditionalData();
@@ -1199,13 +1193,13 @@ public class FormController implements UIElementEventHandler
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
-  private void checkDependingVisibilityGroups(Set elements)
+  private void checkDependingVisibilityGroups(Set<UIElement> elements)
   {
-    Iterator eleIter = elements.iterator();
+    Iterator<UIElement> eleIter = elements.iterator();
     while (eleIter.hasNext())
     {
-      UIElement uiElement = (UIElement)eleIter.next();
-      List dependingGroups = (List)mapIdToListOfDependingGroups.get(uiElement.getId());
+      UIElement uiElement = eleIter.next();
+      List dependingGroups = mapIdToListOfDependingGroups.get(uiElement.getId());
       if (dependingGroups != null)
       {
         Iterator iter = dependingGroups.iterator();
@@ -1231,10 +1225,10 @@ public class FormController implements UIElementEventHandler
   private void setGroupVisibility(Group group, boolean visible)
   {
     group.visible = visible;
-    Iterator uiElementIter = group.uiElements.iterator();
+    Iterator<UIElement> uiElementIter = group.uiElements.iterator();
     while (uiElementIter.hasNext())
     {
-      UIElement ele = (UIElement)uiElementIter.next();
+      UIElement ele = uiElementIter.next();
       UIElementState state = (UIElementState)ele.getAdditionalData();
 
       /*
@@ -1312,14 +1306,14 @@ public class FormController implements UIElementEventHandler
    * Element mit ID aus ids abhängen. 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED */
-  private void checkDependingPlausis(Set elements)
+  private void checkDependingPlausis(Set<UIElement> elements)
   {
-    Iterator eleIter = elements.iterator();
+    Iterator<UIElement> eleIter = elements.iterator();
     while (eleIter.hasNext())
     {
-      UIElement uiElement = (UIElement)eleIter.next();
+      UIElement uiElement = eleIter.next();
       
-      List dependingUIElements = (List)mapIdToListOfUIElementsWithDependingPlausi.get(uiElement.getId());
+      List dependingUIElements = mapIdToListOfUIElementsWithDependingPlausi.get(uiElement.getId());
       if (dependingUIElements != null)
       {
         Iterator iter = dependingUIElements.iterator();
@@ -1369,7 +1363,7 @@ public class FormController implements UIElementEventHandler
     /**
      * Die Mitglieder der Gruppe.
      */
-    public List uiElements = new Vector(1);
+    public List<UIElement> uiElements = new Vector<UIElement>(1);
     
     /**
      * Die Bedingung für die Sichtbarkeit (true = sichtbar) oder null, wenn
@@ -1440,9 +1434,9 @@ public class FormController implements UIElementEventHandler
    */
   private static class UIElementMapValues implements Values
   {
-    private Map mapIdToUIElement;
+    private Map<String, UIElement> mapIdToUIElement;
     
-    public UIElementMapValues(Map mapIdToUIElement)
+    public UIElementMapValues(Map<String, UIElement> mapIdToUIElement)
     {
       this.mapIdToUIElement = mapIdToUIElement;
     }
@@ -1454,14 +1448,14 @@ public class FormController implements UIElementEventHandler
 
     public String getString(String id)
     {
-      UIElement uiElement = (UIElement)mapIdToUIElement.get(id);
+      UIElement uiElement = mapIdToUIElement.get(id);
       if (uiElement == null) return "";
       return uiElement.getString();
     }
 
     public boolean getBoolean(String id)
     {
-      UIElement uiElement = (UIElement)mapIdToUIElement.get(id);
+      UIElement uiElement = mapIdToUIElement.get(id);
       if (uiElement == null) return false;
       return uiElement.getBoolean();
     }
@@ -1482,16 +1476,16 @@ public class FormController implements UIElementEventHandler
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
-  public static ConfigThingy mergeFormDescriptors(List desc, ConfigThingy buttonAnpassung)
+  public static ConfigThingy mergeFormDescriptors(List<Object> desc, ConfigThingy buttonAnpassung)
   {
     if (buttonAnpassung == null) buttonAnpassung = new ConfigThingy("Buttonanpassung");
     String plausiColor = null;
-    Iterator iter = desc.iterator();
-    Map mapFensterIdToConfigThingy = new HashMap();
-    Map mapSichtbarkeitIdToConfigThingy = new HashMap();
-    Map mapFunktionenIdToConfigThingy = new HashMap();
-    Map mapFunktionsdialogeIdToConfigThingy = new HashMap();
-    List tabNames = new Vector();
+    Iterator<Object> iter = desc.iterator();
+    Map<String, Object> mapFensterIdToConfigThingy = new HashMap<String, Object>();
+    Map<String, Object> mapSichtbarkeitIdToConfigThingy = new HashMap<String, Object>();
+    Map<String, Object> mapFunktionenIdToConfigThingy = new HashMap<String, Object>();
+    Map<String, Object> mapFunktionsdialogeIdToConfigThingy = new HashMap<String, Object>();
+    List<Object> tabNames = new Vector<Object>();
     while (iter.hasNext())
     {
       ConfigThingy conf = (ConfigThingy)iter.next();
@@ -1556,7 +1550,7 @@ public class FormController implements UIElementEventHandler
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
-  private static void mergeSection(ConfigThingy conf, String sectionName, Map sectionMap, List idList, boolean duplicatesAllowed)
+  private static void mergeSection(ConfigThingy conf, String sectionName, Map<String, Object> sectionMap, List<Object> idList, boolean duplicatesAllowed)
   {
     Iterator parentIter = conf.query(sectionName).iterator();
     while (parentIter.hasNext())
@@ -1602,8 +1596,8 @@ public class FormController implements UIElementEventHandler
      /*
       * NEVER und ALWAYS Angaben aufsammeln
       */
-    Set neverActions = new HashSet();
-    List alwaysActions = new Vector(); //of ActionUIElementPair
+    Set<String> neverActions = new HashSet<String>();
+    List<ActionUIElementPair> alwaysActions = new Vector<ActionUIElementPair>(); //of ActionUIElementPair
     Iterator anpOuterIter = anpassung.iterator(); //durchläuft die *Tab Abschnitte
     while (anpOuterIter.hasNext())
     {
@@ -1635,7 +1629,7 @@ public class FormController implements UIElementEventHandler
       * Existierende Buttons-Abschnitte durchgehen, ihre Elemente aufsammeln (außer denen,
       * die durch NEVER verboten sind) 
       */
-    List existingUIElements = new Vector(); //of ActionUIElementPair
+    List<ActionUIElementPair> existingUIElements = new Vector<ActionUIElementPair>(); //of ActionUIElementPair
     ConfigThingy buttonsConf = tabConf.query("Buttons");
     Iterator buttonsOuterIter = buttonsConf.iterator(); //durchläuft die Buttons-Abschnitte
     while (buttonsOuterIter.hasNext())
@@ -1654,10 +1648,10 @@ public class FormController implements UIElementEventHandler
     /*
      * den Buttons-Abschnitt löschen (weil nachher ein neuer generiert wird)
      */
-    Iterator iter = tabConf.iterator();
+    Iterator<ConfigThingy> iter = tabConf.iterator();
     while (iter.hasNext())
     {
-      ConfigThingy possiblyButtonsConf = (ConfigThingy)iter.next();
+      ConfigThingy possiblyButtonsConf = iter.next();
       if (possiblyButtonsConf.getName().equals("Buttons")) iter.remove();
     }
     
@@ -1667,14 +1661,12 @@ public class FormController implements UIElementEventHandler
     integrateAlwaysButtons: 
       for (int i = 0; i < alwaysActions.size(); ++i)
     {
-      ActionUIElementPair act = (ActionUIElementPair)alwaysActions.get(i);
+      ActionUIElementPair act = alwaysActions.get(i);
        /* zuerst schauen, ob schon ein Button entsprechender ACTION vorhanden ist
         * und falls ja, dann mit dem nächsten Element aus alwaysActions weitermachen.
         */
-      iter = existingUIElements.iterator();
-      while (iter.hasNext())
+      for (ActionUIElementPair act2 : existingUIElements)
       {
-        ActionUIElementPair act2 = (ActionUIElementPair)iter.next();
         if (act2.action != null && act2.action.equals(act.action))
           continue integrateAlwaysButtons;
       }
@@ -1686,12 +1678,12 @@ public class FormController implements UIElementEventHandler
        */
       if (i > 0)
       {
-        String predecessorAction = ((ActionUIElementPair)alwaysActions.get(i-1)).action;
+        String predecessorAction = alwaysActions.get(i-1).action;
         if (predecessorAction != null)
         {
           for (int k = 0; k < existingUIElements.size(); ++k)
           {
-            ActionUIElementPair act2 = (ActionUIElementPair)existingUIElements.get(k);
+            ActionUIElementPair act2 = existingUIElements.get(k);
             if (act2.action != null && act2.action.equals(predecessorAction))
             {
               existingUIElements.add(k + 1, act);
@@ -1708,12 +1700,12 @@ public class FormController implements UIElementEventHandler
        */
       if (i + 1 < alwaysActions.size())
       {
-        String successorAction = ((ActionUIElementPair)alwaysActions.get(i+1)).action;
+        String successorAction = alwaysActions.get(i+1).action;
         if (successorAction != null)
         {
           for (int k = 0; k < existingUIElements.size(); ++k)
           {
-            ActionUIElementPair act2 = (ActionUIElementPair)existingUIElements.get(k);
+            ActionUIElementPair act2 = existingUIElements.get(k);
             if (act2.action != null && act2.action.equals(successorAction))
             {
               existingUIElements.add(k, act);
@@ -1733,10 +1725,10 @@ public class FormController implements UIElementEventHandler
      * "glue" Elemente am Ende der Buttonliste löschen, da diese dort normalerweise nicht erwünscht
      * sind. 
      */
-    ListIterator liter = existingUIElements.listIterator(existingUIElements.size());
+    ListIterator<ActionUIElementPair> liter = existingUIElements.listIterator(existingUIElements.size());
     while (liter.hasPrevious())
     {
-      ActionUIElementPair act = (ActionUIElementPair)liter.previous();
+      ActionUIElementPair act = liter.previous();
       String type = null;
       try{
         type = act.uiElementDesc.get("TYPE").toString();
@@ -1748,10 +1740,8 @@ public class FormController implements UIElementEventHandler
     }
     
     ConfigThingy newButtons = new ConfigThingy("Buttons");
-    iter = existingUIElements.iterator();
-    while (iter.hasNext())
+    for (ActionUIElementPair act : existingUIElements)
     {
-      ActionUIElementPair act = (ActionUIElementPair)iter.next();
       newButtons.addChild(act.uiElementDesc);
     }
     tabConf.addChild(newButtons);
@@ -1778,7 +1768,7 @@ public class FormController implements UIElementEventHandler
     ConfigThingy merge1Conf = new ConfigThingy("", merge1URL).get("Formular");
     ConfigThingy merge2Conf = new ConfigThingy("", merge2URL).get("Formular");
     ConfigThingy buttonanpassung = new ConfigThingy("Buttonanpassung",anpassungURL);
-    List formDesc = new Vector();
+    List<Object> formDesc = new Vector<Object>();
     formDesc.add(merge1Conf);
     formDesc.add(merge2Conf);
     ConfigThingy merged = mergeFormDescriptors(formDesc, buttonanpassung);

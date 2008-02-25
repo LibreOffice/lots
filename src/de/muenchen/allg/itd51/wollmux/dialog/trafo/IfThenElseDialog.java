@@ -219,7 +219,7 @@ public class IfThenElseDialog extends TrafoDialog
      * @author Matthias Benkmann (D-III-ITD D.10)
      * TESTED
      */
-    public JIfThenElsePanel(ConfigThingy conf, List fieldNames, ActionListener packNecessary)
+    public JIfThenElsePanel(ConfigThingy conf, List<String> fieldNames, ActionListener packNecessary)
     {
       this.packNecessary = packNecessary;
       
@@ -247,7 +247,7 @@ public class IfThenElseDialog extends TrafoDialog
       throw new IllegalArgumentException();
     }
     
-    private void buildGUI(List fieldNames)
+    private void buildGUI(List<String> fieldNames)
     {
       this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
       
@@ -283,7 +283,7 @@ public class IfThenElseDialog extends TrafoDialog
      * @param label "Dann" oder "Sonst" (wird zur Beschriftung verwendet)
      * @author Matthias Benkmann (D-III-ITD D.10)
      */
-    private void buildConditionalResultGUI(final List fieldNames, final JComponent guiContainer, String label, final ConditionalResult conditionalResult)
+    private void buildConditionalResultGUI(final List<String> fieldNames, final JComponent guiContainer, String label, final ConditionalResult conditionalResult)
     {
       Box controls = Box.createHorizontalBox();
       guiContainer.add(controls);
@@ -330,7 +330,7 @@ public class IfThenElseDialog extends TrafoDialog
                 conf = new ConfigThingy("Func");
                 ConfigThingy ifConf = conf.add("IF");
                 ConfigThingy strCmpConf = ifConf.add("STRCMP");
-                strCmpConf.add("VALUE").add((String)fieldNames.get(0));
+                strCmpConf.add("VALUE").add(fieldNames.get(0));
                 strCmpConf.add("");
                 ifConf.add("THEN").add("");
                 ifConf.add("ELSE").add("");
@@ -383,13 +383,13 @@ public class IfThenElseDialog extends TrafoDialog
      * @author Matthias Benkmann (D-III-ITD D.10)
      * TESTED
      */
-    private List makeInsertFieldActions(List fieldNames, final TextComponentTags text)
+    private List<Action> makeInsertFieldActions(List<String> fieldNames, final TextComponentTags text)
     {
-      List actions = new Vector();
-      Iterator iter = fieldNames.iterator();
+      List<Action> actions = new Vector<Action>();
+      Iterator<String> iter = fieldNames.iterator();
       while (iter.hasNext())
       {
-        final String name = (String)iter.next();
+        final String name = iter.next();
         Action action = new AbstractAction(name) {
           public void actionPerformed(ActionEvent e)
           {
@@ -415,7 +415,7 @@ public class IfThenElseDialog extends TrafoDialog
      * 
      * @throws IllegalArgumentException falls conf nicht verstanden wird.
      */
-    private void parseCondition(ConfigThingy conf, List fieldNames)
+    private void parseCondition(ConfigThingy conf, List<String> fieldNames)
     {
       notSelector = new JComboBox(new String[]{"",L.m("nicht")});
       if (conf.getName().equals("NOT"))
@@ -448,10 +448,10 @@ public class IfThenElseDialog extends TrafoDialog
           {
             String compareConf = conf.getLastChild().toString();
             compareTo = new JTextField(compareConf, 20);
-            fieldSelector = new JComboBox(new Vector(fieldNames));
+            fieldSelector = new JComboBox(new Vector<String>(fieldNames));
             fieldSelector.setEditable(false);
             String fieldName = value.toString();
-            Iterator iter = fieldNames.iterator();
+            Iterator<String> iter = fieldNames.iterator();
             findFieldName: while(true){
               for (int i = 0; iter.hasNext(); ++i)
               {
@@ -487,7 +487,7 @@ public class IfThenElseDialog extends TrafoDialog
      * @author Matthias Benkmann (D-III-ITD D.10)
      * TESTED
      */
-    private void parseThenElse(ConfigThingy conf, ConditionalResult res, List fieldNames)
+    private void parseThenElse(ConfigThingy conf, ConditionalResult res, List<String> fieldNames)
     {
       try{
         if (conf.count() == 1 && 
@@ -704,7 +704,7 @@ public class IfThenElseDialog extends TrafoDialog
   public static void main(String [] args) throws Exception
   {
     ConfigThingy funConf = new ConfigThingy("Func","IF(STRCMP(VALUE \"foo\", \"bar\") THEN(\"Krass, ey!\") ELSE( IF(MATCH(VALUE \"doof\" \"^foo\") THEN \"blarg\" ELSE \"Dusel\")) )");
-    Vector fieldNames = new Vector();
+    Vector<String> fieldNames = new Vector<String>();
     fieldNames.add("Du");
     fieldNames.add("bist");
     fieldNames.add("doof");

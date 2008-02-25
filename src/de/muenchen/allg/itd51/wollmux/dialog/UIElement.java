@@ -478,14 +478,14 @@ public interface UIElement extends Value
     
     public void setString(String str)
     {
-      Set vals = new HashSet();
+      Set<String> vals = new HashSet<String>();
       String[] split = str.split("\n");
       for (int i = 0; i < split.length; ++i)
         vals.add(split[i]);
       
-      Vector indices = new Vector(split.length);
+      Vector<Integer> indices = new Vector<Integer>(split.length);
       DefaultListModel model = (DefaultListModel)list.getModel();
-      Enumeration enu = model.elements();
+      Enumeration<?> enu = model.elements();
       int index = 0;
       while (enu.hasMoreElements())
       {
@@ -497,7 +497,7 @@ public interface UIElement extends Value
       {
         int[] selIndices = new int[indices.size()];
         for (int i = 0; i < selIndices.length; ++i)
-          selIndices[i] = ((Integer)indices.get(i)).intValue();
+          selIndices[i] = indices.get(i).intValue();
     
         list.setSelectedIndices(selIndices);
       }

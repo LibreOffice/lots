@@ -143,8 +143,8 @@ public class FormGUI
    * @param dialogLib die Dialogbibliothek, die die Dialoge bereitstellt, die
    *        für automatisch zu befüllende Formularfelder benötigt werden.
    */
-  public FormGUI(final ConfigThingy formFensterConf, final ConfigThingy conf, FormModel doc, final Map mapIdToPresetValue,
-      final Map functionContext,
+  public FormGUI(final ConfigThingy formFensterConf, final ConfigThingy conf, FormModel doc, final Map<String, String> mapIdToPresetValue,
+      final Map<Object, Object> functionContext,
       final FunctionLibrary funcLib, final DialogLibrary dialogLib)
   {
     myDoc = doc;
@@ -166,8 +166,8 @@ public class FormGUI
   }
 
 
-  private void createGUI(ConfigThingy formFensterConf, ConfigThingy conf, Map mapIdToPresetValue,
-      Map functionContext,
+  private void createGUI(ConfigThingy formFensterConf, ConfigThingy conf, Map<String, String> mapIdToPresetValue,
+      Map<Object, Object> functionContext,
       FunctionLibrary funcLib, DialogLibrary dialogLib)
   {
     Common.setLookAndFeelOnce();
@@ -567,7 +567,7 @@ public class FormGUI
         .getProperty("user.dir")).toURL(), confFile));
     XTextDocument doc = UNO.XTextDocument(UNO.loadComponentFromURL("private:factory/swriter", true, true));
     FormModel model = new DummyFormModel(doc);
-    Map mapIdToPresetValue = new HashMap();
+    Map<String, String> mapIdToPresetValue = new HashMap<String, String>();
     mapIdToPresetValue.put("NEFishy", FormController.FISHY);
     mapIdToPresetValue.put("NEPresetInList", "Dings");
     mapIdToPresetValue.put("NEPresetNotInList", "Schwupps");
@@ -578,7 +578,7 @@ public class FormGUI
     mapIdToPresetValue.put("AbtAnteile", "false");
     mapIdToPresetValue.put("AbtKaution", "true");
     
-    Map functionContext = new HashMap();
+    Map<Object, Object> functionContext = new HashMap<Object, Object>();
     DialogLibrary dialogLib = WollMuxFiles.parseFunctionDialogs(conf.get("Formular"), null, functionContext);
     FunctionLibrary funcLib = WollMuxFiles.parseFunctions(conf.get("Formular"), dialogLib, functionContext, null);
 

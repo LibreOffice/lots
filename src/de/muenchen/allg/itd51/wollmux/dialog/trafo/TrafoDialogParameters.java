@@ -50,7 +50,7 @@ public class TrafoDialogParameters
    * Für Dialoge, die Feldnamen zur Auswahl stellen gibt diese Liste an, welche Namen
    * angeboten werden sollen.
    */
-  public List fieldNames;
+  public List<String> fieldNames;
   
   /**
    * Falls nicht null, so wird bei Beendigung des Dialogs dieser Listener aufgerufen,

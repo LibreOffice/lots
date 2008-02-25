@@ -219,7 +219,7 @@ public class PersoenlicheAbsenderlisteVerwalten
    * Speichert Referenzen auf die JButtons, die zu deaktivieren sind,
    * wenn kein Eintrag in einer Liste selektiert ist.
    */
-  private List buttonsToGreyOutIfNothingSelected = new Vector();
+  private List<JButton> buttonsToGreyOutIfNothingSelected = new Vector<JButton>();
   
   /**
    * Die Listbox mit den Suchresultaten.
@@ -646,7 +646,7 @@ public class PersoenlicheAbsenderlisteVerwalten
         
         elements[i++] = new ListElement(ds, icon);
       }
-      Arrays.sort(elements, new Comparator()
+      Arrays.sort(elements, new Comparator<Object>()
           {
         public int compare(Object o1, Object o2)
         {
@@ -763,8 +763,8 @@ public class PersoenlicheAbsenderlisteVerwalten
       Logger.error("Listbox mit ID \"suchergebnisse\" oder \"pal\" fehlt");
     }
      
-    Iterator iter = buttonsToGreyOutIfNothingSelected.iterator();
-    while (iter.hasNext()) ((JButton)iter.next()).setEnabled(enabled);
+    Iterator<JButton> iter = buttonsToGreyOutIfNothingSelected.iterator();
+    while (iter.hasNext()) iter.next().setEnabled(enabled);
   }
 
   private static class MyListCellRenderer extends DefaultListCellRenderer

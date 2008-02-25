@@ -213,7 +213,7 @@ public class MailMergeNew
     
     //FIXME: Ausgrauen, wenn kein Datenquelle ausgewählt
     button = new JPotentiallyOverlongPopupMenuButton(L.m("Serienbrieffeld"),new Iterable()
-        {public Iterator iterator(){
+        {public Iterator<Action> iterator(){
             return getInsertFieldActionList().iterator();
           }});
     hbox.add(button);
@@ -393,7 +393,7 @@ public class MailMergeNew
         
         // Ausgrauen der Anpassen-Knöpfe, wenn alle Felder mit den
         // entsprechenden Datenquellenfeldern zugeordnet werden können.
-        boolean hasUnmappedFields = mod.getReferencedFieldIDsThatAreNotInSchema(new HashSet(ds.getColumnNames())).length > 0; 
+        boolean hasUnmappedFields = mod.getReferencedFieldIDsThatAreNotInSchema(new HashSet<String>(ds.getColumnNames())).length > 0; 
         adjustFieldsMenuItem.setEnabled(hasUnmappedFields);
         //TODO: einkommentieren wenn implementiert:
         //addColumnsMenuItem.setEnabled(hasUnmappedFields);
@@ -428,7 +428,7 @@ public class MailMergeNew
    */
   protected void showAdjustFieldsDialog()
   {
-    ReferencedFieldID[] fieldIDs = mod.getReferencedFieldIDsThatAreNotInSchema(new HashSet(ds.getColumnNames()));
+    ReferencedFieldID[] fieldIDs = mod.getReferencedFieldIDsThatAreNotInSchema(new HashSet<String>(ds.getColumnNames()));
     ActionListener submitActionListener = new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
@@ -456,14 +456,15 @@ public class MailMergeNew
    */
   protected void showAddMissingColumnsDialog()
   {
-    ReferencedFieldID[] fieldIDs = mod.getReferencedFieldIDsThatAreNotInSchema(new HashSet(ds.getColumnNames()));
+    ReferencedFieldID[] fieldIDs = mod.getReferencedFieldIDsThatAreNotInSchema(new HashSet<String>(ds.getColumnNames()));
     ActionListener submitActionListener = new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
       {
         // Enthält die Zuordnung ID -> de.muenchen.allg.itd51.wollmux.TextDocumentModel.FieldSubstitution,
         // in der die anzuwendende Ersetzungsregel beschrieben ist.
-        HashMap mapIdToSubstitution = (HashMap) e.getSource();
+
+        //HashMap mapIdToSubstitution = (HashMap) e.getSource();
         // TODO: tabellenspalten wie in mapIdToSubstitution beschrieben ergänzen
       }
     };
@@ -515,23 +516,23 @@ public class MailMergeNew
     dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
     final TextComponentTags[] currentField = new TextComponentTags[] { null };
-    final HashMap mapTextComponentTagsToFieldname = new HashMap();
+    final HashMap<TextComponentTags, String> mapTextComponentTagsToFieldname = new HashMap<TextComponentTags, String>();
 
     Box headers = Box.createHorizontalBox();
     final JButton insertFieldButton = new JPotentiallyOverlongPopupMenuButton(
         L.m("Serienbrieffeld"), new Iterable()
         {
-          public Iterator iterator()
+          public Iterator<Action> iterator()
           {
-            List actions = new Vector();
-            List columnNames = ds.getColumnNames();
+            List<Action> actions = new Vector<Action>();
+            List<String> columnNames = ds.getColumnNames();
 
             Collections.sort(columnNames);
 
-            Iterator iter = columnNames.iterator();
+            Iterator<String> iter = columnNames.iterator();
             while (iter.hasNext())
             {
-              final String name = (String) iter.next();
+              final String name = iter.next();
               Action button = new AbstractAction(name)
               {
                 private static final long serialVersionUID = 0;
@@ -552,7 +553,7 @@ public class MailMergeNew
     headers.add(insertFieldButton);
 
     Box itemBox = Box.createVerticalBox();
-    ArrayList labels = new ArrayList();
+    ArrayList<JLabel> labels = new ArrayList<JLabel>();
     int maxLabelWidth = 0;
 
     Box hbox = Box.createHorizontalBox();
@@ -569,7 +570,7 @@ public class MailMergeNew
     DimAdjust.maxHeightIsPrefMaxWidthUnlimited(hbox);
     itemBox.add(hbox);
 
-    HashSet addedFields = new HashSet();
+    HashSet<String> addedFields = new HashSet<String>();
     for (int i = 0; i < fieldIDs.length; i++)
     {
       String fieldId = fieldIDs[i].getFieldId();
@@ -616,9 +617,9 @@ public class MailMergeNew
     }
 
     // einheitliche Breite für alle Labels vergeben:
-    for (Iterator iter = labels.iterator(); iter.hasNext();)
+    for (Iterator<JLabel> iter = labels.iterator(); iter.hasNext();)
     {
-      label = (JLabel) iter.next();
+      label = iter.next();
 
       Dimension d = label.getPreferredSize();
       d.width = maxLabelWidth + 10;
@@ -643,11 +644,11 @@ public class MailMergeNew
     {
       public void actionPerformed(ActionEvent e)
       {
-        final HashMap result = new HashMap();
-        for (Iterator iter = mapTextComponentTagsToFieldname.keySet().iterator(); iter
+        final HashMap<String, FieldSubstitution> result = new HashMap<String, FieldSubstitution>();
+        for (Iterator<TextComponentTags> iter = mapTextComponentTagsToFieldname.keySet().iterator(); iter
             .hasNext();)
         {
-          TextComponentTags f = (TextComponentTags) iter.next();
+          TextComponentTags f = iter.next();
           if(!f.isContentValid()) continue;
           String fieldId = "" + mapTextComponentTagsToFieldname.get(f);
           FieldSubstitution subst = new TextDocumentModel.FieldSubstitution();
@@ -738,7 +739,7 @@ public class MailMergeNew
     hbox.add(label);
     hbox.add(Box.createHorizontalStrut(5));
     
-    Vector types = new Vector();
+    Vector<String> types = new Vector<String>();
     types.add(L.m("in neues Dokument schreiben"));
     types.add(L.m("auf dem Drucker ausgeben"));
     final JComboBox typeBox = new JComboBox(types);
@@ -839,17 +840,17 @@ public class MailMergeNew
    * Seriendruckfeld einfügen.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private List getInsertFieldActionList()
+  private List<Action> getInsertFieldActionList()
   {
-    List actions = new Vector();
-    List columnNames = ds.getColumnNames();
+    List<Action> actions = new Vector<Action>();
+    List<String> columnNames = ds.getColumnNames();
 
     Collections.sort(columnNames);
     
-    Iterator iter = columnNames.iterator();
+    Iterator<String> iter = columnNames.iterator();
     while (iter.hasNext())
     {
-      final String name = (String)iter.next();
+      final String name = iter.next();
       Action button = new AbstractAction(name)
       {
         private static final long serialVersionUID = 0; //Eclipse-Warnung totmachen
@@ -978,7 +979,7 @@ public class MailMergeNew
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  protected void insertFieldFromTrafoDialog(List fieldNames,
+  protected void insertFieldFromTrafoDialog(List<String> fieldNames,
       final String buttonName, ConfigThingy trafoConf)
   {
     TrafoDialogParameters params = new TrafoDialogParameters();
@@ -1140,7 +1141,7 @@ public class MailMergeNew
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
-  private static QueryResults getVisibleCalcData(XSpreadsheetDocument doc, String sheetName, Set schema)
+  private static QueryResults getVisibleCalcData(XSpreadsheetDocument doc, String sheetName, Set<String> schema)
   {
     CalcCellQueryResults results = new CalcCellQueryResults();
     
@@ -1150,8 +1151,8 @@ public class MailMergeNew
         XCellRangesQuery sheet = UNO.XCellRangesQuery(doc.getSheets().getByName(sheetName));
         if (sheet != null)
         {
-          SortedSet columnIndexes = new TreeSet();
-          SortedSet rowIndexes = new TreeSet();
+          SortedSet<Integer> columnIndexes = new TreeSet<Integer>();
+          SortedSet<Integer> rowIndexes = new TreeSet<Integer>();
           getVisibleNonemptyRowsAndColumns(sheet, columnIndexes, rowIndexes);
           
           if (columnIndexes.size() > 0 && rowIndexes.size() > 0)
@@ -1165,13 +1166,13 @@ public class MailMergeNew
              * der Calc-Tabelle gemappt wird, sondern auf den Index im später für jeden
              * Datensatz existierenden String[]-Array.
              */
-            int ymin = ((Number)rowIndexes.first()).intValue();
-            Map mapColumnNameToIndex = new HashMap();
+            int ymin = rowIndexes.first().intValue();
+            Map<String, Integer> mapColumnNameToIndex = new HashMap<String, Integer>();
             int idx = 0;
-            Iterator iter = columnIndexes.iterator();
+            Iterator<Integer> iter = columnIndexes.iterator();
             while (iter.hasNext())
             {
-              int x = ((Number)iter.next()).intValue();
+              int x = iter.next().intValue();
               String columnName = UNO.XTextRange(sheetCellRange.getCellByPosition(x, ymin)).getString();
               if (columnName.length() > 0)
               {
@@ -1188,17 +1189,17 @@ public class MailMergeNew
             /*
              * Datensätze erzeugen
              */
-            Iterator rowIndexIter = rowIndexes.iterator();
+            Iterator<Integer> rowIndexIter = rowIndexes.iterator();
             rowIndexIter.next(); //erste Zeile enthält die Tabellennamen, keinen Datensatz
             while (rowIndexIter.hasNext())
             {
-              int y = ((Number)rowIndexIter.next()).intValue();
+              int y = rowIndexIter.next().intValue();
               String[] data = new String[columnIndexes.size()];
-              Iterator columnIndexIter = columnIndexes.iterator();
+              Iterator<Integer> columnIndexIter = columnIndexes.iterator();
               idx = 0;
               while (columnIndexIter.hasNext())
               {
-                int x = ((Number)columnIndexIter.next()).intValue();
+                int x = columnIndexIter.next().intValue();
                 String value = UNO.XTextRange(sheetCellRange.getCellByPosition(x, y)).getString();
                 data[idx++] = value;
               }
@@ -1225,7 +1226,7 @@ public class MailMergeNew
    * @param rowIndexes diesem Set werden die Zeilenindizes hinzugefügt
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private static void getVisibleNonemptyRowsAndColumns(XCellRangesQuery sheet, SortedSet columnIndexes, SortedSet rowIndexes)
+  private static void getVisibleNonemptyRowsAndColumns(XCellRangesQuery sheet, SortedSet<Integer> columnIndexes, SortedSet<Integer> rowIndexes)
   {
     XSheetCellRanges visibleCellRanges = sheet.queryVisibleCells();
     XSheetCellRanges nonEmptyCellRanges = sheet
@@ -1385,8 +1386,8 @@ public class MailMergeNew
         }
       } else if("ooo".equalsIgnoreCase(type)) {
         try{
-          String source = datenquelle.get("SOURCE").toString();
-          String table = datenquelle.get("TABLE").toString();
+          @SuppressWarnings("unused") String source = datenquelle.get("SOURCE").toString();
+          @SuppressWarnings("unused") String table = datenquelle.get("TABLE").toString();
           // TODO: bestehende OOo-Datenbank verwenden
         }catch (NodeNotFoundException e){
           Logger.error(L.m("Fehlendes Argument für Datenquelle vom Typ '%1':", type), e);
@@ -1449,19 +1450,19 @@ public class MailMergeNew
      * @author Matthias Benkmann (D-III-ITD 5.1)
      * TESTED
      */
-    public List getColumnNames()
+    public List<String> getColumnNames()
     {
       try{
         switch(sourceType)
         {
           case SOURCE_CALC: return getColumnNames(getCalcDoc(), tableName);
           case SOURCE_DB: return getDbColumnNames(oooDatasourceName, tableName);
-          default: return new Vector();
+          default: return new Vector<String>();
         }
       }catch(Exception x)
       {
         Logger.error(x);
-        return new Vector();
+        return new Vector<String>();
       }
     }
     
@@ -1472,9 +1473,9 @@ public class MailMergeNew
      * @author Matthias Benkmann (D-III-ITD 5.1)
      * TODO Testen
      */
-    private List getDbColumnNames(String oooDatasourceName, String tableName)
+    private List<String> getDbColumnNames(String oooDatasourceName, String tableName)
     {
-      return new Vector(); //FIXME: getDbColumnNames()
+      return new Vector<String>(); //FIXME: getDbColumnNames()
     }
 
     /**
@@ -1483,14 +1484,14 @@ public class MailMergeNew
      * @author Matthias Benkmann (D-III-ITD 5.1)
      * TESTED
      */
-    private List getColumnNames(XSpreadsheetDocument calcDoc, String tableName)
+    private List<String> getColumnNames(XSpreadsheetDocument calcDoc, String tableName)
     {
-      List columnNames = new Vector();
+      List<String> columnNames = new Vector<String>();
       if (calcDoc == null) return columnNames;
       try{
         XCellRangesQuery sheet = UNO.XCellRangesQuery(calcDoc.getSheets().getByName(tableName));
-        SortedSet columnIndexes = new TreeSet();
-        SortedSet rowIndexes = new TreeSet();
+        SortedSet<Integer> columnIndexes = new TreeSet<Integer>();
+        SortedSet<Integer> rowIndexes = new TreeSet<Integer>();
         getVisibleNonemptyRowsAndColumns(sheet, columnIndexes, rowIndexes);
         
         if (columnIndexes.size() > 0 && rowIndexes.size() > 0)
@@ -1501,11 +1502,11 @@ public class MailMergeNew
            * Erste sichtbare Zeile durchscannen und alle nicht-leeren Zelleninhalte als
            * Tabellenspaltennamen interpretieren. 
            */
-          int ymin = ((Number)rowIndexes.first()).intValue();
-          Iterator iter = columnIndexes.iterator();
+          int ymin = rowIndexes.first().intValue();
+          Iterator<Integer> iter = columnIndexes.iterator();
           while (iter.hasNext())
           {
-            int x = ((Number)iter.next()).intValue();
+            int x = iter.next().intValue();
             String columnName = UNO.XTextRange(sheetCellRange.getCellByPosition(x, ymin)).getString();
             if (columnName.length() > 0)
             {
@@ -1557,7 +1558,7 @@ public class MailMergeNew
       Datasource ds;
       ds = new OOoDatasource(new HashMap(),conf,new URL("file:///"), true);
       
-      Set schema = ds.getSchema();
+      Set<String> schema = ds.getSchema();
       QueryResults res = ds.getContents(MAILMERGE_GETCONTENTS_TIMEOUT);
       return new QueryResultsWithSchema(res, schema);
     }
@@ -1570,7 +1571,7 @@ public class MailMergeNew
      */
     private QueryResultsWithSchema getData(XSpreadsheetDocument calcDoc, String tableName)
     {
-      Set schema = new HashSet();
+      Set<String> schema = new HashSet<String>();
       QueryResults res = getVisibleCalcData(calcDoc, tableName, schema);
       return new QueryResultsWithSchema(res, schema);
     }
@@ -1701,14 +1702,14 @@ public class MailMergeNew
      */
     private void selectOpenCalcWindowAsDatasource(final JFrame parent)
     {
-      List[] calcWindows = getOpenCalcWindows();
-      List names = calcWindows[0];
+      OpenCalcWindows win = getOpenCalcWindows();
+      List<String> names = win.titles;
       
       if (names.isEmpty()) return;
       
       if (names.size() == 1)
       {
-        getCalcDoc((XSpreadsheetDocument)calcWindows[1].get(0));
+        getCalcDoc(win.docs.get(0));
         selectTable(parent);
         return;
       }
@@ -1723,8 +1724,8 @@ public class MailMergeNew
       
       for (int i = 0; i < names.size(); ++i)
       {
-        final String name = (String)names.get(i);
-        final XSpreadsheetDocument spread = (XSpreadsheetDocument)calcWindows[1].get(i);
+        final String name = names.get(i);
+        final XSpreadsheetDocument spread = win.docs.get(i);
         JButton button;
         button = new JButton(name);
         button.addActionListener(new ActionListener(){
@@ -1828,8 +1829,8 @@ public class MailMergeNew
      */
     private void selectTable(JFrame parent)
     {
-      List names = getNamesOfNonEmptyTables();
-      List allNames = getTableNames();
+      List<String> names = getNamesOfNonEmptyTables();
+      List<String> allNames = getTableNames();
       if (allNames.isEmpty())
       {
         setTable("");
@@ -1837,7 +1838,7 @@ public class MailMergeNew
       }
       if (names.isEmpty()) names = allNames;
       
-      setTable((String)names.get(0)); //Falls der Benutzer den Dialog abbricht ohne Auswahl
+      setTable(names.get(0)); //Falls der Benutzer den Dialog abbricht ohne Auswahl
       
       if (names.size() == 1) return; //Falls es nur eine Tabelle gibt, Dialog unnötig.
       
@@ -1849,10 +1850,10 @@ public class MailMergeNew
       JLabel label = new JLabel(L.m("Welche Tabelle möchten Sie verwenden ?"));
       vbox.add(label);
       
-      Iterator iter = names.iterator();
+      Iterator<String> iter = names.iterator();
       while (iter.hasNext())
       {
-        final String name = (String)iter.next();
+        final String name = iter.next();
         JButton button;
         button = new JButton(name);
         button.addActionListener(new ActionListener(){
@@ -1964,24 +1965,30 @@ public class MailMergeNew
      */
     private JButton createDatasourceSelectorCalcWindowButton()
     {
-      List[] calcWindows = getOpenCalcWindows();
+      OpenCalcWindows win = getOpenCalcWindows();
       
-      if (calcWindows[0].isEmpty()) return null;
-      if (calcWindows[0].size() > 1) return new JButton(L.m("Offenes Calc-Fenster..."));
+      if (win.titles.isEmpty()) return null;
+      if (win.titles.size() > 1) return new JButton(L.m("Offenes Calc-Fenster..."));
       
       //Es gibt offenbar genau ein offenes Calc-Fenster
       //das XSpreadsheetDocument dazu ist in calcSheet zu finden
-      List nonEmptyTableNames = getNamesOfNonEmptyTables((XSpreadsheetDocument)calcWindows[1].get(0));
+      List<String> nonEmptyTableNames = getNamesOfNonEmptyTables(win.docs.get(0));
       
-      String str = calcWindows[0].get(0).toString();
+      String str = win.titles.get(0);
       if (nonEmptyTableNames.size() == 1) str = str + "." + nonEmptyTableNames.get(0);
       
       return new JButton(str);
     }
 
+    private static class OpenCalcWindows
+    {
+      public List<String> titles;
+      public List<XSpreadsheetDocument> docs;
+    }
+    
     /**
      * Liefert die Titel und zugehörigen XSpreadsheetDocuments aller offenen Calc-Fenster.
-     * @return ein Array mit 2 Elementen. Das erste ist eine Liste aller Titel von Calc-Fenstern,
+     * @return ein Objekt mit 2 Elementen. Das erste ist eine Liste aller Titel von Calc-Fenstern,
      *         wobei jeder Titel bereits mit {@link #stripOpenOfficeFromWindowName(String)}
      *         bearbeitet wurde. Das zweite Element ist eine Liste von
      *         XSpreadsheetDocuments, wobei jeder Eintrag zum Fenstertitel mit dem selben
@@ -1989,9 +1996,11 @@ public class MailMergeNew
      *         Im Fehlerfalle sind beide Listen leer.
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
-    private List[] getOpenCalcWindows()
+    private OpenCalcWindows getOpenCalcWindows()
     {
-      List[] calcWindows = new List[]{new Vector(), new Vector()};
+      OpenCalcWindows win = new OpenCalcWindows();
+      win.titles = new Vector<String>();
+      win.docs = new Vector<XSpreadsheetDocument>();
       try{
         XSpreadsheetDocument spread = null;
         XEnumeration xenu = UNO.desktop.getComponents().createEnumeration();
@@ -2001,15 +2010,15 @@ public class MailMergeNew
           if (spread != null)
           {
             String title = (String)UNO.getProperty(UNO.XModel(spread).getCurrentController().getFrame(),"Title");
-            calcWindows[0].add(stripOpenOfficeFromWindowName(title));
-            calcWindows[1].add(spread);
+            win.titles.add(stripOpenOfficeFromWindowName(title));
+            win.docs.add(spread);
           }
         }
       }catch(Exception x)
       {
         Logger.error(x);
       }
-      return calcWindows;
+      return win;
     }
 
     /**
@@ -2109,19 +2118,19 @@ public class MailMergeNew
      * es keine nicht-leere Tabelle gibt, so wird eine leere Liste geliefert.
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
-    private List getNamesOfNonEmptyTables()
+    private List<String> getNamesOfNonEmptyTables()
     {
       try{
         switch(sourceType)
         {
           case SOURCE_CALC: return getNamesOfNonEmptyTables(getCalcDoc());
           case SOURCE_DB: return getNamesOfNonEmptyDbTables();
-          default: return new Vector();
+          default: return new Vector<String>();
         }
       }catch(Exception x)
       {
         Logger.error(x);
-        return new Vector();
+        return new Vector<String>();
       }
     }
 
@@ -2132,19 +2141,19 @@ public class MailMergeNew
      * es keine nicht-leere Tabelle gibt, so wird eine leere Liste geliefert.
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
-    private List getTableNames()
+    private List<String> getTableNames()
     {
       try{
         switch(sourceType)
         {
           case SOURCE_CALC: return getTableNames(getCalcDoc());
           case SOURCE_DB: return getDbTableNames();
-          default: return new Vector();
+          default: return new Vector<String>();
         }
       }catch(Exception x)
       {
         Logger.error(x);
-        return new Vector();
+        return new Vector<String>();
       }
     }
     
@@ -2154,9 +2163,9 @@ public class MailMergeNew
      * es keine nicht-leere Tabelle gibt, so wird eine leere Liste geliefert.
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
-    private List getDbTableNames()
+    private List<String> getDbTableNames()
     {
-      return new Vector();
+      return new Vector<String>();
     }
     
     /**
@@ -2164,9 +2173,9 @@ public class MailMergeNew
      * Falls calcDoc == null, wird eine leere Liste geliefert.
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
-    private List getTableNames(XSpreadsheetDocument calcDoc)
+    private List<String> getTableNames(XSpreadsheetDocument calcDoc)
     {
-      List nonEmptyTableNames = new Vector();
+      List<String> nonEmptyTableNames = new Vector<String>();
       if (calcDoc != null) 
       try{
         XSpreadsheets sheets = calcDoc.getSheets();
@@ -2185,9 +2194,9 @@ public class MailMergeNew
      * es keine nicht-leere Tabelle gibt, so wird eine leere Liste geliefert.
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
-    private List getNamesOfNonEmptyDbTables()
+    private List<String> getNamesOfNonEmptyDbTables()
     {
-      return new Vector();
+      return new Vector<String>();
     }
     
     
@@ -2196,15 +2205,15 @@ public class MailMergeNew
      * Falls calcDoc == null wird eine leere Liste geliefert.
      * @author Matthias Benkmann (D-III-ITD 5.1)
      * TESTED*/
-    private List getNamesOfNonEmptyTables(XSpreadsheetDocument calcDoc)
+    private List<String> getNamesOfNonEmptyTables(XSpreadsheetDocument calcDoc)
     {
-      List nonEmptyTableNames = new Vector();
+      List<String> nonEmptyTableNames = new Vector<String>();
       if (calcDoc != null) 
       try{
         XSpreadsheets sheets = calcDoc.getSheets();
         String[] tableNames = sheets.getElementNames();
-        SortedSet columns = new TreeSet();
-        SortedSet rows = new TreeSet();
+        SortedSet<Integer> columns = new TreeSet<Integer>();
+        SortedSet<Integer> rows = new TreeSet<Integer>();
         for (int i = 0; i < tableNames.length; ++i)
         {
           try{
@@ -2304,7 +2313,7 @@ public class MailMergeNew
   private static class QueryResultsWithSchema implements QueryResults
   {
     protected QueryResults results;
-    protected Set schema;
+    protected Set<String> schema;
     
     /**
      * Constructs an empty QueryResultsWithSchema.
@@ -2312,7 +2321,7 @@ public class MailMergeNew
     public QueryResultsWithSchema()
     {
       results = new QueryResultsList(new ArrayList());
-      schema = new HashSet();
+      schema = new HashSet<String>();
     }
     
     /**
@@ -2320,7 +2329,7 @@ public class MailMergeNew
      * schema zusammenfasst. ACHTUNG! res und schema werden als Referenzen übernommen.
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
-    public QueryResultsWithSchema(QueryResults res, Set schema)
+    public QueryResultsWithSchema(QueryResults res, Set<String> schema)
     {
       this.schema = schema;
       this.results = res;
@@ -2331,7 +2340,7 @@ public class MailMergeNew
       return results.size();
     }
 
-    public Iterator iterator()
+    public Iterator<Dataset> iterator()
     {
       return results.iterator();
     }
@@ -2341,7 +2350,7 @@ public class MailMergeNew
       return results.isEmpty();
     }
     
-    public Set getSchema() { return new HashSet(schema);}
+    public Set<String> getSchema() { return new HashSet<String>(schema);}
     
   }
   
@@ -2351,16 +2360,16 @@ public class MailMergeNew
      * Bildet einen Spaltennamen auf den Index in dem zu dem Datensatz gehörenden
      * String[]-Array ab.
      */
-    private Map mapColumnNameToIndex;
+    private Map<String, Integer> mapColumnNameToIndex;
    
-    private List datasets = new ArrayList();
+    private List<Dataset> datasets = new ArrayList<Dataset>();
     
     public int size()
     {
       return datasets.size();
     }
 
-    public Iterator iterator()
+    public Iterator<Dataset> iterator()
     {
       return datasets.iterator();
     }
@@ -2370,7 +2379,7 @@ public class MailMergeNew
       return datasets.isEmpty();
     }
 
-    public void setColumnNameToIndexMap(Map mapColumnNameToIndex)
+    public void setColumnNameToIndexMap(Map<String, Integer> mapColumnNameToIndex)
     {
       this.mapColumnNameToIndex = mapColumnNameToIndex;
     }
@@ -2390,7 +2399,7 @@ public class MailMergeNew
 
       public String get(String columnName) throws ColumnNotFoundException
       {
-        Number idx = (Number)mapColumnNameToIndex.get(columnName);
+        Number idx = mapColumnNameToIndex.get(columnName);
         if (idx == null) throw new ColumnNotFoundException(L.m("Spalte %1 existiert nicht!", columnName));
         return data[idx.intValue()];
       }

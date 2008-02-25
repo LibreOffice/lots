@@ -149,9 +149,9 @@ public class TextComponentTags
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  public List getContent()
+  public List<ContentElement> getContent()
   {
-    List list = new ArrayList();
+    List<ContentElement> list = new ArrayList<ContentElement>();
     String t = compo.getText();
     Matcher m = TAG_PATTERN.matcher(t);
     int lastEndPos = 0;
@@ -184,11 +184,11 @@ public class TextComponentTags
       throw new IllegalArgumentException(L.m("Unbekannter syntaxType: %1",""+syntaxType));
 
     ConfigThingy conf = new ConfigThingy("CAT");
-    List content = getContent();
-    Iterator iter = content.iterator();
+    List<ContentElement> content = getContent();
+    Iterator<ContentElement> iter = content.iterator();
     while (iter.hasNext())
     {
-      ContentElement ele = (ContentElement) iter.next();
+      ContentElement ele = iter.next();
       if (ele.isTag())
         conf.add("VALUE").add(ele.toString());
       else
@@ -305,9 +305,9 @@ public class TextComponentTags
         int dot = compo.getCaret().getDot();
         int mark = compo.getCaret().getMark();
 
-        for (Iterator iter = getTagPosIterator(); iter.hasNext();)
+        for (Iterator<TagPos> iter = getTagPosIterator(); iter.hasNext();)
         {
-          TextComponentTags.TagPos fp = (TextComponentTags.TagPos) iter.next();
+          TextComponentTags.TagPos fp = iter.next();
           if (dot > fp.start && dot < fp.end)
           {
             if (dot < mark)
@@ -377,9 +377,9 @@ public class TextComponentTags
         int dot = compo.getCaret().getDot();
 
         // evtl. vorhandenes Tag überspringen
-        for (Iterator iter = getTagPosIterator(); iter.hasNext();)
+        for (Iterator<TagPos> iter = getTagPosIterator(); iter.hasNext();)
         {
-          TextComponentTags.TagPos fp = (TextComponentTags.TagPos) iter.next();
+          TextComponentTags.TagPos fp = iter.next();
           if (dot == fp.end)
           {
             caretSetDot(fp.start);
@@ -402,9 +402,9 @@ public class TextComponentTags
         int dot = compo.getCaret().getDot();
 
         // evtl. vorhandenes Tag überspringen
-        for (Iterator iter = getTagPosIterator(); iter.hasNext();)
+        for (Iterator<TagPos> iter = getTagPosIterator(); iter.hasNext();)
         {
-          TextComponentTags.TagPos fp = (TextComponentTags.TagPos) iter.next();
+          TextComponentTags.TagPos fp = iter.next();
           if (dot == fp.start)
           {
             caretSetDot(fp.end);
@@ -427,9 +427,9 @@ public class TextComponentTags
         int dot = compo.getCaret().getDot();
 
         // evtl. vorhandenes Tag überspringen
-        for (Iterator iter = getTagPosIterator(); iter.hasNext();)
+        for (Iterator<TagPos> iter = getTagPosIterator(); iter.hasNext();)
         {
-          TextComponentTags.TagPos fp = (TextComponentTags.TagPos) iter.next();
+          TextComponentTags.TagPos fp = iter.next();
           if (dot == fp.end)
           {
             caretMoveDot(fp.start);
@@ -451,9 +451,9 @@ public class TextComponentTags
         int dot = compo.getCaret().getDot();
 
         // evtl. vorhandenes Tag überspringen
-        for (Iterator iter = getTagPosIterator(); iter.hasNext();)
+        for (Iterator<TagPos> iter = getTagPosIterator(); iter.hasNext();)
         {
-          TextComponentTags.TagPos fp = (TextComponentTags.TagPos) iter.next();
+          TextComponentTags.TagPos fp = iter.next();
           if (dot == fp.start)
           {
             caretMoveDot(fp.end);
@@ -484,9 +484,9 @@ public class TextComponentTags
 
         // Endposition des zu löschenden Bereichs bestimmen
         int pos2 = dot + 1;
-        for (Iterator iter = getTagPosIterator(); iter.hasNext();)
+        for (Iterator<TagPos> iter = getTagPosIterator(); iter.hasNext();)
         {
-          TextComponentTags.TagPos fp = (TextComponentTags.TagPos) iter.next();
+          TextComponentTags.TagPos fp = iter.next();
           if (dot == fp.start) pos2 = fp.end;
         }
 
@@ -514,9 +514,9 @@ public class TextComponentTags
 
         // Anfangsposition des zu löschenden Bereichs bestimmen
         int pos2 = dot - 1;
-        for (Iterator iter = getTagPosIterator(); iter.hasNext();)
+        for (Iterator<TagPos> iter = getTagPosIterator(); iter.hasNext();)
         {
-          TextComponentTags.TagPos fp = (TextComponentTags.TagPos) iter.next();
+          TextComponentTags.TagPos fp = iter.next();
           if (dot == fp.end) pos2 = fp.start;
         }
 
@@ -642,9 +642,9 @@ public class TextComponentTags
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  private Iterator getTagPosIterator()
+  private Iterator<TagPos> getTagPosIterator()
   {
-    List results = new ArrayList();
+    List<TagPos> results = new ArrayList<TagPos>();
     Matcher m = TAG_PATTERN.matcher(compo.getText());
     while (m.find())
     {

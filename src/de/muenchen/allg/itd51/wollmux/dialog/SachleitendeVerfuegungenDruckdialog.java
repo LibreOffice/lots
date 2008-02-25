@@ -399,7 +399,7 @@ public class SachleitendeVerfuegungenDruckdialog
       Vector zuleitungszeilen = verfPunkt.getZuleitungszeilen();
 
       // elementComboBoxes vorbelegen:
-      Vector content = new Vector();
+      Vector<String> content = new Vector<String>();
       content.add(cutContent(verfPunkt.getHeading()));
       if (zuleitungszeilen.size() > 0)
         content.add(cutContent("------- Zuleitung an --------"));
@@ -870,16 +870,16 @@ public class SachleitendeVerfuegungenDruckdialog
   private void printAll()
   {
     int size = verfuegungspunkte.size();
-    HashMap multidata = new HashMap();
+    HashMap<String, Object[]> multidata = new HashMap<String, Object[]>();
 
     // Arrays mit den Druckdaten aller Verfügungspunkte aufbauen:
     for (int verfPunkt = 1; verfPunkt <= size; ++verfPunkt)
     {
-      HashMap data = getPrintDataForElement(verfPunkt);
-      for (Iterator iter = data.keySet().iterator(); iter.hasNext();)
+      HashMap<String, Comparable> data = getPrintDataForElement(verfPunkt);
+      for (Iterator<String> iter = data.keySet().iterator(); iter.hasNext();)
       {
-        String key = (String) iter.next();
-        Object[] arr = (Object[]) multidata.get(key);
+        String key = iter.next();
+        Object[] arr = multidata.get(key);
         if (arr == null)
         {
           arr = new Object[size];
@@ -890,9 +890,9 @@ public class SachleitendeVerfuegungenDruckdialog
     }
 
     // Properties für das PrintModel setzten:
-    for (Iterator iter = multidata.keySet().iterator(); iter.hasNext();)
+    for (Iterator<String> iter = multidata.keySet().iterator(); iter.hasNext();)
     {
-      String key = (String) iter.next();
+      String key = iter.next();
       try
       {
         pmodel.setPropertyValue(key, multidata.get(key));
@@ -944,10 +944,10 @@ public class SachleitendeVerfuegungenDruckdialog
   private void printElement(final int verfPunkt)
   {
     // Properties für das PrintModel setzten:
-    HashMap data = getPrintDataForElement(verfPunkt);
-    for (Iterator iter = data.keySet().iterator(); iter.hasNext();)
+    HashMap<String, Comparable> data = getPrintDataForElement(verfPunkt);
+    for (Iterator<String> iter = data.keySet().iterator(); iter.hasNext();)
     {
-      String key = (String) iter.next();
+      String key = iter.next();
       try
       {
         pmodel.setPropertyValue(key, new Object[] { data.get(key) });
@@ -979,7 +979,7 @@ public class SachleitendeVerfuegungenDruckdialog
    * 
    * @author christoph.lutz
    */
-  private HashMap getPrintDataForElement(int verfPunkt)
+  private HashMap<String, Comparable> getPrintDataForElement(int verfPunkt)
   {
     // Anzahl der Kopien bestimmen:
     int numberOfCopies = 0;
@@ -1006,7 +1006,7 @@ public class SachleitendeVerfuegungenDruckdialog
     boolean isDraft = (verfPunkt == verfuegungspunkte.size());
     boolean isOriginal = (verfPunkt == 1);
 
-    HashMap data = new HashMap();
+    HashMap<String, Comparable> data = new HashMap<String, Comparable>();
 
     data
         .put(PrintModelProps.PROP_SLV_VERF_PUNKTE, new Short((short) verfPunkt));

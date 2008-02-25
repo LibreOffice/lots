@@ -223,12 +223,12 @@ public class WollMuxBar
   /**
    * Mappt einen Menü-Namen auf ein entsprechendes JPopupMenu.
    */
-  private Map mapMenuNameToJPopupMenu = new HashMap();
+  private Map<String, JComponent> mapMenuNameToJPopupMenu = new HashMap<String, JComponent>();
   
   /**
    * Mappt einen EXT Attributwert auf die zugehörige {@link WollMuxBar.ExternalApplication}.
    */
-  private Map mapExtToExternalApplication = new HashMap();
+  private Map<String, ExternalApplication> mapExtToExternalApplication = new HashMap<String, ExternalApplication>();
   
   /**
    * Die UIElementFactory, die verwendet wird, um das GUI aufzubauen.
@@ -314,7 +314,7 @@ public class WollMuxBar
   /**
    * Alle {@link Senderbox}es der Leiste.
    */
-  private List senderboxes = new Vector();
+  private List<Senderbox> senderboxes = new Vector<Senderbox>();
 
   /**
    * Die breite der minimierten WollMux-Leiste im UP_AND_AWAY_WINDOW_MODE.
@@ -656,7 +656,7 @@ public class WollMuxBar
   private void addUIElements(ConfigThingy menuConf, ConfigThingy elementParent, 
       JComponent compo, int stepx, int stepy, String context)
   {
-    addUIElementsChecked(new HashSet(), menuConf, elementParent, compo, stepx, stepy, context);
+    addUIElementsChecked(new HashSet<String>(), menuConf, elementParent, compo, stepx, stepy, context);
   }
   
   /**
@@ -665,7 +665,7 @@ public class WollMuxBar
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
-  private void addUIElementsChecked(Set alreadySeen, ConfigThingy menuConf, ConfigThingy elementParent, 
+  private void addUIElementsChecked(Set<String> alreadySeen, ConfigThingy menuConf, ConfigThingy elementParent, 
       JComponent compo, int stepx, int stepy, String context)
   {
     //int gridx, int gridy, int gridwidth, int gridheight, double weightx, double weighty, int anchor,          int fill,                  Insets insets, int ipadx, int ipady) 
@@ -821,11 +821,11 @@ public class WollMuxBar
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
-  private JComponent parseMenu(Set alreadySeen, Map mapMenuNameToMenu, ConfigThingy menuConf, 
+  private JComponent parseMenu(Set<String> alreadySeen, Map<String, JComponent> mapMenuNameToMenu, ConfigThingy menuConf, 
       String menuName, JComponent menu)
   {
     if (mapMenuNameToMenu != null && mapMenuNameToMenu.containsKey(menuName)) 
-      return (JComponent)mapMenuNameToMenu.get(menuName);
+      return mapMenuNameToMenu.get(menuName);
     
     if (mapMenuNameToMenu == null && alreadySeen.contains(menuName))
     {
@@ -864,9 +864,9 @@ public class WollMuxBar
    */
   private void initFactories()
   {
-    Map mapTypeToLayoutConstraints = new HashMap();
-    Map mapTypeToLabelType = new HashMap();
-    Map mapTypeToLabelLayoutConstraints = new HashMap();
+    Map<String, GridBagConstraints> mapTypeToLayoutConstraints = new HashMap<String, GridBagConstraints>();
+    Map<String, Integer> mapTypeToLabelType = new HashMap<String, Integer>();
+    Map<String, Object> mapTypeToLabelLayoutConstraints = new HashMap<String, Object>();
 
     //int gridx, int gridy, int gridwidth, int gridheight, double weightx, double weighty, int anchor,          int fill,                  Insets insets, int ipadx, int ipady) 
     GridBagConstraints gbcCombobox  = new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH,           new Insets(TF_BORDER,TF_BORDER,TF_BORDER,TF_BORDER),0,0);
@@ -914,7 +914,7 @@ public class WollMuxBar
     panelContext.mapTypeToLabelType = mapTypeToLabelType;
     panelContext.mapTypeToLayoutConstraints = mapTypeToLayoutConstraints;
     panelContext.uiElementEventHandler = myUIElementEventHandler;
-    panelContext.mapTypeToType = new HashMap();
+    panelContext.mapTypeToType = new HashMap<String, String>();
     panelContext.mapTypeToType.put("separator","v-separator");
     panelContext.mapTypeToType.put("glue","h-glue");
     
@@ -923,12 +923,12 @@ public class WollMuxBar
     menuContext.mapTypeToLabelType = mapTypeToLabelType;
     menuContext.mapTypeToLayoutConstraints = mapTypeToLayoutConstraints;
     menuContext.uiElementEventHandler = myUIElementEventHandler;
-    menuContext.mapTypeToType = new HashMap();
+    menuContext.mapTypeToType = new HashMap<String, String>();
     menuContext.mapTypeToType.put("separator","h-separator");
     menuContext.mapTypeToType.put("glue","v-glue");
     menuContext.mapTypeToType.put("button", "menuitem");
     
-    Set supportedActions = new HashSet();
+    Set<String> supportedActions = new HashSet<String>();
     supportedActions.add("openTemplate");
     supportedActions.add("absenderAuswaehlen");
     supportedActions.add("openDocument");
@@ -980,7 +980,7 @@ public class WollMuxBar
       else if (action.equals("openExt"))
       {
         minimize();
-        OpenExt openExt = new OpenExt((String)args[1],(ExternalApplication)mapExtToExternalApplication.get(args[1]), (String)args[2]);
+        OpenExt openExt = new OpenExt((String)args[1],mapExtToExternalApplication.get(args[1]), (String)args[2]);
         openExt.setDaemon(false);
         openExt.start();
       }
@@ -1034,7 +1034,7 @@ public class WollMuxBar
       Logger.error("ACTION \"open\" erfordert Abschnitt \"Labels\" in den OPEN-Angaben");
       return;
     }
-    final List checkBoxes = new Vector();
+    final List<JCheckBox> checkBoxes = new Vector<JCheckBox>();
     while (iter.hasNext())
     {
       hbox = Box.createHorizontalBox();
@@ -1063,8 +1063,8 @@ public class WollMuxBar
     button.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e)
       {
-        Iterator iter = checkBoxes.iterator();
-        while (iter.hasNext()) ((JCheckBox)iter.next()).setSelected(true);
+        Iterator<JCheckBox> iter = checkBoxes.iterator();
+        while (iter.hasNext()) iter.next().setSelected(true);
       }}
     );
     hbox.add(button);
@@ -1074,8 +1074,8 @@ public class WollMuxBar
     button.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e)
       {
-        Iterator iter = checkBoxes.iterator();
-        while (iter.hasNext()) ((JCheckBox)iter.next()).setSelected(false);
+        Iterator<JCheckBox> iter = checkBoxes.iterator();
+        while (iter.hasNext()) iter.next().setSelected(false);
       }}
     );
     hbox.add(button);
@@ -1087,7 +1087,7 @@ public class WollMuxBar
       public void actionPerformed(ActionEvent e)
       {
         multiOpenFrame.dispose();
-        Iterator iter = checkBoxes.iterator();
+        Iterator<JCheckBox> iter = checkBoxes.iterator();
         ConfigThingy fragConf;
         try
         {
@@ -1102,7 +1102,7 @@ public class WollMuxBar
         while (iter.hasNext() && fragIter.hasNext()) 
         {
           fragIter.next();
-          JCheckBox checkbox = (JCheckBox)iter.next();
+          JCheckBox checkbox = iter.next();
           if (!checkbox.isSelected()) fragIter.remove();
         }
         
@@ -1219,10 +1219,10 @@ public class WollMuxBar
    */
   public void updateSenderboxes(String[] entries, String current)
   {
-    Iterator iter = senderboxes.iterator();
+    Iterator<Senderbox> iter = senderboxes.iterator();
     while(iter.hasNext()) 
     {
-      Senderbox senderbox = (Senderbox) iter.next();
+      Senderbox senderbox = iter.next();
       
       // alte Items löschen
       senderbox.removeAllItems();
@@ -1484,7 +1484,7 @@ public class WollMuxBar
   private static class ExternalApplication
   {
     public boolean downloadUrl = false;
-    public List commands = new Vector();
+    public List<String> commands = new Vector<String>();
   }
   
   /**
@@ -1642,10 +1642,10 @@ public class WollMuxBar
           }
         }
         
-        Iterator iter = app.commands.iterator();
+        Iterator<String> iter = app.commands.iterator();
         while (iter.hasNext())
         {
-          String command = (String)iter.next();
+          String command = iter.next();
           ProcessBuilder proc = new ProcessBuilder(new String[]{command,appArgument});
           proc.redirectErrorStream(true);
           try{
