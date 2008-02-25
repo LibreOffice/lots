@@ -57,7 +57,7 @@ public class FunctionSelection implements FunctionSelectionAccess
    * beiden Funktionen für das selbe steht oder nicht zu erwünschter
    * Erleichterung oder zu unerwünschter Verwirrung führen.
    */
-  private Map mapNameToParamValue = new HashMap();
+  private Map<String, ParamValue> mapNameToParamValue = new HashMap<String, ParamValue>();
   
   /**
    * Erzeugt eine FunctionSelection für "keine Funktion".
@@ -76,7 +76,7 @@ public class FunctionSelection implements FunctionSelectionAccess
     functionName = orig.functionName;
     this.paramNames = new String[orig.paramNames.length];
     System.arraycopy(orig.paramNames, 0, this.paramNames, 0, orig.paramNames.length);
-    this.mapNameToParamValue = new HashMap(orig.mapNameToParamValue);
+    this.mapNameToParamValue = new HashMap<String, ParamValue>(orig.mapNameToParamValue);
   }
   
   
@@ -112,7 +112,7 @@ public class FunctionSelection implements FunctionSelectionAccess
   /* (non-Javadoc)
    * @see de.muenchen.allg.itd51.wollmux.former.FunctionSelectionAccess#setParameterValues(java.util.Map)
    */
-  public void setParameterValues(Map mapNameToParamValue)
+  public void setParameterValues(Map<String, ParamValue> mapNameToParamValue)
   {
     this.mapNameToParamValue = mapNameToParamValue;
   }
@@ -189,7 +189,7 @@ public class FunctionSelection implements FunctionSelectionAccess
       String[] params = getParameterNames();
       for (int i = 0; i < params.length; ++i)
       {
-        ParamValue value = (ParamValue)mapNameToParamValue.get(params[i]);
+        ParamValue value = mapNameToParamValue.get(params[i]);
         if (value != null && !value.isUnspecified())
         {
           ConfigThingy set = conf.add("SET");
@@ -222,7 +222,7 @@ public class FunctionSelection implements FunctionSelectionAccess
   {
     for (int i = 0; i < paramNames.length; ++i)
     {
-      ParamValue value = (ParamValue)mapNameToParamValue.get(paramNames[i]);
+      ParamValue value = mapNameToParamValue.get(paramNames[i]);
       if (value != null && !value.isUnspecified()) return true;
     }
     return false;
@@ -230,7 +230,7 @@ public class FunctionSelection implements FunctionSelectionAccess
 
   public ParamValue getParameterValue(String paramName)
   {
-    ParamValue val = (ParamValue)mapNameToParamValue.get(paramName);
+    ParamValue val = mapNameToParamValue.get(paramName);
     if (val == null) return ParamValue.unspecified();
     return new ParamValue(val);
   }

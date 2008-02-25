@@ -44,7 +44,7 @@ public class FunctionSelectionProvider
   /**
    * Bildet Funktionsnamen auf dazugehörige FunctionSelections ab.
    */
-  private Map mapNameToFunctionSelection;
+  private Map<String, FunctionSelection> mapNameToFunctionSelection;
   
   /**
    * Der {@link IDManager}, der die IDs von Feldreferenzen verwaltet.
@@ -74,7 +74,7 @@ public class FunctionSelectionProvider
     this.funcLib = funcLib;
     this.idManager = idManager;
     this.namespace = namespace;
-    mapNameToFunctionSelection = new HashMap();
+    mapNameToFunctionSelection = new HashMap<String, FunctionSelection>();
     Iterator iter = funConf.iterator();
     while (iter.hasNext())
     {
@@ -96,7 +96,7 @@ public class FunctionSelectionProvider
    */
   public FunctionSelection getFunctionSelection(String funcName)
   {
-    FunctionSelection funcSel = (FunctionSelection)mapNameToFunctionSelection.get(funcName);
+    FunctionSelection funcSel = mapNameToFunctionSelection.get(funcName);
     if (funcSel != null)
       return new FunctionSelection(funcSel);
     else
@@ -145,7 +145,7 @@ public class FunctionSelectionProvider
     
     if (conf.count() != 1) return funcSel;
       
-    conf = ((ConfigThingy)conf.iterator().next());
+    conf = conf.iterator().next();
     
     if (!conf.getName().equals("BIND")) return funcSel;
       
@@ -154,7 +154,7 @@ public class FunctionSelectionProvider
      * Wenn wir das nicht können, dann liefern wir das ganze als Expert-Funktion zurück,
      * ansonsten setzen wir das BIND entsprechend um.
      */
-    Map mapNameToParamValue = new HashMap();
+    Map<String, ParamValue> mapNameToParamValue = new HashMap<String, ParamValue>();
     String funcName = null;
     Iterator iter = conf.iterator();
     while (iter.hasNext())
@@ -164,7 +164,7 @@ public class FunctionSelectionProvider
       if (name.equals("FUNCTION"))
       {
         if (childConf.count() != 1) return funcSel;
-        if (((ConfigThingy)childConf.iterator().next()).count() != 0)
+        if (childConf.iterator().next().count() != 0)
           return funcSel;
         funcName = childConf.toString();
       }
@@ -207,7 +207,7 @@ public class FunctionSelectionProvider
     }
     else
     {
-      funcSel.setFunction(funcName, (String[])mapNameToParamValue.keySet().toArray(new String[]{}));
+      funcSel.setFunction(funcName, mapNameToParamValue.keySet().toArray(new String[]{}));
     }
     
     funcSel.setParameterValues(mapNameToParamValue);

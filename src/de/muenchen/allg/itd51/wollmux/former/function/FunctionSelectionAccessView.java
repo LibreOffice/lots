@@ -225,7 +225,7 @@ public class FunctionSelectionAccessView implements View
          * nur der leere String als Vorbelegung genommen.
          */
         String literal = "";
-        if (conf.count() == 1 && ((ConfigThingy)conf.iterator().next()).count() == 0)
+        if (conf.count() == 1 && conf.iterator().next().count() == 0)
         {
           literal = conf.toString();
         }

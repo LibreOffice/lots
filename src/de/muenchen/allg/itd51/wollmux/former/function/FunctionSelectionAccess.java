@@ -89,7 +89,7 @@ public interface FunctionSelectionAccess
    * @param mapNameToParamValue wird direkt als Referenz übernommen.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public void setParameterValues(Map mapNameToParamValue);
+  public void setParameterValues(Map<String, ParamValue> mapNameToParamValue);
   
   /**
    * Liefert den für Parameter paramName gesetzten Wert. Ist für paramName kein Wert gesetzt,

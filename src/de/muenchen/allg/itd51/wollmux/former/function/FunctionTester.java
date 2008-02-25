@@ -106,7 +106,7 @@ public class FunctionTester
   /**
    * Liste aller angezeigten {@link FunctionTester.ValueBox}es.
    */
-  private List valueBoxes = new Vector();
+  private List<ValueBox> valueBoxes = new Vector<ValueBox>();
   
   /**
    * Die Funktionsbibliothek, deren Funktionen für BIND zur Verfügung stehen.
@@ -475,10 +475,10 @@ public class FunctionTester
     
     private ValueBox getValueBox(String id)
     {
-      Iterator iter = valueBoxes.iterator();
+      Iterator<ValueBox> iter = valueBoxes.iterator();
       while (iter.hasNext())
       {
-        ValueBox box = (ValueBox)iter.next();
+        ValueBox box = iter.next();
         String boxId = getComboBoxValue(box.combo, "");
         if (boxId.equals(id))
           return box;
