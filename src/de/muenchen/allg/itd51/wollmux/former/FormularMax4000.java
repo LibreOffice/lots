@@ -368,7 +368,7 @@ public class FormularMax4000
    * permanente Objekte sein, d.h. Objekte deren Lebensdauer nicht vor Beenden des
    * FM4000 endet. 
    */
-  private List broadcastListeners = new Vector();
+  private List<BroadcastListener> broadcastListeners = new Vector<BroadcastListener>();
 
   /**
    * Wird auf myFrame registriert, damit zum Schließen des Fensters abort() aufgerufen wird.
@@ -393,7 +393,7 @@ public class FormularMax4000
   /**
    * Die Namen aller Druckfunktionen, die zur Auswahl stehen.
    */
-  private Vector printFunctionNames;
+  private Vector<String> printFunctionNames;
   
   /**
    * Wird bei jeder Änderung von Formularaspekten gestartet, um nach einer Verzögerung die
@@ -418,10 +418,10 @@ public class FormularMax4000
    * TESTED*/
   public void broadcast(Broadcast b)
   {
-    Iterator iter = broadcastListeners.iterator();
+    Iterator<BroadcastListener> iter = broadcastListeners.iterator();
     while (iter.hasNext())
     {
-      b.sendTo((BroadcastListener)iter.next());
+      b.sendTo(iter.next());
     }
   }
   
@@ -476,7 +476,7 @@ public class FormularMax4000
     this.doc = model;
     this.abortListener = abortListener;
     this.functionLibrary = funcLib;
-    this.printFunctionNames = new Vector(printFuncLib.getFunctionNames());
+    this.printFunctionNames = new Vector<String>(printFuncLib.getFunctionNames());
     
     //  GUI im Event-Dispatching Thread erzeugen wg. Thread-Safety.
     try{
@@ -1115,7 +1115,7 @@ public class FormularMax4000
   
   private class ScanVisitor extends DocumentTree.Visitor
   {
-    private Map insertions = new HashMap();
+    private Map<String, InsertionBookmark> insertions = new HashMap<String, InsertionBookmark>();
     private StringBuilder text = new StringBuilder();
     private StringBuilder fixupText = new StringBuilder();
     private FormControlModel fixupCheckbox = null;
@@ -1563,7 +1563,7 @@ public class FormularMax4000
   
   private void setPrintFunction()
   {
-    final JList printFunctionCurrentList = new JList(new Vector(doc.getPrintFunctions()));
+    final JList printFunctionCurrentList = new JList(new Vector<String>(doc.getPrintFunctions()));
     JPanel printFunctionEditorContentPanel = new JPanel(new BorderLayout());
     printFunctionEditorContentPanel.add(printFunctionCurrentList, BorderLayout.CENTER);
     
@@ -1579,7 +1579,7 @@ public class FormularMax4000
         Object[] todel = printFunctionCurrentList.getSelectedValues();
         for (int i = 0; i < todel.length; i++)
           doc.removePrintFunction("" + todel[i]);        
-        printFunctionCurrentList.setListData(new Vector(doc.getPrintFunctions()));
+        printFunctionCurrentList.setListData(new Vector<String>(doc.getPrintFunctions()));
       }
     };
 
@@ -1588,7 +1588,7 @@ public class FormularMax4000
       {
         String newFunctionName = printFunctionComboBox.getSelectedItem().toString();
         doc.addPrintFunction(newFunctionName);
-        printFunctionCurrentList.setListData(new Vector(doc.getPrintFunctions()));
+        printFunctionCurrentList.setListData(new Vector<String>(doc.getPrintFunctions()));
       }
     };
     
@@ -1811,7 +1811,7 @@ public class FormularMax4000
    */
   private void selectionChanged(XIndexAccess access)
   {
-    Set bookmarkNames = null; //wird lazy initialisiert
+    Set<String> bookmarkNames = null; //wird lazy initialisiert
     
     int count = access.getCount();
     for (int i = 0; i < count; ++i)
@@ -1846,7 +1846,7 @@ public class FormularMax4000
                 } catch(Exception x){ continue;}
                 
                 String name = bookmark.getName();
-                if (bookmarkNames == null) bookmarkNames = new HashSet();
+                if (bookmarkNames == null) bookmarkNames = new HashSet<String>();
                 bookmarkNames.add(name);
               }
             }

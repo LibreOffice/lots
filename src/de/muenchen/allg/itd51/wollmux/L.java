@@ -44,7 +44,7 @@ public class L
    * Wird für die aktuelle Sprache initialisiert und bildet einen Originalstring
    * auf einen übersetzten String ab.
    */
-  private static final Map mapMessageToTranslation = new HashMap();
+  private static final Map<String, String> mapMessageToTranslation = new HashMap<String, String>();
 
   /**
    * Falls für original eine Übersetzung verfügbar ist, wird diese
@@ -54,7 +54,7 @@ public class L
    */
   public static String m(String original)
   {
-    String trans = (String) mapMessageToTranslation.get(original.trim());
+    String trans = mapMessageToTranslation.get(original.trim());
     if (trans == null)
       return original;
     else
@@ -130,13 +130,13 @@ public class L
       }
 
       ConfigThingy aliases = l10n.get("LanguageAliases", 2);
-      Iterator iter = aliases.iterator();
+      Iterator<?> iter = aliases.iterator();
       findAlias: while (iter.hasNext())
       {
         ConfigThingy aliasConf = (ConfigThingy) iter.next();
         if (aliasConf.count() > 1)
         {
-          Iterator subIter = aliasConf.iterator();
+          Iterator<?> subIter = aliasConf.iterator();
           String languageCode = subIter.next().toString();
           if (messageLanguage.equals(languageCode)) break;
           while (subIter.hasNext())

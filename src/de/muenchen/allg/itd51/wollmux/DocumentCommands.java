@@ -93,50 +93,50 @@ public class DocumentCommands
    * Enthält die Menge aller Dokumentkommandos und wird über update()
    * aktualisiert.
    */
-  private HashSet allCommands;
+  private HashSet<DocumentCommand> allCommands;
 
   /**
    * Enthält die aktuelle Menge aller TextSections mit GROUPS-Attribut und wird
    * über update() aktualisiert.
    */
-  private HashSet allTextSectionsWithGROUPS;
+  private HashSet<TextSection> allTextSectionsWithGROUPS;
 
   /**
    * Enthält die nach Position sortierte Liste aller Sichtbarkeitselemente
    * (setGroups-Kommando und TextSection mit GROUPS-Attribut) des Dokuments und
    * wird über update() aktualisiert.
    */
-  private LinkedList visibilityElements;
+  private LinkedList<VisibilityElement> visibilityElements;
 
   /**
    * Enthält eine nach Position sortierte Liste aller setJumpMark-Kommandos und
    * wird über update() aktualisiert.
    */
-  private LinkedList setJumpMarkCommands;
+  private LinkedList<SetJumpMark> setJumpMarkCommands;
 
   /**
    * Enthält ein Set aller notInOrininal-Dokumentkommandos des Dokuments, die
    * für die Ein/Ausblendungen in Sachleitenden Verfügungen benötigt werden.
    */
-  private HashSet notInOriginalCommands;
+  private HashSet<DocumentCommand> notInOriginalCommands;
 
   /**
    * Enthält ein Set aller OrininalOnly-Dokumentkommandos des Dokuments, die für
    * die Ein/Ausblendungen in Sachleitenden Verfügungen benötigt werden.
    */
-  private HashSet originalOnlyCommands;
+  private HashSet<DocumentCommand> originalOnlyCommands;
 
   /**
    * Enthält ein Set aller draftOnly-Dokumentkommandos des Dokuments, die für
    * die Ein/Ausblendungen in Sachleitenden Verfügungen benötigt werden.
    */
-  private HashSet draftOnlyCommands;
+  private HashSet<DocumentCommand> draftOnlyCommands;
 
   /**
    * Enthält ein Set aller all-Dokumentkommandos des Dokuments, die für die
    * Ein/Ausblendungen in Sachleitenden Verfügungen benötigt werden.
    */
-  private HashSet allVersionsCommands;
+  private HashSet<DocumentCommand> allVersionsCommands;
 
   /**
    * Erzeugt einen neuen Container für DocumentCommands im TextDocument doc.
@@ -146,15 +146,15 @@ public class DocumentCommands
   public DocumentCommands(XBookmarksSupplier doc)
   {
     this.doc = doc;
-    this.allCommands = new HashSet();
+    this.allCommands = new HashSet<DocumentCommand>();
 
-    this.visibilityElements = new LinkedList();
-    this.setJumpMarkCommands = new LinkedList();
-    this.notInOriginalCommands = new HashSet();
-    this.originalOnlyCommands = new HashSet();
-    this.draftOnlyCommands = new HashSet();
-    this.allVersionsCommands = new HashSet();
-    this.allTextSectionsWithGROUPS = new HashSet();
+    this.visibilityElements = new LinkedList<VisibilityElement>();
+    this.setJumpMarkCommands = new LinkedList<SetJumpMark>();
+    this.notInOriginalCommands = new HashSet<DocumentCommand>();
+    this.originalOnlyCommands = new HashSet<DocumentCommand>();
+    this.draftOnlyCommands = new HashSet<DocumentCommand>();
+    this.allVersionsCommands = new HashSet<DocumentCommand>();
+    this.allTextSectionsWithGROUPS = new HashSet<TextSection>();
   }
 
   /**
@@ -224,11 +224,11 @@ public class DocumentCommands
 
     // HashSets mit den Namen der bekannten, gültigen Dokumentkommandos
     // und den ungültigen Dokumentkommandos erstellen:
-    HashSet knownBookmarks = new HashSet();
-    HashSet retiredDocumentCommands = new HashSet();
-    for (Iterator iter = allCommands.iterator(); iter.hasNext();)
+    HashSet<String> knownBookmarks = new HashSet<String>();
+    HashSet<DocumentCommand> retiredDocumentCommands = new HashSet<DocumentCommand>();
+    for (Iterator<DocumentCommand> iter = allCommands.iterator(); iter.hasNext();)
     {
-      DocumentCommand cmd = (DocumentCommand) iter.next();
+      DocumentCommand cmd = iter.next();
       if (cmd.isRetired())
         retiredDocumentCommands.add(cmd);
       else
@@ -236,7 +236,7 @@ public class DocumentCommands
     }
 
     // Bookmarks scannen und HashSet mit allen neuen Dokumentkommandos aufbauen:
-    HashSet newDocumentCommands = new HashSet();
+    HashSet<DocumentCommand> newDocumentCommands = new HashSet<DocumentCommand>();
     String[] bookmarkNames = doc.getBookmarks().getElementNames();
     for (int i = 0; i < bookmarkNames.length; i++)
     {
@@ -283,11 +283,11 @@ public class DocumentCommands
 
     // HashSets mit den Namen der bekannten, gültigen TextSections
     // und den ungültigen TextSections erstellen:
-    HashSet knownTextSections = new HashSet();
-    HashSet retiredTextSections = new HashSet();
-    for (Iterator iter = allTextSectionsWithGROUPS.iterator(); iter.hasNext();)
+    HashSet<String> knownTextSections = new HashSet<String>();
+    HashSet<TextSection> retiredTextSections = new HashSet<TextSection>();
+    for (Iterator<TextSection> iter = allTextSectionsWithGROUPS.iterator(); iter.hasNext();)
     {
-      TextSection s = (TextSection) iter.next();
+      TextSection s = iter.next();
       if (s.isRetired())
         retiredTextSections.add(s);
       else
@@ -295,7 +295,7 @@ public class DocumentCommands
     }
 
     // TextSections scannen und HashSet mit allen TextSections aufbauen:
-    HashSet newTextSections = new HashSet();
+    HashSet<TextSection> newTextSections = new HashSet<TextSection>();
     String[] textSectionNames = supp.getTextSections().getElementNames();
     for (int i = 0; i < textSectionNames.length; i++)
     {
@@ -331,11 +331,11 @@ public class DocumentCommands
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  private void addNewDocumentCommands(HashSet newDocumentCommands)
+  private void addNewDocumentCommands(HashSet<DocumentCommand> newDocumentCommands)
   {
-    for (Iterator iter = newDocumentCommands.iterator(); iter.hasNext();)
+    for (Iterator<DocumentCommand> iter = newDocumentCommands.iterator(); iter.hasNext();)
     {
-      DocumentCommand cmd = (DocumentCommand) iter.next();
+      DocumentCommand cmd = iter.next();
 
       allCommands.add(cmd);
 
@@ -358,11 +358,11 @@ public class DocumentCommands
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  private void addNewTextSections(HashSet newElements)
+  private void addNewTextSections(HashSet<TextSection> newElements)
   {
-    for (Iterator iter = newElements.iterator(); iter.hasNext();)
+    for (Iterator<TextSection> iter = newElements.iterator(); iter.hasNext();)
     {
-      TextSection s = (TextSection) iter.next();
+      TextSection s = iter.next();
 
       allTextSectionsWithGROUPS.add(s);
 
@@ -389,10 +389,10 @@ public class DocumentCommands
     XTextRange anchor = element.getAnchor();
     if (anchor == null) return;
 
-    ListIterator iter = visibilityElements.listIterator();
+    ListIterator<VisibilityElement> iter = visibilityElements.listIterator();
     while (iter.hasNext())
     {
-      VisibilityElement current = (VisibilityElement) iter.next();
+      VisibilityElement current = iter.next();
 
       TreeRelation rel = new TreeRelation(current.getAnchor(), anchor);
 
@@ -434,10 +434,10 @@ public class DocumentCommands
    */
   private void addNewSetJumpMark(SetJumpMark cmdB)
   {
-    ListIterator iter = setJumpMarkCommands.listIterator();
+    ListIterator<SetJumpMark> iter = setJumpMarkCommands.listIterator();
     while (iter.hasNext())
     {
-      SetJumpMark cmdA = (SetJumpMark) iter.next();
+      SetJumpMark cmdA = iter.next();
       TreeRelation rel = new TreeRelation(cmdA.getAnchor(), cmdB.getAnchor());
       if (rel.isAGreaterThanB() || rel.isAEqualB())
       {
@@ -458,7 +458,7 @@ public class DocumentCommands
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  private void removeRetiredDocumentCommands(HashSet retired)
+  private void removeRetiredDocumentCommands(HashSet<DocumentCommand> retired)
   {
     allCommands.removeAll(retired);
     visibilityElements.removeAll(retired);
@@ -479,7 +479,7 @@ public class DocumentCommands
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  private void removeRetiredTextSections(HashSet retired)
+  private void removeRetiredTextSections(HashSet<TextSection> retired)
   {
     allTextSectionsWithGROUPS.removeAll(retired);
     visibilityElements.removeAll(retired);
@@ -497,7 +497,7 @@ public class DocumentCommands
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  public Iterator iterator()
+  public Iterator<DocumentCommand> iterator()
   {
     return allCommands.iterator();
   }
@@ -513,7 +513,7 @@ public class DocumentCommands
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  public Iterator setGroupsIterator()
+  public Iterator<VisibilityElement> setGroupsIterator()
   {
     return visibilityElements.iterator();
   }
@@ -530,7 +530,7 @@ public class DocumentCommands
   {
     try
     {
-      return (SetJumpMark) setJumpMarkCommands.getFirst();
+      return setJumpMarkCommands.getFirst();
     }
     catch (NoSuchElementException e)
     {
@@ -547,7 +547,7 @@ public class DocumentCommands
    *         Iterator kann auch keine Elemente enthalten.
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  public Iterator notInOriginalIterator()
+  public Iterator<DocumentCommand> notInOriginalIterator()
   {
     return notInOriginalCommands.iterator();
   }
@@ -561,7 +561,7 @@ public class DocumentCommands
    *         Iterator kann auch keine Elemente enthalten.
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  public Iterator originalOnlyIterator()
+  public Iterator<DocumentCommand> originalOnlyIterator()
   {
     return originalOnlyCommands.iterator();
   }
@@ -575,7 +575,7 @@ public class DocumentCommands
    *         enthalten.
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  public Iterator draftOnlyIterator()
+  public Iterator<DocumentCommand> draftOnlyIterator()
   {
     return draftOnlyCommands.iterator();
   }
@@ -589,7 +589,7 @@ public class DocumentCommands
    *         enthalten.
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  public Iterator allVersionsIterator()
+  public Iterator<DocumentCommand> allVersionsIterator()
   {
     return allVersionsCommands.iterator();
   }
@@ -668,7 +668,7 @@ public class DocumentCommands
     XNameAccess sectionsAccess = doc.getTextSections();
 
     // HashSet mit allen Gruppen GROUPS aufbauen:
-    Set groups = new HashSet();
+    Set<String> groups = new HashSet<String>();
     try
     {
       ConfigThingy groupsCfg = new ConfigThingy("", null,
@@ -838,9 +838,9 @@ public class DocumentCommands
       int errors = 0;
 
       // Alle DocumentCommands durchlaufen und mit execute aufrufen.
-      for (Iterator iter = commands.iterator(); iter.hasNext();)
+      for (Iterator<DocumentCommand> iter = commands.iterator(); iter.hasNext();)
       {
-        DocumentCommand cmd = (DocumentCommand) iter.next();
+        DocumentCommand cmd = iter.next();
 
         if (cmd.isDone() == false && cmd.hasError() == false)
         {

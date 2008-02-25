@@ -23,7 +23,6 @@ import java.awt.Window;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -167,7 +166,7 @@ public class TextDocumentModel
    * enthaltenen FormFields sind nicht in {@link #idToTextFieldFormFields}
    * enthalten und umgekehrt.
    */
-  private HashMap idToFormFields;
+  private HashMap<String, List<FormField>> idToFormFields;
 
   /**
    * Liefert zu einer ID eine {@link java.util.List} von FormField-Objekten, die
@@ -175,7 +174,7 @@ public class TextDocumentModel
    * trotzdem vom WollMux interpretiert werden. Die in dieser Map enthaltenen
    * FormFields sind nicht in {@link #idToFormFields} enthalten und umgekehrt.
    */
-  private HashMap idToTextFieldFormFields;
+  private HashMap<String, List<FormField>> idToTextFieldFormFields;
 
   /**
    * Enthält alle Textfelder ohne ein umschließendes WollMux-Bookmark, die vom
@@ -185,7 +184,7 @@ public class TextDocumentModel
    * {@link #idToTextFieldFormFields} enthalten, da sie keine ID besitzen der
    * sie zugeordnet werden können.
    */
-  private List staticTextFieldFormFields;
+  private List<FormField> staticTextFieldFormFields;
 
   /**
    * Falls es sich bei dem Dokument um ein Formular handelt, wird das zugehörige
@@ -227,7 +226,7 @@ public class TextDocumentModel
   /**
    * Enthält die Namen der aktuell gesetzten Druckfunktionen.
    */
-  private HashSet printFunctions;
+  private HashSet<String> printFunctions;
 
   /**
    * Enthält die Formularbeschreibung des Dokuments oder null, wenn die
@@ -238,7 +237,7 @@ public class TextDocumentModel
   /**
    * Enthält die aktuellen Werte der Formularfelder als Zuordnung id -> Wert.
    */
-  private HashMap formFieldValues;
+  private HashMap<String, String> formFieldValues;
 
   /**
    * Verantwortlich für das Speichern persistenter Daten.
@@ -274,7 +273,7 @@ public class TextDocumentModel
    * FRAG_IDs newFragId, die über im Dokument enthaltene Dokumentkommando WM(CMD
    * 'overrideFrag' FRAG_ID 'fragId' NEW_FRAG_ID 'newFragId') entstanden sind.
    */
-  private HashMap /* of String */overrideFragMap;
+  private HashMap /* of String */<String, String>overrideFragMap;
 
   /**
    * Enthält den Kontext für die Funktionsbibliotheken und Dialogbibliotheken
@@ -320,18 +319,18 @@ public class TextDocumentModel
   public TextDocumentModel(XTextDocument doc)
   {
     this.doc = doc;
-    this.idToFormFields = new HashMap();
-    this.idToTextFieldFormFields = new HashMap();
-    this.staticTextFieldFormFields = new Vector();
+    this.idToFormFields = new HashMap<String, List<FormField>>();
+    this.idToTextFieldFormFields = new HashMap<String, List<FormField>>();
+    this.staticTextFieldFormFields = new Vector<FormField>();
     this.fragUrls = new String[] {};
     this.currentMax4000 = null;
     this.closeListener = null;
-    this.printFunctions = new HashSet();
+    this.printFunctions = new HashSet<String>();
     this.printSettingsDone = false;
     this.formularConf = null;
-    this.formFieldValues = new HashMap();
+    this.formFieldValues = new HashMap<String, String>();
     this.invisibleGroups = new HashSet();
-    this.overrideFragMap = new HashMap();
+    this.overrideFragMap = new HashMap<String, String>();
     this.functionContext = new HashMap();
     this.formModel = null;
     this.formFieldPreviewMode = true;
@@ -387,10 +386,10 @@ public class TextDocumentModel
    * GROUPS-Erweiterung) und dann alle Dokumentkommandos des Kommandobaumes in
    * der Reihenfolge, die DocumentCommandTree.depthFirstIterator(false) liefert.
    */
-  synchronized public Iterator visibleElementsIterator()
+  synchronized public Iterator<VisibilityElement> visibleElementsIterator()
   {
-    Vector visibleElements = new Vector();
-    for (Iterator iter = documentCommands.setGroupsIterator(); iter.hasNext();)
+    Vector<VisibilityElement> visibleElements = new Vector<VisibilityElement>();
+    for (Iterator<VisibilityElement> iter = documentCommands.setGroupsIterator(); iter.hasNext();)
       visibleElements.add(iter.next());
     return visibleElements.iterator();
   }
@@ -545,7 +544,7 @@ public class TextDocumentModel
    * 
    * @param idToFormFields
    */
-  synchronized public void setIDToFormFields(HashMap idToFormFields)
+  synchronized public void setIDToFormFields(HashMap<String, List<FormFieldFactory.FormField>> idToFormFields)
   {
     this.idToFormFields = idToFormFields;
   }
@@ -564,21 +563,21 @@ public class TextDocumentModel
    * @return eine vollständige Zuordnung von Feld IDs zu den aktuellen
    *         Vorbelegungen im Dokument. TESTED
    */
-  synchronized public HashMap getIDToPresetValue()
+  synchronized public HashMap<String, String> getIDToPresetValue()
   {
-    HashMap idToPresetValue = new HashMap();
+    HashMap<String, String> idToPresetValue = new HashMap<String, String>();
 
     // durch alle Werte, die im FormDescriptor abgelegt sind gehen, und
     // vergleichen, ob sie mit den Inhalten der Formularfelder im Dokument
     // übereinstimmen.
-    Iterator idIter = formFieldValues.keySet().iterator();
+    Iterator<String> idIter = formFieldValues.keySet().iterator();
     while (idIter.hasNext())
     {
-      String id = (String) idIter.next();
+      String id = idIter.next();
       String value;
-      String lastStoredValue = (String) formFieldValues.get(id);
+      String lastStoredValue = formFieldValues.get(id);
 
-      List fields = (List) idToFormFields.get(id);
+      List<FormField> fields = idToFormFields.get(id);
       if (fields != null && fields.size() > 0)
       {
         boolean allAreUnchanged = true;
@@ -734,9 +733,9 @@ public class TextDocumentModel
               if (id != null && id.length() > 0)
               {
                 if (!idToTextFieldFormFields.containsKey(id))
-                  idToTextFieldFormFields.put(id, new Vector());
+                  idToTextFieldFormFields.put(id, new Vector<FormField>());
 
-                List formFields = (List) idToTextFieldFormFields.get(id);
+                List<FormField> formFields = idToTextFieldFormFields.get(id);
                 formFields.add(f);
               }
             }
@@ -749,9 +748,9 @@ public class TextDocumentModel
             if (id != null && id.length() > 0)
             {
               if (!idToTextFieldFormFields.containsKey(id))
-                idToTextFieldFormFields.put(id, new Vector());
+                idToTextFieldFormFields.put(id, new Vector<FormField>());
 
-              List formFields = (List) idToTextFieldFormFields.get(id);
+              List<FormField> formFields = idToTextFieldFormFields.get(id);
               formFields.add(FormFieldFactory.createDatabaseFormField(doc, tf));
             }
           }
@@ -1072,15 +1071,15 @@ public class TextDocumentModel
   private void storePrintFunctions()
   {
     // Elemente nach Namen sortieren (definierte Reihenfolge bei der Ausgabe)
-    ArrayList names = new ArrayList(printFunctions);
+    ArrayList<String> names = new ArrayList<String>(printFunctions);
     Collections.sort(names);
 
     ConfigThingy wm = new ConfigThingy("WM");
     ConfigThingy druckfunktionen = new ConfigThingy("Druckfunktionen");
     wm.addChild(druckfunktionen);
-    for (Iterator iter = names.iterator(); iter.hasNext();)
+    for (Iterator<String> iter = names.iterator(); iter.hasNext();)
     {
-      String name = (String) iter.next();
+      String name = iter.next();
       ConfigThingy list = new ConfigThingy("");
       ConfigThingy nameConf = new ConfigThingy("FUNCTION");
       nameConf.addChild(new ConfigThingy(name));
@@ -1102,7 +1101,7 @@ public class TextDocumentModel
   /**
    * Liefert eine Menge mit den Namen der aktuell gesetzten Druckfunktionen.
    */
-  synchronized public Set getPrintFunctions()
+  synchronized public Set<String> getPrintFunctions()
   {
     return printFunctions;
   }
@@ -1220,9 +1219,9 @@ public class TextDocumentModel
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  synchronized public Set getAllFieldIDs()
+  synchronized public Set<String> getAllFieldIDs()
   {
-    HashSet ids = new HashSet();
+    HashSet<String> ids = new HashSet<String>();
     ids.addAll(idToFormFields.keySet());
     ids.addAll(idToTextFieldFormFields.keySet());
     return ids;
@@ -1367,8 +1366,8 @@ public class TextDocumentModel
 
       // Formularfeld bekanntmachen, damit es vom WollMux verwendet wird.
       if (!idToTextFieldFormFields.containsKey(fieldId))
-        idToTextFieldFormFields.put(fieldId, new Vector());
-      List formFields = (List) idToTextFieldFormFields.get(fieldId);
+        idToTextFieldFormFields.put(fieldId, new Vector<FormField>());
+      List<FormField> formFields = idToTextFieldFormFields.get(fieldId);
       formFields.add(FormFieldFactory.createDatabaseFormField(doc, field));
 
       // Ansicht des Formularfeldes aktualisieren:
@@ -1563,11 +1562,11 @@ public class TextDocumentModel
     ConfigThingy werte = new ConfigThingy("WM");
     ConfigThingy formwerte = new ConfigThingy("Formularwerte");
     werte.addChild(formwerte);
-    Iterator iter = formFieldValues.keySet().iterator();
+    Iterator<String> iter = formFieldValues.keySet().iterator();
     while (iter.hasNext())
     {
-      String key = (String) iter.next();
-      String value = (String) formFieldValues.get(key);
+      String key = iter.next();
+      String value = formFieldValues.get(key);
       if (key != null && value != null)
       {
         ConfigThingy entry = new ConfigThingy("");
@@ -1718,7 +1717,7 @@ public class TextDocumentModel
   {
     if (formFieldPreviewMode)
     {
-      String value = (String) formFieldValues.get(fieldId);
+      String value = formFieldValues.get(fieldId);
       if (value == null) value = "";
       setFormFields(fieldId, value, true);
     }
@@ -1737,9 +1736,9 @@ public class TextDocumentModel
    */
   private void updateAllFormFields()
   {
-    for (Iterator iter = getAllFieldIDs().iterator(); iter.hasNext();)
+    for (Iterator<String> iter = getAllFieldIDs().iterator(); iter.hasNext();)
     {
-      String fieldId = (String) iter.next();
+      String fieldId = iter.next();
       updateFormFields(fieldId);
     }
   }
@@ -1754,8 +1753,8 @@ public class TextDocumentModel
    */
   private void setFormFields(String fieldId, String value, boolean applyTrafo)
   {
-    setFormFields((List) idToFormFields.get(fieldId), value, applyTrafo, false);
-    setFormFields((List) idToTextFieldFormFields.get(fieldId), value, applyTrafo,
+    setFormFields(idToFormFields.get(fieldId), value, applyTrafo, false);
+    setFormFields(idToTextFieldFormFields.get(fieldId), value, applyTrafo,
       true);
     setFormFields(staticTextFieldFormFields, value, applyTrafo, true);
   }
@@ -1780,14 +1779,14 @@ public class TextDocumentModel
    * 
    * @author Matthias Benkmann, Christoph Lutz (D-III-ITD 5.1)
    */
-  private void setFormFields(List formFields, String value, boolean applyTrafo,
+  private void setFormFields(List<FormField> formFields, String value, boolean applyTrafo,
       boolean useKnownFormValues)
   {
     if (formFields == null) return;
-    Iterator fields = formFields.iterator();
+    Iterator<FormField> fields = formFields.iterator();
     while (fields.hasNext())
     {
-      FormField field = (FormField) fields.next();
+      FormField field = fields.next();
       try
       {
         if (applyTrafo)
@@ -1835,14 +1834,14 @@ public class TextDocumentModel
   synchronized public void focusFormField(String fieldId)
   {
     FormField field = null;
-    List formFields = (List) idToTextFieldFormFields.get(fieldId);
+    List<FormField> formFields = idToTextFieldFormFields.get(fieldId);
     if (formFields != null)
     {
-      field = (FormField) formFields.get(0);
+      field = formFields.get(0);
     }
     else
     {
-      formFields = (List) idToFormFields.get(fieldId);
+      formFields = idToFormFields.get(fieldId);
       field = preferUntransformedFormField(formFields);
     }
 
@@ -1922,7 +1921,7 @@ public class TextDocumentModel
         for (int i = 0; i < pars.length; i++)
         {
           if (useKnownFormValues)
-            args.put(pars[i], (String) formFieldValues.get(pars[i]));
+            args.put(pars[i], formFieldValues.get(pars[i]));
           else
             args.put(pars[i], value);
         }
@@ -2312,7 +2311,7 @@ public class TextDocumentModel
   synchronized public void printWithPageRange(short numberOfCopies,
       short pageRangeType, String pageRangeValue) throws PrintFailedException
   {
-    HashMap props = new HashMap();
+    HashMap<String, Comparable> props = new HashMap<String, Comparable>();
     props.put(PrintModelProps.PROP_PAGE_RANGE_TYPE, new Short(pageRangeType));
     props.put(PrintModelProps.PROP_PAGE_RANGE_VALUE, pageRangeValue);
     props.put(PrintModelProps.PROP_COPY_COUNT, new Short(numberOfCopies));
@@ -2332,11 +2331,11 @@ public class TextDocumentModel
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  synchronized public void printWithProps(HashMap props) throws PrintFailedException
+  synchronized public void printWithProps(HashMap<String, Comparable> props) throws PrintFailedException
   {
     try
     {
-      if (props == null) props = new HashMap();
+      if (props == null) props = new HashMap<String, Comparable>();
       UnoProps myProps = new UnoProps("Wait", Boolean.TRUE);
 
       // Property "CopyCount" bestimmen:
@@ -2560,9 +2559,9 @@ public class TextDocumentModel
     XPrintModel pmod = PrintModels.createPrintModel(this);
     if (useDocPrintFunctions)
     {
-      for (Iterator iter = printFunctions.iterator(); iter.hasNext();)
+      for (Iterator<String> iter = printFunctions.iterator(); iter.hasNext();)
       {
-        String name = (String) iter.next();
+        String name = iter.next();
         pmod.usePrintFunction(name);
       }
     }
@@ -2707,11 +2706,11 @@ public class TextDocumentModel
     boolean modified = getDocumentModified();
 
     // Liste aller derzeit eingesetzten Trafos aufbauen:
-    HashSet usedFunctions = new HashSet();
-    for (Iterator iter = idToFormFields.keySet().iterator(); iter.hasNext();)
+    HashSet<String> usedFunctions = new HashSet<String>();
+    for (Iterator<String> iter = idToFormFields.keySet().iterator(); iter.hasNext();)
     {
-      String id = (String) iter.next();
-      List l = (List) idToFormFields.get(id);
+      String id = iter.next();
+      List<FormField> l = idToFormFields.get(id);
       for (Iterator iterator = l.iterator(); iterator.hasNext();)
       {
         FormField f = (FormField) iterator.next();
@@ -2719,10 +2718,10 @@ public class TextDocumentModel
         if (trafoName != null) usedFunctions.add(trafoName);
       }
     }
-    for (Iterator iter = idToTextFieldFormFields.keySet().iterator(); iter.hasNext();)
+    for (Iterator<String> iter = idToTextFieldFormFields.keySet().iterator(); iter.hasNext();)
     {
-      String id = (String) iter.next();
-      List l = (List) idToTextFieldFormFields.get(id);
+      String id = iter.next();
+      List l = idToTextFieldFormFields.get(id);
       for (Iterator iterator = l.iterator(); iterator.hasNext();)
       {
         FormField f = (FormField) iterator.next();
@@ -2730,9 +2729,9 @@ public class TextDocumentModel
         if (trafoName != null) usedFunctions.add(trafoName);
       }
     }
-    for (Iterator iterator = staticTextFieldFormFields.iterator(); iterator.hasNext();)
+    for (Iterator<FormField> iterator = staticTextFieldFormFields.iterator(); iterator.hasNext();)
     {
-      FormField f = (FormField) iterator.next();
+      FormField f = iterator.next();
       String trafoName = f.getTrafoName();
       if (trafoName != null) usedFunctions.add(trafoName);
     }
@@ -2969,16 +2968,16 @@ public class TextDocumentModel
     XTextCursor vc = getViewCursor();
     if (vc == null) return null;
 
-    HashMap collectedTrafos = collectTrafosFromEnumeration(vc);
+    HashMap<String, Integer> collectedTrafos = collectTrafosFromEnumeration(vc);
 
     // Auswertung von collectedTrafos
-    HashSet completeFields = new HashSet();
-    HashSet startedFields = new HashSet();
-    HashSet finishedFields = new HashSet();
-    for (Iterator iter = collectedTrafos.keySet().iterator(); iter.hasNext();)
+    HashSet<String> completeFields = new HashSet<String>();
+    HashSet<String> startedFields = new HashSet<String>();
+    HashSet<String> finishedFields = new HashSet<String>();
+    for (Iterator<String> iter = collectedTrafos.keySet().iterator(); iter.hasNext();)
     {
-      String trafo = (String) iter.next();
-      int complete = ((Integer) collectedTrafos.get(trafo)).intValue();
+      String trafo = iter.next();
+      int complete = collectedTrafos.get(trafo).intValue();
       if (complete == 1) startedFields.add(trafo);
       if (complete == 2) finishedFields.add(trafo);
       if (complete == 3) completeFields.add(trafo);
@@ -3022,9 +3021,9 @@ public class TextDocumentModel
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  private static HashMap collectTrafosFromEnumeration(XTextRange textRange)
+  private static HashMap<String, Integer> collectTrafosFromEnumeration(XTextRange textRange)
   {
-    HashMap collectedTrafos = new HashMap();
+    HashMap<String, Integer> collectedTrafos = new HashMap<String, Integer>();
 
     if (textRange == null) return collectedTrafos;
     XEnumerationAccess parEnumAcc = UNO.XEnumerationAccess(textRange.getText().createTextCursorByRange(
@@ -3094,7 +3093,7 @@ public class TextDocumentModel
             String t = getFunctionNameForDocumentCommand(m.group(1));
             if (t != null)
             {
-              Integer s = (Integer) collectedTrafos.get(t);
+              Integer s = collectedTrafos.get(t);
               if (s == null) s = new Integer(0);
               if (isStart) s = new Integer(s.intValue() | 1);
               if (isEnd) s = new Integer(s.intValue() | 2);
@@ -3199,7 +3198,7 @@ public class TextDocumentModel
   synchronized public ReferencedFieldID[] getReferencedFieldIDsThatAreNotInSchema(
       Set schema)
   {
-    ArrayList list = new ArrayList();
+    ArrayList<ReferencedFieldID> list = new ArrayList<ReferencedFieldID>();
     if (hasSelection())
     {
       // Nur Felder der aktuellen Selektion zurückliefern.
@@ -3209,17 +3208,17 @@ public class TextDocumentModel
     {
       // Alle ReferencedFieldIDs des Dokuments alphabetisch sortiert
       // zurückliefern.
-      List sortedIDs = new ArrayList(getAllFieldIDs());
+      List<String> sortedIDs = new ArrayList<String>(getAllFieldIDs());
       Collections.sort(sortedIDs);
-      for (Iterator iter = sortedIDs.iterator(); iter.hasNext();)
+      for (Iterator<String> iter = sortedIDs.iterator(); iter.hasNext();)
       {
-        String id = (String) iter.next();
+        String id = iter.next();
         if (schema.contains(id)) continue;
-        List fields = new ArrayList();
+        List<FormField> fields = new ArrayList<FormField>();
         if (idToFormFields.containsKey(id))
-          fields.addAll((Collection) idToFormFields.get(id));
+          fields.addAll(idToFormFields.get(id));
         if (idToTextFieldFormFields.containsKey(id))
-          fields.addAll((Collection) idToTextFieldFormFields.get(id));
+          fields.addAll(idToTextFieldFormFields.get(id));
         boolean hasTrafo = false;
         for (Iterator fieldIter = fields.iterator(); fieldIter.hasNext();)
         {
@@ -3233,9 +3232,9 @@ public class TextDocumentModel
     // Array FieldInfo erstellen
     ReferencedFieldID[] fieldInfos = new ReferencedFieldID[list.size()];
     int i = 0;
-    for (Iterator iter = list.iterator(); iter.hasNext();)
+    for (Iterator<ReferencedFieldID> iter = list.iterator(); iter.hasNext();)
     {
-      ReferencedFieldID fieldInfo = (ReferencedFieldID) iter.next();
+      ReferencedFieldID fieldInfo = iter.next();
       fieldInfos[i++] = fieldInfo;
     }
     return fieldInfos;
@@ -3339,9 +3338,9 @@ public class TextDocumentModel
     // Neuen Text zusammenbauen, Felder sind darin mit <feldname> gekennzeichnet
     String substStr = "";
     int count = 0;
-    for (Iterator substIter = subst.iterator(); substIter.hasNext();)
+    for (Iterator<FieldSubstitution.SubstElement> substIter = subst.iterator(); substIter.hasNext();)
     {
-      FieldSubstitution.SubstElement ele = (FieldSubstitution.SubstElement) substIter.next();
+      FieldSubstitution.SubstElement ele = substIter.next();
       if (ele.isFixedText())
       {
         substStr += ele.getValue();
@@ -3356,7 +3355,7 @@ public class TextDocumentModel
     if (count != 1) newFieldId = null;
 
     // Alle InsertFormValue-Felder anpassen:
-    Collection c = (Collection) idToFormFields.get(fieldId);
+    List<FormField> c = idToFormFields.get(fieldId);
     if (c != null)
     {
       for (Iterator iter = c.iterator(); iter.hasNext();)
@@ -3384,9 +3383,9 @@ public class TextDocumentModel
 
             // Neue Bookmarks passend zum Text platzieren
             cursor.collapseToStart();
-            for (Iterator substIter = subst.iterator(); substIter.hasNext();)
+            for (Iterator<FieldSubstitution.SubstElement> substIter = subst.iterator(); substIter.hasNext();)
             {
-              FieldSubstitution.SubstElement ele = (FieldSubstitution.SubstElement) substIter.next();
+              FieldSubstitution.SubstElement ele = substIter.next();
               if (ele.isFixedText())
               {
                 cursor.goRight((short) ele.getValue().length(), false);
@@ -3406,7 +3405,7 @@ public class TextDocumentModel
     }
 
     // Alle Datenbank- und Benutzerfelder anpassen:
-    c = (Collection) idToTextFieldFormFields.get(fieldId);
+    c = idToTextFieldFormFields.get(fieldId);
     if (c != null)
     {
       for (Iterator iter = c.iterator(); iter.hasNext();)
@@ -3435,9 +3434,9 @@ public class TextDocumentModel
 
             // Neue Datenbankfelder passend zum Text einfügen
             cursor.collapseToStart();
-            for (Iterator substIter = subst.iterator(); substIter.hasNext();)
+            for (Iterator<FieldSubstitution.SubstElement> substIter = subst.iterator(); substIter.hasNext();)
             {
-              FieldSubstitution.SubstElement ele = (FieldSubstitution.SubstElement) substIter.next();
+              FieldSubstitution.SubstElement ele = substIter.next();
               if (ele.isFixedText())
               {
                 cursor.goRight((short) ele.getValue().length(), false);
@@ -3463,9 +3462,9 @@ public class TextDocumentModel
     setFormFieldValue(fieldId, null);
 
     // Ansicht der betroffenen Felder aktualisieren
-    for (Iterator iter = subst.iterator(); iter.hasNext();)
+    for (Iterator<FieldSubstitution.SubstElement> iter = subst.iterator(); iter.hasNext();)
     {
-      FieldSubstitution.SubstElement ele = (FieldSubstitution.SubstElement) iter.next();
+      FieldSubstitution.SubstElement ele = iter.next();
       if (ele.isField()) updateFormFields(ele.getValue());
     }
   }
@@ -3568,7 +3567,7 @@ public class TextDocumentModel
    */
   public static class FieldSubstitution
   {
-    private List list = new ArrayList();
+    private List<SubstElement> list = new ArrayList<SubstElement>();
 
     public void addField(String fieldname)
     {
@@ -3580,7 +3579,7 @@ public class TextDocumentModel
       list.add(new SubstElement(SubstElement.FIXED_TEXT, text));
     }
 
-    public Iterator iterator()
+    public Iterator<SubstElement> iterator()
     {
       return list.iterator();
     }
