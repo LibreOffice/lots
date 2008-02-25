@@ -81,7 +81,7 @@ public abstract class OnDemandCardView implements View
    * Die Liste der aktuell angezeigten View-Karten mit ihren IDs 
    * ({@link OnDemandCardView.ViewCardIdPair}).
    */
-  private List viewCardIdPairs = new Vector();
+  private List<ViewCardIdPair> viewCardIdPairs = new Vector<ViewCardIdPair>();
   
   private static class ViewCardIdPair
   {
@@ -96,7 +96,7 @@ public abstract class OnDemandCardView implements View
    * InsertionModels mit aktiver Sicht, d,h, von all denen, für die nicht
    * das {@link #INACTIVE_PANEL} angezeigt wird. 
    */
-  private Set activeModelCardIds = new HashSet();
+  private Set<String> activeModelCardIds = new HashSet<String>();
   
   public OnDemandCardView(String label)
   {
@@ -140,10 +140,10 @@ public abstract class OnDemandCardView implements View
    */
   private void removeItem(View view)
   {
-    Iterator iter = viewCardIdPairs.iterator();
+    Iterator<ViewCardIdPair> iter = viewCardIdPairs.iterator();
     while (iter.hasNext())
     {
-      ViewCardIdPair pair = (ViewCardIdPair)iter.next();
+      ViewCardIdPair pair = iter.next();
       if (pair.view == view)
       {
         iter.remove();
