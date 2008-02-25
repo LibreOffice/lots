@@ -52,13 +52,13 @@ public class InsertionModelList
   /**
    * Die Liste der {@link InsertionModel}s. 
    */
-  private List models = new LinkedList();
+  private List<InsertionModel> models = new LinkedList<InsertionModel>();
   
   /**
    * Liste aller {@link ItemListener}, die über Änderungen des Listeninhalts informiert
    * werden wollen.
    */
-  private List listeners = new Vector(1);
+  private List<ItemListener> listeners = new Vector<ItemListener>(1);
   
   /**
    * Der FormularMax4000 zu dem diese InsertionModelList gehört.
@@ -97,7 +97,7 @@ public class InsertionModelList
     while (!models.isEmpty())
     {
       int index = models.size() - 1;
-      InsertionModel model = (InsertionModel)models.remove(index);
+      InsertionModel model = models.remove(index);
       model.hasBeenRemoved();
       notifyListeners(model, index, true);
     }
@@ -112,7 +112,7 @@ public class InsertionModelList
    * würde.  
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public Iterator iterator()
+  public Iterator<InsertionModel> iterator()
   {
     return models.iterator();
   }
@@ -151,10 +151,10 @@ public class InsertionModelList
       return;
     }
     String comboId = comboIdd.toString();
-    Iterator iter = iterator();
+    Iterator<InsertionModel> iter = iterator();
     while (iter.hasNext())
     {
-      InsertionModel model = (InsertionModel)iter.next();
+      InsertionModel model = iter.next();
       String comboValue = (String)desc.mapCheckboxId2ComboboxEntry.get(model.getDataID());
       if (comboValue != null)
       {
@@ -198,13 +198,13 @@ public class InsertionModelList
   {
     IDManager.ID comboId = combo.getId();
     if (comboId == null) return;
-    Collection items = combo.getItems();
-    Collection unusedItems = new HashSet(items);
-    Collection brokenInsertionModels = new Vector();
-    Iterator iter = iterator();
+    Collection<String> items = combo.getItems();
+    Collection<String> unusedItems = new HashSet<String>(items);
+    Collection<InsertionModel> brokenInsertionModels = new Vector<InsertionModel>();
+    Iterator<InsertionModel> iter = iterator();
     while (iter.hasNext())
     {
-      InsertionModel model = (InsertionModel)iter.next();
+      InsertionModel model = iter.next();
       if (model.getDataID().equals(comboId))
       {
         FunctionSelectionAccess trafo = model.getTrafoAccess();
@@ -232,10 +232,10 @@ public class InsertionModelList
         
         Pattern p = Pattern.compile(regex);
         boolean found = false;
-        Iterator itemsIter = items.iterator();
+        Iterator<String> itemsIter = items.iterator();
         while (itemsIter.hasNext())
         {
-          String item = (String)itemsIter.next();
+          String item = itemsIter.next();
           if (p.matcher(item).matches())
           {
             unusedItems.remove(item);
@@ -253,11 +253,11 @@ public class InsertionModelList
      */
     if (unusedItems.size() > 0)
     {
-      String item = (String)unusedItems.iterator().next();
+      String item = unusedItems.iterator().next();
       iter = brokenInsertionModels.iterator();
       while(iter.hasNext())
       {
-        InsertionModel model = (InsertionModel)iter.next();
+        InsertionModel model = iter.next();
         setMatchTrafo(model, item);
       }
     }
@@ -303,13 +303,13 @@ public class InsertionModelList
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
-  public void updateDocument(Map mapFunctionNameToConfigThingy)
+  public void updateDocument(Map<String, ConfigThingy> mapFunctionNameToConfigThingy)
   {
-    List defunct = new Vector();
-    Iterator iter = models.iterator();
+    List<InsertionModel> defunct = new Vector<InsertionModel>();
+    Iterator<InsertionModel> iter = models.iterator();
     while (iter.hasNext())
     {
-      InsertionModel model = (InsertionModel)iter.next();
+      InsertionModel model = iter.next();
       if (!model.updateDocument(mapFunctionNameToConfigThingy))
         defunct.add(model);
     }
@@ -317,7 +317,7 @@ public class InsertionModelList
     iter = defunct.iterator();
     while (iter.hasNext())
     {
-      remove((InsertionModel)iter.next());
+      remove(iter.next());
     }
   }
   
@@ -338,10 +338,10 @@ public class InsertionModelList
    */
   private void notifyListeners(InsertionModel model, int index, boolean removed)
   {
-    Iterator iter = listeners.iterator();
+    Iterator<ItemListener> iter = listeners.iterator();
     while (iter.hasNext())
     {
-      ItemListener listener = (ItemListener)iter.next();
+      ItemListener listener = iter.next();
       if (removed)
         listener.itemRemoved(model, index);
       else
@@ -381,10 +381,10 @@ public class InsertionModelList
     { //TESTED
       if (!insertionViewsSelected) return;
       boolean clearSelection = true;
-      Iterator iter = models.iterator();
+      Iterator<InsertionModel> iter = models.iterator();
       while (iter.hasNext())
       {
-        InsertionModel model = (InsertionModel)iter.next();
+        InsertionModel model = iter.next();
         if (bookmarkNames.contains(model.getBookmarkName()))
         {
           formularMax4000.broadcast(new BroadcastObjectSelection(model, 1, clearSelection)

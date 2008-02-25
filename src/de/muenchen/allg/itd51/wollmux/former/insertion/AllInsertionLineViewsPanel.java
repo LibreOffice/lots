@@ -85,7 +85,7 @@ public class AllInsertionLineViewsPanel implements View
   /**
    * Die Liste der {@link OneInsertionLineView}s in dieser View.
    */
-  private List views = new Vector();
+  private List<OneInsertionLineView> views = new Vector<OneInsertionLineView>();
   
   /**
    * Liste von Indizes der selektierten Objekte in der {@link #views} Liste. 
@@ -194,7 +194,7 @@ public class AllInsertionLineViewsPanel implements View
     while (iter.hasNext())
     {
       Integer I = (Integer)iter.next();
-      OneInsertionLineView view = (OneInsertionLineView)views.get(I.intValue());
+      OneInsertionLineView view = views.get(I.intValue());
       view.unmark();
     }
     selection.clear();
@@ -218,7 +218,7 @@ public class AllInsertionLineViewsPanel implements View
     while (!selection.isEmpty())
     {
       int i = selection.lastElement();
-      OneInsertionLineView view = (OneInsertionLineView)views.get(i);
+      OneInsertionLineView view = views.get(i);
       InsertionModel model = view.getModel();
       model.removeFromDocument();
       insertionModelList.remove(model);
@@ -244,7 +244,7 @@ public class AllInsertionLineViewsPanel implements View
     while (!selection.isEmpty())
     {
       int i = selection.lastElement();
-      OneInsertionLineView view = (OneInsertionLineView)views.get(i);
+      OneInsertionLineView view = views.get(i);
       InsertionModel model = view.getModel();
       model.removeBookmark();
       insertionModelList.remove(model);
@@ -292,7 +292,7 @@ public class AllInsertionLineViewsPanel implements View
       InsertionModel model = (InsertionModel)b.getObject();
       for (int index = 0; index < views.size(); ++index)
       {
-        OneInsertionLineView view = (OneInsertionLineView)views.get(index);
+        OneInsertionLineView view = views.get(index);
         if (view.getModel() == model)
         {
           int state = b.getState();

@@ -110,7 +110,7 @@ public class InsertionModel
   /**
    * Liste von {@link InsertionModel.AutosepInfo} Objekten.
    */
-  private List autosep = new Vector();
+  private List<AutosepInfo> autosep = new Vector<AutosepInfo>();
   
   /**
    * Das Bookmarks, das diese Einfügestelle umschließt.
@@ -125,7 +125,7 @@ public class InsertionModel
   /**
    * Die {@link ModelChangeListener}, die über Änderungen dieses Models informiert werden wollen.
    */
-  private List listeners = new Vector(1);
+  private List<ModelChangeListener> listeners = new Vector<ModelChangeListener>(1);
   
   private IDManager.IDChangeListener myIDChangeListener = new MyIDChangeListener();
   
@@ -192,7 +192,7 @@ public class InsertionModel
       this.trafo = funcSelections.getFunctionSelection(functionName);
     }
     
-    Iterator iter = ((ConfigThingy)(conf.iterator().next())).iterator(); //INSERT(WM(<zu iterierender Teil>))
+    Iterator iter = (conf.iterator().next()).iterator(); //INSERT(WM(<zu iterierender Teil>))
     AutosepInfo autosepInfo = null;
     while (iter.hasNext())
     {
@@ -241,7 +241,7 @@ public class InsertionModel
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
-  public boolean updateDocument(Map mapFunctionNameToConfigThingy)
+  public boolean updateDocument(Map<String, ConfigThingy> mapFunctionNameToConfigThingy)
   {
     ConfigThingy conf = new ConfigThingy("WM");
     String cmd = "insertValue";
@@ -277,10 +277,10 @@ public class InsertionModel
       }
     }
     
-    Iterator iter = autosep.iterator();
+    Iterator<AutosepInfo> iter = autosep.iterator();
     while (iter.hasNext())
     {
-      AutosepInfo autosepInfo = (AutosepInfo)iter.next();
+      AutosepInfo autosepInfo = iter.next();
       String autosepStr = "both";
       if (autosepInfo.autosep == AUTOSEP_LEFT)
         autosepStr = "left";
@@ -404,10 +404,10 @@ public class InsertionModel
    * TESTED */
   public void hasBeenRemoved()
   {
-    Iterator iter = listeners.iterator();
+    Iterator<ModelChangeListener> iter = listeners.iterator();
     while (iter.hasNext())
     {
-      ModelChangeListener listener = (ModelChangeListener)iter.next();
+      ModelChangeListener listener = iter.next();
       listener.modelRemoved(this);
     }
     formularMax4000.documentNeedsUpdating();
@@ -419,10 +419,10 @@ public class InsertionModel
    */
   private void notifyListeners(int attributeId, Object newValue)
   {
-    Iterator iter = listeners.iterator();
+    Iterator<ModelChangeListener> iter = listeners.iterator();
     while (iter.hasNext())
     {
-      ModelChangeListener listener = (ModelChangeListener)iter.next();
+      ModelChangeListener listener = iter.next();
       listener.attributeChanged(this, attributeId, newValue);
     }
     formularMax4000.documentNeedsUpdating();
