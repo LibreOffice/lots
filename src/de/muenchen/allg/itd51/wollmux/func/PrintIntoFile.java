@@ -159,12 +159,12 @@ public class PrintIntoFile
       //String[] frameNames = UNO.XTextFramesSupplier(outputDoc).getTextFrames().getElementNames();
       //String[] imageNames = UNO.XTextGraphicObjectsSupplier(outputDoc).getGraphicObjects().getElementNames();
       XIndexAccess shapes = UNO.XIndexAccess(UNO.XDrawPageSupplier(outputDoc).getDrawPage());
-      Set oldShapes = new HashSet(shapes.getCount());
+      Set<HashableComponent> oldShapes = new HashSet<HashableComponent>(shapes.getCount());
       int shapeCount = shapes.getCount();
       for (int i = 0; i < shapeCount; ++i) 
         oldShapes.add(new HashableComponent(shapes.getByIndex(i)));
       
-      Set oldSections = new HashSet();
+      Set<String> oldSections = new HashSet<String>();
       if (startsWithSection)
       {
         String[] sectionNames = UNO.XTextSectionsSupplier(outputDoc).getTextSections().getElementNames();
@@ -229,7 +229,7 @@ public class PrintIntoFile
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
-  private static boolean rangeStartTouchesNewSection(XTextRange range, Set oldSectionNames, XTextDocument doc)
+  private static boolean rangeStartTouchesNewSection(XTextRange range, Set<String> oldSectionNames, XTextDocument doc)
   {
     XTextRange docText = doc.getText();
     XTextRangeCompare compare = UNO.XTextRangeCompare(docText);
@@ -298,7 +298,7 @@ public class PrintIntoFile
       Logger.error(x);
       return;
     }
-    Map mapOldPageStyleName2NewPageStyleName = new HashMap();
+    Map<String, String> mapOldPageStyleName2NewPageStyleName = new HashMap<String, String>();
     while(true)
     {
       try{
@@ -306,7 +306,7 @@ public class PrintIntoFile
         if (AnyConverter.isString(ob))
         {
           String pageDescName = AnyConverter.toString(ob);
-          String newPageStyleName = (String)mapOldPageStyleName2NewPageStyleName.get(pageDescName); 
+          String newPageStyleName = mapOldPageStyleName2NewPageStyleName.get(pageDescName); 
           if (newPageStyleName == null)
           {
             XPropertySet oldStyle = UNO.XPropertySet(oldPageStyles.getByName(pageDescName));
@@ -403,7 +403,7 @@ public class PrintIntoFile
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
-  private static void fixPageAnchoredObjects(XIndexAccess objects, Set old, int pageNumberOffset)
+  private static void fixPageAnchoredObjects(XIndexAccess objects, Set<HashableComponent> old, int pageNumberOffset)
   {
     int count = objects.getCount();
     for (int i = 0; i < count; ++i)

@@ -33,7 +33,7 @@ import java.util.Set;
  */
 public class FunctionLibrary
 {
-  private Map mapIdToFunction;
+  private Map<String, Function> mapIdToFunction;
   private FunctionLibrary baselib;
   
   /**
@@ -53,7 +53,7 @@ public class FunctionLibrary
    */
   public FunctionLibrary(FunctionLibrary baselib)
   {
-    mapIdToFunction = new HashMap();
+    mapIdToFunction = new HashMap<String, Function>();
     this.baselib = baselib; 
   }
 
@@ -78,7 +78,7 @@ public class FunctionLibrary
    */
   public Function get(String funcName)
   {
-    Function func = (Function)mapIdToFunction.get(funcName);
+    Function func = mapIdToFunction.get(funcName);
     if (func == null && baselib != null) func = baselib.get(funcName);
     return func;
   }
@@ -118,9 +118,9 @@ public class FunctionLibrary
    * verfügbar sind.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public Set getFunctionNames()
+  public Set<String> getFunctionNames()
   {
-    Set names = new HashSet(mapIdToFunction.keySet());
+    Set<String> names = new HashSet<String>(mapIdToFunction.keySet());
     if (baselib != null) names.addAll(baselib.getFunctionNames());
     return names;
   }

@@ -159,7 +159,7 @@ public class MailMerge
       return;
     }
     
-    Set schema = ds.getSchema();
+    Set<String> schema = ds.getSchema();
     QueryResults data;
     try
     {
@@ -185,14 +185,12 @@ public class MailMerge
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
-  private static void mailMerge(XPrintModel pmod, boolean offerSelection, Set schema, QueryResults data)
+  private static void mailMerge(XPrintModel pmod, boolean offerSelection, Set<String> schema, QueryResults data)
   {
-    Vector list = new Vector();
-    Iterator iter = data.iterator();
+    Vector<ListElement> list = new Vector<ListElement>();
     int index = 1;
-    while (iter.hasNext())
+    for (Dataset dataset : data)
     {
-      Dataset dataset = (Dataset)iter.next();
       list.add(new ListElement(dataset, "Datensatz "+index));
       ++index;
     }
@@ -207,16 +205,16 @@ public class MailMerge
     
     MailMergeProgressWindow progress = new MailMergeProgressWindow(list.size());
     
-    iter = list.iterator();
+    Iterator<ListElement> iter = list.iterator();
     while (iter.hasNext())
     {
       progress.makeProgress();
-      ListElement ele = (ListElement)iter.next();
+      ListElement ele = iter.next();
       if (offerSelection && !ele.isSelected()) continue;
-      Iterator colIter = schema.iterator();
+      Iterator<String> colIter = schema.iterator();
       while (colIter.hasNext())
       {
-        String column = (String)colIter.next();
+        String column = colIter.next();
         String value = null;
         try
         {
@@ -351,7 +349,7 @@ public class MailMerge
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
-  private static boolean selectFromListDialog(final Vector list)
+  private static boolean selectFromListDialog(final Vector<ListElement> list)
   {
     final boolean[] result = new boolean[]{false,false}; 
     //  GUI im Event-Dispatching Thread erzeugen wg. Thread-Safety.
@@ -395,7 +393,7 @@ public class MailMerge
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
-  private static void createSelectFromListDialog(final Vector list, final boolean[] result)
+  private static void createSelectFromListDialog(final Vector<ListElement> list, final boolean[] result)
   {
     final JFrame myFrame = new JFrame("Gewünschte Ausdrucke wählen");
     myFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
@@ -423,7 +421,7 @@ public class MailMerge
     myList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
     for (int i = 0; i < list.size(); ++i)
     {
-      ListElement ele = (ListElement)list.get(i);
+      ListElement ele = list.get(i);
       if (ele.isSelected()) myList.addSelectionInterval(i,i);
     }
     
@@ -478,11 +476,11 @@ public class MailMerge
     button.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e)
       {
-        for (int i = 0; i < list.size(); ++i) ((ListElement)list.get(i)).setSelected(false);
+        for (int i = 0; i < list.size(); ++i) (list.get(i)).setSelected(false);
         int[] sel = myList.getSelectedIndices();
         for (int i = 0; i < sel.length; ++i)
         {
-          ((ListElement)list.get(sel[i])).setSelected(true);
+          (list.get(sel[i])).setSelected(true);
         }
         synchronized(result)
         {
@@ -510,16 +508,16 @@ public class MailMerge
      * Bildet einen Spaltennamen auf den Index in dem zu dem Datensatz gehörenden
      * String[]-Array ab.
      */
-    private Map mapColumnNameToIndex;
+    private Map<String, Integer> mapColumnNameToIndex;
    
-    private List datasets = new ArrayList();
+    private List<Dataset> datasets = new ArrayList<Dataset>();
     
     public int size()
     {
       return datasets.size();
     }
 
-    public Iterator iterator()
+    public Iterator<Dataset> iterator()
     {
       return datasets.iterator();
     }
@@ -529,7 +527,7 @@ public class MailMerge
       return datasets.isEmpty();
     }
 
-    public void setColumnNameToIndexMap(Map mapColumnNameToIndex)
+    public void setColumnNameToIndexMap(Map<String, Integer> mapColumnNameToIndex)
     {
       this.mapColumnNameToIndex = mapColumnNameToIndex;
     }
@@ -549,7 +547,7 @@ public class MailMerge
 
       public String get(String columnName) throws ColumnNotFoundException
       {
-        Number idx = (Number)mapColumnNameToIndex.get(columnName);
+        Number idx = mapColumnNameToIndex.get(columnName);
         if (idx == null) throw new ColumnNotFoundException("Spalte "+columnName+" existiert nicht!");
         return data[idx.intValue()];
       }
@@ -570,7 +568,7 @@ public class MailMerge
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * TESTED
    */
-  private static QueryResults getVisibleCalcData(String windowTitle, String sheetName, Set schema)
+  private static QueryResults getVisibleCalcData(String windowTitle, String sheetName, Set<String> schema)
   {
     CalcCellQueryResults results = new CalcCellQueryResults();
     
@@ -592,8 +590,8 @@ public class MailMerge
         XCellRangesQuery sheet = UNO.XCellRangesQuery(doc.getSheets().getByName(sheetName));
         if (sheet != null)
         {
-          SortedSet columnIndexes = new TreeSet();
-          SortedSet rowIndexes = new TreeSet();
+          SortedSet<Integer> columnIndexes = new TreeSet<Integer>();
+          SortedSet<Integer> rowIndexes = new TreeSet<Integer>();
           XSheetCellRanges visibleCellRanges = sheet.queryVisibleCells();
           XSheetCellRanges nonEmptyCellRanges = sheet
               .queryContentCells((short) ( com.sun.star.sheet.CellFlags.VALUE
@@ -627,13 +625,13 @@ public class MailMerge
              * der Calc-Tabelle gemappt wird, sondern auf den Index im später für jeden
              * Datensatz existierenden String[]-Array.
              */
-            int ymin = ((Number)rowIndexes.first()).intValue();
-            Map mapColumnNameToIndex = new HashMap();
+            int ymin = rowIndexes.first().intValue();
+            Map<String, Integer> mapColumnNameToIndex = new HashMap<String, Integer>();
             int idx = 0;
-            Iterator iter = columnIndexes.iterator();
+            Iterator<Integer> iter = columnIndexes.iterator();
             while (iter.hasNext())
             {
-              int x = ((Number)iter.next()).intValue();
+              int x = iter.next().intValue();
               String columnName = UNO.XTextRange(sheetCellRange.getCellByPosition(x, ymin)).getString();
               if (columnName.length() > 0)
               {
@@ -650,17 +648,17 @@ public class MailMerge
             /*
              * Datensätze erzeugen
              */
-            Iterator rowIndexIter = rowIndexes.iterator();
+            Iterator<Integer> rowIndexIter = rowIndexes.iterator();
             rowIndexIter.next(); //erste Zeile enthält die Tabellennamen, keinen Datensatz
             while (rowIndexIter.hasNext())
             {
-              int y = ((Number)rowIndexIter.next()).intValue();
+              int y = rowIndexIter.next().intValue();
               String[] data = new String[columnIndexes.size()];
-              Iterator columnIndexIter = columnIndexes.iterator();
+              Iterator<Integer> columnIndexIter = columnIndexes.iterator();
               idx = 0;
               while (columnIndexIter.hasNext())
               {
-                int x = ((Number)columnIndexIter.next()).intValue();
+                int x = columnIndexIter.next().intValue();
                 String value = UNO.XTextRange(sheetCellRange.getCellByPosition(x, y)).getString();
                 data[idx++] = value;
               }
@@ -698,7 +696,7 @@ public class MailMerge
      * Liste von {@link Runnable}-Objekten, die sequentiell abgearbeitet werden im
      * Nicht-Event-Dispatching-Thread.
      */
-    private List todo = new LinkedList();
+    private List<Runnable> todo = new LinkedList<Runnable>();
     
     /**
      * Wird dies auf false gesetzt, so beendet sich {@link #run()}.
@@ -708,12 +706,12 @@ public class MailMerge
     /**
      * Die Menge der Namen aller OOo-Datenquellen.
      */
-    private Set datasourceNames = new TreeSet();
+    private Set<String> datasourceNames = new TreeSet<String>();
     
     /**
      * Die Menge aller Titel von offenen Calc-Dokument-Fenstern.
      */
-    private Set calcDocumentTitles = new TreeSet();
+    private Set<String> calcDocumentTitles = new TreeSet<String>();
     
     /**
      * Die ComboBox in der der Benutzer die OOo-Datenquelle bzw, das Calc-Dokument für
@@ -838,7 +836,7 @@ public class MailMerge
           synchronized(todo)
           {
             while(todo.isEmpty()) todo.wait();
-            r = (Runnable)todo.remove(0);
+            r = todo.remove(0);
           }
           r.run();
         }
@@ -892,7 +890,7 @@ public class MailMerge
       hbox.add(datasourceSelector);
       int selected = 0;
       int idx = 0;
-      Iterator iter = calcDocumentTitles.iterator();
+      Iterator<String> iter = calcDocumentTitles.iterator();
       while (iter.hasNext())
       {
         datasourceSelector.addItem(iter.next());
@@ -901,7 +899,7 @@ public class MailMerge
       iter = datasourceNames.iterator();
       while (iter.hasNext())
       {
-        String dsName = (String)iter.next();
+        String dsName = iter.next();
         if (dsName.equals(selectedDatasource)) selected = idx;
         datasourceSelector.addItem(dsName);
         ++idx;
@@ -1084,7 +1082,7 @@ public class MailMerge
     {
       if (calcDocumentTitles.contains(selectedDatasource))
       {
-        Set schema = new HashSet();
+        Set<String> schema = new HashSet<String>();
         QueryResults data = getVisibleCalcData(selectedDatasource, selectedTable, schema);
         mailMerge(pmod, offerselection.booleanValue(), schema, data);
       }
@@ -1176,12 +1174,12 @@ public class MailMerge
     private void inEDT(String method)
     {
       try{
-        final Method m = this.getClass().getMethod(method,null);
+        final Method m = this.getClass().getMethod(method,(Class[])null);
         final SuperMailMerge self = this;
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
           public void run() {
               try{
-                m.invoke(self, null);
+                m.invoke(self, (Object[])null);
               }catch(Exception x)
               {
                 Logger.error(x);

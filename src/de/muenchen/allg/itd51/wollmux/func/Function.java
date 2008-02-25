@@ -40,7 +40,7 @@ public interface Function
    * Funktion referenziert.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public void getFunctionDialogReferences(Collection set);
+  public void getFunctionDialogReferences(Collection<String> set);
   
   /**
    * Ruft die Funktion mit Argumenten aus parameters auf und liefert das

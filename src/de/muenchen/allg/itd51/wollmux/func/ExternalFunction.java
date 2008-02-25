@@ -93,7 +93,7 @@ public class ExternalFunction
       {
         String classStr = url.substring(5,url.lastIndexOf('.'));
         String methodStr = url.substring(url.lastIndexOf('.')+1);
-        Class c = classLoader.loadClass(classStr);
+        Class<?> c = classLoader.loadClass(classStr);
         Method[] methods = c.getDeclaredMethods();
         for (int i = 0; i < methods.length; ++i)
           if (methods[i].getName().equals(methodStr) && Modifier.isPublic(methods[i].getModifiers()))
@@ -120,7 +120,7 @@ public class ExternalFunction
     
     ConfigThingy paramsConf = conf.query("PARAMS");
     
-    List paramList = new Vector();
+    List<String> paramList = new Vector<String>();
     Iterator iter = paramsConf.iterator();
     while (iter.hasNext())
     {
@@ -135,7 +135,7 @@ public class ExternalFunction
     
     params = new String[paramList.size()];
     for (int i = 0; i < paramList.size(); ++i)
-      params[i] = (String)paramList.get(i);
+      params[i] = paramList.get(i);
   }
   
   /**

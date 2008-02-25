@@ -72,7 +72,7 @@ public interface Values
    */
   public static class SimpleMap implements Values
   {
-    private HashMap values = new HashMap();
+    private HashMap<String, String> values = new HashMap<String, String>();
     
     /**
      * Fügt den Wert value hinzu, identifiziert mit id. Ein bereits vorhandener
@@ -100,7 +100,7 @@ public interface Values
 
     public String getString(String id)
     {
-      String str = (String)values.get(id);
+      String str = values.get(id);
       if (str == null) return "";
       return str;
     }

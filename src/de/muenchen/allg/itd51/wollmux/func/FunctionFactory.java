@@ -111,7 +111,7 @@ public class FunctionFactory
    */
   public static Function parseGrandchildren(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
   {
-    Vector andFunction = new Vector();
+    Vector<Function> andFunction = new Vector<Function>();
     Iterator iter1 = conf.iterator();
     while (iter1.hasNext())
     {
@@ -125,7 +125,7 @@ public class FunctionFactory
     }
     
     if (andFunction.isEmpty()) return null;
-    if (andFunction.size() == 1) return (Function)andFunction.get(0);
+    if (andFunction.size() == 1) return andFunction.get(0);
     
     andFunction.trimToSize();
     return new AndFunction(andFunction);
@@ -153,7 +153,7 @@ public class FunctionFactory
    */
   public static Function parseChildren(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
   {
-    Vector andFunction = new Vector();
+    Vector<Function> andFunction = new Vector<Function>();
     Iterator iter = conf.iterator();
     while (iter.hasNext())
     {
@@ -162,7 +162,7 @@ public class FunctionFactory
     }
     
     if (andFunction.isEmpty()) return null;
-    if (andFunction.size() == 1) return (Function)andFunction.get(0);
+    if (andFunction.size() == 1) return andFunction.get(0);
     
     andFunction.trimToSize();
     return new AndFunction(andFunction);
@@ -332,13 +332,13 @@ public class FunctionFactory
       throw new ConfigurationErrorException("Funktion vom Typ \"BIND\" erfordert genau 1 Unterelement FUNCTION");
     
     Function func;
-    funcConf = (ConfigThingy)funcConf.iterator().next();  //funcConf = FUNCTION - ...
+    funcConf = funcConf.iterator().next();  //funcConf = FUNCTION - ...
     if (funcConf.count() == 0)
       throw new ConfigurationErrorException("Bei Funktionen vom Typ \"BIND\" muss nach \"FUNCTION\" ein Funktionsname oder eine Funktion folgen.");
     if (funcConf.count() > 1)
       throw new ConfigurationErrorException("Bei Funktionen vom Typ \"BIND\" darf nach \"FUNCTION\" keine Liste sondern nur ein Funktionsname oder eine Funktion folgen.");
 
-    funcConf = (ConfigThingy)funcConf.iterator().next(); //<Funktionsname>|<Funktion> - ...
+    funcConf = funcConf.iterator().next(); //<Funktionsname>|<Funktion> - ...
     
     if (funcConf.count() == 0) //d.h. es wurde nur ein <Funktionsname> angegeben
     {
@@ -579,7 +579,7 @@ public class FunctionFactory
     }
     
     public String[] parameters() { return noParams; }
-    public void getFunctionDialogReferences(Collection set)
+    public void getFunctionDialogReferences(Collection<String> set)
     {
       set.add(dialogName);
     }
@@ -599,17 +599,17 @@ public class FunctionFactory
   
   private static class BindFunction implements Function
   {
-    private Map mapParamNameToSetFunction = new HashMap();
+    private Map<String, Function> mapParamNameToSetFunction = new HashMap<String, Function>();
     private Function func;
     private String[] params;
-    private Set functionDialogReferences = new HashSet();
+    private Set<String> functionDialogReferences = new HashSet<String>();
     
     public BindFunction(Function func, ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
     {
       this.func = func;
       
-      Set myParams = new HashSet(Arrays.asList(func.parameters()));
-      Set setFuncParams = new HashSet();
+      Set<String> myParams = new HashSet<String>(Arrays.asList(func.parameters()));
+      Set<String> setFuncParams = new HashSet<String>();
       
       ConfigThingy sets = conf.query("SET");
       Iterator iter = sets.iterator();
@@ -650,7 +650,7 @@ public class FunctionFactory
        * in String[] konvertieren.
        */
       myParams.addAll(setFuncParams);
-      params = (String[])myParams.toArray(new String[0]);
+      params = myParams.toArray(new String[0]);
     }
     
     public String[] parameters()
@@ -658,7 +658,7 @@ public class FunctionFactory
       return params;
     }
     
-    public void getFunctionDialogReferences(Collection set)
+    public void getFunctionDialogReferences(Collection<String> set)
     {
       set.addAll(functionDialogReferences);
     }
@@ -712,7 +712,7 @@ public class FunctionFactory
 
       public String getString(String id)
       {
-        Function setFunc = (Function)mapParamNameToSetFunction.get(id);
+        Function setFunc = mapParamNameToSetFunction.get(id);
         if (setFunc != null)
         {
           String res = setFunc.getString(values);
@@ -728,7 +728,7 @@ public class FunctionFactory
 
       public boolean getBoolean(String id)
       {
-        Function setFunc = (Function)mapParamNameToSetFunction.get(id);
+        Function setFunc = mapParamNameToSetFunction.get(id);
         if (setFunc != null)
         {
           String res = setFunc.getString(values);
@@ -768,7 +768,7 @@ public class FunctionFactory
       return func.parameters();
     }
 
-    public void getFunctionDialogReferences(Collection set)
+    public void getFunctionDialogReferences(Collection<String> set)
     {
       func.getFunctionDialogReferences(set);
     }
@@ -816,7 +816,7 @@ public class FunctionFactory
       return params;
     }
     
-    public void getFunctionDialogReferences(Collection set) {}
+    public void getFunctionDialogReferences(Collection<String> set) {}
 
     public String getString(Values parameters)
     {
@@ -836,7 +836,7 @@ public class FunctionFactory
     private boolean bool;
     
     public String[] parameters() { return noParams; }
-    public void getFunctionDialogReferences(Collection set) {}
+    public void getFunctionDialogReferences(Collection<String> set) {}
 
     public StringLiteralFunction(String str)
     {
@@ -869,7 +869,7 @@ public class FunctionFactory
       return func.parameters();
     }
     
-    public void getFunctionDialogReferences(Collection set) {}
+    public void getFunctionDialogReferences(Collection<String> set) {}
     
     public String getString(Values parameters)
     {
@@ -916,7 +916,7 @@ public class FunctionFactory
       return input.parameters();
     }
     
-    public void getFunctionDialogReferences(Collection set) 
+    public void getFunctionDialogReferences(Collection<String> set) 
     {
       input.getFunctionDialogReferences(set);
     }
@@ -939,10 +939,10 @@ public class FunctionFactory
       pattern = p;
       this.input = input;
       this.replace = replace;
-      Set paramset = new HashSet();
+      Set<String> paramset = new HashSet<String>();
       paramset.addAll(Arrays.asList(input.parameters()));
       paramset.addAll(Arrays.asList(replace.parameters()));
-      this.params = (String[])paramset.toArray(new String[]{});
+      this.params = paramset.toArray(new String[]{});
     }
     
     public String getString(Values parameters)
@@ -958,7 +958,7 @@ public class FunctionFactory
       return params;
     }
     
-    public void getFunctionDialogReferences(Collection set) 
+    public void getFunctionDialogReferences(Collection<String> set) 
     {
       input.getFunctionDialogReferences(set);
       replace.getFunctionDialogReferences(set);
@@ -973,12 +973,12 @@ public class FunctionFactory
   
   private static abstract class MultiFunction implements Function
   {
-    protected Collection subFunction;
+    protected Collection<Function> subFunction;
     private String[] params;
     
     public MultiFunction(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map context) throws ConfigurationErrorException
     {
-      Vector subFunction = new Vector(conf.count());
+      Vector<Function> subFunction = new Vector<Function>(conf.count());
       Iterator iter = conf.iterator();
       while (iter.hasNext())
       {
@@ -1016,20 +1016,19 @@ public class FunctionFactory
      */
     protected String[] getAdditionalParams() {return null;}
     
-    public MultiFunction(Collection subFunction)
+    public MultiFunction(Collection<Function> subFunction)
     {
       init(subFunction);
     }
     
-    private void init(Collection subFunction)
+    private void init(Collection<Function> subFunction)
     {
       this.subFunction = subFunction;
-      Collection deps = new Vector();
-      Iterator iter = subFunction.iterator();
+      Collection<String[]> deps = new Vector<String[]>();
       int count = 0;
-      while (iter.hasNext())
+      for (Function f : subFunction)
       {
-        String[] params = ((Function)iter.next()).parameters();
+        String[] params = f.parameters();
         count += params.length;
         deps.add(params);
       }
@@ -1042,11 +1041,11 @@ public class FunctionFactory
       }
       
       params = new String[count];
-      iter = deps.iterator();
+      Iterator<String[]>iter = deps.iterator();
       int i = 0;
       while (iter.hasNext())
       {
-        String[] p = (String[])iter.next();
+        String[] p = iter.next();
         System.arraycopy(p, 0, params, i, p.length);
         i += p.length;
       }
@@ -1060,19 +1059,19 @@ public class FunctionFactory
     }
 
     public String[] parameters() {  return params; }
-    public void getFunctionDialogReferences(Collection set) 
+    public void getFunctionDialogReferences(Collection<String> set) 
     {
-      Iterator iter = subFunction.iterator();
+      Iterator<Function> iter = subFunction.iterator();
       while (iter.hasNext())
       {
-        ((Function)iter.next()).getFunctionDialogReferences(set);
+        iter.next().getFunctionDialogReferences(set);
       }
     }
   }
 
   private static class CatFunction extends MultiFunction
   {
-    public CatFunction(Collection subFunction)
+    public CatFunction(Collection<Function> subFunction)
     {
       super(subFunction);
     }
@@ -1084,11 +1083,11 @@ public class FunctionFactory
 
     public String getString(Values parameters)
     {
-      Iterator iter = subFunction.iterator();
+      Iterator<Function> iter = subFunction.iterator();
       StringBuffer res = new StringBuffer();
       while (iter.hasNext())
       {
-        Function func = (Function)iter.next();
+        Function func = iter.next();
         String str = func.getString(parameters);
         if (str == Function.ERROR) return Function.ERROR;
         res.append(str);
@@ -1121,7 +1120,7 @@ public class FunctionFactory
   private static class AndFunction extends MultiFunction
   {
   
-    public AndFunction(Collection subFunction)
+    public AndFunction(Collection<Function> subFunction)
     { 
       super(subFunction);
     }
@@ -1133,10 +1132,10 @@ public class FunctionFactory
     
     public String getString(Values parameters)
     { 
-      Iterator iter = subFunction.iterator();
+      Iterator<Function> iter = subFunction.iterator();
       while (iter.hasNext())
       {
-        Function func = (Function)iter.next();
+        Function func = iter.next();
         String str = func.getString(parameters);
         if (str == Function.ERROR) return Function.ERROR;
         if (!str.equalsIgnoreCase("true")) return "false";
@@ -1148,7 +1147,7 @@ public class FunctionFactory
   private static class NotFunction extends MultiFunction
   {
   
-    public NotFunction(Collection subFunction)
+    public NotFunction(Collection<Function> subFunction)
     { 
       super(subFunction);
     }
@@ -1160,10 +1159,10 @@ public class FunctionFactory
     
     public String getString(Values parameters)
     { 
-      Iterator iter = subFunction.iterator();
+      Iterator<Function> iter = subFunction.iterator();
       while (iter.hasNext())
       {
-        Function func = (Function)iter.next();
+        Function func = iter.next();
         String str = func.getString(parameters);
         if (str == Function.ERROR) return Function.ERROR;
         if (!str.equalsIgnoreCase("true")) return "true";
@@ -1175,7 +1174,7 @@ public class FunctionFactory
   
   private static class OrFunction extends MultiFunction
   {
-    public OrFunction(Collection subFunction)
+    public OrFunction(Collection<Function> subFunction)
     {
       super(subFunction);
     }
@@ -1187,10 +1186,10 @@ public class FunctionFactory
     
     public String getString(Values parameters)
     {
-      Iterator iter = subFunction.iterator();
+      Iterator<Function> iter = subFunction.iterator();
       while (iter.hasNext())
       {
-        Function func = (Function)iter.next();
+        Function func = iter.next();
         String str = func.getString(parameters);
         if (str == Function.ERROR) return Function.ERROR;
         if (str.equalsIgnoreCase("true")) return "true";
@@ -1203,7 +1202,7 @@ public class FunctionFactory
   {
     private Function onErrorFunction;
     
-    public SelectFunction(Collection subFunction)
+    public SelectFunction(Collection<Function> subFunction)
     {
       super(subFunction);
     }
@@ -1232,7 +1231,7 @@ public class FunctionFactory
         return null;
     }
     
-    public void getFunctionDialogReferences(Collection set)
+    public void getFunctionDialogReferences(Collection<String> set)
     {
       super.getFunctionDialogReferences(set);
       if (onErrorFunction != null)
@@ -1241,11 +1240,11 @@ public class FunctionFactory
 
     public String getString(Values parameters)
     {
-      Iterator iter = subFunction.iterator();
+      Iterator<Function> iter = subFunction.iterator();
       String result = Function.ERROR;
       while (iter.hasNext())
       {
-        Function func = (Function)iter.next();
+        Function func = iter.next();
         String str = func.getString(parameters);
         if (str != Function.ERROR) 
         {
@@ -1271,14 +1270,14 @@ public class FunctionFactory
 
     public String getString(Values parameters)
     {
-      Iterator iter = subFunction.iterator();
-      Function func = (Function)iter.next();
+      Iterator<Function> iter = subFunction.iterator();
+      Function func = iter.next();
       String compare = func.getString(parameters);
       if (compare == Function.ERROR) return Function.ERROR;
       int prevCompare = 0;
       while (iter.hasNext())
       {
-        func = (Function)iter.next();
+        func = iter.next();
         String str = func.getString(parameters);
         if (str == Function.ERROR) return Function.ERROR; 
         int res = Integer.signum(compare.compareTo(str));
@@ -1337,10 +1336,10 @@ public class FunctionFactory
     {
       String result = initComputation(parameters);
       if (result != null) return result;
-      Iterator iter = subFunction.iterator();
+      Iterator<Function> iter = subFunction.iterator();
       while (iter.hasNext())
       {
-        Function func = (Function)iter.next();
+        Function func = iter.next();
         String str = func.getString(parameters);
         if (str == Function.ERROR) return Function.ERROR;
         try{
@@ -1590,7 +1589,7 @@ public class FunctionFactory
         return null;
     }
     
-    public void getFunctionDialogReferences(Collection set)
+    public void getFunctionDialogReferences(Collection<String> set)
     {
       super.getFunctionDialogReferences(set);
       if (marginFun != null)
@@ -1663,11 +1662,11 @@ public class FunctionFactory
     
     public IfFunction(Function ifFunction, Function thenFunction, Function elseFunction)
     {
-      Set myparams = new HashSet();
+      Set<String> myparams = new HashSet<String>();
       myparams.addAll(Arrays.asList(ifFunction.parameters()));
       myparams.addAll(Arrays.asList(thenFunction.parameters()));
       myparams.addAll(Arrays.asList(elseFunction.parameters()));
-      params = (String[])myparams.toArray(new String[0]);
+      params = myparams.toArray(new String[0]);
       this.ifFunction = ifFunction;
       this.thenFunction = thenFunction;
       this.elseFunction = elseFunction;
@@ -1678,7 +1677,7 @@ public class FunctionFactory
       return params;
     }
     
-    public void getFunctionDialogReferences(Collection set)
+    public void getFunctionDialogReferences(Collection<String> set)
     {
       ifFunction.getFunctionDialogReferences(set);
       thenFunction.getFunctionDialogReferences(set);
@@ -1720,10 +1719,10 @@ public class FunctionFactory
      * TESTED*/
     public DivideFunction(Function dividendFunction, Function divisorFunction, int minScale, int maxScale)
     {
-      Set myparams = new HashSet();
+      Set<String> myparams = new HashSet<String>();
       myparams.addAll(Arrays.asList(dividendFunction.parameters()));
       if (divisorFunction != null) myparams.addAll(Arrays.asList(divisorFunction.parameters()));
-      params = (String[])myparams.toArray(new String[0]);
+      params = myparams.toArray(new String[0]);
       this.dividendFunction = dividendFunction;
       this.divisorFunction = divisorFunction;
       this.minScale = minScale;
@@ -1735,7 +1734,7 @@ public class FunctionFactory
       return params;
     }
     
-    public void getFunctionDialogReferences(Collection set)
+    public void getFunctionDialogReferences(Collection<String> set)
     {
       dividendFunction.getFunctionDialogReferences(set);
       if (divisorFunction != null) divisorFunction.getFunctionDialogReferences(set);
@@ -1830,7 +1829,7 @@ public class FunctionFactory
       return noParams;
     }
     
-    public void getFunctionDialogReferences(Collection set) {} 
+    public void getFunctionDialogReferences(Collection<String> set) {} 
 
     public String getString(Values parameters)
     {
