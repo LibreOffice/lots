@@ -41,7 +41,7 @@ import de.muenchen.allg.itd51.wollmux.DuplicateIDException;
  */
 public class IDManager
 {
-  private Map mapNamespace2mapString2ID = new HashMap();
+  private Map<Object, HashMap<String, ID>> mapNamespace2mapString2ID = new HashMap<Object, HashMap<String,ID>>();
   
   /**
    * Liefert ein {@link IDManager.ID}-Objekt zur String-ID id im Namensraum
@@ -59,14 +59,14 @@ public class IDManager
   public ID getID(Object namespace, String id)
   {
     if (!mapNamespace2mapString2ID.containsKey(namespace))
-      mapNamespace2mapString2ID.put(namespace, new HashMap());
+      mapNamespace2mapString2ID.put(namespace, new HashMap<String,ID>());
     
-    Map mapString2ID = (Map)mapNamespace2mapString2ID.get(namespace);
+    Map<String, ID> mapString2ID = mapNamespace2mapString2ID.get(namespace);
     
     if (!mapString2ID.containsKey(id))
       mapString2ID.put(id, new ID(mapString2ID, id));
     
-    return (ID)mapString2ID.get(id);
+    return mapString2ID.get(id);
   }
   
   /**
@@ -79,7 +79,7 @@ public class IDManager
     if (!mapNamespace2mapString2ID.containsKey(namespace))
       return null;
     
-    Map mapString2ID = (Map)mapNamespace2mapString2ID.get(namespace);
+    Map mapString2ID = mapNamespace2mapString2ID.get(namespace);
     
     if (!mapString2ID.containsKey(id))
       return null;
@@ -116,7 +116,7 @@ public class IDManager
   {
     if (!mapNamespace2mapString2ID.containsKey(namespace)) return new ArrayList();
     
-    Map mapString2ID = (Map)mapNamespace2mapString2ID.get(namespace);
+    Map mapString2ID = mapNamespace2mapString2ID.get(namespace);
     return mapString2ID.values();
   }
   
@@ -137,7 +137,7 @@ public class IDManager
      * Wird verwendet, um Kollisionen zu überprüfen und das Mapping anzupassen,
      * wenn der ID-String dieses Objekts geändert wird.
      */
-    private Map mapString2ID;
+    private Map<String, ID> mapString2ID;
     
     /**
      * true bedeutet, dass irgendwo ein Objekt tatsächlich verwendet wird, das sich
@@ -149,12 +149,12 @@ public class IDManager
     /**
      * Liste von {@link WeakReference}s auf {@link IDManager.IDChangeListener}.
      */
-    private List listeners = new Vector();
+    private List<WeakReference<IDChangeListener>> listeners = new Vector<WeakReference<IDChangeListener>>();
     
     /**
      * Erstellt ein neues ID Objekt, das inaktiv (siehe {@link #isActive()} ist.
      */
-    private ID(Map mapString2ID, String id)
+    private ID(Map<String, ID> mapString2ID, String id)
     {
       this.id = id;
       this.mapString2ID = mapString2ID;
@@ -200,17 +200,17 @@ public class IDManager
      */
     public void addIDChangeListener(IDChangeListener listen)
     {
-      Iterator iter = listeners.iterator();
+      Iterator<WeakReference<IDChangeListener>> iter = listeners.iterator();
       while (iter.hasNext())
       {
-        Reference ref = (Reference)iter.next();
+        Reference ref = iter.next();
         IDChangeListener listen2 = (IDChangeListener)ref.get();
         if (listen2 == null) 
           iter.remove();
         else
           if (listen2 == listen) return;
       }
-      listeners.add(new WeakReference(listen));
+      listeners.add(new WeakReference<IDChangeListener>(listen));
     }
     
     /**
@@ -225,10 +225,10 @@ public class IDManager
      */
     public void removeIDChangeListener(IDChangeListener listen)
     {
-      Iterator iter = listeners.iterator();
+      Iterator<WeakReference<IDChangeListener>> iter = listeners.iterator();
       while (iter.hasNext())
       {
-        Reference ref = (Reference)iter.next();
+        Reference ref = iter.next();
         IDChangeListener listen2 = (IDChangeListener)ref.get();
         if (listen2 == null || listen2 == listen) 
           iter.remove();
@@ -268,10 +268,10 @@ public class IDManager
       mapString2ID.remove(id);
       id = newID;
       mapString2ID.put(id, this);
-      Iterator iter = listeners.iterator();
+      Iterator<WeakReference<IDChangeListener>> iter = listeners.iterator();
       while (iter.hasNext())
       {
-        Reference ref = (Reference)iter.next();
+        Reference ref = iter.next();
         IDChangeListener listen = (IDChangeListener)ref.get();
         if (listen == null) 
           iter.remove();

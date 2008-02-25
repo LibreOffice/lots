@@ -24,7 +24,7 @@ import java.util.Iterator;
  * Ergebnisse einer Datenbankanfrage.
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
-public interface QueryResults
+public interface QueryResults extends Iterable<Dataset>
 {
   /**
    * Die Anzahl der Ergebnisse.
@@ -36,7 +36,7 @@ public interface QueryResults
    * Iterator über die Ergebnisse ({@link Dataset} Objekte).
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public Iterator iterator();
+  public Iterator<Dataset> iterator();
   
   /**
    * Liefert true, falls es keine Ergebnisse gibt.

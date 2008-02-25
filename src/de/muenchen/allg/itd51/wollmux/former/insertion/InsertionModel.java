@@ -516,7 +516,7 @@ public class InsertionModel
     public String getFunctionName()      { return trafo.getFunctionName();}
     public ConfigThingy getExpertFunction() { return trafo.getExpertFunction(); }
 
-    public void setParameterValues(Map mapNameToParamValue)
+    public void setParameterValues(Map<String, ParamValue> mapNameToParamValue)
     {
       trafo.setParameterValues(mapNameToParamValue);
       formularMax4000.documentNeedsUpdating();

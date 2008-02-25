@@ -49,13 +49,13 @@ public class FormControlModelList
   /**
    * Die Liste der {@link FormControlModel}s.
    */
-  private Vector models = new Vector();
+  private Vector<FormControlModel> models = new Vector<FormControlModel>();
   
   /**
    * Liste aller {@link ItemListener}, die über Änderungen des Listeninhalts informiert
    * werden wollen.
    */
-  private List listeners = new Vector(1);
+  private List<ItemListener> listeners = new Vector<ItemListener>(1);
   
   /**
    * Der FormularMax4000 zu dem diese Liste gehört.
@@ -77,7 +77,7 @@ public class FormControlModelList
     while (!models.isEmpty())
     {
       int index = models.size() - 1;
-      FormControlModel model = (FormControlModel)models.remove(index);
+      FormControlModel model = models.remove(index);
       model.hasBeenRemoved();
     }
   }
@@ -109,7 +109,7 @@ public class FormControlModelList
    * würde.  
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public Iterator iterator()
+  public Iterator<FormControlModel> iterator()
   {
     return models.iterator();
   }
@@ -138,11 +138,11 @@ public class FormControlModelList
   public String makeUniqueId(String str)
   {
     if (str.equals("")) return str;
-    Iterator iter = models.iterator();
+    Iterator<FormControlModel> iter = models.iterator();
     int count = 0;
     while (iter.hasNext())
     {
-      FormControlModel model = (FormControlModel)iter.next();
+      FormControlModel model = iter.next();
       IDManager.ID id = model.getId();
       if (id != null && id.toString().startsWith(str))
       {
@@ -194,7 +194,7 @@ public class FormControlModelList
     int tabIdx = 0;
     for (int i = 0; i < models.size(); ++i)
     {
-      if (((FormControlModel)models.get(i)).isTab())
+      if (models.get(i).isTab())
         tabIdx = i;
       
       if (i - tabIdx >= MAX_MODELS_PER_TAB)
@@ -225,8 +225,8 @@ public class FormControlModelList
     {
       int idx = ((Integer)iter.next()).intValue();
       if (idx <= 0) return;
-      FormControlModel model1 = (FormControlModel)models.get(idx-1);
-      FormControlModel model2 = (FormControlModel)models.get(idx);
+      FormControlModel model1 = models.get(idx-1);
+      FormControlModel model2 = models.get(idx);
       haveMovedTab = haveMovedTab || model1.isTab() || model2.isTab();
       models.setElementAt(model2, idx-1);
       models.setElementAt(model1, idx);
@@ -256,8 +256,8 @@ public class FormControlModelList
     {
       int idx = ((Integer)iter.previous()).intValue();
       if (idx >= models.size() - 1) return;
-      FormControlModel model1 = (FormControlModel)models.get(idx+1);
-      FormControlModel model2 = (FormControlModel)models.get(idx);
+      FormControlModel model1 = models.get(idx+1);
+      FormControlModel model2 = models.get(idx);
       haveMovedTab = haveMovedTab || model1.isTab() || model2.isTab();
       models.setElementAt(model2, idx + 1);
       models.setElementAt(model1, idx);
@@ -280,10 +280,10 @@ public class FormControlModelList
     int phase = 0; //0: tab start, 1: Eingabefelder, 2: Buttons
     String id = makeUniqueId(FormularMax4000.STANDARD_TAB_NAME); 
     FormControlModel currentTab = FormControlModel.createTab(id, id, formularMax4000);
-    Iterator iter = models.iterator();
+    Iterator<FormControlModel> iter = models.iterator();
     while (iter.hasNext())
     {
-      FormControlModel model = (FormControlModel)iter.next();
+      FormControlModel model = iter.next();
       if (phase == 0 && model.getType() == FormControlModel.TAB_TYPE)
         currentTab = model;
       else if (phase > 0 && model.getType() == FormControlModel.TAB_TYPE)
@@ -385,10 +385,10 @@ public class FormControlModelList
    */
   private void notifyListeners(FormControlModel model, int index)
   {
-    Iterator iter = listeners.iterator();
+    Iterator<ItemListener> iter = listeners.iterator();
     while (iter.hasNext())
     {
-      ItemListener listener = (ItemListener)iter.next();
+      ItemListener listener = iter.next();
       listener.itemAdded(model, index);
     }
     formularMax4000.documentNeedsUpdating();
@@ -401,10 +401,10 @@ public class FormControlModelList
    */
   private void notifyListeners(int index1, int index2)
   {
-    Iterator iter = listeners.iterator();
+    Iterator<ItemListener> iter = listeners.iterator();
     while (iter.hasNext())
     {
-      ItemListener listener = (ItemListener)iter.next();
+      ItemListener listener = iter.next();
       listener.itemSwapped(index1, index2);
     }
     formularMax4000.documentNeedsUpdating();

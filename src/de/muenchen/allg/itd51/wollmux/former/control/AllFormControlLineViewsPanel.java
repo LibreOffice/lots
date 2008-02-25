@@ -52,6 +52,7 @@ import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
 import de.muenchen.allg.itd51.wollmux.former.IDManager;
 import de.muenchen.allg.itd51.wollmux.former.IndexList;
 import de.muenchen.allg.itd51.wollmux.former.ViewVisibilityDescriptor;
+import de.muenchen.allg.itd51.wollmux.former.IDManager.ID;
 import de.muenchen.allg.itd51.wollmux.former.control.FormControlModelList.ItemListener;
 import de.muenchen.allg.itd51.wollmux.former.view.View;
 
@@ -109,7 +110,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener, OneForm
   /**
    * Enthält die {@link ViewDescriptor}s in der richtigen Reihenfolge.
    */
-  private Vector viewDescriptors = new Vector();
+  private Vector<Object> viewDescriptors = new Vector<Object>();
   
   /**
    * Die Indizes der ausgewählten Elemente in {@link #viewDescriptors}.
@@ -274,11 +275,11 @@ public class AllFormControlLineViewsPanel implements View, ItemListener, OneForm
    */
   private void fixTabStructure()
   {
-    Set toValidate = new HashSet();
+    Set<Object> toValidate = new HashSet<Object>();
     int gridY = 0;
     int tabIndex = 0;
     JComponent tab = firstTab;
-    Iterator iter = viewDescriptors.iterator();
+    Iterator<Object> iter = viewDescriptors.iterator();
     while (iter.hasNext())
     {
       ViewDescriptor desc = (ViewDescriptor)iter.next();
@@ -458,9 +459,9 @@ public class AllFormControlLineViewsPanel implements View, ItemListener, OneForm
    */
   public ComboboxMergeDescriptor mergeCheckboxesIntoCombobox()
   {
-    Map mapCheckboxId2ComboboxEntry = new HashMap();
+    Map<ID, String> mapCheckboxId2ComboboxEntry = new HashMap<ID, String>();
     int count = 0;
-    ArrayList itemList = new ArrayList();
+    ArrayList<String> itemList = new ArrayList<String>();
     Iterator iter = selection.iterator();
     while (iter.hasNext())
     {
@@ -500,7 +501,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener, OneForm
     
     String id = formControlModelList.makeUniqueId("CheckCombo");
     String[] items = new String[itemList.size()];
-    items = (String[])itemList.toArray(items);
+    items = itemList.toArray(items);
     FormControlModel comboModel = FormControlModel.createComboBox("Auswahl", id, items, formularMax4000);
     comboModel.setEditable(false);
     int index = getInsertionIndex();
@@ -683,7 +684,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener, OneForm
        */
       ViewVisibilityDescriptor newDesc = new ViewVisibilityDescriptor(desc);
       
-      Iterator iter = viewDescriptors.iterator();
+      Iterator<Object> iter = viewDescriptors.iterator();
       while (iter.hasNext())
       {
         ViewDescriptor viewDescriptor = (ViewDescriptor)iter.next();

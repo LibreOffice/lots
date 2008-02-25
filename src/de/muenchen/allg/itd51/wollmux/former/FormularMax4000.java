@@ -869,7 +869,7 @@ public class FormularMax4000
   private ConfigThingy updateDocument(TextDocumentModel doc)
   {
     Logger.debug(L.m("Übertrage Formularbeschreibung ins Dokument"));
-    Map mapFunctionNameToConfigThingy = new HashMap();
+    Map<String, ConfigThingy> mapFunctionNameToConfigThingy = new HashMap<String, ConfigThingy>();
     insertionModelList.updateDocument(mapFunctionNameToConfigThingy);
     ConfigThingy conf = buildFormDescriptor(mapFunctionNameToConfigThingy);
     doc.setFormDescription(new ConfigThingy(conf));

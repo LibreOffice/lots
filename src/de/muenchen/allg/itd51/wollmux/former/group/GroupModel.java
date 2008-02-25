@@ -206,7 +206,7 @@ public class GroupModel
     public String getFunctionName()      { return condition.getFunctionName();}
     public ConfigThingy getExpertFunction() { return condition.getExpertFunction(); }
 
-    public void setParameterValues(Map mapNameToParamValue)
+    public void setParameterValues(Map<String, ParamValue> mapNameToParamValue)
     {
       condition.setParameterValues(mapNameToParamValue);
       formularMax4000.documentNeedsUpdating();

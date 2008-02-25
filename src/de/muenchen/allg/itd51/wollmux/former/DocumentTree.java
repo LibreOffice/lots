@@ -96,14 +96,14 @@ public class DocumentTree
    */
   public DocumentTree(XTextDocument doc)
   {
-    Vector topLevelNodes = new Vector();
+    Vector<Node> topLevelNodes = new Vector<Node>();
     
     /*
      * Zuerst enumerieren wir den Inhalt des Body Texts
      */
     XEnumerationAccess enuAccess = UNO.XEnumerationAccess(doc.getText());
     if (enuAccess == null) return;
-    Vector nodes = new Vector();
+    Vector<Node> nodes = new Vector<Node>();
     XEnumeration enu = enuAccess.createEnumeration();
     handleParagraphEnumeration(enu, nodes, doc);
     topLevelNodes.add(new ContainerNode(nodes));
@@ -116,14 +116,14 @@ public class DocumentTree
     String[] names = access.getElementNames();
     if (names.length > 0)
     {
-      nodes = new Vector(names.length);
+      nodes = new Vector<Node>(names.length);
       for (int i = 0; i < names.length; ++i)
       {
         Object frame;
         try{ frame = access.getByName(names[i]); } catch(Exception x){ continue;}
         
         enu = UNO.XEnumerationAccess(frame).createEnumeration();
-        Vector childNodes = new Vector();
+        Vector<Node> childNodes = new Vector<Node>();
         handleParagraphEnumeration(enu, childNodes, doc);
         
         nodes.add(new ContainerNode(childNodes));
@@ -141,7 +141,7 @@ public class DocumentTree
    * @param doc das Dokument in dem die Absätze liegen.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private void handleParagraphEnumeration(XEnumeration enu, Vector nodes, XTextDocument doc)
+  private void handleParagraphEnumeration(XEnumeration enu, Vector<Node> nodes, XTextDocument doc)
   {
     XEnumerationAccess enuAccess;
     while (enu.hasMoreElements())
@@ -166,14 +166,14 @@ public class DocumentTree
    * @param doc das Dokument das die Tabelle enthält.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private void handleTextTable(XTextTable table, Collection nodes, XTextDocument doc)
+  private void handleTextTable(XTextTable table, Collection<Node> nodes, XTextDocument doc)
   {
-    Vector cells = new Vector();
+    Vector<Node> cells = new Vector<Node>();
     String[] cellNames = table.getCellNames();
     for (int i = 0; i < cellNames.length; ++i)
     {
       XCell cell = table.getCellByName(cellNames[i]);
-      Vector cellContents = new Vector();
+      Vector<Node> cellContents = new Vector<Node>();
       handleParagraphEnumeration(UNO.XEnumerationAccess(cell).createEnumeration(), cellContents, doc);
       cells.add(new ContainerNode(cellContents));
     }
@@ -187,9 +187,9 @@ public class DocumentTree
    * @param doc das Dokument das den Absatz enthält.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private void handleParagraph(XEnumerationAccess paragraph, Collection nodes, XTextDocument doc)
+  private void handleParagraph(XEnumerationAccess paragraph, Collection<Node> nodes, XTextDocument doc)
   {
-    Vector textPortions = new Vector();
+    Vector<Node> textPortions = new Vector<Node>();
     
     /*
      * enumeriere alle TextPortions des Paragraphs
@@ -426,7 +426,7 @@ public class DocumentTree
      * Liefert einen Iterator über alle Kindknoten.
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
-    public Iterator iterator() { return (new Vector(0)).iterator();};
+    public Iterator<Node> iterator() { return (new Vector<Node>(0)).iterator();};
     protected Node() {}
     
     /**
@@ -461,15 +461,15 @@ public class DocumentTree
    */
   public static class ContainerNode extends Node implements Container
   {
-    private Collection children;
+    private Collection<Node> children;
     
-    public ContainerNode(Collection children)
+    public ContainerNode(Collection<Node> children)
     {
       super();
       this.children = children;
     }
     
-    public Iterator iterator() { return children.iterator();}
+    public Iterator<Node> iterator() { return children.iterator();}
     public String toString() { return "CONTAINER";}
    
     public int getType() {return CONTAINER_TYPE;}
@@ -478,10 +478,10 @@ public class DocumentTree
     {
       if (!visit.container(this, 0)) return false;
       
-      Iterator iter = iterator();
+      Iterator<Node> iter = iterator();
       while (iter.hasNext())
       {
-        if (!((Node)iter.next()).visit(visit)) return false;
+        if (!iter.next().visit(visit)) return false;
       }
       if (!visit.container(this, 1)) return false;
       return true;
@@ -490,7 +490,7 @@ public class DocumentTree
   
   public static class ParagraphNode extends ContainerNode
   {
-    public ParagraphNode(Collection children)
+    public ParagraphNode(Collection<Node> children)
     {
       super(children);
     }
@@ -784,10 +784,10 @@ public class DocumentTree
   {
     StringBuffer buf = new StringBuffer();
     buf.append(""+root.toString()+"\n");
-    Iterator iter = root.iterator();
+    Iterator<Node> iter = root.iterator();
     while (iter.hasNext())
     {
-      Node child = (Node)iter.next();
+      Node child = iter.next();
       buf.append(childPrefix+"|\n"+childPrefix+"+--");
       char ch = iter.hasNext()?'|':' ';
       buf.append(treeDump(child, childPrefix+ch+"  "));

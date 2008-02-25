@@ -106,7 +106,7 @@ public class FormControlModel
   /** HOTKEY. */
   private char hotkey = 0;
   /** VALUES. */
-  private List items = new Vector(0);
+  private List<String> items = new Vector<String>(0);
   /** EDIT. */
   private boolean editable = false;
   /** READONLY. */
@@ -114,7 +114,7 @@ public class FormControlModel
   /** WRAP. */
   private boolean wrap = true;
   /** GROUPS. */
-  private Set groups = new HashSet();
+  private Set<String> groups = new HashSet<String>();
   /** LINES. */
   private int lines = 4;
   /** MINSIZE. */
@@ -129,7 +129,7 @@ public class FormControlModel
   /**
    * Die {@link ModelChangeListener}, die über Änderungen dieses Models informiert werden wollen.
    */
-  private List listeners = new Vector(1);
+  private List<ModelChangeListener> listeners = new Vector<ModelChangeListener>(1);
   
   /**
    * Der FormularMax4000 zu dem dieses Model gehört. Dieser wird über Änderungen des Models
@@ -195,9 +195,9 @@ public class FormControlModel
    * Liefert eine Liste, die die String-Werte aller Kinder von conf enthält. 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private List parseValues(ConfigThingy conf)
+  private List<String> parseValues(ConfigThingy conf)
   {
-    Vector list = new Vector(conf.count());
+    Vector<String> list = new Vector<String>(conf.count());
     Iterator iter = conf.iterator();
     while (iter.hasNext())
     {
@@ -210,9 +210,9 @@ public class FormControlModel
    * Liefert eine Menge, die die String-Werte aller Kinder von conf enthält. 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private Set parseGroups(ConfigThingy conf)
+  private Set<String> parseGroups(ConfigThingy conf)
   {
-    HashSet set = new HashSet(conf.count());
+    HashSet<String> set = new HashSet<String>(conf.count());
     Iterator iter = conf.iterator();
     while (iter.hasNext())
     {
@@ -278,7 +278,7 @@ public class FormControlModel
   public static FormControlModel createComboBox(String label, String id, String[] items, FormularMax4000 formularMax4000)
   {
     FormControlModel model = new FormControlModel(label, COMBOBOX_TYPE, id, formularMax4000);
-    model.items = new Vector(Arrays.asList(items));
+    model.items = new Vector<String>(Arrays.asList(items));
     return model;
   }
   
@@ -464,7 +464,7 @@ public class FormControlModel
    * Liefert die Liste der VALUES-Werte dieses FormControlModels.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public List getItems()
+  public List<String> getItems()
   {
     return items; 
   }
@@ -473,7 +473,7 @@ public class FormControlModel
    * Liefert die Menge der GROUPS-Werte dieses FormControlModels.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public Set getGroups()
+  public Set<String> getGroups()
   {
     return groups; 
   }
@@ -802,22 +802,22 @@ public class FormControlModel
     if (getHotkey() > 0)
       conf.add("HOTKEY").add(""+getHotkey());
     
-    List items = getItems();
+    List<String> items = getItems();
     if (items.size() > 0)
     {
       ConfigThingy values = conf.add("VALUES");
-      Iterator iter = items.iterator();
+      Iterator<String> iter = items.iterator();
       while (iter.hasNext())
       {
         values.add(iter.next().toString());
       }
     }
     
-    Set groups = getGroups();
+    Set<String> groups = getGroups();
     if (groups.size() > 0)
     {
       ConfigThingy grps = conf.add("GROUPS");
-      Iterator iter = groups.iterator();
+      Iterator<String> iter = groups.iterator();
       while (iter.hasNext())
       {
         grps.add(iter.next().toString());
@@ -842,10 +842,10 @@ public class FormControlModel
    */
   private void notifyListeners(int attributeId, Object newValue)
   {
-    Iterator iter = listeners.iterator();
+    Iterator<ModelChangeListener> iter = listeners.iterator();
     while (iter.hasNext())
     {
-      ModelChangeListener listener = (ModelChangeListener)iter.next();
+      ModelChangeListener listener = iter.next();
       listener.attributeChanged(this, attributeId, newValue);
     }
     formularMax4000.documentNeedsUpdating();
@@ -872,10 +872,10 @@ public class FormControlModel
   public void hasBeenRemoved()
   {
     if (id != null) id.deactivate();
-    Iterator iter = listeners.iterator();
+    Iterator<ModelChangeListener> iter = listeners.iterator();
     while (iter.hasNext())
     {
-      ModelChangeListener listener = (ModelChangeListener)iter.next();
+      ModelChangeListener listener = iter.next();
       listener.modelRemoved(this);
     }
     formularMax4000.documentNeedsUpdating();
@@ -939,7 +939,7 @@ public class FormControlModel
     public String getFunctionName()      { return sel.getFunctionName();}
     public ConfigThingy getExpertFunction() { return sel.getExpertFunction(); }
 
-    public void setParameterValues(Map mapNameToParamValue)
+    public void setParameterValues(Map<String, ParamValue> mapNameToParamValue)
     {
       sel.setParameterValues(mapNameToParamValue);
       formularMax4000.documentNeedsUpdating();

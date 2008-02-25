@@ -64,7 +64,7 @@ public interface Datasource
    * Liefert ein Set, das die Titel aller Spalten der Datenquelle enthält.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public Set getSchema();
+  public Set<String> getSchema();
   
   /**
    * Liefert alle Datensätze, deren Schlüssel in der Collection keys
@@ -91,7 +91,7 @@ public interface Datasource
    * werden konnte.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public QueryResults find(List query, long timeout) 
+  public QueryResults find(List<? extends QueryPart> query, long timeout) 
     throws TimeoutException;
   
   /**

@@ -27,7 +27,7 @@ public class IndexList
   /**
    * Die (immer aufsteigend sortierte) Liste der Indizes.
    */
-  private Vector indices = new Vector();
+  private Vector<Integer> indices = new Vector<Integer>();
   
   
   /**
@@ -38,10 +38,10 @@ public class IndexList
    */
   public void fixup(int start, int offset, int maxindex)
   {
-    ListIterator iter = indices.listIterator();
+    ListIterator<Integer> iter = indices.listIterator();
     while (iter.hasNext())
     {
-      Integer I = (Integer)iter.next();
+      Integer I = iter.next();
       int i = I.intValue();
       if (i >= start)
       {
@@ -61,10 +61,10 @@ public class IndexList
    */
   public void swap(int index1, int index2)
   {
-    ListIterator iter = indices.listIterator();
+    ListIterator<Integer> iter = indices.listIterator();
     while (iter.hasNext())
     {
-      Integer I = (Integer)iter.next();
+      Integer I = iter.next();
       int i = I.intValue();
       if (i == index1)
         iter.set(new Integer(index2));
@@ -79,7 +79,7 @@ public class IndexList
    * Liefert einen Iterator über die Integers in dieser Liste.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public ListIterator iterator()
+  public ListIterator<Integer> iterator()
   {
     return indices.listIterator();
   }
@@ -88,7 +88,7 @@ public class IndexList
    * Liefert einen Listiterator, der hinter dem letzten Element der Liste (von Integers) startet.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public ListIterator reverseIterator()
+  public ListIterator<Integer> reverseIterator()
   {
     return indices.listIterator(indices.size());
   }
@@ -124,13 +124,13 @@ public class IndexList
   public int firstElement()
   {
     if (indices.size() == 0) return -1;
-    return ((Integer)indices.firstElement()).intValue(); 
+    return indices.firstElement().intValue(); 
   }
   
   public int lastElement()
   {
     if (indices.size() == 0) return -1;
-    return ((Integer)indices.lastElement()).intValue(); 
+    return indices.lastElement().intValue(); 
   }
   
   public void clear()
