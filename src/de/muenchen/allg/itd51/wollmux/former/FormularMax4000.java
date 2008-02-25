@@ -1916,7 +1916,7 @@ public class FormularMax4000
     WollMuxFiles.setupWollMuxDir();
     Logger.init(System.err, Logger.DEBUG);
     XTextDocument doc = UNO.XTextDocument(UNO.desktop.getCurrentComponent());
-    Map context = new HashMap();
+    Map<Object, Object> context = new HashMap<Object, Object>();
     DialogLibrary dialogLib = WollMuxFiles.parseFunctionDialogs(WollMuxFiles.getWollmuxConf(), null, context);
     new FormularMax4000(new TextDocumentModel(doc),null, WollMuxFiles.parseFunctions(WollMuxFiles.getWollmuxConf(), dialogLib, context, null), WollMuxFiles.parsePrintFunctions(WollMuxFiles.getWollmuxConf()));
   }
