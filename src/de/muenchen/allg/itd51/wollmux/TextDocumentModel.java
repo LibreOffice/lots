@@ -253,7 +253,7 @@ public class TextDocumentModel
    * Enth‰lt ein Setmit den Namen aller derzeit unsichtbar gestellter
    * Sichtbarkeitsgruppen.
    */
-  private HashSet /* of String */invisibleGroups;
+  private HashSet<String> invisibleGroups;
 
   /**
    * Der Vorschaumodus ist standardm‰ﬂig immer gesetzt - ist dieser Modus nicht
@@ -329,7 +329,7 @@ public class TextDocumentModel
     this.printSettingsDone = false;
     this.formularConf = null;
     this.formFieldValues = new HashMap<String, String>();
-    this.invisibleGroups = new HashSet();
+    this.invisibleGroups = new HashSet<String>();
     this.overrideFragMap = new HashMap<String, String>();
     this.functionContext = new HashMap<Object, Object>();
     this.formModel = null;
@@ -1110,7 +1110,7 @@ public class TextDocumentModel
    * Liefert ein HashSet mit den Namen (Strings) aller als unsichtbar markierten
    * Sichtbarkeitsgruppen.
    */
-  synchronized public HashSet getInvisibleGroups()
+  synchronized public HashSet<String> getInvisibleGroups()
   {
     return invisibleGroups;
   }
@@ -2311,7 +2311,7 @@ public class TextDocumentModel
   synchronized public void printWithPageRange(short numberOfCopies,
       short pageRangeType, String pageRangeValue) throws PrintFailedException
   {
-    HashMap<String, Comparable> props = new HashMap<String, Comparable>();
+    HashMap<String, Object> props = new HashMap<String, Object>();
     props.put(PrintModelProps.PROP_PAGE_RANGE_TYPE, new Short(pageRangeType));
     props.put(PrintModelProps.PROP_PAGE_RANGE_VALUE, pageRangeValue);
     props.put(PrintModelProps.PROP_COPY_COUNT, new Short(numberOfCopies));
@@ -2331,11 +2331,11 @@ public class TextDocumentModel
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  synchronized public void printWithProps(HashMap<String, Comparable> props) throws PrintFailedException
+  synchronized public void printWithProps(HashMap<String, Object> props) throws PrintFailedException
   {
     try
     {
-      if (props == null) props = new HashMap<String, Comparable>();
+      if (props == null) props = new HashMap<String, Object>();
       UnoProps myProps = new UnoProps("Wait", Boolean.TRUE);
 
       // Property "CopyCount" bestimmen:

@@ -136,7 +136,7 @@ public class WollMuxEventHandler
      */
     private boolean acceptEvents = false;
 
-    private List eventQueue = new LinkedList();
+    private List<WollMuxEvent> eventQueue = new LinkedList<WollMuxEvent>();
 
     private static EventProcessor singletonInstance;
 
@@ -181,7 +181,7 @@ public class WollMuxEventHandler
               {
                 while (eventQueue.isEmpty())
                   eventQueue.wait();
-                event = (WollMuxEvent) eventQueue.remove(0);
+                event = eventQueue.remove(0);
               }
 
               event.process();
@@ -656,7 +656,7 @@ public class WollMuxEventHandler
       Dialog dialogInst = null;
       try
       {
-        dialogInst = dialog.instanceFor(new HashMap());
+        dialogInst = dialog.instanceFor(new HashMap<Object, Object>());
 
         setLock();
         dialogInst.show(unlockActionListener, model.getFunctionLibrary(),
@@ -1088,7 +1088,7 @@ public class WollMuxEventHandler
    *          Ein Vector of TextDocumentModels, die in einem Multiformular
    *          zusammengefasst werden sollen.
    */
-  public static void handleProcessMultiform(Vector /* of TextDocumentModel */docs,
+  public static void handleProcessMultiform(Vector /* of TextDocumentModel */<TextDocumentModel>docs,
       ConfigThingy buttonAnpassung)
   {
     handle(new OnProcessMultiform(docs, buttonAnpassung));
@@ -1096,11 +1096,11 @@ public class WollMuxEventHandler
 
   private static class OnProcessMultiform extends BasicEvent
   {
-    Vector docs;
+    Vector<TextDocumentModel> docs;
 
     ConfigThingy buttonAnpassung;
 
-    public OnProcessMultiform(Vector /* of TextDocumentModel */docs,
+    public OnProcessMultiform(Vector /* of TextDocumentModel */<TextDocumentModel>docs,
         ConfigThingy buttonAnpassung)
     {
       this.docs = docs;
@@ -1123,9 +1123,9 @@ public class WollMuxEventHandler
       }
 
       // FormModel in allen Dokumenten registrieren:
-      for (Iterator iter = docs.iterator(); iter.hasNext();)
+      for (Iterator<TextDocumentModel> iter = docs.iterator(); iter.hasNext();)
       {
-        TextDocumentModel doc = (TextDocumentModel) iter.next();
+        TextDocumentModel doc = iter.next();
         doc.setFormModel(fm);
       }
 
@@ -1328,11 +1328,11 @@ public class WollMuxEventHandler
       }
 
       Iterator iter = fragConf.iterator();
-      Vector docs = new Vector();
+      Vector<TextDocumentModel> docs = new Vector<TextDocumentModel>();
       while (iter.hasNext())
       {
         ConfigThingy fragListConf = (ConfigThingy) iter.next();
-        List fragIds = new Vector();
+        List<String> fragIds = new Vector<String>();
         Iterator fragIter = fragListConf.iterator();
         while (fragIter.hasNext())
         {
@@ -1359,7 +1359,7 @@ public class WollMuxEventHandler
      * @return
      * @throws WollMuxFehlerException
      */
-    private TextDocumentModel openTextDocument(List fragIDs, boolean asTemplate,
+    private TextDocumentModel openTextDocument(List<String> fragIDs, boolean asTemplate,
         boolean asPartOfMultiform) throws WollMuxFehlerException
     {
       WollMuxSingleton mux = WollMuxSingleton.getInstance();
@@ -1371,10 +1371,10 @@ public class WollMuxEventHandler
       String[] fragUrls = new String[fragIDs.size() - 1];
       String urlStr = "";
 
-      Iterator iter = fragIDs.iterator();
+      Iterator<String> iter = fragIDs.iterator();
       for (int i = 0; iter.hasNext(); ++i)
       {
-        String frag_id = (String) iter.next();
+        String frag_id = iter.next();
 
         // Fragment-URL holen und aufbereiten:
         Vector urls = new Vector();
@@ -1713,7 +1713,7 @@ public class WollMuxEventHandler
       try
       {
         // invisibleGroups anpassen:
-        HashSet invisibleGroups = model.getInvisibleGroups();
+        HashSet<String> invisibleGroups = model.getInvisibleGroups();
         if (visible)
           invisibleGroups.remove(groupId);
         else
@@ -2764,7 +2764,7 @@ public class WollMuxEventHandler
    *          {@see de.muenchen.allg.itd51.wollmux.PrintModels.PrintModelProps},
    *          die ausgewertet werden sollen.
    */
-  public static void handlePrintViaPrintModel(XTextDocument doc, HashMap props,
+  public static void handlePrintViaPrintModel(XTextDocument doc, HashMap<String, Object> props,
       ActionListener listener)
   {
     handle(new OnPrintViaPrintModel(doc, props, listener));
@@ -2774,11 +2774,11 @@ public class WollMuxEventHandler
   {
     private XTextDocument doc;
 
-    private HashMap props;
+    private HashMap<String, Object> props;
 
     private ActionListener listener;
 
-    public OnPrintViaPrintModel(XTextDocument doc, HashMap props,
+    public OnPrintViaPrintModel(XTextDocument doc, HashMap<String, Object> props,
         ActionListener listener)
     {
       this.doc = doc;
@@ -3107,12 +3107,12 @@ public class WollMuxEventHandler
       }
       String bookmarkName = bookmarkStart + hcAtt + ")";
 
-      Set bmNames = getBookmarkNamesStartingWith(bookmarkStart, range);
+      Set<String> bmNames = getBookmarkNamesStartingWith(bookmarkStart, range);
 
       if (bmNames.size() > 0)
       {
         // bereits bestehende Blöcke löschen
-        Iterator iter = bmNames.iterator();
+        Iterator<String> iter = bmNames.iterator();
         while (iter.hasNext())
         {
           bookmarkName = iter.next().toString();
@@ -3195,7 +3195,7 @@ public class WollMuxEventHandler
      * @param bookmarkName
      * @param range
      */
-    private static HashSet getBookmarkNamesStartingWith(String bookmarkName,
+    private static HashSet<String> getBookmarkNamesStartingWith(String bookmarkName,
         XTextRange range)
     {
       // Hier findet eine iteration des über den XEnumerationAccess des ranges
@@ -3203,8 +3203,8 @@ public class WollMuxEventHandler
       // bestehenden Blöcken aus TextDocumentModel.get<blockname>Blocks()
       // vergleichen...
       bookmarkName = bookmarkName.toLowerCase();
-      HashSet found = new HashSet();
-      HashSet started = new HashSet();
+      HashSet<String> found = new HashSet<String>();
+      HashSet<String> started = new HashSet<String>();
       XTextCursor cursor = range.getText().createTextCursorByRange(range);
       if (UNO.XEnumerationAccess(cursor) != null)
       {
@@ -4110,15 +4110,15 @@ public class WollMuxEventHandler
       }
 
       // Infos der Installationen einlesen.
-      HashMap wmInsts = getInstallations();
+      HashMap<String, Date> wmInsts = getInstallations();
 
       // Variablen recentInstPath / recentInstLastModified bestimmen
       String recentInstPath = "";
       Date recentInstLastModified = null;
-      for (Iterator iter = wmInsts.keySet().iterator(); iter.hasNext();)
+      for (Iterator<String> iter = wmInsts.keySet().iterator(); iter.hasNext();)
       {
-        String path = (String) iter.next();
-        Date d = (Date) wmInsts.get(path);
+        String path = iter.next();
+        Date d = wmInsts.get(path);
         if (recentInstLastModified == null
             || d.compareTo(recentInstLastModified) > 0)
         {
@@ -4129,9 +4129,9 @@ public class WollMuxEventHandler
 
       // Variable wrongInstList bestimmen:
       String otherInstsList = "";
-      for (Iterator iter = wmInsts.keySet().iterator(); iter.hasNext();)
+      for (Iterator<String> iter = wmInsts.keySet().iterator(); iter.hasNext();)
       {
-        String path = (String) iter.next();
+        String path = iter.next();
         if (path.equals(recentInstPath)) continue;
         otherInstsList += "- " + path + "\n";
       }
@@ -4180,9 +4180,9 @@ public class WollMuxEventHandler
      * 
      * @author Christoph Lutz (D-III-ITD-5.1)
      */
-    private HashMap getInstallations()
+    private HashMap<String, Date> getInstallations()
     {
-      HashMap wmInstallations = new HashMap();
+      HashMap<String, Date> wmInstallations = new HashMap<String, Date>();
 
       // Installationspfade der Pakete bestimmen:
       String myPath = null; // user-Pfad
@@ -4235,7 +4235,7 @@ public class WollMuxEventHandler
      * 
      * @author Bettina Bauer (D-III-ITD-5.1), Christoph Lutz (D-III-ITD-5.1)
      */
-    private static void findWollMuxInstallations(HashMap wmInstallations, String path)
+    private static void findWollMuxInstallations(HashMap<String, Date> wmInstallations, String path)
     {
       URI uriPath;
       uriPath = null;

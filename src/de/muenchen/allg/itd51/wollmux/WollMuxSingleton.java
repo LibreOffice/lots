@@ -131,19 +131,19 @@ public class WollMuxSingleton implements XPALProvider
   /**
    * Enthält alle registrierten SenderBox-Objekte.
    */
-  private Vector registeredPALChangeListener;
+  private Vector<XPALChangeEventListener> registeredPALChangeListener;
 
   /**
    * Enthält alle registrierten XEventListener, die bei Statusänderungen der
    * Dokumentbearbeitung informiert werden.
    */
-  private Vector registeredDocumentEventListener;
+  private Vector<XEventListener> registeredDocumentEventListener;
 
   /**
    * Enthält eine Zuordnung von HashableComponent Objekten, die die
    * XTextDocumente repräsentieren, auf die zugehörigen TextDocumentModels
    */
-  private HashMap currentTextDocumentModels;
+  private HashMap<HashableComponent, TextDocumentModel> currentTextDocumentModels;
 
   /**
    * Enthält null (wenn noch keine Installations-Prüfung erfolgte) oder den
@@ -163,7 +163,7 @@ public class WollMuxSingleton implements XPALProvider
     // getXComponentContext zurückgeliefert.
     this.ctx = ctx;
 
-    this.currentTextDocumentModels = new HashMap();
+    this.currentTextDocumentModels = new HashMap<HashableComponent, TextDocumentModel>();
 
     this.currentWollMuxInstallationDate = null;
 
@@ -180,9 +180,9 @@ public class WollMuxSingleton implements XPALProvider
 
     boolean successfulStartup = true;
 
-    registeredPALChangeListener = new Vector();
+    registeredPALChangeListener = new Vector<XPALChangeEventListener>();
 
-    registeredDocumentEventListener = new Vector();
+    registeredDocumentEventListener = new Vector<XEventListener>();
 
     WollMuxFiles.setupWollMuxDir();
 
@@ -281,7 +281,7 @@ public class WollMuxSingleton implements XPALProvider
     // einfach einen leeren Abschnitt anlegen, ohne dass sie wissen, was sie
     // damit anrichten.
     if (oooEinstellungenConf.count() == 0
-        || ((ConfigThingy) oooEinstellungenConf.iterator().next()).count() == 0)
+        || oooEinstellungenConf.iterator().next().count() == 0)
       try
       {
         oooEinstellungenConf = new ConfigThingy("DefaultSettings",
@@ -516,7 +516,7 @@ public class WollMuxSingleton implements XPALProvider
 
     if (listener == null) return;
 
-    Iterator i = registeredPALChangeListener.iterator();
+    Iterator<XPALChangeEventListener> i = registeredPALChangeListener.iterator();
     while (i.hasNext())
     {
       XInterface l = UNO.XInterface(i.next());
@@ -542,7 +542,7 @@ public class WollMuxSingleton implements XPALProvider
 
     if (listener == null) return;
 
-    Iterator i = registeredDocumentEventListener.iterator();
+    Iterator<XEventListener> i = registeredDocumentEventListener.iterator();
     while (i.hasNext())
     {
       XInterface l = UNO.XInterface(i.next());
@@ -563,7 +563,7 @@ public class WollMuxSingleton implements XPALProvider
   public void removePALChangeEventListener(XPALChangeEventListener listener)
   {
     Logger.debug2("WollMuxSingleton::removePALChangeEventListener()");
-    Iterator i = registeredPALChangeListener.iterator();
+    Iterator<XPALChangeEventListener> i = registeredPALChangeListener.iterator();
     while (i.hasNext())
     {
       XInterface l = UNO.XInterface(i.next());
@@ -582,7 +582,7 @@ public class WollMuxSingleton implements XPALProvider
   public void removeDocumentEventListener(XEventListener listener)
   {
     Logger.debug2("WollMuxSingleton::removeDocumentEventListener()");
-    Iterator i = registeredDocumentEventListener.iterator();
+    Iterator<XEventListener> i = registeredDocumentEventListener.iterator();
     while (i.hasNext())
     {
       XInterface l = UNO.XInterface(i.next());
@@ -768,7 +768,7 @@ public class WollMuxSingleton implements XPALProvider
    * 
    * @return Iterator auf alle registrierten SenderBox-Objekte.
    */
-  public Iterator palChangeListenerIterator()
+  public Iterator<XPALChangeEventListener> palChangeListenerIterator()
   {
     return registeredPALChangeListener.iterator();
   }
@@ -780,7 +780,7 @@ public class WollMuxSingleton implements XPALProvider
    * 
    * @return Iterator auf alle registrierten XEventListener-Objekte.
    */
-  public Iterator documentEventListenerIterator()
+  public Iterator<XEventListener> documentEventListenerIterator()
   {
     return registeredDocumentEventListener.iterator();
   }
@@ -1008,7 +1008,7 @@ public class WollMuxSingleton implements XPALProvider
   {
     HashableComponent key = new HashableComponent(doc);
 
-    TextDocumentModel model = (TextDocumentModel) currentTextDocumentModels.get(key);
+    TextDocumentModel model = currentTextDocumentModels.get(key);
     if (model == null)
     {
       // Neues TextDocumentModel erzeugen, wenn es noch nicht existiert.
@@ -1044,7 +1044,7 @@ public class WollMuxSingleton implements XPALProvider
     try
     {
       HashableComponent key = new HashableComponent(frame.getController().getModel());
-      return (TextDocumentModel) currentTextDocumentModels.get(key);
+      return currentTextDocumentModels.get(key);
     }
     catch (java.lang.Exception e)
     {
