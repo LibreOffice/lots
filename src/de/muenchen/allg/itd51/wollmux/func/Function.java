@@ -1,4 +1,3 @@
-//TODO L.m()
 /*
 * Dateiname: Function.java
 * Projekt  : WollMux
@@ -21,16 +20,19 @@ package de.muenchen.allg.itd51.wollmux.func;
 
 import java.util.Collection;
 
+import de.muenchen.allg.itd51.wollmux.L;
+
 /**
  * Eine Funktion, die einen Wert in Abh鄚gigkeit von Parametern berechnet.
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public interface Function
 {
-  public static final String ERROR = "!不!FEHLERHAFTE DATEN!不!";
+  public static final String ERROR = L.m("!不!FEHLERHAFTE DATEN!不!");
   
   /**
    * Liefert die Namen der Parameter, die die Funktion erwartet.
+   * Die Reihenfolge ist undefiniert und es kann ein Name mehrfach vorkommen.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public String[] parameters();
