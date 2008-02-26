@@ -132,6 +132,15 @@ import de.muenchen.allg.itd51.wollmux.func.PrintFunctionLibrary;
 public class FormularMax4000
 {
   public static final String STANDARD_TAB_NAME = L.m("Reiter");
+  
+  /*
+   * Die Namen der Parameter, die die Gender-Trafo erwartet. ACHTUNG! Diese müssen
+   * exakt mit den Parametern der Gender()-Funktion aus der WollMux-Konfig übereinstimmen.
+   * Insbesondere dürfen sie nicht übersetzt werden, ohne dass die Gender()-Funktion
+   * angepasst wird. Und falls die Gender()-Funktion geändert wird, dann funktionieren
+   * existierende Formulare nicht mehr.
+   */
+  private static final String[] GENDER_TRAFO_PARAMS = new String[]{"Falls_Anrede_HerrN", "Falls_Anrede_Frau", "Falls_sonstige_Anrede", "Anrede"};
 
   /**
    * Regex für Test ob String mit Buchstabe oder Underscore beginnt.
@@ -1266,7 +1275,6 @@ public class FormularMax4000
   {
     String[] items = control.getItems();
     FunctionSelection genderTrafo = functionSelectionProvider.getFunctionSelection("Gender");
-    String[] params = genderTrafo.getParameterNames();
     
     for (int i = 0; i < 3 && i < items.length; ++i)
     {
@@ -1289,7 +1297,7 @@ public class FormularMax4000
       
       //bis zu N-1 Leerzeichen am Ende löschen, um mehrere gleiche Einträge zu erlauben.
       for (; n > 1 && item.endsWith(" "); --n) item = item.substring(0, item.length() - 1);
-      genderTrafo.setParameterValue(params[i], ParamValue.literal(item));
+      genderTrafo.setParameterValue(GENDER_TRAFO_PARAMS[i], ParamValue.literal(item));
     }
     
     model.setTrafo(genderTrafo);
