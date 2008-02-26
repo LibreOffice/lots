@@ -1,4 +1,3 @@
-//TODO L.m()
 /*
  * Dateiname: WollMuxEventHandler.java
  * Projekt  : WollMux
@@ -159,9 +158,9 @@ public class WollMuxEventHandler
     {
       acceptEvents = accept;
       if (accept)
-        Logger.debug("EventProcessor: akzeptiere neue Events.");
+        Logger.debug(L.m("EventProcessor: akzeptiere neue Events."));
       else
-        Logger.debug("EventProcessor: blockiere Entgegennahme von Events!");
+        Logger.debug(L.m("EventProcessor: blockiere Entgegennahme von Events!"));
     }
 
     private EventProcessor()
@@ -171,7 +170,7 @@ public class WollMuxEventHandler
       {
         public void run()
         {
-          Logger.debug("Starte EventProcessor-Thread");
+          Logger.debug(L.m("Starte EventProcessor-Thread"));
           try
           {
             while (true)
@@ -189,10 +188,10 @@ public class WollMuxEventHandler
           }
           catch (InterruptedException e)
           {
-            Logger.error("EventProcessor-Thread wurde unterbrochen:");
+            Logger.error(L.m("EventProcessor-Thread wurde unterbrochen:"));
             Logger.error(e);
           }
-          Logger.debug("Beende EventProcessor-Thread");
+          Logger.debug(L.m("Beende EventProcessor-Thread"));
         }
       });
       eventProcessorThread.start();
@@ -260,8 +259,9 @@ public class WollMuxEventHandler
 
     public CantStartDialogException(java.lang.Exception e)
     {
-      super("Der Dialog konnte nicht gestartet werden!\n\n"
-            + "Bitte kontaktieren Sie Ihre Systemadministration.", e);
+      super(
+        L.m("Der Dialog konnte nicht gestartet werden!\n\nBitte kontaktieren Sie Ihre Systemadministration."),
+        e);
     }
   }
 
@@ -312,7 +312,7 @@ public class WollMuxEventHandler
       {
         msg += "\n\n" + c;
       }
-      WollMuxSingleton.showInfoModal("WollMux-Fehler", msg);
+      WollMuxSingleton.showInfoModal(L.m("WollMux-Fehler"), msg);
     }
 
     /**
@@ -649,8 +649,8 @@ public class WollMuxEventHandler
       // Dialog aus Funktionsdialog-Bibliothek holen:
       Dialog dialog = mux.getFunctionDialogs().get(dialogName);
       if (dialog == null)
-        throw new WollMuxFehlerException("Funktionsdialog '" + dialogName
-                                         + "' ist nicht definiert.");
+        throw new WollMuxFehlerException(L.m(
+          "Funktionsdialog '%1' ist nicht definiert.", dialogName));
 
       // Dialoginstanz erzeugen und modal anzeigen:
       Dialog dialogInst = null;
@@ -744,9 +744,9 @@ public class WollMuxEventHandler
 
       String str = "WollMux " + mux.getBuildInfo();
       if (wollMuxBarVersion != null && !wollMuxBarVersion.equals(""))
-        str += "\nWollMux-Leiste " + wollMuxBarVersion;
+        str += "\n" + L.m("WollMux-Leiste") + " " + wollMuxBarVersion;
 
-      str += "\n\nWollMux-Konfiguration: " + mux.getConfVersionInfo();
+      str += "\n\n" + L.m("WollMux-Konfiguration:") + " " + mux.getConfVersionInfo();
       str += "\n" + WollMuxFiles.getDEFAULT_CONTEXT().toExternalForm();
 
       Common.setLookAndFeelOnce();
@@ -756,7 +756,7 @@ public class WollMuxEventHandler
       JOptionPane pane = new JOptionPane(str, JOptionPane.INFORMATION_MESSAGE,
         JOptionPane.DEFAULT_OPTION, icon);
       JDialog dialog = pane.createDialog(null,
-        "Info über Vorlagen und Formulare (WollMux)");
+        L.m("Info über Vorlagen und Formulare (WollMux)"));
 
       // Hintergrundfarbe aller Komponenten auf weiss setzen
       try
@@ -1040,8 +1040,7 @@ public class WollMuxEventHandler
             catch (InvalidFormDescriptorException e)
             {
               throw new WMCommandsFailedException(
-                "Die Vorlage bzw. das Formular enthält keine gültige Formularbeschreibung\n\n"
-                    + "Bitte kontaktieren Sie Ihre Systemadministration.");
+                L.m("Die Vorlage bzw. das Formular enthält keine gültige Formularbeschreibung\n\nBitte kontaktieren Sie Ihre Systemadministration."));
             }
 
             model.setFormModel(fm);
@@ -1051,7 +1050,8 @@ public class WollMuxEventHandler
       }
       catch (java.lang.Exception e)
       {
-        throw new WollMuxFehlerException("Fehler bei der Dokumentbearbeitung.", e);
+        throw new WollMuxFehlerException(L.m("Fehler bei der Dokumentbearbeitung."),
+          e);
       }
 
       // Registrierte XEventListener (etwas später) informieren, dass die
@@ -1088,7 +1088,8 @@ public class WollMuxEventHandler
    *          Ein Vector of TextDocumentModels, die in einem Multiformular
    *          zusammengefasst werden sollen.
    */
-  public static void handleProcessMultiform(Vector /* of TextDocumentModel */<TextDocumentModel>docs,
+  public static void handleProcessMultiform(
+      Vector /* of TextDocumentModel */<TextDocumentModel> docs,
       ConfigThingy buttonAnpassung)
   {
     handle(new OnProcessMultiform(docs, buttonAnpassung));
@@ -1100,7 +1101,8 @@ public class WollMuxEventHandler
 
     ConfigThingy buttonAnpassung;
 
-    public OnProcessMultiform(Vector /* of TextDocumentModel */<TextDocumentModel>docs,
+    public OnProcessMultiform(
+        Vector /* of TextDocumentModel */<TextDocumentModel> docs,
         ConfigThingy buttonAnpassung)
     {
       this.docs = docs;
@@ -1116,10 +1118,10 @@ public class WollMuxEventHandler
       }
       catch (InvalidFormDescriptorException e)
       {
-        throw new WollMuxFehlerException("Fehler bei der Dokumentbearbeitung.",
+        throw new WollMuxFehlerException(
+          L.m("Fehler bei der Dokumentbearbeitung."),
           new WMCommandsFailedException(
-            "Die Vorlage bzw. das Formular enthält keine gültige Formularbeschreibung\n\n"
-                + "Bitte kontaktieren Sie Ihre Systemadministration."));
+            L.m("Die Vorlage bzw. das Formular enthält keine gültige Formularbeschreibung\n\nBitte kontaktieren Sie Ihre Systemadministration.")));
       }
 
       // FormModel in allen Dokumenten registrieren:
@@ -1300,7 +1302,8 @@ public class WollMuxEventHandler
       }
       catch (java.lang.Exception e)
       {
-        throw new WollMuxFehlerException("Fehlerhaftes \"wollmux:Open\" Kommando", e);
+        throw new WollMuxFehlerException(
+          L.m("Fehlerhaftes Kommando 'wollmux:Open'"), e);
       }
 
       try
@@ -1359,8 +1362,8 @@ public class WollMuxEventHandler
      * @return
      * @throws WollMuxFehlerException
      */
-    private TextDocumentModel openTextDocument(List<String> fragIDs, boolean asTemplate,
-        boolean asPartOfMultiform) throws WollMuxFehlerException
+    private TextDocumentModel openTextDocument(List<String> fragIDs,
+        boolean asTemplate, boolean asPartOfMultiform) throws WollMuxFehlerException
     {
       WollMuxSingleton mux = WollMuxSingleton.getInstance();
 
@@ -1379,8 +1382,8 @@ public class WollMuxEventHandler
         // Fragment-URL holen und aufbereiten:
         Vector urls = new Vector();
 
-        java.lang.Exception error = new ConfigurationErrorException(
-          "Das Textfragment mit der FRAG_ID '" + frag_id + "' ist nicht definiert!");
+        java.lang.Exception error = new ConfigurationErrorException(L.m(
+          "Das Textfragment mit der FRAG_ID '%1' ist nicht definiert!", frag_id));
         try
         {
           urls = VisibleTextFragmentList.getURLsByID(frag_id);
@@ -1392,8 +1395,9 @@ public class WollMuxEventHandler
         if (urls.size() == 0)
         {
           throw new WollMuxFehlerException(
-            "Die URL zum Textfragment mit der FRAG_ID '" + frag_id
-                + "' kann nicht bestimmt werden:", error);
+            L.m(
+              "Die URL zum Textfragment mit der FRAG_ID '%1' kann nicht bestimmt werden:",
+              frag_id), error);
         }
 
         // Nur die erste funktionierende URL verwenden. Dazu werden alle URL zu
@@ -1418,7 +1422,7 @@ public class WollMuxEventHandler
           catch (MalformedURLException e)
           {
             Logger.log(e);
-            errors += "Die URL '" + urlStr + "' ist ungültig:\n"
+            errors += L.m("Die URL '%1' ist ungültig:", urlStr) + "\n"
                       + e.getLocalizedMessage() + "\n\n";
             continue;
           }
@@ -1434,10 +1438,10 @@ public class WollMuxEventHandler
 
         if (!found)
         {
-          throw new WollMuxFehlerException("Das Textfragment mit der FRAG_ID '"
-                                           + frag_id
-                                           + "' kann nicht aufgelöst werden:\n\n"
-                                           + errors);
+          throw new WollMuxFehlerException(L.m(
+            "Das Textfragment mit der FRAG_ID '%1' kann nicht aufgelöst werden:",
+            frag_id)
+                                           + "\n\n" + errors);
         }
 
         // URL in die in loadUrlStr (zum sofort öffnen) und in argsUrlStr (zum
@@ -1469,8 +1473,8 @@ public class WollMuxEventHandler
       catch (java.lang.Exception x)
       {
         // sollte eigentlich nicht auftreten, da bereits oben geprüft.
-        throw new WollMuxFehlerException("Die Vorlage mit der URL '" + loadUrlStr
-                                         + "' kann nicht geöffnet werden.", x);
+        throw new WollMuxFehlerException(L.m(
+          "Die Vorlage mit der URL '%1' kann nicht geöffnet werden.", loadUrlStr), x);
       }
       return model;
     }
@@ -1585,9 +1589,9 @@ public class WollMuxEventHandler
       }
       else
       {
-        Logger.error("Setzen des Senders '" + senderName
-                     + "' schlug fehl, da der index '" + idx
-                     + "' nicht mit der PAL übereinstimmt (Inkosistenzen?)");
+        Logger.error(L.m(
+          "Setzen des Senders '%1' schlug fehl, da der index '%2' nicht mit der PAL übereinstimmt (Inkosistenzen?)",
+          senderName, idx));
       }
 
       WollMuxEventHandler.handlePALChangedNotify();
@@ -2072,12 +2076,13 @@ public class WollMuxEventHandler
               Logger.error(x);
             }
           }
-          String message = "Die folgenden Datensätze konnten nicht "
-                           + "aus der Datenbank aktualisiert werden:\n\n" + names
-                           + "\nWenn dieses Problem nicht temporärer "
-                           + "Natur ist, sollten Sie diese Datensätze aus "
-                           + "ihrer Absenderliste löschen und neu hinzufügen!";
-          WollMuxSingleton.showInfoModal("WollMux-Info", message);
+          String message = L.m("Die folgenden Datensätze konnten nicht "
+                               + "aus der Datenbank aktualisiert werden:\n\n"
+                               + "%1\n" + "Wenn dieses Problem nicht temporärer "
+                               + "Natur ist, sollten Sie diese Datensätze aus "
+                               + "ihrer Absenderliste löschen und neu hinzufügen!",
+            names);
+          WollMuxSingleton.showInfoModal(L.m("WollMux-Info"), message);
         }
       }
     }
@@ -2130,8 +2135,8 @@ public class WollMuxEventHandler
           }
           else
           {
-            Logger.error("Ungültiger Schlüssel in Suchstategie: "
-                         + element.stringRepresentation());
+            Logger.error(L.m("Ungültiger Schlüssel in Suchstategie: %1",
+              element.stringRepresentation()));
           }
           if (found != 0) return found;
         }
@@ -2197,7 +2202,7 @@ public class WollMuxEventHandler
           }
           else
           {
-            Logger.error("Nur max zwei Schlüssel/Wert-Paare werden als Argumente für Suchanfragen akzeptiert!");
+            Logger.error(L.m("Nur max zwei Schlüssel/Wert-Paare werden als Argumente für Suchanfragen akzeptiert!"));
           }
         }
 
@@ -2376,8 +2381,10 @@ public class WollMuxEventHandler
         }
         catch (Exception e)
         {
-          Logger.error("Konnte den Wert zum Schlüssel '" + key
-                       + "' des OOoUserProfils nicht bestimmen:", e);
+          Logger.error(
+            L.m(
+              "Konnte den Wert zum Schlüssel '%1' des OOoUserProfils nicht bestimmen:",
+              key), e);
         }
         return "";
       }
@@ -2404,8 +2411,8 @@ public class WollMuxEventHandler
         }
         catch (java.lang.Exception e)
         {
-          Logger.error("Konnte den Wert der JavaProperty '" + key
-                       + "' nicht bestimmen:", e);
+          Logger.error(L.m("Konnte den Wert der JavaProperty '%1' nicht bestimmen:",
+            key), e);
         }
         return "";
       }
@@ -2464,7 +2471,7 @@ public class WollMuxEventHandler
         int myWmConfHash = WollMuxFiles.getWollmuxConf().stringRepresentation().hashCode();
         if (myWmConfHash != wollmuxConfHashCode.intValue())
           errorMessage(new InvalidBindingStateException(
-            "Die Konfiguration des WollMux muss neu eingelesen werden.\n\nBitte beenden Sie den WollMux und OpenOffice.org und schießen Sie alle laufenden 'soffice.bin'-Prozesse über den Taskmanager ab."));
+            L.m("Die Konfiguration des WollMux muss neu eingelesen werden.\n\nBitte beenden Sie den WollMux und OpenOffice.org und schießen Sie alle laufenden 'soffice.bin'-Prozesse über den Taskmanager ab.")));
       }
 
     }
@@ -2764,8 +2771,8 @@ public class WollMuxEventHandler
    *          {@see de.muenchen.allg.itd51.wollmux.PrintModels.PrintModelProps},
    *          die ausgewertet werden sollen.
    */
-  public static void handlePrintViaPrintModel(XTextDocument doc, HashMap<String, Object> props,
-      ActionListener listener)
+  public static void handlePrintViaPrintModel(XTextDocument doc,
+      HashMap<String, Object> props, ActionListener listener)
   {
     handle(new OnPrintViaPrintModel(doc, props, listener));
   }
@@ -3066,31 +3073,31 @@ public class WollMuxEventHandler
 
       if (range.isCollapsed())
       {
-        WollMuxSingleton.showInfoModal("Fehler",
-          "Bitte wählen Sie einen Bereich aus, der markiert werden soll.");
+        WollMuxSingleton.showInfoModal(L.m("Fehler"),
+          L.m("Bitte wählen Sie einen Bereich aus, der markiert werden soll."));
         return;
       }
 
       String markChange = null;
       if (blockname.equalsIgnoreCase("allVersions"))
       {
-        markChange = "wird immer gedruckt";
+        markChange = L.m("wird immer gedruckt");
         highlightColor = getHighlightColor(slvConf, "ALL_VERSIONS_HIGHLIGHT_COLOR");
       }
       else if (blockname.equalsIgnoreCase("draftOnly"))
       {
-        markChange = "wird nur im Entwurf gedruckt";
+        markChange = L.m("wird nur im Entwurf gedruckt");
         highlightColor = getHighlightColor(slvConf, "DRAFT_ONLY_HIGHLIGHT_COLOR");
       }
       else if (blockname.equalsIgnoreCase("notInOriginal"))
       {
-        markChange = "wird immer gedruckt, ausser im Original";
+        markChange = L.m("wird immer gedruckt, ausser im Original");
         highlightColor = getHighlightColor(slvConf,
           "NOT_IN_ORIGINAL_HIGHLIGHT_COLOR");
       }
       else if (blockname.equalsIgnoreCase("originalOnly"))
       {
-        markChange = "wird ausschließlich im Original gedruckt";
+        markChange = L.m("wird ausschließlich im Original gedruckt");
         highlightColor = getHighlightColor(slvConf, "ORIGINAL_ONLY_HIGHLIGHT_COLOR");
       }
       else
@@ -3128,9 +3135,11 @@ public class WollMuxEventHandler
           {
           }
         }
-        WollMuxSingleton.showInfoModal("Markierung des Blockes aufgehoben",
-          "Der ausgewählte Block enthielt bereits eine Markierung \"Block "
-              + markChange + "\". Die bestehende Markierung wurde aufgehoben.");
+        WollMuxSingleton.showInfoModal(
+          L.m("Markierung des Blockes aufgehoben"),
+          L.m(
+            "Der ausgewählte Block enthielt bereits eine Markierung 'Block %1'. Die bestehende Markierung wurde aufgehoben.",
+            markChange));
       }
       else
       {
@@ -3144,8 +3153,8 @@ public class WollMuxEventHandler
           XTextCursor vc = model.getViewCursor();
           if (vc != null) vc.collapseToEnd();
         }
-        WollMuxSingleton.showInfoModal("Block wurde markiert",
-          "Der ausgewählte Block " + markChange + ".");
+        WollMuxSingleton.showInfoModal(L.m("Block wurde markiert"), L.m(
+          "Der ausgewählte Block '%1'.", markChange));
       }
 
       // PrintBlöcke neu einlesen:
@@ -3182,8 +3191,8 @@ public class WollMuxEventHandler
       }
       catch (NumberFormatException e)
       {
-        Logger.error("Der angegebene Farbwert im Attribut '" + attribute
-                     + "' ist ungültig!");
+        Logger.error(L.m("Der angegebene Farbwert im Attribut '%1' ist ungültig!",
+          attribute));
         return null;
       }
     }
@@ -3275,18 +3284,20 @@ public class WollMuxEventHandler
 
     protected void doit() throws WollMuxFehlerException
     {
-      final String title = "Fehlerinfos erstellen";
+      final String title = L.m("Fehlerinfos erstellen");
 
       String name = WollMuxFiles.dumpInfo();
 
       if (name != null)
-        WollMuxSingleton.showInfoModal(title,
-          "Die Fehlerinformationen des WollMux wurden erfolgreich in die Datei '"
-              + name + "' geschrieben.");
+        WollMuxSingleton.showInfoModal(
+          title,
+          L.m(
+            "Die Fehlerinformationen des WollMux wurden erfolgreich in die Datei '%1' geschrieben.",
+            name));
       else
         WollMuxSingleton.showInfoModal(
           title,
-          "Die Fehlerinformationen des WollMux konnten nicht geschrieben werden\n\nDetails siehe Datei wollmux.log!");
+          L.m("Die Fehlerinformationen des WollMux konnten nicht geschrieben werden\n\nDetails siehe Datei wollmux.log!"));
     }
 
     public String toString()
@@ -3650,8 +3661,8 @@ public class WollMuxEventHandler
         }
         else
         {
-          WollMuxSingleton.showInfoModal("WollMux-Fehler",
-            "An der Einfügestelle konnte kein Textbaustein gefunden werden.");
+          WollMuxSingleton.showInfoModal(L.m("WollMux-Fehler"),
+            L.m("An der Einfügestelle konnte kein Textbaustein gefunden werden."));
         }
       }
     }
@@ -3767,8 +3778,8 @@ public class WollMuxEventHandler
       {
         if (msg)
         {
-          WollMuxSingleton.showInfoModal("WollMux",
-            "Kein Platzhalter und keine Marke 'setJumpMark' vorhanden!");
+          WollMuxSingleton.showInfoModal(L.m("WollMux"),
+            L.m("Kein Platzhalter und keine Marke 'setJumpMark' vorhanden!"));
         }
       }
 
@@ -3962,16 +3973,16 @@ public class WollMuxEventHandler
      */
     private boolean mailmergeWrapperDialog()
     {
-      final String SERIENBRIEF_WOLLMUX = "Seriendruck (WollMux)";
-      final String SERIENBRIEF_DEFAULT = "Seriendruck (Standard)";
-      final String PRINT_DEFAULT = "Drucken";
+      final String SERIENBRIEF_WOLLMUX = L.m("Seriendruck (WollMux)");
+      final String SERIENBRIEF_DEFAULT = L.m("Seriendruck (Standard)");
+      final String PRINT_DEFAULT = L.m("Drucken");
 
       JOptionPane pane = new JOptionPane(
-        "Das Dokument enthält Serienbrief-Felder. Was wollen Sie tun?",
+        L.m("Das Dokument enthält Serienbrief-Felder. Was wollen Sie tun?"),
         javax.swing.JOptionPane.INFORMATION_MESSAGE);
       pane.setOptions(new String[] { SERIENBRIEF_WOLLMUX, SERIENBRIEF_DEFAULT,
                                     PRINT_DEFAULT });
-      JDialog dialog = pane.createDialog(null, "Seriendruck");
+      JDialog dialog = pane.createDialog(null, L.m("Seriendruck"));
       dialog.setAlwaysOnTop(true);
       dialog.setVisible(true);
 
@@ -4079,8 +4090,8 @@ public class WollMuxEventHandler
     {
       // Standardwerte für den Warndialog:
       boolean showdialog = true;
-      String title = "Mehrfachinstallation des WollMux";
-      String msg = "Der WollMux ist mehrfach auf Ihrem System installiert.";
+      String title = L.m("Mehrfachinstallation des WollMux");
+      String msg = L.m("Der WollMux ist mehrfach auf Ihrem System installiert.");
       String logMsg = msg;
 
       // Abschnitt Dialoge/MehrfachinstallationWarndialog auswerten
@@ -4163,10 +4174,13 @@ public class WollMuxEventHandler
           f.format(recentInstLastModified));
         msg = msg.replaceAll("\\$\\{OTHER_INSTS_LIST\\}", otherInstsList);
 
-        logMsg += "\nDie juengste WollMux-Installation liegt unter:\n- "
+        logMsg += "\n"
+                  + L.m("Die juengste WollMux-Installation liegt unter:")
+                  + "\n- "
                   + recentInstPath
-                  + "\nAusserdem wurden folgende WollMux-Installationen gefunden:\n"
-                  + otherInstsList;
+                  + "\n"
+                  + L.m("Ausserdem wurden folgende WollMux-Installationen gefunden:")
+                  + "\n" + otherInstsList;
         Logger.error(logMsg);
 
         if (showdialog) WollMuxSingleton.showInfoModal(title, msg, 0);
@@ -4211,7 +4225,7 @@ public class WollMuxEventHandler
 
       if (myPath == null || oooPath == null)
       {
-        Logger.error("Bestimmung der Installationspfade für das WollMux-Paket fehlgeschlagen.");
+        Logger.error(L.m("Bestimmung der Installationspfade für das WollMux-Paket fehlgeschlagen."));
         return wmInstallations;
       }
 
@@ -4235,7 +4249,8 @@ public class WollMuxEventHandler
      * 
      * @author Bettina Bauer (D-III-ITD-5.1), Christoph Lutz (D-III-ITD-5.1)
      */
-    private static void findWollMuxInstallations(HashMap<String, Date> wmInstallations, String path)
+    private static void findWollMuxInstallations(
+        HashMap<String, Date> wmInstallations, String path)
     {
       URI uriPath;
       uriPath = null;
@@ -4297,9 +4312,8 @@ public class WollMuxEventHandler
     }
     catch (NodeNotFoundException e)
     {
-      throw new ConfigurationErrorException("Der Schlüssel '" + sectionName
-                                            + "' fehlt in der Konfigurationsdatei.",
-        e);
+      throw new ConfigurationErrorException(L.m(
+        "Der Schlüssel '%1' fehlt in der Konfigurationsdatei.", sectionName), e);
     }
   }
 }
