@@ -1,4 +1,3 @@
-//TODO L.m()
 /*
  * Dateiname: HashableComponent.java
  * Projekt  : WollMux

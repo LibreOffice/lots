@@ -1,4 +1,3 @@
-//TODO L.m()
 /*
  * Dateiname: FormModelImpl.java
  * Projekt  : WollMux
@@ -63,7 +62,7 @@ public class FormModelImpl
     catch (NodeNotFoundException e)
     {
       throw new InvalidFormDescriptorException(
-        "Kein Abschnitt 'Formular' in der Formularbeschreibung vorhanden");
+        L.m("Kein Abschnitt 'Formular' in der Formularbeschreibung vorhanden"));
     }
 
     // Abschnitt Fenster/Formular aus wollmuxConf holen:
@@ -113,8 +112,8 @@ public class FormModelImpl
       }
       catch (NodeNotFoundException e)
       {
-        Logger.error("Dokument '" + model.getTitle()
-                     + "' enthält keine gültige Formularbeschreibung", e);
+        Logger.error(L.m("Dokument '%1' enthält keine gültige Formularbeschreibung",
+          model.getTitle()), e);
       }
     }
 
@@ -172,7 +171,7 @@ public class FormModelImpl
     }
 
     // FormModels für die Einzeldokumente erzeugen
-    Vector /* of FormModel */<FormModel>fms = new Vector<FormModel>();
+    Vector /* of FormModel */<FormModel> fms = new Vector<FormModel>();
     for (Iterator iter = docs.iterator(); iter.hasNext();)
     {
       TextDocumentModel doc = (TextDocumentModel) iter.next();
@@ -273,7 +272,8 @@ public class FormModelImpl
      */
     public MultiDocumentFormModel(Vector docs, Vector<FormModel> formModels,
         final ConfigThingy formFensterConf, final ConfigThingy formConf,
-        final Map<Object, Object> functionContext, final HashMap<String, String> commonMapIdToPresetValue,
+        final Map<Object, Object> functionContext,
+        final HashMap<String, String> commonMapIdToPresetValue,
         final FunctionLibrary funcLib, final DialogLibrary dialogLib)
     {
       this.docs = docs;

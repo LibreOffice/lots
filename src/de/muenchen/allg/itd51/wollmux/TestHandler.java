@@ -1,4 +1,3 @@
-//TODO L.m()
 /*
  * Dateiname: TestHandler.java
  * Projekt  : WollMux
@@ -166,7 +165,8 @@ public class TestHandler
     }
     catch (java.lang.Exception e)
     {
-      Logger.error("Argumentdatei für wollmux-qatest konnte nicht gelesen werden", e);
+      Logger.error(
+        L.m("Argumentdatei für wollmux-qatest konnte nicht gelesen werden"), e);
     }
     return args;
   }

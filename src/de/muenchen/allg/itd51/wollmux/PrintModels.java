@@ -1,4 +1,3 @@
-//TODO L.m()
 /*
  * Dateiname: PrintModelFactory.java
  * Projekt  : WollMux
@@ -323,7 +322,7 @@ public class PrintModels
       }
       else
       {
-        Logger.error("Druckfunktion '" + functionName + "' nicht definiert.");
+        Logger.error(L.m("Druckfunktion '%1' nicht definiert.", functionName));
         return false;
       }
     }
@@ -1063,7 +1062,7 @@ public class PrintModels
       }
       else
       {
-        Logger.error("Druckfunktion '" + functionName + "' nicht definiert.");
+        Logger.error(L.m("Druckfunktion '%1' nicht definiert.", functionName));
         return false;
       }
     }
@@ -1082,10 +1081,9 @@ public class PrintModels
         PrintFunction currentFunc = master.getPrintFunction(idx);
         if (function.compareTo(currentFunc) <= 0)
         {
-          Logger.error("Druckfunktion '"
-                       + function.getFunctionName()
-                       + "' muss einen höheren ORDER-Wert besitzen als die Druckfunktion '"
-                       + currentFunc.getFunctionName() + "'");
+          Logger.error(L.m(
+            "Druckfunktion '%1' muss einen höheren ORDER-Wert besitzen als die Druckfunktion '%2'",
+            function.getFunctionName(), currentFunc.getFunctionName()));
           return false;
         }
         else
@@ -1093,7 +1091,7 @@ public class PrintModels
       }
       else
       {
-        Logger.error("Die angeforderte interne Druckfunktion ist ungültig.");
+        Logger.error(L.m("Die angeforderte interne Druckfunktion ist ungültig."));
         return false;
       }
     }

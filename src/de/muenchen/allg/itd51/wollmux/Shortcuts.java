@@ -1,4 +1,3 @@
-//TODO L.m()
 /*
  * Dateiname: Shortcuts.java
  * Projekt  : WollMux
@@ -74,8 +73,8 @@ public class Shortcuts
       }
       catch (NodeNotFoundException e)
       {
-        Logger.error("SHORTCUT Angabe fehlt in "
-                     + tastenkombination.stringRepresentation());
+        Logger.error(L.m("SHORTCUT Angabe fehlt in '%1%'",
+          tastenkombination.stringRepresentation()));
         continue;
       }
 
@@ -87,8 +86,8 @@ public class Shortcuts
       }
       catch (NodeNotFoundException e)
       {
-        Logger.error("URL Angabe fehlt in "
-                     + tastenkombination.stringRepresentation());
+        Logger.error(L.m("URL Angabe fehlt in '%1'",
+          tastenkombination.stringRepresentation()));
         continue;
       }
 
@@ -107,8 +106,9 @@ public class Shortcuts
       }
       else
       {
-        Logger.error("Ungültige Tastenkombination '" + shortcut
-                     + "' im .conf Abschnitt Tastenkuerzel");
+        Logger.error(L.m(
+          "Ungültige Tastenkombination '%1' im .conf Abschnitt Tastenkuerzel",
+          shortcut));
       }
     }
 
@@ -179,15 +179,15 @@ public class Shortcuts
     {
       for (int i = 0; i < keys.length; i++)
       {
-        System.out.println("Modifiers: " + keys[i].Modifiers + " KeyCode: "
-                           + keys[i].KeyCode + " --> "
-                           + xac.getCommandByKeyEvent(keys[i]));
+        Logger.debug2("Modifiers: " + keys[i].Modifiers + " KeyCode: "
+                      + keys[i].KeyCode + " --> "
+                      + xac.getCommandByKeyEvent(keys[i]));
 
       }
     }
     catch (Exception e)
     {
-      System.err.println(e);
+      Logger.debug2(e);
     }
 
   }

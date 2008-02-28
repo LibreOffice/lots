@@ -1,4 +1,3 @@
-//TODO L.m()
 /*
  * Dateiname: SachleitendeVerfuegung.java
  * Projekt  : WollMux
@@ -620,8 +619,8 @@ public class SachleitendeVerfuegung
   private static boolean isAbdruck(XTextRange paragraph)
   {
     String str = paragraph.getString();
-    return str.contains("Abdruck von I.")
-           || str.contains("Abdruck von <Vorgänger>.");
+    return str.contains(L.m("Abdruck von I."))
+           || str.contains(L.m("Abdruck von <Vorgänger>."));
   }
 
   /**
@@ -844,10 +843,10 @@ public class SachleitendeVerfuegung
    */
   private static String abdruckString(int number)
   {
-    String str = romanNumber(number) + "\t" + "Abdruck von " + romanNumber(1);
+    String str = romanNumber(number) + "\t" + L.m("Abdruck von ") + romanNumber(1);
     for (int j = 2; j < (number - 1); ++j)
       str += ", " + romanNumber(j);
-    if (number >= 3) str += " und " + romanNumber(number - 1);
+    if (number >= 3) str += L.m(" und ") + romanNumber(number - 1);
     return str;
   }
 
@@ -889,8 +888,8 @@ public class SachleitendeVerfuegung
     XTextRange punkt1 = getVerfuegungspunkt1(doc);
     if (punkt1 != null)
     {
-      Verfuegungspunkt original = new Verfuegungspunkt("I. Original");
-      original.addZuleitungszeile("Empfänger siehe Empfängerfeld");
+      Verfuegungspunkt original = new Verfuegungspunkt(L.m("I. Original"));
+      original.addZuleitungszeile(L.m("Empfänger siehe Empfängerfeld"));
       verfuegungspunkte.add(original);
     }
 
@@ -1067,7 +1066,7 @@ public class SachleitendeVerfuegung
     while (iter.hasNext())
     {
       Verfuegungspunkt vp = iter.next();
-      String text = "Verfügungspunkt '" + vp.getHeading() + "'";
+      String text = L.m("Verfügungspunkt '%1'", vp.getHeading());
       Iterator<String> zuleits = vp.getZuleitungszeilen().iterator();
       while (zuleits.hasNext())
       {
@@ -1089,7 +1088,7 @@ public class SachleitendeVerfuegung
     catch (NodeNotFoundException e)
     {
       Logger.error(
-        "Fehlende Dialogbeschreibung für den Dialog 'SachleitendeVerfuegungenDruckdialog'.",
+        L.m("Fehlende Dialogbeschreibung für den Dialog 'SachleitendeVerfuegungenDruckdialog'."),
         e);
       return;
     }
@@ -1195,8 +1194,8 @@ public class SachleitendeVerfuegung
 
     // Prüfen, welche Textsections im ausgeblendeten Bereich liegen und diese
     // ebenfalls ausblenden:
-    List<XTextSection> hidingSections = getSectionsFromPosition(pmod.getTextDocument(),
-      setInvisibleRange);
+    List<XTextSection> hidingSections = getSectionsFromPosition(
+      pmod.getTextDocument(), setInvisibleRange);
     for (Iterator<XTextSection> iter = hidingSections.iterator(); iter.hasNext();)
     {
       UNO.setProperty(iter.next(), "IsVisible", Boolean.FALSE);
@@ -1282,7 +1281,8 @@ public class SachleitendeVerfuegung
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  private static List<XTextSection> getSectionsFromPosition(XTextDocument doc, XTextRange pos)
+  private static List<XTextSection> getSectionsFromPosition(XTextDocument doc,
+      XTextRange pos)
   {
     Vector<XTextSection> v = new Vector<XTextSection>();
     if (pos == null) return v;
