@@ -1,4 +1,3 @@
-//TODO L.m()
 /*
  * Dateiname: PersistentData.java
  * Projekt  : WollMux
@@ -233,9 +232,7 @@ public class PersistentData
     Vector<Object> textfields = getWollMuxTextFields(dataId, true, dataValue.length());
     if (textfields.size() == 0)
     {
-      Logger.error("Konnte WollMux-Textfeld(er) \""
-                   + dataId
-                   + "\" nicht anlegen");
+      Logger.error(L.m("Konnte WollMux-Textfeld(er) \"%1\" nicht anlegen", dataId));
       return;
     }
 
