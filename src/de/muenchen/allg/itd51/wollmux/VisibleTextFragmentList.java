@@ -1,4 +1,3 @@
-//TODO L.m()
 /*
  * Dateiname: VisibleTextFragmentList.java
  * Projekt  : WollMux
@@ -85,8 +84,8 @@ public class VisibleTextFragmentList
     }
 
     // Debug-Ausgabe:
-    Logger.debug2("Variablenset an Knoten " + node.getName() + " \""
-                  + node.toString() + "\":");
+    Logger.debug2(L.m("Variablenset an Knoten %1 '%2':", node.getName(),
+      node.toString()));
     Iterator<String> keys = variables.keySet().iterator();
     while (keys.hasNext())
     {
@@ -112,7 +111,7 @@ public class VisibleTextFragmentList
         string = string.substring(0, m.start()) + variables.get(key)
                  + string.substring(m.end());
         // string = m.replaceFirst((String) variables.get(key));
-        Logger.debug2("  Ersetzen der Variable " + m.group(0) + " --> " + string);
+        Logger.debug2(L.m("  Ersetzen der Variable %1 --> %2", m.group(0), string));
         // Nach jeder Ersetzung wieder von vorne anfangen.
         m = var.matcher(string);
       }
@@ -121,14 +120,14 @@ public class VisibleTextFragmentList
         // Die Variable kann nicht ersetzt werden und wird auch nicht
         // ersetzt. Eine Exception muss deswegen nicht geworfen werden, es ist
         // aber sinnvoll, die Fehlermeldung in einem Logger rauszuschreiben.
-        Logger.error("Die Variable \"" + key + "\" in der URL \"" + string
-                     + "\" ist nicht definiert.");
+        Logger.error(L.m("Die Variable '%1' in der URL '%2' ist nicht definiert.",
+          key, string));
       }
     }
     if (count == MAXCOUNT)
-      throw new EndlessLoopException(
-        "Endlosschleife ber der Ersetzung der Variablen in URL \"" + node.toString()
-            + "\".");
+      throw new EndlessLoopException(L.m(
+        "Endlosschleife ber der Ersetzung der Variablen in URL '%1'.",
+        node.toString()));
     return string;
   }
 
@@ -140,7 +139,8 @@ public class VisibleTextFragmentList
    * @return die URL des unter der frag_id definierten Textfragments.
    * @throws InvalidIdentifierException
    */
-  public static Vector<String> getURLsByID(String frag_id) throws InvalidIdentifierException
+  public static Vector<String> getURLsByID(String frag_id)
+      throws InvalidIdentifierException
   {
     WollMuxSingleton.checkIdentifier(frag_id);
 
@@ -175,8 +175,8 @@ public class VisibleTextFragmentList
         }
         catch (NodeNotFoundException e)
         {
-          Logger.error("FRAG_ID Angabe fehlt in "
-                       + mappingConf.stringRepresentation());
+          Logger.error(L.m("FRAG_ID Angabe fehlt in %1",
+            mappingConf.stringRepresentation()));
           continue;
         }
 
@@ -206,10 +206,10 @@ public class VisibleTextFragmentList
             }
             catch (EndlessLoopException e)
             {
-              Logger.error("Die URL zum Textfragment '"
-                           + mappingConf.stringRepresentation()
-                           + "' mit der FRAG_ID '" + frag_id + "' ist fehlerhaft.",
-                e);
+              Logger.error(
+                L.m(
+                  "Die URL zum Textfragment '%1' mit der FRAG_ID '%2' ist fehlerhaft.",
+                  mappingConf.stringRepresentation(), frag_id), e);
             }
           }
         }

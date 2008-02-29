@@ -1,4 +1,3 @@
-//TODO L.m()
 /*
  * Dateiname: TextSection.java
  * Projekt  : WollMux

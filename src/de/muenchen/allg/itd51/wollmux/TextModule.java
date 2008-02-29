@@ -1,4 +1,3 @@
-//TODO L.m()
 /*
  * Dateiname: TextModul.java
  * Projekt  : WollMux
@@ -151,7 +150,8 @@ public class TextModule
    *          enthält, in der sie ausgewertet werden sollen.
    * @return Stringarray mit (frag_id + args) oder null
    */
-  private static String[] parseIdentifier(String identifierWithArgs, List<ConfigThingy> tbListe)
+  private static String[] parseIdentifier(String identifierWithArgs,
+      List<ConfigThingy> tbListe)
   {
     Iterator<ConfigThingy> iterTbListe = tbListe.iterator();
     while (iterTbListe.hasNext())
@@ -220,7 +220,8 @@ public class TextModule
       }
       catch (NodeNotFoundException e)
       {
-        Logger.error("FRAG_ID Angabe fehlt in " + mappingConf.stringRepresentation());
+        Logger.error(L.m("FRAG_ID Angabe fehlt in %1",
+          mappingConf.stringRepresentation()));
         continue;
       }
 
@@ -248,7 +249,7 @@ public class TextModule
           }
           catch (java.lang.Exception e)
           {
-            Logger.error("Die Reguläre Ausdruck Gruppierung $<zahl>, die in FRAG_ID verwendet wird gibt es nicht in MATCH. "
+            Logger.error(L.m("Die Reguläre Ausdruck Gruppierung $<zahl>, die in FRAG_ID verwendet wird gibt es nicht in MATCH. ")
                          + e);
           }
           return args;
@@ -316,7 +317,7 @@ public class TextModule
 
     String bookmarkName = DocumentCommand.getCommandString(root);
 
-    Logger.debug2("Erzeuge Bookmark: '" + bookmarkName + "'");
+    Logger.debug2(L.m("Erzeuge Bookmark: '%1'", bookmarkName));
 
     new Bookmark(bookmarkName, doc, range);
   }
