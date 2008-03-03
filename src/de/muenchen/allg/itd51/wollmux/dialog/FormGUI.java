@@ -1,4 +1,3 @@
-//TODO L.m()
 /*
 * Dateiname: FormGUI.java
 * Projekt  : WollMux
@@ -54,6 +53,7 @@ import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.FormModel;
+import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
@@ -98,7 +98,7 @@ public class FormGUI
   /**
    * Der Titel des Formularfensters (falls nicht anderweitig spezifiziert).
    */
-  private String formTitle = "Unbenanntes Formular";
+  private String formTitle = L.m("Unbenanntes Formular");
   
   /**
    * Gibt die Lage und Größe des Fensters der FormGUI an, so wie sie von
