@@ -1,4 +1,3 @@
-//TODO L.m()
 /*
  * Dateiname: WollMuxFiles.java
  * Projekt  : WollMux
@@ -162,21 +161,13 @@ public class WollMuxFiles
    * wollmux.conf-Datei vorhanden ist. Ist defaultWollmuxConf==null, so wird gar
    * keine wollmux.conf-Datei angelegt.
    */
-  private static final String defaultWollmuxConf = null; // "# %include
+  private static final String defaultWollmuxConf = null;
 
   /**
    * Druckfunktionen, bei denen kein ORDER-Attribut angegeben ist, werden
    * automatisch mit diesem ORDER-Wert versehen.
    */
   private static final String DEFAULT_PRINTFUNCTION_ORDER_VALUE = "100";
-
-  // \"<Entfernen Sie
-  // das # am Anfang der
-  // Zeile und tragen
-  // Sie hier die URL
-  // Ihrer zentralen
-  // wollmux-Konfigurationsdatei
-  // ein>\"\r\n";
 
   /**
    * Erzeugt das ,wollmux-Verzeichnis, falls es noch nicht existiert und

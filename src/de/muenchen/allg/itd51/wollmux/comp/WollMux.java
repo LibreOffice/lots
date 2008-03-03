@@ -1,4 +1,3 @@
-//TODO L.m()
 /*
  * Dateiname: WollMux.java
  * Projekt  : WollMux
