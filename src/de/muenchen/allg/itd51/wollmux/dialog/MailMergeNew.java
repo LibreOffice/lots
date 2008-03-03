@@ -1,20 +1,20 @@
 /*
-* Dateiname: MailMergeNew.java
-* Projekt  : WollMux
-* Funktion : Die neuen erweiterten Serienbrief-Funktionalitäten
-* 
-* Copyright: Landeshauptstadt München
-*
-* Änderungshistorie:
-* Datum      | Wer | Änderungsgrund
-* -------------------------------------------------------------------
-* 11.10.2007 | BNK | Erstellung
-* -------------------------------------------------------------------
-*
-* @author Matthias Benkmann (D-III-ITD 5.1)
-* @version 1.0
-* 
-*/
+ * Dateiname: MailMergeNew.java
+ * Projekt  : WollMux
+ * Funktion : Die neuen erweiterten Serienbrief-Funktionalitäten
+ * 
+ * Copyright: Landeshauptstadt München
+ *
+ * Änderungshistorie:
+ * Datum      | Wer | Änderungsgrund
+ * -------------------------------------------------------------------
+ * 11.10.2007 | BNK | Erstellung
+ * -------------------------------------------------------------------
+ *
+ * @author Matthias Benkmann (D-III-ITD 5.1)
+ * @version 1.0
+ * 
+ */
 package de.muenchen.allg.itd51.wollmux.dialog;
 
 import java.awt.Color;
@@ -107,7 +107,7 @@ import de.muenchen.allg.itd51.wollmux.dialog.trafo.TrafoDialogParameters;
 
 /**
  * Die neuen erweiterten Serienbrief-Funktionalitäten.
- *
+ * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class MailMergeNew
@@ -121,46 +121,46 @@ public class MailMergeNew
    * Das {@link TextDocumentModel} zu dem Dokument an dem diese Toolbar hängt.
    */
   private TextDocumentModel mod;
-  
+
   /**
    * Stellt die Felder und Datensätze für die Serienbriefverarbeitung bereit.
    */
   private MailMergeDatasource ds;
-  
+
   /**
    * true gdw wir uns im Vorschau-Modus befinden.
    */
   private boolean previewMode;
-  
+
   /**
-   * Die Nummer des zu previewenden Datensatzes.
-   * ACHTUNG! Kann aufgrund von Veränderung der Daten im Hintergrund größer sein
-   * als die Anzahl der Datensätze. Darauf muss geachtet werden.
+   * Die Nummer des zu previewenden Datensatzes. ACHTUNG! Kann aufgrund von
+   * Veränderung der Daten im Hintergrund größer sein als die Anzahl der Datensätze.
+   * Darauf muss geachtet werden.
    */
   private int previewDatasetNumber = 1;
-  
+
   /**
-   * Wird auf true gesetzt, wenn der Benutzer beim Seriendruck auswählt, dass er
-   * die Ausgabe in einem neuen Dokument haben möchte.
+   * Wird auf true gesetzt, wenn der Benutzer beim Seriendruck auswählt, dass er die
+   * Ausgabe in einem neuen Dokument haben möchte.
    */
   private boolean printIntoDocument = true;
-  
+
   /**
    * Das Textfield in dem Benutzer direkt eine Datensatznummer für die Vorschau
    * eingeben können.
    */
   private JTextField previewDatasetNumberTextfield;
-  
+
   /**
    * Das Toolbar-Fenster.
    */
   private JFrame myFrame;
-  
+
   /**
    * Der WindowListener, der an {@link #myFrame} hängt.
    */
   private MyWindowListener oehrchen;
-  
+
   /**
    * Falls nicht null wird dieser Listener aufgerufen nachdem der MailMergeNew
    * geschlossen wurde.
@@ -169,75 +169,96 @@ public class MailMergeNew
 
   /**
    * Die zentrale Klasse, die die Serienbrieffunktionalität bereitstellt.
-   * @param mod das {@link TextDocumentModel} an dem die Toolbar hängt.
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TESTED
+   * 
+   * @param mod
+   *          das {@link TextDocumentModel} an dem die Toolbar hängt.
+   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public MailMergeNew(TextDocumentModel mod, ActionListener abortListener)
   {
     this.mod = mod;
     this.ds = new MailMergeDatasource(mod);
     this.abortListener = abortListener;
-    
-//  GUI im Event-Dispatching Thread erzeugen wg. Thread-Safety.
-    try{
-      javax.swing.SwingUtilities.invokeLater(new Runnable() {
-        public void run() {
-          try{createGUI();}catch(Exception x){Logger.error(x);};
+
+    // GUI im Event-Dispatching Thread erzeugen wg. Thread-Safety.
+    try
+    {
+      javax.swing.SwingUtilities.invokeLater(new Runnable()
+      {
+        public void run()
+        {
+          try
+          {
+            createGUI();
+          }
+          catch (Exception x)
+          {
+            Logger.error(x);
+          }
+          ;
         }
       });
     }
-    catch(Exception x) {Logger.error(x);}
+    catch (Exception x)
+    {
+      Logger.error(x);
+    }
   }
-  
+
   private void createGUI()
   {
     myFrame = new JFrame(L.m("Seriendruck (WollMux)"));
     myFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
     oehrchen = new MyWindowListener();
     myFrame.addWindowListener(oehrchen);
-    
+
     Box hbox = Box.createHorizontalBox();
     myFrame.add(hbox);
     JButton button;
     button = new JButton(L.m("Datenquelle"));
-    button.addActionListener(new ActionListener(){
+    button.addActionListener(new ActionListener()
+    {
       public void actionPerformed(ActionEvent e)
       {
         ds.showDatasourceSelectionDialog(myFrame);
       }
     });
     hbox.add(button);
-    
+
     hbox.add(new JSeparator(SwingConstants.VERTICAL));
-    
-    //FIXME: Ausgrauen, wenn kein Datenquelle ausgewählt
-    button = new JPotentiallyOverlongPopupMenuButton(L.m("Serienbrieffeld"),new Iterable()
-        {public Iterator<Action> iterator(){
-            return getInsertFieldActionList().iterator();
-          }});
+
+    // FIXME: Ausgrauen, wenn kein Datenquelle ausgewählt
+    button = new JPotentiallyOverlongPopupMenuButton(L.m("Serienbrieffeld"),
+      new Iterable()
+      {
+        public Iterator<Action> iterator()
+        {
+          return getInsertFieldActionList().iterator();
+        }
+      });
     hbox.add(button);
-    
+
     button = new JButton(L.m("Spezialfeld"));
     final JButton specialFieldButton = button;
     button.addActionListener(new ActionListener()
-        {
+    {
       public void actionPerformed(ActionEvent e)
       {
-        showInsertSpecialFieldPopup(specialFieldButton, 0, specialFieldButton.getSize().height);
+        showInsertSpecialFieldPopup(specialFieldButton, 0,
+          specialFieldButton.getSize().height);
       }
-        });
+    });
     hbox.add(button);
-    
+
     hbox.add(new JSeparator(SwingConstants.VERTICAL));
-    
+
     final String VORSCHAU = L.m("   Vorschau   ");
     button = new JButton(VORSCHAU);
     previewMode = false;
-    mod.setFormFieldsPreviewMode(previewMode); //TODO updatePreviewFields()
+    mod.setFormFieldsPreviewMode(previewMode); // TODO updatePreviewFields()
     final JButton previewButton = button;
     button.addActionListener(new ActionListener()
-        {
+    {
       public void actionPerformed(ActionEvent e)
       {
         if (!ds.hasDatasource()) return;
@@ -246,117 +267,120 @@ public class MailMergeNew
           mod.collectNonWollMuxFormFields();
           previewButton.setText(VORSCHAU);
           previewMode = false;
-          mod.setFormFieldsPreviewMode(false);//TODO updatePreviewFields()
+          mod.setFormFieldsPreviewMode(false);// TODO updatePreviewFields()
         }
         else
         {
           mod.collectNonWollMuxFormFields();
           previewButton.setText(L.m("<Feldname>"));
           previewMode = true;
-          //TODO updatePreviewFields();
-          mod.setFormFieldsPreviewMode(true);          
+          // TODO updatePreviewFields();
+          mod.setFormFieldsPreviewMode(true);
         }
       }
-        });
+    });
     hbox.add(DimAdjust.fixedSize(button));
-    
-    //  FIXME: Muss ausgegraut sein, wenn nicht im Vorschau-Modus.
+
+    // FIXME: Muss ausgegraut sein, wenn nicht im Vorschau-Modus.
     button = new JButton("|<");
     button.addActionListener(new ActionListener()
-        {
+    {
       public void actionPerformed(ActionEvent e)
       {
         previewDatasetNumber = 1;
-        //TODO updatePreviewFields();
+        // TODO updatePreviewFields();
       }
-        });
+    });
     hbox.add(button);
-    
-    //FIXME: Muss ausgegraut sein, wenn nicht im Vorschau-Modus.
+
+    // FIXME: Muss ausgegraut sein, wenn nicht im Vorschau-Modus.
     button = new JButton("<");
     button.addActionListener(new ActionListener()
-        {
+    {
       public void actionPerformed(ActionEvent e)
       {
         --previewDatasetNumber;
         if (previewDatasetNumber < 1) previewDatasetNumber = 1;
-        //TODO updatePreviewFields();
+        // TODO updatePreviewFields();
       }
-        });
+    });
     hbox.add(button);
-    
-    //  FIXME: Muss ausgegraut sein, wenn nicht im Vorschau-Modus.
-    previewDatasetNumberTextfield = new JTextField("1",3);
+
+    // FIXME: Muss ausgegraut sein, wenn nicht im Vorschau-Modus.
+    previewDatasetNumberTextfield = new JTextField("1", 3);
     previewDatasetNumberTextfield.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
       {
         String tfValue = previewDatasetNumberTextfield.getText();
-        try{
+        try
+        {
           int newValue = Integer.parseInt(tfValue);
           previewDatasetNumber = newValue;
-        }catch(Exception x)
-        {
-          previewDatasetNumberTextfield.setText(""+previewDatasetNumber);
         }
-        //TODO updatePreviewFields();
+        catch (Exception x)
+        {
+          previewDatasetNumberTextfield.setText("" + previewDatasetNumber);
+        }
+        // TODO updatePreviewFields();
       }
     });
-    previewDatasetNumberTextfield.setMaximumSize(new Dimension(Integer.MAX_VALUE,button.getPreferredSize().height));
+    previewDatasetNumberTextfield.setMaximumSize(new Dimension(Integer.MAX_VALUE,
+      button.getPreferredSize().height));
     hbox.add(previewDatasetNumberTextfield);
-    
-    //  FIXME: Muss ausgegraut sein, wenn nicht im Vorschau-Modus.
+
+    // FIXME: Muss ausgegraut sein, wenn nicht im Vorschau-Modus.
     button = new JButton(">");
     button.addActionListener(new ActionListener()
-        {
+    {
       public void actionPerformed(ActionEvent e)
       {
         ++previewDatasetNumber;
-        //TODO updatePreviewFields();
+        // TODO updatePreviewFields();
       }
-        });
+    });
     hbox.add(button);
-    
-    //  FIXME: Muss ausgegraut sein, wenn nicht im Vorschau-Modus.
+
+    // FIXME: Muss ausgegraut sein, wenn nicht im Vorschau-Modus.
     button = new JButton(">|");
     button.addActionListener(new ActionListener()
-        {
+    {
       public void actionPerformed(ActionEvent e)
       {
         previewDatasetNumber = Integer.MAX_VALUE;
-        //TODO updatePreviewFields();
+        // TODO updatePreviewFields();
       }
-        });
+    });
     hbox.add(button);
-    
+
     hbox.add(new JSeparator(SwingConstants.VERTICAL));
 
-    //FIXME: Ausgrauen, wenn keine Datenquelle gewählt ist.
+    // FIXME: Ausgrauen, wenn keine Datenquelle gewählt ist.
     button = new JButton(L.m("Drucken"));
     button.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
       {
-        if (ds.hasDatasource())
-          showMailmergeTypeSelectionDialog();
+        if (ds.hasDatasource()) showMailmergeTypeSelectionDialog();
       }
     });
     hbox.add(button);
-    
+
     hbox.add(new JSeparator(SwingConstants.VERTICAL));
-    
+
     final JPopupMenu tabelleMenu = new JPopupMenu();
     JMenuItem item = new JMenuItem(L.m("Tabelle bearbeiten"));
     item.addActionListener(new ActionListener()
-        {
+    {
       public void actionPerformed(ActionEvent e)
       {
         ds.toFront();
       }
-        });
+    });
     tabelleMenu.add(item);
 
-    final JMenuItem addColumnsMenuItem = new JMenuItem(L.m("Tabellenspalten ergänzen"));
+    final JMenuItem addColumnsMenuItem = new JMenuItem(
+      L.m("Tabellenspalten ergänzen"));
     addColumnsMenuItem.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
@@ -376,141 +400,146 @@ public class MailMergeNew
     });
     tabelleMenu.add(adjustFieldsMenuItem);
 
-//  FIXME: Button darf nur angezeigt werden, wenn tatsächlich eine Calc-Tabelle
-    //ausgewählt ist.
+    // FIXME: Button darf nur angezeigt werden, wenn tatsächlich eine Calc-Tabelle
+    // ausgewählt ist.
     button = new JButton(L.m("Tabelle"));
     final JButton tabelleButton = button;
     button.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
-      {        
+      {
         // Anpassen des Menüpunktes "Felder anpassen"
-        if(mod.hasSelection()) {
+        if (mod.hasSelection())
+        {
           adjustFieldsMenuItem.setText(L.m("Ausgewählte Felder anpassen"));
-        } else {
+        }
+        else
+        {
           adjustFieldsMenuItem.setText(L.m("Alle Felder anpassen"));
         }
-        
+
         // Ausgrauen der Anpassen-Knöpfe, wenn alle Felder mit den
         // entsprechenden Datenquellenfeldern zugeordnet werden können.
-        boolean hasUnmappedFields = mod.getReferencedFieldIDsThatAreNotInSchema(new HashSet<String>(ds.getColumnNames())).length > 0; 
+        boolean hasUnmappedFields = mod.getReferencedFieldIDsThatAreNotInSchema(new HashSet<String>(
+          ds.getColumnNames())).length > 0;
         adjustFieldsMenuItem.setEnabled(hasUnmappedFields);
-        //TODO: einkommentieren wenn implementiert:
-        //addColumnsMenuItem.setEnabled(hasUnmappedFields);
+        // TODO: einkommentieren wenn implementiert:
+        // addColumnsMenuItem.setEnabled(hasUnmappedFields);
         addColumnsMenuItem.setEnabled(false);
-        
+
         tabelleMenu.show(tabelleButton, 0, tabelleButton.getSize().height);
       }
     });
     hbox.add(button);
-    
+
     myFrame.setAlwaysOnTop(true);
     myFrame.pack();
     int frameWidth = myFrame.getWidth();
     int frameHeight = myFrame.getHeight();
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-    int x = screenSize.width/2 - frameWidth/2; 
-    int y = frameHeight*3;//screenSize.height/2 - frameHeight/2;
-    myFrame.setLocation(x,y);
+    int x = screenSize.width / 2 - frameWidth / 2;
+    int y = frameHeight * 3;// screenSize.height/2 - frameHeight/2;
+    myFrame.setLocation(x, y);
     myFrame.setResizable(false);
     mod.addCoupledWindow(myFrame);
     myFrame.setVisible(true);
-    
+
     if (!ds.hasDatasource()) ds.showDatasourceSelectionDialog(myFrame);
   }
 
   /**
    * Diese Methode zeigt den Dialog an, mit dem die Felder im Dokument an eine
-   * Datenquelle angepasst werden können, die nicht die selben Spalten enthält
-   * wie die Datenquelle, für die das Dokument gemacht wurde.
+   * Datenquelle angepasst werden können, die nicht die selben Spalten enthält wie
+   * die Datenquelle, für die das Dokument gemacht wurde.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
   protected void showAdjustFieldsDialog()
   {
-    ReferencedFieldID[] fieldIDs = mod.getReferencedFieldIDsThatAreNotInSchema(new HashSet<String>(ds.getColumnNames()));
+    ReferencedFieldID[] fieldIDs = mod.getReferencedFieldIDsThatAreNotInSchema(new HashSet<String>(
+      ds.getColumnNames()));
     ActionListener submitActionListener = new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
       {
         HashMap mapIdToSubstitution = (HashMap) e.getSource();
-        for (Iterator iter = mapIdToSubstitution.keySet().iterator(); iter
-            .hasNext();)
+        for (Iterator iter = mapIdToSubstitution.keySet().iterator(); iter.hasNext();)
         {
           String fieldId = (String) iter.next();
-          FieldSubstitution subst = (FieldSubstitution) mapIdToSubstitution
-              .get(fieldId);
+          FieldSubstitution subst = (FieldSubstitution) mapIdToSubstitution.get(fieldId);
           mod.applyFieldSubstitution(fieldId, subst);
         }
       }
     };
-    showFieldMappingDialog(fieldIDs, L.m("Felder anpassen"), L.m("Altes Feld"), L.m("Neue Belegung"), L.m("Felder anpassen"), submitActionListener);
+    showFieldMappingDialog(fieldIDs, L.m("Felder anpassen"), L.m("Altes Feld"),
+      L.m("Neue Belegung"), L.m("Felder anpassen"), submitActionListener);
   }
 
   /**
    * Diese Methode zeigt den Dialog an, mit dem die Spalten der Tabelle ergänzt
-   * werden können, wenn es zu Feldern im Dokument keine passenden Spalten in
-   * der Tabelle gibt.
+   * werden können, wenn es zu Feldern im Dokument keine passenden Spalten in der
+   * Tabelle gibt.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
   protected void showAddMissingColumnsDialog()
   {
-    ReferencedFieldID[] fieldIDs = mod.getReferencedFieldIDsThatAreNotInSchema(new HashSet<String>(ds.getColumnNames()));
+    ReferencedFieldID[] fieldIDs = mod.getReferencedFieldIDsThatAreNotInSchema(new HashSet<String>(
+      ds.getColumnNames()));
     ActionListener submitActionListener = new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
       {
-        // Enthält die Zuordnung ID -> de.muenchen.allg.itd51.wollmux.TextDocumentModel.FieldSubstitution,
+        // Enthält die Zuordnung ID ->
+        // de.muenchen.allg.itd51.wollmux.TextDocumentModel.FieldSubstitution,
         // in der die anzuwendende Ersetzungsregel beschrieben ist.
 
-        //HashMap mapIdToSubstitution = (HashMap) e.getSource();
+        // HashMap mapIdToSubstitution = (HashMap) e.getSource();
         // TODO: tabellenspalten wie in mapIdToSubstitution beschrieben ergänzen
       }
     };
-    showFieldMappingDialog(fieldIDs, L.m("Tabellenspalten ergänzen"), L.m("Spalte"), L.m("Vorbelegung"), L.m("Spalten ergänzen"), submitActionListener);
+    showFieldMappingDialog(fieldIDs, L.m("Tabellenspalten ergänzen"), L.m("Spalte"),
+      L.m("Vorbelegung"), L.m("Spalten ergänzen"), submitActionListener);
   }
-  
+
   /**
    * Zeigt einen Dialog mit dem bestehende Felder fieldIDs über ein Textfeld neu
    * belegt werden können; für die neue Belegung stehen die neuen Felder der
    * aktuellen Datasource und Freitext zur Verfügung. Die Felder fieldIDs werden
-   * dabei in der Reihenfolge angezeigt, in der sie in der Liste aufgeführt
-   * sind, ein bereits aufgeführtes Feld wird aber nicht zweimal angezeigt. Ist
-   * bei einem Feld die Eigenschaft isTransformed()==true, dann wird für dieses
-   * Feld nur die Eingabe einer 1-zu-1 Zuordnung von Feldern akzeptiert, das
-   * andere Zuordnungen für transformierte Felder derzeit nicht unterstützt
-   * werden.
+   * dabei in der Reihenfolge angezeigt, in der sie in der Liste aufgeführt sind, ein
+   * bereits aufgeführtes Feld wird aber nicht zweimal angezeigt. Ist bei einem Feld
+   * die Eigenschaft isTransformed()==true, dann wird für dieses Feld nur die Eingabe
+   * einer 1-zu-1 Zuordnung von Feldern akzeptiert, das andere Zuordnungen für
+   * transformierte Felder derzeit nicht unterstützt werden.
    * 
    * @param fieldIDs
-   *          Die field-IDs der alten, bereits im Dokument enthaltenen Felder,
-   *          die in der gegebenen Reihenfolge angezeigt werden, Dupletten
-   *          werden aber entfernt.
+   *          Die field-IDs der alten, bereits im Dokument enthaltenen Felder, die in
+   *          der gegebenen Reihenfolge angezeigt werden, Dupletten werden aber
+   *          entfernt.
    * @param title
    *          Die Titelzeile des Dialogs
    * @param labelOldFields
-   *          Die Spaltenüberschrift für die linke Spalte, in der die alten
-   *          Felder angezeigt werden.
+   *          Die Spaltenüberschrift für die linke Spalte, in der die alten Felder
+   *          angezeigt werden.
    * @param labelNewFields
-   *          Die Spaltenüberschrift für die rechte Spalte, in dem die neue
-   *          Zuordnung getroffen wird.
+   *          Die Spaltenüberschrift für die rechte Spalte, in dem die neue Zuordnung
+   *          getroffen wird.
    * @param labelSubmitButton
-   *          Die Beschriftung des Submit-Knopfes unten rechts, der die
-   *          entsprechende Aktion auslöst.
+   *          Die Beschriftung des Submit-Knopfes unten rechts, der die entsprechende
+   *          Aktion auslöst.
    * @param submitActionListener
-   *          Nach Beendigung des Dialogs über den Submit-Knopf (unten rechts)
-   *          wird die Methode submitActionListener.actionPerformed(actionEvent)
-   *          in einem separaten Thread aufgerufen. Dort kann der Code stehen,
-   *          der gewünschten Aktionen durchführt. Der ActionListener bekommt
-   *          dabei in actionEvent eine HashMap übergeben, die eine Zuordnung
-   *          von den alten fieldIDs auf den jeweiligen im Dialog gewählten
-   *          Ersatzstring enthält.
+   *          Nach Beendigung des Dialogs über den Submit-Knopf (unten rechts) wird
+   *          die Methode submitActionListener.actionPerformed(actionEvent) in einem
+   *          separaten Thread aufgerufen. Dort kann der Code stehen, der gewünschten
+   *          Aktionen durchführt. Der ActionListener bekommt dabei in actionEvent
+   *          eine HashMap übergeben, die eine Zuordnung von den alten fieldIDs auf
+   *          den jeweiligen im Dialog gewählten Ersatzstring enthält.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  private void showFieldMappingDialog(ReferencedFieldID[] fieldIDs,
-      String title, String labelOldFields, String labelNewFields,
-      String labelSubmitButton, final ActionListener submitActionListener)
+  private void showFieldMappingDialog(ReferencedFieldID[] fieldIDs, String title,
+      String labelOldFields, String labelNewFields, String labelSubmitButton,
+      final ActionListener submitActionListener)
   {
     final JDialog dialog = new JDialog(myFrame, title, true);
     dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
@@ -520,34 +549,34 @@ public class MailMergeNew
 
     Box headers = Box.createHorizontalBox();
     final JButton insertFieldButton = new JPotentiallyOverlongPopupMenuButton(
-        L.m("Serienbrieffeld"), new Iterable()
+      L.m("Serienbrieffeld"), new Iterable()
+      {
+        public Iterator<Action> iterator()
         {
-          public Iterator<Action> iterator()
+          List<Action> actions = new Vector<Action>();
+          List<String> columnNames = ds.getColumnNames();
+
+          Collections.sort(columnNames);
+
+          Iterator<String> iter = columnNames.iterator();
+          while (iter.hasNext())
           {
-            List<Action> actions = new Vector<Action>();
-            List<String> columnNames = ds.getColumnNames();
-
-            Collections.sort(columnNames);
-
-            Iterator<String> iter = columnNames.iterator();
-            while (iter.hasNext())
+            final String name = iter.next();
+            Action button = new AbstractAction(name)
             {
-              final String name = iter.next();
-              Action button = new AbstractAction(name)
+              private static final long serialVersionUID = 0;
+
+              public void actionPerformed(ActionEvent e)
               {
-                private static final long serialVersionUID = 0;
-
-                public void actionPerformed(ActionEvent e)
-                {
-                  if (currentField[0] != null) currentField[0].insertTag(name);
-                }
-              };
-              actions.add(button);
-            }
-
-            return actions.iterator();
+                if (currentField[0] != null) currentField[0].insertTag(name);
+              }
+            };
+            actions.add(button);
           }
-        });
+
+          return actions.iterator();
+        }
+      });
     insertFieldButton.setFocusable(false);
     headers.add(Box.createHorizontalGlue());
     headers.add(insertFieldButton);
@@ -587,13 +616,16 @@ public class MailMergeNew
       label.setBorder(BorderFactory.createEmptyBorder(5, 5, 10, 5));
       hbox.add(label);
 
-      final TextComponentTags field = new TextComponentTags(new JTextField()) {
-          public boolean isContentValid() {
-            if(!isTransformed) return true;
-            List c = getContent();
-            if(c.size() == 0) return true;
-            return c.size() == 1 && ((TextComponentTags.ContentElement) c.get(0)).isTag();  
-          }
+      final TextComponentTags field = new TextComponentTags(new JTextField())
+      {
+        public boolean isContentValid()
+        {
+          if (!isTransformed) return true;
+          List c = getContent();
+          if (c.size() == 0) return true;
+          return c.size() == 1
+                 && ((TextComponentTags.ContentElement) c.get(0)).isTag();
+        }
       };
       mapTextComponentTagsToFieldname.put(field, fieldId);
       Box fbox = Box.createHorizontalBox();
@@ -645,11 +677,10 @@ public class MailMergeNew
       public void actionPerformed(ActionEvent e)
       {
         final HashMap<String, FieldSubstitution> result = new HashMap<String, FieldSubstitution>();
-        for (Iterator<TextComponentTags> iter = mapTextComponentTagsToFieldname.keySet().iterator(); iter
-            .hasNext();)
+        for (Iterator<TextComponentTags> iter = mapTextComponentTagsToFieldname.keySet().iterator(); iter.hasNext();)
         {
           TextComponentTags f = iter.next();
-          if(!f.isContentValid()) continue;
+          if (!f.isContentValid()) continue;
           String fieldId = "" + mapTextComponentTagsToFieldname.get(f);
           FieldSubstitution subst = new TextDocumentModel.FieldSubstitution();
           for (Iterator contentIter = f.getContent().iterator(); contentIter.hasNext();)
@@ -670,7 +701,7 @@ public class MailMergeNew
           public void run()
           {
             submitActionListener.actionPerformed(new ActionEvent(result, 0,
-                "showSubstitutionDialogReturned"));
+              "showSubstitutionDialogReturned"));
           }
         }.start();
       }
@@ -678,8 +709,8 @@ public class MailMergeNew
     buttonBox.add(button);
 
     JScrollPane spane = new JScrollPane(itemBox,
-        ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
-        ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+      ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+      ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
     spane.setBorder(BorderFactory.createEmptyBorder());
     dialog.add(spane);
 
@@ -702,71 +733,87 @@ public class MailMergeNew
     dialog.setVisible(true);
   }
 
-    /**
-     * Schliesst den MailMergeNew und alle zugehörigen Fenster.
-     * 
-     * @author Christoph Lutz (D-III-ITD 5.1)
-     */
+  /**
+   * Schliesst den MailMergeNew und alle zugehörigen Fenster.
+   * 
+   * @author Christoph Lutz (D-III-ITD 5.1)
+   */
   public void dispose()
   {
-    try{
-      javax.swing.SwingUtilities.invokeLater(new Runnable() {
-        public void run() {
-            try{abort();}catch(Exception x){};
+    try
+    {
+      javax.swing.SwingUtilities.invokeLater(new Runnable()
+      {
+        public void run()
+        {
+          try
+          {
+            abort();
+          }
+          catch (Exception x)
+          {
+          }
+          ;
         }
       });
     }
-    catch(Exception x) {}
+    catch (Exception x)
+    {
+    }
   }
 
   /**
-   * Zeigt den Dialog an, der die Serienbriefverarbeitung (Direktdruck oder in neues Dokument)
-   * anwirft.
+   * Zeigt den Dialog an, der die Serienbriefverarbeitung (Direktdruck oder in neues
+   * Dokument) anwirft.
    * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TODO Testen
+   * @author Matthias Benkmann (D-III-ITD 5.1) TODO Testen
    */
   private void showMailmergeTypeSelectionDialog()
   {
     final JDialog dialog = new JDialog(myFrame, L.m("Seriendruck"), true);
     dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-    
+
     Box vbox = Box.createVerticalBox();
     dialog.add(vbox);
-    
+
     Box hbox = Box.createHorizontalBox();
     JLabel label = new JLabel(L.m("Serienbriefe"));
     hbox.add(label);
     hbox.add(Box.createHorizontalStrut(5));
-    
+
     Vector<String> types = new Vector<String>();
     types.add(L.m("in neues Dokument schreiben"));
     types.add(L.m("auf dem Drucker ausgeben"));
     final JComboBox typeBox = new JComboBox(types);
-    typeBox.addItemListener(new ItemListener(){
+    typeBox.addItemListener(new ItemListener()
+    {
       public void itemStateChanged(ItemEvent e)
       {
         printIntoDocument = (typeBox.getSelectedIndex() == 0);
-      }});
+      }
+    });
     hbox.add(typeBox);
-    
-    //FIXME: darf nur sichtbar sein, wenn in typeBox "auf dem Drucker ausgeben" gewählt ist
+
+    // FIXME: darf nur sichtbar sein, wenn in typeBox "auf dem Drucker ausgeben"
+    // gewählt ist
     JButton button = new JButton(L.m("Drucker einrichten"));
     button.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
       {
-        //TODO Drucker einrichten Button
+        // TODO Drucker einrichten Button
       }
     });
     hbox.add(button);
-    
+
     vbox.add(hbox);
-    
+
     hbox = Box.createHorizontalBox();
-    Border border = BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.GRAY), L.m("Folgende Datensätze verwenden"));
+    Border border = BorderFactory.createTitledBorder(
+      BorderFactory.createLineBorder(Color.GRAY),
+      L.m("Folgende Datensätze verwenden"));
     hbox.setBorder(border);
-    
+
     ButtonGroup radioGroup = new ButtonGroup();
     JRadioButton rbutton;
     rbutton = new JRadioButton(L.m("Alle"), true);
@@ -775,28 +822,39 @@ public class MailMergeNew
     rbutton = new JRadioButton(L.m("Von"), false);
     hbox.add(rbutton);
     radioGroup.add(rbutton);
-    JTextField start = new JTextField("     "); //TODO Handler, der Eingabe validiert (nur Zahl erlaubt) und evtl. das end Textfield anpasst (insbes. wenn dort noch nichts drinsteht). Hierzu sind bereits Zugriffe auf die Datenquelle erforderlich. Auch der Von-Radiobutton muss angewählt werden.
+
+    // TODO Handler, der Eingabe validiert (nur Zahl erlaubt) und evtl. das end
+    // Textfield anpasst (insbes. wenn dort noch nichts drinsteht). Hierzu sind
+    // bereits Zugriffe auf die Datenquelle erforderlich. Auch der Von-Radiobutton
+    // muss angewählt werden.
+    JTextField start = new JTextField("     ");
     hbox.add(start);
     label = new JLabel("Bis");
     hbox.add(label);
-    JTextField end = new JTextField("     "); //TODO Handler wie bei start TextField
+
+    // TODO Handler wie bei start TextField
+    JTextField end = new JTextField("     ");
     hbox.add(end);
-    rbutton = new JRadioButton(""); //TODO Anwahl muss selben Effekt haben wie das Drücken des "Einzelauswahl" Buttons
+
+    // TODO Anwahl muss selben Effekt haben wie das Drücken des "Einzelauswahl"
+    // Buttons
+    rbutton = new JRadioButton("");
     hbox.add(rbutton);
     radioGroup.add(rbutton);
-    
+
     button = new JButton(L.m("Einzelauswahl..."));
     button.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
       {
-//      TODO implementieren. Muss auch den davorstehenden Radio-Button selektieren.
+        // TODO implementieren. Muss auch den davorstehenden Radio-Button
+        // selektieren.
       }
     });
     hbox.add(button);
-    
+
     vbox.add(hbox);
-    
+
     hbox = Box.createHorizontalBox();
     button = new JButton(L.m("Abbrechen"));
     button.addActionListener(new ActionListener()
@@ -809,7 +867,7 @@ public class MailMergeNew
     hbox.add(button);
 
     hbox.add(Box.createHorizontalGlue());
-    
+
     button = new JButton(L.m("Los geht's!"));
     button.addActionListener(new ActionListener()
     {
@@ -822,22 +880,22 @@ public class MailMergeNew
     hbox.add(button);
 
     vbox.add(hbox);
-    
+
     dialog.pack();
     int frameWidth = dialog.getWidth();
     int frameHeight = dialog.getHeight();
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-    int x = screenSize.width/2 - frameWidth/2; 
-    int y = screenSize.height/2 - frameHeight/2;
-    dialog.setLocation(x,y);
+    int x = screenSize.width / 2 - frameWidth / 2;
+    int y = screenSize.height / 2 - frameHeight / 2;
+    dialog.setLocation(x, y);
     dialog.setResizable(false);
     dialog.setVisible(true);
   }
 
   /**
-   * Erzeugt eine Liste mit {@link javax.swing.Action}s für 
-   * alle Namen aus {@link #ds},getColumnNames(), die ein entsprechendes
-   * Seriendruckfeld einfügen.
+   * Erzeugt eine Liste mit {@link javax.swing.Action}s für alle Namen aus
+   * {@link #ds},getColumnNames(), die ein entsprechendes Seriendruckfeld einfügen.
+   * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private List<Action> getInsertFieldActionList()
@@ -846,14 +904,14 @@ public class MailMergeNew
     List<String> columnNames = ds.getColumnNames();
 
     Collections.sort(columnNames);
-    
+
     Iterator<String> iter = columnNames.iterator();
     while (iter.hasNext())
     {
       final String name = iter.next();
       Action button = new AbstractAction(name)
       {
-        private static final long serialVersionUID = 0; //Eclipse-Warnung totmachen
+        private static final long serialVersionUID = 0; // Eclipse-Warnung totmachen
 
         public void actionPerformed(ActionEvent e)
         {
@@ -862,27 +920,29 @@ public class MailMergeNew
       };
       actions.add(button);
     }
-    
+
     return actions;
   }
 
-    /**
-   * Erzeugt ein JPopupMenu, das Einträge für das Einfügen von Spezialfeldern
-   * enthält und zeigt es an neben invoker an der relativen
-   * Position x,y.
-   * @param invoker zu welcher Komponente gehört das Popup
-   * @param x Koordinate des Popups im Koordinatenraum von invoker.
-   * @param y Koordinate des Popups im Koordinatenraum von invoker.
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TODO Testen
+  /**
+   * Erzeugt ein JPopupMenu, das Einträge für das Einfügen von Spezialfeldern enthält
+   * und zeigt es an neben invoker an der relativen Position x,y.
+   * 
+   * @param invoker
+   *          zu welcher Komponente gehört das Popup
+   * @param x
+   *          Koordinate des Popups im Koordinatenraum von invoker.
+   * @param y
+   *          Koordinate des Popups im Koordinatenraum von invoker.
+   * @author Matthias Benkmann (D-III-ITD 5.1) TODO Testen
    */
   private void showInsertSpecialFieldPopup(JComponent invoker, int x, int y)
   {
     boolean dsHasFields = ds.getColumnNames().size() > 0;
     final TrafoDialog editFieldDialog = getTrafoDialogForCurrentSelection();
-    
+
     JPopupMenu menu = new JPopupMenu();
-    
+
     JMenuItem button;
 
     final String genderButtonName = L.m("Gender");
@@ -919,29 +979,29 @@ public class MailMergeNew
       }
     });
     menu.add(button);
-    
+
     button = new JMenuItem(L.m("Datensatznummer"));
     button.setEnabled(false); // NOT YET IMPLEMENTED
     button.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
       {
-        //TODO insertDatasetIndex();
+        // TODO insertDatasetIndex();
       }
     });
     menu.add(button);
-    
+
     button = new JMenuItem(L.m("Serienbriefnummer"));
     button.setEnabled(false); // NOT YET IMPLEMENTED
     button.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
       {
-        //TODO insertMailMergeIndex();
+        // TODO insertMailMergeIndex();
       }
     });
     menu.add(button);
-    
+
     button = new JMenuItem(L.m("Feld bearbeiten..."));
     button.setEnabled(editFieldDialog != null);
     button.addActionListener(new ActionListener()
@@ -953,29 +1013,29 @@ public class MailMergeNew
 
     });
     menu.add(button);
-    
+
     menu.show(invoker, x, y);
   }
-  
+
   /**
    * Öffnet den Dialog zum Einfügen eines Spezialfeldes, das über die Funktion
    * trafoConf beschrieben ist, erzeugt daraus ein transformiertes Feld und fügt
-   * dieses Feld in das Dokument mod ein; Es erwartet darüber hinaus den Namen
-   * des Buttons buttonName, aus dem das Label des Dialogs, und später der
-   * Mouse-Over hint erzeugt wird und die Liste der aktuellen Felder, die evtl.
-   * im Dialog zur Verfügung stehen sollen.
+   * dieses Feld in das Dokument mod ein; Es erwartet darüber hinaus den Namen des
+   * Buttons buttonName, aus dem das Label des Dialogs, und später der Mouse-Over
+   * hint erzeugt wird und die Liste der aktuellen Felder, die evtl. im Dialog zur
+   * Verfügung stehen sollen.
    * 
    * @param fieldNames
-   *          Eine Liste der Feldnamen, die der Dialog anzeigt, falls er Buttons
-   *          zum Einfügen von Serienbrieffeldern bereitstellt.
+   *          Eine Liste der Feldnamen, die der Dialog anzeigt, falls er Buttons zum
+   *          Einfügen von Serienbrieffeldern bereitstellt.
    * @param buttonName
    *          Der Name des Buttons, aus dem die Titelzeile des Dialogs und der
    *          Mouse-Over Hint des neu erzeugten Formularfeldes generiert wird.
    * @param trafoConf
    *          ConfigThingy, das die Funktion und damit den aufzurufenden Dialog
    *          spezifiziert. Der von den Dialogen benötigte äußere Knoten
-   *          "Func(...trafoConf...) wird dabei von dieser Methode erzeugt, so
-   *          dass trafoConf nur die eigentliche Funktion darstellen muss.
+   *          "Func(...trafoConf...) wird dabei von dieser Methode erzeugt, so dass
+   *          trafoConf nur die eigentliche Funktion darstellen muss.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
@@ -1019,8 +1079,8 @@ public class MailMergeNew
   }
 
   /**
-   * Prüft, ob sich in der akutellen Selektion ein transformiertes Feld befindet
-   * und liefert ein mit Hilfe der TrafoDialogFactory erzeugtes zugehöriges
+   * Prüft, ob sich in der akutellen Selektion ein transformiertes Feld befindet und
+   * liefert ein mit Hilfe der TrafoDialogFactory erzeugtes zugehöriges
    * TrafoDialog-Objekt zurück, oder null, wenn keine transformierte Funktion
    * selektiert ist oder für die Trafo kein Dialog existiert.
    * 
@@ -1066,7 +1126,7 @@ public class MailMergeNew
       return null;
     }
   }
-  
+
   /**
    * Führt den Seriendruck durch.
    * 
@@ -1074,15 +1134,18 @@ public class MailMergeNew
    */
   private void doMailMerge()
   {
-    //TODO Fortschrittsanzeiger
-    //TODO hier kann man mit lockControllers auf das Gesamtdokument vielleicht noch etwas Performance rausholen - das bitte testen.
+    // TODO Fortschrittsanzeiger
+    // TODO hier kann man mit lockControllers auf das Gesamtdokument vielleicht noch
+    // etwas Performance rausholen - das bitte testen.
     mod.collectNonWollMuxFormFields();
     QueryResultsWithSchema data = ds.getData();
     final XPrintModel pmod = mod.createPrintModel(true);
-    try{
+    try
+    {
       pmod.setPropertyValue("MailMergeNew_Schema", data.getSchema());
       pmod.setPropertyValue(PROP_QUERYRESULTS, data);
-    }catch(Exception x)
+    }
+    catch (Exception x)
     {
       Logger.error(x);
       return;
@@ -1101,69 +1164,69 @@ public class MailMergeNew
       }
     }.start();
   }
-  
-  
+
   /**
-   * PrintFunction, die das jeweils nächste Element der Seriendruckdaten
-   * nimmt und die Seriendruckfelder im Dokument entsprechend setzt.
-   * Herangezogen werden die Properties {@link #PROP_QUERYRESULTS}
-   * (ein Objekt vom Typ {@link QueryResults}) und 
-   * "MailMergeNew_Schema", was ein Set mit den Spaltennamen enthält.
-   * Dies funktioniert natürlich nur dann, wenn pmod kein Proxy ist.
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TESTED
+   * PrintFunction, die das jeweils nächste Element der Seriendruckdaten nimmt und
+   * die Seriendruckfelder im Dokument entsprechend setzt. Herangezogen werden die
+   * Properties {@link #PROP_QUERYRESULTS} (ein Objekt vom Typ {@link QueryResults})
+   * und "MailMergeNew_Schema", was ein Set mit den Spaltennamen enthält. Dies
+   * funktioniert natürlich nur dann, wenn pmod kein Proxy ist.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public static void mailMergeNewSetFormValue(XPrintModel pmod) throws Exception
   {
-    QueryResults data = (QueryResults)pmod.getPropertyValue(PROP_QUERYRESULTS);
-    Collection schema = (Collection)pmod.getPropertyValue("MailMergeNew_Schema");
-    
+    QueryResults data = (QueryResults) pmod.getPropertyValue(PROP_QUERYRESULTS);
+    Collection schema = (Collection) pmod.getPropertyValue("MailMergeNew_Schema");
+
     Iterator iter = data.iterator();
-    
+
     while (iter.hasNext())
     {
-      Dataset ds = (Dataset)iter.next();
+      Dataset ds = (Dataset) iter.next();
       Iterator schemaIter = schema.iterator();
       while (schemaIter.hasNext())
       {
-        String spalte = (String)schemaIter.next();
+        String spalte = (String) schemaIter.next();
         pmod.setFormValue(spalte, ds.get(spalte));
       }
       pmod.printWithProps();
     }
   }
-  
-  
+
   /**
-   * Liefert die sichtbaren Zellen des Arbeitsblattes mit Namen sheetName aus dem Calc 
-   * Dokument doc. Die erste sichtbare Zeile der Calc-Tabelle wird herangezogen
+   * Liefert die sichtbaren Zellen des Arbeitsblattes mit Namen sheetName aus dem
+   * Calc Dokument doc. Die erste sichtbare Zeile der Calc-Tabelle wird herangezogen
    * als Spaltennamen. Diese Spaltennamen werden zu schema hinzugefügt.
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TESTED
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
-  private static QueryResults getVisibleCalcData(XSpreadsheetDocument doc, String sheetName, Set<String> schema)
+  private static QueryResults getVisibleCalcData(XSpreadsheetDocument doc,
+      String sheetName, Set<String> schema)
   {
     CalcCellQueryResults results = new CalcCellQueryResults();
-    
-    try{
+
+    try
+    {
       if (doc != null)
       {
-        XCellRangesQuery sheet = UNO.XCellRangesQuery(doc.getSheets().getByName(sheetName));
+        XCellRangesQuery sheet = UNO.XCellRangesQuery(doc.getSheets().getByName(
+          sheetName));
         if (sheet != null)
         {
           SortedSet<Integer> columnIndexes = new TreeSet<Integer>();
           SortedSet<Integer> rowIndexes = new TreeSet<Integer>();
           getVisibleNonemptyRowsAndColumns(sheet, columnIndexes, rowIndexes);
-          
+
           if (columnIndexes.size() > 0 && rowIndexes.size() > 0)
           {
             XCellRange sheetCellRange = UNO.XCellRange(sheet);
-            
+
             /*
-             * Erste sichtbare Zeile durchscannen und alle nicht-leeren Zelleninhalte als
-             * Tabellenspaltennamen interpretieren. Ein Mapping in
-             * mapColumnNameToIndex wird erzeugt, wobei NICHT auf den Index in
-             * der Calc-Tabelle gemappt wird, sondern auf den Index im später für jeden
+             * Erste sichtbare Zeile durchscannen und alle nicht-leeren Zelleninhalte
+             * als Tabellenspaltennamen interpretieren. Ein Mapping in
+             * mapColumnNameToIndex wird erzeugt, wobei NICHT auf den Index in der
+             * Calc-Tabelle gemappt wird, sondern auf den Index im später für jeden
              * Datensatz existierenden String[]-Array.
              */
             int ymin = rowIndexes.first().intValue();
@@ -1173,24 +1236,27 @@ public class MailMergeNew
             while (iter.hasNext())
             {
               int x = iter.next().intValue();
-              String columnName = UNO.XTextRange(sheetCellRange.getCellByPosition(x, ymin)).getString();
+              String columnName = UNO.XTextRange(
+                sheetCellRange.getCellByPosition(x, ymin)).getString();
               if (columnName.length() > 0)
               {
                 mapColumnNameToIndex.put(columnName, new Integer(idx));
                 schema.add(columnName);
-                ++idx;  
+                ++idx;
               }
-              else 
-                iter.remove(); //Spalten mit leerem Spaltennamen werden nicht benötigt.
+              else
+                iter.remove(); // Spalten mit leerem Spaltennamen werden nicht
+                                // benötigt.
             }
-            
+
             results.setColumnNameToIndexMap(mapColumnNameToIndex);
-            
+
             /*
              * Datensätze erzeugen
              */
             Iterator<Integer> rowIndexIter = rowIndexes.iterator();
-            rowIndexIter.next(); //erste Zeile enthält die Tabellennamen, keinen Datensatz
+            rowIndexIter.next(); // erste Zeile enthält die Tabellennamen, keinen
+                                  // Datensatz
             while (rowIndexIter.hasNext())
             {
               int y = rowIndexIter.next().intValue();
@@ -1203,154 +1269,155 @@ public class MailMergeNew
                 String value = UNO.XTextRange(sheetCellRange.getCellByPosition(x, y)).getString();
                 data[idx++] = value;
               }
-              
+
               results.addDataset(data);
             }
           }
         }
       }
-    }catch(Exception x)
+    }
+    catch (Exception x)
     {
       Logger.error(x);
     }
-    
+
     return results;
   }
 
-  
   /**
    * Liefert von Tabellenblatt sheet die Indizes aller Zeilen und Spalten, in denen
    * mindestens eine sichtbare nicht-leere Zelle existiert.
-   * @param sheet das zu scannende Tabellenblatt
-   * @param columnIndexes diesem Set werden die Spaltenindizes hinzugefügt
-   * @param rowIndexes diesem Set werden die Zeilenindizes hinzugefügt
+   * 
+   * @param sheet
+   *          das zu scannende Tabellenblatt
+   * @param columnIndexes
+   *          diesem Set werden die Spaltenindizes hinzugefügt
+   * @param rowIndexes
+   *          diesem Set werden die Zeilenindizes hinzugefügt
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private static void getVisibleNonemptyRowsAndColumns(XCellRangesQuery sheet, SortedSet<Integer> columnIndexes, SortedSet<Integer> rowIndexes)
+  private static void getVisibleNonemptyRowsAndColumns(XCellRangesQuery sheet,
+      SortedSet<Integer> columnIndexes, SortedSet<Integer> rowIndexes)
   {
     XSheetCellRanges visibleCellRanges = sheet.queryVisibleCells();
-    XSheetCellRanges nonEmptyCellRanges = sheet
-        .queryContentCells((short) ( com.sun.star.sheet.CellFlags.VALUE
-                                   | com.sun.star.sheet.CellFlags.DATETIME
-                                   | com.sun.star.sheet.CellFlags.STRING 
-                                   | com.sun.star.sheet.CellFlags.FORMULA));
+    XSheetCellRanges nonEmptyCellRanges = sheet.queryContentCells((short) (com.sun.star.sheet.CellFlags.VALUE
+                                                                           | com.sun.star.sheet.CellFlags.DATETIME
+                                                                           | com.sun.star.sheet.CellFlags.STRING | com.sun.star.sheet.CellFlags.FORMULA));
     CellRangeAddress[] nonEmptyCellRangeAddresses = nonEmptyCellRanges.getRangeAddresses();
     for (int i = 0; i < nonEmptyCellRangeAddresses.length; ++i)
     {
-      XSheetCellRanges ranges = UNO.XCellRangesQuery(visibleCellRanges).queryIntersection(nonEmptyCellRangeAddresses[i]);
+      XSheetCellRanges ranges = UNO.XCellRangesQuery(visibleCellRanges).queryIntersection(
+        nonEmptyCellRangeAddresses[i]);
       CellRangeAddress[] rangeAddresses = ranges.getRangeAddresses();
       for (int k = 0; k < rangeAddresses.length; ++k)
       {
         CellRangeAddress addr = rangeAddresses[k];
         for (int x = addr.StartColumn; x <= addr.EndColumn; ++x)
           columnIndexes.add(new Integer(x));
-        
+
         for (int y = addr.StartRow; y <= addr.EndRow; ++y)
           rowIndexes.add(new Integer(y));
       }
     }
   }
 
-
-  
   /**
    * Stellt eine OOo-Datenquelle oder ein offenes Calc-Dokument über ein gemeinsames
    * Interface zur Verfügung. Ist auch zuständig dafür, das Calc-Dokument falls nötig
    * wieder zu öffnen und Änderungen seines Fenstertitels und/oder seiner
-   * Speicherstelle zu überwachen. Stellt auch
-   * Dialoge zur Verfügung zur Auswahl der Datenquelle.
-   *
+   * Speicherstelle zu überwachen. Stellt auch Dialoge zur Verfügung zur Auswahl der
+   * Datenquelle.
+   * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private static class MailMergeDatasource
   {
     /**
-     * Wert für {@link #sourceType}, der anzeigt, dass keine Datenquelle ausgewählt ist.
+     * Wert für {@link #sourceType}, der anzeigt, dass keine Datenquelle ausgewählt
+     * ist.
      */
     private static final int SOURCE_NONE = 0;
-    
+
     /**
-     * Wert für {@link #sourceType}, der anzeigt, dass eine Calc-Tabelle als Datenquelle 
-     * ausgewählt ist.
+     * Wert für {@link #sourceType}, der anzeigt, dass eine Calc-Tabelle als
+     * Datenquelle ausgewählt ist.
      */
     private static final int SOURCE_CALC = 1;
-    
+
     /**
-     * Wert für {@link #sourceType}, der anzeigt, dass eine OOo Datenquelle
-     * als Datenquelle ausgewählt ist.
+     * Wert für {@link #sourceType}, der anzeigt, dass eine OOo Datenquelle als
+     * Datenquelle ausgewählt ist.
      */
     private static final int SOURCE_DB = 2;
 
     /**
      * Wenn nach dieser Zeit in ms nicht alle Daten des Seriendruckauftrags
-     * ausgelesen werden konnten, dann wird der Druckauftrag nicht ausgeführt
-     * (und muss eventuell über die Von Bis Auswahl in mehrere Aufträge
-     * zerteilt werden). 
+     * ausgelesen werden konnten, dann wird der Druckauftrag nicht ausgeführt (und
+     * muss eventuell über die Von Bis Auswahl in mehrere Aufträge zerteilt werden).
      */
     private static final long MAILMERGE_GETCONTENTS_TIMEOUT = 60000;
-    
+
     /**
      * Zeigt an, was derzeit als Datenquelle ausgewählt ist.
      */
     private int sourceType = SOURCE_NONE;
-    
+
     /**
      * Wenn {@link #sourceType} == {@link #SOURCE_CALC} und das Calc-Dokument derzeit
-     * offen ist, dann ist diese Variable != null. Falls das Dokument nicht offen ist,
-     * so ist seine URL in {@link #calcUrl} zu finden. Die Kombination 
-     * calcDoc == null && calcUrl == null && sourceType == SOURCE_CALC ist
-     * unzulässig.
+     * offen ist, dann ist diese Variable != null. Falls das Dokument nicht offen
+     * ist, so ist seine URL in {@link #calcUrl} zu finden. Die Kombination calcDoc ==
+     * null && calcUrl == null && sourceType == SOURCE_CALC ist unzulässig.
      */
     private XSpreadsheetDocument calcDoc = null;
-    
+
     /**
      * Wenn {@link #sourceType} == {@link #SOURCE_CALC} und das Calc-Dokument bereits
      * einmal gespeichert wurde, findet sich hier die URL des Dokuments, ansonsten
-     * ist der Wert null. Falls das
-     * Dokument nur als UnbenanntX im Speicher existiert, so ist eine
-     * Referenz auf das Dokument in {@link #calcDoc} zu finden.
-     * Die Kombination 
-     * calcDoc == null && calcUrl == null && sourceType == SOURCE_CALC ist
-     * unzulässig.
+     * ist der Wert null. Falls das Dokument nur als UnbenanntX im Speicher
+     * existiert, so ist eine Referenz auf das Dokument in {@link #calcDoc} zu
+     * finden. Die Kombination calcDoc == null && calcUrl == null && sourceType ==
+     * SOURCE_CALC ist unzulässig.
      */
     private String calcUrl = null;
-    
+
     /**
      * Falls {@link #sourceType} == {@link #SOURCE_DB}, so ist hier der Name der
      * ausgewählten OOo-Datenquelle gespeichert, ansonsten null.
      */
     private String oooDatasourceName = null;
-    
+
     /**
-     * Speichert den Namen der Tabelle bzw, des Tabellenblattes, die als
-     * Quelle der Serienbriefdaten ausgewählt wurde. Ist niemals null, kann
-     * aber der leere String sein oder ein Name, der gar nicht in der
-     * entsprechenden Datenquelle existiert.
+     * Speichert den Namen der Tabelle bzw, des Tabellenblattes, die als Quelle der
+     * Serienbriefdaten ausgewählt wurde. Ist niemals null, kann aber der leere
+     * String sein oder ein Name, der gar nicht in der entsprechenden Datenquelle
+     * existiert.
      */
     private String tableName = "";
-    
+
     /**
-     * Wenn als aktuelle Datenquelle ein Calc-Dokument ausgewählt ist, dann
-     * wird dieser Listener darauf registriert um Änderungen des Speicherorts,
-     * so wie das Schließen des Dokuments zu überwachen.
+     * Wenn als aktuelle Datenquelle ein Calc-Dokument ausgewählt ist, dann wird
+     * dieser Listener darauf registriert um Änderungen des Speicherorts, so wie das
+     * Schließen des Dokuments zu überwachen.
      */
     private MyCalcListener myCalcListener = new MyCalcListener();
-    
+
     /**
      * Wird verwendet zum Speichern/Wiedereinlesen der zuletzt ausgewählten
      * Datenquelle.
      */
     private TextDocumentModel mod;
-    
+
     /**
      * Erzeugt eine neue Datenquelle.
-     * @param mod wird verwendet zum Speichern/Wiedereinlesen der zuletzt ausgewählten
-     *        Datenquelle.
+     * 
+     * @param mod
+     *          wird verwendet zum Speichern/Wiedereinlesen der zuletzt ausgewählten
+     *          Datenquelle.
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     public MailMergeDatasource(TextDocumentModel mod)
     {
-      this.mod = mod;      
+      this.mod = mod;
       openDatasourceFromLastStoredSettings();
     }
 
@@ -1364,43 +1431,71 @@ public class MailMergeNew
     {
       ConfigThingy mmconf = mod.getMailmergeConfig();
       ConfigThingy datenquelle = new ConfigThingy("");
-      try{
+      try
+      {
         datenquelle = mmconf.query("Datenquelle").getLastChild();
-      }catch (NodeNotFoundException e){}
-      
+      }
+      catch (NodeNotFoundException e)
+      {
+      }
+
       String type = null;
-      try{
+      try
+      {
         type = datenquelle.get("TYPE").toString();
-      }catch (NodeNotFoundException e){}
-      
-      if("calc".equalsIgnoreCase(type)) {
-        try{
+      }
+      catch (NodeNotFoundException e)
+      {
+      }
+
+      if ("calc".equalsIgnoreCase(type))
+      {
+        try
+        {
           String url = datenquelle.get("URL").toString();
           String table = datenquelle.get("TABLE").toString();
-          try{
+          try
+          {
             Object d = getCalcDoc(url);
-            if(d != null) setTable(table);
-          }catch (UnavailableException e){Logger.debug(e);}
-        }catch (NodeNotFoundException e){
-          Logger.error(L.m("Fehlendes Argument für Datenquelle vom Typ '%1':", type), e);
+            if (d != null) setTable(table);
+          }
+          catch (UnavailableException e)
+          {
+            Logger.debug(e);
+          }
         }
-      } else if("ooo".equalsIgnoreCase(type)) {
-        try{
-          @SuppressWarnings("unused") String source = datenquelle.get("SOURCE").toString();
-          @SuppressWarnings("unused") String table = datenquelle.get("TABLE").toString();
+        catch (NodeNotFoundException e)
+        {
+          Logger.error(
+            L.m("Fehlendes Argument für Datenquelle vom Typ '%1':", type), e);
+        }
+      }
+      else if ("ooo".equalsIgnoreCase(type))
+      {
+        try
+        {
+          @SuppressWarnings("unused")
+          String source = datenquelle.get("SOURCE").toString();
+          @SuppressWarnings("unused")
+          String table = datenquelle.get("TABLE").toString();
           // TODO: bestehende OOo-Datenbank verwenden
-        }catch (NodeNotFoundException e){
-          Logger.error(L.m("Fehlendes Argument für Datenquelle vom Typ '%1':", type), e);
-        }        
-      } else if (type != null) {
+        }
+        catch (NodeNotFoundException e)
+        {
+          Logger.error(
+            L.m("Fehlendes Argument für Datenquelle vom Typ '%1':", type), e);
+        }
+      }
+      else if (type != null)
+      {
         Logger.error(L.m("Ignoriere Datenquelle mit unbekanntem Typ '%1'", type));
       }
     }
 
     /**
-     * Speichert die aktuellen Einstellungen zu dieser Datenquelle im
-     * zugehörigen Dokument persistent ab, damit die Datenquelle beim nächsten
-     * mal wieder automatisch geöffnet/verbunden werden kann.
+     * Speichert die aktuellen Einstellungen zu dieser Datenquelle im zugehörigen
+     * Dokument persistent ab, damit die Datenquelle beim nächsten mal wieder
+     * automatisch geöffnet/verbunden werden kann.
      * 
      * @author Christoph Lutz (D-III-ITD-5.1) TODO: Testen
      */
@@ -1412,7 +1507,7 @@ public class MailMergeNew
       switch (sourceType)
       {
         case SOURCE_CALC:
-          if(calcUrl == null || tableName.length() == 0) break;
+          if (calcUrl == null || tableName.length() == 0) break;
           arg = new ConfigThingy("TYPE");
           arg.addChild(new ConfigThingy("calc"));
           dq.addChild(arg);
@@ -1424,7 +1519,7 @@ public class MailMergeNew
           dq.addChild(arg);
           break;
         case SOURCE_DB:
-          if(oooDatasourceName == null || tableName.length() == 0) break;
+          if (oooDatasourceName == null || tableName.length() == 0) break;
           arg = new ConfigThingy("TYPE");
           arg.addChild(new ConfigThingy("ooo"));
           dq.addChild(arg);
@@ -1438,105 +1533,119 @@ public class MailMergeNew
       }
 
       ConfigThingy seriendruck = new ConfigThingy("Seriendruck");
-      if(dq.count() > 0) seriendruck.addChild(dq);
+      if (dq.count() > 0) seriendruck.addChild(dq);
       mod.setMailmergeConfig(seriendruck);
-    }    
-    
+    }
+
     /**
-     * Liefert die Titel der Spalten der aktuell ausgewählten Tabelle.
-     * Ist derzeit keine Tabelle ausgewählt oder enthält die ausgewählte
-     * Tabelle keine benannten Spalten, so wird ein leerer Vector geliefert.
+     * Liefert die Titel der Spalten der aktuell ausgewählten Tabelle. Ist derzeit
+     * keine Tabelle ausgewählt oder enthält die ausgewählte Tabelle keine benannten
+     * Spalten, so wird ein leerer Vector geliefert.
+     * 
      * @return
-     * @author Matthias Benkmann (D-III-ITD 5.1)
-     * TESTED
+     * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
      */
     public List<String> getColumnNames()
     {
-      try{
-        switch(sourceType)
+      try
+      {
+        switch (sourceType)
         {
-          case SOURCE_CALC: return getColumnNames(getCalcDoc(), tableName);
-          case SOURCE_DB: return getDbColumnNames(oooDatasourceName, tableName);
-          default: return new Vector<String>();
+          case SOURCE_CALC:
+            return getColumnNames(getCalcDoc(), tableName);
+          case SOURCE_DB:
+            return getDbColumnNames(oooDatasourceName, tableName);
+          default:
+            return new Vector<String>();
         }
-      }catch(Exception x)
+      }
+      catch (Exception x)
       {
         Logger.error(x);
         return new Vector<String>();
       }
     }
-    
-    
+
     /**
-     * Liefert die Spaltennamen der Tabelle tableName aus der
-     * OOo-Datenquelle oooDatasourceName.
-     * @author Matthias Benkmann (D-III-ITD 5.1)
-     * TODO Testen
+     * Liefert die Spaltennamen der Tabelle tableName aus der OOo-Datenquelle
+     * oooDatasourceName.
+     * 
+     * @author Matthias Benkmann (D-III-ITD 5.1) TODO Testen
      */
     private List<String> getDbColumnNames(String oooDatasourceName, String tableName)
     {
-      return new Vector<String>(); //FIXME: getDbColumnNames()
+      return new Vector<String>(); // FIXME: getDbColumnNames()
     }
 
     /**
      * Liefert die Inhalte (als Strings) der nicht-leeren Zellen der ersten
      * sichtbaren Zeile von Tabellenblatt tableName in Calc-Dokument calcDoc.
-     * @author Matthias Benkmann (D-III-ITD 5.1)
-     * TESTED
+     * 
+     * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
      */
-    private List<String> getColumnNames(XSpreadsheetDocument calcDoc, String tableName)
+    private List<String> getColumnNames(XSpreadsheetDocument calcDoc,
+        String tableName)
     {
       List<String> columnNames = new Vector<String>();
       if (calcDoc == null) return columnNames;
-      try{
-        XCellRangesQuery sheet = UNO.XCellRangesQuery(calcDoc.getSheets().getByName(tableName));
+      try
+      {
+        XCellRangesQuery sheet = UNO.XCellRangesQuery(calcDoc.getSheets().getByName(
+          tableName));
         SortedSet<Integer> columnIndexes = new TreeSet<Integer>();
         SortedSet<Integer> rowIndexes = new TreeSet<Integer>();
         getVisibleNonemptyRowsAndColumns(sheet, columnIndexes, rowIndexes);
-        
+
         if (columnIndexes.size() > 0 && rowIndexes.size() > 0)
         {
           XCellRange sheetCellRange = UNO.XCellRange(sheet);
-          
+
           /*
-           * Erste sichtbare Zeile durchscannen und alle nicht-leeren Zelleninhalte als
-           * Tabellenspaltennamen interpretieren. 
+           * Erste sichtbare Zeile durchscannen und alle nicht-leeren Zelleninhalte
+           * als Tabellenspaltennamen interpretieren.
            */
           int ymin = rowIndexes.first().intValue();
           Iterator<Integer> iter = columnIndexes.iterator();
           while (iter.hasNext())
           {
             int x = iter.next().intValue();
-            String columnName = UNO.XTextRange(sheetCellRange.getCellByPosition(x, ymin)).getString();
+            String columnName = UNO.XTextRange(
+              sheetCellRange.getCellByPosition(x, ymin)).getString();
             if (columnName.length() > 0)
             {
               columnNames.add(columnName);
             }
           }
-        }        
-      }catch(Exception x)
-      {
-        Logger.error(L.m("Kann Spaltennamen nicht bestimmen"),x);
+        }
       }
-      return columnNames;  
+      catch (Exception x)
+      {
+        Logger.error(L.m("Kann Spaltennamen nicht bestimmen"), x);
+      }
+      return columnNames;
     }
-    
+
     /**
      * Liefert den Inhalt der aktuell ausgewählten Serienbriefdatenquelle (leer, wenn
      * keine ausgewählt).
-     * @author Matthias Benkmann (D-III-ITD 5.1)
-     * TODO Testen
+     * 
+     * @author Matthias Benkmann (D-III-ITD 5.1) TODO Testen
      */
     public QueryResultsWithSchema getData()
     {
-      try{
-        switch(sourceType)
+      try
+      {
+        switch (sourceType)
         {
-          case SOURCE_CALC: return getData(getCalcDoc(), tableName);
-          case SOURCE_DB: return getDbData(oooDatasourceName, tableName);
-          default: return new QueryResultsWithSchema();
+          case SOURCE_CALC:
+            return getData(getCalcDoc(), tableName);
+          case SOURCE_DB:
+            return getDbData(oooDatasourceName, tableName);
+          default:
+            return new QueryResultsWithSchema();
         }
-      }catch(Exception x)
+      }
+      catch (Exception x)
       {
         Logger.error(x);
         return new QueryResultsWithSchema();
@@ -1544,43 +1653,45 @@ public class MailMergeNew
     }
 
     /**
-     * Liefert den Inhalt der Tabelle tableName aus der OOo Datenquelle 
-     * mit Namen oooDatasourceName.
-     * @author Matthias Benkmann (D-III-ITD 5.1)
-     * TODO Testen
+     * Liefert den Inhalt der Tabelle tableName aus der OOo Datenquelle mit Namen
+     * oooDatasourceName.
+     * 
+     * @author Matthias Benkmann (D-III-ITD 5.1) TODO Testen
      */
-    private QueryResultsWithSchema getDbData(String oooDatasourceName, String tableName) throws Exception, ConfigurationErrorException
+    private QueryResultsWithSchema getDbData(String oooDatasourceName,
+        String tableName) throws Exception, ConfigurationErrorException
     {
       ConfigThingy conf = new ConfigThingy("Datenquelle");
       conf.add("NAME").add("Knuddel");
       conf.add("TABLE").add(tableName);
       conf.add("SOURCE").add(oooDatasourceName);
       Datasource ds;
-      ds = new OOoDatasource(new HashMap(),conf,new URL("file:///"), true);
-      
+      ds = new OOoDatasource(new HashMap(), conf, new URL("file:///"), true);
+
       Set<String> schema = ds.getSchema();
       QueryResults res = ds.getContents(MAILMERGE_GETCONTENTS_TIMEOUT);
       return new QueryResultsWithSchema(res, schema);
     }
 
     /**
-     * Liefert die sichtbaren Zellen aus der Tabelle tableName des Dokuments
-     * calcDoc als QueryResultsWithSchema zurück.
-     * @author Matthias Benkmann (D-III-ITD 5.1)
-     * TODO Testen
+     * Liefert die sichtbaren Zellen aus der Tabelle tableName des Dokuments calcDoc
+     * als QueryResultsWithSchema zurück.
+     * 
+     * @author Matthias Benkmann (D-III-ITD 5.1) TODO Testen
      */
-    private QueryResultsWithSchema getData(XSpreadsheetDocument calcDoc, String tableName)
+    private QueryResultsWithSchema getData(XSpreadsheetDocument calcDoc,
+        String tableName)
     {
       Set<String> schema = new HashSet<String>();
       QueryResults res = getVisibleCalcData(calcDoc, tableName, schema);
       return new QueryResultsWithSchema(res, schema);
     }
-    
+
     /**
      * Liefert true, wenn derzeit eine Datenquelle ausgewählt ist.
+     * 
      * @return
-     * @author Matthias Benkmann (D-III-ITD 5.1)
-     * TODO Testen
+     * @author Matthias Benkmann (D-III-ITD 5.1) TODO Testen
      */
     public boolean hasDatasource()
     {
@@ -1589,35 +1700,40 @@ public class MailMergeNew
 
     /**
      * Lässt den Benutzer über einen Dialog die Datenquelle auswählen.
-     * @param parent der JFrame, zu dem dieser Dialog gehören soll.
-     * @author Matthias Benkmann (D-III-ITD 5.1)
-     * TESTED
+     * 
+     * @param parent
+     *          der JFrame, zu dem dieser Dialog gehören soll.
+     * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
      */
     public void showDatasourceSelectionDialog(final JFrame parent)
     {
-      final JDialog datasourceSelector = new JDialog(parent, L.m("Wo sind Ihre Serienbriefdaten ?"), true);
-      
+      final JDialog datasourceSelector = new JDialog(parent,
+        L.m("Wo sind Ihre Serienbriefdaten ?"), true);
+
       Box vbox = Box.createVerticalBox();
       datasourceSelector.add(vbox);
-      
+
       JLabel label = new JLabel(L.m("Wo sind Ihre Serienbriefdaten ?"));
       vbox.add(label);
-      
+
       JButton button;
       button = createDatasourceSelectorCalcWindowButton();
-      if (button != null) 
+      if (button != null)
       {
-        button.addActionListener(new ActionListener(){
+        button.addActionListener(new ActionListener()
+        {
           public void actionPerformed(ActionEvent e)
           {
             datasourceSelector.dispose();
             selectOpenCalcWindowAsDatasource(parent);
-          }});
+          }
+        });
         vbox.add(DimAdjust.maxWidthUnlimited(button));
       }
-      
+
       button = new JButton(L.m("Datei..."));
-      button.addActionListener(new ActionListener(){
+      button.addActionListener(new ActionListener()
+      {
         public void actionPerformed(ActionEvent e)
         {
           datasourceSelector.dispose();
@@ -1625,9 +1741,10 @@ public class MailMergeNew
         }
       });
       vbox.add(DimAdjust.maxWidthUnlimited(button));
-      
+
       button = new JButton(L.m("Neue Calc-Tabelle..."));
-      button.addActionListener(new ActionListener(){
+      button.addActionListener(new ActionListener()
+      {
         public void actionPerformed(ActionEvent e)
         {
           datasourceSelector.dispose();
@@ -1635,24 +1752,26 @@ public class MailMergeNew
         }
       });
       vbox.add(DimAdjust.maxWidthUnlimited(button));
-      
+
       button = new JButton(L.m("Datenbank..."));
-      button.addActionListener(new ActionListener(){
+      button.addActionListener(new ActionListener()
+      {
         public void actionPerformed(ActionEvent e)
         {
-          //TODO selectOOoDatasourceAsDatasource();
+          // TODO selectOOoDatasourceAsDatasource();
         }
       });
       vbox.add(DimAdjust.maxWidthUnlimited(button));
-      
+
       label = new JLabel(L.m("Aktuell ausgewählte Tabelle"));
       vbox.add(label);
       String str = L.m("<keine>");
       if (sourceType == SOURCE_CALC)
-      { //TODO Testen
+      { // TODO Testen
         if (calcDoc != null)
         {
-          String title = (String)UNO.getProperty(UNO.XModel(calcDoc).getCurrentController().getFrame(),"Title");
+          String title = (String) UNO.getProperty(
+            UNO.XModel(calcDoc).getCurrentController().getFrame(), "Title");
           if (title == null) title = "?????";
           str = stripOpenOfficeFromWindowName(title);
         }
@@ -1660,75 +1779,78 @@ public class MailMergeNew
         {
           str = calcUrl;
         }
-      } else if (sourceType == SOURCE_DB)
+      }
+      else if (sourceType == SOURCE_DB)
       {
         str = oooDatasourceName;
       }
 
-      if (tableName.length() > 0)
-        str = str + "." + tableName;
-      
+      if (tableName.length() > 0) str = str + "." + tableName;
+
       label = new JLabel(str);
       vbox.add(label);
-      
+
       button = new JButton(L.m("Abbrechen"));
-      button.addActionListener(new ActionListener(){
+      button.addActionListener(new ActionListener()
+      {
         public void actionPerformed(ActionEvent e)
         {
           datasourceSelector.dispose();
         }
       });
       vbox.add(DimAdjust.maxWidthUnlimited(button));
-      
+
       datasourceSelector.pack();
       int frameWidth = datasourceSelector.getWidth();
       int frameHeight = datasourceSelector.getHeight();
       Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-      int x = screenSize.width/2 - frameWidth/2; 
-      int y = screenSize.height/2 - frameHeight/2;
-      datasourceSelector.setLocation(x,y);
+      int x = screenSize.width / 2 - frameWidth / 2;
+      int y = screenSize.height / 2 - frameHeight / 2;
+      datasourceSelector.setLocation(x, y);
       datasourceSelector.setResizable(false);
       datasourceSelector.setVisible(true);
     }
-    
+
     /**
-     * Präsentiert dem Benutzer einen Dialog, in dem er aus allen offenen Calc-Fenstern
-     * eines als Datenquelle auswählen kann. Falls es nur ein
-     * offenes Calc-Fenster gibt, wird dieses automatisch gewählt.
+     * Präsentiert dem Benutzer einen Dialog, in dem er aus allen offenen
+     * Calc-Fenstern eines als Datenquelle auswählen kann. Falls es nur ein offenes
+     * Calc-Fenster gibt, wird dieses automatisch gewählt.
      * 
-     * @param parent der JFrame zu dem der die Dialoge gehören sollen.
-     * @author Matthias Benkmann (D-III-ITD 5.1)
-     * TESTED
+     * @param parent
+     *          der JFrame zu dem der die Dialoge gehören sollen.
+     * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
      */
     private void selectOpenCalcWindowAsDatasource(final JFrame parent)
     {
       OpenCalcWindows win = getOpenCalcWindows();
       List<String> names = win.titles;
-      
+
       if (names.isEmpty()) return;
-      
+
       if (names.size() == 1)
       {
         getCalcDoc(win.docs.get(0));
         selectTable(parent);
         return;
       }
-      
-      final JDialog calcWinSelector = new JDialog(parent, L.m("Welche Tabelle möchten Sie verwenden ?"), true);
-      
+
+      final JDialog calcWinSelector = new JDialog(parent,
+        L.m("Welche Tabelle möchten Sie verwenden ?"), true);
+
       Box vbox = Box.createVerticalBox();
       calcWinSelector.add(vbox);
-      
+
       JLabel label = new JLabel(L.m("Welches Calc-Dokument möchten Sie verwenden ?"));
       vbox.add(label);
-      
+
       for (int i = 0; i < names.size(); ++i)
       {
         final String name = names.get(i);
         final XSpreadsheetDocument spread = win.docs.get(i);
         JButton button;
         button = new JButton(name);
-        button.addActionListener(new ActionListener(){
+        button.addActionListener(new ActionListener()
+        {
           public void actionPerformed(ActionEvent e)
           {
             calcWinSelector.dispose();
@@ -1738,42 +1860,43 @@ public class MailMergeNew
         });
         vbox.add(DimAdjust.maxWidthUnlimited(button));
       }
-      
+
       calcWinSelector.pack();
       int frameWidth = calcWinSelector.getWidth();
       int frameHeight = calcWinSelector.getHeight();
       Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-      int x = screenSize.width/2 - frameWidth/2; 
-      int y = screenSize.height/2 - frameHeight/2;
-      calcWinSelector.setLocation(x,y);
+      int x = screenSize.width / 2 - frameWidth / 2;
+      int y = screenSize.height / 2 - frameHeight / 2;
+      calcWinSelector.setLocation(x, y);
       calcWinSelector.setResizable(false);
       calcWinSelector.setVisible(true);
     }
-    
+
     /**
      * Öffnet ein neues Calc-Dokument und setzt es als Seriendruckdatenquelle.
      * 
-     * @param parent der JFrame zu dem der die Dialoge gehören sollen.
-     * @author Matthias Benkmann (D-III-ITD 5.1)
-     * TESTED
+     * @param parent
+     *          der JFrame zu dem der die Dialoge gehören sollen.
+     * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
      */
     private void openAndselectNewCalcTableAsDatasource(JFrame parent)
     {
       try
       {
         Logger.debug(L.m("Öffne neues Calc-Dokument als Datenquelle für Seriendruck"));
-        XSpreadsheetDocument spread = UNO.XSpreadsheetDocument(UNO.loadComponentFromURL("private:factory/scalc", true, true));
+        XSpreadsheetDocument spread = UNO.XSpreadsheetDocument(UNO.loadComponentFromURL(
+          "private:factory/scalc", true, true));
         XSpreadsheets sheets = spread.getSheets();
         String[] sheetNames = sheets.getElementNames();
 
         // Lösche alle bis auf das erste Tabellenblatt ohne Änderung des
         // Modified-Status.
         XModifiable xmo = UNO.XModifiable(spread);
-        boolean modified = (xmo != null)? xmo.isModified() : false;
+        boolean modified = (xmo != null) ? xmo.isModified() : false;
         for (int i = 1; i < sheetNames.length; ++i)
           sheets.removeByName(sheetNames[i]);
-        if(xmo != null) xmo.setModified(modified);
-        
+        if (xmo != null) xmo.setModified(modified);
+
         getCalcDoc(spread);
         selectTable(parent);
       }
@@ -1782,14 +1905,14 @@ public class MailMergeNew
         Logger.error(e);
       }
     }
-    
+
     /**
-     * Öffnet einen FilePicker und falls der Benutzer dort eine Tabelle auswählt, wird diese
-     * geöffnet und als Datenquelle verwendet.
+     * Öffnet einen FilePicker und falls der Benutzer dort eine Tabelle auswählt,
+     * wird diese geöffnet und als Datenquelle verwendet.
      * 
-     * @param parent der JFrame zu dem der die Dialoge gehören sollen.
-     * @author Matthias Benkmann (D-III-ITD 5.1)
-     * TESTED
+     * @param parent
+     *          der JFrame zu dem der die Dialoge gehören sollen.
+     * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
      */
     private void selectFileAsDatasource(JFrame parent)
     {
@@ -1802,9 +1925,11 @@ public class MailMergeNew
         try
         {
           Logger.debug(L.m("Öffne %1 als Datenquelle für Seriendruck", files[0]));
-          try{
+          try
+          {
             getCalcDoc(files[0]);
-          }catch(UnavailableException x)
+          }
+          catch (UnavailableException x)
           {
             return;
           }
@@ -1816,7 +1941,7 @@ public class MailMergeNew
         }
       }
     }
-    
+
     /**
      * Bringt einen Dialog, mit dem der Benutzer in der aktuell ausgewählten
      * Datenquelle eine Tabelle auswählen kann. Falls die Datenquelle genau eine
@@ -1824,8 +1949,7 @@ public class MailMergeNew
      * Falls der Benutzer den Dialog abbricht, so wird die erste Tabelle gewählt.
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1)
-     * @parent Das Hauptfenster, zu dem dieser Dialog gehört.
-     * TESTED
+     * @parent Das Hauptfenster, zu dem dieser Dialog gehört. TESTED
      */
     private void selectTable(JFrame parent)
     {
@@ -1837,26 +1961,29 @@ public class MailMergeNew
         return;
       }
       if (names.isEmpty()) names = allNames;
-      
-      setTable(names.get(0)); //Falls der Benutzer den Dialog abbricht ohne Auswahl
-      
-      if (names.size() == 1) return; //Falls es nur eine Tabelle gibt, Dialog unnötig.
-      
-      final JDialog tableSelector = new JDialog(parent, L.m("Welche Tabelle möchten Sie verwenden ?"), true);
-      
+
+      setTable(names.get(0)); // Falls der Benutzer den Dialog abbricht ohne Auswahl
+
+      if (names.size() == 1) return; // Falls es nur eine Tabelle gibt, Dialog
+                                      // unnötig.
+
+      final JDialog tableSelector = new JDialog(parent,
+        L.m("Welche Tabelle möchten Sie verwenden ?"), true);
+
       Box vbox = Box.createVerticalBox();
       tableSelector.add(vbox);
-      
+
       JLabel label = new JLabel(L.m("Welche Tabelle möchten Sie verwenden ?"));
       vbox.add(label);
-      
+
       Iterator<String> iter = names.iterator();
       while (iter.hasNext())
       {
         final String name = iter.next();
         JButton button;
         button = new JButton(name);
-        button.addActionListener(new ActionListener(){
+        button.addActionListener(new ActionListener()
+        {
           public void actionPerformed(ActionEvent e)
           {
             tableSelector.dispose();
@@ -1865,14 +1992,14 @@ public class MailMergeNew
         });
         vbox.add(DimAdjust.maxWidthUnlimited(button));
       }
-      
+
       tableSelector.pack();
       int frameWidth = tableSelector.getWidth();
       int frameHeight = tableSelector.getHeight();
       Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-      int x = screenSize.width/2 - frameWidth/2; 
-      int y = screenSize.height/2 - frameHeight/2;
-      tableSelector.setLocation(x,y);
+      int x = screenSize.width / 2 - frameWidth / 2;
+      int y = screenSize.height / 2 - frameHeight / 2;
+      tableSelector.setLocation(x, y);
       tableSelector.setResizable(false);
       tableSelector.setVisible(true);
     }
@@ -1882,118 +2009,138 @@ public class MailMergeNew
      * Einstellungen persistent im zugehörigen Dokument ab, damit sie bei der
      * nächsten Bearbeitung des Dokuments wieder verfügbar sind.
      * 
-     * @param name Name der Tabelle die aktuell eingestellt werden soll.
+     * @param name
+     *          Name der Tabelle die aktuell eingestellt werden soll.
      * 
      * @author Christoph Lutz (D-III-ITD-5.1)
      */
     private void setTable(String name)
     {
-      if (name == null) tableName = "";
-      else tableName = name;
+      if (name == null)
+        tableName = "";
+      else
+        tableName = name;
       storeDatasourceSettings();
     }
 
     /**
      * Registriert {@link #myCalcListener} auf calcDoc, falls calcDoc != null.
+     * 
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     private void setListeners(XSpreadsheetDocument calcDoc)
     {
-      //FIXME: Das Ändern des Names eines Sheets muss überwacht werden damit tableName angepasst wird.
+      // FIXME: Das Ändern des Names eines Sheets muss überwacht werden damit
+      // tableName angepasst wird.
       if (calcDoc == null) return;
-      try{
+      try
+      {
         UNO.XCloseBroadcaster(calcDoc).addCloseListener(myCalcListener);
-      }catch(Exception x)
-      {
-        Logger.error(L.m("Kann CloseListener nicht auf Calc-Dokument registrieren"),x);
       }
-      try{
-        UNO.XEventBroadcaster(calcDoc).addEventListener(myCalcListener);
-      }catch(Exception x)
+      catch (Exception x)
       {
-        Logger.error(L.m("Kann EventListener nicht auf Calc-Dokument registrieren"),x);
+        Logger.error(L.m("Kann CloseListener nicht auf Calc-Dokument registrieren"),
+          x);
+      }
+      try
+      {
+        UNO.XEventBroadcaster(calcDoc).addEventListener(myCalcListener);
+      }
+      catch (Exception x)
+      {
+        Logger.error(L.m("Kann EventListener nicht auf Calc-Dokument registrieren"),
+          x);
       }
     }
 
     /**
-     * Falls calcDoc != null wird versucht, {@link #myCalcListener} davon zu deregistrieren.
+     * Falls calcDoc != null wird versucht, {@link #myCalcListener} davon zu
+     * deregistrieren.
+     * 
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     private void removeListeners(XSpreadsheetDocument calcDoc)
     {
       if (calcDoc == null) return;
-      
-      try{
+
+      try
+      {
         UNO.XCloseBroadcaster(calcDoc).removeCloseListener(myCalcListener);
-      }catch(Exception x)
-      {
-        Logger.error(L.m("Konnte alten XCloseListener nicht deregistrieren"),x);
       }
-      try{
+      catch (Exception x)
+      {
+        Logger.error(L.m("Konnte alten XCloseListener nicht deregistrieren"), x);
+      }
+      try
+      {
         UNO.XEventBroadcaster(calcDoc).removeEventListener(myCalcListener);
-      }catch(Exception x)
-      {
-        Logger.error(L.m("Konnte alten XEventListener nicht deregistrieren"),x);
       }
-      
+      catch (Exception x)
+      {
+        Logger.error(L.m("Konnte alten XEventListener nicht deregistrieren"), x);
+      }
+
     }
 
     private static String stripOpenOfficeFromWindowName(String str)
     {
       int idx = str.indexOf(" - OpenOffice");
-      //FIXME: kann unter StarOffice natürlich anders heissen oder bei einer anderen Office-Version
+      // FIXME: kann unter StarOffice natürlich anders heissen oder bei einer anderen
+      // Office-Version
       if (idx > 0) str = str.substring(0, idx);
       return str;
     }
-    
+
     /**
-     * Erzeugt einen Button zur Auswahl der Datenquelle aus den aktuell offenen Calc-Fenstern,
-     * dessen Beschriftung davon abhängt, was zur Auswahl steht oder liefert null, wenn nichts
-     * zur Auswahl steht.
-     * Falls es keine offenen Calc-Fenster gibt, wird null geliefert.
-     * Falls es genau ein offenes Calc-Fenster gibt und dieses genau ein 
-     * nicht-leeres Tabellenblatt hat,
-     * so zeigt der Button die Beschriftung "<Fenstername>.<Tabellenname>".
-     * Falls es genau ein offenes Calc-Fenster gibt und dieses mehr als ein nicht-leeres
-     * oder kein nicht-leeres Tabellenblatt hat, so zeigt der Button die Beschriftung 
-     * "<Fenstername>".
-     * Falls es mehrere offene Calc-Fenster gibt, so zeigt der Button die Beschriftung
-     * "Offenes Calc-Fenster...".
+     * Erzeugt einen Button zur Auswahl der Datenquelle aus den aktuell offenen
+     * Calc-Fenstern, dessen Beschriftung davon abhängt, was zur Auswahl steht oder
+     * liefert null, wenn nichts zur Auswahl steht. Falls es keine offenen
+     * Calc-Fenster gibt, wird null geliefert. Falls es genau ein offenes
+     * Calc-Fenster gibt und dieses genau ein nicht-leeres Tabellenblatt hat, so
+     * zeigt der Button die Beschriftung "<Fenstername>.<Tabellenname>". Falls es
+     * genau ein offenes Calc-Fenster gibt und dieses mehr als ein nicht-leeres oder
+     * kein nicht-leeres Tabellenblatt hat, so zeigt der Button die Beschriftung "<Fenstername>".
+     * Falls es mehrere offene Calc-Fenster gibt, so zeigt der Button die
+     * Beschriftung "Offenes Calc-Fenster...".
+     * 
      * @return JButton oder null.
-     * @author Matthias Benkmann (D-III-ITD 5.1)
-     * TESTED
+     * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
      */
     private JButton createDatasourceSelectorCalcWindowButton()
     {
       OpenCalcWindows win = getOpenCalcWindows();
-      
+
       if (win.titles.isEmpty()) return null;
       if (win.titles.size() > 1) return new JButton(L.m("Offenes Calc-Fenster..."));
-      
-      //Es gibt offenbar genau ein offenes Calc-Fenster
-      //das XSpreadsheetDocument dazu ist in calcSheet zu finden
+
+      // Es gibt offenbar genau ein offenes Calc-Fenster
+      // das XSpreadsheetDocument dazu ist in calcSheet zu finden
       List<String> nonEmptyTableNames = getNamesOfNonEmptyTables(win.docs.get(0));
-      
+
       String str = win.titles.get(0);
-      if (nonEmptyTableNames.size() == 1) str = str + "." + nonEmptyTableNames.get(0);
-      
+      if (nonEmptyTableNames.size() == 1)
+        str = str + "." + nonEmptyTableNames.get(0);
+
       return new JButton(str);
     }
 
     private static class OpenCalcWindows
     {
       public List<String> titles;
+
       public List<XSpreadsheetDocument> docs;
     }
-    
+
     /**
-     * Liefert die Titel und zugehörigen XSpreadsheetDocuments aller offenen Calc-Fenster.
-     * @return ein Objekt mit 2 Elementen. Das erste ist eine Liste aller Titel von Calc-Fenstern,
-     *         wobei jeder Titel bereits mit {@link #stripOpenOfficeFromWindowName(String)}
-     *         bearbeitet wurde. Das zweite Element ist eine Liste von
-     *         XSpreadsheetDocuments, wobei jeder Eintrag zum Fenstertitel mit dem selben
-     *         Index in der ersten Liste gehört.
-     *         Im Fehlerfalle sind beide Listen leer.
+     * Liefert die Titel und zugehörigen XSpreadsheetDocuments aller offenen
+     * Calc-Fenster.
+     * 
+     * @return ein Objekt mit 2 Elementen. Das erste ist eine Liste aller Titel von
+     *         Calc-Fenstern, wobei jeder Titel bereits mit
+     *         {@link #stripOpenOfficeFromWindowName(String)} bearbeitet wurde. Das
+     *         zweite Element ist eine Liste von XSpreadsheetDocuments, wobei jeder
+     *         Eintrag zum Fenstertitel mit dem selben Index in der ersten Liste
+     *         gehört. Im Fehlerfalle sind beide Listen leer.
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     private OpenCalcWindows getOpenCalcWindows()
@@ -2001,20 +2148,23 @@ public class MailMergeNew
       OpenCalcWindows win = new OpenCalcWindows();
       win.titles = new Vector<String>();
       win.docs = new Vector<XSpreadsheetDocument>();
-      try{
+      try
+      {
         XSpreadsheetDocument spread = null;
         XEnumeration xenu = UNO.desktop.getComponents().createEnumeration();
-        while(xenu.hasMoreElements())
+        while (xenu.hasMoreElements())
         {
           spread = UNO.XSpreadsheetDocument(xenu.nextElement());
           if (spread != null)
           {
-            String title = (String)UNO.getProperty(UNO.XModel(spread).getCurrentController().getFrame(),"Title");
+            String title = (String) UNO.getProperty(
+              UNO.XModel(spread).getCurrentController().getFrame(), "Title");
             win.titles.add(stripOpenOfficeFromWindowName(title));
             win.docs.add(spread);
           }
         }
-      }catch(Exception x)
+      }
+      catch (Exception x)
       {
         Logger.error(x);
       }
@@ -2022,43 +2172,46 @@ public class MailMergeNew
     }
 
     /**
-     * Falls aktuell eine Calc-Tabelle als Datenquelle ausgewählt ist, so
-     * wird versucht, diese zurückzuliefern. Falls nötig wird die Datei
-     * anhand von {@link #calcUrl} neu geöffnet. Falls es aus irgendeinem
-     * Grund nicht möglich ist, diese zurückzuliefern, wird eine
-     * {@link de.muenchen.allg.itd51.wollmux.UnavailableException} geworfen.
-     * ACHTUNG! Das zurückgelieferte Objekt könnte bereits disposed sein!
+     * Falls aktuell eine Calc-Tabelle als Datenquelle ausgewählt ist, so wird
+     * versucht, diese zurückzuliefern. Falls nötig wird die Datei anhand von
+     * {@link #calcUrl} neu geöffnet. Falls es aus irgendeinem Grund nicht möglich
+     * ist, diese zurückzuliefern, wird eine
+     * {@link de.muenchen.allg.itd51.wollmux.UnavailableException} geworfen. ACHTUNG!
+     * Das zurückgelieferte Objekt könnte bereits disposed sein!
+     * 
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     private XSpreadsheetDocument getCalcDoc() throws UnavailableException
     {
-      if (sourceType != SOURCE_CALC) throw new UnavailableException(L.m("Keine Calc-Tabelle ausgewählt"));
+      if (sourceType != SOURCE_CALC)
+        throw new UnavailableException(L.m("Keine Calc-Tabelle ausgewählt"));
       if (calcDoc != null) return calcDoc;
       return getCalcDoc(calcUrl);
     }
-    
+
     /**
-     * Falls url bereits offen ist oder geöffnet werden kann und ein
-     * Tabellendokument ist, so wird der {@link #sourceType} auf 
-     * {@link #SOURCE_CALC} gestellt und die Calc-Tabelle als neue
-     * Datenquelle ausgewählt.
+     * Falls url bereits offen ist oder geöffnet werden kann und ein Tabellendokument
+     * ist, so wird der {@link #sourceType} auf {@link #SOURCE_CALC} gestellt und die
+     * Calc-Tabelle als neue Datenquelle ausgewählt.
+     * 
      * @return das Tabellendokument
-     * @throws UnavailableException falls ein Fehler auftritt oder die
-     *         url kein Tabellendokument beschreibt. 
-     * @author Matthias Benkmann (D-III-ITD 5.1)
-     * TESTED
+     * @throws UnavailableException
+     *           falls ein Fehler auftritt oder die url kein Tabellendokument
+     *           beschreibt.
+     * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
      */
     private XSpreadsheetDocument getCalcDoc(String url) throws UnavailableException
     {
       /**
-       * Falls schon ein offenes Fenster mit der entsprechenden URL
-       * existiert, liefere dieses zurück und setze {@link #calcDoc}.
+       * Falls schon ein offenes Fenster mit der entsprechenden URL existiert,
+       * liefere dieses zurück und setze {@link #calcDoc}.
        */
       XSpreadsheetDocument newCalcDoc = null;
-      try{
+      try
+      {
         XSpreadsheetDocument spread;
         XEnumeration xenu = UNO.desktop.getComponents().createEnumeration();
-        while(xenu.hasMoreElements())
+        while (xenu.hasMoreElements())
         {
           spread = UNO.XSpreadsheetDocument(xenu.nextElement());
           if (spread != null && url.equals(UNO.XModel(spread).getURL()))
@@ -2067,21 +2220,27 @@ public class MailMergeNew
             break;
           }
         }
-      }catch(Exception x)
+      }
+      catch (Exception x)
       {
         Logger.error(x);
       }
-      
+
       /**
        * Ansonsten versuchen wir das Dokument zu öffnen.
        */
       if (newCalcDoc == null)
       {
-        try{
-          Object ss = UNO.loadComponentFromURL(url, false, true); //FIXME: Dragndrop-Problem
+        try
+        {
+          Object ss = UNO.loadComponentFromURL(url, false, true); // FIXME:
+                                                                  // Dragndrop-Problem
           newCalcDoc = UNO.XSpreadsheetDocument(ss);
-          if (newCalcDoc == null) throw new UnavailableException(L.m("URL \"%1\" ist kein Tabellendokument", url));
-        }catch(Exception x) 
+          if (newCalcDoc == null)
+            throw new UnavailableException(L.m(
+              "URL \"%1\" ist kein Tabellendokument", url));
+        }
+        catch (Exception x)
         {
           throw new UnavailableException(x);
         }
@@ -2093,162 +2252,187 @@ public class MailMergeNew
 
     /**
      * Setzt newCalcDoc als Datenquelle für den Seriendruck.
+     * 
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     private void getCalcDoc(XSpreadsheetDocument newCalcDoc)
     {
-      try{
+      try
+      {
         calcUrl = UNO.XModel(newCalcDoc).getURL();
-      }catch(Exception x) //typischerweise DisposedException  
-      { 
+      }
+      catch (Exception x) // typischerweise DisposedException
+      {
         return;
       }
       if (calcUrl.length() == 0) calcUrl = null;
       sourceType = SOURCE_CALC;
-      removeListeners(calcDoc); //falls altes calcDoc vorhanden, dort deregistrieren.
+      removeListeners(calcDoc); // falls altes calcDoc vorhanden, dort
+                                // deregistrieren.
       calcDoc = newCalcDoc;
       setListeners(calcDoc);
       storeDatasourceSettings();
     }
-    
-    
+
     /**
-     * Liefert die Namen aller nicht-leeren Tabellenblätter der aktuell
-     * ausgewählten Datenquelle. Wenn keine Datenquelle ausgewählt ist, oder
-     * es keine nicht-leere Tabelle gibt, so wird eine leere Liste geliefert.
+     * Liefert die Namen aller nicht-leeren Tabellenblätter der aktuell ausgewählten
+     * Datenquelle. Wenn keine Datenquelle ausgewählt ist, oder es keine nicht-leere
+     * Tabelle gibt, so wird eine leere Liste geliefert.
+     * 
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     private List<String> getNamesOfNonEmptyTables()
     {
-      try{
-        switch(sourceType)
+      try
+      {
+        switch (sourceType)
         {
-          case SOURCE_CALC: return getNamesOfNonEmptyTables(getCalcDoc());
-          case SOURCE_DB: return getNamesOfNonEmptyDbTables();
-          default: return new Vector<String>();
+          case SOURCE_CALC:
+            return getNamesOfNonEmptyTables(getCalcDoc());
+          case SOURCE_DB:
+            return getNamesOfNonEmptyDbTables();
+          default:
+            return new Vector<String>();
         }
-      }catch(Exception x)
+      }
+      catch (Exception x)
       {
         Logger.error(x);
         return new Vector<String>();
       }
     }
 
-    
     /**
-     * Liefert die Namen aller Tabellen der aktuell
-     * ausgewählten Datenquelle. Wenn keine Datenquelle ausgewählt ist, oder
-     * es keine nicht-leere Tabelle gibt, so wird eine leere Liste geliefert.
+     * Liefert die Namen aller Tabellen der aktuell ausgewählten Datenquelle. Wenn
+     * keine Datenquelle ausgewählt ist, oder es keine nicht-leere Tabelle gibt, so
+     * wird eine leere Liste geliefert.
+     * 
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     private List<String> getTableNames()
     {
-      try{
-        switch(sourceType)
+      try
+      {
+        switch (sourceType)
         {
-          case SOURCE_CALC: return getTableNames(getCalcDoc());
-          case SOURCE_DB: return getDbTableNames();
-          default: return new Vector<String>();
+          case SOURCE_CALC:
+            return getTableNames(getCalcDoc());
+          case SOURCE_DB:
+            return getDbTableNames();
+          default:
+            return new Vector<String>();
         }
-      }catch(Exception x)
+      }
+      catch (Exception x)
       {
         Logger.error(x);
         return new Vector<String>();
       }
     }
-    
+
     /**
-     * Liefert die Namen aller Tabellen der aktuell
-     * ausgewählten OOo-Datenquelle. Wenn keine OOo-Datenquelle ausgewählt ist, oder
-     * es keine nicht-leere Tabelle gibt, so wird eine leere Liste geliefert.
+     * Liefert die Namen aller Tabellen der aktuell ausgewählten OOo-Datenquelle.
+     * Wenn keine OOo-Datenquelle ausgewählt ist, oder es keine nicht-leere Tabelle
+     * gibt, so wird eine leere Liste geliefert.
+     * 
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     private List<String> getDbTableNames()
     {
       return new Vector<String>();
     }
-    
+
     /**
-     * Liefert die Namen aller Tabellenblätter von calcDoc.
-     * Falls calcDoc == null, wird eine leere Liste geliefert.
+     * Liefert die Namen aller Tabellenblätter von calcDoc. Falls calcDoc == null,
+     * wird eine leere Liste geliefert.
+     * 
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     private List<String> getTableNames(XSpreadsheetDocument calcDoc)
     {
       List<String> nonEmptyTableNames = new Vector<String>();
-      if (calcDoc != null) 
-      try{
+      if (calcDoc != null) try
+      {
         XSpreadsheets sheets = calcDoc.getSheets();
         String[] tableNames = sheets.getElementNames();
         nonEmptyTableNames.addAll(Arrays.asList(tableNames));
-      }catch(Exception x)
+      }
+      catch (Exception x)
       {
         Logger.error(x);
       }
       return nonEmptyTableNames;
     }
-    
+
     /**
-     * Liefert die Namen aller nicht-leeren Tabellen der aktuell
-     * ausgewählten OOo-Datenquelle. Wenn keine OOo-Datenquelle ausgewählt ist, oder
-     * es keine nicht-leere Tabelle gibt, so wird eine leere Liste geliefert.
+     * Liefert die Namen aller nicht-leeren Tabellen der aktuell ausgewählten
+     * OOo-Datenquelle. Wenn keine OOo-Datenquelle ausgewählt ist, oder es keine
+     * nicht-leere Tabelle gibt, so wird eine leere Liste geliefert.
+     * 
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     private List<String> getNamesOfNonEmptyDbTables()
     {
       return new Vector<String>();
     }
-    
-    
+
     /**
-     * Liefert die Namen aller nicht-leeren Tabellenblätter von calcDoc.
-     * Falls calcDoc == null wird eine leere Liste geliefert.
-     * @author Matthias Benkmann (D-III-ITD 5.1)
-     * TESTED*/
+     * Liefert die Namen aller nicht-leeren Tabellenblätter von calcDoc. Falls
+     * calcDoc == null wird eine leere Liste geliefert.
+     * 
+     * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
+     */
     private List<String> getNamesOfNonEmptyTables(XSpreadsheetDocument calcDoc)
     {
       List<String> nonEmptyTableNames = new Vector<String>();
-      if (calcDoc != null) 
-      try{
-        XSpreadsheets sheets = calcDoc.getSheets();
-        String[] tableNames = sheets.getElementNames();
-        SortedSet<Integer> columns = new TreeSet<Integer>();
-        SortedSet<Integer> rows = new TreeSet<Integer>();
-        for (int i = 0; i < tableNames.length; ++i)
+      if (calcDoc != null)
+        try
         {
-          try{
-            XCellRangesQuery sheet = UNO.XCellRangesQuery(sheets.getByName(tableNames[i]));
-            columns.clear();
-            rows.clear();
-            getVisibleNonemptyRowsAndColumns(sheet, columns, rows);
-            if (columns.size() > 0 && rows.size() > 0)
-            {
-              nonEmptyTableNames.add(tableNames[i]);
-            }
-          }catch(Exception x)
+          XSpreadsheets sheets = calcDoc.getSheets();
+          String[] tableNames = sheets.getElementNames();
+          SortedSet<Integer> columns = new TreeSet<Integer>();
+          SortedSet<Integer> rows = new TreeSet<Integer>();
+          for (int i = 0; i < tableNames.length; ++i)
           {
-            Logger.error(x);
+            try
+            {
+              XCellRangesQuery sheet = UNO.XCellRangesQuery(sheets.getByName(tableNames[i]));
+              columns.clear();
+              rows.clear();
+              getVisibleNonemptyRowsAndColumns(sheet, columns, rows);
+              if (columns.size() > 0 && rows.size() > 0)
+              {
+                nonEmptyTableNames.add(tableNames[i]);
+              }
+            }
+            catch (Exception x)
+            {
+              Logger.error(x);
+            }
           }
         }
-      }catch(Exception x)
-      {
-        Logger.error(x);
-      }
+        catch (Exception x)
+        {
+          Logger.error(x);
+        }
       return nonEmptyTableNames;
     }
-    
+
     private class MyCalcListener implements XCloseListener, XEventListener
     {
 
-      public void queryClosing(EventObject arg0, boolean arg1) throws CloseVetoException
+      public void queryClosing(EventObject arg0, boolean arg1)
+          throws CloseVetoException
       {
       }
 
       public void notifyClosing(EventObject arg0)
       {
         Logger.debug(L.m("Calc-Datenquelle wurde unerwartet geschlossen"));
-        javax.swing.SwingUtilities.invokeLater(new Runnable() {
-          public void run() {
+        javax.swing.SwingUtilities.invokeLater(new Runnable()
+        {
+          public void run()
+          {
             calcDoc = null;
           }
         });
@@ -2257,21 +2441,27 @@ public class MailMergeNew
       public void disposing(EventObject arg0)
       {
         Logger.debug(L.m("Calc-Datenquelle wurde disposed()"));
-        javax.swing.SwingUtilities.invokeLater(new Runnable() {
-          public void run() {
+        javax.swing.SwingUtilities.invokeLater(new Runnable()
+        {
+          public void run()
+          {
             calcDoc = null;
           }
         });
       }
-    
+
       public void notifyEvent(com.sun.star.document.EventObject event)
-      {  
-        if (event.EventName.equals("OnSaveAsDone") && UnoRuntime.areSame(UNO.XInterface(event.Source), calcDoc))
+      {
+        if (event.EventName.equals("OnSaveAsDone")
+            && UnoRuntime.areSame(UNO.XInterface(event.Source), calcDoc))
         {
-          javax.swing.SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
+          javax.swing.SwingUtilities.invokeLater(new Runnable()
+          {
+            public void run()
+            {
               calcUrl = UNO.XModel(calcDoc).getURL();
-              Logger.debug(L.m("Speicherort der Tabelle hat sich geändert: \"%1\"", calcUrl));
+              Logger.debug(L.m("Speicherort der Tabelle hat sich geändert: \"%1\"",
+                calcUrl));
               storeDatasourceSettings();
             }
           });
@@ -2291,14 +2481,13 @@ public class MailMergeNew
       {
         if (UNO.XModel(calcDoc) != null)
         {
-          XTopWindow win = UNO.XTopWindow(UNO.XModel(calcDoc)
-              .getCurrentController().getFrame().getContainerWindow());
+          XTopWindow win = UNO.XTopWindow(UNO.XModel(calcDoc).getCurrentController().getFrame().getContainerWindow());
           win.toFront();
         }
       }
       // TODO: Behandlung der anderen Datenquellentypen
     }
-    
+
     /**
      * Gibt Ressourcen frei und deregistriert Listener.
      * 
@@ -2307,14 +2496,15 @@ public class MailMergeNew
     public void dispose()
     {
       removeListeners(calcDoc);
-    }    
+    }
   }
-  
+
   private static class QueryResultsWithSchema implements QueryResults
   {
     protected QueryResults results;
+
     protected Set<String> schema;
-    
+
     /**
      * Constructs an empty QueryResultsWithSchema.
      */
@@ -2323,10 +2513,12 @@ public class MailMergeNew
       results = new QueryResultsList(new ArrayList<Dataset>());
       schema = new HashSet<String>();
     }
-    
+
     /**
-     * Erzeugt ein neues QueryResultsWithSchema, das den Inhalt von res und das Schema
-     * schema zusammenfasst. ACHTUNG! res und schema werden als Referenzen übernommen.
+     * Erzeugt ein neues QueryResultsWithSchema, das den Inhalt von res und das
+     * Schema schema zusammenfasst. ACHTUNG! res und schema werden als Referenzen
+     * übernommen.
+     * 
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     public QueryResultsWithSchema(QueryResults res, Set<String> schema)
@@ -2349,11 +2541,14 @@ public class MailMergeNew
     {
       return results.isEmpty();
     }
-    
-    public Set<String> getSchema() { return new HashSet<String>(schema);}
-    
+
+    public Set<String> getSchema()
+    {
+      return new HashSet<String>(schema);
+    }
+
   }
-  
+
   private static class CalcCellQueryResults implements QueryResults
   {
     /**
@@ -2361,9 +2556,9 @@ public class MailMergeNew
      * String[]-Array ab.
      */
     private Map<String, Integer> mapColumnNameToIndex;
-   
+
     private List<Dataset> datasets = new ArrayList<Dataset>();
-    
+
     public int size()
     {
       return datasets.size();
@@ -2388,10 +2583,11 @@ public class MailMergeNew
     {
       datasets.add(new MyDataset(data));
     }
-    
+
     private class MyDataset implements Dataset
     {
       private String[] data;
+
       public MyDataset(String[] data)
       {
         this.data = data;
@@ -2400,7 +2596,9 @@ public class MailMergeNew
       public String get(String columnName) throws ColumnNotFoundException
       {
         Number idx = mapColumnNameToIndex.get(columnName);
-        if (idx == null) throw new ColumnNotFoundException(L.m("Spalte %1 existiert nicht!", columnName));
+        if (idx == null)
+          throw new ColumnNotFoundException(L.m("Spalte %1 existiert nicht!",
+            columnName));
         return data[idx.intValue()];
       }
 
@@ -2408,61 +2606,84 @@ public class MailMergeNew
       {
         return "key";
       }
-      
+
     }
-    
+
   }
-  
+
   private class MyWindowListener implements WindowListener
   {
-    public void windowOpened(WindowEvent e) {}
-    public void windowClosing(WindowEvent e) {abort(); }
-    public void windowClosed(WindowEvent e) {}
-    public void windowIconified(WindowEvent e) {}
-    public void windowDeiconified(WindowEvent e) {}
-    public void windowActivated(WindowEvent e) {}
-    public void windowDeactivated(WindowEvent e){}   
-    
+    public void windowOpened(WindowEvent e)
+    {
+    }
+
+    public void windowClosing(WindowEvent e)
+    {
+      abort();
+    }
+
+    public void windowClosed(WindowEvent e)
+    {
+    }
+
+    public void windowIconified(WindowEvent e)
+    {
+    }
+
+    public void windowDeiconified(WindowEvent e)
+    {
+    }
+
+    public void windowActivated(WindowEvent e)
+    {
+    }
+
+    public void windowDeactivated(WindowEvent e)
+    {
+    }
+
   }
-  
+
   private void abort()
   {
     mod.removeCoupledWindow(myFrame);
     /*
-     * Wegen folgendem Java Bug (WONTFIX) 
-     *   http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4259304
-     * sind die folgenden 3 Zeilen nötig, damit der MailMerge gc'ed werden
-     * kann. Die Befehle sorgen dafür, dass kein globales Objekt (wie z.B.
-     * der Keyboard-Fokus-Manager) indirekt über den JFrame den MailMerge kennt.  
+     * Wegen folgendem Java Bug (WONTFIX)
+     * http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4259304 sind die folgenden
+     * 3 Zeilen nötig, damit der MailMerge gc'ed werden kann. Die Befehle sorgen
+     * dafür, dass kein globales Objekt (wie z.B. der Keyboard-Fokus-Manager)
+     * indirekt über den JFrame den MailMerge kennt.
      */
     myFrame.removeWindowListener(oehrchen);
     myFrame.getContentPane().remove(0);
     myFrame.setJMenuBar(null);
-    
+
     myFrame.dispose();
     myFrame = null;
-    
+
     ds.dispose();
-    
+
     if (abortListener != null)
       abortListener.actionPerformed(new ActionEvent(this, 0, ""));
   }
- 
+
   public static void main(String[] args) throws Exception
   {
-     UNO.init();
-     Logger.init(Logger.ALL);
-     XTextDocument doc = UNO.XTextDocument(UNO.desktop.getCurrentComponent());
-     if (doc == null) 
-     {
-       System.err.println(L.m("Vordergrunddokument ist kein XTextDocument!"));
-       System.exit(1);
-     }
-     
-     MailMergeNew mm = new MailMergeNew(new TextDocumentModel(doc), null);
-     
-     while(mm.myFrame == null) Thread.sleep(1000);
-     while(mm.myFrame != null) Thread.sleep(1000);
-     System.exit(0);
+    UNO.init();
+    Logger.init(Logger.ALL);
+    XTextDocument doc = UNO.XTextDocument(UNO.desktop.getCurrentComponent());
+    if (doc == null)
+    {
+      System.err.println(L.m("Vordergrunddokument ist kein XTextDocument!"));
+      System.exit(1);
+    }
+
+    MailMergeNew mm = new MailMergeNew(new TextDocumentModel(doc), null);
+
+    while (mm.myFrame == null)
+      Thread.sleep(1000);
+    while (mm.myFrame != null)
+      Thread.sleep(1000);
+    System.exit(0);
   }
 }
