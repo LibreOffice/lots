@@ -86,8 +86,8 @@ import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.func.Values.SimpleMap;
 
 /**
- * Diese Klasse repräsentiert das Modell eines aktuell geöffneten TextDokuments
- * und ermöglicht den Zugriff auf alle interessanten Aspekte des TextDokuments.
+ * Diese Klasse repräsentiert das Modell eines aktuell geöffneten TextDokuments und
+ * ermöglicht den Zugriff auf alle interessanten Aspekte des TextDokuments.
  * 
  * @author christoph.lutz
  * 
@@ -107,8 +107,8 @@ public class TextDocumentModel
   public boolean printSettingsDone;
 
   /**
-   * Die dataId unter der die WollMux-Formularbeschreibung in
-   * {@link #persistentData} gespeichert wird.
+   * Die dataId unter der die WollMux-Formularbeschreibung in {@link #persistentData}
+   * gespeichert wird.
    */
   private static final String DATA_ID_FORMULARBESCHREIBUNG = "WollMuxFormularbeschreibung";
 
@@ -161,28 +161,27 @@ public class TextDocumentModel
   public static final String USER_FIELD_NAME_PREFIX = "WM(FUNCTION '";
 
   /**
-   * Ermöglicht den Zugriff auf eine Collection aller FormField-Objekte in
-   * diesem TextDokument über den Namen der zugeordneten ID. Die in dieser Map
-   * enthaltenen FormFields sind nicht in {@link #idToTextFieldFormFields}
-   * enthalten und umgekehrt.
+   * Ermöglicht den Zugriff auf eine Collection aller FormField-Objekte in diesem
+   * TextDokument über den Namen der zugeordneten ID. Die in dieser Map enthaltenen
+   * FormFields sind nicht in {@link #idToTextFieldFormFields} enthalten und
+   * umgekehrt.
    */
   private HashMap<String, List<FormField>> idToFormFields;
 
   /**
-   * Liefert zu einer ID eine {@link java.util.List} von FormField-Objekten, die
-   * alle zu Textfeldern ohne ein umschließendes WollMux-Bookmark gehören, aber
-   * trotzdem vom WollMux interpretiert werden. Die in dieser Map enthaltenen
-   * FormFields sind nicht in {@link #idToFormFields} enthalten und umgekehrt.
+   * Liefert zu einer ID eine {@link java.util.List} von FormField-Objekten, die alle
+   * zu Textfeldern ohne ein umschließendes WollMux-Bookmark gehören, aber trotzdem
+   * vom WollMux interpretiert werden. Die in dieser Map enthaltenen FormFields sind
+   * nicht in {@link #idToFormFields} enthalten und umgekehrt.
    */
   private HashMap<String, List<FormField>> idToTextFieldFormFields;
 
   /**
    * Enthält alle Textfelder ohne ein umschließendes WollMux-Bookmark, die vom
-   * WollMux interpretiert werden sollen, aber TRAFO-Funktionen verwenden, die
-   * nur einen feste Werte zurückliefern (d.h. keine Parameter erwarten) Die in
-   * dieser Map enthaltenen FormFields sind nicht in
-   * {@link #idToTextFieldFormFields} enthalten, da sie keine ID besitzen der
-   * sie zugeordnet werden können.
+   * WollMux interpretiert werden sollen, aber TRAFO-Funktionen verwenden, die nur
+   * einen feste Werte zurückliefern (d.h. keine Parameter erwarten) Die in dieser
+   * Map enthaltenen FormFields sind nicht in {@link #idToTextFieldFormFields}
+   * enthalten, da sie keine ID besitzen der sie zugeordnet werden können.
    */
   private List<FormField> staticTextFieldFormFields;
 
@@ -257,8 +256,8 @@ public class TextDocumentModel
 
   /**
    * Der Vorschaumodus ist standardmäßig immer gesetzt - ist dieser Modus nicht
-   * gesetzt, so werden in den Formularfeldern des Dokuments nur die Feldnamen
-   * in spitzen Klammern angezeigt.
+   * gesetzt, so werden in den Formularfeldern des Dokuments nur die Feldnamen in
+   * spitzen Klammern angezeigt.
    */
   private boolean formFieldPreviewMode;
 
@@ -269,50 +268,47 @@ public class TextDocumentModel
   private boolean partOfMultiform;
 
   /**
-   * Enthält ein ein Mapping von alten FRAG_IDs fragId auf die jeweils neuen
-   * FRAG_IDs newFragId, die über im Dokument enthaltene Dokumentkommando WM(CMD
+   * Enthält ein ein Mapping von alten FRAG_IDs fragId auf die jeweils neuen FRAG_IDs
+   * newFragId, die über im Dokument enthaltene Dokumentkommando WM(CMD
    * 'overrideFrag' FRAG_ID 'fragId' NEW_FRAG_ID 'newFragId') entstanden sind.
    */
-  private HashMap /* of String */<String, String>overrideFragMap;
+  private HashMap /* of String */<String, String> overrideFragMap;
 
   /**
-   * Enthält den Kontext für die Funktionsbibliotheken und Dialogbibliotheken
-   * dieses Dokuments.
+   * Enthält den Kontext für die Funktionsbibliotheken und Dialogbibliotheken dieses
+   * Dokuments.
    */
   private HashMap<Object, Object> functionContext;
 
   /**
    * Enthält die Dialogbibliothek mit den globalen und dokumentlokalen
-   * Dialogfunktionen oder null, wenn die Dialogbibliothek noch nicht benötigt
-   * wurde.
+   * Dialogfunktionen oder null, wenn die Dialogbibliothek noch nicht benötigt wurde.
    */
   private DialogLibrary dialogLib;
 
   /**
-   * Enthält die Funktionsbibliothek mit den globalen und dokumentlokalen
-   * Funktionen oder null, wenn die Funktionsbilbiothek noch nicht benötigt
-   * wurde.
+   * Enthält die Funktionsbibliothek mit den globalen und dokumentlokalen Funktionen
+   * oder null, wenn die Funktionsbilbiothek noch nicht benötigt wurde.
    */
   private FunctionLibrary functionLib;
 
   /**
-   * Enthält null oder ab dem ersten Aufruf von getMailmergeConf() die Metadaten
-   * für den Seriendruck in einem ConfigThingy, das derzeit in der Form
+   * Enthält null oder ab dem ersten Aufruf von getMailmergeConf() die Metadaten für
+   * den Seriendruck in einem ConfigThingy, das derzeit in der Form
    * "Seriendruck(Datenquelle(...))" aufgebaut ist.
    */
   private ConfigThingy mailmergeConf;
 
   /**
-   * Enthält den Controller, der an das Dokumentfenster dieses Dokuments
-   * angekoppelte Fenster überwacht und steuert.
+   * Enthält den Controller, der an das Dokumentfenster dieses Dokuments angekoppelte
+   * Fenster überwacht und steuert.
    */
   private CoupledWindowController coupledWindowController = null;
 
   /**
-   * Erzeugt ein neues TextDocumentModel zum XTextDocument doc und sollte nie
-   * direkt aufgerufen werden, da neue TextDocumentModels über das
-   * WollMuxSingleton (siehe WollMuxSingleton.getTextDocumentModel()) erzeugt
-   * und verwaltet werden.
+   * Erzeugt ein neues TextDocumentModel zum XTextDocument doc und sollte nie direkt
+   * aufgerufen werden, da neue TextDocumentModels über das WollMuxSingleton (siehe
+   * WollMuxSingleton.getTextDocumentModel()) erzeugt und verwaltet werden.
    * 
    * @param doc
    */
@@ -380,11 +376,11 @@ public class TextDocumentModel
   }
 
   /**
-   * Erzeugt einen Iterator über alle Sichtbarkeitselemente (Dokumentkommandos
-   * und Textbereiche mit dem Namenszusatz 'GROUPS ...'), die in diesem Dokument
+   * Erzeugt einen Iterator über alle Sichtbarkeitselemente (Dokumentkommandos und
+   * Textbereiche mit dem Namenszusatz 'GROUPS ...'), die in diesem Dokument
    * enthalten sind. Der Iterator liefert dabei zuerst alle Textbereiche (mit
-   * GROUPS-Erweiterung) und dann alle Dokumentkommandos des Kommandobaumes in
-   * der Reihenfolge, die DocumentCommandTree.depthFirstIterator(false) liefert.
+   * GROUPS-Erweiterung) und dann alle Dokumentkommandos des Kommandobaumes in der
+   * Reihenfolge, die DocumentCommandTree.depthFirstIterator(false) liefert.
    */
   synchronized public Iterator<VisibilityElement> visibleElementsIterator()
   {
@@ -395,10 +391,10 @@ public class TextDocumentModel
   }
 
   /**
-   * Diese Methode wertet den im Dokument enthaltenen PrintFunction-Abschnitt
-   * aus, der entweder im ConfigThingy-Format (siehe storePrintFunctions()) oder
-   * in dem legacy-Format vorliegen kann, in dem früher der Name genau einer
-   * Druckfunktion abgelegt war.
+   * Diese Methode wertet den im Dokument enthaltenen PrintFunction-Abschnitt aus,
+   * der entweder im ConfigThingy-Format (siehe storePrintFunctions()) oder in dem
+   * legacy-Format vorliegen kann, in dem früher der Name genau einer Druckfunktion
+   * abgelegt war.
    * 
    * @param data
    * 
@@ -458,17 +454,16 @@ public class TextDocumentModel
   }
 
   /**
-   * Parst den String value als ConfigThingy und überträgt alle in diesem
-   * enthaltenen Formular-Abschnitte in die übergebene Formularbeschreibung
-   * formularConf.
+   * Parst den String value als ConfigThingy und überträgt alle in diesem enthaltenen
+   * Formular-Abschnitte in die übergebene Formularbeschreibung formularConf.
    * 
    * @param formDesc
    *          Wurzelknoten WM einer Formularbeschreibung dem die neuen
    *          Formular-Abschnitte hinzugefügt werden soll.
    * @param value
-   *          darf null oder leer sein und wird in diesem Fall ignoriert; value
-   *          muss sich fehlerfrei als ConfigThingy parsen lassen, sonst gibt's
-   *          eine Fehlermeldung und es wird nichts hinzugefügt.
+   *          darf null oder leer sein und wird in diesem Fall ignoriert; value muss
+   *          sich fehlerfrei als ConfigThingy parsen lassen, sonst gibt's eine
+   *          Fehlermeldung und es wird nichts hinzugefügt.
    */
   private static void addToFormDescription(ConfigThingy formDesc, String value)
   {
@@ -495,12 +490,11 @@ public class TextDocumentModel
   }
 
   /**
-   * Wertet werteStr aus (das von der Form "WM(FormularWerte(...))" sein muss
-   * und überträgt die gefundenen Werte nach formFieldValues.
+   * Wertet werteStr aus (das von der Form "WM(FormularWerte(...))" sein muss und
+   * überträgt die gefundenen Werte nach formFieldValues.
    * 
    * @param werteStr
-   *          darf null sein (und wird dann ignoriert) aber nicht der leere
-   *          String.
+   *          darf null sein (und wird dann ignoriert) aber nicht der leere String.
    */
   private void parseFormValues(String werteStr)
   {
@@ -539,29 +533,30 @@ public class TextDocumentModel
 
   /**
    * Wird derzeit vom DocumentCommandInterpreter aufgerufen und gibt dem
-   * TextDocumentModel alle FormFields bekannt, die beim Durchlauf des
-   * FormScanners gefunden wurden.
+   * TextDocumentModel alle FormFields bekannt, die beim Durchlauf des FormScanners
+   * gefunden wurden.
    * 
    * @param idToFormFields
    */
-  synchronized public void setIDToFormFields(HashMap<String, List<FormFieldFactory.FormField>> idToFormFields)
+  synchronized public void setIDToFormFields(
+      HashMap<String, List<FormFieldFactory.FormField>> idToFormFields)
   {
     this.idToFormFields = idToFormFields;
   }
 
   /**
    * Diese Methode bestimmt die Vorbelegung der Formularfelder des Formulars und
-   * liefert eine HashMap zurück, die die id eines Formularfeldes auf den
-   * bestimmten Wert abbildet. Der Wert ist nur dann klar definiert, wenn alle
-   * FormFields zu einer ID unverändert geblieben sind, oder wenn nur
-   * untransformierte Felder vorhanden sind, die alle den selben Wert enthalten.
-   * Gibt es zu einer ID kein FormField-Objekt, so wird der zuletzt
-   * abgespeicherte Wert zu dieser ID aus dem FormDescriptor verwendet. Die
-   * Methode sollte erst aufgerufen werden, nachdem dem Model mit
-   * setIDToFormFields die verfügbaren Formularfelder bekanntgegeben wurden.
+   * liefert eine HashMap zurück, die die id eines Formularfeldes auf den bestimmten
+   * Wert abbildet. Der Wert ist nur dann klar definiert, wenn alle FormFields zu
+   * einer ID unverändert geblieben sind, oder wenn nur untransformierte Felder
+   * vorhanden sind, die alle den selben Wert enthalten. Gibt es zu einer ID kein
+   * FormField-Objekt, so wird der zuletzt abgespeicherte Wert zu dieser ID aus dem
+   * FormDescriptor verwendet. Die Methode sollte erst aufgerufen werden, nachdem dem
+   * Model mit setIDToFormFields die verfügbaren Formularfelder bekanntgegeben
+   * wurden.
    * 
-   * @return eine vollständige Zuordnung von Feld IDs zu den aktuellen
-   *         Vorbelegungen im Dokument. TESTED
+   * @return eine vollständige Zuordnung von Feld IDs zu den aktuellen Vorbelegungen
+   *         im Dokument. TESTED
    */
   synchronized public HashMap<String, String> getIDToPresetValue()
   {
@@ -688,9 +683,9 @@ public class TextDocumentModel
   }
 
   /**
-   * Sammelt alle Formularfelder des Dokuments auf, die nicht von
-   * WollMux-Kommandos umgeben sind, jedoch trotzdem vom WollMux verstanden und
-   * befüllt werden (derzeit c,s,s,t,textfield,Database-Felder und manche
+   * Sammelt alle Formularfelder des Dokuments auf, die nicht von WollMux-Kommandos
+   * umgeben sind, jedoch trotzdem vom WollMux verstanden und befüllt werden (derzeit
+   * c,s,s,t,textfield,Database-Felder und manche
    * c,s,s,t,textfield,InputUser-Felder).
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
@@ -769,8 +764,8 @@ public class TextDocumentModel
 
   /**
    * Der DocumentCommandInterpreter liest sich die Liste der setFragUrls()
-   * gespeicherten Fragment-URLs hier aus, wenn die Dokumentkommandos
-   * insertContent ausgeführt werden.
+   * gespeicherten Fragment-URLs hier aus, wenn die Dokumentkommandos insertContent
+   * ausgeführt werden.
    * 
    * @return
    */
@@ -780,8 +775,8 @@ public class TextDocumentModel
   }
 
   /**
-   * Über diese Methode kann der openDocument-Eventhandler die Liste der mit
-   * einem insertContent-Kommando zu öffnenden frag-urls speichern.
+   * Über diese Methode kann der openDocument-Eventhandler die Liste der mit einem
+   * insertContent-Kommando zu öffnenden frag-urls speichern.
    */
   synchronized public void setFragUrls(String[] fragUrls)
   {
@@ -801,8 +796,8 @@ public class TextDocumentModel
    * @author Christoph Lutz (D-III-ITD-5.1)
    * @throws OverrideFragChainException
    *           Wenn eine fragId oder newFragId bereits Ziel/Quelle einer anderen
-   *           Ersetzungsregel sind, dann entsteht eine Ersetzungskette, die
-   *           nicht zugelassen ist.
+   *           Ersetzungsregel sind, dann entsteht eine Ersetzungskette, die nicht
+   *           zugelassen ist.
    */
   synchronized public void setOverrideFrag(String fragId, String newFragId)
       throws OverrideFragChainException
@@ -836,9 +831,9 @@ public class TextDocumentModel
   }
 
   /**
-   * Liefert die neue FragId zurück, die anstelle der FRAG_ID fragId verwendet
-   * werden soll und durch ein WM(CMD 'overrideFrag'...)-Kommando gesetzt wurde,
-   * oder fragId (also sich selbst), wenn keine Überschreibung definiert ist.
+   * Liefert die neue FragId zurück, die anstelle der FRAG_ID fragId verwendet werden
+   * soll und durch ein WM(CMD 'overrideFrag'...)-Kommando gesetzt wurde, oder fragId
+   * (also sich selbst), wenn keine Überschreibung definiert ist.
    */
   synchronized public String getOverrideFrag(String fragId)
   {
@@ -893,11 +888,11 @@ public class TextDocumentModel
   }
 
   /**
-   * Liefert true, wenn das Dokument eine Vorlage ist oder wie eine Vorlage
-   * behandelt werden soll, ansonsten false.
+   * Liefert true, wenn das Dokument eine Vorlage ist oder wie eine Vorlage behandelt
+   * werden soll, ansonsten false.
    * 
-   * @return true, wenn das Dokument eine Vorlage ist oder wie eine Vorlage
-   *         behandelt werden soll, ansonsten false.
+   * @return true, wenn das Dokument eine Vorlage ist oder wie eine Vorlage behandelt
+   *         werden soll, ansonsten false.
    */
   synchronized public boolean isTemplate()
   {
@@ -917,16 +912,15 @@ public class TextDocumentModel
   }
 
   /**
-   * liefert true, wenn das Dokument eine URL besitzt, die die Quelle des
-   * Dokuments beschreibt und es sich damit um ein in OOo im "Bearbeiten"-Modus
-   * geöffnetes Dokument handelt oder false, wenn das Dokument keine URL besitzt
-   * und es sich damit um eine Vorlage handelt.
+   * liefert true, wenn das Dokument eine URL besitzt, die die Quelle des Dokuments
+   * beschreibt und es sich damit um ein in OOo im "Bearbeiten"-Modus geöffnetes
+   * Dokument handelt oder false, wenn das Dokument keine URL besitzt und es sich
+   * damit um eine Vorlage handelt.
    * 
-   * @return liefert true, wenn das Dokument eine URL besitzt, die die Quelle
-   *         des Dokuments beschreibt und es sich damit um ein in OOo im
+   * @return liefert true, wenn das Dokument eine URL besitzt, die die Quelle des
+   *         Dokuments beschreibt und es sich damit um ein in OOo im
    *         "Bearbeiten"-Modus geöffnetes Dokument handelt oder false, wenn das
-   *         Dokument keine URL besitzt und es sich damit um eine Vorlage
-   *         handelt.
+   *         Dokument keine URL besitzt und es sich damit um eine Vorlage handelt.
    */
   synchronized public boolean hasURL()
   {
@@ -936,8 +930,8 @@ public class TextDocumentModel
   /**
    * Liefert true, wenn das Dokument vom Typ formDocument ist ansonsten false.
    * ACHTUNG: Ein Dokument könnte theoretisch mit einem WM(CMD'setType'
-   * TYPE'formDocument') Kommandos als Formulardokument markiert seine, OHNE
-   * eine gültige Formularbeschreibung zu besitzen. Dies kann mit der Methode
+   * TYPE'formDocument') Kommandos als Formulardokument markiert seine, OHNE eine
+   * gültige Formularbeschreibung zu besitzen. Dies kann mit der Methode
    * hasFormDescriptor() geprüft werden.
    * 
    * @return Liefert true, wenn das Dokument vom Typ formDocument ist ansonsten
@@ -964,9 +958,8 @@ public class TextDocumentModel
   }
 
   /**
-   * Liefert true, wenn das Dokument eine nicht leere Formularbeschreibung mit
-   * einem Fenster-Abschnitt enthält. In diesem Fall soll das die FormGUI
-   * gestartet werden.
+   * Liefert true, wenn das Dokument eine nicht leere Formularbeschreibung mit einem
+   * Fenster-Abschnitt enthält. In diesem Fall soll das die FormGUI gestartet werden.
    */
   synchronized public boolean hasFormGUIWindow()
   {
@@ -993,11 +986,10 @@ public class TextDocumentModel
   }
 
   /**
-   * Wird vom {@link DocumentCommandInterpreter} beim Scannen der
-   * Dokumentkommandos aufgerufen wenn ein setType-Dokumentkommando bearbeitet
-   * werden muss und setzt den Typ des Dokuments NICHT PERSISTENT auf
-   * cmd.getType(), wenn nicht bereits ein type gesetzt ist. Ansonsten wird das
-   * Kommando ignoriert.
+   * Wird vom {@link DocumentCommandInterpreter} beim Scannen der Dokumentkommandos
+   * aufgerufen wenn ein setType-Dokumentkommando bearbeitet werden muss und setzt
+   * den Typ des Dokuments NICHT PERSISTENT auf cmd.getType(), wenn nicht bereits ein
+   * type gesetzt ist. Ansonsten wird das Kommando ignoriert.
    */
   synchronized public void setType(DocumentCommand.SetType cmd)
   {
@@ -1005,14 +997,14 @@ public class TextDocumentModel
   }
 
   /**
-   * Diese Methode fügt die Druckfunktion functionName der Menge der dem
-   * Dokument zugeordneten Druckfunktionen hinzu. FunctionName muss dabei ein
-   * gültiger Funktionsbezeichner sein.
+   * Diese Methode fügt die Druckfunktion functionName der Menge der dem Dokument
+   * zugeordneten Druckfunktionen hinzu. FunctionName muss dabei ein gültiger
+   * Funktionsbezeichner sein.
    * 
    * @param functionName
-   *          der Name der Druckfunktion, der ein gültiger Funktionsbezeichner
-   *          sein und in einem Abschnitt "Druckfunktionen" in der wollmux.conf
-   *          definiert sein muss.
+   *          der Name der Druckfunktion, der ein gültiger Funktionsbezeichner sein
+   *          und in einem Abschnitt "Druckfunktionen" in der wollmux.conf definiert
+   *          sein muss.
    */
   synchronized public void addPrintFunction(String functionName)
   {
@@ -1034,13 +1026,12 @@ public class TextDocumentModel
    * Löscht die Druckfunktion functionName aus der Menge der dem Dokument
    * zugeordneten Druckfunktionen.
    * 
-   * Wird z.B. in den Sachleitenden Verfügungen verwendet, um auf die
-   * ursprünglich gesetzte Druckfunktion zurück zu schalten, wenn keine
-   * Verfügungspunkte vorhanden sind.
+   * Wird z.B. in den Sachleitenden Verfügungen verwendet, um auf die ursprünglich
+   * gesetzte Druckfunktion zurück zu schalten, wenn keine Verfügungspunkte vorhanden
+   * sind.
    * 
    * @param functionName
-   *          der Name der Druckfunktion, die aus der Menge gelöscht werden
-   *          soll.
+   *          der Name der Druckfunktion, die aus der Menge gelöscht werden soll.
    */
   synchronized public void removePrintFunction(String functionName)
   {
@@ -1059,12 +1050,11 @@ public class TextDocumentModel
   }
 
   /**
-   * Schreibt den neuen Zustand der internen HashMap printFunctions in die
-   * persistent Data oder löscht den Datenblock, wenn keine Druckfunktion
-   * gesetzt ist. Die Druckfunktionen werden in ConfigThingy-Syntax abgelegt und
-   * haben den Aufbau WM(Druckfunktionen( ... (FUNCTION 'name' ARG 'arg') ...)).
-   * Das Argument ARG ist dabei optional und wird nur gesetzt, wenn ARG nicht
-   * leer ist.
+   * Schreibt den neuen Zustand der internen HashMap printFunctions in die persistent
+   * Data oder löscht den Datenblock, wenn keine Druckfunktion gesetzt ist. Die
+   * Druckfunktionen werden in ConfigThingy-Syntax abgelegt und haben den Aufbau
+   * WM(Druckfunktionen( ... (FUNCTION 'name' ARG 'arg') ...)). Das Argument ARG ist
+   * dabei optional und wird nur gesetzt, wenn ARG nicht leer ist.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
@@ -1116,9 +1106,9 @@ public class TextDocumentModel
   }
 
   /**
-   * Diese Methode setzt die Eigenschaften "Sichtbar" (visible) und die Anzeige
-   * der Hintergrundfarbe (showHighlightColor) für alle Druckblöcke eines
-   * bestimmten Blocktyps blockName (z.B. allVersions).
+   * Diese Methode setzt die Eigenschaften "Sichtbar" (visible) und die Anzeige der
+   * Hintergrundfarbe (showHighlightColor) für alle Druckblöcke eines bestimmten
+   * Blocktyps blockName (z.B. allVersions).
    * 
    * @param blockName
    *          Der Blocktyp dessen Druckblöcke behandelt werden sollen.
@@ -1126,9 +1116,9 @@ public class TextDocumentModel
    *          Der Block wird sichtbar, wenn visible==true und unsichtbar, wenn
    *          visible==false.
    * @param showHighlightColor
-   *          gibt an ob die Hintergrundfarbe angezeigt werden soll (gilt nur,
-   *          wenn zu einem betroffenen Druckblock auch eine Hintergrundfarbe
-   *          angegeben ist).
+   *          gibt an ob die Hintergrundfarbe angezeigt werden soll (gilt nur, wenn
+   *          zu einem betroffenen Druckblock auch eine Hintergrundfarbe angegeben
+   *          ist).
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
@@ -1178,9 +1168,8 @@ public class TextDocumentModel
    * Liefert einen Iterator zurück, der die Iteration aller
    * DraftOnly-Dokumentkommandos dieses Dokuments ermöglicht.
    * 
-   * @return ein Iterator, der die Iteration aller DraftOnly-Dokumentkommandos
-   *         dieses Dokuments ermöglicht. Der Iterator kann auch keine Elemente
-   *         enthalten.
+   * @return ein Iterator, der die Iteration aller DraftOnly-Dokumentkommandos dieses
+   *         Dokuments ermöglicht. Der Iterator kann auch keine Elemente enthalten.
    */
   synchronized public Iterator getDraftOnlyBlocksIterator()
   {
@@ -1188,12 +1177,11 @@ public class TextDocumentModel
   }
 
   /**
-   * Liefert einen Iterator zurück, der die Iteration aller
-   * All-Dokumentkommandos dieses Dokuments ermöglicht.
+   * Liefert einen Iterator zurück, der die Iteration aller All-Dokumentkommandos
+   * dieses Dokuments ermöglicht.
    * 
    * @return ein Iterator, der die Iteration aller All-Dokumentkommandos dieses
-   *         Dokuments ermöglicht. Der Iterator kann auch keine Elemente
-   *         enthalten.
+   *         Dokuments ermöglicht. Der Iterator kann auch keine Elemente enthalten.
    */
   synchronized public Iterator getAllVersionsBlocksIterator()
   {
@@ -1201,13 +1189,13 @@ public class TextDocumentModel
   }
 
   /**
-   * Liefert eine SetJumpMark zurück, der das erste
-   * setJumpMark-Dokumentkommandos dieses Dokuments enthält oder null falls kein
-   * solches Dokumentkommando vorhanden ist.
+   * Liefert eine SetJumpMark zurück, der das erste setJumpMark-Dokumentkommandos
+   * dieses Dokuments enthält oder null falls kein solches Dokumentkommando vorhanden
+   * ist.
    * 
    * @return Liefert eine SetJumpMark zurück, der das erste
-   *         setJumpMark-Dokumentkommandos dieses Dokuments enthält oder null
-   *         falls kein solches Dokumentkommando vorhanden ist.
+   *         setJumpMark-Dokumentkommandos dieses Dokuments enthält oder null falls
+   *         kein solches Dokumentkommando vorhanden ist.
    */
   synchronized public SetJumpMark getFirstJumpMark()
   {
@@ -1228,12 +1216,11 @@ public class TextDocumentModel
   }
 
   /**
-   * Liefert den ViewCursor des aktuellen Dokuments oder null, wenn kein
-   * Controller (oder auch kein ViewCursor) für das Dokument verfügbar ist.
+   * Liefert den ViewCursor des aktuellen Dokuments oder null, wenn kein Controller
+   * (oder auch kein ViewCursor) für das Dokument verfügbar ist.
    * 
    * @return Liefert den ViewCursor des aktuellen Dokuments oder null, wenn kein
-   *         Controller (oder auch kein ViewCursor) für das Dokument verfügbar
-   *         ist.
+   *         Controller (oder auch kein ViewCursor) für das Dokument verfügbar ist.
    */
   synchronized public XTextViewCursor getViewCursor()
   {
@@ -1245,8 +1232,7 @@ public class TextDocumentModel
 
   /**
    * Diese Methode liefert true, wenn der viewCursor im Dokument aktuell nicht
-   * kollabiert ist und damit einen markierten Bereich aufspannt, andernfalls
-   * false.
+   * kollabiert ist und damit einen markierten Bereich aufspannt, andernfalls false.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
@@ -1261,8 +1247,7 @@ public class TextDocumentModel
   }
 
   /**
-   * Entfernt alle Bookmarks, die keine WollMux-Bookmarks sind aus dem Dokument
-   * doc.
+   * Entfernt alle Bookmarks, die keine WollMux-Bookmarks sind aus dem Dokument doc.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -1292,8 +1277,8 @@ public class TextDocumentModel
 
   /**
    * Entfernt die WollMux-Kommandos "insertFormValue", "setGroups", "setType
-   * formDocument" und "form", sowie die WollMux-Formularbeschreibung und Daten
-   * aus dem Dokument doc.
+   * formDocument" und "form", sowie die WollMux-Formularbeschreibung und Daten aus
+   * dem Dokument doc.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
@@ -1326,9 +1311,9 @@ public class TextDocumentModel
 
   /**
    * Fügt an Stelle der aktuellen Selektion ein Serienbrieffeld ein, das auf die
-   * Spalte fieldId zugreift und mit dem Wert "" vorbelegt ist, falls noch kein
-   * Wert für fieldId gesetzt wurde. Das Serienbrieffeld wird im WollMux
-   * registriert und kann damit sofort verwendet werden.
+   * Spalte fieldId zugreift und mit dem Wert "" vorbelegt ist, falls noch kein Wert
+   * für fieldId gesetzt wurde. Das Serienbrieffeld wird im WollMux registriert und
+   * kann damit sofort verwendet werden.
    */
   synchronized public void insertMailMergeFieldAtCursorPosition(String fieldId)
   {
@@ -1337,9 +1322,9 @@ public class TextDocumentModel
 
   /**
    * Fügt an Stelle range ein Serienbrieffeld ein, das auf die Spalte fieldId
-   * zugreift und mit dem Wert "" vorbelegt ist, falls noch kein Wert für
-   * fieldId gesetzt wurde. Das Serienbrieffeld wird im WollMux registriert und
-   * kann damit sofort verwendet werden.
+   * zugreift und mit dem Wert "" vorbelegt ist, falls noch kein Wert für fieldId
+   * gesetzt wurde. Das Serienbrieffeld wird im WollMux registriert und kann damit
+   * sofort verwendet werden.
    */
   private void insertMailMergeField(String fieldId, XTextRange range)
   {
@@ -1381,8 +1366,8 @@ public class TextDocumentModel
 
   /**
    * Liefert die aktuelle Formularbeschreibung des Dokuments; Wurde die
-   * Formularbeschreibung bis jetzt noch nicht eingelesen, so wird sie
-   * spätestens jetzt eingelesen.
+   * Formularbeschreibung bis jetzt noch nicht eingelesen, so wird sie spätestens
+   * jetzt eingelesen.
    * 
    * @author Matthias Benkmann, Christoph Lutz (D-III-ITD 5.1)
    */
@@ -1401,10 +1386,10 @@ public class TextDocumentModel
 
   /**
    * Liefert den Seriendruck-Knoten der im Dokument gespeicherten
-   * Seriendruck-Metadaten zurück. Die Metadaten liegen im Dokument
-   * beispielsweise in der Form "WM(Seriendruck(Datenquelle(...)))" vor - diese
-   * Methode liefert aber nur der Knoten "Seriendruck" zurück. Enthält das
-   * Dokument keine Seriendruck-Metadaten, so liefert diese Methode einen leeren
+   * Seriendruck-Metadaten zurück. Die Metadaten liegen im Dokument beispielsweise in
+   * der Form "WM(Seriendruck(Datenquelle(...)))" vor - diese Methode liefert aber
+   * nur der Knoten "Seriendruck" zurück. Enthält das Dokument keine
+   * Seriendruck-Metadaten, so liefert diese Methode einen leeren
    * "Seriendruck"-Knoten zurück.
    * 
    * @author Christoph Lutz (D-III-ITD 5.1) TESTED
@@ -1429,12 +1414,12 @@ public class TextDocumentModel
   }
 
   /**
-   * Diese Methode speichert die als Kinder von conf übergebenen Metadaten für
-   * den Seriendruck persistent im Dokument oder löscht die Metadaten aus dem
-   * Dokument, wenn conf keine Kinder besitzt. conf kann dabei ein beliebig
-   * benannter Konten sein, dessen Kinder müssen aber gültige Schlüssel des
-   * Abschnitts WM(Seriendruck(...) darstellen. So ist z.B. "Datenquelle" ein
-   * gültiger Kindknoten von conf.
+   * Diese Methode speichert die als Kinder von conf übergebenen Metadaten für den
+   * Seriendruck persistent im Dokument oder löscht die Metadaten aus dem Dokument,
+   * wenn conf keine Kinder besitzt. conf kann dabei ein beliebig benannter Konten
+   * sein, dessen Kinder müssen aber gültige Schlüssel des Abschnitts
+   * WM(Seriendruck(...) darstellen. So ist z.B. "Datenquelle" ein gültiger
+   * Kindknoten von conf.
    * 
    * @param conf
    * 
@@ -1457,11 +1442,10 @@ public class TextDocumentModel
   }
 
   /**
-   * Liefert einen Funktionen-Abschnitt der Formularbeschreibung, in dem die
-   * lokalen Auto-Funktionen abgelegt werden können. Besitzt die
-   * Formularbeschreibung keinen Funktionen-Abschnitt, so wird der
-   * Funktionen-Abschnitt und ggf. auch ein übergeordneter Formular-Abschnitt
-   * neu erzeugt.
+   * Liefert einen Funktionen-Abschnitt der Formularbeschreibung, in dem die lokalen
+   * Auto-Funktionen abgelegt werden können. Besitzt die Formularbeschreibung keinen
+   * Funktionen-Abschnitt, so wird der Funktionen-Abschnitt und ggf. auch ein
+   * übergeordneter Formular-Abschnitt neu erzeugt.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
@@ -1492,9 +1476,9 @@ public class TextDocumentModel
 
   /**
    * Speichert die aktuelle Formularbeschreibung in den persistenten Daten des
-   * Dokuments oder löscht den entsprechenden Abschnitt aus den persistenten
-   * Daten, wenn die Formularbeschreibung nur aus einer leeren Struktur ohne
-   * eigentlichen Formularinhalt besteht.
+   * Dokuments oder löscht den entsprechenden Abschnitt aus den persistenten Daten,
+   * wenn die Formularbeschreibung nur aus einer leeren Struktur ohne eigentlichen
+   * Formularinhalt besteht.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
@@ -1518,13 +1502,13 @@ public class TextDocumentModel
   }
 
   /**
-   * Ersetzt die Formularbeschreibung dieses Dokuments durch die aus conf. Falls
-   * conf == null, so wird die Formularbeschreibung gelöscht. ACHTUNG! conf wird
-   * nicht kopiert sondern als Referenz eingebunden.
+   * Ersetzt die Formularbeschreibung dieses Dokuments durch die aus conf. Falls conf ==
+   * null, so wird die Formularbeschreibung gelöscht. ACHTUNG! conf wird nicht
+   * kopiert sondern als Referenz eingebunden.
    * 
    * @param conf
-   *          ein WM-Knoten, der "Formular"-Kinder hat. Falls conf == null, so
-   *          wird die Formularbeschreibungsnotiz gelöscht.
+   *          ein WM-Knoten, der "Formular"-Kinder hat. Falls conf == null, so wird
+   *          die Formularbeschreibungsnotiz gelöscht.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   synchronized public void setFormDescription(ConfigThingy conf)
@@ -1539,8 +1523,10 @@ public class TextDocumentModel
 
   /**
    * Speichert den neuen Wert value zum Formularfeld fieldId im
-   * Formularwerte-Abschnitt in den persistenten Daten oder löscht den Eintrag
-   * für fieldId aus den persistenten Daten, wenn value==null ist.
+   * Formularwerte-Abschnitt in den persistenten Daten oder löscht den Eintrag für
+   * fieldId aus den persistenten Daten, wenn value==null ist. ACHTUNG! Damit der
+   * neue Wert angezeigt wird, ist ein Aufruf von {@link #updateFormFields(String)}
+   * erforderlich.
    * 
    * @author Matthias Benkmann, Christoph Lutz (D-III-ITD 5.1)
    */
@@ -1584,8 +1570,8 @@ public class TextDocumentModel
   }
 
   /**
-   * Liefert den Kontext mit dem die dokumentlokalen Dokumentfunktionen beim
-   * Aufruf von getFunctionLibrary() und getDialogLibrary() erzeugt werden.
+   * Liefert den Kontext mit dem die dokumentlokalen Dokumentfunktionen beim Aufruf
+   * von getFunctionLibrary() und getDialogLibrary() erzeugt werden.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
@@ -1595,8 +1581,8 @@ public class TextDocumentModel
   }
 
   /**
-   * Liefert die Funktionsbibliothek mit den globalen Funktionen des WollMux und
-   * den lokalen Funktionen dieses Dokuments.
+   * Liefert die Funktionsbibliothek mit den globalen Funktionen des WollMux und den
+   * lokalen Funktionen dieses Dokuments.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
@@ -1619,8 +1605,8 @@ public class TextDocumentModel
   }
 
   /**
-   * Liefert die eine Bibliothek mit den globalen Dialogfunktionen des WollMux
-   * und den lokalen Dialogfunktionen dieses Dokuments.
+   * Liefert die eine Bibliothek mit den globalen Dialogfunktionen des WollMux und
+   * den lokalen Dialogfunktionen dieses Dokuments.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
@@ -1643,26 +1629,25 @@ public class TextDocumentModel
   }
 
   /**
-   * Erzeugt in der Funktionsbeschreibung eine neue Funktion mit einem
-   * automatisch generierten Namen, registriert sie in der Funktionsbibliothek,
-   * so dass diese sofort z.B. als TRAFO-Funktion genutzt werden kann und
-   * liefert den neuen generierten Funktionsnamen zurück oder null, wenn
-   * funcConf fehlerhaft ist.
+   * Erzeugt in der Funktionsbeschreibung eine neue Funktion mit einem automatisch
+   * generierten Namen, registriert sie in der Funktionsbibliothek, so dass diese
+   * sofort z.B. als TRAFO-Funktion genutzt werden kann und liefert den neuen
+   * generierten Funktionsnamen zurück oder null, wenn funcConf fehlerhaft ist.
    * 
    * Der automatisch generierte Name ist, nach dem Prinzip
-   * PRAEFIX_aktuelleZeitinMillisekunden_zahl aufgebaut. Es wird aber in jedem
-   * Fall garantiert, dass der neue Name eindeutig ist und nicht bereits in der
+   * PRAEFIX_aktuelleZeitinMillisekunden_zahl aufgebaut. Es wird aber in jedem Fall
+   * garantiert, dass der neue Name eindeutig ist und nicht bereits in der
    * Funktionsbibliothek vorkommt.
    * 
    * @param funcConf
-   *          Ein ConfigThingy mit dem Aufbau "Bezeichner( FUNKTIONSDEFINITION
-   *          )", wobei Bezeichner ein beliebiger Bezeichner ist und
-   *          FUNKTIONSDEFINITION ein erlaubter Parameter für
+   *          Ein ConfigThingy mit dem Aufbau "Bezeichner( FUNKTIONSDEFINITION )",
+   *          wobei Bezeichner ein beliebiger Bezeichner ist und FUNKTIONSDEFINITION
+   *          ein erlaubter Parameter für
    *          {@link de.muenchen.allg.itd51.wollmux.func.FunctionFactory#parse(ConfigThingy, FunctionLibrary, DialogLibrary, Map)},
-   *          d.h. der oberste Knoten von FUNKTIONSDEFINITION muss eine
-   *          erlaubter Funktionsname, z.B. "AND" sein. Der Bezeichner wird
-   *          NICHT als Name der TRAFO verwendet. Stattdessen wird ein neuer
-   *          eindeutiger TRAFO-Name generiert.
+   *          d.h. der oberste Knoten von FUNKTIONSDEFINITION muss eine erlaubter
+   *          Funktionsname, z.B. "AND" sein. Der Bezeichner wird NICHT als Name der
+   *          TRAFO verwendet. Stattdessen wird ein neuer eindeutiger TRAFO-Name
+   *          generiert.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
@@ -1703,11 +1688,11 @@ public class TextDocumentModel
   }
 
   /**
-   * Im Vorschaumodus überträgt diese Methode den Formularwert zum Feldes
-   * fieldId aus dem persistenten Formularwerte-Abschnitt in die zugehörigen
-   * Formularfelder im Dokument; Ist der Vorschaumodus nicht aktiv, so werden
-   * jeweils nur die Spaltennamen in spitzen Klammern angezeigt; Für die
-   * Auflösung der TRAFOs wird dabei die Funktionsbibliothek funcLib verwendet.
+   * Im Vorschaumodus überträgt diese Methode den Formularwert zum Feldes fieldId aus
+   * dem persistenten Formularwerte-Abschnitt in die zugehörigen Formularfelder im
+   * Dokument; Ist der Vorschaumodus nicht aktiv, so werden jeweils nur die
+   * Spaltennamen in spitzen Klammern angezeigt; Für die Auflösung der TRAFOs wird
+   * dabei die Funktionsbibliothek funcLib verwendet.
    * 
    * @param fieldId
    *          Die ID des Formularfeldes bzw. der Formularfelder, die im Dokument
@@ -1729,10 +1714,10 @@ public class TextDocumentModel
 
   /**
    * Im Vorschaumodus überträgt diese Methode alle Formularwerte aus dem
-   * Formularwerte-Abschnitt der persistenten Daten in die zugehörigen
-   * Formularfelder im Dokument, wobei evtl. gesetzte Trafo-Funktionen
-   * ausgeführt werden; Ist der Vorschaumodus nicht aktiv, so werden jeweils nur
-   * die Spaltennamen in spitzen Klammern angezeigt.
+   * Formularwerte-Abschnitt der persistenten Daten in die zugehörigen Formularfelder
+   * im Dokument, wobei evtl. gesetzte Trafo-Funktionen ausgeführt werden; Ist der
+   * Vorschaumodus nicht aktiv, so werden jeweils nur die Spaltennamen in spitzen
+   * Klammern angezeigt.
    */
   private void updateAllFormFields()
   {
@@ -1747,15 +1732,14 @@ public class TextDocumentModel
    * Setzt den Inhalt aller Formularfelder mit ID fieldId auf value.
    * 
    * @param applyTrafo
-   *          gibt an, ob eine evtl. vorhandene TRAFO-Funktion angewendet werden
-   *          soll (true) oder nicht (false).
+   *          gibt an, ob eine evtl. vorhandene TRAFO-Funktion angewendet werden soll
+   *          (true) oder nicht (false).
    * @author Matthias Benkmann, Christoph Lutz (D-III-ITD 5.1)
    */
   private void setFormFields(String fieldId, String value, boolean applyTrafo)
   {
     setFormFields(idToFormFields.get(fieldId), value, applyTrafo, false);
-    setFormFields(idToTextFieldFormFields.get(fieldId), value, applyTrafo,
-      true);
+    setFormFields(idToTextFieldFormFields.get(fieldId), value, applyTrafo, true);
     setFormFields(staticTextFieldFormFields, value, applyTrafo, true);
   }
 
@@ -1764,23 +1748,20 @@ public class TextDocumentModel
    * formFields kann null sein, dann passiert nichts.
    * 
    * @param funcLib
-   *          Funktionsbibliothek zum Berechnen von TRAFOs. funcLib darf null
-   *          sein, dann werden die Formularwerte in jedem Fall untransformiert
-   *          gesetzt.
+   *          Funktionsbibliothek zum Berechnen von TRAFOs. funcLib darf null sein,
+   *          dann werden die Formularwerte in jedem Fall untransformiert gesetzt.
    * @param applyTrafo
-   *          gibt an ob eine evtl. vorhandenen Trafofunktion verwendet werden
-   *          soll.
+   *          gibt an ob eine evtl. vorhandenen Trafofunktion verwendet werden soll.
    * @param useKnownFormValues
-   *          gibt an, ob die Trafofunktion mit den bekannten Formularwerten
-   *          (true) als Parameter, oder ob alle erwarteten Parameter mit dem
-   *          Wert value (false) versorgt werden - wird aus Gründen der
-   *          Abwärtskompatiblität zu den bisherigen insertFormValue-Kommandos
-   *          benötigt.
+   *          gibt an, ob die Trafofunktion mit den bekannten Formularwerten (true)
+   *          als Parameter, oder ob alle erwarteten Parameter mit dem Wert value
+   *          (false) versorgt werden - wird aus Gründen der Abwärtskompatiblität zu
+   *          den bisherigen insertFormValue-Kommandos benötigt.
    * 
    * @author Matthias Benkmann, Christoph Lutz (D-III-ITD 5.1)
    */
-  private void setFormFields(List<FormField> formFields, String value, boolean applyTrafo,
-      boolean useKnownFormValues)
+  private void setFormFields(List<FormField> formFields, String value,
+      boolean applyTrafo, boolean useKnownFormValues)
   {
     if (formFields == null) return;
     Iterator<FormField> fields = formFields.iterator();
@@ -1806,13 +1787,13 @@ public class TextDocumentModel
 
   /**
    * Schaltet den Vorschaumodus für Formularfelder an oder aus - ist der
-   * Vorschaumodus aktiviert, so werden alle Formularfelder mit den zuvor
-   * gesetzten Formularwerten angezeigt, ist der Preview-Modus nicht aktiv, so
-   * werden nur die Spaltennamen in spitzen Klammern angezeigt.
+   * Vorschaumodus aktiviert, so werden alle Formularfelder mit den zuvor gesetzten
+   * Formularwerten angezeigt, ist der Preview-Modus nicht aktiv, so werden nur die
+   * Spaltennamen in spitzen Klammern angezeigt.
    * 
    * @param previewMode
-   *          true schaltet den Modus an, false schaltet auf den Vorschaumodus
-   *          zurück in dem die aktuell gesetzten Werte wieder angezeigt werden.
+   *          true schaltet den Modus an, false schaltet auf den Vorschaumodus zurück
+   *          in dem die aktuell gesetzten Werte wieder angezeigt werden.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
@@ -1857,15 +1838,13 @@ public class TextDocumentModel
 
   /**
    * Wenn in der übergebenen {@link List} mit FormField-Elementen ein
-   * nicht-transformiertes Feld vorhanden ist, so wird das erste
-   * nicht-transformierte Feld zurückgegeben, ansonsten wird das erste
-   * transformierte Feld zurückgegeben, oder null, falls die Liste keine
-   * Elemente enthält bzw. null ist.
+   * nicht-transformiertes Feld vorhanden ist, so wird das erste nicht-transformierte
+   * Feld zurückgegeben, ansonsten wird das erste transformierte Feld zurückgegeben,
+   * oder null, falls die Liste keine Elemente enthält bzw. null ist.
    * 
    * @param formFields
    *          Liste mit FormField-Elementen
-   * @return Ein FormField Element, wobei untransformierte Felder bevorzugt
-   *         werden.
+   * @return Ein FormField Element, wobei untransformierte Felder bevorzugt werden.
    */
   protected static FormField preferUntransformedFormField(List<FormField> formFields)
   {
@@ -1888,10 +1867,9 @@ public class TextDocumentModel
    * Formularwerte als parameter übergeben wird, oder ob aus Gründen der
    * Abwärtskompatiblilität jeder durch die Trafofunktion gelesene Parameter den
    * selben Wert value übergeben bekommt. Ist trafoName==null, so wird value
-   * zurückgegeben. Ist die Transformationsionfunktion nicht in der globalen
-   * oder dokumentlokalen Funktionsbibliothek enthalten, so wird eine
-   * Fehlermeldung zurückgeliefert und eine weitere Fehlermeldung in die
-   * Log-Datei geschrieben.
+   * zurückgegeben. Ist die Transformationsionfunktion nicht in der globalen oder
+   * dokumentlokalen Funktionsbibliothek enthalten, so wird eine Fehlermeldung
+   * zurückgeliefert und eine weitere Fehlermeldung in die Log-Datei geschrieben.
    * 
    * @param value
    *          Der zu transformierende Wert.
@@ -1900,12 +1878,12 @@ public class TextDocumentModel
    * @param useKnownFormValues
    *          steuert, ob der Trafo die Menge aller bekannten Formularwerte als
    *          parameter übergeben wird, oder ob aus Gründen der
-   *          Abwärtskompatiblilität jeder durch die Trafofunktion gelesene
-   *          Parameter den selben Wert value übergeben bekommt.
-   * @return Der transformierte Wert falls das trafoName gesetzt ist und die
-   *         Trafo korrekt definiert ist. Ist trafoName==null, so wird value
-   *         unverändert zurückgeliefert. Ist die Funktion trafoName nicht
-   *         definiert, wird eine Fehlermeldung zurückgeliefert. TESTED
+   *          Abwärtskompatiblilität jeder durch die Trafofunktion gelesene Parameter
+   *          den selben Wert value übergeben bekommt.
+   * @return Der transformierte Wert falls das trafoName gesetzt ist und die Trafo
+   *         korrekt definiert ist. Ist trafoName==null, so wird value unverändert
+   *         zurückgeliefert. Ist die Funktion trafoName nicht definiert, wird eine
+   *         Fehlermeldung zurückgeliefert. TESTED
    */
   public String getTranformedValue(String value, String trafoName,
       boolean useKnownFormValues)
@@ -1939,8 +1917,8 @@ public class TextDocumentModel
 
   /**
    * Liefert die zu diesem Dokument zugehörige FormularGUI, falls dem
-   * TextDocumentModel die Existent einer FormGUI über setFormGUI(...)
-   * mitgeteilt wurde - andernfalls wird null zurück geliefert.
+   * TextDocumentModel die Existent einer FormGUI über setFormGUI(...) mitgeteilt
+   * wurde - andernfalls wird null zurück geliefert.
    * 
    * @return Die FormularGUI des Formulardokuments oder null
    */
@@ -1950,9 +1928,9 @@ public class TextDocumentModel
   }
 
   /**
-   * Gibt dem TextDocumentModel die Existent der FormularGUI formGUI bekannt und
-   * wird vom DocumentCommandInterpreter in der Methode processFormCommands()
-   * gestartet hat, falls das Dokument ein Formulardokument ist.
+   * Gibt dem TextDocumentModel die Existent der FormularGUI formGUI bekannt und wird
+   * vom DocumentCommandInterpreter in der Methode processFormCommands() gestartet
+   * hat, falls das Dokument ein Formulardokument ist.
    * 
    * @param formGUI
    *          Die zu diesem Dokument zugehörige formGUI
@@ -1981,11 +1959,11 @@ public class TextDocumentModel
   }
 
   /**
-   * Liefert die Gesamtseitenzahl des Dokuments oder 0, wenn die Seitenzahl
-   * nicht bestimmt werden kann.
+   * Liefert die Gesamtseitenzahl des Dokuments oder 0, wenn die Seitenzahl nicht
+   * bestimmt werden kann.
    * 
-   * @return Liefert die Gesamtseitenzahl des Dokuments oder 0, wenn die
-   *         Seitenzahl nicht bestimmt werden kann.
+   * @return Liefert die Gesamtseitenzahl des Dokuments oder 0, wenn die Seitenzahl
+   *         nicht bestimmt werden kann.
    */
   synchronized public int getPageCount()
   {
@@ -2016,8 +1994,8 @@ public class TextDocumentModel
   }
 
   /**
-   * Liefert true, wenn das Dokument als "modifiziert" markiert ist und damit
-   * z.B. die "Speichern?" Abfrage vor dem Schließen erscheint.
+   * Liefert true, wenn das Dokument als "modifiziert" markiert ist und damit z.B.
+   * die "Speichern?" Abfrage vor dem Schließen erscheint.
    * 
    * @param state
    */
@@ -2076,9 +2054,9 @@ public class TextDocumentModel
 
   /**
    * Setzt die Position des Fensters auf die übergebenen Koordinaten, wobei die
-   * Nachteile der UNO-Methode setWindowPosSize greifen, bei der die
-   * Fensterposition nicht mit dem äusseren Fensterrahmen beginnt, sondern mit
-   * der grauen Ecke links über dem File-Menü.
+   * Nachteile der UNO-Methode setWindowPosSize greifen, bei der die Fensterposition
+   * nicht mit dem äusseren Fensterrahmen beginnt, sondern mit der grauen Ecke links
+   * über dem File-Menü.
    * 
    * @param docX
    * @param docY
@@ -2099,10 +2077,10 @@ public class TextDocumentModel
   }
 
   /**
-   * Diese Methode setzt den ZoomTyp bzw. den ZoomValue der Dokumentenansicht
-   * des Dokuments auf den neuen Wert zoom, der entwender eine ganzzahliger
-   * Prozentwert (ohne "%"-Zeichen") oder einer der Werte "Optimal",
-   * "PageWidth", "PageWidthExact" oder "EntirePage" ist.
+   * Diese Methode setzt den ZoomTyp bzw. den ZoomValue der Dokumentenansicht des
+   * Dokuments auf den neuen Wert zoom, der entwender eine ganzzahliger Prozentwert
+   * (ohne "%"-Zeichen") oder einer der Werte "Optimal", "PageWidth",
+   * "PageWidthExact" oder "EntirePage" ist.
    * 
    * @param zoom
    * @throws ConfigurationErrorException
@@ -2157,11 +2135,11 @@ public class TextDocumentModel
   }
 
   /**
-   * Diese Methode liest die (optionalen) Attribute X, Y, WIDTH, HEIGHT und ZOOM
-   * aus dem übergebenen Konfigurations-Abschnitt settings und setzt die
-   * Fenstereinstellungen des Dokuments entsprechend um. Bei den Pärchen X/Y
-   * bzw. SIZE/WIDTH müssen jeweils beide Komponenten im Konfigurationsabschnitt
-   * angegeben sein.
+   * Diese Methode liest die (optionalen) Attribute X, Y, WIDTH, HEIGHT und ZOOM aus
+   * dem übergebenen Konfigurations-Abschnitt settings und setzt die
+   * Fenstereinstellungen des Dokuments entsprechend um. Bei den Pärchen X/Y bzw.
+   * SIZE/WIDTH müssen jeweils beide Komponenten im Konfigurationsabschnitt angegeben
+   * sein.
    * 
    * @param settings
    *          der Konfigurationsabschnitt, der X, Y, WIDHT, HEIGHT und ZOOM als
@@ -2222,11 +2200,10 @@ public class TextDocumentModel
   }
 
   /**
-   * Diese Methode setzt den ZoomTyp bzw. den ZoomValue der Dokumentenansicht
-   * des Dokuments auf den neuen Wert den das ConfigThingy conf im Knoten ZOOM
-   * angibt, der entwender eine ganzzahliger Prozentwert (ohne "%"-Zeichen")
-   * oder einer der Werte "Optimal", "PageWidth", "PageWidthExact" oder
-   * "EntirePage" ist.
+   * Diese Methode setzt den ZoomTyp bzw. den ZoomValue der Dokumentenansicht des
+   * Dokuments auf den neuen Wert den das ConfigThingy conf im Knoten ZOOM angibt,
+   * der entwender eine ganzzahliger Prozentwert (ohne "%"-Zeichen") oder einer der
+   * Werte "Optimal", "PageWidth", "PageWidthExact" oder "EntirePage" ist.
    * 
    * @param zoom
    * @throws ConfigurationErrorException
@@ -2248,17 +2225,17 @@ public class TextDocumentModel
   }
 
   /**
-   * Die Methode fügt die Formular-Abschnitte aus der Formularbeschreibung der
-   * Notiz von formCmd zur aktuellen Formularbeschreibung des Dokuments in den
-   * persistenten Daten hinzu und löscht die Notiz.
+   * Die Methode fügt die Formular-Abschnitte aus der Formularbeschreibung der Notiz
+   * von formCmd zur aktuellen Formularbeschreibung des Dokuments in den persistenten
+   * Daten hinzu und löscht die Notiz.
    * 
    * @param formCmd
-   *          Das formCmd, das die Notzi mit den hinzuzufügenden
-   *          Formular-Abschnitten einer Formularbeschreibung enthält.
+   *          Das formCmd, das die Notzi mit den hinzuzufügenden Formular-Abschnitten
+   *          einer Formularbeschreibung enthält.
    * @throws ConfigurationErrorException
    *           Die Notiz der Formularbeschreibung ist nicht vorhanden, die
-   *           Formularbeschreibung ist nicht vollständig oder kann nicht
-   *           geparst werden.
+   *           Formularbeschreibung ist nicht vollständig oder kann nicht geparst
+   *           werden.
    */
   synchronized public void addToCurrentFormDescription(DocumentCommand.Form formCmd)
       throws ConfigurationErrorException
@@ -2292,8 +2269,8 @@ public class TextDocumentModel
 
   /**
    * Druckt den über pageRangeType/pageRangeValue spezifizierten Bereich des
-   * Dokuments in der Anzahl numberOfCopies auf dem aktuell eingestellten
-   * Drucker aus.
+   * Dokuments in der Anzahl numberOfCopies auf dem aktuell eingestellten Drucker
+   * aus.
    * 
    * @param numberOfCopies
    *          Bestimmt die Anzahl der Kopien
@@ -2302,8 +2279,7 @@ public class TextDocumentModel
    *          PrintModels.PrintModelProps.PAGE_RANGE_TYPE_*.
    * @param pageRangeValue
    *          wird in Verbindung mit dem pageRangeType PAGE_RANGE_TYPE_MANUAL
-   *          zwingend benötigt und enthält den zu druckenden Bereich als
-   *          String.
+   *          zwingend benötigt und enthält den zu druckenden Bereich als String.
    * @throws PrintFailedException
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
@@ -2320,18 +2296,19 @@ public class TextDocumentModel
 
   /**
    * Druckt das Dokument auf dem aktuell eingestellten Drucker aus, wobei die in
-   * props übergebenen Properties CopyCount, Pages, PageRangeType und
-   * PageRangeValue ausgewertet werden, wenn sie vorhanden sind.
+   * props übergebenen Properties CopyCount, Pages, PageRangeType und PageRangeValue
+   * ausgewertet werden, wenn sie vorhanden sind.
    * 
    * @param props
    *          HashMap mit Properties aus
-   *          {@see de.muenchen.allg.itd51.wollmux.PrintModels.PrintModelProps},
-   *          die ausgewertet werden sollen.
+   *          {@see de.muenchen.allg.itd51.wollmux.PrintModels.PrintModelProps}, die
+   *          ausgewertet werden sollen.
    * @throws PrintFailedException
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  synchronized public void printWithProps(HashMap<String, Object> props) throws PrintFailedException
+  synchronized public void printWithProps(HashMap<String, Object> props)
+      throws PrintFailedException
   {
     try
     {
@@ -2460,9 +2437,8 @@ public class TextDocumentModel
   }
 
   /**
-   * Ruft die Dispose-Methoden von allen aktiven, dem TextDocumentModel
-   * zugeordneten Dialogen auf und gibt den Speicher des TextDocumentModels
-   * frei.
+   * Ruft die Dispose-Methoden von allen aktiven, dem TextDocumentModel zugeordneten
+   * Dialogen auf und gibt den Speicher des TextDocumentModels frei.
    */
   synchronized public void dispose()
   {
@@ -2480,9 +2456,9 @@ public class TextDocumentModel
   }
 
   /**
-   * Liefert den Titel des Dokuments, wie er im Fenster des Dokuments angezeigt
-   * wird, ohne den Zusatz " - OpenOffice.org Writer" oder "NoTitle", wenn der
-   * Titel nicht bestimmt werden kann. TextDocumentModel('<title>')
+   * Liefert den Titel des Dokuments, wie er im Fenster des Dokuments angezeigt wird,
+   * ohne den Zusatz " - OpenOffice.org Writer" oder "NoTitle", wenn der Titel nicht
+   * bestimmt werden kann. TextDocumentModel('<title>')
    */
   synchronized public String getTitle()
   {
@@ -2501,8 +2477,8 @@ public class TextDocumentModel
   }
 
   /**
-   * Liefert eine Stringrepräsentation des TextDocumentModels - Derzeit in der
-   * Form 'doc(<title>)'.
+   * Liefert eine Stringrepräsentation des TextDocumentModels - Derzeit in der Form
+   * 'doc(<title>)'.
    * 
    * @see java.lang.Object#toString()
    */
@@ -2512,10 +2488,10 @@ public class TextDocumentModel
   }
 
   /**
-   * Registriert genau einen XCloseListener in der Komponente des
-   * XTextDocuments, so dass beim Schließen des Dokuments die entsprechenden
-   * WollMuxEvents ausgeführt werden - ist in diesem TextDocumentModel bereits
-   * ein XCloseListener registriert, so wird nichts getan.
+   * Registriert genau einen XCloseListener in der Komponente des XTextDocuments, so
+   * dass beim Schließen des Dokuments die entsprechenden WollMuxEvents ausgeführt
+   * werden - ist in diesem TextDocumentModel bereits ein XCloseListener registriert,
+   * so wird nichts getan.
    */
   private void registerCloseListener()
   {
@@ -2543,14 +2519,14 @@ public class TextDocumentModel
   }
 
   /**
-   * Liefert ein neues zu diesem TextDocumentModel zugehörige XPrintModel für
-   * einen Druckvorgang; ist useDocumentPrintFunctions==true, so werden bereits
-   * alle im Dokument gesetzten Druckfunktionen per
+   * Liefert ein neues zu diesem TextDocumentModel zugehörige XPrintModel für einen
+   * Druckvorgang; ist useDocumentPrintFunctions==true, so werden bereits alle im
+   * Dokument gesetzten Druckfunktionen per
    * XPrintModel.usePrintFunctionWithArgument(...) hinzugeladen.
    * 
    * @param useDocPrintFunctions
-   *          steuert ob das PrintModel mit den im Dokument gesetzten
-   *          Druckfunktionen vorbelegt sein soll.
+   *          steuert ob das PrintModel mit den im Dokument gesetzten Druckfunktionen
+   *          vorbelegt sein soll.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
@@ -2570,8 +2546,8 @@ public class TextDocumentModel
 
   /**
    * Koppelt das AWT-Window window an das Fenster dieses Textdokuments an. Die
-   * Methode muss aufgerufen werden, solange das Fenster window unsichtbar und
-   * nicht aktiv ist (also z.B. vor dem Aufruf von window.setVisible(true)).
+   * Methode muss aufgerufen werden, solange das Fenster window unsichtbar und nicht
+   * aktiv ist (also z.B. vor dem Aufruf von window.setVisible(true)).
    * 
    * @param window
    *          das Fenster, das an das Hauptfenster angekoppelt werden soll.
@@ -2594,12 +2570,11 @@ public class TextDocumentModel
   }
 
   /**
-   * Löst die Bindung eines angekoppelten Fensters window an das
-   * Dokumentfenster.
+   * Löst die Bindung eines angekoppelten Fensters window an das Dokumentfenster.
    * 
    * @param window
-   *          das Fenster, dessen Bindung zum Hauptfenster gelöst werden soll.
-   *          Ist das Fenster nicht angekoppelt, dann passiert nichts.
+   *          das Fenster, dessen Bindung zum Hauptfenster gelöst werden soll. Ist
+   *          das Fenster nicht angekoppelt, dann passiert nichts.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
@@ -2621,20 +2596,20 @@ public class TextDocumentModel
   }
 
   /**
-   * Fügt ein neues Dokumentkommando mit dem Kommandostring cmdStr, der in der
-   * Form "WM(...)" erwartet wird, in das Dokument an der TextRange r ein. Dabei
-   * wird ein neues Bookmark erstellt und dieses als Dokumenkommando
-   * registriert. Dieses Bookmark wird genau über r gelegt, so dass abhängig vom
-   * Dokumentkommando der Inhalt der TextRange r durch eine eventuelle spätere
-   * Ausführung des Dokumentkommandos überschrieben wird. cmdStr muss nur das
-   * gewünschte Kommando enthalten ohne eine abschließende Zahl, die zur
-   * Herstellung eindeutiger Bookmarks benötigt wird - diese Zahl wird bei
-   * Bedarf automatisch an den Bookmarknamen angehängt.
+   * Fügt ein neues Dokumentkommando mit dem Kommandostring cmdStr, der in der Form
+   * "WM(...)" erwartet wird, in das Dokument an der TextRange r ein. Dabei wird ein
+   * neues Bookmark erstellt und dieses als Dokumenkommando registriert. Dieses
+   * Bookmark wird genau über r gelegt, so dass abhängig vom Dokumentkommando der
+   * Inhalt der TextRange r durch eine eventuelle spätere Ausführung des
+   * Dokumentkommandos überschrieben wird. cmdStr muss nur das gewünschte Kommando
+   * enthalten ohne eine abschließende Zahl, die zur Herstellung eindeutiger
+   * Bookmarks benötigt wird - diese Zahl wird bei Bedarf automatisch an den
+   * Bookmarknamen angehängt.
    * 
    * @param r
-   *          Die TextRange, an der das neue Bookmark mit diesem
-   *          Dokumentkommando eingefügt werden soll. r darf auch null sein und
-   *          wird in diesem Fall ignoriert.
+   *          Die TextRange, an der das neue Bookmark mit diesem Dokumentkommando
+   *          eingefügt werden soll. r darf auch null sein und wird in diesem Fall
+   *          ignoriert.
    * @param cmdStr
    *          Das Kommando als String der Form "WM(...)".
    * 
@@ -2646,18 +2621,18 @@ public class TextDocumentModel
   }
 
   /**
-   * Fügt an der Stelle r ein neues Textelement vom Typ
-   * css.text.TextField.InputUser ein, und verknüpft das Feld so, dass die Trafo
-   * trafo verwendet wird, um den angezeigten Feldwert zu berechnen.
+   * Fügt an der Stelle r ein neues Textelement vom Typ css.text.TextField.InputUser
+   * ein, und verknüpft das Feld so, dass die Trafo trafo verwendet wird, um den
+   * angezeigten Feldwert zu berechnen.
    * 
    * @param r
    *          die Textrange, an der das Feld eingefügt werden soll
    * @param trafoName
    *          der Name der zu verwendenden Trafofunktion
    * @param hint
-   *          Ein Hinweistext, der im Feld angezeigt werden soll, wenn man mit
-   *          der Maus drüber fährt - kann auch null sein, dann wird der Hint
-   *          nicht gesetzt.
+   *          Ein Hinweistext, der im Feld angezeigt werden soll, wenn man mit der
+   *          Maus drüber fährt - kann auch null sein, dann wird der Hint nicht
+   *          gesetzt.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
@@ -2696,8 +2671,8 @@ public class TextDocumentModel
    * AUTOFUNCTIONS übrig bleiben: AUTOFUNCTIONS-Definitionen aus der
    * Funktionsbibliothek, der Formularbeschreibung in den persistenten Daten und
    * nicht mehr benötigte TextFieldMaster von ehemaligen InputUser-Textfeldern -
-   * Durch die Aufräumaktion ändert sich der DocumentModified-Status des
-   * Dokuments nicht.
+   * Durch die Aufräumaktion ändert sich der DocumentModified-Status des Dokuments
+   * nicht.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1) TESTED
    */
@@ -2792,12 +2767,12 @@ public class TextDocumentModel
   }
 
   /**
-   * Diese Methode liefert den TextFieldMaster, der für Zugriffe auf das
-   * Benutzerfeld mit den Namen userFieldName zuständig ist.
+   * Diese Methode liefert den TextFieldMaster, der für Zugriffe auf das Benutzerfeld
+   * mit den Namen userFieldName zuständig ist.
    * 
    * @param userFieldName
-   * @return den TextFieldMaster oder null, wenn das Benutzerfeld userFieldName
-   *         nicht existiert.
+   * @return den TextFieldMaster oder null, wenn das Benutzerfeld userFieldName nicht
+   *         existiert.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
@@ -2820,15 +2795,15 @@ public class TextDocumentModel
   }
 
   /**
-   * Wenn das Benutzerfeld mit dem Namen userFieldName vom WollMux interpretiert
-   * wird (weil der Name in der Form "WM(FUNCTION '<name>')" aufgebaut ist),
-   * dann liefert diese Funktion den Namen <name> der Funktion zurück; in allen
-   * anderen Fällen liefert die Methode null zurück.
+   * Wenn das Benutzerfeld mit dem Namen userFieldName vom WollMux interpretiert wird
+   * (weil der Name in der Form "WM(FUNCTION '<name>')" aufgebaut ist), dann liefert
+   * diese Funktion den Namen <name> der Funktion zurück; in allen anderen Fällen
+   * liefert die Methode null zurück.
    * 
    * @param userFieldName
    *          Name des Benutzerfeldes
-   * @return den Namen der in diesem Benutzerfeld verwendeten Funktion oder
-   *         null, wenn das Benutzerfeld nicht vom WollMux interpretiert wird.
+   * @return den Namen der in diesem Benutzerfeld verwendeten Funktion oder null,
+   *         wenn das Benutzerfeld nicht vom WollMux interpretiert wird.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
@@ -2845,9 +2820,8 @@ public class TextDocumentModel
   /**
    * Wenn das als Kommandostring cmdStr übergebene Dokumentkommando (derzeit nur
    * insertFormValue) eine Trafofunktion gesetzt hat, so wird der Name dieser
-   * Funktion zurückgeliefert; Bildet cmdStr kein gültiges Dokumentkommando ab
-   * oder verwendet dieses Dokumentkommando keine Funktion, so wird null zurück
-   * geliefert.
+   * Funktion zurückgeliefert; Bildet cmdStr kein gültiges Dokumentkommando ab oder
+   * verwendet dieses Dokumentkommando keine Funktion, so wird null zurück geliefert.
    * 
    * @param cmdStr
    *          Ein Kommandostring eines Dokumentkommandos in der Form "WM(CMD '<command>'
@@ -2887,27 +2861,25 @@ public class TextDocumentModel
   }
 
   /**
-   * Ersetzt die aktuelle Selektion (falls vorhanden) durch ein
-   * WollMux-Formularfeld mit ID id, dem Hinweistext hint und der durch
-   * trafoConf definierten TRAFO. Das Formularfeld ist direkt einsetzbar, d.h.
-   * sobald diese Methode zurückkehrt, kann über setFormFieldValue(id,...) das
-   * Feld befüllt werden. Ist keine Selektion vorhanden, so tut die Funktion
-   * nichts.
+   * Ersetzt die aktuelle Selektion (falls vorhanden) durch ein WollMux-Formularfeld
+   * mit ID id, dem Hinweistext hint und der durch trafoConf definierten TRAFO. Das
+   * Formularfeld ist direkt einsetzbar, d.h. sobald diese Methode zurückkehrt, kann
+   * über setFormFieldValue(id,...) das Feld befüllt werden. Ist keine Selektion
+   * vorhanden, so tut die Funktion nichts.
    * 
    * @param trafoConf
    *          darf null sein, dann wird keine TRAFO gesetzt. Ansonsten ein
-   *          ConfigThingy mit dem Aufbau "Bezeichner( FUNKTIONSDEFINITION )",
-   *          wobei Bezeichner ein beliebiger Bezeichner ist und
-   *          FUNKTIONSDEFINITION ein erlaubter Parameter für
+   *          ConfigThingy mit dem Aufbau "Bezeichner( FUNKTIONSDEFINITION )", wobei
+   *          Bezeichner ein beliebiger Bezeichner ist und FUNKTIONSDEFINITION ein
+   *          erlaubter Parameter für
    *          {@link de.muenchen.allg.itd51.wollmux.func.FunctionFactory#parse(ConfigThingy, FunctionLibrary, DialogLibrary, Map)},
-   *          d.h. der oberste Knoten von FUNKTIONSDEFINITION muss eine
-   *          erlaubter Funktionsname, z.B. "AND" sein. Der Bezeichner wird
-   *          NICHT als Name der TRAFO verwendet. Stattdessen wird ein neuer
-   *          eindeutiger TRAFO-Name generiert.
+   *          d.h. der oberste Knoten von FUNKTIONSDEFINITION muss eine erlaubter
+   *          Funktionsname, z.B. "AND" sein. Der Bezeichner wird NICHT als Name der
+   *          TRAFO verwendet. Stattdessen wird ein neuer eindeutiger TRAFO-Name
+   *          generiert.
    * @param hint
    *          Ein Hinweistext der als Tooltip des neuen Formularfeldes angezeigt
-   *          werden soll. hint kann null sein, dann wird kein Hinweistext
-   *          angezeigt.
+   *          werden soll. hint kann null sein, dann wird kein Hinweistext angezeigt.
    * 
    * @author Matthias Benkmann, Christoph Lutz (D-III-ITD 5.1) TESTED
    */
@@ -2948,19 +2920,18 @@ public class TextDocumentModel
   }
 
   /**
-   * Falls die aktuelle Selektion genau ein Formularfeld enthält (die Selektion
-   * muss nicht bündig mit den Grenzen dieses Feldes sein, aber es darf kein
-   * zweites Formularfeld in der Selektion enthalten sein) und dieses eine TRAFO
-   * gesetzt hat, so wird die Definition dieser TRAFO als ConfigThingy
-   * zurückgeliefert, ansonsten null. Wird eine TRAFO gefunden, die in einem
-   * globalen Konfigurationsabschnitt definiert ist (also nicht dokumentlokal)
-   * und damit auch nicht verändert werden kann, so wird ebenfalls null zurück
-   * geliefert.
+   * Falls die aktuelle Selektion genau ein Formularfeld enthält (die Selektion muss
+   * nicht bündig mit den Grenzen dieses Feldes sein, aber es darf kein zweites
+   * Formularfeld in der Selektion enthalten sein) und dieses eine TRAFO gesetzt hat,
+   * so wird die Definition dieser TRAFO als ConfigThingy zurückgeliefert, ansonsten
+   * null. Wird eine TRAFO gefunden, die in einem globalen Konfigurationsabschnitt
+   * definiert ist (also nicht dokumentlokal) und damit auch nicht verändert werden
+   * kann, so wird ebenfalls null zurück geliefert.
    * 
    * @return null oder die Definition der TRAFO in der Form
-   *         "TrafoName(FUNKTIONSDEFINITION)", wobei TrafoName die Bezeichnung
-   *         ist, unter der die TRAFO mittels
-   *         {@link #setTrafo(String, ConfigThingy)} modifiziert werden kann.
+   *         "TrafoName(FUNKTIONSDEFINITION)", wobei TrafoName die Bezeichnung ist,
+   *         unter der die TRAFO mittels {@link #setTrafo(String, ConfigThingy)}
+   *         modifiziert werden kann.
    * @author Matthias Benkmann, Christoph Lutz (D-III-ITD 5.1) TESTED
    */
   synchronized public ConfigThingy getFormFieldTrafoFromSelection()
@@ -3011,8 +2982,8 @@ public class TextDocumentModel
 
   /**
    * Gibt die Namen aller in der XTextRange gefunden Trafos als Schlüssel einer
-   * HashMap zurück. Die zusätzlichen Integer-Werte in der HashMap geben an, ob
-   * (1) nur die Startmarke, (2) nur die Endemarke oder (3) ein vollständiges
+   * HashMap zurück. Die zusätzlichen Integer-Werte in der HashMap geben an, ob (1)
+   * nur die Startmarke, (2) nur die Endemarke oder (3) ein vollständiges
    * Bookmark/Feld gefunden wurde (Bei atomaren Feldern wird gleich 3 als Wert
    * gesetzt).
    * 
@@ -3021,7 +2992,8 @@ public class TextDocumentModel
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  private static HashMap<String, Integer> collectTrafosFromEnumeration(XTextRange textRange)
+  private static HashMap<String, Integer> collectTrafosFromEnumeration(
+      XTextRange textRange)
   {
     HashMap<String, Integer> collectedTrafos = new HashMap<String, Integer>();
 
@@ -3112,18 +3084,17 @@ public class TextDocumentModel
    * {@link #setFormFieldValue(String, String)} Aufrufe aus.
    * 
    * @param trafoConf
-   *          ein ConfigThingy mit dem Aufbau "Bezeichner( FUNKTIONSDEFINITION
-   *          )", wobei Bezeichner ein beliebiger Bezeichner ist und
-   *          FUNKTIONSDEFINITION ein erlaubter Parameter für
+   *          ein ConfigThingy mit dem Aufbau "Bezeichner( FUNKTIONSDEFINITION )",
+   *          wobei Bezeichner ein beliebiger Bezeichner ist und FUNKTIONSDEFINITION
+   *          ein erlaubter Parameter für
    *          {@link de.muenchen.allg.itd51.wollmux.func.FunctionFactory#parse(ConfigThingy, FunctionLibrary, DialogLibrary, Map)},
-   *          d.h. der oberste Knoten von FUNKTIONSDEFINITION muss eine
-   *          erlaubter Funktionsname, z.B. "AND" sein. Der Bezeichner wird
-   *          NICHT verwendet. Der Name der TRAFO wird ausschließlich durch
-   *          trafoName festgelegt.
+   *          d.h. der oberste Knoten von FUNKTIONSDEFINITION muss eine erlaubter
+   *          Funktionsname, z.B. "AND" sein. Der Bezeichner wird NICHT verwendet.
+   *          Der Name der TRAFO wird ausschließlich durch trafoName festgelegt.
    * @throws UnavailableException
-   *           wird geworfen, wenn die Trafo trafoName nicht schreibend
-   *           verändert werden kann, weil sie z.B. nicht existiert oder in
-   *           einer globalen Funktionsbeschreibung definiert ist.
+   *           wird geworfen, wenn die Trafo trafoName nicht schreibend verändert
+   *           werden kann, weil sie z.B. nicht existiert oder in einer globalen
+   *           Funktionsbeschreibung definiert ist.
    * @throws ConfigurationErrorException
    *           beim Parsen der Funktion trafoConf trat ein Fehler auf.
    * @author Matthias Benkmann, Christoph Lutz (D-III-ITD 5.1) TESTED
@@ -3180,15 +3151,14 @@ public class TextDocumentModel
   }
 
   /**
-   * Diese Methode liefert ein Array von FieldInfo-Objekten, das Informationen
-   * über FeldIDs enthält, die in der aktuellen Selektion (falls der ViewCursor
-   * eine Selektion aufspannt) oder im gesamten Dokument in
-   * insertFormValue-Kommandos, Serienbrieffelder, Benutzerfelder und evtl.
-   * gesetzten Trafos referenziert werden und nicht im Schema schema aufgeführt
-   * sind. Ist eine Selektion vorhanden, so ist die Liste in der Reihenfolge
-   * aufgebaut, in der die IDs im Dokument angesprochen werden. Ist keine
-   * Selektion vorhanden, so werden die Felder in alphabetisch sortierter
-   * Reihenfolge zurückgeliefert.
+   * Diese Methode liefert ein Array von FieldInfo-Objekten, das Informationen über
+   * FeldIDs enthält, die in der aktuellen Selektion (falls der ViewCursor eine
+   * Selektion aufspannt) oder im gesamten Dokument in insertFormValue-Kommandos,
+   * Serienbrieffelder, Benutzerfelder und evtl. gesetzten Trafos referenziert werden
+   * und nicht im Schema schema aufgeführt sind. Ist eine Selektion vorhanden, so ist
+   * die Liste in der Reihenfolge aufgebaut, in der die IDs im Dokument angesprochen
+   * werden. Ist keine Selektion vorhanden, so werden die Felder in alphabetisch
+   * sortierter Reihenfolge zurückgeliefert.
    * 
    * @return Eine Liste aller Referenzierten FeldIDs, des Dokuments oder der
    *         aktuellen Selektion, die nicht in schema enthalten sind.
@@ -3215,8 +3185,7 @@ public class TextDocumentModel
         String id = iter.next();
         if (schema.contains(id)) continue;
         List<FormField> fields = new ArrayList<FormField>();
-        if (idToFormFields.containsKey(id))
-          fields.addAll(idToFormFields.get(id));
+        if (idToFormFields.containsKey(id)) fields.addAll(idToFormFields.get(id));
         if (idToTextFieldFormFields.containsKey(id))
           fields.addAll(idToTextFieldFormFields.get(id));
         boolean hasTrafo = false;
@@ -3241,8 +3210,8 @@ public class TextDocumentModel
   }
 
   /**
-   * Enthält Informationen über die in der Selektion oder im gesamten Dokument
-   * in Feldern referenzierten FeldIDs.
+   * Enthält Informationen über die in der Selektion oder im gesamten Dokument in
+   * Feldern referenzierten FeldIDs.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
@@ -3282,47 +3251,45 @@ public class TextDocumentModel
   }
 
   /**
-   * Diese Methode ersetzt die Referenzen der ID fieldId im gesamten Dokument
-   * durch neue IDs, die in der Ersetzungsregel subst spezifiziert sind. Die
-   * Ersetzungsregel ist vom Typ FieldSubstitution und kann mehrere Elemente
-   * (fester Text oder Felder) enthalten, die an Stelle eines alten Feldes
-   * gesetzt werden sollen. Damit kann eine Ersetzungsregel auch dafür sorgen,
-   * dass aus einem früher atomaren Feld in Zukunft mehrere Felder entstehen.
-   * Folgender Abschnitt beschreibt, wie sich die Ersetzung auf verschiedene
-   * Elemente auswirkt.
+   * Diese Methode ersetzt die Referenzen der ID fieldId im gesamten Dokument durch
+   * neue IDs, die in der Ersetzungsregel subst spezifiziert sind. Die
+   * Ersetzungsregel ist vom Typ FieldSubstitution und kann mehrere Elemente (fester
+   * Text oder Felder) enthalten, die an Stelle eines alten Feldes gesetzt werden
+   * sollen. Damit kann eine Ersetzungsregel auch dafür sorgen, dass aus einem früher
+   * atomaren Feld in Zukunft mehrere Felder entstehen. Folgender Abschnitt
+   * beschreibt, wie sich die Ersetzung auf verschiedene Elemente auswirkt.
    * 
-   * 1) Ersetzungsregel "&lt;neueID&gt;" - Einfache Ersetzung mit genau einem
-   * neuen Serienbrieffeld (z.B. "&lt;Vorname&gt;"): bei
-   * insertFormValue-Kommandos wird WM(CMD'insertFormValue' ID '&lt;alteID&gt;'
-   * [TRAFO...]) ersetzt durch WM(CMD 'insertFormValue' ID '&lt;neueID&gt;'
-   * [TRAFO...]). Bei Serienbrieffeldern wird die ID ebenfalls direkt ersetzt
-   * durch &lt;neueID&gt;. Bei WollMux-Benutzerfeldern, die ja immer eine Trafo
-   * hinterlegt haben, wird jede vorkommende Funktion VALUE 'alteID' ersetzt
-   * durch VALUE 'neueID'.
+   * 1) Ersetzungsregel "&lt;neueID&gt;" - Einfache Ersetzung mit genau einem neuen
+   * Serienbrieffeld (z.B. "&lt;Vorname&gt;"): bei insertFormValue-Kommandos wird
+   * WM(CMD'insertFormValue' ID '&lt;alteID&gt;' [TRAFO...]) ersetzt durch WM(CMD
+   * 'insertFormValue' ID '&lt;neueID&gt;' [TRAFO...]). Bei Serienbrieffeldern wird
+   * die ID ebenfalls direkt ersetzt durch &lt;neueID&gt;. Bei
+   * WollMux-Benutzerfeldern, die ja immer eine Trafo hinterlegt haben, wird jede
+   * vorkommende Funktion VALUE 'alteID' ersetzt durch VALUE 'neueID'.
    * 
-   * 2) Ersetzungsregel "&lt;A&gt; &lt;B&gt;" - Kompexe Ersetzung mit mehreren
-   * neuen IDs und Text: Diese Ersetzung ist bei transformierten Feldern
-   * grundsätzlich nicht zugelassen. Ein bestehendes insertFormValue-Kommando
-   * ohne Trafo wird wie folgt manipuliert: anstelle des alten Bookmarks
-   * WM(CMD'insertFormValue' ID 'alteId') wird der entsprechende Freitext und
-   * entsprechende neue WM(CMD'insertFormValue' ID 'neueIDn') Bookmarks in den
-   * Text eingefügt. Ein Serienbrieffeld wird ersetzt durch entsprechende neue
-   * Serienbrieffelder, die durch den entsprechenden Freitext getrennt sind.
+   * 2) Ersetzungsregel "&lt;A&gt; &lt;B&gt;" - Kompexe Ersetzung mit mehreren neuen
+   * IDs und Text: Diese Ersetzung ist bei transformierten Feldern grundsätzlich
+   * nicht zugelassen. Ein bestehendes insertFormValue-Kommando ohne Trafo wird wie
+   * folgt manipuliert: anstelle des alten Bookmarks WM(CMD'insertFormValue' ID
+   * 'alteId') wird der entsprechende Freitext und entsprechende neue
+   * WM(CMD'insertFormValue' ID 'neueIDn') Bookmarks in den Text eingefügt. Ein
+   * Serienbrieffeld wird ersetzt durch entsprechende neue Serienbrieffelder, die
+   * durch den entsprechenden Freitext getrennt sind.
    * 
-   * 3) Leere Ersetzungsregel - in diesem Fall wird keine Ersetzung vorgenommen
-   * und die Methode kehrt sofort zurück.
+   * 3) Leere Ersetzungsregel - in diesem Fall wird keine Ersetzung vorgenommen und
+   * die Methode kehrt sofort zurück.
    * 
-   * In allen Fällen gilt, dass die Änderung nach Ausführung dieser Methode
-   * sofort aktiv sind und der Aufruf von setFormFieldValue(...) bzw.
-   * updateFormFields(...) mit den neuen IDs direkt in den veränderten Feldern
-   * Wirkung zeigt. Ebenso werden aus dem Formularwerte-Abschnitt in den
-   * persistenten Daten die alten Werte der ersetzten IDs gelöscht.
+   * In allen Fällen gilt, dass die Änderung nach Ausführung dieser Methode sofort
+   * aktiv sind und der Aufruf von setFormFieldValue(...) bzw. updateFormFields(...)
+   * mit den neuen IDs direkt in den veränderten Feldern Wirkung zeigt. Ebenso werden
+   * aus dem Formularwerte-Abschnitt in den persistenten Daten die alten Werte der
+   * ersetzten IDs gelöscht.
    * 
    * @param fieldId
    *          Feld, das mit Hilfe der Ersetzungsregel subst ersetzt werden soll.
    * @param subst
-   *          die Ersetzungsregel, die beschreibt, welche Inhalte an Stelle des
-   *          alten Feldes eingesetzt werden sollen.
+   *          die Ersetzungsregel, die beschreibt, welche Inhalte an Stelle des alten
+   *          Feldes eingesetzt werden sollen.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1) TESTED
    */
@@ -3471,11 +3438,10 @@ public class TextDocumentModel
 
   /**
    * Diese Methode ersetzt jedes Vorkommen von VALUE "oldFieldId" in der
-   * dokumentlokalen Trafo-Funktion trafoName durch VALUE "newFieldId",
-   * speichert die neue Formularbeschreibung persistent im Dokument ab und passt
-   * die aktuelle Funktionsbibliothek entsprechend an. Ist einer der Werte
-   * trafoName, oldFieldId oder newFieldId null, dann macht diese Methode
-   * nichts.
+   * dokumentlokalen Trafo-Funktion trafoName durch VALUE "newFieldId", speichert die
+   * neue Formularbeschreibung persistent im Dokument ab und passt die aktuelle
+   * Funktionsbibliothek entsprechend an. Ist einer der Werte trafoName, oldFieldId
+   * oder newFieldId null, dann macht diese Methode nichts.
    * 
    * @param trafoName
    *          Die Funktion, in der die Ersetzung vorgenommen werden soll.
@@ -3523,8 +3489,8 @@ public class TextDocumentModel
   }
 
   /**
-   * Durchsucht das ConfigThingy conf rekursiv und ersetzt alle VALUE-Knoten,
-   * die genau ein Kind besitzen durch VALUE-Knoten mit dem neuen Kind newId.
+   * Durchsucht das ConfigThingy conf rekursiv und ersetzt alle VALUE-Knoten, die
+   * genau ein Kind besitzen durch VALUE-Knoten mit dem neuen Kind newId.
    * 
    * @param conf
    *          Das ConfigThingy, in dem rekursiv ersetzt wird.
@@ -3558,10 +3524,10 @@ public class TextDocumentModel
   }
 
   /**
-   * Diese Klasse beschreibt die Ersetzung eines bestehendes Formularfeldes
-   * durch neue Felder oder konstante Textinhalte. Sie liefert einen Iterator,
-   * über den die einzelnen Elemente (Felder bzw. fester Text) vom Typ
-   * SubstElement iteriert werden können.
+   * Diese Klasse beschreibt die Ersetzung eines bestehendes Formularfeldes durch
+   * neue Felder oder konstante Textinhalte. Sie liefert einen Iterator, über den die
+   * einzelnen Elemente (Felder bzw. fester Text) vom Typ SubstElement iteriert
+   * werden können.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */

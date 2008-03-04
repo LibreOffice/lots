@@ -232,7 +232,7 @@ public class MailMergeNew
     button = new JButton(VORSCHAU);
     previewMode = false;
     mod.setFormFieldsPreviewMode(previewMode);
-    updatePreviewFields();
+
     final JButton previewButton = button;
     button.addActionListener(new ActionListener()
     {
@@ -258,19 +258,21 @@ public class MailMergeNew
     });
     hbox.add(DimAdjust.fixedSize(button));
 
-    // FIXME: Muss ausgegraut sein, wenn nicht im Vorschau-Modus.
+    // FIXME: Muss ausgegraut sein, wenn nicht im Vorschau-Modus oder wenn erster
+    // Datensatz angezeigt.
     button = new JButton("|<");
     button.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
       {
         previewDatasetNumber = 1;
-        // TODO updatePreviewFields();
+        updatePreviewFields();
       }
     });
     hbox.add(button);
 
-    // FIXME: Muss ausgegraut sein, wenn nicht im Vorschau-Modus.
+    // FIXME: Muss ausgegraut sein, wenn nicht im Vorschau-Modus oder wenn erster
+    // Datensatz angezeigt
     button = new JButton("<");
     button.addActionListener(new ActionListener()
     {
@@ -278,7 +280,7 @@ public class MailMergeNew
       {
         --previewDatasetNumber;
         if (previewDatasetNumber < 1) previewDatasetNumber = 1;
-        // TODO updatePreviewFields();
+        updatePreviewFields();
       }
     });
     hbox.add(button);
@@ -299,33 +301,35 @@ public class MailMergeNew
         {
           previewDatasetNumberTextfield.setText("" + previewDatasetNumber);
         }
-        // TODO updatePreviewFields();
+        updatePreviewFields();
       }
     });
     previewDatasetNumberTextfield.setMaximumSize(new Dimension(Integer.MAX_VALUE,
       button.getPreferredSize().height));
     hbox.add(previewDatasetNumberTextfield);
 
-    // FIXME: Muss ausgegraut sein, wenn nicht im Vorschau-Modus.
+    // FIXME: Muss ausgegraut sein, wenn nicht im Vorschau-Modus oder wenn letzter
+    // Datensatz angezeigt.
     button = new JButton(">");
     button.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
       {
         ++previewDatasetNumber;
-        // TODO updatePreviewFields();
+        updatePreviewFields();
       }
     });
     hbox.add(button);
 
-    // FIXME: Muss ausgegraut sein, wenn nicht im Vorschau-Modus.
+    // FIXME: Muss ausgegraut sein, wenn nicht im Vorschau-Modus oder wenn letzter
+    // Datensatz angezeigt.
     button = new JButton(">|");
     button.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
       {
         previewDatasetNumber = Integer.MAX_VALUE;
-        // TODO updatePreviewFields();
+        updatePreviewFields();
       }
     });
     hbox.add(button);
@@ -423,10 +427,46 @@ public class MailMergeNew
 
     if (!ds.hasDatasource()) ds.showDatasourceSelectionDialog(myFrame);
   }
-  
+
+  /**
+   * Passt {@link #previewDatasetNumber} an, falls sie zu groß oder zu klein ist und
+   * setzt dann falls {@link #previewMode} == true alle Feldwerte auf die Werte des
+   * entsprechenden Datensatzes.
+   * 
+   * @author Matthias Benkmann (D-III-ITD D.10) 
+   * 
+   * TESTED
+   */
   private void updatePreviewFields()
   {
-    if (!previewMode || !ds.hasDatasource()) return;
+    if (!ds.hasDatasource()) return;
+
+    int count = ds.getNumberOfDatasets();
+
+    if (previewDatasetNumber > count) previewDatasetNumber = count;
+    if (previewDatasetNumber <= 0) previewDatasetNumber = 1;
+
+    previewDatasetNumberTextfield.setText("" + previewDatasetNumber);
+
+    if (!previewMode) return;
+
+    List<String> schema = ds.getColumnNames();
+    List<String> data = ds.getValuesForDataset(previewDatasetNumber);
+
+    if (schema.size() != data.size())
+    {
+      Logger.error(L.m("Daten haben sich zwischen dem Auslesen von Schema und Werten verändert"));
+      return;
+    }
+
+    Iterator<String> dataIter = data.iterator();
+    for (String column : schema)
+    {
+      //FIXME: Ist das so richtig? Geht das effizienter?
+      mod.setFormFieldValue(column, dataIter.next());
+      mod.updateFormFields(column);
+    }
+
   }
 
   /**
@@ -1175,8 +1215,6 @@ public class MailMergeNew
       pmod.printWithProps();
     }
   }
-
-  
 
   private class MyWindowListener implements WindowListener
   {
