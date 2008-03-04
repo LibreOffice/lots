@@ -88,6 +88,20 @@ public class L
     // interpretiert
     return replace(m(original, insertion1), "%2", "" + insertion2);
   }
+  
+  public static String m(String original, Object insertion1, Object insertion2, Object insertion3)
+  {
+    // nicht replaceAll verwenden, weil es \ und $ besonders
+    // interpretiert
+    return replace(m(original, insertion1, insertion2), "%3", "" + insertion3);
+  }
+  
+  public static String m(String original, Object insertion1, Object insertion2, Object insertion3, Object insertion4)
+  {
+    // nicht replaceAll verwenden, weil es \ und $ besonders
+    // interpretiert
+    return replace(m(original, insertion1, insertion2, insertion3), "%4", "" + insertion4);
+  }
 
   /**
    * Ersetzt in where alle Vorkommen von what durch withWhat und liefert das

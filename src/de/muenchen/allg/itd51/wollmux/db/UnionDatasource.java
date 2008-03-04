@@ -1,4 +1,3 @@
-//TODO L.m()
 /* 
 * Dateiname: UnionDatasource.java
 * Projekt  : WollMux
@@ -32,6 +31,7 @@ import java.util.Vector;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
+import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.TimeoutException;
 
 /**
@@ -62,27 +62,27 @@ public class UnionDatasource implements Datasource
   {
     try{ name = sourceDesc.get("NAME").toString();} 
     catch(NodeNotFoundException x) {
-      throw new ConfigurationErrorException("NAME der Datenquelle fehlt");
+      throw new ConfigurationErrorException(L.m("NAME der Datenquelle fehlt"));
     }
     
     try{ source1Name = sourceDesc.get("SOURCE1").toString();} 
     catch(NodeNotFoundException x) {
-      throw new ConfigurationErrorException("SOURCE1 der Datenquelle "+name+" fehlt");
+      throw new ConfigurationErrorException(L.m("SOURCE1 der Datenquelle \"%1\" fehlt", name));
     }
     
     try{ source2Name = sourceDesc.get("SOURCE2").toString();} 
     catch(NodeNotFoundException x) {
-      throw new ConfigurationErrorException("SOURCE2 der Datenquelle "+name+" fehlt");
+      throw new ConfigurationErrorException(L.m("SOURCE2 der Datenquelle \"%1\" fehlt", name));
     }
     
     source1 = (Datasource)nameToDatasource.get(source1Name);  
     source2 = (Datasource)nameToDatasource.get(source2Name);
     
     if (source1 == null)
-      throw new ConfigurationErrorException("Fehler bei Initialisierung von Datenquelle \""+name+"\": Referenzierte Datenquelle \""+source1Name+"\" nicht (oder fehlerhaft) definiert");
+      throw new ConfigurationErrorException(L.m("Fehler bei Initialisierung von Datenquelle \"%1\": Referenzierte Datenquelle \"%2\" nicht (oder fehlerhaft) definiert", name, source1Name));
     
     if (source2 == null)
-      throw new ConfigurationErrorException("Fehler bei Initialisierung von Datenquelle \""+name+"\": Referenzierte Datenquelle \""+source2Name+"\" nicht (oder fehlerhaft) definiert");
+      throw new ConfigurationErrorException(L.m("Fehler bei Initialisierung von Datenquelle \"%1\": Referenzierte Datenquelle \"%2\" nicht (oder fehlerhaft) definiert", name, source2Name));
 
     /*
      * Anmerkung: Die folgende Bedingung ist "unnötig" streng, aber um
@@ -114,7 +114,7 @@ public class UnionDatasource implements Datasource
         buf2.append(iter.next());
         if (iter.hasNext()) buf2.append(", ");
       }
-      throw new ConfigurationErrorException("Datenquelle \""+source1Name+"\" fehlen die Spalten: "+buf2+" und Datenquelle \""+source2Name+"\" fehlen die Spalten: "+buf1);
+      throw new ConfigurationErrorException(L.m("Datenquelle \"%1\" fehlen die Spalten: %2 und Datenquelle \"%3\" fehlen die Spalten: %4", source1Name, buf2, source2Name, buf1));
     }
     
     schema = new HashSet<String>(schema1);
@@ -131,7 +131,7 @@ public class UnionDatasource implements Datasource
     QueryResults res1 = source1.getDatasetsByKey(keys, timeout);
     time = (new Date().getTime()) - time;
     timeout -= time;
-    if (timeout <= 0) throw new TimeoutException("Datenquelle "+source1Name+" konnte Anfrage getDatasetsByKey() nicht schnell genug beantworten");
+    if (timeout <= 0) throw new TimeoutException(L.m("Datenquelle \"%1\" konnte Anfrage getDatasetsByKey() nicht schnell genug beantworten", source1Name));
     QueryResults res2 = source2.getDatasetsByKey(keys, timeout);
     return new QueryResultsUnion(res1,res2);
   }
@@ -147,7 +147,7 @@ public class UnionDatasource implements Datasource
     QueryResults res1 = source1.find(query, timeout);
     time = (new Date().getTime()) - time;
     timeout -= time;
-    if (timeout <= 0) throw new TimeoutException("Datenquelle "+source1Name+" konnte Anfrage find() nicht schnell genug beantworten");
+    if (timeout <= 0) throw new TimeoutException(L.m("Datenquelle \"%1\" konnte Anfrage find() nicht schnell genug beantworten", source1Name));
     QueryResults res2 = source2.find(query, timeout);
     return new QueryResultsUnion(res1,res2);
   }
