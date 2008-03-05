@@ -84,9 +84,9 @@ public class GenderDialog extends TrafoDialog
     ConfigThingy conf = params.conf;
 
     /*
-     * Parsen von conf mit dem Aufbau Func(BIND(FUNCTION "Gender" SET("Anrede",
-     * VALUE "<anredeFieldId>") SET("Falls_Anrede_HerrN", "<textHerr>")
-     * SET("Falls_Anrede_Frau", "<textFrau>") SET("Falls_sonstige_Anrede", "<textSonst>")))
+     * Parsen von conf mit dem Aufbau Func(BIND(FUNCTION "Gender" SET("Anrede", VALUE "<anredeFieldId>")
+     * SET("Falls_Anrede_HerrN", "<textHerr>") SET("Falls_Anrede_Frau", "<textFrau>")
+     * SET("Falls_sonstige_Anrede", "<textSonst>")))
      */
     try
     {
@@ -181,7 +181,8 @@ public class GenderDialog extends TrafoDialog
     hbox.add(cbAnrede);
     vbox.add(hbox);
 
-    addText(vbox, L.m("(Kann z.B. 'Herr', 'weibl.', 'm', 'w' enthalten)") + "\n ");
+    addText(vbox, L.m("(Kann z.B. \"Herr\", \"weibl.\", \"m\", \"w\" enthalten)")
+                  + "\n ");
 
     hbox = Box.createHorizontalBox();
     label = new JLabel(L.m("Text weibl."));
@@ -224,13 +225,13 @@ public class GenderDialog extends TrafoDialog
 
     addText(
       vbox,
-      L.m("Der Text sonst. wird z.B. verwendet, um bei der Anrede\nvon Firma 'geehrte Damen und Herren' einzufügen."));
+      L.m("Der Text sonst. wird z.B. verwendet, um bei der Anrede\nvon Firmen \"geehrte Damen und Herren\" einzufügen."));
   }
 
   /**
-   * Fügt der JComponent compo abhängig vom Text ein oder mehrere H-Boxen mit
-   * dem Text text hinzu, wobei der Text an Zeilenumbrüchen umgebrochen und
-   * linksbündig dargestellt wird.
+   * Fügt der JComponent compo abhängig vom Text ein oder mehrere H-Boxen mit dem
+   * Text text hinzu, wobei der Text an Zeilenumbrüchen umgebrochen und linksbündig
+   * dargestellt wird.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
@@ -361,8 +362,8 @@ public class GenderDialog extends TrafoDialog
   }
 
   /**
-   * Der Windowlistener, der die Close-Action des "X"-Knopfs abfängt und den
-   * Dialog sauber mit abort beendet.
+   * Der Windowlistener, der die Close-Action des "X"-Knopfs abfängt und den Dialog
+   * sauber mit abort beendet.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
@@ -408,10 +409,10 @@ public class GenderDialog extends TrafoDialog
   {
     /*
      * Wegen folgendem Java Bug (WONTFIX)
-     * http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4259304 sind die
-     * folgenden 3 Zeilen nötig, damit der Dialog gc'ed werden kann. Die Befehle
-     * sorgen dafür, dass kein globales Objekt (wie z.B. der
-     * Keyboard-Fokus-Manager) indirekt über den JFrame den MailMerge kennt.
+     * http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4259304 sind die folgenden
+     * 3 Zeilen nötig, damit der Dialog gc'ed werden kann. Die Befehle sorgen dafür,
+     * dass kein globales Objekt (wie z.B. der Keyboard-Fokus-Manager) indirekt über
+     * den JFrame den MailMerge kennt.
      */
     if (myDialog != null)
     {
@@ -456,8 +457,8 @@ public class GenderDialog extends TrafoDialog
   }
 
   /**
-   * Erzeugt ein ConfigThingy mit dem Aufbau BIND(FUNCTION "Gender"
-   * SET("Anrede", VALUE "<anredeFieldId>") SET("Falls_Anrede_HerrN", "<textHerr>")
+   * Erzeugt ein ConfigThingy mit dem Aufbau BIND(FUNCTION "Gender" SET("Anrede",
+   * VALUE "<anredeFieldId>") SET("Falls_Anrede_HerrN", "<textHerr>")
    * SET("Falls_Anrede_Frau", "<textFrau>") SET("Falls_sonstige_Anrede", "<textSonst>"))
    * 
    * @param anredeId
