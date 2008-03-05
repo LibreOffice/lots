@@ -62,38 +62,21 @@ interface XPrintModel
     com::sun::star::text::XTextDocument getTextDocument();
 
     /**
-     * Deprecated: Bitte benutzen Sie statt dieser Methode die Methode
-     * printWithProps() mit dem entsprechend gesetzten Property "CopyCount".
-     * Diese Methode dient nur der Abwärtskompatibilität mit älteren
-     * XPrintModels und verwendet intern ebenfalls die Methode printWithProps()
-     * und der Property "CopyCount".
+     * Diese Methode ruft numberOfCopies mal printWithProps() auf.
      */
     void print( [in] short numberOfCopies);
 
     /**
-     * Druckt das TextDocument auf dem aktuell eingestellten Drucker aus oder
-     * leitet die Anfrage an die nächste verfügbare Druckfunktion in der
-     * Aufrufkette weiter, wenn eine weitere Druckfunktion vorhanden ist;
-     * Abhängig von der gesetzten Druckfunktion werden dabei verschiedene
-     * Properties, die über setPropertyValue(...) gesetzt wurden ausgewertet.
-     * Die Methode kehrt erst dann wieder zurück, wenn der gesamte Druckvorgang
-     * dieser und der darunterliegenden Druckfunktionen vollständig ausgeführt
-     * wurde.
+     * Druckt das TextDocument auf dem aktuell eingestellten Drucker aus oder leitet
+     * die Anfrage an die nächste verfügbare Druckfunktion in der Aufrufkette weiter,
+     * wenn eine weitere Druckfunktion vorhanden ist; Abhängig von der gesetzten
+     * Druckfunktion werden dabei verschiedene Properties, die über
+     * setPropertyValue(...) gesetzt wurden ausgewertet. Die Methode kehrt erst dann
+     * wieder zurück, wenn der gesamte Druckvorgang dieser und der darunterliegenden
+     * Druckfunktionen vollständig ausgeführt wurde.
      */
     void printWithProps();
 	
-    /**
-     * Zeigt den PrintSetupDialog an, über den der aktuelle Drucker ausgewählt
-     * und geändert werden kann.
-     * 
-     * @param onlyOnce
-     *          Gibt an, dass der Dialog nur beim ersten Aufruf (aus Sicht eines
-     *          Dokuments) der Methode angezeigt wird. Wurde bereits vor dem
-     *          Aufruf ein PrintSetup-Dialog gestartet, so öffnet sich der
-     *          Dialog nicht und die Methode endet ohne Aktion.
-     */
-    void showPrinterSetupDialog( [in] boolean onlyOnce);
-		
     /**
      * Falls es sich bei dem zugehörigen Dokument um ein Formulardokument (mit
      * einer Formularbeschreibung) handelt, wird das Formularfeld mit der ID id
@@ -179,7 +162,23 @@ interface XPrintModel
      *          false unsichtbar.
      */
 	void setGroupVisible([in] string groupID, [in] boolean visible);
-	
+
+    /**
+     * Liefert true, wenn der Druckvorgang aufgrund einer Benutzereingabe oder eines
+     * vorangegangenen Fehlers abgebrochen wurde (siehe cancel()) und sollte
+     * insbesonders von Druckfunktionen ausgewertet werden, die mehrmals
+     * printWithProps() aufrufen und dabei aufwendige Vor- und Nacharbeiten leisten
+     * müssen (die in diesem Fall sobald sinnvoll möglich eingestellt werden können).
+     */
+	boolean isCanceled();
+
+    /**
+     * Setzt das Flag isCanceled() auf true und sorgt dafür, dass künftige Aufrufe
+     * von printWithProps() sofort ohne Wirkung zurückkehren. Die Methode kann von
+     * jeder Druckfunktion aufgerufen werden wenn Fehler auftreten oder der
+     * Druckvorgang durch den Benutzer abgebrochen wurde.
+     */
+	void cancel();
 };
 
 }; }; }; }; };

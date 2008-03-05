@@ -1,4 +1,3 @@
-//TODO L.m()
 /*
  * Dateiname: PrintFunction.java
  * Projekt  : WollMux
@@ -40,11 +39,10 @@ public class PrintFunction implements Comparable
 
   /**
    * Erzeugt aus einem ConfigThingy (übergeben wird der EXTERN-Knoten) eine
-   * PrintFunction vom Namen functionName mit dem ORDER-Wert order. Die Werte
-   * order und functionName werden für korrekte Sortierung verschiedener
-   * Druckfuntionktionen und damit für die Bildung einer definierten Reihenfolge
-   * bei der Abarbeitung verschachtelter Druckfunktionen benätigt (siehe
-   * compareTo(...)).
+   * PrintFunction vom Namen functionName mit dem ORDER-Wert order. Die Werte order
+   * und functionName werden für korrekte Sortierung verschiedener
+   * Druckfuntionktionen und damit für die Bildung einer definierten Reihenfolge bei
+   * der Abarbeitung verschachtelter Druckfunktionen benätigt (siehe compareTo(...)).
    * 
    * @throws ConfigurationErrorException
    *           falls die Spezifikation in conf fehlerhaft ist.
@@ -72,35 +70,14 @@ public class PrintFunction implements Comparable
    * einem eigenen Thread) auf und liefert den Thread zurück.
    * 
    * @param pmod
-   *          das XPrintModel des aktuellen Vordergrunddokuments, das die
-   *          wichtigsten Druckkomandos bereitstellt, die die externe Funktion
-   *          verwenden kann.
+   *          das XPrintModel des aktuellen Vordergrunddokuments, das die wichtigsten
+   *          Druckkomandos bereitstellt, die die externe Funktion verwenden kann.
    * @throws Exception
    */
   public Thread invoke(XPrintModel pmod)
   {
-    return invoke(pmod, null);
-  }
-
-  /**
-   * Ruft die Funktion mit dem XPrintModel pmod als Parameter und dem
-   * Konfigurationsargument confArg (ein Objekt, das Argumente für diesen einen
-   * Druckvorgang enthält) asynchron (d,h, in einem eigenen Thread) auf und
-   * liefert den Thread zurück.
-   * 
-   * @param pmod
-   *          das XPrintModel des aktuellen Vordergrunddokuments, das die
-   *          wichtigsten Druckkomandos bereitstellt, die die externe Funktion
-   *          verwenden kann.
-   * @throws Exception
-   */
-  public Thread invoke(XPrintModel pmod, Object confArg)
-  {
     final Object[] args;
-    if (confArg != null)
-      args = new Object[] { pmod, confArg };
-    else
-      args = new Object[] { pmod };
+    args = new Object[] { pmod };
 
     Thread t = new Thread(new Runnable()
     {
@@ -121,15 +98,14 @@ public class PrintFunction implements Comparable
   }
 
   /**
-   * Vergleicht this mit otherPrintFunction und liefert -1 zurück, wenn this
-   * eine höhere Priorität besitzt als otherPrintFunction (und damit vor
-   * otherPrintFunction abgearbeitet werden soll) und 1, wenn otherPrintFunction
-   * eine höhere Priorität besitzt als this. Die Priorität ergibt sich dabei aus
-   * dem Attribut ORDER der PrintFunction und deren Namen. Ist die this.order
-   * kleiner als otherPrintFunction.order, so hat this die höhrer Priorität,
-   * sind beide order-Werte gleich, so wird der Name alphabetisch verglichen und
-   * ist this.order größer als otherPrintFunction.order, so hat
-   * otherPrintFunction hörere Priorität.
+   * Vergleicht this mit otherPrintFunction und liefert -1 zurück, wenn this eine
+   * höhere Priorität besitzt als otherPrintFunction (und damit vor
+   * otherPrintFunction abgearbeitet werden soll) und 1, wenn otherPrintFunction eine
+   * höhere Priorität besitzt als this. Die Priorität ergibt sich dabei aus dem
+   * Attribut ORDER der PrintFunction und deren Namen. Ist die this.order kleiner als
+   * otherPrintFunction.order, so hat this die höhrer Priorität, sind beide
+   * order-Werte gleich, so wird der Name alphabetisch verglichen und ist this.order
+   * größer als otherPrintFunction.order, so hat otherPrintFunction hörere Priorität.
    * 
    * @param otherPrintFunction
    *          Die PrintFunction mit der vergleichen werden soll.

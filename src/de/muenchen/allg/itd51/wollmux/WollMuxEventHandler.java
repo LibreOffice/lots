@@ -67,7 +67,6 @@ import com.sun.star.frame.XDispatch;
 import com.sun.star.frame.XDispatchResultListener;
 import com.sun.star.frame.XFrame;
 import com.sun.star.frame.XFrames;
-import com.sun.star.frame.XNotifyingDispatch;
 import com.sun.star.lang.EventObject;
 import com.sun.star.lang.XComponent;
 import com.sun.star.text.XTextContent;
@@ -85,7 +84,6 @@ import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.FormModelImpl.InvalidFormDescriptorException;
-import de.muenchen.allg.itd51.wollmux.TextDocumentModel.PrintFailedException;
 import de.muenchen.allg.itd51.wollmux.WollMuxSingleton.InvalidIdentifierException;
 import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.DJDataset;
@@ -2759,66 +2757,6 @@ public class WollMuxEventHandler
   // *******************************************************************************************
 
   /**
-   * Erzeugt ein neues WollMuxEvent, das signasisiert, dass das Dokument doc mit
-   * den Argumenten props ausgedruckt werden soll. Nach Beendigung des Events
-   * soll der CallBack des übergebenen ActionsListeners aufgerufen werden.
-   * 
-   * Das Event dient als Hilfe für die Komfortdruckfunktionen und wird vom
-   * XPrintModel aufgerufen und mit diesem synchronisiert.
-   * 
-   * @param props
-   *          HashMap mit Properties aus
-   *          {@see de.muenchen.allg.itd51.wollmux.PrintModels.PrintModelProps},
-   *          die ausgewertet werden sollen.
-   */
-  public static void handlePrintViaPrintModel(XTextDocument doc,
-      HashMap<String, Object> props, ActionListener listener)
-  {
-    handle(new OnPrintViaPrintModel(doc, props, listener));
-  }
-
-  private static class OnPrintViaPrintModel extends BasicEvent
-  {
-    private XTextDocument doc;
-
-    private HashMap<String, Object> props;
-
-    private ActionListener listener;
-
-    public OnPrintViaPrintModel(XTextDocument doc, HashMap<String, Object> props,
-        ActionListener listener)
-    {
-      this.doc = doc;
-      this.props = props;
-      this.listener = listener;
-    }
-
-    protected void doit() throws WollMuxFehlerException
-    {
-      TextDocumentModel model = WollMuxSingleton.getInstance().getTextDocumentModel(
-        doc);
-      try
-      {
-        model.printWithProps(props);
-      }
-      catch (PrintFailedException e)
-      {
-        errorMessage(e);
-      }
-
-      stabilize();
-      if (listener != null) listener.actionPerformed(null);
-    }
-
-    public String toString()
-    {
-      return this.getClass().getSimpleName() + "(#" + doc.hashCode() + ")";
-    }
-  }
-
-  // *******************************************************************************************
-
-  /**
    * Diese Methode erzeugt ein neues WollMuxEvent, mit dem die Eigenschaften der
    * Druckblöcke (z.B. allVersions) gesetzt werden können.
    * 
@@ -3338,101 +3276,6 @@ public class WollMuxEventHandler
     public String toString()
     {
       return this.getClass().getSimpleName() + "()";
-    }
-  }
-
-  // *******************************************************************************************
-
-  /**
-   * Erzeugt ein neues WollMuxEvent, das dafür sorgt, dass der PrintSetupDialog
-   * von OOo angezeigt wird, über den der aktuelle Drucker ausgewählt und
-   * geändert werden kann.
-   * 
-   * Das Event wird aus der Implementierung von XPrintModel (siehe
-   * TextDocumentModel) geworfen, wenn die gleichnamige Methode dort aufgerufen
-   * wird.
-   * 
-   * @param doc
-   *          Das Dokument für das die Druckereinstellung gelten sollen.
-   * @param onlyOnce
-   *          Gibt an, dass der Dialog nur beim ersten Aufruf (aus Sicht eines
-   *          Dokuments) der Methode angezeigt wird. Wurde bereits vor dem
-   *          Aufruf ein PrintSetup-Dialog gestartet, so öffnet sich der Dialog
-   *          nicht und die Methode endet ohne Aktion.
-   * @param unlockActionListener
-   *          Der unlockActionListener wird immer aufgerufen, wenn sich doit()
-   *          fertig ist.
-   */
-  public static void handleShowPrinterSetupDialog(XTextDocument doc,
-      boolean onlyOnce, ActionListener unlockActionListener)
-  {
-    handle(new OnShowPrinterSetup(doc, onlyOnce, unlockActionListener));
-  }
-
-  private static class OnShowPrinterSetup extends BasicEvent
-  {
-    private XTextDocument doc;
-
-    private boolean onlyOnce;
-
-    private ActionListener listener;
-
-    public OnShowPrinterSetup(XTextDocument doc, boolean onlyOnce,
-        ActionListener listener)
-    {
-      this.doc = doc;
-      this.onlyOnce = onlyOnce;
-      this.listener = listener;
-    }
-
-    protected void doit() throws WollMuxFehlerException
-    {
-      TextDocumentModel model = WollMuxSingleton.getInstance().getTextDocumentModel(
-        doc);
-
-      // dialog nicht anzeigen, wenn er bereits einmal angezeigt wurde und
-      // onlyOnce gesetzt ist.
-      if (model.printSettingsDone && onlyOnce)
-      {
-        if (listener != null) listener.actionPerformed(null);
-        return;
-      }
-
-      // Dialog anzeigen:
-      try
-      {
-        com.sun.star.util.URL url = UNO.getParsedUNOUrl(DispatchHandler.DISP_unoPrinterSetup);
-        XNotifyingDispatch disp = UNO.XNotifyingDispatch(WollMuxSingleton.getDispatchForModel(
-          UNO.XModel(doc), url));
-
-        if (disp != null)
-        {
-          setLock();
-          disp.dispatchWithNotification(url, new PropertyValue[] {},
-            unlockDispatchResultListener);
-          waitForUnlock();
-        }
-      }
-      catch (java.lang.Exception e)
-      {
-        Logger.error(e);
-      }
-
-      // Leider gibt der Dialog keine verwertbare Statusinformation zurück, die
-      // beschreibt ob der Dialog mit "Abbrechen" oder mit "OK" beendet wurde.
-      // Dann würde ich printSettingsDone nur dann auf true sezten, wenn der
-      // Dialog mit OK beendet wurde...
-      model.printSettingsDone = true;
-
-      if (listener != null) listener.actionPerformed(null);
-
-      stabilize();
-    }
-
-    public String toString()
-    {
-      return this.getClass().getSimpleName() + "(#" + doc.hashCode() + ", onlyOnce="
-             + onlyOnce + ")";
     }
   }
 

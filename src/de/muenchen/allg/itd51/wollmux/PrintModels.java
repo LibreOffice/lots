@@ -21,7 +21,7 @@ package de.muenchen.allg.itd51.wollmux;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -39,154 +39,28 @@ import com.sun.star.text.XTextDocument;
 import com.sun.star.uno.Type;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.afid.UnoProps;
+import de.muenchen.allg.itd51.wollmux.dialog.PrintParametersDialog;
+import de.muenchen.allg.itd51.wollmux.dialog.PrintParametersDialog.PageRange;
+import de.muenchen.allg.itd51.wollmux.dialog.PrintParametersDialog.PageRangeType;
 import de.muenchen.allg.itd51.wollmux.func.PrintFunction;
 
 /**
  * Diese Klasse enthält eine Fabrik für die Erzeugung eines XPrintModels, die
  * Klassendefinitionen des MasterPrintModels und des SlavePrintModels, mit deren
- * Hilfe die Verkettung mehrerer PrintFunctions möglich ist und die Definitionen
- * der Properties, die beim Drucken zum Einsatz kommen. Ein XPrintModel hält
- * alle Daten und Methoden bereit, die beim Drucken aus einer Druckfunktion
- * heraus benötigt werden.
+ * Hilfe die Verkettung mehrerer PrintFunctions möglich ist. Ein XPrintModel hält
+ * alle Daten und Methoden bereit, die beim Drucken aus einer Druckfunktion heraus
+ * benötigt werden.
  * 
  * @author Christoph Lutz (D-III-ITD-5.1)
  */
 public class PrintModels
 {
   /**
-   * Diese Klasse definiert alle Properties, die in einem PrintModel gesetzt
-   * werden können und beim Drucken über die Methode printWithProps() von den
-   * mit dem WollMux mitgelieferten Druckfunktionen ausgewertet werden.
-   * Benutzerdefinierte (also nicht mit dem WollMux mitgeliferte)
-   * Druckfunktionen können natürlich auch weitere Properties auswerten, die
-   * nicht hier aufgeführt sind.
-   * 
-   * @author Christoph Lutz (D-III-ITD-5.1)
-   */
-  public static class PrintModelProps
-  {
-    /**
-     * Diese Property vom Typ Short enthält die Anzahl der Ausfertigungen die
-     * von dem Dokument gedruckt werden sollen. Sie wird von der letzten
-     * Druckfunktion ausgewertet, die bei printWithProps() automatisch gestartet
-     * wird, wenn keine andere Druckfunktion mehr in der Aufrufkette vorhanden
-     * ist.
-     */
-    public static final String PROP_COPY_COUNT = "CopyCount";
-
-    /**
-     * Diese Property vom Typ Short enthält einen der Werte PAGE_RANGE_TYPE_*
-     * und spezifiziert den Typ des Seitenbereichs, der ausgedruckt werden soll.
-     * Dabei sind über diese Property auch automatische Bestimmungen des
-     * Seitenbereichs wie z.B. über die aktuelle Cursorposition möglich. Die
-     * Property ist nur in Verbindung mit der Property PROP_PAGE_RANGE_VALUE
-     * sinnvoll. Sie wird von der letzten Druckfunktion ausgewertet, die bei
-     * printWithProps() automatisch gestartet wird, wenn keine andere
-     * Druckfunktion mehr in der Aufrufkette vorhanden ist.
-     */
-    public static final String PROP_PAGE_RANGE_TYPE = "PageRangeType";
-
-    /**
-     * Diese Property vom Typ String spezifiziert den zu druckenden
-     * Seitenbereich als String in der Form, wie er auch bei Datei->Drucken in
-     * OOo angegeben werden kann (z.B. "1-3", "1,2,5"). Die Property wird nur in
-     * Verbindung mit dem Wert PAGE_RANGE_TYPE_MANUAL der Property
-     * PROP_PAGE_RANGE_TYPE gelesen. Sie wird von der letzten Druckfunktion
-     * ausgewertet, die bei printWithProps() automatisch gestartet wird, wenn
-     * keine andere Druckfunktion mehr in der Aufrufkette vorhanden ist.
-     */
-    public static final String PROP_PAGE_RANGE_VALUE = "PageRangeValue";
-
-    /**
-     * Ist diese Property vom Typ String gesetzt, so wird der Wert direkt als
-     * der zu druckende Seitenbereich übernommen. Er ist in der Form, wie er
-     * auch bei Datei->Drucken in OOo angegeben werden kann (z.B. "1-3",
-     * "1,2,5"). Die Property hat Vorrang vor den Properties PROP_PAGE_RANGE_*
-     * und ermöglicht so die direkte manuelle Angabe des zu druckenden
-     * Seitenbereichs. Sie wird von der letzten Druckfunktion ausgewertet, die
-     * bei printWithProps() automatisch gestartet wird, wenn keine andere
-     * Druckfunktion mehr in der Aufrufkette vorhanden ist.
-     */
-    public static final String PROP_PAGES = "Pages";
-
-    /**
-     * Diese Property vom Typ Array Of Short enthält die Anzahl der
-     * Ausfertigungen, die für jeden in PROP_SLV_VERF_PUNKTE angegebenen
-     * Verfügungspunkt beim Drucken gesetzt werden soll. Sie wird von der
-     * Komfortdruckfunktion SachleitendeVerfuegungOutput ausgewertet.
-     */
-    public static final String PROP_SLV_COPY_COUNTS = "SLV_CopyCounts";
-
-    /**
-     * Diese Property vom Typ Array Of String enthält den PageRange-Wert, der
-     * für jeden in PROP_SLV_VERF_PUNKTE angegebenen Verfügungspunkt beim
-     * Drucken gesetzt werden soll. Sie wird von der Komfortdruckfunktion
-     * SachleitendeVerfuegungOutput ausgewertet.
-     */
-    public static final String PROP_SLV_PAGE_RANGE_VALUES = "SLV_PageRangeValues";
-
-    /**
-     * Diese Property vom Typ Array Of Short enthält den PageRange-Typ, der für
-     * jeden in PROP_SLV_VERF_PUNKTE angegebenen Verfügungspunkt beim Drucken
-     * gesetzt werden soll. Sie wird von der Komfortdruckfunktion
-     * SachleitendeVerfuegungOutput ausgewertet.
-     */
-    public static final String PROP_SLV_PAGE_RANGE_TYPES = "SLV_PageRangeTypes";
-
-    /**
-     * Diese Property vom Typ Array Of Boolean enthält das isOriginal-Flag, das
-     * für jeden in PROP_SLV_VERF_PUNKTE angegebenen Verfügungspunkt beim
-     * Drucken gesetzt werden soll. Sie wird von der Komfortdruckfunktion
-     * SachleitendeVerfuegungOutput ausgewertet.
-     */
-    public static final String PROP_SLV_IS_ORIGINAL_FLAGS = "SLV_isOriginalFlags";
-
-    /**
-     * Diese Property vom Typ Array Of Boolean enthält das isDraft-Flag, das für
-     * jeden in PROP_SLV_VERF_PUNKTE angegebenen Verfügungspunkt beim Drucken
-     * gesetzt werden soll. Sie wird von der Komfortdruckfunktion
-     * SachleitendeVerfuegungOutput ausgewertet.
-     */
-    public static final String PROP_SLV_IS_DRAFT_FLAGS = "SLV_isDraftFlags";
-
-    /**
-     * Diese Property vom Typ Array Of Short enthält die Nummern der zu
-     * druckenden Verfügungspunkte. Sie wird von der Komfortdruckfunktion
-     * SachleitendeVerfuegungOutput ausgewertet.
-     */
-    public static final String PROP_SLV_VERF_PUNKTE = "SLV_verfPunkte";
-
-    /**
-     * Wert der Property PROP_PAGE_RANGE_TYPE: Alle Seiten des Textdokuments
-     * sollen gedruckt werden.
-     */
-    public static final short PAGE_RANGE_TYPE_ALL = 1;
-
-    /**
-     * Wert der Property PROP_PAGE_RANGE_TYPE: Nur die aktuelle Seite des
-     * Textdokuments, auf der der Cursor gerade steht, soll gedruckt werden.
-     */
-    public static final short PAGE_RANGE_TYPE_CURRENT = 2;
-
-    /**
-     * Wert der Property PROP_PAGE_RANGE_TYPE: Der Druckbereich erstreckt sich
-     * von der aktuellen Seite des Textdokuments, auf der der Cursor gerade
-     * steht, bis zum Dokumentende.
-     */
-    public static final short PAGE_RANGE_TYPE_CURRENTFF = 3;
-
-    /**
-     * Wert der Property PROP_PAGE_RANGE_TYPE: Sorgt dafür, dass der Wert der
-     * Property PAGE_RANGE_VALUE als Druckbereich übernommen wird.
-     */
-    public static final short PAGE_RANGE_TYPE_MANUAL = 4;
-  }
-
-  /**
    * Erzeugt ein PrintModel-Objekt, das einen Druckvorgang zum Dokument
-   * TextDocumentModel model repräsentiert. Pro Druckvorgang wird dabei ein
-   * neuer PrintModelMaster erzeugt, der ein oder mehrere PrintModelSlaves
-   * anspricht und so eine Verkettung mehrerer Druckfunktionen ermöglicht.
+   * TextDocumentModel model repräsentiert. Pro Druckvorgang wird dabei ein neuer
+   * PrintModelMaster erzeugt, der ein oder mehrere PrintModelSlaves anspricht und so
+   * eine Verkettung mehrerer Druckfunktionen ermöglicht.
    * 
    * @param model
    *          Das Dokument das gedruckt werden soll
@@ -200,9 +74,9 @@ public class PrintModels
   }
 
   /**
-   * Jedes hier definierte konkrete PrintModel definiert dieses Interface und
-   * kann (ausschließlich) innerhalb der Java-VM des WollMux verwendet werden um
-   * auf nicht im XPrintModel exportierte Methode der PrintModels zuzugreifen.
+   * Jedes hier definierte konkrete PrintModel definiert dieses Interface und kann
+   * (ausschließlich) innerhalb der Java-VM des WollMux verwendet werden um auf nicht
+   * im XPrintModel exportierte Methode der PrintModels zuzugreifen.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
@@ -210,16 +84,16 @@ public class PrintModels
   {
     /**
      * Lädt die WollMux-interne Druckfunktion printFunction (muss als
-     * PrintFunction-Objekt vorliegen) in das XPrintModel und ordnet sie gemäß
-     * dem ORDER-Attribut an der richtigen Position in die Aufrufkette der zu
+     * PrintFunction-Objekt vorliegen) in das XPrintModel und ordnet sie gemäß dem
+     * ORDER-Attribut an der richtigen Position in die Aufrufkette der zu
      * bearbeitenden Druckfunktionen ein.
      * 
      * @param printFunction
      *          Druckfunktion, die durch das PrintModel verwaltet werden soll.
-     * @return liefert true, wenn die Druckfunktion erfolgreich in die
-     *         Aufrufkette übernommen wurde oder bereits geladen war und false,
-     *         wenn die Druckfunktion aufgrund vorangegangener Fehler nicht in
-     *         die Aufrufkette aufgenommen werden konnte.
+     * @return liefert true, wenn die Druckfunktion erfolgreich in die Aufrufkette
+     *         übernommen wurde oder bereits geladen war und false, wenn die
+     *         Druckfunktion aufgrund vorangegangener Fehler nicht in die Aufrufkette
+     *         aufgenommen werden konnte.
      * 
      * @author Christoph Lutz (D-III-ITD-5.1)
      */
@@ -227,39 +101,61 @@ public class PrintModels
   }
 
   /**
-   * Das MasterPrintModel repräsentiert einen kompletten Druckvorgang und
-   * verwaltet alle Druckfunktionen, die an diesem Druckvorgang beteiligt sind.
-   * Es kann dynamisch weitere Druckfunktionen nachladen und diese in der durch
-   * das ORDER-Attribut vorgegebenen Reihenfolge zu einer Aufrufkette anordnen.
-   * Für die Kommunikation zwischen den verschiedenen Druckfunktionen
-   * implementiert es das XPropertySet()-Interface und kann in einer HashMap
-   * beliebige funktionsspezifische Daten ablegen.
+   * Das MasterPrintModel repräsentiert einen kompletten Druckvorgang und verwaltet
+   * alle Druckfunktionen, die an diesem Druckvorgang beteiligt sind. Es kann
+   * dynamisch weitere Druckfunktionen nachladen und diese in der durch das
+   * ORDER-Attribut vorgegebenen Reihenfolge zu einer Aufrufkette anordnen. Für die
+   * Kommunikation zwischen den verschiedenen Druckfunktionen implementiert es das
+   * XPropertySet()-Interface und kann in einer HashMap beliebige
+   * funktionsspezifische Daten ablegen.
    * 
-   * Eine einzelne Druckfunktion wird immer mit einem zugehörigen
-   * SlavePrintModel ausgeführt, das seine Position in der Aufrufkette des
-   * MasterPrintModles kennt und die Weiterleitung an die nächste Druckfunktion
-   * der Aufrufkette erledigt. Da die einzelnen Druckfunktionen in eigenen
-   * Threads laufen, muss an einer zentralen Stelle sicher gestellt sein, dass
-   * die zu erledigenden Aktionen mit dem WollMuxEventHandler-Thread
-   * synchronisiert werden. Dies geschieht in dieser Klasse, die über einen
-   * lock-wait-callback-Mechanismus die Synchronisierung garantiert. Vor dem
-   * Einstellen des Action-Ereignisses in den WollMuxEventHandler wird dabei ein
-   * lock gesetzt. Nach dem Einstellen des Ereignisses wird so lange gewartet,
-   * bis der WollMuxEventHandler die übergebene Callback-Methode aufruft.
+   * Eine einzelne Druckfunktion wird immer mit einem zugehörigen SlavePrintModel
+   * ausgeführt, das seine Position in der Aufrufkette des MasterPrintModles kennt
+   * und die Weiterleitung an die nächste Druckfunktion der Aufrufkette erledigt. Da
+   * die einzelnen Druckfunktionen in eigenen Threads laufen, muss an einer zentralen
+   * Stelle sicher gestellt sein, dass die zu erledigenden Aktionen mit dem
+   * WollMuxEventHandler-Thread synchronisiert werden. Dies geschieht in dieser
+   * Klasse, die über einen lock-wait-callback-Mechanismus die Synchronisierung
+   * garantiert. Vor dem Einstellen des Action-Ereignisses in den WollMuxEventHandler
+   * wird dabei ein lock gesetzt. Nach dem Einstellen des Ereignisses wird so lange
+   * gewartet, bis der WollMuxEventHandler die übergebene Callback-Methode aufruft.
    * 
    * @author christoph.lutz
    */
   private static class MasterPrintModel implements XPrintModel, InternalPrintModel
   {
     /**
+     * Schlüssel der Property, über die gesteuert wird, ob der finale Druckdialog mit
+     * einem CopyCount-Spinner angezeigt wird.
+     */
+    private static final String PROP_FINAL_SHOW_COPIES_SPINNER = "FinalPF_ShowCopiesSpinner";
+
+    /**
+     * Schlüssel der Property, über die die Anzeige des finalen Druckdialogs bei
+     * folgenden Aufrufen von finalPrint() abgeschalten werden kann.
+     */
+    private static final String PROP_FINAL_NO_PARAMS_DIALOG = "FinalPF_NoParamsDialog";
+
+    /**
+     * Schlüssel der Property, an der die Einstellungen zum Druckbereich für folgende
+     * Aufrufe von finalPrint() hinterlegt werden können.
+     */
+    private static final String PROP_FINAL_PAGE_RANGE = "FinalPF_PageRange";
+
+    /**
+     * Schlüssel der Property, an der der Kopienzähler für folgende Aufrufe von
+     * finalPrint() hinterlegt werden können.
+     */
+    private static final String PROP_FINAL_COPY_COUNT = "FinalPF_CopyCount";
+
+    /**
      * Enthält die sortierte Menge aller PrintFunction-Objekte der Aufrufkette.
      */
     private SortedSet<PrintFunction> functions;
 
     /**
-     * Enthält die Properties, die in printWithProps() ausgewertet werden und
-     * über die get/setPropertyValue-Methoden frei gesetzt und gelesen werden
-     * können.
+     * Enthält die Properties, die in printWithProps() ausgewertet werden und über
+     * die get/setPropertyValue-Methoden frei gesetzt und gelesen werden können.
      */
     private HashMap<String, Object> props;
 
@@ -269,20 +165,25 @@ public class PrintModels
     private TextDocumentModel model;
 
     /**
-     * Das lock-Flag, das vor dem Einstellen eines WollMuxEvents auf true
-     * gesetzt werden muss und signalisiert, ob das WollMuxEvent erfolgreich
-     * abgearbeitet wurde.
+     * Enthält das Flag das Auskunft darüber gibt, ob der Druckauftrag abgebrochen
+     * wurde oder nicht.
+     */
+    private boolean[] isCanceled = new boolean[] { false };
+
+    /**
+     * Das lock-Flag, das vor dem Einstellen eines WollMuxEvents auf true gesetzt
+     * werden muss und signalisiert, ob das WollMuxEvent erfolgreich abgearbeitet
+     * wurde.
      */
     private boolean[] lock = new boolean[] { true };
 
     /**
-     * Erzeugt ein neues MasterPrintModel-Objekt für das Dokument model, das
-     * einen Druckvorgang repräsentiert, der mit einer leeren Aufrufkette (Liste
-     * von Druckfunktionen) und einer leeren HashMap für den
-     * Informationsaustausch zwischen den Druckfunktionen vorbelegt ist. Nach
-     * der Erzeugung können weitere Druckfunktionen über
-     * usePrintFunction/useInternalPrintFunction... hinzugeladen werden und
-     * Properties über get/setPropertyValue gesetzt bzw. gelesen werden.
+     * Erzeugt ein neues MasterPrintModel-Objekt für das Dokument model, das einen
+     * Druckvorgang repräsentiert, der mit einer leeren Aufrufkette (Liste von
+     * Druckfunktionen) und einer leeren HashMap für den Informationsaustausch
+     * zwischen den Druckfunktionen vorbelegt ist. Nach der Erzeugung können weitere
+     * Druckfunktionen über usePrintFunction/useInternalPrintFunction... hinzugeladen
+     * werden und Properties über get/setPropertyValue gesetzt bzw. gelesen werden.
      * 
      * @param model
      */
@@ -295,18 +196,18 @@ public class PrintModels
 
     /**
      * Lädt die in der wollmux.conf definierte Druckfunktion mit dem Namen
-     * functionName in das XPrintModel und ordnet sie gemäß dem ORDER-Attribut
-     * an der richtigen Position in die Aufrufkette der zu bearbeitenden
-     * Druckfunktionen ein; Wird die Druckfunktion aufgerufen, so bekommt sie
-     * genau ein Argument (dieses XPrintModel) übergeben.
+     * functionName in das XPrintModel und ordnet sie gemäß dem ORDER-Attribut an der
+     * richtigen Position in die Aufrufkette der zu bearbeitenden Druckfunktionen
+     * ein; Wird die Druckfunktion aufgerufen, so bekommt sie genau ein Argument
+     * (dieses XPrintModel) übergeben.
      * 
      * @param functionName
      *          Name der Druckfunktion, die durch das MasterPrintModel verwaltet
      *          werden soll.
-     * @return liefert true, wenn die Druckfunktion erfolgreich in die
-     *         Aufrufkette übernommen wurde oder bereits geladen war und false,
-     *         wenn die Druckfunktion aufgrund vorangegangener Fehler nicht in
-     *         die Aufrufkette aufgenommen werden konnte.
+     * @return liefert true, wenn die Druckfunktion erfolgreich in die Aufrufkette
+     *         übernommen wurde oder bereits geladen war und false, wenn die
+     *         Druckfunktion aufgrund vorangegangener Fehler nicht in die Aufrufkette
+     *         aufgenommen werden konnte.
      * 
      * @author Christoph Lutz (D-III-ITD-5.1)
      * 
@@ -343,16 +244,16 @@ public class PrintModels
     }
 
     /**
-     * Alle im MasterPrintModel geladenen Druckfuntkionen werden in die durch
-     * das ORDER-Attribut definierte Reihenfolge in einer Aufrufkette
-     * angeordnet; Diese Methode liefert die Druckfunktion an der Position idx
-     * dieser Aufrufkette (die Zählung beginnt mit 0).
+     * Alle im MasterPrintModel geladenen Druckfuntkionen werden in die durch das
+     * ORDER-Attribut definierte Reihenfolge in einer Aufrufkette angeordnet; Diese
+     * Methode liefert die Druckfunktion an der Position idx dieser Aufrufkette (die
+     * Zählung beginnt mit 0).
      * 
      * @param idx
      *          Die Position der Druckfunktion
-     * @return Die Druckfunktion an der Position idx in der sortierten
-     *         Reihenfolge oder null, wenn es an der Position idx keine
-     *         Druckfunktion gibt (z.B. IndexOutOfRange)
+     * @return Die Druckfunktion an der Position idx in der sortierten Reihenfolge
+     *         oder null, wenn es an der Position idx keine Druckfunktion gibt (z.B.
+     *         IndexOutOfRange)
      * 
      * @author Christoph Lutz (D-III-ITD-5.1)
      */
@@ -376,43 +277,30 @@ public class PrintModels
     }
 
     /**
-     * Deprecated: Bitte benutzen Sie statt dieser Methode die Methode
-     * printWithProps() mit dem entsprechend gesetzten Property "CopyCount".
-     * Diese Methode dient nur der Abwärtskompatibilität mit älteren
-     * XPrintModels und verwendet intern ebenfalls die Methode printWithProps()
-     * und der Property "CopyCount".
+     * Diese Methode ruft numberOfCopies mal printWithProps() auf.
      * 
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#print(short)
      */
     public void print(short numberOfCopies)
     {
-      try
-      {
-        setPropertyValue(PrintModelProps.PROP_COPY_COUNT, new Short(numberOfCopies));
+      for (int i = 0; i < numberOfCopies; ++i)
         printWithProps();
-      }
-      catch (java.lang.Exception e)
-      {
-        Logger.error(e);
-      }
     }
 
     /**
-     * Druckt das TextDocument auf dem aktuell eingestellten Drucker aus oder
-     * leitet die Anfrage an die nächste verfügbare Druckfunktion in der
-     * Aufrufkette weiter, wenn eine weitere Druckfunktion vorhanden ist;
-     * Abhängig von der gesetzten Druckfunktion werden dabei verschiedene
-     * Properties, die über setPropertyValue(...) gesetzt wurden ausgewertet.
-     * Die Methode kehrt erst dann wieder zurück, wenn der gesamte Druckvorgang
-     * dieser und der darunterliegenden Druckfunktionen vollständig ausgeführt
-     * wurde.
+     * Druckt das TextDocument auf dem aktuell eingestellten Drucker aus oder leitet
+     * die Anfrage an die nächste verfügbare Druckfunktion in der Aufrufkette weiter,
+     * wenn eine weitere Druckfunktion vorhanden ist; Abhängig von der gesetzten
+     * Druckfunktion werden dabei verschiedene Properties, die über
+     * setPropertyValue(...) gesetzt wurden ausgewertet. Die Methode kehrt erst dann
+     * wieder zurück, wenn der gesamte Druckvorgang dieser und der darunterliegenden
+     * Druckfunktionen vollständig ausgeführt wurde.
      * 
      * Im MasterPrintModel sorgt der Aufruf dieser Methode dafür, dass (nur) die
-     * erste verfügbare Druckfunktion aufgerufen wird. Das Weiterreichen der
-     * Anfrage an die jeweils nächste Druckfunktion übernimmt dann das
-     * SlavePrintModel. Ist die Aufrufkette zum Zeitpunkt des Aufrufs leer, so
-     * wird ein Dispatch ".uno:Print" abgesetzt, damit der Standarddruckdialog
-     * von OOo aufgerufen wird.
+     * erste verfügbare Druckfunktion aufgerufen wird. Das Weiterreichen der Anfrage
+     * an die jeweils nächste Druckfunktion übernimmt dann das SlavePrintModel. Ist
+     * die Aufrufkette zum Zeitpunkt des Aufrufs leer, so wird ein Dispatch
+     * ".uno:Print" abgesetzt, damit der Standarddruckdialog von OOo aufgerufen wird.
      * 
      * @author Christoph Lutz (D-III-ITD-5.1)
      * 
@@ -420,6 +308,8 @@ public class PrintModels
      */
     public void printWithProps()
     {
+      if (isCanceled()) return;
+
       PrintFunction f = getPrintFunction(0);
       if (f != null)
       {
@@ -436,60 +326,155 @@ public class PrintModels
       }
       else
       {
-        // Es ist keine Druckfunktion definiert, darum wird ein erneuter
-        // Dispatch-Aufruf gestartet, der den Standard-Druckdialog aufruft.
-        UNO.dispatch(model.doc, ".uno:Print");
+        setProperty(PROP_FINAL_SHOW_COPIES_SPINNER, Boolean.TRUE);
+        finalPrint();
       }
     }
 
     /**
-     * Wird vom SlavePrintModel aufgerufen, wenn beim Aufruf von
-     * printWithProps() keine weitere Druckfunktion mehr in der Aufrufkette
-     * verfügbar ist und das Dokument damit tatsächlich physikalisch gedruckt
-     * werden soll.
+     * Zeigt beim ersten Aufruf den finalen Druckdialog an, über den die
+     * Einstellungen für den tatsächlichen Druck auf einen Drucker gesetzt werden
+     * können und startet den Druck. Bei folgenden Aufrufe dieser Methode wird kein
+     * Druckdialog mehr angezeigt und die zuletzt getroffenen Einstellungen werden
+     * verwendet.
+     * 
+     * @return bei Erfolg true, sonst false.
+     * @author Christoph Lutz (D-III-ITD-5.1)
+     */
+    protected void finalPrint()
+    {
+      Boolean b = (Boolean) getProperty(PROP_FINAL_SHOW_COPIES_SPINNER);
+      boolean showCopiesSpinner = (b != null) ? b.booleanValue() : false;
+
+      b = (Boolean) getProperty(PROP_FINAL_NO_PARAMS_DIALOG);
+      boolean noParamsDialog = (b != null) ? b.booleanValue() : false;
+
+      // Bei Bedarf den PrintParamsDialog anzeigen.
+      if (noParamsDialog == false)
+      {
+        setLock();
+        new PrintParametersDialog(model.doc, showCopiesSpinner, unlockActionListener);
+        waitForUnlock();
+
+        // Rückgabewerte des Dialogs speichern für diesen und alle folgenden Aufrufe
+        // von finalPrintWithProps()
+        PrintParametersDialog ppd = (PrintParametersDialog) unlockActionListener.actionEvent.getSource();
+        String actionCommand = unlockActionListener.actionEvent.getActionCommand();
+
+        if (PrintParametersDialog.CMD_CANCEL.equals(actionCommand))
+        {
+          cancel();
+          return;
+        }
+        setProperty(PROP_FINAL_COPY_COUNT, ppd.getCopyCount());
+        setProperty(PROP_FINAL_PAGE_RANGE, ppd.getPageRange());
+        setProperty(PROP_FINAL_NO_PARAMS_DIALOG, Boolean.TRUE);
+      }
+
+      Short copyCount = (Short) getProperty(PROP_FINAL_COPY_COUNT);
+      if (copyCount == null) copyCount = new Short((short) 1);
+
+      PageRange pageRange = (PageRange) getProperty(PROP_FINAL_PAGE_RANGE);
+      if (pageRange == null) pageRange = new PageRange(PageRangeType.ALL, null);
+
+      if (!print(pageRange, copyCount)) cancel();
+    }
+
+    /**
+     * Druckt den Druckbereich pr des Dokuments copyCount mal auf dem aktuell
+     * eingestellten Drucker aus und liefert true zurück, wenn das Drucken
+     * erfolgreich war oder false, wenn Fehler auftraten.
+     * 
+     * @param pr
+     *          beschreibt zu druckenden Seitenbereich
+     * @param copyCount
+     *          enthält die Anzahl der anzufertigenden Kopien
+     * @return bei Erfolg true, sonst false.
      * 
      * @author Christoph Lutz (D-III-ITD-5.1)
      */
-    protected void finalPrintWithProps()
+    private boolean print(PageRange pr, Short copyCount)
     {
-      setLock();
-      WollMuxEventHandler.handlePrintViaPrintModel(model.doc, props,
-        unlockActionListener);
-      waitForUnlock();
+      UnoProps myProps = new UnoProps("Wait", Boolean.TRUE);
+
+      // Property "CopyCount" bestimmen:
+      myProps.setPropertyValue("CopyCount", copyCount);
+
+      // pr mit aktueller Seite vorbelegen (oder 1 als fallback)
+      String prStr = "1";
+      if (UNO.XPageCursor(model.getViewCursor()) != null)
+        prStr = "" + UNO.XPageCursor(model.getViewCursor()).getPage();
+
+      // Property "Pages" bestimmen:
+      switch (pr.pageRangeType)
+      {
+        case ALL:
+          // Property Pages muss hier nicht gesetzt werden, da Grundverhalten
+          break;
+
+        case USER_DEFINED:
+          myProps.setPropertyValue("Pages", pr.pageRangeValue);
+          break;
+
+        case CURRENT_PAGE:
+          myProps.setPropertyValue("Pages", prStr);
+          break;
+
+        case CURRENT_AND_FOLLOWING:
+          myProps.setPropertyValue("Pages", prStr + "-" + model.getPageCount());
+          break;
+      }
+
+      if (UNO.XPrintable(model.doc) != null) try
+      {
+        UNO.XPrintable(model.doc).print(myProps.getProps());
+        return true;
+      }
+      catch (IllegalArgumentException e)
+      {
+        Logger.error(e);
+      }
+      return false;
     }
 
     /**
-     * Zeigt den PrintSetupDialog an, über den der aktuelle Drucker ausgewählt
-     * und geändert werden kann.
+     * synchronisiertes Setzen von props
      * 
-     * @param onlyOnce
-     *          Gibt an, dass der Dialog nur beim ersten Aufruf (aus Sicht eines
-     *          Dokuments) der Methode angezeigt wird. Wurde bereits vor dem
-     *          Aufruf ein PrintSetup-Dialog gestartet, so öffnet sich der
-     *          Dialog nicht und die Methode endet ohne Aktion.
-     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#showPrinterSetupDialog()
+     * @author Christoph Lutz (D-III-ITD-5.1)
      */
-    public void showPrinterSetupDialog(boolean onlyOnce)
+    private void setProperty(String prop, Object o)
     {
-      setLock();
-      WollMuxEventHandler.handleShowPrinterSetupDialog(model.doc, onlyOnce,
-        unlockActionListener);
-      waitForUnlock();
+      synchronized (props)
+      {
+        props.put(prop, o);
+      }
     }
 
     /**
-     * Falls es sich bei dem zugehörigen Dokument um ein Formulardokument (mit
-     * einer Formularbeschreibung) handelt, wird das Formularfeld mit der ID id
-     * auf den neuen Wert value gesetzt und alle von diesem Formularfeld
-     * abhängigen Formularfelder entsprechend angepasst. Handelt es sich beim
-     * zugehörigen Dokument um ein Dokument ohne Formularbeschreibung, so werden
-     * nur alle insertFormValue-Kommandos dieses Dokuments angepasst, die die ID
-     * id besitzen.
+     * synchronisiertes Auslesen von props
+     * 
+     * @author Christoph Lutz (D-III-ITD-5.1)
+     */
+    private Object getProperty(String prop)
+    {
+      synchronized (props)
+      {
+        return props.get(prop);
+      }
+    }
+
+    /**
+     * Falls es sich bei dem zugehörigen Dokument um ein Formulardokument (mit einer
+     * Formularbeschreibung) handelt, wird das Formularfeld mit der ID id auf den
+     * neuen Wert value gesetzt und alle von diesem Formularfeld abhängigen
+     * Formularfelder entsprechend angepasst. Handelt es sich beim zugehörigen
+     * Dokument um ein Dokument ohne Formularbeschreibung, so werden nur alle
+     * insertFormValue-Kommandos dieses Dokuments angepasst, die die ID id besitzen.
      * 
      * @param id
-     *          Die ID des Formularfeldes, dessen Wert verändert werden soll.
-     *          Ist die FormGUI aktiv, so werden auch alle von id abhängigen
-     *          Formularwerte neu gesetzt.
+     *          Die ID des Formularfeldes, dessen Wert verändert werden soll. Ist die
+     *          FormGUI aktiv, so werden auch alle von id abhängigen Formularwerte
+     *          neu gesetzt.
      * @param value
      *          Der neue Wert des Formularfeldes id
      * 
@@ -505,14 +490,14 @@ public class PrintModels
     }
 
     /**
-     * Liefert true, wenn das Dokument als "modifiziert" markiert ist und damit
-     * z.B. die "Speichern?" Abfrage vor dem Schließen erscheint.
+     * Liefert true, wenn das Dokument als "modifiziert" markiert ist und damit z.B.
+     * die "Speichern?" Abfrage vor dem Schließen erscheint.
      * 
-     * Manche Druckfunktionen verändern u.U. den Inhalt von Dokumenten. Trotzdem
-     * kann es sein, dass eine solche Druckfunktion den "Modifiziert"-Status des
-     * Dokuments nicht verändern darf um ungewünschte "Speichern?"-Abfragen zu
-     * verhindern. In diesem Fall kann der "Modifiziert"-Status mit folgendem
-     * Konstrukt innerhalb der Druckfunktion unverändert gehalten werden:
+     * Manche Druckfunktionen verändern u.U. den Inhalt von Dokumenten. Trotzdem kann
+     * es sein, dass eine solche Druckfunktion den "Modifiziert"-Status des Dokuments
+     * nicht verändern darf um ungewünschte "Speichern?"-Abfragen zu verhindern. In
+     * diesem Fall kann der "Modifiziert"-Status mit folgendem Konstrukt innerhalb
+     * der Druckfunktion unverändert gehalten werden:
      * 
      * boolean modified = pmod.getDocumentModified();
      * 
@@ -542,11 +527,10 @@ public class PrintModels
     }
 
     /**
-     * Sammelt alle Formularfelder des Dokuments auf, die nicht von
-     * WollMux-Kommandos umgeben sind, jedoch trotzdem vom WollMux verstanden
-     * und befüllt werden (derzeit c,s,s,t,textfield,Database-Felder). So werden
-     * z.B. Seriendruckfelder erkannt, die erst nach dem Öffnen des Dokuments
-     * manuell hinzugefügt wurden.
+     * Sammelt alle Formularfelder des Dokuments auf, die nicht von WollMux-Kommandos
+     * umgeben sind, jedoch trotzdem vom WollMux verstanden und befüllt werden
+     * (derzeit c,s,s,t,textfield,Database-Felder). So werden z.B. Seriendruckfelder
+     * erkannt, die erst nach dem Öffnen des Dokuments manuell hinzugefügt wurden.
      */
     public void collectNonWollMuxFormFields()
     {
@@ -558,12 +542,12 @@ public class PrintModels
 
     /**
      * Setzt einen lock, der in Verbindung mit setUnlock und der
-     * waitForUnlock-Methode verwendet werden kann, um eine Synchronisierung mit
-     * dem WollMuxEventHandler-Thread zu realisieren. setLock() sollte stets vor
-     * dem Absetzen des WollMux-Events erfolgen, nach dem Absetzen des
-     * WollMux-Events folgt der Aufruf der waitForUnlock()-Methode. Das
-     * WollMuxEventHandler-Event erzeugt bei der Beendigung ein ActionEvent, das
-     * dafür sorgt, dass setUnlock aufgerufen wird.
+     * waitForUnlock-Methode verwendet werden kann, um eine Synchronisierung mit dem
+     * WollMuxEventHandler-Thread zu realisieren. setLock() sollte stets vor dem
+     * Absetzen des WollMux-Events erfolgen, nach dem Absetzen des WollMux-Events
+     * folgt der Aufruf der waitForUnlock()-Methode. Das WollMuxEventHandler-Event
+     * erzeugt bei der Beendigung ein ActionEvent, das dafür sorgt, dass setUnlock
+     * aufgerufen wird.
      */
     protected void setLock()
     {
@@ -587,13 +571,12 @@ public class PrintModels
     }
 
     /**
-     * Wartet so lange, bis der vorher mit setLock() gesetzt lock mit der
-     * Methode setUnlock() aufgehoben wird. So kann die Synchronisierung mit
-     * Events aus dem WollMuxEventHandler-Thread realisiert werden. setLock()
-     * sollte stets vor dem Aufruf des Events erfolgen, nach dem Aufruf des
-     * Events folgt der Aufruf der waitForUnlock()-Methode. Das Event erzeugt
-     * bei der Beendigung ein ActionEvent, das dafür sorgt, dass setUnlock
-     * aufgerufen wird.
+     * Wartet so lange, bis der vorher mit setLock() gesetzt lock mit der Methode
+     * setUnlock() aufgehoben wird. So kann die Synchronisierung mit Events aus dem
+     * WollMuxEventHandler-Thread realisiert werden. setLock() sollte stets vor dem
+     * Aufruf des Events erfolgen, nach dem Aufruf des Events folgt der Aufruf der
+     * waitForUnlock()-Methode. Das Event erzeugt bei der Beendigung ein ActionEvent,
+     * das dafür sorgt, dass setUnlock aufgerufen wird.
      */
     protected void waitForUnlock()
     {
@@ -611,10 +594,9 @@ public class PrintModels
     }
 
     /**
-     * Dieser ActionListener kann WollMuxHandler-Events übergeben werden und
-     * sorgt in Verbindung mit den Methoden setLock() und waitForUnlock() dafür,
-     * dass eine Synchronisierung mit dem WollMuxEventHandler-Thread realisiert
-     * werden kann.
+     * Dieser ActionListener kann WollMuxHandler-Events übergeben werden und sorgt in
+     * Verbindung mit den Methoden setLock() und waitForUnlock() dafür, dass eine
+     * Synchronisierung mit dem WollMuxEventHandler-Thread realisiert werden kann.
      */
     protected UnlockActionListener unlockActionListener = new UnlockActionListener();
 
@@ -624,8 +606,8 @@ public class PrintModels
 
       public void actionPerformed(ActionEvent arg0)
       {
-        setUnlock();
         actionEvent = arg0;
+        setUnlock();
       }
     }
 
@@ -636,11 +618,17 @@ public class PrintModels
      */
     public XPropertySetInfo getPropertySetInfo()
     {
+      final HashSet<String> propsKeySet;
+      synchronized (props)
+      {
+        propsKeySet = new HashSet<String>(props.keySet());
+      }
+
       return new XPropertySetInfo()
       {
         public boolean hasPropertyByName(String arg0)
         {
-          return props.containsKey(arg0);
+          return propsKeySet.contains(arg0);
         }
 
         public Property getPropertyByName(String arg0)
@@ -654,11 +642,10 @@ public class PrintModels
 
         public Property[] getProperties()
         {
-          Property[] ps = new Property[props.size()];
+          Property[] ps = new Property[propsKeySet.size()];
           int i = 0;
-          for (Iterator<String> iter = props.keySet().iterator(); iter.hasNext();)
+          for (String name : propsKeySet)
           {
-            String name = iter.next();
             try
             {
               ps[i++] = getPropertyByName(name);
@@ -682,7 +669,7 @@ public class PrintModels
         throws UnknownPropertyException, PropertyVetoException,
         IllegalArgumentException, WrappedTargetException
     {
-      props.put(arg0, arg1);
+      setProperty(arg0, arg1);
     }
 
     /*
@@ -693,8 +680,9 @@ public class PrintModels
     public Object getPropertyValue(String arg0) throws UnknownPropertyException,
         WrappedTargetException
     {
-      if (props.containsKey(arg0))
-        return props.get(arg0);
+      Object o = getProperty(arg0);
+      if (o != null)
+        return o;
       else
         throw new UnknownPropertyException(arg0);
     }
@@ -750,21 +738,21 @@ public class PrintModels
     }
 
     /**
-     * Diese Methode setzt die Eigenschaften "Sichtbar" (visible) und die
-     * Anzeige der Hintergrundfarbe (showHighlightColor) für alle Druckblöcke
-     * eines bestimmten Blocktyps blockName (z.B. "AllVersions").
+     * Diese Methode setzt die Eigenschaften "Sichtbar" (visible) und die Anzeige der
+     * Hintergrundfarbe (showHighlightColor) für alle Druckblöcke eines bestimmten
+     * Blocktyps blockName (z.B. "AllVersions").
      * 
      * @param blockName
-     *          Der Blocktyp dessen Druckblöcke behandelt werden sollen.
-     *          Folgende Blocknamen werden derzeit unterstützt: "AllVersions",
-     *          "DraftOnly" und "NotInOriginal"
+     *          Der Blocktyp dessen Druckblöcke behandelt werden sollen. Folgende
+     *          Blocknamen werden derzeit unterstützt: "AllVersions", "DraftOnly" und
+     *          "NotInOriginal"
      * @param visible
      *          Der Block wird sichtbar, wenn visible==true und unsichtbar, wenn
      *          visible==false.
      * @param showHighlightColor
-     *          gibt an ob die Hintergrundfarbe angezeigt werden soll (gilt nur,
-     *          wenn zu einem betroffenen Druckblock auch eine Hintergrundfarbe
-     *          angegeben ist).
+     *          gibt an ob die Hintergrundfarbe angezeigt werden soll (gilt nur, wenn
+     *          zu einem betroffenen Druckblock auch eine Hintergrundfarbe angegeben
+     *          ist).
      * 
      * @author Christoph Lutz (D-III-ITD-5.1)
      */
@@ -778,17 +766,17 @@ public class PrintModels
     }
 
     /**
-     * Setzt den Sichtbarkeitsstatus der Sichtbarkeitsgruppe groupID auf den
-     * neuen Status visible und wirkt sich damit auf alle Dokumentkommandos
+     * Setzt den Sichtbarkeitsstatus der Sichtbarkeitsgruppe groupID auf den neuen
+     * Status visible und wirkt sich damit auf alle Dokumentkommandos
      * WM(CMD'setGroups'...) bzw. alle Textbereiche aus, die über eine
      * GROUPS-Zuordnung die Sichtbarkeitsgruppe groupId verknüpft haben.
      * 
      * @param groupID
-     *          Name der Sichtbarkeitsgruppe, deren Sichtbarkeitsstatus
-     *          verändert werden soll
+     *          Name der Sichtbarkeitsgruppe, deren Sichtbarkeitsstatus verändert
+     *          werden soll
      * @param visible
-     *          Bei dem Wert true ist die Sichtbarkeitsgruppe sichtbar und bei
-     *          false unsichtbar.
+     *          Bei dem Wert true ist die Sichtbarkeitsgruppe sichtbar und bei false
+     *          unsichtbar.
      * 
      * @author Christoph Lutz (D-III-ITD-5.1)
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#setGroupVisible(java.lang.String,
@@ -801,20 +789,54 @@ public class PrintModels
         unlockActionListener);
       waitForUnlock();
     }
+
+    /**
+     * Liefert true, wenn der Druckvorgang aufgrund einer Benutzereingabe oder eines
+     * vorangegangenen Fehlers abgebrochen wurde (siehe cancel()) und sollte
+     * insbesonders von Druckfunktionen ausgewertet werden, die mehrmals
+     * printWithProps() aufrufen und dabei aufwendige Vor- und Nacharbeiten leisten
+     * müssen (die in diesem Fall sobald sinnvoll möglich eingestellt werden können).
+     * 
+     * @author Christoph Lutz (D-III-ITD-5.1)
+     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#isCanceled()
+     */
+    public boolean isCanceled()
+    {
+      synchronized (isCanceled)
+      {
+        return isCanceled[0];
+      }
+    }
+
+    /**
+     * Setzt das Flag isCanceled() auf true und sorgt dafür, dass künftige Aufrufe
+     * von printWithProps() sofort ohne Wirkung zurückkehren. Die Methode kann von
+     * jeder Druckfunktion aufgerufen werden wenn Fehler auftreten oder der
+     * Druckvorgang durch den Benutzer abgebrochen wurde.
+     * 
+     * @author Christoph Lutz (D-III-ITD-5.1)
+     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#cancel()
+     */
+    public void cancel()
+    {
+      synchronized (isCanceled)
+      {
+        isCanceled[0] = true;
+      }
+    }
   }
 
   /**
    * Beim Aufruf einer einzelnen Druckfunktion wird dieser Druckfunktion ein
-   * XPrintModel, repräsentiert durch das SlavePrintModel, übergeben. Für jede
-   * im MaserPrintModel verwaltete und aufgerufene Druckfunktion existiert also
-   * genau ein SlavePrintModel, das im wesentlichen alle Anfragen
-   * (Methodenaufrufe) an das MasterPrintModel weiterleitet. Das SlavePrintModel
-   * kennt seine Position (idx) in der Aufrufkette und sorgt vor allem dafür,
-   * dass beim Aufruf von printWithProps() die nächste Druckfunktion der
-   * Aufrufkette gestartet wird.
+   * XPrintModel, repräsentiert durch das SlavePrintModel, übergeben. Für jede im
+   * MaserPrintModel verwaltete und aufgerufene Druckfunktion existiert also genau
+   * ein SlavePrintModel, das im wesentlichen alle Anfragen (Methodenaufrufe) an das
+   * MasterPrintModel weiterleitet. Das SlavePrintModel kennt seine Position (idx) in
+   * der Aufrufkette und sorgt vor allem dafür, dass beim Aufruf von printWithProps()
+   * die nächste Druckfunktion der Aufrufkette gestartet wird.
    * 
-   * Das SlavePrintModel ist von WeakBase abgeleitet, damit es in der
-   * Druckfunktion mit den UNO-Mitteln inspiziert werden kann.
+   * Das SlavePrintModel ist von WeakBase abgeleitet, damit es in der Druckfunktion
+   * mit den UNO-Mitteln inspiziert werden kann.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
@@ -833,8 +855,8 @@ public class PrintModels
      *          Das MasterPrintModel, an das die meisten Anfragen weitergeleitet
      *          werden und das die Aufrufkette der Druckfunktionen verwaltet.
      * @param idx
-     *          Die Position der zu diesem SlavePrintModel zugehörigen
-     *          Druckfunktion in der Aufrufkette von master.
+     *          Die Position der zu diesem SlavePrintModel zugehörigen Druckfunktion
+     *          in der Aufrufkette von master.
      */
     public SlavePrintModel(MasterPrintModel master, int idx)
     {
@@ -859,26 +881,21 @@ public class PrintModels
      */
     public void print(short numberOfCopies)
     {
-      try
-      {
-        setPropertyValue(PrintModelProps.PROP_COPY_COUNT, new Short(numberOfCopies));
+      for (int i = 0; i < numberOfCopies && !isCanceled(); ++i)
         printWithProps();
-      }
-      catch (java.lang.Exception e)
-      {
-        Logger.error(e);
-      }
     }
 
     /**
-     * Diese Methode ist die wichtigste Methode im SlavePrintModel, denn sie
-     * sorgt dafür, dass beim Aufruf von PrintWithProps die Weiterleitung an die
-     * nächste Druckfunktion der Aufrufkette veranlasst wird.
+     * Diese Methode ist die wichtigste Methode im SlavePrintModel, denn sie sorgt
+     * dafür, dass beim Aufruf von PrintWithProps die Weiterleitung an die nächste
+     * Druckfunktion der Aufrufkette veranlasst wird.
      * 
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#printWithProps()
      */
     public void printWithProps()
     {
+      if (isCanceled()) return;
+
       PrintFunction f = master.getPrintFunction(idx + 1);
       if (f != null)
       {
@@ -895,18 +912,8 @@ public class PrintModels
       }
       else
       {
-        master.finalPrintWithProps();
+        master.finalPrint();
       }
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#showPrinterSetupDialog(boolean)
-     */
-    public void showPrinterSetupDialog(boolean arg0)
-    {
-      master.showPrinterSetupDialog(arg0);
     }
 
     /*
@@ -1046,9 +1053,9 @@ public class PrintModels
     }
 
     /**
-     * Der wesentliche Unterschied zur gleichnamigen Methode des Masters ist es,
-     * dass nur Druckfunktionen angenommen werden, deren ORDER-Wert höher als
-     * der ORDER-Wert der aktuellen Druckfunktion ist.
+     * Der wesentliche Unterschied zur gleichnamigen Methode des Masters ist es, dass
+     * nur Druckfunktionen angenommen werden, deren ORDER-Wert höher als der
+     * ORDER-Wert der aktuellen Druckfunktion ist.
      * 
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#usePrintFunction(java.lang.String)
      */
@@ -1068,9 +1075,9 @@ public class PrintModels
     }
 
     /**
-     * Der wesentliche Unterschied zur gleichnamigen Methode des Masters ist es,
-     * dass nur Druckfunktionen angenommen werden, deren ORDER-Wert höher als
-     * der ORDER-Wert der aktuellen Druckfunktion ist.
+     * Der wesentliche Unterschied zur gleichnamigen Methode des Masters ist es, dass
+     * nur Druckfunktionen angenommen werden, deren ORDER-Wert höher als der
+     * ORDER-Wert der aktuellen Druckfunktion ist.
      * 
      * @see de.muenchen.allg.itd51.wollmux.PrintModels.InternalPrintModel#useInternalPrintFunction(de.muenchen.allg.itd51.wollmux.func.PrintFunction)
      */
@@ -1105,6 +1112,26 @@ public class PrintModels
     public void setGroupVisible(String arg0, boolean arg1)
     {
       master.setGroupVisible(arg0, arg1);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#isCanceled()
+     */
+    public boolean isCanceled()
+    {
+      return master.isCanceled();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#cancel()
+     */
+    public void cancel()
+    {
+      master.cancel();
     }
 
   }

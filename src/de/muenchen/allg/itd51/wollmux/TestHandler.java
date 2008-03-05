@@ -21,19 +21,20 @@ package de.muenchen.allg.itd51.wollmux;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.PrintModels.InternalPrintModel;
-import de.muenchen.allg.itd51.wollmux.PrintModels.PrintModelProps;
+import de.muenchen.allg.itd51.wollmux.dialog.SachleitendeVerfuegungenDruckdialog.VerfuegungspunktInfo;
 import de.muenchen.allg.itd51.wollmux.func.StandardPrint;
 
 /**
  * Enthält die DispatchHandler für alle dispatch-Urls, die mit "wollmux:Test"
- * anfangen und für den automatisierten Test durch wollmux-qatest benötigt
- * werden.
+ * anfangen und für den automatisierten Test durch wollmux-qatest benötigt werden.
  * 
  * @author Christoph Lutz (D-III-ITD-5.1)
  */
@@ -41,9 +42,8 @@ public class TestHandler
 {
 
   /**
-   * Dieses File enthält die Argumente, die einem TestHandler übergeben werden
-   * sollen und vor dem Aufruf des Teshandlers über das testtool geschrieben
-   * wurden.
+   * Dieses File enthält die Argumente, die einem TestHandler übergeben werden sollen
+   * und vor dem Aufruf des Teshandlers über das testtool geschrieben wurden.
    */
   public static File WOLLMUX_QATEST_ARGS_FILE = new File("/tmp/wollmux_qatest.args");
 
@@ -65,25 +65,17 @@ public class TestHandler
     if (cmd.equalsIgnoreCase("VerfuegungspunktDrucken"))
     {
       Map<String, String> idsAndValues = getWollmuxTestArgs();
-      short count = (short) SachleitendeVerfuegung.countVerfuegungspunkte(model.doc);
-      short verfPunkt = new Short(idsAndValues.get("VerfPunkt").toString()).shortValue();
+      int count = SachleitendeVerfuegung.countVerfuegungspunkte(model.doc);
+      int verfPunkt = new Short(idsAndValues.get("VerfPunkt").toString()).shortValue();
       boolean isDraft = (verfPunkt == count) ? true : false;
       boolean isOriginal = (verfPunkt == 1) ? true : false;
       final XPrintModel pmod = model.createPrintModel(false);
       try
       {
-        pmod.setPropertyValue(PrintModelProps.PROP_SLV_VERF_PUNKTE,
-          new Object[] { new Short(verfPunkt) });
-        pmod.setPropertyValue(PrintModelProps.PROP_SLV_IS_DRAFT_FLAGS,
-          new Object[] { new Boolean(isDraft) });
-        pmod.setPropertyValue(PrintModelProps.PROP_SLV_IS_ORIGINAL_FLAGS,
-          new Object[] { new Boolean(isOriginal) });
-        pmod.setPropertyValue(PrintModelProps.PROP_SLV_COPY_COUNTS,
-          new Object[] { new Short((short) 1) });
-        pmod.setPropertyValue(PrintModelProps.PROP_SLV_PAGE_RANGE_TYPES,
-          new Object[] { new Short(PrintModelProps.PAGE_RANGE_TYPE_ALL) });
-        pmod.setPropertyValue(PrintModelProps.PROP_SLV_PAGE_RANGE_VALUES,
-          new Object[] { "" });
+        List<VerfuegungspunktInfo> settings = new ArrayList<VerfuegungspunktInfo>();
+        settings.add(new VerfuegungspunktInfo(verfPunkt, (short) 1, isDraft,
+          isOriginal));
+        pmod.setPropertyValue(StandardPrint.PROP_SLV_SETTINGS, settings);
       }
       catch (java.lang.Exception e)
       {
@@ -140,10 +132,9 @@ public class TestHandler
   }
 
   /**
-   * Liest die Argumente aus der Datei WOLLMUX_QATEST_ARGS_FILE in eine HashMap
-   * ein und liefert diese zurück. Die Argumente werden in der Datei in Zeilen
-   * der Form "<key>,<value>" abgelegt erwartet (key darf dabei kein ","
-   * enthalten).
+   * Liest die Argumente aus der Datei WOLLMUX_QATEST_ARGS_FILE in eine HashMap ein
+   * und liefert diese zurück. Die Argumente werden in der Datei in Zeilen der Form "<key>,<value>"
+   * abgelegt erwartet (key darf dabei kein "," enthalten).
    * 
    * @return
    * 

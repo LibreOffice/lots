@@ -68,14 +68,12 @@ import com.sun.star.util.XCloseListener;
 import com.sun.star.view.DocumentZoomType;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.parser.SyntaxErrorException;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.OptionalHighlightColorProvider;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.SetJumpMark;
 import de.muenchen.allg.itd51.wollmux.FormFieldFactory.FormField;
-import de.muenchen.allg.itd51.wollmux.PrintModels.PrintModelProps;
 import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
 import de.muenchen.allg.itd51.wollmux.dialog.FormController;
 import de.muenchen.allg.itd51.wollmux.dialog.MailMergeNew;
@@ -99,12 +97,6 @@ public class TextDocumentModel
    * TextDocument-Services der zugehörigen UNO-Komponente.
    */
   public final XTextDocument doc;
-
-  /**
-   * Ist true, wenn PrintSettings-Dialog mindestens einmal aufgerufen wurde und
-   * false, wenn der Dialog noch nicht aufgerufen wurde.
-   */
-  public boolean printSettingsDone;
 
   /**
    * Die dataId unter der die WollMux-Formularbeschreibung in {@link #persistentData}
@@ -322,7 +314,6 @@ public class TextDocumentModel
     this.currentMax4000 = null;
     this.closeListener = null;
     this.printFunctions = new HashSet<String>();
-    this.printSettingsDone = false;
     this.formularConf = null;
     this.formFieldValues = new HashMap<String, String>();
     this.invisibleGroups = new HashSet<String>();
@@ -2264,108 +2255,6 @@ public class TextDocumentModel
     catch (NoSuchElementException e)
     {
       Logger.error(e);
-    }
-  }
-
-  /**
-   * Druckt den über pageRangeType/pageRangeValue spezifizierten Bereich des
-   * Dokuments in der Anzahl numberOfCopies auf dem aktuell eingestellten Drucker
-   * aus.
-   * 
-   * @param numberOfCopies
-   *          Bestimmt die Anzahl der Kopien
-   * @param pageRangeType
-   *          Legt den Typ des Druckbereichs fest und enthält einen der Werte
-   *          PrintModels.PrintModelProps.PAGE_RANGE_TYPE_*.
-   * @param pageRangeValue
-   *          wird in Verbindung mit dem pageRangeType PAGE_RANGE_TYPE_MANUAL
-   *          zwingend benötigt und enthält den zu druckenden Bereich als String.
-   * @throws PrintFailedException
-   * 
-   * @author Christoph Lutz (D-III-ITD-5.1)
-   */
-  synchronized public void printWithPageRange(short numberOfCopies,
-      short pageRangeType, String pageRangeValue) throws PrintFailedException
-  {
-    HashMap<String, Object> props = new HashMap<String, Object>();
-    props.put(PrintModelProps.PROP_PAGE_RANGE_TYPE, new Short(pageRangeType));
-    props.put(PrintModelProps.PROP_PAGE_RANGE_VALUE, pageRangeValue);
-    props.put(PrintModelProps.PROP_COPY_COUNT, new Short(numberOfCopies));
-    printWithProps(props);
-  }
-
-  /**
-   * Druckt das Dokument auf dem aktuell eingestellten Drucker aus, wobei die in
-   * props übergebenen Properties CopyCount, Pages, PageRangeType und PageRangeValue
-   * ausgewertet werden, wenn sie vorhanden sind.
-   * 
-   * @param props
-   *          HashMap mit Properties aus
-   *          {@see de.muenchen.allg.itd51.wollmux.PrintModels.PrintModelProps}, die
-   *          ausgewertet werden sollen.
-   * @throws PrintFailedException
-   * 
-   * @author Christoph Lutz (D-III-ITD-5.1)
-   */
-  synchronized public void printWithProps(HashMap<String, Object> props)
-      throws PrintFailedException
-  {
-    try
-    {
-      if (props == null) props = new HashMap<String, Object>();
-      UnoProps myProps = new UnoProps("Wait", Boolean.TRUE);
-
-      // Property "CopyCount" bestimmen:
-      if (props.containsKey(PrintModelProps.PROP_COPY_COUNT))
-        myProps.setPropertyValue("CopyCount",
-          props.get(PrintModelProps.PROP_COPY_COUNT));
-
-      // Property "Pages" bestimmen:
-      if (props.containsKey(PrintModelProps.PROP_PAGES))
-        myProps.setPropertyValue("Pages", props.get(PrintModelProps.PROP_PAGES));
-      else if (props.containsKey(PrintModelProps.PROP_PAGE_RANGE_TYPE))
-      {
-        // pr mit aktueller Seite vorbelegen (oder 1 als fallback)
-        String pr = "1";
-        if (UNO.XPageCursor(getViewCursor()) != null)
-          pr = "" + UNO.XPageCursor(getViewCursor()).getPage();
-
-        short pageRangeType = ((Short) props.get(PrintModelProps.PROP_PAGE_RANGE_TYPE)).shortValue();
-        String pageRangeValue = null;
-        if (props.containsKey(PrintModelProps.PROP_PAGE_RANGE_VALUE))
-          pageRangeValue = "" + props.get(PrintModelProps.PROP_PAGE_RANGE_VALUE);
-
-        if (pageRangeType == PrintModelProps.PAGE_RANGE_TYPE_CURRENT)
-          myProps.setPropertyValue("Pages", pr);
-        else if (pageRangeType == PrintModelProps.PAGE_RANGE_TYPE_CURRENTFF)
-          myProps.setPropertyValue("Pages", pr + "-" + getPageCount());
-        else if (pageRangeType == PrintModelProps.PAGE_RANGE_TYPE_MANUAL
-                 && pageRangeValue != null)
-          myProps.setPropertyValue("Pages", pageRangeValue);
-      }
-
-      // Drucken:
-      if (UNO.XPrintable(doc) != null)
-        UNO.XPrintable(doc).print(myProps.getProps());
-    }
-    catch (java.lang.Exception e)
-    {
-      throw new PrintFailedException(e);
-    }
-  }
-
-  /**
-   * Das Drucken des Dokuments hat aus irgend einem Grund nicht funktioniert.
-   * 
-   * @author christoph.lutz
-   */
-  public static class PrintFailedException extends Exception
-  {
-    private static final long serialVersionUID = 1L;
-
-    PrintFailedException(Exception e)
-    {
-      super(L.m("Das Drucken des Dokuments schlug fehl: "), e);
     }
   }
 
