@@ -315,7 +315,7 @@ public class IfThenElseDialog extends TrafoDialog
         }});
       controls.add(textRadioButton);
       controls.add(Box.createHorizontalGlue());
-      AbstractButton ifThenElseRadioButton = new JRadioButton(L.m("Wenn...Dann..Sonst..."), conditionalResult.type == 1);
+      AbstractButton ifThenElseRadioButton = new JRadioButton(L.m("Wenn...Dann...Sonst..."), conditionalResult.type == 1);
       ifThenElseRadioButton.addActionListener(new ActionListener(){
         public void actionPerformed(ActionEvent e)
         {
