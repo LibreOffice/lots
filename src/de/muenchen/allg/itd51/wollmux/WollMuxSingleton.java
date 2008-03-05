@@ -41,9 +41,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Vector;
 import java.util.Date;
 
@@ -258,12 +260,23 @@ public class WollMuxSingleton implements XPALProvider
     }
 
     // "Extras->Seriendruck (WollMux)" erzeugen:
+    List<String> removeButtonsFor = new ArrayList<String>();
+    // TODO: früher war der button mit DISP_wmSeriendruck verbunden. Damit dieser
+    // button korrekt durch den neuen Button ersetzt wird, muss der Button zur alten
+    // URL (falls vorhanden) auch gelöscht werden. Kann irgendwann später mal wieder
+    // raus, wenn alle den neuen Button verwenden.
+    removeButtonsFor.add(DispatchHandler.DISP_wmSeriendruck);
+    removeButtonsFor.add(DispatchHandler.DISP_wmSeriendruckNeu);
     createMenuButton(DispatchHandler.DISP_wmSeriendruckNeu,
-      L.m("Seriendruck (WollMux)"), ".uno:ToolsMenu", ".uno:MailMergeWizard");
+      L.m("Seriendruck (WollMux)"), ".uno:ToolsMenu", ".uno:MailMergeWizard",
+      removeButtonsFor);
+
     // "Help->Info über WollMux" erzeugen:
+    removeButtonsFor.clear();
+    removeButtonsFor.add(DispatchHandler.DISP_wmAbout);
     createMenuButton(DispatchHandler.DISP_wmAbout,
       L.m("Info über Vorlagen und Formulare (WollMux)"), ".uno:HelpMenu",
-      ".uno:About");
+      ".uno:About", removeButtonsFor);
 
     // Setzen der in den Abschnitten OOoEinstellungen eingestellten
     // Konfigurationsoptionen
@@ -592,11 +605,13 @@ public class WollMuxSingleton implements XPALProvider
    * Erzeugt einen persistenten Menüeintrag mit der KommandoUrl cmdUrl und dem Label
    * label in dem durch mit insertIntoMenuUrl beschriebenen Toplevelmenü des Writers
    * und ordnet ihn direkt oberhalb des bereits bestehenden Menüpunktes mit der URL
-   * insertBeforeElementUrl an. Ist der Button bereits definiert, so wird der
-   * bestehende Eintrag vorher gelöscht.
+   * insertBeforeElementUrl an. Alle Buttons, deren Url in der Liste removeCmdUrls
+   * aufgeführt sind werden dabei vorher gelöscht (v.a. sollte cmdUrl aufgeführt
+   * sein, damit nicht der selbe Button doppelt erscheint).
    */
   private static void createMenuButton(String cmdUrl, String label,
-      String insertIntoMenuUrl, String insertBeforeElementUrl)
+      String insertIntoMenuUrl, String insertBeforeElementUrl,
+      List<String> removeCmdUrls)
   {
     final String settingsUrl = "private:resource/menubar/menubar";
 
@@ -617,8 +632,11 @@ public class WollMuxSingleton implements XPALProvider
       }
 
       // Seriendruck-Button löschen, wenn er bereits vorhanden ist.
-      idx = findElementWithCmdURL(toolsMenu, cmdUrl);
-      if (idx >= 0) toolsMenu.removeByIndex(idx);
+      for (String rCmdUrl : removeCmdUrls)
+      {
+        idx = findElementWithCmdURL(toolsMenu, rCmdUrl);
+        if (idx >= 0) toolsMenu.removeByIndex(idx);
+      }
 
       // SeriendruckAssistent suchen
       idx = findElementWithCmdURL(toolsMenu, insertBeforeElementUrl);
