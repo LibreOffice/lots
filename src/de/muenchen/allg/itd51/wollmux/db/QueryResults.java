@@ -1,4 +1,3 @@
-//TODO L.m()
 /*
 * Dateiname: QueryResults.java
 * Projekt  : WollMux
