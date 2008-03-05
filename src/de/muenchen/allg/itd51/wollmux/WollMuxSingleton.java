@@ -90,8 +90,8 @@ import de.muenchen.allg.itd51.wollmux.func.PrintFunctionLibrary;
 /**
  * Diese Klasse ist ein Singleton, welcher den WollMux initialisiert und alle
  * zentralen WollMux-Methoden zur Verfügung stellt. Selbst der WollMux-Service
- * de.muenchen.allg.itd51.wollmux.comp.WollMux, der früher zentraler Anlaufpunkt
- * war, bedient sich größtenteils aus den zentralen Methoden des Singletons.
+ * de.muenchen.allg.itd51.wollmux.comp.WollMux, der früher zentraler Anlaufpunkt war,
+ * bedient sich größtenteils aus den zentralen Methoden des Singletons.
  */
 public class WollMuxSingleton implements XPALProvider
 {
@@ -104,26 +104,22 @@ public class WollMuxSingleton implements XPALProvider
   private static WollMuxSingleton singletonInstance = null;
 
   /**
-   * Enthält die im Funktionen-Abschnitt der wollmux,conf definierten
-   * Funktionen.
+   * Enthält die im Funktionen-Abschnitt der wollmux,conf definierten Funktionen.
    */
   private FunctionLibrary globalFunctions;
 
   /**
-   * Enthält die im Funktionsdialoge-Abschnitt der wollmux,conf definierten
-   * Dialoge.
+   * Enthält die im Funktionsdialoge-Abschnitt der wollmux,conf definierten Dialoge.
    */
   private DialogLibrary funcDialogs;
 
   /**
-   * Enthält die im Funktionen-Abschnitt der wollmux,conf definierten
-   * Funktionen.
+   * Enthält die im Funktionen-Abschnitt der wollmux,conf definierten Funktionen.
    */
   private PrintFunctionLibrary globalPrintFunctions;
 
   /**
-   * Enthält den default XComponentContext in dem der WollMux (bzw. das OOo)
-   * läuft.
+   * Enthält den default XComponentContext in dem der WollMux (bzw. das OOo) läuft.
    */
   private XComponentContext ctx;
 
@@ -139,15 +135,15 @@ public class WollMuxSingleton implements XPALProvider
   private Vector<XEventListener> registeredDocumentEventListener;
 
   /**
-   * Enthält eine Zuordnung von HashableComponent Objekten, die die
-   * XTextDocumente repräsentieren, auf die zugehörigen TextDocumentModels
+   * Enthält eine Zuordnung von HashableComponent Objekten, die die XTextDocumente
+   * repräsentieren, auf die zugehörigen TextDocumentModels
    */
   private HashMap<HashableComponent, TextDocumentModel> currentTextDocumentModels;
 
   /**
    * Enthält null (wenn noch keine Installations-Prüfung erfolgte) oder den
-   * Zeitstempel der jungsten WollMuxInstallation, die auf dem System gefunden
-   * wurde. Ändert sich dieser Zeitstempel im laufenden Betrieb, dann liegt eine
+   * Zeitstempel der jungsten WollMuxInstallation, die auf dem System gefunden wurde.
+   * Ändert sich dieser Zeitstempel im laufenden Betrieb, dann liegt eine
    * Mehrfachinstallation des WollMux vor
    * {@see WollMuxEventHandler.handleCheckInstallation()}.
    */
@@ -194,8 +190,8 @@ public class WollMuxSingleton implements XPALProvider
 
     /*
      * Datenquellen/Registriere Abschnitte verarbeiten. ACHTUNG! Dies muss vor
-     * getDatasourceJoiner() geschehen, da die entsprechenden Datenquellen
-     * womöglich schon für WollMux-Datenquellen benötigt werden.
+     * getDatasourceJoiner() geschehen, da die entsprechenden Datenquellen womöglich
+     * schon für WollMux-Datenquellen benötigt werden.
      */
     registerDatasources(WollMuxFiles.getWollmuxConf(),
       WollMuxFiles.getDEFAULT_CONTEXT());
@@ -216,8 +212,8 @@ public class WollMuxSingleton implements XPALProvider
 
     /*
      * Globale Funktionen parsen. ACHTUNG! Verwendet die Funktionsdialoge. Diese
-     * müssen also vorher geparst sein. Als context wird null übergeben, weil
-     * globale Funktionen keinen Kontext haben.
+     * müssen also vorher geparst sein. Als context wird null übergeben, weil globale
+     * Funktionen keinen Kontext haben.
      */
     globalFunctions = WollMuxFiles.parseFunctions(WollMuxFiles.getWollmuxConf(),
       getFunctionDialogs(), null, null);
@@ -262,7 +258,7 @@ public class WollMuxSingleton implements XPALProvider
     }
 
     // "Extras->Seriendruck (WollMux)" erzeugen:
-    createMenuButton(DispatchHandler.DISP_wmSeriendruck,
+    createMenuButton(DispatchHandler.DISP_wmSeriendruckNeu,
       L.m("Seriendruck (WollMux)"), ".uno:ToolsMenu", ".uno:MailMergeWizard");
     // "Help->Info über WollMux" erzeugen:
     createMenuButton(DispatchHandler.DISP_wmAbout,
@@ -299,8 +295,8 @@ public class WollMuxSingleton implements XPALProvider
   }
 
   /**
-   * Diese Methode liefert die Instanz des WollMux-Singletons. Ist der WollMux
-   * noch nicht initialisiert, so liefert die Methode null!
+   * Diese Methode liefert die Instanz des WollMux-Singletons. Ist der WollMux noch
+   * nicht initialisiert, so liefert die Methode null!
    * 
    * @return Instanz des WollMuxSingletons oder null.
    */
@@ -310,8 +306,8 @@ public class WollMuxSingleton implements XPALProvider
   }
 
   /**
-   * Diese Methode initialisiert das WollMuxSingleton (nur dann, wenn es noch
-   * nicht initialisiert wurde)
+   * Diese Methode initialisiert das WollMuxSingleton (nur dann, wenn es noch nicht
+   * initialisiert wurde)
    */
   public static void initialize(XComponentContext ctx)
   {
@@ -329,14 +325,13 @@ public class WollMuxSingleton implements XPALProvider
 
   /**
    * Diese Methode liefert die erste Zeile aus der buildinfo-Datei der aktuellen
-   * WollMux-Installation zurück. Der Build-Status wird während dem
-   * Build-Prozess mit dem Kommando "svn info" auf das Projektverzeichnis
-   * erstellt. Die Buildinfo-Datei buildinfo enthält die Paketnummer und die
-   * svn-Revision und ist im WollMux.uno.pkg-Paket sowie in der
-   * WollMux.uno.jar-Datei abgelegt.
+   * WollMux-Installation zurück. Der Build-Status wird während dem Build-Prozess mit
+   * dem Kommando "svn info" auf das Projektverzeichnis erstellt. Die Buildinfo-Datei
+   * buildinfo enthält die Paketnummer und die svn-Revision und ist im
+   * WollMux.uno.pkg-Paket sowie in der WollMux.uno.jar-Datei abgelegt.
    * 
-   * Kann dieses File nicht gelesen werden, so wird eine entsprechende
-   * Ersatzmeldung erzeugt (siehe Sourcecode).
+   * Kann dieses File nicht gelesen werden, so wird eine entsprechende Ersatzmeldung
+   * erzeugt (siehe Sourcecode).
    * 
    * @return Der Build-Status der aktuellen WollMux-Installation.
    */
@@ -360,10 +355,9 @@ public class WollMuxSingleton implements XPALProvider
 
   /**
    * Diese Methode liefert die Versionsinformation der aktuell verwendeten
-   * wollmux-Konfiguration (z.B. "wollmux-standard-config-2.2.1") als String
-   * zurück, wenn in der Konfiguration ein entsprechender CONF_VERSION-Schlüssel
-   * definiert ist, oder "unbekannt", falls der dieser Schlüssel nicht
-   * existiert.
+   * wollmux-Konfiguration (z.B. "wollmux-standard-config-2.2.1") als String zurück,
+   * wenn in der Konfiguration ein entsprechender CONF_VERSION-Schlüssel definiert
+   * ist, oder "unbekannt", falls der dieser Schlüssel nicht existiert.
    * 
    * @return Der Versionsinformation der aktuellen WollMux-Konfiguration (falls
    *         definiert) oder "unbekannt", falls nicht.
@@ -390,8 +384,7 @@ public class WollMuxSingleton implements XPALProvider
   }
 
   /**
-   * Diese Methode liefert eine Instanz auf den aktuellen DatasourceJoiner
-   * zurück.
+   * Diese Methode liefert eine Instanz auf den aktuellen DatasourceJoiner zurück.
    * 
    * @return Returns the datasourceJoiner.
    */
@@ -507,15 +500,14 @@ public class WollMuxSingleton implements XPALProvider
   }
 
   /**
-   * Diese Methode registriert einen XPALChangeEventListener, der updates
-   * empfängt wenn sich die PAL ändert. Die Methode ignoriert alle
+   * Diese Methode registriert einen XPALChangeEventListener, der updates empfängt
+   * wenn sich die PAL ändert. Die Methode ignoriert alle
    * XPALChangeEventListenener-Instanzen, die bereits registriert wurden.
    * Mehrfachregistrierung der selben Instanz ist also nicht möglich.
    * 
-   * Achtung: Die Methode darf nicht direkt von einem UNO-Service aufgerufen
-   * werden, sondern jeder Aufruf muss über den EventHandler laufen. Deswegen
-   * exportiert WollMuxSingleton auch nicht das
-   * XPALChangedBroadcaster-Interface.
+   * Achtung: Die Methode darf nicht direkt von einem UNO-Service aufgerufen werden,
+   * sondern jeder Aufruf muss über den EventHandler laufen. Deswegen exportiert
+   * WollMuxSingleton auch nicht das XPALChangedBroadcaster-Interface.
    */
   public void addPALChangeEventListener(XPALChangeEventListener listener)
   {
@@ -533,15 +525,15 @@ public class WollMuxSingleton implements XPALProvider
   }
 
   /**
-   * Diese Methode registriert einen XEventListener, der Nachrichten empfängt
-   * wenn sich der Status der Dokumentbearbeitung ändert (z.B. wenn ein Dokument
+   * Diese Methode registriert einen XEventListener, der Nachrichten empfängt wenn
+   * sich der Status der Dokumentbearbeitung ändert (z.B. wenn ein Dokument
    * vollständig bearbeitet/expandiert wurde). Die Methode ignoriert alle
    * XEventListenener-Instanzen, die bereits registriert wurden.
    * Mehrfachregistrierung der selben Instanz ist also nicht möglich.
    * 
-   * Achtung: Die Methode darf nicht direkt von einem UNO-Service aufgerufen
-   * werden, sondern jeder Aufruf muss über den EventHandler laufen. Deswegen
-   * exportiert WollMuxSingleton auch nicht das XEventBroadcaster-Interface.
+   * Achtung: Die Methode darf nicht direkt von einem UNO-Service aufgerufen werden,
+   * sondern jeder Aufruf muss über den EventHandler laufen. Deswegen exportiert
+   * WollMuxSingleton auch nicht das XEventBroadcaster-Interface.
    */
   public void addDocumentEventListener(XEventListener listener)
   {
@@ -562,10 +554,9 @@ public class WollMuxSingleton implements XPALProvider
    * Diese Methode deregistriert einen XPALChangeEventListener wenn er bereits
    * registriert war.
    * 
-   * Achtung: Die Methode darf nicht direkt von einem UNO-Service aufgerufen
-   * werden, sondern jeder Aufruf muss über den EventHandler laufen. Deswegen
-   * exportiert WollMuxSingleton auch nicht das
-   * XPALChangedBroadcaster-Interface.
+   * Achtung: Die Methode darf nicht direkt von einem UNO-Service aufgerufen werden,
+   * sondern jeder Aufruf muss über den EventHandler laufen. Deswegen exportiert
+   * WollMuxSingleton auch nicht das XPALChangedBroadcaster-Interface.
    */
   public void removePALChangeEventListener(XPALChangeEventListener listener)
   {
@@ -579,12 +570,12 @@ public class WollMuxSingleton implements XPALProvider
   }
 
   /**
-   * Diese Methode deregistriert einen XEventListener wenn er bereits
-   * registriert war.
+   * Diese Methode deregistriert einen XEventListener wenn er bereits registriert
+   * war.
    * 
-   * Achtung: Die Methode darf nicht direkt von einem UNO-Service aufgerufen
-   * werden, sondern jeder Aufruf muss über den EventHandler laufen. Deswegen
-   * exportiert WollMuxSingleton auch nicht das XEventBroadcaster-Interface.
+   * Achtung: Die Methode darf nicht direkt von einem UNO-Service aufgerufen werden,
+   * sondern jeder Aufruf muss über den EventHandler laufen. Deswegen exportiert
+   * WollMuxSingleton auch nicht das XEventBroadcaster-Interface.
    */
   public void removeDocumentEventListener(XEventListener listener)
   {
@@ -598,11 +589,11 @@ public class WollMuxSingleton implements XPALProvider
   }
 
   /**
-   * Erzeugt einen persistenten Menüeintrag mit der KommandoUrl cmdUrl und dem
-   * Label label in dem durch mit insertIntoMenuUrl beschriebenen Toplevelmenü
-   * des Writers und ordnet ihn direkt oberhalb des bereits bestehenden
-   * Menüpunktes mit der URL insertBeforeElementUrl an. Ist der Button bereits
-   * definiert, so wird der bestehende Eintrag vorher gelöscht.
+   * Erzeugt einen persistenten Menüeintrag mit der KommandoUrl cmdUrl und dem Label
+   * label in dem durch mit insertIntoMenuUrl beschriebenen Toplevelmenü des Writers
+   * und ordnet ihn direkt oberhalb des bereits bestehenden Menüpunktes mit der URL
+   * insertBeforeElementUrl an. Ist der Button bereits definiert, so wird der
+   * bestehende Eintrag vorher gelöscht.
    */
   private static void createMenuButton(String cmdUrl, String label,
       String insertIntoMenuUrl, String insertBeforeElementUrl)
@@ -649,11 +640,10 @@ public class WollMuxSingleton implements XPALProvider
 
   /**
    * Liefert den Index des ersten Menüelements aus dem Menü menu zurück, dessen
-   * CommandURL mit cmdUrl identisch ist oder -1, falls kein solches Element
-   * gefunden wurde.
+   * CommandURL mit cmdUrl identisch ist oder -1, falls kein solches Element gefunden
+   * wurde.
    * 
-   * @return Liefert den Index des ersten Menüelements mit CommandURL cmdUrl
-   *         oder -1.
+   * @return Liefert den Index des ersten Menüelements mit CommandURL cmdUrl oder -1.
    */
   private static int findElementWithCmdURL(XIndexAccess menu, String cmdUrl)
   {
@@ -676,8 +666,8 @@ public class WollMuxSingleton implements XPALProvider
   }
 
   /**
-   * Setzt die im ConfigThingy übergebenen OOoEinstellungen-Abschnitt
-   * enthaltenen Einstellungen in der OOo-Registry.
+   * Setzt die im ConfigThingy übergebenen OOoEinstellungen-Abschnitt enthaltenen
+   * Einstellungen in der OOo-Registry.
    * 
    * @param oooEinstellungenConf
    *          Der Knoten OOoEinstellungen eines solchen Abschnitts.
@@ -706,13 +696,13 @@ public class WollMuxSingleton implements XPALProvider
   }
 
   /**
-   * Konvertiert den als String übergebenen Wert value in ein Objekt vom Typ
-   * type oder liefert eine IllegalArgumentException, wenn die Werte nicht
-   * konvertiert werden können.
+   * Konvertiert den als String übergebenen Wert value in ein Objekt vom Typ type
+   * oder liefert eine IllegalArgumentException, wenn die Werte nicht konvertiert
+   * werden können.
    * 
    * @param type
-   *          Der Typ in den konvertiert werden soll ('boolean', 'integer',
-   *          'float', 'string').
+   *          Der Typ in den konvertiert werden soll ('boolean', 'integer', 'float',
+   *          'string').
    * @param value
    *          Der zu konvertierende Wert.
    * @return Das neue Objekt vom entsprechenden Typ.
@@ -781,9 +771,8 @@ public class WollMuxSingleton implements XPALProvider
   }
 
   /**
-   * Liefert einen Iterator auf alle registrierten XEventListener-Objekte, die
-   * über Änderungen am Status der Dokumentverarbeitung informiert werden
-   * sollen.
+   * Liefert einen Iterator auf alle registrierten XEventListener-Objekte, die über
+   * Änderungen am Status der Dokumentverarbeitung informiert werden sollen.
    * 
    * @return Iterator auf alle registrierten XEventListener-Objekte.
    */
@@ -794,9 +783,8 @@ public class WollMuxSingleton implements XPALProvider
 
   /**
    * Diese Methode liefert eine alphabethisch aufsteigend sortierte Liste aller
-   * Einträge der Persönlichen Absenderliste (PAL) in einem String-Array, wobei
-   * die einzelnen Einträge in der Form "<Nachname>, <Vorname> (<Rolle>)"
-   * sind.
+   * Einträge der Persönlichen Absenderliste (PAL) in einem String-Array, wobei die
+   * einzelnen Einträge in der Form "<Nachname>, <Vorname> (<Rolle>)" sind.
    * 
    * @see de.muenchen.allg.itd51.wollmux.XPALProvider#getPALEntries()
    */
@@ -812,8 +800,8 @@ public class WollMuxSingleton implements XPALProvider
   }
 
   /**
-   * Diese Methode liefert alle DJDatasetListElemente der Persönlichen
-   * Absenderliste (PAL) in alphabetisch aufsteigend sortierter Reihenfolge.
+   * Diese Methode liefert alle DJDatasetListElemente der Persönlichen Absenderliste
+   * (PAL) in alphabetisch aufsteigend sortierter Reihenfolge.
    * 
    * @return alle DJDatasetListElemente der Persönlichen Absenderliste (PAL) in
    *         alphabetisch aufsteigend sortierter Reihenfolge.
@@ -835,10 +823,10 @@ public class WollMuxSingleton implements XPALProvider
 
   /**
    * Diese Methode liefert den aktuell aus der persönlichen Absenderliste (PAL)
-   * ausgewählten Absender im Format "<Nachname>, <Vorname> (<Rolle>)" zurück.
-   * Ist die PAL leer oder noch kein Absender ausgewählt, so liefert die Methode
-   * den Leerstring "" zurück. Dieser Sonderfall sollte natürlich entsprechend
-   * durch die aufrufende Methode behandelt werden.
+   * ausgewählten Absender im Format "<Nachname>, <Vorname> (<Rolle>)" zurück. Ist
+   * die PAL leer oder noch kein Absender ausgewählt, so liefert die Methode den
+   * Leerstring "" zurück. Dieser Sonderfall sollte natürlich entsprechend durch die
+   * aufrufende Methode behandelt werden.
    * 
    * @see de.muenchen.allg.itd51.wollmux.XPALProvider#getCurrentSender()
    * 
@@ -879,8 +867,7 @@ public class WollMuxSingleton implements XPALProvider
   }
 
   /**
-   * Liefert die Funktionsbibliothek, die die global definierten Funktionen
-   * enthält.
+   * Liefert die Funktionsbibliothek, die die global definierten Funktionen enthält.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -913,8 +900,8 @@ public class WollMuxSingleton implements XPALProvider
 
   /**
    * Liefert null (wenn noch keine Installations-Prüfung erfolgte) oder den
-   * Zeitstempel der jungsten WollMuxInstallation, die auf dem System gefunden
-   * wurde. Ändert sich dieser Zeitstempel im laufenden Betrieb, dann liegt eine
+   * Zeitstempel der jungsten WollMuxInstallation, die auf dem System gefunden wurde.
+   * Ändert sich dieser Zeitstempel im laufenden Betrieb, dann liegt eine
    * Mehrfachinstallation des WollMux vor
    * {@see WollMuxEventHandler.handleCheckInstallation()}.
    * 
@@ -927,8 +914,7 @@ public class WollMuxSingleton implements XPALProvider
 
   /**
    * Ermöglicht das Setzen des Datums der jüngsten WollMux-Installation, die in
-   * WollMuxEventHandler.handleCheckInstallation(...) auf dem System gefunden
-   * wurde.
+   * WollMuxEventHandler.handleCheckInstallation(...) auf dem System gefunden wurde.
    * 
    * @param currentWollMuxInstallationDate
    * 
@@ -950,10 +936,9 @@ public class WollMuxSingleton implements XPALProvider
   }
 
   /**
-   * Diese Methode tut nichts ausser zu prüfen, ob es sich bei dem übergebenen
-   * String id um einen gültigen Bezeichner gemäß der Syntax für
-   * WollMux-Config-Dateien handelt und im negativen Fall eine
-   * InvalidIdentifierException zu werfen.
+   * Diese Methode tut nichts ausser zu prüfen, ob es sich bei dem übergebenen String
+   * id um einen gültigen Bezeichner gemäß der Syntax für WollMux-Config-Dateien
+   * handelt und im negativen Fall eine InvalidIdentifierException zu werfen.
    * 
    * @param id
    *          zu prüfende ID
@@ -1003,8 +988,8 @@ public class WollMuxSingleton implements XPALProvider
 
   /**
    * Liefert das aktuelle TextDocumentModel zum übergebenen XTextDocument doc;
-   * existiert zu doc noch kein TextDocumentModel, so wird hier eines erzeugt
-   * und das neu erzeugte zurück geliefert.
+   * existiert zu doc noch kein TextDocumentModel, so wird hier eines erzeugt und das
+   * neu erzeugte zurück geliefert.
    * 
    * @param doc
    *          Das XTextDocument, zu dem das zugehörige TextDocumentModel
@@ -1026,15 +1011,14 @@ public class WollMuxSingleton implements XPALProvider
   }
 
   /**
-   * Liefert das aktuelle TextDocumentModel zum übergebenen XFrame frame oder
-   * null, falls dem Frame kein entsprechendes TextDocumentModel zugeordnet
-   * werden kann.
+   * Liefert das aktuelle TextDocumentModel zum übergebenen XFrame frame oder null,
+   * falls dem Frame kein entsprechendes TextDocumentModel zugeordnet werden kann.
    * 
    * ACHTUNG: Die Methode wird vom DispatchHandler verwendet, um das
    * TextDocumentModel eines Frames zu bestimmen und wird daher NICHT mit dem
-   * WollMuxEventHandler synchronisiert aufgerufen. Daher darf z.B. im Gegensatz
-   * zu getTextDocumentModel(XTextDocument) hier auch kein TextDocumentModel
-   * erzeugt werden, wenn es nicht bereits existiert.
+   * WollMuxEventHandler synchronisiert aufgerufen. Daher darf z.B. im Gegensatz zu
+   * getTextDocumentModel(XTextDocument) hier auch kein TextDocumentModel erzeugt
+   * werden, wenn es nicht bereits existiert.
    * 
    * Der Zugriff auf das TextDocumentModel in der nicht synchronisierten
    * Aufrufmethode des DispatchHandler darf daher auch auschließend lesend sein.
@@ -1060,8 +1044,8 @@ public class WollMuxSingleton implements XPALProvider
   }
 
   /**
-   * Löscht das übergebene TextDocumentModel von doc aus der internen Liste
-   * aller aktuellen TextDocumentModels.
+   * Löscht das übergebene TextDocumentModel von doc aus der internen Liste aller
+   * aktuellen TextDocumentModels.
    * 
    * @param doc
    *          Das XTextDocument, dessen zugehöriges TextDocumentModel aus der
@@ -1080,8 +1064,8 @@ public class WollMuxSingleton implements XPALProvider
    * entsprechendes Element gefunden wurde.
    * 
    * @param element
-   *          Das erste gefundene AnnotationField oder null, wenn keines
-   *          gefunden wurde.
+   *          Das erste gefundene AnnotationField oder null, wenn keines gefunden
+   *          wurde.
    */
   public static XTextField findAnnotationFieldRecursive(Object element)
   {
@@ -1134,10 +1118,9 @@ public class WollMuxSingleton implements XPALProvider
   }
 
   /**
-   * Diese Methode erzeugt einen modalen Swing-Dialog zur Anzeige von
-   * Informationen und kehrt erst nach Beendigung des Dialogs wieder zurück. Der
-   * sichtbare Text wird dabei ab einer Länge von 50 Zeichen automatisch
-   * umgebrochen.
+   * Diese Methode erzeugt einen modalen Swing-Dialog zur Anzeige von Informationen
+   * und kehrt erst nach Beendigung des Dialogs wieder zurück. Der sichtbare Text
+   * wird dabei ab einer Länge von 50 Zeichen automatisch umgebrochen.
    * 
    * @param sTitle
    *          Titelzeile des Dialogs
@@ -1150,8 +1133,8 @@ public class WollMuxSingleton implements XPALProvider
   }
 
   /**
-   * Diese Methode erzeugt einen modalen Swing-Dialog zur Anzeige von
-   * Informationen und kehrt erst nach Beendigung des Dialogs wieder zurück.
+   * Diese Methode erzeugt einen modalen Swing-Dialog zur Anzeige von Informationen
+   * und kehrt erst nach Beendigung des Dialogs wieder zurück.
    * 
    * @param sTitle
    *          Titelzeile des Dialogs
@@ -1203,16 +1186,16 @@ public class WollMuxSingleton implements XPALProvider
   }
 
   /**
-   * Holt sich den Frame von doc, führt auf diesem ein queryDispatch() mit der
-   * zu urlStr gehörenden URL aus und liefert den Ergebnis XDispatch zurück oder
-   * null, falls der XDispatch nicht verfügbar ist.
+   * Holt sich den Frame von doc, führt auf diesem ein queryDispatch() mit der zu
+   * urlStr gehörenden URL aus und liefert den Ergebnis XDispatch zurück oder null,
+   * falls der XDispatch nicht verfügbar ist.
    * 
    * @param doc
    *          Das Dokument, dessen Frame für den Dispatch verwendet werden soll.
    * @param urlStr
    *          die URL in Form eines Strings (wird intern zu URL umgewandelt).
-   * @return den gefundenen XDispatch oder null, wenn der XDispatch nicht
-   *         verfügbar ist.
+   * @return den gefundenen XDispatch oder null, wenn der XDispatch nicht verfügbar
+   *         ist.
    */
   public static XDispatch getDispatchForModel(XModel doc, com.sun.star.util.URL url)
   {
@@ -1236,9 +1219,9 @@ public class WollMuxSingleton implements XPALProvider
   }
 
   /**
-   * Der GlobalEventListener sorgt dafür, dass der WollMux alle wichtigen
-   * globalen Ereignisse wie z.B. ein OnNew on OnLoad abfangen und darauf
-   * reagieren kann. In diesem Fall wird die Methode notifyEvent aufgerufen.
+   * Der GlobalEventListener sorgt dafür, dass der WollMux alle wichtigen globalen
+   * Ereignisse wie z.B. ein OnNew on OnLoad abfangen und darauf reagieren kann. In
+   * diesem Fall wird die Methode notifyEvent aufgerufen.
    * 
    * @author christoph.lutz
    */
