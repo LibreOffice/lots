@@ -1,4 +1,3 @@
-//TODO L.m()
 /*
 * Dateiname: FunctionFactory.java
 * Projekt  : WollMux
@@ -54,6 +53,7 @@ import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
+import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.dialog.Dialog;
@@ -306,9 +306,9 @@ public class FunctionFactory
     }
     
     if (name.length() == 0)
-      throw new ConfigurationErrorException("Öffnende Klammer ohne voranstehenden Funktionsnamen gefunden. "+outputErrorPosition(conf));
+      throw new ConfigurationErrorException(L.m("Öffnende Klammer ohne voranstehenden Funktionsnamen gefunden. ")+outputErrorPosition(conf));
     else
-      throw new ConfigurationErrorException("\""+name+"\" ist keine unterstützte Grundfunktion. "+outputErrorPosition(conf));
+      throw new ConfigurationErrorException(L.m("\"%1\" ist keine unterstützte Grundfunktion. ", name)+outputErrorPosition(conf));
   }
 
   /**
@@ -322,21 +322,21 @@ public class FunctionFactory
     //str = str.replaceAll("\\p{Space}", " ");
     int end = 100;
     if (str.length() < end) end = str.length();
-    return "Text an der Fehlerstelle: " + str.substring(0, end);
+    return L.m("Text an der Fehlerstelle: %1", str.substring(0, end));
   }
   
   private static Function parseBIND(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map<Object, Object> context) throws ConfigurationErrorException
   {
     ConfigThingy funcConf = conf.query("FUNCTION"); //funcConf = <query results> - FUNCTION - ...
     if (funcConf.count() != 1)
-      throw new ConfigurationErrorException("Funktion vom Typ \"BIND\" erfordert genau 1 Unterelement FUNCTION");
+      throw new ConfigurationErrorException(L.m("Funktion vom Typ \"BIND\" erfordert genau 1 Unterelement FUNCTION"));
     
     Function func;
     funcConf = funcConf.iterator().next();  //funcConf = FUNCTION - ...
     if (funcConf.count() == 0)
-      throw new ConfigurationErrorException("Bei Funktionen vom Typ \"BIND\" muss nach \"FUNCTION\" ein Funktionsname oder eine Funktion folgen.");
+      throw new ConfigurationErrorException(L.m("Bei Funktionen vom Typ \"BIND\" muss nach \"FUNCTION\" ein Funktionsname oder eine Funktion folgen."));
     if (funcConf.count() > 1)
-      throw new ConfigurationErrorException("Bei Funktionen vom Typ \"BIND\" darf nach \"FUNCTION\" keine Liste sondern nur ein Funktionsname oder eine Funktion folgen.");
+      throw new ConfigurationErrorException(L.m("Bei Funktionen vom Typ \"BIND\" darf nach \"FUNCTION\" keine Liste sondern nur ein Funktionsname oder eine Funktion folgen."));
 
     funcConf = funcConf.iterator().next(); //<Funktionsname>|<Funktion> - ...
     
@@ -346,7 +346,7 @@ public class FunctionFactory
       
       func = funcLib.get(funcName);
       if (func == null)
-        throw new ConfigurationErrorException("Funktion \""+funcName+"\" wird verwendet, bevor sie definiert ist");
+        throw new ConfigurationErrorException(L.m("Funktion \"%1\" wird verwendet, bevor sie definiert ist", funcName));
     }
     else //if (funcConf.count() > 0) d.h. es wurde eine ganze Funktion angegeben
     {
@@ -359,7 +359,7 @@ public class FunctionFactory
   private static Function parseDIALOG(ConfigThingy conf, DialogLibrary dialogLib, Map<Object, Object> context) throws ConfigurationErrorException
   {
     if (conf.count() != 2)
-      throw new ConfigurationErrorException("Funktion vom Typ \"DIALOG\" erfordert genau 2 Parameter, nicht "+conf.count());
+      throw new ConfigurationErrorException(L.m("Funktion vom Typ \"DIALOG\" erfordert genau 2 Parameter, nicht %1", conf.count()));
     
     String dialogName;
     String dataName; 
@@ -376,10 +376,10 @@ public class FunctionFactory
     
     Dialog dialog = dialogLib.get(dialogName);
     if (dialog == null)
-      throw new ConfigurationErrorException("Dialog \""+dialogName+"\" ist nicht definiert, aber wird in DIALOG-Funktion verwendet");
+      throw new ConfigurationErrorException(L.m("Dialog \"%1\" ist nicht definiert, aber wird in DIALOG-Funktion verwendet", dialogName));
     
     if (context == null)
-      throw new ConfigurationErrorException("DIALOG-Funktion ist kontextabhängig und kann deshalb hier nicht verwendet werden.");
+      throw new ConfigurationErrorException(L.m("DIALOG-Funktion ist kontextabhängig und kann deshalb hier nicht verwendet werden."));
     
     return new DialogFunction(dialogName, dialog, dataName, context);
   }
@@ -389,10 +389,10 @@ public class FunctionFactory
     ConfigThingy thenConf = conf.query("THEN");
     ConfigThingy elseConf = conf.query("ELSE");
     if (thenConf.count() > 1 || elseConf.count() > 1)
-      throw new ConfigurationErrorException("In IF darf maximal ein THEN und ein ELSE vorhanden sein");
+      throw new ConfigurationErrorException(L.m("In IF darf maximal ein THEN und ein ELSE vorhanden sein"));
     
     if (conf.count() - thenConf.count() - elseConf.count() != 1)
-      throw new ConfigurationErrorException("IF muss genau eine Bedingung enthalten.");
+      throw new ConfigurationErrorException(L.m("IF muss genau eine Bedingung enthalten."));
     
     if (thenConf.count() == 0)
     {
@@ -422,7 +422,7 @@ public class FunctionFactory
   private static Function parseREPLACE(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map<Object, Object> context) throws ConfigurationErrorException
   {
     if (conf.count() != 3)
-      throw new ConfigurationErrorException("Funktion vom Typ \"REPLACE\" erfordert genau 3 Parameter, nicht "+conf.count());
+      throw new ConfigurationErrorException(L.m("Funktion vom Typ \"REPLACE\" erfordert genau 3 Parameter, nicht %1", conf.count()));
     
     Function strFun;
     Function reFun;
@@ -439,7 +439,7 @@ public class FunctionFactory
       p = Pattern.compile(regex);
     }catch(PatternSyntaxException x)
     {
-      throw new ConfigurationErrorException("Fehler in regex \""+regex+"\"", x);
+      throw new ConfigurationErrorException(L.m("Fehler in regex \"%1\"", regex), x);
     }
     return new ReplaceFunction(strFun, p, repFun);
   }
@@ -447,7 +447,7 @@ public class FunctionFactory
   private static Function parseMATCH(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map<Object, Object> context) throws ConfigurationErrorException
   {
     if (conf.count() != 2)
-      throw new ConfigurationErrorException("Funktion vom Typ \"MATCH\" erfordert genau 2 Parameter, nicht "+conf.count());
+      throw new ConfigurationErrorException(L.m("Funktion vom Typ \"MATCH\" erfordert genau 2 Parameter, nicht %1", conf.count()));
     
     Function strFun;
     Function reFun; 
@@ -468,7 +468,7 @@ public class FunctionFactory
       p = Pattern.compile(regex);
     }catch(PatternSyntaxException x)
     {
-      throw new ConfigurationErrorException("Fehler in regex \""+regex+"\"", x);
+      throw new ConfigurationErrorException(L.m("Fehler in regex \"%1\"", regex), x);
     }
     return new MatchFunction(strFun, p);
   }
@@ -476,7 +476,7 @@ public class FunctionFactory
   private static Function parseVALUE(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map<Object, Object> context) throws ConfigurationErrorException
   {
     if (conf.count() != 1)
-      throw new ConfigurationErrorException("Funktion vom Typ \"VALUE\" erfordert genau 1 Parameter, nicht "+conf.count()); 
+      throw new ConfigurationErrorException(L.m("Funktion vom Typ \"VALUE\" erfordert genau 1 Parameter, nicht %1", conf.count())); 
     
     Function valueNameFun;
     try
@@ -505,10 +505,10 @@ public class FunctionFactory
       if (name.equals("BY"))
       {
         if (funConf.count() != 1)
-          throw new ConfigurationErrorException("BY-Angabe von "+conf.getName()+" muss genau eine Funktion oder einen String enthalten");
+          throw new ConfigurationErrorException(L.m("BY-Angabe von %1 muss genau eine Funktion oder einen String enthalten", conf.getName()));
         
         if (byFun != null)
-          throw new ConfigurationErrorException(conf.getName()+"-Funktion darf maximal eine BY-Angabe haben");
+          throw new ConfigurationErrorException(L.m("%1-Funktion darf maximal eine BY-Angabe haben", conf.getName()));
         
         byFun = parseChildren(funConf, funcLib, dialogLib, context);
       } else if (name.equals("MIN"))
@@ -522,7 +522,7 @@ public class FunctionFactory
         }catch(Exception x){}
         
         if (num < 0)
-          throw new ConfigurationErrorException("MIN-Angabe von "+conf.getName()+" muss \"<NichtNegativeGanzeZahl>\" sein");
+          throw new ConfigurationErrorException(L.m("MIN-Angabe von %1 muss \"<NichtNegativeGanzeZahl>\" sein", conf.getName()));
 
         minScale = num;
         
@@ -537,29 +537,29 @@ public class FunctionFactory
         }catch(Exception x){}
         
         if (num < 0)
-          throw new ConfigurationErrorException("MAX-Angabe von "+conf.getName()+" muss \"<NichtNegativeGanzeZahl>\" sein");
+          throw new ConfigurationErrorException(L.m("MAX-Angabe von %1 muss \"<NichtNegativeGanzeZahl>\" sein", conf.getName()));
 
         maxScale = num;        
       } else
       {
-        if (dividendFun != null) throw new ConfigurationErrorException("Bei "+conf.getName()+"-Funktion wurde mehr als eine unqualifizierte Funktion angegeben. Beachten Sie, dass der Divisor mit BY(...) umschlossen sein muss.");
+        if (dividendFun != null) throw new ConfigurationErrorException(L.m("Bei %1-Funktion wurde mehr als eine unqualifizierte Funktion angegeben. Beachten Sie, dass der Divisor mit BY(...) umschlossen sein muss.", conf.getName()));
         dividendFun = parse(funConf, funcLib, dialogLib, context);
       }
     }
     
     if (dividendFun == null)
-      throw new ConfigurationErrorException("Bei "+conf.getName()+"-Funktion muss genau eine unqualifizierte Funktion angegeben werden");
+      throw new ConfigurationErrorException(L.m("Bei %1-Funktion muss genau eine unqualifizierte Funktion angegeben werden", conf.getName()));
     
     if (maxScale < 0)
     {
       if (byFun == null) //falls kein Divisor, dann ist MAX nicht erforderlich, da Division durch 1 nichts kaputt macht
         maxScale = 1024; //eigentlich sollte hier Integer.MAX_SIZE stehen, aber auch bei Division durch 1 reserviert die BigDecimal-Klasse Speicher entsprechend der maximalen Stelligkeit
       else
-        throw new ConfigurationErrorException(conf.getName()+" erfordert die Angabe MAX \"<NichtNegativeZahl>\", wenn mit BY ein Divisor angegeben wird");
+        throw new ConfigurationErrorException(L.m("%1 erfordert die Angabe MAX \"<NichtNegativeZahl>\", wenn mit BY ein Divisor angegeben wird", conf.getName()));
     }
     
     if (maxScale < minScale)
-      throw new ConfigurationErrorException("Bei "+conf.getName()+" muss MIN kleiner oder gleich MAX sein");
+      throw new ConfigurationErrorException(L.m("Bei %1 muss MIN kleiner oder gleich MAX sein", conf.getName()));
     
     return new DivideFunction(dividendFun, byFun, minScale, maxScale);
   }
@@ -617,7 +617,7 @@ public class FunctionFactory
       {
         ConfigThingy set = (ConfigThingy)iter.next();
         if (set.count() != 2)
-          throw new ConfigurationErrorException("BIND: SET benötigt genau 2 Parameter");
+          throw new ConfigurationErrorException(L.m("BIND: SET benötigt genau 2 Parameter"));
         
         String name;
         Function setFunc;
@@ -630,7 +630,7 @@ public class FunctionFactory
         }
         
         if (mapParamNameToSetFunction.containsKey(name))
-          throw new ConfigurationErrorException("BIND: Der Parameter "+name+" wird 2 mal mit SET gebunden");
+          throw new ConfigurationErrorException(L.m("BIND: Der Parameter %1 wird 2 mal mit SET gebunden", name));
         
         mapParamNameToSetFunction.put(name, setFunc);
         setFuncParams.addAll(Arrays.asList(setFunc.parameters()));
@@ -757,7 +757,7 @@ public class FunctionFactory
     public IsErrorFunction(boolean objectCompare, ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map<Object, Object> context) throws ConfigurationErrorException
     {
       if (conf.count() != 1)
-        throw new ConfigurationErrorException("Funktion "+conf.getName()+" muss genau einen Parameter haben");
+        throw new ConfigurationErrorException(L.m("Funktion %1 muss genau einen Parameter haben", conf.getName()));
 
       this.objectCompare = objectCompare;
       func = parseChildren(conf, funcLib, dialogLib, context);
@@ -876,7 +876,7 @@ public class FunctionFactory
       try
       {
         Object result = func.invoke(parameters);
-        if (result == null) throw new Exception("Unbekannter Fehler beim Ausführen einer externen Funktion");
+        if (result == null) throw new Exception(L.m("Unbekannter Fehler beim Ausführen einer externen Funktion"));
         return result.toString();
       }
       catch (Exception e)
@@ -988,7 +988,7 @@ public class FunctionFactory
         subFunction.add(fun);
       }
       
-      if (subFunction.size() == 0) throw new ConfigurationErrorException("Funktion "+conf.getName()+" erfordert mindestens einen Parameter");
+      if (subFunction.size() == 0) throw new ConfigurationErrorException(L.m("Funktion %1 erfordert mindestens einen Parameter", conf.getName()));
       
       subFunction.trimToSize();
       init(subFunction);
@@ -1265,7 +1265,7 @@ public class FunctionFactory
     public StrCmpFunction(ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map<Object, Object> context) throws ConfigurationErrorException
     {
       super(conf, funcLib, dialogLib, context);
-      if (subFunction.size() < 2) throw new ConfigurationErrorException("Funktion "+conf.getName()+" erfordert mindestens 2 Parameter");
+      if (subFunction.size() < 2) throw new ConfigurationErrorException(L.m("Funktion %1 erfordert mindestens 2 Parameter", conf.getName()));
     }
 
     public String getString(Values parameters)
@@ -1561,7 +1561,7 @@ public class FunctionFactory
     public NumberCompareFunction(int cmp1, int cmp2, String result, ConfigThingy conf, FunctionLibrary funcLib, DialogLibrary dialogLib, Map<Object, Object> context) throws ConfigurationErrorException
     {
       super(conf, funcLib, dialogLib, context);
-      if (subFunction.size() < 2) throw new ConfigurationErrorException("Funktion "+conf.getName()+" erfordert mindestens 2 Parameter");
+      if (subFunction.size() < 2) throw new ConfigurationErrorException(L.m("Funktion %1 erfordert mindestens 2 Parameter", conf.getName()));
       this.cmp1 = cmp1;
       this.cmp2 = cmp2;
       this.result = result;
@@ -1573,7 +1573,7 @@ public class FunctionFactory
       if (conf.getName().equals("MARGIN"))
       {
         if (conf.count() != 1)
-          throw new ConfigurationErrorException("MARGIN muss genau eine Funktion enthalten");
+          throw new ConfigurationErrorException(L.m("MARGIN muss genau eine Funktion enthalten"));
         marginFun = parseChildren(conf, funcLib, dialogLib, context);
         return true;
       }

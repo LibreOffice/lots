@@ -1,4 +1,3 @@
-//TODO L.m()
 /*
 * Dateiname: ExternalFunction.java
 * Projekt  : WollMux
@@ -34,6 +33,7 @@ import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
+import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
 
 /**
@@ -84,7 +84,7 @@ public class ExternalFunction
       url = conf.get("URL").toString();
     }catch(NodeNotFoundException x)
     {
-      throw new ConfigurationErrorException("URL fehlt in EXTERN");
+      throw new ConfigurationErrorException(L.m("URL fehlt in EXTERN"));
     }
     
     try
@@ -100,13 +100,13 @@ public class ExternalFunction
           {
             if (method != null)
             { 
-              Logger.error("Klasse \""+classStr+"\" enthält 2 Methoden namens \""+methodStr+"\"");
+              Logger.error(L.m("Klasse \"%1\" enthält 2 Methoden namens \"%2\"", classStr, methodStr));
               break;
             }
             method = methods[i];
           }
         
-        if (method == null) throw new ConfigurationErrorException("Klasse \""+classStr+"\" enthält keine PUBLIC Methode namens \""+methodStr+"\"");
+        if (method == null) throw new ConfigurationErrorException(L.m("Klasse \"%1\" enthält keine PUBLIC Methode namens \"%2", classStr, methodStr));
       }
       else
       {
@@ -115,7 +115,7 @@ public class ExternalFunction
     }
     catch (Exception e)
     {
-      throw new ConfigurationErrorException("Skript \""+url+"\" nicht verfügbar",e);
+      throw new ConfigurationErrorException(L.m("Skript \"%1\" nicht verfügbar", url),e);
     }
     
     ConfigThingy paramsConf = conf.query("PARAMS");
