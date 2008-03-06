@@ -27,6 +27,8 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.util.ArrayList;
@@ -104,6 +106,11 @@ public class MailMergeNew
   private MailMergeDatasource ds;
 
   /**
+   * Verschlingt alle KeyEvents die keine Ziffern oder Editierbefehle sind.
+   */
+  private KeyListener nonNumericKeyConsumer = new NonNumericKeyConsumer();
+
+  /**
    * true gdw wir uns im Vorschau-Modus befinden.
    */
   private boolean previewMode;
@@ -120,6 +127,57 @@ public class MailMergeNew
    * Ausgabe in einem neuen Dokument haben möchte.
    */
   private boolean printIntoDocument = true;
+
+  /**
+   * Auf welche Art hat der Benutzer die zu druckenden Datensätze ausgewählt.
+   * 
+   * @author Matthias Benkmann (D-III-ITD D.10)
+   */
+  private enum DatasetSelectionType {
+    /**
+     * Alle Datensätze.
+     */
+    ALL,
+
+    /**
+     * Der durch {@link MailMergeNew#rangeStart} und {@link MailMergeNew#rangeEnd}
+     * gegebene Wert.
+     */
+    RANGE,
+
+    /**
+     * Die durch {@link MailMergeNew#selectedIndexes} bestimmten Datensätze.
+     */
+    INDIVIDUAL
+  };
+
+  /**
+   * Auf welche Art hat der Benutzer die zu druckenden Datensätze ausgewählt.
+   */
+  private DatasetSelectionType datasetSelectionType = DatasetSelectionType.ALL;
+
+  /**
+   * Falls {@link #datasetSelectionType} == {@link DatasetSelectionType#RANGE}
+   * bestimmt dies den ersten zu druckenden Datensatz. ACHTUNG! Der Wert hier kann 0
+   * oder größer als {@link #rangeEnd} sein. Dies muss dort behandelt werden, wo er
+   * verwendet wird.
+   */
+  private int rangeStart;
+
+  /**
+   * Falls {@link #datasetSelectionType} == {@link DatasetSelectionType#RANGE}
+   * bestimmt dies den letzten zu druckenden Datensatz. ACHTUNG! Der Wert hier kann 0
+   * oder kleiner als {@link #rangeStart} sein. Dies muss dort behandelt werden, wo
+   * er verwendet wird.
+   */
+  private int rangeEnd;
+
+  /**
+   * Falls {@link #datasetSelectionType} == {@link DatasetSelectionType#INDIVIDUAL}
+   * bestimmt dies die Indizes der ausgewählten Datensätze, wobei 1 den ersten
+   * Datensatz bezeichnet.
+   */
+  private List selectedIndexes = new Vector();
 
   /**
    * Das Textfield in dem Benutzer direkt eine Datensatznummer für die Vorschau
@@ -287,6 +345,7 @@ public class MailMergeNew
 
     // FIXME: Muss ausgegraut sein, wenn nicht im Vorschau-Modus.
     previewDatasetNumberTextfield = new JTextField("1", 3);
+    previewDatasetNumberTextfield.addKeyListener(nonNumericKeyConsumer);
     previewDatasetNumberTextfield.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
@@ -433,7 +492,7 @@ public class MailMergeNew
    * setzt dann falls {@link #previewMode} == true alle Feldwerte auf die Werte des
    * entsprechenden Datensatzes.
    * 
-   * @author Matthias Benkmann (D-III-ITD D.10) 
+   * @author Matthias Benkmann (D-III-ITD D.10)
    * 
    * TESTED
    */
@@ -462,7 +521,7 @@ public class MailMergeNew
     Iterator<String> dataIter = data.iterator();
     for (String column : schema)
     {
-      //FIXME: Ist das so richtig? Geht das effizienter?
+      // FIXME: Ist das so richtig? Geht das effizienter?
       mod.setFormFieldValue(column, dataIter.next());
       mod.updateFormFields(column);
     }
@@ -839,6 +898,12 @@ public class MailMergeNew
     ButtonGroup radioGroup = new ButtonGroup();
     JRadioButton rbutton;
     rbutton = new JRadioButton(L.m("Alle"), true);
+    rbutton.addActionListener(new ActionListener()
+    {
+      public void actionPerformed(ActionEvent e)
+      {
+      }
+    });
     hbox.add(rbutton);
     radioGroup.add(rbutton);
     rbutton = new JRadioButton(L.m("Von"), false);
@@ -1213,6 +1278,26 @@ public class MailMergeNew
         pmod.setFormValue(spalte, ds.get(spalte));
       }
       pmod.printWithProps();
+    }
+  }
+
+  private static class NonNumericKeyConsumer implements KeyListener
+  {
+    public void keyTyped(KeyEvent e)
+    {
+      char c = e.getKeyChar();
+      if (!((Character.isDigit(c) || (c == KeyEvent.VK_BACK_SPACE) || (c == KeyEvent.VK_DELETE))))
+      {
+        e.consume();
+      }
+    }
+
+    public void keyPressed(KeyEvent e)
+    {
+    }
+
+    public void keyReleased(KeyEvent e)
+    {
     }
   }
 

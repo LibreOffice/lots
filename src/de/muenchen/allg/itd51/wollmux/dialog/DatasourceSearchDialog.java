@@ -1,4 +1,3 @@
-//TODO L.m()
 /*
 * Dateiname: DatasourceSearchDialog.java
 * Projekt  : WollMux
@@ -61,6 +60,7 @@ import javax.swing.WindowConstants;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
+import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.TimeoutException;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
@@ -249,17 +249,17 @@ public class DatasourceSearchDialog implements Dialog
     this.funcLib = funcLib;
     this.dialogLib = dialogLib;
     
-    String title = "Datensatz Auswählen";
+    String title = L.m("Datensatz Auswählen");
     try{ title = myConf.get("TITLE",1).toString();} catch(Exception x){}
     
-    String type = "<keiner>";
+    String type = L.m("<keiner>");
     try{ type = myConf.get("TYPE",1).toString();} catch(Exception x){}
     if (!type.equals("dbSelect"))
-      throw new ConfigurationErrorException("Ununterstützter TYPE \""+type+"\" in Funktionsdialog \""+myConf.getName()+"\"");
+      throw new ConfigurationErrorException(L.m("Ununterstützter TYPE \"%1\" in Funktionsdialog \"%2\"",type,myConf.getName()));
     
     final ConfigThingy fensterDesc = myConf.query("Fenster");
     if (fensterDesc.count() == 0)
-      throw new ConfigurationErrorException("Schlüssel 'Fenster' fehlt in "+myConf.getName());
+      throw new ConfigurationErrorException(L.m("Schlüssel 'Fenster' fehlt in %1",myConf.getName()));
     
     //  GUI im Event-Dispatching Thread erzeugen wg. Thread-Safety.
     try{
@@ -315,7 +315,7 @@ public class DatasourceSearchDialog implements Dialog
        * um get()-Befehle, sie verhindert auch, dass TIP oder HOTKEY aus Versehen
        * von einem enthaltenen Button aufgeschnappt werden.
        */
-      String tabTitle = "Eingabe";
+      String tabTitle = L.m("Eingabe");
       char hotkey = 0;
       String tip = "";
       Iterator childIter = neuesFenster.iterator();
@@ -394,7 +394,7 @@ public class DatasourceSearchDialog implements Dialog
      * Legt fest, wie die Datensätze in der Ergebnisliste dargestellt werden
      * sollen. Kann Variablen der Form "${name}" enthalten.
      */
-    private String displayTemplate = "<Datensatz>";
+    private String displayTemplate = L.m("<Datensatz>");
     
     /**
      * Die Listbox mit den Suchresultaten.
@@ -536,7 +536,7 @@ public class DatasourceSearchDialog implements Dialog
               try{ displayTemplate = uiConf.get("DISPLAY").toString(); }catch(Exception e) {};
             }catch(ClassCastException e)
             {
-              Logger.error("UI Element mit ID \"suchergebnis\" muss vom TYPE \"listbox\" sein!");
+              Logger.error(L.m("UI Element mit ID \"suchergebnis\" muss vom TYPE \"listbox\" sein!"));
             }
           }
             
@@ -601,7 +601,7 @@ public class DatasourceSearchDialog implements Dialog
         }
         catch (ColumnNotFoundException e)
         {
-          Logger.error("Fehler im Abschnitt \"Spaltenumsetzung\" oder \"Vorschau\". Spalte \""+dbSpalte+"\" soll in Vorschau angezeigt werden ist aber nicht in der Spaltenumsetzung definiert.");
+          Logger.error(L.m("Fehler im Abschnitt \"Spaltenumsetzung\" oder \"Vorschau\". Spalte \"%1\" soll in Vorschau angezeigt werden ist aber nicht in der Spaltenumsetzung definiert.",dbSpalte));
         }
       }
     }
@@ -1117,7 +1117,7 @@ public class DatasourceSearchDialog implements Dialog
         String wert2 = datensatz.get(spalte);
         if (wert2 != null)
           wert = wert2.replaceAll("\\$", "");
-      } catch (ColumnNotFoundException e) { Logger.error("Fehler beim Auflösen des Platzhalters \"${"+spalte+"}\": Spalte für den Datensatz nicht definiert");}
+      } catch (ColumnNotFoundException e) { Logger.error(L.m("Fehler beim Auflösen des Platzhalters \"${%1}\": Spalte für den Datensatz nicht definiert", spalte));}
       str = str.substring(0, m.start()) + wert + str.substring(m.end());
       m = p.matcher(str);
     } while (m.find());
@@ -1164,7 +1164,7 @@ public class DatasourceSearchDialog implements Dialog
         String columnName = iter.next();
         try{
           newData.put(columnName, ds.get(columnName));
-        }catch(Exception x) {Logger.error("Huh? Dies sollte nicht passieren können", x);}
+        }catch(Exception x) {Logger.error(L.m("Huh? Dies sollte nicht passieren können"), x);}
       }
       
       synchronized(data)
@@ -1213,7 +1213,7 @@ public class DatasourceSearchDialog implements Dialog
       this.conf = conf;
       this.dj = dj;
       schema = parseSchema(conf);
-      if (schema.size() == 0) throw new ConfigurationErrorException("Fehler in Funktionsdialog: Abschnitt 'Spaltenumsetzung' konnte nicht geparst werden!");
+      if (schema.size() == 0) throw new ConfigurationErrorException(L.m("Fehler in Funktionsdialog: Abschnitt 'Spaltenumsetzung' konnte nicht geparst werden!"));
     }
     
     public Dialog instanceFor(Map<Object, Object> context) throws ConfigurationErrorException
@@ -1349,7 +1349,7 @@ public class DatasourceSearchDialog implements Dialog
         }
         catch (ConfigurationErrorException e)
         {
-          Logger.error("Fehler beim Parsen der Spaltenumsetzungsfunktion für Ergebnisspalte \"" + name + "\"", e);        
+          Logger.error(L.m("Fehler beim Parsen der Spaltenumsetzungsfunktion für Ergebnisspalte \"%1\"",name), e);        
         }
       }
     }
