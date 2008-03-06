@@ -55,10 +55,8 @@ import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
-import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
-import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
@@ -1327,6 +1325,8 @@ public class MailMergeNew
 
     while (iter.hasNext())
     {
+      if(pmod.isCanceled()) return;
+      
       Dataset ds = (Dataset) iter.next();
       Iterator schemaIter = schema.iterator();
       while (schemaIter.hasNext())
