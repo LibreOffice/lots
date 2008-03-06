@@ -61,6 +61,10 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
 import javax.swing.border.Border;
+import javax.swing.border.EmptyBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.text.Document;
 
 import com.sun.star.text.XTextDocument;
 
@@ -162,7 +166,7 @@ public class MailMergeNew
    * oder größer als {@link #rangeEnd} sein. Dies muss dort behandelt werden, wo er
    * verwendet wird.
    */
-  private int rangeStart;
+  private int rangeStart = 1;
 
   /**
    * Falls {@link #datasetSelectionType} == {@link DatasetSelectionType#RANGE}
@@ -170,7 +174,7 @@ public class MailMergeNew
    * oder kleiner als {@link #rangeStart} sein. Dies muss dort behandelt werden, wo
    * er verwendet wird.
    */
-  private int rangeEnd;
+  private int rangeEnd = Integer.MAX_VALUE;
 
   /**
    * Falls {@link #datasetSelectionType} == {@link DatasetSelectionType#INDIVIDUAL}
@@ -259,8 +263,6 @@ public class MailMergeNew
     });
     hbox.add(button);
 
-    hbox.add(new JSeparator(SwingConstants.VERTICAL));
-
     // FIXME: Ausgrauen, wenn kein Datenquelle ausgewählt
     button = new JPotentiallyOverlongPopupMenuButton(L.m("Serienbrieffeld"),
       new Iterable()
@@ -283,8 +285,6 @@ public class MailMergeNew
       }
     });
     hbox.add(button);
-
-    hbox.add(new JSeparator(SwingConstants.VERTICAL));
 
     final String VORSCHAU = L.m("   Vorschau   ");
     button = new JButton(VORSCHAU);
@@ -393,9 +393,7 @@ public class MailMergeNew
     });
     hbox.add(button);
 
-    hbox.add(new JSeparator(SwingConstants.VERTICAL));
-
-    // FIXME: Ausgrauen, wenn keine Datenquelle gewählt ist.
+       // FIXME: Ausgrauen, wenn keine Datenquelle gewählt ist.
     button = new JButton(L.m("Drucken"));
     button.addActionListener(new ActionListener()
     {
@@ -405,8 +403,6 @@ public class MailMergeNew
       }
     });
     hbox.add(button);
-
-    hbox.add(new JSeparator(SwingConstants.VERTICAL));
 
     final JPopupMenu tabelleMenu = new JPopupMenu();
     JMenuItem item = new JMenuItem(L.m("Tabelle bearbeiten"));
@@ -847,7 +843,7 @@ public class MailMergeNew
    * Zeigt den Dialog an, der die Serienbriefverarbeitung (Direktdruck oder in neues
    * Dokument) anwirft.
    * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TODO Testen
+   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void showMailmergeTypeSelectionDialog()
   {
@@ -855,6 +851,7 @@ public class MailMergeNew
     dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
     Box vbox = Box.createVerticalBox();
+    vbox.setBorder(new EmptyBorder(8,5,10,5));
     dialog.add(vbox);
 
     Box hbox = Box.createHorizontalBox();
@@ -875,26 +872,16 @@ public class MailMergeNew
     });
     hbox.add(typeBox);
 
-    // FIXME: darf nur sichtbar sein, wenn in typeBox "auf dem Drucker ausgeben"
-    // gewählt ist
-    JButton button = new JButton(L.m("Drucker einrichten"));
-    button.addActionListener(new ActionListener()
-    {
-      public void actionPerformed(ActionEvent e)
-      {
-        // TODO Drucker einrichten Button
-      }
-    });
-    hbox.add(button);
-
     vbox.add(hbox);
+    vbox.add(Box.createVerticalStrut(5));
 
-    hbox = Box.createHorizontalBox();
+    Box selectBox = Box.createVerticalBox();
     Border border = BorderFactory.createTitledBorder(
       BorderFactory.createLineBorder(Color.GRAY),
       L.m("Folgende Datensätze verwenden"));
-    hbox.setBorder(border);
+    selectBox.setBorder(border);
 
+    hbox = Box.createHorizontalBox();
     ButtonGroup radioGroup = new ButtonGroup();
     JRadioButton rbutton;
     rbutton = new JRadioButton(L.m("Alle"), true);
@@ -902,45 +889,115 @@ public class MailMergeNew
     {
       public void actionPerformed(ActionEvent e)
       {
+        datasetSelectionType = DatasetSelectionType.ALL;
       }
     });
     hbox.add(rbutton);
-    radioGroup.add(rbutton);
-    rbutton = new JRadioButton(L.m("Von"), false);
-    hbox.add(rbutton);
+    hbox.add(Box.createHorizontalGlue());
     radioGroup.add(rbutton);
 
-    // TODO Handler, der Eingabe validiert (nur Zahl erlaubt) und evtl. das end
-    // Textfield anpasst (insbes. wenn dort noch nichts drinsteht). Hierzu sind
-    // bereits Zugriffe auf die Datenquelle erforderlich. Auch der Von-Radiobutton
-    // muss angewählt werden.
-    JTextField start = new JTextField("     ");
-    hbox.add(start);
-    label = new JLabel("Bis");
-    hbox.add(label);
+    selectBox.add(hbox);
+    selectBox.add(Box.createVerticalStrut(5));
 
-    // TODO Handler wie bei start TextField
-    JTextField end = new JTextField("     ");
-    hbox.add(end);
+    hbox = Box.createHorizontalBox();
 
-    // TODO Anwahl muss selben Effekt haben wie das Drücken des "Einzelauswahl"
-    // Buttons
-    rbutton = new JRadioButton("");
-    hbox.add(rbutton);
-    radioGroup.add(rbutton);
-
-    button = new JButton(L.m("Einzelauswahl..."));
-    button.addActionListener(new ActionListener()
+    final JRadioButton rangebutton = new JRadioButton(L.m("Von"), false);
+    rangebutton.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
       {
-        // TODO implementieren. Muss auch den davorstehenden Radio-Button
-        // selektieren.
+        datasetSelectionType = DatasetSelectionType.RANGE;
       }
     });
-    hbox.add(button);
+    hbox.add(rangebutton);
+    radioGroup.add(rangebutton);
 
-    vbox.add(hbox);
+    final JTextField start = new JTextField(4);
+    start.addKeyListener(nonNumericKeyConsumer);
+    hbox.add(start);
+    hbox.add(Box.createHorizontalStrut(5));
+    label = new JLabel("Bis");
+    hbox.add(label);
+    hbox.add(Box.createHorizontalStrut(5));
+
+    final JTextField end = new JTextField(4);
+    end.addKeyListener(nonNumericKeyConsumer);
+
+    DocumentListener rangeDocumentListener = new DocumentListener()
+    {
+      public void update()
+      {
+        rangebutton.setSelected(true);
+        datasetSelectionType = DatasetSelectionType.RANGE;
+        try
+        {
+          rangeStart = Integer.parseInt(start.getText());
+        }
+        catch (Exception x)
+        {
+        }
+        try
+        {
+          rangeEnd = Integer.parseInt(end.getText());
+        }
+        catch (Exception x)
+        {
+        }
+      }
+
+      public void insertUpdate(DocumentEvent e)
+      {
+        update();
+      }
+
+      public void removeUpdate(DocumentEvent e)
+      {
+        update();
+      }
+
+      public void changedUpdate(DocumentEvent e)
+      {
+        update();
+      }
+    };
+
+    Document tfdoc = start.getDocument();
+    tfdoc.addDocumentListener(rangeDocumentListener);
+    tfdoc = end.getDocument();
+    tfdoc.addDocumentListener(rangeDocumentListener);
+    hbox.add(end);
+
+    selectBox.add(hbox);
+    selectBox.add(Box.createVerticalStrut(5));
+
+    hbox = Box.createHorizontalBox();
+
+    // TODO Anwahl muss selben Effekt haben wie das Drücken des "Einzelauswahl"
+    // Buttons
+    final JRadioButton einzelauswahlRadioButton = new JRadioButton("");
+    hbox.add(einzelauswahlRadioButton);
+    radioGroup.add(einzelauswahlRadioButton);
+
+    ActionListener einzelauswahlActionListener = new ActionListener()
+    {
+      public void actionPerformed(ActionEvent e)
+      {
+        einzelauswahlRadioButton.setSelected(true);
+        datasetSelectionType = DatasetSelectionType.INDIVIDUAL;
+        // TODO showEinzelauswahlDialog();
+      }
+    };
+
+    einzelauswahlRadioButton.addActionListener(einzelauswahlActionListener);
+
+    JButton button = new JButton(L.m("Einzelauswahl..."));
+    hbox.add(button);
+    hbox.add(Box.createHorizontalGlue());
+    button.addActionListener(einzelauswahlActionListener);
+
+    selectBox.add(hbox);
+    vbox.add(selectBox);
+    vbox.add(Box.createVerticalStrut(5));
 
     hbox = Box.createHorizontalBox();
     button = new JButton(L.m("Abbrechen"));
