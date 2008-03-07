@@ -54,8 +54,8 @@ import de.muenchen.allg.itd51.wollmux.L;
 public class TextComponentTags
 {
   /**
-   * Syntax für {@link #getContent(int)}: CAT(... VALUE "&lt;tagname>" ...
-   * VALUE "&lt;tagname"> ...)
+   * Syntax für {@link #getContent(int)}: CAT(... VALUE "&lt;tagname>" ... VALUE
+   * "&lt;tagname"> ...)
    */
   final public static int CAT_VALUE_SYNTAX = 0;
 
@@ -74,9 +74,9 @@ public class TextComponentTags
   private final static String TAG_SUFFIX = "" + Character.toChars(0x200B)[0] + ">";
 
   /**
-   * Beschreibt einen regulären Ausdruck, mit dem nach Tags im Text gesucht
-   * werden kann. Ein Match liefert in Gruppe 1 den Text vor dem Tag, in Gruppe
-   * 2 das Tag mit Präfix und Suffix und in Gruppe 3 den Tag-Namen zurück.
+   * Beschreibt einen regulären Ausdruck, mit dem nach Tags im Text gesucht werden
+   * kann. Ein Match liefert in Gruppe 1 den Text vor dem Tag, in Gruppe 2 das Tag
+   * mit Präfix und Suffix und in Gruppe 3 den Tag-Namen zurück.
    */
   private final static Pattern TAG_PATTERN = Pattern.compile("([^(" + TAG_PREFIX
                                                              + ")]*)(" + TAG_PREFIX
@@ -96,8 +96,8 @@ public class TextComponentTags
   private JTextComponent compo;
 
   /**
-   * Erzeugt den Wrapper und nimmt die notwendigen Änderungen am
-   * Standardverhalten der JTextComponent component vor.
+   * Erzeugt den Wrapper und nimmt die notwendigen Änderungen am Standardverhalten
+   * der JTextComponent component vor.
    */
   public TextComponentTags(JTextComponent component)
   {
@@ -109,13 +109,13 @@ public class TextComponentTags
   }
 
   /**
-   * Fügt an der aktuellen Cursorposition ein neues Tag tag ein, das
-   * anschließend mit der Darstellung &quot;&lt;tag&gt;&quot; angezeigt wird und
-   * bezüglich der Editierung wie ein atomares Element behandelt wird.
+   * Fügt an der aktuellen Cursorposition ein neues Tag tag ein, das anschließend mit
+   * der Darstellung &quot;&lt;tag&gt;&quot; angezeigt wird und bezüglich der
+   * Editierung wie ein atomares Element behandelt wird.
    * 
    * @param tag
-   *          Der Name des tags, das in dieser JTextComponent an der
-   *          Cursorposition eingefügt und angezeigt werden soll.
+   *          Der Name des tags, das in dieser JTextComponent an der Cursorposition
+   *          eingefügt und angezeigt werden soll.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
@@ -144,8 +144,8 @@ public class TextComponentTags
 
   /**
    * Liefert eine Liste von {@link ContentElement}-Objekten, die den aktuellen
-   * Inhalt der JTextComponent repräsentiert und dabei enthaltenen Text und
-   * evtl. enthaltene Tags als eigene Objekte kapselt.
+   * Inhalt der JTextComponent repräsentiert und dabei enthaltenen Text und evtl.
+   * enthaltene Tags als eigene Objekte kapselt.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
@@ -169,8 +169,8 @@ public class TextComponentTags
   }
 
   /**
-   * Liefert den Inhalt der Textkomponente in der durch syntaxType
-   * spezifizierten Syntax.
+   * Liefert den Inhalt der Textkomponente in der durch syntaxType spezifizierten
+   * Syntax.
    * 
    * @see #CAT_VALUE_SYNTAX
    * @throws IllegalArgumentException
@@ -181,18 +181,26 @@ public class TextComponentTags
   public ConfigThingy getContent(int syntaxType)
   {
     if (syntaxType != CAT_VALUE_SYNTAX)
-      throw new IllegalArgumentException(L.m("Unbekannter syntaxType: %1",""+syntaxType));
+      throw new IllegalArgumentException(L.m("Unbekannter syntaxType: %1",
+        "" + syntaxType));
 
     ConfigThingy conf = new ConfigThingy("CAT");
     List<ContentElement> content = getContent();
-    Iterator<ContentElement> iter = content.iterator();
-    while (iter.hasNext())
+    if (content.isEmpty())
     {
-      ContentElement ele = iter.next();
-      if (ele.isTag())
-        conf.add("VALUE").add(ele.toString());
-      else
-        conf.add(ele.toString());
+      conf.add("");
+    }
+    else
+    {
+      Iterator<ContentElement> iter = content.iterator();
+      while (iter.hasNext())
+      {
+        ContentElement ele = iter.next();
+        if (ele.isTag())
+          conf.add("VALUE").add(ele.toString());
+        else
+          conf.add(ele.toString());
+      }
     }
 
     return conf;
@@ -209,7 +217,8 @@ public class TextComponentTags
   public void setContent(int syntaxType, ConfigThingy conf)
   {
     if (syntaxType != CAT_VALUE_SYNTAX)
-      throw new IllegalArgumentException(L.m("Unbekannter syntaxType: %1", ""+syntaxType));
+      throw new IllegalArgumentException(L.m("Unbekannter syntaxType: %1",
+        "" + syntaxType));
 
     if (!conf.getName().equals("CAT"))
       throw new IllegalArgumentException(L.m("Oberster Knoten muss \"CAT\" sein"));
@@ -237,12 +246,12 @@ public class TextComponentTags
   }
 
   /**
-   * Kann überschrieben werden um eine Logik zu hinterlegen, die berechnet, ob
-   * das Feld einen gültigen Inhalt besitzt. Ist der Inhalt nicht gültig, dann
-   * wird das Feld mit einem roten Hintergrund hinterlegt.
+   * Kann überschrieben werden um eine Logik zu hinterlegen, die berechnet, ob das
+   * Feld einen gültigen Inhalt besitzt. Ist der Inhalt nicht gültig, dann wird das
+   * Feld mit einem roten Hintergrund hinterlegt.
    * 
-   * @return true, wenn der Inhalt gültig ist und false, wenn der Inhalt nicht
-   *         gültig ist.
+   * @return true, wenn der Inhalt gültig ist und false, wenn der Inhalt nicht gültig
+   *         ist.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
@@ -252,9 +261,9 @@ public class TextComponentTags
   }
 
   /**
-   * Beschreibt ein Element des Inhalts dieser JTextComponent und kann entweder
-   * ein eingefügtes Tag oder ein normaler String sein. Auskunft über den Typ
-   * des Elements erteilt die Methode isTag(), auf den String-Wert kann über die
+   * Beschreibt ein Element des Inhalts dieser JTextComponent und kann entweder ein
+   * eingefügtes Tag oder ein normaler String sein. Auskunft über den Typ des
+   * Elements erteilt die Methode isTag(), auf den String-Wert kann über die
    * toString()-Methode zugegriffen werden.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
@@ -289,9 +298,9 @@ public class TextComponentTags
   }
 
   /**
-   * Immer wenn der Cursor mit der Maus in einen Bereich innerhalb eines Tags
-   * gesetzt wird, sorgt der hier registrierte caret Listener dafür, dass der
-   * Bereich auf das gesamte Tag ausgedehnt wird.
+   * Immer wenn der Cursor mit der Maus in einen Bereich innerhalb eines Tags gesetzt
+   * wird, sorgt der hier registrierte caret Listener dafür, dass der Bereich auf das
+   * gesamte Tag ausgedehnt wird.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
@@ -351,9 +360,8 @@ public class TextComponentTags
   }
 
   /**
-   * Implementiert die Aktionen für die Tastendrücke Cursor-links,
-   * Cursor-rechts, Delete und Backspace neu und berücksichtigt dabei die
-   * atomaren Tags.
+   * Implementiert die Aktionen für die Tastendrücke Cursor-links, Cursor-rechts,
+   * Delete und Backspace neu und berücksichtigt dabei die atomaren Tags.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
@@ -527,10 +535,9 @@ public class TextComponentTags
   }
 
   /**
-   * Der hier registrierte DocumentListener sorgt dafür, dass nach jeder
-   * Textänderung geprüft wird, ob der Inhalt der JTextComponent noch gültig ist
-   * und im Fehlerfall mit der Hintergrundfarbe invalidEntryBGColor eingefärbt
-   * wird.
+   * Der hier registrierte DocumentListener sorgt dafür, dass nach jeder Textänderung
+   * geprüft wird, ob der Inhalt der JTextComponent noch gültig ist und im Fehlerfall
+   * mit der Hintergrundfarbe invalidEntryBGColor eingefärbt wird.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
@@ -637,8 +644,8 @@ public class TextComponentTags
   }
 
   /**
-   * Liefert einen Iterator von TagPos-Elementen, die beschreiben an welcher
-   * Position im aktuellen Text Tags gefunden werden.
+   * Liefert einen Iterator von TagPos-Elementen, die beschreiben an welcher Position
+   * im aktuellen Text Tags gefunden werden.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
@@ -654,8 +661,8 @@ public class TextComponentTags
   }
 
   /**
-   * Enthält das tag das beim Erzeugen des Extra-Highlights zurückgeliefert
-   * wurde und das Highlight-Objekt auszeichnet.
+   * Enthält das tag das beim Erzeugen des Extra-Highlights zurückgeliefert wurde und
+   * das Highlight-Objekt auszeichnet.
    */
   private Object extraHighlightTag = null;
 
