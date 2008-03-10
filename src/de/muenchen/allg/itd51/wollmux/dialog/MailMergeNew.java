@@ -99,6 +99,12 @@ public class MailMergeNew
   private static final String PROP_QUERYRESULTS = "MailMergeNew_QueryResults";
 
   /**
+   * ID der Property, die einen List der Indizes der zu druckenden Datensätze
+   * speichert.
+   */
+  private static final String PROP_MAILMERGENEW_SELECTION = "MailMergeNew_Selection";
+
+  /**
    * Das {@link TextDocumentModel} zu dem Dokument an dem diese Toolbar hängt.
    */
   private TextDocumentModel mod;
@@ -151,7 +157,7 @@ public class MailMergeNew
     /**
      * Die durch {@link MailMergeNew#selectedIndexes} bestimmten Datensätze.
      */
-    INDIVIDUAL
+    INDIVIDUAL;
   };
 
   /**
@@ -161,17 +167,17 @@ public class MailMergeNew
 
   /**
    * Falls {@link #datasetSelectionType} == {@link DatasetSelectionType#RANGE}
-   * bestimmt dies den ersten zu druckenden Datensatz. ACHTUNG! Der Wert hier kann 0
-   * oder größer als {@link #rangeEnd} sein. Dies muss dort behandelt werden, wo er
-   * verwendet wird.
+   * bestimmt dies den ersten zu druckenden Datensatz (wobei der erste Datensatz die
+   * Nummer 1 hat). ACHTUNG! Der Wert hier kann 0 oder größer als {@link #rangeEnd}
+   * sein. Dies muss dort behandelt werden, wo er verwendet wird.
    */
   private int rangeStart = 1;
 
   /**
    * Falls {@link #datasetSelectionType} == {@link DatasetSelectionType#RANGE}
-   * bestimmt dies den letzten zu druckenden Datensatz. ACHTUNG! Der Wert hier kann 0
-   * oder kleiner als {@link #rangeStart} sein. Dies muss dort behandelt werden, wo
-   * er verwendet wird.
+   * bestimmt dies den letzten zu druckenden Datensatz (wobei der erste Datensatz die
+   * Nummer 1 hat). ACHTUNG! Der Wert hier kann 0 oder kleiner als
+   * {@link #rangeStart} sein. Dies muss dort behandelt werden, wo er verwendet wird.
    */
   private int rangeEnd = Integer.MAX_VALUE;
 
@@ -180,7 +186,7 @@ public class MailMergeNew
    * bestimmt dies die Indizes der ausgewählten Datensätze, wobei 1 den ersten
    * Datensatz bezeichnet.
    */
-  private List selectedIndexes = new Vector();
+  private List<Integer> selectedIndexes = new Vector<Integer>();
 
   /**
    * Das Textfield in dem Benutzer direkt eine Datensatznummer für die Vorschau
@@ -1282,11 +1288,39 @@ public class MailMergeNew
     // etwas Performance rausholen - das bitte testen.
     mod.collectNonWollMuxFormFields();
     QueryResultsWithSchema data = ds.getData();
+
+    List<Integer> selected = new Vector<Integer>();
+    switch (datasetSelectionType)
+    {
+      case ALL:
+        for (int i = 0; i < data.size(); ++i)
+          selected.add(i);
+        break;
+      case INDIVIDUAL:
+        selected.addAll(selectedIndexes);
+        break;
+      case RANGE:
+        if (rangeStart < 1) rangeStart = 1;
+        if (rangeEnd < 1) rangeEnd = 1;
+        if (rangeEnd > data.size()) rangeEnd = data.size();
+        if (rangeStart > data.size()) rangeStart = data.size();
+        if (rangeStart > rangeEnd)
+        {
+          int t = rangeStart;
+          rangeStart = rangeEnd;
+          rangeEnd = t;
+        }
+        for (int i = rangeStart; i <= rangeEnd; ++i)
+          selected.add(i - 1); // wir zählen ab 0, anders als rangeStart/End
+        break;
+    }
+
     final XPrintModel pmod = mod.createPrintModel(true);
     try
     {
       pmod.setPropertyValue("MailMergeNew_Schema", data.getSchema());
       pmod.setPropertyValue(PROP_QUERYRESULTS, data);
+      pmod.setPropertyValue(PROP_MAILMERGENEW_SELECTION, selected);
     }
     catch (Exception x)
     {
@@ -1326,23 +1360,38 @@ public class MailMergeNew
    * PrintFunction, die das jeweils nächste Element der Seriendruckdaten nimmt und
    * die Seriendruckfelder im Dokument entsprechend setzt. Herangezogen werden die
    * Properties {@link #PROP_QUERYRESULTS} (ein Objekt vom Typ {@link QueryResults})
-   * und "MailMergeNew_Schema", was ein Set mit den Spaltennamen enthält. Dies
-   * funktioniert natürlich nur dann, wenn pmod kein Proxy ist.
+   * und "MailMergeNew_Schema", was ein Set mit den Spaltennamen enthält, sowie
+   * {@link #PROP_MAILMERGENEW_SELECTION}, was eine Liste der Indizes der ausgewählten
+   * Datensätze ist (0 ist der erste Datensatz). Dies funktioniert natürlich nur
+   * dann, wenn pmod kein Proxy ist.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
+  @SuppressWarnings("unchecked")
   public static void mailMergeNewSetFormValue(XPrintModel pmod) throws Exception
   {
     QueryResults data = (QueryResults) pmod.getPropertyValue(PROP_QUERYRESULTS);
     Collection schema = (Collection) pmod.getPropertyValue("MailMergeNew_Schema");
+    List<Integer> selection = (List) pmod.getPropertyValue(PROP_MAILMERGENEW_SELECTION);
+    if (selection.isEmpty()) return;
 
     Iterator iter = data.iterator();
+    Iterator<Integer> selIter = selection.iterator();
+    int selectedIdx = selIter.next();
 
-    while (iter.hasNext())
+    int index = -1;
+    while (iter.hasNext() && selectedIdx >= 0)
     {
       if (pmod.isCanceled()) return;
 
       Dataset ds = (Dataset) iter.next();
+      if (++index < selectedIdx) continue;
+
+      if (selIter.hasNext())
+        selectedIdx = selIter.next();
+      else
+        selectedIdx = -1;
+
       Iterator schemaIter = schema.iterator();
       while (schemaIter.hasNext())
       {
