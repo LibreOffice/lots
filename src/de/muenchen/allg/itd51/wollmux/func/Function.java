@@ -32,7 +32,7 @@ public interface Function
   
   /**
    * Liefert die Namen der Parameter, die die Funktion erwartet.
-   * Die Reihenfolge ist undefiniert und es kann ein Name mehrfach vorkommen.
+   * Die Reihenfolge ist undefiniert. Es kann kein Name mehrfach vorkommen.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public String[] parameters();
