@@ -64,6 +64,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.Document;
 
+import com.sun.star.lang.NoSuchMethodException;
 import com.sun.star.text.XTextDocument;
 
 import de.muenchen.allg.afid.UNO;
@@ -391,7 +392,7 @@ public class MailMergeNew
     });
     hbox.add(button);
 
-       // FIXME: Ausgrauen, wenn keine Datenquelle gewählt ist.
+    // FIXME: Ausgrauen, wenn keine Datenquelle gewählt ist.
     button = new JButton(L.m("Drucken"));
     button.addActionListener(new ActionListener()
     {
@@ -849,7 +850,7 @@ public class MailMergeNew
     dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
     Box vbox = Box.createVerticalBox();
-    vbox.setBorder(new EmptyBorder(8,5,10,5));
+    vbox.setBorder(new EmptyBorder(8, 5, 10, 5));
     dialog.add(vbox);
 
     Box hbox = Box.createHorizontalBox();
@@ -1292,8 +1293,22 @@ public class MailMergeNew
       Logger.error(x);
       return;
     }
-    pmod.usePrintFunction("MailMergeNewSetFormValue");
-    if (printIntoDocument) pmod.usePrintFunction("Gesamtdokument");
+    try
+    {
+      pmod.usePrintFunction("MailMergeNewSetFormValue");
+      if (printIntoDocument) pmod.usePrintFunction("Gesamtdokument");
+    }
+    catch (NoSuchMethodException e)
+    {
+      Logger.error(e);
+      WollMuxSingleton.showInfoModal(
+        L.m("Fehler beim Drucken"),
+        L.m(
+          "Eine notwendige Druckfunktion ist nicht definiert. Bitte wenden Sie sich an Ihre Systemadministration damit Ihre Konfiguration entsprechend erweitert bzw. aktualisiert werden kann.\n\n%1",
+          e));
+      pmod.cancel();
+      return;
+    }
 
     // Drucken im Hintergrund, damit der EDT nicht blockiert.
     new Thread()
@@ -1325,8 +1340,8 @@ public class MailMergeNew
 
     while (iter.hasNext())
     {
-      if(pmod.isCanceled()) return;
-      
+      if (pmod.isCanceled()) return;
+
       Dataset ds = (Dataset) iter.next();
       Iterator schemaIter = schema.iterator();
       while (schemaIter.hasNext())
