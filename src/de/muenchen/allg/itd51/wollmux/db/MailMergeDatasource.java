@@ -305,7 +305,7 @@ public class MailMergeDatasource
   public void showDatasourceSelectionDialog(final JFrame parent)
   {
     final JDialog datasourceSelector = new JDialog(parent,
-      L.m("Wo sind Ihre Serienbriefdaten ?"), true);
+      L.m("Serienbriefdaten auswählen"), true);
 
     Box vbox = Box.createVerticalBox();
     datasourceSelector.add(vbox);
@@ -822,7 +822,7 @@ public class MailMergeDatasource
     }
 
     final JDialog calcWinSelector = new JDialog(parent,
-      L.m("Welche Tabelle möchten Sie verwenden ?"), true);
+      L.m("Tabelle auswählen"), true);
 
     Box vbox = Box.createVerticalBox();
     calcWinSelector.add(vbox);
