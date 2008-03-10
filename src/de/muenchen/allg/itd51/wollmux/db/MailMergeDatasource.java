@@ -1217,8 +1217,7 @@ public class MailMergeDatasource
     {
       try
       {
-        Object ss = UNO.loadComponentFromURL(url, false, true); // FIXME:
-        // Dragndrop-Problem
+        Object ss = UNO.loadComponentFromURL(url, false, true); 
         newCalcDoc = UNO.XSpreadsheetDocument(ss);
         if (newCalcDoc == null)
           throw new UnavailableException(L.m("URL \"%1\" ist kein Tabellendokument",
