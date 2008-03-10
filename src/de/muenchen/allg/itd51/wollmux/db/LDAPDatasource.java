@@ -1,4 +1,3 @@
-//TODO L.m()
 /*
  * Dateiname: LDAPDatasource.java
  * Projekt  : WollMux
@@ -65,6 +64,7 @@ import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.parser.SyntaxErrorException;
 import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
+import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.TimeoutException;
 
@@ -85,80 +85,86 @@ public class LDAPDatasource implements Datasource
 
   private String objectClass;
 
-  /** properties für die Verbindung zum LDAP-Server*/
+  /** properties für die Verbindung zum LDAP-Server */
   private Properties properties = new Properties();
 
-  /** Separator zur Schluesselerzeugung aus mehreren Schluesselwerten*/
+  /** Separator zur Schluesselerzeugung aus mehreren Schluesselwerten */
   private final static String SEPARATOR = "&:=&:%";
-  
+
   /**
-   * Trennt den ersten Teil des Schlüssels, der den Pfaden mit Level 0
-   * entspricht vom Rest des Schlüssels
+   * Trennt den ersten Teil des Schlüssels, der den Pfaden mit Level 0 entspricht vom
+   * Rest des Schlüssels
    */
   private static final String KEY_SEPARATOR_0_NON_0_RE = "==%§%==";
 
   /** Map von query-Strings auf LDAP-Attributnamen */
   private Map<String, ColumnDefinition> columnDefinitions = new HashMap<String, ColumnDefinition>();
 
-  /** Key-Attribute (LDAP) (Strings).*/
+  /** Key-Attribute (LDAP) (Strings). */
   private List<Object> keyAttributes = new Vector<Object>();
 
-  /** Was für Arten von Pfaden kommen als Schlüsselspalten vor (ABSOLUTE_ONLY, RELATIVE_ONLY, ABSOLUTE_AND_RELATIVE).*/
+  /**
+   * Was für Arten von Pfaden kommen als Schlüsselspalten vor (ABSOLUTE_ONLY,
+   * RELATIVE_ONLY, ABSOLUTE_AND_RELATIVE).
+   */
   private int keyStatus; // 0:= nur absolute Attribute, 1:= absolute und
-                          // relative Attribute, 2:= nur relative Attribute
+
+  // relative Attribute, 2:= nur relative Attribute
   /** nur Attributpfade der Form 0:*. */
   private static final int ABSOLUTE_ONLY = 0;
-  
-  /** nur Attributpfade der Form num:* wobei num nicht 0 ist.*/
+
+  /** nur Attributpfade der Form num:* wobei num nicht 0 ist. */
   private static final int RELATIVE_ONLY = 2;
-  
+
   /** Sowohl Attributpfade der Form 0:* als auch der Form num:* mit num ungleich 0. */
   private static final int ABSOLUTE_AND_RELATIVE = 1;
 
-  /** regex für erlaubte Bezeichner*/
-  private static final Pattern SPALTENNAME = Pattern
-      .compile("^[a-zA-Z_][a-zA-Z_0-9]*$");
-  
-  /** Regex zum Checken der Syntax von BASE_DN. 
-   * TOD0: Sicher zu restriktiv!
-   */
-  private static final Pattern BASEDN_RE = Pattern
-      .compile("^[a-zA-Z]+=[a-zA-ZäÄöÖüÜß \\\\()-]+(,[a-zA-Z]+=[a-zA-ZäÄöÖüÜß \\\\()-]+)*$");
-  
-  /** Regex zum Checken der Syntax von LDAP-Attributsbezeichnern. 
-   * TOD0: Sicher zu restriktiv!
-   */
-  private static final Pattern ATTRIBUTE_RE = Pattern
-      .compile("^[a-zA-Z]+$");
-  
-  /** Regex zum Checken, ob ein Schlüssel für die LDAP-Datasource legal ist.
-   */
-  private static final Pattern KEY_RE = Pattern
-      .compile("^(\\(&(\\([^()=]+[^()]*\\))+\\))?"+KEY_SEPARATOR_0_NON_0_RE+"([a-zA-Z_][a-zA-Z0-9_]*=.*"+SEPARATOR+")?$");
+  /** regex für erlaubte Bezeichner */
+  private static final Pattern SPALTENNAME = Pattern.compile("^[a-zA-Z_][a-zA-Z_0-9]*$");
 
+  /**
+   * Regex zum Checken der Syntax von BASE_DN. TOD0: Sicher zu restriktiv!
+   */
+  private static final Pattern BASEDN_RE = Pattern.compile("^[a-zA-Z]+=[a-zA-ZäÄöÖüÜß \\\\()-]+(,[a-zA-Z]+=[a-zA-ZäÄöÖüÜß \\\\()-]+)*$");
 
-  /** temporärer cache für relative Attribute (wird bei jeder neuen Suche neu
-  * angelegt) */
+  /**
+   * Regex zum Checken der Syntax von LDAP-Attributsbezeichnern. TOD0: Sicher zu
+   * restriktiv!
+   */
+  private static final Pattern ATTRIBUTE_RE = Pattern.compile("^[a-zA-Z]+$");
+
+  /**
+   * Regex zum Checken, ob ein Schlüssel für die LDAP-Datasource legal ist.
+   */
+  private static final Pattern KEY_RE = Pattern.compile("^(\\(&(\\([^()=]+[^()]*\\))+\\))?"
+                                                        + KEY_SEPARATOR_0_NON_0_RE
+                                                        + "([a-zA-Z_][a-zA-Z0-9_]*=.*"
+                                                        + SEPARATOR + ")?$");
+
+  /**
+   * temporärer cache für relative Attribute (wird bei jeder neuen Suche neu
+   * angelegt)
+   */
   private Map<CacheKey, Attributes> attributeCache = new HashMap<CacheKey, Attributes>();
 
   /**
    * Erzeugt eine neue LDAPDatasource.
    * 
    * @param nameToDatasource
-   *          enthält alle bis zum Zeitpunkt der Definition dieser
-   *          LDAPDatasource bereits vollständig instanziierten Datenquellen
-   *          (zur Zeit nicht verwendet).
+   *          enthält alle bis zum Zeitpunkt der Definition dieser LDAPDatasource
+   *          bereits vollständig instanziierten Datenquellen (zur Zeit nicht
+   *          verwendet).
    * @param sourceDesc
-   *          der "Datenquelle"-Knoten, der die Beschreibung dieser
-   *          LDAPDatasource enthält.
+   *          der "Datenquelle"-Knoten, der die Beschreibung dieser LDAPDatasource
+   *          enthält.
    * @param context
-   *          der Kontext relativ zu dem URLs aufgelöst werden sollen (zur Zeit
-   *          nicht verwendet).
+   *          der Kontext relativ zu dem URLs aufgelöst werden sollen (zur Zeit nicht
+   *          verwendet).
    * @throws ConfigurationErrorException
    *           falls in der Definition in sourceDesc ein Fehler ist.
    */
-  public LDAPDatasource(Map nameToDatasource, ConfigThingy sourceDesc,
-      URL context) throws ConfigurationErrorException
+  public LDAPDatasource(Map nameToDatasource, ConfigThingy sourceDesc, URL context)
+      throws ConfigurationErrorException
   {
 
     try
@@ -166,10 +172,12 @@ public class LDAPDatasource implements Datasource
       datasourceName = sourceDesc.get("NAME").toString();
     }
     catch (NodeNotFoundException x)
-    { throw new ConfigurationErrorException("NAME der Datenquelle fehlt"); }
+    {
+      throw new ConfigurationErrorException(L.m("NAME der Datenquelle fehlt"));
+    }
 
     try
-    { 
+    {
       url = sourceDesc.get("URL").toString();
       try
       {
@@ -177,52 +185,53 @@ public class LDAPDatasource implements Datasource
       }
       catch (URISyntaxException e)
       {
-        throw new ConfigurationErrorException("Fehler in LDAP-URL \""+url+"\"");
+        throw new ConfigurationErrorException(L.m("Fehler in LDAP-URL \"%1\"", url));
       }
-      
+
     }
     catch (NodeNotFoundException e)
     {
       throw new ConfigurationErrorException(errorMessage()
-                                            + "URL des LDAP-Servers fehlt.");
+                                            + L.m("URL des LDAP-Servers fehlt."));
     }
 
     try
-    { 
+    {
       baseDN = sourceDesc.get("BASE_DN").toString();
       if (!BASEDN_RE.matcher(baseDN).matches())
-        throw new ConfigurationErrorException("BASE_DN-Wert ist ungültig: \""+baseDN+"\"");
+        throw new ConfigurationErrorException(L.m(
+          "BASE_DN-Wert ist ungültig: \"%1\"", baseDN));
     }
     catch (NodeNotFoundException e)
     {
       throw new ConfigurationErrorException(errorMessage()
-                                            + "BASE_DN des LDAP-Servers fehlt.");
+                                            + L.m("BASE_DN des LDAP-Servers fehlt."));
     }
 
     try
     {
       objectClass = sourceDesc.get("OBJECT_CLASS").toString();
       if (!ATTRIBUTE_RE.matcher(objectClass).matches())
-        throw new ConfigurationErrorException("OBJECT_CLASS enthält unerlaubte Zeichen: \""+objectClass+"\"");
+        throw new ConfigurationErrorException(L.m(
+          "OBJECT_CLASS enthält unerlaubte Zeichen: \"%1\"", objectClass));
 
     }
     catch (NodeNotFoundException e)
     {
       throw new ConfigurationErrorException(errorMessage()
-                                            + "Keine OBJECT_CLASS definiert.");
+                                            + L.m("Keine OBJECT_CLASS definiert."));
     }
 
     // set properties
-    properties.put(
-        Context.INITIAL_CONTEXT_FACTORY,
-        "com.sun.jndi.ldap.LdapCtxFactory");
+    properties.put(Context.INITIAL_CONTEXT_FACTORY,
+      "com.sun.jndi.ldap.LdapCtxFactory");
     properties.put(Context.PROVIDER_URL, url); // + "/" + baseDN);
 
     ConfigThingy spalten = sourceDesc.query("Spalten");
 
     if (spalten.count() == 0)
       throw new ConfigurationErrorException(errorMessage()
-                                            + "Abschnitt 'Spalten' fehlt.");
+                                            + L.m("Abschnitt 'Spalten' fehlt."));
 
     schema = new HashSet<String>();
 
@@ -247,33 +256,39 @@ public class LDAPDatasource implements Datasource
         String objectClass = null;
         String lineSeparator = null;
 
-        try{ spalte = spalteDesc.get("DB_SPALTE").toString(); } 
+        try
+        {
+          spalte = spalteDesc.get("DB_SPALTE").toString();
+        }
         catch (NodeNotFoundException x)
         {
           throw new ConfigurationErrorException(errorMessage()
-                                                + "DB_SPALTE Angabe fehlt");
+                                                + L.m("DB_SPALTE Angabe fehlt"));
         }
 
         if (!SPALTENNAME.matcher(spalte).matches())
           throw new ConfigurationErrorException(
-              errorMessage()
-                  + "Spalte \""
-                  + spalte
-                  + "\" entspricht nicht der Syntax eines Bezeichners");
+            errorMessage()
+                + L.m("Spalte \"%1\" entspricht nicht der Syntax eines Bezeichners",
+                  spalte));
 
         String path;
-        try{ path = spalteDesc.get("PATH").toString(); }
+        try
+        {
+          path = spalteDesc.get("PATH").toString();
+        }
         catch (NodeNotFoundException e1)
         {
-          throw new ConfigurationErrorException("PATH-Angabe fehlt für Spalte "+spalte);
-        } 
+          throw new ConfigurationErrorException(L.m(
+            "PATH-Angabe fehlt für Spalte %1", spalte));
+        }
 
         // get relativePath and attributeName
         String[] splitted = path.split(":");
 
         if (splitted.length != 2)
           throw new ConfigurationErrorException(
-              errorMessage() + "Syntaxerror bei Pfadangabe von " + spalte);
+            errorMessage() + L.m("Syntaxerror bei Pfadangabe von %1", spalte));
 
         try
         {
@@ -282,14 +297,14 @@ public class LDAPDatasource implements Datasource
         catch (NumberFormatException e)
         {
           throw new ConfigurationErrorException(
-              errorMessage()
-                  + "Syntaxerror bei Angabe des relativen Pfads von "
-                  + spalte);
+            errorMessage()
+                + L.m("Syntaxerror bei Angabe des relativen Pfads von %1", spalte));
         }
 
-        attributeName = splitted[1]; 
+        attributeName = splitted[1];
         if (!ATTRIBUTE_RE.matcher(attributeName).matches())
-          throw new ConfigurationErrorException("Illegaler Attributsbezeichner: \""+attributeName+"\"");
+          throw new ConfigurationErrorException(L.m(
+            "Illegaler Attributsbezeichner: \"%1\"", attributeName));
 
         try
         {
@@ -309,9 +324,8 @@ public class LDAPDatasource implements Datasource
           // do nothing... (Angabe von LINE_SEPARATOR optional)
         }
 
-        
         ColumnDefinition columnAttr = new ColumnDefinition(spalte, relativePath,
-            attributeName);
+          attributeName);
         columnAttr.columnObjectClass = objectClass;
         columnAttr.lineSeparator = lineSeparator;
         columnDefinitions.put(spalte, columnAttr);
@@ -324,7 +338,7 @@ public class LDAPDatasource implements Datasource
 
     if (keys.count() == 0)
       throw new ConfigurationErrorException(errorMessage()
-                                            + "Schluessel-Abschnitt fehlt.");
+                                            + L.m("Schluessel-Abschnitt fehlt."));
 
     ConfigThingy keySpalten;
 
@@ -334,29 +348,33 @@ public class LDAPDatasource implements Datasource
       keySpalten = keys.getLastChild();
     }
     catch (NodeNotFoundException e)
-    { throw new RuntimeException("Unmöglich. Ich hab doch vorher count() überprüft.");}
+    {
+      throw new RuntimeException(
+        L.m("Unmöglich. Ich hab doch vorher count() überprüft."));
+    }
 
     Iterator keyIterator = keySpalten.iterator();
-    
+
     if (!keyIterator.hasNext())
       throw new ConfigurationErrorException(
-          errorMessage() + "Keine Schluesselspalten angegeben.");
-    
-    boolean onlyRelative = true; //true, falls kein Attributpfad der Form 0:*
-    boolean onlyAbsolute = true;  //true, falls nur Attributspfade der Form 0:*
+        errorMessage() + L.m("Keine Schluesselspalten angegeben."));
+
+    boolean onlyRelative = true; // true, falls kein Attributpfad der Form 0:*
+    boolean onlyAbsolute = true; // true, falls nur Attributspfade der Form 0:*
 
     // speichere die Schluesselattribute
     while (keyIterator.hasNext())
     {
       String currentName = keyIterator.next().toString();
 
-      ColumnDefinition currentKeyLDAPAttribute = columnDefinitions
-          .get(currentName);
+      ColumnDefinition currentKeyLDAPAttribute = columnDefinitions.get(currentName);
 
       // ist Schluesselattribut vorhanden?
       if (currentKeyLDAPAttribute == null)
-        throw new ConfigurationErrorException( 
-            "Spalte \""+currentName+"\" ist nicht im Schema definiert und kann deshalb nicht als Schluesselspalte verwendet werden.");
+        throw new ConfigurationErrorException(
+          L.m(
+            "Spalte \"%1\" ist nicht im Schema definiert und kann deshalb nicht als Schluesselspalte verwendet werden.",
+            currentName));
 
       if (currentKeyLDAPAttribute.relativePath != 0)
       {
@@ -377,28 +395,28 @@ public class LDAPDatasource implements Datasource
     else
       keyStatus = ABSOLUTE_AND_RELATIVE;
 
-    
   }
 
   /** Setzt die timeout-Properties. */
   private void setTimeout(Properties props, long timeout)
   {
-    properties.setProperty("com.sun.jndi.ldap.connect.timeout", ""+timeout);
-    properties.setProperty("com.sun.jndi.dns.timeout.initial", ""+timeout);
+    properties.setProperty("com.sun.jndi.ldap.connect.timeout", "" + timeout);
+    properties.setProperty("com.sun.jndi.dns.timeout.initial", "" + timeout);
     properties.setProperty("com.sun.jndi.dns.timeout.retries", "1");
   }
-  
+
   /**
    * repräsentiert eine Spaltendefinition
-   * @author Max  Meier (D-III-ITD 5.1)
+   * 
+   * @author Max Meier (D-III-ITD 5.1)
    */
   private class ColumnDefinition
   {
 
     /**
      * relativer Pfad: 0 := Attribut befindet sich im selben Knoten negativ :=
-     * relative Pfadangabe "nach oben" vom aktuellen Knoten aus positiv :=
-     * relative Pfadangabe von der Wurzel aus
+     * relative Pfadangabe "nach oben" vom aktuellen Knoten aus positiv := relative
+     * Pfadangabe von der Wurzel aus
      */
     int relativePath;
 
@@ -406,8 +424,8 @@ public class LDAPDatasource implements Datasource
      * Name der Spalte.
      */
     String columnName;
-    
-    /** Attributname im LDAP*/
+
+    /** Attributname im LDAP */
     String attributeName = null;
 
     /** exklusive objectClass */
@@ -425,8 +443,6 @@ public class LDAPDatasource implements Datasource
 
   }
 
-  
-  
   /*
    * (non-Javadoc)
    * 
@@ -447,12 +463,12 @@ public class LDAPDatasource implements Datasource
   {
     String[] ks = key.split(KEY_SEPARATOR_0_NON_0_RE, 2);
     ks = ks[1].split(SEPARATOR);
-    
+
     List<QueryPart> query = new Vector<QueryPart>(ks.length);
 
     for (int i = 0; i < ks.length; ++i)
     {
-      String[] q = ks[i].split("=",2);
+      String[] q = ks[i].split("=", 2);
       query.add(new QueryPart(q[0], q[1]));
     }
 
@@ -463,7 +479,7 @@ public class LDAPDatasource implements Datasource
   {
     return new QueryResultsList(new Vector<Dataset>(0));
   }
-  
+
   /*
    * (non-Javadoc)
    * 
@@ -474,9 +490,9 @@ public class LDAPDatasource implements Datasource
       throws TimeoutException
   {
     if (keys.isEmpty()) return new QueryResultsList(new Vector<Dataset>(0));
-    
+
     Vector<Dataset> results = new Vector<Dataset>(keys.size());
-    
+
     try
     {
       long endTime = System.currentTimeMillis() + timeout;
@@ -495,24 +511,20 @@ public class LDAPDatasource implements Datasource
         {
           String currentKey = iter.next();
           if (!KEY_RE.matcher(currentKey).matches()) continue;
-          String[] ks = currentKey.split(KEY_SEPARATOR_0_NON_0_RE,2);
+          String[] ks = currentKey.split(KEY_SEPARATOR_0_NON_0_RE, 2);
           searchFilter = searchFilter + ks[0];
         }
-        if (searchFilter.length() == 0) return new QueryResultsList(new Vector<Dataset>(0));
+        if (searchFilter.length() == 0)
+          return new QueryResultsList(new Vector<Dataset>(0));
         searchFilter = "(|" + searchFilter + ")";
 
         // search LDAP
-        NamingEnumeration currentResults = searchLDAP(
-            "",
-            searchFilter,
-            SearchControls.SUBTREE_SCOPE,
-            true,
-            endTime);
-        
+        NamingEnumeration currentResults = searchLDAP("", searchFilter,
+          SearchControls.SUBTREE_SCOPE, true, endTime);
+
         while (currentResults.hasMoreElements())
         {
-          if (System.currentTimeMillis() > endTime)
-            throw new TimeoutException();
+          if (System.currentTimeMillis() > endTime) throw new TimeoutException();
           try
           {
             SearchResult currentResult = (SearchResult) currentResults.next();
@@ -528,28 +540,29 @@ public class LDAPDatasource implements Datasource
           }
           catch (NamingException e)
           {
-            Logger.error("Error in LDAP-Directory.", e);
+            Logger.error(L.m("Error in LDAP-Directory."), e);
           }
         }
       }
-      else //if (keyStatus == RELATIVE_ONLY)
+      else
+      // if (keyStatus == RELATIVE_ONLY)
       { // nur relative Attribute
         Iterator<String> iter = keys.iterator();
         while (iter.hasNext())
         {
           List<QueryPart> query = keyToFindQuery(iter.next());
           timeout = endTime - System.currentTimeMillis();
-          if (timeout <= 0)
-            throw new TimeoutException();
+          if (timeout <= 0) throw new TimeoutException();
           QueryResults res = find(query, timeout);
           Iterator<Dataset> iter2 = res.iterator();
-          while (iter2.hasNext()) results.add(iter2.next());
+          while (iter2.hasNext())
+            results.add(iter2.next());
         }
       }
-      
+
       results.trimToSize();
       return new QueryResultsList(results);
-      
+
     }
     finally
     {
@@ -559,7 +572,8 @@ public class LDAPDatasource implements Datasource
 
   /**
    * Speichert eine Liste von (Ldap)Names, die zu einer Suchanfrage über Attribute
-   * mit Pfad-Level ungleich 0 gehören (alle mit dem selben Level). 
+   * mit Pfad-Level ungleich 0 gehören (alle mit dem selben Level).
+   * 
    * @author Max Meier (D-III-ITD 5.1)
    */
   private class RelativePaths
@@ -567,7 +581,7 @@ public class LDAPDatasource implements Datasource
 
     public int relative;
 
-    public List<Name> paths; //of (Ldap)Names
+    public List<Name> paths; // of (Ldap)Names
 
     RelativePaths(int relative, List<Name> paths)
     {
@@ -578,9 +592,10 @@ public class LDAPDatasource implements Datasource
   }
 
   /**
-   * Ein (Ldap)Name und der Pfad-Level für die Suche. Typischerweise ist der Pfad-Level != 0,
-   * aber ein Level von 0 ist auch möglich (kann bei Bildung der Schnittmenge von positiven
-   * und negativen Kandidaten entstehen). 
+   * Ein (Ldap)Name und der Pfad-Level für die Suche. Typischerweise ist der
+   * Pfad-Level != 0, aber ein Level von 0 ist auch möglich (kann bei Bildung der
+   * Schnittmenge von positiven und negativen Kandidaten entstehen).
+   * 
    * @author Max Meier (D-III-ITD 5.1)
    */
   private class RelativePath
@@ -599,12 +614,15 @@ public class LDAPDatasource implements Datasource
   }
 
   /**
-   * Liefert zum Pfadlevel pathLength alle Knoten, die auf die LDAP-Suchanfrage filter passen
-   * @throws TimeoutException falls die Suche nicht vor endTime beendet werden konnte.
+   * Liefert zum Pfadlevel pathLength alle Knoten, die auf die LDAP-Suchanfrage
+   * filter passen
+   * 
+   * @throws TimeoutException
+   *           falls die Suche nicht vor endTime beendet werden konnte.
    * @author Max Meier (D-III-ITD 5.1)
    */
-  private RelativePaths getPaths(String filter, int pathLength, 
-      long endTime) throws TimeoutException
+  private RelativePaths getPaths(String filter, int pathLength, long endTime)
+      throws TimeoutException
   {
 
     Vector<Name> paths;
@@ -614,20 +632,21 @@ public class LDAPDatasource implements Datasource
     if (timeout > Integer.MAX_VALUE) timeout = Integer.MAX_VALUE;
 
     try
-    { 
+    {
       setTimeout(properties, timeout);
       Logger.debug2("new InitialLdapContext(properties, null)");
       DirContext ctx = new InitialLdapContext(properties, null);
-      
+
       Logger.debug2("ctx.getNameParser(\"\")");
       NameParser np = ctx.getNameParser("");
-      int rootSize = np.parse(baseDN).size();  
+      int rootSize = np.parse(baseDN).size();
       SearchControls sc = new SearchControls();
       sc.setSearchScope(SearchControls.SUBTREE_SCOPE);
-    
+
       sc.setTimeLimit((int) timeout);
-      
-      Logger.debug2("ctx.search("+baseDN+","+filter+",sc) mit Zeitlimit "+sc.getTimeLimit());
+
+      Logger.debug2("ctx.search(" + baseDN + "," + filter + ",sc) mit Zeitlimit "
+                    + sc.getTimeLimit());
       NamingEnumeration enumer = ctx.search(baseDN, filter, sc);
       Logger.debug2("ctx.search() abgeschlossen");
 
@@ -640,20 +659,19 @@ public class LDAPDatasource implements Datasource
         String path = checkQuotes(result.getName());
         Name pathName = np.parse(path);
         /*
-         * ACHTUNG: hier kann NICHT 
-         * (pathLength < 0 && (pathName.size()+rootLength > abs(pathLength))) 
-         * getestet werden, denn Minus-Bedingungen betreffen die Nachfahren, 
-         * hier muesste also die Tiefe des tiefsten Nachfahrens ausgewertet werden, 
-         * die wir nicht kennen.
+         * ACHTUNG: hier kann NICHT (pathLength < 0 && (pathName.size()+rootLength >
+         * abs(pathLength))) getestet werden, denn Minus-Bedingungen betreffen die
+         * Nachfahren, hier muesste also die Tiefe des tiefsten Nachfahrens
+         * ausgewertet werden, die wir nicht kennen.
          */
-        if (pathName.size() + rootSize == pathLength || pathLength < 0)  
+        if (pathName.size() + rootSize == pathLength || pathLength < 0)
           paths.add(pathName);
       }
 
     }
     catch (NamingException e)
     {
-      throw new TimeoutException("Internal error in LDAP.", e);
+      throw new TimeoutException(L.m("Internal error in LDAP."), e);
     }
 
     return new RelativePaths(pathLength, paths);
@@ -663,11 +681,11 @@ public class LDAPDatasource implements Datasource
   /*
    * (non-Javadoc)
    * 
-   * @see de.muenchen.allg.itd51.wollmux.db.Datasource#find(java.util.List,
-   *      long)
-   *      
+   * @see de.muenchen.allg.itd51.wollmux.db.Datasource#find(java.util.List, long)
+   * 
    */
-  public QueryResults find(List<QueryPart> query, long timeout) throws TimeoutException
+  public QueryResults find(List<QueryPart> query, long timeout)
+      throws TimeoutException
   {
 
     long endTime = System.currentTimeMillis() + timeout;
@@ -679,7 +697,7 @@ public class LDAPDatasource implements Datasource
 
     List<List<RelativePath>> negativeSubtreePathLists = new Vector<List<RelativePath>>();
 
-    Map<Integer, String> mapNon0PathLevelToSearchFilter = new HashMap<Integer, String>(); 
+    Map<Integer, String> mapNon0PathLevelToSearchFilter = new HashMap<Integer, String>();
 
     boolean first = true;
     while (iter.hasNext())
@@ -689,8 +707,7 @@ public class LDAPDatasource implements Datasource
 
       QueryPart currentQuery = iter.next();
 
-      ColumnDefinition colDef = columnDefinitions.get(currentQuery
-          .getColumnName()); 
+      ColumnDefinition colDef = columnDefinitions.get(currentQuery.getColumnName());
 
       if (colDef == null) return new QueryResultsList(new Vector<Dataset>(0));
 
@@ -699,18 +716,12 @@ public class LDAPDatasource implements Datasource
       String attributeValue = currentQuery.getSearchString();
 
       String objectClass = colDef.columnObjectClass;
-      String currentSearchFilter = "(" 
-                                   + ldapEscape(attributeName)
-                                   + "="
-                                   + ldapEscape(attributeValue)
-                                   + ")";
+      String currentSearchFilter = "(" + ldapEscape(attributeName) + "="
+                                   + ldapEscape(attributeValue) + ")";
       if (objectClass != null)
       {
-        currentSearchFilter = "(&"
-                              + currentSearchFilter
-                              + "(objectClass="
-                              + ldapEscape(objectClass)
-                              + "))";
+        currentSearchFilter = "(&" + currentSearchFilter + "(objectClass="
+                              + ldapEscape(objectClass) + "))";
       }
 
       if (relativePath == 0)
@@ -738,10 +749,8 @@ public class LDAPDatasource implements Datasource
         }
         else
         {
-          non0LevelSearchFilter = "(&"
-                             + currentSearchFilter
-                             + non0LevelSearchFilter
-                             + ")";
+          non0LevelSearchFilter = "(&" + currentSearchFilter + non0LevelSearchFilter
+                                  + ")";
         }
 
         mapNon0PathLevelToSearchFilter.put(key, non0LevelSearchFilter);
@@ -751,7 +760,8 @@ public class LDAPDatasource implements Datasource
     }
 
     Iterator<Integer> attributeKeys = mapNon0PathLevelToSearchFilter.keySet().iterator();
-//TOD0 evtl. Optimierung: attributeKeys nicht in zufälliger Reihenfolge durchgehen
+    // TOD0 evtl. Optimierung: attributeKeys nicht in zufälliger Reihenfolge
+    // durchgehen
     while (attributeKeys.hasNext())
     {
       Integer currentKey = attributeKeys.next();
@@ -767,18 +777,18 @@ public class LDAPDatasource implements Datasource
         positiveSubtreePathLists.add(paths);
       }
       else
-      { 
+      {
         /*
-         * RelativePaths in Liste von RelativePath Objekten umwandeln, da nachher
-         * im Merge-Schritt eine Liste entstehen soll, in der Pfade verschiedener
-         * Stufe gemischt enthalten sein können.
+         * RelativePaths in Liste von RelativePath Objekten umwandeln, da nachher im
+         * Merge-Schritt eine Liste entstehen soll, in der Pfade verschiedener Stufe
+         * gemischt enthalten sein können.
          */
         List<RelativePath> negativeSubtreePaths = new Vector<RelativePath>();
-        for (int n = 0; n < paths.paths.size(); n++) //TOD0 Iterator verwenden
+        for (int n = 0; n < paths.paths.size(); n++) // TOD0 Iterator verwenden
         {
           Name currentName = paths.paths.get(n);
           RelativePath newNegativePath = new RelativePath(paths.relative,
-              currentName);
+            currentName);
           negativeSubtreePaths.add(newNegativePath);
         }
         negativeSubtreePathLists.add(negativeSubtreePaths);
@@ -790,34 +800,58 @@ public class LDAPDatasource implements Datasource
     /*
      * bilde die Schnittmenge aller angegebenen positiv relativen Pfade
      * 
-     * Dieser Algorithmus vergleicht zwei Listen, die jeweils alle relevanten
-     * Pfade eines Suchattributs repräsentieren. Zuerst werden die Listen nach
-     * der Länge der enthaltenen Pfade sortiert, danach wird betrachte, ob für
-     * jedes Element der Liste der längeren Pfade ein Element aus der Liste der
-     * kürzeren Pfade existiert, das ein Prefix des ersten Elements ist. Wenn
-     * ja, wird das Element in die Liste mergedPositiveSubtreePathLists
-     * aufgenommen und somit weiter betrachtet, wenn nein, ist die
-     * Schnittmengeneigenschaft nicht gegeben und der Pfad wird verworfen.
+     * Dieser Algorithmus vergleicht zwei Listen, die jeweils alle relevanten Pfade
+     * eines Suchattributs repräsentieren. Zuerst werden die Listen nach der Länge
+     * der enthaltenen Pfade sortiert, danach wird betrachte, ob für jedes Element
+     * der Liste der längeren Pfade ein Element aus der Liste der kürzeren Pfade
+     * existiert, das ein Prefix des ersten Elements ist. Wenn ja, wird das Element
+     * in die Liste mergedPositiveSubtreePathLists aufgenommen und somit weiter
+     * betrachtet, wenn nein, ist die Schnittmengeneigenschaft nicht gegeben und der
+     * Pfad wird verworfen.
      */
     List<Name> mergedPositiveSubtreePathLists = null;
 
-    int mergedCurrentSize = 0; //TOD0: Der Name ist Bullshit. Die Variable gibt den Level an. okay, size bezieht sicht auf die laenge der (Ldap)Names
+    int mergedCurrentSize = 0; // TOD0: Der Name ist Bullshit. Die Variable gibt den
+    // Level an. okay, size bezieht sicht auf die laenge
+    // der (Ldap)Names
 
-    if (positiveSubtreePathLists.size() > 0) //TOD0 if nach aussen ziehen (evtl. gleich auf Iterator übergehen, siehe todo weiter unten), damit mergedPositiveSubtreePathLists nicht mit null initialisiert werden muss und damit beweisbar ist, dass es initialisiert ist
+    if (positiveSubtreePathLists.size() > 0) // TOD0 if nach aussen ziehen (evtl.
+    // gleich auf Iterator übergehen, siehe
+    // todo weiter unten), damit
+    // mergedPositiveSubtreePathLists nicht
+    // mit null initialisiert werden muss
+    // und damit beweisbar ist, dass es
+    // initialisiert ist
     {
-      RelativePaths currentSubtreePaths = positiveSubtreePathLists
-          .get(0); //TOD0: Hier wird eine Liste von zufälligem Level rausgepickt (entsprechend sortierung von attributeMap.keySet(), Wo ist die oben angesprochene Sortierung?
+      RelativePaths currentSubtreePaths = positiveSubtreePathLists.get(0); // TOD0:
+      // Hier
+      // wird
+      // eine
+      // Liste
+      // von
+      // zufälligem
+      // Level
+      // rausgepickt
+      // (entsprechend
+      // sortierung
+      // von
+      // attributeMap.keySet(),
+      // Wo ist
+      // die
+      // oben
+      // angesprochene
+      // Sortierung?
       mergedPositiveSubtreePathLists = currentSubtreePaths.paths;
       mergedCurrentSize = currentSubtreePaths.relative;
     }
 
-    for (int n = 1; n < positiveSubtreePathLists.size(); n++) //TOD0 Iterator verwenden
+    for (int n = 1; n < positiveSubtreePathLists.size(); n++) // TOD0 Iterator
+    // verwenden
     {
 
-      RelativePaths currentSubtreePaths = positiveSubtreePathLists
-          .get(n);
+      RelativePaths currentSubtreePaths = positiveSubtreePathLists.get(n);
 
-      List<Name> shorterLdapNames, longerLdapNames; //of (Ldap)Names
+      List<Name> shorterLdapNames, longerLdapNames; // of (Ldap)Names
 
       if (currentSubtreePaths.relative < mergedCurrentSize)
       {
@@ -840,7 +874,7 @@ public class LDAPDatasource implements Datasource
         for (int p = 0; p < shorterLdapNames.size(); p++)
         {
           Name shorterName = shorterLdapNames.get(p);
-          if (longerName.startsWith(shorterName)) 
+          if (longerName.startsWith(shorterName))
           {
             mergedPositiveSubtreePathLists.add(longerName);
             break;
@@ -858,7 +892,9 @@ public class LDAPDatasource implements Datasource
      * 
      */
     List<RelativePath> mergedNegativeList = null;
-    if (negativeSubtreePathLists.size() > 0) //TOD0 if nach oben ziehen, um mergedNegativeList nicht mit null initialisieren zu müssen
+    if (negativeSubtreePathLists.size() > 0) // TOD0 if nach oben ziehen, um
+    // mergedNegativeList nicht mit null
+    // initialisieren zu müssen
     {
       mergedNegativeList = negativeSubtreePathLists.get(0);
     }
@@ -867,31 +903,33 @@ public class LDAPDatasource implements Datasource
     {
       List<RelativePath> newMergedNegativeList = new Vector<RelativePath>();
 
-      /* 
+      /*
        * alle Objekte von currentList haben die selbe Stufe.
-       */ 
+       */
       List currentList = negativeSubtreePathLists.get(n);
 
       for (int m = 0; m < mergedNegativeList.size(); m++)
       {
         RelativePath currentPath = mergedNegativeList.get(m);
 
-        /* 
-         * Suche zu currentPath in der currentList einen Pfad, der eine Aussage über eine
-         * Teilmenge oder eine Obermenge der Nachkommen von currentPath macht, die potentielle
-         * Ergebnisse sind. Beispiel*/
-//      A1:-2     Hier ist A1 ein Knoten der auf eine Suchbedingung mit Level -2 passt, d.h.
-//     / |        von dem Enkelkinder potentielle Ergebnisse sind.      
-//    D  B:-1     Bei B sind Kinder potentielle Ergebnisse. Die Enkelkinder von A1 sind eine
-//    |  | \      Obermenge der Kinder von B. 
-//    |  |  \   
-//    E  C1  C2
-
-         /* 
-         * Gibt es so einen Match nicht,
-         * dann fliegt currentPath raus (indem es nicht nach newMergedNegativeList 
-         * übertragen wird). Gibt es so einen Match, so wird der längere Pfad von beiden in
-         * die newMergedNegativeList übernommen (im Beispiel B).
+        /*
+         * Suche zu currentPath in der currentList einen Pfad, der eine Aussage über
+         * eine Teilmenge oder eine Obermenge der Nachkommen von currentPath macht,
+         * die potentielle Ergebnisse sind. Beispiel
+         */
+        // A1:-2 Hier ist A1 ein Knoten der auf eine Suchbedingung mit Level -2
+        // passt, d.h.
+        // / | von dem Enkelkinder potentielle Ergebnisse sind.
+        // D B:-1 Bei B sind Kinder potentielle Ergebnisse. Die Enkelkinder von A1
+        // sind eine
+        // | | \ Obermenge der Kinder von B.
+        // | | \
+        // E C1 C2
+        /*
+         * Gibt es so einen Match nicht, dann fliegt currentPath raus (indem es nicht
+         * nach newMergedNegativeList übertragen wird). Gibt es so einen Match, so
+         * wird der längere Pfad von beiden in die newMergedNegativeList übernommen
+         * (im Beispiel B).
          */
         for (int p = 0; p < currentList.size(); p++)
         {
@@ -910,21 +948,21 @@ public class LDAPDatasource implements Datasource
             longer = currentPath;
           }
 
-          if (currentPath.name.size() - currentPath.relative == otherPath.name
-              .size() - otherPath.relative              
-              && longer.name.startsWith(shorter.name)) 
+          if (currentPath.name.size() - currentPath.relative == otherPath.name.size()
+                                                                - otherPath.relative
+              && longer.name.startsWith(shorter.name))
           {
             newMergedNegativeList.add(longer);
-//            * 
-//            * Achtung: Kein break hier! Beispiel
-//            * 
-//            *            A          A ist currentPath mit Level -2
-//            *           / \         B1 und B2 sind in der currentList mit Level -1
-//            *          /   \        Sowohl B1 als auch B2 müssen in die
-//            *         B1   B2       newMergedNegativeList kommen!
-//            *         |     |
-//            *         C1    C2      
-//            *
+            // *
+            // * Achtung: Kein break hier! Beispiel
+            // *
+            // * A A ist currentPath mit Level -2
+            // * / \ B1 und B2 sind in der currentList mit Level -1
+            // * / \ Sowohl B1 als auch B2 müssen in die
+            // * B1 B2 newMergedNegativeList kommen!
+            // * | |
+            // * C1 C2
+            // *
           }
 
         }
@@ -956,16 +994,21 @@ public class LDAPDatasource implements Datasource
 
             if (currentName.startsWith(currentPath.name)
                 && currentPath.name.size() - currentPath.relative >= currentName.size())
-            { 
+            {
               /*
-               * Wir bilden einen neuen RelativePath mit dem Namen des positiven (currentName),
-               * der tiefer im Baum liegt und einem (negativen) Level, der die selbe Nachfahrenebene
-               * selektiert wie der Level des negativen (currentPath).
-               * Achtung: Es ist möglich, dass der neu-gebildete Level 0 ist.
+               * Wir bilden einen neuen RelativePath mit dem Namen des positiven
+               * (currentName), der tiefer im Baum liegt und einem (negativen) Level,
+               * der die selbe Nachfahrenebene selektiert wie der Level des negativen
+               * (currentPath). Achtung: Es ist möglich, dass der neu-gebildete Level
+               * 0 ist.
                */
-              RelativePath newPath = new RelativePath(currentName.size() - currentPath.name.size() + currentPath.relative, currentName);
+              RelativePath newPath = new RelativePath(currentName.size()
+                                                      - currentPath.name.size()
+                                                      + currentPath.relative,
+                currentName);
               mergedNegativeSubtreePaths.add(newPath);
-              //kein break weil mit dem selben negativen currentPath mehrere Schnitte möglich sind.
+              // kein break weil mit dem selben negativen currentPath mehrere
+              // Schnitte möglich sind.
             }
 
           }
@@ -987,27 +1030,29 @@ public class LDAPDatasource implements Datasource
       mergedNegativeSubtreePaths = mergedNegativeList;
     }
 
-    if (searchFilter.equals("") //TOD0: die Listen sollten nie null sein (siehe vorherige TODOs) entsprechend muss hier auf isEmpty() getestet werden
-        && mergedPositiveSubtreePathLists == null 
+    if (searchFilter.equals("") // TOD0: die Listen sollten nie null sein (siehe
+        // vorherige TODOs) entsprechend muss hier auf
+        // isEmpty() getestet werden
+        && mergedPositiveSubtreePathLists == null
         && mergedNegativeSubtreePaths == null)
     {
       return new QueryResultsList(new Vector<Dataset>(0));
     }
-    
+
     List<SearchResult> currentResultList = new Vector<SearchResult>();
 
-    /* 
-     * TOD0: besser insgesamt auf havePositiveConstraints und haveNegativeConstrainst 
-     * Booleans umstellen, anstatt die size zu überprüfen. Könnte zum Irrtum verleiten, 
-     * dass hier  mergedNegativeSubtreePaths getestet werden sollte, was aber nicht stimmt,
-     * da wenn die mergedListe leer ist, eine leere Ergebnisliste geliefert werden muss, 
-     * wenn es positive einschränkungen gibt. 
+    /*
+     * TOD0: besser insgesamt auf havePositiveConstraints und haveNegativeConstrainst
+     * Booleans umstellen, anstatt die size zu überprüfen. Könnte zum Irrtum
+     * verleiten, dass hier mergedNegativeSubtreePaths getestet werden sollte, was
+     * aber nicht stimmt, da wenn die mergedListe leer ist, eine leere Ergebnisliste
+     * geliefert werden muss, wenn es positive einschränkungen gibt.
      */
-    if (negativeSubtreePathLists.size() == 0) 
+    if (negativeSubtreePathLists.size() == 0)
     {
-      
+
       List<String> positiveSubtreeStrings = new Vector<String>();
-      
+
       // create Strings from Names
       if (positiveSubtreePathLists.size() == 0)
       {
@@ -1015,39 +1060,35 @@ public class LDAPDatasource implements Datasource
       }
       else
       {
-        
+
         for (int n = 0; n < mergedPositiveSubtreePathLists.size(); n++)
         {
           Name currentName = mergedPositiveSubtreePathLists.get(n);
           positiveSubtreeStrings.add(currentName.toString());
         }
-        
+
       }
-      
+
       Iterator<String> subtreeIterator = positiveSubtreeStrings.iterator();
-      
+
       // allgemeine Suche
-      
+
       while (subtreeIterator.hasNext())
       {
-        
+
         if (System.currentTimeMillis() > endTime) throw new TimeoutException();
-        
+
         String subTree = subtreeIterator.next();
         String comma = ",";
         if (subTree.equals("")) comma = "";
-        NamingEnumeration currentResults = searchLDAP(
-            subTree + comma,
-            searchFilter,
-            SearchControls.SUBTREE_SCOPE,
-            true,
-            endTime); 
+        NamingEnumeration currentResults = searchLDAP(subTree + comma, searchFilter,
+          SearchControls.SUBTREE_SCOPE, true, endTime);
 
         while (currentResults.hasMoreElements())
         {
           SearchResult sr = (SearchResult) currentResults.nextElement();
           String name = checkQuotes(sr.getName());
-          sr.setName(name + (name.length()>0?comma:"") + subTree);
+          sr.setName(name + (name.length() > 0 ? comma : "") + subTree);
           currentResultList.add(sr);
         }
 
@@ -1055,24 +1096,22 @@ public class LDAPDatasource implements Datasource
     }
     else
     { // Breitensuche ausgehend von den Knoten der mergedNegativeSubtreePaths
-      for (int n = 0; n < mergedNegativeSubtreePaths.size(); n++) //TOD0 Iterator verwenden
+      for (int n = 0; n < mergedNegativeSubtreePaths.size(); n++) // TOD0 Iterator
+      // verwenden
       {
 
         if (System.currentTimeMillis() > endTime) throw new TimeoutException();
 
-        RelativePath currentRelativePath = mergedNegativeSubtreePaths
-            .get(n);
+        RelativePath currentRelativePath = mergedNegativeSubtreePaths.get(n);
         int depth = -currentRelativePath.relative;
-        //ACHTUNG: depth kann 0 sein. Siehe Kommentar bei Bildung des Schnitts aus negativen
-        //und positiven Pfaden.
+        // ACHTUNG: depth kann 0 sein. Siehe Kommentar bei Bildung des Schnitts aus
+        // negativen
+        // und positiven Pfaden.
 
         Name currentName = currentRelativePath.name;
         String currentPath = currentName.toString();
-        List<SearchResult> currentSearch = searchLDAPLevel(
-            currentPath,
-            searchFilter,
-            depth,
-            endTime);
+        List<SearchResult> currentSearch = searchLDAPLevel(currentPath,
+          searchFilter, depth, endTime);
 
         currentResultList.addAll(currentSearch);
       }
@@ -1095,13 +1134,12 @@ public class LDAPDatasource implements Datasource
 
         if (System.currentTimeMillis() > endTime) throw new TimeoutException();
 
-        SearchResult currentResult = currentResultsIterator
-            .next();
+        SearchResult currentResult = currentResultsIterator.next();
         Dataset ds = getDataset(currentResult, endTime);
         results.add(ds);
       }
     }
-    finally 
+    finally
     {
       attributeCache.clear();
     }
@@ -1112,14 +1150,13 @@ public class LDAPDatasource implements Datasource
   }
 
   /**
-   * Escaping nach RFC 2254 Abschnitt 4. 
-   * Sternderl werden nicht escapet, weil sie ihre normale Sternerl-Bedeutung
-   * beibehalten sollen.
-   */  
+   * Escaping nach RFC 2254 Abschnitt 4. Sternderl werden nicht escapet, weil sie
+   * ihre normale Sternerl-Bedeutung beibehalten sollen.
+   */
   private String ldapEscape(String value)
   {
-    return value.replaceAll("\\\\", "\\\\5c").replaceAll("\\(", "\\\\28")
-        .replaceAll("\\)", "\\\\29").replaceAll("\\00","\\\\00");
+    return value.replaceAll("\\\\", "\\\\5c").replaceAll("\\(", "\\\\28").replaceAll(
+      "\\)", "\\\\29").replaceAll("\\00", "\\\\00");
   }
 
   /*
@@ -1133,47 +1170,46 @@ public class LDAPDatasource implements Datasource
   }
 
   /**
-   * generiert einen Schluessel aus einem geordneten(!) Vector der
-   * Schluesselwerte
+   * generiert einen Schluessel aus einem geordneten(!) Vector der Schluesselwerte
+   * 
    * @param values
    * @return
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private String generateKey(Map<String, String> data)
   {
-    List<Object> keyColumns = new Vector<Object>(); 
+    List<Object> keyColumns = new Vector<Object>();
     Iterator<Object> iter = keyAttributes.iterator();
     while (iter.hasNext())
     {
-      String keyAttr = (String)iter.next();
+      String keyAttr = (String) iter.next();
       ColumnDefinition colDef = columnDefinitions.get(keyAttr);
       keyColumns.add(colDef);
     }
-    
-    //Spalten alphabetisch und nach Pfad-Level sortieren, um einen
-    //wohldefinierten Schlüssel zu erhalten, der unabhängig von der Ordnung 
-    //der Map ist.
+
+    // Spalten alphabetisch und nach Pfad-Level sortieren, um einen
+    // wohldefinierten Schlüssel zu erhalten, der unabhängig von der Ordnung
+    // der Map ist.
     Collections.sort(keyColumns, new Comparator<Object>()
     {
-        public int compare(Object o1, Object o2)
-        {
-          ColumnDefinition colDef1 = (ColumnDefinition)o1;
-          ColumnDefinition colDef2 = (ColumnDefinition)o2;
-          int comp1 = colDef1.attributeName.compareTo(colDef2.attributeName);
-          int comp2 = colDef1.relativePath - colDef2.relativePath;
-          int comp = comp1;
-          if (comp == 0) comp = comp2;
-          return comp;
-        }
+      public int compare(Object o1, Object o2)
+      {
+        ColumnDefinition colDef1 = (ColumnDefinition) o1;
+        ColumnDefinition colDef2 = (ColumnDefinition) o2;
+        int comp1 = colDef1.attributeName.compareTo(colDef2.attributeName);
+        int comp2 = colDef1.relativePath - colDef2.relativePath;
+        int comp = comp1;
+        if (comp == 0) comp = comp2;
+        return comp;
+      }
     });
-    
-    
+
     StringBuffer key = new StringBuffer();
     iter = keyColumns.iterator();
     while (iter.hasNext())
     {
-      ColumnDefinition colDef = (ColumnDefinition)iter.next();
-      if (colDef.relativePath == 0) 
+      ColumnDefinition colDef = (ColumnDefinition) iter.next();
+      if (colDef.relativePath == 0)
       {
         key.append('(');
         key.append(ldapEscape(colDef.attributeName));
@@ -1183,36 +1219,41 @@ public class LDAPDatasource implements Datasource
         key.append(ldapEscape(value));
         key.append(')');
       }
-      
+
     }
-    
-    if (key.length() > 0) { key.insert(0,"(&"); key.append(')');}
-    
+
+    if (key.length() > 0)
+    {
+      key.insert(0, "(&");
+      key.append(')');
+    }
+
     key.append(KEY_SEPARATOR_0_NON_0_RE);
-    
+
     iter = keyColumns.iterator();
     while (iter.hasNext())
     {
-      ColumnDefinition colDef = (ColumnDefinition)iter.next();
-      if (colDef.relativePath != 0) 
+      ColumnDefinition colDef = (ColumnDefinition) iter.next();
+      if (colDef.relativePath != 0)
       {
         key.append(colDef.columnName);
         key.append('=');
         String value = data.get(colDef.columnName);
         if (value == null) value = "";
-        key.append(value.replaceAll("\\*","").replaceAll(SEPARATOR,""));
+        key.append(value.replaceAll("\\*", "").replaceAll(SEPARATOR, ""));
         key.append(SEPARATOR);
       }
     }
-    
+
     return key.toString();
   }
-  
+
   private static class CacheKey
   {
     private static final String CACHE_KEY_SEPARATOR = "/{%§";
+
     private String hash;
-    
+
     public CacheKey(Name attributePath, String[] searchAttributes)
     {
       StringBuffer buf = new StringBuffer();
@@ -1225,28 +1266,31 @@ public class LDAPDatasource implements Datasource
       }
       hash = buf.toString();
     }
-    
+
     public int hashCode()
     {
       return hash.hashCode();
     }
-    
+
     public boolean equals(Object other)
     {
-      try{
+      try
+      {
         CacheKey otherKey = (CacheKey) other;
         return hash.equals(otherKey.hash);
-      }catch(Exception e)
+      }
+      catch (Exception e)
       {
         return false;
       }
     }
-    
+
   }
-  
+
   /**
-   * vervollständigt SearchResults um Daten aus dem Verzeichnis und gibt ein
-   * Dataset zurück
+   * vervollständigt SearchResults um Daten aus dem Verzeichnis und gibt ein Dataset
+   * zurück
+   * 
    * @param searchResult
    * @param endTime
    * @return
@@ -1263,53 +1307,58 @@ public class LDAPDatasource implements Datasource
     Map<String, String> relation = new HashMap<String, String>();
 
     DirContext ctx = null;
-    try{
+    try
+    {
       Name pathName;
       Name rootName;
-      
+
       try
       {
-        
+
         String tempPath = searchResult.getName();
-        
+
         tempPath = checkQuotes(tempPath);
-        
+
         long timeout = endTime - System.currentTimeMillis();
         if (timeout <= 0) throw new TimeoutException();
         if (timeout > Integer.MAX_VALUE) timeout = Integer.MAX_VALUE;
-        Logger.debug2("getDataset(): verbleibende Zeit: "+timeout);
+        Logger.debug2("getDataset(): verbleibende Zeit: " + timeout);
         setTimeout(properties, timeout);
         ctx = new InitialLdapContext(properties, null);
-        
+
         NameParser nameParser = ctx.getNameParser("");
         pathName = nameParser.parse(tempPath);
-        rootName = nameParser.parse(baseDN); //TOD0: Das ist eine Konstante, nur einmal berechnen (ausser, dass dies nur mit funktionierender Netzanbindung moeglich ist). Testen mit rausgezogenem Netzkabel
-        
+        rootName = nameParser.parse(baseDN); // TOD0: Das ist eine Konstante, nur
+        // einmal berechnen (ausser, dass dies
+        // nur mit funktionierender
+        // Netzanbindung moeglich ist). Testen
+        // mit rausgezogenem Netzkabel
+
       }
       catch (NamingException e)
       {
         throw new TimeoutException(
-            "Fehler beim Zugriff auf das LDAP-Verzeichnis.", e);
+          L.m("Fehler beim Zugriff auf das LDAP-Verzeichnis."), e);
       }
-      
+
       Iterator<Map.Entry<String, ColumnDefinition>> columnDefIter = columnDefinitions.entrySet().iterator();
-      
+
       while (columnDefIter.hasNext())
       {
-        
+
         if (System.currentTimeMillis() > endTime) throw new TimeoutException();
-        
+
         Map.Entry<String, ColumnDefinition> columnDefEntry = columnDefIter.next();
         ColumnDefinition currentAttribute = columnDefEntry.getValue();
-        
+
         int relativePath = currentAttribute.relativePath;
         String attributeName = currentAttribute.attributeName;
-        
+
         String value = null;
-        
+
         if (relativePath == 0)
         { // value can be found in the attributes
-          
+
           try
           {
             value = (String) attributes.get(attributeName).get();
@@ -1322,52 +1371,67 @@ public class LDAPDatasource implements Datasource
           {
             // do nothing (Attributwert nicht vorhanden und bleibt somit 'null')
           }
-          
+
         }
         else
         { // value is stored somewhere else in the directory
-          
+
           Name attributePath = (Name) rootName.clone();
-          
+
           try
           {
-            
+
             if (relativePath < 0)
             { // Pfad relativ zum aktuellen Element
-          
-              attributePath.addAll(pathName.getPrefix(pathName.size()
-                  + relativePath));
-              
+
+              attributePath.addAll(pathName.getPrefix(pathName.size() + relativePath));
+
             }
             else
             { // relativePath > 0, Pfad relativ zur Wurzel
-              
-              attributePath.addAll(pathName.getPrefix(relativePath
-                  - rootName.size()));
+
+              attributePath.addAll(pathName.getPrefix(relativePath - rootName.size()));
             }
-            
+
             String[] searchAttributes = { attributeName };
-            
+
             Attributes foundAttributes;
-            
+
             CacheKey key = new CacheKey(attributePath, searchAttributes);
             foundAttributes = attributeCache.get(key);
-            
+
             if (foundAttributes == null)
             {
-              foundAttributes = ctx //TOD0: Ist das sinnvoll, nur einzelne Attribute rauszuholen und zu cachen? Wäre es nicht besser, den ganzen Knoten samt aller Attribute zu holen und zu cachen? Das ganze sollte in eine Cache-Klasse ausgelagert werden, an die die Anfrage weitergeleitet wird, so dass dieses Verhalten (wie auch das handeln einer maximalgroesse des Cache) an einem Ort gemanaget wird
-              //TODO geschwindikeitsvergleich mit/ohne Cache
-              .getAttributes(attributePath, searchAttributes); //TOD0: Ein "searchAttributes" zusammenstellen am Anfang auf Basis des Schemas und überall verwenden, um Suchen einzuschränken
+              foundAttributes = ctx // TOD0: Ist das sinnvoll, nur einzelne Attribute
+                // rauszuholen und zu cachen? Wäre es nicht
+                // besser, den ganzen Knoten samt aller Attribute
+                // zu holen und zu cachen? Das ganze sollte in
+                // eine Cache-Klasse ausgelagert werden, an die
+                // die Anfrage weitergeleitet wird, so dass
+                // dieses Verhalten (wie auch das handeln einer
+                // maximalgroesse des Cache) an einem Ort
+                // gemanaget wird
+                // TODO geschwindikeitsvergleich mit/ohne Cache
+                .getAttributes(attributePath, searchAttributes); // TOD0: Ein
+              // "searchAttributes"
+              // zusammenstellen
+              // am Anfang auf
+              // Basis des
+              // Schemas und
+              // überall
+              // verwenden, um
+              // Suchen
+              // einzuschränken
               attributeCache.put(key, foundAttributes);
             }
-            
+
             Attribute foundAttribute = foundAttributes.get(attributeName);
-            
+
             if (foundAttribute != null)
             {
               value = (String) foundAttribute.get();
             }
-            
+
           }
           catch (NamingException e)
           {
@@ -1382,9 +1446,9 @@ public class LDAPDatasource implements Datasource
             // auch hier: do nothing (Attributwert befindet sich unterhalb der
             // aktuellen lhmPerson)
           }
-          
+
         }
-        
+
         if (value != null)
         {
           String lineSeparator = currentAttribute.lineSeparator;
@@ -1395,14 +1459,21 @@ public class LDAPDatasource implements Datasource
           relation.put(columnDefEntry.getKey(), value);
         }
       }
-      
+
       String key = generateKey(relation);
-      
+
       return new LDAPDataset(key, relation);
-      
-    }finally
+
+    }
+    finally
     {
-      try{ctx.close();} catch(Exception e){}
+      try
+      {
+        ctx.close();
+      }
+      catch (Exception e)
+      {
+      }
     }
   }
 
@@ -1410,30 +1481,36 @@ public class LDAPDatasource implements Datasource
    * Sucht im Teilbaum path + BASE_DN nach Knoten, auf die Suchkriterium filter
    * passt.
    * 
-   * @param path der Pfad des Startknotens. Wird mit BASE_DN konkateniert.
-   * @param filter der Suchfilter.
-   * @param searchScope SearchControls.SUBTREE_SCOPE, SearchControls.OBJECT_SCOPE oder
-   *                    SearchControls.ONELEVEL_SCOPE, um anzugeben wo gesucht werden soll.
-   * @param onlyObjectClass falls true, werden nur Knoten zurückgeliefert, deren objectClass
-   *        {@link #objectClass} entspricht.
-   * @param endTime wird die Suche nicht vor dieser Zeit beendet, wird eine TimeoutException 
-   *        geworfen
+   * @param path
+   *          der Pfad des Startknotens. Wird mit BASE_DN konkateniert.
+   * @param filter
+   *          der Suchfilter.
+   * @param searchScope
+   *          SearchControls.SUBTREE_SCOPE, SearchControls.OBJECT_SCOPE oder
+   *          SearchControls.ONELEVEL_SCOPE, um anzugeben wo gesucht werden soll.
+   * @param onlyObjectClass
+   *          falls true, werden nur Knoten zurückgeliefert, deren objectClass
+   *          {@link #objectClass} entspricht.
+   * @param endTime
+   *          wird die Suche nicht vor dieser Zeit beendet, wird eine
+   *          TimeoutException geworfen
    * @return die Suchergebnisse
-   * @throws TimeoutException falls die Suche nicht schnell genug abgeschlossen werden
-   *         konnte.
+   * @throws TimeoutException
+   *           falls die Suche nicht schnell genug abgeschlossen werden konnte.
    * @author Max Meier (D-III-ITD 5.1)
-   *
+   * 
    */
-  private NamingEnumeration searchLDAP(String path, String filter,
-      int searchScope, boolean onlyObjectClass, long endTime)
-      throws TimeoutException
+  private NamingEnumeration searchLDAP(String path, String filter, int searchScope,
+      boolean onlyObjectClass, long endTime) throws TimeoutException
   {
-    Logger.debug("searchLDAP("+path+","+filter+","+searchScope+","+onlyObjectClass+","+endTime+") zum Zeitpunkt "+System.currentTimeMillis());
-    
+    Logger.debug("searchLDAP(" + path + "," + filter + "," + searchScope + ","
+                 + onlyObjectClass + "," + endTime + ") zum Zeitpunkt "
+                 + System.currentTimeMillis());
+
     SearchControls searchControls = new SearchControls();
 
     searchControls.setSearchScope(searchScope);
-    
+
     long timeout = endTime - System.currentTimeMillis();
     if (timeout <= 0) throw new TimeoutException();
     if (timeout > Integer.MAX_VALUE) timeout = Integer.MAX_VALUE;
@@ -1445,7 +1522,9 @@ public class LDAPDatasource implements Datasource
     }
     else
     {
-      filter = "(&(objectClass=" + "*" + ")" + filter + ")"; //TOD0 das objectClass=* ist doch überflüssig
+      filter = "(&(objectClass=" + "*" + ")" + filter + ")"; // TOD0 das
+      // objectClass=* ist
+      // doch überflüssig
     }
 
     DirContext ctx = null;
@@ -1462,7 +1541,9 @@ public class LDAPDatasource implements Datasource
       NameParser nameParser = ctx.getNameParser("");
       Name name = nameParser.parse(path + baseDN);
 
-      Logger.debug2("ctx.search("+name+","+filter+",searchControls) mit Zeitlimit "+searchControls.getTimeLimit());
+      Logger.debug2("ctx.search(" + name + "," + filter
+                    + ",searchControls) mit Zeitlimit "
+                    + searchControls.getTimeLimit());
       result = ctx.search(name, filter, searchControls);
       Logger.debug2("ctx.search() abgeschlossen");
 
@@ -1477,19 +1558,31 @@ public class LDAPDatasource implements Datasource
     }
     finally
     {
-      try{ctx.close();}catch (Exception e){}
+      try
+      {
+        ctx.close();
+      }
+      catch (Exception e)
+      {
+      }
     }
 
-    Logger.debug((result.hasMoreElements()? "Ergebnisse gefunden" : "keine Ergebnisse gefunden")+" (verbleibende Zeit: "+(endTime - System.currentTimeMillis())+")");
+    Logger.debug((result.hasMoreElements() ? "Ergebnisse gefunden"
+                                          : "keine Ergebnisse gefunden")
+                 + " (verbleibende Zeit: "
+                 + (endTime - System.currentTimeMillis())
+                 + ")");
     return result;
   }
 
   /**
-   * Durchsucht die Nachfahren des durch path + BASE_DN bezeichneten Knotens mit Abstand
-   * level zu diesem Knoten nach Knoten, die auf die Suchanfrage filter passen.
-   * Es werden nur Objekte mit objectClass = {@link #objectClass} geliefert.
+   * Durchsucht die Nachfahren des durch path + BASE_DN bezeichneten Knotens mit
+   * Abstand level zu diesem Knoten nach Knoten, die auf die Suchanfrage filter
+   * passen. Es werden nur Objekte mit objectClass = {@link #objectClass} geliefert.
+   * 
    * @return eine List von {@link SearchResult}s.
-   * @throws TimeoutException falls die Anfrage nicht vor endTime beantwortet werden konnte.
+   * @throws TimeoutException
+   *           falls die Anfrage nicht vor endTime beantwortet werden konnte.
    * @author Max Meier (D-III-ITD 5.1)
    * 
    */
@@ -1508,7 +1601,7 @@ public class LDAPDatasource implements Datasource
 
       List<String> nextSeeds = new Vector<String>();
 
-      for (int m = 0; m < seeds.size(); m++) //TOD0 Iterator verwenden
+      for (int m = 0; m < seeds.size(); m++) // TOD0 Iterator verwenden
       {
 
         if (System.currentTimeMillis() > endTime) throw new TimeoutException();
@@ -1518,18 +1611,13 @@ public class LDAPDatasource implements Datasource
         comma = ",";
         if (searchPath.equals("")) comma = "";
 
-        NamingEnumeration enumer = searchLDAP(
-            searchPath + comma,
-            "",
-            SearchControls.ONELEVEL_SCOPE,
-            false,
-            endTime);
+        NamingEnumeration enumer = searchLDAP(searchPath + comma, "",
+          SearchControls.ONELEVEL_SCOPE, false, endTime);
 
         while (enumer.hasMoreElements())
         {
 
-          if (System.currentTimeMillis() > endTime)
-            throw new TimeoutException();
+          if (System.currentTimeMillis() > endTime) throw new TimeoutException();
 
           SearchResult currentResult = (SearchResult) enumer.nextElement();
           String subPath = checkQuotes(currentResult.getName());
@@ -1546,7 +1634,7 @@ public class LDAPDatasource implements Datasource
 
     List<SearchResult> result = new Vector<SearchResult>();
 
-    for (int n = 0; n < seeds.size(); n++) //TOD0 Iterator verwenden
+    for (int n = 0; n < seeds.size(); n++) // TOD0 Iterator verwenden
     {
 
       if (System.currentTimeMillis() > endTime) throw new TimeoutException();
@@ -1556,19 +1644,16 @@ public class LDAPDatasource implements Datasource
       comma = ",";
       if (currentPath.equals("")) comma = "";
 
-      NamingEnumeration enumer = searchLDAP(
-          currentPath + comma,
-          filter,
-          level == 0? SearchControls.OBJECT_SCOPE:SearchControls.ONELEVEL_SCOPE,
-          true,
-          endTime);
+      NamingEnumeration enumer = searchLDAP(currentPath + comma, filter,
+        level == 0 ? SearchControls.OBJECT_SCOPE : SearchControls.ONELEVEL_SCOPE,
+        true, endTime);
 
       while (enumer.hasMoreElements())
       {
         if (System.currentTimeMillis() > endTime) throw new TimeoutException();
-        SearchResult sr = (SearchResult)enumer.nextElement();
+        SearchResult sr = (SearchResult) enumer.nextElement();
         String name = checkQuotes(sr.getName());
-        String actualPath = name + (name.length()>0?comma:"") + currentPath;
+        String actualPath = name + (name.length() > 0 ? comma : "") + currentPath;
         sr.setName(actualPath);
         result.add(sr);
       }
@@ -1579,22 +1664,21 @@ public class LDAPDatasource implements Datasource
   }
 
   /**
-   * Entferne umschliessende Doublequotes aus path falls vorhanden.
-   * Dies muss gemacht werden, da das Zeichen '/' in LDAP Pfadkomponenten 
-   * erlaubt ist, im JNDI jedoch als Komponententrenner verwendet wird. 
-   * Deswegen
-   * werden Pfade, die '/' enthalten von .getName() in Anführungszeichen
-   * gesetzt und können deshalb nicht mehr geparsed werden.
-   *
-   * TOD0 Ich bin mir nicht sicher, ob hier nicht noch mehr zu tun ist.
-   * Was ist z.B. mit enthaltenen Doublequotes? Kann das passieren?
-   * Wie werden die escapet?
+   * Entferne umschliessende Doublequotes aus path falls vorhanden. Dies muss gemacht
+   * werden, da das Zeichen '/' in LDAP Pfadkomponenten erlaubt ist, im JNDI jedoch
+   * als Komponententrenner verwendet wird. Deswegen werden Pfade, die '/' enthalten
+   * von .getName() in Anführungszeichen gesetzt und können deshalb nicht mehr
+   * geparsed werden.
+   * 
+   * TOD0 Ich bin mir nicht sicher, ob hier nicht noch mehr zu tun ist. Was ist z.B.
+   * mit enthaltenen Doublequotes? Kann das passieren? Wie werden die escapet?
+   * 
    * @author Max Meier (D-III-ITD 5.1)
    * 
    */
   private String checkQuotes(String path)
   {
-    
+
     int tempEnd = path.length() - 1;
     if (tempEnd > 0)
     {
@@ -1610,7 +1694,7 @@ public class LDAPDatasource implements Datasource
 
   private String errorMessage()
   {
-    return "Fehler in Definition von Datenquelle " + datasourceName + ": ";
+    return L.m("Fehler in Definition von Datenquelle \"%1\": ", datasourceName);
   }
 
   // LDAPDataset
@@ -1627,8 +1711,7 @@ public class LDAPDatasource implements Datasource
       this.relation = relation;
     }
 
-    public String get(java.lang.String columnName)
-        throws ColumnNotFoundException
+    public String get(java.lang.String columnName) throws ColumnNotFoundException
     {
       if (!schema.contains(columnName)) throw new ColumnNotFoundException();
 
@@ -1642,15 +1725,14 @@ public class LDAPDatasource implements Datasource
 
   }
 
-  
   // TESTFUNKTIONEN
 
   /**
    * Gibt results aus.
    * 
    * @param query
-   *          ein String der in die Überschrift der Ausgabe geschrieben wird,
-   *          damit der Benutzer sieht, was er angezeigt bekommt.
+   *          ein String der in die Überschrift der Ausgabe geschrieben wird, damit
+   *          der Benutzer sieht, was er angezeigt bekommt.
    * @param schema
    *          bestimmt, welche Spalten angezeigt werden von den Datensätzen aus
    *          results.
@@ -1658,7 +1740,8 @@ public class LDAPDatasource implements Datasource
    *          die Ergebnisse der Anfrage.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public static void printResults(String query, Set<String> schema, QueryResults results)
+  public static void printResults(String query, Set<String> schema,
+      QueryResults results)
   {
     System.out.println("Results for query \"" + query + "\":");
     Iterator resIter = results.iterator();
@@ -1737,9 +1820,8 @@ public class LDAPDatasource implements Datasource
    * @throws ConfigurationErrorException
    * @author Max Meier (D-III-ITD 5.1)
    */
-  public static void main(String[] args) throws IOException,
-      SyntaxErrorException, NodeNotFoundException, TimeoutException,
-      ConfigurationErrorException
+  public static void main(String[] args) throws IOException, SyntaxErrorException,
+      NodeNotFoundException, TimeoutException, ConfigurationErrorException
   {
     File curDir = new File(System.getProperty("user.dir"));
     URL context = curDir.toURL();
@@ -1747,14 +1829,11 @@ public class LDAPDatasource implements Datasource
     ConfigThingy ldapConf = new ConfigThingy("", confURL);
     Map nameToDatasource = new HashMap();
     ConfigThingy sourceDesc = ldapConf.query("Datenquelle").getFirstChild();
-    LDAPDatasource source = new LDAPDatasource(nameToDatasource, sourceDesc,
-        context);
+    LDAPDatasource source = new LDAPDatasource(nameToDatasource, sourceDesc, context);
 
     // Test keys
     System.out.println("Schlüssel für Anfrage OrgaEmail=direktorium@muenchen.de:");
-    QueryResults qr = source.simpleFind(
-        "OrgaEmail",
-        "direktorium@muenchen.de");
+    QueryResults qr = source.simpleFind("OrgaEmail", "direktorium@muenchen.de");
     Iterator iter = qr.iterator();
 
     Collection<String> keys = new Vector<String>();
@@ -1773,69 +1852,47 @@ public class LDAPDatasource implements Datasource
 
     printResults("Datensätze zu vorigen Schlüsseln: ", source.schema, qr2);
 
-    printResults("OrgaEmail =  direktorium@muenchen.de , Gertraud = Gertraud", source
-        .getSchema(), source.simpleFind(
-        "OrgaEmail",
-        "direktorium@muenchen.de",
-        "Gertraud",
-        "Gertraud"));
-    
-    printResults("OrgaEmail = linux-client.it.dir@muenchen.de, Referat = Direktorium", source
-        .getSchema(), source.simpleFind(
-        "OrgaEmail",
-        "linux-client.it.dir@muenchen.de",
-        "Referat",
-        "Direktorium"));
-    
-    printResults("Gertraud = Gertraud, Referat = Direktorium", source
-        .getSchema(), source.simpleFind(
-        "Gertraud",
-        "Gertraud",
-        "Referat",
-        "Direktorium"));
-    
-    printResults("OrgaKurz = D-L, UberOrga = d", source
-        .getSchema(), source.simpleFind(
-        "OrgaKurz",
-        "D-L",
-        "UberOrga",
-        "d"));
-    
-    printResults("UberOrga = d", source
-        .getSchema(), source.simpleFind(
-        "UberOrga",
-        "d"));
-    
+    printResults("OrgaEmail =  direktorium@muenchen.de , Gertraud = Gertraud",
+      source.getSchema(), source.simpleFind("OrgaEmail", "direktorium@muenchen.de",
+        "Gertraud", "Gertraud"));
+
     printResults(
-        "Orga2 = Stadtarchiv , Referat = Direktorium",
-        source.getSchema(),
-        source.simpleFind("Orga2", "Stadtarchiv", "Referat", "Direktorium"));
-    
-    printResults(
-        "Referat = Sozialreferat , Nachname = Me\\)er",
-        source.getSchema(),
-        source.simpleFind("Referat", "Sozialreferat", "Nachname", "Me\\)er"));
+      "OrgaEmail = linux-client.it.dir@muenchen.de, Referat = Direktorium",
+      source.getSchema(), source.simpleFind("OrgaEmail",
+        "linux-client.it.dir@muenchen.de", "Referat", "Direktorium"));
+
+    printResults("Gertraud = Gertraud, Referat = Direktorium", source.getSchema(),
+      source.simpleFind("Gertraud", "Gertraud", "Referat", "Direktorium"));
+
+    printResults("OrgaKurz = D-L, UberOrga = d", source.getSchema(),
+      source.simpleFind("OrgaKurz", "D-L", "UberOrga", "d"));
+
+    printResults("UberOrga = d", source.getSchema(), source.simpleFind("UberOrga",
+      "d"));
+
+    printResults("Orga2 = Stadtarchiv , Referat = Direktorium", source.getSchema(),
+      source.simpleFind("Orga2", "Stadtarchiv", "Referat", "Direktorium"));
+
+    printResults("Referat = Sozialreferat , Nachname = Me\\)er", source.getSchema(),
+      source.simpleFind("Referat", "Sozialreferat", "Nachname", "Me\\)er"));
 
     // printResults("Nachname =r*", dj.getSchema(),
     // dj.simpleFind("Nachname","r*"));
 
     printResults("Nachname = *utz", source.getSchema(), source.simpleFind(
-        "Nachname",
-        "*utz"));
+      "Nachname", "*utz"));
     printResults("Nachname = *oe*", source.getSchema(), source.simpleFind(
-        "Nachname",
-        "*oe*"));
+      "Nachname", "*oe*"));
     printResults("Nachname = Lutz", source.getSchema(), source.simpleFind(
-        "Nachname",
-        "Lutz"));
-    printResults("Nachname = *utz, Vorname = Chris*", source.getSchema(), source
-        .simpleFind("Nachname", "Lutz", "Vorname", "Chris*"));
-    
-    printResults("Nachname = Benkmann, Vorname = Matthias", source.getSchema(), source
-        .simpleFind("Nachname", "Benkmann", "Vorname", "Matthias"));
-    
-    printResults("OrgaKurz = *itd-5.1", source.getSchema(), source
-        .simpleFind("OrgaKurz", "*itd-5.1"));
+      "Nachname", "Lutz"));
+    printResults("Nachname = *utz, Vorname = Chris*", source.getSchema(),
+      source.simpleFind("Nachname", "Lutz", "Vorname", "Chris*"));
+
+    printResults("Nachname = Benkmann, Vorname = Matthias", source.getSchema(),
+      source.simpleFind("Nachname", "Benkmann", "Vorname", "Matthias"));
+
+    printResults("OrgaKurz = *itd-5.1", source.getSchema(), source.simpleFind(
+      "OrgaKurz", "*itd-5.1"));
 
   }
 
