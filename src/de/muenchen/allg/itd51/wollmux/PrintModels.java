@@ -33,6 +33,7 @@ import com.sun.star.beans.XPropertyChangeListener;
 import com.sun.star.beans.XPropertySetInfo;
 import com.sun.star.beans.XVetoableChangeListener;
 import com.sun.star.lang.IllegalArgumentException;
+import com.sun.star.lang.NoSuchMethodException;
 import com.sun.star.lang.WrappedTargetException;
 import com.sun.star.lib.uno.helper.WeakBase;
 import com.sun.star.text.XTextDocument;
@@ -204,28 +205,22 @@ public class PrintModels
      * @param functionName
      *          Name der Druckfunktion, die durch das MasterPrintModel verwaltet
      *          werden soll.
-     * @return liefert true, wenn die Druckfunktion erfolgreich in die Aufrufkette
-     *         übernommen wurde oder bereits geladen war und false, wenn die
-     *         Druckfunktion aufgrund vorangegangener Fehler nicht in die Aufrufkette
-     *         aufgenommen werden konnte.
+     * @throws NoSuchMethodException
+     *           Wird geworfen, wenn die Druckfunktion nicht definiert ist.
      * 
      * @author Christoph Lutz (D-III-ITD-5.1)
      * 
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#usePrintFunction(java.lang.String)
      */
-    public boolean usePrintFunction(String functionName)
+    public void usePrintFunction(String functionName) throws NoSuchMethodException
     {
       PrintFunction newFunc = WollMuxSingleton.getInstance().getGlobalPrintFunctions().get(
         functionName);
       if (newFunc != null)
-      {
-        return useInternalPrintFunction(newFunc);
-      }
+        useInternalPrintFunction(newFunc);
       else
-      {
-        Logger.error(L.m("Druckfunktion '%1' nicht definiert.", functionName));
-        return false;
-      }
+        throw new NoSuchMethodException(L.m(
+          "Druckfunktion '%1' ist nicht definiert.", functionName));
     }
 
     /*
@@ -1059,19 +1054,15 @@ public class PrintModels
      * 
      * @see de.muenchen.allg.itd51.wollmux.XPrintModel#usePrintFunction(java.lang.String)
      */
-    public boolean usePrintFunction(String functionName)
+    public void usePrintFunction(String functionName) throws NoSuchMethodException
     {
       PrintFunction newFunc = WollMuxSingleton.getInstance().getGlobalPrintFunctions().get(
         functionName);
       if (newFunc != null)
-      {
-        return useInternalPrintFunction(newFunc);
-      }
+        useInternalPrintFunction(newFunc);
       else
-      {
-        Logger.error(L.m("Druckfunktion '%1' nicht definiert.", functionName));
-        return false;
-      }
+        throw new NoSuchMethodException(L.m("Druckfunktion '%1' nicht definiert.",
+          functionName));
     }
 
     /**

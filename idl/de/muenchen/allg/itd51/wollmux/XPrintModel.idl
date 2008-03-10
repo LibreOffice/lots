@@ -14,6 +14,7 @@
 #define __de_muenchen_allg_itd51_wollmux_XPrintModel_idl__ 
  
 #include <com/sun/star/uno/XInterface.idl> 
+#include <com/sun/star/lang/NoSuchMethodException.idl> 
 #include <com/sun/star/text/XTextDocument.idl> 
 #include <com/sun/star/beans/XPropertySet.idl>
 #include <com/sun/star/beans/PropertyValue.idl>
@@ -41,20 +42,18 @@ interface XPrintModel
 	
     /**
      * Lädt die in der wollmux.conf definierte Druckfunktion mit dem Namen
-     * functionName in das XPrintModel und ordnet sie gemäß dem ORDER-Attribut
-     * an der richtigen Position in die Aufrufkette der zu bearbeitenden
-     * Druckfunktionen ein; Wird die Druckfunktion aufgerufen, so bekommt sie
-     * genau ein Argument (dieses XPrintModel) übergeben.
+     * functionName in das XPrintModel und ordnet sie gemäß dem ORDER-Attribut an der
+     * richtigen Position in die Aufrufkette der zu bearbeitenden Druckfunktionen
+     * ein; Wird die Druckfunktion aufgerufen, so bekommt sie genau ein Argument
+     * (dieses XPrintModel) übergeben.
      * 
      * @param functionName
      *          Name der Druckfunktion, die durch das MasterPrintModel verwaltet
      *          werden soll.
-     * @return liefert true, wenn die Druckfunktion erfolgreich in die
-     *         Aufrufkette übernommen wurde oder bereits geladen war und false,
-     *         wenn die Druckfunktion aufgrund vorangegangener Fehler nicht in
-     *         die Aufrufkette aufgenommen werden konnte.
+     * @throws NoSuchMethodException
+     *           Wird geworfen, wenn die Druckfunktion nicht definiert ist.
      */
-    boolean usePrintFunction([in] string functionName);
+    void usePrintFunction([in] string functionName) raises ( com::sun::star::lang::NoSuchMethodException );
 
     /**
      * Liefert das XTextDocument mit dem die Druckfunktion aufgerufen wurde.

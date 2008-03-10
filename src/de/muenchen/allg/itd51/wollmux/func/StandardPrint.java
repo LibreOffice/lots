@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sun.star.beans.UnknownPropertyException;
+import com.sun.star.lang.NoSuchMethodException;
 import com.sun.star.text.XTextDocument;
 
 import de.muenchen.allg.afid.UNO;
@@ -43,7 +44,11 @@ public class StandardPrint
   public static void sachleitendeVerfuegung(XPrintModel pmod)
   {
     // Druckfunktion SachleitendeVerfuegungOutput für SLV-Ausgabe hinzuladen:
-    if (!pmod.usePrintFunction("SachleitendeVerfuegungOutput"))
+    try
+    {
+      pmod.usePrintFunction("SachleitendeVerfuegungOutput");
+    }
+    catch (NoSuchMethodException e)
     {
       String method = "sachleitendeVerfuegungOutput";
       int order = 150;

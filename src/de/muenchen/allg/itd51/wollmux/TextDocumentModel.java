@@ -49,6 +49,7 @@ import com.sun.star.frame.XController;
 import com.sun.star.frame.XFrame;
 import com.sun.star.lang.EventObject;
 import com.sun.star.lang.IllegalArgumentException;
+import com.sun.star.lang.NoSuchMethodException;
 import com.sun.star.lang.XComponent;
 import com.sun.star.lang.XMultiServiceFactory;
 import com.sun.star.text.XBookmarksSupplier;
@@ -2427,7 +2428,14 @@ public class TextDocumentModel
       for (Iterator<String> iter = printFunctions.iterator(); iter.hasNext();)
       {
         String name = iter.next();
-        pmod.usePrintFunction(name);
+        try
+        {
+          pmod.usePrintFunction(name);
+        }
+        catch (NoSuchMethodException e)
+        {
+          Logger.error(e);
+        }
       }
     }
     return pmod;
