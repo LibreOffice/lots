@@ -68,7 +68,6 @@ import com.sun.star.frame.XDispatchResultListener;
 import com.sun.star.frame.XFrame;
 import com.sun.star.frame.XFrames;
 import com.sun.star.lang.EventObject;
-import com.sun.star.lang.NoSuchMethodException;
 import com.sun.star.lang.XComponent;
 import com.sun.star.text.XTextContent;
 import com.sun.star.text.XTextCursor;
@@ -3619,12 +3618,12 @@ public class WollMuxEventHandler
   // *******************************************************************************************
 
   /**
-   * Erzeugt ein neues WollMuxEvent, das signasisiert, dass die Seriendruckfunktion
-   * des WollMux gestartet werden soll.
+   * Erzeugt ein neues WollMuxEvent, das signasisiert, dass die neue
+   * Seriendruckfunktion des WollMux gestartet werden soll.
    * 
    * Das Event wird über den DispatchHandler aufgerufen, wenn z.B. über das Menü
-   * "Extras->Seriendruck (WollMux)" die dispatch-url wollmux:Seriendruck abgesetzt
-   * wurde.
+   * "Extras->Seriendruck (WollMux)" die dispatch-url wollmux:SeriendruckNeu
+   * abgesetzt wurde.
    */
   public static void handleSeriendruck(TextDocumentModel model,
       boolean useDocPrintFunctions)
@@ -3636,69 +3635,7 @@ public class WollMuxEventHandler
   {
     private TextDocumentModel model;
 
-    boolean useDocPrintFunctions;
-
-    public OnSeriendruck(TextDocumentModel model, boolean useDocumentPrintFunctions)
-    {
-      this.model = model;
-      this.useDocPrintFunctions = useDocumentPrintFunctions;
-    }
-
-    protected void doit() throws WollMuxFehlerException
-    {
-      if (useDocPrintFunctions)
-      {
-        OnExecutePrintFunction.checkPrintPreconditions(model);
-        stabilize();
-      }
-
-      final XPrintModel pmod = model.createPrintModel(useDocPrintFunctions);
-      try
-      {
-        pmod.usePrintFunction("Seriendruck");
-      }
-      catch (NoSuchMethodException e)
-      {
-        Logger.error(e);
-      }
-
-      // Drucken im Hintergrund, damit der WollMuxEventHandler weiterläuft.
-      new Thread()
-      {
-        public void run()
-        {
-          pmod.printWithProps();
-        }
-      }.start();
-    }
-
-    public String toString()
-    {
-      return this.getClass().getSimpleName() + "(" + model + ")";
-    }
-  }
-
-  // *******************************************************************************************
-
-  /**
-   * Erzeugt ein neues WollMuxEvent, das signasisiert, dass die neue
-   * Seriendruckfunktion des WollMux gestartet werden soll.
-   * 
-   * Das Event wird über den DispatchHandler aufgerufen, wenn z.B. über das Menü
-   * "Extras->Seriendruck (WollMux)" die dispatch-url wollmux:SeriendruckNeu
-   * abgesetzt wurde.
-   */
-  public static void handleSeriendruckNeu(TextDocumentModel model,
-      boolean useDocPrintFunctions)
-  {
-    handle(new OnSeriendruckNeu(model, useDocPrintFunctions));
-  }
-
-  private static class OnSeriendruckNeu extends BasicEvent
-  {
-    private TextDocumentModel model;
-
-    public OnSeriendruckNeu(TextDocumentModel model,
+    public OnSeriendruck(TextDocumentModel model,
         boolean useDocumentPrintFunctions)
     {
       this.model = model;
@@ -3707,14 +3644,14 @@ public class WollMuxEventHandler
     protected void doit() throws WollMuxFehlerException
     {
       // Bestehenden Max in den Vordergrund holen oder neuen Max erzeugen.
-      MailMergeNew max = model.getCurrentMailMergeNew();
-      if (max != null)
+      MailMergeNew mmn = model.getCurrentMailMergeNew();
+      if (mmn != null)
       {
         return;
       }
       else
       {
-        max = new MailMergeNew(model, new ActionListener()
+        mmn = new MailMergeNew(model, new ActionListener()
         {
           public void actionPerformed(ActionEvent actionEvent)
           {
@@ -3722,7 +3659,7 @@ public class WollMuxEventHandler
               WollMuxEventHandler.handleMailMergeNewReturned(model);
           }
         });
-        model.setCurrentMailMergeNew(max);
+        model.setCurrentMailMergeNew(mmn);
       }
     }
 

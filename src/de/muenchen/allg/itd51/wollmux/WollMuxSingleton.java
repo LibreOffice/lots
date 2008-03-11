@@ -261,13 +261,8 @@ public class WollMuxSingleton implements XPALProvider
 
     // "Extras->Seriendruck (WollMux)" erzeugen:
     List<String> removeButtonsFor = new ArrayList<String>();
-    // TODO: früher war der button mit DISP_wmSeriendruck verbunden. Damit dieser
-    // button korrekt durch den neuen Button ersetzt wird, muss der Button zur alten
-    // URL (falls vorhanden) auch gelöscht werden. Kann irgendwann später mal wieder
-    // raus, wenn alle den neuen Button verwenden.
     removeButtonsFor.add(DispatchHandler.DISP_wmSeriendruck);
-    removeButtonsFor.add(DispatchHandler.DISP_wmSeriendruckNeu);
-    createMenuButton(DispatchHandler.DISP_wmSeriendruckNeu,
+    createMenuButton(DispatchHandler.DISP_wmSeriendruck,
       L.m("Seriendruck (WollMux)"), ".uno:ToolsMenu", ".uno:MailMergeWizard",
       removeButtonsFor);
 
