@@ -1,4 +1,3 @@
-//TODO L.m()
 /*
 * Dateiname: DatensatzBearbeiten.java
 * Projekt  : WollMux
@@ -89,6 +88,7 @@ import javax.swing.text.JTextComponent;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
+import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.DJDataset;
@@ -233,7 +233,7 @@ public class DatensatzBearbeiten
     
     final ConfigThingy fensterDesc = conf.query("Fenster");
     if (fensterDesc.count() == 0)
-      throw new ConfigurationErrorException("Schlüssel 'Fenster' fehlt in "+conf.getName());
+      throw new ConfigurationErrorException(L.m("Schlüssel 'Fenster' fehlt in %1", conf.getName()));
     
     
     //  GUI im Event-Dispatching Thread erzeugen wg. Thread-Safety.
@@ -264,7 +264,7 @@ public class DatensatzBearbeiten
     Common.setLookAndFeelOnce();
     
     //Create and set up the window.
-    myFrame = new JFrame("Absenderdaten bearbeiten");
+    myFrame = new JFrame(L.m("Absenderdaten bearbeiten"));
     //leave handling of close request to WindowListener.windowClosing
     myFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
     myFrame.addWindowListener(new MyWindowListener());
@@ -336,7 +336,7 @@ public class DatensatzBearbeiten
   private void restoreStandard()
   {
     if (!datensatz.hasBackingStore() || !currentWindow.hasLocalValues()) return;
-    int res = JOptionPane.showConfirmDialog(myFrame, "Wollen Sie Ihre persönlichen Änderungen wirklich verwerfen\nund die Felder dieser Dialogseite wieder mit der zentralen Datenbank synchronisieren?","Lokale Änderungen wirklich verwerfen?",JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+    int res = JOptionPane.showConfirmDialog(myFrame, L.m("Wollen Sie Ihre persönlichen Änderungen wirklich verwerfen\nund die Felder dieser Dialogseite wieder mit der zentralen Datenbank synchronisieren?"),L.m("Lokale Änderungen wirklich verwerfen?"),JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
     if (res != JOptionPane.YES_OPTION) return;
     currentWindow.restoreStandard();
   };
@@ -354,7 +354,7 @@ public class DatensatzBearbeiten
       hasChanges = iter.next().hasChanges() || hasChanges;
     
     if (!hasChanges) return true;
-    int res = JOptionPane.showConfirmDialog(myFrame, "Wollen Sie Ihre Änderungen wirklich speichern\nund auf die Aktualisierung der entsprechenden Felder\naus der zentralen Datenbank verzichten?","Änderungen speichern?",JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+    int res = JOptionPane.showConfirmDialog(myFrame, L.m("Wollen Sie Ihre Änderungen wirklich speichern\nund auf die Aktualisierung der entsprechenden Felder\naus der zentralen Datenbank verzichten?"),L.m("Änderungen speichern?"),JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
     if (res != JOptionPane.YES_OPTION) return false;
     
     iter = fenster.values().iterator();
@@ -603,7 +603,7 @@ public class DatensatzBearbeiten
       }catch(ColumnNotFoundException x){}
        catch(NoBackingStoreException x)
        {
-         Logger.error("Es hätte nie passieren dürfen, aber restoreStandard() wurde für einen Datensatz ohne Backing Store aufgerufen!");
+         Logger.error(L.m("Es hätte nie passieren dürfen, aber restoreStandard() wurde für einen Datensatz ohne Backing Store aufgerufen!"));
        }
       updateBackground();
     }
@@ -842,7 +842,7 @@ public class DatensatzBearbeiten
     
     public void createGUI(ConfigThingy conf)
     {
-      title = "TITLE fehlt in Fensterbeschreibung";
+      title = L.m("TITLE fehlt in Fensterbeschreibung");
       try{title = substituteVars(""+conf.get("TITLE"));}catch(NodeNotFoundException x){}
       
       try{
@@ -997,7 +997,7 @@ public class DatensatzBearbeiten
             }
             else
             {
-              Logger.error("Ununterstützter TYPE für User Interface Element: "+type);
+              Logger.error(L.m("Ununterstützter TYPE für User Interface Element: %1", type));
             }
           } catch(NodeNotFoundException x) {Logger.error(x);}
         }
@@ -1131,7 +1131,7 @@ public class DatensatzBearbeiten
       return null;
     }
     else
-      Logger.error("Ununterstützte ACTION: "+action);
+      Logger.error(L.m("Ununterstützte ACTION: %1", action));
     
     return null;
   }
