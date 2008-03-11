@@ -1,4 +1,3 @@
-//TODO L.m()
 /*
 * Dateiname: Dialog.java
 * Projekt  : WollMux
