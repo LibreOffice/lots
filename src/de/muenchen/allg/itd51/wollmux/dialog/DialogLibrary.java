@@ -1,4 +1,3 @@
-//TODO L.m()
 /*
 * Dateiname: DialogLibrary.java
 * Projekt  : WollMux
@@ -20,6 +19,8 @@ package de.muenchen.allg.itd51.wollmux.dialog;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import de.muenchen.allg.itd51.wollmux.L;
 
 /**
  * Eine Bibliothek von benannten Dialogs.
@@ -54,7 +55,7 @@ public class DialogLibrary
    */
   public void add(String dlgName, Dialog dialog)
   {
-    if (dialog == null || dlgName == null) throw new NullPointerException("Weder Dialogname noch Dialog darf null sein");
+    if (dialog == null || dlgName == null) throw new NullPointerException(L.m("Weder Dialogname noch Dialog darf null sein"));
     mapIdToDialog.put(dlgName, dialog);
   }
 
