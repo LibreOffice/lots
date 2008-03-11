@@ -1,4 +1,3 @@
-//TODO L.m()
 /*
 * Dateiname: DocumentTree.java
 * Projekt  : WollMux
@@ -44,6 +43,7 @@ import com.sun.star.text.XTextTable;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.Bookmark;
+import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModel;
 
@@ -223,7 +223,7 @@ public class DocumentTree
             conf = new ConfigThingy("", null, new StringReader(m.group(1)));
           } catch(Exception x)
           {
-            Logger.error("Fehlerhaftes WM()-Bookmark: \""+name+"\"");
+            Logger.error(L.m("Fehlerhaftes WM()-Bookmark: \"%1\"", name));
             continue;
           }
           textPortions.add(new InsertionBookmarkNode(new Bookmark(bookmark, doc), isStart, conf));
@@ -240,7 +240,7 @@ public class DocumentTree
             conf = new ConfigThingy("", null, new StringReader(m.group(1)));
           } catch(Exception x)
           {
-            Logger.error("Fehlerhaftes WM()-Bookmark: \""+name+"\"");
+            Logger.error(L.m("Fehlerhaftes WM()-Bookmark: \"%1\"", name));
             continue;
           }
           textPortions.add(new GroupBookmarkNode(new Bookmark(bookmark, doc), isStart, conf));
@@ -807,7 +807,7 @@ public class DocumentTree
     long start = System.currentTimeMillis();
     DocumentTree tree = new DocumentTree(doc);
     long time = System.currentTimeMillis() - start;
-    System.out.println("Dokument geparst in "+time+"ms");
+    System.out.println(L.m("Dokument geparst in %1ms", time));
     System.out.println(treeDump(tree.root,""));
     System.exit(0);
   }
