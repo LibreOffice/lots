@@ -387,7 +387,7 @@ public class CoupledWindowController
     {
       for (Iterator<WeakReference<Window>> iter = collectedChildWindows.iterator(); iter.hasNext();)
       {
-        WeakReference ref = iter.next();
+        WeakReference<Window> ref = iter.next();
         Object win = ref.get();
         if (win != null)
         {
