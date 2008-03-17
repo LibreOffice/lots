@@ -1,4 +1,4 @@
-#Wed Mar 12 09:32:01 CET 2008
+#Mon Mar 17 07:28:55 CET 2008
 eclipse.preferences.version=1
 org.eclipse.jdt.core.formatter.align_type_members_on_columns=false
 org.eclipse.jdt.core.formatter.alignment_for_arguments_in_allocation_expression=20
@@ -6,12 +6,12 @@ org.eclipse.jdt.core.formatter.alignment_for_arguments_in_enum_constant=16
 org.eclipse.jdt.core.formatter.alignment_for_arguments_in_explicit_constructor_call=20
 org.eclipse.jdt.core.formatter.alignment_for_arguments_in_method_invocation=20
 org.eclipse.jdt.core.formatter.alignment_for_arguments_in_qualified_allocation_expression=20
-org.eclipse.jdt.core.formatter.alignment_for_assignment=0
-org.eclipse.jdt.core.formatter.alignment_for_binary_expression=18
+org.eclipse.jdt.core.formatter.alignment_for_assignment=20
+org.eclipse.jdt.core.formatter.alignment_for_binary_expression=20
 org.eclipse.jdt.core.formatter.alignment_for_compact_if=16
 org.eclipse.jdt.core.formatter.alignment_for_conditional_expression=18
 org.eclipse.jdt.core.formatter.alignment_for_enum_constants=49
-org.eclipse.jdt.core.formatter.alignment_for_expressions_in_array_initializer=18
+org.eclipse.jdt.core.formatter.alignment_for_expressions_in_array_initializer=21
 org.eclipse.jdt.core.formatter.alignment_for_multiple_fields=16
 org.eclipse.jdt.core.formatter.alignment_for_parameters_in_constructor_declaration=16
 org.eclipse.jdt.core.formatter.alignment_for_parameters_in_method_declaration=16
@@ -81,13 +81,13 @@ org.eclipse.jdt.core.formatter.insert_new_line_before_closing_brace_in_array_ini
 org.eclipse.jdt.core.formatter.insert_new_line_before_else_in_if_statement=insert
 org.eclipse.jdt.core.formatter.insert_new_line_before_finally_in_try_statement=insert
 org.eclipse.jdt.core.formatter.insert_new_line_before_while_in_do_statement=do not insert
-org.eclipse.jdt.core.formatter.insert_new_line_in_empty_annotation_declaration=insert
-org.eclipse.jdt.core.formatter.insert_new_line_in_empty_anonymous_type_declaration=insert
-org.eclipse.jdt.core.formatter.insert_new_line_in_empty_block=insert
-org.eclipse.jdt.core.formatter.insert_new_line_in_empty_enum_constant=insert
-org.eclipse.jdt.core.formatter.insert_new_line_in_empty_enum_declaration=insert
-org.eclipse.jdt.core.formatter.insert_new_line_in_empty_method_body=insert
-org.eclipse.jdt.core.formatter.insert_new_line_in_empty_type_declaration=insert
+org.eclipse.jdt.core.formatter.insert_new_line_in_empty_annotation_declaration=do not insert
+org.eclipse.jdt.core.formatter.insert_new_line_in_empty_anonymous_type_declaration=do not insert
+org.eclipse.jdt.core.formatter.insert_new_line_in_empty_block=do not insert
+org.eclipse.jdt.core.formatter.insert_new_line_in_empty_enum_constant=do not insert
+org.eclipse.jdt.core.formatter.insert_new_line_in_empty_enum_declaration=do not insert
+org.eclipse.jdt.core.formatter.insert_new_line_in_empty_method_body=do not insert
+org.eclipse.jdt.core.formatter.insert_new_line_in_empty_type_declaration=do not insert
 org.eclipse.jdt.core.formatter.insert_space_after_and_in_type_parameter=insert
 org.eclipse.jdt.core.formatter.insert_space_after_assignment_operator=insert
 org.eclipse.jdt.core.formatter.insert_space_after_at_in_annotation=do not insert
