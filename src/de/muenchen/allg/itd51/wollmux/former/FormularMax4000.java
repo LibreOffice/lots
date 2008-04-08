@@ -141,10 +141,7 @@ public class FormularMax4000
    * dann funktionieren existierende Formulare nicht mehr.
    */
   private static final String[] GENDER_TRAFO_PARAMS = new String[] {
-                                                                    "Falls_Anrede_HerrN",
-                                                                    "Falls_Anrede_Frau",
-                                                                    "Falls_sonstige_Anrede",
-                                                                    "Anrede" };
+    "Falls_Anrede_HerrN", "Falls_Anrede_Frau", "Falls_sonstige_Anrede", "Anrede" };
 
   /**
    * Regex für Test ob String mit Buchstabe oder Underscore beginnt. ACHTUNG! Das .*
@@ -155,7 +152,8 @@ public class FormularMax4000
   /**
    * Der Standard-Formulartitel, solange kein anderer gesetzt wird.
    */
-  private static final String GENERATED_FORM_TITLE = L.m("Generiert durch FormularMax 4000");
+  private static final String GENERATED_FORM_TITLE =
+    L.m("Generiert durch FormularMax 4000");
 
   /**
    * Maximale Anzahl Zeichen für ein automatisch generiertes Label.
@@ -178,20 +176,21 @@ public class FormularMax4000
   /**
    * URL des Quelltexts für den Standard-Empfängerauswahl-Tab.
    */
-  private final URL EMPFAENGER_TAB_URL = this.getClass().getClassLoader().getResource(
-    "data/empfaengerauswahl_controls.conf");
+  private final URL EMPFAENGER_TAB_URL =
+    this.getClass().getClassLoader().getResource(
+      "data/empfaengerauswahl_controls.conf");
 
   /**
    * URL des Quelltexts für die Standardbuttons für einen mittleren Tab.
    */
-  private final URL STANDARD_BUTTONS_MIDDLE_URL = this.getClass().getClassLoader().getResource(
-    "data/standardbuttons_mitte.conf");
+  private final URL STANDARD_BUTTONS_MIDDLE_URL =
+    this.getClass().getClassLoader().getResource("data/standardbuttons_mitte.conf");
 
   /**
    * URL des Quelltexts für die Standardbuttons für den letzten Tab.
    */
-  private final URL STANDARD_BUTTONS_LAST_URL = this.getClass().getClassLoader().getResource(
-    "data/standardbuttons_letztes.conf");
+  private final URL STANDARD_BUTTONS_LAST_URL =
+    this.getClass().getClassLoader().getResource("data/standardbuttons_letztes.conf");
 
   /**
    * Beim Import neuer Formularfelder oder Checkboxen schaut der FormularMax4000 nach
@@ -230,7 +229,8 @@ public class FormularMax4000
    * der von {@link DocumentTree.FormControl#getDescriptor()} geliefert wird.
    * 
    */
-  private static final Pattern MAGIC_DESCRIPTOR_PATTERN = Pattern.compile("\\A(.*)<<(.*)>>\\z");
+  private static final Pattern MAGIC_DESCRIPTOR_PATTERN =
+    Pattern.compile("\\A(.*)<<(.*)>>\\z");
 
   /**
    * Präfix zur Markierung von IDs der magischen Deskriptor-Syntax um anzuzeigen,
@@ -318,7 +318,8 @@ public class FormularMax4000
   /**
    * Beschreibt die aktuellen Sichtbarkeitseinstellungen des Benutzers.
    */
-  private ViewVisibilityDescriptor viewVisibilityDescriptor = new ViewVisibilityDescriptor();
+  private ViewVisibilityDescriptor viewVisibilityDescriptor =
+    new ViewVisibilityDescriptor();
 
   /**
    * GUI zum interaktiven Zusammenbauen und Testen von Funktionen.
@@ -383,7 +384,8 @@ public class FormularMax4000
    * dürfen nur permanente Objekte sein, d.h. Objekte deren Lebensdauer nicht vor
    * Beenden des FM4000 endet.
    */
-  private List<BroadcastListener> broadcastListeners = new Vector<BroadcastListener>();
+  private List<BroadcastListener> broadcastListeners =
+    new Vector<BroadcastListener>();
 
   /**
    * Wird auf myFrame registriert, damit zum Schließen des Fensters abort()
@@ -549,8 +551,8 @@ public class FormularMax4000
     myFrame.addWindowListener(oehrchen);
 
     leftPanel = new LeftPanel(insertionModelList, formControlModelList, this);
-    rightPanel = new RightPanel(insertionModelList, formControlModelList,
-      functionLibrary, this);
+    rightPanel =
+      new RightPanel(insertionModelList, formControlModelList, functionLibrary, this);
 
     // damit sich Slider von JSplitPane vernünftig bewegen lässt.
     rightPanel.JComponent().setMinimumSize(new Dimension(100, 0));
@@ -558,8 +560,9 @@ public class FormularMax4000
     nonExistingRightPanel.setMinimumSize(new Dimension(0, 0));
     nonExistingRightPanel.setPreferredSize(nonExistingRightPanel.getMinimumSize());
     nonExistingRightPanel.setMaximumSize(nonExistingRightPanel.getMinimumSize());
-    mainContentPanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-      leftPanel.JComponent(), nonExistingRightPanel);
+    mainContentPanel =
+      new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel.JComponent(),
+        nonExistingRightPanel);
     mainContentPanel.setResizeWeight(1.0);
     defaultDividerSize = mainContentPanel.getDividerSize();
     mainContentPanel.setDividerSize(0);
@@ -664,7 +667,8 @@ public class FormularMax4000
     {
       public void actionPerformed(ActionEvent e)
       {
-        viewVisibilityDescriptor.formControlLineViewId = ((AbstractButton) e.getSource()).isSelected();
+        viewVisibilityDescriptor.formControlLineViewId =
+          ((AbstractButton) e.getSource()).isSelected();
         broadcast(new BroadcastViewVisibilitySettings(viewVisibilityDescriptor));
       }
     });
@@ -676,7 +680,8 @@ public class FormularMax4000
     {
       public void actionPerformed(ActionEvent e)
       {
-        viewVisibilityDescriptor.formControlLineViewLabel = ((AbstractButton) e.getSource()).isSelected();
+        viewVisibilityDescriptor.formControlLineViewLabel =
+          ((AbstractButton) e.getSource()).isSelected();
         broadcast(new BroadcastViewVisibilitySettings(viewVisibilityDescriptor));
       }
     });
@@ -688,7 +693,8 @@ public class FormularMax4000
     {
       public void actionPerformed(ActionEvent e)
       {
-        viewVisibilityDescriptor.formControlLineViewType = ((AbstractButton) e.getSource()).isSelected();
+        viewVisibilityDescriptor.formControlLineViewType =
+          ((AbstractButton) e.getSource()).isSelected();
         broadcast(new BroadcastViewVisibilitySettings(viewVisibilityDescriptor));
       }
     });
@@ -700,7 +706,8 @@ public class FormularMax4000
     {
       public void actionPerformed(ActionEvent e)
       {
-        viewVisibilityDescriptor.formControlLineViewAdditional = ((AbstractButton) e.getSource()).isSelected();
+        viewVisibilityDescriptor.formControlLineViewAdditional =
+          ((AbstractButton) e.getSource()).isSelected();
         broadcast(new BroadcastViewVisibilitySettings(viewVisibilityDescriptor));
       }
     });
@@ -779,7 +786,7 @@ public class FormularMax4000
     });
     menu.add(menuItem);
 
-    menuItem = new JMenuItem(L.m("Druckfunktion setzen"));
+    menuItem = new JMenuItem(L.m("Druckfunktionen setzen"));
     menuItem.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
@@ -870,8 +877,8 @@ public class FormularMax4000
     formControlModelList.clear();
     parseGlobalFormInfo(formDescription);
 
-    ConfigThingy fensterAbschnitte = formDescription.query("Formular").query(
-      "Fenster");
+    ConfigThingy fensterAbschnitte =
+      formDescription.query("Formular").query("Fenster");
     Iterator fensterAbschnittIterator = fensterAbschnitte.iterator();
     while (fensterAbschnittIterator.hasNext())
     {
@@ -913,18 +920,21 @@ public class FormularMax4000
     }
 
     groupModelList.clear();
-    ConfigThingy visibilityConf = formDescription.query("Formular").query(
-      "Sichtbarkeit");
+    ConfigThingy visibilityConf =
+      formDescription.query("Formular").query("Sichtbarkeit");
     Iterator sichtbarkeitsAbschnittIterator = visibilityConf.iterator();
     while (sichtbarkeitsAbschnittIterator.hasNext())
     {
-      ConfigThingy sichtbarkeitsAbschnitt = (ConfigThingy) sichtbarkeitsAbschnittIterator.next();
+      ConfigThingy sichtbarkeitsAbschnitt =
+        (ConfigThingy) sichtbarkeitsAbschnittIterator.next();
       Iterator sichtbarkeitsFunktionIterator = sichtbarkeitsAbschnitt.iterator();
       while (sichtbarkeitsFunktionIterator.hasNext())
       {
-        ConfigThingy sichtbarkeitsFunktion = (ConfigThingy) sichtbarkeitsFunktionIterator.next();
+        ConfigThingy sichtbarkeitsFunktion =
+          (ConfigThingy) sichtbarkeitsFunktionIterator.next();
         String groupName = sichtbarkeitsFunktion.getName();
-        FunctionSelection funcSel = visibilityFunctionSelectionProvider.getFunctionSelection(groupName);
+        FunctionSelection funcSel =
+          visibilityFunctionSelectionProvider.getFunctionSelection(groupName);
         groupModelList.add(new GroupModel(groupName, funcSel, this));
       }
     }
@@ -939,8 +949,9 @@ public class FormularMax4000
    */
   private void setFormTitle()
   {
-    String newTitle = JOptionPane.showInputDialog(myFrame,
-      L.m("Bitte Formulartitel eingeben"), formTitle);
+    String newTitle =
+      JOptionPane.showInputDialog(myFrame, L.m("Bitte Formulartitel eingeben"),
+        formTitle);
     if (newTitle != null)
     {
       formTitle = newTitle;
@@ -959,7 +970,8 @@ public class FormularMax4000
   private ConfigThingy updateDocument(TextDocumentModel doc)
   {
     Logger.debug(L.m("Übertrage Formularbeschreibung ins Dokument"));
-    Map<String, ConfigThingy> mapFunctionNameToConfigThingy = new HashMap<String, ConfigThingy>();
+    Map<String, ConfigThingy> mapFunctionNameToConfigThingy =
+      new HashMap<String, ConfigThingy>();
     insertionModelList.updateDocument(mapFunctionNameToConfigThingy);
     ConfigThingy conf = buildFormDescriptor(mapFunctionNameToConfigThingy);
     doc.setFormDescription(new ConfigThingy(conf));
@@ -1041,15 +1053,15 @@ public class FormularMax4000
         tempConf = tempConf.getFirstChild();
       }
       catch (Exception x)
-      {
-      }
+      {}
     }
     else
     {
       tempConf = new ConfigThingy("Funktionen");
     }
-    functionSelectionProvider = new FunctionSelectionProvider(functionLibrary,
-      tempConf, getIDManager(), NAMESPACE_FORMCONTROLMODEL);
+    functionSelectionProvider =
+      new FunctionSelectionProvider(functionLibrary, tempConf, getIDManager(),
+        NAMESPACE_FORMCONTROLMODEL);
 
     tempConf = conf.query("Formular").query("Sichtbarkeit");
     if (tempConf.count() >= 1)
@@ -1059,15 +1071,15 @@ public class FormularMax4000
         tempConf = tempConf.getFirstChild();
       }
       catch (Exception x)
-      {
-      }
+      {}
     }
     else
     {
       tempConf = new ConfigThingy("Sichtbarkeit");
     }
-    visibilityFunctionSelectionProvider = new FunctionSelectionProvider(null,
-      tempConf, getIDManager(), NAMESPACE_FORMCONTROLMODEL);
+    visibilityFunctionSelectionProvider =
+      new FunctionSelectionProvider(null, tempConf, getIDManager(),
+        NAMESPACE_FORMCONTROLMODEL);
   }
 
   /**
@@ -1210,8 +1222,9 @@ public class FormularMax4000
       Iterator iter = ((ConfigThingy) grandmaIter.next()).iterator();
       while (iter.hasNext())
       {
-        model = new FormControlModel((ConfigThingy) iter.next(),
-          functionSelectionProvider, this);
+        model =
+          new FormControlModel((ConfigThingy) iter.next(),
+            functionSelectionProvider, this);
         lastIsGlue = model.isGlue();
         ++count;
         formControlModelList.add(model, idx++);
@@ -1245,8 +1258,7 @@ public class FormularMax4000
         if (formTitle == GENERATED_FORM_TITLE && tit.length() > 0) formTitle = tit;
       }
       catch (Exception x)
-      {
-      }
+      {}
       DocumentTree tree = new DocumentTree(doc);
       Visitor visitor = new ScanVisitor();
       visitor.visit(tree);
@@ -1261,7 +1273,8 @@ public class FormularMax4000
 
   private class ScanVisitor extends DocumentTree.Visitor
   {
-    private Map<String, InsertionBookmark> insertions = new HashMap<String, InsertionBookmark>();
+    private Map<String, InsertionBookmark> insertions =
+      new HashMap<String, InsertionBookmark>();
 
     private StringBuilder text = new StringBuilder();
 
@@ -1406,8 +1419,9 @@ public class FormularMax4000
 
     try
     {
-      InsertionModel imodel = new InsertionModel(bookmarkName,
-        UNO.XBookmarksSupplier(doc.doc), functionSelectionProvider, this);
+      InsertionModel imodel =
+        new InsertionModel(bookmarkName, UNO.XBookmarksSupplier(doc.doc),
+          functionSelectionProvider, this);
       if (doGenderTrafo) addGenderTrafo(imodel, (DropdownFormControl) control);
       insertionModelList.add(imodel);
     }
@@ -1429,7 +1443,8 @@ public class FormularMax4000
   private void addGenderTrafo(InsertionModel model, DropdownFormControl control)
   {
     String[] items = control.getItems();
-    FunctionSelection genderTrafo = functionSelectionProvider.getFunctionSelection("Gender");
+    FunctionSelection genderTrafo =
+      functionSelectionProvider.getFunctionSelection("Gender");
 
     for (int i = 0; i < 3 && i < items.length; ++i)
     {
@@ -1607,7 +1622,7 @@ public class FormularMax4000
     if (str.length() == 0) return str;
 
     if (Character.isWhitespace(str.charAt(0))
-        || Character.isWhitespace(str.charAt(str.length() - 1)))
+      || Character.isWhitespace(str.charAt(str.length() - 1)))
     {
       int i = 0;
       while (i < str.length() && Character.isWhitespace(str.charAt(i)))
@@ -1701,8 +1716,8 @@ public class FormularMax4000
       {
         try
         {
-          ConfigThingy conf = new ConfigThingy("", null, new StringReader(
-            editor.getText()));
+          ConfigThingy conf =
+            new ConfigThingy("", null, new StringReader(editor.getText()));
           myFrame.setJMenuBar(mainMenuBar);
           myFrame.getContentPane().remove(editorContentPanel);
           myFrame.getContentPane().add(mainContentPanel);
@@ -1738,9 +1753,9 @@ public class FormularMax4000
     editor.setEditorKit(new NoWrapEditorKit());
 
     editor.setFont(new Font("Monospaced", Font.PLAIN, editor.getFont().getSize() + 2));
-    JScrollPane scrollPane = new JScrollPane(editor,
-      ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
-      ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
+    JScrollPane scrollPane =
+      new JScrollPane(editor, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
+        ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
     editorContentPanel = new JPanel(new BorderLayout());
     editorContentPanel.add(scrollPane, BorderLayout.CENTER);
   }
@@ -1764,8 +1779,8 @@ public class FormularMax4000
 
   private void setPrintFunction()
   {
-    final JList printFunctionCurrentList = new JList(new Vector<String>(
-      doc.getPrintFunctions()));
+    final JList printFunctionCurrentList =
+      new JList(new Vector<String>(doc.getPrintFunctions()));
     JPanel printFunctionEditorContentPanel = new JPanel(new BorderLayout());
     printFunctionEditorContentPanel.add(printFunctionCurrentList,
       BorderLayout.CENTER);
@@ -1931,8 +1946,7 @@ public class FormularMax4000
       selectionSupplier.removeSelectionChangeListener(myXSelectionChangedListener);
     }
     catch (Exception x)
-    {
-    }
+    {}
 
     if (abortListener != null)
       abortListener.actionPerformed(new ActionEvent(this, 0, ""));
@@ -1956,15 +1970,13 @@ public class FormularMax4000
             abort();
           }
           catch (Exception x)
-          {
-          }
+          {}
           ;
         }
       });
     }
     catch (Exception x)
-    {
-    }
+    {}
   }
 
   /**
@@ -1985,15 +1997,13 @@ public class FormularMax4000
             myFrame.toFront();
           }
           catch (Exception x)
-          {
-          }
+          {}
           ;
         }
       });
     }
     catch (Exception x)
-    {
-    }
+    {}
   }
 
   /**
@@ -2121,8 +2131,7 @@ public class FormularMax4000
   private class MyWindowListener implements WindowListener
   {
     public void windowOpened(WindowEvent e)
-    {
-    }
+    {}
 
     public void windowClosing(WindowEvent e)
     {
@@ -2130,24 +2139,19 @@ public class FormularMax4000
     }
 
     public void windowClosed(WindowEvent e)
-    {
-    }
+    {}
 
     public void windowIconified(WindowEvent e)
-    {
-    }
+    {}
 
     public void windowDeiconified(WindowEvent e)
-    {
-    }
+    {}
 
     public void windowActivated(WindowEvent e)
-    {
-    }
+    {}
 
     public void windowDeactivated(WindowEvent e)
-    {
-    }
+    {}
 
   }
 
@@ -2157,8 +2161,8 @@ public class FormularMax4000
     {
       try
       {
-        Object selection = AnyConverter.toObject(XInterface.class,
-          selectionSupplier.getSelection());
+        Object selection =
+          AnyConverter.toObject(XInterface.class, selectionSupplier.getSelection());
         final XIndexAccess access = UNO.XIndexAccess(selection);
         if (access == null) return;
         try
@@ -2172,15 +2176,13 @@ public class FormularMax4000
                 FormularMax4000.this.selectionChanged(access);
               }
               catch (Exception x)
-              {
-              }
+              {}
               ;
             }
           });
         }
         catch (Exception x)
-        {
-        }
+        {}
       }
       catch (IllegalArgumentException e)
       {
@@ -2189,8 +2191,7 @@ public class FormularMax4000
     }
 
     public void disposing(EventObject arg0)
-    {
-    }
+    {}
   }
 
   /**
@@ -2206,8 +2207,8 @@ public class FormularMax4000
     Logger.init(System.err, Logger.DEBUG);
     XTextDocument doc = UNO.XTextDocument(UNO.desktop.getCurrentComponent());
     Map<Object, Object> context = new HashMap<Object, Object>();
-    DialogLibrary dialogLib = WollMuxFiles.parseFunctionDialogs(
-      WollMuxFiles.getWollmuxConf(), null, context);
+    DialogLibrary dialogLib =
+      WollMuxFiles.parseFunctionDialogs(WollMuxFiles.getWollmuxConf(), null, context);
     new FormularMax4000(new TextDocumentModel(doc), null,
       WollMuxFiles.parseFunctions(WollMuxFiles.getWollmuxConf(), dialogLib, context,
         null), WollMuxFiles.parsePrintFunctions(WollMuxFiles.getWollmuxConf()));
