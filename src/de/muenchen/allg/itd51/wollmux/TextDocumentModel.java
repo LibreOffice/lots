@@ -11,6 +11,7 @@
  * 15.09.2006 | LUT | Erstellung als TextDocumentModel
  * 03.01.2007 | BNK | +collectNonWollMuxFormFields
  * 11.04.2007 | BNK | [R6176]+removeNonWMBookmarks()
+ * 08.04.2007 | BNK | [R18119]Druckfunktion inkompatibel mit Versionen <3.11.1
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -103,7 +104,8 @@ public class TextDocumentModel
    * Die dataId unter der die WollMux-Formularbeschreibung in {@link #persistentData}
    * gespeichert wird.
    */
-  private static final String DATA_ID_FORMULARBESCHREIBUNG = "WollMuxFormularbeschreibung";
+  private static final String DATA_ID_FORMULARBESCHREIBUNG =
+    "WollMuxFormularbeschreibung";
 
   /**
    * Die dataId unter der die WollMux-Formularwerte in {@link #persistentData}
@@ -132,14 +134,16 @@ public class TextDocumentModel
   /**
    * Pattern zum Erkennen der Bookmarks, die {@link #deForm()} entfernen soll.
    */
-  private static final Pattern BOOKMARK_KILL_PATTERN = Pattern.compile("(\\A\\s*(WM\\s*\\(.*CMD\\s*'((form)|(setGroups)|(insertFormValue))'.*\\))\\s*\\d*\\z)"
-                                                                       + "|(\\A\\s*(WM\\s*\\(.*CMD\\s*'(setType)'.*'formDocument'\\))\\s*\\d*\\z)"
-                                                                       + "|(\\A\\s*(WM\\s*\\(.*'formDocument'.*CMD\\s*'(setType)'.*\\))\\s*\\d*\\z)");
+  private static final Pattern BOOKMARK_KILL_PATTERN =
+    Pattern.compile("(\\A\\s*(WM\\s*\\(.*CMD\\s*'((form)|(setGroups)|(insertFormValue))'.*\\))\\s*\\d*\\z)"
+      + "|(\\A\\s*(WM\\s*\\(.*CMD\\s*'(setType)'.*'formDocument'\\))\\s*\\d*\\z)"
+      + "|(\\A\\s*(WM\\s*\\(.*'formDocument'.*CMD\\s*'(setType)'.*\\))\\s*\\d*\\z)");
 
   /**
    * Pattern zum Erkennen von WollMux-Bookmarks.
    */
-  private static final Pattern WOLLMUX_BOOKMARK_PATTERN = Pattern.compile("(\\A\\s*(WM\\s*\\(.*\\))\\s*\\d*\\z)");
+  private static final Pattern WOLLMUX_BOOKMARK_PATTERN =
+    Pattern.compile("(\\A\\s*(WM\\s*\\(.*\\))\\s*\\d*\\z)");
 
   /**
    * Prefix, mit dem die Namen aller automatisch generierten dokumentlokalen
@@ -353,8 +357,7 @@ public class TextDocumentModel
       getFrame().contextChanged();
     }
     catch (java.lang.Exception e)
-    {
-    }
+    {}
   }
 
   /**
@@ -383,12 +386,18 @@ public class TextDocumentModel
   }
 
   /**
-   * Diese Methode wertet den im Dokument enthaltenen PrintFunction-Abschnitt aus,
-   * der entweder im ConfigThingy-Format (siehe storePrintFunctions()) oder in dem
-   * legacy-Format vorliegen kann, in dem früher der Name genau einer Druckfunktion
-   * abgelegt war.
+   * Diese Methode wertet den im Dokument enthaltenen PrintFunction-Abschnitt aus
+   * (siehe storePrintFunctions()).
    * 
-   * @param data
+   * Anmerkungen:
+   * 
+   * o Das Einlesen von ARG Argumenten ist noch nicht implementiert
+   * 
+   * o WollMux-Versionen zwischen 2188 (3.10.1) und 2544 (4.4.0) (beides inklusive)
+   * schreiben fehlerhafterweise immer ConfigThingy-Syntax. Aus dem Vorhandensein
+   * eines ConfigThingys kann also NICHT darauf geschlossen werden, dass tatsächlich
+   * Argumente oder mehr als eine Druckfunktion vorhanden sind.
+   * 
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
@@ -396,8 +405,8 @@ public class TextDocumentModel
   {
     if (data == null || data.length() == 0) return;
 
-    final String errmsg = L.m(
-      "Fehler beim Einlesen des Druckfunktionen-Abschnitts '%1':", data);
+    final String errmsg =
+      L.m("Fehler beim Einlesen des Druckfunktionen-Abschnitts '%1':", data);
 
     ConfigThingy conf = new ConfigThingy("dummy");
     try
@@ -415,8 +424,8 @@ public class TextDocumentModel
         // Abwärtskompatibilität mit älteren PrintFunction-Blöcken, in denen nur
         // der Funktionsname steht:
         WollMuxSingleton.checkIdentifier(data);
-        conf = new ConfigThingy("dummy", "WM(Druckfunktionen((FUNCTION '" + data
-                                         + "')))");
+        conf =
+          new ConfigThingy("dummy", "WM(Druckfunktionen((FUNCTION '" + data + "')))");
       }
       catch (java.lang.Exception forgetMe)
       {
@@ -425,8 +434,8 @@ public class TextDocumentModel
       }
     }
 
-    ConfigThingy functions = conf.query("WM").query("Druckfunktionen").queryByChild(
-      "FUNCTION");
+    ConfigThingy functions =
+      conf.query("WM").query("Druckfunktionen").queryByChild("FUNCTION");
     for (Iterator iter = functions.iterator(); iter.hasNext();)
     {
       ConfigThingy func = (ConfigThingy) iter.next();
@@ -581,8 +590,8 @@ public class TextDocumentModel
 
           // Wurde der Wert des Feldes gegenüber dem zusetzt gespeicherten Wert
           // verändert?
-          String transformedLastStoredValue = getTranformedValue(lastStoredValue,
-            field.getTrafoName(), true);
+          String transformedLastStoredValue =
+            getTranformedValue(lastStoredValue, field.getTrafoName(), true);
           if (!thisValue.equals(transformedLastStoredValue))
             allAreUnchanged = false;
 
@@ -610,7 +619,7 @@ public class TextDocumentModel
         else
         {
           if (allAreUntransformed && allUntransformedHaveSameValues
-              && refValue != null)
+            && refValue != null)
             value = refValue;
           else
             value = FormController.FISHY;
@@ -626,7 +635,7 @@ public class TextDocumentModel
       // neuen Wert übernehmen:
       idToPresetValue.put(id, value);
       Logger.debug2("Add IDToPresetValue: ID=\"" + id + "\" --> Wert=\"" + value
-                    + "\"");
+        + "\"");
 
     }
     return idToPresetValue;
@@ -639,7 +648,8 @@ public class TextDocumentModel
   {
     try
     {
-      XEnumeration xenu = UNO.XTextFieldsSupplier(doc).getTextFields().createEnumeration();
+      XEnumeration xenu =
+        UNO.XTextFieldsSupplier(doc).getTextFields().createEnumeration();
       while (xenu.hasMoreElements())
       {
         try
@@ -689,7 +699,8 @@ public class TextDocumentModel
 
     try
     {
-      XEnumeration xenu = UNO.XTextFieldsSupplier(doc).getTextFields().createEnumeration();
+      XEnumeration xenu =
+        UNO.XTextFieldsSupplier(doc).getTextFields().createEnumeration();
       while (xenu.hasMoreElements())
       {
         try
@@ -1010,8 +1021,7 @@ public class TextDocumentModel
       getFrame().contextChanged();
     }
     catch (java.lang.Exception e)
-    {
-    }
+    {}
   }
 
   /**
@@ -1037,46 +1047,82 @@ public class TextDocumentModel
       getFrame().contextChanged();
     }
     catch (java.lang.Exception e)
-    {
-    }
+    {}
   }
 
   /**
    * Schreibt den neuen Zustand der internen HashMap printFunctions in die persistent
-   * Data oder löscht den Datenblock, wenn keine Druckfunktion gesetzt ist. Die
-   * Druckfunktionen werden in ConfigThingy-Syntax abgelegt und haben den Aufbau
-   * WM(Druckfunktionen( ... (FUNCTION 'name' ARG 'arg') ...)). Das Argument ARG ist
-   * dabei optional und wird nur gesetzt, wenn ARG nicht leer ist.
+   * Data oder löscht den Datenblock, wenn keine Druckfunktion gesetzt ist. Für die
+   * Druckfunktionen gibt es 2 Syntaxvarianten. Ist nur eine einzige Druckfunktion
+   * gesetzt ohne Parameter, so enthält der Abschnitt nur den Namen der
+   * Druckfunktion. Ist entweder mindestens ein Parameter oder mehrere
+   * Druckfunktionen gesetzt, so wird stattdessen ein ConfigThingy geschrieben, mit
+   * dem Aufbau
+   * 
+   * <pre>
+   * WM(
+   *   Druckfunktionen( 
+   *     (FUNCTION 'name' ARG 'arg') 
+   *          ...
+   *     )
+   *   )
+   * </pre>. Das Argument ARG ist dabei optional und wird nur gesetzt, wenn ARG
+   * nicht leer ist.
+   * 
+   * Anmerkungen:
+   * 
+   * o Das Schreiben von ARG Argumenten ist noch nicht implementiert
+   * 
+   * o WollMux-Versionen zwischen 2188 (3.10.1) und 2544 (4.4.0) (beides inklusive)
+   * schreiben fehlerhafterweise immer ConfigThingy-Syntax.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
+   * @author Matthias Benkmann (D-III-ITD D.10)
+   * 
    */
   private void storePrintFunctions()
   {
-    // Elemente nach Namen sortieren (definierte Reihenfolge bei der Ausgabe)
-    ArrayList<String> names = new ArrayList<String>(printFunctions);
-    Collections.sort(names);
-
-    ConfigThingy wm = new ConfigThingy("WM");
-    ConfigThingy druckfunktionen = new ConfigThingy("Druckfunktionen");
-    wm.addChild(druckfunktionen);
-    for (Iterator<String> iter = names.iterator(); iter.hasNext();)
-    {
-      String name = iter.next();
-      ConfigThingy list = new ConfigThingy("");
-      ConfigThingy nameConf = new ConfigThingy("FUNCTION");
-      nameConf.addChild(new ConfigThingy(name));
-      list.addChild(nameConf);
-      druckfunktionen.addChild(list);
-    }
-
-    // Persistente Daten entsprechend anpassen
-    if (printFunctions.size() > 0)
-    {
-      persistentData.setData(DATA_ID_PRINTFUNCTION, wm.stringRepresentation());
-    }
-    else
+    if (printFunctions.isEmpty())
     {
       persistentData.removeData(DATA_ID_PRINTFUNCTION);
+    }
+    else
+    // if (printFunctions.size() > 0)
+    {
+      /*
+       * Momentan ist es noch unnötig umständlich, die Bedingung
+       * printFunctions.size() > 1 über eine Variable nach unten zu tunneln. Außerdem
+       * ist es derzeit noch so, dass man im Fall printFunctions.size() == 1 erst gar
+       * kein ConfigThingy zusammenbauen müsste. Aber wenn einmal Argumente
+       * implementiert sind, dann gibt es für deren Vorhandensein vielleicht keinen
+       * griffigen Test. In dem Fall ist es am einfachsten unten in der Schleife
+       * einfach sobald man auf ein ARG stößt diese Variable hier auf true zu setzen.
+       */
+      boolean needConfigThingy = (printFunctions.size() > 1);
+
+      // Elemente nach Namen sortieren (definierte Reihenfolge bei der Ausgabe)
+      ArrayList<String> names = new ArrayList<String>(printFunctions);
+      Collections.sort(names);
+
+      ConfigThingy wm = new ConfigThingy("WM");
+      ConfigThingy druckfunktionen = new ConfigThingy("Druckfunktionen");
+      wm.addChild(druckfunktionen);
+      for (Iterator<String> iter = names.iterator(); iter.hasNext();)
+      {
+        String name = iter.next();
+        ConfigThingy list = new ConfigThingy("");
+        ConfigThingy nameConf = new ConfigThingy("FUNCTION");
+        nameConf.addChild(new ConfigThingy(name));
+        list.addChild(nameConf);
+        druckfunktionen.addChild(list);
+        // if (Argument vorhanden) needConfigThingy = true;
+      }
+
+      if (needConfigThingy)
+        persistentData.setData(DATA_ID_PRINTFUNCTION, wm.stringRepresentation());
+      else
+        persistentData.setData(DATA_ID_PRINTFUNCTION,
+          printFunctions.iterator().next().toString());
     }
   }
 
@@ -1131,7 +1177,8 @@ public class TextDocumentModel
     {
       DocumentCommand cmd = (DocumentCommand) iter.next();
       cmd.setVisible(visible);
-      String highlightColor = ((OptionalHighlightColorProvider) cmd).getHighlightColor();
+      String highlightColor =
+        ((OptionalHighlightColorProvider) cmd).getHighlightColor();
 
       if (highlightColor != null)
       {
@@ -1217,7 +1264,8 @@ public class TextDocumentModel
   synchronized public XTextViewCursor getViewCursor()
   {
     if (UNO.XModel(doc) == null) return null;
-    XTextViewCursorSupplier suppl = UNO.XTextViewCursorSupplier(UNO.XModel(doc).getCurrentController());
+    XTextViewCursorSupplier suppl =
+      UNO.XTextViewCursorSupplier(UNO.XModel(doc).getCurrentController());
     if (suppl != null) return suppl.getViewCursor();
     return null;
   }
@@ -1325,8 +1373,10 @@ public class TextDocumentModel
     {
       // Feld einfügen
       XMultiServiceFactory factory = UNO.XMultiServiceFactory(doc);
-      XDependentTextField field = UNO.XDependentTextField(factory.createInstance("com.sun.star.text.TextField.Database"));
-      XPropertySet master = UNO.XPropertySet(factory.createInstance("com.sun.star.text.FieldMaster.Database"));
+      XDependentTextField field =
+        UNO.XDependentTextField(factory.createInstance("com.sun.star.text.TextField.Database"));
+      XPropertySet master =
+        UNO.XPropertySet(factory.createInstance("com.sun.star.text.FieldMaster.Database"));
       UNO.setProperty(master, "DataBaseName", "DataBase");
       UNO.setProperty(master, "DataTableName", "Table");
       UNO.setProperty(master, "DataColumnName", fieldId);
@@ -1395,7 +1445,8 @@ public class TextDocumentModel
       if (data != null)
         try
         {
-          mailmergeConf = new ConfigThingy("", data).query("WM").query("Seriendruck").getLastChild();
+          mailmergeConf =
+            new ConfigThingy("", data).query("WM").query("Seriendruck").getLastChild();
         }
         catch (java.lang.Exception e)
         {
@@ -1480,8 +1531,8 @@ public class TextDocumentModel
     try
     {
       if ((conf.query("Fenster").count() > 0 && conf.get("Fenster").count() > 0)
-          || (conf.query("Sichtbarkeit").count() > 0 && conf.get("Sichtbarkeit").count() > 0)
-          || (conf.query("Funktionen").count() > 0 && conf.get("Funktionen").count() > 0))
+        || (conf.query("Sichtbarkeit").count() > 0 && conf.get("Sichtbarkeit").count() > 0)
+        || (conf.query("Funktionen").count() > 0 && conf.get("Funktionen").count() > 0))
         persistentData.setData(DATA_ID_FORMULARBESCHREIBUNG,
           conf.stringRepresentation());
       else
@@ -1588,10 +1639,10 @@ public class TextDocumentModel
         formConf = getFormDescription().get("Formular");
       }
       catch (NodeNotFoundException e)
-      {
-      }
-      functionLib = WollMuxFiles.parseFunctions(formConf, getDialogLibrary(),
-        functionContext, WollMuxSingleton.getInstance().getGlobalFunctions());
+      {}
+      functionLib =
+        WollMuxFiles.parseFunctions(formConf, getDialogLibrary(), functionContext,
+          WollMuxSingleton.getInstance().getGlobalFunctions());
     }
     return functionLib;
   }
@@ -1612,10 +1663,10 @@ public class TextDocumentModel
         formConf = getFormDescription().get("Formular");
       }
       catch (NodeNotFoundException e)
-      {
-      }
-      dialogLib = WollMuxFiles.parseFunctionDialogs(formConf,
-        WollMuxSingleton.getInstance().getFunctionDialogs(), functionContext);
+      {}
+      dialogLib =
+        WollMuxFiles.parseFunctionDialogs(formConf,
+          WollMuxSingleton.getInstance().getFunctionDialogs(), functionContext);
     }
     return dialogLib;
   }
@@ -2015,8 +2066,7 @@ public class TextDocumentModel
       UNO.XModifiable(doc).setModified(state);
     }
     catch (java.lang.Exception x)
-    {
-    }
+    {}
   }
 
   /**
@@ -2031,7 +2081,7 @@ public class TextDocumentModel
     try
     {
       if (WollMuxSingleton.getInstance().isDebugMode() == false
-          && UNO.XModel(doc) != null)
+        && UNO.XModel(doc) != null)
       {
         if (lock)
           UNO.XModel(doc).lockControllers();
@@ -2040,8 +2090,7 @@ public class TextDocumentModel
       }
     }
     catch (java.lang.Exception e)
-    {
-    }
+    {}
   }
 
   /**
@@ -2064,8 +2113,7 @@ public class TextDocumentModel
         PosSize.POSSIZE);
     }
     catch (java.lang.Exception e)
-    {
-    }
+    {}
   }
 
   /**
@@ -2104,8 +2152,7 @@ public class TextDocumentModel
           zoomValue = new Short(zoom);
         }
         catch (NumberFormatException e)
-        {
-        }
+        {}
       }
     }
 
@@ -2113,11 +2160,11 @@ public class TextDocumentModel
     Object viewSettings = null;
     try
     {
-      viewSettings = UNO.XViewSettingsSupplier(doc.getCurrentController()).getViewSettings();
+      viewSettings =
+        UNO.XViewSettingsSupplier(doc.getCurrentController()).getViewSettings();
     }
     catch (java.lang.Exception e)
-    {
-    }
+    {}
     if (zoomType != null)
       UNO.setProperty(viewSettings, "ZoomType", zoomType);
     else if (zoomValue != null)
@@ -2146,8 +2193,7 @@ public class TextDocumentModel
       window = getFrame().getContainerWindow();
     }
     catch (java.lang.Exception e)
-    {
-    }
+    {}
 
     // Insets bestimmen (Rahmenmaße des Windows)
     int insetLeft = 0, insetTop = 0, insetRight = 0, insetButtom = 0;
@@ -2171,8 +2217,7 @@ public class TextDocumentModel
       }
     }
     catch (java.lang.Exception e)
-    {
-    }
+    {}
     // Dimensions setzen:
     try
     {
@@ -2180,12 +2225,10 @@ public class TextDocumentModel
       int height = new Integer(settings.get("HEIGHT").toString()).intValue();
       if (window != null)
         window.setPosSize(0, 0, width - insetLeft - insetRight, height - insetTop
-                                                                - insetButtom,
-          PosSize.SIZE);
+          - insetButtom, PosSize.SIZE);
     }
     catch (java.lang.Exception e)
-    {
-    }
+    {}
 
     // Zoom setzen:
     setDocumentZoom(settings);
@@ -2234,7 +2277,8 @@ public class TextDocumentModel
   {
     XTextRange range = formCmd.getTextRange();
 
-    XTextContent annotationField = UNO.XTextContent(WollMuxSingleton.findAnnotationFieldRecursive(range));
+    XTextContent annotationField =
+      UNO.XTextContent(WollMuxSingleton.findAnnotationFieldRecursive(range));
     if (annotationField == null)
       throw new ConfigurationErrorException(
         L.m("Die zugehörige Notiz mit der Formularbeschreibung fehlt."));
@@ -2277,8 +2321,8 @@ public class TextDocumentModel
     boolean closeOk = true;
     if (UNO.XFramesSupplier(UNO.desktop) != null)
     {
-      XFrame[] frames = UNO.XFramesSupplier(UNO.desktop).getFrames().queryFrames(
-        FrameSearchFlag.ALL);
+      XFrame[] frames =
+        UNO.XFramesSupplier(UNO.desktop).getFrames().queryFrames(FrameSearchFlag.ALL);
       for (int i = 0; i < frames.length; i++)
       {
         XController c = frames[i].getController();
@@ -2306,8 +2350,7 @@ public class TextDocumentModel
         if (UNO.XCloseable(doc) != null) UNO.XCloseable(doc).close(true);
       }
       catch (CloseVetoException e)
-      {
-      }
+      {}
 
     }
     else if (UNO.XFramesSupplier(UNO.desktop) != null)
@@ -2315,8 +2358,8 @@ public class TextDocumentModel
 
       // Tritt in Kraft, wenn "Abbrechen" betätigt wurde. In diesem Fall werden
       // die Controllers mit suspend(FALSE) wieder reaktiviert.
-      XFrame[] frames = UNO.XFramesSupplier(UNO.desktop).getFrames().queryFrames(
-        FrameSearchFlag.ALL);
+      XFrame[] frames =
+        UNO.XFramesSupplier(UNO.desktop).getFrames().queryFrames(FrameSearchFlag.ALL);
       for (int i = 0; i < frames.length; i++)
       {
         XController c = frames[i].getController();
@@ -2361,8 +2404,7 @@ public class TextDocumentModel
       if (i >= 0) title = title.substring(0, i);
     }
     catch (java.lang.Exception e)
-    {
-    }
+    {}
     return title;
   }
 
@@ -2401,8 +2443,7 @@ public class TextDocumentModel
 
         public void queryClosing(EventObject arg0, boolean arg1)
             throws CloseVetoException
-        {
-        }
+        {}
       };
       UNO.XCloseable(doc).addCloseListener(closeListener);
     }
@@ -2544,15 +2585,17 @@ public class TextDocumentModel
       XPropertySet master = getUserFieldMaster(userFieldName);
       if (master == null)
       {
-        master = UNO.XPropertySet(UNO.XMultiServiceFactory(doc).createInstance(
-          "com.sun.star.text.FieldMaster.User"));
+        master =
+          UNO.XPropertySet(UNO.XMultiServiceFactory(doc).createInstance(
+            "com.sun.star.text.FieldMaster.User"));
         UNO.setProperty(master, "Value", new Integer(0));
         UNO.setProperty(master, "Name", userFieldName);
       }
 
       // textField erzeugen
-      XTextContent f = UNO.XTextContent(UNO.XMultiServiceFactory(doc).createInstance(
-        "com.sun.star.text.TextField.InputUser"));
+      XTextContent f =
+        UNO.XTextContent(UNO.XMultiServiceFactory(doc).createInstance(
+          "com.sun.star.text.TextField.InputUser"));
       UNO.setProperty(f, "Content", userFieldName);
       if (hint != null) UNO.setProperty(f, "Hint", hint);
       r.getText().insertTextContent(r, f, true);
@@ -2614,14 +2657,14 @@ public class TextDocumentModel
     {
       String name = (String) iter.next();
       if (name == null || !name.startsWith(AUTOFUNCTION_PREFIX)
-          || usedFunctions.contains(name)) continue;
+        || usedFunctions.contains(name)) continue;
       funcLib.remove(name);
     }
 
     // Nicht mehr benötigte Autofunctions aus der Formularbeschreibung der
     // persistenten Daten löschen.
-    ConfigThingy functions = getFormDescription().query("Formular").query(
-      "Funktionen");
+    ConfigThingy functions =
+      getFormDescription().query("Formular").query("Funktionen");
     for (Iterator iter = functions.iterator(); iter.hasNext();)
     {
       ConfigThingy funcs = (ConfigThingy) iter.next();
@@ -2629,7 +2672,7 @@ public class TextDocumentModel
       {
         String name = ((ConfigThingy) iterator.next()).getName();
         if (name == null || !name.startsWith(AUTOFUNCTION_PREFIX)
-            || usedFunctions.contains(name)) continue;
+          || usedFunctions.contains(name)) continue;
         iterator.remove();
       }
     }
@@ -2735,8 +2778,7 @@ public class TextDocumentModel
       wm = new ConfigThingy("", cmdStr).get("WM");
     }
     catch (java.lang.Exception e)
-    {
-    }
+    {}
 
     String cmd = "";
     try
@@ -2744,16 +2786,14 @@ public class TextDocumentModel
       cmd = wm.get("CMD").toString();
     }
     catch (NodeNotFoundException e)
-    {
-    }
+    {}
 
     if (cmd.equalsIgnoreCase("insertFormValue")) try
     {
       return wm.get("TRAFO").toString();
     }
     catch (NodeNotFoundException e)
-    {
-    }
+    {}
     return null;
   }
 
@@ -2871,8 +2911,7 @@ public class TextDocumentModel
           trafoName, 2).getLastChild();
       }
       catch (NodeNotFoundException e)
-      {
-      }
+      {}
 
     return null;
   }
@@ -2895,8 +2934,8 @@ public class TextDocumentModel
     HashMap<String, Integer> collectedTrafos = new HashMap<String, Integer>();
 
     if (textRange == null) return collectedTrafos;
-    XEnumerationAccess parEnumAcc = UNO.XEnumerationAccess(textRange.getText().createTextCursorByRange(
-      textRange));
+    XEnumerationAccess parEnumAcc =
+      UNO.XEnumerationAccess(textRange.getText().createTextCursorByRange(textRange));
     if (parEnumAcc == null) return collectedTrafos;
 
     XEnumeration parEnum = parEnumAcc.createEnumeration();
@@ -2929,7 +2968,7 @@ public class TextDocumentModel
         // InputUser-Textfelder verarbeiten
         XTextField tf = UNO.XTextField(UNO.getProperty(portion, "TextField"));
         if (tf != null
-            && UNO.supportsService(tf, "com.sun.star.text.TextField.InputUser"))
+          && UNO.supportsService(tf, "com.sun.star.text.TextField.InputUser"))
         {
           String varName = "" + UNO.getProperty(tf, "Content");
           String t = getFunctionNameForUserFieldName(varName);
@@ -2946,15 +2985,15 @@ public class TextDocumentModel
           boolean isEnd = false;
           try
           {
-            boolean isCollapsed = AnyConverter.toBoolean(UNO.getProperty(portion,
-              "IsCollapsed"));
-            isStart = AnyConverter.toBoolean(UNO.getProperty(portion, "IsStart"))
-                      || isCollapsed;
+            boolean isCollapsed =
+              AnyConverter.toBoolean(UNO.getProperty(portion, "IsCollapsed"));
+            isStart =
+              AnyConverter.toBoolean(UNO.getProperty(portion, "IsStart"))
+                || isCollapsed;
             isEnd = !isStart || isCollapsed;
           }
           catch (IllegalArgumentException e)
-          {
-          }
+          {}
 
           Matcher m = WOLLMUX_BOOKMARK_PATTERN.matcher(name);
           if (m.matches())
@@ -3003,8 +3042,9 @@ public class TextDocumentModel
     ConfigThingy func;
     try
     {
-      func = getFormDescription().query("Formular").query("Funktionen").query(
-        trafoName, 2).getLastChild();
+      func =
+        getFormDescription().query("Formular").query("Funktionen").query(trafoName,
+          2).getLastChild();
     }
     catch (NodeNotFoundException e)
     {
@@ -3013,8 +3053,9 @@ public class TextDocumentModel
 
     // Funktion parsen und in Funktionsbibliothek setzen:
     FunctionLibrary funcLib = getFunctionLibrary();
-    Function function = FunctionFactory.parseChildren(trafoConf, funcLib,
-      getDialogLibrary(), getFunctionContext());
+    Function function =
+      FunctionFactory.parseChildren(trafoConf, funcLib, getDialogLibrary(),
+        getFunctionContext());
     funcLib.add(trafoName, function);
 
     // Kinder von func löschen, damit sie später neu gesetzt werden können
@@ -3247,7 +3288,8 @@ public class TextDocumentModel
 
             // Neue Bookmarks passend zum Text platzieren
             cursor.collapseToStart();
-            for (Iterator<FieldSubstitution.SubstElement> substIter = subst.iterator(); substIter.hasNext();)
+            for (Iterator<FieldSubstitution.SubstElement> substIter =
+              subst.iterator(); substIter.hasNext();)
             {
               FieldSubstitution.SubstElement ele = substIter.next();
               if (ele.isFixedText())
@@ -3298,7 +3340,8 @@ public class TextDocumentModel
 
             // Neue Datenbankfelder passend zum Text einfügen
             cursor.collapseToStart();
-            for (Iterator<FieldSubstitution.SubstElement> substIter = subst.iterator(); substIter.hasNext();)
+            for (Iterator<FieldSubstitution.SubstElement> substIter =
+              subst.iterator(); substIter.hasNext();)
             {
               FieldSubstitution.SubstElement ele = substIter.next();
               if (ele.isFixedText())
@@ -3355,8 +3398,9 @@ public class TextDocumentModel
     if (trafoName == null || oldFieldId == null || newFieldId == null) return;
     try
     {
-      ConfigThingy trafoConf = getFormDescription().query("Formular").query(
-        "Funktionen").query(trafoName, 2).getLastChild();
+      ConfigThingy trafoConf =
+        getFormDescription().query("Formular").query("Funktionen").query(trafoName,
+          2).getLastChild();
       substituteValueRecursive(trafoConf, oldFieldId, newFieldId);
 
       // neue Formularbeschreibung persistent machen
@@ -3366,8 +3410,9 @@ public class TextDocumentModel
       FunctionLibrary funcLib = getFunctionLibrary();
       try
       {
-        Function func = FunctionFactory.parseChildren(trafoConf, funcLib, dialogLib,
-          getFunctionContext());
+        Function func =
+          FunctionFactory.parseChildren(trafoConf, funcLib, dialogLib,
+            getFunctionContext());
         getFunctionLibrary().add(trafoName, func);
       }
       catch (ConfigurationErrorException e)
@@ -3400,7 +3445,7 @@ public class TextDocumentModel
     if (conf == null) return;
 
     if (conf.getName().equals("VALUE") && conf.count() == 1
-        && conf.toString().equals(oldFieldId))
+      && conf.toString().equals(oldFieldId))
     {
       try
       {

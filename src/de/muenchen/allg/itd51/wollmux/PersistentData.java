@@ -51,12 +51,12 @@ public class PersistentData
   private static final String WOLLMUX_FRAME_NAME = "WollMuxDaten";
 
   /**
-   * Maximale Länge von Textfeldern, die der WollMux schreibt. Die Länge 32000
-   * wurde gewählt, weil ich nicht sicher bin, ob die Grenze tatsächlich
-   * 64kZeichen oder 64kBytes sind. In letzterem Fall könnten Zeichen, die 2
-   * Bytes belegen (eine interne UTF16 oder UTF8 kodierung angenommen) schon
-   * früher die Grenze treffen. Also lieber auf der sicheren Seite sein und
-   * 32000. Eigentlich wären es ja 32767, aber ich hab lieber den glatten Wert.
+   * Maximale Länge von Textfeldern, die der WollMux schreibt. Die Länge 32000 wurde
+   * gewählt, weil ich nicht sicher bin, ob die Grenze tatsächlich 64kZeichen oder
+   * 64kBytes sind. In letzterem Fall könnten Zeichen, die 2 Bytes belegen (eine
+   * interne UTF16 oder UTF8 kodierung angenommen) schon früher die Grenze treffen.
+   * Also lieber auf der sicheren Seite sein und 32000. Eigentlich wären es ja 32767,
+   * aber ich hab lieber den glatten Wert.
    */
   private static final int TEXTFIELD_MAXLEN = 32000;
 
@@ -74,8 +74,8 @@ public class PersistentData
   }
 
   /**
-   * Die Methode liefert die unter ID dataId gespeicherten Daten zurück oder
-   * null, wenn keine vorhanden sind.
+   * Die Methode liefert die unter ID dataId gespeicherten Daten zurück oder null,
+   * wenn keine vorhanden sind.
    */
   public String getData(String dataId)
   {
@@ -94,17 +94,18 @@ public class PersistentData
    * Liefert alle Informations-Textfelder mit Id fieldName zurück.
    * 
    * @param create
-   *          falls true so werden entsprechende Felder angelegt, wenn sie nicht
-   *          existieren.
+   *            falls true so werden entsprechende Felder angelegt, wenn sie nicht
+   *            existieren.
    * @size falls create == true werden soviele Felder angelegt, dass darin size
-   *       Zeichen aufgeteilt in TEXTFIELD_MAXLEN lange Blöcke untergebracht
-   *       werden können. Eventuell vorhandene überschüssige Felder werden
-   *       gelöscht. Auch bei size == 0 wird mindestens ein Block geliefert.
-   * @return leeren Vector falls das Feld nicht existiert und create == false
-   *         oder falls ein Fehler auftritt.
+   *       Zeichen aufgeteilt in TEXTFIELD_MAXLEN lange Blöcke untergebracht werden
+   *       können. Eventuell vorhandene überschüssige Felder werden gelöscht. Auch
+   *       bei size == 0 wird mindestens ein Block geliefert.
+   * @return leeren Vector falls das Feld nicht existiert und create == false oder
+   *         falls ein Fehler auftritt.
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
-  private Vector<Object> getWollMuxTextFields(String fieldName, boolean create, int size)
+  private Vector<Object> getWollMuxTextFields(String fieldName, boolean create,
+      int size)
   {
     Vector<Object> textfields = new Vector<Object>();
     XTextFramesSupplier supp = UNO.XTextFramesSupplier(doc);
@@ -122,7 +123,8 @@ public class PersistentData
         {
           if (!create) return textfields;
 
-          frame = UNO.XShape(UNO.XMultiServiceFactory(doc).createInstance(
+          frame =
+            UNO.XShape(UNO.XMultiServiceFactory(doc).createInstance(
               "com.sun.star.text.TextFrame"));
           Size frameSize = new Size();
           frameSize.Height = 5;
@@ -130,10 +132,7 @@ public class PersistentData
           frame.setSize(frameSize);
           UNO.setProperty(frame, "AnchorType", TextContentAnchorType.AT_PAGE);
           XText text = doc.getText();
-          text.insertTextContent(
-              text.getStart(),
-              UNO.XTextContent(frame),
-              false);
+          text.insertTextContent(text.getStart(), UNO.XTextContent(frame), false);
 
           UNO.setProperty(frame, "BackTransparent", Boolean.TRUE);
           UNO.setProperty(frame, "BorderDistance", new Integer(0));
@@ -146,34 +145,30 @@ public class PersistentData
           UNO.setProperty(frame, "HoriOrient", new Short(HoriOrientation.NONE));
           UNO.setProperty(frame, "HoriOrientPosition", new Integer(0));
           UNO.setProperty(frame, "HoriOrientRelation", new Short(
-              RelOrientation.PAGE_LEFT));
-          UNO.setProperty(
-              frame,
-              "VertOrient",
-              new Short(VertOrientation.BOTTOM));
+            RelOrientation.PAGE_LEFT));
+          UNO.setProperty(frame, "VertOrient", new Short(VertOrientation.BOTTOM));
           // UNO.setProperty(frame, "VertOrientPosition", new Integer(0));
           UNO.setProperty(frame, "VertOrientRelation", new Short(
-              RelOrientation.PAGE_FRAME));
+            RelOrientation.PAGE_FRAME));
           UNO.setProperty(frame, "FrameIsAutomaticHeight", Boolean.FALSE);
 
           XNamed frameName = UNO.XNamed(frame);
           frameName.setName(WOLLMUX_FRAME_NAME);
         }
 
-        XEnumeration paragraphEnu = UNO.XEnumerationAccess(frame)
-            .createEnumeration();
+        XEnumeration paragraphEnu =
+          UNO.XEnumerationAccess(frame).createEnumeration();
         while (paragraphEnu.hasMoreElements())
         {
-          XEnumeration textportionEnu = UNO.XEnumerationAccess(
-              paragraphEnu.nextElement()).createEnumeration();
+          XEnumeration textportionEnu =
+            UNO.XEnumerationAccess(paragraphEnu.nextElement()).createEnumeration();
           while (textportionEnu.hasMoreElements())
           {
-            Object textfield = UNO.getProperty(
-                textportionEnu.nextElement(),
-                "TextField");
+            Object textfield =
+              UNO.getProperty(textportionEnu.nextElement(), "TextField");
             String author = (String) UNO.getProperty(textfield, "Author");
-            if (fieldName.equals(author)) // ACHTUNG! author.equals(fieldName)
-            // wäre falsch!
+            // ACHTUNG! author.equals(fieldName) wäre falsch, da author null sein kann!
+            if (fieldName.equals(author))
             {
               textfields.add(textfield);
             }
@@ -181,8 +176,8 @@ public class PersistentData
         }
 
         /*
-         * Falls create == true und zuviele Felder gefunden wurden, dann loesche
-         * die überzähligen.
+         * Falls create == true und zuviele Felder gefunden wurden, dann loesche die
+         * überzähligen.
          */
         if (create && textfields.size() > blockCount)
         {
@@ -195,18 +190,19 @@ public class PersistentData
         }
 
         /*
-         * Falls create == true und zu wenige Felder gefunden wurden, dann
-         * erzeuge zusätzliche.
+         * Falls create == true und zu wenige Felder gefunden wurden, dann erzeuge
+         * zusätzliche.
          */
         if (create && textfields.size() < blockCount)
         {
           XText frameText = UNO.XTextFrame(frame).getText();
           while (textfields.size() < blockCount)
           {
-            Object annotation = UNO.XMultiServiceFactory(doc).createInstance(
+            Object annotation =
+              UNO.XMultiServiceFactory(doc).createInstance(
                 "com.sun.star.text.TextField.Annotation");
-            frameText.insertTextContent(frameText.getEnd(), UNO
-                .XTextContent(annotation), false);
+            frameText.insertTextContent(frameText.getEnd(),
+              UNO.XTextContent(annotation), false);
             UNO.setProperty(annotation, "Author", fieldName);
             textfields.add(annotation);
           }
@@ -229,7 +225,8 @@ public class PersistentData
    */
   public void setData(String dataId, String dataValue)
   {
-    Vector<Object> textfields = getWollMuxTextFields(dataId, true, dataValue.length());
+    Vector<Object> textfields =
+      getWollMuxTextFields(dataId, true, dataValue.length());
     if (textfields.size() == 0)
     {
       Logger.error(L.m("Konnte WollMux-Textfeld(er) \"%1\" nicht anlegen", dataId));
