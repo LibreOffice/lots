@@ -91,6 +91,7 @@ import com.sun.star.document.XDocumentInfo;
 import com.sun.star.lang.EventObject;
 import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.text.XBookmarksSupplier;
+import com.sun.star.text.XDependentTextField;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.uno.AnyConverter;
 import com.sun.star.uno.XInterface;
@@ -503,6 +504,36 @@ public class FormularMax4000
   public FormularMax4000(TextDocumentModel model, ActionListener abortListener,
       FunctionLibrary funcLib, PrintFunctionLibrary printFuncLib)
   {
+    XEnumeration xenu =
+      UNO.XTextFieldsSupplier(model.doc).getTextFields().createEnumeration();
+    boolean dothrow = false;
+    while (xenu.hasMoreElements())
+    {
+      try
+      {
+        XDependentTextField tf = UNO.XDependentTextField(xenu.nextElement());
+        if (tf == null) continue;
+
+        if (UNO.supportsService(tf, "com.sun.star.text.TextField.InputUser"))
+        {
+          dothrow = true;
+          break;
+        }
+      }
+      catch (Exception x)
+      {}
+    }
+
+    if (dothrow)
+    {
+      JOptionPane.showMessageDialog(
+        null,
+        "Der FormularMax 4000 kann Dokumente mit Seriendruckfeldern leider nicht verarbeiten.",
+        "Fehler!", JOptionPane.ERROR_MESSAGE);
+      throw new RuntimeException(
+        "Der FormularMax 4000 kann Dokumente mit Seriendruckfeldern leider nicht verarbeiten.");
+    }
+
     this.doc = model;
     this.abortListener = abortListener;
     this.functionLibrary = funcLib;
