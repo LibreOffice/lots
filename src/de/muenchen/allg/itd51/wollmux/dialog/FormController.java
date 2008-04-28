@@ -1083,6 +1083,8 @@ public class FormController implements UIElementEventHandler
     supportedActions.add("prevTab");
     supportedActions.add("funcDialog");
     supportedActions.add("form2PDF");
+    supportedActions.add("save");
+    supportedActions.add("saveAs");
     supportedActions.add("printForm");
     panelContext.supportedActions = supportedActions;
     buttonContext.supportedActions = supportedActions;
@@ -1230,6 +1232,14 @@ public class FormController implements UIElementEventHandler
         else if (action.equals("form2PDF"))
         {
           formModel.pdf();
+        }
+        else if (action.equals("save"))
+        {
+          formModel.save();
+        }
+        else if (action.equals("saveAs"))
+        {
+          formModel.saveAs();
         }
       }
       else if (eventType.equals("focus"))
