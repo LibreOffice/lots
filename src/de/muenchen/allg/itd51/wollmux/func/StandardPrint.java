@@ -1,3 +1,24 @@
+/*
+ * Copyright (c) 2008 Landeshauptstadt München
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the European Union Public Licence (EUPL), version 1.0.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * European Union Public Licence for more details.
+ *
+ * You should have received a copy of the European Union Public Licence
+ * along with this program. If not, see 
+ * http://ec.europa.eu/idabc/en/document/7330/5980
+ *
+ *
+ * @author Matthias Benkmann (D-III-ITD 5.1)
+ * @author Christoph Lutz (D-III-ITD-5.1)
+ * @version 1.0
+ * 
+ */
 package de.muenchen.allg.itd51.wollmux.func;
 
 import java.util.ArrayList;
@@ -62,7 +83,8 @@ public class StandardPrint
       }
     }
 
-    List<VerfuegungspunktInfo> settings = SachleitendeVerfuegung.callPrintDialog(pmod.getTextDocument());
+    List<VerfuegungspunktInfo> settings =
+      SachleitendeVerfuegung.callPrintDialog(pmod.getTextDocument());
     if (settings != null)
     {
       try
@@ -92,7 +114,8 @@ public class StandardPrint
     List<VerfuegungspunktInfo> settings = new ArrayList<VerfuegungspunktInfo>();
     try
     {
-      settings = (List<VerfuegungspunktInfo>) pmod.getPropertyValue(PROP_SLV_SETTINGS);
+      settings =
+        (List<VerfuegungspunktInfo>) pmod.getPropertyValue(PROP_SLV_SETTINGS);
     }
     catch (java.lang.Exception e)
     {
@@ -185,7 +208,7 @@ public class StandardPrint
     ConfigThingy conf = new ConfigThingy("EXTERN");
     ConfigThingy url = new ConfigThingy("URL");
     url.addChild(new ConfigThingy("java:" + StandardPrint.class.getName() + "."
-                                  + functionName));
+      + functionName));
     conf.addChild(url);
     try
     {
@@ -214,13 +237,15 @@ public class StandardPrint
     XTextDocument outputDoc = null;
     try
     {
-      outputDoc = UNO.XTextDocument(pmod.getPropertyValue("PrintIntoFile_OutputDocument"));
+      outputDoc =
+        UNO.XTextDocument(pmod.getPropertyValue("PrintIntoFile_OutputDocument"));
       firstAppend = false;
     }
     catch (UnknownPropertyException e)
     {
-      outputDoc = UNO.XTextDocument(UNO.loadComponentFromURL(
-        "private:factory/swriter", true, true));
+      outputDoc =
+        UNO.XTextDocument(UNO.loadComponentFromURL("private:factory/swriter", true,
+          true));
       pmod.setPropertyValue("PrintIntoFile_OutputDocument", outputDoc);
     }
 

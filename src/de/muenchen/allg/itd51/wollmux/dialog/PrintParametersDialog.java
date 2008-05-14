@@ -1,3 +1,33 @@
+/*
+ * Dateiname: PrintParametersDialog.java
+ * Projekt  : WollMux
+ * Funktion : Dialog für Druckeinstellungen
+ * 
+ * Copyright (c) 2008 Landeshauptstadt München
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the European Union Public Licence (EUPL), version 1.0.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * European Union Public Licence for more details.
+ *
+ * You should have received a copy of the European Union Public Licence
+ * along with this program. If not, see 
+ * http://ec.europa.eu/idabc/en/document/7330/5980
+ *
+ * Änderungshistorie:
+ * Datum      | Wer | Änderungsgrund
+ * -------------------------------------------------------------------
+ * 03.05.2008 | LUT | Erstellung
+ * 08.08.2006 | BNK | Viel Arbeit reingesteckt.
+ * -------------------------------------------------------------------
+ *
+ * @author Christoph Lutz (D-III-ITD-D101)
+ * @version 1.0
+ * 
+ */
 package de.muenchen.allg.itd51.wollmux.dialog;
 
 import java.awt.BorderLayout;
@@ -75,24 +105,19 @@ public class PrintParametersDialog
   {
 
     public void windowDeactivated(WindowEvent e)
-    {
-    }
+    {}
 
     public void windowActivated(WindowEvent e)
-    {
-    }
+    {}
 
     public void windowDeiconified(WindowEvent e)
-    {
-    }
+    {}
 
     public void windowIconified(WindowEvent e)
-    {
-    }
+    {}
 
     public void windowClosed(WindowEvent e)
-    {
-    }
+    {}
 
     public void windowClosing(WindowEvent e)
     {
@@ -100,8 +125,7 @@ public class PrintParametersDialog
     }
 
     public void windowOpened(WindowEvent e)
-    {
-    }
+    {}
   };
 
   /**
@@ -151,10 +175,11 @@ public class PrintParametersDialog
    */
   public static enum PageRangeType {
     // TODO: Formatierung nochmal anpassen....
-    ALL(L.m("Alles")), USER_DEFINED(L.m("Seiten"), "1,3,5,10-100<etwasPlatz>",
-        L.m("Mögliche Eingaben sind z.B. '1', '2-5' oder '1,3,5'")), CURRENT_PAGE(
-        L.m("Aktuelle Seite")), CURRENT_AND_FOLLOWING(
-        L.m("Aktuelle Seite bis Dokumentende"));
+    ALL(L.m("Alles")),
+    USER_DEFINED(L.m("Seiten"), "1,3,5,10-100<etwasPlatz>",
+        L.m("Mögliche Eingaben sind z.B. '1', '2-5' oder '1,3,5'")),
+    CURRENT_PAGE(L.m("Aktuelle Seite")),
+    CURRENT_AND_FOLLOWING(L.m("Aktuelle Seite bis Dokumentende"));
 
     public final String label;
 
@@ -178,7 +203,8 @@ public class PrintParametersDialog
     {
       this.label = label;
       this.hasAdditionalTextField = true;
-      this.additionalTextFieldPrototypeDisplayValue = additionalTextFieldPrototypeDisplayValue;
+      this.additionalTextFieldPrototypeDisplayValue =
+        additionalTextFieldPrototypeDisplayValue;
       this.additionalTextFieldHint = additionalTextFieldHint;
     }
   };
@@ -235,8 +261,8 @@ public class PrintParametersDialog
     hbox.add(printerNameField);
     hbox.add(Box.createHorizontalStrut(10));
     hbox.add(Box.createHorizontalGlue());
-    JButton printerSettingsButton = new JButton(
-      L.m("Drucker wechseln/einrichten..."));
+    JButton printerSettingsButton =
+      new JButton(L.m("Drucker wechseln/einrichten..."));
     printerSettingsButton.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
@@ -268,8 +294,8 @@ public class PrintParametersDialog
       final JTextField additionalTextfield;
       if (t.hasAdditionalTextField)
       {
-        additionalTextfield = new JTextField(
-          "" + t.additionalTextFieldPrototypeDisplayValue);
+        additionalTextfield =
+          new JTextField("" + t.additionalTextFieldPrototypeDisplayValue);
         DimAdjust.fixedSize(additionalTextfield);
         DimAdjust.fixedMaxSize(additionalTextfield, 0, 0);
         additionalTextfield.setToolTipText(t.additionalTextFieldHint);
@@ -421,9 +447,11 @@ public class PrintParametersDialog
         // Dialog anzeigen:
         try
         {
-          com.sun.star.util.URL url = UNO.getParsedUNOUrl(DispatchHandler.DISP_unoPrinterSetup);
-          XNotifyingDispatch disp = UNO.XNotifyingDispatch(WollMuxSingleton.getDispatchForModel(
-            UNO.XModel(doc), url));
+          com.sun.star.util.URL url =
+            UNO.getParsedUNOUrl(DispatchHandler.DISP_unoPrinterSetup);
+          XNotifyingDispatch disp =
+            UNO.XNotifyingDispatch(WollMuxSingleton.getDispatchForModel(
+              UNO.XModel(doc), url));
 
           if (disp != null)
           {
@@ -431,8 +459,7 @@ public class PrintParametersDialog
               new XDispatchResultListener()
               {
                 public void disposing(EventObject arg0)
-                {
-                }
+                {}
 
                 public void dispatchFinished(DispatchResultEvent arg0)
                 {
@@ -497,8 +524,7 @@ public class PrintParametersDialog
             Thread.sleep(1000);
           }
           catch (InterruptedException e1)
-          {
-          }
+          {}
           System.exit(0);
         }
       });
