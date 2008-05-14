@@ -44,7 +44,6 @@ import de.muenchen.allg.itd51.wollmux.UnknownIDException;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
 import de.muenchen.allg.itd51.wollmux.former.IDManager;
 import de.muenchen.allg.itd51.wollmux.former.IDManager.ID;
-import de.muenchen.allg.itd51.wollmux.former.control.FormControlModel;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelection;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionAccess;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionProvider;
@@ -118,7 +117,7 @@ public class InsertionModel
   private List<AutosepInfo> autosep = new Vector<AutosepInfo>();
 
   /**
-   * Das Bookmarks, das diese Einfügestelle umschließt.
+   * Das Bookmark, das diese Einfügestelle umschließt.
    */
   private Bookmark bookmark;
 
@@ -218,8 +217,8 @@ public class InsertionModel
       this.trafo = funcSelections.getFunctionSelection(functionName);
     }
 
-    Iterator iter = (conf.iterator().next()).iterator(); // INSERT(WM(<zu
-    // iterierender Teil>))
+    // INSERT(WM(<zu iterierender Teil>))
+    Iterator iter = (conf.iterator().next()).iterator();
     AutosepInfo autosepInfo = null;
     while (iter.hasNext())
     {
@@ -458,7 +457,7 @@ public class InsertionModel
   /**
    * Ruft für jeden auf diesem Model registrierten {@link ModelChangeListener} die
    * Methode
-   * {@link ModelChangeListener#attributeChanged(FormControlModel, int, Object)} auf.
+   * {@link ModelChangeListener#attributeChanged(InsertionModel, int, Object)} auf.
    */
   private void notifyListeners(int attributeId, Object newValue)
   {
