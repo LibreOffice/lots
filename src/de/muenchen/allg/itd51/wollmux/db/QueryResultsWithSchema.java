@@ -16,7 +16,7 @@
  *
  * You should have received a copy of the European Union Public Licence
  * along with this program. If not, see
- * http://ec.europa.eu/idabc/en/document/7330/5980
+ * http://ec.europa.eu/idabc/en/document/7330
  *
  * Änderungshistorie:
  * Datum      | Wer | Änderungsgrund
