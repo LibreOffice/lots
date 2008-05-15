@@ -1,3 +1,0 @@
-#!/bin/sh
-JAR_FILE="/usr/lib/wollmux/WollMuxBar.jar"
-exec java -jar "${JAR_FILE}" "$@"
