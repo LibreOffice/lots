@@ -1,10 +1,10 @@
-#Thu May 15 12:56:58 CEST 2008
+#Thu May 15 16:12:48 CEST 2008
 eclipse.preferences.version=1
-encoding//oxt/WollMux/Addons.xcu=UTF-8
-encoding//oxt/WollMux/Controller.xcu=UTF-8
-encoding//oxt/WollMux/Jobs.xcu=UTF-8
-encoding//oxt/WollMux/ProtocolHandler.xcu=UTF-8
-encoding//oxt/WollMux/WriterWindowState.xcu=UTF-8
+encoding//oxt/Addons.xcu=UTF-8
+encoding//oxt/Controller.xcu=UTF-8
+encoding//oxt/Jobs.xcu=UTF-8
+encoding//oxt/ProtocolHandler.xcu=UTF-8
+encoding//oxt/WriterWindowState.xcu=UTF-8
 encoding//src/data=UTF-8
 encoding/<project>=ISO-8859-1
 encoding/default=UTF-8
