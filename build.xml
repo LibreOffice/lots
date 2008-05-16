@@ -3,6 +3,8 @@
 	*****************************************************************
 	Build-Datei für den WollMux.
 	
+	Test bla bla
+	
 	Die Build-Datei stellt Haupt Main-Targets zur Verfügung, die für
 	die Erzeugung des WollMux interessant sind:
 	* package: erzeugt ein WollMux.uno.pkg-Paket
