@@ -29,41 +29,52 @@
 	-->
 
 	<property name="COMPONENT" value="WollMux" />
-	<property name="MAKE_DIR" value="${basedir}/packages/WollMux" />
-	<exec executable="${MAKE_DIR}/makeversion" dir="${MAKE_DIR}" failifexecutionfails="false" failonerror="true" outputproperty="VERSION"/>
+	<property name="MAKE_DIR" value="." />
+<!--	<exec executable="${MAKE_DIR}/makeversion" dir="${MAKE_DIR}" failifexecutionfails="false" failonerror="true" outputproperty="VERSION"/> -->
 	<property name="VERSION" value="1.5.1" />
 	<property name="PKG_NAME" value="${COMPONENT}.uno.pkg" />
-	<property name="PKG_FILE" value="${basedir}/packages/${PKG_NAME}" />
-	<property name="RDB_DIR" value="${basedir}/packages/WollMux" />
-	<property name="PACKAGE_DIR" value="${basedir}/packages" />
-	<property name="MD5SUMS_FILE_NAME" value="${basedir}/packages/md5sums.txt" />
+	<property name="PKG_FILE" value="${PKG_NAME}" />
+	<property name="RDB_DIR" value="oxt" />
+	<property name="PACKAGE_DIR" value="dist" />
+	<property name="MD5SUMS_FILE_NAME" value="${PACKAGE_DIR}/md5sums.txt" />
 	<property name="BUILD_INFO_FILE_NAME" value="buildinfo" />
 	<property name="BUILD_INFO_FILE" value="${RDB_DIR}/${BUILD_INFO_FILE_NAME}" />
-	<property name="LOGO" value="wollmux.jpg" />
 
 	<property name="WollMux_REG_NAME" value="de.muenchen.allg.itd51.wollmux.comp.WollMux" />
 	<property name="WollMux_COMPJAR" value="${COMPONENT}.uno.jar" />
 	
 	<property name="RDBFILE" value="${RDB_DIR}/${COMPONENT}.rdb" />
 
-	<property name="MY_IDL" value="${basedir}/idl" />
-	<property name="MY_CLASSES" value="${basedir}/bin" />
+	<property name="MY_IDL" value="idl" />
+	<property name="MY_CLASSES" value="bin" />
 
-	<property name="UNOHELPER_CLASSES" value="${basedir}/../UNOHelper/bin" />
-	<property name="SDK_RDB" value="${basedir}/../OOo-SDK/types" />
-	<property name="SDK_IDL" value="${basedir}/../OOo-SDK/idl" />
+	<property name="UNOHELPER_CLASSES" value="../UNOHelper/bin" />
+	<property name="OOO_PROGRAM_DIR" value="/opt/openoffice.org/program" />
+	<property name="TYPES_RDB" value="${OOO_PROGRAM_DIR}/types.rdb" />
+	<property name="OOO_SDK" value="/opt/openoffice.org_sdk" />
+	<property name="SDK_IDL" value="${OOO_SDK}/idl" />
 	
-	<property name="BIN" value="${basedir}/bin" />
-	<property name="IDLS" value="${basedir}/idl" />
+	<property name="BIN" value="bin" />
 	
 	<property name="WOLLMUXBAR_JAR" value="${PACKAGE_DIR}/WollMuxBar.jar" />
-	<property name="UNOHELPER_BIN" value="${basedir}/../UNOHelper/bin" />
-	<property name="TOOLING" value="${basedir}/../OOo-SDK/classes" />
+	<property name="UNOHELPER_BIN" value="../UNOHelper/bin" />
+	<property name="TOOLING" value="${OOO_SDK}/classes" />
 	<property name="TOOLING_MAIN_CLASS" value="com.sun.star.lib.loader.Loader" />
 	<property name="WOLLMUXBAR_MAIN_CLASS" value="de.muenchen.allg.itd51.wollmux.dialog.WollMuxBar" />
 
 	<target name="main" depends="build" />
 
+	<target name="clean" >
+	    <delete includeEmptyDirs="true">
+	    	<fileset dir="${MY_IDL}" includes="**/*.urd" />
+	    	<fileset dir="${BIN}" includes="**/*" />
+	    	<fileset file="${RDBFILE}" />
+	    	<fileset file="${MD5SUMS_FILE_NAME}"/>
+	    	<fileset file="${BUILD_INFO_FILE}" />
+     		<fileset file="${WollMux_COMPJAR}" />
+	    </delete>
+	</target>
+	
 	<!-- Das Target install installiert/reinstalliert das erzeugte uno-package -->
 	<target name="install" depends="build">
 		<echo level="info">unopkg remove ${PKG_NAME}:</echo>
@@ -113,7 +124,6 @@
 			<fileset dir="${UNOHELPER_CLASSES}" includes="**/*.class" />
 			<fileset dir="${BIN}" includes="data/**" />
 			<fileset file="${BUILD_INFO_FILE}" />
-			<fileset file="${LOGO}" />
 			<manifest>
 				<attribute name="Bundle-Name" value="${COMPONENT}" />
 				<attribute name="Bundle-Activator" value="${WollMux_REG_NAME}" />
@@ -158,10 +168,14 @@
 		</apply>
 
 		<echo level="info">javamaker:</echo>
-		<apply executable="javamaker" dir="${MY_IDL}" relative="true" addsourcefile="false" dest="${MY_IDL}">
+		<apply executable="javamaker" relative="true" addsourcefile="false" dest="${BIN}">
 			<arg line="-BUCR" />
 			<targetfile />
-			<arg line="-nD ${SDK_RDB}/types.rdb ${RDBFILE}" />
+			
+			<!-- ATTENTION! The ./ before the ${BIN} is important or javamaker fails with
+			the error message ERROR: Cannot create temporary file for bin/de/muenchen/allg/itd51/wollmux/....class
+			-->
+			<arg line="-nD ${TYPES_RDB} ${RDBFILE} -O ./${BIN}/" />
 			<fileset dir="${MY_IDL}" includes="**/*.urd" />
 			<mapper>
 				<mapper type="package" from="*.urd" to="-T*" />
@@ -174,7 +188,6 @@
 		<delete file="${WOLLMUXBAR_JAR}" />
 		<jar destfile="${WOLLMUXBAR_JAR}">
 			<fileset dir="${BIN}" includes="**/*.class" />
-			<fileset dir="${IDLS}" includes="**/*.class" />
 			<fileset dir="${UNOHELPER_BIN}" includes="**/*.class" />
 			<fileset dir="${TOOLING}" includes="**/*" />
 			<fileset dir="${BIN}" includes="data/**" />
