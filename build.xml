@@ -39,8 +39,10 @@
 	<property name="RDB_DIR" value="oxt" />
 	<property name="PACKAGE_DIR" value="dist" />
 	<property name="MD5SUMS_FILE_NAME" value="${PACKAGE_DIR}/md5sums.txt" />
+	<property name="MISC" value="misc" />
 	<property name="BUILD_INFO_FILE_NAME" value="buildinfo" />
-	<property name="BUILD_INFO_FILE" value="${RDB_DIR}/${BUILD_INFO_FILE_NAME}" />
+	<property name="BUILD_INFO_FILE" value="${MISC}/${BUILD_INFO_FILE_NAME}" />
+	<property name="VERSION_FILE" value="${MISC}/version"/>
 
 	<property name="WollMux_REG_NAME" value="de.muenchen.allg.itd51.wollmux.comp.WollMux" />
 	<property name="WollMux_COMPJAR" value="${COMPONENT}.uno.jar" />
@@ -72,9 +74,20 @@
 	    	<fileset dir="${BIN}" includes="**/*" />
 	    	<fileset file="${RDBFILE}" />
 	    	<fileset file="${MD5SUMS_FILE_NAME}"/>
-	    	<fileset file="${BUILD_INFO_FILE}" />
      		<fileset file="${WollMux_COMPJAR}" />
+
+	    	<!-- VERSION_FILE und BUILD_INFO_FILE **nicht** löschen, da diese nur bei
+	    	Vorhandensein von svn oder git regeneriert werden können.
+	    	<fileset file="${BUILD_INFO_FILE}" />
+	    	<fileset file="${VERSION_FILE}" /> -->
 	    </delete>
+	</target>
+	
+	<target name="makeversion">
+		<exec executable="misc/makeversion">
+		  <arg line="${VERSION_FILE} ${BUILD_INFO_FILE}"/>
+		</exec>		
+		<loadfile property="VERSION" srcfile="${VERSION_FILE}" failonerror="true" />
 	</target>
 	
 	<!-- Das Target install installiert/reinstalliert das erzeugte uno-package -->
