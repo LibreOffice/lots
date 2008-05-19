@@ -109,32 +109,31 @@
 	
 	<!-- Das Target compileidl erzeugt das rdb-file und die java-Interfaces -->
 	<target name="compileidl">
-		<echo level="info">idlc:</echo>
-		<apply executable="idlc">
+		<echo level="info">idlc: Creating .urd files</echo>
+		<apply executable="idlc" dest="${MY_IDL}">
 			<arg line="-C -I${SDK_IDL}" />
 			<fileset dir="${MY_IDL}" includes="**/*.idl" />
+			<mapper type="glob" from="*.idl" to="*.urd"/>
 		</apply>
 
 		<delete file="${RDBFILE}" />
-		<echo level="info">regmerge:</echo>
-		<apply executable="regmerge">
+		<echo level="info" message="regmerge: Creating ${RDBFILE}" />
+		<apply executable="regmerge" parallel="true">
 			<arg line="'${RDBFILE}' /UCR" />
 			<fileset dir="${MY_IDL}" includes="**/*.urd" />
 		</apply>
 
-		<echo level="info">javamaker:</echo>
+		<echo level="info">javamaker: Creating .class files</echo>
 		<apply executable="javamaker" relative="true" addsourcefile="false" dest="${BIN}">
 			<arg line="-BUCR" />
 			<targetfile />
-			
+		
 			<!-- ATTENTION! The ./ before the ${BIN} is important or javamaker fails with
 			the error message ERROR: Cannot create temporary file for bin/de/muenchen/allg/itd51/wollmux/....class
 			-->
 			<arg line="-nD ${TYPES_RDB} ${RDBFILE} -O ./${BIN}/" />
 			<fileset dir="${MY_IDL}" includes="**/*.urd" />
-			<mapper>
-				<mapper type="package" from="*.urd" to="-T*" />
-			</mapper>
+  		    <mapper type="package" from="*.urd" to="-T*" />
 		</apply>
 	</target>
 	
