@@ -1,4 +1,4 @@
-<project default="main">
+<project default="all">
 	<!--
 	*****************************************************************
 	Build-Datei für den WollMux.
@@ -24,6 +24,8 @@
 	  entsprechenden Nachbarverzeichnissen zum WollMux-Projektverzeichnis.
     * Die Kommandozeilenversion von svn sollte installiert sein und im PATH
       stehen, damit die buildinfo-Datei erzeugt werden kann.
+    * If ant gives you the error "Unable to locate tools.jar...." you need to set 
+      JAVA_HOME to the root of a Java SDK installation, rather than just a JRE.
 	
 	Datum:  21.11.2005
 	Author: Christoph Lutz (D-III-ITD-5.1), Matthias Benkmann (D-III-ITD-5.1)
@@ -34,47 +36,62 @@
 	<property name="MAKE_DIR" value="." />
 <!--	<exec executable="${MAKE_DIR}/makeversion" dir="${MAKE_DIR}" failifexecutionfails="false" failonerror="true" outputproperty="VERSION"/> -->
 	<property name="VERSION" value="1.5.1" />
-	<property name="PKG_NAME" value="${COMPONENT}.uno.pkg" />
-	<property name="PKG_FILE" value="${PKG_NAME}" />
 	<property name="RDB_DIR" value="oxt" />
 	<property name="PACKAGE_DIR" value="dist" />
+	<property name="PKG_NAME" value="${COMPONENT}.uno.pkg" />
+	<property name="PKG_FILE" value="${PACKAGE_DIR}/${PKG_NAME}" />
 	<property name="MD5SUMS_FILE_NAME" value="${PACKAGE_DIR}/md5sums.txt" />
 	<property name="MISC" value="misc" />
 	<property name="BUILD_INFO_FILE_NAME" value="buildinfo" />
 	<property name="BUILD_INFO_FILE" value="${MISC}/${BUILD_INFO_FILE_NAME}" />
 	<property name="VERSION_FILE" value="${MISC}/version"/>
 
+	<property name="SRC_ENCODING" value="ISO8859-1" />
+	
 	<property name="WollMux_REG_NAME" value="de.muenchen.allg.itd51.wollmux.comp.WollMux" />
-	<property name="WollMux_COMPJAR" value="${COMPONENT}.uno.jar" />
+	<property name="WollMux_COMPJAR" value="${RDB_DIR}/${COMPONENT}.uno.jar" />
 	
 	<property name="RDBFILE" value="${RDB_DIR}/${COMPONENT}.rdb" />
 
 	<property name="MY_IDL" value="idl" />
 	<property name="MY_CLASSES" value="bin" />
 
-	<property name="UNOHELPER_CLASSES" value="../UNOHelper/bin" />
 	<property name="OOO_PROGRAM_DIR" value="/opt/openoffice.org/program" />
+	<property name="OOOCLS" value="/opt/openoffice.org/program/classes" />
+	<property name="OOO_CLASSPATH" value="${OOOCLS}/juh.jar:${OOOCLS}/jurt.jar:${OOOCLS}/ridl.jar:${OOOCLS}/unoil.jar" />
 	<property name="TYPES_RDB" value="${OOO_PROGRAM_DIR}/types.rdb" />
 	<property name="OOO_SDK" value="/opt/openoffice.org_sdk" />
 	<property name="SDK_IDL" value="${OOO_SDK}/idl" />
 	
 	<property name="BIN" value="bin" />
+	<property name="SRC" value="src" />
 	
-	<property name="WOLLMUXBAR_JAR" value="${PACKAGE_DIR}/WollMuxBar.jar" />
-	<property name="UNOHELPER_BIN" value="../UNOHelper/bin" />
+	<property name="WOLLMUXBAR_JAR_NAME" value="WollMuxBar.jar" />
+	<property name="WOLLMUXBAR_JAR" value="${PACKAGE_DIR}/${WOLLMUXBAR_JAR_NAME}" />
+	<property name="UNOHELPER_SRC" value="../UNOHelper/src" />
+	<property name="UNOHELPER_BIN" value="${BIN}" />
 	<property name="TOOLING" value="${OOO_SDK}/classes" />
 	<property name="TOOLING_MAIN_CLASS" value="com.sun.star.lib.loader.Loader" />
 	<property name="WOLLMUXBAR_MAIN_CLASS" value="de.muenchen.allg.itd51.wollmux.dialog.WollMuxBar" />
 
-	<target name="main" depends="build" />
+	<target name="all" depends="WollMuxBar.jar,WollMux.oxt,md5sum" />
 
+	<!-- The debug target doesn't do anything by itself, but for any targets executed later
+	     the DEBUG property will be set. --> 
+	<target name="debug">
+		<property name="DEBUG" value="on" />
+		<property name="OPTIMIZE" value="off" />
+	</target>
+	
 	<target name="clean" >
 	    <delete includeEmptyDirs="true">
 	    	<fileset dir="${MY_IDL}" includes="**/*.urd" />
-	    	<fileset dir="${BIN}" includes="**/*" />
+	    	<fileset dir="${BIN}" includes="de/**" />
 	    	<fileset file="${RDBFILE}" />
 	    	<fileset file="${MD5SUMS_FILE_NAME}"/>
      		<fileset file="${WollMux_COMPJAR}" />
+	    	<fileset file="${WOLLMUXBAR_JAR}" />
+	    	<fileset file="${PKG_FILE}" />
 
 	    	<!-- VERSION_FILE und BUILD_INFO_FILE **nicht** löschen, da diese nur bei
 	    	Vorhandensein von svn oder git regeneriert werden können.
@@ -90,85 +107,8 @@
 		<loadfile property="VERSION" srcfile="${VERSION_FILE}" failonerror="true" />
 	</target>
 	
-	<!-- Das Target install installiert/reinstalliert das erzeugte uno-package -->
-	<target name="install" depends="build">
-		<echo level="info">unopkg remove ${PKG_NAME}:</echo>
-		<exec executable="unopkg" failifexecutionfails="false">
-			<arg line="remove ${PKG_NAME}" />
-		</exec>
-		<echo level="info">unopkg add ${PKG_NAME}:</echo>
-		<exec executable="unopkg" failifexecutionfails="false">
-			<arg line="add ${PKG_FILE}" />
-		</exec>
-		
-		<tstamp><format property="mytime" pattern="HH:mm:ss"/></tstamp>
-		<echo level="info" message="Install finished at ">${mytime}</echo>
-	</target>
-	
-	<!-- Das Target erzeugt das WollMux.uno.pkg, die WollMuxBar.jar und die md5sumsDatei -->
-	<target name="build" depends="package, WollMuxBar.jar">
-		<delete file="${MD5SUMS_FILE_NAME}"/>
-		<apply executable="md5sum" dir="packages" relative="true" failifexecutionfails="false" output="${MD5SUMS_FILE_NAME}" append="true">
-			<fileset dir="packages" includes="WollMux.uno.pkg, WollMuxBar.jar"/>
-		</apply>
-	</target>	
-
-	<!-- Das Target package registriert die Komponente und erzeugt ein uno.pkg-file -->
-	<target name="package" depends="jarfile, buildinfo">
-		<delete file="${PKG_FILE}" />
-		<zip destfile="${PKG_FILE}">
-			<fileset dir="${RDB_DIR}">
-				<include name="${WollMux_COMPJAR}" />
-				<include name="*.xcu" />
-				<include name="*.rdb" />
-				<include name="META-INF/manifest.xml" />
-				<include name="${BUILD_INFO_FILE_NAME}" />
-			</fileset>
-			<fileset dir="${basedir}">
-				<include name="basic/**/*" />
-			</fileset>
-		</zip>
-	</target>
-
-	<!-- Das Target jarfile erzeugt die Java-Komponente WollMux -->
-	<target name="jarfile" depends="javamake, buildinfo">
-		<delete file="${RDB_DIR}/${WollMux_COMPJAR}" />
-		<jar destfile="${RDB_DIR}/${WollMux_COMPJAR}">
-			<fileset dir="${MY_CLASSES}" includes="**/*.class" />
-			<fileset dir="${MY_IDL}" includes="**/*.class" />
-			<fileset dir="${UNOHELPER_CLASSES}" includes="**/*.class" />
-			<fileset dir="${BIN}" includes="data/**" />
-			<fileset file="${BUILD_INFO_FILE}" />
-			<manifest>
-				<attribute name="Bundle-Name" value="${COMPONENT}" />
-				<attribute name="Bundle-Activator" value="${WollMux_REG_NAME}" />
-				<attribute name="Bundle-SymbolicName" value="${COMPONENT}" />
-				<attribute name="Bundle-Version" value="${VERSION}" />
-				<attribute name="RegistrationClassName" value="${WollMux_REG_NAME}" />
-			</manifest>
-		</jar>
-	</target>
-
-	<!-- Das Target erzeugt das buildinfo-File -->
-	<target name="buildinfo">
-		<exec executable="svn" output="${BUILD_INFO_FILE}" failifexecutionfails="false" failonerror="false">
-			<arg line="info ." />
-		</exec>
-		<loadfile property="revision" srcfile="${BUILD_INFO_FILE}" failonerror="false">
-			<filterchain>
-				<linecontains>
-					<contains value="Revision: " />
-				</linecontains>
-				<deletecharacters chars="\r" />
-				<deletecharacters chars="\n" />
-			</filterchain>
-		</loadfile>
-		<echo message="" file="${BUILD_INFO_FILE}" />
-		<echo file="${BUILD_INFO_FILE}">Version: ${VERSION}, ${revision}</echo>
-	</target>
-
-	<!-- Das Target javamake erzeugt das rdb-file und die java-Interfaces -->
-	<target name="javamake">
+	<!-- Das Target compileidl erzeugt das rdb-file und die java-Interfaces -->
+	<target name="compileidl">
 		<echo level="info">idlc:</echo>
 		<apply executable="idlc">
 			<arg line="-C -I${SDK_IDL}" />
@@ -197,15 +137,39 @@
 			</mapper>
 		</apply>
 	</target>
+	
+	<target name="compile" depends="compileidl">
+		<property name="DEBUG" value="off" />
+		<property name="OPTIMIZE" value="on" />
 
-	<!-- Das Target erzeugt die Datei WollMuxBar.jar -->		
-	<target name="WollMuxBar.jar" depends="buildinfo">
+		<javac srcdir="${UNOHELPER_SRC}"
+               destdir="${UNOHELPER_BIN}"
+               classpath="${OOO_CLASSPATH}"
+			   encoding="${SRC_ENCODING}"
+               debug="${DEBUG}"
+			   optimize="${OPTIMIZE}"
+			   target="1.5"
+   	    />
+		
+		<javac srcdir="${SRC}"
+		               destdir="${BIN}"
+		               classpath="${OOO_CLASSPATH}"
+					   encoding="${SRC_ENCODING}"
+		               debug="${DEBUG}"
+					   optimize="${OPTIMIZE}"
+					   target="1.5"
+		/>
+	</target>
+	
+	<target name="WollMuxBar.jar" depends="makeversion, compile">
 		<delete file="${WOLLMUXBAR_JAR}" />
 		<jar destfile="${WOLLMUXBAR_JAR}">
-			<fileset dir="${BIN}" includes="**/*.class" />
+<!--			<fileset dir="${BIN}" includes="**/WollMuxBar*,**/dialog/UIElement*,**/ConfigThingy*,**/NodeNotFoundException*,**/SyntaxErrorException*,**/ConfigurationErrorException*,**/DispatchHandler*,**/L.class,**/Logger*,**/WollMuxFiles*,**/WollMuxBarEventHandler*,**/dialog/Common*,**/XPAL*,**/XWollMux*" />
+			<fileset dir="${UNOHELPER_BIN}" includes="**/afid/*" /> -->
+	  	    <fileset dir="${BIN}" includes="**/*.class"/>
 			<fileset dir="${UNOHELPER_BIN}" includes="**/*.class" />
 			<fileset dir="${TOOLING}" includes="**/*" />
-			<fileset dir="${BIN}" includes="data/**" />
+			<fileset dir="${SRC}" includes="data/**/*" />
 			<fileset file="${BUILD_INFO_FILE}" />
 			<manifest>
 				<attribute name="Main-Class" value="${TOOLING_MAIN_CLASS}" />
@@ -215,9 +179,62 @@
 			</manifest>
 		</jar>
 	</target>
+	
+	<target name="WollMux.uno.jar" depends="compileidl, makeversion">
+		<delete file="${WollMux_COMPJAR}" />
+		<jar destfile="${WollMux_COMPJAR}">
+			<fileset dir="${BIN}" includes="**/*.class"/>
+			<fileset dir="${UNOHELPER_BIN}" includes="**/*.class" />
+			<fileset dir="${TOOLING}" includes="**/*" />
+			<fileset dir="${SRC}" includes="data/**/*" />
+			<fileset file="${BUILD_INFO_FILE}" />
+			<manifest>
+				<attribute name="Bundle-Name" value="${COMPONENT}" />
+				<attribute name="Bundle-Activator" value="${WollMux_REG_NAME}" />
+				<attribute name="Bundle-SymbolicName" value="${COMPONENT}" />
+				<attribute name="Bundle-Version" value="${VERSION}" />
+				<attribute name="RegistrationClassName" value="${WollMux_REG_NAME}" />
+			</manifest>
+		</jar>
+	</target>
+
+    <target name="WollMux.oxt" depends="WollMux.uno.jar, makeversion">
+		<delete file="${PKG_FILE}" />
+		<zip destfile="${PKG_FILE}">
+			<fileset file="${WollMux_COMPJAR}" />
+			<fileset dir="${RDB_DIR}">
+				<include name="*.xcu" />
+				<include name="*.rdb" />
+				<include name="META-INF/manifest.xml" />
+			</fileset>
+			<fileset file="${BUILD_INFO_FILE}" />
+			<fileset dir="." includes="basic/**/*" />
+		</zip>
+	</target>
+
+	<target name="md5sum" depends="WollMux.oxt, WollMuxBar.jar">
+		<apply executable="md5sum" dir="${PACKAGE_DIR}" relative="true" failifexecutionfails="false" output="${MD5SUMS_FILE_NAME}" append="false" parallel="true">
+			<fileset dir="${PACKAGE_DIR}" includes="${PKG_NAME},${WOLLMUXBAR_JAR_NAME}"/>
+		</apply>
+	</target>	
+	
+	<!-- Das Target install installiert/reinstalliert das erzeugte uno-package -->
+	<target name="install" depends="WollMux.oxt">
+		<echo level="info">unopkg remove ${PKG_NAME}:</echo>
+		<exec executable="unopkg" failifexecutionfails="false">
+			<arg line="remove ${PKG_NAME}" />
+		</exec>
+		<echo level="info">unopkg add ${PKG_NAME}:</echo>
+		<exec executable="unopkg" failifexecutionfails="false">
+			<arg line="add ${PKG_FILE}" />
+		</exec>
+		
+		<tstamp><format property="mytime" pattern="HH:mm:ss"/></tstamp>
+		<echo level="info" message="Install finished at ">${mytime}</echo>
+	</target>
 		
 	<!-- Das Target erzeugt das Debian-Paket -->
-	<target name="deb" depends="build">
+	<target name="deb" depends="all">
 		<exec executable="${MAKE_DIR}/make" dir="${MAKE_DIR}" failifexecutionfails="true" failonerror="true">
           <env key="VERSION" value="${VERSION}" />
 		</exec>
