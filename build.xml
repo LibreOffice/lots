@@ -74,7 +74,7 @@
 	<property name="TOOLING_MAIN_CLASS" value="com.sun.star.lib.loader.Loader" />
 	<property name="WOLLMUXBAR_MAIN_CLASS" value="de.muenchen.allg.itd51.wollmux.dialog.WollMuxBar" />
 
-	<target name="all" depends="WollMuxBar.jar,WollMux.oxt,md5sum,deb" />
+	<target name="all" depends="WollMuxBar.jar,WollMux.oxt,md5sum" />
 
 	<!-- The debug target doesn't do anything by itself, but for any targets executed later
 	     the DEBUG property will be set. --> 
@@ -86,6 +86,7 @@
 	<target name="clean" >
 	    <delete includeEmptyDirs="true">
 	    	<fileset dir="${MY_IDL}" includes="**/*.urd" />
+	    	<fileset dir="${MY_IDL}" includes="**/*.class" />
 	    	<fileset dir="${BIN}" includes="de/**" />
 	    	<fileset file="${RDBFILE}" />
 	    	<fileset file="${MD5SUMS_FILE_NAME}"/>
@@ -93,6 +94,11 @@
 	    	<fileset file="${WOLLMUXBAR_JAR}" />
 	    	<fileset file="${PKG_FILE}" />
 
+		    <fileset dir="${PACKAGE_DIR}" includes="wollmux_*.*.*.deb" />
+		    <fileset dir="${PACKAGE_DIR}" includes="wollmux_*.*.*.dsc" />
+			<fileset dir="${PACKAGE_DIR}" includes="wollmux_*.*.*.changes" />
+			<fileset dir="${PACKAGE_DIR}" includes="wollmux_*.*.*.tar.gz" />
+	    	
 	    	<!-- VERSION_FILE und BUILD_INFO_FILE **nicht** löschen, da diese nur bei
 	    	Vorhandensein von svn oder git regeneriert werden können.
 	    	<fileset file="${BUILD_INFO_FILE}" />
@@ -128,10 +134,10 @@
 			<arg line="-BUCR" />
 			<targetfile />
 		
-			<!-- ATTENTION! The ./ before the ${BIN} is important or javamaker fails with
+			<!-- ATTENTION! The ./ before the ${MY_IDL} is important or javamaker fails with
 			the error message ERROR: Cannot create temporary file for bin/de/muenchen/allg/itd51/wollmux/....class
 			-->
-			<arg line="-nD ${TYPES_RDB} ${RDBFILE} -O ./${BIN}/" />
+			<arg line="-nD ${TYPES_RDB} ${RDBFILE} -O ./${MY_IDL}/" />
 			<fileset dir="${MY_IDL}" includes="**/*.urd" />
   		    <mapper type="package" from="*.urd" to="-T*" />
 		</apply>
@@ -166,6 +172,7 @@
 <!--			<fileset dir="${BIN}" includes="**/WollMuxBar*,**/dialog/UIElement*,**/ConfigThingy*,**/NodeNotFoundException*,**/SyntaxErrorException*,**/ConfigurationErrorException*,**/DispatchHandler*,**/L.class,**/Logger*,**/WollMuxFiles*,**/WollMuxBarEventHandler*,**/dialog/Common*,**/XPAL*,**/XWollMux*" />
 			<fileset dir="${UNOHELPER_BIN}" includes="**/afid/*" /> -->
 	  	    <fileset dir="${BIN}" includes="**/*.class"/>
+			<fileset dir="${MY_IDL}" includes="**/*.class"/>
 			<fileset dir="${UNOHELPER_BIN}" includes="**/*.class" />
 			<fileset dir="${TOOLING}" includes="**/*" />
 			<fileset dir="${SRC}" includes="data/**/*" />
@@ -183,6 +190,7 @@
 		<delete file="${WollMux_COMPJAR}" />
 		<jar destfile="${WollMux_COMPJAR}">
 			<fileset dir="${BIN}" includes="**/*.class"/>
+			<fileset dir="${MY_IDL}" includes="**/*.class"/>
 			<fileset dir="${UNOHELPER_BIN}" includes="**/*.class" />
 			<fileset dir="${TOOLING}" includes="**/*" />
 			<fileset dir="${SRC}" includes="data/**/*" />
@@ -233,10 +241,17 @@
 	</target>
 		
 	<!-- Das Target erzeugt das Debian-Paket -->
-	<target name="deb" depends="WollMuxBar.jar,WollMux.oxt">
+	<target name="deb">
 		<exec executable="dpkg-buildpackage" failifexecutionfails="true" failonerror="true">
-          <arg line="-uc -us -tc -rfakeroot -I.git -I.svn -I.gitignore" />
+          <arg line="-uc -us -rfakeroot -I.git -I.svn -I.gitignore" />
 		</exec>
+		<echo message="Moving Debian files to ${PACKAGE_DIR}" />
+		<move todir="${PACKAGE_DIR}">
+		    <fileset dir="../" includes="wollmux_*.*.*.deb" />
+		    <fileset dir="../" includes="wollmux_*.*.*.dsc" />
+			<fileset dir="../" includes="wollmux_*.*.*.changes" />
+			<fileset dir="../" includes="wollmux_*.*.*.tar.gz" />
+		</move>
 	</target>
 
 	<!-- Das Target aktualisiert das LocalizationConf-File -->
