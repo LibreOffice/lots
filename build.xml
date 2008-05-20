@@ -158,7 +158,7 @@
 		
 		<javac srcdir="${SRC}"
 		               destdir="${BIN}"
-		               classpath="${OOO_CLASSPATH}"
+		               classpath="${OOO_CLASSPATH}:${MY_IDL}"
 					   encoding="${SRC_ENCODING}"
 		               debug="${DEBUG}"
 					   optimize="${OPTIMIZE}"
