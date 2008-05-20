@@ -74,7 +74,7 @@
 	<property name="TOOLING_MAIN_CLASS" value="com.sun.star.lib.loader.Loader" />
 	<property name="WOLLMUXBAR_MAIN_CLASS" value="de.muenchen.allg.itd51.wollmux.dialog.WollMuxBar" />
 
-	<target name="all" depends="WollMuxBar.jar,WollMux.oxt,md5sum" />
+	<target name="all" depends="WollMuxBar.jar,WollMux.oxt,md5sum,deb" />
 
 	<!-- The debug target doesn't do anything by itself, but for any targets executed later
 	     the DEBUG property will be set. --> 
@@ -102,7 +102,7 @@
 	
 	<target name="makeversion">
 		<exec executable="misc/makeversion">
-		  <arg line="${VERSION_FILE} ${BUILD_INFO_FILE}"/>
+		  <arg line="${VERSION_FILE} ${BUILD_INFO_FILE} debian/changelog"/>
 		</exec>		
 		<loadfile property="VERSION" srcfile="${VERSION_FILE}" failonerror="true" />
 	</target>
@@ -233,9 +233,9 @@
 	</target>
 		
 	<!-- Das Target erzeugt das Debian-Paket -->
-	<target name="deb" depends="all">
-		<exec executable="${MAKE_DIR}/make" dir="${MAKE_DIR}" failifexecutionfails="true" failonerror="true">
-          <env key="VERSION" value="${VERSION}" />
+	<target name="deb" depends="WollMuxBar.jar,WollMux.oxt">
+		<exec executable="dpkg-buildpackage" failifexecutionfails="true" failonerror="true">
+          <arg line="-uc -us -tc -rfakeroot -I.git -I.svn -I.gitignore" />
 		</exec>
 	</target>
 

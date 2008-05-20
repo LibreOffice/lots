@@ -1,7 +1,7 @@
 #!/bin/sh
 
-if [ $# != 2 ]; then
-  echo 1>&2 "USAGE: makeversion <versionfile> <buildinfofile>"
+if [ $# != 3 ]; then
+  echo 1>&2 "USAGE: makeversion <versionfile> <buildinfofile> <changelog>"
   exit 1
 fi
 
@@ -20,4 +20,10 @@ v3=$(( $(echo ${date##*-}| sed 's/[^-]*-0\?\([^-]*\)-.*/\1/') / 10 ))
 
 echo "$v1.$v2.$v3" >"$1" 
 echo "Version: $v1.$v2.$v3, Revision: $rev" >"$2"
+echo "wollmux ($v1.$v2.$v3) halut; urgency=low
+
+    * Version bump.
+
+ -- Felix WollMux <v-d-iii-itd-d101@muenchen.de>  Wed, 06 Jul 2007 16:13:16 +0200
+" >"$3"
 #echo "$(($(date +%Y) - 2004)).$(date +%m|sed s/^0//).$(($(date +%d|sed s/^0//) / 10))"

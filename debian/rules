@@ -1,30 +1,9 @@
 #!/usr/bin/make -f
 # -*- makefile -*-
-# Sample debian/rules that uses debhelper.
-# This file was originally written by Joey Hess and Craig Small.
-# As a special exception, when this file is copied by dh-make into a
-# dh-make output file, you may use that output file without restriction.
-# This special exception was added by Craig Small in version 0.37 of dh-make.
-
-# Uncomment this to turn on verbose mode.
-#export DH_VERBOSE=1
-
-
-
-
-CFLAGS = -Wall -g
-
-ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
-	CFLAGS += -O0
-else
-	CFLAGS += -O2
-endif
 
 configure: configure-stamp
 configure-stamp:
 	dh_testdir
-	# Add here commands to configure the package.
-
 	touch configure-stamp
 
 
@@ -32,19 +11,13 @@ build: build-stamp
 
 build-stamp: configure-stamp 
 	dh_testdir
-
-	# Add here commands to compile the package.
-	#docbook-to-man debian/wollmux.sgml > wollmux.1
-
+	ant WollMuxBar.jar WollMux.oxt
 	touch build-stamp
 
 clean:
 	dh_testdir
-	dh_testroot
+	ant clean
 	rm -f build-stamp configure-stamp
-
-	# Add here commands to clean up after the build process.
-
 	dh_clean 
 
 install: build
@@ -54,7 +27,11 @@ install: build
 	dh_installdirs
 
 	# Add here commands to install the package into debian/wollmux.
-	./make DESTDIR=$(CURDIR)/debian/wollmux install
+	mkdir -p $(CURDIR)/debian/wollmux/usr/lib/wollmux
+	cp dist/{WollMuxBar.jar,WollMux.uno.pkg} $(CURDIR)/debian/wollmux/usr/lib/wollmux
+	mkdir -p $(CURDIR)/debian/wollmux/usr/bin
+	cp dist/wollmuxbar $(CURDIR)/debian/wollmux/usr/bin
+	chmod a+x $(CURDIR)/debian/wollmux/usr/bin
 
 # Build architecture-independent files here.
 binary-indep: build install
