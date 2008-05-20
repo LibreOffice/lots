@@ -1,23 +1,20 @@
 #!/usr/bin/make -f
 # -*- makefile -*-
 
-configure: configure-stamp
+configure:
 configure-stamp:
 	dh_testdir
-	touch configure-stamp
 
 
-build: build-stamp
+build:
 
-build-stamp: configure-stamp 
+build-stamp:
 	dh_testdir
 	ant WollMuxBar.jar WollMux.oxt
-	touch build-stamp
 
 clean:
 	dh_testdir
 	ant clean
-	rm -f build-stamp configure-stamp
 	dh_clean 
 
 install: build

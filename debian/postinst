@@ -29,9 +29,6 @@ case "$1" in
     unopkg remove WollMux.uno.pkg --shared >>"$TEMPDIR"/messages 2>&1 || true
     echo "***** Ende des Abschnitts der meist harmlosen Fehlermeldungen ******" >>"$TEMPDIR"/messages
     unopkg add WollMux.uno.pkg -v --shared 2>>"$TEMPDIR"/messages | grep -q 'unopkg done'
-    if [ ! -e /usr/bin/wollmuxbar ]; then
-       ln -s /usr/lib/wollmux/wollmuxbar.sh /usr/bin/wollmuxbar
-    fi   
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)

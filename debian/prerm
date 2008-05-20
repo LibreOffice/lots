@@ -28,9 +28,6 @@ case "$1" in
 	echo "***** Eine Fehlermeldung 'There is no such extension deployed' o.ä. ist meist harmlos *****" >>"$TEMPDIR"/messages
     unopkg remove WollMux.uno.pkg --shared >>"$TEMPDIR"/messages 2>&1 || true
     echo "***** Ende des Abschnitts der meist harmlosen Fehlermeldungen ******" >>"$TEMPDIR"/messages
-	if [ -L /usr/bin/wollmuxbar ]; then
-	   rm /usr/bin/wollmuxbar
-	fi   
         ;;
     failed-upgrade)
         ;;
