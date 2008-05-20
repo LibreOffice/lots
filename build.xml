@@ -34,8 +34,6 @@
 
 	<property name="COMPONENT" value="WollMux" />
 	<property name="MAKE_DIR" value="." />
-<!--	<exec executable="${MAKE_DIR}/makeversion" dir="${MAKE_DIR}" failifexecutionfails="false" failonerror="true" outputproperty="VERSION"/> -->
-	<property name="VERSION" value="1.5.1" />
 	<property name="RDB_DIR" value="oxt" />
 	<property name="PACKAGE_DIR" value="dist" />
 	<property name="PKG_NAME" value="${COMPONENT}.uno.pkg" />
@@ -68,7 +66,8 @@
 	
 	<property name="WOLLMUXBAR_JAR_NAME" value="WollMuxBar.jar" />
 	<property name="WOLLMUXBAR_JAR" value="${PACKAGE_DIR}/${WOLLMUXBAR_JAR_NAME}" />
-	<property name="UNOHELPER_SRC" value="../UNOHelper/src" />
+	<property name="UNOHELPER_DIR" value="../UNOHelper" />
+	<property name="UNOHELPER_SRC" value="${UNOHELPER_DIR}/src" />
 	<property name="UNOHELPER_BIN" value="${BIN}" />
 	<property name="TOOLING" value="${OOO_SDK}/classes" />
 	<property name="TOOLING_MAIN_CLASS" value="com.sun.star.lib.loader.Loader" />
@@ -98,6 +97,10 @@
 		    <fileset dir="${PACKAGE_DIR}" includes="wollmux_*.*.*.dsc" />
 			<fileset dir="${PACKAGE_DIR}" includes="wollmux_*.*.*.changes" />
 			<fileset dir="${PACKAGE_DIR}" includes="wollmux_*.*.*.tar.gz" />
+	    	<fileset dir="${PACKAGE_DIR}" includes="wollmux-*/**" />
+	    	
+	    	<fileset file="debian/files" />
+	    	<fileset dir="debian" includes="wollmux/**" />
 	    	
 	    	<!-- VERSION_FILE und BUILD_INFO_FILE **nicht** löschen, da diese nur bei
 	    	Vorhandensein von svn oder git regeneriert werden können.
@@ -107,10 +110,15 @@
 	</target>
 	
 	<target name="makeversion">
-		<exec executable="misc/makeversion">
-		  <arg line="${VERSION_FILE} ${BUILD_INFO_FILE} debian/changelog"/>
+		<exec executable="bash" failifexecutionfails="false">
+		  <arg line="misc/makeversion ${VERSION_FILE} ${BUILD_INFO_FILE} debian/changelog"/>
 		</exec>		
-		<loadfile property="VERSION" srcfile="${VERSION_FILE}" failonerror="true" />
+		<loadfile property="VERSION" srcfile="${VERSION_FILE}" failonerror="true">
+		   <filterchain>
+		       <striplinebreaks/>
+		   </filterchain>
+		</loadfile>
+		<echo message="WollMux-Version is ${VERSION}" />
 	</target>
 	
 	<!-- Das Target compileidl erzeugt das rdb-file und die java-Interfaces -->
@@ -239,19 +247,28 @@
 		<tstamp><format property="mytime" pattern="HH:mm:ss"/></tstamp>
 		<echo level="info" message="Install finished at ">${mytime}</echo>
 	</target>
-		
-	<!-- Das Target erzeugt das Debian-Paket -->
-	<target name="deb">
-		<exec executable="dpkg-buildpackage" failifexecutionfails="true" failonerror="true">
-          <arg line="-uc -us -rfakeroot -I.git -I.svn -I.gitignore" />
+	
+	<target name="deb" depends="makeversion">
+		<property name="DEB_BUILD_DIR" value="${PACKAGE_DIR}/wollmux-${VERSION}" />
+		<mkdir dir="${DEB_BUILD_DIR}" />
+		<copy todir="${DEB_BUILD_DIR}/WollMux" >
+			<fileset dir="." includes="**/*" excludes="${DEB_BUILD_DIR}" /> 
+			<fileset dir="." includes="**/.*" excludes="${DEB_BUILD_DIR}" />
+		</copy>
+		<copy todir="${DEB_BUILD_DIR}/UNOHelper" >
+			<fileset dir="${UNOHELPER_DIR}" includes="**/*" /> 
+			<fileset dir="${UNOHELPER_DIR}" includes="**/.*" />
+		</copy>
+		<copy todir="${DEB_BUILD_DIR}/debian" >
+			<fileset dir="debian" includes="**/*"/> 
+		</copy>
+		<exec dir="${DEB_BUILD_DIR}/debian" executable="chmod" >
+			<arg line="a+x rules" />
 		</exec>
-		<echo message="Moving Debian files to ${PACKAGE_DIR}" />
-		<move todir="${PACKAGE_DIR}">
-		    <fileset dir="../" includes="wollmux_*.*.*.deb" />
-		    <fileset dir="../" includes="wollmux_*.*.*.dsc" />
-			<fileset dir="../" includes="wollmux_*.*.*.changes" />
-			<fileset dir="../" includes="wollmux_*.*.*.tar.gz" />
-		</move>
+		<exec dir="${DEB_BUILD_DIR}" executable="dpkg-buildpackage" failifexecutionfails="true" failonerror="true">
+          <arg line="-uc -us -rfakeroot -I.git -I.svn -I.gitignore" />
+		</exec> 
+		<delete dir="${DEB_BUILD_DIR}" />
 	</target>
 
 	<!-- Das Target aktualisiert das LocalizationConf-File -->
