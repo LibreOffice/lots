@@ -8,8 +8,10 @@ fi
 date=$(LC_ALL=C svn info|grep "^Last Changed Date"|sed -n 's/.*\([0-9]\{4\}-[0-9][0-9]-[0-9][0-9]\).*/\1/p')
 rev=$(LC_ALL=C svn info|grep "^Revision"|sed -n 's/.* \([0-9]\+\).*/\1/p')
 if [ -z "$date" ]; then
+  echo 1>&2 "Getting SVN version info failed => Trying GIT"
   date=$(git log -1 --date=short|grep ^Date:|head -n 1|sed -n 's/.*\([0-9]\{4\}-[0-9][0-9]-[0-9][0-9]\).*/\1/p')
   rev=$(git log -1 --date=short|sed -n 's/^commit \(.*\)/\1/p'|head -n 1)
+  test -z "$date" && echo 1>&2 "Getting GIT version info failed => Falling back to shipped version info"
 fi
 test -z "$date" && exit 1
 test -z "$rev" && exit 1
