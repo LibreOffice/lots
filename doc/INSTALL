@@ -1,0 +1,68 @@
+Instructions for compiling and installing WollMux
+
+== Prerequisites ==
+=== Required software ===
+The following software needs to be installed in order to build WollMux.
+
+- Apache Ant version 1.6.2 or greater (http://ant.apache.org/)
+- Java SDK 1.5 or later (http://java.sun.com/)
+- OpenOffice.org 2.0 or later
+- OpenOffice.org SDK 2.0 or later
+- (optional, for building Debian package) dpkg-dev, fakeroot
+- (optional, for working with development snapshot) git
+
+=== Miscellaneous issues ===
+- If ant gives you the error "Unable to locate tools.jar...." you need to set 
+  the environment variable JAVA_HOME to the root of a Java SDK installation, 
+  rather than just a JRE.
+
+- The binaries from the OOo SDK need to be in the PATH. You may also need to
+  set LD_LIBRARY_PATH to include the OOo programs/ subdirectory. A quick
+  test to see if your OOo SDK is properly installed is to issue the
+  following command on the command line:
+
+     idlc
+
+  If you get the following usage message
+
+    using: idlc [-options] <file_1> ... <file_n> | @<filename> | -stdin
+    [...]
+
+  then your OOo SDK is set up correctly.
+
+== Getting the sources ==
+
+You can either get a release tarball or checkout the development version
+from the public git repositories.
+
+Option 1: Release tarball
+
+- Go to http://wollmux.projects.forge.osor.eu/ and download the source tarball
+  wollmux-<version>.tar.bz2
+
+- Extract the tarball somewhere. This will create a directory
+  named wollmux-<version>/
+
+Option 2: Using development sources from git
+
+- WollMux requires an additional project for building, so start by creating
+  a top-level directory for holding all the necessary projects.
+
+    mkdir wollmux-git
+
+- Next, change into the new directory and check out all of the required 
+  projects from their respective git repositories.
+
+    cd wollmux-git
+    git clone http://....
+    git clone http://....
+
+== Building WollMux ==
+
+- Go to the directory wollmux-<version>/WollMux and open the file build.xml
+  in an editor of your choice.
+
+- Change the properties OOO_PROGRAM_DIR, OOOCLS and OOO_SDK to match your
+  system. This is *required*. The default paths will not work for you.
+
+- If you want a Debian package, simply issue the command
