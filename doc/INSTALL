@@ -65,4 +65,13 @@ Option 2: Using development sources from git
 - Change the properties OOO_PROGRAM_DIR, OOOCLS and OOO_SDK to match your
   system. This is *required*. The default paths will not work for you.
 
-- If you want a Debian package, simply issue the command
+- If you have a Debian system and want a Debian package, simply issue the 
+  command
+
+    ant deb
+
+- If you want to compile WollMux without building a Debian package, issue
+  the command
+
+    ant
+
