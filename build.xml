@@ -1,37 +1,47 @@
 <project default="all">
-	<!--
-	*****************************************************************
-	Build-Datei für den WollMux.
-	
-	Test bla bla
-	
-	Die Build-Datei stellt Haupt Main-Targets zur Verfügung, die für
-	die Erzeugung des WollMux interessant sind:
-	* package: erzeugt ein WollMux.uno.pkg-Paket
-	* install: erzeugt und installiert das WollMux.uno.pkg-Paket mit
-	           unopkg add im Benutzerbereich.
-	           
-	Vorraussetzungen für die erfolgreiche Paketerzeugung:
-	* <OOoPath>/program ist in der PATH-Variable
-	* Nur unter Linux: Die Umgebungsvariable LD_LIBRARY_PATH muss
-	  ebenfalls <OOoPath>/program enthalten.
-	* Die Executables javamaker, idlc und regmerge des OOo2-SDKs werden
-	  über die Pfad-Variable gefunden. Entweder Sie kopieren diese drei
-	  Dateien nach <OOoPath>/program oder sie nehmen das Verzeichnis
-	  <OOoSDK2>/(linux|windows)/bin in die Pfad-Variable auf.
-	* Die Eclipse-Projekte OOo-SDK und UNOHelper sind aus dem 
-	  svn-Repository ausgecheckt worden und befinden sich in den
-	  entsprechenden Nachbarverzeichnissen zum WollMux-Projektverzeichnis.
-    * Die Kommandozeilenversion von svn sollte installiert sein und im PATH
-      stehen, damit die buildinfo-Datei erzeugt werden kann.
-    * If ant gives you the error "Unable to locate tools.jar...." you need to set 
-      JAVA_HOME to the root of a Java SDK installation, rather than just a JRE.
-	
-	Datum:  21.11.2005
-	Author: Christoph Lutz (D-III-ITD-5.1), Matthias Benkmann (D-III-ITD-5.1)
-	*****************************************************************
-	-->
+<!--
+*****************************************************************
 
+See doc/INSTALL for instructions how to build WollMux.
+
+Targets:
+
+clean: Remove all generated files except for version information (which is only
+       regenerated when building from a git/svn working copy.
+
+debug: List this target before other build targets to get .class files with
+       debug information.
+
+all: Create the OOo component and WollMuxBar.jar, but *not* the Debian package.
+     The files are created in the dist/ directory.
+
+deb: Create the Debian package in the dist/ directory.
+
+install: Install the WollMux OOo component in the user area for the user running ant.
+         DO NOT USE THIS AS ROOT. IT DOESN'T DO SYSTEM-WIDE INSTALLATION.
+
+updateLocalizationConf: Collects new strings from the WollMux sources and adds them
+                        to src/data/localization.conf
+
+makeversion: Attempt to regenerate version information and set VERSION property for
+             the rest of the build. This target is implicitly called by the other
+             targets. Do not call this directly.
+
+compileidl: Compiles the files from the idl/ directory. If you're using Eclipse, then
+            you'll need to call this target after an "ant clean", because Eclipse
+            can't compile these files on its own.
+
+*****************************************************************-->
+
+<!-- You will probably have to change the following paths to match your system -->	
+	<property name="OOO_PROGRAM_DIR" value="/opt/openoffice.org/program" />
+	<property name="OOOCLS" value="/opt/openoffice.org/program/classes" />
+	<property name="OOO_SDK" value="/opt/openoffice.org_sdk" />
+
+<!-- If you follow the INSTALL instructions exactly, you won't have to change this path --> 	
+	<property name="UNOHELPER_DIR" value="../UNOHelper" />
+
+<!-- Don't change anything below this line. -->
 	<property name="COMPONENT" value="WollMux" />
 	<property name="MAKE_DIR" value="." />
 	<property name="RDB_DIR" value="oxt" />
@@ -54,11 +64,10 @@
 	<property name="MY_IDL" value="idl" />
 	<property name="MY_CLASSES" value="bin" />
 
-	<property name="OOO_PROGRAM_DIR" value="/opt/openoffice.org/program" />
-	<property name="OOOCLS" value="/opt/openoffice.org/program/classes" />
+	
 	<property name="OOO_CLASSPATH" value="${OOOCLS}/juh.jar:${OOOCLS}/jurt.jar:${OOOCLS}/ridl.jar:${OOOCLS}/unoil.jar" />
 	<property name="TYPES_RDB" value="${OOO_PROGRAM_DIR}/types.rdb" />
-	<property name="OOO_SDK" value="/opt/openoffice.org_sdk" />
+	
 	<property name="SDK_IDL" value="${OOO_SDK}/idl" />
 	
 	<property name="BIN" value="bin" />
@@ -66,7 +75,7 @@
 	
 	<property name="WOLLMUXBAR_JAR_NAME" value="WollMuxBar.jar" />
 	<property name="WOLLMUXBAR_JAR" value="${PACKAGE_DIR}/${WOLLMUXBAR_JAR_NAME}" />
-	<property name="UNOHELPER_DIR" value="../UNOHelper" />
+	
 	<property name="UNOHELPER_SRC" value="${UNOHELPER_DIR}/src" />
 	<property name="UNOHELPER_BIN" value="${BIN}" />
 	<property name="TOOLING" value="${OOO_SDK}/classes" />
