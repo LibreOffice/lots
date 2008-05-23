@@ -54,24 +54,65 @@ Option 2: Using development sources from git
   projects from their respective git repositories.
 
     cd wollmux-git
-    git clone http://....
-    git clone http://....
+    git clone http://wollmux.projects.forge.osor.eu/repo/WollMux.git
+    git clone http://wollmux.projects.forge.osor.eu/repo/UNOHelper.git
 
 == Building WollMux ==
 
 - Go to the directory wollmux-<version>/WollMux and open the file build.xml
   in an editor of your choice.
+    cd WollMux
+    $EDITOR build.xml
 
 - Change the properties OOO_PROGRAM_DIR, OOOCLS and OOO_SDK to match your
   system. This is *required*. The default paths will not work for you.
+
+- If you want to compile WollMux without building a Debian package, issue
+  the command
+
+    ant
+
+  If ant gives you the error "Unable to locate tools.jar...." you need to set 
+  the environment variable JAVA_HOME to the root of a Java SDK installation, 
+  rather than just a JRE.
 
 - If you have a Debian system and want a Debian package, simply issue the 
   command
 
     ant deb
 
-- If you want to compile WollMux without building a Debian package, issue
-  the command
 
-    ant
+== Installing WollMux ==
+
+- On a Debian system, simply install the Debian package built in the
+  previous step with dpkg -i.
+
+  This will add a program /usr/bin/wollmuxbar which launches the
+  WollMux toolbar. Note, however, that you need a working configuration (not
+  described in this document) before this will work.
+
+- For a manual installation, terminate all running OpenOffice.org processes
+  (including the quickstarter), then install the OpenOffice.org extension
+  with the following command:
+
+    unopkg add --shared dist/WollMux.uno.pkg
+
+  This will result in a system-wide installation and usually requires
+  administrator privileges.
+  For a user installation, launch OpenOffice.org, 
+  go to the menu Tools/Extension Manager and use Add to install the
+  extension.
+
+  Next, you need to install the file WollMuxBar.jar somewhere and to
+  establish a way to launch it. Depending on your system, it may already be
+  possible to run it by simply double-clicking it. Otherwise the command
+
+    java -jar <path_to>/WollMuxBar.jar
+
+  or under Windows
+
+    javaw.exe -jar <path_to>/WollMuxBar.jar
+
+  will run the WollMux toolbar. Note, however, that you need a working 
+  configuration (not described in this document) before this will work.
 
