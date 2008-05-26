@@ -1,7 +1,7 @@
 Source: wollmux
 Section: lhm/misc
 Priority: optional
-Maintainer: Felix WollMux <v-d-iii-itd-d101@muenchen.de>
+Maintainer: Felix WollMux <wollmux-general@lists.forge.osor.eu>
 Standards-Version: 3.6.1
 
 Package: wollmux
