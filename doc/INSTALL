@@ -38,7 +38,7 @@ from the public git repositories.
 Option 1: Release tarball
 
 - Go to http://wollmux.projects.forge.osor.eu/ and download the source tarball
-  wollmux-<version>.tar.bz2
+  wollmux-<version>.tar.gz
 
 - Extract the tarball somewhere. This will create a directory
   named wollmux-<version>/
