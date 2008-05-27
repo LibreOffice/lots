@@ -190,15 +190,19 @@ public class L
       }
 
       ConfigThingy messages = l10n.query("Messages", 2);
-      iter = messages.iterator();
-      String original = "foo";
-      while (iter.hasNext())
+      for (ConfigThingy msg : messages)
       {
-        ConfigThingy conf = (ConfigThingy) iter.next();
-        if (conf.getName().equalsIgnoreCase("original")) original = conf.toString();
+        iter = msg.iterator();
+        String original = "foo";
+        while (iter.hasNext())
+        {
+          ConfigThingy conf = (ConfigThingy) iter.next();
+          if (conf.getName().equalsIgnoreCase("original"))
+            original = conf.toString();
 
-        if (conf.getName().equalsIgnoreCase(messageLanguage))
-          mapMessageToTranslation.put(original, conf.toString());
+          if (conf.getName().equalsIgnoreCase(messageLanguage))
+            mapMessageToTranslation.put(original, conf.toString());
+        }
       }
     }
     catch (Exception x)
