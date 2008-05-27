@@ -488,7 +488,7 @@ public class AbsenderAuswaehlen
             catch (NodeNotFoundException e)
             {}
 
-            String label = uiElementDesc.get("LABEL").toString();
+            String label = L.m(uiElementDesc.get("LABEL").toString());
 
             char hotkey = 0;
             try
