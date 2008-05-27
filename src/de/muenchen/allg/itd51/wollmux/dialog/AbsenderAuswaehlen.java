@@ -290,7 +290,7 @@ public class AbsenderAuswaehlen
     String title = L.m("TITLE fehlt für Fenster AbsenderAuswaehlen/Auswaehlen");
     try
     {
-      title = fensterDesc.get("TITLE").toString();
+      title = L.m(fensterDesc.get("TITLE").toString());
     }
     catch (Exception x)
     {}
