@@ -1,8 +1,8 @@
 /*
-* Dateiname: DatensatzBearbeiten.java
-* Projekt  : WollMux
-* Funktion : Dynamisches Erzeugen eines Swing-GUIs für das Bearbeiten eines Datensatzes anhand von ConfigThingy
-* 
+ * Dateiname: DatensatzBearbeiten.java
+ * Projekt  : WollMux
+ * Funktion : Dynamisches Erzeugen eines Swing-GUIs für das Bearbeiten eines Datensatzes anhand von ConfigThingy
+ * 
  * Copyright (c) 2008 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,37 +17,37 @@
  * You should have received a copy of the European Union Public Licence
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
-*
-* Änderungshistorie:
-* Datum      | Wer | Änderungsgrund
-* -------------------------------------------------------------------
-* 11.10.2005 | BNK | Erstellung
-* 14.10.2005 | BNK | Interaktion mit DJDataset
-* 14.10.2005 | BNK | Kommentiert
-* 17.10.2005 | BNK | Unterstützung für immer ausgegraute Buttons.
-* 17.10.2005 | BNK | Unterstützung für READONLY
-* 18.10.2005 | BNK | Zusätzliche Exceptions loggen
-* 24.10.2005 | BNK | dialogEndListener wird am Ende aufgerufen
-*                  | show() entfernt zur Vermeidung von Thread-Problemen
-* 24.10.2005 | BNK | restoreStandard() Buttons nicht mehr ausgegraut, wenn 
-*                  | Werte nicht geändert wurden, aber bereits aus dem LOS sind.
-* 27.10.2005 | BNK | back + CLOSEACTION
-* 02.11.2005 | BNK | +saveAndBack()
-* 15.11.2005 | BNK | Endlosschleife beseitigt durch vertauschen der || Operanden
-* 22.11.2005 | BNK | Common.setLookAndFeel() verwenden
-* 11.01.2006 | BNK | EDIT "true" bei comboboxen unterstützt
-* 25.01.2006 | BNK | Auch editierbare Comboboxen ändern nun den Hintergrund korrekt.
-* 19.04.2006 | BNK | [R1337]Fehlermeldung, bei unbekanntem TYPE
-* 15.05.2006 | BNK | nicht-editierbare Comboboxen funktionieren jetzt hoffentlich 
-*                  | richtig mit Vorgabewerten, die nicht in der Liste sind.
-* 29.09.2006 | BNK | Verbessertes Auslesen von ComboBox-Daten            
-* 23.07.2006 | BNK | [R2551][23097]Scrollbar machen     
-* -------------------------------------------------------------------
-*
-* @author Matthias Benkmann (D-III-ITD 5.1)
-* @version 1.0
-* 
-*/
+ *
+ * Änderungshistorie:
+ * Datum      | Wer | Änderungsgrund
+ * -------------------------------------------------------------------
+ * 11.10.2005 | BNK | Erstellung
+ * 14.10.2005 | BNK | Interaktion mit DJDataset
+ * 14.10.2005 | BNK | Kommentiert
+ * 17.10.2005 | BNK | Unterstützung für immer ausgegraute Buttons.
+ * 17.10.2005 | BNK | Unterstützung für READONLY
+ * 18.10.2005 | BNK | Zusätzliche Exceptions loggen
+ * 24.10.2005 | BNK | dialogEndListener wird am Ende aufgerufen
+ *                  | show() entfernt zur Vermeidung von Thread-Problemen
+ * 24.10.2005 | BNK | restoreStandard() Buttons nicht mehr ausgegraut, wenn 
+ *                  | Werte nicht geändert wurden, aber bereits aus dem LOS sind.
+ * 27.10.2005 | BNK | back + CLOSEACTION
+ * 02.11.2005 | BNK | +saveAndBack()
+ * 15.11.2005 | BNK | Endlosschleife beseitigt durch vertauschen der || Operanden
+ * 22.11.2005 | BNK | Common.setLookAndFeel() verwenden
+ * 11.01.2006 | BNK | EDIT "true" bei comboboxen unterstützt
+ * 25.01.2006 | BNK | Auch editierbare Comboboxen ändern nun den Hintergrund korrekt.
+ * 19.04.2006 | BNK | [R1337]Fehlermeldung, bei unbekanntem TYPE
+ * 15.05.2006 | BNK | nicht-editierbare Comboboxen funktionieren jetzt hoffentlich 
+ *                  | richtig mit Vorgabewerten, die nicht in der Liste sind.
+ * 29.09.2006 | BNK | Verbessertes Auslesen von ComboBox-Daten            
+ * 23.07.2006 | BNK | [R2551][23097]Scrollbar machen     
+ * -------------------------------------------------------------------
+ *
+ * @author Matthias Benkmann (D-III-ITD 5.1)
+ * @version 1.0
+ * 
+ */
 package de.muenchen.allg.itd51.wollmux.dialog;
 
 import java.awt.BorderLayout;
@@ -109,11 +109,12 @@ import de.muenchen.allg.itd51.wollmux.db.NoBackingStoreException;
 import de.muenchen.allg.itd51.wollmux.db.TestDJDataset;
 
 /**
- * Diese Klasse baut anhand einer als ConfigThingy übergebenen 
- * Dialogbeschreibung einen (mehrseitigen) Dialog zur Bearbeitung eines
- * {@link de.muenchen.allg.itd51.wollmux.db.DJDataset}s.
- * <b>ACHTUNG:</b> Die private-Funktionen
- * dürfen NUR aus dem Event-Dispatching Thread heraus aufgerufen werden. 
+ * Diese Klasse baut anhand einer als ConfigThingy übergebenen Dialogbeschreibung
+ * einen (mehrseitigen) Dialog zur Bearbeitung eines
+ * {@link de.muenchen.allg.itd51.wollmux.db.DJDataset}s. <b>ACHTUNG:</b> Die
+ * private-Funktionen dürfen NUR aus dem Event-Dispatching Thread heraus aufgerufen
+ * werden.
+ * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class DatensatzBearbeiten
@@ -122,193 +123,258 @@ public class DatensatzBearbeiten
    * Standardbreite für Textfelder
    */
   private final static int TEXTFIELD_DEFAULT_WIDTH = 22;
+
   /**
-   * Rand um Textfelder (wird auch für ein paar andere Ränder verwendet)
-   * in Pixeln.
+   * Rand um Textfelder (wird auch für ein paar andere Ränder verwendet) in Pixeln.
    */
   private final static int TF_BORDER = 4;
+
   /**
    * Rand über und unter einem horizontalen Separator (in Pixeln).
    */
   private final static int SEP_BORDER = 7;
+
   /**
    * Rand um Buttons (in Pixeln).
    */
   private final static int BUTTON_BORDER = 2;
+
   /**
    * der Datensatz, der durch den Dialog bearbeitet wird.
    */
   private DJDataset datensatz;
+
   /**
-   * Bildet Fensternamen (umschliessender Schlüssel in der Beschreibungssprache)
-   * auf {@link DialogWindow}s ab. Wird unter anderem zum Auflösen der Bezeichner
-   * der switchTo-ACTION verwendet.
+   * Bildet Fensternamen (umschliessender Schlüssel in der Beschreibungssprache) auf
+   * {@link DialogWindow}s ab. Wird unter anderem zum Auflösen der Bezeichner der
+   * switchTo-ACTION verwendet.
    */
   private Map<String, DialogWindow> fenster;
+
   /**
    * das momentan angezeigte Dialogfenster.
    */
   private DialogWindow currentWindow;
+
   /**
    * Der Rahmen des gesamten Dialogs.
    */
   private JFrame myFrame;
+
   /**
-   * Ein mit CardLayout versehenes Panel, das die verschiedenen Dialogseiten
-   * managt.
+   * Ein mit CardLayout versehenes Panel, das die verschiedenen Dialogseiten managt.
    */
   private JPanel cardPanel;
+
   /**
    * Das CardLayout von cardPanel.
    */
   private CardLayout cardLayout;
+
   /**
-   * Der Name (siehe {@link #fenster}) des ersten Fensters des Dialogs,
-   * das ist das erste Fenster, das in der Dialog-Beschreibung aufgeführt ist.
+   * Der Name (siehe {@link #fenster}) des ersten Fensters des Dialogs, das ist das
+   * erste Fenster, das in der Dialog-Beschreibung aufgeführt ist.
    */
   private String firstWindow;
+
   /**
    * Die mit MODIFY_MARKER_COLOR gesetzte Farbe.
    */
   private Color modColor;
-  
+
   /**
-   * ActionListener für Buttons mit der ACTION "abort". 
+   * ActionListener für Buttons mit der ACTION "abort".
    */
   private ActionListener actionListener_abort = new ActionListener()
-        { public void actionPerformed(ActionEvent e){ abort(); } };
- 
-        /**
-         * ActionListener für Buttons mit der ACTION "back".
-         */
-        private ActionListener actionListener_back = new ActionListener()
-          { public void actionPerformed(ActionEvent e) { back(); } };
-          
-        /**
-         * ActionListener für Buttons mit der ACTION "restoreStandard". 
-         */        
-  private ActionListener actionListener_restoreStandard = new ActionListener()
-        { public void actionPerformed(ActionEvent e){ restoreStandard(); } };
-        /**
-         * ActionListener für Buttons mit der ACTION "save". 
-         */
-  private ActionListener actionListener_save = new ActionListener()
-        { public void actionPerformed(ActionEvent e){ save(); } };
-        /**
-         * ActionListener für Buttons mit der ACTION "saveAndExit". 
-         */
-  private ActionListener actionListener_saveAndExit = new ActionListener()
-        { public void actionPerformed(ActionEvent e){ saveAndExit(); } };
- 
-   /**
-    * ActionListener für Buttons mit der ACTION "saveAndExit". 
-    */
-   private ActionListener actionListener_saveAndBack = new ActionListener()
-     { public void actionPerformed(ActionEvent e){ saveAndBack(); } };
+  {
+    public void actionPerformed(ActionEvent e)
+    {
+      abort();
+    }
+  };
 
-  
   /**
-  * wir bei Ende des Dialogs aufgerufen wenn nicht null (siehe Konstruktor).
-  */
+   * ActionListener für Buttons mit der ACTION "back".
+   */
+  private ActionListener actionListener_back = new ActionListener()
+  {
+    public void actionPerformed(ActionEvent e)
+    {
+      back();
+    }
+  };
+
+  /**
+   * ActionListener für Buttons mit der ACTION "restoreStandard".
+   */
+  private ActionListener actionListener_restoreStandard = new ActionListener()
+  {
+    public void actionPerformed(ActionEvent e)
+    {
+      restoreStandard();
+    }
+  };
+
+  /**
+   * ActionListener für Buttons mit der ACTION "save".
+   */
+  private ActionListener actionListener_save = new ActionListener()
+  {
+    public void actionPerformed(ActionEvent e)
+    {
+      save();
+    }
+  };
+
+  /**
+   * ActionListener für Buttons mit der ACTION "saveAndExit".
+   */
+  private ActionListener actionListener_saveAndExit = new ActionListener()
+  {
+    public void actionPerformed(ActionEvent e)
+    {
+      saveAndExit();
+    }
+  };
+
+  /**
+   * ActionListener für Buttons mit der ACTION "saveAndExit".
+   */
+  private ActionListener actionListener_saveAndBack = new ActionListener()
+  {
+    public void actionPerformed(ActionEvent e)
+    {
+      saveAndBack();
+    }
+  };
+
+  /**
+   * wir bei Ende des Dialogs aufgerufen wenn nicht null (siehe Konstruktor).
+   */
   private ActionListener dialogEndListener = null;
-  
+
   /**
    * wird getriggert bei windowClosing() Event.
    */
   private ActionListener closeAction = actionListener_abort;
-    
+
   /**
    * Erzeugt einen neuen Dialog und zeigt ihn an.
-   * @param conf das ConfigThingy, das den Dialog beschreibt (der Vater des
-   *        "Fenster"-Knotens.
-   * @param datensatz der Datensatz, der mit dem Dialog bearbeitet werden soll.
-   * @param dialogEndListener falls nicht null, wird 
-   *        die {@link ActionListener#actionPerformed(java.awt.event.ActionEvent)}
-   *        Methode wird aufgerufen (im Event Dispatching Thread), 
-   *        nachdem der Dialog geschlossen wurde.
-   *        Das actionCommand des ActionEvents gibt die Aktion an, die
-   *        das Speichern des Dialogs veranlasst hat.
-   * @throws ConfigurationErrorException im Falle eines schwerwiegenden
-   *         Konfigurationsfehlers, der es dem Dialog unmöglich macht,
-   *         zu funktionieren (z.B. dass der "Fenster" Schlüssel fehlt.
+   * 
+   * @param conf
+   *          das ConfigThingy, das den Dialog beschreibt (der Vater des
+   *          "Fenster"-Knotens.
+   * @param datensatz
+   *          der Datensatz, der mit dem Dialog bearbeitet werden soll.
+   * @param dialogEndListener
+   *          falls nicht null, wird die
+   *          {@link ActionListener#actionPerformed(java.awt.event.ActionEvent)}
+   *          Methode wird aufgerufen (im Event Dispatching Thread), nachdem der
+   *          Dialog geschlossen wurde. Das actionCommand des ActionEvents gibt die
+   *          Aktion an, die das Speichern des Dialogs veranlasst hat.
+   * @throws ConfigurationErrorException
+   *           im Falle eines schwerwiegenden Konfigurationsfehlers, der es dem
+   *           Dialog unmöglich macht, zu funktionieren (z.B. dass der "Fenster"
+   *           Schlüssel fehlt.
    */
-  public DatensatzBearbeiten(ConfigThingy conf, DJDataset datensatz, ActionListener dialogEndListener) throws ConfigurationErrorException
+  public DatensatzBearbeiten(ConfigThingy conf, DJDataset datensatz,
+      ActionListener dialogEndListener) throws ConfigurationErrorException
   {
     this.datensatz = datensatz;
     this.dialogEndListener = dialogEndListener;
-    
+
     fenster = new HashMap<String, DialogWindow>();
-    
+
     modColor = Color.PINK;
-    try{
-      modColor = Color.decode(conf.get("MODIFY_MARKER_COLOR").getLastChild().toString());
-    }catch(Exception x){Logger.error(x);}
-    
+    try
+    {
+      modColor =
+        Color.decode(conf.get("MODIFY_MARKER_COLOR").getLastChild().toString());
+    }
+    catch (Exception x)
+    {
+      Logger.error(x);
+    }
+
     final ConfigThingy fensterDesc = conf.query("Fenster");
     if (fensterDesc.count() == 0)
-      throw new ConfigurationErrorException(L.m("Schlüssel 'Fenster' fehlt in %1", conf.getName()));
-    
-    
-    //  GUI im Event-Dispatching Thread erzeugen wg. Thread-Safety.
-    try{
-      javax.swing.SwingUtilities.invokeLater(new Runnable() {
-        public void run() {
-            try{createGUI(fensterDesc.getLastChild());}catch(Exception x){};
+      throw new ConfigurationErrorException(L.m("Schlüssel 'Fenster' fehlt in %1",
+        conf.getName()));
+
+    // GUI im Event-Dispatching Thread erzeugen wg. Thread-Safety.
+    try
+    {
+      javax.swing.SwingUtilities.invokeLater(new Runnable()
+      {
+        public void run()
+        {
+          try
+          {
+            createGUI(fensterDesc.getLastChild());
+          }
+          catch (Exception x)
+          {}
+          ;
         }
       });
     }
-    catch(Exception x) {Logger.error(x);}
+    catch (Exception x)
+    {
+      Logger.error(x);
+    }
   }
-  
+
   /**
-   * Wie {@link #DatensatzBearbeiten(ConfigThingy, DJDataset, ActionListener)}
-   * mit null als dialogEndListener.
+   * Wie {@link #DatensatzBearbeiten(ConfigThingy, DJDataset, ActionListener)} mit
+   * null als dialogEndListener.
+   * 
    * @param conf
    * @param datensatz
    * @throws ConfigurationErrorException
    */
-  public DatensatzBearbeiten(ConfigThingy conf, DJDataset datensatz) throws ConfigurationErrorException
+  public DatensatzBearbeiten(ConfigThingy conf, DJDataset datensatz)
+      throws ConfigurationErrorException
   {
     this(conf, datensatz, null);
   }
-  
+
   private void createGUI(ConfigThingy fensterDesc)
   {
     Common.setLookAndFeelOnce();
-    
-    //Create and set up the window.
+
+    // Create and set up the window.
     myFrame = new JFrame(L.m("Absenderdaten bearbeiten"));
-    //leave handling of close request to WindowListener.windowClosing
+    // leave handling of close request to WindowListener.windowClosing
     myFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
     myFrame.addWindowListener(new MyWindowListener());
-    
+
     cardLayout = new CardLayout();
     cardPanel = new JPanel(cardLayout);
-    cardPanel.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
+    cardPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
     myFrame.getContentPane().add(cardPanel);
-    
-    Iterator iter = fensterDesc.iterator();
+
+    Iterator<ConfigThingy> iter = fensterDesc.iterator();
     while (iter.hasNext())
     {
-      ConfigThingy neuesFenster = (ConfigThingy)iter.next();
+      ConfigThingy neuesFenster = iter.next();
       String fensterName = neuesFenster.getName();
       DialogWindow newWindow = new DialogWindow(fensterName, neuesFenster);
       if (firstWindow == null) firstWindow = fensterName;
-      fenster.put(fensterName,newWindow);
-      cardPanel.add(newWindow.JPanel(),fensterName);
+      fenster.put(fensterName, newWindow);
+      cardPanel.add(newWindow.JPanel(), fensterName);
     }
-    
+
     myFrame.pack();
     int frameWidth = myFrame.getWidth();
     int frameHeight = myFrame.getHeight();
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-    int x = screenSize.width/2 - frameWidth/2; 
-    int y = screenSize.height/2 - frameHeight/2;
-    myFrame.setLocation(x,y);
+    int x = screenSize.width / 2 - frameWidth / 2;
+    int y = screenSize.height / 2 - frameHeight / 2;
+    myFrame.setLocation(x, y);
     myFrame.setResizable(false);
     showEDT();
   }
-  
+
   /**
    * Implementiert die gleichnamige ACTION.
    * 
@@ -318,7 +384,7 @@ public class DatensatzBearbeiten
   {
     dialogEnd("abort");
   }
-  
+
   /**
    * Implementiert die gleichnamige ACTION.
    * 
@@ -328,19 +394,20 @@ public class DatensatzBearbeiten
   {
     dialogEnd("back");
   }
-  
+
   /**
-   * Beendet den Dialog und ruft falls nötig den dialogEndListener auf
-   * wobei das gegebene actionCommand übergeben wird.
+   * Beendet den Dialog und ruft falls nötig den dialogEndListener auf wobei das
+   * gegebene actionCommand übergeben wird.
+   * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void dialogEnd(String actionCommand)
   {
     myFrame.dispose();
     if (dialogEndListener != null)
-      dialogEndListener.actionPerformed(new ActionEvent(this,0,actionCommand));
+      dialogEndListener.actionPerformed(new ActionEvent(this, 0, actionCommand));
   }
-  
+
   /**
    * Implementiert die gleichnamige ACTION.
    * 
@@ -349,7 +416,12 @@ public class DatensatzBearbeiten
   private void restoreStandard()
   {
     if (!datensatz.hasBackingStore() || !currentWindow.hasLocalValues()) return;
-    int res = JOptionPane.showConfirmDialog(myFrame, L.m("Wollen Sie Ihre persönlichen Änderungen wirklich verwerfen\nund die Felder dieser Dialogseite wieder mit der zentralen Datenbank synchronisieren?"),L.m("Lokale Änderungen wirklich verwerfen?"),JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+    int res =
+      JOptionPane.showConfirmDialog(
+        myFrame,
+        L.m("Wollen Sie Ihre persönlichen Änderungen wirklich verwerfen\nund die Felder dieser Dialogseite wieder mit der zentralen Datenbank synchronisieren?"),
+        L.m("Lokale Änderungen wirklich verwerfen?"), JOptionPane.YES_NO_OPTION,
+        JOptionPane.QUESTION_MESSAGE);
     if (res != JOptionPane.YES_OPTION) return;
     currentWindow.restoreStandard();
   };
@@ -359,20 +431,26 @@ public class DatensatzBearbeiten
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private boolean save() 
+  private boolean save()
   {
     boolean hasChanges = false;
     Iterator<DialogWindow> iter = fenster.values().iterator();
     while (iter.hasNext())
       hasChanges = iter.next().hasChanges() || hasChanges;
-    
+
     if (!hasChanges) return true;
-    int res = JOptionPane.showConfirmDialog(myFrame, L.m("Wollen Sie Ihre Änderungen wirklich speichern\nund auf die Aktualisierung der entsprechenden Felder\naus der zentralen Datenbank verzichten?"),L.m("Änderungen speichern?"),JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+    int res =
+      JOptionPane.showConfirmDialog(
+        myFrame,
+        L.m("Wollen Sie Ihre Änderungen wirklich speichern\nund auf die Aktualisierung der entsprechenden Felder\naus der zentralen Datenbank verzichten?"),
+        L.m("Änderungen speichern?"), JOptionPane.YES_NO_OPTION,
+        JOptionPane.QUESTION_MESSAGE);
     if (res != JOptionPane.YES_OPTION) return false;
-    
+
     iter = fenster.values().iterator();
-    while (iter.hasNext()) iter.next().save();
-    return true; 
+    while (iter.hasNext())
+      iter.next().save();
+    return true;
   };
 
   /**
@@ -384,7 +462,7 @@ public class DatensatzBearbeiten
   {
     if (save()) dialogEnd("saveAndExit");
   }
-  
+
   /**
    * Implementiert die gleichnamige ACTION.
    * 
@@ -394,46 +472,67 @@ public class DatensatzBearbeiten
   {
     if (save()) dialogEnd("back");
   }
-  
+
   /**
-   * Ein WindowListener, der auf den JFrame registriert wird, damit als
-   * Reaktion auf den Schliessen-Knopf auch die ACTION "abort" ausgeführt wird.
+   * Ein WindowListener, der auf den JFrame registriert wird, damit als Reaktion auf
+   * den Schliessen-Knopf auch die ACTION "abort" ausgeführt wird.
+   * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private class MyWindowListener implements WindowListener
   {
-    public MyWindowListener(){}
-    public void windowActivated(WindowEvent e) { }
-    public void windowClosed(WindowEvent e) {}
-    public void windowClosing(WindowEvent e) { closeAction.actionPerformed(null); }
-    public void windowDeactivated(WindowEvent e) { }
-    public void windowDeiconified(WindowEvent e) {}
-    public void windowIconified(WindowEvent e) { }
-    public void windowOpened(WindowEvent e) {}
+    public MyWindowListener()
+    {}
+
+    public void windowActivated(WindowEvent e)
+    {}
+
+    public void windowClosed(WindowEvent e)
+    {}
+
+    public void windowClosing(WindowEvent e)
+    {
+      closeAction.actionPerformed(null);
+    }
+
+    public void windowDeactivated(WindowEvent e)
+    {}
+
+    public void windowDeiconified(WindowEvent e)
+    {}
+
+    public void windowIconified(WindowEvent e)
+    {}
+
+    public void windowOpened(WindowEvent e)
+    {}
   }
 
   /**
-   * Zerstört den Dialog. Nach Aufruf dieser Funktion dürfen keine weiteren
-   * Aufrufe von Methoden des Dialogs erfolgen. Die Verarbeitung erfolgt
-   * asynchron. Wurde dem Konstruktor ein entsprechender ActionListener
-   * übergeben, so wird seine actionPerformed() Funktion aufgerufen.
+   * Zerstört den Dialog. Nach Aufruf dieser Funktion dürfen keine weiteren Aufrufe
+   * von Methoden des Dialogs erfolgen. Die Verarbeitung erfolgt asynchron. Wurde dem
+   * Konstruktor ein entsprechender ActionListener übergeben, so wird seine
+   * actionPerformed() Funktion aufgerufen.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void dispose()
   {
-    //  GUI im Event-Dispatching Thread zerstören wg. Thread-Safety.
-    try{
-      javax.swing.SwingUtilities.invokeLater(new Runnable() {
-        public void run() {
+    // GUI im Event-Dispatching Thread zerstören wg. Thread-Safety.
+    try
+    {
+      javax.swing.SwingUtilities.invokeLater(new Runnable()
+      {
+        public void run()
+        {
           abort();
         }
       });
     }
-    catch(Exception x) {/*Hope for the best*/}
+    catch (Exception x)
+    {/* Hope for the best */}
   }
 
-  
   /**
    * Zeigt den Dialog an.
    * 
@@ -445,83 +544,90 @@ public class DatensatzBearbeiten
     if (currentWindow == null) showWindow(firstWindow);
   }
 
-  
   /**
    * aktiviert das Dialog-Fenster namens name.
+   * 
    * @param name
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void showWindow(String name)
   {
     if (!fenster.containsKey(name)) return;
-    
+
     currentWindow = fenster.get(name);
 
     myFrame.setTitle(currentWindow.getTitle());
     myFrame.setAlwaysOnTop(true);
     myFrame.setVisible(true);
-    cardLayout.show(cardPanel,currentWindow.getName());
+    cardLayout.show(cardPanel, currentWindow.getName());
     closeAction = currentWindow.getCloseAction();
     myFrame.requestFocus();
   }
 
   /**
-   * Dieses Interface dient dazu, dass {@link DataControl}s jemandem
-   * (nämlich {@link DialogWindow}s) mitteilen können, wenn sie ihre Farbe
-   * geändert haben (weil sich ihr "geändert" Zustand geändert hat).
-   * Dies erlaubt es den DialogWindows, Buttons zu aktualisieren, deren
-   * Ausgegrautseinszustand davon abhängt, ob angezeigte Felder geändert wurden
-   * oder nicht.
+   * Dieses Interface dient dazu, dass {@link DataControl}s jemandem (nämlich
+   * {@link DialogWindow}s) mitteilen können, wenn sie ihre Farbe geändert haben
+   * (weil sich ihr "geändert" Zustand geändert hat). Dies erlaubt es den
+   * DialogWindows, Buttons zu aktualisieren, deren Ausgegrautseinszustand davon
+   * abhängt, ob angezeigte Felder geändert wurden oder nicht.
+   * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private interface ColorChangeListener
   {
     public void colorChanged();
   }
-  
+
   /**
    * Ein DataControl kümmert sich um die Verwaltung von Eingabe-Controls eines
-   * DialogWindows. Es stellt insbesondere die Schnittstelle zwischen dem
-   * Control und dem Datensatz her.
+   * DialogWindows. Es stellt insbesondere die Schnittstelle zwischen dem Control und
+   * dem Datensatz her.
+   * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private abstract class DataControl
   {
     /**
-     * der Text des Datenbankfeldes dieses Controls. Wenn startText nicht mit
-     * dem aktuell im Control angezeigten Text übereinstimmt, dann hat der
-     * Benutzer den Wert seit den letzten Save geändert.
+     * der Text des Datenbankfeldes dieses Controls. Wenn startText nicht mit dem
+     * aktuell im Control angezeigten Text übereinstimmt, dann hat der Benutzer den
+     * Wert seit den letzten Save geändert.
      */
     protected String startText;
+
     /**
      * Der Name der Datenbankspalte, die mit dem Control editiert wird.
      */
     protected String columnName;
-    
+
     /**
      * Cacht den Wert von DJDataset.hasLocalOverride(columnName).
      */
     protected boolean myDatasetIsLocal;
+
     /**
      * die Farbe, die der Hintergrund des Controls annehmen soll, wenn
      * {@link #myDatasetIsLocal} true ist.
      */
     protected Color localColor;
+
     /**
-     * die Farbe, die der Hintegrund des Controls annehmen soll,  wenn
+     * die Farbe, die der Hintegrund des Controls annehmen soll, wenn
      * {@link #myDatasetIsLocal} false ist.
-     */ 
+     */
     protected Color normalColor;
+
     /**
      * Das Control.
      */
     protected JComponent myComponent;
+
     /**
      * true, falls der Hintegrund des Controls aktuell in normalColor eingefärbt ist.
      */
     boolean isCurrentlyNormalColor;
+
     List<ColorChangeListener> listeners = new Vector<ColorChangeListener>();
-    
+
     public void initCompo(String colName, JComponent compo, Color localColor)
     {
       this.localColor = localColor;
@@ -530,7 +636,7 @@ public class DatensatzBearbeiten
       normalColor = myComponent.getBackground();
       isCurrentlyNormalColor = true;
     }
-    
+
     public void initText() throws ColumnNotFoundException
     {
       myDatasetIsLocal = datensatz.hasLocalOverride(columnName);
@@ -539,27 +645,43 @@ public class DatensatzBearbeiten
       setTextInControl(startText);
       updateBackground();
     }
-    
+
     public void addColorChangeListener(ColorChangeListener l)
     {
       if (!listeners.contains(l)) listeners.add(l);
     }
-    
+
     public void notifyColorChangeListeners()
     {
       Iterator<ColorChangeListener> iter = listeners.iterator();
-      while (iter.hasNext()) iter.next().colorChanged();
+      while (iter.hasNext())
+        iter.next().colorChanged();
     }
-    
+
     public void setBackground(Color c)
     {
       myComponent.setBackground(c);
     }
+
     public abstract String getTextFromControl();
-    public String getColumnName() {return columnName;}
+
+    public String getColumnName()
+    {
+      return columnName;
+    }
+
     public abstract void setTextInControl(String text);
-    public boolean hasBeenModified() {return !startText.equals(getTextFromControl());}
-    public boolean datasetIsLocal() {return myDatasetIsLocal;}
+
+    public boolean hasBeenModified()
+    {
+      return !startText.equals(getTextFromControl());
+    }
+
+    public boolean datasetIsLocal()
+    {
+      return myDatasetIsLocal;
+    }
+
     public void updateBackground()
     {
       if (datasetIsLocal() || hasBeenModified())
@@ -581,10 +703,10 @@ public class DatensatzBearbeiten
         }
       }
     }
-    
+
     /**
-     * Falls hasBeenModified() wird der aktuell im Control stehende Wert
-     * in die Datenbank zurückgespeichert.
+     * Falls hasBeenModified() wird der aktuell im Control stehende Wert in die
+     * Datenbank zurückgespeichert.
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
@@ -592,45 +714,53 @@ public class DatensatzBearbeiten
     {
       if (hasBeenModified())
       {
-        try{ 
+        try
+        {
           String text = getTextFromControl();
           datensatz.set(columnName, text);
           startText = text;
           myDatasetIsLocal = datensatz.hasLocalOverride(columnName);
-        }catch(ColumnNotFoundException x){}
+        }
+        catch (ColumnNotFoundException x)
+        {}
         updateBackground();
       }
     }
-    
+
     /**
-     * Der Wert des Controls wird aus der Datenbank aktualisiert und
-     * daran gekoppelt. D.h. lokale Änderungen werden verworfen. 
+     * Der Wert des Controls wird aus der Datenbank aktualisiert und daran gekoppelt.
+     * D.h. lokale Änderungen werden verworfen.
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     public void restoreStandard()
     {
-      try{ 
+      try
+      {
         datensatz.discardLocalOverride(columnName);
         initText();
-      }catch(ColumnNotFoundException x){}
-       catch(NoBackingStoreException x)
-       {
-         Logger.error(L.m("Es hätte nie passieren dürfen, aber restoreStandard() wurde für einen Datensatz ohne Backing Store aufgerufen!"));
-       }
+      }
+      catch (ColumnNotFoundException x)
+      {}
+      catch (NoBackingStoreException x)
+      {
+        Logger.error(L.m("Es hätte nie passieren dürfen, aber restoreStandard() wurde für einen Datensatz ohne Backing Store aufgerufen!"));
+      }
       updateBackground();
     }
-      
+
   }
-  
+
   /**
    * Ein {@link DataControl} für JTextComponents.
+   * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private class TextComponentDataControl extends DataControl implements DocumentListener
+  private class TextComponentDataControl extends DataControl implements
+      DocumentListener
   {
-    public TextComponentDataControl(String colName, JTextComponent compo, Color localColor)
-    throws ColumnNotFoundException
+    public TextComponentDataControl(String colName, JTextComponent compo,
+        Color localColor) throws ColumnNotFoundException
     {
       initCompo(colName, compo, localColor);
       initText();
@@ -639,33 +769,46 @@ public class DatensatzBearbeiten
 
     public String getTextFromControl()
     {
-      return ((JTextComponent)myComponent).getText();
+      return ((JTextComponent) myComponent).getText();
     }
 
     public void setTextInControl(String text)
     {
-      ((JTextComponent)myComponent).setText(text);
+      ((JTextComponent) myComponent).setText(text);
     }
 
-    public void changedUpdate(DocumentEvent e) { updateBackground(); }
-    public void insertUpdate(DocumentEvent e) { updateBackground(); }
-    public void removeUpdate(DocumentEvent e) { updateBackground(); }
-    
+    public void changedUpdate(DocumentEvent e)
+    {
+      updateBackground();
+    }
+
+    public void insertUpdate(DocumentEvent e)
+    {
+      updateBackground();
+    }
+
+    public void removeUpdate(DocumentEvent e)
+    {
+      updateBackground();
+    }
+
   }
-  
-/**
- * Ein {@link DataControl} für JComboBoxes.
- * @author Matthias Benkmann (D-III-ITD 5.1)
- */
-  private class ComboBoxDataControl extends DataControl implements ActionListener, ItemListener 
+
+  /**
+   * Ein {@link DataControl} für JComboBoxes.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private class ComboBoxDataControl extends DataControl implements ActionListener,
+      ItemListener
   {
     public ComboBoxDataControl(String colName, JComboBox compo, Color localColor)
-    throws ColumnNotFoundException
+        throws ColumnNotFoundException
     {
       initCompo(colName, compo, localColor);
       addItem(datensatz.get(columnName));
       initText();
-      
+
       compo.getEditor().addActionListener(this);
       compo.addItemListener(this);
     }
@@ -673,33 +816,37 @@ public class DatensatzBearbeiten
     public void setBackground(Color c)
     {
       super.setBackground(c);
-      ((JComboBox)myComponent).getEditor().getEditorComponent().setBackground(c);
+      ((JComboBox) myComponent).getEditor().getEditorComponent().setBackground(c);
     }
-    
+
     public void addItem(String text)
     {
       if (text == null) text = "";
-      for (int i = ((JComboBox)myComponent).getItemCount() - 1; i >=0 ; --i)
+      for (int i = ((JComboBox) myComponent).getItemCount() - 1; i >= 0; --i)
       {
-        if (((JComboBox)myComponent).getItemAt(i).equals(text)) return;
+        if (((JComboBox) myComponent).getItemAt(i).equals(text)) return;
       }
-      ((JComboBox)myComponent).addItem(text);
+      ((JComboBox) myComponent).addItem(text);
     }
-    
+
     public String getTextFromControl()
     {
-      JComboBox combo = (JComboBox)myComponent;
+      JComboBox combo = (JComboBox) myComponent;
       if (combo.isEditable())
       {
-        Document comboDoc = ((JTextComponent)combo.getEditor().getEditorComponent()).getDocument(); 
-        try{
-          return comboDoc.getText(0,comboDoc.getLength());
-        }catch(BadLocationException x)
+        Document comboDoc =
+          ((JTextComponent) combo.getEditor().getEditorComponent()).getDocument();
+        try
+        {
+          return comboDoc.getText(0, comboDoc.getLength());
+        }
+        catch (BadLocationException x)
         {
           Logger.error(x);
           return "";
         }
-      } else
+      }
+      else
       {
         Object selected = combo.getSelectedItem();
         return selected == null ? "" : selected.toString();
@@ -708,19 +855,27 @@ public class DatensatzBearbeiten
 
     public void setTextInControl(String text)
     {
-      JComboBox myBox = (JComboBox)myComponent;
+      JComboBox myBox = (JComboBox) myComponent;
       boolean edit = myBox.isEditable();
       myBox.setEditable(true);
       myBox.setSelectedItem(text);
       myBox.setEditable(edit);
     }
-    
-    public void actionPerformed(ActionEvent e) { updateBackground(); }
-    public void itemStateChanged(ItemEvent e) { updateBackground(); }
+
+    public void actionPerformed(ActionEvent e)
+    {
+      updateBackground();
+    }
+
+    public void itemStateChanged(ItemEvent e)
+    {
+      updateBackground();
+    }
   }
-  
+
   /**
    * Verwaltet eine Seite des Dialogs.
+   * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private class DialogWindow implements ColorChangeListener
@@ -729,384 +884,530 @@ public class DatensatzBearbeiten
      * Das Panel, das die ganze Dialogseite enthält.
      */
     private JPanel myPanel;
+
     /**
-     * Unter-Panel, das die ganzen Eingabe-Elemente enthält. 
+     * Unter-Panel, das die ganzen Eingabe-Elemente enthält.
      */
     private JPanel myInputPanel;
+
     /**
      * Unter-Panel, das die Buttons enthält.
      */
     private JPanel myButtonPanel;
+
     /**
      * Titel, den der Frame bekommen soll, wenn diese Dialogseite angezeigt wird.
      */
     private String title;
+
     /**
      * Der Name dieses Fensters (vergleiche {@link DatensatzBearbeiten#fenster}).
      */
     private String name;
+
     /**
-     * Alle {@link DataControl}s zu dieser Dialogseite. Falls die Konfigurationsdaten
-     * des Dialogs fehlerhaft sind kann es sein, dass nicht zu jedem Control ein
-     * DataControl existiert.
+     * Alle {@link DataControl}s zu dieser Dialogseite. Falls die
+     * Konfigurationsdaten des Dialogs fehlerhaft sind kann es sein, dass nicht zu
+     * jedem Control ein DataControl existiert.
      */
     private List<DataControl> dataControls = new Vector<DataControl>();
+
     /**
      * Liste aller JButtons, die ausgegraut werden müssen, wenn keines der
      * DataControls einen hasBeenModified() Zustand hat.
      */
     private List<JButton> buttonsToGreyOutIfNoChanges = new Vector<JButton>();
-    
+
     private ActionListener dialogWindowCloseAction = actionListener_abort;
-    
+
     /**
      * Liefert das JPanel für diese Dialogseite zurück.
+     * 
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
-    public JPanel JPanel() {return myPanel;}
+    public JPanel JPanel()
+    {
+      return myPanel;
+    }
+
     /**
-     * Liefert den Titel zurück, den der Frame haben soll, wenn diese
-     * Dialogseite angezeigt wird.
+     * Liefert den Titel zurück, den der Frame haben soll, wenn diese Dialogseite
+     * angezeigt wird.
+     * 
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
-    public String getTitle() {return title;}
-    
+    public String getTitle()
+    {
+      return title;
+    }
+
     /**
-     * Erzeugt ein neues DialogWindow, dessen Name name ist 
-     * (vergleiche {@link DatensatzBearbeiten#fenster}) und das seinen
-     * Aufbau aus conf bezieht. conf sollte ein Kind des Knotens "Fenster"
-     * aus der gesamten Dialogbeschreibung sein.
+     * Erzeugt ein neues DialogWindow, dessen Name name ist (vergleiche
+     * {@link DatensatzBearbeiten#fenster}) und das seinen Aufbau aus conf bezieht.
+     * conf sollte ein Kind des Knotens "Fenster" aus der gesamten Dialogbeschreibung
+     * sein.
      */
     public DialogWindow(String name, final ConfigThingy conf)
     {
       this.name = name;
       createGUI(conf);
     }
-    
+
     /**
-     * liefert den Namen zurück, der dem Konstruktor übergeben wurde
-     * (vergleiche {@link DatensatzBearbeiten#fenster}.
+     * liefert den Namen zurück, der dem Konstruktor übergeben wurde (vergleiche
+     * {@link DatensatzBearbeiten#fenster}.
+     * 
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
-    public String getName() {return name;}
-    
-    public ActionListener getCloseAction() {return this.dialogWindowCloseAction;}
-    
+    public String getName()
+    {
+      return name;
+    }
+
+    public ActionListener getCloseAction()
+    {
+      return this.dialogWindowCloseAction;
+    }
+
     public void save()
     {
       Iterator<DataControl> iter = dataControls.iterator();
-      while (iter.hasNext()) iter.next().save();
+      while (iter.hasNext())
+        iter.next().save();
     }
-    
+
     public boolean hasChanges()
     {
       Iterator<DataControl> iter = dataControls.iterator();
-      while (iter.hasNext()) if (iter.next().hasBeenModified()) return true;
+      while (iter.hasNext())
+        if (iter.next().hasBeenModified()) return true;
       return false;
     }
-    
+
     public boolean hasLocalValues()
     {
       Iterator<DataControl> iter = dataControls.iterator();
-      while (iter.hasNext()) 
+      while (iter.hasNext())
       {
         DataControl ctrl = iter.next();
         if (ctrl.datasetIsLocal() || ctrl.hasBeenModified()) return true;
       }
       return false;
     }
-    
+
     public void colorChanged()
     {
       boolean enabled = hasLocalValues() && datensatz.hasBackingStore();
       Iterator<JButton> iter = buttonsToGreyOutIfNoChanges.iterator();
-      while (iter.hasNext()) iter.next().setEnabled(enabled);
+      while (iter.hasNext())
+        iter.next().setEnabled(enabled);
     }
-    
+
     public void restoreStandard()
     {
       Iterator<DataControl> iter = dataControls.iterator();
-      while (iter.hasNext()) iter.next().restoreStandard();
+      while (iter.hasNext())
+        iter.next().restoreStandard();
     }
-    
-/**
- * Ersetzt "%{SPALTENNAME}" in str durch den Wert der entsprechenden Spalte
- * im Datensatz, der durch den Dialog bearbeitet wird. 
- * @author Matthias Benkmann (D-III-ITD 5.1)
- */
+
+    /**
+     * Ersetzt "%{SPALTENNAME}" in str durch den Wert der entsprechenden Spalte im
+     * Datensatz, der durch den Dialog bearbeitet wird.
+     * 
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
     public String substituteVars(String str)
     {
       Pattern p = Pattern.compile("%\\{([a-zA-Z0-9]+)\\}");
       Matcher m = p.matcher(str);
-      if (m.find())
-      do{
+      if (m.find()) do
+      {
         String spalte = m.group(1);
         String wert = spalte;
-        try{
+        try
+        {
           String wert2 = datensatz.get(spalte);
-          if (wert2 != null)
-            wert = wert2.replaceAll("%","");
-        } catch (ColumnNotFoundException e) { Logger.error(e); }
-        str = str.substring(0,m.start())+wert+str.substring(m.end());
+          if (wert2 != null) wert = wert2.replaceAll("%", "");
+        }
+        catch (ColumnNotFoundException e)
+        {
+          Logger.error(e);
+        }
+        str = str.substring(0, m.start()) + wert + str.substring(m.end());
         m = p.matcher(str);
-      }while(m.find());
+      } while (m.find());
       return str;
     }
-    
+
     public void createGUI(ConfigThingy conf)
     {
       title = L.m("TITLE fehlt in Fensterbeschreibung");
-      try{title = substituteVars(""+conf.get("TITLE"));}catch(NodeNotFoundException x){}
-      
-      try{
+      try
+      {
+        title = substituteVars(L.m("" + conf.get("TITLE")));
+      }
+      catch (NodeNotFoundException x)
+      {}
+
+      try
+      {
         dialogWindowCloseAction = getAction(conf.get("CLOSEACTION").toString());
-      } catch(Exception x){}
-      
+      }
+      catch (Exception x)
+      {}
+
       myPanel = new JPanel(new BorderLayout());
       myInputPanel = new JPanel();
-      JScrollPane pain = new JScrollPane(myInputPanel, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+      JScrollPane pain =
+        new JScrollPane(myInputPanel,
+          ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+          ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
       pain.setBorder(null);
       myButtonPanel = new JPanel();
-      
-      myInputPanel.setLayout(new GridBagLayout());//new BoxLayout(myInputPanel, BoxLayout.PAGE_AXIS));
+
+      myInputPanel.setLayout(new GridBagLayout());// new BoxLayout(myInputPanel,
+      // BoxLayout.PAGE_AXIS));
       myButtonPanel.setLayout(new BoxLayout(myButtonPanel, BoxLayout.LINE_AXIS));
-      myButtonPanel.setBorder(BorderFactory.createEmptyBorder(TF_BORDER,0,0,0));
-      
+      myButtonPanel.setBorder(BorderFactory.createEmptyBorder(TF_BORDER, 0, 0, 0));
+
       myPanel.add(pain, BorderLayout.CENTER);
       myPanel.add(myButtonPanel, BorderLayout.PAGE_END);
-      
-        //int gridx, int gridy, int gridwidth, int gridheight, double weightx, double weighty, int anchor,          int fill,                  Insets insets, int ipadx, int ipady) 
-      GridBagConstraints gbcBottomglue= new GridBagConstraints(0, 0, 2, 1, 1.0, 1.0, GridBagConstraints.PAGE_END,   GridBagConstraints.BOTH,       new Insets(0,0,0,0),0,0);
-      GridBagConstraints gbcLabel     = new GridBagConstraints(0, 0, 2, 1, 0.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.NONE,       new Insets(0,0,0,0),0,0);
-      GridBagConstraints gbcSeparator = new GridBagConstraints(0, 0, 2, 1, 1.0, 0.0, GridBagConstraints.CENTER,     GridBagConstraints.HORIZONTAL, new Insets(0,0,0,0),0,0);
-      GridBagConstraints gbcLabelLeft = new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(0,0,0,10),0,0);
-      GridBagConstraints gbcTextfield = new GridBagConstraints(1, 0, 1, 1, 1.0, 0.0, GridBagConstraints.LINE_END,   GridBagConstraints.HORIZONTAL, new Insets(0,0,0,0),0,0);
-      GridBagConstraints gbcTextarea =  new GridBagConstraints(1, 0, 1, 1, 1.0, 0.0, GridBagConstraints.LINE_END,   GridBagConstraints.HORIZONTAL, new Insets(0,0,0,0),0,0);
-      GridBagConstraints gbcCombobox  = new GridBagConstraints(1, 0, 1, 1, 1.0, 0.0, GridBagConstraints.LINE_END,   GridBagConstraints.HORIZONTAL, new Insets(0,0,0,0),0,0);
-      
+
+      // int gridx, int gridy, int gridwidth, int gridheight, double weightx,
+      // double weighty, int anchor, int fill, Insets insets, int ipadx, int ipady)
+      GridBagConstraints gbcBottomglue =
+        new GridBagConstraints(0, 0, 2, 1, 1.0, 1.0, GridBagConstraints.PAGE_END,
+          GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0);
+      GridBagConstraints gbcLabel =
+        new GridBagConstraints(0, 0, 2, 1, 0.0, 0.0, GridBagConstraints.LINE_START,
+          GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0);
+      GridBagConstraints gbcSeparator =
+        new GridBagConstraints(0, 0, 2, 1, 1.0, 0.0, GridBagConstraints.CENTER,
+          GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0);
+      GridBagConstraints gbcLabelLeft =
+        new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0,
+          GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(
+            0, 0, 0, 10), 0, 0);
+      GridBagConstraints gbcTextfield =
+        new GridBagConstraints(1, 0, 1, 1, 1.0, 0.0, GridBagConstraints.LINE_END,
+          GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0);
+      GridBagConstraints gbcTextarea =
+        new GridBagConstraints(1, 0, 1, 1, 1.0, 0.0, GridBagConstraints.LINE_END,
+          GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0);
+      GridBagConstraints gbcCombobox =
+        new GridBagConstraints(1, 0, 1, 1, 1.0, 0.0, GridBagConstraints.LINE_END,
+          GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0);
+
       ConfigThingy felderParent = conf.query("Eingabefelder");
       int y = -1;
-      
-      Iterator piter = felderParent.iterator();
+
+      Iterator<ConfigThingy> piter = felderParent.iterator();
       while (piter.hasNext())
       {
-        Iterator iter = ((ConfigThingy)piter.next()).iterator();
+        Iterator<ConfigThingy> iter = (piter.next()).iterator();
         while (iter.hasNext())
         {
           ++y;
-          ConfigThingy uiElementDesc = (ConfigThingy)iter.next();
-          try{
-            
-            
+          ConfigThingy uiElementDesc = iter.next();
+          try
+          {
+
             /*
-             * ACHTUNG! DER FOLGENDE CODE SOLLTE SO GESCHRIEBEN WERDEN,
-             * DASS DER ZUSTAND AUCH IM FALLE EINES GESCHEITERTEN GET()
-             * UND EINER EVTL. DARAUS RESULTIERENDEN NULLPOINTEREXCEPTION
-             * NOCH KONSISTENT IST!
+             * ACHTUNG! DER FOLGENDE CODE SOLLTE SO GESCHRIEBEN WERDEN, DASS DER
+             * ZUSTAND AUCH IM FALLE EINES GESCHEITERTEN GET() UND EINER EVTL. DARAUS
+             * RESULTIERENDEN NULLPOINTEREXCEPTION NOCH KONSISTENT IST!
              */
-            
+
             boolean readonly = false;
-            try{ if (uiElementDesc.get("READONLY").toString().equals("true")) readonly = true; }catch(NodeNotFoundException x){}
+            try
+            {
+              if (uiElementDesc.get("READONLY").toString().equals("true"))
+                readonly = true;
+            }
+            catch (NodeNotFoundException x)
+            {}
             String type = uiElementDesc.get("TYPE").toString();
             if (type.equals("textfield"))
             {
               JLabel label = new JLabel();
-              label.setBorder(BorderFactory.createEmptyBorder(TF_BORDER,0,TF_BORDER,0));
+              label.setBorder(BorderFactory.createEmptyBorder(TF_BORDER, 0,
+                TF_BORDER, 0));
               gbcLabelLeft.gridy = y;
               myInputPanel.add(label, gbcLabelLeft);
-              try{ label.setText(uiElementDesc.get("LABEL").toString()); } catch(Exception x){}
-              
-              JPanel uiElement = new JPanel(new GridLayout(1,1));
-              JTextField tf = new JTextField(TEXTFIELD_DEFAULT_WIDTH);
-              tf.setEditable(!readonly);
-              
               try
               {
-                dataControls.add(new TextComponentDataControl(uiElementDesc.get("DB_SPALTE").toString(), tf, modColor));
-              } catch (Exception x) { Logger.error(x); }
-              
-              //Font fnt = tf.getFont();
-              //tf.setFont(fnt.deriveFont((float)14.0));
-              //tf.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
+                label.setText(L.m(uiElementDesc.get("LABEL").toString()));
+              }
+              catch (Exception x)
+              {}
+
+              JPanel uiElement = new JPanel(new GridLayout(1, 1));
+              JTextField tf = new JTextField(TEXTFIELD_DEFAULT_WIDTH);
+              tf.setEditable(!readonly);
+
+              try
+              {
+                dataControls.add(new TextComponentDataControl(uiElementDesc.get(
+                  "DB_SPALTE").toString(), tf, modColor));
+              }
+              catch (Exception x)
+              {
+                Logger.error(x);
+              }
+
+              // Font fnt = tf.getFont();
+              // tf.setFont(fnt.deriveFont((float)14.0));
+              // tf.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
               uiElement.add(tf);
-              uiElement.setBorder(BorderFactory.createEmptyBorder(TF_BORDER,0,TF_BORDER,0));
+              uiElement.setBorder(BorderFactory.createEmptyBorder(TF_BORDER, 0,
+                TF_BORDER, 0));
               gbcTextfield.gridy = y;
               myInputPanel.add(uiElement, gbcTextfield);
             }
             else if (type.equals("textarea"))
             {
               JLabel label = new JLabel();
-              label.setBorder(BorderFactory.createEmptyBorder(TF_BORDER,0,TF_BORDER,0));
+              label.setBorder(BorderFactory.createEmptyBorder(TF_BORDER, 0,
+                TF_BORDER, 0));
               gbcLabelLeft.gridy = y;
               myInputPanel.add(label, gbcLabelLeft);
-              try{ label.setText(uiElementDesc.get("LABEL").toString()); } catch(Exception x){}
-              
-              int lines = 3;
-              try{ lines = Integer.parseInt(uiElementDesc.get("LINES").toString()); } catch(Exception x){}
-              JTextArea textarea = new JTextArea(lines,TEXTFIELD_DEFAULT_WIDTH);
-              textarea.setEditable(!readonly);
-              textarea.setFont(new JTextField().getFont());
-              
               try
               {
-                dataControls.add(new TextComponentDataControl(uiElementDesc.get("DB_SPALTE").toString(), textarea, modColor));
-              } catch (Exception x) { Logger.error(x); }
-              
-              JPanel uiElement = new JPanel(new GridLayout(1,1));
-              JScrollPane scrollPane = new JScrollPane(textarea);//, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER, JScrollPane.VERTICAL_SCROLLBAR_NEVER);
+                label.setText(L.m(uiElementDesc.get("LABEL").toString()));
+              }
+              catch (Exception x)
+              {}
+
+              int lines = 3;
+              try
+              {
+                lines = Integer.parseInt(uiElementDesc.get("LINES").toString());
+              }
+              catch (Exception x)
+              {}
+              JTextArea textarea = new JTextArea(lines, TEXTFIELD_DEFAULT_WIDTH);
+              textarea.setEditable(!readonly);
+              textarea.setFont(new JTextField().getFont());
+
+              try
+              {
+                dataControls.add(new TextComponentDataControl(uiElementDesc.get(
+                  "DB_SPALTE").toString(), textarea, modColor));
+              }
+              catch (Exception x)
+              {
+                Logger.error(x);
+              }
+
+              JPanel uiElement = new JPanel(new GridLayout(1, 1));
+              JScrollPane scrollPane = new JScrollPane(textarea);// ,
+              // JScrollPane.HORIZONTAL_SCROLLBAR_NEVER,
+              // JScrollPane.VERTICAL_SCROLLBAR_NEVER);
               scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
               scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
               uiElement.add(scrollPane);
-              
-              uiElement.setBorder(BorderFactory.createEmptyBorder(TF_BORDER,0,TF_BORDER,0));
+
+              uiElement.setBorder(BorderFactory.createEmptyBorder(TF_BORDER, 0,
+                TF_BORDER, 0));
               gbcTextarea.gridy = y;
               myInputPanel.add(uiElement, gbcTextarea);
             }
             else if (type.equals("separator"))
             {
-              JPanel uiElement = new JPanel(new GridLayout(1,1));
+              JPanel uiElement = new JPanel(new GridLayout(1, 1));
               uiElement.add(new JSeparator(SwingConstants.HORIZONTAL));
-              uiElement.setBorder(BorderFactory.createEmptyBorder(SEP_BORDER,0,SEP_BORDER,0));
+              uiElement.setBorder(BorderFactory.createEmptyBorder(SEP_BORDER, 0,
+                SEP_BORDER, 0));
               gbcSeparator.gridy = y;
               myInputPanel.add(uiElement, gbcSeparator);
             }
             else if (type.equals("label"))
             {
               JLabel uiElement = new JLabel();
-              uiElement.setBorder(BorderFactory.createEmptyBorder(TF_BORDER,0,TF_BORDER,0));
+              uiElement.setBorder(BorderFactory.createEmptyBorder(TF_BORDER, 0,
+                TF_BORDER, 0));
               gbcLabel.gridy = y;
               myInputPanel.add(uiElement, gbcLabel);
-              uiElement.setText(uiElementDesc.get("LABEL").toString());
+              uiElement.setText(L.m(uiElementDesc.get("LABEL").toString()));
             }
             else if (type.equals("combobox"))
             {
               JLabel label = new JLabel();
-              label.setBorder(BorderFactory.createEmptyBorder(TF_BORDER,0,TF_BORDER,0));
+              label.setBorder(BorderFactory.createEmptyBorder(TF_BORDER, 0,
+                TF_BORDER, 0));
               gbcLabelLeft.gridy = y;
               myInputPanel.add(label, gbcLabelLeft);
-              try{ label.setText(uiElementDesc.get("LABEL").toString()); } catch(Exception x){}
-              
-              JPanel uiElement = new JPanel(new GridLayout(1,1));
+              try
+              {
+                label.setText(L.m(uiElementDesc.get("LABEL").toString()));
+              }
+              catch (Exception x)
+              {}
+
+              JPanel uiElement = new JPanel(new GridLayout(1, 1));
               JComboBox combo = new JComboBox();
               combo.setEnabled(!readonly);
               boolean editable = false;
-              try{ if (uiElementDesc.get("EDIT").toString().equals("true")) editable = true; }catch(NodeNotFoundException x){}
+              try
+              {
+                if (uiElementDesc.get("EDIT").toString().equals("true"))
+                  editable = true;
+              }
+              catch (NodeNotFoundException x)
+              {}
               combo.setEditable(editable);
               try
               {
-                ComboBoxDataControl comboCtrl = new ComboBoxDataControl(uiElementDesc.get("DB_SPALTE").toString(), combo, modColor);
-                Iterator values = uiElementDesc.get("VALUES").iterator();
+                ComboBoxDataControl comboCtrl =
+                  new ComboBoxDataControl(uiElementDesc.get("DB_SPALTE").toString(),
+                    combo, modColor);
+                Iterator<ConfigThingy> values =
+                  uiElementDesc.get("VALUES").iterator();
                 while (values.hasNext())
                 {
                   comboCtrl.addItem(values.next().toString());
                 }
                 dataControls.add(comboCtrl);
-              } catch (Exception x) { Logger.error(x); }
-              
+              }
+              catch (Exception x)
+              {
+                Logger.error(x);
+              }
+
               uiElement.add(combo);
-              uiElement.setBorder(BorderFactory.createEmptyBorder(TF_BORDER,0,TF_BORDER,0));
+              uiElement.setBorder(BorderFactory.createEmptyBorder(TF_BORDER, 0,
+                TF_BORDER, 0));
               gbcCombobox.gridy = y;
               myInputPanel.add(uiElement, gbcCombobox);
             }
             else
             {
-              Logger.error(L.m("Ununterstützter TYPE für User Interface Element: %1", type));
+              Logger.error(L.m(
+                "Ununterstützter TYPE für User Interface Element: %1", type));
             }
-          } catch(NodeNotFoundException x) {Logger.error(x);}
+          }
+          catch (NodeNotFoundException x)
+          {
+            Logger.error(x);
+          }
         }
       }
-      
+
       ++y;
       gbcBottomglue.gridy = y;
       myInputPanel.add(Box.createGlue(), gbcBottomglue);
-      
+
       ConfigThingy buttonParents = conf.query("Buttons");
       piter = buttonParents.iterator();
       boolean firstButton = true;
       while (piter.hasNext())
       {
-        Iterator iter = ((ConfigThingy)piter.next()).iterator();
+        Iterator<ConfigThingy> iter = (piter.next()).iterator();
         while (iter.hasNext())
         {
-          ConfigThingy uiElementDesc = (ConfigThingy)iter.next();
-          try{
-            
+          ConfigThingy uiElementDesc = iter.next();
+          try
+          {
+
             /*
-             * ACHTUNG! DER FOLGENDE CODE SOLLTE SO GESCHRIEBEN WERDEN,
-             * DASS DER ZUSTAND AUCH IM FALLE EINES GESCHEITERTEN GET()
-             * UND EINER EVTL. DARAUS RESULTIERENDEN NULLPOINTEREXCEPTION
-             * NOCH KONSISTENT IST!
+             * ACHTUNG! DER FOLGENDE CODE SOLLTE SO GESCHRIEBEN WERDEN, DASS DER
+             * ZUSTAND AUCH IM FALLE EINES GESCHEITERTEN GET() UND EINER EVTL. DARAUS
+             * RESULTIERENDEN NULLPOINTEREXCEPTION NOCH KONSISTENT IST!
              */
-            
+
             String type = uiElementDesc.get("TYPE").toString();
             if (type.equals("button"))
             {
               String action = "";
-              try{
+              try
+              {
                 action = uiElementDesc.get("ACTION").toString();
-              }catch(NodeNotFoundException x){}
-              
-              String label  = uiElementDesc.get("LABEL").toString();
-              
+              }
+              catch (NodeNotFoundException x)
+              {}
+
+              String label = L.m(uiElementDesc.get("LABEL").toString());
+
               char hotkey = 0;
-              try{
+              try
+              {
                 hotkey = uiElementDesc.get("HOTKEY").toString().charAt(0);
-              }catch(Exception x){}
-              
+              }
+              catch (Exception x)
+              {}
+
               JButton button = new JButton(label);
               button.setMnemonic(hotkey);
-              JPanel uiElement = new JPanel(new GridLayout(1,1));
+              JPanel uiElement = new JPanel(new GridLayout(1, 1));
               int left = BUTTON_BORDER;
-              if (firstButton) {left = 0; firstButton = false;}
+              if (firstButton)
+              {
+                left = 0;
+                firstButton = false;
+              }
               int right = BUTTON_BORDER;
               if (!iter.hasNext()) right = 0;
-              uiElement.setBorder(BorderFactory.createEmptyBorder(0,left,0,right));
+              uiElement.setBorder(BorderFactory.createEmptyBorder(0, left, 0, right));
               uiElement.add(button);
               myButtonPanel.add(uiElement);
-              
+
               ActionListener actionL = getAction(action);
-              if (actionL != null) 
+              if (actionL != null)
                 button.addActionListener(actionL);
               else
                 button.setEnabled(false);
-              
+
               if (action.equals("restoreStandard"))
               {
                 buttonsToGreyOutIfNoChanges.add(button);
-              } else
-              if (action.equals("switchWindow"))
+              }
+              else if (action.equals("switchWindow"))
               {
                 final String window = uiElementDesc.get("WINDOW").toString();
-                button.addActionListener( new ActionListener()
-                    { public void actionPerformed(ActionEvent e){ showWindow(window); }
-                    });
-              
+                button.addActionListener(new ActionListener()
+                {
+                  public void actionPerformed(ActionEvent e)
+                  {
+                    showWindow(window);
+                  }
+                });
+
                 button.setEnabled(true);
               }
-              
+
             }
             else if (type.equals("glue"))
             {
-              try{
-                int minsize = Integer.parseInt(uiElementDesc.get("MINSIZE").toString());
+              try
+              {
+                int minsize =
+                  Integer.parseInt(uiElementDesc.get("MINSIZE").toString());
                 myButtonPanel.add(Box.createHorizontalStrut(minsize));
-              }catch(Exception x){}
+              }
+              catch (Exception x)
+              {}
               myButtonPanel.add(Box.createHorizontalGlue());
             }
-          } catch(NodeNotFoundException x) {Logger.error(x);}
+          }
+          catch (NodeNotFoundException x)
+          {
+            Logger.error(x);
+          }
         }
       }
-      
+
       Iterator<DataControl> iter = dataControls.iterator();
-      while (iter.hasNext()) iter.next().addColorChangeListener(this);
+      while (iter.hasNext())
+        iter.next().addColorChangeListener(this);
       colorChanged();
 
     }
   }
-  
+
   /**
-   * Übersetzt den Namen einer ACTION in eine Referenz auf das
-   * passende actionListener_... Objekt.
+   * Übersetzt den Namen einer ACTION in eine Referenz auf das passende
+   * actionListener_... Objekt.
+   * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private ActionListener getAction(String action)
@@ -1145,16 +1446,19 @@ public class DatensatzBearbeiten
     }
     else
       Logger.error(L.m("Ununterstützte ACTION: %1", action));
-    
+
     return null;
   }
-  
+
   public static void main(String[] args) throws Exception
   {
     String confFile = "testdata/AbsenderdatenBearbeiten.conf";
     DJDataset datensatz = new TestDJDataset();
-    ConfigThingy conf = new ConfigThingy("",new URL(new File(System.getProperty("user.dir")).toURL(),confFile)); 
-    DatensatzBearbeiten ab = new DatensatzBearbeiten(conf.get("AbsenderdatenBearbeiten"), datensatz);
+    ConfigThingy conf =
+      new ConfigThingy("", new URL(new File(System.getProperty("user.dir")).toURL(),
+        confFile));
+    DatensatzBearbeiten ab =
+      new DatensatzBearbeiten(conf.get("AbsenderdatenBearbeiten"), datensatz);
     Thread.sleep(60000);
     ab.dispose();
   }
