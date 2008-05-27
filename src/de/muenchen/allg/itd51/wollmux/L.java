@@ -50,18 +50,19 @@ public class L
   /**
    * Die URL der Daten und Übersetzungen zur Lokalisierung.
    */
-  private static final URL LOCALIZE_DATA_URL = L.class.getClassLoader().getResource(
-    "data/localization.conf");
+  private static final URL LOCALIZE_DATA_URL =
+    L.class.getClassLoader().getResource("data/localization.conf");
 
   /**
-   * Wird für die aktuelle Sprache initialisiert und bildet einen Originalstring
-   * auf einen übersetzten String ab.
+   * Wird für die aktuelle Sprache initialisiert und bildet einen Originalstring auf
+   * einen übersetzten String ab.
    */
-  private static final Map<String, String> mapMessageToTranslation = new HashMap<String, String>();
+  private static final Map<String, String> mapMessageToTranslation =
+    new HashMap<String, String>();
 
   /**
-   * Falls für original eine Übersetzung verfügbar ist, wird diese
-   * zurückgeliefert, ansonsten der Originalstring.
+   * Falls für original eine Übersetzung verfügbar ist, wird diese zurückgeliefert,
+   * ansonsten der Originalstring.
    * 
    * @author Matthias Benkmann (D-III-ITD D.10) TESTED
    */
@@ -75,9 +76,9 @@ public class L
   }
 
   /**
-   * Falls für original eine Übersetzung verfügbar ist, wird diese
-   * zurückgeliefert, ansonsten der Originalstring. Dabei werden alle Vorkommen
-   * von "%1" durch insertion1 ersetzt.
+   * Falls für original eine Übersetzung verfügbar ist, wird diese zurückgeliefert,
+   * ansonsten der Originalstring. Dabei werden alle Vorkommen von "%1" durch
+   * insertion1 ersetzt.
    * 
    * @author Matthias Benkmann (D-III-ITD D.10) TESTED
    */
@@ -89,9 +90,9 @@ public class L
   }
 
   /**
-   * Falls für original eine Übersetzung verfügbar ist, wird diese
-   * zurückgeliefert, ansonsten der Originalstring. Dabei werden alle Vorkommen
-   * von "%1" durch insertion1 und von "%2" durch insertion2 ersetzt.
+   * Falls für original eine Übersetzung verfügbar ist, wird diese zurückgeliefert,
+   * ansonsten der Originalstring. Dabei werden alle Vorkommen von "%1" durch
+   * insertion1 und von "%2" durch insertion2 ersetzt.
    * 
    * @author Matthias Benkmann (D-III-ITD D.10) TESTED
    */
@@ -101,24 +102,27 @@ public class L
     // interpretiert
     return replace(m(original, insertion1), "%2", "" + insertion2);
   }
-  
-  public static String m(String original, Object insertion1, Object insertion2, Object insertion3)
+
+  public static String m(String original, Object insertion1, Object insertion2,
+      Object insertion3)
   {
     // nicht replaceAll verwenden, weil es \ und $ besonders
     // interpretiert
     return replace(m(original, insertion1, insertion2), "%3", "" + insertion3);
   }
-  
-  public static String m(String original, Object insertion1, Object insertion2, Object insertion3, Object insertion4)
+
+  public static String m(String original, Object insertion1, Object insertion2,
+      Object insertion3, Object insertion4)
   {
     // nicht replaceAll verwenden, weil es \ und $ besonders
     // interpretiert
-    return replace(m(original, insertion1, insertion2, insertion3), "%4", "" + insertion4);
+    return replace(m(original, insertion1, insertion2, insertion3), "%4", ""
+      + insertion4);
   }
 
   /**
-   * Ersetzt in where alle Vorkommen von what durch withWhat und liefert das
-   * Ergebnis zurück.
+   * Ersetzt in where alle Vorkommen von what durch withWhat und liefert das Ergebnis
+   * zurück.
    * 
    * @author Matthias Benkmann (D-III-ITD D.10) TESTED
    */
@@ -180,12 +184,12 @@ public class L
         else
         {
           debugMessages.append("Aliases line with less than 2 entries: "
-                               + aliasConf.stringRepresentation());
+            + aliasConf.stringRepresentation());
           debugMessages.append('\n');
         }
       }
 
-      ConfigThingy messages = l10n.get("Messages", 2);
+      ConfigThingy messages = l10n.query("Messages", 2);
       iter = messages.iterator();
       String original = "foo";
       while (iter.hasNext())
