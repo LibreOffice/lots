@@ -6,7 +6,7 @@ Standards-Version: 3.6.1
 
 Package: wollmux
 Architecture: all
-Depends: openoffice.org-writer, openoffice.org-core02, openoffice.org-core03, openoffice.org-core03u, openoffice.org-core04, openoffice.org-core04u, openoffice.org-core05, openoffice.org-core06, openoffice.org-core07, openoffice.org-core08, openoffice.org-core09, sun-j2re1.5
+Depends: openoffice.org-writer, openoffice.org-core02, openoffice.org-core03, openoffice.org-core03u, openoffice.org-core04, openoffice.org-core04u, openoffice.org-core05, openoffice.org-core06, openoffice.org-core07, openoffice.org-core08, openoffice.org-core09
 Recommends: wollmux-standalone-config
 Description: Das Briefkopfsystem der Landeshauptstadt München
  Das Briefkopfsystem der Landeshauptstadt München
