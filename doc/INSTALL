@@ -113,6 +113,8 @@ Option 2: Using development sources from git
 
     javaw.exe -jar <path_to>/WollMuxBar.jar
 
-  will run the WollMux toolbar. Note, however, that you need a working 
-  configuration (not described in this document) before this will work.
+  will run the WollMux toolbar. The dist/ directory contains a shell script
+  wollmuxbar and a batch file wollmuxbar.bat that demonstrate this.
+  Note, however, that you need a working configuration 
+  (not described in this document) before any of this will work.
 
