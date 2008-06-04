@@ -36,7 +36,7 @@ install: build
 	cp WollMux/dist/{WollMuxBar.jar,WollMux.uno.pkg} $(CURDIR)/debian/wollmux/usr/lib/wollmux
 	mkdir -p $(CURDIR)/debian/wollmux/usr/bin
 	cp WollMux/dist/wollmuxbar $(CURDIR)/debian/wollmux/usr/bin
-	chmod a+x $(CURDIR)/debian/wollmux/usr/bin
+	chmod a+rx $(CURDIR)/debian/wollmux/usr/bin/wollmuxbar
 
 # Build architecture-independent files here.
 binary-indep: build install
