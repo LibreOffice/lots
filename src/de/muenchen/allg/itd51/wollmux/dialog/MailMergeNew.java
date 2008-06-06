@@ -282,8 +282,8 @@ public class MailMergeNew
     hbox.add(button);
 
     // FIXME: Ausgrauen, wenn kein Datenquelle ausgewählt
-    button = new JPotentiallyOverlongPopupMenuButton(L.m("Serienbrieffeld"),
-      new Iterable()
+    button =
+      new JPotentiallyOverlongPopupMenuButton(L.m("Serienbrieffeld"), new Iterable()
       {
         public Iterator<Action> iterator()
         {
@@ -433,8 +433,8 @@ public class MailMergeNew
     });
     tabelleMenu.add(item);
 
-    final JMenuItem addColumnsMenuItem = new JMenuItem(
-      L.m("Tabellenspalten ergänzen"));
+    final JMenuItem addColumnsMenuItem =
+      new JMenuItem(L.m("Tabellenspalten ergänzen"));
     addColumnsMenuItem.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
@@ -444,7 +444,8 @@ public class MailMergeNew
     });
     tabelleMenu.add(addColumnsMenuItem);
 
-    final JMenuItem adjustFieldsMenuItem = new JMenuItem(L.m("Alle Felder anpassen"));
+    final JMenuItem adjustFieldsMenuItem =
+      new JMenuItem(L.m("Alle Felder anpassen"));
     adjustFieldsMenuItem.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
@@ -474,8 +475,9 @@ public class MailMergeNew
 
         // Ausgrauen der Anpassen-Knöpfe, wenn alle Felder mit den
         // entsprechenden Datenquellenfeldern zugeordnet werden können.
-        boolean hasUnmappedFields = mod.getReferencedFieldIDsThatAreNotInSchema(new HashSet<String>(
-          ds.getColumnNames())).length > 0;
+        boolean hasUnmappedFields =
+          mod.getReferencedFieldIDsThatAreNotInSchema(new HashSet<String>(
+            ds.getColumnNames())).length > 0;
         adjustFieldsMenuItem.setEnabled(hasUnmappedFields);
         // TODO: einkommentieren wenn implementiert:
         // addColumnsMenuItem.setEnabled(hasUnmappedFields);
@@ -551,8 +553,9 @@ public class MailMergeNew
    */
   protected void showAdjustFieldsDialog()
   {
-    ReferencedFieldID[] fieldIDs = mod.getReferencedFieldIDsThatAreNotInSchema(new HashSet<String>(
-      ds.getColumnNames()));
+    ReferencedFieldID[] fieldIDs =
+      mod.getReferencedFieldIDsThatAreNotInSchema(new HashSet<String>(
+        ds.getColumnNames()));
     ActionListener submitActionListener = new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
@@ -561,7 +564,8 @@ public class MailMergeNew
         for (Iterator iter = mapIdToSubstitution.keySet().iterator(); iter.hasNext();)
         {
           String fieldId = (String) iter.next();
-          FieldSubstitution subst = (FieldSubstitution) mapIdToSubstitution.get(fieldId);
+          FieldSubstitution subst =
+            (FieldSubstitution) mapIdToSubstitution.get(fieldId);
           mod.applyFieldSubstitution(fieldId, subst);
         }
       }
@@ -579,18 +583,19 @@ public class MailMergeNew
    */
   protected void showAddMissingColumnsDialog()
   {
-    ReferencedFieldID[] fieldIDs = mod.getReferencedFieldIDsThatAreNotInSchema(new HashSet<String>(
-      ds.getColumnNames()));
+    ReferencedFieldID[] fieldIDs =
+      mod.getReferencedFieldIDsThatAreNotInSchema(new HashSet<String>(
+        ds.getColumnNames()));
     ActionListener submitActionListener = new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
       {
-        // Enthält die Zuordnung ID ->
-        // de.muenchen.allg.itd51.wollmux.TextDocumentModel.FieldSubstitution,
-        // in der die anzuwendende Ersetzungsregel beschrieben ist.
+      // Enthält die Zuordnung ID ->
+      // de.muenchen.allg.itd51.wollmux.TextDocumentModel.FieldSubstitution,
+      // in der die anzuwendende Ersetzungsregel beschrieben ist.
 
-        // HashMap mapIdToSubstitution = (HashMap) e.getSource();
-        // TODO: tabellenspalten wie in mapIdToSubstitution beschrieben ergänzen
+      // HashMap mapIdToSubstitution = (HashMap) e.getSource();
+      // TODO: tabellenspalten wie in mapIdToSubstitution beschrieben ergänzen
       }
     };
     showFieldMappingDialog(fieldIDs, L.m("Tabellenspalten ergänzen"), L.m("Spalte"),
@@ -640,11 +645,12 @@ public class MailMergeNew
     dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
     final TextComponentTags[] currentField = new TextComponentTags[] { null };
-    final HashMap<TextComponentTags, String> mapTextComponentTagsToFieldname = new HashMap<TextComponentTags, String>();
+    final HashMap<TextComponentTags, String> mapTextComponentTagsToFieldname =
+      new HashMap<TextComponentTags, String>();
 
     Box headers = Box.createHorizontalBox();
-    final JButton insertFieldButton = new JPotentiallyOverlongPopupMenuButton(
-      L.m("Serienbrieffeld"), new Iterable()
+    final JButton insertFieldButton =
+      new JPotentiallyOverlongPopupMenuButton(L.m("Serienbrieffeld"), new Iterable()
       {
         public Iterator<Action> iterator()
         {
@@ -719,7 +725,7 @@ public class MailMergeNew
           List c = getContent();
           if (c.size() == 0) return true;
           return c.size() == 1
-                 && ((TextComponentTags.ContentElement) c.get(0)).isTag();
+            && ((TextComponentTags.ContentElement) c.get(0)).isTag();
         }
       };
       mapTextComponentTagsToFieldname.put(field, fieldId);
@@ -729,8 +735,7 @@ public class MailMergeNew
       field.getJTextComponent().addFocusListener(new FocusListener()
       {
         public void focusLost(FocusEvent e)
-        {
-        }
+        {}
 
         public void focusGained(FocusEvent e)
         {
@@ -771,8 +776,10 @@ public class MailMergeNew
     {
       public void actionPerformed(ActionEvent e)
       {
-        final HashMap<String, FieldSubstitution> result = new HashMap<String, FieldSubstitution>();
-        for (Iterator<TextComponentTags> iter = mapTextComponentTagsToFieldname.keySet().iterator(); iter.hasNext();)
+        final HashMap<String, FieldSubstitution> result =
+          new HashMap<String, FieldSubstitution>();
+        for (Iterator<TextComponentTags> iter =
+          mapTextComponentTagsToFieldname.keySet().iterator(); iter.hasNext();)
         {
           TextComponentTags f = iter.next();
           if (!f.isContentValid()) continue;
@@ -780,7 +787,8 @@ public class MailMergeNew
           FieldSubstitution subst = new TextDocumentModel.FieldSubstitution();
           for (Iterator contentIter = f.getContent().iterator(); contentIter.hasNext();)
           {
-            TextComponentTags.ContentElement ce = (TextComponentTags.ContentElement) contentIter.next();
+            TextComponentTags.ContentElement ce =
+              (TextComponentTags.ContentElement) contentIter.next();
             if (ce.isTag())
               subst.addField(ce.toString());
             else
@@ -803,9 +811,9 @@ public class MailMergeNew
     });
     buttonBox.add(button);
 
-    JScrollPane spane = new JScrollPane(itemBox,
-      ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
-      ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+    JScrollPane spane =
+      new JScrollPane(itemBox, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+        ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
     spane.setBorder(BorderFactory.createEmptyBorder());
     dialog.add(spane);
 
@@ -846,15 +854,13 @@ public class MailMergeNew
             abort();
           }
           catch (Exception x)
-          {
-          }
+          {}
           ;
         }
       });
     }
     catch (Exception x)
-    {
-    }
+    {}
   }
 
   /**
@@ -894,9 +900,9 @@ public class MailMergeNew
     vbox.add(Box.createVerticalStrut(5));
 
     Box selectBox = Box.createVerticalBox();
-    Border border = BorderFactory.createTitledBorder(
-      BorderFactory.createLineBorder(Color.GRAY),
-      L.m("Folgende Datensätze verwenden"));
+    Border border =
+      BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.GRAY),
+        L.m("Folgende Datensätze verwenden"));
     selectBox.setBorder(border);
 
     hbox = Box.createHorizontalBox();
@@ -952,15 +958,13 @@ public class MailMergeNew
           rangeStart = Integer.parseInt(start.getText());
         }
         catch (Exception x)
-        {
-        }
+        {}
         try
         {
           rangeEnd = Integer.parseInt(end.getText());
         }
         catch (Exception x)
-        {
-        }
+        {}
       }
 
       public void insertUpdate(DocumentEvent e)
@@ -992,33 +996,33 @@ public class MailMergeNew
 
     // TODO Anwahl muss selben Effekt haben wie das Drücken des "Einzelauswahl"
     // Buttons
-    final JRadioButton einzelauswahlRadioButton = new JRadioButton("");
-    hbox.add(einzelauswahlRadioButton);
-    radioGroup.add(einzelauswahlRadioButton);
-
-    ActionListener einzelauswahlActionListener = new ActionListener()
-    {
-      public void actionPerformed(ActionEvent e)
-      {
-        einzelauswahlRadioButton.setSelected(true);
-        datasetSelectionType = DatasetSelectionType.INDIVIDUAL;
-        // TODO showEinzelauswahlDialog();
-      }
-    };
-
-    einzelauswahlRadioButton.addActionListener(einzelauswahlActionListener);
-
-    JButton button = new JButton(L.m("Einzelauswahl..."));
-    hbox.add(button);
-    hbox.add(Box.createHorizontalGlue());
-    button.addActionListener(einzelauswahlActionListener);
+    // final JRadioButton einzelauswahlRadioButton = new JRadioButton("");
+    // hbox.add(einzelauswahlRadioButton);
+    // radioGroup.add(einzelauswahlRadioButton);
+    //
+    // ActionListener einzelauswahlActionListener = new ActionListener()
+    // {
+    // public void actionPerformed(ActionEvent e)
+    // {
+    // einzelauswahlRadioButton.setSelected(true);
+    // datasetSelectionType = DatasetSelectionType.INDIVIDUAL;
+    // // TODO showEinzelauswahlDialog();
+    // }
+    // };
+    //
+    // einzelauswahlRadioButton.addActionListener(einzelauswahlActionListener);
+    //
+    // JButton button = new JButton(L.m("Einzelauswahl..."));
+    // hbox.add(button);
+    // hbox.add(Box.createHorizontalGlue());
+    // button.addActionListener(einzelauswahlActionListener);
 
     selectBox.add(hbox);
     vbox.add(selectBox);
     vbox.add(Box.createVerticalStrut(5));
 
     hbox = Box.createHorizontalBox();
-    button = new JButton(L.m("Abbrechen"));
+    JButton button = new JButton(L.m("Abbrechen"));
     button.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
@@ -1115,8 +1119,9 @@ public class MailMergeNew
       public void actionPerformed(ActionEvent e)
       {
         // ConfigThingy für leere Gender-Funktion zusammenbauen.
-        ConfigThingy genderConf = GenderDialog.generateGenderTrafoConf(
-          ds.getColumnNames().get(0).toString(), "", "", "");
+        ConfigThingy genderConf =
+          GenderDialog.generateGenderTrafoConf(
+            ds.getColumnNames().get(0).toString(), "", "", "");
         insertFieldFromTrafoDialog(ds.getColumnNames(), genderButtonName, genderConf);
       }
     });
@@ -1148,7 +1153,7 @@ public class MailMergeNew
     {
       public void actionPerformed(ActionEvent e)
       {
-        // TODO insertDatasetIndex();
+      // TODO insertDatasetIndex();
       }
     });
     menu.add(button);
@@ -1159,7 +1164,7 @@ public class MailMergeNew
     {
       public void actionPerformed(ActionEvent e)
       {
-        // TODO insertMailMergeIndex();
+      // TODO insertMailMergeIndex();
       }
     });
     menu.add(button);
@@ -1374,9 +1379,9 @@ public class MailMergeNew
    * die Seriendruckfelder im Dokument entsprechend setzt. Herangezogen werden die
    * Properties {@link #PROP_QUERYRESULTS} (ein Objekt vom Typ {@link QueryResults})
    * und "MailMergeNew_Schema", was ein Set mit den Spaltennamen enthält, sowie
-   * {@link #PROP_MAILMERGENEW_SELECTION}, was eine Liste der Indizes der ausgewählten
-   * Datensätze ist (0 ist der erste Datensatz). Dies funktioniert natürlich nur
-   * dann, wenn pmod kein Proxy ist.
+   * {@link #PROP_MAILMERGENEW_SELECTION}, was eine Liste der Indizes der
+   * ausgewählten Datensätze ist (0 ist der erste Datensatz). Dies funktioniert
+   * natürlich nur dann, wenn pmod kein Proxy ist.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
@@ -1385,7 +1390,8 @@ public class MailMergeNew
   {
     QueryResults data = (QueryResults) pmod.getPropertyValue(PROP_QUERYRESULTS);
     Collection schema = (Collection) pmod.getPropertyValue("MailMergeNew_Schema");
-    List<Integer> selection = (List) pmod.getPropertyValue(PROP_MAILMERGENEW_SELECTION);
+    List<Integer> selection =
+      (List) pmod.getPropertyValue(PROP_MAILMERGENEW_SELECTION);
     if (selection.isEmpty()) return;
 
     Iterator iter = data.iterator();
@@ -1427,19 +1433,16 @@ public class MailMergeNew
     }
 
     public void keyPressed(KeyEvent e)
-    {
-    }
+    {}
 
     public void keyReleased(KeyEvent e)
-    {
-    }
+    {}
   }
 
   private class MyWindowListener implements WindowListener
   {
     public void windowOpened(WindowEvent e)
-    {
-    }
+    {}
 
     public void windowClosing(WindowEvent e)
     {
@@ -1447,24 +1450,19 @@ public class MailMergeNew
     }
 
     public void windowClosed(WindowEvent e)
-    {
-    }
+    {}
 
     public void windowIconified(WindowEvent e)
-    {
-    }
+    {}
 
     public void windowDeiconified(WindowEvent e)
-    {
-    }
+    {}
 
     public void windowActivated(WindowEvent e)
-    {
-    }
+    {}
 
     public void windowDeactivated(WindowEvent e)
-    {
-    }
+    {}
 
   }
 
