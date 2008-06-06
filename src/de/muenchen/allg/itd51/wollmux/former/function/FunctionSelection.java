@@ -1,9 +1,8 @@
-//TODO L.m()
 /*
-* Dateiname: FunctionSelection.java
-* Projekt  : WollMux
-* Funktion : Speichert eine Funktionsauswahl/-def/-konfiguration des Benutzers
-* 
+ * Dateiname: FunctionSelection.java
+ * Projekt  : WollMux
+ * Funktion : Speichert eine Funktionsauswahl/-def/-konfiguration des Benutzers
+ * 
  * Copyright (c) 2008 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,18 +17,18 @@
  * You should have received a copy of the European Union Public Licence
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
-*
-* Änderungshistorie:
-* Datum      | Wer | Änderungsgrund
-* -------------------------------------------------------------------
-* 25.09.2006 | BNK | Erstellung
-* 16.03.2007 | BNK | +updateFieldReferences()
-* -------------------------------------------------------------------
-*
-* @author Matthias Benkmann (D-III-ITD 5.1)
-* @version 1.0
-* 
-*/
+ *
+ * Änderungshistorie:
+ * Datum      | Wer | Änderungsgrund
+ * -------------------------------------------------------------------
+ * 25.09.2006 | BNK | Erstellung
+ * 16.03.2007 | BNK | +updateFieldReferences()
+ * -------------------------------------------------------------------
+ *
+ * @author Matthias Benkmann (D-III-ITD 5.1)
+ * @version 1.0
+ * 
+ */
 package de.muenchen.allg.itd51.wollmux.former.function;
 
 import java.util.HashMap;
@@ -42,97 +41,111 @@ public class FunctionSelection implements FunctionSelectionAccess
   /**
    * Leere Liste von Parameternamen.
    */
-  private static final String[] NO_PARAM_NAMES = new String[]{};
-  
+  private static final String[] NO_PARAM_NAMES = new String[] {};
+
   /**
-   * Falls der Benutzer im Experten-Modus eine Funktionsdefinition selbst geschrieben hat,
-   * so wird diese hier abgelegt. Das ConfigThingy hat immer einen Wurzelknoten der keine
-   * Basisfunktion ist, d.h. "AUTOFILL", "PLAUSI" oder ähnliches.
+   * Falls der Benutzer im Experten-Modus eine Funktionsdefinition selbst geschrieben
+   * hat, so wird diese hier abgelegt. Das ConfigThingy hat immer einen Wurzelknoten
+   * der keine Basisfunktion ist, d.h. "AUTOFILL", "PLAUSI" oder ähnliches.
    */
   private ConfigThingy expertConf = new ConfigThingy("EXPERT");
-  
+
   /**
    * Der Name der vom Benutzer ausgewählten Funktion.
    */
   private String functionName = NO_FUNCTION;
-  
+
   /**
    * Die Namen aller Parameter, die die Funktion erwartet.
    */
   private String[] paramNames = NO_PARAM_NAMES;
-  
+
   /**
-   * Mapped die Namen der Funktionsparameter auf die vom Benutzer konfigurierten Werte
-   * als {@link ParamValue} Objekte. Achtung! Diese Map enthält alle jemals vom Benutzer
-   * gesetzten Werte, nicht nur die für die aktuelle Funktion. Auf diese Weise kann der
-   * Benutzer die Funktion wechseln, ohne dadurch seine Eingaben von früher zu verlieren.
-   * Bei Funktionen mit Parametern des selben Namens kann dies je nachdem ob der Name bei
-   * beiden Funktionen für das selbe steht oder nicht zu erwünschter
-   * Erleichterung oder zu unerwünschter Verwirrung führen.
+   * Mapped die Namen der Funktionsparameter auf die vom Benutzer konfigurierten
+   * Werte als {@link ParamValue} Objekte. Achtung! Diese Map enthält alle jemals vom
+   * Benutzer gesetzten Werte, nicht nur die für die aktuelle Funktion. Auf diese
+   * Weise kann der Benutzer die Funktion wechseln, ohne dadurch seine Eingaben von
+   * früher zu verlieren. Bei Funktionen mit Parametern des selben Namens kann dies
+   * je nachdem ob der Name bei beiden Funktionen für das selbe steht oder nicht zu
+   * erwünschter Erleichterung oder zu unerwünschter Verwirrung führen.
    */
-  private Map<String, ParamValue> mapNameToParamValue = new HashMap<String, ParamValue>();
-  
+  private Map<String, ParamValue> mapNameToParamValue =
+    new HashMap<String, ParamValue>();
+
   /**
    * Erzeugt eine FunctionSelection für "keine Funktion".
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public FunctionSelection() {}
-  
+  public FunctionSelection()
+  {}
+
   /**
    * Copy Constructor.
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TESTED */
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
+   */
   public FunctionSelection(FunctionSelection orig)
   {
     expertConf = new ConfigThingy(orig.expertConf);
     functionName = orig.functionName;
     this.paramNames = new String[orig.paramNames.length];
     System.arraycopy(orig.paramNames, 0, this.paramNames, 0, orig.paramNames.length);
-    this.mapNameToParamValue = new HashMap<String, ParamValue>(orig.mapNameToParamValue);
+    this.mapNameToParamValue =
+      new HashMap<String, ParamValue>(orig.mapNameToParamValue);
   }
-  
-  
-  /* (non-Javadoc)
+
+  /*
+   * (non-Javadoc)
+   * 
    * @see de.muenchen.allg.itd51.wollmux.former.FunctionSelectionAccess#isReference()
-   * TESTED
+   *      TESTED
    */
   public boolean isReference()
   {
     return (functionName != NO_FUNCTION && functionName != EXPERT_FUNCTION);
   }
-  
+
   public boolean isExpert()
   {
     return functionName == EXPERT_FUNCTION;
   }
-  
+
   public boolean isNone()
   {
     return functionName == NO_FUNCTION;
   }
-  
-  /* (non-Javadoc)
+
+  /*
+   * (non-Javadoc)
+   * 
    * @see de.muenchen.allg.itd51.wollmux.former.FunctionSelectionAccess#getName()
    */
-  public String getFunctionName() { return functionName;}
-  
+  public String getFunctionName()
+  {
+    return functionName;
+  }
+
   public String[] getParameterNames()
   {
     return paramNames;
   }
-  
-  /* (non-Javadoc)
+
+  /*
+   * (non-Javadoc)
+   * 
    * @see de.muenchen.allg.itd51.wollmux.former.FunctionSelectionAccess#setParameterValues(java.util.Map)
    */
   public void setParameterValues(Map<String, ParamValue> mapNameToParamValue)
   {
     this.mapNameToParamValue = mapNameToParamValue;
   }
-  
-  /* (non-Javadoc)
-   * @see de.muenchen.allg.itd51.wollmux.former.FunctionSelectionAccess#setFunction(java.lang.String, java.lang.String[])
-   * TESTED
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see de.muenchen.allg.itd51.wollmux.former.FunctionSelectionAccess#setFunction(java.lang.String,
+   *      java.lang.String[]) TESTED
    */
   public void setFunction(String functionName, String[] paramNames)
   {
@@ -153,15 +166,17 @@ public class FunctionSelection implements FunctionSelectionAccess
       this.functionName = functionName;
     }
   }
-  
+
   public ConfigThingy getExpertFunction()
   {
     return new ConfigThingy(expertConf);
   }
-  
-  /* (non-Javadoc)
+
+  /*
+   * (non-Javadoc)
+   * 
    * @see de.muenchen.allg.itd51.wollmux.former.FunctionSelectionAccess#setExpertFunction(de.muenchen.allg.itd51.parser.ConfigThingy)
-   * TESTED
+   *      TESTED
    */
   public void setExpertFunction(ConfigThingy funConf)
   {
@@ -169,32 +184,35 @@ public class FunctionSelection implements FunctionSelectionAccess
     this.paramNames = NO_PARAM_NAMES;
     this.expertConf = new ConfigThingy(funConf);
   }
-  
+
   /**
-   * Liefert ein ConfigThingy, das diese FunctionSelection repräsentiert (ein leeres, falls
-   * keine Funktion ausgewählt).
-   * @param root der Name des Wurzelknotens des zu liefernden ConfigThingys.
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TESTED 
+   * Liefert ein ConfigThingy, das diese FunctionSelection repräsentiert (ein leeres,
+   * falls keine Funktion ausgewählt).
+   * 
+   * @param root
+   *          der Name des Wurzelknotens des zu liefernden ConfigThingys.
+   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public ConfigThingy export(String root)
   {
     return export(root, null);
   }
-  
+
   /**
-   * Liefert ein ConfigThingy, das diese FunctionSelection repräsentiert (ein leeres, falls
-   * keine Funktion ausgewählt).
-   * @param root der Name des Wurzelknotens des zu liefernden ConfigThingys.
-   * @param defaultBind falls nicht null, so werden alle unspezifizierten Parameter dieser
-   *        FunctionSelection an VALUE("&lt;defaultBind>") gebunden. 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TESTED 
+   * Liefert ein ConfigThingy, das diese FunctionSelection repräsentiert (ein leeres,
+   * falls keine Funktion ausgewählt).
+   * 
+   * @param root
+   *          der Name des Wurzelknotens des zu liefernden ConfigThingys.
+   * @param defaultBind
+   *          falls nicht null, so werden alle unspezifizierten Parameter dieser
+   *          FunctionSelection an VALUE("&lt;defaultBind>") gebunden.
+   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public ConfigThingy export(String root, String defaultBind)
   {
-    ConfigThingy rootConf = new ConfigThingy(root); 
-    
+    ConfigThingy rootConf = new ConfigThingy(root);
+
     if (isReference())
     {
       ConfigThingy conf = rootConf.add("BIND");
@@ -210,11 +228,13 @@ public class FunctionSelection implements FunctionSelectionAccess
           if (value.isFieldReference())
           {
             set.add("VALUE").add(value.getString());
-          } else
+          }
+          else
           {
             set.add(value.getString());
           }
-        } else if (defaultBind != null)
+        }
+        else if (defaultBind != null)
         {
           ConfigThingy set = conf.add("SET");
           set.add(params[i]);
@@ -227,7 +247,7 @@ public class FunctionSelection implements FunctionSelectionAccess
       rootConf = getExpertFunction();
       rootConf.setName(root);
     }
-    
+
     return rootConf;
   }
 
