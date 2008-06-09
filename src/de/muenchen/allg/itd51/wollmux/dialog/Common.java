@@ -1,4 +1,3 @@
-//TODO L.m()
 /*
  * Dateiname: Common.java
  * Projekt  : WollMux
@@ -43,6 +42,7 @@ import javax.swing.UIManager;
 import javax.swing.plaf.FontUIResource;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
 
 /**
@@ -159,7 +159,7 @@ public class Common
         {}
       }
     }
-    Logger.debug(changedFonts + " Fontgrößen verändert!");
+    Logger.debug(changedFonts + L.m(" Fontgrößen verändert!"));
   }
 
   /**
