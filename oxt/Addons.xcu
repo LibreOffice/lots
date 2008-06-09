@@ -94,7 +94,7 @@
             <value>Block: immer drucken</value>
             <value xml:lang="de">Block: immer drucken</value>
             <value xml:lang="nl">Textblok: altijd printen</value>
-            <value xml:lang="en">Block: print allways</value>
+            <value xml:lang="en">Block: print always</value>
           </prop>
           <prop oor:name="ImageIdentifier" oor:type="xs:string">
             <value/>
@@ -115,7 +115,7 @@
             <value>immer ausser Original</value>
             <value xml:lang="de">immer ausser Original</value>
             <value xml:lang="nl">altijd zonder originaal</value>
-            <value xml:lang="en">allways but original</value>
+            <value xml:lang="en">always but original</value>
           </prop>
           <prop oor:name="ImageIdentifier" oor:type="xs:string">
             <value/>

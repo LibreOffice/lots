@@ -58,6 +58,7 @@
            <value>Textbausteine (WollMux)</value>
            <value xml:lang="de">Textbausteine (WollMux)</value>
            <value xml:lang="nl">Tekstbouwsteenen (WollMux)</value>
+           <value xml:lang="en">Textmodules (WollMux)</value>
          </prop>
          <prop oor:name="DockPos" oor:type="xs:string">
            <value>0,2</value>
@@ -95,6 +96,7 @@
            <value>Werkzeuge für Vorlagenersteller (WollMux)</value>
            <value xml:lang="de">Werkzeuge für Vorlagenersteller (WollMux)</value>
            <value xml:lang="nl">Werktiug voor formulierontwikkelaar (WollMux)</value>
+           <value xml:lang="en">Tools for creating templates (WollMux)</value>
          </prop>
          <prop oor:name="DockPos" oor:type="xs:string">
            <value>0,2</value>
