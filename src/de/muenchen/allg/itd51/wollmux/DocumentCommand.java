@@ -51,8 +51,8 @@ import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.parser.SyntaxErrorException;
 
 /**
- * Beschreibt ein Dokumentkommando mit allen zugehörigen Eigenschaften wie z.B.
- * die Gruppenzugehörigkeit, Sichtbarkeit und Ausführstatus.
+ * Beschreibt ein Dokumentkommando mit allen zugehörigen Eigenschaften wie z.B. die
+ * Gruppenzugehörigkeit, Sichtbarkeit und Ausführstatus.
  * 
  * @author Christoph Lutz (D-III-ITD 5.1)
  */
@@ -87,8 +87,8 @@ abstract public class DocumentCommand
   private Boolean done;
 
   /**
-   * Enthält den aktuellen EROOR-Status oder null, falls der Wert nicht
-   * verändert wurde.
+   * Enthält den aktuellen EROOR-Status oder null, falls der Wert nicht verändert
+   * wurde.
    */
   private Boolean error;
 
@@ -110,8 +110,8 @@ abstract public class DocumentCommand
   /* ************************************************************ */
 
   /**
-   * Der Konstruktor liefert eine Instanz eines DocumentCommand an der Stelle
-   * des Bookmarks bookmark mit dem geparsten Kommando wmCmd.
+   * Der Konstruktor liefert eine Instanz eines DocumentCommand an der Stelle des
+   * Bookmarks bookmark mit dem geparsten Kommando wmCmd.
    * 
    * @param wmCmd
    *          das geparste WM-Kommando
@@ -135,10 +135,9 @@ abstract public class DocumentCommand
   }
 
   /**
-   * Seit der Umstellung auf den neuen Scan über DocumentCommands darf nur noch
-   * das Dokumentkommando SetGroups ein GROUPS-Attribut besitzen. Diese Methode
-   * stellt das sicher und wird vom SetGroups-Kommando mit Rückgabewert true
-   * überschrieben.
+   * Seit der Umstellung auf den neuen Scan über DocumentCommands darf nur noch das
+   * Dokumentkommando SetGroups ein GROUPS-Attribut besitzen. Diese Methode stellt
+   * das sicher und wird vom SetGroups-Kommando mit Rückgabewert true überschrieben.
    * 
    * @return false außer es ist ein SetGroups-Kommando
    * 
@@ -150,8 +149,8 @@ abstract public class DocumentCommand
   }
 
   /**
-   * Liefert true, wenn das Dokumentkommando Textinhalte in das zugehörige
-   * Bookmark einfügen möchte, ansonsten false.
+   * Liefert true, wenn das Dokumentkommando Textinhalte in das zugehörige Bookmark
+   * einfügen möchte, ansonsten false.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
@@ -171,21 +170,20 @@ abstract public class DocumentCommand
   }
 
   /**
-   * Diese Methode liefert eine String-Repräsentation des DokumentCommands
-   * zurück. Die String-Repräsentation hat den Aufbau DocumentCommand[<bookmarkName>].
+   * Diese Methode liefert eine String-Repräsentation des DokumentCommands zurück.
+   * Die String-Repräsentation hat den Aufbau DocumentCommand[<bookmarkName>].
    */
   public String toString()
   {
     return "" + this.getClass().getSimpleName() + "["
-           + (isRetired() ? "RETIRED:" : "") + (isDone() ? "DONE:" : "")
-           + getBookmarkName() + "]";
+      + (isRetired() ? "RETIRED:" : "") + (isDone() ? "DONE:" : "")
+      + getBookmarkName() + "]";
   }
 
   /**
    * Callbackfunktion für die Ausführung des Dokumentkommandos in einem
-   * DocumentCommand.Executor wie z.B. dem DocumentCommandInterpreter. Die
-   * Methode liefert die Anzahl der bei der Ausführung entstandenen Fehler
-   * zurück.
+   * DocumentCommand.Executor wie z.B. dem DocumentCommandInterpreter. Die Methode
+   * liefert die Anzahl der bei der Ausführung entstandenen Fehler zurück.
    * 
    * @param executor
    * @return Anzahl der aufgetretenen Fehler
@@ -194,11 +192,10 @@ abstract public class DocumentCommand
 
   /**
    * Diese Methode ermöglicht den Zugriff auf den vollständigen TextRange des
-   * Bookmarks, welches das DocumentCommand definiert - die Methode darf aber
-   * nur verwendet werden, um die Inhalte an dieser Positon auszulesen und nicht
-   * um neue Textinhalte an dieser Stelle einzufügen (dafür gibt es
-   * createInsertCursor()); ist das Bookmark nicht (mehr) vorhanden, wird null
-   * zurück geliefert.
+   * Bookmarks, welches das DocumentCommand definiert - die Methode darf aber nur
+   * verwendet werden, um die Inhalte an dieser Positon auszulesen und nicht um neue
+   * Textinhalte an dieser Stelle einzufügen (dafür gibt es createInsertCursor());
+   * ist das Bookmark nicht (mehr) vorhanden, wird null zurück geliefert.
    * 
    * @return
    */
@@ -208,8 +205,8 @@ abstract public class DocumentCommand
   }
 
   /**
-   * Liefert die TextRange an der das Bookmark dieses Kommandos verankert ist
-   * oder null, falls das Bookmark nicht mehr existiert.
+   * Liefert die TextRange an der das Bookmark dieses Kommandos verankert ist oder
+   * null, falls das Bookmark nicht mehr existiert.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * @see de.muenchen.allg.itd51.wollmux.VisibilityElement#getAnchor()
@@ -222,16 +219,15 @@ abstract public class DocumentCommand
   /**
    * Erzeugt einen Cursor, der ein sicheres Einfügen von Inhalten an der
    * Cursorposition gewährleistet, ohne dabei die Hierarchie oder Ordnung der
-   * Dokumentkommandos zu zerstören. Kann das Dokumentkommando Kinder besitzen,
-   * so wird der Cursor in INSERT_MARKs eingeschlossen. Kann das
-   * Dokumentkommando keine Kinder besitzen, so wird ein einfacher TextCursor
-   * aus dem vollen TextRange des Bookmarks erzeugt. Ist das Bookmark nicht
-   * (mehr) vorhanden, wird null zurück geliefert. Jeder Aufruf von
-   * createInsertCursor überschreibt die bestehenden Inhalte des bisherigen
-   * DocumentCommands. Der InsertCursor von Dokumentkommandos mit Kindern sieht
-   * in etwa wie folgt aus: "<" CURSOR ">". Der InsertCursor hat direkt nach
-   * der Erzeugung keine Ausdehnung. Die INSERT_MARKS "<" und ">" können nach
-   * Beendigung der Dokumentgenerierung über die Methode cleanInsertMarks()
+   * Dokumentkommandos zu zerstören. Kann das Dokumentkommando Kinder besitzen, so
+   * wird der Cursor in INSERT_MARKs eingeschlossen. Kann das Dokumentkommando keine
+   * Kinder besitzen, so wird ein einfacher TextCursor aus dem vollen TextRange des
+   * Bookmarks erzeugt. Ist das Bookmark nicht (mehr) vorhanden, wird null zurück
+   * geliefert. Jeder Aufruf von createInsertCursor überschreibt die bestehenden
+   * Inhalte des bisherigen DocumentCommands. Der InsertCursor von Dokumentkommandos
+   * mit Kindern sieht in etwa wie folgt aus: "<" CURSOR ">". Der InsertCursor hat
+   * direkt nach der Erzeugung keine Ausdehnung. Die INSERT_MARKS "<" und ">" können
+   * nach Beendigung der Dokumentgenerierung über die Methode cleanInsertMarks()
    * wieder entfernt werden.
    * 
    * @return XTextCursor zum Einfügen oder null
@@ -285,8 +281,8 @@ abstract public class DocumentCommand
   }
 
   /**
-   * Liefert entweder null falls kein Start-Einfügemarke vorhanden oder liefert
-   * 2 Cursor, von denen der erste links neben der zweite rechts neben der
+   * Liefert entweder null falls kein Start-Einfügemarke vorhanden oder liefert 2
+   * Cursor, von denen der erste links neben der zweite rechts neben der
    * Start-Einfügemarke steht.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
@@ -323,9 +319,8 @@ abstract public class DocumentCommand
   }
 
   /**
-   * Liefert true zurück, wenn das Dokumentkommando insertMarks besitzt, die
-   * zuvor über den Aufruf von createInsertCursor() erzeugt worden sind,
-   * ansonsten false.
+   * Liefert true zurück, wenn das Dokumentkommando insertMarks besitzt, die zuvor
+   * über den Aufruf von createInsertCursor() erzeugt worden sind, ansonsten false.
    */
   public boolean hasInsertMarks()
   {
@@ -334,8 +329,7 @@ abstract public class DocumentCommand
 
   /**
    * Teilt dem Dokumentkommando mit, dass die insertMarks des Dokumentkommandos
-   * entfernt wurden und hasInsertMarks() in Folge dessen false zurück liefern
-   * muss.
+   * entfernt wurden und hasInsertMarks() in Folge dessen false zurück liefern muss.
    */
   public void unsetHasInsertMarks()
   {
@@ -343,12 +337,12 @@ abstract public class DocumentCommand
   }
 
   /**
-   * Liefert true, wenn das Bookmark zu diesem Dokumentkommando nicht mehr
-   * existiert und das Dokumentkommando daher nicht mehr zu gebrauchen ist oder
-   * andernfalls false.
+   * Liefert true, wenn das Bookmark zu diesem Dokumentkommando nicht mehr existiert
+   * und das Dokumentkommando daher nicht mehr zu gebrauchen ist oder andernfalls
+   * false.
    * 
-   * @return true, wenn das Bookmark zu diesem Dokumentkommando nicht mehr
-   *         existiert, ansonsten false.
+   * @return true, wenn das Bookmark zu diesem Dokumentkommando nicht mehr existiert,
+   *         ansonsten false.
    */
   public boolean isRetired()
   {
@@ -361,8 +355,7 @@ abstract public class DocumentCommand
    * nicht definiert oder gesetzt worden, so wird der Defaultwert false
    * zurückgeliefert.
    * 
-   * @return true, falls das Kommando bereits bearbeitet wurde, andernfalls
-   *         false.
+   * @return true, falls das Kommando bereits bearbeitet wurde, andernfalls false.
    */
   public boolean isDone()
   {
@@ -382,12 +375,12 @@ abstract public class DocumentCommand
 
   /**
    * Markiert ein Dokumentkommando als bearbeitet; Das Dokumentkommando wird
-   * daraufhin aus dem Dokument gelöscht, wenn removeBookmark==true oder
-   * umbenannt, wenn removeBookmark==false.
+   * daraufhin aus dem Dokument gelöscht, wenn removeBookmark==true oder umbenannt,
+   * wenn removeBookmark==false.
    * 
    * @param removeBookmark
-   *          true, signalisiert, dass das zugehörige Bookmark gelöscht werden
-   *          soll. False signalisiert, dass das Bookmark mit dem Zusatz "<alterName>
+   *          true, signalisiert, dass das zugehörige Bookmark gelöscht werden soll.
+   *          False signalisiert, dass das Bookmark mit dem Zusatz "<alterName>
    *          STATE(DONE 'true')" versehen wird.
    */
   public void markDone(boolean removeBookmark)
@@ -398,12 +391,12 @@ abstract public class DocumentCommand
   }
 
   /**
-   * Liefert den Fehler-Status der Kommandobearbeitung zurück. Ist das Attribut
-   * ERROR bisher nicht definiert oder kein Fehler gesetzt worden, so wird der
-   * Defaultwert false zurückgliefert.
+   * Liefert den Fehler-Status der Kommandobearbeitung zurück. Ist das Attribut ERROR
+   * bisher nicht definiert oder kein Fehler gesetzt worden, so wird der Defaultwert
+   * false zurückgliefert.
    * 
-   * @return true, wenn bei der Kommandobearbeitung Fehler auftraten;
-   *         andernfalls false
+   * @return true, wenn bei der Kommandobearbeitung Fehler auftraten; andernfalls
+   *         false
    */
   public boolean hasError()
   {
@@ -429,13 +422,13 @@ abstract public class DocumentCommand
   }
 
   /**
-   * Liefert ein ConfigThingy, das ein "WM"-Kommando mit allen
-   * Statusinformationen enthält. Neue Unterknoten werden dabei nur angelegt,
-   * wenn dies unbedingt erforderlich ist, d.h. wenn ein Wert vom Defaultwert
-   * abweicht oder der Wert bereits vorher gesetzt war.
+   * Liefert ein ConfigThingy, das ein "WM"-Kommando mit allen Statusinformationen
+   * enthält. Neue Unterknoten werden dabei nur angelegt, wenn dies unbedingt
+   * erforderlich ist, d.h. wenn ein Wert vom Defaultwert abweicht oder der Wert
+   * bereits vorher gesetzt war.
    * 
-   * @return Ein ConfigThingy, das das "WM"-Kommando mit allen
-   *         Statusinformationen enthält.
+   * @return Ein ConfigThingy, das das "WM"-Kommando mit allen Statusinformationen
+   *         enthält.
    */
   protected ConfigThingy toConfigThingy()
   {
@@ -470,13 +463,13 @@ abstract public class DocumentCommand
 
   /**
    * Liefert den Inhalt des übergebenen ConfigThingy-Objekts (üblicherweise das
-   * wmCmd) als einen String, der geeignet ist, um den ihn in Bookmarknamen
-   * verwenden zu können. D.h. alle Newline, Komma und andere für Bookmarknamen
-   * unverträgliche Zeichen werden entfernt.
+   * wmCmd) als einen String, der geeignet ist, um den ihn in Bookmarknamen verwenden
+   * zu können. D.h. alle Newline, Komma und andere für Bookmarknamen unverträgliche
+   * Zeichen werden entfernt.
    * 
    * @param conf
-   *          Das ConfigThingy-Objekt, zu dem die Stringrepräsentation erzeugt
-   *          werden soll.
+   *          Das ConfigThingy-Objekt, zu dem die Stringrepräsentation erzeugt werden
+   *          soll.
    * @return Einen String, der als Bookmarkname verwendet werden kann.
    */
   public static String getCommandString(ConfigThingy conf)
@@ -493,11 +486,11 @@ abstract public class DocumentCommand
 
   /**
    * Schreibt den neuen Status des Dokumentkommandos in das Dokument zurück oder
-   * löscht ein Bookmark, wenn der Status DONE=true gesetzt ist - Die Methode
-   * liefert entweder den Namen des neuen Bookmarks, welches die neuen
-   * Statusinformationen enthält zurück, oder null, wenn das zugehörige Bookmark
-   * gelöscht wurde. Ist der DEBUG-modus gesetzt, so werden in gar keinem Fall
-   * Bookmarks gelöscht, womit die Fehlersuche erleichtert werden soll.
+   * löscht ein Bookmark, wenn der Status DONE=true gesetzt ist - Die Methode liefert
+   * entweder den Namen des neuen Bookmarks, welches die neuen Statusinformationen
+   * enthält zurück, oder null, wenn das zugehörige Bookmark gelöscht wurde. Ist der
+   * DEBUG-modus gesetzt, so werden in gar keinem Fall Bookmarks gelöscht, womit die
+   * Fehlersuche erleichtert werden soll.
    * 
    * @return der Name des neuen Bookmarks oder null.
    */
@@ -534,8 +527,7 @@ abstract public class DocumentCommand
   }
 
   /**
-   * Liefert das ConfigThingy zu dem gesuchten Key key unterhalt des
-   * STATE-Knotens.
+   * Liefert das ConfigThingy zu dem gesuchten Key key unterhalt des STATE-Knotens.
    * 
    * @param key
    * @return
@@ -555,11 +547,10 @@ abstract public class DocumentCommand
   }
 
   /**
-   * Setzt einen Schlüssel-Wert-Paar unterhalb des STATE-Knotens. Ist der
-   * Schlüssel bereits definiert, wird der bestehende Wert überschrieben. Sind
-   * der STATE-Knoten oder der Schlüssel nicht definiert, so werden die
-   * entsprechenden Knoten erzeugt und der Key key erhält ein Kindknoten mit dem
-   * Value value.
+   * Setzt einen Schlüssel-Wert-Paar unterhalb des STATE-Knotens. Ist der Schlüssel
+   * bereits definiert, wird der bestehende Wert überschrieben. Sind der STATE-Knoten
+   * oder der Schlüssel nicht definiert, so werden die entsprechenden Knoten erzeugt
+   * und der Key key erhält ein Kindknoten mit dem Value value.
    * 
    * @param key
    * @param value
@@ -602,8 +593,8 @@ abstract public class DocumentCommand
   }
 
   /**
-   * gibt den Sichtbarkeitsstatus des Textinhaltes unter dem Dokumentkommando
-   * zurück, der über das CharHidden-Attribut realisiert ist.
+   * gibt den Sichtbarkeitsstatus des Textinhaltes unter dem Dokumentkommando zurück,
+   * der über das CharHidden-Attribut realisiert ist.
    * 
    * @return true=sichtbar, false=ausgeblendet
    * @see de.muenchen.allg.itd51.wollmux.VisibilityElement#isVisible()
@@ -614,9 +605,9 @@ abstract public class DocumentCommand
   }
 
   /**
-   * Setzt den Sichtbarkeitsstatus des Textinhaltes unter dem Dokumentkommando
-   * in dem das CharHidden-Attribut des entsprechenden TextCursors gesetzt wird.
-   * Der Status visible wird nicht persistent im Bookmark hinterlegt.
+   * Setzt den Sichtbarkeitsstatus des Textinhaltes unter dem Dokumentkommando in dem
+   * das CharHidden-Attribut des entsprechenden TextCursors gesetzt wird. Der Status
+   * visible wird nicht persistent im Bookmark hinterlegt.
    * 
    * @param visible
    *          true=sichtbar, false=ausgeblendet
@@ -679,8 +670,8 @@ abstract public class DocumentCommand
 
   // ********************************************************************************
   /**
-   * Beschreibt ein Dokumentkommando, das einen Wert in das Dokument einfügt,
-   * der über eine optionale Transformation umgewandelt werden kann (Derzeit
+   * Beschreibt ein Dokumentkommando, das einen Wert in das Dokument einfügt, der
+   * über eine optionale Transformation umgewandelt werden kann (Derzeit
    * implementieren insertValue und insertFormValue dieses Interface).
    */
   public static interface OptionalTrafoProvider
@@ -702,8 +693,8 @@ abstract public class DocumentCommand
 
   // ********************************************************************************
   /**
-   * Eine Exception die geworfen wird, wenn ein Dokumentkommando als ungültig
-   * erkannt wurde, z,b, aufgrund eines fehlenden Parameters.
+   * Eine Exception die geworfen wird, wenn ein Dokumentkommando als ungültig erkannt
+   * wurde, z,b, aufgrund eines fehlenden Parameters.
    */
   static public class InvalidCommandException extends Exception
   {
@@ -717,9 +708,9 @@ abstract public class DocumentCommand
 
   // ********************************************************************************
   /**
-   * Beschreibt ein Dokumentkommando, das aufgrund eines Syntax-Fehlers oder
-   * eines fehlenden Parameters ungültig ist, jedoch trotzdem im Dokument als
-   * Fehlerfeld dargestellt werden soll.
+   * Beschreibt ein Dokumentkommando, das aufgrund eines Syntax-Fehlers oder eines
+   * fehlenden Parameters ungültig ist, jedoch trotzdem im Dokument als Fehlerfeld
+   * dargestellt werden soll.
    * 
    * @author lut
    * 
@@ -762,9 +753,9 @@ abstract public class DocumentCommand
 
   // ********************************************************************************
   /**
-   * Beschreibt ein noch nicht implementiertes Dokumentkommando, das jedoch für
-   * die Zukunft geplant ist und dess Ausführung daher keine Fehler beim
-   * Erzeugen des Briefkopfs liefern darf.
+   * Beschreibt ein noch nicht implementiertes Dokumentkommando, das jedoch für die
+   * Zukunft geplant ist und dess Ausführung daher keine Fehler beim Erzeugen des
+   * Briefkopfs liefern darf.
    */
   static public class NotYetImplemented extends DocumentCommand
   {
@@ -783,8 +774,8 @@ abstract public class DocumentCommand
   // ********************************************************************************
   /**
    * Beschreibt das Dokumentkommando Form, welches Zugriff auf die
-   * Formularbeschreibung des Dokuments ermöglicht, die in Form einer Notiz
-   * innerhalb des zum Form-Kommando zugehörigen Bookmarks abgelegt ist.
+   * Formularbeschreibung des Dokuments ermöglicht, die in Form einer Notiz innerhalb
+   * des zum Form-Kommando zugehörigen Bookmarks abgelegt ist.
    * 
    * @author lut
    * 
@@ -834,10 +825,10 @@ abstract public class DocumentCommand
       try
       {
         ConfigThingy argsConf = wmCmd.get("WM").get("ARGS");
-        Iterator iter = argsConf.iterator();
+        Iterator<ConfigThingy> iter = argsConf.iterator();
         while (iter.hasNext())
         {
-          ConfigThingy arg = (ConfigThingy) iter.next();
+          ConfigThingy arg = iter.next();
           args.add(arg.getName());
         }
       }
@@ -864,7 +855,7 @@ abstract public class DocumentCommand
       try
       {
         ConfigThingy stylesConf = wmCmd.get("WM").get("STYLES");
-        for (Iterator iter = stylesConf.iterator(); iter.hasNext();)
+        for (Iterator<ConfigThingy> iter = stylesConf.iterator(); iter.hasNext();)
         {
           String s = iter.next().toString();
           if (s.equalsIgnoreCase("all"))
@@ -934,8 +925,8 @@ abstract public class DocumentCommand
 
   // ********************************************************************************
   /**
-   * Das Kommando InsertContent dient zum Mischen von Dokumenten und ist im
-   * Handbuch des WollMux ausführlicher beschrieben.
+   * Das Kommando InsertContent dient zum Mischen von Dokumenten und ist im Handbuch
+   * des WollMux ausführlicher beschrieben.
    */
   static public class InsertContent extends DocumentCommand
   {
@@ -991,15 +982,15 @@ abstract public class DocumentCommand
       }
 
       // Auswertung der AUTOSEP bzw SEPERATOR-Attribute
-      Iterator autoseps = wmCmd.query("AUTOSEP").iterator();
-      Iterator seps = wmCmd.query("SEPARATOR").iterator();
+      Iterator<ConfigThingy> autoseps = wmCmd.query("AUTOSEP").iterator();
+      Iterator<ConfigThingy> seps = wmCmd.query("SEPARATOR").iterator();
       String currentSep = " "; // mit Default-Separator vorbelegt
 
       while (autoseps.hasNext())
       {
-        ConfigThingy as = (ConfigThingy) autoseps.next();
+        ConfigThingy as = autoseps.next();
         String sep = currentSep;
-        if (seps.hasNext()) sep = ((ConfigThingy) seps.next()).toString();
+        if (seps.hasNext()) sep = seps.next().toString();
 
         if (as.toString().compareToIgnoreCase("left") == 0)
         {
@@ -1114,7 +1105,7 @@ abstract public class DocumentCommand
       {
         ConfigThingy idConf = wmCmd.query("WM").query("ID").getLastChild();
         // alten Wert von ID löschen
-        for (Iterator iter = idConf.iterator(); iter.hasNext();)
+        for (Iterator<ConfigThingy> iter = idConf.iterator(); iter.hasNext();)
         {
           iter.next();
           iter.remove();
@@ -1173,10 +1164,10 @@ abstract public class DocumentCommand
       try
       {
         ConfigThingy argsConf = wmCmd.get("WM").get("ARGS");
-        Iterator iter = argsConf.iterator();
+        Iterator<ConfigThingy> iter = argsConf.iterator();
         while (iter.hasNext())
         {
-          ConfigThingy arg = (ConfigThingy) iter.next();
+          ConfigThingy arg = iter.next();
           args.add(arg.getName());
         }
       }
@@ -1209,8 +1200,8 @@ abstract public class DocumentCommand
 
   // ********************************************************************************
   /**
-   * dieses Kommando sorgt dafür, dass alle unter dem Bookmark liegenden
-   * TextFields geupdatet werden.
+   * dieses Kommando sorgt dafür, dass alle unter dem Bookmark liegenden TextFields
+   * geupdatet werden.
    */
   static public class UpdateFields extends DocumentCommand
   {
@@ -1227,11 +1218,11 @@ abstract public class DocumentCommand
 
   // ********************************************************************************
   /**
-   * Über dieses Dokumentkommando kann der Typ des Dokuments festgelegt werden.
-   * Es gibt die Typen SETTYPE_normalTemplate, SETTYPE_templateTemplate und
+   * Über dieses Dokumentkommando kann der Typ des Dokuments festgelegt werden. Es
+   * gibt die Typen SETTYPE_normalTemplate, SETTYPE_templateTemplate und
    * SETTYPE_formDocument. Die SetType-Kommandos werden bereits im
-   * OnProcessTextDocument-Event verarbeitet und spielen daher keine Rolle mehr
-   * für den DocumentCommandInterpreter.
+   * OnProcessTextDocument-Event verarbeitet und spielen daher keine Rolle mehr für
+   * den DocumentCommandInterpreter.
    */
   static public class SetType extends DocumentCommand
   {
@@ -1251,8 +1242,8 @@ abstract public class DocumentCommand
         throw new InvalidCommandException(L.m("Fehlendes Attribut TYPE"));
       }
       if (type.compareToIgnoreCase("templateTemplate") != 0
-          && type.compareToIgnoreCase("normalTemplate") != 0
-          && type.compareToIgnoreCase("formDocument") != 0)
+        && type.compareToIgnoreCase("normalTemplate") != 0
+        && type.compareToIgnoreCase("formDocument") != 0)
         throw new InvalidCommandException(
           L.m("Angegebener TYPE ist ungültig oder falsch geschrieben. Erwarte \"templateTemplate\", \"normalTemplate\" oder \"formDocument\"!"));
     }
@@ -1270,8 +1261,8 @@ abstract public class DocumentCommand
 
   // ********************************************************************************
   /**
-   * Dieses Kommando dient zum Überschreiben von FRAG_IDs, die mit insertFrag
-   * oder insertContent eingefügt werden sollen.
+   * Dieses Kommando dient zum Überschreiben von FRAG_IDs, die mit insertFrag oder
+   * insertContent eingefügt werden sollen.
    */
   static public class OverrideFrag extends DocumentCommand
   {
@@ -1327,11 +1318,11 @@ abstract public class DocumentCommand
 
   // ********************************************************************************
   /**
-   * Über dieses Dokumentkommando kann der Typ des Dokuments festgelegt werden.
-   * Es gibt die Typen SETTYPE_normalTemplate, SETTYPE_templateTemplate und
+   * Über dieses Dokumentkommando kann der Typ des Dokuments festgelegt werden. Es
+   * gibt die Typen SETTYPE_normalTemplate, SETTYPE_templateTemplate und
    * SETTYPE_formDocument. Die SetType-Kommandos werden bereits im
-   * OnProcessTextDocument-Event verarbeitet und spielen daher keine Rolle mehr
-   * für den DocumentCommandInterpreter.
+   * OnProcessTextDocument-Event verarbeitet und spielen daher keine Rolle mehr für
+   * den DocumentCommandInterpreter.
    */
   static public class SetPrintFunction extends DocumentCommand
   {
@@ -1365,11 +1356,10 @@ abstract public class DocumentCommand
 
   // ********************************************************************************
   /**
-   * Das Kommando SetGroups dient dazu, dem vom Bookmark umschlossenen
-   * Textinhalt eine oder mehrere Gruppen zuweisen zu können. Im Gegensatz zu
-   * anderen Dokumentkommandos, die auch das GROUPS Attribut unterstützen,
-   * besitzt dieses Kommando ausser der Zuordnung von Gruppen keine weitere
-   * Funktion.
+   * Das Kommando SetGroups dient dazu, dem vom Bookmark umschlossenen Textinhalt
+   * eine oder mehrere Gruppen zuweisen zu können. Im Gegensatz zu anderen
+   * Dokumentkommandos, die auch das GROUPS Attribut unterstützen, besitzt dieses
+   * Kommando ausser der Zuordnung von Gruppen keine weitere Funktion.
    */
   static public class SetGroups extends DocumentCommand implements VisibilityElement
   {
@@ -1387,12 +1377,12 @@ abstract public class DocumentCommand
     }
 
     /**
-     * Liefert alle Gruppen, die dem Dokumentkommando zugeordnet sind, wobei
-     * jede Gruppe auch die Gruppenzugehörigkeit des Vaterelements im
-     * DocumentCommand-Baum erbt.
+     * Liefert alle Gruppen, die dem Dokumentkommando zugeordnet sind, wobei jede
+     * Gruppe auch die Gruppenzugehörigkeit des Vaterelements im DocumentCommand-Baum
+     * erbt.
      * 
-     * @return Ein Set, das alle zugeordneten groupId's, einschließlich der vom
-     *         Vater geerbten, als Strings enthält.
+     * @return Ein Set, das alle zugeordneten groupId's, einschließlich der vom Vater
+     *         geerbten, als Strings enthält.
      * @see de.muenchen.allg.itd51.wollmux.VisibilityElement#getGroups()
      */
     public Set<String> getGroups()
@@ -1404,11 +1394,10 @@ abstract public class DocumentCommand
         groups = wmCmd.get("GROUPS");
       }
       catch (NodeNotFoundException e)
-      {
-      }
+      {}
 
       // Gruppen aus dem GROUPS-Argument in das Set aufnehmen:
-      for (Iterator iter = groups.iterator(); iter.hasNext();)
+      for (Iterator<ConfigThingy> iter = groups.iterator(); iter.hasNext();)
       {
         String groupId = iter.next().toString();
         groupsSet.add(groupId);
@@ -1428,14 +1417,14 @@ abstract public class DocumentCommand
     }
 
     /**
-     * Diese Methode liefert eine String-Repräsentation des DokumentCommands
-     * zurück. Die String-Repräsentation hat den Aufbau DocumentCommand[<bookmarkName>].
+     * Diese Methode liefert eine String-Repräsentation des DokumentCommands zurück.
+     * Die String-Repräsentation hat den Aufbau DocumentCommand[<bookmarkName>].
      */
     public String toString()
     {
       return "" + this.getClass().getSimpleName() + "["
-             + (isRetired() ? "RETIRED:" : "") + (isDone() ? "DONE:" : "")
-             + "GROUPS:" + groupsSet.toString() + getBookmarkName() + "]";
+        + (isRetired() ? "RETIRED:" : "") + (isDone() ? "DONE:" : "") + "GROUPS:"
+        + groupsSet.toString() + getBookmarkName() + "]";
     }
   }
 
@@ -1479,10 +1468,10 @@ abstract public class DocumentCommand
   // ********************************************************************************
   /**
    * Beim Drucken von Sachleitenden Verfügungen wird der Verfügungspunkt I als
-   * Original bezeichnet. Mit dem NotInOriginal Kommando ist es möglich Blöcke
-   * im Text zu definieren, die NIEMALS in Originalen abgedruckt werden sollen,
-   * jedoch in allen anderen Ausdrucken, die nicht das Original sind (wie z.B.
-   * Abdrücke und Entwurf).
+   * Original bezeichnet. Mit dem NotInOriginal Kommando ist es möglich Blöcke im
+   * Text zu definieren, die NIEMALS in Originalen abgedruckt werden sollen, jedoch
+   * in allen anderen Ausdrucken, die nicht das Original sind (wie z.B. Abdrücke und
+   * Entwurf).
    */
   static public class NotInOriginal extends DocumentCommand implements
       OptionalHighlightColorProvider
@@ -1517,9 +1506,8 @@ abstract public class DocumentCommand
   // ********************************************************************************
   /**
    * Beim Drucken von Sachleitenden Verfügungen wird der Verfügungspunkt I als
-   * Original bezeichnet. Mit dem OriginalOnly Kommando ist es möglich Blöcke im
-   * Text zu definieren, die ausschließlich in Originalen abgedruckt werden
-   * sollen.
+   * Original bezeichnet. Mit dem OriginalOnly Kommando ist es möglich Blöcke im Text
+   * zu definieren, die ausschließlich in Originalen abgedruckt werden sollen.
    */
   static public class OriginalOnly extends DocumentCommand implements
       OptionalHighlightColorProvider
@@ -1554,10 +1542,9 @@ abstract public class DocumentCommand
   // ********************************************************************************
   /**
    * Beim Drucken von Sachleitenden Verfügungen werden alle Verfügungspunkte
-   * unterhalb des ausgewählten Verfügungspunktes ausgeblendet. Mit dem
-   * AllVersions Kommando ist es möglich Blöcke im Text zu definieren, die IMMER
-   * ausgedruckt werden sollen, d.h. sowohl bei Originalen, als auch bei
-   * Abdrucken und Entwürfen.
+   * unterhalb des ausgewählten Verfügungspunktes ausgeblendet. Mit dem AllVersions
+   * Kommando ist es möglich Blöcke im Text zu definieren, die IMMER ausgedruckt
+   * werden sollen, d.h. sowohl bei Originalen, als auch bei Abdrucken und Entwürfen.
    */
   static public class AllVersions extends DocumentCommand implements
       OptionalHighlightColorProvider
@@ -1591,10 +1578,10 @@ abstract public class DocumentCommand
 
   // ********************************************************************************
   /**
-   * Falls nach dem Einfügen eines Textbausteines keine Einfügestelle vorhanden
-   * ist wird die Marke 'setJumpMark' falls vorhanden angesprungen. Wird auch
-   * falls vorhanden und keine Platzhalter vorhanden ist, mit
-   * PlatzhalterAnspringen angesprungen.
+   * Falls nach dem Einfügen eines Textbausteines keine Einfügestelle vorhanden ist
+   * wird die Marke 'setJumpMark' falls vorhanden angesprungen. Wird auch falls
+   * vorhanden und keine Platzhalter vorhanden ist, mit PlatzhalterAnspringen
+   * angesprungen.
    */
   static public class SetJumpMark extends DocumentCommand
   {

@@ -48,30 +48,28 @@ import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 
 /**
- * Klasse enthält statische Methoden die für das Textbausteinsystem benötigt
- * werden
+ * Klasse enthält statische Methoden die für das Textbausteinsystem benötigt werden
  * 
  * @author bettina.bauer
  */
 public class TextModule
 {
   /**
-   * Sucht ab der Stelle range rückwarts nach gültigen Textfragmentbezeichnern
-   * mit Argumenten, legt um jedes einzufügenden Textbaustein ein
-   * Dokumentkommando 'insertFrag' mit den gefundenen Argumenten und liefert
-   * true zurück wenn mind. ein Dokumentenkommando erzeugt wurde.
+   * Sucht ab der Stelle range rückwarts nach gültigen Textfragmentbezeichnern mit
+   * Argumenten, legt um jedes einzufügenden Textbaustein ein Dokumentkommando
+   * 'insertFrag' mit den gefundenen Argumenten und liefert true zurück wenn mind.
+   * ein Dokumentenkommando erzeugt wurde.
    * 
    * @param doc
    *          Aktuelle Textdocument in dem gesucht werden soll
    * @param range
-   *          Stelle in der nach Textfragmentbezeichnern gesucht werden soll.
-   *          Die Stelle kann ein markierter Bereich sein oder ein kollabierter
-   *          Cursor von dem rückwärts bis zur ersten Zeile die kein
-   *          Textfragment enthält gesucht wird. Meistens handelt es sich um den
-   *          viewCursor.
+   *          Stelle in der nach Textfragmentbezeichnern gesucht werden soll. Die
+   *          Stelle kann ein markierter Bereich sein oder ein kollabierter Cursor
+   *          von dem rückwärts bis zur ersten Zeile die kein Textfragment enthält
+   *          gesucht wird. Meistens handelt es sich um den viewCursor.
    * @param isManual
-   *          kennzeichnet Einfügungen, die manuell vorgenommen worden sind.
-   *          Setzt den optinalen Knoten MODE = "manual"
+   *          kennzeichnet Einfügungen, die manuell vorgenommen worden sind. Setzt
+   *          den optinalen Knoten MODE = "manual"
    */
   public static boolean createInsertFragFromIdentifier(XTextDocument doc,
       XTextRange range, boolean isManual)
@@ -84,15 +82,15 @@ public class TextModule
     // Textbaustein Abschnitte immer Vorrang haben.
     LinkedList<ConfigThingy> tbListe = new LinkedList<ConfigThingy>();
     ConfigThingy tbConf = conf.query("Textbausteine");
-    Iterator iter = tbConf.iterator();
+    Iterator<ConfigThingy> iter = tbConf.iterator();
     while (iter.hasNext())
     {
-      ConfigThingy confTextbaustein = (ConfigThingy) iter.next();
+      ConfigThingy confTextbaustein = iter.next();
       tbListe.addFirst(confTextbaustein);
     }
 
-    XParagraphCursor cursor = UNO.XParagraphCursor(range.getText().createTextCursorByRange(
-      range));
+    XParagraphCursor cursor =
+      UNO.XParagraphCursor(range.getText().createTextCursorByRange(range));
 
     // Sonderbehandlung, wenn der viewCursor bereits eine Bereich markiert.
     // In diesem Fall soll ausschließlich der Inhalt des Bereichs evaluiert
@@ -147,17 +145,16 @@ public class TextModule
   }
 
   /**
-   * Parsed den übergebenen identifierWithArgs nach allen Abbildungen der Form
-   * (MATCH ... FRAG_ID ...), die in den Textbausteine-Abschnitten in tbListe
-   * enthalten sind und liefert null zurück, wenn es keine Übereinstimmung mit
-   * den MATCHes gab oder falls es eine Übereinstimmung gab ein Array, das an
-   * der ersten Stelle die neue frag_id enthält und in den folgenden Stellen die
-   * Argumente.
+   * Parsed den übergebenen identifierWithArgs nach allen Abbildungen der Form (MATCH
+   * ... FRAG_ID ...), die in den Textbausteine-Abschnitten in tbListe enthalten sind
+   * und liefert null zurück, wenn es keine Übereinstimmung mit den MATCHes gab oder
+   * falls es eine Übereinstimmung gab ein Array, das an der ersten Stelle die neue
+   * frag_id enthält und in den folgenden Stellen die Argumente.
    * 
    * @param identifierWithArgs
    *          Ein String in der Form "<identifier>#arg1#...#argN", wobei der
-   *          Separator "#" über den SEPARATOR-Schlüssel in textbausteine
-   *          verändert werden kann.
+   *          Separator "#" über den SEPARATOR-Schlüssel in textbausteine verändert
+   *          werden kann.
    * @param tbListe
    *          Eine Liste, die die Textbausteine-Abschnitte in der Reihenfolge
    *          enthält, in der sie ausgewertet werden sollen.
@@ -171,25 +168,24 @@ public class TextModule
     {
       ConfigThingy textbausteine = iterTbListe.next();
 
-      String[] results = parseIdentifierInTextbausteine(identifierWithArgs,
-        textbausteine);
+      String[] results =
+        parseIdentifierInTextbausteine(identifierWithArgs, textbausteine);
       if (results != null) return results;
     }
     return null;
   }
 
   /**
-   * Parsed den übergebenen identifierWithArgs nach allen Abbildungen der Form
-   * (MATCH ... FRAG_ID ...), die in textbausteine (=ein einzelner
-   * Textbausteine-Abschnitt) enthalten sind und liefert null zurück, wenn es
-   * keine Übereinstimmung mit den MATCHes gab oder falls es eine
-   * Übereinstimmung gab ein Array, das an der ersten Stelle die neue frag_id
-   * enthält und in den folgenden Stellen die Argumente.
+   * Parsed den übergebenen identifierWithArgs nach allen Abbildungen der Form (MATCH
+   * ... FRAG_ID ...), die in textbausteine (=ein einzelner Textbausteine-Abschnitt)
+   * enthalten sind und liefert null zurück, wenn es keine Übereinstimmung mit den
+   * MATCHes gab oder falls es eine Übereinstimmung gab ein Array, das an der ersten
+   * Stelle die neue frag_id enthält und in den folgenden Stellen die Argumente.
    * 
    * @param identifierWithArgs
    *          Ein String in der Form "<identifier>#arg1#...#argN", wobei der
-   *          Separator "#" über den SEPARATOR-Schlüssel in textbausteine
-   *          verändert werden kann.
+   *          Separator "#" über den SEPARATOR-Schlüssel in textbausteine verändert
+   *          werden kann.
    * @param textbausteine
    *          Beschreibung eines Textbausteinabschnittes in der Form
    *          "Textbausteine(SEPARATOR ... Kuerzel(...))"
@@ -221,10 +217,10 @@ public class TextModule
 
     // Iterieren über alle Knoten der Form "(MATCH ... FRAG_ID ...)"
     ConfigThingy mappingsConf = textbausteine.queryByChild("MATCH");
-    Iterator iterMappings = mappingsConf.iterator();
+    Iterator<ConfigThingy> iterMappings = mappingsConf.iterator();
     while (iterMappings.hasNext())
     {
-      ConfigThingy mappingConf = (ConfigThingy) iterMappings.next();
+      ConfigThingy mappingConf = iterMappings.next();
 
       String frag_id = null;
       try
@@ -238,7 +234,7 @@ public class TextModule
         continue;
       }
 
-      Iterator matchesIterator = null;
+      Iterator<ConfigThingy> matchesIterator = null;
       try
       {
         matchesIterator = mappingConf.get("MATCH").iterator();
@@ -263,7 +259,7 @@ public class TextModule
           catch (java.lang.Exception e)
           {
             Logger.error(L.m("Die Reguläre Ausdruck Gruppierung $<zahl>, die in FRAG_ID verwendet wird gibt es nicht in MATCH. ")
-                         + e);
+              + e);
           }
           return args;
         }
@@ -273,8 +269,8 @@ public class TextModule
   }
 
   /**
-   * Erzeugt ein Bookmark vom Typ "WM(CMD'insertFrag' FRAG_ID '<args[0]>'
-   * ARGS('<args[1]>' '...' '<args[n]>')" im Dokument doc an der Stelle range.
+   * Erzeugt ein Bookmark vom Typ "WM(CMD'insertFrag' FRAG_ID '<args[0]>' ARGS('<args[1]>'
+   * '...' '<args[n]>')" im Dokument doc an der Stelle range.
    * 
    * @param doc
    *          Aktuelles Textdokument
@@ -283,8 +279,8 @@ public class TextModule
    * @param args
    *          Übergebene Parameter
    * @param isManual
-   *          kennzeichnet Einfügungen, die manuell vorgenommen worden sind.
-   *          Setzt den optinalen Knoten MODE = "manual"
+   *          kennzeichnet Einfügungen, die manuell vorgenommen worden sind. Setzt
+   *          den optinalen Knoten MODE = "manual"
    */
   public static void createInsertFrag(XTextDocument doc, XTextRange range,
       String[] args, boolean isManual)
@@ -346,8 +342,9 @@ public class TextModule
   {
     boolean found = false;
 
-    XTextCursor cursor = UNO.XTextCursor(viewCursor.getText().createTextCursorByRange(
-      viewCursor.getEnd()));
+    XTextCursor cursor =
+      UNO.XTextCursor(viewCursor.getText().createTextCursorByRange(
+        viewCursor.getEnd()));
 
     cursor.gotoRange(cursor.getText().getEnd(), true);
 
@@ -385,15 +382,16 @@ public class TextModule
             {
               continue;
             }
-            String textPortionType = (String) UNO.getProperty(textPortion,
-              "TextPortionType");
+            String textPortionType =
+              (String) UNO.getProperty(textPortion, "TextPortionType");
             // Wenn es ein Textfeld ist
             if (textPortionType.equals("TextField"))
             {
               XTextField textField = null;
               try
               {
-                textField = UNO.XTextField(UNO.getProperty(textPortion, "TextField"));
+                textField =
+                  UNO.XTextField(UNO.getProperty(textPortion, "TextField"));
                 // Wenn es ein Platzhalterfeld ist, dem Vector placeholders
                 // hinzufügen
 
@@ -412,8 +410,9 @@ public class TextModule
           }
         }
       }
-      cursor = UNO.XTextCursor(viewCursor.getText().createTextCursorByRange(
-        cursor.getText()));
+      cursor =
+        UNO.XTextCursor(viewCursor.getText().createTextCursorByRange(
+          cursor.getText()));
     }
     // Falls kein Platzhalter gefunden wurde wird zur Marke 'setJumpMark'
     // gesprungen falls vorhanden sonst kommt eine Fehlermeldung -->

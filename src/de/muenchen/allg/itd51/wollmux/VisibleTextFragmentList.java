@@ -48,12 +48,11 @@ import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.WollMuxSingleton.InvalidIdentifierException;
 
 /**
- * TODO: überarbeiten! Die VisibleTextFragmentList repräsentiert die
- * ausgewertete Liste aller in den Konfigurationsdateien beschriebener
- * "Textfragmente" Abschnitte. Sie kümmert sich insbesondere um das Auswerten
- * der Variablen in den URL-Attributen und um die Beachtung der Vorrangregelung:
- * Immer das zuletzt definierte Textfragment oder die zuletzt definierte
- * Variable gewinnt.
+ * TODO: überarbeiten! Die VisibleTextFragmentList repräsentiert die ausgewertete
+ * Liste aller in den Konfigurationsdateien beschriebener "Textfragmente" Abschnitte.
+ * Sie kümmert sich insbesondere um das Auswerten der Variablen in den URL-Attributen
+ * und um die Beachtung der Vorrangregelung: Immer das zuletzt definierte
+ * Textfragment oder die zuletzt definierte Variable gewinnt.
  * 
  * @author Christoph Lutz (D-III-ITD 5.1)
  * 
@@ -82,10 +81,11 @@ public class VisibleTextFragmentList
   {
     // Map der sichtbaren Variablen erzeugen:
     Map<String, String> variables = new HashMap<String, String>();
-    Iterator i = ConfigThingy.getNodesVisibleAt(node, "VAR", root).iterator();
+    Iterator<ConfigThingy> i =
+      ConfigThingy.getNodesVisibleAt(node, "VAR", root).iterator();
     while (i.hasNext())
     {
-      ConfigThingy var = (ConfigThingy) i.next();
+      ConfigThingy var = i.next();
       try
       {
         variables.put(var.get("NAME").toString(), var.get("VALUE").toString());
@@ -121,8 +121,9 @@ public class VisibleTextFragmentList
       String key = m.group(1);
       if (variables.containsKey(key))
       {
-        string = string.substring(0, m.start()) + variables.get(key)
-                 + string.substring(m.end());
+        string =
+          string.substring(0, m.start()) + variables.get(key)
+            + string.substring(m.end());
         // string = m.replaceFirst((String) variables.get(key));
         Logger.debug2(L.m("  Ersetzen der Variable %1 --> %2", m.group(0), string));
         // Nach jeder Ersetzung wieder von vorne anfangen.
@@ -161,10 +162,10 @@ public class VisibleTextFragmentList
 
     LinkedList<ConfigThingy> tfListe = new LinkedList<ConfigThingy>();
     ConfigThingy tfConf = conf.query("Textfragmente");
-    Iterator iter = tfConf.iterator();
+    Iterator<ConfigThingy> iter = tfConf.iterator();
     while (iter.hasNext())
     {
-      ConfigThingy confTextfragmente = (ConfigThingy) iter.next();
+      ConfigThingy confTextfragmente = iter.next();
       tfListe.addFirst(confTextfragmente);
     }
 
@@ -175,11 +176,11 @@ public class VisibleTextFragmentList
       ConfigThingy textfragmente = iterTbListe.next();
 
       ConfigThingy mappingsConf = textfragmente.queryByChild("FRAG_ID");
-      Iterator iterMappings = mappingsConf.iterator();
+      Iterator<ConfigThingy> iterMappings = mappingsConf.iterator();
 
       while (iterMappings.hasNext())
       {
-        ConfigThingy mappingConf = (ConfigThingy) iterMappings.next();
+        ConfigThingy mappingConf = iterMappings.next();
 
         String frag_idConf = null;
         try
@@ -193,10 +194,9 @@ public class VisibleTextFragmentList
           continue;
         }
 
-        Iterator URLIterator = null;
+        Iterator<ConfigThingy> URLIterator = null;
         try
         {
-
           URLIterator = mappingConf.get("URL").iterator();
         }
         catch (NodeNotFoundException e)
@@ -210,7 +210,7 @@ public class VisibleTextFragmentList
 
           while (URLIterator.hasNext())
           {
-            ConfigThingy url_next = (ConfigThingy) URLIterator.next();
+            ConfigThingy url_next = URLIterator.next();
             try
             {
               String urlStr = expandVariable(url_next, conf);

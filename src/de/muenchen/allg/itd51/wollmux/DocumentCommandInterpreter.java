@@ -117,8 +117,7 @@ public class DocumentCommandInterpreter
 
   /**
    * Der Konstruktor erzeugt einen neuen Kommandointerpreter, der alle
-   * Dokumentkommandos im übergebenen Dokument xDoc scannen und interpretieren
-   * kann.
+   * Dokumentkommandos im übergebenen Dokument xDoc scannen und interpretieren kann.
    * 
    * @param xDoc
    *          Das Dokument, dessen Kommandos ausgeführt werden sollen.
@@ -136,8 +135,7 @@ public class DocumentCommandInterpreter
 
   /**
    * Der Konstruktor erzeugt einen neuen Kommandointerpreter, der alle
-   * Dokumentkommandos im übergebenen Dokument xDoc scannen und interpretieren
-   * kann.
+   * Dokumentkommandos im übergebenen Dokument xDoc scannen und interpretieren kann.
    * 
    * @param xDoc
    *          Das Dokument, dessen Kommandos ausgeführt werden sollen.
@@ -152,9 +150,9 @@ public class DocumentCommandInterpreter
   }
 
   /**
-   * Diese Methode sollte vor executeTemplateCommands und vor
-   * executeFormCommands aufgerufen werden und sorgt dafür, dass alle globalen
-   * Einstellungen des Dokuments an das TextDocumentModel weitergereicht werden.
+   * Diese Methode sollte vor executeTemplateCommands und vor executeFormCommands
+   * aufgerufen werden und sorgt dafür, dass alle globalen Einstellungen des
+   * Dokuments an das TextDocumentModel weitergereicht werden.
    */
   public void scanGlobalDocumentCommands()
   {
@@ -187,7 +185,8 @@ public class DocumentCommandInterpreter
     // Zuerst alle Kommandos bearbeiten, die irgendwie Kinder bekommen
     // können, damit der DocumentCommandTree vollständig aufgebaut werden
     // kann.
-    errors += new DocumentExpander(model.getFragUrls()).execute(model.getDocumentCommands());
+    errors +=
+      new DocumentExpander(model.getFragUrls()).execute(model.getDocumentCommands());
 
     // Überträgt beim übergebenen XTextDocument doc die Eigenschaften der
     // Seitenvorlage Wollmuxseite auf die Seitenvorlage Standard, falls
@@ -246,14 +245,13 @@ public class DocumentCommandInterpreter
   }
 
   /**
-   * Überträgt beim übergebenen XTextDocument doc die Eigenschaften der
-   * Seitenvorlage Wollmuxseite auf die Seitenvorlage Standard, falls
-   * Seitenvorlage Wollmuxseite vorhanden ist.
+   * Überträgt beim übergebenen XTextDocument doc die Eigenschaften der Seitenvorlage
+   * Wollmuxseite auf die Seitenvorlage Standard, falls Seitenvorlage Wollmuxseite
+   * vorhanden ist.
    * 
    * @param doc
-   *          Das dessen Seitenvorlage Standard an die Seitenvorlage
-   *          Wollmuxseite angepasst werden soll, falls Wollmuxseite vorhanden
-   *          ist.
+   *          Das dessen Seitenvorlage Standard an die Seitenvorlage Wollmuxseite
+   *          angepasst werden soll, falls Wollmuxseite vorhanden ist.
    */
   public static void pageStyleWollmuxseiteToStandard(XTextDocument doc)
   {
@@ -281,16 +279,17 @@ public class DocumentCommandInterpreter
       styleStandard = UNO.XStyle(nameContainer.getByName("Standard"));
     }
     catch (java.lang.Exception e)
-    {
-    }
+    {}
 
     // Falls eine Seitenvorlage Wollmuxseite vorhanden ist, werden deren
     // Properties ausgelesen und alle, die nicht READONLY sind, auf die
     // Seitenvorlage Standard übertragen.
     if (styleWollmuxseite != null)
     {
-      XMultiPropertySet multiPropertySetWollmuxseite = UNO.XMultiPropertySet(styleWollmuxseite);
-      XPropertySetInfo propertySetInfo = multiPropertySetWollmuxseite.getPropertySetInfo();
+      XMultiPropertySet multiPropertySetWollmuxseite =
+        UNO.XMultiPropertySet(styleWollmuxseite);
+      XPropertySetInfo propertySetInfo =
+        multiPropertySetWollmuxseite.getPropertySetInfo();
       Property[] propertys = propertySetInfo.getProperties();
       HashSet<String> set = new HashSet<String>();
       // Schleife über die Properties der Wollmuxseite. Wenn die Properties
@@ -299,7 +298,8 @@ public class DocumentCommandInterpreter
       for (int i = 0; i < propertys.length; i++)
       {
         String name = propertys[i].Name;
-        boolean readonly = (propertys[i].Attributes & PropertyAttribute.READONLY) != 0;
+        boolean readonly =
+          (propertys[i].Attributes & PropertyAttribute.READONLY) != 0;
         if (!readonly)
         {
           set.add(name);
@@ -346,17 +346,19 @@ public class DocumentCommandInterpreter
   }
 
   /**
-   * Hierbei handelt es sich um einen minimalen Scanner, der zu aller erst
-   * abläuft und die globalen Einstellungen des Dokuments (setType,
-   * setPrintFunction) ausliest und dem TextDocumentModel zur Verfügung stellt.
+   * Hierbei handelt es sich um einen minimalen Scanner, der zu aller erst abläuft
+   * und die globalen Einstellungen des Dokuments (setType, setPrintFunction)
+   * ausliest und dem TextDocumentModel zur Verfügung stellt.
    * 
    * @author christoph.lutz
    */
   private class GlobalDocumentCommandsScanner extends DocumentCommands.Executor
   {
-    public HashMap<String, List<FormField>> idToFormFields = new HashMap<String, List<FormField>>();
+    public HashMap<String, List<FormField>> idToFormFields =
+      new HashMap<String, List<FormField>>();
 
-    private Map<String, FormField> bookmarkNameToFormField = new HashMap<String, FormField>();
+    private Map<String, FormField> bookmarkNameToFormField =
+      new HashMap<String, FormField>();
 
     public int execute(DocumentCommands commands)
     {
@@ -400,8 +402,8 @@ public class DocumentCommandInterpreter
         fields = new LinkedList<FormField>();
         idToFormFields.put(id, fields);
       }
-      FormField field = FormFieldFactory.createFormField(model.doc, cmd,
-        bookmarkNameToFormField);
+      FormField field =
+        FormFieldFactory.createFormField(model.doc, cmd, bookmarkNameToFormField);
 
       if (field != null)
       {
@@ -482,10 +484,10 @@ public class DocumentCommandInterpreter
     private int execute(DocumentCommands commands)
     {
       int errors = 0;
-      Iterator iter = commands.iterator();
+      Iterator<DocumentCommand> iter = commands.iterator();
       while (iter.hasNext())
       {
-        DocumentCommand cmd = (DocumentCommand) iter.next();
+        DocumentCommand cmd = iter.next();
         errors += cmd.execute(this);
       }
 
@@ -545,10 +547,10 @@ public class DocumentCommandInterpreter
     // Helper-Methoden:
 
     /**
-     * Diese Methode erfasst Einfügemarken und leere Absätze zum Beginn und zum
-     * Ende des übergebenen Dokumentkommandos cmd, wobei über
-     * removeAnLastEmptyParagraph gesteuert werden kann, ob ein Absatz am Ende
-     * eines Textes gelöscht werden soll (bei true) oder nicht (bei false).
+     * Diese Methode erfasst Einfügemarken und leere Absätze zum Beginn und zum Ende
+     * des übergebenen Dokumentkommandos cmd, wobei über removeAnLastEmptyParagraph
+     * gesteuert werden kann, ob ein Absatz am Ende eines Textes gelöscht werden soll
+     * (bei true) oder nicht (bei false).
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
      */
@@ -557,13 +559,12 @@ public class DocumentCommandInterpreter
     {
       /*
        * Im folgenden steht eine 0 in der ersten Stelle dafür, dass vor dem
-       * Einfügemarker kein Text mehr steht (der Marker also am Anfang des
-       * Absatzes ist). Eine 0 an der zweiten Stelle steht dafür, dass hinter
-       * dem Einfügemarker kein Text mehr folgt (der Einfügemarker also am Ende
-       * des Absatzes steht). Ein "T" an dritter Stelle gibt an, dass hinter dem
-       * Absatz des Einfügemarkers eine Tabelle folgt. Ein "E" an dritter Stelle
-       * gibt an, dass hinter dem Cursor das Dokument aufhört und kein weiterer
-       * Absatz kommt.
+       * Einfügemarker kein Text mehr steht (der Marker also am Anfang des Absatzes
+       * ist). Eine 0 an der zweiten Stelle steht dafür, dass hinter dem
+       * Einfügemarker kein Text mehr folgt (der Einfügemarker also am Ende des
+       * Absatzes steht). Ein "T" an dritter Stelle gibt an, dass hinter dem Absatz
+       * des Einfügemarkers eine Tabelle folgt. Ein "E" an dritter Stelle gibt an,
+       * dass hinter dem Cursor das Dokument aufhört und kein weiterer Absatz kommt.
        * 
        * Startmarke: Grundsätzlich gibt es die folgenden Fälle zu unterscheiden.
        * 
@@ -589,15 +590,14 @@ public class DocumentCommandInterpreter
        * 
        * DO NOT TOUCH THIS CODE ! Dieser Code ist komplex und fehleranfällig.
        * Kleinste Änderungen können dafür sorgen, dass irgendeine der 1000e von
-       * Vorlagen plötzlich anders dargestellt wird. Das gewünschte Verhalten
-       * dieses Codes ist in diesem Kommentar vollständig dokumentiert und
-       * Änderungen sollten nur erfolgen, falls obiger Kommentar nicht korrekt
-       * umgesetzt wurde. Um neue Anforderungen umzusetzen sollten unbedingt
-       * alle anderen Möglichkeiten in Betracht gezogen werden bevor hier eine
-       * Änderung erfolgt. Sollte eine Änderung unumgehbar sein, so ist sie VOR
-       * der Implementierung im Wiki und in obigem Kommentar zu dokumentieren.
-       * Dabei ist darauf zu achten, dass ein neuer Fall sich mit keinem der
-       * anderen Fälle überschneidet.
+       * Vorlagen plötzlich anders dargestellt wird. Das gewünschte Verhalten dieses
+       * Codes ist in diesem Kommentar vollständig dokumentiert und Änderungen
+       * sollten nur erfolgen, falls obiger Kommentar nicht korrekt umgesetzt wurde.
+       * Um neue Anforderungen umzusetzen sollten unbedingt alle anderen
+       * Möglichkeiten in Betracht gezogen werden bevor hier eine Änderung erfolgt.
+       * Sollte eine Änderung unumgehbar sein, so ist sie VOR der Implementierung im
+       * Wiki und in obigem Kommentar zu dokumentieren. Dabei ist darauf zu achten,
+       * dass ein neuer Fall sich mit keinem der anderen Fälle überschneidet.
        * 
        */
       XParagraphCursor[] start = cmd.getStartMark();
@@ -629,7 +629,7 @@ public class DocumentCommandInterpreter
       if (removeAnLastEmptyParagraph == false) isEndOfDocument = false;
 
       if (end[0].isStartOfParagraph() && end[1].isEndOfParagraph()
-          && !isEndOfDocument)
+        && !isEndOfDocument)
       {
         muellmaenner.add(new ParagraphMuellmann(end[1]));
       }
@@ -643,8 +643,8 @@ public class DocumentCommandInterpreter
 
   /**
    * Der DocumentExpander sorgt dafür, dass das Dokument nach Ausführung der
-   * enthaltenen Kommandos komplett aufgebaut ist und alle Textfragmente
-   * eingefügt wurden.
+   * enthaltenen Kommandos komplett aufgebaut ist und alle Textfragmente eingefügt
+   * wurden.
    * 
    * @author christoph.lutz
    * 
@@ -660,9 +660,9 @@ public class DocumentCommandInterpreter
     private boolean firstEmptyPlaceholder = false;
 
     /**
-     * Erzeugt einen neuen DocumentExpander, mit der Liste fragUrls, die die
-     * URLs beschreibt, von denen die Textfragmente für den insertContent Befehl
-     * bezogen werden sollen.
+     * Erzeugt einen neuen DocumentExpander, mit der Liste fragUrls, die die URLs
+     * beschreibt, von denen die Textfragmente für den insertContent Befehl bezogen
+     * werden sollen.
      * 
      * @param fragUrls
      */
@@ -673,11 +673,10 @@ public class DocumentCommandInterpreter
     }
 
     /**
-     * Führt die Dokumentkommandos von commands aus, welche so lange
-     * aktualisiert werden, bis das Dokument vollständig aufgebaut ist. Die
-     * Dokumentkommandos OverrideFrags erhalten dabei eine Sonderrolle, da sie
-     * bereits vor den anderen Dokumentkommandos (insertFrag/insertContent)
-     * abgefeiert werden.
+     * Führt die Dokumentkommandos von commands aus, welche so lange aktualisiert
+     * werden, bis das Dokument vollständig aufgebaut ist. Die Dokumentkommandos
+     * OverrideFrags erhalten dabei eine Sonderrolle, da sie bereits vor den anderen
+     * Dokumentkommandos (insertFrag/insertContent) abgefeiert werden.
      * 
      * @param tree
      * @return
@@ -699,8 +698,8 @@ public class DocumentCommandInterpreter
     }
 
     /**
-     * führt alle OverrideFrag-Kommandos aus commands aus, wenn sie nicht den
-     * Status DONE=true oder ERROR=true besitzen.
+     * führt alle OverrideFrag-Kommandos aus commands aus, wenn sie nicht den Status
+     * DONE=true oder ERROR=true besitzen.
      * 
      * @param commands
      * @return Anzahl der bei der Ausführung aufgetretenen Fehler.
@@ -710,9 +709,9 @@ public class DocumentCommandInterpreter
       int errors = 0;
 
       // Alle DocumentCommands durchlaufen und mit execute aufrufen.
-      for (Iterator iter = commands.iterator(); iter.hasNext();)
+      for (Iterator<DocumentCommand> iter = commands.iterator(); iter.hasNext();)
       {
-        DocumentCommand cmd = (DocumentCommand) iter.next();
+        DocumentCommand cmd = iter.next();
         if (!(cmd instanceof OverrideFrag)) continue;
 
         if (cmd.isDone() == false && cmd.hasError() == false)
@@ -725,10 +724,10 @@ public class DocumentCommandInterpreter
     }
 
     /**
-     * Wertet ein OverrideFrag-Kommandos aus, über das Fragmente umgemapped
-     * werden können, und setzt das Kommando sofort auf DONE. Dies geschieht vor
-     * der Bearbeitung der anderen Kommandos (insertFrag/insertContent), da das
-     * mapping beim insertFrag/insertContent benötigt wird.
+     * Wertet ein OverrideFrag-Kommandos aus, über das Fragmente umgemapped werden
+     * können, und setzt das Kommando sofort auf DONE. Dies geschieht vor der
+     * Bearbeitung der anderen Kommandos (insertFrag/insertContent), da das mapping
+     * beim insertFrag/insertContent benötigt wird.
      */
     public int executeCommand(OverrideFrag cmd)
     {
@@ -757,7 +756,7 @@ public class DocumentCommandInterpreter
       cmd.setErrorState(false);
       boolean found = false;
       String errors = "";
-      Vector urls = new Vector();
+      Vector<String> urls = new Vector<String>();
       String fragId = "";
 
       try
@@ -782,10 +781,10 @@ public class DocumentCommandInterpreter
             cmd.getFragID()));
         }
         // Iterator über URLs
-        Iterator iter = urls.iterator();
+        Iterator<String> iter = urls.iterator();
         while (iter.hasNext() && found == false)
         {
-          String urlStr = (String) iter.next();
+          String urlStr = iter.next();
           try
           {
             URL url = WollMuxFiles.makeURL(urlStr);
@@ -823,8 +822,7 @@ public class DocumentCommandInterpreter
           WollMuxSingleton.showInfoModal(L.m("WollMux-Fehler"), L.m(
             "Das Textfragment mit der FRAG_ID '%1' konnte nicht eingefügt werden:",
             cmd.getFragID())
-                                                                + "\n\n"
-                                                                + e.getMessage());
+            + "\n\n" + e.getMessage());
         }
         else
         {
@@ -842,9 +840,9 @@ public class DocumentCommandInterpreter
     }
 
     /**
-     * Diese Methode fügt das nächste Textfragment aus der dem
-     * WMCommandInterpreter übergebenen frag_urls liste ein. Im Fehlerfall wird
-     * eine entsprechende Fehlermeldung eingefügt.
+     * Diese Methode fügt das nächste Textfragment aus der dem WMCommandInterpreter
+     * übergebenen frag_urls liste ein. Im Fehlerfall wird eine entsprechende
+     * Fehlermeldung eingefügt.
      */
     public int executeCommand(InsertContent cmd)
     {
@@ -875,11 +873,10 @@ public class DocumentCommandInterpreter
     // Helper-Methoden:
 
     /**
-     * Die Methode fügt das externe Dokument von der URL url an die Stelle von
-     * cmd ein. Die Methode enthält desweiteren notwendige Workarounds für die
-     * Bugs des insertDocumentFromURL der UNO-API. public int
-     * execute(DocumentCommandTree tree) { return executeDepthFirst(tree,
-     * false); }
+     * Die Methode fügt das externe Dokument von der URL url an die Stelle von cmd
+     * ein. Die Methode enthält desweiteren notwendige Workarounds für die Bugs des
+     * insertDocumentFromURL der UNO-API. public int execute(DocumentCommandTree
+     * tree) { return executeDepthFirst(tree, false); }
      * 
      * @param cmd
      *          Einfügeposition
@@ -911,13 +908,14 @@ public class DocumentCommandInterpreter
       XTextRange range = cmd.getTextRange();
       if (range != null)
       {
-        endCursor = new UnoService(range.getText().createTextCursorByRange(
-          range.getEnd()));
+        endCursor =
+          new UnoService(range.getText().createTextCursorByRange(range.getEnd()));
       }
       try
       {
         if (endCursor.xPropertySet() != null)
-          paraStyleName = endCursor.getPropertyValue("ParaStyleName").getObject().toString();
+          paraStyleName =
+            endCursor.getPropertyValue("ParaStyleName").getObject().toString();
       }
       catch (java.lang.Exception e)
       {
@@ -930,7 +928,8 @@ public class DocumentCommandInterpreter
       HashSet<String> textFrames = new HashSet<String>();
       if (UNO.XTextFramesSupplier(model.doc) != null)
       {
-        String[] names = UNO.XTextFramesSupplier(model.doc).getTextFrames().getElementNames();
+        String[] names =
+          UNO.XTextFramesSupplier(model.doc).getTextFrames().getElementNames();
         for (int i = 0; i < names.length; i++)
         {
           textFrames.add(names[i]);
@@ -961,16 +960,15 @@ public class DocumentCommandInterpreter
     }
 
     /**
-     * Diese Methode importiert alle in styles angegebenen Formatvorlagen aus
-     * dem durch url beschriebenen Fragment definiert und ersetzt dabei auch die
-     * bereits bestehenden Formatvorlagen des aktuellen Dokuments. Nach der
-     * erfolgreichen Einfügung der Formatvorlagen wird der Inhalt des
-     * Dokumentkommandos gelöscht, da ja mit dem Einfügen keine Textinhalte
-     * eingefügt werden.
+     * Diese Methode importiert alle in styles angegebenen Formatvorlagen aus dem
+     * durch url beschriebenen Fragment definiert und ersetzt dabei auch die bereits
+     * bestehenden Formatvorlagen des aktuellen Dokuments. Nach der erfolgreichen
+     * Einfügung der Formatvorlagen wird der Inhalt des Dokumentkommandos gelöscht,
+     * da ja mit dem Einfügen keine Textinhalte eingefügt werden.
      * 
      * @param cmd
-     *          das Dokumentkommando dessen Inhalt nach dem erfolgreichen
-     *          Einfügen gelöscht wird.
+     *          das Dokumentkommando dessen Inhalt nach dem erfolgreichen Einfügen
+     *          gelöscht wird.
      * @param styles
      *          ein Set mit den in Kleinbuchstaben geschriebenen Namen der zu
      *          importierenden styles.
@@ -979,7 +977,7 @@ public class DocumentCommandInterpreter
      * @throws java.io.IOException
      * @throws IOException
      */
-    private void insertStylesFromURL(DocumentCommand cmd, Set styles, URL url)
+    private void insertStylesFromURL(DocumentCommand cmd, Set<String> styles, URL url)
         throws java.io.IOException, IOException
     {
       // Workaround für Einfrierfehler von OOo, wenn ressource nicht auflösbar
@@ -1030,7 +1028,7 @@ public class DocumentCommandInterpreter
      *          Argumente die beim Aufruf zum Einfügen übergeben werden
      */
     private void fillPlaceholders(XTextDocument doc, XTextCursor viewCursor,
-        XTextRange range, Vector args)
+        XTextRange range, Vector<String> args)
     {
       // Vector mit allen Platzhalterfelder
       Vector<XTextField> placeholders = new Vector<XTextField>();
@@ -1066,15 +1064,16 @@ public class DocumentCommandInterpreter
             {
               continue;
             }
-            String textPortionType = (String) UNO.getProperty(textPortion,
-              "TextPortionType");
+            String textPortionType =
+              (String) UNO.getProperty(textPortion, "TextPortionType");
             // Wenn es ein Textfeld ist
             if (textPortionType.equals("TextField"))
             {
               XTextField textField = null;
               try
               {
-                textField = UNO.XTextField(UNO.getProperty(textPortion, "TextField"));
+                textField =
+                  UNO.XTextField(UNO.getProperty(textPortion, "TextField"));
                 // Wenn es ein Platzhalterfeld ist, dem Vector placeholders
                 // hinzufügen
                 if (UNO.supportsService(textField,
@@ -1118,8 +1117,7 @@ public class DocumentCommandInterpreter
             viewCursor.gotoRange(textFieldAnchor, false);
           }
           catch (java.lang.Exception e)
-          {
-          }
+          {}
         }
       }
 
@@ -1152,7 +1150,8 @@ public class DocumentCommandInterpreter
       if (placeholders.size() < args.size())
       {
 
-        String error = (L.m("Es sind mehr Parameter angegeben als Platzhalter vorhanden sind"));
+        String error =
+          (L.m("Es sind mehr Parameter angegeben als Platzhalter vorhanden sind"));
 
         Logger.error(error);
 
@@ -1165,8 +1164,7 @@ public class DocumentCommandInterpreter
           message = WarnungenConf.getLastChild().toString();
         }
         catch (NodeNotFoundException e)
-        {
-        }
+        {}
 
         if (message.equals("true") || message.equals("on") || message.equals("1"))
         {
@@ -1177,8 +1175,7 @@ public class DocumentCommandInterpreter
   }
 
   /**
-   * Der Hauptverarbeitungsschritt, in dem vor allem die Textinhalte gefüllt
-   * werden.
+   * Der Hauptverarbeitungsschritt, in dem vor allem die Textinhalte gefüllt werden.
    * 
    * @author christoph.lutz
    * 
@@ -1200,10 +1197,9 @@ public class DocumentCommandInterpreter
     }
 
     /**
-     * Besitzt das Dokument ein (inzwischen veraltetes) Form-Dokumentkommando,
-     * so wird dieses in die persistenten Daten des Dokuments kopiert und die
-     * zugehörige Notiz gelöscht, wenn nicht bereits eine Formularbeschreibung
-     * dort existiert.
+     * Besitzt das Dokument ein (inzwischen veraltetes) Form-Dokumentkommando, so
+     * wird dieses in die persistenten Daten des Dokuments kopiert und die zugehörige
+     * Notiz gelöscht, wenn nicht bereits eine Formularbeschreibung dort existiert.
      */
     public int executeCommand(DocumentCommand.Form cmd)
     {
@@ -1223,8 +1219,8 @@ public class DocumentCommandInterpreter
     }
 
     /**
-     * Diese Methode bearbeitet ein InvalidCommand und fügt ein Fehlerfeld an
-     * der Stelle des Dokumentkommandos ein.
+     * Diese Methode bearbeitet ein InvalidCommand und fügt ein Fehlerfeld an der
+     * Stelle des Dokumentkommandos ein.
      */
     public int executeCommand(DocumentCommand.InvalidCommand cmd)
     {
@@ -1272,7 +1268,7 @@ public class DocumentCommandInterpreter
         else
         {
           insCursor.setString(cmd.getLeftSeparator() + value
-                              + cmd.getRightSeparator());
+            + cmd.getRightSeparator());
         }
       }
       cmd.markDone(!mux.isDebugMode());
@@ -1293,17 +1289,18 @@ public class DocumentCommandInterpreter
       {
         SimpleMap args = new SimpleMap();
         String[] pars = func.parameters();
-        Iterator iter = cmd.getArgs().iterator();
+        Iterator<String> iter = cmd.getArgs().iterator();
         for (int i = 0; i < pars.length && iter.hasNext(); ++i)
         {
-          String arg = iter.next().toString();
+          String arg = iter.next();
           args.put(pars[i], arg);
         }
         value = func.getString(args);
       }
       else
       {
-        value = L.m("<FEHLER: FUNCTION '%1' nicht definiert>", cmd.getFunctionName());
+        value =
+          L.m("<FEHLER: FUNCTION '%1' nicht definiert>", cmd.getFunctionName());
         Logger.error(L.m(
           "Die in Kommando '%1' verwendete FUNCTION '%2' ist nicht definiert.", cmd,
           cmd.getFunctionName()));
@@ -1351,9 +1348,8 @@ public class DocumentCommandInterpreter
     }
 
     /**
-     * Diese Methode durchsucht das Element element bzw. dessen
-     * XEnumerationAccess Interface rekursiv nach TextFeldern und ruft deren
-     * Methode update() auf.
+     * Diese Methode durchsucht das Element element bzw. dessen XEnumerationAccess
+     * Interface rekursiv nach TextFeldern und ruft deren Methode update() auf.
      * 
      * @param element
      *          Das Element das geupdated werden soll.
@@ -1391,8 +1387,7 @@ public class DocumentCommandInterpreter
           }
         }
         catch (Exception e)
-        {
-        }
+        {}
       }
     }
   }
@@ -1432,8 +1427,9 @@ public class DocumentCommandInterpreter
       XTextRange range = cursor.xTextCursor().getEnd();
       XTextCursor c = range.getText().createTextCursorByRange(range);
       c.goLeft((short) 2, false);
-      XTextContent note = UNO.XTextContent(UNO.XMultiServiceFactory(model.doc).createInstance(
-        "com.sun.star.text.TextField.Annotation"));
+      XTextContent note =
+        UNO.XTextContent(UNO.XMultiServiceFactory(model.doc).createInstance(
+          "com.sun.star.text.TextField.Annotation"));
       UNO.setProperty(note, "Content", msg + ":\n\n" + e.getMessage());
       c.getText().insertTextContent(c, note, false);
     }

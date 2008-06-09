@@ -56,11 +56,11 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
-import java.util.Date;
 
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
@@ -94,6 +94,7 @@ import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.DJDataset;
 import de.muenchen.allg.itd51.wollmux.db.DJDatasetListElement;
+import de.muenchen.allg.itd51.wollmux.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.db.DatasetNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
 import de.muenchen.allg.itd51.wollmux.db.QueryResults;
@@ -113,8 +114,8 @@ public class WollMuxSingleton implements XPALProvider
   /**
    * Default-oooEinstellungen-Abschnitt (Übergangslösung).
    */
-  private final URL OOOEINSTELLUNGEN_URL = this.getClass().getClassLoader().getResource(
-    "data/oooEinstellungen.conf");
+  private final URL OOOEINSTELLUNGEN_URL =
+    this.getClass().getClassLoader().getResource("data/oooEinstellungen.conf");
 
   private static WollMuxSingleton singletonInstance = null;
 
@@ -173,7 +174,8 @@ public class WollMuxSingleton implements XPALProvider
     // getXComponentContext zurückgeliefert.
     this.ctx = ctx;
 
-    this.currentTextDocumentModels = new HashMap<HashableComponent, TextDocumentModel>();
+    this.currentTextDocumentModels =
+      new HashMap<HashableComponent, TextDocumentModel>();
 
     this.currentWollMuxInstallationDate = null;
 
@@ -200,7 +202,7 @@ public class WollMuxSingleton implements XPALProvider
     Logger.debug("Build-Info: " + getBuildInfo());
     Logger.debug("wollmuxConfFile = " + WollMuxFiles.getWollMuxConfFile().toString());
     Logger.debug("DEFAULT_CONTEXT \"" + WollMuxFiles.getDEFAULT_CONTEXT().toString()
-                 + "\"");
+      + "\"");
     Logger.debug("CONF_VERSION: " + getConfVersionInfo());
 
     /*
@@ -222,21 +224,23 @@ public class WollMuxSingleton implements XPALProvider
      * könnte. Dadurch könnten globale Funktionen globale Funktionsdialoge
      * darstellen, die global einheitliche Werte haben.
      */
-    funcDialogs = WollMuxFiles.parseFunctionDialogs(WollMuxFiles.getWollmuxConf(),
-      null, null);
+    funcDialogs =
+      WollMuxFiles.parseFunctionDialogs(WollMuxFiles.getWollmuxConf(), null, null);
 
     /*
      * Globale Funktionen parsen. ACHTUNG! Verwendet die Funktionsdialoge. Diese
      * müssen also vorher geparst sein. Als context wird null übergeben, weil globale
      * Funktionen keinen Kontext haben.
      */
-    globalFunctions = WollMuxFiles.parseFunctions(WollMuxFiles.getWollmuxConf(),
-      getFunctionDialogs(), null, null);
+    globalFunctions =
+      WollMuxFiles.parseFunctions(WollMuxFiles.getWollmuxConf(),
+        getFunctionDialogs(), null, null);
 
     /*
      * Globale Druckfunktionen parsen.
      */
-    globalPrintFunctions = WollMuxFiles.parsePrintFunctions(WollMuxFiles.getWollmuxConf());
+    globalPrintFunctions =
+      WollMuxFiles.parsePrintFunctions(WollMuxFiles.getWollmuxConf());
 
     // Initialisiere EventProcessor
     WollMuxEventHandler.setAcceptEvents(successfulStartup);
@@ -244,8 +248,9 @@ public class WollMuxSingleton implements XPALProvider
     // register global EventListener
     try
     {
-      UnoService eventBroadcaster = UnoService.createWithContext(
-        "com.sun.star.frame.GlobalEventBroadcaster", ctx);
+      UnoService eventBroadcaster =
+        UnoService.createWithContext("com.sun.star.frame.GlobalEventBroadcaster",
+          ctx);
       eventBroadcaster.xEventBroadcaster().addEventListener(
         new GlobalEventListener());
     }
@@ -258,11 +263,11 @@ public class WollMuxSingleton implements XPALProvider
     ConfigThingy tastenkuerzel = new ConfigThingy("");
     try
     {
-      tastenkuerzel = WollMuxFiles.getWollmuxConf().query("Tastenkuerzel").getLastChild();
+      tastenkuerzel =
+        WollMuxFiles.getWollmuxConf().query("Tastenkuerzel").getLastChild();
     }
     catch (NodeNotFoundException e)
-    {
-    }
+    {}
     try
     {
       Shortcuts.createShortcuts(tastenkuerzel);
@@ -288,8 +293,8 @@ public class WollMuxSingleton implements XPALProvider
 
     // Setzen der in den Abschnitten OOoEinstellungen eingestellten
     // Konfigurationsoptionen
-    ConfigThingy oooEinstellungenConf = WollMuxFiles.getWollmuxConf().query(
-      "OOoEinstellungen");
+    ConfigThingy oooEinstellungenConf =
+      WollMuxFiles.getWollmuxConf().query("OOoEinstellungen");
     // ggf. fest verdrahtete Standardeinstellungen verwenden
     // Solange wir dieses Fallback-Verhalten haben (es soll 2008 entfernt
     // werden, (siehe R5973)), wenden wir es auch an, wenn ein leerer
@@ -298,19 +303,18 @@ public class WollMuxSingleton implements XPALProvider
     // einfach einen leeren Abschnitt anlegen, ohne dass sie wissen, was sie
     // damit anrichten.
     if (oooEinstellungenConf.count() == 0
-        || oooEinstellungenConf.iterator().next().count() == 0)
+      || oooEinstellungenConf.iterator().next().count() == 0)
       try
       {
-        oooEinstellungenConf = new ConfigThingy("DefaultSettings",
-          OOOEINSTELLUNGEN_URL);
+        oooEinstellungenConf =
+          new ConfigThingy("DefaultSettings", OOOEINSTELLUNGEN_URL);
         Logger.error(L.m("Kein Konfigurationsabschnitt OOoEinstellungen gefunden => Verwende interne Vorgabe. ACHTUNG! Dieses Fallback-Verhalten wird mittelfristig entfernt. Bitte updaten Sie auf eine neue Standardkonfig, oder falls Sie dies nicht können/wollen wenden Sie sich an D-III-ITD-5.1"));
       }
       catch (java.lang.Exception e)
-      {
-      }
-    for (Iterator iter = oooEinstellungenConf.iterator(); iter.hasNext();)
+      {}
+    for (Iterator<ConfigThingy> iter = oooEinstellungenConf.iterator(); iter.hasNext();)
     {
-      ConfigThingy settings = (ConfigThingy) iter.next();
+      ConfigThingy settings = iter.next();
       setConfigurationValues(settings);
     }
   }
@@ -363,14 +367,13 @@ public class WollMuxSingleton implements XPALProvider
       URL url = WollMuxSingleton.class.getClassLoader().getResource("buildinfo");
       if (url != null)
       {
-        BufferedReader in = new BufferedReader(new InputStreamReader(
-          url.openStream()));
+        BufferedReader in =
+          new BufferedReader(new InputStreamReader(url.openStream()));
         return in.readLine().toString();
       }
     }
     catch (java.lang.Exception x)
-    {
-    }
+    {}
     return L.m("Version: unbekannt");
   }
 
@@ -426,10 +429,11 @@ public class WollMuxSingleton implements XPALProvider
    */
   private static void registerDatasources(ConfigThingy conf, URL context)
   {
-    Iterator iter = conf.query("Datenquellen").query("Registriere").iterator();
+    Iterator<ConfigThingy> iter =
+      conf.query("Datenquellen").query("Registriere").iterator();
     while (iter.hasNext())
     {
-      ConfigThingy regConf = (ConfigThingy) iter.next();
+      ConfigThingy regConf = iter.next();
       String name;
       try
       {
@@ -626,8 +630,10 @@ public class WollMuxSingleton implements XPALProvider
     try
     {
       // Menüleiste aus des Moduls com.sun.star.text.TextDocument holen:
-      XModuleUIConfigurationManagerSupplier suppl = UNO.XModuleUIConfigurationManagerSupplier(UNO.createUNOService("com.sun.star.ui.ModuleUIConfigurationManagerSupplier"));
-      XUIConfigurationManager cfgMgr = UNO.XUIConfigurationManager(suppl.getUIConfigurationManager("com.sun.star.text.TextDocument"));
+      XModuleUIConfigurationManagerSupplier suppl =
+        UNO.XModuleUIConfigurationManagerSupplier(UNO.createUNOService("com.sun.star.ui.ModuleUIConfigurationManagerSupplier"));
+      XUIConfigurationManager cfgMgr =
+        UNO.XUIConfigurationManager(suppl.getUIConfigurationManager("com.sun.star.text.TextDocument"));
       XIndexAccess menubar = UNO.XIndexAccess(cfgMgr.getSettings(settingsUrl, true));
 
       // Elemente des .uno:ToolsMenu besorgen:
@@ -636,7 +642,8 @@ public class WollMuxSingleton implements XPALProvider
       if (idx >= 0)
       {
         UnoProps desc = new UnoProps((PropertyValue[]) menubar.getByIndex(idx));
-        toolsMenu = UNO.XIndexContainer(desc.getPropertyValue("ItemDescriptorContainer"));
+        toolsMenu =
+          UNO.XIndexContainer(desc.getPropertyValue("ItemDescriptorContainer"));
       }
 
       // Seriendruck-Button löschen, wenn er bereits vorhanden ist.
@@ -660,8 +667,7 @@ public class WollMuxSingleton implements XPALProvider
       }
     }
     catch (java.lang.Exception e)
-    {
-    }
+    {}
   }
 
   /**
@@ -686,8 +692,7 @@ public class WollMuxSingleton implements XPALProvider
       }
     }
     catch (java.lang.Exception e)
-    {
-    }
+    {}
     return -1;
   }
 
@@ -700,9 +705,9 @@ public class WollMuxSingleton implements XPALProvider
    */
   private static void setConfigurationValues(ConfigThingy oooEinstellungenConf)
   {
-    for (Iterator iter = oooEinstellungenConf.iterator(); iter.hasNext();)
+    for (Iterator<ConfigThingy> iter = oooEinstellungenConf.iterator(); iter.hasNext();)
     {
-      ConfigThingy element = (ConfigThingy) iter.next();
+      ConfigThingy element = iter.next();
       try
       {
         String node = element.get("NODE").toString();
@@ -838,7 +843,7 @@ public class WollMuxSingleton implements XPALProvider
     QueryResults data = getDatasourceJoiner().getLOS();
 
     DJDatasetListElement[] elements = new DJDatasetListElement[data.size()];
-    Iterator iter = data.iterator();
+    Iterator<Dataset> iter = data.iterator();
     int i = 0;
     while (iter.hasNext())
       elements[i++] = new DJDatasetListElement((DJDataset) iter.next());
@@ -1060,7 +1065,8 @@ public class WollMuxSingleton implements XPALProvider
 
     try
     {
-      HashableComponent key = new HashableComponent(frame.getController().getModel());
+      HashableComponent key =
+        new HashableComponent(frame.getController().getModel());
       return currentTextDocumentModels.get(key);
     }
     catch (java.lang.Exception e)
@@ -1199,8 +1205,9 @@ public class WollMuxSingleton implements XPALProvider
       // infobox ausgeben:
       Common.setLookAndFeelOnce();
 
-      JOptionPane pane = new JOptionPane(formattedMessage,
-        javax.swing.JOptionPane.INFORMATION_MESSAGE);
+      JOptionPane pane =
+        new JOptionPane(formattedMessage,
+          javax.swing.JOptionPane.INFORMATION_MESSAGE);
       JDialog dialog = pane.createDialog(null, sTitle);
       dialog.setAlwaysOnTop(true);
       dialog.setVisible(true);
@@ -1233,8 +1240,7 @@ public class WollMuxSingleton implements XPALProvider
       dispProv = UNO.XDispatchProvider(doc.getCurrentController().getFrame());
     }
     catch (java.lang.Exception e)
-    {
-    }
+    {}
 
     if (dispProv != null)
     {
@@ -1261,10 +1267,10 @@ public class WollMuxSingleton implements XPALProvider
       if (doc != null)
       {
         Logger.debug2("Incoming documentEvent for #" + doc.hashCode() + ": "
-                      + docEvent.EventName);
+          + docEvent.EventName);
 
         if (docEvent.EventName.equalsIgnoreCase("OnLoad")
-            || docEvent.EventName.equalsIgnoreCase(("OnNew")))
+          || docEvent.EventName.equalsIgnoreCase(("OnNew")))
         {
           // Verarbeitung von TextDocuments anstossen:
           WollMuxEventHandler.handleProcessTextDocument(doc);
@@ -1279,7 +1285,7 @@ public class WollMuxSingleton implements XPALProvider
 
     public void disposing(EventObject arg0)
     {
-      // nothing to do
+    // nothing to do
     }
   }
 }

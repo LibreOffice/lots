@@ -49,17 +49,16 @@ import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 
 /**
- * Diese Klasse liest alle zu lokalisierenden Strings des WollMux aus dem
- * Source-Code und aktualisiert die Datei localization.conf. Dabei wird wie
- * folgt vorgegangen: Bereits bestehende Einträge bleiben in der Reihenfolge, in
- * der sie bestehen. Durch den Update neu hinzukommende Einträge werden an das
- * Ende der Liste angehängt. Bereits bestehende Einträge, zu denen es im Code
- * keine zugehörigen Original-Strings mehr gibt, werden auskommentiert und an
- * das Ende der Liste verschoben. Sind unter den auskommentierten, verschobenen
- * Zeilen auch Einträge dabei, die tatsächlich eine Übersetzung in anderen
- * Sprachen besitzen, so wird nach dem Update eine Warnung ausgegeben, die
- * darauf hinweist, dass hier bereits übersetzte Strings mit dem nächsten
- * Update-Lauf entfernt werden.
+ * Diese Klasse liest alle zu lokalisierenden Strings des WollMux aus dem Source-Code
+ * und aktualisiert die Datei localization.conf. Dabei wird wie folgt vorgegangen:
+ * Bereits bestehende Einträge bleiben in der Reihenfolge, in der sie bestehen. Durch
+ * den Update neu hinzukommende Einträge werden an das Ende der Liste angehängt.
+ * Bereits bestehende Einträge, zu denen es im Code keine zugehörigen
+ * Original-Strings mehr gibt, werden auskommentiert und an das Ende der Liste
+ * verschoben. Sind unter den auskommentierten, verschobenen Zeilen auch Einträge
+ * dabei, die tatsächlich eine Übersetzung in anderen Sprachen besitzen, so wird nach
+ * dem Update eine Warnung ausgegeben, die darauf hinweist, dass hier bereits
+ * übersetzte Strings mit dem nächsten Update-Lauf entfernt werden.
  * 
  * @author Christoph Lutz (D-III-ITD-5.1)
  */
@@ -69,7 +68,8 @@ public class LocalizationUpdater
    * Enthält den Pfad zur Konfigurationsdatei localization.conf aus Sicht des
    * Projekt-Hauptverzeichnisses.
    */
-  private static File localizationConfFile = new File("./src/data/localization.conf");
+  private static File localizationConfFile =
+    new File("./src/data/localization.conf");
 
   /**
    * Enthält das Wurzelverzeichnis der Source-Dateien aus Sicht des
@@ -78,10 +78,11 @@ public class LocalizationUpdater
   private static File sourcesDir = new File("./src/");
 
   /**
-   * Enthält das Pattern, mit dem nach L.m-Strings gesucht wird. In Gruppe 1 ist
-   * der String dieser zu lokalisierenden Message enthalten.
+   * Enthält das Pattern, mit dem nach L.m-Strings gesucht wird. In Gruppe 1 ist der
+   * String dieser zu lokalisierenden Message enthalten.
    */
-  private static Pattern L_m_Pattern = Pattern.compile("L.m\\(\\s*\"((?:\\\\\"|[^\"])*)\"");
+  private static Pattern L_m_Pattern =
+    Pattern.compile("L.m\\(\\s*\"((?:\\\\\"|[^\"])*)\"");
 
   /**
    * Muss aus dem Hauptverzeichnis des WollMux-Projekts ausgeführt werden und
@@ -113,8 +114,8 @@ public class LocalizationUpdater
     ConfigThingy messages;
     try
     {
-      localizationConf = new ConfigThingy("localization",
-        localizationConfFile.toURL());
+      localizationConf =
+        new ConfigThingy("localization", localizationConfFile.toURL());
     }
     catch (Exception e)
     {
@@ -123,9 +124,9 @@ public class LocalizationUpdater
     try
     {
       messages = localizationConf.query("L10n").query("Messages").getLastChild();
-      for (Iterator iter = messages.iterator(); iter.hasNext();)
+      for (Iterator<ConfigThingy> iter = messages.iterator(); iter.hasNext();)
       {
-        ConfigThingy element = (ConfigThingy) iter.next();
+        ConfigThingy element = iter.next();
         if (element.getName().equalsIgnoreCase("original"))
           knownOriginals.add(element.toString());
       }
@@ -187,9 +188,9 @@ public class LocalizationUpdater
     HashMap<String, Integer> countTranslations = new HashMap<String, Integer>();
     boolean valid = false;
     boolean removedTranslatedMessagesWarning = false;
-    for (Iterator iter = messages.iterator(); iter.hasNext();)
+    for (Iterator<ConfigThingy> iter = messages.iterator(); iter.hasNext();)
     {
-      ConfigThingy element = (ConfigThingy) iter.next();
+      ConfigThingy element = iter.next();
       String elementStr = element.stringRepresentation();
       elementStr.replaceAll("\\n", "%n");
 
@@ -254,12 +255,12 @@ public class LocalizationUpdater
 
     if (removedTranslatedMessagesWarning)
       System.err.println("\n"
-                         + L.m("ACHTUNG: Bitte überprüfen Sie den Inhalt Ihrer Datei localization.conf,\nda bereits übersetzte aber nicht mehr benötigte Einträge auskommentiert\nwurden und mit der nächsten Aktualisierung endgültig entfernt werden."));
+        + L.m("ACHTUNG: Bitte überprüfen Sie den Inhalt Ihrer Datei localization.conf,\nda bereits übersetzte aber nicht mehr benötigte Einträge auskommentiert\nwurden und mit der nächsten Aktualisierung endgültig entfernt werden."));
   }
 
   /**
-   * Liefert den kompletten Inhalt der mit encoding encodierten Datei file als
-   * String zurück.
+   * Liefert den kompletten Inhalt der mit encoding encodierten Datei file als String
+   * zurück.
    * 
    * @param file
    * @throws FileNotFoundException
@@ -271,8 +272,8 @@ public class LocalizationUpdater
     String str = "";
     try
     {
-      InputStreamReader r = new InputStreamReader(new FileInputStream(file),
-        encoding);
+      InputStreamReader r =
+        new InputStreamReader(new FileInputStream(file), encoding);
       char[] buff = new char[1024];
       int count;
       while ((count = r.read(buff)) > 0)
@@ -289,8 +290,8 @@ public class LocalizationUpdater
   }
 
   /**
-   * Fügt alle Dateien, die mit .java enden aus diesem Verzeichnis fileOrDir und
-   * aus allen Unterverzeichnissen zur Liste l hinzu.
+   * Fügt alle Dateien, die mit .java enden aus diesem Verzeichnis fileOrDir und aus
+   * allen Unterverzeichnissen zur Liste l hinzu.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
@@ -318,8 +319,8 @@ public class LocalizationUpdater
    * Java-Compiler interpretieren würde und liefert den Java-String zurück.
    * 
    * Derzeit werden folgende Escape-Sequenzen aus
-   * http://java.sun.com/docs/books/tutorial/java/data/characters.html
-   * umgesetzt: \t, \b, \n, \r, \f, \', \", \\
+   * http://java.sun.com/docs/books/tutorial/java/data/characters.html umgesetzt: \t,
+   * \b, \n, \r, \f, \', \", \\
    * 
    * @param str
    *          Ein String aus dem SourceCode, der zu übersetzen ist.

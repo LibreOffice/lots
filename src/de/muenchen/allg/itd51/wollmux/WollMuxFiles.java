@@ -103,21 +103,23 @@ public class WollMuxFiles
 {
   private static final String ETC_WOLLMUX_WOLLMUX_CONF = "/etc/wollmux/wollmux.conf";
 
-  private static final String C_PROGRAMME_WOLLMUX_WOLLMUX_CONF = "C:\\Programme\\wollmux\\wollmux.conf";
+  private static final String C_PROGRAMME_WOLLMUX_WOLLMUX_CONF =
+    "C:\\Programme\\wollmux\\wollmux.conf";
 
   private static final long DATASOURCE_TIMEOUT = 10000;
 
   /**
-   * Wenn nach dieser Anzahl Millisekunden die Konfiguration noch nicht
-   * vollständig eingelesen ist, wird ein Popup mit der Meldung
-   * {@link #SLOW_SERVER_MESSAGE} gebracht.
+   * Wenn nach dieser Anzahl Millisekunden die Konfiguration noch nicht vollständig
+   * eingelesen ist, wird ein Popup mit der Meldung {@link #SLOW_SERVER_MESSAGE}
+   * gebracht.
    */
   private static final long SLOW_SERVER_TIMEOUT = 10000;
 
   /**
    * Siehe {@link #SLOW_SERVER_TIMEOUT}.
    */
-  private static final String SLOW_SERVER_MESSAGE = L.m("Ihr Vorlagen-Server und/oder Ihre Netzwerkverbindung sind sehr langsam.\nDies kann die Arbeit mit OpenOffice.org stark beeinträchtigen.");
+  private static final String SLOW_SERVER_MESSAGE =
+    L.m("Ihr Vorlagen-Server und/oder Ihre Netzwerkverbindung sind sehr langsam.\nDies kann die Arbeit mit OpenOffice.org stark beeinträchtigen.");
 
   private static final WollMuxClassLoader classLoader = new WollMuxClassLoader();
 
@@ -132,8 +134,8 @@ public class WollMuxFiles
   private static DatasourceJoiner datasourceJoiner;
 
   /**
-   * Falls true, wurde bereits versucht, den DJ zu initialisieren (über den
-   * Erfolg des Versuchs sagt die Variable nichts.)
+   * Falls true, wurde bereits versucht, den DJ zu initialisieren (über den Erfolg
+   * des Versuchs sagt die Variable nichts.)
    */
   private static boolean djInitialized = false;
 
@@ -177,14 +179,14 @@ public class WollMuxFiles
   private static final String defaultWollmuxConf = null;
 
   /**
-   * Druckfunktionen, bei denen kein ORDER-Attribut angegeben ist, werden
-   * automatisch mit diesem ORDER-Wert versehen.
+   * Druckfunktionen, bei denen kein ORDER-Attribut angegeben ist, werden automatisch
+   * mit diesem ORDER-Wert versehen.
    */
   private static final String DEFAULT_PRINTFUNCTION_ORDER_VALUE = "100";
 
   /**
-   * Erzeugt das ,wollmux-Verzeichnis, falls es noch nicht existiert und
-   * erstellt eine Standard-wollmux,conf. Initialisiert auch den Logger.
+   * Erzeugt das ,wollmux-Verzeichnis, falls es noch nicht existiert und erstellt
+   * eine Standard-wollmux,conf. Initialisiert auch den Logger.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
@@ -212,13 +214,12 @@ public class WollMuxFiles
         wmconf.close();
       }
       catch (FileNotFoundException e)
-      {
-      }
+      {}
     }
 
     /*
-     * Zuerst leeres ConfigThingy anlegen, damit wollmuxConf auch dann
-     * wohldefiniert ist, wenn die Datei Fehler enthält bzw. fehlt.
+     * Zuerst leeres ConfigThingy anlegen, damit wollmuxConf auch dann wohldefiniert
+     * ist, wenn die Datei Fehler enthält bzw. fehlt.
      */
     wollmuxConf = new ConfigThingy("wollmuxConf");
 
@@ -235,8 +236,8 @@ public class WollMuxFiles
     try
     {
       if (getWollMuxConfFile().exists())
-        wollmuxConf = new ConfigThingy("wollmuxConf",
-          getWollMuxConfFile().toURI().toURL());
+        wollmuxConf =
+          new ConfigThingy("wollmuxConf", getWollMuxConfFile().toURI().toURL());
     }
     catch (Exception e)
     {
@@ -246,15 +247,15 @@ public class WollMuxFiles
     fido.dontBark();
 
     /*
-     * Logging-Mode zum ersten Mal setzen. Wird nachher nochmal gesetzt, nachdem
-     * wir /etc/wollmux/wollmux.conf geparst haben.
+     * Logging-Mode zum ersten Mal setzen. Wird nachher nochmal gesetzt, nachdem wir
+     * /etc/wollmux/wollmux.conf geparst haben.
      */
     setLoggingMode(WollMuxFiles.getWollmuxConf());
 
     /*
-     * Falls die obige wollmux.conf keinen DEFAULT_CONTEXT definiert, so wird
-     * falls /etc/wollmux/wollmux.conf existiert diese der oben geparsten
-     * wollmux.conf aus dem HOME-Verzeichnis vorangestellt.
+     * Falls die obige wollmux.conf keinen DEFAULT_CONTEXT definiert, so wird falls
+     * /etc/wollmux/wollmux.conf existiert diese der oben geparsten wollmux.conf aus
+     * dem HOME-Verzeichnis vorangestellt.
      */
     if (wollmuxConf.query("DEFAULT_CONTEXT", 1).count() == 0)
       try
@@ -267,12 +268,12 @@ public class WollMuxFiles
         wollmuxConfFile = new File(defaultWollmuxConfPath);
         if (wollmuxConfFile.exists())
         {
-          ConfigThingy etcWollmuxConf = new ConfigThingy("etcWollmuxConf",
-            wollmuxConfFile.toURI().toURL());
+          ConfigThingy etcWollmuxConf =
+            new ConfigThingy("etcWollmuxConf", wollmuxConfFile.toURI().toURL());
 
-          Iterator iter = wollmuxConf.iterator();
+          Iterator<ConfigThingy> iter = wollmuxConf.iterator();
           while (iter.hasNext())
-            etcWollmuxConf.addChild((ConfigThingy) iter.next());
+            etcWollmuxConf.addChild(iter.next());
           wollmuxConf = etcWollmuxConf;
         }
       }
@@ -287,11 +288,12 @@ public class WollMuxFiles
     setLoggingMode(WollMuxFiles.getWollmuxConf());
 
     Logger.debug(L.debugMessages.toString());
-    L.debugMessages = null;  //Speicherplatz freigeben
-    
+    L.debugMessages = null; // Speicherplatz freigeben
+
     fido.logTimes();
 
-    showCredits = WollMuxFiles.getWollmuxConf().query("SHOW_CREDITS", 1).query("on").count() > 0;
+    showCredits =
+      WollMuxFiles.getWollmuxConf().query("SHOW_CREDITS", 1).query("on").count() > 0;
 
     determineDefaultContext();
 
@@ -301,8 +303,8 @@ public class WollMuxFiles
 
     setLookAndFeel();
 
-    Logger.debug(L.m(".wollmux init time: %1ms",
-      "" + (System.currentTimeMillis() - time)));
+    Logger.debug(L.m(".wollmux init time: %1ms", ""
+      + (System.currentTimeMillis() - time)));
   }
 
   /**
@@ -316,9 +318,9 @@ public class WollMuxFiles
   }
 
   /**
-   * Liefert das File-Objekt der wollmux,conf zurück, die gelesen wurde (kann
-   * z,B, auch die aus /etc/wollmux/ sein). Darf erst nach setupWollMuxDir()
-   * aufgerufen werden.
+   * Liefert das File-Objekt der wollmux,conf zurück, die gelesen wurde (kann z,B,
+   * auch die aus /etc/wollmux/ sein). Darf erst nach setupWollMuxDir() aufgerufen
+   * werden.
    */
   public static File getWollMuxConfFile()
   {
@@ -326,8 +328,8 @@ public class WollMuxFiles
   }
 
   /**
-   * Liefert das File-Objekt der Logdatei zurück. Darf erst nach
-   * setupWollMuxDir() aufgerufen werden.
+   * Liefert das File-Objekt der Logdatei zurück. Darf erst nach setupWollMuxDir()
+   * aufgerufen werden.
    * 
    */
   public static File getWollMuxLogFile()
@@ -336,8 +338,8 @@ public class WollMuxFiles
   }
 
   /**
-   * Liefert das File-Objekt des LocalOverrideStorage Caches zurück. Darf erst
-   * nach setupWollMuxDir() aufgerufen werden.
+   * Liefert das File-Objekt des LocalOverrideStorage Caches zurück. Darf erst nach
+   * setupWollMuxDir() aufgerufen werden.
    * 
    * @return das File-Objekt des LocalOverrideStorage Caches.
    */
@@ -356,8 +358,8 @@ public class WollMuxFiles
 
   /**
    * Diese Methode liefert den letzten in der Konfigurationsdatei definierten
-   * DEFAULT_CONTEXT zurück. Ist in der Konfigurationsdatei keine URL definiert
-   * bzw. ist die Angabe fehlerhaft, so wird die URL des .wollmux Verzeichnisses
+   * DEFAULT_CONTEXT zurück. Ist in der Konfigurationsdatei keine URL definiert bzw.
+   * ist die Angabe fehlerhaft, so wird die URL des .wollmux Verzeichnisses
    * zurückgeliefert.
    */
   public static URL getDEFAULT_CONTEXT()
@@ -379,8 +381,8 @@ public class WollMuxFiles
   }
 
   /**
-   * Initialisiert den DJ wenn nötig und liefert ihn dann zurück (oder null,
-   * falls ein Fehler während der Initialisierung aufgetreten ist).
+   * Initialisiert den DJ wenn nötig und liefert ihn dann zurück (oder null, falls
+   * ein Fehler während der Initialisierung aufgetreten ist).
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -389,8 +391,8 @@ public class WollMuxFiles
     if (!djInitialized)
     {
       djInitialized = true;
-      ConfigThingy senderSource = WollMuxFiles.getWollmuxConf().query(
-        "SENDER_SOURCE", 1);
+      ConfigThingy senderSource =
+        WollMuxFiles.getWollmuxConf().query("SENDER_SOURCE", 1);
       String senderSourceStr = "";
       try
       {
@@ -401,8 +403,8 @@ public class WollMuxFiles
         Logger.error(L.m("Keine Hauptdatenquelle SENDER_SOURCE definiert! Setze SENDER_SOURCE=\"\"."));
       }
 
-      ConfigThingy dataSourceTimeout = WollMuxFiles.getWollmuxConf().query(
-        "DATASOURCE_TIMEOUT", 1);
+      ConfigThingy dataSourceTimeout =
+        WollMuxFiles.getWollmuxConf().query("DATASOURCE_TIMEOUT", 1);
       String datasourceTimeoutStr = "";
       long datasourceTimeoutLong = 0;
       try
@@ -429,8 +431,9 @@ public class WollMuxFiles
 
       try
       {
-        datasourceJoiner = new DatasourceJoiner(getWollmuxConf(), senderSourceStr,
-          getLosCacheFile(), getDEFAULT_CONTEXT(), datasourceTimeoutLong);
+        datasourceJoiner =
+          new DatasourceJoiner(getWollmuxConf(), senderSourceStr, getLosCacheFile(),
+            getDEFAULT_CONTEXT(), datasourceTimeoutLong);
       }
       catch (ConfigurationErrorException e)
       {
@@ -442,8 +445,8 @@ public class WollMuxFiles
   }
 
   /**
-   * Werten den DEFAULT_CONTEXT aus wollmux,conf aus und erstellt eine
-   * entsprechende URL.
+   * Werten den DEFAULT_CONTEXT aus wollmux,conf aus und erstellt eine entsprechende
+   * URL.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
@@ -472,11 +475,10 @@ public class WollMuxFiles
       try
       {
         /*
-         * Die folgenden 3 Statements realisieren ein Fallback-Verhalten. Falls
-         * das letzte Statement eine MalformedURLException wirft, dann gilt das
-         * vorige Statement. Hat dieses schon eine MalformedURLException
-         * geworfen (sollte eigentlich nicht passieren können), so gilt immer
-         * noch das erste.
+         * Die folgenden 3 Statements realisieren ein Fallback-Verhalten. Falls das
+         * letzte Statement eine MalformedURLException wirft, dann gilt das vorige
+         * Statement. Hat dieses schon eine MalformedURLException geworfen (sollte
+         * eigentlich nicht passieren können), so gilt immer noch das erste.
          */
         defaultContextURL = new URL("file:///");
         defaultContextURL = getWollMuxDir().toURI().toURL();
@@ -490,8 +492,8 @@ public class WollMuxFiles
   }
 
   /**
-   * Wertet die FONT_ZOOM-Direktive des Dialoge-Abschnitts aus und zoomt die
-   * Fonts falls erforderlich.
+   * Wertet die FONT_ZOOM-Direktive des Dialoge-Abschnitts aus und zoomt die Fonts
+   * falls erforderlich.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -507,7 +509,7 @@ public class WollMuxFiles
         if (zoomFactor < 0.5 || zoomFactor > 10)
         {
           Logger.error(L.m("Unsinniger FONT_ZOOM Wert angegeben: %1", ""
-                                                                      + zoomFactor));
+            + zoomFactor));
         }
         else
         {
@@ -522,9 +524,9 @@ public class WollMuxFiles
   }
 
   /**
-   * Wertet die undokumentierte wollmux.conf-Direktive LOGGING_MODE aus und
-   * setzt den Logging-Modus entsprechend. Ist kein LOGGING_MODE gegeben, so
-   * greift der Standard (siehe Logger.java)
+   * Wertet die undokumentierte wollmux.conf-Direktive LOGGING_MODE aus und setzt den
+   * Logging-Modus entsprechend. Ist kein LOGGING_MODE gegeben, so greift der
+   * Standard (siehe Logger.java)
    * 
    * @param ct
    */
@@ -546,11 +548,10 @@ public class WollMuxFiles
   }
 
   /**
-   * Gibt Auskunft darüber, sich der WollMux im debug-modus befindet; Der
-   * debug-modus wird automatisch aktiviert, wenn der LOGGING_MODE auf "debug"
-   * oder "all" gesetzt wurde. Im debug-mode werden z.B. die Bookmarks
-   * abgearbeiteter Dokumentkommandos nach der Ausführung nicht entfernt, damit
-   * sich Fehler leichter finden lassen.
+   * Gibt Auskunft darüber, sich der WollMux im debug-modus befindet; Der debug-modus
+   * wird automatisch aktiviert, wenn der LOGGING_MODE auf "debug" oder "all" gesetzt
+   * wurde. Im debug-mode werden z.B. die Bookmarks abgearbeiteter Dokumentkommandos
+   * nach der Ausführung nicht entfernt, damit sich Fehler leichter finden lassen.
    * 
    * @return
    */
@@ -568,14 +569,13 @@ public class WollMuxFiles
       {
         String mode = log.getLastChild().toString();
         if (mode.compareToIgnoreCase("debug") == 0
-            || mode.compareToIgnoreCase("all") == 0)
+          || mode.compareToIgnoreCase("all") == 0)
         {
           debugMode = true;
         }
       }
       catch (Exception e)
-      {
-      }
+      {}
     }
     else
       debugMode = false;
@@ -590,16 +590,16 @@ public class WollMuxFiles
   private static void initClassLoader()
   {
     ConfigThingy conf = getWollmuxConf().query("CLASSPATH", 1);
-    Iterator parentiter = conf.iterator();
+    Iterator<ConfigThingy> parentiter = conf.iterator();
     while (parentiter.hasNext())
     {
-      ConfigThingy CLASSPATHconf = (ConfigThingy) parentiter.next();
-      Iterator iter = CLASSPATHconf.iterator();
+      ConfigThingy CLASSPATHconf = parentiter.next();
+      Iterator<ConfigThingy> iter = CLASSPATHconf.iterator();
       while (iter.hasNext())
       {
         String urlStr = iter.next().toString();
         if (!urlStr.endsWith("/")
-            && (urlStr.indexOf('.') < 0 || urlStr.lastIndexOf('/') > urlStr.lastIndexOf('.')))
+          && (urlStr.indexOf('.') < 0 || urlStr.lastIndexOf('/') > urlStr.lastIndexOf('.')))
           urlStr = urlStr + "/"; // Falls keine
         // Dateierweiterung
         // angegeben, /
@@ -640,36 +640,35 @@ public class WollMuxFiles
   }
 
   /**
-   * Parst die "Funktionsdialoge" Abschnitte aus conf und liefert als Ergebnis
-   * eine DialogLibrary zurück.
+   * Parst die "Funktionsdialoge" Abschnitte aus conf und liefert als Ergebnis eine
+   * DialogLibrary zurück.
    * 
    * @param baselib
    *          falls nicht-null wird diese als Fallback verlinkt, um Dialoge zu
    *          liefern, die anderweitig nicht gefunden werden.
    * @param context
    *          der Kontext in dem in Dialogen enthaltene Funktionsdefinitionen
-   *          ausgewertet werden sollen (insbesondere DIALOG-Funktionen).
-   *          ACHTUNG! Hier werden Werte gespeichert, es ist nicht nur ein
-   *          Schlüssel.
+   *          ausgewertet werden sollen (insbesondere DIALOG-Funktionen). ACHTUNG!
+   *          Hier werden Werte gespeichert, es ist nicht nur ein Schlüssel.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static DialogLibrary parseFunctionDialogs(ConfigThingy conf,
-      DialogLibrary baselib, Map context)
+      DialogLibrary baselib, Map<Object, Object> context)
   {
     DialogLibrary funcDialogs = new DialogLibrary(baselib);
 
     Set<String> dialogsInBlock = new HashSet<String>();
 
     conf = conf.query("Funktionsdialoge");
-    Iterator parentIter = conf.iterator();
+    Iterator<ConfigThingy> parentIter = conf.iterator();
     while (parentIter.hasNext())
     {
       dialogsInBlock.clear();
-      Iterator iter = ((ConfigThingy) parentIter.next()).iterator();
+      Iterator<ConfigThingy> iter = parentIter.next().iterator();
       while (iter.hasNext())
       {
-        ConfigThingy dialogConf = (ConfigThingy) iter.next();
+        ConfigThingy dialogConf = iter.next();
         String name = dialogConf.getName();
         if (dialogsInBlock.contains(name))
           Logger.error(L.m(
@@ -696,13 +695,13 @@ public class WollMuxFiles
    * FunctionLibrary.
    * 
    * @param context
-   *          der Kontext in dem die Funktionsdefinitionen ausgewertet werden
-   *          sollen (insbesondere DIALOG-Funktionen). ACHTUNG! Hier werden
-   *          Werte gespeichert, es ist nicht nur ein Schlüssel.
+   *          der Kontext in dem die Funktionsdefinitionen ausgewertet werden sollen
+   *          (insbesondere DIALOG-Funktionen). ACHTUNG! Hier werden Werte
+   *          gespeichert, es ist nicht nur ein Schlüssel.
    * 
    * @param baselib
-   *          falls nicht-null wird diese als Fallback verlinkt, um Funktionen
-   *          zu liefern, die anderweitig nicht gefunden werden.
+   *          falls nicht-null wird diese als Fallback verlinkt, um Funktionen zu
+   *          liefern, die anderweitig nicht gefunden werden.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -712,18 +711,18 @@ public class WollMuxFiles
     FunctionLibrary funcs = new FunctionLibrary(baselib);
 
     conf = conf.query("Funktionen");
-    Iterator parentIter = conf.iterator();
+    Iterator<ConfigThingy> parentIter = conf.iterator();
     while (parentIter.hasNext())
     {
-      Iterator iter = ((ConfigThingy) parentIter.next()).iterator();
+      Iterator<ConfigThingy> iter = parentIter.next().iterator();
       while (iter.hasNext())
       {
-        ConfigThingy funcConf = (ConfigThingy) iter.next();
+        ConfigThingy funcConf = iter.next();
         String name = funcConf.getName();
         try
         {
-          Function func = FunctionFactory.parseChildren(funcConf, funcs, dialogLib,
-            context);
+          Function func =
+            FunctionFactory.parseChildren(funcConf, funcs, dialogLib, context);
           funcs.add(name, func);
         }
         catch (ConfigurationErrorException e)
@@ -737,8 +736,8 @@ public class WollMuxFiles
   }
 
   /**
-   * Parst die "Druckfunktionen" Abschnitte aus conf und liefert eine
-   * entsprechende PrintFunctionLibrary.
+   * Parst die "Druckfunktionen" Abschnitte aus conf und liefert eine entsprechende
+   * PrintFunctionLibrary.
    * 
    * @author Christoph Lutz (D-III-ITD 5.1)
    */
@@ -747,13 +746,13 @@ public class WollMuxFiles
     PrintFunctionLibrary funcs = new PrintFunctionLibrary();
 
     conf = conf.query("Druckfunktionen");
-    Iterator parentIter = conf.iterator();
+    Iterator<ConfigThingy> parentIter = conf.iterator();
     while (parentIter.hasNext())
     {
-      Iterator iter = ((ConfigThingy) parentIter.next()).iterator();
+      Iterator<ConfigThingy> iter = parentIter.next().iterator();
       while (iter.hasNext())
       {
-        ConfigThingy funcConf = (ConfigThingy) iter.next();
+        ConfigThingy funcConf = iter.next();
         String name = funcConf.getName();
         try
         {
@@ -809,24 +808,24 @@ public class WollMuxFiles
   }
 
   /**
-   * Erstellt eine Dump-Datei im WollMux-Verzeichnis, die wichtige Informationen
-   * zur Fehlersuche enthält und liefert den Namen dieser Datei als String
-   * zurück, oder null falls bei der Erstellung Fehler auftraten.
+   * Erstellt eine Dump-Datei im WollMux-Verzeichnis, die wichtige Informationen zur
+   * Fehlersuche enthält und liefert den Namen dieser Datei als String zurück, oder
+   * null falls bei der Erstellung Fehler auftraten.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1), Christoph Lutz
    */
   public static String dumpInfo()
   {
     Calendar cal = Calendar.getInstance();
-    String date = "" + cal.get(Calendar.YEAR) + "-" + (cal.get(Calendar.MONTH) + 1)
-                  + "-" + cal.get(Calendar.DAY_OF_MONTH) + "_"
-                  + cal.getTimeInMillis();
+    String date =
+      "" + cal.get(Calendar.YEAR) + "-" + (cal.get(Calendar.MONTH) + 1) + "-"
+        + cal.get(Calendar.DAY_OF_MONTH) + "_" + cal.getTimeInMillis();
     File dumpFile = new File(getWollMuxDir(), "dump" + date);
     try
     {
       OutputStream outStream = new FileOutputStream(dumpFile);
-      BufferedWriter out = new BufferedWriter(new OutputStreamWriter(outStream,
-        ConfigThingy.CHARSET));
+      BufferedWriter out =
+        new BufferedWriter(new OutputStreamWriter(outStream, ConfigThingy.CHARSET));
       out.write("Dump time: " + date + "\n");
       out.write(WollMuxSingleton.getInstance().getBuildInfo() + "\n");
       StringBuilder buffy = new StringBuilder();
@@ -836,7 +835,8 @@ public class WollMuxFiles
        */
       try
       {
-        InetAddress[] addresses = InetAddress.getAllByName(getDEFAULT_CONTEXT().getHost());
+        InetAddress[] addresses =
+          InetAddress.getAllByName(getDEFAULT_CONTEXT().getHost());
         for (int i = 0; i < addresses.length; ++i)
         {
           if (i > 0) buffy.append(", ");
@@ -850,9 +850,9 @@ public class WollMuxFiles
       }
 
       out.write("DEFAULT_CONTEXT: \"" + getDEFAULT_CONTEXT() + "\" (" + buffy
-                + ")\n");
+        + ")\n");
       out.write("CONF_VERSION: "
-                + WollMuxSingleton.getInstance().getConfVersionInfo() + "\n");
+        + WollMuxSingleton.getInstance().getConfVersionInfo() + "\n");
       out.write("wollmuxDir: " + getWollMuxDir() + "\n");
       out.write("wollmuxLogFile: " + getWollMuxLogFile() + "\n");
       out.write("wollmuxConfFile: " + getWollMuxConfFile() + "\n");
@@ -861,11 +861,13 @@ public class WollMuxFiles
       out.write("===================== START JVM-Settings ==================\n");
       try
       {
-        XStringSubstitution subst = UNO.XStringSubstitution(UNO.createUNOService("com.sun.star.util.PathSubstitution"));
-        String jConfPath = new URL(subst.substituteVariables("$(user)/config", true)).toURI().getPath();
+        XStringSubstitution subst =
+          UNO.XStringSubstitution(UNO.createUNOService("com.sun.star.util.PathSubstitution"));
+        String jConfPath =
+          new URL(subst.substituteVariables("$(user)/config", true)).toURI().getPath();
         File[] jConfFiles = new File(jConfPath).listFiles();
-        Pattern p = Pattern.compile("^javasettings_.*\\.xml$",
-          Pattern.CASE_INSENSITIVE);
+        Pattern p =
+          Pattern.compile("^javasettings_.*\\.xml$", Pattern.CASE_INSENSITIVE);
         boolean found = false;
         for (int i = 0; i < jConfFiles.length; i++)
         {
@@ -878,8 +880,8 @@ public class WollMuxFiles
           break;
         }
         if (!found)
-          out.write(L.m("Datei '%1' konnte nicht gefunden werden.\n",
-            jConfPath + "/javasettings_*.xml"));
+          out.write(L.m("Datei '%1' konnte nicht gefunden werden.\n", jConfPath
+            + "/javasettings_*.xml"));
       }
       catch (java.lang.Exception e)
       {
@@ -965,14 +967,13 @@ public class WollMuxFiles
         in.close();
       }
       catch (Exception x)
-      {
-      }
+      {}
     }
   }
 
   /**
-   * Gibt den Inhalt der OOo-Konfiguration einschließlich aller Unterknoten am
-   * Knoten nodePath zurück.
+   * Gibt den Inhalt der OOo-Konfiguration einschließlich aller Unterknoten am Knoten
+   * nodePath zurück.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
@@ -980,11 +981,13 @@ public class WollMuxFiles
   {
     try
     {
-      Object cfgProvider = UNO.createUNOService("com.sun.star.configuration.ConfigurationProvider");
+      Object cfgProvider =
+        UNO.createUNOService("com.sun.star.configuration.ConfigurationProvider");
 
-      Object cfgAccess = UNO.XMultiServiceFactory(cfgProvider).createInstanceWithArguments(
-        "com.sun.star.configuration.ConfigurationAccess",
-        new UnoProps("nodepath", nodePath).getProps());
+      Object cfgAccess =
+        UNO.XMultiServiceFactory(cfgProvider).createInstanceWithArguments(
+          "com.sun.star.configuration.ConfigurationAccess",
+          new UnoProps("nodepath", nodePath).getProps());
 
       return dumpNode(cfgAccess, "");
     }
@@ -997,9 +1000,9 @@ public class WollMuxFiles
   }
 
   /**
-   * Gibt den Inhalt eines Knotens element der OOo-Konfiguration mit dem
-   * Knotennamen und allen enthaltenen Properties zurück, wobei die Inhalte pro
-   * Zeile um den String spaces eingerückt werden.
+   * Gibt den Inhalt eines Knotens element der OOo-Konfiguration mit dem Knotennamen
+   * und allen enthaltenen Properties zurück, wobei die Inhalte pro Zeile um den
+   * String spaces eingerückt werden.
    * 
    * @param element
    * @param spaces
@@ -1014,7 +1017,8 @@ public class WollMuxFiles
     String properties = "";
     if (UNO.XPropertySet(element) != null)
     {
-      Property[] props = UNO.XPropertySet(element).getPropertySetInfo().getProperties();
+      Property[] props =
+        UNO.XPropertySet(element).getPropertySetInfo().getProperties();
       for (int i = 0; i < props.length; i++)
       {
         Object prop = UNO.getProperty(element, props[i].Name);
@@ -1047,17 +1051,16 @@ public class WollMuxFiles
           childs += dumpNode(xna.getByName(elements[i]), spaces + "|    ");
         }
         catch (java.lang.Exception e)
-        {
-        }
+        {}
       }
     }
 
     // Knoten zusammenbauen: Eigener Name + properties + kinder (nur wenn der
     // Knoten auch angezeigte Properties oder Kinder hat):
     if (UNO.XNamed(element) != null
-        && (properties.length() > 0 || childs.length() > 0))
+      && (properties.length() > 0 || childs.length() > 0))
       return spaces + "+ " + UNO.XNamed(element).getName() + "\n" + properties
-             + childs;
+        + childs;
 
     return "";
   }
@@ -1098,8 +1101,7 @@ public class WollMuxFiles
           Thread.sleep(wait);
         }
         catch (InterruptedException e)
-        {
-        }
+        {}
       }
 
       synchronized (bark)
@@ -1113,8 +1115,9 @@ public class WollMuxFiles
         public void run()
         {
           Logger.error(SLOW_SERVER_MESSAGE);
-          JOptionPane pane = new JOptionPane(SLOW_SERVER_MESSAGE,
-            JOptionPane.WARNING_MESSAGE, JOptionPane.DEFAULT_OPTION);
+          JOptionPane pane =
+            new JOptionPane(SLOW_SERVER_MESSAGE, JOptionPane.WARNING_MESSAGE,
+              JOptionPane.DEFAULT_OPTION);
           JDialog dialog = pane.createDialog(null, L.m("Hinweis"));
           dialog.setModal(false);
           dialog.setVisible(true);
@@ -1134,7 +1137,7 @@ public class WollMuxFiles
     public void logTimes()
     {
       Logger.debug("init: " + initTime + " start: " + startTime + " end: " + endTime
-                   + " test: " + testTime + " dontBark: " + dontBarkTime);
+        + " test: " + testTime + " dontBark: " + dontBarkTime);
     }
 
   }

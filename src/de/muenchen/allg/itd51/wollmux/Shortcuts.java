@@ -53,16 +53,17 @@ import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 public class Shortcuts
 {
   /**
-   * Liest alle Attribute SHORTCUT und URL aus tastenkombinationenConf aus,
-   * löscht alle bisher vorhandenen Tastenkombinationen deren URL mit "wollmux:"
-   * beginnt und setzt neue Tastenkombination in OOo-Writer.
+   * Liest alle Attribute SHORTCUT und URL aus tastenkombinationenConf aus, löscht
+   * alle bisher vorhandenen Tastenkombinationen deren URL mit "wollmux:" beginnt und
+   * setzt neue Tastenkombination in OOo-Writer.
    * 
    * @param tastenkombinationenConf
    *          .conf Abschnitt Tastenkuerzel mit allen Knoten
    */
   public static void createShortcuts(ConfigThingy tastenkombinationenConf)
   {
-    XAcceleratorConfiguration shortcutManager = UNO.getShortcutManager("com.sun.star.text.TextDocument");
+    XAcceleratorConfiguration shortcutManager =
+      UNO.getShortcutManager("com.sun.star.text.TextDocument");
     if (shortcutManager == null) return;
 
     // löschen aller KeyEvents die mit "wollmux:" beginnen
@@ -72,11 +73,11 @@ public class Shortcuts
     ConfigThingy shortcutConf = tastenkombinationenConf.queryByChild("SHORTCUT");
 
     // Iterieren über die Knoten SHORTCUT
-    Iterator iterShortcut = shortcutConf.iterator();
+    Iterator<ConfigThingy> iterShortcut = shortcutConf.iterator();
     while (iterShortcut.hasNext())
     {
 
-      ConfigThingy tastenkombination = (ConfigThingy) iterShortcut.next();
+      ConfigThingy tastenkombination = iterShortcut.next();
 
       String shortcut = null;
       // lesen der Knoten SHORTCUT
@@ -140,8 +141,8 @@ public class Shortcuts
   }
 
   /**
-   * Wenn es Tastenkuerzel mit einer UNO-url beginnent mit "wollmux:" gibt,
-   * werden diese gelöscht. Workaround wegen nicht funktionierendem
+   * Wenn es Tastenkuerzel mit einer UNO-url beginnent mit "wollmux:" gibt, werden
+   * diese gelöscht. Workaround wegen nicht funktionierendem
    * xAcceleratorConfiguration.removeCommandFromAllKeyEvents(). OOo Issue #72558
    * 
    * @param xAcceleratorConfiguration
@@ -193,8 +194,7 @@ public class Shortcuts
       for (int i = 0; i < keys.length; i++)
       {
         Logger.debug2("Modifiers: " + keys[i].Modifiers + " KeyCode: "
-                      + keys[i].KeyCode + " --> "
-                      + xac.getCommandByKeyEvent(keys[i]));
+          + keys[i].KeyCode + " --> " + xac.getCommandByKeyEvent(keys[i]));
 
       }
     }

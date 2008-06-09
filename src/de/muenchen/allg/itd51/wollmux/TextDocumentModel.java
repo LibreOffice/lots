@@ -449,9 +449,9 @@ public class TextDocumentModel
 
     ConfigThingy functions =
       conf.query("WM").query("Druckfunktionen").queryByChild("FUNCTION");
-    for (Iterator iter = functions.iterator(); iter.hasNext();)
+    for (Iterator<ConfigThingy> iter = functions.iterator(); iter.hasNext();)
     {
-      ConfigThingy func = (ConfigThingy) iter.next();
+      ConfigThingy func = iter.next();
       String name;
       try
       {
@@ -496,9 +496,9 @@ public class TextDocumentModel
 
     // enthaltene Formular-Abschnitte übertragen:
     ConfigThingy formulare = conf.query("Formular");
-    for (Iterator iter = formulare.iterator(); iter.hasNext();)
+    for (Iterator<ConfigThingy> iter = formulare.iterator(); iter.hasNext();)
     {
-      ConfigThingy formular = (ConfigThingy) iter.next();
+      ConfigThingy formular = iter.next();
       formDesc.addChild(formular);
     }
   }
@@ -528,10 +528,10 @@ public class TextDocumentModel
     }
 
     // "Formularwerte"-Abschnitt auswerten.
-    Iterator iter = werte.iterator();
+    Iterator<ConfigThingy> iter = werte.iterator();
     while (iter.hasNext())
     {
-      ConfigThingy element = (ConfigThingy) iter.next();
+      ConfigThingy element = iter.next();
       try
       {
         String id = element.get("ID").toString();
@@ -1176,7 +1176,7 @@ public class TextDocumentModel
   synchronized public void setPrintBlocksProps(String blockName, boolean visible,
       boolean showHighlightColor)
   {
-    Iterator iter = new HashSet().iterator();
+    Iterator<DocumentCommand> iter = new HashSet<DocumentCommand>().iterator();
     if (SachleitendeVerfuegung.BLOCKNAME_SLV_ALL_VERSIONS.equals(blockName))
       iter = documentCommands.allVersionsIterator();
     if (SachleitendeVerfuegung.BLOCKNAME_SLV_DRAFT_ONLY.equals(blockName))
@@ -1188,7 +1188,7 @@ public class TextDocumentModel
 
     while (iter.hasNext())
     {
-      DocumentCommand cmd = (DocumentCommand) iter.next();
+      DocumentCommand cmd = iter.next();
       cmd.setVisible(visible);
       String highlightColor =
         ((OptionalHighlightColorProvider) cmd).getHighlightColor();
@@ -1223,7 +1223,7 @@ public class TextDocumentModel
    * @return ein Iterator, der die Iteration aller DraftOnly-Dokumentkommandos dieses
    *         Dokuments ermöglicht. Der Iterator kann auch keine Elemente enthalten.
    */
-  synchronized public Iterator getDraftOnlyBlocksIterator()
+  synchronized public Iterator<DocumentCommand> getDraftOnlyBlocksIterator()
   {
     return documentCommands.draftOnlyIterator();
   }
@@ -1235,7 +1235,7 @@ public class TextDocumentModel
    * @return ein Iterator, der die Iteration aller All-Dokumentkommandos dieses
    *         Dokuments ermöglicht. Der Iterator kann auch keine Elemente enthalten.
    */
-  synchronized public Iterator getAllVersionsBlocksIterator()
+  synchronized public Iterator<DocumentCommand> getAllVersionsBlocksIterator()
   {
     return documentCommands.allVersionsIterator();
   }
@@ -1484,9 +1484,9 @@ public class TextDocumentModel
   synchronized public void setMailmergeConfig(ConfigThingy conf)
   {
     mailmergeConf = new ConfigThingy("Seriendruck");
-    for (Iterator iter = conf.iterator(); iter.hasNext();)
+    for (Iterator<ConfigThingy> iter = conf.iterator(); iter.hasNext();)
     {
-      ConfigThingy c = new ConfigThingy((ConfigThingy) iter.next());
+      ConfigThingy c = new ConfigThingy(iter.next());
       mailmergeConf.addChild(c);
     }
     ConfigThingy wm = new ConfigThingy("WM");
@@ -1714,7 +1714,7 @@ public class TextDocumentModel
     Map<Object, Object> context = getFunctionContext();
 
     // eindeutigen Namen für die neue Autofunktion erzeugen:
-    Set currentFunctionNames = funcLib.getFunctionNames();
+    Set<String> currentFunctionNames = funcLib.getFunctionNames();
     String name = null;
     for (int i = 0; name == null || currentFunctionNames.contains(name); ++i)
       name = AUTOFUNCTION_PREFIX + System.currentTimeMillis() + "_" + i;
@@ -1726,9 +1726,9 @@ public class TextDocumentModel
 
       // Funktion zur Formularbeschreibung hinzufügen:
       ConfigThingy betterNameFunc = new ConfigThingy(name);
-      for (Iterator iter = funcConf.iterator(); iter.hasNext();)
+      for (Iterator<ConfigThingy> iter = funcConf.iterator(); iter.hasNext();)
       {
-        ConfigThingy func = (ConfigThingy) iter.next();
+        ConfigThingy func = iter.next();
         betterNameFunc.addChild(func);
       }
       getFunktionenConf().addChild(betterNameFunc);
@@ -1766,6 +1766,7 @@ public class TextDocumentModel
     {
       setFormFields(fieldId, "<" + fieldId + ">", false);
     }
+    setDocumentModified(true);
   }
 
   /**
@@ -2649,10 +2650,10 @@ public class TextDocumentModel
     for (Iterator<String> iter = idToTextFieldFormFields.keySet().iterator(); iter.hasNext();)
     {
       String id = iter.next();
-      List l = idToTextFieldFormFields.get(id);
-      for (Iterator iterator = l.iterator(); iterator.hasNext();)
+      List<FormField> l = idToTextFieldFormFields.get(id);
+      for (Iterator<FormField> iterator = l.iterator(); iterator.hasNext();)
       {
-        FormField f = (FormField) iterator.next();
+        FormField f = iterator.next();
         String trafoName = f.getTrafoName();
         if (trafoName != null) usedFunctions.add(trafoName);
       }
@@ -2666,9 +2667,9 @@ public class TextDocumentModel
 
     // Nicht mehr benötigte Autofunctions aus der Funktionsbibliothek löschen:
     FunctionLibrary funcLib = getFunctionLibrary();
-    for (Iterator iter = funcLib.getFunctionNames().iterator(); iter.hasNext();)
+    for (Iterator<String> iter = funcLib.getFunctionNames().iterator(); iter.hasNext();)
     {
-      String name = (String) iter.next();
+      String name = iter.next();
       if (name == null || !name.startsWith(AUTOFUNCTION_PREFIX)
         || usedFunctions.contains(name)) continue;
       funcLib.remove(name);
@@ -2678,12 +2679,12 @@ public class TextDocumentModel
     // persistenten Daten löschen.
     ConfigThingy functions =
       getFormDescription().query("Formular").query("Funktionen");
-    for (Iterator iter = functions.iterator(); iter.hasNext();)
+    for (Iterator<ConfigThingy> iter = functions.iterator(); iter.hasNext();)
     {
-      ConfigThingy funcs = (ConfigThingy) iter.next();
-      for (Iterator iterator = funcs.iterator(); iterator.hasNext();)
+      ConfigThingy funcs = iter.next();
+      for (Iterator<ConfigThingy> iterator = funcs.iterator(); iterator.hasNext();)
       {
-        String name = ((ConfigThingy) iterator.next()).getName();
+        String name = iterator.next().getName();
         if (name == null || !name.startsWith(AUTOFUNCTION_PREFIX)
           || usedFunctions.contains(name)) continue;
         iterator.remove();
@@ -3072,16 +3073,16 @@ public class TextDocumentModel
     funcLib.add(trafoName, function);
 
     // Kinder von func löschen, damit sie später neu gesetzt werden können
-    for (Iterator iter = func.iterator(); iter.hasNext();)
+    for (Iterator<ConfigThingy> iter = func.iterator(); iter.hasNext();)
     {
       iter.next();
       iter.remove();
     }
 
     // Kinder von trafoConf auf func übertragen
-    for (Iterator iter = trafoConf.iterator(); iter.hasNext();)
+    for (Iterator<ConfigThingy> iter = trafoConf.iterator(); iter.hasNext();)
     {
-      ConfigThingy f = (ConfigThingy) iter.next();
+      ConfigThingy f = iter.next();
       func.addChild(new ConfigThingy(f));
     }
 
@@ -3117,7 +3118,7 @@ public class TextDocumentModel
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
   synchronized public ReferencedFieldID[] getReferencedFieldIDsThatAreNotInSchema(
-      Set schema)
+      Set<String> schema)
   {
     ArrayList<ReferencedFieldID> list = new ArrayList<ReferencedFieldID>();
     if (hasSelection())
@@ -3471,9 +3472,9 @@ public class TextDocumentModel
       return;
     }
 
-    for (Iterator iter = conf.iterator(); iter.hasNext();)
+    for (Iterator<ConfigThingy> iter = conf.iterator(); iter.hasNext();)
     {
-      ConfigThingy child = (ConfigThingy) iter.next();
+      ConfigThingy child = iter.next();
       substituteValueRecursive(child, oldFieldId, newFieldId);
     }
   }

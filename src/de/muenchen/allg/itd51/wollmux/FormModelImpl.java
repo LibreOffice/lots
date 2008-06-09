@@ -109,15 +109,15 @@ public class FormModelImpl
    * @throws InvalidFormDescriptorException
    */
   public static FormModel createMultiDocumentFormModel(
-      Vector /* of TextDocumentModel */docs, ConfigThingy buttonAnpassung)
+      Vector<TextDocumentModel> docs, ConfigThingy buttonAnpassung)
       throws InvalidFormDescriptorException
   {
 
     // Formular-Abschnitte aller TextDocumentModels sammeln...
     ArrayList<Object> formularSections = new ArrayList<Object>();
-    for (Iterator iter = docs.iterator(); iter.hasNext();)
+    for (Iterator<TextDocumentModel> iter = docs.iterator(); iter.hasNext();)
     {
-      TextDocumentModel model = (TextDocumentModel) iter.next();
+      TextDocumentModel model = iter.next();
       try
       {
         ConfigThingy formular = model.getFormDescription().get("Formular");
@@ -136,11 +136,11 @@ public class FormModelImpl
 
     // mapIdToPresetValue aller Einzeldokumente vereinheitlichen:
     HashMap<String, String> commonMapIdToPresetValue = new HashMap<String, String>();
-    for (Iterator iter = docs.iterator(); iter.hasNext();)
+    for (Iterator<TextDocumentModel> iter = docs.iterator(); iter.hasNext();)
     {
-      TextDocumentModel doc = (TextDocumentModel) iter.next();
-      HashMap myIdToPresetValue = doc.getIDToPresetValue();
-      Iterator piter = myIdToPresetValue.keySet().iterator();
+      TextDocumentModel doc = iter.next();
+      HashMap<String, String> myIdToPresetValue = doc.getIDToPresetValue();
+      Iterator<String> piter = myIdToPresetValue.keySet().iterator();
       while (piter.hasNext())
       {
         String id = piter.next().toString();
@@ -186,9 +186,9 @@ public class FormModelImpl
 
     // FormModels für die Einzeldokumente erzeugen
     Vector /* of FormModel */<FormModel> fms = new Vector<FormModel>();
-    for (Iterator iter = docs.iterator(); iter.hasNext();)
+    for (Iterator<TextDocumentModel> iter = docs.iterator(); iter.hasNext();)
     {
-      TextDocumentModel doc = (TextDocumentModel) iter.next();
+      TextDocumentModel doc = iter.next();
       FormModel fm =
         new FormModelImpl.SingleDocumentFormModel(doc, formFensterConf, formConf,
           functionContext, funcLib, dialogLib);
@@ -227,7 +227,7 @@ public class FormModelImpl
    */
   private static class MultiDocumentFormModel implements FormModel
   {
-    private Vector docs;
+    private Vector<TextDocumentModel> docs;
 
     private Vector<FormModel> formModels;
 
@@ -282,9 +282,9 @@ public class FormModelImpl
      *          automatisch zu befüllende Formularfelder benötigt werden (wird für
      *          createFormGUI() benötigt).
      */
-    public MultiDocumentFormModel(Vector docs, Vector<FormModel> formModels,
-        final ConfigThingy formFensterConf, final ConfigThingy formConf,
-        final Map<Object, Object> functionContext,
+    public MultiDocumentFormModel(Vector<TextDocumentModel> docs,
+        Vector<FormModel> formModels, final ConfigThingy formFensterConf,
+        final ConfigThingy formConf, final Map<Object, Object> functionContext,
         final HashMap<String, String> commonMapIdToPresetValue,
         final FunctionLibrary funcLib, final DialogLibrary dialogLib)
     {
@@ -470,7 +470,7 @@ public class FormModelImpl
     {
       for (int i = 0; i < docs.size(); i++)
       {
-        TextDocumentModel doc = (TextDocumentModel) docs.get(i);
+        TextDocumentModel doc = docs.get(i);
         FormModel fm = formModels.get(i);
 
         if (doc.equals(source))
