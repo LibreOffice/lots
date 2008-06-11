@@ -1,9 +1,8 @@
-//TODO L.m()
 /*
-* Dateiname: AllInsertionLineViewsPanel.java
-* Projekt  : WollMux
-* Funktion : Enthält alle OneInsertionLineViews.
-* 
+ * Dateiname: AllInsertionLineViewsPanel.java
+ * Projekt  : WollMux
+ * Funktion : Enthält alle OneInsertionLineViews.
+ * 
  * Copyright (c) 2008 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,17 +17,17 @@
  * You should have received a copy of the European Union Public Licence
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
-*
-* Änderungshistorie:
-* Datum      | Wer | Änderungsgrund
-* -------------------------------------------------------------------
-* 13.09.2006 | BNK | Erstellung
-* -------------------------------------------------------------------
-*
-* @author Matthias Benkmann (D-III-ITD 5.1)
-* @version 1.0
-* 
-*/
+ *
+ * Änderungshistorie:
+ * Datum      | Wer | Änderungsgrund
+ * -------------------------------------------------------------------
+ * 13.09.2006 | BNK | Erstellung
+ * -------------------------------------------------------------------
+ *
+ * @author Matthias Benkmann (D-III-ITD 5.1)
+ * @version 1.0
+ * 
+ */
 package de.muenchen.allg.itd51.wollmux.former.insertion;
 
 import java.awt.BorderLayout;
@@ -49,6 +48,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 
+import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastObjectSelection;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
@@ -56,10 +56,9 @@ import de.muenchen.allg.itd51.wollmux.former.IndexList;
 import de.muenchen.allg.itd51.wollmux.former.view.View;
 import de.muenchen.allg.itd51.wollmux.former.view.ViewChangeListener;
 
-
 /**
  * Enthält alle OneInsertionLineViews.
- *
+ * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class AllInsertionLineViewsPanel implements View
@@ -73,117 +72,129 @@ public class AllInsertionLineViewsPanel implements View
    * Der {@link FormularMax4000} zu dem diese View gehört.
    */
   private FormularMax4000 formularMax4000;
-  
+
   /**
    * Wird auf alle {@link OneInsertionLineView}s registriert.
    */
   private ViewChangeListener myViewChangeListener;
-  
+
   /**
    * Das JPanel, das die ganze View enthält.
    */
   private JPanel myPanel;
-  
+
   /**
-   * Das JPanel, das die {@link de.muenchen.allg.itd51.wollmux.former.insertion.OneInsertionLineView}s
+   * Das JPanel, das die
+   * {@link de.muenchen.allg.itd51.wollmux.former.insertion.OneInsertionLineView}s
    * enthält.
    */
   private JPanel mainPanel;
-  
+
   /**
    * Die JScrollPane, die {@link #mainPanel} enthält.
    */
   private JScrollPane scrollPane;
-  
+
   /**
    * Die Liste der {@link OneInsertionLineView}s in dieser View.
    */
   private List<OneInsertionLineView> views = new Vector<OneInsertionLineView>();
-  
+
   /**
-   * Liste von Indizes der selektierten Objekte in der {@link #views} Liste. 
+   * Liste von Indizes der selektierten Objekte in der {@link #views} Liste.
    */
   private IndexList selection = new IndexList();
-  
+
   /**
    * Die Liste der Models, zu denen diese View die LineViews enthält.
    */
   private InsertionModelList insertionModelList;
-  
+
   /**
-   * Erzeugt ein AllInsertionLineViewsPanel, die den Inhalt von
-   * insertionModelList anzeigt. ACHTUNG! insertionModelList sollte leer sein,
-   * da nur neu hinzugekommene Elemente in der View angezeigt werden.
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TESTED
+   * Erzeugt ein AllInsertionLineViewsPanel, die den Inhalt von insertionModelList
+   * anzeigt. ACHTUNG! insertionModelList sollte leer sein, da nur neu hinzugekommene
+   * Elemente in der View angezeigt werden.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
-  public AllInsertionLineViewsPanel(InsertionModelList insertionModelList, FormularMax4000 formularMax4000)
+  public AllInsertionLineViewsPanel(InsertionModelList insertionModelList,
+      FormularMax4000 formularMax4000)
   {
     this.formularMax4000 = formularMax4000;
     this.insertionModelList = insertionModelList;
     insertionModelList.addListener(new MyItemListener());
     formularMax4000.addBroadcastListener(new MyBroadcastListener());
     myViewChangeListener = new MyViewChangeListener();
-  
+
     mainPanel = new JPanel();
     mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 
     mainPanel.add(Box.createGlue());
-    
-    scrollPane = new JScrollPane(mainPanel, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-    
+
+    scrollPane =
+      new JScrollPane(mainPanel, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+        ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+
     JPanel buttonPanel = new JPanel(new GridBagLayout());
-    
+
     myPanel = new JPanel(new BorderLayout());
     myPanel.add(scrollPane, BorderLayout.CENTER);
     myPanel.add(buttonPanel, BorderLayout.SOUTH);
-    
-    GridBagConstraints gbcButton = new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.NONE,       new Insets(BUTTON_BORDER,BUTTON_BORDER,BUTTON_BORDER,BUTTON_BORDER),0,0);
-    JButton button = new JButton("Löschen");
-    button.addActionListener(new ActionListener(){
+
+    GridBagConstraints gbcButton =
+      new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.LINE_START,
+        GridBagConstraints.NONE, new Insets(BUTTON_BORDER, BUTTON_BORDER,
+          BUTTON_BORDER, BUTTON_BORDER), 0, 0);
+    JButton button = new JButton(L.m("Löschen"));
+    button.addActionListener(new ActionListener()
+    {
       public void actionPerformed(ActionEvent e)
       {
         deleteSelectedElements();
-      }});
+      }
+    });
     buttonPanel.add(button, gbcButton);
-    
+
     ++gbcButton.gridx;
-    button = new JButton("DeMux");
-    button.addActionListener(new ActionListener(){
+    button = new JButton(L.m("DeMux"));
+    button.addActionListener(new ActionListener()
+    {
       public void actionPerformed(ActionEvent e)
       {
         demuxSelectedElements();
-      }});
+      }
+    });
     buttonPanel.add(button, gbcButton);
-    
+
     ++gbcButton.gridx;
-  
+
   }
-  
+
   /**
    * Fügt dieser View eine {@link OneInsertionLineView} für model hinzu.
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TESTED
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private void addItem(InsertionModel model)
   {
-    OneInsertionLineView view = new OneInsertionLineView(model, myViewChangeListener, formularMax4000);
+    OneInsertionLineView view =
+      new OneInsertionLineView(model, myViewChangeListener, formularMax4000);
     views.add(view);
-    
+
     /*
-     * view vor dem letzten Element von mainPanel einfügen, weil das letzte
-     * Element immer ein Glue sein soll.
+     * view vor dem letzten Element von mainPanel einfügen, weil das letzte Element
+     * immer ein Glue sein soll.
      */
     mainPanel.add(view.JComponent(), mainPanel.getComponentCount() - 1);
-    
+
     mainPanel.validate();
     scrollPane.validate();
   }
-  
+
   /**
    * Entfernt view aus diesem Container (falls dort vorhanden).
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TESTED
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private void removeItem(OneInsertionLineView view)
   {
@@ -192,41 +203,40 @@ public class AllInsertionLineViewsPanel implements View
     views.remove(index);
     mainPanel.remove(view.JComponent());
     mainPanel.validate();
-    selection.remove(index); 
+    selection.remove(index);
     selection.fixup(index, -1, views.size() - 1);
   }
-  
+
   /**
    * Hebt die Selektion aller Elemente auf.
    * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TESTED */
+   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
+   */
   private void clearSelection()
   {
-    Iterator iter = selection.iterator();
+    Iterator<Integer> iter = selection.iterator();
     while (iter.hasNext())
     {
-      Integer I = (Integer)iter.next();
+      Integer I = iter.next();
       OneInsertionLineView view = views.get(I.intValue());
       view.unmark();
     }
     selection.clear();
   }
-  
+
   /**
    * Löscht alle ausgewählten Elemente.
    * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TESTED
+   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private void deleteSelectedElements()
   {
     /**
-     * Die folgende Schleife muss auf diese Weise geschrieben werden und nicht mit einem
-     * Iterator, weil es ansonsten eine ConcurrentModificationException gibt, da
-     * über {@link ViewChangeListener#viewShouldBeRemoved(View)}
-     * die Selektion während des remove() gleich verändert wird, was den Iterator
-     * invalidieren würde.
+     * Die folgende Schleife muss auf diese Weise geschrieben werden und nicht mit
+     * einem Iterator, weil es ansonsten eine ConcurrentModificationException gibt,
+     * da über {@link ViewChangeListener#viewShouldBeRemoved(View)} die Selektion
+     * während des remove() gleich verändert wird, was den Iterator invalidieren
+     * würde.
      */
     while (!selection.isEmpty())
     {
@@ -237,22 +247,22 @@ public class AllInsertionLineViewsPanel implements View
       insertionModelList.remove(model);
     }
   }
-  
+
   /**
-   * Löscht die WollMux-Bookmarks um alle ausgewählten Elemente. Da es damit keine Einfügestellen
-   * mehr sind, werden die entsprechenden LineViews ebenfalls entfernt.
+   * Löscht die WollMux-Bookmarks um alle ausgewählten Elemente. Da es damit keine
+   * Einfügestellen mehr sind, werden die entsprechenden LineViews ebenfalls
+   * entfernt.
    * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TESTED
+   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private void demuxSelectedElements()
   {
     /**
-     * Die folgende Schleife muss auf diese Weise geschrieben werden und nicht mit einem
-     * Iterator, weil es ansonsten eine ConcurrentModificationException gibt, da
-     * über {@link ViewChangeListener#viewShouldBeRemoved(View)}
-     * die Selektion während des remove() gleich verändert wird, was den Iterator
-     * invalidieren würde.
+     * Die folgende Schleife muss auf diese Weise geschrieben werden und nicht mit
+     * einem Iterator, weil es ansonsten eine ConcurrentModificationException gibt,
+     * da über {@link ViewChangeListener#viewShouldBeRemoved(View)} die Selektion
+     * während des remove() gleich verändert wird, was den Iterator invalidieren
+     * würde.
      */
     while (!selection.isEmpty())
     {
@@ -263,14 +273,12 @@ public class AllInsertionLineViewsPanel implements View
       insertionModelList.remove(model);
     }
   }
-  
+
   public JComponent JComponent()
   {
     return myPanel;
   }
-  
-  
-  
+
   private class MyItemListener implements InsertionModelList.ItemListener
   {
 
@@ -280,53 +288,53 @@ public class AllInsertionLineViewsPanel implements View
     }
 
     public void itemRemoved(InsertionModel model, int index)
-    {
-    }
-    
+    {}
+
   }
-  
+
   private class MyViewChangeListener implements ViewChangeListener
   {
 
     public void viewShouldBeRemoved(View view)
     {
-      removeItem((OneInsertionLineView)view);
+      removeItem((OneInsertionLineView) view);
     }
-    
+
   }
 
-  
   private class MyBroadcastListener extends BroadcastListener
   {
-    public void broadcastFormControlModelSelection(BroadcastObjectSelection b) {}
+    public void broadcastFormControlModelSelection(BroadcastObjectSelection b)
+    {}
+
     public void broadcastInsertionModelSelection(BroadcastObjectSelection b)
-    { 
+    {
       if (b.getClearSelection()) clearSelection();
-      InsertionModel model = (InsertionModel)b.getObject();
+      InsertionModel model = (InsertionModel) b.getObject();
       for (int index = 0; index < views.size(); ++index)
       {
         OneInsertionLineView view = views.get(index);
         if (view.getModel() == model)
         {
           int state = b.getState();
-          if (state == 0) //toggle
+          if (state == 0) // toggle
             state = selection.contains(index) ? -1 : 1;
-            
+
           switch (state)
           {
-            case -1: //abwählen
-                     view.unmark();
-                     selection.remove(index);
-                     break;
-            case 1: //auswählen
-                     view.mark();
-                     selection.add(index);
-                     break;
+            case -1: // abwählen
+              view.unmark();
+              selection.remove(index);
+              break;
+            case 1: // auswählen
+              view.mark();
+              selection.add(index);
+              break;
           }
         }
       }
 
     }
   }
-    
+
 }

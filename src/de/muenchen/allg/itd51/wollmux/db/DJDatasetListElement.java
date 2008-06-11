@@ -1,4 +1,3 @@
-//TODO L.m()
 /*
  * Dateiname: DJDatasetListElement.java
  * Projekt  : WollMux
@@ -37,7 +36,7 @@ import java.util.regex.Pattern;
 
 import de.muenchen.allg.itd51.wollmux.Logger;
 
-public class DJDatasetListElement implements Comparable
+public class DJDatasetListElement implements Comparable<DJDatasetListElement>
 {
   /**
    * Gibt an, wie die Personen in den Listen angezeigt werden sollen. %{Spalte}
@@ -124,14 +123,14 @@ public class DJDatasetListElement implements Comparable
   }
 
   /**
-   * Vergleicht die String-Repräsentation (toString()) zweier Listenelemente
-   * über die compareTo()-Methode der Klasse String.
+   * Vergleicht die String-Repräsentation (toString()) zweier Listenelemente über die
+   * compareTo()-Methode der Klasse String.
    * 
    * @param o
    * @return Rückgabewert von this.toString().compareTo(o.toString())
    * @author Christoph Lutz (D-III-ITD 5.1)
    */
-  public int compareTo(Object o)
+  public int compareTo(DJDatasetListElement o)
   {
     return this.toString().compareTo(o.toString());
   }
