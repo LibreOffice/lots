@@ -1,4 +1,3 @@
-//TODO L.m()
 /*
  * Copyright (c) 2008 Landeshauptstadt München
  * 
@@ -76,13 +75,13 @@ public abstract class DatasetChecker
    *          Liste von QueryParts.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public static DatasetChecker makeChecker(List query)
+  public static DatasetChecker makeChecker(List<QueryPart> query)
   {
     DatasetChecker checker = new MatchAllDatasetChecker();
-    Iterator iter = query.iterator();
+    Iterator<QueryPart> iter = query.iterator();
     while (iter.hasNext())
     {
-      QueryPart part = (QueryPart) iter.next();
+      QueryPart part = iter.next();
       checker =
         checker.and(DatasetChecker.makeChecker(part.getColumnName(),
           part.getSearchString()));
