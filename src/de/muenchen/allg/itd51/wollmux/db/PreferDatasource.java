@@ -1,10 +1,9 @@
-//TODO L.m()
 /* 
-* Dateiname: PreferDatasource.java
-* Projekt  : WollMux
-* Funktion : Datasource, die Daten einer Datenquelle von Datein einer andere
-*            Datenquelle verdecken lässt.
-* 
+ * Dateiname: PreferDatasource.java
+ * Projekt  : WollMux
+ * Funktion : Datasource, die Daten einer Datenquelle von Datein einer andere
+ *            Datenquelle verdecken lässt.
+ * 
  * Copyright (c) 2008 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -19,18 +18,18 @@
  * You should have received a copy of the European Union Public Licence
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
-*
-* Änderungshistorie:
-* Datum      | Wer | Änderungsgrund
-* -------------------------------------------------------------------
-* 07.11.2005 | BNK | Erstellung
-* 11.11.2005 | BNK | getestet und debuggt
-* -------------------------------------------------------------------
-*
-* @author Matthias Benkmann (D-III-ITD 5.1)
-* @version 1.0
-* 
-*/
+ *
+ * Änderungshistorie:
+ * Datum      | Wer | Änderungsgrund
+ * -------------------------------------------------------------------
+ * 07.11.2005 | BNK | Erstellung
+ * 11.11.2005 | BNK | getestet und debuggt
+ * -------------------------------------------------------------------
+ *
+ * @author Matthias Benkmann (D-III-ITD 5.1)
+ * @version 1.0
+ * 
+ */
 package de.muenchen.allg.itd51.wollmux.db;
 
 import java.net.URL;
@@ -47,71 +46,100 @@ import java.util.Vector;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
+import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.TimeoutException;
 
 /**
- * Datasource, die Daten einer Datenquelle A von Dateien einer anderen
- * Datenquelle B verdecken lässt. Dies funktioniert so, dass Anfragen erst
- * an Datenquelle A gestellt werden und dann für alle Ergebnisdatensätze
- * geprüft wird, ob ein Datensatz (oder mehrere Datensätze) 
- * mit gleichem Schlüssel in Datenquelle B ist. Falls dies so ist, werden
- * für diesen Schlüssel nur die Datensätze aus Datenquelle B zurückgeliefert.
+ * Datasource, die Daten einer Datenquelle A von Dateien einer anderen Datenquelle B
+ * verdecken lässt. Dies funktioniert so, dass Anfragen erst an Datenquelle A
+ * gestellt werden und dann für alle Ergebnisdatensätze geprüft wird, ob ein
+ * Datensatz (oder mehrere Datensätze) mit gleichem Schlüssel in Datenquelle B ist.
+ * Falls dies so ist, werden für diesen Schlüssel nur die Datensätze aus Datenquelle
+ * B zurückgeliefert.
+ * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class PreferDatasource implements Datasource
 {
   private Datasource source1;
+
   private Datasource source2;
+
   private String source1Name;
+
   private String source2Name;
+
   private Set<String> schema;
+
   private String name;
-  
+
   /**
    * Erzeugt eine neue PreferDatasource.
-   * @param nameToDatasource enthält alle bis zum Zeitpunkt der Definition
-   *        dieser PreferDatasource bereits vollständig instanziierten
-   *        Datenquellen.
-   * @param sourceDesc der "Datenquelle"-Knoten, der die Beschreibung
-   *        dieser PreferDatasource enthält.
-   * @param context der Kontext relativ zu dem URLs aufgelöst werden sollen
-   *        (zur Zeit nicht verwendet).
+   * 
+   * @param nameToDatasource
+   *          enthält alle bis zum Zeitpunkt der Definition dieser PreferDatasource
+   *          bereits vollständig instanziierten Datenquellen.
+   * @param sourceDesc
+   *          der "Datenquelle"-Knoten, der die Beschreibung dieser PreferDatasource
+   *          enthält.
+   * @param context
+   *          der Kontext relativ zu dem URLs aufgelöst werden sollen (zur Zeit nicht
+   *          verwendet).
    */
-  public PreferDatasource(Map nameToDatasource, ConfigThingy sourceDesc, URL context)
-  throws ConfigurationErrorException
+  public PreferDatasource(Map<String, Datasource> nameToDatasource,
+      ConfigThingy sourceDesc, URL context) throws ConfigurationErrorException
   {
-    try{ name = sourceDesc.get("NAME").toString();} 
-    catch(NodeNotFoundException x) {
-      throw new ConfigurationErrorException("NAME der Datenquelle fehlt");
+    try
+    {
+      name = sourceDesc.get("NAME").toString();
     }
-    
-    try{ source1Name = sourceDesc.get("SOURCE").toString();} 
-    catch(NodeNotFoundException x) {
-      throw new ConfigurationErrorException("SOURCE der Datenquelle "+name+" fehlt");
+    catch (NodeNotFoundException x)
+    {
+      throw new ConfigurationErrorException(L.m("NAME der Datenquelle fehlt"));
     }
-    
-    try{ source2Name = sourceDesc.get("OVER").toString();} 
-    catch(NodeNotFoundException x) {
-      throw new ConfigurationErrorException("OVER-Angabe der Datenquelle "+name+" fehlt");
+
+    try
+    {
+      source1Name = sourceDesc.get("SOURCE").toString();
     }
-    
-    source1 = (Datasource)nameToDatasource.get(source1Name);  
-    source2 = (Datasource)nameToDatasource.get(source2Name);
-    
+    catch (NodeNotFoundException x)
+    {
+      throw new ConfigurationErrorException(L.m("SOURCE der Datenquelle %1 fehlt",
+        name));
+    }
+
+    try
+    {
+      source2Name = sourceDesc.get("OVER").toString();
+    }
+    catch (NodeNotFoundException x)
+    {
+      throw new ConfigurationErrorException(L.m(
+        "OVER-Angabe der Datenquelle %1 fehlt", name));
+    }
+
+    source1 = nameToDatasource.get(source1Name);
+    source2 = nameToDatasource.get(source2Name);
+
     if (source1 == null)
-      throw new ConfigurationErrorException("Fehler bei Initialisierung von Datenquelle \""+name+"\": Referenzierte Datenquelle \""+source1Name+"\" nicht (oder fehlerhaft) definiert");
-    
+      throw new ConfigurationErrorException(
+        L.m(
+          "Fehler bei Initialisierung von Datenquelle \"%1\": Referenzierte Datenquelle \"%2\" nicht (oder fehlerhaft) definiert",
+          name));
+
     if (source2 == null)
-      throw new ConfigurationErrorException("Fehler bei Initialisierung von Datenquelle \""+name+"\": Referenzierte Datenquelle \""+source2Name+"\" nicht (oder fehlerhaft) definiert");
+      throw new ConfigurationErrorException(
+        L.m(
+          "Fehler bei Initialisierung von Datenquelle \"%1\": Referenzierte Datenquelle \"%2\" nicht (oder fehlerhaft) definiert",
+          name, source2Name));
 
     /*
-     * Anmerkung: Die folgende Bedingung ist "unnötig" streng, aber um
-     * sie aufzuweichen (z.B. Gesamtschema ist immer Schema von 
-     * bevorzugter Datenquelle)
-     * wäre es erforderlich, einen Dataset-Wrapper zu implementieren,
-     * der dafür sorgt, dass alle Datasets, die in QueryResults zurück-
-     * geliefert werden das selbe Schema haben. Solange dafür keine
-     * Notwendigkeit ersichtlich ist, spare ich mir diesen Aufwand.
+     * Anmerkung: Die folgende Bedingung ist "unnötig" streng, aber um sie
+     * aufzuweichen (z.B. Gesamtschema ist immer Schema von bevorzugter Datenquelle)
+     * wäre es erforderlich, einen Dataset-Wrapper zu implementieren, der dafür
+     * sorgt, dass alle Datasets, die in QueryResults zurück- geliefert werden das
+     * selbe Schema haben. Solange dafür keine Notwendigkeit ersichtlich ist, spare
+     * ich mir diesen Aufwand.
      */
     Set<String> schema1 = source1.getSchema();
     Set<String> schema2 = source2.getSchema();
@@ -135,10 +163,12 @@ public class PreferDatasource implements Datasource
         buf2.append(iter.next());
         if (iter.hasNext()) buf2.append(", ");
       }
-      throw new ConfigurationErrorException("Datenquelle \""+source1Name+"\" fehlen die Spalten: "+buf2+" und Datenquelle \""+source2Name+"\" fehlen die Spalten: "+buf1);
+      throw new ConfigurationErrorException(L.m(
+        "Datenquelle \"%1\" fehlen die Spalten: %2", source1Name, buf2)
+        + L.m(" und ")
+        + L.m("Datenquelle \"%1\" fehlen die Spalten: %2", source2Name, buf1));
     }
 
-    
     schema = new HashSet<String>(schema1);
   }
 
@@ -147,40 +177,56 @@ public class PreferDatasource implements Datasource
     return schema;
   }
 
-  public QueryResults getDatasetsByKey(Collection<String> keys, long timeout) throws TimeoutException
+  public QueryResults getDatasetsByKey(Collection<String> keys, long timeout)
+      throws TimeoutException
   {
     long endTime = System.currentTimeMillis() + timeout;
     QueryResults results = source2.getDatasetsByKey(keys, timeout);
-    
+
     timeout = endTime - System.currentTimeMillis();
-    if (timeout <= 0) throw new TimeoutException("Datenquelle "+source2Name+" konnte Anfrage getDatasetsByKey() nicht schnell genug beantworten");
-     
+    if (timeout <= 0)
+      throw new TimeoutException(
+        L.m(
+          "Datenquelle %1 konnte Anfrage getDatasetsByKey() nicht schnell genug beantworten",
+          source2Name));
+
     QueryResults overrideResults = source1.getDatasetsByKey(keys, timeout);
-    
+
     timeout = endTime - System.currentTimeMillis();
-    if (timeout <= 0) throw new TimeoutException("Datenquelle "+source1Name+" konnte Anfrage getDatasetsByKey() nicht schnell genug beantworten");
-    
+    if (timeout <= 0)
+      throw new TimeoutException(
+        L.m(
+          "Datenquelle %1 konnte Anfrage getDatasetsByKey() nicht schnell genug beantworten",
+          source1Name));
+
     return new QueryResultsOverride(results, overrideResults, source1, timeout);
   }
-  
+
   public QueryResults getContents(long timeout) throws TimeoutException
   {
     return new QueryResultsList(new Vector<Dataset>(0));
   }
 
-  public QueryResults find(List<QueryPart> query, long timeout) throws TimeoutException
+  public QueryResults find(List<QueryPart> query, long timeout)
+      throws TimeoutException
   {
     long endTime = System.currentTimeMillis() + timeout;
     QueryResults results = source2.find(query, timeout);
-    
+
     timeout = endTime - System.currentTimeMillis();
-    if (timeout <= 0) throw new TimeoutException("Datenquelle "+source2Name+" konnte Anfrage find() nicht schnell genug beantworten");
-     
+    if (timeout <= 0)
+      throw new TimeoutException(L.m(
+        "Datenquelle %1 konnte Anfrage find() nicht schnell genug beantworten",
+        source2Name));
+
     QueryResults overrideResults = source1.find(query, timeout);
-    
+
     timeout = endTime - System.currentTimeMillis();
-    if (timeout <= 0) throw new TimeoutException("Datenquelle "+source1Name+" konnte Anfrage find() nicht schnell genug beantworten");
-    
+    if (timeout <= 0)
+      throw new TimeoutException(L.m(
+        "Datenquelle %1 konnte Anfrage find() nicht schnell genug beantworten",
+        source1Name));
+
     return new QueryResultsOverride(results, overrideResults, source1, timeout);
   }
 
@@ -192,56 +238,59 @@ public class PreferDatasource implements Datasource
   private static class QueryResultsOverride implements QueryResults
   {
     private int size;
+
     private Set<String> keyBlacklist = new HashSet<String>();
+
     private QueryResults overrideResults;
+
     private QueryResults results;
-    
-    public QueryResultsOverride(QueryResults results, QueryResults overrideResults, Datasource override, long timeout)
-    throws TimeoutException
+
+    public QueryResultsOverride(QueryResults results, QueryResults overrideResults,
+        Datasource override, long timeout) throws TimeoutException
     {
       this.overrideResults = overrideResults;
-      
+
       long endTime = System.currentTimeMillis() + timeout;
       this.results = results;
       size = results.size();
-        
-      Map<String, int[]> keyToCount = new HashMap<String, int[]>(); //of int[]
-      
-      Iterator iter = results.iterator();
+
+      Map<String, int[]> keyToCount = new HashMap<String, int[]>(); // of int[]
+
+      Iterator<Dataset> iter = results.iterator();
       while (iter.hasNext())
-      { 
-        Dataset ds = (Dataset)iter.next();
+      {
+        Dataset ds = iter.next();
         String key = ds.getKey();
-        if (!keyToCount.containsKey(key))
-          keyToCount.put(key, new int[]{0});
+        if (!keyToCount.containsKey(key)) keyToCount.put(key, new int[] { 0 });
         int[] count = keyToCount.get(key);
         ++count[0];
-        if (System.currentTimeMillis() > endTime)
-          throw new TimeoutException();
+        if (System.currentTimeMillis() > endTime) throw new TimeoutException();
       }
-      
+
       /**
        * Datensätze für die ein Korrekturdatensatz vorliegt, dieaber nicht in
-       * overrideResults auftauchen (weil die Korrektur dafür gesorgt hat, dass
-       * die Suchbedingung nicht mehr passt) müssen auch mit ihrem Schlüssel
-       * auf die Blacklist. Deswegen müssen wir diese Datensätze suchen.
+       * overrideResults auftauchen (weil die Korrektur dafür gesorgt hat, dass die
+       * Suchbedingung nicht mehr passt) müssen auch mit ihrem Schlüssel auf die
+       * Blacklist. Deswegen müssen wir diese Datensätze suchen.
        */
       timeout = endTime - System.currentTimeMillis();
       if (timeout <= 0) throw new TimeoutException();
-      QueryResults blacklistResults = override.getDatasetsByKey(keyToCount.keySet(),timeout); 
-      
+      QueryResults blacklistResults =
+        override.getDatasetsByKey(keyToCount.keySet(), timeout);
+
       size += overrideResults.size();
-      
-      QueryResults[] oResults = new QueryResults[]{overrideResults, blacklistResults};
-      
+
+      QueryResults[] oResults = new QueryResults[] {
+        overrideResults, blacklistResults };
+
       for (int i = 0; i < oResults.length; ++i)
       {
         iter = oResults[i].iterator();
         while (iter.hasNext())
         {
-          Dataset ds = (Dataset)iter.next();
+          Dataset ds = iter.next();
           String key = ds.getKey();
-          
+
           int[] count = keyToCount.get(key);
           if (count != null)
           {
@@ -249,12 +298,11 @@ public class PreferDatasource implements Datasource
             count[0] = 0;
             keyBlacklist.add(key);
           }
-          if (System.currentTimeMillis() > endTime)
-            throw new TimeoutException();
+          if (System.currentTimeMillis() > endTime) throw new TimeoutException();
         }
       }
     }
-    
+
     public int size()
     {
       return size;
@@ -269,20 +317,22 @@ public class PreferDatasource implements Datasource
     {
       return size == 0;
     }
-    
+
     private class MyIterator implements Iterator<Dataset>
     {
       private Iterator<Dataset> iter;
+
       private boolean inOverride;
+
       private int remaining;
-      
+
       public MyIterator()
       {
         iter = overrideResults.iterator();
         inOverride = true;
         remaining = size;
       }
-      
+
       public void remove()
       {
         throw new UnsupportedOperationException();
@@ -295,26 +345,26 @@ public class PreferDatasource implements Datasource
 
       public Dataset next()
       {
-        if (remaining == 0)
-          throw new NoSuchElementException();
-        
+        if (remaining == 0) throw new NoSuchElementException();
+
         --remaining;
-        
+
         if (inOverride)
         {
           if (iter.hasNext()) return iter.next();
           inOverride = false;
           iter = results.iterator();
         }
-        
+
         Dataset ds;
-        do{
+        do
+        {
           ds = iter.next();
-        }while (keyBlacklist.contains(ds.getKey()));
-        
+        } while (keyBlacklist.contains(ds.getKey()));
+
         return ds;
       }
     }
   }
-  
+
 }
