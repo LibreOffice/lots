@@ -1,9 +1,8 @@
-//TODO L.m()
 /*
-* Dateiname: EmptyDatasource.java
-* Projekt  : WollMux
-* Funktion : Eine Datenquelle, die keine Datensätze enthält.
-* 
+ * Dateiname: EmptyDatasource.java
+ * Projekt  : WollMux
+ * Funktion : Eine Datenquelle, die keine Datensätze enthält.
+ * 
  * Copyright (c) 2008 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,19 +17,19 @@
  * You should have received a copy of the European Union Public Licence
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
-*
-* Änderungshistorie:
-* Datum      | Wer | Änderungsgrund
-* -------------------------------------------------------------------
-* 28.10.2005 | BNK | Erstellung
-* 28.10.2005 | BNK | +getName()
-* 31.10.2005 | BNK | +find()
-* -------------------------------------------------------------------
-*
-* @author Matthias Benkmann (D-III-ITD 5.1)
-* @version 1.0
-* 
-*/
+ *
+ * Änderungshistorie:
+ * Datum      | Wer | Änderungsgrund
+ * -------------------------------------------------------------------
+ * 28.10.2005 | BNK | Erstellung
+ * 28.10.2005 | BNK | +getName()
+ * 31.10.2005 | BNK | +find()
+ * -------------------------------------------------------------------
+ *
+ * @author Matthias Benkmann (D-III-ITD 5.1)
+ * @version 1.0
+ * 
+ */
 package de.muenchen.allg.itd51.wollmux.db;
 
 import java.util.Collection;
@@ -42,21 +41,27 @@ import de.muenchen.allg.itd51.wollmux.TimeoutException;
 
 /**
  * Eine Datenquelle, die keine Datensätze enthält.
+ * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class EmptyDatasource implements Datasource
 {
-  private static QueryResults emptyResults = new QueryResultsList(new Vector<Dataset>(0));
+  private static QueryResults emptyResults =
+    new QueryResultsList(new Vector<Dataset>(0));
+
   private Set<String> schema;
+
   private String name;
-  
-  public EmptyDatasource(Set<String> schema, String name)  
+
+  public EmptyDatasource(Set<String> schema, String name)
   {
     this.schema = schema;
     this.name = name;
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see de.muenchen.allg.itd51.wollmux.db.Datasource#getSchema()
    */
   public Set<String> getSchema()
@@ -64,25 +69,29 @@ public class EmptyDatasource implements Datasource
     return schema;
   }
 
-  /* (non-Javadoc)
-   * @see de.muenchen.allg.itd51.wollmux.db.Datasource#getDatasetsByKey(java.util.Collection, long)
+  /*
+   * (non-Javadoc)
+   * 
+   * @see de.muenchen.allg.itd51.wollmux.db.Datasource#getDatasetsByKey(java.util.Collection,
+   *      long)
    */
   public QueryResults getDatasetsByKey(Collection<String> keys, long timeout)
   {
     return emptyResults;
   }
-  
+
   public QueryResults getContents(long timeout) throws TimeoutException
   {
     return emptyResults;
   }
-  
+
   public String getName()
   {
     return name;
   }
 
-  public QueryResults find(List<QueryPart> query, long timeout) throws TimeoutException
+  public QueryResults find(List<QueryPart> query, long timeout)
+      throws TimeoutException
   {
     return emptyResults;
   }
