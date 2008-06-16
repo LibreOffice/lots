@@ -1240,7 +1240,7 @@ public class DatasourceSearchDialog implements Dialog
    */
   public String substituteVars(String str, Dataset datensatz)
   {
-    Pattern p = Pattern.compile("\\$\\{([a-zA-Z0-9]+)\\}");
+    Pattern p = Pattern.compile("\\$\\{([a-zA-Z_][a-zA-Z_0-9]*)\\}");
     Matcher m = p.matcher(str);
     if (m.find())
       do
