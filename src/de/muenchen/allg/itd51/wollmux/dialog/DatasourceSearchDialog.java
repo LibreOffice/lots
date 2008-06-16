@@ -137,7 +137,7 @@ public class DatasourceSearchDialog implements Dialog
    * data[0] speichert die aktuell ausgewählten Formulardaten. ACHTUNG! Nur in
    * synchronized(data)-Blöcken verwenden!
    */
-  private Map[] data = new Map[] { new HashMap() };
+  private Map<String, String>[] data;
 
   /**
    * Alle ids, die durch Spaltenumsetzungsabschnitte definiert werden.
@@ -222,6 +222,7 @@ public class DatasourceSearchDialog implements Dialog
    * @param conf
    *          die Beschreibung des Dialogs.
    */
+  @SuppressWarnings("unchecked")
   private DatasourceSearchDialog(Instantiator ilse, Set<String> schema,
       ConfigThingy conf, DatasourceJoiner dj) throws ConfigurationErrorException
   {
@@ -229,6 +230,9 @@ public class DatasourceSearchDialog implements Dialog
     this.ilse = ilse;
     this.dj = dj;
     this.schema = schema;
+    // Unfortunately, creating generic arrays is not possible, i.e.
+    // new Map<String,String>[] doesn't work.
+    this.data = new Map[] { new HashMap<String, String>() };
   }
 
   public Dialog instanceFor(Map<Object, Object> context)
@@ -248,7 +252,7 @@ public class DatasourceSearchDialog implements Dialog
     synchronized (data)
     {
       if (!schema.contains(id)) return null;
-      str = (String) data[0].get(id);
+      str = data[0].get(id);
     }
     if (str == null) return "";
     return str;
@@ -348,11 +352,11 @@ public class DatasourceSearchDialog implements Dialog
     /********************************************************************************
      * Tabs erzeugen.
      *******************************************************************************/
-    Iterator iter = fensterDesc.iterator();
+    Iterator<ConfigThingy> iter = fensterDesc.iterator();
     int tabIndex = 0;
     while (iter.hasNext())
     {
-      ConfigThingy neuesFenster = (ConfigThingy) iter.next();
+      ConfigThingy neuesFenster = iter.next();
 
       /*
        * Die folgende Schleife ist nicht nur eleganter als mehrere try-catch-Blöcke
@@ -362,10 +366,10 @@ public class DatasourceSearchDialog implements Dialog
       String tabTitle = L.m("Eingabe");
       char hotkey = 0;
       String tip = "";
-      Iterator childIter = neuesFenster.iterator();
+      Iterator<ConfigThingy> childIter = neuesFenster.iterator();
       while (childIter.hasNext())
       { // TODO CLOSEACTION unterstuetzen
-        ConfigThingy childConf = (ConfigThingy) childIter.next();
+        ConfigThingy childConf = childIter.next();
         String name = childConf.getName();
         if (name.equals("TIP"))
           tip = childConf.toString();
@@ -551,13 +555,13 @@ public class DatasourceSearchDialog implements Dialog
       int y = 0;
       int x = 0;
 
-      Iterator parentiter = conf.query(key).iterator();
+      Iterator<ConfigThingy> parentiter = conf.query(key).iterator();
       while (parentiter.hasNext())
       {
-        Iterator iter = ((ConfigThingy) parentiter.next()).iterator();
+        Iterator<ConfigThingy> iter = parentiter.next().iterator();
         while (iter.hasNext())
         {
-          ConfigThingy uiConf = (ConfigThingy) iter.next();
+          ConfigThingy uiConf = iter.next();
           UIElement uiElement;
           try
           {
@@ -659,12 +663,13 @@ public class DatasourceSearchDialog implements Dialog
     {
       Dataset ds = null;
       if (ele != null) ds = ele.getDataset();
-      Iterator iter = mapDB_SPALTEtoUIElement.entrySet().iterator();
+      Iterator<Map.Entry<String, UIElement>> iter =
+        mapDB_SPALTEtoUIElement.entrySet().iterator();
       while (iter.hasNext())
       {
-        Map.Entry entry = (Map.Entry) iter.next();
-        String dbSpalte = (String) entry.getKey();
-        UIElement uiElement = (UIElement) entry.getValue();
+        Map.Entry<String, UIElement> entry = iter.next();
+        String dbSpalte = entry.getKey();
+        UIElement uiElement = entry.getValue();
         try
         {
           if (ds == null)
@@ -698,10 +703,10 @@ public class DatasourceSearchDialog implements Dialog
       else
       {
         elements = new ListElement[data.size()];
-        Iterator iter = data.iterator();
+        Iterator<Dataset> iter = data.iterator();
         int i = 0;
         while (iter.hasNext())
-          elements[i++] = new ListElement((Dataset) iter.next());
+          elements[i++] = new ListElement(iter.next());
         Arrays.sort(elements, new Comparator<Object>()
         {
           public int compare(Object o1, Object o2)
@@ -1057,20 +1062,20 @@ public class DatasourceSearchDialog implements Dialog
       Map<Integer, List<Query>> mapWordcountToListOfQuerys =
         new HashMap<Integer, List<Query>>();
       conf = conf.query("Suchstrategie");
-      Iterator parentIter = conf.iterator();
+      Iterator<ConfigThingy> parentIter = conf.iterator();
       while (parentIter.hasNext())
       {
-        Iterator iter = ((ConfigThingy) parentIter.next()).iterator();
+        Iterator<ConfigThingy> iter = parentIter.next().iterator();
         while (iter.hasNext())
         {
-          ConfigThingy queryConf = (ConfigThingy) iter.next();
+          ConfigThingy queryConf = iter.next();
           String datasource = queryConf.getName();
           List<QueryPart> listOfQueryParts = new Vector<QueryPart>();
-          Iterator columnIter = queryConf.iterator();
+          Iterator<ConfigThingy> columnIter = queryConf.iterator();
           int wordcount = 0;
           while (columnIter.hasNext())
           {
-            ConfigThingy qconf = (ConfigThingy) columnIter.next();
+            ConfigThingy qconf = columnIter.next();
             String columnName = qconf.getName();
             String searchString = qconf.toString();
             Matcher m =
@@ -1114,7 +1119,7 @@ public class DatasourceSearchDialog implements Dialog
      * @return null falls keine Strategie für den gegebenen wordcount vorhanden.
      * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
      */
-    public List getTemplate(int wordcount)
+    public List<Query> getTemplate(int wordcount)
     {
       return mapWordcountToListOfQuerys.get(new Integer(wordcount));
     }
@@ -1131,10 +1136,10 @@ public class DatasourceSearchDialog implements Dialog
   {
     String dbName = template.getDatasourceName();
     List<QueryPart> listOfQueryParts = new Vector<QueryPart>();
-    Iterator qpIter = template.iterator();
+    Iterator<QueryPart> qpIter = template.iterator();
     while (qpIter.hasNext())
     {
-      QueryPart templatePart = (QueryPart) qpIter.next();
+      QueryPart templatePart = qpIter.next();
       String str = templatePart.getSearchString();
 
       for (int i = 0; i < wordcount; ++i)
@@ -1216,11 +1221,11 @@ public class DatasourceSearchDialog implements Dialog
      */
     if (count < 0) return queryList;
 
-    List templateList = searchStrategy.getTemplate(count);
-    Iterator iter = templateList.iterator();
+    List<Query> templateList = searchStrategy.getTemplate(count);
+    Iterator<Query> iter = templateList.iterator();
     while (iter.hasNext())
     {
-      Query template = (Query) iter.next();
+      Query template = iter.next();
       queryList.add(resolveTemplate(template, queryArray, count));
     }
 
@@ -1381,21 +1386,22 @@ public class DatasourceSearchDialog implements Dialog
     private HashSet<String> parseSchema(ConfigThingy conf)
     {
       HashSet<String> schema = new HashSet<String>();
-      Iterator fensterIter = conf.query("Fenster").iterator();
+      Iterator<ConfigThingy> fensterIter = conf.query("Fenster").iterator();
       while (fensterIter.hasNext())
       {
-        ConfigThingy fenster = (ConfigThingy) fensterIter.next();
-        Iterator tabIter = fenster.iterator();
+        ConfigThingy fenster = fensterIter.next();
+        Iterator<ConfigThingy> tabIter = fenster.iterator();
         while (tabIter.hasNext())
         {
-          ConfigThingy tab = (ConfigThingy) tabIter.next();
-          Iterator suIter = tab.query("Spaltenumsetzung", 1).iterator();
+          ConfigThingy tab = tabIter.next();
+          Iterator<ConfigThingy> suIter =
+            tab.query("Spaltenumsetzung", 1).iterator();
           while (suIter.hasNext())
           {
-            Iterator spaltenIterator = ((ConfigThingy) suIter.next()).iterator();
+            Iterator<ConfigThingy> spaltenIterator = suIter.next().iterator();
             while (spaltenIterator.hasNext())
             {
-              ConfigThingy spalte = (ConfigThingy) spaltenIterator.next();
+              ConfigThingy spalte = spaltenIterator.next();
               schema.add(spalte.getName());
             }
           }
@@ -1501,18 +1507,21 @@ public class DatasourceSearchDialog implements Dialog
       Collection<String> schema)
   {
     Vector<ColumnTranslation> columnTrans = new Vector<ColumnTranslation>();
-    Iterator parentIter = conf.query("Spaltenumsetzung").iterator();
+    Iterator<ConfigThingy> parentIter = conf.query("Spaltenumsetzung").iterator();
     while (parentIter.hasNext())
     {
-      Iterator iter = ((ConfigThingy) parentIter.next()).iterator();
+      Iterator<ConfigThingy> iter = parentIter.next().iterator();
       while (iter.hasNext())
       {
-        ConfigThingy transConf = (ConfigThingy) iter.next();
+        ConfigThingy transConf = iter.next();
         String name = transConf.getName();
         try
         {
           Function func =
             FunctionFactory.parseChildren(transConf, funcLib, dialogLib, context);
+          if (func == null)
+            throw new ConfigurationErrorException(
+              L.m("Leere Funktionsdefinition ist nicht erlaubt. Verwenden Sie stattdessen den leeren String \"\""));
           columnTrans.add(new ColumnTranslation(name, func));
           schema.add(name);
         }
@@ -1594,10 +1603,10 @@ public class DatasourceSearchDialog implements Dialog
         List<ColumnTranslation> columnTranslations)
     {
       qres = new Vector<Dataset>(res.size());
-      Iterator iter = res.iterator();
+      Iterator<Dataset> iter = res.iterator();
       while (iter.hasNext())
       {
-        Dataset ds = (Dataset) iter.next();
+        Dataset ds = iter.next();
         Map<String, String> data = new HashMap<String, String>();
         Iterator<ColumnTranslation> transIter = columnTranslations.iterator();
         while (transIter.hasNext())
