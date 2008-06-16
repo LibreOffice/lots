@@ -1,10 +1,9 @@
-//TODO L.m()
 /*
-* Dateiname: RAMDatasource.java
-* Projekt  : WollMux
-* Funktion : Oberklasse für Datasources, die ihre Daten vollständig
-*            im Speicher halten
-* 
+ * Dateiname: RAMDatasource.java
+ * Projekt  : WollMux
+ * Funktion : Oberklasse für Datasources, die ihre Daten vollständig
+ *            im Speicher halten
+ * 
  * Copyright (c) 2008 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -19,19 +18,19 @@
  * You should have received a copy of the European Union Public Licence
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
-*
-* Änderungshistorie:
-* Datum      | Wer | Änderungsgrund
-* -------------------------------------------------------------------
-* 31.10.2005 | BNK | Erstellung
-* 03.11.2005 | BNK | besser kommentiert
-* 10.11.2005 | BNK | Refactoring: DatasetChecker & Co. in eigene Klassen
-* -------------------------------------------------------------------
-*
-* @author Matthias Benkmann (D-III-ITD 5.1)
-* @version 1.0
-* 
-*/
+ *
+ * Änderungshistorie:
+ * Datum      | Wer | Änderungsgrund
+ * -------------------------------------------------------------------
+ * 31.10.2005 | BNK | Erstellung
+ * 03.11.2005 | BNK | besser kommentiert
+ * 10.11.2005 | BNK | Refactoring: DatasetChecker & Co. in eigene Klassen
+ * -------------------------------------------------------------------
+ *
+ * @author Matthias Benkmann (D-III-ITD 5.1)
+ * @version 1.0
+ * 
+ */
 package de.muenchen.allg.itd51.wollmux.db;
 
 import java.util.Collection;
@@ -45,8 +44,8 @@ import de.muenchen.allg.itd51.wollmux.TimeoutException;
 import de.muenchen.allg.itd51.wollmux.db.checker.DatasetChecker;
 
 /**
- * Oberklasse für Datasources, die ihre Daten vollständig
- *  im Speicher halten
+ * Oberklasse für Datasources, die ihre Daten vollständig im Speicher halten
+ * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class RAMDatasource implements Datasource
@@ -55,57 +54,63 @@ public class RAMDatasource implements Datasource
    * Das Schema dieser Datenquelle.
    */
   private Set<String> schema;
-  
+
   /**
    * Liste aller Datasets, die in dieser Datasource gespeichert sind.
    */
   private List<Dataset> data;
-  
+
   /**
    * Der Name dieser Datenquelle.
    */
   private String name;
-  
+
   /**
-   * Erzeugt eine neue RAMDatasource mit Namen name.
-   * data und schema werden direkt als Referenz eingebunden, nicht kopiert.
-   * @param name der Name der Datenquelle
-   * @param schema das Schema der Datenquelle
-   * @param data die Datensätze der Datenquelle
+   * Erzeugt eine neue RAMDatasource mit Namen name. data und schema werden direkt
+   * als Referenz eingebunden, nicht kopiert.
+   * 
+   * @param name
+   *          der Name der Datenquelle
+   * @param schema
+   *          das Schema der Datenquelle
+   * @param data
+   *          die Datensätze der Datenquelle
    */
   public RAMDatasource(String name, Set<String> schema, List<Dataset> data)
   {
     init(name, schema, data);
   }
-  
+
   /**
-   * Führt die Initialisierungsaktionen des Konstruktors mit den gleichen
-   * Parametern aus. Diese Methode sollte von abgeleiteten Klassen verwendet
-   * werden, wenn sie den Konstruktor ohne Argumente verwenden.
+   * Führt die Initialisierungsaktionen des Konstruktors mit den gleichen Parametern
+   * aus. Diese Methode sollte von abgeleiteten Klassen verwendet werden, wenn sie
+   * den Konstruktor ohne Argumente verwenden.
+   * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   protected void init(String name, Set<String> schema, List<Dataset> data)
   {
-    this.schema = schema; 
+    this.schema = schema;
     this.data = data;
     this.name = name;
   }
-  
+
   /**
-  * Erzeugt eine uninitialisierte RAMDatasource. Eine abgeleitete Klasse, die diesen
-  * Konstruktor verwendet sollte init() aufrufen, um die nötigen Initialisierungen
-  * zu erledigen. 
-  */
-  protected RAMDatasource(){};
+   * Erzeugt eine uninitialisierte RAMDatasource. Eine abgeleitete Klasse, die diesen
+   * Konstruktor verwendet sollte init() aufrufen, um die nötigen Initialisierungen
+   * zu erledigen.
+   */
+  protected RAMDatasource()
+  {};
 
   public Set<String> getSchema()
-  { //TESTED
+  { // TESTED
     return new HashSet<String>(schema);
   }
 
   public QueryResults getDatasetsByKey(Collection<String> keys, long timeout)
       throws TimeoutException
-  { //TESTED
+  { // TESTED
     Vector<Dataset> res = new Vector<Dataset>();
     Iterator<Dataset> iter = data.iterator();
     while (iter.hasNext())
@@ -113,20 +118,23 @@ public class RAMDatasource implements Datasource
       Dataset ds = iter.next();
       if (keys.contains(ds.getKey())) res.add(ds);
     }
-        
+
     return new QueryResultsList(res);
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see de.muenchen.allg.itd51.wollmux.db.Datasource#find(java.util.List, long)
    */
-  public QueryResults find(List<QueryPart> query, long timeout) throws TimeoutException
-  { //TESTED
+  public QueryResults find(List<QueryPart> query, long timeout)
+      throws TimeoutException
+  { // TESTED
     if (query.isEmpty()) return new QueryResultsList(new Vector<Dataset>(0));
     DatasetChecker checker = DatasetChecker.makeChecker(query);
-    
+
     List<Dataset> results = new Vector<Dataset>();
-    
+
     Iterator<Dataset> iter = data.iterator();
     while (iter.hasNext())
     {
@@ -135,13 +143,15 @@ public class RAMDatasource implements Datasource
     }
     return new QueryResultsList(results);
   }
-  
+
   public QueryResults getContents(long timeout) throws TimeoutException
   {
     return new QueryResultsList(new Vector<Dataset>(data));
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see de.muenchen.allg.itd51.wollmux.db.Datasource#getName()
    */
   public String getName()
@@ -149,7 +159,4 @@ public class RAMDatasource implements Datasource
     return name;
   }
 
-  
-  
-  
 }
