@@ -85,8 +85,8 @@ public class SchemaDatasource implements Datasource
    *          der Kontext relativ zu dem URLs aufgelöst werden sollen (zur Zeit nicht
    *          verwendet).
    */
-  public SchemaDatasource(Map nameToDatasource, ConfigThingy sourceDesc, URL context)
-      throws ConfigurationErrorException
+  public SchemaDatasource(Map<String, Datasource> nameToDatasource,
+      ConfigThingy sourceDesc, URL context) throws ConfigurationErrorException
   {
     try
     {
@@ -107,7 +107,7 @@ public class SchemaDatasource implements Datasource
         name));
     }
 
-    source = (Datasource) nameToDatasource.get(sourceName);
+    source = nameToDatasource.get(sourceName);
 
     if (source == null)
       throw new ConfigurationErrorException(
@@ -124,7 +124,7 @@ public class SchemaDatasource implements Datasource
     Iterator<ConfigThingy> iter = drops.iterator();
     while (iter.hasNext())
     {
-      Iterator iter2 = iter.next().iterator();
+      Iterator<ConfigThingy> iter2 = iter.next().iterator();
       while (iter2.hasNext())
       {
         String spalte = iter2.next().toString();
@@ -141,7 +141,7 @@ public class SchemaDatasource implements Datasource
     iter = adds.iterator();
     while (iter.hasNext())
     {
-      Iterator iter2 = iter.next().iterator();
+      Iterator<ConfigThingy> iter2 = iter.next().iterator();
       while (iter2.hasNext())
       {
         String spalte = iter2.next().toString();
@@ -254,9 +254,9 @@ public class SchemaDatasource implements Datasource
   private QueryResults wrapDatasets(QueryResults res)
   {
     List<RenameDataset> wrappedRes = new Vector<RenameDataset>(res.size());
-    Iterator iter = res.iterator();
+    Iterator<Dataset> iter = res.iterator();
     while (iter.hasNext())
-      wrappedRes.add(new RenameDataset((Dataset) iter.next()));
+      wrappedRes.add(new RenameDataset(iter.next()));
 
     return new QueryResultsList(wrappedRes);
   }

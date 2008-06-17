@@ -206,15 +206,14 @@ public class MailMergeDatasource
       return new Vector<String>();
     }
   }
-  
+
   /**
    * Liefert die sichtbaren Inhalte (als Strings) der Zellen aus der rowIndex-ten
    * sichtbaren nicht-leeren Zeile (wobei die erste solche Zeile, diejenige die die
    * Namen for {@link #getColumnNames()} liefert, den Index 0 hat) aus der aktuell
-   * ausgewählten Tabelle. Falls sich die Daten
-   * zwischen den Aufrufen der beiden Methoden nicht geändert haben, passen die
-   * zurückgelieferten Daten in Anzahl und Reihenfolge genau zu der von
-   * {@link #getColumnNames()} gelieferten Liste.
+   * ausgewählten Tabelle. Falls sich die Daten zwischen den Aufrufen der beiden
+   * Methoden nicht geändert haben, passen die zurückgelieferten Daten in Anzahl und
+   * Reihenfolge genau zu der von {@link #getColumnNames()} gelieferten Liste.
    * 
    * Falls rowIndex zu groß ist, wird ein Vektor mit leeren Strings zurückgeliefert.
    * Im Fehlerfall wird ein leerer Vektor zurückgeliefert.
@@ -317,8 +316,8 @@ public class MailMergeDatasource
    */
   public void showDatasourceSelectionDialog(final JFrame parent)
   {
-    final JDialog datasourceSelector = new JDialog(parent,
-      L.m("Serienbriefdaten auswählen"), true);
+    final JDialog datasourceSelector =
+      new JDialog(parent, L.m("Serienbriefdaten auswählen"), true);
 
     Box vbox = Box.createVerticalBox();
     datasourceSelector.add(vbox);
@@ -368,7 +367,7 @@ public class MailMergeDatasource
     {
       public void actionPerformed(ActionEvent e)
       {
-        // TODO selectOOoDatasourceAsDatasource();
+      // TODO selectOOoDatasourceAsDatasource();
       }
     });
     vbox.add(DimAdjust.maxWidthUnlimited(button));
@@ -380,8 +379,9 @@ public class MailMergeDatasource
     { // TODO Testen
       if (calcDoc != null)
       {
-        String title = (String) UNO.getProperty(
-          UNO.XModel(calcDoc).getCurrentController().getFrame(), "Title");
+        String title =
+          (String) UNO.getProperty(
+            UNO.XModel(calcDoc).getCurrentController().getFrame(), "Title");
         if (title == null) title = "?????";
         str = stripOpenOfficeFromWindowName(title);
       }
@@ -433,7 +433,8 @@ public class MailMergeDatasource
     {
       if (UNO.XModel(calcDoc) != null)
       {
-        XTopWindow win = UNO.XTopWindow(UNO.XModel(calcDoc).getCurrentController().getFrame().getContainerWindow());
+        XTopWindow win =
+          UNO.XTopWindow(UNO.XModel(calcDoc).getCurrentController().getFrame().getContainerWindow());
         win.toFront();
       }
     }
@@ -465,8 +466,7 @@ public class MailMergeDatasource
       datenquelle = mmconf.query("Datenquelle").getLastChild();
     }
     catch (NodeNotFoundException e)
-    {
-    }
+    {}
 
     String type = null;
     try
@@ -474,8 +474,7 @@ public class MailMergeDatasource
       type = datenquelle.get("TYPE").toString();
     }
     catch (NodeNotFoundException e)
-    {
-    }
+    {}
 
     if ("calc".equalsIgnoreCase(type))
     {
@@ -594,8 +593,8 @@ public class MailMergeDatasource
     {
       try
       {
-        XCellRangesQuery sheet = UNO.XCellRangesQuery(calcDoc.getSheets().getByName(
-          tableName));
+        XCellRangesQuery sheet =
+          UNO.XCellRangesQuery(calcDoc.getSheets().getByName(tableName));
         SortedSet<Integer> columnIndexes = new TreeSet<Integer>();
         SortedSet<Integer> rowIndexes = new TreeSet<Integer>();
         getVisibleNonemptyRowsAndColumns(sheet, columnIndexes, rowIndexes);
@@ -637,8 +636,8 @@ public class MailMergeDatasource
     if (calcDoc == null) return columnNames;
     try
     {
-      XCellRangesQuery sheet = UNO.XCellRangesQuery(calcDoc.getSheets().getByName(
-        tableName));
+      XCellRangesQuery sheet =
+        UNO.XCellRangesQuery(calcDoc.getSheets().getByName(tableName));
       SortedSet<Integer> columnIndexes = new TreeSet<Integer>();
       SortedSet<Integer> rowIndexes = new TreeSet<Integer>();
       getVisibleNonemptyRowsAndColumns(sheet, columnIndexes, rowIndexes);
@@ -656,8 +655,8 @@ public class MailMergeDatasource
         while (iter.hasNext())
         {
           int x = iter.next().intValue();
-          String columnName = UNO.XTextRange(
-            sheetCellRange.getCellByPosition(x, ymin)).getString();
+          String columnName =
+            UNO.XTextRange(sheetCellRange.getCellByPosition(x, ymin)).getString();
           if (columnName.length() > 0)
           {
             columnNames.add(columnName);
@@ -714,8 +713,8 @@ public class MailMergeDatasource
     if (calcDoc == null) return columnValues;
     try
     {
-      XCellRangesQuery sheet = UNO.XCellRangesQuery(calcDoc.getSheets().getByName(
-        tableName));
+      XCellRangesQuery sheet =
+        UNO.XCellRangesQuery(calcDoc.getSheets().getByName(tableName));
       SortedSet<Integer> columnIndexes = new TreeSet<Integer>();
       SortedSet<Integer> rowIndexes = new TreeSet<Integer>();
       getVisibleNonemptyRowsAndColumns(sheet, columnIndexes, rowIndexes);
@@ -751,14 +750,14 @@ public class MailMergeDatasource
         while (iter.hasNext())
         {
           int x = iter.next().intValue();
-          String columnName = UNO.XTextRange(
-            sheetCellRange.getCellByPosition(x, ymin)).getString();
+          String columnName =
+            UNO.XTextRange(sheetCellRange.getCellByPosition(x, ymin)).getString();
           if (columnName.length() > 0)
           {
             if (yTargetRow >= 0)
             {
-              String columnValue = UNO.XTextRange(
-                sheetCellRange.getCellByPosition(x, yTargetRow)).getString();
+              String columnValue =
+                UNO.XTextRange(sheetCellRange.getCellByPosition(x, yTargetRow)).getString();
               columnValues.add(columnValue);
             }
             else
@@ -778,7 +777,7 @@ public class MailMergeDatasource
    * Liefert den Inhalt der Tabelle tableName aus der OOo Datenquelle mit Namen
    * oooDatasourceName.
    * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
    * 
    * TODO Testen
    */
@@ -790,7 +789,9 @@ public class MailMergeDatasource
     conf.add("TABLE").add(tableName);
     conf.add("SOURCE").add(oooDatasourceName);
     Datasource ds;
-    ds = new OOoDatasource(new HashMap(), conf, new URL("file:///"), true);
+    ds =
+      new OOoDatasource(new HashMap<String, Datasource>(), conf,
+        new URL("file:///"), true);
 
     Set<String> schema = ds.getSchema();
     QueryResults res = ds.getContents(MAILMERGE_GETCONTENTS_TIMEOUT);
@@ -834,8 +835,8 @@ public class MailMergeDatasource
       return;
     }
 
-    final JDialog calcWinSelector = new JDialog(parent,
-      L.m("Tabelle auswählen"), true);
+    final JDialog calcWinSelector =
+      new JDialog(parent, L.m("Tabelle auswählen"), true);
 
     Box vbox = Box.createVerticalBox();
     calcWinSelector.add(vbox);
@@ -884,8 +885,9 @@ public class MailMergeDatasource
     try
     {
       Logger.debug(L.m("Öffne neues Calc-Dokument als Datenquelle für Seriendruck"));
-      XSpreadsheetDocument spread = UNO.XSpreadsheetDocument(UNO.loadComponentFromURL(
-        "private:factory/scalc", true, true));
+      XSpreadsheetDocument spread =
+        UNO.XSpreadsheetDocument(UNO.loadComponentFromURL("private:factory/scalc",
+          true, true));
       XSpreadsheets sheets = spread.getSheets();
       String[] sheetNames = sheets.getElementNames();
 
@@ -916,7 +918,8 @@ public class MailMergeDatasource
    */
   private void selectFileAsDatasource(JFrame parent)
   {
-    XFilePicker picker = UNO.XFilePicker(UNO.createUNOService("com.sun.star.ui.dialogs.FilePicker"));
+    XFilePicker picker =
+      UNO.XFilePicker(UNO.createUNOService("com.sun.star.ui.dialogs.FilePicker"));
     short res = picker.execute();
     if (res == com.sun.star.ui.dialogs.ExecutableDialogResults.OK)
     {
@@ -967,8 +970,8 @@ public class MailMergeDatasource
     if (names.size() == 1) return; // Falls es nur eine Tabelle gibt, Dialog
     // unnötig.
 
-    final JDialog tableSelector = new JDialog(parent,
-      L.m("Welche Tabelle möchten Sie verwenden ?"), true);
+    final JDialog tableSelector =
+      new JDialog(parent, L.m("Welche Tabelle möchten Sie verwenden ?"), true);
 
     Box vbox = Box.createVerticalBox();
     tableSelector.add(vbox);
@@ -1154,8 +1157,9 @@ public class MailMergeDatasource
         spread = UNO.XSpreadsheetDocument(xenu.nextElement());
         if (spread != null)
         {
-          String title = (String) UNO.getProperty(
-            UNO.XModel(spread).getCurrentController().getFrame(), "Title");
+          String title =
+            (String) UNO.getProperty(
+              UNO.XModel(spread).getCurrentController().getFrame(), "Title");
           win.titles.add(stripOpenOfficeFromWindowName(title));
           win.docs.add(spread);
         }
@@ -1230,7 +1234,7 @@ public class MailMergeDatasource
     {
       try
       {
-        Object ss = UNO.loadComponentFromURL(url, false, true); 
+        Object ss = UNO.loadComponentFromURL(url, false, true);
         newCalcDoc = UNO.XSpreadsheetDocument(ss);
         if (newCalcDoc == null)
           throw new UnavailableException(L.m("URL \"%1\" ist kein Tabellendokument",
@@ -1392,7 +1396,8 @@ public class MailMergeDatasource
         {
           try
           {
-            XCellRangesQuery sheet = UNO.XCellRangesQuery(sheets.getByName(tableNames[i]));
+            XCellRangesQuery sheet =
+              UNO.XCellRangesQuery(sheets.getByName(tableNames[i]));
             columns.clear();
             rows.clear();
             getVisibleNonemptyRowsAndColumns(sheet, columns, rows);
@@ -1419,8 +1424,7 @@ public class MailMergeDatasource
 
     public void queryClosing(EventObject arg0, boolean arg1)
         throws CloseVetoException
-    {
-    }
+    {}
 
     public void notifyClosing(EventObject arg0)
     {
@@ -1449,7 +1453,7 @@ public class MailMergeDatasource
     public void notifyEvent(com.sun.star.document.EventObject event)
     {
       if (event.EventName.equals("OnSaveAsDone")
-          && UnoRuntime.areSame(UNO.XInterface(event.Source), calcDoc))
+        && UnoRuntime.areSame(UNO.XInterface(event.Source), calcDoc))
       {
         javax.swing.SwingUtilities.invokeLater(new Runnable()
         {
@@ -1481,8 +1485,8 @@ public class MailMergeDatasource
     {
       if (doc != null)
       {
-        XCellRangesQuery sheet = UNO.XCellRangesQuery(doc.getSheets().getByName(
-          sheetName));
+        XCellRangesQuery sheet =
+          UNO.XCellRangesQuery(doc.getSheets().getByName(sheetName));
         if (sheet != null)
         {
           SortedSet<Integer> columnIndexes = new TreeSet<Integer>();
@@ -1501,14 +1505,15 @@ public class MailMergeDatasource
              * Datensatz existierenden String[]-Array.
              */
             int ymin = rowIndexes.first().intValue();
-            Map<String, Integer> mapColumnNameToIndex = new HashMap<String, Integer>();
+            Map<String, Integer> mapColumnNameToIndex =
+              new HashMap<String, Integer>();
             int idx = 0;
             Iterator<Integer> iter = columnIndexes.iterator();
             while (iter.hasNext())
             {
               int x = iter.next().intValue();
-              String columnName = UNO.XTextRange(
-                sheetCellRange.getCellByPosition(x, ymin)).getString();
+              String columnName =
+                UNO.XTextRange(sheetCellRange.getCellByPosition(x, ymin)).getString();
               if (columnName.length() > 0)
               {
                 mapColumnNameToIndex.put(columnName, new Integer(idx));
@@ -1537,7 +1542,8 @@ public class MailMergeDatasource
               while (columnIndexIter.hasNext())
               {
                 int x = columnIndexIter.next().intValue();
-                String value = UNO.XTextRange(sheetCellRange.getCellByPosition(x, y)).getString();
+                String value =
+                  UNO.XTextRange(sheetCellRange.getCellByPosition(x, y)).getString();
                 data[idx++] = value;
               }
 
@@ -1571,14 +1577,17 @@ public class MailMergeDatasource
       SortedSet<Integer> columnIndexes, SortedSet<Integer> rowIndexes)
   {
     XSheetCellRanges visibleCellRanges = sheet.queryVisibleCells();
-    XSheetCellRanges nonEmptyCellRanges = sheet.queryContentCells((short) (com.sun.star.sheet.CellFlags.VALUE
-                                                                           | com.sun.star.sheet.CellFlags.DATETIME
-                                                                           | com.sun.star.sheet.CellFlags.STRING | com.sun.star.sheet.CellFlags.FORMULA));
-    CellRangeAddress[] nonEmptyCellRangeAddresses = nonEmptyCellRanges.getRangeAddresses();
+    XSheetCellRanges nonEmptyCellRanges =
+      sheet.queryContentCells((short) (com.sun.star.sheet.CellFlags.VALUE
+        | com.sun.star.sheet.CellFlags.DATETIME
+        | com.sun.star.sheet.CellFlags.STRING | com.sun.star.sheet.CellFlags.FORMULA));
+    CellRangeAddress[] nonEmptyCellRangeAddresses =
+      nonEmptyCellRanges.getRangeAddresses();
     for (int i = 0; i < nonEmptyCellRangeAddresses.length; ++i)
     {
-      XSheetCellRanges ranges = UNO.XCellRangesQuery(visibleCellRanges).queryIntersection(
-        nonEmptyCellRangeAddresses[i]);
+      XSheetCellRanges ranges =
+        UNO.XCellRangesQuery(visibleCellRanges).queryIntersection(
+          nonEmptyCellRangeAddresses[i]);
       CellRangeAddress[] rangeAddresses = ranges.getRangeAddresses();
       for (int k = 0; k < rangeAddresses.length; ++k)
       {

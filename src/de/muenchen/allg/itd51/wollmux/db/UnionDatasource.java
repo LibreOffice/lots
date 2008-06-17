@@ -1,8 +1,8 @@
 /* 
-* Dateiname: UnionDatasource.java
-* Projekt  : WollMux
-* Funktion : Datasource, die die Vereinigung 2er Datasources darstellt
-* 
+ * Dateiname: UnionDatasource.java
+ * Projekt  : WollMux
+ * Funktion : Datasource, die die Vereinigung 2er Datasources darstellt
+ * 
  * Copyright (c) 2008 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,18 +17,18 @@
  * You should have received a copy of the European Union Public Licence
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
-*
-* Änderungshistorie:
-* Datum      | Wer | Änderungsgrund
-* -------------------------------------------------------------------
-* 07.11.2005 | BNK | Erstellung
-* 10.11.2005 | BNK | getestet und debuggt
-* -------------------------------------------------------------------
-*
-* @author Matthias Benkmann (D-III-ITD 5.1)
-* @version 1.0
-* 
-*/
+ *
+ * Änderungshistorie:
+ * Datum      | Wer | Änderungsgrund
+ * -------------------------------------------------------------------
+ * 07.11.2005 | BNK | Erstellung
+ * 10.11.2005 | BNK | getestet und debuggt
+ * -------------------------------------------------------------------
+ *
+ * @author Matthias Benkmann (D-III-ITD 5.1)
+ * @version 1.0
+ * 
+ */
 package de.muenchen.allg.itd51.wollmux.db;
 
 import java.net.URL;
@@ -49,61 +49,90 @@ import de.muenchen.allg.itd51.wollmux.TimeoutException;
 
 /**
  * Datasource, die die Vereinigung 2er Datasources darstellt
+ * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class UnionDatasource implements Datasource
 {
   private Datasource source1;
+
   private Datasource source2;
+
   private String source1Name;
+
   private String source2Name;
+
   private Set<String> schema;
+
   private String name;
-  
+
   /**
    * Erzeugt eine neue UnionDatasource.
-   * @param nameToDatasource enthält alle bis zum Zeitpunkt der Definition
-   *        dieser UnionDatasource bereits vollständig instanziierten
-   *        Datenquellen.
-   * @param sourceDesc der "Datenquelle"-Knoten, der die Beschreibung
-   *        dieser UnionDatasource enthält.
-   * @param context der Kontext relativ zu dem URLs aufgelöst werden sollen
-   *        (zur Zeit nicht verwendet).
+   * 
+   * @param nameToDatasource
+   *          enthält alle bis zum Zeitpunkt der Definition dieser UnionDatasource
+   *          bereits vollständig instanziierten Datenquellen.
+   * @param sourceDesc
+   *          der "Datenquelle"-Knoten, der die Beschreibung dieser UnionDatasource
+   *          enthält.
+   * @param context
+   *          der Kontext relativ zu dem URLs aufgelöst werden sollen (zur Zeit nicht
+   *          verwendet).
    */
-  public UnionDatasource(Map nameToDatasource, ConfigThingy sourceDesc, URL context)
-  throws ConfigurationErrorException
+  public UnionDatasource(Map<String, Datasource> nameToDatasource,
+      ConfigThingy sourceDesc, URL context) throws ConfigurationErrorException
   {
-    try{ name = sourceDesc.get("NAME").toString();} 
-    catch(NodeNotFoundException x) {
+    try
+    {
+      name = sourceDesc.get("NAME").toString();
+    }
+    catch (NodeNotFoundException x)
+    {
       throw new ConfigurationErrorException(L.m("NAME der Datenquelle fehlt"));
     }
-    
-    try{ source1Name = sourceDesc.get("SOURCE1").toString();} 
-    catch(NodeNotFoundException x) {
-      throw new ConfigurationErrorException(L.m("SOURCE1 der Datenquelle \"%1\" fehlt", name));
+
+    try
+    {
+      source1Name = sourceDesc.get("SOURCE1").toString();
     }
-    
-    try{ source2Name = sourceDesc.get("SOURCE2").toString();} 
-    catch(NodeNotFoundException x) {
-      throw new ConfigurationErrorException(L.m("SOURCE2 der Datenquelle \"%1\" fehlt", name));
+    catch (NodeNotFoundException x)
+    {
+      throw new ConfigurationErrorException(L.m(
+        "SOURCE1 der Datenquelle \"%1\" fehlt", name));
     }
-    
-    source1 = (Datasource)nameToDatasource.get(source1Name);  
-    source2 = (Datasource)nameToDatasource.get(source2Name);
-    
+
+    try
+    {
+      source2Name = sourceDesc.get("SOURCE2").toString();
+    }
+    catch (NodeNotFoundException x)
+    {
+      throw new ConfigurationErrorException(L.m(
+        "SOURCE2 der Datenquelle \"%1\" fehlt", name));
+    }
+
+    source1 = nameToDatasource.get(source1Name);
+    source2 = nameToDatasource.get(source2Name);
+
     if (source1 == null)
-      throw new ConfigurationErrorException(L.m("Fehler bei Initialisierung von Datenquelle \"%1\": Referenzierte Datenquelle \"%2\" nicht (oder fehlerhaft) definiert", name, source1Name));
-    
+      throw new ConfigurationErrorException(
+        L.m(
+          "Fehler bei Initialisierung von Datenquelle \"%1\": Referenzierte Datenquelle \"%2\" nicht (oder fehlerhaft) definiert",
+          name, source1Name));
+
     if (source2 == null)
-      throw new ConfigurationErrorException(L.m("Fehler bei Initialisierung von Datenquelle \"%1\": Referenzierte Datenquelle \"%2\" nicht (oder fehlerhaft) definiert", name, source2Name));
+      throw new ConfigurationErrorException(
+        L.m(
+          "Fehler bei Initialisierung von Datenquelle \"%1\": Referenzierte Datenquelle \"%2\" nicht (oder fehlerhaft) definiert",
+          name, source2Name));
 
     /*
-     * Anmerkung: Die folgende Bedingung ist "unnötig" streng, aber um
-     * sie aufzuweichen (z.B. Gesamtschema ist Vereinigung der Schemata)
-     * wäre es erforderlich, einen Dataset-Wrapper zu implementieren,
-     * der dafür sorgt, dass alle Datasets, die in QueryResults zurück-
-     * geliefert werden das selbe Schema haben. Solange dafür keine
-     * Notwendigkeit ersichtlich ist, spare ich mir diesen Aufwand.
+     * Anmerkung: Die folgende Bedingung ist "unnötig" streng, aber um sie
+     * aufzuweichen (z.B. Gesamtschema ist Vereinigung der Schemata) wäre es
+     * erforderlich, einen Dataset-Wrapper zu implementieren, der dafür sorgt, dass
+     * alle Datasets, die in QueryResults zurück- geliefert werden das selbe Schema
+     * haben. Solange dafür keine Notwendigkeit ersichtlich ist, spare ich mir diesen
+     * Aufwand.
      */
     Set<String> schema1 = source1.getSchema();
     Set<String> schema2 = source2.getSchema();
@@ -127,9 +156,12 @@ public class UnionDatasource implements Datasource
         buf2.append(iter.next());
         if (iter.hasNext()) buf2.append(", ");
       }
-      throw new ConfigurationErrorException(L.m("Datenquelle \"%1\" fehlen die Spalten: %2 und Datenquelle \"%3\" fehlen die Spalten: %4", source1Name, buf2, source2Name, buf1));
+      throw new ConfigurationErrorException(
+        L.m(
+          "Datenquelle \"%1\" fehlen die Spalten: %2 und Datenquelle \"%3\" fehlen die Spalten: %4",
+          source1Name, buf2, source2Name, buf1));
     }
-    
+
     schema = new HashSet<String>(schema1);
   }
 
@@ -138,31 +170,40 @@ public class UnionDatasource implements Datasource
     return schema;
   }
 
-  public QueryResults getDatasetsByKey(Collection<String> keys, long timeout) throws TimeoutException
+  public QueryResults getDatasetsByKey(Collection<String> keys, long timeout)
+      throws TimeoutException
   {
     long time = new Date().getTime();
     QueryResults res1 = source1.getDatasetsByKey(keys, timeout);
     time = (new Date().getTime()) - time;
     timeout -= time;
-    if (timeout <= 0) throw new TimeoutException(L.m("Datenquelle \"%1\" konnte Anfrage getDatasetsByKey() nicht schnell genug beantworten", source1Name));
+    if (timeout <= 0)
+      throw new TimeoutException(
+        L.m(
+          "Datenquelle \"%1\" konnte Anfrage getDatasetsByKey() nicht schnell genug beantworten",
+          source1Name));
     QueryResults res2 = source2.getDatasetsByKey(keys, timeout);
-    return new QueryResultsUnion(res1,res2);
+    return new QueryResultsUnion(res1, res2);
   }
-  
+
   public QueryResults getContents(long timeout) throws TimeoutException
   {
     return new QueryResultsList(new Vector<Dataset>(0));
   }
 
-  public QueryResults find(List<QueryPart> query, long timeout) throws TimeoutException
+  public QueryResults find(List<QueryPart> query, long timeout)
+      throws TimeoutException
   {
     long time = new Date().getTime();
     QueryResults res1 = source1.find(query, timeout);
     time = (new Date().getTime()) - time;
     timeout -= time;
-    if (timeout <= 0) throw new TimeoutException(L.m("Datenquelle \"%1\" konnte Anfrage find() nicht schnell genug beantworten", source1Name));
+    if (timeout <= 0)
+      throw new TimeoutException(L.m(
+        "Datenquelle \"%1\" konnte Anfrage find() nicht schnell genug beantworten",
+        source1Name));
     QueryResults res2 = source2.find(query, timeout);
-    return new QueryResultsUnion(res1,res2);
+    return new QueryResultsUnion(res1, res2);
   }
 
   public String getName()
