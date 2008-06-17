@@ -135,14 +135,13 @@ public class FunctionFactory
       throws ConfigurationErrorException
   {
     Vector<Function> andFunction = new Vector<Function>();
-    Iterator iter1 = conf.iterator();
+    Iterator<ConfigThingy> iter1 = conf.iterator();
     while (iter1.hasNext())
     {
-      Iterator iter = ((ConfigThingy) iter1.next()).iterator();
+      Iterator<ConfigThingy> iter = iter1.next().iterator();
       while (iter.hasNext())
       {
-        Function cons = parse((ConfigThingy) iter.next(), funcLib, dialogLib,
-          context);
+        Function cons = parse(iter.next(), funcLib, dialogLib, context);
 
         andFunction.add(cons);
       }
@@ -183,10 +182,10 @@ public class FunctionFactory
       throws ConfigurationErrorException
   {
     Vector<Function> andFunction = new Vector<Function>();
-    Iterator iter = conf.iterator();
+    Iterator<ConfigThingy> iter = conf.iterator();
     while (iter.hasNext())
     {
-      Function cons = parse((ConfigThingy) iter.next(), funcLib, dialogLib, context);
+      Function cons = parse(iter.next(), funcLib, dialogLib, context);
       andFunction.add(cons);
     }
 
@@ -348,11 +347,11 @@ public class FunctionFactory
     if (name.length() == 0)
       throw new ConfigurationErrorException(
         L.m("Öffnende Klammer ohne voranstehenden Funktionsnamen gefunden. ")
-            + outputErrorPosition(conf));
+          + outputErrorPosition(conf));
     else
       throw new ConfigurationErrorException(L.m(
         "\"%1\" ist keine unterstützte Grundfunktion. ", name)
-                                            + outputErrorPosition(conf));
+        + outputErrorPosition(conf));
   }
 
   /**
@@ -471,12 +470,12 @@ public class FunctionFactory
       elseConf.add("ELSE").add("");
     }
 
-    Iterator iter = conf.iterator();
+    Iterator<ConfigThingy> iter = conf.iterator();
     ConfigThingy condition;
     do
     { // oben wurde überprüft, dass es genau einen Knoten gibt, der nicht ELSE oder
       // THEN ist
-      condition = (ConfigThingy) iter.next();
+      condition = iter.next();
     } while (condition.getName().equals("THEN") || condition.equals("ELSE"));
 
     Function ifFun = parse(condition, funcLib, dialogLib, context);
@@ -499,10 +498,10 @@ public class FunctionFactory
     Function reFun;
     Function repFun;
 
-    Iterator iter = conf.iterator();
-    strFun = parse((ConfigThingy) iter.next(), funcLib, dialogLib, context);
-    reFun = parse((ConfigThingy) iter.next(), funcLib, dialogLib, context);
-    repFun = parse((ConfigThingy) iter.next(), funcLib, dialogLib, context);
+    Iterator<ConfigThingy> iter = conf.iterator();
+    strFun = parse(iter.next(), funcLib, dialogLib, context);
+    reFun = parse(iter.next(), funcLib, dialogLib, context);
+    repFun = parse(iter.next(), funcLib, dialogLib, context);
 
     String regex = reFun.getString(noValues);
     Pattern p;
@@ -585,10 +584,10 @@ public class FunctionFactory
     Function byFun = null;
     int minScale = 0;
     int maxScale = -1;
-    Iterator iter = conf.iterator();
+    Iterator<ConfigThingy> iter = conf.iterator();
     while (iter.hasNext())
     {
-      ConfigThingy funConf = (ConfigThingy) iter.next();
+      ConfigThingy funConf = iter.next();
       String name = funConf.getName();
       if (name.equals("BY"))
       {
@@ -614,8 +613,7 @@ public class FunctionFactory
           }
         }
         catch (Exception x)
-        {
-        }
+        {}
 
         if (num < 0)
           throw new ConfigurationErrorException(L.m(
@@ -636,8 +634,7 @@ public class FunctionFactory
           }
         }
         catch (Exception x)
-        {
-        }
+        {}
 
         if (num < 0)
           throw new ConfigurationErrorException(L.m(
@@ -725,7 +722,8 @@ public class FunctionFactory
 
   private static class BindFunction implements Function
   {
-    private Map<String, Function> mapParamNameToSetFunction = new HashMap<String, Function>();
+    private Map<String, Function> mapParamNameToSetFunction =
+      new HashMap<String, Function>();
 
     private Function func;
 
@@ -743,10 +741,10 @@ public class FunctionFactory
       Set<String> setFuncParams = new HashSet<String>();
 
       ConfigThingy sets = conf.query("SET");
-      Iterator iter = sets.iterator();
+      Iterator<ConfigThingy> iter = sets.iterator();
       while (iter.hasNext())
       {
-        ConfigThingy set = (ConfigThingy) iter.next();
+        ConfigThingy set = iter.next();
         if (set.count() != 2)
           throw new ConfigurationErrorException(
             L.m("BIND: SET benötigt genau 2 Parameter"));
@@ -957,8 +955,7 @@ public class FunctionFactory
     }
 
     public void getFunctionDialogReferences(Collection<String> set)
-    {
-    }
+    {}
 
     public String getString(Values parameters)
     {
@@ -984,8 +981,7 @@ public class FunctionFactory
     }
 
     public void getFunctionDialogReferences(Collection<String> set)
-    {
-    }
+    {}
 
     public StringLiteralFunction(String str)
     {
@@ -1020,8 +1016,7 @@ public class FunctionFactory
     }
 
     public void getFunctionDialogReferences(Collection<String> set)
-    {
-    }
+    {}
 
     public String getString(Values parameters)
     {
@@ -1139,10 +1134,10 @@ public class FunctionFactory
         throws ConfigurationErrorException
     {
       Vector<Function> subFunction = new Vector<Function>(conf.count());
-      Iterator iter = conf.iterator();
+      Iterator<ConfigThingy> iter = conf.iterator();
       while (iter.hasNext())
       {
-        ConfigThingy subFunConf = (ConfigThingy) iter.next();
+        ConfigThingy subFunConf = iter.next();
         if (handleParam(subFunConf, funcLib, dialogLib, context)) continue;
         Function fun = parse(subFunConf, funcLib, dialogLib, context);
         subFunction.add(fun);
@@ -1194,7 +1189,7 @@ public class FunctionFactory
     private void init(Collection<Function> subFunction)
     {
       this.subFunction = subFunction;
-      
+
       // Ein Set wäre performanter, aber so wird die Reihenfolge beibehalten. Evtl.
       // macht es Sinn, auch die anderen Function-Klassen, die im Moment Sets
       // verwenden auf das Konstrukt mit Liste und contains()-Test umzustellen und
@@ -1500,11 +1495,11 @@ public class FunctionFactory
       super(conf, funcLib, dialogLib, context);
       try
       {
-        decimalPoint = ((DecimalFormat) NumberFormat.getInstance()).getDecimalFormatSymbols().getDecimalSeparator();
+        decimalPoint =
+          ((DecimalFormat) NumberFormat.getInstance()).getDecimalFormatSymbols().getDecimalSeparator();
       }
       catch (Exception x)
-      {
-      }
+      {}
       ;
     }
 
@@ -1996,11 +1991,11 @@ public class FunctionFactory
       char decimalPoint = '.';
       try
       {
-        decimalPoint = ((DecimalFormat) NumberFormat.getInstance()).getDecimalFormatSymbols().getDecimalSeparator();
+        decimalPoint =
+          ((DecimalFormat) NumberFormat.getInstance()).getDecimalFormatSymbols().getDecimalSeparator();
       }
       catch (Exception x)
-      {
-      }
+      {}
       ;
 
       String dividend = dividendFunction.getString(parameters);
@@ -2088,8 +2083,7 @@ public class FunctionFactory
     }
 
     public void getFunctionDialogReferences(Collection<String> set)
-    {
-    }
+    {}
 
     public String getString(Values parameters)
     {
@@ -2112,13 +2106,13 @@ public class FunctionFactory
       System.out.print((i == 0 ? "" : ", ") + args[i] + "=");
       if (vals.hasValue(args[i]))
         System.out.print("\"" + vals.getString(args[i]) + "\"" + "("
-                         + vals.getBoolean(args[i]) + ")");
+          + vals.getBoolean(args[i]) + ")");
       else
         System.out.print("n/a");
     }
     System.out.println();
     System.out.println("Funktionsergebnis: \"" + func.getString(vals) + "\"("
-                       + func.getBoolean(vals) + ")");
+      + func.getBoolean(vals) + ")");
   }
 
   public static void main(String[] args) throws Exception
@@ -2144,38 +2138,37 @@ public class FunctionFactory
 
       public void show(ActionListener dialogEndListener, FunctionLibrary funcLib,
           DialogLibrary dialogLib)
-      {
-      }
+      {}
 
-      public Collection getSchema()
+      public Collection<String> getSchema()
       {
-        return new Vector(0);
+        return new Vector<String>(0);
       }
     });
 
     printFunction("alwaysTrueFunction()", alwaysTrueFunction(), noValues);
 
     String funcStr = "BAR('true' 'false' 'true')";
-    ConfigThingy funcThingy = new ConfigThingy("FOO", new URL("file:///"),
-      new StringReader(funcStr));
+    ConfigThingy funcThingy =
+      new ConfigThingy("FOO", new URL("file:///"), new StringReader(funcStr));
     printFunction(funcStr, parseGrandchildren(funcThingy, funcLib, dialogLib,
       context), noValues);
 
     funcStr = "BAR('true' 'true' 'true')";
-    funcThingy = new ConfigThingy("FOO", new URL("file:///"), new StringReader(
-      funcStr));
+    funcThingy =
+      new ConfigThingy("FOO", new URL("file:///"), new StringReader(funcStr));
     printFunction(funcStr, parseGrandchildren(funcThingy, funcLib, dialogLib,
       context), noValues);
 
     funcStr = "AND('true' 'false' 'true')";
-    funcThingy = new ConfigThingy("BAR", new URL("file:///"), new StringReader(
-      funcStr));
+    funcThingy =
+      new ConfigThingy("BAR", new URL("file:///"), new StringReader(funcStr));
     printFunction(funcStr, parseChildren(funcThingy, funcLib, dialogLib, context),
       noValues);
 
     funcStr = "OR('true' 'false' 'true')";
-    funcThingy = new ConfigThingy("BAR", new URL("file:///"), new StringReader(
-      funcStr));
+    funcThingy =
+      new ConfigThingy("BAR", new URL("file:///"), new StringReader(funcStr));
     printFunction(funcStr, parseChildren(funcThingy, funcLib, dialogLib, context),
       noValues);
 
@@ -2189,143 +2182,147 @@ public class FunctionFactory
     values.put("TextMaennl", "(männl.)");
 
     funcStr = "OR(VALUE('Fehler') VALUE('LegtEier') VALUE('GibtMilch'))";
-    funcThingy = new ConfigThingy("BAR", new URL("file:///"), new StringReader(
-      funcStr));
+    funcThingy =
+      new ConfigThingy("BAR", new URL("file:///"), new StringReader(funcStr));
     printFunction(funcStr, parseChildren(funcThingy, funcLib, dialogLib, context),
       values);
 
     funcStr = "AND(VALUE('LegtEier') VALUE('Fehler'))";
-    funcThingy = new ConfigThingy("BAR", new URL("file:///"), new StringReader(
-      funcStr));
+    funcThingy =
+      new ConfigThingy("BAR", new URL("file:///"), new StringReader(funcStr));
     printFunction(funcStr, parseChildren(funcThingy, funcLib, dialogLib, context),
       values);
 
     funcStr = "NOT(VALUE('GibtMilch'))";
-    funcThingy = new ConfigThingy("BAR", new URL("file:///"), new StringReader(
-      funcStr));
+    funcThingy =
+      new ConfigThingy("BAR", new URL("file:///"), new StringReader(funcStr));
     printFunction(funcStr, parseChildren(funcThingy, funcLib, dialogLib, context),
       values);
 
     funcStr = "MATCH(VALUE('Name'),'llMux')";
-    funcThingy = new ConfigThingy("BAR", new URL("file:///"), new StringReader(
-      funcStr));
+    funcThingy =
+      new ConfigThingy("BAR", new URL("file:///"), new StringReader(funcStr));
     printFunction(funcStr, parseChildren(funcThingy, funcLib, dialogLib, context),
       values);
 
     funcStr = "REPLACE(CAT(VALUE('Name') '%n' 'Mux'),'Mux\\p{Space}Mux', 'Max')";
-    funcThingy = new ConfigThingy("BAR", new URL("file:///"), new StringReader(
-      funcStr));
+    funcThingy =
+      new ConfigThingy("BAR", new URL("file:///"), new StringReader(funcStr));
     printFunction(funcStr, parseChildren(funcThingy, funcLib, dialogLib, context),
       values);
 
     funcStr = "MATCH(VALUE('Name'),'.*llMux.*')";
-    funcThingy = new ConfigThingy("BAR", new URL("file:///"), new StringReader(
-      funcStr));
+    funcThingy =
+      new ConfigThingy("BAR", new URL("file:///"), new StringReader(funcStr));
     printFunction(funcStr, parseChildren(funcThingy, funcLib, dialogLib, context),
       values);
 
-    funcStr = "EXTERN(URL 'vnd.sun.star.script:WollMux.Trafo.MannOderFrau?language=Basic&location=application' PARAMS('Anrede', 'TextWeibl', 'TextMaennl'))";
-    funcThingy = new ConfigThingy("BAR", new URL("file:///"), new StringReader(
-      funcStr));
+    funcStr =
+      "EXTERN(URL 'vnd.sun.star.script:WollMux.Trafo.MannOderFrau?language=Basic&location=application' PARAMS('Anrede', 'TextWeibl', 'TextMaennl'))";
+    funcThingy =
+      new ConfigThingy("BAR", new URL("file:///"), new StringReader(funcStr));
     printFunction(funcStr, parseChildren(funcThingy, funcLib, dialogLib, context),
       values);
 
-    funcStr = "EXTERN(URL 'java:de.muenchen.allg.itd51.wollmux.func.Standard.herrFrauText' PARAMS('Anrede', 'TextWeibl', 'TextMaennl'))";
-    funcThingy = new ConfigThingy("BAR", new URL("file:///"), new StringReader(
-      funcStr));
+    funcStr =
+      "EXTERN(URL 'java:de.muenchen.allg.itd51.wollmux.func.Standard.herrFrauText' PARAMS('Anrede', 'TextWeibl', 'TextMaennl'))";
+    funcThingy =
+      new ConfigThingy("BAR", new URL("file:///"), new StringReader(funcStr));
     Function func = parseChildren(funcThingy, funcLib, dialogLib, context);
     funcLib.add("AnredeText", func);
     values.put("Anrede", "Frau");
     printFunction(funcStr, func, values);
 
-    funcStr = "BIND( FUNCTION('AnredeText') SET('TextWeibl' 'die') SET('TextMaennl' 'der' ) SET('Anrede' VALUE('SGAnrede')))";
-    funcThingy = new ConfigThingy("BAR", new URL("file:///"), new StringReader(
-      funcStr));
+    funcStr =
+      "BIND( FUNCTION('AnredeText') SET('TextWeibl' 'die') SET('TextMaennl' 'der' ) SET('Anrede' VALUE('SGAnrede')))";
+    funcThingy =
+      new ConfigThingy("BAR", new URL("file:///"), new StringReader(funcStr));
     values.put("SGAnrede", "Herr");
     printFunction(funcStr, parseChildren(funcThingy, funcLib, dialogLib, context),
       values);
 
-    funcStr = "BIND( FUNCTION('AnredeText') SET('TextWeibl' 'die') SET('TextMaennl' 'der' ) SET('Anrede' VALUE('Fehler')))";
-    funcThingy = new ConfigThingy("BAR", new URL("file:///"), new StringReader(
-      funcStr));
+    funcStr =
+      "BIND( FUNCTION('AnredeText') SET('TextWeibl' 'die') SET('TextMaennl' 'der' ) SET('Anrede' VALUE('Fehler')))";
+    funcThingy =
+      new ConfigThingy("BAR", new URL("file:///"), new StringReader(funcStr));
     printFunction(funcStr, parseChildren(funcThingy, funcLib, dialogLib, context),
       values);
 
     funcStr = "CAT('1' '2' '3')";
-    funcThingy = new ConfigThingy("BAR", new URL("file:///"), new StringReader(
-      funcStr));
+    funcThingy =
+      new ConfigThingy("BAR", new URL("file:///"), new StringReader(funcStr));
     printFunction(funcStr, parseChildren(funcThingy, funcLib, dialogLib, context),
       values);
 
     funcStr = "CAT('1' VALUE('Fehler') '3')";
-    funcThingy = new ConfigThingy("BAR", new URL("file:///"), new StringReader(
-      funcStr));
+    funcThingy =
+      new ConfigThingy("BAR", new URL("file:///"), new StringReader(funcStr));
     printFunction(funcStr, parseChildren(funcThingy, funcLib, dialogLib, context),
       values);
 
     funcStr = "SELECT('' '1' VALUE('Fehler') '3')";
-    funcThingy = new ConfigThingy("BAR", new URL("file:///"), new StringReader(
-      funcStr));
+    funcThingy =
+      new ConfigThingy("BAR", new URL("file:///"), new StringReader(funcStr));
     printFunction(funcStr, parseChildren(funcThingy, funcLib, dialogLib, context),
       values);
 
     funcStr = "SELECT('' VALUE('Fehler') '3')";
-    funcThingy = new ConfigThingy("BAR", new URL("file:///"), new StringReader(
-      funcStr));
+    funcThingy =
+      new ConfigThingy("BAR", new URL("file:///"), new StringReader(funcStr));
     printFunction(funcStr, parseChildren(funcThingy, funcLib, dialogLib, context),
       values);
 
     funcStr = "SELECT('' '')";
-    funcThingy = new ConfigThingy("BAR", new URL("file:///"), new StringReader(
-      funcStr));
+    funcThingy =
+      new ConfigThingy("BAR", new URL("file:///"), new StringReader(funcStr));
     printFunction(funcStr, parseChildren(funcThingy, funcLib, dialogLib, context),
       values);
 
     funcStr = "IF(THEN 'then' VALUE('Fehler') ELSE 'else')";
-    funcThingy = new ConfigThingy("BAR", new URL("file:///"), new StringReader(
-      funcStr));
+    funcThingy =
+      new ConfigThingy("BAR", new URL("file:///"), new StringReader(funcStr));
     printFunction(funcStr, parseChildren(funcThingy, funcLib, dialogLib, context),
       values);
 
     funcStr = "IF(THEN 'then' VALUE('LegtEier') ELSE 'else')";
-    funcThingy = new ConfigThingy("BAR", new URL("file:///"), new StringReader(
-      funcStr));
+    funcThingy =
+      new ConfigThingy("BAR", new URL("file:///"), new StringReader(funcStr));
     printFunction(funcStr, parseChildren(funcThingy, funcLib, dialogLib, context),
       values);
 
     funcStr = "IF(VALUE('GibtMilch') THEN 'then'  ELSE 'else')";
-    funcThingy = new ConfigThingy("BAR", new URL("file:///"), new StringReader(
-      funcStr));
+    funcThingy =
+      new ConfigThingy("BAR", new URL("file:///"), new StringReader(funcStr));
     printFunction(funcStr, parseChildren(funcThingy, funcLib, dialogLib, context),
       values);
 
     funcStr = "IF(VALUE('GibtMilch') THEN 'then')";
-    funcThingy = new ConfigThingy("BAR", new URL("file:///"), new StringReader(
-      funcStr));
+    funcThingy =
+      new ConfigThingy("BAR", new URL("file:///"), new StringReader(funcStr));
     printFunction(funcStr, parseChildren(funcThingy, funcLib, dialogLib, context),
       values);
 
     funcStr = "IF(VALUE('LegtEier') ELSE 'else')";
-    funcThingy = new ConfigThingy("BAR", new URL("file:///"), new StringReader(
-      funcStr));
+    funcThingy =
+      new ConfigThingy("BAR", new URL("file:///"), new StringReader(funcStr));
     printFunction(funcStr, parseChildren(funcThingy, funcLib, dialogLib, context),
       values);
 
     funcStr = "DIALOG('Empfaenger', 'Strasse')";
-    funcThingy = new ConfigThingy("BAR", new URL("file:///"), new StringReader(
-      funcStr));
+    funcThingy =
+      new ConfigThingy("BAR", new URL("file:///"), new StringReader(funcStr));
     printFunction(funcStr, parseChildren(funcThingy, funcLib, dialogLib, context),
       values);
 
     funcStr = "DIALOG('Empfaenger', 'Fehler')";
-    funcThingy = new ConfigThingy("BAR", new URL("file:///"), new StringReader(
-      funcStr));
+    funcThingy =
+      new ConfigThingy("BAR", new URL("file:///"), new StringReader(funcStr));
     printFunction(funcStr, parseChildren(funcThingy, funcLib, dialogLib, context),
       values);
 
     funcStr = "AND()";
-    funcThingy = new ConfigThingy("BAR", new URL("file:///"), new StringReader(
-      funcStr));
+    funcThingy =
+      new ConfigThingy("BAR", new URL("file:///"), new StringReader(funcStr));
     printFunction(funcStr, parseChildren(funcThingy, funcLib, dialogLib, context),
       values);
 

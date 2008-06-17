@@ -41,7 +41,7 @@ import de.muenchen.allg.itd51.wollmux.XPrintModel;
  * 
  * @author christoph.lutz
  */
-public class PrintFunction implements Comparable
+public class PrintFunction implements Comparable<PrintFunction>
 {
 
   private ExternalFunction func = null;
@@ -126,9 +126,9 @@ public class PrintFunction implements Comparable
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  public int compareTo(Object otherPrintFunction)
+  public int compareTo(PrintFunction otherPrintFunction)
   {
-    PrintFunction other = (PrintFunction) otherPrintFunction;
+    PrintFunction other = otherPrintFunction;
     if (this.order != other.order) return (this.order < other.order) ? -1 : 1;
     return this.functionName.compareTo(other.functionName);
   }
