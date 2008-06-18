@@ -286,8 +286,7 @@ public class SachleitendeVerfuegungenDruckdialog
             createGUI(fensterDesc.getLastChild());
           }
           catch (Exception x)
-          {
-          }
+          {}
         }
       });
     }
@@ -325,8 +324,7 @@ public class SachleitendeVerfuegungenDruckdialog
     public String toString()
     {
       return "VerfuegungspunktInfo(verfPunkt=" + verfPunktNr + ", copyCount="
-             + copyCount + ", isDraft=" + isDraft + ", isOriginal=" + isOriginal
-             + ")";
+        + copyCount + ", isDraft=" + isDraft + ", isOriginal=" + isOriginal + ")";
     }
   }
 
@@ -362,24 +360,24 @@ public class SachleitendeVerfuegungenDruckdialog
     for (int i = 0; i < size; ++i)
     {
       Verfuegungspunkt verfPunkt = verfuegungspunkte.get(i);
-      Vector zuleitungszeilen = verfPunkt.getZuleitungszeilen();
+      Vector<String> zuleitungszeilen = verfPunkt.getZuleitungszeilen();
 
       // elementComboBoxes vorbelegen:
       Vector<String> content = new Vector<String>();
       content.add(cutContent(verfPunkt.getHeading()));
       if (zuleitungszeilen.size() > 0)
         content.add(cutContent(L.m("------- Zuleitung an --------")));
-      Iterator iter = zuleitungszeilen.iterator();
+      Iterator<String> iter = zuleitungszeilen.iterator();
       while (iter.hasNext())
       {
-        String zuleitung = (String) iter.next();
+        String zuleitung = iter.next();
         content.add(cutContent(zuleitung));
       }
       elementComboBoxes[i] = new JComboBox(content);
 
       // elementCountComboBoxes vorbelegen:
-      SpinnerNumberModel model = new SpinnerNumberModel(
-        verfPunkt.getNumberOfCopies(), 0, 50, 1);
+      SpinnerNumberModel model =
+        new SpinnerNumberModel(verfPunkt.getNumberOfCopies(), 0, 50, 1);
       elementCountSpinner[i] = new JSpinner(model);
 
       // printElementButtons vorbelegen:
@@ -392,16 +390,14 @@ public class SachleitendeVerfuegungenDruckdialog
       title = fensterDesc.get("TITLE").toString();
     }
     catch (Exception x)
-    {
-    }
+    {}
 
     try
     {
       closeAction = getAction(fensterDesc.get("CLOSEACTION").toString());
     }
     catch (Exception x)
-    {
-    }
+    {}
 
     // Create and set up the window.
     myFrame = new JFrame(title);
@@ -428,9 +424,10 @@ public class SachleitendeVerfuegungenDruckdialog
     }
 
     // separator zwischen Verfügungspunkte und Summenzeile hinzufügen
-    GridBagConstraints gbcSeparator = new GridBagConstraints(0, 0,
-      GridBagConstraints.REMAINDER, 1, 1.0, 0.0, GridBagConstraints.CENTER,
-      GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0);
+    GridBagConstraints gbcSeparator =
+      new GridBagConstraints(0, 0, GridBagConstraints.REMAINDER, 1, 1.0, 0.0,
+        GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 0,
+          0, 0), 0, 0);
     JPanel uiElement = new JPanel(new GridLayout(1, 1));
     uiElement.add(new JSeparator(SwingConstants.HORIZONTAL));
     uiElement.setBorder(BorderFactory.createEmptyBorder(SEP_BORDER, 0, SEP_BORDER, 0));
@@ -486,39 +483,44 @@ public class SachleitendeVerfuegungenDruckdialog
     // GridBagConstraints gbcTextfield = new GridBagConstraints(0, 0, 1, 1, 1.0,
     // 0.0, GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL, new
     // Insets(TF_BORDER,TF_BORDER,TF_BORDER,TF_BORDER),0,0);
-    GridBagConstraints gbcLabel = new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0,
-      GridBagConstraints.LINE_START, GridBagConstraints.NONE, new Insets(TF_BORDER,
-        TF_BORDER, TF_BORDER, TF_BORDER), 0, 0);
-    GridBagConstraints gbcGlue = new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0,
-      GridBagConstraints.LINE_START, GridBagConstraints.BOTH,
-      new Insets(0, 0, 0, 0), 0, 0);
-    GridBagConstraints gbcButton = new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0,
-      GridBagConstraints.LINE_START, GridBagConstraints.NONE, new Insets(
-        BUTTON_BORDER, BUTTON_BORDER, BUTTON_BORDER, BUTTON_BORDER), 0, 0);
-    GridBagConstraints gbcComboBox = new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0,
-      GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(TF_BORDER,
-        TF_BORDER, TF_BORDER, TF_BORDER), 0, 0);
-    GridBagConstraints gbcTextField = new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0,
-      GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(TF_BORDER,
-        TF_BORDER, TF_BORDER, TF_BORDER), 0, 0);
-    GridBagConstraints gbcSpinner = new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0,
-      GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(TF_BORDER,
-        TF_BORDER, TF_BORDER, TF_BORDER), 0, 0);
+    GridBagConstraints gbcLabel =
+      new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.LINE_START,
+        GridBagConstraints.NONE, new Insets(TF_BORDER, TF_BORDER, TF_BORDER,
+          TF_BORDER), 0, 0);
+    GridBagConstraints gbcGlue =
+      new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.LINE_START,
+        GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0);
+    GridBagConstraints gbcButton =
+      new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.LINE_START,
+        GridBagConstraints.NONE, new Insets(BUTTON_BORDER, BUTTON_BORDER,
+          BUTTON_BORDER, BUTTON_BORDER), 0, 0);
+    GridBagConstraints gbcComboBox =
+      new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER,
+        GridBagConstraints.BOTH, new Insets(TF_BORDER, TF_BORDER, TF_BORDER,
+          TF_BORDER), 0, 0);
+    GridBagConstraints gbcTextField =
+      new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER,
+        GridBagConstraints.BOTH, new Insets(TF_BORDER, TF_BORDER, TF_BORDER,
+          TF_BORDER), 0, 0);
+    GridBagConstraints gbcSpinner =
+      new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER,
+        GridBagConstraints.BOTH, new Insets(TF_BORDER, TF_BORDER, TF_BORDER,
+          TF_BORDER), 0, 0);
 
     ConfigThingy felderParent = conf.query(key);
     int y = -stepy + yOffset;
     int x = -stepx;
 
-    Iterator piter = felderParent.iterator();
+    Iterator<ConfigThingy> piter = felderParent.iterator();
     while (piter.hasNext())
     {
-      Iterator iter = ((ConfigThingy) piter.next()).iterator();
+      Iterator<ConfigThingy> iter = piter.next().iterator();
       while (iter.hasNext())
       {
         y += stepy;
         x += stepx;
 
-        ConfigThingy uiElementDesc = (ConfigThingy) iter.next();
+        ConfigThingy uiElementDesc = iter.next();
         try
         {
           /*
@@ -534,8 +536,7 @@ public class SachleitendeVerfuegungenDruckdialog
             id = uiElementDesc.get("ID").toString();
           }
           catch (NodeNotFoundException e)
-          {
-          }
+          {}
           // try{ if (uiElementDesc.get("READONLY").toString().equals("true"))
           // readonly = true; }catch(NodeNotFoundException e){}
           String type = uiElementDesc.get("TYPE").toString();
@@ -568,12 +569,12 @@ public class SachleitendeVerfuegungenDruckdialog
             Box uiElement = Box.createHorizontalBox();
             try
             {
-              int minsize = Integer.parseInt(uiElementDesc.get("MINSIZE").toString());
+              int minsize =
+                Integer.parseInt(uiElementDesc.get("MINSIZE").toString());
               uiElement.add(Box.createHorizontalStrut(minsize));
             }
             catch (Exception e)
-            {
-            }
+            {}
             uiElement.add(Box.createHorizontalGlue());
 
             gbcGlue.gridx = x;
@@ -585,7 +586,7 @@ public class SachleitendeVerfuegungenDruckdialog
           {
             JSpinner spinner;
             if (id.equals("elementCount")
-                && verfPunktNr < elementCountSpinner.length)
+              && verfPunktNr < elementCountSpinner.length)
               spinner = elementCountSpinner[verfPunktNr];
             else
               spinner = new JSpinner(new SpinnerNumberModel(0, 0, 0, 0));
@@ -648,8 +649,7 @@ public class SachleitendeVerfuegungenDruckdialog
               action = uiElementDesc.get("ACTION").toString();
             }
             catch (NodeNotFoundException e)
-            {
-            }
+            {}
 
             String label = uiElementDesc.get("LABEL").toString();
 
@@ -659,15 +659,14 @@ public class SachleitendeVerfuegungenDruckdialog
               hotkey = uiElementDesc.get("HOTKEY").toString().charAt(0);
             }
             catch (Exception e)
-            {
-            }
+            {}
 
             // Bei printElement-Actions die vordefinierten Buttons verwenden,
             // ansonsten einen neuen erzeugen.
             JButton button = null;
 
             if (action.equalsIgnoreCase("printElement") && verfPunktNr >= 0
-                && verfPunktNr < printElementButtons.length)
+              && verfPunktNr < printElementButtons.length)
             {
               button = printElementButtons[verfPunktNr];
               button.setText(label);
@@ -815,8 +814,8 @@ public class SachleitendeVerfuegungenDruckdialog
     short numberOfCopies = 0;
     try
     {
-      numberOfCopies = new Short(
-        elementCountSpinner[verfPunkt - 1].getValue().toString()).shortValue();
+      numberOfCopies =
+        new Short(elementCountSpinner[verfPunkt - 1].getValue().toString()).shortValue();
     }
     catch (Exception e)
     {
@@ -838,16 +837,13 @@ public class SachleitendeVerfuegungenDruckdialog
   private class MyWindowListener implements WindowListener
   {
     public MyWindowListener()
-    {
-    }
+    {}
 
     public void windowActivated(WindowEvent e)
-    {
-    }
+    {}
 
     public void windowClosed(WindowEvent e)
-    {
-    }
+    {}
 
     public void windowClosing(WindowEvent e)
     {
@@ -855,27 +851,24 @@ public class SachleitendeVerfuegungenDruckdialog
     }
 
     public void windowDeactivated(WindowEvent e)
-    {
-    }
+    {}
 
     public void windowDeiconified(WindowEvent e)
-    {
-    }
+    {}
 
     public void windowIconified(WindowEvent e)
-    {
-    }
+    {}
 
     public void windowOpened(WindowEvent e)
-    {
-    }
+    {}
   }
 
   public static void main(String[] args) throws Exception
   {
     UNO.init();
     WollMuxSingleton.initialize(UNO.defaultContext);
-    List<VerfuegungspunktInfo> info = SachleitendeVerfuegung.callPrintDialog(UNO.XTextDocument(UNO.desktop.getCurrentComponent()));
+    List<VerfuegungspunktInfo> info =
+      SachleitendeVerfuegung.callPrintDialog(UNO.XTextDocument(UNO.desktop.getCurrentComponent()));
     for (VerfuegungspunktInfo v : info)
     {
       System.out.println(v);

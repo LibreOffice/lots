@@ -91,11 +91,9 @@ public class TextComponentTags
    * kann. Ein Match liefert in Gruppe 1 den Text vor dem Tag, in Gruppe 2 das Tag
    * mit Präfix und Suffix und in Gruppe 3 den Tag-Namen zurück.
    */
-  private final static Pattern TAG_PATTERN = Pattern.compile("([^(" + TAG_PREFIX
-                                                             + ")]*)(" + TAG_PREFIX
-                                                             + "([^(" + TAG_SUFFIX
-                                                             + ")]*)" + TAG_SUFFIX
-                                                             + ")");
+  private final static Pattern TAG_PATTERN =
+    Pattern.compile("([^(" + TAG_PREFIX + ")]*)(" + TAG_PREFIX + "([^(" + TAG_SUFFIX
+      + ")]*)" + TAG_SUFFIX + ")");
 
   /**
    * Farbe, mit dem der Hintergund eines Textfeldes im Dialog "Felder anpassen"
@@ -194,8 +192,8 @@ public class TextComponentTags
   public ConfigThingy getContent(int syntaxType)
   {
     if (syntaxType != CAT_VALUE_SYNTAX)
-      throw new IllegalArgumentException(L.m("Unbekannter syntaxType: %1",
-        "" + syntaxType));
+      throw new IllegalArgumentException(L.m("Unbekannter syntaxType: %1", ""
+        + syntaxType));
 
     ConfigThingy conf = new ConfigThingy("CAT");
     List<ContentElement> content = getContent();
@@ -230,17 +228,17 @@ public class TextComponentTags
   public void setContent(int syntaxType, ConfigThingy conf)
   {
     if (syntaxType != CAT_VALUE_SYNTAX)
-      throw new IllegalArgumentException(L.m("Unbekannter syntaxType: %1",
-        "" + syntaxType));
+      throw new IllegalArgumentException(L.m("Unbekannter syntaxType: %1", ""
+        + syntaxType));
 
     if (!conf.getName().equals("CAT"))
       throw new IllegalArgumentException(L.m("Oberster Knoten muss \"CAT\" sein"));
 
     StringBuilder buffy = new StringBuilder();
-    Iterator iter = conf.iterator();
+    Iterator<ConfigThingy> iter = conf.iterator();
     while (iter.hasNext())
     {
-      ConfigThingy subConf = (ConfigThingy) iter.next();
+      ConfigThingy subConf = iter.next();
       if (subConf.getName().equals("VALUE") && subConf.count() == 1)
       {
         // ACHTUNG! Änderungen hier müssen auch in insertTag() gemacht werden
@@ -367,8 +365,7 @@ public class TextComponentTags
       }
 
       public void focusGained(FocusEvent e)
-      {
-      }
+      {}
     });
   }
 
@@ -709,16 +706,15 @@ public class TextComponentTags
     {
       if (extraHighlightTag == null)
       {
-        Highlighter.HighlightPainter hp = new DefaultHighlighter.DefaultHighlightPainter(
-          new Color(0xddddff));
+        Highlighter.HighlightPainter hp =
+          new DefaultHighlighter.DefaultHighlightPainter(new Color(0xddddff));
         extraHighlightTag = hl.addHighlight(pos1, pos2, hp);
       }
       else
         hl.changeHighlight(extraHighlightTag, pos1, pos2);
     }
     catch (BadLocationException e1)
-    {
-    }
+    {}
   }
 
 }

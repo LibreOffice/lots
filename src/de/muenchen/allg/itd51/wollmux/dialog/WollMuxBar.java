@@ -383,9 +383,9 @@ public class WollMuxBar
    * Erzeugt eine neue WollMuxBar.
    * 
    * @param winMode
-   *            Anzeigemodus, z.B. {@link #UP_AND_AWAY_WINDOW_MODE}.
+   *          Anzeigemodus, z.B. {@link #UP_AND_AWAY_WINDOW_MODE}.
    * @param conf
-   *            der Inhalt der wollmux.conf
+   *          der Inhalt der wollmux.conf
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public WollMuxBar(int winMode, final ConfigThingy conf)
@@ -703,11 +703,11 @@ public class WollMuxBar
    * Streifen).
    * 
    * @param title
-   *            der Titel für das Fenster (nur für Anzeige in Taskleiste)
+   *          der Titel für das Fenster (nur für Anzeige in Taskleiste)
    * @param wmBarConf
-   *            ConfigThingy des Fenster/WollMuxBar-Abschnitts.
+   *          ConfigThingy des Fenster/WollMuxBar-Abschnitts.
    * @param upAndAwayWidth
-   *            breite des Streifens für Modus "UpAndAway"
+   *          breite des Streifens für Modus "UpAndAway"
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void setupMinimizedFrame(String title, ConfigThingy wmBarConf)
@@ -724,25 +724,25 @@ public class WollMuxBar
    * elementParent.
    * 
    * @param menuConf
-   *            die Kinder dieses ConfigThingys müssen "Menues"-Knoten sein, deren
-   *            Kinder Menübeschreibungen sind für die Menüs, die als UI Elemente
-   *            verwendet werden.
+   *          die Kinder dieses ConfigThingys müssen "Menues"-Knoten sein, deren
+   *          Kinder Menübeschreibungen sind für die Menüs, die als UI Elemente
+   *          verwendet werden.
    * @param elementParent
-   *            das Element, dessen Kinder die UI Elemente beschreiben.
+   *          das Element, dessen Kinder die UI Elemente beschreiben.
    * @param context
-   *            kann die Werte "menu" oder "panel" haben und gibt an, um was es sich
-   *            bei compo handelt. Abhängig vom context werden manche UI Elemente
-   *            anders interpretiert, z.B. werden "button" Elemente im context "menu"
-   *            zu JMenuItems.
+   *          kann die Werte "menu" oder "panel" haben und gibt an, um was es sich
+   *          bei compo handelt. Abhängig vom context werden manche UI Elemente
+   *          anders interpretiert, z.B. werden "button" Elemente im context "menu"
+   *          zu JMenuItems.
    * @param compo
-   *            die Komponente zu der die UI Elemente hinzugefügt werden sollen.
-   *            Falls context nicht "menu" ist, muss compo ein GridBagLayout haben.
+   *          die Komponente zu der die UI Elemente hinzugefügt werden sollen. Falls
+   *          context nicht "menu" ist, muss compo ein GridBagLayout haben.
    * @param stepx
-   *            stepx und stepy geben an, um wieviel mit jedem UI Element die x und
-   *            die y Koordinate innerhalb des GridBagLayouts erhöht werden sollen.
-   *            Sinnvoll sind hier normalerweise nur (0,1) und (1,0).
+   *          stepx und stepy geben an, um wieviel mit jedem UI Element die x und die
+   *          y Koordinate innerhalb des GridBagLayouts erhöht werden sollen.
+   *          Sinnvoll sind hier normalerweise nur (0,1) und (1,0).
    * @param stepy
-   *            siehe stepx
+   *          siehe stepx
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void addUIElements(ConfigThingy menuConf, ConfigThingy elementParent,
@@ -782,10 +782,10 @@ public class WollMuxBar
     UIElementFactory.Context contextMap =
       context.equals("menu") ? menuContext : panelContext;
 
-    Iterator piter = elementParent.iterator();
+    Iterator<ConfigThingy> piter = elementParent.iterator();
     while (piter.hasNext())
     {
-      ConfigThingy uiElementDesc = (ConfigThingy) piter.next();
+      ConfigThingy uiElementDesc = piter.next();
       y += stepy;
       x += stepx;
 
@@ -927,23 +927,22 @@ public class WollMuxBar
    * Parst eine Menübeschreibung und erzeugt ein entsprechendes Menü.
    * 
    * @param menu
-   *            das JMenu oder JPopupMenu zu dem die UI Elemente hinzugefügt werden
-   *            sollen.
+   *          das JMenu oder JPopupMenu zu dem die UI Elemente hinzugefügt werden
+   *          sollen.
    * @param menuConf
-   *            die Kinder dieses ConfigThingys müssen "Menues"-Knoten sein, deren
-   *            Kinder Menübeschreibungen sind.
+   *          die Kinder dieses ConfigThingys müssen "Menues"-Knoten sein, deren
+   *          Kinder Menübeschreibungen sind.
    * @param menuName
-   *            identifiziert das Menü aus menuConf, das geparst wird. Gibt es
-   *            mehrere, so wird das letzte verwendet.
+   *          identifiziert das Menü aus menuConf, das geparst wird. Gibt es mehrere,
+   *          so wird das letzte verwendet.
    * @param mapMenuNameToMenu
-   *            falls nicht-null, so wird falls bereits ein Eintrag menuName
-   *            enthalten ist, dieser zurückgeliefert, ansonsten wird ein Mapping von
-   *            menuName auf menu hinzugefügt. Falls null, so wird immer ein neues
-   *            Menü erzeugt, außer das menuName ist in alreadySeen, dann gibt es
-   *            eine Fehlermeldung.
+   *          falls nicht-null, so wird falls bereits ein Eintrag menuName enthalten
+   *          ist, dieser zurückgeliefert, ansonsten wird ein Mapping von menuName
+   *          auf menu hinzugefügt. Falls null, so wird immer ein neues Menü erzeugt,
+   *          außer das menuName ist in alreadySeen, dann gibt es eine Fehlermeldung.
    * @param alreadySeen
-   *            falls menuName hier enthalten ist und mapMenuNameToMenu==null dann
-   *            wird eine Fehlermeldung ausgegeben und null zurückgeliefert.
+   *          falls menuName hier enthalten ist und mapMenuNameToMenu==null dann wird
+   *          eine Fehlermeldung ausgegeben und null zurückgeliefert.
    * 
    * @return menu, falls das Menü erfolgreich aufgebaut werden konnte, null, wenn das
    *         Menü nicht in menuConf definiert ist oder wenn es in alreadySeen ist und
@@ -1182,7 +1181,7 @@ public class WollMuxBar
      */
     final ConfigThingy openConf = new ConfigThingy(conf); // Kopie machen, die
     // manipuliert werden darf.
-    Iterator iter;
+    Iterator<ConfigThingy> iter;
     try
     {
       iter = conf.get("Labels").iterator();
@@ -1262,7 +1261,7 @@ public class WollMuxBar
           Logger.error(L.m("Abschnitt \"Fragmente\" fehlt in OPEN-Angabe"));
           return;
         }
-        Iterator fragIter = fragConf.iterator();
+        Iterator<ConfigThingy> fragIter = fragConf.iterator();
         while (iter.hasNext() && fragIter.hasNext())
         {
           fragIter.next();
@@ -1378,9 +1377,9 @@ public class WollMuxBar
    * Setzt die Einträge aller Senderboxes neu.
    * 
    * @param entries
-   *            die Einträge, die die Senderboxen enthalten sollen.
+   *          die Einträge, die die Senderboxen enthalten sollen.
    * @param current
-   *            der ausgewählte Eintrag
+   *          der ausgewählte Eintrag
    * @author Matthias Benkmann, Christoph Lutz (D-III-ITD 5.1) TESTED
    */
   public void updateSenderboxes(String[] entries, String current)
@@ -1707,19 +1706,19 @@ public class WollMuxBar
    * {@link #mapExtToExternalApplication}.
    * 
    * @param conf
-   *            Knoten, dessen Kinder "ExterneAnwendungen" Knoten sein müssen.
+   *          Knoten, dessen Kinder "ExterneAnwendungen" Knoten sein müssen.
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private void parseExternalApplications(ConfigThingy conf)
   {
-    Iterator parentIter = conf.iterator();
+    Iterator<ConfigThingy> parentIter = conf.iterator();
     while (parentIter.hasNext())
     {
-      ConfigThingy parentConf = (ConfigThingy) parentIter.next();
-      Iterator iter = parentConf.iterator();
+      ConfigThingy parentConf = parentIter.next();
+      Iterator<ConfigThingy> iter = parentConf.iterator();
       while (iter.hasNext())
       {
-        ConfigThingy appConf = (ConfigThingy) iter.next();
+        ConfigThingy appConf = iter.next();
         ExternalApplication app = new ExternalApplication();
         ConfigThingy extConf;
         try
@@ -1747,7 +1746,7 @@ public class WollMuxBar
           ConfigThingy programConf = appConf.get("PROGRAM");
           programConf.getFirstChild(); // Testen, ob mindestens ein Kind vorhanden
           // ist, ansonsten Exception
-          Iterator progiter = programConf.iterator();
+          Iterator<ConfigThingy> progiter = programConf.iterator();
           while (progiter.hasNext())
           {
             String prog = progiter.next().toString();
@@ -1760,7 +1759,7 @@ public class WollMuxBar
           continue;
         }
 
-        Iterator extIter = extConf.iterator();
+        Iterator<ConfigThingy> extIter = extConf.iterator();
         while (extIter.hasNext())
         {
           mapExtToExternalApplication.put(extIter.next().toString(), app);
@@ -1787,16 +1786,16 @@ public class WollMuxBar
      * Erzeugt ein neues OpenExt Objekt.
      * 
      * @param ext
-     *            ID-String für die Anwendung, normalerweise die Dateierweiterung.
-     *            Falls aus der url kein Dateiname abgeleitet werden konnte wird
-     *            dieser String an einen generierten Dateinamen angehängt.
+     *          ID-String für die Anwendung, normalerweise die Dateierweiterung.
+     *          Falls aus der url kein Dateiname abgeleitet werden konnte wird dieser
+     *          String an einen generierten Dateinamen angehängt.
      * @param app
-     *            die zu startende {@link WollMuxBar.ExternalApplication}. Falls
-     *            null, so wird eine Fehlermeldung geloggt und nichts weiter getan.
+     *          die zu startende {@link WollMuxBar.ExternalApplication}. Falls null,
+     *          so wird eine Fehlermeldung geloggt und nichts weiter getan.
      * @param url
-     *            die URL die der Anwendung als Argument übergeben werden soll (bzw.
-     *            die heruntergeladen und als temporäre Datei an die Anwendung
-     *            übergeben werden soll.)
+     *          die URL die der Anwendung als Argument übergeben werden soll (bzw.
+     *          die heruntergeladen und als temporäre Datei an die Anwendung
+     *          übergeben werden soll.)
      * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
      */
     public OpenExt(String ext, ExternalApplication app, String url)
@@ -1981,8 +1980,8 @@ public class WollMuxBar
    * Startet die WollMuxBar.
    * 
    * @param args
-   *            --minimize, --topbar, --normalwindow um das Anzeigeverhalten
-   *            festzulegen.
+   *          --minimize, --topbar, --normalwindow um das Anzeigeverhalten
+   *          festzulegen.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static void main(String[] args)

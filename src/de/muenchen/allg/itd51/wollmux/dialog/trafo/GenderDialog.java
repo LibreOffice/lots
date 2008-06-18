@@ -92,7 +92,7 @@ public class GenderDialog extends TrafoDialog
   {
     this.params = params;
     if (!params.isValid || params.conf == null || params.fieldNames == null
-        || params.fieldNames.size() == 0) throw new IllegalArgumentException();
+      || params.fieldNames.size() == 0) throw new IllegalArgumentException();
 
     ConfigThingy conf = params.conf;
 
@@ -117,15 +117,14 @@ public class GenderDialog extends TrafoDialog
       ConfigThingy func = funcs.getLastChild();
       if (!func.toString().equals("Gender")) stop();
 
-      for (Iterator iter = bind.iterator(); iter.hasNext();)
+      for (ConfigThingy set : bind)
       {
-        ConfigThingy set = (ConfigThingy) iter.next();
         if (!set.getName().equals("SET") || set.count() != 2) continue;
         String setKey = set.getFirstChild().toString();
         ConfigThingy value = set.getLastChild();
 
         if (setKey.equals("Anrede") && value.getName().equals("VALUE")
-            && value.count() == 1) anredeId = value.toString();
+          && value.count() == 1) anredeId = value.toString();
         if (setKey.equals("Falls_Anrede_HerrN") && value.count() == 0)
           textHerr = value.getName();
         if (setKey.equals("Falls_Anrede_Frau") && value.count() == 0)
@@ -135,7 +134,7 @@ public class GenderDialog extends TrafoDialog
       }
 
       if (anredeId == null || textHerr == null || textFrau == null
-          || textSonst == null) stop();
+        || textSonst == null) stop();
 
       HashSet<String> uniqueFieldNames = new HashSet<String>(params.fieldNames);
       uniqueFieldNames.add(anredeId);
@@ -195,7 +194,7 @@ public class GenderDialog extends TrafoDialog
     vbox.add(hbox);
 
     addText(vbox, L.m("(Kann z.B. \"Herr\", \"weibl.\", \"m\", \"w\" enthalten)")
-                  + "\n ");
+      + "\n ");
 
     hbox = Box.createHorizontalBox();
     label = new JLabel(L.m("Text weibl."));
@@ -383,8 +382,7 @@ public class GenderDialog extends TrafoDialog
   private class MyWindowListener implements WindowListener
   {
     public void windowOpened(WindowEvent e)
-    {
-    }
+    {}
 
     public void windowClosing(WindowEvent e)
     {
@@ -392,24 +390,19 @@ public class GenderDialog extends TrafoDialog
     }
 
     public void windowClosed(WindowEvent e)
-    {
-    }
+    {}
 
     public void windowIconified(WindowEvent e)
-    {
-    }
+    {}
 
     public void windowDeiconified(WindowEvent e)
-    {
-    }
+    {}
 
     public void windowActivated(WindowEvent e)
-    {
-    }
+    {}
 
     public void windowDeactivated(WindowEvent e)
-    {
-    }
+    {}
   }
 
   /**
@@ -459,14 +452,12 @@ public class GenderDialog extends TrafoDialog
             abort();
           }
           catch (Exception x)
-          {
-          }
+          {}
         }
       });
     }
     catch (Exception x)
-    {
-    }
+    {}
   }
 
   /**

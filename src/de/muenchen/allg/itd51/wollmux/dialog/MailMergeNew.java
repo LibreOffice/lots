@@ -283,13 +283,14 @@ public class MailMergeNew
 
     // FIXME: Ausgrauen, wenn kein Datenquelle ausgewählt
     button =
-      new JPotentiallyOverlongPopupMenuButton(L.m("Serienbrieffeld"), new Iterable()
-      {
-        public Iterator<Action> iterator()
+      new JPotentiallyOverlongPopupMenuButton(L.m("Serienbrieffeld"),
+        new Iterable<Action>()
         {
-          return getInsertFieldActionList().iterator();
-        }
-      });
+          public Iterator<Action> iterator()
+          {
+            return getInsertFieldActionList().iterator();
+          }
+        });
     hbox.add(button);
 
     button = new JButton(L.m("Spezialfeld"));
@@ -558,14 +559,15 @@ public class MailMergeNew
         ds.getColumnNames()));
     ActionListener submitActionListener = new ActionListener()
     {
+      @SuppressWarnings("unchecked")
       public void actionPerformed(ActionEvent e)
       {
-        HashMap mapIdToSubstitution = (HashMap) e.getSource();
-        for (Iterator iter = mapIdToSubstitution.keySet().iterator(); iter.hasNext();)
+        HashMap<String, FieldSubstitution> mapIdToSubstitution =
+          (HashMap<String, FieldSubstitution>) e.getSource();
+        for (Iterator<String> iter = mapIdToSubstitution.keySet().iterator(); iter.hasNext();)
         {
-          String fieldId = (String) iter.next();
-          FieldSubstitution subst =
-            (FieldSubstitution) mapIdToSubstitution.get(fieldId);
+          String fieldId = iter.next();
+          FieldSubstitution subst = mapIdToSubstitution.get(fieldId);
           mod.applyFieldSubstitution(fieldId, subst);
         }
       }
@@ -650,34 +652,35 @@ public class MailMergeNew
 
     Box headers = Box.createHorizontalBox();
     final JButton insertFieldButton =
-      new JPotentiallyOverlongPopupMenuButton(L.m("Serienbrieffeld"), new Iterable()
-      {
-        public Iterator<Action> iterator()
+      new JPotentiallyOverlongPopupMenuButton(L.m("Serienbrieffeld"),
+        new Iterable<Action>()
         {
-          List<Action> actions = new Vector<Action>();
-          List<String> columnNames = ds.getColumnNames();
-
-          Collections.sort(columnNames);
-
-          Iterator<String> iter = columnNames.iterator();
-          while (iter.hasNext())
+          public Iterator<Action> iterator()
           {
-            final String name = iter.next();
-            Action button = new AbstractAction(name)
+            List<Action> actions = new Vector<Action>();
+            List<String> columnNames = ds.getColumnNames();
+
+            Collections.sort(columnNames);
+
+            Iterator<String> iter = columnNames.iterator();
+            while (iter.hasNext())
             {
-              private static final long serialVersionUID = 0;
-
-              public void actionPerformed(ActionEvent e)
+              final String name = iter.next();
+              Action button = new AbstractAction(name)
               {
-                if (currentField[0] != null) currentField[0].insertTag(name);
-              }
-            };
-            actions.add(button);
-          }
+                private static final long serialVersionUID = 0;
 
-          return actions.iterator();
-        }
-      });
+                public void actionPerformed(ActionEvent e)
+                {
+                  if (currentField[0] != null) currentField[0].insertTag(name);
+                }
+              };
+              actions.add(button);
+            }
+
+            return actions.iterator();
+          }
+        });
     insertFieldButton.setFocusable(false);
     headers.add(Box.createHorizontalGlue());
     headers.add(insertFieldButton);
@@ -722,10 +725,9 @@ public class MailMergeNew
         public boolean isContentValid()
         {
           if (!isTransformed) return true;
-          List c = getContent();
+          List<TextComponentTags.ContentElement> c = getContent();
           if (c.size() == 0) return true;
-          return c.size() == 1
-            && ((TextComponentTags.ContentElement) c.get(0)).isTag();
+          return c.size() == 1 && c.get(0).isTag();
         }
       };
       mapTextComponentTagsToFieldname.put(field, fieldId);
@@ -785,10 +787,8 @@ public class MailMergeNew
           if (!f.isContentValid()) continue;
           String fieldId = "" + mapTextComponentTagsToFieldname.get(f);
           FieldSubstitution subst = new TextDocumentModel.FieldSubstitution();
-          for (Iterator contentIter = f.getContent().iterator(); contentIter.hasNext();)
+          for (TextComponentTags.ContentElement ce : f.getContent())
           {
-            TextComponentTags.ContentElement ce =
-              (TextComponentTags.ContentElement) contentIter.next();
             if (ce.isTag())
               subst.addField(ce.toString());
             else

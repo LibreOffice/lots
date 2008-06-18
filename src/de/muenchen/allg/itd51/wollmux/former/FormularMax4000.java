@@ -922,14 +922,14 @@ public class FormularMax4000
 
     ConfigThingy fensterAbschnitte =
       formDescription.query("Formular").query("Fenster");
-    Iterator fensterAbschnittIterator = fensterAbschnitte.iterator();
+    Iterator<ConfigThingy> fensterAbschnittIterator = fensterAbschnitte.iterator();
     while (fensterAbschnittIterator.hasNext())
     {
-      ConfigThingy fensterAbschnitt = (ConfigThingy) fensterAbschnittIterator.next();
-      Iterator tabIter = fensterAbschnitt.iterator();
+      ConfigThingy fensterAbschnitt = fensterAbschnittIterator.next();
+      Iterator<ConfigThingy> tabIter = fensterAbschnitt.iterator();
       while (tabIter.hasNext())
       {
-        ConfigThingy tab = (ConfigThingy) tabIter.next();
+        ConfigThingy tab = tabIter.next();
         parseTab(tab, -1);
       }
     }
@@ -965,16 +965,16 @@ public class FormularMax4000
     groupModelList.clear();
     ConfigThingy visibilityConf =
       formDescription.query("Formular").query("Sichtbarkeit");
-    Iterator sichtbarkeitsAbschnittIterator = visibilityConf.iterator();
+    Iterator<ConfigThingy> sichtbarkeitsAbschnittIterator =
+      visibilityConf.iterator();
     while (sichtbarkeitsAbschnittIterator.hasNext())
     {
-      ConfigThingy sichtbarkeitsAbschnitt =
-        (ConfigThingy) sichtbarkeitsAbschnittIterator.next();
-      Iterator sichtbarkeitsFunktionIterator = sichtbarkeitsAbschnitt.iterator();
+      ConfigThingy sichtbarkeitsAbschnitt = sichtbarkeitsAbschnittIterator.next();
+      Iterator<ConfigThingy> sichtbarkeitsFunktionIterator =
+        sichtbarkeitsAbschnitt.iterator();
       while (sichtbarkeitsFunktionIterator.hasNext())
       {
-        ConfigThingy sichtbarkeitsFunktion =
-          (ConfigThingy) sichtbarkeitsFunktionIterator.next();
+        ConfigThingy sichtbarkeitsFunktion = sichtbarkeitsFunktionIterator.next();
         String groupName = sichtbarkeitsFunktion.getName();
         FunctionSelection funcSel =
           visibilityFunctionSelectionProvider.getFunctionSelection(groupName);
@@ -1056,7 +1056,8 @@ public class FormularMax4000
    *          Funktionen ergeben den Funktionen-Abschnitt.
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
-  private ConfigThingy buildFormDescriptor(Map mapFunctionNameToConfigThingy)
+  private ConfigThingy buildFormDescriptor(
+      Map<String, ConfigThingy> mapFunctionNameToConfigThingy)
   {
     ConfigThingy conf = new ConfigThingy("WM");
     ConfigThingy form = conf.add("Formular");
@@ -1066,10 +1067,11 @@ public class FormularMax4000
     if (!mapFunctionNameToConfigThingy.isEmpty())
     {
       ConfigThingy funcs = form.add("Funktionen");
-      Iterator iter = mapFunctionNameToConfigThingy.values().iterator();
+      Iterator<ConfigThingy> iter =
+        mapFunctionNameToConfigThingy.values().iterator();
       while (iter.hasNext())
       {
-        funcs.addChild((ConfigThingy) iter.next());
+        funcs.addChild(iter.next());
       }
     }
     return conf;
@@ -1203,10 +1205,10 @@ public class FormularMax4000
     String tooltip = "";
     char hotkey = 0;
 
-    Iterator iter = conf.iterator();
+    Iterator<ConfigThingy> iter = conf.iterator();
     while (iter.hasNext())
     {
-      ConfigThingy attr = (ConfigThingy) iter.next();
+      ConfigThingy attr = iter.next();
       String name = attr.getName();
       String str = attr.toString();
       if (name.equals("TITLE"))
@@ -1259,15 +1261,13 @@ public class FormularMax4000
     boolean lastIsGlue = false;
     FormControlModel model = null;
     int count = 0;
-    Iterator grandmaIter = grandma.iterator();
+    Iterator<ConfigThingy> grandmaIter = grandma.iterator();
     while (grandmaIter.hasNext())
     {
-      Iterator iter = ((ConfigThingy) grandmaIter.next()).iterator();
+      Iterator<ConfigThingy> iter = grandmaIter.next().iterator();
       while (iter.hasNext())
       {
-        model =
-          new FormControlModel((ConfigThingy) iter.next(),
-            functionSelectionProvider, this);
+        model = new FormControlModel(iter.next(), functionSelectionProvider, this);
         lastIsGlue = model.isGlue();
         ++count;
         formControlModelList.add(model, idx++);

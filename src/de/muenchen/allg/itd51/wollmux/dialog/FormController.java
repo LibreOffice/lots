@@ -271,9 +271,10 @@ public class FormController implements UIElementEventHandler
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public FormController(ConfigThingy conf, FormModel model,
-      final Map mapIdToPresetValue, Map<Object, Object> functionContext,
-      FunctionLibrary funcLib, DialogLibrary dialogLib,
-      ActionListener abortRequestListener) throws ConfigurationErrorException
+      final Map<String, String> mapIdToPresetValue,
+      Map<Object, Object> functionContext, FunctionLibrary funcLib,
+      DialogLibrary dialogLib, ActionListener abortRequestListener)
+      throws ConfigurationErrorException
   {
     this.functionContext = functionContext;
     this.formModel = model;
@@ -330,7 +331,7 @@ public class FormController implements UIElementEventHandler
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private void createGUI(ConfigThingy fensterDesc, ConfigThingy visibilityDesc,
-      Map mapIdToPresetValue)
+      Map<String, String> mapIdToPresetValue)
   {
     Common.setLookAndFeelOnce();
 
@@ -360,10 +361,10 @@ public class FormController implements UIElementEventHandler
       String tabTitle = "Eingabe";
       char hotkey = 0;
       String tip = "";
-      Iterator childIter = neuesFenster.iterator();
+      Iterator<ConfigThingy> childIter = neuesFenster.iterator();
       while (childIter.hasNext())
       {
-        ConfigThingy childConf = (ConfigThingy) childIter.next();
+        ConfigThingy childConf = childIter.next();
         String name = childConf.getName();
         if (name.equals("TIP"))
           tip = childConf.toString();
@@ -443,14 +444,11 @@ public class FormController implements UIElementEventHandler
    */
   private void setVisibility(ConfigThingy visibilityDesc)
   {
-    Iterator iter;
-    iter = visibilityDesc.iterator();
-    while (iter.hasNext())
+    for (ConfigThingy visRule : visibilityDesc)
     {
       /*
        * Sichtbarkeitsfunktion parsen.
        */
-      ConfigThingy visRule = (ConfigThingy) iter.next();
       String groupId = visRule.getName();
       Function cond;
       try
@@ -512,7 +510,7 @@ public class FormController implements UIElementEventHandler
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private void initialStateForUIElementsNotInMapIdToPresetValue(
-      Map mapIdToPresetValue)
+      Map<String, String> mapIdToPresetValue)
   {
     Iterator<UIElement> iter = uiElements.iterator();
     while (iter.hasNext())
@@ -586,7 +584,8 @@ public class FormController implements UIElementEventHandler
      *          markiert als ungültig bis der Benutzer es manuell ändert.
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
-    public DialogWindow(int tabIndex, ConfigThingy conf, Map mapIdToPresetValue)
+    public DialogWindow(int tabIndex, ConfigThingy conf,
+        Map<String, String> mapIdToPresetValue)
     {
       myPanel = new JPanel(new GridBagLayout());
       JPanel mainPanel = new JPanel(new GridBagLayout());
@@ -603,13 +602,13 @@ public class FormController implements UIElementEventHandler
 
       int y = 0;
 
-      Iterator parentiter = conf.query("Eingabefelder").iterator();
+      Iterator<ConfigThingy> parentiter = conf.query("Eingabefelder").iterator();
       while (parentiter.hasNext())
       {
-        Iterator iter = ((ConfigThingy) parentiter.next()).iterator();
+        Iterator<ConfigThingy> iter = parentiter.next().iterator();
         while (iter.hasNext())
         {
-          ConfigThingy uiConf = (ConfigThingy) iter.next();
+          ConfigThingy uiConf = iter.next();
           UIElement uiElement;
           try
           {
@@ -771,7 +770,6 @@ public class FormController implements UIElementEventHandler
      */
     private void createButtonPanel(ConfigThingy conf, int y)
     {
-      Iterator parentiter;
       JPanel buttonPanel = new JPanel(new GridBagLayout());
       // int gridx, int gridy, int gridwidth, int gridheight, double weightx, double
       // weighty, int anchor, int fill, Insets insets, int ipadx, int ipady)
@@ -787,13 +785,13 @@ public class FormController implements UIElementEventHandler
       addTabSwitcher(buttonPanel);
       int x = 0;
 
-      parentiter = conf.query("Buttons").iterator();
+      Iterator<ConfigThingy> parentiter = conf.query("Buttons").iterator();
       while (parentiter.hasNext())
       {
-        Iterator iter = ((ConfigThingy) parentiter.next()).iterator();
+        Iterator<ConfigThingy> iter = parentiter.next().iterator();
         while (iter.hasNext())
         {
-          ConfigThingy uiConf = (ConfigThingy) iter.next();
+          ConfigThingy uiConf = iter.next();
           UIElement uiElement;
           try
           {
@@ -946,11 +944,11 @@ public class FormController implements UIElementEventHandler
     private void parseGROUPS(ConfigThingy uiConf, UIElement uiElement)
     {
       ConfigThingy groupsConf = uiConf.query("GROUPS");
-      Iterator groupsIter = groupsConf.iterator();
+      Iterator<ConfigThingy> groupsIter = groupsConf.iterator();
       while (groupsIter.hasNext())
       {
-        ConfigThingy groups = (ConfigThingy) groupsIter.next();
-        Iterator groupIter = groups.iterator();
+        ConfigThingy groups = groupsIter.next();
+        Iterator<ConfigThingy> groupIter = groups.iterator();
         while (groupIter.hasNext())
         {
           String groupId = groupIter.next().toString();
@@ -1266,14 +1264,14 @@ public class FormController implements UIElementEventHandler
       {
         String dialogName = (String) args[0];
         Set<UIElement> todo = new HashSet<UIElement>();
-        List depending =
+        List<UIElement> depending =
           mapDialogNameToListOfUIElementsWithDependingAutofill.get(dialogName);
         if (depending != null)
         {
-          Iterator iter = depending.iterator();
+          Iterator<UIElement> iter = depending.iterator();
           while (iter.hasNext())
           {
-            UIElement uiElement = (UIElement) iter.next();
+            UIElement uiElement = iter.next();
             todo.add(uiElement);
           }
         }
@@ -1315,13 +1313,13 @@ public class FormController implements UIElementEventHandler
       if (!elements.contains(uiElement))
       {
         elements.add(uiElement);
-        List deps =
+        List<UIElement> deps =
           mapIdToListOfUIElementsWithDependingAutofill.get(uiElement.getId());
         if (deps == null) continue;
-        Iterator iter2 = deps.iterator();
+        Iterator<UIElement> iter2 = deps.iterator();
         while (iter2.hasNext())
         {
-          uiElement = (UIElement) iter2.next();
+          uiElement = iter2.next();
           if (!elements.contains(uiElement)) todo.add(uiElement);
         }
       }
@@ -1370,13 +1368,14 @@ public class FormController implements UIElementEventHandler
     while (eleIter.hasNext())
     {
       UIElement uiElement = eleIter.next();
-      List dependingGroups = mapIdToListOfDependingGroups.get(uiElement.getId());
+      List<Group> dependingGroups =
+        mapIdToListOfDependingGroups.get(uiElement.getId());
       if (dependingGroups != null)
       {
-        Iterator iter = dependingGroups.iterator();
+        Iterator<Group> iter = dependingGroups.iterator();
         while (iter.hasNext())
         {
-          Group dependingGroup = (Group) iter.next();
+          Group dependingGroup = iter.next();
           Function cond = dependingGroup.condition;
           if (cond == null) continue;
           boolean result = cond.getBoolean(myUIElementValues);
@@ -1485,14 +1484,14 @@ public class FormController implements UIElementEventHandler
     {
       UIElement uiElement = eleIter.next();
 
-      List dependingUIElements =
+      List<UIElement> dependingUIElements =
         mapIdToListOfUIElementsWithDependingPlausi.get(uiElement.getId());
       if (dependingUIElements != null)
       {
-        Iterator iter = dependingUIElements.iterator();
+        Iterator<UIElement> iter = dependingUIElements.iterator();
         while (iter.hasNext())
         {
-          UIElement dependingUIElement = (UIElement) iter.next();
+          UIElement dependingUIElement = iter.next();
           checkPlausi(dependingUIElement);
         }
       }
@@ -1745,13 +1744,13 @@ public class FormController implements UIElementEventHandler
   private static void mergeSection(ConfigThingy conf, String sectionName,
       Map<String, Object> sectionMap, List<Object> idList, boolean duplicatesAllowed)
   {
-    Iterator parentIter = conf.query(sectionName).iterator();
+    Iterator<ConfigThingy> parentIter = conf.query(sectionName).iterator();
     while (parentIter.hasNext())
     {
-      Iterator iter = ((ConfigThingy) parentIter.next()).iterator();
+      Iterator<ConfigThingy> iter = parentIter.next().iterator();
       while (iter.hasNext())
       {
-        ConfigThingy node = (ConfigThingy) iter.next();
+        ConfigThingy node = iter.next();
         String name = node.getName();
         if (idList != null && !idList.contains(name)) idList.add(name);
         if (!duplicatesAllowed && sectionMap.containsKey(name))
@@ -1804,21 +1803,18 @@ public class FormController implements UIElementEventHandler
     Set<String> neverActions = new HashSet<String>();
     List<ActionUIElementPair> alwaysActions = new Vector<ActionUIElementPair>(); // of
     // ActionUIElementPair
-    Iterator anpOuterIter = anpassung.iterator(); // durchläuft die *Tab Abschnitte
+    Iterator<ConfigThingy> anpOuterIter = anpassung.iterator(); // durchläuft die
+    // *Tab Abschnitte
     while (anpOuterIter.hasNext())
     {
-      Iterator anpInnerIter = ((ConfigThingy) anpOuterIter.next()).iterator(); // durchläuft
-      // die
-      // NEVER
-      // und
-      // ALWAYS
-      // Angaben
+      // durchläuft die NEVER und ALWAYS Angaben
+      Iterator<ConfigThingy> anpInnerIter = anpOuterIter.next().iterator();
       while (anpInnerIter.hasNext())
       {
-        ConfigThingy neverOrAlwaysConf = (ConfigThingy) anpInnerIter.next();
+        ConfigThingy neverOrAlwaysConf = anpInnerIter.next();
         if (neverOrAlwaysConf.getName().equals("NEVER"))
         {
-          Iterator neverActionIter = neverOrAlwaysConf.iterator();
+          Iterator<ConfigThingy> neverActionIter = neverOrAlwaysConf.iterator();
           while (neverActionIter.hasNext())
             neverActions.add(neverActionIter.next().toString());
         }
@@ -1846,19 +1842,19 @@ public class FormController implements UIElementEventHandler
     List<ActionUIElementPair> existingUIElements = new Vector<ActionUIElementPair>(); // of
     // ActionUIElementPair
     ConfigThingy buttonsConf = tabConf.query("Buttons");
-    Iterator buttonsOuterIter = buttonsConf.iterator(); // durchläuft die
+    Iterator<ConfigThingy> buttonsOuterIter = buttonsConf.iterator(); // durchläuft
+    // die
     // Buttons-Abschnitte
     while (buttonsOuterIter.hasNext())
     {
-      Iterator buttonsInnerIter =
-        ((ConfigThingy) buttonsOuterIter.next()).iterator(); // durchläuft
+      Iterator<ConfigThingy> buttonsInnerIter = buttonsOuterIter.next().iterator(); // durchläuft
       // die
       // Eingabeelemente
       // im
       // Buttons-Abschnitt
       while (buttonsInnerIter.hasNext())
       {
-        ConfigThingy buttonConf = (ConfigThingy) buttonsInnerIter.next();
+        ConfigThingy buttonConf = buttonsInnerIter.next();
         String action = null;
         try
         {
