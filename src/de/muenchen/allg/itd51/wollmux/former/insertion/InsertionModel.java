@@ -231,11 +231,11 @@ public class InsertionModel
     }
 
     // INSERT(WM(<zu iterierender Teil>))
-    Iterator iter = (conf.iterator().next()).iterator();
+    Iterator<ConfigThingy> iter = (conf.iterator().next()).iterator();
     AutosepInfo autosepInfo = null;
     while (iter.hasNext())
     {
-      ConfigThingy subConf = (ConfigThingy) iter.next();
+      ConfigThingy subConf = iter.next();
       String name = subConf.getName();
       String value = subConf.toString();
 

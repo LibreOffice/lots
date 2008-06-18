@@ -167,12 +167,12 @@ public class FunctionSelectionAccessView implements View
    * Erzeugt eine neue View über die funcSel angezeigt und bearbeitet werden kann.
    * 
    * @param funcLib
-   *            die Funktionsbibliothek, deren Funktionen auswählbar sein sollen.
+   *          die Funktionsbibliothek, deren Funktionen auswählbar sein sollen.
    * @param idManager
-   *            Als Feldreferenzen sind alle aktiven IDs dieses {@link IDManager}s
-   *            auswählbar.
+   *          Als Feldreferenzen sind alle aktiven IDs dieses {@link IDManager}s
+   *          auswählbar.
    * @param namespace
-   *            der Namensraum aus dem die IDs von idManager genommen werden sollen.
+   *          der Namensraum aus dem die IDs von idManager genommen werden sollen.
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public FunctionSelectionAccessView(FunctionSelectionAccess funcSel,
@@ -282,10 +282,10 @@ public class FunctionSelectionAccessView implements View
         expertFunctionIsComplex = true;
 
         StringBuilder code = new StringBuilder();
-        Iterator iter = conf.iterator();
+        Iterator<ConfigThingy> iter = conf.iterator();
         while (iter.hasNext())
         {
-          code.append(((ConfigThingy) iter.next()).stringRepresentation());
+          code.append(iter.next().stringRepresentation());
         }
 
         complexFunctionArea = new JTextArea(code.toString());
@@ -333,9 +333,9 @@ public class FunctionSelectionAccessView implements View
    * festlegen kann.
    * 
    * @param paramName
-   *            der Name des Parameters.
+   *          der Name des Parameters.
    * @param startValue
-   *            der Wert, den die ComboBox zu Beginn eingestellt haben soll.
+   *          der Wert, den die ComboBox zu Beginn eingestellt haben soll.
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private JComboBox buildParameterBox(final String paramName, ParamValue startValue)
@@ -458,10 +458,10 @@ public class FunctionSelectionAccessView implements View
     combo.addItem(UNSPECIFIED_ITEM);
     combo.setSelectedIndex(0);
     boolean found = currentValue.equals(UNSPECIFIED_ITEM);
-    Iterator iter = idManager.getAllIDs(namespace).iterator();
+    Iterator<IDManager.ID> iter = idManager.getAllIDs(namespace).iterator();
     while (iter.hasNext())
     {
-      IDManager.ID id = (IDManager.ID) iter.next();
+      IDManager.ID id = iter.next();
       if (id.isActive())
       {
         String brackId = "[" + id.toString() + "]";
@@ -496,12 +496,12 @@ public class FunctionSelectionAccessView implements View
     functionSelectorBox.addItem(NONE_ITEM);
     int string_index = functionSelectorBox.getItemCount();
     functionSelectorBox.addItem(STRING_ITEM);
-    Iterator iter = funcLib.getFunctionNames().iterator();
+    Iterator<String> iter = funcLib.getFunctionNames().iterator();
     int i = functionSelectorBox.getItemCount();
 
     while (iter.hasNext())
     {
-      String funcName = (String) iter.next();
+      String funcName = iter.next();
 
       if (funcName.equals(funcSel.getFunctionName())) selectedIndex = i;
       functionSelectorBox.addItem(funcName);

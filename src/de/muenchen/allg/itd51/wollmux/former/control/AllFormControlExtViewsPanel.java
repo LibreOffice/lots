@@ -1,9 +1,8 @@
-//TODO L.m()
 /*
-* Dateiname: AllFormControlExtViewsPanel.java
-* Projekt  : WollMux
-* Funktion : Eine View, die alle OneFormControlExtViews enthält.
-* 
+ * Dateiname: AllFormControlExtViewsPanel.java
+ * Projekt  : WollMux
+ * Funktion : Eine View, die alle OneFormControlExtViews enthält.
+ * 
  * Copyright (c) 2008 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,21 +17,22 @@
  * You should have received a copy of the European Union Public Licence
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
-*
-* Änderungshistorie:
-* Datum      | Wer | Änderungsgrund
-* -------------------------------------------------------------------
-* 23.10.2006 | BNK | Erstellung
-* -------------------------------------------------------------------
-*
-* @author Matthias Benkmann (D-III-ITD 5.1)
-* @version 1.0
-* 
-*/
+ *
+ * Änderungshistorie:
+ * Datum      | Wer | Änderungsgrund
+ * -------------------------------------------------------------------
+ * 23.10.2006 | BNK | Erstellung
+ * -------------------------------------------------------------------
+ *
+ * @author Matthias Benkmann (D-III-ITD 5.1)
+ * @version 1.0
+ * 
+ */
 package de.muenchen.allg.itd51.wollmux.former.control;
 
 import java.util.Iterator;
 
+import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastObjectSelection;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
@@ -42,50 +42,51 @@ import de.muenchen.allg.itd51.wollmux.former.view.ViewChangeListener;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 
 /**
- * Eine View, die alle 
- * {@link de.muenchen.allg.itd51.wollmux.former.control.OneFormControlExtView}s enthält.
- *
+ * Eine View, die alle
+ * {@link de.muenchen.allg.itd51.wollmux.former.control.OneFormControlExtView}s
+ * enthält.
+ * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class AllFormControlExtViewsPanel extends OnDemandCardView
 {
   /**
-   * Die Funktionsbibliothek, die die Funktionen enthält, die die Views zur Auswahl 
+   * Die Funktionsbibliothek, die die Funktionen enthält, die die Views zur Auswahl
    * anbieten sollen.
    */
   private FunctionLibrary funcLib;
-  
+
   /**
    * Erzeugt ein {@link AllFormControlExtViewsPanel}, das den Inhalt von
-   * formControlModelList anzeigt. 
-   * @param funcLib die Funktionsbibliothek, die die Funktionen enthält, die die Views 
-   *        zur Auswahl anbieten sollen.
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TESTED
+   * formControlModelList anzeigt.
+   * 
+   * @param funcLib
+   *          die Funktionsbibliothek, die die Funktionen enthält, die die Views zur
+   *          Auswahl anbieten sollen.
+   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
-  public AllFormControlExtViewsPanel(FormControlModelList formControlModelList, FunctionLibrary funcLib, FormularMax4000 formularMax4000)
+  public AllFormControlExtViewsPanel(FormControlModelList formControlModelList,
+      FunctionLibrary funcLib, FormularMax4000 formularMax4000)
   {
-    super("Extra-View");
+    super(L.m("Extra-View"));
     this.funcLib = funcLib;
     formControlModelList.addListener(new MyItemListener());
     formularMax4000.addBroadcastListener(new MyBroadcastListener());
-    
-    Iterator iter = formControlModelList.iterator();
-    while (iter.hasNext()) 
+
+    Iterator<FormControlModel> iter = formControlModelList.iterator();
+    while (iter.hasNext())
     {
-      FormControlModel model = (FormControlModel)iter.next();
+      FormControlModel model = iter.next();
       if (model.hasPlausi() || model.hasAutofill()) addItem(model);
     }
   }
-  
+
   public View createViewFor(Object model, ViewChangeListener viewChangeListener)
   {
-    FormControlModel m = (FormControlModel)model;
-    return new OneFormControlExtView(m, funcLib, viewChangeListener); 
+    FormControlModel m = (FormControlModel) model;
+    return new OneFormControlExtView(m, funcLib, viewChangeListener);
   }
-  
-  
-  
+
   private class MyItemListener implements FormControlModelList.ItemListener
   {
 
@@ -94,14 +95,13 @@ public class AllFormControlExtViewsPanel extends OnDemandCardView
       if (model.hasPlausi() || model.hasAutofill()) addItem(model);
     }
 
-    public void itemSwapped(int index1, int index2) {}
+    public void itemSwapped(int index1, int index2)
+    {}
   }
-  
 
-  
   private class MyBroadcastListener extends BroadcastListener
   {
-    public void broadcastFormControlModelSelection(BroadcastObjectSelection b) 
+    public void broadcastFormControlModelSelection(BroadcastObjectSelection b)
     {
       if (b.getState() == 1)
       {
@@ -113,7 +113,7 @@ public class AllFormControlExtViewsPanel extends OnDemandCardView
       }
     }
 
-    public void broadcastInsertionModelSelection(BroadcastObjectSelection b) 
+    public void broadcastInsertionModelSelection(BroadcastObjectSelection b)
     {
       showEmpty();
     }
