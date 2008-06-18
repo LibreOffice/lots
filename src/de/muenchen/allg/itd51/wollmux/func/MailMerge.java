@@ -1,4 +1,3 @@
-//TODO L.m()
 /*
  * Dateiname: MailMerge.java
  * Projekt  : WollMux
@@ -85,6 +84,7 @@ import com.sun.star.text.XTextDocument;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.TimeoutException;
@@ -126,7 +126,7 @@ public class MailMerge
     }
     catch (Exception x)
     {
-      Logger.error("Kann DocumentSettings nicht auslesen", x);
+      Logger.error(L.m("Kann DocumentSettings nicht auslesen"), x);
       return;
     }
 
@@ -195,7 +195,7 @@ public class MailMerge
     catch (TimeoutException e)
     {
       Logger.error(
-        "Konnte Daten für Serienbrief nicht aus der Datenquelle auslesen", e);
+        L.m("Konnte Daten für Serienbrief nicht aus der Datenquelle auslesen"), e);
       return;
     }
 
@@ -221,7 +221,7 @@ public class MailMerge
     int index = 1;
     for (Dataset dataset : data)
     {
-      list.add(new ListElement(dataset, "Datensatz " + index));
+      list.add(new ListElement(dataset, L.m("Datensatz ") + index));
       ++index;
     }
 
@@ -254,8 +254,9 @@ public class MailMerge
         }
         catch (Exception e)
         {
-          Logger.error("Spalte \"" + column
-            + "\" fehlt unerklärlicherweise => Abbruch des Drucks", e);
+          Logger.error(
+            L.m("Spalte \"%1\" fehlt unerklärlicherweise => Abbruch des Drucks",
+              column), e);
           return;
         }
 
@@ -288,13 +289,13 @@ public class MailMerge
         {
           public void run()
           {
-            myFrame = new JFrame("Seriendruck");
+            myFrame = new JFrame(L.m("Seriendruck"));
             Box vbox = Box.createVerticalBox();
             myFrame.getContentPane().add(vbox);
             Box hbox = Box.createHorizontalBox();
             vbox.add(hbox);
             hbox.add(Box.createHorizontalStrut(5));
-            hbox.add(new JLabel("Verarbeite Dokument"));
+            hbox.add(new JLabel(L.m("Verarbeite Dokument")));
             hbox.add(Box.createHorizontalStrut(5));
             countLabel = new JLabel("   -");
             hbox.add(countLabel);
@@ -495,7 +496,7 @@ public class MailMerge
   private static void createSelectFromListDialog(final Vector<ListElement> list,
       final boolean[] result)
   {
-    final JFrame myFrame = new JFrame("Gewünschte Ausdrucke wählen");
+    final JFrame myFrame = new JFrame(L.m("Gewünschte Ausdrucke wählen"));
     myFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
     myFrame.addWindowListener(new WindowListener()
     {
@@ -543,7 +544,8 @@ public class MailMerge
     myPanel.add(scrollPane, BorderLayout.CENTER);
 
     Box top = Box.createVerticalBox();
-    top.add(new JLabel("Bitte wählen Sie, welche Ausdrucke Sie bekommen möchten"));
+    top.add(new JLabel(
+      L.m("Bitte wählen Sie, welche Ausdrucke Sie bekommen möchten")));
     top.add(Box.createVerticalStrut(5));
     myPanel.add(top, BorderLayout.NORTH);
 
@@ -553,7 +555,7 @@ public class MailMerge
     bottomV.add(bottom);
     myPanel.add(bottomV, BorderLayout.SOUTH);
 
-    JButton button = new JButton("Abbrechen");
+    JButton button = new JButton(L.m("Abbrechen"));
     button.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
@@ -565,7 +567,7 @@ public class MailMerge
 
     bottom.add(Box.createHorizontalGlue());
 
-    button = new JButton("Alle");
+    button = new JButton(L.m("Alle"));
     button.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
@@ -577,7 +579,7 @@ public class MailMerge
 
     bottom.add(Box.createHorizontalStrut(5));
 
-    button = new JButton("Keinen");
+    button = new JButton(L.m("Keinen"));
     button.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
@@ -589,7 +591,7 @@ public class MailMerge
 
     bottom.add(Box.createHorizontalGlue());
 
-    button = new JButton("Start");
+    button = new JButton(L.m("Start"));
     button.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
@@ -669,8 +671,8 @@ public class MailMerge
       {
         Number idx = mapColumnNameToIndex.get(columnName);
         if (idx == null)
-          throw new ColumnNotFoundException("Spalte " + columnName
-            + " existiert nicht!");
+          throw new ColumnNotFoundException(L.m("Spalte %1 existiert nicht!",
+            columnName));
         return data[idx.intValue()];
       }
 
@@ -943,7 +945,7 @@ public class MailMerge
       }
       catch (Exception x)
       {
-        Logger.error("Kann DocumentSettings nicht auslesen", x);
+        Logger.error(L.m("Kann DocumentSettings nicht auslesen"), x);
         return;
       }
       String datasource =
@@ -1006,7 +1008,7 @@ public class MailMerge
      */
     public void createGUI()
     {
-      final JFrame myFrame = new JFrame("Seriendruck");
+      final JFrame myFrame = new JFrame(L.m("Seriendruck"));
       myFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
       myFrame.addWindowListener(new WindowListener()
       {
@@ -1047,7 +1049,7 @@ public class MailMerge
        */
       Box hbox = Box.createHorizontalBox();
       vbox.add(hbox);
-      hbox.add(new JLabel("Datenquelle"));
+      hbox.add(new JLabel(L.m("Datenquelle")));
       datasourceSelector = new JComboBox();
       hbox.add(Box.createHorizontalStrut(5));
       hbox.add(datasourceSelector);
@@ -1100,7 +1102,7 @@ public class MailMerge
       hbox = Box.createHorizontalBox();
       vbox.add(Box.createVerticalStrut(5));
       vbox.add(hbox);
-      hbox.add(new JLabel("Tabelle"));
+      hbox.add(new JLabel(L.m("Tabelle")));
       hbox.add(Box.createHorizontalStrut(5));
       tableSelector = new JComboBox();
       hbox.add(tableSelector);
@@ -1112,7 +1114,7 @@ public class MailMerge
       hbox = Box.createHorizontalBox();
       vbox.add(Box.createVerticalStrut(5));
       vbox.add(hbox);
-      JButton button = new JButton("Abbrechen");
+      JButton button = new JButton(L.m("Abbrechen"));
       button.addActionListener(new ActionListener()
       {
         public void actionPerformed(ActionEvent e)
@@ -1123,7 +1125,7 @@ public class MailMerge
       });
       hbox.add(button);
 
-      button = new JButton("Start");
+      button = new JButton(L.m("Start"));
       button.addActionListener(new ActionListener()
       {
         public void actionPerformed(ActionEvent e)
@@ -1141,7 +1143,7 @@ public class MailMerge
       hbox.add(Box.createHorizontalStrut(5));
       hbox.add(button);
 
-      button = new JButton("Einzelauswahl");
+      button = new JButton(L.m("Einzelauswahl"));
       button.addActionListener(new ActionListener()
       {
         public void actionPerformed(ActionEvent e)
@@ -1411,12 +1413,12 @@ public class MailMerge
     XTextDocument doc = UNO.XTextDocument(UNO.desktop.getCurrentComponent());
     if (doc == null)
     {
-      System.err.println("Vordergrunddokument ist kein XTextDocument!");
+      System.err.println(L.m("Vordergrunddokument ist kein XTextDocument!"));
       System.exit(1);
     }
 
     XPrintModel pmod = new TextDocumentModel(doc).createPrintModel(false);
-    pmod.usePrintFunction("Seriendruck");
+    pmod.usePrintFunction(L.m("Seriendruck"));
     pmod.printWithProps();
 
     System.exit(0);

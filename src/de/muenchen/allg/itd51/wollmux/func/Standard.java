@@ -1,4 +1,3 @@
-//TODO L.m()
 /*
  * Dateiname: Standard.java
  * Projekt  : WollMux
@@ -48,8 +47,9 @@ import java.util.regex.PatternSyntaxException;
  */
 public class Standard
 {
-  private static final Pattern DATE_SYNTAX = Pattern.compile("\\d{1,2}\\.\\d{1,2}\\.\\d{4}");
-  
+  private static final Pattern DATE_SYNTAX =
+    Pattern.compile("\\d{1,2}\\.\\d{1,2}\\.\\d{4}");
+
   /**
    * Liefert immer true.
    * 
@@ -83,28 +83,28 @@ public class Standard
   }
 
   /**
-   * Liefert den String herrText zurück, falls lowcase(anrede) == "herr",
-   * ansonsten wird frauText geliefert.
+   * Liefert den String herrText zurück, falls lowcase(anrede) == "herr", ansonsten
+   * wird frauText geliefert.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public static String herrFrauText(String anrede, String frauText,
-      String herrText)
+  public static String herrFrauText(String anrede, String frauText, String herrText)
   {
     if (anrede.equalsIgnoreCase("herr"))
       return herrText;
     else
       return frauText;
   }
-  
+
   /**
-   * Liefert herrText zurück, falls lowcase(anrede) == "herr" oder "herrn",
-   * liefert frauText zurück, falls lowcase(anrede) == "frau",
-   * liefert sonstText zurück, falls keiner der obigen Fälle zutrifft.
+   * Liefert herrText zurück, falls lowcase(anrede) == "herr" oder "herrn", liefert
+   * frauText zurück, falls lowcase(anrede) == "frau", liefert sonstText zurück,
+   * falls keiner der obigen Fälle zutrifft.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public static String gender(String herrText, String frauText, String sonstText, String anrede)
+  public static String gender(String herrText, String frauText, String sonstText,
+      String anrede)
   {
     if (anrede.equalsIgnoreCase("herr") || anrede.equalsIgnoreCase("herrn"))
       return herrText;
@@ -115,8 +115,8 @@ public class Standard
   }
 
   /**
-   * Versucht, zu erkennen, ob datum ein korrektes Datum der Form Monat.Tag.Jahr
-   * ist (wobei Jahr immer 4-stellig sein muss).
+   * Versucht, zu erkennen, ob datum ein korrektes Datum der Form Monat.Tag.Jahr ist
+   * (wobei Jahr immer 4-stellig sein muss).
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
@@ -126,19 +126,21 @@ public class Standard
   }
 
   /**
-   * Liefert true gdw datum ein korrektes Datum der Form Tag.Monat.Jahr
-   * ist (wobei Jahr immer 4-stellig sein muss) und das Datum nicht in der Vergangenheit liegt.
+   * Liefert true gdw datum ein korrektes Datum der Form Tag.Monat.Jahr ist (wobei
+   * Jahr immer 4-stellig sein muss) und das Datum nicht in der Vergangenheit liegt.
+   * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static boolean datumNichtInVergangenheit(String datum)
   {
     return checkDate(datum, true);
   }
-  
+
   /**
-   * Liefert true gdw datum ein korrektes Datum der Form Tag.Monat.Jahr
-   * ist (wobei Jahr immer 4-stellig sein muss) und entweder noPast == false ist oder 
-   * das Datum nicht in der Vergangenheit liegt.
+   * Liefert true gdw datum ein korrektes Datum der Form Tag.Monat.Jahr ist (wobei
+   * Jahr immer 4-stellig sein muss) und entweder noPast == false ist oder das Datum
+   * nicht in der Vergangenheit liegt.
+   * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private static boolean checkDate(String datum, boolean noPast)
@@ -159,21 +161,20 @@ public class Standard
       cal.set(Calendar.MONTH, monat - 1);
       cal.set(Calendar.YEAR, jahr);
       return (cal.get(Calendar.DAY_OF_MONTH) == tag
-              && cal.get(Calendar.MONTH) == monat - 1 && cal.get(Calendar.YEAR) == jahr)
-              && (noPast == false || cal.compareTo(current) >= 0);
+        && cal.get(Calendar.MONTH) == monat - 1 && cal.get(Calendar.YEAR) == jahr)
+        && (noPast == false || cal.compareTo(current) >= 0);
     }
     catch (Exception x)
-    {
-    }
+    {}
     return false;
 
   }
-  
+
   /**
    * Formatiert tel gemäss DIN 5008 und setzt dann die Vorwahl "089" davor.
    * 
    * @author Bettina Bauer (D-III-ITD 5.1)
-   */  
+   */
   public static String formatiereTelefonnummerDIN5008(String tel)
   {
     String vorwahlExtern = "089";
@@ -182,8 +183,9 @@ public class Standard
   }
 
   /**
-   * Formatiert tel gemäss DIN 5008 und setzt dann die Vorwahl "0" davor, getrennt durch
-   * Space. Dadurch entsteht eine Nummer, die von jedem internen Telefon aus funktioniert.
+   * Formatiert tel gemäss DIN 5008 und setzt dann die Vorwahl "0" davor, getrennt
+   * durch Space. Dadurch entsteht eine Nummer, die von jedem internen Telefon aus
+   * funktioniert.
    * 
    * @author Bettina Bauer (D-III-ITD 5.1)
    */
@@ -195,8 +197,8 @@ public class Standard
   }
 
   /**
-   * Formatiert tel gemäss DIN 5008 und setzt dann die Vorwahl vorwahl davor, getrennt durch
-   * Space.
+   * Formatiert tel gemäss DIN 5008 und setzt dann die Vorwahl vorwahl davor,
+   * getrennt durch Space.
    * 
    * @author Bettina Bauer (D-III-ITD 5.1)
    */
@@ -216,9 +218,12 @@ public class Standard
       if (tel.startsWith("233"))
       {
         tel = tel.replaceAll("\\p{Punct}", "");
-        if(tel.startsWith("233989")){
+        if (tel.startsWith("233989"))
+        {
           tel = tel.replaceFirst("233989", vorwahl + " 233-989 ");
-        }else {
+        }
+        else
+        {
           tel = tel.replaceFirst("233", vorwahl + " 233-");
         }
       }
@@ -250,17 +255,20 @@ public class Standard
     }
     return tel;
   }
-  
+
   /**
    * Liefert true gdw regex eingabe vollständig matcht.
+   * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static boolean regex(String regex, String eingabe)
   {
-    try{
+    try
+    {
       Pattern pattern = Pattern.compile(regex);
       return pattern.matcher(eingabe).matches();
-    }catch(PatternSyntaxException x)
+    }
+    catch (PatternSyntaxException x)
     {
       return false;
     }

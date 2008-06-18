@@ -1,9 +1,8 @@
-//TODO L.m()
 /*
-* Dateiname: OnDemandCardView.java
-* Projekt  : WollMux
-* Funktion : Basisklasse für Views mit CardLayout für eine Menge von Objekten, wobei die einzelnen Karten erst on-demand erzeugt werden.
-* 
+ * Dateiname: OnDemandCardView.java
+ * Projekt  : WollMux
+ * Funktion : Basisklasse für Views mit CardLayout für eine Menge von Objekten, wobei die einzelnen Karten erst on-demand erzeugt werden.
+ * 
  * Copyright (c) 2008 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,17 +17,17 @@
  * You should have received a copy of the European Union Public Licence
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
-*
-* Änderungshistorie:
-* Datum      | Wer | Änderungsgrund
-* -------------------------------------------------------------------
-* 19.07.2007 | BNK | Erstellung
-* -------------------------------------------------------------------
-*
-* @author Matthias Benkmann (D-III-ITD 5.1)
-* @version 1.0
-* 
-*/
+ *
+ * Änderungshistorie:
+ * Datum      | Wer | Änderungsgrund
+ * -------------------------------------------------------------------
+ * 19.07.2007 | BNK | Erstellung
+ * -------------------------------------------------------------------
+ *
+ * @author Matthias Benkmann (D-III-ITD 5.1)
+ * @version 1.0
+ * 
+ */
 package de.muenchen.allg.itd51.wollmux.former.view;
 
 import java.awt.CardLayout;
@@ -47,29 +46,30 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.former.insertion.OneInsertionExtView;
 
 /**
- * Basisklasse für Views mit CardLayout für eine Menge von Objekten, wobei die einzelnen
- * Karten erst on-demand erzeugt werden.
+ * Basisklasse für Views mit CardLayout für eine Menge von Objekten, wobei die
+ * einzelnen Karten erst on-demand erzeugt werden.
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public abstract class OnDemandCardView implements View
 {
   /**
-   * Wird für das CardLayout verwendet als ID-String des leeren Panels, das angezeigt wird, 
-   * wenn keine bestimmte Einfügung ausgewählt ist.
+   * Wird für das CardLayout verwendet als ID-String des leeren Panels, das angezeigt
+   * wird, wenn keine bestimmte Einfügung ausgewählt ist.
    */
   private static final String EMPTY_PANEL = "EMPTY_PANEL";
-  
+
   /**
-   * Wird für das CardLayout verwendet als ID-String des Panels, das nur einen Button anzeigt,
-   * der für das momentan ausgewählte Objekt die entsprechende 
-   * View-Karte aktiviert.
+   * Wird für das CardLayout verwendet als ID-String des Panels, das nur einen Button
+   * anzeigt, der für das momentan ausgewählte Objekt die entsprechende View-Karte
+   * aktiviert.
    */
   private static final String INACTIVE_PANEL = "INACTIVE PANEL";
-  
+
   /**
    * Wird auf alle View-Karten registriert.
    */
@@ -79,38 +79,42 @@ public abstract class OnDemandCardView implements View
    * Das JPanel, das die ganze View enthält.
    */
   private JPanel myPanel;
-  
+
   /**
    * Das CardLayout, das für {@link #myPanel} verwendet wird.
    */
   private CardLayout cards;
-  
+
   /**
    * Das Model, dessen View-Karte im Augenblick angezeigt wird.
    */
   private Object currentModel;
-  
+
   /**
-   * Die Liste der aktuell angezeigten View-Karten mit ihren IDs 
-   * ({@link OnDemandCardView.ViewCardIdPair}).
+   * Die Liste der aktuell angezeigten View-Karten mit ihren IDs ({@link OnDemandCardView.ViewCardIdPair}).
    */
   private List<ViewCardIdPair> viewCardIdPairs = new Vector<ViewCardIdPair>();
-  
+
   private static class ViewCardIdPair
   {
     public View view;
+
     public String cardId;
-    public ViewCardIdPair(View view, String cardId) {this.view = view; this.cardId = cardId;};
+
+    public ViewCardIdPair(View view, String cardId)
+    {
+      this.view = view;
+      this.cardId = cardId;
+    };
   }
-  
-  
+
   /**
    * Enthält alle cardIds (wie von {@link #getCardIdFor(Object)} zurückgeliefert) von
-   * InsertionModels mit aktiver Sicht, d,h, von all denen, für die nicht
-   * das {@link #INACTIVE_PANEL} angezeigt wird. 
+   * InsertionModels mit aktiver Sicht, d,h, von all denen, für die nicht das
+   * {@link #INACTIVE_PANEL} angezeigt wird.
    */
   private Set<String> activeModelCardIds = new HashSet<String>();
-  
+
   public OnDemandCardView(String label)
   {
     cards = new CardLayout();
@@ -118,22 +122,25 @@ public abstract class OnDemandCardView implements View
     JPanel emptyPanel = new JPanel();
     emptyPanel.add(new JLabel(label));
     myPanel.add(emptyPanel, EMPTY_PANEL);
-    
+
     myPanel.add(makeInactivePanel(label), INACTIVE_PANEL);
   }
 
   /**
    * Liefert eine View-Karte für model.
-   * @param viewChangeListener wird auf die View registriert, damit die View
-   *        mitteilen kann, wenn Sie entfernt werden muss.
+   * 
+   * @param viewChangeListener
+   *          wird auf die View registriert, damit die View mitteilen kann, wenn Sie
+   *          entfernt werden muss.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  protected abstract View createViewFor(Object model, ViewChangeListener viewChangeListener);
-  
+  protected abstract View createViewFor(Object model,
+      ViewChangeListener viewChangeListener);
+
   /**
    * Fügt dieser View eine View-Karte für model hinzu.
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TESTED
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   protected void addItem(Object model)
   {
@@ -145,11 +152,10 @@ public abstract class OnDemandCardView implements View
     myPanel.validate();
   }
 
-
   /**
    * Entfernt view aus diesem Container (falls dort vorhanden).
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TESTED
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private void removeItem(View view)
   {
@@ -165,15 +171,16 @@ public abstract class OnDemandCardView implements View
         activeModelCardIds.remove(pair.cardId);
         if (currentModel != null && getCardIdFor(currentModel).equals(pair.cardId))
           showEmpty();
-        
+
         return;
       }
     }
   }
-  
-  
+
   /**
-   * Liefert einen Identifikationsstring für ob zur Verwendung mit einem {@link CardLayout}.
+   * Liefert einen Identifikationsstring für ob zur Verwendung mit einem
+   * {@link CardLayout}.
+   * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private String getCardIdFor(Object ob)
@@ -181,46 +188,47 @@ public abstract class OnDemandCardView implements View
     return "" + ob.hashCode();
   }
 
-  
   /**
    * Liefert ein JPanel, das nur einen Button enthält zum Aktivieren der
    * {@link OneInsertionExtView} des aktiven Models.
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   * TESTED
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private JPanel makeInactivePanel(String label)
   {
     JPanel inactivePanel = new JPanel();
     inactivePanel.setLayout(new BoxLayout(inactivePanel, BoxLayout.Y_AXIS));
-    
+
     inactivePanel.add(Box.createVerticalStrut(5));
-    
+
     Box hbox = Box.createHorizontalBox();
     hbox.add(Box.createHorizontalGlue());
     hbox.add(new JLabel(label));
     hbox.add(Box.createHorizontalGlue());
     inactivePanel.add(hbox);
-    
+
     inactivePanel.add(Box.createGlue());
-    
+
     hbox = Box.createHorizontalBox();
     hbox.add(Box.createHorizontalGlue());
-    JButton button = new JButton("Aktivieren");
+    JButton button = new JButton(L.m("Aktivieren"));
     hbox.add(button);
     hbox.add(Box.createHorizontalGlue());
     inactivePanel.add(hbox);
-    
+
     inactivePanel.add(Box.createGlue());
-    
-    button.addActionListener(new ActionListener(){
+
+    button.addActionListener(new ActionListener()
+    {
       public void actionPerformed(ActionEvent e)
       {
-        if (currentModel == null) return; //sollte nicht passieren können, aber zur Sicherheit
+        if (currentModel == null) return; // sollte nicht passieren können, aber zur
+                                          // Sicherheit
         addItem(currentModel);
         cards.show(myPanel, getCardIdFor(currentModel));
-      }}
-    );
-    
+      }
+    });
+
     return inactivePanel;
   }
 
@@ -228,7 +236,7 @@ public abstract class OnDemandCardView implements View
   {
     return myPanel;
   }
-  
+
   /**
    * Zeigt die leer View-Karte an.
    * 
@@ -237,12 +245,13 @@ public abstract class OnDemandCardView implements View
   public void showEmpty()
   {
     cards.show(myPanel, EMPTY_PANEL);
-    currentModel = null;    
+    currentModel = null;
   }
-  
+
   /**
-   * Zeigt die passende View-Karte für model an. Dies ist entweder eine richtige View-Karte,
-   * oder die View-Karte zum on-demand aktivieren der Sicht.
+   * Zeigt die passende View-Karte für model an. Dies ist entweder eine richtige
+   * View-Karte, oder die View-Karte zum on-demand aktivieren der Sicht.
+   * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void show(Object model)
@@ -254,8 +263,7 @@ public abstract class OnDemandCardView implements View
     else
       cards.show(myPanel, INACTIVE_PANEL);
   }
-  
-  
+
   private class MyViewChangeListener implements ViewChangeListener
   {
 
@@ -263,7 +271,7 @@ public abstract class OnDemandCardView implements View
     {
       removeItem(view);
     }
-    
+
   }
 
 }

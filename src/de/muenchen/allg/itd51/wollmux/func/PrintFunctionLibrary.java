@@ -1,4 +1,3 @@
-//TODO L.m()
 /*
  * Dateiname: PrintFunctionLibrary.java
  * Projekt  : WollMux
@@ -36,6 +35,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import de.muenchen.allg.itd51.wollmux.L;
+
 /**
  * Eine Bibliothek von benannten PrintFunctions
  * 
@@ -58,10 +59,9 @@ public class PrintFunctionLibrary
   }
 
   /**
-   * Erzeugt eine Funktionsbibliothek, die baselib referenziert (nicht
-   * kopiert!). baselib wird immer dann befragt, wenn die Funktionsbibliothek
-   * selbst keine Funktion des entsprechenden Namens enthält. baselib darf null
-   * sein.
+   * Erzeugt eine Funktionsbibliothek, die baselib referenziert (nicht kopiert!).
+   * baselib wird immer dann befragt, wenn die Funktionsbibliothek selbst keine
+   * Funktion des entsprechenden Namens enthält. baselib darf null sein.
    * 
    * @param baselib
    */
@@ -81,16 +81,15 @@ public class PrintFunctionLibrary
   {
     if (func == null || funcName == null)
       throw new NullPointerException(
-          "Weder Funktionsname noch Funktion darf null sein");
+        L.m("Weder Funktionsname noch Funktion darf null sein"));
     mapIdToFunction.put(funcName, func);
   }
 
   /**
-   * Liefert die Function namens funcName zurück oder null, falls keine Funktion
-   * mit diesem Namen bekannt ist. Wurde die Funktionsbibliothek mit einer
-   * Referenz auf eine andere Funktionsbibliothek initialisiert, so wird diese
-   * befragt, falls die Funktionsbibliothek selbst keine Funktion des
-   * entsprechenden Namens kennt.
+   * Liefert die Function namens funcName zurück oder null, falls keine Funktion mit
+   * diesem Namen bekannt ist. Wurde die Funktionsbibliothek mit einer Referenz auf
+   * eine andere Funktionsbibliothek initialisiert, so wird diese befragt, falls die
+   * Funktionsbibliothek selbst keine Funktion des entsprechenden Namens kennt.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -100,10 +99,11 @@ public class PrintFunctionLibrary
     if (func == null && baselib != null) func = baselib.get(funcName);
     return func;
   }
-  
+
   /**
-   * Liefert die Namen aller Funktionen, die über diese Funktionsbibliothek
-   * verfügbar sind.
+   * Liefert die Namen aller Funktionen, die über diese Funktionsbibliothek verfügbar
+   * sind.
+   * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public Set<String> getFunctionNames()
