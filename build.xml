@@ -37,6 +37,10 @@ compileidl: Compiles the files from the idl/ directory. If you're using Eclipse,
 	<property name="OOO_PROGRAM_DIR" value="/opt/openoffice.org/program" />
 	<property name="OOOCLS" value="/opt/openoffice.org/program/classes" />
 	<property name="OOO_SDK" value="/opt/openoffice.org_sdk" />
+<!--	<property name="OOO_PROGRAM_DIR" value="C:\Programme\OpenOffice.org 2.4\program" />
+	<property name="OOOCLS" value="C:\Programme\OpenOffice.org 2.4\program\classes" />
+	<property name="OOO_SDK" value="C:/Programme/OpenOffice.org_2.4_SDK" />
+-->
 
 <!-- If you follow the INSTALL instructions exactly, you won't have to change this path --> 	
 	<property name="UNOHELPER_DIR" value="../UNOHelper" />
@@ -147,14 +151,18 @@ compileidl: Compiles the files from the idl/ directory. If you're using Eclipse,
 		</apply>
 
 		<echo level="info">javamaker: Creating .class files</echo>
-		<apply executable="javamaker" relative="true" addsourcefile="false" dest="${BIN}">
+		<apply verbose="true" executable="javamaker" relative="true" addsourcefile="false" dest="${BIN}">
 			<arg line="-BUCR" />
 			<targetfile />
-		
+
 			<!-- ATTENTION! The ./ before the ${MY_IDL} is important or javamaker fails with
 			the error message ERROR: Cannot create temporary file for bin/de/muenchen/allg/itd51/wollmux/....class
 			-->
-			<arg line="-nD ${TYPES_RDB} ${RDBFILE} -O ./${MY_IDL}/" />
+			<arg value="-nD" />
+			<arg value="${TYPES_RDB}" />
+			<arg value="${RDBFILE}" />
+			<arg value="-O" />
+			<arg value="./${MY_IDL}" />
 			<fileset dir="${MY_IDL}" includes="**/*.urd" />
   		    <mapper type="package" from="*.urd" to="-T*" />
 		</apply>
