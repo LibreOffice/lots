@@ -418,6 +418,7 @@ public class FormGUI
 
     myFrame.setBounds(frameBounds);
     myFrame.validate(); // ohne diese wurde in Tests manchmal nicht neu gezeichnet
+    myFrame.toFront();
   }
 
   /**
