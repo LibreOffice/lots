@@ -649,8 +649,6 @@ abstract public class DocumentCommand
 
     public int executeCommand(DocumentCommand.InsertFormValue cmd);
 
-    public int executeCommand(DocumentCommand.InsertFunctionValue cmd);
-
     public int executeCommand(DocumentCommand.SetGroups cmd);
 
     public int executeCommand(DocumentCommand.SetPrintFunction cmd);
@@ -1123,68 +1121,6 @@ abstract public class DocumentCommand
     public String getTrafoName()
     {
       return trafo;
-    }
-
-    public int execute(DocumentCommand.Executor visitable)
-    {
-      return visitable.executeCommand(this);
-    }
-
-    protected boolean insertsTextContent()
-    {
-      return true;
-    }
-  }
-
-  // ********************************************************************************
-  /**
-   * Dieses Kommando fügt den Rückgabewert einer Funktion in den Briefkopf ein.
-   */
-  static public class InsertFunctionValue extends DocumentCommand
-  {
-    private Vector<String> args = null;
-
-    private String function = null;
-
-    public InsertFunctionValue(ConfigThingy wmCmd, Bookmark bookmark)
-        throws InvalidCommandException
-    {
-      super(wmCmd, bookmark);
-
-      try
-      {
-        function = wmCmd.get("WM").get("FUNCTION").toString();
-      }
-      catch (NodeNotFoundException e)
-      {
-        throw new InvalidCommandException(L.m("Fehlendes Attribut FUNCTION"));
-      }
-
-      args = new Vector<String>();
-      try
-      {
-        ConfigThingy argsConf = wmCmd.get("WM").get("ARGS");
-        Iterator<ConfigThingy> iter = argsConf.iterator();
-        while (iter.hasNext())
-        {
-          ConfigThingy arg = iter.next();
-          args.add(arg.getName());
-        }
-      }
-      catch (NodeNotFoundException e)
-      {
-        // ARGS sind optional
-      }
-    }
-
-    public String getFunctionName()
-    {
-      return function;
-    }
-
-    public Vector<String> getArgs()
-    {
-      return args;
     }
 
     public int execute(DocumentCommand.Executor visitable)

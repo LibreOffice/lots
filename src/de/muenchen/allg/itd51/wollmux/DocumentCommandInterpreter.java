@@ -94,9 +94,6 @@ import de.muenchen.allg.itd51.wollmux.TextDocumentModel.OverrideFragChainExcepti
 import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.db.DatasetNotFoundException;
-import de.muenchen.allg.itd51.wollmux.func.Function;
-import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
-import de.muenchen.allg.itd51.wollmux.func.Values.SimpleMap;
 import de.muenchen.allg.ooo.TextDocument;
 
 /**
@@ -1271,43 +1268,6 @@ public class DocumentCommandInterpreter
             + cmd.getRightSeparator());
         }
       }
-      cmd.markDone(!mux.isDebugMode());
-      return 0;
-    }
-
-    /**
-     * Diese Methode fügt den Rückgabewert einer Funktion ein.
-     */
-    public int executeCommand(DocumentCommand.InsertFunctionValue cmd)
-    {
-      cmd.setErrorState(false);
-
-      String value;
-      FunctionLibrary funcLib = model.getFunctionLibrary();
-      Function func = funcLib.get(cmd.getFunctionName());
-      if (func != null)
-      {
-        SimpleMap args = new SimpleMap();
-        String[] pars = func.parameters();
-        Iterator<String> iter = cmd.getArgs().iterator();
-        for (int i = 0; i < pars.length && iter.hasNext(); ++i)
-        {
-          String arg = iter.next();
-          args.put(pars[i], arg);
-        }
-        value = func.getString(args);
-      }
-      else
-      {
-        value =
-          L.m("<FEHLER: FUNCTION '%1' nicht definiert>", cmd.getFunctionName());
-        Logger.error(L.m(
-          "Die in Kommando '%1' verwendete FUNCTION '%2' ist nicht definiert.", cmd,
-          cmd.getFunctionName()));
-      }
-
-      XTextCursor insCursor = cmd.createInsertCursor(false);
-      if (insCursor != null) insCursor.setString(value);
       cmd.markDone(!mux.isDebugMode());
       return 0;
     }
