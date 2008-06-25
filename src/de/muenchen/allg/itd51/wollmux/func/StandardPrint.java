@@ -25,8 +25,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sun.star.beans.UnknownPropertyException;
+import com.sun.star.document.EventObject;
+import com.sun.star.document.XEventListener;
 import com.sun.star.lang.NoSuchMethodException;
 import com.sun.star.text.XTextDocument;
+import com.sun.star.uno.UnoRuntime;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoService;
@@ -35,6 +38,8 @@ import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung;
+import de.muenchen.allg.itd51.wollmux.WollMuxEventHandler;
+import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.PrintModels.InternalPrintModel;
 import de.muenchen.allg.itd51.wollmux.dialog.SachleitendeVerfuegungenDruckdialog.VerfuegungspunktInfo;
@@ -231,7 +236,7 @@ public class StandardPrint
    *           falls was schief geht.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public static void printIntoFile(XPrintModel pmod) throws Exception
+  public static void printIntoFile(final XPrintModel pmod) throws Exception
   {
     boolean firstAppend = true;
     XTextDocument outputDoc = null;
@@ -243,13 +248,42 @@ public class StandardPrint
     }
     catch (UnknownPropertyException e)
     {
-      outputDoc =
-        UNO.XTextDocument(UNO.loadComponentFromURL("private:factory/swriter", true,
-          true));
-      pmod.setPropertyValue("PrintIntoFile_OutputDocument", outputDoc);
+      final XTextDocument[] compo = new XTextDocument[] { null };
+
+      WollMuxEventHandler.handleAddDocumentEventListener(new XEventListener()
+      {
+        public void notifyEvent(EventObject arg0)
+        {
+          if (arg0.EventName.equals("OnWollMuxProcessingFinished"))
+          {
+            synchronized (compo)
+            {
+              if (!UnoRuntime.areSame(compo[0], arg0.Source)) return;
+              UNO.XEventBroadcaster(WollMuxSingleton.getInstance()).removeEventListener(
+                this);
+              compo.notifyAll();
+            }
+          }
+        }
+
+        public void disposing(com.sun.star.lang.EventObject arg0)
+        {}
+      });
+
+      synchronized (compo)
+      {
+
+        outputDoc =
+          compo[0] =
+            UNO.XTextDocument(UNO.loadComponentFromURL("private:factory/swriter",
+              true, true));
+        pmod.setPropertyValue("PrintIntoFile_OutputDocument", compo[0]);
+
+        while (compo[0] == null)
+          compo.wait();
+      }
     }
 
     PrintIntoFile.appendToFile(outputDoc, pmod.getTextDocument(), firstAppend);
   }
-
 }
