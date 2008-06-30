@@ -317,7 +317,7 @@ public class DocumentTree
       else if (textPortionType.equals("TextField"))
       {
         XDependentTextField textField = null;
-        int textfieldType = 0; // 0:input, 1:dropdown, 2: reference
+        int textfieldType = 0; // 0:input, 1:dropdown
         try
         {
           textField =
