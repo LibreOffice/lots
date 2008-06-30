@@ -123,6 +123,20 @@ public class OneInsertionLineView extends LineView
   private JComponent makeIDView()
   {
     idBox = new JComboBox();
+    final InsertionModel4InsertXValue model;
+    try
+    {
+      model = (InsertionModel4InsertXValue) this.model;
+    }
+    catch (ClassCastException x)
+    {
+      idBox.setEditable(true);
+      idBox.setSelectedItem("Spezialfeld");
+      idBox.setEditable(false);
+      idBox.setEnabled(false);
+      return idBox;
+    }
+
     idBox.setEditable(true);
     idBox.setSelectedItem(model.getDataID());
     final JTextComponent tc =
@@ -201,7 +215,7 @@ public class OneInsertionLineView extends LineView
       if (ignoreAttributeChanged) return;
       switch (attributeId)
       {
-        case InsertionModel.ID_ATTR:
+        case InsertionModel4InsertXValue.ID_ATTR:
           idChangedDueToExternalReasons((IDManager.ID) newValue);
           break;
       }

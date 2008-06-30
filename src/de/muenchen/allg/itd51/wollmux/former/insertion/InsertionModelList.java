@@ -171,21 +171,29 @@ public class InsertionModelList
     Iterator<InsertionModel> iter = iterator();
     while (iter.hasNext())
     {
-      InsertionModel model = iter.next();
-      String comboValue = desc.mapCheckboxId2ComboboxEntry.get(model.getDataID());
-      if (comboValue != null)
+      try
       {
-        try
+        InsertionModel4InsertXValue model =
+          (InsertionModel4InsertXValue) iter.next();
+        String comboValue = desc.mapCheckboxId2ComboboxEntry.get(model.getDataID());
+        if (comboValue != null)
         {
-          model.setDataID(comboId);
-        }
-        catch (UnknownIDException e)
-        {
-          Logger.error(L.m("Programmfehler"), e);
-          return;
-        }
+          try
+          {
+            model.setDataID(comboId);
+          }
+          catch (UnknownIDException e)
+          {
+            Logger.error(L.m("Programmfehler"), e);
+            return;
+          }
 
-        setMatchTrafo(model, comboValue);
+          setMatchTrafo(model, comboValue);
+        }
+      }
+      catch (ClassCastException x)
+      {
+        // skip this InsertionModel since it can't refer to a checkbox
       }
     }
   }
@@ -222,8 +230,17 @@ public class InsertionModelList
     Iterator<InsertionModel> iter = iterator();
     while (iter.hasNext())
     {
-      InsertionModel model = iter.next();
-      if (model.getDataID().equals(comboId))
+      InsertionModel4InsertXValue model;
+      try
+      {
+        model = (InsertionModel4InsertXValue) iter.next();
+      }
+      catch (ClassCastException x)
+      {
+        model = null;
+      }
+
+      if (model != null && model.getDataID().equals(comboId))
       {
         FunctionSelectionAccess trafo = model.getTrafoAccess();
         if (!trafo.isExpert()) continue;

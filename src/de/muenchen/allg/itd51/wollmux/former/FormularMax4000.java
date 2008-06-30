@@ -133,6 +133,7 @@ import de.muenchen.allg.itd51.wollmux.former.function.ParamValue;
 import de.muenchen.allg.itd51.wollmux.former.group.GroupModel;
 import de.muenchen.allg.itd51.wollmux.former.group.GroupModelList;
 import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModel;
+import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModel4InsertXValue;
 import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModelList;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.func.PrintFunctionLibrary;
@@ -952,8 +953,8 @@ public class FormularMax4000
       try
       {
         String bookmark = bookmarks[i];
-        if (InsertionModel.INSERTION_BOOKMARK.matcher(bookmark).matches())
-          insertionModelList.add(new InsertionModel(bookmark, bmSupp,
+        if (InsertionModel4InsertXValue.INSERTION_BOOKMARK.matcher(bookmark).matches())
+          insertionModelList.add(new InsertionModel4InsertXValue(bookmark, bmSupp,
             functionSelectionProvider, this));
       }
       catch (Exception x)
@@ -1463,8 +1464,8 @@ public class FormularMax4000
     try
     {
       InsertionModel imodel =
-        new InsertionModel(bookmarkName, UNO.XBookmarksSupplier(doc.doc),
-          functionSelectionProvider, this);
+        new InsertionModel4InsertXValue(bookmarkName,
+          UNO.XBookmarksSupplier(doc.doc), functionSelectionProvider, this);
       if (doGenderTrafo) addGenderTrafo(imodel, (DropdownFormControl) control);
       insertionModelList.add(imodel);
     }
@@ -2106,6 +2107,10 @@ public class FormularMax4000
    */
   private void selectionChanged(XIndexAccess access)
   {
+    // FIXME: Auch InputUser-Felder aufsammeln (hier nicht Bookmarkname sondern Name
+    // der Variable)
+    // FIXME: Rename der bookmark... Variablen zu name...
+
     Set<String> bookmarkNames = null; // wird lazy initialisiert
 
     int count = access.getCount();
