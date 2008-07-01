@@ -93,6 +93,7 @@ import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
 import de.muenchen.allg.itd51.wollmux.dialog.FormController;
 import de.muenchen.allg.itd51.wollmux.dialog.MailMergeNew;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
+import de.muenchen.allg.itd51.wollmux.former.InsertionModel4InputUser;
 import de.muenchen.allg.itd51.wollmux.func.Function;
 import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
@@ -163,12 +164,6 @@ public class TextDocumentModel
    * Funktionen beginnen.
    */
   private static final String AUTOFUNCTION_PREFIX = "AUTOFUNCTION_";
-
-  /**
-   * Prefix "WM(FUNCTION '", mit dem die Namen von Benutzerfelder mit
-   * WollMux-Funktionen beginnen.
-   */
-  public static final String USER_FIELD_NAME_PREFIX = "WM(FUNCTION '";
 
   /**
    * Ermöglicht den Zugriff auf eine Collection aller FormField-Objekte in diesem
@@ -2593,7 +2588,9 @@ public class TextDocumentModel
   {
     try
     {
-      String userFieldName = USER_FIELD_NAME_PREFIX + trafoName + "')";
+      ConfigThingy conf = new ConfigThingy("WM");
+      conf.add("FUNCTION").add(trafoName);
+      String userFieldName = conf.stringRepresentation(false, '\'', false);
 
       // master erzeugen
       XPropertySet master = getUserFieldMaster(userFieldName);
@@ -2759,16 +2756,32 @@ public class TextDocumentModel
    * @return den Namen der in diesem Benutzerfeld verwendeten Funktion oder null,
    *         wenn das Benutzerfeld nicht vom WollMux interpretiert wird.
    * 
-   * @author Christoph Lutz (D-III-ITD-5.1)
+   * @author Matthias Benkmann (D-III-ITD-D101)
    */
   public static String getFunctionNameForUserFieldName(String userFieldName)
   {
     if (userFieldName == null) return null;
-    if (userFieldName.startsWith(TextDocumentModel.USER_FIELD_NAME_PREFIX))
-      return userFieldName.substring(
-        TextDocumentModel.USER_FIELD_NAME_PREFIX.length(),
-        userFieldName.length() - 2);
-    return null;
+
+    Matcher m = InsertionModel4InputUser.INPUT_USER_FUNCTION.matcher(userFieldName);
+
+    if (!m.matches()) return null;
+    String confStr = m.group(1);
+
+    ConfigThingy conf;
+    try
+    {
+      conf = new ConfigThingy("INSERT", confStr);
+    }
+    catch (Exception x)
+    {
+      return null;
+    }
+
+    ConfigThingy trafoConf = conf.query("FUNCTION");
+    if (trafoConf.count() != 1)
+      return null;
+    else
+      return trafoConf.toString();
   }
 
   /**
