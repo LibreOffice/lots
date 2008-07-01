@@ -268,9 +268,18 @@ public class AllInsertionLineViewsPanel implements View
     {
       int i = selection.lastElement();
       OneInsertionLineView view = views.get(i);
-      InsertionModel model = view.getModel();
-      model.removeBookmark();
-      insertionModelList.remove(model);
+      try
+      {
+        // throws ClassCastException for other InsertionModel subtypes
+        InsertionModel4InsertXValue model =
+          (InsertionModel4InsertXValue) view.getModel();
+        model.removeBookmark();
+        insertionModelList.remove(model);
+      }
+      catch (ClassCastException x)
+      {
+        // InsertionModel4InputUser can't be deMux'ed
+      }
     }
   }
 

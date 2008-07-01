@@ -102,9 +102,10 @@ import com.sun.star.container.XNamed;
 import com.sun.star.document.XDocumentInfo;
 import com.sun.star.lang.EventObject;
 import com.sun.star.lang.IllegalArgumentException;
+import com.sun.star.lang.XServiceInfo;
 import com.sun.star.text.XBookmarksSupplier;
-import com.sun.star.text.XDependentTextField;
 import com.sun.star.text.XTextDocument;
+import com.sun.star.text.XTextFieldsSupplier;
 import com.sun.star.uno.AnyConverter;
 import com.sun.star.uno.XInterface;
 import com.sun.star.view.XSelectionChangeListener;
@@ -133,6 +134,7 @@ import de.muenchen.allg.itd51.wollmux.former.function.ParamValue;
 import de.muenchen.allg.itd51.wollmux.former.group.GroupModel;
 import de.muenchen.allg.itd51.wollmux.former.group.GroupModelList;
 import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModel;
+import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModel4InputUser;
 import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModel4InsertXValue;
 import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModelList;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
@@ -517,36 +519,6 @@ public class FormularMax4000
   public FormularMax4000(TextDocumentModel model, ActionListener abortListener,
       FunctionLibrary funcLib, PrintFunctionLibrary printFuncLib)
   {
-    XEnumeration xenu =
-      UNO.XTextFieldsSupplier(model.doc).getTextFields().createEnumeration();
-    boolean dothrow = false;
-    while (xenu.hasMoreElements())
-    {
-      try
-      {
-        XDependentTextField tf = UNO.XDependentTextField(xenu.nextElement());
-        if (tf == null) continue;
-
-        if (UNO.supportsService(tf, "com.sun.star.text.TextField.InputUser"))
-        {
-          dothrow = true;
-          break;
-        }
-      }
-      catch (Exception x)
-      {}
-    }
-
-    if (dothrow)
-    {
-      JOptionPane.showMessageDialog(
-        null,
-        "Der FormularMax 4000 kann Dokumente mit Seriendruckfeldern leider nicht verarbeiten.",
-        "Fehler!", JOptionPane.ERROR_MESSAGE);
-      throw new RuntimeException(
-        "Der FormularMax 4000 kann Dokumente mit Seriendruckfeldern leider nicht verarbeiten.");
-    }
-
     this.doc = model;
     this.abortListener = abortListener;
     this.functionLibrary = funcLib;
@@ -946,6 +918,10 @@ public class FormularMax4000
     }
 
     insertionModelList.clear();
+
+    /*
+     * Collect insertions via WollMux bookmarks
+     */
     XBookmarksSupplier bmSupp = UNO.XBookmarksSupplier(doc.doc);
     String[] bookmarks = bmSupp.getBookmarks().getElementNames();
     for (int i = 0; i < bookmarks.length; ++i)
@@ -956,6 +932,34 @@ public class FormularMax4000
         if (InsertionModel4InsertXValue.INSERTION_BOOKMARK.matcher(bookmark).matches())
           insertionModelList.add(new InsertionModel4InsertXValue(bookmark, bmSupp,
             functionSelectionProvider, this));
+      }
+      catch (Exception x)
+      {
+        Logger.error(x);
+      }
+    }
+
+    /*
+     * Collect insertions via InputUser textfields
+     */
+    XTextFieldsSupplier tfSupp = UNO.XTextFieldsSupplier(doc.doc);
+    XEnumeration enu = tfSupp.getTextFields().createEnumeration();
+    while (enu.hasMoreElements())
+    {
+      try
+      {
+        Object tf = enu.nextElement();
+        XServiceInfo info = UNO.XServiceInfo(tf);
+        if (info.supportsService("com.sun.star.text.TextField.InputUser"))
+        {
+          Matcher m =
+            InsertionModel4InputUser.INPUT_USER_FUNCTION.matcher(UNO.getProperty(tf,
+              "Content").toString());
+
+          if (m.matches())
+            insertionModelList.add(new InsertionModel4InputUser(tf, doc.doc,
+              functionSelectionProvider, this));
+        }
       }
       catch (Exception x)
       {

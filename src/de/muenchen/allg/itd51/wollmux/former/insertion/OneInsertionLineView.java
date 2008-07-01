@@ -123,66 +123,66 @@ public class OneInsertionLineView extends LineView
   private JComponent makeIDView()
   {
     idBox = new JComboBox();
-    final InsertionModel4InsertXValue model;
-    try
-    {
-      model = (InsertionModel4InsertXValue) this.model;
-    }
-    catch (ClassCastException x)
+
+    if (!(this.model instanceof InsertionModel4InsertXValue))
     {
       idBox.setEditable(true);
       idBox.setSelectedItem("Spezialfeld");
       idBox.setEditable(false);
       idBox.setEnabled(false);
-      return idBox;
+    }
+    else
+    {
+      final InsertionModel4InsertXValue model =
+        (InsertionModel4InsertXValue) this.model;
+      idBox.setEditable(true);
+      idBox.setSelectedItem(model.getDataID());
+      final JTextComponent tc =
+        ((JTextComponent) idBox.getEditor().getEditorComponent());
+      final Document comboDoc = tc.getDocument();
+      final Color defaultBackground = tc.getBackground();
+
+      tc.addMouseListener(myMouseListener);
+
+      comboDoc.addDocumentListener(new DocumentListener()
+      {
+        public void update()
+        {
+          ignoreAttributeChanged = true;
+          try
+          {
+            model.setDataID(comboDoc.getText(0, comboDoc.getLength()));
+            tc.setBackground(defaultBackground);
+          }
+          catch (BadLocationException x)
+          {
+            Logger.error(x);
+          }
+          catch (UnknownIDException x)
+          {
+            tc.setBackground(Color.RED);
+          }
+          ignoreAttributeChanged = false;
+        }
+
+        public void insertUpdate(DocumentEvent e)
+        {
+          update();
+        }
+
+        public void removeUpdate(DocumentEvent e)
+        {
+          update();
+        }
+
+        public void changedUpdate(DocumentEvent e)
+        {
+          update();
+        }
+      });
     }
 
-    idBox.setEditable(true);
-    idBox.setSelectedItem(model.getDataID());
-    final JTextComponent tc =
-      ((JTextComponent) idBox.getEditor().getEditorComponent());
-    final Document comboDoc = tc.getDocument();
-    final Color defaultBackground = tc.getBackground();
-
     idBox.addMouseListener(myMouseListener);
-    tc.addMouseListener(myMouseListener);
-
-    comboDoc.addDocumentListener(new DocumentListener()
-    {
-      public void update()
-      {
-        ignoreAttributeChanged = true;
-        try
-        {
-          model.setDataID(comboDoc.getText(0, comboDoc.getLength()));
-          tc.setBackground(defaultBackground);
-        }
-        catch (BadLocationException x)
-        {
-          Logger.error(x);
-        }
-        catch (UnknownIDException x)
-        {
-          tc.setBackground(Color.RED);
-        }
-        ignoreAttributeChanged = false;
-      }
-
-      public void insertUpdate(DocumentEvent e)
-      {
-        update();
-      }
-
-      public void removeUpdate(DocumentEvent e)
-      {
-        update();
-      }
-
-      public void changedUpdate(DocumentEvent e)
-      {
-        update();
-      }
-    });
 
     return idBox;
   }

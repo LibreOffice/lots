@@ -155,9 +155,8 @@ public class InsertionModel4InsertXValue extends InsertionModel
   {
     this.formularMax4000 = formularMax4000;
     bookmark = new Bookmark(bookmarkName, doc);
-    String confStr = bookmarkName.replaceAll("\\d*\\z", ""); // eventuell vorhandene
-    // Ziffern am Ende
-    // löschen
+    // eventuell vorhandene Ziffern am Ende löschen
+    String confStr = bookmarkName.replaceAll("\\d*\\z", "");
     URL url = null;
     try
     {
@@ -377,6 +376,12 @@ public class InsertionModel4InsertXValue extends InsertionModel
     bookmark.remove();
   }
 
+  /**
+   * Entfernt das zur Einfügestelle gehörende WollMux-Bookmark, nicht jedoch den
+   * zugehörigen Feldbefehl.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
   public void removeBookmark()
   {
     bookmark.remove();

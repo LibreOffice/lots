@@ -71,15 +71,6 @@ public abstract class InsertionModel
   public abstract void removeFromDocument();
 
   /**
-   * Falls zu der Einfügestelle ein WollMux-Bookmark gehört, so wird dieses entfernt
-   * (der zugehörige Feldbefehl jedoch nicht).
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  public void removeBookmark()
-  {};
-
-  /**
    * Liefert den "Namen" der Einfügestelle. Dies kann z.B. der Name des Bookmarks
    * sein, das die Einfügestelle umschließt.
    * 
