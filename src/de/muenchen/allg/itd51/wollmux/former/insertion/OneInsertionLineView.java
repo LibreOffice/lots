@@ -249,7 +249,7 @@ public class OneInsertionLineView extends LineView
         }
       });
 
-      if (state != 0) getModel().selectBookmark();
+      if (state != 0) getModel().selectWithViewCursor();
     }
 
     public void mouseReleased(MouseEvent e)

@@ -74,20 +74,16 @@ public abstract class InsertionModel
    * Liefert den "Namen" der Einfügestelle. Dies kann z.B. der Name des Bookmarks
    * sein, das die Einfügestelle umschließt.
    * 
-   * FIXME: Rename to getName()
-   * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public abstract String getBookmarkName();
+  public abstract String getName();
 
   /**
    * Setzt den ViewCursor auf die Einfügestelle.
    * 
-   * FIXME: Rename to selectWithViewCursor()
-   * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public abstract void selectBookmark();
+  public abstract void selectWithViewCursor();
 
   /**
    * Lässt dieses {@link InsertionModel} sein zugehöriges Bookmark bzw, sonstige

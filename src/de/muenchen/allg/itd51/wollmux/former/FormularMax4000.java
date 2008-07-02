@@ -95,6 +95,7 @@ import javax.swing.text.PlainView;
 import javax.swing.text.View;
 import javax.swing.text.ViewFactory;
 
+import com.sun.star.container.NoSuchElementException;
 import com.sun.star.container.XEnumeration;
 import com.sun.star.container.XEnumerationAccess;
 import com.sun.star.container.XIndexAccess;
@@ -102,10 +103,14 @@ import com.sun.star.container.XNamed;
 import com.sun.star.document.XDocumentInfo;
 import com.sun.star.lang.EventObject;
 import com.sun.star.lang.IllegalArgumentException;
+import com.sun.star.lang.WrappedTargetException;
 import com.sun.star.lang.XServiceInfo;
+import com.sun.star.table.XCell;
 import com.sun.star.text.XBookmarksSupplier;
+import com.sun.star.text.XDependentTextField;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextFieldsSupplier;
+import com.sun.star.text.XTextTable;
 import com.sun.star.uno.AnyConverter;
 import com.sun.star.uno.XInterface;
 import com.sun.star.view.XSelectionChangeListener;
@@ -2111,11 +2116,7 @@ public class FormularMax4000
    */
   private void selectionChanged(XIndexAccess access)
   {
-    // FIXME: Auch InputUser-Felder aufsammeln (hier nicht Bookmarkname sondern Name
-    // der Variable)
-    // FIXME: Rename der bookmark... Variablen zu name...
-
-    Set<String> bookmarkNames = null; // wird lazy initialisiert
+    Set<String> names = new HashSet<String>();
 
     int count = access.getCount();
     for (int i = 0; i < count; ++i)
@@ -2124,51 +2125,7 @@ public class FormularMax4000
       try
       {
         enuAccess = UNO.XEnumerationAccess(access.getByIndex(i));
-      }
-      catch (Exception x)
-      {
-        Logger.error(x);
-      }
-      try
-      {
-        if (enuAccess != null)
-        {
-          XEnumeration paraEnu = enuAccess.createEnumeration();
-          while (paraEnu.hasMoreElements())
-          {
-            Object nextEle = paraEnu.nextElement();
-            if (nextEle == null)
-              throw new NullPointerException(
-                L.m("nextElement() == null obwohl hasMoreElements()==true"));
-            XEnumerationAccess xs = UNO.XEnumerationAccess(nextEle);
-            if (xs == null)
-              throw new NullPointerException(
-                L.m("Paragraph unterstützt nicht XEnumerationAccess?!?"));
-            XEnumeration textportionEnu = xs.createEnumeration();
-            while (textportionEnu.hasMoreElements())
-            {
-              Object textportion = textportionEnu.nextElement();
-              if ("Bookmark".equals(UNO.getProperty(textportion, "TextPortionType")))
-              {
-                XNamed bookmark = null;
-                try
-                {
-                  // boolean isStart = ((Boolean)UNO.getProperty(textportion,
-                  // "IsStart")).booleanValue();
-                  bookmark = UNO.XNamed(UNO.getProperty(textportion, "Bookmark"));
-                }
-                catch (Exception x)
-                {
-                  continue;
-                }
-
-                String name = bookmark.getName();
-                if (bookmarkNames == null) bookmarkNames = new HashSet<String>();
-                bookmarkNames.add(name);
-              }
-            }
-          }
-        }
+        handleParagraphEnumeration(names, enuAccess);
       }
       catch (Exception x)
       {
@@ -2176,8 +2133,121 @@ public class FormularMax4000
       }
     }
 
-    if (bookmarkNames != null && !bookmarkNames.isEmpty())
-      broadcast(new BroadcastObjectSelectionByBookmarks(bookmarkNames));
+    if (!names.isEmpty()) broadcast(new BroadcastObjectSelectionByBookmarks(names));
+  }
+
+  /**
+   * Falls enuAccess != null, wird die entsprechende XEnumeration genommen und ihre
+   * Elemente als Paragraphen bzw TextTables interpretiert, deren Inhalt enumeriert
+   * wird, um daraus alle enthaltenen Bookmarks UND InputUser Felder zu bestimmen und
+   * ihre Namen zu names hinzuzufügen.
+   * 
+   * @throws NoSuchElementException
+   * @throws WrappedTargetException
+   * @author Matthias Benkmann (D-III-ITD-D101)
+   * 
+   * TESTED
+   */
+  private void handleParagraphEnumeration(Set<String> names,
+      XEnumerationAccess enuAccess) throws NoSuchElementException,
+      WrappedTargetException
+  {
+    if (enuAccess != null)
+    {
+      XEnumeration paraEnu = enuAccess.createEnumeration();
+      while (paraEnu.hasMoreElements())
+      {
+        Object nextEle = paraEnu.nextElement();
+        if (nextEle == null)
+          throw new NullPointerException(
+            L.m("nextElement() == null obwohl hasMoreElements()==true"));
+
+        XEnumerationAccess xs = UNO.XEnumerationAccess(nextEle);
+        if (xs != null)
+          handleParagraph(names, xs);
+        else
+        {// unterstützt nicht XEnumerationAccess, ist wohl SwXTextTable
+          XTextTable table = UNO.XTextTable(nextEle);
+          if (table != null) handleTextTable(names, table);
+        }
+      }
+    }
+  }
+
+  /**
+   * Enumeriert über die Zellen von table und ruft für jede
+   * {@link #handleParagraph(Set, XEnumerationAccess)} auf.
+   * 
+   * @throws NoSuchElementException
+   * @throws WrappedTargetException
+   * 
+   * @author Matthias Benkmann (D-III-ITD-D101)
+   * 
+   * TESTED
+   */
+  private void handleTextTable(Set<String> names, XTextTable table)
+      throws NoSuchElementException, WrappedTargetException
+  {
+    String[] cellNames = table.getCellNames();
+    for (int i = 0; i < cellNames.length; ++i)
+    {
+      XCell cell = table.getCellByName(cellNames[i]);
+      handleParagraphEnumeration(names, UNO.XEnumerationAccess(cell));
+    }
+  }
+
+  /**
+   * Enumeriert über die TextPortions des Paragraphen para und sammelt alle Bookmarks
+   * und InputUser-Felder darin auf und fügt ihre Namen zu names hinzu.
+   * 
+   * @throws NoSuchElementException
+   * @throws WrappedTargetException
+   * @author Matthias Benkmann (D-III-ITD-D101)
+   * 
+   * TESTED
+   */
+  private void handleParagraph(Set<String> names, XEnumerationAccess para)
+      throws NoSuchElementException, WrappedTargetException
+  {
+    XEnumeration textportionEnu = para.createEnumeration();
+    while (textportionEnu.hasMoreElements())
+    {
+      Object textportion = textportionEnu.nextElement();
+      String type = (String) UNO.getProperty(textportion, "TextPortionType");
+      if ("Bookmark".equals(type)) // String constant first b/c type may be null
+      {
+        XNamed bookmark = null;
+        try
+        {
+          // boolean isStart = ((Boolean)UNO.getProperty(textportion,
+          // "IsStart")).booleanValue();
+          bookmark = UNO.XNamed(UNO.getProperty(textportion, "Bookmark"));
+          names.add(bookmark.getName());
+        }
+        catch (Exception x)
+        {
+          Logger.error(x);
+        }
+      }
+      else if ("TextField".equals(type)) // String const first b/c type may be null
+      {
+        XDependentTextField textField = null;
+        try
+        {
+          textField =
+            UNO.XDependentTextField(UNO.getProperty(textportion, "TextField"));
+          XServiceInfo info = UNO.XServiceInfo(textField);
+          if (info.supportsService("com.sun.star.text.TextField.InputUser"))
+          {
+            names.add((String) UNO.getProperty(textField, "Content"));
+          }
+        }
+        catch (Exception x)
+        {
+          Logger.error(x);
+        }
+      }
+    }
   }
 
   private class MyWindowListener implements WindowListener

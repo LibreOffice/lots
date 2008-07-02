@@ -359,12 +359,12 @@ public class InsertionModel4InsertXValue extends InsertionModel
     // formularMax4000.documentNeedsUpdating(); ist bereits in notifyListeners
   }
 
-  public String getBookmarkName()
+  public String getName()
   {
     return bookmark.getName();
   }
 
-  public void selectBookmark()
+  public void selectWithViewCursor()
   {
     bookmark.select();
   }

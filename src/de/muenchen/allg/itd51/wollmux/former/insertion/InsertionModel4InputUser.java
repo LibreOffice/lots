@@ -131,7 +131,7 @@ public class InsertionModel4InputUser extends InsertionModel
     }
   }
 
-  public String getBookmarkName()
+  public String getName()
   {
     return name;
   }
@@ -209,7 +209,7 @@ public class InsertionModel4InputUser extends InsertionModel
     }
   }
 
-  public void selectBookmark()
+  public void selectWithViewCursor()
   { // TESTED
     try
     {

@@ -435,7 +435,7 @@ public class InsertionModelList
       while (iter.hasNext())
       {
         InsertionModel model = iter.next();
-        if (bookmarkNames.contains(model.getBookmarkName()))
+        if (bookmarkNames.contains(model.getName()))
         {
           formularMax4000.broadcast(new BroadcastObjectSelection(model, 1,
             clearSelection)
