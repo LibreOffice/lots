@@ -110,7 +110,7 @@ public class PrintIntoFile
   {
     File[] dest = new File[] {
       null, null }; // dest[0] ist das temp. Verzeichnis, dest[1] die temp. Datei
-                    // darin
+    // darin
     try
     {
       String url = storeInTemporaryFile(inputDoc, dest);
@@ -183,7 +183,7 @@ public class PrintIntoFile
       int pageNumberOffset =
         ((Number) UNO.getProperty(outputDoc.getCurrentController(), "PageCount")).intValue();
       --pageNumberOffset; // Die gerade eben angehängte Seite darf nicht mitgezählt
-                          // werden.
+      // werden.
 
       // String[] frameNames =
       // UNO.XTextFramesSupplier(outputDoc).getTextFrames().getElementNames();
@@ -348,7 +348,7 @@ public class PrintIntoFile
    *          das Dokument in dem der Cursor wandert
    * @param oldPageStyles
    *          die PageStyles Familie des alten Dokuments
-   * @author Matthias Benkmann (D-III-ITD 5.1) TODO Testen
+   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private static void renamePageStyles(XParagraphCursor cursor, XTextDocument doc,
       XNameAccess oldPageStyles)
@@ -598,7 +598,7 @@ public class PrintIntoFile
     // FilterName setzen auskommentiert, damit OOo automatisch den besten Filter
     // wählt
     arguments.setPropertyValue("FilterName", "writer8"); // found in
-                                                          // /opt/openoffice.org/share/registry/modules/org/openoffice/TypeDetection/Filter/fcfg_writer_filters.xcu
+    // /opt/openoffice.org/share/registry/modules/org/openoffice/TypeDetection/Filter/fcfg_writer_filters.xcu
     UNO.XStorable(inputDoc).storeToURL(url, arguments.getProps());
     return url;
   }

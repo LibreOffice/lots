@@ -110,6 +110,8 @@ import com.sun.star.text.XBookmarksSupplier;
 import com.sun.star.text.XDependentTextField;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextFieldsSupplier;
+import com.sun.star.text.XTextRange;
+import com.sun.star.text.XTextRangeCompare;
 import com.sun.star.text.XTextTable;
 import com.sun.star.uno.AnyConverter;
 import com.sun.star.uno.XInterface;
@@ -2124,8 +2126,10 @@ public class FormularMax4000
       XEnumerationAccess enuAccess = null;
       try
       {
-        enuAccess = UNO.XEnumerationAccess(access.getByIndex(i));
-        handleParagraphEnumeration(names, enuAccess);
+        XTextRange range = UNO.XTextRange(access.getByIndex(i));
+        enuAccess = UNO.XEnumerationAccess(range);
+        handleParagraphEnumeration(names, enuAccess,
+          UNO.XTextRangeCompare(range.getText()), range, false);
       }
       catch (Exception x)
       {
@@ -2142,6 +2146,11 @@ public class FormularMax4000
    * wird, um daraus alle enthaltenen Bookmarks UND InputUser Felder zu bestimmen und
    * ihre Namen zu names hinzuzufügen.
    * 
+   * @param doCompare
+   *          if true, then text portions will be ignored if they lie outside of
+   *          range (as tested with compare). Text portions inside of tables are
+   *          always checked, regardless of doCompare.
+   * 
    * @throws NoSuchElementException
    * @throws WrappedTargetException
    * @author Matthias Benkmann (D-III-ITD-D101)
@@ -2149,8 +2158,8 @@ public class FormularMax4000
    * TESTED
    */
   private void handleParagraphEnumeration(Set<String> names,
-      XEnumerationAccess enuAccess) throws NoSuchElementException,
-      WrappedTargetException
+      XEnumerationAccess enuAccess, XTextRangeCompare compare, XTextRange range,
+      boolean doCompare) throws NoSuchElementException, WrappedTargetException
   {
     if (enuAccess != null)
     {
@@ -2164,19 +2173,53 @@ public class FormularMax4000
 
         XEnumerationAccess xs = UNO.XEnumerationAccess(nextEle);
         if (xs != null)
-          handleParagraph(names, xs);
+          handleParagraph(names, xs, compare, range, doCompare);
         else
         {// unterstützt nicht XEnumerationAccess, ist wohl SwXTextTable
           XTextTable table = UNO.XTextTable(nextEle);
-          if (table != null) handleTextTable(names, table);
+          if (table != null) handleTextTable(names, table, compare, range);
         }
       }
     }
   }
 
   /**
+   * Returns true iff (doCompare == false OR range2 is null or not an XTextRange OR
+   * range2 lies inside of range (tested with compare)).
+   * 
+   * @author Matthias Benkmann (D-III-ITD-D101)
+   * 
+   * TODO Testen
+   */
+  private boolean isInvalidRange(XTextRangeCompare compare, XTextRange range,
+      Object range2, boolean doCompare)
+  {
+    XTextRange compareRange = UNO.XTextRange(range2);
+    if (doCompare && compareRange != null)
+    {
+      try
+      {
+        if (compare.compareRegionStarts(range, compareRange) < 0) return true;
+        if (compare.compareRegionEnds(range, compareRange) > 0) return true;
+      }
+      catch (Exception x)
+      {
+        return true;/*
+                     * Do not Logger.error(x); because the most likely cause for an
+                     * exception is that range2 does not belong to the text object
+                     * compare, which happens in tables, because when enumerating
+                     * over a range inside of a table the enumeration hits a lot of
+                     * unrelated cells (OOo bug).
+                     */
+      }
+    }
+    return false;
+  }
+
+  /**
    * Enumeriert über die Zellen von table und ruft für jede
-   * {@link #handleParagraph(Set, XEnumerationAccess)} auf.
+   * {@link #handleParagraph(Set, XEnumerationAccess, XTextRangeCompare, XTextRange, boolean)}
+   * auf, wobei für doCompare immer true übergeben wird.
    * 
    * @throws NoSuchElementException
    * @throws WrappedTargetException
@@ -2185,14 +2228,16 @@ public class FormularMax4000
    * 
    * TESTED
    */
-  private void handleTextTable(Set<String> names, XTextTable table)
-      throws NoSuchElementException, WrappedTargetException
+  private void handleTextTable(Set<String> names, XTextTable table,
+      XTextRangeCompare compare, XTextRange range) throws NoSuchElementException,
+      WrappedTargetException
   {
     String[] cellNames = table.getCellNames();
     for (int i = 0; i < cellNames.length; ++i)
     {
       XCell cell = table.getCellByName(cellNames[i]);
-      handleParagraphEnumeration(names, UNO.XEnumerationAccess(cell));
+      handleParagraphEnumeration(names, UNO.XEnumerationAccess(cell), compare,
+        range, true);
     }
   }
 
@@ -2200,13 +2245,19 @@ public class FormularMax4000
    * Enumeriert über die TextPortions des Paragraphen para und sammelt alle Bookmarks
    * und InputUser-Felder darin auf und fügt ihre Namen zu names hinzu.
    * 
+   * @param doCompare
+   *          if true, then text portions will be ignored if they lie outside of
+   *          range (as tested with compare). Text portions inside of tables are
+   *          always checked, regardless of doCompare.
+   * 
    * @throws NoSuchElementException
    * @throws WrappedTargetException
    * @author Matthias Benkmann (D-III-ITD-D101)
    * 
    * TESTED
    */
-  private void handleParagraph(Set<String> names, XEnumerationAccess para)
+  private void handleParagraph(Set<String> names, XEnumerationAccess para,
+      XTextRangeCompare compare, XTextRange range, boolean doCompare)
       throws NoSuchElementException, WrappedTargetException
   {
     XEnumeration textportionEnu = para.createEnumeration();
@@ -2216,6 +2267,7 @@ public class FormularMax4000
       String type = (String) UNO.getProperty(textportion, "TextPortionType");
       if ("Bookmark".equals(type)) // String constant first b/c type may be null
       {
+        if (isInvalidRange(compare, range, textportion, doCompare)) continue;
         XNamed bookmark = null;
         try
         {
@@ -2239,6 +2291,7 @@ public class FormularMax4000
           XServiceInfo info = UNO.XServiceInfo(textField);
           if (info.supportsService("com.sun.star.text.TextField.InputUser"))
           {
+            if (isInvalidRange(compare, range, textportion, doCompare)) continue;
             names.add((String) UNO.getProperty(textField, "Content"));
           }
         }
