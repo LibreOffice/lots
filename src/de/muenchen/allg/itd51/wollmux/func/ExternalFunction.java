@@ -139,7 +139,7 @@ public class ExternalFunction
         script = UNO.masterScriptProvider.getScript(url);
       }
     }
-    catch (Exception e)
+    catch (Throwable e)
     {
       throw new ConfigurationErrorException(
         L.m("Skript \"%1\" nicht verfügbar", url), e);
