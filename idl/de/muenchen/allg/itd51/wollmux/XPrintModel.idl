@@ -191,6 +191,35 @@ interface XPrintModel
      * Druckvorgang durch den Benutzer abgebrochen wurde.
      */
 	void cancel();
+
+    /**
+     * Diese Methode aktiviert die Anzeige der Fortschrittsleiste und initialisiert
+     * die Anzahl der von dieser Druckfunktion zu erwartenden Versionen auf maxValue,
+     * wenn maxValue größer 0 ist, oder entfernt die Druckfunktion aus der
+     * Fortschrittsanzeige, wenn maxValue gleich 0 ist. Die Fortschrittsanzeige ist
+     * prinzipiell in der Lage, den Druckstatus verschiedener verketteter
+     * Druckfunktionen anzuzeigen. Die Berechnung der Gesamtausfertigungen und des
+     * aktuellen Gesamtstatus wird von der Fortschrittsanzeige übernommen. Damit muss
+     * jede Druckfunktion hier auch nur die Anzahl Versionen setzen, die von der
+     * Druckfunktion selbst erzeugt werden.
+     * 
+     * @param maxValue
+     *          den maximalen Wert der von dieser Druckfunktion zu druckenden
+     *          Ausfertigungen.
+     */	
+	void setPrintProgressMaxValue([in] short maxValue);
+
+    /**
+     * Über diese Methode wird der Fortschrittsleiste ein neuer Fortschrittstatus
+     * value (=Anzahl bis jetzt tatsächlich gedruckter Versionen) der aktuellen
+     * Druckfunktion übermittelt. Der Wert value muss im Bereich 0 <= value <=
+     * maxValue (siehe setPrintProgressMaxValue(maxValue)) liegen.
+     * 
+     * @param value
+     *          Die Anzahl der bis jetzt tatsächlich von dieser Druckfunktion
+     *          gedruckten Versionen. Es muss gelten: 0 <= value <= maxValue
+     */
+	void setPrintProgressValue([in] short value);
 };
 
 }; }; }; }; };

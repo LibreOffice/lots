@@ -127,6 +127,12 @@ public class StandardPrint
       Logger.error(e);
     }
 
+    short countMax = 0;
+    for (VerfuegungspunktInfo v : settings)
+      countMax += v.copyCount;
+    pmod.setPrintProgressMaxValue(countMax);
+
+    short count = 0;
     for (VerfuegungspunktInfo v : settings)
     {
       if (pmod.isCanceled()) return;
@@ -135,6 +141,8 @@ public class StandardPrint
         SachleitendeVerfuegung.printVerfuegungspunkt(pmod, v.verfPunktNr, v.isDraft,
           v.isOriginal, v.copyCount);
       }
+      count += v.copyCount;
+      pmod.setPrintProgressValue(count);
     }
   }
 

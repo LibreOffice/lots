@@ -1301,9 +1301,6 @@ public class MailMergeNew
    */
   private void doMailMerge()
   {
-    // TODO Fortschrittsanzeiger
-    // TODO hier kann man mit lockControllers auf das Gesamtdokument vielleicht noch
-    // etwas Performance rausholen - das bitte testen.
     mod.collectNonWollMuxFormFields();
     QueryResultsWithSchema data = ds.getData();
 
@@ -1398,6 +1395,8 @@ public class MailMergeNew
     Iterator<Integer> selIter = selection.iterator();
     int selectedIdx = selIter.next();
 
+    pmod.setPrintProgressMaxValue((short) data.size());
+
     int index = -1;
     while (iter.hasNext() && selectedIdx >= 0)
     {
@@ -1418,6 +1417,8 @@ public class MailMergeNew
         pmod.setFormValue(spalte, ds.get(spalte));
       }
       pmod.printWithProps();
+
+      pmod.setPrintProgressValue((short) (index + 1));
     }
   }
 

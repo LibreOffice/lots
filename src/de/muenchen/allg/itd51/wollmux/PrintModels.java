@@ -55,6 +55,7 @@ import com.sun.star.uno.Type;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.itd51.wollmux.dialog.PrintParametersDialog;
+import de.muenchen.allg.itd51.wollmux.dialog.PrintProgressBar;
 import de.muenchen.allg.itd51.wollmux.dialog.PrintParametersDialog.PageRange;
 import de.muenchen.allg.itd51.wollmux.dialog.PrintParametersDialog.PageRangeType;
 import de.muenchen.allg.itd51.wollmux.func.PrintFunction;
@@ -142,13 +143,15 @@ public class PrintModels
      * Schlüssel der Property, über die gesteuert wird, ob der finale Druckdialog mit
      * einem CopyCount-Spinner angezeigt wird.
      */
-    private static final String PROP_FINAL_SHOW_COPIES_SPINNER = "FinalPF_ShowCopiesSpinner";
+    private static final String PROP_FINAL_SHOW_COPIES_SPINNER =
+      "FinalPF_ShowCopiesSpinner";
 
     /**
      * Schlüssel der Property, über die die Anzeige des finalen Druckdialogs bei
      * folgenden Aufrufen von finalPrint() abgeschalten werden kann.
      */
-    private static final String PROP_FINAL_NO_PARAMS_DIALOG = "FinalPF_NoParamsDialog";
+    private static final String PROP_FINAL_NO_PARAMS_DIALOG =
+      "FinalPF_NoParamsDialog";
 
     /**
      * Schlüssel der Property, an der die Einstellungen zum Druckbereich für folgende
@@ -192,6 +195,12 @@ public class PrintModels
     private boolean[] lock = new boolean[] { true };
 
     /**
+     * Enthält null oder ab dem ersten Aufruf von setPrintProgress[Max]Value ein
+     * gültiges PrintProgressBar-Objekt zur Anzeige des Druckstatus.
+     */
+    private PrintProgressBar printProgressBar = null;
+
+    /**
      * Erzeugt ein neues MasterPrintModel-Objekt für das Dokument model, das einen
      * Druckvorgang repräsentiert, der mit einer leeren Aufrufkette (Liste von
      * Druckfunktionen) und einer leeren HashMap für den Informationsaustausch
@@ -227,8 +236,8 @@ public class PrintModels
      */
     public void usePrintFunction(String functionName) throws NoSuchMethodException
     {
-      PrintFunction newFunc = WollMuxSingleton.getInstance().getGlobalPrintFunctions().get(
-        functionName);
+      PrintFunction newFunc =
+        WollMuxSingleton.getInstance().getGlobalPrintFunctions().get(functionName);
       if (newFunc != null)
         useInternalPrintFunction(newFunc);
       else
@@ -337,6 +346,12 @@ public class PrintModels
         setProperty(PROP_FINAL_SHOW_COPIES_SPINNER, Boolean.TRUE);
         finalPrint();
       }
+
+      if (printProgressBar != null)
+      {
+        printProgressBar.dispose();
+        printProgressBar = null;
+      }
     }
 
     /**
@@ -366,7 +381,8 @@ public class PrintModels
 
         // Rückgabewerte des Dialogs speichern für diesen und alle folgenden Aufrufe
         // von finalPrintWithProps()
-        PrintParametersDialog ppd = (PrintParametersDialog) unlockActionListener.actionEvent.getSource();
+        PrintParametersDialog ppd =
+          (PrintParametersDialog) unlockActionListener.actionEvent.getSource();
         String actionCommand = unlockActionListener.actionEvent.getActionCommand();
 
         if (PrintParametersDialog.CMD_CANCEL.equals(actionCommand))
@@ -597,8 +613,7 @@ public class PrintModels
         }
       }
       catch (InterruptedException e)
-      {
-      }
+      {}
     }
 
     /**
@@ -659,8 +674,7 @@ public class PrintModels
               ps[i++] = getPropertyByName(name);
             }
             catch (UnknownPropertyException e)
-            {
-            }
+            {}
           }
           return ps;
         }
@@ -704,7 +718,7 @@ public class PrintModels
     public void addPropertyChangeListener(String arg0, XPropertyChangeListener arg1)
         throws UnknownPropertyException, WrappedTargetException
     {
-      // NOT IMPLEMENTED
+    // NOT IMPLEMENTED
     }
 
     /*
@@ -717,7 +731,7 @@ public class PrintModels
         XPropertyChangeListener arg1) throws UnknownPropertyException,
         WrappedTargetException
     {
-      // NOT IMPLEMENTED
+    // NOT IMPLEMENTED
     }
 
     /*
@@ -729,7 +743,7 @@ public class PrintModels
     public void addVetoableChangeListener(String arg0, XVetoableChangeListener arg1)
         throws UnknownPropertyException, WrappedTargetException
     {
-      // NOT IMPLEMENTED
+    // NOT IMPLEMENTED
     }
 
     /*
@@ -742,7 +756,7 @@ public class PrintModels
         XVetoableChangeListener arg1) throws UnknownPropertyException,
         WrappedTargetException
     {
-      // NOT IMPLEMENTED
+    // NOT IMPLEMENTED
     }
 
     /**
@@ -832,6 +846,98 @@ public class PrintModels
         isCanceled[0] = true;
       }
     }
+
+    /**
+     * Diese Methode aktiviert die Anzeige der Fortschrittsleiste und initialisiert
+     * die Anzahl der von dieser Druckfunktion zu erwartenden Versionen auf maxValue,
+     * wenn maxValue größer 0 ist, oder entfernt die Druckfunktion aus der
+     * Fortschrittsanzeige, wenn maxValue gleich 0 ist. Die Fortschrittsanzeige ist
+     * prinzipiell in der Lage, den Druckstatus verschiedener verketteter
+     * Druckfunktionen anzuzeigen. Die Berechnung der Gesamtausfertigungen und des
+     * aktuellen Gesamtstatus wird von der Fortschrittsanzeige übernommen. Damit muss
+     * jede Druckfunktion hier auch nur die Anzahl Versionen setzen, die von der
+     * Druckfunktion selbst erzeugt werden.
+     * 
+     * @param maxValue
+     *          den maximalen Wert der von dieser Druckfunktion zu druckenden
+     *          Ausfertigungen.
+     * 
+     * @author Christoph Lutz (D-III-ITD-5.1)
+     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#setPrintProgressMaxValue(short)
+     */
+    public void setPrintProgressMaxValue(short maxValue)
+    {
+    // nicht auf das MasterPrintModel anwendbar, aber auf SlavePrintModels.
+    }
+
+    /**
+     * Über diese Methode wird der Fortschrittsleiste ein neuer Fortschrittstatus
+     * value (=Anzahl bis jetzt tatsächlich gedruckter Versionen) der aktuellen
+     * Druckfunktion übermittelt. Der Wert value muss im Bereich 0 <= value <=
+     * maxValue (siehe setPrintProgressMaxValue(maxValue)) liegen.
+     * 
+     * @param value
+     *          Die Anzahl der bis jetzt tatsächlich von dieser Druckfunktion
+     *          gedruckten Versionen. Es muss gelten: 0 <= value <= maxValue
+     * 
+     * @author Christoph Lutz (D-III-ITD-5.1)
+     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#setPrintProgressValue(short)
+     */
+    public void setPrintProgressValue(short value)
+    {
+    // nicht auf das MasterPrintModel anwendbar, aber auf SlavePrintModels.
+    }
+
+    /**
+     * Registriert die durch key repräsentierte Druckfunktion mit dem Maximalwert
+     * maxValue in der aktuellen Fortschrittsleiste; Ist bis jetzt noch keine
+     * Fortschrittsleiste aktiv, so wird eine neue Fortschrittsleiste erzeugt und
+     * aktiviert; ist maxValue==0, so wird die durch key repräsentierte Druckfunktion
+     * deregistriert.
+     * 
+     * @param key
+     *          repräsentiert eine Druckfunktion (oder genauer Ihr zugehöriges
+     *          SlavePrintModel)
+     * @param maxValue
+     *          den Maximalwert von dieser Funktion zu erwartenden Versionen
+     * 
+     * @author Christoph Lutz (D-III-ITD-5.1)
+     */
+    private void setPrintProgressMaxValue(Object key, short maxValue)
+    {
+      if (printProgressBar == null && maxValue > 0)
+      {
+        printProgressBar = new PrintProgressBar(new ActionListener()
+        {
+          public void actionPerformed(ActionEvent e)
+          {
+            cancel();
+          }
+        });
+      }
+
+      if (printProgressBar != null) printProgressBar.setMaxValue(key, maxValue);
+    }
+
+    /**
+     * Reicht den Fortschrittswert value der durch key ausgezeichneten Druckfunktion
+     * an die Fortschrittsleiste weiter, wenn die Fortschrittsleiste aktiviert wurde
+     * (dazu muss mindestens eine Druckfunktion mit setPrintProgressMaxValue(...)
+     * registriert worden sein).
+     * 
+     * @param key
+     *          repräsentiert die Druckfunktion (oder genauer ihr zugehöriges
+     *          SlavePrintModel)
+     * @param value
+     *          enthält die Anzahl der von dieser Druckfunktion bereits erstellten
+     *          Versionen.
+     * 
+     * @author Christoph Lutz (D-III-ITD-5.1)
+     */
+    private void setPrintProgressValue(Object key, short value)
+    {
+      if (printProgressBar != null) printProgressBar.setValue(key, value);
+    }
   }
 
   /**
@@ -917,6 +1023,7 @@ public class PrintModels
         {
           Logger.error(e);
         }
+        master.setPrintProgressMaxValue(pmod, (short) 0);
       }
       else
       {
@@ -1069,8 +1176,8 @@ public class PrintModels
      */
     public void usePrintFunction(String functionName) throws NoSuchMethodException
     {
-      PrintFunction newFunc = WollMuxSingleton.getInstance().getGlobalPrintFunctions().get(
-        functionName);
+      PrintFunction newFunc =
+        WollMuxSingleton.getInstance().getGlobalPrintFunctions().get(functionName);
       if (newFunc != null)
         useInternalPrintFunction(newFunc);
       else
@@ -1136,6 +1243,26 @@ public class PrintModels
     public void cancel()
     {
       master.cancel();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#setPrintProgressMaxValue(short)
+     */
+    public void setPrintProgressMaxValue(short maxValue)
+    {
+      master.setPrintProgressMaxValue(this, maxValue);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.muenchen.allg.itd51.wollmux.XPrintModel#setPrintProgressValue(short)
+     */
+    public void setPrintProgressValue(short value)
+    {
+      master.setPrintProgressValue(this, value);
     }
 
   }
