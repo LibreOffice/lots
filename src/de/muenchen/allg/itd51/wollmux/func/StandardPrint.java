@@ -289,8 +289,19 @@ public class StandardPrint
               true, true));
         pmod.setPropertyValue("PrintIntoFile_OutputDocument", compo[0]);
 
-        while (compo[1] == null)
-          compo.wait();
+        try
+        {
+          // max. 30s Warten, dann machen wir weiter, auch ohne Synchronisation
+          long endTime = 30 * 1000 + System.currentTimeMillis();
+          while (compo[1] == null)
+          {
+            long ctime = System.currentTimeMillis();
+            if (ctime > endTime) break;
+            compo.wait(endTime - ctime);
+          }
+        }
+        catch (InterruptedException i)
+        {}
       }
     }
 
