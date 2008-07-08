@@ -588,7 +588,7 @@ public class MailMergeDatasource
    * Dokument persistent ab, damit die Datenquelle beim nächsten mal wieder
    * automatisch geöffnet/verbunden werden kann.
    * 
-   * @author Christoph Lutz (D-III-ITD-5.1) TODO: Testen
+   * @author Christoph Lutz (D-III-ITD-5.1)
    */
   private void storeDatasourceSettings()
   {
