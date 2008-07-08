@@ -1227,7 +1227,9 @@ public class MailMerge
         {
           XDataSource ds =
             UNO.XDataSource(UNO.dbContext.getRegisteredObject(datasourceName));
-          ds.setLoginTimeout(DATABASE_TIMEOUT);
+          long lgto = DATABASE_TIMEOUT / 1000;
+          if (lgto < 1) lgto = 1;
+          ds.setLoginTimeout((int) lgto);
           XConnection conn = ds.getConnection("", "");
           XNameAccess tables = UNO.XTablesSupplier(conn).getTables();
           tableNames = tables.getElementNames();
