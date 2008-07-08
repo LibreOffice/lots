@@ -36,7 +36,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -55,8 +54,15 @@ import javax.swing.JLabel;
 
 import com.sun.star.awt.XTopWindow;
 import com.sun.star.container.XEnumeration;
+import com.sun.star.container.XNameAccess;
 import com.sun.star.document.XEventListener;
+import com.sun.star.frame.XFrame;
+import com.sun.star.frame.XModel;
 import com.sun.star.lang.EventObject;
+import com.sun.star.sdb.XDocumentDataSource;
+import com.sun.star.sdb.XOfficeDatabaseDocument;
+import com.sun.star.sdbc.XConnection;
+import com.sun.star.sdbc.XDataSource;
 import com.sun.star.sheet.XCellRangesQuery;
 import com.sun.star.sheet.XSheetCellRanges;
 import com.sun.star.sheet.XSpreadsheetDocument;
@@ -116,6 +122,11 @@ public class MailMergeDatasource
   private static final long MAILMERGE_GETCONTENTS_TIMEOUT = 60000;
 
   /**
+   * Timeout für den Login bei einer OOo-Datenquelle.
+   */
+  private static final int MAILMERGE_LOGIN_TIMEOUT = 5000;
+
+  /**
    * Zeigt an, was derzeit als Datenquelle ausgewählt ist.
    */
   private int sourceType = SOURCE_NONE;
@@ -139,10 +150,18 @@ public class MailMergeDatasource
   private String calcUrl = null;
 
   /**
-   * Falls {@link #sourceType} == {@link #SOURCE_DB}, so ist hier der Name der
-   * ausgewählten OOo-Datenquelle gespeichert, ansonsten null.
+   * Falls {@link #sourceType} == {@link #SOURCE_DB}, so ist dies der Name der
+   * ausgewählten OOo-Datenquelle, ansonsten null.
    */
   private String oooDatasourceName = null;
+
+  /**
+   * Falls {@link #sourceType} == {@link #SOURCE_DB} und die Datenquelle bereits
+   * initialisiert wurde (durch {@link #getOOoDatasource()}), so ist dies eine
+   * {@link Datasource} zum Zugriff auf die ausgewählte OOo-Datenquelle, ansonsten
+   * null.
+   */
+  private Datasource oooDatasource = null;
 
   /**
    * Speichert den Namen der Tabelle bzw, des Tabellenblattes, die als Quelle der
@@ -183,7 +202,6 @@ public class MailMergeDatasource
    * keine Tabelle ausgewählt oder enthält die ausgewählte Tabelle keine benannten
    * Spalten, so wird ein leerer Vector geliefert.
    * 
-   * @return
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public List<String> getColumnNames()
@@ -195,7 +213,7 @@ public class MailMergeDatasource
         case SOURCE_CALC:
           return getColumnNames(getCalcDoc(), tableName);
         case SOURCE_DB:
-          return getDbColumnNames(oooDatasourceName, tableName);
+          return getDbColumnNames(getOOoDatasource());
         default:
           return new Vector<String>();
       }
@@ -229,7 +247,7 @@ public class MailMergeDatasource
         case SOURCE_CALC:
           return getValuesForDataset(getCalcDoc(), tableName, rowIndex);
         case SOURCE_DB:
-          return getDbValuesForDataset(oooDatasourceName, tableName, rowIndex);
+          return getDbValuesForDataset(getOOoDatasource(), rowIndex);
         default:
           return new Vector<String>();
       }
@@ -257,7 +275,7 @@ public class MailMergeDatasource
         case SOURCE_CALC:
           return getNumberOfDatasets(getCalcDoc(), tableName);
         case SOURCE_DB:
-          return getDbNumberOfDatasets(oooDatasourceName, tableName);
+          return getDbNumberOfDatasets(getOOoDatasource());
         default:
           return 0;
       }
@@ -284,7 +302,7 @@ public class MailMergeDatasource
         case SOURCE_CALC:
           return getData(getCalcDoc(), tableName);
         case SOURCE_DB:
-          return getDbData(oooDatasourceName, tableName);
+          return getDbData(getOOoDatasource());
         default:
           return new QueryResultsWithSchema();
       }
@@ -367,7 +385,8 @@ public class MailMergeDatasource
     {
       public void actionPerformed(ActionEvent e)
       {
-      // TODO selectOOoDatasourceAsDatasource();
+        datasourceSelector.dispose();
+        selectOOoDatasourceAsDatasource(parent);
       }
     });
     vbox.add(DimAdjust.maxWidthUnlimited(button));
@@ -376,7 +395,7 @@ public class MailMergeDatasource
     vbox.add(label);
     String str = L.m("<keine>");
     if (sourceType == SOURCE_CALC)
-    { // TODO Testen
+    {
       if (calcDoc != null)
       {
         String title =
@@ -425,20 +444,65 @@ public class MailMergeDatasource
    * Versucht die Datenquelle in den Vordergrund zu holen und wird vom Button
    * "Tabelle bearbeiten" aufgerufen.
    * 
-   * @author Christoph Lutz (D-III-ITD-5.1)
+   * @author Matthias Benkmann (D-III-ITD-5.1)
+   * 
+   * TODO testen
    */
   public void toFront()
   {
+    Object document = null;
     if (sourceType == SOURCE_CALC)
     {
-      if (UNO.XModel(calcDoc) != null)
+      document = calcDoc;
+    }
+    else if (sourceType == SOURCE_DB)
+    {
+      try
+      {
+        XDocumentDataSource ds =
+          UNO.XDocumentDataSource(UNO.dbContext.getRegisteredObject(oooDatasourceName));
+        XOfficeDatabaseDocument dbdoc = ds.getDatabaseDocument();
+        String url = UNO.XModel(dbdoc).getURL();
+
+        XEnumeration xenu = UNO.desktop.getComponents().createEnumeration();
+        while (xenu.hasMoreElements())
+        {
+          try
+          {
+            XModel model = UNO.XModel(xenu.nextElement());
+            if (model.getURL().equals(url))
+            {
+              document = model;
+              break;
+            }
+          }
+          catch (Exception x)
+          {}
+        }
+
+        if (document == null)
+          document = UNO.loadComponentFromURL(url, false, false);
+      }
+      catch (Exception x)
+      {
+        Logger.error(x);
+      }
+    }
+
+    try
+    {
+      XModel documentModel = UNO.XModel(document);
+      if (documentModel != null)
       {
         XTopWindow win =
-          UNO.XTopWindow(UNO.XModel(calcDoc).getCurrentController().getFrame().getContainerWindow());
+          UNO.XTopWindow(documentModel.getCurrentController().getFrame().getContainerWindow());
         win.toFront();
       }
     }
-    // TODO: Behandlung der anderen Datenquellentypen
+    catch (Exception x)
+    {
+      Logger.error(x);
+    }
   }
 
   /**
@@ -455,7 +519,7 @@ public class MailMergeDatasource
    * Öffnet die Datenquelle die durch einen früheren Aufruf von
    * storeDatasourceSettings() im Dokument hinterlegt wurde.
    * 
-   * @author Christoph Lutz (D-III-ITD-5.1) TODO: Testen
+   * @author Christoph Lutz (D-III-ITD-5.1) TESTED
    */
   private void openDatasourceFromLastStoredSettings()
   {
@@ -502,11 +566,10 @@ public class MailMergeDatasource
     {
       try
       {
-        @SuppressWarnings("unused")
         String source = datenquelle.get("SOURCE").toString();
-        @SuppressWarnings("unused")
         String table = datenquelle.get("TABLE").toString();
-        // TODO: bestehende OOo-Datenbank verwenden
+        getOOoDatasource(source);
+        setTable(table);
       }
       catch (NodeNotFoundException e)
       {
@@ -573,7 +636,7 @@ public class MailMergeDatasource
    * 
    * TODO Testen
    */
-  private int getDbNumberOfDatasets(String oooDatasourceName, String tableName)
+  private int getDbNumberOfDatasets(Datasource oooDatasource)
   {
     return 0; // FIXME: getDbNumberOfDatasets()
   }
@@ -619,9 +682,11 @@ public class MailMergeDatasource
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TODO Testen
    */
-  private List<String> getDbColumnNames(String oooDatasourceName, String tableName)
+  private List<String> getDbColumnNames(Datasource oooDatasource)
   {
-    return new Vector<String>(); // FIXME: getDbColumnNames()
+    List<String> columnNames = new Vector<String>();
+    // FIXME: getDbColumnNames()
+    return columnNames;
   }
 
   /**
@@ -685,8 +750,7 @@ public class MailMergeDatasource
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private List<String> getDbValuesForDataset(String oooDatasourceName,
-      String tableName, int rowIndex)
+  private List<String> getDbValuesForDataset(Datasource oooDatasource, int rowIndex)
   {
     return new Vector<String>(); // FIXME: getDbValuesForDataset()
   }
@@ -781,20 +845,11 @@ public class MailMergeDatasource
    * 
    * TODO Testen
    */
-  private QueryResultsWithSchema getDbData(String oooDatasourceName, String tableName)
+  private QueryResultsWithSchema getDbData(Datasource oooDatasource)
       throws Exception, ConfigurationErrorException
   {
-    ConfigThingy conf = new ConfigThingy("Datenquelle");
-    conf.add("NAME").add("Knuddel");
-    conf.add("TABLE").add(tableName);
-    conf.add("SOURCE").add(oooDatasourceName);
-    Datasource ds;
-    ds =
-      new OOoDatasource(new HashMap<String, Datasource>(), conf,
-        new URL("file:///"), true);
-
-    Set<String> schema = ds.getSchema();
-    QueryResults res = ds.getContents(MAILMERGE_GETCONTENTS_TIMEOUT);
+    Set<String> schema = oooDatasource.getSchema();
+    QueryResults res = oooDatasource.getContents(MAILMERGE_GETCONTENTS_TIMEOUT);
     return new QueryResultsWithSchema(res, schema);
   }
 
@@ -810,6 +865,88 @@ public class MailMergeDatasource
     Set<String> schema = new HashSet<String>();
     QueryResults res = getVisibleCalcData(calcDoc, tableName, schema);
     return new QueryResultsWithSchema(res, schema);
+  }
+
+  /**
+   * Präsentiert dem Benutzer einen Dialog, in dem er aus allen registrierten
+   * Datenbanken eine als Datenquelle auswählen kann. Falls es nur eine registrierte
+   * Datenbank gibt, wird diese automatisch gewählt.
+   * 
+   * @param parent
+   *          der JFrame zu dem der die Dialoge gehören sollen.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private void selectOOoDatasourceAsDatasource(final JFrame parent)
+  {
+    List<String> names = getRegisteredDatabaseNames();
+
+    if (names.isEmpty()) return;
+
+    if (names.size() == 1)
+    {
+      getOOoDatasource(names.get(0));
+      selectTable(parent);
+      return;
+    }
+
+    final JDialog dbSelector = new JDialog(parent, L.m("Datenbank auswählen"), true);
+
+    Box vbox = Box.createVerticalBox();
+    dbSelector.add(vbox);
+
+    JLabel label = new JLabel(L.m("Welche Datenbank möchten Sie verwenden ?"));
+    vbox.add(label);
+
+    for (int i = 0; i < names.size(); ++i)
+    {
+      final String name = names.get(i);
+      JButton button;
+      button = new JButton(name);
+      button.addActionListener(new ActionListener()
+      {
+        public void actionPerformed(ActionEvent e)
+        {
+          dbSelector.dispose();
+          getOOoDatasource(name);
+          selectTable(parent);
+        }
+      });
+      vbox.add(DimAdjust.maxWidthUnlimited(button));
+    }
+
+    dbSelector.pack();
+    int frameWidth = dbSelector.getWidth();
+    int frameHeight = dbSelector.getHeight();
+    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+    int x = screenSize.width / 2 - frameWidth / 2;
+    int y = screenSize.height / 2 - frameHeight / 2;
+    dbSelector.setLocation(x, y);
+    dbSelector.setResizable(false);
+    dbSelector.setVisible(true);
+  }
+
+  /**
+   * Returns the names of all datasources registered in OOo.
+   * 
+   * @author Matthias Benkmann (D-III-ITD-D101)
+   * 
+   * TESTED
+   */
+  private List<String> getRegisteredDatabaseNames()
+  {
+    List<String> datasourceNames = new Vector<String>();
+    try
+    {
+      String[] datasourceNamesA = UNO.XNameAccess(UNO.dbContext).getElementNames();
+      for (int i = 0; i < datasourceNamesA.length; ++i)
+        datasourceNames.add(datasourceNamesA[i]);
+    }
+    catch (Exception x)
+    {
+      Logger.error(x);
+    }
+    return datasourceNames;
   }
 
   /**
@@ -956,14 +1093,12 @@ public class MailMergeDatasource
    */
   private void selectTable(JFrame parent)
   {
-    List<String> names = getNamesOfNonEmptyTables();
-    List<String> allNames = getTableNames();
-    if (allNames.isEmpty())
+    List<String> names = getTableNames();
+    if (names.isEmpty())
     {
       setTable("");
       return;
     }
-    if (names.isEmpty()) names = allNames;
 
     setTable(names.get(0)); // Falls der Benutzer den Dialog abbricht ohne Auswahl
 
@@ -1157,11 +1292,13 @@ public class MailMergeDatasource
         spread = UNO.XSpreadsheetDocument(xenu.nextElement());
         if (spread != null)
         {
-          String title =
-            (String) UNO.getProperty(
-              UNO.XModel(spread).getCurrentController().getFrame(), "Title");
-          win.titles.add(stripOpenOfficeFromWindowName(title));
-          win.docs.add(spread);
+          XFrame frame = UNO.XModel(spread).getCurrentController().getFrame();
+          if (!Boolean.TRUE.equals(UNO.getProperty(frame, "IsHidden")))
+          {
+            String title = (String) UNO.getProperty(frame, "Title");
+            win.titles.add(stripOpenOfficeFromWindowName(title));
+            win.docs.add(spread);
+          }
         }
       }
     }
@@ -1267,6 +1404,8 @@ public class MailMergeDatasource
     }
     if (calcUrl.length() == 0) calcUrl = null;
     sourceType = SOURCE_CALC;
+    oooDatasourceName = null;
+    oooDatasource = null;
     removeListeners(calcDoc); // falls altes calcDoc vorhanden, dort
     // deregistrieren.
     calcDoc = newCalcDoc;
@@ -1275,37 +1414,72 @@ public class MailMergeDatasource
   }
 
   /**
-   * Liefert die Namen aller nicht-leeren Tabellenblätter der aktuell ausgewählten
-   * Datenquelle. Wenn keine Datenquelle ausgewählt ist, oder es keine nicht-leere
-   * Tabelle gibt, so wird eine leere Liste geliefert.
+   * Falls aktuell eine OOo-Datenquelle als Datenquelle ausgewählt ist, so wird diese
+   * zurückgeliefert. Falls es aus irgendeinem Grund nicht möglich ist, diese
+   * zurückzuliefern, wird eine
+   * {@link de.muenchen.allg.itd51.wollmux.UnavailableException} geworfen.
    * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * @author Matthias Benkmann (D-III-ITD-D101)
+   * 
+   * TODO Testen
    */
-  private List<String> getNamesOfNonEmptyTables()
+  private Datasource getOOoDatasource() throws UnavailableException
   {
+    if (sourceType != SOURCE_DB)
+      throw new UnavailableException(L.m("Keine OOo-Datenquelle ausgewählt"));
+    if (oooDatasource != null) return oooDatasource;
+
+    ConfigThingy conf = new ConfigThingy("Datenquelle");
+    conf.add("NAME").add("Knuddel");
+    conf.add("TABLE").add(tableName);
+    conf.add("SOURCE").add(oooDatasourceName);
     try
     {
-      switch (sourceType)
-      {
-        case SOURCE_CALC:
-          return getNamesOfNonEmptyTables(getCalcDoc());
-        case SOURCE_DB:
-          return getNamesOfNonEmptyDbTables();
-        default:
-          return new Vector<String>();
-      }
+      oooDatasource =
+        new OOoDatasource(new HashMap<String, Datasource>(), conf, new URL(
+          "file:///"), true);
     }
     catch (Exception x)
     {
-      Logger.error(x);
-      return new Vector<String>();
+      throw new UnavailableException(x);
     }
+
+    return oooDatasource;
   }
 
   /**
-   * Liefert die Namen aller Tabellen der aktuell ausgewählten Datenquelle. Wenn
-   * keine Datenquelle ausgewählt ist, oder es keine nicht-leere Tabelle gibt, so
-   * wird eine leere Liste geliefert.
+   * Setzt die registrierte Datenquelle mit Namen newDsName als neue Datenquelle für
+   * den Seriendruck.
+   * 
+   * @author Matthias Benkmann (D-III-ITD-D101)
+   * 
+   * TESTED
+   */
+  private void getOOoDatasource(String newDsName)
+  {
+    try
+    {
+      UNO.XNameAccess(UNO.dbContext).getByName(newDsName);
+    }
+    catch (Exception x) // typischerweise DisposedException
+    {
+      return;
+    }
+    if (newDsName.length() == 0) return;
+
+    sourceType = SOURCE_DB;
+    removeListeners(calcDoc); // falls altes calcDoc vorhanden, dort deregistrieren.
+    calcDoc = null;
+
+    oooDatasourceName = newDsName;
+    storeDatasourceSettings();
+  }
+
+  /**
+   * Liefert die Namen aller relevanten Tabellen der aktuell ausgewählten
+   * Datenquelle. Wenn keine Datenquelle ausgewählt ist, oder es keine Tabellen darin
+   * gibt, so wird eine leere Liste geliefert. Eine Tabelle in einem Calc-Dokument
+   * ist nur relevant, wenn sie nicht leer ist.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -1316,7 +1490,7 @@ public class MailMergeDatasource
       switch (sourceType)
       {
         case SOURCE_CALC:
-          return getTableNames(getCalcDoc());
+          return getNamesOfNonEmptyTables(getCalcDoc());
         case SOURCE_DB:
           return getDbTableNames();
         default:
@@ -1336,44 +1510,30 @@ public class MailMergeDatasource
    * wird eine leere Liste geliefert.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
+   * 
+   * TESTED
    */
   private List<String> getDbTableNames()
   {
-    return new Vector<String>();
-  }
-
-  /**
-   * Liefert die Namen aller Tabellenblätter von calcDoc. Falls calcDoc == null, wird
-   * eine leere Liste geliefert.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private List<String> getTableNames(XSpreadsheetDocument calcDoc)
-  {
-    List<String> nonEmptyTableNames = new Vector<String>();
-    if (calcDoc != null) try
+    List<String> tableNames = new Vector<String>();
+    if (sourceType == SOURCE_DB && oooDatasourceName != null)
     {
-      XSpreadsheets sheets = calcDoc.getSheets();
-      String[] tableNames = sheets.getElementNames();
-      nonEmptyTableNames.addAll(Arrays.asList(tableNames));
+      try
+      {
+        XDataSource ds =
+          UNO.XDataSource(UNO.dbContext.getRegisteredObject(oooDatasourceName));
+        ds.setLoginTimeout(MAILMERGE_LOGIN_TIMEOUT);
+        XConnection conn = ds.getConnection("", "");
+        XNameAccess tables = UNO.XTablesSupplier(conn).getTables();
+        for (String name : tables.getElementNames())
+          tableNames.add(name);
+      }
+      catch (Exception x)
+      {
+        Logger.error(x);
+      }
     }
-    catch (Exception x)
-    {
-      Logger.error(x);
-    }
-    return nonEmptyTableNames;
-  }
-
-  /**
-   * Liefert die Namen aller nicht-leeren Tabellen der aktuell ausgewählten
-   * OOo-Datenquelle. Wenn keine OOo-Datenquelle ausgewählt ist, oder es keine
-   * nicht-leere Tabelle gibt, so wird eine leere Liste geliefert.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private List<String> getNamesOfNonEmptyDbTables()
-  {
-    return new Vector<String>();
+    return tableNames;
   }
 
   /**
