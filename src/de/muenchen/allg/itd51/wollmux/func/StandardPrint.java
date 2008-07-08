@@ -256,55 +256,74 @@ public class StandardPrint
     }
     catch (UnknownPropertyException e)
     {
-      final XTextDocument[] compo = new XTextDocument[] {
-        null, null };
-
-      WollMuxEventHandler.handleAddDocumentEventListener(new XEventListener()
-      {
-        public void notifyEvent(EventObject arg0)
-        {
-          if (arg0.EventName.equals("OnWollMuxProcessingFinished"))
-          {
-            synchronized (compo)
-            {
-              if (!UnoRuntime.areSame(compo[0], arg0.Source)) return;
-              UNO.XEventBroadcaster(WollMuxSingleton.getInstance()).removeEventListener(
-                this);
-              compo[1] = compo[0];
-              compo.notifyAll();
-            }
-          }
-        }
-
-        public void disposing(com.sun.star.lang.EventObject arg0)
-        {}
-      });
-
-      synchronized (compo)
-      {
-
-        outputDoc =
-          compo[0] =
-            UNO.XTextDocument(UNO.loadComponentFromURL("private:factory/swriter",
-              true, true));
-        pmod.setPropertyValue("PrintIntoFile_OutputDocument", compo[0]);
-
-        try
-        {
-          // max. 30s Warten, dann machen wir weiter, auch ohne Synchronisation
-          long endTime = 30 * 1000 + System.currentTimeMillis();
-          while (compo[1] == null)
-          {
-            long ctime = System.currentTimeMillis();
-            if (ctime > endTime) break;
-            compo.wait(endTime - ctime);
-          }
-        }
-        catch (InterruptedException i)
-        {}
-      }
+      outputDoc = createNewTargetDocument(pmod);
     }
 
     PrintIntoFile.appendToFile(outputDoc, pmod.getTextDocument(), firstAppend);
+  }
+
+  /**
+   * Erzeugt ein neues leeres Dokument für {@link PrintIntoFile} und setzt die
+   * entsprechenden Properties von pmod, damit das Dokument verwendet wird. Dabei
+   * wird auf korrekte Synchronisation mit dem WollMux geachtet.
+   * 
+   * @return das erzeugte neue Zieldokument.
+   * 
+   * @author Matthias Benkmann (D-III-ITD-D101)
+   * 
+   * TODO Testen
+   */
+  private static XTextDocument createNewTargetDocument(final XPrintModel pmod)
+      throws Exception
+  {
+    XTextDocument outputDoc;
+    final XTextDocument[] compo = new XTextDocument[] {
+      null, null };
+
+    WollMuxEventHandler.handleAddDocumentEventListener(new XEventListener()
+    {
+      public void notifyEvent(EventObject arg0)
+      {
+        if (arg0.EventName.equals("OnWollMuxProcessingFinished"))
+        {
+          synchronized (compo)
+          {
+            if (!UnoRuntime.areSame(compo[0], arg0.Source)) return;
+            UNO.XEventBroadcaster(WollMuxSingleton.getInstance()).removeEventListener(
+              this);
+            compo[1] = compo[0];
+            compo.notifyAll();
+          }
+        }
+      }
+
+      public void disposing(com.sun.star.lang.EventObject arg0)
+      {}
+    });
+
+    synchronized (compo)
+    {
+
+      outputDoc =
+        compo[0] =
+          UNO.XTextDocument(UNO.loadComponentFromURL("private:factory/swriter",
+            true, true));
+      pmod.setPropertyValue("PrintIntoFile_OutputDocument", compo[0]);
+
+      try
+      {
+        // max. 30s Warten, dann machen wir weiter, auch ohne Synchronisation
+        long endTime = 30 * 1000 + System.currentTimeMillis();
+        while (compo[1] == null)
+        {
+          long ctime = System.currentTimeMillis();
+          if (ctime > endTime) break;
+          compo.wait(endTime - ctime);
+        }
+      }
+      catch (InterruptedException i)
+      {}
+    }
+    return outputDoc;
   }
 }
