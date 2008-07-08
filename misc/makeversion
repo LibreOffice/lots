@@ -18,7 +18,7 @@ test -z "$rev" && exit 1
 
 v1=$((${date%%-*} - 2004))
 v2=$(echo $date| sed 's/[^-]*-0\?\([^-]*\)-.*/\1/')
-v3=$(( $(echo ${date##*-}| sed 's/[^-]*-0\?\([^-]*\)-.*/\1/') / 10 ))
+v3=$(( $(echo ${date##*-}| sed 's/^0\?\(.*\)/\1/') / 10 ))
 
 echo "$v1.$v2.$v3" >"$1" 
 echo "Version: $v1.$v2.$v3, Revision: $rev" >"$2"
