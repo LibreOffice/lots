@@ -256,7 +256,8 @@ public class StandardPrint
     }
     catch (UnknownPropertyException e)
     {
-      final XTextDocument[] compo = new XTextDocument[] { null };
+      final XTextDocument[] compo = new XTextDocument[] {
+        null, null };
 
       WollMuxEventHandler.handleAddDocumentEventListener(new XEventListener()
       {
@@ -269,6 +270,7 @@ public class StandardPrint
               if (!UnoRuntime.areSame(compo[0], arg0.Source)) return;
               UNO.XEventBroadcaster(WollMuxSingleton.getInstance()).removeEventListener(
                 this);
+              compo[1] = compo[0];
               compo.notifyAll();
             }
           }
@@ -287,7 +289,7 @@ public class StandardPrint
               true, true));
         pmod.setPropertyValue("PrintIntoFile_OutputDocument", compo[0]);
 
-        while (compo[0] == null)
+        while (compo[1] == null)
           compo.wait();
       }
     }
