@@ -1100,7 +1100,7 @@ public class MailMergeNew
    *          Koordinate des Popups im Koordinatenraum von invoker.
    * @param y
    *          Koordinate des Popups im Koordinatenraum von invoker.
-   * @author Matthias Benkmann (D-III-ITD 5.1) TODO Testen
+   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void showInsertSpecialFieldPopup(JComponent invoker, int x, int y)
   {

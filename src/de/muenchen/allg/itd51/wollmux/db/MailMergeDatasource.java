@@ -36,6 +36,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -53,6 +54,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 
 import com.sun.star.awt.XTopWindow;
+import com.sun.star.beans.XPropertySet;
 import com.sun.star.container.XEnumeration;
 import com.sun.star.container.XNameAccess;
 import com.sun.star.document.XEventListener;
@@ -63,6 +65,8 @@ import com.sun.star.sdb.XDocumentDataSource;
 import com.sun.star.sdb.XOfficeDatabaseDocument;
 import com.sun.star.sdbc.XConnection;
 import com.sun.star.sdbc.XDataSource;
+import com.sun.star.sdbc.XRow;
+import com.sun.star.sdbc.XRowSet;
 import com.sun.star.sheet.XCellRangesQuery;
 import com.sun.star.sheet.XSheetCellRanges;
 import com.sun.star.sheet.XSpreadsheetDocument;
@@ -78,10 +82,10 @@ import com.sun.star.util.XModifiable;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
-import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
+import de.muenchen.allg.itd51.wollmux.TimeoutException;
 import de.muenchen.allg.itd51.wollmux.UnavailableException;
 import de.muenchen.allg.itd51.wollmux.dialog.DimAdjust;
 
@@ -124,7 +128,7 @@ public class MailMergeDatasource
   /**
    * Timeout für den Login bei einer OOo-Datenquelle.
    */
-  private static final int MAILMERGE_LOGIN_TIMEOUT = 5000;
+  private static final long MAILMERGE_LOGIN_TIMEOUT = 5000;
 
   /**
    * Zeigt an, was derzeit als Datenquelle ausgewählt ist.
@@ -200,7 +204,9 @@ public class MailMergeDatasource
   /**
    * Liefert die Titel der Spalten der aktuell ausgewählten Tabelle. Ist derzeit
    * keine Tabelle ausgewählt oder enthält die ausgewählte Tabelle keine benannten
-   * Spalten, so wird ein leerer Vector geliefert.
+   * Spalten, so wird ein leerer Vector geliefert. Die Reihenfolge der Spalten
+   * entspricht der Reihenfolge der Werte, wie sie von
+   * {@link #getValuesForDataset(int)} geliefert werden.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
@@ -275,7 +281,7 @@ public class MailMergeDatasource
         case SOURCE_CALC:
           return getNumberOfDatasets(getCalcDoc(), tableName);
         case SOURCE_DB:
-          return getDbNumberOfDatasets(getOOoDatasource());
+          return getDbNumberOfDatasets();
         default:
           return 0;
       }
@@ -291,7 +297,7 @@ public class MailMergeDatasource
    * Liefert den Inhalt der aktuell ausgewählten Serienbriefdatenquelle (leer, wenn
    * keine ausgewählt).
    * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TODO Testen
+   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public QueryResultsWithSchema getData()
   {
@@ -318,7 +324,7 @@ public class MailMergeDatasource
    * Liefert true, wenn derzeit eine Datenquelle ausgewählt ist.
    * 
    * @return
-   * @author Matthias Benkmann (D-III-ITD 5.1) TODO Testen
+   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public boolean hasDatasource()
   {
@@ -446,7 +452,7 @@ public class MailMergeDatasource
    * 
    * @author Matthias Benkmann (D-III-ITD-5.1)
    * 
-   * TODO testen
+   * TESTED
    */
   public void toFront()
   {
@@ -634,11 +640,91 @@ public class MailMergeDatasource
    * 
    * @author Matthias Benkmann (D-III-ITD D.10)
    * 
-   * TODO Testen
+   * TESTED
    */
-  private int getDbNumberOfDatasets(Datasource oooDatasource)
+  private int getDbNumberOfDatasets()
   {
-    return 0; // FIXME: getDbNumberOfDatasets()
+    if (sourceType != SOURCE_DB) return 0;
+
+    XRowSet results = null;
+    XConnection conn = null;
+    try
+    {
+      try
+      {
+        XDataSource ds =
+          UNO.XDataSource(UNO.dbContext.getRegisteredObject(oooDatasourceName));
+        long lgto = MAILMERGE_LOGIN_TIMEOUT / 1000;
+        if (lgto < 1) lgto = 1;
+        ds.setLoginTimeout((int) lgto);
+        conn = ds.getConnection("", "");
+      }
+      catch (Exception x)
+      {
+        throw new TimeoutException(L.m(
+          "Kann keine Verbindung zur Datenquelle \"%1\" herstellen",
+          oooDatasourceName));
+      }
+
+      Object rowSet = UNO.createUNOService("com.sun.star.sdb.RowSet");
+      results = UNO.XRowSet(rowSet);
+
+      XPropertySet xProp = UNO.XPropertySet(results);
+
+      xProp.setPropertyValue("ActiveConnection", conn);
+
+      /*
+       * EscapeProcessing == false bedeutet, dass OOo die Query nicht selbst anfassen
+       * darf, sondern direkt an die Datenbank weiterleiten soll. Wird dies verwendet
+       * ist das Ergebnis (derzeit) immer read-only, da OOo keine Updates von
+       * Statements durchführen kann, die es nicht geparst hat. Siehe Kommentar zu
+       * http://qa.openoffice.org/issues/show_bug.cgi?id=78522 Entspricht dem Button
+       * SQL mit grünem Haken (SQL-Kommando direkt ausführen) im Base-Abfrageentwurf.
+       */
+      xProp.setPropertyValue("EscapeProcessing", new Boolean(false));
+
+      xProp.setPropertyValue("CommandType", new Integer(
+        com.sun.star.sdb.CommandType.COMMAND));
+
+      xProp.setPropertyValue("Command", "SELECT COUNT(*) FROM "
+        + sqlIdentifier(tableName) + ";");
+
+      results.execute();
+
+      results.first();
+      XRow row = UNO.XRow(results);
+
+      int num = row.getInt(1);
+      return num;
+    }
+    catch (Exception x)
+    {
+      Logger.error(x);
+      return 0;
+    }
+    finally
+    {
+      if (results != null) UNO.XComponent(results).dispose();
+      if (conn != null) try
+      {
+        conn.close();
+      }
+      catch (Exception e)
+      {}
+    }
+  }
+
+  /**
+   * Liefert str zurück, als Identifier-Name vorbereitet für das Einfügen in
+   * SQL-Statements.
+   * 
+   * @param str
+   *          beginnt und endet immer mit einem Doublequote.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private static String sqlIdentifier(String str)
+  {
+    return "\"" + str.replaceAll("\"", "\"\"") + "\"";
   }
 
   /**
@@ -678,14 +764,16 @@ public class MailMergeDatasource
 
   /**
    * Liefert die Spaltennamen der Tabelle tableName aus der OOo-Datenquelle
-   * oooDatasourceName.
+   * oooDatasourceName in alphabetischer Reihenfolge. Die Reihenfolge entspricht der
+   * von {@link #getDbValuesForDataset(Datasource, int)}.
    * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TODO Testen
+   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private List<String> getDbColumnNames(Datasource oooDatasource)
   {
     List<String> columnNames = new Vector<String>();
-    // FIXME: getDbColumnNames()
+    columnNames.addAll(oooDatasource.getSchema());
+    Collections.sort(columnNames);
     return columnNames;
   }
 
@@ -737,22 +825,73 @@ public class MailMergeDatasource
   }
 
   /**
-   * Liefert die sichtbaren Inhalte (als Strings) der Zellen aus der rowIndex-ten
-   * sichtbaren nicht-leeren Zeile (wobei die erste solche Zeile, diejenige die die
-   * Namen for {@link #getColumnNames()} liefert, den Index 0 hat) von Tabelle
-   * tableName aus der OOo-Datenquelle oooDatasourceName. Falls sich die Daten
-   * zwischen den Aufrufen der beiden Methoden nicht geändert haben, passen die
+   * Liefert die Daten des rowIndex-ten Datensatzes der Datenquelle oooDatasource
+   * (wobei der erste Datensatz die Nummer 1 hat!!!) Falls sich die Daten zwischen
+   * den Aufrufen der beiden Methoden nicht geändert haben, passen die
    * zurückgelieferten Daten in Anzahl und Reihenfolge genau zu der von
-   * {@link #getColumnNames()} gelieferten Liste.
+   * {@link #getDbColumnNames(Datasource)} gelieferten Liste.
    * 
    * Falls rowIndex zu groß ist, wird ein Vektor mit leeren Strings zurückgeliefert.
    * Im Fehlerfall wird ein leerer Vektor zurückgeliefert.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
+   * 
+   * TESTED
    */
   private List<String> getDbValuesForDataset(Datasource oooDatasource, int rowIndex)
   {
-    return new Vector<String>(); // FIXME: getDbValuesForDataset()
+    /*
+     * Die folgende Implementierung ist nicht schön. Sie hat die folgenden Probleme
+     * 
+     * o Liest jedes Mal erneut die ganze Tabelle aus => langsam, übermäßige Garbage
+     * Produktion
+     * 
+     * o Kann kein Ergebnis zurückliefern, wenn das Auslesen der gesamten Tabelle
+     * nicht innerhalb des Timeouts möglich ist => Vorschau broken bei langsamen
+     * Datenquellen
+     * 
+     * Der große Vorteil dieser Implementierung ist ihre Einfachheit.
+     */
+
+    List<String> list = getDbColumnNames(oooDatasource);
+    try
+    {
+      if (rowIndex < 1)
+        throw new IllegalArgumentException(L.m("Illegale Datensatznummer: %1",
+          rowIndex));
+      QueryResults res = oooDatasource.getContents(MAILMERGE_GETCONTENTS_TIMEOUT);
+      for (Dataset ds : res)
+      {
+        if (--rowIndex == 0)
+        {
+          // Avoid needless obj creation by overwriting col names with return values
+          for (int i = 0; i < list.size(); ++i)
+          {
+            String str;
+            try
+            {
+              str = ds.get(list.get(i));
+            }
+            catch (ColumnNotFoundException x)
+            {
+              str = "";
+            }
+            list.set(i, str);
+          }
+          return list;
+        }
+      }
+
+      // Avoid needless object creation by overwriting col names with return values
+      for (int i = 0; i < list.size(); ++i)
+        list.set(i, "");
+      return list;
+    }
+    catch (Exception x)
+    {
+      Logger.error(x);
+      return new Vector<String>();
+    }
   }
 
   /**
@@ -843,10 +982,10 @@ public class MailMergeDatasource
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * 
-   * TODO Testen
+   * TESTED
    */
   private QueryResultsWithSchema getDbData(Datasource oooDatasource)
-      throws Exception, ConfigurationErrorException
+      throws Exception
   {
     Set<String> schema = oooDatasource.getSchema();
     QueryResults res = oooDatasource.getContents(MAILMERGE_GETCONTENTS_TIMEOUT);
@@ -857,7 +996,7 @@ public class MailMergeDatasource
    * Liefert die sichtbaren Zellen aus der Tabelle tableName des Dokuments calcDoc
    * als QueryResultsWithSchema zurück.
    * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TODO Testen
+   * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private QueryResultsWithSchema getData(XSpreadsheetDocument calcDoc,
       String tableName)
@@ -1158,6 +1297,7 @@ public class MailMergeDatasource
       tableName = "";
     else
       tableName = name;
+    oooDatasource = null;
     storeDatasourceSettings();
   }
 
@@ -1472,6 +1612,7 @@ public class MailMergeDatasource
     calcDoc = null;
 
     oooDatasourceName = newDsName;
+    oooDatasource = null;
     storeDatasourceSettings();
   }
 
@@ -1522,7 +1663,9 @@ public class MailMergeDatasource
       {
         XDataSource ds =
           UNO.XDataSource(UNO.dbContext.getRegisteredObject(oooDatasourceName));
-        ds.setLoginTimeout(MAILMERGE_LOGIN_TIMEOUT);
+        long lgto = MAILMERGE_LOGIN_TIMEOUT / 1000;
+        if (lgto < 1) lgto = 1;
+        ds.setLoginTimeout((int) lgto);
         XConnection conn = ds.getConnection("", "");
         XNameAccess tables = UNO.XTablesSupplier(conn).getTables();
         for (String name : tables.getElementNames())
