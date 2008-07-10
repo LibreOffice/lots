@@ -98,6 +98,7 @@ import de.muenchen.allg.itd51.wollmux.dialog.trafo.GenderDialog;
 import de.muenchen.allg.itd51.wollmux.dialog.trafo.TrafoDialog;
 import de.muenchen.allg.itd51.wollmux.dialog.trafo.TrafoDialogFactory;
 import de.muenchen.allg.itd51.wollmux.dialog.trafo.TrafoDialogParameters;
+import de.muenchen.allg.itd51.wollmux.func.StandardPrint;
 
 /**
  * Die neuen erweiterten Serienbrief-Funktionalitäten.
@@ -1364,9 +1365,34 @@ public class MailMergeNew
     {
       public void run()
       {
+        // Falls printIntoDocument==true soll das Ausgabedokument für das
+        // Gesamtdokument im Hintergrund geöffnet und lockControllers gesetzt werden.
+        XTextDocument outputDoc = null;
+        if (printIntoDocument)
+        {
+          try
+          {
+            outputDoc = StandardPrint.createNewTargetDocument(pmod, true);
+            outputDoc.lockControllers();
+          }
+          catch (java.lang.Exception e)
+          {
+            Logger.error(e);
+          }
+        }
+
         mod.setFormFieldsPreviewMode(true);
         pmod.printWithProps();
         mod.setFormFieldsPreviewMode(previewMode);
+
+        // lockControllers des Gesamtdokuments aufheben und das Gesamtdokument
+        // anzeigen.
+        if (outputDoc != null)
+        {
+          outputDoc.unlockControllers();
+          outputDoc.getCurrentController().getFrame().getContainerWindow().setVisible(
+            true);
+        }
       }
     }.start();
   }

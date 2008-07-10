@@ -39,7 +39,6 @@ import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung;
 import de.muenchen.allg.itd51.wollmux.WollMuxEventHandler;
-import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.PrintModels.InternalPrintModel;
 import de.muenchen.allg.itd51.wollmux.dialog.SachleitendeVerfuegungenDruckdialog.VerfuegungspunktInfo;
@@ -247,34 +246,48 @@ public class StandardPrint
   public static void printIntoFile(final XPrintModel pmod) throws Exception
   {
     boolean firstAppend = true;
+    try
+    {
+      pmod.getPropertyValue("PrintIntoFile_HasContent");
+      firstAppend = false;
+    }
+    catch (UnknownPropertyException e)
+    {}
+
     XTextDocument outputDoc = null;
     try
     {
       outputDoc =
         UNO.XTextDocument(pmod.getPropertyValue("PrintIntoFile_OutputDocument"));
-      firstAppend = false;
     }
     catch (UnknownPropertyException e)
     {
-      outputDoc = createNewTargetDocument(pmod);
+      outputDoc = createNewTargetDocument(pmod, false);
     }
 
     PrintIntoFile.appendToFile(outputDoc, pmod.getTextDocument(), firstAppend);
+
+    if (firstAppend)
+      pmod.setPropertyValue("PrintIntoFile_HasContent", Boolean.TRUE);
   }
 
   /**
-   * Erzeugt ein neues leeres Dokument für {@link PrintIntoFile} und setzt die
-   * entsprechenden Properties von pmod, damit das Dokument verwendet wird. Dabei
-   * wird auf korrekte Synchronisation mit dem WollMux geachtet.
+   * Erzeugt abhängig von hidden ein sichtbares oder unsichtbares neues leeres
+   * Dokument für {@link PrintIntoFile} und setzt die entsprechenden Properties von
+   * pmod, damit das Dokument verwendet wird. Dabei wird auf korrekte Synchronisation
+   * mit dem WollMux geachtet.
+   * 
+   * @param pmod
+   *          Das XPrintModel in dem die Property gesetzt wird
+   * @param hidden
+   *          wenn hidden==true ist, wird das Dokument unsichtbar erzeugt.
    * 
    * @return das erzeugte neue Zieldokument.
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
-   * 
-   * TODO Testen
    */
-  private static XTextDocument createNewTargetDocument(final XPrintModel pmod)
-      throws Exception
+  public static XTextDocument createNewTargetDocument(final XPrintModel pmod,
+      boolean hidden) throws Exception
   {
     XTextDocument outputDoc;
     final XTextDocument[] compo = new XTextDocument[] {
@@ -289,8 +302,7 @@ public class StandardPrint
           synchronized (compo)
           {
             if (!UnoRuntime.areSame(compo[0], arg0.Source)) return;
-            UNO.XEventBroadcaster(WollMuxSingleton.getInstance()).removeEventListener(
-              this);
+            WollMuxEventHandler.handleRemoveDocumentEventListener(this);
             compo[1] = compo[0];
             compo.notifyAll();
           }
@@ -303,11 +315,10 @@ public class StandardPrint
 
     synchronized (compo)
     {
-
       outputDoc =
         compo[0] =
           UNO.XTextDocument(UNO.loadComponentFromURL("private:factory/swriter",
-            true, true));
+            true, true, hidden));
       pmod.setPropertyValue("PrintIntoFile_OutputDocument", compo[0]);
 
       try
@@ -324,6 +335,7 @@ public class StandardPrint
       catch (InterruptedException i)
       {}
     }
+
     return outputDoc;
   }
 }
