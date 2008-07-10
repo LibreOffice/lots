@@ -86,7 +86,6 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
   public WollMux(XComponentContext ctx)
   {
     WollMuxSingleton.initialize(ctx);
-    WollMuxSingleton.showInfoModal("WollMux-init", "WollMux Service wurde erzeugt");
   }
 
   /*
