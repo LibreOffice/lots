@@ -77,6 +77,7 @@ import com.sun.star.frame.XFrame;
 import com.sun.star.frame.XModel;
 import com.sun.star.lang.EventObject;
 import com.sun.star.lang.WrappedTargetException;
+import com.sun.star.lang.XComponent;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextField;
 import com.sun.star.ui.XModuleUIConfigurationManagerSupplier;
@@ -340,7 +341,7 @@ public class WollMuxSingleton implements XPALProvider
     {
       singletonInstance = new WollMuxSingleton(ctx);
 
-      // Prüfen ob Dippelt- oder Halbinstallation vorliegt.
+      // Prüfen ob Doppelt- oder Halbinstallation vorliegt.
       WollMuxEventHandler.handleCheckInstallation();
 
       // Event ON_FIRST_INITIALIZE erzeugen:
@@ -1253,34 +1254,90 @@ public class WollMuxSingleton implements XPALProvider
   /**
    * Der GlobalEventListener sorgt dafür, dass der WollMux alle wichtigen globalen
    * Ereignisse wie z.B. ein OnNew on OnLoad abfangen und darauf reagieren kann. In
-   * diesem Fall wird die Methode notifyEvent aufgerufen.
+   * diesem Fall wird die Methode notifyEvent aufgerufen. Wichtig ist dabei, dass der
+   * Verarbeitungsstatus für alle Dokumenttypen (auch nicht-Textdokumente) erfasst
+   * wird, damit der WollMux auch für diese Komponenten onWollMuxProcessingFinished
+   * liefern kann.
    * 
    * @author christoph.lutz
    */
   public static class GlobalEventListener implements
       com.sun.star.document.XEventListener
   {
+    private static ArrayList<XComponent> processedCompos =
+      new ArrayList<XComponent>();
+
+    private static boolean isProcessed(XComponent compo)
+    {
+      if (compo == null) return false;
+      for (XComponent c : processedCompos)
+        if (UnoRuntime.areSame(c, compo)) return true;
+      return false;
+    }
+
+    private static void setProcessed(XComponent compo)
+    {
+      if (compo == null) return;
+      if (!isProcessed(compo)) processedCompos.add(compo);
+    }
+
+    private static void unset(XComponent compo)
+    {
+      if (compo == null) return;
+      for (Iterator<XComponent> iter = processedCompos.iterator(); iter.hasNext();)
+      {
+        if (UnoRuntime.areSame(iter.next(), compo)) iter.remove();
+      }
+    }
+
     public void notifyEvent(com.sun.star.document.EventObject docEvent)
     {
-      XTextDocument doc = UNO.XTextDocument(docEvent.Source);
+      XComponent compo = UNO.XComponent(docEvent.Source);
+      if (compo == null) return;
 
-      if (doc != null)
+      XTextDocument xTextDoc = UNO.XTextDocument(compo);
+
+      String event = docEvent.EventName;
+
+      // Im Gegensatz zu OnLoad oder OnNew wird das Event OnViewCreated auch bei
+      // unsichtbar geöffneten Dokumenten erzeugt. Daher wird nun hauptsächlich
+      // dieses Event zur Initiierung der Dokumentbearbeitung verwendet.
+      if (event.equals("OnViewCreated") && !isProcessed(compo))
       {
-        Logger.debug2("Incoming documentEvent for #" + doc.hashCode() + ": "
-          + docEvent.EventName);
-
-        if (docEvent.EventName.equalsIgnoreCase("OnLoad")
-          || docEvent.EventName.equalsIgnoreCase(("OnNew")))
+        if (xTextDoc != null)
         {
-          // Verarbeitung von TextDocuments anstossen:
-          WollMuxEventHandler.handleProcessTextDocument(doc);
+          WollMuxEventHandler.handleProcessTextDocument(xTextDoc);
         }
+        else
+        {
+          WollMuxEventHandler.handleNotifyDocumentEventListener(
+            "OnWollMuxProcessingFinished", compo);
+        }
+        setProcessed(compo);
       }
-      else
+
+      // Die Events OnLoad und OnNew kommen nur bei sichtbar geöffneten Dokumenten.
+      // Das macht die Events für unsichtbar geöffnete Dokumente unbrauchbar. Nur
+      // falls das Event OnViewCreated nicht empfangen wurden (z.B. möglicherweise
+      // bei alten OOo-Verisonen), greift als Fallback die Dokumentbearbeitung über
+      // OnNew bzw. OnLoad.
+      else if ((event.equals("OnLoad") || event.equals(("OnNew")))
+        && !isProcessed(compo))
       {
-        WollMuxEventHandler.handleNotifyDocumentEventListener(
-          "OnWollMuxProcessingFinished", docEvent.Source);
+        if (xTextDoc != null)
+        {
+          WollMuxEventHandler.handleProcessTextDocument(xTextDoc);
+        }
+        else
+        {
+          WollMuxEventHandler.handleNotifyDocumentEventListener(
+            "OnWollMuxProcessingFinished", compo);
+        }
+        setProcessed(compo);
       }
+
+      // hält die Liste processedCompos sauber:
+      else if ((event.equals("OnUnload"))) unset(compo);
     }
 
     public void disposing(EventObject arg0)
