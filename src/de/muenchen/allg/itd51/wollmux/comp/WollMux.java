@@ -57,12 +57,11 @@ import de.muenchen.allg.itd51.wollmux.XPALChangeEventListener;
 import de.muenchen.allg.itd51.wollmux.XWollMux;
 
 /**
- * Diese Klasse stellt den zentralen UNO-Service WollMux dar. Der Service hat
- * drei Funktionen: als XAsyncJob sorgt der Service dafür, dass das
- * WollMuxSingleton beim Starten von OpenOffice initialisiert wird (er startet
- * also den WollMux). Als XDispatchProvider und XDispatch behandelt er alle
- * "wollmux:kommando..." URLs und als XWollMux stellt er die Schnittstelle für
- * externe UNO-Komponenten dar.
+ * Diese Klasse stellt den zentralen UNO-Service WollMux dar. Der Service hat drei
+ * Funktionen: als XAsyncJob sorgt der Service dafür, dass das WollMuxSingleton beim
+ * Starten von OpenOffice initialisiert wird (er startet also den WollMux). Als
+ * XDispatchProvider und XDispatch behandelt er alle "wollmux:kommando..." URLs und
+ * als XWollMux stellt er die Schnittstelle für externe UNO-Komponenten dar.
  */
 public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
     XDispatchProvider, XWollMux
@@ -73,14 +72,13 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
    * implementiert.
    */
   public static final java.lang.String[] SERVICENAMES = {
-                                                         "com.sun.star.task.AsyncJob",
-                                                         "de.muenchen.allg.itd51.wollmux.WollMux" };
+    "com.sun.star.task.AsyncJob", "de.muenchen.allg.itd51.wollmux.WollMux" };
 
   /**
    * Der Konstruktor initialisiert das WollMuxSingleton und startet damit den
-   * eigentlichen WollMux. Der Konstuktor wird aufgerufen, bevor OpenOffice.org
-   * die Methode executeAsync() aufrufen kann, die bei einem
-   * ON_FIRST_VISIBLE_TASK-Event über den Job-Mechanismus ausgeführt wird.
+   * eigentlichen WollMux. Der Konstuktor wird aufgerufen, bevor OpenOffice.org die
+   * Methode executeAsync() aufrufen kann, die bei einem ON_FIRST_VISIBLE_TASK-Event
+   * über den Job-Mechanismus ausgeführt wird.
    * 
    * @param context
    */
@@ -90,9 +88,9 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
   }
 
   /**
-   * Der AsyncJob wird mit dem Event OnFirstVisibleTask gestartet. Die Methode
-   * selbst beendet sich sofort wieder, bevor die Methode jedoch ausgeführt
-   * wird, wird im Konstruktor das WollMuxSingleton initialisiert.
+   * Der AsyncJob wird mit dem Event OnFirstVisibleTask gestartet. Die Methode selbst
+   * beendet sich sofort wieder, bevor die Methode jedoch ausgeführt wird, wird im
+   * Konstruktor das WollMuxSingleton initialisiert.
    * 
    * @see com.sun.star.task.XAsyncJob#executeAsync(com.sun.star.beans.NamedValue[],
    *      com.sun.star.task.XJobListener)
@@ -148,10 +146,8 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
   /* IN */String sTargetFrameName,
   /* IN */int iSearchFlags)
   {
-    return DispatchHandler.globalWollMuxDispatches.queryDispatch(
-        aURL,
-        sTargetFrameName,
-        iSearchFlags);
+    return DispatchHandler.globalWollMuxDispatches.queryDispatch(aURL,
+      sTargetFrameName, iSearchFlags);
   }
 
   /*
@@ -161,15 +157,14 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
    */
   public XDispatch[] queryDispatches( /* IN */DispatchDescriptor[] seqDescripts)
   {
-    return DispatchHandler.globalWollMuxDispatches
-        .queryDispatches(seqDescripts);
+    return DispatchHandler.globalWollMuxDispatches.queryDispatches(seqDescripts);
   }
 
   /**
-   * Diese Methode liefert eine Factory zurück, die in der Lage ist den
-   * UNO-Service zu erzeugen. Die Methode wird von UNO intern benötigt. Die
-   * Methoden __getComponentFactory und __writeRegistryServiceInfo stellen das
-   * Herzstück des UNO-Service dar.
+   * Diese Methode liefert eine Factory zurück, die in der Lage ist den UNO-Service
+   * zu erzeugen. Die Methode wird von UNO intern benötigt. Die Methoden
+   * __getComponentFactory und __writeRegistryServiceInfo stellen das Herzstück des
+   * UNO-Service dar.
    * 
    * @param sImplName
    * @return
@@ -191,21 +186,18 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
    * @param xRegKey
    * @return
    */
-  public synchronized static boolean __writeRegistryServiceInfo(
-      XRegistryKey xRegKey)
+  public synchronized static boolean __writeRegistryServiceInfo(XRegistryKey xRegKey)
   {
-    return Factory.writeRegistryServiceInfo(
-        WollMux.class.getName(),
-        WollMux.SERVICENAMES,
-        xRegKey);
+    return Factory.writeRegistryServiceInfo(WollMux.class.getName(),
+      WollMux.SERVICENAMES, xRegKey);
   }
 
   /**
-   * Diese Methode registriert einen XPALChangeEventListener, der updates
-   * empfängt wenn sich die PAL ändert. Nach dem Registrieren wird sofort ein
-   * ON_SELECTION_CHANGED Ereignis ausgelöst, welches dafür sort, dass sofort
-   * ein erster update aller Listener ausgeführt wird. Die Methode ignoriert
-   * alle XPALChangeEventListenener-Instanzen, die bereits registriert wurden.
+   * Diese Methode registriert einen XPALChangeEventListener, der updates empfängt
+   * wenn sich die PAL ändert. Nach dem Registrieren wird sofort ein
+   * ON_SELECTION_CHANGED Ereignis ausgelöst, welches dafür sort, dass sofort ein
+   * erster update aller Listener ausgeführt wird. Die Methode ignoriert alle
+   * XPALChangeEventListenener-Instanzen, die bereits registriert wurden.
    * Mehrfachregistrierung der selben Instanz ist also nicht möglich.
    * 
    * @see de.muenchen.allg.itd51.wollmux.XPALChangeEventBroadcaster#addPALChangeEventListener(de.muenchen.allg.itd51.wollmux.XPALChangeEventListener)
@@ -216,23 +208,23 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
   }
 
   /**
-   * Diese Methode registriert einen XPALChangeEventListener, der updates
-   * empfängt wenn sich die PAL ändert; nach der Registrierung wird geprüft, ob
-   * der WollMux und der XPALChangeEventListener die selbe WollMux-Konfiguration
-   * verwenden, wozu der Listener den HashCode wollmuxConfHashCode der aktuellen
+   * Diese Methode registriert einen XPALChangeEventListener, der updates empfängt
+   * wenn sich die PAL ändert; nach der Registrierung wird geprüft, ob der WollMux
+   * und der XPALChangeEventListener die selbe WollMux-Konfiguration verwenden, wozu
+   * der Listener den HashCode wollmuxConfHashCode der aktuellen
    * WollMux-Konfiguration übermittelt. Stimmt wollmuxConfHashCode nicht mit dem
-   * HashCode der WollMux-Konfiguration des WollMux überein, so erscheint ein
-   * Dialog, der vor möglichen Fehlern warnt. Nach dem Registrieren wird sofort
-   * ein ON_SELECTION_CHANGED Ereignis ausgelöst, welches dafür sort, dass
-   * sofort ein erster update aller Listener ausgeführt wird. Die Methode
-   * ignoriert alle XPALChangeEventListenener-Instanzen, die bereits registriert
-   * wurden. Mehrfachregistrierung der selben Instanz ist also nicht möglich.
+   * HashCode der WollMux-Konfiguration des WollMux überein, so erscheint ein Dialog,
+   * der vor möglichen Fehlern warnt. Nach dem Registrieren wird sofort ein
+   * ON_SELECTION_CHANGED Ereignis ausgelöst, welches dafür sort, dass sofort ein
+   * erster update aller Listener ausgeführt wird. Die Methode ignoriert alle
+   * XPALChangeEventListenener-Instanzen, die bereits registriert wurden.
+   * Mehrfachregistrierung der selben Instanz ist also nicht möglich.
    * 
    * @param l
    *          Der zu registrierende XPALChangeEventListener
    * @param wollmuxConfHashCode
-   *          Der HashCode der WollMux-Config der zur Konsistenzprüfung
-   *          herangezogen wird und über
+   *          Der HashCode der WollMux-Config der zur Konsistenzprüfung herangezogen
+   *          wird und über
    *          WollMuxFiles.getWollMuxConf().getStringRepresentation().hashCode()
    *          erzeugt wird.
    * 
@@ -244,31 +236,30 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
       XPALChangeEventListener l, int wollmuxConfHashCode)
   {
     WollMuxEventHandler.handleAddPALChangeEventListener(l, new Integer(
-        wollmuxConfHashCode));
+      wollmuxConfHashCode));
   }
 
   /**
-   * Diese Methode registriert einen Listener im WollMux, über den der WollMux
-   * über den Status der Dokumentbearbeitung informiert (z.B. wenn ein Dokument
+   * Diese Methode registriert einen Listener im WollMux, über den der WollMux über
+   * den Status der Dokumentbearbeitung informiert (z.B. wenn ein Dokument
    * vollständig bearbeitet/expandiert wurde). Die Methode ignoriert alle
    * XEventListenener-Instanzen, die bereits registriert wurden.
    * Mehrfachregistrierung der selben Instanz ist also nicht möglich.
    * 
-   * Tritt ein entstprechendes Ereignis ein, so erfolgt der Aufruf der
-   * entsprechenden Methoden XEventListener.notifyEvent(...) immer gleichzeitig
-   * (d.h. für jeden Listener in einem eigenen Thread).
+   * Tritt ein entstprechendes Ereignis ein, so erfolgt der Aufruf der entsprechenden
+   * Methoden XEventListener.notifyEvent(...) immer gleichzeitig (d.h. für jeden
+   * Listener in einem eigenen Thread).
    * 
    * Der WollMux liefert derzeit folgende Events:
    * 
-   * OnWollMuxProcessingFinished: Dieses Event wird erzeugt, wenn ein
-   * Textdokument nach dem Öffnen vollständig vom WollMux bearbeitet und
-   * expandiert wurde oder bei allen anderen Dokumenttypen direkt nach dem
-   * Öffnen. D.h. für jedes in OOo geöffnete Dokument erfolgt früher oder später
-   * ein solches Event.
+   * OnWollMuxProcessingFinished: Dieses Event wird erzeugt, wenn ein Textdokument
+   * nach dem Öffnen vollständig vom WollMux bearbeitet und expandiert wurde oder bei
+   * allen anderen Dokumenttypen direkt nach dem Öffnen. D.h. für jedes in OOo
+   * geöffnete Dokument erfolgt früher oder später ein solches Event.
    * 
    * @param l
-   *          Der XEventListener, der bei Statusänderungen der
-   *          Dokumentbearbeitung informiert werden soll.
+   *          Der XEventListener, der bei Statusänderungen der Dokumentbearbeitung
+   *          informiert werden soll.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    * @see com.sun.star.document.XEventBroadcaster#addEventListener(com.sun.star.document.XEventListener)
@@ -290,8 +281,8 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
   }
 
   /**
-   * Diese Methode deregistriert einen mit registerEventListener(XEventListener
-   * l) registrierten XEventListener.
+   * Diese Methode deregistriert einen mit registerEventListener(XEventListener l)
+   * registrierten XEventListener.
    * 
    * @param l
    *          der XEventListener, der deregistriert werden soll.
@@ -305,13 +296,13 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
   }
 
   /**
-   * Diese Methode setzt den aktuellen Absender der Persönlichen Absenderliste
-   * (PAL) auf den Absender sender. Der Absender wird nur gesetzt, wenn die
-   * Parameter sender und idx in der alphabetisch sortierten Absenderliste des
-   * WollMux übereinstimmen - d.h. die Absenderliste der veranlassenden
-   * SenderBox zum Zeitpunkt der Auswahl konsistent zur PAL des WollMux war. Die
-   * Methode verwendet für sender das selben Format wie es vom
-   * XPALProvider:getCurrentSender() geliefert wird.
+   * Diese Methode setzt den aktuellen Absender der Persönlichen Absenderliste (PAL)
+   * auf den Absender sender. Der Absender wird nur gesetzt, wenn die Parameter
+   * sender und idx in der alphabetisch sortierten Absenderliste des WollMux
+   * übereinstimmen - d.h. die Absenderliste der veranlassenden SenderBox zum
+   * Zeitpunkt der Auswahl konsistent zur PAL des WollMux war. Die Methode verwendet
+   * für sender das selben Format wie es vom XPALProvider:getCurrentSender()
+   * geliefert wird.
    */
   public void setCurrentSender(String sender, short idx)
   {
@@ -322,37 +313,35 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
   /**
    * Diese Methode liefert den Wert zur Datenbankspalte dbSpalte, der dem Wert
    * entspricht, den das Dokumentkommando WM(CMD'insertValue' DB_SPALTE'<dbSpalte>')
-   * in das Dokument einfügen würde, oder den Leerstring "" wenn dieser Wert
-   * nicht bestimmt werden kann (z.B. wenn ein ungültiger Spaltennamen dbSpalte
-   * übergeben wurde). So ist es z.B. möglich, aus externen Anwendungen (z.B.
-   * Basic-Makros) auf Werte des aktuell gesetzten Absenders des WollMux
-   * zuzugreifen.
+   * in das Dokument einfügen würde, oder den Leerstring "" wenn dieser Wert nicht
+   * bestimmt werden kann (z.B. wenn ein ungültiger Spaltennamen dbSpalte übergeben
+   * wurde). So ist es z.B. möglich, aus externen Anwendungen (z.B. Basic-Makros) auf
+   * Werte des aktuell gesetzten Absenders des WollMux zuzugreifen.
    * 
-   * Anmerkung: Ist die aufrufende Anwendung ein Basic-Makro, so muss damit
-   * gerechnet werden, dass dieses Makro bereits in einer synchronisierten
-   * Umgebung abläuft (das ist Standard bei Basic-Makros). Um Deadlocks in
-   * Zusammenhang mit dem WollMux zu vermeiden, darf die Methode also nicht über
-   * den WollMuxEventHandler synchonisiert werden. Aufgrund der fehlenden
-   * Synchronisierung auf Seiten des WollMux ist die Methode jedoch mit Vorsicht
-   * zu genießen. Insbesondere sollten die über diese Methode gelieferten Werte
-   * NICHT verwendet werden, um z.B. mit setCurrentSender() Daten des WollMux zu
-   * manipulieren.
+   * Anmerkung: Ist die aufrufende Anwendung ein Basic-Makro, so muss damit gerechnet
+   * werden, dass dieses Makro bereits in einer synchronisierten Umgebung abläuft
+   * (das ist Standard bei Basic-Makros). Um Deadlocks in Zusammenhang mit dem
+   * WollMux zu vermeiden, darf die Methode also nicht über den WollMuxEventHandler
+   * synchonisiert werden. Aufgrund der fehlenden Synchronisierung auf Seiten des
+   * WollMux ist die Methode jedoch mit Vorsicht zu genießen. Insbesondere sollten
+   * die über diese Methode gelieferten Werte NICHT verwendet werden, um z.B. mit
+   * setCurrentSender() Daten des WollMux zu manipulieren.
    * 
-   * Zum Auslesen und Reagieren auf Änderungen der PersoenlichenAbsenderlist
-   * (PAL) sollten die Methoden verwendet werden, die der XPALProvider anbietet.
-   * Diese Methoden sind über den WollMuxEventHandler synchronisiert.
+   * Zum Auslesen und Reagieren auf Änderungen der PersoenlichenAbsenderlist (PAL)
+   * sollten die Methoden verwendet werden, die der XPALProvider anbietet. Diese
+   * Methoden sind über den WollMuxEventHandler synchronisiert.
    * 
    * @param dbSpalte
    *          Name der Datenbankspalte deren Wert zurückgeliefert werden soll.
-   * @return Der Wert der Datenbankspalte dbSpalte des aktuell ausgewählten
-   *         Absenders oder "", wenn der Wert nicht bestimmt werden kann.
+   * @return Der Wert der Datenbankspalte dbSpalte des aktuell ausgewählten Absenders
+   *         oder "", wenn der Wert nicht bestimmt werden kann.
    */
   public String getValue(String dbSpalte)
   {
     try
     {
-      return WollMuxSingleton.getInstance().getDatasourceJoiner()
-          .getSelectedDataset().get(dbSpalte).toString();
+      return WollMuxSingleton.getInstance().getDatasourceJoiner().getSelectedDataset().get(
+        dbSpalte).toString();
     }
     catch (java.lang.Exception e)
     {
