@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE manifest:manifest PUBLIC "-//OpenOffice.org//DTD Manifest 1.0//EN" "Manifest.dtd">
 <manifest:manifest>
- <manifest:file-entry manifest:media-type="application/vnd.sun.star.configuration-data" manifest:full-path="Jobs.xcu"/>
  <manifest:file-entry manifest:media-type="application/vnd.sun.star.configuration-data" manifest:full-path="ProtocolHandler.xcu"/>
  <manifest:file-entry manifest:media-type="application/vnd.sun.star.configuration-data" manifest:full-path="Controller.xcu"/>
  <manifest:file-entry manifest:media-type="application/vnd.sun.star.uno-component;type=Java" manifest:full-path="WollMux.uno.jar"/>

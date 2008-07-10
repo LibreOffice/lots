@@ -36,7 +36,6 @@
 
 package de.muenchen.allg.itd51.wollmux.comp;
 
-import com.sun.star.beans.NamedValue;
 import com.sun.star.document.XEventListener;
 import com.sun.star.frame.DispatchDescriptor;
 import com.sun.star.frame.XDispatch;
@@ -46,7 +45,6 @@ import com.sun.star.lang.XSingleComponentFactory;
 import com.sun.star.lib.uno.helper.Factory;
 import com.sun.star.lib.uno.helper.WeakBase;
 import com.sun.star.registry.XRegistryKey;
-import com.sun.star.task.XAsyncJob;
 import com.sun.star.uno.XComponentContext;
 
 import de.muenchen.allg.itd51.wollmux.DispatchHandler;
@@ -57,22 +55,25 @@ import de.muenchen.allg.itd51.wollmux.XPALChangeEventListener;
 import de.muenchen.allg.itd51.wollmux.XWollMux;
 
 /**
- * Diese Klasse stellt den zentralen UNO-Service WollMux dar. Der Service hat drei
- * Funktionen: als XAsyncJob sorgt der Service dafür, dass das WollMuxSingleton beim
- * Starten von OpenOffice initialisiert wird (er startet also den WollMux). Als
- * XDispatchProvider und XDispatch behandelt er alle "wollmux:kommando..." URLs und
- * als XWollMux stellt er die Schnittstelle für externe UNO-Komponenten dar.
+ * Diese Klasse stellt den zentralen UNO-Service WollMux dar. Der Service hat
+ * folgende Funktionen: Als XDispatchProvider und XDispatch behandelt er alle
+ * "wollmux:kommando..." URLs und als XWollMux stellt er die Schnittstelle für
+ * externe UNO-Komponenten dar. Der Service wird beim Starten von OpenOffice.org
+ * automatisch (mehrfach) instanziiert, wenn OOo einen dispatchprovider für die in
+ * der Datei Addons.xcu enthaltenen wollmux:... dispatches besorgen möchte (dies
+ * geschieht auch bei unsichtbar geöffneten Dokumenten). Als Folge wird das
+ * WollMux-Singleton bei OOo-Start (einmalig) initialisiert.
  */
-public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
-    XDispatchProvider, XWollMux
+public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider,
+    XWollMux
 {
 
   /**
    * Dieses Feld entält eine Liste aller Services, die dieser UNO-Service
    * implementiert.
    */
-  public static final java.lang.String[] SERVICENAMES = {
-    "com.sun.star.task.AsyncJob", "de.muenchen.allg.itd51.wollmux.WollMux" };
+  public static final java.lang.String[] SERVICENAMES =
+    { "de.muenchen.allg.itd51.wollmux.WollMux" };
 
   /**
    * Der Konstruktor initialisiert das WollMuxSingleton und startet damit den
@@ -85,20 +86,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XAsyncJob,
   public WollMux(XComponentContext ctx)
   {
     WollMuxSingleton.initialize(ctx);
-  }
-
-  /**
-   * Der AsyncJob wird mit dem Event OnFirstVisibleTask gestartet. Die Methode selbst
-   * beendet sich sofort wieder, bevor die Methode jedoch ausgeführt wird, wird im
-   * Konstruktor das WollMuxSingleton initialisiert.
-   * 
-   * @see com.sun.star.task.XAsyncJob#executeAsync(com.sun.star.beans.NamedValue[],
-   *      com.sun.star.task.XJobListener)
-   */
-  public synchronized void executeAsync(com.sun.star.beans.NamedValue[] lArgs,
-      com.sun.star.task.XJobListener xListener)
-  {
-    xListener.jobFinished(this, new NamedValue[] {});
+    WollMuxSingleton.showInfoModal("WollMux-init", "WollMux Service wurde erzeugt");
   }
 
   /*
