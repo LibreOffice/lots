@@ -1365,6 +1365,8 @@ public class MailMergeNew
     {
       public void run()
       {
+        long startTime = System.currentTimeMillis();
+
         // Falls printIntoDocument==true soll das Ausgabedokument für das
         // Gesamtdokument im Hintergrund geöffnet und lockControllers gesetzt werden.
         XTextDocument outputDoc = null;
@@ -1393,6 +1395,9 @@ public class MailMergeNew
           outputDoc.getCurrentController().getFrame().getContainerWindow().setVisible(
             true);
         }
+
+        long duration = (System.currentTimeMillis() - startTime) / 1000;
+        Logger.debug(L.m("printIntoFile finished after %1 seconds", duration));
       }
     }.start();
   }
