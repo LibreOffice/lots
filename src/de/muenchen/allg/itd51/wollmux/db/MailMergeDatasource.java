@@ -1391,7 +1391,7 @@ public class MailMergeDatasource
 
     // Es gibt offenbar genau ein offenes Calc-Fenster
     // das XSpreadsheetDocument dazu ist in calcSheet zu finden
-    List<String> nonEmptyTableNames = getNamesOfNonEmptyTables(win.docs.get(0));
+    List<String> nonEmptyTableNames = getRelevantTableNames(win.docs.get(0));
 
     String str = win.titles.get(0);
     if (nonEmptyTableNames.size() == 1) str = str + "." + nonEmptyTableNames.get(0);
@@ -1631,7 +1631,7 @@ public class MailMergeDatasource
       switch (sourceType)
       {
         case SOURCE_CALC:
-          return getNamesOfNonEmptyTables(getCalcDoc());
+          return getRelevantTableNames(getCalcDoc());
         case SOURCE_DB:
           return getDbTableNames();
         default:
@@ -1681,11 +1681,12 @@ public class MailMergeDatasource
 
   /**
    * Liefert die Namen aller nicht-leeren Tabellenblätter von calcDoc. Falls calcDoc ==
-   * null wird eine leere Liste geliefert.
+   * null wird eine leere Liste geliefert. Falls alle Tabellen leer sind, wird
+   * trotzdem eine Liste mit dem Namen der ersten Tabelle zurückgeliefert.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
-  private List<String> getNamesOfNonEmptyTables(XSpreadsheetDocument calcDoc)
+  private List<String> getRelevantTableNames(XSpreadsheetDocument calcDoc)
   {
     List<String> nonEmptyTableNames = new Vector<String>();
     if (calcDoc != null)
@@ -1714,6 +1715,10 @@ public class MailMergeDatasource
             Logger.error(x);
           }
         }
+
+        if (nonEmptyTableNames.isEmpty() && tableNames.length > 0)
+          nonEmptyTableNames.add(tableNames[0]);
+
       }
       catch (Exception x)
       {
