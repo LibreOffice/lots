@@ -107,8 +107,8 @@ import de.muenchen.allg.itd51.wollmux.db.QueryResults;
 import de.muenchen.allg.itd51.wollmux.dialog.AbsenderAuswaehlen;
 import de.muenchen.allg.itd51.wollmux.dialog.Common;
 import de.muenchen.allg.itd51.wollmux.dialog.Dialog;
-import de.muenchen.allg.itd51.wollmux.dialog.MailMergeNew;
 import de.muenchen.allg.itd51.wollmux.dialog.PersoenlicheAbsenderlisteVerwalten;
+import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeNew;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
 
 /**

@@ -91,7 +91,7 @@ import de.muenchen.allg.itd51.wollmux.DocumentCommand.SetJumpMark;
 import de.muenchen.allg.itd51.wollmux.FormFieldFactory.FormField;
 import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
 import de.muenchen.allg.itd51.wollmux.dialog.FormController;
-import de.muenchen.allg.itd51.wollmux.dialog.MailMergeNew;
+import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeNew;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
 import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModel4InputUser;
 import de.muenchen.allg.itd51.wollmux.func.Function;

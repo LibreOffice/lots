@@ -28,7 +28,7 @@
  * @version 1.0
  * 
  */
-package de.muenchen.allg.itd51.wollmux.dialog;
+package de.muenchen.allg.itd51.wollmux.dialog.mailmerge;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -94,6 +94,10 @@ import de.muenchen.allg.itd51.wollmux.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.db.MailMergeDatasource;
 import de.muenchen.allg.itd51.wollmux.db.QueryResults;
 import de.muenchen.allg.itd51.wollmux.db.QueryResultsWithSchema;
+import de.muenchen.allg.itd51.wollmux.dialog.DimAdjust;
+import de.muenchen.allg.itd51.wollmux.dialog.JPotentiallyOverlongPopupMenuButton;
+import de.muenchen.allg.itd51.wollmux.dialog.TextComponentTags;
+import de.muenchen.allg.itd51.wollmux.dialog.TextComponentTags.ContentElement;
 import de.muenchen.allg.itd51.wollmux.dialog.trafo.GenderDialog;
 import de.muenchen.allg.itd51.wollmux.dialog.trafo.TrafoDialog;
 import de.muenchen.allg.itd51.wollmux.dialog.trafo.TrafoDialogFactory;
