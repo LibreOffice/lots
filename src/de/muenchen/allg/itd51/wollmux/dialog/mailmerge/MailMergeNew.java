@@ -30,15 +30,10 @@
  */
 package de.muenchen.allg.itd51.wollmux.dialog.mailmerge;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.util.Collection;
@@ -50,25 +45,14 @@ import java.util.Vector;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import javax.swing.BorderFactory;
 import javax.swing.Box;
-import javax.swing.ButtonGroup;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JComponent;
-import javax.swing.JDialog;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
-import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import javax.swing.WindowConstants;
-import javax.swing.border.Border;
-import javax.swing.border.EmptyBorder;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-import javax.swing.text.Document;
 
 import com.sun.star.lang.NoSuchMethodException;
 import com.sun.star.text.XTextDocument;
@@ -87,6 +71,10 @@ import de.muenchen.allg.itd51.wollmux.db.QueryResults;
 import de.muenchen.allg.itd51.wollmux.db.QueryResultsWithSchema;
 import de.muenchen.allg.itd51.wollmux.dialog.DimAdjust;
 import de.muenchen.allg.itd51.wollmux.dialog.JPotentiallyOverlongPopupMenuButton;
+import de.muenchen.allg.itd51.wollmux.dialog.NonNumericKeyConsumer;
+import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeParams.DatasetSelectionType;
+import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeParams.IndexSelection;
+import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeParams.MailMergeType;
 import de.muenchen.allg.itd51.wollmux.dialog.trafo.GenderDialog;
 import de.muenchen.allg.itd51.wollmux.dialog.trafo.TrafoDialog;
 import de.muenchen.allg.itd51.wollmux.dialog.trafo.TrafoDialogFactory;
@@ -122,11 +110,6 @@ public class MailMergeNew
   private MailMergeDatasource ds;
 
   /**
-   * Verschlingt alle KeyEvents die keine Ziffern oder Editierbefehle sind.
-   */
-  private KeyListener nonNumericKeyConsumer = new NonNumericKeyConsumer();
-
-  /**
    * true gdw wir uns im Vorschau-Modus befinden.
    */
   private boolean previewMode;
@@ -137,97 +120,6 @@ public class MailMergeNew
    * Darauf muss geachtet werden.
    */
   private int previewDatasetNumber = 1;
-
-  /**
-   * Auf welche Art hat der Benutzer die zu druckenden Datensätze ausgewählt.
-   * 
-   * @author Matthias Benkmann (D-III-ITD D.10)
-   */
-  private enum DatasetSelectionType {
-    /**
-     * Alle Datensätze.
-     */
-    ALL,
-
-    /**
-     * Der durch {@link MailMergeNew#rangeStart} und {@link MailMergeNew#rangeEnd}
-     * gegebene Wert.
-     */
-    RANGE,
-
-    /**
-     * Die durch {@link MailMergeNew#selectedIndexes} bestimmten Datensätze.
-     */
-    INDIVIDUAL;
-  };
-
-  private enum MailMergeType {
-    /**
-     * Gesamtdokument erzeugen, das alle Serienbriefe in allen Ausfertigungen
-     * enthält.
-     */
-    SINGLE_FILE(L.m("in neues Dokument schreiben")),
-
-    /**
-     * Eine Datei pro Serienbrief, wobei jede Datei alle Versionen (bei SLV-Druck)
-     * enthält.
-     */
-    MULTI_FILE(L.m("in einzelne Dateien schreiben")),
-
-    /**
-     * Direkte Ausgabe auf dem Drucker.
-     */
-    PRINTER(L.m("auf dem Drucker ausgeben")),
-
-    /**
-     * Versenden per E-Mail.
-     */
-    // EMAIL(L.m("als E-Mails versenden"))
-    ;
-
-    /**
-     * Label für die Anzeige dieser Option.
-     */
-    private final String menuLabel;
-
-    MailMergeType(String menuLabel)
-    {
-      this.menuLabel = menuLabel;
-    }
-
-    public String toString()
-    {
-      return menuLabel;
-    }
-  }
-
-  /**
-   * Auf welche Art hat der Benutzer die zu druckenden Datensätze ausgewählt.
-   */
-  private DatasetSelectionType datasetSelectionType = DatasetSelectionType.ALL;
-
-  /**
-   * Falls {@link #datasetSelectionType} == {@link DatasetSelectionType#RANGE}
-   * bestimmt dies den ersten zu druckenden Datensatz (wobei der erste Datensatz die
-   * Nummer 1 hat). ACHTUNG! Der Wert hier kann 0 oder größer als {@link #rangeEnd}
-   * sein. Dies muss dort behandelt werden, wo er verwendet wird.
-   */
-  private int rangeStart = 1;
-
-  /**
-   * Falls {@link #datasetSelectionType} == {@link DatasetSelectionType#RANGE}
-   * bestimmt dies den letzten zu druckenden Datensatz (wobei der erste Datensatz die
-   * Nummer 1 hat). ACHTUNG! Der Wert hier kann 0 oder kleiner als
-   * {@link #rangeStart} sein. Dies muss dort behandelt werden, wo er verwendet wird.
-   */
-  private int rangeEnd = Integer.MAX_VALUE;
-
-  /**
-   * Falls {@link #datasetSelectionType} == {@link DatasetSelectionType#INDIVIDUAL}
-   * bestimmt dies die Indizes der ausgewählten Datensätze, wobei 1 den ersten
-   * Datensatz bezeichnet.
-   */
-  private List<Integer> selectedIndexes = new Vector<Integer>();
 
   /**
    * Das Textfield in dem Benutzer direkt eine Datensatznummer für die Vorschau
@@ -250,6 +142,8 @@ public class MailMergeNew
    * geschlossen wurde.
    */
   private ActionListener abortListener = null;
+
+  private MailMergeParams mailMergeParams = new MailMergeParams();
 
   /**
    * Die zentrale Klasse, die die Serienbrieffunktionalität bereitstellt.
@@ -392,7 +286,7 @@ public class MailMergeNew
 
     // FIXME: Muss ausgegraut sein, wenn nicht im Vorschau-Modus.
     previewDatasetNumberTextfield = new JTextField("1", 3);
-    previewDatasetNumberTextfield.addKeyListener(nonNumericKeyConsumer);
+    previewDatasetNumberTextfield.addKeyListener(NonNumericKeyConsumer.instance);
     previewDatasetNumberTextfield.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
@@ -446,7 +340,8 @@ public class MailMergeNew
     {
       public void actionPerformed(ActionEvent e)
       {
-        if (ds.hasDatasource()) showDoMailmergeDialog();
+        if (ds.hasDatasource())
+          mailMergeParams.showDoMailmergeDialog(myFrame, MailMergeNew.this);
       }
     });
     hbox.add(button);
@@ -598,245 +493,6 @@ public class MailMergeNew
     }
     catch (Exception x)
     {}
-  }
-
-  /**
-   * Zeigt den Dialog an, der die Serienbriefverarbeitung (Direktdruck oder in neues
-   * Dokument) anwirft.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private void showDoMailmergeDialog()
-  {
-    final JDialog dialog = new JDialog(myFrame, L.m("Seriendruck"), true);
-    dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-
-    Box vbox = Box.createVerticalBox();
-    vbox.setBorder(new EmptyBorder(8, 5, 10, 5));
-    dialog.add(vbox);
-
-    Box hbox = Box.createHorizontalBox();
-    JLabel label = new JLabel(L.m("Serienbriefe"));
-    hbox.add(label);
-    hbox.add(Box.createHorizontalStrut(5));
-
-    Vector<MailMergeType> types = new Vector<MailMergeType>();
-    for (MailMergeType type : MailMergeType.values())
-      types.add(type);
-    final JComboBox typeBox = new JComboBox(types);
-    typeBox.addItemListener(new ItemListener()
-    {
-      public void itemStateChanged(ItemEvent e)
-      {
-      // printIntoDocument = (typeBox.getSelectedIndex() == 0);
-      }
-    });
-    hbox.add(typeBox);
-
-    vbox.add(hbox);
-    vbox.add(Box.createVerticalStrut(5));
-
-    Box selectBox = Box.createVerticalBox();
-    Border border =
-      BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.GRAY),
-        L.m("Folgende Datensätze verwenden"));
-    selectBox.setBorder(border);
-
-    hbox = Box.createHorizontalBox();
-    ButtonGroup radioGroup = new ButtonGroup();
-    JRadioButton rbutton;
-    rbutton = new JRadioButton(L.m("Alle"), true);
-    rbutton.addActionListener(new ActionListener()
-    {
-      public void actionPerformed(ActionEvent e)
-      {
-        datasetSelectionType = DatasetSelectionType.ALL;
-      }
-    });
-    hbox.add(rbutton);
-    hbox.add(Box.createHorizontalGlue());
-    radioGroup.add(rbutton);
-
-    selectBox.add(hbox);
-    selectBox.add(Box.createVerticalStrut(5));
-
-    hbox = Box.createHorizontalBox();
-
-    final JRadioButton rangebutton = new JRadioButton(L.m("Von"), false);
-    rangebutton.addActionListener(new ActionListener()
-    {
-      public void actionPerformed(ActionEvent e)
-      {
-        datasetSelectionType = DatasetSelectionType.RANGE;
-      }
-    });
-    hbox.add(rangebutton);
-    radioGroup.add(rangebutton);
-
-    final JTextField start = new JTextField(4);
-    start.addKeyListener(nonNumericKeyConsumer);
-    hbox.add(start);
-    hbox.add(Box.createHorizontalStrut(5));
-    label = new JLabel("Bis");
-    hbox.add(label);
-    hbox.add(Box.createHorizontalStrut(5));
-
-    final JTextField end = new JTextField(4);
-    end.addKeyListener(nonNumericKeyConsumer);
-
-    DocumentListener rangeDocumentListener = new DocumentListener()
-    {
-      public void update()
-      {
-        rangebutton.setSelected(true);
-        datasetSelectionType = DatasetSelectionType.RANGE;
-        try
-        {
-          rangeStart = Integer.parseInt(start.getText());
-        }
-        catch (Exception x)
-        {}
-        try
-        {
-          rangeEnd = Integer.parseInt(end.getText());
-        }
-        catch (Exception x)
-        {}
-      }
-
-      public void insertUpdate(DocumentEvent e)
-      {
-        update();
-      }
-
-      public void removeUpdate(DocumentEvent e)
-      {
-        update();
-      }
-
-      public void changedUpdate(DocumentEvent e)
-      {
-        update();
-      }
-    };
-
-    Document tfdoc = start.getDocument();
-    tfdoc.addDocumentListener(rangeDocumentListener);
-    tfdoc = end.getDocument();
-    tfdoc.addDocumentListener(rangeDocumentListener);
-    hbox.add(end);
-
-    selectBox.add(hbox);
-    selectBox.add(Box.createVerticalStrut(5));
-
-    hbox = Box.createHorizontalBox();
-
-    // TODO Anwahl muss selben Effekt haben wie das Drücken des "Einzelauswahl"
-    // Buttons
-    // final JRadioButton einzelauswahlRadioButton = new JRadioButton("");
-    // hbox.add(einzelauswahlRadioButton);
-    // radioGroup.add(einzelauswahlRadioButton);
-    //
-    // ActionListener einzelauswahlActionListener = new ActionListener()
-    // {
-    // public void actionPerformed(ActionEvent e)
-    // {
-    // einzelauswahlRadioButton.setSelected(true);
-    // datasetSelectionType = DatasetSelectionType.INDIVIDUAL;
-    // // TODO showEinzelauswahlDialog();
-    // }
-    // };
-    //
-    // einzelauswahlRadioButton.addActionListener(einzelauswahlActionListener);
-    //
-    // JButton button = new JButton(L.m("Einzelauswahl..."));
-    // hbox.add(button);
-    // hbox.add(Box.createHorizontalGlue());
-    // button.addActionListener(einzelauswahlActionListener);
-
-    selectBox.add(hbox);
-    vbox.add(selectBox);
-    vbox.add(Box.createVerticalStrut(5));
-
-    hbox = Box.createHorizontalBox();
-    hbox.add(new JLabel(L.m("Zielverzeichnis")));
-    hbox.add(Box.createHorizontalGlue());
-    vbox.add(hbox);
-
-    hbox = Box.createHorizontalBox();
-    final JTextField targetDirectory = new JTextField();
-    hbox.add(targetDirectory);
-    hbox.add(new JButton(new AbstractAction("Suchen...")
-    {
-      public void actionPerformed(ActionEvent e)
-      {}
-    }));
-
-    hbox.add(Box.createHorizontalGlue());
-    vbox.add(hbox);
-
-    vbox.add(Box.createVerticalStrut(5));
-
-    hbox = Box.createHorizontalBox();
-    hbox.add(new JLabel(L.m("Dateinamenmuster")));
-    hbox.add(Box.createHorizontalStrut(5));
-    hbox.add(new JButton(new AbstractAction("Serienbrieffeld")
-    {
-      public void actionPerformed(ActionEvent e)
-      {}
-    }));
-    hbox.add(Box.createHorizontalStrut(5));
-    hbox.add(new JButton(new AbstractAction("Spezialfeld")
-    {
-      public void actionPerformed(ActionEvent e)
-      {}
-    }));
-    vbox.add(hbox);
-
-    vbox.add(Box.createVerticalStrut(5));
-
-    hbox = Box.createHorizontalBox();
-    final JTextField targetPattern = new JTextField();
-    hbox.add(targetPattern);
-    vbox.add(hbox);
-
-    vbox.add(Box.createVerticalStrut(5));
-
-    hbox = Box.createHorizontalBox();
-    JButton button = new JButton(L.m("Abbrechen"));
-    button.addActionListener(new ActionListener()
-    {
-      public void actionPerformed(ActionEvent e)
-      {
-        dialog.dispose();
-      }
-    });
-    hbox.add(button);
-
-    hbox.add(Box.createHorizontalGlue());
-
-    button = new JButton(L.m("Los geht's!"));
-    button.addActionListener(new ActionListener()
-    {
-      public void actionPerformed(ActionEvent e)
-      {
-        dialog.dispose();
-        doMailMerge((MailMergeType) typeBox.getSelectedItem());
-      }
-    });
-    hbox.add(button);
-
-    vbox.add(hbox);
-
-    dialog.pack();
-    int frameWidth = dialog.getWidth();
-    int frameHeight = dialog.getHeight();
-    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-    int x = screenSize.width / 2 - frameWidth / 2;
-    int y = screenSize.height / 2 - frameHeight / 2;
-    dialog.setLocation(x, y);
-    dialog.setResizable(false);
-    dialog.setVisible(true);
   }
 
   /**
@@ -1080,7 +736,8 @@ public class MailMergeNew
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private void doMailMerge(final MailMergeType mailMergeType)
+  void doMailMerge(final MailMergeType mailMergeType,
+      DatasetSelectionType datasetSelectionType, IndexSelection indexSelection)
   {
     mod.collectNonWollMuxFormFields();
     QueryResultsWithSchema data = ds.getData();
@@ -1093,20 +750,22 @@ public class MailMergeNew
           selected.add(i);
         break;
       case INDIVIDUAL:
-        selected.addAll(selectedIndexes);
+        selected.addAll(indexSelection.selectedIndexes);
         break;
       case RANGE:
-        if (rangeStart < 1) rangeStart = 1;
-        if (rangeEnd < 1) rangeEnd = 1;
-        if (rangeEnd > data.size()) rangeEnd = data.size();
-        if (rangeStart > data.size()) rangeStart = data.size();
-        if (rangeStart > rangeEnd)
+        if (indexSelection.rangeStart < 1) indexSelection.rangeStart = 1;
+        if (indexSelection.rangeEnd < 1) indexSelection.rangeEnd = 1;
+        if (indexSelection.rangeEnd > data.size())
+          indexSelection.rangeEnd = data.size();
+        if (indexSelection.rangeStart > data.size())
+          indexSelection.rangeStart = data.size();
+        if (indexSelection.rangeStart > indexSelection.rangeEnd)
         {
-          int t = rangeStart;
-          rangeStart = rangeEnd;
-          rangeEnd = t;
+          int t = indexSelection.rangeStart;
+          indexSelection.rangeStart = indexSelection.rangeEnd;
+          indexSelection.rangeEnd = t;
         }
-        for (int i = rangeStart; i <= rangeEnd; ++i)
+        for (int i = indexSelection.rangeStart; i <= indexSelection.rangeEnd; ++i)
           selected.add(i - 1); // wir zählen ab 0, anders als rangeStart/End
         break;
     }
@@ -1232,24 +891,6 @@ public class MailMergeNew
 
       pmod.setPrintProgressValue((short) (index + 1));
     }
-  }
-
-  private static class NonNumericKeyConsumer implements KeyListener
-  {
-    public void keyTyped(KeyEvent e)
-    {
-      char c = e.getKeyChar();
-      if (!((Character.isDigit(c) || (c == KeyEvent.VK_BACK_SPACE) || (c == KeyEvent.VK_DELETE))))
-      {
-        e.consume();
-      }
-    }
-
-    public void keyPressed(KeyEvent e)
-    {}
-
-    public void keyReleased(KeyEvent e)
-    {}
   }
 
   private class MyWindowListener implements WindowListener
