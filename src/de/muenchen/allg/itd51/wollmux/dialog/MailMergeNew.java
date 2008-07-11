@@ -146,12 +146,6 @@ public class MailMergeNew
   private int previewDatasetNumber = 1;
 
   /**
-   * Wird auf true gesetzt, wenn der Benutzer beim Seriendruck auswählt, dass er die
-   * Ausgabe in einem neuen Dokument haben möchte.
-   */
-  private boolean printIntoDocument = true;
-
-  /**
    * Auf welche Art hat der Benutzer die zu druckenden Datensätze ausgewählt.
    * 
    * @author Matthias Benkmann (D-III-ITD D.10)
@@ -173,6 +167,46 @@ public class MailMergeNew
      */
     INDIVIDUAL;
   };
+
+  private enum MailMergeType {
+    /**
+     * Gesamtdokument erzeugen, das alle Serienbriefe in allen Ausfertigungen
+     * enthält.
+     */
+    SINGLE_FILE(L.m("in neues Dokument schreiben")),
+
+    /**
+     * Eine Datei pro Serienbrief, wobei jede Datei alle Versionen (bei SLV-Druck)
+     * enthält.
+     */
+    MULTI_FILE(L.m("in einzelne Dateien schreiben")),
+
+    /**
+     * Direkte Ausgabe auf dem Drucker.
+     */
+    PRINTER(L.m("auf dem Drucker ausgeben")),
+
+    /**
+     * Versenden per E-Mail.
+     */
+    // EMAIL(L.m("als E-Mails versenden"))
+    ;
+
+    /**
+     * Label für die Anzeige dieser Option.
+     */
+    private final String menuLabel;
+
+    MailMergeType(String menuLabel)
+    {
+      this.menuLabel = menuLabel;
+    }
+
+    public String toString()
+    {
+      return menuLabel;
+    }
+  }
 
   /**
    * Auf welche Art hat der Benutzer die zu druckenden Datensätze ausgewählt.
@@ -419,7 +453,7 @@ public class MailMergeNew
     {
       public void actionPerformed(ActionEvent e)
       {
-        if (ds.hasDatasource()) showMailmergeTypeSelectionDialog();
+        if (ds.hasDatasource()) showDoMailmergeDialog();
       }
     });
     hbox.add(button);
@@ -870,7 +904,7 @@ public class MailMergeNew
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private void showMailmergeTypeSelectionDialog()
+  private void showDoMailmergeDialog()
   {
     final JDialog dialog = new JDialog(myFrame, L.m("Seriendruck"), true);
     dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
@@ -884,15 +918,15 @@ public class MailMergeNew
     hbox.add(label);
     hbox.add(Box.createHorizontalStrut(5));
 
-    Vector<String> types = new Vector<String>();
-    types.add(L.m("in neues Dokument schreiben"));
-    types.add(L.m("auf dem Drucker ausgeben"));
+    Vector<MailMergeType> types = new Vector<MailMergeType>();
+    for (MailMergeType type : MailMergeType.values())
+      types.add(type);
     final JComboBox typeBox = new JComboBox(types);
     typeBox.addItemListener(new ItemListener()
     {
       public void itemStateChanged(ItemEvent e)
       {
-        printIntoDocument = (typeBox.getSelectedIndex() == 0);
+      // printIntoDocument = (typeBox.getSelectedIndex() == 0);
       }
     });
     hbox.add(typeBox);
@@ -1023,6 +1057,50 @@ public class MailMergeNew
     vbox.add(Box.createVerticalStrut(5));
 
     hbox = Box.createHorizontalBox();
+    hbox.add(new JLabel(L.m("Zielverzeichnis")));
+    hbox.add(Box.createHorizontalGlue());
+    vbox.add(hbox);
+
+    hbox = Box.createHorizontalBox();
+    final JTextField targetDirectory = new JTextField();
+    hbox.add(targetDirectory);
+    hbox.add(new JButton(new AbstractAction("Suchen...")
+    {
+      public void actionPerformed(ActionEvent e)
+      {}
+    }));
+
+    hbox.add(Box.createHorizontalGlue());
+    vbox.add(hbox);
+
+    vbox.add(Box.createVerticalStrut(5));
+
+    hbox = Box.createHorizontalBox();
+    hbox.add(new JLabel(L.m("Dateinamenmuster")));
+    hbox.add(Box.createHorizontalStrut(5));
+    hbox.add(new JButton(new AbstractAction("Serienbrieffeld")
+    {
+      public void actionPerformed(ActionEvent e)
+      {}
+    }));
+    hbox.add(Box.createHorizontalStrut(5));
+    hbox.add(new JButton(new AbstractAction("Spezialfeld")
+    {
+      public void actionPerformed(ActionEvent e)
+      {}
+    }));
+    vbox.add(hbox);
+
+    vbox.add(Box.createVerticalStrut(5));
+
+    hbox = Box.createHorizontalBox();
+    final JTextField targetPattern = new JTextField();
+    hbox.add(targetPattern);
+    vbox.add(hbox);
+
+    vbox.add(Box.createVerticalStrut(5));
+
+    hbox = Box.createHorizontalBox();
     JButton button = new JButton(L.m("Abbrechen"));
     button.addActionListener(new ActionListener()
     {
@@ -1041,7 +1119,7 @@ public class MailMergeNew
       public void actionPerformed(ActionEvent e)
       {
         dialog.dispose();
-        doMailMerge();
+        doMailMerge((MailMergeType) typeBox.getSelectedItem());
       }
     });
     hbox.add(button);
@@ -1300,7 +1378,7 @@ public class MailMergeNew
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private void doMailMerge()
+  private void doMailMerge(final MailMergeType mailMergeType)
   {
     mod.collectNonWollMuxFormFields();
     QueryResultsWithSchema data = ds.getData();
@@ -1346,7 +1424,8 @@ public class MailMergeNew
     try
     {
       pmod.usePrintFunction("MailMergeNewSetFormValue");
-      if (printIntoDocument) pmod.usePrintFunction("Gesamtdokument");
+      if (mailMergeType == MailMergeType.SINGLE_FILE)
+        pmod.usePrintFunction("Gesamtdokument");
     }
     catch (NoSuchMethodException e)
     {
@@ -1370,7 +1449,7 @@ public class MailMergeNew
         // Falls printIntoDocument==true soll das Ausgabedokument für das
         // Gesamtdokument im Hintergrund geöffnet und lockControllers gesetzt werden.
         XTextDocument outputDoc = null;
-        if (printIntoDocument)
+        if (mailMergeType == MailMergeType.SINGLE_FILE)
         {
           try
           {
