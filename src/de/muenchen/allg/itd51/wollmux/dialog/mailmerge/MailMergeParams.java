@@ -58,7 +58,13 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.Document;
 
+import com.sun.star.ui.dialogs.ExecutableDialogResults;
+import com.sun.star.ui.dialogs.XFolderPicker;
+
+import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.L;
+import de.muenchen.allg.itd51.wollmux.Logger;
+import de.muenchen.allg.itd51.wollmux.dialog.DimAdjust;
 import de.muenchen.allg.itd51.wollmux.dialog.NonNumericKeyConsumer;
 
 /**
@@ -185,7 +191,7 @@ class MailMergeParams
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  void showDoMailmergeDialog(JFrame parent, final MailMergeNew mm)
+  void showDoMailmergeDialog(final JFrame parent, final MailMergeNew mm)
   {
     final JDialog dialog = new JDialog(parent, L.m("Seriendruck"), true);
     dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
@@ -203,16 +209,9 @@ class MailMergeParams
     for (MailMergeType type : MailMergeType.values())
       types.add(type);
     final JComboBox typeBox = new JComboBox(types);
-    typeBox.addItemListener(new ItemListener()
-    {
-      public void itemStateChanged(ItemEvent e)
-      {
-      // printIntoDocument = (typeBox.getSelectedIndex() == 0);
-      }
-    });
     hbox.add(typeBox);
 
-    vbox.add(hbox);
+    vbox.add(DimAdjust.maxHeightIsPrefMaxWidthUnlimited(hbox));
     vbox.add(Box.createVerticalStrut(5));
 
     Box selectBox = Box.createVerticalBox();
@@ -334,27 +333,45 @@ class MailMergeParams
     // button.addActionListener(einzelauswahlActionListener);
 
     selectBox.add(hbox);
-    vbox.add(selectBox);
+    vbox.add(DimAdjust.maxHeightIsPrefMaxWidthUnlimited(selectBox));
     vbox.add(Box.createVerticalStrut(5));
 
+    final Box multiFileParamsGUI = Box.createVerticalBox();
     hbox = Box.createHorizontalBox();
     hbox.add(new JLabel(L.m("Zielverzeichnis")));
     hbox.add(Box.createHorizontalGlue());
-    vbox.add(hbox);
+    multiFileParamsGUI.add(hbox);
 
     hbox = Box.createHorizontalBox();
     final JTextField targetDirectory = new JTextField();
-    hbox.add(targetDirectory);
+    hbox.add(DimAdjust.maxHeightIsPrefMaxWidthUnlimited(targetDirectory));
     hbox.add(new JButton(new AbstractAction("Suchen...")
     {
       public void actionPerformed(ActionEvent e)
-      {}
+      {
+        parent.setAlwaysOnTop(false);
+        dialog.setAlwaysOnTop(false);
+        dialog.setEnabled(false);
+        dialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+        final DirectoryPicker dirPicker = new DirectoryPicker();
+        dirPicker.pickDir(new Runnable()
+        {
+          public void run()
+          {
+            dialog.setEnabled(true);
+            dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+            parent.setAlwaysOnTop(true);
+            dialog.setAlwaysOnTop(true);
+            if (dirPicker.result != null) targetDirectory.setText(dirPicker.result);
+          }
+        });
+      }
     }));
 
     hbox.add(Box.createHorizontalGlue());
-    vbox.add(hbox);
+    multiFileParamsGUI.add(hbox);
 
-    vbox.add(Box.createVerticalStrut(5));
+    multiFileParamsGUI.add(Box.createVerticalStrut(5));
 
     hbox = Box.createHorizontalBox();
     hbox.add(new JLabel(L.m("Dateinamenmuster")));
@@ -370,17 +387,27 @@ class MailMergeParams
       public void actionPerformed(ActionEvent e)
       {}
     }));
-    vbox.add(hbox);
+    multiFileParamsGUI.add(hbox);
 
-    vbox.add(Box.createVerticalStrut(5));
+    multiFileParamsGUI.add(Box.createVerticalStrut(3));
 
     hbox = Box.createHorizontalBox();
     final JTextField targetPattern = new JTextField();
     hbox.add(targetPattern);
-    vbox.add(hbox);
+    multiFileParamsGUI.add(hbox);
 
-    vbox.add(Box.createVerticalStrut(5));
+    multiFileParamsGUI.add(Box.createVerticalStrut(5));
 
+    vbox.add(multiFileParamsGUI);
+    typeBox.addItemListener(new ItemListener()
+    {
+      public void itemStateChanged(ItemEvent e)
+      {
+        multiFileParamsGUI.setVisible((MailMergeType) typeBox.getSelectedItem() == MailMergeType.MULTI_FILE);
+      }
+    });
+
+    vbox.add(Box.createVerticalGlue());
     hbox = Box.createHorizontalBox();
     JButton button = new JButton(L.m("Abbrechen"));
     button.addActionListener(new ActionListener()
@@ -416,7 +443,41 @@ class MailMergeParams
     int y = screenSize.height / 2 - frameHeight / 2;
     dialog.setLocation(x, y);
     dialog.setResizable(false);
+    multiFileParamsGUI.setVisible(false);
     dialog.setVisible(true);
+  }
+
+  private static class DirectoryPicker extends Thread
+  {
+    private Runnable runnable;
+
+    public String result = null;
+
+    public void pickDir(Runnable runnable)
+    {
+      this.runnable = runnable;
+      this.start();
+    }
+
+    public void run()
+    {
+      try
+      {
+        XFolderPicker picker =
+          UNO.XFolderPicker(UNO.createUNOService("com.sun.star.ui.dialogs.FolderPicker"));
+        picker.setTitle(L.m("Verzeichnis für die Serienbriefdateien wählen"));
+        if (picker.execute() == ExecutableDialogResults.OK)
+        {
+          result = picker.getDirectory();
+        }
+      }
+      catch (Exception x)
+      {
+        Logger.error(x);
+      }
+      runnable.run();
+    }
+
   }
 
 }
