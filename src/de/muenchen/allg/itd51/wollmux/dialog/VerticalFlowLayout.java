@@ -119,7 +119,8 @@ public class VerticalFlowLayout implements LayoutManager
        * 
        * So just leave it in. It doesn't hurt.
        */
-      parent.getComponent(parent.getComponentCount() - 1).getPreferredSize();
+      if (parent.getComponentCount() > 0)
+        parent.getComponent(parent.getComponentCount() - 1).getPreferredSize();
 
       Insets insets = parent.getInsets();
       int maxheight = parent.getMaximumSize().height - insets.bottom - insets.top;
