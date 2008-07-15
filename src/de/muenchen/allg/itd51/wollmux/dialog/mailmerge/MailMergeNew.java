@@ -341,7 +341,8 @@ public class MailMergeNew
       public void actionPerformed(ActionEvent e)
       {
         if (ds.hasDatasource())
-          mailMergeParams.showDoMailmergeDialog(myFrame, MailMergeNew.this);
+          mailMergeParams.showDoMailmergeDialog(myFrame, MailMergeNew.this,
+            ds.getColumnNames());
       }
     });
     hbox.add(button);

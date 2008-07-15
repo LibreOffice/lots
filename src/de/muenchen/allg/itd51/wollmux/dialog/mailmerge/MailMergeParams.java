@@ -37,6 +37,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Vector;
 
@@ -65,7 +68,9 @@ import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.dialog.DimAdjust;
+import de.muenchen.allg.itd51.wollmux.dialog.JPotentiallyOverlongPopupMenuButton;
 import de.muenchen.allg.itd51.wollmux.dialog.NonNumericKeyConsumer;
+import de.muenchen.allg.itd51.wollmux.dialog.TextComponentTags;
 
 /**
  * Dialoge zur Bestimmung der Parameter für den wirklichen Merge (z.B. ob in
@@ -191,7 +196,8 @@ class MailMergeParams
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  void showDoMailmergeDialog(final JFrame parent, final MailMergeNew mm)
+  void showDoMailmergeDialog(final JFrame parent, final MailMergeNew mm,
+      List<String> fieldNames)
   {
     final JDialog dialog = new JDialog(parent, L.m("Seriendruck"), true);
     dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
@@ -362,7 +368,18 @@ class MailMergeParams
             dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
             parent.setAlwaysOnTop(true);
             dialog.setAlwaysOnTop(true);
-            if (dirPicker.result != null) targetDirectory.setText(dirPicker.result);
+            if (dirPicker.result != null)
+            {
+              try
+              {
+                File dir = new File(new URI(dirPicker.result));
+                targetDirectory.setText(dir.getAbsolutePath());
+              }
+              catch (URISyntaxException x)
+              {
+                Logger.error(x);
+              }
+            }
           }
         });
       }
@@ -375,14 +392,15 @@ class MailMergeParams
 
     hbox = Box.createHorizontalBox();
     hbox.add(new JLabel(L.m("Dateinamenmuster")));
+    final JTextField targetPattern = new JTextField();
+    final TextComponentTags textTags = new TextComponentTags(targetPattern);
     hbox.add(Box.createHorizontalStrut(5));
-    hbox.add(new JButton(new AbstractAction("Serienbrieffeld")
-    {
-      public void actionPerformed(ActionEvent e)
-      {}
-    }));
+    JPotentiallyOverlongPopupMenuButton insertFieldButton =
+      new JPotentiallyOverlongPopupMenuButton(L.m("Serienbrieffeld"),
+        TextComponentTags.makeInsertFieldActions(fieldNames, textTags));
+    hbox.add(insertFieldButton);
     hbox.add(Box.createHorizontalStrut(5));
-    hbox.add(new JButton(new AbstractAction("Spezialfeld")
+    hbox.add(new JButton(new AbstractAction(L.m("Spezialfeld"))
     {
       public void actionPerformed(ActionEvent e)
       {}
@@ -392,7 +410,6 @@ class MailMergeParams
     multiFileParamsGUI.add(Box.createVerticalStrut(3));
 
     hbox = Box.createHorizontalBox();
-    final JTextField targetPattern = new JTextField();
     hbox.add(targetPattern);
     multiFileParamsGUI.add(hbox);
 
