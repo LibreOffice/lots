@@ -42,6 +42,7 @@ import de.muenchen.allg.itd51.wollmux.WollMuxEventHandler;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.PrintModels.InternalPrintModel;
 import de.muenchen.allg.itd51.wollmux.dialog.SachleitendeVerfuegungenDruckdialog.VerfuegungspunktInfo;
+import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeNew;
 
 public class StandardPrint
 {
@@ -198,6 +199,21 @@ public class StandardPrint
   public static void superMailMerge(XPrintModel pmod)
   {
     MailMerge.superMailMerge(pmod);
+  }
+
+  /**
+   * PrintFunction, die das jeweils nächste Element der Seriendruckdaten nimmt und
+   * die Seriendruckfelder im Dokument entsprechend setzt. Siehe
+   * {@link MailMergeNew#mailMergeNewSetFormValue(XPrintModel)}.
+   * 
+   * @throws Exception
+   *           falls was schief geht.
+   * @author Matthias Benkmann (D-III-ITD 5.1), Christoph Lutz (D-III-ITD 5.1)
+   */
+  public static void mailMergeNewSetFormValue(final XPrintModel pmod)
+      throws Exception
+  {
+    MailMergeNew.mailMergeNewSetFormValue(pmod);
   }
 
   /**

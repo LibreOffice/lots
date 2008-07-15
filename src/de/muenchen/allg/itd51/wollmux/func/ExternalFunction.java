@@ -102,6 +102,12 @@ public class ExternalFunction
     try
     {
       url = conf.get("URL").toString();
+      // Der folgende Spezialfall dient der Kompatibilität mit
+      // wollmux-standard-config <=4.7.0
+      // FIXME: diesen Spezialfall irgendwann 2010 entfernen...
+      if ("java:de.muenchen.allg.itd51.wollmux.dialog.MailMergeNew.mailMergeNewSetFormValue".equals(url))
+        url =
+          "java:de.muenchen.allg.itd51.wollmux.func.StandardPrint.mailMergeNewSetFormValue";
     }
     catch (NodeNotFoundException x)
     {
