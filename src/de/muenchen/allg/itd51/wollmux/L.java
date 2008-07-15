@@ -132,7 +132,7 @@ public class L
     if (i < 0 || what.length() == 0) return where;
 
     StringBuilder buffy = new StringBuilder(where);
-    while (i > 0)
+    while (i >= 0)
     {
       buffy.replace(i, i + what.length(), withWhat);
       i = buffy.indexOf(what, i + withWhat.length());
