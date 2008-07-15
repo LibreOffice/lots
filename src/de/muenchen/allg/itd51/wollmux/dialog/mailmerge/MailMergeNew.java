@@ -738,7 +738,8 @@ public class MailMergeNew
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   void doMailMerge(final MailMergeType mailMergeType,
-      DatasetSelectionType datasetSelectionType, IndexSelection indexSelection)
+      DatasetSelectionType datasetSelectionType, IndexSelection indexSelection,
+      String dir, String filePattern)
   {
     mod.collectNonWollMuxFormFields();
     QueryResultsWithSchema data = ds.getData();
