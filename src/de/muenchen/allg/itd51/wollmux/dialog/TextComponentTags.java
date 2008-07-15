@@ -40,10 +40,12 @@ import java.awt.event.FocusListener;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.InputMap;
 import javax.swing.KeyStroke;
 import javax.swing.event.CaretEvent;
@@ -254,6 +256,32 @@ public class TextComponentTags
 
     extraHighlightOff();
     compo.setText(buffy.toString());
+  }
+
+  /**
+   * Liefert zur String-Liste fieldNames eine Liste von Actions, die die
+   * entsprechenden Strings in text einfügen.
+   * 
+   * @author Matthias Benkmann (D-III-ITD D.10) TESTED
+   */
+  public static List<Action> makeInsertFieldActions(List<String> fieldNames,
+      final TextComponentTags text)
+  {
+    List<Action> actions = new Vector<Action>();
+    Iterator<String> iter = fieldNames.iterator();
+    while (iter.hasNext())
+    {
+      final String name = iter.next();
+      Action action = new AbstractAction(name)
+      {
+        public void actionPerformed(ActionEvent e)
+        {
+          text.insertTag(name);
+        }
+      };
+      actions.add(action);
+    }
+    return actions;
   }
 
   /**

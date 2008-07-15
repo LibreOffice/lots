@@ -43,9 +43,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
-import javax.swing.AbstractAction;
 import javax.swing.AbstractButton;
-import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -414,39 +412,14 @@ public class IfThenElseDialog extends TrafoDialog
       controls.add(Box.createHorizontalGlue());
       JPotentiallyOverlongPopupMenuButton butt =
         new JPotentiallyOverlongPopupMenuButton(L.m("Serienbrieffeld"),
-          makeInsertFieldActions(fieldNames, conditionalResult.text));
+          TextComponentTags.makeInsertFieldActions(fieldNames,
+            conditionalResult.text));
       butt.setFocusable(false);
       controls.add(butt);
       if (conditionalResult.type == 0)
         guiContainer.add(conditionalResult.scrollPane);
       else
         guiContainer.add(conditionalResult.panel);
-    }
-
-    /**
-     * Liefert zur String-Liste fieldNames eine Liste von Actions, die die
-     * entsprechenden Strings in text einfügen.
-     * 
-     * @author Matthias Benkmann (D-III-ITD D.10) TESTED
-     */
-    private List<Action> makeInsertFieldActions(List<String> fieldNames,
-        final TextComponentTags text)
-    {
-      List<Action> actions = new Vector<Action>();
-      Iterator<String> iter = fieldNames.iterator();
-      while (iter.hasNext())
-      {
-        final String name = iter.next();
-        Action action = new AbstractAction(name)
-        {
-          public void actionPerformed(ActionEvent e)
-          {
-            text.insertTag(name);
-          }
-        };
-        actions.add(action);
-      }
-      return actions;
     }
 
     /**
