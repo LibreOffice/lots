@@ -344,7 +344,7 @@ public class StandardPrint
         while (compo[1] == null)
         {
           long ctime = System.currentTimeMillis();
-          if (ctime > endTime) break;
+          if (ctime >= endTime) break;
           compo.wait(endTime - ctime);
         }
       }
