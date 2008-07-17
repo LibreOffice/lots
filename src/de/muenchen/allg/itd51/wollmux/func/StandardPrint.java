@@ -261,15 +261,6 @@ public class StandardPrint
    */
   public static void printIntoFile(final XPrintModel pmod) throws Exception
   {
-    boolean firstAppend = true;
-    try
-    {
-      pmod.getPropertyValue("PrintIntoFile_HasContent");
-      firstAppend = false;
-    }
-    catch (UnknownPropertyException e)
-    {}
-
     XTextDocument outputDoc = null;
     try
     {
@@ -281,10 +272,20 @@ public class StandardPrint
       outputDoc = createNewTargetDocument(pmod, false);
     }
 
+    boolean firstAppend = true;
+    try
+    {
+      XTextDocument previousDoc =
+        UNO.XTextDocument(pmod.getPropertyValue("PrintIntoFile_PreviousOutputDocument"));
+      firstAppend = !(UnoRuntime.areSame(outputDoc, previousDoc));
+    }
+    catch (UnknownPropertyException e)
+    {}
+
     PrintIntoFile.appendToFile(outputDoc, pmod.getTextDocument(), firstAppend);
 
     if (firstAppend)
-      pmod.setPropertyValue("PrintIntoFile_HasContent", Boolean.TRUE);
+      pmod.setPropertyValue("PrintIntoFile_PreviousOutputDocument", outputDoc);
   }
 
   /**
