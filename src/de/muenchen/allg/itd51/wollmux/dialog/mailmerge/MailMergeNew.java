@@ -36,6 +36,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.io.File;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -54,6 +55,8 @@ import javax.swing.JPopupMenu;
 import javax.swing.JTextField;
 import javax.swing.WindowConstants;
 
+import com.sun.star.beans.PropertyValue;
+import com.sun.star.frame.XStorable;
 import com.sun.star.lang.NoSuchMethodException;
 import com.sun.star.text.XTextDocument;
 
@@ -65,6 +68,7 @@ import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.UnavailableException;
 import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
+import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.db.MailMergeDatasource;
 import de.muenchen.allg.itd51.wollmux.db.QueryResults;
@@ -72,6 +76,8 @@ import de.muenchen.allg.itd51.wollmux.db.QueryResultsWithSchema;
 import de.muenchen.allg.itd51.wollmux.dialog.DimAdjust;
 import de.muenchen.allg.itd51.wollmux.dialog.JPotentiallyOverlongPopupMenuButton;
 import de.muenchen.allg.itd51.wollmux.dialog.NonNumericKeyConsumer;
+import de.muenchen.allg.itd51.wollmux.dialog.TextComponentTags;
+import de.muenchen.allg.itd51.wollmux.dialog.TextComponentTags.ContentElement;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeParams.DatasetSelectionType;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeParams.IndexSelection;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeParams.MailMergeType;
@@ -92,6 +98,18 @@ public class MailMergeNew
    * ID der Property in der die Serienbriefdaten gespeichert werden.
    */
   private static final String PROP_QUERYRESULTS = "MailMergeNew_QueryResults";
+
+  /**
+   * ID der Property in der das Zielverzeichnis für den Druck in Einzeldokumente
+   * gespeichert wird.
+   */
+  private static final String PROP_TARGETDIR = "MailMergeNew_TargetDir";
+
+  /**
+   * ID der Property in der das Dateinamenmuster für den Einzeldokumentdruck
+   * gespeichert wird.
+   */
+  private static final String PROP_FILEPATTERN = "MailMergeNew_FilePattern";
 
   /**
    * ID der Property, die einen List der Indizes der zu druckenden Datensätze
@@ -380,8 +398,6 @@ public class MailMergeNew
     });
     tabelleMenu.add(adjustFieldsMenuItem);
 
-    // FIXME: Button darf nur angezeigt werden, wenn tatsächlich eine Calc-Tabelle
-    // ausgewählt ist.
     button = new JButton(L.m("Tabelle"));
     final JButton tabelleButton = button;
     button.addActionListener(new ActionListener()
@@ -462,7 +478,6 @@ public class MailMergeNew
     Iterator<String> dataIter = data.iterator();
     for (String column : schema)
     {
-      // FIXME: Ist das so richtig? Geht das effizienter?
       mod.setFormFieldValue(column, dataIter.next());
       mod.updateFormFields(column);
     }
@@ -739,7 +754,7 @@ public class MailMergeNew
    */
   void doMailMerge(final MailMergeType mailMergeType,
       DatasetSelectionType datasetSelectionType, IndexSelection indexSelection,
-      String dir, String filePattern)
+      String dir, TextComponentTags filePattern)
   {
     mod.collectNonWollMuxFormFields();
     QueryResultsWithSchema data = ds.getData();
@@ -778,6 +793,11 @@ public class MailMergeNew
       pmod.setPropertyValue("MailMergeNew_Schema", data.getSchema());
       pmod.setPropertyValue(PROP_QUERYRESULTS, data);
       pmod.setPropertyValue(PROP_MAILMERGENEW_SELECTION, selected);
+      if (mailMergeType == MailMergeType.MULTI_FILE)
+      {
+        pmod.setPropertyValue(PROP_TARGETDIR, dir);
+        pmod.setPropertyValue(PROP_FILEPATTERN, filePattern);
+      }
     }
     catch (Exception x)
     {
@@ -787,7 +807,14 @@ public class MailMergeNew
     try
     {
       pmod.usePrintFunction("MailMergeNewSetFormValue");
-      if (mailMergeType == MailMergeType.SINGLE_FILE)
+
+      /*
+       * Auch im MULTI_FILE Fall wird die Gesamtdokument-Funktion verwendet,
+       * allerdings werden in diesem Fall mehrere Gesamtdokumente erzeugt, eines pro
+       * Datensatz (aber z.B. mit allen Versionen beim SLV-Druck im selben Dokument).
+       */
+      if (mailMergeType == MailMergeType.SINGLE_FILE
+        || mailMergeType == MailMergeType.MULTI_FILE)
         pmod.usePrintFunction("Gesamtdokument");
     }
     catch (NoSuchMethodException e)
@@ -809,8 +836,8 @@ public class MailMergeNew
       {
         long startTime = System.currentTimeMillis();
 
-        // Falls printIntoDocument==true soll das Ausgabedokument für das
-        // Gesamtdokument im Hintergrund geöffnet und lockControllers gesetzt werden.
+        // Wenn wir in ein Gesamtdokument drucken, erzeugen wir dieses hier und
+        // verwenden lockControllers() um die Performance etwas zu steigern.
         XTextDocument outputDoc = null;
         if (mailMergeType == MailMergeType.SINGLE_FILE)
         {
@@ -864,19 +891,32 @@ public class MailMergeNew
       (List) pmod.getPropertyValue(PROP_MAILMERGENEW_SELECTION);
     if (selection.isEmpty()) return;
 
+    TextComponentTags filePattern = null;
+    String targetDir = null;
+    try
+    {
+      filePattern = (TextComponentTags) pmod.getPropertyValue(PROP_FILEPATTERN);
+      targetDir = (String) pmod.getPropertyValue(PROP_TARGETDIR);
+    }
+    catch (Exception x)
+    {}
+
     Iterator iter = data.iterator();
     Iterator<Integer> selIter = selection.iterator();
     int selectedIdx = selIter.next();
 
-    pmod.setPrintProgressMaxValue((short) data.size());
+    pmod.setPrintProgressMaxValue((short) selection.size());
 
     int index = -1;
+    int serienbriefNummer = 1;
     while (iter.hasNext() && selectedIdx >= 0)
     {
       if (pmod.isCanceled()) return;
 
       Dataset ds = (Dataset) iter.next();
       if (++index < selectedIdx) continue;
+
+      int datensatzNummer = index + 1; // same as datensatzNummer = selectedIdx+1;
 
       if (selIter.hasNext())
         selectedIdx = selIter.next();
@@ -889,10 +929,150 @@ public class MailMergeNew
         String spalte = (String) schemaIter.next();
         pmod.setFormValue(spalte, ds.get(spalte));
       }
+
+      /*
+       * Wenn wir im Fall des Einzeldokumentdrucks sind, dann wird hier vor dem
+       * Ausdruck für den aktuellen Datensatz ein neues Dokument angelegt.
+       * lockControllers() soll der Performance-Steigerung dienen.
+       */
+      XTextDocument outputDoc = null;
+      if (filePattern != null)
+      {
+        try
+        {
+          outputDoc = StandardPrint.createNewTargetDocument(pmod, true);
+          outputDoc.lockControllers();
+        }
+        catch (java.lang.Exception e)
+        {
+          Logger.error(e);
+        }
+      }
+
       pmod.printWithProps();
 
-      pmod.setPrintProgressValue((short) (index + 1));
+      /*
+       * Im Falle des Einzeldokumentdrucks wird das Zieldokument jetzt gespeichert
+       * (ohne es vorher sichtbar zu machen) und dann geschlossen.
+       */
+      if (filePattern != null)
+      {
+        File outFile =
+          makeOutputPath(targetDir, filePattern, ds, datensatzNummer,
+            serienbriefNummer);
+        saveAndCloseOutputFileForMailmerge(outFile, outputDoc);
+      }
+
+      pmod.setPrintProgressValue((short) serienbriefNummer);
+      ++serienbriefNummer;
     }
+  }
+
+  /**
+   * Speichert doc unter dem in outFile angegebenen Dateipfad und schließt dann doc.
+   * 
+   * @author Matthias Benkmann (D-III-ITD-D101)
+   * 
+   * TESTED
+   */
+  private static void saveAndCloseOutputFileForMailmerge(File outFile,
+      XTextDocument doc)
+  {
+    try
+    {
+      String unparsedUrl = outFile.toURI().toURL().toString();
+
+      XStorable store = UNO.XStorable(doc);
+      PropertyValue[] options;
+
+      /*
+       * For more options see:
+       * 
+       * http://wiki.services.openoffice.org/wiki/API/Tutorials/PDF_export
+       */
+      if (unparsedUrl.endsWith(".pdf"))
+      {
+        options = new PropertyValue[1];
+
+        options[0] = new PropertyValue();
+        options[0].Name = "FilterName";
+        options[0].Value = "writer_pdf_Export";
+      }
+      else if (unparsedUrl.endsWith(".doc"))
+      {
+        options = new PropertyValue[1];
+
+        options[0] = new PropertyValue();
+        options[0].Name = "FilterName";
+        options[0].Value = "MS Word 97";
+      }
+      else
+      {
+        if (!unparsedUrl.endsWith(".odt")) unparsedUrl = unparsedUrl + ".odt";
+
+        options = new PropertyValue[0];
+      }
+
+      com.sun.star.util.URL url = UNO.getParsedUNOUrl(unparsedUrl);
+
+      /*
+       * storeTOurl() has to be used instead of storeASurl() for PDF export
+       */
+      store.storeToURL(url.Complete, options);
+    }
+    catch (Exception x)
+    {
+      Logger.error(x);
+    }
+
+    try
+    {
+      UNO.XCloseable(doc).close(true);
+    }
+    catch (Exception x)
+    {}
+  }
+
+  /**
+   * Nimmt filePatter, ersetzt darin befindliche Tags durch entsprechende
+   * Spaltenwerte aus ds und setzt daraus einen Dateipfad mit Elternverzeichnis
+   * targetDir zusammen. Die Spezialtags {@link MailMergeParams#TAG_DATENSATZNUMMER}
+   * und {@link MailMergeParams#TAG_SERIENBRIEFNUMMER} werden durch die Strings
+   * datensatzNummer und serienbriefNummer ersetzt.
+   * 
+   * @author Matthias Benkmann (D-III-ITD-D101)
+   * 
+   * TESTED
+   */
+  private static File makeOutputPath(String targetDir,
+      TextComponentTags filePattern, Dataset ds, int datensatzNummer,
+      int serienbriefNummer)
+  {
+    StringBuilder buffy = new StringBuilder();
+    for (ContentElement ele : filePattern.getContent())
+    {
+      String value = ele.toString();
+      if (ele.isTag())
+      {
+        String tag = ele.toString();
+        if (tag.equals(MailMergeParams.TAG_DATENSATZNUMMER))
+          value = "" + datensatzNummer;
+        else if (tag.equals(MailMergeParams.TAG_SERIENBRIEFNUMMER))
+          value = "" + serienbriefNummer;
+        else
+          try
+          {
+            value = ds.get(tag);
+          }
+          catch (ColumnNotFoundException x)
+          {
+            Logger.error(x);
+          }
+      }
+      buffy.append(value);
+    }
+
+    return new File(targetDir, buffy.toString());
   }
 
   private class MyWindowListener implements WindowListener

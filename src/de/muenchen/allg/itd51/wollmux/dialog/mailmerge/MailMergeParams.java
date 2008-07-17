@@ -84,6 +84,18 @@ import de.muenchen.allg.itd51.wollmux.dialog.TextComponentTags;
 class MailMergeParams
 {
   /**
+   * Tag für {@link TextComponentTags}, das als Platzhalter für die
+   * Serienbriefnummer steht.
+   */
+  static final String TAG_SERIENBRIEFNUMMER = "#SB";
+
+  /**
+   * Tag für {@link TextComponentTags}, das als Platzhalter für die Datensatznummer
+   * steht.
+   */
+  static final String TAG_DATENSATZNUMMER = "#DS";
+
+  /**
    * Auf welche Art hat der Benutzer die zu druckenden Datensätze ausgewählt.
    * 
    * @author Matthias Benkmann (D-III-ITD D.10)
@@ -186,8 +198,16 @@ class MailMergeParams
   private IndexSelection indexSelection = new IndexSelection();
 
   /**
+   * Der Dialog, der durch {@link #showDoMailmergeDialog(JFrame, MailMergeNew, List)}
+   * angezeigt wird. Bei jedem Aufruf mit dem gleichen parent Frame wird der selbe
+   * Dialog verwendet, damit die Vorbelegungen erhalten bleiben.
+   */
+  private JDialog dialog = null;
+
+  /**
    * Zeigt den Dialog an, der die Serienbriefverarbeitung (Direktdruck oder in neues
-   * Dokument) anwirft.
+   * Dokument) anwirft. Bei jedem Aufruf mit dem gleichen parent Frame wird der selbe
+   * Dialog verwendet, damit die Vorbelegungen erhalten bleiben.
    * 
    * @param parent
    *          Elternfenster für den anzuzeigenden Dialog.
@@ -202,260 +222,266 @@ class MailMergeParams
   void showDoMailmergeDialog(final JFrame parent, final MailMergeNew mm,
       List<String> fieldNames)
   {
-    final JDialog dialog = new JDialog(parent, L.m("Seriendruck"), true);
-    dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-
-    Box vbox = Box.createVerticalBox();
-    vbox.setBorder(new EmptyBorder(8, 5, 10, 5));
-    dialog.add(vbox);
-
-    Box hbox = Box.createHorizontalBox();
-    JLabel label = new JLabel(L.m("Serienbriefe"));
-    hbox.add(label);
-    hbox.add(Box.createHorizontalStrut(5));
-
-    Vector<MailMergeType> types = new Vector<MailMergeType>();
-    for (MailMergeType type : MailMergeType.values())
-      types.add(type);
-    final JComboBox typeBox = new JComboBox(types);
-    hbox.add(typeBox);
-
-    vbox.add(DimAdjust.maxHeightIsPrefMaxWidthUnlimited(hbox));
-    vbox.add(Box.createVerticalStrut(5));
-
-    Box selectBox = Box.createVerticalBox();
-    Border border =
-      BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.GRAY),
-        L.m("Folgende Datensätze verwenden"));
-    selectBox.setBorder(border);
-
-    hbox = Box.createHorizontalBox();
-    ButtonGroup radioGroup = new ButtonGroup();
-    JRadioButton rbutton;
-    rbutton = new JRadioButton(L.m("Alle"), true);
-    rbutton.addActionListener(new ActionListener()
+    if (dialog == null || dialog.getParent() != parent)
     {
-      public void actionPerformed(ActionEvent e)
+      dialog = new JDialog(parent, L.m("Seriendruck"), true);
+      dialog.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
+
+      Box vbox = Box.createVerticalBox();
+      vbox.setBorder(new EmptyBorder(8, 5, 10, 5));
+      dialog.add(vbox);
+
+      Box hbox = Box.createHorizontalBox();
+      JLabel label = new JLabel(L.m("Serienbriefe"));
+      hbox.add(label);
+      hbox.add(Box.createHorizontalStrut(5));
+
+      Vector<MailMergeType> types = new Vector<MailMergeType>();
+      for (MailMergeType type : MailMergeType.values())
+        types.add(type);
+      final JComboBox typeBox = new JComboBox(types);
+      hbox.add(typeBox);
+
+      vbox.add(DimAdjust.maxHeightIsPrefMaxWidthUnlimited(hbox));
+      vbox.add(Box.createVerticalStrut(5));
+
+      Box selectBox = Box.createVerticalBox();
+      Border border =
+        BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.GRAY),
+          L.m("Folgende Datensätze verwenden"));
+      selectBox.setBorder(border);
+
+      hbox = Box.createHorizontalBox();
+      ButtonGroup radioGroup = new ButtonGroup();
+      JRadioButton rbutton;
+      rbutton = new JRadioButton(L.m("Alle"), true);
+      rbutton.addActionListener(new ActionListener()
       {
-        datasetSelectionType = DatasetSelectionType.ALL;
-      }
-    });
-    hbox.add(rbutton);
-    hbox.add(Box.createHorizontalGlue());
-    radioGroup.add(rbutton);
-
-    selectBox.add(hbox);
-    selectBox.add(Box.createVerticalStrut(5));
-
-    hbox = Box.createHorizontalBox();
-
-    final JRadioButton rangebutton = new JRadioButton(L.m("Von"), false);
-    rangebutton.addActionListener(new ActionListener()
-    {
-      public void actionPerformed(ActionEvent e)
-      {
-        datasetSelectionType = DatasetSelectionType.RANGE;
-      }
-    });
-    hbox.add(rangebutton);
-    radioGroup.add(rangebutton);
-
-    final JTextField start = new JTextField(4);
-    start.addKeyListener(NonNumericKeyConsumer.instance);
-    hbox.add(start);
-    hbox.add(Box.createHorizontalStrut(5));
-    label = new JLabel("Bis");
-    hbox.add(label);
-    hbox.add(Box.createHorizontalStrut(5));
-
-    final JTextField end = new JTextField(4);
-    end.addKeyListener(NonNumericKeyConsumer.instance);
-
-    DocumentListener rangeDocumentListener = new DocumentListener()
-    {
-      public void update()
-      {
-        rangebutton.setSelected(true);
-        datasetSelectionType = DatasetSelectionType.RANGE;
-        try
+        public void actionPerformed(ActionEvent e)
         {
-          indexSelection.rangeStart = Integer.parseInt(start.getText());
+          datasetSelectionType = DatasetSelectionType.ALL;
         }
-        catch (Exception x)
-        {}
-        try
+      });
+      hbox.add(rbutton);
+      hbox.add(Box.createHorizontalGlue());
+      radioGroup.add(rbutton);
+
+      selectBox.add(hbox);
+      selectBox.add(Box.createVerticalStrut(5));
+
+      hbox = Box.createHorizontalBox();
+
+      final JRadioButton rangebutton = new JRadioButton(L.m("Von"), false);
+      rangebutton.addActionListener(new ActionListener()
+      {
+        public void actionPerformed(ActionEvent e)
         {
-          indexSelection.rangeEnd = Integer.parseInt(end.getText());
+          datasetSelectionType = DatasetSelectionType.RANGE;
         }
-        catch (Exception x)
-        {}
-      }
+      });
+      hbox.add(rangebutton);
+      radioGroup.add(rangebutton);
 
-      public void insertUpdate(DocumentEvent e)
+      final JTextField start = new JTextField(4);
+      start.addKeyListener(NonNumericKeyConsumer.instance);
+      hbox.add(start);
+      hbox.add(Box.createHorizontalStrut(5));
+      label = new JLabel("Bis");
+      hbox.add(label);
+      hbox.add(Box.createHorizontalStrut(5));
+
+      final JTextField end = new JTextField(4);
+      end.addKeyListener(NonNumericKeyConsumer.instance);
+
+      DocumentListener rangeDocumentListener = new DocumentListener()
       {
-        update();
-      }
-
-      public void removeUpdate(DocumentEvent e)
-      {
-        update();
-      }
-
-      public void changedUpdate(DocumentEvent e)
-      {
-        update();
-      }
-    };
-
-    Document tfdoc = start.getDocument();
-    tfdoc.addDocumentListener(rangeDocumentListener);
-    tfdoc = end.getDocument();
-    tfdoc.addDocumentListener(rangeDocumentListener);
-    hbox.add(end);
-
-    selectBox.add(hbox);
-    selectBox.add(Box.createVerticalStrut(5));
-
-    hbox = Box.createHorizontalBox();
-
-    // TODO Anwahl muss selben Effekt haben wie das Drücken des "Einzelauswahl"
-    // Buttons
-    // final JRadioButton einzelauswahlRadioButton = new JRadioButton("");
-    // hbox.add(einzelauswahlRadioButton);
-    // radioGroup.add(einzelauswahlRadioButton);
-    //
-    // ActionListener einzelauswahlActionListener = new ActionListener()
-    // {
-    // public void actionPerformed(ActionEvent e)
-    // {
-    // einzelauswahlRadioButton.setSelected(true);
-    // datasetSelectionType = DatasetSelectionType.INDIVIDUAL;
-    // // TODO showEinzelauswahlDialog();
-    // }
-    // };
-    //
-    // einzelauswahlRadioButton.addActionListener(einzelauswahlActionListener);
-    //
-    // JButton button = new JButton(L.m("Einzelauswahl..."));
-    // hbox.add(button);
-    // hbox.add(Box.createHorizontalGlue());
-    // button.addActionListener(einzelauswahlActionListener);
-
-    selectBox.add(hbox);
-    vbox.add(DimAdjust.maxHeightIsPrefMaxWidthUnlimited(selectBox));
-    vbox.add(Box.createVerticalStrut(5));
-
-    final Box multiFileParamsGUI = Box.createVerticalBox();
-    hbox = Box.createHorizontalBox();
-    hbox.add(new JLabel(L.m("Zielverzeichnis")));
-    hbox.add(Box.createHorizontalGlue());
-    multiFileParamsGUI.add(hbox);
-
-    hbox = Box.createHorizontalBox();
-    final JTextField targetDirectory = new JTextField();
-    hbox.add(DimAdjust.maxHeightIsPrefMaxWidthUnlimited(targetDirectory));
-    hbox.add(new JButton(new AbstractAction("Suchen...")
-    {
-      public void actionPerformed(ActionEvent e)
-      {
-        parent.setAlwaysOnTop(false);
-        dialog.setAlwaysOnTop(false);
-        dialog.setEnabled(false);
-        dialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-        final DirectoryPicker dirPicker = new DirectoryPicker();
-        dirPicker.pickDir(new Runnable()
+        public void update()
         {
-          public void run()
+          rangebutton.setSelected(true);
+          datasetSelectionType = DatasetSelectionType.RANGE;
+          try
           {
-            dialog.setEnabled(true);
-            dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-            parent.setAlwaysOnTop(true);
-            dialog.setAlwaysOnTop(true);
-            if (dirPicker.result != null)
+            indexSelection.rangeStart = Integer.parseInt(start.getText());
+          }
+          catch (Exception x)
+          {}
+          try
+          {
+            indexSelection.rangeEnd = Integer.parseInt(end.getText());
+          }
+          catch (Exception x)
+          {}
+        }
+
+        public void insertUpdate(DocumentEvent e)
+        {
+          update();
+        }
+
+        public void removeUpdate(DocumentEvent e)
+        {
+          update();
+        }
+
+        public void changedUpdate(DocumentEvent e)
+        {
+          update();
+        }
+      };
+
+      Document tfdoc = start.getDocument();
+      tfdoc.addDocumentListener(rangeDocumentListener);
+      tfdoc = end.getDocument();
+      tfdoc.addDocumentListener(rangeDocumentListener);
+      hbox.add(end);
+
+      selectBox.add(hbox);
+      selectBox.add(Box.createVerticalStrut(5));
+
+      hbox = Box.createHorizontalBox();
+
+      // TODO Anwahl muss selben Effekt haben wie das Drücken des "Einzelauswahl"
+      // Buttons
+      // final JRadioButton einzelauswahlRadioButton = new JRadioButton("");
+      // hbox.add(einzelauswahlRadioButton);
+      // radioGroup.add(einzelauswahlRadioButton);
+      //
+      // ActionListener einzelauswahlActionListener = new ActionListener()
+      // {
+      // public void actionPerformed(ActionEvent e)
+      // {
+      // einzelauswahlRadioButton.setSelected(true);
+      // datasetSelectionType = DatasetSelectionType.INDIVIDUAL;
+      // // TODO showEinzelauswahlDialog();
+      // }
+      // };
+      //
+      // einzelauswahlRadioButton.addActionListener(einzelauswahlActionListener);
+      //
+      // JButton button = new JButton(L.m("Einzelauswahl..."));
+      // hbox.add(button);
+      // hbox.add(Box.createHorizontalGlue());
+      // button.addActionListener(einzelauswahlActionListener);
+
+      selectBox.add(hbox);
+      vbox.add(DimAdjust.maxHeightIsPrefMaxWidthUnlimited(selectBox));
+      vbox.add(Box.createVerticalStrut(5));
+
+      final Box multiFileParamsGUI = Box.createVerticalBox();
+      hbox = Box.createHorizontalBox();
+      hbox.add(new JLabel(L.m("Zielverzeichnis")));
+      hbox.add(Box.createHorizontalGlue());
+      multiFileParamsGUI.add(hbox);
+
+      hbox = Box.createHorizontalBox();
+      final JTextField targetDirectory = new JTextField();
+      hbox.add(DimAdjust.maxHeightIsPrefMaxWidthUnlimited(targetDirectory));
+      hbox.add(new JButton(new AbstractAction("Suchen...")
+      {
+        public void actionPerformed(ActionEvent e)
+        {
+          parent.setAlwaysOnTop(false);
+          dialog.setAlwaysOnTop(false);
+          dialog.setEnabled(false);
+          dialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+          final DirectoryPicker dirPicker = new DirectoryPicker();
+          dirPicker.pickDir(targetDirectory.getText(), new Runnable()
+          {
+            public void run()
             {
-              try
+              dialog.setEnabled(true);
+              dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+              parent.setAlwaysOnTop(true);
+              dialog.setAlwaysOnTop(true);
+              if (dirPicker.result != null)
               {
-                File dir = new File(new URI(dirPicker.result));
-                targetDirectory.setText(dir.getAbsolutePath());
-              }
-              catch (URISyntaxException x)
-              {
-                Logger.error(x);
+                try
+                {
+                  File dir = new File(new URI(dirPicker.result));
+                  targetDirectory.setText(dir.getAbsolutePath());
+                }
+                catch (URISyntaxException x)
+                {
+                  Logger.error(x);
+                }
               }
             }
-          }
-        });
-      }
-    }));
+          });
+        }
+      }));
 
-    hbox.add(Box.createHorizontalGlue());
-    multiFileParamsGUI.add(hbox);
+      hbox.add(Box.createHorizontalGlue());
+      multiFileParamsGUI.add(hbox);
 
-    multiFileParamsGUI.add(Box.createVerticalStrut(5));
+      multiFileParamsGUI.add(Box.createVerticalStrut(5));
 
-    hbox = Box.createHorizontalBox();
-    hbox.add(new JLabel(L.m("Dateinamenmuster")));
-    final JTextField targetPattern = new JTextField();
-    final TextComponentTags textTags = new TextComponentTags(targetPattern);
-    hbox.add(Box.createHorizontalStrut(5));
-    JPotentiallyOverlongPopupMenuButton insertFieldButton =
-      new JPotentiallyOverlongPopupMenuButton(L.m("Serienbrieffeld"),
-        TextComponentTags.makeInsertFieldActions(fieldNames, textTags));
-    hbox.add(insertFieldButton);
-    hbox.add(Box.createHorizontalStrut(5));
-    hbox.add(new JPotentiallyOverlongPopupMenuButton(L.m("Spezialfeld"),
-      makeSpecialFieldActions(textTags)));
-    multiFileParamsGUI.add(hbox);
+      hbox = Box.createHorizontalBox();
+      hbox.add(new JLabel(L.m("Dateinamenmuster")));
+      final JTextField targetPattern = new JTextField(".odt");
+      final TextComponentTags textTags = new TextComponentTags(targetPattern);
+      targetPattern.setCaretPosition(0);
+      textTags.insertTag(TAG_DATENSATZNUMMER);
+      hbox.add(Box.createHorizontalStrut(5));
+      JPotentiallyOverlongPopupMenuButton insertFieldButton =
+        new JPotentiallyOverlongPopupMenuButton(L.m("Serienbrieffeld"),
+          TextComponentTags.makeInsertFieldActions(fieldNames, textTags));
+      hbox.add(insertFieldButton);
+      hbox.add(Box.createHorizontalStrut(5));
+      hbox.add(new JPotentiallyOverlongPopupMenuButton(L.m("Spezialfeld"),
+        makeSpecialFieldActions(textTags)));
+      multiFileParamsGUI.add(hbox);
 
-    multiFileParamsGUI.add(Box.createVerticalStrut(3));
+      multiFileParamsGUI.add(Box.createVerticalStrut(3));
 
-    hbox = Box.createHorizontalBox();
-    hbox.add(targetPattern);
-    multiFileParamsGUI.add(hbox);
+      hbox = Box.createHorizontalBox();
+      hbox.add(targetPattern);
+      multiFileParamsGUI.add(hbox);
 
-    multiFileParamsGUI.add(Box.createVerticalStrut(5));
+      multiFileParamsGUI.add(Box.createVerticalStrut(5));
 
-    vbox.add(multiFileParamsGUI);
-    typeBox.addItemListener(new ItemListener()
-    {
-      public void itemStateChanged(ItemEvent e)
+      vbox.add(multiFileParamsGUI);
+      multiFileParamsGUI.setVisible(false);
+
+      typeBox.addItemListener(new ItemListener()
       {
-        multiFileParamsGUI.setVisible((MailMergeType) typeBox.getSelectedItem() == MailMergeType.MULTI_FILE);
-      }
-    });
-
-    vbox.add(Box.createVerticalGlue());
-    hbox = Box.createHorizontalBox();
-    JButton button = new JButton(L.m("Abbrechen"));
-    button.addActionListener(new ActionListener()
-    {
-      public void actionPerformed(ActionEvent e)
+        public void itemStateChanged(ItemEvent e)
+        {
+          multiFileParamsGUI.setVisible((MailMergeType) typeBox.getSelectedItem() == MailMergeType.MULTI_FILE);
+          dialog.pack();
+        }
+      });
+      vbox.add(Box.createVerticalGlue());
+      hbox = Box.createHorizontalBox();
+      JButton button = new JButton(L.m("Abbrechen"));
+      button.addActionListener(new ActionListener()
       {
-        dialog.dispose();
-      }
-    });
-    hbox.add(button);
+        public void actionPerformed(ActionEvent e)
+        {
+          dialog.dispose();
+        }
+      });
+      hbox.add(button);
 
-    hbox.add(Box.createHorizontalGlue());
+      hbox.add(Box.createHorizontalGlue());
 
-    button = new JButton(L.m("Los geht's!"));
-    button.addActionListener(new ActionListener()
-    {
-      public void actionPerformed(ActionEvent e)
+      button = new JButton(L.m("Los geht's!"));
+      button.addActionListener(new ActionListener()
       {
-        if (!checkInput(dialog, (MailMergeType) typeBox.getSelectedItem(),
-          datasetSelectionType, indexSelection, targetDirectory.getText(),
-          targetPattern.getText())) return;
-        dialog.dispose();
-        mm.doMailMerge((MailMergeType) typeBox.getSelectedItem(),
-          datasetSelectionType, indexSelection, targetDirectory.getText(),
-          targetPattern.getText());
-      }
-    });
-    hbox.add(button);
+        public void actionPerformed(ActionEvent e)
+        {
+          if (!checkInput(dialog, (MailMergeType) typeBox.getSelectedItem(),
+            datasetSelectionType, indexSelection, targetDirectory.getText(),
+            textTags)) return;
+          dialog.dispose();
+          mm.doMailMerge((MailMergeType) typeBox.getSelectedItem(),
+            datasetSelectionType, indexSelection, targetDirectory.getText(),
+            textTags);
+        }
+      });
+      hbox.add(button);
 
-    vbox.add(hbox);
-
+      vbox.add(hbox);
+    }
     dialog.pack();
     int frameWidth = dialog.getWidth();
     int frameHeight = dialog.getHeight();
@@ -464,7 +490,6 @@ class MailMergeParams
     int y = screenSize.height / 2 - frameHeight / 2;
     dialog.setLocation(x, y);
     dialog.setResizable(false);
-    multiFileParamsGUI.setVisible(false);
     dialog.setVisible(true);
   }
 
@@ -478,26 +503,25 @@ class MailMergeParams
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
    * 
-   * TODO Testen
    */
   private boolean checkInput(Component parent, MailMergeType type,
       DatasetSelectionType datasetSelectionType, IndexSelection indexSelection,
-      String dir, String filePattern)
+      String dir, TextComponentTags filePattern)
   {
     if (type == MailMergeType.MULTI_FILE)
     {
       if (dir.length() == 0)
       {
-        JOptionPane.showMessageDialog(parent, L.m(
-          "Sie müssen ein Zielverzeichnis angeben!", dir),
+        JOptionPane.showMessageDialog(parent,
+          L.m("Sie müssen ein Zielverzeichnis angeben!"),
           L.m("Zielverzeichnis fehlt"), JOptionPane.ERROR_MESSAGE);
         return false;
       }
 
-      if (filePattern.length() == 0)
+      if (filePattern.getContent().isEmpty())
       {
-        JOptionPane.showMessageDialog(parent, L.m(
-          "Sie müssen ein Dateinamenmuster angeben!", dir),
+        JOptionPane.showMessageDialog(parent,
+          L.m("Sie müssen ein Dateinamenmuster angeben!"),
           L.m("Dateinamenmuster fehlt"), JOptionPane.ERROR_MESSAGE);
         return false;
       }
@@ -526,14 +550,14 @@ class MailMergeParams
     {
       public void actionPerformed(ActionEvent e)
       {
-        tags.insertTag("#DS");
+        tags.insertTag(TAG_DATENSATZNUMMER);
       }
     });
     actions.add(new AbstractAction(L.m("Serienbriefnummer"))
     {
       public void actionPerformed(ActionEvent e)
       {
-        tags.insertTag("#SB");
+        tags.insertTag(TAG_SERIENBRIEFNUMMER);
       }
     });
     return actions;
@@ -543,11 +567,14 @@ class MailMergeParams
   {
     private Runnable runnable;
 
+    private String startDir;
+
     public String result = null;
 
-    public void pickDir(Runnable runnable)
+    public void pickDir(String startDir, Runnable runnable)
     {
       this.runnable = runnable;
+      this.startDir = startDir;
       this.start();
     }
 
@@ -558,6 +585,14 @@ class MailMergeParams
         XFolderPicker picker =
           UNO.XFolderPicker(UNO.createUNOService("com.sun.star.ui.dialogs.FolderPicker"));
         picker.setTitle(L.m("Verzeichnis für die Serienbriefdateien wählen"));
+        if (startDir != null && startDir.length() > 0)
+          try
+          {
+            picker.setDisplayDirectory(UNO.getParsedUNOUrl("file:" + startDir).Complete);
+          }
+          catch (Exception x)
+          {}
+
         if (picker.execute() == ExecutableDialogResults.OK)
         {
           result = picker.getDirectory();

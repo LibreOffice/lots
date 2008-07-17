@@ -277,6 +277,14 @@ public class StandardPrint
     {
       XTextDocument previousDoc =
         UNO.XTextDocument(pmod.getPropertyValue("PrintIntoFile_PreviousOutputDocument"));
+
+      /*
+       * It is important to do the firstAppend check via this comparison as opposed
+       * to just storing a boolean property. This is because in the case of a mail
+       * merge with multiple output documents this print function will be called
+       * several times with the same PrintModel but different documents in the
+       * PrintIntoFile_OutputDocument property.
+       */
       firstAppend = !(UnoRuntime.areSame(outputDoc, previousDoc));
     }
     catch (UnknownPropertyException e)
