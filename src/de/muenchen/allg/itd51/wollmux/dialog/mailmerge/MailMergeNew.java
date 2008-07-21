@@ -1072,7 +1072,8 @@ public class MailMergeNew
       buffy.append(value);
     }
 
-    return new File(targetDir, buffy.toString());
+    return new File(targetDir, buffy.toString().replaceAll(
+      "[^\\p{javaLetterOrDigit} ,.()=+_-]", "_"));
   }
 
   private class MyWindowListener implements WindowListener
