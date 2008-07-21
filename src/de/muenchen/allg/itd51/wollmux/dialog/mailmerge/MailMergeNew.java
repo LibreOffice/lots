@@ -462,7 +462,8 @@ public class MailMergeNew
     if (previewDatasetNumber > count) previewDatasetNumber = count;
     if (previewDatasetNumber <= 0) previewDatasetNumber = 1;
 
-    previewDatasetNumberTextfield.setText("" + previewDatasetNumber);
+    String previewDatasetNumberStr = "" + previewDatasetNumber;
+    previewDatasetNumberTextfield.setText(previewDatasetNumberStr);
 
     if (!previewMode) return;
 
@@ -482,6 +483,12 @@ public class MailMergeNew
       mod.updateFormFields(column);
     }
 
+    mod.setFormFieldValue(MailMergeParams.TAG_DATENSATZNUMMER,
+      previewDatasetNumberStr);
+    mod.updateFormFields(MailMergeParams.TAG_DATENSATZNUMMER);
+    mod.setFormFieldValue(MailMergeParams.TAG_SERIENBRIEFNUMMER,
+      previewDatasetNumberStr);
+    mod.updateFormFields(MailMergeParams.TAG_SERIENBRIEFNUMMER);
   }
 
   /**
@@ -601,23 +608,21 @@ public class MailMergeNew
     menu.add(button);
 
     button = new JMenuItem(L.m("Datensatznummer"));
-    button.setEnabled(false); // NOT YET IMPLEMENTED
     button.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
       {
-      // TODO insertDatasetIndex();
+        mod.insertMailMergeFieldAtCursorPosition(MailMergeParams.TAG_DATENSATZNUMMER);
       }
     });
     menu.add(button);
 
     button = new JMenuItem(L.m("Serienbriefnummer"));
-    button.setEnabled(false); // NOT YET IMPLEMENTED
     button.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
       {
-      // TODO insertMailMergeIndex();
+        mod.insertMailMergeFieldAtCursorPosition(MailMergeParams.TAG_SERIENBRIEFNUMMER);
       }
     });
     menu.add(button);
@@ -929,6 +934,9 @@ public class MailMergeNew
         String spalte = (String) schemaIter.next();
         pmod.setFormValue(spalte, ds.get(spalte));
       }
+      pmod.setFormValue(MailMergeParams.TAG_DATENSATZNUMMER, "" + datensatzNummer);
+      pmod.setFormValue(MailMergeParams.TAG_SERIENBRIEFNUMMER, ""
+        + serienbriefNummer);
 
       /*
        * Wenn wir im Fall des Einzeldokumentdrucks sind, dann wird hier vor dem
