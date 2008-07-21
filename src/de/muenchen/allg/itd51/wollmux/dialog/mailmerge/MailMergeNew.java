@@ -959,7 +959,7 @@ public class MailMergeNew
       {
         File outFile =
           makeOutputPath(targetDir, filePattern, ds, datensatzNummer,
-            serienbriefNummer);
+            serienbriefNummer, data.size());
         saveAndCloseOutputFileForMailmerge(outFile, outputDoc);
       }
 
@@ -1040,14 +1040,26 @@ public class MailMergeNew
    * und {@link MailMergeParams#TAG_SERIENBRIEFNUMMER} werden durch die Strings
    * datensatzNummer und serienbriefNummer ersetzt.
    * 
+   * @param totalDatasets
+   *          die Gesamtzahl aller Datensätze (auch der für den aktuellen
+   *          Druckauftrag nicht gewählten). Wird verwendet um datensatzNummer und
+   *          serienbriefNummer mit 0ern zu padden.
+   * 
    * @author Matthias Benkmann (D-III-ITD-D101)
    * 
    * TESTED
    */
   private static File makeOutputPath(String targetDir,
       TextComponentTags filePattern, Dataset ds, int datensatzNummer,
-      int serienbriefNummer)
+      int serienbriefNummer, int totalDatasets)
   {
+    String totalDatasetsStr = "" + totalDatasets;
+    String datensatzNummerStr = "" + datensatzNummer;
+    while (datensatzNummerStr.length() < totalDatasetsStr.length())
+      datensatzNummerStr = "0" + datensatzNummerStr;
+    String serienbriefNummerStr = "" + serienbriefNummer;
+    while (serienbriefNummerStr.length() < totalDatasetsStr.length())
+      serienbriefNummerStr = "0" + serienbriefNummerStr;
     StringBuilder buffy = new StringBuilder();
     for (ContentElement ele : filePattern.getContent())
     {
@@ -1056,9 +1068,9 @@ public class MailMergeNew
       {
         String tag = ele.toString();
         if (tag.equals(MailMergeParams.TAG_DATENSATZNUMMER))
-          value = "" + datensatzNummer;
+          value = datensatzNummerStr;
         else if (tag.equals(MailMergeParams.TAG_SERIENBRIEFNUMMER))
-          value = "" + serienbriefNummer;
+          value = serienbriefNummerStr;
         else
           try
           {
