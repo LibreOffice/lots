@@ -60,6 +60,11 @@ import de.muenchen.allg.itd51.parser.NodeNotFoundException;
  * dem Update eine Warnung ausgegeben, die darauf hinweist, dass hier bereits
  * übersetzte Strings mit dem nächsten Update-Lauf entfernt werden.
  * 
+ * Der Einfachheit halber findet der LocalizationUpdater auch L.m-Ausdrücke in
+ * auskommentierten Code-Stellen. Eine Erkennung und Ausfilterung von Kommentaren
+ * erscheint mit an dieser Stelle zu aufwendig und würde den Code unnötig
+ * verkomplizieren.
+ * 
  * @author Christoph Lutz (D-III-ITD-5.1)
  */
 public class LocalizationUpdater
@@ -78,11 +83,24 @@ public class LocalizationUpdater
   private static File sourcesDir = new File("./src/");
 
   /**
-   * Enthält das Pattern, mit dem nach L.m-Strings gesucht wird. In Gruppe 1 ist der
-   * String dieser zu lokalisierenden Message enthalten.
+   * Beschreibt einen String im Sourcecode. In Gruppe 1 wird der Stringinhalt
+   * zurückgeliefert (ohne die Anführungszeichen, aber nach wie vor in Java-Syntax
+   * escaped). Ein einzelner String in Java kann sich niemals über mehrere Codezeilen
+   * erstrecken (das wäre syntaktisch falsch). In auskommentierten Codezeilen kann
+   * jedoch ein String ungünstig über mehrere Codezeilen umgebrochen werden. Der
+   * Ausschluss der Zeichen \n\r verhindert daher die Erkennung von ungültigen
+   * Strings.
    */
-  private static Pattern L_m_Pattern =
-    Pattern.compile("L.m\\(\\s*\"((?:\\\\\"|[^\"])*)\"");
+  private static Pattern STRING = Pattern.compile("\"((?:\\\\\"|[^\"\r\n])*)\"");
+
+  /**
+   * Enthält das Pattern, mit dem nach L.m(STRINGS[, args])-Ausdrücken gesucht wird.
+   * In Gruppe 1 wird der um Leerzeichen getrimmte STRINGS-Ausdruck zurückgeliefert.
+   * STRINGS können dabei auch mit "+" verkettete Strings sein.
+   */
+  private static Pattern L_M =
+    Pattern.compile("L.m\\(\\s*(" + STRING + "(?:\\s*\\+\\s*" + STRING
+      + ")*)\\s*[\\),]");
 
   /**
    * Muss aus dem Hauptverzeichnis des WollMux-Projekts ausgeführt werden und
@@ -146,12 +164,17 @@ public class LocalizationUpdater
     {
       File file = iter.next();
 
-      String str = readFile(file, "ISO-8859-1");
+      String sourceCode = readFile(file, "ISO-8859-1");
 
-      Matcher m = L_m_Pattern.matcher(str);
+      Matcher m = L_M.matcher(sourceCode);
       while (m.find())
       {
-        String original = evalString(m.group(1));
+        String lmFirstArg = m.group(1);
+        String concatinatedStrings = "";
+        Matcher strings = STRING.matcher(lmFirstArg);
+        while (strings.find())
+          concatinatedStrings += strings.group(1);
+        String original = evalString(concatinatedStrings);
         currentOriginals.add(original);
         if (!knownOriginals.contains(original))
         {
