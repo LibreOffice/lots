@@ -1,5 +1,3 @@
-
-
 /*
  * Dateiname: Standard.java
  * Projekt  : WollMux
@@ -39,17 +37,22 @@
  */
 package de.muenchen.allg.itd51.wollmux.func;
 
-/* ACHTUNG!! DATEI NICHT MEHR EDITIERT, WURDE IN DIE WOLLMUX-STANDARD-CONF AUSGELAGERT
-*
-* Änderungen haben in der wollmux-standard-config zu erfolgen! 
-* wollmux-standard-config/plugins/de/muenchen/allg/itd51/wollmux/func/Standard.java
-* 
-* In Change R24060 wird Ende 2009 die Standard.java aus dem WollMux entfernt.
-*/
+/*
+ * ACHTUNG!! DATEI NICHT MEHR EDITIERT, WURDE IN DIE WOLLMUX-STANDARD-CONF
+ * AUSGELAGERT
+ * 
+ * Änderungen haben in der wollmux-standard-config zu erfolgen!
+ * wollmux-standard-config/plugins/de/muenchen/allg/itd51/wollmux/func/Standard.java
+ * 
+ * In Change R24060 wird Ende 2009 die Standard.java aus dem WollMux entfernt.
+ */
 
 import java.util.Calendar;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+
+import de.muenchen.allg.itd51.wollmux.L;
+import de.muenchen.allg.itd51.wollmux.Logger;
 
 /**
  * Standardfunktionen für Plausibilitätschecks, Trafos,... in Formularen.
@@ -58,8 +61,17 @@ import java.util.regex.PatternSyntaxException;
  */
 public class Standard
 {
+  private static boolean haveOutputMessage = false;
+
   private static final Pattern DATE_SYNTAX =
     Pattern.compile("\\d{1,2}\\.\\d{1,2}\\.\\d{4}");
+
+  private static void outputMessageIfNecessary()
+  {
+    if (haveOutputMessage) return;
+    haveOutputMessage = true;
+    Logger.error(L.m("Veraltete Version von de.muenchen.allg.itd51.wollmux.func.Standard wird verwendet. Bitte Konfiguration updaten."));
+  }
 
   /**
    * Liefert immer true.
@@ -68,6 +80,7 @@ public class Standard
    */
   public static Boolean immerWahr()
   {
+    outputMessageIfNecessary();
     return new Boolean(true);
   }
 
@@ -78,6 +91,7 @@ public class Standard
    */
   public static Boolean zahlenBereich(String low, String hi, String zahl)
   {
+    outputMessageIfNecessary();
     try
     {
       long l = Long.parseLong(zahl);
@@ -101,6 +115,7 @@ public class Standard
    */
   public static String herrFrauText(String anrede, String frauText, String herrText)
   {
+    outputMessageIfNecessary();
     if (anrede.equalsIgnoreCase("herr"))
       return herrText;
     else
@@ -117,6 +132,7 @@ public class Standard
   public static String gender(String herrText, String frauText, String sonstText,
       String anrede)
   {
+    outputMessageIfNecessary();
     if (anrede.equalsIgnoreCase("herr") || anrede.equalsIgnoreCase("herrn"))
       return herrText;
     else if (anrede.equalsIgnoreCase("frau"))
@@ -133,6 +149,7 @@ public class Standard
    */
   public static boolean korrektesDatum(String datum)
   {
+    outputMessageIfNecessary();
     return checkDate(datum, false);
   }
 
@@ -144,6 +161,7 @@ public class Standard
    */
   public static boolean datumNichtInVergangenheit(String datum)
   {
+    outputMessageIfNecessary();
     return checkDate(datum, true);
   }
 
@@ -156,6 +174,7 @@ public class Standard
    */
   private static boolean checkDate(String datum, boolean noPast)
   {
+    outputMessageIfNecessary();
     try
     {
       if (!DATE_SYNTAX.matcher(datum).matches()) return false;
@@ -188,6 +207,7 @@ public class Standard
    */
   public static String formatiereTelefonnummerDIN5008(String tel)
   {
+    outputMessageIfNecessary();
     String vorwahlExtern = "089";
     String formatierteTelExtern = formatiereTelefonnummer(tel, vorwahlExtern);
     return formatierteTelExtern;
@@ -202,6 +222,7 @@ public class Standard
    */
   public static String formatiereTelefonnummerDIN5008Intern(String tel)
   {
+    outputMessageIfNecessary();
     String vorwahlIntern = "0";
     String formatierteTelIntern = formatiereTelefonnummer(tel, vorwahlIntern);
     return formatierteTelIntern;
@@ -215,6 +236,7 @@ public class Standard
    */
   private static String formatiereTelefonnummer(String tel, String vorwahl)
   {
+    outputMessageIfNecessary();
     if (tel == null || tel.length() == 0)
     {
       return tel;
@@ -274,6 +296,7 @@ public class Standard
    */
   public static boolean regex(String regex, String eingabe)
   {
+    outputMessageIfNecessary();
     try
     {
       Pattern pattern = Pattern.compile(regex);

@@ -37,6 +37,7 @@
  * 17.07.2007 | BNK | [R7605]Dateien bin‰r kopieren in dumpInfo(), auﬂerdem immer als UTF-8 schreiben
  * 18.07.2007 | BNK | Alle Java-Properties in dumpInfo() ausgeben
  * 27.07.2007 | BNK | [P1448]WollMuxClassLoader.class.getClassLoader() als parent verwenden 
+ * 01.09.2008 | BNK | [R28149]Klassen im CLASSPATH aus wollmux.conf haben vorrang vor WollMux-internen.
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -1153,12 +1154,14 @@ public class WollMuxFiles
     {
       super.addURL(url);
     }
-    
+
     public Class<?> loadClass(String name) throws ClassNotFoundException
     {
-      try{
+      try
+      {
         return super.loadClass(name);
-      }catch(ClassNotFoundException x)
+      }
+      catch (ClassNotFoundException x)
       {
         return WollMuxClassLoader.class.getClassLoader().loadClass(name);
       }
