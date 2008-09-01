@@ -1,3 +1,5 @@
+
+
 /*
  * Dateiname: Standard.java
  * Projekt  : WollMux
@@ -28,6 +30,7 @@
  * 26.10.2006 | BNK | +gender()
  * 30.10.2006 | BNK | Kommentare verbessert.
  * 07.11.2006 | BNK | +datumNichtInVergangenheit()
+ * 29.08.2008 | BAB | Auslagerung in wollmux-standard-config 
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -35,6 +38,14 @@
  * 
  */
 package de.muenchen.allg.itd51.wollmux.func;
+
+/* ACHTUNG!! DATEI NICHT MEHR EDITIERT, WURDE IN DIE WOLLMUX-STANDARD-CONF AUSGELAGERT
+*
+* Änderungen haben in der wollmux-standard-config zu erfolgen! 
+* wollmux-standard-config/plugins/de/muenchen/allg/itd51/wollmux/func/Standard.java
+* 
+* In Change R24060 wird Ende 2009 die Standard.java aus dem WollMux entfernt.
+*/
 
 import java.util.Calendar;
 import java.util.regex.Pattern;

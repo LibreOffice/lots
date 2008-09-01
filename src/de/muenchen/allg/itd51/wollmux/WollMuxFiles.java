@@ -1146,12 +1146,22 @@ public class WollMuxFiles
   {
     public WollMuxClassLoader()
     {
-      super(new URL[] {}, WollMuxClassLoader.class.getClassLoader());
+      super(new URL[] {});
     }
 
     public void addURL(URL url)
     {
       super.addURL(url);
+    }
+    
+    public Class<?> loadClass(String name) throws ClassNotFoundException
+    {
+      try{
+        return super.loadClass(name);
+      }catch(ClassNotFoundException x)
+      {
+        return WollMuxClassLoader.class.getClassLoader().loadClass(name);
+      }
     }
   }
 
