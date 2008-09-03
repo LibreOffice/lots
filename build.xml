@@ -34,13 +34,17 @@ compileidl: Compiles the files from the idl/ directory. If you're using Eclipse,
 *****************************************************************-->
 
 <!-- You will probably have to change the following paths to match your system -->	
-	<property name="OOO_PROGRAM_DIR" value="/opt/openoffice.org/program" />
-	<property name="OOOCLS" value="/opt/openoffice.org/program/classes" />
+	<property name="TYPES_DIR" value="/opt/openoffice.org/program" />
+    <property name="OOO_OFFAPI_DIR" value="/opt/openoffice.org/Basis 3.0/program" />
+	<property name="OOOCLS1" value="/opt/openoffice.org/program/classes" />
+	<property name="OOOCLS2" value="/opt/openoffice.org/program/classes" />
 	<property name="OOO_SDK" value="/opt/openoffice.org_sdk" />
-<!--	<property name="OOO_PROGRAM_DIR" value="C:\Programme\OpenOffice.org 2.4\program" />
-	<property name="OOOCLS" value="C:\Programme\OpenOffice.org 2.4\program\classes" />
-	<property name="OOO_SDK" value="C:/Programme/OpenOffice.org_2.4_SDK" />
--->
+<!--	<property name="OOO_TYPES_DIR" value="C:/Programme/OOo-dev/URE/misc" />
+	<property name="OOO_OFFAPI_DIR" value="C:/Programme/OOo-dev/Basis 3.0/program" />
+	<property name="OOOCLS1" value="C:\Programme\OOo-dev\URE\java" />
+	<property name="OOOCLS2" value="${OOO_OFFAPI_DIR}/classes" />
+	<property name="OOO_SDK" value="C:/Programme/OpenOffice.org_3.0_SDK/sdk" /> -->
+
 
 <!-- If you follow the INSTALL instructions exactly, you won't have to change this path --> 	
 	<property name="UNOHELPER_DIR" value="../UNOHelper" />
@@ -69,8 +73,9 @@ compileidl: Compiles the files from the idl/ directory. If you're using Eclipse,
 	<property name="MY_CLASSES" value="bin" />
 
 	
-	<property name="OOO_CLASSPATH" value="${OOOCLS}/juh.jar:${OOOCLS}/jurt.jar:${OOOCLS}/ridl.jar:${OOOCLS}/unoil.jar" />
-	<property name="TYPES_RDB" value="${OOO_PROGRAM_DIR}/types.rdb" />
+	<property name="OOO_CLASSPATH" value="${OOOCLS1}/juh.jar:${OOOCLS1}/jurt.jar:${OOOCLS1}/ridl.jar:${OOOCLS2}/unoil.jar" />
+	<property name="TYPES_RDB" value="${OOO_TYPES_DIR}/types.rdb" />
+	<available file="${OOO_OFFAPI_DIR}/offapi.rdb" property="OFFAPI_RDB" value="${OOO_OFFAPI_DIR}/offapi.rdb" />
 	
 	<property name="SDK_IDL" value="${OOO_SDK}/idl" />
 	
@@ -151,6 +156,10 @@ compileidl: Compiles the files from the idl/ directory. If you're using Eclipse,
 		</apply>
 
 		<echo level="info">javamaker: Creating .class files</echo>
+		<!-- Trick for debugging: 
+		    Replace "javamaker" with "echo"
+		-->
+
 		<apply verbose="true" executable="javamaker" relative="true" addsourcefile="false" dest="${BIN}">
 			<arg line="-BUCR" />
 			<targetfile />
@@ -160,6 +169,7 @@ compileidl: Compiles the files from the idl/ directory. If you're using Eclipse,
 			-->
 			<arg value="-nD" />
 			<arg value="${TYPES_RDB}" />
+			<arg value="${OFFAPI_RDB}" />
 			<arg value="${RDBFILE}" />
 			<arg value="-O" />
 			<arg value="./${MY_IDL}" />
