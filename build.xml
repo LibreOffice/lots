@@ -34,7 +34,7 @@ compileidl: Compiles the files from the idl/ directory. If you're using Eclipse,
 *****************************************************************-->
 
 <!-- You will probably have to change the following paths to match your system -->	
-	<property name="TYPES_DIR" value="/opt/openoffice.org/program" />
+	<property name="OOO_TYPES_DIR" value="/opt/openoffice.org/program" />
     <property name="OOO_OFFAPI_DIR" value="/opt/openoffice.org/Basis 3.0/program" />
 	<property name="OOOCLS1" value="/opt/openoffice.org/program/classes" />
 	<property name="OOOCLS2" value="/opt/openoffice.org/program/classes" />
@@ -76,6 +76,7 @@ compileidl: Compiles the files from the idl/ directory. If you're using Eclipse,
 	<property name="OOO_CLASSPATH" value="${OOOCLS1}/juh.jar:${OOOCLS1}/jurt.jar:${OOOCLS1}/ridl.jar:${OOOCLS2}/unoil.jar" />
 	<property name="TYPES_RDB" value="${OOO_TYPES_DIR}/types.rdb" />
 	<available file="${OOO_OFFAPI_DIR}/offapi.rdb" property="OFFAPI_RDB" value="${OOO_OFFAPI_DIR}/offapi.rdb" />
+	<property name="OFFAPI_RDB" value="${TYPES_RDB}" /> <!-- Fallback for 2.x installations that don't have OFFAPI_RDB -->
 	
 	<property name="SDK_IDL" value="${OOO_SDK}/idl" />
 	
