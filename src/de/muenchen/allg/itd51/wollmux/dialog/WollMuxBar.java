@@ -1986,7 +1986,7 @@ public class WollMuxBar
    */
   public static void main(String[] args)
   {
-    int windowMode = UP_AND_AWAY_WINDOW_MODE;
+    Integer windowMode = null;
     if (args.length > 0)
     {
       if (args[0].equals("--minimize"))
@@ -2021,25 +2021,27 @@ public class WollMuxBar
     {
       Logger.debug(L.m("WollMuxBar gestartet"));
 
-      try
-      {
-        String windowMode2 =
-          wollmuxConf.query("Fenster").query("WollMuxBar").getLastChild().query(
-            "MODE").getLastChild().toString();
-        if (windowMode2.equalsIgnoreCase("AlwaysOnTop"))
-          windowMode = ALWAYS_ON_TOP_WINDOW_MODE;
-        else if (windowMode2.equalsIgnoreCase("Window"))
-          windowMode = NORMAL_WINDOW_MODE;
-        else if (windowMode2.equalsIgnoreCase("Minimize"))
-          windowMode = MINIMIZE_TO_TASKBAR_MODE;
-        else if (windowMode2.equalsIgnoreCase("UpAndAway"))
+      if (windowMode == null)
+        try
+        {
           windowMode = UP_AND_AWAY_WINDOW_MODE;
-        else
-          Logger.error(L.m("Ununterstützer MODE für WollMuxBar-Fenster: '%1'",
-            windowMode2));
-      }
-      catch (Exception x)
-      {}
+          String windowMode2 =
+            wollmuxConf.query("Fenster").query("WollMuxBar").getLastChild().query(
+              "MODE").getLastChild().toString();
+          if (windowMode2.equalsIgnoreCase("AlwaysOnTop"))
+            windowMode = ALWAYS_ON_TOP_WINDOW_MODE;
+          else if (windowMode2.equalsIgnoreCase("Window"))
+            windowMode = NORMAL_WINDOW_MODE;
+          else if (windowMode2.equalsIgnoreCase("Minimize"))
+            windowMode = MINIMIZE_TO_TASKBAR_MODE;
+          else if (windowMode2.equalsIgnoreCase("UpAndAway"))
+            windowMode = UP_AND_AWAY_WINDOW_MODE;
+          else
+            Logger.error(L.m("Ununterstützer MODE für WollMuxBar-Fenster: '%1'",
+              windowMode2));
+        }
+        catch (Exception x)
+        {}
 
       if (wollmuxConf.query("Symbolleisten").count() == 0)
       {
