@@ -39,11 +39,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.sun.star.awt.FontWeight;
-import com.sun.star.beans.PropertyValue;
 import com.sun.star.container.XEnumeration;
 import com.sun.star.container.XNameAccess;
 import com.sun.star.container.XNameContainer;
-import com.sun.star.io.IOException;
 import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.style.XStyle;
 import com.sun.star.text.XParagraphCursor;
@@ -66,8 +64,6 @@ import de.muenchen.allg.itd51.wollmux.dialog.SachleitendeVerfuegungenDruckdialog
 
 public class SachleitendeVerfuegung
 {
-  static int LOESCH_MICH_WIEDER_COUNTER = 0;
-
   public static final String BLOCKNAME_SLV_ALL_VERSIONS = "AllVersions";
 
   public static final String BLOCKNAME_SLV_ORIGINAL_ONLY = "OriginalOnly";
@@ -1297,17 +1293,8 @@ public class SachleitendeVerfuegung
     // -----------------------------------------------------------------------
     // Druck des Dokuments
     // -----------------------------------------------------------------------
-    try
-    {
-      UNO.XStorable(pmod.getTextDocument()).storeToURL(
-        "file:///tmp/test" + (LOESCH_MICH_WIEDER_COUNTER++) + ".odt", new PropertyValue[] {});
-    }
-    catch (IOException e)
-    {
-      Logger.error(e);
-    }
-    // for (int j = 0; j < copyCount; ++j)
-    // pmod.printWithProps();
+    for (int j = 0; j < copyCount; ++j)
+      pmod.printWithProps();
 
     // Ausblendung von Ziffer von Punkt 1 wieder aufheben
     if (punkt1ZifferOnly != null)
