@@ -33,11 +33,16 @@ compileidl: Compiles the files from the idl/ directory. If you're using Eclipse,
 
 *****************************************************************-->
 
-<!-- You will probably have to change the following paths to match your system -->	
+<!-- You will probably have to change the following paths to match your system -->
+	        <!-- Directory containing types.rdb -->
 	<property name="OOO_TYPES_DIR" value="/opt/openoffice.org/program" />
-    <property name="OOO_OFFAPI_DIR" value="/opt/openoffice.org/Basis 3.0/program" />
+	        <!-- Directory containing offapi.rdb (OOo 3.0 only, ignore for 2.x) -->
+    <property name="OOO_OFFAPI_DIR" value="/opt/openoffice.org/basis3.0/program" />
+	        <!-- Directory containing juh.jar, jurt.jar and ridl.jar -->
 	<property name="OOOCLS1" value="/opt/openoffice.org/program/classes" />
+	        <!-- Directory containing unoil.jar --> 
 	<property name="OOOCLS2" value="/opt/openoffice.org/program/classes" />
+	        <!-- Directory containing subdirectories idl/ and classes/ -->
 	<property name="OOO_SDK" value="/opt/openoffice.org_sdk" />
 <!--	<property name="OOO_TYPES_DIR" value="C:/Programme/OOo-dev/URE/misc" />
 	<property name="OOO_OFFAPI_DIR" value="C:/Programme/OOo-dev/Basis 3.0/program" />
