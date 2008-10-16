@@ -19,7 +19,7 @@ set -e
 
 case "$1" in
     configure)
-    OOoTemp="$(dpkg -L openoffice.org-core02 | grep "unopkg$")" > /dev/null
+    OOoTemp="$(dpkg -L openoffice.org3 openoffice.org-core02 openoffice.org-common  2>/dev/null | grep "unopkg$" | head -n 1)"      #"
     export PATH="$(dirname $OOoTemp):$PATH"
     TEMPDIR="$(mktemp -d -p /tmp wollmux-postinst.XXXXXX)"
     echo "postinst log: $TEMPDIR/messages"
