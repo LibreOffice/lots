@@ -78,17 +78,14 @@ import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.TimeoutException;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
+import de.muenchen.allg.itd51.wollmux.db.ColumnTransformer;
 import de.muenchen.allg.itd51.wollmux.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
 import de.muenchen.allg.itd51.wollmux.db.Query;
 import de.muenchen.allg.itd51.wollmux.db.QueryPart;
 import de.muenchen.allg.itd51.wollmux.db.QueryResults;
-import de.muenchen.allg.itd51.wollmux.db.SimpleDataset;
 import de.muenchen.allg.itd51.wollmux.dialog.UIElementFactory.Context;
-import de.muenchen.allg.itd51.wollmux.func.Function;
-import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
-import de.muenchen.allg.itd51.wollmux.func.Values;
 
 /**
  * Dialog zur Suche nach Daten in einer Datenquelle, die über DIALOG-Funktion
@@ -134,15 +131,15 @@ public class DatasourceSearchDialog implements Dialog
   private Instantiator ilse;
 
   /**
+   * Alle ids, die durch Spaltenumsetzungsabschnitte definiert werden.
+   */
+  private Set<String> schema;
+
+  /**
    * data[0] speichert die aktuell ausgewählten Formulardaten. ACHTUNG! Nur in
    * synchronized(data)-Blöcken verwenden!
    */
   private Map<String, String>[] data;
-
-  /**
-   * Alle ids, die durch Spaltenumsetzungsabschnitte definiert werden.
-   */
-  private Set<String> schema = new HashSet<String>();
 
   /**
    * Der Rahmen des gesamten Dialogs.
@@ -433,12 +430,9 @@ public class DatasourceSearchDialog implements Dialog
     private SearchStrategy searchStrategy;
 
     /**
-     * Eine Liste von ColumnTranslations, die die Umsetzung der Spalten der
-     * gefundenen Datasets auf die vom Dialog zu exportierenden Werte realisieren.
-     * Jede ColumnTranslation entspricht einem Eintrag des
-     * Spaltenumsetzung-Abschnitts.
+     * Der für die Spaltenumsetzung verantwortliche {@link ColumnTransformer}.
      */
-    private List<ColumnTranslation> columnTranslations;
+    private ColumnTransformer columnTransformer;
 
     /**
      * Legt fest, wie die Datensätze in der Ergebnisliste dargestellt werden sollen.
@@ -491,13 +485,23 @@ public class DatasourceSearchDialog implements Dialog
      * @param conf
      *          der Kind-Knoten des Fenster-Knotens der das Tab beschreibt. conf ist
      *          direkter Elternknoten der Knoten "Intro" et al.
+     * 
      * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
      */
     public DialogWindow(int tabIndex, ConfigThingy conf)
     {
       searchStrategy = SearchStrategy.parse(conf);
-      dialogWindowSchema = new HashSet<String>();
-      columnTranslations = parseColumnTranslations(conf, dialogWindowSchema);
+      try
+      {
+        columnTransformer =
+          new ColumnTransformer(conf, "Spaltenumsetzung", funcLib, dialogLib,
+            context);
+      }
+      catch (ConfigurationErrorException x)
+      {
+        Logger.error(L.m("Fehler beim Parsen des Abschnitts 'Spaltenumsetzung'"), x);
+      }
+      dialogWindowSchema = columnTransformer.getSchema();
       initFactories();
 
       myPanel = new JPanel(new BorderLayout());
@@ -795,8 +799,7 @@ public class DatasourceSearchDialog implements Dialog
       } // wird bei illegalen Suchanfragen geworfen
 
       if (results != null && resultsList != null)
-        setListElements(resultsList, new TranslatedQueryResults(results,
-          columnTranslations));
+        setListElements(resultsList, columnTransformer.transform(results));
     }
 
     /**
@@ -1031,6 +1034,7 @@ public class DatasourceSearchDialog implements Dialog
       uiElementFactory = new UIElementFactory();
 
     }
+
   }
 
   /**********************************************************************************
@@ -1410,6 +1414,7 @@ public class DatasourceSearchDialog implements Dialog
 
       return schema;
     }
+
   }
 
   /**
@@ -1445,193 +1450,6 @@ public class DatasourceSearchDialog implements Dialog
 
     public void windowOpened(WindowEvent e)
     {}
-  }
-
-  /**
-   * Definition einer neuen Spalte als Funktion alter Spaltenwerte.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private static class ColumnTranslation
-  {
-    /**
-     * der Name der neuen Spalte.
-     */
-    private String newColumnName;
-
-    /**
-     * Die Funktion, die die neue Spalte definiert.
-     */
-    private Function func;
-
-    /**
-     * Erzeugt eine neue ColumnTranslation, die eine neue Spalte mit Namen
-     * newColumnName definiert als Wert der Funktion func.
-     */
-    public ColumnTranslation(String newColumnName, Function func)
-    {
-      this.newColumnName = newColumnName;
-      this.func = func;
-    }
-
-    /**
-     * Liefert den Namen der neuen Spalte.
-     * 
-     * @author Matthias Benkmann (D-III-ITD 5.1)
-     */
-    public String getNewColumnName()
-    {
-      return newColumnName;
-    }
-
-    /**
-     * Liefert den Wert der neuen Spalte für Datensatz ds.
-     * 
-     * @author Matthias Benkmann (D-III-ITD 5.1)
-     */
-    public String getNewColumnValue(Dataset ds)
-    {
-      return func.getString(new DatasetValues(ds));
-    }
-  }
-
-  /**
-   * Parst conf,query("Spaltenumsetzung") und liefert eine Liste, die für jeden
-   * Eintrag ein entsprechendes ColumnTranslation Objekt enthält.
-   * 
-   * @param schema
-   *          Dieser Collection werden die Namen aller Ergebnisspalten hinzugefügt.
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
-   */
-  private List<ColumnTranslation> parseColumnTranslations(ConfigThingy conf,
-      Collection<String> schema)
-  {
-    Vector<ColumnTranslation> columnTrans = new Vector<ColumnTranslation>();
-    Iterator<ConfigThingy> parentIter = conf.query("Spaltenumsetzung").iterator();
-    while (parentIter.hasNext())
-    {
-      Iterator<ConfigThingy> iter = parentIter.next().iterator();
-      while (iter.hasNext())
-      {
-        ConfigThingy transConf = iter.next();
-        String name = transConf.getName();
-        try
-        {
-          Function func =
-            FunctionFactory.parseChildren(transConf, funcLib, dialogLib, context);
-          if (func == null)
-            throw new ConfigurationErrorException(
-              L.m("Leere Funktionsdefinition ist nicht erlaubt. Verwenden Sie stattdessen den leeren String \"\""));
-          columnTrans.add(new ColumnTranslation(name, func));
-          schema.add(name);
-        }
-        catch (ConfigurationErrorException e)
-        {
-          Logger.error(
-            L.m(
-              "Fehler beim Parsen der Spaltenumsetzungsfunktion für Ergebnisspalte \"%1\"",
-              name), e);
-        }
-      }
-    }
-
-    columnTrans.trimToSize();
-    return columnTrans;
-  }
-
-  /**
-   * Stellt die Spalten eines Datasets als Values zur Verfügung.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private static class DatasetValues implements Values
-  {
-    private Dataset ds;
-
-    public DatasetValues(Dataset ds)
-    {
-      this.ds = ds;
-    }
-
-    public boolean hasValue(String id)
-    {
-      try
-      {
-        ds.get(id);
-      }
-      catch (ColumnNotFoundException x)
-      {
-        return false;
-      }
-      return true;
-    }
-
-    public String getString(String id)
-    {
-      String str = null;
-      try
-      {
-        str = ds.get(id);
-      }
-      catch (ColumnNotFoundException x)
-      {}
-
-      return str == null ? "" : str;
-    }
-
-    public boolean getBoolean(String id)
-    {
-      return getString(id).equalsIgnoreCase("true");
-    }
-  }
-
-  /**
-   * Wendet Spaltenumsetzungen auf QueryResults an und stellt das Ergebnis wieder als
-   * QueryResults zur Verfügung.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private class TranslatedQueryResults implements QueryResults
-  {
-    private List<Dataset> qres;
-
-    /**
-     * Die QueryResults res werden mit den columnTranslations (Liste von
-     * ColumnTranslation Objekten) übersetzt.
-     */
-    public TranslatedQueryResults(QueryResults res,
-        List<ColumnTranslation> columnTranslations)
-    {
-      qres = new Vector<Dataset>(res.size());
-      Iterator<Dataset> iter = res.iterator();
-      while (iter.hasNext())
-      {
-        Dataset ds = iter.next();
-        Map<String, String> data = new HashMap<String, String>();
-        Iterator<ColumnTranslation> transIter = columnTranslations.iterator();
-        while (transIter.hasNext())
-        {
-          ColumnTranslation trans = transIter.next();
-          data.put(trans.getNewColumnName(), trans.getNewColumnValue(ds));
-        }
-        qres.add(new SimpleDataset(ds.getKey(), data));
-      }
-    }
-
-    public int size()
-    {
-      return qres.size();
-    }
-
-    public Iterator<Dataset> iterator()
-    {
-      return qres.iterator();
-    }
-
-    public boolean isEmpty()
-    {
-      return qres.isEmpty();
-    }
   }
 
   /**
