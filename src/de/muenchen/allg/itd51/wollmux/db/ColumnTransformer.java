@@ -238,7 +238,7 @@ public class ColumnTransformer
    * Liefert den Wert der Pseudospalte columnName, der anhand der Umsetzungsregeln
    * aus dem {@link Dataset} ds berechnet wird. Falls keine Umsetzungsregel für
    * columnName existiert, wird direkt der Wert der Spalte columnName von ds
-   * zurückgeliefert.
+   * zurückgeliefert (null falls nicht belegt).
    * 
    * @throws ColumnNotFoundException
    *           falls weder eine Umsetzungsregel für columnName definiert ist noch ds

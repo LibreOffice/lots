@@ -1238,8 +1238,9 @@ public class DocumentCommandInterpreter
       String value = null;
       try
       {
-        Dataset ds = mux.getDatasourceJoiner().getSelectedDataset();
+        Dataset ds = mux.getDatasourceJoiner().getSelectedDatasetTransformed();
         value = ds.get(spaltenname);
+        if (value == null) value = "";
 
         // ggf. TRAFO durchführen
         value = model.getTranformedValue(value, cmd.getTrafoName(), false);

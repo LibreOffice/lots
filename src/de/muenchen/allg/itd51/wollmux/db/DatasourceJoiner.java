@@ -115,6 +115,11 @@ public class DatasourceJoiner
   private LocalOverrideStorage myLOS;
 
   /**
+   * Wird von {@link #getSelectedDatasetTransformed()} verwendet; kann null sein!
+   */
+  private ColumnTransformer columnTransformer;
+
+  /**
    * Die Datenquelle auf die sich find(), getLOS(), etc beziehen.
    */
   protected Datasource mainDatasource;
@@ -534,6 +539,37 @@ public class DatasourceJoiner
   public int getSelectedDatasetSameKeyIndex() throws DatasetNotFoundException
   {
     return myLOS.getSelectedDatasetSameKeyIndex();
+  }
+
+  /**
+   * Erlaubt es, einen {@link ColumnTransformer} zu setzen, der von
+   * {@link #getSelectedDatasetTransformed()} verwendet wird. Falls null übergeben
+   * wird, wird die Transformation deaktiviert und
+   * {@link #getSelectedDatasetTransformed()} liefert das selbe Ergebnis wie
+   * {@link #getSelectedDataset()}.
+   * 
+   * @author Matthias Benkmann (D-III-ITD-D101)
+   */
+  public void setTransformer(ColumnTransformer columnTransformer)
+  {
+    this.columnTransformer = columnTransformer;
+  }
+
+  /**
+   * Falls kein {@link ColumnTransformer} gesetzt wurde mit
+   * {@link #setTransformer(ColumnTransformer)}, so liefert diese Funktion das selbe
+   * wie {@link #getSelectedDataset()}, ansonsten wird das durch den
+   * ColumnTransformer transformierte Dataset geliefert.
+   * 
+   * @throws DatasetNotFoundException
+   *           falls der LOS leer ist (ansonsten ist immer ein Datensatz selektiert).
+   * @author Matthias Benkmann (D-III-ITD-D101)
+   */
+  public Dataset getSelectedDatasetTransformed() throws DatasetNotFoundException
+  {
+    DJDataset ds = getSelectedDataset();
+    if (columnTransformer == null) return ds;
+    return columnTransformer.transform(ds);
   }
 
   /**

@@ -64,6 +64,7 @@ import java.net.URLClassLoader;
 import java.net.UnknownHostException;
 import java.util.Calendar;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -84,6 +85,7 @@ import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
+import de.muenchen.allg.itd51.wollmux.db.ColumnTransformer;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
 import de.muenchen.allg.itd51.wollmux.dialog.Common;
 import de.muenchen.allg.itd51.wollmux.dialog.DatasourceSearchDialog;
@@ -435,6 +437,24 @@ public class WollMuxFiles
         datasourceJoiner =
           new DatasourceJoiner(getWollmuxConf(), senderSourceStr, getLosCacheFile(),
             getDEFAULT_CONTEXT(), datasourceTimeoutLong);
+        /*
+         * Zum Zeitpunkt wo der DJ initialisiert wird sind die Funktions- und
+         * Dialogbibliothek des WollMuxSingleton noch nicht initialisiert, deswegen
+         * können sie hier nicht verwendet werden. Man könnte die Reihenfolge
+         * natürlich ändern, aber diese Reihenfolgeabhängigkeit gefällt mir nicht.
+         * Besser wäre auch bei den Funktionen WollMuxSingleton.getFunctionDialogs()
+         * und WollMuxSingleton.getGlobalFunctions() eine on-demand initialisierung
+         * nach dem Prinzip if (... == null) initialisieren. Aber das heben wir uns
+         * für einen Zeitpunkt auf, wo es benötigt wird und nehmen jetzt erst mal
+         * leere Dummy-Bibliotheken.
+         */
+        FunctionLibrary funcLib = new FunctionLibrary();
+        DialogLibrary dialogLib = new DialogLibrary();
+        Map<Object, Object> context = new HashMap<Object, Object>();
+        ColumnTransformer columnTransformer =
+          new ColumnTransformer(WollMuxFiles.getWollmuxConf(),
+            "AbsenderdatenSpaltenumsetzung", funcLib, dialogLib, context);
+        datasourceJoiner.setTransformer(columnTransformer);
       }
       catch (ConfigurationErrorException e)
       {

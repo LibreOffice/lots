@@ -327,8 +327,11 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
   {
     try
     {
-      return WollMuxSingleton.getInstance().getDatasourceJoiner().getSelectedDataset().get(
-        dbSpalte).toString();
+      String value =
+        WollMuxSingleton.getInstance().getDatasourceJoiner().getSelectedDatasetTransformed().get(
+          dbSpalte);
+      if (value == null) value = "";
+      return value;
     }
     catch (java.lang.Exception e)
     {
