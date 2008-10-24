@@ -235,6 +235,8 @@ public class DatasourceJoiner
           ds = new LDAPDatasource(nameToDatasource, sourceDesc, context);
         else if (type.equals("ooo"))
           ds = new OOoDatasource(nameToDatasource, sourceDesc, context);
+        else if (type.equals("funky"))
+          ds = new FunkyDatasource(nameToDatasource, sourceDesc, context);
         else
           Logger.error(L.m("Ununterstützter Datenquellentyp: %1", type));
       }
