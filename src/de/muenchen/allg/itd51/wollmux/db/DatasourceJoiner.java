@@ -227,6 +227,8 @@ public class DatasourceJoiner
           ds = new UnionDatasource(nameToDatasource, sourceDesc, context);
         else if (type.equals("attach"))
           ds = new AttachDatasource(nameToDatasource, sourceDesc, context);
+        else if (type.equals("overlay"))
+          ds = new OverlayDatasource(nameToDatasource, sourceDesc, context);
         else if (type.equals("prefer"))
           ds = new PreferDatasource(nameToDatasource, sourceDesc, context);
         else if (type.equals("schema"))
