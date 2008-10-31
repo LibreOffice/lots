@@ -66,6 +66,7 @@ compileidl: Compiles the files from the idl/ directory. If you're using Eclipse,
 	<property name="BUILD_INFO_FILE_NAME" value="buildinfo" />
 	<property name="BUILD_INFO_FILE" value="${MISC}/${BUILD_INFO_FILE_NAME}" />
 	<property name="DESCRIPTION_XML" value="${RDB_DIR}/description.xml" />
+	<property name="UPDATE_XML" value="${PACKAGE_DIR}/${COMPONENT}.update.xml" />
 	<property name="VERSION_FILE" value="${MISC}/version"/>
 
 	<property name="SRC_ENCODING" value="ISO8859-1" />
@@ -104,7 +105,8 @@ compileidl: Compiles the files from the idl/ directory. If you're using Eclipse,
 	     the DEBUG property will be set. --> 
 	<target name="debug">
 		<property name="DEBUG" value="on" />
-		<property name="OPTIMIZE" value="off" />
+		<!-- If optimization interferes with debugging, it can be disabled. -->
+		<!-- <property name="OPTIMIZE" value="off" /> -->
 	</target>
 	
 	<target name="clean" >
@@ -133,12 +135,15 @@ compileidl: Compiles the files from the idl/ directory. If you're using Eclipse,
 	    	<fileset file="${BUILD_INFO_FILE}" />
 	    	<fileset file="${DESCRIPTION_XML}" />
 	    	<fileset file="${VERSION_FILE}" /> -->
+	    	
+	    	<!-- UPDATE_XML schon löschen, da diese extern eh nicht benötigt wird -->
+	    	<fileset file="${UPDATE_XML}" />
 	    </delete>
 	</target>
 	
 	<target name="makeversion">
 		<exec executable="bash" failifexecutionfails="false">
-		  <arg line="misc/makeversion ${VERSION_FILE} ${BUILD_INFO_FILE} debian/changelog ${DESCRIPTION_XML}"/>
+		  <arg line="misc/makeversion ${VERSION_FILE} ${BUILD_INFO_FILE} debian/changelog ${DESCRIPTION_XML} ${UPDATE_XML}"/>
 		</exec>		
 		<loadfile property="VERSION" srcfile="${VERSION_FILE}" failonerror="true">
 		   <filterchain>

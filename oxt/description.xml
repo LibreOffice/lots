@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <description xmlns="http://openoffice.org/extensions/description/2006"
 	     xmlns:xlink="http://www.w3.org/1999/xlink">
-	<version value="4.10.2" />
+	<version value="4.10.3" />
 	<identifier value="de.muenchen.allg.d101.wollmux"/>
 	<dependencies>
 		<OpenOffice.org-minimal-version value="2.1" name="OpenOffice.org 2.1"/>
 	</dependencies>
 
-<!--
+
 	<update-information>
-	<src xlink:href="http://extensions.openoffice.org/testarea/desktop/license/update/lic3.update.xml"/>
+	  <src xlink:href="http://limux.tvc.muenchen.de/ablage/sonstiges/wollmux/packages/WollMux-snapshot/WollMux.update.xml"/>
 	</update-information>
-	<registration>
+<!--	<registration>
 		<simple-license accept-by="admin" default-license-id="en-NZ" suppress-on-update="true" >
 			<license-text xlink:href="registration/license_de-DE.txt" lang="de-DE" />
 			<license-text xlink:href="registration/license_en-GB.txt" lang="en-GB" />
