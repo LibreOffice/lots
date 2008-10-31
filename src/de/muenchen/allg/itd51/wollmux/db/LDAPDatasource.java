@@ -670,7 +670,7 @@ public class LDAPDatasource implements Datasource
       {
         if (System.currentTimeMillis() > endTime) throw new TimeoutException();
         SearchResult result = enumer.nextElement();
-        String path = checkQuotes(result.getName());
+        String path = preparePath(result.getNameInNamespace());
         Name pathName = np.parse(path);
         /*
          * ACHTUNG: hier kann NICHT (pathLength < 0 && (pathName.size()+rootLength >
@@ -833,32 +833,19 @@ public class LDAPDatasource implements Datasource
     // Level an. okay, size bezieht sicht auf die laenge
     // der (Ldap)Names
 
-    if (positiveSubtreePathLists.size() > 0) // TOD0 if nach aussen ziehen (evtl.
-    // gleich auf Iterator übergehen, siehe
-    // todo weiter unten), damit
-    // mergedPositiveSubtreePathLists nicht
-    // mit null initialisiert werden muss
-    // und damit beweisbar ist, dass es
-    // initialisiert ist
+    if (positiveSubtreePathLists.size() > 0)
+    /*
+     * TOD0 if nach aussen ziehen (evtl. gleich auf Iterator übergehen, siehe todo
+     * weiter unten), damit mergedPositiveSubtreePathLists nicht mit null
+     * initialisiert werden muss und damit beweisbar ist, dass es initialisiert ist
+     */
     {
-      RelativePaths currentSubtreePaths = positiveSubtreePathLists.get(0); // TOD0:
-      // Hier
-      // wird
-      // eine
-      // Liste
-      // von
-      // zufälligem
-      // Level
-      // rausgepickt
-      // (entsprechend
-      // sortierung
-      // von
-      // attributeMap.keySet(),
-      // Wo ist
-      // die
-      // oben
-      // angesprochene
-      // Sortierung?
+      RelativePaths currentSubtreePaths = positiveSubtreePathLists.get(0);
+      /*
+       * TOD0: Hier wird eine Liste von zufälligem Level rausgepickt (entsprechend
+       * sortierung von attributeMap.keySet(), Wo ist die oben angesprochene
+       * Sortierung?
+       */
       mergedPositiveSubtreePathLists = currentSubtreePaths.paths;
       mergedCurrentSize = currentSubtreePaths.relative;
     }
@@ -1105,7 +1092,7 @@ public class LDAPDatasource implements Datasource
         while (currentResults.hasMoreElements())
         {
           SearchResult sr = currentResults.nextElement();
-          String name = checkQuotes(sr.getName());
+          String name = preparePath(sr.getNameInNamespace());
           sr.setName(name + (name.length() > 0 ? comma : "") + subTree);
           currentResultList.add(sr);
         }
@@ -1332,10 +1319,9 @@ public class LDAPDatasource implements Datasource
 
       try
       {
+        String tempPath = searchResult.getNameInNamespace();
 
-        String tempPath = searchResult.getName();
-
-        tempPath = checkQuotes(tempPath);
+        tempPath = preparePath(tempPath);
 
         long timeout = endTime - System.currentTimeMillis();
         if (timeout <= 0) throw new TimeoutException();
@@ -1636,7 +1622,7 @@ public class LDAPDatasource implements Datasource
           if (System.currentTimeMillis() > endTime) throw new TimeoutException();
 
           SearchResult currentResult = enumer.nextElement();
-          String subPath = checkQuotes(currentResult.getName());
+          String subPath = preparePath(currentResult.getNameInNamespace());
           comma = ",";
           if (subPath.equals("")) comma = "";
           String currentPath = subPath + comma + searchPath;
@@ -1669,7 +1655,7 @@ public class LDAPDatasource implements Datasource
       {
         if (System.currentTimeMillis() > endTime) throw new TimeoutException();
         SearchResult sr = enumer.nextElement();
-        String name = checkQuotes(sr.getName());
+        String name = preparePath(sr.getNameInNamespace());
         String actualPath = name + (name.length() > 0 ? comma : "") + currentPath;
         sr.setName(actualPath);
         result.add(sr);
@@ -1681,19 +1667,27 @@ public class LDAPDatasource implements Datasource
   }
 
   /**
-   * Entferne umschliessende Doublequotes aus path falls vorhanden. Dies muss gemacht
-   * werden, da das Zeichen '/' in LDAP Pfadkomponenten erlaubt ist, im JNDI jedoch
-   * als Komponententrenner verwendet wird. Deswegen werden Pfade, die '/' enthalten
-   * von .getName() in Anführungszeichen gesetzt und können deshalb nicht mehr
-   * geparsed werden.
+   * Entferne umschliessende Doublequotes aus path falls vorhanden. [Folgende
+   * Erklärung stimmt eventuell nicht mehr, seit von getName() auf
+   * getNameInNamespace() umgestellt wurde. Eventuell kann das ganze
+   * Doublequote-Killen entfallen] Dies muss gemacht werden, da das Zeichen '/' in
+   * LDAP Pfadkomponenten erlaubt ist, im JNDI jedoch als Komponententrenner
+   * verwendet wird. Deswegen werden Pfade, die '/' enthalten von .getName() in
+   * Anführungszeichen gesetzt und können deshalb nicht mehr geparsed werden.]
    * 
-   * TOD0 Ich bin mir nicht sicher, ob hier nicht noch mehr zu tun ist. Was ist z.B.
-   * mit enthaltenen Doublequotes? Kann das passieren? Wie werden die escapet?
+   * Nach dem Entfernen der Doublequotes wird geschaut ob path auf {@link #baseDN}
+   * endet (ist normalerweise der Fall) und falls ja wird dieses Suffix
+   * weggeschnitten.
    * 
-   * @author Max Meier (D-III-ITD 5.1)
+   * [Folgendes ist mit der Umstellung auf getNameInNamespace() eventuell auch
+   * überholt: TOD0 Ich bin mir nicht sicher, ob hier nicht noch mehr zu tun ist. Was
+   * ist z.B. mit enthaltenen Doublequotes? Kann das passieren? Wie werden die
+   * escapet?]
+   * 
+   * @author Max Meier, Matthias Benkmann (D-III-ITD 5.1)
    * 
    */
-  private String checkQuotes(String path)
+  private String preparePath(String path)
   {
 
     int tempEnd = path.length() - 1;
@@ -1703,6 +1697,12 @@ public class LDAPDatasource implements Datasource
       {
         path = path.substring(1, tempEnd);
       }
+    }
+    if (path.endsWith(baseDN))
+    {
+      int end = path.length() - baseDN.length();
+      if (end > 0) --end; // for the comma present if path != baseDN
+      path = path.substring(0, end);
     }
 
     return path;
