@@ -282,7 +282,7 @@ public class WollMuxBar
   private static final String CONNECTION_FAILED_MESSAGE =
     L.m("Es konnte keine Verbindung zur WollMux-Komponente von OpenOffice hergestellt werden.\n"
       + "Eine mögliche Ursache ist ein fehlerhaft installiertes OpenOffice.\n"
-      + "Eine weitere mögliche Ursache ist, dass WollMux.uno.pkg nicht oder fehlerhaft installiert wurde.");
+      + "Eine weitere mögliche Ursache ist, dass WollMux.oxt nicht oder fehlerhaft installiert wurde.");
 
   private static final String WOLLMUX_CONFIG_ERROR_MESSAGE =
     L.m("Aus Ihrer WollMux-Konfiguration konnte kein Abschnitt \"Symbolleisten\" gelesen werden.\n"

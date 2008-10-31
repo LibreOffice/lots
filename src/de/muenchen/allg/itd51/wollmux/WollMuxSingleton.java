@@ -331,7 +331,7 @@ public class WollMuxSingleton implements XPALProvider
    * WollMux-Installation zurück. Der Build-Status wird während dem Build-Prozess mit
    * dem Kommando "svn info" auf das Projektverzeichnis erstellt. Die Buildinfo-Datei
    * buildinfo enthält die Paketnummer und die svn-Revision und ist im
-   * WollMux.uno.pkg-Paket sowie in der WollMux.uno.jar-Datei abgelegt.
+   * WollMux.oxt-Paket sowie in der WollMux.uno.jar-Datei abgelegt.
    * 
    * Kann dieses File nicht gelesen werden, so wird eine entsprechende Ersatzmeldung
    * erzeugt (siehe Sourcecode).

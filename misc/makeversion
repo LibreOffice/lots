@@ -1,7 +1,7 @@
 #!/bin/sh
 
-if [ $# != 3 ]; then
-  echo 1>&2 "USAGE: makeversion <versionfile> <buildinfofile> <changelog>"
+if [ $# != 4 ]; then
+  echo 1>&2 "USAGE: makeversion <versionfile> <buildinfofile> <changelog> <descriptionxmlfile>"
   exit 1
 fi
 
@@ -20,12 +20,39 @@ v1=$((${date%%-*} - 2004))
 v2=$(echo $date| sed 's/[^-]*-0\?\([^-]*\)-.*/\1/')
 v3=$(( $(echo ${date##*-}| sed 's/^0\?\(.*\)/\1/') / 10 ))
 
-echo "$v1.$v2.$v3" >"$1" 
-echo "Version: $v1.$v2.$v3, Revision: $rev" >"$2"
-echo "wollmux ($v1.$v2.$v3) halut; urgency=low
+version="$v1.$v2.$v3"
+echo "$version" >"$1" 
+echo "Version: $version, Revision: $rev" >"$2"
+echo "wollmux ($version) halut; urgency=low
 
     * Version bump.
 
  -- Felix WollMux <wollmux-general@lists.forge.osor.eu>  Wed, 06 Jul 2007 16:13:16 +0200
 " >"$3"
 #echo "$(($(date +%Y) - 2004)).$(date +%m|sed s/^0//).$(($(date +%d|sed s/^0//) / 10))"
+
+cat >"$4" <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<description xmlns="http://openoffice.org/extensions/description/2006"
+	     xmlns:xlink="http://www.w3.org/1999/xlink">
+	<version value="$version" />
+	<identifier value="de.muenchen.allg.d101.wollmux"/>
+	<dependencies>
+		<OpenOffice.org-minimal-version value="2.1" name="OpenOffice.org 2.1"/>
+	</dependencies>
+
+<!--
+	<update-information>
+	<src xlink:href="http://extensions.openoffice.org/testarea/desktop/license/update/lic3.update.xml"/>
+	</update-information>
+	<registration>
+		<simple-license accept-by="admin" default-license-id="en-NZ" suppress-on-update="true" >
+			<license-text xlink:href="registration/license_de-DE.txt" lang="de-DE" />
+			<license-text xlink:href="registration/license_en-GB.txt" lang="en-GB" />
+			<license-text xlink:href="registration/license_en-NZ.txt" lang="en-NZ" license-id="en-NZ" />
+			<license-text xlink:href="registration/license_en-US.txt" lang="en-US" />
+		</simple-license>
+	</registration>
+-->
+</description>
+EOF

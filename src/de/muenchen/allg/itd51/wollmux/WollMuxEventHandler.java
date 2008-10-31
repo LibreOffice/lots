@@ -4015,8 +4015,8 @@ public class WollMuxEventHandler
     }
 
     /**
-     * Sucht im übergebenen Pfad path nach Verzeichnissen die WollMux.uno.pkg
-     * enthalten und fügt die Schlüssel-/Wertpaare <VerzeichnisDasWollMuxEnthält>/<DatumDesVerzeichnis>
+     * Sucht im übergebenen Pfad path nach Verzeichnissen die WollMux.oxt enthalten
+     * und fügt die Schlüssel-/Wertpaare <VerzeichnisDasWollMuxEnthält>/<DatumDesVerzeichnis>
      * zur übergebenen HashMap wmInstallations
      * 
      * @param wmInstallations
@@ -4055,14 +4055,14 @@ public class WollMuxEventHandler
             File[] dateien = dir.listFiles();
             for (int j = 0; j < dateien.length; j++)
             {
-              // Wenn das Verzeichnis WollMux.uno.pkg enthält, speichern des
+              // Wenn das Verzeichnis WollMux.oxt enthält, speichern des
               // Verzeichnisnames und des Verzeichnisdatum in einer HashMap
               if (dateien[j].isDirectory()
                 && dateien[j].getName().startsWith("WollMux."))
               {
-                // Name des Verzeichnis in dem sich WollMux.uno.pkg befindet
+                // Name des Verzeichnis in dem sich WollMux.oxt befindet
                 String directoryName = dateien[j].getAbsolutePath();
-                // Datum des Verzeichnis in dem sich WollMux.uno.pkg befindet
+                // Datum des Verzeichnis in dem sich WollMux.oxt befindet
                 Date directoryDate = new Date(dateien[j].lastModified());
                 wmInstallations.put(directoryName, directoryDate);
               }

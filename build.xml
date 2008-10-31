@@ -59,12 +59,13 @@ compileidl: Compiles the files from the idl/ directory. If you're using Eclipse,
 	<property name="MAKE_DIR" value="." />
 	<property name="RDB_DIR" value="oxt" />
 	<property name="PACKAGE_DIR" value="dist" />
-	<property name="PKG_NAME" value="${COMPONENT}.uno.pkg" />
+	<property name="PKG_NAME" value="${COMPONENT}.oxt" />
 	<property name="PKG_FILE" value="${PACKAGE_DIR}/${PKG_NAME}" />
 	<property name="MD5SUMS_FILE_NAME" value="${PACKAGE_DIR}/md5sums.txt" />
 	<property name="MISC" value="misc" />
 	<property name="BUILD_INFO_FILE_NAME" value="buildinfo" />
 	<property name="BUILD_INFO_FILE" value="${MISC}/${BUILD_INFO_FILE_NAME}" />
+	<property name="DESCRIPTION_XML" value="${RDB_DIR}/description.xml" />
 	<property name="VERSION_FILE" value="${MISC}/version"/>
 
 	<property name="SRC_ENCODING" value="ISO8859-1" />
@@ -126,16 +127,18 @@ compileidl: Compiles the files from the idl/ directory. If you're using Eclipse,
 	    	<fileset file="debian/files" />
 	    	<fileset dir="debian" includes="wollmux/**" />
 	    	
-	    	<!-- VERSION_FILE und BUILD_INFO_FILE **nicht** löschen, da diese nur bei
+	    	<!-- VERSION_FILE, BUILD_INFO_FILE und DESCRIPTION_XML 
+	    	    **nicht** löschen, da diese nur bei
 	    	Vorhandensein von svn oder git regeneriert werden können.
 	    	<fileset file="${BUILD_INFO_FILE}" />
+	    	<fileset file="${DESCRIPTION_XML}" />
 	    	<fileset file="${VERSION_FILE}" /> -->
 	    </delete>
 	</target>
 	
 	<target name="makeversion">
 		<exec executable="bash" failifexecutionfails="false">
-		  <arg line="misc/makeversion ${VERSION_FILE} ${BUILD_INFO_FILE} debian/changelog"/>
+		  <arg line="misc/makeversion ${VERSION_FILE} ${BUILD_INFO_FILE} debian/changelog ${DESCRIPTION_XML}"/>
 		</exec>		
 		<loadfile property="VERSION" srcfile="${VERSION_FILE}" failonerror="true">
 		   <filterchain>
@@ -256,6 +259,7 @@ compileidl: Compiles the files from the idl/ directory. If you're using Eclipse,
 				<include name="META-INF/manifest.xml" />
 			</fileset>
 			<fileset file="${BUILD_INFO_FILE}" />
+			<fileset file="${DESCRIPTION_XML}" />
 			<fileset dir="." includes="basic/**/*" />
 		</zip>
 	</target>

@@ -95,7 +95,7 @@ Option 2: Using development sources from git
   (including the quickstarter), then install the OpenOffice.org extension
   with the following command:
 
-    unopkg add --shared dist/WollMux.uno.pkg
+    unopkg add --shared dist/WollMux.oxt
 
   This will result in a system-wide installation and usually requires
   administrator privileges.

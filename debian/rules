@@ -6,13 +6,13 @@ configure-stamp:
 	dh_testdir
 
 
-build: WollMux/dist/WollMuxBar.jar WollMux/dist/WollMux.uno.pkg
+build: WollMux/dist/WollMuxBar.jar WollMux/dist/WollMux.oxt
 
 WollMux/dist/WollMuxBar.jar:
 	dh_testdir
 	ant -f WollMux/build.xml WollMuxBar.jar
 
-WollMux/dist/WollMux.uno.pkg:
+WollMux/dist/WollMux.oxt:
 	dh_testdir
 	ant -f WollMux/build.xml WollMux.oxt
 
@@ -33,7 +33,7 @@ install: build
 
 	# Add here commands to install the package into debian/wollmux.
 	mkdir -p $(CURDIR)/debian/wollmux/usr/lib/wollmux
-	cp WollMux/dist/{WollMuxBar.jar,WollMux.uno.pkg} $(CURDIR)/debian/wollmux/usr/lib/wollmux
+	cp WollMux/dist/{WollMuxBar.jar,WollMux.oxt} $(CURDIR)/debian/wollmux/usr/lib/wollmux
 	mkdir -p $(CURDIR)/debian/wollmux/usr/bin
 	cp WollMux/dist/wollmuxbar $(CURDIR)/debian/wollmux/usr/bin
 	chmod a+rx $(CURDIR)/debian/wollmux/usr/bin/wollmuxbar

@@ -27,8 +27,9 @@ case "$1" in
     cd /usr/lib/wollmux
     echo "***** Eine Fehlermeldung 'There is no such extension deployed' o.ä. ist meist harmlos *****" >>"$TEMPDIR"/messages
     unopkg remove WollMux.uno.pkg --shared >>"$TEMPDIR"/messages 2>&1 || true
+    unopkg remove de.muenchen.allg.d101.wollmux --shared >>"$TEMPDIR"/messages 2>&1 || true
     echo "***** Ende des Abschnitts der meist harmlosen Fehlermeldungen ******" >>"$TEMPDIR"/messages
-    unopkg add WollMux.uno.pkg -v --shared 2>>"$TEMPDIR"/messages | grep -q 'unopkg done'
+    unopkg add WollMux.oxt -v --shared 2>>"$TEMPDIR"/messages | grep -q 'unopkg done'
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
