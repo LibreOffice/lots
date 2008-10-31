@@ -10,11 +10,11 @@ build: WollMux/dist/WollMuxBar.jar WollMux/dist/WollMux.oxt
 
 WollMux/dist/WollMuxBar.jar:
 	dh_testdir
-	ant -f WollMux/build.xml WollMuxBar.jar
+	ant -f WollMux/build.xml debug WollMuxBar.jar
 
 WollMux/dist/WollMux.oxt:
 	dh_testdir
-	ant -f WollMux/build.xml WollMux.oxt
+	ant -f WollMux/build.xml debug WollMux.oxt
 
 build-stamp:
 	dh_testdir
