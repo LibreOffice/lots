@@ -52,6 +52,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -2453,10 +2454,6 @@ public class WollMuxEventHandler
 
       WollMuxEventHandler.handlePALChangedNotify();
 
-      // Prüfen, ob WollMux-Installation noch passt (keine Halb- oder
-      // Doppelinstallation)
-      WollMuxEventHandler.handleCheckInstallation();
-
       // Konsistenzprüfung: Stimmt WollMux-Konfiguration der entfernten
       // Komponente mit meiner Konfiguration überein? Ansonsten Fehlermeldung.
       if (wollmuxConfHashCode != null)
@@ -3852,9 +3849,7 @@ public class WollMuxEventHandler
    * WollMux fehlerhaft installiert, erscheint eine Fehlermeldung mit entsprechenden
    * Hinweisen.
    * 
-   * Das Event wird geworfen, wenn der WollMux startet oder wenn ein der
-   * Sachleitenden Verfügungen eingefügt werden, bzw. eine bestehende Ziffer gelöscht
-   * werden soll.
+   * Das Event wird geworfen, wenn der WollMux startet.
    */
   public static void handleCheckInstallation()
   {
@@ -3868,7 +3863,8 @@ public class WollMuxEventHandler
       // Standardwerte für den Warndialog:
       boolean showdialog = true;
       String title = L.m("Mehrfachinstallation des WollMux");
-      String msg = L.m("Der WollMux ist mehrfach auf Ihrem System installiert.");
+      String msg =
+        L.m("Es wurden eine systemweite und eine benutzerlokale Installation des WollMux\n(oder Überreste von einer unvollständigen Deinstallation) gefunden.\nDiese Konstellation kann obskure Fehler verursachen.\n\nEntfernen Sie eine der beiden Installationen.\n\nDie wollmux.log enthält nähere Informationen zu den betroffenen Pfaden.");
       String logMsg = msg;
 
       // Abschnitt Dialoge/MehrfachinstallationWarndialog auswerten
@@ -3898,51 +3894,35 @@ public class WollMuxEventHandler
       }
 
       // Infos der Installationen einlesen.
-      HashMap<String, Date> wmInsts = getInstallations();
+      List<WollMuxInstallationDescriptor> wmInsts = getInstallations();
 
-      // Variablen recentInstPath / recentInstLastModified bestimmen
+      // Variablen recentInstPath / recentInstLastModified / shared / local bestimmen
       String recentInstPath = "";
       Date recentInstLastModified = null;
-      for (Iterator<String> iter = wmInsts.keySet().iterator(); iter.hasNext();)
+      boolean shared = false;
+      boolean local = false;
+      for (WollMuxInstallationDescriptor desc : wmInsts)
       {
-        String path = iter.next();
-        Date d = wmInsts.get(path);
+        shared = shared || desc.isShared;
+        local = local || !desc.isShared;
         if (recentInstLastModified == null
-          || d.compareTo(recentInstLastModified) > 0)
+          || desc.date.compareTo(recentInstLastModified) > 0)
         {
-          recentInstLastModified = d;
-          recentInstPath = path;
+          recentInstLastModified = desc.date;
+          recentInstPath = desc.path;
         }
       }
 
       // Variable wrongInstList bestimmen:
       String otherInstsList = "";
-      for (Iterator<String> iter = wmInsts.keySet().iterator(); iter.hasNext();)
+      for (WollMuxInstallationDescriptor desc : wmInsts)
       {
-        String path = iter.next();
-        if (path.equals(recentInstPath)) continue;
-        otherInstsList += "- " + path + "\n";
+        if (!desc.path.equals(recentInstPath))
+          otherInstsList += "- " + desc.path + "\n";
       }
-
-      // recentInstlastModifiedDate vergleichen mit dem Zeitstempel der
-      // Installation, die in der letzten Prüfung gefunden wurde.
-      boolean newerInstallationDetected = false;
-      boolean firstCheck = false;
-
-      WollMuxSingleton mux = WollMuxSingleton.getInstance();
-      Date oldCurrentInstLastModified = mux.getCurrentWollMuxInstallationDate();
-      if (oldCurrentInstLastModified == null)
-      {
-        firstCheck = true;
-        mux.setCurrentWollMuxInstallationDate(recentInstLastModified);
-        oldCurrentInstLastModified = recentInstLastModified;
-      }
-      if (recentInstLastModified != null)
-        newerInstallationDetected =
-          oldCurrentInstLastModified.compareTo(recentInstLastModified) < 0;
 
       // Im Fehlerfall Dialog und Fehlermeldung bringen.
-      if ((wmInsts.size() > 1 && firstCheck) || newerInstallationDetected)
+      if (local && shared)
       {
 
         // Variablen in msg evaluieren:
@@ -3964,20 +3944,42 @@ public class WollMuxEventHandler
       }
     }
 
-    /**
-     * Liefert eine HashMap mit den aktuell auf dem System vorhandenen
-     * WollMux-Installationen, die in den Schüssel/Wert-Paaren Pfad/Modified-Datum
-     * belegt sind.
-     * 
-     * @author Christoph Lutz (D-III-ITD-5.1)
-     */
-    private HashMap<String, Date> getInstallations()
+    private static class WollMuxInstallationDescriptor
     {
-      HashMap<String, Date> wmInstallations = new HashMap<String, Date>();
+      public String path;
+
+      public Date date;
+
+      public boolean isShared;
+
+      public WollMuxInstallationDescriptor(String path, Date date, boolean isShared)
+      {
+        this.path = path;
+        this.date = date;
+        this.isShared = isShared;
+      }
+
+      public String toString()
+      {
+        return path + " -- " + date + " shared:" + isShared;
+      }
+    }
+
+    /**
+     * Liefert eine {@link List} mit den aktuell auf dem System vorhandenen
+     * WollMux-Installationen.
+     * 
+     * @author Christoph Lutz, Matthias Benkmann (D-III-ITD-D101)
+     */
+    private List<WollMuxInstallationDescriptor> getInstallations()
+    {
+      List<WollMuxInstallationDescriptor> wmInstallations =
+        new ArrayList<WollMuxInstallationDescriptor>();
 
       // Installationspfade der Pakete bestimmen:
       String myPath = null; // user-Pfad
       String oooPath = null; // shared-Pfad
+      String oooPathNew = null; // shared-Pfad (OOo 3.x)
 
       try
       {
@@ -3995,6 +3997,17 @@ public class WollMuxEventHandler
         oooPath =
           xSS.substituteVariables("$(inst)/share/uno_packages/cache/uno_packages/",
             true);
+        try
+        {
+          oooPathNew =
+            xSS.substituteVariables(
+              "$(brandbaseurl)/share/uno_packages/cache/uno_packages/", true);
+        }
+        catch (NoSuchElementException e)
+        {
+          // OOo 2.x does not have $(brandbaseurl)
+        }
+
       }
       catch (java.lang.Exception e)
       {
@@ -4008,27 +4021,23 @@ public class WollMuxEventHandler
         return wmInstallations;
       }
 
-      findWollMuxInstallations(wmInstallations, myPath);
-      findWollMuxInstallations(wmInstallations, oooPath);
+      findWollMuxInstallations(wmInstallations, myPath, false);
+      findWollMuxInstallations(wmInstallations, oooPath, true);
+      if (oooPathNew != null)
+        findWollMuxInstallations(wmInstallations, oooPathNew, true);
 
       return wmInstallations;
     }
 
     /**
      * Sucht im übergebenen Pfad path nach Verzeichnissen die WollMux.oxt enthalten
-     * und fügt die Schlüssel-/Wertpaare <VerzeichnisDasWollMuxEnthält>/<DatumDesVerzeichnis>
-     * zur übergebenen HashMap wmInstallations
+     * und fügt die Information zu wmInstallations hinzu.
      * 
-     * @param wmInstallations
-     *          HashMap, in der gefundene WollMux-Installationen abgelegt werden als
-     *          Pfas(als String) und Datum(als Date).
-     * @param path
-     *          Der Pfad in dem nach WollMux-Installationen gesucht werden soll.
-     * 
-     * @author Bettina Bauer (D-III-ITD-5.1), Christoph Lutz (D-III-ITD-5.1)
+     * @author Bettina Bauer, Christoph Lutz, Matthias Benkmann (D-III-ITD-D101)
      */
     private static void findWollMuxInstallations(
-        HashMap<String, Date> wmInstallations, String path)
+        List<WollMuxInstallationDescriptor> wmInstallations, String path,
+        boolean isShared)
     {
       URI uriPath;
       uriPath = null;
@@ -4064,7 +4073,8 @@ public class WollMuxEventHandler
                 String directoryName = dateien[j].getAbsolutePath();
                 // Datum des Verzeichnis in dem sich WollMux.oxt befindet
                 Date directoryDate = new Date(dateien[j].lastModified());
-                wmInstallations.put(directoryName, directoryDate);
+                wmInstallations.add(new WollMuxInstallationDescriptor(directoryName,
+                  directoryDate, isShared));
               }
             }
           }

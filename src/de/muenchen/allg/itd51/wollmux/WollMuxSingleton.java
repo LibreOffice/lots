@@ -56,7 +56,6 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -152,15 +151,6 @@ public class WollMuxSingleton implements XPALProvider
   private HashMap<HashableComponent, TextDocumentModel> currentTextDocumentModels;
 
   /**
-   * Enthält null (wenn noch keine Installations-Prüfung erfolgte) oder den
-   * Zeitstempel der jungsten WollMuxInstallation, die auf dem System gefunden wurde.
-   * Ändert sich dieser Zeitstempel im laufenden Betrieb, dann liegt eine
-   * Mehrfachinstallation des WollMux vor
-   * {@see WollMuxEventHandler.handleCheckInstallation()}.
-   */
-  private Date currentWollMuxInstallationDate;
-
-  /**
    * Die WollMux-Hauptklasse ist als singleton realisiert.
    */
   private WollMuxSingleton(XComponentContext ctx)
@@ -171,8 +161,6 @@ public class WollMuxSingleton implements XPALProvider
 
     this.currentTextDocumentModels =
       new HashMap<HashableComponent, TextDocumentModel>();
-
-    this.currentWollMuxInstallationDate = null;
 
     // Initialisiere die UNO-Klasse, so dass auch mit dieser Hilfsklasse
     // gearbeitet werden kann.
@@ -905,33 +893,6 @@ public class WollMuxSingleton implements XPALProvider
   public DialogLibrary getFunctionDialogs()
   {
     return funcDialogs;
-  }
-
-  /**
-   * Liefert null (wenn noch keine Installations-Prüfung erfolgte) oder den
-   * Zeitstempel der jungsten WollMuxInstallation, die auf dem System gefunden wurde.
-   * Ändert sich dieser Zeitstempel im laufenden Betrieb, dann liegt eine
-   * Mehrfachinstallation des WollMux vor
-   * {@see WollMuxEventHandler.handleCheckInstallation()}.
-   * 
-   * @author Christoph Lutz (D-III-ITD-5.1)
-   */
-  public Date getCurrentWollMuxInstallationDate()
-  {
-    return currentWollMuxInstallationDate;
-  }
-
-  /**
-   * Ermöglicht das Setzen des Datums der jüngsten WollMux-Installation, die in
-   * WollMuxEventHandler.handleCheckInstallation(...) auf dem System gefunden wurde.
-   * 
-   * @param currentWollMuxInstallationDate
-   * 
-   * @author Christoph Lutz (D-III-ITD-5.1)
-   */
-  public void setCurrentWollMuxInstallationDate(Date currentWollMuxInstallationDate)
-  {
-    this.currentWollMuxInstallationDate = currentWollMuxInstallationDate;
   }
 
   /**
