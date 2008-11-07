@@ -331,6 +331,7 @@ public class TextDocumentModel
     this.formFieldValues = new HashMap<String, String>();
     this.invisibleGroups = new HashSet<String>();
     this.overrideFragMap = new HashMap<String, String>();
+    parseInitialOverrideFragMap(WollMuxSingleton.getInstance().getInitialOverrideFragMap());
     this.functionContext = new HashMap<Object, Object>();
     this.formModel = null;
     this.formFieldPreviewMode = true;
@@ -366,6 +367,63 @@ public class TextDocumentModel
     }
     catch (java.lang.Exception e)
     {}
+  }
+
+  /**
+   * Nimmt ein ConfigThingy von folgender Form
+   * 
+   * <pre>
+   * overrideFrag(
+   *   (FRAG_ID 'A' NEW_FRAG_ID 'B')
+   *   (FRAG_ID 'C' NEW_FRAG_ID 'D')
+   *   ...
+   * )
+   * </pre>
+   * 
+   * parst es und initialisiert damit {@link #overrideFragMap}. NEW_FRAG_ID ist
+   * optional und wird als leerer String behandelt wenn es fehlt.
+   * 
+   * @author Matthias Benkmann (D-III-ITD-D101)
+   * 
+   * TESTED
+   */
+  private void parseInitialOverrideFragMap(ConfigThingy initialOverrideFragMap)
+  {
+    for (ConfigThingy conf : initialOverrideFragMap)
+    {
+      String oldFragId;
+      try
+      {
+        oldFragId = conf.get("FRAG_ID").toString();
+      }
+      catch (NodeNotFoundException x)
+      {
+        Logger.error(L.m(
+          "FRAG_ID Angabe fehlt in einem Eintrag der %1: %2\nVielleicht haben Sie die Klammern um (FRAG_ID 'A' NEW_FRAG_ID 'B') vergessen?",
+          WollMuxSingleton.OVERRIDE_FRAG_DB_SPALTE, conf.stringRepresentation()));
+        continue;
+      }
+
+      String newFragId = "";
+      try
+      {
+        newFragId = conf.get("NEW_FRAG_ID").toString();
+      }
+      catch (NodeNotFoundException x)
+      {
+        // NEW_FRAG_ID ist optional
+      }
+
+      try
+      {
+        setOverrideFrag(oldFragId, newFragId);
+      }
+      catch (OverrideFragChainException x)
+      {
+        Logger.error(L.m("Fehlerhafte Angabe in %1: %2",
+          WollMuxSingleton.OVERRIDE_FRAG_DB_SPALTE, conf.stringRepresentation()), x);
+      }
+    }
   }
 
   /**

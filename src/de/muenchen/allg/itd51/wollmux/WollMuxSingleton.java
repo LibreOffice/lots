@@ -92,6 +92,8 @@ import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
+import de.muenchen.allg.itd51.parser.SyntaxErrorException;
+import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.DJDataset;
 import de.muenchen.allg.itd51.wollmux.db.DJDatasetListElement;
 import de.muenchen.allg.itd51.wollmux.db.Dataset;
@@ -111,6 +113,8 @@ import de.muenchen.allg.itd51.wollmux.func.PrintFunctionLibrary;
  */
 public class WollMuxSingleton implements XPALProvider
 {
+  public static final String OVERRIDE_FRAG_DB_SPALTE = "OVERRIDE_FRAG_DB_SPALTE";
+
   private static WollMuxSingleton singletonInstance = null;
 
   /**
@@ -127,6 +131,12 @@ public class WollMuxSingleton implements XPALProvider
    * Enthält die im Funktionen-Abschnitt der wollmux,conf definierten Funktionen.
    */
   private PrintFunctionLibrary globalPrintFunctions;
+
+  /**
+   * Der Wert von {@link #OVERRIDE_FRAG_DB_SPALTE}, d,h, der Name der Spalte, die
+   * die persönliche OverrideFrag-Liste enthält. "" falls nicht definiert.
+   */
+  private String overrideFragDbSpalte;
 
   /**
    * Enthält den default XComponentContext in dem der WollMux (bzw. das OOo) läuft.
@@ -893,6 +903,65 @@ public class WollMuxSingleton implements XPALProvider
   public DialogLibrary getFunctionDialogs()
   {
     return funcDialogs;
+  }
+
+  /**
+   * Liefert die persönliche OverrideFrag-Liste des aktuell gewählten Absenders.
+   * 
+   * @author Matthias Benkmann (D-III-ITD-D101)
+   * 
+   * TESTED
+   */
+  /* package private */ConfigThingy getInitialOverrideFragMap()
+  {
+    ConfigThingy overrideFragConf = new ConfigThingy("overrideFrag");
+    if (overrideFragDbSpalte == null)
+    {
+      ConfigThingy overrideFragDbSpalteConf =
+        getWollmuxConf().query(OVERRIDE_FRAG_DB_SPALTE, 1);
+      try
+      {
+        overrideFragDbSpalte = overrideFragDbSpalteConf.getLastChild().toString();
+      }
+      catch (NodeNotFoundException x)
+      {
+        // keine OVERRIDE_FRAG_DB_SPALTE Direktive gefunden
+        overrideFragDbSpalte = "";
+      }
+    }
+
+    if (overrideFragDbSpalte.length() > 0)
+    {
+      try
+      {
+        Dataset ds = getDatasourceJoiner().getSelectedDatasetTransformed();
+        String value = ds.get(overrideFragDbSpalte);
+        if (value == null) value = "";
+        overrideFragConf = new ConfigThingy("overrideFrag", value);
+      }
+      catch (DatasetNotFoundException e)
+      {
+        Logger.log(L.m("Kein Absender ausgewählt => %1 bleibt wirkungslos",
+          OVERRIDE_FRAG_DB_SPALTE));
+      }
+      catch (ColumnNotFoundException e)
+      {
+        Logger.error(L.m("%2 spezifiziert Spalte '%1', die nicht vorhanden ist",
+          overrideFragDbSpalte, OVERRIDE_FRAG_DB_SPALTE), e);
+      }
+      catch (IOException x)
+      {
+        Logger.error(L.m("Fehler beim Parsen der %2 '%1'", overrideFragDbSpalte,
+          OVERRIDE_FRAG_DB_SPALTE), x);
+      }
+      catch (SyntaxErrorException x)
+      {
+        Logger.error(L.m("Fehler beim Parsen der %2 '%1'", overrideFragDbSpalte,
+          OVERRIDE_FRAG_DB_SPALTE), x);
+      }
+    }
+
+    return overrideFragConf;
   }
 
   /**
