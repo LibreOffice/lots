@@ -1,7 +1,7 @@
 #!/bin/sh
 
-if [ $# != 5 ]; then
-  echo 1>&2 "USAGE: makeversion <versionfile> <buildinfofile> <changelog> <descriptionxmlfile> <updatexmlfile>"
+if [ $# != 4 ]; then
+  echo 1>&2 "USAGE: makeversion <versionfile> <buildinfofile> <descriptionxmlfile> <updatexmlfile>"
   exit 1
 fi
 
@@ -23,15 +23,8 @@ v3=$(( $(echo ${date##*-}| sed 's/^0\?\(.*\)/\1/') / 10 ))
 version="$v1.$v2.$v3"
 echo "$version" >"$1" 
 echo "Version: $version, Revision: $rev" >"$2"
-echo "wollmux ($version) halut; urgency=low
 
-    * Version bump.
-
- -- Felix WollMux <wollmux-general@lists.forge.osor.eu>  Wed, 06 Jul 2007 16:13:16 +0200
-" >"$3"
-#echo "$(($(date +%Y) - 2004)).$(date +%m|sed s/^0//).$(($(date +%d|sed s/^0//) / 10))"
-
-cat >"$4" <<EOF
+cat >"$3" <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <description xmlns="http://openoffice.org/extensions/description/2006"
 	     xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -57,7 +50,7 @@ cat >"$4" <<EOF
 </description>
 EOF
 
-cat >"$5" <<EOF
+cat >"$4" <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <description xmlns="http://openoffice.org/extensions/update/2006"
 	     xmlns:xlink="http://www.w3.org/1999/xlink">
