@@ -60,6 +60,7 @@ import com.sun.star.container.XNameAccess;
 import com.sun.star.document.XEventListener;
 import com.sun.star.frame.XFrame;
 import com.sun.star.frame.XModel;
+import com.sun.star.lang.DisposedException;
 import com.sun.star.lang.EventObject;
 import com.sun.star.sdb.XDocumentDataSource;
 import com.sun.star.sdb.XOfficeDatabaseDocument;
@@ -1601,8 +1602,13 @@ public class MailMergeDatasource
     {
       UNO.XNameAccess(UNO.dbContext).getByName(newDsName);
     }
-    catch (Exception x) // typischerweise DisposedException
+    catch (DisposedException x)
     {
+      return;
+    }
+    catch (Exception x)
+    {
+      Logger.error(x);
       return;
     }
     if (newDsName.length() == 0) return;
