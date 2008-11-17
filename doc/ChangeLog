@@ -1,5 +1,16 @@
  ==================== Neu in dieser Version ====================
 
+    * Die neue Direktive OVERRIDE_FRAG_DB_SPALTE erlaubt es, Benutzer- und
+      Rollen-spezifische overrideFrag-Listen einzurichten. Ein Anwendungsfall
+      ist z.B. das Einrichten einer Rolle "Englisch", die in alle Vorlagen
+      englischsprachige Briefköpfe einbindet anstatt der deutschsprachigen.
+      Ein weiteres Beispiel wäre eine Rolle "total e-quality", die als Logo
+      immer das total e-quality Logo einbindet, auch wenn das Standardlogo ein
+      anderes ist.
+
+
+ ==================== Neu in Version 4.11.0 ====================
+
     * Hinweis: Die WollMux-Komponente wird jetzt nicht mehr als
       WollMux.uno.pkg, sondern WollMux.oxt zur Verfügung gestellt. Dies
       ermöglicht auch ein GUI-gesteuertes Update über den Extension Manager
@@ -10,6 +21,9 @@
       ist. Bei einer shared-Installation hat er diese typischerweise nicht. Es
       besteht also nicht das Risiko, dass ein unberechtigter Anwender
       selbstständig updatet.
+      (Sollte Ihr Verteilmechanismus noch nicht mit .oxt Dateien umgehen
+      können, ist es kein Problem, die WollMux.oxt einfach in WollMux.uno.pkg
+      umzubenennen.)
     * .class Dateien aus dem in der wollmux.conf spezifizierten CLASSPATH haben
       jetzt Vorrang vor WollMux-internen Klassen.
     * Die Verwendung der WollMux-internen Funktionen von
@@ -36,13 +50,6 @@
       Weise Teile der Absenderdaten transformieren.
     * Mit dem neuen Datenquellentyp_"overlay" lassen sich selektiv einzelne
       Spaltenwerte mit Werten aus einer anderen Datenquelle überschreiben.
-    * Die neue Direktive OVERRIDE_FRAG_DB_SPALTE erlaubt es, Benutzer- und
-      Rollen-spezifische overrideFrag-Listen einzurichten. Ein Anwendungsfall
-      ist z.B. das Einrichten einer Rolle "Englisch", die in alle Vorlagen
-      englischsprachige Briefköpfe einbindet anstatt der deutschsprachigen.
-      Ein weiteres Beispiel wäre eine Rolle "total e-quality", die als Logo
-      immer das total e-quality Logo einbindet, auch wenn das Standardlogo ein
-      anderes ist.
 
 
  ==================== Neu in Version 4.8.0 ====================
