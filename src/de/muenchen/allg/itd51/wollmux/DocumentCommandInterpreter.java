@@ -1243,7 +1243,7 @@ public class DocumentCommandInterpreter
         if (value == null) value = "";
 
         // ggf. TRAFO durchführen
-        value = model.getTranformedValue(value, cmd.getTrafoName(), false);
+        value = model.getTransformedValue(value, cmd.getTrafoName(), false);
       }
       catch (DatasetNotFoundException e)
       {

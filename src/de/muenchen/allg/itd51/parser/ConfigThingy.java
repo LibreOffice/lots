@@ -641,9 +641,9 @@ public class ConfigThingy implements Iterable<ConfigThingy>
   }
 
   /**
-   * Wie {@link #get(String)}, aber es wird grundsätzlich ein ConfigThingy mit Namen "<query
-   * results>" über die Resultate gesetzt. Im Falle, dass es keine Resultate gibt,
-   * wird nicht null sondern ein ConfigThingy ohne Kinder geliefert.
+   * Wie {@link #get(String)}, aber es wird grundsätzlich ein ConfigThingy mit Namen
+   * "&lt;query results>" über die Resultate gesetzt. Im Falle, dass es keine
+   * Resultate gibt, wird nicht null sondern ein ConfigThingy ohne Kinder geliefert.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */

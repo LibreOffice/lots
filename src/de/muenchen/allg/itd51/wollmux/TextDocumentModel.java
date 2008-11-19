@@ -657,7 +657,7 @@ public class TextDocumentModel
           // Wurde der Wert des Feldes gegenüber dem zusetzt gespeicherten Wert
           // verändert?
           String transformedLastStoredValue =
-            getTranformedValue(lastStoredValue, field.getTrafoName(), true);
+            getTransformedValue(lastStoredValue, field.getTrafoName(), true);
           if (!thisValue.equals(transformedLastStoredValue))
             allAreUnchanged = false;
 
@@ -1028,7 +1028,7 @@ public class TextDocumentModel
 
   /**
    * Liefert true, wenn das Dokument eine nicht leere Formularbeschreibung mit einem
-   * Fenster-Abschnitt enthält. In diesem Fall soll das die FormGUI gestartet werden.
+   * Fenster-Abschnitt enthält. In diesem Fall soll die FormGUI gestartet werden.
    */
   synchronized public boolean hasFormGUIWindow()
   {
@@ -1487,9 +1487,110 @@ public class TextDocumentModel
       formularConf = new ConfigThingy("WM");
       addToFormDescription(formularConf,
         persistentData.getData(DATA_ID_FORMULARBESCHREIBUNG));
+      formularConf = applyFormularanpassung(formularConf);
     }
 
     return formularConf;
+  }
+
+  /**
+   * Wendet alle matchenden "Formularanpassung"-Abschnitte in der Reihenfolge ihres
+   * auftretends in der wollmux,conf auf formularConf an und liefert das Ergebnis
+   * zurück. Achtung! Das zurückgelieferte Objekt kann das selbe Objekt sein wie das
+   * übergebene.
+   * 
+   * @param formularConf
+   *          ein "WM" Knoten unterhalb dessen sich eine normale Formularbeschreibung
+   *          befindet ("Formular" Knoten).
+   * 
+   * @author Matthias Benkmann (D-III-ITD-D101)
+   * 
+   * TESTED
+   */
+  private ConfigThingy applyFormularanpassung(ConfigThingy formularConf)
+  {
+    ConfigThingy anpassungen =
+      WollMuxSingleton.getInstance().getWollmuxConf().query("Formularanpassung", 1);
+    if (anpassungen.count() == 0) return formularConf;
+
+    try
+    {
+      ConfigThingy formularConfOld = formularConf;
+      formularConf = formularConf.getFirstChild(); // Formular-Knoten
+      if (!formularConf.getName().equals("Formular")) return formularConfOld;
+    }
+    catch (NodeNotFoundException x)
+    {
+      return formularConf;
+    }
+
+    process_anpassung: for (ConfigThingy conf : anpassungen)
+    {
+      ConfigThingy matches = conf.query("Match", 1);
+      for (ConfigThingy matchConf : matches)
+      {
+        for (ConfigThingy subMatchConf : matchConf)
+        {
+          if (!matches(formularConf, subMatchConf)) continue process_anpassung;
+        }
+      }
+
+      ConfigThingy formularAnpassung = conf.query("Formular", 1);
+      List<ConfigThingy> mergeForms = new ArrayList<ConfigThingy>(2);
+      mergeForms.add(formularConf);
+      String title = "";
+      try
+      {
+        title = formularConf.get("TITLE", 1).toString();
+      }
+      catch (Exception x)
+      {}
+      try
+      {
+        mergeForms.add(formularAnpassung.getFirstChild());
+      }
+      catch (NodeNotFoundException x)
+      {}
+      ConfigThingy buttonAnpassung = conf.query("Buttonanpassung");
+      if (buttonAnpassung.count() == 0) buttonAnpassung = null;
+      formularConf =
+        FormController.mergeFormDescriptors(mergeForms, buttonAnpassung, title);
+    }
+
+    ConfigThingy formularConfWithWM = new ConfigThingy("WM");
+    formularConfWithWM.addChild(formularConf);
+    return formularConfWithWM;
+  }
+
+  /**
+   * Liefert true, wenn der Baum, der durch conf dargestellt wird sich durch
+   * Herauslöschen von Knoten in den durch matchConf dargestellten Baum überführen
+   * lässt. Herauslöschen bedeutet in diesem Fall bei einem inneren Knoten, dass
+   * seine Kinder seinen Platz einnehmen.
+   * 
+   * Anmerkung: Die derzeitige Implementierung setzt die obige Spezifikation nicht
+   * korrekt um, da {@link ConfigThingy#query(String)} nur die Ergebnisse auf einer
+   * Ebene zurückliefert. In der Praxis sollten jedoch keine Fälle auftreten wo dies
+   * zum Problem wird.
+   * 
+   * @author Matthias Benkmann (D-III-ITD-D101)
+   * 
+   * TESTED
+   */
+  private boolean matches(ConfigThingy conf, ConfigThingy matchConf)
+  {
+    ConfigThingy resConf = conf.query(matchConf.getName());
+    if (resConf.count() == 0) return false;
+    testMatch: for (ConfigThingy subConf : resConf)
+    {
+      for (ConfigThingy subMatchConf : matchConf)
+      {
+        if (!matches(subConf, subMatchConf)) continue testMatch;
+      }
+
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -1883,7 +1984,7 @@ public class TextDocumentModel
         if (applyTrafo)
         {
           String trafoName = field.getTrafoName();
-          field.setValue(getTranformedValue(value, trafoName, useKnownFormValues));
+          field.setValue(getTransformedValue(value, trafoName, useKnownFormValues));
         }
         else
           field.setValue(value);
@@ -1995,7 +2096,7 @@ public class TextDocumentModel
    *         zurückgeliefert. Ist die Funktion trafoName nicht definiert, wird eine
    *         Fehlermeldung zurückgeliefert. TESTED
    */
-  public String getTranformedValue(String value, String trafoName,
+  public String getTransformedValue(String value, String trafoName,
       boolean useKnownFormValues)
   {
     String transformed = value;

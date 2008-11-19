@@ -97,10 +97,6 @@ import de.muenchen.allg.itd51.wollmux.func.Values;
  */
 public class FormController implements UIElementEventHandler
 {
-
-  public static final String MULTI_FORM_TITLE =
-    L.m("Mehrere Formulare gleichzeitig ausfüllen");
-
   /**
    * Wird and FormGUI und FormController in mapIdToPresetValue übergeben, wenn der
    * Wert des entsprechenden Feldes nicht korrekt widerhergestellt werden kann.
@@ -1640,34 +1636,37 @@ public class FormController implements UIElementEventHandler
    * enthaltener Formularbeschreibung ist, und liefert ein neues ConfigThingy zurück,
    * das eine gemergte Formularbeschreibung enthält. Beim Merge wird von Reitern mit
    * gleicher ID nur der letzte übernommen. Für die Reihenfolge wird die Reihenfolge
-   * des ersten Auftretens herangezogen. Der TITLE wird zu {@link #MULTI_FORM_TITLE}.
-   * Die Funktionen- und Funktionsdialoge-Abschnitte werden verschmolzen, wobei
-   * mehrfach auftretende Funktionen eine Fehlermeldung im Log produzieren (und die
-   * letzte Definition gewinnt). Selbiges gilt auch für die Sichtbarkeit-Abschnitte
+   * des ersten Auftretens herangezogen. Der TITLE wird zu newTitle. Die Funktionen-
+   * und Funktionsdialoge-Abschnitte werden verschmolzen, wobei mehrfach auftretende
+   * Funktionen eine Fehlermeldung im Log produzieren (und die letzte Definition
+   * gewinnt). Selbiges gilt auch für die Sichtbarkeit-Abschnitte
    * 
    * @param buttonAnpassung
    *          ein ButtonAnpassung-Abschnitt wie bei wollmux:Open dokumentiert, oder
-   *          null, wenn keine Anpassung erforderlich.
+   *          null, wenn keine Anpassung erforderlich. Der oberste Knoten muss nicht
+   *          Buttonanpassung sein. In der Tat ist es auch erlaubt, dass ein
+   *          &lt;query results> Knoten mit mehreren Buttonanpassung-Abschnitten
+   *          übergeben wird. Es ist nur wichtig, dass alle ...Tab-Abschnitte auf der
+   *          selben Höhe im Baum sind.
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
-  public static ConfigThingy mergeFormDescriptors(List<Object> desc,
-      ConfigThingy buttonAnpassung)
+  public static ConfigThingy mergeFormDescriptors(List<ConfigThingy> desc,
+      ConfigThingy buttonAnpassung, String newTitle)
   {
     if (buttonAnpassung == null)
       buttonAnpassung = new ConfigThingy("Buttonanpassung");
     String plausiColor = null;
-    Iterator<Object> iter = desc.iterator();
-    Map<String, Object> mapFensterIdToConfigThingy = new HashMap<String, Object>();
-    Map<String, Object> mapSichtbarkeitIdToConfigThingy =
-      new HashMap<String, Object>();
-    Map<String, Object> mapFunktionenIdToConfigThingy =
-      new HashMap<String, Object>();
-    Map<String, Object> mapFunktionsdialogeIdToConfigThingy =
-      new HashMap<String, Object>();
-    List<Object> tabNames = new Vector<Object>();
-    while (iter.hasNext())
+    Map<String, ConfigThingy> mapFensterIdToConfigThingy =
+      new HashMap<String, ConfigThingy>();
+    Map<String, ConfigThingy> mapSichtbarkeitIdToConfigThingy =
+      new HashMap<String, ConfigThingy>();
+    Map<String, ConfigThingy> mapFunktionenIdToConfigThingy =
+      new HashMap<String, ConfigThingy>();
+    Map<String, ConfigThingy> mapFunktionsdialogeIdToConfigThingy =
+      new HashMap<String, ConfigThingy>();
+    List<String> tabNames = new Vector<String>();
+    for (ConfigThingy conf : desc)
     {
-      ConfigThingy conf = (ConfigThingy) iter.next();
       try
       {
         plausiColor = conf.get("PLAUSI_MARKER_COLOR", 1).toString();
@@ -1684,17 +1683,16 @@ public class FormController implements UIElementEventHandler
     }
 
     ConfigThingy conf = new ConfigThingy("Formular");
-    conf.add("TITLE").add(MULTI_FORM_TITLE);
+    conf.add("TITLE").add(newTitle);
     if (plausiColor != null) conf.add("PLAUSI_MARKER_COLOR").add(plausiColor);
 
     ConfigThingy subConf = conf.add("Fenster");
     int tabNum = -1;
     if (tabNames.size() > 1) tabNum = 0;
-    iter = tabNames.iterator();
+    Iterator<String> iter = tabNames.iterator();
     while (iter.hasNext())
     {
-      ConfigThingy tabConf =
-        (ConfigThingy) mapFensterIdToConfigThingy.get(iter.next());
+      ConfigThingy tabConf = mapFensterIdToConfigThingy.get(iter.next());
       buttonAnpassung(tabNum, tabConf, buttonAnpassung);
       if (++tabNum == tabNames.size() - 1) tabNum = Integer.MAX_VALUE;
       subConf.addChild(tabConf);
@@ -1703,25 +1701,22 @@ public class FormController implements UIElementEventHandler
     if (!mapSichtbarkeitIdToConfigThingy.isEmpty())
     {
       subConf = conf.add("Sichtbarkeit");
-      iter = mapSichtbarkeitIdToConfigThingy.values().iterator();
-      while (iter.hasNext())
-        subConf.addChild((ConfigThingy) iter.next());
+      for (ConfigThingy conf2 : mapSichtbarkeitIdToConfigThingy.values())
+        subConf.addChild(conf2);
     }
 
     if (!mapFunktionenIdToConfigThingy.isEmpty())
     {
       subConf = conf.add("Funktionen");
-      iter = mapFunktionenIdToConfigThingy.values().iterator();
-      while (iter.hasNext())
-        subConf.addChild((ConfigThingy) iter.next());
+      for (ConfigThingy conf2 : mapFunktionenIdToConfigThingy.values())
+        subConf.addChild(conf2);
     }
 
     if (!mapFunktionsdialogeIdToConfigThingy.isEmpty())
     {
       subConf = conf.add("Funktionsdialoge");
-      iter = mapFunktionsdialogeIdToConfigThingy.values().iterator();
-      while (iter.hasNext())
-        subConf.addChild((ConfigThingy) iter.next());
+      for (ConfigThingy conf2 : mapFunktionsdialogeIdToConfigThingy.values())
+        subConf.addChild(conf2);
     }
 
     return conf;
@@ -1735,14 +1730,15 @@ public class FormController implements UIElementEventHandler
    * Ersetzung eines Mappings für einen Bezeichner durch ein neues Mapping
    * stattfindet.
    * 
-   * @param idList
+   * @param tabNames
    *          falls nicht null, so werden alle Namen von Enkeln, die noch nicht in
    *          idList enthalten sind dieser in der Reihenfolge ihres Auftretens
    *          hinzugefügt.
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   private static void mergeSection(ConfigThingy conf, String sectionName,
-      Map<String, Object> sectionMap, List<Object> idList, boolean duplicatesAllowed)
+      Map<String, ConfigThingy> mapFensterIdToConfigThingy, List<String> tabNames,
+      boolean duplicatesAllowed)
   {
     Iterator<ConfigThingy> parentIter = conf.query(sectionName).iterator();
     while (parentIter.hasNext())
@@ -1752,27 +1748,31 @@ public class FormController implements UIElementEventHandler
       {
         ConfigThingy node = iter.next();
         String name = node.getName();
-        if (idList != null && !idList.contains(name)) idList.add(name);
-        if (!duplicatesAllowed && sectionMap.containsKey(name))
+        if (tabNames != null && !tabNames.contains(name)) tabNames.add(name);
+        if (!duplicatesAllowed && mapFensterIdToConfigThingy.containsKey(name))
           Logger.error(L.m(
             "Fehler beim Zusammenfassen mehrerer Formulare zum gemeinsamen Ausfüllen: Mehrere \"%1\" Abschnitte enthalten \"%2\"",
             sectionName, name));
 
-        sectionMap.put(name, new ConfigThingy(node));
+        mapFensterIdToConfigThingy.put(name, new ConfigThingy(node));
       }
     }
   }
 
   /**
    * Passt die in tabConf gespeicherte Beschreibung eines Reiters einer FormularGUI
-   * an entsprechend dem ButtonAnpassung-Abschnitt in buttonAnpassung.
+   * an entsprechend dem Buttonanpassung-Abschnitt in buttonAnpassung. Der oberste
+   * Knoten muss nicht Buttonanpassung sein. In der Tat ist es auch erlaubt, dass ein
+   * &lt;query results> Knoten mit mehreren Buttonanpassung-Abschnitten übergeben
+   * wird. Es ist nur wichtig, dass alle ...Tab-Abschnitte auf der selben Höhe im
+   * Baum sind.
    * 
    * @param tabNum
    *          0: tabConf beschreibt den ersten Tab, Integer.MAX_VALUE: tabConf
    *          beschreibt den letzten Tab, -1: tabConf beschreibt den einzigen Tab.
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
-  public static void buttonAnpassung(int tabNum, ConfigThingy tabConf,
+  private static void buttonAnpassung(int tabNum, ConfigThingy tabConf,
       ConfigThingy buttonAnpassung)
   {
     ConfigThingy anpassung;
@@ -1793,7 +1793,7 @@ public class FormController implements UIElementEventHandler
     }
 
     /*
-     * Kopie machen, da wir evtl. Veränderungenv vornehmen (z.B. "ALWAYS" entfernen)
+     * Kopie machen, da wir evtl. Veränderungen vornehmen (z.B. "ALWAYS" entfernen)
      */
     anpassung = new ConfigThingy(anpassung);
 
@@ -1829,7 +1829,7 @@ public class FormController implements UIElementEventHandler
           catch (Exception x)
           {
             Logger.error(
-              L.m("Fehlerhafter ALWAYS-Angabe in ButtonAnpassung-Abschnitt"), x);
+              L.m("Fehlerhafter ALWAYS-Angabe in Buttonanpassung-Abschnitt"), x);
           }
         }
       }
@@ -1996,10 +1996,11 @@ public class FormController implements UIElementEventHandler
     ConfigThingy merge1Conf = new ConfigThingy("", merge1URL).get("Formular");
     ConfigThingy merge2Conf = new ConfigThingy("", merge2URL).get("Formular");
     ConfigThingy buttonanpassung = new ConfigThingy("Buttonanpassung", anpassungURL);
-    List<Object> formDesc = new Vector<Object>();
+    List<ConfigThingy> formDesc = new Vector<ConfigThingy>();
     formDesc.add(merge1Conf);
     formDesc.add(merge2Conf);
-    ConfigThingy merged = mergeFormDescriptors(formDesc, buttonanpassung);
+    ConfigThingy merged =
+      mergeFormDescriptors(formDesc, buttonanpassung, "Multi-Form");
     System.out.println(merged.stringRepresentation());
   }
 

@@ -54,6 +54,9 @@ import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 public class FormModelImpl
 {
 
+  public static final String MULTI_FORM_TITLE =
+    L.m("Mehrere Formulare gleichzeitig ausfüllen");
+
   /**
    * Erzeugt ein FormModel für ein einfaches Formular mit genau einem zugehörigen
    * Formulardokument.
@@ -114,7 +117,7 @@ public class FormModelImpl
   {
 
     // Formular-Abschnitte aller TextDocumentModels sammeln...
-    ArrayList<Object> formularSections = new ArrayList<Object>();
+    ArrayList<ConfigThingy> formularSections = new ArrayList<ConfigThingy>();
     for (Iterator<TextDocumentModel> iter = docs.iterator(); iter.hasNext();)
     {
       TextDocumentModel model = iter.next();
@@ -132,7 +135,8 @@ public class FormModelImpl
 
     // ...und mergen
     ConfigThingy formConf =
-      FormController.mergeFormDescriptors(formularSections, buttonAnpassung);
+      FormController.mergeFormDescriptors(formularSections, buttonAnpassung,
+        MULTI_FORM_TITLE);
 
     // mapIdToPresetValue aller Einzeldokumente vereinheitlichen:
     HashMap<String, String> commonMapIdToPresetValue = new HashMap<String, String>();
