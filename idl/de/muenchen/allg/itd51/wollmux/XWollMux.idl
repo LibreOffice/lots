@@ -28,6 +28,7 @@
 
 #include "XPALChangeEventBroadcaster.idl"
 #include <com/sun/star/document/XEventBroadcaster.idl>
+#include <com/sun/star/text/XTextDocument.idl>
  
 module de {  module muenchen {  module allg { module itd51 { module wollmux {
 
@@ -101,6 +102,36 @@ interface XWollMux
               Absenders oder "", wenn der Wert nicht bestimmt werden kann.
      */	
     string getValue([in] string dbSpalte);
+
+    /**
+      Nimmt die Druckfunktion functionName in die Liste der Druckfunktionen des
+      Dokuments doc auf. Die Druckfunktion wird dabei automatisch aktiv, wenn das
+      Dokument das nächste mal mit Datei->Drucken gedruckt werden soll. Ist die
+      Druckfunktion bereits in der Liste der Druckfunktionen des Dokuments enthalten,
+      so geschieht nichts.
+      
+      @param doc
+               Das Dokument, dem die Druckfunktion functionName hinzugefügt werden
+               soll.
+      @param functionName
+               der Name einer Druckfunktion, die im Abschnitt "Druckfunktionen" der
+               WollMux-Konfiguration definiert sein muss.
+     */     
+    void addPrintFunction([in] com::sun::star::text::XTextDocument doc, [in] string functionName);
+
+    /**
+      Löscht die Druckfunktion functionName aus der Liste der Druckfunktionen des
+      Dokuments doc. Die Druckfunktion wird damit ab dem nächsten Aufruf von
+      Datei->Drucken nicht mehr aufgerufen. Ist die Druckfunktion nicht in der Liste
+      der Druckfunktionen des Dokuments enthalten, so geschieht nichts.
+      
+      @param doc
+               Das Dokument, dem die Druckfunktion functionName genommen werden soll.
+      @param functionName
+               der Name einer Druckfunktion, die im Dokument gesetzt ist.
+     */
+    void removePrintFunction([in] com::sun::star::text::XTextDocument doc, [in] string functionName);
+    
 }; 
   
 service WollMux: XWollMux;

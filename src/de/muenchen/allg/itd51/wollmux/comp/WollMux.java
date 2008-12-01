@@ -45,6 +45,7 @@ import com.sun.star.lang.XSingleComponentFactory;
 import com.sun.star.lib.uno.helper.Factory;
 import com.sun.star.lib.uno.helper.WeakBase;
 import com.sun.star.registry.XRegistryKey;
+import com.sun.star.text.XTextDocument;
 import com.sun.star.uno.XComponentContext;
 
 import de.muenchen.allg.itd51.wollmux.DispatchHandler;
@@ -338,5 +339,44 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
       Logger.error(e);
       return "";
     }
+  }
+
+  /**
+   * Nimmt die Druckfunktion functionName in die Liste der Druckfunktionen des
+   * Dokuments doc auf. Die Druckfunktion wird dabei automatisch aktiv, wenn das
+   * Dokument das nächste mal mit Datei->Drucken gedruckt werden soll. Ist die
+   * Druckfunktion bereits in der Liste der Druckfunktionen des Dokuments enthalten,
+   * so geschieht nichts.
+   * 
+   * @param doc
+   *          Das Dokument, dem die Druckfunktion functionName hinzugefügt werden
+   *          soll.
+   * @param functionName
+   *          der Name einer Druckfunktion, die im Abschnitt "Druckfunktionen" der
+   *          WollMux-Konfiguration definiert sein muss.
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101)
+   */
+  public void addPrintFunction(XTextDocument doc, String functionName)
+  {
+    WollMuxEventHandler.handleManagePrintFunction(doc, functionName, false);
+  }
+
+  /**
+   * Löscht die Druckfunktion functionName aus der Liste der Druckfunktionen des
+   * Dokuments doc. Die Druckfunktion wird damit ab dem nächsten Aufruf von
+   * Datei->Drucken nicht mehr aufgerufen. Ist die Druckfunktion nicht in der Liste
+   * der Druckfunktionen des Dokuments enthalten, so geschieht nichts.
+   * 
+   * @param doc
+   *          Das Dokument, dem die Druckfunktion functionName genommen werden soll.
+   * @param functionName
+   *          der Name einer Druckfunktion, die im Dokument gesetzt ist.
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101)
+   */
+  public void removePrintFunction(XTextDocument doc, String functionName)
+  {
+    WollMuxEventHandler.handleManagePrintFunction(doc, functionName, true);
   }
 }

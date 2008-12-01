@@ -2826,6 +2826,65 @@ public class WollMuxEventHandler
   // *******************************************************************************************
 
   /**
+   * Diese Methode erzeugt ein neues WollMux-Event über das die Liste der dem
+   * Dokument doc zugeordneten Druckfunktionen verwaltet werden kann; ist
+   * remove==false, so wird die Druckfunktion functionName in die Liste der
+   * Druckfunktionen für dieses Dokument aufgenommen; ist remove==true, so wird die
+   * Druckfunktion aus der Liste entfernt.
+   * 
+   * @param doc
+   *          beschreibt das Dokument dessen Druckfunktionen verwaltet werden sollen.
+   * @param functionName
+   *          der Name der Druckfunktion, die hinzugefügt oder entfernt werden soll.
+   * @param remove
+   *          ist remove==false, so wird die Druckfunktion functionName in die Liste
+   *          der Druckfunktionen für dieses Dokument aufgenommen; ist remove==true,
+   *          so wird die Druckfunktion aus der Liste entfernt.
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101)
+   */
+  public static void handleManagePrintFunction(XTextDocument doc,
+      String functionName, boolean remove)
+  {
+    handle(new OnManagePrintFunction(doc, functionName, remove));
+  }
+
+  private static class OnManagePrintFunction extends BasicEvent
+  {
+    private XTextDocument doc;
+
+    private String functionName;
+
+    private boolean remove;
+
+    public OnManagePrintFunction(XTextDocument doc, String functionName,
+        boolean remove)
+    {
+      this.doc = doc;
+      this.functionName = functionName;
+      this.remove = remove;
+    }
+
+    protected void doit() throws WollMuxFehlerException
+    {
+      TextDocumentModel model =
+        WollMuxSingleton.getInstance().getTextDocumentModel(doc);
+      if (remove)
+        model.removePrintFunction(functionName);
+      else
+        model.addPrintFunction(functionName);
+    }
+
+    public String toString()
+    {
+      return this.getClass().getSimpleName() + "(#" + doc.hashCode() + ", '"
+        + functionName + "', remove=" + remove + ")";
+    }
+  }
+
+  // *******************************************************************************************
+
+  /**
    * Erzeugt ein neues WollMuxEvent, das signasisiert, dass eine weitere Ziffer der
    * Sachleitenden Verfügungen eingefügt werden, bzw. eine bestehende Ziffer gelöscht
    * werden soll.
