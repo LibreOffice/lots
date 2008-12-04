@@ -41,14 +41,19 @@ import java.util.List;
 
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.comp.helper.Bootstrap;
+import com.sun.star.container.XEnumeration;
+import com.sun.star.frame.TerminationVetoException;
+import com.sun.star.frame.XDesktop;
 import com.sun.star.frame.XDispatch;
 import com.sun.star.frame.XDispatchProvider;
+import com.sun.star.frame.XTerminateListener2;
 import com.sun.star.lang.DisposedException;
 import com.sun.star.lang.EventObject;
 import com.sun.star.lang.XMultiServiceFactory;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
 
+import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
@@ -81,6 +86,18 @@ public class WollMuxBarEventHandler
    * von OOo während die WollMuxBar läuft klarkommt.
    */
   private Object remoteWollMux;
+
+  /**
+   * Falls nicht null, so ist dies der Desktop auf dem eventuell ein
+   * TerminateListener registriert ist.
+   */
+  private XDesktop desktop;
+
+  /**
+   * Falls nicht null, so ist dieser TerminateListener auf {@link #desktop}
+   * registriert.
+   */
+  private XTerminateListener2 terminateListener;
 
   /**
    * Dieses Objekt wird beim WollMux als {@link XPALChangeEventListener} registriert.
@@ -322,6 +339,8 @@ public class WollMuxBarEventHandler
     {
       XWollMux mux = getRemoteWollMux(false);
       if (mux != null) mux.removePALChangeEventListener(myPALChangeEventListener);
+      if (desktop != null && terminateListener != null)
+        desktop.removeTerminateListener(terminateListener);
     }
   }
 
@@ -444,6 +463,8 @@ public class WollMuxBarEventHandler
       catch (DisposedException e)
       {
         remoteWollMux = null;
+        desktop = null;
+        terminateListener = null;
       }
     }
 
@@ -463,6 +484,9 @@ public class WollMuxBarEventHandler
           WollMuxFiles.getWollmuxConf().stringRepresentation().hashCode();
         mux.addPALChangeEventListenerWithConsistencyCheck(myPALChangeEventListener,
           wmConfHashCode);
+
+        installQuickstarter(factory);
+
         return mux;
       }
       catch (Exception e)
@@ -486,4 +510,83 @@ public class WollMuxBarEventHandler
 
     return null;
   }
+
+  private void installQuickstarter(XMultiServiceFactory factory) throws Exception
+  {
+    desktop = null;
+    terminateListener = null;
+    if (!wollmuxbar.isQuickstarterEnabled()) return;
+    desktop =
+      (XDesktop) UnoRuntime.queryInterface(XDesktop.class,
+        factory.createInstance("com.sun.star.frame.Desktop"));
+    terminateListener = new XTerminateListener2()
+    {
+
+      public void cancelTermination(EventObject arg0)
+      {
+        Logger.debug("cancelTermination");
+      }
+
+      public void notifyTermination(EventObject arg0)
+      {
+        Logger.debug("notifyTermination");
+      }
+
+      public void queryTermination(EventObject arg0) throws TerminationVetoException
+      {
+        Logger.debug("queryTermination");
+        /*
+         * Because of issue
+         * 
+         * http://www.openoffice.org/issues/show_bug.cgi?id=65942
+         * 
+         * OOo does not allow the user to close the last window if termination is
+         * vetoed. So we close all windows for him.
+         */
+        try
+        {
+          XEnumeration xenu = desktop.getComponents().createEnumeration();
+          while (xenu.hasMoreElements())
+          {
+            Object compo = xenu.nextElement();
+            try
+            { /*
+               * First see if the component itself offers a close function
+               */
+              UNO.XCloseable(compo).close(true);
+            }
+            catch (Exception x)
+            {
+              Logger.debug("Konnte Komponente nicht schließen. Versuche es über den Frame nochmal");
+              try
+              {
+                /*
+                 * Okay, so the component can't be closed. Maybe it has a frame that
+                 * we can close.
+                 */
+                UNO.XCloseable(UNO.XController(compo).getFrame()).close(true);
+              }
+              catch (Exception y)
+              {
+                Logger.error("Konnte Komponente weder direkt noch über den Frame schließen");
+              }
+            }
+          }
+        }
+        catch (Throwable x)
+        {
+          x.printStackTrace();
+        }
+        throw new TerminationVetoException();
+      }
+
+      public void disposing(EventObject arg0)
+      {
+        Logger.debug("disposing");
+      }
+    };
+
+    desktop.addTerminateListener(terminateListener);
+  }
+
 }

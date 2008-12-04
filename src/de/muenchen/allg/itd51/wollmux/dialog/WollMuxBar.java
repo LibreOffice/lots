@@ -188,6 +188,11 @@ public class WollMuxBar
   private int windowMode;
 
   /**
+   * Falls true, so agiert die WollMuxBar als OOo-Quickstarter.
+   */
+  private boolean quickstarterEnabled = false;
+
+  /**
    * Dient der thread-safen Kommunikation mit dem entfernten WollMux.
    */
   private WollMuxBarEventHandler eventHandler;
@@ -386,11 +391,14 @@ public class WollMuxBar
    *          Anzeigemodus, z.B. {@link #UP_AND_AWAY_WINDOW_MODE}.
    * @param conf
    *          der Inhalt der wollmux.conf
+   * @param quickstarter
+   *          falls true wird die WollMuxBar als OOo-Quickstarter agieren.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public WollMuxBar(int winMode, final ConfigThingy conf)
+  public WollMuxBar(int winMode, final ConfigThingy conf, boolean quickstarter)
   {
     windowMode = winMode;
+    quickstarterEnabled = quickstarter;
 
     parseExternalApplications(conf.query("ExterneAnwendungen"));
 
@@ -1694,6 +1702,16 @@ public class WollMuxBar
     }
   }
 
+  /**
+   * Liefert true, gdw die WollMuxBar als Quickstarter agiert.
+   * 
+   * @author Matthias Benkmann (D-III-ITD-D101)
+   */
+  boolean isQuickstarterEnabled()
+  {
+    return quickstarterEnabled;
+  }
+
   private static class ExternalApplication
   {
     public boolean downloadUrl = false;
@@ -1987,30 +2005,39 @@ public class WollMuxBar
   public static void main(String[] args)
   {
     Integer windowMode = null;
+    boolean quickstarter = false;
     if (args.length > 0)
     {
-      if (args[0].equals("--minimize"))
-        windowMode = MINIMIZE_TO_TASKBAR_MODE;
-      else if (args[0].equals("--topbar"))
-        windowMode = ALWAYS_ON_TOP_WINDOW_MODE;
-      else if (args[0].equals("--normalwindow"))
-        windowMode = NORMAL_WINDOW_MODE;
-      else if (args[0].equals("--load"))
+      if (args[0].equals("--load"))
       {
-        if (args.length < 2 || args[1].length() == 0) System.exit(0);
+        if (args.length != 2)
+        {
+          System.err.println(L.m("--load erwartet genau einen weiteren Parameter!"));
+          System.exit(1);
+        }
+
+        if (args[1].length() == 0) System.exit(0);
         load(args[1]);
-      }
-      else
-      {
-        System.err.println(L.m("Unbekannter Aufrufparameter: %1", args[0]));
-        System.exit(1);
+        System.exit(1); // sollte nie erreicht werden, da load() exit() aufruft.
       }
 
-      if (args.length > 1)
+      for (String arg : args)
       {
-        System.err.println(L.m("Zu viele Aufrufparameter!"));
-        System.exit(1);
+        if (arg.equals("--minimize"))
+          windowMode = MINIMIZE_TO_TASKBAR_MODE;
+        else if (arg.equals("--topbar"))
+          windowMode = ALWAYS_ON_TOP_WINDOW_MODE;
+        else if (arg.equals("--normalwindow"))
+          windowMode = NORMAL_WINDOW_MODE;
+        else if (arg.equals("--quickstarter"))
+          quickstarter = true;
+        else
+        {
+          System.err.println(L.m("Unbekannter Aufrufparameter: %1", arg));
+          System.exit(1);
+        }
       }
+
     }
 
     WollMuxFiles.setupWollMuxDir();
@@ -2050,7 +2077,7 @@ public class WollMuxBar
           L.m("Fehlerhafte Konfiguration"), JOptionPane.ERROR_MESSAGE);
       }
       else
-        new WollMuxBar(windowMode, wollmuxConf);
+        new WollMuxBar(windowMode, wollmuxConf, quickstarter);
 
     }
     catch (Exception x)
