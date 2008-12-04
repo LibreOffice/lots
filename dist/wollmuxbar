@@ -5,4 +5,4 @@ case "_$1" in
   _) ;;
   *) set -- --load "$@" ;;
 esac
-exec java -jar "${JAR_FILE}" "$@"
+exec java -jar "${JAR_FILE}" --quickstarter "$@"
