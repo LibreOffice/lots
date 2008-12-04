@@ -261,7 +261,7 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 		</jar>
 	</target>
 	
-	<target name="WollMux.uno.jar" depends="compileidl, makeversion">
+	<target name="WollMux.uno.jar" depends="compile, compileidl, makeversion">
 		<delete file="${WollMux_COMPJAR}" />
 		<jar destfile="${WollMux_COMPJAR}">
 			<fileset dir="${BIN}" includes="**/*.class"/>
