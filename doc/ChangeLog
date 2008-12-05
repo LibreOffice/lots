@@ -1,5 +1,11 @@
  ==================== Neu in dieser Version ====================
 
+    * Die WollMuxBar akzeptiert jetzt ein Kommandozeilenargument --
+      quickstarter. Wird dieses übergeben agiert die WollMuxBar als
+      OpenOffice.org Quickstarter, d.h. OOo bleibt permanent im Hintergrund im
+      Speicher, auch wenn das letzte Fenster geschlossen wird. Dieses Feature
+      ist primär unter Linux von Interesse, da hier der Standard-Quickstarter
+      von OOo nicht zur Verfügung steht.
     * Die neue Direktive OVERRIDE_FRAG_DB_SPALTE erlaubt es, Benutzer- und
       Rollen-spezifische overrideFrag-Listen einzurichten. Ein Anwendungsfall
       ist z.B. das Einrichten einer Rolle "Englisch", die in alle Vorlagen
@@ -7,6 +13,17 @@
       Ein weiteres Beispiel wäre eine Rolle "total e-quality", die als Logo
       immer das total e-quality Logo einbindet, auch wenn das Standardlogo ein
       anderes ist.
+    * Mit Hilfe eines Formularanpassung-Abschnitts kann jetzt der
+      Empfängerauswahl-Reiter für alle Formulare zentral über die
+      wollmux.conf vorgegeben werden. Dadurch entfällt das Anpassen aller
+      Vorlagen, wenn z.B. ein neuer Zustellvermerk hinzukommt.
+    * Mit Hilfe eines Formularanpassung-Abschnitts kann jetzt das Vorhandensein
+      der "Drucken.." und "PDF.." Buttons für alle Formulare zentral über die
+      wollmux.conf gesteuert werden.
+
+    * Dem Interface XWollMux wurden die neuen_Funktionen addPrintFunction(doc,
+      printFunctionName) und removePrintFunction(doc, printFunctionName)
+      hinzugefügt.
 
 
  ==================== Neu in Version 4.11.0 ====================
@@ -44,12 +61,13 @@
       Zeichen "#" enthalten. Damit lassen sich links wie http://
       intranet.muenchen.de/basis/formulare/personal/geld/sonstige/
       index.html#Arbeitsplatzbeschreibung in die WollMux-Leiste aufnehmen.
-    * Der WollMux lässt sich jetzt auch mit OpenOffice.org 3.0 verwenden.
     * Über den neuen Konfigurationsabschnitt_AbsenderdatenSpaltenumsetzung und
       den neuen Datenquellentyp_"funky" lassen sich auf vielfältige Art und
       Weise Teile der Absenderdaten transformieren.
     * Mit dem neuen Datenquellentyp_"overlay" lassen sich selektiv einzelne
       Spaltenwerte mit Werten aus einer anderen Datenquelle überschreiben.
+
+    * Der WollMux lässt sich jetzt auch mit OpenOffice.org 3.0 verwenden.
 
 
  ==================== Neu in Version 4.8.0 ====================
@@ -102,6 +120,7 @@
       erscheinen auf dem Reiter Einfügungen.
 
 
+
  ==================== Neu in Version 4.5.2 ====================
 
     * Mit Versionen 3.11.1 bis 4.3.3 gespeicherte Dokumente mit SLV können auf
@@ -145,6 +164,7 @@
       zugehörige WollMux-Standardkonfig 4.x.y (x>3) vorausgesetzt. Alternativ
       können Sie einfach die neue funktionen.conf in Ihre Konfiguration
       einspielen.
+
 
 
  ==================== Neu in Version 3.11.1 ====================
@@ -255,6 +275,7 @@
             Endbenutzerarbeitsplätze ist also nicht erforderlich.
 
 
+
  ==================== Neu in Version 3.8.0 ====================
 
     * Vermeidung von potentiellen Fehlern nach Konfigurationsänderungen: Wenn
@@ -325,6 +346,7 @@
       verfügbaren Standardkonfiguration enthalten ist. Wenn Sie diese Funktion
       aktivieren möchten, dann wenden Sie sich bitte an D-III-ITD-5.1. Wir
       bieten dann die entsprechende Hilfestellung
+
 
 
  ==================== Neu in Version 3.5.0 ====================
@@ -440,6 +462,7 @@
       mit dem neuen WollMux zusammen arbeitet.
 
 
+
  ==================== Neu in Version 1.5.0 ====================
 
     * Das Textbausteinsystem steht (erstmalig) zur Verfügung. Über eine
@@ -515,6 +538,7 @@
       (normalerweise Drucken).
 
 
+
  ==================== Neu in Version 1.4.2 ====================
 
     * FormularMax_4000: Sichtbarkeit-Abschnitt wird nicht mehr gelöscht, d.h.
@@ -533,10 +557,12 @@
       Standardsymbole von OpenOffice mehr.
 
 
+
  ==================== Neu in Version 1.4.1 ====================
 
     * Kritischer Fehler von Version 1.4.0 behoben: Öffnen einer Mischvorlage
       expandiert den Briefkopf nicht.
+
 
 
  ==================== Neu in Version 1.4.0 ====================
@@ -599,6 +625,7 @@
       (Anzahl Zeilen)
 
 
+
  ==================== Neu in Version 1.3.2 ====================
 
     * Behebung kritischer Fehler beim Öffnen von Vorlagen.
@@ -609,10 +636,12 @@
     * Diverse sonstige Verbesserungen des FormularMax 4000
 
 
+
  ==================== Neu in Version 1.3.1 ====================
 
     * Der FormularMax4000 ermöglicht jetzt auch die Bearbeitung von Labels und
       das Hinzufügen von Tabs.
+
 
 
  ==================== Neu in Version 1.3.0 ====================
@@ -649,12 +678,14 @@
       WollMux/Call/functionDialogEmpfaengerauswahl.
 
 
+
  ==================== Neu in Version 1.2.0 ====================
 
     * Das Formularsystem steht (erstmals) zur Verfügung
     * Über die Dokumentkommandos_"setType" können Sie steuern, ob ein
       Dokument bzw. eine Vorlage wie eine Vorlage, wie eine Vorlage für eine
       Vorlage oder als Formulardokument behandelt werden soll.
+
 
 
  ==================== Neu in Version 0.96.0 ====================
@@ -700,9 +731,26 @@
       Briefköpfe) enthalten nun keine versteckten Leerzeichen mehr.
 
 
+
  ==================== Neu in Version 0.95.0 ====================
 
     * Unterstützung von Umlauten in URLs
     * In der Menübeschreibung wird eine neue ACTION "openDocument"
       unterstützt, die ein Fragment direkt zum Bearbeiten öffnet anstatt es
       als Vorlage für ein neues Dokument "UnbenanntX" zu verwenden.
+
+Use of uninitialized value in print at misc/makechangelog line 56, <$in> line 1414.
+Use of uninitialized value in print at misc/makechangelog line 56, <$in> line 1414.
+Use of uninitialized value in print at misc/makechangelog line 56, <$in> line 1414.
+Use of uninitialized value in print at misc/makechangelog line 56, <$in> line 1414.
+Use of uninitialized value in print at misc/makechangelog line 56, <$in> line 1414.
+Use of uninitialized value in print at misc/makechangelog line 56, <$in> line 1414.
+Use of uninitialized value in print at misc/makechangelog line 56, <$in> line 1414.
+Use of uninitialized value in print at misc/makechangelog line 56, <$in> line 1414.
+Use of uninitialized value in print at misc/makechangelog line 56, <$in> line 1414.
+Use of uninitialized value in print at misc/makechangelog line 56, <$in> line 1414.
+Use of uninitialized value in print at misc/makechangelog line 56, <$in> line 1414.
+Use of uninitialized value in print at misc/makechangelog line 56, <$in> line 1414.
+Use of uninitialized value in print at misc/makechangelog line 56, <$in> line 1414.
+Use of uninitialized value in print at misc/makechangelog line 56, <$in> line 1414.
+Use of uninitialized value in print at misc/makechangelog line 56, <$in> line 1414.
