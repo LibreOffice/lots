@@ -498,14 +498,20 @@ public class DocumentCommandInterpreter
      */
     private void removeGarbage()
     {
-      model.setLockControllers(true);
-      Iterator<Muellmann> iter = muellmaenner.iterator();
-      while (iter.hasNext())
+      try
       {
-        Muellmann muellmann = iter.next();
-        muellmann.tueDeinePflicht();
+        model.setLockControllers(true);
+        Iterator<Muellmann> iter = muellmaenner.iterator();
+        while (iter.hasNext())
+        {
+          Muellmann muellmann = iter.next();
+          muellmann.tueDeinePflicht();
+        }
       }
-      model.setLockControllers(false);
+      finally
+      {
+        model.setLockControllers(false);
+      }
     }
 
     public int executeCommand(InsertFrag cmd)
@@ -1184,13 +1190,18 @@ public class DocumentCommandInterpreter
      */
     private int execute(DocumentCommands commands)
     {
-      model.setLockControllers(true);
+      try
+      {
+        model.setLockControllers(true);
 
-      int errors = executeAll(commands);
+        int errors = executeAll(commands);
 
-      model.setLockControllers(false);
-
-      return errors;
+        return errors;
+      }
+      finally
+      {
+        model.setLockControllers(false);
+      }
     }
 
     /**
@@ -1284,13 +1295,19 @@ public class DocumentCommandInterpreter
      */
     private int execute(DocumentCommands commands)
     {
-      model.setLockControllers(true);
+      try
+      {
+        model.setLockControllers(true);
 
-      int errors = executeAll(commands);
+        int errors = executeAll(commands);
 
-      model.setLockControllers(false);
+        return errors;
+      }
+      finally
+      {
+        model.setLockControllers(false);
+      }
 
-      return errors;
     }
 
     /**

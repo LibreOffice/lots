@@ -844,32 +844,36 @@ public class MailMergeNew
         // Wenn wir in ein Gesamtdokument drucken, erzeugen wir dieses hier und
         // verwenden lockControllers() um die Performance etwas zu steigern.
         XTextDocument outputDoc = null;
-        if (mailMergeType == MailMergeType.SINGLE_FILE)
+        try
         {
-          try
+          if (mailMergeType == MailMergeType.SINGLE_FILE)
           {
-            outputDoc = StandardPrint.createNewTargetDocument(pmod, true);
-            outputDoc.lockControllers();
+            try
+            {
+              outputDoc = StandardPrint.createNewTargetDocument(pmod, true);
+              outputDoc.lockControllers();
+            }
+            catch (java.lang.Exception e)
+            {
+              Logger.error(e);
+            }
           }
-          catch (java.lang.Exception e)
+
+          mod.setFormFieldsPreviewMode(true);
+          pmod.printWithProps();
+          mod.setFormFieldsPreviewMode(previewMode);
+        }
+        finally
+        {
+          // lockControllers des Gesamtdokuments aufheben und das Gesamtdokument
+          // anzeigen.
+          if (outputDoc != null)
           {
-            Logger.error(e);
+            outputDoc.unlockControllers();
+            outputDoc.getCurrentController().getFrame().getContainerWindow().setVisible(
+              true);
           }
         }
-
-        mod.setFormFieldsPreviewMode(true);
-        pmod.printWithProps();
-        mod.setFormFieldsPreviewMode(previewMode);
-
-        // lockControllers des Gesamtdokuments aufheben und das Gesamtdokument
-        // anzeigen.
-        if (outputDoc != null)
-        {
-          outputDoc.unlockControllers();
-          outputDoc.getCurrentController().getFrame().getContainerWindow().setVisible(
-            true);
-        }
-
         long duration = (System.currentTimeMillis() - startTime) / 1000;
         Logger.debug(L.m("printIntoFile finished after %1 seconds", duration));
       }
