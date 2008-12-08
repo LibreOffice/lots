@@ -53,7 +53,7 @@ for my $version (reverse sort versionsort keys %$oldversions)
   {
     print "\n\n", " " x 1,"=" x 20, " Neu in $version ", "=" x 20;
     print $oldversions->{$version}->{"Release Notes"}->{"text"};
-    print $oldversions->{$version}->{"Release Notes Erweitert"}->{"text"};
+    print $oldversions->{$version}->{"Release Notes Erweitert"}->{"text"} if defined($oldversions->{$version}->{"Release Notes Erweitert"});
   }
 }
 
