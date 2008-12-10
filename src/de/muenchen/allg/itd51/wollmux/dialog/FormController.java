@@ -59,6 +59,8 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -1397,6 +1399,23 @@ public class FormController implements UIElementEventHandler
     {
       UIElement ele = uiElementIter.next();
       UIElementState state = (UIElementState) ele.getAdditionalData();
+      boolean oldElementVisible =
+        state.invisibleGroups == null || state.invisibleGroups.isEmpty();
+
+      if (visible)
+      {
+        if (state.invisibleGroups != null) state.invisibleGroups.remove(group);
+      }
+      else
+      {
+        if (state.invisibleGroups == null)
+          state.invisibleGroups = new ArrayList<Group>(1);
+        if (!state.invisibleGroups.contains(group))
+          state.invisibleGroups.add(group);
+      }
+
+      boolean newElementVisible =
+        state.invisibleGroups == null || state.invisibleGroups.isEmpty();
 
       /*
        * Der folgende Test ist erforderlich, weil Elemente mehreren Gruppen angehören
@@ -1405,13 +1424,12 @@ public class FormController implements UIElementEventHandler
        * geändert hat, dann darf weder increaseTabVisibleCount() noch
        * decreaseTabVisibleCount() aufgerufen werden.
        */
-      if (state.visible != group.visible)
+      if (oldElementVisible != newElementVisible)
       {
-        ele.setVisible(group.visible);
-        state.visible = group.visible;
+        ele.setVisible(newElementVisible);
         if (!ele.isStatic())
         {
-          if (state.visible)
+          if (newElementVisible)
             increaseTabVisibleCount(state.tabIndex);
           else
             decreaseTabVisibleCount(state.tabIndex);
@@ -1592,9 +1610,11 @@ public class FormController implements UIElementEventHandler
     public int tabIndex = -1;
 
     /**
-     * true, wenn das Element sichtbar ist.
+     * Falls nicht null, so enthält diese Collection alle {@link Group}s, zu denen
+     * das UIElement gehört, die im Augenblick unsichtbar sind. D.h. das UIElement
+     * ist genau dann sichtbar, wenn hier null oder eine leere Collection steht.
      */
-    public boolean visible = true;
+    public Collection<Group> invisibleGroups = null;
   }
 
   /**
@@ -1989,7 +2009,7 @@ public class FormController implements UIElementEventHandler
   public static void main(String[] args) throws Exception
   {
     File curDir = new File(System.getProperty("user.dir"));
-    URL context = curDir.toURL();
+    URL context = curDir.toURI().toURL();
     URL merge1URL = new URL(context, "testdata/merge_form_1.conf");
     URL merge2URL = new URL(context, "testdata/merge_form_2.conf");
     URL anpassungURL = new URL(context, "testdata/buttonanpassung.conf");
