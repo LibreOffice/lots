@@ -102,13 +102,17 @@ public interface Values
 
     /**
      * Fügt den Wert value hinzu, identifiziert mit id. Ein bereits vorhandener Wert
-     * wird ersetzt.
+     * wird ersetzt. Falls value==null, so wird der Aufruf behandelt wie
+     * {@link #remove(String)}.
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     public void put(String id, String value)
     {
-      values.put(id, value);
+      if (value == null)
+        remove(id);
+      else
+        values.put(id, value);
     }
 
     /**

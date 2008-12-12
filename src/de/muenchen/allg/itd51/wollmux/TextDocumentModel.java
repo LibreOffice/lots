@@ -657,7 +657,8 @@ public class TextDocumentModel
           // Wurde der Wert des Feldes gegenüber dem zusetzt gespeicherten Wert
           // verändert?
           String transformedLastStoredValue =
-            getTransformedValue(lastStoredValue, field.getTrafoName(), true);
+            getTransformedValue(lastStoredValue, field.getTrafoName(),
+              !field.singleParameterTrafo());
           if (!thisValue.equals(transformedLastStoredValue))
             allAreUnchanged = false;
 
