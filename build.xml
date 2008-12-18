@@ -59,6 +59,9 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 	<property name="OOOCLS2" value="${OOO_OFFAPI_DIR}/classes" />
 	<property name="OOO_SDK" value="C:/Programme/OpenOffice.org_3.0_SDK/sdk" /> -->
 
+	  <!-- The directory that contains the subdirectories com/ and win/ of the SDK -->
+	<!-- <property name="TOOLING" value="${OOO_SDK}/classes" /> -->
+	<property name="TOOLING" value="../classes/bin" />
 
 <!-- If you follow the INSTALL instructions exactly, you won't have to change this path --> 	
 	<property name="UNOHELPER_DIR" value="../UNOHelper" />
@@ -105,7 +108,7 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 	
 	<property name="UNOHELPER_SRC" value="${UNOHELPER_DIR}/src" />
 	<property name="UNOHELPER_BIN" value="${BIN}" />
-	<property name="TOOLING" value="${OOO_SDK}/classes" />
+	
 	<property name="TOOLING_MAIN_CLASS" value="com.sun.star.lib.loader.Loader" />
 	<property name="WOLLMUXBAR_MAIN_CLASS" value="de.muenchen.allg.itd51.wollmux.dialog.WollMuxBar" />
 
