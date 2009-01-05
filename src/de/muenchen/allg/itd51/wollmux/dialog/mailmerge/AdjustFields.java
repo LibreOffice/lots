@@ -63,6 +63,7 @@ import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.TextDocumentModel.FieldSubstitution;
 import de.muenchen.allg.itd51.wollmux.TextDocumentModel.ReferencedFieldID;
 import de.muenchen.allg.itd51.wollmux.db.MailMergeDatasource;
+import de.muenchen.allg.itd51.wollmux.dialog.Common;
 import de.muenchen.allg.itd51.wollmux.dialog.DimAdjust;
 import de.muenchen.allg.itd51.wollmux.dialog.JPotentiallyOverlongPopupMenuButton;
 import de.muenchen.allg.itd51.wollmux.dialog.TextComponentTags;
@@ -358,6 +359,9 @@ class AdjustFields
     JScrollPane spane =
       new JScrollPane(itemBox, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
         ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+    spane.getVerticalScrollBar().setUnitIncrement(
+      Common.VERTICAL_SCROLLBAR_UNIT_INCREMENT);
+
     spane.setBorder(BorderFactory.createEmptyBorder());
     dialog.add(spane);
 

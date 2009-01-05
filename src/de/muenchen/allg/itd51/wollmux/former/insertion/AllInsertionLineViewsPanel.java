@@ -49,6 +49,7 @@ import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 
 import de.muenchen.allg.itd51.wollmux.L;
+import de.muenchen.allg.itd51.wollmux.dialog.Common;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastObjectSelection;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
@@ -134,6 +135,8 @@ public class AllInsertionLineViewsPanel implements View
     scrollPane =
       new JScrollPane(mainPanel, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
         ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+    scrollPane.getVerticalScrollBar().setUnitIncrement(
+      Common.VERTICAL_SCROLLBAR_UNIT_INCREMENT);
 
     JPanel buttonPanel = new JPanel(new GridBagLayout());
 

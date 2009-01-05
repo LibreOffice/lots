@@ -247,7 +247,7 @@ public class WollMuxSingleton implements XPALProvider
       eventBroadcaster.xEventBroadcaster().addEventListener(
         new GlobalEventListener());
     }
-    catch (Exception e)
+    catch (java.lang.Exception e)
     {
       Logger.error(e);
     }

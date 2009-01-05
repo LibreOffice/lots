@@ -20,10 +20,17 @@
     * Mit Hilfe eines Formularanpassung-Abschnitts kann jetzt das Vorhandensein
       der "Drucken.." und "PDF.." Buttons für alle Formulare zentral über die
       wollmux.conf gesteuert werden.
+    * Wichtiger Bugfix: Wenn Formulare transformierte Felder enthalten, so
+      werden diese nach dem Speichern und erneuten Öffnen des Formulars in der
+      FormularGUI immer mit "!!!PRÜFEN!!!" markiert. Der Bugfix behebt dieses
+      Problem.
 
     * Dem Interface XWollMux wurden die neuen_Funktionen addPrintFunction(doc,
       printFunctionName) und removePrintFunction(doc, printFunctionName)
       hinzugefügt.
+    * Falls ein Formularelement zu mehreren Sichtbarkeitsgruppen gehört, so
+      werden deren Sichtbarkeiten jetzt UND-verknüpft. Früher hat die letzte
+      geänderte Sichtbarkeitsgruppe den Sichtbarkeitszustand bestimmt.
 
 
  ==================== Neu in Version 4.11.0 ====================

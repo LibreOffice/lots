@@ -1062,6 +1062,8 @@ public class DatensatzBearbeiten
         new JScrollPane(myInputPanel,
           ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
           ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+      pain.getVerticalScrollBar().setUnitIncrement(
+        Common.VERTICAL_SCROLLBAR_UNIT_INCREMENT);
       pain.setBorder(null);
       myButtonPanel = new JPanel();
 

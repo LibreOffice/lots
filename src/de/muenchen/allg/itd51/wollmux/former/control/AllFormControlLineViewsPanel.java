@@ -58,6 +58,7 @@ import javax.swing.SwingConstants;
 
 import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
+import de.muenchen.allg.itd51.wollmux.dialog.Common;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastObjectSelection;
 import de.muenchen.allg.itd51.wollmux.former.ComboboxMergeDescriptor;
@@ -172,6 +173,8 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
     // was den nervigen Effekt hat, dass das Fenster ein bisschen zu klein ist.
     scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
     scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+    scrollPane.getVerticalScrollBar().setUnitIncrement(
+      Common.VERTICAL_SCROLLBAR_UNIT_INCREMENT);
     scrollPane.setBorder(BorderFactory.createLineBorder(Color.WHITE, 1));
 
     // int gridx, int gridy, int gridwidth, int gridheight, double weightx, double

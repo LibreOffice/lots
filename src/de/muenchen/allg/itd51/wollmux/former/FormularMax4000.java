@@ -124,6 +124,7 @@ import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
+import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
 import de.muenchen.allg.itd51.wollmux.dialog.Common;
 import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
 import de.muenchen.allg.itd51.wollmux.former.DocumentTree.Container;
@@ -2205,12 +2206,12 @@ public class FormularMax4000
       catch (Exception x)
       {
         return true;/*
-                     * Do not Logger.error(x); because the most likely cause for an
-                     * exception is that range2 does not belong to the text object
-                     * compare, which happens in tables, because when enumerating
-                     * over a range inside of a table the enumeration hits a lot of
-                     * unrelated cells (OOo bug).
-                     */
+         * Do not Logger.error(x); because the most likely cause for an
+         * exception is that range2 does not belong to the text object
+         * compare, which happens in tables, because when enumerating
+         * over a range inside of a table the enumeration hits a lot of
+         * unrelated cells (OOo bug).
+         */
       }
     }
     return false;
@@ -2378,7 +2379,7 @@ public class FormularMax4000
   public static void main(String[] args) throws Exception
   {
     UNO.init();
-    WollMuxFiles.setupWollMuxDir();
+    WollMuxSingleton.initialize(UNO.defaultContext);
     Logger.init(System.err, Logger.DEBUG);
     XTextDocument doc = UNO.XTextDocument(UNO.desktop.getCurrentComponent());
     Map<Object, Object> context = new HashMap<Object, Object>();

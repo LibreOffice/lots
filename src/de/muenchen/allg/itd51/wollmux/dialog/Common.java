@@ -83,6 +83,12 @@ public class Common
    */
   public static final int COORDINATE_UNSPECIFIED = -4;
 
+  /**
+   * Der Unit-Increment für vertikale Scrollbars, die Zeilen von Eingabefeldern
+   * enthalten, wie z,B, die Steuerelemente-Ansicht des FM4000.
+   */
+  public static int VERTICAL_SCROLLBAR_UNIT_INCREMENT = 12;
+
   private static boolean lafSet = false;
 
   /**

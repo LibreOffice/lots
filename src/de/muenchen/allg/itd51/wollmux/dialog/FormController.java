@@ -595,6 +595,8 @@ public class FormController implements UIElementEventHandler
       JScrollPane scrollPane =
         new JScrollPane(mainPanel, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
           ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+      scrollPane.getVerticalScrollBar().setUnitIncrement(
+        Common.VERTICAL_SCROLLBAR_UNIT_INCREMENT);
       scrollPane.setBorder(BorderFactory.createLineBorder(Color.WHITE, 1));
       myPanel.add(scrollPane, gbcMainPanel);
 
