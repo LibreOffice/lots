@@ -31,7 +31,6 @@ install: build
 	dh_clean -k 
 	dh_installdirs
 
-	# Add here commands to install the package into debian/wollmux.
 	mkdir -p $(CURDIR)/debian/wollmux/usr/lib/wollmux
 	cp WollMux/dist/{WollMuxBar.jar,WollMux.oxt} $(CURDIR)/debian/wollmux/usr/lib/wollmux
 	mkdir -p $(CURDIR)/debian/wollmux/usr/bin

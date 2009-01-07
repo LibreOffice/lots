@@ -59,10 +59,6 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 	<property name="OOOCLS2" value="${OOO_OFFAPI_DIR}/classes" />
 	<property name="OOO_SDK" value="C:/Programme/OpenOffice.org_3.0_SDK/sdk" /> -->
 
-	  <!-- The directory that contains the subdirectories com/ and win/ of the SDK -->
-	<!-- <property name="TOOLING" value="${OOO_SDK}/classes" /> -->
-	<property name="TOOLING" value="../classes/bin" />
-
 <!-- If you follow the INSTALL instructions exactly, you won't have to change this path --> 	
 	<property name="UNOHELPER_DIR" value="../UNOHelper" />
 
@@ -111,6 +107,15 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 	
 	<property name="TOOLING_MAIN_CLASS" value="com.sun.star.lib.loader.Loader" />
 	<property name="WOLLMUXBAR_MAIN_CLASS" value="de.muenchen.allg.itd51.wollmux.dialog.WollMuxBar" />
+	
+    <!-- The directory that contains the subdirectories com/ and win/ of the SDK -->
+	<!-- First check if we got our own copy of classes/ on the same level as WollMux and UNOHelper -->
+	<available file="../classes/bin" property="TOOLING" value="../classes/bin"/>
+	<!-- When building the Debian package, we're a little deeper in the directory tree -->
+	<available file="../../../../classes/bin" property="TOOLING" value="../../../../classes/bin"/>
+	<!-- Last resort: Use classes/ subdirectory from OOO_SDK -->
+	<property name="TOOLING" value="${OOO_SDK}/classes" />
+
 
 	<target name="all" depends="WollMuxBar.jar,WollMux.oxt,md5sum" />
 	

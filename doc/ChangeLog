@@ -21,9 +21,11 @@
       der "Drucken.." und "PDF.." Buttons für alle Formulare zentral über die
       wollmux.conf gesteuert werden.
     * Wichtiger Bugfix: Wenn Formulare transformierte Felder enthalten, so
-      werden diese nach dem Speichern und erneuten Öffnen des Formulars in der
-      FormularGUI immer mit "!!!PRÜFEN!!!" markiert. Der Bugfix behebt dieses
-      Problem.
+      wurden diese in früheren Versionen nach dem Speichern und erneuten
+      Öffnen des Formulars in der FormularGUI immer mit "!!!PRÜFEN!!!"
+      markiert. Der Bugfix behebt dieses Problem.
+    * Das Scrollrad scrollt jetzt in diversen Dialogen des WollMux schneller,
+      z.B. im FormularMax 4000.
 
     * Dem Interface XWollMux wurden die neuen_Funktionen addPrintFunction(doc,
       printFunctionName) und removePrintFunction(doc, printFunctionName)
