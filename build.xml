@@ -103,6 +103,9 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 	<property name="WOLLMUXBAR_JAR" value="${PACKAGE_DIR}/${WOLLMUXBAR_JAR_NAME}" />
 	
 	<property name="UNOHELPER_SRC" value="${UNOHELPER_DIR}/src" />
+	
+	<!-- Nicht ${UNOHELPER_DIR}/bin. Dies liegt in einem anderen
+	   Projektordner. Da pfuschen wir nicht drin rum. -->
 	<property name="UNOHELPER_BIN" value="${BIN}" />
 	
 	<property name="TOOLING_MAIN_CLASS" value="com.sun.star.lib.loader.Loader" />
@@ -110,9 +113,12 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 	
     <!-- The directory that contains the subdirectories com/ and win/ of the SDK -->
 	<!-- First check if we got our own copy of classes/ on the same level as WollMux and UNOHelper -->
-	<available file="../classes/bin" property="TOOLING" value="../classes/bin"/>
-	<!-- When building the Debian package, we're a little deeper in the directory tree -->
-	<available file="../../../../classes/bin" property="TOOLING" value="../../../../classes/bin"/>
+	<available type="dir" file="../classes/bin" property="TOOLING" value="../classes/bin"/>
+	<!-- When building the Debian package, we're a little deeper in the directory tree.
+	     The use of filepath rather than putting the dots in the file attribute
+	     is necessary, because ant aborts with an error if file contains a path that
+	     goes up beyond the filesystem root, which is possible if building e.g. in /tmp -->
+	<available type="dir" filepath="../../../../" file="classes/bin" property="TOOLING" value="../../../../classes/bin"/>
 	<!-- Last resort: Use classes/ subdirectory from OOO_SDK -->
 	<property name="TOOLING" value="${OOO_SDK}/classes" />
 
@@ -134,6 +140,8 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 	    	<fileset dir="${MY_IDL}" includes="**/*.urd" />
 	    	<fileset dir="${MY_IDL}" includes="**/*.class" />
 	    	<fileset dir="${BIN}" includes="de/**" />
+	    	<fileset dir="${BIN}" includes="data/**" />
+	    	
 	    	<fileset file="${RDBFILE}" />
 	    	<fileset file="${MD5SUMS_FILE_NAME}"/>
      		<fileset file="${WollMux_COMPJAR}" />
@@ -144,6 +152,7 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 		    <fileset dir="${PACKAGE_DIR}" includes="wollmux_*.*.*.dsc" />
 			<fileset dir="${PACKAGE_DIR}" includes="wollmux_*.*.*.changes" />
 			<fileset dir="${PACKAGE_DIR}" includes="wollmux_*.*.*.tar.gz" />
+	    	<fileset dir="${PACKAGE_DIR}" includes="wollmux_*.*.*.diff.gz" />
 	    	<fileset dir="${PACKAGE_DIR}" includes="wollmux-*/**" />
 	    	
 	    	<!-- VERSION_FILE, BUILD_INFO_FILE und DESCRIPTION_XML 
@@ -335,17 +344,30 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 			<fileset dir="." includes="**/.*" excludes="${DEB_BUILD_DIR}" />
 		</copy>
 		<copy todir="${DEB_BUILD_DIR}/UNOHelper" >
-			<fileset dir="${UNOHELPER_DIR}" includes="**/*" /> 
-			<fileset dir="${UNOHELPER_DIR}" includes="**/.*" />
+			<fileset dir="${UNOHELPER_DIR}" includes="**/*" excludes="bin/**" /> 
+			<fileset dir="${UNOHELPER_DIR}" includes="**/.*"/>
 		</copy>
+		
+		<exec dir="${DEB_BUILD_DIR}" executable="ant" failifexecutionfails="true" failonerror="true">
+		    <arg line="-f WollMux/build.xml clean" />
+		</exec>
+
+		<exec dir="${PACKAGE_DIR}" executable="tar" failifexecutionfails="true" failonerror="true">
+		    <arg line="-czf wollmux_${VERSION}.orig.tar.gz --exclude=.git --exclude=.svn --exclude=.gitignore --exclude=debian wollmux-${VERSION}" />
+		</exec>
+		<exec dir="${PACKAGE_DIR}" executable="ln" failifexecutionfails="true" failonerror="true">
+		    <arg line="-nf wollmux_${VERSION}.orig.tar.gz wollmux-${VERSION}.tar.gz" />
+		</exec>
+		
 		<copy todir="${DEB_BUILD_DIR}/debian" >
 			<fileset dir="${DEBIAN_DIR}" includes="**/*"/> 
 		</copy>
 		<exec dir="${DEB_BUILD_DIR}/debian" executable="chmod" >
 			<arg line="a+x rules" />
 		</exec>
+		
 		<exec dir="${DEB_BUILD_DIR}" executable="dpkg-buildpackage" failifexecutionfails="true" failonerror="true">
-          <arg line="-uc -us -rfakeroot -I.git -I.svn -I.gitignore -Idebian" />
+          <arg line="-uc -us -sa -rfakeroot -I.git -I.svn -I.gitignore" />
 		</exec> 
 		<delete dir="${DEB_BUILD_DIR}" />
 	</target>
