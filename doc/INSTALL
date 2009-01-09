@@ -57,6 +57,35 @@ Option 2: Using development sources from git
     git clone http://wollmux.projects.forge.osor.eu/repo/WollMux.git
     git clone http://wollmux.projects.forge.osor.eu/repo/UNOHelper.git
 
+=== classes.tar.gz ===
+
+The WollMuxBar.jar binary includes certain bootstrap files from OpenOffice.org.
+OpenOffice.org's license, the GPL, requires that whenever you pass on the
+WollMuxBar binary to someone else, you provide that person with the sources
+to those bootstrap files. Normally, WollMux will be built with the bootstrap
+files from your installation of the OpenOffice.org SDK. Since the GPL requires
+that you provide the complete corresponding source, whenever you distribute
+a WollMux built like this, you must distribute the complete OpenOffice.org
+sources in exactly the same version that was used to build that SDK. Unless you
+already distribute OpenOffice.org's sources, this requirement may be too tough
+for you (who wants to distribute several 100M just to be allowed to pass on one
+small file like WollMuxBar.jar?). 
+
+If you desire strict GPL-compliance without having to distribute the complete
+OOo sources, then you can download classes.tar.gz and extract it in the 
+directory that contains the WollMux and UNOHelper subdirectories before building
+WollMux. The build will pick up this classes/ directory automatically. A message
+is output right at the beginning of the build to tell you which bootstrap files 
+are being used, so you can verify you've set up classes/ correctly.
+
+classes.tar.gz includes binaries and source code for the bootstrap
+files and all files necessary to build the binaries from the source. Whenever
+you distribute a WollMuxBar.jar built with these files, you can satisfy your
+GPL obligations by distributing classes.tar.gz (in addition to the WollMux
+sources whose distribution is required by the EUPL).
+
+Rebuilding classes.tar.gz on a Debian system requires the package mingw32.
+
 == Building WollMux ==
 
 - Go to the directory wollmux-<version>/WollMux and open the file build.xml
@@ -64,32 +93,42 @@ Option 2: Using development sources from git
     cd WollMux
     $EDITOR build.xml
 
-- Change the properties OOO_PROGRAM_DIR, OOOCLS and OOO_SDK to match your
-  system. This is *required*. The default paths will not work for you.
+- Change the properties OOO_TYPES_DIR, OOO_OFFAPI_DIR, OOOCLS1, OOOCLS2 and 
+  OOO_SDK to match your system. This is *required*. The default paths WILL NOT 
+  work for you. The comments in build.xml tell you, which files or directories
+  are supposed to be in the respective directories. Simply locate these
+  files/directories on your system to determine the proper values for the
+  properties. Typical settings for a Windows system are listed in a comment 
+  below the property definitions.
 
 - If you want to compile WollMux without building a Debian package, issue
   the command
 
-    ant
+    ant clean all
 
   If ant gives you the error "Unable to locate tools.jar...." you need to set 
   the environment variable JAVA_HOME to the root of a Java SDK installation, 
   rather than just a JRE.
 
-- If you have a Debian system and want a Debian package, simply issue the 
-  command
+=== Building a Debian package ===
 
-    ant deb
+- To build a Debian package, issue the command
 
+    ant clean deb
+
+  The package will be found in the dist/ directory.
+
+  ATTENTION! If you build from vanilla sources, this Debian package will NOT work
+  on a standard Debian or Ubuntu system. If you want a Debian package that works
+  on these systems, you will have to add a debian/ directory inside the WollMux
+  directory. If debian/ is present, it will be used. Otherwise the lhmdeb/ 
+  directory is used, which only works for the Landeshauptstadt München's 
+  Basisclient.
 
 == Installing WollMux ==
 
 - On a Debian system, simply install the Debian package built in the
   previous step with dpkg -i.
-
-  This will add a program /usr/bin/wollmuxbar which launches the
-  WollMux toolbar. Note, however, that you need a working configuration (not
-  described in this document) before this will work.
 
 - For a manual installation, terminate all running OpenOffice.org processes
   (including the quickstarter), then install the OpenOffice.org extension

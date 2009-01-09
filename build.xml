@@ -15,7 +15,12 @@ debug: List this target before other build targets to get .class files with
 all: Create the OOo component and WollMuxBar.jar, but *not* the Debian package.
      The files are created in the dist/ directory.
 
-deb: Create the Debian package in the dist/ directory.
+deb: Create the Debian package in the dist/ directory. 
+     ATTENTION! If you build from vanilla sources, this Debian package will NOT work
+     on a standard Debian or Ubuntu system. If you want a Debian package that works
+     on these systems, you will have to add a debian/ directory. If this is present,
+     it will be used. Otherwise the lhmdeb directory is used, which only works for
+     the Landeshauptstadt München's Basisclient.
 
 install: Install the WollMux OOo component in the user area for the user running ant.
          DO NOT USE THIS AS ROOT. IT DOESN'T DO SYSTEM-WIDE INSTALLATION.
@@ -43,21 +48,29 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 *****************************************************************-->
 
 <!-- You will probably have to change the following paths to match your system -->
+
 	        <!-- Directory containing types.rdb -->
 	<property name="OOO_TYPES_DIR" value="/opt/openoffice.org/program" />
+
 	        <!-- Directory containing offapi.rdb (OOo 3.0 only, ignore for 2.x) -->
-    <property name="OOO_OFFAPI_DIR" value="/opt/openoffice.org/basis3.0/program" />
+        <property name="OOO_OFFAPI_DIR" value="/opt/openoffice.org/basis3.0/program" />
+
 	        <!-- Directory containing juh.jar, jurt.jar and ridl.jar -->
 	<property name="OOOCLS1" value="/opt/openoffice.org/program/classes" />
+
 	        <!-- Directory containing unoil.jar --> 
 	<property name="OOOCLS2" value="/opt/openoffice.org/program/classes" />
+
 	        <!-- Directory containing subdirectories idl/ and classes/ -->
 	<property name="OOO_SDK" value="/opt/openoffice.org_sdk" />
+	
+<!--	The following would be typical settings for a Windows system -->
 <!--	<property name="OOO_TYPES_DIR" value="C:/Programme/OOo-dev/URE/misc" />
 	<property name="OOO_OFFAPI_DIR" value="C:/Programme/OOo-dev/Basis 3.0/program" />
 	<property name="OOOCLS1" value="C:\Programme\OOo-dev\URE\java" />
 	<property name="OOOCLS2" value="${OOO_OFFAPI_DIR}/classes" />
 	<property name="OOO_SDK" value="C:/Programme/OpenOffice.org_3.0_SDK/sdk" /> -->
+
 
 <!-- If you follow the INSTALL instructions exactly, you won't have to change this path --> 	
 	<property name="UNOHELPER_DIR" value="../UNOHelper" />
@@ -121,6 +134,7 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 	<available type="dir" filepath="../../../../" file="classes/bin" property="TOOLING" value="../../../../classes/bin"/>
 	<!-- Last resort: Use classes/ subdirectory from OOO_SDK -->
 	<property name="TOOLING" value="${OOO_SDK}/classes" />
+	<echo message="===== Using bootstrap files from ${TOOLING} =====" />
 
 
 	<target name="all" depends="WollMuxBar.jar,WollMux.oxt,md5sum" />
