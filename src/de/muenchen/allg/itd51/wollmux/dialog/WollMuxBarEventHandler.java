@@ -46,7 +46,7 @@ import com.sun.star.frame.TerminationVetoException;
 import com.sun.star.frame.XDesktop;
 import com.sun.star.frame.XDispatch;
 import com.sun.star.frame.XDispatchProvider;
-import com.sun.star.frame.XTerminateListener2;
+import com.sun.star.frame.XTerminateListener;
 import com.sun.star.lang.DisposedException;
 import com.sun.star.lang.EventObject;
 import com.sun.star.lang.XMultiServiceFactory;
@@ -97,7 +97,7 @@ public class WollMuxBarEventHandler
    * Falls nicht null, so ist dieser TerminateListener auf {@link #desktop}
    * registriert.
    */
-  private XTerminateListener2 terminateListener;
+  private XTerminateListener terminateListener;
 
   /**
    * Dieses Objekt wird beim WollMux als {@link XPALChangeEventListener} registriert.
@@ -519,14 +519,8 @@ public class WollMuxBarEventHandler
     desktop =
       (XDesktop) UnoRuntime.queryInterface(XDesktop.class,
         factory.createInstance("com.sun.star.frame.Desktop"));
-    terminateListener = new XTerminateListener2()
+    terminateListener = new XTerminateListener()
     {
-
-      public void cancelTermination(EventObject arg0)
-      {
-        Logger.debug("cancelTermination");
-      }
-
       public void notifyTermination(EventObject arg0)
       {
         Logger.debug("notifyTermination");
@@ -551,8 +545,8 @@ public class WollMuxBarEventHandler
             Object compo = xenu.nextElement();
             try
             { /*
-               * First see if the component itself offers a close function
-               */
+             * First see if the component itself offers a close function
+             */
               UNO.XCloseable(compo).close(true);
             }
             catch (Exception x)
