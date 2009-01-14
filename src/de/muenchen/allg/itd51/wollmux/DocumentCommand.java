@@ -73,12 +73,12 @@ abstract public class DocumentCommand
   /**
    * Vorbelegung für den Status DONE.
    */
-  private static final Boolean STATE_DEFAULT_DONE = new Boolean(false);
+  private static final Boolean STATE_DEFAULT_DONE = Boolean.FALSE;
 
   /**
    * Vorbelegung für den Status ERROR
    */
-  private static final Boolean STATE_DEFAULT_ERROR = new Boolean(false);
+  private static final Boolean STATE_DEFAULT_ERROR = Boolean.FALSE;
 
   /**
    * Enthält den aktuellen DONE-Status oder null, falls der Wert nicht verändert

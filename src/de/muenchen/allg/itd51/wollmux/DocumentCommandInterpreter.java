@@ -759,7 +759,6 @@ public class DocumentCommandInterpreter
       cmd.setErrorState(false);
       boolean found = false;
       String errors = "";
-      Vector<String> urls = new Vector<String>();
       String fragId = "";
 
       try
@@ -776,7 +775,7 @@ public class DocumentCommandInterpreter
           return 0;
         }
 
-        urls = VisibleTextFragmentList.getURLsByID(fragId);
+        Vector<String> urls = VisibleTextFragmentList.getURLsByID(fragId);
         if (urls.size() == 0)
         {
           throw new ConfigurationErrorException(L.m(

@@ -536,7 +536,7 @@ public class TextDocumentModel
   {
     if (value == null || value.length() == 0) return;
 
-    ConfigThingy conf = new ConfigThingy("");
+    ConfigThingy conf;
     try
     {
       conf = new ConfigThingy("", null, new StringReader(value));

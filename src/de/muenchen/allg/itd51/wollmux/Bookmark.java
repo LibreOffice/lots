@@ -66,8 +66,8 @@ import de.muenchen.allg.afid.UnoService;
 public class Bookmark
 {
   /**
-   * Wird festgestellt, dass das Bookmark aus dem Dokument gelöscht wurde, so
-   * wird der Name auf diesen String gesetzt (== vergleichbar).
+   * Wird festgestellt, dass das Bookmark aus dem Dokument gelöscht wurde, so wird
+   * der Name auf diesen String gesetzt (== vergleichbar).
    */
   public static final String BROKEN = "WM(CMD'bookmarkBroken')";
 
@@ -82,10 +82,9 @@ public class Bookmark
   private UnoService document;
 
   /**
-   * Der Konstruktor liefert eine Instanz eines bereits im Dokument doc
-   * bestehenden Bookmarks mit dem Namen name zurück; ist das Bookmark im
-   * angebegenen Dokument nicht enthalten, so wird eine NoSuchElementException
-   * zurückgegeben.
+   * Der Konstruktor liefert eine Instanz eines bereits im Dokument doc bestehenden
+   * Bookmarks mit dem Namen name zurück; ist das Bookmark im angebegenen Dokument
+   * nicht enthalten, so wird eine NoSuchElementException zurückgegeben.
    * 
    * @param name
    *          Der Name des bereits im Dokument vorhandenen Bookmarks.
@@ -104,8 +103,8 @@ public class Bookmark
   }
 
   /**
-   * Der Konstruktor liefert eine Instanz eines bereits im Dokument doc
-   * bestehenden Bookmarks bookmark zurück.
+   * Der Konstruktor liefert eine Instanz eines bereits im Dokument doc bestehenden
+   * Bookmarks bookmark zurück.
    */
   public Bookmark(XNamed bookmark, XTextDocument doc)
   {
@@ -114,8 +113,8 @@ public class Bookmark
   }
 
   /**
-   * Der Konstruktor erzeugt ein neues Bookmark name im Dokument doc an der
-   * Position, die durch range beschrieben ist.
+   * Der Konstruktor erzeugt ein neues Bookmark name im Dokument doc an der Position,
+   * die durch range beschrieben ist.
    * 
    * @param name
    *          Der Name des neu zu erstellenden Bookmarks.
@@ -148,7 +147,7 @@ public class Bookmark
 
     // Bookmark ins Dokument einfügen
     if (document.xTextDocument() != null && bookmark.xTextContent() != null
-        && range != null)
+      && range != null)
     {
       try
       {
@@ -167,11 +166,11 @@ public class Bookmark
   }
 
   /**
-   * Vor jedem Zugriff auf den BookmarkService bookmark sollte der Service neu
-   * geholt werden, damit auch der Fall behandelt wird, dass das Bookmark
-   * inzwischen vom Anwender gelöscht wurde. Ist das Bookmark nicht (mehr) im
-   * Dokument vorhanden, so wird ein new UnoService(null) zurückgeliefert,
-   * welches leichter verarbeitet werden kann.
+   * Vor jedem Zugriff auf den BookmarkService bookmark sollte der Service neu geholt
+   * werden, damit auch der Fall behandelt wird, dass das Bookmark inzwischen vom
+   * Anwender gelöscht wurde. Ist das Bookmark nicht (mehr) im Dokument vorhanden, so
+   * wird ein new UnoService(null) zurückgeliefert, welches leichter verarbeitet
+   * werden kann.
    * 
    * @param name
    *          Der Name des bereits im Dokument vorhandenen Bookmarks.
@@ -193,15 +192,13 @@ public class Bookmark
         Logger.error(e);
       }
       catch (NoSuchElementException e)
-      {
-      }
+      {}
     }
     return new UnoService(null);
   }
 
   /**
-   * Diese Methode liefert den (aktuellen) Namen des Bookmarks als String
-   * zurück.
+   * Diese Methode liefert den (aktuellen) Namen des Bookmarks als String zurück.
    * 
    * @return liefert den (aktuellen) Namen des Bookmarks als String zurück.
    */
@@ -228,8 +225,7 @@ public class Bookmark
           cursor, false);
       }
       catch (java.lang.Exception x)
-      {
-      }
+      {}
     }
   }
 
@@ -252,17 +248,18 @@ public class Bookmark
 
   /**
    * Diese Methode benennt dieses Bookmark in newName um. Ist der Name bereits
-   * definiert, so wird automatisch eine Nummer an den Namen angehängt. Die
-   * Methode gibt den tatsächlich erzeugten Bookmarknamen zurück.
+   * definiert, so wird automatisch eine Nummer an den Namen angehängt. Die Methode
+   * gibt den tatsächlich erzeugten Bookmarknamen zurück.
    * 
    * @return den tatsächlich erzeugten Namen des Bookmarks. Falls das Bookmark
-   *         verschwunden ist, so wird das Objekt {@link #BROKEN}
-   *         zurückgeliefert (== vergleichbar).
+   *         verschwunden ist, so wird das Objekt {@link #BROKEN} zurückgeliefert (==
+   *         vergleichbar).
    * @throws Exception
    */
   public String rename(String newName)
   {
-    XNameAccess bookmarks = UNO.XBookmarksSupplier(document.getObject()).getBookmarks();
+    XNameAccess bookmarks =
+      UNO.XBookmarksSupplier(document.getObject()).getBookmarks();
 
     // Um OOo nicht zu stressen vermeiden wir unnötige Renames
     // Wir testen aber trotzdem ob das Bookmark BROKEN ist
@@ -337,9 +334,8 @@ public class Bookmark
   /**
    * Die Methode gibt die XTextRange des Bookmarks zurück, oder null, falls das
    * Bookmark nicht vorhanden ist (z,B, weil es inzwischen gelöscht wurde). Als
-   * Workaround für Bug #67869 erzeugt diese Methode jedoch noch einen
-   * TextCursor, mit dessen Hilfe sich der Inhalt des Bookmarks sicherer
-   * enumerieren lassen kann.
+   * Workaround für Bug #67869 erzeugt diese Methode jedoch noch einen TextCursor,
+   * mit dessen Hilfe sich der Inhalt des Bookmarks sicherer enumerieren lassen kann.
    * 
    * @return
    */
@@ -354,8 +350,8 @@ public class Bookmark
   }
 
   /**
-   * Liefert die TextRange an der dieses Bookmark verankert ist oder null falls
-   * das Bookmark nicht mehr existiert.
+   * Liefert die TextRange an der dieses Bookmark verankert ist oder null falls das
+   * Bookmark nicht mehr existiert.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -384,7 +380,6 @@ public class Bookmark
       {
         XTextRange range = bookmark.xTextContent().getAnchor();
         range.getText().removeTextContent(bookmark.xTextContent());
-        bookmark = new UnoService(null);
       }
       catch (NoSuchElementException e)
       {
@@ -408,8 +403,8 @@ public class Bookmark
       // Rest des Textes abtrennt, d.h. welches dafür sorgt, dass unser Text
       // eine
       // eigene Textportion ist.
-      Object bookmark = UNO.XMultiServiceFactory(doc).createInstance(
-        "com.sun.star.text.Bookmark");
+      Object bookmark =
+        UNO.XMultiServiceFactory(doc).createInstance("com.sun.star.text.Bookmark");
       UNO.XNamed(bookmark).setName("killer");
       range.getText().insertTextContent(range, UNO.XTextContent(bookmark), true);
       String name = UNO.XNamed(bookmark).getName();
@@ -432,18 +427,19 @@ public class Bookmark
             Object textPortion = xEnum2.nextElement();
             if ("Bookmark".equals(UNO.getProperty(textPortion, "TextPortionType")))
             {
-              String portionName = UNO.XNamed(
-                UNO.getProperty(textPortion, "Bookmark")).getName();
+              String portionName =
+                UNO.XNamed(UNO.getProperty(textPortion, "Bookmark")).getName();
               if (name.equals(portionName))
               {
-                kill = ((Boolean) UNO.getProperty(textPortion, "IsStart")).booleanValue();
+                kill =
+                  ((Boolean) UNO.getProperty(textPortion, "IsStart")).booleanValue();
               }
               else
                 collateral.add(portionName);
             }
 
             if (kill
-                && "Text".equals(UNO.getProperty(textPortion, "TextPortionType")))
+              && "Text".equals(UNO.getProperty(textPortion, "TextPortionType")))
             {
               victims.add(textPortion);
             }
@@ -456,8 +452,7 @@ public class Bookmark
        */
       /*
        * Iterator iter = victims.iterator(); XText text = range.getText(); while
-       * (iter.hasNext()) {
-       * text.removeTextContent(UNO.XTextContent(iter.next())); }
+       * (iter.hasNext()) { text.removeTextContent(UNO.XTextContent(iter.next())); }
        */
       range.setString("");
 
@@ -475,8 +470,9 @@ public class Bookmark
         if (!bookmarks.hasByName(portionName))
         {
           Logger.debug(L.m("Regeneriere Bookmark '%1'", portionName));
-          bookmark = UNO.XMultiServiceFactory(doc).createInstance(
-            "com.sun.star.text.Bookmark");
+          bookmark =
+            UNO.XMultiServiceFactory(doc).createInstance(
+              "com.sun.star.text.Bookmark");
           UNO.XNamed(bookmark).setName(portionName);
           range.getText().insertTextContent(range, UNO.XTextContent(bookmark), true);
         }
@@ -492,11 +488,11 @@ public class Bookmark
   /**
    * Diese Methode liefert den Wert der Property IsCollapsed zurück, wenn das
    * Ankerobjekt des Bookmarks diese Property besitzt, ansonsten wird false
-   * geliefert. Das entsprechende Ankerobjekt wird durch entsprechende
-   * Enumerationen über das Bookmarkobject gewonnen.
+   * geliefert. Das entsprechende Ankerobjekt wird durch entsprechende Enumerationen
+   * über das Bookmarkobject gewonnen.
    * 
-   * @return true, wenn die Property IsCollapsed existiert und true ist.
-   *         Ansonsten wird false geliefert.
+   * @return true, wenn die Property IsCollapsed existiert und true ist. Ansonsten
+   *         wird false geliefert.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
@@ -520,22 +516,20 @@ public class Bookmark
           return AnyConverter.toBoolean(UNO.getProperty(element, "IsCollapsed"));
         }
         catch (java.lang.Exception e2)
-        {
-        }
+        {}
       }
     }
     catch (java.lang.Exception e)
-    {
-    }
+    {}
     return false;
   }
 
   /**
-   * Diese Methode wandelt ein kollabiertes Bookmark (IsCollapsed()==true) in
-   * ein nicht-kollabiertes Bookmark (IsCollapsed()==false) ohne Ausdehnung um.
-   * Auf diese Weise wird OOo-Issue #73568 umgangen, gemäß dem kein Inhalt in
-   * das Bookmark eingefügt werden kann, wenn IsCollapsed==true ist. Ist das
-   * Bookmark bereits nicht-kollabiert, so wird nichts unternommen.
+   * Diese Methode wandelt ein kollabiertes Bookmark (IsCollapsed()==true) in ein
+   * nicht-kollabiertes Bookmark (IsCollapsed()==false) ohne Ausdehnung um. Auf diese
+   * Weise wird OOo-Issue #73568 umgangen, gemäß dem kein Inhalt in das Bookmark
+   * eingefügt werden kann, wenn IsCollapsed==true ist. Ist das Bookmark bereits
+   * nicht-kollabiert, so wird nichts unternommen.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
@@ -569,8 +563,8 @@ public class Bookmark
   }
 
   /**
-   * Definition von equals, damit Bookmarks über HashMaps/HashSets verwaltet
-   * werden können.
+   * Definition von equals, damit Bookmarks über HashMaps/HashSets verwaltet werden
+   * können.
    * 
    * @see java.lang.Object#equals(java.lang.Object)
    */
@@ -587,8 +581,8 @@ public class Bookmark
   }
 
   /**
-   * Definition von hashCode, damit Bookmarks über HashMaps/HashSets verwaltet
-   * werden können.
+   * Definition von hashCode, damit Bookmarks über HashMaps/HashSets verwaltet werden
+   * können.
    * 
    * @see java.lang.Object#hashCode()
    */

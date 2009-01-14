@@ -71,7 +71,7 @@ public class FormModelImpl
   {
 
     // Abschnitt "Formular" holen:
-    ConfigThingy formConf = new ConfigThingy("");
+    ConfigThingy formConf;
     try
     {
       formConf = doc.getFormDescription().get("Formular");
@@ -164,17 +164,15 @@ public class FormModelImpl
     // FunctionContext erzeugen und im Formular definierte
     // Funktionen/DialogFunktionen parsen:
     Map<Object, Object> functionContext = new HashMap<Object, Object>();
-    DialogLibrary dialogLib = new DialogLibrary();
-    FunctionLibrary funcLib = new FunctionLibrary();
     WollMuxSingleton mux = WollMuxSingleton.getInstance();
-    dialogLib =
+    DialogLibrary dialogLib =
       WollMuxFiles.parseFunctionDialogs(formConf, mux.getFunctionDialogs(),
         functionContext);
     // FIXME: hier müsste eine gemergte Variante der Funktionsbibliotheken der
     // einzel-TextDocumentModels erzeugt werden, damit auch dokumentlokale
     // Trafos funktionieren - aber wer verwendet schon Multiform? Warten wir mit
     // der Änderung sie jemand benötigt.
-    funcLib =
+    FunctionLibrary funcLib =
       WollMuxFiles.parseFunctions(formConf, dialogLib, functionContext,
         mux.getGlobalFunctions());
 
@@ -752,7 +750,9 @@ public class FormModelImpl
         UNO.XChangesBatch(ca).commitChanges();
       }
       catch (java.lang.Exception e)
-      {}
+      {
+        Logger.error(e);
+      }
     }
 
     /*

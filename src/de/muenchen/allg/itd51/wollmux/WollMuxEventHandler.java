@@ -391,11 +391,15 @@ public class WollMuxEventHandler
             if (contWin != null) contWin.setEnable(enabled);
           }
           catch (java.lang.Exception e)
-          {}
+          {
+            Logger.error(e);
+          }
         }
       }
       catch (java.lang.Exception e)
-      {}
+      {
+        Logger.error(e);
+      }
     }
 
     /**
@@ -989,10 +993,9 @@ public class WollMuxEventHandler
       TextDocumentModel model = mux.getTextDocumentModel(xTextDoc);
 
       // Konfigurationsabschnitt Textdokument verarbeiten:
-      ConfigThingy tds = new ConfigThingy("Textdokument");
       try
       {
-        tds =
+        ConfigThingy tds =
           mux.getWollmuxConf().query("Fenster").query("Textdokument").getLastChild();
         model.setWindowViewSettings(tds);
       }
