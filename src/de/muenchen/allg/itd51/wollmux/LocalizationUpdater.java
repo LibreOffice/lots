@@ -42,6 +42,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -189,7 +190,7 @@ public class LocalizationUpdater
       int progress = (int) ((1.0 * count / sources.size()) * 100);
       if (progress / 10 != lastProgress / 10)
       {
-        System.out.println(L.m("Fortschritt: %1 %", new Integer(progress)));
+        System.out.println(L.m("Fortschritt: %1 %", Integer.valueOf(progress)));
         lastProgress = progress;
       }
     }
@@ -215,7 +216,6 @@ public class LocalizationUpdater
     {
       ConfigThingy element = iter.next();
       String elementStr = element.stringRepresentation();
-      elementStr.replaceAll("\\n", "%n");
 
       if (element.getName().equalsIgnoreCase("original"))
       {
@@ -238,7 +238,7 @@ public class LocalizationUpdater
           String language = element.getName().toLowerCase();
           Integer ct = countTranslations.get(language);
           int cti = (ct != null) ? ct.intValue() : 0;
-          countTranslations.put(language, new Integer(cti + 1));
+          countTranslations.put(language, Integer.valueOf(cti + 1));
         }
         else
         {
@@ -263,17 +263,18 @@ public class LocalizationUpdater
 
     // Statistik und Warnung ausgeben:
     System.out.println("");
-    System.out.println(L.m("Neue original-Strings: %1", new Integer(countNew)));
-    System.out.println(L.m("Auskommentierte original-Strings: %1", new Integer(
-      countRemoved)));
-    System.out.println(L.m("Gesamtzahl aktuelle original-Strings: %1", new Integer(
-      currentOriginals.size())));
-    for (Iterator<String> iter = countTranslations.keySet().iterator(); iter.hasNext();)
+    System.out.println(L.m("Neue original-Strings: %1", Integer.valueOf(countNew)));
+    System.out.println(L.m("Auskommentierte original-Strings: %1",
+      Integer.valueOf(countRemoved)));
+    System.out.println(L.m("Gesamtzahl aktuelle original-Strings: %1",
+      Integer.valueOf(currentOriginals.size())));
+
+    for (Map.Entry<String, Integer> ent : countTranslations.entrySet())
     {
-      String language = iter.next();
-      int ct = countTranslations.get(language).intValue();
+      String language = ent.getKey();
+      int ct = ent.getValue().intValue();
       System.out.println(L.m("Davon nicht übersetzt in Sprache %1: %2", language,
-        new Integer(currentOriginals.size() - ct)));
+        Integer.valueOf(currentOriginals.size() - ct)));
     }
 
     if (removedTranslatedMessagesWarning)
@@ -353,7 +354,7 @@ public class LocalizationUpdater
    */
   private static String evalString(String str)
   {
-    String evalStr = new String(str);
+    String evalStr = str;
     evalStr = evalStr.replaceAll("\\\\t", "\t");
     evalStr = evalStr.replaceAll("\\\\b", "\b");
     evalStr = evalStr.replaceAll("\\\\n", "\n");

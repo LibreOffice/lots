@@ -559,10 +559,10 @@ public class OOoDatasource implements Datasource
        * http://qa.openoffice.org/issues/show_bug.cgi?id=78522 Entspricht dem Button
        * SQL mit grünem Haken (SQL-Kommando direkt ausführen) im Base-Abfrageentwurf.
        */
-      xProp.setPropertyValue("EscapeProcessing", new Boolean(false));
+      xProp.setPropertyValue("EscapeProcessing", Boolean.FALSE);
 
-      xProp.setPropertyValue("CommandType", new Integer(
-        com.sun.star.sdb.CommandType.COMMAND));
+      xProp.setPropertyValue("CommandType",
+        Integer.valueOf(com.sun.star.sdb.CommandType.COMMAND));
 
       xProp.setPropertyValue("Command", query);
 
@@ -637,7 +637,7 @@ public class OOoDatasource implements Datasource
       }
       catch (Exception x)
       {}
-      mapColumnNameToIndex.put(column, new Integer(idx));
+      mapColumnNameToIndex.put(column, Integer.valueOf(idx));
     }
     return mapColumnNameToIndex;
   }

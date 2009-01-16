@@ -47,7 +47,6 @@ import java.util.Set;
 import java.util.Vector;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.TimeoutException;
 
 /**
  * Variante des DatasourceJoiners, die zum testen besser geeignet ist.
@@ -85,23 +84,15 @@ public class TestDatasourceJoiner extends DatasourceJoiner
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public TestDatasourceJoiner()
+  public TestDatasourceJoiner() throws Exception
   { // TESTED
-    try
-    {
-      File curDir = new File(System.getProperty("user.dir"));
-      URL context = curDir.toURL();
-      File losCache = new File(curDir, "testdata/cache.conf");
-      String confFile = "testdata/testdjjoin.conf";
-      URL confURL = new URL(context, confFile);
-      ConfigThingy joinConf = new ConfigThingy("", confURL);
-      init(joinConf, "Personal", losCache, context, TEST_QUERY_TIMEOUT);
-    }
-    catch (Exception e)
-    {
-      e.printStackTrace();
-      System.exit(1);
-    }
+    File curDir = new File(System.getProperty("user.dir"));
+    URL context = curDir.toURL();
+    File losCache = new File(curDir, "testdata/cache.conf");
+    String confFile = "testdata/testdjjoin.conf";
+    URL confURL = new URL(context, confFile);
+    ConfigThingy joinConf = new ConfigThingy("", confURL);
+    init(joinConf, "Personal", losCache, context, TEST_QUERY_TIMEOUT);
   }
 
   protected long queryTimeout()
@@ -164,7 +155,7 @@ public class TestDatasourceJoiner extends DatasourceJoiner
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public static void main(String[] args) throws TimeoutException, IOException
+  public static void main(String[] args) throws Exception
   {
     TestDatasourceJoiner dj = new TestDatasourceJoiner();
 

@@ -37,7 +37,6 @@ import java.util.List;
 import java.util.Vector;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
 
 /**
@@ -61,7 +60,7 @@ public class GroupModelList
   /**
    * Der FormularMax4000 zu dem diese GroupModelList gehört.
    */
-  private FormularMax4000 formularMax4000;
+  //private FormularMax4000 formularMax4000;
 
   /**
    * Erzeugt eine neue GroupModelList.
@@ -72,8 +71,8 @@ public class GroupModelList
    */
   public GroupModelList(FormularMax4000 formularMax4000)
   {
-    this.formularMax4000 = formularMax4000;
-    this.formularMax4000.addBroadcastListener(new MyBroadcastListener());
+    //this.formularMax4000 = formularMax4000;
+    //this.formularMax4000.addBroadcastListener(new MyBroadcastListener());
   }
 
   /**
@@ -185,7 +184,7 @@ public class GroupModelList
      */
     public void itemAdded(GroupModel model, int index);
   }
-
+/*
   private class MyBroadcastListener extends BroadcastListener
-  {}
+  {}*/
 }

@@ -99,11 +99,12 @@ public class VisibleTextFragmentList
     // Debug-Ausgabe:
     Logger.debug2(L.m("Variablenset an Knoten %1 '%2':", node.getName(),
       node.toString()));
-    Iterator<String> keys = variables.keySet().iterator();
-    while (keys.hasNext())
+
+    
+    for (Map.Entry<String, String> ent: variables.entrySet())
     {
-      String key = keys.next();
-      String value = variables.get(key);
+      String key = ent.getKey();
+      String value = ent.getValue();
       Logger.debug2("  " + key + "=\"" + value + "\"");
     }
 

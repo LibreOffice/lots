@@ -424,7 +424,7 @@ public class LDAPDatasource implements Datasource
    * 
    * @author Max Meier (D-III-ITD 5.1)
    */
-  private class ColumnDefinition
+  private static class ColumnDefinition
   {
 
     /**
@@ -590,7 +590,7 @@ public class LDAPDatasource implements Datasource
    * 
    * @author Max Meier (D-III-ITD 5.1)
    */
-  private class RelativePaths
+  private static class RelativePaths
   {
 
     public int relative;
@@ -612,7 +612,7 @@ public class LDAPDatasource implements Datasource
    * 
    * @author Max Meier (D-III-ITD 5.1)
    */
-  private class RelativePath
+  private static class RelativePath
   {
 
     public int relative;
@@ -756,7 +756,7 @@ public class LDAPDatasource implements Datasource
       else
       { // edit searchFilters for subtree searches:
 
-        Integer key = new Integer(relativePath);
+        Integer key = Integer.valueOf(relativePath);
 
         String non0LevelSearchFilter = mapNon0PathLevelToSearchFilter.get(key);
 
@@ -776,17 +776,15 @@ public class LDAPDatasource implements Datasource
 
     }
 
-    Iterator<Integer> attributeKeys =
-      mapNon0PathLevelToSearchFilter.keySet().iterator();
     // TOD0 evtl. Optimierung: attributeKeys nicht in zufälliger Reihenfolge
     // durchgehen
-    while (attributeKeys.hasNext())
+    for (Map.Entry<Integer, String> ent : mapNon0PathLevelToSearchFilter.entrySet())
     {
-      Integer currentKey = attributeKeys.next();
+      Integer currentKey = ent.getKey();
 
       int relativePath = currentKey.intValue();
 
-      String pathFilter = mapNon0PathLevelToSearchFilter.get(currentKey);
+      String pathFilter = ent.getValue();
 
       RelativePaths paths = getPaths(pathFilter, relativePath, endTime);
 

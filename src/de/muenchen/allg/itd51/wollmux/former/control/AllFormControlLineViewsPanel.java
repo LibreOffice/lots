@@ -174,7 +174,7 @@ public class AllFormControlLineViewsPanel implements View, ItemListener,
     scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
     scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
     scrollPane.getVerticalScrollBar().setUnitIncrement(
-      Common.VERTICAL_SCROLLBAR_UNIT_INCREMENT);
+      Common.getVerticalScrollbarUnitIncrement());
     scrollPane.setBorder(BorderFactory.createLineBorder(Color.WHITE, 1));
 
     // int gridx, int gridy, int gridwidth, int gridheight, double weightx, double

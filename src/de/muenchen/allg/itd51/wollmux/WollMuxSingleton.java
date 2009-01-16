@@ -345,11 +345,13 @@ public class WollMuxSingleton implements XPALProvider
       {
         BufferedReader in =
           new BufferedReader(new InputStreamReader(url.openStream()));
-        return in.readLine().toString();
+        String str = in.readLine();
+        if (str != null) return str;
       }
     }
     catch (java.lang.Exception x)
     {}
+
     return L.m("Version: unbekannt");
   }
 
@@ -612,34 +614,33 @@ public class WollMuxSingleton implements XPALProvider
         UNO.XUIConfigurationManager(suppl.getUIConfigurationManager("com.sun.star.text.TextDocument"));
       XIndexAccess menubar = UNO.XIndexAccess(cfgMgr.getSettings(settingsUrl, true));
 
-      // Elemente des .uno:ToolsMenu besorgen:
-      XIndexContainer toolsMenu = null;
       int idx = findElementWithCmdURL(menubar, insertIntoMenuUrl);
       if (idx >= 0)
       {
         UnoProps desc = new UnoProps((PropertyValue[]) menubar.getByIndex(idx));
-        toolsMenu =
+        // Elemente des .uno:ToolsMenu besorgen:
+        XIndexContainer toolsMenu =
           UNO.XIndexContainer(desc.getPropertyValue("ItemDescriptorContainer"));
-      }
 
-      // Seriendruck-Button löschen, wenn er bereits vorhanden ist.
-      for (String rCmdUrl : removeCmdUrls)
-      {
-        idx = findElementWithCmdURL(toolsMenu, rCmdUrl);
-        if (idx >= 0) toolsMenu.removeByIndex(idx);
-      }
+        // Seriendruck-Button löschen, wenn er bereits vorhanden ist.
+        for (String rCmdUrl : removeCmdUrls)
+        {
+          idx = findElementWithCmdURL(toolsMenu, rCmdUrl);
+          if (idx >= 0) toolsMenu.removeByIndex(idx);
+        }
 
-      // SeriendruckAssistent suchen
-      idx = findElementWithCmdURL(toolsMenu, insertBeforeElementUrl);
-      if (idx >= 0)
-      {
-        UnoProps desc = new UnoProps();
-        desc.setPropertyValue("CommandURL", cmdUrl);
-        desc.setPropertyValue("Type", FormButtonType.PUSH);
-        desc.setPropertyValue("Label", label);
-        toolsMenu.insertByIndex(idx, desc.getProps());
-        cfgMgr.replaceSettings(settingsUrl, menubar);
-        UNO.XUIConfigurationPersistence(cfgMgr).store();
+        // SeriendruckAssistent suchen
+        idx = findElementWithCmdURL(toolsMenu, insertBeforeElementUrl);
+        if (idx >= 0)
+        {
+          UnoProps newDesc = new UnoProps();
+          newDesc.setPropertyValue("CommandURL", cmdUrl);
+          newDesc.setPropertyValue("Type", FormButtonType.PUSH);
+          newDesc.setPropertyValue("Label", label);
+          toolsMenu.insertByIndex(idx, newDesc.getProps());
+          cfgMgr.replaceSettings(settingsUrl, menubar);
+          UNO.XUIConfigurationPersistence(cfgMgr).store();
+        }
       }
     }
     catch (java.lang.Exception e)
@@ -721,19 +722,19 @@ public class WollMuxSingleton implements XPALProvider
   {
     if (type.equalsIgnoreCase("boolean"))
     {
-      return new Boolean(value);
+      return Boolean.valueOf(value);
     }
     else if (type.equalsIgnoreCase("integer"))
     {
-      return new Integer(value);
+      return Integer.valueOf(value);
     }
     else if (type.equalsIgnoreCase("float"))
     {
-      return new Float(value);
+      return Float.valueOf(value);
     }
     else if (type.equalsIgnoreCase("string"))
     {
-      return new String(value);
+      return value;
     }
 
     throw new IllegalArgumentException(

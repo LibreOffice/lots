@@ -172,7 +172,7 @@ public class WollMuxFiles
    */
   private static boolean debugMode;
 
-  public static boolean showCredits;
+  private static boolean showCredits = false;
 
   /**
    * Inhalt der wollmux.conf-Datei, die angelegt wird, wenn noch keine
@@ -290,9 +290,8 @@ public class WollMuxFiles
      */
     setLoggingMode(WollMuxFiles.getWollmuxConf());
 
-    Logger.debug(L.debugMessages.toString());
-    L.debugMessages = null; // Speicherplatz freigeben
-
+    Logger.debug(L.flushDebugMessages());
+    
     fido.logTimes();
 
     showCredits =
@@ -1186,6 +1185,16 @@ public class WollMuxFiles
         return WollMuxClassLoader.class.getClassLoader().loadClass(name);
       }
     }
+  }
+
+  public static boolean showCredits()
+  {
+    return showCredits;
+  }
+
+  public static void showCredits(boolean showCredits)
+  {
+    WollMuxFiles.showCredits = showCredits;
   }
 
 }

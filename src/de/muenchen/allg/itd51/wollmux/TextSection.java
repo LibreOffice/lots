@@ -100,8 +100,8 @@ public class TextSection implements VisibilityElement
    */
   public void setVisible(boolean visible)
   {
-    UNO.setProperty(section, "IsVisible", new Boolean(visible));
-    UNO.setProperty(section.getAnchor(), "CharHidden", new Boolean(!visible));
+    UNO.setProperty(section, "IsVisible", Boolean.valueOf(visible));
+    UNO.setProperty(section.getAnchor(), "CharHidden", Boolean.valueOf(!visible));
   }
 
   /*

@@ -333,18 +333,25 @@ public final class FormFieldFactory
               "com.sun.star.text.TextPortion");
           while (contentEnum.hasMoreElements())
           {
-            XControlShape tempShape = null;
+            XControlShape tempShape;
             try
             {
               tempShape = UNO.XControlShape(contentEnum.nextElement());
             }
-            catch (java.lang.Exception x)
-            {}
-            XControlModel tempModel = tempShape.getControl();
-            XServiceInfo info = UNO.XServiceInfo(tempModel);
-            if (info.supportsService("com.sun.star.form.component.CheckBox"))
+            catch (Exception x)
             {
-              model = tempModel;
+              // Wegen OOo Bugs kann nextElement() werfen auch wenn hasMoreElements()
+              continue;
+            }
+
+            if (tempShape != null)
+            {
+              XControlModel tempModel = tempShape.getControl();
+              XServiceInfo info = UNO.XServiceInfo(tempModel);
+              if (info.supportsService("com.sun.star.form.component.CheckBox"))
+              {
+                model = tempModel;
+              }
             }
           }
         }
@@ -869,10 +876,10 @@ public final class FormFieldFactory
 
     public void setValue(String value)
     {
-      Boolean bv = new Boolean(value);
+      Boolean bv = Boolean.valueOf(value);
 
-      UNO.setProperty(checkbox, "State", ((bv.booleanValue()) ? new Short((short) 1)
-                                                             : new Short((short) 0)));
+      UNO.setProperty(checkbox, "State",
+        ((bv.booleanValue()) ? Short.valueOf((short) 1) : Short.valueOf((short) 0)));
     }
 
     /*
@@ -883,7 +890,7 @@ public final class FormFieldFactory
     public String getFormElementValue()
     {
       Object state = UNO.getProperty(checkbox, "State");
-      if (state != null && state.equals(new Short((short) 1)))
+      if (state != null && state.equals(Short.valueOf((short) 1)))
         return "true";
       else
         return "false";
@@ -961,12 +968,12 @@ public final class FormFieldFactory
 
     public int hashCode()
     {
-      return UnoRuntime.generateOid(textfield).hashCode();
+      return UnoRuntime.generateOid(UNO.XInterface(textfield)).hashCode();
     }
 
     public boolean equals(Object b)
     {
-      return UnoRuntime.areSame(textfield, UNO.XInterface(b));
+      return UnoRuntime.areSame(UNO.XInterface(textfield), UNO.XInterface(b));
     }
 
     public boolean substituteFieldID(String oldFieldId, String newFieldId)

@@ -1092,7 +1092,7 @@ public class DatasourceSearchDialog implements Dialog
             listOfQueryParts.add(new QueryPart(columnName, searchString));
           }
 
-          Integer wc = new Integer(wordcount);
+          Integer wc = Integer.valueOf(wordcount);
           if (!mapWordcountToListOfQuerys.containsKey(wc))
             mapWordcountToListOfQuerys.put(wc, new Vector<Query>());
 
@@ -1125,7 +1125,7 @@ public class DatasourceSearchDialog implements Dialog
      */
     public List<Query> getTemplate(int wordcount)
     {
-      return mapWordcountToListOfQuerys.get(new Integer(wordcount));
+      return mapWordcountToListOfQuerys.get(Integer.valueOf(wordcount));
     }
   }
 

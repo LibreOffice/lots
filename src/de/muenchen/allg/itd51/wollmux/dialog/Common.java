@@ -87,7 +87,7 @@ public class Common
    * Der Unit-Increment für vertikale Scrollbars, die Zeilen von Eingabefeldern
    * enthalten, wie z,B, die Steuerelemente-Ansicht des FM4000.
    */
-  public static int VERTICAL_SCROLLBAR_UNIT_INCREMENT = 12;
+  private static int vertical_scrollbar_unit_increment = 12;
 
   private static boolean lafSet = false;
 
@@ -166,6 +166,11 @@ public class Common
       }
     }
     Logger.debug(changedFonts + L.m(" Fontgrößen verändert!"));
+  }
+  
+  public static int getVerticalScrollbarUnitIncrement()
+  {
+    return vertical_scrollbar_unit_increment;
   }
 
   /**

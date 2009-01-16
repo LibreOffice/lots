@@ -57,6 +57,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.io.Serializable;
 import java.io.StringReader;
 import java.net.URL;
 import java.util.HashMap;
@@ -185,19 +186,6 @@ public class FormularMax4000
   private static final int GENERATED_LABEL_MAXLENGTH = 30;
 
   /**
-   * Wird als Label gesetzt, falls kein sinnvolles Label automatisch generiert werden
-   * konnte.
-   */
-  private static final String NO_LABEL = "";
-
-  /**
-   * Wird temporär als Label gesetzt, wenn kein Label benötigt wird, weil es sich nur
-   * um eine Einfügestelle handelt, die nicht als Formularsteuerelement erfasst
-   * werden soll.
-   */
-  private static final String INSERTION_ONLY = "<<InsertionOnly>>";
-
-  /**
    * URL des Quelltexts für den Standard-Empfängerauswahl-Tab.
    */
   private final URL EMPFAENGER_TAB_URL =
@@ -271,13 +259,13 @@ public class FormularMax4000
   /**
    * Der {@link IDManager}-Namensraum für die IDs von {@link FormControlModel}s.
    */
-  public static final Integer NAMESPACE_FORMCONTROLMODEL = new Integer(0);
+  public static final Integer NAMESPACE_FORMCONTROLMODEL = Integer.valueOf(0);
 
   /**
    * Der {@link IDManager}-Namensraum für die DB_SPALTE-Angaben von
    * {@link InsertionModel}s.
    */
-  public static final Integer NAMESPACE_DB_SPALTE = new Integer(1);
+  public static final Integer NAMESPACE_DB_SPALTE = Integer.valueOf(1);
 
   /**
    * ActionListener für Buttons mit der ACTION "abort".
@@ -837,7 +825,7 @@ public class FormularMax4000
      * Solange dies nicht erkannt wird, muss die Funktion deaktiviert sein.
      * 
      */
-    if (new Integer(3).equals(new Integer(0)))
+    if (Integer.valueOf(3).equals(Integer.valueOf(0)))
     {
       menuItem = new JMenuItem(L.m("Ladezeit des Dokuments optimieren"));
       menuItem.addActionListener(new ActionListener()
@@ -1340,7 +1328,7 @@ public class FormularMax4000
 
     private void fixup()
     {
-      if (fixupCheckbox != null && fixupCheckbox.getLabel() == NO_LABEL)
+      if (fixupCheckbox != null && fixupCheckbox.getLabel().length() == 0)
       {
         fixupCheckbox.setLabel(makeLabelFromStartOf(fixupText,
           2 * GENERATED_LABEL_MAXLENGTH));
@@ -1409,31 +1397,32 @@ public class FormularMax4000
   private FormControlModel registerFormControl(FormControl control,
       StringBuilder text)
   {
-    String label;
+    boolean insertionOnlyNoLabel = false;
+    String label = "";
     String id;
     String descriptor = control.getDescriptor();
     Matcher m = MAGIC_DESCRIPTOR_PATTERN.matcher(descriptor);
     if (m.matches())
     {
       label = m.group(1).trim();
-      if (label.length() == 0) label = INSERTION_ONLY;
+      if (label.length() == 0) insertionOnlyNoLabel = true;
       id = m.group(2).trim();
     }
     else
     {
       if (control.getType() == DocumentTree.CHECKBOX_CONTROL)
-        label = NO_LABEL; // immer fixUp-Text von hinter der Checkbox benutzen, weil
+        label = ""; // immer fixUp-Text von hinter der Checkbox benutzen, weil
       // meist bessere Ergebnisse als Text von vorne
       else
         label = makeLabelFromEndOf(text, GENERATED_LABEL_MAXLENGTH);
       id = descriptor;
     }
 
-    id = makeControlId(label, id);
+    id = makeControlId(label, id, insertionOnlyNoLabel);
 
     FormControlModel model = null;
 
-    if (label != INSERTION_ONLY)
+    if (!insertionOnlyNoLabel)
     {
       switch (control.getType())
       {
@@ -1455,7 +1444,7 @@ public class FormularMax4000
     boolean doGenderTrafo = false;
 
     String bookmarkName = insertFormValue(id);
-    if (label == INSERTION_ONLY)
+    if (insertionOnlyNoLabel)
     {
       if (id.startsWith(GLOBAL_PREFIX))
       {
@@ -1546,7 +1535,7 @@ public class FormularMax4000
     int len = str.length();
     if (len > maxlen) len = maxlen;
     label = str.substring(str.length() - len);
-    if (label.length() < 2) label = NO_LABEL;
+    if (label.length() < 2) label = "";
     return label;
   }
 
@@ -1563,7 +1552,7 @@ public class FormularMax4000
     int len = str.length();
     if (len > maxlen) len = maxlen;
     label = str.substring(0, len);
-    if (label.length() < 2) label = NO_LABEL;
+    if (label.length() < 2) label = "";
     return label;
   }
 
@@ -1694,16 +1683,16 @@ public class FormularMax4000
   }
 
   /**
-   * Macht aus str einen passenden Bezeichner für ein Steuerelement. Falls label ==
-   * {@link #INSERTION_ONLY}, so muss der Bezeichner nicht eindeutig sein (dies ist
-   * der Marker für eine reine Einfügestelle, für die kein Steuerelement erzeugt
+   * Macht aus str einen passenden Bezeichner für ein Steuerelement. Falls
+   * insertionOnlyNoLabel == true, so muss der Bezeichner nicht eindeutig sein (dies
+   * ist der Marker für eine reine Einfügestelle, für die kein Steuerelement erzeugt
    * werden muss).
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private String makeControlId(String label, String str)
+  private String makeControlId(String label, String str, boolean insertionOnlyNoLabel)
   {
-    if (label == INSERTION_ONLY)
+    if (insertionOnlyNoLabel)
     {
       String prefix = "";
       if (str.startsWith(GLOBAL_PREFIX))
@@ -1742,7 +1731,7 @@ public class FormularMax4000
       return vf;
     };
 
-    private class NoWrapFactory implements ViewFactory
+    private static class NoWrapFactory implements ViewFactory, Serializable
     {
       public View create(Element e)
       {
@@ -2206,12 +2195,12 @@ public class FormularMax4000
       catch (Exception x)
       {
         return true;/*
-         * Do not Logger.error(x); because the most likely cause for an
-         * exception is that range2 does not belong to the text object
-         * compare, which happens in tables, because when enumerating
-         * over a range inside of a table the enumeration hits a lot of
-         * unrelated cells (OOo bug).
-         */
+                     * Do not Logger.error(x); because the most likely cause for an
+                     * exception is that range2 does not belong to the text object
+                     * compare, which happens in tables, because when enumerating
+                     * over a range inside of a table the enumeration hits a lot of
+                     * unrelated cells (OOo bug).
+                     */
       }
     }
     return false;

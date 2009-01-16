@@ -1544,7 +1544,7 @@ public class SachleitendeVerfuegung
     {
       style = createParagraphStyle(doc, ParaStyleNameDefault, null);
       UNO.setProperty(style, "FollowStyle", ParaStyleNameDefault);
-      UNO.setProperty(style, "CharHeight", new Integer(11));
+      UNO.setProperty(style, "CharHeight", Integer.valueOf(11));
       UNO.setProperty(style, "CharFontName", "Arial");
     }
 
@@ -1555,9 +1555,9 @@ public class SachleitendeVerfuegung
         createParagraphStyle(doc, ParaStyleNameVerfuegungspunkt,
           ParaStyleNameDefault);
       UNO.setProperty(style, "FollowStyle", ParaStyleNameDefault);
-      UNO.setProperty(style, "CharWeight", new Float(FontWeight.BOLD));
-      UNO.setProperty(style, "ParaFirstLineIndent", new Integer(-700));
-      UNO.setProperty(style, "ParaTopMargin", new Integer(460));
+      UNO.setProperty(style, "CharWeight", Float.valueOf(FontWeight.BOLD));
+      UNO.setProperty(style, "ParaFirstLineIndent", Integer.valueOf(-700));
+      UNO.setProperty(style, "ParaTopMargin", Integer.valueOf(460));
     }
 
     style = getParagraphStyle(doc, ParaStyleNameVerfuegungspunkt1);
@@ -1567,8 +1567,8 @@ public class SachleitendeVerfuegung
         createParagraphStyle(doc, ParaStyleNameVerfuegungspunkt1,
           ParaStyleNameVerfuegungspunkt);
       UNO.setProperty(style, "FollowStyle", ParaStyleNameDefault);
-      UNO.setProperty(style, "ParaFirstLineIndent", new Integer(0));
-      UNO.setProperty(style, "ParaTopMargin", new Integer(0));
+      UNO.setProperty(style, "ParaFirstLineIndent", Integer.valueOf(0));
+      UNO.setProperty(style, "ParaTopMargin", Integer.valueOf(0));
     }
 
     style = getParagraphStyle(doc, ParaStyleNameAbdruck);
@@ -1578,9 +1578,9 @@ public class SachleitendeVerfuegung
         createParagraphStyle(doc, ParaStyleNameAbdruck,
           ParaStyleNameVerfuegungspunkt);
       UNO.setProperty(style, "FollowStyle", ParaStyleNameDefault);
-      UNO.setProperty(style, "CharWeight", new Integer(100));
-      UNO.setProperty(style, "ParaFirstLineIndent", new Integer(-700));
-      UNO.setProperty(style, "ParaTopMargin", new Integer(460));
+      UNO.setProperty(style, "CharWeight", Integer.valueOf(100));
+      UNO.setProperty(style, "ParaFirstLineIndent", Integer.valueOf(-700));
+      UNO.setProperty(style, "ParaTopMargin", Integer.valueOf(460));
     }
 
     style = getParagraphStyle(doc, ParaStyleNameZuleitungszeile);
@@ -1589,8 +1589,8 @@ public class SachleitendeVerfuegung
       style =
         createParagraphStyle(doc, ParaStyleNameZuleitungszeile, ParaStyleNameDefault);
       UNO.setProperty(style, "FollowStyle", ParaStyleNameDefault);
-      UNO.setProperty(style, "CharUnderline", new Integer(1));
-      UNO.setProperty(style, "CharWeight", new Float(FontWeight.BOLD));
+      UNO.setProperty(style, "CharUnderline", Integer.valueOf(1));
+      UNO.setProperty(style, "CharWeight", Float.valueOf(FontWeight.BOLD));
     }
 
     style = getParagraphStyle(doc, ParaStyleNameVerfuegungspunktMitZuleitung);
@@ -1600,7 +1600,7 @@ public class SachleitendeVerfuegung
         createParagraphStyle(doc, ParaStyleNameVerfuegungspunktMitZuleitung,
           ParaStyleNameVerfuegungspunkt);
       UNO.setProperty(style, "FollowStyle", ParaStyleNameDefault);
-      UNO.setProperty(style, "CharUnderline", new Integer(1));
+      UNO.setProperty(style, "CharUnderline", Integer.valueOf(1));
     }
 
     // Zeichenformate:
@@ -1610,9 +1610,9 @@ public class SachleitendeVerfuegung
     {
       style = createCharacterStyle(doc, CharStyleNameDefault, null);
       UNO.setProperty(style, "FollowStyle", CharStyleNameDefault);
-      UNO.setProperty(style, "CharHeight", new Integer(11));
+      UNO.setProperty(style, "CharHeight", Integer.valueOf(11));
       UNO.setProperty(style, "CharFontName", "Arial");
-      UNO.setProperty(style, "CharUnderline", new Integer(0));
+      UNO.setProperty(style, "CharUnderline", Integer.valueOf(0));
     }
 
     style = getCharacterStyle(doc, CharStyleNameRoemischeZiffer);
@@ -1621,7 +1621,7 @@ public class SachleitendeVerfuegung
       style =
         createCharacterStyle(doc, CharStyleNameRoemischeZiffer, CharStyleNameDefault);
       UNO.setProperty(style, "FollowStyle", CharStyleNameDefault);
-      UNO.setProperty(style, "CharWeight", new Float(FontWeight.BOLD));
+      UNO.setProperty(style, "CharWeight", Float.valueOf(FontWeight.BOLD));
     }
   }
 }

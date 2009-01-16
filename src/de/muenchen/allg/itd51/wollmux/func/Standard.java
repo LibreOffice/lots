@@ -81,7 +81,7 @@ public class Standard
   public static Boolean immerWahr()
   {
     outputMessageIfNecessary();
-    return new Boolean(true);
+    return Boolean.TRUE;
   }
 
   /**
@@ -97,14 +97,14 @@ public class Standard
       long l = Long.parseLong(zahl);
       long lo = Long.parseLong(low);
       long high = Long.parseLong(hi);
-      if (l < lo) return new Boolean(false);
-      if (l > high) return new Boolean(false);
+      if (l < lo) return Boolean.FALSE;
+      if (l > high) return Boolean.FALSE;
     }
     catch (Exception x)
     {
-      return new Boolean(false);
+      return Boolean.FALSE;
     }
-    return new Boolean(true);
+    return Boolean.TRUE;
   }
 
   /**

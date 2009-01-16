@@ -118,7 +118,7 @@ class MailMergeParams
     INDIVIDUAL;
   }
 
-  public class IndexSelection
+  public static class IndexSelection
   {
     /**
      * Falls {@link #datasetSelectionType} == {@link DatasetSelectionType#RANGE}

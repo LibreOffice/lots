@@ -404,7 +404,7 @@ abstract public class DocumentCommand
       return error.booleanValue();
     else if (isDefinedState("ERROR"))
     {
-      Boolean errorBool = new Boolean(getState("ERROR").toString());
+      Boolean errorBool = Boolean.valueOf(getState("ERROR").toString());
       return errorBool.booleanValue();
     }
     else
@@ -418,7 +418,7 @@ abstract public class DocumentCommand
    */
   public void setErrorState(boolean error)
   {
-    this.error = new Boolean(error);
+    this.error = Boolean.valueOf(error);
   }
 
   /**
@@ -620,7 +620,7 @@ abstract public class DocumentCommand
     if (range != null)
     {
       XTextCursor cursor = range.getText().createTextCursorByRange(range);
-      UNO.setProperty(cursor, "CharHidden", new Boolean(!visible));
+      UNO.setProperty(cursor, "CharHidden", Boolean.valueOf(!visible));
     }
   }
 

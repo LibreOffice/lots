@@ -133,6 +133,23 @@ public class PrintFunction implements Comparable<PrintFunction>
     return this.functionName.compareTo(other.functionName);
   }
 
+  public boolean equals(Object o)
+  {
+    if (o == null) return false;
+    try
+    {
+      return (this.compareTo((PrintFunction) o) == 0);
+    }
+    catch (ClassCastException x)
+    {}
+    return false;
+  }
+
+  public int hashCode()
+  {
+    return this.functionName.hashCode();
+  }
+
   /*
    * (non-Javadoc)
    * 

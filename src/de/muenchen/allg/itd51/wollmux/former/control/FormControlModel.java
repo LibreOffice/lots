@@ -67,12 +67,6 @@ public class FormControlModel
    */
   private static Pattern ID_PATTERN = Pattern.compile("^([a-zA-Z_][a-zA-Z_0-9]*)");
 
-  /**
-   * Die *_TYPE-Konstanten haben eine Doppelfunktion. Einerseits sind sie Typ-IDs,
-   * die mit == verglichen werden, andererseits wird bei der Ausgabe der String
-   * direkt als TYPE-Wert verwendet. Das ist etwas unsauber, aber jeder Code muss ein
-   * paar kleine Makel haben ;-)
-   */
   public static final String COMBOBOX_TYPE = "combobox";
 
   public static final String TEXTFIELD_TYPE = "textfield";
@@ -962,7 +956,7 @@ public class FormControlModel
       Iterator<String> iter = items.iterator();
       while (iter.hasNext())
       {
-        values.add(iter.next().toString());
+        values.add(iter.next());
       }
     }
 
@@ -973,7 +967,7 @@ public class FormControlModel
       Iterator<String> iter = groups.iterator();
       while (iter.hasNext())
       {
-        grps.add(iter.next().toString());
+        grps.add(iter.next());
       }
     }
 

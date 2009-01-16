@@ -36,6 +36,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
+import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.former.IDManager;
 import de.muenchen.allg.itd51.wollmux.func.Function;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
@@ -195,9 +196,12 @@ public class FunctionSelectionProvider
           paramName = childConf.getFirstChild().toString();
           paramConf = childConf.getLastChild();
         }
-        catch (Exception x)
-        {}
-        ;
+        catch (NodeNotFoundException x)
+        {
+          // Kann nicht passieren, weil childConf.count() getestet wurde. Ist nur hier
+          // um Compiler-Warnungen und findBugs zu besänftigen
+          throw new RuntimeException(x);
+        }
 
         ParamValue paramValue;
 

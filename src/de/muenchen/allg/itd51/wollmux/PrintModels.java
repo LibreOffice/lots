@@ -396,7 +396,7 @@ public class PrintModels
       }
 
       Short copyCount = (Short) getProperty(PROP_FINAL_COPY_COUNT);
-      if (copyCount == null) copyCount = new Short((short) 1);
+      if (copyCount == null) copyCount = Short.valueOf((short) 1);
 
       PageRange pageRange = (PageRange) getProperty(PROP_FINAL_PAGE_RANGE);
       if (pageRange == null) pageRange = new PageRange(PageRangeType.ALL, null);

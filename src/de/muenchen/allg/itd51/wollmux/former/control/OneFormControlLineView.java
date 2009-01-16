@@ -529,19 +529,19 @@ public class OneFormControlLineView extends LineView
    */
   private void setTypeSpecificTraits(JComponent compo, String type)
   {
-    if (type == FormControlModel.TAB_TYPE)
+    if (type.equals(FormControlModel.TAB_TYPE))
     {
       compo.setFont(boldFont);
       compo.setBackground(new Color(230, 235, 250));
       compo.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3));
     }
-    else if (type == FormControlModel.BUTTON_TYPE)
+    else if (type.equals(FormControlModel.BUTTON_TYPE))
     {
       compo.setFont(normalFont);
       compo.setBackground(Color.LIGHT_GRAY);
       compo.setBorder(BorderFactory.createRaisedBevelBorder());
     }
-    else if (type == FormControlModel.LABEL_TYPE)
+    else if (type.equals(FormControlModel.LABEL_TYPE))
     {
       compo.setFont(boldFont);
       compo.setBackground(Color.WHITE);

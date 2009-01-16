@@ -996,16 +996,16 @@ public class DocumentCommandInterpreter
       {
         UnoProps props = new UnoProps();
         props.setPropertyValue("OverwriteStyles", Boolean.TRUE);
-        props.setPropertyValue("LoadCellStyles", new Boolean(
-          styles.contains("cellstyles")));
-        props.setPropertyValue("LoadTextStyles", new Boolean(
-          styles.contains("textstyles")));
-        props.setPropertyValue("LoadFrameStyles", new Boolean(
-          styles.contains("framestyles")));
-        props.setPropertyValue("LoadPageStyles", new Boolean(
-          styles.contains("pagestyles")));
-        props.setPropertyValue("LoadNumberingStyles", new Boolean(
-          styles.contains("numberingstyles")));
+        props.setPropertyValue("LoadCellStyles",
+          Boolean.valueOf(styles.contains("cellstyles")));
+        props.setPropertyValue("LoadTextStyles",
+          Boolean.valueOf(styles.contains("textstyles")));
+        props.setPropertyValue("LoadFrameStyles",
+          Boolean.valueOf(styles.contains("framestyles")));
+        props.setPropertyValue("LoadPageStyles",
+          Boolean.valueOf(styles.contains("pagestyles")));
+        props.setPropertyValue("LoadNumberingStyles",
+          Boolean.valueOf(styles.contains("numberingstyles")));
         XStyleFamiliesSupplier sfs = UNO.XStyleFamiliesSupplier(model.doc);
         XStyleLoader loader = UNO.XStyleLoader(sfs.getStyleFamilies());
         loader.loadStylesFromURL(urlStr, props.getProps());
@@ -1107,7 +1107,7 @@ public class DocumentCommandInterpreter
         // sie ersetzt
         if (!(args.elementAt(j).equals("")))
         {
-          textFieldAnchor.setString(args.elementAt(j).toString());
+          textFieldAnchor.setString(args.elementAt(j));
           // setzen des ViewCursor auf die erste nicht ausgefüllte Einfügestelle
           // nach dem Einfügen des Textbausteines
         }
@@ -1390,8 +1390,8 @@ public class DocumentCommandInterpreter
     // Text fett und rot machen:
     try
     {
-      cursor.setPropertyValue("CharColor", new Integer(0xff0000));
-      cursor.setPropertyValue("CharWeight", new Float(FontWeight.BOLD));
+      cursor.setPropertyValue("CharColor", Integer.valueOf(0xff0000));
+      cursor.setPropertyValue("CharWeight", Float.valueOf(FontWeight.BOLD));
     }
     catch (java.lang.Exception x)
     {

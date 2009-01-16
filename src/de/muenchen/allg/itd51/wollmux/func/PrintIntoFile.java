@@ -168,7 +168,7 @@ public class PrintIntoFile
          * Setzen von PageNumberOffset auf 1 eine leere Seite davor eingefügt! Siehe
          * dazu auch den Kommentar weiter unten bei pageNumberOffset
          */
-        UNO.setProperty(cursor, "PageNumberOffset", new Short((short) 1));
+        UNO.setProperty(cursor, "PageNumberOffset", Short.valueOf((short) 1));
       }
 
       /**
@@ -512,7 +512,7 @@ public class PrintIntoFile
             Logger.debug2(L.m("Verschiebe \"%1\" von Seite %2 nach Seite %3", name,
               oldPageNo, newPageNo));
             Object afterMovePageNo =
-              UNO.setProperty(ob, "AnchorPageNo", new Short((short) newPageNo));
+              UNO.setProperty(ob, "AnchorPageNo", Short.valueOf((short) newPageNo));
             if (null == afterMovePageNo
               || ((Number) afterMovePageNo).intValue() != newPageNo)
             {

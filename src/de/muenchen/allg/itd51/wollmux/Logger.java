@@ -367,7 +367,7 @@ public class Logger
         out.print(prefix);
         out.println("-------- CAUSED BY ------");
       }
-    }while(e != null);
+    }
     out.println();
     out.flush();
 

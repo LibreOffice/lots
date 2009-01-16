@@ -739,10 +739,10 @@ public class MailMerge
             {
               CellRangeAddress addr = rangeAddresses[k];
               for (int x = addr.StartColumn; x <= addr.EndColumn; ++x)
-                columnIndexes.add(new Integer(x));
+                columnIndexes.add(Integer.valueOf(x));
 
               for (int y = addr.StartRow; y <= addr.EndRow; ++y)
-                rowIndexes.add(new Integer(y));
+                rowIndexes.add(Integer.valueOf(y));
             }
           }
 
@@ -769,7 +769,7 @@ public class MailMerge
                 UNO.XTextRange(sheetCellRange.getCellByPosition(x, ymin)).getString();
               if (columnName.length() > 0)
               {
-                mapColumnNameToIndex.put(columnName, new Integer(idx));
+                mapColumnNameToIndex.put(columnName, Integer.valueOf(idx));
                 schema.add(columnName);
                 ++idx;
               }
@@ -1135,7 +1135,7 @@ public class MailMerge
           if (selectedTable != null && selectedDatasource != null)
           {
             clearTodo();
-            addTodo("print", new Boolean(false));
+            addTodo("print", Boolean.FALSE);
             myFrame.dispose();
           }
         }
@@ -1153,7 +1153,7 @@ public class MailMerge
           if (selectedTable != null && selectedDatasource != null)
           {
             clearTodo();
-            addTodo("print", new Boolean(true));
+            addTodo("print", Boolean.TRUE);
             myFrame.dispose();
           }
         }
@@ -1281,8 +1281,8 @@ public class MailMerge
         mailMerge(pmod, offerselection.booleanValue(), schema, data);
       }
       else
-        mailMerge(pmod, selectedDatasource, selectedTable, new Integer(
-          CommandType.TABLE), offerselection.booleanValue());
+        mailMerge(pmod, selectedDatasource, selectedTable,
+          Integer.valueOf(CommandType.TABLE), offerselection.booleanValue());
     }
 
     /**

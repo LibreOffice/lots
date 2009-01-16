@@ -535,9 +535,9 @@ public class FunctionFactory
     }
     catch (NodeNotFoundException x)
     {
-      /* Kann nicht sein, weil count() getestet */
-      strFun = null;
-      reFun = null;
+      /* Kann nicht sein, weil count() getestet wurde. Statement ist nur hier,
+       * um Warnungen des Compilers und von findBugs zu besänftigen. */
+      throw new RuntimeException(x);
     }
 
     String regex = reFun.getString(noValues);
@@ -569,8 +569,9 @@ public class FunctionFactory
     }
     catch (NodeNotFoundException e)
     {
-      /* Kann nicht passieren. Hab count() getestet. */
-      valueNameFun = null;
+      /* Kann nicht sein, weil count() getestet wurde. Statement ist nur hier,
+       * um Warnungen des Compilers und von findBugs zu besänftigen. */
+      throw new RuntimeException(e);
     }
 
     return new ValueFunction(valueNameFun.getString(noValues));

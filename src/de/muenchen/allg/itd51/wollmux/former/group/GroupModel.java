@@ -48,8 +48,8 @@ import de.muenchen.allg.itd51.wollmux.former.function.ParamValue;
  * zu der Gruppe gehören + * Implementierung der Seriendruckfunktion des WollMux - *
  * 
  * '''2006-11-17''' BNK (2t): OneFormControlGroupsView mit Eingabefeld und Button zum
- * Hinzufügen einer neuen Gruppe (d.h. einer die bislang nicht existiert) + -
- *  * '''2006-12-02''' BNK (2t): AllGroupNamesView mit Markierung aller FormControls,
+ * Hinzufügen einer neuen Gruppe (d.h. einer die bislang nicht existiert) + - *
+ * '''2006-12-02''' BNK (2t): AllGroupNamesView mit Markierung aller FormControls,
  * die Mitglieder der Gruppe sind bei Anklicken eines Gruppennamens + - *
  * 
  * '''2006-12-04''' BNK (5t): Unterstützung für Feldreferenzen in
@@ -113,9 +113,9 @@ public class GroupModel
     this.name = name;
     this.condition = condition;
     this.formularMax4000 = formularMax4000;
-    bookmarks.add(new Integer(0)); // Dummy-Statement, nur um die Warnung
-                                    // wegzukriegen, dass bookmarks derzeit nicht
-                                    // verwendet wird.
+    bookmarks.add(Integer.valueOf(0)); // Dummy-Statement, nur um die Warnung
+    // wegzukriegen, dass bookmarks derzeit nicht
+    // verwendet wird.
   }
 
   /**
@@ -201,7 +201,6 @@ public class GroupModel
      */
     // public void attributeChanged(GroupModel model, int attributeId, Object
     // newValue);
-
     /**
      * Wird aufgerufen, wenn model aus seinem Container entfernt wird (und damit in
      * keiner View mehr angezeigt werden soll).

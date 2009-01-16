@@ -44,7 +44,6 @@ import com.sun.star.awt.KeyModifier;
 import com.sun.star.container.NoSuchElementException;
 import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.ui.XAcceleratorConfiguration;
-import com.sun.star.uno.Exception;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
@@ -263,120 +262,120 @@ public class Shortcuts
     final Map<String, Short> myMap = new HashMap<String, Short>();
 
     // Zahlen 0-9
-    myMap.put("0", new Short(Key.NUM0));
-    myMap.put("1", new Short(Key.NUM1));
-    myMap.put("2", new Short(Key.NUM2));
-    myMap.put("3", new Short(Key.NUM3));
-    myMap.put("4", new Short(Key.NUM4));
-    myMap.put("5", new Short(Key.NUM5));
-    myMap.put("6", new Short(Key.NUM6));
-    myMap.put("7", new Short(Key.NUM7));
-    myMap.put("8", new Short(Key.NUM8));
-    myMap.put("9", new Short(Key.NUM9));
+    myMap.put("0", Short.valueOf(Key.NUM0));
+    myMap.put("1", Short.valueOf(Key.NUM1));
+    myMap.put("2", Short.valueOf(Key.NUM2));
+    myMap.put("3", Short.valueOf(Key.NUM3));
+    myMap.put("4", Short.valueOf(Key.NUM4));
+    myMap.put("5", Short.valueOf(Key.NUM5));
+    myMap.put("6", Short.valueOf(Key.NUM6));
+    myMap.put("7", Short.valueOf(Key.NUM7));
+    myMap.put("8", Short.valueOf(Key.NUM8));
+    myMap.put("9", Short.valueOf(Key.NUM9));
 
     // Buchstaben A-Z
-    myMap.put("A", new Short(Key.A));
-    myMap.put("B", new Short(Key.B));
-    myMap.put("C", new Short(Key.C));
-    myMap.put("D", new Short(Key.D));
-    myMap.put("E", new Short(Key.E));
-    myMap.put("F", new Short(Key.F));
-    myMap.put("G", new Short(Key.G));
-    myMap.put("H", new Short(Key.H));
-    myMap.put("I", new Short(Key.I));
-    myMap.put("J", new Short(Key.J));
-    myMap.put("K", new Short(Key.K));
-    myMap.put("L", new Short(Key.L));
-    myMap.put("M", new Short(Key.M));
-    myMap.put("N", new Short(Key.N));
-    myMap.put("O", new Short(Key.O));
-    myMap.put("P", new Short(Key.P));
-    myMap.put("Q", new Short(Key.Q));
-    myMap.put("R", new Short(Key.R));
-    myMap.put("S", new Short(Key.S));
-    myMap.put("T", new Short(Key.T));
-    myMap.put("U", new Short(Key.U));
-    myMap.put("V", new Short(Key.V));
-    myMap.put("W", new Short(Key.W));
-    myMap.put("X", new Short(Key.X));
-    myMap.put("Y", new Short(Key.Y));
-    myMap.put("Z", new Short(Key.Z));
+    myMap.put("A", Short.valueOf(Key.A));
+    myMap.put("B", Short.valueOf(Key.B));
+    myMap.put("C", Short.valueOf(Key.C));
+    myMap.put("D", Short.valueOf(Key.D));
+    myMap.put("E", Short.valueOf(Key.E));
+    myMap.put("F", Short.valueOf(Key.F));
+    myMap.put("G", Short.valueOf(Key.G));
+    myMap.put("H", Short.valueOf(Key.H));
+    myMap.put("I", Short.valueOf(Key.I));
+    myMap.put("J", Short.valueOf(Key.J));
+    myMap.put("K", Short.valueOf(Key.K));
+    myMap.put("L", Short.valueOf(Key.L));
+    myMap.put("M", Short.valueOf(Key.M));
+    myMap.put("N", Short.valueOf(Key.N));
+    myMap.put("O", Short.valueOf(Key.O));
+    myMap.put("P", Short.valueOf(Key.P));
+    myMap.put("Q", Short.valueOf(Key.Q));
+    myMap.put("R", Short.valueOf(Key.R));
+    myMap.put("S", Short.valueOf(Key.S));
+    myMap.put("T", Short.valueOf(Key.T));
+    myMap.put("U", Short.valueOf(Key.U));
+    myMap.put("V", Short.valueOf(Key.V));
+    myMap.put("W", Short.valueOf(Key.W));
+    myMap.put("X", Short.valueOf(Key.X));
+    myMap.put("Y", Short.valueOf(Key.Y));
+    myMap.put("Z", Short.valueOf(Key.Z));
 
     // F1 - F26
-    myMap.put("F1", new Short(Key.F1));
-    myMap.put("F2", new Short(Key.F2));
-    myMap.put("F3", new Short(Key.F3));
-    myMap.put("F4", new Short(Key.F4));
-    myMap.put("F5", new Short(Key.F5));
-    myMap.put("F6", new Short(Key.F6));
-    myMap.put("F7", new Short(Key.F7));
-    myMap.put("F8", new Short(Key.F8));
-    myMap.put("F9", new Short(Key.F9));
-    myMap.put("F10", new Short(Key.F10));
-    myMap.put("F11", new Short(Key.F11));
-    myMap.put("F12", new Short(Key.F12));
-    myMap.put("F13", new Short(Key.F13));
-    myMap.put("F14", new Short(Key.F14));
-    myMap.put("F15", new Short(Key.F15));
-    myMap.put("F16", new Short(Key.F16));
-    myMap.put("F17", new Short(Key.F17));
-    myMap.put("F18", new Short(Key.F18));
-    myMap.put("F19", new Short(Key.F19));
-    myMap.put("F20", new Short(Key.F20));
-    myMap.put("F21", new Short(Key.F21));
-    myMap.put("F22", new Short(Key.F22));
-    myMap.put("F23", new Short(Key.F23));
-    myMap.put("F24", new Short(Key.F24));
-    myMap.put("F25", new Short(Key.F25));
-    myMap.put("F26", new Short(Key.F26));
+    myMap.put("F1", Short.valueOf(Key.F1));
+    myMap.put("F2", Short.valueOf(Key.F2));
+    myMap.put("F3", Short.valueOf(Key.F3));
+    myMap.put("F4", Short.valueOf(Key.F4));
+    myMap.put("F5", Short.valueOf(Key.F5));
+    myMap.put("F6", Short.valueOf(Key.F6));
+    myMap.put("F7", Short.valueOf(Key.F7));
+    myMap.put("F8", Short.valueOf(Key.F8));
+    myMap.put("F9", Short.valueOf(Key.F9));
+    myMap.put("F10", Short.valueOf(Key.F10));
+    myMap.put("F11", Short.valueOf(Key.F11));
+    myMap.put("F12", Short.valueOf(Key.F12));
+    myMap.put("F13", Short.valueOf(Key.F13));
+    myMap.put("F14", Short.valueOf(Key.F14));
+    myMap.put("F15", Short.valueOf(Key.F15));
+    myMap.put("F16", Short.valueOf(Key.F16));
+    myMap.put("F17", Short.valueOf(Key.F17));
+    myMap.put("F18", Short.valueOf(Key.F18));
+    myMap.put("F19", Short.valueOf(Key.F19));
+    myMap.put("F20", Short.valueOf(Key.F20));
+    myMap.put("F21", Short.valueOf(Key.F21));
+    myMap.put("F22", Short.valueOf(Key.F22));
+    myMap.put("F23", Short.valueOf(Key.F23));
+    myMap.put("F24", Short.valueOf(Key.F24));
+    myMap.put("F25", Short.valueOf(Key.F25));
+    myMap.put("F26", Short.valueOf(Key.F26));
 
-    myMap.put("DOWN", new Short(Key.DOWN));
-    myMap.put("UNTEN", new Short(Key.DOWN));
-    myMap.put("UP", new Short(Key.UP));
-    myMap.put("OBEN", new Short(Key.UP));
-    myMap.put("LEFT", new Short(Key.LEFT));
-    myMap.put("LINKS", new Short(Key.LEFT));
-    myMap.put("RIGHT", new Short(Key.RIGHT));
-    myMap.put("RECHTS", new Short(Key.RIGHT));
-    myMap.put("HOME", new Short(Key.HOME));
-    myMap.put("POS1", new Short(Key.HOME));
-    myMap.put("END", new Short(Key.END));
-    myMap.put("ENDE", new Short(Key.END));
-    myMap.put("PAGEUP", new Short(Key.PAGEUP));
-    myMap.put("BILDAUF", new Short(Key.PAGEUP));
-    myMap.put("RETURN", new Short(Key.RETURN));
-    myMap.put("EINGABE", new Short(Key.RETURN));
-    myMap.put("ESCAPE", new Short(Key.ESCAPE));
-    myMap.put("ESC", new Short(Key.ESCAPE));
-    myMap.put("TAB", new Short(Key.TAB));
-    myMap.put("TABULATOR", new Short(Key.TAB));
-    myMap.put("BACKSPACE", new Short(Key.BACKSPACE));
-    myMap.put("RUECKSCHRITT", new Short(Key.BACKSPACE));
-    myMap.put("RÜCKSCHRITT", new Short(Key.BACKSPACE));
-    myMap.put("SPACE", new Short(Key.SPACE));
-    myMap.put("LEERTASTE", new Short(Key.SPACE));
-    myMap.put("INSERT", new Short(Key.INSERT));
-    myMap.put("EINFG", new Short(Key.INSERT));
-    myMap.put("DELETE", new Short(Key.DELETE));
-    myMap.put("ENTF", new Short(Key.DELETE));
-    myMap.put("ADD", new Short(Key.ADD));
-    myMap.put("PLUS", new Short(Key.ADD));
-    myMap.put("SUBTRACT", new Short(Key.SUBTRACT));
-    myMap.put("-", new Short(Key.SUBTRACT));
-    myMap.put("MULTIPLY", new Short(Key.MULTIPLY));
-    myMap.put("*", new Short(Key.MULTIPLY));
-    myMap.put("DIVIDE", new Short(Key.DIVIDE));
-    myMap.put("/", new Short(Key.DIVIDE));
-    myMap.put("POINT", new Short(Key.POINT));
-    myMap.put(".", new Short(Key.POINT));
-    myMap.put("COMMA", new Short(Key.COMMA));
-    myMap.put(",", new Short(Key.COMMA));
-    myMap.put("LESS", new Short(Key.LESS));
-    myMap.put("<", new Short(Key.LESS));
-    myMap.put("GREATER", new Short(Key.GREATER));
-    myMap.put(">", new Short(Key.GREATER));
-    myMap.put("EQUAL", new Short(Key.EQUAL));
-    myMap.put("=", new Short(Key.EQUAL));
+    myMap.put("DOWN", Short.valueOf(Key.DOWN));
+    myMap.put("UNTEN", Short.valueOf(Key.DOWN));
+    myMap.put("UP", Short.valueOf(Key.UP));
+    myMap.put("OBEN", Short.valueOf(Key.UP));
+    myMap.put("LEFT", Short.valueOf(Key.LEFT));
+    myMap.put("LINKS", Short.valueOf(Key.LEFT));
+    myMap.put("RIGHT", Short.valueOf(Key.RIGHT));
+    myMap.put("RECHTS", Short.valueOf(Key.RIGHT));
+    myMap.put("HOME", Short.valueOf(Key.HOME));
+    myMap.put("POS1", Short.valueOf(Key.HOME));
+    myMap.put("END", Short.valueOf(Key.END));
+    myMap.put("ENDE", Short.valueOf(Key.END));
+    myMap.put("PAGEUP", Short.valueOf(Key.PAGEUP));
+    myMap.put("BILDAUF", Short.valueOf(Key.PAGEUP));
+    myMap.put("RETURN", Short.valueOf(Key.RETURN));
+    myMap.put("EINGABE", Short.valueOf(Key.RETURN));
+    myMap.put("ESCAPE", Short.valueOf(Key.ESCAPE));
+    myMap.put("ESC", Short.valueOf(Key.ESCAPE));
+    myMap.put("TAB", Short.valueOf(Key.TAB));
+    myMap.put("TABULATOR", Short.valueOf(Key.TAB));
+    myMap.put("BACKSPACE", Short.valueOf(Key.BACKSPACE));
+    myMap.put("RUECKSCHRITT", Short.valueOf(Key.BACKSPACE));
+    myMap.put("RÜCKSCHRITT", Short.valueOf(Key.BACKSPACE));
+    myMap.put("SPACE", Short.valueOf(Key.SPACE));
+    myMap.put("LEERTASTE", Short.valueOf(Key.SPACE));
+    myMap.put("INSERT", Short.valueOf(Key.INSERT));
+    myMap.put("EINFG", Short.valueOf(Key.INSERT));
+    myMap.put("DELETE", Short.valueOf(Key.DELETE));
+    myMap.put("ENTF", Short.valueOf(Key.DELETE));
+    myMap.put("ADD", Short.valueOf(Key.ADD));
+    myMap.put("PLUS", Short.valueOf(Key.ADD));
+    myMap.put("SUBTRACT", Short.valueOf(Key.SUBTRACT));
+    myMap.put("-", Short.valueOf(Key.SUBTRACT));
+    myMap.put("MULTIPLY", Short.valueOf(Key.MULTIPLY));
+    myMap.put("*", Short.valueOf(Key.MULTIPLY));
+    myMap.put("DIVIDE", Short.valueOf(Key.DIVIDE));
+    myMap.put("/", Short.valueOf(Key.DIVIDE));
+    myMap.put("POINT", Short.valueOf(Key.POINT));
+    myMap.put(".", Short.valueOf(Key.POINT));
+    myMap.put("COMMA", Short.valueOf(Key.COMMA));
+    myMap.put(",", Short.valueOf(Key.COMMA));
+    myMap.put("LESS", Short.valueOf(Key.LESS));
+    myMap.put("<", Short.valueOf(Key.LESS));
+    myMap.put("GREATER", Short.valueOf(Key.GREATER));
+    myMap.put(">", Short.valueOf(Key.GREATER));
+    myMap.put("EQUAL", Short.valueOf(Key.EQUAL));
+    myMap.put("=", Short.valueOf(Key.EQUAL));
 
     final Short keyCode = myMap.get(shortcut.toUpperCase());
 
@@ -397,41 +396,27 @@ public class Shortcuts
     final Map<String, Short> myMap = new HashMap<String, Short>();
 
     // SHIFT, CTRL und ALT
-    myMap.put("SHIFT", new Short(KeyModifier.SHIFT));
-    myMap.put("UMSCHALT", new Short(KeyModifier.SHIFT));
-    myMap.put("CTRL", new Short(KeyModifier.MOD1));
-    myMap.put("STRG", new Short(KeyModifier.MOD1));
-    myMap.put("ALT", new Short(KeyModifier.MOD2));
+    myMap.put("SHIFT", Short.valueOf(KeyModifier.SHIFT));
+    myMap.put("UMSCHALT", Short.valueOf(KeyModifier.SHIFT));
+    myMap.put("CTRL", Short.valueOf(KeyModifier.MOD1));
+    myMap.put("STRG", Short.valueOf(KeyModifier.MOD1));
+    myMap.put("ALT", Short.valueOf(KeyModifier.MOD2));
 
     final Short keyModifier = myMap.get(shortcut.toUpperCase());
 
     return keyModifier;
   }
 
-  public static void main(String[] args)
+  public static void main(String[] args) throws Exception
   {
 
-    try
-    {
-      UNO.init();
-    }
-    catch (java.lang.Exception e)
-    {
-      Logger.error(e);
-    }
+    UNO.init();
 
     // lesen der conf --> fällt nachher weg
     ConfigThingy conf = null;
     String confFile = "../../.wollmux/wollmux.conf";
 
-    try
-    {
-      conf = new ConfigThingy("", new URL(new File(".").toURL(), confFile));
-    }
-    catch (java.lang.Exception e)
-    {
-      System.out.println("Fehler ConfigThingy " + e);
-    }
+    conf = new ConfigThingy("", new URL(new File(".").toURL(), confFile));
 
     // ConfigThingy conf = WollMuxSingleton.getInstance().getWollmuxConf();
 

@@ -133,7 +133,7 @@ public class JPotentiallyOverlongPopupMenuButton extends JButton
     Vector<Action> actions = new Vector<Action>();
     for (int i = 1; i <= 100; ++i)
     {
-      final Integer I = new Integer(i);
+      final Integer I = Integer.valueOf(i);
       actions.add(new AbstractAction("" + i)
       {
 

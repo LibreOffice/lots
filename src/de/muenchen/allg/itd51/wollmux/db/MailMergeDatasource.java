@@ -682,10 +682,10 @@ public class MailMergeDatasource
        * http://qa.openoffice.org/issues/show_bug.cgi?id=78522 Entspricht dem Button
        * SQL mit grünem Haken (SQL-Kommando direkt ausführen) im Base-Abfrageentwurf.
        */
-      xProp.setPropertyValue("EscapeProcessing", new Boolean(false));
+      xProp.setPropertyValue("EscapeProcessing", Boolean.FALSE);
 
-      xProp.setPropertyValue("CommandType", new Integer(
-        com.sun.star.sdb.CommandType.COMMAND));
+      xProp.setPropertyValue("CommandType",
+        Integer.valueOf(com.sun.star.sdb.CommandType.COMMAND));
 
       xProp.setPropertyValue("Command", "SELECT COUNT(*) FROM "
         + sqlIdentifier(tableName) + ";");
@@ -1830,7 +1830,7 @@ public class MailMergeDatasource
                 UNO.XTextRange(sheetCellRange.getCellByPosition(x, ymin)).getString();
               if (columnName.length() > 0)
               {
-                mapColumnNameToIndex.put(columnName, new Integer(idx));
+                mapColumnNameToIndex.put(columnName, Integer.valueOf(idx));
                 schema.add(columnName);
                 ++idx;
               }
@@ -1907,10 +1907,10 @@ public class MailMergeDatasource
       {
         CellRangeAddress addr = rangeAddresses[k];
         for (int x = addr.StartColumn; x <= addr.EndColumn; ++x)
-          columnIndexes.add(new Integer(x));
+          columnIndexes.add(Integer.valueOf(x));
 
         for (int y = addr.StartRow; y <= addr.EndRow; ++y)
-          rowIndexes.add(new Integer(y));
+          rowIndexes.add(Integer.valueOf(y));
       }
     }
   }

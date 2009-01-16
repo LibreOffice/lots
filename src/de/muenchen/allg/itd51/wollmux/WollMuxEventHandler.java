@@ -155,7 +155,11 @@ public class WollMuxEventHandler
 
     private static EventProcessor getInstance()
     {
-      if (singletonInstance == null) singletonInstance = new EventProcessor();
+      if (singletonInstance == null)
+      {
+        singletonInstance = new EventProcessor();
+        singletonInstance.start();
+      }
       return singletonInstance;
     }
 
@@ -206,6 +210,15 @@ public class WollMuxEventHandler
           Logger.debug(L.m("Beende EventProcessor-Thread"));
         }
       });
+    }
+
+    /**
+     * Startet den {@link #eventProcessorThread}.
+     * 
+     * @author Matthias Benkmann (D-III-ITD-D101)
+     */
+    private void start()
+    {
       eventProcessorThread.start();
     }
 
@@ -2404,7 +2417,7 @@ public class WollMuxEventHandler
       {
         try
         {
-          return System.getProperty(key).toString();
+          return System.getProperty(key);
         }
         catch (java.lang.Exception e)
         {
@@ -3115,7 +3128,7 @@ public class WollMuxEventHandler
         Iterator<String> iter = bmNames.iterator();
         while (iter.hasNext())
         {
-          bookmarkName = iter.next().toString();
+          bookmarkName = iter.next();
           try
           {
             Bookmark b =
@@ -3175,7 +3188,7 @@ public class WollMuxEventHandler
         if (highlightColor.equals("") || highlightColor.equalsIgnoreCase("none"))
           return null;
         int hc = Integer.parseInt(highlightColor, 16);
-        return new Integer(hc);
+        return Integer.valueOf(hc);
       }
       catch (NodeNotFoundException e)
       {

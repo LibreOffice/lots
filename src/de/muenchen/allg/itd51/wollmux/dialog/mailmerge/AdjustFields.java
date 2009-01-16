@@ -43,6 +43,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import javax.swing.AbstractAction;
@@ -98,10 +99,10 @@ class AdjustFields
       {
         HashMap<String, FieldSubstitution> mapIdToSubstitution =
           (HashMap<String, FieldSubstitution>) e.getSource();
-        for (Iterator<String> iter = mapIdToSubstitution.keySet().iterator(); iter.hasNext();)
+        for (Map.Entry<String, FieldSubstitution> ent: mapIdToSubstitution.entrySet())
         {
-          String fieldId = iter.next();
-          FieldSubstitution subst = mapIdToSubstitution.get(fieldId);
+          String fieldId = ent.getKey();
+          FieldSubstitution subst = ent.getValue();
           mod.applyFieldSubstitution(fieldId, subst);
         }
       }
@@ -213,7 +214,7 @@ class AdjustFields
               final String name = iter.next();
               Action button = new AbstractAction(name)
               {
-                private static final long serialVersionUID = 0;
+                
 
                 public void actionPerformed(ActionEvent e)
                 {
@@ -360,7 +361,7 @@ class AdjustFields
       new JScrollPane(itemBox, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
         ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
     spane.getVerticalScrollBar().setUnitIncrement(
-      Common.VERTICAL_SCROLLBAR_UNIT_INCREMENT);
+      Common.getVerticalScrollbarUnitIncrement());
 
     spane.setBorder(BorderFactory.createEmptyBorder());
     dialog.add(spane);

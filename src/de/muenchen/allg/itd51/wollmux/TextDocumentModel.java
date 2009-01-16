@@ -632,12 +632,11 @@ public class TextDocumentModel
     // durch alle Werte, die im FormDescriptor abgelegt sind gehen, und
     // vergleichen, ob sie mit den Inhalten der Formularfelder im Dokument
     // übereinstimmen.
-    Iterator<String> idIter = formFieldValues.keySet().iterator();
-    while (idIter.hasNext())
+    for (Map.Entry<String, String> ent : formFieldValues.entrySet())
     {
-      String id = idIter.next();
+      String id = ent.getKey();
       String value;
-      String lastStoredValue = formFieldValues.get(id);
+      String lastStoredValue = ent.getValue();
 
       List<FormField> fields = idToFormFields.get(id);
       if (fields != null && fields.size() > 0)
@@ -839,7 +838,7 @@ public class TextDocumentModel
    * 
    * @return
    */
-  synchronized public String[] getFragUrls()
+  synchronized String[] getFragUrls()
   {
     return fragUrls;
   }
@@ -848,7 +847,7 @@ public class TextDocumentModel
    * Über diese Methode kann der openDocument-Eventhandler die Liste der mit einem
    * insertContent-Kommando zu öffnenden frag-urls speichern.
    */
-  synchronized public void setFragUrls(String[] fragUrls)
+  synchronized void setFragUrls(String[] fragUrls)
   {
     this.fragUrls = fragUrls;
   }
@@ -908,7 +907,7 @@ public class TextDocumentModel
   synchronized public String getOverrideFrag(String fragId)
   {
     if (overrideFragMap.containsKey(fragId))
-      return overrideFragMap.get(fragId).toString();
+      return overrideFragMap.get(fragId);
     else
       return fragId;
   }
@@ -1189,7 +1188,7 @@ public class TextDocumentModel
         persistentData.setData(DATA_ID_PRINTFUNCTION, wm.stringRepresentation());
       else
         persistentData.setData(DATA_ID_PRINTFUNCTION,
-          printFunctions.iterator().next().toString());
+          printFunctions.iterator().next());
     }
   }
 
@@ -1252,7 +1251,7 @@ public class TextDocumentModel
         if (showHighlightColor)
           try
           {
-            Integer bgColor = new Integer(Integer.parseInt(highlightColor, 16));
+            Integer bgColor = Integer.valueOf(Integer.parseInt(highlightColor, 16));
             UNO.setProperty(cmd.getTextRange(), "CharBackColor", bgColor);
           }
           catch (NumberFormatException e)
@@ -1759,11 +1758,10 @@ public class TextDocumentModel
     ConfigThingy werte = new ConfigThingy("WM");
     ConfigThingy formwerte = new ConfigThingy("Formularwerte");
     werte.addChild(formwerte);
-    Iterator<String> iter = formFieldValues.keySet().iterator();
-    while (iter.hasNext())
+    for (Map.Entry<String, String> ent : formFieldValues.entrySet())
     {
-      String key = iter.next();
-      String value = formFieldValues.get(key);
+      String key = ent.getKey();
+      String value = ent.getValue();
       if (key != null && value != null)
       {
         ConfigThingy entry = new ConfigThingy("");
@@ -2303,22 +2301,22 @@ public class TextDocumentModel
     {
       // ZOOM-Argument auswerten:
       if (zoom.equalsIgnoreCase("Optimal"))
-        zoomType = new Short(DocumentZoomType.OPTIMAL);
+        zoomType = Short.valueOf(DocumentZoomType.OPTIMAL);
 
       if (zoom.equalsIgnoreCase("PageWidth"))
-        zoomType = new Short(DocumentZoomType.PAGE_WIDTH);
+        zoomType = Short.valueOf(DocumentZoomType.PAGE_WIDTH);
 
       if (zoom.equalsIgnoreCase("PageWidthExact"))
-        zoomType = new Short(DocumentZoomType.PAGE_WIDTH_EXACT);
+        zoomType = Short.valueOf(DocumentZoomType.PAGE_WIDTH_EXACT);
 
       if (zoom.equalsIgnoreCase("EntirePage"))
-        zoomType = new Short(DocumentZoomType.ENTIRE_PAGE);
+        zoomType = Short.valueOf(DocumentZoomType.ENTIRE_PAGE);
 
       if (zoomType == null)
       {
         try
         {
-          zoomValue = new Short(zoom);
+          zoomValue = Short.valueOf(zoom);
         }
         catch (NumberFormatException e)
         {}
@@ -2378,8 +2376,8 @@ public class TextDocumentModel
     // Position setzen:
     try
     {
-      int xPos = new Integer(settings.get("X").toString()).intValue();
-      int yPos = new Integer(settings.get("Y").toString()).intValue();
+      int xPos = Integer.parseInt(settings.get("X").toString());
+      int yPos = Integer.parseInt(settings.get("Y").toString());
       if (window != null)
       {
         window.setPosSize(xPos + insetLeft, yPos + insetTop, 0, 0, PosSize.POS);
@@ -2390,8 +2388,8 @@ public class TextDocumentModel
     // Dimensions setzen:
     try
     {
-      int width = new Integer(settings.get("WIDTH").toString()).intValue();
-      int height = new Integer(settings.get("HEIGHT").toString()).intValue();
+      int width = Integer.parseInt(settings.get("WIDTH").toString());
+      int height = Integer.parseInt(settings.get("HEIGHT").toString());
       if (window != null)
         window.setPosSize(0, 0, width - insetLeft - insetRight, height - insetTop
           - insetButtom, PosSize.SIZE);
@@ -2759,7 +2757,7 @@ public class TextDocumentModel
         master =
           UNO.XPropertySet(UNO.XMultiServiceFactory(doc).createInstance(
             "com.sun.star.text.FieldMaster.User"));
-        UNO.setProperty(master, "Value", new Integer(0));
+        UNO.setProperty(master, "Value", Integer.valueOf(0));
         UNO.setProperty(master, "Name", userFieldName);
       }
 
@@ -2793,10 +2791,10 @@ public class TextDocumentModel
 
     // Liste aller derzeit eingesetzten Trafos aufbauen:
     HashSet<String> usedFunctions = new HashSet<String>();
-    for (Iterator<String> iter = idToFormFields.keySet().iterator(); iter.hasNext();)
+    for (Map.Entry<String, List<FormField>> ent : idToFormFields.entrySet())
     {
-      String id = iter.next();
-      List<FormField> l = idToFormFields.get(id);
+
+      List<FormField> l = ent.getValue();
       for (Iterator<FormField> iterator = l.iterator(); iterator.hasNext();)
       {
         FormField f = iterator.next();
@@ -2804,10 +2802,11 @@ public class TextDocumentModel
         if (trafoName != null) usedFunctions.add(trafoName);
       }
     }
-    for (Iterator<String> iter = idToTextFieldFormFields.keySet().iterator(); iter.hasNext();)
+
+    for (Map.Entry<String, List<FormField>> ent : idToTextFieldFormFields.entrySet())
     {
-      String id = iter.next();
-      List<FormField> l = idToTextFieldFormFields.get(id);
+
+      List<FormField> l = ent.getValue();
       for (Iterator<FormField> iterator = l.iterator(); iterator.hasNext();)
       {
         FormField f = iterator.next();
@@ -3069,10 +3068,11 @@ public class TextDocumentModel
     HashSet<String> completeFields = new HashSet<String>();
     HashSet<String> startedFields = new HashSet<String>();
     HashSet<String> finishedFields = new HashSet<String>();
-    for (Iterator<String> iter = collectedTrafos.keySet().iterator(); iter.hasNext();)
+
+    for (Map.Entry<String, Integer> ent : collectedTrafos.entrySet())
     {
-      String trafo = iter.next();
-      int complete = collectedTrafos.get(trafo).intValue();
+      String trafo = ent.getKey();
+      int complete = ent.getValue().intValue();
       if (complete == 1) startedFields.add(trafo);
       if (complete == 2) finishedFields.add(trafo);
       if (complete == 3) completeFields.add(trafo);
@@ -3084,11 +3084,10 @@ public class TextDocumentModel
     if (completeFields.size() > 1)
       return null; // nicht eindeutige Felder
     else if (completeFields.size() == 1)
-      trafoName = completeFields.iterator().next().toString();
+      trafoName = completeFields.iterator().next();
     else if (startedFields.size() > 1)
       return null; // nicht eindeutige Felder
-    else if (startedFields.size() == 1)
-      trafoName = startedFields.iterator().next().toString();
+    else if (startedFields.size() == 1) trafoName = startedFields.iterator().next();
 
     // zugehöriges ConfigThingy aus der Formularbeschreibung zurückliefern.
     if (trafoName != null)
@@ -3159,7 +3158,7 @@ public class TextDocumentModel
         {
           String varName = "" + UNO.getProperty(tf, "Content");
           String t = getFunctionNameForUserFieldName(varName);
-          if (t != null) collectedTrafos.put(t, new Integer(3));
+          if (t != null) collectedTrafos.put(t, Integer.valueOf(3));
         }
 
         // Dokumentkommandos (derzeit insertFormValue) verarbeiten
@@ -3189,9 +3188,9 @@ public class TextDocumentModel
             if (t != null)
             {
               Integer s = collectedTrafos.get(t);
-              if (s == null) s = new Integer(0);
-              if (isStart) s = new Integer(s.intValue() | 1);
-              if (isEnd) s = new Integer(s.intValue() | 2);
+              if (s == null) s = Integer.valueOf(0);
+              if (isStart) s = Integer.valueOf(s.intValue() | 1);
+              if (isEnd) s = Integer.valueOf(s.intValue() | 2);
               collectedTrafos.put(t, s);
             }
           }

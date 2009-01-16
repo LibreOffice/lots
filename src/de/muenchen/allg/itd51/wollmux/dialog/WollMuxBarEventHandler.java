@@ -125,6 +125,15 @@ public class WollMuxBarEventHandler
      * abzumelden dürfen wir kein Daemon sein.
      */
     myThread.setDaemon(false);
+  }
+
+  /**
+   * Startet den Event Handler Thread.
+   * 
+   * @author Matthias Benkmann (D-III-ITD-D101)
+   */
+  void start()
+  {
     myThread.start();
   }
 
@@ -545,8 +554,8 @@ public class WollMuxBarEventHandler
             Object compo = xenu.nextElement();
             try
             { /*
-             * First see if the component itself offers a close function
-             */
+               * First see if the component itself offers a close function
+               */
               UNO.XCloseable(compo).close(true);
             }
             catch (Exception x)

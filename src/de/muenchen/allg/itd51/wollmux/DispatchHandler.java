@@ -52,22 +52,24 @@ import com.sun.star.util.URL;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
+import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 
 /**
- * Der DispatchHandler behandelt alle globalen Dispatches des WollMux und
- * registriert den DocumentDispatchInterceptor, der alle dokumentgebundenen
- * Dispatches behandeln kann. Er ermöglicht darüber hinaus das Abfangen und
- * Überschreiben von OOo-Dispatches (wie z.B. .uno:Print).
+ * Der DispatchHandler behandelt alle globalen Dispatches des WollMux und registriert
+ * den DocumentDispatchInterceptor, der alle dokumentgebundenen Dispatches behandeln
+ * kann. Er ermöglicht darüber hinaus das Abfangen und Überschreiben von
+ * OOo-Dispatches (wie z.B. .uno:Print).
  * 
  * @author christoph.lutz
  */
 public class DispatchHandler
 {
   /**
-   * Enthält einen XDispatchProvider, der Dispatch-Objekte für alle globalen
-   * (d.h. nicht dokumentgebundenen) Funktionalitäten des WollMux bereitstellt.
+   * Enthält einen XDispatchProvider, der Dispatch-Objekte für alle globalen (d.h.
+   * nicht dokumentgebundenen) Funktionalitäten des WollMux bereitstellt.
    */
-  public static final XDispatchProvider globalWollMuxDispatches = new GlobalDispatchProvider();
+  public static final XDispatchProvider globalWollMuxDispatches =
+    new GlobalDispatchProvider();
 
   // *****************************************************************************
   // * Definition aller möglichen Dispatch-URLs
@@ -79,7 +81,8 @@ public class DispatchHandler
 
   public static final String DISP_unoPrinterSetup = ".uno:PrinterSetup";
 
-  public static final String DISP_wmAbsenderAuswaehlen = "wollmux:AbsenderAuswaehlen";
+  public static final String DISP_wmAbsenderAuswaehlen =
+    "wollmux:AbsenderAuswaehlen";
 
   public static final String DISP_wmPALVerwalten = "wollmux:PALVerwalten";
 
@@ -107,19 +110,22 @@ public class DispatchHandler
 
   public static final String DISP_wmMarkBlock = "wollmux:MarkBlock";
 
-  public static final String DISP_wmTextbausteinEinfuegen = "wollmux:TextbausteinEinfuegen";
+  public static final String DISP_wmTextbausteinEinfuegen =
+    "wollmux:TextbausteinEinfuegen";
 
-  public static final String DISP_wmPlatzhalterAnspringen = "wollmux:PlatzhalterAnspringen";
+  public static final String DISP_wmPlatzhalterAnspringen =
+    "wollmux:PlatzhalterAnspringen";
 
-  public static final String DISP_wmTextbausteinVerweisEinfuegen = "wollmux:TextbausteinVerweisEinfuegen";
+  public static final String DISP_wmTextbausteinVerweisEinfuegen =
+    "wollmux:TextbausteinVerweisEinfuegen";
 
   public static final String DISP_wmSeriendruck = "wollmux:Seriendruck";
 
   public static final String DISP_wmTest = "wollmux:Test";
 
-  /*****************************************************************************
+  /**********************************************************************************
    * Erzeugt alle globalen DispatchHandler
-   ****************************************************************************/
+   *********************************************************************************/
   private static Set<BasicDispatchHandler> createGlobalDispatchHandlers()
   {
     Set<BasicDispatchHandler> handler = new HashSet<BasicDispatchHandler>();
@@ -201,10 +207,11 @@ public class DispatchHandler
     return handler;
   }
 
-  /*****************************************************************************
+  /**********************************************************************************
    * Erzeugt alle dokumentgebundenen Dispatchhandler
-   ****************************************************************************/
-  private static Set<BasicDispatchHandler> createDocumentDispatchHandler(TextDocumentModel model)
+   *********************************************************************************/
+  private static Set<BasicDispatchHandler> createDocumentDispatchHandler(
+      TextDocumentModel model)
   {
     Set<BasicDispatchHandler> handler = new HashSet<BasicDispatchHandler>();
     if (model == null) return handler;
@@ -328,13 +335,24 @@ public class DispatchHandler
       }
     });
 
-    handler.add(new DocumentDispatchHandler(DISP_wmTest, model)
+    try
     {
-      public void dispatch(String arg, PropertyValue[] props)
+      if (WollMuxFiles.getWollmuxConf().get("QA_TEST_HANDLER").toString().equalsIgnoreCase(
+        "true"))
       {
-        TestHandler.doTest(model, arg);
+        handler.add(new DocumentDispatchHandler(DISP_wmTest, model)
+        {
+          public void dispatch(String arg, PropertyValue[] props)
+          {
+            TestHandler.doTest(model, arg);
+          }
+        });
       }
-    });
+    }
+    catch (NodeNotFoundException x)
+    {
+      // TestHandler wird nicht installiert, wenn QA_TEST_HANDLER fehlt
+    }
 
     return handler;
   }
@@ -344,9 +362,8 @@ public class DispatchHandler
   // *****************************************************************************
 
   /**
-   * Dient als Basisklasse für DispatchHandler, die XDispatch implementieren und
-   * für die Bearbeitung von Dispatch-Aufrufen zu GENAU EINER URL zuständig
-   * sind.
+   * Dient als Basisklasse für DispatchHandler, die XDispatch implementieren und für
+   * die Bearbeitung von Dispatch-Aufrufen zu GENAU EINER URL zuständig sind.
    * 
    * @author christoph.lutz
    */
@@ -360,11 +377,12 @@ public class DispatchHandler
     /**
      * Enthält alle aktuell registrierten StatusListener
      */
-    protected final Vector<XStatusListener> statusListener = new Vector<XStatusListener>();
+    protected final Vector<XStatusListener> statusListener =
+      new Vector<XStatusListener>();
 
     /**
-     * Erzeugt einen DispatchHandler, der Dispatches mit der url urlStr
-     * bearbeiten kann.
+     * Erzeugt einen DispatchHandler, der Dispatches mit der url urlStr bearbeiten
+     * kann.
      * 
      * @param urlStr
      */
@@ -374,12 +392,11 @@ public class DispatchHandler
     }
 
     /**
-     * Führt den Dispatch selbst durch, wobei arg das Argument der URL enthält
-     * (z.B. "internerBriefkopf", wenn
-     * url="wollmux:openTemplate#internerBriefkopf" war) und props das
-     * PropertyValues[], das auch schon der ursprünglichen dispatch Methode
-     * mitgeliefert wurde. Es kann davon ausgegangen werden, dass arg nicht null
-     * ist und falls es nicht vorhanden ist den Leerstring enthält.
+     * Führt den Dispatch selbst durch, wobei arg das Argument der URL enthält (z.B.
+     * "internerBriefkopf", wenn url="wollmux:openTemplate#internerBriefkopf" war)
+     * und props das PropertyValues[], das auch schon der ursprünglichen dispatch
+     * Methode mitgeliefert wurde. Es kann davon ausgegangen werden, dass arg nicht
+     * null ist und falls es nicht vorhanden ist den Leerstring enthält.
      * 
      * @param arg
      *          Das Argument das mit der URL mitgeliefert wurde.
@@ -389,13 +406,13 @@ public class DispatchHandler
 
     /**
      * Prüft ob der DiapatchHandler zum aktuellen Zeitpunkt in der Lage ist, den
-     * Dispatch abzuhandeln und liefert false zurück, wenn der DispatchHandler
-     * nicht verwendet werden soll.
+     * Dispatch abzuhandeln und liefert false zurück, wenn der DispatchHandler nicht
+     * verwendet werden soll.
      * 
      * @param url
-     *          die zu prüfende URL ohne Argumente (z.B. "wollmux:openTemplate",
-     *          wenn die urprüngliche URL
-     *          "wollmux:openTemplate#internerBriefkopf" enthielt).
+     *          die zu prüfende URL ohne Argumente (z.B. "wollmux:openTemplate", wenn
+     *          die urprüngliche URL "wollmux:openTemplate#internerBriefkopf"
+     *          enthielt).
      * @return true, wenn der DispatchHandler verwendet werden soll, andernfalls
      *         false.
      */
@@ -406,8 +423,8 @@ public class DispatchHandler
 
     /**
      * Benachrichtigt den übergebenen XStatusListener listener mittels
-     * listener.statusChanged() über den aktuellen Zustand des DispatchHandlers
-     * und setzt z.B. den Zustände IsEnabled (Standardmäßig wird IsEnabled=true
+     * listener.statusChanged() über den aktuellen Zustand des DispatchHandlers und
+     * setzt z.B. den Zustände IsEnabled (Standardmäßig wird IsEnabled=true
      * übermittelt).
      * 
      * @param listener
@@ -430,7 +447,7 @@ public class DispatchHandler
     public void dispatch(URL url, PropertyValue[] props)
     {
       Logger.debug2(this.getClass().getSimpleName() + ".dispatch('" + url.Complete
-                    + "')");
+        + "')");
 
       // z.B. "wollmux:OpenTemplate#internerBriefkopf"
       // =====> {"wollmux:OpenTemplate", "internerBriefkopf"}
@@ -496,8 +513,8 @@ public class DispatchHandler
   }
 
   /**
-   * Definiert einen DispatchHandler, der dokumentgebundene Dispatches
-   * behandelt, die immer einem TextDocumentModel model zugeordnet sein müssen.
+   * Definiert einen DispatchHandler, der dokumentgebundene Dispatches behandelt, die
+   * immer einem TextDocumentModel model zugeordnet sein müssen.
    * 
    * @author christoph.lutz
    */
@@ -512,15 +529,13 @@ public class DispatchHandler
     }
 
     /**
-     * Callback-Methode, die vom DispatchProvider provider aufgerufen wird,
-     * bevor dieser DispatchHandler über queryDispatch(...) zurückgegeben wird,
-     * über die es möglich ist, das Original-Dispatch-Objekt beim
-     * DispatchProvider abzufragen.
+     * Callback-Methode, die vom DispatchProvider provider aufgerufen wird, bevor
+     * dieser DispatchHandler über queryDispatch(...) zurückgegeben wird, über die es
+     * möglich ist, das Original-Dispatch-Objekt beim DispatchProvider abzufragen.
      */
     public void requireOrigDispatch(DocumentDispatchInterceptor provider,
         com.sun.star.util.URL url, String frameName, int fsFlag)
-    {
-    }
+    {}
   }
 
   // *****************************************************************************
@@ -529,8 +544,8 @@ public class DispatchHandler
 
   /**
    * Enthält einen abstrakten DispatchProvider als Basis für die konkreten
-   * DispatchProvider GlobalDispatchProvider und DocumentDispatchInterceptor und
-   * ist in der Lage wollMuxURLs zu parsen.
+   * DispatchProvider GlobalDispatchProvider und DocumentDispatchInterceptor und ist
+   * in der Lage wollMuxURLs zu parsen.
    * 
    * @author christoph.lutz
    * 
@@ -538,12 +553,13 @@ public class DispatchHandler
   private static abstract class BasicWollMuxDispatchProvider implements
       XDispatchProvider
   {
-    private Set<BasicDispatchHandler> dispatchHandlers = new HashSet<BasicDispatchHandler>();
+    private Set<BasicDispatchHandler> dispatchHandlers =
+      new HashSet<BasicDispatchHandler>();
 
     /**
-     * Teilt dem DispatchProvider mit, dass er in Zukunft alle in
-     * dispatchHandlers enthaltenen DispatchHandler prüfen kann, wenn
-     * queryDispatch(...) aufgerufen wird.
+     * Teilt dem DispatchProvider mit, dass er in Zukunft alle in dispatchHandlers
+     * enthaltenen DispatchHandler prüfen kann, wenn queryDispatch(...) aufgerufen
+     * wird.
      * 
      * @param dispatchHandlers
      *          Set of BasicDispatchHandler
@@ -554,9 +570,9 @@ public class DispatchHandler
     }
 
     /**
-     * Liefert einen DispatchHandler für die url urlStr zurück oder null, falls
-     * der WollMux (in der aktuellen Situation) keinen dispatchHandler für
-     * urlStr definiert.
+     * Liefert einen DispatchHandler für die url urlStr zurück oder null, falls der
+     * WollMux (in der aktuellen Situation) keinen dispatchHandler für urlStr
+     * definiert.
      * 
      * @param urlStr
      *          die url des gesuchten Dispatch
@@ -609,8 +625,9 @@ public class DispatchHandler
       XDispatch[] lDispatcher = new XDispatch[nCount];
 
       for (int i = 0; i < nCount; ++i)
-        lDispatcher[i] = queryDispatch(seqDescripts[i].FeatureURL,
-          seqDescripts[i].FrameName, seqDescripts[i].SearchFlags);
+        lDispatcher[i] =
+          queryDispatch(seqDescripts[i].FeatureURL, seqDescripts[i].FrameName,
+            seqDescripts[i].SearchFlags);
 
       return lDispatcher;
     }
@@ -630,8 +647,7 @@ public class DispatchHandler
   }
 
   /**
-   * Diese Klasse stellt alle dokumentgebundenen WollMux-Dispatches zu
-   * Verfügung.
+   * Diese Klasse stellt alle dokumentgebundenen WollMux-Dispatches zu Verfügung.
    * 
    * @author christoph.lutz
    */
@@ -698,8 +714,8 @@ public class DispatchHandler
     public XDispatch queryDispatch(com.sun.star.util.URL url, String frameName,
         int fsFlag)
     {
-      TextDocumentModel model = WollMuxSingleton.getInstance().getTextDocumentModelForFrame(
-        frame);
+      TextDocumentModel model =
+        WollMuxSingleton.getInstance().getTextDocumentModelForFrame(frame);
       setDispatchHandlers(createDocumentDispatchHandler(model));
 
       XDispatch myDisp = null;
@@ -735,16 +751,16 @@ public class DispatchHandler
   }
 
   /**
-   * Registriert einen DocumentDispatchProvider im Frame frame (nur dann, wenn
-   * er nicht bereits registriert wurde).
+   * Registriert einen DocumentDispatchProvider im Frame frame (nur dann, wenn er
+   * nicht bereits registriert wurde).
    */
   public static void registerDocumentDispatchInterceptor(XFrame frame)
   {
     if (frame == null || UNO.XDispatchProviderInterception(frame) == null
-        || UNO.XDispatchProvider(frame) == null) return;
+      || UNO.XDispatchProvider(frame) == null) return;
 
     Logger.debug(L.m("Registriere DocumentDispatchInterceptor für frame #%1",
-      new Integer(frame.hashCode())));
+      Integer.valueOf(frame.hashCode())));
 
     // Hier möchte ich wissen, ob der DocumentDispatchInterceptor bereits im
     // Frame registriert ist. Ist das der Fall, so darf der
@@ -759,8 +775,9 @@ public class DispatchHandler
     // Objekt =! null zurück, so ist der frame bereits registriert, ansonsten
     // nicht.
     com.sun.star.util.URL url = UNO.getParsedUNOUrl(DISP_wmAbdruck);
-    XDispatch disp = UNO.XDispatchProvider(frame).queryDispatch(url, "_self",
-      com.sun.star.frame.FrameSearchFlag.SELF);
+    XDispatch disp =
+      UNO.XDispatchProvider(frame).queryDispatch(url, "_self",
+        com.sun.star.frame.FrameSearchFlag.SELF);
     boolean alreadyRegistered = disp != null;
 
     // DispatchInterceptor registrieren (wenn nicht bereits registriert):

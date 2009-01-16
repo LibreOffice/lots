@@ -83,14 +83,16 @@ public class FormModelImpl
     }
 
     // Abschnitt Fenster/Formular aus wollmuxConf holen:
-    ConfigThingy formFensterConf = new ConfigThingy("");
+    ConfigThingy formFensterConf;
     try
     {
       formFensterConf =
         WollMuxFiles.getWollmuxConf().query("Fenster").query("Formular").getLastChild();
     }
     catch (NodeNotFoundException x)
-    {}
+    {
+      formFensterConf = new ConfigThingy("");
+    }
 
     return new FormModelImpl.SingleDocumentFormModel(doc, formFensterConf, formConf,
       doc.getFunctionContext(), doc.getFunctionLibrary(), doc.getDialogLibrary());
@@ -144,11 +146,10 @@ public class FormModelImpl
     {
       TextDocumentModel doc = iter.next();
       HashMap<String, String> myIdToPresetValue = doc.getIDToPresetValue();
-      Iterator<String> piter = myIdToPresetValue.keySet().iterator();
-      while (piter.hasNext())
+      for (Map.Entry<String, String> ent: myIdToPresetValue.entrySet())
       {
-        String id = piter.next().toString();
-        String myPresetValue = "" + myIdToPresetValue.get(id);
+        String id = ent.getKey();
+        String myPresetValue = ent.getValue();
         String commonPresetValue = commonMapIdToPresetValue.get(id);
         if (commonPresetValue == null)
         {

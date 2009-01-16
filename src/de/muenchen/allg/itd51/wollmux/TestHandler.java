@@ -36,7 +36,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -48,6 +47,8 @@ import de.muenchen.allg.itd51.wollmux.func.StandardPrint;
 /**
  * Enthält die DispatchHandler für alle dispatch-Urls, die mit "wollmux:Test"
  * anfangen und für den automatisierten Test durch wollmux-qatest benötigt werden.
+ * Der Handler wird nur installiert, wenn die wollmux.conf die Direktive
+ * QA_TEST_HANDLER "true" enthält.
  * 
  * @author Christoph Lutz (D-III-ITD-5.1)
  */
@@ -58,7 +59,8 @@ public class TestHandler
    * Dieses File enthält die Argumente, die einem TestHandler übergeben werden sollen
    * und vor dem Aufruf des Teshandlers über das testtool geschrieben wurden.
    */
-  public static File WOLLMUX_QATEST_ARGS_FILE = new File("/tmp/wollmux_qatest.args");
+  private static final File WOLLMUX_QATEST_ARGS_FILE =
+    new File("/tmp/wollmux_qatest.args");
 
   /**
    * Bearbeitet den Test, der im Argument arg spezifiziert ist und im
@@ -79,7 +81,7 @@ public class TestHandler
     {
       Map<String, String> idsAndValues = getWollmuxTestArgs();
       int count = SachleitendeVerfuegung.countVerfuegungspunkte(model.doc);
-      int verfPunkt = new Short(idsAndValues.get("VerfPunkt").toString()).shortValue();
+      int verfPunkt = Short.parseShort(idsAndValues.get("VerfPunkt"));
       boolean isDraft = (verfPunkt == count) ? true : false;
       boolean isOriginal = (verfPunkt == 1) ? true : false;
       final XPrintModel pmod = model.createPrintModel(false);
@@ -90,7 +92,7 @@ public class TestHandler
           isOriginal));
         pmod.setPropertyValue(StandardPrint.PROP_SLV_SETTINGS, settings);
       }
-      catch (java.lang.Exception e)
+      catch (Exception e)
       {
         Logger.error(e);
       }
@@ -110,10 +112,10 @@ public class TestHandler
     if (cmd.equalsIgnoreCase("SchreibeFormularwerte"))
     {
       Map<String, String> idsAndValues = getWollmuxTestArgs();
-      for (Iterator<String> iter = idsAndValues.keySet().iterator(); iter.hasNext();)
+      for (Map.Entry<String, String> ent : idsAndValues.entrySet())
       {
-        String id = "" + iter.next();
-        String value = "" + idsAndValues.get(id);
+        String id = ent.getKey();
+        String value = ent.getValue();
         WollMuxEventHandler.handleSetFormValueViaPrintModel(model.doc, id, value,
           null);
       }
@@ -129,14 +131,14 @@ public class TestHandler
       // model.replaceSelectionWithFormField(t, c);
       ConfigThingy trafo = model.getFormFieldTrafoFromSelection();
       Logger.error("EinTest Trafo = '"
-                   + ((trafo != null) ? trafo.stringRepresentation() : "null") + "'");
+        + ((trafo != null) ? trafo.stringRepresentation() : "null") + "'");
       if (trafo != null)
       {
         try
         {
           model.setTrafo(trafo.getName(), c);
         }
-        catch (java.lang.Exception e)
+        catch (Exception e)
         {
           Logger.error(e);
         }
@@ -158,8 +160,8 @@ public class TestHandler
     HashMap<String, String> args = new HashMap<String, String>();
     try
     {
-      BufferedReader br = new BufferedReader(
-        new FileReader(WOLLMUX_QATEST_ARGS_FILE));
+      BufferedReader br =
+        new BufferedReader(new FileReader(WOLLMUX_QATEST_ARGS_FILE));
 
       for (String line = null; (line = br.readLine()) != null;)
       {
@@ -167,7 +169,7 @@ public class TestHandler
         args.put(keyValue[0], keyValue[1]);
       }
     }
-    catch (java.lang.Exception e)
+    catch (Exception e)
     {
       Logger.error(
         L.m("Argumentdatei für wollmux-qatest konnte nicht gelesen werden"), e);

@@ -107,8 +107,8 @@ public class PersistentData
    * Liefert alle Informations-Textfelder mit Id fieldName zurück.
    * 
    * @param create
-   *            falls true so werden entsprechende Felder angelegt, wenn sie nicht
-   *            existieren.
+   *          falls true so werden entsprechende Felder angelegt, wenn sie nicht
+   *          existieren.
    * @size falls create == true werden soviele Felder angelegt, dass darin size
    *       Zeichen aufgeteilt in TEXTFIELD_MAXLEN lange Blöcke untergebracht werden
    *       können. Eventuell vorhandene überschüssige Felder werden gelöscht. Auch
@@ -148,21 +148,21 @@ public class PersistentData
           text.insertTextContent(text.getStart(), UNO.XTextContent(frame), false);
 
           UNO.setProperty(frame, "BackTransparent", Boolean.TRUE);
-          UNO.setProperty(frame, "BorderDistance", new Integer(0));
+          UNO.setProperty(frame, "BorderDistance", Integer.valueOf(0));
           BorderLine line = new BorderLine(0, (short) 0, (short) 0, (short) 0);
           UNO.setProperty(frame, "LeftBorder", line);
           UNO.setProperty(frame, "TopBorder", line);
           UNO.setProperty(frame, "BottomBorder", line);
           UNO.setProperty(frame, "RightBorder", line);
           UNO.setProperty(frame, "TextWrap", WrapTextMode.THROUGHT);
-          UNO.setProperty(frame, "HoriOrient", new Short(HoriOrientation.NONE));
-          UNO.setProperty(frame, "HoriOrientPosition", new Integer(0));
-          UNO.setProperty(frame, "HoriOrientRelation", new Short(
-            RelOrientation.PAGE_LEFT));
-          UNO.setProperty(frame, "VertOrient", new Short(VertOrientation.BOTTOM));
-          // UNO.setProperty(frame, "VertOrientPosition", new Integer(0));
-          UNO.setProperty(frame, "VertOrientRelation", new Short(
-            RelOrientation.PAGE_FRAME));
+          UNO.setProperty(frame, "HoriOrient", Short.valueOf(HoriOrientation.NONE));
+          UNO.setProperty(frame, "HoriOrientPosition", Integer.valueOf(0));
+          UNO.setProperty(frame, "HoriOrientRelation",
+            Short.valueOf(RelOrientation.PAGE_LEFT));
+          UNO.setProperty(frame, "VertOrient", Short.valueOf(VertOrientation.BOTTOM));
+          // UNO.setProperty(frame, "VertOrientPosition", Integer.valueOf(0));
+          UNO.setProperty(frame, "VertOrientRelation",
+            Short.valueOf(RelOrientation.PAGE_FRAME));
           UNO.setProperty(frame, "FrameIsAutomaticHeight", Boolean.FALSE);
 
           XNamed frameName = UNO.XNamed(frame);
@@ -180,7 +180,8 @@ public class PersistentData
             Object textfield =
               UNO.getProperty(textportionEnu.nextElement(), "TextField");
             String author = (String) UNO.getProperty(textfield, "Author");
-            // ACHTUNG! author.equals(fieldName) wäre falsch, da author null sein kann!
+            // ACHTUNG! author.equals(fieldName) wäre falsch, da author null sein
+            // kann!
             if (fieldName.equals(author))
             {
               textfields.add(textfield);

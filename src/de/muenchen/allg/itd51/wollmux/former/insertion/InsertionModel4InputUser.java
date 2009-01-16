@@ -194,7 +194,7 @@ public class InsertionModel4InputUser extends InsertionModel
     XPropertySet master =
       UNO.XPropertySet(UNO.XMultiServiceFactory(doc).createInstance(
         "com.sun.star.text.FieldMaster.User"));
-    UNO.setProperty(master, "Value", new Integer(0));
+    UNO.setProperty(master, "Value", Integer.valueOf(0));
     UNO.setProperty(master, "Name", newName);
     UNO.setProperty(master, "Content", content);
 
@@ -229,14 +229,12 @@ public class InsertionModel4InputUser extends InsertionModel
 
     if (trafo.isNone())
     {
-      ConfigThingy expertConf = null;
       try
       {
-        expertConf = new ConfigThingy("TRAFO", "\"\"");
+        trafo.setExpertFunction(new ConfigThingy("TRAFO", "\"\""));
       }
       catch (Exception x)
       {}
-      trafo.setExpertFunction(expertConf);
     }
 
     // Falls eine externe Funktion referenziert wird, ohne dass irgendwelche

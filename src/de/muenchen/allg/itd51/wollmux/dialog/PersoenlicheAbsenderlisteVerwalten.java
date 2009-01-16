@@ -730,7 +730,7 @@ public class PersoenlicheAbsenderlisteVerwalten
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private class MyActionMouseListener extends MouseAdapter
+  private static class MyActionMouseListener extends MouseAdapter
   {
     private JList list;
 
@@ -795,7 +795,7 @@ public class PersoenlicheAbsenderlisteVerwalten
 
         if (mail == null) mail = "";
 
-        if (WollMuxFiles.showCredits)
+        if (WollMuxFiles.showCredits())
         {
           if (mail.equals("matthias.benkmann@muenchen.de"))
             icon = new ImageIcon(MB_URL);
@@ -1498,7 +1498,7 @@ public class PersoenlicheAbsenderlisteVerwalten
 
   private void credits()
   {
-    WollMuxFiles.showCredits = true;
+    WollMuxFiles.showCredits(true);
     QueryResults results = null;
     try
     {
@@ -1741,7 +1741,7 @@ public class PersoenlicheAbsenderlisteVerwalten
     RunTest test =
       new RunTest(conf.get("PersoenlicheAbsenderliste"),
         abConf.get("AbsenderdatenBearbeiten"), dj);
-    test.actionPerformed(null);
+    test.actionPerformed(new ActionEvent(null, 0, ""));
     Thread.sleep(600000);
     System.exit(0);
   }

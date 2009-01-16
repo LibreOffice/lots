@@ -581,7 +581,7 @@ public class MailMergeNew
         // ConfigThingy für leere Gender-Funktion zusammenbauen.
         ConfigThingy genderConf =
           GenderDialog.generateGenderTrafoConf(
-            ds.getColumnNames().get(0).toString(), "", "", "");
+            ds.getColumnNames().get(0), "", "", "");
         insertFieldFromTrafoDialog(ds.getColumnNames(), genderButtonName, genderConf);
       }
     });
@@ -598,7 +598,7 @@ public class MailMergeNew
         // IF(STRCMP(VALUE '<firstField>', '') THEN('') ELSE(''))
         ConfigThingy ifConf = new ConfigThingy("IF");
         ConfigThingy strCmpConf = ifConf.add("STRCMP");
-        strCmpConf.add("VALUE").add(ds.getColumnNames().get(0).toString());
+        strCmpConf.add("VALUE").add(ds.getColumnNames().get(0));
         strCmpConf.add("");
         ifConf.add("THEN").add("");
         ifConf.add("ELSE").add("");

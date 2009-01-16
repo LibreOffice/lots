@@ -1063,7 +1063,7 @@ public class DatensatzBearbeiten
           ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
           ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
       pain.getVerticalScrollBar().setUnitIncrement(
-        Common.VERTICAL_SCROLLBAR_UNIT_INCREMENT);
+        Common.getVerticalScrollbarUnitIncrement());
       pain.setBorder(null);
       myButtonPanel = new JPanel();
 

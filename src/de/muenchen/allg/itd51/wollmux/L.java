@@ -45,7 +45,7 @@ import de.muenchen.allg.itd51.parser.ConfigThingy;
  */
 public class L
 {
-  public static StringBuilder debugMessages = new StringBuilder();
+  private static StringBuilder debugMessages = new StringBuilder();
 
   /**
    * Die URL der Daten und Übersetzungen zur Lokalisierung.
@@ -141,6 +141,24 @@ public class L
     return buffy.toString();
   }
 
+  /**
+   * Liefert alle während der Initialisierung aufgelaufenen Debug-Messages zurück und gibt dann
+   * ihren Speicher frei. 
+   * @author Matthias Benkmann (D-III-ITD-D101)
+   */
+  public static String flushDebugMessages()
+  {
+    String str;
+    if (debugMessages != null)
+    {
+      str = debugMessages.toString();
+      debugMessages = null; //Speicher freigeben
+    }
+    else str = "";
+    
+    return str;
+  }
+  
   static
   {
     try

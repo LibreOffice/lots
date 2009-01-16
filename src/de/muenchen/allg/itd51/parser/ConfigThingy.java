@@ -844,7 +844,7 @@ public class ConfigThingy implements Iterable<ConfigThingy>
     Matcher m = p.matcher(str);
     ArrayList<Integer> locations = new ArrayList<Integer>();
     while (m.find())
-      locations.add(new Integer(m.start()));
+      locations.add(Integer.valueOf(m.start()));
     StringBuilder buffy = new StringBuilder(str);
     while (!locations.isEmpty())
     {

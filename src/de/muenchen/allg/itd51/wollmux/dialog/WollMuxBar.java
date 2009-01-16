@@ -403,6 +403,7 @@ public class WollMuxBar
     parseExternalApplications(conf.query("ExterneAnwendungen"));
 
     eventHandler = new WollMuxBarEventHandler(this);
+    eventHandler.start();
 
     /*
      * Die GUI wird im Event-Dispatching Thread erzeugt wg. Thread-Safety. Auch
@@ -1331,11 +1332,13 @@ public class WollMuxBar
       {
         BufferedReader in =
           new BufferedReader(new InputStreamReader(url.openStream()));
-        return in.readLine().toString();
+        String str = in.readLine();
+        if (str != null) return str;
       }
     }
     catch (java.lang.Exception x)
     {}
+    
     return L.m("Version: unbekannt");
   }
 

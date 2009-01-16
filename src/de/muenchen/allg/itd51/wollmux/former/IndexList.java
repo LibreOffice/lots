@@ -61,7 +61,7 @@ public class IndexList
         if (i < 0 || i > maxindex)
           iter.remove();
         else
-          iter.set(new Integer(i));
+          iter.set(Integer.valueOf(i));
       }
     }
   }
@@ -79,8 +79,8 @@ public class IndexList
       Integer I = iter.next();
       int i = I.intValue();
       if (i == index1)
-        iter.set(new Integer(index2));
-      else if (i == index2) iter.set(new Integer(index1));
+        iter.set(Integer.valueOf(index2));
+      else if (i == index2) iter.set(Integer.valueOf(index1));
     }
 
     Collections.sort(indices);
@@ -114,18 +114,18 @@ public class IndexList
    */
   public void remove(int i)
   {
-    if (indices.remove(new Integer(i))) Collections.sort(indices);
+    if (indices.remove(Integer.valueOf(i))) Collections.sort(indices);
   }
 
   public void add(int i)
   {
-    indices.add(new Integer(i));
+    indices.add(Integer.valueOf(i));
     Collections.sort(indices);
   }
 
   public boolean contains(int i)
   {
-    return indices.contains(new Integer(i));
+    return indices.contains(Integer.valueOf(i));
   }
 
   public boolean isEmpty()

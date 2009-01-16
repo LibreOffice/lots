@@ -103,17 +103,17 @@ public class FunctionSelection implements FunctionSelectionAccess
    */
   public boolean isReference()
   {
-    return (functionName != NO_FUNCTION && functionName != EXPERT_FUNCTION);
+    return !(isNone() || isExpert());
   }
 
   public boolean isExpert()
   {
-    return functionName == EXPERT_FUNCTION;
+    return functionName.equals(EXPERT_FUNCTION);
   }
 
   public boolean isNone()
   {
-    return functionName == NO_FUNCTION;
+    return functionName.equals(NO_FUNCTION);
   }
 
   /*

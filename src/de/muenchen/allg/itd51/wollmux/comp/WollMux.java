@@ -73,7 +73,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
    * Dieses Feld entält eine Liste aller Services, die dieser UNO-Service
    * implementiert.
    */
-  public static final java.lang.String[] SERVICENAMES =
+  private static final java.lang.String[] SERVICENAMES =
     { "de.muenchen.allg.itd51.wollmux.WollMux" };
 
   /**
@@ -223,8 +223,8 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
   public void addPALChangeEventListenerWithConsistencyCheck(
       XPALChangeEventListener l, int wollmuxConfHashCode)
   {
-    WollMuxEventHandler.handleAddPALChangeEventListener(l, new Integer(
-      wollmuxConfHashCode));
+    WollMuxEventHandler.handleAddPALChangeEventListener(l,
+      Integer.valueOf(wollmuxConfHashCode));
   }
 
   /**

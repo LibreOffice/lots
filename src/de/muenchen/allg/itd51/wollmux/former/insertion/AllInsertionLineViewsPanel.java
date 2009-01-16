@@ -136,7 +136,7 @@ public class AllInsertionLineViewsPanel implements View
       new JScrollPane(mainPanel, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
         ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
     scrollPane.getVerticalScrollBar().setUnitIncrement(
-      Common.VERTICAL_SCROLLBAR_UNIT_INCREMENT);
+      Common.getVerticalScrollbarUnitIncrement());
 
     JPanel buttonPanel = new JPanel(new GridBagLayout());
 

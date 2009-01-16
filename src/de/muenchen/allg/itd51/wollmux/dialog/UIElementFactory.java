@@ -789,7 +789,7 @@ public class UIElementFactory
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private class MyActionMouseListener extends MouseAdapter
+  private static class MyActionMouseListener extends MouseAdapter
   {
     private JList list;
 

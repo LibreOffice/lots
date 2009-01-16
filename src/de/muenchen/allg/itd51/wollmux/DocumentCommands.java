@@ -269,7 +269,7 @@ public class DocumentCommands
 
     Logger.debug2(L.m(
       "updateBookmarks fertig nach %1 ms. Entfernte/Neue Dokumentkommandos: ",
-      new Integer((int) (System.currentTimeMillis() - startTime)))
+      Integer.valueOf((int) (System.currentTimeMillis() - startTime)))
       + retiredDocumentCommands.size() + " / " + newDocumentCommands.size());
     return retiredDocumentCommands.size() > 0 || newDocumentCommands.size() > 0;
   }
@@ -326,7 +326,7 @@ public class DocumentCommands
 
     Logger.debug2(L.m(
       "updateTextSections fertig nach %1 ms. Entfernte/Neue TextSections: ",
-      new Integer((int) (System.currentTimeMillis() - startTime)))
+      Integer.valueOf((int) (System.currentTimeMillis() - startTime)))
       + retiredTextSections.size() + " / " + newTextSections.size());
     return retiredTextSections.size() > 0 || newTextSections.size() > 0;
   }

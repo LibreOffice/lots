@@ -78,17 +78,17 @@ public interface UIElement extends Value
   /**
    * Gibt an, dass das UI Element kein zusätzliches Label erhalten soll.
    */
-  public static final Integer LABEL_NONE = new Integer(0);
+  public static final Integer LABEL_NONE = Integer.valueOf(0);
 
   /**
    * Gibt an, dass links neben dem UI Element ein zusätzliches Label stehen soll.
    */
-  public static final Integer LABEL_LEFT = new Integer(-1);
+  public static final Integer LABEL_LEFT = Integer.valueOf(-1);
 
   /**
    * Gibt an, dass rechts neben dem UI Element ein zusätzliches Label stehen soll.
    */
-  public static final Integer LABEL_RIGHT = new Integer(+1);
+  public static final Integer LABEL_RIGHT = Integer.valueOf(+1);
 
   /**
    * Liefert die Information, ob das UI Element ein zusätzliches Label links oder
@@ -534,7 +534,7 @@ public interface UIElement extends Value
       int index = 0;
       while (enu.hasMoreElements())
       {
-        if (vals.contains(enu.nextElement())) indices.add(new Integer(index));
+        if (vals.contains(enu.nextElement())) indices.add(Integer.valueOf(index));
         ++index;
       }
 

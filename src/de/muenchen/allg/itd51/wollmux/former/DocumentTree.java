@@ -357,19 +357,24 @@ public class DocumentTree
               "com.sun.star.text.TextPortion");
           while (contentEnum.hasMoreElements())
           {
-            XControlShape tempShape = null;
+            XControlShape tempShape;
             try
             {
               tempShape = UNO.XControlShape(contentEnum.nextElement());
             }
             catch (Exception x)
-            {}
-            XControlModel tempModel = tempShape.getControl();
-            XServiceInfo info = UNO.XServiceInfo(tempModel);
-            if (info.supportsService("com.sun.star.form.component.CheckBox"))
+            { // Wegen OOo Bugs kann nextElement() werfen auch wenn hasMoreElements()
+              continue;
+            }
+            if (tempShape != null)
             {
-              shape = tempShape;
-              model = tempModel;
+              XControlModel tempModel = tempShape.getControl();
+              XServiceInfo info = UNO.XServiceInfo(tempModel);
+              if (info.supportsService("com.sun.star.form.component.CheckBox"))
+              {
+                shape = tempShape;
+                model = tempModel;
+              }
             }
           }
         }
@@ -709,7 +714,7 @@ public class DocumentTree
 
     private XControlModel model;
 
-    private static final Short CHECKED_STATE = new Short((short) 1);
+    private static final Short CHECKED_STATE = Short.valueOf((short) 1);
 
     public CheckboxNode(XControlShape shape, XControlModel model, XTextDocument doc)
     {

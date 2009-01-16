@@ -231,11 +231,11 @@ public class PrintParametersDialog
   {
     try
     {
-      return new Short(copyCountSpinner.getValue().toString());
+      return Short.valueOf(copyCountSpinner.getValue().toString());
     }
     catch (NumberFormatException e)
     {
-      return new Short((short) 1);
+      return Short.valueOf((short) 1);
     }
   }
 
