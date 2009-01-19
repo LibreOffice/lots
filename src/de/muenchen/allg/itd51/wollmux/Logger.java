@@ -50,7 +50,6 @@ package de.muenchen.allg.itd51.wollmux;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Calendar;
 
@@ -312,14 +311,14 @@ public class Logger
   private static void printInfo(String prefix, String msg, Throwable e)
   {
     PrintStream out = null;
-    FileOutputStream fileOut = null;
+    PrintStream fileOut = null;
     try
     {
       if (file != null)
         try
         {
-          fileOut = new FileOutputStream(file, true);
-          out = new PrintStream(fileOut);
+          fileOut = new PrintStream(new FileOutputStream(file, true));
+          out = fileOut;
         }
         catch (FileNotFoundException x)
         {
@@ -385,7 +384,7 @@ public class Logger
         {
           fileOut.close();
         }
-        catch (IOException e1)
+        catch (Exception e1)
         {}
       }
     }
