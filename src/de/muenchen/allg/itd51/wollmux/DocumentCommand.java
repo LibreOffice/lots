@@ -928,16 +928,9 @@ abstract public class DocumentCommand
    */
   static public class InsertContent extends DocumentCommand
   {
-    private String fragID;
-
     public InsertContent(ConfigThingy wmCmd, Bookmark bookmark)
     {
       super(wmCmd, bookmark);
-    }
-
-    public String getFragID()
-    {
-      return fragID;
     }
 
     public int execute(DocumentCommand.Executor visitable)

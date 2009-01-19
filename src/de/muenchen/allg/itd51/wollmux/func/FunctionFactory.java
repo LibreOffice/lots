@@ -476,7 +476,7 @@ public class FunctionFactory
     { // oben wurde überprüft, dass es genau einen Knoten gibt, der nicht ELSE oder
       // THEN ist
       condition = iter.next();
-    } while (condition.getName().equals("THEN") || condition.equals("ELSE"));
+    } while (condition.getName().equals("THEN") || condition.getName().equals("ELSE"));
 
     Function ifFun = parse(condition, funcLib, dialogLib, context);
     Function thenFun = parseChildren(thenConf, funcLib, dialogLib, context);

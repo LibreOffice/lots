@@ -658,7 +658,7 @@ public class TextDocumentModel
           String transformedLastStoredValue =
             getTransformedValue(lastStoredValue, field.getTrafoName(),
               !field.singleParameterTrafo());
-          if (!thisValue.equals(transformedLastStoredValue))
+          if (thisValue == null || !thisValue.equals(transformedLastStoredValue))
             allAreUnchanged = false;
 
           if (field.getTrafoName() != null)

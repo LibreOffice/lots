@@ -81,7 +81,6 @@ import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextField;
 import com.sun.star.ui.XModuleUIConfigurationManagerSupplier;
 import com.sun.star.ui.XUIConfigurationManager;
-import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
 import com.sun.star.uno.XInterface;
@@ -178,7 +177,7 @@ public class WollMuxSingleton implements XPALProvider
     {
       UNO.init(ctx.getServiceManager());
     }
-    catch (java.lang.Exception e)
+    catch (Exception e)
     {
       Logger.error(e);
     }
@@ -247,7 +246,7 @@ public class WollMuxSingleton implements XPALProvider
       eventBroadcaster.xEventBroadcaster().addEventListener(
         new GlobalEventListener());
     }
-    catch (java.lang.Exception e)
+    catch (Exception e)
     {
       Logger.error(e);
     }
@@ -265,7 +264,7 @@ public class WollMuxSingleton implements XPALProvider
     {
       Shortcuts.createShortcuts(tastenkuerzel);
     }
-    catch (java.lang.Exception e)
+    catch (Exception e)
     {
       Logger.error(e);
     }
@@ -338,19 +337,28 @@ public class WollMuxSingleton implements XPALProvider
    */
   public String getBuildInfo()
   {
+    BufferedReader in = null;
     try
     {
       URL url = WollMuxSingleton.class.getClassLoader().getResource("buildinfo");
       if (url != null)
       {
-        BufferedReader in =
-          new BufferedReader(new InputStreamReader(url.openStream()));
+        in = new BufferedReader(new InputStreamReader(url.openStream()));
         String str = in.readLine();
         if (str != null) return str;
       }
     }
-    catch (java.lang.Exception x)
+    catch (Exception x)
     {}
+    finally
+    {
+      try
+      {
+        in.close();
+      }
+      catch (Exception y)
+      {}
+    }
 
     return L.m("Version: unbekannt");
   }
@@ -450,13 +458,13 @@ public class WollMuxSingleton implements XPALProvider
             // hierher (und damit weiter ohne continue) kommen wir nur, wenn
             // ein REFRESH-Abschnitt vorhanden ist und "true" enthält.
           }
-          catch (java.lang.Exception x) // vor allem NodeNotFoundException
+          catch (Exception x) // vor allem NodeNotFoundException
           {
             continue;
           }
         }
       }
-      catch (java.lang.Exception x)
+      catch (Exception x)
       {
         Logger.error(L.m(
           "Fehler beim Überprüfen, ob Datenquelle '%1' bereits registriert ist",
@@ -473,7 +481,7 @@ public class WollMuxSingleton implements XPALProvider
         URL url = new URL(context, ConfigThingy.urlEncode(urlStr));
         parsedUrl = UNO.getParsedUNOUrl(url.toExternalForm()).Complete;
       }
-      catch (java.lang.Exception x)
+      catch (Exception x)
       {
         Logger.error(L.m(
           "Fehler beim Registrieren von Datenquelle '%1': Illegale URL: '%2'", name,
@@ -643,7 +651,7 @@ public class WollMuxSingleton implements XPALProvider
         }
       }
     }
-    catch (java.lang.Exception e)
+    catch (Exception e)
     {}
   }
 
@@ -668,7 +676,7 @@ public class WollMuxSingleton implements XPALProvider
         }
       }
     }
-    catch (java.lang.Exception e)
+    catch (Exception e)
     {}
     return -1;
   }
@@ -695,7 +703,7 @@ public class WollMuxSingleton implements XPALProvider
 
         setConfigurationValue(node, prop, v);
       }
-      catch (java.lang.Exception e)
+      catch (Exception e)
       {
         Logger.error(L.m("OOoEinstellungen: Konnte Einstellung '%1'nicht setzen:",
           element.stringRepresentation()), e);
@@ -991,7 +999,7 @@ public class WollMuxSingleton implements XPALProvider
       throw new InvalidIdentifierException(id);
   }
 
-  public static class InvalidIdentifierException extends java.lang.Exception
+  public static class InvalidIdentifierException extends Exception
   {
     private static final long serialVersionUID = 495666967644874471L;
 
@@ -1078,7 +1086,7 @@ public class WollMuxSingleton implements XPALProvider
         new HashableComponent(frame.getController().getModel());
       return currentTextDocumentModels.get(key);
     }
-    catch (java.lang.Exception e)
+    catch (Exception e)
     {
       return null;
     }
@@ -1124,7 +1132,7 @@ public class WollMuxSingleton implements XPALProvider
           // das erste gefundene Element zurückliefern.
           if (found != null) return found;
         }
-        catch (java.lang.Exception e)
+        catch (Exception e)
         {
           Logger.error(e);
         }
@@ -1221,7 +1229,7 @@ public class WollMuxSingleton implements XPALProvider
       dialog.setAlwaysOnTop(true);
       dialog.setVisible(true);
     }
-    catch (java.lang.Exception e)
+    catch (Exception e)
     {
       Logger.error(e);
     }
@@ -1248,7 +1256,7 @@ public class WollMuxSingleton implements XPALProvider
     {
       dispProv = UNO.XDispatchProvider(doc.getCurrentController().getFrame());
     }
-    catch (java.lang.Exception e)
+    catch (Exception e)
     {}
 
     if (dispProv != null)

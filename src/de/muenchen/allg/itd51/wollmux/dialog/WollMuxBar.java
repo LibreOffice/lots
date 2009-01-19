@@ -1325,20 +1325,29 @@ public class WollMuxBar
    */
   public String getBuildInfo()
   {
+    BufferedReader in = null;
     try
     {
       URL url = WollMuxBar.class.getClassLoader().getResource("buildinfo");
       if (url != null)
       {
-        BufferedReader in =
-          new BufferedReader(new InputStreamReader(url.openStream()));
+        in = new BufferedReader(new InputStreamReader(url.openStream()));
         String str = in.readLine();
         if (str != null) return str;
       }
     }
-    catch (java.lang.Exception x)
+    catch (Exception x)
     {}
-    
+    finally
+    {
+      try
+      {
+        in.close();
+      }
+      catch (Exception y)
+      {}
+    }
+
     return L.m("Version: unbekannt");
   }
 

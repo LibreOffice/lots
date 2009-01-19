@@ -250,15 +250,24 @@ public class LocalizationUpdater
     str += removed;
     str += "\n  )\n)";
 
+    FileWriter writer = null;
     try
     {
-      FileWriter writer = new FileWriter(localizationConfFile);
+      writer = new FileWriter(localizationConfFile);
       writer.write(str);
-      writer.close();
     }
     catch (Exception e)
     {
       e.printStackTrace();
+    }
+    finally
+    {
+      try
+      {
+        writer.close();
+      }
+      catch (Exception x)
+      {}
     }
 
     // Statistik und Warnung ausgeben:

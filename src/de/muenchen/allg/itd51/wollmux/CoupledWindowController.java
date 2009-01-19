@@ -220,7 +220,7 @@ public class CoupledWindowController
      * 
      * @author Christoph Lutz (D-III-ITD-5.1)
      */
-    public void deactivationEvent(Object key)
+    public void deactivationEvent(XTopWindowOrAWTWindow key)
     {
       if (key == null) return;
       synchronized (activeWindow)
@@ -274,7 +274,8 @@ public class CoupledWindowController
     {
       public void windowDeactivated(EventObject arg0)
       {
-        windowState.deactivationEvent(UNO.XInterface(arg0.Source));
+        windowState.deactivationEvent(new XTopWindowOrAWTWindow(
+          UNO.XTopWindow(arg0.Source)));
       }
 
       public void windowActivated(EventObject arg0)
@@ -364,7 +365,8 @@ public class CoupledWindowController
         }
 
         // Deaktivierungsevent weiterreichen
-        windowState.deactivationEvent(e.getSource());
+        windowState.deactivationEvent(new XTopWindowOrAWTWindow(
+          (Window) e.getSource()));
       }
 
       public void windowDeiconified(WindowEvent e)
@@ -461,7 +463,7 @@ public class CoupledWindowController
         toRemove.removeWindowListener(windowState.coupledWindowListener);
       }
     }
-    windowState.deactivationEvent(window);
+    windowState.deactivationEvent(new XTopWindowOrAWTWindow(window));
   }
 
   /**
@@ -507,7 +509,7 @@ public class CoupledWindowController
   {
     if (w == null) return;
     w.removeTopWindowListener(windowState.topWindowListener);
-    windowState.deactivationEvent(UNO.XInterface(w));
+    windowState.deactivationEvent(new XTopWindowOrAWTWindow(w));
   }
 
   /**
@@ -707,12 +709,18 @@ public class CoupledWindowController
 
     public boolean equals(Object o)
     {
-      XInterface x = UNO.XInterface(o);
-      if (x != null)
-        return UnoRuntime.areSame(x, window);
-      else
+      if (o == null) return false;
+      try
       {
-        return window.equals(o);
+        XTopWindowOrAWTWindow win2 = (XTopWindowOrAWTWindow) o;
+        if (window instanceof XInterface)
+          return UnoRuntime.areSame(window, win2.window);
+        else
+          return window.equals(win2.window);
+      }
+      catch (ClassCastException x)
+      {
+        return false;
       }
     }
   }

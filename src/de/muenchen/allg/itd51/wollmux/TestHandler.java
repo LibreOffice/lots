@@ -158,10 +158,10 @@ public class TestHandler
   private static HashMap<String, String> getWollmuxTestArgs()
   {
     HashMap<String, String> args = new HashMap<String, String>();
+    BufferedReader br = null;
     try
     {
-      BufferedReader br =
-        new BufferedReader(new FileReader(WOLLMUX_QATEST_ARGS_FILE));
+      br = new BufferedReader(new FileReader(WOLLMUX_QATEST_ARGS_FILE));
 
       for (String line = null; (line = br.readLine()) != null;)
       {
@@ -173,6 +173,15 @@ public class TestHandler
     {
       Logger.error(
         L.m("Argumentdatei für wollmux-qatest konnte nicht gelesen werden"), e);
+    }
+    finally
+    {
+      try
+      {
+        br.close();
+      }
+      catch (Exception x)
+      {}
     }
     return args;
   }
