@@ -343,19 +343,68 @@ public class DocumentCommands
    */
   private void addNewDocumentCommands(HashSet<DocumentCommand> newDocumentCommands)
   {
+    long times[] = new long[] {
+      0, 0, 0, 0, 0, 0, 0 };
+    long counters[] = new long[] {
+      0, 0, 0, 0, 0, 0, 0 };
+    Logger.debug2("addNewDocumentCommands");
+
+    long lastTime = System.currentTimeMillis();
     for (Iterator<DocumentCommand> iter = newDocumentCommands.iterator(); iter.hasNext();)
     {
       DocumentCommand cmd = iter.next();
 
+      int id = 0;
       allCommands.add(cmd);
 
-      if (cmd instanceof SetGroups) addNewVisibilityElement((SetGroups) cmd);
-      if (cmd instanceof SetJumpMark) addNewSetJumpMark((SetJumpMark) cmd);
-      if (cmd instanceof NotInOriginal) notInOriginalCommands.add(cmd);
-      if (cmd instanceof OriginalOnly) originalOnlyCommands.add(cmd);
-      if (cmd instanceof DraftOnly) draftOnlyCommands.add(cmd);
-      if (cmd instanceof AllVersions) allVersionsCommands.add(cmd);
+      if (cmd instanceof SetGroups)
+      {
+        addNewVisibilityElement((SetGroups) cmd);
+        id = 1;
+      }
+      else if (cmd instanceof SetJumpMark)
+      {
+        addNewSetJumpMark((SetJumpMark) cmd);
+        id = 2;
+      }
+      else if (cmd instanceof NotInOriginal)
+      {
+        notInOriginalCommands.add(cmd);
+        id = 3;
+      }
+      else if (cmd instanceof OriginalOnly)
+      {
+        originalOnlyCommands.add(cmd);
+        id = 4;
+      }
+      else if (cmd instanceof DraftOnly)
+      {
+        draftOnlyCommands.add(cmd);
+        id = 5;
+      }
+      else if (cmd instanceof AllVersions)
+      {
+        allVersionsCommands.add(cmd);
+        id = 6;
+      }
+
+      long currentTime = System.currentTimeMillis();
+      if (id >= 0)
+      {
+        times[id] += currentTime - lastTime;
+        counters[id]++;
+      }
+      lastTime = currentTime;
     }
+
+    Logger.debug2("addNewDocumentCommands statistics (number of elements, overalltime to add):");
+    Logger.debug2("- SetGroups:     " + counters[1] + ", " + times[1] + " ms");
+    Logger.debug2("- SetJumpMark:   " + counters[2] + ", " + times[2] + " ms");
+    Logger.debug2("- NotInOriginal: " + counters[3] + ", " + times[3] + " ms");
+    Logger.debug2("- OriginalOnly:  " + counters[4] + ", " + times[4] + " ms");
+    Logger.debug2("- DraftOnly:     " + counters[5] + ", " + times[5] + " ms");
+    Logger.debug2("- AllVersions:   " + counters[6] + ", " + times[6] + " ms");
+    Logger.debug2("- Others:        " + counters[0] + ", " + times[0] + " ms");
   }
 
   /**
