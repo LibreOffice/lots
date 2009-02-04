@@ -541,7 +541,7 @@ public class OOoDatasource implements Datasource
       {
         throw new TimeoutException(L.m(
           "Kann keine Verbindung zur Datenquelle \"%1\" herstellen",
-          oooDatasourceName));
+          oooDatasourceName), x);
       }
 
       Object rowSet = UNO.createUNOService("com.sun.star.sdb.RowSet");
