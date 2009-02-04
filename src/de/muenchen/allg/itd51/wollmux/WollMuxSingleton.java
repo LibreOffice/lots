@@ -309,7 +309,7 @@ public class WollMuxSingleton implements XPALProvider
    * Diese Methode initialisiert das WollMuxSingleton (nur dann, wenn es noch nicht
    * initialisiert wurde)
    */
-  public static void initialize(XComponentContext ctx)
+  public static synchronized void initialize(XComponentContext ctx)
   {
     if (singletonInstance == null)
     {
