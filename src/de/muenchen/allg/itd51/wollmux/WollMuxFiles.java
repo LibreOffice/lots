@@ -78,6 +78,8 @@ import javax.swing.SwingUtilities;
 
 import com.sun.star.beans.Property;
 import com.sun.star.container.XNameAccess;
+import com.sun.star.sdbc.XConnection;
+import com.sun.star.sdbc.XDataSource;
 import com.sun.star.uno.AnyConverter;
 import com.sun.star.util.XStringSubstitution;
 
@@ -291,7 +293,7 @@ public class WollMuxFiles
     setLoggingMode(WollMuxFiles.getWollmuxConf());
 
     Logger.debug(L.flushDebugMessages());
-    
+
     fido.logTimes();
 
     showCredits =
@@ -948,6 +950,37 @@ public class WollMuxFiles
       out.write(dumpOOoConfiguration("/org.openoffice.Office.Writer/") + "\n");
       out.write(dumpOOoConfiguration("/org.openoffice.Inet/") + "\n");
       out.write("===================== END OOo-Configuration dump ==================\n");
+
+      out.write("===================== START OOo datasources ==================\n");
+      try
+      {
+        String[] datasourceNamesA = UNO.XNameAccess(UNO.dbContext).getElementNames();
+        for (int i = 0; i < datasourceNamesA.length; ++i)
+        {
+          out.write(datasourceNamesA[i]);
+          out.write("\n");
+          try
+          {
+            XDataSource ds =
+              UNO.XDataSource(UNO.dbContext.getRegisteredObject(datasourceNamesA[i]));
+            ds.setLoginTimeout(1);
+            XConnection conn = ds.getConnection("", "");
+            XNameAccess tables = UNO.XTablesSupplier(conn).getTables();
+            for (String name : tables.getElementNames())
+              out.write("  " + name + "\n");
+          }
+          catch (Exception x)
+          {
+            out.write("  " + x.toString() + "\n");
+          }
+        }
+      }
+      catch (Exception x)
+      {
+        out.write(x.toString() + "\n");
+      }
+      out.write("===================== END OOo datasources ==================\n");
+
       out.close();
     }
     catch (IOException x)
