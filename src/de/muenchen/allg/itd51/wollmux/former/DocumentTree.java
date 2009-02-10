@@ -383,7 +383,8 @@ public class DocumentTree
           continue;
         }
 
-        textPortions.add(new CheckboxNode(shape, model, doc));
+        if (shape != null && model != null)
+          textPortions.add(new CheckboxNode(shape, model, doc));
 
       }
       else if (textPortionType.equals("Text"))
