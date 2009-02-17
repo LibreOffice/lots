@@ -2020,21 +2020,10 @@ public class WollMuxBar
     boolean quickstarter = false;
     if (args.length > 0)
     {
-      if (args[0].equals("--load"))
+      for (int i = 0; i < args.length; ++i)
       {
-        if (args.length != 2)
-        {
-          System.err.println(L.m("--load erwartet genau einen weiteren Parameter!"));
-          System.exit(1);
-        }
+        String arg = args[i];
 
-        if (args[1].length() == 0) System.exit(0);
-        load(args[1]);
-        System.exit(1); // sollte nie erreicht werden, da load() exit() aufruft.
-      }
-
-      for (String arg : args)
-      {
         if (arg.equals("--minimize"))
           windowMode = MINIMIZE_TO_TASKBAR_MODE;
         else if (arg.equals("--topbar"))
@@ -2043,6 +2032,18 @@ public class WollMuxBar
           windowMode = NORMAL_WINDOW_MODE;
         else if (arg.equals("--quickstarter"))
           quickstarter = true;
+        else if (arg.equals("--load"))
+        {
+          if (i == args.length - 1)
+          {
+            System.err.println(L.m("--load erwartet genau einen weiteren Parameter!"));
+            System.exit(1);
+          }
+
+          if (args[i + 1].length() == 0) System.exit(0);
+          load(args[i + 1]);
+          System.exit(1); // sollte nie erreicht werden, da load() exit() aufruft.
+        }
         else
         {
           System.err.println(L.m("Unbekannter Aufrufparameter: %1", arg));
