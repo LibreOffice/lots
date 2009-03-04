@@ -3790,72 +3790,17 @@ public class WollMuxEventHandler
     protected void doit() throws WollMuxFehlerException
     {
       boolean hasPrintFunction = model.getPrintFunctions().size() > 0;
-      boolean hasMailMergeFields = model.hasMailMergeFields();
 
-      if (!hasMailMergeFields && !hasPrintFunction)
-      {
-        // Forward auf Standardfunktion
-        if (origDisp != null) origDisp.dispatch(origUrl, origArgs);
-      }
-      else if (!hasMailMergeFields && hasPrintFunction)
+      if (hasPrintFunction)
       {
         // Druckfunktion aufrufen
         handleExecutePrintFunctions(model);
       }
-      else if (hasMailMergeFields && !hasPrintFunction)
+      else
       {
-        // "Was tun?"-Dialog
-        if (!mailmergeWrapperDialog())
-          if (origDisp != null) origDisp.dispatch(origUrl, origArgs);
+        // Forward auf Standardfunktion
+        if (origDisp != null) origDisp.dispatch(origUrl, origArgs);
       }
-      else if (hasMailMergeFields && hasPrintFunction)
-      {
-        handleSeriendruck(model, true);
-      }
-    }
-
-    /**
-     * Liefert true, wenn der Dialog die Anfrage vollständig bearbeiten konnte oder
-     * false, wenn die Standard-Druckfunktion aufgerufen werden soll.
-     * 
-     * @return
-     */
-    private boolean mailmergeWrapperDialog()
-    {
-      final String SERIENBRIEF_WOLLMUX = L.m("Seriendruck (WollMux)");
-      final String SERIENBRIEF_DEFAULT = L.m("Seriendruck (Standard)");
-      final String PRINT_DEFAULT = L.m("Drucken");
-
-      JOptionPane pane =
-        new JOptionPane(
-          L.m("Das Dokument enthält Serienbrief-Felder. Was wollen Sie tun?"),
-          javax.swing.JOptionPane.INFORMATION_MESSAGE);
-      pane.setOptions(new String[] {
-        SERIENBRIEF_WOLLMUX, SERIENBRIEF_DEFAULT, PRINT_DEFAULT });
-      JDialog dialog = pane.createDialog(null, L.m("Seriendruck"));
-      dialog.setAlwaysOnTop(true);
-      dialog.setVisible(true);
-
-      Object value = pane.getValue();
-
-      if (SERIENBRIEF_WOLLMUX.equals(value))
-      {
-        handleSeriendruck(model, false);
-        return true;
-      }
-
-      if (SERIENBRIEF_DEFAULT.equals(value))
-      {
-        UNO.dispatch(model.doc, ".uno:MergeDialog");
-        return true;
-      }
-
-      if (PRINT_DEFAULT.equals(value))
-      {
-        return false;
-      }
-
-      return true;
     }
 
     public String toString()

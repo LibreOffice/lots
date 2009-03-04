@@ -708,49 +708,6 @@ public class TextDocumentModel
   }
 
   /**
-   * Liefert true, wenn das Dokument Serienbrieffelder enthält, ansonsten false.
-   */
-  synchronized public boolean hasMailMergeFields()
-  {
-    try
-    {
-      XEnumeration xenu =
-        UNO.XTextFieldsSupplier(doc).getTextFields().createEnumeration();
-      while (xenu.hasMoreElements())
-      {
-        try
-        {
-          XDependentTextField tf = UNO.XDependentTextField(xenu.nextElement());
-
-          // Dieser Code wurde früher verwendet um zu erkennen, ob es sich um
-          // ein Datenbankfeld handelt. In P1243 ist jedoch ein Crash
-          // aufgeführt, der reproduzierbar von diesen Zeilen getriggert wurde:
-          // if (tf == null) continue;
-          // XPropertySet master = tf.getTextFieldMaster();
-          // String column = (String) UNO.getProperty(master, "DataColumnName");
-          // if (column != null && column.length() > 0) return true;
-
-          // und hier der Workaround: Wenn es sich um ein Datenbankfeld handelt
-          // (das den Service c.s.s.t.TextField.Database implementiert), dann
-          // ist auch die Property DataBaseFormat definiert. Es reicht also aus
-          // zu testen, ob diese Property definiert ist.
-          Object o = UNO.getProperty(tf, "DataBaseFormat");
-          if (o != null) return true;
-        }
-        catch (Exception x)
-        {
-          Logger.error(x);
-        }
-      }
-    }
-    catch (Exception x)
-    {
-      Logger.error(x);
-    }
-    return false;
-  }
-
-  /**
    * Sammelt alle Formularfelder des Dokuments auf, die nicht von WollMux-Kommandos
    * umgeben sind, jedoch trotzdem vom WollMux verstanden und befüllt werden (derzeit
    * c,s,s,t,textfield,Database-Felder und manche
