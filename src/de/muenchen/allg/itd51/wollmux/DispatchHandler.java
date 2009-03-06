@@ -230,6 +230,8 @@ public class DispatchHandler
       public void requireOrigDispatch(DocumentDispatchInterceptor provider,
           com.sun.star.util.URL url, String frameName, int fsFlag)
       {
+        // FIXME: Achtung: potentielle Fehlerquelle, da immer das selbe Objekt
+        // in verschiedenen Threads modifiziert werden kann.
         origUrl = url;
         origDisp = provider.getOrigDispatch(url, frameName, fsFlag);
       }
@@ -249,6 +251,8 @@ public class DispatchHandler
       public void requireOrigDispatch(DocumentDispatchInterceptor provider,
           com.sun.star.util.URL url, String frameName, int fsFlag)
       {
+        // FIXME: Achtung: potentielle Fehlerquelle, da immer das selbe Objekt
+        // in verschiedenen Threads modifiziert werden kann.
         origUrl = url;
         origDisp = provider.getOrigDispatch(url, frameName, fsFlag);
       }
