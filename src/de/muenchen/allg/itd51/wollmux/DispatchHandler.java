@@ -68,7 +68,7 @@ public class DispatchHandler
    * Enthält einen XDispatchProvider, der Dispatch-Objekte für alle globalen (d.h.
    * nicht dokumentgebundenen) Funktionalitäten des WollMux bereitstellt.
    */
-  public static final XDispatchProvider globalWollMuxDispatches =
+  public static final XDispatchProviderInterceptor globalWollMuxDispatches =
     new GlobalDispatchProvider();
 
   // *****************************************************************************
@@ -409,7 +409,7 @@ public class DispatchHandler
     protected abstract void dispatch(String arg, PropertyValue[] props);
 
     /**
-     * Prüft ob der DiapatchHandler zum aktuellen Zeitpunkt in der Lage ist, den
+     * Prüft ob der DispatchHandler zum aktuellen Zeitpunkt in der Lage ist, den
      * Dispatch abzuhandeln und liefert false zurück, wenn der DispatchHandler nicht
      * verwendet werden soll.
      * 
@@ -643,10 +643,69 @@ public class DispatchHandler
    * @author christoph.lutz
    */
   private static class GlobalDispatchProvider extends BasicWollMuxDispatchProvider
+      implements XDispatchProviderInterceptor
   {
+    private XDispatchProvider slave = null;
+
+    private XDispatchProvider master = null;
+
     public GlobalDispatchProvider()
     {
       setDispatchHandlers(createGlobalDispatchHandlers());
+    }
+
+    public XDispatchProvider getSlaveDispatchProvider()
+    {
+      return slave;
+    }
+
+    public void setSlaveDispatchProvider(XDispatchProvider slave)
+    {
+      this.slave = slave;
+    }
+
+    public XDispatchProvider getMasterDispatchProvider()
+    {
+      return master;
+    }
+
+    public void setMasterDispatchProvider(XDispatchProvider master)
+    {
+      this.master = master;
+    }
+
+    public XDispatch queryDispatch(com.sun.star.util.URL url, String frameName,
+        int fsFlag)
+    {
+      XDispatch myDisp = null;
+      myDisp = super.queryDispatch(url, frameName, fsFlag);
+
+      if (myDisp != null)
+      {
+        return myDisp;
+      }
+      else
+      {
+        return getOrigDispatch(url, frameName, fsFlag);
+      }
+    }
+
+    /**
+     * Liefert das OriginalDispatch-Objekt, das der registrierte
+     * slave-DispatchProvider liefert.
+     * 
+     * @param url
+     * @param frameName
+     * @param fsFlag
+     * @return
+     */
+    public XDispatch getOrigDispatch(com.sun.star.util.URL url, String frameName,
+        int fsFlag)
+    {
+      if (slave != null)
+        return slave.queryDispatch(url, frameName, fsFlag);
+      else
+        return null;
     }
   }
 
@@ -783,6 +842,9 @@ public class DispatchHandler
       UNO.XDispatchProvider(frame).queryDispatch(url, "_self",
         com.sun.star.frame.FrameSearchFlag.SELF);
     boolean alreadyRegistered = disp != null;
+
+    if (alreadyRegistered)
+      Logger.error(L.m("Doppelter Aufruf von registerDocumentDispatchInterceptor() für den selben Frame???"));
 
     // DispatchInterceptor registrieren (wenn nicht bereits registriert):
     if (!alreadyRegistered)

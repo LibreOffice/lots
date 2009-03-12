@@ -174,6 +174,12 @@ public class WollMuxFiles
    */
   private static boolean debugMode;
 
+  /**
+   * Gibt an, dass die WollMuxBar im Falle einer fehlenden WollMux-Komponente in OOo
+   * ihren eigenen WollMux instanziieren soll.
+   */
+  private static boolean externalWollMuxEnabled = false;
+
   private static boolean showCredits = false;
 
   /**
@@ -304,6 +310,16 @@ public class WollMuxFiles
     initClassLoader();
 
     initDebugMode();
+
+    try
+    { // TODO Switch dokumentieren, sobald er fehlerfrei implementiert ist
+      // (Ticket #645/R4904)
+      externalWollMuxEnabled =
+        getWollmuxConf().get("ALLOW_EXTERNAL_WOLLMUX", 1).toString().equalsIgnoreCase(
+          "true");
+    }
+    catch (Exception x)
+    {}
 
     setLookAndFeel();
 
@@ -580,6 +596,11 @@ public class WollMuxFiles
   public static boolean isDebugMode()
   {
     return debugMode;
+  }
+
+  public static boolean externalWollMuxEnabled()
+  {
+    return externalWollMuxEnabled;
   }
 
   private static void initDebugMode()

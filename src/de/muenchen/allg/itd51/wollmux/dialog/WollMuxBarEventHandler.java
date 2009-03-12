@@ -61,6 +61,7 @@ import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.XPALChangeEventListener;
 import de.muenchen.allg.itd51.wollmux.XPALProvider;
 import de.muenchen.allg.itd51.wollmux.XWollMux;
+import de.muenchen.allg.itd51.wollmux.comp.WollMux;
 
 /**
  * Dient der thread-safen Kommunikation der WollMuxBar mit dem WollMux im OOo.
@@ -85,7 +86,7 @@ public class WollMuxBarEventHandler
    * Methode getRemoteWollMux bezogen werden, da diese mit einem möglichen Schließen
    * von OOo während die WollMuxBar läuft klarkommt.
    */
-  private Object remoteWollMux;
+  private XWollMux remoteWollMux;
 
   /**
    * Falls nicht null, so ist dies der Desktop auf dem eventuell ein
@@ -467,7 +468,7 @@ public class WollMuxBarEventHandler
     {
       try
       {
-        return (XWollMux) UnoRuntime.queryInterface(XWollMux.class, remoteWollMux);
+        return remoteWollMux;
       }
       catch (DisposedException e)
       {
@@ -479,42 +480,58 @@ public class WollMuxBarEventHandler
 
     if (connect)
     {
+      XMultiServiceFactory factory = null;
+      XComponentContext ctx = null;
       try
       {
-        XComponentContext ctx = Bootstrap.bootstrap();
-        XMultiServiceFactory factory =
+        ctx = Bootstrap.bootstrap();
+        factory =
           (XMultiServiceFactory) UnoRuntime.queryInterface(
             XMultiServiceFactory.class, ctx.getServiceManager());
-        remoteWollMux =
-          factory.createInstance("de.muenchen.allg.itd51.wollmux.WollMux");
-        XWollMux mux =
-          (XWollMux) UnoRuntime.queryInterface(XWollMux.class, remoteWollMux);
-        int wmConfHashCode =
-          WollMuxFiles.getWollmuxConf().stringRepresentation().hashCode();
-        mux.addPALChangeEventListenerWithConsistencyCheck(myPALChangeEventListener,
-          wmConfHashCode);
-
-        installQuickstarter(factory);
-
-        return mux;
       }
-      catch (Exception e)
+      catch (Exception x)
+      {
+        Logger.error(L.m("Konnte keine Verbindung zu OpenOffice herstellen"));
+        wollmuxbar.connectionFailedWarning();
+
+        return null;
+      }
+
+      try
+      {
+        Object mux =
+          factory.createInstance("de.muenchen.allg.itd51.wollmux.WollMux");
+        remoteWollMux = (XWollMux) UnoRuntime.queryInterface(XWollMux.class, mux);
+      }
+      catch (Exception x)
+      {}
+
+      if (remoteWollMux == null)
       {
         Logger.error(L.m("Konnte keine Verbindung zum WollMux-Modul in OpenOffice herstellen"));
-        try
+        if (WollMuxFiles.externalWollMuxEnabled())
+          remoteWollMux = new WollMux(ctx);
+        else
         {
-          final WollMuxBar wmbar = wollmuxbar;
-          javax.swing.SwingUtilities.invokeLater(new Runnable()
-          {
-            public void run()
-            {
-              wmbar.connectionFailedWarning();
-            }
-          });
+          wollmuxbar.connectionFailedWarning();
+          return null;
         }
-        catch (Exception x)
-        {}
       }
+
+      try
+      {
+        int wmConfHashCode =
+          WollMuxFiles.getWollmuxConf().stringRepresentation().hashCode();
+        remoteWollMux.addPALChangeEventListenerWithConsistencyCheck(
+          myPALChangeEventListener, wmConfHashCode);
+
+        installQuickstarter(factory);
+      }
+      catch (Exception x)
+      {
+        Logger.error(x);
+      }
+      return remoteWollMux;
     }
 
     return null;

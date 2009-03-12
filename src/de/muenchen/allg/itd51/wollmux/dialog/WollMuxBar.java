@@ -282,12 +282,10 @@ public class WollMuxBar
 
   /**
    * Die Fehlermeldung die in einem Popup-Fenster gebracht wird, wenn keine
-   * Verbindung zum WollMux in OOo hergestellt werden konnte.
+   * Verbindung zu OOo hergestellt werden konnte.
    */
   private static final String CONNECTION_FAILED_MESSAGE =
-    L.m("Es konnte keine Verbindung zur WollMux-Komponente von OpenOffice hergestellt werden.\n"
-      + "Eine mögliche Ursache ist ein fehlerhaft installiertes OpenOffice.\n"
-      + "Eine weitere mögliche Ursache ist, dass WollMux.oxt nicht oder fehlerhaft installiert wurde.");
+    L.m("Es konnte keine Verbindung zu OpenOffice bzw. zur WollMux-Komponente in OpenOffice hergestellt werden.\n");
 
   private static final String WOLLMUX_CONFIG_ERROR_MESSAGE =
     L.m("Aus Ihrer WollMux-Konfiguration konnte kein Abschnitt \"Symbolleisten\" gelesen werden.\n"
@@ -1504,14 +1502,25 @@ public class WollMuxBar
 
   /**
    * Erzeugt ein Popup-Fenster, das den Benutzer darüber informiert, dass keine
-   * Verbindung zur WollMux-Komponente in OpenOffice hergestellt werden konnte.
+   * Verbindung zu OpenOffice hergestellt werden konnte.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void connectionFailedWarning()
   {
-    JOptionPane.showMessageDialog(null, CONNECTION_FAILED_MESSAGE,
-      L.m("WollMux-Fehler"), JOptionPane.ERROR_MESSAGE);
+    try
+    {
+      javax.swing.SwingUtilities.invokeLater(new Runnable()
+      {
+        public void run()
+        {
+          JOptionPane.showMessageDialog(null, CONNECTION_FAILED_MESSAGE,
+            L.m("WollMux-Fehler"), JOptionPane.ERROR_MESSAGE);
+        }
+      });
+    }
+    catch (Exception y)
+    {}
   }
 
   /**
