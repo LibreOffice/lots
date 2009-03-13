@@ -47,7 +47,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import de.muenchen.allg.itd51.wollmux.L;
-import de.muenchen.allg.itd51.wollmux.former.insertion.OneInsertionExtView;
 
 /**
  * Basisklasse für Views mit CardLayout für eine Menge von Objekten, wobei die
@@ -110,7 +109,7 @@ public abstract class OnDemandCardView implements View
 
   /**
    * Enthält alle cardIds (wie von {@link #getCardIdFor(Object)} zurückgeliefert) von
-   * InsertionModels mit aktiver Sicht, d,h, von all denen, für die nicht das
+   * ...Models mit aktiver Sicht, d,h, von all denen, für die nicht das
    * {@link #INACTIVE_PANEL} angezeigt wird.
    */
   private Set<String> activeModelCardIds = new HashSet<String>();
@@ -153,7 +152,9 @@ public abstract class OnDemandCardView implements View
   }
 
   /**
-   * Entfernt view aus diesem Container (falls dort vorhanden).
+   * Entfernt view aus diesem Container (falls dort vorhanden). DIESE FUNKTION IST
+   * PRIVATE UND MUSS AUCH NICHT PROTECTED SEIN. DAS ENTFERNEN VON VIEWS HANDHABT DIE
+   * OnDemandCardView selbstständig über {@link MyViewChangeListener}.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
@@ -189,8 +190,8 @@ public abstract class OnDemandCardView implements View
   }
 
   /**
-   * Liefert ein JPanel, das nur einen Button enthält zum Aktivieren der
-   * {@link OneInsertionExtView} des aktiven Models.
+   * Liefert ein JPanel, das nur einen Button enthält zum Aktivieren der One...View
+   * des aktiven Models.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
@@ -223,7 +224,7 @@ public abstract class OnDemandCardView implements View
       public void actionPerformed(ActionEvent e)
       {
         if (currentModel == null) return; // sollte nicht passieren können, aber zur
-                                          // Sicherheit
+        // Sicherheit
         addItem(currentModel);
         cards.show(myPanel, getCardIdFor(currentModel));
       }

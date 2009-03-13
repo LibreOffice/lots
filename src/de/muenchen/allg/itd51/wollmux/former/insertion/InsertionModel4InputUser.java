@@ -1,7 +1,7 @@
 /*
  * Dateiname: InsertionModel4InputUser.java
- * Projekt  : n/a
- * Funktion : TODO Funktionsbeschreibung
+ * Projekt  : WollMux
+ * Funktion : InsertionModel für InputUser Felder.
  * 
  * Copyright (c) 2008 Landeshauptstadt München
  * 

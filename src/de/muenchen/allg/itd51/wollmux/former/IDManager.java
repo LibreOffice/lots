@@ -217,10 +217,12 @@ public class IDManager
 
     /**
      * listen wird benachrichtigt, wenn sich dieses ID-Objekt ändert. ACHTUNG! listen
-     * wird nur über eine {@link java.lang.ref.WeakReference} referenziert. Daher ist
-     * der Aufruf von {@link #removeIDChangeListener(IDChangeListener)} nur
-     * notwendig, wenn man keine Events mehr empfangen möcht, nicht jedoch vor der
-     * Zerstörung des Listeners.
+     * wird nur über eine {@link java.lang.ref.WeakReference} referenziert. Das
+     * heisst, dass der Aufrufer selbst eine Referenz auf den Listener am Leben
+     * erhalten muss. Dafür ist der Aufruf von
+     * {@link #removeIDChangeListener(IDChangeListener)} nur notwendig, wenn man
+     * keine Events mehr empfangen möcht, nicht jedoch vor der Zerstörung des
+     * Listeners.
      * 
      * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
      */

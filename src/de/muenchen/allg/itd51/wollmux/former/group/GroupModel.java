@@ -38,25 +38,14 @@ import java.util.Vector;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.Bookmark;
+import de.muenchen.allg.itd51.wollmux.DuplicateIDException;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
+import de.muenchen.allg.itd51.wollmux.former.IDManager;
+import de.muenchen.allg.itd51.wollmux.former.IDManager.ID;
+import de.muenchen.allg.itd51.wollmux.former.IDManager.IDChangeListener;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelection;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionAccess;
 import de.muenchen.allg.itd51.wollmux.former.function.ParamValue;
-
-/*
- * '''2006-11-15''' BNK (2t): GroupModel, das 0 bis mehrere Bookmarks haben kann, die
- * zu der Gruppe gehören + * Implementierung der Seriendruckfunktion des WollMux - *
- * 
- * '''2006-11-17''' BNK (2t): OneFormControlGroupsView mit Eingabefeld und Button zum
- * Hinzufügen einer neuen Gruppe (d.h. einer die bislang nicht existiert) + - *
- * '''2006-12-02''' BNK (2t): AllGroupNamesView mit Markierung aller FormControls,
- * die Mitglieder der Gruppe sind bei Anklicken eines Gruppennamens + - *
- * 
- * '''2006-12-04''' BNK (5t): Unterstützung für Feldreferenzen in
- * FunctionSelectionAccessView. Das FormControlModel muss Events broadcasten, wenn
- * neue IDs hinzukommen oder alte IDs verschwinden. ID-Änderungen werden ja schon
- * gebroadcastet, aber noch nicht in der FunctionSelectionAccessView ausgewertet.
- */
 
 /**
  * Eine Sichtbarkeitsgruppe, zu der 0 bis mehrere setGroups-Bookmarks gehören können.
@@ -66,15 +55,21 @@ import de.muenchen.allg.itd51.wollmux.former.function.ParamValue;
 public class GroupModel
 {
   /**
+   * Für {@link ModelChangeListener#attributeChanged(GroupModel, int, Object)}, gibt
+   * an, dass die ID (der Name) der Gruppe sich geändert hat.
+   */
+  public static final int ID_ATTR = 0;
+
+  /**
    * 
    */
   private Map<String, Bookmark> mapBookmarkNameToBookmark =
     new HashMap<String, Bookmark>();
 
   /**
-   * Der Name dieser Gruppe.
+   * Die ID (=der Name) dieser Gruppe.
    */
-  private String name;
+  private IDManager.ID id;
 
   /**
    * Die Liste der setGroups-{@link Bookmark}s, die zu dieser Gruppe gehören.
@@ -98,7 +93,12 @@ public class GroupModel
   private FormularMax4000 formularMax4000;
 
   /**
-   * Erzeugt eine neue Gruppe mit Name name.
+   * Listener der Änderungen an {@link #id} überwacht.
+   */
+  private MyIDChangeListener myIDChangeListener;
+
+  /**
+   * Erzeugt eine neue Gruppe mit Name/ID id. ACHTUNG! id muss activated sein!
    * 
    * @param condition
    *          wird direkt als Referenz übernommen und bestimmt die
@@ -107,15 +107,28 @@ public class GroupModel
    *          der {@link FormularMax4000} zu dem diese Gruppe gehört.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public GroupModel(String name, FunctionSelection condition,
+  public GroupModel(IDManager.ID id, FunctionSelection condition,
       FormularMax4000 formularMax4000)
   {
-    this.name = name;
+    this.id = id;
+    // Achtung! Wir müssen eine Referenz halten (siehe addIdChangeListener())
+    myIDChangeListener = new MyIDChangeListener();
+    id.addIDChangeListener(myIDChangeListener);
     this.condition = condition;
     this.formularMax4000 = formularMax4000;
     bookmarks.add(Integer.valueOf(0)); // Dummy-Statement, nur um die Warnung
     // wegzukriegen, dass bookmarks derzeit nicht
     // verwendet wird.
+  }
+
+  /**
+   * Liefert den FormularMax4000 zu dem dieses Model gehört.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public FormularMax4000 getFormularMax4000()
+  {
+    return formularMax4000;
   }
 
   /**
@@ -159,6 +172,18 @@ public class GroupModel
   }
 
   /**
+   * Liefert immer true. Diese Funktion existiert nur, damit der entsprechende Code
+   * in {@link AllGroupFuncViewsPanel} analog zu den anderen Panels gehalten werden
+   * kann.
+   * 
+   * @author Matthias Benkmann (D-III-ITD-D101)
+   */
+  public boolean hasFunc()
+  {
+    return true;
+  }
+
+  /**
    * Liefert ein Interface zum Zugriff auf die Sichtbarkeitsbedingung dieses Objekts.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
@@ -169,6 +194,41 @@ public class GroupModel
   }
 
   /**
+   * Liefert die {@link IDManager.ID} dieser Sichtbarkeitsgruppe zurück.
+   * 
+   * @return
+   * @author Matthias Benkmann (D-III-ITD-D101)
+   * 
+   */
+  public IDManager.ID getID()
+  {
+    return id;
+  }
+
+  /**
+   * Setzt newID als neuen Namen für diese Sichtbarkeitsgruppe und benachrichtigt
+   * alle mittels
+   * {@link #addListener(de.muenchen.allg.itd51.wollmux.former.group.GroupModel.ModelChangeListener)}
+   * registrierten Listener.
+   * 
+   * @author Matthias Benkmann (D-III-ITD-D101)
+   * 
+   * @throws DuplicateIDException
+   *           falls newID bereits von einer anderen Sichtbarkeitsgruppe verwendet
+   *           wird.
+   * 
+   * TESTED
+   */
+  public void setID(String newID) throws DuplicateIDException
+  {
+    id.setID(newID);
+    /**
+     * IDManager.ID ruft MyIDChangeListener.idHasChanged() auf, was wiederum die
+     * Listener auf diesem Model benachrichtigt.
+     */
+  }
+
+  /**
    * Liefert ein ConfigThingy zurück, dessen Name der Name der Gruppe ist und dessen
    * Inhalt die Definition der Sichtbarkeitsfunktion der Gruppe ist.
    * 
@@ -176,7 +236,23 @@ public class GroupModel
    */
   public ConfigThingy export()
   {
-    return condition.export(name);
+    return condition.export(id.toString());
+  }
+
+  /**
+   * Ruft für jeden auf diesem Model registrierten {@link ModelChangeListener} die
+   * Methode {@link ModelChangeListener#attributeChanged(GroupModel, int, Object)}
+   * auf.
+   */
+  protected void notifyListeners(int attributeId, Object newValue)
+  {
+    Iterator<ModelChangeListener> iter = listeners.iterator();
+    while (iter.hasNext())
+    {
+      ModelChangeListener listener = iter.next();
+      listener.attributeChanged(this, attributeId, newValue);
+    }
+    formularMax4000.documentNeedsUpdating();
   }
 
   /**
@@ -193,14 +269,14 @@ public class GroupModel
      * @param model
      *          das Model, das sich geändert hat.
      * @param attributeId
-     *          eine der {@link GroupModel#CONDITION_ATTR Attribut-ID-Konstanten}.
+     *          eine der {@link GroupModel#ID_ATTR Attribut-ID-Konstanten}.
      * @param newValue
-     *          der neue Wert des Attributs. Numerische Attribute werden als Integer
+     *          der neue Wert des Attributs. Die ID wird als {@link IDManager.ID}
      *          übergeben.
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
-    // public void attributeChanged(GroupModel model, int attributeId, Object
-    // newValue);
+    public void attributeChanged(GroupModel model, int attributeId, Object newValue);
+
     /**
      * Wird aufgerufen, wenn model aus seinem Container entfernt wird (und damit in
      * keiner View mehr angezeigt werden soll).
@@ -208,6 +284,14 @@ public class GroupModel
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     public void modelRemoved(GroupModel model);
+  }
+
+  private class MyIDChangeListener implements IDChangeListener
+  {
+    public void idHasChanged(ID id)
+    {
+      notifyListeners(ID_ATTR, id);
+    }
   }
 
   /**

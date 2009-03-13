@@ -147,7 +147,7 @@ public class FormControlModel
   private boolean wrap = true;
 
   /** GROUPS. */
-  private Set<String> groups = new HashSet<String>();
+  private Set<IDManager.ID> groups = new HashSet<IDManager.ID>();
 
   /** LINES. */
   private int lines = 4;
@@ -281,17 +281,20 @@ public class FormControlModel
   }
 
   /**
-   * Liefert eine Menge, die die String-Werte aller Kinder von conf enthält.
+   * Liefert eine Menge, die {@link IDManager.ID} Objekte im Namensraum
+   * {@link FormularMax4000#NAMESPACE_GROUPS} für die String-Werte aller Kinder von
+   * conf enthält.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private Set<String> parseGroups(ConfigThingy conf)
+  private Set<IDManager.ID> parseGroups(ConfigThingy conf)
   {
-    HashSet<String> set = new HashSet<String>(conf.count());
+    HashSet<IDManager.ID> set = new HashSet<IDManager.ID>(conf.count());
     Iterator<ConfigThingy> iter = conf.iterator();
     while (iter.hasNext())
     {
-      set.add(iter.next().toString());
+      set.add(formularMax4000.getIDManager().getID(FormularMax4000.NAMESPACE_GROUPS,
+        iter.next().toString()));
     }
     return set;
   }
@@ -584,7 +587,7 @@ public class FormControlModel
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public Set<String> getGroups()
+  public Set<IDManager.ID> getGroups()
   {
     return groups;
   }
@@ -960,14 +963,13 @@ public class FormControlModel
       }
     }
 
-    Set<String> groups = getGroups();
+    Set<IDManager.ID> groups = getGroups();
     if (groups.size() > 0)
     {
       ConfigThingy grps = conf.add("GROUPS");
-      Iterator<String> iter = groups.iterator();
-      while (iter.hasNext())
+      for (IDManager.ID gid : groups)
       {
-        grps.add(iter.next());
+        grps.add(gid.toString());
       }
     }
 

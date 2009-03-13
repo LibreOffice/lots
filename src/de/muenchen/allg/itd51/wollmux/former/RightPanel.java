@@ -37,6 +37,8 @@ import javax.swing.JPanel;
 
 import de.muenchen.allg.itd51.wollmux.former.control.AllFormControlExtViewsPanel;
 import de.muenchen.allg.itd51.wollmux.former.control.FormControlModelList;
+import de.muenchen.allg.itd51.wollmux.former.group.AllGroupFuncViewsPanel;
+import de.muenchen.allg.itd51.wollmux.former.group.GroupModelList;
 import de.muenchen.allg.itd51.wollmux.former.insertion.AllInsertionTrafoViewsPanel;
 import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModelList;
 import de.muenchen.allg.itd51.wollmux.former.view.View;
@@ -62,6 +64,12 @@ public class RightPanel implements View
     "ALL_FORMCONTROL_EXT_VIEWS_PANEL";
 
   /**
+   * Identifikationsstring für {@link CardLayout}.
+   */
+  private static final String ALL_GROUP_FUNC_VIEWS_PANEL =
+    "ALL_GROUP_FUNC_VIEWS_PANEL";
+
+  /**
    * Das JPanel, dass alle Inhalte dieser View enthält.
    */
   private JPanel myPanel;
@@ -80,8 +88,8 @@ public class RightPanel implements View
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public RightPanel(InsertionModelList insertionModelList,
-      FormControlModelList formControlModelList, FunctionLibrary funcLib,
-      FormularMax4000 formularMax4000)
+      FormControlModelList formControlModelList, GroupModelList groupModelList,
+      FunctionLibrary funcLib, FormularMax4000 formularMax4000)
   {
     cards = new CardLayout();
     myPanel = new JPanel(cards);
@@ -93,6 +101,10 @@ public class RightPanel implements View
       new AllInsertionTrafoViewsPanel(insertionModelList, funcLib, formularMax4000);
     myPanel.add(allInsertionTrafoViewsPanel.JComponent(),
       ALL_INSERTION_TRAFO_VIEWS_PANEL);
+    AllGroupFuncViewsPanel allGroupFuncViewsPanel =
+      new AllGroupFuncViewsPanel(groupModelList, new FunctionLibrary(),
+        formularMax4000);
+    myPanel.add(allGroupFuncViewsPanel.JComponent(), ALL_GROUP_FUNC_VIEWS_PANEL);
 
     formularMax4000.addBroadcastListener(new MyBroadcastListener());
   }
@@ -112,6 +124,11 @@ public class RightPanel implements View
     public void broadcastAllFormControlsViewSelected()
     {
       cards.show(myPanel, ALL_FORMCONTROL_EXT_VIEWS_PANEL);
+    }
+
+    public void broadcastAllGroupsViewSelected()
+    {
+      cards.show(myPanel, ALL_GROUP_FUNC_VIEWS_PANEL);
     }
   }
 }

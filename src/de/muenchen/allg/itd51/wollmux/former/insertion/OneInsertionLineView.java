@@ -1,7 +1,7 @@
 /*
  * Dateiname: OneInsertionLineView.java
  * Projekt  : WollMux
- * Funktion : Eine einzelige Sicht auf eine Einfügestelle im Dokument.
+ * Funktion : Eine einzeilige Sicht auf eine Einfügestelle im Dokument.
  * 
  * Copyright (c) 2008 Landeshauptstadt München
  *

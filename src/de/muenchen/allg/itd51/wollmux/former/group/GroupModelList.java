@@ -44,7 +44,7 @@ import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
-public class GroupModelList
+public class GroupModelList implements Iterable<GroupModel>
 {
   /**
    * Die Liste der {@link GroupModel}s.
@@ -60,8 +60,7 @@ public class GroupModelList
   /**
    * Der FormularMax4000 zu dem diese GroupModelList gehört.
    */
-  //private FormularMax4000 formularMax4000;
-
+  // private FormularMax4000 formularMax4000;
   /**
    * Erzeugt eine neue GroupModelList.
    * 
@@ -71,8 +70,8 @@ public class GroupModelList
    */
   public GroupModelList(FormularMax4000 formularMax4000)
   {
-    //this.formularMax4000 = formularMax4000;
-    //this.formularMax4000.addBroadcastListener(new MyBroadcastListener());
+  // this.formularMax4000 = formularMax4000;
+  // this.formularMax4000.addBroadcastListener(new MyBroadcastListener());
   }
 
   /**
@@ -84,7 +83,7 @@ public class GroupModelList
   {
     int idx = models.size();
     models.add(idx, model);
-    notifyListeners(model, idx);
+    notifyListeners(model, idx, false);
   }
 
   /**
@@ -99,6 +98,7 @@ public class GroupModelList
       int index = models.size() - 1;
       GroupModel model = models.remove(index);
       model.hasBeenRemoved();
+      notifyListeners(model, index, true);
     }
   }
 
@@ -141,6 +141,15 @@ public class GroupModelList
     if (index < 0) return;
     models.remove(index);
     model.hasBeenRemoved();
+    notifyListeners(model, index, true);
+  }
+
+  /**
+   * Liefert einen Iterator über alle Models dieser Liste.
+   */
+  public Iterator<GroupModel> iterator()
+  {
+    return models.iterator();
   }
 
   /**
@@ -154,18 +163,23 @@ public class GroupModelList
   }
 
   /**
-   * Benachrichtigt alle ItemListener über das Hinzufügen von model zur Liste an
-   * Index index.
+   * Benachrichtigt alle ItemListener über das Hinzufügen oder Entfernen von model
+   * zur bzw. aus der Liste an/von Index index.
    * 
+   * @param removed
+   *          falls true, wurde model entfernt, ansonsten hinzugefügt.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private void notifyListeners(GroupModel model, int index)
+  private void notifyListeners(GroupModel model, int index, boolean removed)
   {
     Iterator<ItemListener> iter = listeners.iterator();
     while (iter.hasNext())
     {
       ItemListener listener = iter.next();
-      listener.itemAdded(model, index);
+      if (removed)
+        listener.itemRemoved(model, index);
+      else
+        listener.itemAdded(model, index);
     }
   }
 
@@ -183,8 +197,19 @@ public class GroupModelList
      * @author Matthias Benkmann (D-III-ITD 5.1)
      */
     public void itemAdded(GroupModel model, int index);
+
+    /**
+     * Wird aufgerufen, nachdem model aus der Liste entfernt wurde.
+     * 
+     * @param index
+     *          der alte Index von model in der Liste.
+     * @author Matthias Benkmann (D-III-ITD 5.1)
+     */
+    public void itemRemoved(GroupModel model, int index);
   }
-/*
-  private class MyBroadcastListener extends BroadcastListener
-  {}*/
+
+  /*
+   * private class MyBroadcastListener extends BroadcastListener {}
+   */
+
 }

@@ -96,7 +96,10 @@ public class AllInsertionTrafoViewsPanel extends OnDemandCardView
     }
 
     public void itemRemoved(InsertionModel model, int index)
-    {}
+    {
+    // Hier muss nicht removeItem(model) aufgerufen werden. Dies behandelt die
+    // OnDemandCardView selbst mittels Listener
+    }
   }
 
   private class MyBroadcastListener extends BroadcastListener

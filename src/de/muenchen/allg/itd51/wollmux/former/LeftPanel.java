@@ -40,6 +40,8 @@ import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.former.control.AllFormControlLineViewsPanel;
 import de.muenchen.allg.itd51.wollmux.former.control.FormControlModel;
 import de.muenchen.allg.itd51.wollmux.former.control.FormControlModelList;
+import de.muenchen.allg.itd51.wollmux.former.group.AllGroupLineViewsPanel;
+import de.muenchen.allg.itd51.wollmux.former.group.GroupModelList;
 import de.muenchen.allg.itd51.wollmux.former.insertion.AllInsertionLineViewsPanel;
 import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModel;
 import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModelList;
@@ -63,6 +65,11 @@ public class LeftPanel implements View
   private AllInsertionLineViewsPanel allInsertionModelLineViewsPanel;
 
   /**
+   * Hält in einem Panel GroupModelLineViews für alle {@link InsertionModel}s.
+   */
+  private AllGroupLineViewsPanel allGroupModelLineViewsPanel;
+
+  /**
    * Enthält alle im linken Panel angezeigten Views.
    */
   private JTabbedPane myTabbedPane;
@@ -73,13 +80,16 @@ public class LeftPanel implements View
   private FormularMax4000 formularMax4000;
 
   public LeftPanel(InsertionModelList insertionModelList,
-      FormControlModelList formControlModelList, FormularMax4000 formularMax4000)
+      FormControlModelList formControlModelList, GroupModelList groupModelList,
+      FormularMax4000 formularMax4000)
   {
     this.formularMax4000 = formularMax4000;
     allFormControlModelLineViewsPanel =
       new AllFormControlLineViewsPanel(formControlModelList, formularMax4000);
     allInsertionModelLineViewsPanel =
       new AllInsertionLineViewsPanel(insertionModelList, formularMax4000);
+    allGroupModelLineViewsPanel =
+      new AllGroupLineViewsPanel(groupModelList, formularMax4000);
 
     myTabbedPane =
       new JTabbedPane(SwingConstants.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
@@ -87,6 +97,7 @@ public class LeftPanel implements View
       allFormControlModelLineViewsPanel.JComponent());
     myTabbedPane.add(L.m("Einfügungen"),
       allInsertionModelLineViewsPanel.JComponent());
+    myTabbedPane.add(L.m("Sichtbarkeiten"), allGroupModelLineViewsPanel.JComponent());
 
     myTabbedPane.addChangeListener(new ChangeListener()
     {
@@ -116,6 +127,16 @@ public class LeftPanel implements View
         public void sendTo(BroadcastListener listener)
         {
           listener.broadcastAllInsertionsViewSelected();
+        }
+      });
+    }
+    else if (myTabbedPane.getSelectedComponent() == allGroupModelLineViewsPanel.JComponent())
+    {
+      formularMax4000.broadcast(new Broadcast()
+      {
+        public void sendTo(BroadcastListener listener)
+        {
+          listener.broadcastAllGroupsViewSelected();
         }
       });
     }

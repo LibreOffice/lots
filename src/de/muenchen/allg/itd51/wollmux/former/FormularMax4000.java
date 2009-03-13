@@ -121,6 +121,7 @@ import com.sun.star.view.XSelectionSupplier;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.DuplicateIDException;
 import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
@@ -268,6 +269,11 @@ public class FormularMax4000
   public static final Integer NAMESPACE_DB_SPALTE = Integer.valueOf(1);
 
   /**
+   * Der {@link IDManager}-Namensraum für die Namen von {@link GroupModel}s.
+   */
+  public static final Integer NAMESPACE_GROUPS = Integer.valueOf(2);
+
+  /**
    * ActionListener für Buttons mit der ACTION "abort".
    */
   private ActionListener actionListener_abort = new ActionListener()
@@ -353,7 +359,7 @@ public class FormularMax4000
    * 
    * @see #NAMESPACE_FORMCONTROLMODEL
    */
-  private IDManager idManager = new IDManager();
+  private IDManager idManager;
 
   /**
    * Verwaltet die FormControlModels dieses Formulars.
@@ -562,9 +568,11 @@ public class FormularMax4000
     // wird
     myFrame.addWindowListener(oehrchen);
 
-    leftPanel = new LeftPanel(insertionModelList, formControlModelList, this);
+    leftPanel =
+      new LeftPanel(insertionModelList, formControlModelList, groupModelList, this);
     rightPanel =
-      new RightPanel(insertionModelList, formControlModelList, functionLibrary, this);
+      new RightPanel(insertionModelList, formControlModelList, groupModelList,
+        functionLibrary, this);
 
     // damit sich Slider von JSplitPane vernünftig bewegen lässt.
     rightPanel.JComponent().setMinimumSize(new Dimension(100, 0));
@@ -886,6 +894,7 @@ public class FormularMax4000
    */
   private void initModelsAndViews(ConfigThingy formDescription)
   {
+    idManager = new IDManager();
     formControlModelList.clear();
     parseGlobalFormInfo(formDescription);
 
@@ -977,9 +986,24 @@ public class FormularMax4000
       {
         ConfigThingy sichtbarkeitsFunktion = sichtbarkeitsFunktionIterator.next();
         String groupName = sichtbarkeitsFunktion.getName();
-        FunctionSelection funcSel =
-          visibilityFunctionSelectionProvider.getFunctionSelection(groupName);
-        groupModelList.add(new GroupModel(groupName, funcSel, this));
+        try
+        {
+          IDManager.ID groupId =
+            getIDManager().getActiveID(NAMESPACE_GROUPS, groupName);
+          FunctionSelection funcSel =
+            visibilityFunctionSelectionProvider.getFunctionSelection(groupName);
+          groupModelList.add(new GroupModel(groupId, funcSel, this));
+        }
+        catch (DuplicateIDException x)
+        {
+          /*
+           * Kein Problem. Wir haben die entsprechende Sichtbarkeitsgruppe schon
+           * angelegt. Die Initialisierung des visibilityFunctionSelectionProviders
+           * sorgt dafür, dass bei mehrfachen Deklarationen der selben
+           * Sichtbarkeitsgruppe die letzte gewinnt. Der obige
+           * getFunctionSelection()-Aufruf liefert nur noch die letzte Definition.
+           */
+        }
       }
     }
 
@@ -2179,7 +2203,6 @@ public class FormularMax4000
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
    * 
-   * TODO Testen
    */
   private boolean isInvalidRange(XTextRangeCompare compare, XTextRange range,
       Object range2, boolean doCompare)
@@ -2195,12 +2218,12 @@ public class FormularMax4000
       catch (Exception x)
       {
         return true;/*
-                     * Do not Logger.error(x); because the most likely cause for an
-                     * exception is that range2 does not belong to the text object
-                     * compare, which happens in tables, because when enumerating
-                     * over a range inside of a table the enumeration hits a lot of
-                     * unrelated cells (OOo bug).
-                     */
+         * Do not Logger.error(x); because the most likely cause for an
+         * exception is that range2 does not belong to the text object
+         * compare, which happens in tables, because when enumerating
+         * over a range inside of a table the enumeration hits a lot of
+         * unrelated cells (OOo bug).
+         */
       }
     }
     return false;
