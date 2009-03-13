@@ -94,7 +94,8 @@ public class RightPanel implements View
     cards = new CardLayout();
     myPanel = new JPanel(cards);
     AllFormControlExtViewsPanel allFormControlExtViewsPanel =
-      new AllFormControlExtViewsPanel(formControlModelList, funcLib, formularMax4000);
+      new AllFormControlExtViewsPanel(formControlModelList, funcLib, groupModelList,
+        formularMax4000);
     myPanel.add(allFormControlExtViewsPanel.JComponent(),
       ALL_FORMCONTROL_EXT_VIEWS_PANEL);
     AllInsertionTrafoViewsPanel allInsertionTrafoViewsPanel =

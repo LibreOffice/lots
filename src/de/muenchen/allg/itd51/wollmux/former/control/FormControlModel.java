@@ -40,7 +40,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Vector;
 import java.util.regex.Pattern;
 
@@ -54,6 +53,7 @@ import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelection;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionAccess;
 import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionProvider;
 import de.muenchen.allg.itd51.wollmux.former.function.ParamValue;
+import de.muenchen.allg.itd51.wollmux.former.group.GroupsProvider;
 
 /**
  * Repräsentiert ein Formularsteuerelement.
@@ -147,7 +147,7 @@ public class FormControlModel
   private boolean wrap = true;
 
   /** GROUPS. */
-  private Set<IDManager.ID> groups = new HashSet<IDManager.ID>();
+  GroupsProvider groups;
 
   /** LINES. */
   private int lines = 4;
@@ -194,6 +194,7 @@ public class FormControlModel
       FormularMax4000 formularMax4000)
   {
     this.formularMax4000 = formularMax4000;
+    this.groups = new GroupsProvider(formularMax4000);
     label = L.m("Steuerelement");
     type = TEXTFIELD_TYPE;
     String idStr = "";
@@ -249,7 +250,7 @@ public class FormControlModel
       else if (name.equals("VALUES"))
         items = parseValues(attr);
       else if (name.equals("GROUPS"))
-        groups = parseGroups(attr);
+        parseGroups(attr);
       else if (name.equals("PLAUSI"))
         plausiConf = attr;
       else if (name.equals("AUTOFILL"))
@@ -287,7 +288,7 @@ public class FormControlModel
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private Set<IDManager.ID> parseGroups(ConfigThingy conf)
+  private void parseGroups(ConfigThingy conf)
   {
     HashSet<IDManager.ID> set = new HashSet<IDManager.ID>(conf.count());
     Iterator<ConfigThingy> iter = conf.iterator();
@@ -296,7 +297,7 @@ public class FormControlModel
       set.add(formularMax4000.getIDManager().getID(FormularMax4000.NAMESPACE_GROUPS,
         iter.next().toString()));
     }
-    return set;
+    groups.initGroups(set);
   }
 
   /**
@@ -315,6 +316,7 @@ public class FormControlModel
     this.label = label;
     this.type = type;
     this.formularMax4000 = formularMax4000;
+    this.groups = new GroupsProvider(formularMax4000);
     makeInactiveID(id);
   }
 
@@ -583,16 +585,6 @@ public class FormControlModel
   }
 
   /**
-   * Liefert die Menge der GROUPS-Werte dieses FormControlModels.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  public Set<IDManager.ID> getGroups()
-  {
-    return groups;
-  }
-
-  /**
    * Liefert ein Interface zum Zugriff auf das AUTOFILL-Attribut dieses Objekts.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
@@ -644,6 +636,26 @@ public class FormControlModel
   public boolean hasPlausi()
   {
     return !plausi.isNone();
+  }
+
+  /**
+   * Liefert true gdw, die GROUPS-Angabe nicht leer ist.
+   * 
+   * @author Matthias Benkmann (D-III-ITD-D101)
+   */
+  public boolean hasGroups()
+  {
+    return groups.hasGroups();
+  }
+
+  /**
+   * Liefert den GroupsProvider, der die GROUPS dieses Models managet.
+   * 
+   * @author Matthias Benkmann (D-III-ITD-D101)
+   */
+  public GroupsProvider getGroupsProvider()
+  {
+    return groups;
   }
 
   /**
@@ -963,8 +975,7 @@ public class FormControlModel
       }
     }
 
-    Set<IDManager.ID> groups = getGroups();
-    if (groups.size() > 0)
+    if (groups.hasGroups())
     {
       ConfigThingy grps = conf.add("GROUPS");
       for (IDManager.ID gid : groups)

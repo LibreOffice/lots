@@ -33,6 +33,8 @@ package de.muenchen.allg.itd51.wollmux.former.control;
 import javax.swing.JComponent;
 import javax.swing.JTabbedPane;
 
+import de.muenchen.allg.itd51.wollmux.former.group.GroupModelList;
+import de.muenchen.allg.itd51.wollmux.former.group.OneGroupsProviderGroupsEditView;
 import de.muenchen.allg.itd51.wollmux.former.view.View;
 import de.muenchen.allg.itd51.wollmux.former.view.ViewChangeListener;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
@@ -68,13 +70,15 @@ public class OneFormControlExtView implements View
    * @param funcLib
    *          die Funktionsbibliothek deren Funktionen zur Verfügung gestellt werden
    *          sollen für das Auswählen von Attributen, die eine Funktion erfordern.
+   * @param groupModelList
+   *          die Liste mit den Gruppen, die zur Auswahl angeboten werden sollen.
    * @param myViewChangeListener
    *          typischerweise ein Container, der diese View enthält und über
    *          Änderungen informiert werden soll.
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public OneFormControlExtView(FormControlModel model, FunctionLibrary funcLib,
-      ViewChangeListener myViewChangeListener)
+      GroupModelList groupModelList, ViewChangeListener myViewChangeListener)
   {
     this.bigDaddy = myViewChangeListener;
     this.model = model;
@@ -89,6 +93,9 @@ public class OneFormControlExtView implements View
     OneFormControlPlausiEditView plausiView =
       new OneFormControlPlausiEditView(model, funcLib, null);
     myTabbedPane.addTab("PLAUSI", plausiView.JComponent());
+    OneGroupsProviderGroupsEditView groupsView =
+      new OneGroupsProviderGroupsEditView(model.getGroupsProvider(), groupModelList);
+    myTabbedPane.addTab("GROUPS", groupsView.JComponent());
 
     model.addListener(new MyModelChangeListener());
   }

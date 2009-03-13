@@ -36,6 +36,7 @@ import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastObjectSelection;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
+import de.muenchen.allg.itd51.wollmux.former.group.GroupModelList;
 import de.muenchen.allg.itd51.wollmux.former.view.OnDemandCardView;
 import de.muenchen.allg.itd51.wollmux.former.view.View;
 import de.muenchen.allg.itd51.wollmux.former.view.ViewChangeListener;
@@ -57,19 +58,28 @@ public class AllFormControlExtViewsPanel extends OnDemandCardView
   private FunctionLibrary funcLib;
 
   /**
+   * Die Liste der Gruppen, die zur Auswahl gestellt werden.
+   */
+  private GroupModelList groupModelList;
+
+  /**
    * Erzeugt ein {@link AllFormControlExtViewsPanel}, das den Inhalt von
    * formControlModelList anzeigt.
    * 
    * @param funcLib
-   *          die Funktionsbibliothek, die die Funktionen enthält, die die Views zur
+   *          die Funktionsbibliothek, die die Funktionen enthält, die die View zur
    *          Auswahl anbieten sollen.
+   * @param groupModelList
+   *          die Liste der Gruppen, die zur Auswahl stehen sollen.
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public AllFormControlExtViewsPanel(FormControlModelList formControlModelList,
-      FunctionLibrary funcLib, FormularMax4000 formularMax4000)
+      FunctionLibrary funcLib, GroupModelList groupModelList,
+      FormularMax4000 formularMax4000)
   {
     super(L.m("Extra-View"));
     this.funcLib = funcLib;
+    this.groupModelList = groupModelList;
     formControlModelList.addListener(new MyItemListener());
     formularMax4000.addBroadcastListener(new MyBroadcastListener());
 
@@ -77,14 +87,15 @@ public class AllFormControlExtViewsPanel extends OnDemandCardView
     while (iter.hasNext())
     {
       FormControlModel model = iter.next();
-      if (model.hasPlausi() || model.hasAutofill()) addItem(model);
+      if (model.hasPlausi() || model.hasAutofill() || model.hasGroups())
+        addItem(model);
     }
   }
 
   public View createViewFor(Object model, ViewChangeListener viewChangeListener)
   {
     FormControlModel m = (FormControlModel) model;
-    return new OneFormControlExtView(m, funcLib, viewChangeListener);
+    return new OneFormControlExtView(m, funcLib, groupModelList, viewChangeListener);
   }
 
   private class MyItemListener implements FormControlModelList.ItemListener
@@ -92,7 +103,8 @@ public class AllFormControlExtViewsPanel extends OnDemandCardView
 
     public void itemAdded(FormControlModel model, int index)
     {
-      if (model.hasPlausi() || model.hasAutofill()) addItem(model);
+      if (model.hasPlausi() || model.hasAutofill() || model.hasGroups())
+        addItem(model);
     }
 
     public void itemSwapped(int index1, int index2)
@@ -114,6 +126,11 @@ public class AllFormControlExtViewsPanel extends OnDemandCardView
     }
 
     public void broadcastInsertionModelSelection(BroadcastObjectSelection b)
+    {
+      showEmpty();
+    }
+
+    public void broadcastGroupModelSelection(BroadcastObjectSelection b)
     {
       showEmpty();
     }

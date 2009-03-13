@@ -734,7 +734,7 @@ public class FormularMax4000
     menuItem.setSelected(viewVisibilityDescriptor.formControlLineViewAdditional);
     menu.add(menuItem);
 
-    menuItem = new JCheckBoxMenuItem("TRAFO, PLAUSI, AUTOFILL");
+    menuItem = new JCheckBoxMenuItem("TRAFO, PLAUSI, AUTOFILL, GROUPS");
     menuItem.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent e)
@@ -2218,12 +2218,12 @@ public class FormularMax4000
       catch (Exception x)
       {
         return true;/*
-         * Do not Logger.error(x); because the most likely cause for an
-         * exception is that range2 does not belong to the text object
-         * compare, which happens in tables, because when enumerating
-         * over a range inside of a table the enumeration hits a lot of
-         * unrelated cells (OOo bug).
-         */
+                     * Do not Logger.error(x); because the most likely cause for an
+                     * exception is that range2 does not belong to the text object
+                     * compare, which happens in tables, because when enumerating
+                     * over a range inside of a table the enumeration hits a lot of
+                     * unrelated cells (OOo bug).
+                     */
       }
     }
     return false;

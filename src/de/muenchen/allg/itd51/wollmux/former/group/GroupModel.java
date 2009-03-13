@@ -1,7 +1,7 @@
 /*
  * Dateiname: GroupModel.java
  * Projekt  : WollMux
- * Funktion : Eine Sichtbarkeitsgruppe, zu der 0 bis mehrere setGroups-Bookmarks gehören können.
+ * Funktion : Eine Sichtbarkeitsgruppe.
  * 
  * Copyright (c) 2008 Landeshauptstadt München
  *
@@ -30,14 +30,12 @@
  */
 package de.muenchen.allg.itd51.wollmux.former.group;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.Bookmark;
 import de.muenchen.allg.itd51.wollmux.DuplicateIDException;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
 import de.muenchen.allg.itd51.wollmux.former.IDManager;
@@ -48,7 +46,7 @@ import de.muenchen.allg.itd51.wollmux.former.function.FunctionSelectionAccess;
 import de.muenchen.allg.itd51.wollmux.former.function.ParamValue;
 
 /**
- * Eine Sichtbarkeitsgruppe, zu der 0 bis mehrere setGroups-Bookmarks gehören können.
+ * Eine Sichtbarkeitsgruppe.
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
@@ -61,20 +59,9 @@ public class GroupModel
   public static final int ID_ATTR = 0;
 
   /**
-   * 
-   */
-  private Map<String, Bookmark> mapBookmarkNameToBookmark =
-    new HashMap<String, Bookmark>();
-
-  /**
    * Die ID (=der Name) dieser Gruppe.
    */
   private IDManager.ID id;
-
-  /**
-   * Die Liste der setGroups-{@link Bookmark}s, die zu dieser Gruppe gehören.
-   */
-  private List<Integer> bookmarks = new Vector<Integer>(1);
 
   /**
    * Die Sichtbarkeitsbedingung für diese Gruppe.
@@ -116,9 +103,6 @@ public class GroupModel
     id.addIDChangeListener(myIDChangeListener);
     this.condition = condition;
     this.formularMax4000 = formularMax4000;
-    bookmarks.add(Integer.valueOf(0)); // Dummy-Statement, nur um die Warnung
-    // wegzukriegen, dass bookmarks derzeit nicht
-    // verwendet wird.
   }
 
   /**
@@ -129,18 +113,6 @@ public class GroupModel
   public FormularMax4000 getFormularMax4000()
   {
     return formularMax4000;
-  }
-
-  /**
-   * Fügt das Bookmark bm zu dieser Gruppe hinzu, wenn es in dieser Gruppe noch kein
-   * Bookmark gleichen Namens gibt. Falls es schon ein Bookmark gleichen Namens gibt,
-   * so wird dieses ersetzt.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  public void addBookmark(Bookmark bm)
-  {
-    mapBookmarkNameToBookmark.put(bm.getName(), bm);
   }
 
   /**
