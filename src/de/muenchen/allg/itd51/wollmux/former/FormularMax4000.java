@@ -449,6 +449,13 @@ public class FormularMax4000
   private MyXSelectionChangedListener myXSelectionChangedListener;
 
   /**
+   * Speichert die Funktionsdialoge-Abschnitte des Formulars. Der FM4000 macht
+   * derzeit nichts besonderes mit ihnen, sondern schreibt sie einfach nur ins
+   * Dokument zurück.
+   */
+  private ConfigThingy funktionsDialogeAbschnitteConf;
+
+  /**
    * Sendet die Nachricht b an alle Listener, die auf dem globalen Broadcast-Kanal
    * registriert sind.
    * 
@@ -1089,6 +1096,13 @@ public class FormularMax4000
     form.add("TITLE").add(formTitle);
     form.addChild(formControlModelList.export());
     form.addChild(groupModelList.export());
+    if (funktionsDialogeAbschnitteConf.count() > 0)
+    {
+      for (ConfigThingy funktionsDialogeAbschnitt : funktionsDialogeAbschnitteConf)
+      {
+        form.addChild(funktionsDialogeAbschnitt);
+      }
+    }
     if (!mapFunctionNameToConfigThingy.isEmpty())
     {
       ConfigThingy funcs = form.add("Funktionen");
@@ -1115,6 +1129,8 @@ public class FormularMax4000
   {
     ConfigThingy tempConf = conf.query("Formular").query("TITLE");
     if (tempConf.count() > 0) formTitle = tempConf.toString();
+    funktionsDialogeAbschnitteConf =
+      conf.query("Formular").query("Funktionsdialoge", 2);
     tempConf = conf.query("Formular").query("Funktionen");
     if (tempConf.count() >= 1)
     {
@@ -2218,12 +2234,12 @@ public class FormularMax4000
       catch (Exception x)
       {
         return true;/*
-                     * Do not Logger.error(x); because the most likely cause for an
-                     * exception is that range2 does not belong to the text object
-                     * compare, which happens in tables, because when enumerating
-                     * over a range inside of a table the enumeration hits a lot of
-                     * unrelated cells (OOo bug).
-                     */
+         * Do not Logger.error(x); because the most likely cause for an
+         * exception is that range2 does not belong to the text object
+         * compare, which happens in tables, because when enumerating
+         * over a range inside of a table the enumeration hits a lot of
+         * unrelated cells (OOo bug).
+         */
       }
     }
     return false;

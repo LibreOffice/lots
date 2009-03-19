@@ -1,5 +1,21 @@
  ==================== Neu in dieser Version ====================
 
+    * Enthielt ein mit Datei->Drucken zu druckendes Dokument Serienbrieffelder,
+      so wurde früher der Dialog "Das Dokument enthält Serienbrief-Felder.
+      Was wollen Sie tun?" gebracht. Dieser Dialog wurde entfernt, da er seit
+      Einführung der neuen Seriendruckfunktion "Extras->Seriendruck (WollMux)"
+      überflüssig ist und für Fehler und Verwirrungen sorgte.
+    * FormularMax_4000: Bisher musste zur Erstellung, Zuweisung und Bearbeitung
+      von Sichtbarkeitsgruppen direkt der Formularquellcode editiert werden.
+      Dies ist nun nicht mehr nötig, da entsprechende Unterstützung in die
+      GUI des FM4000 integriert wurde.
+    * FormularMax_4000: Im Dokument eingebettete Funktionsdialoge-Abschnitte
+      werden nicht mehr gelöscht.
+
+
+
+ ==================== Neu in Version 5.1.0 ====================
+
     * Die WollMuxBar akzeptiert jetzt ein Kommandozeilenargument --
       quickstarter. Wird dieses übergeben agiert die WollMuxBar als
       OpenOffice.org Quickstarter, d.h. OOo bleibt permanent im Hintergrund im

@@ -100,7 +100,7 @@ sub parse
     chomp $line;
     while (defined($line))
     {
-      if (my ($asterix, $title) = ($line =~ m/^(\*+)\s\[bearbeiten\]\s+([^*]+\S)\s+\*+/))
+      if (my ($asterix, $title) = ($line =~ m/^(\*+)(?:\s\[bearbeiten\])?\s+([^*]+\S)\s+\*+/))
       {
         my $newlevel = length($asterix);
         if ($newlevel < $level)
