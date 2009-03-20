@@ -52,7 +52,6 @@ import com.sun.star.util.URL;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
-import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 
 /**
  * Der DispatchHandler behandelt alle globalen Dispatches des WollMux und registriert
@@ -339,23 +338,15 @@ public class DispatchHandler
       }
     });
 
-    try
+    if (WollMuxFiles.installQATestHandler())
     {
-      if (WollMuxFiles.getWollmuxConf().get("QA_TEST_HANDLER").toString().equalsIgnoreCase(
-        "true"))
+      handler.add(new DocumentDispatchHandler(DISP_wmTest, model)
       {
-        handler.add(new DocumentDispatchHandler(DISP_wmTest, model)
+        public void dispatch(String arg, PropertyValue[] props)
         {
-          public void dispatch(String arg, PropertyValue[] props)
-          {
-            TestHandler.doTest(model, arg);
-          }
-        });
-      }
-    }
-    catch (NodeNotFoundException x)
-    {
-      // TestHandler wird nicht installiert, wenn QA_TEST_HANDLER fehlt
+          TestHandler.doTest(model, arg);
+        }
+      });
     }
 
     return handler;
