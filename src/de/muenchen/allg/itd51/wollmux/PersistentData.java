@@ -30,7 +30,6 @@
  */
 package de.muenchen.allg.itd51.wollmux;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Vector;
 
@@ -78,11 +77,6 @@ public class PersistentData
    * Das Dokument, in dem die Daten gespeichert werden.
    */
   private XTextDocument doc;
-
-  /**
-   * Mapped dataId auf die zuletzt gesetzten Daten
-   */
-  private HashMap<String, String[]> currentData;
 
   /**
    * Erzeugt einen neuen persistenten Datenspeicher im Dokument doc.
