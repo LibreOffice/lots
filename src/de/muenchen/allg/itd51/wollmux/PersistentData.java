@@ -30,6 +30,7 @@
  */
 package de.muenchen.allg.itd51.wollmux;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Vector;
 
@@ -77,6 +78,11 @@ public class PersistentData
    * Das Dokument, in dem die Daten gespeichert werden.
    */
   private XTextDocument doc;
+
+  /**
+   * Mapped dataId auf die zuletzt gesetzten Daten
+   */
+  private HashMap<String, String[]> currentData;
 
   /**
    * Erzeugt einen neuen persistenten Datenspeicher im Dokument doc.
@@ -239,6 +245,15 @@ public class PersistentData
    */
   public void setData(String dataId, String dataValue)
   {
+    // Workaround für OOo Issue 100374 (Betrifft OOo 3.0.x bis voraussichtlich OOo
+    // 3.2): Notizen werden beim zweiten Schreibzugriff nicht korrekt geschrieben.
+    // Durch das vorherige Entfernen aller bereits bestehenden Notizen wird die Notiz
+    // in getWollMuxTextFields(...) neu angelegt und dadurch das erste Mal
+    // beschrieben. TODO: dieser Workaround kann wieder entfernt werden, wenn eine
+    // fehlerbereinigte OOo-Version flächendeckend im Einsatz ist.
+    removeData(dataId);
+    // Ende des Workarounds
+
     Vector<Object> textfields =
       getWollMuxTextFields(dataId, true, dataValue.length());
     if (textfields.size() == 0)
