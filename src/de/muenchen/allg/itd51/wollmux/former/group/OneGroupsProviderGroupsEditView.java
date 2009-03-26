@@ -46,6 +46,7 @@ import javax.swing.event.ListSelectionListener;
 
 import de.muenchen.allg.itd51.wollmux.former.IDManager;
 import de.muenchen.allg.itd51.wollmux.former.IDManager.ID;
+import de.muenchen.allg.itd51.wollmux.former.IDManager.IDChangeListener;
 import de.muenchen.allg.itd51.wollmux.former.view.View;
 
 /**
@@ -113,12 +114,14 @@ public class OneGroupsProviderGroupsEditView implements View
 
     for (GroupModel model : groupModelList)
     {
-      listModel.addElement(model.getID().toString());
+      IDManager.ID id = model.getID();
+      listModel.addElement(id);
+      id.addIDChangeListener(myListener);
     }
 
     for (IDManager.ID id : groupsProvider)
     {
-      if (!listModel.contains(id.toString())) listModel.addElement(id.toString());
+      if (!listModel.contains(id)) listModel.addElement(id);
     }
 
     Set<IDManager.ID> selected = groupsProvider.getGroups();
@@ -126,7 +129,7 @@ public class OneGroupsProviderGroupsEditView implements View
     int i = 0;
     for (IDManager.ID id : selected)
     {
-      indices[i++] = listModel.indexOf(id.toString());
+      indices[i++] = listModel.indexOf(id);
     }
 
     myList.setSelectedIndices(indices);
@@ -140,7 +143,7 @@ public class OneGroupsProviderGroupsEditView implements View
   }
 
   private class MyListener implements GroupModelList.ItemListener,
-      GroupsProvider.GroupsChangedListener, ListSelectionListener
+      GroupsProvider.GroupsChangedListener, ListSelectionListener, IDChangeListener
   {
 
     /**
@@ -151,8 +154,8 @@ public class OneGroupsProviderGroupsEditView implements View
     {
       if (recursion) return;
       recursion = true;
-      String groupName = model.getID().toString();
-      if (!listModel.contains(groupName)) listModel.addElement(groupName);
+      IDManager.ID id = model.getID();
+      if (!listModel.contains(id)) listModel.addElement(id);
       recursion = false;
     }
 
@@ -165,8 +168,7 @@ public class OneGroupsProviderGroupsEditView implements View
       if (recursion) return;
       recursion = true;
       IDManager.ID groupID = model.getID();
-      String groupName = groupID.toString();
-      listModel.removeElement(groupName);
+      listModel.removeElement(groupID);
       groupsProvider.removeGroup(groupID);
       recursion = false;
     }
@@ -179,7 +181,7 @@ public class OneGroupsProviderGroupsEditView implements View
     {
       if (recursion) return;
       recursion = true;
-      int index = listModel.indexOf(groupID.toString());
+      int index = listModel.indexOf(groupID);
       if (index >= 0) myList.getSelectionModel().addSelectionInterval(index, index);
 
       recursion = false;
@@ -193,7 +195,7 @@ public class OneGroupsProviderGroupsEditView implements View
     {
       if (recursion) return;
       recursion = true;
-      int index = listModel.indexOf(groupID.toString());
+      int index = listModel.indexOf(groupID);
       if (index >= 0)
         myList.getSelectionModel().removeSelectionInterval(index, index);
       recursion = false;
@@ -217,7 +219,7 @@ public class OneGroupsProviderGroupsEditView implements View
         {
           for (Object o : selected)
           {
-            if (o.equals(id.toString())) break found;
+            if (o.equals(id)) break found;
           }
 
           iter.remove();
@@ -229,11 +231,18 @@ public class OneGroupsProviderGroupsEditView implements View
         for (GroupModel model : groupModelList)
         {
           IDManager.ID id = model.getID();
-          if (o.equals(id.toString())) groupsProvider.addGroup(id);
+          if (o.equals(id)) groupsProvider.addGroup(id);
         }
       }
 
       recursion = false;
     }
+
+    /**
+     * Die ID einer der Gruppen aus groupModelList (d.h. der Liste aller verfügbaren
+     * Gruppen) sich geändert.
+     */
+    public void idHasChanged(ID id)
+    {}
   }
 }

@@ -73,6 +73,15 @@ public abstract class BroadcastListener
   {}
 
   /**
+   * getObject() ist ein
+   * {@link de.muenchen.allg.itd51.wollmux.former.section.SectionModel}.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public void broadcastSectionModelSelection(BroadcastObjectSelection b)
+  {}
+
+  /**
    * Eine View die Views aller InsertionModel enthält wurde ausgewählt.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -94,6 +103,14 @@ public abstract class BroadcastListener
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void broadcastAllGroupsViewSelected()
+  {}
+
+  /**
+   * Eine View die Views aller SectionModels enthält wurde ausgewählt.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public void broadcastAllSectionsViewSelected()
   {}
 
   /**

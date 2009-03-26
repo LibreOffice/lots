@@ -147,7 +147,7 @@ public class FormControlModel
   private boolean wrap = true;
 
   /** GROUPS. */
-  GroupsProvider groups;
+  private GroupsProvider groups;
 
   /** LINES. */
   private int lines = 4;

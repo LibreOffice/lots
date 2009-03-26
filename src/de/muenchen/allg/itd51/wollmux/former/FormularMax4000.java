@@ -100,6 +100,7 @@ import com.sun.star.container.NoSuchElementException;
 import com.sun.star.container.XEnumeration;
 import com.sun.star.container.XEnumerationAccess;
 import com.sun.star.container.XIndexAccess;
+import com.sun.star.container.XNameAccess;
 import com.sun.star.container.XNamed;
 import com.sun.star.document.XDocumentInfo;
 import com.sun.star.lang.EventObject;
@@ -113,6 +114,7 @@ import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextFieldsSupplier;
 import com.sun.star.text.XTextRange;
 import com.sun.star.text.XTextRangeCompare;
+import com.sun.star.text.XTextSectionsSupplier;
 import com.sun.star.text.XTextTable;
 import com.sun.star.uno.AnyConverter;
 import com.sun.star.uno.XInterface;
@@ -147,6 +149,8 @@ import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModel;
 import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModel4InputUser;
 import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModel4InsertXValue;
 import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModelList;
+import de.muenchen.allg.itd51.wollmux.former.section.SectionModel;
+import de.muenchen.allg.itd51.wollmux.former.section.SectionModelList;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 import de.muenchen.allg.itd51.wollmux.func.PrintFunctionLibrary;
 
@@ -377,6 +381,11 @@ public class FormularMax4000
   private GroupModelList groupModelList;
 
   /**
+   * Verwaltet die {@link SectionModel}s dieses Formulars.
+   */
+  private SectionModelList sectionModelList;
+
+  /**
    * Funktionsbibliothek, die globale Funktionen zur Verfügung stellt.
    */
   private FunctionLibrary functionLibrary;
@@ -565,6 +574,7 @@ public class FormularMax4000
     formControlModelList = new FormControlModelList(this);
     insertionModelList = new InsertionModelList(this);
     groupModelList = new GroupModelList(this);
+    sectionModelList = new SectionModelList(this);
 
     // Create and set up the window.
     myFrame = new JFrame("FormularMax 4000");
@@ -576,10 +586,11 @@ public class FormularMax4000
     myFrame.addWindowListener(oehrchen);
 
     leftPanel =
-      new LeftPanel(insertionModelList, formControlModelList, groupModelList, this);
+      new LeftPanel(insertionModelList, formControlModelList, groupModelList,
+        sectionModelList, this, doc.doc);
     rightPanel =
       new RightPanel(insertionModelList, formControlModelList, groupModelList,
-        functionLibrary, this);
+        sectionModelList, functionLibrary, this);
 
     // damit sich Slider von JSplitPane vernünftig bewegen lässt.
     rightPanel.JComponent().setMinimumSize(new Dimension(100, 0));
@@ -1014,6 +1025,15 @@ public class FormularMax4000
       }
     }
 
+    sectionModelList.clear();
+    XTextSectionsSupplier tsSupp = UNO.XTextSectionsSupplier(doc.doc);
+    XNameAccess textSections = tsSupp.getTextSections();
+    String[] sectionNames = textSections.getElementNames();
+    for (String sectionName : sectionNames)
+    {
+      sectionModelList.add(new SectionModel(sectionName, tsSupp, this));
+    }
+
     setFrameSize();
   }
 
@@ -1048,6 +1068,7 @@ public class FormularMax4000
     Map<String, ConfigThingy> mapFunctionNameToConfigThingy =
       new HashMap<String, ConfigThingy>();
     insertionModelList.updateDocument(mapFunctionNameToConfigThingy);
+    sectionModelList.updateDocument();
     ConfigThingy conf = buildFormDescriptor(mapFunctionNameToConfigThingy);
     doc.setFormDescription(new ConfigThingy(conf));
     return conf;
@@ -2234,12 +2255,12 @@ public class FormularMax4000
       catch (Exception x)
       {
         return true;/*
-         * Do not Logger.error(x); because the most likely cause for an
-         * exception is that range2 does not belong to the text object
-         * compare, which happens in tables, because when enumerating
-         * over a range inside of a table the enumeration hits a lot of
-         * unrelated cells (OOo bug).
-         */
+                     * Do not Logger.error(x); because the most likely cause for an
+                     * exception is that range2 does not belong to the text object
+                     * compare, which happens in tables, because when enumerating
+                     * over a range inside of a table the enumeration hits a lot of
+                     * unrelated cells (OOo bug).
+                     */
       }
     }
     return false;

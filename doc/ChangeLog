@@ -5,12 +5,21 @@
       Was wollen Sie tun?" gebracht. Dieser Dialog wurde entfernt, da er seit
       Einführung der neuen Seriendruckfunktion "Extras->Seriendruck (WollMux)"
       überflüssig ist und für Fehler und Verwirrungen sorgte.
-    * FormularMax_4000: Bisher musste zur Erstellung, Zuweisung und Bearbeitung
-      von Sichtbarkeitsgruppen direkt der Formularquellcode editiert werden.
-      Dies ist nun nicht mehr nötig, da entsprechende Unterstützung in die
-      GUI des FM4000 integriert wurde.
-    * FormularMax_4000: Im Dokument eingebettete Funktionsdialoge-Abschnitte
-      werden nicht mehr gelöscht.
+    * WollMux-5.2.0 hat für den Aufbau von Vorlagen teilweise doppelt so lang
+      gebraucht als WollMux-5.1.0. Dieses Problem wurde beseitigt.
+    * FormularMax_4000
+          o Bisher musste zur Erstellung, Zuweisung und Bearbeitung von
+            Sichtbarkeitsgruppen direkt der Formularquellcode editiert werden.
+            Dies ist nun nicht mehr nötig, da entsprechende Unterstützung in
+            die GUI des FM4000 integriert wurde (Reiter_Sichtbarkeiten).
+          o Im Dokument eingebettete Funktionsdialoge-Abschnitte werden nicht
+            mehr gelöscht.
+          o Über den neuen Reiter_Bereiche lassen sich im Dokument ein- und
+            auszublendende Bereiche anlegen und mit Sichtbarkeitsgruppen
+            verknüpfen. Insbesondere erwähnenswert ist eine Funktion die
+            einen Bereich automatisch an manuellen Seitenumbrüchen einfügt,
+            so dass in ein Formular eingebettete Teildokumente bequem ein- und
+            ausgeblendet werden können.
 
 
 

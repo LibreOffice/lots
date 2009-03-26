@@ -275,7 +275,25 @@ public class AllGroupLineViewsPanel implements View
       OneGroupLineView view = views.get(i);
       GroupModel model = view.getModel();
       groupModelList.remove(model);
-      model.getID().deactivate();
+
+      /**
+       * Es gibt keine Möglichkeit, eine ID aus dem IDManager zu entfernen und ein
+       * Inaktivieren reicht nicht, um Namenskollisionen zu verhindern. Deswegen
+       * benennen wir die ID einfach um in einen zufälligen String.
+       */
+      IDManager.ID id = model.getID();
+      while (true)
+      {
+        try
+        {
+          id.setID("ExistiertNichtMehr" + Math.random());
+          break;
+        }
+        catch (DuplicateIDException x)
+        {
+          continue;
+        }
+      }
     }
   }
 

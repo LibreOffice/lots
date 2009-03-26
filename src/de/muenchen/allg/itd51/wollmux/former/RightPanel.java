@@ -41,6 +41,8 @@ import de.muenchen.allg.itd51.wollmux.former.group.AllGroupFuncViewsPanel;
 import de.muenchen.allg.itd51.wollmux.former.group.GroupModelList;
 import de.muenchen.allg.itd51.wollmux.former.insertion.AllInsertionTrafoViewsPanel;
 import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModelList;
+import de.muenchen.allg.itd51.wollmux.former.section.AllSectionExtViewsPanel;
+import de.muenchen.allg.itd51.wollmux.former.section.SectionModelList;
 import de.muenchen.allg.itd51.wollmux.former.view.View;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 
@@ -70,6 +72,12 @@ public class RightPanel implements View
     "ALL_GROUP_FUNC_VIEWS_PANEL";
 
   /**
+   * Identifikationsstring für {@link CardLayout}.
+   */
+  private static final String ALL_SECTION_EXT_VIEWS_PANEL =
+    "ALL_SECTION_EXT_VIEWS_PANEL";
+
+  /**
    * Das JPanel, dass alle Inhalte dieser View enthält.
    */
   private JPanel myPanel;
@@ -84,12 +92,17 @@ public class RightPanel implements View
    * {@link de.muenchen.allg.itd51.wollmux.former.insertion.AllInsertionTrafoViewsPanel#AllInsertionTrafoViewsPanel(InsertionModelList, FunctionLibrary, FormularMax4000)}
    * und
    * {@link de.muenchen.allg.itd51.wollmux.former.control.AllFormControlExtViewsPanel#AllFormControlExtViewsPanel(FormControlModelList, FunctionLibrary, FormularMax4000)}.
+   * und
+   * {@link AllGroupFuncViewsPanel#AllGroupFuncViewsPanel(GroupModelList, FunctionLibrary, FormularMax4000)}
+   * und
+   * {@link AllSectionExtViewsPanel#AllSectionExtViewsPanel(SectionModelList, GroupModelList, FormularMax4000)}
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
   public RightPanel(InsertionModelList insertionModelList,
       FormControlModelList formControlModelList, GroupModelList groupModelList,
-      FunctionLibrary funcLib, FormularMax4000 formularMax4000)
+      SectionModelList sectionModelList, FunctionLibrary funcLib,
+      FormularMax4000 formularMax4000)
   {
     cards = new CardLayout();
     myPanel = new JPanel(cards);
@@ -106,6 +119,9 @@ public class RightPanel implements View
       new AllGroupFuncViewsPanel(groupModelList, new FunctionLibrary(),
         formularMax4000);
     myPanel.add(allGroupFuncViewsPanel.JComponent(), ALL_GROUP_FUNC_VIEWS_PANEL);
+    AllSectionExtViewsPanel allSectionExtViewsPanel =
+      new AllSectionExtViewsPanel(sectionModelList, groupModelList, formularMax4000);
+    myPanel.add(allSectionExtViewsPanel.JComponent(), ALL_SECTION_EXT_VIEWS_PANEL);
 
     formularMax4000.addBroadcastListener(new MyBroadcastListener());
   }
@@ -130,6 +146,11 @@ public class RightPanel implements View
     public void broadcastAllGroupsViewSelected()
     {
       cards.show(myPanel, ALL_GROUP_FUNC_VIEWS_PANEL);
+    }
+
+    public void broadcastAllSectionsViewSelected()
+    {
+      cards.show(myPanel, ALL_SECTION_EXT_VIEWS_PANEL);
     }
   }
 }

@@ -36,15 +36,21 @@ import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import com.sun.star.text.XTextDocument;
+
 import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.former.control.AllFormControlLineViewsPanel;
 import de.muenchen.allg.itd51.wollmux.former.control.FormControlModel;
 import de.muenchen.allg.itd51.wollmux.former.control.FormControlModelList;
 import de.muenchen.allg.itd51.wollmux.former.group.AllGroupLineViewsPanel;
+import de.muenchen.allg.itd51.wollmux.former.group.GroupModel;
 import de.muenchen.allg.itd51.wollmux.former.group.GroupModelList;
 import de.muenchen.allg.itd51.wollmux.former.insertion.AllInsertionLineViewsPanel;
 import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModel;
 import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModelList;
+import de.muenchen.allg.itd51.wollmux.former.section.AllSectionLineViewsPanel;
+import de.muenchen.allg.itd51.wollmux.former.section.SectionModel;
+import de.muenchen.allg.itd51.wollmux.former.section.SectionModelList;
 import de.muenchen.allg.itd51.wollmux.former.view.View;
 
 /**
@@ -65,9 +71,14 @@ public class LeftPanel implements View
   private AllInsertionLineViewsPanel allInsertionModelLineViewsPanel;
 
   /**
-   * Hält in einem Panel GroupModelLineViews für alle {@link InsertionModel}s.
+   * Hält in einem Panel GroupModelLineViews für alle {@link GroupModel}s.
    */
   private AllGroupLineViewsPanel allGroupModelLineViewsPanel;
+
+  /**
+   * Hält in einem Panel SectionModelLineViews für alle {@link SectionModel}s.
+   */
+  private AllSectionLineViewsPanel allSectionModelLineViewsPanel;
 
   /**
    * Enthält alle im linken Panel angezeigten Views.
@@ -81,7 +92,8 @@ public class LeftPanel implements View
 
   public LeftPanel(InsertionModelList insertionModelList,
       FormControlModelList formControlModelList, GroupModelList groupModelList,
-      FormularMax4000 formularMax4000)
+      SectionModelList sectionModelList, FormularMax4000 formularMax4000,
+      XTextDocument doc)
   {
     this.formularMax4000 = formularMax4000;
     allFormControlModelLineViewsPanel =
@@ -90,6 +102,8 @@ public class LeftPanel implements View
       new AllInsertionLineViewsPanel(insertionModelList, formularMax4000);
     allGroupModelLineViewsPanel =
       new AllGroupLineViewsPanel(groupModelList, formularMax4000);
+    allSectionModelLineViewsPanel =
+      new AllSectionLineViewsPanel(sectionModelList, formularMax4000, doc);
 
     myTabbedPane =
       new JTabbedPane(SwingConstants.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
@@ -98,6 +112,7 @@ public class LeftPanel implements View
     myTabbedPane.add(L.m("Einfügungen"),
       allInsertionModelLineViewsPanel.JComponent());
     myTabbedPane.add(L.m("Sichtbarkeiten"), allGroupModelLineViewsPanel.JComponent());
+    myTabbedPane.add(L.m("Bereiche"), allSectionModelLineViewsPanel.JComponent());
 
     myTabbedPane.addChangeListener(new ChangeListener()
     {
@@ -137,6 +152,16 @@ public class LeftPanel implements View
         public void sendTo(BroadcastListener listener)
         {
           listener.broadcastAllGroupsViewSelected();
+        }
+      });
+    }
+    else if (myTabbedPane.getSelectedComponent() == allSectionModelLineViewsPanel.JComponent())
+    {
+      formularMax4000.broadcast(new Broadcast()
+      {
+        public void sendTo(BroadcastListener listener)
+        {
+          listener.broadcastAllSectionsViewSelected();
         }
       });
     }
