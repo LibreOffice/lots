@@ -976,6 +976,7 @@ public class WollMuxFiles
       out.write("===================== END wollmux.log ==================\n");
 
       out.write("===================== START OOo-Configuration dump ==================\n");
+      out.write(dumpOOoConfiguration("/org.openoffice.Office.Paths/") + "\n");
       out.write(dumpOOoConfiguration("/org.openoffice.Office.Writer/") + "\n");
       out.write(dumpOOoConfiguration("/org.openoffice.Inet/") + "\n");
       out.write("===================== END OOo-Configuration dump ==================\n");
