@@ -48,12 +48,6 @@ public class L
   private static StringBuilder debugMessages = new StringBuilder();
 
   /**
-   * Die URL der Daten und Übersetzungen zur Lokalisierung.
-   */
-  private static final URL LOCALIZE_DATA_URL =
-    L.class.getClassLoader().getResource("data/localization.conf");
-
-  /**
    * Wird für die aktuelle Sprache initialisiert und bildet einen Originalstring auf
    * einen übersetzten String ab.
    */
@@ -142,8 +136,9 @@ public class L
   }
 
   /**
-   * Liefert alle während der Initialisierung aufgelaufenen Debug-Messages zurück und gibt dann
-   * ihren Speicher frei. 
+   * Liefert alle während der Initialisierung aufgelaufenen Debug-Messages zurück und
+   * gibt dann ihren Speicher frei.
+   * 
    * @author Matthias Benkmann (D-III-ITD-D101)
    */
   public static String flushDebugMessages()
@@ -152,18 +147,26 @@ public class L
     if (debugMessages != null)
     {
       str = debugMessages.toString();
-      debugMessages = null; //Speicher freigeben
+      debugMessages = null; // Speicher freigeben
     }
-    else str = "";
-    
+    else
+      str = "";
+
     return str;
   }
-  
+
   static
   {
     try
     {
-      ConfigThingy l10n = new ConfigThingy("l10n", LOCALIZE_DATA_URL);
+      // diese Variable hatten wir mal als statisches, finales Feld in dieser Klasse
+      // definiert, es gab aber Fälle, in denen vermutlich eine falsche
+      // Initialisierungsreihenfolge dafür sorgte, dass das Feld leer blieb. Durch
+      // eine direkte Initialisierung als lokale Variable wird das vermieden.
+      URL localizeDataURL =
+        L.class.getClassLoader().getResource("data/localization.conf");
+
+      ConfigThingy l10n = new ConfigThingy("l10n", localizeDataURL);
 
       String messageLanguage = Locale.getDefault().getLanguage();
       debugMessages.append("Message language from locale: " + messageLanguage + '\n');
