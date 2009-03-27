@@ -28,21 +28,21 @@ import com.sun.star.comp.helper.Bootstrap;
 import com.sun.star.comp.helper.BootstrapException;
 import com.sun.star.frame.XFrame;
 import com.sun.star.lang.EventObject;
-import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
 
 public class PALChangeEventTest implements XPALChangeEventListener
 {
 
-  public static void main(String[] args) throws BootstrapException, Exception
+  public static void main(String[] args) throws BootstrapException,
+      com.sun.star.uno.Exception
   {
     XComponentContext ctx = Bootstrap.bootstrap();
 
     new PALChangeEventTest(ctx);
   }
 
-  public PALChangeEventTest(XComponentContext ctx) throws Exception
+  public PALChangeEventTest(XComponentContext ctx) throws com.sun.star.uno.Exception
   {
     XPALChangeEventBroadcaster mux =
       (XPALChangeEventBroadcaster) UnoRuntime.queryInterface(

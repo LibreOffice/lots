@@ -52,7 +52,6 @@ import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextRange;
 import com.sun.star.uno.AnyConverter;
-import com.sun.star.uno.Exception;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.afid.UnoService;
@@ -134,7 +133,7 @@ public class Bookmark
     {
       bookmark = document.create("com.sun.star.text.Bookmark");
     }
-    catch (Exception e)
+    catch (com.sun.star.uno.Exception e)
     {
       Logger.error(e);
     }
@@ -254,7 +253,7 @@ public class Bookmark
    * @return den tatsächlich erzeugten Namen des Bookmarks. Falls das Bookmark
    *         verschwunden ist, so wird das Objekt {@link #BROKEN} zurückgeliefert (==
    *         vergleichbar).
-   * @throws Exception
+   * @throws com.sun.star.uno.Exception
    */
   public String rename(String newName)
   {
@@ -325,7 +324,7 @@ public class Bookmark
       xTextRange.getText().insertTextContent(xTextRange, bookmark.xTextContent(),
         true);
     }
-    catch (Exception e)
+    catch (com.sun.star.uno.Exception e)
     {
       Logger.error(e);
     }
@@ -362,7 +361,7 @@ public class Bookmark
     {
       return UNO.XTextContent(supp.getBookmarks().getByName(name)).getAnchor();
     }
-    catch (Exception x)
+    catch (com.sun.star.uno.Exception x)
     {
       return null;
     }
@@ -479,7 +478,7 @@ public class Bookmark
 
       }
     }
-    catch (Exception x)
+    catch (com.sun.star.uno.Exception x)
     {
       Logger.error(x);
     }
@@ -556,7 +555,7 @@ public class Bookmark
       cursor.getText().insertTextContent(cursor, bookmark.xTextContent(), true);
       bookmark.xTextContent().getAnchor().setString("");
     }
-    catch (Exception e)
+    catch (com.sun.star.uno.Exception e)
     {
       Logger.error(e);
     }

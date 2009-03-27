@@ -43,7 +43,6 @@ import com.sun.star.text.XParagraphCursor;
 import com.sun.star.text.XText;
 import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextRange;
-import com.sun.star.uno.Exception;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
@@ -694,7 +693,7 @@ abstract public class DocumentCommand
    * Eine Exception die geworfen wird, wenn ein Dokumentkommando als ungültig erkannt
    * wurde, z,b, aufgrund eines fehlenden Parameters.
    */
-  static public class InvalidCommandException extends Exception
+  static public class InvalidCommandException extends com.sun.star.uno.Exception
   {
     private static final long serialVersionUID = -3960668930339529734L;
 
