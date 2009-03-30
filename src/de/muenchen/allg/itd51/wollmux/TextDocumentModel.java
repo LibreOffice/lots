@@ -629,82 +629,123 @@ public class TextDocumentModel
   {
     HashMap<String, String> idToPresetValue = new HashMap<String, String>();
 
-    // durch alle Werte, die im FormDescriptor abgelegt sind gehen, und
-    // vergleichen, ob sie mit den Inhalten der Formularfelder im Dokument
-    // übereinstimmen.
-    for (Map.Entry<String, String> ent : formFieldValues.entrySet())
+    Set<String> ids = new HashSet<String>();
+    ids.addAll(idToFormFields.keySet());
+    ids.addAll(idToTextFieldFormFields.keySet());
+
+    // mapIdToPresetValue vorbelegen: Gibt es zu id mindestens ein untransformiertes
+    // Feld, so wird der Wert dieses Feldes genommen. Gibt es kein untransformiertes
+    // Feld, so wird der zuletzt im Formularwerte abgespeicherte Wert genommen.
+    for (String id : ids)
     {
-      String id = ent.getKey();
-      String value;
-      String lastStoredValue = ent.getValue();
+      List<FormField> fields = new ArrayList<FormField>();
+      if (idToFormFields.get(id) != null) fields.addAll(idToFormFields.get(id));
+      if (idToTextFieldFormFields.get(id) != null)
+        fields.addAll(idToTextFieldFormFields.get(id));
 
-      List<FormField> fields = idToFormFields.get(id);
-      if (fields != null && fields.size() > 0)
+      String value = getFirstUntransformedValue(fields);
+      if (value == null) value = formFieldValues.get(id);
+      if (value != null) idToPresetValue.put(id, value);
+    }
+
+    // Alle id's herauslöschen, deren Felder-Werte nicht konsistent sind.
+    for (String id : ids)
+    {
+      String value = idToPresetValue.get(id);
+      if (value != null)
       {
-        boolean allAreUnchanged = true;
-        boolean allAreUntransformed = true;
-        boolean allUntransformedHaveSameValues = true;
-
-        String refValue = null;
-
-        Iterator<FormField> j = fields.iterator();
-        while (j.hasNext())
-        {
-          FormField field = j.next();
-          String thisValue = field.getValue();
-
-          // Wurde der Wert des Feldes gegenüber dem zusetzt gespeicherten Wert
-          // verändert?
-          String transformedLastStoredValue =
-            getTransformedValue(lastStoredValue, field.getTrafoName(),
-              !field.singleParameterTrafo());
-          if (thisValue == null || !thisValue.equals(transformedLastStoredValue))
-            allAreUnchanged = false;
-
-          if (field.getTrafoName() != null)
-            allAreUntransformed = false;
-          else
-          {
-            // Referenzwert bestimmen
-            if (refValue == null) refValue = thisValue;
-
-            if (thisValue == null || !thisValue.equals(refValue))
-              allUntransformedHaveSameValues = false;
-          }
-        }
-
-        // neuen Formularwert bestimmen. Regeln:
-        // 1) Wenn sich kein Formularfeld geändert hat, wird der zuletzt
-        // gesetzte Formularwert verwendet.
-        // 2) Wenn sich mindestens ein Formularfeld geandert hat, jedoch alle
-        // untransformiert sind und den selben Wert enhtalten, so wird dieser
-        // gleiche Wert als neuer Formularwert übernommen.
-        // 3) in allen anderen Fällen wird FISHY übergeben.
-        if (allAreUnchanged)
-          value = lastStoredValue;
-        else
-        {
-          if (allAreUntransformed && allUntransformedHaveSameValues
-            && refValue != null)
-            value = refValue;
-          else
-            value = FormController.FISHY;
-        }
+        boolean fieldValuesConsistent =
+          fieldValuesConsistent(idToFormFields.get(id), idToPresetValue, value)
+            && fieldValuesConsistent(idToTextFieldFormFields.get(id),
+              idToPresetValue, value);
+        if (!fieldValuesConsistent) idToPresetValue.remove(id);
       }
-      else
-      {
-        // wenn kein Formularfeld vorhanden ist wird der zuletzt gesetzte
-        // Formularwert übernommen.
-        value = lastStoredValue;
-      }
+    }
 
-      // neuen Wert übernehmen:
-      idToPresetValue.put(id, value);
-      Logger.debug2("Add IDToPresetValue: ID=\"" + id + "\" --> Wert=\"" + value
-        + "\"");
-
+    // IDs, zu denen keine gültige Vorbelegung vorhanden ist auf FISHY setzen (FISHY
+    // wird erst am Schluss gesetzt, damit FISHY nicht bereits als Wert bei der
+    // Transformation berücksichtigt wird):
+    for (String id : ids)
+    {
+      if (!idToPresetValue.containsKey(id))
+        idToPresetValue.put(id, FormController.FISHY);
     }
     return idToPresetValue;
+  }
+
+  /**
+   * Diese Methode prüft ob die Formularwerte der in fields enthaltenen
+   * Formularfelder konsistent aus den in mapIdToValue enthaltenen Werten abgeleitet
+   * werden können; Der Wert value beschreibt dabei den Wert der für
+   * FormField-Objekte anzuwenden ist, die untransformiert sind oder deren Methode
+   * field.singleParameterTrafo()==true zurück liefert. Ist in fields auch nur ein
+   * Formularfeld enthalten, dessen Inhalt nicht konsistent aus diesen Werten
+   * abgeleitet werden kann, so liefert die Methode false zurück. Die Methode liefert
+   * true zurück, wenn die Konsistenzprüfung für alle Formularfelder erfolgreich
+   * durchlaufen wurde.
+   * 
+   * @param fields
+   *          Enthält die Liste der zu prüfenden Felder.
+   * @param mapIdToValues
+   *          enthält die für evtl. gesetzte Trafofunktionen zu verwendenden
+   *          Parameter
+   * @param value
+   *          enthält den Wert der für untransformierte Felder oder für Felder, deren
+   *          Trafofunktion nur einen einheitlichen Wert für sämtliche Parameter
+   *          erwartet, verwendet werden soll.
+   * @return true, wenn alle Felder konsistent aus den Werten mapIdToValue und value
+   *         abgeleitet werden können oder false, falls nicht.
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101) TESTED
+   */
+  private boolean fieldValuesConsistent(List<FormField> fields,
+      HashMap<String, String> mapIdToValues, String value)
+  {
+    if (fields == null) fields = new ArrayList<FormField>();
+    if (mapIdToValues == null) mapIdToValues = new HashMap<String, String>();
+
+    for (FormField field : fields)
+    {
+      // Soll-Wert refValue bestimmen
+      String refValue = value;
+      String trafoName = field.getTrafoName();
+      if (trafoName != null)
+      {
+        if (field.singleParameterTrafo())
+        {
+          refValue = getTransformedValue(trafoName, value);
+        }
+        else
+        {
+          // Abbruch, wenn die Parameter für diese Funktion unvollständig sind.
+          Function func = getFunctionLibrary().get(trafoName);
+          if (func != null) for (String par : func.parameters())
+            if (mapIdToValues.get(par) == null) return false;
+
+          refValue = getTransformedValue(trafoName, mapIdToValues);
+        }
+      }
+
+      // Ist-Wert mit Soll-Wert vergleichen:
+      if (!field.getValue().equals(refValue)) return false;
+    }
+    return true;
+  }
+
+  /**
+   * Diese Methode iteriert fields und liefert den Wert des ersten gefundenen
+   * untransformierten Formularfeldes zurück, oder null, wenn kein untransformiertes
+   * Formularfeld gefunden wurde.
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101)
+   */
+  private String getFirstUntransformedValue(List<FormField> fields)
+  {
+    for (FormField field : fields)
+    {
+      if (field.getTrafoName() == null) return field.getValue();
+    }
+    return null;
   }
 
   /**
@@ -1931,16 +1972,16 @@ public class TextDocumentModel
       boolean applyTrafo, boolean useKnownFormValues)
   {
     if (formFields == null) return;
-    Iterator<FormField> fields = formFields.iterator();
-    while (fields.hasNext())
-    {
-      FormField field = fields.next();
+    for (FormField field : formFields)
       try
       {
-        if (applyTrafo)
+        String trafoName = field.getTrafoName();
+        if (trafoName != null && applyTrafo)
         {
-          String trafoName = field.getTrafoName();
-          field.setValue(getTransformedValue(value, trafoName, useKnownFormValues));
+          if (useKnownFormValues)
+            field.setValue(getTransformedValue(trafoName));
+          else
+            field.setValue(getTransformedValue(trafoName, value));
         }
         else
           field.setValue(value);
@@ -1949,7 +1990,6 @@ public class TextDocumentModel
       {
         // Absicherung gegen das manuelle Löschen von Dokumentinhalten.
       }
-    }
   }
 
   /**
@@ -2028,32 +2068,81 @@ public class TextDocumentModel
   }
 
   /**
+   * Diese Methode führt die Trafofunktion trafoName aus, wobei die Werte der
+   * erwarteten Parameter aus mapIdToValues gewonnen werden, und liefert das
+   * transformierte Ergebnis zurück. Die Trafofunktion trafoName darf nicht null sein
+   * und muss global oder dokumentlokal definiert sein; Ist die Transfofunktion nicht
+   * in der globalen oder dokumentlokalen Funktionsbibliothek enthalten, so wird ein
+   * Fehlerstring zurückgeliefert und eine weitere Fehlermeldung in die Log-Datei
+   * geschrieben.
+   * 
+   * @param trafoName
+   *          Der Name der Trafofunktion, der nicht null sein darf.
+   * @param mapIdToValues
+   *          eine Zuordnung von ids auf die zugehörigen Werte, aus der die Werte für
+   *          die von der Trafofunktion erwarteten Parameter bestimmt werden.
+   * @return Der transformierte Wert falls die Trafo definiert ist oder ein
+   *         Fehlerstring, falls die Trafo nicht definiert ist.
+   */
+  private String getTransformedValue(String trafoName,
+      HashMap<String, String> mapIdToValues)
+  {
+    Function func = getFunctionLibrary().get(trafoName);
+    if (func != null)
+    {
+      SimpleMap args = new SimpleMap();
+      String[] pars = func.parameters();
+      for (int i = 0; i < pars.length; i++)
+        args.put(pars[i], mapIdToValues.get(pars[i]));
+      return func.getString(args);
+    }
+    else
+    {
+      Logger.error(L.m("Die TRAFO '%1' ist nicht definiert.", trafoName));
+      return L.m("<FEHLER: TRAFO '%1' nicht definiert>", trafoName);
+    }
+  }
+
+  /**
+   * Diese Methode führt die Trafofunktion trafoName aus, übergibt ihr dabei die
+   * aktuell dem TextDocumentModel bekannten Formularwerte als Parameter und liefert
+   * das transformierte Ergebnis zurück; Die Trafofunktion trafoName darf nicht null
+   * sein und muss global oder dokumentlokal definiert sein; Ist die Transfofunktion
+   * nicht in der globalen oder dokumentlokalen Funktionsbibliothek enthalten, so
+   * wird ein Fehlerstring zurückgeliefert und eine weitere Fehlermeldung in die
+   * Log-Datei geschrieben.
+   * 
+   * @param trafoName
+   *          Der Name der Trafofunktion, der nicht null sein darf.
+   * @return Der transformierte Wert falls die Trafo definiert ist oder ein
+   *         Fehlerstring, falls die Trafo nicht definiert ist.
+   */
+  public String getTransformedValue(String trafoName)
+  {
+    return getTransformedValue(trafoName, formFieldValues);
+  }
+
+  /**
    * Diese Methode berechnet die Transformation des Wertes value mit der
    * Trafofunktion trafoName, die global oder dokumentlokal definiert sein muss;
-   * dabei steuert useKnownFormValues, ob der Trafo die Menge aller bekannten
-   * Formularwerte als parameter übergeben wird, oder ob aus Gründen der
-   * Abwärtskompatiblilität jeder durch die Trafofunktion gelesene Parameter den
-   * selben Wert value übergeben bekommt. Ist trafoName==null, so wird value
+   * Dabei wird für alle von der Trafofunktion erwarteten Parameter der Wert value
+   * übergeben - eine Praxis, die für insertFormValue- und für insertValue-Befehle
+   * üblich war und mit Einführung der UserFieldFormFields geändert wurde (siehe
+   * {@link #getTransformedValue(String)}. Ist trafoName==null, so wird value
    * zurückgegeben. Ist die Transformationsionfunktion nicht in der globalen oder
-   * dokumentlokalen Funktionsbibliothek enthalten, so wird eine Fehlermeldung
+   * dokumentlokalen Funktionsbibliothek enthalten, so wird ein Fehlerstring
    * zurückgeliefert und eine weitere Fehlermeldung in die Log-Datei geschrieben.
    * 
    * @param value
    *          Der zu transformierende Wert.
    * @param trafoName
    *          Der Name der Trafofunktion, der auch null sein darf.
-   * @param useKnownFormValues
-   *          steuert, ob der Trafo die Menge aller bekannten Formularwerte als
-   *          parameter übergeben wird, oder ob aus Gründen der
-   *          Abwärtskompatiblilität jeder durch die Trafofunktion gelesene Parameter
-   *          den selben Wert value übergeben bekommt.
    * @return Der transformierte Wert falls das trafoName gesetzt ist und die Trafo
    *         korrekt definiert ist. Ist trafoName==null, so wird value unverändert
-   *         zurückgeliefert. Ist die Funktion trafoName nicht definiert, wird eine
-   *         Fehlermeldung zurückgeliefert. TESTED
+   *         zurückgeliefert. Ist die Funktion trafoName nicht definiert, wird ein
+   *         Fehlerstring zurückgeliefert.
    */
-  public String getTransformedValue(String value, String trafoName,
-      boolean useKnownFormValues)
+  public String getTransformedValue(String trafoName, String value)
   {
     String transformed = value;
     if (trafoName != null)
@@ -2064,12 +2153,7 @@ public class TextDocumentModel
         SimpleMap args = new SimpleMap();
         String[] pars = func.parameters();
         for (int i = 0; i < pars.length; i++)
-        {
-          if (useKnownFormValues)
-            args.put(pars[i], formFieldValues.get(pars[i]));
-          else
-            args.put(pars[i], value);
-        }
+          args.put(pars[i], value);
         transformed = func.getString(args);
       }
       else
@@ -2078,7 +2162,6 @@ public class TextDocumentModel
         Logger.error(L.m("Die TRAFO '%1' ist nicht definiert.", trafoName));
       }
     }
-
     return transformed;
   }
 
