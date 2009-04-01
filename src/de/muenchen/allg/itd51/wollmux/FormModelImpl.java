@@ -140,28 +140,6 @@ public class FormModelImpl
       FormController.mergeFormDescriptors(formularSections, buttonAnpassung,
         MULTI_FORM_TITLE);
 
-    // mapIdToPresetValue aller Einzeldokumente vereinheitlichen:
-    HashMap<String, String> commonMapIdToPresetValue = new HashMap<String, String>();
-    for (Iterator<TextDocumentModel> iter = docs.iterator(); iter.hasNext();)
-    {
-      TextDocumentModel doc = iter.next();
-      HashMap<String, String> myIdToPresetValue = doc.getIDToPresetValue();
-      for (Map.Entry<String, String> ent: myIdToPresetValue.entrySet())
-      {
-        String id = ent.getKey();
-        String myPresetValue = ent.getValue();
-        String commonPresetValue = commonMapIdToPresetValue.get(id);
-        if (commonPresetValue == null)
-        {
-          commonMapIdToPresetValue.put(id, myPresetValue);
-        }
-        else if (!commonPresetValue.equals(myPresetValue))
-        {
-          commonMapIdToPresetValue.put(id, FormController.FISHY);
-        }
-      }
-    }
-
     // FunctionContext erzeugen und im Formular definierte
     // Funktionen/DialogFunktionen parsen:
     Map<Object, Object> functionContext = new HashMap<Object, Object>();
@@ -199,7 +177,7 @@ public class FormModelImpl
     }
 
     return new FormModelImpl.MultiDocumentFormModel(docs, fms, formFensterConf,
-      formConf, functionContext, commonMapIdToPresetValue, funcLib, dialogLib);
+      formConf, functionContext, funcLib, dialogLib);
   }
 
   /**
@@ -244,8 +222,6 @@ public class FormModelImpl
 
     private final DialogLibrary dialogLib;
 
-    private final HashMap<String, String> commonMapIdToPresetValue;
-
     private FormGUI formGUI = null;
 
     /**
@@ -267,13 +243,6 @@ public class FormModelImpl
      * @param formConf
      *          der Formular-Knoten, der die Formularbeschreibung enthält (wird für
      *          createFormGUI() benötigt).
-     * @param commonMapIdToPresetValue
-     *          bildet IDs von Formularfeldern auf Vorgabewerte ab. Falls hier ein
-     *          Wert für ein Formularfeld vorhanden ist, so wird dieser allen anderen
-     *          automatischen Befüllungen vorgezogen. Wird das Objekt
-     *          {@link FormController#FISHY} als Wert für ein Feld übergeben, so wird
-     *          dieses Feld speziell markiert als ungültig bis der Benutzer es
-     *          manuell ändert (wird für createFormGUI() benötigt).
      * @param functionContext
      *          der Kontext für Funktionen, die einen benötigen (wird für
      *          createFormGUI() benötigt).
@@ -288,7 +257,6 @@ public class FormModelImpl
     public MultiDocumentFormModel(Vector<TextDocumentModel> docs,
         Vector<FormModel> formModels, final ConfigThingy formFensterConf,
         final ConfigThingy formConf, final Map<Object, Object> functionContext,
-        final HashMap<String, String> commonMapIdToPresetValue,
         final FunctionLibrary funcLib, final DialogLibrary dialogLib)
     {
       this.docs = docs;
@@ -296,7 +264,6 @@ public class FormModelImpl
       this.formFensterConf = formFensterConf;
       this.formConf = formConf;
       this.functionContext = functionContext;
-      this.commonMapIdToPresetValue = commonMapIdToPresetValue;
       this.funcLib = funcLib;
       this.dialogLib = dialogLib;
     }
@@ -511,8 +478,13 @@ public class FormModelImpl
      */
     public void startFormGUI()
     {
+      // Als mapIDToPresetValue kann hier eine leere Map übergeben werden, da
+      // Multiform nur beim erstmaligen Öffnen der Vorlagen ausgeführt wird. Zu
+      // diesem Zeitpunkt sind noch keine Formularwerte durch Benutzer eingegeben
+      // worden - weder in der FormGUI noch in den Einfügungen im Dokument - und
+      // somit darf auch diese HashMap keinen Inhalt haben.
       formGUI =
-        new FormGUI(formFensterConf, formConf, this, commonMapIdToPresetValue,
+        new FormGUI(formFensterConf, formConf, this, new HashMap<String, String>(),
           functionContext, funcLib, dialogLib);
     }
   }
@@ -815,8 +787,10 @@ public class FormModelImpl
      */
     public void startFormGUI()
     {
+      HashMap<String, String> idToPresetValue = new HashMap<String, String>();
+      if (!doc.isTemplate()) idToPresetValue = doc.getIDToPresetValue();
       formGUI =
-        new FormGUI(formFensterConf, formConf, this, doc.getIDToPresetValue(),
+        new FormGUI(formFensterConf, formConf, this, idToPresetValue,
           functionContext, funcLib, dialogLib);
     }
   }

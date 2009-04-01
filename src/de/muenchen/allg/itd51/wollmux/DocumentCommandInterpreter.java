@@ -222,9 +222,9 @@ public class DocumentCommandInterpreter
     // da hier bookmarks entfernt werden, muss der Baum upgedatet werden
     model.getDocumentCommands().update();
 
-    // Jetzt wird der Dokumenttyp formDocument gesetzt, um das Dokument als
-    // Formulardokument auszuzeichnen, falls es ein Formularfenster definiert.
-    if (model.hasFormGUIWindow()) model.setType("formDocument");
+    // Jetzt wird das Dokument als Formulardokument markiert, wenn mindestens ein
+    // Formularfenster definiert ist.
+    if (model.hasFormGUIWindow()) model.markAsFormDocument();
 
     // Document-Modified auf false setzen, da nur wirkliche
     // Benutzerinteraktionen den Modified-Status beeinflussen sollen.
@@ -375,7 +375,7 @@ public class DocumentCommandInterpreter
 
     public int executeCommand(SetType cmd)
     {
-      model.setType(cmd);
+      model.setType(cmd.getType());
 
       // Wenn eine Mischvorlage zum Bearbeiten geöffnet wurde soll der typ
       // "templateTemplate" NICHT gelöscht werden, ansonsten schon.

@@ -223,9 +223,16 @@ public class TextDocumentModel
   private String[] fragUrls;
 
   /**
-   * Enthält den Typ des Dokuments oder null, falls keiner gesetzt ist.
+   * Gibt an, ob das Dokument ein Template ist oder wie ein Template zu behandeln
+   * ist.
    */
-  private String type = null;
+  private boolean isTemplate;
+
+  /**
+   * Gibt an, ob das Dokument wie ein Dokument mit WollMux-Formularfunktion zu
+   * behandeln ist.
+   */
+  private boolean isFormDocument;
 
   /**
    * Enthält die Namen der aktuell gesetzten Druckfunktionen.
@@ -356,9 +363,13 @@ public class TextDocumentModel
 
     // Auslesen der Persistenten Daten:
     this.persistentData = new PersistentData(doc);
-    this.type = persistentData.getData(DATA_ID_SETTYPE);
     parsePrintFunctions(persistentData.getData(DATA_ID_PRINTFUNCTION));
     parseFormValues(persistentData.getData(DATA_ID_FORMULARWERTE));
+
+    // Type auswerten
+    this.isTemplate = !hasURL();
+    this.isFormDocument = false;
+    setType(persistentData.getData(DATA_ID_SETTYPE));
 
     // Sicherstellen, dass die Schaltflächen der Symbolleisten aktiviert werden:
     try
@@ -963,19 +974,7 @@ public class TextDocumentModel
    */
   synchronized public boolean isTemplate()
   {
-    if (type != null)
-    {
-      if (type.equalsIgnoreCase("normalTemplate"))
-        return true;
-      else if (type.equalsIgnoreCase("templateTemplate"))
-        return false;
-      else if (type.equalsIgnoreCase("formDocument")) return false;
-    }
-
-    // Das Dokument ist automatisch eine Vorlage, wenn es keine zugehörige URL
-    // gibt (dann steht ja in der Fensterüberschrift auch "Unbenannt1" statt
-    // einem konkreten Dokumentnamen).
-    return !hasURL();
+    return isTemplate;
   }
 
   /**
@@ -1006,7 +1005,7 @@ public class TextDocumentModel
    */
   synchronized public boolean isFormDocument()
   {
-    return (type != null && type.equalsIgnoreCase("formDocument"));
+    return isFormDocument;
   }
 
   /**
@@ -1034,33 +1033,40 @@ public class TextDocumentModel
   }
 
   /**
-   * Setzt den Typ des Dokuments auf type und speichert den Wert persistent im
-   * Dokument ab.
+   * Makiert dieses Dokument als Formulardokument (siehe {@link #isFormDocument()})
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101)
    */
-  synchronized public void setType(String type)
+  synchronized public void setFormDocument()
   {
-    this.type = type;
-
-    // Persistente Daten entsprechend anpassen
-    if (type != null)
-    {
-      persistentData.setData(DATA_ID_SETTYPE, type);
-    }
-    else
-    {
-      persistentData.removeData(DATA_ID_SETTYPE);
-    }
+    this.isFormDocument = true;
   }
 
   /**
-   * Wird vom {@link DocumentCommandInterpreter} beim Scannen der Dokumentkommandos
-   * aufgerufen wenn ein setType-Dokumentkommando bearbeitet werden muss und setzt
-   * den Typ des Dokuments NICHT PERSISTENT auf cmd.getType(), wenn nicht bereits ein
-   * type gesetzt ist. Ansonsten wird das Kommando ignoriert.
+   * Setzt abhängig von typeStr die NICHT PRESISTENTEN Zustände {@link #isTemplate()}
+   * und {@link #isFormDocument()}, wenn es sich um einen der Dokumenttypen
+   * normalTemplate, templateTemplate oder formDocument handelt.
    */
-  synchronized public void setType(DocumentCommand.SetType cmd)
+  synchronized public void setType(String typeStr)
   {
-    if (type == null) this.type = cmd.getType();
+    if ("normalTemplate".equalsIgnoreCase(typeStr))
+      isTemplate = true;
+    else if ("templateTemplate".equalsIgnoreCase(typeStr))
+      isTemplate = false;
+    else if ("formDocument".equalsIgnoreCase(typeStr)) isFormDocument = true;
+  }
+
+  /**
+   * Markiert das Dokument als Formulardokument - damit liefert
+   * {@link #isFormDocument()} zukünftig true und der Typ "formDocument" wird
+   * persistent im Dokument hinterlegt.
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101)
+   */
+  synchronized public void markAsFormDocument()
+  {
+    setType("formDocument");
+    persistentData.setData(DATA_ID_SETTYPE, "formDocument");
   }
 
   /**
