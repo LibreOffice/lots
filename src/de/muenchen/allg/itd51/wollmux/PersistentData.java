@@ -239,6 +239,15 @@ public class PersistentData
    */
   public void setData(String dataId, String dataValue)
   {
+    if (Workarounds.applyWorkaroundForOOoIssue100374())
+    {
+      // Notizen werden beim zweiten Schreibzugriff nicht korrekt geschrieben. Durch
+      // das vorherige Entfernen aller bereits bestehenden Notizen wird die Notiz in
+      // getWollMuxTextFields(...) neu angelegt und dadurch das erste Mal
+      // beschrieben.
+      removeData(dataId);
+    }
+
     Vector<Object> textfields =
       getWollMuxTextFields(dataId, true, dataValue.length());
     if (textfields.size() == 0)
