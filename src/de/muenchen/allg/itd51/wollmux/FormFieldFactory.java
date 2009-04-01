@@ -479,7 +479,7 @@ public final class FormFieldFactory
 
     /**
      * Diese Methode liefert den aktuellen Wert des Formularfeldes als String zurück
-     * oder null, falls der Wert nicht bestimmt werden kann.
+     * oder den Leerstring, falls der Wert nicht bestimmt werden kann.
      * 
      * @return der aktuelle Wert des Formularfeldes als String
      */
