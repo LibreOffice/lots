@@ -45,32 +45,80 @@ import de.muenchen.allg.afid.UnoProps;
 public class Workarounds
 {
   /**
-   * Issue #100374 betrifft OOo 3.0.x bis voraussichtlich OOo 3.2. Der Workaround
-   * kann entfernt werden, wenn voraussichtlich OOo 3.2 flächendeckend eingesetzt
-   * wird.
-   * 
-   * @author Christoph Lutz (D-III-ITD-D101)
-   */
-  public static boolean applyWorkaroundForOOoIssue100374()
-  {
-    String version = getOOoVersion();
-    // TODO: Selbst kompilierte, gepatchte OOos erkennen und ausschließen
-    if (version != null && version.startsWith("3."))
-      return true;
-    else
-      return false;
-  }
-
-  /**
    * Enthält die Version des eingesetzten OpenOffice.org, die mit
    * {@link #getOOoVersion()} abgefragt werden kann.
    */
   private static String oooVersion = null;
 
+  private static Boolean workaround100374 = null;
+
+  private static Boolean workaround100718 = null;
+
+  private static Boolean applyWorkaround(String issueNumber)
+  {
+    Logger.error("Workaround für Issue "
+      + issueNumber
+      + " aktiv. Bestimmte Features sind evtl. nicht verfügbar. Die Performance kann ebenfalls leiden.");
+    return Boolean.TRUE;
+  }
+
+  /**
+   * Issue #100374 betrifft OOo 3.0.x bis voraussichtlich OOo 3.2. Der Workaround
+   * kann entfernt werden, wenn voraussichtlich OOo 3.2 flächendeckend eingesetzt
+   * wird.
+   * 
+   * @author Matthias Benkmann (D-III-ITD-D101)
+   */
+  public static boolean applyWorkaroundForOOoIssue100374()
+  {
+    if (workaround100374 == null)
+    {
+      String version = getOOoVersion();
+      // -100374 ist der Marker für unsere selbst gepatchten Versionen ohne den
+      // Fehler
+      if (version != null
+        && (version.startsWith("3.0") || version.startsWith("3.1"))
+        && !version.contains("-100374"))
+      {
+        workaround100374 = applyWorkaround("100374");
+      }
+      else
+        workaround100374 = Boolean.FALSE;
+    }
+
+    return workaround100374.booleanValue();
+  }
+
+  /**
+   * Issue #100718 betrifft OOo 3.1 bis voraussichtlich OOo 3.2. Der Workaround kann
+   * entfernt werden, wenn voraussichtlich OOo 3.2 flächendeckend eingesetzt wird.
+   * 
+   * @author Matthias Benkmann (D-III-ITD-D101)
+   */
+  public static boolean applyWorkaroundForOOoIssue100718()
+  {
+    if (workaround100718 == null)
+    {
+      String version = getOOoVersion();
+      // -100718 ist der Marker für unsere selbst gepatchten Versionen ohne den
+      // Fehler
+      if (version != null && (version.startsWith("3.1"))
+        && !version.contains("-100718"))
+      {
+        workaround100718 = applyWorkaround("100718");
+      }
+      else
+        workaround100718 = Boolean.FALSE;
+    }
+
+    return workaround100718.booleanValue();
+  }
+
   /**
    * Diese Methode liefert die Versionsnummer von OpenOffice.org aus dem
    * Konfigurationsknoten /org.openoffice.Setup/Product/oooSetupVersionAboutBox
-   * zurück oder null, falls bei der Bestimmung der Versionsnummer Fehler auftraten.
+   * konkateniert mit /org.openoffice.Setup/Product/oooSetupExtension zurück oder
+   * null, falls bei der Bestimmung der Versionsnummer Fehler auftraten.
    * 
    * @author Christoph Lutz (D-III-ITD-D101)
    */
@@ -96,7 +144,9 @@ public class Workarounds
         {
           try
           {
-            oooVersion = "" + cfgAccess.getByName("ooSetupVersionAboutBox");
+            oooVersion =
+              "" + cfgAccess.getByName("ooSetupVersionAboutBox")
+                + cfgAccess.getByName("ooSetupExtension");
           }
           catch (Exception e)
           {}
