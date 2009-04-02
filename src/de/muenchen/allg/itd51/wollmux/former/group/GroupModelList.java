@@ -60,7 +60,8 @@ public class GroupModelList implements Iterable<GroupModel>
   /**
    * Der FormularMax4000 zu dem diese GroupModelList gehört.
    */
-  // private FormularMax4000 formularMax4000;
+  private FormularMax4000 formularMax4000;
+
   /**
    * Erzeugt eine neue GroupModelList.
    * 
@@ -70,8 +71,8 @@ public class GroupModelList implements Iterable<GroupModel>
    */
   public GroupModelList(FormularMax4000 formularMax4000)
   {
-  // this.formularMax4000 = formularMax4000;
-  // this.formularMax4000.addBroadcastListener(new MyBroadcastListener());
+    this.formularMax4000 = formularMax4000;
+    // this.formularMax4000.addBroadcastListener(new MyBroadcastListener());
   }
 
   /**
@@ -181,6 +182,7 @@ public class GroupModelList implements Iterable<GroupModel>
       else
         listener.itemAdded(model, index);
     }
+    formularMax4000.documentNeedsUpdating();
   }
 
   /**
