@@ -319,6 +319,7 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 				<include name="*.xcu" />
 				<include name="*.rdb" />
 				<include name="META-INF/manifest.xml" />
+				<include name="help/component*.txt" />
 			</fileset>
 			<fileset file="${BUILD_INFO_FILE}" />
 			<fileset file="${DESCRIPTION_XML}" />

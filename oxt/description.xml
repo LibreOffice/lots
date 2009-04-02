@@ -7,6 +7,13 @@
 		<OpenOffice.org-minimal-version value="2.1" name="OpenOffice.org 2.1"/>
 	</dependencies>
 
+	<publisher>
+		<name xlink:href="http://www.wollmux.org" lang="de">WollMux.org</name>
+	</publisher>
+
+	<display-name>
+		<name lang="de-DE">WollMux</name>
+	</display-name>
 
 	<update-information>
 	  <src xlink:href="http://limux.tvc.muenchen.de/ablage/sonstiges/wollmux/packages/WollMux-snapshot/WollMux.update.xml"/>
