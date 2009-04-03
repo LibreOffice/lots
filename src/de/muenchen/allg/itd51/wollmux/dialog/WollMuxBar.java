@@ -859,7 +859,8 @@ public class WollMuxBar
           String label = L.m("LABEL FEHLT ODER FEHLERHAFT!");
           try
           {
-            label = uiElementDesc.get("LABEL").toString();
+            String str = uiElementDesc.get("LABEL").toString();
+            label = L.m(str);
           }
           catch (Exception e)
           {}
