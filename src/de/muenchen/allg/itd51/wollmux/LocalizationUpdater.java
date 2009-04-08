@@ -74,8 +74,7 @@ public class LocalizationUpdater
    * Enthält den Pfad zur Konfigurationsdatei localization.conf aus Sicht des
    * Projekt-Hauptverzeichnisses.
    */
-  private static File localizationConfFile =
-    new File("./src/data/localization.conf");
+  private static File localizationConfFile = new File("./localization.conf");
 
   /**
    * Enthält das Wurzelverzeichnis der Source-Dateien aus Sicht des
