@@ -30,7 +30,6 @@
  */
 package de.muenchen.allg.itd51.wollmux;
 
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
@@ -155,19 +154,18 @@ public class L
     return str;
   }
 
-  static
+  /**
+   * Initialisiert die Übersetzungs-Map mit l10n.
+   * 
+   * @param l10n
+   *          ein beliebiger Knoten mit "L10n"-Unterknoten.
+   * @author Matthias Benkmann (D-III-ITD-D101)
+   * 
+   */
+  public static void init(ConfigThingy l10n)
   {
     try
     {
-      // diese Variable hatten wir mal als statisches, finales Feld in dieser Klasse
-      // definiert, es gab aber Fälle, in denen vermutlich eine falsche
-      // Initialisierungsreihenfolge dafür sorgte, dass das Feld leer blieb. Durch
-      // eine direkte Initialisierung als lokale Variable wird das vermieden.
-      URL localizeDataURL =
-        L.class.getClassLoader().getResource("data/localization.conf");
-
-      ConfigThingy l10n = new ConfigThingy("l10n", localizeDataURL);
-
       String messageLanguage = Locale.getDefault().getLanguage();
       debugMessages.append("Message language from locale: " + messageLanguage + '\n');
       String lcMessages = System.getenv("LC_MESSAGES");
@@ -228,8 +226,7 @@ public class L
     }
     catch (Exception x)
     {
-      x.printStackTrace();
+      Logger.error("Error initializing localized strings", x);
     }
-
   }
 }
