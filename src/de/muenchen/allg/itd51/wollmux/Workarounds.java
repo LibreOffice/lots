@@ -76,8 +76,7 @@ public class Workarounds
       String version = getOOoVersion();
       // -100374 ist der Marker für unsere selbst gepatchten Versionen ohne den
       // Fehler
-      if (version != null
-        && (version.startsWith("3.0") || version.startsWith("3.1"))
+      if (version != null && version.startsWith("3.0")
         && !version.contains("-100374"))
       {
         workaround100374 = applyWorkaround("100374");
@@ -99,16 +98,17 @@ public class Workarounds
   {
     if (workaround100718 == null)
     {
-      String version = getOOoVersion();
-      // -100718 ist der Marker für unsere selbst gepatchten Versionen ohne den
-      // Fehler
-      if (version != null && (version.startsWith("3.1"))
-        && !version.contains("-100718"))
-      {
-        workaround100718 = applyWorkaround("100718");
-      }
-      else
-        workaround100718 = Boolean.FALSE;
+      // auskommentiert, da Bug voraussichtlich in 3.1 doch behoben sein wird.
+      // String version = getOOoVersion();
+      // // -100718 ist der Marker für unsere selbst gepatchten Versionen ohne den
+      // // Fehler
+      // if (version != null && (version.startsWith("3.1"))
+      // && !version.contains("-100718"))
+      // {
+      // workaround100718 = applyWorkaround("100718");
+      // }
+      // else
+      workaround100718 = Boolean.FALSE;
     }
 
     return workaround100718.booleanValue();
