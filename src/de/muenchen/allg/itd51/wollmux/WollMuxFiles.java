@@ -269,7 +269,7 @@ public class WollMuxFiles
     setLoggingMode(WollMuxFiles.getWollmuxConf());
 
     ConfigThingy l10n = getWollmuxConf().query("L10n", 1);
-    L.init(l10n);
+    if (l10n.count() > 0) L.init(l10n);
 
     /*
      * Falls die obige wollmux.conf keinen DEFAULT_CONTEXT definiert, so wird falls
