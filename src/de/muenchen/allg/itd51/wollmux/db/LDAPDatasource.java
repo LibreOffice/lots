@@ -519,22 +519,24 @@ public class LDAPDatasource implements Datasource
         Iterator<String> iter = keys.iterator();
 
         // build searchFilter
-        String searchFilter = "";
+        StringBuilder searchFilter = new StringBuilder();
 
         while (iter.hasNext())
         {
           String currentKey = iter.next();
           if (!KEY_RE.matcher(currentKey).matches()) continue;
           String[] ks = currentKey.split(KEY_SEPARATOR_0_NON_0_RE, 2);
-          searchFilter = searchFilter + ks[0];
+          searchFilter.append(ks[0]);
         }
         if (searchFilter.length() == 0)
           return new QueryResultsList(new Vector<Dataset>(0));
-        searchFilter = "(|" + searchFilter + ")";
+        searchFilter.insert(0, "(|");
+        searchFilter.append(")");
 
         // search LDAP
         NamingEnumeration<SearchResult> currentResults =
-          searchLDAP("", searchFilter, SearchControls.SUBTREE_SCOPE, true, endTime);
+          searchLDAP("", searchFilter.toString(), SearchControls.SUBTREE_SCOPE,
+            true, endTime);
 
         while (currentResults.hasMoreElements())
         {
