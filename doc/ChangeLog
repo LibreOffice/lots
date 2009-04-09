@@ -1,5 +1,15 @@
  ==================== Neu in dieser Version ====================
 
+    * Wichtiger Workaround für Fehler in OpenOffice.org 3.0.1: In
+      OpenOffice.org 3.0.1 existiert ein Fehler der die Funktionalität des
+      WollMux beeinträchtigt. Dies betraf Vorlagenumgstellerinnen und
+      Vorlagenumsteller, da die Pflege von WollMux-Vorlagen mit OpenOffice.org
+      3.0.1 und bisherigen WollMux-Versionen nicht mehr möglich war.
+      Endanwenderinnen und Endanwender konnten einen Anzeigefehler
+      ("!!!PRÜFEN!!!") bekommen, wenn WollMux-Formulare mehr als zwei mal
+      weiter bearbeitet wurden. Dieser WollMux enthält nun einen Workaround
+      für das Problem. Bitte verwenden Sie OpenOffice.org 3.0.1
+      ausschließlich mit einer WollMux-Version 5.4.0 oder höher.
     * Enthielt ein mit Datei->Drucken zu druckendes Dokument Serienbrieffelder,
       so wurde früher der Dialog "Das Dokument enthält Serienbrief-Felder.
       Was wollen Sie tun?" gebracht. Dieser Dialog wurde entfernt, da er seit
@@ -21,6 +31,10 @@
             so dass in ein Formular eingebettete Teildokumente bequem ein- und
             ausgeblendet werden können.
 
+    * Die Lokalisierung, die bisher fester Teil des WollMux-Binärpakets war,
+      wurde in die wollmux.conf übertragen. Damit können die
+      Lokalisierungsdateien nun auch leicht von Admins innerhalb der WollMux-
+      Konfiguration gepflegt werden.
 
 
  ==================== Neu in Version 5.1.0 ====================
