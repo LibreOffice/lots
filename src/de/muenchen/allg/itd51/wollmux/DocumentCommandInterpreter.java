@@ -800,8 +800,6 @@ public class DocumentCommandInterpreter
               insertDocumentFromURL(cmd, url);
 
             found = true;
-            fillPlaceholders(model.doc, model.getViewCursor(),
-              cmd.createInsertCursor(false), cmd.getArgs());
           }
           catch (java.lang.Exception e)
           {
@@ -809,12 +807,17 @@ public class DocumentCommandInterpreter
             // funktioniert wird die nächste URL ausgewertet
             errors += e.getLocalizedMessage() + "\n\n";
             Logger.debug(e);
+            continue;
           }
         }
+
         if (!found)
         {
           throw new Exception(errors);
         }
+
+        fillPlaceholders(model.doc, model.getViewCursor(),
+          cmd.createInsertCursor(false), cmd.getArgs());
       }
       catch (java.lang.Exception e)
       {
