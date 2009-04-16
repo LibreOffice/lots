@@ -787,8 +787,7 @@ public class FormModelImpl
      */
     public void startFormGUI()
     {
-      HashMap<String, String> idToPresetValue = new HashMap<String, String>();
-      if (!doc.isTemplate()) idToPresetValue = doc.getIDToPresetValue();
+      HashMap<String, String> idToPresetValue = doc.getIDToPresetValue();
       formGUI =
         new FormGUI(formFensterConf, formConf, this, idToPresetValue,
           functionContext, funcLib, dialogLib);

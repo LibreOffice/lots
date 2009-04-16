@@ -640,7 +640,10 @@ public class TextDocumentModel
   {
     HashMap<String, String> idToPresetValue = new HashMap<String, String>();
 
+    // zu betrachtenden IDs bestimmen als Vereinigung der IDs aus Formularwerte plus
+    // den IDs aller Einfügungen
     Set<String> ids = new HashSet<String>();
+    ids.addAll(formFieldValues.keySet());
     ids.addAll(idToFormFields.keySet());
     ids.addAll(idToTextFieldFormFields.keySet());
 
@@ -673,12 +676,14 @@ public class TextDocumentModel
       }
     }
 
-    // IDs, zu denen keine gültige Vorbelegung vorhanden ist auf FISHY setzen (FISHY
-    // wird erst am Schluss gesetzt, damit FISHY nicht bereits als Wert bei der
-    // Transformation berücksichtigt wird):
+    // IDs, zu denen keine gültige Vorbelegung vorhanden ist auf FISHY setzen, aber
+    // nur, wenn die ID im Formularwerteabschnitt aufgeführt ist, d.h. mindestens
+    // einmal initialisiert wurde. Das Setzen von FISHY darf erst am Ende der Methode
+    // erfolgen, damit FISHY nicht bereits als Wert bei der Transformation
+    // berücksichtigt wird
     for (String id : ids)
     {
-      if (!idToPresetValue.containsKey(id))
+      if (!idToPresetValue.containsKey(id) && formFieldValues.containsKey(id))
         idToPresetValue.put(id, FormController.FISHY);
     }
     return idToPresetValue;
