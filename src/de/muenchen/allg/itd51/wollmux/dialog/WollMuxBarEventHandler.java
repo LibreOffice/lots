@@ -85,8 +85,11 @@ public class WollMuxBarEventHandler
    * WollMux-Service sollte nicht über dieses Feld, sondern ausschließlich über die
    * Methode getRemoteWollMux bezogen werden, da diese mit einem möglichen Schließen
    * von OOo während die WollMuxBar läuft klarkommt.
+   * 
+   * ACHTUNG! Diese Variable ist absichtlich ein Object, kein XWollMux, um den
+   * queryInterface-Aufruf zu erzwingen, damit ein Disposed Zustand erkannt wird.
    */
-  private XWollMux remoteWollMux;
+  private Object remoteWollMux; // soll Object sein, nicht XWollMux!!
 
   /**
    * Falls nicht null, so ist dies der Desktop auf dem eventuell ein
@@ -468,7 +471,10 @@ public class WollMuxBarEventHandler
     {
       try
       {
-        return remoteWollMux;
+        XWollMux mux =
+          (XWollMux) UnoRuntime.queryInterface(XWollMux.class, remoteWollMux);
+        if (mux == null) throw new DisposedException();
+        return mux;
       }
       catch (DisposedException e)
       {
@@ -499,9 +505,8 @@ public class WollMuxBarEventHandler
 
       try
       {
-        Object mux =
+        remoteWollMux =
           factory.createInstance("de.muenchen.allg.itd51.wollmux.WollMux");
-        remoteWollMux = (XWollMux) UnoRuntime.queryInterface(XWollMux.class, mux);
       }
       catch (Exception x)
       {}
@@ -518,12 +523,14 @@ public class WollMuxBarEventHandler
         }
       }
 
+      XWollMux mux =
+        (XWollMux) UnoRuntime.queryInterface(XWollMux.class, remoteWollMux);
       try
       {
         int wmConfHashCode =
           WollMuxFiles.getWollmuxConf().stringRepresentation().hashCode();
-        remoteWollMux.addPALChangeEventListenerWithConsistencyCheck(
-          myPALChangeEventListener, wmConfHashCode);
+        mux.addPALChangeEventListenerWithConsistencyCheck(myPALChangeEventListener,
+          wmConfHashCode);
 
         installQuickstarter(factory);
       }
@@ -531,7 +538,7 @@ public class WollMuxBarEventHandler
       {
         Logger.error(x);
       }
-      return remoteWollMux;
+      return mux;
     }
 
     return null;
@@ -571,8 +578,8 @@ public class WollMuxBarEventHandler
             Object compo = xenu.nextElement();
             try
             { /*
-               * First see if the component itself offers a close function
-               */
+             * First see if the component itself offers a close function
+             */
               UNO.XCloseable(compo).close(true);
             }
             catch (Exception x)
