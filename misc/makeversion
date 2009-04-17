@@ -2,6 +2,12 @@
 
 if [ $# != 4 ]; then
   echo 1>&2 "USAGE: makeversion <versionfile> <buildinfofile> <descriptionxmlfile> <updatexmlfile>"
+  echo 1>&2 "If <versionfile> exists and contains a version number identical to the generated"
+  echo 1>&2 "version number PLUS some other string, the other string is preserved."
+  echo 1>&2 "E.g.: If the generated version number would be '4.5.1' and <versionfile> contains"
+  echo 1>&2 "'4.5.1.2', then the newly generated version will be '4.5.1.2'."
+  echo 1>&2 "But if <versionfile> contains '1.2.3.4', the generated version will be"
+  echo 1>&2 "'4.5.1', NOT '4.5.1.4'."
   exit 1
 fi
 
@@ -21,6 +27,12 @@ v2=$(echo $date| sed 's/[^-]*-0\?\([^-]*\)-.*/\1/')
 v3=$(( $(echo ${date##*-}| sed 's/^0\?\(.*\)/\1/') / 10 ))
 
 version="$v1.$v2.$v3"
+
+if [ -e "$1" ]; then
+  dotversion=$(sed -n "s/^$version//p" "$1")
+  version=${version}${dotversion}
+fi
+
 echo "$version" >"$1" 
 echo "Version: $version, Revision: $rev" >"$2"
 

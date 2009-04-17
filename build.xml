@@ -198,9 +198,9 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 	</target>
 	
 	<available file="debian/rules" property="debian.native" />
-	<target name="bumpversion" unless="debian.native">
+	<target name="bumpversion" unless="debian.native" depends="makeversion">
 		<exec executable="bash" failifexecutionfails="false">
-		  <arg line="misc/bumpversion lhmdeb/changelog"/>
+		  <arg line="misc/bumpversion ${VERSION_FILE} lhmdeb/changelog"/>
 		</exec>		
 	</target>
 	
