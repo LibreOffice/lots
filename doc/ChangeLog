@@ -1,5 +1,15 @@
  ==================== Neu in dieser Version ====================
 
+    * In WollMux 5.4.0 gab es einen Fehler der dazu führte, dass nach
+      Speichern und Wiederöffnen von Formularen manche Werte in der Formular-
+      GUI verloren gingen. Der Fehler ist in dieser Version behoben.
+    * In WollMux-Versionen zwischen 5.3.1 und 5.4.1.0 funktionierte nach
+      Schließen von OOo die WollMux-Leiste nicht mehr.
+
+
+
+ ==================== Neu in Version 5.4.0 ====================
+
     * Wichtiger Workaround für Fehler in OpenOffice.org 3.0.1: In
       OpenOffice.org 3.0.1 existiert ein Fehler der die Funktionalität des
       WollMux beeinträchtigt. Dies betraf Vorlagenumgstellerinnen und
