@@ -742,7 +742,6 @@ public class DocumentCommandInterpreter
       catch (OverrideFragChainException e)
       {
         insertErrorField(cmd, e);
-        Logger.error(e);
         cmd.setErrorState(true);
         return 1;
       }
@@ -763,12 +762,19 @@ public class DocumentCommandInterpreter
       try
       {
         fragId = model.getOverrideFrag(cmd.getFragID());
+        XTextCursor insCursor = cmd.createInsertCursor(false);
+        if (insCursor == null)
+        {
+          throw new Exception(
+            L.m(
+              "Kann keinen Einfügecursor erstellen für Dokumentkommando '%1'\nIst das Bookmark vielleicht verschwunden? Fehlt am Anfang oder Ende eines Fragments evtl. der leere Absatz?",
+              cmd.toString()));
+        }
 
         // Bei leeren FragIds wird nur der Text unter dem Dokumentkommando
         // gelöscht und das Dokumentkommando auf DONE gesetzt.
         if (fragId.length() == 0)
         {
-          XTextCursor insCursor = cmd.createInsertCursor(false);
           if (insCursor != null) insCursor.setString("");
           cmd.markDone(false);
           return 0;
@@ -823,6 +829,7 @@ public class DocumentCommandInterpreter
       {
         if (cmd.isManualMode())
         {
+          Logger.error(e);
           WollMuxSingleton.showInfoModal(L.m("WollMux-Fehler"), L.m(
             "Das Textfragment mit der FRAG_ID '%1' konnte nicht eingefügt werden:",
             cmd.getFragID())
@@ -832,7 +839,6 @@ public class DocumentCommandInterpreter
         {
           insertErrorField(cmd, e);
         }
-        Logger.error(e);
         cmd.setErrorState(true);
         return 1;
       }
@@ -915,6 +921,10 @@ public class DocumentCommandInterpreter
         endCursor =
           new UnoService(range.getText().createTextCursorByRange(range.getEnd()));
       }
+      else
+        Logger.error(L.m(
+          "insertDocumentFromURL: TextRange des Dokumentkommandos '%1' ist null => Bookmark verschwunden?",
+          cmd.toString()));
       try
       {
         if (endCursor.xPropertySet() != null)
@@ -1386,7 +1396,14 @@ public class DocumentCommandInterpreter
     else
       Logger.error(msg);
 
-    UnoService cursor = new UnoService(cmd.createInsertCursor(false));
+    XTextCursor insCursor = cmd.createInsertCursor(false);
+    if (insCursor == null)
+    {
+      Logger.error(L.m("Kann Fehler-Feld nicht einfügen, da kein InsertCursor erzeugt werden konnte."));
+      return;
+    }
+
+    UnoService cursor = new UnoService(insCursor);
     cursor.xTextCursor().setString(L.m("<FEHLER:  >"));
 
     // Text fett und rot machen:
