@@ -44,7 +44,7 @@ import de.muenchen.allg.itd51.parser.ConfigThingy;
  */
 public class L
 {
-  private static StringBuilder debugMessages = new StringBuilder();
+  private static StringBuilder debugMessages;
 
   /**
    * Wird für die aktuelle Sprache initialisiert und bildet einen Originalstring auf
@@ -167,6 +167,7 @@ public class L
     try
     {
       String messageLanguage = Locale.getDefault().getLanguage();
+      debugMessages = new StringBuilder();
       debugMessages.append("Message language from locale: " + messageLanguage + '\n');
       String lcMessages = System.getenv("LC_MESSAGES");
       if (lcMessages != null && lcMessages.length() >= 2)
