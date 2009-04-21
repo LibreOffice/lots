@@ -385,7 +385,7 @@ public final class FormFieldFactory
   private static void handleNewInputField(String bookmarkName, XNamed bookmark,
       Map<String, FormField> mapBookmarkNameToFormField, XTextDocument doc)
   {
-    FormField formField = new DynamicInputFormField(doc, null);
+    FormField formField = new DynamicInputFormField(doc);
     mapBookmarkNameToFormField.put(bookmarkName, formField);
   }
 
@@ -684,17 +684,38 @@ public final class FormFieldFactory
    * Repräsentiert ein FormField-Objekt, das zunächst kein Formularelement enthält,
    * aber eines vom Typ c,s,s,text,TextField,InputField erzeugt, wenn mittels focus()
    * oder setFormElementValue(...) darauf zugegriffen wird und der zu setzende Wert
-   * nicht der Leerstring ist. Wird setFormElementValue() der Leerstring übergeben,
-   * so werden der Inhalt des Bookmarks und das Formularelement gelöscht.
+   * nicht der Leerstring ist.
    * 
    * @author Christoph Lutz (D-III-ITD 5.1)
    */
   private static class DynamicInputFormField extends InputFormField
   {
 
-    public DynamicInputFormField(XTextDocument doc, InsertFormValue cmd)
+    public DynamicInputFormField(XTextDocument doc)
     {
-      super(doc, cmd, null);
+      super(doc, null, null);
+    }
+
+    public void setCommand(InsertFormValue cmd)
+    {
+      super.setCommand(cmd);
+      // R43846 (#2439)
+      if (inputField == null)
+      {
+        XTextRange range = cmd.createInsertCursor(false);
+        if (range != null)
+        {
+          String textSurroundedByBookmark = range.getString();
+          String trimmedText = textSurroundedByBookmark.trim();
+          Pattern p = Workarounds.workaroundForIssue101249();
+          if (trimmedText.length() > 0 && !p.matcher(trimmedText).matches())
+          {
+            Logger.log(L.m("Lösche text \"%1\" in Textmarke \"%2\"",
+              textSurroundedByBookmark, cmd.getBookmarkName()));
+            range.setString("");
+          }
+        }
+      }
     }
 
     public void setValue(String value)
