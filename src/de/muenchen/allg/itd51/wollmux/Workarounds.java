@@ -67,7 +67,7 @@ public class Workarounds
 
   private static Boolean applyWorkaround(String issueNumber)
   {
-    Logger.error("Workaround für Issue "
+    Logger.debug("Workaround für Issue "
       + issueNumber
       + " aktiv. Bestimmte Features sind evtl. nicht verfügbar. Die Performance kann ebenfalls leiden.");
     return Boolean.TRUE;
