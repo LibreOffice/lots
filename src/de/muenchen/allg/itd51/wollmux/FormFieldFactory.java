@@ -571,6 +571,7 @@ public final class FormFieldFactory
      */
     public void focus()
     {
+      if (cmd == null) return;
       try
       {
         XController controller = UNO.XModel(doc).getCurrentController();
@@ -712,7 +713,7 @@ public final class FormFieldFactory
           {
             Logger.log(L.m("Lösche text \"%1\" in Textmarke \"%2\"",
               textSurroundedByBookmark, cmd.getBookmarkName()));
-            range.setString("");
+            range.setString(Workarounds.workaroundForIssue101283());
           }
         }
       }
@@ -720,6 +721,8 @@ public final class FormFieldFactory
 
     public void setValue(String value)
     {
+      if (cmd == null) return;
+
       if (value.length() == 0)
       {
         // wenn kein inputField vorhanden ist, so wird der Inhalt des Bookmarks
@@ -727,7 +730,8 @@ public final class FormFieldFactory
         if (inputField == null)
         {
           XTextRange range = cmd.createInsertCursor(false);
-          if (range != null) range.setString("");
+          if (range != null)
+            range.setString(Workarounds.workaroundForIssue101283());
         }
       }
       else
@@ -736,12 +740,6 @@ public final class FormFieldFactory
         if (inputField == null) createInputField();
       }
       super.setValue(value);
-    }
-
-    public void focus()
-    {
-      if (inputField == null) createInputField();
-      super.focus();
     }
 
     private void createInputField()

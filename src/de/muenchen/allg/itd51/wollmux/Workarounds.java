@@ -65,6 +65,8 @@ public class Workarounds
 
   private static Pattern workaround101249 = null;
 
+  private static String workaround101283 = null;
+
   private static Boolean applyWorkaround(String issueNumber)
   {
     Logger.debug("Workaround für Issue "
@@ -184,5 +186,25 @@ public class Workarounds
         INSERTFORMVALUE_BOOKMARK_TEXT_THAT_CAN_BE_SAFELY_DELETED_WORKAROUND;
     }
     return workaround101249;
+  }
+
+  /**
+   * Wegen http://qa.openoffice.org/issues/show_bug.cgi?id=101283 muss der Inhalt des
+   * Bookmarks durch ein Leerzeichen an Stelle des gewünschten Leerstrings ersetzt
+   * werden.
+   * 
+   * @return Der String, der an Stelle des gewünschten Leerstrings zur Behebung des
+   *         Workarounds verwendet werden muss.
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101)
+   */
+  public static String workaroundForIssue101283()
+  {
+    if (workaround101283 == null)
+    {
+      Logger.debug(L.m("Workaround für Issue 101283 aktiv."));
+      workaround101283 = " ";
+    }
+    return workaround101283;
   }
 }
