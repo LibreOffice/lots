@@ -61,7 +61,6 @@ public class Shortcuts
    */
   public static void createShortcuts(ConfigThingy tastenkombinationenConf)
   {
-    if (Workarounds.applyWorkaroundForOOoIssue100718()) return;
     XAcceleratorConfiguration shortcutManager =
       UNO.getShortcutManager("com.sun.star.text.TextDocument");
     if (shortcutManager == null) return;

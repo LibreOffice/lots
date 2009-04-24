@@ -61,8 +61,6 @@ public class Workarounds
 
   private static Boolean workaround100374 = null;
 
-  private static Boolean workaround100718 = null;
-
   private static Pattern workaround101249 = null;
 
   private static String workaround101283 = null;
@@ -76,9 +74,8 @@ public class Workarounds
   }
 
   /**
-   * Issue #100374 betrifft OOo 3.0.x bis voraussichtlich OOo 3.2. Der Workaround
-   * kann entfernt werden, wenn voraussichtlich OOo 3.2 flächendeckend eingesetzt
-   * wird.
+   * Issue #100374 betrifft OOo 3.0.x. Der Workaround kann entfernt werden, wenn
+   * voraussichtlich OOo 3.1 flächendeckend eingesetzt wird.
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
    */
@@ -99,32 +96,6 @@ public class Workarounds
     }
 
     return workaround100374.booleanValue();
-  }
-
-  /**
-   * Issue #100718 betrifft OOo 3.1 bis voraussichtlich OOo 3.2. Der Workaround kann
-   * entfernt werden, wenn voraussichtlich OOo 3.2 flächendeckend eingesetzt wird.
-   * 
-   * @author Matthias Benkmann (D-III-ITD-D101)
-   */
-  public static boolean applyWorkaroundForOOoIssue100718()
-  {
-    if (workaround100718 == null)
-    {
-      // auskommentiert, da Bug voraussichtlich in 3.1 doch behoben sein wird.
-      // String version = getOOoVersion();
-      // // -100718 ist der Marker für unsere selbst gepatchten Versionen ohne den
-      // // Fehler
-      // if (version != null && (version.startsWith("3.1"))
-      // && !version.contains("-100718"))
-      // {
-      // workaround100718 = applyWorkaround("100718");
-      // }
-      // else
-      workaround100718 = Boolean.FALSE;
-    }
-
-    return workaround100718.booleanValue();
   }
 
   /**
