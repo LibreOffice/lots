@@ -1,10 +1,50 @@
  ==================== Neu in dieser Version ====================
 
+
+
+
+ ==================== Neu in Version 5.4.2 ====================
+
     * In WollMux 5.4.0 gab es einen Fehler der dazu führte, dass nach
       Speichern und Wiederöffnen von Formularen manche Werte in der Formular-
       GUI verloren gingen. Der Fehler ist in dieser Version behoben.
     * In WollMux-Versionen zwischen 5.3.1 und 5.4.1.0 funktionierte nach
       Schließen von OOo die WollMux-Leiste nicht mehr.
+    * Textmarken mit Dokumentkommando "insertFormValue" werden jetzt, wenn sie
+      nicht entweder ein Formularfeld enthalten oder einen von <>, [] oder {}
+      eingefassten Text gleich nach Öffnen des Dokuments bzw. der Vorlage
+      durch den leeren String ersetzt. Ein Formularfeld wird weiterhin nur bei
+      Bedarf eingefügt. Dadurch wird das Verhalten optisch wieder dem von
+      WollMux-Versionen vor 3.11.1 angenähert. Dies beseitigt das Problem,
+      dass bei manchen Formularen Teile des Texts, die in WollMux-Versionen vor
+      3.11.1 nicht angezeigt wurden, in Versionen ab 3.11.1 in manchen
+      Situationen zu sehen waren und in anderen Situationen gelöscht wurden.
+      Achtung! Dies kann in fehlerhaften Formularen dazu führen, dass wichtige
+      Teile des Texts verschwinden. Aus diesem Grund gibt der WollMux eine
+      Warnmeldung in der wollmux.log aus (mit Priorität LOG), wannimmer er
+      einen Text löscht. Potentiell betroffen sind alle Formulare, die nur mit
+      WollMux-Versionen ab 3.11.1 getestet wurden, da diese WollMux-Versionen
+      den Fehler meist verbergen. Um für eine bestimmte Vorlage
+      sicherzustellen, dass sie den Fehler nicht enthält, muss diese nur mit
+      dem neuen WollMux geöffnet und danach die Log-Datei kontrolliert werden.
+      Ist dort kein Eintrag, ist die Vorlage in Ordnung.
+    * Ein OpenOffice.org Fehler sorgte schon seit längerem dafür, dass in
+      manchen Fällen Text hinter insertFormValue-Bookmarks gelöscht wurde.
+      Betroffen waren davon nur insertFormValue-Bookmarks, die selbst kein
+      Formulafeld beinhalteten. Da in der Praxis die meisten insertFormValue-
+      Bookmarks ein Formularfeld umschließen, wurde der Fehler bisher nicht
+      bemerkt. Zur Umgehung des OpenOffice.org-Fehlers und potentieller
+      inhaltlicher Fehler in erzeugten Dokumenten werden die entsprechenden
+      Bookmarks nun durch einzelne Leerzeichen an Stelle der ursprünglichen
+      Leerstrings ersetzt. Die Auswirkung dieser Änderung ist z.B. im
+      Empfängerfeld des externen Briefkopfs sichtbar, in dem nun jede Zeile
+      mit einem Leerzeichen startet.
+    * Wiederherstellung des alten Verhaltens bezüglich der Vorbelegung von
+      Formularfeldern: Beim ersten Öffnen einer WollMux-Vorlage sind alle
+      Formularfelder der Form-GUI leer bzw. enthalten den Wert von AUTOFILL.
+      Das in WollMux 5.4.0 enthaltene Verhalten, bei dem auch die in den
+      Formularfeldern im Dokument enthaltenen Werte als Vorbelegung verwendet
+      werden, wurde aus Kompatibilitätsgründen rückgängig gemacht.
 
 
 
