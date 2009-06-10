@@ -236,7 +236,7 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 			<targetfile />
 
 			<!-- ATTENTION! The ./ before the ${MY_IDL} is important or javamaker fails with
-			the error message ERROR: Cannot create temporary file for bin/de/muenchen/allg/itd51/wollmux/....class
+			the error message ERROR: Cannot create temporary file for idl/de/muenchen/allg/itd51/wollmux/....class
 			-->
 			<arg value="-nD" />
 			<arg value="${TYPES_RDB}" />
