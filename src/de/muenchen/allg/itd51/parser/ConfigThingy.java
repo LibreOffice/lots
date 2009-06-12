@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Parsen und Repräsentation von WollMux-Konfigurationsdateien
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2009 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -62,11 +62,11 @@
  * 02.08.2007 | BNK | +ConfigThingy(String, String)       
  * 07.08.2007 | BNK | Bei Syntaxfehlern im Exceptiontext den beanstandeten Text angeben.
  * 10.08.2007 | BNK | Fehler bei der stringRepresentation() von Listen mit nur einem Element behoben.
- * 25.02.2008 | BNK | ConfigThingy generisiert           
+ * 25.02.2008 | BNK | ConfigThingy generisiert
+ * 12.06.2009 | BED | get, query und queryByChild um jeweils eine Version mit minlevel Argument erweitert
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
- * @version 1.0
  * 
  */
 package de.muenchen.allg.itd51.parser;
@@ -117,6 +117,13 @@ public class ConfigThingy implements Iterable<ConfigThingy>
    * Einrückung für stringRepresentation().
    */
   private static final String INDENT = "  ";
+
+  /**
+   * Default-Wert für den minlevel-Parameter, falls die get- bzw. query-Methoden ohne
+   * explizite Angabe von minlevel verwendet werden. Suchtiefe 1 bedeutet, dass this
+   * von der Suche ausgenommen ist und nur nach Nachfahrenknoten gesucht wird.
+   */
+  private static final int DEFAULT_MINLEVEL = 1;
 
   /** Die Kindknoten. */
   private List<ConfigThingy> children;
@@ -632,7 +639,20 @@ public class ConfigThingy implements Iterable<ConfigThingy>
    */
   public ConfigThingy get(String name, int maxlevel) throws NodeNotFoundException
   {
-    ConfigThingy res = query(name, false, maxlevel);
+    return get(name, maxlevel, DEFAULT_MINLEVEL);
+  }
+
+  /**
+   * Wie {@link #get(String)}, es werden aber nur Ergebnisse, deren Suchtiefe
+   * kleiner/gleich maxlevel und größer/gleich minlevel ist (0 ist this),
+   * zurückgeliefert.
+   * 
+   * @author Daniel Benkmann (D-III-ITD-D101)
+   */
+  public ConfigThingy get(String name, int maxlevel, int minlevel)
+      throws NodeNotFoundException
+  {
+    ConfigThingy res = query(name, false, maxlevel, minlevel);
     if (res.count() == 0)
       throw new NodeNotFoundException("Knoten " + getName()
         + " hat keinen Nachfahren '" + name + "'");
@@ -649,7 +669,7 @@ public class ConfigThingy implements Iterable<ConfigThingy>
    */
   public ConfigThingy query(String name)
   {
-    return query(name, false, Integer.MAX_VALUE);
+    return query(name, false, Integer.MAX_VALUE, DEFAULT_MINLEVEL);
   }
 
   /**
@@ -661,7 +681,19 @@ public class ConfigThingy implements Iterable<ConfigThingy>
    */
   public ConfigThingy query(String name, int maxlevel)
   {
-    return query(name, false, maxlevel);
+    return query(name, false, maxlevel, DEFAULT_MINLEVEL);
+  }
+
+  /**
+   * Wie {@link #get(String, int, int)}, aber es wird grundsätzlich ein ConfigThingy
+   * mit Namen "<query results>" über die Resultate gesetzt. Im Falle, dass es keine
+   * Resultate gibt, wird nicht null sondern ein ConfigThingy ohne Kinder geliefert.
+   * 
+   * @author Daniel Benkmann (D-III-ITD-D101)
+   */
+  public ConfigThingy query(String name, int maxlevel, int minlevel)
+  {
+    return query(name, false, maxlevel, minlevel);
   }
 
   /**
@@ -688,13 +720,31 @@ public class ConfigThingy implements Iterable<ConfigThingy>
    * 
    * @throws NodeNotFoundException
    *           falls keine entsprechenden Knoten gefunden wurden. Falls das nicht
-   *           gewünscht ist, kann {@link #query(String)} benutzt werden.
+   *           gewünscht ist, kann {@link #query(String, int)} benutzt werden.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public ConfigThingy getByChild(String name, int maxlevel)
       throws NodeNotFoundException
   {
-    ConfigThingy res = query(name, true, maxlevel);
+    return getByChild(name, maxlevel, DEFAULT_MINLEVEL);
+  }
+
+  /**
+   * Wie {@link #get(String, int, int)}, aber es werden die Elternknoten der
+   * gefundenen Knoten zurückgeliefert anstatt der Knoten selbst. Es ist zu beachten,
+   * dass jeder Elternknoten nur genau einmal in den Ergebnissen enthalten ist, auch
+   * wenn er mehrere passende Kinder hat,
+   * 
+   * @throws NodeNotFoundException
+   *           falls keine entsprechenden Knoten gefunden wurden. Falls das nicht
+   *           gewünscht ist, kann {@link #query(String, int, int)} benutzt werden.
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * @author Daniel Benkmann (D-III-ITD-D101)
+   */
+  public ConfigThingy getByChild(String name, int maxlevel, int minlevel)
+      throws NodeNotFoundException
+  {
+    ConfigThingy res = query(name, true, maxlevel, minlevel);
     if (res.count() == 0)
       throw new NodeNotFoundException("Knoten " + getName()
         + " hat keinen Nachfahren '" + name + "'");
@@ -712,7 +762,7 @@ public class ConfigThingy implements Iterable<ConfigThingy>
    */
   public ConfigThingy queryByChild(String name)
   {
-    return query(name, true, Integer.MAX_VALUE);
+    return query(name, true, Integer.MAX_VALUE, DEFAULT_MINLEVEL);
   }
 
   /**
@@ -725,7 +775,45 @@ public class ConfigThingy implements Iterable<ConfigThingy>
    */
   public ConfigThingy queryByChild(String name, int maxlevel)
   {
-    return query(name, true, maxlevel);
+    return query(name, true, maxlevel, DEFAULT_MINLEVEL);
+  }
+
+  /**
+   * Wie {@link #query(String, int, int)}, aber es werden die Elternknoten der
+   * gefundenen Knoten zurückgeliefert anstatt der Knoten selbst. Es ist zu beachten,
+   * dass jeder Elternknoten nur genau einmal in den Ergebnissen enthalten ist, auch
+   * wenn er mehrere passende Kinder hat,
+   * 
+   * @author Daniel Benkmann (D-III-ITD-D101)
+   */
+  public ConfigThingy queryByChild(String name, int maxlevel, int minlevel)
+  {
+    return query(name, true, maxlevel, minlevel);
+  }
+
+  /**
+   * Falls getParents == false verhält sich diese Funktion wie
+   * {@link #get(String, int, int)}, falls getParents == true wie
+   * {@link #getByChild(String, int, int)}.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * @author Daniel Benkmann (D-III-ITD-D101)
+   */
+  protected ConfigThingy query(String name, boolean getParents, int maxlevel,
+      int minlevel)
+  {
+    List<ConfigThingy> found = new Vector<ConfigThingy>();
+    boolean haveMore;
+    int searchlevel = minlevel;
+    do
+    {
+      if (searchlevel > maxlevel) break;
+      haveMore = rollcall(this, name, found, -1, searchlevel, getParents);
+      ++searchlevel;
+    } while (found.isEmpty() && haveMore);
+
+    if (found.size() == 0) return new ConfigThingy("<query results>");
+    return new ConfigThingy("<query results>", found);
   }
 
   /**
@@ -737,18 +825,7 @@ public class ConfigThingy implements Iterable<ConfigThingy>
    */
   protected ConfigThingy query(String name, boolean getParents, int maxlevel)
   {
-    List<ConfigThingy> found = new Vector<ConfigThingy>();
-    boolean haveMore;
-    int searchlevel = 1;
-    do
-    {
-      if (searchlevel > maxlevel) break;
-      haveMore = rollcall(this, name, found, -1, searchlevel, getParents);
-      ++searchlevel;
-    } while (found.isEmpty() && haveMore);
-
-    if (found.size() == 0) return new ConfigThingy("<query results>");
-    return new ConfigThingy("<query results>", found);
+    return query(name, getParents, maxlevel, DEFAULT_MINLEVEL);
   }
 
   /**
