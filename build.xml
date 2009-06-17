@@ -302,10 +302,6 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 			<fileset dir="${SRC}" includes="data/**/*" />
 			<fileset file="${BUILD_INFO_FILE}" />
 			<manifest>
-				<attribute name="Bundle-Name" value="${COMPONENT}" />
-				<attribute name="Bundle-Activator" value="${WollMux_REG_NAME}" />
-				<attribute name="Bundle-SymbolicName" value="${COMPONENT}" />
-				<attribute name="Bundle-Version" value="${VERSION}" />
 				<attribute name="RegistrationClassName" value="${WollMux_REG_NAME}" />
 			</manifest>
 		</jar>
