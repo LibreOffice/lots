@@ -714,6 +714,36 @@ public final class FormFieldFactory
             Logger.log(L.m("Lösche text \"%1\" in Textmarke \"%2\"",
               textSurroundedByBookmark, cmd.getBookmarkName()));
             range.setString(Workarounds.workaroundForIssue101283());
+
+            // 1. Entferne in allen Fällen wo jetzt eine Warnung ausgegeben wird das
+            // Bookmark, ABER lasse den Text bestehen (Warnung muss weiterhin
+            // ausgegeben werden).
+            // 2. Kollabierte Bookmarks werden dann und nur dann dekollabiert, wenn
+            // ein nicht-leerer Text eingefügt wird.
+            // 3. Alle Stellen, die Bookmarks und daraus abgeleitete Textranges
+            // verarbeiten müssen einen Spezialfall für kollabierte Bookmarks haben
+            // 4. An allen Stellen, wo der Inhalt eines Bookmarks verändert wird,
+            // wird geprüft ob der neue Inhalt der leere String ist. Falls ja, wird
+            // das Bookmark durch ein kollabiertes ersetzt.
+            // 5. Gleich beim initialen Scan werden nicht kollabierte Bookmarks mit
+            // leerem Inhalt in kollabierte umgewandelt (Performanceverlust in großem
+            // Formular möglich, weil bislang unnötige Zugriffe auf Bookmarks und
+            // deren Inhalt, was in OOo eventuell eine lineare Suche auslösen kann)
+            //
+            //
+            // Logger.log(L.m(
+            // "Lösche Textmarke \"%2\" die um den Text \"%1\" herum liegt. Der Text
+            // bleibt erhalten, aber evtl. gehen gewisse WollMux-Funktionalitäten
+            // verloren",
+            // textSurroundedByBookmark, cmd.getBookmarkName()));
+            // try
+            // {
+            // new Bookmark(cmd.getBookmarkName(),
+            // UNO.XBookmarksSupplier(doc)).remove();
+            // }
+            // catch (Exception x)
+            // {}
+
           }
         }
       }
