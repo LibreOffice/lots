@@ -3434,7 +3434,7 @@ public class TextDocumentModel
    * WollMux-Benutzerfeldern, die ja immer eine Trafo hinterlegt haben, wird jede
    * vorkommende Funktion VALUE 'alteID' ersetzt durch VALUE 'neueID'.
    * 
-   * 2) Ersetzungsregel "&lt;A&gt; &lt;B&gt;" - Kompexe Ersetzung mit mehreren neuen
+   * 2) Ersetzungsregel "&lt;A&gt; &lt;B&gt;" - Komplexe Ersetzung mit mehreren neuen
    * IDs und Text: Diese Ersetzung ist bei transformierten Feldern grundsätzlich
    * nicht zugelassen. Ein bestehendes insertFormValue-Kommando ohne Trafo wird wie
    * folgt manipuliert: anstelle des alten Bookmarks WM(CMD'insertFormValue' ID
