@@ -730,7 +730,7 @@ public final class FormFieldFactory
             // deren Inhalt, was in OOo eventuell eine lineare Suche auslösen kann)
             //
             //
-            Logger.log(L.m(
+            Logger.error(L.m(
               "Lösche Textmarke \"%2\" die um den Text \"%1\" herum liegt. Der Text bleibt erhalten, aber evtl. gehen gewisse WollMux-Funktionalitäten verloren",
               textSurroundedByBookmark, cmd.getBookmarkName()));
             try
