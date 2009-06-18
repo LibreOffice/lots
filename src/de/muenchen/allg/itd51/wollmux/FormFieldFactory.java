@@ -53,6 +53,7 @@ import com.sun.star.lang.XServiceInfo;
 import com.sun.star.table.XCell;
 import com.sun.star.text.XDependentTextField;
 import com.sun.star.text.XText;
+import com.sun.star.text.XTextContent;
 import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextField;
@@ -711,9 +712,10 @@ public final class FormFieldFactory
           Pattern p = Workarounds.workaroundForIssue101249();
           if (trimmedText.length() > 0 && !p.matcher(trimmedText).matches())
           {
-            // 1. Entferne in allen Fällen wo jetzt eine Warnung ausgegeben wird das
-            // Bookmark, ABER lasse den Text bestehen (Warnung muss weiterhin
-            // ausgegeben werden). [FERTIG]
+            // 1. Kollabiere in allen Fällen wo jetzt eine Warnung ausgegeben wird
+            // das
+            // Bookmark vor den Text (Warnung muss weiterhin ausgegeben werden).
+            // [FERTIG]
             // FIXME 2. Kollabierte Bookmarks werden dann und nur dann dekollabiert,
             // wenn
             // ein nicht-leerer Text eingefügt wird.
@@ -730,12 +732,19 @@ public final class FormFieldFactory
             // deren Inhalt, was in OOo eventuell eine lineare Suche auslösen kann)
             //
             //
-            Logger.error(L.m(
-              "Lösche Textmarke \"%2\" die um den Text \"%1\" herum liegt. Der Text bleibt erhalten, aber evtl. gehen gewisse WollMux-Funktionalitäten verloren",
+            Logger.log(L.m(
+              "Kollabiere Textmarke \"%2\" die um den Text \"%1\" herum liegt.",
               textSurroundedByBookmark, cmd.getBookmarkName()));
             try
             {
-              new Bookmark(cmd.getBookmarkName(), UNO.XBookmarksSupplier(doc)).remove();
+              String bmName = cmd.getBookmarkName();
+              new Bookmark(bmName, UNO.XBookmarksSupplier(doc)).remove();
+              XTextRange start = range.getStart();
+              XTextContent bookmark =
+                UNO.XTextContent(UNO.XMultiServiceFactory(doc).createInstance(
+                  "com.sun.star.text.Bookmark"));
+              UNO.XNamed(bookmark).setName(bmName);
+              start.getText().insertTextContent(start, bookmark, false);
             }
             catch (Exception x)
             {}
