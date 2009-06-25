@@ -1260,14 +1260,7 @@ public class SachleitendeVerfuegung
     }
 
     // ensprechende Verfügungspunkte ausblenden
-    if (setInvisibleRange != null)
-    {
-      UNO.setProperty(setInvisibleRange, "CharHidden", Boolean.TRUE);
-      // Workaround für update Bug
-      // http://qa.openoffice.org/issues/show_bug.cgi?id=78896
-      UNO.setProperty(setInvisibleRange, "CharHidden", Boolean.FALSE);
-      UNO.setProperty(setInvisibleRange, "CharHidden", Boolean.TRUE);
-    }
+    if (setInvisibleRange != null) UNO.hideTextRange(setInvisibleRange, true);
 
     // Ein/Ausblenden Druckblöcke (z.B. draftOnly):
     pmod.setPrintBlocksProps(BLOCKNAME_SLV_DRAFT_ONLY, isDraft, false);
@@ -1286,7 +1279,7 @@ public class SachleitendeVerfuegung
     if (isOriginal && punkt1 != null)
     {
       punkt1ZifferOnly = getZifferOnly(punkt1, true);
-      UNO.setProperty(punkt1ZifferOnly, "CharHidden", Boolean.TRUE);
+      UNO.hideTextRange(punkt1ZifferOnly, true);
     }
 
     // -----------------------------------------------------------------------
@@ -1296,8 +1289,7 @@ public class SachleitendeVerfuegung
       pmod.printWithProps();
 
     // Ausblendung von Ziffer von Punkt 1 wieder aufheben
-    if (punkt1ZifferOnly != null)
-      UNO.setProperty(punkt1ZifferOnly, "CharHidden", Boolean.FALSE);
+    if (punkt1ZifferOnly != null) UNO.hideTextRange(punkt1ZifferOnly, false);
 
     // Sichtbarkeitsgruppen wieder einblenden
     pmod.setGroupVisible(GROUP_ID_SLV_DRAFT_ONLY, true);
@@ -1318,8 +1310,7 @@ public class SachleitendeVerfuegung
     }
 
     // Verfügungspunkte wieder einblenden:
-    if (setInvisibleRange != null)
-      UNO.setProperty(setInvisibleRange, "CharHidden", Boolean.FALSE);
+    if (setInvisibleRange != null) UNO.hideTextRange(setInvisibleRange, false);
 
     // ViewCursor wieder herstellen:
     if (vc != null && oldViewCursor != null) vc.gotoRange(oldViewCursor, false);

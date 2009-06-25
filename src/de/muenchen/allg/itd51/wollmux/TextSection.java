@@ -42,10 +42,10 @@ import com.sun.star.uno.UnoRuntime;
 import de.muenchen.allg.afid.UNO;
 
 /**
- * Diese Klasse repräsentiert einen Textbereich (TextSection), dessen Namen um
- * den Zusatz 'GROUPS <ListeMitSichtbarkeitsgruppen>' ergänzt wurde, über den
- * die Sichtbarkeitsgruppen festgelegt sind, die diesen Bereich sichtbar oder
- * unsichtbar schalten können.
+ * Diese Klasse repräsentiert einen Textbereich (TextSection), dessen Namen um den
+ * Zusatz 'GROUPS <ListeMitSichtbarkeitsgruppen>' ergänzt wurde, über den die
+ * Sichtbarkeitsgruppen festgelegt sind, die diesen Bereich sichtbar oder unsichtbar
+ * schalten können.
  * 
  * @author christoph.lutz
  */
@@ -67,8 +67,8 @@ public class TextSection implements VisibilityElement
    * @param section
    *          UNO-Objekt des Bereichs
    * @param groups
-   *          Set mit den Namen (als String) aller Sichtbarkeitsgruppen, die
-   *          diesen Bereich sichtbar oder unsichtbar machen können.
+   *          Set mit den Namen (als String) aller Sichtbarkeitsgruppen, die diesen
+   *          Bereich sichtbar oder unsichtbar machen können.
    */
   public TextSection(XTextSection section, Set<String> groups)
   {
@@ -101,7 +101,7 @@ public class TextSection implements VisibilityElement
   public void setVisible(boolean visible)
   {
     UNO.setProperty(section, "IsVisible", Boolean.valueOf(visible));
-    UNO.setProperty(section.getAnchor(), "CharHidden", Boolean.valueOf(!visible));
+    UNO.hideTextRange(section.getAnchor(), !visible);
   }
 
   /*
@@ -142,9 +142,9 @@ public class TextSection implements VisibilityElement
   }
 
   /**
-   * Liefert den Namen der TextSection, der auch dann noch aktuell bleibt, wenn
-   * der Name manuell im Dokument geändert wurde, oder "<disposedTextSection>",
-   * wenn die TextSection nicht mehr existiert.
+   * Liefert den Namen der TextSection, der auch dann noch aktuell bleibt, wenn der
+   * Name manuell im Dokument geändert wurde, oder "<disposedTextSection>", wenn die
+   * TextSection nicht mehr existiert.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
@@ -155,8 +155,8 @@ public class TextSection implements VisibilityElement
   }
 
   /**
-   * Liefert den HashCode von getName() und ermöglicht das Verwenden der
-   * TextSection in einem HashSet.
+   * Liefert den HashCode von getName() und ermöglicht das Verwenden der TextSection
+   * in einem HashSet.
    * 
    * @see java.lang.Object#hashCode()
    */

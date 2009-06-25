@@ -592,8 +592,7 @@ abstract public class DocumentCommand
   }
 
   /**
-   * gibt den Sichtbarkeitsstatus des Textinhaltes unter dem Dokumentkommando zurück,
-   * der über das CharHidden-Attribut realisiert ist.
+   * gibt den Sichtbarkeitsstatus des Textinhaltes unter dem Dokumentkommando zurück.
    * 
    * @return true=sichtbar, false=ausgeblendet
    * @see de.muenchen.allg.itd51.wollmux.VisibilityElement#isVisible()
@@ -604,9 +603,8 @@ abstract public class DocumentCommand
   }
 
   /**
-   * Setzt den Sichtbarkeitsstatus des Textinhaltes unter dem Dokumentkommando in dem
-   * das CharHidden-Attribut des entsprechenden TextCursors gesetzt wird. Der Status
-   * visible wird nicht persistent im Bookmark hinterlegt.
+   * Setzt den Sichtbarkeitsstatus des Textinhaltes unter dem Dokumentkommando auf
+   * visible. Der Status visible wird zudem nicht persistent im Bookmark hinterlegt.
    * 
    * @param visible
    *          true=sichtbar, false=ausgeblendet
@@ -619,7 +617,7 @@ abstract public class DocumentCommand
     if (range != null)
     {
       XTextCursor cursor = range.getText().createTextCursorByRange(range);
-      UNO.setProperty(cursor, "CharHidden", Boolean.valueOf(!visible));
+      UNO.hideTextRange(cursor, !visible);
     }
   }
 
