@@ -65,6 +65,8 @@ public class Workarounds
 
   private static String workaround101283 = null;
 
+  private static Boolean workaround103137 = null;
+
   private static Boolean applyWorkaround(String issueNumber)
   {
     Logger.debug("Workaround für Issue "
@@ -96,6 +98,33 @@ public class Workarounds
     }
 
     return workaround100374.booleanValue();
+  }
+
+  /**
+   * Issue #103137 betrifft OOo 3.x (derzeit noch keine OOo-Version mit Fix bekannt).
+   * Der Workaround kann entfernt werden, wenn keine Dokumente mehr im Umlauf sind,
+   * deren Generator OOo 2 ist und in denen Textstellen mindestens einmal aus- und
+   * wieder eingeblendet wurden. Notfalls muss man vor der Deaktivierung einen
+   * Mechanismus über die Dokumentablagen der Referate laufen lassen der dafür sorgt,
+   * dass der Altbestand der von OOo 2 erzeugten Dokumente von sämtlichen
+   * text:display="none"-Stellen befreit wurde.
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101)
+   */
+  public static boolean applyWorkaroundForOOoIssue103137()
+  {
+    if (workaround103137 == null)
+    {
+      String version = getOOoVersion();
+      if (version != null && version.startsWith("3."))
+      {
+        workaround103137 = applyWorkaround("103137");
+      }
+      else
+        workaround103137 = Boolean.FALSE;
+    }
+
+    return workaround103137.booleanValue();
   }
 
   /**

@@ -1014,6 +1014,20 @@ public class WollMuxEventHandler
       catch (NodeNotFoundException e)
       {}
 
+      // Workaround für OOo-Issue 103137 ggf. anwenden:
+      if (Workarounds.applyWorkaroundForOOoIssue103137())
+      {
+        // Alle mit OOo 2 erstellen Dokumente, die Textstellen enthalten, die von
+        // älteren WollMux-Versionen ein- oder ausgeblendet wurden sind potentiell
+        // betroffen. Ein- und Ausblendungen in WollMux-Formularen werden
+        // glücklicherweise auch ohne Workaround vom WollMux korrigiert, da der
+        // WollMux beim Erzeugen der FormularGUI alle Formularwerte und damit auch
+        // die Sichtbarkeiten explizit setzt. Damit bleiben nur die Sachleitenden
+        // Verfügungen übrig, die vom WollMux bisher noch nicht automatisch
+        // korrigiert wurden. Dieser Workaround macht das nun:
+        SachleitendeVerfuegung.workaround103137(model);
+      }
+
       // Mögliche Aktionen für das neu geöffnete Dokument:
       DocumentCommandInterpreter dci = new DocumentCommandInterpreter(model, mux);
 

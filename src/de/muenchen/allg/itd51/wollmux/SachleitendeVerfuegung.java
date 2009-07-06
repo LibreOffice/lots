@@ -1317,6 +1317,72 @@ public class SachleitendeVerfuegung
   }
 
   /**
+   * Workaround für OOo-Issue 103137, der das selbe macht, wie
+   * {@link #printVerfuegungspunkt(XPrintModel, int, boolean, boolean, short)} nach
+   * Beendigung des Drucks eines Originals - es setzt alle Verfügungspunkte,
+   * Druckblöcke und Sichtbarkeitsgruppen aus model auf sichtbar.
+   */
+  public static void workaround103137(TextDocumentModel model)
+  {
+    XTextDocument doc = model.doc;
+    XParagraphCursor cursor =
+      UNO.XParagraphCursor(doc.getText().createTextCursorByRange(
+        doc.getText().getStart()));
+    if (doc == null || cursor == null) return;
+
+    // Punkt1 und den wieder Einzublendenden Bereich festlegen:
+    XTextRange punkt1 = getVerfuegungspunkt1(doc);
+    XTextRange setInvisibleRange = null;
+    do
+    {
+      cursor.gotoEndOfParagraph(true);
+
+      if (isVerfuegungspunkt(cursor))
+      {
+        if (punkt1 == null)
+          punkt1 = cursor.getText().createTextCursorByRange(cursor);
+        cursor.collapseToStart();
+        cursor.gotoRange(cursor.getText().getEnd(), true);
+        setInvisibleRange = cursor;
+      }
+    } while (setInvisibleRange == null && cursor.gotoNextParagraph(false));
+
+    // Sammeln der Textsections, die im ausgeblendeten Bereich liegen
+    List<XTextSection> hidingSections =
+      getSectionsFromPosition(doc, setInvisibleRange);
+
+    // Ausblendung der Ziffer von Punkt 1 aufheben:
+    if (punkt1 != null)
+    {
+      XTextRange punkt1ZifferOnly = getZifferOnly(punkt1, true);
+      if (punkt1ZifferOnly != null) UNO.hideTextRange(punkt1ZifferOnly, false);
+    }
+
+    // Sichtbarkeitsgruppen einblenden:
+    WollMuxEventHandler.handleSetVisibleState(model, GROUP_ID_SLV_DRAFT_ONLY, true,
+      null);
+    WollMuxEventHandler.handleSetVisibleState(model, GROUP_ID_SLV_NOT_IN_ORIGINAL,
+      true, null);
+    WollMuxEventHandler.handleSetVisibleState(model, GROUP_ID_SLV_ORIGINAL_ONLY,
+      true, null);
+    WollMuxEventHandler.handleSetVisibleState(model, GROUP_ID_SLV_ALL_VERSIONS,
+      true, null);
+
+    // Druckblöcke wieder einblenden:
+    model.setPrintBlocksProps(BLOCKNAME_SLV_DRAFT_ONLY, true, true);
+    model.setPrintBlocksProps(BLOCKNAME_SLV_NOT_IN_ORIGINAL, true, true);
+    model.setPrintBlocksProps(BLOCKNAME_SLV_ORIGINAL_ONLY, true, true);
+    model.setPrintBlocksProps(BLOCKNAME_SLV_ALL_VERSIONS, true, true);
+
+    // ausgeblendete TextSections wieder einblenden:
+    for (XTextSection sect : hidingSections)
+      UNO.setProperty(sect, "IsVisible", Boolean.TRUE);
+
+    // Verfügungspunkte wieder einblenden:
+    if (setInvisibleRange != null) UNO.hideTextRange(setInvisibleRange, false);
+  }
+
+  /**
    * Diese Methode liefert in eine Liste aller Textsections aus doc, deren Anker an
    * der selben Position oder hinter der Position der TextRange pos liegt.
    * 
