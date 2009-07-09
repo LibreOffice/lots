@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Interpretiert die in einem Dokument enthaltenen Dokumentkommandos.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2009 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -33,10 +33,10 @@
  *                  | SurroundingGarbageCollector und dabei komplettes Rewrite.
  * 23.08.2006 | BNK | nochmal Rewrite. Ich glaube dieser Code hält den Rekord im WollMux
  *                  | was rewrites angeht.
+ * 08.07.2009 | BED | Anpassung an die Änderungen in DocumentCommand (R48539)
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
- * @version 1.0
  * 
  */
 package de.muenchen.allg.itd51.wollmux;
@@ -762,20 +762,12 @@ public class DocumentCommandInterpreter
       try
       {
         fragId = model.getOverrideFrag(cmd.getFragID());
-        XTextCursor insCursor = cmd.createInsertCursor(false);
-        if (insCursor == null)
-        {
-          throw new Exception(
-            L.m(
-              "Kann keinen Einfügecursor erstellen für Dokumentkommando '%1'\nIst das Bookmark vielleicht verschwunden? Fehlt am Anfang oder Ende eines Fragments evtl. der leere Absatz?",
-              cmd.toString()));
-        }
 
-        // Bei leeren FragIds wird nur der Text unter dem Dokumentkommando
+        // Bei leeren FragIds wird der Text unter dem Dokumentkommando
         // gelöscht und das Dokumentkommando auf DONE gesetzt.
         if (fragId.length() == 0)
         {
-          if (insCursor != null) insCursor.setString("");
+          cmd.setTextRangeString("");
           cmd.markDone(false);
           return 0;
         }
@@ -822,8 +814,8 @@ public class DocumentCommandInterpreter
           throw new Exception(errors);
         }
 
-        fillPlaceholders(model.doc, model.getViewCursor(),
-          cmd.createInsertCursor(false), cmd.getArgs());
+        fillPlaceholders(model.doc, model.getViewCursor(), cmd.getTextCursor(),
+          cmd.getArgs());
       }
       catch (java.lang.Exception e)
       {
@@ -915,7 +907,7 @@ public class DocumentCommandInterpreter
       // http://qa.openoffice.org/issues/show_bug.cgi?id=60475
       String paraStyleName = null;
       UnoService endCursor = new UnoService(null);
-      XTextRange range = cmd.getTextRange();
+      XTextRange range = cmd.getTextCursor();
       if (range != null)
       {
         endCursor =
@@ -937,8 +929,7 @@ public class DocumentCommandInterpreter
       }
 
       // Liste aller TextFrames vor dem Einfügen zusammenstellen (benötigt für
-      // das
-      // Updaten der enthaltenen TextFields später).
+      // das Updaten der enthaltenen TextFields später).
       HashSet<String> textFrames = new HashSet<String>();
       if (UNO.XTextFramesSupplier(model.doc) != null)
       {
@@ -950,11 +941,11 @@ public class DocumentCommandInterpreter
         }
       }
 
-      // Textfragment einfügen:
-      UnoService insCursor = new UnoService(cmd.createInsertCursor(true));
-      if (insCursor.xDocumentInsertable() != null && urlStr != null)
+      // Textfragment (mit Insert Marks) einfügen:
+      XTextCursor insCursor = cmd.getTextCursorWithinInsertMarks();
+      if (UNO.XDocumentInsertable(insCursor) != null && urlStr != null)
       {
-        insCursor.xDocumentInsertable().insertDocumentFromURL(urlStr,
+        UNO.XDocumentInsertable(insCursor).insertDocumentFromURL(urlStr,
           new PropertyValue[] {});
       }
 
@@ -1028,8 +1019,7 @@ public class DocumentCommandInterpreter
       }
 
       // Textinhalt löschen
-      XTextRange range = cmd.createInsertCursor(false);
-      if (range != null) range.setString("");
+      cmd.setTextRangeString("");
     }
 
     /**
@@ -1278,19 +1268,16 @@ public class DocumentCommandInterpreter
         return 1;
       }
 
-      XTextCursor insCursor = cmd.createInsertCursor(false);
-      if (insCursor != null)
+      if (value == null || value.equals(""))
       {
-        if (value == null || value.equals(""))
-        {
-          insCursor.setString("");
-        }
-        else
-        {
-          insCursor.setString(cmd.getLeftSeparator() + value
-            + cmd.getRightSeparator());
-        }
+        cmd.setTextRangeString("");
       }
+      else
+      {
+        cmd.setTextRangeString(cmd.getLeftSeparator() + value
+          + cmd.getRightSeparator());
+      }
+
       cmd.markDone(!mux.isDebugMode());
       return 0;
     }
@@ -1326,7 +1313,7 @@ public class DocumentCommandInterpreter
      */
     public int executeCommand(UpdateFields cmd)
     {
-      XTextRange range = cmd.getTextRange();
+      XTextRange range = cmd.getTextCursor();
       if (range != null)
       {
         UnoService cursor = new UnoService(range);
@@ -1392,35 +1379,36 @@ public class DocumentCommandInterpreter
 
     // Meldung auch auf dem Logger ausgeben
     if (e != null)
+    {
       Logger.error(msg, e);
+    }
     else
+    {
       Logger.error(msg);
+    }
 
-    XTextCursor insCursor = cmd.createInsertCursor(false);
+    cmd.setTextRangeString(L.m("<FEHLER:  >"));
+
+    // Cursor erst NACH Aufruf von cmd.setTextRangeString(...) holen, da Bookmark
+    // eventuell dekollabiert wird!
+    XTextCursor insCursor = cmd.getTextCursor();
     if (insCursor == null)
     {
       Logger.error(L.m("Kann Fehler-Feld nicht einfügen, da kein InsertCursor erzeugt werden konnte."));
       return;
+      // Anmerkung: Aufruf von cmd.setTextRangeString() oben macht nichts, falls kein
+      // InsertCursor erzeugt werden kann, daher kein Problem, dass die Abfrage nach
+      // insCursor == null erst danach geschieht
     }
-
-    UnoService cursor = new UnoService(insCursor);
-    cursor.xTextCursor().setString(L.m("<FEHLER:  >"));
 
     // Text fett und rot machen:
-    try
-    {
-      cursor.setPropertyValue("CharColor", Integer.valueOf(0xff0000));
-      cursor.setPropertyValue("CharWeight", Float.valueOf(FontWeight.BOLD));
-    }
-    catch (java.lang.Exception x)
-    {
-      Logger.error(x);
-    }
+    UNO.setProperty(insCursor, "CharColor", Integer.valueOf(0xff0000));
+    UNO.setProperty(insCursor, "CharWeight", Float.valueOf(FontWeight.BOLD));
 
     // Ein Annotation-Textfield erzeugen und einfügen:
     try
     {
-      XTextRange range = cursor.xTextCursor().getEnd();
+      XTextRange range = insCursor.getEnd();
       XTextCursor c = range.getText().createTextCursorByRange(range);
       c.goLeft((short) 2, false);
       XTextContent note =

@@ -4,7 +4,7 @@
  * Funktion : Diese Klasse repräsentiert ein Bookmark in OOo und bietet Methoden
  *            für den vereinfachten Zugriff und die Manipulation von Bookmarks an.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2009 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -29,10 +29,13 @@
  * 29.09.2006 | BNK | Auch im optimierten Fall wo kein rename stattfindet auf BROKEN testen
  * 20.10.2006 | BNK | rename() Debug-Meldung nicht mehr ausgeben, wenn No Op Optimierung triggert.
  * 31.10.2006 | BNK | +select() zum Setzen des ViewCursors
+ * 08.07.2009 | BED | +collapseBookmark()
+ *                  | Bookmark(String, XTextDocument, XTextRange) erzeugt kollabierte Bookmarks falls range keine Ausdehnung
+ *                  | getTextRange() umbenannt in getTextCursor()
+ *                  | decollapseBookmark() gefixt so dass dekollabierte Bookmarks nicht nochmal dekollabiert werden
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
- * @version 1.0
  * 
  */
 package de.muenchen.allg.itd51.wollmux;
@@ -113,7 +116,9 @@ public class Bookmark
 
   /**
    * Der Konstruktor erzeugt ein neues Bookmark name im Dokument doc an der Position,
-   * die durch range beschrieben ist.
+   * die durch range beschrieben ist. Sollte die range keine Ausdehnung haben, so
+   * wird an der Position ein kollabiertes Bookmark erzeugt, ansonsten ein
+   * dekollabiertes Bookmark, das die range umschließt.
    * 
    * @param name
    *          Der Name des neu zu erstellenden Bookmarks.
@@ -154,7 +159,14 @@ public class Bookmark
         // erfolgreich gesetzt werden können. Das geht mit normalen TextRanges
         // nicht.
         XTextCursor cursor = range.getText().createTextCursorByRange(range);
-        range.getText().insertTextContent(cursor, bookmark.xTextContent(), true);
+        if (cursor.isCollapsed())
+        { // kollabiertes Bookmark einfügen
+          range.getText().insertTextContent(cursor, bookmark.xTextContent(), false);
+        }
+        else
+        { // dekollabiertes Bookmark einfügen
+          range.getText().insertTextContent(cursor, bookmark.xTextContent(), true);
+        }
         this.name = bookmark.xNamed().getName();
       }
       catch (IllegalArgumentException e)
@@ -331,14 +343,17 @@ public class Bookmark
   }
 
   /**
-   * Die Methode gibt die XTextRange des Bookmarks zurück, oder null, falls das
-   * Bookmark nicht vorhanden ist (z,B, weil es inzwischen gelöscht wurde). Als
-   * Workaround für Bug #67869 erzeugt diese Methode jedoch noch einen TextCursor,
-   * mit dessen Hilfe sich der Inhalt des Bookmarks sicherer enumerieren lassen kann.
+   * Liefert einen TextCursor für die TextRange, an der dieses Bookmark verankert
+   * ist, zurück oder <code>null</code>, falls das Bookmark nicht mehr existiert
+   * (zum Beispiel weil es inzwischen gelöscht wurde). Aufgrund von OOo-Issue #67869
+   * ist es besser den von dieser Methode erzeugten Cursor statt direkt die TextRange
+   * zu verwenden, da sich mit dem Cursor der Inhalt des Bookmarks sicherer
+   * enumerieren lässt.
    * 
-   * @return
+   * @return einen TextCursor für den Anchor des Bookmarks oder <code>null</code>
+   *         wenn das Bookmark nicht mehr existiert
    */
-  public XTextRange getTextRange()
+  public XTextCursor getTextCursor()
   {
     // Workaround für OOo-Bug: fehlerhafter Anchor bei Bookmarks in Tabellen.
     // http://www.openoffice.org/issues/show_bug.cgi?id=67869 . Ein
@@ -350,7 +365,9 @@ public class Bookmark
 
   /**
    * Liefert die TextRange an der dieses Bookmark verankert ist oder null falls das
-   * Bookmark nicht mehr existiert.
+   * Bookmark nicht mehr existiert. Aufgrund von OOo-Issue #67869 sollte überprüft
+   * werden, ob es nicht besser ist statt dieser Methode {@link #getTextCursor()} zu
+   * verwenden.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
@@ -497,7 +514,7 @@ public class Bookmark
    */
   public boolean isCollapsed()
   {
-    XTextRange anchor = getTextRange();
+    XTextRange anchor = getTextCursor();
     if (anchor == null) return false;
     try
     {
@@ -537,9 +554,11 @@ public class Bookmark
     XTextRange range = getAnchor();
     if (range == null) return;
 
-    // alte Range sichern und beenden, wenn nicht-kolabiert.
+    // Beenden, wenn nicht-kollabiert.
+    if (!isCollapsed()) return;
+
+    // Alte Range sichern
     XTextCursor cursor = range.getText().createTextCursorByRange(range);
-    if (!cursor.isCollapsed()) return;
 
     Logger.debug(L.m("Dekollabiere Bookmark '%1'", name));
 
@@ -554,6 +573,45 @@ public class Bookmark
       cursor.setString("x");
       cursor.getText().insertTextContent(cursor, bookmark.xTextContent(), true);
       bookmark.xTextContent().getAnchor().setString("");
+    }
+    catch (com.sun.star.uno.Exception e)
+    {
+      Logger.error(e);
+    }
+  }
+
+  /**
+   * Diese Methode wandelt ein nicht-kollabiertes Bookmark ({@link #isCollapsed()}==false)
+   * in ein kollabiertes Bookmark ({@link #isCollapsed()}==true) um. Ist das
+   * Bookmark bereits kollabiert oder existiert nicht mehr, wird nichts unternommen.
+   * Beim Kollabieren des Bookmarks wird der vom dekollabierten Bookmark umgebene
+   * Inhalt NICHT gelöscht. Das Bookmark befindet sich nach dem Kollabieren direkt
+   * vor dem ehemals umschlossenen Inhalt.
+   * 
+   * @author Daniel Benkmann (D-III-ITD-D101)
+   */
+  public void collapseBookmark()
+  {
+    XTextRange range = getAnchor();
+
+    // Nichts tun, falls Bookmark nicht mehr existiert oder bereits kollabiert ist
+    if (range == null || isCollapsed())
+    {
+      return;
+    }
+
+    Logger.debug(L.m("Kollabiere Bookmark '%1'", name));
+
+    // altes Bookmark löschen.
+    remove();
+
+    // neues (kollabiertes) Bookmark unter dem alten Namen hinzufügen.
+    try
+    {
+      UnoService bookmark = document.create("com.sun.star.text.Bookmark");
+      bookmark.xNamed().setName(name);
+      range.getText().insertTextContent(range.getStart(), bookmark.xTextContent(),
+        false);
     }
     catch (com.sun.star.uno.Exception e)
     {

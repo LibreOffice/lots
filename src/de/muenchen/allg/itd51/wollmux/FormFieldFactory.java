@@ -5,7 +5,7 @@
  *            WM('insertFormValue'...)-Bookmark entsprechende FormField-Elemente
  *            erzeugt.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2009 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -30,10 +30,10 @@
  * 12.09.2006 | BNK | Bugfix: Bookmarks ohne Ausdehnung wurden nicht gefunden.
  * 03.01.2007 | BNK | +TextFieldFormField
  *                  | +createFormField(doc, textfield)
+ * 08.07.2009 | BED | Änderungen im Rahmen von R48539 (#2867)
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
- * @version 1.0
  * 
  */
 package de.muenchen.allg.itd51.wollmux;
@@ -52,8 +52,6 @@ import com.sun.star.frame.XController;
 import com.sun.star.lang.XServiceInfo;
 import com.sun.star.table.XCell;
 import com.sun.star.text.XDependentTextField;
-import com.sun.star.text.XText;
-import com.sun.star.text.XTextContent;
 import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextField;
@@ -76,7 +74,7 @@ public final class FormFieldFactory
     Pattern.compile("\\A\\s*(WM\\s*\\(.*CMD\\s*'((insertFormValue))'.*\\))\\s*\\d*\\z");
 
   /**
-   * Erzeugt ein Formualfeld im Dokument doc an der Stelle des
+   * Erzeugt ein Formularfeld im Dokument doc an der Stelle des
    * InsertFormValue-Kommandos cmd. Ist unter dem bookmark bereits ein
    * Formularelement (derzeit TextFeld vom Typ Input, DropDown oder eine Checkbox)
    * vorhanden, so wird dieses Feld als Formularelement für die Darstellung des
@@ -107,8 +105,10 @@ public final class FormFieldFactory
     {
       range = range.getText();
       XCell cell = UNO.XCell(range);
-      if (cell == null)
+      if (cell == null) // range nicht in Tabellenzelle?
+      {
         range = null;
+      }
       else if (WollMuxFiles.isDebugMode())
       {
         String cellName = (String) UNO.getProperty(cell, "CellName");
@@ -116,7 +116,7 @@ public final class FormFieldFactory
       }
     }
 
-    if (range == null) range = cmd.getTextRange();
+    if (range == null) range = cmd.getTextCursor();
 
     if (range != null)
     {
@@ -513,7 +513,7 @@ public final class FormFieldFactory
     };
 
     /**
-     * Erzeugt ein Formualfeld im Dokument doc an der Stelle des
+     * Erzeugt ein Formularfeld im Dokument doc an der Stelle des
      * InsertFormValue-Kommandos cmd. Ist unter dem bookmark bereits ein TextFeld vom
      * Typ InputField vorhanden, so wird dieses Feld als inputField für die
      * Darstellung des Wertes des Formularfeldes genutzt. Ist innerhalb des Bookmarks
@@ -577,7 +577,7 @@ public final class FormFieldFactory
       {
         XController controller = UNO.XModel(doc).getCurrentController();
         XTextCursor cursor = UNO.XTextViewCursorSupplier(controller).getViewCursor();
-        XTextRange focusRange = cmd.getTextRange();
+        XTextRange focusRange = cmd.getTextCursor();
         if (focusRange != null) cursor.gotoRange(focusRange, false);
       }
       catch (java.lang.Exception e)
@@ -701,55 +701,38 @@ public final class FormFieldFactory
     public void setCommand(InsertFormValue cmd)
     {
       super.setCommand(cmd);
-      // R43846 (#2439)
+      // ursprünglich R43846 (#2439), überarbeitet nach R48539 (#2867)
       if (inputField == null)
       {
-        XTextRange range = cmd.createInsertCursor(false);
-        if (range != null)
-        {
-          String textSurroundedByBookmark = range.getString();
-          String trimmedText = textSurroundedByBookmark.trim();
-          Pattern p = Workarounds.workaroundForIssue101249();
-          if (trimmedText.length() > 0 && !p.matcher(trimmedText).matches())
-          {
-            // 1. Kollabiere in allen Fällen wo jetzt eine Warnung ausgegeben wird
-            // das
-            // Bookmark vor den Text (Warnung muss weiterhin ausgegeben werden).
-            // [FERTIG]
-            // FIXME 2. Kollabierte Bookmarks werden dann und nur dann dekollabiert,
-            // wenn
-            // ein nicht-leerer Text eingefügt wird.
-            // FIXME 3. Alle Stellen, die Bookmarks und daraus abgeleitete Textranges
-            // verarbeiten müssen einen Spezialfall für kollabierte Bookmarks haben
-            // FIXME 4. An allen Stellen, wo der Inhalt eines Bookmarks verändert
-            // wird,
-            // wird geprüft ob der neue Inhalt der leere String ist. Falls ja, wird
-            // das Bookmark durch ein kollabiertes ersetzt.
-            // FIXME 5. Gleich beim initialen Scan werden nicht kollabierte Bookmarks
-            // mit
-            // leerem Inhalt in kollabierte umgewandelt (Performanceverlust in großem
-            // Formular möglich, weil bislang unnötige Zugriffe auf Bookmarks und
-            // deren Inhalt, was in OOo eventuell eine lineare Suche auslösen kann)
-            //
-            //
-            Logger.log(L.m(
-              "Kollabiere Textmarke \"%2\" die um den Text \"%1\" herum liegt.",
-              textSurroundedByBookmark, cmd.getBookmarkName()));
-            try
-            {
-              String bmName = cmd.getBookmarkName();
-              new Bookmark(bmName, UNO.XBookmarksSupplier(doc)).remove();
-              XTextRange start = range.getStart();
-              XTextContent bookmark =
-                UNO.XTextContent(UNO.XMultiServiceFactory(doc).createInstance(
-                  "com.sun.star.text.Bookmark"));
-              UNO.XNamed(bookmark).setName(bmName);
-              start.getText().insertTextContent(start, bookmark, false);
-            }
-            catch (Exception x)
-            {}
+        XTextCursor cursor = cmd.getTextCursor();
 
+        if (cursor != null)
+        {
+          try
+          {
+            Bookmark bookmark =
+              new Bookmark(cmd.getBookmarkName(), UNO.XBookmarksSupplier(doc));
+            String textSurroundedByBookmark = cursor.getString();
+
+            String trimmedText = textSurroundedByBookmark.trim();
+            Pattern p = Workarounds.workaroundForIssue101249();
+            // Für die Überprüfung des Patterns verwenden wir den getrimmten Text, da
+            // wir auch die Fälle erwischen wollen, wo vielleicht aus Versehen ein
+            // Leerzeichen am Anfang reingerutscht ist. Besser wäre es aber eventuell
+            // das direkt ins Pattern einzubauen, statt hier zu trimmen.
+
+            if (textSurroundedByBookmark.length() > 0
+              && !p.matcher(trimmedText).matches())
+            {
+              Logger.log(L.m(
+                "Kollabiere Textmarke \"%2\", die um den Text \"%1\" herum liegt.",
+                textSurroundedByBookmark, cmd.getBookmarkName()));
+
+              bookmark.collapseBookmark();
+            }
           }
+          catch (Exception x)
+          {}
         }
       }
     }
@@ -761,12 +744,10 @@ public final class FormFieldFactory
       if (value.length() == 0)
       {
         // wenn kein inputField vorhanden ist, so wird der Inhalt des Bookmarks
-        // gelöscht.
+        // gelöscht
         if (inputField == null)
         {
-          XTextRange range = cmd.createInsertCursor(false);
-          if (range != null)
-            range.setString(Workarounds.workaroundForIssue101283());
+          cmd.setTextRangeString("");
         }
       }
       else
@@ -787,17 +768,15 @@ public final class FormFieldFactory
         bookmarkName));
       try
       {
-        XTextRange range = cmd.createInsertCursor(false);
-        XText text = range.getText();
         XTextField field =
           UNO.XTextField(UNO.XMultiServiceFactory(doc).createInstance(
             "com.sun.star.text.TextField.Input"));
-        XTextCursor cursor = text.createTextCursorByRange(range);
 
-        if (cursor != null && field != null)
-          text.insertTextContent(cursor, field, true);
-
-        inputField = field;
+        if (field != null)
+        {
+          cmd.insertTextContentIntoBookmark(field, true);
+          inputField = field;
+        }
       }
       catch (java.lang.Exception e)
       {

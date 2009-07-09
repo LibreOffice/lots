@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Beschreibt ein Dokumentkommando mit allen zugehörigen Eigenschaften.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2009 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -26,10 +26,15 @@
  * 26.04.2006 | LUT | Komplette Überarbeitung und Umbenennung in DocumentCommand
  * 17.05.2006 | LUT | Doku überarbeitet
  * 13.11.2006 | BAB | Erweitern von 'insertFrag' um optionale Argumente 'ARGS'
+ * 08.07.2009 | BED | getTextRange() aus Interface OptionalHighlightColorProvider entfernt
+ *                  | getTextRange() in getTextCursor() umgearbeitet
+ *                  | -createInsertCursor(boolean)
+ *                  | +getTextCursorWithinInsertMarks()
+ *                  | +setTextRangeString(String)
+ *                  | +insertTextContentIntoBookmark(XTextContent, boolean)
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
- * @version 1.0
  * 
  */
 package de.muenchen.allg.itd51.wollmux;
@@ -39,8 +44,10 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.Vector;
 
+import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.text.XParagraphCursor;
 import com.sun.star.text.XText;
+import com.sun.star.text.XTextContent;
 import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextRange;
 
@@ -190,17 +197,28 @@ abstract public class DocumentCommand
   public abstract int execute(DocumentCommand.Executor executor);
 
   /**
-   * Diese Methode ermöglicht den Zugriff auf den vollständigen TextRange des
-   * Bookmarks, welches das DocumentCommand definiert - die Methode darf aber nur
-   * verwendet werden, um die Inhalte an dieser Positon auszulesen und nicht um neue
-   * Textinhalte an dieser Stelle einzufügen (dafür gibt es createInsertCursor());
-   * ist das Bookmark nicht (mehr) vorhanden, wird null zurück geliefert.
+   * Liefert einen TextCursor für die TextRange, an der das Bookmark dieses
+   * {@link DocumentCommand}s verankert ist, zurück oder <code>null</code>, falls
+   * das Bookmark nicht mehr existiert (zum Beispiel weil es inzwischen gelöscht
+   * wurde). Aufgrund von OOo-Issue #67869 ist es besser den von dieser Methode
+   * erzeugten Cursor statt direkt die TextRange zu verwenden, da sich mit dem Cursor
+   * der Inhalt des Bookmarks sicherer enumerieren lässt.
    * 
-   * @return
+   * @return einen TextCursor für den Anchor des Bookmarks oder <code>null</code>
+   *         wenn das Bookmark nicht mehr existiert
+   * 
+   * @author Daniel Benkmann (D-III-ITD-D101)
    */
-  public XTextRange getTextRange()
+  public XTextCursor getTextCursor()
   {
-    return bookmark.getTextRange();
+    XTextCursor cursor = bookmark.getTextCursor();
+    if (cursor == null)
+    {
+      Logger.debug(L.m(
+        "Kann keinen Textcursor erstellen für Dokumentkommando '%1'\nIst das Bookmark vielleicht verschwunden?",
+        this.toString()));
+    }
+    return cursor;
   }
 
   /**
@@ -216,47 +234,102 @@ abstract public class DocumentCommand
   }
 
   /**
-   * Erzeugt einen Cursor, der ein sicheres Einfügen von Inhalten an der
-   * Cursorposition gewährleistet, ohne dabei die Hierarchie oder Ordnung der
-   * Dokumentkommandos zu zerstören. Kann das Dokumentkommando Kinder besitzen, so
-   * wird der Cursor in INSERT_MARKs eingeschlossen. Kann das Dokumentkommando keine
-   * Kinder besitzen, so wird ein einfacher TextCursor aus dem vollen TextRange des
-   * Bookmarks erzeugt. Ist das Bookmark nicht (mehr) vorhanden, wird null zurück
-   * geliefert. Jeder Aufruf von createInsertCursor überschreibt die bestehenden
-   * Inhalte des bisherigen DocumentCommands. Der InsertCursor von Dokumentkommandos
-   * mit Kindern sieht in etwa wie folgt aus: "<" CURSOR ">". Der InsertCursor hat
-   * direkt nach der Erzeugung keine Ausdehnung. Die INSERT_MARKS "<" und ">" können
-   * nach Beendigung der Dokumentgenerierung über die Methode cleanInsertMarks()
-   * wieder entfernt werden.
+   * Liefert einen TextCursor ohne Ausdehnung zum Einfügen von Inhalt innerhalb des
+   * Bookmarks dieses {@link DocumentCommand}s zurück, wobei der ursprünglich
+   * enthaltene Inhalt des Ankers des Bookmarks durch zwei Insert Marks ({@link #INSERT_MARK_OPEN}
+   * und {@link #INSERT_MARK_CLOSE}) ersetzt wird. Sollte das Bookmark kollabiert
+   * gewesen sein, so wird es zunächst dekollabiert, so dass die Insert Marks
+   * innerhalb des Bookmarks eingefügt werden können. Der zurückgelieferte Cursor
+   * besitzt keine Ausdehnung und befindet sich zwischen den beiden eingefügten
+   * Insert Marks. Falls das Bookmark nicht mehr existiert liefert die Methode
+   * <code>null</code> zurück.
    * 
-   * @return XTextCursor zum Einfügen oder null
+   * @return TextCursor zum Einfügen innerhalb von Insert Marks oder
+   *         <code>null</code>
+   * @author Daniel Benkmann (D-III-ITD-D101)
    */
-  public XTextCursor createInsertCursor(boolean createInsertMarks)
+  public XTextCursor getTextCursorWithinInsertMarks()
   {
-    // Workaround für OOo-Issue #73568
-    if (bookmark.isCollapsed()) bookmark.decollapseBookmark();
+    // Insert Marks hinzufügen
+    // (dabei wird das Bookmark falls nötig dekollabiert)
+    this.setTextRangeString(INSERT_MARK_OPEN + INSERT_MARK_CLOSE);
+    hasInsertMarks = true;
 
-    XTextRange range = bookmark.getTextRange();
+    XTextCursor cursor = this.getTextCursor(); // Cursor mit Insert Marks
+    if (cursor != null)
+    {
+      cursor.goRight(getStartMarkLength(), false);
+      cursor.collapseToStart();
+    }
 
+    return cursor;
+  }
+
+  /**
+   * Setzt den Inhalt der TextRange, an der das Bookmark dieses Kommandos verankert
+   * ist, auf den übergebenen String-Wert und kollabiert/dekollabiert das Bookmark je
+   * nachdem ob der String leer (bzw. <code>null</code>) oder nicht-leer ist. Bei
+   * einem leeren String wird das Bookmark kollabiert (sofern es dies nicht schon
+   * ist), bei einem nicht-leeren String wird das Bookmark dekollabiert (sofern nicht
+   * schon der Fall) und das dekollabierte Bookmark umfasst anschließend den
+   * übergebenen Text.
+   * 
+   * @param text
+   *          der einzufügende String; falls leer (oder <code>null</code>) wird
+   *          Bookmark kollabiert
+   * @author Daniel Benkmann (D-III-ITD-D101)
+   */
+  public void setTextRangeString(String text)
+  {
+    if (text != null && text.length() > 0)
+    {
+      bookmark.decollapseBookmark();
+    }
+
+    XTextRange range = bookmark.getAnchor();
     if (range != null)
     {
-      if (createInsertMarks)
-      {
-        XTextCursor cursor = range.getText().createTextCursorByRange(range);
-        cursor.setString(INSERT_MARK_OPEN + INSERT_MARK_CLOSE);
-        hasInsertMarks = true;
-
-        bookmark.rerangeBookmark(cursor);
-
-        cursor.goRight(getStartMarkLength(), false);
-        cursor.collapseToStart();
-
-        return cursor;
-      }
-      else
-        return range.getText().createTextCursorByRange(range);
+      range.setString(text); // setString(null) kein Problem
     }
-    return null;
+
+    if (text == null || text.length() == 0)
+    {
+      bookmark.collapseBookmark();
+    }
+  }
+
+  /**
+   * Fügt in die TextRange, an der das Bookmark dieses Kommandos verankert ist, den
+   * übergebenen TextContent ein, wobei das Bookmark zuvor dekollabiert wird (sollte
+   * es das nicht ohnehin schon sein). Über den Parameter replace kann gesteuert
+   * werden, ob beim Einfügen der bisherige Inhalt der TextRange des Bookmarks
+   * ersetzt werden soll oder nicht. Wird <code>false</code> übergeben, so wird der
+   * TextContent an das Ende der TextRange des Bookmarks (aber natürlich noch im
+   * Bookmark) hinzugefügt.
+   * 
+   * @param textContent
+   *          der einzufügende TextContent
+   * @param replace
+   *          bestimmt ob der in der TextRange des Bookmarks enthaltene Inhalt von
+   *          textContent ersetzt werden soll. Falls <code>true</code> wird der
+   *          Inhalt ersetzt, ansonsten wird textContent an das Ende der TextRange
+   *          des Bookmarks gehängt
+   * @throws IllegalArgumentException
+   * @author Daniel Benkmann (D-III-ITD-D101)
+   */
+  public void insertTextContentIntoBookmark(XTextContent textContent, boolean replace)
+      throws IllegalArgumentException
+  {
+    if (textContent != null)
+    {
+      bookmark.decollapseBookmark();
+      XTextCursor cursor = bookmark.getTextCursor();
+      if (cursor != null)
+      {
+        XText text = cursor.getText();
+        text.insertTextContent(cursor, textContent, replace);
+      }
+    }
   }
 
   /**
@@ -288,7 +361,7 @@ abstract public class DocumentCommand
    */
   public XParagraphCursor[] getStartMark()
   {
-    XTextRange range = bookmark.getTextRange();
+    XTextRange range = bookmark.getTextCursor();
     if (range == null || !hasInsertMarks) return null;
     XParagraphCursor[] cursor = new XParagraphCursor[2];
     XText text = range.getText();
@@ -307,7 +380,7 @@ abstract public class DocumentCommand
    */
   public XParagraphCursor[] getEndMark()
   {
-    XTextRange range = bookmark.getTextRange();
+    XTextRange range = bookmark.getTextCursor();
     if (range == null || !hasInsertMarks) return null;
     XParagraphCursor[] cursor = new XParagraphCursor[2];
     XText text = range.getText();
@@ -613,10 +686,9 @@ abstract public class DocumentCommand
   public void setVisible(boolean visible)
   {
     this.visible = visible;
-    XTextRange range = getTextRange();
-    if (range != null)
+    XTextCursor cursor = getTextCursor();
+    if (cursor != null)
     {
-      XTextCursor cursor = range.getText().createTextCursorByRange(range);
       UNO.hideTextRange(cursor, !visible);
     }
   }
@@ -677,13 +749,11 @@ abstract public class DocumentCommand
   // ********************************************************************************
   /**
    * Beschreibt ein Dokumentkommando, das das optionale Attribut HIGHLIGHT_COLOR
-   * enthalten kann (derzeit AllVersions, DraftOnly und NotInOriginal)
+   * enthalten kann (derzeit AllVersions, DraftOnly, NotInOriginal und OriginalOnly)
    */
   public static interface OptionalHighlightColorProvider
   {
     public String getHighlightColor();
-
-    public XTextRange getTextRange();
   }
 
   // ********************************************************************************

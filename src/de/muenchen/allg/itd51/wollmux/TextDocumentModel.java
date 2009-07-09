@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Repräsentiert ein aktuell geöffnetes TextDokument.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2009 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -25,10 +25,11 @@
  * 03.01.2007 | BNK | +collectNonWollMuxFormFields
  * 11.04.2007 | BNK | [R6176]+removeNonWMBookmarks()
  * 08.04.2007 | BNK | [R18119]Druckfunktion inkompatibel mit Versionen <3.11.1
+ * 08.07.2009 | BED | addToCurrentFormDescription(...) löscht jetzt nicht nur Notiz
+ *                  | sondern kompletten Bookmark-Inhalt und Bookmark wird kollabiert
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
- * @version 1.0
  * 
  */
 package de.muenchen.allg.itd51.wollmux;
@@ -53,7 +54,6 @@ import com.sun.star.awt.PosSize;
 import com.sun.star.awt.XTopWindow;
 import com.sun.star.awt.XWindow;
 import com.sun.star.beans.XPropertySet;
-import com.sun.star.container.NoSuchElementException;
 import com.sun.star.container.XEnumeration;
 import com.sun.star.container.XEnumerationAccess;
 import com.sun.star.container.XNameAccess;
@@ -1253,7 +1253,7 @@ public class TextDocumentModel
           try
           {
             Integer bgColor = Integer.valueOf(Integer.parseInt(highlightColor, 16));
-            UNO.setProperty(cmd.getTextRange(), "CharBackColor", bgColor);
+            UNO.setProperty(cmd.getTextCursor(), "CharBackColor", bgColor);
           }
           catch (NumberFormatException e)
           {
@@ -1263,7 +1263,7 @@ public class TextDocumentModel
           }
         else
         {
-          UNO.setPropertyToDefault(cmd.getTextRange(), "CharBackColor");
+          UNO.setPropertyToDefault(cmd.getTextCursor(), "CharBackColor");
         }
       }
 
@@ -2472,10 +2472,10 @@ public class TextDocumentModel
   /**
    * Die Methode fügt die Formular-Abschnitte aus der Formularbeschreibung der Notiz
    * von formCmd zur aktuellen Formularbeschreibung des Dokuments in den persistenten
-   * Daten hinzu und löscht die Notiz.
+   * Daten hinzu und löscht die Notiz (sowie den übrigen Inhalt von formCmd).
    * 
    * @param formCmd
-   *          Das formCmd, das die Notzi mit den hinzuzufügenden Formular-Abschnitten
+   *          Das formCmd, das die Notiz mit den hinzuzufügenden Formular-Abschnitten
    *          einer Formularbeschreibung enthält.
    * @throws ConfigurationErrorException
    *           Die Notiz der Formularbeschreibung ist nicht vorhanden, die
@@ -2485,7 +2485,7 @@ public class TextDocumentModel
   synchronized public void addToCurrentFormDescription(DocumentCommand.Form formCmd)
       throws ConfigurationErrorException
   {
-    XTextRange range = formCmd.getTextRange();
+    XTextRange range = formCmd.getTextCursor();
 
     XTextContent annotationField =
       UNO.XTextContent(WollMuxSingleton.findAnnotationFieldRecursive(range));
@@ -2502,15 +2502,8 @@ public class TextDocumentModel
     addToFormDescription(getFormDescription(), content.toString());
     storeCurrentFormDescription();
 
-    // Notiz löschen
-    try
-    {
-      range.getText().removeTextContent(annotationField);
-    }
-    catch (NoSuchElementException e)
-    {
-      Logger.error(e);
-    }
+    // Notiz (sowie anderen Inhalt des Bookmarks) löschen
+    formCmd.setTextRangeString("");
   }
 
   /**
@@ -2749,10 +2742,11 @@ public class TextDocumentModel
    * neues Bookmark erstellt und dieses als Dokumenkommando registriert. Dieses
    * Bookmark wird genau über r gelegt, so dass abhängig vom Dokumentkommando der
    * Inhalt der TextRange r durch eine eventuelle spätere Ausführung des
-   * Dokumentkommandos überschrieben wird. cmdStr muss nur das gewünschte Kommando
-   * enthalten ohne eine abschließende Zahl, die zur Herstellung eindeutiger
-   * Bookmarks benötigt wird - diese Zahl wird bei Bedarf automatisch an den
-   * Bookmarknamen angehängt.
+   * Dokumentkommandos überschrieben wird (wenn r keine Ausdehnung hat, wird ein
+   * kollabiertes Bookmark erzeugt und es kann logischerweise auch nichts
+   * überschrieben werden). cmdStr muss nur das gewünschte Kommando enthalten ohne
+   * eine abschließende Zahl, die zur Herstellung eindeutiger Bookmarks benötigt wird -
+   * diese Zahl wird bei Bedarf automatisch an den Bookmarknamen angehängt.
    * 
    * @param r
    *          Die TextRange, an der das neue Bookmark mit diesem Dokumentkommando

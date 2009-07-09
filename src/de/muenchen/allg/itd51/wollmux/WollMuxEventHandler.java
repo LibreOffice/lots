@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Ermöglicht die Einstellung neuer WollMuxEvents in die EventQueue.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2009 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -36,7 +36,6 @@
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
- * @version 1.0
  * 
  */
 package de.muenchen.allg.itd51.wollmux;
@@ -3147,7 +3146,7 @@ public class WollMuxEventHandler
             Bookmark b =
               new Bookmark(bookmarkName, UNO.XBookmarksSupplier(model.doc));
             if (bookmarkName.contains("HIGHLIGHT_COLOR"))
-              UNO.setPropertyToDefault(b.getTextRange(), "CharBackColor");
+              UNO.setPropertyToDefault(b.getTextCursor(), "CharBackColor");
             b.remove();
           }
           catch (NoSuchElementException e)
@@ -3677,7 +3676,7 @@ public class WollMuxEventHandler
       {
         try
         {
-          XTextRange range = cmd.getTextRange();
+          XTextRange range = cmd.getTextCursor();
           if (range != null) viewCursor.gotoRange(range.getStart(), false);
         }
         catch (java.lang.Exception e)

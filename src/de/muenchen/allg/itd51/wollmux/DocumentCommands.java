@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Verwaltet alle in einem Dokument enthaltenen Dokumentkommandos.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2009 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -26,7 +26,6 @@
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
- * @version 1.0
  * 
  */
 package de.muenchen.allg.itd51.wollmux;
@@ -196,10 +195,11 @@ public class DocumentCommands
    * neues Bookmark erstellt und dieses als Dokumenkommando registriert. Dieses
    * Bookmark wird genau über r gelegt, so dass abhängig vom Dokumentkommando der
    * Inhalt der TextRange r durch eine eventuelle spätere Ausführung des
-   * Dokumentkommandos überschrieben wird. cmdStr muss nur das gewünschte Kommando
-   * enthalten ohne eine abschließende Zahl, die zur Herstellung eindeutiger
-   * Bookmarks benötigt wird - diese Zahl wird bei Bedarf automatisch an den
-   * Bookmarknamen angehängt.
+   * Dokumentkommandos überschrieben wird (wenn r keine Ausdehnung hat, wird ein
+   * kollabiertes Bookmark erzeugt und es kann logischerweise auch nichts
+   * überschrieben werden). cmdStr muss nur das gewünschte Kommando enthalten ohne
+   * eine abschließende Zahl, die zur Herstellung eindeutiger Bookmarks benötigt wird -
+   * diese Zahl wird bei Bedarf automatisch an den Bookmarknamen angehängt.
    * 
    * @param r
    *          Die TextRange, an der das neue Bookmark mit diesem Dokumentkommando
