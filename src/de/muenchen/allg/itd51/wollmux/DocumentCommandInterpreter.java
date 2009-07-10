@@ -1034,6 +1034,9 @@ public class DocumentCommandInterpreter
     private void fillPlaceholders(XTextDocument doc, XTextCursor viewCursor,
         XTextRange range, Vector<String> args)
     {
+      if (doc == null || viewCursor == null || range == null || args == null)
+        return;
+
       // Vector mit allen Platzhalterfelder
       Vector<XTextField> placeholders = new Vector<XTextField>();
 
