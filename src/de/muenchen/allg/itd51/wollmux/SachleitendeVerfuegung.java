@@ -1324,11 +1324,12 @@ public class SachleitendeVerfuegung
    */
   public static void workaround103137(TextDocumentModel model)
   {
+    if (model == null || model.doc == null) return;
     XTextDocument doc = model.doc;
     XParagraphCursor cursor =
       UNO.XParagraphCursor(doc.getText().createTextCursorByRange(
         doc.getText().getStart()));
-    if (doc == null || cursor == null) return;
+    if (cursor == null) return;
 
     // Punkt1 und den wieder Einzublendenden Bereich festlegen:
     XTextRange punkt1 = getVerfuegungspunkt1(doc);
