@@ -668,6 +668,10 @@ public class DocumentCommands
     try
     {
       Bookmark b = new Bookmark(bookmarkName, doc);
+      if (b.getTextCursor().isCollapsed())
+      {
+        b.collapseBookmark();
+      }
       try
       {
         ConfigThingy wmCmd = new ConfigThingy("", null, new StringReader(cmdStr));
