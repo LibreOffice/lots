@@ -1,5 +1,47 @@
  ==================== Neu in dieser Version ====================
 
+    * Entdeckt der WollMux eine Textmarke mit InsertFormValue-Kommando, die
+      nicht entweder leer ist, ein Formularfeld enthält oder einen von <>, []
+      oder {} eingefassten Text (z.B. <Vorname>), so kann er diesen nicht
+      zugelassenen Zustand reparieren. Insbesondere ist es ein ungültiger
+      Zustand, wenn die Textmarke Nutztext umschließt, da dieser Inhalt nicht
+      sicher ist und in früheren WollMux-Versionen bei Aktionen wie z.B.
+      "Empfängerfeld einfügen" oder "Seriendruck (WollMux)" verloren ging.
+      Zur Vermeidung dieser Unsicherheit wird nun die Textmarke vor den
+      Nutztext gesetzt. Sowohl Textmarke als auch Nutztext bleiben erhalten.
+    * Neben der obigen Änderung in Bezug auf Textmarken mit InsertFormValue-
+      Kommandos wurde das Behandeln von Textmarken zudem grundsätzlich
+      verändert und ist nun wesentlich robuster. Auch in anderen Szenarien
+      kann es nun nicht mehr vorkommen, dass Textmarken unerwünscht Nutztext
+      umschließen und dieser so verloren gehen kann.
+    * Der WollMux sorgt nun dafür, dass sich die Absatz- und Zeichenformate
+      von Textinhalten durch das Aus- und Wiedereinblenden nicht verändern. In
+      früheren Versionen wurde insbesondere nach dem Wiedereinblenden die
+      Eigenschaft "Sichtbarkeit" explizit auf "sichtbar" gesetzt. Das
+      beeinträchtigte im Zusammenhang mit der in OOo-Issue #96878
+      beschriebenen Austauschproblematik in manchen Fällen den
+      Dokumentenaustausch von neu erstellen Dokumenten zwischen OpenOffice.org
+      2 und OpenOffice.org 3. Durch das verbesserte Verhalten des WollMux wird
+      nun dafür gesorgt, dass neu erstellte Dokumente diesbezüglich korrekt
+      zwischen OpenOffice.org 2 und OpenOffice.org 3 ausgetauscht werden
+      können.
+    * Nach dem Ausführen des Dokumentkommandos WM(CMD_'form') wird nun nicht
+      nur mehr die Notiz innerhalb der Textmarke dieses Kommandos gelöscht,
+      sondern jeglicher Inhalt, der sich eventuell innerhalb der Textmarke des
+      form-Kommandos befindet.
+
+
+
+ ==================== Neu in Version 5.6.1a ====================
+
+    * Zur Umgehung eines neu bekannt gewordenen OpenOffice.org-Fehlers wurde
+      das in WollMux 5.4.2 eingeführte Verhalten wieder rückgängig gemacht,
+      bei dem Textmarken mit Dokumentkommando "insertFormValue" gleich nach
+      Öffnen des Dokuments bzw. der Vorlage durch ein Leerzeichen ersetzt
+      werden, wenn sie nicht entweder ein Formularfeld enthalten oder einen von
+      <>, [] oder {} eingefassten Text. Eine entsprechende, mit WollMux 5.4.2
+      ebenso eingeführte Warnmeldung in der Logdatei wollmux.log, wurde in
+      angepasster Form beibehalten.
 
 
 
