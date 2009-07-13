@@ -33,6 +33,7 @@
  *                  | Bookmark(String, XTextDocument, XTextRange) erzeugt kollabierte Bookmarks falls range keine Ausdehnung
  *                  | getTextRange() umbenannt in getTextCursor()
  *                  | decollapseBookmark() gefixt so dass dekollabierte Bookmarks nicht nochmal dekollabiert werden
+ * 13.07.2009 | BED | decollapseBookmark() ruft jetzt kein setString() mehr auf
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -570,9 +571,7 @@ public class Bookmark
     {
       UnoService bookmark = document.create("com.sun.star.text.Bookmark");
       bookmark.xNamed().setName(name);
-      cursor.setString("x");
       cursor.getText().insertTextContent(cursor, bookmark.xTextContent(), true);
-      bookmark.xTextContent().getAnchor().setString("");
     }
     catch (com.sun.star.uno.Exception e)
     {
