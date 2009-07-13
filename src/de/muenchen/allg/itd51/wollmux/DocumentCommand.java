@@ -200,9 +200,14 @@ abstract public class DocumentCommand
    * Liefert einen TextCursor für die TextRange, an der das Bookmark dieses
    * {@link DocumentCommand}s verankert ist, zurück oder <code>null</code>, falls
    * das Bookmark nicht mehr existiert (zum Beispiel weil es inzwischen gelöscht
-   * wurde). Aufgrund von OOo-Issue #67869 ist es besser den von dieser Methode
-   * erzeugten Cursor statt direkt die TextRange zu verwenden, da sich mit dem Cursor
-   * der Inhalt des Bookmarks sicherer enumerieren lässt.
+   * wurde). Aufgrund von OOo-Issue #67869 ist es im allgemeinen besser den von
+   * dieser Methode erzeugten Cursor statt direkt die TextRange zu verwenden, da sich
+   * mit dem Cursor der Inhalt des Bookmarks sicherer enumerieren lässt. Der von
+   * dieser Methode zurückgelieferte TextCursor sollte allerdings nicht verwendet
+   * werden, um direkt Text innerhalb eines Bookmarks einzufügen! Dafür sind die
+   * Methoden {@link #setTextRangeString(String)},
+   * {@link #insertTextContentIntoBookmark(XTextContent, boolean)} und
+   * {@link #getTextCursorWithinInsertMarks()} da.
    * 
    * @return einen TextCursor für den Anchor des Bookmarks oder <code>null</code>
    *         wenn das Bookmark nicht mehr existiert
@@ -223,7 +228,12 @@ abstract public class DocumentCommand
 
   /**
    * Liefert die TextRange an der das Bookmark dieses Kommandos verankert ist oder
-   * null, falls das Bookmark nicht mehr existiert.
+   * null, falls das Bookmark nicht mehr existiert. Die von dieser Methode
+   * zurückgelieferte TextRange sollte nicht verwendet werden, um direkt Text
+   * innerhalb eines Bookmarks einzufügen! Dafür sind die Methoden
+   * {@link #setTextRangeString(String)},
+   * {@link #insertTextContentIntoBookmark(XTextContent, boolean)} und
+   * {@link #getTextCursorWithinInsertMarks()} da.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    * @see de.muenchen.allg.itd51.wollmux.VisibilityElement#getAnchor()
