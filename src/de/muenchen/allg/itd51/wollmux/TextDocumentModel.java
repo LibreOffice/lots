@@ -3335,7 +3335,7 @@ public class TextDocumentModel
       // Nur Felder der aktuellen Selektion zurückliefern.
       // TODO: diesen Fall implementieren
     }
-    else
+    // else TODO einkommentieren wenn obiger branch implementiert
     {
       // Alle ReferencedFieldIDs des Dokuments alphabetisch sortiert
       // zurückliefern.
@@ -3399,7 +3399,7 @@ public class TextDocumentModel
     }
 
     /**
-     * Liefert true, wenn das Feld TODO: comment FieldInfo.isTransformed
+     * Liefert true, wenn auf dem Feld eine TRAFO gesetzt ist.
      * 
      * @return
      * 
@@ -3696,7 +3696,8 @@ public class TextDocumentModel
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  public static class FieldSubstitution
+  public static class FieldSubstitution implements
+      Iterable<FieldSubstitution.SubstElement>
   {
     private List<SubstElement> list = new ArrayList<SubstElement>();
 
@@ -3715,7 +3716,15 @@ public class TextDocumentModel
       return list.iterator();
     }
 
-    private static class SubstElement
+    public String toString()
+    {
+      StringBuilder buffy = new StringBuilder();
+      for (SubstElement ele : this)
+        buffy.append(ele.isField() ? "<" + ele.getValue() + ">" : ele.getValue());
+      return buffy.toString();
+    }
+
+    public static class SubstElement
     {
       private static final int FIXED_TEXT = 0;
 
@@ -3736,14 +3745,27 @@ public class TextDocumentModel
         return value;
       }
 
+      /**
+       * Liefert true gdw das SubstElement ein Feld darstellt. In diesem Fall liefert
+       * {@link #getValue()} die ID des Feldes.
+       */
       public boolean isField()
       {
         return type == FIELD;
       }
 
+      /**
+       * Liefert true gdw das SubstElement einen einfachen Text darstellt. In diesem
+       * Fall liefert {@link #getValue()} diesen Text.
+       */
       public boolean isFixedText()
       {
         return type == FIXED_TEXT;
+      }
+
+      public String toString()
+      {
+        return (isField() ? "FIELD" : "FIXED_TEXT") + " \"" + value + "\"";
       }
     }
   }

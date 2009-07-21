@@ -99,7 +99,7 @@ class AdjustFields
       {
         HashMap<String, FieldSubstitution> mapIdToSubstitution =
           (HashMap<String, FieldSubstitution>) e.getSource();
-        for (Map.Entry<String, FieldSubstitution> ent: mapIdToSubstitution.entrySet())
+        for (Map.Entry<String, FieldSubstitution> ent : mapIdToSubstitution.entrySet())
         {
           String fieldId = ent.getKey();
           FieldSubstitution subst = ent.getValue();
@@ -109,7 +109,7 @@ class AdjustFields
     };
     showFieldMappingDialog(parent, fieldIDs, L.m("Felder anpassen"),
       L.m("Altes Feld"), L.m("Neue Belegung"), L.m("Felder anpassen"),
-      ds.getColumnNames(), submitActionListener);
+      ds.getColumnNames(), submitActionListener, false);
   }
 
   /**
@@ -123,26 +123,24 @@ class AdjustFields
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
   static void showAddMissingColumnsDialog(JFrame parent, TextDocumentModel mod,
-      MailMergeDatasource ds)
+      final MailMergeDatasource ds)
   {
     ReferencedFieldID[] fieldIDs =
       mod.getReferencedFieldIDsThatAreNotInSchema(new HashSet<String>(
         ds.getColumnNames()));
     ActionListener submitActionListener = new ActionListener()
     {
+      @SuppressWarnings("unchecked")
       public void actionPerformed(ActionEvent e)
       {
-      // Enthält die Zuordnung ID ->
-      // de.muenchen.allg.itd51.wollmux.TextDocumentModel.FieldSubstitution,
-      // in der die anzuwendende Ersetzungsregel beschrieben ist.
-
-      // HashMap mapIdToSubstitution = (HashMap) e.getSource();
-      // TODO: tabellenspalten wie in mapIdToSubstitution beschrieben ergänzen
+        HashMap<String, FieldSubstitution> mapIdToSubstitution =
+          (HashMap<String, FieldSubstitution>) e.getSource();
+        ds.addColumns(mapIdToSubstitution);
       }
     };
     showFieldMappingDialog(parent, fieldIDs, L.m("Tabellenspalten ergänzen"),
       L.m("Spalte"), L.m("Vorbelegung"), L.m("Spalten ergänzen"),
-      ds.getColumnNames(), submitActionListener);
+      ds.getColumnNames(), submitActionListener, true);
   }
 
   /**
@@ -151,9 +149,10 @@ class AdjustFields
    * aktuellen Datasource und Freitext zur Verfügung. Die Felder fieldIDs werden
    * dabei in der Reihenfolge angezeigt, in der sie in der Liste aufgeführt sind, ein
    * bereits aufgeführtes Feld wird aber nicht zweimal angezeigt. Ist bei einem Feld
-   * die Eigenschaft isTransformed()==true, dann wird für dieses Feld nur die Eingabe
-   * einer 1-zu-1 Zuordnung von Feldern akzeptiert, das andere Zuordnungen für
-   * transformierte Felder derzeit nicht unterstützt werden.
+   * die Eigenschaft isTransformed()==true und ignoreIsTransformed == false, dann
+   * wird für dieses Feld nur die Eingabe einer 1-zu-1 Zuordnung von Feldern
+   * akzeptiert, das andere Zuordnungen für transformierte Felder derzeit nicht
+   * unterstützt werden.
    * 
    * @param parent
    *          Das Elternfenster dieses Dialogs.
@@ -182,12 +181,17 @@ class AdjustFields
    *          Aktionen durchführt. Der ActionListener bekommt dabei in actionEvent
    *          eine HashMap übergeben, die eine Zuordnung von den alten fieldIDs auf
    *          den jeweiligen im Dialog gewählten Ersatzstring enthält.
+   * @param ignoreIsTransformed
+   *          falls true, werden Felder mit isTransformed()==true nicht speziell
+   *          behandelt und es gibt keine Einschränkungen bzw. der
+   *          Auswahlmöglichkeiten.
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
   private static void showFieldMappingDialog(JFrame parent,
       ReferencedFieldID[] fieldIDs, String title, String labelOldFields,
       String labelNewFields, String labelSubmitButton,
-      final List<String> fieldNames, final ActionListener submitActionListener)
+      final List<String> fieldNames, final ActionListener submitActionListener,
+      boolean ignoreIsTransformed)
   {
     final JDialog dialog = new JDialog(parent, title, true);
     dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
@@ -214,7 +218,6 @@ class AdjustFields
               final String name = iter.next();
               Action button = new AbstractAction(name)
               {
-                
 
                 public void actionPerformed(ActionEvent e)
                 {
@@ -254,7 +257,8 @@ class AdjustFields
     {
       String fieldId = fieldIDs[i].getFieldId();
       if (addedFields.contains(fieldId)) continue;
-      final boolean isTransformed = fieldIDs[i].isTransformed();
+      final boolean isTransformed =
+        fieldIDs[i].isTransformed() && !ignoreIsTransformed;
       addedFields.add(fieldId);
 
       hbox = Box.createHorizontalBox();

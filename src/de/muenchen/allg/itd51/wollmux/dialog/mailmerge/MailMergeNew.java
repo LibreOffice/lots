@@ -416,13 +416,14 @@ public class MailMergeNew
 
         // Ausgrauen der Anpassen-Knöpfe, wenn alle Felder mit den
         // entsprechenden Datenquellenfeldern zugeordnet werden können.
+        // Tabellenspalten ergänzen wird außerdem ausgegraut, wenn die Datenquelle
+        // dies
+        // nicht unterstützt
         boolean hasUnmappedFields =
           mod.getReferencedFieldIDsThatAreNotInSchema(new HashSet<String>(
             ds.getColumnNames())).length > 0;
         adjustFieldsMenuItem.setEnabled(hasUnmappedFields);
-        // TODO: einkommentieren wenn implementiert:
-        // addColumnsMenuItem.setEnabled(hasUnmappedFields);
-        addColumnsMenuItem.setEnabled(false);
+        addColumnsMenuItem.setEnabled(hasUnmappedFields && ds.supportsAddColumns());
 
         tabelleMenu.show(tabelleButton, 0, tabelleButton.getSize().height);
       }
@@ -580,8 +581,8 @@ public class MailMergeNew
       {
         // ConfigThingy für leere Gender-Funktion zusammenbauen.
         ConfigThingy genderConf =
-          GenderDialog.generateGenderTrafoConf(
-            ds.getColumnNames().get(0), "", "", "");
+          GenderDialog.generateGenderTrafoConf(ds.getColumnNames().get(0), "", "",
+            "");
         insertFieldFromTrafoDialog(ds.getColumnNames(), genderButtonName, genderConf);
       }
     });

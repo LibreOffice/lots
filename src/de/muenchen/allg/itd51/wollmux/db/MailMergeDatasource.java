@@ -88,6 +88,7 @@ import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.TimeoutException;
 import de.muenchen.allg.itd51.wollmux.UnavailableException;
+import de.muenchen.allg.itd51.wollmux.TextDocumentModel.FieldSubstitution;
 import de.muenchen.allg.itd51.wollmux.dialog.DimAdjust;
 
 /**
@@ -130,6 +131,14 @@ public class MailMergeDatasource
    * Timeout für den Login bei einer OOo-Datenquelle.
    */
   private static final long MAILMERGE_LOGIN_TIMEOUT = 5000;
+
+  /**
+   * Ein String der möglichst nie in einem vom Benutzer eingegebenen Felder-Anpassen
+   * Feld auftauchen sollte. Wird als Platzhalter für das Einfügen der Zeilennummer
+   * in den Formel-String verwendet. Darf keine Zeichen enthalten, die in regulären
+   * Ausdrücken Bedeutung haben.
+   */
+  private static final String ROW_NUM_PLACEHOLDER = "Ø©¿";
 
   /**
    * Zeigt an, was derzeit als Datenquelle ausgewählt ist.
@@ -291,6 +300,26 @@ public class MailMergeDatasource
     {
       Logger.error(x);
       return 0;
+    }
+  }
+
+  /**
+   * Liefert true gdw die Funktion {@link #addColumns(Map)} verfügbar ist für diese
+   * Datenquelle.
+   * 
+   * @author Matthias Benkmann (D-III-ITD-D101)
+   * 
+   */
+  public boolean supportsAddColumns()
+  {
+    switch (sourceType)
+    {
+      case SOURCE_CALC:
+        return true;
+      case SOURCE_DB:
+        return false;
+      default:
+        return false;
     }
   }
 
@@ -1620,6 +1649,170 @@ public class MailMergeDatasource
     oooDatasourceName = newDsName;
     oooDatasource = null;
     storeDatasourceSettings();
+  }
+
+  /**
+   * Liefert den Spaltennamen (z,B, "A") zu Spalte col. Dabei ist Spalte 1 = "A".
+   * 
+   * @author Matthias Benkmann (D-III-ITD-D101)
+   * 
+   * TESTED
+   */
+  private static String getCalcColumnNameForColumnIndex(int col)
+  {
+    StringBuilder buffy = new StringBuilder();
+    do
+    {
+      --col;
+      buffy.insert(0, (char) ('A' + (col % 26)));
+    } while ((col = col / 26) > 0);
+    return buffy.toString();
+  }
+
+  /**
+   * Falls unterstützt (siehe {@link #supportsAddColumns()}), wird für jedes Mapping
+   * fieldId->subst eine neue Spalte in die Datenbank eingefügt mit Titel fieldId,
+   * deren Inhalt durch subst beschrieben wird. Referenzen auf andere Felder
+   * innerhalb von subst werden interpretiert als Referenzen auf die Tabellenspalten
+   * mit entsprechenden Titeln.
+   * 
+   * @author Matthias Benkmann (D-III-ITD-D101)
+   * 
+   * TESTED
+   */
+  public void addColumns(Map<String, FieldSubstitution> mapIdToSubstitution)
+  {
+    if (sourceType != SOURCE_CALC) return;
+
+    XSpreadsheetDocument calcDoc;
+    XCellRangesQuery sheet;
+    try
+    {
+      calcDoc = getCalcDoc();
+      sheet = UNO.XCellRangesQuery(calcDoc.getSheets().getByName(tableName));
+    }
+    catch (Exception x)
+    {
+      return;
+    }
+
+    /*
+     * Indizes sichtbarer Zellen sowie Mapping von Spaltennamen (basierend auf erster
+     * sichtbarer Zeile) auf Calc-Spaltennamen (z.B. "A") erstellen.
+     */
+    Map<String, String> mapColumnNameToCalcColumnName =
+      new HashMap<String, String>();
+    SortedSet<Integer> columnIndexes = new TreeSet<Integer>();
+    SortedSet<Integer> rowIndexes = new TreeSet<Integer>();
+    try
+    {
+      getVisibleNonemptyRowsAndColumns(sheet, columnIndexes, rowIndexes);
+
+      if (columnIndexes.size() > 0 && rowIndexes.size() > 0)
+      {
+        XCellRange sheetCellRange = UNO.XCellRange(sheet);
+
+        /*
+         * Erste sichtbare Zeile durchscannen und alle nicht-leeren Zelleninhalte als
+         * Tabellenspaltennamen interpretieren.
+         */
+        int ymin = rowIndexes.first().intValue();
+        Iterator<Integer> iter = columnIndexes.iterator();
+        while (iter.hasNext())
+        {
+          int x = iter.next().intValue();
+          String columnName =
+            UNO.XTextRange(sheetCellRange.getCellByPosition(x, ymin)).getString();
+          if (columnName.length() > 0)
+          {
+            mapColumnNameToCalcColumnName.put(columnName,
+              getCalcColumnNameForColumnIndex(x + 1));
+          }
+        }
+      }
+    }
+    catch (Exception x)
+    {
+      Logger.error(L.m("Fehler beim Zugriff auf Calc-Dokument"), x);
+      return;
+    }
+
+    // Erste neue Spalte hinter die letzte Spalte
+    int newColumnX = columnIndexes.last() + 1;
+
+    for (Map.Entry<String, FieldSubstitution> ent : mapIdToSubstitution.entrySet())
+    {
+      String fieldId = ent.getKey();
+      FieldSubstitution subst = ent.getValue();
+      StringBuilder formula = new StringBuilder();
+      for (FieldSubstitution.SubstElement substEle : subst)
+      {
+        if (formula.length() == 0)
+          formula.append("=CONCATENATE(");
+        else
+          formula.append(';');
+        if (substEle.isFixedText())
+        {
+          formula.append('"');
+          formula.append(substEle.getValue().replaceAll("\"", "\"\""));
+          formula.append('"');
+        }
+        else if (substEle.isField())
+        {
+          String calcColumnName =
+            mapColumnNameToCalcColumnName.get(substEle.getValue());
+          if (calcColumnName != null)
+          {
+            formula.append(calcColumnName);
+            formula.append(ROW_NUM_PLACEHOLDER);
+          }
+          else
+          {
+            formula.append("\"<");
+            formula.append(substEle.getValue().replaceAll("\"", "\"\""));
+            formula.append(ROW_NUM_PLACEHOLDER);
+            formula.append(">\"");
+          }
+        }
+        else
+          formula.append("\"UNKNOWN\"");
+      }
+
+      // Wenn Formel leer ist, brauchen wir nichts zu tun
+      if (formula.length() == 0) continue;
+
+      formula.append(')');
+      String formulaStr = formula.toString();
+
+      try
+      {
+        XCellRange sheetCellRange = UNO.XCellRange(sheet);
+
+        int ymin = rowIndexes.first();
+        int ymax = rowIndexes.last();
+        UNO.XTextRange(sheetCellRange.getCellByPosition(newColumnX, ymin)).setString(
+          fieldId);
+
+        /*
+         * KEINE zusätzlichen Zeilen mit der Formel belegen, weil ansonsten bei
+         * Eingabe eines fixen Textes, auch wenn es nur ein Leerzeichen zwischen
+         * <Vorname> und <Nachname> ist, dazu führt, dass 1007 zusätzliche Datensätze
+         * erkannt werden.
+         */
+        for (int y = ymin + 1; y <= ymax + 0; ++y)
+        {
+          UNO.XCell(sheetCellRange.getCellByPosition(newColumnX, y)).setFormula(
+            formulaStr.replaceAll(ROW_NUM_PLACEHOLDER, "" + (y + 1)));
+        }
+
+        ++newColumnX;
+
+      }
+      catch (Exception x)
+      {
+        Logger.error(L.m("Kann Spalte \"%1\" nicht hinzufügen", fieldId), x);
+      }
+    }
   }
 
   /**
