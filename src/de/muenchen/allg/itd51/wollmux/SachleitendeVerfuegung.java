@@ -899,7 +899,7 @@ public class SachleitendeVerfuegung
   private static String romanNumber(int i)
   {
     String number = "" + i + ".";
-    if (i > 0 && i < romanNumbers.length) number = romanNumbers[i - 1];
+    if (i > 0 && i <= romanNumbers.length) number = romanNumbers[i - 1];
     return number;
   }
 
