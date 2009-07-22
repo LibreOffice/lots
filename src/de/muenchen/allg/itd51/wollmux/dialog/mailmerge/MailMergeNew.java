@@ -140,10 +140,34 @@ public class MailMergeNew
   private int previewDatasetNumber = 1;
 
   /**
+   * Die beim letzten Aufruf von {@link #updatePreviewFields()} aktuelle Anzahl an
+   * Datensätzen in {@link #ds}.
+   */
+  private int previewDatasetNumberMax = Integer.MAX_VALUE;
+
+  /**
    * Das Textfield in dem Benutzer direkt eine Datensatznummer für die Vorschau
    * eingeben können.
    */
   private JTextField previewDatasetNumberTextfield;
+
+  private Collection<JComponent> elementsDisabledWhenNoDatasourceSelected =
+    new Vector<JComponent>();
+
+  private Collection<JComponent> elementsDisabledWhenNotInPreviewMode =
+    new Vector<JComponent>();
+
+  private Collection<JComponent> elementsDisabledWhenFirstDatasetSelected =
+    new Vector<JComponent>();
+
+  private Collection<JComponent> elementsDisabledWhenLastDatasetSelected =
+    new Vector<JComponent>();
+
+  /**
+   * Enthält alle elementsDisabledWhen... Collections.
+   */
+  private Vector<Collection<JComponent>> listsOfElementsDisabledUnderCertainCircumstances =
+    new Vector<Collection<JComponent>>();
 
   /**
    * Das Toolbar-Fenster.
@@ -203,6 +227,16 @@ public class MailMergeNew
 
   private void createGUI()
   {
+    elementsDisabledWhenNoDatasourceSelected.clear();
+    elementsDisabledWhenNotInPreviewMode.clear();
+    elementsDisabledWhenFirstDatasetSelected.clear();
+    elementsDisabledWhenLastDatasetSelected.clear();
+    listsOfElementsDisabledUnderCertainCircumstances.clear();
+    listsOfElementsDisabledUnderCertainCircumstances.add(elementsDisabledWhenNoDatasourceSelected);
+    listsOfElementsDisabledUnderCertainCircumstances.add(elementsDisabledWhenNotInPreviewMode);
+    listsOfElementsDisabledUnderCertainCircumstances.add(elementsDisabledWhenFirstDatasetSelected);
+    listsOfElementsDisabledUnderCertainCircumstances.add(elementsDisabledWhenLastDatasetSelected);
+
     myFrame = new JFrame(L.m("Seriendruck (WollMux)"));
     myFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
     oehrchen = new MyWindowListener();
@@ -216,12 +250,17 @@ public class MailMergeNew
     {
       public void actionPerformed(ActionEvent e)
       {
-        ds.showDatasourceSelectionDialog(myFrame);
+        ds.showDatasourceSelectionDialog(myFrame, new Runnable()
+        {
+          public void run()
+          {
+            updateEnabledDisabledState();
+          }
+        });
       }
     });
     hbox.add(button);
 
-    // FIXME: Ausgrauen, wenn kein Datenquelle ausgewählt
     button =
       new JPotentiallyOverlongPopupMenuButton(L.m("Serienbrieffeld"),
         new Iterable<Action>()
@@ -232,6 +271,7 @@ public class MailMergeNew
           }
         });
     hbox.add(button);
+    elementsDisabledWhenNoDatasourceSelected.add(button);
 
     button = new JButton(L.m("Spezialfeld"));
     final JButton specialFieldButton = button;
@@ -262,6 +302,7 @@ public class MailMergeNew
           previewButton.setText(VORSCHAU);
           previewMode = false;
           mod.setFormFieldsPreviewMode(false);
+          updateEnabledDisabledState();
         }
         else
         {
@@ -274,9 +315,8 @@ public class MailMergeNew
       }
     });
     hbox.add(DimAdjust.fixedSize(button));
+    elementsDisabledWhenNoDatasourceSelected.add(button);
 
-    // FIXME: Muss ausgegraut sein, wenn nicht im Vorschau-Modus oder wenn erster
-    // Datensatz angezeigt.
     button = new JButton("|<");
     button.addActionListener(new ActionListener()
     {
@@ -287,9 +327,9 @@ public class MailMergeNew
       }
     });
     hbox.add(button);
+    elementsDisabledWhenNotInPreviewMode.add(button);
+    elementsDisabledWhenFirstDatasetSelected.add(button);
 
-    // FIXME: Muss ausgegraut sein, wenn nicht im Vorschau-Modus oder wenn erster
-    // Datensatz angezeigt
     button = new JButton("<");
     button.addActionListener(new ActionListener()
     {
@@ -301,8 +341,9 @@ public class MailMergeNew
       }
     });
     hbox.add(button);
+    elementsDisabledWhenNotInPreviewMode.add(button);
+    elementsDisabledWhenFirstDatasetSelected.add(button);
 
-    // FIXME: Muss ausgegraut sein, wenn nicht im Vorschau-Modus.
     previewDatasetNumberTextfield = new JTextField("1", 3);
     previewDatasetNumberTextfield.addKeyListener(NonNumericKeyConsumer.instance);
     previewDatasetNumberTextfield.addActionListener(new ActionListener()
@@ -325,9 +366,8 @@ public class MailMergeNew
     previewDatasetNumberTextfield.setMaximumSize(new Dimension(Integer.MAX_VALUE,
       button.getPreferredSize().height));
     hbox.add(previewDatasetNumberTextfield);
+    elementsDisabledWhenNotInPreviewMode.add(previewDatasetNumberTextfield);
 
-    // FIXME: Muss ausgegraut sein, wenn nicht im Vorschau-Modus oder wenn letzter
-    // Datensatz angezeigt.
     button = new JButton(">");
     button.addActionListener(new ActionListener()
     {
@@ -338,9 +378,9 @@ public class MailMergeNew
       }
     });
     hbox.add(button);
+    elementsDisabledWhenNotInPreviewMode.add(button);
+    elementsDisabledWhenLastDatasetSelected.add(button);
 
-    // FIXME: Muss ausgegraut sein, wenn nicht im Vorschau-Modus oder wenn letzter
-    // Datensatz angezeigt.
     button = new JButton(">|");
     button.addActionListener(new ActionListener()
     {
@@ -351,8 +391,9 @@ public class MailMergeNew
       }
     });
     hbox.add(button);
+    elementsDisabledWhenNotInPreviewMode.add(button);
+    elementsDisabledWhenLastDatasetSelected.add(button);
 
-    // FIXME: Ausgrauen, wenn keine Datenquelle gewählt ist.
     button = new JButton(L.m("Drucken"));
     button.addActionListener(new ActionListener()
     {
@@ -364,6 +405,7 @@ public class MailMergeNew
       }
     });
     hbox.add(button);
+    elementsDisabledWhenNoDatasourceSelected.add(button);
 
     final JPopupMenu tabelleMenu = new JPopupMenu();
     JMenuItem item = new JMenuItem(L.m("Tabelle bearbeiten"));
@@ -429,7 +471,9 @@ public class MailMergeNew
       }
     });
     hbox.add(button);
+    elementsDisabledWhenNoDatasourceSelected.add(button);
 
+    updateEnabledDisabledState();
     myFrame.setAlwaysOnTop(true);
     myFrame.pack();
     int frameWidth = myFrame.getWidth();
@@ -442,13 +486,55 @@ public class MailMergeNew
     mod.addCoupledWindow(myFrame);
     myFrame.setVisible(true);
 
-    if (!ds.hasDatasource()) ds.showDatasourceSelectionDialog(myFrame);
+    if (!ds.hasDatasource())
+      ds.showDatasourceSelectionDialog(myFrame, new Runnable()
+      {
+        public void run()
+        {
+          updateEnabledDisabledState();
+        }
+      });
   }
 
   /**
-   * Passt {@link #previewDatasetNumber} an, falls sie zu groß oder zu klein ist und
-   * setzt dann falls {@link #previewMode} == true alle Feldwerte auf die Werte des
-   * entsprechenden Datensatzes.
+   * Geht alle Komponenten durch, die unter bestimmten Bedingungen ausgegraut werden
+   * müssen und setzt ihren Status korrekt.
+   * 
+   * @author Matthias Benkmann (D-III-ITD-D101)
+   * 
+   */
+  private void updateEnabledDisabledState()
+  {
+    // Zuerst alles enablen.
+    for (Collection<JComponent> list : listsOfElementsDisabledUnderCertainCircumstances)
+    {
+      for (JComponent compo : list)
+      {
+        compo.setEnabled(true);
+      }
+    }
+
+    if (!ds.hasDatasource())
+      for (JComponent compo : elementsDisabledWhenNoDatasourceSelected)
+        compo.setEnabled(false);
+
+    if (previewDatasetNumber <= 1)
+      for (JComponent compo : elementsDisabledWhenFirstDatasetSelected)
+        compo.setEnabled(false);
+
+    if (previewDatasetNumber >= previewDatasetNumberMax)
+      for (JComponent compo : elementsDisabledWhenLastDatasetSelected)
+        compo.setEnabled(false);
+
+    if (!previewMode) for (JComponent compo : elementsDisabledWhenNotInPreviewMode)
+      compo.setEnabled(false);
+  }
+
+  /**
+   * Passt {@link #previewDatasetNumber} an, falls sie zu groß oder zu klein ist,
+   * setzt {@link #previewDatasetNumberMax} und setzt dann falls {@link #previewMode} ==
+   * true alle Feldwerte auf die Werte des entsprechenden Datensatzes. Ruft außerdem
+   * {@link #updateEnabledDisabledState()} auf.
    * 
    * @author Matthias Benkmann (D-III-ITD D.10)
    * 
@@ -459,12 +545,15 @@ public class MailMergeNew
     if (!ds.hasDatasource()) return;
 
     int count = ds.getNumberOfDatasets();
+    previewDatasetNumberMax = count;
 
     if (previewDatasetNumber > count) previewDatasetNumber = count;
     if (previewDatasetNumber <= 0) previewDatasetNumber = 1;
 
     String previewDatasetNumberStr = "" + previewDatasetNumber;
     previewDatasetNumberTextfield.setText(previewDatasetNumberStr);
+
+    updateEnabledDisabledState();
 
     if (!previewMode) return;
 
@@ -1125,7 +1214,6 @@ public class MailMergeNew
 
     public void windowDeactivated(WindowEvent e)
     {}
-
   }
 
   private void abort()

@@ -52,6 +52,7 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.SwingUtilities;
 
 import com.sun.star.awt.XTopWindow;
 import com.sun.star.beans.XPropertySet;
@@ -366,9 +367,13 @@ public class MailMergeDatasource
    * 
    * @param parent
    *          der JFrame, zu dem dieser Dialog gehören soll.
+   * @param callback
+   *          wird (im EDT) getriggert, nachdem eine neue Datenquelle ausgewählt
+   *          wurde.
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
-  public void showDatasourceSelectionDialog(final JFrame parent)
+  public void showDatasourceSelectionDialog(final JFrame parent,
+      final Runnable callback)
   {
     final JDialog datasourceSelector =
       new JDialog(parent, L.m("Serienbriefdaten auswählen"), true);
@@ -388,7 +393,7 @@ public class MailMergeDatasource
         public void actionPerformed(ActionEvent e)
         {
           datasourceSelector.dispose();
-          selectOpenCalcWindowAsDatasource(parent);
+          selectOpenCalcWindowAsDatasource(parent, callback);
         }
       });
       vbox.add(DimAdjust.maxWidthUnlimited(button));
@@ -400,7 +405,7 @@ public class MailMergeDatasource
       public void actionPerformed(ActionEvent e)
       {
         datasourceSelector.dispose();
-        selectFileAsDatasource(parent);
+        selectFileAsDatasource(parent, callback);
       }
     });
     vbox.add(DimAdjust.maxWidthUnlimited(button));
@@ -411,7 +416,7 @@ public class MailMergeDatasource
       public void actionPerformed(ActionEvent e)
       {
         datasourceSelector.dispose();
-        openAndselectNewCalcTableAsDatasource(parent);
+        openAndselectNewCalcTableAsDatasource(parent, callback);
       }
     });
     vbox.add(DimAdjust.maxWidthUnlimited(button));
@@ -422,7 +427,7 @@ public class MailMergeDatasource
       public void actionPerformed(ActionEvent e)
       {
         datasourceSelector.dispose();
-        selectOOoDatasourceAsDatasource(parent);
+        selectOOoDatasourceAsDatasource(parent, callback);
       }
     });
     vbox.add(DimAdjust.maxWidthUnlimited(button));
@@ -1043,10 +1048,14 @@ public class MailMergeDatasource
    * 
    * @param parent
    *          der JFrame zu dem der die Dialoge gehören sollen.
+   * @param callback
+   *          wird (im EDT) getriggert, nachdem eine neue OOo Datenquelle als
+   *          Datenquelle gesetzt wurde.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private void selectOOoDatasourceAsDatasource(final JFrame parent)
+  private void selectOOoDatasourceAsDatasource(final JFrame parent,
+      final Runnable callback)
   {
     List<String> names = getRegisteredDatabaseNames();
 
@@ -1055,6 +1064,7 @@ public class MailMergeDatasource
     if (names.size() == 1)
     {
       getOOoDatasource(names.get(0));
+      SwingUtilities.invokeLater(callback);
       selectTable(parent);
       return;
     }
@@ -1078,6 +1088,7 @@ public class MailMergeDatasource
         {
           dbSelector.dispose();
           getOOoDatasource(name);
+          SwingUtilities.invokeLater(callback);
           selectTable(parent);
         }
       });
@@ -1125,9 +1136,13 @@ public class MailMergeDatasource
    * 
    * @param parent
    *          der JFrame zu dem der die Dialoge gehören sollen.
+   * @param callback
+   *          wird getriggert (im EDT), nachdem eine neue Calc-Tabelle als
+   *          Datenquelle gesetzt wurde.
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
-  private void selectOpenCalcWindowAsDatasource(final JFrame parent)
+  private void selectOpenCalcWindowAsDatasource(final JFrame parent,
+      final Runnable callback)
   {
     MailMergeDatasource.OpenCalcWindows win = getOpenCalcWindows();
     List<String> names = win.titles;
@@ -1137,6 +1152,7 @@ public class MailMergeDatasource
     if (names.size() == 1)
     {
       getCalcDoc(win.docs.get(0));
+      SwingUtilities.invokeLater(callback);
       selectTable(parent);
       return;
     }
@@ -1162,6 +1178,7 @@ public class MailMergeDatasource
         {
           calcWinSelector.dispose();
           getCalcDoc(spread);
+          SwingUtilities.invokeLater(callback);
           selectTable(parent);
         }
       });
@@ -1184,9 +1201,13 @@ public class MailMergeDatasource
    * 
    * @param parent
    *          der JFrame zu dem der die Dialoge gehören sollen.
+   * @param wird
+   *          (im EDT) ausgeführt, nachdem das Calc-Dokument als Datenquelle gesetzt
+   *          wurde.
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
-  private void openAndselectNewCalcTableAsDatasource(JFrame parent)
+  private void openAndselectNewCalcTableAsDatasource(JFrame parent,
+      final Runnable callback)
   {
     try
     {
@@ -1206,6 +1227,7 @@ public class MailMergeDatasource
       if (xmo != null) xmo.setModified(modified);
 
       getCalcDoc(spread);
+      SwingUtilities.invokeLater(callback);
       selectTable(parent);
     }
     catch (Exception e)
@@ -1220,9 +1242,12 @@ public class MailMergeDatasource
    * 
    * @param parent
    *          der JFrame zu dem der die Dialoge gehören sollen.
+   * @param callback
+   *          wird getriggert (im EDT), wenn eine neue Calc-Datei als Datenquelle
+   *          gesetzt wurde.
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
-  private void selectFileAsDatasource(JFrame parent)
+  private void selectFileAsDatasource(JFrame parent, final Runnable callback)
   {
     XFilePicker picker =
       UNO.XFilePicker(UNO.createUNOService("com.sun.star.ui.dialogs.FilePicker"));
@@ -1237,6 +1262,7 @@ public class MailMergeDatasource
         try
         {
           getCalcDoc(files[0]);
+          SwingUtilities.invokeLater(callback);
         }
         catch (UnavailableException x)
         {
@@ -1338,8 +1364,6 @@ public class MailMergeDatasource
    */
   private void setListeners(XSpreadsheetDocument calcDoc)
   {
-    // FIXME: Das Ändern des Names eines Sheets muss überwacht werden damit
-    // tableName angepasst wird.
     if (calcDoc == null) return;
     try
     {
@@ -1390,9 +1414,12 @@ public class MailMergeDatasource
 
   private static String stripOpenOfficeFromWindowName(String str)
   {
+    /*
+     * Sonderfall für OpenOffice
+     */
     int idx = str.indexOf(" - OpenOffice");
-    // FIXME: kann unter StarOffice natürlich anders heissen oder bei einer anderen
-    // Office-Version
+    /* Fallback für andere Office-Varianten */
+    if (idx < 0) idx = str.lastIndexOf(" -");
     if (idx > 0) str = str.substring(0, idx);
     return str;
   }
@@ -1591,7 +1618,6 @@ public class MailMergeDatasource
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
    * 
-   * TODO Testen
    */
   private Datasource getOOoDatasource() throws UnavailableException
   {
