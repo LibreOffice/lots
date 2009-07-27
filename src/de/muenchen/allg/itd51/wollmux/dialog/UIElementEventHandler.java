@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Interface für Klassen, die auf Events reagieren, die von UIElements verursacht werden.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2009 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -26,7 +26,6 @@
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
- * @version 1.0
  * 
  */
 package de.muenchen.allg.itd51.wollmux.dialog;
@@ -40,7 +39,7 @@ package de.muenchen.allg.itd51.wollmux.dialog;
 public interface UIElementEventHandler
 {
   /**
-   * Wird aufgerufen, wenn auf einem UI Element ein Event registriert wird.
+   * Wird aufgerufen, wenn auf einem UIElement ein Event registriert wird.
    * 
    * @param source
    *          das UIElement auf dem der Event registriert wurde.
@@ -55,14 +54,22 @@ public interface UIElementEventHandler
    *          Das Array args enthält als erstes Element den Namen der ACTION. Falls
    *          die ACTION weitere Parameter benötigt, so werden diese in den folgenden
    *          Arrayelementen übergeben.</dd>
+   *          <dt>valueChanged</dt>
+   *          <dd>Wird von Elementen ausgelöst, die der Benutzer bearbeiten kann
+   *          (zum Beispiel TextFields), wenn der Wert geändert wurde. Achtung! Es
+   *          ist nicht garantiert, dass der Wert sich tatsächlich geändert hat.
+   *          Dieser Event wird auch ausgelöst, wenn der Benutzer aus einer Auswahl
+   *          (z.B. ComboBox) ein Element ausgewählt hat.</dd>
+   *          <dt>focus</dt>
+   *          <dd>Wird von Elementen ausgelöst, wenn sie den Focus bekommen oder
+   *          verloren haben. Das Array args enthält als erstes Element entweder den
+   *          String "lost", falls der Focus verloren wurde, oder "gained", falls das
+   *          Element den Focus bekommen hat.</dd>
+   *          </dl>
+   *          <dt>funcDialogSelect</dt>
+   *          <dd>TODO: Doku</dd>
+   *          </dl>
    * 
-   * <dt>valueChanged</dt>
-   * <dd>Wird von Elementen ausgelöst, die der Benutzer bearbeiten kann (zum
-   * Beispiel Textfields), wenn der Wert geändert wurde. Achtung! Es ist nicht
-   * garantiert, dass der Wert sich tatsächlich geändert hat. Dieser Event wird auch
-   * ausgelöst, wenn der Benutzer aus einer Auswahl (z.B. ComboBox) ein Element
-   * ausgewählt hat.</dd>
-   * </dl>
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void processUiElementEvent(UIElement source, String eventType, Object[] args);
