@@ -699,16 +699,6 @@ public interface UIElement extends Value
     {
       return false;
     }
-
-    public boolean hasFocus()
-    {
-      return box.isFocusOwner();
-    }
-
-    public void takeFocus()
-    {
-      box.requestFocusInWindow();
-    }
   }
 
   public static class Separator extends UIElementBase
