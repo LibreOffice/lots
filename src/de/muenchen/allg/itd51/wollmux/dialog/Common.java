@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Enthält von den Dialogen gemeinsam genutzten Code.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2009 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -25,18 +25,24 @@
  * 26.06.2006 | BNK | +zoomFonts
  *                  | refak. von setLookAndFeel() zu setLookAndFeelOnce()
  * 27.07.2006 | BNK | "auto" Wert explizit parsen.
+ * 29.07.2009 | BED | +configureTextFieldBehaviour()
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
- * @version 1.0
  * 
  */
 package de.muenchen.allg.itd51.wollmux.dialog;
 
 import java.awt.Font;
+import java.awt.KeyEventPostProcessor;
+import java.awt.KeyboardFocusManager;
 import java.awt.Rectangle;
+import java.awt.event.KeyEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.Enumeration;
 
+import javax.swing.JTextField;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import javax.swing.plaf.FontUIResource;
@@ -89,6 +95,9 @@ public class Common
    */
   private static int vertical_scrollbar_unit_increment = 12;
 
+  /**
+   * Gibt an ob {@link #setLookAndFeel()} bereits aufgerufen wurde.
+   */
   private static boolean lafSet = false;
 
   /**
@@ -103,14 +112,14 @@ public class Common
   }
 
   /**
-   * Setzt das Metal Look and Feel. Das plattformspezifische LAF wird nicht
-   * verwendet, damit die Benutzer unter Windows und Linux eine einheitliche Optik
-   * haben, so dass a) Schulungsvideos und Unterlagen für beide Plattformen anwendbar
-   * sind und b) Benutzer sich bei der Umstellung von Windows auf Linux nicht noch
-   * beim WollMux umgewöhnen müssen. Des weiteren hatte zumindest als wir angefangen
-   * haben das GTK Look and Feel einige Bugs. Es ist also auch ein Problem, dass wir
-   * nicht genug Ressourcen haben, um 2 Plattformen diesbzgl. zu testen und zu
-   * debuggen.
+   * Setzt das Metal Look and Feel und ruft {@link #configureTextFieldBehaviour()}
+   * auf. Das plattformspezifische LAF wird nicht verwendet, damit die Benutzer unter
+   * Windows und Linux eine einheitliche Optik haben, so dass a) Schulungsvideos und
+   * Unterlagen für beide Plattformen anwendbar sind und b) Benutzer sich bei der
+   * Umstellung von Windows auf Linux nicht noch beim WollMux umgewöhnen müssen. Des
+   * weiteren hatte zumindest als wir angefangen haben das GTK Look and Feel einige
+   * Bugs. Es ist also auch ein Problem, dass wir nicht genug Ressourcen haben, um 2
+   * Plattformen diesbzgl. zu testen und zu debuggen.
    * 
    * alt: Setzt das System Look and Feel, falls es nicht MetalLookAndFeel ist.
    * Ansonsten setzt es GTKLookAndFeel falls möglich.
@@ -129,10 +138,81 @@ public class Common
     }
     catch (Exception x)
     {}
-    ;
+
     // JFrame.setDefaultLookAndFeelDecorated(true); seems to cause problems with
     // undecorated windows in Metal LAF
+
+    // configure behaviour of JTextFields:
+    configureTextFieldBehaviour();
+
     lafSet = true;
+  }
+
+  /**
+   * Konfiguriert das Verhalten von JTextFields, die in der GUI der Applikation
+   * benutzt werden, so dass es dem erwarteten Standard-Verhalten von Textfeldern
+   * entspricht - nämlich dass eventuell vorhandener Text im Textfeld automatisch
+   * selektiert wird, wenn mit der Tabulator-Taste (nicht aber mit der Maus) in das
+   * Feld gewechselt wird, so dass man einfach lostippen kann um den Inhalt zu
+   * überschreiben.
+   * 
+   * Dazu installieren wir im aktuellen {@link KeyboardFocusManager} einen
+   * {@link KeyEventPostProcessor}, der beim Loslassen ({@link KeyEvent#KEY_RELEASED})
+   * der Tabulator-Taste überprüft, ob das KeyEvent von einem JTextField ausgelöst
+   * wurde und in diesem Fall allen Text in dem Textfeld selektiert.
+   * 
+   * Sollte irgendwann mal RFE 4493590
+   * (http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4493590) umgesetzt werden,
+   * kann man das ganze vielleicht besser lösen.
+   * 
+   * Außerdem wird ein Swing-Problem korrigiert, durch das es vorkommen kann, dass in
+   * einem JTextField selektierter Text auch nachdem des Textfeld den Focus verloren
+   * hat noch als selektiert angezeigt wird.
+   * 
+   * @author Daniel Benkmann (D-III-ITD-D101)
+   */
+  private static void configureTextFieldBehaviour()
+  {
+    KeyboardFocusManager kfm = KeyboardFocusManager.getCurrentKeyboardFocusManager();
+
+    // Wir fügen dem aktuellen KeyboardFocusManager einen
+    // KeyEventPostProcessor hinzu, der beim Loslassen (KeyEvent.KEY_RELEASED)
+    // der Tabulator-Taste überprüft, ob das KeyEvent von einem JTextField ausgelöst
+    // wurde und in diesem Fall allen Text in dem Textfeld selektiert.
+    kfm.addKeyEventPostProcessor(new KeyEventPostProcessor()
+    {
+      public boolean postProcessKeyEvent(KeyEvent e)
+      {
+        if (e.getKeyCode() == KeyEvent.VK_TAB && e.getID() == KeyEvent.KEY_RELEASED
+          && e.getComponent() instanceof JTextField)
+        {
+          JTextField textField = (JTextField) e.getComponent();
+          textField.selectAll();
+        }
+        return false;
+      }
+    });
+
+    // Wir melden am aktuellen KeyboardFocusManager einen PropertyChangeListener an,
+    // der bemerkt, ob ein JTextField den Focus verloren hat und dessen Selektion
+    // löscht.
+    kfm.addPropertyChangeListener("focusOwner", new PropertyChangeListener()
+    {
+      public void propertyChange(PropertyChangeEvent evt)
+      {
+        if (evt.getOldValue() instanceof JTextField)
+        {
+          JTextField textField = (JTextField) evt.getOldValue();
+
+          // Aufruf von setCaretPosition löscht die Selektion.
+          textField.setCaretPosition(textField.getCaretPosition());
+
+          // eigentlich sollte folgendes ausreichen:
+          // textField.getCaret().setSelectionVisible(false);
+          // geht aber aus irgendeinem Grund nicht
+        }
+      }
+    });
   }
 
   /**
@@ -167,7 +247,7 @@ public class Common
     }
     Logger.debug(changedFonts + L.m(" Fontgrößen verändert!"));
   }
-  
+
   public static int getVerticalScrollbarUnitIncrement()
   {
     return vertical_scrollbar_unit_increment;
