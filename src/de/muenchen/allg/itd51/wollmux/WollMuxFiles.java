@@ -273,14 +273,18 @@ public class WollMuxFiles
 
     /*
      * Falls die obige wollmux.conf keinen DEFAULT_CONTEXT definiert, so wird falls
-     * /etc/wollmux/wollmux.conf existiert diese der oben geparsten wollmux.conf aus
-     * dem HOME-Verzeichnis vorangestellt.
+     * /etc/wollmux/wollmux.conf (oder unter Windows
+     * C:\Programme\wollmux\wollmux.conf) existiert diese der oben geparsten
+     * wollmux.conf aus dem HOME-Verzeichnis vorangestellt.
      */
     if (wollmuxConf.query("DEFAULT_CONTEXT", 1).count() == 0)
+    {
       try
       {
         File[] roots = File.listRoots();
         String defaultWollmuxConfPath = ETC_WOLLMUX_WOLLMUX_CONF;
+
+        // Testen, ob wir unter Windows sind - falls ja, Pfad ändern:
         if (roots.length > 0 && roots[0].toString().contains(":"))
           defaultWollmuxConfPath = C_PROGRAMME_WOLLMUX_WOLLMUX_CONF;
 
@@ -300,6 +304,7 @@ public class WollMuxFiles
       {
         Logger.error(e);
       }
+    }
 
     /*
      * Logging-Mode endgültig setzen.
