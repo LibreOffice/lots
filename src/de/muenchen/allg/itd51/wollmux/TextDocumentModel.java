@@ -1239,6 +1239,8 @@ public class TextDocumentModel
       iter = documentCommands.notInOriginalIterator();
     if (SachleitendeVerfuegung.BLOCKNAME_SLV_ORIGINAL_ONLY.equals(blockName))
       iter = documentCommands.originalOnlyIterator();
+    if (SachleitendeVerfuegung.BLOCKNAME_SLV_COPY_ONLY.equals(blockName))
+      iter = documentCommands.copyOnlyIterator();
 
     while (iter.hasNext())
     {
@@ -1268,30 +1270,6 @@ public class TextDocumentModel
       }
 
     }
-  }
-
-  /**
-   * Liefert einen Iterator zurück, der die Iteration aller
-   * DraftOnly-Dokumentkommandos dieses Dokuments ermöglicht.
-   * 
-   * @return ein Iterator, der die Iteration aller DraftOnly-Dokumentkommandos dieses
-   *         Dokuments ermöglicht. Der Iterator kann auch keine Elemente enthalten.
-   */
-  synchronized public Iterator<DocumentCommand> getDraftOnlyBlocksIterator()
-  {
-    return documentCommands.draftOnlyIterator();
-  }
-
-  /**
-   * Liefert einen Iterator zurück, der die Iteration aller All-Dokumentkommandos
-   * dieses Dokuments ermöglicht.
-   * 
-   * @return ein Iterator, der die Iteration aller All-Dokumentkommandos dieses
-   *         Dokuments ermöglicht. Der Iterator kann auch keine Elemente enthalten.
-   */
-  synchronized public Iterator<DocumentCommand> getAllVersionsBlocksIterator()
-  {
-    return documentCommands.allVersionsIterator();
   }
 
   /**

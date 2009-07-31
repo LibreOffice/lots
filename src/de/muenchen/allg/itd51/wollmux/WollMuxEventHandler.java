@@ -3056,8 +3056,8 @@ public class WollMuxEventHandler
    *          Das Textdokument, in dem der Block eingefügt werden soll.
    * @param blockname
    *          Derzeit werden folgende Blocknamen akzeptiert "draftOnly",
-   *          "notInOriginal" und "allVersions". Alle anderen Blocknamen werden
-   *          ignoriert und keine Aktion ausgeführt.
+   *          "notInOriginal", "originalOnly", "copyOnly" und "allVersions". Alle
+   *          anderen Blocknamen werden ignoriert und keine Aktion ausgeführt.
    */
   public static void handleMarkBlock(TextDocumentModel model, String blockname)
   {
@@ -3109,7 +3109,7 @@ public class WollMuxEventHandler
       }
       else if (blockname.equalsIgnoreCase("notInOriginal"))
       {
-        markChange = L.m("wird immer gedruckt, ausser im Original");
+        markChange = L.m("wird im Original nicht gedruckt");
         highlightColor =
           getHighlightColor(slvConf, "NOT_IN_ORIGINAL_HIGHLIGHT_COLOR");
       }
@@ -3117,6 +3117,11 @@ public class WollMuxEventHandler
       {
         markChange = L.m("wird ausschließlich im Original gedruckt");
         highlightColor = getHighlightColor(slvConf, "ORIGINAL_ONLY_HIGHLIGHT_COLOR");
+      }
+      else if (blockname.equalsIgnoreCase("copyOnly"))
+      {
+        markChange = L.m("wird ausschließlich in Abdrucken gedruckt");
+        highlightColor = getHighlightColor(slvConf, "COPY_ONLY_HIGHLIGHT_COLOR");
       }
       else
         return;
@@ -3171,7 +3176,7 @@ public class WollMuxEventHandler
           if (vc != null) vc.collapseToEnd();
         }
         WollMuxSingleton.showInfoModal(L.m("Block wurde markiert"), L.m(
-          "Der ausgewählte Block '%1'.", markChange));
+          "Der ausgewählte Block %1.", markChange));
       }
 
       // PrintBlöcke neu einlesen:

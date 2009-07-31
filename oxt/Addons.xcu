@@ -91,10 +91,10 @@
             <value>wollmux:markBlock#allVersions</value>
           </prop>
           <prop oor:name="Title" oor:type="xs:string">
-            <value>Block: immer drucken</value>
-            <value xml:lang="de">Block: immer drucken</value>
-            <value xml:lang="nl">Textblok: altijd printen</value>
-            <value xml:lang="en">Block: print always</value>
+            <value>Immer drucken</value>
+            <value xml:lang="de">Immer drucken</value>
+            <value xml:lang="nl">Altijd printen</value>
+            <value xml:lang="en">Print always</value>
           </prop>
           <prop oor:name="ImageIdentifier" oor:type="xs:string">
             <value/>
@@ -112,10 +112,10 @@
             <value>wollmux:markBlock#notInOriginal</value>
           </prop>
           <prop oor:name="Title" oor:type="xs:string">
-            <value>immer ausser Original</value>
-            <value xml:lang="de">immer ausser Original</value>
-            <value xml:lang="nl">altijd zonder originaal</value>
-            <value xml:lang="en">always but original</value>
+            <value>Nicht im Original</value>
+            <value xml:lang="de">Nicht im Original</value>
+            <value xml:lang="nl">Niet in het originaal</value>
+            <value xml:lang="en">Not in original</value>
           </prop>
           <prop oor:name="ImageIdentifier" oor:type="xs:string">
             <value/>
@@ -133,10 +133,10 @@
             <value>wollmux:markBlock#originalOnly</value>
           </prop>
           <prop oor:name="Title" oor:type="xs:string">
-            <value>nur im Original</value>
-            <value xml:lang="de">nur im Original</value>
-            <value xml:lang="nl">alleen in het originaal</value>
-            <value xml:lang="en">original only</value>
+            <value>Nur Original</value>
+            <value xml:lang="de">Nur Original</value>
+            <value xml:lang="nl">Alleen in het originaal</value>
+            <value xml:lang="en">Original only</value>
           </prop>
           <prop oor:name="ImageIdentifier" oor:type="xs:string">
             <value/>
@@ -154,10 +154,31 @@
             <value>wollmux:markBlock#draftOnly</value>
           </prop>
           <prop oor:name="Title" oor:type="xs:string">
-            <value>nur im Entwurf</value>
-            <value xml:lang="de">nur im Entwurf</value>
-            <value xml:lang="nl">alleen in het ontwerp</value>
-            <value xml:lang="en">draft only</value>
+            <value>Nur Entwurf</value>
+            <value xml:lang="de">Nur Entwurf</value>
+            <value xml:lang="nl">Alleen in het ontwerp</value>
+            <value xml:lang="en">Draft only</value>
+          </prop>
+          <prop oor:name="ImageIdentifier" oor:type="xs:string">
+            <value/>
+          </prop>
+          <prop oor:name="Target" oor:type="xs:string">
+            <value>_self</value>
+          </prop>
+          <prop oor:name="Context" oor:type="xs:string">
+            <value>com.sun.star.text.TextDocument</value>
+          </prop>
+        </node>
+        
+        <node oor:name="m9" oor:op="replace">
+          <prop oor:name="URL" oor:type="xs:string">
+            <value>wollmux:markBlock#copyOnly</value>
+          </prop>
+          <prop oor:name="Title" oor:type="xs:string">
+            <value>Nur Abdrucke</value>
+            <value xml:lang="de">Nur Abdrucke</value>
+            <value xml:lang="nl">Alleen in het Afrdruk</value>
+            <value xml:lang="en">Copies only</value>
           </prop>
           <prop oor:name="ImageIdentifier" oor:type="xs:string">
             <value/>

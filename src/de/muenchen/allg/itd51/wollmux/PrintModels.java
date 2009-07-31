@@ -4,7 +4,7 @@
  * Funktion : Diese Klasse enthält eine Fabrik für die Erzeugung eines PrintModels
  *            und die Klassendefinitionen des MasterPrintModels und des SlavePrintModels.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2009 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -26,7 +26,6 @@
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
- * @version 1.0
  * 
  */
 package de.muenchen.allg.itd51.wollmux;
@@ -766,8 +765,8 @@ public class PrintModels
      * 
      * @param blockName
      *          Der Blocktyp dessen Druckblöcke behandelt werden sollen. Folgende
-     *          Blocknamen werden derzeit unterstützt: "AllVersions", "DraftOnly" und
-     *          "NotInOriginal"
+     *          Blocknamen werden derzeit unterstützt: "AllVersions", "DraftOnly",
+     *          "OriginalOnly", "CopyOnly" und "NotInOriginal"
      * @param visible
      *          Der Block wird sichtbar, wenn visible==true und unsichtbar, wenn
      *          visible==false.

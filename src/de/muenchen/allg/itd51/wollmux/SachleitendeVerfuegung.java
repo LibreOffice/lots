@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Hilfen für Sachleitende Verfügungen.
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2009 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -22,10 +22,10 @@
  * Datum      | Wer | Änderungsgrund
  * -------------------------------------------------------------------
  * 26.09.2006 | LUT | Erstellung als SachleitendeVerfuegung
+ * 31.07.2009 | BED | +"copyOnly"
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
- * @version 1.0
  * 
  */
 package de.muenchen.allg.itd51.wollmux;
@@ -71,6 +71,8 @@ public class SachleitendeVerfuegung
 
   public static final String BLOCKNAME_SLV_DRAFT_ONLY = "DraftOnly";
 
+  public static final String BLOCKNAME_SLV_COPY_ONLY = "CopyOnly";
+
   public static final String GROUP_ID_SLV_ALL_VERSIONS =
     "SLV_" + BLOCKNAME_SLV_ALL_VERSIONS;
 
@@ -82,6 +84,9 @@ public class SachleitendeVerfuegung
 
   public static final String GROUP_ID_SLV_DRAFT_ONLY =
     "SLV_" + BLOCKNAME_SLV_DRAFT_ONLY;
+
+  public static final String GROUP_ID_SLV_COPY_ONLY =
+    "SLV_" + BLOCKNAME_SLV_COPY_ONLY;
 
   public static final String PRINT_FUNCTION_NAME = "SachleitendeVerfuegung";
 
@@ -1267,12 +1272,14 @@ public class SachleitendeVerfuegung
     pmod.setPrintBlocksProps(BLOCKNAME_SLV_NOT_IN_ORIGINAL, !isOriginal, false);
     pmod.setPrintBlocksProps(BLOCKNAME_SLV_ORIGINAL_ONLY, isOriginal, false);
     pmod.setPrintBlocksProps(BLOCKNAME_SLV_ALL_VERSIONS, true, false);
+    pmod.setPrintBlocksProps(BLOCKNAME_SLV_COPY_ONLY, !isDraft && !isOriginal, false);
 
     // Ein/Ausblenden der Sichtbarkeitsgruppen:
     pmod.setGroupVisible(GROUP_ID_SLV_DRAFT_ONLY, isDraft);
     pmod.setGroupVisible(GROUP_ID_SLV_NOT_IN_ORIGINAL, !isOriginal);
     pmod.setGroupVisible(GROUP_ID_SLV_ORIGINAL_ONLY, isOriginal);
     pmod.setGroupVisible(GROUP_ID_SLV_ALL_VERSIONS, true);
+    pmod.setGroupVisible(GROUP_ID_SLV_COPY_ONLY, !isDraft && !isOriginal);
 
     // Ziffer von Punkt 1 ausblenden falls isOriginal
     XTextRange punkt1ZifferOnly = null;
@@ -1296,12 +1303,14 @@ public class SachleitendeVerfuegung
     pmod.setGroupVisible(GROUP_ID_SLV_NOT_IN_ORIGINAL, true);
     pmod.setGroupVisible(GROUP_ID_SLV_ORIGINAL_ONLY, true);
     pmod.setGroupVisible(GROUP_ID_SLV_ALL_VERSIONS, true);
+    pmod.setGroupVisible(GROUP_ID_SLV_COPY_ONLY, true);
 
     // Alte Eigenschaften der Druckblöcke wieder herstellen:
     pmod.setPrintBlocksProps(BLOCKNAME_SLV_DRAFT_ONLY, true, true);
     pmod.setPrintBlocksProps(BLOCKNAME_SLV_NOT_IN_ORIGINAL, true, true);
     pmod.setPrintBlocksProps(BLOCKNAME_SLV_ORIGINAL_ONLY, true, true);
     pmod.setPrintBlocksProps(BLOCKNAME_SLV_ALL_VERSIONS, true, true);
+    pmod.setPrintBlocksProps(BLOCKNAME_SLV_COPY_ONLY, true, true);
 
     // ausgeblendete TextSections wieder einblenden
     for (Iterator<XTextSection> iter = hidingSections.iterator(); iter.hasNext();)
@@ -1368,12 +1377,15 @@ public class SachleitendeVerfuegung
       true, null);
     WollMuxEventHandler.handleSetVisibleState(model, GROUP_ID_SLV_ALL_VERSIONS,
       true, null);
+    WollMuxEventHandler.handleSetVisibleState(model, GROUP_ID_SLV_COPY_ONLY, true,
+      null);
 
     // Druckblöcke wieder einblenden:
     model.setPrintBlocksProps(BLOCKNAME_SLV_DRAFT_ONLY, true, true);
     model.setPrintBlocksProps(BLOCKNAME_SLV_NOT_IN_ORIGINAL, true, true);
     model.setPrintBlocksProps(BLOCKNAME_SLV_ORIGINAL_ONLY, true, true);
     model.setPrintBlocksProps(BLOCKNAME_SLV_ALL_VERSIONS, true, true);
+    model.setPrintBlocksProps(BLOCKNAME_SLV_COPY_ONLY, true, true);
 
     // ausgeblendete TextSections wieder einblenden:
     for (XTextSection sect : hidingSections)

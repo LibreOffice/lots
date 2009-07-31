@@ -51,6 +51,7 @@ import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.parser.SyntaxErrorException;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.AllVersions;
+import de.muenchen.allg.itd51.wollmux.DocumentCommand.CopyOnly;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.DraftOnly;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.Form;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand.InsertContent;
@@ -133,7 +134,7 @@ public class DocumentCommands
   private HashSet<DocumentCommand> notInOriginalCommands;
 
   /**
-   * Enthält ein Set aller OrininalOnly-Dokumentkommandos des Dokuments, die für die
+   * Enthält ein Set aller OriginalOnly-Dokumentkommandos des Dokuments, die für die
    * Ein/Ausblendungen in Sachleitenden Verfügungen benötigt werden.
    */
   private HashSet<DocumentCommand> originalOnlyCommands;
@@ -143,6 +144,12 @@ public class DocumentCommands
    * Ein/Ausblendungen in Sachleitenden Verfügungen benötigt werden.
    */
   private HashSet<DocumentCommand> draftOnlyCommands;
+
+  /**
+   * Enthält ein Set aller copyOnly-Dokumentkommandos des Dokuments, die für die
+   * Ein/Ausblendungen in Sachleitenden Verfügungen benötigt werden.
+   */
+  private HashSet<DocumentCommand> copyOnlyCommands;
 
   /**
    * Enthält ein Set aller all-Dokumentkommandos des Dokuments, die für die
@@ -165,6 +172,7 @@ public class DocumentCommands
     this.notInOriginalCommands = new HashSet<DocumentCommand>();
     this.originalOnlyCommands = new HashSet<DocumentCommand>();
     this.draftOnlyCommands = new HashSet<DocumentCommand>();
+    this.copyOnlyCommands = new HashSet<DocumentCommand>();
     this.allVersionsCommands = new HashSet<DocumentCommand>();
     this.allTextSectionsWithGROUPS = new HashSet<TextSection>();
   }
@@ -344,9 +352,9 @@ public class DocumentCommands
   private void addNewDocumentCommands(HashSet<DocumentCommand> newDocumentCommands)
   {
     long times[] = new long[] {
-      0, 0, 0, 0, 0, 0, 0 };
+      0, 0, 0, 0, 0, 0, 0, 0 };
     long counters[] = new long[] {
-      0, 0, 0, 0, 0, 0, 0 };
+      0, 0, 0, 0, 0, 0, 0, 0 };
     Logger.debug2("addNewDocumentCommands");
 
     long lastTime = System.currentTimeMillis();
@@ -387,6 +395,11 @@ public class DocumentCommands
         allVersionsCommands.add(cmd);
         id = 6;
       }
+      else if (cmd instanceof CopyOnly)
+      {
+        copyOnlyCommands.add(cmd);
+        id = 7;
+      }
 
       long currentTime = System.currentTimeMillis();
       if (id >= 0)
@@ -404,6 +417,7 @@ public class DocumentCommands
     Logger.debug2("- OriginalOnly:  " + counters[4] + ", " + times[4] + " ms");
     Logger.debug2("- DraftOnly:     " + counters[5] + ", " + times[5] + " ms");
     Logger.debug2("- AllVersions:   " + counters[6] + ", " + times[6] + " ms");
+    Logger.debug2("- CopyOnly:      " + counters[7] + ", " + times[7] + " ms");
     Logger.debug2("- Others:        " + counters[0] + ", " + times[0] + " ms");
   }
 
@@ -524,6 +538,7 @@ public class DocumentCommands
     notInOriginalCommands.removeAll(retired);
     originalOnlyCommands.removeAll(retired);
     draftOnlyCommands.removeAll(retired);
+    copyOnlyCommands.removeAll(retired);
     allVersionsCommands.removeAll(retired);
   }
 
@@ -638,11 +653,25 @@ public class DocumentCommands
   }
 
   /**
-   * Liefert einen Iterator zurück, der die Iteration aller All-Dokumentkommandos
-   * dieses Dokuments ermöglicht.
+   * Liefert einen Iterator zurück, der die Iteration aller
+   * CopyOnly-Dokumentkommandos dieses Dokuments ermöglicht.
    * 
-   * @return ein Iterator, der die Iteration aller All-Dokumentkommandos dieses
+   * @return ein Iterator, der die Iteration aller CopyOnly-Dokumentkommandos dieses
    *         Dokuments ermöglicht. Der Iterator kann auch keine Elemente enthalten.
+   * @author Daniel Benkmann (D-III-ITD-101)
+   */
+  public Iterator<DocumentCommand> copyOnlyIterator()
+  {
+    return copyOnlyCommands.iterator();
+  }
+
+  /**
+   * Liefert einen Iterator zurück, der die Iteration aller
+   * AllVersions-Dokumentkommandos dieses Dokuments ermöglicht.
+   * 
+   * @return ein Iterator, der die Iteration aller AllVersions-Dokumentkommandos
+   *         dieses Dokuments ermöglicht. Der Iterator kann auch keine Elemente
+   *         enthalten.
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
   public Iterator<DocumentCommand> allVersionsIterator()
@@ -833,6 +862,11 @@ public class DocumentCommands
         return new DocumentCommand.DraftOnly(wmCmd, bookmark);
       }
 
+      else if (cmd.compareToIgnoreCase("copyOnly") == 0)
+      {
+        return new DocumentCommand.CopyOnly(wmCmd, bookmark);
+      }
+
       else if (cmd.compareToIgnoreCase("notInOriginal") == 0)
       {
         return new DocumentCommand.NotInOriginal(wmCmd, bookmark);
@@ -952,6 +986,11 @@ public class DocumentCommands
     }
 
     public int executeCommand(DraftOnly cmd)
+    {
+      return 0;
+    }
+
+    public int executeCommand(CopyOnly cmd)
     {
       return 0;
     }

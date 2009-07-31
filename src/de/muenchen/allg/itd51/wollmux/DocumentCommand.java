@@ -734,6 +734,8 @@ abstract public class DocumentCommand
 
     public int executeCommand(DocumentCommand.DraftOnly cmd);
 
+    public int executeCommand(DocumentCommand.CopyOnly cmd);
+
     public int executeCommand(DocumentCommand.NotInOriginal cmd);
 
     public int executeCommand(DocumentCommand.OriginalOnly cmd);
@@ -759,7 +761,8 @@ abstract public class DocumentCommand
   // ********************************************************************************
   /**
    * Beschreibt ein Dokumentkommando, das das optionale Attribut HIGHLIGHT_COLOR
-   * enthalten kann (derzeit AllVersions, DraftOnly, NotInOriginal und OriginalOnly)
+   * enthalten kann (derzeit AllVersions, DraftOnly, CopyOnly, NotInOriginal und
+   * OriginalOnly)
    */
   public static interface OptionalHighlightColorProvider
   {
@@ -1521,6 +1524,43 @@ abstract public class DocumentCommand
     String highlightColor = null;
 
     public OriginalOnly(ConfigThingy wmCmd, Bookmark bookmark)
+    {
+      super(wmCmd, bookmark);
+
+      try
+      {
+        highlightColor = wmCmd.get("WM").get("HIGHLIGHT_COLOR").toString();
+      }
+      catch (NodeNotFoundException e)
+      {
+        // HIGHLIGHT_COLOR ist optional
+      }
+    }
+
+    public String getHighlightColor()
+    {
+      return highlightColor;
+    }
+
+    public int execute(DocumentCommand.Executor visitable)
+    {
+      return visitable.executeCommand(this);
+    }
+  }
+
+  // ********************************************************************************
+  /**
+   * Beim Drucken von Sachleitenden Verfügungen werden die Ausfertigungen, die weder
+   * Original noch Entwurf sind, als "Abdrucke" bezeichnet. Mit einem
+   * CopyOnly-Kommando können Blöcke im Text definiert werden (auch an anderen
+   * Stellen), die ausschließlich in Abdrucken angezeigt werden sollen.
+   */
+  static public class CopyOnly extends DocumentCommand implements
+      OptionalHighlightColorProvider
+  {
+    String highlightColor = null;
+
+    public CopyOnly(ConfigThingy wmCmd, Bookmark bookmark)
     {
       super(wmCmd, bookmark);
 
