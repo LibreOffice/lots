@@ -147,7 +147,7 @@ interface XPrintModel
      * @param blockName
      *          Der Blocktyp dessen Druckblöcke behandelt werden sollen.
      *          Folgende Blocknamen werden derzeit unterstützt: "AllVersions",
-     *          "DraftOnly" und "NotInOriginal"
+     *          "DraftOnly", "OriginalOnly", "CopyOnly" und "NotInOriginal"
      * @param visible
      *          Der Block wird sichtbar, wenn visible==true und unsichtbar, wenn
      *          visible==false.
