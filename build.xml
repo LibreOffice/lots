@@ -298,7 +298,7 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 			<fileset dir="${BIN}" includes="**/*.class"/>
 			<fileset dir="${MY_IDL}" includes="**/*.class"/>
 			<fileset dir="${UNOHELPER_BIN}" includes="**/*.class" />
-			<!-- <fileset dir="${TOOLING}" includes="**/*" /> -->
+			<fileset dir="${TOOLING}" includes="**/*" />
 			<fileset dir="${SRC}" includes="data/**/*" />
 			<fileset file="${BUILD_INFO_FILE}" />
 			<manifest>

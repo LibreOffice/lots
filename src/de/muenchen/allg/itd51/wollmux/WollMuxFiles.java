@@ -78,6 +78,7 @@ import javax.swing.SwingUtilities;
 
 import com.sun.star.beans.Property;
 import com.sun.star.container.XNameAccess;
+import com.sun.star.lib.loader.WollMuxRegistryAccess;
 import com.sun.star.sdbc.XConnection;
 import com.sun.star.sdbc.XDataSource;
 import com.sun.star.uno.AnyConverter;
@@ -107,9 +108,6 @@ import de.muenchen.allg.itd51.wollmux.func.PrintFunctionLibrary;
 public class WollMuxFiles
 {
   private static final String ETC_WOLLMUX_WOLLMUX_CONF = "/etc/wollmux/wollmux.conf";
-
-  private static final String C_PROGRAMME_WOLLMUX_WOLLMUX_CONF =
-    "C:\\Programme\\wollmux\\wollmux.conf";
 
   private static final long DATASOURCE_TIMEOUT = 10000;
 
@@ -283,10 +281,16 @@ public class WollMuxFiles
       {
         File[] roots = File.listRoots();
         String defaultWollmuxConfPath = ETC_WOLLMUX_WOLLMUX_CONF;
-
-        // Testen, ob wir unter Windows sind - falls ja, Pfad ändern:
-        if (roots.length > 0 && roots[0].toString().contains(":"))
-          defaultWollmuxConfPath = C_PROGRAMME_WOLLMUX_WOLLMUX_CONF;
+        try
+        {
+          // Testen, ob wir unter Windows sind - falls ja, Pfad aus Registry lesen
+          if (roots.length > 0 && roots[0].toString().contains(":"))
+            defaultWollmuxConfPath = WollMuxRegistryAccess.getWollMuxConfDir();
+        }
+        catch (Throwable t)
+        {
+          Logger.error(t);
+        }
 
         wollmuxConfFile = new File(defaultWollmuxConfPath);
         if (wollmuxConfFile.exists())
@@ -299,6 +303,8 @@ public class WollMuxFiles
             etcWollmuxConf.addChild(iter.next());
           wollmuxConf = etcWollmuxConf;
         }
+        else
+          Logger.log(L.m("Datei nicht gefunden: %1", wollmuxConfFile));
       }
       catch (Exception e)
       {
