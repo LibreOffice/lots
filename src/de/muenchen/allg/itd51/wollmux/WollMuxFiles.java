@@ -218,7 +218,9 @@ public class WollMuxFiles
     losCacheFile = new File(wollmuxDir, "cache.conf");
     wollmuxLogFile = new File(wollmuxDir, "wollmux.log");
 
-    // Default wollmux.conf erzeugen falls noch keine wollmux.conf existiert.
+    // Default wollmux.conf erzeugen falls
+    // - keine wollmux.conf existiert UND
+    // - defaultWollMuxConf != null
     if (!wollmuxConfFile.exists() && defaultWollmuxConf != null)
     {
       try
