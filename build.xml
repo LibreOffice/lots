@@ -154,6 +154,7 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 	    	<fileset dir="${MY_IDL}" includes="**/*.urd" />
 	    	<fileset dir="${MY_IDL}" includes="**/*.class" />
 	    	<fileset dir="${BIN}" includes="de/**" />
+	    	<fileset dir="${BIN}" includes="com/**" />
 	    	<fileset dir="${BIN}" includes="data/**" />
 	    	
 	    	<fileset file="${RDBFILE}" />
@@ -264,7 +265,7 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 		
 		<javac srcdir="${SRC}"
 		               destdir="${BIN}"
-		               classpath="${OOO_CLASSPATH}:${MY_IDL}"
+		               classpath="${OOO_CLASSPATH}:${MY_IDL}:${TOOLING}"
 					   encoding="${SRC_ENCODING}"
 		               debug="${DEBUG}"
 					   optimize="${OPTIMIZE}"
