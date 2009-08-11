@@ -425,6 +425,8 @@ public class OOoDatasource implements Datasource
   public QueryResults getDatasetsByKey(Collection<String> keys, long timeout)
       throws TimeoutException
   { // TESTED
+    if (keys.isEmpty()) return new QueryResultsList(new ArrayList<Dataset>(0));
+
     long endTime = System.currentTimeMillis() + timeout;
     StringBuilder buffy =
       new StringBuilder("SELECT * FROM " + sqlIdentifier(oooTableName) + " WHERE ");
