@@ -1,5 +1,39 @@
  ==================== Neu in dieser Version ====================
 
+    * In der Seriendruckleiste des WollMux wurde die Funktion "Tabellenspalten
+      ergänzen" implementiert. Diese stellt das Gegenstück zur bisher schon
+      verfügbaren Funktion "Felder anpassen" dar. Wenn in der
+      Serienbriefvorlage Felder verwendet werden, die in dieser Form nicht in
+      der Tabelle existieren, so können automatisch entsprechende
+      Tabellenspalten zur Tabelle hinzugefügt werden. Typischer Anwendungsfall
+      ist das Erweitern einer existierenden Tabelle um Spalten
+      "EmpfängerzeileX" zur Befüllung des Briefkopfes.
+    * Diverse Bedienelemente der Seriendruckleiste werden jetzt ausgegraut,
+      wenn sie aufgrund des Kontexts funktionslos sind.
+    * Das Verhalten der Eingabefelder des WollMux (z.B. in der Formular-GUI)
+      und im FormularMax4000 wurde so geändert, dass nun bereits vorhandener
+      Text im Eingabefeld automatisch selektiert wird, wenn mittels Tabulator-
+      Taste in das Eingabefeld gewechselt wurde.
+    * Mit dem neuen Dokumentkommando WM(CMD 'copyOnly') können jetzt Blöcke
+      markiert werden, die ausschließlich in Abdrucken (das sind alle SLV-
+      Ausdrucke außer dem ersten und dem letzen) gedruckt werden. Die
+      Symbolleiste "Sachleitende Verfügungen" besitzt passend dazu eine neue
+      Schaltfläche "Nur Abdrucke".
+    * Da die Symbolleiste "Sachleitende Verfügungen" aufgrund des neuen
+      Druckblock-Buttons in die Breite gewachsen ist, wurden die Beschriftungen
+      etwas abgekürzt:
+          o "Block: immer drucken" -> "Immer drucken"
+          o "immer ausser Original" -> "Nicht im Original"
+          o "nur im Original" -> "Nur Original"
+          o "nur im Entwurf" -> "Nur Entwurf"
+    * Ein Fehler wurde behoben, der bei der Verwendung einer Datenquelle des
+      Typs "ooo" für die Absenderliste Probleme gemacht hat (Initialisierung
+      nicht möglich, solange cache.conf leer ist.)
+
+
+
+ ==================== Neu in Version 5.7.1 ====================
+
     * Entdeckt der WollMux eine Textmarke mit InsertFormValue-Kommando, die
       nicht entweder leer ist, ein Formularfeld enthält oder einen von <>, []
       oder {} eingefassten Text (z.B. <Vorname>), so kann er diesen nicht
