@@ -1,0 +1,46 @@
+=head1 NAME
+
+WollMux Bar - external controller for the WollMux form letter extension for OpenOffice.org Writer
+
+=head1 SYNOPSIS
+
+B<wollmuxbar>
+
+=head1 DESCRIPTION
+
+WollMux is an extension to Openoffice.org Writer with the following features:
+
+=over 6
+
+=item - On the fly template generation from fragments (e.g. letterhead, footer, form)
+
+=item - Pre-filling templates with personal and organizational data from a variety of databases (LDAP, local user data, and other sources)
+
+=item - Advanced form support with auto-computed fields and input validity checking
+
+=item - Improved user interface for interactive form data
+
+=item - Hiding and showing parts of the document based on form input
+
+=item - Advanced autotext support with identifier pattern matching and a shortcut syntax for filling in placeholders
+
+=item - Chainable printing plugins to provide custom dialogs and transformations when printing
+
+=item - Automatic printing of document variants according to document content
+
+=item - Enhanced serial letter functionality that ties in with the form functionality (e.g. auto-computed fields) and the custom print plugins. 
+
+=back
+
+The file /usr/bin/wollmux is a shellscript that adds a toolbar to your
+desktop for easy access to the extension without a permanently running
+instance of OpenOffice.org Writer.
+
+=head1 SEE ALSO
+
+L<openoffice(1)>
+
+=head1 AUTHOR
+
+Torsten Werner <twerner@debian.org>
+

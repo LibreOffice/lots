@@ -1,12 +1,56 @@
 Source: wollmux
 Section: lhm/misc
 Priority: optional
-Maintainer: Felix WollMux <wollmux-general@lists.forge.osor.eu>
-Standards-Version: 3.6.1
+Maintainer: WollMux mailing list <wollmux-general@lists.forge.osor.eu>
+Uploaders: Florian Maier <limux_packaging@muenchen.de>
+Build-Depends: ant, cdbs, debhelper (>= 5), openoffice.org-devscripts,
+ inkscape, sun-j2sdk1.5, ooobasis3.0-sdk|ooobasis3.1-sdk, openoffice.org3,
+ openoffice.org-debian-menus
+X-Debian-Build-Depends: openoffice.org-java-common, openoffice.org-dev
+X-Upstream-Build-Depends: ooobasis3.0-sdk|ooobasis3.1-sdk, openoffice.org3, 
+ openoffice.org-debian-menus
+X-Halut-Java-Build-Depends: sun-j2sdk1.5
+X-Debian-Java-Build-Depends: sun-java5-jdk
+Standards-Version: 3.8.0
+Homepage: http://www.wollmux.org
+
+Package: openoffice.org-wollmux
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}, openjdk-6-jre | java2-runtime,
+ openoffice.org-writer, openoffice.org-debian-menus
+X-Debian-Depends: openoffice.org-java-common (>= 3.0.0)
+X-Upstream-Depends: openoffice.org-debian-menus
+Suggests: wollmuxbar
+Description: WollMux extension for OpenOffice.org Writer
+ The package adds an extension to Openoffice.org with the following features:
+  - On the fly template generation from fragments (e.g. letterhead, footer,
+    form)
+  - Pre-filling templates with personal and organizational data from a variety
+    of databases (LDAP, local user data, and other sources)
+  - Advanced form support with auto-computed fields and input validity checking
+  - Improved user interface for interactive form data
+  - Hiding and showing parts of the document based on form input
+  - Advanced autotext support with identifier pattern matching and a shortcut
+    syntax for filling in placeholders
+  - Chainable printing plugins to provide custom dialogs and transformations
+    when printing
+  - Automatic printing of document variants according to document content
+  - Enhanced serial letter functionality that ties in with the form
+    functionality (e.g. auto-computed fields) and the custom print plugins.
+
+Package: wollmuxbar
+Architecture: all
+Depends: openoffice.org-wollmux (= ${binary:Version})
+Conflicts: wollmux (<< ${binary:Version})
+Replaces: wollmux (<< ${binary:Version})
+Description: Standalone toolbar for WollMux
+ The package adds a toolbar to your desktop that provides easy access to the
+ openoffice.org-wollmux extension without a permanently running instance of
+ OpenOffice.org Writer.
 
 Package: wollmux
 Architecture: all
-Depends: openoffice.org3 | openoffice.org-core01 | openoffice.org-core
-Recommends: wollmux-standalone-config
-Description: Das Briefkopfsystem der Landeshauptstadt München
- Das Briefkopfsystem der Landeshauptstadt München
+Depends: wollmuxbar (= ${binary:Version})
+Description: Transitional package for WollMux Bar
+ Ease transition from wollmux to wollmuxbar package
+

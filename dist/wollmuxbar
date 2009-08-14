@@ -1,5 +1,5 @@
 #!/bin/sh
-JAR_FILE="/usr/lib/wollmux/WollMuxBar.jar"
+JAR_FILE="/usr/share/java/WollMuxBar.jar"
 case "_$1" in
   _--*) ;;
   _) ;;

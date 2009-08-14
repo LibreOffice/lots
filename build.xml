@@ -15,6 +15,8 @@ debug: List this target before other build targets to get .class files with
 all: Create the OOo component and WollMuxBar.jar, but *not* the Debian package.
      The files are created in the dist/ directory.
 
+.tar.gz: Creates wollmux-<version>.tar.gz with the WollMux and UNOHelper sources
+
 deb: Create the Debian package in the dist/ directory. 
      ATTENTION! If you build from vanilla sources, this Debian package will NOT work
      on a standard Debian or Ubuntu system. If you want a Debian package that works
@@ -139,7 +141,7 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 
 	<target name="all" depends="WollMuxBar.jar,WollMux.oxt,md5sum" />
 	
-	<target name="snapshot" depends="clean, makechangelog, debug, all, deb" />
+	<target name="snapshot" depends="clean, makechangelog, debug, all, .tar.gz, deb" />
 
 	<!-- The debug target doesn't do anything by itself, but for any targets executed later
 	     the DEBUG property will be set. --> 
@@ -162,14 +164,7 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
      		<fileset file="${WollMux_COMPJAR}" />
 	    	<fileset file="${WOLLMUXBAR_JAR}" />
 	    	<fileset file="${PKG_FILE}" />
-	    	
-		    <fileset dir="${PACKAGE_DIR}" includes="wollmux_*.*.*.deb" />
-		    <fileset dir="${PACKAGE_DIR}" includes="wollmux_*.*.*.dsc" />
-			<fileset dir="${PACKAGE_DIR}" includes="wollmux_*.*.*.changes" />
-			<fileset dir="${PACKAGE_DIR}" includes="wollmux_*.*.*.tar.gz" />
-	    	<fileset dir="${PACKAGE_DIR}" includes="wollmux_*.*.*.diff.gz" />
-	    	<fileset dir="${PACKAGE_DIR}" includes="wollmux-*/**" />
-	    	
+
 	    	<!-- VERSION_FILE, BUILD_INFO_FILE und DESCRIPTION_XML 
 	    	    **nicht** löschen, da diese nur bei
 	    	Vorhandensein von svn oder git regeneriert werden können.
@@ -184,6 +179,7 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 	    	<!-- UPDATE_XML schon löschen, da diese extern eh nicht benötigt wird -->
 	    	<fileset file="${UPDATE_XML}" />
 	    </delete>
+	    <delete dir="${PACKAGE_DIR}/deb" />
 	</target>
 	
 	<target name="makeversion">
@@ -344,14 +340,36 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 		<tstamp><format property="mytime" pattern="HH:mm:ss"/></tstamp>
 		<echo level="info" message="Install finished at ">${mytime}</echo>
 	</target>
+
+        <target name=".tar.gz" depends="makeversion, bumpversion">
+		<property name="TAR_BUILD_DIR" value="${PACKAGE_DIR}/wollmux-${VERSION}" />
+		<mkdir dir="${TAR_BUILD_DIR}" />
+		<copy todir="${TAR_BUILD_DIR}/WollMux" >
+			<fileset dir="." includes="**/*" excludes="${TAR_BUILD_DIR}" /> 
+			<fileset dir="." includes="**/.*" excludes="${TAR_BUILD_DIR}" />
+		</copy>
+		<copy todir="${TAR_BUILD_DIR}/UNOHelper" >
+			<fileset dir="${UNOHELPER_DIR}" includes="**/*" excludes="bin/**" /> 
+			<fileset dir="${UNOHELPER_DIR}" includes="**/.*"/>
+		</copy>
+		
+		<exec dir="${TAR_BUILD_DIR}" executable="ant" failifexecutionfails="true" failonerror="true">
+		    <arg line="-f WollMux/build.xml clean" />
+		</exec>
+
+		<exec dir="${PACKAGE_DIR}" executable="tar" failifexecutionfails="true" failonerror="true">
+		    <arg line="-czf wollmux-${VERSION}.tar.gz --exclude=.git --exclude=.svn --exclude=.gitignore --exclude=debian wollmux-${VERSION}" />
+		</exec>
+		
+		<delete dir="${TAR_BUILD_DIR}" />
+	</target>
 	
 	<target name="deb" depends="makeversion, bumpversion">
-		<property name="DEB_BUILD_DIR" value="${PACKAGE_DIR}/wollmux-${VERSION}" />
+		<property name="DEB_BUILD_DIR" value="${PACKAGE_DIR}/deb/wollmux-${VERSION}" />
 		<condition property="DEBIAN_DIR" value="debian" else="lhmdeb">
 			<available file="debian/rules" />
 		</condition>
-		<mkdir dir="${DEB_BUILD_DIR}" />
-		<copy todir="${DEB_BUILD_DIR}/WollMux" >
+		<copy todir="${DEB_BUILD_DIR}" >
 			<fileset dir="." includes="**/*" excludes="${DEB_BUILD_DIR}" /> 
 			<fileset dir="." includes="**/.*" excludes="${DEB_BUILD_DIR}" />
 		</copy>
@@ -361,21 +379,18 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 		</copy>
 		
 		<exec dir="${DEB_BUILD_DIR}" executable="ant" failifexecutionfails="true" failonerror="true">
-		    <arg line="-f WollMux/build.xml clean" />
+		    <arg line="-f build.xml clean" />
 		</exec>
 
-		<exec dir="${PACKAGE_DIR}" executable="tar" failifexecutionfails="true" failonerror="true">
-		    <arg line="-czf wollmux_${VERSION}.orig.tar.gz --exclude=.git --exclude=.svn --exclude=.gitignore --exclude=debian wollmux-${VERSION}" />
-		</exec>
-		<exec dir="${PACKAGE_DIR}" executable="ln" failifexecutionfails="true" failonerror="true">
-		    <arg line="-nf wollmux_${VERSION}.orig.tar.gz wollmux-${VERSION}.tar.gz" />
-		</exec>
-		
 		<copy todir="${DEB_BUILD_DIR}/debian" >
 			<fileset dir="${DEBIAN_DIR}" includes="**/*"/> 
 		</copy>
 		<exec dir="${DEB_BUILD_DIR}/debian" executable="chmod" >
 			<arg line="a+x rules" />
+		</exec>
+		
+		<exec dir="${PACKAGE_DIR}/deb" executable="tar" failifexecutionfails="true" failonerror="true">
+		    <arg line="-czf wollmux_${VERSION}.orig.tar.gz --exclude=.git --exclude=.svn --exclude=.gitignore --exclude=debian wollmux-${VERSION}" />
 		</exec>
 		
 		<exec dir="${DEB_BUILD_DIR}" executable="dpkg-buildpackage" failifexecutionfails="true" failonerror="true">

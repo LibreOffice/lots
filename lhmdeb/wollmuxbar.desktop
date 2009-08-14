@@ -1,0 +1,16 @@
+[Desktop Entry]
+Exec[$e]=wollmux
+GenericName=templates and forms
+GenericName[de]=Vorlagen und Formulare
+Comment=toolbar for the WollMux extension of OpenOffice.org Writer
+Icon=wollmux
+MimeType=
+Name=WollMux
+Path[$e]=
+StartupNotify=false
+Terminal=false
+Type=Application
+X-DCOP-ServiceType=
+X-KDE-SubstituteUID=false
+X-KDE-Username=
+Categories=Office;

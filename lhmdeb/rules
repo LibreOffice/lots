@@ -1,76 +1,45 @@
 #!/usr/bin/make -f
-# -*- makefile -*-
 
-configure:
-configure-stamp:
-	dh_testdir
+# Add verbosity
+#export DH_VERBOSE=1
+#DEB_ANT_INVOKE += -v
 
+OOO_EXTENSION_PKG := openoffice.org-wollmux
+OOO_OXT_FILE := dist/WollMux.oxt
+OOO_OXT_IDENTIFIER := oxt/description.xml
+OOO_OXT_BUILD_COMMAND :=
 
-build: WollMux/dist/WollMuxBar.jar WollMux/dist/WollMux.oxt
+include /usr/share/cdbs/1/rules/debhelper.mk
+include /usr/share/cdbs/1/class/ant.mk
+include /usr/share/openoffice.org-devscripts/ooo-extension.mk
 
-WollMux/dist/WollMuxBar.jar:
-	dh_testdir
-	ant -f WollMux/build.xml debug WollMuxBar.jar
+# JAVA_HOME := /usr/lib/jvm/default-java
+JAVA_HOME := /usr/lib/j2sdk1.5-sun
+ARCH := $(shell dpkg-architecture -qDEB_HOST_ARCH)
 
-WollMux/dist/WollMux.oxt:
-	dh_testdir
-	ant -f WollMux/build.xml debug WollMux.oxt
+# Debian SDK path
+#export PATH := $(PATH):/usr/lib/openoffice/basis3.0/sdk/bin
 
-build-stamp:
-	dh_testdir
-	
+build/wollmuxbar:: debian/stamp-build
+debian/stamp-build:
+	pod2man -c 'WollMux for Debian GNU/Linux' \
+	  -r WollMux-$(DEB_UPSTREAM_VERSION) \
+	  debian/wollmuxbar.pod > debian/wollmuxbar.1
+	inkscape -h 128 -D -e debian/wollmuxbar.png debian/frog.svg
+	touch $@
 
-clean:
-	dh_testdir
-	ant -f WollMux/build.xml clean
-	dh_clean 
+install/wollmux:: oxt-maintscripts
 
-install: build
-	dh_testdir
-	dh_testroot
-	dh_clean -k 
-	dh_installdirs
+install/wollmuxbar::
+	install -m 644 -D dist/WollMuxBar.jar \
+	  debian/wollmuxbar/usr/share/java/WollMuxBar-$(DEB_UPSTREAM_VERSION).jar
+	dh_link -pwollmuxbar /usr/share/java/WollMuxBar-$(DEB_UPSTREAM_VERSION).jar \
+	  /usr/share/java/WollMuxBar.jar
 
-	mkdir -p $(CURDIR)/debian/wollmux/usr/lib/wollmux
-	cp WollMux/dist/{WollMuxBar.jar,WollMux.oxt} $(CURDIR)/debian/wollmux/usr/lib/wollmux
-	mkdir -p $(CURDIR)/debian/wollmux/usr/bin
-	cp WollMux/dist/wollmuxbar $(CURDIR)/debian/wollmux/usr/bin
-	chmod a+rx $(CURDIR)/debian/wollmux/usr/bin/wollmuxbar
+clean:: oxt-clean
+	$(RM) debian/stamp-* debian/wollmuxbar.1 debian/wollmuxbar.png 
+	$(RM) debian/*.{pre,post}{inst,rm}
 
-# Build architecture-independent files here.
-binary-indep: build install
-# We have nothing to do by default.
+#get-orig-source:
+#	-uscan --upstream-version 0
 
-# Build architecture-dependent files here.
-binary-arch: build install
-	dh_testdir
-	dh_testroot
-	dh_installchangelogs 
-	dh_installdocs
-	dh_installexamples
-#	dh_install
-#	dh_installmenu
-#	dh_installdebconf	
-#	dh_installlogrotate
-#	dh_installemacsen
-#	dh_installpam
-#	dh_installmime
-#	dh_installinit
-#	dh_installcron
-#	dh_installinfo
-	dh_installman
-	dh_link
-	dh_strip
-	dh_compress
-	dh_fixperms
-#	dh_perl
-#	dh_python
-#	dh_makeshlibs
-	dh_installdeb
-	dh_shlibdeps
-	dh_gencontrol
-	dh_md5sums
-	dh_builddeb
-
-binary: binary-indep binary-arch
-.PHONY: build clean binary-indep binary-arch binary install configure
