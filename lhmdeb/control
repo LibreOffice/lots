@@ -2,7 +2,7 @@ Source: wollmux
 Section: lhm/misc
 Priority: optional
 Maintainer: WollMux mailing list <wollmux-general@lists.forge.osor.eu>
-Uploaders: Florian Maier <limux_packaging@muenchen.de>
+Uploaders: Felix WollMux <wollmux-general@lists.forge.osor.eu>
 Build-Depends: ant, cdbs, debhelper (>= 5), openoffice.org-devscripts,
  inkscape, sun-j2sdk1.5, ooobasis3.0-sdk|ooobasis3.1-sdk, openoffice.org3,
  openoffice.org-debian-menus
