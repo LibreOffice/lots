@@ -33,29 +33,14 @@
 // Leider ist WinRegKey package protected, also müssen wir uns in diese Package einklinken.
 package com.sun.star.lib.loader;
 
+import de.muenchen.allg.itd51.wollmux.L;
+
 public class WollMuxRegistryAccess
 {
   /**
-   * Der Pfad (ohne Wurzel wie HKCU oder HKLM) zu dem Registrierungsschlüssel, unter
-   * dem der WollMux seine Registry-Werte speichert
-   */
-  private final static String WOLLMUX_KEY = "Software\\WollMux";
-
-  /**
-   * Der Name des String-Wertes, unter dem der WollMux in der Registry den Ort der
-   * wollmux.conf speichert
-   */
-  private final static String WOLLMUX_CONF_PATH_VALUE_NAME = "ConfigPath";
-
-  /**
-   * Versucht den Wert {@link #WOLLMUX_CONF_PATH_VALUE_NAME} des
-   * Registrierungsschlüssels {@link #WOLLMUX_KEY} unter der Wurzel
-   * "HKEY_CURRENT_USER" in der Windows-Registry auszulesen und gibt die in diesem
-   * Wert gespeicherten String-Daten zurück.
+   * Liefert die String-Daten des Werts namens valueName des Registrierungsschlüssels
+   * keyName unter der Wurzel root in der Windows-Registry zurück.
    * 
-   * @return die String-Daten, die im Wert {@link #WOLLMUX_CONF_PATH_VALUE_NAME} des
-   *         Schlüssels HKEY_CURRENT_USER\{@link #WOLLMUX_KEY} in der Registry
-   *         liegen
    * @throws WollMuxRegistryAccessException
    *           wenn der Wert nicht gefunden wurde oder ein sonstiger Fehler beim
    *           Lesen der Windows-Registry auftrat. Wird diese Methode unter Linux
@@ -64,61 +49,25 @@ public class WollMuxRegistryAccess
    * @author Matthias Benkmann (D-III-ITD-D101)
    * @author Daniel Benkmann (D-III-ITD-D101)
    */
-  public static String getUserWollMuxConfPath()
-      throws WollMuxRegistryAccessException
+  public static String getStringValueFromRegistry(String root, String keyName,
+      String valueName) throws WollMuxRegistryAccessException
   {
     String path = null;
     try
     {
-      WinRegKey key = new WinRegKey("HKEY_CURRENT_USER", WOLLMUX_KEY);
-      path = key.getStringValue(WOLLMUX_CONF_PATH_VALUE_NAME);
+      WinRegKey key = new WinRegKey(root, keyName);
+      path = key.getStringValue(valueName);
     }
     // Wir fangen Throwable statt Exception, da unter Linux von WinRegKey ein
     // UnsatisfiedLinkError geworfen wird
     catch (Throwable e)
     {
-      throw new WollMuxRegistryAccessException(
-        "Fehler beim Lesen der Windows-Registry: " + e.getLocalizedMessage(), e);
+      throw new WollMuxRegistryAccessException(L.m(
+        "Fehler beim Lesen von Wert %3 aus %1\\%2 aus der Windows-Registry: %4",
+        root, keyName, valueName, e.getLocalizedMessage()), e);
     }
 
     return path;
 
-  }
-
-  /**
-   * Versucht den Wert {@link #WOLLMUX_CONF_PATH_VALUE_NAME} des
-   * Registrierungsschlüssels {@link #WOLLMUX_KEY} unter der Wurzel
-   * "HKEY_LOCAL_MACHINE" in der Windows-Registry auszulesen und gibt die in diesem
-   * Wert gespeicherten String-Daten zurück.
-   * 
-   * @return die String-Daten, die im Wert {@link #WOLLMUX_CONF_PATH_VALUE_NAME} des
-   *         Schlüssels HKEY_LOCAL_MACHINE\{@link #WOLLMUX_KEY} in der Registry
-   *         liegen
-   * @throws WollMuxRegistryAccessException
-   *           wenn der Wert nicht gefunden wurde oder ein sonstiger Fehler beim
-   *           Lesen der Windows-Registry auftrat. Wird diese Methode unter Linux
-   *           aufgerufen, sollte immer dieser Fehler geworfen werden.
-   * 
-   * @author Matthias Benkmann (D-III-ITD-D101)
-   * @author Daniel Benkmann (D-III-ITD-D101)
-   */
-  public static String getSharedWollMuxConfPath()
-      throws WollMuxRegistryAccessException
-  {
-    String path = null;
-    try
-    {
-      WinRegKey key = new WinRegKey("HKEY_LOCAL_MACHINE", WOLLMUX_KEY);
-      path = key.getStringValue(WOLLMUX_CONF_PATH_VALUE_NAME);
-    }
-    // Wir fangen Throwable statt Exception, da unter Linux von WinRegKey ein
-    // UnsatisfiedLinkError geworfen wird
-    catch (Throwable e)
-    {
-      throw new WollMuxRegistryAccessException(
-        "Fehler beim Lesen der Windows-Registry: " + e.getLocalizedMessage(), e);
-    }
-
-    return path;
   }
 }

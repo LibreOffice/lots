@@ -113,6 +113,18 @@ public class WollMuxFiles
   private static final String C_PROGRAMME_WOLLMUX_WOLLMUX_CONF =
     "C:\\Programme\\wollmux\\wollmux.conf";
 
+  /**
+   * Der Pfad (ohne Wurzel wie HKCU oder HKLM) zu dem Registrierungsschlüssel, unter
+   * dem der WollMux seine Registry-Werte speichert
+   */
+  private final static String WOLLMUX_KEY = "Software\\WollMux";
+
+  /**
+   * Der Name des String-Wertes, unter dem der WollMux in der Registry den Ort der
+   * wollmux.conf speichert
+   */
+  private final static String WOLLMUX_CONF_PATH_VALUE_NAME = "ConfigPath";
+
   private static final long DATASOURCE_TIMEOUT = 10000;
 
   /**
@@ -235,6 +247,8 @@ public class WollMuxFiles
     losCacheFile = new File(wollmuxDir, "cache.conf");
     wollmuxLogFile = new File(wollmuxDir, "wollmux.log");
 
+    StringBuilder debug2Messages = new StringBuilder();
+
     // Logger initialisieren:
     Logger.init(wollmuxLogFile, Logger.LOG);
 
@@ -245,12 +259,16 @@ public class WollMuxFiles
     // Schlägt unter Linux automatisch fehl
     try
     {
-      wollmuxConfPath = WollMuxRegistryAccess.getUserWollMuxConfPath();
+      wollmuxConfPath =
+        WollMuxRegistryAccess.getStringValueFromRegistry("HKEY_CURRENT_USER",
+          WOLLMUX_KEY, WOLLMUX_CONF_PATH_VALUE_NAME);
       wollmuxConfFile = new File(wollmuxConfPath);
     }
     catch (WollMuxRegistryAccessException e)
     {
       // Entweder Linux oder Registry Key nicht gefunden
+      debug2Messages.append(e.getLocalizedMessage());
+      debug2Messages.append('\n');
     }
 
     // Als nächstes wird im .wollmux-Verzeichnis nach der wollmux.conf gesucht
@@ -262,14 +280,21 @@ public class WollMuxFiles
       // => Versuch den Pfad aus HKLM-Registry zu lesen (schlägt unter Linux fehl)
       if (!wollmuxConfFile.exists())
       {
+        debug2Messages.append(wollmuxConfFile + " does not exist\n");
+
         try
         {
-          wollmuxConfPath = WollMuxRegistryAccess.getSharedWollMuxConfPath();
+          wollmuxConfPath =
+            WollMuxRegistryAccess.getStringValueFromRegistry("HKEY_LOCAL_MACHINE",
+              WOLLMUX_KEY, WOLLMUX_CONF_PATH_VALUE_NAME);
+
           wollmuxConfFile = new File(wollmuxConfPath);
         }
         catch (WollMuxRegistryAccessException e)
         {
           // Entweder Linux oder Registry Key nicht gefunden
+          debug2Messages.append(e.getLocalizedMessage());
+          debug2Messages.append('\n');
         }
 
         // Als letzte Möglichkeit wird in einem Fallback-Verzeichnis gesucht
@@ -283,6 +308,8 @@ public class WollMuxFiles
             wollmuxConfPath = C_PROGRAMME_WOLLMUX_WOLLMUX_CONF;
 
           wollmuxConfFile = new File(wollmuxConfPath);
+          debug2Messages.append("Final wollmux.conf fallback: ");
+          debug2Messages.append(wollmuxConfPath);
         }
       }
     }
@@ -310,6 +337,9 @@ public class WollMuxFiles
 
     // Logging-Mode setzen
     setLoggingMode(WollMuxFiles.getWollmuxConf());
+
+    // Gesammelte debug2 Messages rausschreiben
+    Logger.debug2(debug2Messages.toString());
 
     // Lokalisierung initialisieren
     ConfigThingy l10n = getWollmuxConf().query("L10n", 1);
