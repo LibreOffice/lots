@@ -3,7 +3,7 @@
  * Projekt  : WollMux
  * Funktion : Managed die Dateien auf die der WollMux zugreift (z.B. wollmux.conf)
  * 
- * Copyright (c) 2008 Landeshauptstadt München
+ * Copyright (c) 2009 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -38,6 +38,9 @@
  * 18.07.2007 | BNK | Alle Java-Properties in dumpInfo() ausgeben
  * 27.07.2007 | BNK | [P1448]WollMuxClassLoader.class.getClassLoader() als parent verwenden 
  * 01.09.2008 | BNK | [R28149]Klassen im CLASSPATH aus wollmux.conf haben vorrang vor WollMux-internen.
+ * 18.08.2009 | BED | -defaultWollmuxConf
+ *                  | andere Strategie für Suche nach wollmux.conf in setupWollMuxDir()
+ *                  | Verzeichnis der wollmux.conf als Default für DEFAULT_CONTEXT
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -49,13 +52,11 @@ package de.muenchen.allg.itd51.wollmux;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
@@ -79,6 +80,7 @@ import javax.swing.SwingUtilities;
 import com.sun.star.beans.Property;
 import com.sun.star.container.XNameAccess;
 import com.sun.star.lib.loader.WollMuxRegistryAccess;
+import com.sun.star.lib.loader.WollMuxRegistryAccessException;
 import com.sun.star.sdbc.XConnection;
 import com.sun.star.sdbc.XDataSource;
 import com.sun.star.uno.AnyConverter;
@@ -108,6 +110,9 @@ import de.muenchen.allg.itd51.wollmux.func.PrintFunctionLibrary;
 public class WollMuxFiles
 {
   private static final String ETC_WOLLMUX_WOLLMUX_CONF = "/etc/wollmux/wollmux.conf";
+
+  private static final String C_PROGRAMME_WOLLMUX_WOLLMUX_CONF =
+    "C:\\Programme\\wollmux\\wollmux.conf";
 
   private static final long DATASOURCE_TIMEOUT = 10000;
 
@@ -186,74 +191,115 @@ public class WollMuxFiles
   private static boolean installQATestHandler = false;
 
   /**
-   * Inhalt der wollmux.conf-Datei, die angelegt wird, wenn noch keine
-   * wollmux.conf-Datei vorhanden ist. Ist defaultWollmuxConf==null, so wird gar
-   * keine wollmux.conf-Datei angelegt.
-   */
-  private static final String defaultWollmuxConf = null;
-
-  /**
    * Druckfunktionen, bei denen kein ORDER-Attribut angegeben ist, werden automatisch
    * mit diesem ORDER-Wert versehen.
    */
   private static final String DEFAULT_PRINTFUNCTION_ORDER_VALUE = "100";
 
   /**
-   * Erzeugt das ,wollmux-Verzeichnis, falls es noch nicht existiert und erstellt
-   * eine Standard-wollmux,conf. Initialisiert auch den Logger.
+   * Erzeugt das .wollmux-Verzeichnis im Home-Verzeichnis des Benutzers (falls es
+   * noch nicht existiert), sucht nach der wollmux.conf und parst sie. Initialisiert
+   * auch den Logger.
+   * <p>
+   * Die wollmux.conf wird an folgenden Stellen in der angegebenen Reihenfolge
+   * gesucht:
    * 
-   * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
+   * <ol>
+   * <li>unter dem Dateipfad (inkl. Dateiname!), der von
+   * {@link WollMuxRegistryAccess#getUserWollMuxConfPath()} zurückgeliefert wird</li>
+   * <li>$HOME/.wollmux/wollmux.conf (wobei $HOME unter Windows das
+   * Profilverzeichnis bezeichnet)</li>
+   * <li>unter dem Dateipfad (inkl. Dateiname!), der von
+   * {@link WollMuxRegistryAccess#getSharedWollMuxConfPath()} zurückgeliefert wird</li>
+   * <li>unter dem Dateipfad, der in der Konstanten
+   * {@link #C_PROGRAMME_WOLLMUX_WOLLMUX_CONF} festgelegt ist (nur Windows!)</li>
+   * <li>unter dem Dateipfad, der in der Konstanten
+   * {@link #ETC_WOLLMUX_WOLLMUX_CONF} festgelegt ist (nur Linux!)</li>
+   * </ol>
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   * @author Daniel Benkmann (D-III-ITD-D101)
    */
   public static void setupWollMuxDir()
   {
-    long time = System.currentTimeMillis();
+    long time = System.currentTimeMillis(); // Zeitnahme fürs Debuggen
+
     String userHome = System.getProperty("user.home");
     wollmuxDir = new File(userHome, ".wollmux");
 
-    // .wollmux-Verzeichnis erzeugen falls es nicht existiert
+    // .wollmux-Verzeichnis im userHome erzeugen falls es nicht existiert
+    // Selbst wenn die wollmux.conf nicht im .wollmux-Verzeichnis liegt,
+    // wird es dennoch für die cache.conf und wollmux.log benötigt
     if (!wollmuxDir.exists()) wollmuxDir.mkdirs();
 
-    wollmuxConfFile = new File(wollmuxDir, "wollmux.conf");
-
+    // cache.conf und wollmux.log im .wollmux-Verzeichnis
     losCacheFile = new File(wollmuxDir, "cache.conf");
     wollmuxLogFile = new File(wollmuxDir, "wollmux.log");
 
-    // Default wollmux.conf erzeugen falls
-    // - keine wollmux.conf existiert UND
-    // - defaultWollMuxConf != null
-    if (!wollmuxConfFile.exists() && defaultWollmuxConf != null)
+    // Logger initialisieren:
+    Logger.init(wollmuxLogFile, Logger.LOG);
+
+    // Pfad zur wollmux.conf
+    String wollmuxConfPath = null;
+
+    // Versuch den Pfad der wollmux.conf für den User aus der Registry zu lesen
+    // Schlägt unter Linux automatisch fehl
+    try
     {
-      try
-      {
-        PrintStream wmconf = new PrintStream(new FileOutputStream(wollmuxConfFile));
-        wmconf.println(defaultWollmuxConf);
-        wmconf.close();
-      }
-      catch (FileNotFoundException e)
-      {}
+      wollmuxConfPath = WollMuxRegistryAccess.getUserWollMuxConfPath();
+      wollmuxConfFile = new File(wollmuxConfPath);
+    }
+    catch (WollMuxRegistryAccessException e)
+    {
+      // Entweder Linux oder Registry Key nicht gefunden
     }
 
-    /*
-     * Zuerst leeres ConfigThingy anlegen, damit wollmuxConf auch dann wohldefiniert
-     * ist, wenn die Datei Fehler enthält bzw. fehlt.
-     */
-    wollmuxConf = new ConfigThingy("wollmuxConf");
+    // Als nächstes wird im .wollmux-Verzeichnis nach der wollmux.conf gesucht
+    if (wollmuxConfFile == null || !wollmuxConfFile.exists())
+    {
+      wollmuxConfFile = new File(wollmuxDir, "wollmux.conf");
 
-    // Logger initialisieren:
-    if (WollMuxFiles.getWollMuxLogFile() != null)
-      Logger.init(WollMuxFiles.getWollMuxLogFile(), Logger.LOG);
+      // Falls wollmux.conf im .wollmux-Verzeichnis nicht existiert
+      // => Versuch den Pfad aus HKLM-Registry zu lesen (schlägt unter Linux fehl)
+      if (!wollmuxConfFile.exists())
+      {
+        try
+        {
+          wollmuxConfPath = WollMuxRegistryAccess.getSharedWollMuxConfPath();
+          wollmuxConfFile = new File(wollmuxConfPath);
+        }
+        catch (WollMuxRegistryAccessException e)
+        {
+          // Entweder Linux oder Registry Key nicht gefunden
+        }
+
+        // Als letzte Möglichkeit wird in einem Fallback-Verzeichnis gesucht
+        if (!wollmuxConfFile.exists())
+        {
+          wollmuxConfPath = ETC_WOLLMUX_WOLLMUX_CONF;
+
+          // Falls Windows, dann anderes Fallback-Verzeichnis
+          File[] roots = File.listRoots();
+          if (roots.length > 0 && roots[0].toString().contains(":"))
+            wollmuxConfPath = C_PROGRAMME_WOLLMUX_WOLLMUX_CONF;
+
+          wollmuxConfFile = new File(wollmuxConfPath);
+        }
+      }
+    }
+
+    // Bevor wir versuchen zu parsen wird auf jeden Fall ein leeres ConfigThingy
+    // angelegt, damit wollmuxConf auch dann wohldefiniert ist, wenn die Datei
+    // Fehler enthält bzw. fehlt.
+    wollmuxConf = new ConfigThingy("wollmuxConf");
 
     SlowServerWatchdog fido = new SlowServerWatchdog(SLOW_SERVER_TIMEOUT);
     fido.start();
 
-    /*
-     * Jetzt versuchen, die wollmux.conf zu parsen (falls die Datei existiert).
-     */
+    // Jetzt versuchen, die wollmux.conf zu parsen
     try
     {
-      if (getWollMuxConfFile().exists())
-        wollmuxConf =
-          new ConfigThingy("wollmuxConf", getWollMuxConfFile().toURI().toURL());
+      wollmuxConf = new ConfigThingy("wollmuxConf", wollmuxConfFile.toURI().toURL());
     }
     catch (Exception e)
     {
@@ -261,67 +307,15 @@ public class WollMuxFiles
     }
 
     fido.dontBark();
+    fido.logTimes();
 
-    /*
-     * Logging-Mode zum ersten Mal setzen. Wird nachher nochmal gesetzt, nachdem wir
-     * /etc/wollmux/wollmux.conf geparst haben.
-     */
+    // Logging-Mode setzen
     setLoggingMode(WollMuxFiles.getWollmuxConf());
 
+    // Lokalisierung initialisieren
     ConfigThingy l10n = getWollmuxConf().query("L10n", 1);
     if (l10n.count() > 0) L.init(l10n);
-
-    /*
-     * Falls die obige wollmux.conf keinen DEFAULT_CONTEXT definiert, so wird falls
-     * /etc/wollmux/wollmux.conf (oder unter Windows
-     * C:\Programme\wollmux\wollmux.conf) existiert diese der oben geparsten
-     * wollmux.conf aus dem HOME-Verzeichnis vorangestellt.
-     */
-    if (wollmuxConf.query("DEFAULT_CONTEXT", 1).count() == 0)
-    {
-      try
-      {
-        File[] roots = File.listRoots();
-        String defaultWollmuxConfPath = ETC_WOLLMUX_WOLLMUX_CONF;
-        try
-        {
-          // Testen, ob wir unter Windows sind - falls ja, Pfad aus Registry lesen
-          if (roots.length > 0 && roots[0].toString().contains(":"))
-            defaultWollmuxConfPath = WollMuxRegistryAccess.getWollMuxConfDir();
-        }
-        catch (Throwable t)
-        {
-          Logger.error(t);
-        }
-
-        wollmuxConfFile = new File(defaultWollmuxConfPath);
-        if (wollmuxConfFile.exists())
-        {
-          ConfigThingy etcWollmuxConf =
-            new ConfigThingy("etcWollmuxConf", wollmuxConfFile.toURI().toURL());
-
-          Iterator<ConfigThingy> iter = wollmuxConf.iterator();
-          while (iter.hasNext())
-            etcWollmuxConf.addChild(iter.next());
-          wollmuxConf = etcWollmuxConf;
-        }
-        else
-          Logger.log(L.m("Datei nicht gefunden: %1", wollmuxConfFile));
-      }
-      catch (Exception e)
-      {
-        Logger.error(e);
-      }
-    }
-
-    /*
-     * Logging-Mode endgültig setzen.
-     */
-    setLoggingMode(WollMuxFiles.getWollmuxConf());
-
     Logger.debug(L.flushDebugMessages());
-
-    fido.logTimes();
 
     showCredits =
       WollMuxFiles.getWollmuxConf().query("SHOW_CREDITS", 1).query("on").count() > 0;
@@ -507,8 +501,13 @@ public class WollMuxFiles
   }
 
   /**
-   * Werten den DEFAULT_CONTEXT aus wollmux,conf aus und erstellt eine entsprechende
-   * URL.
+   * Wertet den DEFAULT_CONTEXT aus wollmux.conf aus und erstellt eine entsprechende
+   * URL, mit der {@link #defaultContextURL} initialisiert wird. Wenn in der
+   * wollmux.conf kein DEFAULT_CONTEXT angegeben ist, so wird das Verzeichnis, in dem
+   * die wollmux.conf gefunden wurde, als Default Context verwendet.
+   * 
+   * Sollte {{@link #defaultContextURL} nicht <code>null</code> sein, tut diese
+   * Methode nichts.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
@@ -543,7 +542,7 @@ public class WollMuxFiles
          * eigentlich nicht passieren können), so gilt immer noch das erste.
          */
         defaultContextURL = new URL("file:///");
-        defaultContextURL = getWollMuxDir().toURI().toURL();
+        defaultContextURL = getWollMuxConfFile().toURI().toURL();
         defaultContextURL = new URL(defaultContextURL, urlVerzStr);
       }
       catch (MalformedURLException e)
