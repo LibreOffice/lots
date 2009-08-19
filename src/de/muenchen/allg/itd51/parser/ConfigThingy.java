@@ -64,6 +64,7 @@
  * 10.08.2007 | BNK | Fehler bei der stringRepresentation() von Listen mit nur einem Element behoben.
  * 25.02.2008 | BNK | ConfigThingy generisiert
  * 12.06.2009 | BED | get, query und queryByChild um jeweils eine Version mit minlevel Argument erweitert
+ * 19.08.2009 | BNK | [R52737]FIXED: Lange Strings führen zu StackOverflowError in ConfigThingy
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -1178,13 +1179,6 @@ public class ConfigThingy implements Iterable<ConfigThingy>
   private static class StringToken extends StringContentToken
   {
     /**
-     * Regex zur Identifikation von legalen Strings.
-     */
-    private static Pattern p1 = Pattern.compile("^\"((([^\"])|(\"\"))*)\"");
-
-    private static Pattern p2 = Pattern.compile("^'((([^'])|(''))*)'");
-
-    /**
      * Erzeugt ein neues StringToken
      * 
      * @param tokenData
@@ -1194,53 +1188,67 @@ public class ConfigThingy implements Iterable<ConfigThingy>
     public StringToken(String tokenData, URL url, int line, int position)
     {
       super(url, line, position);
-      Matcher m = p1.matcher(tokenData); // testet auf "..." Strings
-      if (m.find())
-      {
-        // extract string inside "..." and replace "" with ", %n with "\n" and
-        // %% with %
-        content = m.group(1).replaceAll("\"\"", "\"");
-      }
-      else
-      {
-        m = p2.matcher(tokenData); // tested auf '...' Strings
-        if (!m.find()) throw new IllegalArgumentException("String token expected!");
 
-        // extract string inside '...' and replace '' with ', %n with "\n" and
-        // %% with %
-        content = m.group(1).replaceAll("''", "'");
-      }
+      int len = atStartOf(tokenData);
+      if (len < 2) throw new IllegalArgumentException("String token expected!");
+
+      char quote = tokenData.charAt(0);
+
       /*
-       * %-Escapes auswerten
+       * %-Escapes auswerten, sowie quotequote durch quote ersetzen
        */
-      StringBuilder buffy = new StringBuilder(content);
+      StringBuilder buffy = new StringBuilder(tokenData.substring(1, len - 1));
+      String quoteStr = "" + quote;
       int startidx = 0;
       int idx;
-      while ((idx = buffy.indexOf("%", startidx)) >= 0)
+      while (true)
       {
-        if (idx + 1 >= buffy.length()) break;
+        idx = buffy.indexOf("%", startidx);
+        int idx2 = buffy.indexOf(quoteStr, startidx);
 
-        int replen = 1;
-        String repstr = "" + buffy.charAt(idx);
-        switch (buffy.charAt(idx + 1))
+        if (idx < 0 && idx2 < 0) break;
+
+        String repstr;
+        int replen;
+
+        if (idx < 0 || (idx2 >= 0 && idx2 < idx)) // quotequote
         {
-          case 'n':
-            repstr = "\n";
-            replen = 2;
-            break;
-          case '%':
-            repstr = "%";
-            replen = 2;
-            break;
-          case 'u':
-            repstr = parseUnicode(buffy, idx + 2);
-            replen = 6;
-            break;
-          // darf nicht gemacht werden, weil zum Beispiel in URLs %-escapes
-          // vorkommen: default: throw new IllegalArgumentException("Unknown escape
-          // in string token '%" + buffy.charAt(idx)+"'!");
+          idx = idx2;
+          replen = 2;
+          repstr = quoteStr;
         }
+        else
+        // if (idx >= 0 && (idx2 < 0 || idx2 >= idx)) // %-Escape
+        {
+          if (idx + 1 >= buffy.length()) break;
 
+          // default: durch selbes Zeichen, also % ersetzen
+          repstr = "" + buffy.charAt(idx);
+          replen = 1;
+
+          switch (buffy.charAt(idx + 1))
+          {
+            case 'n':
+              repstr = "\n";
+              replen = 2;
+              break;
+            case '%':
+              repstr = "%";
+              replen = 2;
+              break;
+            case 'u':
+              repstr = parseUnicode(buffy, idx + 2);
+              replen = 6;
+              break;
+            /*
+             * darf nicht gemacht werden, weil zum Beispiel in URLs %-escapes
+             * vorkommen:
+             * 
+             * default: throw new IllegalArgumentException("Unknown escape in string
+             * token '%" + buffy.charAt(idx)+"'!");
+             */
+          }
+        }
         buffy.replace(idx, idx + replen, repstr);
         startidx = idx + repstr.length();
       }
@@ -1278,11 +1286,19 @@ public class ConfigThingy implements Iterable<ConfigThingy>
      */
     public static int atStartOf(String str)
     {
-      Matcher m = p1.matcher(str);
-      if (m.find()) return m.end();
-      m = p2.matcher(str);
-      if (m.find()) return m.end();
-      return 0;
+      if (str.length() < 2) return 0;
+      char quote = str.charAt(0);
+      if (quote != '"' && quote != '\'') return 0;
+
+      int idx = 1;
+      while (true)
+      {
+        idx = str.indexOf(quote, idx);
+        if (idx < 0) return 0;
+        ++idx;
+        if (idx >= str.length() || str.charAt(idx) != quote) return idx;
+        ++idx;
+      }
     }
   }
 
