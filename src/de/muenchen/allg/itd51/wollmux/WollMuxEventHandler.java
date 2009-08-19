@@ -330,6 +330,18 @@ public class WollMuxEventHandler
       String msg = "";
       if (t.getMessage() != null) msg += t.getMessage();
       Throwable c = t.getCause();
+      /*
+       * Bei RuntimeExceptions keine Benutzersichtbare Meldung, weil
+       * 
+       * 1. der Benutzer damit eh nix anfangen kann
+       * 
+       * 2. dies typischerweise passiert, wenn der Benutzer das Dokument geschlossen
+       * hat, bevor der WollMux fertig war. In diesem Fall will er nicht mit einer
+       * Meldung belästigt werden.
+       * 
+       */
+      if (c instanceof RuntimeException) return;
+
       if (c != null)
       {
         msg += "\n\n" + c;
