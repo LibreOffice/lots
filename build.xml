@@ -165,7 +165,7 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 	    	<fileset file="${MD5SUMS_FILE_NAME}"/>
      		<fileset file="${WollMux_COMPJAR}" />
 	    	<fileset file="${WOLLMUXBAR_JAR}" />
-	    	<fileset file="${WOLLMUXBAR_EXE}" />
+	    	<!-- <fileset file="${WOLLMUXBAR_EXE}" /> -->
 	    	<fileset file="${PKG_FILE}" />
 
 	    	<!-- VERSION_FILE, BUILD_INFO_FILE und DESCRIPTION_XML 
