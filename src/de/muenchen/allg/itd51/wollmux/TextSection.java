@@ -101,7 +101,6 @@ public class TextSection implements VisibilityElement
   public void setVisible(boolean visible)
   {
     UNO.setProperty(section, "IsVisible", Boolean.valueOf(visible));
-    UNO.hideTextRange(section.getAnchor(), !visible);
   }
 
   /*

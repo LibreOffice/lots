@@ -32,6 +32,7 @@ package de.muenchen.allg.itd51.wollmux;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
@@ -1256,13 +1257,21 @@ public class SachleitendeVerfuegung
   } while (setInvisibleRange == null && cursor.gotoNextParagraph(false));
 
     // Prüfen, welche Textsections im ausgeblendeten Bereich liegen und diese
-    // ebenfalls ausblenden:
+    // ebenfalls ausblenden (und den alten Stand merken):
     List<XTextSection> hidingSections =
       getSectionsFromPosition(pmod.getTextDocument(), setInvisibleRange);
-    for (Iterator<XTextSection> iter = hidingSections.iterator(); iter.hasNext();)
-    {
-      UNO.setProperty(iter.next(), "IsVisible", Boolean.FALSE);
-    }
+    HashMap<XTextSection, Boolean> sectionOldState =
+      new HashMap<XTextSection, Boolean>();
+    for (XTextSection section : hidingSections)
+      try
+      {
+        boolean oldState =
+          AnyConverter.toBoolean(UNO.getProperty(section, "IsVisible"));
+        sectionOldState.put(section, oldState);
+        UNO.setProperty(section, "IsVisible", Boolean.FALSE);
+      }
+      catch (IllegalArgumentException x)
+      {}
 
     // ensprechende Verfügungspunkte ausblenden
     if (setInvisibleRange != null) UNO.hideTextRange(setInvisibleRange, true);
@@ -1313,9 +1322,10 @@ public class SachleitendeVerfuegung
     pmod.setPrintBlocksProps(BLOCKNAME_SLV_COPY_ONLY, true, true);
 
     // ausgeblendete TextSections wieder einblenden
-    for (Iterator<XTextSection> iter = hidingSections.iterator(); iter.hasNext();)
+    for (XTextSection section : hidingSections)
     {
-      UNO.setProperty(iter.next(), "IsVisible", Boolean.TRUE);
+      Boolean oldState = sectionOldState.get(section);
+      if (oldState != null) UNO.setProperty(section, "IsVisible", oldState);
     }
 
     // Verfügungspunkte wieder einblenden:
