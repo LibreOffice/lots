@@ -116,6 +116,8 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 	
 	<property name="WOLLMUXBAR_JAR_NAME" value="WollMuxBar.jar" />
 	<property name="WOLLMUXBAR_JAR" value="${PACKAGE_DIR}/${WOLLMUXBAR_JAR_NAME}" />
+	<property name="WOLLMUXBAR_EXE_NAME" value="wollmuxbar.exe" />
+	<property name="WOLLMUXBAR_EXE" value="${PACKAGE_DIR}/${WOLLMUXBAR_EXE_NAME}" />
 	
 	<property name="UNOHELPER_SRC" value="${UNOHELPER_DIR}/src" />
 	
@@ -141,7 +143,7 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 
 	<target name="all" depends="WollMuxBar.jar,WollMux.oxt,md5sum" />
 	
-	<target name="snapshot" depends="clean, makechangelog, debug, all, .tar.gz, deb" />
+	<target name="snapshot" depends="clean, makechangelog, debug, all, wollmuxbar.exe, .tar.gz, deb" />
 
 	<!-- The debug target doesn't do anything by itself, but for any targets executed later
 	     the DEBUG property will be set. --> 
@@ -163,6 +165,7 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 	    	<fileset file="${MD5SUMS_FILE_NAME}"/>
      		<fileset file="${WollMux_COMPJAR}" />
 	    	<fileset file="${WOLLMUXBAR_JAR}" />
+	    	<fileset file="${WOLLMUXBAR_EXE}" />
 	    	<fileset file="${PKG_FILE}" />
 
 	    	<!-- VERSION_FILE, BUILD_INFO_FILE und DESCRIPTION_XML 
@@ -404,4 +407,12 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 		<java classname="de.muenchen.allg.itd51.wollmux.LocalizationUpdater" fork="true" classpath="${MY_CLASSES}" dir="${basedir}"/>
 	</target>
 
+	<!-- Das Target erzeugt die wollmuxbar.exe -->
+	<target name="wollmuxbar.exe">
+		<exec executable="makensis" failonerror="true" failifexecutionfails="true">
+			<arg line="-V3 ${MISC}/wollmuxbarlauncher.nsi"/>
+		</exec>
+		<move file="${MISC}/${WOLLMUXBAR_EXE_NAME}" todir="${PACKAGE_DIR}" />
+	</target>
+	
 </project>
