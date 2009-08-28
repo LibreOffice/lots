@@ -578,13 +578,14 @@ public class DispatchHandler
     {
       // z.B. "wollmux:OpenTemplate#internerBriefkopf"
       // =====> {"wollmux:OpenTemplate", "internerBriefkopf"}
-      String[] parts = urlStr.split("#", 2);
+      int idx = urlStr.indexOf('#');
+      String part = idx < 0 ? urlStr : urlStr.substring(0, idx);
 
       Iterator<BasicDispatchHandler> iter = dispatchHandlers.iterator();
       while (iter.hasNext())
       {
         BasicDispatchHandler handler = iter.next();
-        if (handler.providesUrl(parts[0])) return handler;
+        if (handler.providesUrl(part)) return handler;
       }
       return null;
     }
