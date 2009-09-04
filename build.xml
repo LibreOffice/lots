@@ -119,6 +119,9 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 	<property name="WOLLMUXBAR_EXE_NAME" value="wollmuxbar.exe" />
 	<property name="WOLLMUXBAR_EXE" value="${PACKAGE_DIR}/${WOLLMUXBAR_EXE_NAME}" />
 	
+    <property name="TERMINATEOOO_JAR_NAME" value="TerminateOOo.jar" />
+	<property name="TERMINATEOOO_JAR" value="${PACKAGE_DIR}/${TERMINATEOOO_JAR_NAME}" />
+	
 	<property name="UNOHELPER_SRC" value="${UNOHELPER_DIR}/src" />
 	
 	<!-- Nicht ${UNOHELPER_DIR}/bin. Dies liegt in einem anderen
@@ -127,6 +130,7 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 	
 	<property name="TOOLING_MAIN_CLASS" value="com.sun.star.lib.loader.Loader" />
 	<property name="WOLLMUXBAR_MAIN_CLASS" value="de.muenchen.allg.itd51.wollmux.dialog.WollMuxBar" />
+    <property name="TERMINATEOOO_MAIN_CLASS" value="TerminateOOo" />
 	
     <!-- The directory that contains the subdirectories com/ and win/ of the SDK -->
 	<!-- First check if we got our own copy of classes/ on the same level as WollMux and UNOHelper -->
@@ -165,6 +169,7 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 	    	<fileset file="${MD5SUMS_FILE_NAME}"/>
      		<fileset file="${WollMux_COMPJAR}" />
 	    	<fileset file="${WOLLMUXBAR_JAR}" />
+	    	<fileset file="${TERMINATEOOO_JAR}" />
 	    	<!-- <fileset file="${WOLLMUXBAR_EXE}" /> -->
 	    	<fileset file="${PKG_FILE}" />
 
@@ -414,5 +419,33 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 		</exec>
 		<move file="${MISC}/${WOLLMUXBAR_EXE_NAME}" todir="${PACKAGE_DIR}" />
 	</target>
+	
+    <target name="TerminateOOo.jar">
+        <property name="DEBUG" value="off" />
+        <property name="OPTIMIZE" value="on" />
+        <javac srcdir="${MISC}"
+            destdir="${BIN}"
+        	includes="${TERMINATEOOO_MAIN_CLASS}.java"
+    	    classpath="${OOO_CLASSPATH}"
+    	    encoding="${SRC_ENCODING}"
+    	    debug="${DEBUG}"
+    	    optimize="${OPTIMIZE}"
+    	    target="1.5"
+        />
+    	
+        <delete file="${TERMINATEOOO_JAR}" />
+		<jar destfile="${TERMINATEOOO_JAR}">
+		    <fileset dir="${BIN}" includes="${TERMINATEOOO_MAIN_CLASS}.class"/>
+			<fileset dir="${TOOLING}" includes="**/*" />
+			<manifest>
+			    <attribute name="Main-Class" value="${TOOLING_MAIN_CLASS}" />
+	            <section name="com/sun/star/lib/loader/Loader.class">
+	                <attribute name="Application-Class" value="${TERMINATEOOO_MAIN_CLASS}" />
+	            </section>
+	        </manifest>
+	    </jar>
+    	
+    	<delete file="${BIN}/${TERMINATEOOO_MAIN_CLASS}.class" />
+    </target>
 	
 </project>
