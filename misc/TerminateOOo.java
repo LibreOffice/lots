@@ -3,7 +3,7 @@
  * Projekt  : n/a
  * Funktion : Kleines Tool zum Beenden von OpenOffice.org
  * 
- * Copyright (c) 2009 Landeshauptstadt MÃ¼nchen
+ * Copyright (c) 2009 Landeshauptstadt München
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL), 
@@ -18,8 +18,8 @@
  * along with this program. If not, see 
  * http://ec.europa.eu/idabc/en/document/7330
  *
- * Ã„nderungshistorie:
- * Datum      | Wer | Ã„nderungsgrund
+ * Änderungshistorie:
+ * Datum      | Wer | Änderungsgrund
  * -------------------------------------------------------------------
  * 03.09.2009 | BED | Erstellung
  * -------------------------------------------------------------------
@@ -27,7 +27,6 @@
  * @author Daniel Benkmann (D-III-ITD-D101)
  * 
  */
-package de.muenchen.allg.d101.test;
 
 import com.sun.star.beans.XPropertySet;
 import com.sun.star.comp.helper.Bootstrap;
@@ -46,7 +45,7 @@ public class TerminateOOo
 
   /**
    * Stellt eine Verbindung mit OpenOffice.org her (und startet dabei einen
-   * soffice-Prozess, falls noch keiner lÃ¤uft) und beendet dann OpenOffice.org
+   * soffice-Prozess, falls noch keiner läuft) und beendet dann OpenOffice.org
    * mittels XDesktop.terminate(). Das Programm beendet die JVM mit Statuscode 0,
    * wenn das Beenden von Openoffice.org erfolgreich war und mit einem Statuscode !=
    * 0, wenn OpenOffice.org nicht beendet wurde bzw. irgendetwas schief gelaufen ist
@@ -76,6 +75,10 @@ public class TerminateOOo
       XPropertySet xPropSet =
         (XPropertySet) UnoRuntime.queryInterface(XPropertySet.class, desktop);
       xPropSet.setPropertyValue("SuspendQuickstartVeto", Boolean.TRUE);
+      //ACHTUNG: Der obige Code hat keine Auswirkung auf den Quickstarter der
+      //WollMuxBar! Wenn die WollMuxBar mit "--quickstarter" gestartet wird,
+      //kann OpenOffice nicht beendet werden.
+      
 
       // Versuch OOo zu beenden
       terminated = desktop.terminate();
