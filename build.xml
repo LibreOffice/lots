@@ -119,7 +119,7 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 	<property name="WOLLMUXBAR_EXE_NAME" value="wollmuxbar.exe" />
 	<property name="WOLLMUXBAR_EXE" value="${PACKAGE_DIR}/${WOLLMUXBAR_EXE_NAME}" />
 	
-    <property name="TERMINATEOOO_JAR_NAME" value="TerminateOOo.jar" />
+	<property name="TERMINATEOOO_JAR_NAME" value="TerminateOOo.jar" />
 	<property name="TERMINATEOOO_JAR" value="${PACKAGE_DIR}/${TERMINATEOOO_JAR_NAME}" />
 	
 	<property name="UNOHELPER_SRC" value="${UNOHELPER_DIR}/src" />
@@ -158,36 +158,37 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 	</target>
 	
 	<target name="clean" >
-	    <delete includeEmptyDirs="true">
-	    	<fileset dir="${MY_IDL}" includes="**/*.urd" />
-	    	<fileset dir="${MY_IDL}" includes="**/*.class" />
-	    	<fileset dir="${BIN}" includes="de/**" />
-	    	<fileset dir="${BIN}" includes="com/**" />
-	    	<fileset dir="${BIN}" includes="data/**" />
-	    	
-	    	<fileset file="${RDBFILE}" />
-	    	<fileset file="${MD5SUMS_FILE_NAME}"/>
-     		<fileset file="${WollMux_COMPJAR}" />
-	    	<fileset file="${WOLLMUXBAR_JAR}" />
-	    	<fileset file="${TERMINATEOOO_JAR}" />
-	    	<!-- <fileset file="${WOLLMUXBAR_EXE}" /> -->
-	    	<fileset file="${PKG_FILE}" />
+		<delete includeEmptyDirs="true">
+		<fileset dir="${MY_IDL}" includes="**/*.urd" />
+			<fileset dir="${MY_IDL}" includes="**/*.class" />
+			<fileset dir="${BIN}" includes="de/**" />
+			<fileset dir="${BIN}" includes="com/**" />
+			<fileset dir="${BIN}" includes="data/**" />
+			
+			<fileset file="${RDBFILE}" />
+			<fileset file="${MD5SUMS_FILE_NAME}"/>
+			<fileset file="${WollMux_COMPJAR}" />
+			<fileset file="${WOLLMUXBAR_JAR}" />
+			<fileset file="${TERMINATEOOO_JAR}" />
+			<fileset dir="${PACKAGE_DIR}" includes="*-installer.exe" />
+			<!-- <fileset file="${WOLLMUXBAR_EXE}" /> -->
+			<fileset file="${PKG_FILE}" />
 
-	    	<!-- VERSION_FILE, BUILD_INFO_FILE und DESCRIPTION_XML 
-	    	    **nicht** löschen, da diese nur bei
-	    	Vorhandensein von svn oder git regeneriert werden können.
-	    	<fileset file="${BUILD_INFO_FILE}" />
-	    	<fileset file="${DESCRIPTION_XML}" />
-	    	<fileset file="${VERSION_FILE}" /> -->
-	    	
-	    	<!-- CHANGELOG_FILE nicht löschen, da dies nur innerhalb der LHM
-	    	generiert werden kann. -->
-	    	<!-- <fileset file="${CHANGELOG_FILE}" /> -->
-	    	
-	    	<!-- UPDATE_XML schon löschen, da diese extern eh nicht benötigt wird -->
-	    	<fileset file="${UPDATE_XML}" />
-	    </delete>
-	    <delete dir="${PACKAGE_DIR}/deb" />
+			<!-- VERSION_FILE, BUILD_INFO_FILE und DESCRIPTION_XML 
+			    **nicht** löschen, da diese nur bei
+			    Vorhandensein von svn oder git regeneriert werden können.
+			<fileset file="${BUILD_INFO_FILE}" />
+			<fileset file="${DESCRIPTION_XML}" />
+			<fileset file="${VERSION_FILE}" /> -->
+
+			<!-- CHANGELOG_FILE nicht löschen, da dies nur innerhalb der LHM
+			generiert werden kann. -->
+			<!-- <fileset file="${CHANGELOG_FILE}" /> -->
+
+			<!-- UPDATE_XML schon löschen, da diese extern eh nicht benötigt wird -->
+			<fileset file="${UPDATE_XML}" />
+		</delete>
+		<delete dir="${PACKAGE_DIR}/deb" />
 	</target>
 	
 	<target name="makeversion">
@@ -446,6 +447,16 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 		</jar>
 
 		<delete file="${BIN}/${TERMINATEOOO_MAIN_CLASS}.class" />
+	</target>
+	
+	<!-- Das Target erzeugt den Windows WollMux-Installer -->
+	<target name="wininstaller" depends="makeversion, TerminateOOo.jar, WollMuxBar.jar, WollMux.oxt">
+		<exec executable="makensis" failonerror="true" failifexecutionfails="true">
+			<arg line="-V3 -DFILESDIR=../${PACKAGE_DIR} -DVERSION=${VERSION} ${MISC}/wollmuxinstaller.nsi"/>
+		</exec>
+		
+		<move file="${MISC}/wollmux-${VERSION}-installer.exe" todir="${PACKAGE_DIR}" />
+		<delete file="${TERMINATEOOO_JAR}" />
 	</target>
 
 </project>
