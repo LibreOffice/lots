@@ -192,12 +192,12 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 	
 	<target name="makeversion">
 		<exec executable="bash" failifexecutionfails="false">
-		  <arg line="misc/makeversion ${VERSION_FILE} ${BUILD_INFO_FILE} ${DESCRIPTION_XML} ${UPDATE_XML}"/>
+			<arg line="misc/makeversion ${VERSION_FILE} ${BUILD_INFO_FILE} ${DESCRIPTION_XML} ${UPDATE_XML}"/>
 		</exec>		
 		<loadfile property="VERSION" srcfile="${VERSION_FILE}" failonerror="true">
-		   <filterchain>
-		       <striplinebreaks/>
-		   </filterchain>
+			<filterchain>
+				<striplinebreaks/>
+			</filterchain>
 		</loadfile>
 		<echo message="WollMux-Version is ${VERSION}" />
 	</target>
@@ -250,7 +250,7 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 			<arg value="-O" />
 			<arg value="./${MY_IDL}" />
 			<fileset dir="${MY_IDL}" includes="**/*.urd" />
-  		    <mapper type="package" from="*.urd" to="-T*" />
+			<mapper type="package" from="*.urd" to="-T*" />
 		</apply>
 	</target>
 	
@@ -259,21 +259,21 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 		<property name="OPTIMIZE" value="on" />
 
 		<javac srcdir="${UNOHELPER_SRC}"
-               destdir="${UNOHELPER_BIN}"
-               classpath="${OOO_CLASSPATH}"
-			   encoding="${SRC_ENCODING}"
-               debug="${DEBUG}"
-			   optimize="${OPTIMIZE}"
-			   target="1.5"
-   	    />
+			destdir="${UNOHELPER_BIN}"
+			classpath="${OOO_CLASSPATH}"
+			encoding="${SRC_ENCODING}"
+			debug="${DEBUG}"
+			optimize="${OPTIMIZE}"
+			target="1.5"
+		/>
 		
 		<javac srcdir="${SRC}"
-		               destdir="${BIN}"
-		               classpath="${OOO_CLASSPATH}:${MY_IDL}:${TOOLING}"
-					   encoding="${SRC_ENCODING}"
-		               debug="${DEBUG}"
-					   optimize="${OPTIMIZE}"
-					   target="1.5"
+			destdir="${BIN}"
+			classpath="${OOO_CLASSPATH}:${MY_IDL}:${TOOLING}"
+			encoding="${SRC_ENCODING}"
+			debug="${DEBUG}"
+			optimize="${OPTIMIZE}"
+			target="1.5"
 		/>
 	</target>
 	
@@ -282,7 +282,7 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 		<jar destfile="${WOLLMUXBAR_JAR}">
 <!--			<fileset dir="${BIN}" includes="**/WollMuxBar*,**/dialog/UIElement*,**/ConfigThingy*,**/NodeNotFoundException*,**/SyntaxErrorException*,**/ConfigurationErrorException*,**/DispatchHandler*,**/L.class,**/Logger*,**/WollMuxFiles*,**/WollMuxBarEventHandler*,**/dialog/Common*,**/XPAL*,**/XWollMux*" />
 			<fileset dir="${UNOHELPER_BIN}" includes="**/afid/*" /> -->
-	  	    <fileset dir="${BIN}" includes="**/*.class"/>
+			<fileset dir="${BIN}" includes="**/*.class"/>
 			<fileset dir="${MY_IDL}" includes="**/*.class"/>
 			<fileset dir="${UNOHELPER_BIN}" includes="**/*.class" />
 			<fileset dir="${TOOLING}" includes="**/*" />
@@ -349,7 +349,7 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 		<echo level="info" message="Install finished at ">${mytime}</echo>
 	</target>
 
-        <target name=".tar.gz" depends="makeversion, bumpversion">
+	<target name=".tar.gz" depends="makeversion, bumpversion">
 		<property name="TAR_BUILD_DIR" value="${PACKAGE_DIR}/wollmux-${VERSION}" />
 		<mkdir dir="${TAR_BUILD_DIR}" />
 		<copy todir="${TAR_BUILD_DIR}/WollMux" >
@@ -362,11 +362,11 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 		</copy>
 		
 		<exec dir="${TAR_BUILD_DIR}" executable="ant" failifexecutionfails="true" failonerror="true">
-		    <arg line="-f WollMux/build.xml clean" />
+			<arg line="-f WollMux/build.xml clean" />
 		</exec>
 
 		<exec dir="${PACKAGE_DIR}" executable="tar" failifexecutionfails="true" failonerror="true">
-		    <arg line="-czf wollmux-${VERSION}.tar.gz --exclude=.git --exclude=.svn --exclude=.gitignore --exclude=debian wollmux-${VERSION}" />
+			<arg line="-czf wollmux-${VERSION}.tar.gz --exclude=.git --exclude=.svn --exclude=.gitignore --exclude=debian wollmux-${VERSION}" />
 		</exec>
 		
 		<delete dir="${TAR_BUILD_DIR}" />
@@ -387,7 +387,7 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 		</copy>
 		
 		<exec dir="${DEB_BUILD_DIR}" executable="ant" failifexecutionfails="true" failonerror="true">
-		    <arg line="-f build.xml clean" />
+			<arg line="-f build.xml clean" />
 		</exec>
 
 		<copy todir="${DEB_BUILD_DIR}/debian" >
@@ -398,11 +398,11 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 		</exec>
 		
 		<exec dir="${PACKAGE_DIR}/deb" executable="tar" failifexecutionfails="true" failonerror="true">
-		    <arg line="-czf wollmux_${VERSION}.orig.tar.gz --exclude=.git --exclude=.svn --exclude=.gitignore --exclude=debian wollmux-${VERSION}" />
+			<arg line="-czf wollmux_${VERSION}.orig.tar.gz --exclude=.git --exclude=.svn --exclude=.gitignore --exclude=debian wollmux-${VERSION}" />
 		</exec>
 		
 		<exec dir="${DEB_BUILD_DIR}" executable="dpkg-buildpackage" failifexecutionfails="true" failonerror="true">
-          <arg line="-uc -us -sa -rfakeroot -I.git -I.svn -I.gitignore" />
+			<arg line="-uc -us -sa -rfakeroot -I.git -I.svn -I.gitignore" />
 		</exec> 
 		<delete dir="${DEB_BUILD_DIR}" />
 	</target>
@@ -420,32 +420,32 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 		<move file="${MISC}/${WOLLMUXBAR_EXE_NAME}" todir="${PACKAGE_DIR}" />
 	</target>
 	
-    <target name="TerminateOOo.jar">
-        <property name="DEBUG" value="off" />
-        <property name="OPTIMIZE" value="on" />
-        <javac srcdir="${MISC}"
-            destdir="${BIN}"
-        	includes="${TERMINATEOOO_MAIN_CLASS}.java"
-    	    classpath="${OOO_CLASSPATH}"
-    	    encoding="${SRC_ENCODING}"
-    	    debug="${DEBUG}"
-    	    optimize="${OPTIMIZE}"
-    	    target="1.5"
-        />
-    	
-        <delete file="${TERMINATEOOO_JAR}" />
+	<target name="TerminateOOo.jar">
+		<property name="DEBUG" value="off" />
+		<property name="OPTIMIZE" value="on" />
+		<javac srcdir="${MISC}"
+			destdir="${BIN}"
+			includes="${TERMINATEOOO_MAIN_CLASS}.java"
+			classpath="${OOO_CLASSPATH}"
+			encoding="${SRC_ENCODING}"
+			debug="${DEBUG}"
+			optimize="${OPTIMIZE}"
+			target="1.5"
+		/>
+
+		<delete file="${TERMINATEOOO_JAR}" />
 		<jar destfile="${TERMINATEOOO_JAR}">
-		    <fileset dir="${BIN}" includes="${TERMINATEOOO_MAIN_CLASS}.class"/>
+			<fileset dir="${BIN}" includes="${TERMINATEOOO_MAIN_CLASS}.class" />
 			<fileset dir="${TOOLING}" includes="**/*" />
 			<manifest>
-			    <attribute name="Main-Class" value="${TOOLING_MAIN_CLASS}" />
-	            <section name="com/sun/star/lib/loader/Loader.class">
-	                <attribute name="Application-Class" value="${TERMINATEOOO_MAIN_CLASS}" />
-	            </section>
-	        </manifest>
-	    </jar>
-    	
-    	<delete file="${BIN}/${TERMINATEOOO_MAIN_CLASS}.class" />
-    </target>
-	
+				<attribute name="Main-Class" value="${TOOLING_MAIN_CLASS}" />
+				<section name="com/sun/star/lib/loader/Loader.class">
+					<attribute name="Application-Class" value="${TERMINATEOOO_MAIN_CLASS}" />
+				</section>
+			</manifest>
+		</jar>
+
+		<delete file="${BIN}/${TERMINATEOOO_MAIN_CLASS}.class" />
+	</target>
+
 </project>
