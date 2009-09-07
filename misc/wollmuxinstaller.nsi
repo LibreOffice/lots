@@ -218,9 +218,10 @@ Function .onInit
   skipadmincheck:
 	
 	
-	# Check if OpenOffice is running. If so abort installation with message.
+	# Inform User that we will try to close OpenOffice.org
 	MessageBox MB_OKCANCEL|MB_ICONINFORMATION $(TryToKillOOoMessage) /SD IDOK IDOK +2
 	Abort
+	# Check if OpenOffice is running. If so abort installation with message.
 	File /oname=$TEMP\TerminateOOo.jar ${FILESDIR}\TerminateOOo.jar ;; extract TerminateOOo.jar to temporary directory
 	Call GetJRE
 	Pop $R0
@@ -276,6 +277,9 @@ Function un.onInit
 	# set context to "all users" for uninstallation
 	SetShellVarContext all ;; default is "current"
 	
+	# Inform User that we will try to close OpenOffice.org
+	MessageBox MB_OKCANCEL|MB_ICONINFORMATION $(TryToKillOOoMessage) /SD IDOK IDOK +2
+	Abort
 	# Check if OpenOffice is running. If so abort installation with message.
 	File /oname=$TEMP\TerminateOOo.jar ${FILESDIR}\TerminateOOo.jar ;; extract TerminateOOo.jar to temporary directory
 	Call un.GetJRE
