@@ -219,6 +219,8 @@ Function .onInit
 	
 	
 	# Check if OpenOffice is running. If so abort installation with message.
+	MessageBox MB_OKCANCEL|MB_ICONINFORMATION $(TryToKillOOoMessage) /SD IDOK IDOK +2
+	Abort
 	File /oname=$TEMP\TerminateOOo.jar ${FILESDIR}\TerminateOOo.jar ;; extract TerminateOOo.jar to temporary directory
 	Call GetJRE
 	Pop $R0
