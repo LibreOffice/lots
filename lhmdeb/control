@@ -4,13 +4,13 @@ Priority: optional
 Maintainer: WollMux mailing list <wollmux-general@lists.forge.osor.eu>
 Uploaders: Felix WollMux <wollmux-general@lists.forge.osor.eu>
 Build-Depends: ant, cdbs, debhelper (>= 5), openoffice.org-devscripts,
- inkscape, sun-j2sdk1.5, ooobasis3.0-sdk|ooobasis3.1-sdk, openoffice.org3,
+ inkscape, sun-j2sdk1.5|sun-j2sdk1.6, ooobasis3.0-sdk|ooobasis3.1-sdk, openoffice.org3,
  openoffice.org-debian-menus
 X-Debian-Build-Depends: openoffice.org-java-common, openoffice.org-dev
 X-Upstream-Build-Depends: ooobasis3.0-sdk|ooobasis3.1-sdk, openoffice.org3, 
  openoffice.org-debian-menus
-X-Halut-Java-Build-Depends: sun-j2sdk1.5
-X-Debian-Java-Build-Depends: sun-java5-jdk
+X-Halut-Java-Build-Depends: sun-j2sdk1.5|sun-j2sdk1.6
+X-Debian-Java-Build-Depends: sun-java5-jdk|sun-java6-jdk
 Standards-Version: 3.8.0
 Homepage: http://www.wollmux.org
 
