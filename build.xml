@@ -187,6 +187,7 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 
 			<!-- UPDATE_XML schon löschen, da diese extern eh nicht benötigt wird -->
 			<fileset file="${UPDATE_XML}" />
+			<fileset file="${PACKAGE_DIR}/wollmux-*.tar.gz" />
 		</delete>
 		<delete dir="${PACKAGE_DIR}/deb" />
 	</target>
