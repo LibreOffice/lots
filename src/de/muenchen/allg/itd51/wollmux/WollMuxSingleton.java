@@ -1317,17 +1317,17 @@ public class WollMuxSingleton implements XPALProvider
 
     public void notifyEvent(com.sun.star.document.EventObject docEvent)
     {
+      XComponent compo = UNO.XComponent(docEvent.Source);
+      if (compo == null) return;
+
       /*
        * Workaround for #3091: Die unsichtbaren Dokumente, die beim OOo-Seriendruck
        * anfallen nicht bearbeiten.
        */
-      String url = UNO.XModel(docEvent.Source).getURL();
+      String url = UNO.XModel(compo).getURL();
       int idx = url.lastIndexOf('/') - 4;
       if (url.startsWith(".tmp/sv", idx) && url.endsWith(".tmp")) return;
       // --------------
-
-      XComponent compo = UNO.XComponent(docEvent.Source);
-      if (compo == null) return;
 
       XTextDocument xTextDoc = UNO.XTextDocument(compo);
 
