@@ -63,7 +63,7 @@ Section "WollMuxBar & OOo Extension"
 	Call GetOOoPath
 	Pop $R0
 	StrCmp $R0 "NOTFOUND" 0 +3
-	  MessageBox MB_OK|MB_ICONEXCLAMATION $(NoOOoFoundMessage)
+	  MessageBox MB_OK|MB_ICONEXCLAMATION $(NoOOoFoundMessage) /SD IDOK
 	  Goto skipunopkg
 	
 	Var /GLOBAL sharedSwitch ;; used later for unopkg call
@@ -81,7 +81,7 @@ Section "WollMuxBar & OOo Extension"
 	  MessageBox MB_RETRYCANCEL|MB_ICONEXCLAMATION $(UnoPkgErrorMessage) /SD IDCANCEL IDRETRY unopkg IDCANCEL 0
 	  SetOutPath $INSTDIR ;; current working directory can't be deleted so we change it
 	  RMDir /r $R9 ;; delete temporary files
-	  MessageBox MB_OK|MB_ICONEXCLAMATION $(AbortUnoPkgErrorMessage)
+	  MessageBox MB_OK|MB_ICONEXCLAMATION $(AbortUnoPkgErrorMessage) /SD IDOK
 	  Abort $(AbortMessage)
 	
   skipunopkg:
@@ -97,7 +97,7 @@ Section "WollMuxBar & OOo Extension"
 	CopyFiles /SILENT $R9\*.* $INSTDIR
 	IfErrors 0 +4
 	  RMDir /r $R9 ;; delete temporary files
-	  MessageBox MB_OK|MB_ICONEXCLAMATION $(AbortFileCopy)
+	  MessageBox MB_OK|MB_ICONEXCLAMATION $(AbortFileCopy) /SD IDOK
 	  Abort $(AbortMessage)
 	
 	# remove temporary folder
@@ -126,14 +126,14 @@ Section $(StartMenuShortcut) startmenu_section_id
 	CreateShortCut "$SMPROGRAMS\WollMux\WollMuxBar.lnk" "$INSTDIR\wollmuxbar.exe"
 	CreateShortCut "$SMPROGRAMS\WollMux\$(UninstallWollMux).lnk" "$INSTDIR\wollmux_uninstall.exe"
 	IfErrors 0 +2
-	  MessageBox MB_OK|MB_ICONEXCLAMATION $(StartMenuShortcutErrorMessage)
+	  MessageBox MB_OK|MB_ICONEXCLAMATION $(StartMenuShortcutErrorMessage) /SD IDOK
 SectionEnd
 
 Section $(DesktopShortcut) desktop_section_id
 	ClearErrors
 	CreateShortCut "$DESKTOP\WollMuxBar.lnk" "$INSTDIR\wollmuxbar.exe"
 	IfErrors 0 +2
-	  MessageBox MB_OK|MB_ICONEXCLAMATION $(DesktopShortcutErrorMessage)
+	  MessageBox MB_OK|MB_ICONEXCLAMATION $(DesktopShortcutErrorMessage) /SD IDOK
 SectionEnd
 SectionGroupEnd
 
@@ -160,14 +160,14 @@ Section "un.WollMuxBar & OOo Extension"
 	Call un.GetOOoPath
 	Pop $R0
 	StrCmp $R0 "NOTFOUND" 0 +3
-	  MessageBox MB_OK|MB_ICONEXCLAMATION $(unNoOOoFoundMessage)
+	  MessageBox MB_OK|MB_ICONEXCLAMATION $(unNoOOoFoundMessage) /SD IDOK
 	  Goto skipunopkg
 	
 	ExecWait '"$R0\unopkg" remove WollMux.oxt --shared'
 	
   skipunopkg:
 	IfFileExists $INSTDIR\*.* 0 +2
-	MessageBox MB_OK|MB_ICONINFORMATION $(InstDirNotDeletedMessage)
+	MessageBox MB_OK|MB_ICONINFORMATION $(InstDirNotDeletedMessage) /SD IDOK
 SectionEnd
 
 Section "un.$(StartMenuShortcut)"
@@ -211,7 +211,7 @@ Function .onInit
 	Pop $R0
 	StrCmp $R0 "Admin" +4
 	StrCmp $R0 "Power" +3
-	MessageBox MB_OK|MB_ICONEXCLAMATION $(NeedAdminMessage)
+	MessageBox MB_OK|MB_ICONEXCLAMATION $(NeedAdminMessage) /SD IDOK
 	Abort
 
 	# set context to "all users" for installation
@@ -229,7 +229,7 @@ Function .onInit
 	ClearErrors
 	ExecWait '"$R0" -jar "$TEMP\TerminateOOo.jar"' ;; does not work if WollMuxBar is running with "--quickstarter" option
 	IfErrors 0 +4
-	  MessageBox MB_OK|MB_ICONEXCLAMATION $(OOoRunningMessage) ;; we also get this error if no Java was found
+	  MessageBox MB_OK|MB_ICONEXCLAMATION $(OOoRunningMessage) /SD IDOK ;; we also get this error if no Java was found
 	  Delete $TEMP\TerminateOOo.jar
 	  Abort
 	
@@ -266,7 +266,7 @@ Function un.onInit
 	Pop $R0
 	StrCmp $R0 "Admin" +4
 	StrCmp $R0 "Power" +3
-	MessageBox MB_OK|MB_ICONEXCLAMATION $(NeedAdminMessage)
+	MessageBox MB_OK|MB_ICONEXCLAMATION $(NeedAdminMessage) /SD IDOK
 	Abort
 	
 	# set context to "all users" for uninstallation
@@ -282,7 +282,7 @@ Function un.onInit
 	ClearErrors
 	ExecWait '"$R0" -jar "$TEMP\TerminateOOo.jar"' ;; does not work if WollMuxBar is running with "--quickstarter" option
 	IfErrors 0 +4
-	  MessageBox MB_OK|MB_ICONEXCLAMATION $(OOoRunningMessage) ;; we also get this error if no Java was found
+	  MessageBox MB_OK|MB_ICONEXCLAMATION $(OOoRunningMessage) /SD IDOK ;; we also get this error if no Java was found
 	  Delete $TEMP\TerminateOOo.jar
 	  Abort
 	
