@@ -192,6 +192,12 @@ Function .onInit
 	Var /GLOBAL cmdParameters
 	${GetParameters} $cmdParameters
 	
+	# Set SilentInstall if command line parameter "--SILENT" was used
+	ClearErrors
+	${GetOptions} $cmdParameters "--SILENT" $R1 ;; read optional "--SILENT" parameter
+	IfErrors +2
+	SetSilent silent
+	
 	# Check if command line parameter "--LOCAL" was used - if so try local installation instead of shared install
 	# THIS SWITCH IS NOT SUPPORTED BY THE UNINSTALLER!
 	ClearErrors
@@ -212,7 +218,6 @@ Function .onInit
 	SetShellVarContext all ;; default is "current"
 	
   skipadmincheck:
-	
 	
 	# Inform User that we will try to close OpenOffice.org
 	MessageBox MB_OKCANCEL|MB_ICONINFORMATION $(TryToKillOOoMessage) /SD IDOK IDOK +2
@@ -235,12 +240,6 @@ Function .onInit
 	${GetOptions} $cmdParameters "--INSTDIR=" $R1 ;; read optional "--INSTDIR=" parameter
 	IfErrors +2 0
 	StrCpy $INSTDIR $R1 ;; set installation directory
-	
-	# Set SilentInstall if command line parameter "--SILENT" was used
-	ClearErrors
-	${GetOptions} $cmdParameters "--SILENT" $R1 ;; read optional "--SILENT" parameter
-	IfErrors +2 0
-	SetSilent silent
 
 	# Unselect "Start Menu Shortcut" section if command line parameter "--NOSTARTMENU" was used
 	ClearErrors
