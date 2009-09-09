@@ -12,7 +12,10 @@ Caption "WollMuxBar Launcher"
 Icon "wollmux.ico"
 OutFile "wollmuxbar.exe"
 
-; RequestExecutionLevel user ;; needed to set ExecutionLevel for Vista/Windows 7 - since NSIS ver. 2.21
+!if ${NSIS_VERSION} != "v2.19-3"
+	RequestExecutionLevel user ;; needed to set ExecutionLevel for Vista/Windows 7 - available since NSIS ver. 2.21
+!endif
+
 SilentInstall silent
 AutoCloseWindow true
 ShowInstDetails nevershow
