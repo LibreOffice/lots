@@ -24,6 +24,8 @@ deb: Create the Debian package in the dist/ directory.
      it will be used. Otherwise the lhmdeb directory is used, which only works for
      the Landeshauptstadt München's Basisclient.
 
+wininstaller : Creates the Windows installer executable in the dist/ directory.
+
 install: Install the WollMux OOo component in the user area for the user running ant.
          DO NOT USE THIS AS ROOT. IT DOESN'T DO SYSTEM-WIDE INSTALLATION.
 
