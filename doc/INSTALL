@@ -10,6 +10,7 @@ The following software needs to be installed in order to build WollMux.
 - OpenOffice.org SDK 2.0 or later
 - (optional, for building Debian package) dpkg-dev, fakeroot
 - (optional, for working with development snapshot) git
+- (optional, for building the Windows installer) nsis
 
 === Miscellaneous issues ===
 - If ant gives you the error "Unable to locate tools.jar...." you need to set 
@@ -122,13 +123,25 @@ Rebuilding classes.tar.gz on a Debian system requires the package mingw32.
   on a standard Debian or Ubuntu system. If you want a Debian package that works
   on these systems, you will have to add a debian/ directory inside the WollMux
   directory. If debian/ is present, it will be used. Otherwise the lhmdeb/ 
-  directory is used, which only works for the Landeshauptstadt MÃ¼nchen's 
+  directory is used, which only works for the Landeshauptstadt München's 
   Basisclient.
+
+== Building a Windows installer ===
+
+- To build a Windows installer, issue the command
+
+    ant wininstaller
+    
+  The installer executable will be found in the dist/ directory.
+  You need to have NSIS installed on your system for this to work and
+  makensis needs to be on the path.
 
 == Installing WollMux ==
 
 - On a Debian system, simply install the Debian package built in the
   previous step with dpkg -i.
+
+- On Windows you can use the installer executable built above.
 
 - For a manual installation, terminate all running OpenOffice.org processes
   (including the quickstarter), then install the OpenOffice.org extension
@@ -137,7 +150,8 @@ Rebuilding classes.tar.gz on a Debian system requires the package mingw32.
     unopkg add --shared dist/WollMux.oxt
 
   This will result in a system-wide installation and usually requires
-  administrator privileges.
+  administrator privileges. The command line tool unopkg can be found in the
+  program-subfolder inside your OpenOffice.org installation directory.
   For a user installation, launch OpenOffice.org, 
   go to the menu Tools/Extension Manager and use Add to install the
   extension.
@@ -152,8 +166,10 @@ Rebuilding classes.tar.gz on a Debian system requires the package mingw32.
 
     javaw.exe -jar <path_to>/WollMuxBar.jar
 
-  will run the WollMux toolbar. The dist/ directory contains a shell script
-  wollmuxbar and a batch file wollmuxbar.bat that demonstrate this.
+  will run the WollMux toolbar. The dist/ directory contains a UNIX shell
+  script called wollmuxbar that demonstrates this.
+  For Windows an executable wollmuxbar.exe can be found in the dist/ directory.
+  wollmuxbar.exe needs to be put in the same directory as the WollMuxBar.jar.
   Note, however, that you need a working configuration 
   (not described in this document) before any of this will work.
 
