@@ -150,11 +150,7 @@ Section "un.WollMuxBar & OOo Extension"
 	Delete $PROFILE\.wollmux\wollmux.log
 	;;Delete $PROFILE\.wollmux\cache.conf
 	RMDir $PROFILE\.wollmux ;; deletes the directory only if it is empty
-	
-	# Delete WollMux registry key (only if empty - which probably never happens but we don't want to delete any user-set preferences)
-	# We could explicitly check if "JavaHome" is empty and if no other value exist and depending on that delete the key but that's too much trouble. 
-	DeleteRegKey /ifempty SHELL_CONTEXT "Software\WollMux"
-	
+		
 	# Delete registry keys created for "Add/Remove Programs" (only if they really point to this uninstaller!)
 	ReadRegStr $R0 SHELL_CONTEXT "Software\Microsoft\Windows\CurrentVersion\Uninstall\WollMux" "UninstallString"
 	StrCmp $R0 "$\"$INSTDIR\wollmux_uninstall.exe$\"" 0 +2
