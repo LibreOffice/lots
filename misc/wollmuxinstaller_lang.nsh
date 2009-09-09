@@ -60,5 +60,5 @@ LangString unNoOOoFoundMessage ${LANG_ENGLISH} "Could not uninstall WollMux.oxt 
 											    Please uninstall WollMux.oxt manually using the OpenOffice.org extension manager."
 LangString unNoOOoFoundMessage ${LANG_GERMAN} "Konnte Wollmux.oxt nicht deinstallieren, da keine OpenOffice.org-Installation gefunden wurde!$\n\
 											   Bitte deinstallieren Sie die WollMux.oxt manuell mit dem Extension Manager von OpenOffice.org."
-LangString InstDirNotDeletedMessage ${LANG_ENGLISH} "The directory $INSTDIR was not deleted since it still contains files!"
-LangString InstDirNotDeletedMessage ${LANG_GERMAN} "Der Ordner $INSTDIR wurde nicht gelöscht, da er noch Dateien enthält!"
+LangString InstDirNotDeletedMessage ${LANG_ENGLISH} "The directory $INSTDIR was not deleted since it still contains files or deletion was prevented by the operating system!"
+LangString InstDirNotDeletedMessage ${LANG_GERMAN} "Der Ordner $INSTDIR wurde nicht gelöscht, da er noch Dateien enthält oder das Löschen vom Betriebssystem verhindert wurde!"
