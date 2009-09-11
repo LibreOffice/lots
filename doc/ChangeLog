@@ -29,6 +29,54 @@
     * Ein Fehler wurde behoben, der bei der Verwendung einer Datenquelle des
       Typs "ooo" für die Absenderliste Probleme gemacht hat (Initialisierung
       nicht möglich, solange cache.conf leer ist.)
+    * Debian-Pakete werden in Zukunft wieder automatisiert erstellt und zum
+      Download bereitgestellt.
+    * Der Ort der Konfigurationsdatei_wollmux.conf wird vom WollMux anhand
+      einer neuen Strategie ermittelt. Unter Windows wird zunächst der Wert
+      "ConfigPath" im Registrierungsschlüssel
+      HKEY_CURRENT_USER\Software\WollMux ausgewertet, bevor wie gehabt unter
+      $HOME/.wollmux/wollmux.conf (wobei $HOME unter Windows das
+      Profilverzeichnis bezeichnet) gesucht wird. Wird hier ebenfalls keine
+      wollmux.conf gefunden, so wird unter Windows der Wert "ConfigPath" im
+      Registrierungsschlüssel HKEY_LOCAL_MACHINE\Software\WollMux ausgewertet.
+      Als letzter Fallback wird unter Linux unter /etc/wollmux/wollmux.conf und
+      unter Windows unter C:\Programme\wollmux\wollmux.conf nachgesehen. Im
+      Gegensatz zum früheren Verhalten des WollMux ist die Suche nach der
+      wollmux.conf nicht mehr davon abhängig, ob ein Wert für DEFAULT_CONTEXT
+      gesetzt wurde, und die Suche bricht ab, sobald eine wollmux.conf gefunden
+      wurde (unter bestimmten Umständen wurde in früheren WollMux-Versionen
+      die Fallback-Konfigurationsdatei in die wollmux.conf im $HOME-Verzeichnis
+      eingefügt).
+    * Die Datei wollmuxbar.bat, die unter Windows zum Starten der WollMuxBar
+      verwendet werden konnte, wurde abgelöst durch die Datei wollmuxbar.exe.
+      Diese Datei muss sich beim Ausführen im selben Verzeichnis wie die
+      WollMuxBar.jar befinden und sucht automatisch nach einer Java-
+      Installation um die WollMuxBar zu starten. Ein manuelles Angeben des
+      Java-Pfades wie in der wollmuxbar.bat ist daher nicht mehr nötig. Sollte
+      dennoch Bedarf bestehen, kann die zu verwendende Java-Installation über
+      den Wert "JavaHome" im Registrierungschlüssel HKCU\Software\WollMux
+      (für einen Benutzer) bzw. HKLM\Software\WollMux (für alle Benutzer)
+      oder über die Umgebungsvariable JAVA_HOME festgelegt werden.
+    * Bugfix: Alle Textbereiche, die beim Drucken von Sachleitenden
+      Verfügungen zwischenzeitig ausgeblendet sind, werden nach dem Drucken
+      wieder auf den ursprünglichen Sichtbarkeitszustand gesetzt. Damit
+      können nun Textbereiche_mit_GROUPS-Attribut auch problemfrei innerhalb
+      von Sachleitenden Verfügungen verwendet werden. Bisher führte das
+      Drucken von Sachleitenden Verfügungen dazu, dass die entsprechenden
+      Textbereiche sichtbar gestellt wurden, obwohl der Textbereich gemäß der
+      zugehörige Sichtbarkeitsgruppe nicht sichtbar sein durfte.
+    * Die Verwendung von setGroups-Kommandos innerhalb von Sachleitenden
+      Verfügungen oder innerhalb von Kommandos_zur_SLV-Drucksteuerung ist
+      unzulässig. Die Dokumentation wurde entsprechend angepasst.
+    * Performanceprobleme und Fehlermeldungen, die beim normalen (nicht
+      WollMux-)OpenOffice.org-Seriendruck auftraten, wenn der WollMux
+      installiert war, wurden behoben.
+    * Um die Installation des WollMux unter Windows zu erleichtern, steht in
+      Zukunft ein EXE-Installer zum Download bereit. Der Installer installiert
+      den WollMux sowie die WollMuxBar und legt optional Verknüpfungen auf
+      Desktop und im Startmenü an. Außerdem wird bei der Installation ein
+      Uninstaller angelegt, mit dem man den WollMux ebenso leicht wieder
+      deinstallieren kann.
 
 
 
