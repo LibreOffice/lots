@@ -149,7 +149,7 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 
 	<target name="all" depends="WollMuxBar.jar,WollMux.oxt,md5sum" />
 	
-	<target name="snapshot" depends="clean, makechangelog, debug, all, .tar.gz, deb" />
+	<target name="snapshot" depends="clean, makechangelog, debug, all, .tar.gz, deb, wininstaller" />
 
 	<!-- The debug target doesn't do anything by itself, but for any targets executed later
 	     the DEBUG property will be set. --> 
