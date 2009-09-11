@@ -549,57 +549,58 @@ public class OOoDatasource implements Datasource
       Object rowSet = UNO.createUNOService("com.sun.star.sdb.RowSet");
       results = UNO.XRowSet(rowSet);
 
-      if (results != null)
+      if (results == null)
+        throw new NullPointerException(L.m("Konnte kein RowSet erzeugen"));
+
+      XPropertySet xProp = UNO.XPropertySet(results);
+
+      xProp.setPropertyValue("ActiveConnection", conn);
+
+      /*
+       * EscapeProcessing == false bedeutet, dass OOo die Query nicht selbst anfassen
+       * darf, sondern direkt an die Datenbank weiterleiten soll. Wird dies verwendet
+       * ist das Ergebnis (derzeit) immer read-only, da OOo keine Updates von
+       * Statements durchführen kann, die es nicht geparst hat. Siehe Kommentar zu
+       * http://qa.openoffice.org/issues/show_bug.cgi?id=78522 Entspricht dem Button
+       * SQL mit grünem Haken (SQL-Kommando direkt ausführen) im Base-Abfrageentwurf.
+       */
+      xProp.setPropertyValue("EscapeProcessing", Boolean.FALSE);
+
+      xProp.setPropertyValue("CommandType",
+        Integer.valueOf(com.sun.star.sdb.CommandType.COMMAND));
+
+      xProp.setPropertyValue("Command", query);
+
+      results.execute();
+
+      Map<String, Integer> mapColumnNameToIndex = getColumnMapping(results);
+      XRow row = UNO.XRow(results);
+
+      while (results.next())
       {
-        XPropertySet xProp = UNO.XPropertySet(results);
-
-        xProp.setPropertyValue("ActiveConnection", conn);
-
-        /*
-         * EscapeProcessing == false bedeutet, dass OOo die Query nicht selbst anfassen
-         * darf, sondern direkt an die Datenbank weiterleiten soll. Wird dies verwendet
-         * ist das Ergebnis (derzeit) immer read-only, da OOo keine Updates von
-         * Statements durchführen kann, die es nicht geparst hat. Siehe Kommentar zu
-         * http://qa.openoffice.org/issues/show_bug.cgi?id=78522 Entspricht dem Button
-         * SQL mit grünem Haken (SQL-Kommando direkt ausführen) im Base-Abfrageentwurf.
-         */
-        xProp.setPropertyValue("EscapeProcessing", Boolean.FALSE);
-
-        xProp.setPropertyValue("CommandType",
-          Integer.valueOf(com.sun.star.sdb.CommandType.COMMAND));
-
-        xProp.setPropertyValue("Command", query);
-
-        results.execute();
-
-        Map<String, Integer> mapColumnNameToIndex = getColumnMapping(results);
-        XRow row = UNO.XRow(results);
-
-        while (results.next())
+        Map<String, String> data = new HashMap<String, String>();
+        Iterator<Map.Entry<String, Integer>> iter =
+          mapColumnNameToIndex.entrySet().iterator();
+        while (iter.hasNext())
         {
-          Map<String, String> data = new HashMap<String, String>();
-          Iterator<Map.Entry<String, Integer>> iter =
-            mapColumnNameToIndex.entrySet().iterator();
-          while (iter.hasNext())
-          {
-            Map.Entry<String, Integer> entry = iter.next();
-            String column = entry.getKey();
-            int idx = ((Number) entry.getValue()).intValue();
-            String value = null;
-            if (idx > 0) value = row.getString(idx);
-            data.put(column, value);
-          }
-          datasets.add(new OOoDataset(data));
-          if (System.currentTimeMillis() > endTime)
-          {
-            if (throwOnTimeout)
-              throw new TimeoutException(
-                L.m("Konnte Anfrage nicht innerhalb der vorgegebenen Zeit vollenden"));
-            else
-              break;
-          }
+          Map.Entry<String, Integer> entry = iter.next();
+          String column = entry.getKey();
+          int idx = ((Number) entry.getValue()).intValue();
+          String value = null;
+          if (idx > 0) value = row.getString(idx);
+          data.put(column, value);
+        }
+        datasets.add(new OOoDataset(data));
+        if (System.currentTimeMillis() > endTime)
+        {
+          if (throwOnTimeout)
+            throw new TimeoutException(
+              L.m("Konnte Anfrage nicht innerhalb der vorgegebenen Zeit vollenden"));
+          else
+            break;
         }
       }
+
     }
     catch (Exception x)
     {
