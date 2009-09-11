@@ -1286,7 +1286,11 @@ public class WollMuxEventHandler
       Iterator<String> iter = fragIDs.iterator();
       StringBuffer fragIdStr = new StringBuffer();
       while (iter.hasNext())
-        fragIdStr.append("'" + iter.next() + "' ");
+      {
+        fragIdStr.append("'");
+        fragIdStr.append(iter.next());
+        fragIdStr.append("' ");
+      }
       handleOpen("AS_TEMPLATE '" + asTemplate
         + "' FORMGUIS 'independent' Fragmente( FRAG_ID_LIST ("
         + fragIdStr.toString() + "))");

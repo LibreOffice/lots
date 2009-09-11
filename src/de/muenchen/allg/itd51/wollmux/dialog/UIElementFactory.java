@@ -876,7 +876,8 @@ public class UIElementFactory
         fragId.append(i.next().toString());
         while (i.hasNext())
         {
-          fragId.append("&" + i.next().toString());
+          fragId.append("&");
+          fragId.append(i.next().toString());
         }
         return new UIElementActionListener(handler, uiElement, false, "action",
           new Object[] {
