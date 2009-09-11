@@ -779,7 +779,7 @@ public class FormController implements UIElementEventHandler
             TF_BORDER), 0, 0);
       gbcButtonPanel.gridx = 0;
       gbcButtonPanel.gridy = y;
-      ++y;
+      // ++y;
       myPanel.add(buttonPanel, gbcButtonPanel);
 
       addTabSwitcher(buttonPanel);
