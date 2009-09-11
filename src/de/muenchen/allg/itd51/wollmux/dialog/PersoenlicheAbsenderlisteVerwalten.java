@@ -593,7 +593,7 @@ public class PersoenlicheAbsenderlisteVerwalten
           else if (type.equals("label"))
           {
             JLabel uiElement = new JLabel();
-            gbcLabel.gridy = x;
+            gbcLabel.gridx = x;
             gbcLabel.gridy = y;
             compo.add(uiElement, gbcLabel);
             uiElement.setText(L.m(uiElementDesc.get("LABEL").toString()));
@@ -611,7 +611,7 @@ public class PersoenlicheAbsenderlisteVerwalten
             {}
             uiElement.add(Box.createHorizontalGlue());
 
-            gbcGlue.gridy = x;
+            gbcGlue.gridx = x;
             gbcGlue.gridy = y;
             compo.add(uiElement, gbcGlue);
           }
