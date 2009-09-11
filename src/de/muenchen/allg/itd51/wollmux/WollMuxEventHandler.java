@@ -1284,11 +1284,12 @@ public class WollMuxEventHandler
       // Baue ein ConfigThingy (als String), das die neue open-Methode versteht
       // und leite es weiter an diese.
       Iterator<String> iter = fragIDs.iterator();
-      String fragIdStr = "";
+      StringBuffer fragIdStr = new StringBuffer();
       while (iter.hasNext())
-        fragIdStr += "'" + iter.next() + "' ";
+        fragIdStr.append("'" + iter.next() + "' ");
       handleOpen("AS_TEMPLATE '" + asTemplate
-        + "' FORMGUIS 'independent' Fragmente( FRAG_ID_LIST (" + fragIdStr + "))");
+        + "' FORMGUIS 'independent' Fragmente( FRAG_ID_LIST ("
+        + fragIdStr.toString() + "))");
     }
 
     public String toString()
