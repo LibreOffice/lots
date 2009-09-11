@@ -872,14 +872,15 @@ public class UIElementFactory
       if (fids.count() > 0)
       {
         Iterator<ConfigThingy> i = fids.iterator();
-        String fragId = i.next().toString();
+        StringBuffer fragId = new StringBuffer();
+        fragId.append(i.next().toString());
         while (i.hasNext())
         {
-          fragId += "&" + i.next().toString();
+          fragId.append("&" + i.next().toString());
         }
         return new UIElementActionListener(handler, uiElement, false, "action",
           new Object[] {
-            action, fragId });
+            action, fragId.toString() });
       }
       else
       {
