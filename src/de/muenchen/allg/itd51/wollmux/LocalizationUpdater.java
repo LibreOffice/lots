@@ -170,11 +170,11 @@ public class LocalizationUpdater
       while (m.find())
       {
         String lmFirstArg = m.group(1);
-        String concatinatedStrings = "";
+        StringBuffer concatinatedStrings = new StringBuffer();
         Matcher strings = STRING.matcher(lmFirstArg);
         while (strings.find())
-          concatinatedStrings += strings.group(1);
-        String original = evalString(concatinatedStrings);
+          concatinatedStrings.append(strings.group(1));
+        String original = evalString(concatinatedStrings.toString());
         currentOriginals.add(original);
         if (!knownOriginals.contains(original))
         {
@@ -301,7 +301,7 @@ public class LocalizationUpdater
    */
   private static String readFile(File file, String encoding)
   {
-    String str = "";
+    StringBuffer str = new StringBuffer();
     try
     {
       InputStreamReader r =
@@ -310,7 +310,7 @@ public class LocalizationUpdater
       int count;
       while ((count = r.read(buff)) > 0)
       {
-        str += new String(buff, 0, count);
+        str.append(new String(buff, 0, count));
       }
       r.close();
     }
@@ -318,7 +318,7 @@ public class LocalizationUpdater
     {
       e.printStackTrace();
     }
-    return str;
+    return str.toString();
   }
 
   /**
