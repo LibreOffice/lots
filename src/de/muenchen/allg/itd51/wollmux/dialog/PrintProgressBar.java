@@ -340,9 +340,9 @@ public class PrintProgressBar
   {
     int allMax = 1;
     int allCurrent = 0;
-    String fromMaxString = "";
+    StringBuffer fromMaxString = new StringBuffer();
     boolean showfms = order.size() > 1;
-    if (showfms) fromMaxString = " (=";
+    if (showfms) fromMaxString.append(" (=");
     boolean first = true;
 
     for (Object key : order)
@@ -350,13 +350,13 @@ public class PrintProgressBar
       allCurrent += currentValues.get(key) * allMax;
       if (first)
         first = false;
-      else if (showfms) fromMaxString += "x";
-      if (showfms) fromMaxString += maxValues.get(key);
+      else if (showfms) fromMaxString.append("x");
+      if (showfms) fromMaxString.append(maxValues.get(key));
       allMax *= maxValues.get(key);
     }
-    if (showfms) fromMaxString += ")";
+    if (showfms) fromMaxString.append(")");
 
-    refresh(allCurrent, allMax, fromMaxString);
+    refresh(allCurrent, allMax, fromMaxString.toString());
   }
 
   /**
