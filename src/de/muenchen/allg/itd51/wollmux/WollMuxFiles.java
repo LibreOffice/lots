@@ -216,12 +216,12 @@ public class WollMuxFiles
    * gesucht:
    * 
    * <ol>
-   * <li>unter dem Dateipfad (inkl. Dateiname!), der von
-   * {@link WollMuxRegistryAccess#getUserWollMuxConfPath()} zurückgeliefert wird</li>
+   * <li>unter dem Dateipfad (inkl. Dateiname!), der im Registrierungswert
+   * "ConfigPath" des Schlüssels HKCU\Software\WollMux\ festgelegt ist (nur Windows!)</li>
    * <li>$HOME/.wollmux/wollmux.conf (wobei $HOME unter Windows das
    * Profilverzeichnis bezeichnet)</li>
-   * <li>unter dem Dateipfad (inkl. Dateiname!), der von
-   * {@link WollMuxRegistryAccess#getSharedWollMuxConfPath()} zurückgeliefert wird</li>
+   * <li>unter dem Dateipfad (inkl. Dateiname!), der im Registrierungswert
+   * "ConfigPath" des Schlüssels HKLM\Software\WollMux\ festgelegt ist (nur Windows!)</li>
    * <li>unter dem Dateipfad, der in der Konstanten
    * {@link #C_PROGRAMME_WOLLMUX_WOLLMUX_CONF} festgelegt ist (nur Windows!)</li>
    * <li>unter dem Dateipfad, der in der Konstanten
@@ -255,20 +255,27 @@ public class WollMuxFiles
     // Pfad zur wollmux.conf
     String wollmuxConfPath = null;
 
-    // Versuch den Pfad der wollmux.conf für den User aus der Registry zu lesen
-    // Schlägt unter Linux automatisch fehl
-    try
+    // Überprüfen, ob das Betriebssystem Windows ist
+    boolean windowsOS =
+      System.getProperty("os.name").toLowerCase().contains("windows");
+
+    // Falls Windows:
+    // Versuch den Pfad der wollmux.conf aus HKCU-Registry zu lesen
+    if (windowsOS)
     {
-      wollmuxConfPath =
-        WollMuxRegistryAccess.getStringValueFromRegistry("HKEY_CURRENT_USER",
-          WOLLMUX_KEY, WOLLMUX_CONF_PATH_VALUE_NAME);
-      wollmuxConfFile = new File(wollmuxConfPath);
-    }
-    catch (WollMuxRegistryAccessException e)
-    {
-      // Entweder Linux oder Registry Key nicht gefunden
-      debug2Messages.append(e.getLocalizedMessage());
-      debug2Messages.append('\n');
+      try
+      {
+        wollmuxConfPath =
+          WollMuxRegistryAccess.getStringValueFromRegistry("HKEY_CURRENT_USER",
+            WOLLMUX_KEY, WOLLMUX_CONF_PATH_VALUE_NAME);
+        wollmuxConfFile = new File(wollmuxConfPath);
+      }
+      catch (WollMuxRegistryAccessException e)
+      {
+        // Entweder Linux oder Registry Key nicht gefunden
+        debug2Messages.append(e.getLocalizedMessage());
+        debug2Messages.append('\n');
+      }
     }
 
     // Als nächstes wird im .wollmux-Verzeichnis nach der wollmux.conf gesucht
@@ -277,24 +284,27 @@ public class WollMuxFiles
       wollmuxConfFile = new File(wollmuxDir, "wollmux.conf");
 
       // Falls wollmux.conf im .wollmux-Verzeichnis nicht existiert
-      // => Versuch den Pfad aus HKLM-Registry zu lesen (schlägt unter Linux fehl)
       if (!wollmuxConfFile.exists())
       {
         debug2Messages.append(wollmuxConfFile + " does not exist\n");
 
-        try
+        // Falls Windows => Versuch den Pfad aus HKLM-Registry zu lesen
+        if (windowsOS)
         {
-          wollmuxConfPath =
-            WollMuxRegistryAccess.getStringValueFromRegistry("HKEY_LOCAL_MACHINE",
-              WOLLMUX_KEY, WOLLMUX_CONF_PATH_VALUE_NAME);
+          try
+          {
+            wollmuxConfPath =
+              WollMuxRegistryAccess.getStringValueFromRegistry("HKEY_LOCAL_MACHINE",
+                WOLLMUX_KEY, WOLLMUX_CONF_PATH_VALUE_NAME);
 
-          wollmuxConfFile = new File(wollmuxConfPath);
-        }
-        catch (WollMuxRegistryAccessException e)
-        {
-          // Entweder Linux oder Registry Key nicht gefunden
-          debug2Messages.append(e.getLocalizedMessage());
-          debug2Messages.append('\n');
+            wollmuxConfFile = new File(wollmuxConfPath);
+          }
+          catch (WollMuxRegistryAccessException e)
+          {
+            // Entweder Linux oder Registry Key nicht gefunden
+            debug2Messages.append(e.getLocalizedMessage());
+            debug2Messages.append('\n');
+          }
         }
 
         // Als letzte Möglichkeit wird in einem Fallback-Verzeichnis gesucht
@@ -303,9 +313,10 @@ public class WollMuxFiles
           wollmuxConfPath = ETC_WOLLMUX_WOLLMUX_CONF;
 
           // Falls Windows, dann anderes Fallback-Verzeichnis
-          File[] roots = File.listRoots();
-          if (roots.length > 0 && roots[0].toString().contains(":"))
+          if (windowsOS)
+          {
             wollmuxConfPath = C_PROGRAMME_WOLLMUX_WOLLMUX_CONF;
+          }
 
           wollmuxConfFile = new File(wollmuxConfPath);
           debug2Messages.append("Final wollmux.conf fallback: ");
