@@ -24,9 +24,11 @@ LangString TryToKillOOoMessage ${LANG_ENGLISH} "OpenOffice.org must be closed be
 LangString TryToKillOOoMessage ${LANG_GERMAN} "OpenOffice.org muss vor dem Ausführen dieses Programms geschlossen werden.$\n\
 											   Das Programm überprüft nun, ob irgendwelche OOo-Fenster offen sind und versucht diese zu schließen."
 LangString OOoRunningMessage ${LANG_ENGLISH} "OpenOffice.org or the OpenOffice.org quickstarter could not be closed!$\n\
-											  Please close all OpenOffice.org windows and the quickstarter, then try again."
+											  Please close all OpenOffice.org windows and the quickstarter, then try again.$\n\
+											  Another reason for this error could be that either OpenOffice.org or Java is not installed on your system."
 LangString OOoRunningMessage ${LANG_GERMAN} "OpenOffice.org oder der OpenOffice.org-Schnellstarter konnten nicht beendet werden!$\n\
-                                             Bitte schließen Sie alle offenen OpenOffice.org-Fenster sowie den Schnellstarter und versuchen Sie es erneut."
+                                             Bitte schließen Sie alle offenen OpenOffice.org-Fenster sowie den Schnellstarter und versuchen Sie es erneut.$\n\
+											 Ein anderer Grund für diesen Fehler könnte sein, dass entweder OpenOffice.org oder Java nicht auf Ihrem System installiert ist."
 LangString AbortMessage ${LANG_ENGLISH} "Execution aborted!"
 LangString AbortMessage ${LANG_GERMAN} "Ausführung abgebrochen!"
 
