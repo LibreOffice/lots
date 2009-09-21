@@ -95,7 +95,7 @@ public class DocumentCommands
    * Namenszusatz zur Definition der Sichtbarkeitsgruppen dieses Bereichs
    */
   private static final Pattern sectionWithGROUPSPattern =
-    Pattern.compile("\\A.*(GROUPS.*)\\d*\\z");
+    Pattern.compile("\\A.*(GROUPS.*[^\\d])\\d*\\z");
 
   /**
    * Das Dokument, in dem die Bookmarks enthalten sind und das dazu ein
