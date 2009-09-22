@@ -112,7 +112,7 @@ public class ConfigThingy implements Iterable<ConfigThingy>
   /**
    * Pattern für Zeichen, die in ConfigThingys escapet werden müssen.
    */
-  private static final Pattern CONFIGTHINGY_SPECIAL = Pattern.compile("[%\n\"']");
+  private static final Pattern CONFIGTHINGY_SPECIAL = Pattern.compile("[%\n\r\"']");
 
   /**
    * Einrückung für stringRepresentation().
@@ -949,6 +949,9 @@ public class ConfigThingy implements Iterable<ConfigThingy>
             break;
           case '\n':
             repstr = "%n";
+            break;
+          case '\r':
+            repstr = "%u000a";
             break;
           case '%':
             repstr = "%%";
