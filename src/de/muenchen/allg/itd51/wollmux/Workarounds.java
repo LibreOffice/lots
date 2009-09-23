@@ -29,6 +29,8 @@
  * 
  */package de.muenchen.allg.itd51.wollmux;
 
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.regex.Pattern;
 
 import com.sun.star.container.XNameAccess;
@@ -67,6 +69,10 @@ public class Workarounds
 
   private static Boolean workaround103137 = null;
 
+  private static Boolean workaround102164 = null;
+
+  private static ClassLoader workaround102164CL = null;
+
   private static Boolean applyWorkaround(String issueNumber)
   {
     Logger.debug("Workaround für Issue "
@@ -98,6 +104,41 @@ public class Workarounds
     }
 
     return workaround100374.booleanValue();
+  }
+
+  /**
+   * Issue #102164 betrifft OOo 3.2. Es ist unklar, wann der Workaround entfernt
+   * werden kann, da er aufgrund eines Bugs in der Swing-Implementierung von Java 6
+   * zurückgeht.
+   * 
+   * @author Matthias Benkmann (D-III-ITD-D101)
+   */
+  public static void applyWorkaroundForOOoIssue102164()
+  {
+    if (workaround102164 == null)
+    {
+      String version = getOOoVersion();
+      if (version != null && !version.startsWith("3.1") && !version.startsWith("2")
+        && !version.startsWith("3.0"))
+      {
+        workaround102164 = applyWorkaround("102164");
+      }
+      else
+        workaround100374 = Boolean.FALSE;
+    }
+
+    if (workaround102164.booleanValue())
+    {
+      if (workaround102164CL == null)
+        workaround102164CL = Thread.currentThread().getContextClassLoader();
+      if (workaround102164CL == null)
+        workaround102164CL = Workarounds.class.getClassLoader();
+      if (workaround102164CL == null)
+        workaround102164CL = ClassLoader.getSystemClassLoader();
+      if (workaround102164CL == null)
+        workaround102164CL = new URLClassLoader(new URL[] {});
+      Thread.currentThread().setContextClassLoader(workaround102164CL);
+    }
   }
 
   /**

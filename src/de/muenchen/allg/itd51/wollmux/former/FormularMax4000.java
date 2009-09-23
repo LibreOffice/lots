@@ -129,6 +129,7 @@ import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
+import de.muenchen.allg.itd51.wollmux.Workarounds;
 import de.muenchen.allg.itd51.wollmux.dialog.Common;
 import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
 import de.muenchen.allg.itd51.wollmux.former.DocumentTree.Container;
@@ -1855,6 +1856,7 @@ public class FormularMax4000
 
     editorMenuBar.add(menu);
 
+    Workarounds.applyWorkaroundForOOoIssue102164();
     editor = new JEditorPane("text/plain", "");
     editor.setEditorKit(new NoWrapEditorKit());
 
@@ -2255,12 +2257,12 @@ public class FormularMax4000
       catch (Exception x)
       {
         return true;/*
-                     * Do not Logger.error(x); because the most likely cause for an
-                     * exception is that range2 does not belong to the text object
-                     * compare, which happens in tables, because when enumerating
-                     * over a range inside of a table the enumeration hits a lot of
-                     * unrelated cells (OOo bug).
-                     */
+         * Do not Logger.error(x); because the most likely cause for an
+         * exception is that range2 does not belong to the text object
+         * compare, which happens in tables, because when enumerating
+         * over a range inside of a table the enumeration hits a lot of
+         * unrelated cells (OOo bug).
+         */
       }
     }
     return false;
