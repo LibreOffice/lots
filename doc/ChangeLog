@@ -77,6 +77,9 @@
       Desktop und im Startmenü an. Außerdem wird bei der Installation ein
       Uninstaller angelegt, mit dem man den WollMux ebenso leicht wieder
       deinstallieren kann.
+    * Bugfix: Textbereiche_mit_GROUPS-Attribut, die einen Namen der Art
+      "irgendwas GROUPS 'gruppe'123" besaßen, wurden nicht immer als korrekte
+      Bereiche erkannt. Dieses Problem ist nun behoben.
 
 
 
