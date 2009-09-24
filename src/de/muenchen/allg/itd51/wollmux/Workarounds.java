@@ -124,7 +124,7 @@ public class Workarounds
         workaround102164 = applyWorkaround("102164");
       }
       else
-        workaround100374 = Boolean.FALSE;
+        workaround102164 = Boolean.FALSE;
     }
 
     if (workaround102164.booleanValue())
