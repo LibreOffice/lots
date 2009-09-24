@@ -355,6 +355,11 @@ public class FormularMax4000
   private String formTitle = GENERATED_FORM_TITLE;
 
   /**
+   * Wert von PLAUSI_MARKER_COLOR oder null wenn nicht gesetzt.
+   */
+  private String plausiMarkerColor = null;
+
+  /**
    * Das TextDocumentModel, zu dem das Dokument doc gehört.
    */
   private TextDocumentModel doc;
@@ -1116,6 +1121,8 @@ public class FormularMax4000
     ConfigThingy conf = new ConfigThingy("WM");
     ConfigThingy form = conf.add("Formular");
     form.add("TITLE").add(formTitle);
+    if (plausiMarkerColor != null)
+      form.add("PLAUSI_MARKER_COLOR").add(plausiMarkerColor);
     form.addChild(formControlModelList.export());
     form.addChild(groupModelList.export());
     if (funktionsDialogeAbschnitteConf.count() > 0)
@@ -1151,6 +1158,8 @@ public class FormularMax4000
   {
     ConfigThingy tempConf = conf.query("Formular").query("TITLE");
     if (tempConf.count() > 0) formTitle = tempConf.toString();
+    tempConf = conf.query("Formular").query("PLAUSI_MARKER_COLOR");
+    if (tempConf.count() > 0) plausiMarkerColor = tempConf.toString();
     funktionsDialogeAbschnitteConf =
       conf.query("Formular").query("Funktionsdialoge", 2);
     tempConf = conf.query("Formular").query("Funktionen");
