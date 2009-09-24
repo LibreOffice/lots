@@ -1122,6 +1122,46 @@ public class FormController implements UIElementEventHandler
   }
 
   /**
+   * Liefert true gdw keine SICHTBARE PLAUSI mit negativen Testresultat und keine
+   * SICHTBAREN als fishy markierten Felder existieren, in anderen Worten es wird
+   * true geliefert, genau dann wenn kein Feld mit Warnfarbe markiert ist. Kann
+   * sowohl aus dem EDT als auch aus einem anderen Thread aufgerufen werden.
+   * 
+   * @author Matthias Benkmann (D-III-ITD-D101)
+   * 
+   * TODO Testen
+   */
+  public boolean isInputOkay()
+  {
+    final boolean[] result = new boolean[] { false };
+    try
+    {
+      Runnable runner = new Runnable()
+      {
+        public void run()
+        {
+          for (UIElement ele : uiElements)
+          {
+            UIElementState state = ((UIElementState) ele.getAdditionalData());
+            if ((!state.okay) && state.visible()) return;
+          }
+          result[0] = true;
+        }
+      };
+
+      if (SwingUtilities.isEventDispatchThread())
+        runner.run();
+      else
+        SwingUtilities.invokeAndWait(runner);
+    }
+    catch (Exception x)
+    {
+      Logger.error(x);
+    }
+    return result[0];
+  }
+
+  /**
    * Setzt den Wert des {@link UIElement}s mit ID uiElementId auf value und
    * behandelt die Änderung so als wäre sie durch den Benutzer erfolgt.
    * 
@@ -1401,8 +1441,7 @@ public class FormController implements UIElementEventHandler
     {
       UIElement ele = uiElementIter.next();
       UIElementState state = (UIElementState) ele.getAdditionalData();
-      boolean oldElementVisible =
-        state.invisibleGroups == null || state.invisibleGroups.isEmpty();
+      boolean oldElementVisible = state.visible();
 
       if (visible)
       {
@@ -1416,8 +1455,7 @@ public class FormController implements UIElementEventHandler
           state.invisibleGroups.add(group);
       }
 
-      boolean newElementVisible =
-        state.invisibleGroups == null || state.invisibleGroups.isEmpty();
+      boolean newElementVisible = state.visible();
 
       /*
        * Der folgende Test ist erforderlich, weil Elemente mehreren Gruppen angehören
@@ -1522,10 +1560,6 @@ public class FormController implements UIElementEventHandler
    */
   private void checkPlausi(UIElement uiElement)
   {
-    // TODO Plausi-Counter einführen, der zählt, wieviele AKTUELL SICHTBARE!!!!!
-    // Eingabeelemente aktuell eine nicht erfuellte Plausi haben. Bei Änderung
-    // zwischen 0 und einem anderen Wert muss FormModel.setPlausiOkay() aufgerufen
-    // werden.
     UIElementState state = ((UIElementState) uiElement.getAdditionalData());
     Function plausi = state.plausi;
 
@@ -1617,6 +1651,16 @@ public class FormController implements UIElementEventHandler
      * ist genau dann sichtbar, wenn hier null oder eine leere Collection steht.
      */
     public Collection<Group> invisibleGroups = null;
+
+    /**
+     * Liefer true gdw invisibleGroups == null oder invisibleGroups leer ist.
+     * 
+     * @author Matthias Benkmann (D-III-ITD-D101)
+     */
+    public boolean visible()
+    {
+      return (invisibleGroups == null || invisibleGroups.isEmpty());
+    }
   }
 
   /**
