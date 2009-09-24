@@ -76,6 +76,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
+import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
@@ -125,6 +126,18 @@ public class FormController implements UIElementEventHandler
    * von Elementen, die immer vorhanden sein sollen.
    */
   private final static int GRID_MAX = 500;
+
+  /**
+   * Die Farbe mit der Felder mit fehlerhafter Eingabe (PLAUSI oder FISHY) eingefärbt
+   * werden.
+   */
+  private Color plausiMarkerColor;
+
+  /**
+   * Die Farbe mit der Felder normalerweise eingefärbt sind. Gegenstück zu
+   * {@link #plausiMarkerColor}.
+   */
+  private Color normalColor;
 
   /**
    * Die JTabbedPane, die die ganzen Tabs der GUI enthält.
@@ -287,6 +300,15 @@ public class FormController implements UIElementEventHandler
 
     initFactories();
 
+    plausiMarkerColor = Color.PINK;
+    try
+    {
+      plausiMarkerColor =
+        Color.decode(conf.get("PLAUSI_MARKER_COLOR", 1).getLastChild().toString());
+    }
+    catch (Exception x)
+    {}
+
     try
     {
       ConfigThingy visibilityDesc = conf.query("Sichtbarkeit");
@@ -332,6 +354,8 @@ public class FormController implements UIElementEventHandler
       Map<String, String> mapIdToPresetValue)
   {
     Common.setLookAndFeelOnce();
+
+    normalColor = new JTextField().getBackground();
 
     /*
      * ACHTUNG! Wenn die JTabbedPane noch in ein Panel eingebettet werden soll (dazu
@@ -1567,15 +1591,13 @@ public class FormController implements UIElementEventHandler
 
     if (plausi != null) newOkay = newOkay && plausi.getBoolean(myUIElementValues);
 
-    // TODO Farben nicht fest verdrahten. WHITE aus dem standardbackground eines
-    // neuen Elements holen. PINK aus Config.
     if (state.okay == newOkay) return;
     state.okay = newOkay;
 
     if (newOkay)
-      uiElement.setBackground(Color.WHITE);
+      uiElement.setBackground(normalColor);
     else
-      uiElement.setBackground(Color.PINK);
+      uiElement.setBackground(plausiMarkerColor);
   }
 
   /**
