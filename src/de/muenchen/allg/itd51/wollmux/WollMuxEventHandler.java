@@ -2174,7 +2174,7 @@ public class WollMuxEventHandler
           }
           else
           {
-            Logger.error(L.m("Ungültiger Schlüssel in Suchstategie: %1",
+            Logger.error(L.m("Ungültiger Schlüssel in Suchstrategie: %1",
               element.stringRepresentation()));
           }
           if (found != 0) return found;
