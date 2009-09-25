@@ -1924,6 +1924,7 @@ public class WollMuxBar
           }
         }
 
+        StringBuilder errors = new StringBuilder();
         Iterator<String> iter = app.commands.iterator();
         while (iter.hasNext())
         {
@@ -1962,12 +1963,15 @@ public class WollMuxBar
             return;
           }
           catch (Exception x)
-          {}
+          {
+            errors.append(x.toString());
+            errors.append('\n');
+          }
         }
 
         error(L.m(
-          "Keines der für die Erweiterung \"%1\"konfigurierten Programme konnte gestartet werden!",
-          ext));
+          "Keines der für die Erweiterung \"%1\"konfigurierten Programme konnte gestartet werden!\n%2",
+          ext, errors.toString()));
         return;
 
       }
