@@ -97,6 +97,7 @@ import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModel4InputUser;
 import de.muenchen.allg.itd51.wollmux.func.Function;
 import de.muenchen.allg.itd51.wollmux.func.FunctionFactory;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
+import de.muenchen.allg.itd51.wollmux.func.Values;
 import de.muenchen.allg.itd51.wollmux.func.Values.SimpleMap;
 
 /**
@@ -2889,6 +2890,126 @@ public class TextDocumentModel
     }
 
     setDocumentModified(modified);
+  }
+
+  /**
+   * Führt alle Funktionen aus funcs der Reihe nach aus, solange bis eine davon einen
+   * nicht-leeren String zurückliefert und interpretiert diesen als Angabe, welche
+   * Aktionen für das Dokument auszuführen sind. Derzeit wird nur "noaction"
+   * unterstützt und entsprechend true geliefert, wenn der erste nicht-leere
+   * Funktionswert "noaction" lautet. Bei späteren Erweiterungen kann der
+   * Rückgabewert von boolean z.B. auf eine int-Bitmaske geändert werden, die
+   * spezifiziert, welche Aktionen durchzuführen sind.
+   * 
+   * Den Funktionen werden als {@link Values} diverse Daten zur Verfügung gestellt.
+   * Derzeit sind dies
+   * <ul>
+   * <li>"User/<Name>" Werte von Benutzervariablen (vgl.
+   * {@link #getUserFieldMaster(String)}</li>
+   * </ul>
+   * 
+   * @author Matthias Benkmann (D-III-ITD-D101)
+   * 
+   * TESTED
+   */
+  public boolean evaluateDocumentActions(Iterator<Function> funcs)
+  {
+    Values values = new MyValues();
+    while (funcs.hasNext())
+    {
+      Function f = funcs.next();
+      String res = f.getString(values);
+      if (res.length() > 0) return res.equals("noaction");
+    }
+    return false;
+  }
+
+  /**
+   * Stellt diverse Daten zur Verfügung in der Syntax "Namensraum/Name". Derzeit
+   * unterstützte Namensräume sind
+   * <ul>
+   * <li>"User/" Werte von Benutzervariablen (vgl.
+   * {@link #getUserFieldMaster(String)}</li>
+   * </ul>
+   * 
+   * 
+   * @author Matthias Benkmann (D-III-ITD-D101)
+   */
+  private class MyValues implements Values
+  {
+    public static final int MYVALUES_NAMESPACE_UNKNOWN = 0;
+
+    public static final int MYVALUES_NAMESPACE_USER = 1;
+
+    public String getString(String id)
+    {
+      switch (namespace(id))
+      {
+        case MYVALUES_NAMESPACE_USER:
+          return getString_User(id);
+        default:
+          return "";
+      }
+    }
+
+    public boolean getBoolean(String id)
+    {
+      switch (namespace(id))
+      {
+        case MYVALUES_NAMESPACE_USER:
+          return getBoolean_User(id);
+        default:
+          return false;
+      }
+    }
+
+    public boolean hasValue(String id)
+    {
+      switch (namespace(id))
+      {
+        case MYVALUES_NAMESPACE_USER:
+          return hasValue_User(id);
+        default:
+          return false;
+      }
+    }
+
+    private int namespace(String id)
+    {
+      if (id.startsWith("User/")) return MYVALUES_NAMESPACE_USER;
+      return MYVALUES_NAMESPACE_UNKNOWN;
+    }
+
+    private String getString_User(String id)
+    {
+      try
+      {
+        id = id.substring(id.indexOf('/') + 1);
+        return getUserFieldMaster(id).getPropertyValue("Content").toString();
+      }
+      catch (Exception x)
+      {
+        return "";
+      }
+    }
+
+    private boolean getBoolean_User(String id)
+    {
+      return getString_User(id).equalsIgnoreCase("true");
+    }
+
+    private boolean hasValue_User(String id)
+    {
+      try
+      {
+        id = id.substring(id.indexOf('/') + 1);
+        return getUserFieldMaster(id) != null;
+      }
+      catch (Exception x)
+      {
+        return false;
+      }
+    }
   }
 
   /**

@@ -814,9 +814,32 @@ public class WollMuxFiles
   public static FunctionLibrary parseFunctions(ConfigThingy conf,
       DialogLibrary dialogLib, Map<Object, Object> context, FunctionLibrary baselib)
   {
-    FunctionLibrary funcs = new FunctionLibrary(baselib);
+    return parseFunctions(new FunctionLibrary(baselib), conf, "Funktionen",
+      dialogLib, context);
+  }
 
-    conf = conf.query("Funktionen");
+  /**
+   * Parst die Inhalte von conf,query(section) als Funktionsdefinitionen und fügt sie
+   * funcs hinzu.
+   * 
+   * @param context
+   *          der Kontext in dem die Funktionsdefinitionen ausgewertet werden sollen
+   *          (insbesondere DIALOG-Funktionen). ACHTUNG! Hier werden Werte
+   *          gespeichert, es ist nicht nur ein Schlüssel.
+   * 
+   * @param baselib
+   *          falls nicht-null wird diese als Fallback verlinkt, um Funktionen zu
+   *          liefern, die anderweitig nicht gefunden werden.
+   * 
+   * @return funcs
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public static FunctionLibrary parseFunctions(FunctionLibrary funcs,
+      ConfigThingy conf, String section, DialogLibrary dialogLib,
+      Map<Object, Object> context)
+  {
+    conf = conf.query(section);
     Iterator<ConfigThingy> parentIter = conf.iterator();
     while (parentIter.hasNext())
     {
@@ -833,7 +856,9 @@ public class WollMuxFiles
         }
         catch (ConfigurationErrorException e)
         {
-          Logger.error(L.m("Fehler beim Parsen der Funktion \"%1\"", name), e);
+          Logger.error(L.m(
+            "Fehler beim Parsen der Funktion \"%1\" im Abschnitt \"%2\"", name,
+            section), e);
         }
       }
     }

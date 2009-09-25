@@ -36,6 +36,8 @@ package de.muenchen.allg.itd51.wollmux.func;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -46,7 +48,7 @@ import de.muenchen.allg.itd51.wollmux.L;
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
-public class FunctionLibrary
+public class FunctionLibrary implements Iterable<Function>
 {
   private Map<String, Function> mapIdToFunction;
 
@@ -71,7 +73,26 @@ public class FunctionLibrary
    */
   public FunctionLibrary(FunctionLibrary baselib)
   {
-    mapIdToFunction = new HashMap<String, Function>();
+    this(baselib, false);
+  }
+
+  /**
+   * Erzeugt eine Funktionsbibliothek, die baselib referenziert (nicht kopiert!).
+   * baselib wird immer dann befragt, wenn die Funktionsbibliothek selbst keine
+   * Funktion des entsprechenden Namens enthält. baselib darf null sein.
+   * 
+   * @param ordered
+   *          Falls true liefert der Iterator dieser Funktionsbibliothek die
+   *          Funktionen in Einfügereihenfolge. Ansonsten werden sie in unbestimmter
+   *          Reihenfolge geliefert. Es sollte offensichtlich sein, dass
+   *          ordered==true mit einem erhöhten Overhead verbunden ist.
+   */
+  public FunctionLibrary(FunctionLibrary baselib, boolean ordered)
+  {
+    if (ordered)
+      mapIdToFunction = new LinkedHashMap<String, Function>();
+    else
+      mapIdToFunction = new HashMap<String, Function>();
     this.baselib = baselib;
   }
 
@@ -146,5 +167,35 @@ public class FunctionLibrary
     Set<String> names = new HashSet<String>(mapIdToFunction.keySet());
     if (baselib != null) names.addAll(baselib.getFunctionNames());
     return names;
+  }
+
+  public Iterator<Function> iterator()
+  {
+    return new IteratorWrapper(mapIdToFunction.values().iterator());
+  }
+
+  private static class IteratorWrapper implements Iterator<Function>
+  {
+    private Iterator<Function> iter;
+
+    public IteratorWrapper(Iterator<Function> iter)
+    {
+      this.iter = iter;
+    }
+
+    public boolean hasNext()
+    {
+      return iter.hasNext();
+    }
+
+    public Function next()
+    {
+      return iter.next();
+    }
+
+    public void remove()
+    {
+      throw new UnsupportedOperationException();
+    }
   }
 }

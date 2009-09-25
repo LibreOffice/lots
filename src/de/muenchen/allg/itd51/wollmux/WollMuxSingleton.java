@@ -122,6 +122,11 @@ public class WollMuxSingleton implements XPALProvider
   private FunctionLibrary globalFunctions;
 
   /**
+   * Enthält die im Dokumentaktionen der wollmux,conf definierten Funktionen.
+   */
+  private FunctionLibrary documentActionFunctions;
+
+  /**
    * Enthält die im Funktionsdialoge-Abschnitt der wollmux,conf definierten Dialoge.
    */
   private DialogLibrary funcDialogs;
@@ -233,6 +238,13 @@ public class WollMuxSingleton implements XPALProvider
      */
     globalPrintFunctions =
       WollMuxFiles.parsePrintFunctions(WollMuxFiles.getWollmuxConf());
+
+    /**
+     * Dokumentaktionen parsen. Diese haben weder Kontext noch Dialoge.
+     */
+    documentActionFunctions = new FunctionLibrary(null, true);
+    WollMuxFiles.parseFunctions(documentActionFunctions,
+      WollMuxFiles.getWollmuxConf(), "Dokumentaktionen", null, null);
 
     // Initialisiere EventProcessor
     WollMuxEventHandler.setAcceptEvents(successfulStartup);
@@ -899,6 +911,16 @@ public class WollMuxSingleton implements XPALProvider
   public FunctionLibrary getGlobalFunctions()
   {
     return globalFunctions;
+  }
+
+  /**
+   * Liefert die Funktionsbibliothek, die die Dokumentaktionen enthält.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public FunctionLibrary getDocumentActionFunctions()
+  {
+    return documentActionFunctions;
   }
 
   /**
