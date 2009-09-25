@@ -187,13 +187,6 @@ public class PrintModels
     private boolean[] isCanceled = new boolean[] { false };
 
     /**
-     * Das lock-Flag, das vor dem Einstellen eines WollMuxEvents auf true gesetzt
-     * werden muss und signalisiert, ob das WollMuxEvent erfolgreich abgearbeitet
-     * wurde.
-     */
-    private boolean[] lock = new boolean[] { true };
-
-    /**
      * Enthält null oder ab dem ersten Aufruf von setPrintProgress[Max]Value ein
      * gültiges PrintProgressBar-Objekt zur Anzeige des Druckstatus.
      */
@@ -374,15 +367,14 @@ public class PrintModels
       // Bei Bedarf den PrintParamsDialog anzeigen.
       if (noParamsDialog == false)
       {
-        setLock();
-        new PrintParametersDialog(model.doc, showCopiesSpinner, unlockActionListener);
-        waitForUnlock();
+        SyncActionListener s = new SyncActionListener();
+        new PrintParametersDialog(model.doc, showCopiesSpinner, s);
+        ActionEvent result = s.synchronize();
 
         // Rückgabewerte des Dialogs speichern für diesen und alle folgenden Aufrufe
         // von finalPrintWithProps()
-        PrintParametersDialog ppd =
-          (PrintParametersDialog) unlockActionListener.actionEvent.getSource();
-        String actionCommand = unlockActionListener.actionEvent.getActionCommand();
+        PrintParametersDialog ppd = (PrintParametersDialog) result.getSource();
+        String actionCommand = result.getActionCommand();
 
         if (PrintParametersDialog.CMD_CANCEL.equals(actionCommand))
         {
@@ -506,10 +498,9 @@ public class PrintModels
      */
     public void setFormValue(String id, String value)
     {
-      setLock();
-      WollMuxEventHandler.handleSetFormValueViaPrintModel(model.doc, id, value,
-        unlockActionListener);
-      waitForUnlock();
+      SyncActionListener s = new SyncActionListener();
+      WollMuxEventHandler.handleSetFormValue(model.doc, id, value, s);
+      s.synchronize();
     }
 
     /**
@@ -557,80 +548,9 @@ public class PrintModels
      */
     public void collectNonWollMuxFormFields()
     {
-      setLock();
-      WollMuxEventHandler.handleCollectNonWollMuxFormFieldsViaPrintModel(model,
-        unlockActionListener);
-      waitForUnlock();
-    }
-
-    /**
-     * Setzt einen lock, der in Verbindung mit setUnlock und der
-     * waitForUnlock-Methode verwendet werden kann, um eine Synchronisierung mit dem
-     * WollMuxEventHandler-Thread zu realisieren. setLock() sollte stets vor dem
-     * Absetzen des WollMux-Events erfolgen, nach dem Absetzen des WollMux-Events
-     * folgt der Aufruf der waitForUnlock()-Methode. Das WollMuxEventHandler-Event
-     * erzeugt bei der Beendigung ein ActionEvent, das dafür sorgt, dass setUnlock
-     * aufgerufen wird.
-     */
-    protected void setLock()
-    {
-      synchronized (lock)
-      {
-        lock[0] = true;
-      }
-    }
-
-    /**
-     * Macht einen mit setLock() gesetzten Lock rückgängig und bricht damit eine
-     * evtl. wartende waitForUnlock()-Methode ab.
-     */
-    protected void setUnlock()
-    {
-      synchronized (lock)
-      {
-        lock[0] = false;
-        lock.notifyAll();
-      }
-    }
-
-    /**
-     * Wartet so lange, bis der vorher mit setLock() gesetzt lock mit der Methode
-     * setUnlock() aufgehoben wird. So kann die Synchronisierung mit Events aus dem
-     * WollMuxEventHandler-Thread realisiert werden. setLock() sollte stets vor dem
-     * Aufruf des Events erfolgen, nach dem Aufruf des Events folgt der Aufruf der
-     * waitForUnlock()-Methode. Das Event erzeugt bei der Beendigung ein ActionEvent,
-     * das dafür sorgt, dass setUnlock aufgerufen wird.
-     */
-    protected void waitForUnlock()
-    {
-      try
-      {
-        synchronized (lock)
-        {
-          while (lock[0] == true)
-            lock.wait();
-        }
-      }
-      catch (InterruptedException e)
-      {}
-    }
-
-    /**
-     * Dieser ActionListener kann WollMuxHandler-Events übergeben werden und sorgt in
-     * Verbindung mit den Methoden setLock() und waitForUnlock() dafür, dass eine
-     * Synchronisierung mit dem WollMuxEventHandler-Thread realisiert werden kann.
-     */
-    protected UnlockActionListener unlockActionListener = new UnlockActionListener();
-
-    protected class UnlockActionListener implements ActionListener
-    {
-      public ActionEvent actionEvent = null;
-
-      public void actionPerformed(ActionEvent arg0)
-      {
-        actionEvent = arg0;
-        setUnlock();
-      }
+      SyncActionListener s = new SyncActionListener();
+      WollMuxEventHandler.handleCollectNonWollMuxFormFieldsViaPrintModel(model, s);
+      s.synchronize();
     }
 
     /*
@@ -780,10 +700,10 @@ public class PrintModels
     public void setPrintBlocksProps(String blockName, boolean visible,
         boolean showHighlightColor)
     {
-      setLock();
+      SyncActionListener s = new SyncActionListener();
       WollMuxEventHandler.handleSetPrintBlocksPropsViaPrintModel(model.doc,
-        blockName, visible, showHighlightColor, unlockActionListener);
-      waitForUnlock();
+        blockName, visible, showHighlightColor, s);
+      s.synchronize();
     }
 
     /**
@@ -805,10 +725,9 @@ public class PrintModels
      */
     public void setGroupVisible(String groupID, boolean visible)
     {
-      setLock();
-      WollMuxEventHandler.handleSetVisibleState(model, groupID, visible,
-        unlockActionListener);
-      waitForUnlock();
+      SyncActionListener s = new SyncActionListener();
+      WollMuxEventHandler.handleSetVisibleState(model, groupID, visible, s);
+      s.synchronize();
     }
 
     /**

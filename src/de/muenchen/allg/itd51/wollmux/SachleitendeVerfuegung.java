@@ -31,7 +31,6 @@
 package de.muenchen.allg.itd51.wollmux;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -1129,35 +1128,12 @@ public class SachleitendeVerfuegung
     // Dialog ausführen und Rückgabewert zurückliefern.
     try
     {
-      final ActionEvent[] result = new ActionEvent[] { null };
-      new SachleitendeVerfuegungenDruckdialog(printDialogConf, vps,
-        new ActionListener()
-        {
-          public void actionPerformed(ActionEvent e)
-          {
-            synchronized (result)
-            {
-              result[0] = e;
-              result.notifyAll();
-            }
-          }
-        });
-      synchronized (result)
-      {
-        while (result[0] == null)
-          try
-          {
-            result.wait();
-          }
-          catch (InterruptedException e1)
-          {
-            Logger.error(e1);
-            return null;
-          }
-      }
-      String cmd = result[0].getActionCommand();
+      SyncActionListener s = new SyncActionListener();
+      new SachleitendeVerfuegungenDruckdialog(printDialogConf, vps, s);
+      ActionEvent result = s.synchronize();
+      String cmd = result.getActionCommand();
       SachleitendeVerfuegungenDruckdialog slvd =
-        (SachleitendeVerfuegungenDruckdialog) result[0].getSource();
+        (SachleitendeVerfuegungenDruckdialog) result.getSource();
       if (SachleitendeVerfuegungenDruckdialog.CMD_SUBMIT.equals(cmd) && slvd != null)
       {
         return slvd.getCurrentSettings();

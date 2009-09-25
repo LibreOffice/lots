@@ -1187,7 +1187,9 @@ public class FormController implements UIElementEventHandler
 
   /**
    * Setzt den Wert des {@link UIElement}s mit ID uiElementId auf value und
-   * behandelt die Änderung so als wäre sie durch den Benutzer erfolgt.
+   * behandelt die Änderung so als wäre sie durch den Benutzer erfolgt. ACHTUNG! Die
+   * Verarbeitung läuft asynchron im Event-Dispatching Thread, d.h. diese Funktion
+   * kehrt evtl. bereits vor Abarbeitung zurück.
    * 
    * @param callback
    *          Nach dem Abarbeiten dieser Änderung wird callback.actionPerformed()
@@ -1195,21 +1197,28 @@ public class FormController implements UIElementEventHandler
    *          Event-Dispatching Thread!
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public void setValue(String uiElementId, String value, ActionListener callback)
+  public void setValue(final String uiElementId, final String value,
+      final ActionListener callback)
   {
-    UIElement uiElement = mapIdToUIElement.get(uiElementId);
-    if (uiElement != null)
+    SwingUtilities.invokeLater(new Runnable()
     {
-      processUIElementEvents = false;
-      uiElement.setString(value);
-      processUIElementEvents = true;
-      processUiElementEvent(uiElement, "valueChanged", new Object[] {});
-    }
-    else
-    {
-      formModel.valueChanged(uiElementId, value);
-    }
-    callback.actionPerformed(new ActionEvent(this, 0, "setValue"));
+      public void run()
+      {
+        UIElement uiElement = mapIdToUIElement.get(uiElementId);
+        if (uiElement != null)
+        {
+          processUIElementEvents = false;
+          uiElement.setString(value);
+          processUIElementEvents = true;
+          processUiElementEvent(uiElement, "valueChanged", new Object[] {});
+        }
+        else
+        {
+          formModel.valueChanged(uiElementId, value);
+        }
+        callback.actionPerformed(new ActionEvent(this, 0, "setValue"));
+      }
+    });
   }
 
   /**

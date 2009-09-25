@@ -40,6 +40,7 @@ import com.sun.star.document.XEventListener;
 import com.sun.star.frame.DispatchDescriptor;
 import com.sun.star.frame.XDispatch;
 import com.sun.star.frame.XDispatchProvider;
+import com.sun.star.lang.XComponent;
 import com.sun.star.lang.XServiceInfo;
 import com.sun.star.lang.XSingleComponentFactory;
 import com.sun.star.lib.uno.helper.Factory;
@@ -48,12 +49,15 @@ import com.sun.star.registry.XRegistryKey;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.uno.XComponentContext;
 
+import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.DispatchHandler;
 import de.muenchen.allg.itd51.wollmux.Logger;
+import de.muenchen.allg.itd51.wollmux.SyncActionListener;
 import de.muenchen.allg.itd51.wollmux.WollMuxEventHandler;
 import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
 import de.muenchen.allg.itd51.wollmux.XPALChangeEventListener;
 import de.muenchen.allg.itd51.wollmux.XWollMux;
+import de.muenchen.allg.itd51.wollmux.XWollMuxDocument;
 
 /**
  * Diese Klasse stellt den zentralen UNO-Service WollMux dar. Der Service hat
@@ -342,11 +346,9 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
   }
 
   /**
-   * Nimmt die Druckfunktion functionName in die Liste der Druckfunktionen des
-   * Dokuments doc auf. Die Druckfunktion wird dabei automatisch aktiv, wenn das
-   * Dokument das nächste mal mit Datei->Drucken gedruckt werden soll. Ist die
-   * Druckfunktion bereits in der Liste der Druckfunktionen des Dokuments enthalten,
-   * so geschieht nichts.
+   * Macht das selbe wie XWollMuxDocument wdoc = getWollMuxDocument(doc); if (wdoc !=
+   * null) wdoc.addPrintFunction(functionName) und sollte durch diese Anweisungen
+   * entsprechend ersetzt werden.
    * 
    * @param doc
    *          Das Dokument, dem die Druckfunktion functionName hinzugefügt werden
@@ -354,29 +356,188 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
    * @param functionName
    *          der Name einer Druckfunktion, die im Abschnitt "Druckfunktionen" der
    *          WollMux-Konfiguration definiert sein muss.
+   * @deprecated since 2009-09-18
    * 
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   public void addPrintFunction(XTextDocument doc, String functionName)
   {
-    WollMuxEventHandler.handleManagePrintFunction(doc, functionName, false);
+    XWollMuxDocument wdoc = getWollMuxDocument(doc);
+    if (wdoc != null) wdoc.removePrintFunction(functionName);
   }
 
   /**
-   * Löscht die Druckfunktion functionName aus der Liste der Druckfunktionen des
-   * Dokuments doc. Die Druckfunktion wird damit ab dem nächsten Aufruf von
-   * Datei->Drucken nicht mehr aufgerufen. Ist die Druckfunktion nicht in der Liste
-   * der Druckfunktionen des Dokuments enthalten, so geschieht nichts.
+   * Macht das selbe wie XWollMuxDocument wdoc = getWollMuxDocument(doc); if (wdoc !=
+   * null) wdoc.removePrintFunction(functionName) und sollte durch diese Anweisungen
+   * entsprechend ersetzt werden.
    * 
    * @param doc
    *          Das Dokument, dem die Druckfunktion functionName genommen werden soll.
    * @param functionName
    *          der Name einer Druckfunktion, die im Dokument gesetzt ist.
+   * @deprecated since 2009-09-18
    * 
    * @author Christoph Lutz (D-III-ITD-D101)
    */
   public void removePrintFunction(XTextDocument doc, String functionName)
   {
-    WollMuxEventHandler.handleManagePrintFunction(doc, functionName, true);
+    XWollMuxDocument wdoc = getWollMuxDocument(doc);
+    if (wdoc != null) wdoc.removePrintFunction(functionName);
+  }
+
+  /**
+   * Ermöglicht den Zugriff auf WollMux-Funktionen, die spezifisch für das Dokument
+   * doc sind. Derzeit ist als doc nur ein c.s.s.t.TextDocument möglich. Wird ein
+   * Dokument übergeben, für das der WollMux keine Funktionen anbietet (derzeit zum
+   * Beispiel ein Calc-Dokument), so wird null zurückgeliefert. Dass diese Funktion
+   * ein nicht-null Objekt zurückliefert bedeutet jedoch nicht zwangsweise, dass der
+   * WollMux für das Dokument sinnvolle Funktionen bereitstellt. Es ist möglich, dass
+   * Aufrufe der entsprechenden Funktionen des XWollMuxDocument-Interfaces nichts
+   * tun.
+   * 
+   * Hinweis zur Synchronisation: Aufrufe der Funktionen von XWollMuxDocument können
+   * ohne weitere Synchronisation sofort erfolgen. Jedoch ersetzt
+   * getWollMuxDocument() keinesfalls die Synchronisation mit dem WollMux.
+   * Insbesondere ist es möglich, dass getWollMuxDocument() zurückkehrt BEVOR der
+   * WollMux das Dokument doc bearbeitet hat. Vergleiche hierzu die Beschreibung von
+   * XWollMuxDocument.
+   * 
+   * @param doc
+   *          Ein OpenOffice.org-Dokument, in dem dokumentspezifische Funktionen des
+   *          WollMux aufgerufen werden sollen.
+   * @return Liefert null, falls doc durch den WollMux nicht bearbeitet wird und eine
+   *         Instanz von XWollMuxDocument, falls es sich bei doc prinzipiell um ein
+   *         WollMux-Dokument handelt.
+   * 
+   * @author Matthias Benkmann (D-III-ITD-D101), Christoph Lutz (D-III-ITD-D101)
+   */
+  public XWollMuxDocument getWollMuxDocument(XComponent doc)
+  {
+    XTextDocument tdoc = UNO.XTextDocument(doc);
+    if (doc != null) return new WollMuxDocument(tdoc);
+    return null;
+  }
+
+  /**
+   * Implementiert XWollMuxDocument für alle dokumentspezifischen Aktionen
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101)
+   */
+  private static class WollMuxDocument implements XWollMuxDocument
+  {
+    XTextDocument doc;
+
+    public WollMuxDocument(XTextDocument doc)
+    {
+      this.doc = doc;
+    }
+
+    /**
+     * Nimmt die Druckfunktion functionName in die Liste der Druckfunktionen des
+     * Dokuments auf. Die Druckfunktion wird dabei automatisch aktiv, wenn das
+     * Dokument das nächste mal mit Datei->Drucken gedruckt werden soll. Ist die
+     * Druckfunktion bereits in der Liste der Druckfunktionen des Dokuments
+     * enthalten, so geschieht nichts.
+     * 
+     * Hinweis: Die Ausführung erfolgt asynchron, d.h. addPrintFunction() kehrt unter
+     * Umständen bereits zurück BEVOR die Methode ihre Wirkung entfaltet hat.
+     * 
+     * @param functionName
+     *          der Name einer Druckfunktion, die im Abschnitt "Druckfunktionen" der
+     *          WollMux-Konfiguration definiert sein muss.
+     * 
+     * @author Christoph Lutz (D-III-ITD-D101)
+     */
+    public void addPrintFunction(String functionName)
+    {
+      WollMuxEventHandler.handleManagePrintFunction(doc, functionName, false);
+    }
+
+    /**
+     * Löscht die Druckfunktion functionName aus der Liste der Druckfunktionen des
+     * Dokuments. Die Druckfunktion wird damit ab dem nächsten Aufruf von
+     * Datei->Drucken nicht mehr aufgerufen. Ist die Druckfunktion nicht in der Liste
+     * der Druckfunktionen des Dokuments enthalten, so geschieht nichts.
+     * 
+     * Hinweis: Die Ausführung erfolgt asynchron, d.h. removePrintFunction() kehrt
+     * unter Umständen bereits zurück BEVOR die Methode ihre Wirkung entfaltet hat.
+     * 
+     * @param functionName
+     *          der Name einer Druckfunktion, die im Dokument gesetzt ist.
+     * 
+     * @author Christoph Lutz (D-III-ITD-D101)
+     */
+    public void removePrintFunction(String functionName)
+    {
+      WollMuxEventHandler.handleManagePrintFunction(doc, functionName, true);
+    }
+
+    /**
+     * Setzt den Wert mit ID id in der FormularGUI auf Wert mit allen Folgen, die das
+     * nach sich zieht (PLAUSIs, AUTOFILLs, Ein-/Ausblendungen,...). Es ist nicht
+     * garantiert, dass der Befehl ausgeführt wird, bevor updateFormGUI() aufgerufen
+     * wurde. Eine Implementierung mit einer Queue ist möglich.
+     * 
+     * @param id
+     * @param value
+     * 
+     * @author Christoph Lutz (D-III-ITD-D101)
+     */
+    public void setFormValue(String id, String value)
+    {
+      SyncActionListener s = new SyncActionListener();
+      WollMuxEventHandler.handleSetFormValue(doc, id, value, s);
+      s.synchronize();
+    }
+
+    /**
+     * Setzt den Wert, der bei insertValue-Dokumentkommandos mit DB_SPALTE "dbSpalte"
+     * eingefügt werden soll auf Wert. Es ist nicht garantiert, dass der neue Wert im
+     * Dokument sichtbar wird, bevor updateInsertFields() aufgerufen wurde. Eine
+     * Implementierung mit einer Queue ist möglich.
+     * 
+     * @param dbSpalte
+     *          enthält den Namen der Absenderdatenspalte, deren Wert geändert werden
+     *          soll.
+     * @param value
+     *          enthält den neuen Wert für dbSpalte.
+     * 
+     * @author Christoph Lutz (D-III-ITD-D101)
+     */
+    public void setInsertValue(String dbSpalte, String value)
+    {
+    // TODO Auto-generated method stub
+
+    }
+
+    /**
+     * Sorgt für die Ausführung aller noch nicht ausgeführten setFormValue()
+     * Kommandos. Die Methode kehrt garantiert erst zurück, wenn alle
+     * setFormValue()-Kommandos ihre Wirkung im WollMux und im entsprechenden
+     * Dokument entfaltet haben.
+     * 
+     * @author Christoph Lutz (D-III-ITD-D101)
+     */
+    public void updateFormGUI()
+    {
+    // Wird implementiert, wenn setFormValue(...) so umgestellt werden soll, dass die
+    // Änderungen vorerst nur in einer queue gesammelt werden und mit dieser Methode
+    // aktiv werden sollen.
+    }
+
+    /**
+     * Sorgt für die Ausführung aller noch nicht ausgeführten setInsertValue()
+     * Kommandos. Die Methode kehrt garantiert erst zurück, wenn alle
+     * setInsertValue()-Kommandos ihre Wirkung im WollMux und im entsprechenden
+     * Dokument entfaltet haben.
+     * 
+     * @author Christoph Lutz (D-III-ITD-D101)
+     */
+    public void updateInsertFields()
+    {
+    // Wird implementiert, wenn setInsertValue(...) so umgestellt werden soll, dass
+    // die Änderungen vorerst nur in einer queue gesammelt werden und mit dieser
+    // Methode aktiv werden sollen.
+    }
   }
 }

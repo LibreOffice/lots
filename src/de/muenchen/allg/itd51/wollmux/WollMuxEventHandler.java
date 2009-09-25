@@ -3390,8 +3390,9 @@ public class WollMuxEventHandler
    * beachten. Nach der erfolgreichen Ausführung aller notwendigen Anpassungen wird
    * der unlockActionListener benachrichtigt.
    * 
-   * Das Event wird aus der Implementierung von XPrintModel (siehe TextDocumentModel)
-   * geworfen, wenn dort die Methode setFormValue aufgerufen wird.
+   * Das Event wird aus den Implementierungen von XPrintModel (siehe
+   * TextDocumentModel) und XWollMuxDocument (siehe compo.WollMux) geworfen, wenn
+   * dort die Methode setFormValue aufgerufen wird.
    * 
    * @param doc
    *          Das Dokument, in dem das Formularfeld mit der ID id neu gesetzt werden
@@ -3406,13 +3407,13 @@ public class WollMuxEventHandler
    *          Der unlockActionListener wird immer informiert, wenn alle notwendigen
    *          Anpassungen durchgeführt wurden.
    */
-  public static void handleSetFormValueViaPrintModel(XTextDocument doc, String id,
-      String value, ActionListener unlockActionListener)
+  public static void handleSetFormValue(XTextDocument doc, String id, String value,
+      ActionListener unlockActionListener)
   {
-    handle(new OnSetFormValueViaPrintModel(doc, id, value, unlockActionListener));
+    handle(new OnSetFormValue(doc, id, value, unlockActionListener));
   }
 
-  private static class OnSetFormValueViaPrintModel extends BasicEvent
+  private static class OnSetFormValue extends BasicEvent
   {
     private XTextDocument doc;
 
@@ -3422,7 +3423,7 @@ public class WollMuxEventHandler
 
     private final ActionListener listener;
 
-    public OnSetFormValueViaPrintModel(XTextDocument doc, String id, String value,
+    public OnSetFormValue(XTextDocument doc, String id, String value,
         ActionListener listener)
     {
       this.doc = doc;
@@ -3445,7 +3446,7 @@ public class WollMuxEventHandler
         {
           public void actionPerformed(ActionEvent arg0)
           {
-            handleSetFormValueViaPrintModelFinished(listener);
+            handleSetFormValueFinished(listener);
           }
         });
       }
@@ -3516,12 +3517,11 @@ public class WollMuxEventHandler
   // *******************************************************************************************
 
   /**
-   * Dieses WollMuxEvent ist das Gegenstück zu handleSetFormValueViaPrintModel und
-   * wird dann erzeugt, wenn nach einer Änderung eines Formularwertes - gesteuert
-   * durch die FormGUI - alle abhängigen Formularwerte angepasst wurden. In diesem
-   * Fall ist die einzige Aufgabe dieses Events, den unlockActionListener zu
-   * informieren, den handleSetFormValueViaPrintModel() nicht selbst informieren
-   * konnte.
+   * Dieses WollMuxEvent ist das Gegenstück zu handleSetFormValue und wird dann
+   * erzeugt, wenn nach einer Änderung eines Formularwertes - gesteuert durch die
+   * FormGUI - alle abhängigen Formularwerte angepasst wurden. In diesem Fall ist die
+   * einzige Aufgabe dieses Events, den unlockActionListener zu informieren, den
+   * handleSetFormValueViaPrintModel() nicht selbst informieren konnte.
    * 
    * Das Event wird aus der Implementierung vom OnSetFormValueViaPrintModel.doit()
    * erzeugt, wenn Feldänderungen über die FormGUI laufen.
@@ -3529,17 +3529,16 @@ public class WollMuxEventHandler
    * @param unlockActionListener
    *          Der zu informierende unlockActionListener.
    */
-  public static void handleSetFormValueViaPrintModelFinished(
-      ActionListener unlockActionListener)
+  public static void handleSetFormValueFinished(ActionListener unlockActionListener)
   {
-    handle(new OnSetFormValueViaPrintModelFinished(unlockActionListener));
+    handle(new OnSetFormValueFinished(unlockActionListener));
   }
 
-  private static class OnSetFormValueViaPrintModelFinished extends BasicEvent
+  private static class OnSetFormValueFinished extends BasicEvent
   {
     private ActionListener listener;
 
-    public OnSetFormValueViaPrintModelFinished(ActionListener unlockActionListener)
+    public OnSetFormValueFinished(ActionListener unlockActionListener)
     {
       this.listener = unlockActionListener;
     }

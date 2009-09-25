@@ -56,6 +56,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 import com.sun.star.awt.PosSize;
@@ -183,7 +184,7 @@ public class FormGUI
     // GUI im Event-Dispatching Thread erzeugen wg. Thread-Safety.
     try
     {
-      javax.swing.SwingUtilities.invokeLater(new Runnable()
+      Runnable runner = new Runnable()
       {
         public void run()
         {
@@ -198,7 +199,11 @@ public class FormGUI
           }
           ;
         }
-      });
+      };
+      if (SwingUtilities.isEventDispatchThread())
+        runner.run();
+      else
+        SwingUtilities.invokeAndWait(runner);
     }
     catch (Exception x)
     {
