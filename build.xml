@@ -147,13 +147,14 @@ snapshot: Create all files for a WollMux-Snapshot. LHM-internal use only.
 	<echo message="===== Using bootstrap files from ${TOOLING} =====" />
 
 
-	<target name="all" depends="WollMuxBar.jar,WollMux.oxt,md5sum" />
+	<target name="all" depends="debug,WollMuxBar.jar,WollMux.oxt,md5sum" />
 	
 	<target name="snapshot" depends="clean, makechangelog, debug, all, .tar.gz, deb, wininstaller" />
 
 	<!-- The debug target doesn't do anything by itself, but for any targets executed later
 	     the DEBUG property will be set. --> 
 	<target name="debug">
+	        <echo message="===== Compiling with debug info (RECOMMENDED!) =====" />
 		<property name="DEBUG" value="on" />
 		<!-- If optimization interferes with debugging, it can be disabled. -->
 		<!-- <property name="OPTIMIZE" value="off" /> -->
