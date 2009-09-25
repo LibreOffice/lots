@@ -36,6 +36,8 @@
 
 package de.muenchen.allg.itd51.wollmux.comp;
 
+import java.util.HashMap;
+
 import com.sun.star.document.XEventListener;
 import com.sun.star.frame.DispatchDescriptor;
 import com.sun.star.frame.XDispatch;
@@ -425,11 +427,14 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
    */
   private static class WollMuxDocument implements XWollMuxDocument
   {
-    XTextDocument doc;
+    private XTextDocument doc;
+
+    private HashMap<String, String> mapDbSpalteToValue;
 
     public WollMuxDocument(XTextDocument doc)
     {
       this.doc = doc;
+      this.mapDbSpalteToValue = new HashMap<String, String>();
     }
 
     /**
@@ -506,8 +511,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
      */
     public void setInsertValue(String dbSpalte, String value)
     {
-    // TODO Auto-generated method stub
-
+      mapDbSpalteToValue.put(dbSpalte, value);
     }
 
     /**
@@ -535,9 +539,11 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
      */
     public void updateInsertFields()
     {
-    // Wird implementiert, wenn setInsertValue(...) so umgestellt werden soll, dass
-    // die Änderungen vorerst nur in einer queue gesammelt werden und mit dieser
-    // Methode aktiv werden sollen.
+      HashMap<String, String> m = new HashMap<String, String>(mapDbSpalteToValue);
+      mapDbSpalteToValue.clear();
+      SyncActionListener s = new SyncActionListener();
+      WollMuxEventHandler.handleSetInsertValues(doc, m, s);
+      s.synchronize();
     }
   }
 }

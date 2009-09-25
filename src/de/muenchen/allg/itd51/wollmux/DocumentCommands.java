@@ -81,7 +81,7 @@ import de.muenchen.allg.itd51.wollmux.TextRangeRelation.TreeRelation;
  * 
  * @author Christoph Lutz (D-III-ITD-5.1)
  */
-public class DocumentCommands
+public class DocumentCommands implements Iterable<DocumentCommand>
 {
   /**
    * Folgendes Pattern prüft ob es sich bei einem Bookmark um ein gültiges

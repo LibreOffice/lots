@@ -59,6 +59,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 import java.util.regex.Matcher;
@@ -3551,6 +3552,94 @@ public class WollMuxEventHandler
     public String toString()
     {
       return this.getClass().getSimpleName() + "()";
+    }
+  }
+
+  // *******************************************************************************************
+
+  /**
+   * Erzeugt ein neues WollMuxEvent, das dafür sorgt, dass im Textdokument doc alle
+   * insertValue-Befehle mit einer DB_SPALTE, die in der übergebenen
+   * mapDbSpalteToValue enthalten sind neu für den entsprechenden Wert evaluiert und
+   * gesetzt werden, unabhängig davon, ob sie den Status DONE besitzen oder nicht.
+   * 
+   * Das Event wird aus der Implementierung von XWollMuxDocument (siehe
+   * compo.WollMux) geworfen, wenn dort die Methode setInsertValue aufgerufen wird.
+   * 
+   * @param doc
+   *          Das Dokument, in dem das die insertValue-Kommandos neu gesetzt werden
+   *          sollen.
+   * @param mapDbSpalteToValue
+   *          Enthält eine Zuordnung von DB_SPALTEn auf die zu setzenden Werte.
+   *          Enthält ein betroffenes Dokumentkommando eine Trafo, so wird die Trafo
+   *          mit dem zugehörigen Wert ausgeführt und das Transformationsergebnis als
+   *          neuer Inhalt des Bookmarks gesetzt.
+   * @param unlockActionListener
+   *          Wird informiert, sobald das Event vollständig abgearbeitet wurde.
+   * 
+   * @author Christoph Lutz (D-III-ITD-D101)
+   */
+  public static void handleSetInsertValues(XTextDocument doc,
+      Map<String, String> mapDbSpalteToValue, ActionListener unlockActionListener)
+  {
+    handle(new OnSetInsertValues(doc, mapDbSpalteToValue, unlockActionListener));
+  }
+
+  private static class OnSetInsertValues extends BasicEvent
+  {
+    private XTextDocument doc;
+
+    private Map<String, String> mapDbSpalteToValue;
+
+    private ActionListener listener;
+
+    public OnSetInsertValues(XTextDocument doc,
+        Map<String, String> mapDbSpalteToValue, ActionListener unlockActionListener)
+    {
+      this.doc = doc;
+      this.mapDbSpalteToValue = mapDbSpalteToValue;
+      this.listener = unlockActionListener;
+    }
+
+    protected void doit() throws WollMuxFehlerException
+    {
+      TextDocumentModel model =
+        WollMuxSingleton.getInstance().getTextDocumentModel(doc);
+
+      for (DocumentCommand cmd : model.getDocumentCommands())
+        // stellt sicher, dass listener am Schluss informiert wird
+        try
+        {
+          if (cmd instanceof DocumentCommand.InsertValue)
+          {
+            DocumentCommand.InsertValue insVal = (DocumentCommand.InsertValue) cmd;
+            String value = mapDbSpalteToValue.get(insVal.getDBSpalte());
+            if (value != null)
+            {
+              value = model.getTransformedValue(insVal.getTrafoName(), value);
+              if ("".equals(value))
+              {
+                cmd.setTextRangeString("");
+              }
+              else
+              {
+                cmd.setTextRangeString(insVal.getLeftSeparator() + value
+                  + insVal.getRightSeparator());
+              }
+            }
+          }
+        }
+        catch (java.lang.Exception e)
+        {
+          Logger.error(e);
+        }
+      if (listener != null) listener.actionPerformed(null);
+    }
+
+    public String toString()
+    {
+      return this.getClass().getSimpleName() + "(#" + doc.hashCode()
+        + ", Nr.Values=" + mapDbSpalteToValue.size() + ")";
     }
   }
 

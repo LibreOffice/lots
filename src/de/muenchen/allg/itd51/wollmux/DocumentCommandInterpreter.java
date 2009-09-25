@@ -1281,7 +1281,7 @@ public class DocumentCommandInterpreter
           + cmd.getRightSeparator());
       }
 
-      cmd.markDone(!mux.isDebugMode());
+      cmd.markDone(false);
       return 0;
     }
   }
