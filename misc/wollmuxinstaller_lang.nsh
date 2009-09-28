@@ -20,9 +20,11 @@ LangString UninstallWollMux ${LANG_GERMAN} "WollMux entfernen"
 LangString NeedAdminMessage ${LANG_ENGLISH} "You need administrator privileges to execute this program!"
 LangString NeedAdminMessage ${LANG_GERMAN} "Sie benötigen Administrator-Rechte um dieses Programm auszuführen!"
 LangString TryToKillOOoMessage ${LANG_ENGLISH} "OpenOffice.org must be closed before execution of this program.$\n\
-												The program will now check if any OOo windows are open and try to close them."
+												The program will now check if any OOo windows are open and try to close them.$\n\
+												This can take a few seconds."
 LangString TryToKillOOoMessage ${LANG_GERMAN} "OpenOffice.org muss vor dem Ausführen dieses Programms geschlossen werden.$\n\
-											   Das Programm überprüft nun, ob irgendwelche OOo-Fenster offen sind und versucht diese zu schließen."
+											   Das Programm überprüft nun, ob irgendwelche OOo-Fenster offen sind und versucht diese zu schließen.$\n\
+											   Dieser Vorgang kann einige Sekunden dauern."
 LangString OOoRunningMessage ${LANG_ENGLISH} "OpenOffice.org or the OpenOffice.org quickstarter could not be closed!$\n\
 											  Please close all OpenOffice.org windows and the quickstarter, then try again.$\n\
 											  Another reason for this error could be that either OpenOffice.org or Java is not installed on your system."
