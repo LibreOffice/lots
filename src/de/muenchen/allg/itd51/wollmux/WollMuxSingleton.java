@@ -117,6 +117,11 @@ public class WollMuxSingleton implements XPALProvider
   private static WollMuxSingleton singletonInstance = null;
 
   /**
+   * Versionsstring des WollMux.
+   */
+  private String version = null;
+
+  /**
    * Enthält die im Funktionen-Abschnitt der wollmux,conf definierten Funktionen.
    */
   private FunctionLibrary globalFunctions;
@@ -345,6 +350,17 @@ public class WollMuxSingleton implements XPALProvider
   }
 
   /**
+   * Liefert die Versionsnummer des WollMux (z.B. "5.9.2") zurück.
+   * 
+   * @author Matthias Benkmann (D-III-ITD-D101)
+   */
+  public String getVersion()
+  {
+    if (version == null) getBuildInfo();
+    return version;
+  }
+
+  /**
    * Diese Methode liefert die erste Zeile aus der buildinfo-Datei der aktuellen
    * WollMux-Installation zurück. Der Build-Status wird während dem Build-Prozess mit
    * dem Kommando "svn info" auf das Projektverzeichnis erstellt. Die Buildinfo-Datei
@@ -358,6 +374,7 @@ public class WollMuxSingleton implements XPALProvider
    */
   public String getBuildInfo()
   {
+    version = "unknown";
     BufferedReader in = null;
     try
     {
@@ -366,7 +383,12 @@ public class WollMuxSingleton implements XPALProvider
       {
         in = new BufferedReader(new InputStreamReader(url.openStream()));
         String str = in.readLine();
-        if (str != null) return str;
+        if (str != null)
+        {
+          if (str.startsWith("Version: "))
+            version = str.substring(9, str.indexOf(','));
+          return str;
+        }
       }
     }
     catch (Exception x)
@@ -1350,6 +1372,7 @@ public class WollMuxSingleton implements XPALProvider
        * anfallen nicht bearbeiten.
        */
       String url = UNO.XModel(docEvent.Source).getURL();
+      Logger.debug2(url);
       int idx = url.lastIndexOf('/') - 4;
       if (url.startsWith(".tmp/sv", idx) && url.endsWith(".tmp")) return;
       // --------------

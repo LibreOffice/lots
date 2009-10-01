@@ -110,6 +110,12 @@ import de.muenchen.allg.itd51.wollmux.func.Values.SimpleMap;
 public class TextDocumentModel
 {
   /**
+   * Verwendet für {@link #lastTouchedByOOoVersion} und
+   * {@link #lastTouchedByWollMuxVersion}.
+   */
+  public static final String VERSION_UNKNOWN = "unknown";
+
+  /**
    * Enthält die Referenz auf das XTextDocument-interface des eigentlichen
    * TextDocument-Services der zugehörigen UNO-Komponente.
    */
@@ -145,6 +151,18 @@ public class TextDocumentModel
    * gespeichert wird.
    */
   private static final String DATA_ID_SETTYPE = "SetType";
+
+  /**
+   * Die dataId unter der die Version des letzten WollMux der das Dokument angefasst
+   * hat (vor diesem gerade laufenden) gespeichert wird.
+   */
+  private static final String DATA_ID_TOUCH_WOLLMUXVERSION = "WollMuxVersion";
+
+  /**
+   * Die dataId unter der die Version des letzten OpenOffice,orgs das das Dokument
+   * angefasst hat (vor diesem gerade laufenden) gespeichert wird.
+   */
+  private static final String DATA_ID_TOUCH_OOOVERSION = "OOoVersion";
 
   /**
    * Pattern zum Erkennen der Bookmarks, die {@link #deForm()} entfernen soll.
@@ -319,6 +337,25 @@ public class TextDocumentModel
   private CoupledWindowController coupledWindowController = null;
 
   /**
+   * Enthält die Versionsnummer (nicht Revision, da diese zwischen git und svn
+   * unterschiedlich ist) des WollMux, der das Dokument zuletzt angefasst hat (vor
+   * diesem gerade laufenden).
+   */
+  private String lastTouchedByWollMuxVersion;
+
+  /**
+   * Enthält die Versionsnummer des OpenOffice,org, das das Dokument zuletzt
+   * angefasst hat (vor diesem gerade laufenden).
+   */
+  private String lastTouchedByOOoVersion;
+
+  /**
+   * Wird auf true gesetzt, wenn das erste mal
+   * {@link #updateLastTouchedByVersionInfo() aufgerufen wurde.
+   */
+  private boolean haveUpdatedLastTouchedByVersionInfo = false;
+
+  /**
    * Erzeugt ein neues TextDocumentModel zum XTextDocument doc und sollte nie direkt
    * aufgerufen werden, da neue TextDocumentModels über das WollMuxSingleton (siehe
    * WollMuxSingleton.getTextDocumentModel()) erzeugt und verwaltet werden.
@@ -366,6 +403,12 @@ public class TextDocumentModel
     this.persistentData = new PersistentData(doc);
     parsePrintFunctions(persistentData.getData(DATA_ID_PRINTFUNCTION));
     parseFormValues(persistentData.getData(DATA_ID_FORMULARWERTE));
+    lastTouchedByWollMuxVersion =
+      persistentData.getData(DATA_ID_TOUCH_WOLLMUXVERSION);
+    if (lastTouchedByWollMuxVersion == null)
+      lastTouchedByWollMuxVersion = VERSION_UNKNOWN;
+    lastTouchedByOOoVersion = persistentData.getData(DATA_ID_TOUCH_OOOVERSION);
+    if (lastTouchedByOOoVersion == null) lastTouchedByOOoVersion = VERSION_UNKNOWN;
 
     // Type auswerten
     this.isTemplate = !hasURL();
@@ -379,6 +422,63 @@ public class TextDocumentModel
     }
     catch (java.lang.Exception e)
     {}
+  }
+
+  /**
+   * Liefert die Version des letzten WollMux der dieses Dokument angefasst hat (vor
+   * dem aktuell laufenden) oder {@link #VERSION_UNKNOWN} falls unbekannt.
+   * 
+   * Achtung! Es kann günstiger sein, hier im TextDocumentModel an zentraler Stelle
+   * Funktionen einzubauen zum Vergleich des Versionsstrings mit bestimmten anderen
+   * Versionen, als das Parsen/Vergleichen von Versionsstrings an mehreren Stellen zu
+   * replizieren.
+   * 
+   * @author Matthias Benkmann (D-III-ITD-D101)
+   * 
+   */
+  public String getLastTouchedByWollMuxVersion()
+  {
+    return lastTouchedByWollMuxVersion;
+  }
+
+  /**
+   * Liefert die Version des letzten OpenOffice,org das dieses Dokument angefasst hat
+   * (vor dem aktuell laufenden) oder {@link #VERSION_UNKNOWN} falls unbekannt.
+   * 
+   * Achtung! Es kann günstiger sein, hier im TextDocumentModel an zentraler Stelle
+   * Funktionen einzubauen zum Vergleich des Versionsstrings mit bestimmten anderen
+   * Versionen, als das Parsen/Vergleichen von Versionsstrings an mehreren Stellen zu
+   * replizieren.
+   * 
+   * @author Matthias Benkmann (D-III-ITD-D101)
+   * 
+   */
+  public String getLastTouchedByOOoVersion()
+  {
+    return lastTouchedByOOoVersion;
+  }
+
+  /**
+   * Schreibt die WollMux und OOo-Version in {@link PersistentData}. Die
+   * Rückgabewerte von {@link #getLastTouchedByOOoVersion()} und
+   * {@link #getLastTouchedByWollMuxVersion()} sind davon NICHT betroffen, da diese
+   * immer den Zustand beim Öffnen repräsentieren. Der modified-Zustand des Dokuments
+   * wird durch diese Funktion nicht verändert.
+   * 
+   * @author Matthias Benkmann (D-III-ITD-D101)
+   */
+  public void updateLastTouchedByVersionInfo()
+  {
+    if (!haveUpdatedLastTouchedByVersionInfo)
+    {
+      // Logger.error(new Exception()); //um einen Stacktrace zu kriegen
+      haveUpdatedLastTouchedByVersionInfo = true;
+      boolean modified = getDocumentModified();
+      persistentData.setData(DATA_ID_TOUCH_WOLLMUXVERSION,
+        WollMuxSingleton.getInstance().getVersion());
+      persistentData.setData(DATA_ID_TOUCH_OOOVERSION, Workarounds.getOOoVersion());
+      setDocumentModified(modified);
+    }
   }
 
   /**
@@ -1063,6 +1163,7 @@ public class TextDocumentModel
    */
   synchronized public void markAsFormDocument()
   {
+    updateLastTouchedByVersionInfo();
     setType("formDocument");
     persistentData.setData(DATA_ID_SETTYPE, "formDocument");
   }
@@ -1105,7 +1206,7 @@ public class TextDocumentModel
    */
   synchronized public void removePrintFunction(String functionName)
   {
-    printFunctions.remove(functionName);
+    if (!printFunctions.remove(functionName)) return;
     storePrintFunctions();
 
     // Frame veranlassen, die dispatches neu einzulesen - z.B. damit File->Print
@@ -1150,6 +1251,7 @@ public class TextDocumentModel
    */
   private void storePrintFunctions()
   {
+    updateLastTouchedByVersionInfo();
     if (printFunctions.isEmpty())
     {
       persistentData.removeData(DATA_ID_PRINTFUNCTION);
@@ -1231,6 +1333,8 @@ public class TextDocumentModel
   synchronized public void setPrintBlocksProps(String blockName, boolean visible,
       boolean showHighlightColor)
   {
+    updateLastTouchedByVersionInfo();
+
     Iterator<DocumentCommand> iter = new HashSet<DocumentCommand>().iterator();
     if (SachleitendeVerfuegung.BLOCKNAME_SLV_ALL_VERSIONS.equals(blockName))
       iter = documentCommands.allVersionsIterator();
@@ -1339,6 +1443,8 @@ public class TextDocumentModel
    */
   synchronized public void removeNonWMBookmarks()
   {
+    updateLastTouchedByVersionInfo();
+
     XBookmarksSupplier bmSupp = UNO.XBookmarksSupplier(doc);
     XNameAccess bookmarks = bmSupp.getBookmarks();
     String[] names = bookmarks.getElementNames();
@@ -1370,6 +1476,8 @@ public class TextDocumentModel
    */
   synchronized public void deForm()
   {
+    updateLastTouchedByVersionInfo();
+
     XBookmarksSupplier bmSupp = UNO.XBookmarksSupplier(doc);
     XNameAccess bookmarks = bmSupp.getBookmarks();
     String[] names = bookmarks.getElementNames();
@@ -1403,6 +1511,7 @@ public class TextDocumentModel
    */
   synchronized public void insertMailMergeFieldAtCursorPosition(String fieldId)
   {
+    updateLastTouchedByVersionInfo();
     insertMailMergeField(fieldId, getViewCursor());
   }
 
@@ -1414,6 +1523,8 @@ public class TextDocumentModel
    */
   private void insertMailMergeField(String fieldId, XTextRange range)
   {
+    updateLastTouchedByVersionInfo();
+
     if (fieldId == null || fieldId.length() == 0 || range == null) return;
     try
     {
@@ -1617,6 +1728,8 @@ public class TextDocumentModel
    */
   synchronized public void setMailmergeConfig(ConfigThingy conf)
   {
+    updateLastTouchedByVersionInfo();
+
     mailmergeConf = new ConfigThingy("Seriendruck");
     for (Iterator<ConfigThingy> iter = conf.iterator(); iter.hasNext();)
     {
@@ -1674,6 +1787,8 @@ public class TextDocumentModel
    */
   private void storeCurrentFormDescription()
   {
+    updateLastTouchedByVersionInfo();
+
     ConfigThingy conf = getFormDescription();
     try
     {
@@ -1722,6 +1837,7 @@ public class TextDocumentModel
    */
   synchronized public void setFormFieldValue(String fieldId, String value)
   {
+    updateLastTouchedByVersionInfo();
     if (value == null)
       formFieldValues.remove(fieldId);
     else
@@ -1954,6 +2070,9 @@ public class TextDocumentModel
       boolean applyTrafo, boolean useKnownFormValues)
   {
     if (formFields == null) return;
+
+    updateLastTouchedByVersionInfo();
+
     for (FormField field : formFields)
       try
       {
@@ -2760,6 +2879,8 @@ public class TextDocumentModel
   synchronized public void addNewInputUserField(XTextRange r, String trafoName,
       String hint)
   {
+    updateLastTouchedByVersionInfo();
+
     try
     {
       ConfigThingy conf = new ConfigThingy("WM");

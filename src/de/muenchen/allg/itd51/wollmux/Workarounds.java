@@ -142,13 +142,12 @@ public class Workarounds
   }
 
   /**
-   * Issue #103137 betrifft OOo 3.x (derzeit noch keine OOo-Version mit Fix bekannt).
-   * Der Workaround kann entfernt werden, wenn keine Dokumente mehr im Umlauf sind,
-   * deren Generator OOo 2 ist und in denen Textstellen mindestens einmal aus- und
-   * wieder eingeblendet wurden. Notfalls muss man vor der Deaktivierung einen
-   * Mechanismus über die Dokumentablagen der Referate laufen lassen der dafür sorgt,
-   * dass der Altbestand der von OOo 2 erzeugten Dokumente von sämtlichen
-   * text:display="none"-Stellen befreit wurde.
+   * Issue #103137 betrifft OOo 3.0 und 3.1. Der Workaround kann entfernt werden,
+   * wenn keine Dokumente mehr im Umlauf sind, deren Generator OOo 2 ist und in denen
+   * Textstellen mindestens einmal aus- und wieder eingeblendet wurden. Notfalls muss
+   * man vor der Deaktivierung einen Mechanismus über die Dokumentablagen der
+   * Referate laufen lassen der dafür sorgt, dass der Altbestand der von OOo 2
+   * erzeugten Dokumente von sämtlichen text:display="none"-Stellen befreit wurde.
    * 
    * @author Christoph Lutz (D-III-ITD-D101)
    */
@@ -157,7 +156,8 @@ public class Workarounds
     if (workaround103137 == null)
     {
       String version = getOOoVersion();
-      if (version != null && version.startsWith("3."))
+      if (version != null
+        && (version.startsWith("3.0") || version.startsWith("3.1")))
       {
         workaround103137 = applyWorkaround("103137");
       }
@@ -176,7 +176,7 @@ public class Workarounds
    * 
    * @author Christoph Lutz (D-III-ITD-D101)
    */
-  private static String getOOoVersion()
+  public static String getOOoVersion()
   {
     if (oooVersion == null)
     {
