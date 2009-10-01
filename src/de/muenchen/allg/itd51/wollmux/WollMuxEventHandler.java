@@ -1037,7 +1037,9 @@ public class WollMuxEventHandler
         // die Sichtbarkeiten explizit setzt. Damit bleiben nur die Sachleitenden
         // Verfügungen übrig, die vom WollMux bisher noch nicht automatisch
         // korrigiert wurden. Dieser Workaround macht das nun:
-        SachleitendeVerfuegung.workaround103137(model);
+        if (model.getPrintFunctions().contains(
+          SachleitendeVerfuegung.PRINT_FUNCTION_NAME))
+          SachleitendeVerfuegung.workaround103137(model);
       }
 
       // Mögliche Aktionen für das neu geöffnete Dokument:
