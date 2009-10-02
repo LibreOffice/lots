@@ -3016,33 +3016,36 @@ public class TextDocumentModel
   /**
    * Führt alle Funktionen aus funcs der Reihe nach aus, solange bis eine davon einen
    * nicht-leeren String zurückliefert und interpretiert diesen als Angabe, welche
-   * Aktionen für das Dokument auszuführen sind. Derzeit wird nur "noaction"
-   * unterstützt und entsprechend true geliefert, wenn der erste nicht-leere
-   * Funktionswert "noaction" lautet. Bei späteren Erweiterungen kann der
-   * Rückgabewert von boolean z.B. auf eine int-Bitmaske geändert werden, die
-   * spezifiziert, welche Aktionen durchzuführen sind.
-   * 
-   * Den Funktionen werden als {@link Values} diverse Daten zur Verfügung gestellt.
-   * Derzeit sind dies
+   * Aktionen für das Dokument auszuführen sind. Derzeit werden nur "noaction" und
+   * "allactions" unterstützt. Den Funktionen werden als {@link Values} diverse Daten
+   * zur Verfügung gestellt. Derzeit sind dies
    * <ul>
    * <li>"User/<Name>" Werte von Benutzervariablen (vgl.
    * {@link #getUserFieldMaster(String)}</li>
    * </ul>
    * 
+   * @return 0 => noaction, Integer.MAX_VALUE => allactions, -1 => WollMux-Default
+   * 
    * @author Matthias Benkmann (D-III-ITD-D101)
    * 
    * TESTED
    */
-  public boolean evaluateDocumentActions(Iterator<Function> funcs)
+  public int evaluateDocumentActions(Iterator<Function> funcs)
   {
     Values values = new MyValues();
     while (funcs.hasNext())
     {
       Function f = funcs.next();
       String res = f.getString(values);
-      if (res.length() > 0) return res.equals("noaction");
+      if (res.length() > 0)
+      {
+        if (res.equals("noaction")) return 0;
+        if (res.equals("allactions")) return Integer.MAX_VALUE;
+        Logger.error(L.m(
+          "Unbekannter Rückgabewert \"%1\" von Dokumentaktionen-Funktion", res));
+      }
     }
-    return false;
+    return -1;
   }
 
   /**

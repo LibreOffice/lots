@@ -1051,11 +1051,11 @@ public class WollMuxEventHandler
         // insertFormValue, ... auswerten.
         dci.scanGlobalDocumentCommands();
 
-        boolean noAction =
+        int actions =
           model.evaluateDocumentActions(mux.getDocumentActionFunctions().iterator());
 
         // Bei Vorlagen: Ausführung der Dokumentkommandos
-        if (!noAction && model.isTemplate())
+        if ((actions < 0 && model.isTemplate()) || (actions == Integer.MAX_VALUE))
         {
           dci.executeTemplateCommands();
 
@@ -1064,7 +1064,10 @@ public class WollMuxEventHandler
         }
 
         // Bei Formularen:
-        if (!noAction && model.isFormDocument())
+        // Anmerkung: actions == allactions wird NICHT so interpretiert, dass auch
+        // bei Dokumenten ohne Formularfunktionen der folgende Abschnitt ausgeführt
+        // wird. Dies würde unsinnige Ergebnisse verursachen.
+        if (actions != 0 && model.isFormDocument())
         {
           // Konfigurationsabschnitt Fenster/Formular verarbeiten
           try
