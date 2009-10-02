@@ -42,8 +42,8 @@ module de {  module muenchen {  module allg { module itd51 { module wollmux {
 */
 interface XWollMux
 {
-	// Methoden zum Registrieren/Deregistieren von XPALChangeEventListenern.
-	interface XPALChangeEventBroadcaster;
+    // Methoden zum Registrieren/Deregistieren von XPALChangeEventListenern.
+    interface XPALChangeEventBroadcaster;
 
     /**
      * Die in diesem Interface beschriebenen Methoden registrieren bzw. deregistrieren
@@ -65,7 +65,7 @@ interface XWollMux
      * Öffnen. D.h. für jedes in OOo geöffnete Dokument erfolgt früher oder später
      * ein solches Event.
      */	
-	interface com::sun::star::document::XEventBroadcaster;
+    interface com::sun::star::document::XEventBroadcaster;
 
     /**
       Diese Methode setzt den aktuellen Absender der Persönlichen Absenderliste
@@ -76,7 +76,7 @@ interface XWollMux
       Die Methode verwendet für sender das selben Format wie es vom
       XPALProvider:getCurrentSender() geliefert wird.
      */
-	void setCurrentSender([in] string sender, [in] short index);
+    void setCurrentSender([in] string sender, [in] short index);
 
     /**
       Diese Methode liefert den Wert zur Datenbankspalte dbSpalte, der dem Wert
