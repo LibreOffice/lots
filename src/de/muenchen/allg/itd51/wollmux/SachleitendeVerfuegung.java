@@ -1333,19 +1333,17 @@ public class SachleitendeVerfuegung
     {
       cursor.gotoEndOfParagraph(true);
 
-      if (isVerfuegungspunkt(cursor))
+      if (isVerfuegungspunkt(cursor)) if (punkt1 == null)
       {
-        if (punkt1 == null)
-          punkt1 = cursor.getText().createTextCursorByRange(cursor);
+        punkt1 = cursor.getText().createTextCursorByRange(cursor);
+      }
+      else
+      {
         cursor.collapseToStart();
         cursor.gotoRange(cursor.getText().getEnd(), true);
         setInvisibleRange = cursor;
       }
     } while (setInvisibleRange == null && cursor.gotoNextParagraph(false));
-
-    // Sammeln der Textsections, die im ausgeblendeten Bereich liegen
-    List<XTextSection> hidingSections =
-      getSectionsFromPosition(doc, setInvisibleRange);
 
     // Ausblendung der Ziffer von Punkt 1 aufheben:
     if (punkt1 != null)
@@ -1372,10 +1370,6 @@ public class SachleitendeVerfuegung
     model.setPrintBlocksProps(BLOCKNAME_SLV_ORIGINAL_ONLY, true, true);
     model.setPrintBlocksProps(BLOCKNAME_SLV_ALL_VERSIONS, true, true);
     model.setPrintBlocksProps(BLOCKNAME_SLV_COPY_ONLY, true, true);
-
-    // ausgeblendete TextSections wieder einblenden:
-    for (XTextSection sect : hidingSections)
-      UNO.setProperty(sect, "IsVisible", Boolean.TRUE);
 
     // Verfügungspunkte wieder einblenden:
     if (setInvisibleRange != null) UNO.hideTextRange(setInvisibleRange, false);
