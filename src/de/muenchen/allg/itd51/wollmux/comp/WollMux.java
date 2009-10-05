@@ -416,7 +416,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
   public XWollMuxDocument getWollMuxDocument(XComponent doc)
   {
     XTextDocument tdoc = UNO.XTextDocument(doc);
-    if (doc != null) return new WollMuxDocument(tdoc);
+    if (tdoc != null) return new WollMuxDocument(tdoc);
     return null;
   }
 
