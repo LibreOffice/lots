@@ -1371,7 +1371,9 @@ public class WollMuxSingleton implements XPALProvider
        * Workaround for #3091: Die unsichtbaren Dokumente, die beim OOo-Seriendruck
        * anfallen nicht bearbeiten.
        */
+      String event = docEvent.EventName;
       String url = UNO.XModel(docEvent.Source).getURL();
+      Logger.debug2(event);
       Logger.debug2(url);
       int idx = url.lastIndexOf('/') - 4;
       if (url.startsWith(".tmp/sv", idx) && url.endsWith(".tmp")) return;
@@ -1380,8 +1382,6 @@ public class WollMuxSingleton implements XPALProvider
       XComponent compo = UNO.XComponent(docEvent.Source);
       if (compo == null) return;
       XTextDocument xTextDoc = UNO.XTextDocument(compo);
-
-      String event = docEvent.EventName;
 
       // Im Gegensatz zu OnLoad oder OnNew wird das Event OnViewCreated auch bei
       // unsichtbar geöffneten Dokumenten erzeugt. Daher wird nun hauptsächlich
