@@ -1394,8 +1394,8 @@ public class WollMuxSingleton implements XPALProvider
         }
         else
         {
-          WollMuxEventHandler.handleNotifyDocumentEventListener(
-            "OnWollMuxProcessingFinished", compo);
+          WollMuxEventHandler.handleNotifyDocumentEventListener(null,
+            WollMuxEventHandler.ON_WOLLMUX_PROCESSING_FINISHED, compo);
         }
         setProcessed(compo);
       }
@@ -1414,8 +1414,8 @@ public class WollMuxSingleton implements XPALProvider
         }
         else
         {
-          WollMuxEventHandler.handleNotifyDocumentEventListener(
-            "OnWollMuxProcessingFinished", compo);
+          WollMuxEventHandler.handleNotifyDocumentEventListener(null,
+            WollMuxEventHandler.ON_WOLLMUX_PROCESSING_FINISHED, compo);
         }
         setProcessed(compo);
       }

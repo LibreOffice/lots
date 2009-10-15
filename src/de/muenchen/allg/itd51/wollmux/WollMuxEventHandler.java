@@ -131,6 +131,21 @@ import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
 public class WollMuxEventHandler
 {
   /**
+   * Name des OnWollMuxProcessingFinished-Events.
+   */
+  public static final String ON_WOLLMUX_PROCESSING_FINISHED =
+    "OnWollMuxProcessingFinished";
+
+  /**
+   * Das aktuell vom WollMux verarbeitete Dokument. Die Verarbeitung von Dokumenten
+   * erfolgt teilweise über mehrere Events hinweg. Diese Variable wird auf die OOo
+   * Komponente (normalerweise ein XTextDocument) gesetzt sobald die Verarbeitung
+   * begonnen wird und die Variable wird wieder auf null gesetzt, sobald das
+   * OnWollMuxProcessingFinished Event abgesetzt wurde.
+   */
+  private static XComponent documentCurrentlyBeingProcessed = null;
+
+  /**
    * Mit dieser Methode ist es möglich die Entgegennahme von Events zu blockieren.
    * Alle eingehenden Events werden ignoriert, wenn accept auf false gesetzt ist und
    * entgegengenommen, wenn accept auf true gesetzt ist.
@@ -1133,6 +1148,7 @@ public class WollMuxEventHandler
     protected void doit() throws WollMuxFehlerException
     {
       if (xTextDoc == null) return;
+      documentCurrentlyBeingProcessed = xTextDoc;
 
       WollMuxSingleton mux = WollMuxSingleton.getInstance();
       TextDocumentModel model = mux.getTextDocumentModel(xTextDoc);
@@ -1226,7 +1242,8 @@ public class WollMuxEventHandler
 
       // Registrierte XEventListener (etwas später) informieren, dass die
       // Dokumentbearbeitung fertig ist.
-      handleNotifyDocumentEventListener("OnWollMuxProcessingFinished", model.doc);
+      handleNotifyDocumentEventListener(null, ON_WOLLMUX_PROCESSING_FINISHED,
+        model.doc);
 
       // ContextChanged auslösen, damit die Dispatches aktualisiert werden.
       try
@@ -2722,6 +2739,24 @@ public class WollMuxEventHandler
     protected void doit()
     {
       WollMuxSingleton.getInstance().addDocumentEventListener(listener);
+      XEnumeration enu = UNO.desktop.getComponents().createEnumeration();
+      while (enu.hasMoreElements())
+      {
+        try
+        {
+          XComponent compo = UNO.XComponent(enu.nextElement());
+          if (documentCurrentlyBeingProcessed != null
+            && !UnoRuntime.areSame(documentCurrentlyBeingProcessed, compo))
+          {
+            handleNotifyDocumentEventListener(listener,
+              ON_WOLLMUX_PROCESSING_FINISHED, compo);
+          }
+        }
+        catch (Exception x)
+        {
+          Logger.error(x);
+        }
+      }
     }
 
     public boolean requires(Object o)
@@ -2772,10 +2807,16 @@ public class WollMuxEventHandler
   // *******************************************************************************************
 
   /**
-   * Über dieses Event werden alle registrierten DocumentEventListener
-   * (XEventListener-Objekte) über Statusänderungen der Dokumentbearbeitung
-   * informiert
+   * Über dieses Event werden alle registrierten DocumentEventListener (falls
+   * listener==null) oder ein bestimmter registrierter DocumentEventListener (falls
+   * listener != null) (XEventListener-Objekte) über Statusänderungen der
+   * Dokumentbearbeitung informiert
    * 
+   * @param listener
+   *          der zu benachrichtigende XEventListener. Falls null werden alle
+   *          registrierten Listener benachrichtig. listener wird auf jeden Fall nur
+   *          benachrichtigt, wenn er zur Zeit der Abarbeitung des Events noch
+   *          registriert ist.
    * @param eventName
    *          Name des Events
    * @param source
@@ -2784,10 +2825,10 @@ public class WollMuxEventHandler
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
-  public static void handleNotifyDocumentEventListener(String eventName,
-      Object source)
+  public static void handleNotifyDocumentEventListener(XEventListener listener,
+      String eventName, Object source)
   {
-    handle(new OnNotifyDocumentEventListener(eventName, source));
+    handle(new OnNotifyDocumentEventListener(listener, eventName, source));
   }
 
   private static class OnNotifyDocumentEventListener extends BasicEvent
@@ -2796,8 +2837,12 @@ public class WollMuxEventHandler
 
     private Object source;
 
-    public OnNotifyDocumentEventListener(String eventName, Object source)
+    private XEventListener listener;
+
+    public OnNotifyDocumentEventListener(XEventListener listener, String eventName,
+        Object source)
     {
+      this.listener = listener;
       this.eventName = eventName;
       this.source = source;
     }
@@ -2817,7 +2862,7 @@ public class WollMuxEventHandler
         try
         {
           final XEventListener listener = i.next();
-          new Thread()
+          if (this.listener == null || this.listener == listener) new Thread()
           {
             public void run()
             {
@@ -2835,6 +2880,10 @@ public class WollMuxEventHandler
           i.remove();
         }
       }
+
+      if (eventName.equals(ON_WOLLMUX_PROCESSING_FINISHED)
+        && source == documentCurrentlyBeingProcessed)
+        documentCurrentlyBeingProcessed = null;
     }
 
     public String toString()

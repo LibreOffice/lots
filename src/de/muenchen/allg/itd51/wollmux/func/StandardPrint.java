@@ -322,7 +322,7 @@ public class StandardPrint
     {
       public void notifyEvent(EventObject arg0)
       {
-        if (arg0.EventName.equals("OnWollMuxProcessingFinished"))
+        if (arg0.EventName.equals(WollMuxEventHandler.ON_WOLLMUX_PROCESSING_FINISHED))
         {
           synchronized (compo)
           {
