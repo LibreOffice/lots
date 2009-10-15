@@ -2745,8 +2745,8 @@ public class WollMuxEventHandler
         try
         {
           XComponent compo = UNO.XComponent(enu.nextElement());
-          if (documentCurrentlyBeingProcessed != null
-            && !UnoRuntime.areSame(documentCurrentlyBeingProcessed, compo))
+          if (documentCurrentlyBeingProcessed == null
+            || !UnoRuntime.areSame(documentCurrentlyBeingProcessed, compo))
           {
             handleNotifyDocumentEventListener(listener,
               ON_WOLLMUX_PROCESSING_FINISHED, compo);
