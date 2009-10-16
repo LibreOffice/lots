@@ -123,6 +123,7 @@ import com.sun.star.view.XSelectionSupplier;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.DuplicateIDException;
 import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
@@ -653,38 +654,9 @@ public class FormularMax4000
 
     // ========================= Bearbeiten/Einfügen ============================
     JMenu submenu = new JMenu(L.m("Standardelemente einfügen"));
-    menuItem = new JMenuItem(L.m("Empfängerauswahl-Tab"));
-    menuItem.addActionListener(new ActionListener()
-    {
-      public void actionPerformed(ActionEvent e)
-      {
-        insertStandardEmpfaengerauswahl();
-        setFrameSize();
-      }
-    });
-    submenu.add(menuItem);
 
-    menuItem = new JMenuItem(L.m("Abbrechen, <-Zurück, Weiter->"));
-    menuItem.addActionListener(new ActionListener()
-    {
-      public void actionPerformed(ActionEvent e)
-      {
-        insertStandardButtonsMiddle();
-        setFrameSize();
-      }
-    });
-    submenu.add(menuItem);
-
-    menuItem = new JMenuItem(L.m("Abbrechen, <-Zurück, PDF, Drucken"));
-    menuItem.addActionListener(new ActionListener()
-    {
-      public void actionPerformed(ActionEvent e)
-      {
-        insertStandardButtonsLast();
-        setFrameSize();
-      }
-    });
-    submenu.add(menuItem);
+    if (!createStandardelementeMenuNew(submenu))
+      createStandardelementeMenuOld(submenu);
 
     menu.add(submenu);
     // =================== Bearbeiten (Fortsetzung) ============================
@@ -907,6 +879,131 @@ public class FormularMax4000
     setFrameSize();
     myFrame.setResizable(true);
     myFrame.setVisible(true);
+  }
+
+  /**
+   * Wertet den Konfigurationsabschnitt FormularMax4000/Standardelemente aus und fügt
+   * submenu entsprechende Einträge hinzu.
+   * 
+   * @return false, falls der Konfigurationsabschnitt nicht existiert.
+   * @author Matthias Benkmann (D-III-ITD-D101)
+   * 
+   * TESTED
+   */
+  private boolean createStandardelementeMenuNew(JMenu submenu)
+  {
+    boolean found = false;
+    for (ConfigThingy fm4000conf : WollMuxSingleton.getInstance().getWollmuxConf().query(
+      "FormularMax4000", 1))
+    {
+      for (ConfigThingy eleConf : fm4000conf.query("Standardelemente", 1))
+      {
+        found = true;
+        for (ConfigThingy conf : eleConf)
+        {
+          try
+          {
+            String label = conf.get("LABEL", 1).toString();
+            ConfigThingy tabConf = conf.query("Tab", 1);
+            if (tabConf.count() > 1)
+              throw new ConfigurationErrorException(
+                L.m("Mehr als ein Tab-Abschnitt"));
+            if (tabConf.count() == 1)
+            {
+              JMenuItem menuItem;
+              menuItem = new JMenuItem(L.m("Empfängerauswahl-Tab"));
+              final ConfigThingy tabConfEntry =
+                tabConf.getFirstChild().getFirstChild();
+              menuItem.addActionListener(new ActionListener()
+              {
+                public void actionPerformed(ActionEvent e)
+                {
+                  insertStandardTab(tabConfEntry, null);
+                  setFrameSize();
+                }
+              });
+              submenu.add(menuItem);
+
+            }
+            else
+            {
+              ConfigThingy buttonsConf = conf.query("Buttons", 1);
+              if (buttonsConf.count() > 1)
+                throw new ConfigurationErrorException(
+                  L.m("Mehr als ein Buttons-Abschnitt"));
+              if (buttonsConf.count() == 0)
+                throw new ConfigurationErrorException(
+                  L.m("Weder Tab noch Buttons-Abschnitt"));
+
+              final ConfigThingy buttonsConfEntry = buttonsConf.getFirstChild();
+
+              JMenuItem menuItem = new JMenuItem(L.m(label));
+              menuItem.addActionListener(new ActionListener()
+              {
+                public void actionPerformed(ActionEvent e)
+                {
+                  insertStandardButtons(buttonsConfEntry, null);
+                  setFrameSize();
+                }
+              });
+              submenu.add(menuItem);
+
+            }
+          }
+          catch (Exception x)
+          {
+            Logger.error(
+              L.m("Fehler beim Parsen des Abschnitts FormularMax4000/Standardelemente"),
+              x);
+          }
+        }
+      }
+    }
+    return found;
+  }
+
+  /**
+   * Fügt submenu die alten im WollMux gespeicherten Standardelemente-Einträge hinzu.
+   * Sollte nur verwendet werden, wenn der entsprechende Konfigurationsabschnitt in
+   * der wollmux,conf fehlt.
+   * 
+   * @author Matthias Benkmann (D-III-ITD-D101)
+   */
+  private void createStandardelementeMenuOld(JMenu submenu)
+  {
+    JMenuItem menuItem;
+    menuItem = new JMenuItem(L.m("Empfängerauswahl-Tab"));
+    menuItem.addActionListener(new ActionListener()
+    {
+      public void actionPerformed(ActionEvent e)
+      {
+        insertStandardTab(null, EMPFAENGER_TAB_URL);
+        setFrameSize();
+      }
+    });
+    submenu.add(menuItem);
+
+    menuItem = new JMenuItem(L.m("Abbrechen, <-Zurück, Weiter->"));
+    menuItem.addActionListener(new ActionListener()
+    {
+      public void actionPerformed(ActionEvent e)
+      {
+        insertStandardButtons(null, STANDARD_BUTTONS_MIDDLE_URL);
+        setFrameSize();
+      }
+    });
+    submenu.add(menuItem);
+
+    menuItem = new JMenuItem(L.m("Abbrechen, <-Zurück, PDF, Drucken"));
+    menuItem.addActionListener(new ActionListener()
+    {
+      public void actionPerformed(ActionEvent e)
+      {
+        insertStandardButtons(null, STANDARD_BUTTONS_LAST_URL);
+        setFrameSize();
+      }
+    });
+    submenu.add(menuItem);
   }
 
   /**
@@ -1200,16 +1297,21 @@ public class FormularMax4000
   }
 
   /**
-   * Fügt am Anfang der Liste eine Standard-Empfaengerauswahl-Tab ein.
+   * Fügt am Anfang der Liste einem Tab ein, dessen Konfiguration aus tabConf kommt
+   * (Wurzelknoten wird ignoriert, darunter sollten TITLE, Eingabefelder etc, liegen)
+   * falls tabConf != null, ansonsten aus einem ConfigThingy was an der URL
+   * tabConfUrl gespeichert ist (hier sind TITLE, Eingabefelder, etc, auf oberster
+   * Ebene).
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private void insertStandardEmpfaengerauswahl()
+  private void insertStandardTab(ConfigThingy tabConf, URL tabConfUrl)
   {
     try
     {
-      ConfigThingy conf = new ConfigThingy("Empfaengerauswahl", EMPFAENGER_TAB_URL);
-      parseTab(conf, 0);
+      if (tabConf == null)
+        tabConf = new ConfigThingy("Empfaengerauswahl", EMPFAENGER_TAB_URL);
+      parseTab(tabConf, 0);
       documentNeedsUpdating();
     }
     catch (Exception x)
@@ -1219,35 +1321,24 @@ public class FormularMax4000
   }
 
   /**
-   * Hängt die Standardbuttons für einen mittleren Tab an das Ende der Liste.
+   * Hängt die Standardbuttons aus conf (Wurzelknoten "Buttons", darunter direkt die
+   * Button-Spezifikationen) oder (falls conf==null) aus dem ConfigThingy das an
+   * confUrl gespeichert ist (kein umschließender Abschnitt, sondern direkt die
+   * Button-Beschreibungen) das Ende der Liste.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private void insertStandardButtonsMiddle()
+  private void insertStandardButtons(ConfigThingy conf, URL confUrl)
   {
     try
     {
-      ConfigThingy conf = new ConfigThingy("Buttons", STANDARD_BUTTONS_MIDDLE_URL);
-      int index = leftPanel.getButtonInsertionIndex();
-      parseGrandchildren(conf, index, false);
-      documentNeedsUpdating();
-    }
-    catch (Exception x)
-    {
-      Logger.error(x);
-    }
-  }
+      if (conf == null)
+        conf = new ConfigThingy("Buttons", STANDARD_BUTTONS_MIDDLE_URL);
 
-  /**
-   * Hängt die Standardbuttons für den letzten Tab an das Ende der Liste.
-   * 
-   * @author Matthias Benkmann (D-III-ITD 5.1)
-   */
-  private void insertStandardButtonsLast()
-  {
-    try
-    {
-      ConfigThingy conf = new ConfigThingy("Buttons", STANDARD_BUTTONS_LAST_URL);
+      // damit ich parseGrandchildren() verwenden kann muss ich noch einen
+      // Großelternknoten hinzufügen.
+      conf = conf.query("Buttons", 0, 0);
+
       int index = leftPanel.getButtonInsertionIndex();
       parseGrandchildren(conf, index, false);
       documentNeedsUpdating();
@@ -2266,12 +2357,12 @@ public class FormularMax4000
       catch (Exception x)
       {
         return true;/*
-         * Do not Logger.error(x); because the most likely cause for an
-         * exception is that range2 does not belong to the text object
-         * compare, which happens in tables, because when enumerating
-         * over a range inside of a table the enumeration hits a lot of
-         * unrelated cells (OOo bug).
-         */
+                     * Do not Logger.error(x); because the most likely cause for an
+                     * exception is that range2 does not belong to the text object
+                     * compare, which happens in tables, because when enumerating
+                     * over a range inside of a table the enumeration hits a lot of
+                     * unrelated cells (OOo bug).
+                     */
       }
     }
     return false;
