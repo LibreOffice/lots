@@ -29,7 +29,10 @@ ShowInstDetails nevershow
 Section ""
   Call GetJRE
   Pop $R0
- 
+  StrCmp $R0 "NOTFOUND" 0 +3
+    MessageBox MB_OK|MB_ICONEXCLAMATION "Could not execute WollMuxBar because no Java executable was found!"
+  
+  ;; get command line parameters
   ${GetParameters} $R1
   
   StrCpy $0 '"$R0" -jar "${JAR_FILE}" $R1'
@@ -40,14 +43,15 @@ SectionEnd
  
 Function GetJRE
 ;
-;  returns the full path of a valid java.exe
+;  returns the full path of a valid java.exe (or javaw.exe - depending on how JAVAEXE is defined)
 ;  looks in:
 ;  1 - .\jre directory (JRE Installed with application)
 ;  2 - the registry value "JavaHome" of the key "HKCU\Software\WollMux"
 ;  3 - the registry value "JavaHome" of the key "HKLM\Software\WollMux"
 ;  4 - JAVA_HOME environment variable
 ;  5 - the registry value set by the Java Installation in HKLM
-;  6 - hopes it is in current dir or PATH
+; 
+;  If nothing was found the string "NOTFOUND" is returned
  
   Push $R0
   Push $R1
@@ -91,7 +95,7 @@ Function GetJRE
   StrCpy $R0 "$R0\bin\${JAVAEXE}"
   IfFileExists $R0 JreFound  ;; 5) found it in the registry key set by Java
   
-  StrCpy $R0 "${JAVAEXE}"  ;; 6) wishing you good luck
+  StrCpy $R0 "NOTFOUND"  ;; 6) return "NOTFOUND"
  
  JreFound:
   Pop $R1
