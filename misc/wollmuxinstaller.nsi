@@ -24,7 +24,7 @@
 Name "WollMux ${VERSION}"
 OutFile "wollmux-${VERSION}-installer.exe"
 Caption "WollMux Installer"
-BrandingText " " ;; to disable "Nullsoft Install System vX.XX" string at the bottom of install window
+BrandingText "(c) Landeshauptstadt München" ;; string to replace "Nullsoft Install System vX.XX" at the bottom of install window
 
 ; RequestExecutionLevel admin ;; needed to set ExecutionLevel for Vista/Windows 7 - works only with NSIS ver. 2.21+
 AllowRootDirInstall true ;; not necessary but why restrict the user?
@@ -41,6 +41,12 @@ Page directory
 Page instfiles
 UninstPage uninstConfirm
 UninstPage instFiles
+
+
+# The sharedSwitch variable is used by the unopkg call in the installer section
+# It is declared here because it is not only used in the installer section but also in .onInit
+# since the optional "--LOCAL" command line parameter can overwrite it
+Var sharedSwitch
 
 
 
@@ -66,15 +72,21 @@ Section "WollMuxBar & OOo Extension"
 	  MessageBox MB_OK|MB_ICONEXCLAMATION $(NoOOoFoundMessage) /SD IDOK
 	  Goto skipunopkg
 	
-	Var /GLOBAL sharedSwitch ;; used later for unopkg call
-	;;	ReadINIStr $R0 "$PLUGINSDIR\wollmuxinstaller.ini" "Field 3" "State" ;; this field contains the setting of the "shared installation" radio button ("1" means selected)
-	;;	StrCmp $R0 "1" 0 +2 ;; test if shared is selected ($R0 == "1")
-	StrCpy $sharedSwitch "--shared"
+
 	
   unopkg:
+	;; First we try to remove previously installed WollMux extensions (local as well as shared). If errors occur when removing the extension it's likely because
+	;; the WollMux wasn't installed, so we do nothing in that case; other errors will reoccur below when adding the new extension
+	DetailPrint $(UnoPkgRemoveMessage)
 	ClearErrors
-	ExecWait '"$R0\unopkg" remove WollMux.oxt $sharedSwitch'
-	IfErrors 0 ;; if errors occur when removing the extension it's likely because the WollMux wasn't installed, so we do nothing; other errors will reoccur below
+	ExecWait '"$R0\unopkg" remove WollMux.uno.pkg'
+	ExecWait '"$R0\unopkg" remove WollMux.uno.pkg --shared'
+	ExecWait '"$R0\unopkg" remove de.muenchen.allg.d101.wollmux'
+	ExecWait '"$R0\unopkg" remove de.muenchen.allg.d101.wollmux --shared'
+	IfErrors 0 ;; we do nothing on errors here, see above
+	
+	;; Now we try to install the new WollMux.oxt
+	DetailPrint $(UnoPkgAddMessage)
 	ClearErrors
 	ExecWait '"$R0\unopkg" add "$R9\WollMux.oxt" $sharedSwitch'
 	IfErrors 0 +6
@@ -163,7 +175,7 @@ Section "un.WollMuxBar & OOo Extension"
 	  MessageBox MB_OK|MB_ICONEXCLAMATION $(unNoOOoFoundMessage) /SD IDOK
 	  Goto skipunopkg
 	
-	ExecWait '"$R0\unopkg" remove WollMux.oxt --shared'
+	ExecWait '"$R0\unopkg" remove de.muenchen.allg.d101.wollmux --shared'
 	
   skipunopkg:
 	IfFileExists $INSTDIR\*.* 0 +2
@@ -188,6 +200,9 @@ Function .onInit
 	Push $R0
 	Push $R1
 
+	# Initialize sharedSwitch variable
+	StrCpy $sharedSwitch "--shared" ;; "--shared" is default
+	
 	# Get command line parameters
 	Var /GLOBAL cmdParameters
 	${GetParameters} $cmdParameters
@@ -202,8 +217,9 @@ Function .onInit
 	# THIS SWITCH IS NOT SUPPORTED BY THE UNINSTALLER!
 	ClearErrors
 	${GetOptions} $cmdParameters "--LOCAL" $R1 ;; read optional "--LOCAL" parameter
-	IfErrors +3
+	IfErrors +4
 	  SetShellVarContext current
+	  StrCpy $sharedSwitch ""
 	  Goto skipadmincheck
 	
 	# check if user is admin or power user - if not abort
@@ -226,6 +242,10 @@ Function .onInit
 	File /oname=$TEMP\TerminateOOo.jar ${FILESDIR}\TerminateOOo.jar ;; extract TerminateOOo.jar to temporary directory
 	Call GetJRE
 	Pop $R0
+	StrCmp $R0 "NOTFOUND" 0 +4 ;; check if Java was found
+	  MessageBox MB_OK|MB_ICONEXCLAMATION $(NoJavaFoundMessage) /SD IDOK
+	  Delete $TEMP\TerminateOOo.jar
+	  Abort
 	ClearErrors
 	ExecWait '"$R0" -jar "$TEMP\TerminateOOo.jar"' ;; does not work if WollMuxBar is running with "--quickstarter" option
 	IfErrors 0 +4
@@ -279,6 +299,10 @@ Function un.onInit
 	File /oname=$TEMP\TerminateOOo.jar ${FILESDIR}\TerminateOOo.jar ;; extract TerminateOOo.jar to temporary directory
 	Call un.GetJRE
 	Pop $R0
+	StrCmp $R0 "NOTFOUND" 0 +4 ;; check if Java was found
+	  MessageBox MB_OK|MB_ICONEXCLAMATION $(NoJavaFoundMessage) /SD IDOK
+	  Delete $TEMP\TerminateOOo.jar
+	  Abort
 	ClearErrors
 	ExecWait '"$R0" -jar "$TEMP\TerminateOOo.jar"' ;; does not work if WollMuxBar is running with "--quickstarter" option
 	IfErrors 0 +4
@@ -332,11 +356,12 @@ FunctionEnd
 !macro GetJRE UN
 Function ${UN}GetJRE
 ;
-;  This function returns the full path of a valid java.exe
+;  This function returns the full path of a valid java.exe (javaw.exe)
 ;  looks in:
 ;  1 - JAVA_HOME environment variable
 ;  2 - the registry value set by the Java Installation in HKLM
-;  3 - hopes it is in current dir or PATH
+;
+; If the path could not be found the string "NOTFOUND" is returned
  
   Push $R0
   Push $R1
@@ -355,7 +380,7 @@ Function ${UN}GetJRE
   StrCpy $R0 "$R0\bin\${JAVAEXE}"
   IfFileExists $R0 JreFound  ;; 2) found it in the registry key set by Java
   
-  StrCpy $R0 "${JAVAEXE}"  ;; 3) wishing you good luck
+  StrCpy $R0 "NOTFOUND"
  
  JreFound:
   Pop $R1

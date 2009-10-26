@@ -27,10 +27,14 @@ LangString TryToKillOOoMessage ${LANG_GERMAN} "OpenOffice.org muss vor dem Ausfü
 											   Dieser Vorgang kann einige Sekunden dauern."
 LangString OOoRunningMessage ${LANG_ENGLISH} "OpenOffice.org or the OpenOffice.org quickstarter could not be closed!$\n\
 											  Please close all OpenOffice.org windows and the quickstarter, then try again.$\n\
-											  Another reason for this error could be that either OpenOffice.org or Java is not installed on your system."
+											  Another reason for this error could be that OpenOffice.org is not installed on your system."
 LangString OOoRunningMessage ${LANG_GERMAN} "OpenOffice.org oder der OpenOffice.org-Schnellstarter konnten nicht beendet werden!$\n\
                                              Bitte schließen Sie alle offenen OpenOffice.org-Fenster sowie den Schnellstarter und versuchen Sie es erneut.$\n\
-											 Ein anderer Grund für diesen Fehler könnte sein, dass entweder OpenOffice.org oder Java nicht auf Ihrem System installiert ist."
+											 Ein anderer Grund für diesen Fehler könnte sein, dass OpenOffice.org nicht auf Ihrem System installiert ist."
+LangString NoJavaFoundMessage ${LANG_ENGLISH} "Program cannot be executed because no Java was found! Please install the Java Runtime Environment.$\n\
+											   If the JRE is already installed make sure the JAVA_HOME environment variable contains the path to your JRE directory.$\n\"
+LangString NoJavaFoundMessage ${LANG_GERMAN} "Programm kann nicht ausgeführt werden, das kein Java gefunden wurde! Bitte installieren Sie Java auf Ihrem System.$\n\
+											  Wenn eine Java-Laufzeitumgebung (JRE) bereits installiert ist, stellen Sie sicher, dass die JAVA_HOME Umgebungsvariable den Pfad zu ihrem JRE-Ordner enthält."
 LangString AbortMessage ${LANG_ENGLISH} "Execution aborted!"
 LangString AbortMessage ${LANG_GERMAN} "Ausführung abgebrochen!"
 
@@ -39,6 +43,10 @@ LangString NoOOoFoundMessage ${LANG_ENGLISH} "Could not install WollMux.oxt beca
 											  Please install WollMux.oxt manually using the OpenOffice.org extension manager."
 LangString NoOOoFoundMessage ${LANG_GERMAN} "Konnte Wollmux.oxt nicht installieren, da keine OpenOffice.org-Installation gefunden wurde!$\n\
 											 Bitte installieren Sie die WollMux.oxt manuell mit dem Extension Manager von OpenOffice.org."
+LangString UnoPkgRemoveMessage ${LANG_ENGLISH} "Removing previously installed WollMux extensions..."
+LangString UnoPkgRemoveMessage ${LANG_GERMAN} "Entferne bereits installierte WollMux-Extensions..."
+LangString UnoPkgAddMessage ${LANG_ENGLISH} "Installing WollMux extension into OpenOffice.org..."
+LangString UnoPkgAddMessage ${LANG_GERMAN} "Füge WollMux-Extension zu OpenOffice.org hinzu..."
 LangString UnoPkgErrorMessage ${LANG_ENGLISH} "Error while installing WollMux.oxt extension into OpenOffice.org!$\n\
 	                                           Please make sure no process with the name 'soffice.bin' is running and that you have the necessary rights, then try again."
 LangString UnoPkgErrorMessage ${LANG_GERMAN} "Fehler beim Installieren der WollMux.oxt-Extension in OpenOffice.org!$\n\
@@ -57,6 +65,7 @@ LangString DesktopShortcutErrorMessage ${LANG_ENGLISH} "Could not create desktop
                                                         Installer is proceeding with installation despite the error."
 LangString DesktopShortcutErrorMessage ${LANG_GERMAN} "Konnte keine Desktop-Verknüpfung anlegen! Sie müssen eventuell manuell ein Verknüpfung anlegen.$\n\
                                                        Die Installation wird trotz des Fehlers fortgesetzt."
+
 
 
 # Uninstaller Messages
