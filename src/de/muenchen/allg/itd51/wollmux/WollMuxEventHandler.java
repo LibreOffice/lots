@@ -1082,31 +1082,23 @@ public class WollMuxEventHandler
    * 
    * Dieses Event wird ausgelöst, wenn ein TextDokument geschlossen wird.
    */
-  public static void handleTextDocumentClosed(XTextDocument doc)
+  public static void handleTextDocumentClosed(TextDocumentModel doc)
   {
     handle(new OnTextDocumentClosed(doc));
   }
 
   private static class OnTextDocumentClosed extends BasicEvent
   {
-    private XTextDocument doc;
+    private TextDocumentModel doc;
 
-    private OnTextDocumentClosed(XTextDocument doc)
+    private OnTextDocumentClosed(TextDocumentModel doc)
     {
       this.doc = doc;
     }
 
     protected void doit() throws WollMuxFehlerException
     {
-      WollMuxSingleton mux = WollMuxSingleton.getInstance();
-
-      if (mux.hasTextDocumentModel(doc))
-      {
-        TextDocumentModel model = mux.getTextDocumentModel(doc);
-        model.dispose();
-      }
-
-      stabilize();
+      doc.dispose();
     }
 
     public String toString()

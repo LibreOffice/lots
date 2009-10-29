@@ -61,7 +61,6 @@ import com.sun.star.container.XNamed;
 import com.sun.star.frame.FrameSearchFlag;
 import com.sun.star.frame.XController;
 import com.sun.star.frame.XFrame;
-import com.sun.star.lang.EventObject;
 import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.lang.NoSuchMethodException;
 import com.sun.star.lang.XComponent;
@@ -79,7 +78,6 @@ import com.sun.star.uno.AnyConverter;
 import com.sun.star.uno.RuntimeException;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.util.CloseVetoException;
-import com.sun.star.util.XCloseListener;
 import com.sun.star.view.DocumentZoomType;
 
 import de.muenchen.allg.afid.UNO;
@@ -215,12 +213,6 @@ public class TextDocumentModel
    * geschlossen.
    */
   private FormModel formModel;
-
-  /**
-   * In diesem Feld wird der CloseListener gespeichert, nachdem die Methode
-   * registerCloseListener() aufgerufen wurde.
-   */
-  private XCloseListener closeListener;
 
   /**
    * Enthält die Instanz des aktuell geöffneten, zu diesem Dokument gehörenden
@@ -370,7 +362,6 @@ public class TextDocumentModel
     this.staticTextFieldFormFields = new Vector<FormField>();
     this.fragUrls = new String[] {};
     this.currentMax4000 = null;
-    this.closeListener = null;
     this.printFunctions = new HashSet<String>();
     this.formularConf = null;
     this.formFieldValues = new HashMap<String, String>();
@@ -387,18 +378,6 @@ public class TextDocumentModel
     documentCommands.update();
     setDocumentModified(modified);
 
-    registerCloseListener();
-
-    // WollMuxDispatchInterceptor registrieren
-    try
-    {
-      DispatchHandler.registerDocumentDispatchInterceptor(getFrame());
-    }
-    catch (java.lang.Exception e)
-    {
-      Logger.error(L.m("Kann DispatchInterceptor nicht registrieren:"), e);
-    }
-
     // Auslesen der Persistenten Daten:
     this.persistentData = new PersistentData(doc);
     parsePrintFunctions(persistentData.getData(DATA_ID_PRINTFUNCTION));
@@ -414,6 +393,20 @@ public class TextDocumentModel
     this.isTemplate = !hasURL();
     this.isFormDocument = false;
     setType(persistentData.getData(DATA_ID_SETTYPE));
+
+    /*
+     * WollMuxDispatchInterceptor registrieren. Wir machen dies relativ am Ende des
+     * Konstruktors, um zu verhindern, dass Dispatches auf ein unfertiges
+     * TextDocumentModel losgehen.
+     */
+    try
+    {
+      DispatchHandler.registerDocumentDispatchInterceptor(getFrame(), this);
+    }
+    catch (java.lang.Exception e)
+    {
+      Logger.error(L.m("Kann DispatchInterceptor nicht registrieren:"), e);
+    }
 
     // Sicherstellen, dass die Schaltflächen der Symbolleisten aktiviert werden:
     try
@@ -2684,9 +2677,6 @@ public class TextDocumentModel
 
     if (formModel != null) formModel.disposing(this);
     formModel = null;
-
-    // Löscht das TextDocumentModel von doc aus dem WollMux-Singleton.
-    WollMuxSingleton.getInstance().disposedTextDocument(doc);
   }
 
   /**
@@ -2718,36 +2708,6 @@ public class TextDocumentModel
   synchronized public String toString()
   {
     return "doc('" + getTitle() + "')";
-  }
-
-  /**
-   * Registriert genau einen XCloseListener in der Komponente des XTextDocuments, so
-   * dass beim Schließen des Dokuments die entsprechenden WollMuxEvents ausgeführt
-   * werden - ist in diesem TextDocumentModel bereits ein XCloseListener registriert,
-   * so wird nichts getan.
-   */
-  private void registerCloseListener()
-  {
-    if (closeListener == null && UNO.XCloseable(doc) != null)
-    {
-      closeListener = new XCloseListener()
-      {
-        public void disposing(EventObject arg0)
-        {
-          WollMuxEventHandler.handleTextDocumentClosed(doc);
-        }
-
-        public void notifyClosing(EventObject arg0)
-        {
-          WollMuxEventHandler.handleTextDocumentClosed(doc);
-        }
-
-        public void queryClosing(EventObject arg0, boolean arg1)
-            throws CloseVetoException
-        {}
-      };
-      UNO.XCloseable(doc).addCloseListener(closeListener);
-    }
   }
 
   /**

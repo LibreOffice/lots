@@ -56,7 +56,6 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
@@ -72,7 +71,6 @@ import com.sun.star.document.XEventListener;
 import com.sun.star.form.FormButtonType;
 import com.sun.star.frame.XDispatch;
 import com.sun.star.frame.XDispatchProvider;
-import com.sun.star.frame.XFrame;
 import com.sun.star.frame.XModel;
 import com.sun.star.lang.EventObject;
 import com.sun.star.lang.WrappedTargetException;
@@ -164,10 +162,9 @@ public class WollMuxSingleton implements XPALProvider
   private Vector<XEventListener> registeredDocumentEventListener;
 
   /**
-   * Enthält eine Zuordnung von HashableComponent Objekten, die die XTextDocumente
-   * repräsentieren, auf die zugehörigen TextDocumentModels
+   * Verwaltet Informationen zu allen offenen OOo-Dokumenten.
    */
-  private HashMap<HashableComponent, TextDocumentModel> currentTextDocumentModels;
+  private DocumentManager docManager;
 
   /**
    * Die WollMux-Hauptklasse ist als singleton realisiert.
@@ -178,8 +175,7 @@ public class WollMuxSingleton implements XPALProvider
     // getXComponentContext zurückgeliefert.
     this.ctx = ctx;
 
-    this.currentTextDocumentModels =
-      new HashMap<HashableComponent, TextDocumentModel>();
+    this.docManager = new DocumentManager();
 
     // Initialisiere die UNO-Klasse, so dass auch mit dieser Hilfsklasse
     // gearbeitet werden kann.
@@ -261,7 +257,7 @@ public class WollMuxSingleton implements XPALProvider
         UnoService.createWithContext("com.sun.star.frame.GlobalEventBroadcaster",
           ctx);
       eventBroadcaster.xEventBroadcaster().addEventListener(
-        new GlobalEventListener());
+        new GlobalEventListener(docManager));
     }
     catch (Exception e)
     {
@@ -1072,22 +1068,6 @@ public class WollMuxSingleton implements XPALProvider
   }
 
   /**
-   * Liefert true, wenn für das XTextDocument doc ein TextDocumentModel im
-   * WollMuxSingleton registriert ist, ansonsten false.
-   * 
-   * @param doc
-   *          das Dokument für das ein TextDocumentModel gesucht wird.
-   * @return true, wenn für das XTextDocument doc ein TextDocumentModel im
-   *         WollMuxSingleton registriert ist, ansonsten false.
-   */
-  public boolean hasTextDocumentModel(XTextDocument doc)
-  {
-    HashableComponent key = new HashableComponent(doc);
-
-    return currentTextDocumentModels.containsKey(key);
-  }
-
-  /**
    * Liefert das aktuelle TextDocumentModel zum übergebenen XTextDocument doc;
    * existiert zu doc noch kein TextDocumentModel, so wird hier eines erzeugt und das
    * neu erzeugte zurück geliefert.
@@ -1099,64 +1079,19 @@ public class WollMuxSingleton implements XPALProvider
    */
   public TextDocumentModel getTextDocumentModel(XTextDocument doc)
   {
-    HashableComponent key = new HashableComponent(doc);
-
-    TextDocumentModel model = currentTextDocumentModels.get(key);
-    if (model == null)
+    DocumentManager.Info info = docManager.getInfo(doc);
+    if (info == null)
     {
-      // Neues TextDocumentModel erzeugen, wenn es noch nicht existiert.
-      model = new TextDocumentModel(doc);
-      currentTextDocumentModels.put(key, model);
-    }
-    return model;
-  }
+      Logger.error(
+        L.m("Irgendwer will hier ein TextDocumentModel für ein Objekt was der DocumentManager nicht kennt. Das sollte nicht passieren!"),
+        new Exception());
 
-  /**
-   * Liefert das aktuelle TextDocumentModel zum übergebenen XFrame frame oder null,
-   * falls dem Frame kein entsprechendes TextDocumentModel zugeordnet werden kann.
-   * 
-   * ACHTUNG: Die Methode wird vom DispatchHandler verwendet, um das
-   * TextDocumentModel eines Frames zu bestimmen und wird daher NICHT mit dem
-   * WollMuxEventHandler synchronisiert aufgerufen. Daher darf z.B. im Gegensatz zu
-   * getTextDocumentModel(XTextDocument) hier auch kein TextDocumentModel erzeugt
-   * werden, wenn es nicht bereits existiert.
-   * 
-   * Der Zugriff auf das TextDocumentModel in der nicht synchronisierten
-   * Aufrufmethode des DispatchHandler darf daher auch auschließend lesend sein.
-   * 
-   * @param frame
-   *          Der Frame, über den das TextDocumentModel gesucht werden soll.
-   * @return Das zu frame zugehörige TextDocumentModel oder null, falls keine
-   *         Zuordnung gefunden werden konnte.
-   */
-  public TextDocumentModel getTextDocumentModelForFrame(XFrame frame)
-  {
-    if (frame == null) return null;
-
-    try
-    {
-      HashableComponent key =
-        new HashableComponent(frame.getController().getModel());
-      return currentTextDocumentModels.get(key);
+      // Wir versuchen trotzdem sinnvoll weiterzumachen.
+      docManager.addTextDocument(doc);
+      info = docManager.getInfo(doc);
     }
-    catch (Exception e)
-    {
-      return null;
-    }
-  }
 
-  /**
-   * Löscht das übergebene TextDocumentModel von doc aus der internen Liste aller
-   * aktuellen TextDocumentModels.
-   * 
-   * @param doc
-   *          Das XTextDocument, dessen zugehöriges TextDocumentModel aus der
-   *          internen Liste gelöscht werden soll.
-   */
-  public void disposedTextDocument(XTextDocument doc)
-  {
-    HashableComponent key = new HashableComponent(doc);
-    currentTextDocumentModels.remove(key);
+    return info.getTextDocumentModel();
   }
 
   /**
@@ -1330,36 +1265,23 @@ public class WollMuxSingleton implements XPALProvider
    * 
    * @author christoph.lutz
    */
-  public static class GlobalEventListener implements
+  private static class GlobalEventListener implements
       com.sun.star.document.XEventListener
   {
-    private static ArrayList<XComponent> processedCompos =
-      new ArrayList<XComponent>();
+    private DocumentManager docManager;
 
-    private static boolean isProcessed(XComponent compo)
+    public GlobalEventListener(DocumentManager docManager)
+    {
+      this.docManager = docManager;
+    }
+
+    private boolean seenAlready(XComponent compo)
     {
       if (compo == null) return false;
-      for (XComponent c : processedCompos)
-        if (UnoRuntime.areSame(c, compo)) return true;
-      return false;
+      return docManager.getInfo(compo) != null;
     }
 
-    private static void setProcessed(XComponent compo)
-    {
-      if (compo == null) return;
-      if (!isProcessed(compo)) processedCompos.add(compo);
-    }
-
-    private static void unset(XComponent compo)
-    {
-      if (compo == null) return;
-      for (Iterator<XComponent> iter = processedCompos.iterator(); iter.hasNext();)
-      {
-        if (UnoRuntime.areSame(iter.next(), compo)) iter.remove();
-      }
-    }
-
-    public void notifyEvent(com.sun.star.document.EventObject docEvent)
+    public synchronized void notifyEvent(com.sun.star.document.EventObject docEvent)
     {
       /*
        * Extra Test ohne Cast nach XComponent, weil queryInterface im Seriendruckfall
@@ -1383,45 +1305,36 @@ public class WollMuxSingleton implements XPALProvider
       if (compo == null) return;
       XTextDocument xTextDoc = UNO.XTextDocument(compo);
 
-      // Im Gegensatz zu OnLoad oder OnNew wird das Event OnViewCreated auch bei
-      // unsichtbar geöffneten Dokumenten erzeugt. Daher wird nun hauptsächlich
-      // dieses Event zur Initiierung der Dokumentbearbeitung verwendet.
-      if (event.equals("OnViewCreated") && !isProcessed(compo))
-      {
-        if (xTextDoc != null)
-        {
-          WollMuxEventHandler.handleProcessTextDocument(xTextDoc);
-        }
-        else
-        {
-          WollMuxEventHandler.handleNotifyDocumentEventListener(null,
-            WollMuxEventHandler.ON_WOLLMUX_PROCESSING_FINISHED, compo);
-        }
-        setProcessed(compo);
-      }
-
       // Die Events OnLoad und OnNew kommen nur bei sichtbar geöffneten Dokumenten.
       // Das macht die Events für unsichtbar geöffnete Dokumente unbrauchbar. Nur
       // falls das Event OnViewCreated nicht empfangen wurden (z.B. möglicherweise
       // bei alten OOo-Verisonen), greift als Fallback die Dokumentbearbeitung über
       // OnNew bzw. OnLoad.
-      else if ((event.equals("OnLoad") || event.equals(("OnNew")))
-        && !isProcessed(compo))
+      // Im Gegensatz zu OnLoad oder OnNew wird das Event OnViewCreated auch bei
+      // unsichtbar geöffneten Dokumenten erzeugt. Daher wird nun hauptsächlich
+      // dieses Event zur Initiierung der Dokumentbearbeitung verwendet.
+      if ((event.equals("OnViewCreated") || event.equals("OnLoad") || event.equals("OnNew"))
+        && !seenAlready(compo))
       {
         if (xTextDoc != null)
         {
+          docManager.addTextDocument(xTextDoc);
           WollMuxEventHandler.handleProcessTextDocument(xTextDoc);
         }
         else
         {
+          docManager.add(compo);
           WollMuxEventHandler.handleNotifyDocumentEventListener(null,
             WollMuxEventHandler.ON_WOLLMUX_PROCESSING_FINISHED, compo);
         }
-        setProcessed(compo);
+      }
+      else if ((event.equals("OnUnload") && compo != null))
+      {
+        DocumentManager.Info info = docManager.remove(compo);
+        if (info.hasTextDocumentModel())
+          WollMuxEventHandler.handleTextDocumentClosed(info.getTextDocumentModel());
       }
 
-      // hält die Liste processedCompos sauber:
-      else if ((event.equals("OnUnload"))) unset(compo);
     }
 
     public void disposing(EventObject arg0)

@@ -713,11 +713,9 @@ public class DispatchHandler
 
     private XDispatchProvider master = null;
 
-    private final XFrame frame;
-
-    public DocumentDispatchInterceptor(XFrame frame)
+    public DocumentDispatchInterceptor(TextDocumentModel model)
     {
-      this.frame = frame;
+      setDispatchHandlers(createDocumentDispatchHandler(model));
     }
 
     /*
@@ -769,10 +767,6 @@ public class DispatchHandler
     public XDispatch queryDispatch(com.sun.star.util.URL url, String frameName,
         int fsFlag)
     {
-      TextDocumentModel model =
-        WollMuxSingleton.getInstance().getTextDocumentModelForFrame(frame);
-      setDispatchHandlers(createDocumentDispatchHandler(model));
-
       XDispatch myDisp = null;
       myDisp = super.queryDispatch(url, frameName, fsFlag);
 
@@ -809,7 +803,8 @@ public class DispatchHandler
    * Registriert einen DocumentDispatchProvider im Frame frame (nur dann, wenn er
    * nicht bereits registriert wurde).
    */
-  public static void registerDocumentDispatchInterceptor(XFrame frame)
+  public static void registerDocumentDispatchInterceptor(XFrame frame,
+      TextDocumentModel model)
   {
     if (frame == null || UNO.XDispatchProviderInterception(frame) == null
       || UNO.XDispatchProvider(frame) == null) return;
@@ -841,7 +836,7 @@ public class DispatchHandler
     // DispatchInterceptor registrieren (wenn nicht bereits registriert):
     if (!alreadyRegistered)
     {
-      XDispatchProviderInterceptor dpi = new DocumentDispatchInterceptor(frame);
+      XDispatchProviderInterceptor dpi = new DocumentDispatchInterceptor(model);
       UNO.XDispatchProviderInterception(frame).registerDispatchProviderInterceptor(
         dpi);
     }
