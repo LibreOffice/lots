@@ -57,6 +57,7 @@ import de.muenchen.allg.itd51.wollmux.dialog.PrintParametersDialog;
 import de.muenchen.allg.itd51.wollmux.dialog.PrintProgressBar;
 import de.muenchen.allg.itd51.wollmux.dialog.PrintParametersDialog.PageRange;
 import de.muenchen.allg.itd51.wollmux.dialog.PrintParametersDialog.PageRangeType;
+import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 import de.muenchen.allg.itd51.wollmux.func.PrintFunction;
 
 /**

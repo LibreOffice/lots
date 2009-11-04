@@ -38,7 +38,7 @@
  * @author Christoph Lutz (D-III-ITD 5.1)
  * 
  */
-package de.muenchen.allg.itd51.wollmux;
+package de.muenchen.allg.itd51.wollmux.event;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -108,6 +108,26 @@ import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.afid.UnoService;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
+import de.muenchen.allg.itd51.wollmux.Bookmark;
+import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
+import de.muenchen.allg.itd51.wollmux.DocumentCommand;
+import de.muenchen.allg.itd51.wollmux.DocumentCommandInterpreter;
+import de.muenchen.allg.itd51.wollmux.FormModel;
+import de.muenchen.allg.itd51.wollmux.FormModelImpl;
+import de.muenchen.allg.itd51.wollmux.L;
+import de.muenchen.allg.itd51.wollmux.Logger;
+import de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung;
+import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
+import de.muenchen.allg.itd51.wollmux.TextModule;
+import de.muenchen.allg.itd51.wollmux.TimeoutException;
+import de.muenchen.allg.itd51.wollmux.VisibilityElement;
+import de.muenchen.allg.itd51.wollmux.VisibleTextFragmentList;
+import de.muenchen.allg.itd51.wollmux.WMCommandsFailedException;
+import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
+import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
+import de.muenchen.allg.itd51.wollmux.Workarounds;
+import de.muenchen.allg.itd51.wollmux.XPALChangeEventListener;
+import de.muenchen.allg.itd51.wollmux.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.FormModelImpl.InvalidFormDescriptorException;
 import de.muenchen.allg.itd51.wollmux.WollMuxSingleton.InvalidIdentifierException;
 import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;

@@ -93,6 +93,7 @@ import de.muenchen.allg.itd51.wollmux.TextDocumentModel.OverrideFragChainExcepti
 import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.db.DatasetNotFoundException;
+import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 import de.muenchen.allg.ooo.TextDocument;
 
 /**

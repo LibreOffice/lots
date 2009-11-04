@@ -52,6 +52,7 @@ import com.sun.star.util.URL;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 
 /**
  * Der DispatchHandler behandelt alle globalen Dispatches des WollMux und registriert

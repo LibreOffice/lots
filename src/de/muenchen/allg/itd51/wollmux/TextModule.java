@@ -45,6 +45,7 @@ import com.sun.star.text.XTextRange;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
 import de.muenchen.allg.itd51.parser.NodeNotFoundException;
+import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 
 /**
  * Klasse enthält statische Methoden die für das Textbausteinsystem benötigt werden

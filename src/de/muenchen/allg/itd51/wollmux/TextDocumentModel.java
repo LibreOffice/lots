@@ -947,7 +947,7 @@ public class TextDocumentModel
    * Über diese Methode kann der openDocument-Eventhandler die Liste der mit einem
    * insertContent-Kommando zu öffnenden frag-urls speichern.
    */
-  synchronized void setFragUrls(String[] fragUrls)
+  synchronized public void setFragUrls(String[] fragUrls)
   {
     this.fragUrls = fragUrls;
   }

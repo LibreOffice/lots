@@ -38,11 +38,11 @@ import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung;
-import de.muenchen.allg.itd51.wollmux.WollMuxEventHandler;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.PrintModels.InternalPrintModel;
 import de.muenchen.allg.itd51.wollmux.dialog.SachleitendeVerfuegungenDruckdialog.VerfuegungspunktInfo;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeNew;
+import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 
 public class StandardPrint
 {
