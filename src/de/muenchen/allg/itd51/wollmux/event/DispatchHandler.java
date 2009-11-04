@@ -30,7 +30,7 @@
  * @version 1.0
  * 
  */
-package de.muenchen.allg.itd51.wollmux;
+package de.muenchen.allg.itd51.wollmux.event;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -52,7 +52,10 @@ import com.sun.star.util.URL;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.parser.ConfigThingy;
-import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
+import de.muenchen.allg.itd51.wollmux.L;
+import de.muenchen.allg.itd51.wollmux.Logger;
+import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
+import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 
 /**
  * Der DispatchHandler behandelt alle globalen Dispatches des WollMux und registriert
