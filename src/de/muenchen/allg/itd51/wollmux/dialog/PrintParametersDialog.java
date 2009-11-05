@@ -69,7 +69,7 @@ import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
-import de.muenchen.allg.itd51.wollmux.event.DispatchHandler;
+import de.muenchen.allg.itd51.wollmux.event.Dispatch;
 
 public class PrintParametersDialog
 {
@@ -448,7 +448,7 @@ public class PrintParametersDialog
         try
         {
           com.sun.star.util.URL url =
-            UNO.getParsedUNOUrl(DispatchHandler.DISP_unoPrinterSetup);
+            UNO.getParsedUNOUrl(Dispatch.DISP_unoPrinterSetup);
           XNotifyingDispatch disp =
             UNO.XNotifyingDispatch(WollMuxSingleton.getDispatchForModel(
               UNO.XModel(doc), url));

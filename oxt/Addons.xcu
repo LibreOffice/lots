@@ -88,7 +88,7 @@
 
         <node oor:name="m5" oor:op="replace">
           <prop oor:name="URL" oor:type="xs:string">
-            <value>wollmux:markBlock#allVersions</value>
+            <value>wollmux:MarkBlock#allVersions</value>
           </prop>
           <prop oor:name="Title" oor:type="xs:string">
             <value>Immer drucken</value>
@@ -109,7 +109,7 @@
 
         <node oor:name="m6" oor:op="replace">
           <prop oor:name="URL" oor:type="xs:string">
-            <value>wollmux:markBlock#notInOriginal</value>
+            <value>wollmux:MarkBlock#notInOriginal</value>
           </prop>
           <prop oor:name="Title" oor:type="xs:string">
             <value>Nicht im Original</value>
@@ -130,7 +130,7 @@
 
         <node oor:name="m7" oor:op="replace">
           <prop oor:name="URL" oor:type="xs:string">
-            <value>wollmux:markBlock#originalOnly</value>
+            <value>wollmux:MarkBlock#originalOnly</value>
           </prop>
           <prop oor:name="Title" oor:type="xs:string">
             <value>Nur Original</value>
@@ -151,7 +151,7 @@
 
         <node oor:name="m8" oor:op="replace">
           <prop oor:name="URL" oor:type="xs:string">
-            <value>wollmux:markBlock#draftOnly</value>
+            <value>wollmux:MarkBlock#draftOnly</value>
           </prop>
           <prop oor:name="Title" oor:type="xs:string">
             <value>Nur Entwurf</value>
@@ -172,7 +172,7 @@
         
         <node oor:name="m9" oor:op="replace">
           <prop oor:name="URL" oor:type="xs:string">
-            <value>wollmux:markBlock#copyOnly</value>
+            <value>wollmux:MarkBlock#copyOnly</value>
           </prop>
           <prop oor:name="Title" oor:type="xs:string">
             <value>Nur Abdrucke</value>
@@ -339,7 +339,7 @@
         
         <node oor:name="m5" oor:op="replace">
           <prop oor:name="URL" oor:type="xs:string">
-            <value>wollmux:dumpInfo</value>
+            <value>wollmux:DumpInfo</value>
           </prop>
           <prop oor:name="Title" oor:type="xs:string">
             <value>Fehlerinfos erstellen</value>

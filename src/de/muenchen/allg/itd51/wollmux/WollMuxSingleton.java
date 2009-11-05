@@ -97,7 +97,7 @@ import de.muenchen.allg.itd51.wollmux.db.DatasourceJoiner;
 import de.muenchen.allg.itd51.wollmux.db.QueryResults;
 import de.muenchen.allg.itd51.wollmux.dialog.Common;
 import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
-import de.muenchen.allg.itd51.wollmux.event.DispatchHandler;
+import de.muenchen.allg.itd51.wollmux.event.Dispatch;
 import de.muenchen.allg.itd51.wollmux.event.GlobalEventListener;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
@@ -294,15 +294,14 @@ public class WollMuxSingleton implements XPALProvider
 
     // "Extras->Seriendruck (WollMux)" erzeugen:
     List<String> removeButtonsFor = new ArrayList<String>();
-    removeButtonsFor.add(DispatchHandler.DISP_wmSeriendruck);
-    createMenuButton(DispatchHandler.DISP_wmSeriendruck,
-      L.m("Seriendruck (WollMux)"), ".uno:ToolsMenu", ".uno:MailMergeWizard",
-      removeButtonsFor);
+    removeButtonsFor.add(Dispatch.DISP_wmSeriendruck);
+    createMenuButton(Dispatch.DISP_wmSeriendruck, L.m("Seriendruck (WollMux)"),
+      ".uno:ToolsMenu", ".uno:MailMergeWizard", removeButtonsFor);
 
     // "Help->Info über WollMux" erzeugen:
     removeButtonsFor.clear();
-    removeButtonsFor.add(DispatchHandler.DISP_wmAbout);
-    createMenuButton(DispatchHandler.DISP_wmAbout,
+    removeButtonsFor.add(Dispatch.DISP_wmAbout);
+    createMenuButton(Dispatch.DISP_wmAbout,
       L.m("Info über Vorlagen und Formulare (WollMux)"), ".uno:HelpMenu",
       ".uno:About", removeButtonsFor);
 

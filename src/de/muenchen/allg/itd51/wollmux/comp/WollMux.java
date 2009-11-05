@@ -58,7 +58,7 @@ import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
 import de.muenchen.allg.itd51.wollmux.XPALChangeEventListener;
 import de.muenchen.allg.itd51.wollmux.XWollMux;
 import de.muenchen.allg.itd51.wollmux.XWollMuxDocument;
-import de.muenchen.allg.itd51.wollmux.event.DispatchHandler;
+import de.muenchen.allg.itd51.wollmux.event.GlobalDispatchProvider;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 
 /**
@@ -140,7 +140,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
   /* IN */String sTargetFrameName,
   /* IN */int iSearchFlags)
   {
-    return DispatchHandler.globalWollMuxDispatches.queryDispatch(aURL,
+    return GlobalDispatchProvider.globalWollMuxDispatches.queryDispatch(aURL,
       sTargetFrameName, iSearchFlags);
   }
 
@@ -151,7 +151,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
    */
   public XDispatch[] queryDispatches( /* IN */DispatchDescriptor[] seqDescripts)
   {
-    return DispatchHandler.globalWollMuxDispatches.queryDispatches(seqDescripts);
+    return GlobalDispatchProvider.globalWollMuxDispatches.queryDispatches(seqDescripts);
   }
 
   /**

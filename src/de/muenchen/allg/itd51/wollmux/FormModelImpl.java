@@ -45,7 +45,7 @@ import de.muenchen.allg.itd51.parser.NodeNotFoundException;
 import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
 import de.muenchen.allg.itd51.wollmux.dialog.FormController;
 import de.muenchen.allg.itd51.wollmux.dialog.FormGUI;
-import de.muenchen.allg.itd51.wollmux.event.DispatchHandler;
+import de.muenchen.allg.itd51.wollmux.event.Dispatch;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 
@@ -747,7 +747,7 @@ public class FormModelImpl
      */
     public void print()
     {
-      UNO.dispatch(doc.doc, DispatchHandler.DISP_unoPrint);
+      UNO.dispatch(doc.doc, Dispatch.DISP_unoPrint);
     }
 
     /*

@@ -134,7 +134,7 @@ import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
-import de.muenchen.allg.itd51.wollmux.event.DispatchHandler;
+import de.muenchen.allg.itd51.wollmux.event.Dispatch;
 
 /**
  * Menü-Leiste als zentraler Ausgangspunkt für WollMux-Funktionen.
@@ -332,7 +332,7 @@ public class WollMuxBar
   {
     public void actionPerformed(ActionEvent e)
     {
-      eventHandler.handleWollMuxUrl(DispatchHandler.DISP_wmPALVerwalten, null);
+      eventHandler.handleWollMuxUrl(Dispatch.DISP_wmPALVerwalten, null);
       minimize();
     }
   };
@@ -1151,18 +1151,18 @@ public class WollMuxBar
       if (action.equals("absenderAuswaehlen"))
       {
         minimize();
-        eventHandler.handleWollMuxUrl(DispatchHandler.DISP_wmAbsenderAuswaehlen, "");
+        eventHandler.handleWollMuxUrl(Dispatch.DISP_wmAbsenderAuswaehlen, "");
       }
       else if (action.equals("openDocument"))
       {
         minimize();
-        eventHandler.handleWollMuxUrl(DispatchHandler.DISP_wmOpenDocument,
+        eventHandler.handleWollMuxUrl(Dispatch.DISP_wmOpenDocument,
           args[1].toString());
       }
       else if (action.equals("openTemplate"))
       {
         minimize();
-        eventHandler.handleWollMuxUrl(DispatchHandler.DISP_wmOpenTemplate,
+        eventHandler.handleWollMuxUrl(Dispatch.DISP_wmOpenTemplate,
           args[1].toString());
       }
       else if (action.equals("open"))
@@ -1181,7 +1181,7 @@ public class WollMuxBar
       }
       else if (action.equals("dumpInfo"))
       {
-        eventHandler.handleWollMuxUrl(DispatchHandler.DISP_wmDumpInfo, null);
+        eventHandler.handleWollMuxUrl(Dispatch.DISP_wmDumpInfo, null);
       }
       else if (action.equals("abort"))
       {
@@ -1189,12 +1189,12 @@ public class WollMuxBar
       }
       else if (action.equals("kill"))
       {
-        eventHandler.handleWollMuxUrl(DispatchHandler.DISP_wmKill, null);
+        eventHandler.handleWollMuxUrl(Dispatch.DISP_wmKill, null);
         abort();
       }
       else if (action.equals("about"))
       {
-        eventHandler.handleWollMuxUrl(DispatchHandler.DISP_wmAbout, getBuildInfo());
+        eventHandler.handleWollMuxUrl(Dispatch.DISP_wmAbout, getBuildInfo());
       }
     }
   }
@@ -1308,7 +1308,7 @@ public class WollMuxBar
           if (!checkbox.isSelected()) fragIter.remove();
         }
 
-        eventHandler.handleWollMuxUrl(DispatchHandler.DISP_wmOpen,
+        eventHandler.handleWollMuxUrl(Dispatch.DISP_wmOpen,
           openConf.stringRepresentation(true, '"', false));
       }
     });

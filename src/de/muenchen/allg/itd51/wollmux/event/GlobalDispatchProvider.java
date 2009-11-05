@@ -1,7 +1,7 @@
 /*
  * Dateiname: DispatchInterceptor.java
  * Projekt  : WollMux
- * Funktion : Diese Klasse stellt alle globalen Dispatches des WollMux zur Verfügung.
+ * Funktion : Erweitert BasicWollMuxDispatchProvider um das XDispatchProviderInterceptor Interface. 
  * 
  * Copyright (c) 2008 Landeshauptstadt München
  *
@@ -36,74 +36,72 @@ import com.sun.star.frame.XDispatch;
 import com.sun.star.frame.XDispatchProvider;
 import com.sun.star.frame.XDispatchProviderInterceptor;
 
+/**
+ * Erweitert {@link BasicWollMuxDispatchProvider} um das XDispatchProviderInterceptor
+ * Interface.
+ * 
+ * @author christoph.lutz
+ */
+public class GlobalDispatchProvider extends BasicWollMuxDispatchProvider implements
+    XDispatchProviderInterceptor
+{
+  private XDispatchProvider slave = null;
+
+  private XDispatchProvider master = null;
+
   /**
-   * Diese Klasse stellt alle globalen Dispatches des WollMux zur Verfügung.
-   * 
-   * @author christoph.lutz
+   * Enthält einen XDispatchProvider, der Dispatch-Objekte für alle globalen (d.h.
+   * nicht dokumentgebundenen) Funktionalitäten des WollMux bereitstellt.
    */
-  class GlobalDispatchProvider extends BasicWollMuxDispatchProvider
-      implements XDispatchProviderInterceptor
+  public static final XDispatchProviderInterceptor globalWollMuxDispatches =
+    new GlobalDispatchProvider();
+
+  public XDispatchProvider getSlaveDispatchProvider()
   {
-    private XDispatchProvider slave = null;
+    return slave;
+  }
 
-    private XDispatchProvider master = null;
+  public void setSlaveDispatchProvider(XDispatchProvider slave)
+  {
+    this.slave = slave;
+  }
 
-    public GlobalDispatchProvider()
+  public XDispatchProvider getMasterDispatchProvider()
+  {
+    return master;
+  }
+
+  public void setMasterDispatchProvider(XDispatchProvider master)
+  {
+    this.master = master;
+  }
+
+  public XDispatch queryDispatch(com.sun.star.util.URL url, String frameName,
+      int fsFlag)
+  {
+    XDispatch myDisp = null;
+    myDisp = super.queryDispatch(url, frameName, fsFlag);
+
+    if (myDisp != null)
     {
-      setDispatchHandlers(DispatchHandler.createGlobalDispatchHandlers());
+      return myDisp;
     }
-
-    public XDispatchProvider getSlaveDispatchProvider()
+    else
     {
-      return slave;
-    }
-
-    public void setSlaveDispatchProvider(XDispatchProvider slave)
-    {
-      this.slave = slave;
-    }
-
-    public XDispatchProvider getMasterDispatchProvider()
-    {
-      return master;
-    }
-
-    public void setMasterDispatchProvider(XDispatchProvider master)
-    {
-      this.master = master;
-    }
-
-    public XDispatch queryDispatch(com.sun.star.util.URL url, String frameName,
-        int fsFlag)
-    {
-      XDispatch myDisp = null;
-      myDisp = super.queryDispatch(url, frameName, fsFlag);
-
-      if (myDisp != null)
-      {
-        return myDisp;
-      }
-      else
-      {
-        return getOrigDispatch(url, frameName, fsFlag);
-      }
-    }
-
-    /**
-     * Liefert das OriginalDispatch-Objekt, das der registrierte
-     * slave-DispatchProvider liefert.
-     * 
-     * @param url
-     * @param frameName
-     * @param fsFlag
-     * @return
-     */
-    public XDispatch getOrigDispatch(com.sun.star.util.URL url, String frameName,
-        int fsFlag)
-    {
-      if (slave != null)
-        return slave.queryDispatch(url, frameName, fsFlag);
-      else
-        return null;
+      return getOrigDispatch(url, frameName, fsFlag);
     }
   }
+
+  /**
+   * Liefert das OriginalDispatch-Objekt, das der registrierte slave-DispatchProvider
+   * liefert oder null falls kein slave.
+   */
+  public XDispatch getOrigDispatch(com.sun.star.util.URL url, String frameName,
+      int fsFlag)
+  {
+    if (slave != null)
+      return slave.queryDispatch(url, frameName, fsFlag);
+    else
+      return null;
+  }
+}

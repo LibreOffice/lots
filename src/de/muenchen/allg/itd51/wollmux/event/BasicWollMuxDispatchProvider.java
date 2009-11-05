@@ -1,7 +1,7 @@
 /*
  * Dateiname: BasicWollMuxDispatchProvider.java
  * Projekt  : WollMux
- * Funktion : Enthält einen abstrakten DispatchProvider als Basis.
+ * Funktion : Liefert zu Dispatch-URLs, die der WollMux ohne ein zugehöriges TextDocumentModel behandeln kann XDispatch-Objekte.
  * 
  * Copyright (c) 2008 Landeshauptstadt München
  *
@@ -24,115 +24,90 @@
  * 28.10.2006 | LUT | Erstellung als DispatchInterceptor
  * 10.01.2007 | LUT | Umbenennung in DispatchHandler: Behandelt jetzt
  *                    auch globale WollMux Dispatches
+ * 05.11.2009 | BNK | Auf Verwendung der neuen Dispatch und DocumentDispatch
+ *                    Klassen umgeschrieben
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
+ * @author Matthias S. Benkmann (D-III-ITD-D101)
  * @version 1.0
  * 
  */
 package de.muenchen.allg.itd51.wollmux.event;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
+import java.lang.reflect.Method;
 
+import com.sun.star.beans.PropertyValue;
 import com.sun.star.frame.DispatchDescriptor;
 import com.sun.star.frame.XDispatch;
 import com.sun.star.frame.XDispatchProvider;
 import com.sun.star.util.URL;
 
-import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
 
+/**
+ * Liefert zu Dispatch-URLs, die der WollMux ohne ein zugehöriges TextDocumentModel
+ * behandeln kann XDispatch-Objekte.
+ * 
+ * @author Matthias Benkmann (D-III-ITD-D101)
+ */
+public class BasicWollMuxDispatchProvider implements XDispatchProvider
+{
 
   /**
-   * Enthält einen abstrakten DispatchProvider als Basis für die konkreten
-   * DispatchProvider GlobalDispatchProvider und DocumentDispatchInterceptor und ist
-   * in der Lage wollMuxURLs zu parsen.
+   * Liefert die Methode methodName(String, PropertyValue[]) aus der Klasse c, oder
+   * null falls so eine Methode nicht vorhanden ist.
    * 
-   * @author christoph.lutz
+   * @author Matthias Benkmann (D-III-ITD-D101)
    * 
+   * TESTED
    */
-  abstract class BasicWollMuxDispatchProvider implements
-      XDispatchProvider
+  protected Method getMethod(Class<?> c, String methodName)
   {
-    private Set<BasicDispatchHandler> dispatchHandlers =
-      new HashSet<BasicDispatchHandler>();
-
-    /**
-     * Teilt dem DispatchProvider mit, dass er in Zukunft alle in dispatchHandlers
-     * enthaltenen DispatchHandler prüfen kann, wenn queryDispatch(...) aufgerufen
-     * wird.
-     * 
-     * @param dispatchHandlers
-     *          Set of BasicDispatchHandler
-     */
-    protected void setDispatchHandlers(Set<BasicDispatchHandler> dispatchHandlers)
+    try
     {
-      this.dispatchHandlers = dispatchHandlers;
+      Method method =
+        c.getDeclaredMethod(methodName, String.class, PropertyValue[].class);
+      return method;
     }
-
-    /**
-     * Liefert einen DispatchHandler für die url urlStr zurück oder null, falls der
-     * WollMux (in der aktuellen Situation) keinen dispatchHandler für urlStr
-     * definiert.
-     * 
-     * @param urlStr
-     *          die url des gesuchten Dispatch
-     * @return ein DocumentDispatchHandler oder null, falls für urlStr in der
-     *         aktuellen Situation kein DispatchHandler verfügbar ist.
-     */
-    private BasicDispatchHandler getDispatchHandlerForUrl(String urlStr)
+    catch (Throwable x)
     {
-      // z.B. "wollmux:OpenTemplate#internerBriefkopf"
-      // =====> {"wollmux:OpenTemplate", "internerBriefkopf"}
-      int idx = urlStr.indexOf('#');
-      String part = idx < 0 ? urlStr : urlStr.substring(0, idx);
-
-      Iterator<BasicDispatchHandler> iter = dispatchHandlers.iterator();
-      while (iter.hasNext())
-      {
-        BasicDispatchHandler handler = iter.next();
-        if (handler.providesUrl(part)) return handler;
-      }
+      Logger.debug2(x);
       return null;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.sun.star.frame.XDispatchProvider#queryDispatch(com.sun.star.util.URL,
-     *      java.lang.String, int)
-     */
-    public XDispatch queryDispatch(URL url, String frameName, int fsFlag)
-    {
-      String urlStr = url.Complete;
-
-      // Eigenes Dispatch-Objekt zurück liefern.
-      BasicDispatchHandler myDisp = getDispatchHandlerForUrl(urlStr);
-      if (myDisp != null)
-      {
-        Logger.debug2(L.m("queryDispatch: verwende %1", myDisp));
-        return myDisp;
-      }
-      return null;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.sun.star.frame.XDispatchProvider#queryDispatches(com.sun.star.frame.DispatchDescriptor[])
-     */
-    public XDispatch[] queryDispatches(DispatchDescriptor[] seqDescripts)
-    {
-      int nCount = seqDescripts.length;
-      XDispatch[] lDispatcher = new XDispatch[nCount];
-
-      for (int i = 0; i < nCount; ++i)
-        lDispatcher[i] =
-          queryDispatch(seqDescripts[i].FeatureURL, seqDescripts[i].FrameName,
-            seqDescripts[i].SearchFlags);
-
-      return lDispatcher;
     }
   }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.sun.star.frame.XDispatchProvider#queryDispatch(com.sun.star.util.URL,
+   *      java.lang.String, int)
+   */
+  public XDispatch queryDispatch(URL url, String frameName, int fsFlag)
+  {
+    String methodName = Dispatch.getMethodName(url);
+
+    if (getMethod(Dispatch.class, methodName) != null)
+      return new Dispatch();
+    else
+      return null;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.sun.star.frame.XDispatchProvider#queryDispatches(com.sun.star.frame.DispatchDescriptor[])
+   */
+  public XDispatch[] queryDispatches(DispatchDescriptor[] seqDescripts)
+  {
+    int nCount = seqDescripts.length;
+    XDispatch[] lDispatcher = new XDispatch[nCount];
+
+    for (int i = 0; i < nCount; ++i)
+      lDispatcher[i] =
+        queryDispatch(seqDescripts[i].FeatureURL, seqDescripts[i].FrameName,
+          seqDescripts[i].SearchFlags);
+
+    return lDispatcher;
+  }
+}
