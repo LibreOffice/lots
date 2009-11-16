@@ -44,7 +44,7 @@ import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 public class DocumentDispatch extends Dispatch
 {
   /**
-   * Ein XDispatch-Objekt, das die ursprüngliche Standard-Aktion der URL url
+   * Ein XDispatch-Objekt, das die ursprüngliche Standard-Aktion der URL url ist.
    * 
    */
   private XDispatch origDisp;

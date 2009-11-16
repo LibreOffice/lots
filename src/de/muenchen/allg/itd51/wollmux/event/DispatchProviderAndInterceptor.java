@@ -49,8 +49,7 @@ import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
 
 /**
- * Liefert zu Dispatch-URLs, die der WollMux ohne ein zugehöriges TextDocumentModel
- * behandeln kann XDispatch-Objekte.
+ * Liefert zu Dispatch-URLs, die der WollMux behandeln kann XDispatch-Objekte.
  * 
  * @author Matthias Benkmann (D-III-ITD-D101)
  */
@@ -117,8 +116,8 @@ public class DispatchProviderAndInterceptor implements XDispatchProvider,
   }
 
   /**
-   * Liefert die Methode methodName(String, PropertyValue[]) aus der Klasse c, oder
-   * null falls so eine Methode nicht vorhanden ist.
+   * Liefert true, wenn die Methode methodName(String, PropertyValue[]) in der Klasse
+   * c vorhanden ist, andern falls false.
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
    * 
