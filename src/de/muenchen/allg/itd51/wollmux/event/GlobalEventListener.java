@@ -85,58 +85,73 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
 
   public synchronized void notifyEvent(com.sun.star.document.EventObject docEvent)
   {
-    /*
-     * Extra Test ohne Cast nach XComponent, weil queryInterface im Seriendruckfall
-     * schon signifikanten Overhead erzeugt.
-     */
-    if (docEvent.Source == null) return;
-
-    /*
-     * Workaround for #3091: Die unsichtbaren Dokumente, die beim OOo-Seriendruck
-     * anfallen nicht bearbeiten.
-     */
-    String event = docEvent.EventName;
-    String url = UNO.XModel(docEvent.Source).getURL();
-    Logger.debug2(event);
-    Logger.debug2(url);
-    int idx = url.lastIndexOf('/') - 4;
-    if (url.startsWith(".tmp/sv", idx) && url.endsWith(".tmp")) return;
-    // --------------
-
-    XComponent compo = UNO.XComponent(docEvent.Source);
-    if (compo == null) return;
-    XTextDocument xTextDoc = UNO.XTextDocument(compo);
-
-    // Die Events OnLoad und OnNew kommen nur bei sichtbar geöffneten Dokumenten.
-    // Das macht die Events für unsichtbar geöffnete Dokumente unbrauchbar. Nur
-    // falls das Event OnViewCreated nicht empfangen wurden (z.B. möglicherweise
-    // bei alten OOo-Verisonen), greift als Fallback die Dokumentbearbeitung über
-    // OnNew bzw. OnLoad.
-    // Im Gegensatz zu OnLoad oder OnNew wird das Event OnViewCreated auch bei
-    // unsichtbar geöffneten Dokumenten erzeugt. Daher wird nun hauptsächlich
-    // dieses Event zur Initiierung der Dokumentbearbeitung verwendet.
-    if ((event.equals("OnViewCreated") || event.equals("OnLoad") || event.equals("OnNew"))
-      && !seenAlready(compo))
+    // Der try-catch-Block verhindert, daß die Funktion und damit der
+    // ganze Listener ohne Fehlermeldung abstürzt.
+    try
     {
-      if (xTextDoc != null)
-      {
-        docManager.addTextDocument(xTextDoc);
-        WollMuxEventHandler.handleProcessTextDocument(xTextDoc);
-      }
+      /*
+       * Extra Test ohne Cast nach XComponent, weil queryInterface im Seriendruckfall
+       * schon signifikanten Overhead erzeugt.
+       */
+      if (docEvent.Source == null) return;
+
+      /*
+       * Workaround for #3091: Die unsichtbaren Dokumente, die beim OOo-Seriendruck
+       * anfallen nicht bearbeiten.
+       */
+      String event = docEvent.EventName;
+      
+      String url = "";
+      com.sun.star.frame.XModel modelSource = UNO.XModel(docEvent.Source);
+      if (modelSource != null)
+        url = UNO.XModel(docEvent.Source).getURL();
       else
+        return;
+      
+      Logger.debug2(event);
+      Logger.debug2(url);
+      int idx = url.lastIndexOf('/') - 4;
+      if (url.startsWith(".tmp/sv", idx) && url.endsWith(".tmp")) return;
+      // --------------
+
+      XComponent compo = UNO.XComponent(docEvent.Source);
+      if (compo == null) return;
+      XTextDocument xTextDoc = UNO.XTextDocument(compo);
+
+      // Die Events OnLoad und OnNew kommen nur bei sichtbar geöffneten Dokumenten.
+      // Das macht die Events für unsichtbar geöffnete Dokumente unbrauchbar. Nur
+      // falls das Event OnViewCreated nicht empfangen wurden (z.B. möglicherweise
+      // bei alten OOo-Verisonen), greift als Fallback die Dokumentbearbeitung über
+      // OnNew bzw. OnLoad.
+      // Im Gegensatz zu OnLoad oder OnNew wird das Event OnViewCreated auch bei
+      // unsichtbar geöffneten Dokumenten erzeugt. Daher wird nun hauptsächlich
+      // dieses Event zur Initiierung der Dokumentbearbeitung verwendet.
+      if ((event.equals("OnViewCreated") || event.equals("OnLoad") || event.equals("OnNew"))
+        && !seenAlready(compo))
       {
-        docManager.add(compo);
-        WollMuxEventHandler.handleNotifyDocumentEventListener(null,
-          WollMuxEventHandler.ON_WOLLMUX_PROCESSING_FINISHED, compo);
+        if (xTextDoc != null)
+        {
+          docManager.addTextDocument(xTextDoc);
+          WollMuxEventHandler.handleProcessTextDocument(xTextDoc);
+        }
+        else
+        {
+          docManager.add(compo);
+          WollMuxEventHandler.handleNotifyDocumentEventListener(null,
+            WollMuxEventHandler.ON_WOLLMUX_PROCESSING_FINISHED, compo);
+        }
+      }
+      else if ((event.equals("OnUnload") && compo != null))
+      {
+        DocumentManager.Info info = docManager.remove(compo);
+        if (info.hasTextDocumentModel())
+          WollMuxEventHandler.handleTextDocumentClosed(info.getTextDocumentModel());
       }
     }
-    else if ((event.equals("OnUnload") && compo != null))
+    catch (Exception e)
     {
-      DocumentManager.Info info = docManager.remove(compo);
-      if (info.hasTextDocumentModel())
-        WollMuxEventHandler.handleTextDocumentClosed(info.getTextDocumentModel());
+      Logger.error(e);
     }
-
   }
 
   public void disposing(EventObject arg0)
