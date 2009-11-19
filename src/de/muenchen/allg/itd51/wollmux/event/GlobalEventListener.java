@@ -50,6 +50,7 @@
 
 package de.muenchen.allg.itd51.wollmux.event;
 
+import com.sun.star.frame.XModel;
 import com.sun.star.lang.EventObject;
 import com.sun.star.lang.XComponent;
 import com.sun.star.text.XTextDocument;
@@ -100,14 +101,14 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
        * anfallen nicht bearbeiten.
        */
       String event = docEvent.EventName;
-      
+
       String url = "";
-      com.sun.star.frame.XModel modelSource = UNO.XModel(docEvent.Source);
+      XModel modelSource = UNO.XModel(docEvent.Source);
       if (modelSource != null)
-        url = UNO.XModel(docEvent.Source).getURL();
+        url = modelSource.getURL();
       else
         return;
-      
+
       Logger.debug2(event);
       Logger.debug2(url);
       int idx = url.lastIndexOf('/') - 4;
