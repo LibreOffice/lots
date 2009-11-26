@@ -33,7 +33,7 @@ ShowInstDetails hide
 ShowUninstDetails hide
 
 # Set Default Installation Directory
-InstallDir "$PROGRAMFILES\wollmux" ;; default ($INSTDIR will be overwritten in .onInit function if "--INSTDIR=" command line parameter is set)
+InstallDir "$PROGRAMFILES\WollMux" ;; default ($INSTDIR will be overwritten in .onInit function if "--INSTDIR=" command line parameter is set)
 
 # Installer & Uninstaller Pages
 Page components ;; Soll der User überhaupt was auswählen dürfen?
