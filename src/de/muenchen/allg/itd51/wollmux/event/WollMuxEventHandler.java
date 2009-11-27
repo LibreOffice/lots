@@ -157,15 +157,6 @@ public class WollMuxEventHandler
     "OnWollMuxProcessingFinished";
 
   /**
-   * Das aktuell vom WollMux verarbeitete Dokument. Die Verarbeitung von Dokumenten
-   * erfolgt teilweise über mehrere Events hinweg. Diese Variable wird auf die OOo
-   * Komponente (normalerweise ein XTextDocument) gesetzt sobald die Verarbeitung
-   * begonnen wird und die Variable wird wieder auf null gesetzt, sobald das
-   * OnWollMuxProcessingFinished Event abgesetzt wurde.
-   */
-  private static XComponent documentCurrentlyBeingProcessed = null;
-
-  /**
    * Mit dieser Methode ist es möglich die Entgegennahme von Events zu blockieren.
    * Alle eingehenden Events werden ignoriert, wenn accept auf false gesetzt ist und
    * entgegengenommen, wenn accept auf true gesetzt ist.
@@ -1160,7 +1151,6 @@ public class WollMuxEventHandler
     protected void doit() throws WollMuxFehlerException
     {
       if (xTextDoc == null) return;
-      documentCurrentlyBeingProcessed = xTextDoc;
 
       WollMuxSingleton mux = WollMuxSingleton.getInstance();
       TextDocumentModel model = mux.getTextDocumentModel(xTextDoc);
@@ -2750,24 +2740,16 @@ public class WollMuxEventHandler
 
     protected void doit()
     {
-      WollMuxSingleton.getInstance().addDocumentEventListener(listener);
-      XEnumeration enu = UNO.desktop.getComponents().createEnumeration();
-      while (enu.hasMoreElements())
+      WollMuxSingleton mux = WollMuxSingleton.getInstance();
+      mux.addDocumentEventListener(listener);
+
+      List<XComponent> processedDocuments = new Vector<XComponent>();
+      mux.getDocumentManager().getProcessedDocuments(processedDocuments);
+
+      for (XComponent compo : processedDocuments)
       {
-        try
-        {
-          XComponent compo = UNO.XComponent(enu.nextElement());
-          if (documentCurrentlyBeingProcessed == null
-            || !UnoRuntime.areSame(documentCurrentlyBeingProcessed, compo))
-          {
-            handleNotifyDocumentEventListener(listener,
-              ON_WOLLMUX_PROCESSING_FINISHED, compo);
-          }
-        }
-        catch (Exception x)
-        {
-          Logger.error(x);
-        }
+        handleNotifyDocumentEventListener(listener, ON_WOLLMUX_PROCESSING_FINISHED,
+          compo);
       }
     }
 
@@ -2893,9 +2875,11 @@ public class WollMuxEventHandler
         }
       }
 
-      if (eventName.equals(ON_WOLLMUX_PROCESSING_FINISHED)
-        && source == documentCurrentlyBeingProcessed)
-        documentCurrentlyBeingProcessed = null;
+      XComponent compo = UNO.XComponent(source);
+      if (compo != null && eventName.equals(ON_WOLLMUX_PROCESSING_FINISHED))
+        WollMuxSingleton.getInstance().getDocumentManager().setProcessingFinished(
+          compo);
+
     }
 
     public String toString()

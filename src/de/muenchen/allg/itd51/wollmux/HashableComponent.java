@@ -59,6 +59,16 @@ public class HashableComponent
     if (this.compo == null) throw new ClassCastException();
   }
 
+  /**
+   * Liefert die Komponente, die durch diese {@link HashableComponent} gewrappt ist.
+   * 
+   * @author Matthias Benkmann (D-III-ITD-D101)
+   */
+  public XInterface getComponent()
+  {
+    return compo;
+  }
+
   public int hashCode()
   {
     if (compo != null) return UnoRuntime.generateOid(compo).hashCode();

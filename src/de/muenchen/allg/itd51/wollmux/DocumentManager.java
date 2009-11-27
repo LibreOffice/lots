@@ -29,10 +29,14 @@
  */
 package de.muenchen.allg.itd51.wollmux;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Map;
 
 import com.sun.star.lang.XComponent;
 import com.sun.star.text.XTextDocument;
+
+import de.muenchen.allg.afid.UNO;
 
 /**
  * Verwaltet Informationen zu allen offenen OOo-Dokumenten.
@@ -53,7 +57,6 @@ public class DocumentManager
    */
   public synchronized void addTextDocument(XTextDocument compo)
   {
-
     info.put(new HashableComponent(compo), new TextDocumentInfo(compo));
   }
 
@@ -94,8 +97,61 @@ public class DocumentManager
     return info.get(new HashableComponent(compo));
   }
 
+  /**
+   * Fügt infoCollector alle Dokumente hinzu für die das
+   * OnWollMuxProcessingFinished-Event bereits verschickt wurde.
+   * 
+   * @author Matthias Benkmann (D-III-ITD-D101)
+   * 
+   * TESTED
+   */
+  public synchronized void getProcessedDocuments(Collection<XComponent> infoCollector)
+  {
+    for (Map.Entry<HashableComponent, Info> ent : info.entrySet())
+    {
+      if (ent.getValue().isProcessingFinished())
+      {
+        XComponent compo = UNO.XComponent(ent.getKey().getComponent());
+        if (compo != null) infoCollector.add(compo);
+      }
+    }
+  }
+
+  /**
+   * Setzt in den Informationen zu compo (falls dem DocumentManager bekannt) das Flag
+   * das anzeigt, dass das OnWollMuxProcessingFinished-Event für diese Komponente
+   * bereits verschickt wurde.
+   * 
+   * @param compo
+   * @author Matthias Benkmann (D-III-ITD-D101)
+   * 
+   * TESTED
+   */
+  public synchronized void setProcessingFinished(XComponent compo)
+  {
+    Info nfo = info.get(new HashableComponent(compo));
+    if (nfo != null) nfo.setProcessingFinished();
+  }
+
   public static class Info
   {
+    /**
+     * Gibt an ob für das Dokument bereits ein OnWollMuxProcessingFinished-Event an
+     * die Listener verschickt wurde.
+     */
+    private boolean processingFinished = false;
+
+    /**
+     * Liefert true gdw für das Dokument bereits ein
+     * OnWollMuxProcessingFinished-Event an die Listener verschickt wurde.
+     * 
+     * @author Matthias Benkmann (D-III-ITD-D101)
+     */
+    public boolean isProcessingFinished()
+    {
+      return processingFinished;
+    }
+
     /**
      * Liefert das zu diesem Dokument gehörige TextDocumentModel. Falls es noch nicht
      * angelegt wurde, wird es angelegt.
@@ -119,6 +175,17 @@ public class DocumentManager
     public boolean hasTextDocumentModel()
     {
       return false;
+    }
+
+    /**
+     * Setzt das Flag, das mit {@link #isProcessingFinished()} abgefragt wird auf
+     * true.
+     * 
+     * @author Matthias Benkmann (D-III-ITD-D101)
+     */
+    private void setProcessingFinished()
+    {
+      processingFinished = true;
     }
   }
 

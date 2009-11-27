@@ -922,6 +922,17 @@ public class WollMuxSingleton implements XPALProvider
   }
 
   /**
+   * Liefert eine Referenz auf den von diesem WollMux verwendeten
+   * {@link DocumentManager}.
+   * 
+   * @author Matthias Benkmann (D-III-ITD-D101)
+   */
+  public DocumentManager getDocumentManager()
+  {
+    return docManager;
+  }
+
+  /**
    * Liefert die Funktionsbibliothek, die die global definierten Funktionen enthält.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
