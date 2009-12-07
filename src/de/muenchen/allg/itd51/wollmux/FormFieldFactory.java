@@ -250,6 +250,10 @@ public final class FormFieldFactory
 
       String textPortionType =
         (String) UNO.getProperty(textPortion, "TextPortionType");
+      if (textPortionType == null)
+      {
+        continue;
+      }
       if (textPortionType.equals("Bookmark"))
       {
         XNamed bookmark = null;
