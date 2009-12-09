@@ -1,5 +1,36 @@
  ==================== Neu in dieser Version ====================
 
+    * FormularMax_4000: Das Menü Einfügen/Standardelemente einfügen ist
+      jetzt über die wollmux.conf konfigurierbar. Dadurch kann jedes Referat
+      dort häufig verwendete Tabs oder Gruppen von Buttons konfigurieren und
+      sie so Vorlagenerstellern zugänglich machen. In der nächsten
+      Standardkonfiguration wird eine entsprechende Konfigurationsdatei
+      enthalten sein. Diese enthält zusätzlich zu den bisherigen Einträgen
+      auch einen Eintrag Abbrechen, <-Zurück, Speichern, Drucken, der die
+      entsprechenden Buttons einfügt. Ist ein entsprechender
+      Konfigurationsabschnitt nicht vorhanden (z.B. bei einer alten
+      Konfiguration), wird als Fallback das alte Menü angeboten.
+    * Wenn die WollMuxBar mit Java 6 gestartet wird, so hat sie nun ihr eigenes
+      WollMux-Icon in der Taskleiste und beim Umschalten mittels Alt+Tabulator.
+      Unter Java 5 ist das Verhalten unverändert und das Default-Java-Icon
+      wird verwendet.
+
+
+
+ ==================== Neu in Version 5.9.3 ====================
+
+    * Bugfix für ein Kompatibilitätsproblem von WollMux 5.9.2 beim
+      Weiterbearbeiten von Formularen die mit WollMux-Versionen < 5.7.2
+      erstellt wurden. In manchen Fällen kam es mit WollMux 5.9.2 zu Fehlern
+      beim Wiedereinblenden von Textinhalten.
+    * Zur Realisierung der Zusammenarbeit zwischen WollMux und anderen externen
+      Office-nahen Softwarelösungen, z.B. der Software für Wohnen in München
+      (WIM), wurde die Entwicklerschnittstelle des WollMux erweitert.
+      Hinzugekommen ist die Möglichkeit, XWollMuxDocument-Instanzen über den
+      WollMux-Service anzufordern und damit Änderungen an aktuell geöffneten
+      WollMux-Dokumenten wie z.B. das Setzen von InsertValue- oder
+      Formularwerten und Setzen der Druckfunktionen programmatisch durchführen
+      zu können (siehe Schnittstellen_des_WollMux_für_Experten)
 
 
 
