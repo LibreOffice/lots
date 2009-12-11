@@ -14,7 +14,16 @@
       WollMux-Icon in der Taskleiste und beim Umschalten mittels Alt+Tabulator.
       Unter Java 5 ist das Verhalten unverändert und das Default-Java-Icon
       wird verwendet.
+    * Windows-Installer und wollmuxbar.exe produzieren nun eine verständliche
+      Fehlermeldung, wenn auf dem System keine Java-Installation gefunden
+      wurde.
+    * Der Windows-Installer deinstalliert vor der Installation der WollMux-
+      Extension nun auch alte WollMux.uno.pkg-Extensions.
 
+    * Der WollMux funktioniert jetzt auch wenn die KDE/GNOME Desktop-
+      Integration von OOo aktiv ist. Früher musste man OOo mit der
+      Environment-Variable OOO_FORCE_DESKTOP=none starten. Dies ist nun nicht
+      mehr der Fall.
 
 
  ==================== Neu in Version 5.9.3 ====================
