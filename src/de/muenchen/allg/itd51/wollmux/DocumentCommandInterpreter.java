@@ -34,6 +34,7 @@
  * 23.08.2006 | BNK | nochmal Rewrite. Ich glaube dieser Code hält den Rekord im WollMux
  *                  | was rewrites angeht.
  * 08.07.2009 | BED | Anpassung an die Änderungen in DocumentCommand (R48539)
+ * 16.12.2009 | ERT | Cast XTextField-Interface entfernt
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -1355,20 +1356,16 @@ public class DocumentCommandInterpreter
         }
       }
 
-      // jetzt noch update selbst aufrufen (wenn verfügbar):
-      if (element.xTextField() != null)
+      try
       {
-        try
+        UnoService textField = element.getPropertyValue("TextField");
+        if (textField != null && textField.xUpdatable() != null)
         {
-          UnoService textField = element.getPropertyValue("TextField");
-          if (textField.xUpdatable() != null)
-          {
-            textField.xUpdatable().update();
-          }
+          textField.xUpdatable().update();
         }
-        catch (Exception e)
-        {}
       }
+      catch (Exception e)
+      {}
     }
   }
 

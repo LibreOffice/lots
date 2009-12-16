@@ -33,6 +33,7 @@
  *                    + Überarbeitung vieler Fehlermeldungen
  *                    + Zeilenumbrüche in showInfoModal, damit keine unlesbaren
  *                      Fehlermeldungen mehr ausgegeben werden.
+ * 16.12.2009 | ERT | Cast XTextContent-Interface entfernt
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -95,7 +96,6 @@ import com.sun.star.frame.XFrame;
 import com.sun.star.frame.XFrames;
 import com.sun.star.lang.EventObject;
 import com.sun.star.lang.XComponent;
-import com.sun.star.text.XTextContent;
 import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextRange;
@@ -3445,23 +3445,24 @@ public class WollMuxEventHandler
 
           while (parEnum != null && parEnum.hasMoreElements())
           {
-            XTextContent textPortion = null;
             try
             {
-              textPortion = UNO.XTextContent(parEnum.nextElement());
-            }
-            catch (java.lang.Exception e)
-            {}
-            XNamed bookmark = UNO.XNamed(UNO.getProperty(textPortion, "Bookmark"));
-            String name = (bookmark != null) ? bookmark.getName() : "";
+              Object element = parEnum.nextElement();
+              XNamed bookmark = UNO.XNamed(UNO.getProperty(element, "Bookmark"));
+              String name = (bookmark != null) ? bookmark.getName() : "";
 
-            if (name.toLowerCase().startsWith(bookmarkName))
+              if (name.toLowerCase().startsWith(bookmarkName))
+              {
+                boolean isStart =
+                  ((Boolean) UNO.getProperty(element, "IsStart")).booleanValue();
+                if (isStart)
+                  started.add(name);
+                else if (started.contains(name)) found.add(name);
+              }
+            }
+            catch (Exception ex)
             {
-              boolean isStart =
-                ((Boolean) UNO.getProperty(textPortion, "IsStart")).booleanValue();
-              if (isStart)
-                started.add(name);
-              else if (started.contains(name)) found.add(name);
+              Logger.error(ex);
             }
           }
         }

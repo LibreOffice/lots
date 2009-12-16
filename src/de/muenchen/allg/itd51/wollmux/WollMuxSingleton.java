@@ -41,6 +41,7 @@
  * 19.12.2006 | BAB | + setzen von Shortcuts im Konstruktor
  * 29.12.2006 | BNK | +registerDatasources()
  * 27.03.2007 | BNK | Default-oooEinstellungen ausgelagert nach data/...
+ * 16.12.2009 | ERT | Cast XTextField-Interface entfernt 
  * -------------------------------------------------------------------
  *
  * @author Christoph Lutz (D-III-ITD 5.1)
@@ -1138,15 +1139,11 @@ public class WollMuxSingleton implements XPALProvider
       }
     }
 
-    // jetzt noch schauen, ob es sich bei dem Element um eine Annotation
-    // handelt:
-    if (UNO.XTextField(element) != null)
+    Object textField = UNO.getProperty(element, "TextField");
+    if (textField != null
+      && UNO.supportsService(textField, "com.sun.star.text.TextField.Annotation"))
     {
-      Object textField = UNO.getProperty(element, "TextField");
-      if (UNO.supportsService(textField, "com.sun.star.text.TextField.Annotation"))
-      {
-        return UNO.XTextField(textField);
-      }
+      return UNO.XTextField(textField);
     }
 
     return null;
