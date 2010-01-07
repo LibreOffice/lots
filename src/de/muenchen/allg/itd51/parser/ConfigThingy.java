@@ -99,6 +99,18 @@ import java.util.regex.Pattern;
 public class ConfigThingy implements Iterable<ConfigThingy>
 {
   /**
+   * Wegen JIT bug http://bugs.sun.com/view_bug.do?bug_id=6196102, den die
+   * hirnverbrannten Idioten von Sun seit 2004 nicht behoben haben, weil es Ihnen
+   * egal ist, ob irgendwo geschäftskritische Anwendungen abschmieren und Entwickler
+   * viel Zeit investieren um Heisenbugs zu jagen, und überhaupt, wer arbeitet denn
+   * schon mit so großen Zahlen. Wenn viele amerikanische Teenager nicht bis 3 zählen
+   * können, kann man doch nicht erwarten, dass Java zuverlässig weiß dass die Zahl 2
+   * kleiner ist als 2147483647 und nicht größer. Computer sind ja auch nur Menschen
+   * und können bei so großen Zahlen schon mal einen Fehler machen.
+   */
+  private static final int INTEGER_MAX = Integer.MAX_VALUE - 1;
+
+  /**
    * Der Name des Zeichensatzes, in dem ConfigThingy-Dateien gespeichert werden.
    */
   public static final String CHARSET = "UTF-8";
@@ -629,7 +641,7 @@ public class ConfigThingy implements Iterable<ConfigThingy>
    */
   public ConfigThingy get(String name) throws NodeNotFoundException
   {
-    return get(name, Integer.MAX_VALUE);
+    return get(name, INTEGER_MAX);
   }
 
   /**
@@ -670,7 +682,7 @@ public class ConfigThingy implements Iterable<ConfigThingy>
    */
   public ConfigThingy query(String name)
   {
-    return query(name, false, Integer.MAX_VALUE, DEFAULT_MINLEVEL);
+    return query(name, false, INTEGER_MAX, DEFAULT_MINLEVEL);
   }
 
   /**
@@ -710,7 +722,7 @@ public class ConfigThingy implements Iterable<ConfigThingy>
    */
   public ConfigThingy getByChild(String name) throws NodeNotFoundException
   {
-    return getByChild(name, Integer.MAX_VALUE);
+    return getByChild(name, INTEGER_MAX);
   }
 
   /**
@@ -763,7 +775,7 @@ public class ConfigThingy implements Iterable<ConfigThingy>
    */
   public ConfigThingy queryByChild(String name)
   {
-    return query(name, true, Integer.MAX_VALUE, DEFAULT_MINLEVEL);
+    return query(name, true, INTEGER_MAX, DEFAULT_MINLEVEL);
   }
 
   /**
