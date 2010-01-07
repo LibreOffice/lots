@@ -48,7 +48,6 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 
-import de.muenchen.allg.itd51.wollmux.DuplicateIDException;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastListener;
 import de.muenchen.allg.itd51.wollmux.former.BroadcastObjectSelection;
@@ -144,7 +143,7 @@ public class OneGroupLineView extends LineView
         {
           Logger.error(x);
         }
-        catch (DuplicateIDException x)
+        catch (Exception x)
         {
           tc.setBackground(Color.RED);
         }

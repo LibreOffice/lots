@@ -34,9 +34,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
+import java.util.regex.Pattern;
 
 import de.muenchen.allg.itd51.parser.ConfigThingy;
+import de.muenchen.allg.itd51.parser.SyntaxErrorException;
 import de.muenchen.allg.itd51.wollmux.DuplicateIDException;
+import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
 import de.muenchen.allg.itd51.wollmux.former.IDManager;
 import de.muenchen.allg.itd51.wollmux.former.IDManager.ID;
@@ -52,6 +55,11 @@ import de.muenchen.allg.itd51.wollmux.former.function.ParamValue;
  */
 public class GroupModel
 {
+  /**
+   * {@link Pattern} für legale IDs.
+   */
+  private static Pattern ID_PATTERN = Pattern.compile("^([a-zA-Z_][a-zA-Z_0-9]*)");
+
   /**
    * Für {@link ModelChangeListener#attributeChanged(GroupModel, int, Object)}, gibt
    * an, dass die ID (der Name) der Gruppe sich geändert hat.
@@ -191,13 +199,26 @@ public class GroupModel
    * 
    * TESTED
    */
-  public void setID(String newID) throws DuplicateIDException
+  public void setID(String newID) throws DuplicateIDException, SyntaxErrorException
   {
+    if (!isLegalID(newID))
+      throw new SyntaxErrorException(L.m(
+        "'%1' ist keine syntaktisch korrekte ID für Sichtbarkeitsgruppen", newID));
     id.setID(newID);
     /**
      * IDManager.ID ruft MyIDChangeListener.idHasChanged() auf, was wiederum die
      * Listener auf diesem Model benachrichtigt.
      */
+  }
+
+  /**
+   * Liefert true gdw, id auf {@link #ID_PATTERN} matcht.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  private boolean isLegalID(String id)
+  {
+    return ID_PATTERN.matcher(id).matches();
   }
 
   /**
