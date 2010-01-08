@@ -402,8 +402,7 @@ public class TextDocumentModel
      */
     try
     {
-      DispatchProviderAndInterceptor.registerDocumentDispatchInterceptor(getFrame(),
-        this);
+      DispatchProviderAndInterceptor.registerDocumentDispatchInterceptor(getFrame());
     }
     catch (java.lang.Exception e)
     {

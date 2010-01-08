@@ -46,7 +46,6 @@ import com.sun.star.util.URL;
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
-import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
 
 /**
  * Liefert zu Dispatch-URLs, die der WollMux behandeln kann XDispatch-Objekte.
@@ -71,7 +70,7 @@ public class DispatchProviderAndInterceptor implements XDispatchProvider,
    * Falls ungleich null, so ist dieser {@link DispatchProviderAndInterceptor} in der
    * Lage für model-spezifische URLs {@link DocumentDispatch}-Objekte zu liefern.
    */
-  private TextDocumentModel model = null;
+  private XFrame frame = null;
 
   /**
    * Erzeugt einen {@link DispatchProviderAndInterceptor}, der nur globale URLs
@@ -90,9 +89,9 @@ public class DispatchProviderAndInterceptor implements XDispatchProvider,
    * @author Matthias Benkmann (D-III-ITD-D101)
    * 
    */
-  public DispatchProviderAndInterceptor(TextDocumentModel model)
+  public DispatchProviderAndInterceptor(XFrame frame)
   {
-    this.model = model;
+    this.frame = frame;
   }
 
   public XDispatchProvider getSlaveDispatchProvider()
@@ -150,11 +149,11 @@ public class DispatchProviderAndInterceptor implements XDispatchProvider,
       return new Dispatch();
     else
     {
-      if (model != null)
+      if (frame != null)
       {
         if (hasMethod(DocumentDispatch.class, methodName))
           return new DocumentDispatch(getOrigDispatch(url, frameName, fsFlag), url,
-            model);
+            frame);
       }
     }
 
@@ -197,8 +196,7 @@ public class DispatchProviderAndInterceptor implements XDispatchProvider,
    * Registriert einen DocumentDispatchProvider im Frame frame (nur dann, wenn er
    * nicht bereits registriert wurde).
    */
-  public static void registerDocumentDispatchInterceptor(XFrame frame,
-      TextDocumentModel model)
+  public static void registerDocumentDispatchInterceptor(XFrame frame)
   {
     if (frame == null || UNO.XDispatchProviderInterception(frame) == null
       || UNO.XDispatchProvider(frame) == null) return;
@@ -225,12 +223,12 @@ public class DispatchProviderAndInterceptor implements XDispatchProvider,
     boolean alreadyRegistered = disp != null;
 
     if (alreadyRegistered)
-      Logger.error(L.m("Doppelter Aufruf von registerDocumentDispatchInterceptor() für den selben Frame???"));
+      Logger.debug(L.m("Ignoriere doppelten Aufruf von registerDocumentDispatchInterceptor() für den selben Frame"));
 
     // DispatchInterceptor registrieren (wenn nicht bereits registriert):
     if (!alreadyRegistered)
     {
-      XDispatchProviderInterceptor dpi = new DispatchProviderAndInterceptor(model);
+      XDispatchProviderInterceptor dpi = new DispatchProviderAndInterceptor(frame);
       UNO.XDispatchProviderInterception(frame).registerDispatchProviderInterceptor(
         dpi);
     }
