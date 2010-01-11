@@ -65,6 +65,7 @@
  * 25.02.2008 | BNK | ConfigThingy generisiert
  * 12.06.2009 | BED | get, query und queryByChild um jeweils eine Version mit minlevel Argument erweitert
  * 19.08.2009 | BNK | [R52737]FIXED: Lange Strings führen zu StackOverflowError in ConfigThingy
+ * 11.01.2010 | BED | [R67584] +trimConfigThingy() zur Speicheroptimierung
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -139,7 +140,7 @@ public class ConfigThingy implements Iterable<ConfigThingy>
   private static final int DEFAULT_MINLEVEL = 1;
 
   /** Die Kindknoten. */
-  private List<ConfigThingy> children;
+  private Vector<ConfigThingy> children;
 
   /** Der Name des Knotens. Bei Blättern ist dies der (String-)Wert des Knotens. */
   private String name;
@@ -225,6 +226,7 @@ public class ConfigThingy implements Iterable<ConfigThingy>
       childCopy.addChildCopiesFrom(childToCopy);
       this.addChild(childCopy);
     }
+    this.children.trimToSize();
   }
 
   /**
@@ -330,8 +332,11 @@ public class ConfigThingy implements Iterable<ConfigThingy>
       } while (token1.type() != Token.END);
 
       if (stack.size() > 1)
+      {
         throw new SyntaxErrorException(token1.url() + ": " + (stack.size() - 1)
           + " schließende Klammern fehlen");
+      }
+      trimConfigThingy();
     }
     finally
     {
@@ -346,6 +351,20 @@ public class ConfigThingy implements Iterable<ConfigThingy>
   }
 
   /**
+   * Ruft trimToSize() auf dem {@link #children}-Vector dieses ConfigThingys auf und
+   * rekursiv auf den children-Vectoren der Kinder dieses ConfigThingys. Dient zur
+   * Speicheroptimierung.
+   * 
+   * @author Daniel Benkmann (D-III-ITD-D101)
+   */
+  private void trimConfigThingy()
+  {
+    this.children.trimToSize();
+    for (ConfigThingy child : children)
+      child.trimConfigThingy();
+  }
+
+  /**
    * Erzeugt ein ConfigThingy mit Name/Wert name, ohne Kinder. Achtung! Mit dieser
    * Methode ist es möglich, ConfigThingys zu erzeugen, die sich nicht an die
    * Syntaxbeschränkungen des Parsers für Schlüssel halten. Wird so ein ConfigThingy
@@ -355,7 +374,7 @@ public class ConfigThingy implements Iterable<ConfigThingy>
   public ConfigThingy(String name)
   {
     this.name = name;
-    this.children = new Vector<ConfigThingy>();
+    this.children = new Vector<ConfigThingy>(1);
   }
 
   /**
@@ -400,9 +419,10 @@ public class ConfigThingy implements Iterable<ConfigThingy>
   /**
    * Erzeugt ein anonymes ConfigThingy mit Kindern aus children.
    */
-  private ConfigThingy(String name, List<ConfigThingy> children)
+  private ConfigThingy(String name, Vector<ConfigThingy> children)
   {
     this.name = name;
+    children.trimToSize();
     this.children = children;
   }
 
@@ -815,7 +835,7 @@ public class ConfigThingy implements Iterable<ConfigThingy>
   protected ConfigThingy query(String name, boolean getParents, int maxlevel,
       int minlevel)
   {
-    List<ConfigThingy> found = new Vector<ConfigThingy>();
+    Vector<ConfigThingy> found = new Vector<ConfigThingy>();
     boolean haveMore;
     int searchlevel = minlevel;
     do
