@@ -1680,7 +1680,8 @@ public class ConfigThingy implements Iterable<ConfigThingy>
     File cwd = new File(System.getProperty("user.dir"));
 
     args[0] = args[0].replaceAll("\\\\", "/");
-    ConfigThingy conf = new ConfigThingy(args[0], new URL(cwd.toURL(), args[0]));
+    ConfigThingy conf =
+      new ConfigThingy(args[0], new URL(cwd.toURI().toURL(), args[0]));
 
     System.out.println("Dies ist die stringRepresentation(): \n\n"
       + conf.stringRepresentation());
