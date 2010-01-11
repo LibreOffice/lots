@@ -213,6 +213,29 @@ public class ConfigThingy implements Iterable<ConfigThingy>
   }
 
   /**
+   * Erzeugt ein ConfigThingy mit Name/Wert name, ohne Kinder. Achtung! Mit dieser
+   * Methode ist es möglich, ConfigThingys zu erzeugen, die sich nicht an die
+   * Syntaxbeschränkungen des Parsers für Schlüssel halten. Wird so ein ConfigThingy
+   * mittels stringRepresentation() in Text konvertiert, entsteht etwas, das der
+   * Parser nicht wieder einlesen kann.
+   */
+  public ConfigThingy(String name)
+  {
+    this.name = name;
+    this.children = new Vector<ConfigThingy>(1);
+  }
+
+  /**
+   * Erzeugt ein anonymes ConfigThingy mit Kindern aus children.
+   */
+  private ConfigThingy(String name, Vector<ConfigThingy> children)
+  {
+    this.name = name;
+    children.trimToSize();
+    this.children = children;
+  }
+
+  /**
    * Fügt diesem ConfigThingy unabhängige Kopien aller Kinder von conf hinzu. Die
    * Kinder werden samt aller Nachfahren kopiert.
    * 
@@ -365,19 +388,6 @@ public class ConfigThingy implements Iterable<ConfigThingy>
   }
 
   /**
-   * Erzeugt ein ConfigThingy mit Name/Wert name, ohne Kinder. Achtung! Mit dieser
-   * Methode ist es möglich, ConfigThingys zu erzeugen, die sich nicht an die
-   * Syntaxbeschränkungen des Parsers für Schlüssel halten. Wird so ein ConfigThingy
-   * mittels stringRepresentation() in Text konvertiert, entsteht etwas, das der
-   * Parser nicht wieder einlesen kann.
-   */
-  public ConfigThingy(String name)
-  {
-    this.name = name;
-    this.children = new Vector<ConfigThingy>(1);
-  }
-
-  /**
    * Jagt alle in URLs verbotenen Zeichen durch URLEncoder,encode(ch,{@link #CHARSET}).
    * Das Leerzeichen bekommt eine Sonderbehandlung (Umsetzung nach %20), weil
    * URLEncoder.encode() es nach "+" umsetzen würde, was zumindest bei unseren
@@ -414,16 +424,6 @@ public class ConfigThingy implements Iterable<ConfigThingy>
     catch (UnsupportedEncodingException x)
     {}
     return url;
-  }
-
-  /**
-   * Erzeugt ein anonymes ConfigThingy mit Kindern aus children.
-   */
-  private ConfigThingy(String name, Vector<ConfigThingy> children)
-  {
-    this.name = name;
-    children.trimToSize();
-    this.children = children;
   }
 
   /**
