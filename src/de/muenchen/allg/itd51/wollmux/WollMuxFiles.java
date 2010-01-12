@@ -41,6 +41,7 @@
  * 18.08.2009 | BED | -defaultWollmuxConf
  *                  | andere Strategie für Suche nach wollmux.conf in setupWollMuxDir()
  *                  | Verzeichnis der wollmux.conf als Default für DEFAULT_CONTEXT
+ * 12.01.2010 | BED | dumpInfo() gibt nun auch JVM Heap Size + verwendeten Speicher aus
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -1029,6 +1030,16 @@ public class WollMuxFiles
         out.write(key + ": " + props.getProperty(key) + "\n");
       }
       out.write("===================== END java-properties ==================\n");
+
+      out.write("===================== START java-memoryinfo ==================\n");
+      long maxMemory = Runtime.getRuntime().maxMemory();
+      long totalMemory = Runtime.getRuntime().totalMemory();
+      long freeMemory = Runtime.getRuntime().freeMemory();
+      out.write("Maximum Heap Size: " + (maxMemory / 1024) + " KB\n");
+      out.write("Currently Allocated Heap Size: " + (totalMemory / 1024) + " KB\n");
+      out.write("Currently Used Memory: " + ((totalMemory - freeMemory) / 1024)
+        + " KB\n");
+      out.write("===================== END java-memoryinfo ==================\n");
 
       out.write("===================== START wollmuxConfFile ==================\n");
       out.flush(); // weil wir gleich direkt auf den Stream zugreifen
