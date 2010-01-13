@@ -38,11 +38,11 @@
  *                  | Änderung der Menüstruktur (Einführung Ansicht und Bearbeiten Menü, Einfügen wandert nach Bearbeiten)
  *                  | JSplitPane besser initialisiert, um verschieben des Dividers zu verbessern.
  * 01.08.2007 | BNK | FunctionTester eingebaut      
- * 10.12.2007 | BNK | [R11302]intelligentere Behandlung von Leerzeichen am Ende von gender-Dropdown-Listen                             
+ * 10.12.2007 | BNK | [R11302]intelligentere Behandlung von Leerzeichen am Ende von gender-Dropdown-Listen
+ * 13.01.2010 | BED | [R67584]FormularMax öffnet sich bei großen Formularen und niedriger JVM Heap Size nicht mehr, sondern bringt entsprechende Meldung
  * -------------------------------------------------------------------
  *
  * @author Matthias Benkmann (D-III-ITD 5.1)
- * @version 1.0
  * 
  */
 package de.muenchen.allg.itd51.wollmux.former;
@@ -163,9 +163,12 @@ import de.muenchen.allg.itd51.wollmux.func.PrintFunctionLibrary;
  */
 public class FormularMax4000
 {
+  /**
+   * Default-Name für ein neues Tab.
+   */
   public static final String STANDARD_TAB_NAME = L.m("Reiter");
 
-  /*
+  /**
    * Die Namen der Parameter, die die Gender-Trafo erwartet. ACHTUNG! Diese müssen
    * exakt mit den Parametern der Gender()-Funktion aus der WollMux-Konfig
    * übereinstimmen. Insbesondere dürfen sie nicht übersetzt werden, ohne dass die
@@ -472,6 +475,21 @@ public class FormularMax4000
   private ConfigThingy funktionsDialogeAbschnitteConf;
 
   /**
+   * Zahl von Formularsteuerelementen in einem Formular, ab der es in Zusammenhang
+   * mit einer maximaler Heap Size der JVM, die kleiner ist als
+   * {@link #LOWEST_ALLOWED_HEAP_SIZE}, zu Speicherplatzproblemen kommen kann.
+   */
+  private static final int CRITICAL_NUMBER_OF_FORMCONTROLS = 500;
+
+  /**
+   * Mindestgröße der maximalen Heap Size der JVM (in Bytes). Sollte die maximale
+   * Heap Size der JVM kleiner als dieser Wert sein, kann es bei Formularen mit mehr
+   * Formularsteuerelementen als {@link #CRITICAL_NUMBER_OF_FORMCONTROLS} zu
+   * Speicherplatzproblemen kommen.
+   */
+  private static final long LOWEST_ALLOWED_HEAP_SIZE = 70000000;
+
+  /**
    * Sendet die Nachricht b an alle Listener, die auf dem globalen Broadcast-Kanal
    * registriert sind.
    * 
@@ -577,6 +595,31 @@ public class FormularMax4000
   private void createGUI()
   {
     Common.setLookAndFeelOnce();
+
+    // Zuerst überprüfen wir, ob das Formular eine kritische Anzahl an FormControls
+    // sowie eine niedrige Einstellung für die Java Heap Size hat, die zu
+    // OutOfMemoryErrors führen könnte. Wenn ja, wird eine entsprechende Meldung
+    // ausgegeben, dass der Benutzer seine Java-Einstellungen ändern soll und
+    // der FormularMax wird nicht gestartet.
+    int formControlCount = doc.getFormDescription().query("TYPE", 6, 6).count();
+    long maxMemory = Runtime.getRuntime().maxMemory();
+    if (formControlCount > CRITICAL_NUMBER_OF_FORMCONTROLS
+      && maxMemory < LOWEST_ALLOWED_HEAP_SIZE)
+    {
+      Logger.log(L.m(
+        "Starten von FormularMax beim Bearbeiten von Dokument '%1' abgebrochen, da maximale Java Heap Size = %2 bytes und Anzahl FormControls = %3",
+        doc.getTitle(), maxMemory, formControlCount));
+      JOptionPane.showMessageDialog(
+        myFrame,
+        L.m("Der FormularMax 4000 kann nicht ausgeführt werden, da der Java-Laufzeitumgebung zu wenig Hauptspeicher zur Verfügung steht.\n"
+          + "Bitte ändern Sie in OpenOffice.org Ihre Java-Einstellungen. Sie finden diese unter \"Extras->Optionen->OpenOffice.org->Java\".\n"
+          + "Dort wählen Sie in der Liste Ihre aktuelle Java-Laufzeitumgebung aus, klicken auf den Button \"Parameter\",\n"
+          + "tragen den neuen Parameter \"-Xms256m\" ein (Groß-/Kleinschreibung beachten!) und klicken auf \"Zuweisen\".\n"
+          + "Danach ist ein Neustart von OpenOffice.org nötig."),
+        L.m("Java Heap Size zu gering"), JOptionPane.ERROR_MESSAGE);
+      doc.setCurrentFormularMax4000(null);
+      return;
+    }
 
     formControlModelList = new FormControlModelList(this);
     insertionModelList = new InsertionModelList(this);
@@ -2356,13 +2399,13 @@ public class FormularMax4000
       }
       catch (Exception x)
       {
-        return true;/*
-                     * Do not Logger.error(x); because the most likely cause for an
-                     * exception is that range2 does not belong to the text object
-                     * compare, which happens in tables, because when enumerating
-                     * over a range inside of a table the enumeration hits a lot of
-                     * unrelated cells (OOo bug).
-                     */
+        return true;
+        /*
+         * Do not Logger.error(x); because the most likely cause for an exception is
+         * that range2 does not belong to the text object compare, which happens in
+         * tables, because when enumerating over a range inside of a table the
+         * enumeration hits a lot of unrelated cells (OOo bug).
+         */
       }
     }
     return false;
