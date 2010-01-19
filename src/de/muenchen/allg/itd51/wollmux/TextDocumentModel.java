@@ -90,7 +90,7 @@ import de.muenchen.allg.itd51.wollmux.FormFieldFactory.FormField;
 import de.muenchen.allg.itd51.wollmux.dialog.DialogLibrary;
 import de.muenchen.allg.itd51.wollmux.dialog.FormController;
 import de.muenchen.allg.itd51.wollmux.dialog.mailmerge.MailMergeNew;
-import de.muenchen.allg.itd51.wollmux.event.DispatchProviderAndInterceptor;
+import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
 import de.muenchen.allg.itd51.wollmux.former.FormularMax4000;
 import de.muenchen.allg.itd51.wollmux.former.insertion.InsertionModel4InputUser;
 import de.muenchen.allg.itd51.wollmux.func.Function;
@@ -395,27 +395,10 @@ public class TextDocumentModel
     this.isFormDocument = false;
     setType(persistentData.getData(DATA_ID_SETTYPE));
 
-    /*
-     * WollMuxDispatchInterceptor registrieren. Wir machen dies relativ am Ende des
-     * Konstruktors, um zu verhindern, dass Dispatches auf ein unfertiges
-     * TextDocumentModel losgehen.
+    /**
+     * Dispatch Handler in eigenem Event registrieren, da es Deadlocks gegeben hat.
      */
-    try
-    {
-      DispatchProviderAndInterceptor.registerDocumentDispatchInterceptor(getFrame());
-    }
-    catch (java.lang.Exception e)
-    {
-      Logger.error(L.m("Kann DispatchInterceptor nicht registrieren:"), e);
-    }
-
-    // Sicherstellen, dass die Schaltflächen der Symbolleisten aktiviert werden:
-    try
-    {
-      getFrame().contextChanged();
-    }
-    catch (java.lang.Exception e)
-    {}
+    WollMuxEventHandler.handleRegisterDispatchInterceptor(getFrame());
   }
 
   /**

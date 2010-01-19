@@ -112,6 +112,7 @@ import de.muenchen.allg.itd51.wollmux.Bookmark;
 import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.DocumentCommand;
 import de.muenchen.allg.itd51.wollmux.DocumentCommandInterpreter;
+import de.muenchen.allg.itd51.wollmux.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.FormModel;
 import de.muenchen.allg.itd51.wollmux.FormModelImpl;
 import de.muenchen.allg.itd51.wollmux.L;
@@ -128,6 +129,7 @@ import de.muenchen.allg.itd51.wollmux.WollMuxSingleton;
 import de.muenchen.allg.itd51.wollmux.Workarounds;
 import de.muenchen.allg.itd51.wollmux.XPALChangeEventListener;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
+import de.muenchen.allg.itd51.wollmux.DocumentManager.TextDocumentInfo;
 import de.muenchen.allg.itd51.wollmux.FormModelImpl.InvalidFormDescriptorException;
 import de.muenchen.allg.itd51.wollmux.WollMuxSingleton.InvalidIdentifierException;
 import de.muenchen.allg.itd51.wollmux.db.ColumnNotFoundException;
@@ -286,12 +288,6 @@ public class WollMuxEventHandler
      * aufgerufen werden.
      */
     public void process();
-
-    /**
-     * Gibt an, ob das Event eine Referenz auf das Objekt o, welches auch ein
-     * UNO-Service sein kann, enthält.
-     */
-    public boolean requires(Object o);
   }
 
   /**
@@ -413,16 +409,6 @@ public class WollMuxEventHandler
     protected void stabilize()
     {
       System.gc();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see de.muenchen.allg.itd51.wollmux.WollMuxEventHandler.WollMuxEvent#requires(java.lang.Object)
-     */
-    public boolean requires(Object o)
-    {
-      return false;
     }
 
     public String toString()
@@ -1092,29 +1078,56 @@ public class WollMuxEventHandler
    * geschlossen wurde und damit auch das TextDocumentModel disposed werden soll.
    * 
    * Dieses Event wird ausgelöst, wenn ein TextDokument geschlossen wird.
+   * 
+   * @param docInfo
+   *          ein {@link DocumentManager.Info} Objekt, an dem das TextDocumentModel
+   *          dranhängt des Dokuments, das geschlossen wurde. ACHTUNG! docInfo hat
+   *          nicht zwingend ein TextDocumentModel. Es muss
+   *          {@link DocumentManager.Info#hasTextDocumentModel()} verwendet werden.
+   * 
+   * 
+   * ACHTUNG! ACHTUNG! Die Implementierung wurde extra so gewählt, dass hier ein
+   * DocumentManager.Info anstatt direkt eines TextDocumentModel übergeben wird. Es
+   * kam nämlich bei einem Dokument, das schnell geöffnet und gleich wieder
+   * geschlossen wurde zu folgendem Deadlock:
+   * 
+   * {@link OnProcessTextDocument} =>
+   * {@link de.muenchen.allg.itd51.wollmux.DocumentManager.TextDocumentInfo#getTextDocumentModel()} =>
+   * {@link TextDocumentModel#TextDocumentModel(XTextDocument)} =>
+   * {@link DispatchProviderAndInterceptor#registerDocumentDispatchInterceptor(XFrame)} =>
+   * OOo Proxy =>
+   * {@link GlobalEventListener#notifyEvent(com.sun.star.document.EventObject)}
+   * ("OnUnload") =>
+   * {@link de.muenchen.allg.itd51.wollmux.DocumentManager.TextDocumentInfo#hasTextDocumentModel()}
+   * 
+   * Da {@link TextDocumentInfo} synchronized ist kam es zum Deadlock.
+   * 
    */
-  public static void handleTextDocumentClosed(TextDocumentModel doc)
+  public static void handleTextDocumentClosed(DocumentManager.Info docInfo)
   {
-    handle(new OnTextDocumentClosed(doc));
+    handle(new OnTextDocumentClosed(docInfo));
   }
 
   private static class OnTextDocumentClosed extends BasicEvent
   {
-    private TextDocumentModel doc;
+    private DocumentManager.Info docInfo;
 
-    private OnTextDocumentClosed(TextDocumentModel doc)
+    private OnTextDocumentClosed(DocumentManager.Info doc)
     {
-      this.doc = doc;
+      this.docInfo = doc;
     }
 
     protected void doit() throws WollMuxFehlerException
     {
-      doc.dispose();
+      if (docInfo.hasTextDocumentModel()) docInfo.getTextDocumentModel().dispose();
     }
 
     public String toString()
     {
-      return this.getClass().getSimpleName() + "(#" + doc.hashCode() + ")";
+      String code = "unknown";
+      if (docInfo.hasTextDocumentModel())
+        code = "" + docInfo.getTextDocumentModel().hashCode();
+      return this.getClass().getSimpleName() + "(#" + code + ")";
     }
   }
 
@@ -2716,6 +2729,55 @@ public class WollMuxEventHandler
   }
 
   // *******************************************************************************************
+  /**
+   * Erzeugt ein neues WollMuxEvent zum Registrieren eines (frischen)
+   * {@link DispatchProviderAndInterceptor} auf frame.
+   * 
+   * @param frame
+   *          der {@link XFrame} auf den der {@link DispatchProviderAndInterceptor}
+   *          registriert werden soll.
+   */
+  public static void handleRegisterDispatchInterceptor(XFrame frame)
+  {
+    handle(new OnRegisterDispatchInterceptor(frame));
+  }
+
+  private static class OnRegisterDispatchInterceptor extends BasicEvent
+  {
+    private XFrame frame;
+
+    public OnRegisterDispatchInterceptor(XFrame frame)
+    {
+      this.frame = frame;
+    }
+
+    protected void doit()
+    {
+      try
+      {
+        DispatchProviderAndInterceptor.registerDocumentDispatchInterceptor(frame);
+      }
+      catch (java.lang.Exception e)
+      {
+        Logger.error(L.m("Kann DispatchInterceptor nicht registrieren:"), e);
+      }
+
+      // Sicherstellen, dass die Schaltflächen der Symbolleisten aktiviert werden:
+      try
+      {
+        frame.contextChanged();
+      }
+      catch (java.lang.Exception e)
+      {}
+    }
+
+    public String toString()
+    {
+      return this.getClass().getSimpleName() + "(#" + frame.hashCode() + ")";
+    }
+  }
+
+  // *******************************************************************************************
 
   /**
    * Erzeugt ein neues WollMuxEvent zum Registrieren des übergebenen XEventListeners
@@ -2751,11 +2813,6 @@ public class WollMuxEventHandler
         handleNotifyDocumentEventListener(listener, ON_WOLLMUX_PROCESSING_FINISHED,
           compo);
       }
-    }
-
-    public boolean requires(Object o)
-    {
-      return UnoRuntime.areSame(listener, UNO.XInterface(o));
     }
 
     public String toString()

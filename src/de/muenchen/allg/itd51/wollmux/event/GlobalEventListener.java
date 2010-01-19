@@ -84,7 +84,11 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
     return docManager.getInfo(compo) != null;
   }
 
-  public synchronized void notifyEvent(com.sun.star.document.EventObject docEvent)
+  /**
+   * NICHT SYNCHRONIZED, weil es Deadlocks gibt zwischen getUrl() und der Zustellung
+   * bestimmter Events (z.B. OnSave).
+   */
+  public void notifyEvent(com.sun.star.document.EventObject docEvent)
   {
     // Der try-catch-Block verhindert, daß die Funktion und damit der
     // ganze Listener ohne Fehlermeldung abstürzt.
@@ -101,6 +105,7 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
        * anfallen nicht bearbeiten.
        */
       String event = docEvent.EventName;
+      Logger.debug2(event);
 
       String url = "";
       XModel modelSource = UNO.XModel(docEvent.Source);
@@ -109,7 +114,6 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
       else
         return;
 
-      Logger.debug2(event);
       Logger.debug2(url);
       int idx = url.lastIndexOf('/') - 4;
       if (url.startsWith(".tmp/sv", idx) && url.endsWith(".tmp")) return;
@@ -127,7 +131,12 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
       // Im Gegensatz zu OnLoad oder OnNew wird das Event OnViewCreated auch bei
       // unsichtbar geöffneten Dokumenten erzeugt. Daher wird nun hauptsächlich
       // dieses Event zur Initiierung der Dokumentbearbeitung verwendet.
-      if ((event.equals("OnViewCreated") || event.equals("OnLoad") || event.equals("OnNew"))
+      // Es gibt Situationen (vorsynchronized allem beim Anlegen und Öffnen von
+      // .odbs), wo
+      // OnCreate oder OnLoadFinished kommt, ohne dass einer der anderen Events
+      // kommt.
+      if ((event.equals("OnViewCreated") || event.equals("OnLoad")
+        || event.equals("OnNew") || event.equals("OnCreate") || event.equals("OnLoadFinished"))
         && !seenAlready(compo))
       {
         if (xTextDoc != null)
@@ -145,8 +154,13 @@ public class GlobalEventListener implements com.sun.star.document.XEventListener
       else if ((event.equals("OnUnload") && compo != null))
       {
         DocumentManager.Info info = docManager.remove(compo);
-        if (info.hasTextDocumentModel())
-          WollMuxEventHandler.handleTextDocumentClosed(info.getTextDocumentModel());
+        /**
+         * ACHTUNG! ACHTUNG! Zu folgender Zeile unbedingt
+         * {@link WollMuxEventHandler#handleTextDocumentClosed(DocumentManager.Info}
+         * lesen. Hier darf AUF KEINEN FALL info.hasTextDocumentModel() getestet oder
+         * info.getTextDocumentModel() aufgerufen werden!
+         */
+        WollMuxEventHandler.handleTextDocumentClosed(info);
       }
     }
     catch (Exception e)
