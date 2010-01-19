@@ -173,8 +173,10 @@ public class PersistentData
           UNO.XEnumerationAccess(frame).createEnumeration();
         while (paragraphEnu.hasMoreElements())
         {
+          Object para = paragraphEnu.nextElement();
+          if (create) UNO.setProperty(para, "CharHidden", Boolean.TRUE);
           XEnumeration textportionEnu =
-            UNO.XEnumerationAccess(paragraphEnu.nextElement()).createEnumeration();
+            UNO.XEnumerationAccess(para).createEnumeration();
           while (textportionEnu.hasMoreElements())
           {
             Object textfield =
