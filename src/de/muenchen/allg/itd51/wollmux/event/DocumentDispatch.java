@@ -32,7 +32,9 @@ package de.muenchen.allg.itd51.wollmux.event;
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.frame.XDispatch;
 import com.sun.star.frame.XFrame;
+import com.sun.star.frame.XStatusListener;
 import com.sun.star.text.XTextDocument;
+import com.sun.star.util.URL;
 
 import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
@@ -83,6 +85,34 @@ public class DocumentDispatch extends Dispatch
     this.origDisp = origDisp;
     this.origUrl = origUrl;
     this.frame = frame;
+  }
+
+  /**
+   * Wenn wir ein Original-Dispatch-Objekt haben, überlassen wir diesem das managen
+   * des Status.
+   * 
+   * @see #removeStatusListener(XStatusListener, URL)
+   */
+  public void addStatusListener(XStatusListener listener, URL url)
+  {
+    if (origDisp != null)
+      origDisp.addStatusListener(listener, url);
+    else
+      super.addStatusListener(listener, url);
+  }
+
+  /**
+   * Wenn wir ein Original-Dispatch-Objekt haben, überlassen wir diesem das managen
+   * des Status.
+   * 
+   * @see #addStatusListener(XStatusListener, URL)
+   */
+  public void removeStatusListener(XStatusListener listener, URL url)
+  {
+    if (origDisp != null)
+      origDisp.removeStatusListener(listener, url);
+    else
+      super.removeStatusListener(listener, url);
   }
 
   private TextDocumentModel getModel()
