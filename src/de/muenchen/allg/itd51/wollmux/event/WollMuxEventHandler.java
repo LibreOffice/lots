@@ -2739,7 +2739,10 @@ public class WollMuxEventHandler
    */
   public static void handleRegisterDispatchInterceptor(XFrame frame)
   {
-    handle(new OnRegisterDispatchInterceptor(frame));
+    if (frame == null)
+      Logger.debug(L.m("Ignoriere handleRegisterDispatchInterceptor(null)"));
+    else
+      handle(new OnRegisterDispatchInterceptor(frame));
   }
 
   private static class OnRegisterDispatchInterceptor extends BasicEvent
