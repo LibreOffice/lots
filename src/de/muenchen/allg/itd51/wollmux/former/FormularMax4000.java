@@ -1353,7 +1353,7 @@ public class FormularMax4000
     try
     {
       if (tabConf == null)
-        tabConf = new ConfigThingy("Empfaengerauswahl", EMPFAENGER_TAB_URL);
+        tabConf = new ConfigThingy("Empfaengerauswahl", tabConfUrl);
       parseTab(tabConf, 0);
       documentNeedsUpdating();
     }
@@ -1375,8 +1375,7 @@ public class FormularMax4000
   {
     try
     {
-      if (conf == null)
-        conf = new ConfigThingy("Buttons", STANDARD_BUTTONS_MIDDLE_URL);
+      if (conf == null) conf = new ConfigThingy("Buttons", confUrl);
 
       // damit ich parseGrandchildren() verwenden kann muss ich noch einen
       // Großelternknoten hinzufügen.
