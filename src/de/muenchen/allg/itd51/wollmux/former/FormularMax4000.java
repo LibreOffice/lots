@@ -614,7 +614,7 @@ public class FormularMax4000
         L.m("Der FormularMax 4000 kann nicht ausgeführt werden, da der Java-Laufzeitumgebung zu wenig Hauptspeicher zur Verfügung steht.\n"
           + "Bitte ändern Sie in OpenOffice.org Ihre Java-Einstellungen. Sie finden diese unter \"Extras->Optionen->OpenOffice.org->Java\".\n"
           + "Dort wählen Sie in der Liste Ihre aktuelle Java-Laufzeitumgebung aus, klicken auf den Button \"Parameter\",\n"
-          + "tragen den neuen Parameter \"-Xms256m\" ein (Groß-/Kleinschreibung beachten!) und klicken auf \"Zuweisen\".\n"
+          + "tragen den neuen Parameter \"-Xmx256m\" ein (Groß-/Kleinschreibung beachten!) und klicken auf \"Zuweisen\".\n"
           + "Danach ist ein Neustart von OpenOffice.org nötig."),
         L.m("Java Heap Size zu gering"), JOptionPane.ERROR_MESSAGE);
       doc.setCurrentFormularMax4000(null);
