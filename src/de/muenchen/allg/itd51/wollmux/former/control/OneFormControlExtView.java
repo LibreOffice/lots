@@ -32,10 +32,12 @@ package de.muenchen.allg.itd51.wollmux.former.control;
 
 import javax.swing.JComponent;
 import javax.swing.JTabbedPane;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import de.muenchen.allg.itd51.wollmux.former.group.GroupModelList;
 import de.muenchen.allg.itd51.wollmux.former.group.OneGroupsProviderGroupsEditView;
-import de.muenchen.allg.itd51.wollmux.former.view.View;
+import de.muenchen.allg.itd51.wollmux.former.view.LazyView;
 import de.muenchen.allg.itd51.wollmux.former.view.ViewChangeListener;
 import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
 
@@ -44,8 +46,15 @@ import de.muenchen.allg.itd51.wollmux.func.FunctionLibrary;
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
-public class OneFormControlExtView implements View
+public class OneFormControlExtView implements LazyView
 {
+  /**
+   * Da alle Views ihre eigene {@link JTabbedPane} haben, wird über diese (über
+   * {@link ChangeListener} gepflegte) statische Variable dafür gesorgt, dass beim
+   * Umschalten von einer auf die andere View trotzdem das selbe Tab selektiert ist.
+   */
+  private static int selectedTab = 0;
+
   /**
    * Typischerweise ein Container, der die View enthält und daher über Änderungen auf
    * dem Laufenden gehalten werden muss.
@@ -61,6 +70,32 @@ public class OneFormControlExtView implements View
    * Das Model zu dieser View.
    */
   private FormControlModel model;
+
+  /**
+   * Die Liste mit den Gruppen, die zur Auswahl angeboten werden sollen.
+   */
+  private GroupModelList groupModelList;
+
+  /**
+   * Die Funktionsbibliothek deren Funktionen zur Verfügung gestellt werden sollen
+   * für das Auswählen von Attributen, die eine Funktion erfordern.
+   */
+  private FunctionLibrary funcLib;
+
+  /**
+   * Der AUTOFILL-Reiter.
+   */
+  private OneFormControlAutofillEditView autofillView;
+
+  /**
+   * Der PLAUSI-Reiter.
+   */
+  private OneFormControlPlausiEditView plausiView;
+
+  /**
+   * Der GROUPS-Reiter.
+   */
+  private OneGroupsProviderGroupsEditView groupsView;
 
   /**
    * Erzeugt eine neue View.
@@ -82,22 +117,52 @@ public class OneFormControlExtView implements View
   {
     this.bigDaddy = myViewChangeListener;
     this.model = model;
+    this.groupModelList = groupModelList;
+    this.funcLib = funcLib;
     myTabbedPane = new JTabbedPane();
+    model.addListener(new MyModelChangeListener());
+    myTabbedPane.addChangeListener(new ChangeListener()
+    {
+      public void stateChanged(ChangeEvent e)
+      {
+        if (myTabbedPane.getTabCount() > 1 && myTabbedPane.getSelectedIndex() >= 0)
+          selectedTab = myTabbedPane.getSelectedIndex();
+      }
+    });
+  }
 
-    // als ViewChangeListener wird null übergeben, weil die OneFormControlExtView
-    // sich nachher
-    // direkt auf dem Model als Listener registriert.
-    OneFormControlAutofillEditView autofillView =
-      new OneFormControlAutofillEditView(model, funcLib, null);
+  /**
+   * Baut myTabbedPane auf.
+   */
+  private void initPanel()
+  {
+    autofillView = new OneFormControlAutofillEditView(model, funcLib, null);
     myTabbedPane.addTab("AUTOFILL", autofillView.JComponent());
-    OneFormControlPlausiEditView plausiView =
-      new OneFormControlPlausiEditView(model, funcLib, null);
+    plausiView = new OneFormControlPlausiEditView(model, funcLib, null);
     myTabbedPane.addTab("PLAUSI", plausiView.JComponent());
-    OneGroupsProviderGroupsEditView groupsView =
+    groupsView =
       new OneGroupsProviderGroupsEditView(model.getGroupsProvider(), groupModelList);
     myTabbedPane.addTab("GROUPS", groupsView.JComponent());
+    myTabbedPane.setSelectedIndex(selectedTab);
+  }
 
-    model.addListener(new MyModelChangeListener());
+  public void viewIsVisible()
+  {
+    if (myTabbedPane.getTabCount() == 0) initPanel();
+  }
+
+  public void viewIsNotVisible()
+  {
+    if (myTabbedPane.getTabCount() != 0)
+    {
+      autofillView.dispose();
+      autofillView = null;
+      plausiView.dispose();
+      plausiView = null;
+      groupsView.dispose();
+      groupsView = null;
+      myTabbedPane.removeAll();
+    }
   }
 
   public JComponent JComponent()

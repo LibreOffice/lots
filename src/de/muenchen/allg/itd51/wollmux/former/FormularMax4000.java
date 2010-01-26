@@ -478,8 +478,12 @@ public class FormularMax4000
    * Zahl von Formularsteuerelementen in einem Formular, ab der es in Zusammenhang
    * mit einer maximaler Heap Size der JVM, die kleiner ist als
    * {@link #LOWEST_ALLOWED_HEAP_SIZE}, zu Speicherplatzproblemen kommen kann.
+   * 
+   * Der Wert 5000 wurde vollkommen willkürlich gewählt und ist wahrscheinlich zu
+   * hoch. Wir warten auf den ersten Bugreport mit einem {@link OutOfMemoryError} und
+   * legen den Wert dann anhand des realen Falles neu fest.
    */
-  private static final int CRITICAL_NUMBER_OF_FORMCONTROLS = 500;
+  private static final int CRITICAL_NUMBER_OF_FORMCONTROLS = 5000;
 
   /**
    * Mindestgröße der maximalen Heap Size der JVM (in Bytes). Sollte die maximale

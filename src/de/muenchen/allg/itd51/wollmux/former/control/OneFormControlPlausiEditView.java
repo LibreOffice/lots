@@ -54,6 +54,8 @@ public class OneFormControlPlausiEditView extends FunctionSelectionAccessView
    */
   private FormControlModel model;
 
+  private MyModelChangeListener listener;
+
   /**
    * Erzeugt eine neue View.
    * 
@@ -75,7 +77,19 @@ public class OneFormControlPlausiEditView extends FunctionSelectionAccessView
       FormularMax4000.NAMESPACE_FORMCONTROLMODEL);
     this.model = model;
     this.bigDaddy = bigDaddy;
-    model.addListener(new MyModelChangeListener());
+    listener = new MyModelChangeListener();
+    model.addListener(listener);
+  }
+
+  /**
+   * Gibt von dieser View belegte Ressourcen frei, damit diese View gc'ed werden
+   * kann.
+   * 
+   * @author Matthias Benkmann (D-III-ITD-D101)
+   */
+  public void dispose()
+  {
+    model.removeListener(listener);
   }
 
   private class MyModelChangeListener implements

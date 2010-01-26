@@ -137,6 +137,18 @@ public class OneGroupsProviderGroupsEditView implements View
     myList.addListSelectionListener(myListener);
   }
 
+  /**
+   * Gibt von dieser View belegte Ressourcen frei, damit diese View gc'ed werden
+   * kann.
+   * 
+   * @author Matthias Benkmann (D-III-ITD-D101)
+   */
+  public void dispose()
+  {
+    groupModelList.removeListener(myListener);
+    myList.removeListSelectionListener(myListener);
+  }
+
   public JComponent JComponent()
   {
     return myPanel;

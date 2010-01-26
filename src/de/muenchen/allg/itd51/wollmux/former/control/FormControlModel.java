@@ -1052,6 +1052,17 @@ public class FormControlModel
   }
 
   /**
+   * listener wird in Zukunft nicht mehr über Änderungen des FormControlModels
+   * informiert.
+   * 
+   * @author Matthias Benkmann (D-III-ITD-D101)
+   */
+  public void removeListener(ModelChangeListener listener)
+  {
+    listeners.remove(listener);
+  }
+
+  /**
    * Interface für Listener, die über Änderungen eines FormControlModels informiert
    * werden wollen.
    * 

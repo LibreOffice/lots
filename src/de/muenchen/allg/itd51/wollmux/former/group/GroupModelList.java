@@ -164,6 +164,16 @@ public class GroupModelList implements Iterable<GroupModel>
   }
 
   /**
+   * listener wird in Zukunft nicht mehr über Änderungen der Liste informiert.
+   * 
+   * @author Matthias Benkmann (D-III-ITD-D101)
+   */
+  public void removeListener(ItemListener listener)
+  {
+    listeners.remove(listener);
+  }
+
+  /**
    * Benachrichtigt alle ItemListener über das Hinzufügen oder Entfernen von model
    * zur bzw. aus der Liste an/von Index index.
    * 

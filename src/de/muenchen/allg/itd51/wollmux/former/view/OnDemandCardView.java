@@ -33,11 +33,9 @@ package de.muenchen.allg.itd51.wollmux.former.view;
 import java.awt.CardLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.Vector;
+import java.util.Map;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -90,9 +88,10 @@ public abstract class OnDemandCardView implements View
   private Object currentModel;
 
   /**
-   * Die Liste der aktuell angezeigten View-Karten mit ihren IDs ({@link OnDemandCardView.ViewCardIdPair}).
+   * Bildet ein Model auf das zugehörige {@link ViewCardIdPair} ab.
    */
-  private List<ViewCardIdPair> viewCardIdPairs = new Vector<ViewCardIdPair>();
+  private Map<Object, ViewCardIdPair> mapModel2ViewDescriptor =
+    new HashMap<Object, ViewCardIdPair>();
 
   private static class ViewCardIdPair
   {
@@ -106,13 +105,6 @@ public abstract class OnDemandCardView implements View
       this.cardId = cardId;
     };
   }
-
-  /**
-   * Enthält alle cardIds (wie von {@link #getCardIdFor(Object)} zurückgeliefert) von
-   * ...Models mit aktiver Sicht, d,h, von all denen, für die nicht das
-   * {@link #INACTIVE_PANEL} angezeigt wird.
-   */
-  private Set<String> activeModelCardIds = new HashSet<String>();
 
   public OnDemandCardView(String label)
   {
@@ -137,7 +129,9 @@ public abstract class OnDemandCardView implements View
       ViewChangeListener viewChangeListener);
 
   /**
-   * Fügt dieser View eine View-Karte für model hinzu.
+   * Fügt dieser View eine View-Karte für model hinzu. Falls die zugehörige View eine
+   * {@link LazyView} ist, wird sie erst bei einem entsprechenden
+   * {@link #show(Object)} initialisiert.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
@@ -145,8 +139,7 @@ public abstract class OnDemandCardView implements View
   {
     View view = createViewFor(model, myViewChangeListener);
     String cardId = getCardIdFor(model);
-    viewCardIdPairs.add(new ViewCardIdPair(view, cardId));
-    activeModelCardIds.add(cardId);
+    mapModel2ViewDescriptor.put(model, new ViewCardIdPair(view, cardId));
     myPanel.add(view.JComponent(), cardId);
     myPanel.validate();
   }
@@ -160,16 +153,17 @@ public abstract class OnDemandCardView implements View
    */
   private void removeItem(View view)
   {
-    Iterator<ViewCardIdPair> iter = viewCardIdPairs.iterator();
+    Iterator<Map.Entry<Object, ViewCardIdPair>> iter =
+      mapModel2ViewDescriptor.entrySet().iterator();
     while (iter.hasNext())
     {
-      ViewCardIdPair pair = iter.next();
+      Map.Entry<Object, ViewCardIdPair> entry = iter.next();
+      ViewCardIdPair pair = entry.getValue();
       if (pair.view == view)
       {
         iter.remove();
         myPanel.remove(view.JComponent());
         myPanel.validate();
-        activeModelCardIds.remove(pair.cardId);
         if (currentModel != null && getCardIdFor(currentModel).equals(pair.cardId))
           showEmpty();
 
@@ -226,7 +220,7 @@ public abstract class OnDemandCardView implements View
         if (currentModel == null) return; // sollte nicht passieren können, aber zur
         // Sicherheit
         addItem(currentModel);
-        cards.show(myPanel, getCardIdFor(currentModel));
+        show(currentModel);
       }
     });
 
@@ -245,24 +239,42 @@ public abstract class OnDemandCardView implements View
    */
   public void showEmpty()
   {
+    if (currentModel != null)
+    {
+      ViewCardIdPair oldPair = mapModel2ViewDescriptor.get(currentModel);
+      if (oldPair != null && oldPair.view instanceof LazyView)
+        ((LazyView) oldPair.view).viewIsNotVisible();
+    }
+
     cards.show(myPanel, EMPTY_PANEL);
     currentModel = null;
   }
 
   /**
    * Zeigt die passende View-Karte für model an. Dies ist entweder eine richtige
-   * View-Karte, oder die View-Karte zum on-demand aktivieren der Sicht.
+   * View-Karte, oder die View-Karte zum on-demand aktivieren der Sicht. Falls die
+   * zugehörige View eine {@link LazyView} ist, so wird diese initialisiert.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public void show(Object model)
   {
+    if (currentModel != model && currentModel != null)
+    {
+      ViewCardIdPair oldPair = mapModel2ViewDescriptor.get(currentModel);
+      if (oldPair != null && oldPair.view instanceof LazyView)
+        ((LazyView) oldPair.view).viewIsNotVisible();
+    }
+
     currentModel = model;
-    String cardId = getCardIdFor(model);
-    if (activeModelCardIds.contains(cardId))
-      cards.show(myPanel, cardId);
-    else
+    ViewCardIdPair pair = mapModel2ViewDescriptor.get(model);
+    if (pair == null)
       cards.show(myPanel, INACTIVE_PANEL);
+    else
+    {
+      cards.show(myPanel, pair.cardId);
+      if (pair.view instanceof LazyView) ((LazyView) pair.view).viewIsVisible();
+    }
   }
 
   private class MyViewChangeListener implements ViewChangeListener
