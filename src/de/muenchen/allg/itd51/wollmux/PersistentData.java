@@ -64,14 +64,10 @@ public class PersistentData
   private static final String WOLLMUX_FRAME_NAME = "WollMuxDaten";
 
   /**
-   * Maximale Länge von Textfeldern, die der WollMux schreibt. Die Länge 32000 wurde
-   * gewählt, weil ich nicht sicher bin, ob die Grenze tatsächlich 64kZeichen oder
-   * 64kBytes sind. In letzterem Fall könnten Zeichen, die 2 Bytes belegen (eine
-   * interne UTF16 oder UTF8 kodierung angenommen) schon früher die Grenze treffen.
-   * Also lieber auf der sicheren Seite sein und 32000. Eigentlich wären es ja 32767,
-   * aber ich hab lieber den glatten Wert.
+   * Maximale Länge von Textfeldern, die der WollMux schreibt. Die Länge 16000 wurde
+   * gewählt, wegen http://qa.openoffice.org/issues/show_bug.cgi?id=108709.
    */
-  private static final int TEXTFIELD_MAXLEN = 32000;
+  private static final int TEXTFIELD_MAXLEN = 16000;
 
   /**
    * Das Dokument, in dem die Daten gespeichert werden.
