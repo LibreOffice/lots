@@ -6,7 +6,8 @@
  * Copyright (c) 2008 Landeshauptstadt München
  * 
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the European Union Public Licence (EUPL), version 1.0.
+ * it under the terms of the European Union Public Licence (EUPL),
+ * version 1.0 (or any later version).
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
