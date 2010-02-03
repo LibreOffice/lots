@@ -148,9 +148,9 @@ public class DocumentCommandInterpreter
   }
 
   /**
-   * Diese Methode sollte vor executeTemplateCommands und vor executeFormCommands
-   * aufgerufen werden und sorgt dafür, dass alle globalen Einstellungen des
-   * Dokuments an das TextDocumentModel weitergereicht werden.
+   * Diese Methode sollte vor {@link #executeTemplateCommands()} aufgerufen werden
+   * und sorgt dafür, dass alle globalen Einstellungen des Dokuments (setType,
+   * setPrintFunction) an das TextDocumentModel weitergereicht werden.
    */
   public void scanGlobalDocumentCommands()
   {
@@ -158,6 +158,33 @@ public class DocumentCommandInterpreter
     boolean modified = model.getDocumentModified();
 
     GlobalDocumentCommandsScanner s = new GlobalDocumentCommandsScanner();
+    s.execute(model.getDocumentCommands());
+
+    model.setDocumentModified(modified);
+  }
+
+  /**
+   * Diese Methode scannt alle insertFormValue-Kommandos des Dokuments, verarbeitet
+   * diese und reicht das gefundene Mapping von IDs zu FormFields an das
+   * TextDocumentModel weiter. Zudem wird von dieser Methode auch noch
+   * {@link TextDocumentModel#collectNonWollMuxFormFields()} aufgerufen, so dass auch
+   * alle Formularfelder aufgesammelt werden, die nicht von WollMux-Kommandos umgeben
+   * sind, jedoch trotzdem vom WollMux verstanden und befüllt werden.
+   * 
+   * Diese Methode wurde aus der Methode {@link #scanGlobalDocumentCommands()}
+   * ausgelagert, die früher neben den globalen Dokumentkommandos auch die
+   * insertFormValue-Kommandos bearbeitet hat. Die Auslagerung geschah hauptsächlich
+   * aus Performance-Optimierungsgründen, da so beim OnProcessTextDocument-Event nur
+   * einmal die insertFormValue-Kommandos ausgewertet werden müssen.
+   * 
+   * @author Daniel Benkmann (D-III-ITD-D101)
+   */
+  public void scanInsertFormValueCommands()
+  {
+    Logger.debug("scanInsertFormValueCommands");
+    boolean modified = model.getDocumentModified();
+
+    InsertFormValueCommandsScanner s = new InsertFormValueCommandsScanner();
     s.execute(model.getDocumentCommands());
 
     model.setIDToFormFields(s.idToFormFields);
@@ -352,12 +379,6 @@ public class DocumentCommandInterpreter
    */
   private class GlobalDocumentCommandsScanner extends DocumentCommands.Executor
   {
-    public HashMap<String, List<FormField>> idToFormFields =
-      new HashMap<String, List<FormField>>();
-
-    private Map<String, FormField> bookmarkNameToFormField =
-      new HashMap<String, FormField>();
-
     public int execute(DocumentCommands commands)
     {
       return executeAll(commands);
@@ -384,6 +405,27 @@ public class DocumentCommandInterpreter
       if (!(model.hasURL() && cmd.getType().equalsIgnoreCase("templateTemplate")))
         cmd.markDone(true);
       return 0;
+    }
+
+  }
+
+  /**
+   * Scanner, der die InsertFormValue-Kommandos des Dokuments abarbeitet und ein
+   * Mapping von IDs zu FormFields aufbaut, das dann dem TextDocumentModel zur
+   * Verfügung gestellt werden kann.
+   */
+  private class InsertFormValueCommandsScanner extends DocumentCommands.Executor
+  {
+    /** Mapping von IDs zu FormFields */
+    public HashMap<String, List<FormField>> idToFormFields =
+      new HashMap<String, List<FormField>>();
+
+    private Map<String, FormField> bookmarkNameToFormField =
+      new HashMap<String, FormField>();
+
+    public int execute(DocumentCommands commands)
+    {
+      return executeAll(commands);
     }
 
     public int executeCommand(InsertFormValue cmd)

@@ -1044,6 +1044,16 @@ public class TextDocumentModel
    * Liefert true, wenn das Dokument eine Vorlage ist oder wie eine Vorlage behandelt
    * werden soll, ansonsten false.
    * 
+   * Nicht davon verwirren lassen, dass z.B. in einem Dokument "Unbenannt x", das aus
+   * einer Vorlage erstellt wurde, true zurückgeliefert wird, obwohl man ja meinen
+   * könnte, dass man eigentlich ein normales Dokument und kein Template bearbeitet.
+   * Entscheidend ist in diesem Fall, dass das Dokument aus einem Template erzeugt
+   * wurde und nicht einfach eine odt-Datei ist, die man bearbeitet. Dies entspricht
+   * letztlich dem Parameter asTemplate der Methode loadComponentFromURL.
+   * 
+   * Bei WollMux-Mischvorlagen, die mittels setType-Kommando ihren Typ auf
+   * "templateTemplate" gesetzt haben, wird entsprechend false zurückgeliefert.
+   * 
    * @return true, wenn das Dokument eine Vorlage ist oder wie eine Vorlage behandelt
    *         werden soll, ansonsten false.
    */
@@ -3752,8 +3762,10 @@ public class TextDocumentModel
 
     // Datenstrukturen aktualisieren
     getDocumentCommands().update();
+    DocumentCommandInterpreter dci = new DocumentCommandInterpreter(this);
+    dci.scanGlobalDocumentCommands();
     // collectNonWollMuxFormFields() wird im folgenden scan auch noch erledigt
-    new DocumentCommandInterpreter(this).scanGlobalDocumentCommands();
+    dci.scanInsertFormValueCommands();
 
     // Alte Formularwerte aus den persistenten Daten entfernen
     setFormFieldValue(fieldId, null);

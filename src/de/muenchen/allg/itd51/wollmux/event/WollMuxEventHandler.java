@@ -1199,8 +1199,8 @@ public class WollMuxEventHandler
 
       try
       {
-        // Globale Dokumentkommandos wie z.B. setType, setPrintFunction,
-        // insertFormValue, ... auswerten.
+        // Globale Dokumentkommandos wie z.B. setType, setPrintFunction, ...
+        // auswerten.
         dci.scanGlobalDocumentCommands();
 
         int actions =
@@ -1214,6 +1214,8 @@ public class WollMuxEventHandler
           // manche Kommandos sind erst nach der Expansion verfügbar
           dci.scanGlobalDocumentCommands();
         }
+        // insertFormValue-Kommandos auswerten
+        dci.scanInsertFormValueCommands();
 
         // Bei Formularen:
         // Anmerkung: actions == allactions wird NICHT so interpretiert, dass auch
@@ -1384,6 +1386,7 @@ public class WollMuxEventHandler
 
         // manche Kommandos sind erst nach der Expansion verfügbar
         dci.scanGlobalDocumentCommands();
+        dci.scanInsertFormValueCommands();
       }
       catch (java.lang.Exception e)
       {
@@ -3436,6 +3439,7 @@ public class WollMuxEventHandler
       DocumentCommandInterpreter dci =
         new DocumentCommandInterpreter(model, WollMuxSingleton.getInstance());
       dci.scanGlobalDocumentCommands();
+      dci.scanInsertFormValueCommands();
 
       stabilize();
     }
