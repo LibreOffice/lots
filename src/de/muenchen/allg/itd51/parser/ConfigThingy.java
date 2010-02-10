@@ -202,7 +202,7 @@ public class ConfigThingy implements Iterable<ConfigThingy>
   }
 
   /**
-   * Copy Constructor.
+   * Copy Constructor (deep copy).
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1) TESTED
    */
@@ -868,7 +868,11 @@ public class ConfigThingy implements Iterable<ConfigThingy>
   public String toString()
   {
     if (children.isEmpty()) return name;
-    StringBuffer buf = new StringBuffer();
+
+    // Optimierung: Nicht unnötig StringBuilder produzieren
+    if (children.size() == 1) return children.get(0).toString();
+
+    StringBuilder buf = new StringBuilder();
     for (ConfigThingy child : children)
       buf.append(child.toString());
     return buf.toString();
