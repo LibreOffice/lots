@@ -667,6 +667,11 @@ public class FormGUI
     {
       Logger.log("saveAs()");
     }
+
+    public void closeAndOpenExt(String ext)
+    {
+      Logger.log("closeAndOpenExt(" + ext + ")");
+    }
   }
 
   private class MyAbortRequestListener implements ActionListener

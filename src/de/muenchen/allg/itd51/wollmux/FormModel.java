@@ -219,9 +219,16 @@ public interface FormModel
   public void saveAs();
 
   /**
-   * Ãœber diese Methode kann der FormController das FormModel informieren, dass er
-   * vollstÃ¤ndig initialisiert wurde und notwendige Aktionen wie z.B. das
-   * zurÃ¼cksetzen des modified-Status des Dokuments durchgefÃ¼hrt werden sollen.
+   * Speichert dieses Formular in eine temporäre Datei unter Verwendung des in in
+   * ExterneAnwendungen für ext festgelegten FILTERs und startet dann die zugehörige
+   * externe Anwendung mit dieser Datei.
+   */
+  public void closeAndOpenExt(String ext);
+
+  /**
+   * Über diese Methode kann der FormController das FormModel informieren, dass er
+   * vollständig initialisiert wurde und notwendige Aktionen wie z.B. das
+   * zurücksetzen des modified-Status des Dokuments durchgeführt werden sollen.
    */
   public void formControllerInitCompleted();
 }

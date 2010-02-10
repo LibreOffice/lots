@@ -119,6 +119,7 @@ import de.muenchen.allg.itd51.wollmux.FormModel;
 import de.muenchen.allg.itd51.wollmux.FormModelImpl;
 import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
+import de.muenchen.allg.itd51.wollmux.OpenExt;
 import de.muenchen.allg.itd51.wollmux.SachleitendeVerfuegung;
 import de.muenchen.allg.itd51.wollmux.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.TextModule;
@@ -2204,6 +2205,74 @@ public class WollMuxEventHandler
     public String toString()
     {
       return this.getClass().getSimpleName() + "(#" + model.hashCode() + ")";
+    }
+  }
+
+  // *******************************************************************************************
+
+  /**
+   * Erzeugt ein Event, das das übergebene Dokument in eine temporäre Datei speichert
+   * und eine externe Anwendung mit dieser aufruft, wobei der
+   * ExterneAnwendungen-Abschnitt zu ext die näheren Details wie den FILTER regelt.
+   * 
+   * @param model
+   *          Das an die externe Anwendung weiterzureichende TextDocumentModel.
+   * @param ext
+   *          identifiziert den entsprechenden Eintrag im Abschnitt
+   *          ExterneAnwendungen.
+   */
+  public static void handleCloseAndOpenExt(TextDocumentModel model, String ext)
+  {
+    handle(new OnCloseAndOpenExt(model, ext));
+  }
+
+  /**
+   * Dieses Event wird vom FormModelImpl ausgelöst, wenn der Benutzer die Aktion
+   * "closeAndOpenExt" aktiviert hat.
+   * 
+   * @author matthias.benkmann
+   */
+  private static class OnCloseAndOpenExt extends BasicEvent
+  {
+    private TextDocumentModel model;
+
+    private String ext;
+
+    public OnCloseAndOpenExt(TextDocumentModel model, String ext)
+    {
+      this.model = model;
+      this.ext = ext;
+    }
+
+    protected void doit()
+    {
+      try
+      {
+        OpenExt openExt = new OpenExt(ext, WollMuxFiles.getWollmuxConf());
+        openExt.setSource(UNO.XStorable(model.doc));
+        openExt.storeIfNecessary();
+        openExt.launch(new OpenExt.ExceptionHandler()
+        {
+          public void handle(Exception x)
+          {
+            Logger.error(x);
+          }
+        });
+      }
+      catch (Exception x)
+      {
+        Logger.error(x);
+        return;
+      }
+
+      model.setDocumentModified(false);
+      model.close();
+    }
+
+    public String toString()
+    {
+      return this.getClass().getSimpleName() + "(#" + model.hashCode() + ", " + ext
+        + ")";
     }
   }
 

@@ -1150,6 +1150,7 @@ public class FormController implements UIElementEventHandler
     supportedActions.add("save");
     supportedActions.add("saveAs");
     supportedActions.add("printForm");
+    supportedActions.add("closeAndOpenExt");
     panelContext.supportedActions = supportedActions;
     buttonContext.supportedActions = supportedActions;
 
@@ -1338,6 +1339,10 @@ public class FormController implements UIElementEventHandler
             dlg.instanceFor(functionContext).show(
               new FunctionDialogEndListener(dialogName), funcLib, dialogLib);
           }
+        }
+        else if (action.equals("closeAndOpenExt"))
+        {
+          formModel.closeAndOpenExt((String) args[1]);
         }
         else if (action.equals("printForm"))
         {

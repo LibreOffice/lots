@@ -421,6 +421,15 @@ public class FormModelImpl
       }
     }
 
+    public void closeAndOpenExt(String ext)
+    {
+      for (int i = 0; i < docs.size(); i++)
+      {
+        FormModel fm = formModels.get(i);
+        fm.closeAndOpenExt(ext);
+      }
+    }
+
     /*
      * (non-Javadoc)
      * 
@@ -580,6 +589,11 @@ public class FormModelImpl
     public void close()
     {
       WollMuxEventHandler.handleCloseTextDocument(doc);
+    }
+
+    public void closeAndOpenExt(String ext)
+    {
+      WollMuxEventHandler.handleCloseAndOpenExt(doc, ext);
     }
 
     /*

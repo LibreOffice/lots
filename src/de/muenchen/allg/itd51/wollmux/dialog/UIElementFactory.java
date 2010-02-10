@@ -911,6 +911,20 @@ public class UIElementFactory
         }
       }
     }
+    else if (action.equals("closeAndOpenExt"))
+    {
+      ConfigThingy ext = conf.query("EXT");
+      if (ext.count() != 1)
+      {
+        Logger.error(L.m("ACTION \"%1\" erfordert genau ein Attribut EXT", action));
+      }
+      else
+      {
+        return new UIElementActionListener(handler, uiElement, false, "action",
+          new Object[] {
+            action, ext.toString() });
+      }
+    }
     else if (action.equals("open"))
     {
       try

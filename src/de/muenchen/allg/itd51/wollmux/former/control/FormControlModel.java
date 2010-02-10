@@ -128,6 +128,9 @@ public class FormControlModel
   /** DIALOG. */
   private String dialog = "";
 
+  /** EXT. */
+  private String ext = "";
+
   /** TIP. */
   private String tooltip = "";
 
@@ -216,6 +219,8 @@ public class FormControlModel
         action = str;
       else if (name.equals("DIALOG"))
         dialog = str;
+      else if (name.equals("EXT"))
+        ext = str;
       else if (name.equals("TIP"))
         tooltip = str;
       else if (name.equals("HOTKEY"))
@@ -492,6 +497,16 @@ public class FormControlModel
   public String getDialog()
   {
     return dialog;
+  }
+
+  /**
+   * Liefert den EXT dieses FormControlModels.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public String getExt()
+  {
+    return ext;
   }
 
   /**
@@ -962,6 +977,7 @@ public class FormControlModel
     if (isGlue() && getMaxsize() > 0) conf.add("MAXSIZE").add("" + getMaxsize());
     if (getAction().length() > 0) conf.add("ACTION").add("" + getAction());
     if (getDialog().length() > 0) conf.add("DIALOG").add("" + getDialog());
+    if (getExt().length() > 0) conf.add("EXT").add("" + getExt());
     if (getHotkey() > 0) conf.add("HOTKEY").add("" + getHotkey());
 
     List<String> items = getItems();
