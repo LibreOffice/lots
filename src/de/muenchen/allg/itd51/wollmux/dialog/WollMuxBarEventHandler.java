@@ -227,6 +227,16 @@ public class WollMuxBarEventHandler
   }
 
   /**
+   * Versucht, eine WollMux-Verbindung aufzubauen falls im Moment keine besteht und
+   * führt dann run aus. ACHTUNG! run wird auch ausgeführt, wenn das Herstellen der
+   * Verbindung fehlschlägt.
+   */
+  public void handleDoWithConnection(Runnable run)
+  {
+    handle(new DoWithConnectionEvent(run));
+  }
+
+  /**
    * Schiebt Event e in die Queue.
    * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
@@ -362,6 +372,22 @@ public class WollMuxBarEventHandler
     public void process()
     {
       getRemoteWollMux(true);
+    }
+  }
+
+  private class DoWithConnectionEvent implements Event
+  {
+    private Runnable run;
+
+    public DoWithConnectionEvent(Runnable run)
+    {
+      this.run = run;
+    }
+
+    public void process()
+    {
+      getRemoteWollMux(true);
+      run.run();
     }
   }
 
@@ -501,6 +527,19 @@ public class WollMuxBarEventHandler
         wollmuxbar.connectionFailedWarning();
 
         return null;
+      }
+
+      /*
+       * Die UNO-Funktionalitäten ebenfalls initialisieren.
+       */
+      try
+      {
+        UNO.init(ctx.getServiceManager());
+      }
+      catch (Exception e)
+      {
+        Logger.error(e);
+        // Aber wir machen trotzdem weiter
       }
 
       try
