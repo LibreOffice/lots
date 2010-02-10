@@ -926,6 +926,8 @@ public class MenuManager
       parentNode.userModified = true;
       for (TreeModelListener listen : listeners)
         listen.treeNodesChanged(new TreeModelEvent(this, parentPath));
+      for (TreeModelListener listen : listeners)
+        listen.treeNodesChanged(new TreeModelEvent(this, selectedPath));
     }
   }
 
@@ -1185,11 +1187,21 @@ public class MenuManager
 
   private void closeAfterQuestion()
   {
-    if (JOptionPane.YES_OPTION == JOptionPane.showConfirmDialog(
-      myFrame,
-      L.m("Wollen Sie den Menü-Manager wirklich verlassen?\nNicht gespeicherte Änderungen gehen dabei verloren."),
-      L.m("Menü-Manager verlassen?"), JOptionPane.YES_NO_OPTION,
-      JOptionPane.QUESTION_MESSAGE)) dispose();
+    int answer =
+      JOptionPane.showConfirmDialog(myFrame,
+        L.m("Sie verlassen den Menü-Manager.\nWollen Sie das Menü speichern?"),
+        L.m("Menü-Manager verlassen?"), JOptionPane.YES_NO_CANCEL_OPTION,
+        JOptionPane.QUESTION_MESSAGE);
+
+    if (answer == JOptionPane.YES_OPTION)
+    {
+      doSave();
+      dispose();
+    }
+    else if (answer == JOptionPane.NO_OPTION)
+      dispose();
+    else
+      return;
   }
 
   private void dispose()
@@ -1501,6 +1513,11 @@ public class MenuManager
     if (!confirm(L.m("Menü speichern?"),
       L.m("Wollen Sie das neue Menü wirklich speichern?"))) return;
 
+    doSave();
+  }
+
+  private void doSave()
+  {
     ConfigThingy conf = new ConfigThingy("wollmuxbarconf");
     Node buttonleiste = menuTreeRoot.children.get(0);
     if (buttonleiste.userModified)
