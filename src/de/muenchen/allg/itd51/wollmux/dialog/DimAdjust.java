@@ -1,9 +1,9 @@
 /*
-* Dateiname: DimAdjust.java
-* Projekt  : WollMux
-* Funktion : Statische Methoden zur Justierung der max.,pref.,min. Size einer JComponent.
-* 
- * Copyright (c) 2008 Landeshauptstadt MÃ¼nchen
+ * Dateiname: DimAdjust.java
+ * Projekt  : WollMux
+ * Funktion : Statische Methoden zur Justierung der max.,pref.,min. Size einer JComponent.
+ * 
+ * Copyright (c) 2008 Landeshauptstadt München
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the European Union Public Licence (EUPL),
@@ -17,17 +17,17 @@
  * You should have received a copy of the European Union Public Licence
  * along with this program. If not, see
  * http://ec.europa.eu/idabc/en/document/7330
-*
-* Ã„nderungshistorie:
-* Datum      | Wer | Ã„nderungsgrund
-* -------------------------------------------------------------------
-* 19.10.2007 | BNK | Erstellung
-* -------------------------------------------------------------------
-*
-* @author Matthias Benkmann (D-III-ITD 5.1)
-* @version 1.0
-* 
-*/
+ *
+ * Änderungshistorie:
+ * Datum      | Wer | Änderungsgrund
+ * -------------------------------------------------------------------
+ * 19.10.2007 | BNK | Erstellung
+ * -------------------------------------------------------------------
+ *
+ * @author Matthias Benkmann (D-III-ITD 5.1)
+ * @version 1.0
+ * 
+ */
 package de.muenchen.allg.itd51.wollmux.dialog;
 
 import java.awt.Dimension;
@@ -36,14 +36,15 @@ import javax.swing.JComponent;
 
 /**
  * Statische Methoden zur Justierung der max.,pref.,min. Size einer JComponent.
- *
+ * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
 public class DimAdjust
 {
-  
+
   /**
-   * Setzt die maximale Breite von compo auf unendlich und liefert compo zurÃ¼ck.
+   * Setzt die maximale Breite von compo auf unendlich und liefert compo zurück.
+   * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static JComponent maxWidthUnlimited(JComponent compo)
@@ -53,10 +54,11 @@ public class DimAdjust
     compo.setMaximumSize(dim);
     return compo;
   }
-  
+
   /**
-   * Setzt die maximale Breite von compo auf unendlich, die maximale HÃ¶he auf
-   * die bevorzugte HÃ¶he und liefert compo zurÃ¼ck.
+   * Setzt die maximale Breite von compo auf unendlich, die maximale Höhe auf die
+   * bevorzugte Höhe und liefert compo zurück.
+   * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static JComponent maxHeightIsPrefMaxWidthUnlimited(JComponent compo)
@@ -67,15 +69,30 @@ public class DimAdjust
     compo.setMaximumSize(dim);
     return compo;
   }
-  
+
   /**
    * Nagelt die preferred size von compo auf den aktuellen Wert fest.
+   * 
+   * @author Matthias Benkmann (D-III-ITD 5.1)
+   */
+  public static JComponent fixedPreferredSize(JComponent compo)
+  {
+    Dimension dim = compo.getPreferredSize();
+    compo.setPreferredSize(dim);
+    return compo;
+  }
+
+  /**
+   * Nagelt die preferred und die max size von compo auf den aktuellen preferred size
+   * Wert fest.
+   * 
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   public static JComponent fixedSize(JComponent compo)
   {
     Dimension dim = compo.getPreferredSize();
     compo.setPreferredSize(dim);
+    compo.setMaximumSize(dim);
     return compo;
   }
 
@@ -93,10 +110,9 @@ public class DimAdjust
     compo.setMaximumSize(dim);
     return compo;
   }
-  
+
   /**
-   * Liefert das Maximum der beiden Werte w und der preferred-width von compo
-   * zurÃ¼ck.
+   * Liefert das Maximum der beiden Werte w und der preferred-width von compo zurück.
    * 
    * @author Christoph Lutz (D-III-ITD-5.1)
    */
