@@ -317,7 +317,7 @@ public class MailMergeNew
         }
       }
     });
-    hbox.add(DimAdjust.fixedSize(button));
+    hbox.add(DimAdjust.fixedPreferredSize(button));
     elementsDisabledWhenNoDatasourceSelected.add(button);
 
     button = new JButton("|<");

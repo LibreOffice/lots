@@ -297,7 +297,7 @@ public class PrintParametersDialog
       {
         additionalTextfield =
           new JTextField("" + t.additionalTextFieldPrototypeDisplayValue);
-        DimAdjust.fixedSize(additionalTextfield);
+        DimAdjust.fixedPreferredSize(additionalTextfield);
         DimAdjust.fixedMaxSize(additionalTextfield, 0, 0);
         additionalTextfield.setToolTipText(t.additionalTextFieldHint);
         additionalTextfield.setText("");
