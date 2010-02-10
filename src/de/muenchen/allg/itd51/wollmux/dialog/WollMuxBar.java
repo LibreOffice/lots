@@ -98,7 +98,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -150,6 +149,11 @@ import de.muenchen.allg.itd51.wollmux.event.Dispatch;
 public class WollMuxBar
 {
   /**
+   * Name der Datei in der die WollMuxBar ihre Konfiguration schreibt.
+   */
+  public static final String WOLLMUXBAR_CONF = "wollmuxbar.conf";
+
+  /**
    * Titel des WollMuxBar-Fensters (falls nicht anders konfiguriert).
    */
   private static final String DEFAULT_TITLE = L.m("Vorlagen und Formulare");
@@ -185,6 +189,21 @@ public class WollMuxBar
    * Die WollMuxBar verschwindet am oberen Rand, wenn der Mauscursor sie verlässt.
    */
   private static final int UP_AND_AWAY_WINDOW_MODE = 4;
+
+  public static final Set<String> SUPPORTED_ACTIONS = new HashSet<String>();
+  static
+  {
+    SUPPORTED_ACTIONS.add("openTemplate");
+    SUPPORTED_ACTIONS.add("absenderAuswaehlen");
+    SUPPORTED_ACTIONS.add("openDocument");
+    SUPPORTED_ACTIONS.add("openExt");
+    SUPPORTED_ACTIONS.add("open");
+    SUPPORTED_ACTIONS.add("dumpInfo");
+    SUPPORTED_ACTIONS.add("abort");
+    SUPPORTED_ACTIONS.add("kill");
+    SUPPORTED_ACTIONS.add("about");
+    SUPPORTED_ACTIONS.add("menuManager");
+  }
 
   /**
    * TODO Die WollMuxBar ist vertikal und verschwindet am linken Rand, wenn der
@@ -405,18 +424,36 @@ public class WollMuxBar
   private boolean isMinimized = false;
 
   /**
+   * Die wollmux.conf.
+   */
+  private ConfigThingy defaultConf;
+
+  /**
+   * Die wollmuxbar.conf.
+   */
+  private ConfigThingy userConf;
+
+  /**
    * Erzeugt eine neue WollMuxBar.
    * 
    * @param winMode
    *          Anzeigemodus, z.B. {@link #UP_AND_AWAY_WINDOW_MODE}.
    * @param conf
-   *          der Inhalt der wollmux.conf
+   *          combinedConf(wollmuxConf(<Inhalt der wollmux.conf>) wollmuxbarConf(<Inhalt
+   *          der wollmuxbar.conf>)
+   * @param defaultConf
+   *          die wollmux.conf
+   * @param userConf
+   *          die wollmuxbar.conf
    * @param quickstarter
    *          falls true wird die WollMuxBar als OOo-Quickstarter agieren.
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  public WollMuxBar(int winMode, final ConfigThingy conf, boolean quickstarter)
+  public WollMuxBar(int winMode, final ConfigThingy conf, ConfigThingy defaultConf,
+      ConfigThingy userConf, boolean quickstarter)
   {
+    this.defaultConf = defaultConf;
+    this.userConf = userConf;
     windowMode = winMode;
     quickstarterEnabled = quickstarter;
 
@@ -739,8 +776,6 @@ public class WollMuxBar
    *          der Titel für das Fenster (nur für Anzeige in Taskleiste)
    * @param wmBarConf
    *          ConfigThingy des Fenster/WollMuxBar-Abschnitts.
-   * @param upAndAwayWidth
-   *          breite des Streifens für Modus "UpAndAway"
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
   private void setupMinimizedFrame(String title, ConfigThingy wmBarConf)
@@ -1136,19 +1171,8 @@ public class WollMuxBar
     menuContext.mapTypeToType.put("glue", "v-glue");
     menuContext.mapTypeToType.put("button", "menuitem");
 
-    Set<String> supportedActions = new HashSet<String>();
-    supportedActions.add("openTemplate");
-    supportedActions.add("absenderAuswaehlen");
-    supportedActions.add("openDocument");
-    supportedActions.add("openExt");
-    supportedActions.add("open");
-    supportedActions.add("dumpInfo");
-    supportedActions.add("abort");
-    supportedActions.add("kill");
-    supportedActions.add("about");
-
-    panelContext.supportedActions = supportedActions;
-    menuContext.supportedActions = supportedActions;
+    panelContext.supportedActions = SUPPORTED_ACTIONS;
+    menuContext.supportedActions = SUPPORTED_ACTIONS;
 
     uiElementFactory = new UIElementFactory();
   }
@@ -1214,6 +1238,10 @@ public class WollMuxBar
       else if (action.equals("about"))
       {
         eventHandler.handleWollMuxUrl(Dispatch.DISP_wmAbout, getBuildInfo());
+      }
+      else if (action.equals("menuManager"))
+      {
+        menuManager();
       }
     }
   }
@@ -1358,6 +1386,36 @@ public class WollMuxBar
     eventHandler.waitForThreadTermination();
 
     System.exit(0);
+  }
+
+  /**
+   * Startet den {@link MenuManager} und f�hrt dann eine Reinitialisierung der
+   * WollMuxBar aus.
+   * 
+   */
+  private void menuManager()
+  {
+    new MenuManager(defaultConf, userConf, new ActionListener()
+    {
+      public void actionPerformed(ActionEvent e)
+      {
+        reinit();
+      }
+    });
+  }
+
+  /**
+   * L�sst die WollMuxBar sich komplett neu starten.
+   * 
+   * @author Matthias Benkmann (D-III-ITD-D101)
+   */
+  private void reinit()
+  {
+    eventHandler.handleTerminate();
+    myFrame.dispose();
+    eventHandler.waitForThreadTermination();
+    readWollMuxBarConfAndStartWollMuxBar(windowMode, isQuickstarterEnabled(), false,
+      defaultConf);
   }
 
   /**
@@ -2334,6 +2392,7 @@ public class WollMuxBar
   {
     Integer windowMode = null;
     boolean quickstarter = false;
+    boolean menumanager = false;
     if (args.length > 0)
     {
       for (int i = 0; i < args.length; ++i)
@@ -2348,6 +2407,8 @@ public class WollMuxBar
           windowMode = NORMAL_WINDOW_MODE;
         else if (arg.equals("--quickstarter"))
           quickstarter = true;
+        else if (arg.equals("--mm"))
+          menumanager = true;
         else if (arg.equals("--load"))
         {
           if (i == args.length - 1)
@@ -2373,6 +2434,49 @@ public class WollMuxBar
 
     ConfigThingy wollmuxConf = WollMuxFiles.getWollmuxConf();
 
+    readWollMuxBarConfAndStartWollMuxBar(windowMode, quickstarter, menumanager,
+      wollmuxConf);
+  }
+
+  /**
+   * Liest die wollmuxbar.conf ein und startet die WollMuxBar.
+   * 
+   * @param windowMode
+   *          falls nicht-null, overridet dieser windowMode den aus der Konfiguration
+   *          gelesenen Wert.
+   * @param quickstarter
+   *          falls true wird der quickstarter aktiviert.
+   * @param menumanager
+   *          falls true wird automatisch der {@link MenuManager} gestartet.
+   * @param wollmuxConf
+   *          die wollmux.conf
+   */
+  private static void readWollMuxBarConfAndStartWollMuxBar(Integer windowMode,
+      boolean quickstarter, boolean menumanager, ConfigThingy wollmuxConf)
+  {
+    ConfigThingy wollmuxbarConf = null;
+    File wollmuxbarConfFile =
+      new File(WollMuxFiles.getWollMuxDir(), WOLLMUXBAR_CONF);
+    if (wollmuxbarConfFile.exists())
+    {
+      try
+      {
+        wollmuxbarConf =
+          new ConfigThingy("wollmuxbarConf", wollmuxbarConfFile.toURI().toURL());
+      }
+      catch (Exception x)
+      {
+        Logger.error(
+          L.m("Fehler beim Lesen von '%1'", wollmuxbarConfFile.toString()), x);
+      }
+    }
+
+    if (wollmuxbarConf == null) wollmuxbarConf = new ConfigThingy("wollmuxbarConf");
+
+    ConfigThingy combinedConf = new ConfigThingy("combinedConf");
+    combinedConf.addChild(wollmuxConf);
+    combinedConf.addChild(wollmuxbarConf);
+
     try
     {
       Logger.debug(L.m("WollMuxBar gestartet"));
@@ -2382,7 +2486,7 @@ public class WollMuxBar
         {
           windowMode = UP_AND_AWAY_WINDOW_MODE;
           String windowMode2 =
-            wollmuxConf.query("Fenster").query("WollMuxBar").getLastChild().query(
+            combinedConf.query("Fenster").query("WollMuxBar").getLastChild().query(
               "MODE").getLastChild().toString();
           if (windowMode2.equalsIgnoreCase("AlwaysOnTop"))
             windowMode = ALWAYS_ON_TOP_WINDOW_MODE;
@@ -2399,14 +2503,25 @@ public class WollMuxBar
         catch (Exception x)
         {}
 
-      if (wollmuxConf.query("Symbolleisten").count() == 0)
+      WollMuxBar bar = null;
+      if (combinedConf.query("Symbolleisten").count() == 0)
       {
         Logger.error(WOLLMUX_CONFIG_ERROR_MESSAGE);
         JOptionPane.showMessageDialog(null, WOLLMUX_CONFIG_ERROR_MESSAGE,
           L.m("Fehlerhafte Konfiguration"), JOptionPane.ERROR_MESSAGE);
       }
       else
-        new WollMuxBar(windowMode, wollmuxConf, quickstarter);
+        bar =
+          new WollMuxBar(windowMode, combinedConf, wollmuxConf, wollmuxbarConf,
+            quickstarter);
+
+      if (menumanager)
+      {
+        if (bar != null)
+          bar.menuManager();
+        else
+          new MenuManager(wollmuxConf, wollmuxbarConf, null);
+      }
 
     }
     catch (Exception x)
@@ -2414,5 +2529,4 @@ public class WollMuxBar
       Logger.error(x);
     }
   }
-
 }
