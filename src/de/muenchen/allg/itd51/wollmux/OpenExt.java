@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.List;
@@ -188,7 +189,7 @@ public class OpenExt
    * versuchen wird, sie auszuführen. Die gelieferte Liste ist eine Referenz auf die
    * internen Daten. Es ist also möglich, sie vor dem Aufruf von launch zu verändern.
    * 
-   * TODO test
+   * TESTED
    */
   public List<String> getPrograms()
   {
@@ -228,7 +229,7 @@ public class OpenExt
    * 
    * @see #setSource(URL)
    * 
-   * TODO test
+   * TESTED
    */
   public void setSource(XStorable doc) throws ConfigurationErrorException
   {
@@ -251,7 +252,7 @@ public class OpenExt
    *           eine Quelle festgelegt wurde.
    * 
    * 
-   * TODO TEST
+   * TESTED
    */
   public void storeIfNecessary() throws IOException, IllegalStateException
   {
@@ -398,16 +399,21 @@ public class OpenExt
         }
 
         String appArgument;
-        if (url != null)
-        {
-          if (download)
-            appArgument = destFile.getAbsolutePath();
-          else
-            appArgument = url.toString();
-        }
+        if (download)
+          appArgument = destFile.getAbsolutePath();
         else
         {
-          appArgument = destFile.getAbsolutePath();
+          if (url != null)
+            appArgument = url.toString();
+          else
+            try
+            {
+              appArgument = destFile.toURI().toURL().toString();
+            }
+            catch (MalformedURLException x)
+            {
+              appArgument = "file:" + destFile.getAbsolutePath();
+            }
         }
 
         StringBuilder errors = new StringBuilder();
