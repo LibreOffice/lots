@@ -59,11 +59,8 @@ package de.muenchen.allg.itd51.wollmux.db;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
 import java.net.URL;
 import java.util.Date;
 import java.util.HashMap;
@@ -83,6 +80,7 @@ import de.muenchen.allg.itd51.wollmux.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.L;
 import de.muenchen.allg.itd51.wollmux.Logger;
 import de.muenchen.allg.itd51.wollmux.TimeoutException;
+import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 
 /**
  * Stellt eine virtuelle Datenbank zur Verfügung, die ihre Daten aus verschiedenen
@@ -555,11 +553,7 @@ public class DatasourceJoiner
     catch (DatasetNotFoundException x)
     {}
 
-    Writer out =
-      new OutputStreamWriter(new FileOutputStream(cacheFile), ConfigThingy.CHARSET);
-    out.write("\uFEFF");
-    out.write(conf.stringRepresentation(true, '"'));
-    out.close();
+    WollMuxFiles.writeConfToFile(cacheFile, conf);
   }
 
   /**
