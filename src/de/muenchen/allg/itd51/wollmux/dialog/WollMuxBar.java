@@ -153,35 +153,10 @@ public class WollMuxBar
   public static final String WOLLMUXBAR_CONF = "wollmuxbar.conf";
 
   /**
-   * Titel des WollMuxBar-Fensters (falls nicht anders konfiguriert).
-   */
-  private static final String DEFAULT_TITLE = L.m("Vorlagen und Formulare");
-
-  /**
    * Spezialeintrag in der Absenderliste, der genau dann vorhanden ist, wenn die
    * Absenderliste leer ist.
    */
   private static final String LEERE_LISTE = L.m("<kein Absender vorhanden>");
-
-  /**
-   * Wenn die WollMuxBar den Fokus verliert, minimiert sich das Fenster.
-   */
-  private static final int MINIMIZE_TO_TASKBAR_MODE = 1;
-
-  /**
-   * Die WollMuxBar verh√§lt sich wie ein normales Fenster.
-   */
-  private static final int NORMAL_WINDOW_MODE = 2;
-
-  /**
-   * Die WollMuxBar ist immer im Vordergrund.
-   */
-  private static final int ALWAYS_ON_TOP_WINDOW_MODE = 3;
-
-  /**
-   * Die WollMuxBar verschwindet am oberen Rand, wenn der Mauscursor sie verl√§sst.
-   */
-  private static final int UP_AND_AWAY_WINDOW_MODE = 4;
 
   public static final Set<String> SUPPORTED_ACTIONS = new HashSet<String>();
   static
@@ -196,15 +171,39 @@ public class WollMuxBar
     SUPPORTED_ACTIONS.add("kill");
     SUPPORTED_ACTIONS.add("about");
     SUPPORTED_ACTIONS.add("menuManager");
+    SUPPORTED_ACTIONS.add("options");
   }
 
   /**
-   * TODO Die WollMuxBar ist vertikal und verschwindet am linken Rand, wenn der
-   * Mauscursor sie verl√§sst.
+   * Verwaltet die Konfiguration der WollMuxBar.
    */
-  // private static final int LEFT_AND_AWAY_WINDOW_MODE = 5;
+  private WollMuxBarConfig config;
+
   /**
-   * Der Anzeigemodus f√ºr die WollMuxBar (z,B, {@link #UP_AND_AWAY_WINDOW_MODE}).
+   * Siehe {@link WollMuxBarConfig#getX()}. Der Wert aus {@link #config} wird nur
+   * einmal gelesen und dann diese Variable hier verwendet, damit im Falle, dass eine
+   * feste Koordinate gesetzt ist, der Benutzer trotzdem das Fenster frei verschieben
+   * kann nachdem es einmal an die feste Koordinate gesetzt wurde.
+   */
+  private int myFrame_x;
+
+  /**
+   * Siehe {@link WollMuxBarConfig#getY()}. Der Wert aus {@link #config} wird nur
+   * einmal gelesen und dann diese Variable hier verwendet, damit im Falle, dass eine
+   * feste Koordinate gesetzt ist, der Benutzer trotzdem das Fenster frei verschieben
+   * kann nachdem es einmal an die feste Koordinate gesetzt wurde.
+   * 
+   * Auﬂerdem wird dieser Wert immer auf 0 gesetzt wenn der
+   * {@link WollMuxBarConfig#UP_AND_AWAY_WINDOW_MODE} gesetzt ist.
+   */
+  private int myFrame_y;
+
+  /**
+   * Das Verhalten der WollMuxBar wird nur einmal aus {@link #config} ausgelesen und
+   * dann hier gecachet, weil es ansonsten zu komischen Effekten kommen kann, wenn
+   * ¸ber den Optionen-Dialog das Fensterverhalten ver‰ndert wird und Handler wie
+   * z.B. der der auf Focus-Ver‰nderungen reagiert, das Fensterverhalten auswerten
+   * bevor der {@link #reinit()} stattgefunden hat.
    */
   private int windowMode;
 
@@ -224,41 +223,7 @@ public class WollMuxBar
   private JFrame myFrame;
 
   /**
-   * Falls > 0, so ist dies eine von wollmux,conf fest vorgegebene Breite. Falls 0,
-   * so wird die nat√ºrliche Breite verwendet. Falls -1, so wird die maximale Breite
-   * verwendet.
-   */
-  private int myFrame_width;
-
-  /**
-   * Falls > 0, so ist dies eine von wollmux,conf fest vorgegebene H√∂he. Falls 0, so
-   * wird die nat√ºrliche H√∂he verwendet. Falls -1, so wird die maximale H√∂he
-   * verwendet.
-   */
-  private int myFrame_height;
-
-  /**
-   * Falls >= 0, so ist dies eine von wollmux,conf fest vorgegebene x-Koordinate.
-   * Diese wird nur einmal gesetzt. Danach kann der Benutzer das Fenster verschieben,
-   * wenn er m√∂chte. Falls -1, so wird das Fenster zentriert. Falls -2, so wird die
-   * gr√∂√üte sinnvolle Koordinate verwendet. Falls -3, so wird die kleinste sinnvolle
-   * Koordinate verwendet. Falls Integer.MIN_VALUE, so ist keine Koordinate fest
-   * vorgegeben.
-   */
-  private int myFrame_x;
-
-  /**
-   * Falls >= 0, so ist dies eine von wollmux,conf fest vorgegebene y-Koordinate.
-   * Diese wird nur einmal gesetzt. Danach kann der Benutzer das Fenster verschieben,
-   * wenn er m√∂chte. Falls -1, so wird das Fenster zentriert. Falls -2, so wird die
-   * gr√∂√üte sinnvolle Koordinate verwendet. Falls -3, so wird die kleinste sinnvolle
-   * Koordinate verwendet. Falls Integer.MIN_VALUE, so ist keine Koordinate fest
-   * vorgegeben.
-   */
-  private int myFrame_y;
-
-  /**
-   * Das Panel f√ºr den Inhalt des Fensters der WollMuxBar (myFrame).
+   * Das Panel f¸r den Inhalt des Fensters der WollMuxBar (myFrame).
    */
   private JPanel contentPanel;
 
@@ -423,7 +388,7 @@ public class WollMuxBar
    * Erzeugt eine neue WollMuxBar.
    * 
    * @param winMode
-   *          Anzeigemodus, z.B. {@link #UP_AND_AWAY_WINDOW_MODE}.
+   *          Anzeigemodus, z.B. {@link WollMuxBarConfig#UP_AND_AWAY_WINDOW_MODE}.
    * @param conf
    *          combinedConf(wollmuxConf(<Inhalt der wollmux.conf>) wollmuxbarConf(<Inhalt
    *          der wollmuxbar.conf>)
@@ -440,7 +405,7 @@ public class WollMuxBar
   {
     this.defaultConf = defaultConf;
     this.userConf = userConf;
-    windowMode = winMode;
+    config = new WollMuxBarConfig(winMode, defaultConf, userConf);
     quickstarterEnabled = quickstarter;
 
     eventHandler = new WollMuxBarEventHandler(this);
@@ -505,103 +470,18 @@ public class WollMuxBar
     // Dimension screenSize = tk.getScreenSize();
     // Rectangle bounds = genv.getMaximumWindowBounds();
 
-    String title = DEFAULT_TITLE;
-    ConfigThingy wmBarConf = new ConfigThingy("");
-    try
-    {
-      wmBarConf = conf.query("Fenster").query("WollMuxBar").getLastChild();
-    }
-    catch (Exception x)
-    {}
-    try
-    {
-      title = wmBarConf.get("TITLE").toString();
-    }
-    catch (Exception x)
-    {}
-
-    myFrame_x = Integer.MIN_VALUE;
-    try
-    {
-      String xStr = wmBarConf.get("X").toString();
-      if (xStr.equalsIgnoreCase("center"))
-        myFrame_x = -1;
-      else if (xStr.equalsIgnoreCase("max"))
-        myFrame_x = -2;
-      else if (xStr.equalsIgnoreCase("min"))
-        myFrame_x = -3;
-      else
-      {
-        myFrame_x = Integer.parseInt(xStr);
-        // Ja, das folgende ist eine Einschr√§nkung, aber
-        // negative Koordinaten gehen in KDE eh nicht und kollidieren mit
-        // obigen Festlegungen
-        if (myFrame_x < 0) myFrame_x = 0;
-      }
-    }
-    catch (Exception x)
-    {}
-
-    myFrame_y = Integer.MIN_VALUE;
-    try
-    {
-      String yStr = wmBarConf.get("Y").toString();
-      if (yStr.equalsIgnoreCase("center"))
-        myFrame_y = -1;
-      else if (yStr.equalsIgnoreCase("max"))
-        myFrame_y = -2;
-      else if (yStr.equalsIgnoreCase("min"))
-        myFrame_y = -3;
-      else
-      {
-        myFrame_y = Integer.parseInt(yStr);
-        // Ja, das folgende ist eine Einschr√§nkung, aber
-        // negative Koordinaten gehen in KDE eh nicht und kollidieren mit
-        // obigen Festlegungen
-        if (myFrame_y < 0) myFrame_y = 0;
-      }
-    }
-    catch (Exception x)
-    {}
-
-    myFrame_width = 0;
-    try
-    {
-      String widthStr = wmBarConf.get("WIDTH").toString();
-      if (widthStr.equalsIgnoreCase("max"))
-        myFrame_width = -1;
-      else
-      {
-        myFrame_width = Integer.parseInt(widthStr);
-        if (myFrame_width < 0) myFrame_width = 0;
-      }
-    }
-    catch (Exception x)
-    {}
-
-    myFrame_height = 0;
-    try
-    {
-      String heightStr = wmBarConf.get("HEIGHT").toString();
-      if (heightStr.equalsIgnoreCase("max"))
-        myFrame_height = -1;
-      else
-      {
-        myFrame_height = Integer.parseInt(heightStr);
-        if (myFrame_height < 0) myFrame_height = 0;
-      }
-    }
-    catch (Exception x)
-    {}
-
-    myFrame = new JFrame(title);
+    myFrame = new JFrame(config.getWindowTitle());
     // leave handling of close request to WindowListener.windowClosing
     myFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+
+    myFrame_x = config.getX();
+    myFrame_y = config.getY();
+    windowMode = config.getWindowMode();
 
     // set the icon for the WollMuxBar frame
     Common.setWollMuxIcon(myFrame);
 
-    if (windowMode == UP_AND_AWAY_WINDOW_MODE)
+    if (windowMode == WollMuxBarConfig.UP_AND_AWAY_WINDOW_MODE)
     {
       myFrame.setUndecorated(true);
       // myFrame.setFocusable(false);
@@ -654,9 +534,10 @@ public class WollMuxBar
     }
     myFrame.setJMenuBar(menuBar);
 
-    setupMinimizedFrame(title, wmBarConf);
+    setupMinimizedFrame(config.getWindowTitle());
 
-    if (windowMode != NORMAL_WINDOW_MODE) myFrame.setAlwaysOnTop(true);
+    if (windowMode != WollMuxBarConfig.NORMAL_WINDOW_MODE)
+      myFrame.setAlwaysOnTop(true);
 
     setSizeAndLocation();
     myFrame.setResizable(true);
@@ -681,7 +562,7 @@ public class WollMuxBar
     Dimension frameSize = new Dimension(naturalFrameSize);
     Point frameLocation = myFrame.getLocation();
 
-    switch (myFrame_width)
+    switch (config.getWidth())
     {
       case 0: // natural width
         break;
@@ -689,11 +570,11 @@ public class WollMuxBar
         frameSize.width = bounds.width;
         break;
       default: // specified width
-        frameSize.width = myFrame_width;
+        frameSize.width = config.getWidth();
         break;
     }
 
-    switch (myFrame_height)
+    switch (config.getHeight())
     {
       case 0: // natural height
         break;
@@ -701,7 +582,7 @@ public class WollMuxBar
         frameSize.height = bounds.height;
         break;
       default: // specified height
-        frameSize.height = myFrame_height;
+        frameSize.height = config.getHeight();
         break;
     }
 
@@ -757,14 +638,12 @@ public class WollMuxBar
    * Streifen).
    * 
    * @param title
-   *          der Titel f√ºr das Fenster (nur f√ºr Anzeige in Taskleiste)
-   * @param wmBarConf
-   *          ConfigThingy des Fenster/WollMuxBar-Abschnitts.
+   *          der Titel f¸r das Fenster (nur f¸r Anzeige in Taskleiste)
    * @author Matthias Benkmann (D-III-ITD 5.1)
    */
-  private void setupMinimizedFrame(String title, ConfigThingy wmBarConf)
+  private void setupMinimizedFrame(String title)
   {
-    if (windowMode == UP_AND_AWAY_WINDOW_MODE)
+    if (windowMode == WollMuxBarConfig.UP_AND_AWAY_WINDOW_MODE)
     {
       upAndAwayMinimizedPanel = new JPanel();
       upAndAwayMinimizedPanel.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
@@ -843,6 +722,24 @@ public class WollMuxBar
 
       try
       {
+        /*
+         * Falls kein CONF_ID vorhanden ist, wird das Element angezeigt, ansonsten
+         * nur dann wenn mindestens eine CONF_ID aktiv ist.
+         */
+        ConfigThingy conf_ids = uiElementDesc.query("CONF_ID");
+        if (conf_ids.count() > 0)
+        {
+          boolean active = false;
+          for (ConfigThingy conf_id_group : conf_ids)
+            for (ConfigThingy conf_id : conf_id_group)
+              if (config.isIDActive(conf_id.getName()))
+              {
+                active = true;
+                break;
+              }
+          if (!active) continue;
+        }
+
         String type;
         try
         {
@@ -1223,6 +1120,10 @@ public class WollMuxBar
       {
         menuManager();
       }
+      else if (action.equals("options"))
+      {
+        options();
+      }
     }
   }
 
@@ -1385,6 +1286,25 @@ public class WollMuxBar
   }
 
   /**
+   * Zeigt den Optionsdialog von {@link WollMuxBarConfig} und f¸hrt dann eine
+   * Reinitialisierung der WollMuxBar aus.
+   * 
+   */
+  private void options()
+  {
+    config.showOptionsDialog(myFrame, new ActionListener()
+    {
+      public void actionPerformed(ActionEvent e)
+      {
+        // derzeit ist der OK-Vergleich unnˆtig, da bei negativer Beendigung des
+        // Dialogs der ActionListener eh
+        // nicht aufgerufen wird. Aber das kann sich ‰ndern.
+        if (e.getActionCommand().equals("OK")) reinit();
+      }
+    });
+  }
+
+  /**
    * L‰sst die WollMuxBar sich komplett neu starten.
    * 
    * @author Matthias Benkmann (D-III-ITD-D101)
@@ -1394,8 +1314,8 @@ public class WollMuxBar
     eventHandler.handleTerminate();
     myFrame.dispose();
     eventHandler.waitForThreadTermination();
-    readWollMuxBarConfAndStartWollMuxBar(windowMode, isQuickstarterEnabled(), false,
-      defaultConf);
+    readWollMuxBarConfAndStartWollMuxBar(config.getWindowMode(),
+      isQuickstarterEnabled(), false, defaultConf);
   }
 
   /**
@@ -1985,7 +1905,7 @@ public class WollMuxBar
 
     public void mouseEntered(MouseEvent e)
     {
-      if (windowMode != UP_AND_AWAY_WINDOW_MODE) return;
+      if (windowMode != WollMuxBarConfig.UP_AND_AWAY_WINDOW_MODE) return;
       timer.stop();
     }
 
@@ -1996,7 +1916,7 @@ public class WollMuxBar
 
     public void delayedMinimize()
     {
-      if (windowMode != UP_AND_AWAY_WINDOW_MODE) return;
+      if (windowMode != WollMuxBarConfig.UP_AND_AWAY_WINDOW_MODE) return;
       timer.restart();
     }
 
@@ -2014,9 +1934,15 @@ public class WollMuxBar
    */
   private void minimize()
   {
-    if (windowMode == ALWAYS_ON_TOP_WINDOW_MODE || windowMode == NORMAL_WINDOW_MODE)
-      return;
-    if (windowMode == MINIMIZE_TO_TASKBAR_MODE)
+    /*
+     * Minimieren stˆrt die Anzeige des modalen Options-Dialogs (zumindest unter
+     * manchen Window-Managern).
+     */
+    if (config.isDialogVisible()) return;
+
+    if (windowMode == WollMuxBarConfig.ALWAYS_ON_TOP_WINDOW_MODE
+      || windowMode == WollMuxBarConfig.NORMAL_WINDOW_MODE) return;
+    if (windowMode == WollMuxBarConfig.MINIMIZE_TO_TASKBAR_MODE)
     {
       myFrame.setExtendedState(Frame.ICONIFIED);
       return;
@@ -2025,7 +1951,7 @@ public class WollMuxBar
     if (isMinimized) return;
     isMinimized = true;
 
-    if (windowMode == UP_AND_AWAY_WINDOW_MODE)
+    if (windowMode == WollMuxBarConfig.UP_AND_AWAY_WINDOW_MODE)
     {
       myFrame.setJMenuBar(null);
       Container contentPane = myFrame.getContentPane();
@@ -2044,7 +1970,7 @@ public class WollMuxBar
    */
   private void maximize()
   {
-    if (windowMode == MINIMIZE_TO_TASKBAR_MODE)
+    if (windowMode == WollMuxBarConfig.MINIMIZE_TO_TASKBAR_MODE)
     {
       myFrame.setExtendedState(Frame.NORMAL);
       return;
@@ -2053,7 +1979,7 @@ public class WollMuxBar
     if (!isMinimized) return;
     isMinimized = false;
 
-    if (windowMode == UP_AND_AWAY_WINDOW_MODE)
+    if (windowMode == WollMuxBarConfig.UP_AND_AWAY_WINDOW_MODE)
     {
       myFrame.removeMouseListener(upAndAwayWindowTransformer);
       Container contentPane = myFrame.getContentPane();
@@ -2175,7 +2101,7 @@ public class WollMuxBar
    */
   public static void main(String[] args)
   {
-    Integer windowMode = null;
+    int windowMode = -1;
     boolean quickstarter = false;
     boolean menumanager = false;
     if (args.length > 0)
@@ -2185,11 +2111,11 @@ public class WollMuxBar
         String arg = args[i];
 
         if (arg.equals("--minimize"))
-          windowMode = MINIMIZE_TO_TASKBAR_MODE;
+          windowMode = WollMuxBarConfig.MINIMIZE_TO_TASKBAR_MODE;
         else if (arg.equals("--topbar"))
-          windowMode = ALWAYS_ON_TOP_WINDOW_MODE;
+          windowMode = WollMuxBarConfig.ALWAYS_ON_TOP_WINDOW_MODE;
         else if (arg.equals("--normalwindow"))
-          windowMode = NORMAL_WINDOW_MODE;
+          windowMode = WollMuxBarConfig.NORMAL_WINDOW_MODE;
         else if (arg.equals("--quickstarter"))
           quickstarter = true;
         else if (arg.equals("--mm"))
@@ -2227,7 +2153,7 @@ public class WollMuxBar
    * Liest die wollmuxbar.conf ein und startet die WollMuxBar.
    * 
    * @param windowMode
-   *          falls nicht-null, overridet dieser windowMode den aus der Konfiguration
+   *          falls >0, overridet dieser windowMode den aus der Konfiguration
    *          gelesenen Wert.
    * @param quickstarter
    *          falls true wird der quickstarter aktiviert.
@@ -2236,7 +2162,7 @@ public class WollMuxBar
    * @param wollmuxConf
    *          die wollmux.conf
    */
-  private static void readWollMuxBarConfAndStartWollMuxBar(Integer windowMode,
+  private static void readWollMuxBarConfAndStartWollMuxBar(int windowMode,
       boolean quickstarter, boolean menumanager, ConfigThingy wollmuxConf)
   {
     ConfigThingy wollmuxbarConf = null;
@@ -2265,28 +2191,6 @@ public class WollMuxBar
     try
     {
       Logger.debug(L.m("WollMuxBar gestartet"));
-
-      if (windowMode == null)
-        try
-        {
-          windowMode = UP_AND_AWAY_WINDOW_MODE;
-          String windowMode2 =
-            combinedConf.query("Fenster").query("WollMuxBar").getLastChild().query(
-              "MODE").getLastChild().toString();
-          if (windowMode2.equalsIgnoreCase("AlwaysOnTop"))
-            windowMode = ALWAYS_ON_TOP_WINDOW_MODE;
-          else if (windowMode2.equalsIgnoreCase("Window"))
-            windowMode = NORMAL_WINDOW_MODE;
-          else if (windowMode2.equalsIgnoreCase("Minimize"))
-            windowMode = MINIMIZE_TO_TASKBAR_MODE;
-          else if (windowMode2.equalsIgnoreCase("UpAndAway"))
-            windowMode = UP_AND_AWAY_WINDOW_MODE;
-          else
-            Logger.error(L.m("Ununterst√ºtzer MODE f√ºr WollMuxBar-Fenster: '%1'",
-              windowMode2));
-        }
-        catch (Exception x)
-        {}
 
       WollMuxBar bar = null;
       if (combinedConf.query("Symbolleisten").count() == 0)
