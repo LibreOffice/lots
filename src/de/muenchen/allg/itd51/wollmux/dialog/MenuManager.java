@@ -642,7 +642,7 @@ public class MenuManager
     String userHome = System.getProperty("user.home");
     String homePath = canonicalPath(new File(userHome));
     String relativePath = makeRelative(path, homePath);
-    if (relativePath != null) return turnIntoURL("${user.home}/" + relativePath);
+    if (relativePath != null) return fixSlashes("${user.home}/" + relativePath);
 
     try
     {
@@ -654,9 +654,9 @@ public class MenuManager
     }
   }
 
-  private String turnIntoURL(String path)
+  private String fixSlashes(String path)
   {
-    return "file:" + path.replaceAll("[" + File.separator + "]", "/");
+    return path.replaceAll("[" + File.separator + "]", "/");
   }
 
   private String makeRelative(String pathToMakeRel,

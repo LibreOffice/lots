@@ -103,6 +103,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
@@ -2009,6 +2011,29 @@ public class WollMuxBar
   {
     try
     {
+      final String USER_HOME = "${user.home}";
+      int uhidx = url.indexOf(USER_HOME);
+      if (uhidx >= 0)
+      {
+        String userHomeUrl =
+          new File(System.getProperty("user.home")).toURI().toURL().toString();
+
+        while ((uhidx = url.indexOf(USER_HOME)) >= 0)
+          url =
+            url.substring(0, uhidx) + userHomeUrl
+              + url.substring(uhidx + USER_HOME.length());
+
+        /**
+         * Beim Einbau einer URL in eine bestehende URL kann es zu Doppelungen des
+         * Protokollbezeichners file: kommen. In diesem Fall entfernen wir das erste
+         * davon.
+         */
+        final Pattern DUPLICATE_FILE_PROTOCOL_PATTERN =
+          Pattern.compile("file:/*(file:.*)");
+        Matcher m = DUPLICATE_FILE_PROTOCOL_PATTERN.matcher(url);
+        if (m.matches()) url = m.group(1);
+      }
+
       URL srcUrl = WollMuxFiles.makeURL(url);
       final OpenExt openExt = new OpenExt(ext, defaultConf);
       openExt.setSource(srcUrl);
