@@ -300,7 +300,7 @@ public class UIElementConfigThingyEditor
       conf.add("TYPE").add(type);
       conf.add("MENU").add(menu.getAttributeValue());
       String favoStr = favo.getAttributeValue();
-      if (favo.equals("1")) conf.add("FAVO").add(favoStr);
+      if (favoStr.equals("1")) conf.add("FAVO").add(favoStr);
       conf.add("LABEL").add(label.getAttributeValue());
     }
     else if (type.equals("button"))
