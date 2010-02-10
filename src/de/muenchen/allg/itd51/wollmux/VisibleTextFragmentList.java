@@ -100,8 +100,7 @@ public class VisibleTextFragmentList
     Logger.debug2(L.m("Variablenset an Knoten %1 '%2':", node.getName(),
       node.toString()));
 
-    
-    for (Map.Entry<String, String> ent: variables.entrySet())
+    for (Map.Entry<String, String> ent : variables.entrySet())
     {
       String key = ent.getKey();
       String value = ent.getValue();
@@ -187,6 +186,8 @@ public class VisibleTextFragmentList
         try
         {
           frag_idConf = mappingConf.get("FRAG_ID").toString();
+          // Typischen Konfigurationsfehler korrigieren
+          if (frag_idConf.equals(".*")) frag_idConf = ".+";
         }
         catch (NodeNotFoundException e)
         {
