@@ -1,0 +1,14 @@
+syntax: glob
+oxt/WollMux.rdb
+idl/de/muenchen/allg/itd51/wollmux/*.urd
+idl/de/muenchen/allg/itd51/wollmux/*.class
+bin/de
+bin/data
+bin/com
+dist/deb/wollmux_*.orig.tar.gz
+dist/WollMux.oxt
+dist/WollMuxBar.jar
+dist/md5sums.txt
+dist/wollmux-*.tar.gz
+oxt/WollMux.uno.jar
+*~
