@@ -248,7 +248,6 @@ public class PrintIntoFile
       pageCount -= pageNumberOffset;
       fixPageCountFields(UNO.XTextFieldsSupplier(outputDoc).getTextFields(),
         pageCount);
-      fixTextFields(UNO.XTextFieldsSupplier(outputDoc).getTextFields());
 
       oldShapes = null;
       System.gc();
@@ -344,7 +343,7 @@ public class PrintIntoFile
    * entsprechend geändert, dass es auf das neue Format verweist. Das selbe Format
    * wird jeweils nur einmal kopiert.
    * 
-   * @param doc,
+   * @param doc
    *          das Dokument in dem der Cursor wandert
    * @param oldPageStyles
    *          die PageStyles Familie des alten Dokuments
@@ -458,29 +457,6 @@ public class PrintIntoFile
           UNO.XPropertySet(cursor));
         range.setString("");
       }
-    }
-  }
-
-  /**
-   * Ersetzt alle Textfelder in textFields durch ihren Stringwert.
-   * 
-   * @author Matthias Benkmann (D-III-ITD D.10)
-   * @throws WrappedTargetException
-   * @throws NoSuchElementException
-   */
-  private static void fixTextFields(XEnumerationAccess textFields)
-      throws NoSuchElementException, WrappedTargetException
-  {
-    XEnumeration enu = textFields.createEnumeration();
-    while (enu.hasMoreElements())
-    {
-      Object textfield = enu.nextElement();
-      XTextRange range = UNO.XTextContent(textfield).getAnchor();
-      XTextCursor cursor = range.getText().createTextCursorByRange(range.getStart());
-      cursor.setString(cursor.getString());
-      TextDocument.copyDirectValueCharAttributes(UNO.XPropertyState(range),
-        UNO.XPropertySet(cursor));
-      range.setString("");
     }
   }
 
