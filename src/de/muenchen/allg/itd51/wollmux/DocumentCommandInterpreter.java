@@ -1398,6 +1398,7 @@ public class DocumentCommandInterpreter
         }
       }
 
+      // jetzt noch update selbst aufrufen (wenn verfügbar):
       try
       {
         UnoService textField = element.getPropertyValue("TextField");
