@@ -84,6 +84,8 @@ import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
@@ -111,6 +113,7 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -274,6 +277,18 @@ public class WollMuxBar
    * uiElementFactory).
    */
   private UIElementFactory.Context menuContext;
+
+  /**
+   * Rand um Textfelder (wird auch f√ºr ein paar andere R√§nder verwendet) in Pixeln.
+   * Enth√§lt nach dem Aufruf von initMenuOrder(...) eine Liste aller IDs von Men√ºs
+   * und deren per Tiefensuche ermittelten Untermen√ºs
+   */
+  private List<String> menuOrder = new ArrayList<String>();
+
+  /**
+   * TODO
+   */
+  private Map<String, String> mapMenuIDToLabel = new HashMap<String, String>();
 
   /**
    * Rand um Textfelder (wird auch f√ºr ein paar andere R√§nder verwendet) in Pixeln.
@@ -605,8 +620,9 @@ public class WollMuxBar
       ConfigThingy menubar = conf.query("Menueleiste");
       if (menubar.count() > 0)
       {
-        addUIElements(conf.query("Menues"), menubar.getLastChild(), menuBar, 1, 0,
-          "menu");
+        ConfigThingy menueConf = conf.query("Menues");
+        initMenuOrder(menueConf, menubar, "");
+        addUIElements(menueConf, menubar.getLastChild(), menuBar, 1, 0, "menu");
       }
     }
     catch (NodeNotFoundException x)
@@ -873,10 +889,8 @@ public class WollMuxBar
           catch (Exception e)
           {}
 
-          JTextField sfield = new JTextField(label);
-
-          sfield.getDocument().addDocumentListener(
-            new SearchBoxListener(sfield, menuConf));
+          SearchBox searchBox = new SearchBox(label, menuConf);
+          JTextField sfield = searchBox.getTextField();
 
           gbcMenuButton.gridx = x;
           gbcMenuButton.gridy = y;
@@ -1533,65 +1547,167 @@ public class WollMuxBar
     }
   }
 
-  private class SearchBoxListener implements DocumentListener
+  /**
+   * TODO
+   * 
+   * @param allMenues
+   * @param currentMenu
+   * @param path
+   */
+  public void initMenuOrder(ConfigThingy allMenues, ConfigThingy currentMenu,
+      String path)
   {
-
-    private JTextField textField;
-
-    private JPopupMenu menu;
-
-    private ConfigThingy menuConf;
-
-    public SearchBoxListener(JTextField textField, ConfigThingy menuConf)
+    for (ConfigThingy sub : currentMenu.queryByChild("MENU"))
     {
-      this.textField = textField;
-      this.menu = new JPopupMenu();
-      menu.setFocusable(false);
-      this.menuConf = menuConf;
-    }
-
-    public void changedUpdate(DocumentEvent e)
-    {
-      update(e);
-    }
-
-    public void removeUpdate(DocumentEvent e)
-    {
-      update(e);
-    }
-
-    public void insertUpdate(DocumentEvent e)
-    {
-      update(e);
-    }
-
-    private void update(DocumentEvent e)
-    {
-      Document doc = e.getDocument();
-      String text = "";
       try
       {
-        text = doc.getText(0, doc.getLength()).trim();
+        String id = sub.get("MENU").toString();
+        String label = path + sub.get("LABEL").toString();
+        menuOrder.add(id);
+        mapMenuIDToLabel.put(id, label);
+        initMenuOrder(allMenues, allMenues.get(id), label + " / ");
       }
-      catch (BadLocationException e1)
-      {}
+      catch (NodeNotFoundException e)
+      {
+        Logger.log(e);
+      }
+    }
+  }
 
-      String[] words = null;
-      if(text.length() > 0) words = text.split("\\s+");
+  /**
+   * Implementiert eine SearchBox, die in einem JTextField nach Men¸eintr‰gen der
+   * WollMuxBar suchen kann und so den Schnellzugriff auf bestimmte Men¸eintr‰ge
+   * ermˆglicht.
+   * 
+   * @author Christoph Lutz (privat)
+   */
+  private class SearchBox
+  {
+    private static final int MAX_SHOWN = 20;
 
+    private final JTextField textField;
+
+    private final JPopupMenu menu;
+
+    private final ConfigThingy menuConf;
+
+    public SearchBox(String label, ConfigThingy menuConf)
+    {
+      this.textField = new JTextField(L.m(label));
+      this.menu = new JPopupMenu();
+      this.menuConf = menuConf;
+
+      textField.addFocusListener(new FocusListener()
+      {
+        public void focusLost(FocusEvent arg0)
+        {}
+
+        public void focusGained(FocusEvent arg0)
+        {
+          if (menu.getComponentCount() > 0 && !menu.isVisible())
+          {
+            menu.setVisible(true);
+            textField.requestFocusInWindow();
+          }
+        }
+      });
+
+      textField.getDocument().addDocumentListener(new DocumentListener()
+      {
+        public void changedUpdate(DocumentEvent e)
+        {
+          update(e);
+        }
+
+        public void removeUpdate(DocumentEvent e)
+        {
+          update(e);
+        }
+
+        public void insertUpdate(DocumentEvent e)
+        {
+          update(e);
+        }
+
+        private void update(DocumentEvent e)
+        {
+          Document doc = e.getDocument();
+          String text = "";
+          try
+          {
+            text = doc.getText(0, doc.getLength()).trim();
+          }
+          catch (BadLocationException e1)
+          {}
+
+          String[] words = null;
+          if (text.length() > 0) words = text.split("\\s+");
+          updateResultPopupMenu(words);
+        }
+      });
+    }
+
+    public JTextField getTextField()
+    {
+      return textField;
+    }
+
+    private void updateResultPopupMenu(String[] words)
+    {
       ConfigThingy matches = new ConfigThingy("Matches");
-      ConfigThingy elementeKnoten = menuConf.query("Elemente");
-      for (ConfigThingy elemente : elementeKnoten)
-        for (ConfigThingy button : elemente)
-          if (buttonMatches(button, words)) matches.addChild(button);
+      int count = 0;
+      for (String menuId : menuOrder)
+      {
+        boolean added = false;
+        ConfigThingy elementeKnoten = new ConfigThingy("");
+        try
+        {
+          elementeKnoten = menuConf.query(menuId).getLastChild().query("Elemente");
+        }
+        catch (NodeNotFoundException e)
+        {}
+        ConfigThingy label = new ConfigThingy("");
+        ConfigThingy l = new ConfigThingy("LABEL");
+        l.add(" " + mapMenuIDToLabel.get(menuId));
+        label.addChild(l);
+        ConfigThingy t = new ConfigThingy("TYPE");
+        t.add("label");
+        label.addChild(t);
+
+        for (ConfigThingy elemente : elementeKnoten)
+          for (ConfigThingy button : elemente)
+            if (buttonMatches(button, words) && count++ < MAX_SHOWN)
+            {
+              if (!added)
+              {
+                try
+                {
+                  matches.addChild(new ConfigThingy("", "TYPE 'separator'"));
+                  matches.addChild(label);
+                  matches.addChild(new ConfigThingy("", "TYPE 'separator'"));
+                }
+                catch (Exception e)
+                {}
+                added = true;
+              }
+              matches.addChild(button);
+            }
+      }
 
       menu.setVisible(false);
       menu.removeAll();
       if (matches.count() > 0)
       {
         addUIElements(menuConf, matches, menu, 0, 1, "menu");
+        if (count > MAX_SHOWN)
+        {
+          menu.addSeparator();
+          menu.add(new JLabel(L.m(" Und %1 nicht angezeigte Treffer", count
+            - MAX_SHOWN)));
+        }
         menu.show(textField, 0, textField.getHeight());
       }
+      textField.requestFocusInWindow();
     }
 
     /**
