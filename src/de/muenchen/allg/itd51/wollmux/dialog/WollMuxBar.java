@@ -118,9 +118,14 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JSeparator;
+import javax.swing.JTextField;
 import javax.swing.Timer;
 import javax.swing.WindowConstants;
 import javax.swing.border.BevelBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
 
 import com.sun.star.document.MacroExecMode;
 
@@ -857,6 +862,30 @@ public class WollMuxBar
           else
             compo.add(button, gbcSenderbox);
         }
+        else if (type.equals("searchbox"))
+        {
+          String label = L.m("suchen...");
+          try
+          {
+            String str = uiElementDesc.get("LABEL").toString();
+            label = L.m(str);
+          }
+          catch (Exception e)
+          {}
+
+          JTextField sfield = new JTextField(label);
+
+          sfield.getDocument().addDocumentListener(
+            new SearchBoxListener(sfield, menuConf));
+
+          gbcMenuButton.gridx = x;
+          gbcMenuButton.gridy = y;
+          sfield.addMouseListener(myIsInsideMonitor);
+          if (context.equals("menu"))
+            compo.add(sfield);
+          else
+            compo.add(sfield, gbcMenuButton);
+        }
         else if (type.equals("menu"))
         {
           String label = L.m("LABEL FEHLT ODER FEHLERHAFT!");
@@ -1501,6 +1530,109 @@ public class WollMuxBar
       {
         button.setText(item);
       }
+    }
+  }
+
+  private class SearchBoxListener implements DocumentListener
+  {
+
+    private JTextField textField;
+
+    private JPopupMenu menu;
+
+    private ConfigThingy menuConf;
+
+    public SearchBoxListener(JTextField textField, ConfigThingy menuConf)
+    {
+      this.textField = textField;
+      this.menu = new JPopupMenu();
+      menu.setFocusable(false);
+      this.menuConf = menuConf;
+    }
+
+    public void changedUpdate(DocumentEvent e)
+    {
+      update(e);
+    }
+
+    public void removeUpdate(DocumentEvent e)
+    {
+      update(e);
+    }
+
+    public void insertUpdate(DocumentEvent e)
+    {
+      update(e);
+    }
+
+    private void update(DocumentEvent e)
+    {
+      Document doc = e.getDocument();
+      String text = "";
+      try
+      {
+        text = doc.getText(0, doc.getLength()).trim();
+      }
+      catch (BadLocationException e1)
+      {}
+
+      String[] words = null;
+      if(text.length() > 0) words = text.split("\\s+");
+
+      ConfigThingy matches = new ConfigThingy("Matches");
+      ConfigThingy elementeKnoten = menuConf.query("Elemente");
+      for (ConfigThingy elemente : elementeKnoten)
+        for (ConfigThingy button : elemente)
+          if (buttonMatches(button, words)) matches.addChild(button);
+
+      menu.setVisible(false);
+      menu.removeAll();
+      if (matches.count() > 0)
+      {
+        addUIElements(menuConf, matches, menu, 0, 1, "menu");
+        menu.show(textField, 0, textField.getHeight());
+      }
+    }
+
+    /**
+     * Liefert true gdw. das durch button beschriebene Element ein button ist
+     * (TYPE-Attribut muss "button" sein) und alle in words enthaltenen strings ohne
+     * Beachtung der Groß-/Kleinschreibung im Wert des LABEL-Attributs (das natürlich
+     * vorhanden sein muss) vorkommen.
+     * 
+     * @param button
+     *          Den ConfigThingy-Knoten, der ein UI-Element beschreibt, wie z.B.
+     *          "(TYPE 'button' LABEL 'Hallo' ...)"
+     * @param words
+     *          Diese Wörter müssen ALLE im LABEL vorkommen (ohne Beachtung der
+     *          Groß-/Kleinschreibung).
+     */
+    private boolean buttonMatches(ConfigThingy button, String[] words)
+    {
+      if (words == null || words.length == 0) return false;
+      try
+      {
+        String type = button.get("TYPE").toString();
+        if (!type.equals("button")) return false;
+      }
+      catch (NodeNotFoundException e1)
+      {
+        return false;
+      }
+
+      String label;
+      try
+      {
+        label = button.get("LABEL").toString();
+      }
+      catch (NodeNotFoundException e1)
+      {
+        return false;
+      }
+
+      for (String word : words)
+        if (!label.toLowerCase().contains(word.toLowerCase())) return false;
+      return true;
     }
   }
 
