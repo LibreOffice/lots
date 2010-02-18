@@ -286,7 +286,8 @@ public class WollMuxBar
   private List<String> menuOrder = new ArrayList<String>();
 
   /**
-   * TODO
+   * Enthält nach dem Aufruf von initMenuOrder(...) eine Zuordnung von MenüIDs zu den
+   * mit vollständigen Pfaden (der Menünavigation) aufgeführten Namen der Menüs
    */
   private Map<String, String> mapMenuIDToLabel = new HashMap<String, String>();
 
@@ -1548,11 +1549,25 @@ public class WollMuxBar
   }
 
   /**
-   * TODO
+   * Diese Methode initialisiert die Datenstrukturen menuOrder und mapMenuIDToLabel
+   * zur Verwendung für die Searchbox. Dabei werden ausgehend von currentMenu alle
+   * dort beschriebenen Untermenüs zu menuOrder hinzugefügt; Weitere Unter-Untermenüs
+   * werden rekursiv durchsucht und ebenfalls angehängt.
+   * 
+   * enthält menuOrder ausgehend vom Startmenü currentMenu (in gegebener Reihenfolge)
+   * alle Menüs und Untermenüs
    * 
    * @param allMenues
+   *          Erwartet die "Menues"-Knoten der WollMux-Konfiguration, in denen die
+   *          verfügbaren Menü-IDs aller möglichen Menüs beschrieben sind.
    * @param currentMenu
+   *          Ausgehend von currentMenu werden rekursiv alle enthaltenen Unter- und
+   *          Unter-Untermenüs zu menuOrder hinzugefügt.
    * @param path
+   *          Beschreibt den Namen des jeweils übergeordneten Menüs (initial sollte
+   *          "" übergeben werden), aus dem der Name für mapMenuIDToLabel
+   *          zusammengesetzt wird.
+   * @author Christoph Lutz (privat)
    */
   public void initMenuOrder(ConfigThingy allMenues, ConfigThingy currentMenu,
       String path)
@@ -1596,6 +1611,26 @@ public class WollMuxBar
       this.textField = new JTextField(L.m(label));
       this.menu = new JPopupMenu();
       this.menuConf = menuConf;
+
+      textField.addActionListener(new ActionListener()
+      {
+        public void actionPerformed(ActionEvent arg0)
+        {
+          for (Component compo : menu.getComponents())
+          {
+            if (compo instanceof JMenuItem)
+            {
+              JMenuItem item = (JMenuItem) compo;
+              if (item.isArmed())
+              {
+                item.doClick();
+                menu.setVisible(false);
+                return;
+              }
+            }
+          }
+        }
+      });
 
       textField.addFocusListener(new FocusListener()
       {
@@ -1654,7 +1689,9 @@ public class WollMuxBar
 
     private void updateResultPopupMenu(String[] words)
     {
-      ConfigThingy matches = new ConfigThingy("Matches");
+      menu.setVisible(false);
+      menu.removeAll();
+
       int count = 0;
       for (String menuId : menuOrder)
       {
@@ -1666,48 +1703,38 @@ public class WollMuxBar
         }
         catch (NodeNotFoundException e)
         {}
-        ConfigThingy label = new ConfigThingy("");
-        ConfigThingy l = new ConfigThingy("LABEL");
-        l.add(" " + mapMenuIDToLabel.get(menuId));
-        label.addChild(l);
-        ConfigThingy t = new ConfigThingy("TYPE");
-        t.add("label");
-        label.addChild(t);
 
+        ConfigThingy matches = new ConfigThingy("Matches");
         for (ConfigThingy elemente : elementeKnoten)
           for (ConfigThingy button : elemente)
-            if (buttonMatches(button, words) && count++ < MAX_SHOWN)
+            if (buttonMatches(button, words) && count++ <= MAX_SHOWN)
             {
               if (!added)
               {
-                try
-                {
-                  matches.addChild(new ConfigThingy("", "TYPE 'separator'"));
-                  matches.addChild(label);
-                  matches.addChild(new ConfigThingy("", "TYPE 'separator'"));
-                }
-                catch (Exception e)
-                {}
+                JMenuItem label = new JMenuItem(mapMenuIDToLabel.get(menuId));
+                label.setBorder(BorderFactory.createBevelBorder(1));
+                label.setBackground(Color.WHITE);
+                label.setEnabled(false);
+                menu.add(label);
                 added = true;
               }
               matches.addChild(button);
             }
+        addUIElements(menuConf, matches, menu, 0, 1, "menu");
       }
 
-      menu.setVisible(false);
-      menu.removeAll();
-      if (matches.count() > 0)
+      if (count > 0)
       {
-        addUIElements(menuConf, matches, menu, 0, 1, "menu");
-        if (count > MAX_SHOWN)
+        // nur anzeigen, wenn mindestens zwei Treffer nicht angezeigt wurden
+        if (count > (MAX_SHOWN + 1))
         {
           menu.addSeparator();
-          menu.add(new JLabel(L.m(" Und %1 nicht angezeigte Treffer", count
+          menu.add(new JLabel(L.m("und %1 nicht angezeigte Treffer", count
             - MAX_SHOWN)));
         }
         menu.show(textField, 0, textField.getHeight());
+        textField.requestFocusInWindow();
       }
-      textField.requestFocusInWindow();
     }
 
     /**
